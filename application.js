@@ -48,8 +48,10 @@ function redrawCurrent()
 
 function pickTuneAndPdf(pdf_id, abc_file, value)
 {
-	var pdf_file = abc_file.substring(0, abc_file.lastIndexOf('.'));
-	pdf_file = "/testdata/" + pdf_file + '.pdf';
+	$("persistent_url").update("http://" + window.location.host + "/comparison?tune=" + abc_file);
+	var filename = abc_file.substring(0, abc_file.lastIndexOf('.'));
+	var pdf_file = "/testdata/" + filename.gsub('\\+', '%2B') + '.ps';
+	var err_file = filename + '.txt';
 	if (value == '')
 	{
 		// TODO
@@ -60,7 +62,7 @@ function pickTuneAndPdf(pdf_id, abc_file, value)
 	var pdf = $(pdf_id);
 	//pdf.src = '/testdata/Ach_below.pdf';
 	pdf.innerHTML = "<embed src='" + pdf_file + "' height='100%' width='100%'>";
-	//window.open('/testdata/Ach_below.pdf','resizable,scrollbars');
+	new Ajax.Updater("abcm2ps_output", "/tunes/get_file", { parameters: { file: err_file, authenticity_token: window.authenticity_token } });
 }
 
 function pickTune(value)
@@ -161,35 +163,38 @@ function abc_keystroke()
 		return;
 	bReentry = true;
 
+	// clear out any old tune
+	var done = false;
+	var i = 0;
+	while (!done) {
+		var el = $("canvas"+i);
+		if (el)
+			el.innerHTML = "";
+		else
+			done = true;
+		i++;
+	}
+
 	try {
-	//	parseABC();
-	//	var draw = new DrawNotation('music', 'main_title', 'author');
-	//
 		var t = editArea.get();
+		var tunebook = new AbcTuneBook(t);
 		if (abcParser === null)
 			abcParser = new ParseAbc();
-		abcParser.parse(t);
-	//	  var scratch = $('scratch2');
-		  var tune = abcParser.getTune();
-		  var canvas = $("canvas");
-		  //canvas.down().update();
-		  canvas.innerHTML = "";
-		  //paper.remove();
-		  //if (paper === null)
-			 paper = Raphael(canvas, 1000, 600);
-		 //else
-		//	 paper.remove();
-			 //canvas.innerHTML = "";
-		 //if (printer === null)
-			  printer = new ABCPrinter(paper);
-		  printer.printABC(tune);
-		  //	  scratch.innerHTML = tune.toString();
-	//	selection = editArea.getSelection();
-	//	draw.draw(abcParser.getTune());
+		
+		for (i = 0; i < tunebook.tunes.length; i++) {
+			try {
+				abcParser.parse(tunebook.tunes[i]);
+				var tune = abcParser.getTune();
+				var canvas = $("canvas"+i);
+				paper = Raphael(canvas, 1000, 600);
+				printer = new ABCPrinter(paper);
+				printer.printABC(tune);
+			} catch (e) {
+				$("canvas"+i).update("error: " + e)
+			}
+		}
 	} catch (e) {
-	  if (canvas)
-	    canvas.update("error: " + e);
-	  else throw(e);
+		$("canvas0").update("error: " + e)
 	}
 	
 	bReentry = false;

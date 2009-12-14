@@ -211,7 +211,9 @@ ABCPrinter.prototype.printABC = function(abctune) {
   this.y = 0;
   this.paper.text(100, 5, abctune.title);
   this.paper.text(100, 20, abctune.author);
-  
+  if (abctune.origin && abctune.origin.length > 0)
+    this.paper.text(100, 35, "(" + abctune.origin + ")");
+
   for(var line=0; line<abctune.lines.length; line++) {
     this.printABCLine(abctune.lines[line]);
     this.y+=AbcSpacing.STAVEHEIGHT;
@@ -263,6 +265,9 @@ ABCPrinter.prototype.printABCElement = function() {
   case "key":
     this.printKeySignature(elem);
     break;
+  case "rest":
+    this.debugMsg("rest("+elem.duration+")");
+    break;
   }
 
   return graphelem;
@@ -297,6 +302,10 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
   var elemset = this.paper.set();
   var notehead = null;
   
+  if (elem.decoration) {
+	  var decs = elem.decoration.join(',');
+	  this.debugMsg(decs);
+  }
 	if (elem.chord !== undefined)
 		  this.paper.text(this.x, this.y+20, elem.chord);
 
@@ -317,6 +326,10 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
     var acc = this.glyphs.printSymbol(this.x, this.calcY(elem.pitch+1), symb); // 1 is hardcoded
     acc.translate(-(this.glyphs.getSymbolWidth(symb, acc)+2),0); // hardcoded
     elemset.push(acc);
+  }
+
+  if (elem.lyric !== undefined) {
+    this.debugMsg(elem.lyric.syllable + "  " + elem.lyric.divider);
   }
 
   var chartable = {up:{0:"w", 1:"h", 2:"q", 3:"e", 4: "x"},

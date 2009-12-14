@@ -21,10 +21,11 @@ var AbcTune = Class.create({
 	//			2 (quarter), 3 (dotted quarter), 4 (half), 6 (dotted half) 8 (whole)
 	//		chord: string
 	//		end_beam = true or undefined if this is the last note in a beam.
+	//		lyric: { syllable: xxx, divider: one of " -_" }
 	// TODO: actually, decoration should be an array.
 	//		decoration: upbow, downbow, accent
 	// BAR: type=bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
-	//		bools: start_first_ending, start_second_ending, end_first_ending, end_second_ending
+	//	
 	// CLEF: type=treble,bass
 	// KEY-SIG: num:0-7 dir:sharp,flat
 	//		extra[]: { pitch: as above, type: sharp,flat,natural }
@@ -191,6 +192,7 @@ var ParseAbc = Class.create({
 					// We didn't find the accent in the list, so consume the space, but don't return an accent.
 					ret[1] = "";
 					return ret;
+				case 'H': return [1, 'fermata'];
 			}
 			return [0, 0];
 		};
@@ -280,7 +282,8 @@ var ParseAbc = Class.create({
 				return [0, 0];
 		};
 
-		// returns the class of the bar line and the number of the repeat to begin after
+		// returns the class of the bar line
+		// the number of the repeat
 		// and the number of characters used up
 		// if 0 is returned, then the next element was not a bar line
 		var letter_to_bar = function(line, curr_pos)
@@ -306,8 +309,7 @@ var ParseAbc = Class.create({
 		  else return [0,""];
 		};
 
-
-		// returns the pitch and the number of chars used up
+		// returns the pitch (null for a rest) and the number of chars used up
 		var letter_to_pitch = function(line, curr_pos)
 		{
 			var ret = [ 0, -1 ];
@@ -354,7 +356,9 @@ var ParseAbc = Class.create({
 				this.copyright = "";
 				this.transcription = "";
 				this.notes = "";
+				this.book = "";
 				this.rhythm = "";
+				this.default_length = 1;
 			}
 		};
 		
@@ -369,6 +373,7 @@ var ParseAbc = Class.create({
 		};
 		
 		var setMeter = function(meter) {
+			meter = meter.strip();
 			if (meter === 'C')
 				multilineVars.meter = { type: 'common_time' };
 			else if (meter === 'C|')
@@ -379,6 +384,27 @@ var ParseAbc = Class.create({
 				if (a.length === 2)
 					multilineVars.meter = { type: 'specified', num: a[0].strip(), den: a[1].strip()};
 			}
+		};
+
+		var addWords = function(line, words) {
+			words = words.strip();
+			if (words[words.length-1] != '-')
+				words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
+			var word_list = [];
+			// first make a list of words from the string we are passed. A word is divided on either a space or dash.
+			var last_divider = -1;
+			for (var i = 0; i < words.length; i++) {
+				if ((words[i] === ' ') || (words[i] === '-')) {
+					word_list.push({ syllable: words.substring(last_divider+1, i), divider: words[i] });
+					last_divider = i;
+				}
+			}
+
+			line.each(function(el) {
+				if (el.el_type === 'note' && word_list.length > 0) {
+					el.lyric = word_list.shift();
+				}
+			});
 		};
 
 		//
@@ -411,7 +437,7 @@ var ParseAbc = Class.create({
 				if (ret[0] > 0) {
 					i += ret[0];
 					multilineVars.iChar += ret[0];
-					var bar = { type: ret[1], number: ret[2]};
+					var bar = { type: ret[1], number:ret[2] };
 					tune.appendElement('bar', multilineVars.iChar, multilineVars.iChar+ret[0], bar);
 				} else {
 					// Looking for a note. The note syntax looks like this:
@@ -453,20 +479,20 @@ var ParseAbc = Class.create({
 						multilineVars.iChar += ret[0];
 
 						var ret2 = letter_to_duration(line, i);
-						el.duration = 1;
+						el.duration = multilineVars.default_length;
 						if (ret2[1] > 0)
 						{
-							el.duration = ret2[1];
+							el.duration = ret2[1]*multilineVars.default_length;
 							i += ret2[0];
 							multilineVars.iChar += ret2[0];
 						}
 						var ret3 = letter_to_spacer(line, i);
 						if (ret3[1] == 'spacer')
 							el.end_beam = true;
-						if (ret[1])	// not a rest
-							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
-						else
+						if (ret[1] === -1)	// rest
 							tune.appendElement('rest', multilineVars.iChar, multilineVars.iChar, el);
+						else
+							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
 					}
 					else {	// don't know what this is, so ignore it.
 						i++;
@@ -496,6 +522,11 @@ var ParseAbc = Class.create({
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'L:':
+					var len = line.substring(2).gsub(" ", "");
+					switch (len) {
+					case "1/4": multilineVars.default_length = 2; break;
+					case "1/8": multilineVars.default_length = 1; break;
+					}
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'Q:':
@@ -503,6 +534,14 @@ var ParseAbc = Class.create({
 					break;
 				case  'C:':
 					tune.author = line.substring(2);
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'O:':
+					tune.origin = line.substring(2);
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'B:':
+					multilineVars.book = line.substring(2);
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'S:':
@@ -514,7 +553,7 @@ var ParseAbc = Class.create({
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'N:':
-					multilineVars.notes = line.substring(2);
+					multilineVars.notes += line.substring(2) + "\n";
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'R:':
@@ -523,6 +562,14 @@ var ParseAbc = Class.create({
 					break;
 				case  'K:':
 					multilineVars.key = parseKey(line.substring(2));
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'w:':
+					addWords(tune.lines[tune.lines.length-1].staff, line.substring(2));
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'P:':
+					// TODO: handle parts.
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  '%%':
@@ -550,8 +597,10 @@ var ParseAbc = Class.create({
 			if (multilineVars.notes !== "")
 				multilineVars.notes = "Notes: " + multilineVars.notes + "\n";
 			if (multilineVars.transcription !== "")
-				multilineVars.transcription = "Transcription: " + multilineVars.transcription;
-			tune.extraText = multilineVars.rhythm+multilineVars.copyright+multilineVars.transcription;
+				multilineVars.transcription = "Transcription: " + multilineVars.transcription + "\n";
+			if (multilineVars.book !== "")
+				multilineVars.book = "Book: " + multilineVars.book + "\n";
+			tune.extraText = multilineVars.rhythm+multilineVars.copyright+multilineVars.transcription+multilineVars.notes+multilineVars.book;
 		};
 		
 		this.parse = function(strTune) {
