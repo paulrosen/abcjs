@@ -1,0 +1,22 @@
+.explanation {
+	font-style: italic;
+}
+
+ul.NoBulletNoIndent {
+  list-style-type: none;
+  margin-left: 0px;
+  padding-left: 0px
+}
+
+#ajax_status {
+	background-color: #eeeeee;
+	color: red;
+}
+
+.about_text {
+	max-width: 800px;
+}
+
+.about_text p {
+	font-size: 16px;
+}

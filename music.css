@@ -1,0 +1,560 @@
+/*.music {
+	width:600px;
+	height:400px;
+	background-image: url("../images/fragments.gif");
+	background-repeat: repeat;
+	background-position-y: 80px;
+	background-attachment:fixed;
+}*/
+
+div {
+	overflow: hidden;
+	/*border: 1px solid black;*/
+}
+
+.staff {
+	width: 54px;
+	height: 60px;
+	position: absolute;
+}
+
+.staff img {
+	margin-top: -374px;
+	margin-left: -14px;
+}
+
+.chord5 {
+	height: 25px;
+	position: absolute;
+	font-family: tahoma;
+	font-size: .6em;
+	font-weight: bold;
+}
+
+.chord6 {
+	height: 25px;
+	position: absolute;
+	font-family: tahoma;
+	font-size: .7em;
+	font-weight: bold;
+}
+
+.chord7 {
+	height: 25px;
+	position: absolute;
+	font-family: tahoma;
+	font-size: .9em;
+	font-weight: bold;
+}
+
+.chord8 {
+	height: 25px;
+	position: absolute;
+	font-family: tahoma;
+	font-size: 1em;
+	font-weight: bold;
+}
+
+.chord9 {
+	height: 25px;
+	position: absolute;
+	font-family: tahoma;
+	font-size: 1.1em;
+	font-weight: bold;
+}
+
+.chord10 {
+	height: 25px;
+	position: absolute;
+	font-family: tahoma;
+	font-size: 1.2em;
+	font-weight: bold;
+}
+
+.extra_text {
+	height: 40px;
+	position: absolute;
+	font-family: times;
+	font-size: 1em;
+}
+
+.hollow_note {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+}
+
+.hollow_note img {
+	margin-top: -160px;
+	margin-left: -238px;
+}
+
+.filled_note {
+	width: 20px;
+	height: 20px;
+	position: absolute;	
+}
+
+.filled_note img {
+	margin-top: -160px;
+	margin-left: -267px;
+}
+
+.ledger_line {
+	width: 26px;
+	height: 3px;
+	position: absolute;	
+}
+
+.ledger_line img {
+	margin-top: -166px;
+	margin-left: -168px;
+}
+
+.dot {
+	width: 7px;
+	height: 20px;
+	position: absolute;	
+}
+
+.dot img {
+	margin-top: -160px;
+	margin-left: -206px;
+}
+
+.staccato {
+	width: 7px;
+	height: 20px;
+	position: absolute;	
+}
+
+.staccato img {
+	margin-top: -160px;
+	margin-left: -206px;
+}
+
+.up_bow {
+	width: 14px;
+	height: 24px;
+	position: absolute;	
+}
+
+.up_bow img {
+	margin-top: -269px;
+	margin-left: -233px;
+}
+
+.down_bow {
+	width: 20px;
+	height: 24px;
+	position: absolute;	
+}
+
+.down_bow img {
+	margin-top: -269px;
+	margin-left: -201px;
+}
+
+.trill {
+	width: 33px;
+	height: 24px;
+	position: absolute;	
+}
+
+.trill img {
+	margin-top: -269px;
+	margin-left: -260px;
+}
+
+.fermata {
+	width: 50px;
+	height: 50px;
+	position: absolute;	
+}
+
+.fermata img {
+	margin-top: -160px;
+	margin-left: -85px;
+}
+
+.sharp {
+	width: 17px;
+	height: 50px;
+	position: absolute;
+}
+
+.sharp img {
+	margin-top: -20px;
+	margin-left: -160px;
+}
+
+.flat {
+	width: 17px;
+	height: 50px;
+	position: absolute;
+}
+
+.flat img {
+	margin-top: -20px;
+	margin-left: -186px;
+}
+
+.natural {
+	width: 17px;
+	height: 50px;
+	position: absolute;
+}
+
+.natural img {
+	margin-top: -20px;
+	margin-left: -211px;
+}
+
+.treble_clef {
+	width: 40px;
+	height: 95px;
+	position: absolute;
+}
+
+.treble_clef img {
+	margin-top: 0px;
+	margin-left: -100px;
+}
+
+.zero {
+	width: 32px;
+	height: 26px;
+	position: absolute;
+}
+
+.zero img {
+	margin-top: -32px;
+	margin-left: -266px;
+}
+
+.one {
+	width: 32px;
+	height: 26px;
+	position: absolute;
+}
+
+.one img {
+	margin-top: -32px;
+	margin-left: -298px;
+}
+
+.two {
+	width: 32px;
+	height: 26px;
+	position: absolute;
+}
+
+.two img {
+	margin-top: -32px;
+	margin-left: -330px;
+}
+
+.three {
+	width: 32px;
+	height: 26px;
+	position: absolute;
+}
+
+.three img {
+	margin-top: -32px;
+	margin-left: -362px;
+}
+
+.four {
+	width: 32px;
+	height: 26px;
+	position: absolute;
+}
+
+.four img {
+	margin-top: -32px;
+	margin-left: -393px;
+}
+
+.five {
+	width: 32px;
+	height: 26px;
+	position: absolute;
+}
+
+.five img {
+	margin-top: -32px;
+	margin-left: -425px;
+}
+
+.six {
+	width: 30px;
+	height: 26px;
+	position: absolute;
+}
+
+.six img {
+	margin-top: -32px;
+	margin-left: -456px;
+}
+
+.seven {
+	width: 32px;
+	height: 26px;
+	position: absolute;
+}
+
+.seven img {
+	margin-top: -32px;
+	margin-left: -488px;
+}
+
+.eight {
+	width: 32px;
+	height: 26px;
+	position: absolute;
+}
+
+.eight img {
+	margin-top: -32px;
+	margin-left: -521px;
+}
+
+.nine {
+	width: 32px;
+	height: 26px;
+	position: absolute;
+}
+
+.nine img {
+	margin-top: -32px;
+	margin-left: -554px;
+}
+
+.common_time {
+	width: 24px;
+	height: 44px;
+	position: absolute;
+}
+
+.common_time img {
+	margin-top: -23px;
+	margin-left: -591px;
+}
+
+.cut_time {
+	width: 24px;
+	height: 44px;
+	position: absolute;
+}
+
+.cut_time img {
+	margin-top: -23px;
+	margin-left: -629px;
+}
+
+.note_stem {
+	width: 2px;
+	height: 46px;
+	position: absolute;
+}
+
+.note_stem img {
+	margin-top: -374px;
+	margin-left: -220px;
+}
+
+.bar_thick {
+	width: 11px;
+	height: 56px;
+	position: absolute;
+}
+
+.bar_thick img {
+	margin-top: -374px;
+	margin-left: -85px;
+}
+
+.bar_left_repeat {
+	width: 25px;
+	height: 56px;
+	position: absolute;
+}
+
+.bar_left_repeat img {
+	margin-top: -374px;
+	margin-left: -113px;
+}
+
+.bar_thick_thin {
+	width: 18px;
+	height: 56px;
+	position: absolute;
+}
+
+.bar_thick_thin img {
+	margin-top: -374px;
+	margin-left: -157px;
+}
+
+.bar_thin {
+	width: 5px;
+	height: 56px;
+	position: absolute;
+}
+
+.bar_thin img {
+	margin-top: -374px;
+	margin-left: -219px;
+}
+
+.bar_thin_thin {
+	width: 12px;
+	height: 56px;
+	position: absolute;
+}
+
+.bar_thin_thin img {
+	margin-top: -374px;
+	margin-left: -247px;
+}
+
+.bar_thin_thick_thin {
+	width: 22px;
+	height: 56px;
+	position: absolute;
+}
+
+.bar_thin_thick_thin img {
+	margin-top: -374px;
+	margin-left: -276px;
+}
+
+.bar_right_repeat {
+	width: 26px;
+	height: 56px;
+	position: absolute;
+}
+
+.bar_right_repeat img {
+	margin-top: -374px;
+	margin-left: -315px;
+}
+
+.bar_double_repeat {
+	width: 42px;
+	height: 56px;
+	position: absolute;
+}
+
+.bar_double_repeat img {
+	margin-top: -374px;
+	margin-left: -360px;
+}
+
+.bar_thin_thick {
+	width: 26px;
+	height: 56px;
+	position: absolute;
+}
+
+.bar_thin_thick img {
+	margin-top: -374px;
+	margin-left: -419px;
+}
+
+.whole_rest {
+	width: 17px;
+	height: 8px;
+	position: absolute;
+}
+
+.whole_rest img {
+	margin-top: -278px;
+	margin-left: -12px;
+}
+
+.quarter_rest {
+	width: 17px;
+	height: 42px;
+	position: absolute;
+}
+
+.quarter_rest img {
+	margin-top: -269px;
+	margin-left: -40px;
+}
+
+.eighth_rest {
+	width: 17px;
+	height: 42px;
+	position: absolute;
+}
+
+.eighth_rest img {
+	margin-top: -269px;
+	margin-left: -68px;
+}
+
+.eighth_tail_up {
+	width: 17px;
+	height: 42px;
+	position: absolute;
+}
+
+.eighth_tail_up img {
+	margin-top: -169px;
+	margin-left: -298px;
+}
+
+.sixteenth_tail_up {
+	width: 17px;
+	height: 42px;
+	position: absolute;
+}
+
+.sixteenth_tail_up img {
+	margin-top: -169px;
+	margin-left: -344px;
+}
+
+.eighth_tail_down {
+	width: 17px;
+	height: 42px;
+	position: absolute;
+}
+
+.eighth_tail_down img {
+	margin-top: -129px;
+	margin-left: -482px;
+}
+
+.sixteenth_tail_down {
+	width: 17px;
+	height: 42px;
+	position: absolute;
+}
+
+.sixteenth_tail_down img {
+	margin-top: -129px;
+	margin-left: -513px;
+}
+
+#main_title {
+	font-family: times;
+	font-size: 2em;
+	text-align: center;
+	min-height: 1.5em;
+	padding-top:0.3em;
+}
+
+#author {
+	font-family: times;
+	font-size: 1em;
+	font-style: italic;
+	text-align: right;
+}
+
+.selection {
+	background-color: #ffaaaa;
+}
