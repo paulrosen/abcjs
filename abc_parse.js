@@ -280,53 +280,32 @@ var ParseAbc = Class.create({
 				return [0, 0];
 		};
 
-		// returns the class of the bar line
+		// returns the class of the bar line and the number of the repeat to begin after
 		// and the number of characters used up
 		// if 0 is returned, then the next element was not a bar line
 		var letter_to_bar = function(line, curr_pos)
 		{
-			if (curr_pos < line.length-1)
-			{
-				// at least two chars left; check for the two char bars
-				var str = line.substring(curr_pos, curr_pos+2);
-				switch (str)
-				{
-					case '|]': return [ 2, "bar_thin_thick"];
-					case '||': return [ 2, "bar_thin_thin"];
-					case '[|': return [ 2, "bar_thick_thin"];
-					case ':|': return [ 2, "bar_right_repeat"];
-					case '|:': return [ 2, "bar_left_repeat"];
-					case '::': return [ 2, "bar_double_repeat"];
-				}
-			}
-			if (line[curr_pos] === '|')
-				return [ 1, "bar_thin"];
-			return [ 0, ""];
+		  str1 = line.substring(curr_pos, curr_pos+1);
+		  str2 = line.substring(curr_pos, curr_pos+2);
+		  str3 = line.substring(curr_pos, curr_pos+3);
+		  str4 = line.substring(curr_pos, curr_pos+4);
+
+		  if (str4 === ":||:") return [ 4, "bar_dbl_repeat"];
+		  else if (str3 === ":|2") return [ 3, "bar_right_repeat", 2];
+		  else if (str3 === "[|:") return [ 3, "bar_left_repeat"];
+		  else if (str3 === "||:") return [ 3, "bar_left_repeat"];
+		  else if (str2 === ":|") return [ 2, "bar_right_repeat"];
+		  else if (str2 === "|:") return [ 2, "bar_left_repeat"];
+		  else if (str2 === "||") return [ 2, "bar_thin_thin"];
+		  else if (str2 === "::") return [ 2, "bar_dbl_repeat"];
+		  else if (str2 === "[2" || str2 === "[1") return [ 2, "bar_thin", 2]; // should it guess a repeat?
+		  else if (str2 === "[1" || str2 === "|1") return [ 2, "bar_thin", 1];
+		  else if (str2 === "|]") return [ 2, "bar_thin_thick"];
+		  else if (str2 === "[|") return [ 2, "bar_thick_thin"]; 
+		  else if (str1 === "|") return [1, "bar_thin"];
+		  else return [0,""];
 		};
 
-		// returns whether this is a decoration on the bar
-		var letter_to_bar_ending = function(line, curr_pos, active_first_ending, active_second_ending)
-		{
-			if (curr_pos < line.length)
-			{
-				// at least one char left; check for an ending mark
-				var ret = [];
-				if (active_first_ending)
-					ret.push("end_first_ending");
-				if (active_second_ending)
-					ret.push("end_second_ending");
-				switch (line[curr_pos])
-				{
-					case '1': ret.push("start_first_ending"); return [ 1, ret];
-					case '2': ret.push("start_second_ending"); return [ 1, ret];
-				}
-			}
-			else if (active_first_ending)
-				return [ 0, ["end_first_ending"]];
-			else if (active_second_ending)
-				return [ 0, ["end_second_ending"]];
-			return [ 0, []];
-		};
 
 		// returns the pitch and the number of chars used up
 		var letter_to_pitch = function(line, curr_pos)
@@ -348,7 +327,7 @@ var ParseAbc = Class.create({
 				case 'e' : ret = [ 1, 9 ]; break;
 				case 'f' : ret = [ 1, 10 ]; break;
 				case 'g' : ret = [ 1, 11 ]; break;
-				case 'z' : ret = [ 1, null ]; break;
+				case 'z' : ret = [ 1, null ]; break; // missing x, y
 			}
 			if ((ret[0] !== 0) && (curr_pos < line.length-1))
 			{
@@ -423,8 +402,6 @@ var ParseAbc = Class.create({
 				multilineVars.meter = "";
 			}
 
-			var active_first_ending = false;
-			var active_second_ending = false;
 			while (i < line.length)
 			{
 				if (line[i] === '%')
@@ -434,23 +411,7 @@ var ParseAbc = Class.create({
 				if (ret[0] > 0) {
 					i += ret[0];
 					multilineVars.iChar += ret[0];
-					var ret_bar = letter_to_bar_ending(line,i, active_first_ending, active_second_ending);
-					var bar = { type: ret[1] };
-					if (ret_bar[1].length > 0) {
-						ret_bar[1].each(function(attr) {
-							bar[attr] = true;
-							if (attr === 'start_first_ending')
-								active_first_ending = true;
-							if (attr === 'end_first_ending')
-								active_first_ending = false;
-							if (attr === 'start_second_ending')
-								active_second_ending = true;
-							if (attr === 'end_second_ending')
-								active_second_ending = false;
-						});
-						i += ret_bar[0];
-						multilineVars.iChar += ret_bar[0];
-					}
+					var bar = { type: ret[1], number: ret[2]};
 					tune.appendElement('bar', multilineVars.iChar, multilineVars.iChar+ret[0], bar);
 				} else {
 					// Looking for a note. The note syntax looks like this:

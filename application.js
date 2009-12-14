@@ -187,7 +187,9 @@ function abc_keystroke()
 	//	selection = editArea.getSelection();
 	//	draw.draw(abcParser.getTune());
 	} catch (e) {
-		canvas.update("error: " + e)
+	  if (canvas)
+	    canvas.update("error: " + e);
+	  else throw(e);
 	}
 	
 	bReentry = false;
