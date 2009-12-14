@@ -16,7 +16,7 @@ var AbcTune = Class.create({
 	// field. The rest of the fields depend on the type and are listed below:
 	// REST: duration=1,2,4,8; chord: string
 	// NOTE: accidental=none,dbl_flat,flat,natural,sharp,dbl_sharp
-	//		pitch: "C," is 3. The numbers refer to the pitch letter.
+	//		pitch: "C" is 0. The numbers refer to the pitch letter.
 	//		duration: .5 (sixteenth), .75 (dotted sixteenth), 1 (eighth), 1.5 (dotted eighth)
 	//			2 (quarter), 3 (dotted quarter), 4 (half), 6 (dotted half) 8 (whole)
 	//		chord: string
@@ -334,21 +334,21 @@ var ParseAbc = Class.create({
 			var ret = [ 0, -1 ];
 			switch (line[curr_pos])
 			{
-				case 'A' : ret = [ 1, 15 ]; break;
-				case 'B' : ret = [ 1, 16 ]; break;
-				case 'C' : ret = [ 1, 10 ]; break;
-				case 'D' : ret = [ 1, 11 ]; break;
-				case 'E' : ret = [ 1, 12 ]; break;
-				case 'F' : ret = [ 1, 13 ]; break;
-				case 'G' : ret = [ 1, 14 ]; break;
-				case 'a' : ret = [ 1, 22 ]; break;
-				case 'b' : ret = [ 1, 23 ]; break;
-				case 'c' : ret = [ 1, 17 ]; break;
-				case 'd' : ret = [ 1, 18 ]; break;
-				case 'e' : ret = [ 1, 19 ]; break;
-				case 'f' : ret = [ 1, 20 ]; break;
-				case 'g' : ret = [ 1, 21 ]; break;
-				case 'z' : ret = [ 1, -1 ]; break;
+				case 'A' : ret = [ 1, 5 ]; break;
+				case 'B' : ret = [ 1, 6 ]; break;
+				case 'C' : ret = [ 1, 0 ]; break;
+				case 'D' : ret = [ 1, 1 ]; break;
+				case 'E' : ret = [ 1, 2 ]; break;
+				case 'F' : ret = [ 1, 3 ]; break;
+				case 'G' : ret = [ 1, 4 ]; break;
+				case 'a' : ret = [ 1, 12 ]; break;
+				case 'b' : ret = [ 1, 13 ]; break;
+				case 'c' : ret = [ 1, 7 ]; break;
+				case 'd' : ret = [ 1, 8 ]; break;
+				case 'e' : ret = [ 1, 9 ]; break;
+				case 'f' : ret = [ 1, 10 ]; break;
+				case 'g' : ret = [ 1, 11 ]; break;
+				case 'z' : ret = [ 1, null ]; break;
 			}
 			if ((ret[0] !== 0) && (curr_pos < line.length-1))
 			{
@@ -502,10 +502,10 @@ var ParseAbc = Class.create({
 						var ret3 = letter_to_spacer(line, i);
 						if (ret3[1] == 'spacer')
 							el.end_beam = true;
-						if (ret[1] === -1)	// rest
-							tune.appendElement('rest', multilineVars.iChar, multilineVars.iChar, el);
-						else
+						if (ret[1])	// not a rest
 							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
+						else
+							tune.appendElement('rest', multilineVars.iChar, multilineVars.iChar, el);
 					}
 					else {	// don't know what this is, so ignore it.
 						i++;

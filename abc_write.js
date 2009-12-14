@@ -1,6 +1,6 @@
 /*global Class */
 /*global sprintf */
-/*extern  ABCBeamElem, ABCGraphElem, ABCPrinter, AbcGlyphs, AbcSpacing, getDuration, getPitch */
+/*extern  ABCBeamElem, ABCGraphElem, ABCPrinter, AbcGlyphs, AbcSpacing, getDuration */
 
 var AbcGlyphs = Class.create({
 	initialize: function(paper) {
@@ -27,10 +27,7 @@ var AbcGlyphs = Class.create({
 	}
 });
 
-// Temporary functions to convert from the parser's numbering system to the writer's TODO-PER: use the same system on both sides.
-var getPitch = function(elem) {
-	return elem.pitch-10;
-};
+
 
 var getDuration = function(elem) {
 	if (!elem || !elem.duration)
@@ -67,12 +64,12 @@ function ABCBeamElem () {
 ABCBeamElem.prototype.add = function(elem,note) {
   this.elems[this.elems.length] = elem;
   this.notes[this.notes.length] = note;
-  this.total += getPitch(note);
-  if (!this.min || getPitch(note)<this.min) {
-    this.min = getPitch(note);
+  this.total += note.pitch;
+  if (!this.min || note.pitch<this.min) {
+    this.min = note.pitch;
   }
-  if (!this.max || getPitch(note)>this.max) {
-    this.max = getPitch(note);
+  if (!this.max || note>this.max) {
+    this.max = note.pitch;
   }
 };
 
@@ -315,7 +312,7 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
     case "natural":
       symb = "n";
     }
-    var acc = this.glyphs.printSymbol(this.x, this.calcY(getPitch(elem)+1), symb); // 1 is hardcoded
+    var acc = this.glyphs.printSymbol(this.x, this.calcY(elem.pitch+1), symb); // 1 is hardcoded
     acc.translate(-(this.glyphs.getSymbolWidth(symb, acc)+2),0); // hardcoded
     elemset.push(acc);
   }
@@ -330,31 +327,31 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
   var dot = (Math.pow(2,durlog)!==dur);
   var c = "";
   if (!stem) {
-    var dir = (getPitch(elem)>=6) ? "down": "up";
+    var dir = (elem.pitch>=6) ? "down": "up";
     c = chartable[dir][-durlog];
   } else {
     c="\u0153"; // 1 is hardcoded
     xcorr = 1;
   }
 
-  notehead = this.glyphs.printSymbol(this.x, this.calcY(getPitch(elem)+xcorr), c);
+  notehead = this.glyphs.printSymbol(this.x, this.calcY(elem.pitch+xcorr), c);
   
   elemset.push(notehead);
-  var bbox = {"x":this.x, "y":this.calcY(getPitch(elem)+xcorr), "width": this.glyphs.getSymbolWidth(c,notehead), height: this.glyphs.getSymbolHeight(c,notehead)};
+  var bbox = {"x":this.x, "y":this.calcY(elem.pitch+xcorr), "width": this.glyphs.getSymbolWidth(c,notehead), height: this.glyphs.getSymbolHeight(c,notehead)};
 
   if (dot) {
-    var dotadjust = (1-getPitch(elem)%2);
-    elemset.push(this.glyphs.printSymbol(this.x+12, 1+this.calcY(getPitch(elem)+2-1+dotadjust), ".")); // 12 and 1 is hardcoded. some weird bug with dot y-pos ??!
+    var dotadjust = (1-elem.pitch%2);
+    elemset.push(this.glyphs.printSymbol(this.x+12, 1+this.calcY(elem.pitch+2-1+dotadjust), ".")); // 12 and 1 is hardcoded. some weird bug with dot y-pos ??!
   }
 
   // ledger lines
-  for (var i=getPitch(elem); i>11; i--) {
+  for (var i=elem.pitch; i>11; i--) {
     if (i%2===0) {
       elemset.push(this.glyphs.printSymbol(this.x-1, this.calcY(i+1), "_")); // 1 is hardcoded
     }
   }
 
-  for (i=getPitch(elem); i<1; i++) {
+  for (i=elem.pitch; i<1; i++) {
     if (i%2===0) {
       elemset.push(this.glyphs.printSymbol(this.x-1, this.calcY(i+1), "_")); // 1 is hardcoded
     }
