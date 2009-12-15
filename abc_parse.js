@@ -489,10 +489,10 @@ var ParseAbc = Class.create({
 						var ret3 = letter_to_spacer(line, i);
 						if (ret3[1] == 'spacer')
 							el.end_beam = true;
-						if (ret[1] === -1)	// rest
-							tune.appendElement('rest', multilineVars.iChar, multilineVars.iChar, el);
-						else
+						if (ret[1]!==null)	// not rest
 							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
+						else
+							tune.appendElement('rest', multilineVars.iChar, multilineVars.iChar, el);
 					}
 					else {	// don't know what this is, so ignore it.
 						i++;
