@@ -183,7 +183,7 @@ function abc_keystroke()
 		
 		for (i = 0; i < tunebook.tunes.length; i++) {
 			try {
-				abcParser.parse(tunebook.tunes[i]);
+				abcParser.parse(tunebook.tunes[i].abc);
 				var tune = abcParser.getTune();
 				var canvas = $("canvas"+i);
 				paper = Raphael(canvas, 1000, 600);
