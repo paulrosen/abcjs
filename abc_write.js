@@ -376,14 +376,23 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
     xcorr = 1;
   }
 
-  notehead = this.glyphs.printSymbol(this.x, this.calcY(elem.pitch+xcorr), c);
-  
-  elemset.push(notehead);
-  var bbox = {"x":this.x, "y":this.calcY(elem.pitch+xcorr), "width": this.glyphs.getSymbolWidth(c), height: this.glyphs.getSymbolHeight(c,notehead)};
+  if (elem.grace_start)
+	  this.debugMsg("grace_start");
+  if (elem.grace_end)
+	  this.debugMsg("grace_end");
+  if (c === undefined)
+	  this.debugMsg("chartable["+ dir + "][" + (-durlog) + '] is undefined');
+  else {
 
-  if (dot) {
-    var dotadjust = (1-elem.pitch%2);
-    elemset.push(this.glyphs.printSymbol(this.x+12, 1+this.calcY(elem.pitch+2-1+dotadjust), ".")); // 12 and 1 is hardcoded. some weird bug with dot y-pos ??!
+	  notehead = this.glyphs.printSymbol(this.x, this.calcY(elem.pitch+xcorr), c);
+
+	  elemset.push(notehead);
+	  var bbox = {"x":this.x, "y":this.calcY(elem.pitch+xcorr), "width": this.glyphs.getSymbolWidth(c), height: this.glyphs.getSymbolHeight(c,notehead)};
+
+	  if (dot) {
+		var dotadjust = (1-elem.pitch%2);
+		elemset.push(this.glyphs.printSymbol(this.x+12, 1+this.calcY(elem.pitch+2-1+dotadjust), ".")); // 12 and 1 is hardcoded. some weird bug with dot y-pos ??!
+	  }
   }
 
   // ledger lines
