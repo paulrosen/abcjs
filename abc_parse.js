@@ -25,7 +25,7 @@ var AbcTune = Class.create({
 	// TODO: actually, decoration should be an array.
 	//		decoration: upbow, downbow, accent
 	// BAR: type=bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
-	//	
+	//	number: 1 or 2: if it is the start of a first or second ending
 	// CLEF: type=treble,bass
 	// KEY-SIG: num:0-7 dir:sharp,flat
 	//		extra[]: { pitch: as above, type: sharp,flat,natural }
@@ -229,32 +229,58 @@ var ParseAbc = Class.create({
 			{
 				case '>': return [1, 1.5, 0.5];
 				case '<': return [1, 0.5, 1.5];
+				case '1':
 				case '2':
-					if ((i < line.length-1) && (line[i+1] === '>'))
-						return [2, 3, 1];
-					else if ((i < line.length-1) && (line[i+1] === '<'))
-						return [2, 1, 3];
-					else
-						return [1, 2];
-					break;
 				case '3':
-					if ((i < line.length-2) && (line[i+1] === '/') && (line[i+2] === '2'))
-						return [3, 1.5];
-					else
-						return [1, 3];
-					break;
-				case '4': return [1, 4];
-				case '6': return [1, 6];
-				case '8': return [1, 8];
-				case '/':
-					if (i < line.length-1)
-					{
-						switch (line[i+1])
-						{
-							case '2': return [2, 0.5];
-							case '4': return [4, 0.25];
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					if (line[i] === '2' && (i < line.length-1) && (line[i+1] === '>'))
+						return [2, 3, 1];
+					else if (line[i] === '2' && (i < line.length-1) && (line[i+1] === '<'))
+						return [2, 1, 3];
+					else {
+						// we are looking for: 999/999 where 999 is 0 to an arbitrary number of digits and the slash and second number are optional
+						var start = i;
+						var num = parseInt(line[i]);
+						var den = 1;	// if it isn't set below, then it is 1 so that it doesn't change the division
+						i++;
+						while (i < line.length && line[i] >= '0' && line[i] <= '9') {
+							num =  num*10 + parseInt(line[i]);
+							i++;
 						}
+						// num now has the first number. Look for a slash.
+						if (i < line.length && line[i] === '/') {
+							i++;
+							// now look for the denominator.
+							var d = 0;
+							while (i < line.length && line[i] >= '0' && line[i] <= '9') {
+								d = d * 10 + parseInt(line[i]);
+								i++;
+							}
+							if (d !== 0)
+								den = d;
+						}
+						return [ i -  start, num / den ];
+					}				
+					break;
+				case '/':
+					// assume the numerator is 1; if the next character is not a number, then assume it is a 2
+					var start2 = i;
+					i++;
+					var dd = 0;
+					while (i < line.length && line[i] >= '0' && line[i] <= '9') {
+						dd = dd * 10 + parseInt(line[i]);
+						i++;
 					}
+					if (dd === 0)
+						return [1, .5];
+					else
+						return [ i - start2, 1 / dd];
+					break;
 			}
 			return [0, 0];
 		};
@@ -428,6 +454,7 @@ var ParseAbc = Class.create({
 				multilineVars.meter = "";
 			}
 
+			var inGrace = false;
 			while (i < line.length)
 			{
 				if (line[i] === '%')
@@ -442,8 +469,17 @@ var ParseAbc = Class.create({
 				} else {
 					// Looking for a note. The note syntax looks like this:
 					// note :=  [chord] [accents] [accidental] pitch [duration]
-					// TODO: straighen out all the start and end chars
+					// TODO: straighten out all the start and end chars
+					// a note, or group of notes, can also be enclosed in {}. If so, the first gets the attribute "grace_start", and the last gets the attribute "grace_end"
 					var el = { };
+					if (!inGrace && line[i] === '{') {
+						el.grace_start = true;
+						inGrace = true;
+						if (i < line.length+1) {
+							i++;
+							multilineVars.iChar++;
+						}
+					}
 					ret = letter_to_chord(line, i);
 					if (ret[0] > 0) {
 						el.chord = ret[1];
@@ -489,6 +525,16 @@ var ParseAbc = Class.create({
 						var ret3 = letter_to_spacer(line, i);
 						if (ret3[1] == 'spacer')
 							el.end_beam = true;
+
+						// look ahead to see if we are ending a grace note series
+						if (inGrace && i < line.length && line[i] === '}') {
+							el.grace_end = true;
+							inGrace = false;
+							if (i < line.length+1) {
+								i++;
+								multilineVars.iChar++;
+							}
+						}
 						if (ret[1]!==null)	// not rest
 							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
 						else
@@ -523,9 +569,14 @@ var ParseAbc = Class.create({
 					break;
 				case  'L:':
 					var len = line.substring(2).gsub(" ", "");
-					switch (len) {
-					case "1/4": multilineVars.default_length = 2; break;
-					case "1/8": multilineVars.default_length = 1; break;
+					var len_arr = len.split('/');
+					if (len_arr.length === 2) {
+						var n = parseInt(len_arr[0]);
+						var d = parseInt(len_arr[1]);
+						if (d > 0) {
+							var q = n / d;
+							multilineVars.default_length = q*8;	// an eighth note is 1
+						}
 					}
 					multilineVars.iChar += line.length + 1;
 					break;
