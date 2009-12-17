@@ -137,16 +137,17 @@ var ParseAbc = Class.create({
 			return str;
 		};
 
-		var getBrackettedSubstring = function(line, i, maxErrorChars)
+		var getBrackettedSubstring = function(line, i, maxErrorChars, _matchChar)
 		{
 			// This extracts the sub string by looking at the first character and searching for that
-			// character later in the line. For instance, if the first character is a quote it will look for
+			// character later in the line (or search for the optional _matchChar). 
+                        // For instance, if the first character is a quote it will look for
 			// the end quote. If the end of the line is reached, then only up to the default number
 			// of characters are returned, so that a missing end quote won't eat up the entire line.
 			// It returns the substring and the number of characters consumed.
 			// The number of characters consumed is normally two more than the size of the substring,
 			// but in the error case it might not be.
-			var matchChar = line[i];
+			var matchChar = _matchChar || line[i];
 			var pos = i+1;
 			while ((pos < line.length) && (line[pos] !== matchChar))
 				++pos;
@@ -332,7 +333,7 @@ var ParseAbc = Class.create({
 		  else if (str2 === "|:") return [ 2, "bar_left_repeat"];
 		  else if (str2 === "||") return [ 2, "bar_thin_thin"];
 		  else if (str2 === "::") return [ 2, "bar_dbl_repeat"];
-		  else if (str2 === "[2" || str2 === "[1") return [ 2, "bar_thin", 2]; // should it guess a repeat?
+		  else if (str2 === "[2" || str2 === "[2") return [ 2, "bar_thin", 2]; // should it guess a repeat?
 		  else if (str2 === "[1" || str2 === "|1") return [ 2, "bar_thin", 1];
 		  else if (str2 === "|]") return [ 2, "bar_thin_thick"];
 		  else if (str2 === "[|") return [ 2, "bar_thick_thin"]; 
@@ -454,7 +455,6 @@ var ParseAbc = Class.create({
 				multilineVars.meter = "";
 			}
 
-			var inGrace = false;
 			while (i < line.length)
 			{
 				if (line[i] === '%')
@@ -468,23 +468,29 @@ var ParseAbc = Class.create({
 					tune.appendElement('bar', multilineVars.iChar, multilineVars.iChar+ret[0], bar);
 				} else {
 					// Looking for a note. The note syntax looks like this:
-					// note :=  [chord] [accents] [accidental] pitch [duration]
+					// note :=  [chord] [grace-notes] [accents] [accidental] pitch [duration]
 					// TODO: straighten out all the start and end chars
-					// a note, or group of notes, can also be enclosed in {}. If so, the first gets the attribute "grace_start", and the last gets the attribute "grace_end"
 					var el = { };
-					if (!inGrace && line[i] === '{') {
-						el.grace_start = true;
-						inGrace = true;
-						if (i < line.length+1) {
-							i++;
-							multilineVars.iChar++;
-						}
-					}
 					ret = letter_to_chord(line, i);
 					if (ret[0] > 0) {
 						el.chord = ret[1];
 						i += ret[0];
 						multilineVars.iChar += ret[0];
+					}
+					el.gracenotes = [];
+					if (line[i] === '{') {
+					  // fetch the gracenotes string and consume that into the array
+					  var gra = getBrackettedSubstring(line, i, 1, '}'); // what happens on line ends?
+					  // TODO: alert errors when non-matching close 
+					  var ii = 0;
+					  for (ret = letter_to_pitch(gra[1], ii); ret[0]>0 && ii<gra[1].length;
+					       ret = letter_to_pitch(gra[1], ii)) {
+					    //todo get other stuff that could be in a grace note
+					    ii += ret[0];
+					    el.gracenotes.push({el_type:"gracenote",pitch:ret[1]});
+					  }
+					  i += gra[0];
+					  multilineVars.iChar += gra[0];
 					}
 					var done = false;
 					while (!done)
@@ -526,15 +532,6 @@ var ParseAbc = Class.create({
 						if (ret3[1] == 'spacer')
 							el.end_beam = true;
 
-						// look ahead to see if we are ending a grace note series
-						if (inGrace && i < line.length && line[i] === '}') {
-							el.grace_end = true;
-							inGrace = false;
-							if (i < line.length+1) {
-								i++;
-								multilineVars.iChar++;
-							}
-						}
 						if (ret[1]!==null)	// not rest
 							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
 						else
