@@ -186,7 +186,7 @@ function abc_keystroke()
 				abcParser.parse(tunebook.tunes[i].abc);
 				var tune = abcParser.getTune();
 				var canvas = $("canvas"+i);
-				paper = Raphael(canvas, 1000, 600);
+				paper = Raphael(canvas, 1500, 1500);
 				printer = new ABCPrinter(paper);
 				printer.printABC(tune);
 			} catch (e) {
