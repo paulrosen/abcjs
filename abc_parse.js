@@ -7,7 +7,11 @@
 
 // This is the data for a single ABC tune. It is created and populated by the ParseAbc class.
 var AbcTune = Class.create({
-	// lines is an array of elements, or one of the following:
+	// The structure consists of a hash with the following two items:
+	// metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...
+	// tempo: { noteLength: number (e.g. .125), bpm: number }
+	// lines: an array of elements, or one of the following:
+	//
 	// STAFF: array of elements
 	// SUBTITLE: string
 	//
@@ -32,9 +36,7 @@ var AbcTune = Class.create({
 	// METER: type: common_time,cut_time,specified
 	//		if specified, { num: 99, den: 99 }
 	reset: function () {
-		this.title = "";
-		this.author = "";
-		this.extraText = "";
+		this.metaText = {};
 		this.lines = [];
 	},
 
@@ -163,7 +165,10 @@ var ParseAbc = Class.create({
 		{
 			if (line[i] === '"')
 			{
-				return getBrackettedSubstring(line, i, 5);
+				var chord = getBrackettedSubstring(line, i, 5);
+				if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '^')	// If it starts with ^, then the chord appears above, but that is also the default, so strip it.
+					chord[1] = chord[1].substring(1);
+				return chord;
 			}
 			return [0, ""];
 		};
@@ -379,27 +384,22 @@ var ParseAbc = Class.create({
 				this.key = { num: 0 };
 				this.meter = { type: 'specified', num: '4', den: '4'};	// if no meter is specified, there is an implied one.
 				this.hasMainTitle = false;
-				this.copyright = "";
-				this.transcription = "";
-				this.notes = "";
-				this.book = "";
-				this.rhythm = "";
 				this.default_length = 1;
 			}
 		};
 		
 		var setTitle = function(title) {
 			if (multilineVars.hasMainTitle)
-				tune.lines[tune.lines.length] = { subtitle: title };	// display secondary title
+				tune.lines[tune.lines.length] = { subtitle: stripComment(title) };	// display secondary title
 			else
 			{
-				tune.title = title;
+				addMetaText("title", title);
 				multilineVars.hasMainTitle = true;
 			}
 		};
 		
 		var setMeter = function(meter) {
-			meter = meter.strip();
+			meter = stripComment(meter);
 			if (meter === 'C')
 				multilineVars.meter = { type: 'common_time' };
 			else if (meter === 'C|')
@@ -549,6 +549,100 @@ var ParseAbc = Class.create({
 			multilineVars.iChar++;	// for the newline
 		};
 
+		var stripComment = function(str) {
+			var i = str.indexOf('%');
+			if (i >= 0)
+				return str.substring(0, i).strip();
+			return str.strip();
+		};
+
+		var addMetaText = function(key, value) {
+			if (tune.metaText[key] === undefined)
+				tune.metaText[key] = stripComment(value) + "\n";
+			else
+				tune.metaText[key] += stripComment(value) + "\n";
+		}
+
+		var getNumber = function(str) {
+			// This parses the beginning of the string for a number and returns { value: num, digits: num }
+			// If digits is 0, then the string didn't point to a number.
+			var x = parseInt(str);
+			if (x === NaN)
+				return { digits: 0 };
+			var s = "" + x;
+			var i = str.indexOf(s);	// This is to account for leading spaces
+			return { value: x, digits: i+s.length };
+		};
+
+		var setTempo = function(str) {
+			//Q - tempo; can be used to specify the notes per minute, e.g.   if
+			//the  default  note length is an eighth note then Q:120 or Q:C=120
+			//is 120 eighth notes per minute. Similarly  Q:C3=40  would  be  40
+			//dotted  quarter  notes per minute.  An absolute tempo may also be
+			//set,  e.g.  Q:1/8=120  is  also  120  eighth  notes  per  minute,
+			//irrespective of the default note length.
+			//
+			// This is either a number, "C=number", "Cnumber=number", or fraction=number
+			// It depends on the L: field, which may either not be present, or may appear after this.
+			// If L: is not present, an eighth note is used.
+			// That means that this field can't be calculated until the end, if it is the first three types, since we don't know if we'll see an L: field.
+			// So, if it is the fourth type, set it here, otherwise, save the info in the multilineVars.
+			// The temporary variables we keep are the multiplier and the bpm. In the first two forms, the multiplier is 1.
+			var commentStart = str.indexOf('%');	// get rid of any comment part
+			if (commentStart >= 0)
+				str = str.substring(0, commentStart);
+			str = str.strip();
+			if (str.length === 0)
+				return;	// just ignore a blank field.
+
+			if (str[0] === 'C') {	// either type 2 or type 3
+				if (str.length >= 3 && str[1] === '=') {
+					// This is a type 2 format. The multiplier is an implied 1
+					var x = getNumber(str.substring(2));
+					if (x.digits === 0)
+						return;	// TODO-PER: flag as an error.
+					multilineVars.tempo = { multiplier: 1, bpm: x.value };
+					return;
+				} else if (str.length >= 2 && str[1] >= '0' && str[1] <= '9') {
+					// This is a type 3 format.
+					var mult = getNumber(str.substring(1));
+					str = str.substring(mult.digits+1);
+					if (str.length < 2 || str[0] !== '=')
+						return;	// TODO-PER: flag an error
+					var speed = getNumber(str.substring(1));
+					if (speed.digits === 0)
+						return;	// TODO-PER: flag as an error.
+					multilineVars.tempo = { multiplier: mult.value, bpm: speed.value };
+					return;
+				}	// TODO-PER: if it isn't one of the above, flag as an error
+
+			} else if (str[0] >= '0' && str[0] <= '9') {	// either type 1 or type 4
+				var num = getNumber(str);
+				if (num.digits === 0)
+					return;	// TODO-PER: flag as an error.
+				str = str.substring(num.digits);
+				if (str.length === 0 || str[0] !== '/') {
+					// This is type 1
+					multilineVars.tempo = { multiplier: 1, bpm: num.value };
+					return;
+				}
+				str = str.substring(1);
+				var num2 = getNumber(str);
+				if (num2.digits === 0)
+					return;	// TODO-PER: flag as an error.
+
+				str = str.substring(num2.digits);
+				if (str.length === 0 || str[0] !== '=')
+					return;	// TODO-PER: flag as an error.
+
+				var num3 = getNumber(str.substring(1));
+				if (num3.digits === 0)
+					return;	// TODO-PER: flag as an error.
+				tune.metaText.tempo = { duration: num.value/num2.value, bpm: num3.value };
+			}
+			// TODO-PER: if it isn't one of the above, flag as an error
+		};
+
 		var parseLine = function(line) {
 			var str = "";
 			if (line.length >= 2)
@@ -556,15 +650,35 @@ var ParseAbc = Class.create({
 
 			switch(str)
 			{
-				case  'X:':
+				case  'B:':
+					addMetaText("book", line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
-				case  'T:':
-					setTitle(line.substring(2));
+				case  'C:':
+					addMetaText("author", line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
-				case  'M:':
-					setMeter(line.substring(2));
+				case  'D:':
+					addMetaText("discography", line.substring(2));
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'H:':
+					addMetaText("history", line.substring(2));
+					multilineVars.iChar += line.length + 1;
+					break;
+				case 'E:':
+				case 'I:':
+					// Not supported currently.
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'K:':
+					// since the key is the last thing that can happen in the header, we can resolve the tempo now
+					if (multilineVars.tempo) {	// If there's a tempo waiting to be resolved
+						var dur = multilineVars.default_length ? multilineVars.default_length / 8 : 1/8;
+						tune.metaText.tempo = { duration: dur * multilineVars.tempo.multiplier, bpm: multilineVars.tempo.bpm };
+						multilineVars.tempo = null;
+					}
+					multilineVars.key = parseKey(line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'L:':
@@ -580,47 +694,51 @@ var ParseAbc = Class.create({
 					}
 					multilineVars.iChar += line.length + 1;
 					break;
-				case  'Q:':
-					multilineVars.iChar += line.length + 1;
-					break;
-				case  'C:':
-					tune.author = line.substring(2);
-					multilineVars.iChar += line.length + 1;
-					break;
-				case  'O:':
-					tune.origin = line.substring(2);
-					multilineVars.iChar += line.length + 1;
-					break;
-				case  'B:':
-					multilineVars.book = line.substring(2);
-					multilineVars.iChar += line.length + 1;
-					break;
-				case  'S:':
-					multilineVars.copyright = line.substring(2);
-					multilineVars.iChar += line.length + 1;
-					break;
-				case  'Z:':
-					multilineVars.transcription = line.substring(2);
+				case  'M:':
+					setMeter(line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'N:':
-					multilineVars.notes += line.substring(2) + "\n";
+					addMetaText("notes", line.substring(2));
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'O:':
+					addMetaText("origin", line.substring(2));
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'P:':
+					// TODO: handle parts.
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'Q:':
+					setTempo(line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'R:':
-					multilineVars.rhythm = line.substring(2);
+					addMetaText("rhythm", line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
-				case  'K:':
-					multilineVars.key = parseKey(line.substring(2));
+				case  'S:':
+					addMetaText("copyright", line.substring(2));
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'T:':
+					setTitle(line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'w:':
 					addWords(tune.lines[tune.lines.length-1].staff, line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
-				case  'P:':
-					// TODO: handle parts.
+				case  'W:':
+					addMetaText("unalignedWords", line.substring(2));
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'X:':
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'Z:':
+					addMetaText("transcription", line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  '%%':
@@ -635,23 +753,12 @@ var ParseAbc = Class.create({
 		
 		var parseTune = function(strTune) {
 			strTune = strTune.replace(/\\\n/g, "  ");	// take care of line continuations right away, but keep the same number of characters
+			strTune = strTune.replace(/\\ \n/g, "   ");	// take care of line continuations right away, but keep the same number of characters
 			var lines = strTune.split('\n');
 			lines.each( function(line)
 			{
 				parseLine(line);
 			});
-
-			if (multilineVars.rhythm !== "")
-				multilineVars.rhythm = "Rhythm: " + multilineVars.rhythm + "\n";
-			if (multilineVars.copyright !== "")
-				multilineVars.copyright = "Source: " + multilineVars.copyright + "\n";
-			if (multilineVars.notes !== "")
-				multilineVars.notes = "Notes: " + multilineVars.notes + "\n";
-			if (multilineVars.transcription !== "")
-				multilineVars.transcription = "Transcription: " + multilineVars.transcription + "\n";
-			if (multilineVars.book !== "")
-				multilineVars.book = "Book: " + multilineVars.book + "\n";
-			tune.extraText = multilineVars.rhythm+multilineVars.copyright+multilineVars.transcription+multilineVars.notes+multilineVars.book;
 		};
 		
 		this.parse = function(strTune) {
