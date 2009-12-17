@@ -209,12 +209,15 @@ ABCPrinter.prototype.printABC = function(abctune) {
   //this.currenttune = abctune;
   //ABCNote.duration = eval(this.currenttune.header.fields["L"]);
   this.y = 15;
-  this.paper.text(300, this.y, abctune.title).attr({"font-size":20});
+  this.paper.text(300, this.y, abctune.metaText.title).attr({"font-size":20});
   this.y+=20;
-  this.paper.text(100, this.y, abctune.author);
+  if (abctune.metaText.author)
+    this.paper.text(100, this.y, abctune.metaText.author);
   this.y+=15;
-  if (abctune.origin && abctune.origin.length > 0)
-    this.paper.text(100, this.y, "(" + abctune.origin + ")");
+  if (abctune.metaText.origin)
+    this.paper.text(100, this.y, "(" + abctune.metaText.origin + ")");
+  if (abctune.metaText.tempo)
+    this.paper.text(100, this.y+20, "Tempo: " + abctune.metaText.tempo.duration + '=' + abctune.metaText.tempo.bpm);
 
   for(var line=0; line<abctune.lines.length; line++) {
     var abcline = abctune.lines[line];
@@ -226,7 +229,16 @@ ABCPrinter.prototype.printABC = function(abctune) {
       this.y+=20; //hardcoded
     }
   }
-  this.paper.text(100, this.y, abctune.extraText);
+  var extraText = "";	// TODO-PER: This is just an easy way to display this info for now.
+  if (abctune.metaText.notes) extraText += "Notes:\n" + abctune.metaText.notes;
+  if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book;
+  if (abctune.metaText.copyright) extraText += "Copyright: " + abctune.metaText.copyright;
+  if (abctune.metaText.transcription) extraText += "Transcription: " + abctune.metaText.transcription;
+  if (abctune.metaText.rhythm) extraText += "Rhythm: " + abctune.metaText.rhythm;
+  if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography;
+  if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history;
+  if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords;
+  this.paper.text(100, this.y, extraText);
 };
 
 ABCPrinter.prototype.printSubtitleLine = function(abcline) {
@@ -320,8 +332,8 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
     var unknowndecs = [];
     for (var i=0;i<elem.decoration.length; i++) {
       switch(elem.decoration[i]) {
-      case "trill": dec="T"; break;
-      case "staccato": dec="k"; break;
+      case "trill":dec="T";break;
+      case "staccato":dec="k";break;
       default:
 	unknowndecs[unknowndecs.length]=elem.decoration[i];
 	continue;
