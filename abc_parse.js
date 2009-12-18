@@ -24,7 +24,7 @@ var AbcTune = Class.create({
 	//		duration: .5 (sixteenth), .75 (dotted sixteenth), 1 (eighth), 1.5 (dotted eighth)
 	//			2 (quarter), 3 (dotted quarter), 4 (half), 6 (dotted half) 8 (whole)
 	//		chord: { name:chord, position: one of 'default', 'above', 'below' }
-	//		end_beam = true or undefined if this is the last note in a beam.
+	//		end_beam = true or undefined if this is the last note in a beam.|| (elem.pitch<9) &&
 	//		lyric: { syllable: xxx, divider: one of " -_" }
 	// TODO: actually, decoration should be an array.
 	//		decoration: upbow, downbow, accent
@@ -189,13 +189,13 @@ var ParseAbc = Class.create({
 			switch (line[i])
 			{
 				case '.': return [1, 'staccato'];
-				case 'u': return [1, 'up_bow'];
-				case 'v': return [1, 'down_bow'];
-				case '~': return [1, 'trill'];
+				case 'u': return [1, 'upbow'];
+				case 'v': return [1, 'downbow'];
+				case '~': return [1, 'roll'];
 				case '!':
 					var ret = getBrackettedSubstring(line, i, 5);
 					// Be sure that the accent is recognizable.
-					var legalAccents = [ "trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
+					var legalAccents = [ "trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accenpt",
 						"emphasis", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 						"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
 						"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
@@ -211,6 +211,7 @@ var ParseAbc = Class.create({
 					ret[1] = "";
 					return ret;
 				case 'H': return [1, 'fermata'];
+				case 'M': return [1, 'mordent'];
 			}
 			return [0, 0];
 		};
