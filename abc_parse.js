@@ -23,7 +23,7 @@ var AbcTune = Class.create({
 	//		pitch: "C" is 0. The numbers refer to the pitch letter.
 	//		duration: .5 (sixteenth), .75 (dotted sixteenth), 1 (eighth), 1.5 (dotted eighth)
 	//			2 (quarter), 3 (dotted quarter), 4 (half), 6 (dotted half) 8 (whole)
-	//		chord: string
+	//		chord: { name:chord, position: one of 'default', 'above', 'below' }
 	//		end_beam = true or undefined if this is the last note in a beam.
 	//		lyric: { syllable: xxx, divider: one of " -_" }
 	// TODO: actually, decoration should be an array.
@@ -37,6 +37,7 @@ var AbcTune = Class.create({
 	//		if specified, { num: 99, den: 99 }
 	reset: function () {
 		this.metaText = {};
+		this.formatting = {};
 		this.lines = [];
 	},
 
@@ -167,8 +168,17 @@ var ParseAbc = Class.create({
 			if (line[i] === '"')
 			{
 				var chord = getBrackettedSubstring(line, i, 5);
-				if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '^')	// If it starts with ^, then the chord appears above, but that is also the default, so strip it.
+				// If it starts with ^, then the chord appears above.
+				// If it starts with _ then the chord appears below.
+				// (note that the 2.0 draft standard defines them as not chords, but annotations and also defines < > and @.)
+				if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '^') {
 					chord[1] = chord[1].substring(1);
+					chord.push('above');
+				} else if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '_') {
+					chord[1] = chord[1].substring(1);
+					chord.push('below');
+				} else
+					chord.push('default');
 				return chord;
 			}
 			return [0, ""];
@@ -191,6 +201,8 @@ var ParseAbc = Class.create({
 						"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
 						"p", "pp", "f", "ff", "mf", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2",
 						"upbow", "downbow" ];
+					if (ret[1].length > 0 && (ret[1][0] === '^' || ret[1][0] ==='_'))
+						ret[1] = ret[1].substring(1);	// TODO-PER: The test files have indicators forcing the orniment to the top or bottom, but that isn't in the standard. We'll just ignore them.
 					if (legalAccents.detect(function(acc) {
 						return (ret[1] === acc);
 					}))
@@ -333,7 +345,7 @@ var ParseAbc = Class.create({
 		  else if (str2 === "|:") return [ 2, "bar_left_repeat"];
 		  else if (str2 === "||") return [ 2, "bar_thin_thin"];
 		  else if (str2 === "::") return [ 2, "bar_dbl_repeat"];
-		  else if (str2 === "[2" || str2 === "[2") return [ 2, "bar_thin", 2]; // should it guess a repeat?
+		  else if (str2 === "[2" || str2 === "|2") return [ 2, "bar_thin", 2]; // should it guess a repeat?
 		  else if (str2 === "[1" || str2 === "|1") return [ 2, "bar_thin", 1];
 		  else if (str2 === "|]") return [ 2, "bar_thin_thick"];
 		  else if (str2 === "[|") return [ 2, "bar_thick_thin"]; 
@@ -377,6 +389,29 @@ var ParseAbc = Class.create({
 				}
 			}
 			return ret;
+		};
+
+		var addDirective = function(str) {
+			var s = stripComment(str);
+			var i = s.indexOf(' ');
+			var cmd = (i > 0) ? s.substring(0, i) : s;
+			var num;
+			switch (cmd)
+			{
+				case "stretchlast": tune.formatting.stretchlast = true; break;
+				case "staffwidth":
+					num = getInt(s.substring(i));
+					if (num.digits === 0)
+						return; // TODO-PER: flag an error
+					tune.formatting.staffwidth = num.value;
+					break;
+				case "scale":
+					num = getFloat(s.substring(i));
+					if (num.digits === 0)
+						return; // TODO-PER: flag an error
+					tune.formatting.scale = num.value;
+					break;
+			}
 		};
 
 		var multilineVars = {
@@ -473,7 +508,7 @@ var ParseAbc = Class.create({
 					var el = { };
 					ret = letter_to_chord(line, i);
 					if (ret[0] > 0) {
-						el.chord = ret[1];
+						el.chord = { name: ret[1], position: ret[2] };
 						i += ret[0];
 						multilineVars.iChar += ret[0];
 					}
@@ -560,10 +595,21 @@ var ParseAbc = Class.create({
 				tune.metaText[key] += stripComment(value) + "\n";
 		}
 
-		var getNumber = function(str) {
+		var getInt = function(str) {
 			// This parses the beginning of the string for a number and returns { value: num, digits: num }
 			// If digits is 0, then the string didn't point to a number.
 			var x = parseInt(str);
+			if (x === NaN)
+				return { digits: 0 };
+			var s = "" + x;
+			var i = str.indexOf(s);	// This is to account for leading spaces
+			return { value: x, digits: i+s.length };
+		};
+
+		var getFloat = function(str) {
+			// This parses the beginning of the string for a number and returns { value: num, digits: num }
+			// If digits is 0, then the string didn't point to a number.
+			var x = parseFloat(str);
 			if (x === NaN)
 				return { digits: 0 };
 			var s = "" + x;
@@ -595,18 +641,18 @@ var ParseAbc = Class.create({
 			if (str[0] === 'C') {	// either type 2 or type 3
 				if (str.length >= 3 && str[1] === '=') {
 					// This is a type 2 format. The multiplier is an implied 1
-					var x = getNumber(str.substring(2));
+					var x = getInt(str.substring(2));
 					if (x.digits === 0)
 						return;	// TODO-PER: flag as an error.
 					multilineVars.tempo = { multiplier: 1, bpm: x.value };
 					return;
 				} else if (str.length >= 2 && str[1] >= '0' && str[1] <= '9') {
 					// This is a type 3 format.
-					var mult = getNumber(str.substring(1));
+					var mult = getInt(str.substring(1));
 					str = str.substring(mult.digits+1);
 					if (str.length < 2 || str[0] !== '=')
 						return;	// TODO-PER: flag an error
-					var speed = getNumber(str.substring(1));
+					var speed = getInt(str.substring(1));
 					if (speed.digits === 0)
 						return;	// TODO-PER: flag as an error.
 					multilineVars.tempo = { multiplier: mult.value, bpm: speed.value };
@@ -614,7 +660,7 @@ var ParseAbc = Class.create({
 				}	// TODO-PER: if it isn't one of the above, flag as an error
 
 			} else if (str[0] >= '0' && str[0] <= '9') {	// either type 1 or type 4
-				var num = getNumber(str);
+				var num = getInt(str);
 				if (num.digits === 0)
 					return;	// TODO-PER: flag as an error.
 				str = str.substring(num.digits);
@@ -624,7 +670,7 @@ var ParseAbc = Class.create({
 					return;
 				}
 				str = str.substring(1);
-				var num2 = getNumber(str);
+				var num2 = getInt(str);
 				if (num2.digits === 0)
 					return;	// TODO-PER: flag as an error.
 
@@ -632,7 +678,7 @@ var ParseAbc = Class.create({
 				if (str.length === 0 || str[0] !== '=')
 					return;	// TODO-PER: flag as an error.
 
-				var num3 = getNumber(str.substring(1));
+				var num3 = getInt(str.substring(1));
 				if (num3.digits === 0)
 					return;	// TODO-PER: flag as an error.
 				tune.metaText.tempo = { duration: num.value/num2.value, bpm: num3.value };
@@ -739,7 +785,7 @@ var ParseAbc = Class.create({
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  '%%':
-					// TODO: handle meta commands.
+					addDirective(line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
 				default:
