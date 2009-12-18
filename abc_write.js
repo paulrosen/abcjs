@@ -236,6 +236,9 @@ ABCPrinter.prototype.printABC = function(abctune) {
   //this.currenttune = abctune;
   //ABCNote.duration = eval(this.currenttune.header.fields["L"]);
   this.y = 15;
+  if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
+  if (abctune.formatting.staffwidth) { this.paper.text(200, this.y, "Format: staffwidth="+abctune.formatting.staffwidth); this.y += 20; }
+  if (abctune.formatting.scale) { this.paper.text(200, this.y, "Format: scale="+abctune.formatting.scale); this.y += 20; }
   this.paper.text(300, this.y, abctune.metaText.title).attr({"font-size":20});
   this.y+=20;
   if (abctune.metaText.author)
@@ -355,7 +358,7 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
   var roomtaken = 0; // room needed to the left of the note
   
   if (elem.chord !== undefined)
-    this.paper.text(this.x, this.y+15, elem.chord);
+    this.paper.text(this.x, this.y+15 + (elem.chord.position === 'below' ? 65 : 0), elem.chord.name);
 
   if (elem.accidental !== undefined && elem.accidental !== 'none') {
     var symb; 
