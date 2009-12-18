@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<script src="raphael-patched.js"></script>
+<script src="Maestro_500.js"></script>
+<script src="sprintf.js"></script>
+<script src="abc.js"></script>
+<script src="scalefont.js"></script>
+
+<script>
+
+function doScale() {
+var paper = Raphael(document.getElementById("canvas"), 1000, 600);
+var font = paper.getFont("Maestro", 500);
+scale_font(font, 30, paper);
+}
+
+
+
+
+
+
+
+
+</script>
+</head>
+<body onload="doScale()">
+<div id="canvas"></div>
+</body>
+</html>
