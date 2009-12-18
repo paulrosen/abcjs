@@ -384,9 +384,21 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
     var dec;
     var unknowndecs = [];
     var yslot = (elem.pitch>9) ? elem.pitch+3 : 12;
+    var ypos;
     (elem.pitch===5) && (yslot=14); // avoid upstem of the A
+
+    for (var i=0;i<elem.decoration.length; i++) { // treat staccato first (may need to shift other markers)
+      if (elem.decoration[i]==="staccato") {
+	ypos = (elem.pitch>=6) ? elem.pitch+2:elem.pitch-2;
+        (elem.pitch===4) && ypos--; // don't place on a stave line
+	((elem.pitch===6) || (elem.pitch===8)) && ypos++;
+	(elem.pitch>9) && yslot++; // take up some room of those that are above
+	var deltax = (this.glyphs.getSymbolWidth("\u0153")-this.glyphs.getSymbolWidth("."))/2;
+	elemset.push(this.printSymbol(this.x+deltax, ypos, "."));
+      }
+    }
+
     for (var i=0;i<elem.decoration.length; i++) {
-      var above = true;
       switch(elem.decoration[i]) {
       case "trill":dec="\0178";break;
       case "roll": dec="~"; break;
@@ -396,7 +408,7 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
       case "uppermordent": dec="m"; break;
       case "mordent": 
       case "lowermordent": dec="M"; break;
-      case "staccato":dec="."; above=false; break;
+      case "staccato": continue;
       case "downbow": dec="\u2265";break;
       case "upbow": dec="\u2264";break;
       case "fermata": dec="U"; break;
@@ -422,16 +434,8 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
 	unknowndecs[unknowndecs.length]=elem.decoration[i];
 	continue;
       }
-      var ypos;
-      if (above) {
-	ypos=yslot;
-	yslot+=3;
-      } else { // place immediately above or below the note
-	ypos = (elem.pitch>=6) ? elem.pitch+2:elem.pitch-2;
-        (elem.pitch===4) && ypos--; // don't place on a stave line
-	((elem.pitch===6) || (elem.pitch===8)) && ypos++;
-	(elem.pitch>9) && yslot++; // take up some room of those that are above
-      }
+      ypos=yslot;
+      yslot+=3;
       var deltax = (this.glyphs.getSymbolWidth("\u0153")-this.glyphs.getSymbolWidth(dec))/2;
       elemset.push(this.printSymbol(this.x+deltax, ypos, dec));
       
