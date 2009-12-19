@@ -185,6 +185,13 @@ function abc_keystroke()
 			try {
 				abcParser.parse(tunebook.tunes[i].abc);
 				var tune = abcParser.getTune();
+				var warnings = abcParser.getWarnings();
+				if (warnings) {
+					warnings = warnings.join("<br />");
+					$('warnings').update(warnings);
+				}
+				else
+					$('warnings').update('No errors');
 				var canvas = $("canvas"+i);
 				paper = Raphael(canvas, 1500, 1500);
 				printer = new ABCPrinter(paper);
