@@ -403,11 +403,21 @@ var ParseAbc = Class.create({
 				{
 					ret[0]++;
 					ret[1] -= 7;
+					if ((curr_pos+1 < line.length-1) && line[curr_pos+2] === ',')	// see if there is a double comma
+					{
+						ret[0]++;
+						ret[1] -= 7;
+					}
 				}
 				else if (line[curr_pos+1] === "'")
 				{
 					ret[0]++;
 					ret[1] += 7;
+					if ((curr_pos+1 < line.length-1) && line[curr_pos+2] === '\'')	// see if there is a double prime
+					{
+						ret[0]++;
+						ret[1] += 7;
+					}
 				}
 			}
 			return ret;
