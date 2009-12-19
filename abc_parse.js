@@ -24,7 +24,7 @@ var AbcTune = Class.create({
 	//		duration: .5 (sixteenth), .75 (dotted sixteenth), 1 (eighth), 1.5 (dotted eighth)
 	//			2 (quarter), 3 (dotted quarter), 4 (half), 6 (dotted half) 8 (whole)
 	//		chord: { name:chord, position: one of 'default', 'above', 'below' }
-	//		end_beam = true or undefined if this is the last note in a beam.|| (elem.pitch<9) &&
+	//		end_beam = true or undefined if this is the last note in a beam.
 	//		lyric: { syllable: xxx, divider: one of " -_" }
 	// TODO: actually, decoration should be an array.
 	//		decoration: upbow, downbow, accent
@@ -195,7 +195,7 @@ var ParseAbc = Class.create({
 				case '!':
 					var ret = getBrackettedSubstring(line, i, 5);
 					// Be sure that the accent is recognizable.
-					var legalAccents = [ "trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accenpt",
+					var legalAccents = [ "trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
 						"emphasis", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 						"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
 						"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
@@ -246,8 +246,16 @@ var ParseAbc = Class.create({
 		{
 			switch (line[i])
 			{
-				case '>': return [1, 1.5, 0.5];
-				case '<': return [1, 0.5, 1.5];
+				case '>':
+					if (i < line.length - 1 && line[i+1] === '>')	// double >>
+						return [2, 1.75, .25];
+					else
+						return [1, 1.5, 0.5];
+				case '<':
+					if (i < line.length - 1 && line[i+1] === '<')	// double <<
+						return [2, .25, 1.75];
+					else
+						return [1, 0.5, 1.5];
 				case '1':
 				case '2':
 				case '3':
@@ -291,6 +299,16 @@ var ParseAbc = Class.create({
 					var start2 = i;
 					i++;
 					var dd = 0;
+					if (i < line.length && line[i] === '/')	{ // this is the construction where there are multiple slashes: c// for instance.
+						var numSlashes = 1;
+						var divisor = 2;
+						while (i < line.length && line[i] === '/') {
+							numSlashes++;
+							divisor = divisor * 2;
+							i++;
+						}
+						return [ numSlashes, 1 / divisor ];
+					}
 					while (i < line.length && line[i] >= '0' && line[i] <= '9') {
 						dd = dd * 10 + parseInt(line[i]);
 						i++;
@@ -374,7 +392,9 @@ var ParseAbc = Class.create({
 				case 'e' : ret = [ 1, 9 ]; break;
 				case 'f' : ret = [ 1, 10 ]; break;
 				case 'g' : ret = [ 1, 11 ]; break;
-				case 'z' : ret = [ 1, null ]; break; // missing x, y
+				case 'x' : ret = [ 1, null, 'invisible' ]; break;
+				case 'y' : ret = [ 1, null, 'spacer' ]; break;
+				case 'z' : ret = [ 1, null, 'rest' ]; break;
 			}
 			if ((ret[0] !== 0) && (curr_pos < line.length-1))
 			{
@@ -422,6 +442,7 @@ var ParseAbc = Class.create({
 				this.meter = { type: 'specified', num: '4', den: '4'};	// if no meter is specified, there is an implied one.
 				this.hasMainTitle = false;
 				this.default_length = 1;
+				this.clef = 'treble';
 			}
 		};
 		
@@ -483,7 +504,7 @@ var ParseAbc = Class.create({
 
 			// Start with the standard staff, clef and key symbols on each line
 			tune.lines.push({ staff: [] });
-			tune.appendElement('clef', -1, -1, { type: 'treble' });
+			tune.appendElement('clef', -1, -1, { type: multilineVars.clef });
 			tune.appendElement('key', -1, -1, multilineVars.key);
 			if (multilineVars.meter !== "")
 			{
@@ -571,7 +592,15 @@ var ParseAbc = Class.create({
 						if (ret[1]!==null)	// not rest
 							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
 						else
-							tune.appendElement('rest', multilineVars.iChar, multilineVars.iChar, el);
+							tune.appendElement(ret[2], multilineVars.iChar, multilineVars.iChar, el);
+					} else if (el.decoration !== undefined) {	// decorations can also be attached to bars, so see if the next thing is a decoration
+						var ret4 = letter_to_bar(line, i);
+						if (ret4[0] > 0) {
+							i += ret4[0];
+							multilineVars.iChar += ret4[0];
+							var bar2 = { type: ret4[1], number:ret4[2], decoration: el.decoration };
+							tune.appendElement('bar', multilineVars.iChar, multilineVars.iChar+ret4[0], bar2);
+						}
 					}
 					else {	// don't know what this is, so ignore it.
 						i++;
@@ -591,9 +620,9 @@ var ParseAbc = Class.create({
 
 		var addMetaText = function(key, value) {
 			if (tune.metaText[key] === undefined)
-				tune.metaText[key] = stripComment(value) + "\n";
+				tune.metaText[key] = stripComment(value);
 			else
-				tune.metaText[key] += stripComment(value) + "\n";
+				tune.metaText[key] += "\n" + stripComment(value);
 		}
 
 		var getInt = function(str) {
@@ -763,7 +792,7 @@ var ParseAbc = Class.create({
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'S:':
-					addMetaText("copyright", line.substring(2));
+					addMetaText("source", line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'T:':
