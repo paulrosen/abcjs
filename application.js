@@ -62,7 +62,7 @@ function pickTuneAndPdf(pdf_id, abc_file, value)
 	var pdf = $(pdf_id);
 	//pdf.src = '/testdata/Ach_below.pdf';
 	pdf.innerHTML = "<embed src='" + pdf_file + "' height='100%' width='100%'>";
-	new Ajax.Updater("abcm2ps_output", "/tunes/get_file", { parameters: { file: err_file, authenticity_token: window.authenticity_token } });
+	new Ajax.Updater("abcm2ps_output", "/tunes/get_file", {parameters: {file: err_file, authenticity_token: window.authenticity_token}});
 }
 
 function pickTune(value)
@@ -192,6 +192,18 @@ function abc_keystroke()
 			} catch (e) {
 				$("canvas"+i).update("error: " + e)
 			}
+			var paths = $$('path');
+			var click = function() {
+				var x = this.getAttribute('abc-pos');
+				//$(this).setStyle({ backgroundColor: '#ff0000' });
+				if (x && !x.startsWith('-1')) {
+					var arr = x.split(',');
+					editArea.setSelection(parseInt(arr[0])-1, parseInt(arr[1]));
+				}
+			};
+			paths.each(function(path) {
+				path.onclick = click;
+			});
 		}
 	} catch (e) {
 		$("canvas0").update("error: " + e)
@@ -227,5 +239,5 @@ function doGradeTest(url, failed_tests, passed_tests, pass) {
 	else
 		failed.appendChild(selection);
 
-	new Ajax.Request(url, { parameters: { pass: pass, value: value, authenticity_token: window.authenticity_token } });
+	new Ajax.Request(url, {parameters: {pass: pass, value: value, authenticity_token: window.authenticity_token}});
 }
