@@ -288,8 +288,9 @@ var ParseAbc = Class.create({
 								d = d * 10 + parseInt(line[i]);
 								i++;
 							}
-							if (d !== 0)
-								den = d;
+							if (d === 0)	// If there is no denominator  "c3/" then that is the same as 2 "c3/2"
+								d = 2;
+							den = d;
 						}
 						return [ i -  start, num / den ];
 					}				
