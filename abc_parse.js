@@ -31,8 +31,9 @@ var AbcTune = Class.create({
 	// BAR: type=bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
 	//	number: 1 or 2: if it is the start of a first or second ending
 	// CLEF: type=treble,bass
-	// KEY-SIG: num:0-7 dir:sharp,flat
-	//		extra[]: { pitch: as above, type: sharp,flat,natural }
+	// KEY-SIG:
+	//		regularKey: { num:0-7 dir:sharp,flat }
+	//		extraAccidentals[]: { acc:sharp|dblsharp|natural|flat|dblflat,  note:a|b|c|d|e|f|g }
 	// METER: type: common_time,cut_time,specified
 	//		if specified, { num: 99, den: 99 }
 	reset: function () {
@@ -54,79 +55,452 @@ var AbcTune = Class.create({
 	}
 });
 
+// this is a series of functions that get a particular element out of the passed stream.
+// the return is the number of characters consumed, so 0 means that the element wasn't found.
+// also returned is the element found. This may be a different length because spaces may be consumed that aren't part of the string.
+// The return structure for most calls is { len: num_chars_consumed, token: str }
+var AbcTokenizer = Class.create({
+	initialize: function () {
+		var skipWhiteSpace = function(str) {
+			for (var i = 0; i < str.length; i++) {
+				if (str[i] !== ' ' && str[i] !== '\t')
+					return i;
+			}
+			return str.length;	// It must have been all white space
+		};
+		var finished = function(str, i) {
+			return i >= str.length;
+		};
+
+		// This just gets the basic pitch letter, ignoring leading spaces, and normalizing it to a capital
+		this.getKeyPitch = function(str) {
+			var i = skipWhiteSpace(str);
+			if (finished(str, i))
+				return { len: 0 };
+			switch (str[i]) {
+				case 'A': return { len: i+1, token: 'A' };
+				case 'B': return { len: i+1, token: 'B' };
+				case 'C': return { len: i+1, token: 'C' };
+				case 'D': return { len: i+1, token: 'D' };
+				case 'E': return { len: i+1, token: 'E' };
+				case 'F': return { len: i+1, token: 'F' };
+				case 'G': return { len: i+1, token: 'G' };
+				case 'a': return { len: i+1, token: 'A' };
+				case 'b': return { len: i+1, token: 'B' };
+				case 'c': return { len: i+1, token: 'C' };
+				case 'd': return { len: i+1, token: 'D' };
+				case 'e': return { len: i+1, token: 'E' };
+				case 'f': return { len: i+1, token: 'F' };
+				case 'g': return { len: i+1, token: 'G' };
+			}
+			return { len: 0 };
+		};
+
+		// This just gets the basic accidental, ignoring leading spaces, and only the ones that appear in a key
+		this.getSharpFlat = function(str) {
+			switch (str[0]) {
+				case '#': return { len: 1, token: '#' };
+				case 'b': return { len: 1, token: 'b' };
+			}
+			return { len: 0 };
+		};
+
+		this.getMode = function(str) {
+			var skipAlpha = function(str, start) {
+				// This returns the index of the next non-alphabetic char, or the entire length of the string if not found.
+				while (start < str.length && ((str[start] >= 'a' && str[start] <= 'z') || (str[start] >= 'A' && str[start] <= 'Z')))
+					start++;
+				return start;
+			};
+
+			var i = skipWhiteSpace(str);
+			if (finished(str, i))
+				return { len: 0 };
+			var firstThree = str.substring(i,i+3).toLowerCase();
+			if (firstThree.length > 1 && firstThree[1] === ' ') firstThree = firstThree[0];	// This will handle the case of 'm'
+			switch (firstThree) {
+				case 'mix': return { len: skipAlpha(str, i), token: 'Mix' };
+				case 'dor': return { len: skipAlpha(str, i), token: 'Dor' };
+				case 'phr': return { len: skipAlpha(str, i), token: 'Phr' };
+				case 'lyd': return { len: skipAlpha(str, i), token: 'Lyd' };
+				case 'loc': return { len: skipAlpha(str, i), token: 'Loc' };
+				case 'aeo': return { len: skipAlpha(str, i), token: 'm' };
+				case 'maj': return { len: skipAlpha(str, i), token: '' };
+				case 'ion': return { len: skipAlpha(str, i), token: '' };
+				case 'min': return { len: skipAlpha(str, i), token: 'm' };
+				case 'm': return { len: skipAlpha(str, i), token: 'm' };
+			}
+			return { len: 0 };
+		};
+
+		this.getClef = function(str) {
+			var strOrig = str;
+			var i = skipWhiteSpace(str);
+			if (finished(str, i))
+				return { len: 0 };
+			// The word 'clef' is optional, but if it appears, a clef MUST appear
+			var needsClef = false;
+			var strClef = str.substring(i);
+			if (strClef.startsWith('clef=')) {
+				needsClef = true;
+				strClef = strClef.substring(5);
+				i += 5;
+			}
+			if (strClef.length === 0 && needsClef)
+				return { len: i+5, warn: "No clef specified: " + strOrig };
+
+			var j = skipWhiteSpace(strClef);
+			if (finished(strClef, j))
+				return { len: 0 };
+			if (j > 0) {
+				i += j;
+				strClef = strClef.substring(j);
+			}
+			var name = null;
+			if (strClef.startsWith('treble'))
+				name = 'treble';
+			else if (strClef.startsWith('bass3'))
+				name = 'bass3';
+			else if (strClef.startsWith('bass'))
+				name = 'bass';
+			else if (strClef.startsWith('tenor'))
+				name = 'tenor';
+			else if (strClef.startsWith('alto2'))
+				name = 'alto2';
+			else if (strClef.startsWith('alto1'))
+				name = 'alto1';
+			else if (strClef.startsWith('alto'))
+				name = 'alto';
+			else if (strClef.startsWith('none'))
+				name = 'none';
+			else
+				return { len: i+5, warn: "Unknown clef specified: " + strOrig };
+
+			strClef = strClef.substring(name.length);
+			j = this.isMatch(strClef, '+8');
+			if (j > 0)
+				name += "+8";
+			j = this.isMatch(strClef, '-8');
+			if (j > 0)
+				name += "-8";
+
+			return { len: i+name.length, token: name };
+		};
+
+		// This just sees if the next token is the word passed in, with possible leading spaces
+		this.isMatch = function(str, match) {
+			var i = skipWhiteSpace(str);
+			if (finished(str, i))
+				return 0;
+			if (str.substring(i).startsWith(match))
+				return match.length;
+			return 0;
+		};
+
+		// This gets an accidental marking for the key signature. It has the accidental then the pitch letter.
+		this.getKeyAccidental = function(str) {
+			var accTranslation = {
+				'^': 'sharp',
+				'^^': 'dblsharp',
+				'=': 'natural',
+				'_': 'flat',
+				'__': 'dblflat'
+			};
+			var i = skipWhiteSpace(str);
+			if (finished(str, i))
+				return { len: 0 };
+			var acc = null;
+			switch (str[i])
+			{
+				case '^':
+				case '_':
+				case '=':
+					acc = str[i];
+					break;
+				default: return { len: 0 };
+			}
+			i++;
+			if (finished(str, i))
+				return { len: 1, warn: 'Expected note name after accidental' };
+			switch (str[i])
+			{
+				case 'a':
+				case 'b':
+				case 'c':
+				case 'd':
+				case 'e':
+				case 'f':
+				case 'g':
+				case 'A':
+				case 'B':
+				case 'C':
+				case 'D':
+				case 'E':
+				case 'F':
+				case 'G':
+					return { len: i+1, token: { acc: accTranslation[acc], note: str[i]} };
+				case '^':
+				case '_':
+					acc += str[i];
+					i++;
+					if (finished(str, i))
+						return { len: 2, warn: 'Expected note name after accidental' };
+					switch (str[i])
+					{
+						case 'a':
+						case 'b':
+						case 'c':
+						case 'd':
+						case 'e':
+						case 'f':
+						case 'g':
+						case 'A':
+						case 'B':
+						case 'C':
+						case 'D':
+						case 'E':
+						case 'F':
+						case 'G':
+							return { len: i+1, token: { acc: accTranslation[acc], note: str[i]} };
+						default:
+							return { len: 2, warn: 'Expected note name after accidental' };
+					}
+				default:
+					return { len: 1, warn: 'Expected note name after accidental' };
+			}
+		}
+	}
+});
+
 var ParseAbc = Class.create({
 	initialize: function () {
 		var tune = new AbcTune();
+		var tokenizer = new AbcTokenizer();
 
 		this.getTune = function() {
 			return tune;
 		};
 
+		var multilineVars = {
+			reset: function() {
+				this.iChar = 0;
+				this.key = { num: 0 };
+				this.meter = { type: 'specified', num: '4', den: '4'};	// if no meter is specified, there is an implied one.
+				this.hasMainTitle = false;
+				this.default_length = 1;
+				this.clef = 'treble';
+				this.warnings = null;
+			}
+		};
+
+		var addWarning = function(str) {
+			if (!multilineVars.warnings)
+				multilineVars.warnings = [];
+			multilineVars.warnings.push(str);
+		};
+		this.getWarnings = function() {
+			return multilineVars.warnings;
+		};
+
+		var keys = {
+			'C#': { num: 7, acc: 'sharps' },
+			'A#m': { num: 7, acc: 'sharps' },
+			'G#Mix': { num: 7, acc: 'sharps' },
+			'D#Dor': { num: 7, acc: 'sharps' },
+			'E#Phr': { num: 7, acc: 'sharps' },
+			'F#Lyd': { num: 7, acc: 'sharps' },
+			'B#Loc': { num: 7, acc: 'sharps' },
+
+			'F#': { num: 6, acc: 'sharp' },
+			'D#m': { num: 6, acc: 'sharp' },
+			'C#Mix': { num: 6, acc: 'sharp' },
+			'G#Dor': { num: 6, acc: 'sharp' },
+			'A#Phr': { num: 6, acc: 'sharp' },
+			'BLyd': { num: 6, acc: 'sharp' },
+			'E#Loc': { num: 6, acc: 'sharp' },
+
+			'B': { num: 5, acc: 'sharp' },
+			'G#m': { num: 5, acc: 'sharp' },
+			'F#Mix': { num: 5, acc: 'sharp' },
+			'C#Dor': { num: 5, acc: 'sharp' },
+			'D#Phr': { num: 5, acc: 'sharp' },
+			'ELyd': { num: 5, acc: 'sharp' },
+			'A#Loc': { num: 5, acc: 'sharp' },
+
+			'E': { num: 4, acc: 'sharp' },
+			'C#m': { num: 4, acc: 'sharp' },
+			'BMix': { num: 4, acc: 'sharp' },
+			'F#Dor': { num: 4, acc: 'sharp' },
+			'G#Phr': { num: 4, acc: 'sharp' },
+			'ALyd': { num: 4, acc: 'sharp' },
+			'D#Loc': { num: 4, acc: 'sharp' },
+
+			'A': { num: 3, acc: 'sharp' },
+			'F#m': { num: 3, acc: 'sharp' },
+			'EMix': { num: 3, acc: 'sharp' },
+			'BDor': { num: 3, acc: 'sharp' },
+			'C#Phr': { num: 3, acc: 'sharp' },
+			'DLyd': { num: 3, acc: 'sharp' },
+			'G#Loc': { num: 3, acc: 'sharp' },
+
+			'D': { num: 2, acc: 'sharp' },
+			'Bm': { num: 2, acc: 'sharp' },
+			'AMix': { num: 2, acc: 'sharp' },
+			'EDor': { num: 2, acc: 'sharp' },
+			'F#Phr': { num: 2, acc: 'sharp' },
+			'GLyd': { num: 2, acc: 'sharp' },
+			'C#Loc': { num: 2, acc: 'sharp' },
+
+			'G': { num: 1, acc: 'sharp' },
+			'Em': { num: 1, acc: 'sharp' },
+			'DMix': { num: 1, acc: 'sharp' },
+			'ADor': { num: 1, acc: 'sharp' },
+			'BPhr': { num: 1, acc: 'sharp' },
+			'CLyd': { num: 1, acc: 'sharp' },
+			'F#Loc': { num: 1, acc: 'sharp' },
+
+			'C': { num: 0, acc: 'sharp' },
+			'Am': { num: 0, acc: 'sharp' },
+			'GMix': { num: 0, acc: 'sharp' },
+			'DDor': { num: 0, acc: 'sharp' },
+			'EPhr': { num: 0, acc: 'sharp' },
+			'FLyd': { num: 0, acc: 'sharp' },
+			'BLoc': { num: 0, acc: 'sharp' },
+
+			'F': { num: 1, acc: 'flat' },
+			'Dm': { num: 1, acc: 'flat' },
+			'CMix': { num: 1, acc: 'flat' },
+			'GDor': { num: 1, acc: 'flat' },
+			'APhr': { num: 1, acc: 'flat' },
+			'BbLyd': { num: 1, acc: 'flat' },
+			'ELoc': { num: 1, acc: 'flat' },
+
+			'Bb': { num: 2, acc: 'flat' },
+			'Gm': { num: 2, acc: 'flat' },
+			'FMix': { num: 2, acc: 'flat' },
+			'CDor': { num: 2, acc: 'flat' },
+			'DPhr': { num: 2, acc: 'flat' },
+			'EbLyd': { num: 2, acc: 'flat' },
+			'ALoc': { num: 2, acc: 'flat' },
+
+			'Eb': { num: 3, acc: 'flat' },
+			'Cm': { num: 3, acc: 'flat' },
+			'BbMix': { num: 3, acc: 'flat' },
+			'FDor': { num: 3, acc: 'flat' },
+			'GPhr': { num: 3, acc: 'flat' },
+			'AbLyd': { num: 3, acc: 'flat' },
+			'DLoc': { num: 3, acc: 'flat' },
+
+			'Ab': { num: 4, acc: 'flat' },
+			'Fm': { num: 4, acc: 'flat' },
+			'EbMix': { num: 4, acc: 'flat' },
+			'BbDor': { num: 4, acc: 'flat' },
+			'CPhr': { num: 4, acc: 'flat' },
+			'DbLyd': { num: 4, acc: 'flat' },
+			'GLoc': { num: 4, acc: 'flat' },
+
+			'Db': { num: 5, acc: 'flat' },
+			'Bbm': { num: 5, acc: 'flat' },
+			'AbMix': { num: 5, acc: 'flat' },
+			'EbDor': { num: 5, acc: 'flat' },
+			'FPhr': { num: 5, acc: 'flat' },
+			'GgLyd': { num: 5, acc: 'flat' },
+			'CLoc': { num: 5, acc: 'flat' },
+
+			'Gb': { num: 6, acc: 'flat' },
+			'Ebm': { num: 6, acc: 'flat' },
+			'DbMix': { num: 6, acc: 'flat' },
+			'AbDor': { num: 6, acc: 'flat' },
+			'BbPhr': { num: 6, acc: 'flat' },
+			'CbLyd': { num: 6, acc: 'flat' },
+			'FLoc': { num: 6, acc: 'flat' },
+
+			'Cb': { num: 7, acc: 'flat' },
+			'Abm': { num: 7, acc: 'flat' },
+			'GbMix': { num: 7, acc: 'flat' },
+			'DbDor': { num: 7, acc: 'flat' },
+			'EbPhr': { num: 7, acc: 'flat' },
+			'FbLyd': { num: 7, acc: 'flat' },
+			'BbLoc': { num: 7, acc: 'flat' },
+
+			// The following are not in the 2.0 spec, but seem normal enough.
+			// TODO-PER: These SOUND the same as what's written, but they aren't right
+			'A#': { num: 2, acc: 'flat' },
+			'B#': { num: 0, acc: 'sharp' },
+			'D#': { num: 3, acc: 'flat' },
+			'E#': { num: 1, acc: 'flat' },
+			'G#': { num: 4, acc: 'flat' }
+		};
 		///////////////// private functions ////////////////////
-		var parseKey = function(str)
+		var parseKey = function(str)	// (and clef)
 		{
+			var origStr = str;
+			// The format is:
+			// [space][tonic[#|b][ ][3-letter-mode][ignored-chars][space]][ accidentals...][ clef=treble|bass|bass3|tenor|alto|alto2|alto1|none [+8|-8]]
+			// -- or -- the key can be "none"
 			// First get the key letter: turn that into a index into the key array (0-11)
 			// Then see if there is a sharp or flat. Increment or decrement.
 			// Then see if there is a mode modifier. Add or subtract to the index.
 			// Then do a mod 12 on the index and return the key.
-			var keys = [
-				{ num: 3, acc: 'sharp' },	// A
-				{ num: 2, acc: 'flat' },		// Bb
-				{ num: 5, acc: 'sharp' },	// B
-				{ num: 0 },	// C
-				{ num: 5, acc: 'flat' },	// Db
-				{ num: 2, acc: 'sharp' },	// D
-				{ num: 3, acc: 'flat' },	// Eb
-				{ num: 4, acc: 'sharp' },	// E
-				{ num: 1, acc: 'flat' },	// F
-				{ num: 6, acc: 'flat' },	// Gb
-				{ num: 1, acc: 'sharp' },	//G
-				{ num: 4, acc: 'flat' }		// Ab
-			];
 
-			str = str.gsub(" ", "");
-			str = str.toUpperCase();
+			var ret = {};
 
-			var key;
-			switch(str[0])
-			{
-				case 'A': key = 0; break;
-				case 'B': key = 2; break;
-				case 'C': key = 3; break;
-				case 'D': key = 5; break;
-				case 'E': key = 7; break;
-				case 'F': key = 8; break;
-				case 'G': key = 10; break;
-				default: key = 3; break;
-			}
-			var i = 1;
-			if (i < str.length)
-			{
-				switch(str[i])
-				{
-					case '#': key += 1; i += 1; break;
-					case 'B': key -= 1; i += 1; break;
+			var retPitch = tokenizer.getKeyPitch(str);
+			if (retPitch.len > 0) {
+				var key = retPitch.token;
+				str = str.substring(retPitch.len);
+				// We got a pitch to start with, so we might also have an accidental and a mode
+				var retAcc = tokenizer.getSharpFlat(str);
+				if (retAcc.len > 0) {
+					key += retAcc.token;
+					str = str.substring(retAcc.len);
+				}
+				var retMode = tokenizer.getMode(str);
+				if (retMode.len > 0) {
+					key += retMode.token;
+					str = str.substring(retMode.len);
+				}
+				ret.regularKey = keys[key];
+			} else {
+				var retNone = tokenizer.isMatch(str, 'none');
+				if (retNone > 0) {
+					// we got the none key - that's the same as C to us
+					ret.regularKey = keys['C'];
+					str = str.substring(retNone.len);
 				}
 			}
-			if (i < str.length)
-			{
-				var j = i + 3;
-				if (j >= str.length) j = str.length-1;
-				str = str.substring(i, j+1);
-				switch(str)
-				{
-					case 'LYD': key -= 5; break;
-					case 'MIX': key -= 7; break;
-					case 'DOR': key -= 2; break;
-					case 'MIN': key -= 9; break;
-					case 'M': key -= 9; break;
-					case 'AEO': key -= 9; break;
-					case 'PHR': key -= 4; break;
-					case 'LOC': key -= 11; break;
+			// now see if there are extra accidentals
+			var done = false;
+			while (!done) {
+				var retExtra = tokenizer.getKeyAccidental(str);
+				if (retExtra.len === 0)
+					done = true;
+				else {
+					str = str.substring(retExtra.len);
+					if (retExtra.warn)
+						addWarning("error parsing extra accidentals:" + origStr);
+					else {
+						if (!ret.extraAccidentals)
+							ret.extraAccidentals = [];
+						ret.extraAccidentals.push(retExtra.token);
+					}
 				}
 			}
-			if (key < 0) key += 12;
-			return keys[key];
+
+			// now see if there is a clef
+			var retClef = tokenizer.getClef(str);
+			if (retClef.len > 0) {
+				if (retClef.warn)
+					addWarning("error parsing clef:" + origStr);
+				else
+				ret.clef = retClef.token;
+			}
+
+			if (ret.regularKey === undefined && ret.extraAccidentals === undefined) {
+				addWarning("error parsing key: " + origStr);
+				ret.regularKey = keys['C'];
+			}
+			return ret;
 		};
 
 		var substInChord = function(str)
@@ -446,17 +820,6 @@ var ParseAbc = Class.create({
 			}
 		};
 
-		var multilineVars = {
-			reset: function() {
-				this.iChar = 0;
-				this.key = { num: 0 };
-				this.meter = { type: 'specified', num: '4', den: '4'};	// if no meter is specified, there is an implied one.
-				this.hasMainTitle = false;
-				this.default_length = 1;
-				this.clef = 'treble';
-			}
-		};
-		
 		var setTitle = function(title) {
 			if (multilineVars.hasMainTitle)
 				tune.lines[tune.lines.length] = { subtitle: stripComment(title) };	// display secondary title
@@ -473,6 +836,8 @@ var ParseAbc = Class.create({
 				multilineVars.meter = { type: 'common_time' };
 			else if (meter === 'C|')
 				multilineVars.meter = { type: 'cut_time' };
+			else if (meter.toLowerCase() === 'none')
+				multilineVars.meter = null;
 			else
 			{
 				var a = meter.split('/');
@@ -517,7 +882,7 @@ var ParseAbc = Class.create({
 			tune.lines.push({ staff: [] });
 			tune.appendElement('clef', -1, -1, { type: multilineVars.clef });
 			tune.appendElement('key', -1, -1, multilineVars.key);
-			if (multilineVars.meter !== "")
+			if (multilineVars.meter !== null)
 			{
 				tune.appendElement('meter', -1, -1, multilineVars.meter);
 				multilineVars.meter = "";
@@ -603,7 +968,7 @@ var ParseAbc = Class.create({
 						if (ret[1]===null) {	// rest
 							el.rest_type=ret[2];
 						}
-						tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
+							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
 
 					} else if (el.decoration !== undefined) {	// decorations can also be attached to bars, so see if the next thing is a decoration
 						var ret4 = letter_to_bar(line, i);
@@ -763,7 +1128,10 @@ var ParseAbc = Class.create({
 						tune.metaText.tempo = { duration: dur * multilineVars.tempo.multiplier, bpm: multilineVars.tempo.bpm };
 						multilineVars.tempo = null;
 					}
-					multilineVars.key = parseKey(line.substring(2));
+					var retKey = parseKey(line.substring(2));
+					multilineVars.key = retKey;
+					if (retKey.clef)
+						multilineVars.clef = retKey.clef;
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'L:':
