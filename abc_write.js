@@ -142,9 +142,11 @@ function ABCPrinter(paper) {
 }
 
 // assumes this.y is set appropriately
-ABCPrinter.prototype.printSymbol = function(x, offset, symbol) {
+ABCPrinter.prototype.printSymbol = function(x, offset, symbol, start, end) {
   var ycorr = this.glyphs.getYCorr(symbol);
-  return this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol);
+  var el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol);
+  el.node.setAttribute("abc-pos", "" + start + ',' + end);
+  return el
 };
 
 ABCPrinter.prototype.calcY = function(ofs) {
@@ -219,14 +221,14 @@ ABCPrinter.prototype.printABC = function(abctune) {
     }
   }
   var extraText = "";	// TODO-PER: This is just an easy way to display this info for now.
-  if (abctune.metaText.notes) extraText += "Notes:\n" + abctune.metaText.notes;
-  if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book;
-  if (abctune.metaText.copyright) extraText += "Source: " + abctune.metaText.copyright;
-  if (abctune.metaText.transcription) extraText += "Transcription: " + abctune.metaText.transcription;
-  if (abctune.metaText.rhythm) extraText += "Rhythm: " + abctune.metaText.rhythm;
-  if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography;
-  if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history;
-  if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords;
+  if (abctune.metaText.notes) extraText += "Notes:\n" + abctune.metaText.notes + "\n";
+  if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
+  if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
+  if (abctune.metaText.transcription) extraText += "Transcription: " + abctune.metaText.transcription + "\n";
+  if (abctune.metaText.rhythm) extraText += "Rhythm: " + abctune.metaText.rhythm + "\n";
+  if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
+  if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
+  if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords + "\n";
   this.paper.text(10, this.y+30, extraText).attr({"text-anchor":"start"});
 };
 
@@ -276,6 +278,10 @@ ABCPrinter.prototype.printABCElement = function() {
     break;
   case "key":
     this.printKeySignature(elem);
+    break;
+  case "invisible":
+  case "spacer":
+    this.x += 15*elem.duration;
     break;
   case "rest":
     graphelem = this.printRest(elem);
@@ -330,7 +336,7 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
     case "natural":
       symb = "n";
     }
-    var acc = this.printSymbol(this.x, elem.pitch, symb); // 1 is hardcoded
+    var acc = this.printSymbol(this.x, elem.pitch, symb, elem.startChar, elem.endChar); // 1 is hardcoded
     roomtaken += (this.glyphs.getSymbolWidth(symb)+2)
     acc.translate(-roomtaken,0); // hardcoded
     elemset.push(acc);
@@ -361,20 +367,20 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
 	  this.debugMsg("chartable["+ dir + "][" + (-durlog) + '] is undefined');
   else {
 
-	  notehead = this.printSymbol(this.x, elem.pitch, c);
+	  notehead = this.printSymbol(this.x, elem.pitch, c, elem.startChar, elem.endChar);
 
 	  elemset.push(notehead);
 	  
 
 	  if (dot) {
 		var dotadjust = (1-elem.pitch%2);
-		elemset.push(this.glyphs.printSymbol(this.x+12, 1+this.calcY(elem.pitch+2-1+dotadjust), ".")); // 12 and 1 is hardcoded. some weird bug with dot y-pos ??!
+		elemset.push(this.glyphs.printSymbol(this.x+12, 1+this.calcY(elem.pitch+2-1+dotadjust), ".", elem.startChar, elem.endChar)); // 12 and 1 is hardcoded. some weird bug with dot y-pos ??!
 	  }
   }
 
   
   for (var i=elem.gracenotes.length-1; i>=0; i--) {
-    var grace = this.printSymbol(this.x, elem.gracenotes[i].pitch, ";");
+    var grace = this.printSymbol(this.x, elem.gracenotes[i].pitch, ";", elem.startChar, elem.endChar);
     roomtaken +=10; // hardcoded
     grace.translate(-roomtaken,0); // hardcoded
     elemset.push(grace);
@@ -394,7 +400,7 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
 	((elem.pitch===6) || (elem.pitch===8)) && ypos++;
 	(elem.pitch>9) && yslot++; // take up some room of those that are above
 	var deltax = (this.glyphs.getSymbolWidth("\u0153")-this.glyphs.getSymbolWidth("."))/2;
-	elemset.push(this.printSymbol(this.x+deltax, ypos, "."));
+	elemset.push(this.printSymbol(this.x+deltax, ypos, ".", elem.startChar, elem.endChar));
       }
     }
 
@@ -437,7 +443,7 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
       ypos=yslot;
       yslot+=3;
       var deltax = (this.glyphs.getSymbolWidth("\u0153")-this.glyphs.getSymbolWidth(dec))/2;
-      elemset.push(this.printSymbol(this.x+deltax, ypos, dec));
+      elemset.push(this.printSymbol(this.x+deltax, ypos, dec, elem.startChar, elem.endChar));
       
     }
     (unknowndecs.length>0) && this.debugMsg(unknowndecs.join(','));
@@ -446,13 +452,13 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
   // ledger lines
   for (i=elem.pitch; i>11; i--) {
     if (i%2===0) {
-      elemset.push(this.printSymbol(this.x-1, i, "_"));
+      elemset.push(this.printSymbol(this.x-1, i, "_", elem.startChar, elem.endChar));
     }
   }
 
   for (i=elem.pitch; i<1; i++) {
     if (i%2===0) {
-      elemset.push(this.printSymbol(this.x-1, i, "_"));
+      elemset.push(this.printSymbol(this.x-1, i, "_", elem.startChar, elem.endChar));
     }
   }
 
@@ -491,13 +497,13 @@ ABCPrinter.prototype.printBarLine = function (elem) {
   var seconddots = (elem.type==="bar_left_repeat" || elem.type==="bar_dbl_repeat");
 
   if (firstdots) {
-    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(7+1), "."));
-    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(5+1), "."));
+    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(7+1), ".", elem.startChar, elem.endChar));
+    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(5+1), ".", elem.startChar, elem.endChar));
     this.x+=5; //2 hardcoded, twice;
   }
 
   if (firstthin) {
-    symb = this.printSymbol(this.x, 3, "\\"); // 3 is hardcoded
+    symb = this.printSymbol(this.x, 3, "\\", elem.startChar, elem.endChar); // 3 is hardcoded
     symbscale = 1;
   }
 
@@ -510,7 +516,7 @@ ABCPrinter.prototype.printBarLine = function (elem) {
 			      this.x, this.y+10, this.x, this.y, this.partstartx, this.y)).attr({stroke:"#000000"});
       this.partstartx = null;
     }     
-    symb = this.printSymbol(this.x, 3, "\\"); // 3 is hardcoded
+    symb = this.printSymbol(this.x, 3, "\\", elem.startChar, elem.endChar); // 3 is hardcoded
     symb.scale(10,1,this.x);
     symbscale = 10;
     elemset.push(symb);
@@ -526,15 +532,15 @@ ABCPrinter.prototype.printBarLine = function (elem) {
 
   if (secondthin) {
     this.x+=3; //3 hardcoded;
-    symb = this.printSymbol(this.x, 3, "\\"); // 3 is hardcoded
+    symb = this.printSymbol(this.x, 3, "\\", elem.startChar, elem.endChar); // 3 is hardcoded
     symbscale = 1;
     elemset.push(symb);
   }
 
   if (seconddots) {
     this.x+=2; //3 hardcoded;
-    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(7+1), "."));
-    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(5+1), "."));
+    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(7+1), ".", elem.startChar, elem.endChar));
+    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(5+1), ".", elem.startChar, elem.endChar));
   } // 2 is hardcoded
 
   if (elem.number) {
@@ -549,13 +555,13 @@ ABCPrinter.prototype.printBarLine = function (elem) {
 };
 
 ABCPrinter.prototype.printStave = function (width) {
-  var staff = this.printSymbol(0, 3, "="); // 3 is hardcoded
+  var staff = this.printSymbol(0, 3, "=", -1, -1); // 3 is hardcoded
   width = width/(this.glyphs.getSymbolWidth("="));
   staff.scale(width,1,0);
 };
 
 ABCPrinter.prototype.printKeySignature = function(elem) {
-  var clef = this.printSymbol(this.x, 5, "&"); //5 is hardcoded
+  var clef = this.printSymbol(this.x, 5, "&", elem.startChar, elem.endChar); //5 is hardcoded
   this.x += this.glyphs.getSymbolWidth("&")+10; // hardcoded
   var FLATS = [6,9,5,8,4,7];
   var SHARPS = [10,7,11,8,5,9];
@@ -563,7 +569,8 @@ ABCPrinter.prototype.printKeySignature = function(elem) {
   var number = elem.num;
   var symbol = (elem.acc !== "sharp") ? "b" : "#";
   for (var i=0; i<number; i++) {
-    var path = this.printSymbol(this.x, accidentals[i], symbol);
+    var path = this.printSymbol(this.x, accidentals[i], symbol, elem.startChar, elem.endChar);
+    path.node.setAttribute("abc-pos", "" + elem.startChar + ',' + elem.endChar);
     this.x += this.glyphs.getSymbolWidth(symbol);
   }
   this.x += 10; // hardcoded
@@ -576,13 +583,13 @@ ABCPrinter.prototype.printTimeSignature= function(elem) {
   if (elem.type === "specified") {
     //TODO make the alignment for time signatures centered
     graphelem = this.paper.set();
-    graphelem.push(this.printSymbol(this.x, 9, elem.num)); //7 is hardcoded
-    graphelem.push(this.printSymbol(this.x, 5, elem.den)); //3 is hardcoded
+    graphelem.push(this.printSymbol(this.x, 9, elem.num, elem.startChar, elem.endChar)); //7 is hardcoded
+    graphelem.push(this.printSymbol(this.x, 5, elem.den, elem.startChar, elem.endChar)); //3 is hardcoded
   } else if (elem.type === "common_time") {
-    graphelem = this.printSymbol(this.x, 7, "c"); //5 is hardcoded
+    graphelem = this.printSymbol(this.x, 7, "c", elem.startChar, elem.endChar); //5 is hardcoded
 
   } else if (elem.type === "cut_time") {
-    graphelem = this.printSymbol(this.x, 7, "C"); //5 is hardcoded
+    graphelem = this.printSymbol(this.x, 7, "C", elem.startChar, elem.endChar); //5 is hardcoded
   }
   this.x += graphelem.getBBox().width; // no caching
   this.x += AbcSpacing.SPACE;
