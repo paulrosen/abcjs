@@ -393,8 +393,8 @@ var ParseAbc = Class.create({
 				case 'e' : ret = [ 1, 9 ]; break;
 				case 'f' : ret = [ 1, 10 ]; break;
 				case 'g' : ret = [ 1, 11 ]; break;
-				case 'x' : ret = [ 1, null, 'invisible' ]; break;
-				case 'y' : ret = [ 1, null, 'spacer' ]; break;
+				case 'x' : ret = [ 1, null, 'spacer' ]; break; // will take up physical space
+				case 'y' : ret = [ 1, null, 'invisible' ]; break; // used for timing integrity
 				case 'z' : ret = [ 1, null, 'rest' ]; break;
 			}
 			if ((ret[0] !== 0) && (curr_pos < line.length-1))
@@ -600,10 +600,11 @@ var ParseAbc = Class.create({
 						if (ret3[1] == 'spacer')
 							el.end_beam = true;
 
-						if (ret[1]!==null)	// not rest
-							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
-						else
-							tune.appendElement(ret[2], multilineVars.iChar, multilineVars.iChar, el);
+						if (ret[1]===null) {	// rest
+							el.rest_type=ret[2];
+						}
+						tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
+
 					} else if (el.decoration !== undefined) {	// decorations can also be attached to bars, so see if the next thing is a decoration
 						var ret4 = letter_to_bar(line, i);
 						if (ret4[0] > 0) {
