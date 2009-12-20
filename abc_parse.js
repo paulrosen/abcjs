@@ -61,7 +61,7 @@ var AbcTune = Class.create({
 // The return structure for most calls is { len: num_chars_consumed, token: str }
 var AbcTokenizer = Class.create({
 	initialize: function () {
-		var skipWhiteSpace = function(str) {
+		this.skipWhiteSpace = function(str) {
 			for (var i = 0; i < str.length; i++) {
 				if (str[i] !== ' ' && str[i] !== '\t')
 					return i;
@@ -74,7 +74,7 @@ var AbcTokenizer = Class.create({
 
 		// This just gets the basic pitch letter, ignoring leading spaces, and normalizing it to a capital
 		this.getKeyPitch = function(str) {
-			var i = skipWhiteSpace(str);
+			var i = this.skipWhiteSpace(str);
 			if (finished(str, i))
 				return { len: 0 };
 			switch (str[i]) {
@@ -113,7 +113,7 @@ var AbcTokenizer = Class.create({
 				return start;
 			};
 
-			var i = skipWhiteSpace(str);
+			var i = this.skipWhiteSpace(str);
 			if (finished(str, i))
 				return { len: 0 };
 			var firstThree = str.substring(i,i+3).toLowerCase();
@@ -135,7 +135,7 @@ var AbcTokenizer = Class.create({
 
 		this.getClef = function(str) {
 			var strOrig = str;
-			var i = skipWhiteSpace(str);
+			var i = this.skipWhiteSpace(str);
 			if (finished(str, i))
 				return { len: 0 };
 			// The word 'clef' is optional, but if it appears, a clef MUST appear
@@ -149,7 +149,7 @@ var AbcTokenizer = Class.create({
 			if (strClef.length === 0 && needsClef)
 				return { len: i+5, warn: "No clef specified: " + strOrig };
 
-			var j = skipWhiteSpace(strClef);
+			var j = this.skipWhiteSpace(strClef);
 			if (finished(strClef, j))
 				return { len: 0 };
 			if (j > 0) {
@@ -187,9 +187,37 @@ var AbcTokenizer = Class.create({
 			return { len: i+name.length, token: name };
 		};
 
+		// This returns one of the legal bar lines
+		this.getBarLine = function(str) {
+			if (str[0] !== ':' && str[0] !== '|' && str[0] !== ']' && str[0] !== '[')
+				return { len: 0 };
+
+			if (str.startsWith(":||:")) return { len: 4, token: "bar_dbl_repeat" };
+			if (str.startsWith(":|")) return { len: 2, token: "bar_right_repeat" };
+			if (str.startsWith("::")) return { len: 2, token: "bar_dbl_repeat" };
+			if (str.startsWith("[|:")) return { len: 3, token: "bar_left_repeat" };
+			if (str.startsWith("[|")) return { len: 2, token: "bar_thick_thin" };
+			if (str.startsWith("[")) return { len: 1, token: "bar_thick" };
+			if (str.startsWith("||:")) return { len: 3, token: "bar_left_repeat" };
+			if (str.startsWith("|:")) return { len: 2, token: "bar_left_repeat" };
+			if (str.startsWith("||")) return { len: 2, token: "bar_thin_thin" };
+			if (str.startsWith("|]")) return { len: 2, token: "bar_thin_thick" };
+			if (str.startsWith("|")) return { len: 1, token: "bar_thin" };
+			return { len: 1, warn: "Unknown bar symbol" };
+		};
+
+		// this returns all the characters in the string that match one of the characters in the legalChars string
+		this.getTokenOf = function(str, legalChars) {
+			for (var i = 0; i < str.length; i++) {
+				if (legalChars.indexOf(str[i]) < 0)
+					return { len: i, token: str.substring(0, i) };
+			}
+			return { len: i, token: str };
+		};
+
 		// This just sees if the next token is the word passed in, with possible leading spaces
 		this.isMatch = function(str, match) {
-			var i = skipWhiteSpace(str);
+			var i = this.skipWhiteSpace(str);
 			if (finished(str, i))
 				return 0;
 			if (str.substring(i).startsWith(match))
@@ -206,7 +234,7 @@ var AbcTokenizer = Class.create({
 				'_': 'flat',
 				'__': 'dblflat'
 			};
-			var i = skipWhiteSpace(str);
+			var i = this.skipWhiteSpace(str);
 			if (finished(str, i))
 				return { len: 0 };
 			var acc = null;
@@ -291,6 +319,12 @@ var ParseAbc = Class.create({
 				this.clef = 'treble';
 				this.warnings = null;
 			}
+		};
+
+		var formatWarning = function(str, line_num, col_num, line) {
+			var clean_line = line.substring(0, col_num) + '\n' + line[col_num] + '\n' + line.substring(col_num+1);
+			clean_line = clean_line.gsub('&', '&amp;').gsub('<', '&lt;').gsub('>', '&gt;').replace('\n', '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">').replace('\n', '</span>');
+			return "Music Line:" + line_num + ":" + (col_num+1) + ': ' + str + ":  " + clean_line;
 		};
 
 		var addWarning = function(str) {
@@ -726,25 +760,21 @@ var ParseAbc = Class.create({
 		// if 0 is returned, then the next element was not a bar line
 		var letter_to_bar = function(line, curr_pos)
 		{
-		  str1 = line.substring(curr_pos, curr_pos+1);
-		  str2 = line.substring(curr_pos, curr_pos+2);
-		  str3 = line.substring(curr_pos, curr_pos+3);
-		  str4 = line.substring(curr_pos, curr_pos+4);
+			var ret = tokenizer.getBarLine(line.substring(curr_pos));
+			if (ret.len === 0)
+				return [0,""];
+			if (ret.warn) {
+				addWarning(formatWarning(ret.warn, tune.lines.length, curr_pos, line));
+				return [ret.len,""];
+			}
 
-		  if (str4 === ":||:") return [ 4, "bar_dbl_repeat"];
-		  else if (str3 === ":|2") return [ 3, "bar_right_repeat", 2];
-		  else if (str3 === "[|:") return [ 3, "bar_left_repeat"];
-		  else if (str3 === "||:") return [ 3, "bar_left_repeat"];
-		  else if (str2 === ":|") return [ 2, "bar_right_repeat"];
-		  else if (str2 === "|:") return [ 2, "bar_left_repeat"];
-		  else if (str2 === "||") return [ 2, "bar_thin_thin"];
-		  else if (str2 === "::") return [ 2, "bar_dbl_repeat"];
-		  else if (str2 === "[2" || str2 === "|2") return [ 2, "bar_thin", 2]; // should it guess a repeat?
-		  else if (str2 === "[1" || str2 === "|1") return [ 2, "bar_thin", 1];
-		  else if (str2 === "|]") return [ 2, "bar_thin_thick"];
-		  else if (str2 === "[|") return [ 2, "bar_thick_thin"]; 
-		  else if (str1 === "|") return [1, "bar_thin"];
-		  else return [0,""];
+			// Now see if this is a repeated ending
+			// A repeated ending is all of the characters 1,2,3,4,5,6,7,8,9,0,-, and comma
+			var retRep = tokenizer.getTokenOf(line.substring(curr_pos+ret.len), "1234567890-,");
+			if (retRep.len === 0)
+				return [ret.len, ret.token];
+
+			return [ret.len+retRep.len, ret.token, retRep.token];
 		};
 
 		// returns the pitch (null for a rest) and the number of chars used up
@@ -909,7 +939,9 @@ var ParseAbc = Class.create({
 						el.chord = { name: ret[1], position: ret[2] };
 						i += ret[0];
 						multilineVars.iChar += ret[0];
+						i += tokenizer.skipWhiteSpace(line.substring(i));
 					}
+					
 					el.gracenotes = [];
 					if (line[i] === '{') {
 					  // fetch the gracenotes string and consume that into the array
@@ -980,6 +1012,8 @@ var ParseAbc = Class.create({
 						}
 					}
 					else {	// don't know what this is, so ignore it.
+						if (line[i] != ' ')
+							addWarning(formatWarning("Unknown character ignored", tune.lines.length, i, line));
 						i++;
 						multilineVars.iChar++;
 					}
