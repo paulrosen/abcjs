@@ -26,6 +26,10 @@ var ABCGlyphs = function(paper) {
      switch(symbol) {
      case "\u00d9": // 64th rest
      case "\u00c2": return -2; // 128th rest
+     case "\u0153": // down flag
+     case "K": // up flag
+     case "\u203a": //dblbreve
+     case "W": //dblbreve
      case ";":
      case ".":
      case "\u2026": // acciatura gracenote

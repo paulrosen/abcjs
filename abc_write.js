@@ -3,10 +3,14 @@
 /*extern  ABCBeamElem, ABCGraphElem, ABCPrinter, ABCGlyphs, AbcSpacing, getDuration */
 
 var getDuration = function(elem) {
-	if (!elem || !elem.duration)
-		return 0;
-	return elem.duration / 8;	// the parser calls a 1 an eigth note.
+  if (!elem || !elem.duration)
+    return 0;
+  return elem.duration / 8;	// the parser calls a 1 an eigth note.
 };
+
+var getDurlog = function(elem) {
+  return Math.floor(Math.log(getDuration(elem))/Math.log(2));
+}
 
 var AbcSpacing = function() {};
 AbcSpacing.FONTEM = 360;
@@ -88,6 +92,7 @@ ABCBeamElem.prototype.drawBeam = function(paper,basey) {
 };
 
 ABCBeamElem.prototype.drawStems = function(paper) {
+  var auxbeams = [];  // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
   for (var i=0,ii=this.elems.length; i<ii; i++) {
     if (this.notes[i].rest_type)
       continue;
@@ -99,33 +104,28 @@ ABCBeamElem.prototype.drawStems = function(paper) {
     paper.path(sprintf("M %f %f L %f %f L %f %f L %f %f z", x, y, x, bary,
 		       x+dx, bary, x+dx, y)).attr({stroke:"none",fill: "#000000"});
 
-    if (getDuration(this.notes[i]) < 1/8) {
-
-      var sy = (this.asc) ? 1.5*AbcSpacing.STEP: -1.5*AbcSpacing.STEP;
-
-
-      if (!this.auxbeamx) { // TODO replace with a pile/stack of auxbeams for each depth
-	this.auxbeamx = x;
-	this.auxbeamy = bary+sy;
-	this.auxbeamsingle = true;
+    var sy = (this.asc) ? 1.5*AbcSpacing.STEP: -1.5*AbcSpacing.STEP;
+    for (var durlog=getDurlog(this.notes[i]); durlog<-3; durlog++) {
+      if (auxbeams[-4-durlog]) {
+	auxbeams[-4-durlog].single = false;
       } else {
-	this.auxbeamsingle = false;
+	auxbeams[-4-durlog] = {x:x, y:bary+sy*(-4-durlog+1), durlog:durlog, single:true};
       }
-
-      if (i===ii-1 || getDuration(this.notes[i+1]) >=1/8) {
-
+    }
+    
+    for (var j=auxbeams.length-1;j>=0;j--) {
+      if (i===ii-1 || getDurlog(this.notes[i+1])>(-j-4)) {
+	
 	var auxbeamendx = x;
-	var auxbeamendy = bary + sy;
+	var auxbeamendy = bary + sy*(j+1);
 	var dy = (this.asc) ? AbcSpacing.STEP: -AbcSpacing.STEP;
-	if (this.auxbeamsingle) {
+	if (auxbeams[j].single) {
 	  auxbeamendx = (i===0) ? x+5 : x-5;
-	  auxbeamendy = this.getBarYAt(auxbeamendx) + sy;
+	  auxbeamendy = this.getBarYAt(auxbeamendx) + sy*(j+1);
 	}
-	 paper.path("M"+this.auxbeamx+" "+this.auxbeamy+" L"+auxbeamendx+" "+auxbeamendy+
-	     "L"+auxbeamendx+" "+(auxbeamendy+dy) +" L"+this.auxbeamx+" "+(this.auxbeamy+dy)+"z").attr({fill: "#000000"});
-
-	this.auxbeamx = null;
-	this.auxbeamy = null;
+	paper.path("M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
+		   "L"+auxbeamendx+" "+(auxbeamendy+dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+dy)+"z").attr({fill: "#000000"});
+	auxbeams = auxbeams.slice(0,j);
       }
     }
   }
@@ -141,7 +141,7 @@ function ABCPrinter(paper) {
   this.x = 0;
   this.y = 0;
   this.paper = paper;
-  this.space = 2*AbcSpacing.SPACE;
+  this.space = 3*AbcSpacing.SPACE;
   this.glyphs = new ABCGlyphs(paper);
 }
 
@@ -359,8 +359,8 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
     this.debugMsg(elem.lyric.syllable + "  " + elem.lyric.divider);
   }
 
-  var chartable = {up:{0:"w", 1:"h", 2:"q", 3:"e", 4:"x", 4:"x", 4:"x", 7:"x"},
-		   down:{0:"w", 1:"H", 2:"Q", 3:"E", 4:"X", 5:"X", 6:"X", 7:"X"},
+  var chartable = {up:{"-2": "\u203a", "-1": "W", 0:"w", 1:"h", 2:"q", 3:"e", 4:"x", 5:"x", 6:"x", 7:"x"},
+		   down:{"-2": "\u203a", "-1": "W", 0:"w", 1:"H", 2:"Q", 3:"E", 4:"X", 5:"X", 6:"X", 7:"X"},
 		   rest:{0:"\u2211", 1:"\u00d3", 2:"\u0152", 3:"\u2030", 4: "\u2248",5: "\u00ae", 6: "\u00d9", 7: "\u00c2"}};
 
   
@@ -382,8 +382,9 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
   } else if (!stem) {
     var dir = (pitch>=6) ? "down": "up";
     c = chartable[dir][-durlog];
+    var extraflags = (durlog<-4)?-4-durlog:0;
   } else {
-    c="\u0153"; // 1 is hardcoded
+    c="\u0153";
   }
   
 
@@ -427,9 +428,15 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
 
     notehead = this.printSymbol(this.x, pitch, c, elem.startChar, elem.endChar);
     elemset.push(notehead);
-    if (dot) {
+    for (;extraflags>0; extraflags--) {
+      var pos = pitch+((dir=="down")?-1.5*extraflags-3.2:1.5*extraflags+4.1);
+      var flag = (dir=="down")?"\u00d4":"K";
+      var xdelta = (dir=="down")?0:this.glyphs.getSymbolWidth("\u0153")-0.6;
+      elemset.push(this.printSymbol(this.x+xdelta, pos, flag, 0,0));
+    }
+    for (;dot>0;dot--) {
       var dotadjust = (1-pitch%2);
-      elemset.push(this.glyphs.printSymbol(this.x+12, 1+this.calcY(pitch+2-1+dotadjust), ".", elem.startChar, elem.endChar)); // 12 and 1 is hardcoded. some weird bug with dot y-pos ??!
+      elemset.push(this.glyphs.printSymbol(this.x+this.glyphs.getSymbolWidth(c)+5*dot, 1+this.calcY(pitch+2-1+dotadjust), ".", elem.startChar, elem.endChar)); // 12 and 1 is hardcoded. some weird bug with dot y-pos ??!
   }
     var bbox = {"x":this.x, "y":this.calcY(pitch+this.glyphs.getYCorr(c)), "width": this.glyphs.getSymbolWidth(c), height: this.glyphs.getSymbolHeight(c)};
   }
