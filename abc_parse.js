@@ -26,6 +26,8 @@ var AbcTune = Class.create({
 	//		chord: { name:chord, position: one of 'default', 'above', 'below' }
 	//		end_beam = true or undefined if this is the last note in a beam.
 	//		lyric: { syllable: xxx, divider: one of " -_" }
+	//		startTie = true|undefined
+	//		endTie = true|undefined
 	// TODO: actually, decoration should be an array.
 	//		decoration: upbow, downbow, accent
 	// BAR: type=bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
@@ -754,6 +756,43 @@ var ParseAbc = Class.create({
 				return [0, 0];
 		};
 
+		var letter_to_inline_header = function(line, i)
+		{
+			if (line.length > i+5) {
+				switch(line.substring(i, i+3))
+				{
+					case "[K:":
+					case "[M:":
+					case "[V:":
+						var e = line.indexOf(']', i);
+						if (e > 0)
+							return [ e-i+1, line[i+1], line.substring(i+3, e)];
+						break;
+				}
+			}
+			return [ 0 ];
+		};
+
+		var letter_to_body_header = function(line, i)
+		{
+			if (line.length > i+3) {
+				switch(line.substring(i, i+1))
+				{
+					case "K:":
+					case "M:":
+					case "V:":
+						return [ line.length, line[i], line.substring(2).strip()];
+				}
+			}
+			return [ 0 ];
+		};
+
+		var letter_to_tie = function(line, i) {
+			if (line.length > i && line[i] === '-')
+				return [1, 'tie'];
+			return [ 0 ];
+		};
+
 		// returns the class of the bar line
 		// the number of the repeat
 		// and the number of characters used up
@@ -775,6 +814,18 @@ var ParseAbc = Class.create({
 				return [ret.len, ret.token];
 
 			return [ret.len+retRep.len, ret.token, retRep.token];
+		};
+
+		var letter_to_triplet = function(line, i)
+		{
+			if (line.length < i+2)
+				return [ 0 ];
+			if (line[i] === '(') {
+				var num = line[i+1];
+				if (num >= '2' && num <= '9')
+					return [2, num];
+			}
+			return [ 0 ];
 		};
 
 		// returns the pitch (null for a rest) and the number of chars used up
@@ -917,105 +968,156 @@ var ParseAbc = Class.create({
 				tune.appendElement('meter', -1, -1, multilineVars.meter);
 				multilineVars.meter = "";
 			}
+			var tripletNotesLeft = 0;
+			var tripletMultiplier = 0;
+			var inTie = false;
+
+			// See if the line starts with a header field
+			var retHeader = letter_to_body_header(line, i);
+			if (retHeader[0] > 0) {
+				i += retInlineHeader[0];
+				multilineVars.iChar += retInlineHeader[0];
+				// TODO-PER: Handle inline headers
+			}
 
 			while (i < line.length)
 			{
 				if (line[i] === '%')
 					break;
 
-				var ret = letter_to_bar(line, i);
-				if (ret[0] > 0) {
-					i += ret[0];
-					multilineVars.iChar += ret[0];
-					var bar = { type: ret[1], number:ret[2] };
-					tune.appendElement('bar', multilineVars.iChar, multilineVars.iChar+ret[0], bar);
+				var retInlineHeader = letter_to_inline_header(line, i);
+				if (retInlineHeader[0] > 0) {
+						i += retInlineHeader[0];
+						multilineVars.iChar += retInlineHeader[0];
+						// TODO-PER: Handle inline headers
+
 				} else {
-					// Looking for a note. The note syntax looks like this:
-					// note :=  [chord] [grace-notes] [accents] [accidental] pitch [duration]
-					// TODO: straighten out all the start and end chars
-					var el = { };
-					ret = letter_to_chord(line, i);
+					var retTrip = letter_to_triplet(line, i);
+					if (retTrip[0] > 0) {
+						i += retTrip[0];
+						multilineVars.iChar += retTrip[0];
+						if (tripletNotesLeft > 0)
+							addWarning(formatWarning("Can't nest triplets", tune.lines.length, i, line));
+						else {
+							tripletNotesLeft = parseInt(retTrip[1]);
+							var mult = [ 3/2, 2/3, 3/4, 2/5, 2/6, 2/7, 3/8, 2/9];
+							tripletMultiplier = mult[tripletNotesLeft-2];
+						}
+					}
+					var ret = letter_to_bar(line, i);
 					if (ret[0] > 0) {
-						el.chord = { name: ret[1], position: ret[2] };
 						i += ret[0];
 						multilineVars.iChar += ret[0];
-						i += tokenizer.skipWhiteSpace(line.substring(i));
-					}
-					
-					el.gracenotes = [];
-					if (line[i] === '{') {
-					  // fetch the gracenotes string and consume that into the array
-					  var gra = getBrackettedSubstring(line, i, 1, '}'); // what happens on line ends?
-					  // TODO: alert errors when non-matching close 
-					  var ii = 0;
-					  for (ret = letter_to_pitch(gra[1], ii); ret[0]>0 && ii<gra[1].length;
-					       ret = letter_to_pitch(gra[1], ii)) {
-					    //todo get other stuff that could be in a grace note
-					    ii += ret[0];
-					    el.gracenotes.push({el_type:"gracenote",pitch:ret[1]});
-					  }
-					  i += gra[0];
-					  multilineVars.iChar += gra[0];
-					}
-					var done = false;
-					while (!done)
-					{
-						ret = letter_to_accent(line, i);
+						var bar = { type: ret[1], number:ret[2] };
+						tune.appendElement('bar', multilineVars.iChar, multilineVars.iChar+ret[0], bar);
+					} else {
+						// Looking for a note. The note syntax looks like this:
+						// note :=  [chord] [grace-notes] [accents] [accidental] pitch [duration]
+						// TODO: straighten out all the start and end chars
+						var el = { };
+						ret = letter_to_chord(line, i);
 						if (ret[0] > 0) {
-							if (ret[1].length > 0) {
-								if (el.decoration === undefined)
-									el.decoration = [];
-								el.decoration.push(ret[1]);
+							el.chord = { name: ret[1], position: ret[2] };
+							i += ret[0];
+							multilineVars.iChar += ret[0];
+							i += tokenizer.skipWhiteSpace(line.substring(i));
+						}
+
+						el.gracenotes = [];
+						if (line[i] === '{') {
+						  // fetch the gracenotes string and consume that into the array
+						  var gra = getBrackettedSubstring(line, i, 1, '}'); // what happens on line ends?
+						  // TODO: alert errors when non-matching close
+						  var ii = 0;
+						  for (ret = letter_to_pitch(gra[1], ii); ret[0]>0 && ii<gra[1].length;
+							   ret = letter_to_pitch(gra[1], ii)) {
+							//todo get other stuff that could be in a grace note
+							ii += ret[0];
+							el.gracenotes.push({el_type:"gracenote",pitch:ret[1]});
+						  }
+						  i += gra[0];
+						  multilineVars.iChar += gra[0];
+						}
+						var done = false;
+						while (!done)
+						{
+							ret = letter_to_accent(line, i);
+							if (ret[0] > 0) {
+								if (ret[1].length > 0) {
+									if (el.decoration === undefined)
+										el.decoration = [];
+									el.decoration.push(ret[1]);
+								}
+								i += ret[0];
+								multilineVars.iChar += ret[0];
 							}
+							else
+								done = true;
+						}
+						ret = letter_to_accidental(line, i);
+						if (ret[0] > 0) {
+							el.accidental = ret[1];
 							i += ret[0];
 							multilineVars.iChar += ret[0];
 						}
-						else
-							done = true;
-					}
-					ret = letter_to_accidental(line, i);
-					if (ret[0] > 0) {
-						el.accidental = ret[1];
-						i += ret[0];
-						multilineVars.iChar += ret[0];
-					}
-					ret = letter_to_pitch(line, i);
-					if (ret[0] > 0) {
-						el.pitch = ret[1];
-						i += ret[0];
-						multilineVars.iChar += ret[0];
+						ret = letter_to_pitch(line, i);
+						if (ret[0] > 0) {
+							el.pitch = ret[1];
+							i += ret[0];
+							multilineVars.iChar += ret[0];
 
-						var ret2 = letter_to_duration(line, i);
-						el.duration = multilineVars.default_length;
-						if (ret2[1] > 0)
-						{
-							el.duration = ret2[1]*multilineVars.default_length;
-							i += ret2[0];
-							multilineVars.iChar += ret2[0];
-						}
-						var ret3 = letter_to_spacer(line, i);
-						if (ret3[1] == 'spacer')
-							el.end_beam = true;
+							var ret2 = letter_to_duration(line, i);
+							el.duration = multilineVars.default_length;
+							if (ret2[1] > 0)
+							{
+								el.duration = ret2[1]*multilineVars.default_length;
+								i += ret2[0];
+								multilineVars.iChar += ret2[0];
+							}
+							if (tripletNotesLeft > 0) {
+								tripletNotesLeft--;
+								el.duration = el.duration * tripletMultiplier;
+							}
+							var ret3 = letter_to_spacer(line, i);
+							if (ret3[1] == 'spacer')
+								el.end_beam = true;
 
-						if (ret[1]===null) {	// rest
-							el.rest_type=ret[2];
-						}
-							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
+							if (inTie) {
+								el.endTie = true;
+								inTie = false;
+							}
+							var retTie = letter_to_tie(line, i);
+							if (retTie[0] > 0) {
+								if (inTie) {
+									addWarning(formatWarning("Can't nest ties", tune.lines.length, i, line));
+								} else {
+									inTie = true;
+									el.startTie = true;
+								}
+								i += retTie[0];
+								multilineVars.iChar += retTie[0];
+							}
 
-					} else if (el.decoration !== undefined) {	// decorations can also be attached to bars, so see if the next thing is a decoration
-						var ret4 = letter_to_bar(line, i);
-						if (ret4[0] > 0) {
-							i += ret4[0];
-							multilineVars.iChar += ret4[0];
-							var bar2 = { type: ret4[1], number:ret4[2], decoration: el.decoration };
-							tune.appendElement('bar', multilineVars.iChar, multilineVars.iChar+ret4[0], bar2);
+							if (ret[1]===null) {	// rest
+								el.rest_type=ret[2];
+							}
+								tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
+
+						} else if (el.decoration !== undefined) {	// decorations can also be attached to bars, so see if the next thing is a decoration
+							var ret4 = letter_to_bar(line, i);
+							if (ret4[0] > 0) {
+								i += ret4[0];
+								multilineVars.iChar += ret4[0];
+								var bar2 = { type: ret4[1], number:ret4[2], decoration: el.decoration };
+								tune.appendElement('bar', multilineVars.iChar, multilineVars.iChar+ret4[0], bar2);
+							}
 						}
-					}
-					else {	// don't know what this is, so ignore it.
-						if (line[i] != ' ')
-							addWarning(formatWarning("Unknown character ignored", tune.lines.length, i, line));
-						i++;
-						multilineVars.iChar++;
+						else {	// don't know what this is, so ignore it.
+							if (line[i] != ' ')
+								addWarning(formatWarning("Unknown character ignored", tune.lines.length, i, line));
+							i++;
+							multilineVars.iChar++;
+						}
 					}
 				}
 			}
@@ -1194,7 +1296,8 @@ var ParseAbc = Class.create({
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'P:':
-					// TODO: handle parts.
+					// TODO-PER: There is more to do with parts, but the writer doesn't care.
+					addMetaText("partOrder", line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'Q:':
@@ -1211,6 +1314,10 @@ var ParseAbc = Class.create({
 					break;
 				case  'T:':
 					setTitle(line.substring(2));
+					multilineVars.iChar += line.length + 1;
+					break;
+				case  'V:':
+					// TODO-PER: handle voice
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'w:':
