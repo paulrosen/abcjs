@@ -46,23 +46,18 @@ function redrawCurrent()
 	abc_keystroke();
 }
 
-function pickTuneAndPdf(pdf_id, abc_file, value)
+function pickTuneAndPdf(pdf_id, folder, abc_file)
 {
+	var sel = abc_contents_output[abc_file];
 	$("persistent_url").update("http://" + window.location.host + "/comparison?tune=" + abc_file);
 	var filename = abc_file.substring(0, abc_file.lastIndexOf('.'));
-	var pdf_file = "/testdata/" + filename.gsub('\\+', '%2B') + '.ps';
-	var err_file = filename + '.txt';
-	if (value == '')
-	{
-		// TODO
-		alert("implement NEXT");
-	}
-	editArea.set(value.gsub('`n', '\n').gsub('`a', "'"));
+	var pdf_file = "/testdata/" + folder + '/' + filename.gsub('\\+', '%2B') + '.ps';
+	$("abcm2ps_output").update(sel.out.gsub('\n', '<br />'));
+
+	editArea.set(sel.abc);
 	abc_keystroke();
 	var pdf = $(pdf_id);
-	//pdf.src = '/testdata/Ach_below.pdf';
 	pdf.innerHTML = "<embed src='" + pdf_file + "' height='100%' width='100%'>";
-	new Ajax.Updater("abcm2ps_output", "/tunes/get_file", {parameters: {file: err_file, authenticity_token: window.authenticity_token}});
 }
 
 function pickTune(value)
@@ -98,6 +93,19 @@ function magnify(value)
 	abc_keystroke();
 }
 
+function saveCurrentToTest()
+{
+	var onSuccess = function(resp) {
+		var arr = resp.responseText.split('/');
+		var fname = arr[arr.length-1];
+		fname = fname.split(' ')[0];
+		$('paul_failed_tests').appendChild(new Element('option').update(fname));
+		abc_contents_output[fname] = { abc: editArea.get(), out: "Unknown: reload page to see this data." }
+	};
+	var t = editArea.get();
+	new Ajax.Updater('ajax_status', '/tunes/save_test',
+	{parameters: {abc: t, authenticity_token: window.authenticity_token}, onSuccess: onSuccess});
+}
 /////////////////////////////////////////////////////////////////////////////////
 
 var playEmbedded = null;
