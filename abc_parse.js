@@ -1078,9 +1078,7 @@ var ParseAbc = Class.create({
 								tripletNotesLeft--;
 								el.duration = el.duration * tripletMultiplier;
 							}
-							var ret3 = letter_to_spacer(line, i);
-							if (ret3[1] == 'spacer')
-								el.end_beam = true;
+
 
 							if (inTie) {
 								el.endTie = true;
@@ -1097,6 +1095,10 @@ var ParseAbc = Class.create({
 								i += retTie[0];
 								multilineVars.iChar += retTie[0];
 							}
+
+							var ret3 = letter_to_spacer(line, i);
+							if (ret3[1] == 'spacer')
+								el.end_beam = true;
 
 							if (ret[1]===null) {	// rest
 								el.rest_type=ret[2];

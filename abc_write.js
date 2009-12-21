@@ -77,8 +77,8 @@ ABCBeamElem.prototype.drawBeam = function(paper,basey) {
 
   if (slant>maxslant) slant = maxslant;
   if (slant<-maxslant) slant = -maxslant;
-  this.starty = basey+((AbcSpacing.TOPNOTE-(this.pos+Math.round(slant/2)))*AbcSpacing.STEP);
-  this.endy = basey+((AbcSpacing.TOPNOTE-(this.pos+Math.round(-slant/2)))*AbcSpacing.STEP);
+  this.starty = basey+((AbcSpacing.TOPNOTE-(this.pos+Math.floor(slant/2)))*AbcSpacing.STEP);
+  this.endy = basey+((AbcSpacing.TOPNOTE-(this.pos+Math.floor(-slant/2)))*AbcSpacing.STEP);
 
   this.startx = this.elems[0].bbox.x;
   if(this.asc) this.startx+=this.elems[0].bbox.width;
@@ -169,6 +169,24 @@ ABCPrinter.prototype.printSymbol = function(x, offset, symbol, start, end) {
     return elemset;
   }
 };
+
+ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
+  x1 = x1 + 6;
+  x2 = x2 + 4;
+  pitch1 = pitch1 + ((above)?1.5:-1.5);
+  pitch2 = pitch2 + ((above)?1.5:-1.5);
+  var y1 = this.calcY(pitch1);
+  var y2 = this.calcY(pitch2);
+  var dy = (x2-x1)/7;
+  var controlx1 = x1+(x2-x1)/5;
+  var controly1 = y1+ ((above)?-dy:dy);
+  var controlx2 = x2-(x2-x1)/5;
+  var controly2 = y2+ ((above)?-dy:dy);
+  var thickness = 2;
+  return this.paper.path(sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1, 
+				 controlx1, controly1, controlx2, controly2, x2, y2, 
+				 controlx2, controly2+thickness, controlx1, controly1+thickness, x1, y1)).attr({stroke:"none", fill: "#000000"});
+}
 
 ABCPrinter.prototype.calcY = function(ofs) {
   return this.y+((AbcSpacing.TOPNOTE-ofs)*AbcSpacing.STEP);
@@ -394,6 +412,7 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
     roomtaken +=10; // hardcoded
     grace.translate(-roomtaken,0); // hardcoded
     elemset.push(grace);
+    if (i==0) elemset.push(this.drawArc(this.x-roomtaken, this.x, elem.gracenotes[i].pitch, pitch, false));
   }
 
   if (elem.decoration) {
@@ -437,7 +456,7 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
     }
     for (;dot>0;dot--) {
       var dotadjust = (1-pitch%2);
-      elemset.push(this.glyphs.printSymbol(this.x+this.glyphs.getSymbolWidth(c)+5*dot, 1+this.calcY(pitch+2-1+dotadjust), ".", elem.startChar, elem.endChar)); // 12 and 1 is hardcoded. some weird bug with dot y-pos ??!
+      elemset.push(this.printSymbol(this.x+this.glyphs.getSymbolWidth(c)+5*dot, pitch+dotadjust-0.25, ".", elem.startChar, elem.endChar)); // 12 and 1 is hardcoded. some weird bug with dot y-pos ??!
   }
     var bbox = {"x":this.x, "y":this.calcY(pitch+this.glyphs.getYCorr(c)), "width": this.glyphs.getSymbolWidth(c), height: this.glyphs.getSymbolHeight(c)};
   }
@@ -446,6 +465,15 @@ ABCPrinter.prototype.printNote = function(elem, stem) { //stem dir, null if norm
     var chord = this.paper.text(this.x, this.y+15 + (elem.chord.position === 'below' ? 65 : 0), elem.chord.name);
     chord.translate(chord.getBBox().width/2,0);
     elemset.push(chord);
+  }
+
+  if (elem.endTie) {
+    elemset.push(this.drawArc(this.tiestartx, this.x, this.tiestartpitch, pitch,  (pitch>=6)));
+  }
+
+  if (elem.startTie) {
+    this.tiestartx = this.x;
+    this.tiestartpitch = pitch;
   }
 
   return new ABCGraphElem(elemset, notehead,0,Math.sqrt(duration*8),bbox);
@@ -529,8 +557,8 @@ ABCPrinter.prototype.printBarLine = function (elem) {
   var seconddots = (elem.type==="bar_left_repeat" || elem.type==="bar_dbl_repeat");
 
   if (firstdots) {
-    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(7+1), ".", elem.startChar, elem.endChar));
-    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(5+1), ".", elem.startChar, elem.endChar));
+    elemset.push(this.printSymbol(this.x, 6.75, ".", elem.startChar, elem.endChar));
+    elemset.push(this.printSymbol(this.x, 4.75, ".", elem.startChar, elem.endChar));
     this.x+=5; //2 hardcoded, twice;
   }
 
@@ -574,8 +602,8 @@ ABCPrinter.prototype.printBarLine = function (elem) {
 
   if (seconddots) {
     this.x+=2; //3 hardcoded;
-    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(7+1), ".", elem.startChar, elem.endChar));
-    elemset.push(this.glyphs.printSymbol(this.x, 1+this.calcY(5+1), ".", elem.startChar, elem.endChar));
+    elemset.push(this.printSymbol(this.x, 6.75, ".", elem.startChar, elem.endChar));
+    elemset.push(this.printSymbol(this.x, 4.75, ".", elem.startChar, elem.endChar));
   } // 2 is hardcoded
 
   if (elem.number) {

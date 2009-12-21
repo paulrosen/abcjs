@@ -25,7 +25,7 @@ var ABCGlyphs = function(paper) {
    this.getYCorr = function (symbol) {
      switch(symbol) {
      case "\u00d9": // 64th rest
-     case "\u00c2": return -2; // 128th rest
+     case "\u00c2": return -3; // 128th rest
      case "\u0153": // down flag
      case "K": // up flag
      case "\u203a": //dblbreve
@@ -38,8 +38,8 @@ var ABCGlyphs = function(paper) {
      case "#":
      case "b":
      case "n":
-     case "w": return 1;
-     default: return 0;
+     case "w": return 0;
+     default: return -1;
      }
    }
 };
