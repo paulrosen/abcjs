@@ -242,6 +242,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
     }
   }
   var extraText = "";	// TODO-PER: This is just an easy way to display this info for now.
+  if (abctune.metaText.partOrder) extraText += "Part Order: " + abctune.metaText.partOrder + "\n";
   if (abctune.metaText.notes) extraText += "Notes:\n" + abctune.metaText.notes + "\n";
   if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
   if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
