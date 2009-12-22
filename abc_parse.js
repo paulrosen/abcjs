@@ -866,8 +866,8 @@ var ParseAbc = Class.create({
 				case 'e' : ret = [ 1, 9 ]; break;
 				case 'f' : ret = [ 1, 10 ]; break;
 				case 'g' : ret = [ 1, 11 ]; break;
-				case 'x' : ret = [ 1, null, 'spacer' ]; break; // will take up physical space
-				case 'y' : ret = [ 1, null, 'invisible' ]; break; // used for timing integrity
+				case 'x' : ret = [ 1, null, 'invisible' ]; break; // takes up physical space
+				case 'y' : ret = [ 1, null, 'spacer' ]; break; // takes up physical space, not part of timing integrity
 				case 'z' : ret = [ 1, null, 'rest' ]; break;
 			}
 			if ((ret[0] !== 0) && (curr_pos < line.length-1))

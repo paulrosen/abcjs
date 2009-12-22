@@ -205,7 +205,8 @@ function abc_keystroke()
 				printer = new ABCPrinter(paper);
 				printer.printABC(tune);
 			} catch (e) {
-				$("canvas"+i).update("error: " + e)
+			  $("canvas"+i).update("error: " + e);
+			  throw e;
 			}
 			var paths = $$('path');
 			var click = function() {
@@ -221,7 +222,8 @@ function abc_keystroke()
 			});
 		}
 	} catch (e) {
-		$("canvas0").update("error: " + e)
+	  $("canvas0").update("error: " + e);
+	  throw e;
 	}
 	
 	bReentry = false;
