@@ -28,6 +28,8 @@ var AbcTune = Class.create({
 	//		lyric: { syllable: xxx, divider: one of " -_" }
 	//		startTie = true|undefined
 	//		endTie = true|undefined
+	//		startTriplet = num <- that is the number to print
+	//		endTriplet = true|undefined (the last note of the triplet)
 	// TODO: actually, decoration should be an array.
 	//		decoration: upbow, downbow, accent
 	// BAR: type=bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
@@ -182,11 +184,12 @@ var AbcTokenizer = Class.create({
 			j = this.isMatch(strClef, '+8');
 			if (j > 0)
 				name += "+8";
-			j = this.isMatch(strClef, '-8');
-			if (j > 0)
-				name += "-8";
-
-			return { len: i+name.length, token: name };
+			else {
+				j = this.isMatch(strClef, '-8');
+				if (j > 0)
+					name += "-8";
+			}
+			return { len: i+name.length+j, token: name };
 		};
 
 		// This returns one of the legal bar lines
@@ -223,7 +226,7 @@ var AbcTokenizer = Class.create({
 			if (finished(str, i))
 				return 0;
 			if (str.substring(i).startsWith(match))
-				return match.length;
+				return i+match.length;
 			return 0;
 		};
 
@@ -502,7 +505,7 @@ var ParseAbc = Class.create({
 				if (retNone > 0) {
 					// we got the none key - that's the same as C to us
 					ret.regularKey = keys['C'];
-					str = str.substring(retNone.len);
+					str = str.substring(retNone);
 				}
 			}
 			// now see if there are extra accidentals
@@ -828,6 +831,21 @@ var ParseAbc = Class.create({
 			return [ 0 ];
 		};
 
+		var letter_to_open_slur =  function(line, i) {
+			var num = tokenizer.isMatch(line.substring(i), '(');
+			if (num > 0) {
+				if (line.length === i - 1 || line[i+1] < '2' || line[i+1] > '9')
+					return [ num ];
+			}
+			return [ 0 ];
+		};
+
+		var letter_to_close_slur =  function(line, i) {
+			var num = tokenizer.isMatch(line.substring(i), ')');
+				return [ num ];
+			return [ 0 ];
+		};
+
 		// returns the pitch (null for a rest) and the number of chars used up
 		var letter_to_pitch = function(line, curr_pos)
 		{
@@ -969,7 +987,7 @@ var ParseAbc = Class.create({
 				multilineVars.meter = "";
 			}
 			var tripletNotesLeft = 0;
-			var tripletMultiplier = 0;
+			//var tripletMultiplier = 0;
 			var inTie = false;
 
 			// See if the line starts with a header field
@@ -992,6 +1010,21 @@ var ParseAbc = Class.create({
 						// TODO-PER: Handle inline headers
 
 				} else {
+					var el = { };
+
+					// if an open paren is not followed immediately by a number, then we assume it is an open slur
+					var retSlur = letter_to_open_slur(line, i);
+					while (retSlur[0] > 0) {
+						i += retSlur[0];
+						multilineVars.iChar += retSlur[0];
+						if (el.startSlur === undefined)
+							el.startSlur = 1;
+						else
+							el.startSlur++;
+						
+						retSlur = letter_to_open_slur(line, i);
+					}
+
 					var retTrip = letter_to_triplet(line, i);
 					if (retTrip[0] > 0) {
 						i += retTrip[0];
@@ -1000,10 +1033,12 @@ var ParseAbc = Class.create({
 							addWarning(formatWarning("Can't nest triplets", tune.lines.length, i, line));
 						else {
 							tripletNotesLeft = parseInt(retTrip[1]);
-							var mult = [ 3/2, 2/3, 3/4, 2/5, 2/6, 2/7, 3/8, 2/9];
-							tripletMultiplier = mult[tripletNotesLeft-2];
+							el.startTriplet = tripletNotesLeft;
+							//var mult = [ 3/2, 2/3, 3/4, 2/5, 2/6, 2/7, 3/8, 2/9];
+							//tripletMultiplier = mult[tripletNotesLeft-2];
 						}
 					}
+
 					var ret = letter_to_bar(line, i);
 					if (ret[0] > 0) {
 						i += ret[0];
@@ -1014,7 +1049,6 @@ var ParseAbc = Class.create({
 						// Looking for a note. The note syntax looks like this:
 						// note :=  [chord] [grace-notes] [accents] [accidental] pitch [duration]
 						// TODO: straighten out all the start and end chars
-						var el = { };
 						ret = letter_to_chord(line, i);
 						if (ret[0] > 0) {
 							el.chord = { name: ret[1], position: ret[2] };
@@ -1076,9 +1110,9 @@ var ParseAbc = Class.create({
 							}
 							if (tripletNotesLeft > 0) {
 								tripletNotesLeft--;
-								el.duration = el.duration * tripletMultiplier;
+								if (tripletNotesLeft === 0)
+									el.endTriplet = true;
 							}
-
 
 							if (inTie) {
 								el.endTie = true;
@@ -1096,14 +1130,28 @@ var ParseAbc = Class.create({
 								multilineVars.iChar += retTie[0];
 							}
 
+							retSlur = letter_to_close_slur(line, i);
+							while (retSlur[0] > 0) {
+								i += retSlur[0];
+								multilineVars.iChar += retSlur[0];
+								if (el.endSlur === undefined)
+									el.endSlur = 1;
+								else
+									el.endSlur++;
+
+								if (retSlur[0] > 1)	// we can infer that we swallowed some spaces here.
+									el.end_beam = true;
+								retSlur = letter_to_close_slur(line, i);
+							}
+
 							var ret3 = letter_to_spacer(line, i);
 							if (ret3[1] == 'spacer')
 								el.end_beam = true;
 
-							if (ret[1]===null) {	// rest
+							if (ret[1]===null)	// rest
 								el.rest_type=ret[2];
-							}
-								tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
+
+							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
 
 						} else if (el.decoration !== undefined) {	// decorations can also be attached to bars, so see if the next thing is a decoration
 							var ret4 = letter_to_bar(line, i);
@@ -1232,6 +1280,7 @@ var ParseAbc = Class.create({
 		};
 
 		var parseLine = function(line) {
+			line = stripComment(line);
 			var str = "";
 			if (line.length >= 2)
 				str = line.substring(0, 2);
