@@ -70,7 +70,7 @@ ABCStaffElement.prototype.draw = function () {
     this.children[i].draw(this.printer);
   }
   for (var i=0; i<this.otherchildren.length; i++) {
-    this.otherchildren[i].draw(this.printer);
+    this.otherchildren[i].draw(this.printer,10,this.w-1);
   }
   this.printer.printStave(this.w-1);
 };
@@ -141,13 +141,14 @@ ABCRelativeElement.prototype.draw = function (printer, x) {
   this.x = x+this.dx;
   switch(this.type) {
   case "symbol":
+    if (this.c===null) return null;
     ret = printer.printSymbol(this.x, this.pitch, this.c, 0, 0); break;
   case "path":
     ret = printer.paper.path(this.c); break;
   case "debug":
     ret = printer.debugMsg(this.x, this.c); break;
   case "text":
-    ret = printer.printText(this.x, this.c); break;
+    ret = printer.printText(this.x, this.pitch, this.c); break;
   }
   if (this.scalex!=1) {
     ret.scale(this.scalex, 1, this.x);
@@ -163,14 +164,14 @@ function ABCEndingElem (text, anchor1, anchor2) {
 
 ABCEndingElem.prototype.draw = function (printer, linestartx, lineendx) {
   if (this.anchor1) {
-    linestartx = this.anchor1.x;
+    linestartx = this.anchor1.x+this.anchor1.w;
     printer.paper.path(sprintf("M %f %f L %f %f",
 			       linestartx, printer.y, linestartx, printer.y+10)).attr({stroke:"#000000"});
-    printer.printText(linestartx+5, this.text);
+    printer.printText(linestartx+5, 18.5, this.text);
   }
 
   if (this.anchor2) {
-    lineendx = this.anchor2.x+this.anchor2.w;
+    lineendx = this.anchor2.x;
     printer.paper.path(sprintf("M %f %f L %f %f",
 			   lineendx, printer.y, lineendx, printer.y+10)).attr({stroke:"#000000"});
   }
@@ -187,7 +188,23 @@ function ABCTieElem (anchor1, anchor2, above) {
 
 ABCTieElem.prototype.draw = function (printer, linestartx, lineendx) {
   // TODO end and beginning of line
-  printer.drawArc(this.anchor1.x, this.anchor2.x, this.anchor1.pitch, this.anchor2.pitch,  this.above);
+  if (this.anchor1 && this.anchor2) {
+    printer.drawArc(this.anchor1.x, this.anchor2.x, this.anchor1.pitch, this.anchor2.pitch,  this.above);
+  }
+};
+
+function ABCTripletElem (number, anchor1, anchor2, above) {
+  this.anchor1 = anchor1; // must have a .x and a .pitch property or be null (means starts at the "beginning" of the line - after keysig)
+  this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
+  this.above = above; // true if the arc curves above
+  this.number = number;
+}
+
+ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
+  // TODO end and beginning of line
+  if (this.anchor1 && this.anchor2) {
+    printer.printText((this.anchor1.x+this.anchor2.x)/2, this.above?16:-1, this.number);
+  }
 }
 
 function ABCBeamElem () {
@@ -302,7 +319,7 @@ function ABCPrinter(paper) {
 
 
 ABCPrinter.prototype.printText = function (x, offset, text) {
-  this.paper.text(10, this.calcY(offset), text).attr({"text-anchor":"start"});
+  this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":"start"});
 }
 
 // assumes this.y is set appropriately
@@ -396,13 +413,10 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.formatting.scale) { this.paper.text(200, this.y, "Format: scale="+abctune.formatting.scale); this.y += 20; }
   this.paper.text(300, this.y, abctune.metaText.title).attr({"font-size":20});
   this.y+=20;
-  if (abctune.metaText.author)
-    this.paper.text(100, this.y, abctune.metaText.author);
+  if (abctune.metaText.author) {this.paper.text(100, this.y, abctune.metaText.author); this.y+=15;}
+  if (abctune.metaText.origin) {this.paper.text(100, this.y, "(" + abctune.metaText.origin + ")");this.y+=15;}
+  if (abctune.metaText.tempo) {this.paper.text(100, this.y+20, "Tempo: " + abctune.metaText.tempo.duration + '=' + abctune.metaText.tempo.bpm); this.y+=15;}
   this.y+=15;
-  if (abctune.metaText.origin)
-    this.paper.text(100, this.y, "(" + abctune.metaText.origin + ")");
-  if (abctune.metaText.tempo)
-    this.paper.text(100, this.y+20, "Tempo: " + abctune.metaText.tempo.duration + '=' + abctune.metaText.tempo.bpm);
   var longest = 0;
   var staffs = [];
   for(var line=0; line<abctune.lines.length; line++) {
@@ -436,17 +450,21 @@ ABCPrinter.prototype.printSubtitleLine = function(abcline) {
 ABCPrinter.prototype.printABCLine = function(abcline) {
   this.abcline = abcline.staff;
   this.staff = new ABCStaffElement(this, this.y);
-  var start = (this.partstartx) ? true : false;
+  if (this.partstartelem) {
+    this.partstartelem = new ABCEndingElem("", null, null);
+    this.staff.addOther(this.partstartelem);
+  }
+  this.ties = [];
   for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
     var type = this.getElem().el_type;
-    this.partstartx && start && type!="key" && type!="meter" && type!="clef" && (this.partstartx=this.x) && (start=false);
     var abselems = this.printABCElement();
     for (var i=0; i<abselems.length; i++) {
       this.staff.addChild(abselems[i]);
     }
   }
   this.staff.layout(this.space);
-  this.staff.layout(this.space*700/this.staff.w);
+  var prop = Math.min(2,700/this.staff.w)
+  this.staff.layout(this.space*prop);
   this.staff.draw(printer);
   return this.staff;
 };
@@ -533,12 +551,13 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
   }
   
 
-  abselem = new ABCAbsoluteElement(elem, duration);
+  abselem = new ABCAbsoluteElement(elem, duration, 1);
 
   if (c === undefined)
     abselem.addChild(new ABCRelativeElement("chartable["+ dir + "][" + (-durlog) + '] is undefined', 0, 0, 0, {type:"debug"}));
   else if (c==="") {
-    // do nothing?
+    notehead = new ABCRelativeElement(null, 0, 0, pitch);
+    abselem.addHead(notehead);
   } else {
     notehead = new ABCRelativeElement(c, 0, this.glyphs.getSymbolWidth(c), pitch);
     abselem.addHead(notehead);
@@ -600,16 +619,41 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
     }
   }
 
-  if (elem.chord !== undefined) { //18 -> high G.
-    abselem.addChild(new ABCRelativeElement(elem.chord.name, 0, 0, 18, {type:"text"}));
+  if (elem.chord !== undefined) { //16 -> high E.
+    abselem.addChild(new ABCRelativeElement(elem.chord.name, 0, 0, (elem.chord.position=="below")?-3:16, {type:"text"}));
   }
 
   if (elem.endTie) {
     this.staff.addOther(new ABCTieElem(this.tiestartelem, notehead, (pitch>=6)));
   }
 
+  for (var i=elem.endSlur;i>0;i--) {
+    if (this.ties.length==0) {
+      abselem.addChild(new ABCRelativeElement("missing begin slur", 0, 0, 0, {type:"debug"}));
+      continue;
+    }
+    this.ties[this.ties.length-1].anchor2=notehead;
+    this.ties = this.ties.slice(0,this.ties.length-1);
+  }
+
+  for (var i=elem.startSlur;i>0;i--) {
+    var tie = new ABCTieElem(notehead, null, (pitch>=6));
+    this.ties[this.ties.length]=tie
+    this.staff.addOther(tie);
+  }
+  
   if (elem.startTie) {
     this.tiestartelem = notehead;
+  }
+
+  if (elem.startTriplet) {
+    this.triplet = new ABCTripletElem(elem.startTriplet, notehead, null, (pitch<6)); // above is opposite from case of slurs
+    this.staff.addOther(this.triplet);
+  }
+
+  if (elem.endTriplet) {
+    this.triplet.anchor2 = notehead;
+    this.triplet = null;
   }
 
   return abselem;
@@ -707,14 +751,14 @@ ABCPrinter.prototype.printBarLine = function (elem) {
     this.printDecoration(elem.decoration, 12, (thick)?3:1, abselem);
   }
 
-  if (thick) { // also means end of nth part
+  if (thick) {
     dx+=3; //3 hardcoded;    
-    anchor = new ABCRelativeElement("\\", dx, 1, 3, {scalex:10});
+    anchor = new ABCRelativeElement("\\", dx, 6, 3, {scalex:10});
     abselem.addRight(anchor);
     dx+=6;
   }
   
-  if (this.partstartelem) { // means end of nth part but at different place
+  if (this.partstartelem && (thick || (firstthin && secondthin))) { // means end of nth part
     this.partstartelem.anchor2=anchor;
     this.partstartelem = null;
   }
@@ -734,6 +778,7 @@ ABCPrinter.prototype.printBarLine = function (elem) {
 
   if (elem.number) {
     this.partstartelem = new ABCEndingElem(elem.number, anchor, null);
+    this.staff.addOther(this.partstartelem);
   } 
 
   return abselem;	
@@ -748,7 +793,7 @@ ABCPrinter.prototype.printStave = function (width) {
 
 ABCPrinter.prototype.printKeySignature = function(elem) {
   var abselem = new ABCAbsoluteElement(elem,0,10);
-  var dx =0;
+  var dx =10;
   abselem.addRight(new ABCRelativeElement("&", dx, this.glyphs.getSymbolWidth("&"), 5));
   dx += this.glyphs.getSymbolWidth("&")+10; // hardcoded
   if (elem.regularKey) {
@@ -776,7 +821,7 @@ ABCPrinter.prototype.printKeySignature = function(elem) {
 ABCPrinter.prototype.printTimeSignature= function(elem) {
   //var timesig = this.currenttune.header.fields["M"];
   //var parts=timesig.match(/([\d]+)\/([\d]+)/);
-  var abselem = new ABCAbsoluteElement(elem,0,10);
+  var abselem = new ABCAbsoluteElement(elem,0,20);
   if (elem.type === "specified") {
     //TODO make the alignment for time signatures centered
     abselem.addRight(new ABCRelativeElement(elem.num, 0, this.glyphs.getSymbolWidth(elem.num[0]), 9));
