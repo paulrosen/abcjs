@@ -34,6 +34,11 @@ EditArea.prototype = {
 		//editAreaLoader.setSelectionRange('abc', pos, parseInt(pos)+1);
 		$(this._id).setSelectionRange(start,end);
 		$(this._id).focus();
+	},
+
+	highlight : function (abcelem)
+	{
+	  this.setSelection(abcelem.startChar, abcelem.endChar);
 	}
 };
 
@@ -164,13 +169,26 @@ var paper = null;
 
 /////////////////////////////////////////////////////////////////////////////////
 
+function abc_mousemove() {
+  var selection = editArea.getSelection();
+  printer.rangeHighlight(selection.start, selection.end);
+}
+
 var bReentry = false;
+var oldt ="";
 function abc_keystroke()
 {
 	if (bReentry)
 		return;
 	bReentry = true;
-
+	var t = editArea.get();
+	if (t==oldt) {
+	  abc_mousemove();
+	  bReentry = false; 
+	  return;
+	} else {
+	  oldt = t;
+	}
 	// clear out any old tune
 	var done = false;
 	var i = 0;
@@ -184,7 +202,6 @@ function abc_keystroke()
 	}
 
 	try {
-		var t = editArea.get();
 		var tunebook = new AbcTuneBook(t);
 		if (abcParser === null)
 			abcParser = new ParseAbc();
@@ -204,23 +221,14 @@ function abc_keystroke()
 				paper = Raphael(canvas, 1500, 1500);
 				printer = new ABCPrinter(paper);
 				printer.printABC(tune);
+				printer.addSelectListener(editArea);
+				abc_mousemove();
 			} catch (e) {
 			  $("canvas"+i).update("error: " + e);
 			  throw e;
 			}
-			var paths = $$('path');
-			var click = function() {
-				var x = this.getAttribute('abc-pos');
-				//$(this).setStyle({ backgroundColor: '#ff0000' });
-				if (x && !x.startsWith('-1')) {
-					var arr = x.split(',');
-					editArea.setSelection(parseInt(arr[0])-1, parseInt(arr[1]));
-				}
-			};
-			paths.each(function(path) {
-				path.onclick = click;
-			});
 		}
+		
 	} catch (e) {
 	  $("canvas0").update("error: " + e);
 	  throw e;

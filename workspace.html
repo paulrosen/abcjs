@@ -12,7 +12,6 @@
 	<script src="prototype.js" type="text/javascript"></script>
 
 	<script src="raphael-patched.js" type="text/javascript"></script>
-	<script src="Maestro_500.js" type="text/javascript"></script>
 	<script src="sprintf.js" type="text/javascript"></script>
 	<script src="scalefont.js" type="text/javascript"></script>
         <script src="abc_glyphs.js" type="text/javascript"></script>
@@ -33,23 +32,11 @@ window.authenticity_token = '/7ppFNYyTniT052rHPqqX7tN+rWz9TknC8Y2rA+T2VE='
 
 <p style="color: green;"></p>
 
-<!--<script language="javascript" type="text/javascript" src="/edit_area/edit_area_loader.js"></script>
-<script language="javascript" type="text/javascript">
-editAreaLoader.init({
-	id : "abc"		// textarea id
-	,syntax: "abc"			// syntax to be uses for highgliting
-	,start_highlight: true		// to display with highlight mode on start-up
-	,allow_resize: "both"
-	,allow_toggle: false
-	,change_callback: "abc_keystroke"
-	,plugins: "keypresscallback"
-});
-</script>-->
 
 <table>
 	<tbody><tr>
 		<td>
-			<textarea name="abc" id="abc" cols="80" rows="15" onclick="click();" onkeyup="abc_keystroke();">X: 1
+			<textarea name="abc" id="abc" cols="80" rows="15" onclick="click();" onkeyup="abc_keystroke();" onmousemove="abc_mousemove()">X: 1
 T: Cooley's
 M: 4/4
 L: 1/8

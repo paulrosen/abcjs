@@ -120,10 +120,23 @@ ABCAbsoluteElement.prototype.addChild = function (child) {
 };
 
 ABCAbsoluteElement.prototype.draw = function (printer) {
+  this.elemset = printer.paper.set();
   for (var i=0; i<this.children.length; i++) {
-    this.children[i].draw(printer,this.x);
+    this.elemset.push(this.children[i].draw(printer,this.x));
   }
+  var self = this;
+  this.elemset.mouseup(function (e) {
+      printer.notifySelect(self);
+    });
 };
+
+ABCAbsoluteElement.prototype.highlight = function () {
+  this.elemset.attr({fill:"#ff0000"});
+}
+
+ABCAbsoluteElement.prototype.unhighlight = function () {
+  this.elemset.attr({fill:"#000000"});
+}
 
 function ABCRelativeElement(c, dx, w, pitch, opt) {
   opt = opt || {};
@@ -137,23 +150,22 @@ function ABCRelativeElement(c, dx, w, pitch, opt) {
 }
 
 ABCRelativeElement.prototype.draw = function (printer, x) {
-  var ret;
   this.x = x+this.dx;
   switch(this.type) {
   case "symbol":
     if (this.c===null) return null;
-    ret = printer.printSymbol(this.x, this.pitch, this.c, 0, 0); break;
+    this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, 0, 0); break;
   case "path":
-    ret = printer.paper.path(this.c); break;
+    this.graphelem = printer.paper.path(this.c); break;
   case "debug":
-    ret = printer.debugMsg(this.x, this.c); break;
+    this.graphelem = printer.debugMsg(this.x, this.c); break;
   case "text":
-    ret = printer.printText(this.x, this.pitch, this.c); break;
+    this.graphelem = printer.printText(this.x, this.pitch, this.c); break;
   }
   if (this.scalex!=1) {
-    ret.scale(this.scalex, 1, this.x);
+    this.graphelem.scale(this.scalex, 1, this.x);
   }
-  return ret;
+  return this.graphelem;
 };
 
 function ABCEndingElem (text, anchor1, anchor2) {
@@ -315,8 +327,43 @@ function ABCPrinter(paper) {
   this.paper = paper;
   this.space = 3*AbcSpacing.SPACE;
   this.glyphs = new ABCGlyphs(paper);
+  this.listeners = [];
+  this.selected = [];
 }
 
+ABCPrinter.prototype.notifySelect = function (abselem) {
+  this.clearSelection();
+  this.selected = [abselem];
+  abselem.highlight();
+  for (var i=0; i<this.listeners.length;i++) {
+    this.listeners[i].highlight(abselem.abcelem);
+  }
+};
+
+ABCPrinter.prototype.clearSelection = function () {
+  for (var i=0;i<this.selected.length;i++) {
+    this.selected[i].unhighlight();
+  }
+  this.selected = [];
+};
+
+ABCPrinter.prototype.addSelectListener = function (listener) {
+  this.listeners[this.listeners.length] = listener;
+};
+
+ABCPrinter.prototype.rangeHighlight = function(start,end)
+{
+  this.clearSelection();
+  for (var line=0;line<this.staffs.length; line++) {
+    var elems = this.staffs[line].children;
+    for (var elem=0; elem<elems.length; elem++) {
+      if (elems[elem].abcelem.startChar>=start && elems[elem].abcelem.endChar<=end) {
+	this.selected[this.selected.length]=elems[elem];
+	elems[elem].highlight();
+      }
+    }
+  }
+};
 
 ABCPrinter.prototype.printText = function (x, offset, text) {
   this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":"start"});
@@ -355,7 +402,7 @@ ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
   pitch2 = pitch2 + ((above)?1.5:-1.5);
   var y1 = this.calcY(pitch1);
   var y2 = this.calcY(pitch2);
-  var dy = (x2-x1)/7;
+  var dy = Math.max(4, (x2-x1)/5);
   var controlx1 = x1+(x2-x1)/5;
   var controly1 = y1+ ((above)?-dy:dy);
   var controlx2 = x2-(x2-x1)/5;
@@ -411,18 +458,17 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
   if (abctune.formatting.staffwidth) { this.paper.text(200, this.y, "Format: staffwidth="+abctune.formatting.staffwidth); this.y += 20; }
   if (abctune.formatting.scale) { this.paper.text(200, this.y, "Format: scale="+abctune.formatting.scale); this.y += 20; }
-  this.paper.text(300, this.y, abctune.metaText.title).attr({"font-size":20});
+  this.paper.text(350, this.y, abctune.metaText.title).attr({"font-size":20});
   this.y+=20;
   if (abctune.metaText.author) {this.paper.text(100, this.y, abctune.metaText.author); this.y+=15;}
   if (abctune.metaText.origin) {this.paper.text(100, this.y, "(" + abctune.metaText.origin + ")");this.y+=15;}
   if (abctune.metaText.tempo) {this.paper.text(100, this.y+20, "Tempo: " + abctune.metaText.tempo.duration + '=' + abctune.metaText.tempo.bpm); this.y+=15;}
   this.y+=15;
-  var longest = 0;
-  var staffs = [];
+  this.staffs = [];
   for(var line=0; line<abctune.lines.length; line++) {
     var abcline = abctune.lines[line];
     if (abcline.staff) {
-      staffs[staffs.length] = this.printABCLine(abcline);
+      this.staffs[this.staffs.length] = this.printABCLine(abcline);
       this.y+=AbcSpacing.STAVEHEIGHT;
     } else if (abcline.subtitle) {
       this.printSubtitleLine(abcline);
@@ -463,7 +509,7 @@ ABCPrinter.prototype.printABCLine = function(abcline) {
     }
   }
   this.staff.layout(this.space);
-  var prop = Math.min(2,700/this.staff.w)
+  var prop = Math.min(1,700/this.staff.w)
   this.staff.layout(this.space*prop);
   this.staff.draw(printer);
   return this.staff;
@@ -569,7 +615,7 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
     }
     for (;dot>0;dot--) {
       var dotadjust = (1-pitch%2); //TODO don't adjust when above or below stave?
-      abselem.addRight(new ABCRelativeElement(".", notehead.w+5*dot, this.glyphs.getSymbolWidth("."), pitch+dotadjust-0.25));
+      abselem.addRight(new ABCRelativeElement(".", notehead.w-2+5*dot, this.glyphs.getSymbolWidth("."), pitch+dotadjust-0.25));
     }
   }
   
