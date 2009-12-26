@@ -641,13 +641,15 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
     abselem.addChild(new ABCRelativeElement(elem.lyric, 0, 0, 0, {type:"debug"}));
   }
 
-  for (var i=elem.gracenotes.length-1; i>=0; i--) {
-    roomtaken +=10; // hardcoded
-    var grace = new ABCRelativeElement(";", -roomtaken, this.glyphs.getSymbolWidth(";"), elem.gracenotes[i].pitch);
-    abselem.addExtra(grace);
-    if (i==0) this.staff.addOther(new ABCTieElem(grace, notehead, false));
+  if (elem.gracenotes !== undefined) {
+    for (var i=elem.gracenotes.length-1; i>=0; i--) {
+      roomtaken +=10; // hardcoded
+      var grace = new ABCRelativeElement(";", -roomtaken, this.glyphs.getSymbolWidth(";"), elem.gracenotes[i].pitch);
+      abselem.addExtra(grace);
+      if (i==0) this.staff.addOther(new ABCTieElem(grace, notehead, false));
+    }
   }
-
+  
   if (elem.decoration) {
     this.printDecoration(elem.decoration, pitch, (notehead)?notehead.w:0, abselem);
   }
