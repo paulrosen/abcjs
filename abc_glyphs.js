@@ -41,5 +41,5 @@ var ABCGlyphs = function(paper) {
      case "w": return 0;
      default: return -1;
      }
-   }
+   };
 };
