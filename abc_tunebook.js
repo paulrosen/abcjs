@@ -2,6 +2,9 @@
  * @author paulrosen
  */
 
+/*global Class */
+/*extern AbcTuneBook */
+
 var AbcTuneBook = Class.create({
 	initialize: function (book) {
 		var This = this;
