@@ -570,7 +570,7 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
   if (elem.pitch!==undefined) {
     elem.pitches=[{accidental:elem.accidental, pitch:elem.pitch}]
   }
-  var pitch = elem.pitches[0].pitch; // TODO CHORDS
+  var pitch = (elem.pitches && elem.pitches.length>0)?elem.pitches[0].pitch: null; // TODO CHORDS
   var duration = getDuration(elem);
 
   var chartable = {up:{"-2": "\u203a", "-1": "W", 0:"w", 1:"h", 2:"q", 3:"e", 4:"x", 5:"x", 6:"x", 7:"x"},
