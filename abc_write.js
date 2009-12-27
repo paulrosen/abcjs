@@ -642,7 +642,7 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
   }
 
   if (elem.lyric !== undefined) {
-    abselem.addChild(new ABCRelativeElement(elem.lyric, 0, 0, 0, {type:"debug"}));
+    abselem.addChild(new ABCRelativeElement(elem.lyric.syllable + elem.lyric.divider, 0, 0, 0, {type:"debug"}));
   }
 
   if (elem.gracenotes !== undefined) {
