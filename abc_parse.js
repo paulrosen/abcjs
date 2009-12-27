@@ -1410,6 +1410,7 @@ var ParseAbc = Class.create({
 			var tripletNotesLeft = 0;
 			//var tripletMultiplier = 0;
 			var inTie = false;
+			var startChord = false;
 
 			// See if the line starts with a header field
 			var retHeader = letter_to_body_header(line, i);
@@ -1421,6 +1422,7 @@ var ParseAbc = Class.create({
 
 			while (i < line.length)
 			{
+				var startI = i;
 				if (line[i] === '%')
 					break;
 
@@ -1517,8 +1519,7 @@ var ParseAbc = Class.create({
 						}
 
 						// TODO-PER: put a test here for [ and handle chords.
-						var startChord = false;
-						if (line[i] === '[') {
+						if (!startChord && line[i] === '[') {
 							i++;
 							multilineVars.iChar++;
 							startChord = true;
@@ -1555,7 +1556,15 @@ var ParseAbc = Class.create({
 
 							tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
 
-						} else {	// don't know what this is, so ignore it.
+						}
+
+						if (startChord && line[i] === ']') {
+							i++;
+							multilineVars.iChar++;
+							startChord = false;
+						}
+
+						if (i === startI) {	// don't know what this is, so ignore it.
 							if (line[i] !== ' ')
 								addWarning(formatWarning("Unknown character ignored", tune.lines.length, i, line));
 							i++;
