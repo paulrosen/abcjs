@@ -67,7 +67,7 @@ function processAbc(params) {
 			abcParser = new ParseAbc();
 
 		for (var i = 0; i < tunebook.tunes.length; i++) {
-			abcParser.parse(tunebook.tunes[0].abc);
+			abcParser.parse(tunebook.tunes[i].abc);
 			var tune = abcParser.getTune();
 			var warnings = abcParser.getWarnings();
 			ret.push(fnCallback(tune, warnings, i));
@@ -271,7 +271,7 @@ function doGradeTest(url, failed_tests, passed_tests, pass) {
 
 var lint = new AbcParserLint();
 
-function lintOneTune(tune, warnings) {
+function lintOneTune(tune, warnings, count) {
 	if (tune === null)
 		return warnings;
 	var output = lint.lint(tune, warnings);
