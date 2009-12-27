@@ -228,12 +228,13 @@ function ABCBeamElem () {
 ABCBeamElem.prototype.add = function(abselem) {
   this.allrests = this.allrests && abselem.abcelem.rest_type;
   this.elems[this.elems.length] = abselem;
-  this.total += abselem.abcelem.pitch;
-  if (!this.min || abselem.abcelem.pitch<this.min) {
-    this.min = abselem.abcelem.pitch;
+  var pitch = abselem.abcelem.pitches[0].pitch;
+  this.total += pitch; // TODO CHORD (get pitches from abselem.heads)
+  if (!this.min || pitch<this.min) {
+    this.min = pitch;
   }
-  if (!this.max || abselem.abcelem.pitch>this.max) {
-    this.max = abselem.abcelem.pitch;
+  if (!this.max || pitch>this.max) {
+    this.max = pitch;
   }
 };
 
@@ -257,7 +258,7 @@ ABCBeamElem.prototype.drawBeam = function(paper,basey) {
   var average = this.average();
   this.asc = average<6; // hardcoded 6 is B
   this.pos = Math.round(this.asc ? Math.max(average+7,this.max+5) : Math.min(average-7,this.min-5));
-  var slant = this.elems[0].abcelem.pitch-this.elems[this.elems.length-1].abcelem.pitch;
+  var slant = this.elems[0].abcelem.pitches[0].pitch-this.elems[this.elems.length-1].abcelem.pitches[0].pitch;
   var maxslant = this.elems.length/2;
 
   if (slant>maxslant) slant = maxslant;
@@ -566,7 +567,10 @@ ABCPrinter.prototype.printBeam = function() {
 ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var roomtaken = 0; // room needed to the left of the note
-  var pitch = elem.pitch;
+  if (elem.pitch!==undefined) {
+    elem.pitches=[{accidental:elem.accidental, pitch:elem.pitch}]
+  }
+  var pitch = elem.pitches[0].pitch; // TODO CHORDS
   var duration = getDuration(elem);
 
   var chartable = {up:{"-2": "\u203a", "-1": "W", 0:"w", 1:"h", 2:"q", 3:"e", 4:"x", 5:"x", 6:"x", 7:"x"},
@@ -583,7 +587,7 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
   if (elem.rest_type) {
     pitch = 7;
     switch(elem.rest_type) {
-    case "rest": c = chartable["rest"][-durlog]; elem.pitch=7; break;
+    case "rest": c = chartable["rest"][-durlog]; elem.pitch=7; break; // TODO rests in bars is now broken
     case "invisible":
     case "spacer":
       c="";
@@ -619,9 +623,9 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
     }
   }
   
-  if (elem.accidental !== undefined && elem.accidental !== 'none') {
+  if (elem.pitches[0].accidental !== undefined && elem.pitches[0].accidental !== 'none') {
     var symb; 
-    switch (elem.accidental) {
+    switch (elem.pitches[0].accidental) {
     case "dbl_sharp":
     case "sharp":
       symb = "#";
