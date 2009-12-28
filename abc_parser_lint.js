@@ -288,6 +288,19 @@ var AbcParserLint = Class.create({
 							onlyContains(property, obj[property], [ 'name', 'position' ]);
 							addOutput(property + ": " + obj[property].name + " " + obj[property].position, 4);
 							break;
+						case 'pitches':
+							onlyArray(obj[property], property);
+							for (var i = 0; i < obj[property].length; i++) {
+								var pitch = obj[property][i];
+								onlyContains('pitches['+i+']', pitch, [ 'pitch', 'duration', 'endChar', 'startTie', 'endTie', 'startSlur', 'endSlur', 'accidental' ]);
+								var str = property + ": p=" + pitch.pitch;
+								if (pitch.accidental !== undefined) str += ' a: ' + pitch.accidental;
+								str += " d=" + pitch.duration;
+								if (pitch.startTie === true) str += " startTie";
+								if (pitch.endTie === true) str += " endTie";
+								addOutput(str, 5);
+							}
+							break;
 						case 'startChar':
 						case 'endChar':
 						case 'el_type': break;
