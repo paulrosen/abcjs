@@ -3,9 +3,14 @@
 /*extern  ABCBeamElem, ABCGraphElem, ABCPrinter, ABCGlyphs, AbcSpacing, getDuration */
 
 var getDuration = function(elem) {
-  if (!elem || !elem.duration)
-    return 0;
-  return elem.duration / 8;	// the parser calls a 1 an eigth note.
+  var d = 0;
+  if (elem) {
+    if (elem.duration) 
+      d = elem.duration;
+    else if (elem.pitches && elem.pitches[0])
+      d = elem.pitches[0].duration;
+  } 
+  return d / 8;	// the parser calls a 1 an eigth note.
 };
 
 var getDurlog = function(duration) {
@@ -20,7 +25,7 @@ AbcSpacing.SPACE = 10;
 AbcSpacing.TOPNOTE = 20;
 AbcSpacing.STAVEHEIGHT = 100;
 
-function ABCStaffElement(printer, y) {
+ function ABCStaffElement(printer, y) {
   this.printer = printer;
   this.children = [];
   this.otherchildren = []; // ties, slurs, beams, triplets
@@ -567,84 +572,91 @@ ABCPrinter.prototype.printBeam = function() {
 ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var roomtaken = 0; // room needed to the left of the note
-  if (elem.pitch!==undefined) {
-    elem.pitches=[{accidental:elem.accidental, pitch:elem.pitch}]
+  if (elem.pitches==undefined) {
+    elem.pitches=[{accidental:elem.accidental, pitch:elem.pitch, duration:elem.duration, startTie: elem.startTie,
+		   endTie: elem.endTie, startSlur: elem.startSlur, endSlur: elem.endSlur}]
   }
-  var pitch = (elem.pitches && elem.pitches.length>0)?elem.pitches[0].pitch: null; // TODO CHORDS
+
   var duration = getDuration(elem);
 
   var chartable = {up:{"-2": "\u203a", "-1": "W", 0:"w", 1:"h", 2:"q", 3:"e", 4:"x", 5:"x", 6:"x", 7:"x"},
 		   down:{"-2": "\u203a", "-1": "W", 0:"w", 1:"H", 2:"Q", 3:"E", 4:"X", 5:"X", 6:"X", 7:"X"},
 		   rest:{0:"\u2211", 1:"\u00d3", 2:"\u0152", 3:"\u2030", 4: "\u2248",5: "\u00ae", 6: "\u00d9", 7: "\u00c2"}};
 
-  
-
-  var durlog = Math.floor(Math.log(duration)/Math.log(2));
-  var dot=0;
-
-  for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
-  var c = "";
-  if (elem.rest_type) {
-    pitch = 7;
-    switch(elem.rest_type) {
-    case "rest": c = chartable["rest"][-durlog]; elem.pitch=7; break; // TODO rests in bars is now broken
-    case "invisible":
-    case "spacer":
-      c="";
-    }
-  } else if (!nostem) {
-    var dir = (pitch>=6) ? "down": "up";
-    c = chartable[dir][-durlog];
-    var extraflags = (durlog<-4)?-4-durlog:0;
-  } else {
-    c="\u0153";
-  }
-  
-
   abselem = new ABCAbsoluteElement(elem, duration, 1);
-
-  if (c === undefined)
-    abselem.addChild(new ABCRelativeElement("chartable["+ dir + "][" + (-durlog) + '] is undefined', 0, 0, 0, {type:"debug"}));
-  else if (c==="") {
-    notehead = new ABCRelativeElement(null, 0, 0, pitch);
-    abselem.addHead(notehead);
-  } else {
-    notehead = new ABCRelativeElement(c, 0, this.glyphs.getSymbolWidth(c), pitch);
-    abselem.addHead(notehead);
-    for (;extraflags>0; extraflags--) {
-      var pos = pitch+((dir=="down")?-1.5*extraflags-3.2:1.5*extraflags+4.1);
-      var flag = (dir=="down")?"\u00d4":"K";
-      var xdelta = (dir=="down")?0:this.glyphs.getSymbolWidth("\u0153")-0.6;
-      abselem.addRight(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag), pos));
+  
+  // var pitch = (elem.pitches.length>0)?elem.pitches[0].pitch: null; // TODO CHORDS
+  for (var p=0; p<elem.pitches.length; p++) {
+    var pitch = elem.pitches[p].pitch;
+    var durlog = Math.floor(Math.log(duration)/Math.log(2));
+    var dot=0;
+    
+    for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
+    var c = "";
+    if (elem.rest_type) {
+      pitch = 7;
+      switch(elem.rest_type) {
+      case "rest": c = chartable["rest"][-durlog]; elem.pitch=7; break; // TODO rests in bars is now broken
+      case "invisible":
+      case "spacer":
+	c="";
+      }
+    } else if (!nostem) {
+      var dir = (pitch>=6) ? "down": "up";
+      c = chartable[dir][-durlog];
+      var extraflags = (durlog<-4)?-4-durlog:0;
+    } else {
+      c="\u0153";
     }
-    for (;dot>0;dot--) {
-      var dotadjust = (1-pitch%2); //TODO don't adjust when above or below stave?
-      abselem.addRight(new ABCRelativeElement(".", notehead.w-2+5*dot, this.glyphs.getSymbolWidth("."), pitch+dotadjust-0.25));
+    
+    
+    
+    
+    if (c === undefined)
+      abselem.addChild(new ABCRelativeElement("chartable["+ dir + "][" + (-durlog) + '] is undefined', 0, 0, 0, {type:"debug"}));
+    else if (c==="") {
+      notehead = new ABCRelativeElement(null, 0, 0, pitch);
+      abselem.addHead(notehead);
+    } else {
+      notehead = new ABCRelativeElement(c, 0, this.glyphs.getSymbolWidth(c), pitch);
+      abselem.addHead(notehead);
+      for (;extraflags>0; extraflags--) {
+	var pos = pitch+((dir=="down")?-1.5*extraflags-3.2:1.5*extraflags+4.1);
+	var flag = (dir=="down")?"\u00d4":"K";
+	var xdelta = (dir=="down")?0:this.glyphs.getSymbolWidth("\u0153")-0.6;
+	abselem.addRight(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag), pos));
+      }
+      for (;dot>0;dot--) {
+	var dotadjust = (1-pitch%2); //TODO don't adjust when above or below stave?
+	abselem.addRight(new ABCRelativeElement(".", notehead.w-2+5*dot, this.glyphs.getSymbolWidth("."), pitch+dotadjust-0.25));
+      }
+    }
+
+    if (elem.pitches[p].accidental !== undefined && elem.pitches[p].accidental !== 'none') {
+      var symb; 
+      switch (elem.pitches[p].accidental) {
+      case "dbl_sharp":
+      case "sharp":
+	symb = "#";
+	break;
+      case "flat":
+      case "dbl_flat":
+	symb = "b";
+	break;
+      case "natural":
+	symb = "n";
+      }
+      roomtaken += (this.glyphs.getSymbolWidth(symb)+2);
+      abselem.addExtra(new ABCRelativeElement(symb, -roomtaken, this.glyphs.getSymbolWidth(symb), pitch));
     }
   }
   
-  if (elem.pitches[0].accidental !== undefined && elem.pitches[0].accidental !== 'none') {
-    var symb; 
-    switch (elem.pitches[0].accidental) {
-    case "dbl_sharp":
-    case "sharp":
-      symb = "#";
-      break;
-    case "flat":
-    case "dbl_flat":
-      symb = "b";
-      break;
-    case "natural":
-      symb = "n";
-    }
-    roomtaken += (this.glyphs.getSymbolWidth(symb)+2);
-    abselem.addExtra(new ABCRelativeElement(symb, -roomtaken, this.glyphs.getSymbolWidth(symb), pitch));
-  }
 
+  
   if (elem.lyric !== undefined) {
     abselem.addChild(new ABCRelativeElement(elem.lyric.syllable + elem.lyric.divider, 0, 0, 0, {type:"debug"}));
   }
-
+  
   if (elem.gracenotes !== undefined) {
     for (var i=elem.gracenotes.length-1; i>=0; i--) {
       roomtaken +=10; // hardcoded
