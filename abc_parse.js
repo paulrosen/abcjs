@@ -320,6 +320,50 @@ var AbcTokenizer = Class.create({
 					return { len: 1, warn: 'Expected note name after accidental' };
 			}
 		};
+		
+		var charMap = { 
+			"`a": 'à', "'a": "á", "^a": "â", "~a": "ã", "\"a": "ä", "oa": "å", "=a": "ā", "ua": "ă", ";a": "ą", 
+			"`e": 'è', "'e": "é", "^e": "ê", "\"e": "ë", "=e": "ē", "ue": "ĕ", ";e": "ę", ".e": "ė",
+			"`i": 'ì', "'i": "í", "^i": "î", "\"i": "ï", "=i": "ī", "ui": "ĭ", ";i": "į",
+			"`o": 'ò', "'o": "ó", "^o": "ô", "~o": "õ", "\"o": "ö", "=o": "ō", "uo": "ŏ", "/o": "ø",
+			"`u": 'ù', "'u": "ú", "^u": "û", "~u": "ũ", "\"u": "ü", "ou": "ů", "=u": "ū", "uu": "ŭ", ";u": "ų", 
+			"`A": 'À', "'A": "Á", "^A": "Â", "~A": "Ã", "\"A": "Ä", "oA": "Å", "=A": "Ā", "uA": "Ă", ";A": "Ą", 
+			"`E": 'È', "'E": "É", "^E": "Ê", "\"E": "Ë", "=E": "Ē", "uE": "Ĕ", ";E": "Ę", ".E": "Ė",
+			"`I": 'Ì', "'I": "Í", "^I": "Î", "~I": "Ĩ", "\"I": "Ï", "=I": "Ī", "uI": "Ĭ", ";I": "Į", ".I": "İ",
+			"`O": 'Ò', "'O": "Ó", "^O": "Ô", "~O": "Õ", "\"O": "Ö", "=O": "Ō", "uO": "Ŏ", "/O": "Ø",
+			"`U": 'Ù', "'U": "Ú", "^U": "Û", "~U": "Ũ", "\"U": "Ü", "oU": "Ů", "=U": "Ū", "uU": "Ŭ", ";U": "Ų", 
+			"ae": "æ", "AE": "Æ", "oe": "œ", "OE": "Œ", "ss": "ß",
+			"'c": "ć", "^c": "ĉ", "uc": "č", "cc": "ç", ".c": "ċ", "cC": "Ç", "'C": "Ć", "^C": "Ĉ", "uC": "Č", ".C": "Ċ",
+			"~n": "ñ"
+// More chars: Ñ Ĳ ĳ Ď ď Đ đ Ĝ ĝ Ğ ğ Ġ ġ Ģ ģ Ĥ ĥ Ħ ħ Ĵ ĵ Ķ ķ ĸ Ĺ ĺ Ļ ļ Ľ ľ Ŀ ŀ Ł ł Ń ń Ņ ņ Ň ň ŉ Ŋ ŋ   Ŕ ŕ Ŗ ŗ Ř ř Ś ś Ŝ ŝ Ş ş Š š Ţ ţ Ť ť Ŧ ŧ Ŵ ŵ Ŷ ŷ Ÿ ÿ Ÿ Ź ź Ż ż Ž ž
+		};
+		var charMap2 = {
+			"251": "©"
+		};
+		this.translateString = function(str) {
+			var arr = str.split('\\');
+			if (arr.length === 1) return str;
+			var out = null;
+			arr.each(function(s) {
+				if (out === null)
+					out = s;
+				else if (s.length < 2)
+					out += "\\" + s;
+				else {
+					var c = charMap[s.substring(0, 2)];
+					if (c !== undefined)
+						out += c + s.substring(2);
+					else {
+						c = charMap2[s.substring(0, 3)];
+						if (c !== undefined)
+							out += c + s.substring(3);
+						else
+							out += "\\" + s;
+					}
+				}
+			});
+			return out;
+		};
 	}
 });
 
@@ -625,6 +669,7 @@ var ParseAbc = Class.create({
 				case 'v': return [1, 'downbow'];
 				case '~': return [1, 'roll'];
 				case '!':
+				case '+':
 					var ret = getBrackettedSubstring(line, i, 5);
 					// Be sure that the accent is recognizable.
 					var legalAccents = [ "trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
@@ -640,6 +685,7 @@ var ParseAbc = Class.create({
 					}))
 						return ret;
 					// We didn't find the accent in the list, so consume the space, but don't return an accent.
+					addWarning(formatWarning("Unknown decoration: " + ret[1], tune.lines.length, i, line));
 					ret[1] = "";
 					return ret;
 				case 'H': return [1, 'fermata'];
@@ -866,9 +912,9 @@ var ParseAbc = Class.create({
 
 		var addMetaText = function(key, value) {
 			if (tune.metaText[key] === undefined)
-				tune.metaText[key] = stripComment(value);
+				tune.metaText[key] = tokenizer.translateString(stripComment(value));
 			else
-				tune.metaText[key] += "\n" + stripComment(value);
+				tune.metaText[key] += "\n" + tokenizer.translateString(stripComment(value));
 		};
 
 		var addDirective = function(str) {
@@ -896,7 +942,7 @@ var ParseAbc = Class.create({
 
 		var setTitle = function(title) {
 			if (multilineVars.hasMainTitle)
-				tune.lines[tune.lines.length] = { subtitle: stripComment(title) };	// display secondary title
+				tune.lines[tune.lines.length] = { subtitle: tokenizer.translateString(stripComment(title)) };	// display secondary title
 			else
 			{
 				addMetaText("title", title);
@@ -929,13 +975,13 @@ var ParseAbc = Class.create({
 			var last_divider = -1;
 			for (var i = 0; i < words.length; i++) {
 				if ((words[i] === ' ') || (words[i] === '-')) {
-					word_list.push({ syllable: words.substring(last_divider+1, i), divider: words[i] });
+					word_list.push({ syllable: tokenizer.translateString(words.substring(last_divider+1, i)), divider: words[i] });
 					last_divider = i;
 				}
 			}
 
 			line.each(function(el) {
-				if (el.el_type === 'note' && word_list.length > 0) {
+				if (el.el_type === 'note' && el.pitch !== null && word_list.length > 0) {
 					el.lyric = word_list.shift();
 				}
 			});
@@ -1329,7 +1375,7 @@ var ParseAbc = Class.create({
 						ret = letter_to_chord(line, i);
 						if (ret[0] > 0) {
 							// TODO-PER: There could be more than one chord here if they have different positions.
-							el.chord = { name: ret[1], position: ret[2] };
+							el.chord = { name: tokenizer.translateString(ret[1]), position: ret[2] };
 							i += ret[0];
 							multilineVars.iChar += ret[0];
 							i += tokenizer.skipWhiteSpace(line.substring(i));
@@ -1399,6 +1445,7 @@ var ParseAbc = Class.create({
 						if (line[i] === '[') {
 							i++;
 							multilineVars.iChar++;
+							var chordDuration = null;
 
 							var done = false;
 							while (!done) {
@@ -1428,21 +1475,59 @@ var ParseAbc = Class.create({
 											el.endTie = true;
 											inTie = false;
 										}
-										while (i < line.length && (line[i] === ')' || line[i] === '-' || line[i] === ' ' || line[i] === '\t')) {
-											if (line[i] === '-') {
-												el.startTie = true;
-												inTie = true;
-											} else if (line[i] === ')') {
-												if (el.endSlur === undefined) el.endSlur = 1; else el.endSlur++;
-											} else
-												addEndBeam(el);
-											i++;
-											multilineVars.iChar++;
+
+										if (tripletNotesLeft > 0) {
+											tripletNotesLeft--;
+											if (tripletNotesLeft === 0) {
+												el.endTriplet = true;
+											}
+										}
+
+										var postChordDone = false;
+										while (i < line.length && !postChordDone) {
+											switch (line[i]) {
+												case ' ':
+												case '\t':
+													addEndBeam(el);
+													break;
+												case ')':
+													if (el.endSlur === undefined) el.endSlur = 1; else el.endSlur++;
+													break;
+												case '-':
+													if (el.startTie === true)	// can only have one of these
+														postChordDone = true;
+													else {
+														el.startTie = true;
+														inTie = true;
+													}
+													break;
+												case '>':
+												case '<':
+													var br2 = getBrokenRhythm(line, i);
+													i += br2[0] - 1;	// index gets incremented below, so we'll let that happen
+													multilineVars.next_note_duration = br2[2];
+													chordDuration = br2[1];
+													break;
+												default:
+													postChordDone = true;
+													break;
+											}
+											if (!postChordDone) {
+												i++;
+												multilineVars.iChar++;
+											}
 										}
 									} else
 										addWarning(formatWarning("Expected ']' to end the chords", tune.lines.length, i, line));
-									if (el.pitches !== undefined)
+
+									if (el.pitches !== undefined) {
+										if (chordDuration !== null) {
+											el.pitches.each(function(p) {
+												p.duration = p.duration * chordDuration;
+											});
+										}
 										tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
+									}
 									done = true;
 								}
 							}
