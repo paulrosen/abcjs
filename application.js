@@ -82,7 +82,9 @@ function processAbc(params) {
 
 function abc_mousemove() {
   var selection = editArea.getSelection();
+  try {
   printer.rangeHighlight(selection.start, selection.end);
+  } catch (e) {}
 }
 
 function writeOneTune(tune, warnings, count) {

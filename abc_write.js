@@ -506,6 +506,7 @@ ABCPrinter.prototype.printABCLine = function(abcline) {
     this.partstartelem = new ABCEndingElem("", null, null);
     this.staff.addOther(this.partstartelem);
   }
+  this.slurs = [];
   this.ties = [];
   for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
     var type = this.getElem().el_type;
@@ -569,6 +570,20 @@ ABCPrinter.prototype.printBeam = function() {
   return abselemset;
 };
 
+function sortPitch(elem) {
+  do {
+    var sorted = true;
+    for (var p = 0; p<elem.pitches.length-1; p++) {
+      if (elem.pitches[p].pitch>elem.pitches[p+1].pitch) {
+	sorted = false;
+	var tmp = elem.pitches[p];
+	elem.pitches[p] = elem.pitches[p+1];
+	elem.pitches[p+1] = tmp;
+      }     
+    }
+  } while (!sorted);
+}
+
 ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var roomtaken = 0; // room needed to the left of the note
@@ -583,8 +598,16 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
 		   down:{"-2": "\u203a", "-1": "W", 0:"w", 1:"H", 2:"Q", 3:"E", 4:"X", 5:"X", 6:"X", 7:"X"},
 		   rest:{0:"\u2211", 1:"\u00d3", 2:"\u0152", 3:"\u2030", 4: "\u2248",5: "\u00ae", 6: "\u00d9", 7: "\u00c2"}};
 
+  sortPitch(elem);
   abselem = new ABCAbsoluteElement(elem, duration, 1);
   
+  var sum=0
+  for (var p=0; p<elem.pitches.length; p++) {
+    sum += elem.pitches[p].pitch;
+  }
+
+  elem.averagepitch = sum/elem.pitches.length;
+
   // var pitch = (elem.pitches.length>0)?elem.pitches[0].pitch: null; // TODO CHORDS
   for (var p=0; p<elem.pitches.length; p++) {
     var pitch = elem.pitches[p].pitch;
@@ -596,13 +619,13 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
     if (elem.rest_type) {
       pitch = 7;
       switch(elem.rest_type) {
-      case "rest": c = chartable["rest"][-durlog]; elem.pitch=7; break; // TODO rests in bars is now broken
+      case "rest": c = chartable["rest"][-durlog]; elem.averagepitch=7; break; // TODO rests in bars is now broken
       case "invisible":
       case "spacer":
 	c="";
       }
     } else if (!nostem) {
-      var dir = (pitch>=6) ? "down": "up";
+      var dir = (elem.averagepitch>=6) ? "down": "up";
       c = chartable[dir][-durlog];
       var extraflags = (durlog<-4)?-4-durlog:0;
     } else {
@@ -649,6 +672,18 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
       roomtaken += (this.glyphs.getSymbolWidth(symb)+2);
       abselem.addExtra(new ABCRelativeElement(symb, -roomtaken, this.glyphs.getSymbolWidth(symb), pitch));
     }
+
+    if (elem.pitches[p].endTie) {
+      this.ties[0].anchor2=notehead;
+      this.ties = this.ties.slice(1,this.ties.length);
+    }
+
+    if (elem.pitches[p].startTie) {
+      var tie = new ABCTieElem(notehead, null, (elem.avaragepitch>=6));
+      this.ties[this.ties.length]=tie;
+      this.staff.addOther(tie);
+    }
+
   }
   
 
@@ -671,13 +706,13 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
   }
 
   // ledger lines
-  for (i=pitch; i>11; i--) {
+  for (i=elem.pitches[elem.pitches.length-1].pitch; i>11; i--) {
     if (i%2===0) {
       abselem.addChild(new ABCRelativeElement("_", -1, this.glyphs.getSymbolWidth("_"), i));
     }
   }
 
-  for (i=pitch; i<1; i++) {
+  for (i=elem.pitches[0].pitch; i<1; i++) {
     if (i%2===0) {
       abselem.addChild(new ABCRelativeElement("_", -1, this.glyphs.getSymbolWidth("_"), i));
     }
@@ -687,31 +722,27 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
     abselem.addChild(new ABCRelativeElement(elem.chord.name, 0, 0, (elem.chord.position=="below")?-3:16, {type:"text"}));
   }
 
-  if (elem.endTie) {
-    this.staff.addOther(new ABCTieElem(this.tiestartelem, notehead, (pitch>=6)));
-  }
-
   for (var i=elem.endSlur;i>0;i--) {
-    if (this.ties.length==0) {
+    if (this.slurs.length==0) {
       abselem.addChild(new ABCRelativeElement("missing begin slur", 0, 0, 0, {type:"debug"}));
       continue;
     }
-    this.ties[this.ties.length-1].anchor2=notehead;
-    this.ties = this.ties.slice(0,this.ties.length-1);
+    this.slurs[this.slurs.length-1].anchor2=notehead;
+    this.slurs = this.slurs.slice(0,this.slurs.length-1);
   }
 
   for (var i=elem.startSlur;i>0;i--) {
-    var tie = new ABCTieElem(notehead, null, (pitch>=6));
-    this.ties[this.ties.length]=tie
-    this.staff.addOther(tie);
+    var slur = new ABCTieElem(notehead, null, (elem.averagepitch>=6));
+    this.slurs[this.slurs.length]=slur;
+    this.staff.addOther(slur);
   }
   
-  if (elem.startTie) {
-    this.tiestartelem = notehead;
-  }
+
+    
+
 
   if (elem.startTriplet) {
-    this.triplet = new ABCTripletElem(elem.startTriplet, notehead, null, (pitch<6)); // above is opposite from case of slurs
+    this.triplet = new ABCTripletElem(elem.startTriplet, notehead, null, (elem.averagepitch<6)); // above is opposite from case of slurs
     this.staff.addOther(this.triplet);
   }
 
