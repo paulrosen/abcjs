@@ -76,6 +76,8 @@ var AbcParserLint = Class.create({
 						case 'origin':
 						case 'rhythm':
 						case 'author':
+						case 'composer':
+						case 'url':
 						case 'history':
 						case 'discography':
 						case 'source':
@@ -102,10 +104,57 @@ var AbcParserLint = Class.create({
 			keys.each(function(property) {
 				var t = typeof obj[property];
 				if (t !== 'function') {
-					switch (property) {
+					switch (property.toLowerCase()) {
 						case 'stretchlast':
 						case 'staffwidth':
 						case 'scale':
+						case "sep":
+						case "score":
+						case "indent":
+						case "voicefont":
+						case "titlefont":
+						case "barlabelfont":
+						case "barnumfont":
+						case "barnumberfont":
+						case "barnumbers":
+						case "topmargin":
+						case "botmargin":
+						case "topspace":
+						case "titlespace":
+						case "subtitlespace":
+						case "composerspace":
+						case "musicspace":
+						case "partsspace":
+						case "wordsspace":
+						case "textspace":
+						case "vocalspace":
+						case "staffsep":
+						case "linesep":
+						case "midi":
+						case "titlecaps":
+						case "titlefont":
+						case "composerfont":
+						case "indent":
+						case "playtempo":
+						case "auquality":
+						case "text":
+						case "begintext":
+						case "endtext":
+						case "vocalfont":
+						case "systemsep":
+						case "sysstaffsep":
+						case "landscape":
+						case "gchordfont":
+						case "leftmargin":
+						case "partsfont":
+						case "staves":
+						case "slurgraces":
+						case "titleleft":
+						case "subtitlefont":
+						case "tempofont":
+						case "continuous":
+						case "botspace":
+						case "nobarcheck":
 							addOutput(property + ": " + obj[property], 1); break;
 						default:
 							addError("Formatting should not contain: " + property);
@@ -317,6 +366,7 @@ var AbcParserLint = Class.create({
 			obj.each(function(el) {
 				var ty = el.el_type;
 				switch (ty) {
+					case "part": onlyContains(ty, el, [ 'el_type', 'title', 'startChar', 'endChar' ]); addOutput("Part: " + el.title, 3); break;
 					case "clef": parseClef(el); break;
 					case "key": parseKey(el); break;
 					case "meter": parseMeter(el); break;
