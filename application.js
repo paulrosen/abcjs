@@ -100,7 +100,7 @@ function writeOneTune(tune, warnings, count) {
 	printer.printABC(tune);
 	printer.addSelectListener(editArea);
 	abc_mousemove();
-}
+	}
 
 var bReentry = false;
 var oldt ="";
@@ -169,7 +169,9 @@ function pickTuneAndPdf(pdf_id, folder, abc_file)
 
 function pickTune(value)
 {
-	editArea.set(value.gsub('`n', '\n').gsub('`a', "'"));
+	var sel = abc_contents_output[value];
+	editArea.set(sel);
+	//editArea.set(value.gsub('`n', '\n').gsub('`a', "'"));
 	abc_keystroke();
 }
 
@@ -262,11 +264,22 @@ function doGradeTest(url, failed_tests, passed_tests, pass) {
 	var passed = $(passed_tests);
 	var selection = pass ? failed.options[failed.selectedIndex] : passed.options[passed.selectedIndex];
 	var value = selection.innerHTML;
+	var num_success = parseInt($('success_count').innerHTML);
+	var num_fail = parseInt($('fail_count').innerHTML);
 	selection.remove();
-	if (pass)
+	if (pass) {
 		passed.appendChild(selection);
-	else
+		num_success++;
+		num_fail--;
+	}
+	else {
 		failed.appendChild(selection);
+		num_success--;
+		num_fail++;
+	}
+
+	$('success_count').update(num_success);
+	$('fail_count').update(num_fail);
 
 	new Ajax.Request(url, {parameters: {pass: pass, value: value, authenticity_token: window.authenticity_token}});
 }
