@@ -321,9 +321,9 @@ function runRegressionTest() {
 }
 
 function createRegressionData() {
-	var x = confirm("This will overwrite all the regression data that is currently saved. Do you want to continue?");
-	if (x === false)
-		return;
+//	var x = confirm("This will overwrite all the regression data that is currently saved. Do you want to continue?");
+//	if (x === false)
+//		return;
 
 	var count = 1;
 	Object.keys(abc_contents_output).each(function(filename) {

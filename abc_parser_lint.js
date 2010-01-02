@@ -8,438 +8,214 @@
  */
 
 /*global Class */
+/*global JSONSchema */
 /*extern AbcParserLint */
 
 var AbcParserLint = Class.create({
-
 	initialize: function () {
-		var err = "";
-		var out = "";
 
-		var addError = function(str, indent) {
-			err += str + "\n";
-		};
+		var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
+			"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
+			"emphasis", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
+			"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
+			"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
+			"p", "pp", "f", "ff", "mf", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2",
+			"upbow", "downbow", "staccato"
+		] } };
 
-		var addOutput = function(str, indent) {
-			var spacing = "";
-			for (var i = 0; i < indent; i++)
-				spacing += "\t";
-			out += spacing + str + "\n";
-			if (str.indexOf("[object Object]") >= 0)
-				addError("Object not expanded: " + str);
-			if (str.indexOf("undefined") >= 0)
-				addError("property undefined: " + str);
-		};
-
-		var needs = function(obj, attr, name) {
-			if (obj[attr] === undefined)
-				addError(name + " must contain: " + attr);
-		};
-		var lacks = function(obj, attr, name) {
-			if (obj[attr] !== undefined)
-				addError(name + " cannot contain: " + attr);
-		};
-		var onlyArray = function(obj, name) {
-			var keys = $H(obj).keys();
-			keys.sort();
-			keys.each(function(property) {
-				var t = typeof obj[property];
-				if (t !== 'function') {
-					var index = parseInt(property);
-					if (index === 0 && property !== '0')
-						addError(name + " should not contain: " + property);
-				}
-			});
-		};
-		var onlyContains = function(name, obj, arr) {
-			var keys = $H(obj).keys();
-			keys.sort();
-			keys.each(function(property) {
-				var t = typeof obj[property];
-				if (t !== 'function') {
-					if (arr.indexOf(property) < 0)
-						addError(name + " cannot contain: " + property);
-				}
-			});
-		};
-
-		var parseMetaText = function(obj) {
-			addOutput("MetaText:", 0);
-			var keys = $H(obj).keys();
-			keys.sort();
-			keys.each(function(property) {
-				var t = typeof obj[property];
-				if (t !== 'function') {
-					switch (property) {
-						case 'title':
-						case 'notes':
-						case 'origin':
-						case 'rhythm':
-						case 'author':
-						case 'composer':
-						case 'url':
-						case 'history':
-						case 'discography':
-						case 'source':
-						case 'book':
-						case 'partOrder':
-						case 'transcription':
-						case 'unalignedWords':
-							addOutput(property + ": " + obj[property], 1); break;
-						case 'tempo':
-							addOutput(property + ": duration=" + obj[property].duration + " bpm=" + obj[property].bpm);
-							onlyContains("tempo", obj[property], [ "duration", "bpm" ]);
-							break;
-						default:
-							addError("MetaText should not contain: " + property);
+		var musicSchema = {
+			description:"ABC Internal Music Representation",
+			type:"object",
+			properties: {
+				formatting: {type:"object",
+					properties: {
+						auquality: { type: "string", optional: true },
+						barlabelfont: { type: "string", optional: true },
+						barnumberfont: { type: "string", optional: true },
+						barnumbers: { type: "string", optional: true },
+						barnumfont: { type: "string", optional: true },
+						begintext: { type: "string", optional: true },
+						botmargin: { type: "string", optional: true },
+						botspace: { type: "string", optional: true },
+						composerfont: { type: "string", optional: true },
+						composerspace: { type: "string", optional: true },
+						continuous: { type: "string", optional: true },
+						endtext: { type: "string", optional: true },
+						gchordfont: { type: "string", optional: true },
+						indent: { type: "string", optional: true },
+						landscape: { type: "string", optional: true },
+						leftmargin: { type: "string", optional: true },
+						linesep: { type: "string", optional: true },
+						midi: { type: "string", optional: true },
+						musicspace: { type: "string", optional: true },
+						nobarcheck: { type: "string", optional: true },
+						partsfont: { type: "string", optional: true },
+						partsspace: { type: "string", optional: true },
+						playtempo: { type: "string", optional: true },
+						scale: { type: "number", optional: true },
+						score: { type: "string", optional: true },
+						sep: { type: "string", optional: true },
+						slurgraces: { type: "string", optional: true },
+						staffsep: { type: "string", optional: true },
+						staffwidth: { type: "number", optional: true },
+						staves: { type: "string", optional: true },
+						stretchlast: { type: "boolean", optional: true },
+						subtitlefont: { type: "string", optional: true },
+						subtitlespace: { type: "string", optional: true },
+						sysstaffsep: { type: "string", optional: true },
+						systemsep: { type: "string", optional: true },
+						tempofont: { type: "string", optional: true },
+						textspace: { type: "string", optional: true },
+						text: { type: "string", optional: true },
+						titlecaps: { type: "string", optional: true },
+						titlefont: { type: "string", optional: true },
+						titleleft: { type: "string", optional: true },
+						titlespace: { type: "string", optional: true },
+						topmargin: { type: "string", optional: true },
+						topspace: { type: "string", optional: true },
+						vocalfont: { type: "string", optional: true },
+						vocalspace: { type: "string", optional: true },
+						voicefont: { type: "string", optional: true },
+						wordsspace: { type: "string", optional: true }
 					}
-				}
-			});
-		};
+				},
+				lines: {type:"array",
+					items: { type: "object",
+						properties: {
+							subtitle: { type: "string", optional: true },
+							staff: { type: "array", optional: true, output: "noindex",
+								items: { type: "union",
+									field: "el_type",
+									types: [
+										{ value: "clef", properties: {
+											startChar: { type: 'number', output: 'hidden' },
+											endChar: { type: 'number', output: 'hidden' },
+											type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] }
+										} },
+										{ value: "bar", properties: {
+											startChar: { type: 'number', output: 'hidden' },
+											endChar: { type: 'number', output: 'hidden' },
+											chord: { type: 'object', optional: true, properties: {
+													name: { type: 'string'},
+													position: { type: 'string'}
+												}
+											},
+											decoration: decorationList,
+											number: { type: 'string', optional: true },
+											type: { type: 'string', Enum: [ 'bar_dbl_repeat', 'bar_right_repeat', 'bar_left_repeat', 'bar_invisible', 'bar_thick_thin', 'bar_thin_thin', 'bar_thin', 'bar_thin_thick' ] }
+										} },
+										{ value: "key", properties: {
+											startChar: { type: 'number', output: 'hidden' },
+											endChar: { type: 'number', output: 'hidden' },
+											extraAccidentals: { type: 'array', optional: true, output: "noindex", items: {
+													type: 'object', properties: {
+														acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp'] },
+														note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] }
+													}
+											} },
+											regularKey: { type: 'object', optional: true,
+												properties: {
+													num: { type: 'number'},
+													acc: { type: 'string', Enum: [ 'sharp', 'flat' ]}
+												}
+											}
+										} },
+										{ value: "meter", properties: {
+											startChar: { type: 'number', output: 'hidden' },
+											endChar: { type: 'number', output: 'hidden' },
+											type: { type: 'string' },
+											num: { type: 'string', optional: true },	// TODO-PER: Check for type=specified and require these in that case.
+											den: { type: 'string', optional: true }
+										} },
+										{ value: "part", properties: {
+											startChar: { type: 'number', output: 'hidden' },
+											endChar: { type: 'number', output: 'hidden' },
+											title: { type: 'string' }
+										} },
 
-		var parseFormatting = function(obj) {
-			addOutput("Formatting:", 0);
-			var keys = $H(obj).keys();
-			keys.sort();
-			keys.each(function(property) {
-				var t = typeof obj[property];
-				if (t !== 'function') {
-					switch (property.toLowerCase()) {
-						case 'stretchlast':
-						case 'staffwidth':
-						case 'scale':
-						case "sep":
-						case "score":
-						case "indent":
-						case "voicefont":
-						case "titlefont":
-						case "barlabelfont":
-						case "barnumfont":
-						case "barnumberfont":
-						case "barnumbers":
-						case "topmargin":
-						case "botmargin":
-						case "topspace":
-						case "titlespace":
-						case "subtitlespace":
-						case "composerspace":
-						case "musicspace":
-						case "partsspace":
-						case "wordsspace":
-						case "textspace":
-						case "vocalspace":
-						case "staffsep":
-						case "linesep":
-						case "midi":
-						case "titlecaps":
-						case "titlefont":
-						case "composerfont":
-						case "indent":
-						case "playtempo":
-						case "auquality":
-						case "text":
-						case "begintext":
-						case "endtext":
-						case "vocalfont":
-						case "systemsep":
-						case "sysstaffsep":
-						case "landscape":
-						case "gchordfont":
-						case "leftmargin":
-						case "partsfont":
-						case "staves":
-						case "slurgraces":
-						case "titleleft":
-						case "subtitlefont":
-						case "tempofont":
-						case "continuous":
-						case "botspace":
-						case "nobarcheck":
-							addOutput(property + ": " + obj[property], 1); break;
-						default:
-							addError("Formatting should not contain: " + property);
-					}
-				}
-			});
-		};
-
-		var parseClef = function(obj) {
-			var name = "Clef";
-			addOutput(name + ": (" + obj.startChar + "," + obj.endChar + ")", 3);
-			var keys = $H(obj).keys();
-			keys.sort();
-			keys.each(function(property) {
-				var t = typeof obj[property];
-				if (t !== 'function') {
-					switch (property) {
-						case 'type':
-							addOutput(property + ": " + obj[property], 4); break;
-						case 'startChar':
-						case 'endChar':
-						case 'el_type': break;
-						default:
-							addError(name + " should not contain: " + property);
-					}
-				}
-			});
-		};
-
-		var parseRegularKey = function(obj) {
-			var name = "Regular Key";
-			var keys = $H(obj).keys();
-			keys.sort();
-			keys.each(function(property) {
-				var t = typeof obj[property];
-				if (t !== 'function') {
-					switch (property) {
-						case 'num': break;
-						case 'acc': break;
-						default:
-							addError(name + " should not contain: " + property);
-					}
-				}
-			});
-
-			needs(obj, "num", name);
-			needs(obj, "acc", name);
-			addOutput("(" + obj.num + ", " + obj.acc + ")", 4);
-		};
-
-		var parseGrace = function(obj) {
-			var name = "Gracenotes";
-			onlyArray(obj, name);
-			obj.each(function(el) {
-				addOutput(el.el_type + " " + el.pitch, 5);
-			});
-		};
-
-		var parseKey = function(obj) {
-			var name = "Key";
-			addOutput(name + ": (" + obj.startChar + "," + obj.endChar + ")", 3);
-			var processExtraAccidentals = function(obj, property) {
-				var strAcc = "";
-				obj[property].each(function(o) {
-					onlyContains(property, o, ["acc", 'note']);
-					strAcc += o.acc + " " + o.note + " ";
-				});
-				return strAcc;
-			};
-
-			var keys = $H(obj).keys();
-			keys.sort();
-			keys.each(function(property) {
-				var t = typeof obj[property];
-				if (t !== 'function') {
-					switch (property) {
-						case 'regularKey':
-							parseRegularKey(obj[property]); break;
-						case 'extraAccidentals':
-							onlyArray(property, obj[property]);
-							var strAcc = processExtraAccidentals(obj, property);
-							addOutput(property + ": " + strAcc, 4);
-							break;
-						case 'startChar':
-						case 'endChar':
-						case 'el_type': break;
-						default:
-							addError(name + " should not contain: " + property);
-					}
-				}
-			});
-		};
-
-		var parseMeter = function(obj) {
-			var name = "Meter";
-			addOutput(name + ": (" + obj.startChar + "," + obj.endChar + ")", 3);
-			var keys = $H(obj).keys();
-			keys.sort();
-			keys.each(function(property) {
-				var t = typeof obj[property];
-				if (t !== 'function') {
-					switch (property) {
-						case 'type':
-							if (obj[property] === 'specified')
-								addOutput(property + ": " + obj[property] + ': ' + obj.num + '/' + obj.den, 4);
-							else {
-								addOutput(property + ": " + obj[property], 5);
-								lacks(obj, "num", name);
-								lacks(obj, "den", name);
+										{ value: "note", properties: {
+											startChar: { type: 'number', output: 'hidden' },
+											endChar: { type: 'number', output: 'hidden' },
+											accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
+											chord: { type: 'object', optional: true, properties: {
+													name: { type: 'string'},
+													position: { type: 'string'}
+												}
+											},
+											decoration: decorationList,
+											duration: { type: 'number', optional: true },	// TODO-PER: Straighten this out.
+											endSlur: { type: 'number', minimum: 1, optional: true },
+											endTie: { type: 'boolean', Enum: [ true ], optional: true },
+											endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
+											end_beam: { type: 'boolean', Enum: [ true ], optional: true },
+											gracenotes: { type: 'array', optional: true, output: "noindex", items: {
+													type: "object", properties: {
+														el_type: { type: 'string', Enum: [ 'gracenote'] },
+														pitch: { type: 'number' }
+													}
+											}},
+											lyric: { type: 'object', optional: true, properties: {
+												syllable: { type :'string' },
+												divider: { type: 'string', Enum: [ '-', ' ' ]}
+											}},
+										// TODO-PER: either pitch or pitches must be present. Test for that.
+											pitch: { optional: true, type: [ { type: 'number', prohibits: [ 'rest_type', 'pitches' ]}, { type: 'null', requires: ['rest_type'], prohibits: [ 'startSlur', 'startTie', 'startTriplet', 'endSlur', 'endTie', 'endTriplet', 'end_beam', 'grace_notes', 'lyric' ] } ] },
+											pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'pitch', 'duration' ], items: {
+													type: 'object', properties: {
+														endChar: { type: 'number', output: 'hidden' },
+														accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
+														duration: { type: 'number' },
+														endSlur: { type: 'number', minimum: 1, optional: true },
+														endTie: { type: 'boolean', Enum: [ true ], optional: true },
+														pitch: { type: 'number' },
+														startSlur: { type: 'number', minimum: 1, optional: true },
+														startTie: { type: 'boolean', Enum: [ true ], optional: true }
+													}
+											}},
+											rest_type: { type: 'string', optional: true },
+											startSlur: { type: 'number', minimum: 1, optional: true },
+											startTie: { type: 'boolean', Enum: [ true ], optional: true },
+											startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }
+										}}
+									]
+								}
 							}
-							break;
-						case 'num':
-						case 'den':
-						case 'startChar':
-						case 'endChar':
-						case 'el_type': break;
-						default:
-							addError(name + " should not contain: " + property);
+						}
+					}
+				},
+				metaText: {type:"object",
+					properties: {
+						author: { type: "string", optional: true },
+						book: { type: "string", optional: true },
+						composer: { type: "string", optional: true },
+						discography: { type: "string", optional: true },
+						history: { type: "string", optional: true },
+						notes: { type: "string", optional: true },
+						origin: { type: "string", optional: true },
+						partOrder: { type: "string", optional: true },
+						rhythm: { type: "string", optional: true },
+						source: { type: "string", optional: true },
+						tempo: { type: "object", optional: true, properties: {
+							duration: { type: "number"},
+							bpm: { type: "number"}
+						}},
+						title: { type: "string", optional: true },
+						transcription: { type: "string", optional: true },
+						unalignedWords: { type: "string", optional: true },
+						url: { type: "string", optional: true }
 					}
 				}
-			});
-		};
-
-		var parseBar = function(obj) {
-			var name = "Bar";
-			//addOutput(name + ": (" + obj.startChar + "," + obj.endChar + ")", 3);
-			addOutput(name + ":", 3);
-			var keys = $H(obj).keys();
-			keys.sort();
-			keys.each(function(property) {
-				switch (property) {
-					case 'type':
-					case 'decoration':
-					case 'number':
-						addOutput(property + ": " + obj[property], 4); break;
-					case 'chord':
-						onlyContains(property, obj[property], [ 'name', 'position' ]);
-						addOutput(property + ": " + obj[property].name + " " + obj[property].position, 4);
-						break;
-					case 'startChar':
-					case 'endChar':
-					case 'el_type': break;
-					default:
-						addError(name + " should not contain: " + property);
-				}
-			});
-		};
-
-		var parseNote = function(obj) {
-			var name = "Note";
-			//addOutput(name + ": (" + obj.startChar + "," + obj.endChar + ")", 3);
-			addOutput(name + ":", 3);
-			var keys = $H(obj).keys();
-			keys.sort();
-			keys.each(function(property) {
-				var t = typeof obj[property];
-				if (t !== 'function') {
-					switch (property) {
-						case 'pitch':
-						case 'duration':
-						case 'end_beam':
-						case 'startSlur':
-						case 'endSlur':
-						case 'startTriplet':
-						case 'endTriplet':
-						case 'startTie':
-						case 'endTie':
-						case 'decoration':
-						case 'accidental':
-						case 'rest_type':
-							addOutput(property + ": " + obj[property], 4);
-							break;
-						case 'lyric':
-							onlyContains(property, obj[property], [ 'divider', 'syllable' ]);
-							addOutput(property + ": " + obj[property].syllable + " div=" + obj[property].divider, 4);
-							break;
-						case 'gracenotes':
-							parseGrace(obj[property]); break;
-						case 'chord':
-							onlyContains(property, obj[property], [ 'name', 'position' ]);
-							addOutput(property + ": " + obj[property].name + " " + obj[property].position, 4);
-							break;
-						case 'pitches':
-							onlyArray(obj[property], property);
-							for (var i = 0; i < obj[property].length; i++) {
-								var pitch = obj[property][i];
-								onlyContains('pitches['+i+']', pitch, [ 'pitch', 'duration', 'endChar', 'startTie', 'endTie', 'startSlur', 'endSlur', 'accidental' ]);
-								var str = property + ": p=" + pitch.pitch;
-								if (pitch.accidental !== undefined) str += ' a: ' + pitch.accidental;
-								str += " d=" + pitch.duration;
-								if (pitch.startTie === true) str += " startTie";
-								if (pitch.endTie === true) str += " endTie";
-								addOutput(str, 5);
-							}
-							break;
-						case 'startChar':
-						case 'endChar':
-						case 'el_type': break;
-						default:
-							addError(name + " should not contain: " + property);
-					}
-				}
-			});
-		};
-
-		var parseStaff = function(obj) {
-			addOutput("Staff:", 2);
-			onlyArray(obj, "Staff");
-			obj.each(function(el) {
-				var ty = el.el_type;
-				switch (ty) {
-					case "part": onlyContains(ty, el, [ 'el_type', 'title', 'startChar', 'endChar' ]); addOutput("Part: " + el.title, 3); break;
-					case "clef": parseClef(el); break;
-					case "key": parseKey(el); break;
-					case "meter": parseMeter(el); break;
-					case "note": parseNote(el); break;
-					case "bar": parseBar(el); break;
-					default:
-						addError("No staff element type of: " + ty);
-				}
-				if (el.startChar === undefined)
-					addError("All elements need a startChar: " + el.el_type);
-				if (el.endChar === undefined)
-					addError("All elements need an endChar:" + el.el_type);
-			});
-		};
-
-		var parseLine = function(obj, index) {
-			addOutput("Line " + (index+1) + ":", 1);
-			var keys = $H(obj).keys();
-			keys.sort();
-			keys.each(function(property) {
-				var t = typeof obj[property];
-				if (t !== 'function') {
-					switch (property) {
-						case 'staff':
-							parseStaff(obj[property]);
-							break;
-						case 'subtitle':
-							addOutput("Subtitle: " + obj[property]);
-							break;
-						default:
-							addError("Line should not contain: " + property);
-					}
-				}
-			});
-		};
-
-		var parseLines = function(obj) {
-			addOutput("Lines:", 0);
-			var keys = $H(obj).keys();
-//			keys.sort();
-			keys.each(function(property) {
-				var t = typeof obj[property];
-				if (t !== 'function') {
-					var index = parseInt(property);
-					if (index === 0 && property !== '0')
-						addError("Lines should not contain: " + property);
-					else {
-						parseLine(obj[index], index);
-					}
-				}
-			});
+			}
 		};
 
 		this.lint = function(tune, warnings) {
-			//var str = Object.toJSON(tune);
-			//str = str.gsub('},', '},\n');
-			//str = str.gsub('", "', '",\n"');
-			out = "";
-			err = "";
-			var keys = $H(tune).keys();
-			keys.sort();
-			keys.each(function(property) {
-				var t = typeof tune[property];
-				if (t !== 'function') {
-					switch (property) {
-						case 'metaText': parseMetaText(tune[property]); break;
-						case 'formatting': parseFormatting(tune[property]); break;
-						case 'lines': parseLines(tune[property]); break;
-						default:
-							addError("tune should not contain: " + property);
-					}
-				}
+			var ret = JSONSchema.validate(tune, musicSchema);
+			var err = "";
+			ret.errors.each(function(e) {
+				err += e.property + ": " + e.message + "\n";
 			});
+			var out = ret.output.join("\n");
+			
 			var warn = warnings === null ? "No errors" : warnings.join('\n');
 			warn = warn.gsub('<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">', '$$$$');
 			warn = warn.gsub('</span>', '$$$$');
