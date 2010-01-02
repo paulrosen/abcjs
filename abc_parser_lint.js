@@ -154,10 +154,11 @@ var AbcParserLint = Class.create({
 														pitch: { type: 'number' }
 													}
 											}},
-											lyric: { type: 'object', optional: true, properties: {
+											lyric: { type: 'array', optional: true, output: "noindex", items: {
+												type: 'object', properties: {
 												syllable: { type :'string' },
-												divider: { type: 'string', Enum: [ '-', ' ' ]}
-											}},
+												divider: { type: 'string', Enum: [ '-', ' ', '_' ]}
+											}}},
 										// TODO-PER: either pitch or pitches must be present. Test for that.
 											pitch: { optional: true, type: [ { type: 'number', prohibits: [ 'rest_type', 'pitches' ]}, { type: 'null', requires: ['rest_type'], prohibits: [ 'startSlur', 'startTie', 'startTriplet', 'endSlur', 'endTie', 'endTriplet', 'end_beam', 'grace_notes', 'lyric' ] } ] },
 											pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'pitch', 'duration' ], items: {

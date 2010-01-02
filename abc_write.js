@@ -695,7 +695,11 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
 
   
   if (elem.lyric !== undefined) {
-    abselem.addChild(new ABCRelativeElement(elem.lyric.syllable + elem.lyric.divider, 0, 0, 0, {type:"debugLow"}));
+	  var lyricStr = "";
+	  elem.lyric.each(function(ly) {
+		  lyricStr += ly.syllable + ly.divider + "\n";
+	  });
+    abselem.addChild(new ABCRelativeElement(lyricStr, 0, 0, 0, {type:"debugLow"}));
   }
   
   if (elem.gracenotes !== undefined) {

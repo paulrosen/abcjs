@@ -26,7 +26,7 @@ var AbcTune = Class.create({
 	//			2 (quarter), 3 (dotted quarter), 4 (half), 6 (dotted half) 8 (whole)
 	//		chord: { name:chord, position: one of 'default', 'above', 'below' }
 	//		end_beam = true or undefined if this is the last note in a beam.
-	//		lyric: { syllable: xxx, divider: one of " -_" }
+	//		lyric: array of { syllable: xxx, divider: one of " -_" }
 	//		startTie = true|undefined
 	//		endTie = true|undefined
 	//		startTriplet = num <- that is the number to print
@@ -724,6 +724,7 @@ var ParseAbc = Class.create({
 					return ret;
 				case 'H': return [1, 'fermata'];
 				case 'M': return [1, 'mordent'];
+				case 'T': return [1, 'trill'];
 			}
 			return [0, 0];
 		};
@@ -1119,11 +1120,24 @@ var ParseAbc = Class.create({
 			var word_list = [];
 			// first make a list of words from the string we are passed. A word is divided on either a space or dash.
 			var last_divider = -1;
+			var replace = false;
 			for (var i = 0; i < words.length; i++) {
-				if ((words[i] === ' ') || (words[i] === '-')) {
-					word_list.push({ syllable: tokenizer.translateString(words.substring(last_divider+1, i)), divider: words[i] });
+				if (words[i] === '*') {	// There may not be spaces between the astericks, so handle them separately
+					word_list.push({ syllable: "*" });
 					last_divider = i;
-				}
+				} else if ((words[i] === ' ') || (words[i] === '-') || words[i] === '_' || words[i] === '|') {
+					var word = words.substring(last_divider+1, i).strip();
+					if (replace)
+						word = word.gsub('~', ' ');
+					if (word.length > 0)
+						word_list.push({ syllable: tokenizer.translateString(word), divider: words[i] });
+					last_divider = i;
+					if (words[i] === '_')
+						word_list.push({ syllable: "*" });
+					else if (words[i] === '_')
+						; // TODO-PER: handle moving the pointer to the next bar
+				} else if (words[i] === '~')
+					replace = true;
 			}
 
 			var inSlur = false;
@@ -1131,8 +1145,12 @@ var ParseAbc = Class.create({
 				if (el.el_type === 'note' && el.pitch !== null && word_list.length > 0) {
 					if (!inSlur) {
 						var lyric = word_list.shift();
-						if (lyric.syllable !== '*')
-							el.lyric = lyric;
+						if (lyric.syllable !== '*') {
+							if (el.lyric === undefined)
+								el.lyric = [ lyric ];
+							else
+								el.lyric.push(lyric);
+						}
 					}
 					if (el.endSlur === true || el.endTie === true)
 						inSlur = false;
