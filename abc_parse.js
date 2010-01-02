@@ -206,6 +206,7 @@ var AbcTokenizer = Class.create({
 				return { len: 0 };
 
 			if (str.startsWith(":||:")) return { len: 4, token: "bar_dbl_repeat" };
+			if (str.startsWith(":|]|:")) return { len: 5, token: "bar_dbl_repeat" };
 			if (str.startsWith(":|]")) return { len: 3, token: "bar_right_repeat" };
 			if (str.startsWith(":||")) return { len: 3, token: "bar_right_repeat" };
 			if (str.startsWith(":|")) return { len: 2, token: "bar_right_repeat" };
@@ -417,13 +418,13 @@ var ParseAbc = Class.create({
 		};
 
 		var keys = {
-			'C#': { num: 7, acc: 'sharps' },
-			'A#m': { num: 7, acc: 'sharps' },
-			'G#Mix': { num: 7, acc: 'sharps' },
-			'D#Dor': { num: 7, acc: 'sharps' },
-			'E#Phr': { num: 7, acc: 'sharps' },
-			'F#Lyd': { num: 7, acc: 'sharps' },
-			'B#Loc': { num: 7, acc: 'sharps' },
+			'C#': { num: 7, acc: 'sharp' },
+			'A#m': { num: 7, acc: 'sharp' },
+			'G#Mix': { num: 7, acc: 'sharp' },
+			'D#Dor': { num: 7, acc: 'sharp' },
+			'E#Phr': { num: 7, acc: 'sharp' },
+			'F#Lyd': { num: 7, acc: 'sharp' },
+			'B#Loc': { num: 7, acc: 'sharp' },
 
 			'F#': { num: 6, acc: 'sharp' },
 			'D#m': { num: 6, acc: 'sharp' },
@@ -995,7 +996,8 @@ var ParseAbc = Class.create({
 			var i = s.indexOf(' ');
 			var cmd = (i > 0) ? s.substring(0, i) : s;
 			var num;
-			switch (cmd.toLowerCase())
+			cmd = cmd.toLowerCase();
+			switch (cmd)
 			{
 				case "stretchlast": tune.formatting.stretchlast = true; break;
 				case "staffwidth":
@@ -1124,9 +1126,18 @@ var ParseAbc = Class.create({
 				}
 			}
 
+			var inSlur = false;
 			line.each(function(el) {
 				if (el.el_type === 'note' && el.pitch !== null && word_list.length > 0) {
-					el.lyric = word_list.shift();
+					if (!inSlur) {
+						var lyric = word_list.shift();
+						if (lyric.syllable !== '*')
+							el.lyric = lyric;
+					}
+					if (el.endSlur === true || el.endTie === true)
+						inSlur = false;
+					if (el.startSlur === true || el.startTie === true)
+						inSlur = true;
 				}
 			});
 		};
