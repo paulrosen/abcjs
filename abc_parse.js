@@ -709,7 +709,7 @@ var ParseAbc = Class.create({
 						"emphasis", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 						"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
 						"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
-						"p", "pp", "f", "ff", "mf", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2",
+						"p", "pp", "f", "ff", "mf", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 						"upbow", "downbow" ];
 					if (ret[1].length > 0 && (ret[1][0] === '^' || ret[1][0] ==='_'))
 						ret[1] = ret[1].substring(1);	// TODO-PER: The test files have indicators forcing the orniment to the top or bottom, but that isn't in the standard. We'll just ignore them.
@@ -725,7 +725,9 @@ var ParseAbc = Class.create({
 					ret[1] = "";
 					return ret;
 				case 'H': return [1, 'fermata'];
+				case 'J': return [1, 'slide'];
 				case 'M': return [1, 'mordent'];
+				case 'R': return [1, 'roll'];
 				case 'T': return [1, 'trill'];
 			}
 			return [0, 0];
@@ -1302,6 +1304,15 @@ var ParseAbc = Class.create({
 						if (state === 'startSlur') {
 							el.pitch = null;
 							el.rest_type = rests[line[index]];
+							// There shouldn't be some of the properties that notes have. If some sneak in due to bad syntax in the abc file,
+							// just nix them here.
+							delete el.accidental;
+							delete el.startSlur;
+							delete el.startTie;
+							delete el.endSlur;
+							delete el.endTie;
+							delete el.end_beam;
+							delete el.grace_notes;
 							// At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
 							if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
 								el.duration = multilineVars.next_note_duration;
@@ -1506,6 +1517,7 @@ var ParseAbc = Class.create({
 				multilineVars.iChar += retHeader[0];
 				// TODO-PER: Handle inline headers
 			}
+			var el = { };
 
 			while (i < line.length)
 			{
@@ -1520,7 +1532,7 @@ var ParseAbc = Class.create({
 						// TODO-PER: Handle inline headers
 						//multilineVars.start_new_line = false;
 				} else {
-					var el = { };
+//					var el = { };
 
 					// We need to decide if the following characters are a bar-marking or a note-group.
 					// Unfortunately, that is ambiguous. Both can contain chord symbols and decorations.
@@ -1603,6 +1615,7 @@ var ParseAbc = Class.create({
 							if (el.chord !== undefined)
 								bar.chord = el.chord;
 							tune.appendElement('bar', multilineVars.iChar, multilineVars.iChar+ret[0], bar);
+							el = {};
 						}
 						i += ret[0];
 						multilineVars.iChar += ret[0];
@@ -1719,6 +1732,7 @@ var ParseAbc = Class.create({
 											});
 										}
 										tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
+										el = {};
 									}
 									done = true;
 								}
@@ -1749,6 +1763,7 @@ var ParseAbc = Class.create({
 									addEndBeam(el);
 
 								tune.appendElement('note', multilineVars.iChar, multilineVars.iChar, el);
+								el = {};
 							}
 						}
 
