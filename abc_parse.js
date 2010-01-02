@@ -649,7 +649,7 @@ var ParseAbc = Class.create({
 		{
 			// This extracts the sub string by looking at the first character and searching for that
 			// character later in the line (or search for the optional _matchChar). 
-                        // For instance, if the first character is a quote it will look for
+			// For instance, if the first character is a quote it will look for
 			// the end quote. If the end of the line is reached, then only up to the default number
 			// of characters are returned, so that a missing end quote won't eat up the entire line.
 			// It returns the substring and the number of characters consumed.
@@ -660,13 +660,13 @@ var ParseAbc = Class.create({
 			while ((pos < line.length) && (line[pos] !== matchChar))
 				++pos;
 			if (line[pos] === matchChar)
-				return [pos-i+1,substInChord(line.substring(i+1, pos))];
+				return [pos-i+1,substInChord(line.substring(i+1, pos)), true];
 			else	// we hit the end of line, so we'll just pick an arbitrary num of chars so the line doesn't disappear.
 			{
 				pos = i+maxErrorChars;
 				if (pos > line.length-1)
 					pos = line.length-1;
-				return [pos-i+1, substInChord(line.substring(i+1, pos))];
+				return [pos-i+1, substInChord(line.substring(i+1, pos)), false];
 			}
 		};
 
@@ -675,17 +675,19 @@ var ParseAbc = Class.create({
 			if (line[i] === '"')
 			{
 				var chord = getBrackettedSubstring(line, i, 5);
+				if (!chord[2])
+					addWarning(formatWarning("Missing the closing quote while parsing the chord symbol", tune.lines.length, i, line));
 				// If it starts with ^, then the chord appears above.
 				// If it starts with _ then the chord appears below.
 				// (note that the 2.0 draft standard defines them as not chords, but annotations and also defines < > and @.)
 				if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '^') {
 					chord[1] = chord[1].substring(1);
-					chord.push('above');
+					chord[2] = 'above';
 				} else if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '_') {
 					chord[1] = chord[1].substring(1);
-					chord.push('below');
+					chord[2] = 'below';
 				} else
-					chord.push('default');
+					chord[2] = 'default';
 				return chord;
 			}
 			return [0, ""];
@@ -887,71 +889,52 @@ var ParseAbc = Class.create({
 		};
 
 		var letter_to_grace =  function(line, i) {
+			// Grace notes are an array of: startslur, note, endslur, space; where note is accidental, pitch, duration
 			if (line[i] === '{') {
 				// fetch the gracenotes string and consume that into the array
-				var gra = getBrackettedSubstring(line, i, 1, '}'); // what happens on line ends?
-				// TODO: alert errors when non-matching close
+				var gra = getBrackettedSubstring(line, i, 1, '}');
+				if (!gra[2])
+					addWarning(formatWarning("Missing the closing '}' while parsing grace note", tune.lines.length, i, line));
+
 				var gracenotes = [];
 				var ii = 0;
-				for (var ret = letter_to_pitch(gra[1], ii); ret[0]>0 && ii<gra[1].length;
-					ret = letter_to_pitch(gra[1], ii)) {
-					//todo get other stuff that could be in a grace note
-					ii += ret[0];
-					gracenotes.push({el_type:"gracenote",pitch:ret[1]});
-				}
-				return [ gra[0], gracenotes ];
-			} else return [ 0 ];
-		};
+				var inTie = false;
+				while (ii < gra[1].length) {
+					var note = getCoreNote(gra[1], ii, {}, false);
+					if (note !== null) {
+						gracenotes.push(note);
 
-		// returns the pitch (null for a rest) and the number of chars used up
-		// TODO-PER: replacing this
-		var letter_to_pitch = function(line, curr_pos)
-		{
-			var ret = [ 0, -1 ];
-			switch (line[curr_pos])
-			{
-				case 'A' : ret = [ 1, 5 ]; break;
-				case 'B' : ret = [ 1, 6 ]; break;
-				case 'C' : ret = [ 1, 0 ]; break;
-				case 'D' : ret = [ 1, 1 ]; break;
-				case 'E' : ret = [ 1, 2 ]; break;
-				case 'F' : ret = [ 1, 3 ]; break;
-				case 'G' : ret = [ 1, 4 ]; break;
-				case 'a' : ret = [ 1, 12 ]; break;
-				case 'b' : ret = [ 1, 13 ]; break;
-				case 'c' : ret = [ 1, 7 ]; break;
-				case 'd' : ret = [ 1, 8 ]; break;
-				case 'e' : ret = [ 1, 9 ]; break;
-				case 'f' : ret = [ 1, 10 ]; break;
-				case 'g' : ret = [ 1, 11 ]; break;
-				case 'x' : ret = [ 1, null, 'invisible' ]; break; // takes up physical space
-				case 'y' : ret = [ 1, null, 'spacer' ]; break; // takes up physical space, not part of timing integrity
-				case 'z' : ret = [ 1, null, 'rest' ]; break;
-			}
-			if ((ret[0] !== 0) && (curr_pos < line.length-1))
-			{
-				if (line[curr_pos+1] === ',')
-				{
-					ret[0]++;
-					ret[1] -= 7;
-					if ((curr_pos+1 < line.length-1) && line[curr_pos+2] === ',')	// see if there is a double comma
-					{
-						ret[0]++;
-						ret[1] -= 7;
+						if (inTie) {
+							note.endTie = true;
+							inTie = false;
+						}
+						if (note.startTie)
+							inTie = true;
+
+						ii  = note.endChar;
+						delete note.endChar;
+					}
+					else {
+						// We shouldn't get anything but notes or a space here, so report an error
+						if (gra[1][ii] === ' ') {
+							if (gracenotes.length > 0)
+								gracenotes[gracenotes.length-1].end_beam = true;
+						} else
+							addWarning(formatWarning("Unknown character '" + gra[1][ii] + "' while parsing grace note", tune.lines.length, i+ii+1, line));
+						ii++;
 					}
 				}
-				else if (line[curr_pos+1] === "'")
-				{
-					ret[0]++;
-					ret[1] += 7;
-					if ((curr_pos+1 < line.length-1) && line[curr_pos+2] === '\'')	// see if there is a double prime
-					{
-						ret[0]++;
-						ret[1] += 7;
-					}
-				}
+				if (gracenotes.length)
+					return [gra[0], gracenotes];
+//				for (var ret = letter_to_pitch(gra[1], ii); ret[0]>0 && ii<gra[1].length;
+//					ret = letter_to_pitch(gra[1], ii)) {
+//					//todo get other stuff that could be in a grace note
+//					ii += ret[0];
+//					gracenotes.push({el_type:"gracenote",pitch:ret[1]});
+//				}
+//				return [ gra[0], gracenotes ];
 			}
-			return ret;
+			return [ 0 ];
 		};
 
 		var stripComment = function(str) {
@@ -1294,7 +1277,7 @@ var ParseAbc = Class.create({
 							el.pitch = pitches[line[index]];
 							state = 'octave';
 							// At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
-							if (multilineVars.next_note_duration !== 0) {
+							if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
 								el.duration = multilineVars.next_note_duration;
 								multilineVars.next_note_duration = 0;
 								durationSetByPreviousNote = true;
@@ -1320,7 +1303,7 @@ var ParseAbc = Class.create({
 							el.pitch = null;
 							el.rest_type = rests[line[index]];
 							// At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
-							if (multilineVars.next_note_duration !== 0) {
+							if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
 								el.duration = multilineVars.next_note_duration;
 								multilineVars.next_note_duration = 0;
 								durationSetByPreviousNote = true;
@@ -1672,6 +1655,13 @@ var ParseAbc = Class.create({
 										// consume the close bracket
 										i++;
 										multilineVars.iChar++;
+
+										if (multilineVars.next_note_duration !== 0) {
+											el.pitches.each(function(p) {
+												p.duration = p.duration * multilineVars.next_note_duration;
+											});
+											multilineVars.next_note_duration = 0;
+										}
 
 										if (inTie) {
 											el.endTie = true;

@@ -149,10 +149,16 @@ var AbcParserLint = Class.create({
 											endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
 											end_beam: { type: 'boolean', Enum: [ true ], optional: true },
 											gracenotes: { type: 'array', optional: true, output: "noindex", items: {
-													type: "object", properties: {
-														el_type: { type: 'string', Enum: [ 'gracenote'] },
-														pitch: { type: 'number' }
-													}
+												type: "object", properties: {
+													accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
+													duration: { type: 'number' },
+													end_beam: { type: 'boolean', Enum: [ true ], optional: true },
+													endSlur: { type: 'number', minimum: 1, optional: true },
+													endTie: { type: 'boolean', Enum: [ true ], optional: true },
+													pitch: { type: 'number' },
+													startSlur: { type: 'number', minimum: 1, optional: true },
+													startTie: { type: 'boolean', Enum: [ true ], optional: true }
+												}
 											}},
 											lyric: { type: 'array', optional: true, output: "noindex", items: {
 												type: 'object', properties: {
