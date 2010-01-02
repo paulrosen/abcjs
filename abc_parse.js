@@ -584,6 +584,16 @@ var ParseAbc = Class.create({
 					str = str.substring(retMode.len);
 				}
 				ret.regularKey = keys[key];
+			} else if (str.startsWith('HP')) {
+				addDirective("bagpipes");
+				ret.regularKey = keys.C;
+				multilineVars.key = ret;
+				return { foundKey: true};
+			} else if (str.startsWith('Hp')) {
+				ret.extraAccidentals = [ { acc: 'natural', note: 'g'}, { acc: 'sharp', note: 'f'}, { acc: 'sharp', note: 'c'}  ];
+				addDirective("bagpipes");
+				multilineVars.key = ret;
+				return { foundKey: true};
 			} else {
 				var retNone = tokenizer.isMatch(str, 'none');
 				if (retNone > 0) {
@@ -985,6 +995,7 @@ var ParseAbc = Class.create({
 			cmd = cmd.toLowerCase();
 			switch (cmd)
 			{
+				case "bagpipes": tune.formatting.bagpipes = true; break;
 				case "stretchlast": tune.formatting.stretchlast = true; break;
 				case "staffwidth":
 					num = getInt(s.substring(i));

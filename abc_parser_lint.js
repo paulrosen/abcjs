@@ -30,6 +30,7 @@ var AbcParserLint = Class.create({
 				formatting: {type:"object",
 					properties: {
 						auquality: { type: "string", optional: true },
+						bagpipes: { type: "boolean", optional: true },
 						barlabelfont: { type: "string", optional: true },
 						barnumberfont: { type: "string", optional: true },
 						barnumbers: { type: "string", optional: true },
