@@ -164,6 +164,8 @@ ABCRelativeElement.prototype.draw = function (printer, x) {
     this.graphelem = printer.paper.path(this.c); break;
   case "debug":
     this.graphelem = printer.debugMsg(this.x, this.c); break;
+  case "debugLow":
+    this.graphelem = printer.debugMsgLow(this.x, this.c); break;
   case "text":
     this.graphelem = printer.printText(this.x, this.pitch, this.c); break;
   }
@@ -457,6 +459,10 @@ ABCPrinter.prototype.debugMsg = function(x, msg) {
   this.paper.text(x, this.y, msg);
 }
 
+ABCPrinter.prototype.debugMsgLow = function(x, msg) {
+  this.paper.text(x, this.y+80, msg);
+}
+
 ABCPrinter.prototype.printABC = function(abctune) {
   //this.currenttune = abctune;
   //ABCNote.duration = eval(this.currenttune.header.fields["L"]);
@@ -689,7 +695,7 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
 
   
   if (elem.lyric !== undefined) {
-    abselem.addChild(new ABCRelativeElement(elem.lyric.syllable + elem.lyric.divider, 0, 0, 0, {type:"debug"}));
+    abselem.addChild(new ABCRelativeElement(elem.lyric.syllable + elem.lyric.divider, 0, 0, 0, {type:"debugLow"}));
   }
   
   if (elem.gracenotes !== undefined) {
