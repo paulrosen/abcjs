@@ -56,7 +56,61 @@ var AbcTune = Class.create({
 		hashParams.el_type = type;
 		hashParams.startChar = startChar;
 		hashParams.endChar = endChar;
-		this.lines[this.lines.length-1].staff.push(hashParams);
+		this.lines[this.lines.length-1].staff.voices[0].push(hashParams);
+	},
+
+	appendStartingElement: function(type, startChar, endChar, hashParams)
+	{
+		hashParams.el_type = type;
+		hashParams.startChar = startChar;
+		hashParams.endChar = endChar;
+
+		// These elements should not be added twice, so if the element exists on this line without a note or bar between them, just replace it.
+		var voice = this.lines[this.lines.length-1].staff.voices[0];
+		for (var i = voice.length-1; i >= 0; i--) {
+			if (voice[i].el_type === 'note' || voice[i].el_type === 'bar') {
+				voice.push(hashParams);
+				return;
+			}
+			if (voice[i].el_type === type) {
+				voice[i] = hashParams;
+				return;
+			}
+		}
+		// We didn't see either that type or a note, so add the element
+		voice.push(hashParams);
+	},
+
+	getNumLines: function() {
+		return this.lines.length;
+	},
+
+	addSubtitle: function(str) {
+		this.lines.push({subtitle: str});
+	},
+
+	containsNotes: function(voice) {
+		for (var i = 0; i < voice.length; i++) {
+			if (voice[i].el_type === 'note')
+				return true;
+		}
+		return false;
+	},
+
+	startNewLine: function() {
+		var lastLine = this.getCurrentVoice();
+		if (lastLine === null || this.containsNotes(lastLine))
+			this.lines.push({staff: {voices: [ [] ]}});
+	},
+
+	hasBeginMusic: function() {
+		return this.lines.length > 0
+	},
+
+	getCurrentVoice: function() {
+		if (this.lines.length > 0 && this.lines[this.lines.length-1].staff !== undefined)
+			return this.lines[this.lines.length-1].staff.voices[0];
+		else return null;
 	}
 });
 
@@ -88,33 +142,33 @@ var AbcTokenizer = Class.create({
 		this.getKeyPitch = function(str) {
 			var i = this.skipWhiteSpace(str);
 			if (finished(str, i))
-				return { len: 0 };
+				return {len: 0};
 			switch (str[i]) {
-				case 'A': return { len: i+1, token: 'A' };
-				case 'B': return { len: i+1, token: 'B' };
-				case 'C': return { len: i+1, token: 'C' };
-				case 'D': return { len: i+1, token: 'D' };
-				case 'E': return { len: i+1, token: 'E' };
-				case 'F': return { len: i+1, token: 'F' };
-				case 'G': return { len: i+1, token: 'G' };
-				case 'a': return { len: i+1, token: 'A' };
-				case 'b': return { len: i+1, token: 'B' };
-				case 'c': return { len: i+1, token: 'C' };
-				case 'd': return { len: i+1, token: 'D' };
-				case 'e': return { len: i+1, token: 'E' };
-				case 'f': return { len: i+1, token: 'F' };
-				case 'g': return { len: i+1, token: 'G' };
+				case 'A':return {len: i+1, token: 'A'};
+				case 'B':return {len: i+1, token: 'B'};
+				case 'C':return {len: i+1, token: 'C'};
+				case 'D':return {len: i+1, token: 'D'};
+				case 'E':return {len: i+1, token: 'E'};
+				case 'F':return {len: i+1, token: 'F'};
+				case 'G':return {len: i+1, token: 'G'};
+				case 'a':return {len: i+1, token: 'A'};
+				case 'b':return {len: i+1, token: 'B'};
+				case 'c':return {len: i+1, token: 'C'};
+				case 'd':return {len: i+1, token: 'D'};
+				case 'e':return {len: i+1, token: 'E'};
+				case 'f':return {len: i+1, token: 'F'};
+				case 'g':return {len: i+1, token: 'G'};
 			}
-			return { len: 0 };
+			return {len: 0};
 		};
 
 		// This just gets the basic accidental, ignoring leading spaces, and only the ones that appear in a key
 		this.getSharpFlat = function(str) {
 			switch (str[0]) {
-				case '#': return { len: 1, token: '#' };
-				case 'b': return { len: 1, token: 'b' };
+				case '#':return {len: 1, token: '#'};
+				case 'b':return {len: 1, token: 'b'};
 			}
-			return { len: 0 };
+			return {len: 0};
 		};
 
 		this.getMode = function(str) {
@@ -127,29 +181,29 @@ var AbcTokenizer = Class.create({
 
 			var i = this.skipWhiteSpace(str);
 			if (finished(str, i))
-				return { len: 0 };
+				return {len: 0};
 			var firstThree = str.substring(i,i+3).toLowerCase();
 			if (firstThree.length > 1 && firstThree[1] === ' ') firstThree = firstThree[0];	// This will handle the case of 'm'
 			switch (firstThree) {
-				case 'mix': return { len: skipAlpha(str, i), token: 'Mix' };
-				case 'dor': return { len: skipAlpha(str, i), token: 'Dor' };
-				case 'phr': return { len: skipAlpha(str, i), token: 'Phr' };
-				case 'lyd': return { len: skipAlpha(str, i), token: 'Lyd' };
-				case 'loc': return { len: skipAlpha(str, i), token: 'Loc' };
-				case 'aeo': return { len: skipAlpha(str, i), token: 'm' };
-				case 'maj': return { len: skipAlpha(str, i), token: '' };
-				case 'ion': return { len: skipAlpha(str, i), token: '' };
-				case 'min': return { len: skipAlpha(str, i), token: 'm' };
-				case 'm': return { len: skipAlpha(str, i), token: 'm' };
+				case 'mix':return {len: skipAlpha(str, i), token: 'Mix'};
+				case 'dor':return {len: skipAlpha(str, i), token: 'Dor'};
+				case 'phr':return {len: skipAlpha(str, i), token: 'Phr'};
+				case 'lyd':return {len: skipAlpha(str, i), token: 'Lyd'};
+				case 'loc':return {len: skipAlpha(str, i), token: 'Loc'};
+				case 'aeo':return {len: skipAlpha(str, i), token: 'm'};
+				case 'maj':return {len: skipAlpha(str, i), token: ''};
+				case 'ion':return {len: skipAlpha(str, i), token: ''};
+				case 'min':return {len: skipAlpha(str, i), token: 'm'};
+				case 'm':return {len: skipAlpha(str, i), token: 'm'};
 			}
-			return { len: 0 };
+			return {len: 0};
 		};
 
 		this.getClef = function(str) {
 			var strOrig = str;
 			var i = this.skipWhiteSpace(str);
 			if (finished(str, i))
-				return { len: 0 };
+				return {len: 0};
 			// The word 'clef' is optional, but if it appears, a clef MUST appear
 			var needsClef = false;
 			var strClef = str.substring(i);
@@ -159,11 +213,11 @@ var AbcTokenizer = Class.create({
 				i += 5;
 			}
 			if (strClef.length === 0 && needsClef)
-				return { len: i+5, warn: "No clef specified: " + strOrig };
+				return {len: i+5, warn: "No clef specified: " + strOrig};
 
 			var j = this.skipWhiteSpace(strClef);
 			if (finished(strClef, j))
-				return { len: 0 };
+				return {len: 0};
 			if (j > 0) {
 				i += j;
 				strClef = strClef.substring(j);
@@ -186,7 +240,7 @@ var AbcTokenizer = Class.create({
 			else if (strClef.startsWith('none'))
 				name = 'none';
 			else
-				return { len: i+5, warn: "Unknown clef specified: " + strOrig };
+				return {len: i+5, warn: "Unknown clef specified: " + strOrig};
 
 			strClef = strClef.substring(name.length);
 			j = this.isMatch(strClef, '+8');
@@ -197,48 +251,57 @@ var AbcTokenizer = Class.create({
 				if (j > 0)
 					name += "-8";
 			}
-			return { len: i+name.length+j, token: name, explicit: needsClef };
+			return {len: i+name.length+j, token: name, explicit: needsClef};
 		};
 
 		// This returns one of the legal bar lines
 		this.getBarLine = function(str) {
-			if (str[0] !== ':' && str[0] !== '|' && str[0] !== '[')
-				return { len: 0 };
+			if (str[0] !== ':' && str[0] !== '|' && str[0] !== '[' && str[0] !== ']')
+				return {len: 0};
 
-			if (str.startsWith(":||:")) return { len: 4, token: "bar_dbl_repeat" };
-			if (str.startsWith(":|]|:")) return { len: 5, token: "bar_dbl_repeat" };
-			if (str.startsWith(":|]")) return { len: 3, token: "bar_right_repeat" };
-			if (str.startsWith(":||")) return { len: 3, token: "bar_right_repeat" };
-			if (str.startsWith(":|")) return { len: 2, token: "bar_right_repeat" };
-			if (str.startsWith("::")) return { len: 2, token: "bar_dbl_repeat" };
-			if (str.startsWith("[|:")) return { len: 3, token: "bar_left_repeat" };
-			if (str.startsWith("[|]")) return { len: 3, token: "bar_invisible" };
-			if (str.startsWith("[|")) return { len: 2, token: "bar_thick_thin" };
+			if (str.startsWith("]|")) return {len: 2, token: "bar_thick_thin"};
+			if (str.startsWith(":||:")) return {len: 4, token: "bar_dbl_repeat"};
+			if (str.startsWith(":|]|:")) return {len: 5, token: "bar_dbl_repeat"};
+			if (str.startsWith(":|]")) return {len: 3, token: "bar_right_repeat"};
+			if (str.startsWith(":||")) return {len: 3, token: "bar_right_repeat"};
+			if (str.startsWith(":|")) return {len: 2, token: "bar_right_repeat"};
+			if (str.startsWith("::")) return {len: 2, token: "bar_dbl_repeat"};
+			if (str.startsWith("[|:")) return {len: 3, token: "bar_left_repeat"};
+			if (str.startsWith("[|]")) return {len: 3, token: "bar_invisible"};
+			if (str.startsWith("[|")) return {len: 2, token: "bar_thick_thin"};
 			if (str.startsWith("[")) {
 				if ((str[1] >= '1' && str[1] <= '9') || str[1] === '"')
-					return { len: 1, token: "bar_invisible"};
-				return { len: 0 };
+					return {len: 1, token: "bar_invisible"};
+				return {len: 0};
 			}
-			if (str.startsWith("||:")) return { len: 3, token: "bar_left_repeat" };
-			if (str.startsWith("|:::::")) return { len: 6, token: "bar_left_repeat" };
-			if (str.startsWith("|::::")) return { len: 5, token: "bar_left_repeat" };
-			if (str.startsWith("|:::")) return { len: 4, token: "bar_left_repeat" };
-			if (str.startsWith("|::")) return { len: 3, token: "bar_left_repeat" };
-			if (str.startsWith("|:")) return { len: 2, token: "bar_left_repeat" };
-			if (str.startsWith("||")) return { len: 2, token: "bar_thin_thin" };
-			if (str.startsWith("|]")) return { len: 2, token: "bar_thin_thick" };
+			if (str.startsWith("||:")) return {len: 3, token: "bar_left_repeat"};
+			if (str.startsWith("|:::::")) return {len: 6, token: "bar_left_repeat"};
+			if (str.startsWith("|::::")) return {len: 5, token: "bar_left_repeat"};
+			if (str.startsWith("|:::")) return {len: 4, token: "bar_left_repeat"};
+			if (str.startsWith("|::")) return {len: 3, token: "bar_left_repeat"};
+			if (str.startsWith("|:")) return {len: 2, token: "bar_left_repeat"};
+			if (str.startsWith("||")) return {len: 2, token: "bar_thin_thin"};
+			if (str.startsWith("|]")) return {len: 2, token: "bar_thin_thick"};
 //			if (str.startsWith("|[")) return { len: 2, token: "bar_thin_thick" };
-			if (str.startsWith("|")) return { len: 1, token: "bar_thin" };
-			return { len: 1, warn: "Unknown bar symbol" };
+			if (str.startsWith("|")) return {len: 1, token: "bar_thin"};
+			return {len: 1, warn: "Unknown bar symbol"};
 		};
 
 		// this returns all the characters in the string that match one of the characters in the legalChars string
 		this.getTokenOf = function(str, legalChars) {
 			for (var i = 0; i < str.length; i++) {
 				if (legalChars.indexOf(str[i]) < 0)
-					return { len: i, token: str.substring(0, i) };
+					return {len: i, token: str.substring(0, i)};
 			}
-			return { len: i, token: str };
+			return {len: i, token: str};
+		};
+
+		this.getToken = function(str, start, end) {
+			// This returns the next set of chars that doesn't contain spaces
+			var i = start;
+			while (i < end && !this.isWhiteSpace(str[i]))
+				i++;
+			return str.substring(start, i);
 		};
 
 		// This just sees if the next token is the word passed in, with possible leading spaces
@@ -262,7 +325,7 @@ var AbcTokenizer = Class.create({
 			};
 			var i = this.skipWhiteSpace(str);
 			if (finished(str, i))
-				return { len: 0 };
+				return {len: 0};
 			var acc = null;
 			switch (str[i])
 			{
@@ -271,11 +334,11 @@ var AbcTokenizer = Class.create({
 				case '=':
 					acc = str[i];
 					break;
-				default: return { len: 0 };
+				default:return {len: 0};
 			}
 			i++;
 			if (finished(str, i))
-				return { len: 1, warn: 'Expected note name after accidental' };
+				return {len: 1, warn: 'Expected note name after accidental'};
 			switch (str[i])
 			{
 				case 'a':
@@ -292,13 +355,13 @@ var AbcTokenizer = Class.create({
 				case 'E':
 				case 'F':
 				case 'G':
-					return { len: i+1, token: { acc: accTranslation[acc], note: str[i]} };
+					return {len: i+1, token: {acc: accTranslation[acc], note: str[i]}};
 				case '^':
 				case '_':
 					acc += str[i];
 					i++;
 					if (finished(str, i))
-						return { len: 2, warn: 'Expected note name after accidental' };
+						return {len: 2, warn: 'Expected note name after accidental'};
 					switch (str[i])
 					{
 						case 'a':
@@ -315,13 +378,13 @@ var AbcTokenizer = Class.create({
 						case 'E':
 						case 'F':
 						case 'G':
-							return { len: i+1, token: { acc: accTranslation[acc], note: str[i]} };
+							return {len: i+1, token: {acc: accTranslation[acc], note: str[i]}};
 						default:
-							return { len: 2, warn: 'Expected note name after accidental' };
+							return {len: 2, warn: 'Expected note name after accidental'};
 					}
 					break;
 				default:
-					return { len: 1, warn: 'Expected note name after accidental' };
+					return {len: 1, warn: 'Expected note name after accidental'};
 			}
 		};
 
@@ -329,6 +392,38 @@ var AbcTokenizer = Class.create({
 			return ch === ' ' || ch === '\t' || ch === '\x12';
 		};
 		
+		this.getMeat = function(line, start, end) {
+			// This removes any comments starting with '%' and trims the ends of the string so that there are no leading or trailing spaces.
+			// it returns just the start and end characters that contain the meat.
+			var comment = line.indexOf('%', start);
+			if (comment >= 0 && comment < end)
+				end = comment;
+			while (start < end && (line[start] === ' ' || line[start] === 't' || line[start] === '\x12'))
+				start++;
+			while (start < end && (line[end-1] === ' ' || line[end-1] === 't' || line[end-1] === '\x12'))
+				end--;
+			return {start: start, end: end};
+		};
+
+		this.getVoiceToken = function(line, start, end) {
+			// This finds the next token. A token is delimited by a space or an equal sign. If it starts with a quote, then the portion between the quotes is returned.
+			var i = start;
+			while (i < end && this.isWhiteSpace(line[i]) || line[i] === '=')
+				i++;
+				
+			if (line[i] === '"') {
+				var close = line.indexOf('"', i+1);
+				if (close === -1 || close >= end)
+					return {len: 1, err: "Missing close quote"};
+				return {len: close-start, token: this.translateString(line.substring(i+1, close))};
+			} else {
+				var ii = i;
+				while (ii < end && !this.isWhiteSpace(line[ii]) && line[ii] !== '=')
+					ii++;
+				return {len: ii-start+1, token: line.substring(i, ii)};
+			}
+		};
+
 		var charMap = { 
 			"`a": 'à', "'a": "á", "^a": "â", "~a": "ã", "\"a": "ä", "oa": "å", "=a": "ā", "ua": "ă", ";a": "ą", 
 			"`e": 'è', "'e": "é", "^e": "ê", "\"e": "ë", "=e": "ē", "ue": "ĕ", ";e": "ę", ".e": "ė",
@@ -342,8 +437,10 @@ var AbcTokenizer = Class.create({
 			"`U": 'Ù', "'U": "Ú", "^U": "Û", "~U": "Ũ", "\"U": "Ü", "oU": "Ů", "=U": "Ū", "uU": "Ŭ", ";U": "Ų", 
 			"ae": "æ", "AE": "Æ", "oe": "œ", "OE": "Œ", "ss": "ß",
 			"'c": "ć", "^c": "ĉ", "uc": "č", "cc": "ç", ".c": "ċ", "cC": "Ç", "'C": "Ć", "^C": "Ĉ", "uC": "Č", ".C": "Ċ",
-			"~n": "ñ"
-// More chars: Ñ Ĳ ĳ Ď ď Đ đ Ĝ ĝ Ğ ğ Ġ ġ Ģ ģ Ĥ ĥ Ħ ħ Ĵ ĵ Ķ ķ ĸ Ĺ ĺ Ļ ļ Ľ ľ Ŀ ŀ Ł ł Ń ń Ņ ņ Ň ň ŉ Ŋ ŋ   Ŕ ŕ Ŗ ŗ Ř ř Ś ś Ŝ ŝ Ş ş Š š Ţ ţ Ť ť Ŧ ŧ Ŵ ŵ Ŷ ŷ Ÿ ÿ Ÿ Ź ź Ż ż Ž ž
+			"~n": "ñ",
+			"=s": "š"
+
+// More chars: Ñ Ĳ ĳ Ď ď Đ đ Ĝ ĝ Ğ ğ Ġ ġ Ģ ģ Ĥ ĥ Ħ ħ Ĵ ĵ Ķ ķ ĸ Ĺ ĺ Ļ ļ Ľ ľ Ŀ ŀ Ł ł Ń ń Ņ ņ Ň ň ŉ Ŋ ŋ   Ŕ ŕ Ŗ ŗ Ř ř Ś ś Ŝ ŝ Ş ş Š Ţ ţ Ť ť Ŧ ŧ Ŵ ŵ Ŷ ŷ Ÿ ÿ Ÿ Ź ź Ż ż Ž ž
 		};
 		var charMap2 = {
 			"251": "©"
@@ -387,8 +484,8 @@ var ParseAbc = Class.create({
 		var multilineVars = {
 			reset: function() {
 				this.iChar = 0;
-				this.key = { regularKey: { num: 0, acc: 'sharp' } };
-				this.meter = { type: 'specified', num: '4', den: '4'};	// if no meter is specified, there is an implied one.
+				this.key = {regularKey: {num: 0, acc: 'sharp'}};
+				this.meter = {type: 'specified', num: '4', den: '4'};	// if no meter is specified, there is an implied one.
 				this.hasMainTitle = false;
 				this.default_length = 1;
 				this.clef = 'treble';
@@ -399,6 +496,8 @@ var ParseAbc = Class.create({
 				this.partForNextLine = "";
 				this.havent_set_length = true;
 				this.tempo = null;
+				this.voices = {};
+				this.staves = [];
 			}
 		};
 
@@ -413,138 +512,143 @@ var ParseAbc = Class.create({
 				multilineVars.warnings = [];
 			multilineVars.warnings.push(str);
 		};
+		
+		var warn = function(msg, line, start) {
+			addWarning(formatWarning(msg, tune.getNumLines(), start, line));
+		};
+		
 		this.getWarnings = function() {
 			return multilineVars.warnings;
 		};
 
 		var keys = {
-			'C#': { num: 7, acc: 'sharp' },
-			'A#m': { num: 7, acc: 'sharp' },
-			'G#Mix': { num: 7, acc: 'sharp' },
-			'D#Dor': { num: 7, acc: 'sharp' },
-			'E#Phr': { num: 7, acc: 'sharp' },
-			'F#Lyd': { num: 7, acc: 'sharp' },
-			'B#Loc': { num: 7, acc: 'sharp' },
+			'C#': {num: 7, acc: 'sharp'},
+			'A#m': {num: 7, acc: 'sharp'},
+			'G#Mix': {num: 7, acc: 'sharp'},
+			'D#Dor': {num: 7, acc: 'sharp'},
+			'E#Phr': {num: 7, acc: 'sharp'},
+			'F#Lyd': {num: 7, acc: 'sharp'},
+			'B#Loc': {num: 7, acc: 'sharp'},
 
-			'F#': { num: 6, acc: 'sharp' },
-			'D#m': { num: 6, acc: 'sharp' },
-			'C#Mix': { num: 6, acc: 'sharp' },
-			'G#Dor': { num: 6, acc: 'sharp' },
-			'A#Phr': { num: 6, acc: 'sharp' },
-			'BLyd': { num: 6, acc: 'sharp' },
-			'E#Loc': { num: 6, acc: 'sharp' },
+			'F#': {num: 6, acc: 'sharp'},
+			'D#m': {num: 6, acc: 'sharp'},
+			'C#Mix': {num: 6, acc: 'sharp'},
+			'G#Dor': {num: 6, acc: 'sharp'},
+			'A#Phr': {num: 6, acc: 'sharp'},
+			'BLyd': {num: 6, acc: 'sharp'},
+			'E#Loc': {num: 6, acc: 'sharp'},
 
-			'B': { num: 5, acc: 'sharp' },
-			'G#m': { num: 5, acc: 'sharp' },
-			'F#Mix': { num: 5, acc: 'sharp' },
-			'C#Dor': { num: 5, acc: 'sharp' },
-			'D#Phr': { num: 5, acc: 'sharp' },
-			'ELyd': { num: 5, acc: 'sharp' },
-			'A#Loc': { num: 5, acc: 'sharp' },
+			'B': {num: 5, acc: 'sharp'},
+			'G#m': {num: 5, acc: 'sharp'},
+			'F#Mix': {num: 5, acc: 'sharp'},
+			'C#Dor': {num: 5, acc: 'sharp'},
+			'D#Phr': {num: 5, acc: 'sharp'},
+			'ELyd': {num: 5, acc: 'sharp'},
+			'A#Loc': {num: 5, acc: 'sharp'},
 
-			'E': { num: 4, acc: 'sharp' },
-			'C#m': { num: 4, acc: 'sharp' },
-			'BMix': { num: 4, acc: 'sharp' },
-			'F#Dor': { num: 4, acc: 'sharp' },
-			'G#Phr': { num: 4, acc: 'sharp' },
-			'ALyd': { num: 4, acc: 'sharp' },
-			'D#Loc': { num: 4, acc: 'sharp' },
+			'E': {num: 4, acc: 'sharp'},
+			'C#m': {num: 4, acc: 'sharp'},
+			'BMix': {num: 4, acc: 'sharp'},
+			'F#Dor': {num: 4, acc: 'sharp'},
+			'G#Phr': {num: 4, acc: 'sharp'},
+			'ALyd': {num: 4, acc: 'sharp'},
+			'D#Loc': {num: 4, acc: 'sharp'},
 
-			'A': { num: 3, acc: 'sharp' },
-			'F#m': { num: 3, acc: 'sharp' },
-			'EMix': { num: 3, acc: 'sharp' },
-			'BDor': { num: 3, acc: 'sharp' },
-			'C#Phr': { num: 3, acc: 'sharp' },
-			'DLyd': { num: 3, acc: 'sharp' },
-			'G#Loc': { num: 3, acc: 'sharp' },
+			'A': {num: 3, acc: 'sharp'},
+			'F#m': {num: 3, acc: 'sharp'},
+			'EMix': {num: 3, acc: 'sharp'},
+			'BDor': {num: 3, acc: 'sharp'},
+			'C#Phr': {num: 3, acc: 'sharp'},
+			'DLyd': {num: 3, acc: 'sharp'},
+			'G#Loc': {num: 3, acc: 'sharp'},
 
-			'D': { num: 2, acc: 'sharp' },
-			'Bm': { num: 2, acc: 'sharp' },
-			'AMix': { num: 2, acc: 'sharp' },
-			'EDor': { num: 2, acc: 'sharp' },
-			'F#Phr': { num: 2, acc: 'sharp' },
-			'GLyd': { num: 2, acc: 'sharp' },
-			'C#Loc': { num: 2, acc: 'sharp' },
+			'D': {num: 2, acc: 'sharp'},
+			'Bm': {num: 2, acc: 'sharp'},
+			'AMix': {num: 2, acc: 'sharp'},
+			'EDor': {num: 2, acc: 'sharp'},
+			'F#Phr': {num: 2, acc: 'sharp'},
+			'GLyd': {num: 2, acc: 'sharp'},
+			'C#Loc': {num: 2, acc: 'sharp'},
 
-			'G': { num: 1, acc: 'sharp' },
-			'Em': { num: 1, acc: 'sharp' },
-			'DMix': { num: 1, acc: 'sharp' },
-			'ADor': { num: 1, acc: 'sharp' },
-			'BPhr': { num: 1, acc: 'sharp' },
-			'CLyd': { num: 1, acc: 'sharp' },
-			'F#Loc': { num: 1, acc: 'sharp' },
+			'G': {num: 1, acc: 'sharp'},
+			'Em': {num: 1, acc: 'sharp'},
+			'DMix': {num: 1, acc: 'sharp'},
+			'ADor': {num: 1, acc: 'sharp'},
+			'BPhr': {num: 1, acc: 'sharp'},
+			'CLyd': {num: 1, acc: 'sharp'},
+			'F#Loc': {num: 1, acc: 'sharp'},
 
-			'C': { num: 0, acc: 'sharp' },
-			'Am': { num: 0, acc: 'sharp' },
-			'GMix': { num: 0, acc: 'sharp' },
-			'DDor': { num: 0, acc: 'sharp' },
-			'EPhr': { num: 0, acc: 'sharp' },
-			'FLyd': { num: 0, acc: 'sharp' },
-			'BLoc': { num: 0, acc: 'sharp' },
+			'C': {num: 0, acc: 'sharp'},
+			'Am': {num: 0, acc: 'sharp'},
+			'GMix': {num: 0, acc: 'sharp'},
+			'DDor': {num: 0, acc: 'sharp'},
+			'EPhr': {num: 0, acc: 'sharp'},
+			'FLyd': {num: 0, acc: 'sharp'},
+			'BLoc': {num: 0, acc: 'sharp'},
 
-			'F': { num: 1, acc: 'flat' },
-			'Dm': { num: 1, acc: 'flat' },
-			'CMix': { num: 1, acc: 'flat' },
-			'GDor': { num: 1, acc: 'flat' },
-			'APhr': { num: 1, acc: 'flat' },
-			'BbLyd': { num: 1, acc: 'flat' },
-			'ELoc': { num: 1, acc: 'flat' },
+			'F': {num: 1, acc: 'flat'},
+			'Dm': {num: 1, acc: 'flat'},
+			'CMix': {num: 1, acc: 'flat'},
+			'GDor': {num: 1, acc: 'flat'},
+			'APhr': {num: 1, acc: 'flat'},
+			'BbLyd': {num: 1, acc: 'flat'},
+			'ELoc': {num: 1, acc: 'flat'},
 
-			'Bb': { num: 2, acc: 'flat' },
-			'Gm': { num: 2, acc: 'flat' },
-			'FMix': { num: 2, acc: 'flat' },
-			'CDor': { num: 2, acc: 'flat' },
-			'DPhr': { num: 2, acc: 'flat' },
-			'EbLyd': { num: 2, acc: 'flat' },
-			'ALoc': { num: 2, acc: 'flat' },
+			'Bb': {num: 2, acc: 'flat'},
+			'Gm': {num: 2, acc: 'flat'},
+			'FMix': {num: 2, acc: 'flat'},
+			'CDor': {num: 2, acc: 'flat'},
+			'DPhr': {num: 2, acc: 'flat'},
+			'EbLyd': {num: 2, acc: 'flat'},
+			'ALoc': {num: 2, acc: 'flat'},
 
-			'Eb': { num: 3, acc: 'flat' },
-			'Cm': { num: 3, acc: 'flat' },
-			'BbMix': { num: 3, acc: 'flat' },
-			'FDor': { num: 3, acc: 'flat' },
-			'GPhr': { num: 3, acc: 'flat' },
-			'AbLyd': { num: 3, acc: 'flat' },
-			'DLoc': { num: 3, acc: 'flat' },
+			'Eb': {num: 3, acc: 'flat'},
+			'Cm': {num: 3, acc: 'flat'},
+			'BbMix': {num: 3, acc: 'flat'},
+			'FDor': {num: 3, acc: 'flat'},
+			'GPhr': {num: 3, acc: 'flat'},
+			'AbLyd': {num: 3, acc: 'flat'},
+			'DLoc': {num: 3, acc: 'flat'},
 
-			'Ab': { num: 4, acc: 'flat' },
-			'Fm': { num: 4, acc: 'flat' },
-			'EbMix': { num: 4, acc: 'flat' },
-			'BbDor': { num: 4, acc: 'flat' },
-			'CPhr': { num: 4, acc: 'flat' },
-			'DbLyd': { num: 4, acc: 'flat' },
-			'GLoc': { num: 4, acc: 'flat' },
+			'Ab': {num: 4, acc: 'flat'},
+			'Fm': {num: 4, acc: 'flat'},
+			'EbMix': {num: 4, acc: 'flat'},
+			'BbDor': {num: 4, acc: 'flat'},
+			'CPhr': {num: 4, acc: 'flat'},
+			'DbLyd': {num: 4, acc: 'flat'},
+			'GLoc': {num: 4, acc: 'flat'},
 
-			'Db': { num: 5, acc: 'flat' },
-			'Bbm': { num: 5, acc: 'flat' },
-			'AbMix': { num: 5, acc: 'flat' },
-			'EbDor': { num: 5, acc: 'flat' },
-			'FPhr': { num: 5, acc: 'flat' },
-			'GgLyd': { num: 5, acc: 'flat' },
-			'CLoc': { num: 5, acc: 'flat' },
+			'Db': {num: 5, acc: 'flat'},
+			'Bbm': {num: 5, acc: 'flat'},
+			'AbMix': {num: 5, acc: 'flat'},
+			'EbDor': {num: 5, acc: 'flat'},
+			'FPhr': {num: 5, acc: 'flat'},
+			'GgLyd': {num: 5, acc: 'flat'},
+			'CLoc': {num: 5, acc: 'flat'},
 
-			'Gb': { num: 6, acc: 'flat' },
-			'Ebm': { num: 6, acc: 'flat' },
-			'DbMix': { num: 6, acc: 'flat' },
-			'AbDor': { num: 6, acc: 'flat' },
-			'BbPhr': { num: 6, acc: 'flat' },
-			'CbLyd': { num: 6, acc: 'flat' },
-			'FLoc': { num: 6, acc: 'flat' },
+			'Gb': {num: 6, acc: 'flat'},
+			'Ebm': {num: 6, acc: 'flat'},
+			'DbMix': {num: 6, acc: 'flat'},
+			'AbDor': {num: 6, acc: 'flat'},
+			'BbPhr': {num: 6, acc: 'flat'},
+			'CbLyd': {num: 6, acc: 'flat'},
+			'FLoc': {num: 6, acc: 'flat'},
 
-			'Cb': { num: 7, acc: 'flat' },
-			'Abm': { num: 7, acc: 'flat' },
-			'GbMix': { num: 7, acc: 'flat' },
-			'DbDor': { num: 7, acc: 'flat' },
-			'EbPhr': { num: 7, acc: 'flat' },
-			'FbLyd': { num: 7, acc: 'flat' },
-			'BbLoc': { num: 7, acc: 'flat' },
+			'Cb': {num: 7, acc: 'flat'},
+			'Abm': {num: 7, acc: 'flat'},
+			'GbMix': {num: 7, acc: 'flat'},
+			'DbDor': {num: 7, acc: 'flat'},
+			'EbPhr': {num: 7, acc: 'flat'},
+			'FbLyd': {num: 7, acc: 'flat'},
+			'BbLoc': {num: 7, acc: 'flat'},
 
 			// The following are not in the 2.0 spec, but seem normal enough.
 			// TODO-PER: These SOUND the same as what's written, but they aren't right
-			'A#': { num: 2, acc: 'flat' },
-			'B#': { num: 0, acc: 'sharp' },
-			'D#': { num: 3, acc: 'flat' },
-			'E#': { num: 1, acc: 'flat' },
-			'G#': { num: 4, acc: 'flat' }
+			'A#': {num: 2, acc: 'flat'},
+			'B#': {num: 0, acc: 'sharp'},
+			'D#': {num: 3, acc: 'flat'},
+			'E#': {num: 1, acc: 'flat'},
+			'G#': {num: 4, acc: 'flat'}
 		};
 		///////////////// private functions ////////////////////
 		var parseKey = function(str)	// (and clef)
@@ -563,7 +667,7 @@ var ParseAbc = Class.create({
 			var retClef = tokenizer.getClef(str);
 			if (retClef.token !== undefined && (retClef.explicit === true || retClef.token !== 'none')) {	// none is the only ambiguous marking. We need to assume that's a key
 				multilineVars.clef = retClef.token;
-				return { foundClef: true };
+				return {foundClef: true};
 			}
 
 			var ret = {};
@@ -588,12 +692,12 @@ var ParseAbc = Class.create({
 				addDirective("bagpipes");
 				ret.regularKey = keys.C;
 				multilineVars.key = ret;
-				return { foundKey: true};
+				return {foundKey: true};
 			} else if (str.startsWith('Hp')) {
-				ret.extraAccidentals = [ { acc: 'natural', note: 'g'}, { acc: 'sharp', note: 'f'}, { acc: 'sharp', note: 'c'}  ];
+				ret.extraAccidentals = [ {acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'} ];
 				addDirective("bagpipes");
 				multilineVars.key = ret;
-				return { foundKey: true};
+				return {foundKey: true};
 			} else {
 				var retNone = tokenizer.isMatch(str, 'none');
 				if (retNone > 0) {
@@ -686,7 +790,7 @@ var ParseAbc = Class.create({
 			{
 				var chord = getBrackettedSubstring(line, i, 5);
 				if (!chord[2])
-					addWarning(formatWarning("Missing the closing quote while parsing the chord symbol", tune.lines.length, i, line));
+					warn("Missing the closing quote while parsing the chord symbol", line , i);
 				// If it starts with ^, then the chord appears above.
 				// If it starts with _ then the chord appears below.
 				// (note that the 2.0 draft standard defines them as not chords, but annotations and also defines < > and @.)
@@ -707,10 +811,10 @@ var ParseAbc = Class.create({
 		{
 			switch (line[i])
 			{
-				case '.': return [1, 'staccato'];
-				case 'u': return [1, 'upbow'];
-				case 'v': return [1, 'downbow'];
-				case '~': return [1, 'roll'];
+				case '.':return [1, 'staccato'];
+				case 'u':return [1, 'upbow'];
+				case 'v':return [1, 'downbow'];
+				case '~':return [1, 'roll'];
 				case '!':
 				case '+':
 					var ret = getBrackettedSubstring(line, i, 5);
@@ -731,14 +835,14 @@ var ParseAbc = Class.create({
 					// Although it is possible that ! was used as a line break, so accept that.
 					if (line[i] === '!' && (ret[0] === 1 || line[i+ret[0]-1] !== '!'))
 						return [1, null ];
-					addWarning(formatWarning("Unknown decoration: " + ret[1], tune.lines.length, i, line));
+					warn("Unknown decoration: " + ret[1], line, i);
 					ret[1] = "";
 					return ret;
-				case 'H': return [1, 'fermata'];
-				case 'J': return [1, 'slide'];
-				case 'M': return [1, 'mordent'];
-				case 'R': return [1, 'roll'];
-				case 'T': return [1, 'trill'];
+				case 'H':return [1, 'fermata'];
+				case 'J':return [1, 'slide'];
+				case 'M':return [1, 'mordent'];
+				case 'R':return [1, 'roll'];
+				case 'T':return [1, 'trill'];
 			}
 			return [0, 0];
 		};
@@ -761,28 +865,34 @@ var ParseAbc = Class.create({
 				{
 					case "[I:":
 						var err = addDirective(line.substring(i+3, e));
-						if (err) addWarning(formatWarning(err, tune.lines.length, i, line));
+						if (err) warn(err, line, i);
 						return [ e-i+1+ws ];
 					case "[M:":
 						setMeter(line.substring(i+3, e));
-						tune.appendElement('meter', -1, -1, multilineVars.meter);
+						tune.appendStartingElement('meter', -1, -1, multilineVars.meter);
 						return [ e-i+1+ws ];
 					case "[K:":
 						var result = parseKey(line.substring(i+3, e));
 						if (result.foundClef)
-							tune.appendElement('clef', -1, -1, { type: multilineVars.clef });
+							tune.appendStartingElement('clef', -1, -1, {type: multilineVars.clef});
 						if (result.foundKey)
-							tune.appendElement('key', -1, -1, multilineVars.key);
+							tune.appendStartingElement('key', -1, -1, multilineVars.key);
 						return [ e-i+1+ws ];
 					case "[P:":
-						tune.appendElement('part', -1, -1, { title: line.substring(i+3, e) });
+						tune.appendElement('part', -1, -1, {title: line.substring(i+3, e)});
 						return [ e-i+1+ws ];
 					case "[L:":
 					case "[Q:":
-					case "[V:":
 						if (e > 0)
 							return [ e-i+1+ws, line[i+1], line.substring(i+3, e)];
 						break;
+					case "[V:":
+						if (e > 0) {
+							setCurrentVoice(line.substring(i+3, e));
+							return [ e-i+1+ws, line[i+1], line.substring(i+3, e)];
+						}
+						break;
+
 					default:
 						// TODO: complain about unhandled header
 				}
@@ -797,25 +907,26 @@ var ParseAbc = Class.create({
 				{
 					case "I:":
 						var err = addDirective(line.substring(i+2));
-						if (err) addWarning(formatWarning(err, tune.lines.length, i, line));
+						if (err) warn(err, line, i);
 						return [ line.length ];
 					case "M:":
 						setMeter(line.substring(i+2));
-						tune.appendElement('meter', -1, -1, multilineVars.meter);
+						tune.appendStartingElement('meter', -1, -1, multilineVars.meter);
 						return [ line.length ];
 					case "K:":
 						var result = parseKey(line.substring(i+2));
 						if (result.foundClef)
-							tune.appendElement('clef', -1, -1, { type: multilineVars.clef });
+							tune.appendStartingElement('clef', -1, -1, {type: multilineVars.clef});
 						if (result.foundKey)
-							tune.appendElement('key', -1, -1, multilineVars.key);
+							tune.appendStartingElement('key', -1, -1, multilineVars.key);
 						return [ line.length ];
 					case "P:":
-						tune.appendElement('part', -1, -1, { title: line.substring(i+2) });
+						tune.appendStartingElement('part', -1, -1, {title: line.substring(i+2)});
 						return [ line.length ];
 					case "L:":
 					case "Q:":
 					case "V:":
+						setCurrentVoice(line.substring(2).strip());
 						return [ line.length, line[i], line.substring(2).strip()];
 					default:
 						// TODO: complain about unhandled header
@@ -834,7 +945,7 @@ var ParseAbc = Class.create({
 			if (ret.len === 0)
 				return [0,""];
 			if (ret.warn) {
-				addWarning(formatWarning(ret.warn, tune.lines.length, curr_pos, line));
+				warn(ret.warn, line, curr_pos);
 				return [ret.len,""];
 			}
 
@@ -870,7 +981,7 @@ var ParseAbc = Class.create({
 				if (line[i] === '(') {
 					if (i+1 < line.length && (line[i+1] >= '2' && line[i+1] <= '9')) {
 						if (ret.triplet !== undefined)
-							addWarning(formatWarning("Can't nest triplets", tune.lines.length, i, line));
+							warn("Can't nest triplets", line, i);
 						else {
 							ret.triplet = line[i+1] - '0';
 							if (i+2 < line.length && line[i+2] === ':') {
@@ -880,9 +991,9 @@ var ParseAbc = Class.create({
 										ret.num_notes = line[i+4] - '0';
 										i += 3;
 									} else
-										addWarning(formatWarning("expected number after the two colons after the triplet to mark the duration", tune.lines.length, i, line));
+										warn("expected number after the two colons after the triplet to mark the duration", line, i);
 								} else
-									addWarning(formatWarning("expected two colons after the triplet to mark the duration", tune.lines.length, i, line));
+									warn("expected two colons after the triplet to mark the duration", line, i);
 							}
 						}
 						i++;
@@ -906,7 +1017,7 @@ var ParseAbc = Class.create({
 				// fetch the gracenotes string and consume that into the array
 				var gra = getBrackettedSubstring(line, i, 1, '}');
 				if (!gra[2])
-					addWarning(formatWarning("Missing the closing '}' while parsing grace note", tune.lines.length, i, line));
+					warn("Missing the closing '}' while parsing grace note", line, i);
 
 				var gracenotes = [];
 				var ii = 0;
@@ -932,7 +1043,7 @@ var ParseAbc = Class.create({
 							if (gracenotes.length > 0)
 								gracenotes[gracenotes.length-1].end_beam = true;
 						} else
-							addWarning(formatWarning("Unknown character '" + gra[1][ii] + "' while parsing grace note", tune.lines.length, i+ii+1, line));
+							warn("Unknown character '" + gra[1][ii] + "' while parsing grace note", line, i);
 						ii++;
 					}
 				}
@@ -961,10 +1072,10 @@ var ParseAbc = Class.create({
 			// If digits is 0, then the string didn't point to a number.
 			var x = parseInt(str);
 			if (isNaN(x))
-				return { digits: 0 };
+				return {digits: 0};
 			var s = "" + x;
 			var i = str.indexOf(s);	// This is to account for leading spaces
-			return { value: x, digits: i+s.length };
+			return {value: x, digits: i+s.length};
 		};
 
 		var getFloat = function(str) {
@@ -972,10 +1083,10 @@ var ParseAbc = Class.create({
 			// If digits is 0, then the string didn't point to a number.
 			var x = parseFloat(str);
 			if (isNaN(x))
-				return { digits: 0 };
+				return {digits: 0};
 			var s = "" + x;
 			var i = str.indexOf(s);	// This is to account for leading spaces
-			return { value: x, digits: i+s.length };
+			return {value: x, digits: i+s.length};
 		};
 
 		var addMetaText = function(key, value) {
@@ -995,8 +1106,8 @@ var ParseAbc = Class.create({
 			cmd = cmd.toLowerCase();
 			switch (cmd)
 			{
-				case "bagpipes": tune.formatting.bagpipes = true; break;
-				case "stretchlast": tune.formatting.stretchlast = true; break;
+				case "bagpipes":tune.formatting.bagpipes = true;break;
+				case "stretchlast":tune.formatting.stretchlast = true;break;
 				case "staffwidth":
 					num = getInt(s.substring(i));
 					if (num.digits === 0)
@@ -1077,9 +1188,159 @@ var ParseAbc = Class.create({
 			return str;
 		};
 
+		function setCurrentVoice(id) {
+			multilineVars.currentVoice = id;
+		}
+
+		function parseVoice(line, i) {
+			//First truncate the string to the first non-space character after V: through either the
+			//end of the line or a % character. Then remove trailing spaces, too.
+			var ret = tokenizer.getMeat(line, i, line.length);
+			var start = ret.start;
+			var end = ret.end;
+			//The first thing on the line is the ID. It can be any non-space string and terminates at the
+			//first space.
+			var id = tokenizer.getToken(line, start, end);
+			if (id.length === 0) {
+				warn("Expected a voice id", line, start);
+				return;
+			}
+			if (multilineVars.voices[id] === undefined) {
+				multilineVars.voices[id] = {};
+//				warn("voice id "+id+" has already been defined", line, start);
+//				return;
+			}
+			start += id.length;
+			start += tokenizer.eatWhiteSpace(line, start);
+
+			var staffInfo = {startStaff: true};
+			var addNextTokenToStaffInfo = function(name) {
+				var attr = tokenizer.getVoiceToken(line, start, end);
+				if (attr.warn !== undefined)
+					warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
+				else if (attr.token.length === 0)
+					warn("Expected value for " + name + " in voice", line, start);
+				else
+					staffInfo[name] = attr.token;
+				start += attr.len;
+			};
+
+			//Then the following items can occur in any order:
+			while (start < end) {
+				var token = tokenizer.getVoiceToken(line, start, end);
+				start += token.len;
+
+				if (token.warn) {
+					warn("Error parsing voice: " + token.warn, line, start);
+				} else {
+					var attr = null;
+					switch (token.token) {
+						case 'clef':
+						case 'cl':
+							addNextTokenToStaffInfo('clef');
+							break;
+						case 'treble':
+						case 'bass':
+						case 'tenor':
+						case 'alto':
+						case 'none':
+						case 'treble\'':
+						case 'bass\'':
+						case 'tenor\'':
+						case 'alto\'':
+						case 'none\'':
+						case 'treble\'\'':
+						case 'bass\'\'':
+						case 'tenor\'\'':
+						case 'alto\'\'':
+						case 'none\'\'':
+						case 'treble,':
+						case 'bass,':
+						case 'tenor,':
+						case 'alto,':
+						case 'none,':
+						case 'treble,,':
+						case 'bass,,':
+						case 'tenor,,':
+						case 'alto,,':
+						case 'none,,':
+							staffInfo.clef = token.token;
+							break;
+						case 'staves':
+						case 'stave':
+						case 'stv':
+							addNextTokenToStaffInfo('staves');
+							break;
+						case 'brace':
+						case 'brc':
+							addNextTokenToStaffInfo('brace');
+							break;
+						case 'bracket':
+						case 'brk':
+							addNextTokenToStaffInfo('bracket');
+							break;
+						case 'name':
+						case 'nm':
+							addNextTokenToStaffInfo('name');
+							break;
+						case 'subname':
+						case 'sname':
+						case 'snm':
+							addNextTokenToStaffInfo('subname');
+							break;
+						case 'merge':
+							staffInfo.startStaff = false;
+							break;
+						case 'stems':
+							attr = tokenizer.getVoiceToken(line, start, end);
+							if (attr.warn !== undefined)
+								warn("Expected value for stems in voice: " + attr.warn, line, start);
+							else if (attr.token === 'up' || attr.token === 'down')
+								multilineVars.voices[id].stem = attr.token;
+							else
+								warn("Expected up or down for voice stem", line, start);
+							start += attr.len;
+							break;
+						case 'up':
+						case 'down':
+							multilineVars.voices[id].stem = token.token;
+							break;
+						case 'middle':
+						case 'm':
+							addNextTokenToStaffInfo('middle');
+							break;
+						case 'gchords':
+						case 'gch':
+							multilineVars.voices[id].suppressChords = true;
+							break;
+						case 'space':
+						case 'spc':
+							addNextTokenToStaffInfo('spacing');
+							break;
+					}
+				}
+				start += tokenizer.eatWhiteSpace(line, start);
+			}
+
+			// now we've filled up staffInfo, figure out what to do with this voice
+			// TODO-PER: It is unclear from the standard and the examples what to do with brace, bracket, and staves, so they are ignored for now.
+			if (staffInfo.startStaff)
+				multilineVars.staves.push({});
+			var s = multilineVars.staves[multilineVars.staves.length-1];
+			if (staffInfo.startStaff) {
+				if (staffInfo.clef) s.clef = staffInfo.clef;
+				if (staffInfo.spacing) s.spacing_below_offset = staffInfo.spacing;
+				if (staffInfo.middle) s.middle = staffInfo.middle;
+			}
+			if (staffInfo.name) {if (s.name) s.name.push(staffInfo.name); else s.name = [ staffInfo.name ];}
+			if (staffInfo.subname) {if (s.subname) s.name.push(staffInfo.subname); else s.subname = [ staffInfo.subname ];}
+
+			setCurrentVoice(id);
+		}
+
 		var setTitle = function(title) {
 			if (multilineVars.hasMainTitle)
-				tune.lines[tune.lines.length] = { subtitle: tokenizer.translateString(stripComment(title)) };	// display secondary title
+				tune.addSubtitle(tokenizer.translateString(stripComment(title)));	// display secondary title
 			else
 			{
 				addMetaText("title", theReverser(stripComment(title)));
@@ -1090,10 +1351,10 @@ var ParseAbc = Class.create({
 		var setMeter = function(meter) {
 			meter = stripComment(meter);
 			if (meter === 'C') {
-				multilineVars.meter = { type: 'common_time' };
+				multilineVars.meter = {type: 'common_time'};
 				multilineVars.havent_set_length = false;
 			} else if (meter === 'C|') {
-				multilineVars.meter = { type: 'cut_time' };
+				multilineVars.meter = {type: 'cut_time'};
 				multilineVars.havent_set_length = false;
 			} else if (meter.length === 0 || meter.toLowerCase() === 'none')
 				multilineVars.meter = null;
@@ -1101,7 +1362,7 @@ var ParseAbc = Class.create({
 			{
 				var a = meter.split('/');
 				if (a.length === 2)
-					multilineVars.meter = { type: 'specified', num: a[0].strip(), den: a[1].strip()};
+					multilineVars.meter = {type: 'specified', num: a[0].strip(), den: a[1].strip()};
 					if (multilineVars.havent_set_length === true) {
 						multilineVars.default_length = multilineVars.meter.num/multilineVars.meter.den < 0.75 ? 0.5 : 1;
 						multilineVars.havent_set_length = false;
@@ -1119,17 +1380,17 @@ var ParseAbc = Class.create({
 			var replace = false;
 			for (var i = 0; i < words.length; i++) {
 				if (words[i] === '*') {	// There may not be spaces between the astericks, so handle them separately
-					word_list.push({ syllable: "*" });
+					word_list.push({syllable: "*"});
 					last_divider = i;
 				} else if ((words[i] === ' ') || (words[i] === '-') || words[i] === '_' || words[i] === '|') {
 					var word = words.substring(last_divider+1, i).strip();
 					if (replace)
 						word = word.gsub('~', ' ');
 					if (word.length > 0)
-						word_list.push({ syllable: tokenizer.translateString(word), divider: words[i] });
+						word_list.push({syllable: tokenizer.translateString(word), divider: words[i]});
 					last_divider = i;
 					if (words[i] === '_')
-						word_list.push({ syllable: "*" });
+						word_list.push({syllable: "*"});
 					else if (words[i] === '_')
 						; // TODO-PER: handle moving the pointer to the next bar
 				} else if (words[i] === '~')
@@ -1160,21 +1421,21 @@ var ParseAbc = Class.create({
 			var num = 0;
 			while (index < line.length) {
 				switch (line[index]) {
-					case '0': num = num*10; index++; break;
-					case '1': num = num*10+1; index++; break;
-					case '2': num = num*10+2; index++; break;
-					case '3': num = num*10+3; index++; break;
-					case '4': num = num*10+4; index++; break;
-					case '5': num = num*10+5; index++; break;
-					case '6': num = num*10+6; index++; break;
-					case '7': num = num*10+7; index++; break;
-					case '8': num = num*10+8; index++; break;
-					case '9': num = num*10+9; index++; break;
+					case '0':num = num*10;index++;break;
+					case '1':num = num*10+1;index++;break;
+					case '2':num = num*10+2;index++;break;
+					case '3':num = num*10+3;index++;break;
+					case '4':num = num*10+4;index++;break;
+					case '5':num = num*10+5;index++;break;
+					case '6':num = num*10+6;index++;break;
+					case '7':num = num*10+7;index++;break;
+					case '8':num = num*10+8;index++;break;
+					case '9':num = num*10+9;index++;break;
 					default:
-						return { num: num, index: index };
+						return {num: num, index: index};
 				}
 			}
-			return { num: num, index: index };
+			return {num: num, index: index};
 		};
 
 		var getFraction = function(line, index) {
@@ -1191,7 +1452,7 @@ var ParseAbc = Class.create({
 					var div = 0.5;
 					while (line[index++] === '/')
 						div = div /2;
-					return {value: num * div, index: index-1 };
+					return {value: num * div, index: index-1};
 				} else {
 					var iSave = index;
 					var ret2 = getNumber(line, index);
@@ -1203,7 +1464,7 @@ var ParseAbc = Class.create({
 				}
 			}
 
-			return { value: num/den, index: index };
+			return {value: num/den, index: index};
 		};
 
 		var getBrokenRhythm = function(line, index) {
@@ -1233,8 +1494,8 @@ var ParseAbc = Class.create({
 			return el;
 		};
 
-		var pitches = { A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11 };
-		var rests = { x: 'invisible', y: 'spacer', z: 'rest' };
+		var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
+		var rests = {x: 'invisible', y: 'spacer', z: 'rest'};
 		var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 			//var el = { startChar: index };
 			var isComplete = function(state) {
@@ -1247,7 +1508,7 @@ var ParseAbc = Class.create({
 					case '(':
 						if (state === 'startSlur') {
 							if (el.startSlur === undefined) el.startSlur = 1; else el.startSlur++;
-						} else if (isComplete(state)) { el.endChar = index; return el; }
+						} else if (isComplete(state)) {el.endChar = index;return el;}
 						else return null;
 						break;
 					case ')':
@@ -1256,20 +1517,20 @@ var ParseAbc = Class.create({
 						} else return null;
 						break;
 					case '^':
-						if (state === 'startSlur') { el.accidental = 'sharp'; state = 'sharp2'; }
-						else if (state === 'sharp2') { el.accidental = 'dblsharp'; state = 'pitch'; }
-						else if (isComplete(state)) { el.endChar = index; return el; }
+						if (state === 'startSlur') {el.accidental = 'sharp';state = 'sharp2';}
+						else if (state === 'sharp2') {el.accidental = 'dblsharp';state = 'pitch';}
+						else if (isComplete(state)) {el.endChar = index;return el;}
 						else return null;
 						break;
 					case '_':
-						if (state === 'startSlur') { el.accidental = 'flat'; state = 'flat2'; }
-						else if (state === 'flat2') { el.accidental = 'dblflat'; state = 'pitch'; }
-						else if (isComplete(state)) { el.endChar = index; return el; }
+						if (state === 'startSlur') {el.accidental = 'flat';state = 'flat2';}
+						else if (state === 'flat2') {el.accidental = 'dblflat';state = 'pitch';}
+						else if (isComplete(state)) {el.endChar = index;return el;}
 						else return null;
 						break;
 					case '=':
-						if (state === 'startSlur') { el.accidental = 'natural'; state = 'pitch'; }
-						else if (isComplete(state)) { el.endChar = index; return el; }
+						if (state === 'startSlur') {el.accidental = 'natural';state = 'pitch';}
+						else if (isComplete(state)) {el.endChar = index;return el;}
 						else return null;
 						break;
 					case 'A':
@@ -1296,17 +1557,17 @@ var ParseAbc = Class.create({
 								durationSetByPreviousNote = true;
 							} else
 								el.duration = multilineVars.default_length;
-						} else if (isComplete(state)) { el.endChar = index; return el; }
+						} else if (isComplete(state)) {el.endChar = index;return el;}
 						else return null;
 						break;
 					case ',':
-						if (state === 'octave') { el.pitch -= 7; }
-						else if (isComplete(state)) { el.endChar = index; return el; }
+						if (state === 'octave') {el.pitch -= 7;}
+						else if (isComplete(state)) {el.endChar = index;return el;}
 						else return null;
 						break;
 					case '\'':
-						if (state === 'octave') { el.pitch += 7; }
-						else if (isComplete(state)) { el.endChar = index; return el; }
+						if (state === 'octave') {el.pitch += 7;}
+						else if (isComplete(state)) {el.endChar = index;return el;}
 						else return null;
 						break;
 					case 'x':
@@ -1332,7 +1593,7 @@ var ParseAbc = Class.create({
 							} else
 								el.duration = multilineVars.default_length;
 							state = 'duration';
-						} else if (isComplete(state)) { el.endChar = index; return el; }
+						} else if (isComplete(state)) {el.endChar = index;return el;}
 						else return null;
 						break;
 					case '1':
@@ -1375,7 +1636,7 @@ var ParseAbc = Class.create({
 								el.endChar = index+1;
 								return el;
 							}
-						} else if (state === 'broken_rhythm') { el.endChar = index; return el; }
+						} else if (state === 'broken_rhythm') {el.endChar = index;return el;}
 						else return null;
 						break;
 					case ' ':
@@ -1422,7 +1683,7 @@ var ParseAbc = Class.create({
 				}
 				index++;
 				if (index === line.length) {
-					if (isComplete(state)) { el.endChar = index; return el; }
+					if (isComplete(state)) {el.endChar = index;return el;}
 					else return null;
 				}
 			}
@@ -1430,13 +1691,13 @@ var ParseAbc = Class.create({
 		};
 
 		var startNewLine = function() {
-			tune.lines.push({ staff: [] });
+			tune.startNewLine();
 			if (multilineVars.partForNextLine.length) {
-				tune.appendElement('part', -1, -1, { title: multilineVars.partForNextLine });
+				tune.appendElement('part', -1, -1, {title: multilineVars.partForNextLine});
 				multilineVars.partForNextLine = "";
 			}
-			tune.appendElement('clef', -1, -1, { type: multilineVars.clef });
-			tune.appendElement('key', -1, -1, multilineVars.key);
+			tune.appendStartingElement('clef', -1, -1, {type: multilineVars.clef});
+			tune.appendStartingElement('key', -1, -1, multilineVars.key);
 		};
 
 		//
@@ -1511,7 +1772,7 @@ var ParseAbc = Class.create({
 				startNewLine();
 				if (multilineVars.meter !== null)
 				{
-					tune.appendElement('meter', -1, -1, multilineVars.meter);
+					tune.appendStartingElement('meter', -1, -1, multilineVars.meter);
 					multilineVars.meter = null;
 				}
 			}
@@ -1580,7 +1841,7 @@ var ParseAbc = Class.create({
 						ret = letter_to_chord(line, i);
 						if (ret[0] > 0) {
 							// TODO-PER: There could be more than one chord here if they have different positions.
-							el.chord = { name: tokenizer.translateString(ret[1]), position: ret[2] };
+							el.chord = {name: tokenizer.translateString(ret[1]), position: ret[2]};
 							i += ret[0];
 							multilineVars.iChar += ret[0];
 							i += tokenizer.skipWhiteSpace(line.substring(i));
@@ -1614,10 +1875,10 @@ var ParseAbc = Class.create({
 					if (ret[0] > 0) {
 						// This is definitely a bar
 						if (el.gracenote !== undefined)
-							addWarning(formatWarning("Can't have a grace note before a barline", tune.lines.length, i, line));
-						var bar = { type: ret[1] };
+							warn("Can't have a grace note before a barline", line, i);
+						var bar = {type: ret[1]};
 						if (bar.type.length === 0)
-							addWarning(formatWarning("Unknown bar type", tune.lines.length, i, line));
+							warn("Unknown bar type", line, i);
 						else {
 							if (ret[2])
 								bar.number = ret[2];
@@ -1640,7 +1901,7 @@ var ParseAbc = Class.create({
 								el.startSlur = ret.startSlur;
 							if (ret.triplet !== undefined) {
 								if (tripletNotesLeft > 0)
-									addWarning(formatWarning("Can't nest triplets", tune.lines.length, i, line));
+									warn("Can't nest triplets", line, i);
 								else {
 									el.startTriplet = ret.triplet;
 									tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
@@ -1734,7 +1995,7 @@ var ParseAbc = Class.create({
 											}
 										}
 									} else
-										addWarning(formatWarning("Expected ']' to end the chords", tune.lines.length, i, line));
+										warn("Expected ']' to end the chords", line, i);
 
 									if (el.pitches !== undefined) {
 										if (chordDuration !== null) {
@@ -1780,7 +2041,7 @@ var ParseAbc = Class.create({
 
 						if (i === startI) {	// don't know what this is, so ignore it.
 							if (line[i] !== ' ' && line[i] !== '`')
-								addWarning(formatWarning("Unknown character ignored", tune.lines.length, i, line));
+								warn("Unknown character ignored", line, i);
 							i++;
 							multilineVars.iChar++;
 						}
@@ -1817,7 +2078,7 @@ var ParseAbc = Class.create({
 					var x = getInt(str.substring(2));
 					if (x.digits === 0)
 						return;	// TODO-PER: flag as an error.
-					multilineVars.tempo = { duration: 1, bpm: x.value };
+					multilineVars.tempo = {duration: 1, bpm: x.value};
 					return;
 				} else if (str.length >= 2 && str[1] >= '0' && str[1] <= '9') {
 					// This is a type 3 format.
@@ -1828,7 +2089,7 @@ var ParseAbc = Class.create({
 					var speed = getInt(str.substring(1));
 					if (speed.digits === 0)
 						return;	// TODO-PER: flag as an error.
-					multilineVars.tempo = { duration: mult.value, bpm: speed.value };
+					multilineVars.tempo = {duration: mult.value, bpm: speed.value};
 					return;
 				}	// TODO-PER: if it isn't one of the above, flag as an error
 
@@ -1839,7 +2100,7 @@ var ParseAbc = Class.create({
 				str = str.substring(num.digits);
 				if (str.length === 0 || str[0] !== '/') {
 					// This is type 1
-					multilineVars.tempo = { duration: 1, bpm: num.value };
+					multilineVars.tempo = {duration: 1, bpm: num.value};
 					return;
 				}
 				str = str.substring(1);
@@ -1848,13 +2109,16 @@ var ParseAbc = Class.create({
 					return;	// TODO-PER: flag as an error.
 
 				str = str.substring(num2.digits);
+				str = str.strip();
+
 				if (str.length === 0 || str[0] !== '=')
 					return;	// TODO-PER: flag as an error.
 
-				var num3 = getInt(str.substring(1));
+				str = str.substring(1).strip();
+				var num3 = getInt(str);
 				if (num3.digits === 0)
 					return;	// TODO-PER: flag as an error.
-				tune.metaText.tempo = { duration: num.value/num2.value, bpm: num3.value };
+				tune.metaText.tempo = {duration: num.value/num2.value, bpm: num3.value};
 			}
 			// TODO-PER: if it isn't one of the above, flag as an error
 		};
@@ -1901,15 +2165,15 @@ var ParseAbc = Class.create({
 					// since the key is the last thing that can happen in the header, we can resolve the tempo now
 					if (multilineVars.tempo) {	// If there's a tempo waiting to be resolved
 						var dur = multilineVars.default_length ? multilineVars.default_length / 8 : 1/8;
-						tune.metaText.tempo = { duration: dur * multilineVars.tempo.duration, bpm: multilineVars.tempo.bpm };
+						tune.metaText.tempo = {duration: dur * multilineVars.tempo.duration, bpm: multilineVars.tempo.bpm};
 						multilineVars.tempo = null;
 					}
 					var result = parseKey(line.substring(2));
-					if (!multilineVars.is_in_header && tune.lines.length > 0) {
+					if (!multilineVars.is_in_header && tune.hasBeginMusic()) {
 						if (result.foundClef)
-							tune.appendElement('clef', -1, -1, { type: multilineVars.clef });
+							tune.appendStartingElement('clef', -1, -1, {type: multilineVars.clef});
 						if (result.foundKey)
-							tune.appendElement('key', -1, -1, multilineVars.key);
+							tune.appendStartingElement('key', -1, -1, multilineVars.key);
 					}
 					multilineVars.is_in_header = false;	// The first key signifies the end of the header.
 					multilineVars.iChar += line.length + 1;
@@ -1931,7 +2195,7 @@ var ParseAbc = Class.create({
 				case  'M:':
 					setMeter(line.substring(2));
 //					if (!multilineVars.is_in_header && tune.lines.length > 0)
-//						tune.appendElement('meter', -1, -1, multilineVars.meter);
+//						tune.appendStartingElement('meter', -1, -1, multilineVars.meter);
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'N:':
@@ -1967,11 +2231,11 @@ var ParseAbc = Class.create({
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'V:':
-					// TODO-PER: handle voice
+					parseVoice(line, 2);
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'w:':
-					addWords(tune.lines[tune.lines.length-1].staff, line.substring(2));
+					addWords(tune.getCurrentVoice(), line.substring(2));
 					multilineVars.iChar += line.length + 1;
 					break;
 				case  'W:':
@@ -1988,7 +2252,7 @@ var ParseAbc = Class.create({
 				case  'I:':
 				case  '%%':
 					var err = addDirective(line.substring(2));
-					if (err) addWarning(formatWarning(err, tune.lines.length, 2, line));
+					if (err) warn(err, line, 2);
 					multilineVars.iChar += line.length + 1;
 					break;
 				default:

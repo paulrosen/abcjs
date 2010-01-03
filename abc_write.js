@@ -506,7 +506,7 @@ ABCPrinter.prototype.printSubtitleLine = function(abcline) {
 }
 
 ABCPrinter.prototype.printABCLine = function(abcline) {
-  this.abcline = abcline.staff;
+  this.abcline = abcline.staff.voices[0];	// TODO-PER: handle all the voices.
   this.staff = new ABCStaffElement(this, this.y);
   if (this.partstartelem) {
     this.partstartelem = new ABCEndingElem("", null, null);

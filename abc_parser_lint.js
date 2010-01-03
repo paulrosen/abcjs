@@ -23,6 +23,109 @@ var AbcParserLint = Class.create({
 			"upbow", "downbow", "staccato"
 		] } };
 
+		var voiceItem = { type: "union",
+			field: "el_type",
+			types: [
+				{ value: "clef", properties: {
+					startChar: { type: 'number', output: 'hidden' },
+					endChar: { type: 'number', output: 'hidden' },
+					type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] }
+				} },
+				{ value: "bar", properties: {
+					startChar: { type: 'number', output: 'hidden' },
+					endChar: { type: 'number', output: 'hidden' },
+					chord: { type: 'object', optional: true, properties: {
+							name: { type: 'string'},
+							position: { type: 'string'}
+						}
+					},
+					decoration: decorationList,
+					number: { type: 'string', optional: true },	// TODO-PER: change the name of this to "ending"
+					type: { type: 'string', Enum: [ 'bar_dbl_repeat', 'bar_right_repeat', 'bar_left_repeat', 'bar_invisible', 'bar_thick_thin', 'bar_thin_thin', 'bar_thin', 'bar_thin_thick' ] }
+				} },
+				{ value: "key", properties: {
+					startChar: { type: 'number', output: 'hidden' },
+					endChar: { type: 'number', output: 'hidden' },
+					extraAccidentals: { type: 'array', optional: true, output: "noindex", items: {
+							type: 'object', properties: {
+								acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp'] },
+								note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] }
+							}
+					} },
+					regularKey: { type: 'object', optional: true,
+						properties: {
+							num: { type: 'number', minimum: 0, maximum: 7 },
+							acc: { type: 'string', Enum: [ 'sharp', 'flat' ]}
+						}
+					}
+				} },
+				{ value: "meter", properties: {
+					startChar: { type: 'number', output: 'hidden' },
+					endChar: { type: 'number', output: 'hidden' },
+					type: { type: 'string' },
+					num: { type: 'string', optional: true },	// TODO-PER: Check for type=specified and require these in that case.
+					den: { type: 'string', optional: true }
+				} },
+				{ value: "part", properties: {
+					startChar: { type: 'number', output: 'hidden' },
+					endChar: { type: 'number', output: 'hidden' },
+					title: { type: 'string' }
+				} },
+
+				{ value: "note", properties: {
+					startChar: { type: 'number', output: 'hidden' },
+					endChar: { type: 'number', output: 'hidden' },
+					accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
+					chord: { type: 'object', optional: true, properties: {
+							name: { type: 'string'},
+							position: { type: 'string'}
+						}
+					},
+					decoration: decorationList,
+					duration: { type: 'number', optional: true },	// TODO-PER: Straighten this out. It might be required.
+					endSlur: { type: 'number', minimum: 1, optional: true },
+					endTie: { type: 'boolean', Enum: [ true ], optional: true },
+					endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
+					end_beam: { type: 'boolean', Enum: [ true ], optional: true },
+					gracenotes: { type: 'array', optional: true, output: "noindex", items: {
+						type: "object", properties: {
+							accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
+							duration: { type: 'number' },
+							end_beam: { type: 'boolean', Enum: [ true ], optional: true },
+							endSlur: { type: 'number', minimum: 1, optional: true },
+							endTie: { type: 'boolean', Enum: [ true ], optional: true },
+							pitch: { type: 'number' },
+							startSlur: { type: 'number', minimum: 1, optional: true },
+							startTie: { type: 'boolean', Enum: [ true ], optional: true }
+						}
+					}},
+					lyric: { type: 'array', optional: true, output: "noindex", items: {
+						type: 'object', properties: {
+						syllable: { type :'string' },
+						divider: { type: 'string', Enum: [ '-', ' ', '_' ]}
+					}}},
+				// TODO-PER: either pitch or pitches must be present. Test for that. Or, change it to just use pitches.
+					pitch: { optional: true, type: [ { type: 'number', prohibits: [ 'rest_type', 'pitches' ]}, { type: 'null', requires: ['rest_type'], prohibits: [ 'startSlur', 'startTie', 'startTriplet', 'endSlur', 'endTie', 'endTriplet', 'end_beam', 'grace_notes', 'lyric' ] } ] },
+					pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'pitch', 'duration' ], items: {
+							type: 'object', properties: {
+								endChar: { type: 'number', output: 'hidden' },
+								accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
+								duration: { type: 'number' },
+								endSlur: { type: 'number', minimum: 1, optional: true },
+								endTie: { type: 'boolean', Enum: [ true ], optional: true },
+								pitch: { type: 'number' },
+								startSlur: { type: 'number', minimum: 1, optional: true },
+								startTie: { type: 'boolean', Enum: [ true ], optional: true }
+							}
+					}},
+					rest_type: { type: 'string', optional: true },
+					startSlur: { type: 'number', minimum: 1, optional: true },
+					startTie: { type: 'boolean', Enum: [ true ], optional: true },
+					startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }
+				}}
+			]
+		};
+
 		var musicSchema = {
 			description:"ABC Internal Music Representation",
 			type:"object",
@@ -80,117 +183,30 @@ var AbcParserLint = Class.create({
 						wordsspace: { type: "string", optional: true }
 					}
 				},
+
 				lines: {type:"array",
+					description: "This is an array of horizontal elements. It is usually a staff of music. For multi-stave music, each staff is an element, just like single-staff. The difference is the connector properties.",
 					items: { type: "object",
 						properties: {
-							subtitle: { type: "string", optional: true },
-							staff: { type: "array", optional: true, output: "noindex",
-								items: { type: "union",
-									field: "el_type",
-									types: [
-										{ value: "clef", properties: {
-											startChar: { type: 'number', output: 'hidden' },
-											endChar: { type: 'number', output: 'hidden' },
-											type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] }
-										} },
-										{ value: "bar", properties: {
-											startChar: { type: 'number', output: 'hidden' },
-											endChar: { type: 'number', output: 'hidden' },
-											chord: { type: 'object', optional: true, properties: {
-													name: { type: 'string'},
-													position: { type: 'string'}
-												}
-											},
-											decoration: decorationList,
-											number: { type: 'string', optional: true },
-											type: { type: 'string', Enum: [ 'bar_dbl_repeat', 'bar_right_repeat', 'bar_left_repeat', 'bar_invisible', 'bar_thick_thin', 'bar_thin_thin', 'bar_thin', 'bar_thin_thick' ] }
-										} },
-										{ value: "key", properties: {
-											startChar: { type: 'number', output: 'hidden' },
-											endChar: { type: 'number', output: 'hidden' },
-											extraAccidentals: { type: 'array', optional: true, output: "noindex", items: {
-													type: 'object', properties: {
-														acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp'] },
-														note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] }
-													}
-											} },
-											regularKey: { type: 'object', optional: true,
-												properties: {
-													num: { type: 'number'},
-													acc: { type: 'string', Enum: [ 'sharp', 'flat' ]}
-												}
-											}
-										} },
-										{ value: "meter", properties: {
-											startChar: { type: 'number', output: 'hidden' },
-											endChar: { type: 'number', output: 'hidden' },
-											type: { type: 'string' },
-											num: { type: 'string', optional: true },	// TODO-PER: Check for type=specified and require these in that case.
-											den: { type: 'string', optional: true }
-										} },
-										{ value: "part", properties: {
-											startChar: { type: 'number', output: 'hidden' },
-											endChar: { type: 'number', output: 'hidden' },
-											title: { type: 'string' }
-										} },
-
-										{ value: "note", properties: {
-											startChar: { type: 'number', output: 'hidden' },
-											endChar: { type: 'number', output: 'hidden' },
-											accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
-											chord: { type: 'object', optional: true, properties: {
-													name: { type: 'string'},
-													position: { type: 'string'}
-												}
-											},
-											decoration: decorationList,
-											duration: { type: 'number', optional: true },	// TODO-PER: Straighten this out.
-											endSlur: { type: 'number', minimum: 1, optional: true },
-											endTie: { type: 'boolean', Enum: [ true ], optional: true },
-											endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
-											end_beam: { type: 'boolean', Enum: [ true ], optional: true },
-											gracenotes: { type: 'array', optional: true, output: "noindex", items: {
-												type: "object", properties: {
-													accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
-													duration: { type: 'number' },
-													end_beam: { type: 'boolean', Enum: [ true ], optional: true },
-													endSlur: { type: 'number', minimum: 1, optional: true },
-													endTie: { type: 'boolean', Enum: [ true ], optional: true },
-													pitch: { type: 'number' },
-													startSlur: { type: 'number', minimum: 1, optional: true },
-													startTie: { type: 'boolean', Enum: [ true ], optional: true }
-												}
-											}},
-											lyric: { type: 'array', optional: true, output: "noindex", items: {
-												type: 'object', properties: {
-												syllable: { type :'string' },
-												divider: { type: 'string', Enum: [ '-', ' ', '_' ]}
-											}}},
-										// TODO-PER: either pitch or pitches must be present. Test for that.
-											pitch: { optional: true, type: [ { type: 'number', prohibits: [ 'rest_type', 'pitches' ]}, { type: 'null', requires: ['rest_type'], prohibits: [ 'startSlur', 'startTie', 'startTriplet', 'endSlur', 'endTie', 'endTriplet', 'end_beam', 'grace_notes', 'lyric' ] } ] },
-											pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'pitch', 'duration' ], items: {
-													type: 'object', properties: {
-														endChar: { type: 'number', output: 'hidden' },
-														accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
-														duration: { type: 'number' },
-														endSlur: { type: 'number', minimum: 1, optional: true },
-														endTie: { type: 'boolean', Enum: [ true ], optional: true },
-														pitch: { type: 'number' },
-														startSlur: { type: 'number', minimum: 1, optional: true },
-														startTie: { type: 'boolean', Enum: [ true ], optional: true }
-													}
-											}},
-											rest_type: { type: 'string', optional: true },
-											startSlur: { type: 'number', minimum: 1, optional: true },
-											startTie: { type: 'boolean', Enum: [ true ], optional: true },
-											startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }
-										}}
-									]
+							subtitle: { type: "string", optional: true, prohibits: [ 'staff' ]  },
+							staff: { type: 'object', optional: true, prohibits: [ 'subtitle' ],
+								properties: {
+									curlyBrace: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+									bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+									connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+									spacingBelow: { type: 'number', optional: true },
+									voices: { type: 'array', output: 'hidden',
+										items: {
+											type: "array", optional: true, output: "noindex",
+											items: voiceItem
+										}
+									}
 								}
 							}
 						}
 					}
 				},
+
 				metaText: {type:"object",
 					properties: {
 						author: { type: "string", optional: true },
@@ -204,7 +220,7 @@ var AbcParserLint = Class.create({
 						rhythm: { type: "string", optional: true },
 						source: { type: "string", optional: true },
 						tempo: { type: "object", optional: true, properties: {
-							duration: { type: "number"},
+							duration: { type: "number"},	// TODO-PER: This can be an array of durations.
 							bpm: { type: "number"}
 						}},
 						title: { type: "string", optional: true },

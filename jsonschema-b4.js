@@ -155,13 +155,16 @@ JSONSchema = {
 							}
 						}else{
 							for(i=0,l=value.length; i<l; i++){
+								var nextRecursion = recursion;
 								if (schema.output !== 'noindex') {
+									nextRecursion++;
+									var thisRecursion = (recursion===0)?1:recursion;	// TODO-PER-HACK: Not sure why the first case is different. Figure it out someday.
 									if (typeof value[i] !== 'object')
-										addPrint(recursion+1, (value[i]===null?'null':value[i]));
+										addPrint(thisRecursion, (value[i]===null?'null':value[i]));
 									else
-										addPrint(recursion+1, path + " " + (i+1));
+										addPrint(thisRecursion, path.substring(path.lastIndexOf('.')+1) + " " + (i+1));
 								}
-								errors.concat(checkProp(value[i],schema.items,path,i, recursion+1));
+								errors.concat(checkProp(value[i],schema.items,path,i, nextRecursion));
 							}
 						}							
 					}
