@@ -480,7 +480,13 @@ ABCPrinter.prototype.printABC = function(abctune) {
   for(var line=0; line<abctune.lines.length; line++) {
     var abcline = abctune.lines[line];
     if (abcline.staff) {
-      this.staffs[this.staffs.length] = this.printABCLine(abcline);
+		for (var s = 0; s < abcline.staff.length; s++) {
+		  for (var v = 0; v < abcline.staff[s].voices.length; v++) {
+			  this.staffs[this.staffs.length] = this.printABCLine(abcline.staff[s].voices[v]);
+		  }
+		  if (s !== abcline.staff.length-1)
+			this.y+= (AbcSpacing.STAVEHEIGHT*0.5);
+		}
       this.y+=AbcSpacing.STAVEHEIGHT;
     } else if (abcline.subtitle) {
       this.printSubtitleLine(abcline);
@@ -506,7 +512,7 @@ ABCPrinter.prototype.printSubtitleLine = function(abcline) {
 }
 
 ABCPrinter.prototype.printABCLine = function(abcline) {
-  this.abcline = abcline.staff.voices[0];	// TODO-PER: handle all the voices.
+  this.abcline = abcline;
   this.staff = new ABCStaffElement(this, this.y);
   if (this.partstartelem) {
     this.partstartelem = new ABCEndingElem("", null, null);

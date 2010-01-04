@@ -3,7 +3,7 @@
 
 /*global $, $$, Class, Ajax, Element */
 /*global window, confirm */
-/*global ParseAbc, AbcTuneBook, AbcParserLint, PlayEmbedded, DrawNotation, ABCPrinter, Raphael */
+/*global AbcParse, AbcTuneBook, AbcParserLint, PlayEmbedded, DrawNotation, ABCPrinter, Raphael */
 /*extern abcParser, EditArea, editArea, writeOneTune */
 /*global abc_contents_output */
 
@@ -64,7 +64,7 @@ function processAbc(params) {
 	try {
 		var tunebook = new AbcTuneBook(strAbc);
 		if (abcParser === null)
-			abcParser = new ParseAbc();
+			abcParser = new AbcParse();
 
 		for (var i = 0; i < tunebook.tunes.length; i++) {
 			abcParser.parse(tunebook.tunes[i].abc);
@@ -226,7 +226,7 @@ function play()
 {
 	var t = editArea.get();
 	if (abcParser === null)
-		abcParser = new ParseAbc();
+		abcParser = new AbcParse();
 	abcParser.parse(t);
 	//selection = editArea.getSelection();
 	playEmbedded.play(abcParser.getTune());

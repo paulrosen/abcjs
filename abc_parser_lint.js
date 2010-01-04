@@ -189,16 +189,19 @@ var AbcParserLint = Class.create({
 					items: { type: "object",
 						properties: {
 							subtitle: { type: "string", optional: true, prohibits: [ 'staff' ]  },
-							staff: { type: 'object', optional: true, prohibits: [ 'subtitle' ],
-								properties: {
-									curlyBrace: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
-									bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
-									connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
-									spacingBelow: { type: 'number', optional: true },
-									voices: { type: 'array', output: 'hidden',
-										items: {
-											type: "array", optional: true, output: "noindex",
-											items: voiceItem
+							staff: { type: 'array', optional: true, prohibits: [ 'subtitle' ],
+								items: { type: 'object',
+									properties: {
+										curlyBrace: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+										bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+										connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+										spacingBelow: { type: 'number', optional: true },
+										title: { type: 'array', optional: true, items: { type: 'string' } },
+										voices: { type: 'array', output: 'hidden',
+											items: {
+												type: "array", optional: true, output: "noindex",
+												items: voiceItem
+											}
 										}
 									}
 								}
@@ -214,6 +217,7 @@ var AbcParserLint = Class.create({
 						composer: { type: "string", optional: true },
 						discography: { type: "string", optional: true },
 						history: { type: "string", optional: true },
+						instruction: { type: "string", optional: true },
 						notes: { type: "string", optional: true },
 						origin: { type: "string", optional: true },
 						partOrder: { type: "string", optional: true },
