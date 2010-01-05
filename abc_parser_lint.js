@@ -224,8 +224,10 @@ var AbcParserLint = Class.create({
 						rhythm: { type: "string", optional: true },
 						source: { type: "string", optional: true },
 						tempo: { type: "object", optional: true, properties: {
-							duration: { type: "number"},	// TODO-PER: This can be an array of durations.
-							bpm: { type: "number"}
+							duration: { type: "array", optional: true, output: "join", requires: [ 'bpm'], items: { type: "number"} },
+							bpm: { type: "number", optional: true, requires: [ 'duration'] },
+							preString: { type: 'string', optional: true},
+							postString: { type: 'string', optional: true}
 						}},
 						title: { type: "string", optional: true },
 						transcription: { type: "string", optional: true },

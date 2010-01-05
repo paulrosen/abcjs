@@ -61,6 +61,10 @@ JSONSchema = {
 			str += "\t";
 		prettyPrint.push(str + message);
 	}
+	function appendPrint(message){
+		if (prettyPrint.length > 0)
+			prettyPrint[prettyPrint.length-1] += " " + message;
+	}
 
 		// validate a value against a property definition
 	function checkProp(value, schema, path,i, recursion){
@@ -154,13 +158,17 @@ JSONSchema = {
 								errors.concat(checkProp(value[i],schema.items[i],path,i, recursion));
 							}
 						}else{
+							var thisRecursion = (recursion===0)?1:recursion;	// TODO-PER-HACK: Not sure why the first case is different. Figure it out someday.
 							for(i=0,l=value.length; i<l; i++){
 								var nextRecursion = recursion;
 								if (schema.output !== 'noindex') {
 									nextRecursion++;
-									var thisRecursion = (recursion===0)?1:recursion;	// TODO-PER-HACK: Not sure why the first case is different. Figure it out someday.
-									if (typeof value[i] !== 'object')
-										addPrint(thisRecursion, (value[i]===null?'null':value[i]));
+									if (typeof value[i] !== 'object') {
+										if (schema.output === 'join')
+											appendPrint(value[i]===null?'null':value[i]);
+										else
+											addPrint(thisRecursion, (value[i]===null?'null':value[i]));
+									}
 									else
 										addPrint(thisRecursion, path.substring(path.lastIndexOf('.')+1) + " " + (i+1));
 								}

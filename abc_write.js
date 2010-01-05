@@ -474,7 +474,19 @@ ABCPrinter.prototype.printABC = function(abctune) {
   this.y+=20;
   if (abctune.metaText.author) {this.paper.text(100, this.y, abctune.metaText.author); this.y+=15;}
   if (abctune.metaText.origin) {this.paper.text(100, this.y, "(" + abctune.metaText.origin + ")");this.y+=15;}
-  if (abctune.metaText.tempo) {this.paper.text(100, this.y+20, "Tempo: " + abctune.metaText.tempo.duration + '=' + abctune.metaText.tempo.bpm); this.y+=15;}
+  if (abctune.metaText.tempo) {
+	  var tempo = "";
+	  if (abctune.metaText.tempo.preString) tempo += abctune.metaText.tempo.preString;
+	  tempo += ' | ';
+	  if (abctune.metaText.tempo.duration) {
+		  tempo += abctune.metaText.tempo.duration.join(' ');
+		  tempo += " = " + abctune.metaText.tempo.bpm + " ";
+	  }
+	  tempo += ' | ';
+	  if (abctune.metaText.tempo.postString) tempo += abctune.metaText.tempo.postString;
+	  this.paper.text(100, this.y+20, "Tempo: " + tempo);
+	  this.y+=15;
+  }
   this.y+=15;
   this.staffs = [];
   for(var line=0; line<abctune.lines.length; line++) {

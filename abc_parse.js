@@ -888,43 +888,74 @@ var AbcParse = Class.create({
 				words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
 			var word_list = [];
 			// first make a list of words from the string we are passed. A word is divided on either a space or dash.
-			var last_divider = -1;
+			var last_divider = 0;
 			var replace = false;
-			for (var i = 0; i < words.length; i++) {
-				if (words[i] === '*') {	// There may not be spaces between the astericks, so handle them separately
-					word_list.push({syllable: "*"});
-					last_divider = i;
-				} else if ((words[i] === ' ') || (words[i] === '-') || words[i] === '_' || words[i] === '|') {
-					var word = words.substring(last_divider+1, i).strip();
+			var addWord = function(i) {
+				var word = words.substring(last_divider, i).strip();
+				last_divider = i+1;
+				if (word.length > 0) {
 					if (replace)
 						word = word.gsub('~', ' ');
-					if (word.length > 0)
-						word_list.push({syllable: tokenizer.translateString(word), divider: words[i]});
-					last_divider = i;
-					if (words[i] === '_')
-						word_list.push({syllable: "*"});
-					else if (words[i] === '|')
-						; // TODO-PER: handle moving the pointer to the next bar
-				} else if (words[i] === '~')
-					replace = true;
+					var div = words[i];
+					if (div !== '_' && div !== '-')
+						div = ' ';
+					word_list.push({syllable: tokenizer.translateString(word), divider: div});
+					replace = false;
+					return true;
+				}
+				return false;
+			};
+			for (var i = 0; i < words.length; i++) {
+				switch (words[i]) {
+					case ' ':
+						addWord(i);
+						break;
+					case '-':
+						if (!addWord(i) && word_list.length > 0) {
+							word_list.last().divider = '-';
+							word_list.push({skip: true, to: 'next'});
+						}
+						break;
+					case '_':
+						addWord(i);
+						word_list.push({skip: true, to: 'slur'});
+						break;
+					case '*':
+						addWord(i);
+						word_list.push({skip: true, to: 'next'});
+						break;
+					case '|':
+						addWord(i);
+						word_list.push({skip: true, to: 'bar'});
+						break;
+					case '~':
+						replace = true;
+						break;
+				}
 			}
 
 			var inSlur = false;
 			line.each(function(el) {
-				if (el.el_type === 'note' && el.pitch !== null && word_list.length > 0) {
-					if (!inSlur) {
-						var lyric = word_list.shift();
-						if (lyric.syllable !== '*') {
+				if (word_list.length !== 0) {
+					if (word_list[0].skip) {
+						switch (word_list[0].to) {
+							case 'next': if (el.el_type === 'note' && el.pitch !== null && !inSlur) word_list.shift(); break;
+							case 'slur': if (el.el_type === 'note' && el.pitch !== null) word_list.shift(); break;
+							case 'bar': if (el.el_type === 'bar') word_list.shift(); break;
+						}
+					} else {
+						if (el.el_type === 'note' && el.pitch !== null && !inSlur) {
+							var lyric = word_list.shift();
 							if (el.lyric === undefined)
 								el.lyric = [ lyric ];
 							else
 								el.lyric.push(lyric);
 						}
 					}
-					if (el.endSlur === true || el.endTie === true)
-						inSlur = false;
-					if (el.startSlur === true || el.startTie === true)
-						inSlur = true;
+//					if (el.endSlur === true || el.endTie === true)
+//						inSlur = false;
+//					if (el.startSlur === true || el.startTie === true)
+//						inSlur = true;
 				}
 			});
 		};
@@ -1168,6 +1199,16 @@ var AbcParse = Class.create({
 			multilineVars.meter = null;
 		}
 
+		function resolveTempo() {
+			if (multilineVars.tempo) {	// If there's a tempo waiting to be resolved
+				var dur = multilineVars.default_length ? multilineVars.default_length / 8 : 1/8;
+				for (var i = 0; i < multilineVars.tempo.duration; i++)
+					multilineVars.tempo.duration[i] = dur * multilineVars.tempo.duration[i];
+				tune.metaText.tempo = multilineVars.tempo;
+				delete multilineVars.tempo;
+			}
+		}
+
 		//
 		// Parse line of music
 		//
@@ -1227,6 +1268,7 @@ var AbcParse = Class.create({
 		// back-tick, space, tab: space
 
 		var parseRegularMusicLine = function(line) {
+			resolveTempo();
 			multilineVars.havent_set_length = false;	// To late to set this now.
 			multilineVars.is_in_header = false;	// We should have gotten a key header by now, but just in case, this is definitely out of the header.
 			var i = 0;
@@ -1499,7 +1541,7 @@ var AbcParse = Class.create({
 			}
 		};
 
-		var setTempo = function(str) {
+		function setTempo(line, start, end) {
 			//Q - tempo; can be used to specify the notes per minute, e.g.   if
 			//the  default  note length is an eighth note then Q:120 or Q:C=120
 			//is 120 eighth notes per minute. Similarly  Q:C3=40  would  be  40
@@ -1507,69 +1549,101 @@ var AbcParse = Class.create({
 			//set,  e.g.  Q:1/8=120  is  also  120  eighth  notes  per  minute,
 			//irrespective of the default note length.
 			//
-			// This is either a number, "C=number", "Cnumber=number", or fraction=number
+			// This is either a number, "C=number", "Cnumber=number", or fraction [fraction...]=number
 			// It depends on the L: field, which may either not be present, or may appear after this.
 			// If L: is not present, an eighth note is used.
 			// That means that this field can't be calculated until the end, if it is the first three types, since we don't know if we'll see an L: field.
 			// So, if it is the fourth type, set it here, otherwise, save the info in the multilineVars.
 			// The temporary variables we keep are the duration and the bpm. In the first two forms, the duration is 1.
-			var commentStart = str.indexOf('%');	// get rid of any comment part
-			if (commentStart >= 0)
-				str = str.substring(0, commentStart);
-			str = str.strip();
-			if (str.length === 0)
-				return;	// just ignore a blank field.
+			// In addition, a quoted string may both precede and follow. If a quoted string is present, then the duration part is optional.
+			try {
+				var tokens = tokenizer.tokenize(line, start, end);
 
-			if (str[0] === 'C') {	// either type 2 or type 3
-				if (str.length >= 3 && str[1] === '=') {
-					// This is a type 2 format. The duration is an implied 1
-					var x = tokenizer.getInt(str.substring(2));
-					if (x.digits === 0)
-						return;	// TODO-PER: flag as an error.
-					multilineVars.tempo = {duration: 1, bpm: x.value};
-					return;
-				} else if (str.length >= 2 && str[1] >= '0' && str[1] <= '9') {
-					// This is a type 3 format.
-					var mult = tokenizer.getInt(str.substring(1));
-					str = str.substring(mult.digits+1);
-					if (str.length < 2 || str[0] !== '=')
-						return;	// TODO-PER: flag an error
-					var speed = tokenizer.getInt(str.substring(1));
-					if (speed.digits === 0)
-						return;	// TODO-PER: flag as an error.
-					multilineVars.tempo = {duration: mult.value, bpm: speed.value};
-					return;
-				}	// TODO-PER: if it isn't one of the above, flag as an error
+				if (tokens.length === 0) throw "Missing parameter in Q: field";
 
-			} else if (str[0] >= '0' && str[0] <= '9') {	// either type 1 or type 4
-				var num = tokenizer.getInt(str);
-				if (num.digits === 0)
-					return;	// TODO-PER: flag as an error.
-				str = str.substring(num.digits);
-				if (str.length === 0 || str[0] !== '/') {
-					// This is type 1
-					multilineVars.tempo = {duration: 1, bpm: num.value};
-					return;
+				multilineVars.tempo = {};
+				var delaySet = true;
+				var token = tokens.shift();
+				if (token.type === 'quote') {
+					multilineVars.tempo.preString = token.token;
+					token = tokens.shift();
+					if (tokens.length === 0) {	// It's ok to just get a string for the tempo
+						tune.metaText.tempo = multilineVars.tempo;
+						delete multilineVars.tempo;
+						return;
+					}
 				}
-				str = str.substring(1);
-				var num2 = tokenizer.getInt(str);
-				if (num2.digits === 0)
-					return;	// TODO-PER: flag as an error.
+				if (token.type === 'alpha' && token.token === 'C')	 { // either type 2 or type 3
+					if (tokens.length === 0) throw "Missing tempo after C in Q: field";
+					token = tokens.shift();
+					if (token.type === 'punct' && token.token === '=') {
+						// This is a type 2 format. The duration is an implied 1
+						if (tokens.length === 0) throw "Missing tempo after = in Q: field";
+						token = tokens.shift();
+						if (token.type !== 'number') throw "Expected number after = in Q: field";
+						multilineVars.tempo.duration = [1];
+						multilineVars.tempo.bpm = parseInt(token.token);
+					} else if (token.type === 'number') {
+						// This is a type 3 format.
+						multilineVars.tempo.duration = [parseInt(token.token)];
+						if (tokens.length === 0) throw "Missing = after duration in Q: field";
+						token = tokens.shift();
+						if (token.type !== 'punct' || token.token !== '=') throw "Expected = after duration in Q: field";
+						if (tokens.length === 0) throw "Missing tempo after = in Q: field";
+						token = tokens.shift();
+						if (token.type !== 'number') throw "Expected number after = in Q: field";
+						multilineVars.tempo.bpm = parseInt(token.token);
+					} else throw "Expected number or equal after C in Q: field";
 
-				str = str.substring(num2.digits);
-				str = str.strip();
-
-				if (str.length === 0 || str[0] !== '=')
-					return;	// TODO-PER: flag as an error.
-
-				str = str.substring(1).strip();
-				var num3 = tokenizer.getInt(str);
-				if (num3.digits === 0)
-					return;	// TODO-PER: flag as an error.
-				tune.metaText.tempo = {duration: num.value/num2.value, bpm: num3.value};
+				} else if (token.type === 'number') {	// either type 1 or type 4
+					var num = parseInt(token.token);
+					if (tokens.length === 0 || tokens[0].type === 'quote') {
+						// This is type 1
+						multilineVars.tempo.duration = [1];
+						multilineVars.tempo.bpm = num;
+					} else {	// This is type 4
+						delaySet = false;
+						token = tokens.shift();
+						if (token.type !== 'punct' && token.token !== '/') throw "Expected fraction in Q: field";
+						token = tokens.shift();
+						if (token.type !== 'number') throw "Expected fraction in Q: field";
+						var den = parseInt(token.token);
+						multilineVars.tempo.duration = [num/den];
+						// We got the first fraction, keep getting more as long as we find them.
+						while (tokens.length > 0  && tokens[0].token !== '=' && tokens[0].type !== 'quote') {
+							token = tokens.shift();
+							if (token.type !== 'number') throw "Expected fraction in Q: field";
+							num = parseInt(token.token);
+							token = tokens.shift();
+							if (token.type !== 'punct' && token.token !== '/') throw "Expected fraction in Q: field";
+							token = tokens.shift();
+							if (token.type !== 'number') throw "Expected fraction in Q: field";
+							den = parseInt(token.token);
+							multilineVars.tempo.duration.push(num/den);
+						}
+						token = tokens.shift();
+						if (token.type !== 'punct' && token.token !== '=') throw "Expected = in Q: field";
+						token = tokens.shift();
+						if (token.type !== 'number') throw "Expected tempo in Q: field";
+						multilineVars.tempo.bpm = parseInt(token.token);
+					}
+				} else throw "Unknown value in Q: field";
+				if (tokens.length !== 0) {
+					token = tokens.shift();
+					if (token.type === 'quote') {
+						multilineVars.tempo.postString = token.token;
+						token = tokens.shift();
+					}
+					if (tokens.length !== 0) throw "Unexpected string at end of Q: field";
+				}
+				if (!delaySet) {
+					tune.metaText.tempo = multilineVars.tempo;
+					delete multilineVars.tempo;
+				}
+			} catch (msg) {
+				warn(msg, line, start);
 			}
-			// TODO-PER: if it isn't one of the above, flag as an error
-		};
+		}
 
 		var metaTextHeaders = {
 			A: 'author',
@@ -1608,11 +1682,7 @@ var AbcParse = Class.create({
 						{
 							case  'K':
 								// since the key is the last thing that can happen in the header, we can resolve the tempo now
-								if (multilineVars.tempo) {	// If there's a tempo waiting to be resolved
-									var dur = multilineVars.default_length ? multilineVars.default_length / 8 : 1/8;
-									tune.metaText.tempo = {duration: dur * multilineVars.tempo.duration, bpm: multilineVars.tempo.bpm};
-									multilineVars.tempo = null;
-								}
+								resolveTempo();
 								var result = parseKey(line.substring(2));
 								if (!multilineVars.is_in_header && tune.hasBeginMusic()) {
 									if (result.foundClef)
@@ -1646,7 +1716,7 @@ var AbcParse = Class.create({
 									multilineVars.partForNextLine = tokenizer.translateString(tokenizer.stripComment(line.substring(2)));
 								break;
 							case  'Q':
-								setTempo(line.substring(2));
+								setTempo(line, 2, line.length);
 								break;
 							case  'T':
 								setTitle(line.substring(2));

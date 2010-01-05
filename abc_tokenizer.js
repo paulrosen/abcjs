@@ -296,6 +296,42 @@ var AbcTokenizer = Class.create({
 			return {start: start, end: end};
 		};
 
+		this.tokenize = function(line, start, end) {
+			// this returns all the tokens inside the passed string. A token is a punctuation mark, a string of digits, a string of letters.
+			//  Quoted strings are one token.
+			// The type of token is returned: quote, alpha, number, punct
+			var ret = this.getMeat(line, start, end);
+			start = ret.start;
+			end = ret.end;
+			var tokens = [];
+			var i;
+			while (start < end) {
+				if (line[start] === '"') {
+					i = start+1;
+					while (i < end && line[i] !== '"') i++;
+					tokens.push({ type: 'quote', token: line.substring(start+1, i)});
+					i++;
+				} else if ((line[start] >= 'A' && line[start] <= 'Z') || (line[start] >= 'a' && line[start] <= 'z')) {
+					i = start+1;
+					while (i < end && ((line[i] >= 'A' && line[i] <= 'Z') || (line[i] >= 'a' && line[i] <= 'z'))) i++;
+					tokens.push({ type: 'alpha', token: line.substring(start, i)});
+					start = i + 1;
+				} else if ((line[start] >= '0' && line[start] <= '9')) {
+					i = start+1;
+					while (i < end && line[i] >= '0' && line[i] <= '9') i++;
+					tokens.push({ type: 'number', token: line.substring(start, i)});
+					start = i + 1;
+				} else if (line[start] === ' ') {
+					i = start+1;
+				} else {
+					tokens.push({ type: 'punct', token: line[start]});
+					i = start+1;
+				}
+				start = i;
+			}
+			return tokens;
+		}
+
 		this.getVoiceToken = function(line, start, end) {
 			// This finds the next token. A token is delimited by a space or an equal sign. If it starts with a quote, then the portion between the quotes is returned.
 			var i = start;
