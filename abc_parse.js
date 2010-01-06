@@ -26,6 +26,7 @@ var AbcParse = Class.create({
 				this.next_note_duration = 0;
 				this.start_new_line = true;
 				this.is_in_header = true;
+				this.is_in_history = false;
 				this.partForNextLine = "";
 				this.havent_set_length = true;
 				this.tempo = null;
@@ -42,7 +43,10 @@ var AbcParse = Class.create({
 		};
 		
 		var warn = function(str, line, col_num) {
-			var clean_line = line.substring(0, col_num).gsub('\x12', ' ') + '\n' + line[col_num] + '\n' + line.substring(col_num+1).gsub('\x12', ' ');
+			var bad_char = line[col_num];
+			if (bad_char === ' ')
+				bad_char = "SPACE";
+			var clean_line = line.substring(0, col_num).gsub('\x12', ' ') + '\n' + bad_char + '\n' + line.substring(col_num+1).gsub('\x12', ' ');
 			clean_line = clean_line.gsub('&', '&amp;').gsub('<', '&lt;').gsub('>', '&gt;').replace('\n', '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">').replace('\n', '</span>');
 			addWarning("Music Line:" + tune.getNumLines() + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
 		};
@@ -456,6 +460,9 @@ var AbcParse = Class.create({
 						return [ line.length ];
 					case "L:":
 					case "Q:":
+						// TODO-PER: handle these
+						return [ line.length, line[i], line.substring(2).strip()];
+						break;
 					case "V:":
 						parseVoice(line, 2, line.length);
 //						setCurrentVoice(line.substring(2).strip());
@@ -518,15 +525,27 @@ var AbcParse = Class.create({
 						else {
 							ret.triplet = line[i+1] - '0';
 							if (i+2 < line.length && line[i+2] === ':') {
-								// We are expecting two colons and a number, which is the duration multiplier.
+								// We are expecting "(p:q:r" or "(p:q" or "(p::r" we are only interested in the first number (p) and the number of notes (r)
+								// if r is missing, then it is equal to p.
 								if (i+3 < line.length && line[i+3] === ':') {
 									if (i+4 < line.length && (line[i+4] >= '1' && line[i+4] <= '9')) {
 										ret.num_notes = line[i+4] - '0';
 										i += 3;
 									} else
 										warn("expected number after the two colons after the triplet to mark the duration", line, i);
+								} else if (i+3 < line.length && (line[i+3] >= '1' && line[i+3] <= '9')) {
+									// ignore this middle number
+									if (i+4 < line.length && line[i+4] === ':') {
+										if (i+5 < line.length && (line[i+5] >= '1' && line[i+5] <= '9')) {
+											ret.num_notes = line[i+5] - '0';
+											i += 4;
+										}
+									} else {
+										ret.num_notes = ret.triplet;
+										i += 3;
+									}
 								} else
-									warn("expected two colons after the triplet to mark the duration", line, i);
+									warn("expected number after the triplet to mark the duration", line, i);
 							}
 						}
 						i++;
@@ -1430,6 +1449,10 @@ var AbcParse = Class.create({
 										inTieChord[el.pitches.length] = true;
 
 									i  = chordNote.endChar;
+								} else if (line[i] === ' ') {
+									// Spaces are not allowed in chords, but we can recover from it by ignoring it.
+									warn("Spaces are not allowed in chords", line, i);
+									i++;
 								} else {
 									if (i < line.length && line[i] === ']') {
 										// consume the close bracket
@@ -1651,7 +1674,6 @@ var AbcParse = Class.create({
 			C: 'composer',
 			D: 'discography',
 			F: 'url',
-			H: 'history',
 			I: 'instruction',
 			N: 'notes',
 			O: 'origin',
@@ -1680,6 +1702,10 @@ var AbcParse = Class.create({
 					} else {
 						switch(line[0])
 						{
+							case  'H':
+								tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+								multilineVars.is_in_history = true;
+								break;
 							case  'K':
 								// since the key is the last thing that can happen in the header, we can resolve the tempo now
 								resolveTempo();
@@ -1754,7 +1780,14 @@ var AbcParse = Class.create({
 			strTune = strTune.replace(/\\([ \t]*)\n/g, "$1 \x12");	// take care of line continuations right away, but keep the same number of characters
 			var lines = strTune.split('\n');
 			lines.each( function(line) {
-				parseLine(line);
+				if (multilineVars.is_in_history) {
+					if (line[1] === ':') {
+						multilineVars.is_in_history = false;
+						parseLine(line);
+					} else
+						tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
+				} else
+					parseLine(line);
 				multilineVars.iChar += line.length + 1;
 			});
 			tune.cleanUp();
