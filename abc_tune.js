@@ -85,6 +85,20 @@ var AbcTune = Class.create({
 		this.reset();
 	},
 
+	addTieToLastNote: function() {
+		if (this.lines[this.lineNum] && this.lines[this.lineNum].staff && this.lines[this.lineNum].staff[this.staffNum] &&
+			this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum]) {
+			for (var i = this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum].length-1; i >= 0; i--) {
+				var el = this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum][i];
+				if (el.el_type === 'note') {
+					el.startTie = true;
+					return true;
+				}
+			}
+		}
+		return false;
+	},
+
 	appendElement: function(type, startChar, endChar, hashParams)
 	{
 		hashParams.el_type = type;
@@ -208,9 +222,9 @@ var AbcTune = Class.create({
 	},
 
 	addMetaText: function(key, value) {
-			if (this.metaText[key] === undefined)
-				this.metaText[key] = value;
-			else
-				this.metaText[key] += "\n" + value;
+		if (this.metaText[key] === undefined)
+			this.metaText[key] = value;
+		else
+			this.metaText[key] += "\n" + value;
 	}
 });

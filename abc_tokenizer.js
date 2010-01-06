@@ -74,7 +74,7 @@ var AbcTokenizer = Class.create({
 			if (finished(str, i))
 				return {len: 0};
 			var firstThree = str.substring(i,i+3).toLowerCase();
-			if (firstThree.length > 1 && firstThree[1] === ' ') firstThree = firstThree[0];	// This will handle the case of 'm'
+			if (firstThree.length > 1 && firstThree[1] === ' ' || firstThree[1] === '^' || firstThree[1] === '_' || firstThree[1] === '=') firstThree = firstThree[0];	// This will handle the case of 'm'
 			switch (firstThree) {
 				case 'mix':return {len: skipAlpha(str, i), token: 'Mix'};
 				case 'dor':return {len: skipAlpha(str, i), token: 'Dor'};

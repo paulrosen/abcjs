@@ -33,6 +33,7 @@ var AbcParse = Class.create({
 				this.voices = {};
 				this.currentVoice = null;
 				this.staves = [];
+				this.macros = {};
 			}
 		};
 
@@ -343,7 +344,14 @@ var AbcParse = Class.create({
 
 		var letter_to_accent = function(line, i)
 		{
-			switch (line[i])
+//			var ch = line[i];
+//			var macro = multilineVars.macros[ch];
+//
+//			if (macro !== undefined) {
+//				ch = macro;
+//				i = 0;
+//			}
+			switch (ch)
 			{
 				case '.':return [1, 'staccato'];
 				case 'u':return [1, 'upbow'];
@@ -927,6 +935,7 @@ var AbcParse = Class.create({
 			for (var i = 0; i < words.length; i++) {
 				switch (words[i]) {
 					case ' ':
+					case '\x12':
 						addWord(i);
 						break;
 					case '-':
@@ -1137,7 +1146,13 @@ var AbcParse = Class.create({
 						} else return null;
 						break;
 					case '-':
-						if (state === 'octave' || state === 'duration' || state === 'end_slur') {
+						if (state === 'startSlur') {
+							// This is the first character, so it must have been meant for the previous note. Correct that here.
+							if (tune.addTieToLastNote())
+								el.endTie = true;
+							else
+								warn("Illegal tie before any other note", line, index);
+						} else if (state === 'octave' || state === 'duration' || state === 'end_slur') {
 							el.startTie = true;
 							if (!durationSetByPreviousNote && canHaveBrokenRhythm)
 								state = 'broken_rhythm';
@@ -1564,6 +1579,34 @@ var AbcParse = Class.create({
 			}
 		};
 
+		function addUserDefinition(line, start, end) {
+			var equals = line.indexOf('=', start);
+			if (equals === -1) {
+				warn("Need an = in a macro definition", line, start);
+				return;
+			}
+
+			var before = line.substring(start, equals).strip();
+			var after = line.substring(equals+1).strip();
+
+			if (before.length !== 1) {
+				warn("Macro definitions can only be one character", line, start);
+				return;
+			}
+			var legalChars = "HIJKLMNOPQRSTUVWhijklmnopqrstuvw~";
+			if (legalChars.indexOf(before) === -1) {
+				warn("Macro definitions must be H-W, h-w, or tilde", line, start);
+				return;
+			}
+			if (after.length === 0) {
+				warn("Missing macro definition", line, start);
+				return;
+			}
+			if (multilineVars.macros === undefined)
+				multilineVars.macros = {};
+			multilineVars.macros[before] = after;
+		}
+
 		function setTempo(line, start, end) {
 			//Q - tempo; can be used to specify the notes per minute, e.g.   if
 			//the  default  note length is an eighth note then Q:120 or Q:C=120
@@ -1747,6 +1790,9 @@ var AbcParse = Class.create({
 							case  'T':
 								setTitle(line.substring(2));
 								break;
+							case 'U':
+								addUserDefinition(line, 2, line.length);
+								break;
 							case  'V':
 								parseVoice(line, 2, line.length);
 								if (!multilineVars.is_in_header)
@@ -1777,8 +1823,11 @@ var AbcParse = Class.create({
 			// Take care of whatever line endings come our way
 			strTune = strTune.gsub('\x12\n', '\n');
 			strTune = strTune.gsub('\x12', '\n');
+			strTune += '\n';	// Tacked on temporarily to make the last line continuation work
 			strTune = strTune.replace(/\\([ \t]*)\n/g, "$1 \x12");	// take care of line continuations right away, but keep the same number of characters
 			var lines = strTune.split('\n');
+			if (lines.last().length === 0)	// remove the blank line we added above.
+				lines.pop();
 			lines.each( function(line) {
 				if (multilineVars.is_in_history) {
 					if (line[1] === ':') {
