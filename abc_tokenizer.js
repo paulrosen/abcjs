@@ -342,7 +342,7 @@ var AbcTokenizer = Class.create({
 				var close = line.indexOf('"', i+1);
 				if (close === -1 || close >= end)
 					return {len: 1, err: "Missing close quote"};
-				return {len: close-start, token: this.translateString(line.substring(i+1, close))};
+				return {len: close-start+1, token: this.translateString(line.substring(i+1, close))};
 			} else {
 				var ii = i;
 				while (ii < end && !this.isWhiteSpace(line[ii]) && line[ii] !== '=')
@@ -365,9 +365,10 @@ var AbcTokenizer = Class.create({
 			"ae": "æ", "AE": "Æ", "oe": "œ", "OE": "Œ", "ss": "ß",
 			"'c": "ć", "^c": "ĉ", "uc": "č", "cc": "ç", ".c": "ċ", "cC": "Ç", "'C": "Ć", "^C": "Ĉ", "uC": "Č", ".C": "Ċ",
 			"~n": "ñ",
-			"=s": "š"
+			"=s": "š", "vs": "š",
+			"vz": 'ž'
 
-// More chars: Ñ Ĳ ĳ Ď ď Đ đ Ĝ ĝ Ğ ğ Ġ ġ Ģ ģ Ĥ ĥ Ħ ħ Ĵ ĵ Ķ ķ ĸ Ĺ ĺ Ļ ļ Ľ ľ Ŀ ŀ Ł ł Ń ń Ņ ņ Ň ň ŉ Ŋ ŋ   Ŕ ŕ Ŗ ŗ Ř ř Ś ś Ŝ ŝ Ş ş Š Ţ ţ Ť ť Ŧ ŧ Ŵ ŵ Ŷ ŷ Ÿ ÿ Ÿ Ź ź Ż ż Ž ž
+// More chars: Ñ Ĳ ĳ Ď ď Đ đ Ĝ ĝ Ğ ğ Ġ ġ Ģ ģ Ĥ ĥ Ħ ħ Ĵ ĵ Ķ ķ ĸ Ĺ ĺ Ļ ļ Ľ ľ Ŀ ŀ Ł ł Ń ń Ņ ņ Ň ň ŉ Ŋ ŋ   Ŕ ŕ Ŗ ŗ Ř ř Ś ś Ŝ ŝ Ş ş Š Ţ ţ Ť ť Ŧ ŧ Ŵ ŵ Ŷ ŷ Ÿ ÿ Ÿ Ź ź Ż ż Ž 
 		};
 		var charMap2 = {
 			"251": "©"

@@ -28,7 +28,7 @@ var AbcTuneBook = Class.create({
 			var arrDir = dir.abc.split('\n');
 			arrDir.each(function(line) {
 				if (line.startsWith('%%'))
-					directives += '\n' + line;
+					directives += line + '\n';
 			});
 		}
 		// Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
@@ -36,7 +36,7 @@ var AbcTuneBook = Class.create({
 			var end = tune.abc.indexOf('\n\n');
 			if (end > 0)
 				tune.abc = tune.abc.substring(0, end);
-			tune.abc += directives;
+			tune.abc = directives + tune.abc;
 		});
 	}
 });

@@ -503,6 +503,9 @@ ABCPrinter.prototype.printABC = function(abctune) {
     } else if (abcline.subtitle) {
       this.printSubtitleLine(abcline);
       this.y+=20; //hardcoded
+    } else if (abcline.text) {
+      this.paper.text(100, this.y, "TEXT: " + abcline.text);
+      this.y+=20; //hardcoded
     }
   }
   var extraText = "";	// TODO-PER: This is just an easy way to display this info for now.
@@ -698,8 +701,10 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
     }
 
     if (elem.pitches[p].endTie) {
-      this.ties[0].anchor2=notehead;
-      this.ties = this.ties.slice(1,this.ties.length);
+      if (this.ties[0]) {
+        this.ties[0].anchor2=notehead;
+        this.ties = this.ties.slice(1,this.ties.length);
+	  }
     }
 
     if (elem.pitches[p].startTie) {
@@ -731,6 +736,10 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
   
   if (elem.decoration) {
     this.printDecoration(elem.decoration, pitch, (notehead)?notehead.w:0, abselem);
+  }
+
+  if (elem.barNumber) {
+      abselem.addChild(new ABCRelativeElement(elem.barNumber, -10, 0, 0, {type:"debug"}));
   }
 
   // ledger lines
@@ -899,8 +908,8 @@ ABCPrinter.prototype.printBarLine = function (elem) {
     abselem.addRight(new ABCRelativeElement(".", dx, 1, 4.75));
   } // 2 is hardcoded
 
-  if (elem.number) {
-    this.partstartelem = new ABCEndingElem(elem.number, anchor, null);
+  if (elem.ending) {
+    this.partstartelem = new ABCEndingElem(elem.ending, anchor, null);
     this.staff.addOther(this.partstartelem);
   } 
 
@@ -947,8 +956,12 @@ ABCPrinter.prototype.printTimeSignature= function(elem) {
   var abselem = new ABCAbsoluteElement(elem,0,20);
   if (elem.type === "specified") {
     //TODO make the alignment for time signatures centered
-    abselem.addRight(new ABCRelativeElement(elem.num, 0, this.glyphs.getSymbolWidth(elem.num[0]), 9));
-    abselem.addRight(new ABCRelativeElement(elem.den, 0, this.glyphs.getSymbolWidth(elem.den[0]), 5));
+	for (var i = 0; i < elem.value.length; i++) {
+	  if (i !== 0)	// TODO-PER: I used '9' where it should be + to make if visible for now.
+        abselem.addRight(new ABCRelativeElement('9', i*15-7, this.glyphs.getSymbolWidth(elem.value[i].num[0]), 7));
+    abselem.addRight(new ABCRelativeElement(elem.value[i].num.replace('+', '9'), i*15, this.glyphs.getSymbolWidth(elem.value[i].num[0]), 9));
+    abselem.addRight(new ABCRelativeElement(elem.value[i].den, i*15, this.glyphs.getSymbolWidth(elem.value[i].den[0]), 5));
+	}
   } else if (elem.type === "common_time") {
     abselem.addRight(new ABCRelativeElement("c", 0, this.glyphs.getSymbolWidth("c"), 7));
 

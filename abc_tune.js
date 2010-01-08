@@ -137,6 +137,10 @@ var AbcTune = Class.create({
 		this.lines.push({subtitle: str});
 	},
 
+	addText: function(str) {
+		this.lines.push({text: str});
+	},
+
 	containsNotes: function(voice) {
 		for (var i = 0; i < voice.length; i++) {
 			if (voice[i].el_type === 'note' || voice[i].el_type === 'bar')
@@ -161,14 +165,15 @@ var AbcTune = Class.create({
 			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum] = [];
 			if (params.part)
 				This.appendElement('part', params.startChar, params.endChar, {title: params.part});
-			This.appendStartingElement('clef', params.startChar, params.endChar, {type: params.clef });
+			This.appendStartingElement('clef', params.startChar, params.endChar, params.clef );
 			This.appendStartingElement('key', params.startChar, params.endChar, params.key);
 			if (params.meter !== undefined)
 				This.appendStartingElement('meter', params.startChar, params.endChar, params.meter);
 		};
 		var createStaff = function(params) {
 			This.lines[This.lineNum].staff[This.staffNum] = { voices: [ ]};
-			if (params.name) this.lines[This.lineNum].staff[This.staffNum].title = params.name;
+			if (params.name) This.lines[This.lineNum].staff[This.staffNum].title = params.name;
+			if (params.fontVocal) This.lines[This.lineNum].staff[This.staffNum].fontVocal = params.fontVocal;
 			createVoice(params);
 		};
 		var createLine = function(params) {

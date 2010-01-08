@@ -29,7 +29,9 @@ var AbcParserLint = Class.create({
 				{ value: "clef", properties: {
 					startChar: { type: 'number', output: 'hidden' },
 					endChar: { type: 'number', output: 'hidden' },
-					type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] }
+					type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] },
+					middle: { type: 'string', optional: true, Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'A,', 'B,', 'C,', 'D,', 'E,', 'F,', 'G,',
+							'A,,', 'B,,', 'C,,', 'D,,', 'E,,', 'F,,', 'G,,', 'a\'', 'b\'', 'c\'', 'd\'', 'e\'', 'f\'', 'g\'', 'a\'\'', 'b\'\'', 'c\'\'', 'd\'\'', 'e\'\'', 'f\'\'', 'g\'\'' ] }
 				} },
 				{ value: "bar", properties: {
 					startChar: { type: 'number', output: 'hidden' },
@@ -40,7 +42,7 @@ var AbcParserLint = Class.create({
 						}
 					},
 					decoration: decorationList,
-					number: { type: 'string', optional: true },	// TODO-PER: change the name of this to "ending"
+					ending: { type: 'string', optional: true },
 					type: { type: 'string', Enum: [ 'bar_dbl_repeat', 'bar_right_repeat', 'bar_left_repeat', 'bar_invisible', 'bar_thick_thin', 'bar_thin_thin', 'bar_thin', 'bar_thin_thick' ] }
 				} },
 				{ value: "key", properties: {
@@ -62,9 +64,15 @@ var AbcParserLint = Class.create({
 				{ value: "meter", properties: {
 					startChar: { type: 'number', output: 'hidden' },
 					endChar: { type: 'number', output: 'hidden' },
-					type: { type: 'string' },
-					num: { type: 'string', optional: true },	// TODO-PER: Check for type=specified and require these in that case.
-					den: { type: 'string', optional: true }
+					type: { type: 'string', Enum: [ 'common_time', 'cut_time', 'specified' ] },
+					value: { type: 'array', optional: true, output: 'noindex',	// TODO-PER: Check for type=specified and require these in that case.
+						items: {
+							type: 'object', properties: {
+								num: { type: 'string' },
+								den: { type: 'string' }
+							}
+						}
+					}
 				} },
 				{ value: "part", properties: {
 					startChar: { type: 'number', output: 'hidden' },
@@ -76,6 +84,7 @@ var AbcParserLint = Class.create({
 					startChar: { type: 'number', output: 'hidden' },
 					endChar: { type: 'number', output: 'hidden' },
 					accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
+					barNumber: { type: 'number', optional: true },
 					chord: { type: 'object', optional: true, properties: {
 							name: { type: 'string'},
 							position: { type: 'string'}
@@ -136,15 +145,12 @@ var AbcParserLint = Class.create({
 						bagpipes: { type: "boolean", optional: true },
 						barlabelfont: { type: "string", optional: true },
 						barnumberfont: { type: "string", optional: true },
-						barnumbers: { type: "string", optional: true },
 						barnumfont: { type: "string", optional: true },
-						begintext: { type: "string", optional: true },
 						botmargin: { type: "string", optional: true },
 						botspace: { type: "string", optional: true },
 						composerfont: { type: "string", optional: true },
 						composerspace: { type: "string", optional: true },
 						continuous: { type: "string", optional: true },
-						endtext: { type: "string", optional: true },
 						gchordfont: { type: "string", optional: true },
 						indent: { type: "string", optional: true },
 						landscape: { type: "string", optional: true },
@@ -170,14 +176,12 @@ var AbcParserLint = Class.create({
 						systemsep: { type: "string", optional: true },
 						tempofont: { type: "string", optional: true },
 						textspace: { type: "string", optional: true },
-						text: { type: "string", optional: true },
 						titlecaps: { type: "string", optional: true },
 						titlefont: { type: "string", optional: true },
 						titleleft: { type: "string", optional: true },
 						titlespace: { type: "string", optional: true },
 						topmargin: { type: "string", optional: true },
 						topspace: { type: "string", optional: true },
-						vocalfont: { type: "string", optional: true },
 						vocalspace: { type: "string", optional: true },
 						voicefont: { type: "string", optional: true },
 						wordsspace: { type: "string", optional: true }
@@ -188,13 +192,19 @@ var AbcParserLint = Class.create({
 					description: "This is an array of horizontal elements. It is usually a staff of music. For multi-stave music, each staff is an element, just like single-staff. The difference is the connector properties.",
 					items: { type: "object",
 						properties: {
-							subtitle: { type: "string", optional: true, prohibits: [ 'staff' ]  },
-							staff: { type: 'array', optional: true, prohibits: [ 'subtitle' ],
+							subtitle: { type: "string", optional: true, prohibits: [ 'staff', 'text' ]  },
+							text: { type: "string", optional: true, prohibits: [ 'staff', 'subtitle' ]  },
+							staff: { type: 'array', optional: true, prohibits: [ 'subtitle', 'text' ],
 								items: { type: 'object',
 									properties: {
 										curlyBrace: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 										bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 										connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+										fontVocal: { type: 'object', optional: true,
+											properties: {
+												font: { type: 'string', optional: true },
+												size: { type: 'number', optional: true }
+											} },
 										spacingBelow: { type: 'number', optional: true },
 										title: { type: 'array', optional: true, items: { type: 'string' } },
 										voices: { type: 'array', output: 'hidden',
@@ -229,6 +239,7 @@ var AbcParserLint = Class.create({
 							preString: { type: 'string', optional: true},
 							postString: { type: 'string', optional: true}
 						}},
+						textBlock: { type: "string", optional: true },
 						title: { type: "string", optional: true },
 						transcription: { type: "string", optional: true },
 						unalignedWords: { type: "string", optional: true },
