@@ -89,8 +89,12 @@ function abc_mousemove() {
 
 function writeOneTune(tune, warnings, count) {
 	if (warnings) {
+	  if (warnings.join) {
 		warnings = warnings.join("<br />");
 		$('warnings').update(warnings);
+	  } else {
+	    throw warnings;
+	  }
 	}
 	else
 		$('warnings').update('No errors');
