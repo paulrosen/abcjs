@@ -24,6 +24,15 @@ var ABCGlyphs = function(paper) {
      if (glyphs[symbol]) return glyphs[symbol].h;
      return 0;
    };
+
+  this.getSymbolAlign = function (symbol) {
+    if (symbol.substring(0,7)==="scripts" && 
+	symbol!=="scripts.roll" &&
+	symbol!=="scripts.staccato") {
+      return "center";
+    }
+    return "left";
+  }
    
    this.getYCorr = function (symbol) {
      switch(symbol) {
@@ -46,6 +55,9 @@ var ABCGlyphs = function(paper) {
      case "rests.8th": return -1;
      case "rests.quarter": return -2;
      case "rests.16th": return -1;
+     case "rests.32nd": return -1;
+     case "rests.64th": return -1;
+     case "clefs.G": return -1;
      default: return 0;
      }
    };

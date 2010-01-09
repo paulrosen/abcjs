@@ -641,7 +641,7 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
   var duration = getDuration(elem);
   var durlog = Math.floor(Math.log(duration)/Math.log(2));
   
-  var chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "\rests.64th", 7: "rests.128th"},
+  var chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
 		   note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter"},
 		   uflags:{3:"flags.u8th", 4:"flags.u16th", 5:"flags.u32nd", 6:"flags.u64th"},
 		   dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}};
@@ -745,8 +745,8 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
   
   // draw stem from the furthest note to a pitch above/below the stemmed note
   if (!nostem && durlog<=-1 && !elem.rest_type) {
-    var p1 = (elem.averagepitch>=6) ? elem.pitches[0].pitch-7 : elem.pitches[elem.pitches.length-1].pitch+1/3;
-    var p2 = (elem.averagepitch>=6) ? elem.pitches[elem.pitches.length-1].pitch-1/3 : elem.pitches[0].pitch+7;
+    var p1 = (elem.averagepitch>=6) ? elem.pitches[0].pitch-7 : elem.pitches[0].pitch+1/3;
+    var p2 = (elem.averagepitch>=6) ? elem.pitches[elem.pitches.length-1].pitch-1/3 : elem.pitches[elem.pitches.length-1].pitch+7;
     var dx = (elem.averagepitch>=6)?0:abselem.heads[0].w;
     var width = (elem.averagepitch>=6)?1:-1;
     abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
@@ -764,7 +764,7 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
   if (elem.gracenotes !== undefined) {
     for (var i=elem.gracenotes.length-1; i>=0; i--) {
       roomtaken +=10; // hardcoded
-      var grace = new ABCRelativeElement("noteheads.quarter", -roomtaken, this.glyphs.getSymbolWidth("noteheads.quarter")/3, elem.gracenotes[i].pitch, {scalex:1/2, scaley: 1/2});
+      var grace = new ABCRelativeElement("noteheads.quarter", -roomtaken, this.glyphs.getSymbolWidth("noteheads.quarter")/3, elem.gracenotes[i].pitch, {scalex:3/5, scaley: 3/5});
       abselem.addExtra(grace);
       if (i==0) this.staff.addOther(new ABCTieElem(grace, notehead, false));
     }
@@ -881,7 +881,10 @@ ABCPrinter.prototype.printDecoration = function(decoration, pitch, width, absele
     }
     ypos=yslot;
     yslot+=3;
-    var deltax = (width-this.glyphs.getSymbolWidth(dec))/2;
+    var deltax = width/2;
+    if (this.glyphs.getSymbolAlign(dec)!=="center") {
+      deltax -= (this.glyphs.getSymbolWidth(dec)/2);
+    }
     abselem.addChild(new ABCRelativeElement(dec, deltax, this.glyphs.getSymbolWidth(dec), ypos));
   }
   (unknowndecs.length>0) && this.debugMsg(20,unknowndecs.join(','));
@@ -902,8 +905,8 @@ ABCPrinter.prototype.printBarLine = function (elem) {
   var seconddots = (elem.type==="bar_left_repeat" || elem.type==="bar_dbl_repeat");
 
   if (firstdots) {
-    abselem.addRight(new ABCRelativeElement(".", dx, 1, 6.75));
-    abselem.addRight(new ABCRelativeElement(".", dx, 1, 4.75));
+    abselem.addRight(new ABCRelativeElement("dots.dot", dx, 1, 7));
+    abselem.addRight(new ABCRelativeElement("dots.dot", dx, 1, 5));
     dx+=6; //2 hardcoded, twice;
   }
 
@@ -918,10 +921,10 @@ ABCPrinter.prototype.printBarLine = function (elem) {
   }
 
   if (thick) {
-    dx+=3; //3 hardcoded;    
-    anchor = new ABCRelativeElement(null, dx, 6, 2, {"type": "stem", "pitch2":10, scalex:8, linewidth:0.6});
+    dx+=6; //3 hardcoded;    
+    anchor = new ABCRelativeElement(null, dx, 4, 2, {"type": "stem", "pitch2":10, scalex:6, linewidth:0.6});
     abselem.addRight(anchor);
-    dx+=6;
+    dx+=4;
   }
   
   if (this.partstartelem && (thick || (firstthin && secondthin))) { // means end of nth part
@@ -938,8 +941,8 @@ ABCPrinter.prototype.printBarLine = function (elem) {
 
   if (seconddots) {
     dx+=3; //3 hardcoded;
-    abselem.addRight(new ABCRelativeElement(".", dx, 1, 6.75));
-    abselem.addRight(new ABCRelativeElement(".", dx, 1, 4.75));
+    abselem.addRight(new ABCRelativeElement("dots.dot", dx, 1, 7));
+    abselem.addRight(new ABCRelativeElement("dots.dot", dx, 1, 5));
   } // 2 is hardcoded
 
   if (elem.ending) {
