@@ -1,11 +1,22 @@
-/**
- * @author paulrosen
- *
- * This file takes as input the output of AbcParser and analyzes it to make sure there are no
- * unexpected elements in it. It also returns a person-readable version of it that is suitable
- * for regression tests.
- *
- */
+//    abc_parser_lint.js: Analyzes the output of abc_parse.
+//    Copyright (C) 2010 Paul Rosen (paul at paulrosen dot net)
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+//This file takes as input the output of AbcParser and analyzes it to make sure there are no
+//unexpected elements in it. It also returns a person-readable version of it that is suitable
+//for regression tests.
 
 /*global Class */
 /*global JSONSchema */
@@ -22,6 +33,21 @@ var AbcParserLint = Class.create({
 			"p", "pp", "f", "ff", "mf", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 			"upbow", "downbow", "staccato"
 		] } };
+
+		var tempoProperties =  {
+			duration: { type: "array", optional: true, output: "join", requires: [ 'bpm'], items: { type: "number"} },
+			bpm: { type: "number", optional: true, requires: [ 'duration'] },
+			preString: { type: 'string', optional: true},
+			postString: { type: 'string', optional: true}
+		};
+
+		var appendPositioning = function(properties) {
+			var ret = Object.clone(properties);
+			ret.startChar = { type: 'number', output: 'hidden' };
+			ret.endChar = { type: 'number', output: 'hidden' };
+			return ret;
+		}
+
 
 		var voiceItem = { type: "union",
 			field: "el_type",
@@ -50,7 +76,7 @@ var AbcParserLint = Class.create({
 					endChar: { type: 'number', output: 'hidden' },
 					extraAccidentals: { type: 'array', optional: true, output: "noindex", items: {
 							type: 'object', properties: {
-								acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp'] },
+								acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ] },
 								note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] }
 							}
 					} },
@@ -80,10 +106,12 @@ var AbcParserLint = Class.create({
 					title: { type: 'string' }
 				} },
 
+				{ value: 'tempo', properties: appendPositioning(tempoProperties) },
+
 				{ value: "note", properties: {
 					startChar: { type: 'number', output: 'hidden' },
 					endChar: { type: 'number', output: 'hidden' },
-					accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
+					accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
 					barNumber: { type: 'number', optional: true },
 					chord: { type: 'object', optional: true, properties: {
 							name: { type: 'string'},
@@ -114,7 +142,7 @@ var AbcParserLint = Class.create({
 						divider: { type: 'string', Enum: [ '-', ' ', '_' ]}
 					}}},
 				// TODO-PER: either pitch or pitches must be present. Test for that. Or, change it to just use pitches.
-					pitch: { optional: true, type: [ { type: 'number', prohibits: [ 'rest_type', 'pitches' ]}, { type: 'null', requires: ['rest_type'], prohibits: [ 'startSlur', 'startTie', 'startTriplet', 'endSlur', 'endTie', 'endTriplet', 'end_beam', 'grace_notes', 'lyric' ] } ] },
+					pitch: { optional: true, type: [ { type: 'number', prohibits: [ 'rest_type', 'pitches' ]}, { type: 'null', requires: ['rest_type'], prohibits: [ 'startSlur', 'startTie', 'startTriplet', 'endSlur', 'endTie', 'endTriplet', 'end_beam', 'lyric' ] } ] },
 					pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'pitch', 'duration' ], items: {
 							type: 'object', properties: {
 								endChar: { type: 'number', output: 'hidden' },
@@ -164,7 +192,6 @@ var AbcParserLint = Class.create({
 						playtempo: { type: "string", optional: true },
 						scale: { type: "number", optional: true },
 						score: { type: "string", optional: true },
-						sep: { type: "string", optional: true },
 						slurgraces: { type: "string", optional: true },
 						staffsep: { type: "string", optional: true },
 						staffwidth: { type: "number", optional: true },
@@ -192,12 +219,19 @@ var AbcParserLint = Class.create({
 					description: "This is an array of horizontal elements. It is usually a staff of music. For multi-stave music, each staff is an element, just like single-staff. The difference is the connector properties.",
 					items: { type: "object",
 						properties: {
-							subtitle: { type: "string", optional: true, prohibits: [ 'staff', 'text' ]  },
-							text: { type: "string", optional: true, prohibits: [ 'staff', 'subtitle' ]  },
-							staff: { type: 'array', optional: true, prohibits: [ 'subtitle', 'text' ],
+							separator: { type: 'object', optional: true, prohibits: [ 'staff', 'text', 'subtitle' ],
+								properties: {
+									lineLength: { type: 'number', optional: true },
+									spaceAbove: { type: 'number', optional: true },
+									spaceBelow: { type: 'number', optional: true }
+								}
+							},
+							subtitle: { type: "string", optional: true, prohibits: [ 'staff', 'text', 'separator' ]  },
+							text: { type: "string", optional: true, prohibits: [ 'staff', 'subtitle', 'separator' ]  },
+							staff: { type: 'array', optional: true, prohibits: [ 'subtitle', 'text', 'separator' ],
 								items: { type: 'object',
 									properties: {
-										curlyBrace: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+										brace: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 										bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 										connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 										fontVocal: { type: 'object', optional: true,
@@ -233,12 +267,7 @@ var AbcParserLint = Class.create({
 						partOrder: { type: "string", optional: true },
 						rhythm: { type: "string", optional: true },
 						source: { type: "string", optional: true },
-						tempo: { type: "object", optional: true, properties: {
-							duration: { type: "array", optional: true, output: "join", requires: [ 'bpm'], items: { type: "number"} },
-							bpm: { type: "number", optional: true, requires: [ 'duration'] },
-							preString: { type: 'string', optional: true},
-							postString: { type: 'string', optional: true}
-						}},
+						tempo: { type: "object", optional: true, properties: tempoProperties },
 						textBlock: { type: "string", optional: true },
 						title: { type: "string", optional: true },
 						transcription: { type: "string", optional: true },

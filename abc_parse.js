@@ -1,6 +1,18 @@
-/**
- * @author paulrosen
- */
+//    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
+//    Copyright (C) 2010 Paul Rosen (paul at paulrosen dot net)
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*global Class */
 /*extern AbcParse */
@@ -39,6 +51,7 @@ var AbcParse = Class.create({
 				this.barNumOnNextNote = null;
 				this.inTextBlock = false;
 				this.textBlock = "";
+				delete this.fontVocal;
 			}
 		};
 
@@ -455,8 +468,12 @@ var AbcParse = Class.create({
 						setDefaultLength(line, i+3, e);
 						return [ e-i+1+ws ];
 					case "[Q:":
-						if (e > 0)
+						if (e > 0) {
+							var tempo = setTempo(line, i+3, e);
+							if (tempo.type === 'delaySet') tune.appendElement('tempo', -1, -1, calcTempo(tempo.tempo));
+							else if (tempo.type === 'immediate') tune.appendElement('tempo', -1, -1, tempo.tempo);
 							return [ e-i+1+ws, line[i+1], line.substring(i+3, e)];
+						}
 						break;
 					case "[V:":
 						if (e > 0) {
@@ -500,8 +517,12 @@ var AbcParse = Class.create({
 						setDefaultLength(line, i+2, line.length);
 						return [ line.length ];
 					case "Q:":
-						// TODO-PER: handle these
-						return [ line.length, line[i], line.substring(i+2).strip()];
+						var e = line.indexOf('\x12', i+2);
+						if (e === -1) e = line.length;
+						var tempo = setTempo(line, i+2, e);
+						if (tempo.type === 'delaySet') tune.appendElement('tempo', -1, -1, calcTempo(tempo.tempo));
+						else if (tempo.type === 'immediate') tune.appendElement('tempo', -1, -1, tempo.tempo);
+						return [ e, line[i], line.substring(i+2).strip()];
 						break;
 					case "V:":
 						parseVoice(line, 2, line.length);
@@ -655,7 +676,8 @@ var AbcParse = Class.create({
 		var addDirective = function(str) {
 			var tokens = tokenizer.tokenize(str, 0, str.length);	// 3 or more % in a row, or just spaces after %% is just a comment
 			if (tokens.length === 0 || tokens[0].type !== 'alpha') return null;
-			var restOfString = str.substring(str.indexOf(tokens[0]));
+			var restOfString = str.substring(str.indexOf(tokens[0].token)+tokens[0].token.length);
+			restOfString = tokenizer.stripComment(restOfString);
 			var cmd = tokens.shift().token.toLowerCase();
 //			var s = tokenizer.stripComment(str).strip();
 //			if (s.length === 0)	// 3 or more % in a row, or just spaces after %% is just a comment
@@ -670,9 +692,10 @@ var AbcParse = Class.create({
 				case "bagpipes":tune.formatting.bagpipes = true;break;
 				case "stretchlast":tune.formatting.stretchlast = true;break;
 				case "staffwidth":
-					if (tokens.length !== 1 || tokens[0].type != 'number')
-						return "Directive \"" + cmd + "\" requires a number as a parameter.";
-					tune.formatting.staffwidth = parseInt(tokens[0].token);
+					scratch = tokenizer.getMeasurement(tokens);
+					if (scratch.used === 0 || tokens.length !== 0)
+						return "Directive \"" + cmd + "\" requires a measurement as a parameter.";
+					tune.formatting.staffwidth = scratch.value;
 					break;
 				case "scale":
 					scratch = "";
@@ -685,15 +708,18 @@ var AbcParse = Class.create({
 					tune.formatting.scale = num;
 					break;
 				case "sep":
-					// TODO-PER: This actually goes into the stream, it is not global
 					if (tokens.length === 0)
-						return "Directive \"" + cmd + "\" requires a string as a parameter.";
-					tune.formatting.sep = tokens[0].token;
+						tune.addSeparator();
+					else {
+						if (tokens.length !== 3 || tokens[0].type !== 'number' || tokens[1].type !== 'number' || tokens[2].type !== 'number')
+							return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
+						tune.addSeparator(parseInt(tokens[0].token), parseInt(tokens[1].token), parseInt(tokens[2].token));
+					}
 					break;
 				case "barnumbers":
 					if (tokens.length !== 1 || tokens[0].type != 'number')
 						return "Directive \"" + cmd + "\" requires a number as a parameter.";
-					multilineVars.barNumbers = tokens[0].token;
+					multilineVars.barNumbers = parseInt(tokens[0].token);
 					break;
 				case "begintext":
 					multilineVars.inTextBlock = true;
@@ -718,6 +744,82 @@ var AbcParse = Class.create({
 					}
 					break;
 				case "score":
+					var addVoice = function(id, newStaff, bracket, brace, continueBar) {
+						if (newStaff || multilineVars.staves.length === 0) {
+							multilineVars.staves.push({ index: multilineVars.staves.length, numVoices: 0 });
+						}
+						var staff = multilineVars.staves.last();
+						if (bracket !== undefined) staff.bracket = bracket;
+						if (brace !== undefined) staff.brace = brace;
+						if (continueBar) staff.bar = 'end';
+						if (multilineVars.voices[id] === undefined) {
+							multilineVars.voices[id] = { staffNum: staff.index, index: staff.numVoices};
+							staff.numVoices++;
+						}
+					};
+
+					var openParen = false;
+					var openBracket = false;
+					var openBrace = false;
+					var justOpenParen = false;
+					var justOpenBracket = false;
+					var justOpenBrace = false;
+					var continueBar = false;
+					var lastVoice = undefined;
+					while (tokens.length) {
+						var t = tokens.shift();
+						switch (t.token) {
+							case '(':
+								if (openParen) warn("Can't nest parenthesis in %%score", str, t.start);
+								else { openParen = true; justOpenParen = true; }
+								break;
+							case ')':
+								if (!openParen || justOpenParen) warn("Unexpected close parenthesis in %%score", str, t.start);
+								else openParen = false;
+								break;
+							case '[':
+								if (openBracket) warn("Can't nest brackets in %%score", str, t.start);
+								else { openBracket = true; justOpenBracket = true; }
+								break;
+							case ']':
+								if (!openBracket || justOpenBracket) warn("Unexpected close bracket in %%score", str, t.start);
+								else { openBracket = false; multilineVars.staves[lastVoice.staffNum].bracket = 'end'; }
+								break;
+							case '{':
+								if (openBrace ) warn("Can't nest braces in %%score", str, t.start);
+								else { openBrace = true; justOpenBrace = true; }
+								break;
+							case '}':
+								if (!openBrace || justOpenBrace) warn("Unexpected close brace in %%score", str, t.start);
+								else { openBrace = false; multilineVars.staves[lastVoice.staffNum].brace = 'end'; }
+								break;
+							case '|':
+								continueBar = true;
+								if (lastVoice)
+									multilineVars.staves[lastVoice.staffNum].bar = 'start';
+								break;
+							default:
+								var vc = "";
+								while (t.type === 'alpha' || t.type === 'number') {
+									vc += t.token;
+									if (t.continueId)
+										t = tokens.shift();
+									else
+										break;
+								}
+								var newStaff = !openParen || justOpenParen;
+								var bracket = justOpenBracket ? 'start' : openBracket ? 'continue' : undefined;
+								var brace = justOpenBrace ? 'start' : openBrace ? 'continue' : undefined;
+								addVoice(vc, newStaff, bracket, brace, continueBar);
+								justOpenParen = false;
+								justOpenBracket = false;
+								justOpenBrace = false;
+								continueBar = false;
+								lastVoice = multilineVars.voices[vc];
+								break;
+						}
+					}
+					break;
 				case "indent":
 				case "voicefont":
 				case "titlefont":
@@ -908,12 +1010,12 @@ var AbcParse = Class.create({
 			if (staffInfo.startStaff || multilineVars.staves.length === 0) {
 				multilineVars.staves.push({ index: multilineVars.staves.length });
 				// TODO-PER: For now, the entire collection is bracketted. Refine this later.
-				if (multilineVars.staves.length > 1) {
-					multilineVars.staves[0].bracket = 'start';
-					for (var b = 1; b < multilineVars.staves.length-1; b++)
-						multilineVars.staves[b].bracket = "continue";
-					multilineVars.staves[multilineVars.staves.length-1].bracket = 'end';
-				}
+//				if (multilineVars.staves.length > 1) {
+//					multilineVars.staves[0].bracket = 'start';
+//					for (var b = 1; b < multilineVars.staves.length-1; b++)
+//						multilineVars.staves[b].bracket = "continue";
+//					multilineVars.staves[multilineVars.staves.length-1].bracket = 'end';
+//				}
 				multilineVars.staves[multilineVars.staves.length-1].numVoices = 0;
 			}
 			if (multilineVars.voices[id].staffNum === undefined) {
@@ -928,14 +1030,14 @@ var AbcParse = Class.create({
 				}
 				multilineVars.voices[id].index = vi-1;
 			}
-			var s = multilineVars.staves[multilineVars.staves.length-1];
+			var s = multilineVars.staves[multilineVars.voices[id].staffNum];
 			s.numVoices++;
 			if (staffInfo.clef) s.clef = { type: staffInfo.clef, middle: staffInfo.middle };
 			if (staffInfo.spacing) s.spacing_below_offset = staffInfo.spacing;
 			if (staffInfo.middle) s.middle = staffInfo.middle;
 
 			if (staffInfo.name) {if (s.name) s.name.push(staffInfo.name); else s.name = [ staffInfo.name ];}
-			if (staffInfo.subname) {if (s.subname) s.name.push(staffInfo.subname); else s.subname = [ staffInfo.subname ];}
+			if (staffInfo.subname) {if (s.subname) s.subname.push(staffInfo.subname); else s.subname = [ staffInfo.subname ];}
 
 			setCurrentVoice(id);
 		}
@@ -1267,6 +1369,10 @@ var AbcParse = Class.create({
 							}
 							index = fraction.index-1;
 							state = 'broken_rhythm';
+						} else if (state === 'sharp2') {
+							el.accidental = 'quartersharp';state = 'pitch';
+						} else if (state === 'flat2') {
+							el.accidental = 'quarterflat';state = 'pitch';
 						} else return null;
 						break;
 					case '-':
@@ -1292,13 +1398,13 @@ var AbcParse = Class.create({
 					case '\t':
 						if (isComplete(state)) {
 							el = addEndBeam(el);
-							el.endChar = index;
 							// look ahead to see if there is a tie
 							do {
 								if (line[index] === '-')
 									el.startTie = true;
 								index++;
 							} while (index < line.length && (tokenizer.isWhiteSpace(line[index]) || line[index] === '-'));
+							el.endChar = index;
 							if (!durationSetByPreviousNote && canHaveBrokenRhythm && (line[index] === '<' || line[index] === '>')) {	// TODO-PER: Don't need the test for < and >, but that makes the endChar work out for the regression test.
 								index--;
 								state = 'broken_rhythm';
@@ -1351,6 +1457,14 @@ var AbcParse = Class.create({
 				params.name = multilineVars.currentVoice.name;
 			if (multilineVars.fontVocal)
 				params.fontVocal = multilineVars.fontVocal;
+			if (multilineVars.currentVoice) {
+				var staff = multilineVars.staves[multilineVars.currentVoice.staffNum];
+				if (staff.brace) params.brace = staff.brace;
+				if (staff.bracket) params.bracket = staff.bracket;
+				if (staff.connectBarLines) params.connectBarLines = staff.connectBarLines;
+				if (staff.name) params.name = staff.name[multilineVars.currentVoice.index];
+				if (staff.subname) params.subname = staff.subname[multilineVars.currentVoice.index];
+			}
 			tune.startNewLine(params);
 
 			multilineVars.partForNextLine = "";
@@ -1359,11 +1473,16 @@ var AbcParse = Class.create({
 				multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
 		}
 
+		function calcTempo(relTempo) {
+			var dur = multilineVars.default_length ? multilineVars.default_length / 8 : 1/8;
+			for (var i = 0; i < relTempo.duration; i++)
+				relTempo.duration[i] = dur * relTempo.duration[i];
+			return relTempo;
+		}
+
 		function resolveTempo() {
 			if (multilineVars.tempo) {	// If there's a tempo waiting to be resolved
-				var dur = multilineVars.default_length ? multilineVars.default_length / 8 : 1/8;
-				for (var i = 0; i < multilineVars.tempo.duration; i++)
-					multilineVars.tempo.duration[i] = dur * multilineVars.tempo.duration[i];
+				calcTempo(multilineVars.tempo);
 				tune.metaText.tempo = multilineVars.tempo;
 				delete multilineVars.tempo;
 			}
@@ -1490,7 +1609,7 @@ var AbcParse = Class.create({
 							ret = letter_to_body_header(line, i);
 							if (ret[0] > 0) {
 								// TODO: insert header here
-								i += ret[0];
+								i = ret[0];
 								multilineVars.start_new_line = false;
 							}
 						}
@@ -1533,8 +1652,13 @@ var AbcParse = Class.create({
 					ret = letter_to_bar(line, i);
 					if (ret[0] > 0) {
 						// This is definitely a bar
-						if (el.gracenote !== undefined)
-							warn("Can't have a grace note before a barline", line, i);
+						if (el.gracenotes !== undefined) {
+							// Attach the grace note to an invisible note
+							el.pitch = null;
+							el.rest_type = 'spacer';
+							tune.appendElement('note', -1, -1, el);
+							el = {};
+						}
 						var bar = {type: ret[1]};
 						if (bar.type.length === 0)
 							warn("Unknown bar type", line, i);
@@ -1793,16 +1917,14 @@ var AbcParse = Class.create({
 
 				if (tokens.length === 0) throw "Missing parameter in Q: field";
 
-				multilineVars.tempo = {};
+				var tempo = {};
 				var delaySet = true;
 				var token = tokens.shift();
 				if (token.type === 'quote') {
-					multilineVars.tempo.preString = token.token;
+					tempo.preString = token.token;
 					token = tokens.shift();
 					if (tokens.length === 0) {	// It's ok to just get a string for the tempo
-						tune.metaText.tempo = multilineVars.tempo;
-						delete multilineVars.tempo;
-						return;
+						return { type: 'immediate', tempo: tempo };
 					}
 				}
 				if (token.type === 'alpha' && token.token === 'C')	 { // either type 2 or type 3
@@ -1813,26 +1935,26 @@ var AbcParse = Class.create({
 						if (tokens.length === 0) throw "Missing tempo after = in Q: field";
 						token = tokens.shift();
 						if (token.type !== 'number') throw "Expected number after = in Q: field";
-						multilineVars.tempo.duration = [1];
-						multilineVars.tempo.bpm = parseInt(token.token);
+						tempo.duration = [1];
+						tempo.bpm = parseInt(token.token);
 					} else if (token.type === 'number') {
 						// This is a type 3 format.
-						multilineVars.tempo.duration = [parseInt(token.token)];
+						tempo.duration = [parseInt(token.token)];
 						if (tokens.length === 0) throw "Missing = after duration in Q: field";
 						token = tokens.shift();
 						if (token.type !== 'punct' || token.token !== '=') throw "Expected = after duration in Q: field";
 						if (tokens.length === 0) throw "Missing tempo after = in Q: field";
 						token = tokens.shift();
 						if (token.type !== 'number') throw "Expected number after = in Q: field";
-						multilineVars.tempo.bpm = parseInt(token.token);
+						tempo.bpm = parseInt(token.token);
 					} else throw "Expected number or equal after C in Q: field";
 
 				} else if (token.type === 'number') {	// either type 1 or type 4
 					var num = parseInt(token.token);
 					if (tokens.length === 0 || tokens[0].type === 'quote') {
 						// This is type 1
-						multilineVars.tempo.duration = [1];
-						multilineVars.tempo.bpm = num;
+						tempo.duration = [1];
+						tempo.bpm = num;
 					} else {	// This is type 4
 						delaySet = false;
 						token = tokens.shift();
@@ -1840,7 +1962,7 @@ var AbcParse = Class.create({
 						token = tokens.shift();
 						if (token.type !== 'number') throw "Expected fraction in Q: field";
 						var den = parseInt(token.token);
-						multilineVars.tempo.duration = [num/den];
+						tempo.duration = [num/den];
 						// We got the first fraction, keep getting more as long as we find them.
 						while (tokens.length > 0  && tokens[0].token !== '=' && tokens[0].type !== 'quote') {
 							token = tokens.shift();
@@ -1851,29 +1973,27 @@ var AbcParse = Class.create({
 							token = tokens.shift();
 							if (token.type !== 'number') throw "Expected fraction in Q: field";
 							den = parseInt(token.token);
-							multilineVars.tempo.duration.push(num/den);
+							tempo.duration.push(num/den);
 						}
 						token = tokens.shift();
 						if (token.type !== 'punct' && token.token !== '=') throw "Expected = in Q: field";
 						token = tokens.shift();
 						if (token.type !== 'number') throw "Expected tempo in Q: field";
-						multilineVars.tempo.bpm = parseInt(token.token);
+						tempo.bpm = parseInt(token.token);
 					}
 				} else throw "Unknown value in Q: field";
 				if (tokens.length !== 0) {
 					token = tokens.shift();
 					if (token.type === 'quote') {
-						multilineVars.tempo.postString = token.token;
+						tempo.postString = token.token;
 						token = tokens.shift();
 					}
 					if (tokens.length !== 0) throw "Unexpected string at end of Q: field";
 				}
-				if (!delaySet) {
-					tune.metaText.tempo = multilineVars.tempo;
-					delete multilineVars.tempo;
-				}
+				return { type: delaySet?'delaySet':'immediate', tempo: tempo };
 			} catch (msg) {
 				warn(msg, line, start);
+				return { type: 'none' };
 			}
 		}
 
@@ -1946,7 +2066,9 @@ var AbcParse = Class.create({
 									multilineVars.partForNextLine = tokenizer.translateString(tokenizer.stripComment(line.substring(2)));
 								break;
 							case  'Q':
-								setTempo(line, 2, line.length);
+								var tempo = setTempo(line, 2, line.length);
+								if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;
+								else if (tempo.type === 'immediate') tune.metaText.tempo = tempo.tempo;
 								break;
 							case  'T':
 								setTitle(line.substring(2));
@@ -1963,7 +2085,10 @@ var AbcParse = Class.create({
 								addWords(tune.getCurrentVoice(), line.substring(2));
 								break;
 							case 'X':
+								break;
 							case 'E':
+							case 'm':
+								warn("Unknown header", line, 0);
 								break;
 							default:
 								// It wasn't a recognized header value, so parse it as music.

@@ -1,6 +1,18 @@
-/**
- * @author paulrosen
- */
+//    abc_tokenizer.js: tokenizes an ABC Music Notation string to support abc_parse.
+//    Copyright (C) 2010 Paul Rosen (paul at paulrosen dot net)
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*global Class */
 /*extern AbcTokenizer */
@@ -160,6 +172,12 @@ var AbcTokenizer = Class.create({
 			if (str.startsWith("[|:")) return {len: 3, token: "bar_left_repeat"};
 			if (str.startsWith("[|]")) return {len: 3, token: "bar_invisible"};
 			if (str.startsWith("[|")) return {len: 2, token: "bar_thick_thin"};
+			if (str.startsWith("][")) {
+				if ((str[2] >= '1' && str[2] <= '9') || str[2] === '"')
+					return {len: 2, token: "bar_invisible"};
+				return {len: 0};
+			}
+			if (str.startsWith("]")) return {len: 1, token: "bar_invisible"};
 			if (str.startsWith("[")) {
 				if ((str[1] >= '1' && str[1] <= '9') || str[1] === '"')
 					return {len: 1, token: "bar_invisible"};
@@ -212,7 +230,9 @@ var AbcTokenizer = Class.create({
 				'^^': 'dblsharp',
 				'=': 'natural',
 				'_': 'flat',
-				'__': 'dblflat'
+				'__': 'dblflat',
+				'_/': 'quarterflat',
+				'^/': 'quartersharp'
 			};
 			var i = this.skipWhiteSpace(str);
 			if (finished(str, i))
@@ -249,6 +269,7 @@ var AbcTokenizer = Class.create({
 					return {len: i+1, token: {acc: accTranslation[acc], note: str[i]}};
 				case '^':
 				case '_':
+				case '/':
 					acc += str[i];
 					i++;
 					if (finished(str, i))
@@ -289,11 +310,19 @@ var AbcTokenizer = Class.create({
 			var comment = line.indexOf('%', start);
 			if (comment >= 0 && comment < end)
 				end = comment;
-			while (start < end && (line[start] === ' ' || line[start] === 't' || line[start] === '\x12'))
+			while (start < end && (line[start] === ' ' || line[start] === '\t' || line[start] === '\x12'))
 				start++;
-			while (start < end && (line[end-1] === ' ' || line[end-1] === 't' || line[end-1] === '\x12'))
+			while (start < end && (line[end-1] === ' ' || line[end-1] === '\t' || line[end-1] === '\x12'))
 				end--;
 			return {start: start, end: end};
+		};
+
+		var isLetter = function(ch) {
+			return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
+		};
+
+		var isNumber = function(ch) {
+			return (ch >= '0' && ch <= '9');
 		};
 
 		this.tokenize = function(line, start, end) {
@@ -309,22 +338,22 @@ var AbcTokenizer = Class.create({
 				if (line[start] === '"') {
 					i = start+1;
 					while (i < end && line[i] !== '"') i++;
-					tokens.push({ type: 'quote', token: line.substring(start+1, i)});
+					tokens.push({ type: 'quote', token: line.substring(start+1, i), start: start+1, end: i});
 					i++;
-				} else if ((line[start] >= 'A' && line[start] <= 'Z') || (line[start] >= 'a' && line[start] <= 'z')) {
+				} else if (isLetter(line[start])) {
 					i = start+1;
-					while (i < end && ((line[i] >= 'A' && line[i] <= 'Z') || (line[i] >= 'a' && line[i] <= 'z'))) i++;
-					tokens.push({ type: 'alpha', token: line.substring(start, i)});
+					while (i < end && isLetter(line[i])) i++;
+					tokens.push({ type: 'alpha', token: line.substring(start, i), continueId: isNumber(line[i]), start: start, end: i});
 					start = i + 1;
-				} else if ((line[start] >= '0' && line[start] <= '9')) {
+				} else if (isNumber(line[start])) {
 					i = start+1;
-					while (i < end && line[i] >= '0' && line[i] <= '9') i++;
-					tokens.push({ type: 'number', token: line.substring(start, i)});
+					while (i < end && isNumber(line[i])) i++;
+					tokens.push({ type: 'number', token: line.substring(start, i), continueId: isLetter(line[i]), start: start, end: i});
 					start = i + 1;
 				} else if (line[start] === ' ') {
 					i = start+1;
 				} else {
-					tokens.push({ type: 'punct', token: line[start]});
+					tokens.push({ type: 'punct', token: line[start], start: start, end: start+1});
 					i = start+1;
 				}
 				start = i;
@@ -484,5 +513,28 @@ var AbcTokenizer = Class.create({
 			return {value: x, digits: i+s.length};
 		};
 
+		this.getMeasurement = function(tokens) {
+			if (tokens.length === 0) return { used: 0 };
+			if (tokens[0].type !== 'number') return { used: 0 };
+			var num = tokens.shift().token;
+			if (tokens.length === 0) return { used: 1, value: parseInt(num) };
+			var x = tokens.shift();
+			var used = 1;
+			if (x.token === '.') {
+				if (tokens.length === 0) return { used: 0 };
+				x = tokens.shift();
+				if (x.type !== 'number') return { used: 0 };
+				num = num + '.' + x.token;
+				used = 3;
+			}
+			if (tokens.length === 0) return { used: used, value: parseFloat(num) };
+			x = tokens.shift();
+			switch (x.token) {
+				case 'pt': return { used: used+1, value: num };
+				case 'cm': return { used: used+1, value: num*72*2.54 };
+				case 'in': return { used: used+1, value: num*72 };
+			}
+			return { used: 0 };
+		};
 	}
 });

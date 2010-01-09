@@ -1,5 +1,18 @@
-// Place your application-specific JavaScript functions and classes here
-// This file is automatically included by javascript_include_tag :defaults
+//    application.js: Interface between a web page and the abc javascript processor.
+//    Copyright (C) 2010 Paul Rosen (paul at paulrosen dot net)
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*global $, $$, Class, Ajax, Element */
 /*global window, confirm */
@@ -202,8 +215,8 @@ function save()
 
 function magnify(value)
 {
-	DrawNotation.prototype.setCssZoom(value);
-	abc_keystroke();
+//	DrawNotation.prototype.setCssZoom(value);
+//	abc_keystroke();
 }
 
 function saveCurrentToTest()
@@ -223,22 +236,22 @@ function saveCurrentToTest()
 
 var playEmbedded = null;
 window.onload = function() {
-	playEmbedded = new PlayEmbedded();
+//	playEmbedded = new PlayEmbedded();
 };
 
 function play()
 {
-	var t = editArea.get();
-	if (abcParser === null)
-		abcParser = new AbcParse();
-	abcParser.parse(t);
-	//selection = editArea.getSelection();
-	playEmbedded.play(abcParser.getTune());
+//	var t = editArea.get();
+//	if (abcParser === null)
+//		abcParser = new AbcParse();
+//	abcParser.parse(t);
+//	//selection = editArea.getSelection();
+//	playEmbedded.play(abcParser.getTune());
 }
 
 function stopPlay()
 {
-	playEmbedded.stop();
+//	playEmbedded.stop();
 }
 
 //function doScale() {

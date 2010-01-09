@@ -1,6 +1,18 @@
-/**
- * @author paulrosen
- */
+//    abc_tune.js: a computer usable internal structure representing one tune.
+//    Copyright (C) 2010 Paul Rosen (paul at paulrosen dot net)
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*global Class */
 /*extern AbcTune */
@@ -60,9 +72,11 @@ var AbcTune = Class.create({
 			if (this.lines[i].staff !== undefined) {
 				var hasAny = false;
 				for (var s = 0; s < this.lines[i].staff.length; s++) {
-					if (this.lines[i].staff[s] === undefined)
-						this.lines[i].staff[s] = { voices: []};	// TODO-PER: There was a part missing in the abc music. How should we recover?
-					else {
+					if (this.lines[i].staff[s] === undefined) {
+						anyDeleted = true;
+						this.lines[i].staff[s] = null;
+						//this.lines[i].staff[s] = { voices: []};	// TODO-PER: There was a part missing in the abc music. How should we recover?
+					} else {
 						for (var v = 0; v < this.lines[i].staff[s].voices.length; v++) {
 							if (this.lines[i].staff[s].voices[v] === undefined)
 								this.lines[i].staff[s].voices[v] = [];	// TODO-PER: There was a part missing in the abc music. How should we recover?
@@ -77,8 +91,13 @@ var AbcTune = Class.create({
 				}
 			}
 		}
-		if (anyDeleted)
+		if (anyDeleted) {
 			this.lines = this.lines.compact();
+			this.lines.each(function(line) {
+				if (line.staff)
+					line.staff = line.staff.compact();
+			})
+		}
 	},
 
 	initialize: function () {
@@ -137,6 +156,10 @@ var AbcTune = Class.create({
 		this.lines.push({subtitle: str});
 	},
 
+	addSeparator: function(spaceAbove, spaceBelow, lineLength) {
+		this.lines.push({separator: {spaceAbove: spaceAbove, spaceBelow: spaceBelow, lineLength: lineLength} });
+	},
+
 	addText: function(str) {
 		this.lines.push({text: str});
 	},
@@ -163,18 +186,26 @@ var AbcTune = Class.create({
 		var This = this;
 		var createVoice = function(params) {
 			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum] = [];
+			if (This.isFirstLine(This.lineNum)) {
+				if (params.name) { if (!This.lines[This.lineNum].staff[This.staffNum].title) This.lines[This.lineNum].staff[This.staffNum].title = []; This.lines[This.lineNum].staff[This.staffNum].title[This.voiceNum] = params.name; }
+			} else {
+				if (params.subname) { if (!This.lines[This.lineNum].staff[This.staffNum].title) This.lines[This.lineNum].staff[This.staffNum].title = []; This.lines[This.lineNum].staff[This.staffNum].title[This.voiceNum] = params.subname; }
+			}
+		};
+		var createStaff = function(params) {
+			This.lines[This.lineNum].staff[This.staffNum] = { voices: [ ]};
+			if (params.fontVocal) This.lines[This.lineNum].staff[This.staffNum].fontVocal = params.fontVocal;
+			if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
+			if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;
+			if (params.connectBarLines) This.lines[This.lineNum].staff[This.staffNum].connectBarLines = params.connectBarLines;
+			createVoice(params);
+			// Some stuff just happens for the first voice
 			if (params.part)
 				This.appendElement('part', params.startChar, params.endChar, {title: params.part});
 			This.appendStartingElement('clef', params.startChar, params.endChar, params.clef );
 			This.appendStartingElement('key', params.startChar, params.endChar, params.key);
 			if (params.meter !== undefined)
 				This.appendStartingElement('meter', params.startChar, params.endChar, params.meter);
-		};
-		var createStaff = function(params) {
-			This.lines[This.lineNum].staff[This.staffNum] = { voices: [ ]};
-			if (params.name) This.lines[This.lineNum].staff[This.staffNum].title = params.name;
-			if (params.fontVocal) This.lines[This.lineNum].staff[This.staffNum].fontVocal = params.fontVocal;
-			createVoice(params);
 		};
 		var createLine = function(params) {
 			This.lines[This.lineNum] = { staff: [] };
@@ -195,6 +226,13 @@ var AbcTune = Class.create({
 
 	hasBeginMusic: function() {
 		return this.lines.length > 0;
+	},
+
+	isFirstLine: function(index) {
+		for (var i = index-1; i >= 0; i--) {
+			if (this.lines[i].staff !== undefined) return false;
+		}
+		return true;
 	},
 
 //	getLastStaff: function(index) {
