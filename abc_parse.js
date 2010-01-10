@@ -564,7 +564,7 @@ var AbcParse = Class.create({
 			var params = { startChar: -1, endChar: -1};
 			if (multilineVars.partForNextLine.length)
 				params.part =multilineVars.partForNextLine;
-			params.clef = multilineVars.currentVoice && multilineVars.currentVoice.clef !== undefined ? multilineVars.currentVoice.clef : multilineVars.clef ;
+			params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? multilineVars.staves[multilineVars.currentVoice.staffNum].clef : multilineVars.clef ;
 			params.key = multilineVars.key;
 			if (multilineVars.meter !== null) {
 				if (multilineVars.currentVoice) {

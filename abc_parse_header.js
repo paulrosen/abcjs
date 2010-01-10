@@ -510,6 +510,8 @@ var AbcParseHeader = Class.create({
 						case 'clef':
 						case 'cl':
 							addNextTokenToStaffInfo('clef');
+							// TODO-PER: check for a legal clef; do octavizing
+							staffInfo.clef = staffInfo.clef.replace(/[',]/g, "");
 							break;
 						case 'treble':
 						case 'bass':
@@ -536,7 +538,8 @@ var AbcParseHeader = Class.create({
 						case 'tenor,,':
 						case 'alto,,':
 						case 'none,,':
-							staffInfo.clef = token.token;
+							// TODO-PER: handle the octave indicators on the clef by changing the middle property
+							staffInfo.clef = token.token.replace(/[',]/g, "");
 							break;
 						case 'staves':
 						case 'stave':

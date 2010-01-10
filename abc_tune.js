@@ -126,26 +126,31 @@ var AbcTune = Class.create({
 		this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum].push(hashParams);
 	},
 
-	appendStartingElement: function(type, startChar, endChar, hashParams)
+	appendStartingElement: function(type, startChar, endChar, hashParams2)
 	{
-		hashParams.el_type = type;
-		hashParams.startChar = startChar;
-		hashParams.endChar = endChar;
+		// Clone the object because it will be sticking around for the next line and we don't want the extra fields in it.
+		hashParams = Object.clone(hashParams2);
 
-		// These elements should not be added twice, so if the element exists on this line without a note or bar between them, just replace it.
+		// These elements should not be added twice, so if the element exists on this line without a note or bar before it, just replace the staff version.
 		var voice = this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum];
-		for (var i = voice.length-1; i >= 0; i--) {
+		for (var i = 0; i < voice.length; i++) {
 			if (voice[i].el_type === 'note' || voice[i].el_type === 'bar') {
+				hashParams.el_type = type;
+				hashParams.startChar = startChar;
+				hashParams.endChar = endChar;
 				voice.push(hashParams);
 				return;
 			}
 			if (voice[i].el_type === type) {
+				hashParams.el_type = type;
+				hashParams.startChar = startChar;
+				hashParams.endChar = endChar;
 				voice[i] = hashParams;
 				return;
 			}
 		}
-		// We didn't see either that type or a note, so add the element
-		voice.push(hashParams);
+		// We didn't see either that type or a note, so replace the element to the staff.
+		this.lines[this.lineNum].staff[this.staffNum][type] = hashParams2;
 	},
 
 	getNumLines: function() {
@@ -195,7 +200,7 @@ var AbcTune = Class.create({
 				This.appendElement('stem', -1, -1, { direction: params.stem });
 		};
 		var createStaff = function(params) {
-			This.lines[This.lineNum].staff[This.staffNum] = { voices: [ ]};
+			This.lines[This.lineNum].staff[This.staffNum] = { voices: [ ], clef: params.clef, key: params.key };
 			if (params.fontVocal) This.lines[This.lineNum].staff[This.staffNum].fontVocal = params.fontVocal;
 			if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
 			if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;
@@ -204,10 +209,7 @@ var AbcTune = Class.create({
 			// Some stuff just happens for the first voice
 			if (params.part)
 				This.appendElement('part', params.startChar, params.endChar, {title: params.part});
-			This.appendStartingElement('clef', params.startChar, params.endChar, params.clef );
-			This.appendStartingElement('key', params.startChar, params.endChar, params.key);
-			if (params.meter !== undefined)
-				This.appendStartingElement('meter', params.startChar, params.endChar, params.meter);
+			if (params.meter !== undefined) This.lines[This.lineNum].staff[This.staffNum].meter = params.meter;
 		};
 		var createLine = function(params) {
 			This.lines[This.lineNum] = { staff: [] };

@@ -358,3 +358,11 @@ function profileParser() {
 		processAbc({ tunebook: t, fnCallback: nothing });
 	}
 }
+
+function profileRegression() {
+	var t = editArea.get();
+	for (var i = 1; i <= 20; i++) {
+		var nothing = function() { $('warnings').innerHTML = "Pass: " + i; };
+		processAbc({ tunebook: t, fnCallback: lintOneTune });
+	}
+}

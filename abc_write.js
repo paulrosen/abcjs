@@ -512,9 +512,23 @@ ABCPrinter.prototype.printABC = function(abctune) {
     var abcline = abctune.lines[line];
     if (abcline.staff) {
 		for (var s = 0; s < abcline.staff.length; s++) {
+			var header = "";
+			if (abcline.staff[s].bracket) header += "bracket "+abcline.staff[s].bracket+" ";
+			if (abcline.staff[s].brace) header += "brace "+abcline.staff[s].brace+" ";
+			if (abcline.staff[s].connectBarLines) header += "bar "+abcline.staff[s].connectBarLines+" ";
+			if (abcline.staff[s].title) {
+				abcline.staff[s].title.each(function(t) { header += t; })
+			}
+			this.staff = new ABCStaffElement(this, this.y);
+			this.staff.addChild(this.printClef(abcline.staff[s].clef));
+			this.staff.addChild(this.printKeySignature(abcline.staff[s].key));
+			if (abcline.staff[s].meter)
+				this.staff.addChild(this.printTimeSignature(abcline.staff[s].meter));
 		  for (var v = 0; v < abcline.staff[s].voices.length; v++) {
 			  this.staffs[this.staffs.length] = this.printABCLine(abcline.staff[s].voices[v]);
 		  }
+			if (header.length > 0)
+				this.paper.text(500, this.y+20, header);
 		  if (s !== abcline.staff.length-1)
 			this.y+= (AbcSpacing.STAVEHEIGHT*0.5);
 		}
@@ -547,7 +561,6 @@ ABCPrinter.prototype.printSubtitleLine = function(abcline) {
 
 ABCPrinter.prototype.printABCLine = function(abcline) {
   this.abcline = abcline;
-  this.staff = new ABCStaffElement(this, this.y);
   if (this.partstartelem) {
     this.partstartelem = new ABCEndingElem("", null, null);
     this.staff.addOther(this.partstartelem);
@@ -584,8 +597,7 @@ ABCPrinter.prototype.printABCElement = function() {
     elemset[0] = this.printTimeSignature(elem);
     break;
   case "clef":
-    if (elem.type !== 'treble')
-      this.debugMsg(10,"clef="+elem.type);
+    elemset[0] = this.printClef(elem);
     break;
   case "key":
     elemset[0] = this.printKeySignature(elem);
@@ -969,11 +981,18 @@ ABCPrinter.prototype.printStave = function (width) {
   //staff.scale(width,1,0);
 };
 
-ABCPrinter.prototype.printKeySignature = function(elem) {
+ABCPrinter.prototype.printClef = function(elem) {
+  if (elem.type !== 'treble')
+    this.debugMsg(10,"clef="+elem.type);
   var abselem = new ABCAbsoluteElement(elem,0,10);
   var dx =10;
   abselem.addRight(new ABCRelativeElement("clefs.G", dx, this.glyphs.getSymbolWidth("clefs.G"), 5));
   dx += this.glyphs.getSymbolWidth("clefs.G")+10; // hardcoded
+  return abselem;
+};
+ABCPrinter.prototype.printKeySignature = function(elem) {
+  var abselem = new ABCAbsoluteElement(elem,0,10);
+  var dx =10;
   if (elem.regularKey) {
 	  var FLATS = [6,9,5,8,4,7];
 	  var SHARPS = [10,7,11,8,5,9];

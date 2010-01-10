@@ -49,16 +49,43 @@ var AbcParserLint = Class.create({
 		}
 
 
+		var clefProperties = {
+			type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] },
+			middle: { type: 'string', optional: true, Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'A,', 'B,', 'C,', 'D,', 'E,', 'F,', 'G,',
+					'A,,', 'B,,', 'C,,', 'D,,', 'E,,', 'F,,', 'G,,', 'a\'', 'b\'', 'c\'', 'd\'', 'e\'', 'f\'', 'g\'', 'a\'\'', 'b\'\'', 'c\'\'', 'd\'\'', 'e\'\'', 'f\'\'', 'g\'\'' ] }
+		};
+
+		var keyProperties = {
+			extraAccidentals: { type: 'array', optional: true, output: "noindex", items: {
+					type: 'object', properties: {
+						acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ] },
+						note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] }
+					}
+			} },
+			regularKey: { type: 'object', optional: true,
+				properties: {
+					num: { type: 'number', minimum: 0, maximum: 7 },
+					acc: { type: 'string', Enum: [ 'sharp', 'flat' ]}
+				}
+			}
+		};
+
+		var meterProperties = {
+			type: { type: 'string', Enum: [ 'common_time', 'cut_time', 'specified' ] },
+			value: { type: 'array', optional: true, output: 'noindex',	// TODO-PER: Check for type=specified and require these in that case.
+				items: {
+					type: 'object', properties: {
+						num: { type: 'string' },
+						den: { type: 'string' }
+					}
+				}
+			}
+		};
+
 		var voiceItem = { type: "union",
 			field: "el_type",
 			types: [
-				{ value: "clef", properties: {
-					startChar: { type: 'number', output: 'hidden' },
-					endChar: { type: 'number', output: 'hidden' },
-					type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] },
-					middle: { type: 'string', optional: true, Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'A,', 'B,', 'C,', 'D,', 'E,', 'F,', 'G,',
-							'A,,', 'B,,', 'C,,', 'D,,', 'E,,', 'F,,', 'G,,', 'a\'', 'b\'', 'c\'', 'd\'', 'e\'', 'f\'', 'g\'', 'a\'\'', 'b\'\'', 'c\'\'', 'd\'\'', 'e\'\'', 'f\'\'', 'g\'\'' ] }
-				} },
+				{ value: "clef", properties: appendPositioning(clefProperties) },
 				{ value: "bar", properties: {
 					startChar: { type: 'number', output: 'hidden' },
 					endChar: { type: 'number', output: 'hidden' },
@@ -71,35 +98,8 @@ var AbcParserLint = Class.create({
 					ending: { type: 'string', optional: true },
 					type: { type: 'string', Enum: [ 'bar_dbl_repeat', 'bar_right_repeat', 'bar_left_repeat', 'bar_invisible', 'bar_thick_thin', 'bar_thin_thin', 'bar_thin', 'bar_thin_thick' ] }
 				} },
-				{ value: "key", properties: {
-					startChar: { type: 'number', output: 'hidden' },
-					endChar: { type: 'number', output: 'hidden' },
-					extraAccidentals: { type: 'array', optional: true, output: "noindex", items: {
-							type: 'object', properties: {
-								acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ] },
-								note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] }
-							}
-					} },
-					regularKey: { type: 'object', optional: true,
-						properties: {
-							num: { type: 'number', minimum: 0, maximum: 7 },
-							acc: { type: 'string', Enum: [ 'sharp', 'flat' ]}
-						}
-					}
-				} },
-				{ value: "meter", properties: {
-					startChar: { type: 'number', output: 'hidden' },
-					endChar: { type: 'number', output: 'hidden' },
-					type: { type: 'string', Enum: [ 'common_time', 'cut_time', 'specified' ] },
-					value: { type: 'array', optional: true, output: 'noindex',	// TODO-PER: Check for type=specified and require these in that case.
-						items: {
-							type: 'object', properties: {
-								num: { type: 'string' },
-								den: { type: 'string' }
-							}
-						}
-					}
-				} },
+				{ value: "key", properties: appendPositioning(keyProperties) },
+				{ value: "meter", properties: appendPositioning(meterProperties) },
 				{ value: "part", properties: {
 					startChar: { type: 'number', output: 'hidden' },
 					endChar: { type: 'number', output: 'hidden' },
@@ -238,12 +238,15 @@ var AbcParserLint = Class.create({
 									properties: {
 										brace: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 										bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+										clef: { type: 'object', optional: true, properties: clefProperties },
 										connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 										fontVocal: { type: 'object', optional: true,
 											properties: {
 												font: { type: 'string', optional: true },
 												size: { type: 'number', optional: true }
 											} },
+										key: { type: 'object', optional: true, properties: keyProperties },
+										meter: { type: 'object', optional: true, properties: meterProperties },
 										spacingBelow: { type: 'number', optional: true },
 										title: { type: 'array', optional: true, items: { type: 'string' } },
 										voices: { type: 'array', output: 'hidden',
