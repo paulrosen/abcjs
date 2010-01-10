@@ -27,8 +27,7 @@ var ABCGlyphs = function(paper) {
 
   this.getSymbolAlign = function (symbol) {
     if (symbol.substring(0,7)==="scripts" && 
-	symbol!=="scripts.roll" &&
-	symbol!=="scripts.staccato") {
+	symbol!=="scripts.roll") {
       return "center";
     }
     return "left";
@@ -52,6 +51,8 @@ var ABCGlyphs = function(paper) {
      case "flags.d64th": return -2;
      case "flags.u32nd": return 1;
      case "flags.u64th": return 3;
+     case "rests.whole": return 1;
+     case "rests.half": return -1;
      case "rests.8th": return -1;
      case "rests.quarter": return -2;
      case "rests.16th": return -1;

@@ -597,14 +597,14 @@ ABCPrinter.prototype.printABCElement = function() {
 
 ABCPrinter.prototype.printBeam = function() {
   var abselemset = [];
-  if (this.nextElemType() === 'note') {
+  if (!this.getElem().end_beam) {
     var beamelem = new ABCBeamElem();
 
-    for (;;) {
+    while (this.getElem()) {
       abselem = this.printNote(this.getElem(),true);
       abselemset[abselemset.length] = abselem;
       beamelem.add(abselem);
-      if (this.getElem().end_beam !== undefined || this.nextElemType()!=="note") {
+      if (this.getElem().end_beam) {
 		break;
       }
       this.pos++;
@@ -658,6 +658,7 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
 
   for (var p=0; p<elem.pitches.length; p++) {
     var pitch = elem.pitches[p].pitch;
+    var extraflags = false;
 
     var dot=0;
     
@@ -676,7 +677,7 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
       if ((dir=="down" && p!=0) || (dir=="up" && p!=pp-1)) { // not the stemmed elem of the chord
 	dir = "chord";
       } else {
-	var extraflags = true;
+	extraflags = true;
       }
       c = chartable["note"][-durlog];
     } else {
@@ -840,7 +841,10 @@ ABCPrinter.prototype.printDecoration = function(decoration, pitch, width, absele
       (pitch===4) && ypos--; // don't place on a stave line
       ((pitch===6) || (pitch===8)) && ypos++;
       (pitch>9) && yslot++; // take up some room of those that are above
-      var deltax = (width-this.glyphs.getSymbolWidth("."))/2;
+      var deltax = width/2;
+      if (this.glyphs.getSymbolAlign("scripts.staccato")!=="center") {
+	deltax -= (this.glyphs.getSymbolWidth(dec)/2);
+      }
       abselem.addChild(new ABCRelativeElement("scripts.staccato", deltax, this.glyphs.getSymbolWidth("scripts.staccato"), ypos));
     }
   }
