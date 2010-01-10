@@ -191,6 +191,8 @@ var AbcTune = Class.create({
 			} else {
 				if (params.subname) { if (!This.lines[This.lineNum].staff[This.staffNum].title) This.lines[This.lineNum].staff[This.staffNum].title = []; This.lines[This.lineNum].staff[This.staffNum].title[This.voiceNum] = params.subname; }
 			}
+			if (params.stem)
+				This.appendElement('stem', -1, -1, { direction: params.stem });
 		};
 		var createStaff = function(params) {
 			This.lines[This.lineNum].staff[This.staffNum] = { voices: [ ]};

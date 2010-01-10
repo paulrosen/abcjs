@@ -106,6 +106,11 @@ var AbcParserLint = Class.create({
 					title: { type: 'string' }
 				} },
 
+				{ value: 'stem', properties: {
+					startChar: { type: 'number', output: 'hidden' },
+					endChar: { type: 'number', output: 'hidden' },
+					direction: { type: 'string', Enum: [ 'up', 'down' ] }
+				}},
 				{ value: 'tempo', properties: appendPositioning(tempoProperties) },
 
 				{ value: "note", properties: {
@@ -155,7 +160,7 @@ var AbcParserLint = Class.create({
 								startTie: { type: 'boolean', Enum: [ true ], optional: true }
 							}
 					}},
-					rest_type: { type: 'string', optional: true },
+					rest_type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest' ], optional: true },
 					startSlur: { type: 'number', minimum: 1, optional: true },
 					startTie: { type: 'boolean', Enum: [ true ], optional: true },
 					startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }

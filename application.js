@@ -350,3 +350,11 @@ function createRegressionData() {
 		new Ajax.Updater('warnings', "/tunes/write_regression_data", { parameters: { authenticity_token: window.authenticity_token, filename: filename, data: ret, count: count++ }});
 	});
 }
+
+function profileParser() {
+	var t = editArea.get();
+	for (var i = 1; i <= 20; i++) {
+		var nothing = function() { $('warnings').innerHTML = "Pass: " + i; };
+		processAbc({ tunebook: t, fnCallback: nothing });
+	}
+}

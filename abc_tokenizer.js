@@ -158,42 +158,84 @@ var AbcTokenizer = Class.create({
 		};
 
 		// This returns one of the legal bar lines
-		this.getBarLine = function(str) {
-			if (str[0] !== ':' && str[0] !== '|' && str[0] !== '[' && str[0] !== ']')
-				return {len: 0};
-
-			if (str.startsWith("]|")) return {len: 2, token: "bar_thick_thin"};
-			if (str.startsWith(":||:")) return {len: 4, token: "bar_dbl_repeat"};
-			if (str.startsWith(":|]|:")) return {len: 5, token: "bar_dbl_repeat"};
-			if (str.startsWith(":|]")) return {len: 3, token: "bar_right_repeat"};
-			if (str.startsWith(":||")) return {len: 3, token: "bar_right_repeat"};
-			if (str.startsWith(":|")) return {len: 2, token: "bar_right_repeat"};
-			if (str.startsWith("::")) return {len: 2, token: "bar_dbl_repeat"};
-			if (str.startsWith("[|:")) return {len: 3, token: "bar_left_repeat"};
-			if (str.startsWith("[|]")) return {len: 3, token: "bar_invisible"};
-			if (str.startsWith("[|")) return {len: 2, token: "bar_thick_thin"};
-			if (str.startsWith("][")) {
-				if ((str[2] >= '1' && str[2] <= '9') || str[2] === '"')
-					return {len: 2, token: "bar_invisible"};
-				return {len: 0};
+		// This is called alot and there is no obvious tokenable items, so this is broken apart.
+		this.getBarLine = function(line, i) {
+			switch (line[i]) {
+				case ']':
+					++i;
+					switch (line[i]) {
+						case '|': return {len: 2, token: "bar_thick_thin"};
+						case '[': 
+							++i;
+							if ((line[i] >= '1' && line[i] <= '9') || line[i] === '"')
+								return {len: 2, token: "bar_invisible"};
+							return {len: 1, warn: "Unknown bar symbol"};
+						default:
+							return {len: 1, token: "bar_invisible"};
+					}
+					break;
+				case ':':
+					++i;
+					switch (line[i]) {
+						case ':': return {len: 2, token: "bar_dbl_repeat"};
+						case '|':	// :|
+							++i;
+							switch (line[i]) {
+								case ']':	// :|]
+									++i;
+									switch (line[i]) {
+										case '|':	// :|]|
+											++i;
+											if (line[i] === ':')  return {len: 5, token: "bar_dbl_repeat"};
+											return {len: 3, token: "bar_right_repeat"};
+										default:
+											return {len: 3, token: "bar_right_repeat"};
+									}
+									break;
+								case '|':	// :||
+									++i;
+									if (line[i] === ':')  return {len: 4, token: "bar_dbl_repeat"};
+									return {len: 3, token: "bar_right_repeat"};
+									break;
+								default:
+									return {len: 2, token: "bar_right_repeat"};
+							}
+						default:
+							return {len: 1, warn: "Unknown bar symbol"};
+					}
+					break;
+				case '[':	// [
+					++i;
+					if (line[i] === '|') {	// [|
+						++i;
+						switch (line[i]) {
+							case ':': return {len: 3, token: "bar_left_repeat"};
+							case ']': return {len: 3, token: "bar_invisible"};
+							default: return {len: 2, token: "bar_thick_thin"};
+						}
+					} else {
+						if ((line[i] >= '1' && line[i] <= '9') || line[i] === '"')
+							return {len: 1, token: "bar_invisible"};
+						return {len: 0};
+					}
+					break;
+				case '|':	// |
+					++i;
+					switch (line[i]) {
+						case ']': return {len: 2, token: "bar_thin_thick"};
+						case '|': // ||
+							++i;
+							if (line[i] === ':') return {len: 3, token: "bar_left_repeat"};
+							return {len: 2, token: "bar_thin_thin"};
+						case ':':	// |:
+							var colons = 0;
+							while (line[i+colons] === ':') colons++;
+							return { len: 1+colons, token: "bar_left_repeat"};
+						default: return {len: 1, token: "bar_thin"};
+					}
+					break;
 			}
-			if (str.startsWith("]")) return {len: 1, token: "bar_invisible"};
-			if (str.startsWith("[")) {
-				if ((str[1] >= '1' && str[1] <= '9') || str[1] === '"')
-					return {len: 1, token: "bar_invisible"};
-				return {len: 0};
-			}
-			if (str.startsWith("||:")) return {len: 3, token: "bar_left_repeat"};
-			if (str.startsWith("|:::::")) return {len: 6, token: "bar_left_repeat"};
-			if (str.startsWith("|::::")) return {len: 5, token: "bar_left_repeat"};
-			if (str.startsWith("|:::")) return {len: 4, token: "bar_left_repeat"};
-			if (str.startsWith("|::")) return {len: 3, token: "bar_left_repeat"};
-			if (str.startsWith("|:")) return {len: 2, token: "bar_left_repeat"};
-			if (str.startsWith("||")) return {len: 2, token: "bar_thin_thin"};
-			if (str.startsWith("|]")) return {len: 2, token: "bar_thin_thick"};
-//			if (str.startsWith("|[")) return { len: 2, token: "bar_thin_thick" };
-			if (str.startsWith("|")) return {len: 1, token: "bar_thin"};
-			return {len: 1, warn: "Unknown bar symbol"};
+			return {len: 0};
 		};
 
 		// this returns all the characters in the string that match one of the characters in the legalChars string
@@ -359,7 +401,7 @@ var AbcTokenizer = Class.create({
 				start = i;
 			}
 			return tokens;
-		}
+		};
 
 		this.getVoiceToken = function(line, start, end) {
 			// This finds the next token. A token is delimited by a space or an equal sign. If it starts with a quote, then the portion between the quotes is returned.
@@ -536,5 +578,39 @@ var AbcTokenizer = Class.create({
 			}
 			return { used: 0 };
 		};
+		var substInChord = function(str)
+		{
+			while ( str.indexOf("\\n") !== -1)
+			{
+				str = str.replace("\\n", "\n");
+			}
+			return str;
+		};
+		this.getBrackettedSubstring = function(line, i, maxErrorChars, _matchChar)
+		{
+			// This extracts the sub string by looking at the first character and searching for that
+			// character later in the line (or search for the optional _matchChar). 
+			// For instance, if the first character is a quote it will look for
+			// the end quote. If the end of the line is reached, then only up to the default number
+			// of characters are returned, so that a missing end quote won't eat up the entire line.
+			// It returns the substring and the number of characters consumed.
+			// The number of characters consumed is normally two more than the size of the substring,
+			// but in the error case it might not be.
+			var matchChar = _matchChar || line[i];
+			var pos = i+1;
+			while ((pos < line.length) && (line[pos] !== matchChar))
+				++pos;
+			if (line[pos] === matchChar)
+				return [pos-i+1,substInChord(line.substring(i+1, pos)), true];
+			else	// we hit the end of line, so we'll just pick an arbitrary num of chars so the line doesn't disappear.
+			{
+				pos = i+maxErrorChars;
+				if (pos > line.length-1)
+					pos = line.length-1;
+				return [pos-i+1, substInChord(line.substring(i+1, pos)), false];
+			}
+		};
+
+
 	}
 });
