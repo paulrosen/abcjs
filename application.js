@@ -362,7 +362,8 @@ function profileParser() {
 function profileRegression() {
 	var t = editArea.get();
 	for (var i = 1; i <= 20; i++) {
-		var nothing = function() { $('warnings').innerHTML = "Pass: " + i; };
+		$('warnings').innerHTML = "running...";
 		processAbc({ tunebook: t, fnCallback: lintOneTune });
+		$('warnings').innerHTML = "finished";
 	}
 }

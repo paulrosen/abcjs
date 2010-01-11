@@ -34,7 +34,7 @@ var AbcParse = Class.create({
 				this.meter = {type: 'specified', value: [{num: '4', den: '4'}]};	// if no meter is specified, there is an implied one.
 				this.origMeter = {type: 'specified', value: [{num: '4', den: '4'}]};	// this is for new voices that are created after we set the meter.
 				this.hasMainTitle = false;
-				this.default_length = 1;
+				this.default_length = 0.125;
 				this.clef = { type: 'treble' };
 				this.warnings = null;
 				this.next_note_duration = 0;
@@ -349,9 +349,9 @@ var AbcParse = Class.create({
 
 		// TODO-PER: make this a method in el.
 		var addEndBeam = function(el) {
-			if (el.pitch !== null && el.duration < 2)
+			if (el.pitch !== null && el.duration < 0.25)
 				el.end_beam = true;
-			if (el.pitches !== undefined && el.pitches[0].duration < 2)
+			if (el.pitches !== undefined && el.pitches[0].duration < 0.25)
 				el.end_beam = true;
 			return el;
 		};

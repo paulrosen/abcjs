@@ -10,7 +10,7 @@ var getDuration = function(elem) {
     else if (elem.pitches && elem.pitches[0])
       d = elem.pitches[0].duration;
   } 
-  return d / 8;	// the parser calls a 1 an eigth note.
+  return d;
 };
 
 var getDurlog = function(duration) {

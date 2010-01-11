@@ -643,15 +643,15 @@ var AbcParseHeader = Class.create({
 			line = tokenizer.stripComment(line);
 			if (line === 'C') {
 				if (multilineVars.havent_set_length === true)
-					multilineVars.default_length = 1;
+					multilineVars.default_length = 0.125;
 				return {type: 'common_time'};
 			} else if (line === 'C|') {
 				if (multilineVars.havent_set_length === true)
-					multilineVars.default_length = 1;
+					multilineVars.default_length = 0.125;
 				return {type: 'cut_time'};
 			} else if (line.length === 0 || line.toLowerCase() === 'none') {
 				if (multilineVars.havent_set_length === true)
-					multilineVars.default_length = 1;
+					multilineVars.default_length = 0.125;
 				return null;
 			}
 			else
@@ -710,7 +710,7 @@ var AbcParseHeader = Class.create({
 					}
 
 					if (multilineVars.havent_set_length === true) {
-						multilineVars.default_length = totalLength < 0.75 ? 0.5 : 1;
+						multilineVars.default_length = totalLength < 0.75 ? 0.0625 : 0.125;
 					}
 					return meter;
 				} catch (e) {
@@ -721,7 +721,7 @@ var AbcParseHeader = Class.create({
 		};
 
 		this.calcTempo = function(relTempo) {
-			var dur = multilineVars.default_length ? multilineVars.default_length / 8 : 1/8;
+			var dur = multilineVars.default_length ? multilineVars.default_length : 1;
 			for (var i = 0; i < relTempo.duration; i++)
 				relTempo.duration[i] = dur * relTempo.duration[i];
 			return relTempo;
@@ -771,7 +771,7 @@ var AbcParseHeader = Class.create({
 				var d = parseInt(len_arr[1]);
 				if (d > 0) {
 					var q = n / d;
-					multilineVars.default_length = q*8;	// an eighth note is 1
+					multilineVars.default_length = q;	// a whole note is 1
 					multilineVars.havent_set_length = false;
 				}
 			}
