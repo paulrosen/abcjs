@@ -616,7 +616,7 @@ ABCPrinter.prototype.printBeam = function() {
       abselem = this.printNote(this.getElem(),true);
       abselemset[abselemset.length] = abselem;
       beamelem.add(abselem);
-      if (this.getElem().end_beam) {
+      if (this.getNextElem().el_type!=="note" || this.getElem().end_beam) {
 		break;
       }
       this.pos++;
