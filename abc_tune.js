@@ -104,18 +104,32 @@ var AbcTune = Class.create({
 		this.reset();
 	},
 
-	addTieToLastNote: function() {
+	getLastNote: function() {
 		if (this.lines[this.lineNum] && this.lines[this.lineNum].staff && this.lines[this.lineNum].staff[this.staffNum] &&
 			this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum]) {
 			for (var i = this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum].length-1; i >= 0; i--) {
 				var el = this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum][i];
 				if (el.el_type === 'note') {
-					el.startTie = true;
-					return true;
+					return el;
 				}
 			}
 		}
+		return null;
+	},
+
+	addTieToLastNote: function() {
+		var el = this.getLastNote();
+		if (el) {
+			el.startTie = true;
+			return true;
+		}
 		return false;
+	},
+
+	getDuration: function(el) {
+		if (el.duration) return el.duration;
+		if (el.pitches && el.pitches.length > 0) return el.pitches[0].duration;
+		return 0;
 	},
 
 	appendElement: function(type, startChar, endChar, hashParams)
@@ -123,6 +137,24 @@ var AbcTune = Class.create({
 		hashParams.el_type = type;
 		hashParams.startChar = startChar;
 		hashParams.endChar = endChar;
+		if (type === 'note' && hashParams.end_beam === undefined) {
+			// Now, add the end_beam where it is needed.
+			//  end_beam goes on all notes which are followed by a space.  (This case is already done by the parser.)
+			// end_beam goes on all notes that are 1/4 or longer (regardless of spacing).
+			var dur = this.getDuration(hashParams);
+			if (dur >= 0.25) {
+				hashParams.end_beam = true;
+				//  end_beam goes on notes which _precede_ a note which is 1/4 or longer.
+				var el = this.getLastNote();
+				if (el) el.end_beam = true;
+			}
+
+			//  end_beam goes on rests and notes which precede rests _except_ when a rest (or set of adjacent rests) has normal notes on both sides (no spaces)
+			if (hashParams.rest_type !== undefined) {
+				hashParams.end_beam = true;
+				// TODO-PER: implement exception mentioned in the comment.
+			}
+		}
 		this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum].push(hashParams);
 	},
 
@@ -162,7 +194,7 @@ var AbcTune = Class.create({
 	},
 
 	addSeparator: function(spaceAbove, spaceBelow, lineLength) {
-		this.lines.push({separator: {spaceAbove: spaceAbove, spaceBelow: spaceBelow, lineLength: lineLength} });
+		this.lines.push({separator: {spaceAbove: spaceAbove, spaceBelow: spaceBelow, lineLength: lineLength}});
 	},
 
 	addText: function(str) {
@@ -192,15 +224,15 @@ var AbcTune = Class.create({
 		var createVoice = function(params) {
 			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum] = [];
 			if (This.isFirstLine(This.lineNum)) {
-				if (params.name) { if (!This.lines[This.lineNum].staff[This.staffNum].title) This.lines[This.lineNum].staff[This.staffNum].title = []; This.lines[This.lineNum].staff[This.staffNum].title[This.voiceNum] = params.name; }
+				if (params.name) {if (!This.lines[This.lineNum].staff[This.staffNum].title) This.lines[This.lineNum].staff[This.staffNum].title = [];This.lines[This.lineNum].staff[This.staffNum].title[This.voiceNum] = params.name;}
 			} else {
-				if (params.subname) { if (!This.lines[This.lineNum].staff[This.staffNum].title) This.lines[This.lineNum].staff[This.staffNum].title = []; This.lines[This.lineNum].staff[This.staffNum].title[This.voiceNum] = params.subname; }
+				if (params.subname) {if (!This.lines[This.lineNum].staff[This.staffNum].title) This.lines[This.lineNum].staff[This.staffNum].title = [];This.lines[This.lineNum].staff[This.staffNum].title[This.voiceNum] = params.subname;}
 			}
 			if (params.stem)
-				This.appendElement('stem', -1, -1, { direction: params.stem });
+				This.appendElement('stem', -1, -1, {direction: params.stem});
 		};
 		var createStaff = function(params) {
-			This.lines[This.lineNum].staff[This.staffNum] = { voices: [ ], clef: params.clef, key: params.key };
+			This.lines[This.lineNum].staff[This.staffNum] = {voices: [ ], clef: params.clef, key: params.key};
 			if (params.fontVocal) This.lines[This.lineNum].staff[This.staffNum].fontVocal = params.fontVocal;
 			if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
 			if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;
@@ -212,7 +244,7 @@ var AbcTune = Class.create({
 			if (params.meter !== undefined) This.lines[This.lineNum].staff[This.staffNum].meter = params.meter;
 		};
 		var createLine = function(params) {
-			This.lines[This.lineNum] = { staff: [] };
+			This.lines[This.lineNum] = {staff: []};
 			createStaff(params);
 		};
 		if (this.lines[this.lineNum] === undefined) createLine(params);
