@@ -609,14 +609,27 @@ ABCPrinter.prototype.printABCElement = function() {
 
 ABCPrinter.prototype.printBeam = function() {
   var abselemset = [];
-  if (!this.getElem().end_beam) {
+  
+  if (this.getElem().startBeam) {
+    var beamelem = new ABCBeamElem();
+    while (this.getElem()) {
+      abselem = this.printNote(this.getElem(),true);
+      abselemset[abselemset.length] = abselem;
+      beamelem.add(abselem);
+      if (this.getElem().endBeam) {
+		break;
+      }
+      this.pos++;
+    }
+    this.staff.addOther(beamelem);
+  } else if (!this.getElem().end_beam) {
     var beamelem = new ABCBeamElem();
 
     while (this.getElem()) {
       abselem = this.printNote(this.getElem(),true);
       abselemset[abselemset.length] = abselem;
       beamelem.add(abselem);
-      if (this.getNextElem().el_type!=="note" || this.getElem().end_beam) {
+      if (!this.getNextElem() || this.getNextElem().el_type!=="note" || this.getElem().end_beam) {
 		break;
       }
       this.pos++;
@@ -722,16 +735,22 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
     if (elem.pitches[p].accidental !== undefined && elem.pitches[p].accidental !== 'none') {
       var symb; 
       switch (elem.pitches[p].accidental) {
-      case "dbl_sharp":
+      case "quartersharp":
+	symb = "accidentals.halfsharp";
+	break;
+      case "dblsharp":
 	symb = "accidentals.dblsharp";
 	break;
       case "sharp":
 	symb = "accidentals.sharp";
 	break;
+      case "quarterflat":
+	symb = "accidentals.halfflat";
+	break;
       case "flat":
 	symb = "accidentals.flat";
 	break;
-      case "dbl_flat":
+      case "dblflat":
 	symb = "accidentals.dblflat";
 	break;
       case "natural":
