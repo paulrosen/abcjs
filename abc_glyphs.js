@@ -44,7 +44,8 @@ var ABCGlyphs = function(paper) {
      case "6":
      case "7":
      case "8":
-     case "9": return -3;
+     case "9":
+     case "+": return -3;
      case "timesig.common":
      case "timesig.cut": return -1;
      case "flags.d32nd": return -1;
@@ -58,7 +59,9 @@ var ABCGlyphs = function(paper) {
      case "rests.16th": return -1;
      case "rests.32nd": return -1;
      case "rests.64th": return -1;
-     case "clefs.G": return -1;
+     case "clefs.G": 
+     case "clefs.F":
+     case "clefs.C": return -1;
      default: return 0;
      }
    };

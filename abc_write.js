@@ -391,35 +391,38 @@ ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
 
 };
 
-ABCPrinter.prototype.printText = function (x, offset, text) {
-  this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":"start"});
+ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
+  anchor = anchor || "start";
+  this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor});
 };
 
 // assumes this.y is set appropriately
+// if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
 ABCPrinter.prototype.printSymbol = function(x, offset, symbol, start, end) {
-  var ycorr = this.glyphs.getYCorr(symbol);
-  if (symbol=="") return null;
-  var el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol);
-  if (el)
-    return el;
-  else
-    this.debugMsg("no symbol:" +symbol);
-  return null;
-  //   if (symbol.length<2) {
-  //     return el;
-  //   } else {
-  //     var elemset = this.paper.set();
-  //     elemset.push(el);
-  //     for (var i=1; i<symbol.length; i++) {
-  //       el = this.glyphs.printSymbol(x+elemset.getBBox().width+3, this.calcY(offset+ycorr), symbol[i]);
-  //       if (el)
-  // 	el.node.setAttribute("abc-pos", "" + start + ',' + end);
-  //       else
-  // 	this.debugMsg("no symbol:" +symbol);
-  //       elemset.push(el);
-  //     }
-  //     return elemset;
-  //   }
+  if (!symbol) return null;
+  if (symbol.length>0 && symbol.indexOf(".")<0) {
+    var elemset = this.paper.set();
+    dx =0;
+    for (var i=0; i<symbol.length; i++) {
+      var ycorr = this.glyphs.getYCorr(symbol[i]);
+      el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol[i]);
+      if (el) {
+	elemset.push(el);
+	dx+=this.glyphs.getSymbolWidth(symbol[i]);
+      } else {
+	this.debugMsg("no symbol:" +symbol);
+      }
+    }
+    return elemset;
+  } else {
+    var ycorr = this.glyphs.getYCorr(symbol);
+    var el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol);
+    if (el) {
+      return el;
+    } else
+      this.debugMsg("no symbol:" +symbol);
+    return null;    
+  }
 };
 
 ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
@@ -483,16 +486,14 @@ ABCPrinter.prototype.debugMsgLow = function(x, msg) {
 }
 
 ABCPrinter.prototype.printABC = function(abctune) {
-  //this.currenttune = abctune;
-  //ABCNote.duration = eval(this.currenttune.header.fields["L"]);
   this.y = 15;
   if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
   if (abctune.formatting.staffwidth) { this.paper.text(200, this.y, "Format: staffwidth="+abctune.formatting.staffwidth); this.y += 20; }
   if (abctune.formatting.scale) { this.paper.text(200, this.y, "Format: scale="+abctune.formatting.scale); this.y += 20; }
   this.paper.text(350, this.y, abctune.metaText.title).attr({"font-size":20});
   this.y+=20;
-  if (abctune.metaText.author) {this.paper.text(100, this.y, abctune.metaText.author); this.y+=15;}
-  if (abctune.metaText.origin) {this.paper.text(100, this.y, "(" + abctune.metaText.origin + ")");this.y+=15;}
+  if (abctune.metaText.author) {this.paper.text(500, this.y, abctune.metaText.author, "end"); this.y+=15;}
+  if (abctune.metaText.origin) {this.paper.text(500, this.y, "(" + abctune.metaText.origin + ")", "end");this.y+=15;}
   if (abctune.metaText.tempo) {
 	  var tempo = "";
 	  if (abctune.metaText.tempo.preString) tempo += abctune.metaText.tempo.preString;
@@ -511,27 +512,27 @@ ABCPrinter.prototype.printABC = function(abctune) {
   for(var line=0; line<abctune.lines.length; line++) {
     var abcline = abctune.lines[line];
     if (abcline.staff) {
-		for (var s = 0; s < abcline.staff.length; s++) {
-			var header = "";
-			if (abcline.staff[s].bracket) header += "bracket "+abcline.staff[s].bracket+" ";
-			if (abcline.staff[s].brace) header += "brace "+abcline.staff[s].brace+" ";
-			if (abcline.staff[s].connectBarLines) header += "bar "+abcline.staff[s].connectBarLines+" ";
-			if (abcline.staff[s].title) {
-				abcline.staff[s].title.each(function(t) { header += t; })
-			}
-			this.staff = new ABCStaffElement(this, this.y);
-			this.staff.addChild(this.printClef(abcline.staff[s].clef));
-			this.staff.addChild(this.printKeySignature(abcline.staff[s].key));
-			if (abcline.staff[s].meter)
-				this.staff.addChild(this.printTimeSignature(abcline.staff[s].meter));
-		  for (var v = 0; v < abcline.staff[s].voices.length; v++) {
-			  this.staffs[this.staffs.length] = this.printABCLine(abcline.staff[s].voices[v]);
-		  }
-			if (header.length > 0)
-				this.paper.text(500, this.y+20, header);
-		  if (s !== abcline.staff.length-1)
-			this.y+= (AbcSpacing.STAVEHEIGHT*0.5);
-		}
+      for (var s = 0; s < abcline.staff.length; s++) {
+	var header = "";
+	if (abcline.staff[s].bracket) header += "bracket "+abcline.staff[s].bracket+" ";
+	if (abcline.staff[s].brace) header += "brace "+abcline.staff[s].brace+" ";
+	if (abcline.staff[s].connectBarLines) header += "bar "+abcline.staff[s].connectBarLines+" ";
+	if (abcline.staff[s].title) {
+	  abcline.staff[s].title.each(function(t) { header += t; });
+	}
+	this.staff = new ABCStaffElement(this, this.y);
+	this.staff.addChild(this.printClef(abcline.staff[s].clef));
+	this.staff.addChild(this.printKeySignature(abcline.staff[s].key));
+	if (abcline.staff[s].meter)
+	  this.staff.addChild(this.printTimeSignature(abcline.staff[s].meter));
+	for (var v = 0; v < abcline.staff[s].voices.length; v++) {
+	  this.staffs[this.staffs.length] = this.printABCLine(abcline.staff[s].voices[v]);
+	}
+	if (header.length > 0)
+	  this.paper.text(500, this.y+20, header, "end");
+	if (s !== abcline.staff.length-1)
+	  this.y+= (AbcSpacing.STAVEHEIGHT*0.5);
+      }
       this.y+=AbcSpacing.STAVEHEIGHT;
     } else if (abcline.subtitle) {
       this.printSubtitleLine(abcline);
@@ -551,7 +552,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
   if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
   if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords + "\n";
-  var text = this.paper.text(10, this.y+30, extraText).attr({"text-anchor":"start"});
+  var text = this.paper.text(10, this.y+30, extraText);
   text.translate(0,text.getBBox().height/2);
 };
 
@@ -722,9 +723,9 @@ ABCPrinter.prototype.printNote = function(elem, nostem) { //stem presence: true 
       abselem.addHead(notehead);
       if (extraflags) {
 	var pos = pitch+((dir=="down")?-7:7);
-	var flag = chartable[(dir=="down")?"dflags":"uflags"][-durlog]
+	var flag = chartable[(dir=="down")?"dflags":"uflags"][-durlog];
 	var xdelta = (dir=="down")?0:this.glyphs.getSymbolWidth("noteheads.quarter")-0.6;
-	abselem.addRight(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag), pos));
+	if (flag) abselem.addRight(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag), pos));
       }
       for (;dot>0;dot--) {
 	var dotadjust = (1-pitch%2); //TODO don't adjust when above or below stave?
@@ -900,16 +901,16 @@ ABCPrinter.prototype.printDecoration = function(decoration, pitch, width, absele
     case "tenuto": dec="scripts.tenuto"; break;
     case "coda": dec="scripts.coda"; break;
     case "segno": dec="scripts.segno"; break;
-    // case "p": dec="p"; break;
-    //case "mp": dec="mp"; break;
-    //case "ppp": dec="ppp"; break;
-    //case "pppp": dec="u"; break;
-    //case "f": dec="f"; break;
-    //case "ff": dec="\u0192"; break;
-    //case "fff": dec="\u00cf"; break;
-    //case "ffff": dec="\u00ce"; break;
-    //case "sffz": dec="\u00e7"; break;
-    //case "mf": dec="F"; break;
+    case "p": 
+    case "mp": 
+    case "ppp": 
+    case "pppp": 
+    case "f":
+    case "ff": 
+    case "fff": 
+    case "ffff":
+    case "sfz": 
+    case "mf": dec = decoration[i]; break;
     default:
     unknowndecs[unknowndecs.length]=decoration[i];
     continue;
@@ -995,23 +996,30 @@ ABCPrinter.prototype.printStave = function (width) {
   this.printStaveLine(0,width,6);
   this.printStaveLine(0,width,8);
   this.printStaveLine(0,width,10);
-  //var staff = this.printSymbol(0, 3, "=", -1, -1); // 3 is hardcoded
-  //width = width/(this.glyphs.getSymbolWidth("="));
-  //staff.scale(width,1,0);
 };
 
 ABCPrinter.prototype.printClef = function(elem) {
-  if (elem.type !== 'treble')
-    this.debugMsg(10,"clef="+elem.type);
+  var clef = "clefs.G";
+  var pitch = 5;
+  switch (elem.type) {
+  case "treble": break;
+  case "tenor": clef="clefs.C"; pitch=9; break;
+  case "alto": clef="clefs.C"; pitch=7; break;
+  case "bass": clef="clefs.F"; pitch=9; break;
+  default: this.debugMsg(10,"clef="+elem.type);
+  }    
+  if (elem.pitch) {
+    pitch = elem.pitch;
+  }
+
   var abselem = new ABCAbsoluteElement(elem,0,10);
   var dx =10;
-  abselem.addRight(new ABCRelativeElement("clefs.G", dx, this.glyphs.getSymbolWidth("clefs.G"), 5));
-  dx += this.glyphs.getSymbolWidth("clefs.G")+10; // hardcoded
+  abselem.addRight(new ABCRelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), pitch));
   return abselem;
 };
 ABCPrinter.prototype.printKeySignature = function(elem) {
   var abselem = new ABCAbsoluteElement(elem,0,10);
-  var dx =10;
+  var dx = 0;
   if (elem.regularKey) {
 	  var FLATS = [6,9,5,8,4,7];
 	  var SHARPS = [10,7,11,8,5,9];
@@ -1035,17 +1043,16 @@ ABCPrinter.prototype.printKeySignature = function(elem) {
 };
 
 ABCPrinter.prototype.printTimeSignature= function(elem) {
-  //var timesig = this.currenttune.header.fields["M"];
-  //var parts=timesig.match(/([\d]+)\/([\d]+)/);
+
   var abselem = new ABCAbsoluteElement(elem,0,20);
   if (elem.type === "specified") {
     //TODO make the alignment for time signatures centered
-	for (var i = 0; i < elem.value.length; i++) {
-	  if (i !== 0)	// TODO-PER: I used '9' where it should be + to make if visible for now.
-        abselem.addRight(new ABCRelativeElement('9', i*15-7, this.glyphs.getSymbolWidth(elem.value[i].num[0]), 7));
-    abselem.addRight(new ABCRelativeElement(elem.value[i].num.replace('+', '9'), i*15, this.glyphs.getSymbolWidth(elem.value[i].num[0]), 9));
-    abselem.addRight(new ABCRelativeElement(elem.value[i].den, i*15, this.glyphs.getSymbolWidth(elem.value[i].den[0]), 5));
-	}
+    for (var i = 0; i < elem.value.length; i++) {
+      if (i !== 0)	// TODO-PER: I used '9' where it should be + to make if visible for now.
+        abselem.addRight(new ABCRelativeElement('+', i*20-9, this.glyphs.getSymbolWidth("+"), 7));
+      abselem.addRight(new ABCRelativeElement(elem.value[i].num, i*20, this.glyphs.getSymbolWidth(elem.value[i].num[0])*elem.value[i].num.length, 9));
+      abselem.addRight(new ABCRelativeElement(elem.value[i].den, i*20, this.glyphs.getSymbolWidth(elem.value[i].den[0])*elem.value[i].den.length, 5));
+    }
   } else if (elem.type === "common_time") {
     abselem.addRight(new ABCRelativeElement("timesig.common", 0, this.glyphs.getSymbolWidth("timesig.common"), 7));
 
