@@ -1000,12 +1000,12 @@ ABCPrinter.prototype.printStave = function (width) {
 
 ABCPrinter.prototype.printClef = function(elem) {
   var clef = "clefs.G";
-  var pitch = 5;
+  var pitch = 4;
   switch (elem.type) {
   case "treble": break;
-  case "tenor": clef="clefs.C"; pitch=9; break;
-  case "alto": clef="clefs.C"; pitch=7; break;
-  case "bass": clef="clefs.F"; pitch=9; break;
+  case "tenor": clef="clefs.C"; pitch=8; break;
+  case "alto": clef="clefs.C"; pitch=6; break;
+  case "bass": clef="clefs.F"; pitch=8; break;
   default: this.debugMsg(10,"clef="+elem.type);
   }    
   if (elem.pitch) {

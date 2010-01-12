@@ -59,9 +59,6 @@ var ABCGlyphs = function(paper) {
      case "rests.16th": return -1;
      case "rests.32nd": return -1;
      case "rests.64th": return -1;
-     case "clefs.G": 
-     case "clefs.F":
-     case "clefs.C": return -1;
      default: return 0;
      }
    };
