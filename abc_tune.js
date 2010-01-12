@@ -98,6 +98,14 @@ var AbcTune = Class.create({
 					line.staff = line.staff.compact();
 			})
 		}
+		for (this.lineNum = 0; this.lineNum < this.lines.length; this.lineNum++) {
+			if (this.lines[this.lineNum].staff) for (this.staffNum = 0; this.staffNum < this.lines[this.lineNum].staff.length; this.staffNum++) {
+				for (this.voiceNum = 0; this.voiceNum < this.lines[this.lineNum].staff[this.staffNum].voices.length; this.voiceNum++) {
+					var el = this.getLastNote();
+					if (el) el.end_beam = true;
+				}
+			}
+		}
 	},
 
 	initialize: function () {
@@ -150,8 +158,11 @@ var AbcTune = Class.create({
 			}
 
 			//  end_beam goes on rests and notes which precede rests _except_ when a rest (or set of adjacent rests) has normal notes on both sides (no spaces)
-			if (hashParams.rest_type !== undefined) {
+			if (hashParams.rest_type !== undefined && !hashParams.end_beam)
+			{
 				hashParams.end_beam = true;
+				var el = this.getLastNote();
+				if (el) el.end_beam = true;
 				// TODO-PER: implement exception mentioned in the comment.
 			}
 		}
