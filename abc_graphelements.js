@@ -105,6 +105,7 @@ ABCAbsoluteElement.prototype.addExtra = function (extra) {
 };
 
 ABCAbsoluteElement.prototype.addHead = function (head) {
+  if (head.dx<this.extraw) this.extraw = head.dx;
   this.heads[this.heads.length] = head;
   this.addRight(head);
 };
@@ -237,11 +238,11 @@ ABCBeamElem.prototype.add = function(abselem) {
   this.elems[this.elems.length] = abselem;
   var pitch = abselem.abcelem.averagepitch;
   this.total += pitch; // TODO CHORD (get pitches from abselem.heads)
-  if (!this.min || pitch<this.min) {
-    this.min = pitch;
+  if (!this.min || abselem.abcelem.pitches[0].pitch<this.min) {
+    this.min = abselem.abcelem.pitches[0].pitch;
   }
-  if (!this.max || pitch>this.max) {
-    this.max = pitch;
+  if (!this.max || abselem.abcelem.pitches[abselem.abcelem.pitches.length-1].pitch>this.max) {
+    this.max = abselem.abcelem.pitches[abselem.abcelem.pitches.length-1].pitch;
   }
 };
 

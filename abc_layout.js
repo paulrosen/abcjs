@@ -131,7 +131,7 @@ ABCLineLayout.prototype.printBeam = function() {
       this.pos++;
     }
     this.staff.addOther(beamelem);
-  } else if (!this.getElem().end_beam) {
+  } else if (this.getNextElem() && this.getNextElem().el_type=="note" && !this.getElem().end_beam) {
     var beamelem = new ABCBeamElem();
 
     while (this.getElem()) {
@@ -167,6 +167,7 @@ function sortPitch(elem) {
 ABCLineLayout.prototype.printNote = function(elem, nostem) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var roomtaken = 0; // room needed to the left of the note
+  var dotshift = 0; // room taken by chords with displaced noteheads which cause dots to shift
   if (elem.pitches==undefined) {
     elem.pitches=[{accidental:elem.accidental, pitch:elem.pitch, duration:elem.duration, startTie: elem.startTie,
 		   endTie: elem.endTie, startSlur: elem.startSlur, endSlur: elem.endSlur}]
@@ -189,14 +190,30 @@ ABCLineLayout.prototype.printNote = function(elem, nostem) { //stem presence: tr
   }
 
   elem.averagepitch = sum/elem.pitches.length;
+  var dir = (elem.averagepitch>=6) ? "down": "up";
+
+  // determine elements of chords which should be shifted
+  for (var p=(dir=="down")?elem.pitches.length-2:1; (dir=="down")?p>=0:p<elem.pitches.length; p=(dir=="down")?p-1:p+1) {
+    var prev = elem.pitches[(dir=="down")?p+1:p-1];
+    var curr = elem.pitches[p];
+    var delta = (dir=="down")?prev.pitch-curr.pitch:curr.pitch-prev.pitch;
+    if (delta<=1 && !prev.printer_shift) {
+      curr.printer_shift=(delta)?"different":"same";
+      if (dir=="down") {
+	roomtaken = this.glyphs.getSymbolWidth(chartable["note"][-durlog])+2
+      } else {
+	dotshift = this.glyphs.getSymbolWidth(chartable["note"][-durlog])+2
+      }
+    }
+  }
 
   for (var p=0; p<elem.pitches.length; p++) {
     var pitch = elem.pitches[p].pitch;
     var extraflags = false;
 
     var dot=0;
-    
     for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
+
     var c = "";
     if (elem.rest_type) {
       pitch = 7;
@@ -207,9 +224,8 @@ ABCLineLayout.prototype.printNote = function(elem, nostem) { //stem presence: tr
 	c="";
       }
     } else if (!nostem) {
-      var dir = (elem.averagepitch>=6) ? "down": "up";
       if ((dir=="down" && p!=0) || (dir=="up" && p!=pp-1)) { // not the stemmed elem of the chord
-	dir = "chord";
+	extraflags = false;
       } else {
 	extraflags = true;
       }
@@ -227,17 +243,22 @@ ABCLineLayout.prototype.printNote = function(elem, nostem) { //stem presence: tr
       notehead = new ABCRelativeElement(null, 0, 0, pitch);
       abselem.addHead(notehead);
     } else {
-      notehead = new ABCRelativeElement(c, 0, this.glyphs.getSymbolWidth(c), pitch);
+      var headx = 0;
+      if (elem.pitches[p].printer_shift) {
+	adjust = (elem.pitches[p].printer_shift="same")?1:0;
+	headx = (dir=="down")?-this.glyphs.getSymbolWidth(c)+adjust:this.glyphs.getSymbolWidth(c)-adjust;
+      }
+      notehead = new ABCRelativeElement(c, headx, this.glyphs.getSymbolWidth(c), pitch);
       abselem.addHead(notehead);
       if (extraflags) {
 	var pos = pitch+((dir=="down")?-7:7);
 	var flag = chartable[(dir=="down")?"dflags":"uflags"][-durlog];
-	var xdelta = (dir=="down")?0:this.glyphs.getSymbolWidth("noteheads.quarter")-0.6;
+	var xdelta = (dir=="down")?0:this.glyphs.getSymbolWidth(c)-0.6;
 	if (flag) abselem.addRight(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag), pos));
       }
       for (;dot>0;dot--) {
 	var dotadjust = (1-pitch%2); //TODO don't adjust when above or below stave?
-	abselem.addRight(new ABCRelativeElement("dots.dot", notehead.w-2+5*dot, this.glyphs.getSymbolWidth("dots.dot"), pitch+dotadjust));
+	abselem.addRight(new ABCRelativeElement("dots.dot", notehead.w+dotshift-2+5*dot, this.glyphs.getSymbolWidth("dots.dot"), pitch+dotadjust));
       }
     }
 
