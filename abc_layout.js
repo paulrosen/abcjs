@@ -215,9 +215,9 @@ ABCLineLayout.prototype.printNote = function(elem, nostem) { //stem presence: tr
     for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
 
     var c = "";
-    if (elem.rest_type) {
+    if (elem.rest) {
       pitch = 7;
-      switch(elem.rest_type) {
+      switch(elem.rest.type) {
       case "rest": c = chartable["rest"][-durlog]; elem.averagepitch=7; break; // TODO rests in bars is now broken
       case "invisible":
       case "spacer":
@@ -306,7 +306,7 @@ ABCLineLayout.prototype.printNote = function(elem, nostem) { //stem presence: tr
   }
   
   // draw stem from the furthest note to a pitch above/below the stemmed note
-  if (!nostem && durlog<=-1 && !elem.rest_type) {
+  if (!nostem && durlog<=-1 && !elem.rest) {
     var p1 = (elem.averagepitch>=6) ? elem.pitches[0].pitch-7 : elem.pitches[0].pitch+1/3;
     var p2 = (elem.averagepitch>=6) ? elem.pitches[elem.pitches.length-1].pitch-1/3 : elem.pitches[elem.pitches.length-1].pitch+7;
     var dx = (elem.averagepitch>=6)?0:abselem.heads[0].w;
@@ -342,13 +342,13 @@ ABCLineLayout.prototype.printNote = function(elem, nostem) { //stem presence: tr
 
   // ledger lines
   for (i=elem.pitches[elem.pitches.length-1].pitch; i>11; i--) {
-    if (i%2===0 && !elem.rest_type) {
+    if (i%2===0 && !elem.rest) {
       abselem.addChild(new ABCRelativeElement(null, -2, this.glyphs.getSymbolWidth("noteheads.quarter")+4, i, {type:"ledger"}));
     }
   }
 
   for (i=elem.pitches[0].pitch; i<1; i++) {
-    if (i%2===0 && !elem.rest_type) {
+    if (i%2===0 && !elem.rest) {
       abselem.addChild(new ABCRelativeElement(null, -2, this.glyphs.getSymbolWidth("noteheads.quarter")+4, i, {type:"ledger"}));
     }
   }

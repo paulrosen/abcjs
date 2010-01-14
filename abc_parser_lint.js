@@ -48,6 +48,12 @@ var AbcParserLint = Class.create({
 			return ret;
 		}
 
+		var fontType = {
+			type: 'object', optional: true, properties: {
+				font: { type: 'string', optional: true },
+				size: { type: 'number', optional: true }
+			}
+		};
 
 		var clefProperties = {
 			type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] },
@@ -124,7 +130,7 @@ var AbcParserLint = Class.create({
 						}
 					},
 					decoration: decorationList,
-					duration: { type: 'number', optional: true },	// TODO-PER: Straighten this out. It might be required.
+					duration: { type: 'number' },
 					endSlur: { type: 'number', minimum: 1, optional: true },
 					endTie: { type: 'boolean', Enum: [ true ], optional: true },
 					endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
@@ -147,12 +153,11 @@ var AbcParserLint = Class.create({
 						divider: { type: 'string', Enum: [ '-', ' ', '_' ]}
 					}}},
 				// TODO-PER: either pitch or pitches must be present. Test for that. Or, change it to just use pitches.
-					pitch: { optional: true, type: [ { type: 'number', prohibits: [ 'rest_type', 'pitches' ]}, { type: 'null', requires: ['rest_type'], prohibits: [ 'startSlur', 'startTie', 'startTriplet', 'endSlur', 'endTie', 'endTriplet', 'end_beam', 'lyric' ] } ] },
-					pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'pitch', 'duration' ], items: {
+					pitch: { optional: true, type: 'number', prohibits: [ 'rest', 'pitches' ] },
+					pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'pitch', 'duration', 'rest' ], items: {
 							type: 'object', properties: {
 								endChar: { type: 'number', output: 'hidden' },
 								accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
-								duration: { type: 'number' },
 								endSlur: { type: 'number', minimum: 1, optional: true },
 								endTie: { type: 'boolean', Enum: [ true ], optional: true },
 								pitch: { type: 'number' },
@@ -160,7 +165,13 @@ var AbcParserLint = Class.create({
 								startTie: { type: 'boolean', Enum: [ true ], optional: true }
 							}
 					}},
-					rest_type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest' ], optional: true },
+					rest: { type: 'object',  optional: true, prohibits: [ 'pitch', 'duration', 'lyric' ], properties: {
+						type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest' ] },
+						endSlur: { type: 'number', minimum: 1, optional: true },
+						endTie: { type: 'boolean', Enum: [ true ], optional: true },
+						startSlur: { type: 'number', minimum: 1, optional: true },
+						startTie: { type: 'boolean', Enum: [ true ], optional: true }
+					}},
 					startSlur: { type: 'number', minimum: 1, optional: true },
 					startTie: { type: 'boolean', Enum: [ true ], optional: true },
 					startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }
@@ -176,47 +187,45 @@ var AbcParserLint = Class.create({
 					properties: {
 						auquality: { type: "string", optional: true },
 						bagpipes: { type: "boolean", optional: true },
-						barlabelfont: { type: "string", optional: true },
-						barnumberfont: { type: "string", optional: true },
-						barnumfont: { type: "string", optional: true },
-						botmargin: { type: "string", optional: true },
-						botspace: { type: "string", optional: true },
-						composerfont: { type: "string", optional: true },
-						composerspace: { type: "string", optional: true },
+						barlabelfont: fontType,
+						barnumberfont: fontType,
+						botmargin: { type: "number", optional: true },
+						botspace: { type: "number", optional: true },
+						composerfont: fontType,
+						composerspace: { type: "number", optional: true },
 						continuous: { type: "string", optional: true },
-						gchordfont: { type: "string", optional: true },
-						indent: { type: "string", optional: true },
-						landscape: { type: "string", optional: true },
-						leftmargin: { type: "string", optional: true },
-						linesep: { type: "string", optional: true },
+						gchordfont: fontType,
+						indent: { type: "number", optional: true },
+						landscape: { type: "boolean", optional: true },
+						leftmargin: { type: "number", optional: true },
+						linesep: { type: "number", optional: true },
 						midi: { type: "string", optional: true },
-						musicspace: { type: "string", optional: true },
+						musicspace: { type: "number", optional: true },
 						nobarcheck: { type: "string", optional: true },
-						partsfont: { type: "string", optional: true },
-						partsspace: { type: "string", optional: true },
+						partsfont: fontType,
+						partsspace: { type: "number", optional: true },
 						playtempo: { type: "string", optional: true },
 						scale: { type: "number", optional: true },
 						score: { type: "string", optional: true },
-						slurgraces: { type: "string", optional: true },
-						staffsep: { type: "string", optional: true },
+						slurgraces: { type: "boolean", optional: true },
+						staffsep: { type: "number", optional: true },
 						staffwidth: { type: "number", optional: true },
 						staves: { type: "string", optional: true },
 						stretchlast: { type: "boolean", optional: true },
-						subtitlefont: { type: "string", optional: true },
-						subtitlespace: { type: "string", optional: true },
-						sysstaffsep: { type: "string", optional: true },
-						systemsep: { type: "string", optional: true },
-						tempofont: { type: "string", optional: true },
-						textspace: { type: "string", optional: true },
-						titlecaps: { type: "string", optional: true },
-						titlefont: { type: "string", optional: true },
-						titleleft: { type: "string", optional: true },
-						titlespace: { type: "string", optional: true },
-						topmargin: { type: "string", optional: true },
-						topspace: { type: "string", optional: true },
-						vocalspace: { type: "string", optional: true },
-						voicefont: { type: "string", optional: true },
-						wordsspace: { type: "string", optional: true }
+						subtitlefont: fontType,
+						subtitlespace: { type: "number", optional: true },
+						sysstaffsep: { type: "number", optional: true },
+						systemsep: { type: "number", optional: true },
+						tempofont: fontType,
+						textspace: { type: "number", optional: true },
+						titlefont: fontType,
+						titleleft: { type: "boolean", optional: true },
+						titlespace: { type: "number", optional: true },
+						topmargin: { type: "number", optional: true },
+						topspace: { type: "number", optional: true },
+						vocalspace: { type: "number", optional: true },
+						voicefont: fontType,
+						wordsspace: { type: "number", optional: true }
 					}
 				},
 
@@ -240,11 +249,7 @@ var AbcParserLint = Class.create({
 										bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 										clef: { type: 'object', optional: true, properties: clefProperties },
 										connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
-										fontVocal: { type: 'object', optional: true,
-											properties: {
-												font: { type: 'string', optional: true },
-												size: { type: 'number', optional: true }
-											} },
+										vocalfont: fontType,
 										key: { type: 'object', optional: true, properties: keyProperties },
 										meter: { type: 'object', optional: true, properties: meterProperties },
 										spacingBelow: { type: 'number', optional: true },
@@ -294,7 +299,7 @@ var AbcParserLint = Class.create({
 			});
 			var out = ret.output.join("\n");
 			
-			var warn = warnings === null ? "No errors" : warnings.join('\n');
+			var warn = warnings === undefined ? "No errors" : warnings.join('\n');
 			warn = warn.gsub('<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">', '$$$$');
 			warn = warn.gsub('</span>', '$$$$');
 			return "Error:------\n" + err + "\nObj:-------\n" + out + "\nWarn:------\n" + warn;

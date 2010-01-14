@@ -62,10 +62,6 @@ var AbcTune = Class.create({
 	},
 
 	cleanUp: function() {
-		// Remove temporary variables that the outside doesn't need to know about
-		delete this.staffNum;
-		delete this.voiceNum;
-		delete this.lineNum;
 		// Remove any blank lines
 		var anyDeleted = false;
 		for (var i = 0; i < this.lines.length; i++) {
@@ -106,6 +102,10 @@ var AbcTune = Class.create({
 				}
 			}
 		}
+		// Remove temporary variables that the outside doesn't need to know about
+		delete this.staffNum;
+		delete this.voiceNum;
+		delete this.lineNum;
 	},
 
 	initialize: function () {
@@ -136,7 +136,7 @@ var AbcTune = Class.create({
 
 	getDuration: function(el) {
 		if (el.duration) return el.duration;
-		if (el.pitches && el.pitches.length > 0) return el.pitches[0].duration;
+		//if (el.pitches && el.pitches.length > 0) return el.pitches[0].duration;
 		return 0;
 	},
 
@@ -158,11 +158,11 @@ var AbcTune = Class.create({
 			}
 
 			//  end_beam goes on rests and notes which precede rests _except_ when a rest (or set of adjacent rests) has normal notes on both sides (no spaces)
-			if (hashParams.rest_type !== undefined && !hashParams.end_beam)
+			if (hashParams.rest !== undefined)
 			{
 				hashParams.end_beam = true;
-				var el = this.getLastNote();
-				if (el) el.end_beam = true;
+				var el2 = this.getLastNote();
+				if (el2) el2.end_beam = true;
 				// TODO-PER: implement exception mentioned in the comment.
 			}
 		}
@@ -244,7 +244,7 @@ var AbcTune = Class.create({
 		};
 		var createStaff = function(params) {
 			This.lines[This.lineNum].staff[This.staffNum] = {voices: [ ], clef: params.clef, key: params.key};
-			if (params.fontVocal) This.lines[This.lineNum].staff[This.staffNum].fontVocal = params.fontVocal;
+			if (params.vocalfont) This.lines[This.lineNum].staff[This.staffNum].vocalfont = params.vocalfont;
 			if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
 			if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;
 			if (params.connectBarLines) This.lines[This.lineNum].staff[This.staffNum].connectBarLines = params.connectBarLines;

@@ -563,18 +563,20 @@ var AbcTokenizer = Class.create({
 			var x = tokens.shift();
 			var used = 1;
 			if (x.token === '.') {
-				if (tokens.length === 0) return { used: 0 };
-				x = tokens.shift();
-				if (x.type !== 'number') return { used: 0 };
-				num = num + '.' + x.token;
-				used = 3;
+				used++;
+				if (tokens.length === 0) return { used: used, value: parseInt(num) };
+				if (tokens[0].type === 'number') {
+					x = tokens.shift();
+					num = num + '.' + x.token;
+					used++;
+				}
 			}
 			if (tokens.length === 0) return { used: used, value: parseFloat(num) };
 			x = tokens.shift();
 			switch (x.token) {
-				case 'pt': return { used: used+1, value: num };
-				case 'cm': return { used: used+1, value: num*72*2.54 };
-				case 'in': return { used: used+1, value: num*72 };
+				case 'pt': return { used: used+1, value: parseFloat(num) };
+				case 'cm': return { used: used+1, value: parseFloat(num)*72*2.54 };
+				case 'in': return { used: used+1, value: parseFloat(num)*72 };
 			}
 			return { used: 0 };
 		};

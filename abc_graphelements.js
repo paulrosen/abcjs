@@ -234,7 +234,7 @@ function ABCBeamElem () {
 }
 
 ABCBeamElem.prototype.add = function(abselem) {
-  this.allrests = this.allrests && abselem.abcelem.rest_type;
+  this.allrests = this.allrests && abselem.abcelem.rest;
   this.elems[this.elems.length] = abselem;
   var pitch = abselem.abcelem.averagepitch;
   this.total += pitch; // TODO CHORD (get pitches from abselem.heads)
@@ -287,7 +287,7 @@ ABCBeamElem.prototype.drawBeam = function(paper,basey) {
 ABCBeamElem.prototype.drawStems = function(printer) {
   var auxbeams = [];  // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
   for (var i=0,ii=this.elems.length; i<ii; i++) {
-    if (this.elems[i].abcelem.rest_type)
+    if (this.elems[i].abcelem.rest)
       continue;
     var furthesthead = this.elems[i].heads[(this.asc)? 0: this.elems[i].heads.length-1];
     var pitch = furthesthead.pitch + ((this.asc) ? 1/3 : -1/3);

@@ -29,6 +29,11 @@ var AbcParse = Class.create({
 
 		var multilineVars = {
 			reset: function() {
+				for (property in this) {
+					if (this.hasOwnProperty(property) && typeof this[property] != "function") {
+						delete this[property];
+					}
+				}
 				this.iChar = 0;
 				this.key = {regularKey: {num: 0, acc: 'sharp'}};
 				this.meter = {type: 'specified', value: [{num: '4', den: '4'}]};	// if no meter is specified, there is an implied one.
@@ -36,24 +41,18 @@ var AbcParse = Class.create({
 				this.hasMainTitle = false;
 				this.default_length = 0.125;
 				this.clef = { type: 'treble' };
-				this.warnings = null;
 				this.next_note_duration = 0;
 				this.start_new_line = true;
 				this.is_in_header = true;
 				this.is_in_history = false;
 				this.partForNextLine = "";
 				this.havent_set_length = true;
-				this.tempo = null;
 				this.voices = {};
-				this.currentVoice = null;
 				this.staves = [];
 				this.macros = {};
-				this.barNumbers = null;
 				this.currBarNumber = 1;
-				this.barNumOnNextNote = null;
 				this.inTextBlock = false;
 				this.textBlock = "";
-				delete this.fontVocal;
 				this.score_is_present = false;	// Can't have original V: lines when there is the score directive
 			}
 		};
@@ -313,7 +312,7 @@ var AbcParse = Class.create({
 							case 'bar': if (el.el_type === 'bar') word_list.shift(); break;
 						}
 					} else {
-						if (el.el_type === 'note' && el.pitch !== null && !inSlur) {
+						if (el.el_type === 'note' && el.rest === undefined && !inSlur) {
 							var lyric = word_list.shift();
 							if (el.lyric === undefined)
 								el.lyric = [ lyric ];
@@ -349,9 +348,9 @@ var AbcParse = Class.create({
 
 		// TODO-PER: make this a method in el.
 		var addEndBeam = function(el) {
-			if (el.pitch !== null && el.duration < 0.25)
+			if (el.pitch !== undefined && el.duration < 0.25)
 				el.end_beam = true;
-			if (el.pitches !== undefined && el.pitches[0].duration < 0.25)
+			if (el.pitches !== undefined && el.duration < 0.25)
 				el.end_beam = true;
 			return el;
 		};
@@ -436,8 +435,7 @@ var AbcParse = Class.create({
 					case 'y':
 					case 'z':
 						if (state === 'startSlur') {
-							el.pitch = null;
-							el.rest_type = rests[line[index]];
+							el.rest = { type: rests[line[index]] };
 							// There shouldn't be some of the properties that notes have. If some sneak in due to bad syntax in the abc file,
 							// just nix them here.
 							delete el.accidental;
@@ -583,8 +581,8 @@ var AbcParse = Class.create({
 			}
 			if (multilineVars.currentVoice && multilineVars.currentVoice.name)
 				params.name = multilineVars.currentVoice.name;
-			if (multilineVars.fontVocal)
-				params.fontVocal = multilineVars.fontVocal;
+			if (multilineVars.vocalfont)
+				params.vocalfont = multilineVars.vocalfont;
 			if (multilineVars.currentVoice) {
 				var staff = multilineVars.staves[multilineVars.currentVoice.staffNum];
 				if (staff.brace) params.brace = staff.brace;
@@ -598,7 +596,7 @@ var AbcParse = Class.create({
 			tune.startNewLine(params);
 
 			multilineVars.partForNextLine = "";
-			if (multilineVars.currentVoice === null || (multilineVars.currentVoice.staffNum === multilineVars.staves.length-1 && multilineVars.staves[multilineVars.currentVoice.staffNum].numVoices-1 === multilineVars.currentVoice.index)) {
+			if (multilineVars.currentVoice === undefined || (multilineVars.currentVoice.staffNum === multilineVars.staves.length-1 && multilineVars.staves[multilineVars.currentVoice.staffNum].numVoices-1 === multilineVars.currentVoice.index)) {
 				//multilineVars.meter = null;
 				if (multilineVars.barNumbers === 0)
 					multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
@@ -829,8 +827,8 @@ var AbcParse = Class.create({
 						// This is definitely a bar
 						if (el.gracenotes !== undefined) {
 							// Attach the grace note to an invisible note
-							el.pitch = null;
-							el.rest_type = 'spacer';
+							el.rest = { type: 'spacer' };
+							el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
 							tune.appendElement('note', -1, -1, el);
 							el = {};
 						}
@@ -881,10 +879,12 @@ var AbcParse = Class.create({
 							while (!done) {
 								var chordNote = getCoreNote(line, i, {}, false);
 								if (chordNote !== null) {
-									if (el.pitches === undefined)
+									if (el.pitches === undefined) {
+										el.duration = chordNote.duration;
 										el.pitches = [ chordNote ];
-									else
+									} else	// Just ignore the note lengths of all but the first note. The standard isn't clear here, but this seems less confusing.
 										el.pitches.push(chordNote);
+									delete chordNote.duration;
 
 									if (inTieChord[el.pitches.length]) {
 										chordNote.endTie = true;
@@ -904,9 +904,10 @@ var AbcParse = Class.create({
 										i++;
 
 										if (multilineVars.next_note_duration !== 0) {
-											el.pitches.each(function(p) {
-												p.duration = p.duration * multilineVars.next_note_duration;
-											});
+											el.duration = el.duration * multilineVars.next_note_duration;
+//											el.pitches.each(function(p) {
+//												p.duration = p.duration * multilineVars.next_note_duration;
+//											});
 											multilineVars.next_note_duration = 0;
 										}
 
@@ -975,9 +976,10 @@ var AbcParse = Class.create({
 
 									if (el.pitches !== undefined) {
 										if (chordDuration !== null) {
-											el.pitches.each(function(p) {
-												p.duration = p.duration * chordDuration;
-											});
+											el.duration = el.duration * chordDuration;
+//											el.pitches.each(function(p) {
+//												p.duration = p.duration * chordDuration;
+//											});
 										}
 										if (multilineVars.barNumOnNextNote) {
 											el.barNumber = multilineVars.barNumOnNextNote;

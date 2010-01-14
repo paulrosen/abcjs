@@ -267,6 +267,45 @@ var AbcParseHeader = Class.create({
 		};
 
 		this.addDirective = function(str) {
+			var oneParameterMeasurement = function(cmd, tokens) {
+				var points = tokenizer.getMeasurement(tokens);
+				if (points.used === 0 || tokens.length !== 0)
+					return "Directive \"" + cmd + "\" requires a measurement as a parameter.";
+				tune.formatting[cmd] = points.value;
+				return null;
+			};
+			var getFontParameter = function(tokens) {
+				var font = {};
+				var token = tokens.last();
+				if (token.type === 'number') {
+					font.size = parseInt(token.token);
+					tokens.pop();
+				}
+				if (tokens.length > 0) {
+					var scratch = "";
+					tokens.each(function(tok) {
+						if (tok.token !== '-') {
+							if (scratch.length > 0) scratch += ' ';
+							scratch += tok.token;
+						}
+					});
+					font.font = scratch;
+				}
+				return font;
+			};
+			var getChangingFont = function(cmd, tokens) {
+				if (tokens.length === 0)
+					return "Directive \"" + cmd + "\" requires a font as a parameter.";
+				multilineVars[cmd] = getFontParameter(tokens);
+				return null;
+			};
+			var getGlobalFont = function(cmd, tokens) {
+				if (tokens.length === 0)
+					return "Directive \"" + cmd + "\" requires a font as a parameter.";
+				tune.formatting[cmd] = getFontParameter(tokens);
+				return null;
+			};
+
 			var tokens = tokenizer.tokenize(str, 0, str.length);	// 3 or more % in a row, or just spaces after %% is just a comment
 			if (tokens.length === 0 || tokens[0].type !== 'alpha') return null;
 			var restOfString = str.substring(str.indexOf(tokens[0].token)+tokens[0].token.length);
@@ -277,12 +316,32 @@ var AbcParseHeader = Class.create({
 			switch (cmd)
 			{
 				case "bagpipes":tune.formatting.bagpipes = true;break;
+				case "landscape":tune.formatting.landscape = true;break;
+				case "slurgraces":tune.formatting.slurgraces = true;break;
 				case "stretchlast":tune.formatting.stretchlast = true;break;
+				case "titlecaps": multilineVars.titlecaps = true;break;
+				case "titleleft":tune.formatting.titleleft = true;break;
+
+				case "botmargin":
+				case "botspace":
+				case "composerspace":
+				case "indent":
+				case "leftmargin":
+				case "linesep":
+				case "musicspace":
+				case "partsspace":
+				case "staffsep":
 				case "staffwidth":
-					scratch = tokenizer.getMeasurement(tokens);
-					if (scratch.used === 0 || tokens.length !== 0)
-						return "Directive \"" + cmd + "\" requires a measurement as a parameter.";
-					tune.formatting.staffwidth = scratch.value;
+				case "subtitlespace":
+				case "sysstaffsep":
+				case "systemsep":
+				case "textspace":
+				case "titlespace":
+				case "topmargin":
+				case "topspace":
+				case "vocalspace":
+				case "wordsspace":
+					return oneParameterMeasurement(cmd, tokens);
 					break;
 				case "scale":
 					scratch = "";
@@ -314,21 +373,22 @@ var AbcParseHeader = Class.create({
 				case "text":
 					tune.addText(tokenizer.translateString(restOfString));	// display secondary title
 					break;
+				case "gchordfont":
+				case "partsfont":
 				case "vocalfont":
-					multilineVars.fontVocal = {};
-					var token = tokens.last();
-					if (token.type === 'number') {
-						multilineVars.fontVocal.size = parseInt(token.token);
-						tokens.pop();
-					}
-					if (tokens.length > 0) {
-						scratch = "";
-						tokens.each(function(tok) {
-							if (tok.token === '-') scratch += ' ';
-							else scratch += tok.token;
-						});
-						multilineVars.fontVocal.font = scratch;
-					}
+					return getChangingFont(cmd, tokens);
+					break;
+				case "barlabelfont":
+				case "barnumberfont":
+				case "composerfont":
+				case "subtitlefont":
+				case "tempofont":
+				case "titlefont":
+				case "voicefont":
+					return getGlobalFont(cmd, tokens);
+					break;
+				case "barnumfont":
+					return getGlobalFont("barnumberfont", tokens);
 					break;
 				case "score":
 					multilineVars.score_is_present = true;
@@ -408,46 +468,14 @@ var AbcParseHeader = Class.create({
 						}
 					}
 					break;
-				case "indent":
-				case "voicefont":
-				case "titlefont":
-				case "barlabelfont":
-				case "barnumfont":
-				case "barnumberfont":
-				case "topmargin":
-				case "botmargin":
-				case "topspace":
-				case "titlespace":
-				case "subtitlespace":
-				case "composerspace":
-				case "musicspace":
-				case "partsspace":
-				case "wordsspace":
-				case "textspace":
-				case "vocalspace":
-				case "staffsep":
-				case "linesep":
+
 				case "midi":
-				case "titlecaps":
-				case "titlefont":
-				case "composerfont":
 				case "indent":
 				case "playtempo":
 				case "auquality":
-				case "systemsep":
-				case "sysstaffsep":
-				case "landscape":
-				case "gchordfont":
-				case "leftmargin":
-				case "partsfont":
-				case "staves":
-				case "slurgraces":
-				case "titleleft":
-				case "subtitlefont":
-				case "tempofont":
 				case "continuous":
-				case "botspace":
 				case "nobarcheck":
+				case "staves":
 					// TODO-PER: Actually handle the parameters of these
 					tune.formatting[cmd] = restOfString;
 					break;
@@ -512,6 +540,10 @@ var AbcParseHeader = Class.create({
 							addNextTokenToStaffInfo('clef');
 							// TODO-PER: check for a legal clef; do octavizing
 							staffInfo.clef = staffInfo.clef.replace(/[',]/g, "");
+							if (staffInfo.clef.indexOf('+16') != -1) {
+								// TODO: process this here if the middle has not been set, otherwise ignore.
+								staffInfo.clef = staffInfo.clef.replace('+16', '');
+							}
 							break;
 						case 'treble':
 						case 'bass':
@@ -953,7 +985,7 @@ var AbcParseHeader = Class.create({
 						return [ line.length ];
 					case "P:":
 						if (tune.hasBeginMusic())
-							tune.appendStartingElement('part', -1, -1, {title: line.substring(i+2)});
+							tune.appendElement('part', -1, -1, {title: line.substring(i+2)});
 						return [ line.length ];
 					case "L:":
 						this.setDefaultLength(line, i+2, line.length);
