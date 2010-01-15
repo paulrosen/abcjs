@@ -324,35 +324,92 @@ ABCLineLayout.prototype.printNote = function(elem, nostem) { //stem presence: tr
   }
   
   if (elem.gracenotes !== undefined) {
+    var gracescale = 3/5;
+    var gracebeam = null;
+    if (elem.gracenotes.length>1) {
+      gracebeam = new ABCBeamElem("grace");
+    }
     for (var i=elem.gracenotes.length-1; i>=0; i--) {
+      var gracepitch = elem.gracenotes[i].pitch
       roomtaken +=10; // hardcoded
-      var grace = new ABCRelativeElement("noteheads.quarter", -roomtaken, this.glyphs.getSymbolWidth("noteheads.quarter")/3, elem.gracenotes[i].pitch, {scalex:3/5, scaley: 3/5});
+      var grace = new ABCRelativeElement("noteheads.quarter", -roomtaken, this.glyphs.getSymbolWidth("noteheads.quarter")*gracescale, gracepitch, {scalex:gracescale, scaley: gracescale});
       abselem.addExtra(grace);
+      if (gracebeam) {
+	var pseudoabselem = {heads:[grace], 
+			     abcelem:{duration: 1/16, pitches:[{pitch:gracepitch}], averagepitch: gracepitch},
+			     duration:1/16};
+	gracebeam.add(pseudoabselem);
+      }
+      
+      
+      if (elem.gracenotes[i].accidental) {
+	var symb; 
+	switch (elem.gracenotes[i].accidental) {
+	case "quartersharp":
+	  symb = "accidentals.halfsharp";
+	  break;
+	case "dblsharp":
+	  symb = "accidentals.dblsharp";
+	  break;
+	case "sharp":
+	  symb = "accidentals.sharp";
+	  break;
+	case "quarterflat":
+	  symb = "accidentals.halfflat";
+	  break;
+	case "flat":
+	  symb = "accidentals.flat";
+	  break;
+	case "dblflat":
+	  symb = "accidentals.dblflat";
+	  break;
+	case "natural":
+	  symb = "accidentals.nat";
+	}
+	roomtaken += (this.glyphs.getSymbolWidth(symb)*gracescale+2);
+	abselem.addExtra(new ABCRelativeElement(symb, -roomtaken, 
+						this.glyphs.getSymbolWidth(symb)*gracescale, elem.gracenotes[i].pitch, {scalex:gracescale, scaley: gracescale}));
+      }
       if (i==0) this.staff.addOther(new ABCTieElem(grace, notehead, false));
+    }
+    if (gracebeam) {
+      this.staff.addOther(gracebeam);
+    } else {
+      
+      var p1 = gracepitch+1/5;
+      var p2 = gracepitch+5;
+      var dx = grace.dx + grace.w;
+      var width = -0.6;
+      abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+      var pos = p2;
+      var flag = chartable["uflags"][3];
+      var xdelta = grace.dx+grace.w+width;
+      abselem.addChild(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag)*gracescale, pos, {scalex:gracescale, scaley: gracescale}));
+      
     }
   }
   
   if (elem.decoration) {
-    this.printDecoration(elem.decoration, pitch, (notehead)?notehead.w:0, abselem);
+    this.printDecoration(elem.decoration, pitch, (notehead)?notehead.w:0, abselem, roomtaken);
   }
-
+  
   if (elem.barNumber) {
-      abselem.addChild(new ABCRelativeElement(elem.barNumber, -10, 0, 0, {type:"debug"}));
+    abselem.addChild(new ABCRelativeElement(elem.barNumber, -10, 0, 0, {type:"debug"}));
   }
-
+  
   // ledger lines
   for (i=elem.pitches[elem.pitches.length-1].pitch; i>11; i--) {
     if (i%2===0 && !elem.rest) {
-      abselem.addChild(new ABCRelativeElement(null, -2, this.glyphs.getSymbolWidth("noteheads.quarter")+4, i, {type:"ledger"}));
+      abselem.addChild(new ABCRelativeElement(null, -2, this.glyphs.getSymbolWidth(c)+4, i, {type:"ledger"}));
     }
   }
-
+  
   for (i=elem.pitches[0].pitch; i<1; i++) {
     if (i%2===0 && !elem.rest) {
-      abselem.addChild(new ABCRelativeElement(null, -2, this.glyphs.getSymbolWidth("noteheads.quarter")+4, i, {type:"ledger"}));
+      abselem.addChild(new ABCRelativeElement(null, -2, this.glyphs.getSymbolWidth(c)+4, i, {type:"ledger"}));
     }
   }
-
+  
   if (elem.chord !== undefined) { //16 -> high E.
     abselem.addChild(new ABCRelativeElement(elem.chord.name, 0, 0, (elem.chord.position=="below")?-3:16, {type:"text"}));
   }
@@ -389,11 +446,12 @@ ABCLineLayout.prototype.printNote = function(elem, nostem) { //stem presence: tr
   return abselem;
 };
 
-ABCLineLayout.prototype.printDecoration = function(decoration, pitch, width, abselem) {
+ABCLineLayout.prototype.printDecoration = function(decoration, pitch, width, abselem, roomtaken) {
   var dec;
   var unknowndecs = [];
   var yslot = (pitch>9) ? pitch+3 : 12;
   var ypos;
+  roomtaken = roomtaken || 0;
   (pitch===5) && (yslot=14); // avoid upstem of the A
 
   for (var i=0;i<decoration.length; i++) { // treat staccato first (may need to shift other markers) //TODO, same with tenuto?
@@ -408,6 +466,14 @@ ABCLineLayout.prototype.printDecoration = function(decoration, pitch, width, abs
       }
       abselem.addChild(new ABCRelativeElement("scripts.staccato", deltax, this.glyphs.getSymbolWidth("scripts.staccato"), ypos));
     }
+    if (decoration[i]==="slide" && abselem.heads[0]) {
+      ypos = abselem.heads[0].pitch;
+      blank1 = new ABCRelativeElement("", -roomtaken-15, 0, ypos-1);
+      blank2 = new ABCRelativeElement("", -roomtaken-5, 0, ypos+1);
+      abselem.addChild(blank1);
+      abselem.addChild(blank2);
+      this.staff.addOther(new ABCTieElem(blank1, blank2, false))
+    }
   }
 
   for (var i=0;i<decoration.length; i++) {
@@ -420,7 +486,8 @@ ABCLineLayout.prototype.printDecoration = function(decoration, pitch, width, abs
     case "uppermordent": dec="scripts.prall"; break;
     case "mordent":
     case "lowermordent": dec="scripts.mordent"; break;
-    case "staccato": continue;
+    case "staccato":
+    case "slide": continue;
     case "downbow": dec="scripts.downbow";break;
     case "upbow": dec="scripts.upbow";break;
     case "fermata": dec="scripts.ufermata"; break;

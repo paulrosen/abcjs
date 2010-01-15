@@ -227,7 +227,8 @@ ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
   }
 };
 
-function ABCBeamElem () {
+function ABCBeamElem (type) {
+  this.isgrace = (type && type==="grace");
   this.elems = []; // all the ABCAbsoluteElements
   this.total = 0;
   this.allrests = true;
@@ -264,8 +265,10 @@ ABCBeamElem.prototype.draw = function(printer) {
 ABCBeamElem.prototype.drawBeam = function(paper,basey) {
 
   var average = this.average();
-  this.asc = average<6; // hardcoded 6 is B
-  this.pos = Math.round(this.asc ? Math.max(average+7,this.max+5) : Math.min(average-7,this.min-5));
+  var barpos = (this.isgrace)? 5:7;
+  var barminpos = 5;
+  this.asc = this.isgrace || average<6; // hardcoded 6 is B
+  this.pos = Math.round(this.asc ? Math.max(average+barpos,this.max+barminpos) : Math.min(average-barpos,this.min-barminpos));
   var slant = this.elems[0].abcelem.averagepitch-this.elems[this.elems.length-1].abcelem.averagepitch;
   var maxslant = this.elems.length/2;
 
@@ -273,12 +276,13 @@ ABCBeamElem.prototype.drawBeam = function(paper,basey) {
   if (slant<-maxslant) slant = -maxslant;
   this.starty = printer.calcY(this.pos+Math.floor(slant/2));
   this.endy = printer.calcY(this.pos+Math.floor(-slant/2));
-  this.startx = this.elems[0].x;
+  this.startx = this.elems[0].heads[0].x;
   if(this.asc) this.startx+=this.elems[0].heads[0].w;
-  this.endx = this.elems[this.elems.length-1].x;
+  this.endx = this.elems[this.elems.length-1].heads[0].x;
   if(this.asc) this.endx+=this.elems[this.elems.length-1].heads[0].w;
 
   var dy = (this.asc)?AbcSpacing.STEP:-AbcSpacing.STEP;
+  if (this.isgrace) dy = dy/2;
 
   printer.paper.path("M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
 	     "L"+this.endx+" "+(this.endy+dy) +" L"+this.startx+" "+(this.starty+dy)+"z").attr({fill: "#000000"});
@@ -290,7 +294,8 @@ ABCBeamElem.prototype.drawStems = function(printer) {
     if (this.elems[i].abcelem.rest)
       continue;
     var furthesthead = this.elems[i].heads[(this.asc)? 0: this.elems[i].heads.length-1];
-    var pitch = furthesthead.pitch + ((this.asc) ? 1/3 : -1/3);
+    var ovaldelta = (this.isgrace)?1/3:1/5;
+    var pitch = furthesthead.pitch + ((this.asc) ? ovaldelta : -ovaldelta);
     var y = printer.calcY(pitch);
     var x = furthesthead.x + ((this.asc) ? furthesthead.w : 0);
     var bary=this.getBarYAt(x);
@@ -298,6 +303,7 @@ ABCBeamElem.prototype.drawStems = function(printer) {
     printer.printStem(x,dx,y,bary);
 
     var sy = (this.asc) ? 1.5*AbcSpacing.STEP: -1.5*AbcSpacing.STEP;
+    (this.isgrace) && (sy = sy*2/3);
     for (var durlog=getDurlog(this.elems[i].duration); durlog<-3; durlog++) {
       if (auxbeams[-4-durlog]) {
 	auxbeams[-4-durlog].single = false;
@@ -312,6 +318,8 @@ ABCBeamElem.prototype.drawStems = function(printer) {
 	var auxbeamendx = x;
 	var auxbeamendy = bary + sy*(j+1);
 	var dy = (this.asc) ? AbcSpacing.STEP: -AbcSpacing.STEP;
+	if (this.isgrace) dy = dy/2;
+
 	if (auxbeams[j].single) {
 	  auxbeamendx = (i===0) ? x+5 : x-5;
 	  auxbeamendy = this.getBarYAt(auxbeamendx) + sy*(j+1);
