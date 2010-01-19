@@ -15,55 +15,143 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*global ABCPrinter */
-/*extern  ABCStaffElement ABCRelativeElement ABCAbsoluteElement ABCBeamElem ABCEndingElem ABCTripletElem ABCTieElem */
+/*extern  ABCVoiceElement ABCRelativeElement ABCAbsoluteElement ABCBeamElem ABCEndingElem ABCTripletElem ABCTieElem */
 
+function ABCStaffGroupElement() {
+  this.voices = [];
+  this.staffs = [];
+}
 
-function ABCStaffElement(y) {
-  this.printer = printer;
+ABCStaffGroupElement.prototype.addVoice = function (voice) {
+  this.voices[this.voices.length] = voice;
+  for (var i=0; i<this.staffs.length;i++) {
+    if (this.staffs[i]==voice.y) return;
+  }
+  this.staffs[this.staffs.length] = voice.y;
+};
+
+ABCStaffGroupElement.prototype.finished = function() {
+  for (var i=0;i<this.voices.length;i++) {
+      if (this.voices[i].i<this.voices[i].children.length) return false;
+    }
+  return true;
+}
+
+ABCStaffGroupElement.prototype.layout = function(spacing) {
+  var x = 0;
+  var currentduration = 0;
+  for (var i=0;i<this.voices.length;i++) {
+    this.voices[i].beginLayout();
+  }
+
+  while (!this.finished()) {
+    var childx=x;
+    var cont=true;
+    // find smallest duration to be laid out among candidates across voices
+    var currentduration= null; 
+    for (var i=0;i<this.voices.length;i++) {
+      if (!currentduration || this.voices[i].durationindex<currentduration) currentduration=this.voices[i].durationindex;
+    }
+
+    // among the current duration level find the one which needs starting furthest right
+    for (var i=0;i<this.voices.length;i++) {
+      if (this.voices[i].durationindex != currentduration) continue;
+      if (this.voices[i].nextx>x) x=this.voices[i].nextx;
+    }
+    while (cont) {
+      cont = false;
+      for (var i=0;i<this.voices.length;i++) {
+	if (this.voices[i].durationindex != currentduration) continue;
+	var voicechildx = this.voices[i].layoutOneItem(x,childx,spacing);
+	if (voicechildx>childx) {
+	  childx = voicechildx;
+	  cont = true; //TODO not optimised for single cases
+	} 
+      }
+    }
+    for (var i=0;i<this.voices.length;i++) {
+      var voice = this.voices[i]; 
+      if (voice.durationindex != currentduration) continue;
+      voice.durationindex += voice.children[voice.i].duration;
+      voice.i++;
+    }
+  }
+  // increment to the greatest x
+  for (var i=0;i<this.voices.length;i++) {
+    if (this.voices[i].nextx>x) x=this.voices[i].nextx;
+  }
+
+  this.w = x;
+};
+
+ABCStaffGroupElement.prototype.draw = function (printer) {
+  for (var i=0;i<this.voices.length;i++) {
+    this.voices[i].draw(printer);
+  }
+  for (var i=0;i<this.staffs.length;i++) {
+    printer.setY(this.staffs[i]);
+    printer.printStave(this.w);
+    printer.unSetY();
+  }
+};
+
+function ABCVoiceElement(y) {
   this.children = [];
   this.otherchildren = []; // ties, slurs, beams, triplets
   this.w = 0;
   this.y = y;
 }
 
-ABCStaffElement.prototype.addChild = function (child) {
+ABCVoiceElement.prototype.addChild = function (child) {
   this.children[this.children.length] = child;
 };
 
-ABCStaffElement.prototype.addOther = function (child) {
+ABCVoiceElement.prototype.addInvisibleChild = function (child) {
+  child.invisible = true;
+  this.addChild(child);
+};
+
+ABCVoiceElement.prototype.addOther = function (child) {
   this.otherchildren[this.otherchildren.length] = child;
 };
 
-ABCStaffElement.prototype.layout = function (spacing) {
-  var x = 0;
-  var extraroom = 0;
-  var durationroom = 0;
-  var room = 0;
-  for (var i=0, ii=this.children.length; i<ii; i++) {
-    var child = this.children[i];
-    var er = child.getExtraWidth() - room;
-    if (er>0) {
-      x+=child.getExtraWidth();
-      extraroom+=er;
-    }
-    child.x=x;
-    x+=(spacing*Math.sqrt(child.duration*8));
-    er = child.x+child.getMinWidth() - x;
-    if (er > 0) {
-      x = child.x+child.getMinWidth();
-      (i!=ii-1) && (x+=child.minspacing);
-      extraroom+=er;
-      room = 0;
-    } else {
-      room = -er;
-      durationroom+=(spacing*Math.sqrt(child.duration*8));
-    }
+ABCVoiceElement.prototype.beginLayout = function () {
+  this.i=0;
+  this.durationindex=0;
+  this.ii=this.children.length;
+  this.extraroom=0;
+  this.durationroom=0;
+  this.room=0;
+  this.nextx=0;
+};
+
+ABCVoiceElement.prototype.layoutOneItem = function (x, childx, spacing) {
+  var child = this.children[this.i];
+  if (!child) return {x: 0, childx: 0};
+  var er = child.getExtraWidth() - this.room;
+  if (er>0) {
+    x+=child.getExtraWidth();
+    this.extraroom+=er;
+  }
+  if (x<childx) x=childx;
+  child.x=x;
+  x+=(spacing*Math.sqrt(child.duration*8));
+  er = child.x+child.getMinWidth() - x;
+  if (er > 0) {
+    x = child.x+child.getMinWidth();
+    (this.i!=this.ii-1) && (x+=child.minspacing);
+    this.extraroom+=er;
+    this.room = 0;
+  } else {
+    this.room = -er;
+    this.durationroom+=(spacing*Math.sqrt(child.duration*8));
   }
   this.w = x;
-  this.extraroom = extraroom;
+  this.nextx = x;
+  return child.x;
 }
 
-ABCStaffElement.prototype.draw = function (printer) {
+ABCVoiceElement.prototype.draw = function (printer) {
   printer.setY(this.y);
   for (var i=0; i<this.children.length; i++) {
     this.children[i].draw(printer);
@@ -71,7 +159,9 @@ ABCStaffElement.prototype.draw = function (printer) {
   for (var i=0; i<this.otherchildren.length; i++) {
     this.otherchildren[i].draw(printer,10,this.w-1);
   }
-  printer.printStave(this.w-1);
+  if (this.header) {
+    printer.paper.text(100, this.y, this.header);
+  }
   printer.unSetY();
 };
 
@@ -122,6 +212,7 @@ ABCAbsoluteElement.prototype.addChild = function (child) {
 
 ABCAbsoluteElement.prototype.draw = function (printer) {
   this.elemset = printer.paper.set();
+  if (this.invisible) return;
   for (var i=0; i<this.children.length; i++) {
     this.elemset.push(this.children[i].draw(printer,this.x));
   }
@@ -229,6 +320,8 @@ ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
 
 function ABCBeamElem (type) {
   this.isgrace = (type && type==="grace");
+  this.forceup = (type && type==="up");
+  this.forcedown = (type && type==="down");
   this.elems = []; // all the ABCAbsoluteElements
   this.total = 0;
   this.allrests = true;
@@ -267,7 +360,7 @@ ABCBeamElem.prototype.drawBeam = function(paper,basey) {
   var average = this.average();
   var barpos = (this.isgrace)? 5:7;
   var barminpos = 5;
-  this.asc = this.isgrace || average<6; // hardcoded 6 is B
+  this.asc = (this.forceup || this.isgrace || average<6) && (!this.forcedown); // hardcoded 6 is B
   this.pos = Math.round(this.asc ? Math.max(average+barpos,this.max+barminpos) : Math.min(average-barpos,this.min-barminpos));
   var slant = this.elems[0].abcelem.averagepitch-this.elems[this.elems.length-1].abcelem.averagepitch;
   var maxslant = this.elems.length/2;
