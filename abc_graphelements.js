@@ -88,11 +88,20 @@ ABCStaffGroupElement.prototype.draw = function (printer) {
   for (var i=0;i<this.voices.length;i++) {
     this.voices[i].draw(printer);
   }
+
+  if (this.staffs.length>1) {
+    printer.setY(this.staffs[0]);
+    var top = printer.calcY(10);
+    printer.setY(this.staffs[this.staffs.length-1]);
+    var bottom = printer.calcY(2);
+    printer.printStem(0, 0.6, top, bottom);
+  }
+
   for (var i=0;i<this.staffs.length;i++) {
     printer.setY(this.staffs[i]);
     printer.printStave(this.w);
-    printer.unSetY();
   }
+  printer.unSetY();
 };
 
 function ABCVoiceElement(y) {
