@@ -32,8 +32,8 @@ ABCStaffGroupElement.prototype.addVoice = function (voice) {
 
 ABCStaffGroupElement.prototype.finished = function() {
   for (var i=0;i<this.voices.length;i++) {
-      if (this.voices[i].i<this.voices[i].children.length) return false;
-    }
+    if (!this.voices[i].layoutEnded()) return false;
+  }
   return true;
 }
 
@@ -50,7 +50,7 @@ ABCStaffGroupElement.prototype.layout = function(spacing) {
     // find smallest duration to be laid out among candidates across voices
     var currentduration= null; 
     for (var i=0;i<this.voices.length;i++) {
-      if (!currentduration || this.voices[i].durationindex<currentduration) currentduration=this.voices[i].durationindex;
+      if (!this.voices[i].layoutEnded() && (!currentduration || this.voices[i].durationindex<currentduration)) currentduration=this.voices[i].durationindex;
     }
 
     // among the current duration level find the one which needs starting furthest right
@@ -72,8 +72,7 @@ ABCStaffGroupElement.prototype.layout = function(spacing) {
     for (var i=0;i<this.voices.length;i++) {
       var voice = this.voices[i]; 
       if (voice.durationindex != currentduration) continue;
-      voice.durationindex += voice.children[voice.i].duration;
-      voice.i++;
+      voice.updateIndices();
     }
   }
   // increment to the greatest x
@@ -122,6 +121,17 @@ ABCVoiceElement.prototype.addInvisibleChild = function (child) {
 
 ABCVoiceElement.prototype.addOther = function (child) {
   this.otherchildren[this.otherchildren.length] = child;
+};
+
+ABCVoiceElement.prototype.updateIndices = function () {
+  if (!this.layoutEnded()) {
+    this.durationindex += this.children[this.i].duration;
+    this.i++;
+  }
+}; 
+
+ABCVoiceElement.prototype.layoutEnded = function () {
+  return !(this.i<this.children.length)
 };
 
 ABCVoiceElement.prototype.beginLayout = function () {
