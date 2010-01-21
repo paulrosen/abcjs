@@ -105,7 +105,8 @@ ABCStaffGroupElement.prototype.draw = function (printer) {
 
 function ABCVoiceElement(y) {
   this.children = [];
-  this.otherchildren = []; // ties, slurs, beams, triplets
+  this.beams = []; 
+  this.otherchildren = []; // ties, slurs, triplets
   this.w = 0;
   this.y = y;
 }
@@ -120,7 +121,11 @@ ABCVoiceElement.prototype.addInvisibleChild = function (child) {
 };
 
 ABCVoiceElement.prototype.addOther = function (child) {
-  this.otherchildren[this.otherchildren.length] = child;
+  if (child instanceof ABCBeamElem) {
+    this.beams.push(child)
+  } else {
+    this.otherchildren.push(child);
+  }
 };
 
 ABCVoiceElement.prototype.updateIndices = function () {
@@ -171,13 +176,19 @@ ABCVoiceElement.prototype.layoutOneItem = function (x, childx, spacing) {
 }
 
 ABCVoiceElement.prototype.draw = function (printer) {
+  var width = this.w-1;
   printer.setY(this.y);
-  for (var i=0; i<this.children.length; i++) {
-    this.children[i].draw(printer);
-  }
-  for (var i=0; i<this.otherchildren.length; i++) {
-    this.otherchildren[i].draw(printer,10,this.w-1);
-  }
+
+  this.children.each(function(child) {
+      child.draw(printer,10,width);
+    });
+  this.beams.each(function(beam) {
+      beam.draw(printer,10,width);
+    });
+  this.otherchildren.each(function(child) {
+      child.draw(printer,10,width);
+    });
+
   if (this.header) {
     printer.paper.text(100, this.y, this.header);
   }
@@ -226,6 +237,7 @@ ABCAbsoluteElement.prototype.addRight = function (right) {
 };
 
 ABCAbsoluteElement.prototype.addChild = function (child) {
+  child.parent = this;
   this.children[this.children.length] = child;
 };
 
@@ -311,30 +323,77 @@ ABCEndingElem.prototype.draw = function (printer, linestartx, lineendx) {
 }
 
 function ABCTieElem (anchor1, anchor2, above) {
-  this.anchor1 = anchor1; // must have a .x and a .pitch property or be null (means starts at the "beginning" of the line - after keysig)
+  this.anchor1 = anchor1; // must have a .x and a .pitch, and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
   this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
   this.above = above; // true if the arc curves above
 }
 
 ABCTieElem.prototype.draw = function (printer, linestartx, lineendx) {
   // TODO end and beginning of line
+
   if (this.anchor1 && this.anchor2) {
+    if (this.anchor1.parent.beam && this.anchor2.parent.beam && 
+	this.anchor1.parent.beam.asc===this.anchor2.parent.beam.asc) {
+      this.above = !this.anchor1.parent.beam.asc;
+    }
     printer.drawArc(this.anchor1.x, this.anchor2.x, this.anchor1.pitch, this.anchor2.pitch,  this.above);
   }
 };
 
 function ABCTripletElem (number, anchor1, anchor2, above) {
-  this.anchor1 = anchor1; // must have a .x and a .pitch property or be null (means starts at the "beginning" of the line - after keysig)
-  this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
-  this.above = above; // true if the arc curves above
+  this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
+  this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
+  this.above = above;
   this.number = number;
 };
 
 ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
   // TODO end and beginning of line
   if (this.anchor1 && this.anchor2) {
-    printer.printText((this.anchor1.x+this.anchor2.x)/2, this.above?16:-1, this.number);
+    var ypos = this.above?14:-1;
+    
+    if (this.anchor1.parent.beam && 
+	this.anchor1.parent.beam===this.anchor2.parent.beam) {
+      var beam = this.anchor1.parent.beam;
+      this.above = beam.asc;
+      ypos = beam.pos;     
+    } else {
+      this.drawLine(printer,printer.calcY(ypos))
+    }
+    var xsum = this.anchor1.x+this.anchor2.x;
+    var ydelta = 0;
+    if (beam) {
+      if (this.above) {
+	xsum += (this.anchor2.w + this.anchor1.w);
+	ydelta = 4;
+      } else {
+	ydelta = -4;
+      }
+    } else {
+      xsum += this.anchor2.w;
+    }
+    
+    
+    printer.printText(xsum/2, ypos+ydelta, this.number, "middle");
+
   }
+};
+
+ABCTripletElem.prototype.drawLine = function (printer, y) {
+  linestartx = this.anchor1.x;
+  printer.paper.path(sprintf("M %f %f L %f %f",
+			     linestartx, y, linestartx, y+5)).attr({stroke:"#000000"});
+  
+  lineendx = this.anchor2.x+this.anchor2.w;
+  printer.paper.path(sprintf("M %f %f L %f %f",
+			     lineendx, y, lineendx, y+5)).attr({stroke:"#000000"});
+  
+  printer.paper.path(sprintf("M %f %f L %f %f",
+			     linestartx, y, (linestartx+lineendx)/2-5, y)).attr({stroke:"#000000"});
+
+  printer.paper.path(sprintf("M %f %f L %f %f",
+			    (linestartx+lineendx)/2+5, y, lineendx, y)).attr({stroke:"#000000"});
+
 };
 
 function ABCBeamElem (type) {
@@ -348,6 +407,7 @@ function ABCBeamElem (type) {
 
 ABCBeamElem.prototype.add = function(abselem) {
   this.allrests = this.allrests && abselem.abcelem.rest;
+  abselem.beam = this;
   this.elems[this.elems.length] = abselem;
   var pitch = abselem.abcelem.averagepitch;
   this.total += pitch; // TODO CHORD (get pitches from abselem.heads)

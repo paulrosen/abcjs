@@ -350,8 +350,8 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   if (elem.lyric !== undefined) {
 	  var lyricStr = "";
 	  elem.lyric.each(function(ly) {
-		  lyricStr += ly.syllable + ly.divider + "\n";
-	  });
+	      lyricStr += ly.syllable + ly.divider + "\n";
+	    });
     abselem.addChild(new ABCRelativeElement(lyricStr, 0, 0, 0, {type:"debugLow"}));
   }
   
@@ -466,7 +466,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 
 
   if (elem.startTriplet) {
-    this.triplet = new ABCTripletElem(elem.startTriplet, notehead, null, (dir=="down")); // above is opposite from case of slurs
+    this.triplet = new ABCTripletElem(elem.startTriplet, notehead, null, true); // above is opposite from case of slurs
     this.staff.addOther(this.triplet);
   }
 
