@@ -238,49 +238,52 @@ JSONSchema = {
 		}
 		return null;
 	}
-	// validate an object against a schema
-	function checkObj(instance,objTypeDef,path,additionalProp, recursion){
-		
-		if(typeof objTypeDef =='object'){
-			if(typeof instance != 'object' || instance instanceof Array){
-				errors.push({property:path,message:"an object is required"});
-			}
-			
-			for(var i in objTypeDef){ 
-				if(objTypeDef.hasOwnProperty(i) && !(i.charAt(0) == '_' && i.charAt(1) == '_')){
-					var value = instance[i];
-					var propDef = objTypeDef[i];
-					if (propDef.output !== 'hidden' && value !== undefined) {
-						if (value === null)
-							addPrint(recursion, i+": null");
-						else if (typeof value === 'object')
-							addPrint(recursion, i+":");
-						else
-							addPrint(recursion, i+": "+value);
-					}
-					checkProp(value,propDef,path,i, recursion);
+
+	function checkAllProps(instance,objTypeDef,path,recursion) {
+		for(var i in objTypeDef){
+			if(objTypeDef.hasOwnProperty(i)){
+				var value = instance[i];
+				var propDef = objTypeDef[i];
+				if (propDef.output !== 'hidden' && value !== undefined) {
+					if (value === null)
+						addPrint(recursion, i+": null");
+					else if (typeof value === 'object')
+						addPrint(recursion, i+":");
+					else
+						addPrint(recursion, i+": "+value);
 				}
+				checkProp(value,propDef,path,i, recursion);
 			}
 		}
+	}
+
+	// validate an object against a schema
+	function checkObj(instance,objTypeDef,path,additionalProp, recursion){
+
+		checkAllProps(instance,objTypeDef,path,recursion);
+		
 		for(i in instance){
-			if(instance.hasOwnProperty(i) && !(i.charAt(0) == '_' && i.charAt(1) == '_') && objTypeDef && !objTypeDef[i] && additionalProp!==true){
+			if(instance.hasOwnProperty(i)) {
+				if (objTypeDef[i]) {
+					var requires = objTypeDef[i].requires;
+					if(requires && !(requires in instance)){
+						errors.push({property:path,message:"the presence of the property " + i + " requires that " + requires + " also be present"});
+					}
+					var prohibits = objTypeDef[i].prohibits;
+					if(prohibits && (prohibits in instance)){
+						errors.push({property:path,message:"the presence of the property " + i + " prohibits " + requires + " from being present"});
+					}
+					var value = instance[i];
+					if(!(i in objTypeDef)){
+						checkProp(value,additionalProp,path,i, recursion);
+					}
+					if(!_changing && value && value.$schema){
+						errors = errors.concat(checkProp(value,value.$schema,path,i, recursion));
+					}
+				} else if (additionalProp!==true){
 				errors.push({property:path+' '+i,message:(typeof i) + " The property " + i +
 						" is not defined in the schema and the schema does not allow additional properties"});
-			}
-			var requires = objTypeDef && objTypeDef[i] && objTypeDef[i].requires;
-			if(requires && !(requires in instance)){
-				errors.push({property:path,message:"the presence of the property " + i + " requires that " + requires + " also be present"});
-			}
-			var prohibits = objTypeDef && objTypeDef[i] && objTypeDef[i].prohibits;
-			if(prohibits && (prohibits in instance)){
-				errors.push({property:path,message:"the presence of the property " + i + " prohibits " + requires + " from being present"});
-			}
-			value = instance[i];
-			if(objTypeDef && typeof objTypeDef == 'object' && !(i in objTypeDef)){
-				checkProp(value,additionalProp,path,i, recursion);
-			}
-			if(!_changing && value && value.$schema){
-				errors = errors.concat(checkProp(value,value.$schema,path,i, recursion));
+				}
 			}
 		}
 		return errors;

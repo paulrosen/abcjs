@@ -19,136 +19,207 @@
 
 var AbcParseHeader = Class.create({
 	initialize: function (tokenizer, warn, multilineVars, tune) {
+		var key1sharp = { acc: 'sharp', note: 'f' };
+		var key2sharp = { acc: 'sharp', note: 'c' };
+		var key3sharp = { acc: 'sharp', note: 'g' };
+		var key4sharp = { acc: 'sharp', note: 'd' };
+		var key5sharp = { acc: 'sharp', note: 'A' };
+		var key6sharp = { acc: 'sharp', note: 'e' };
+		var key7sharp = { acc: 'sharp', note: 'B' };
+		var key1flat = { acc: 'flat', note: 'B' };
+		var key2flat = { acc: 'flat', note: 'e' };
+		var key3flat = { acc: 'flat', note: 'A' };
+		var key4flat = { acc: 'flat', note: 'd' };
+		var key5flat = { acc: 'flat', note: 'g' };
+		var key6flat = { acc: 'flat', note: 'c' };
+		var key7flat = { acc: 'flat', note: 'f' };
+
 		var keys = {
-			'C#': {num: 7, acc: 'sharp'},
-			'A#m': {num: 7, acc: 'sharp'},
-			'G#Mix': {num: 7, acc: 'sharp'},
-			'D#Dor': {num: 7, acc: 'sharp'},
-			'E#Phr': {num: 7, acc: 'sharp'},
-			'F#Lyd': {num: 7, acc: 'sharp'},
-			'B#Loc': {num: 7, acc: 'sharp'},
+			'C#': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ],
+			'A#m': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ],
+			'G#Mix': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ],
+			'D#Dor': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ],
+			'E#Phr': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ],
+			'F#Lyd': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ],
+			'B#Loc': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ],
 
-			'F#': {num: 6, acc: 'sharp'},
-			'D#m': {num: 6, acc: 'sharp'},
-			'C#Mix': {num: 6, acc: 'sharp'},
-			'G#Dor': {num: 6, acc: 'sharp'},
-			'A#Phr': {num: 6, acc: 'sharp'},
-			'BLyd': {num: 6, acc: 'sharp'},
-			'E#Loc': {num: 6, acc: 'sharp'},
+			'F#': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp ],
+			'D#m': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp ],
+			'C#Mix': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp ],
+			'G#Dor': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp ],
+			'A#Phr': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp ],
+			'BLyd': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp ],
+			'E#Loc': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp ],
 
-			'B': {num: 5, acc: 'sharp'},
-			'G#m': {num: 5, acc: 'sharp'},
-			'F#Mix': {num: 5, acc: 'sharp'},
-			'C#Dor': {num: 5, acc: 'sharp'},
-			'D#Phr': {num: 5, acc: 'sharp'},
-			'ELyd': {num: 5, acc: 'sharp'},
-			'A#Loc': {num: 5, acc: 'sharp'},
+			'B': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp ],
+			'G#m': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp ],
+			'F#Mix': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp ],
+			'C#Dor': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp ],
+			'D#Phr': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp ],
+			'ELyd': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp ],
+			'A#Loc': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp ],
 
-			'E': {num: 4, acc: 'sharp'},
-			'C#m': {num: 4, acc: 'sharp'},
-			'BMix': {num: 4, acc: 'sharp'},
-			'F#Dor': {num: 4, acc: 'sharp'},
-			'G#Phr': {num: 4, acc: 'sharp'},
-			'ALyd': {num: 4, acc: 'sharp'},
-			'D#Loc': {num: 4, acc: 'sharp'},
+			'E': [ key1sharp, key2sharp, key3sharp, key4sharp ],
+			'C#m': [ key1sharp, key2sharp, key3sharp, key4sharp ],
+			'BMix': [ key1sharp, key2sharp, key3sharp, key4sharp ],
+			'F#Dor': [ key1sharp, key2sharp, key3sharp, key4sharp ],
+			'G#Phr': [ key1sharp, key2sharp, key3sharp, key4sharp ],
+			'ALyd': [ key1sharp, key2sharp, key3sharp, key4sharp ],
+			'D#Loc': [ key1sharp, key2sharp, key3sharp, key4sharp ],
 
-			'A': {num: 3, acc: 'sharp'},
-			'F#m': {num: 3, acc: 'sharp'},
-			'EMix': {num: 3, acc: 'sharp'},
-			'BDor': {num: 3, acc: 'sharp'},
-			'C#Phr': {num: 3, acc: 'sharp'},
-			'DLyd': {num: 3, acc: 'sharp'},
-			'G#Loc': {num: 3, acc: 'sharp'},
+			'A': [ key1sharp, key2sharp, key3sharp ],
+			'F#m': [ key1sharp, key2sharp, key3sharp ],
+			'EMix': [ key1sharp, key2sharp, key3sharp ],
+			'BDor': [ key1sharp, key2sharp, key3sharp ],
+			'C#Phr': [ key1sharp, key2sharp, key3sharp ],
+			'DLyd': [ key1sharp, key2sharp, key3sharp ],
+			'G#Loc': [ key1sharp, key2sharp, key3sharp ],
 
-			'D': {num: 2, acc: 'sharp'},
-			'Bm': {num: 2, acc: 'sharp'},
-			'AMix': {num: 2, acc: 'sharp'},
-			'EDor': {num: 2, acc: 'sharp'},
-			'F#Phr': {num: 2, acc: 'sharp'},
-			'GLyd': {num: 2, acc: 'sharp'},
-			'C#Loc': {num: 2, acc: 'sharp'},
+			'D': [ key1sharp, key2sharp ],
+			'Bm': [ key1sharp, key2sharp ],
+			'AMix': [ key1sharp, key2sharp ],
+			'EDor': [ key1sharp, key2sharp ],
+			'F#Phr': [ key1sharp, key2sharp ],
+			'GLyd': [ key1sharp, key2sharp ],
+			'C#Loc': [ key1sharp, key2sharp ],
 
-			'G': {num: 1, acc: 'sharp'},
-			'Em': {num: 1, acc: 'sharp'},
-			'DMix': {num: 1, acc: 'sharp'},
-			'ADor': {num: 1, acc: 'sharp'},
-			'BPhr': {num: 1, acc: 'sharp'},
-			'CLyd': {num: 1, acc: 'sharp'},
-			'F#Loc': {num: 1, acc: 'sharp'},
+			'G': [ key1sharp ],
+			'Em': [ key1sharp ],
+			'DMix': [ key1sharp ],
+			'ADor': [ key1sharp ],
+			'BPhr': [ key1sharp ],
+			'CLyd': [ key1sharp ],
+			'F#Loc': [ key1sharp ],
 
-			'C': {num: 0, acc: 'sharp'},
-			'Am': {num: 0, acc: 'sharp'},
-			'GMix': {num: 0, acc: 'sharp'},
-			'DDor': {num: 0, acc: 'sharp'},
-			'EPhr': {num: 0, acc: 'sharp'},
-			'FLyd': {num: 0, acc: 'sharp'},
-			'BLoc': {num: 0, acc: 'sharp'},
+			'C': [],
+			'Am': [],
+			'GMix': [],
+			'DDor': [],
+			'EPhr': [],
+			'FLyd': [],
+			'BLoc': [],
 
-			'F': {num: 1, acc: 'flat'},
-			'Dm': {num: 1, acc: 'flat'},
-			'CMix': {num: 1, acc: 'flat'},
-			'GDor': {num: 1, acc: 'flat'},
-			'APhr': {num: 1, acc: 'flat'},
-			'BbLyd': {num: 1, acc: 'flat'},
-			'ELoc': {num: 1, acc: 'flat'},
+			'F': [ key1flat ],
+			'Dm': [ key1flat ],
+			'CMix': [ key1flat ],
+			'GDor': [ key1flat ],
+			'APhr': [ key1flat ],
+			'BbLyd': [ key1flat ],
+			'ELoc': [ key1flat ],
 
-			'Bb': {num: 2, acc: 'flat'},
-			'Gm': {num: 2, acc: 'flat'},
-			'FMix': {num: 2, acc: 'flat'},
-			'CDor': {num: 2, acc: 'flat'},
-			'DPhr': {num: 2, acc: 'flat'},
-			'EbLyd': {num: 2, acc: 'flat'},
-			'ALoc': {num: 2, acc: 'flat'},
+			'Bb': [ key1flat, key2flat ],
+			'Gm': [ key1flat, key2flat ],
+			'FMix': [ key1flat, key2flat ],
+			'CDor': [ key1flat, key2flat ],
+			'DPhr': [ key1flat, key2flat ],
+			'EbLyd': [ key1flat, key2flat ],
+			'ALoc': [ key1flat, key2flat ],
 
-			'Eb': {num: 3, acc: 'flat'},
-			'Cm': {num: 3, acc: 'flat'},
-			'BbMix': {num: 3, acc: 'flat'},
-			'FDor': {num: 3, acc: 'flat'},
-			'GPhr': {num: 3, acc: 'flat'},
-			'AbLyd': {num: 3, acc: 'flat'},
-			'DLoc': {num: 3, acc: 'flat'},
+			'Eb': [ key1flat, key2flat, key3flat ],
+			'Cm': [ key1flat, key2flat, key3flat ],
+			'BbMix': [ key1flat, key2flat, key3flat ],
+			'FDor': [ key1flat, key2flat, key3flat ],
+			'GPhr': [ key1flat, key2flat, key3flat ],
+			'AbLyd': [ key1flat, key2flat, key3flat ],
+			'DLoc': [ key1flat, key2flat, key3flat ],
 
-			'Ab': {num: 4, acc: 'flat'},
-			'Fm': {num: 4, acc: 'flat'},
-			'EbMix': {num: 4, acc: 'flat'},
-			'BbDor': {num: 4, acc: 'flat'},
-			'CPhr': {num: 4, acc: 'flat'},
-			'DbLyd': {num: 4, acc: 'flat'},
-			'GLoc': {num: 4, acc: 'flat'},
+			'Ab': [ key1flat, key2flat, key3flat, key4flat ],
+			'Fm': [ key1flat, key2flat, key3flat, key4flat ],
+			'EbMix': [ key1flat, key2flat, key3flat, key4flat ],
+			'BbDor': [ key1flat, key2flat, key3flat, key4flat ],
+			'CPhr': [ key1flat, key2flat, key3flat, key4flat ],
+			'DbLyd': [ key1flat, key2flat, key3flat, key4flat ],
+			'GLoc': [ key1flat, key2flat, key3flat, key4flat ],
 
-			'Db': {num: 5, acc: 'flat'},
-			'Bbm': {num: 5, acc: 'flat'},
-			'AbMix': {num: 5, acc: 'flat'},
-			'EbDor': {num: 5, acc: 'flat'},
-			'FPhr': {num: 5, acc: 'flat'},
-			'GgLyd': {num: 5, acc: 'flat'},
-			'CLoc': {num: 5, acc: 'flat'},
+			'Db': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
+			'Bbm': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
+			'AbMix': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
+			'EbDor': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
+			'FPhr': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
+			'GgLyd': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
+			'CLoc': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
 
-			'Gb': {num: 6, acc: 'flat'},
-			'Ebm': {num: 6, acc: 'flat'},
-			'DbMix': {num: 6, acc: 'flat'},
-			'AbDor': {num: 6, acc: 'flat'},
-			'BbPhr': {num: 6, acc: 'flat'},
-			'CbLyd': {num: 6, acc: 'flat'},
-			'FLoc': {num: 6, acc: 'flat'},
+			'Gb': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat ],
+			'Ebm': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat ],
+			'DbMix': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat ],
+			'AbDor': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat ],
+			'BbPhr': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat ],
+			'CbLyd': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat ],
+			'FLoc': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat ],
 
-			'Cb': {num: 7, acc: 'flat'},
-			'Abm': {num: 7, acc: 'flat'},
-			'GbMix': {num: 7, acc: 'flat'},
-			'DbDor': {num: 7, acc: 'flat'},
-			'EbPhr': {num: 7, acc: 'flat'},
-			'FbLyd': {num: 7, acc: 'flat'},
-			'BbLoc': {num: 7, acc: 'flat'},
+			'Cb': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat ],
+			'Abm': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat ],
+			'GbMix': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat ],
+			'DbDor': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat ],
+			'EbPhr': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat ],
+			'FbLyd': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat ],
+			'BbLoc': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat ],
 
 			// The following are not in the 2.0 spec, but seem normal enough.
 			// TODO-PER: These SOUND the same as what's written, but they aren't right
-			'A#': {num: 2, acc: 'flat'},
-			'B#': {num: 0, acc: 'sharp'},
-			'D#': {num: 3, acc: 'flat'},
-			'E#': {num: 1, acc: 'flat'},
-			'G#': {num: 4, acc: 'flat'}
+			'A#': [ key1flat, key2flat ],
+			'B#': [],
+			'D#': [ key1flat, key2flat, key3flat ],
+			'E#': [ key1flat ],
+			'G#': [ key1flat, key2flat, key3flat, key4flat ]
 		};
 
+		var calcMiddle = function(clef, oct) {
+			var mid = 6;
+			switch(clef) {
+				case 'treble':
+				case 'none':
+				case 'treble+8':
+				case 'treble-8':
+					break;
+				case 'bass3':
+				case 'bass':
+				case 'bass+8':
+				case 'bass-8':
+				case 'bass+16':
+				case 'bass-16':
+					mid = -6;
+					break;
+				case 'tenor':
+					mid = -2;
+					break;
+				case 'alto2':
+				case 'alto1':
+				case 'alto':
+				case 'alto+8':
+				case 'alto-8':
+					mid = 0;
+					break;
+			}
+			return mid+oct;
+		};
+
+		var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
+
+		this.addPosToKey = function(clef, key) {
+			var mid = calcMiddle(clef.type, 0);
+			key.extraAccidentals.each(function(acc) {
+				var pitch = pitches[acc.note];
+				pitch = pitch + 6 - mid;
+				acc.verticalPos = pitch % 14;	// Always keep this on the two octaves on the staff
+			})
+		};
+
+		this.fixKey = function(clef, key) {
+			var fixedKey = Object.clone(key);
+			this.addPosToKey(clef, fixedKey);
+			return fixedKey;
+		}
+
+		var parseMiddle = function(str) {
+			var mid = pitches[str[0]];
+			for (i = 1; i < str.length; i++) {
+				if (str[i] === ',') mid -= 7;
+				else if (str[i] === ',') mid += 7;
+			}
+			return mid;
+		};
+		
 		this.parseKey = function(str)	// (and clef)
 		{
 			var origStr = str;
@@ -166,13 +237,13 @@ var AbcParseHeader = Class.create({
 				str = str.substring(i);
 				if (str.startsWith('m=') || str.startsWith('middle=')) {
 					str = str.substring(str.indexOf('=')+1);
-					multilineVars.clef.middle = str;
+					multilineVars.clef.middle = parseMiddle(str);
 				}
 			};
 			// check first to see if there is only a clef. If so, just take that, but ignore an error after that.
 			var retClef = tokenizer.getClef(str);
 			if (retClef.token !== undefined && (retClef.explicit === true || retClef.token !== 'none')) {	// none is the only ambiguous marking. We need to assume that's a key
-				multilineVars.clef = { type: retClef.token };
+				multilineVars.clef = { type: retClef.token, middle: calcMiddle(retClef.token, 0) };
 				str = str.substring(retClef.len);
 				setMiddle(str);
 				return {foundClef: true};
@@ -195,10 +266,14 @@ var AbcParseHeader = Class.create({
 					key += retMode.token;
 					str = str.substring(retMode.len);
 				}
-				ret.regularKey = keys[key];
+				// We need to do a deep copy because we are going to modify it
+				ret.extraAccidentals = [];
+				keys[key].each(function(k) {
+					ret.extraAccidentals.push(Object.clone(k));
+				});
 			} else if (str.startsWith('HP')) {
 				this.addDirective("bagpipes");
-				ret.regularKey = keys.C;
+				ret.extraAccidentals = [];
 				multilineVars.key = ret;
 				return {foundKey: true};
 			} else if (str.startsWith('Hp')) {
@@ -210,7 +285,7 @@ var AbcParseHeader = Class.create({
 				var retNone = tokenizer.isMatch(str, 'none');
 				if (retNone > 0) {
 					// we got the none key - that's the same as C to us
-					ret.regularKey = keys.C;
+					ret.extraAccidentals = [];
 					str = str.substring(retNone);
 				}
 			}
@@ -245,7 +320,7 @@ var AbcParseHeader = Class.create({
 					warn("error parsing clef:" + retClef.warn, origStr, 0);
 				else {
 					//ret.clef = retClef.token;
-					multilineVars.clef = { type: retClef.token};
+					multilineVars.clef = { type: retClef.token, middle: calcMiddle(retClef.token, 0) };
 					str = str.substring(retClef.len);
 					setMiddle(str);
 				}
@@ -539,11 +614,17 @@ var AbcParseHeader = Class.create({
 						case 'cl':
 							addNextTokenToStaffInfo('clef');
 							// TODO-PER: check for a legal clef; do octavizing
+							var oct = 0;
+//							for (var ii = 0; ii < staffInfo.clef.length; ii++) {
+//								if (staffInfo.clef[ii] === ',') oct -= 7;
+//								else if (staffInfo.clef[ii] === "'") oct += 7;
+//							}
 							staffInfo.clef = staffInfo.clef.replace(/[',]/g, "");
 							if (staffInfo.clef.indexOf('+16') != -1) {
-								// TODO: process this here if the middle has not been set, otherwise ignore.
+								oct += 14;
 								staffInfo.clef = staffInfo.clef.replace('+16', '');
 							}
+							staffInfo.middle = calcMiddle(staffInfo.clef, oct);
 							break;
 						case 'treble':
 						case 'bass':
@@ -571,7 +652,13 @@ var AbcParseHeader = Class.create({
 						case 'alto,,':
 						case 'none,,':
 							// TODO-PER: handle the octave indicators on the clef by changing the middle property
+							var oct2 = 0;
+//							for (var iii = 0; iii < token.token.length; iii++) {
+//								if (token.token[iii] === ',') oct2 -= 7;
+//								else if (token.token[iii] === "'") oct2 += 7;
+//							}
 							staffInfo.clef = token.token.replace(/[',]/g, "");
+							staffInfo.middle = calcMiddle(staffInfo.clef, oct2);
 							break;
 						case 'staves':
 						case 'stave':
@@ -615,6 +702,7 @@ var AbcParseHeader = Class.create({
 						case 'middle':
 						case 'm':
 							addNextTokenToStaffInfo('middle');
+							staffInfo.middle = parseMiddle(staffInfo.middle);
 							break;
 						case 'gchords':
 						case 'gch':
@@ -931,7 +1019,7 @@ var AbcParseHeader = Class.create({
 						if (result.foundClef && tune.hasBeginMusic())
 							tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
 						if (result.foundKey && tune.hasBeginMusic())
-							tune.appendStartingElement('key', -1, -1, multilineVars.key);
+							tune.appendStartingElement('key', -1, -1, this.fixKey(multilineVars.clef, multilineVars.key));
 						return [ e-i+1+ws ];
 					case "[P:":
 						tune.appendElement('part', -1, -1, {title: line.substring(i+3, e)});
@@ -981,7 +1069,7 @@ var AbcParseHeader = Class.create({
 						if (result.foundClef && tune.hasBeginMusic())
 							tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
 						if (result.foundKey && tune.hasBeginMusic())
-							tune.appendStartingElement('key', -1, -1, multilineVars.key);
+							tune.appendStartingElement('key', -1, -1, this.fixKey(multilineVars.clef, multilineVars.key));
 						return [ line.length ];
 					case "P:":
 						if (tune.hasBeginMusic())
@@ -1006,6 +1094,118 @@ var AbcParseHeader = Class.create({
 				}
 			}
 			return [ 0 ];
+		};
+
+		var metaTextHeaders = {
+			A: 'author',
+			B: 'book',
+			C: 'composer',
+			D: 'discography',
+			F: 'url',
+			I: 'instruction',
+			N: 'notes',
+			O: 'origin',
+			R: 'rhythm',
+			S: 'source',
+			W: 'unalignedWords',
+			Z: 'transcription'
+		};
+
+		this.parseHeader = function(line) {
+			if (line.startsWith('%%')) {
+				var err = this.addDirective(line.substring(2));
+				if (err) warn(err, line, 2);
+				return {};
+			}
+			line = tokenizer.stripComment(line);
+			if (line.length === 0)
+				return {};
+
+			if (line.length >= 2) {
+				if (line[1] === ':') {
+					var nextLine = "";
+					if (line.indexOf('\x12') >= 0 && line[0] !== 'w') {	// w: is the only header field that can have a continuation.
+						nextLine = line.substring(line.indexOf('\x12')+1);
+						line = line.substring(0, line.indexOf('\x12'));	//This handles a continuation mark on a header field
+					}
+					var field = metaTextHeaders[line[0]];
+					if (field !== undefined) {
+						tune.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+						return {};
+					} else {
+						switch(line[0])
+						{
+							case  'H':
+								tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+								multilineVars.is_in_history = true;
+								break;
+							case  'K':
+								// since the key is the last thing that can happen in the header, we can resolve the tempo now
+								this.resolveTempo();
+								var result = this.parseKey(line.substring(2));
+								if (!multilineVars.is_in_header && tune.hasBeginMusic()) {
+									if (result.foundClef)
+										tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
+									if (result.foundKey)
+										tune.appendStartingElement('key', -1, -1, this.fixKey(multilineVars.clef, multilineVars.key));
+								}
+								multilineVars.is_in_header = false;	// The first key signifies the end of the header.
+								break;
+							case  'L':
+								this.setDefaultLength(line, 2, line.length);
+								break;
+							case  'M':
+								multilineVars.origMeter = multilineVars.meter = this.setMeter(line.substring(2));
+								break;
+							case  'P':
+								// TODO-PER: There is more to do with parts, but the writer doesn't care.
+								if (multilineVars.is_in_header)
+									tune.addMetaText("partOrder", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+								else
+									multilineVars.partForNextLine = tokenizer.translateString(tokenizer.stripComment(line.substring(2)));
+								break;
+							case  'Q':
+								var tempo = this.setTempo(line, 2, line.length);
+								if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;
+								else if (tempo.type === 'immediate') tune.metaText.tempo = tempo.tempo;
+								break;
+							case  'T':
+								this.setTitle(line.substring(2));
+								break;
+							case 'U':
+								this.addUserDefinition(line, 2, line.length);
+								break;
+							case  'V':
+								this.parseVoice(line, 2, line.length);
+								if (!multilineVars.is_in_header)
+									return { newline: true };
+								break;
+							case  'w':
+								return { words: true };
+								break;
+							case 'X':
+								break;
+							case 'E':
+							case 'm':
+								warn("Ignored header", line, 0);
+								break;
+							default:
+								// It wasn't a recognized header value, so parse it as music.
+								if (nextLine.length)
+									nextLine = "\x12" + nextLine;
+								//parseRegularMusicLine(line+nextLine);
+								//nextLine = "";
+								return { regular: true, str: line+nextLine };
+						}
+					}
+					if (nextLine.length > 0)
+						return { recurse: true, str: nextLine };
+					return {};
+				}
+			}
+
+			// If we got this far, we have a regular line of mulsic
+			return { regular: true, str: line };
 		};
 	}
 });

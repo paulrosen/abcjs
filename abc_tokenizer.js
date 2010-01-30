@@ -154,7 +154,7 @@ var AbcTokenizer = Class.create({
 				if (j > 0)
 					name += "-8";
 			}
-			return {len: i+name.length+j, token: name, explicit: needsClef};
+			return {len: i+name.length, token: name, explicit: needsClef};
 		};
 
 		// This returns one of the legal bar lines

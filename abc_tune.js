@@ -126,9 +126,10 @@ var AbcTune = Class.create({
 	},
 
 	addTieToLastNote: function() {
+		// TODO-PER: if this is a chord, which note?
 		var el = this.getLastNote();
 		if (el) {
-			el.startTie = true;
+			el.pitches[0].startTie = true;
 			return true;
 		}
 		return false;
@@ -142,10 +143,22 @@ var AbcTune = Class.create({
 
 	appendElement: function(type, startChar, endChar, hashParams)
 	{
+		var This = this;
+		var pushNote = function(hp) {
+			if (hp.pitches !== undefined) {
+				var mid = This.lines[This.lineNum].staff[This.staffNum].clef.middle;
+				hp.pitches.each(function(p) { p.verticalPos = p.pitch + 6 - mid; });	// the -6 is because the pitches start at C=0.
+			}
+			if (hp.gracenotes !== undefined) {
+				var mid2 = This.lines[This.lineNum].staff[This.staffNum].clef.middle;
+				hp.gracenotes.each(function(p) { p.verticalPos = p.pitch + 6 - mid2; });	// the -6 is because the pitches start at C=0.
+			}
+			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum].push(hp);
+		};
 		hashParams.el_type = type;
 		hashParams.startChar = startChar;
 		hashParams.endChar = endChar;
-		if (type === 'note' && hashParams.end_beam === undefined) {
+		if (type === 'note' && (hashParams.rest !== undefined || hashParams.end_beam === undefined)) {
 			// Now, add the end_beam where it is needed.
 			//  end_beam goes on all notes which are followed by a space.  (This case is already done by the parser.)
 			// end_beam goes on all notes that are 1/4 or longer (regardless of spacing).
@@ -166,13 +179,13 @@ var AbcTune = Class.create({
 				// TODO-PER: implement exception mentioned in the comment.
 			}
 		}
-		this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum].push(hashParams);
+		pushNote(hashParams);
 	},
 
 	appendStartingElement: function(type, startChar, endChar, hashParams2)
 	{
 		// Clone the object because it will be sticking around for the next line and we don't want the extra fields in it.
-		hashParams = Object.clone(hashParams2);
+		var hashParams = Object.clone(hashParams2);
 
 		// These elements should not be added twice, so if the element exists on this line without a note or bar before it, just replace the staff version.
 		var voice = this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum];

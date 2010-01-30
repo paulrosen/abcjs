@@ -57,23 +57,23 @@ var AbcParserLint = Class.create({
 
 		var clefProperties = {
 			type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] },
-			middle: { type: 'string', optional: true, Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'A,', 'B,', 'C,', 'D,', 'E,', 'F,', 'G,',
-					'A,,', 'B,,', 'C,,', 'D,,', 'E,,', 'F,,', 'G,,', 'a\'', 'b\'', 'c\'', 'd\'', 'e\'', 'f\'', 'g\'', 'a\'\'', 'b\'\'', 'c\'\'', 'd\'\'', 'e\'\'', 'f\'\'', 'g\'\'' ] }
+			middle: { type: 'number', minimum: -14, maximum: 14 }	// the pitch that goes in the middle of the staff C=0
 		};
 
 		var keyProperties = {
 			extraAccidentals: { type: 'array', optional: true, output: "noindex", items: {
 					type: 'object', properties: {
 						acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ] },
-						note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] }
+						note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] },
+						verticalPos: { type: 'number', minimum: 0, maximum: 13 }
 					}
-			} },
-			regularKey: { type: 'object', optional: true,
-				properties: {
-					num: { type: 'number', minimum: 0, maximum: 7 },
-					acc: { type: 'string', Enum: [ 'sharp', 'flat' ]}
-				}
-			}
+			} }
+//			regularKey: { type: 'object', optional: true,
+//				properties: {
+//					num: { type: 'number', minimum: 0, maximum: 7 },
+//					acc: { type: 'string', Enum: [ 'sharp', 'flat' ]}
+//				}
+//			}
 		};
 
 		var meterProperties = {
@@ -122,7 +122,7 @@ var AbcParserLint = Class.create({
 				{ value: "note", properties: {
 					startChar: { type: 'number', output: 'hidden' },
 					endChar: { type: 'number', output: 'hidden' },
-					accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
+					//accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
 					barNumber: { type: 'number', optional: true },
 					chord: { type: 'object', optional: true, properties: {
 							name: { type: 'string'},
@@ -131,18 +131,19 @@ var AbcParserLint = Class.create({
 					},
 					decoration: decorationList,
 					duration: { type: 'number' },
-					endSlur: { type: 'number', minimum: 1, optional: true },
-					endTie: { type: 'boolean', Enum: [ true ], optional: true },
+//					endSlur: { type: 'number', minimum: 1, optional: true },
+//					endTie: { type: 'boolean', Enum: [ true ], optional: true },
 					endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
 					end_beam: { type: 'boolean', Enum: [ true ], optional: true },
 					gracenotes: { type: 'array', optional: true, output: "noindex", items: {
 						type: "object", properties: {
-							accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
+							accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
 							duration: { type: 'number' },
 							end_beam: { type: 'boolean', Enum: [ true ], optional: true },
 							endSlur: { type: 'number', minimum: 1, optional: true },
 							endTie: { type: 'boolean', Enum: [ true ], optional: true },
 							pitch: { type: 'number' },
+							verticalPos: { type: 'number' },
 							startSlur: { type: 'number', minimum: 1, optional: true },
 							startTie: { type: 'boolean', Enum: [ true ], optional: true }
 						}
@@ -152,15 +153,14 @@ var AbcParserLint = Class.create({
 						syllable: { type :'string' },
 						divider: { type: 'string', Enum: [ '-', ' ', '_' ]}
 					}}},
-				// TODO-PER: either pitch or pitches must be present. Test for that. Or, change it to just use pitches.
-					pitch: { optional: true, type: 'number', prohibits: [ 'rest', 'pitches' ] },
+					//pitch: { optional: true, type: 'number', prohibits: [ 'rest', 'pitches' ] },
 					pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'pitch', 'duration', 'rest' ], items: {
 							type: 'object', properties: {
-								endChar: { type: 'number', output: 'hidden' },
-								accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural' ], optional: true },
+								accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
 								endSlur: { type: 'number', minimum: 1, optional: true },
 								endTie: { type: 'boolean', Enum: [ true ], optional: true },
 								pitch: { type: 'number' },
+								verticalPos: { type: 'number' },
 								startSlur: { type: 'number', minimum: 1, optional: true },
 								startTie: { type: 'boolean', Enum: [ true ], optional: true }
 							}
@@ -172,8 +172,8 @@ var AbcParserLint = Class.create({
 						startSlur: { type: 'number', minimum: 1, optional: true },
 						startTie: { type: 'boolean', Enum: [ true ], optional: true }
 					}},
-					startSlur: { type: 'number', minimum: 1, optional: true },
-					startTie: { type: 'boolean', Enum: [ true ], optional: true },
+//					startSlur: { type: 'number', minimum: 1, optional: true },
+//					startTie: { type: 'boolean', Enum: [ true ], optional: true },
 					startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }
 				}}
 			]

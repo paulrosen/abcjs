@@ -35,12 +35,12 @@ var AbcParse = Class.create({
 					}
 				}
 				this.iChar = 0;
-				this.key = {regularKey: {num: 0, acc: 'sharp'}};
+				this.key = {extraAccidentals: []};
 				this.meter = {type: 'specified', value: [{num: '4', den: '4'}]};	// if no meter is specified, there is an implied one.
 				this.origMeter = {type: 'specified', value: [{num: '4', den: '4'}]};	// this is for new voices that are created after we set the meter.
 				this.hasMainTitle = false;
 				this.default_length = 0.125;
-				this.clef = { type: 'treble' };
+				this.clef = { type: 'treble', middle: 6 };
 				this.next_note_duration = 0;
 				this.start_new_line = true;
 				this.is_in_header = true;
@@ -307,8 +307,8 @@ var AbcParse = Class.create({
 				if (word_list.length !== 0) {
 					if (word_list[0].skip) {
 						switch (word_list[0].to) {
-							case 'next': if (el.el_type === 'note' && el.pitch !== null && !inSlur) word_list.shift(); break;
-							case 'slur': if (el.el_type === 'note' && el.pitch !== null) word_list.shift(); break;
+							case 'next': if (el.el_type === 'note' && el.pitches !== null && !inSlur) word_list.shift(); break;
+							case 'slur': if (el.el_type === 'note' && el.pitches !== null) word_list.shift(); break;
 							case 'bar': if (el.el_type === 'bar') word_list.shift(); break;
 						}
 					} else {
@@ -348,9 +348,9 @@ var AbcParse = Class.create({
 
 		// TODO-PER: make this a method in el.
 		var addEndBeam = function(el) {
-			if (el.pitch !== undefined && el.duration < 0.25)
-				el.end_beam = true;
-			if (el.pitches !== undefined && el.duration < 0.25)
+//			if (el.pitch !== undefined && el.duration < 0.25)
+//				el.end_beam = true;
+			if (el.duration !== undefined && el.duration < 0.25)
 				el.end_beam = true;
 			return el;
 		};
@@ -510,7 +510,7 @@ var AbcParse = Class.create({
 					case ' ':
 					case '\t':
 						if (isComplete(state)) {
-							el = addEndBeam(el);
+							el.end_beam = true; 
 							// look ahead to see if there is a tie
 							do {
 								if (line[index] === '-')
@@ -561,9 +561,10 @@ var AbcParse = Class.create({
 		function startNewLine() {
 			var params = { startChar: -1, endChar: -1};
 			if (multilineVars.partForNextLine.length)
-				params.part =multilineVars.partForNextLine;
+				params.part = multilineVars.partForNextLine;
 			params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? multilineVars.staves[multilineVars.currentVoice.staffNum].clef : multilineVars.clef ;
-			params.key = multilineVars.key;
+			params.key = Object.clone(multilineVars.key);
+			header.addPosToKey(params.clef, params.key);
 			if (multilineVars.meter !== null) {
 				if (multilineVars.currentVoice) {
 					multilineVars.staves.each(function(st) {
@@ -879,6 +880,10 @@ var AbcParse = Class.create({
 							while (!done) {
 								var chordNote = getCoreNote(line, i, {}, false);
 								if (chordNote !== null) {
+									if (chordNote.end_beam) {
+										el.end_beam = true;
+										delete chordNote.end_beam;
+									}
 									if (el.pitches === undefined) {
 										el.duration = chordNote.duration;
 										el.pitches = [ chordNote ];
@@ -894,6 +899,7 @@ var AbcParse = Class.create({
 										inTieChord[el.pitches.length] = true;
 
 									i  = chordNote.endChar;
+									delete chordNote.endChar;
 								} else if (line[i] === ' ') {
 									// Spaces are not allowed in chords, but we can recover from it by ignoring it.
 									warn("Spaces are not allowed in chords", line, i);
@@ -912,7 +918,7 @@ var AbcParse = Class.create({
 										}
 
 										if (inTie) {
-											el.endTie = true;
+											el.pitches.each(function(pitch) { pitch.endTie = true; });
 											inTie = false;
 										}
 
@@ -923,6 +929,11 @@ var AbcParse = Class.create({
 											}
 										}
 
+										if (el.startSlur !== undefined) {
+											el.pitches.each(function(pitch) { if (pitch.startSlur === undefined) pitch.startSlur = el.startSlur; else pitch.startSlur += el.startSlur; });
+											delete el.startSlur;
+										}
+
 										var postChordDone = false;
 										while (i < line.length && !postChordDone) {
 											switch (line[i]) {
@@ -931,15 +942,11 @@ var AbcParse = Class.create({
 													addEndBeam(el);
 													break;
 												case ')':
-													if (el.endSlur === undefined) el.endSlur = 1; else el.endSlur++;
+													el.pitches.each(function(pitch) { if (pitch.endSlur === undefined) pitch.endSlur = 1; else pitch.endSlur++; });
 													break;
 												case '-':
-													if (el.startTie === true)	// can only have one of these
-														postChordDone = true;
-													else {
-														el.startTie = true;
-														inTie = true;
-													}
+													el.pitches.each(function(pitch) { pitch.startTie = true; });
+													inTie = true;
 													break;
 												case '>':
 												case '<':
@@ -994,16 +1001,46 @@ var AbcParse = Class.create({
 							
 						} else {
 							// Single pitch
-							var core = getCoreNote(line, i, el, true);
+							var el2 = {};
+							var core = getCoreNote(line, i, el2, true);
+							if (el2.endTie !== undefined) inTie = true;
 							if (core !== null) {
-								el = core;
+								if (core.pitch != undefined) {
+									el.pitches = [ { } ];
+									// TODO-PER: straighten this out so there is not so much copying: getCoreNote shouldn't change e'
+									if (core.accidental != undefined) el.pitches[0].accidental = core.accidental;
+									el.pitches[0].pitch = core.pitch;
+									if (core.endSlur != undefined) el.pitches[0].endSlur = core.endSlur;
+									if (core.endTie != undefined) el.pitches[0].endTie = core.endTie;
+									if (core.startSlur != undefined) el.pitches[0].startSlur = core.startSlur;
+									if (el.startSlur != undefined) el.pitches[0].startSlur = el.startSlur;
+									if (core.startTie != undefined) el.pitches[0].startTie = core.startTie;
+									if (el.startTie != undefined) el.pitches[0].startTie = el.startTie;
+								} else {
+									el.rest = core.rest;
+									if (core.endSlur != undefined) el.rest.endSlur = core.endSlur;
+									if (core.endTie != undefined) el.rest.endTie = core.endTie;
+									if (core.startSlur != undefined) el.rest.startSlur = core.startSlur;
+									if (el.startSlur != undefined) el.rest.startSlur = el.startSlur;
+									if (core.startTie != undefined) el.rest.startTie = core.startTie;
+									if (el.startTie != undefined) el.rest.startTie = el.startTie;
+								}
+								
+								if (core.chord != undefined) el.chord = core.chord;
+								if (core.duration != undefined) el.duration = core.duration;
+								if (core.decoration != undefined) el.decoration = core.decoration;
+								if (core.graceNotes != undefined) el.graceNotes = core.graceNotes;
+								delete el.startSlur;
 								if (inTie) {
-									el.endTie = true;
+									if (el.pitches !== undefined)
+										el.pitches[0].endTie = true;
+									else
+										el.rest.endTie = true;
 									inTie = false;
 								}
-								if (el.startTie)
+								if (core.startTie || el.startTie)
 									inTie = true;
-								i  = el.endChar;
+								i  = core.endChar;
 
 								if (tripletNotesLeft > 0) {
 									tripletNotesLeft--;
@@ -1012,7 +1049,7 @@ var AbcParse = Class.create({
 									}
 								}
 
-								if (ret.end_beam)
+								if (core.end_beam)
 									addEndBeam(el);
 
 								if (multilineVars.barNumOnNextNote) {
@@ -1034,116 +1071,16 @@ var AbcParse = Class.create({
 			}
 		};
 
-
-		var metaTextHeaders = {
-			A: 'author',
-			B: 'book',
-			C: 'composer',
-			D: 'discography',
-			F: 'url',
-			I: 'instruction',
-			N: 'notes',
-			O: 'origin',
-			R: 'rhythm',
-			S: 'source',
-			W: 'unalignedWords',
-			Z: 'transcription'
-		};
-
 		var parseLine = function(line) {
-			if (line.startsWith('%%')) {
-				var err = header.addDirective(line.substring(2));
-				if (err) warn(err, line, 2);
-				return;
-			}
-			line = tokenizer.stripComment(line);
-			if (line.length === 0)
-				return;
-
-			if (line.length >= 2) {
-				if (line[1] === ':') {
-					var nextLine = "";
-					if (line.indexOf('\x12') >= 0 && line[0] !== 'w') {	// w: is the only header field that can have a continuation.
-						nextLine = line.substring(line.indexOf('\x12')+1);
-						line = line.substring(0, line.indexOf('\x12'));	//This handles a continuation mark on a header field
-					}
-					var field = metaTextHeaders[line[0]];
-					if (field !== undefined) {
-						tune.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
-						return;
-					} else {
-						switch(line[0])
-						{
-							case  'H':
-								tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
-								multilineVars.is_in_history = true;
-								break;
-							case  'K':
-								// since the key is the last thing that can happen in the header, we can resolve the tempo now
-								header.resolveTempo();
-								var result = header.parseKey(line.substring(2));
-								if (!multilineVars.is_in_header && tune.hasBeginMusic()) {
-									if (result.foundClef)
-										tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
-									if (result.foundKey)
-										tune.appendStartingElement('key', -1, -1, multilineVars.key);
-								}
-								multilineVars.is_in_header = false;	// The first key signifies the end of the header.
-								break;
-							case  'L':
-								header.setDefaultLength(line, 2, line.length);
-								break;
-							case  'M':
-								multilineVars.origMeter = multilineVars.meter = header.setMeter(line.substring(2));
-								break;
-							case  'P':
-								// TODO-PER: There is more to do with parts, but the writer doesn't care.
-								if (multilineVars.is_in_header)
-									tune.addMetaText("partOrder", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
-								else
-									multilineVars.partForNextLine = tokenizer.translateString(tokenizer.stripComment(line.substring(2)));
-								break;
-							case  'Q':
-								var tempo = header.setTempo(line, 2, line.length);
-								if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;
-								else if (tempo.type === 'immediate') tune.metaText.tempo = tempo.tempo;
-								break;
-							case  'T':
-								header.setTitle(line.substring(2));
-								break;
-							case 'U':
-								header.addUserDefinition(line, 2, line.length);
-								break;
-							case  'V':
-								header.parseVoice(line, 2, line.length);
-								if (!multilineVars.is_in_header)
-									startNewLine();
-								break;
-							case  'w':
-								addWords(tune.getCurrentVoice(), line.substring(2));
-								break;
-							case 'X':
-								break;
-							case 'E':
-							case 'm':
-								warn("Unknown header", line, 0);
-								break;
-							default:
-								// It wasn't a recognized header value, so parse it as music.
-								if (nextLine.length)
-									nextLine = "\x12" + nextLine;
-								parseRegularMusicLine(line+nextLine);
-								nextLine = "";
-						}
-					}
-					if (nextLine.length > 0)
-						parseLine(nextLine);
-					return;
-				}
-			}
-
-			// If we got this far, we have a regular line of mulsic
-			parseRegularMusicLine(line);
+			var ret = header.parseHeader(line);
+			if (ret.regular)
+				parseRegularMusicLine(ret.str);
+			if (ret.newline)
+				startNewLine();
+			if (ret.words)
+				addWords(tune.getCurrentVoice(), line.substring(2));
+			if (ret.recurse)
+				parseLine(ret.str);
 		};
 		
 		this.parse = function(strTune) {
