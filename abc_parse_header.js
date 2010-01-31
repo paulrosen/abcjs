@@ -474,7 +474,7 @@ var AbcParseHeader = Class.create({
 						var staff = multilineVars.staves.last();
 						if (bracket !== undefined) staff.bracket = bracket;
 						if (brace !== undefined) staff.brace = brace;
-						if (continueBar) staff.bar = 'end';
+						if (continueBar) staff.connectBarLines = 'end';
 						if (multilineVars.voices[id] === undefined) {
 							multilineVars.voices[id] = { staffNum: staff.index, index: staff.numVoices};
 							staff.numVoices++;
@@ -518,8 +518,15 @@ var AbcParseHeader = Class.create({
 								break;
 							case '|':
 								continueBar = true;
-								if (lastVoice)
-									multilineVars.staves[lastVoice.staffNum].bar = 'start';
+								if (lastVoice) {
+									var ty = 'start';
+									if (lastVoice.staffNum > 0) {
+										if (multilineVars.staves[lastVoice.staffNum-1].connectBarLines === 'start' ||
+											multilineVars.staves[lastVoice.staffNum-1].connectBarLines === 'continue')
+											ty = 'continue';
+									}
+									multilineVars.staves[lastVoice.staffNum].connectBarLines = ty;
+								}
 								break;
 							default:
 								var vc = "";
@@ -619,12 +626,14 @@ var AbcParseHeader = Class.create({
 //								if (staffInfo.clef[ii] === ',') oct -= 7;
 //								else if (staffInfo.clef[ii] === "'") oct += 7;
 //							}
-							staffInfo.clef = staffInfo.clef.replace(/[',]/g, "");
-							if (staffInfo.clef.indexOf('+16') != -1) {
-								oct += 14;
-								staffInfo.clef = staffInfo.clef.replace('+16', '');
+							if (staffInfo.clef !== undefined) {
+								staffInfo.clef = staffInfo.clef.replace(/[',]/g, "");
+								if (staffInfo.clef.indexOf('+16') != -1) {
+									oct += 14;
+									staffInfo.clef = staffInfo.clef.replace('+16', '');
+								}
+								staffInfo.middle = calcMiddle(staffInfo.clef, oct);
 							}
-							staffInfo.middle = calcMiddle(staffInfo.clef, oct);
 							break;
 						case 'treble':
 						case 'bass':
