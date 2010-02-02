@@ -254,6 +254,20 @@ var AbcTune = Class.create({
 			}
 			if (params.stem)
 				This.appendElement('stem', -1, -1, {direction: params.stem});
+			else if (This.voiceNum > 0) {
+				if (This.lines[This.lineNum].staff[This.staffNum].voices[0]!== undefined) {
+					var found = false;
+					for (var i = 0; i < This.lines[This.lineNum].staff[This.staffNum].voices[0].length; i++) {
+						if (This.lines[This.lineNum].staff[This.staffNum].voices[0].el_type === 'stem')
+							found = true;
+					}
+					if (!found) {
+						var stem = { el_type: 'stem', startChar: -1, endChar: -1, direction: 'up' };
+						This.lines[This.lineNum].staff[This.staffNum].voices[0].splice(0,0,stem);
+					}
+				}
+				This.appendElement('stem', -1, -1, {direction: 'down'});
+			}
 		};
 		var createStaff = function(params) {
 			This.lines[This.lineNum].staff[This.staffNum] = {voices: [ ], clef: params.clef, key: params.key};
