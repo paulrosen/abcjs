@@ -25,6 +25,8 @@ empty list will be returned. A validation error will have two properties:
  * added prohibits, which is the opposite of requires.
  */
 
+/*extern JSONSchema */
+
 JSONSchema = {
 	validate : function(/*Any*/instance,/*Object*/schema) {
 		// Summary:
@@ -69,13 +71,13 @@ JSONSchema = {
 		// validate a value against a property definition
 	function checkProp(value, schema, path,i, recursion){
 		var l;
-		path += path ? typeof i == 'number' ? '[' + i + ']' : typeof i == 'undefined' ? '' : '.' + i : i;
+		path += path ? typeof i === 'number' ? '[' + i + ']' : typeof i === 'undefined' ? '' : '.' + i : i;
 		function addError(message){
 			errors.push({property:path,message:message});
 		}
 		
-		if((typeof schema != 'object' || schema instanceof Array) && (path || typeof schema != 'function')){
-			if(typeof schema == 'function'){
+		if((typeof schema !== 'object' || schema instanceof Array) && (path || typeof schema !== 'function')){
+			if(typeof schema === 'function'){
 				if(!(value instanceof schema)){
 					addError("is not an instance of the class/constructor " + schema.name);
 				}
@@ -93,10 +95,10 @@ JSONSchema = {
 		// validate a value against a type definition
 		function checkType(type,value){
 			if(type){
-				if(typeof type == 'string' && type != 'any' && 
-						(type == 'null' ? value !== null : typeof value != type) && 
-						!(value instanceof Array && type == 'array') &&
-						!(type == 'integer' && value%1===0)){
+				if(typeof type === 'string' && type !== 'any' &&
+						(type === 'null' ? value !== null : typeof value !== type) &&
+						!(value instanceof Array && type === 'array') &&
+						!(type === 'integer' && value%1===0)){
 					return [{property:path,message:(typeof value) + " value found, but a " + type + " is required"}];
 				}
 				if(type instanceof Array){
@@ -109,7 +111,7 @@ JSONSchema = {
 					if(unionErrors.length){
 						return unionErrors;
 					}
-				}else if(typeof type == 'object'){
+				}else if(typeof type === 'object'){
 					var priorErrors = errors;
 					errors = []; 
 					checkProp(value,type,path, recursion);
@@ -184,12 +186,12 @@ JSONSchema = {
 					}
 					if (schema.additionalProperties !== true) {
 						for(i in value){
-							if(value.hasOwnProperty(i)) {
+							if(value.hasOwnProperty(i) && typeof value[i] !== 'function') {
 								var num = parseInt(i);
 								var index = "" + num;
 								var isNum = i === index;
 								if(!isNum ){
-									addError((typeof i) + " The property " + i +
+									addError((typeof value[i]) + " The property " + i +
 											" is not defined in the schema and the schema does not allow additional properties");
 								}
 							}
@@ -198,25 +200,25 @@ JSONSchema = {
 				}else if(schema.properties){
 					errors.concat(checkObj(value,schema.properties,path,schema.additionalProperties, recursion+1));
 				}
-				if(schema.pattern && typeof value == 'string' && !value.match(schema.pattern)){
+				if(schema.pattern && typeof value === 'string' && !value.match(schema.pattern)){
 					addError("does not match the regex pattern " + schema.pattern);
 				}
-				if(schema.maxLength && typeof value == 'string' && value.length > schema.maxLength){
+				if(schema.maxLength && typeof value === 'string' && value.length > schema.maxLength){
 					addError("may only be " + schema.maxLength + " characters long");
 				}
-				if(schema.minLength && typeof value == 'string' && value.length < schema.minLength){
+				if(schema.minLength && typeof value === 'string' && value.length < schema.minLength){
 					addError("must be at least " + schema.minLength + " characters long");
 				}
-				if(typeof schema.minimum !== undefined && typeof value == typeof schema.minimum && 
+				if(typeof schema.minimum !== undefined && typeof value === typeof schema.minimum &&
 						schema.minimum > value){
 					addError("must have a minimum value of " + schema.minimum);
 				}
-				if(typeof schema.maximum !== undefined && typeof value == typeof schema.maximum && 
+				if(typeof schema.maximum !== undefined && typeof value === typeof schema.maximum &&
 						schema.maximum < value){
 					addError("must have a maximum value of " + schema.maximum);
 				}
-				if(schema['Enum']){
-					var enumer = schema['Enum'];
+				if(schema.Enum){
+					var enumer = schema.Enum;
 					l = enumer.length;
 					var found;
 					for(var j = 0; j < l; j++){
@@ -230,7 +232,7 @@ JSONSchema = {
 					}
 				}
 
-				if(typeof schema.maxDecimal == 'number' && 
+				if(typeof schema.maxDecimal === 'number' &&
 					(value.toString().match(new RegExp("\\.[0-9]{" + (schema.maxDecimal + 1) + ",}")))){
 					addError("may only have " + schema.maxDecimal + " digits of decimal places");
 				}
@@ -263,7 +265,7 @@ JSONSchema = {
 		checkAllProps(instance,objTypeDef,path,recursion);
 		
 		for(i in instance){
-			if(instance.hasOwnProperty(i)) {
+			if(instance.hasOwnProperty(i) && typeof instance[i] !== 'function') {
 				if (objTypeDef[i]) {
 					var requires = objTypeDef[i].requires;
 					if(requires && !(requires in instance)){
@@ -281,7 +283,7 @@ JSONSchema = {
 						errors = errors.concat(checkProp(value,value.$schema,path,i, recursion));
 					}
 				} else if (additionalProp!==true){
-				errors.push({property:path+' '+i,message:(typeof i) + " The property " + i +
+				errors.push({property:path+' '+i,message:(typeof instance[i]) + " The property " + i +
 						" is not defined in the schema and the schema does not allow additional properties"});
 				}
 			}

@@ -18,13 +18,10 @@
 //unexpected elements in it. It also returns a person-readable version of it that is suitable
 //for regression tests.
 
-/*global Class */
 /*global JSONSchema */
 /*extern AbcParserLint */
 
-var AbcParserLint = Class.create({
-	initialize: function () {
-
+function AbcParserLint() {
 		var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
 			"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
 			"emphasis", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
@@ -46,7 +43,7 @@ var AbcParserLint = Class.create({
 			ret.startChar = { type: 'number', output: 'hidden' };
 			ret.endChar = { type: 'number', output: 'hidden' };
 			return ret;
-		}
+		};
 
 		var fontType = {
 			type: 'object', optional: true, properties: {
@@ -304,7 +301,6 @@ var AbcParserLint = Class.create({
 			warn = warn.gsub('</span>', '$$$$');
 			return "Error:------\n" + err + "\nObj:-------\n" + out + "\nWarn:------\n" + warn;
 		};
-	}
-});
+}
 
 

@@ -14,49 +14,44 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global $, $$, Class, Ajax, Element */
+/*global $, Ajax, Element */
 /*global window, confirm */
 /*global AbcParse, AbcTuneBook, AbcParserLint, PlayEmbedded, DrawNotation, ABCPrinter, Raphael */
 /*extern abcParser, EditArea, editArea, writeOneTune */
 /*global abc_contents_output */
 
-EditArea = Class.create();
+function EditArea(id) {
+	this._id = id;
 
-EditArea.prototype = {
-	initialize: function (id) {
-		this._id = id;
-	},
-	
-	_id : '',
-	
-	set : function(str)
+	this.set = function(str)
 	{
 		//editAreaLoader.setValue(id, str);
 		$(this._id).value =str;
-	},
+	};
 	
-	get : function()
+	this.get = function()
 	{
 		return $(this._id).value;
-	},
+	};
 	
-	getSelection : function()
+	this.getSelection = function()
 	{
 		//selection = editAreaLoader.getSelectionRange('abc');
 		return {start: $(this._id).selectionStart, end: $(this._id).selectionEnd};
-	},
+	};
 	
-	setSelection : function(start, end)
+	this.setSelection = function(start, end)
 	{
 		//editAreaLoader.setSelectionRange('abc', pos, parseInt(pos)+1);
 		$(this._id).setSelectionRange(start,end);
 		$(this._id).focus();
-	},
-	highlight : function (abcelem)
+	};
+
+	this.highlight = function (abcelem)
 	{
 	  this.setSelection(abcelem.startChar, abcelem.endChar);
-	}
-};
+	};
+}
 
 editArea = new EditArea('abc');
 
@@ -104,13 +99,13 @@ function writeOneTune(tune, warnings, count) {
 	if (warnings) {
 	  if (warnings.join) {
 		warnings = warnings.join("<br />");
-		$('warnings').update(warnings);
+		$('warnings').innerHTML = warnings;
 	  } else {
 	    throw warnings;
 	  }
 	}
 	else
-		$('warnings').update('No errors');
+		$('warnings').innerHTML = 'No errors';
 	var canvas = $("canvas"+count);
 	paper = Raphael(canvas, 1500, 1500);
 	printer = new ABCPrinter(paper);
@@ -127,7 +122,7 @@ function abc_keystroke()
 		return;
 	bReentry = true;
 	var t = editArea.get();
-	if (t==oldt) {
+	if (t===oldt) {
 	  abc_mousemove();
 	  bReentry = false; 
 	  return;
@@ -173,10 +168,10 @@ function redrawCurrent()
 function pickTuneAndPdf(pdf_id, folder, abc_file)
 {
 	var sel = abc_contents_output[abc_file];
-	$("persistent_url").update("http://" + window.location.host + "/comparison?tune=" + abc_file);
+	$("persistent_url").innerHTML = "http://" + window.location.host + "/comparison?tune=" + abc_file;
 	var filename = abc_file.substring(0, abc_file.lastIndexOf('.'));
 	var pdf_file = "/testdata/" + folder + '/' + filename.gsub('\\+', '%2B') + '.ps';
-	$("abcm2ps_output").update(sel.out.gsub(' ', '&nbsp;').gsub('\n', '<br />'));
+	$("abcm2ps_output").innerHTML = sel.out.gsub(' ', '&nbsp;').gsub('\n', '<br />');
 
 	editArea.set(sel.abc);
 	abc_keystroke();
@@ -225,7 +220,7 @@ function saveCurrentToTest()
 		var arr = resp.responseText.split('/');
 		var fname = arr[arr.length-1];
 		fname = fname.split(' ')[0];
-		$('paul_failed_tests').appendChild(new Element('option').update(fname));
+		$('paul_failed_tests').appendChild(new Element('option').innerHTML = fname);
 		abc_contents_output[fname] = { abc: editArea.get(), out: "Unknown: reload page to see this data." };
 	};
 	var t = editArea.get();
@@ -268,8 +263,8 @@ function click()
 function selectNote(div)
 {
 	var pos = div.getAttribute("charPos");
-	selection['start'] = pos;
-	if (pos != undefined)
+	selection.start = pos;
+	if (pos !== undefined)
 	{
 		editArea.setSelection(parseInt(pos), parseInt(pos)+1);
 	}
@@ -295,8 +290,8 @@ function doGradeTest(url, failed_tests, passed_tests, pass) {
 		num_fail++;
 	}
 
-	$('success_count').update(num_success);
-	$('fail_count').update(num_fail);
+	$('success_count').innerHTML = num_success;
+	$('fail_count').innerHTML = num_fail;
 
 	new Ajax.Request(url, {parameters: {pass: pass, value: value, authenticity_token: window.authenticity_token}});
 }

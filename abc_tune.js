@@ -14,11 +14,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global Class */
 /*extern AbcTune */
 
 // This is the data for a single ABC tune. It is created and populated by the AbcParse class.
-var AbcTune = Class.create({
+function AbcTune() {
 	// The structure consists of a hash with the following two items:
 	// metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...
 	// tempo: { noteLength: number (e.g. .125), bpm: number }
@@ -52,16 +51,16 @@ var AbcTune = Class.create({
 	//		extraAccidentals[]: { acc:sharp|dblsharp|natural|flat|dblflat,  note:a|b|c|d|e|f|g }
 	// METER: type: common_time,cut_time,specified
 	//		if specified, { num: 99, den: 99 }
-	reset: function () {
+	this.reset = function () {
 		this.metaText = {};
 		this.formatting = {};
 		this.lines = [];
 		this.staffNum = 0;
 		this.voiceNum = 0;
 		this.lineNum = 0;
-	},
+	};
 
-	cleanUp: function() {
+	this.cleanUp = function() {
 		// Remove any blank lines
 		var anyDeleted = false;
 		for (var i = 0; i < this.lines.length; i++) {
@@ -92,7 +91,7 @@ var AbcTune = Class.create({
 			this.lines.each(function(line) {
 				if (line.staff)
 					line.staff = line.staff.compact();
-			})
+			});
 		}
 		for (this.lineNum = 0; this.lineNum < this.lines.length; this.lineNum++) {
 			if (this.lines[this.lineNum].staff) for (this.staffNum = 0; this.staffNum < this.lines[this.lineNum].staff.length; this.staffNum++) {
@@ -106,13 +105,11 @@ var AbcTune = Class.create({
 		delete this.staffNum;
 		delete this.voiceNum;
 		delete this.lineNum;
-	},
+	};
 
-	initialize: function () {
-		this.reset();
-	},
+	this.reset();
 
-	getLastNote: function() {
+	this.getLastNote = function() {
 		if (this.lines[this.lineNum] && this.lines[this.lineNum].staff && this.lines[this.lineNum].staff[this.staffNum] &&
 			this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum]) {
 			for (var i = this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum].length-1; i >= 0; i--) {
@@ -123,9 +120,9 @@ var AbcTune = Class.create({
 			}
 		}
 		return null;
-	},
+	};
 
-	addTieToLastNote: function() {
+	this.addTieToLastNote = function() {
 		// TODO-PER: if this is a chord, which note?
 		var el = this.getLastNote();
 		if (el) {
@@ -133,15 +130,15 @@ var AbcTune = Class.create({
 			return true;
 		}
 		return false;
-	},
+	};
 
-	getDuration: function(el) {
+	this.getDuration = function(el) {
 		if (el.duration) return el.duration;
 		//if (el.pitches && el.pitches.length > 0) return el.pitches[0].duration;
 		return 0;
-	},
+	};
 
-	appendElement: function(type, startChar, endChar, hashParams)
+	this.appendElement = function(type, startChar, endChar, hashParams)
 	{
 		var This = this;
 		var pushNote = function(hp) {
@@ -180,9 +177,9 @@ var AbcTune = Class.create({
 			}
 		}
 		pushNote(hashParams);
-	},
+	};
 
-	appendStartingElement: function(type, startChar, endChar, hashParams2)
+	this.appendStartingElement = function(type, startChar, endChar, hashParams2)
 	{
 		// Clone the object because it will be sticking around for the next line and we don't want the extra fields in it.
 		var hashParams = Object.clone(hashParams2);
@@ -207,31 +204,31 @@ var AbcTune = Class.create({
 		}
 		// We didn't see either that type or a note, so replace the element to the staff.
 		this.lines[this.lineNum].staff[this.staffNum][type] = hashParams2;
-	},
+	};
 
-	getNumLines: function() {
+	this.getNumLines = function() {
 		return this.lines.length;
-	},
+	};
 
-	addSubtitle: function(str) {
+	this.addSubtitle = function(str) {
 		this.lines.push({subtitle: str});
-	},
+	};
 
-	addSeparator: function(spaceAbove, spaceBelow, lineLength) {
+	this.addSeparator = function(spaceAbove, spaceBelow, lineLength) {
 		this.lines.push({separator: {spaceAbove: spaceAbove, spaceBelow: spaceBelow, lineLength: lineLength}});
-	},
+	};
 
-	addText: function(str) {
+	this.addText = function(str) {
 		this.lines.push({text: str});
-	},
+	};
 
-	containsNotes: function(voice) {
+	this.containsNotes = function(voice) {
 		for (var i = 0; i < voice.length; i++) {
 			if (voice[i].el_type === 'note' || voice[i].el_type === 'bar')
 				return true;
 		}
 		return false;
-	},
+	};
 
 //	anyVoiceContainsNotes: function(line) {
 //		for (var i = 0; i < line.staff.voices.length; i++) {
@@ -241,7 +238,7 @@ var AbcTune = Class.create({
 //		return false;
 //	},
 
-	startNewLine: function(params) {
+	this.startNewLine = function(params) {
 		// If the pointed to line doesn't exist, just create that. If the line does exist, but doesn't have any music on it, just use it.
 		// If it does exist and has music, then increment the line number. If the new element doesn't exist, create it.
 		var This = this;
@@ -296,34 +293,26 @@ var AbcTune = Class.create({
 			this.lineNum++;
 			this.startNewLine(params);
 		}
-	},
+	};
 
-	hasBeginMusic: function() {
+	this.hasBeginMusic = function() {
 		return this.lines.length > 0;
-	},
+	};
 
-	isFirstLine: function(index) {
+	this.isFirstLine = function(index) {
 		for (var i = index-1; i >= 0; i--) {
 			if (this.lines[i].staff !== undefined) return false;
 		}
 		return true;
-	},
+	};
 
-//	getLastStaff: function(index) {
-//		for (var i = this.lines.length-1; i >= 0; i--) {
-//			if (this.lines[i].staff && this.lines[i].staff.index === index)
-//				return this.lines[i];
-//		}
-//		return null;
-//	},
-
-	getCurrentVoice: function() {
+	this.getCurrentVoice = function() {
 		if (this.lines[this.lineNum] !== undefined && this.lines[this.lineNum].staff[this.staffNum] !== undefined && this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum] !== undefined)
 			return this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum];
 		else return null;
-	},
+	};
 
-	setCurrentVoice: function(staffNum, voiceNum) {
+	this.setCurrentVoice = function(staffNum, voiceNum) {
 		this.staffNum = staffNum;
 		this.voiceNum = voiceNum;
 		for (var i = 0; i < this.lines.length; i++) {
@@ -336,12 +325,12 @@ var AbcTune = Class.create({
 			}
 		}
 		this.lineNum =  i;
-	},
+	};
 
-	addMetaText: function(key, value) {
+	this.addMetaText = function(key, value) {
 		if (this.metaText[key] === undefined)
 			this.metaText[key] = value;
 		else
 			this.metaText[key] += "\n" + value;
-	}
-});
+	};
+}
