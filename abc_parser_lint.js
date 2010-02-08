@@ -22,121 +22,141 @@
 /*extern AbcParserLint */
 
 function AbcParserLint() {
-		var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
-			"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
-			"emphasis", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
-			"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
-			"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
-			"p", "pp", "f", "ff", "mf", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
-			"upbow", "downbow", "staccato"
-		] } };
+	var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
+		"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
+		"emphasis", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
+		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
+		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
+		"p", "pp", "f", "ff", "mf", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
+		"upbow", "downbow", "staccato"
+	] } };
 
-		var tempoProperties =  {
-			duration: { type: "array", optional: true, output: "join", requires: [ 'bpm'], items: { type: "number"} },
-			bpm: { type: "number", optional: true, requires: [ 'duration'] },
-			preString: { type: 'string', optional: true},
-			postString: { type: 'string', optional: true}
-		};
+	var tempoProperties =  {
+		duration: { type: "array", optional: true, output: "join", requires: [ 'bpm'], items: { type: "number"} },
+		bpm: { type: "number", optional: true, requires: [ 'duration'] },
+		preString: { type: 'string', optional: true},
+		postString: { type: 'string', optional: true}
+	};
 
-		var appendPositioning = function(properties) {
-			var ret = Object.clone(properties);
-			ret.startChar = { type: 'number', output: 'hidden' };
-			ret.endChar = { type: 'number', output: 'hidden' };
-			return ret;
-		};
+	var startChar = { type: 'number' }; //, output: 'hidden' };
+	var endChar = { type: 'number' }; //, output: 'hidden' };
 
-		var fontType = {
-			type: 'object', optional: true, properties: {
-				font: { type: 'string', optional: true },
-				size: { type: 'number', optional: true }
-			}
-		};
+	var appendPositioning = function(properties) {
+		var ret = Object.clone(properties);
+		ret.startChar = startChar;
+		ret.endChar = endChar;
+		return ret;
+	};
 
-		var clefProperties = {
-			type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] },
-			middle: { type: 'number', minimum: -14, maximum: 14 }	// the pitch that goes in the middle of the staff C=0
-		};
+	var fontType = {
+		type: 'object', optional: true, properties: {
+			font: { type: 'string', optional: true },
+			size: { type: 'number', optional: true }
+		}
+	};
 
-		var keyProperties = {
-			extraAccidentals: { type: 'array', optional: true, output: "noindex", items: {
-					type: 'object', properties: {
-						acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ] },
-						note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] },
-						verticalPos: { type: 'number', minimum: 0, maximum: 13 }
-					}
-			} }
+	var clefProperties = {
+		type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] },
+		middle: { type: 'number', minimum: -14, maximum: 14 }	// the pitch that goes in the middle of the staff C=0
+	};
+
+	var keyProperties = {
+		extraAccidentals: { type: 'array', optional: true, output: "noindex", items: {
+				type: 'object', properties: {
+					acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ] },
+					note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] },
+					verticalPos: { type: 'number', minimum: 0, maximum: 13 }
+				}
+		} }
 //			regularKey: { type: 'object', optional: true,
 //				properties: {
 //					num: { type: 'number', minimum: 0, maximum: 7 },
 //					acc: { type: 'string', Enum: [ 'sharp', 'flat' ]}
 //				}
 //			}
-		};
+	};
 
-		var meterProperties = {
-			type: { type: 'string', Enum: [ 'common_time', 'cut_time', 'specified' ] },
-			value: { type: 'array', optional: true, output: 'noindex',	// TODO-PER: Check for type=specified and require these in that case.
-				items: {
-					type: 'object', properties: {
-						num: { type: 'string' },
-						den: { type: 'string' }
-					}
+	var meterProperties = {
+		type: { type: 'string', Enum: [ 'common_time', 'cut_time', 'specified' ] },
+		value: { type: 'array', optional: true, output: 'noindex',	// TODO-PER: Check for type=specified and require these in that case.
+			items: {
+				type: 'object', properties: {
+					num: { type: 'string' },
+					den: { type: 'string' }
 				}
 			}
-		};
+		}
+	};
 
-		var voiceItem = { type: "union",
-			field: "el_type",
-			types: [
-				{ value: "clef", properties: appendPositioning(clefProperties) },
-				{ value: "bar", properties: {
-					startChar: { type: 'number', output: 'hidden' },
-					endChar: { type: 'number', output: 'hidden' },
-					chord: { type: 'object', optional: true, properties: {
-							name: { type: 'string'},
-							position: { type: 'string'}
-						}
-					},
-					decoration: decorationList,
-					ending: { type: 'string', optional: true },
-					type: { type: 'string', Enum: [ 'bar_dbl_repeat', 'bar_right_repeat', 'bar_left_repeat', 'bar_invisible', 'bar_thick_thin', 'bar_thin_thin', 'bar_thin', 'bar_thin_thick' ] }
-				} },
-				{ value: "key", properties: appendPositioning(keyProperties) },
-				{ value: "meter", properties: appendPositioning(meterProperties) },
-				{ value: "part", properties: {
-					startChar: { type: 'number', output: 'hidden' },
-					endChar: { type: 'number', output: 'hidden' },
-					title: { type: 'string' }
-				} },
+	var voiceItem = { type: "union",
+		field: "el_type",
+		types: [
+			{ value: "clef", properties: appendPositioning(clefProperties) },
+			{ value: "bar", properties: {
+				startChar: startChar,
+				endChar: endChar,
+				chord: { type: 'object', optional: true, properties: {
+						name: { type: 'string'},
+						position: { type: 'string'}
+					}
+				},
+				decoration: decorationList,
+				ending: { type: 'string', optional: true },
+				type: { type: 'string', Enum: [ 'bar_dbl_repeat', 'bar_right_repeat', 'bar_left_repeat', 'bar_invisible', 'bar_thick_thin', 'bar_thin_thin', 'bar_thin', 'bar_thin_thick' ] }
+			} },
+			{ value: "key", properties: appendPositioning(keyProperties) },
+			{ value: "meter", properties: appendPositioning(meterProperties) },
+			{ value: "part", properties: {
+				startChar: startChar,
+				endChar: endChar,
+				title: { type: 'string' }
+			} },
 
-				{ value: 'stem', properties: {
-					startChar: { type: 'number', output: 'hidden' },
-					endChar: { type: 'number', output: 'hidden' },
-					direction: { type: 'string', Enum: [ 'up', 'down' ] }
-				}},
-				{ value: 'tempo', properties: appendPositioning(tempoProperties) },
+			{ value: 'stem', properties: {
+				startChar: startChar,
+				endChar: endChar,
+				direction: { type: 'string', Enum: [ 'up', 'down' ] }
+			}},
+			{ value: 'tempo', properties: appendPositioning(tempoProperties) },
 
-				{ value: "note", properties: {
-					startChar: { type: 'number', output: 'hidden' },
-					endChar: { type: 'number', output: 'hidden' },
-					//accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
-					barNumber: { type: 'number', optional: true },
-					chord: { type: 'object', optional: true, properties: {
-							name: { type: 'string'},
-							position: { type: 'string'}
-						}
-					},
-					decoration: decorationList,
-					duration: { type: 'number' },
+			{ value: "note", properties: {
+				startChar: startChar,
+				endChar: endChar,
+				//accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
+				barNumber: { type: 'number', optional: true },
+				chord: { type: 'object', optional: true, properties: {
+						name: { type: 'string'},
+						position: { type: 'string'}
+					}
+				},
+				decoration: decorationList,
+				duration: { type: 'number' },
 //					endSlur: { type: 'number', minimum: 1, optional: true },
 //					endTie: { type: 'boolean', Enum: [ true ], optional: true },
-					endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
-					end_beam: { type: 'boolean', Enum: [ true ], optional: true },
-					gracenotes: { type: 'array', optional: true, output: "noindex", items: {
-						type: "object", properties: {
+				endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
+				end_beam: { type: 'boolean', Enum: [ true ], optional: true },
+				gracenotes: { type: 'array', optional: true, output: "noindex", items: {
+					type: "object", properties: {
+						accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
+						duration: { type: 'number' },
+						end_beam: { type: 'boolean', Enum: [ true ], optional: true },
+						endSlur: { type: 'number', minimum: 1, optional: true },
+						endTie: { type: 'boolean', Enum: [ true ], optional: true },
+						pitch: { type: 'number' },
+						verticalPos: { type: 'number' },
+						startSlur: { type: 'number', minimum: 1, optional: true },
+						startTie: { type: 'boolean', Enum: [ true ], optional: true }
+					}
+				}},
+				lyric: { type: 'array', optional: true, output: "noindex", items: {
+					type: 'object', properties: {
+					syllable: { type :'string' },
+					divider: { type: 'string', Enum: [ '-', ' ', '_' ]}
+				}}},
+				//pitch: { optional: true, type: 'number', prohibits: [ 'rest', 'pitches' ] },
+				pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'pitch', 'duration', 'rest' ], items: {
+						type: 'object', properties: {
 							accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
-							duration: { type: 'number' },
-							end_beam: { type: 'boolean', Enum: [ true ], optional: true },
 							endSlur: { type: 'number', minimum: 1, optional: true },
 							endTie: { type: 'boolean', Enum: [ true ], optional: true },
 							pitch: { type: 'number' },
@@ -144,163 +164,146 @@ function AbcParserLint() {
 							startSlur: { type: 'number', minimum: 1, optional: true },
 							startTie: { type: 'boolean', Enum: [ true ], optional: true }
 						}
-					}},
-					lyric: { type: 'array', optional: true, output: "noindex", items: {
-						type: 'object', properties: {
-						syllable: { type :'string' },
-						divider: { type: 'string', Enum: [ '-', ' ', '_' ]}
-					}}},
-					//pitch: { optional: true, type: 'number', prohibits: [ 'rest', 'pitches' ] },
-					pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'pitch', 'duration', 'rest' ], items: {
-							type: 'object', properties: {
-								accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
-								endSlur: { type: 'number', minimum: 1, optional: true },
-								endTie: { type: 'boolean', Enum: [ true ], optional: true },
-								pitch: { type: 'number' },
-								verticalPos: { type: 'number' },
-								startSlur: { type: 'number', minimum: 1, optional: true },
-								startTie: { type: 'boolean', Enum: [ true ], optional: true }
-							}
-					}},
-					rest: { type: 'object',  optional: true, prohibits: [ 'pitch', 'duration', 'lyric' ], properties: {
-						type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest' ] },
-						endSlur: { type: 'number', minimum: 1, optional: true },
-						endTie: { type: 'boolean', Enum: [ true ], optional: true },
-						startSlur: { type: 'number', minimum: 1, optional: true },
-						startTie: { type: 'boolean', Enum: [ true ], optional: true }
-					}},
+				}},
+				rest: { type: 'object',  optional: true, prohibits: [ 'pitch', 'duration', 'lyric' ], properties: {
+					type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest' ] },
+					endSlur: { type: 'number', minimum: 1, optional: true },
+					endTie: { type: 'boolean', Enum: [ true ], optional: true },
+					startSlur: { type: 'number', minimum: 1, optional: true },
+					startTie: { type: 'boolean', Enum: [ true ], optional: true }
+				}},
 //					startSlur: { type: 'number', minimum: 1, optional: true },
 //					startTie: { type: 'boolean', Enum: [ true ], optional: true },
-					startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }
-				}}
-			]
-		};
+				startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }
+			}}
+		]
+	};
 
-		var musicSchema = {
-			description:"ABC Internal Music Representation",
-			type:"object",
-			properties: {
-				formatting: {type:"object",
+	var musicSchema = {
+		description:"ABC Internal Music Representation",
+		type:"object",
+		properties: {
+			formatting: {type:"object",
+				properties: {
+					auquality: { type: "string", optional: true },
+					bagpipes: { type: "boolean", optional: true },
+					barlabelfont: fontType,
+					barnumberfont: fontType,
+					botmargin: { type: "number", optional: true },
+					botspace: { type: "number", optional: true },
+					composerfont: fontType,
+					composerspace: { type: "number", optional: true },
+					continuous: { type: "string", optional: true },
+					gchordfont: fontType,
+					indent: { type: "number", optional: true },
+					landscape: { type: "boolean", optional: true },
+					leftmargin: { type: "number", optional: true },
+					linesep: { type: "number", optional: true },
+					midi: { type: "string", optional: true },
+					musicspace: { type: "number", optional: true },
+					nobarcheck: { type: "string", optional: true },
+					partsfont: fontType,
+					partsspace: { type: "number", optional: true },
+					playtempo: { type: "string", optional: true },
+					scale: { type: "number", optional: true },
+					score: { type: "string", optional: true },
+					slurgraces: { type: "boolean", optional: true },
+					staffsep: { type: "number", optional: true },
+					staffwidth: { type: "number", optional: true },
+					staves: { type: "string", optional: true },
+					stretchlast: { type: "boolean", optional: true },
+					subtitlefont: fontType,
+					subtitlespace: { type: "number", optional: true },
+					sysstaffsep: { type: "number", optional: true },
+					systemsep: { type: "number", optional: true },
+					tempofont: fontType,
+					textspace: { type: "number", optional: true },
+					titlefont: fontType,
+					titleleft: { type: "boolean", optional: true },
+					titlespace: { type: "number", optional: true },
+					topmargin: { type: "number", optional: true },
+					topspace: { type: "number", optional: true },
+					vocalspace: { type: "number", optional: true },
+					voicefont: fontType,
+					wordsspace: { type: "number", optional: true }
+				}
+			},
+
+			lines: {type:"array",
+				description: "This is an array of horizontal elements. It is usually a staff of music. For multi-stave music, each staff is an element, just like single-staff. The difference is the connector properties.",
+				items: { type: "object",
 					properties: {
-						auquality: { type: "string", optional: true },
-						bagpipes: { type: "boolean", optional: true },
-						barlabelfont: fontType,
-						barnumberfont: fontType,
-						botmargin: { type: "number", optional: true },
-						botspace: { type: "number", optional: true },
-						composerfont: fontType,
-						composerspace: { type: "number", optional: true },
-						continuous: { type: "string", optional: true },
-						gchordfont: fontType,
-						indent: { type: "number", optional: true },
-						landscape: { type: "boolean", optional: true },
-						leftmargin: { type: "number", optional: true },
-						linesep: { type: "number", optional: true },
-						midi: { type: "string", optional: true },
-						musicspace: { type: "number", optional: true },
-						nobarcheck: { type: "string", optional: true },
-						partsfont: fontType,
-						partsspace: { type: "number", optional: true },
-						playtempo: { type: "string", optional: true },
-						scale: { type: "number", optional: true },
-						score: { type: "string", optional: true },
-						slurgraces: { type: "boolean", optional: true },
-						staffsep: { type: "number", optional: true },
-						staffwidth: { type: "number", optional: true },
-						staves: { type: "string", optional: true },
-						stretchlast: { type: "boolean", optional: true },
-						subtitlefont: fontType,
-						subtitlespace: { type: "number", optional: true },
-						sysstaffsep: { type: "number", optional: true },
-						systemsep: { type: "number", optional: true },
-						tempofont: fontType,
-						textspace: { type: "number", optional: true },
-						titlefont: fontType,
-						titleleft: { type: "boolean", optional: true },
-						titlespace: { type: "number", optional: true },
-						topmargin: { type: "number", optional: true },
-						topspace: { type: "number", optional: true },
-						vocalspace: { type: "number", optional: true },
-						voicefont: fontType,
-						wordsspace: { type: "number", optional: true }
-					}
-				},
-
-				lines: {type:"array",
-					description: "This is an array of horizontal elements. It is usually a staff of music. For multi-stave music, each staff is an element, just like single-staff. The difference is the connector properties.",
-					items: { type: "object",
-						properties: {
-							separator: { type: 'object', optional: true, prohibits: [ 'staff', 'text', 'subtitle' ],
+						separator: { type: 'object', optional: true, prohibits: [ 'staff', 'text', 'subtitle' ],
+							properties: {
+								lineLength: { type: 'number', optional: true },
+								spaceAbove: { type: 'number', optional: true },
+								spaceBelow: { type: 'number', optional: true }
+							}
+						},
+						subtitle: { type: "string", optional: true, prohibits: [ 'staff', 'text', 'separator' ]  },
+						text: { type: "string", optional: true, prohibits: [ 'staff', 'subtitle', 'separator' ]  },
+						staff: { type: 'array', optional: true, prohibits: [ 'subtitle', 'text', 'separator' ],
+							items: { type: 'object',
 								properties: {
-									lineLength: { type: 'number', optional: true },
-									spaceAbove: { type: 'number', optional: true },
-									spaceBelow: { type: 'number', optional: true }
-								}
-							},
-							subtitle: { type: "string", optional: true, prohibits: [ 'staff', 'text', 'separator' ]  },
-							text: { type: "string", optional: true, prohibits: [ 'staff', 'subtitle', 'separator' ]  },
-							staff: { type: 'array', optional: true, prohibits: [ 'subtitle', 'text', 'separator' ],
-								items: { type: 'object',
-									properties: {
-										brace: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
-										bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
-										clef: { type: 'object', optional: true, properties: clefProperties },
-										connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
-										vocalfont: fontType,
-										key: { type: 'object', optional: true, properties: keyProperties },
-										meter: { type: 'object', optional: true, properties: meterProperties },
-										spacingBelow: { type: 'number', optional: true },
-										title: { type: 'array', optional: true, items: { type: 'string' } },
-										voices: { type: 'array', output: 'hidden',
-											items: {
-												type: "array", optional: true, output: "noindex",
-												items: voiceItem
-											}
+									brace: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+									bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+									clef: { type: 'object', optional: true, properties: clefProperties },
+									connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+									vocalfont: fontType,
+									key: { type: 'object', optional: true, properties: keyProperties },
+									meter: { type: 'object', optional: true, properties: meterProperties },
+									spacingBelow: { type: 'number', optional: true },
+									title: { type: 'array', optional: true, items: { type: 'string' } },
+									voices: { type: 'array', output: 'hidden',
+										items: {
+											type: "array", optional: true, output: "noindex",
+											items: voiceItem
 										}
 									}
 								}
 							}
 						}
 					}
-				},
+				}
+			},
 
-				metaText: {type:"object",
-					properties: {
-						author: { type: "string", optional: true },
-						book: { type: "string", optional: true },
-						composer: { type: "string", optional: true },
-						discography: { type: "string", optional: true },
-						history: { type: "string", optional: true },
-						instruction: { type: "string", optional: true },
-						notes: { type: "string", optional: true },
-						origin: { type: "string", optional: true },
-						partOrder: { type: "string", optional: true },
-						rhythm: { type: "string", optional: true },
-						source: { type: "string", optional: true },
-						tempo: { type: "object", optional: true, properties: tempoProperties },
-						textBlock: { type: "string", optional: true },
-						title: { type: "string", optional: true },
-						transcription: { type: "string", optional: true },
-						unalignedWords: { type: "string", optional: true },
-						url: { type: "string", optional: true }
-					}
+			metaText: {type:"object",
+				properties: {
+					author: { type: "string", optional: true },
+					book: { type: "string", optional: true },
+					composer: { type: "string", optional: true },
+					discography: { type: "string", optional: true },
+					history: { type: "string", optional: true },
+					instruction: { type: "string", optional: true },
+					notes: { type: "string", optional: true },
+					origin: { type: "string", optional: true },
+					partOrder: { type: "string", optional: true },
+					rhythm: { type: "string", optional: true },
+					source: { type: "string", optional: true },
+					tempo: { type: "object", optional: true, properties: tempoProperties },
+					textBlock: { type: "string", optional: true },
+					title: { type: "string", optional: true },
+					transcription: { type: "string", optional: true },
+					unalignedWords: { type: "string", optional: true },
+					url: { type: "string", optional: true }
 				}
 			}
-		};
+		}
+	};
 
-		this.lint = function(tune, warnings) {
-			var ret = JSONSchema.validate(tune, musicSchema);
-			var err = "";
-			ret.errors.each(function(e) {
-				err += e.property + ": " + e.message + "\n";
-			});
-			var out = ret.output.join("\n");
-			
-			var warn = warnings === undefined ? "No errors" : warnings.join('\n');
-			warn = warn.gsub('<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">', '$$$$');
-			warn = warn.gsub('</span>', '$$$$');
-			return "Error:------\n" + err + "\nObj:-------\n" + out + "\nWarn:------\n" + warn;
-		};
+	this.lint = function(tune, warnings) {
+		var ret = JSONSchema.validate(tune, musicSchema);
+		var err = "";
+		ret.errors.each(function(e) {
+			err += e.property + ": " + e.message + "\n";
+		});
+		var out = ret.output.join("\n");
+
+		var warn = warnings === undefined ? "No errors" : warnings.join('\n');
+		warn = warn.gsub('<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">', '$$$$');
+		warn = warn.gsub('</span>', '$$$$');
+		return "Error:------\n" + err + "\nObj:-------\n" + out + "\nWarn:------\n" + warn;
+	};
 }
 
 

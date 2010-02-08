@@ -77,10 +77,16 @@ ABCPrinter.prototype.rangeHighlight = function(start,end)
     for (var voice=0;voice<voices.length;voice++) {
       var elems = voices[voice].children;
       for (var elem=0; elem<elems.length; elem++) {
-	if (elems[elem].abcelem.startChar>=start && elems[elem].abcelem.endChar<=end) {
-	  this.selected[this.selected.length]=elems[elem];
-	  elems[elem].highlight();
-	}
+		  // Since the user can highlight more than an element, or part of an element, a hit is if any of the endpoints
+		  // is inside the other range.
+		  var elStart = elems[elem].abcelem.startChar;
+		  var elEnd = elems[elem].abcelem.endChar;
+		  if ((elStart <= start && start <= elEnd) || (elStart <= end && end <= elEnd) ||
+			  (start <= elStart && elStart <= end) || (start <= elEnd && elEnd <= end)) {
+//		if (elems[elem].abcelem.startChar>=start && elems[elem].abcelem.endChar<=end) {
+		  this.selected[this.selected.length]=elems[elem];
+		  elems[elem].highlight();
+		}
       }
     }
   }

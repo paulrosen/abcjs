@@ -828,7 +828,7 @@ function AbcParse() {
 						// Attach the grace note to an invisible note
 						el.rest = { type: 'spacer' };
 						el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
-						tune.appendElement('note', -1, -1, el);
+						tune.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el);
 						el = {};
 					}
 					var bar = {type: ret[1]};
@@ -1054,7 +1054,7 @@ function AbcParse() {
 								el.barNumber = multilineVars.barNumOnNextNote;
 								multilineVars.barNumOnNextNote = null;
 							}
-							tune.appendElement('note', startOfLine+i, startOfLine+1, el);
+							tune.appendElement('note', startOfLine+startI, startOfLine+i, el);
 							el = {};
 						}
 					}
