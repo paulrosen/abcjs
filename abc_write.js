@@ -14,9 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global sprintf */
-/*global ABCLineLayout */
-/*extern ABCPrinter */
+
+/*global Math, sprintf, ABCGlyphs, ABCLayout*/
+/*extern ABCPrinter, AbcSpacing */
 
 
 var AbcSpacing = function() {};
@@ -43,11 +43,11 @@ function ABCPrinter(paper) {
 ABCPrinter.prototype.setY = function(y) {
   this.backupy=this.y;
   this.y = y;
-}
+};
 
 ABCPrinter.prototype.unSetY = function(y) {
   this.y = this.backupy;
-}
+};
 
 ABCPrinter.prototype.notifySelect = function (abselem) {
   this.clearSelection();
@@ -95,12 +95,12 @@ ABCPrinter.prototype.rangeHighlight = function(start,end)
 ABCPrinter.prototype.printStaveLine = function (x1,x2, pitch) {
   var dy = 0.35;
   var y = this.calcY(pitch);
-  return printer.paper.path(sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
+  return this.paper.path(sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
 		       x2, y+dy, x1, y+dy)).attr({stroke:"none",fill: "#000000"});
 };
 
 ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
-  return printer.paper.path(sprintf("M %f %f L %f %f L %f %f L %f %f z", x-0.3, y1, x-0.3, y2,
+  return this.paper.path(sprintf("M %f %f L %f %f L %f %f L %f %f z", x-0.3, y1, x-0.3, y2,
 		       x+dx, y2, x+dx, y1)).attr({stroke:"none",fill: "#000000"});
 
 };
@@ -116,10 +116,10 @@ ABCPrinter.prototype.printSymbol = function(x, offset, symbol, start, end) {
   if (!symbol) return null;
   if (symbol.length>0 && symbol.indexOf(".")<0) {
     var elemset = this.paper.set();
-    dx =0;
+    var dx =0;
     for (var i=0; i<symbol.length; i++) {
       var ycorr = this.glyphs.getYCorr(symbol[i]);
-      el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol[i], this.paper);
+      var el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol[i], this.paper);
       if (el) {
 	elemset.push(el);
 	dx+=this.glyphs.getSymbolWidth(symbol[i]);
@@ -155,15 +155,15 @@ ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
   return this.paper.path(sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1, 
 				 controlx1, controly1, controlx2, controly2, x2, y2, 
 				 controlx2, controly2+thickness, controlx1, controly1+thickness, x1, y1)).attr({stroke:"none", fill: "#000000"});
-}
+};
 
 ABCPrinter.prototype.debugMsg = function(x, msg) {
   this.paper.text(x, this.y, msg);
-}
+};
 
 ABCPrinter.prototype.debugMsgLow = function(x, msg) {
   this.paper.text(x, this.y+80, msg);
-}
+};
 
 ABCPrinter.prototype.calcY = function(ofs) {
   return this.y+((AbcSpacing.TOPNOTE-ofs)*AbcSpacing.STEP);
@@ -178,7 +178,7 @@ ABCPrinter.prototype.printStave = function (width) {
 };
 
 ABCPrinter.prototype.printABC = function(abctune) {
-  this.layouter = new ABCLayout(this.glyphs);
+  this.layouter = new ABCLayout(this.glyphs, abctune.formatting.bagpipes);
   this.y = 15;
   if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
   if (abctune.formatting.staffwidth) { 
@@ -236,7 +236,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
   if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
   if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords + "\n";
-  var text = this.paper.text(10, this.y+30, extraText);
+  var text = this.paper.text(30, this.y+30, extraText);
   text.translate(0,text.getBBox().height/2);
 };
 

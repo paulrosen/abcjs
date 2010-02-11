@@ -21,28 +21,30 @@
 /*global ABCEndingElem */
 /*global ABCTripletElem */
 /*global ABCTieElem */
+/*global ABCStaffGroupElement */ 
+/*global AbcSpacing */
 /*extern ABCLayout getDuration getDurlog */
 
 var getDuration = function(elem) {
   var d = 0;
-  if (elem) {
-    if (elem.duration) 
-      d = elem.duration;
-    else if (elem.pitches && elem.pitches[0])
-      d = elem.pitches[0].duration;
-  } 
+  if (elem.duration) {
+    d = elem.duration;
+  }
   return d;
 };
 
 var getDurlog = function(duration) {
   return Math.floor(Math.log(duration)/Math.log(2));
-}
-
-function ABCLayout(glyphs, space, width) {
-  this.glyphs = glyphs;
-  this.space = space;
-  this.width = width;
 };
+
+function ABCLayout(glyphs, bagpipes) {
+  this.glyphs = glyphs;
+  this.isBagpipes = bagpipes;
+  this.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
+		   note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter"},
+		   uflags:{3:"flags.u8th", 4:"flags.u16th", 5:"flags.u32nd", 6:"flags.u64th"},
+		   dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}};
+}
 
 ABCLayout.prototype.getElem = function() {
   if (this.abcline.length <= this.pos)
@@ -79,7 +81,7 @@ ABCLayout.prototype.printABCStaff = function(abcstaff) {
   
   for (var v = 0; v < abcstaff.voices.length; v++) {
     this.staff = new ABCVoiceElement(this.y);
-    if (v==0) {
+    if (v===0) {
       this.staff.header=header;
       this.staff.addChild(this.printClef(abcstaff.clef));
       this.staff.addChild(this.printKeySignature(abcstaff.key));
@@ -97,7 +99,7 @@ ABCLayout.prototype.printABCStaff = function(abcstaff) {
 };
 
 ABCLayout.prototype.printABCVoice = function(abcline) {
-  this.stemdir = null;
+  this.stemdir = (this.isBagpipes)?"down":null;
   this.abcline = abcline;
   if (this.partstartelem) {
     this.partstartelem = new ABCEndingElem("", null, null);
@@ -153,8 +155,8 @@ ABCLayout.prototype.printBeam = function() {
   if (this.getElem().startBeam) {
     var beamelem = new ABCBeamElem(this.stemdir);
     while (this.getElem()) {
-      abselem = this.printNote(this.getElem(),true);
-      abselemset[abselemset.length] = abselem;
+      var abselem = this.printNote(this.getElem(),true);
+      abselemset.push(abselem);
       beamelem.add(abselem);
       if (this.getElem().endBeam) {
 		break;
@@ -166,7 +168,7 @@ ABCLayout.prototype.printBeam = function() {
     var beamelem = new ABCBeamElem(this.stemdir);
 
     while (this.getElem()) {
-      abselem = this.printNote(this.getElem(),true);
+      var abselem = this.printNote(this.getElem(),true);
       abselemset[abselemset.length] = abselem;
       beamelem.add(abselem);
       if (!this.getNextElem() || this.getNextElem().el_type!=="note" || this.getElem().end_beam) {
@@ -182,8 +184,9 @@ ABCLayout.prototype.printBeam = function() {
 };
 
 function sortPitch(elem) {
+  var sorted;
   do {
-    var sorted = true;
+    sorted = true;
     for (var p = 0; p<elem.pitches.length-1; p++) {
       if (elem.pitches[p].pitch>elem.pitches[p+1].pitch) {
 	sorted = false;
@@ -196,155 +199,99 @@ function sortPitch(elem) {
 }
 
 ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true for drawing stemless notehead
-  var notehead = null;
-  var roomtaken = 0; // room needed to the left of the note
-  var dotshift = 0; // room taken by chords with displaced noteheads which cause dots to shift
-  if (elem.pitches==undefined) {
-    elem.pitches=[{accidental:elem.accidental, pitch:elem.pitch, duration:elem.duration, startTie: elem.startTie,
-		   endTie: elem.endTie, startSlur: elem.startSlur, endSlur: elem.endSlur}]
-  }
+  var notehead = null, 
+  var grace= null;
+  this.roomtaken = 0; // room needed to the left of the note
+  
+  var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
+  var c="";
+  var flag = null;
+  
+  var p, i, pp;
+  var width, p1, p2, dx;
 
   var duration = getDuration(elem);
   var durlog = Math.floor(Math.log(duration)/Math.log(2));
-  
-  var chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
-		   note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter"},
-		   uflags:{3:"flags.u8th", 4:"flags.u16th", 5:"flags.u32nd", 6:"flags.u64th"},
-		   dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}};
-              
-  sortPitch(elem);
-  abselem = new ABCAbsoluteElement(elem, duration, 1);
-  
-  var sum=0
-  for (var p=0, pp=elem.pitches.length; p<pp; p++) {
-    sum += elem.pitches[p].pitch;
-  }
+  var dot=0;
 
-  elem.averagepitch = sum/elem.pitches.length;
-  var dir = (elem.averagepitch>=6) ? "down": "up";
-  if (this.stemdir) dir=this.stemdir;
+  for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
+  
+  var abselem = new ABCAbsoluteElement(elem, duration, 1);
+  
+  if (elem.rest) {
+    switch(elem.rest.type) {
+    case "rest": 
+      c = this.chartable["rest"][-durlog]; 
+      elem.averagepitch=7; 
+      elem.minpitch=7;
+      elem.maxpitch=7;
+      break; // TODO rests in bars is now broken
+    case "invisible":
+    case "spacer":
+      c="";
+    }
+    notehead = this.printNoteHead(abselem, c, {verticalPos:7}, null, 0, null, dot, 0, 1);
+    if (notehead) abselem.addHead(notehead);
 
-  // determine elements of chords which should be shifted
-  for (var p=(dir=="down")?elem.pitches.length-2:1; (dir=="down")?p>=0:p<elem.pitches.length; p=(dir=="down")?p-1:p+1) {
-    var prev = elem.pitches[(dir=="down")?p+1:p-1];
-    var curr = elem.pitches[p];
-    var delta = (dir=="down")?prev.pitch-curr.pitch:curr.pitch-prev.pitch;
-    if (delta<=1 && !prev.printer_shift) {
-      curr.printer_shift=(delta)?"different":"same";
-      if (dir=="down") {
-	roomtaken = this.glyphs.getSymbolWidth(chartable["note"][-durlog])+2
+  } else {
+    sortPitch(elem);
+    
+    // determine averagepitch, minpitch, maxpitch and stem direction
+    var sum=0;
+    for (p=0, pp=elem.pitches.length; p<pp; p++) {
+      sum += elem.pitches[p].verticalPos;
+    }
+    elem.averagepitch = sum/elem.pitches.length;
+    elem.minpitch = elem.pitches[0].verticalPos;
+    elem.maxpitch = elem.pitches[elem.pitches.length-1].verticalPos;
+    var dir = (elem.averagepitch>=6) ? "down": "up";
+    if (this.stemdir) dir=this.stemdir;
+    
+    // determine elements of chords which should be shifted
+    for (p=(dir=="down")?elem.pitches.length-2:1; (dir=="down")?p>=0:p<elem.pitches.length; p=(dir=="down")?p-1:p+1) {
+      var prev = elem.pitches[(dir=="down")?p+1:p-1];
+      var curr = elem.pitches[p];
+      var delta = (dir=="down")?prev.pitch-curr.pitch:curr.pitch-prev.pitch;
+      if (delta<=1 && !prev.printer_shift) {
+	curr.printer_shift=(delta)?"different":"same";
+	if (dir=="down") {
+	  this.roomtaken = this.glyphs.getSymbolWidth(this.chartable["note"][-durlog])+2;
+	} else {
+	  dotshiftx = this.glyphs.getSymbolWidth(this.chartable["note"][-durlog])+2;
+	}
+      }
+    }
+    
+    
+    for (p=0; p<elem.pitches.length; p++) {
+      
+      if (!nostem) {
+	if ((dir=="down" && p!==0) || (dir=="up" && p!=pp-1)) { // not the stemmed elem of the chord
+	  flag = null;
+	} else {
+	  flag = this.chartable[(dir=="down")?"dflags":"uflags"][-durlog];
+	}
+	c = this.chartable["note"][-durlog];
       } else {
-	dotshift = this.glyphs.getSymbolWidth(chartable["note"][-durlog])+2
+	c="noteheads.quarter";
       }
+      
+      notehead = this.printNoteHead(abselem, c, elem.pitches[p], dir, 0, flag, dot, dotshiftx, 1);
+      if (notehead) abselem.addHead(notehead);
     }
+      
+    // draw stem from the furthest note to a pitch above/below the stemmed note
+    if (!nostem && durlog<=-1) {
+      p1 = (dir=="down") ? elem.minpitch-7 : elem.minpitch+1/3;
+      p2 = (dir=="down") ? elem.maxpitch-1/3 : elem.maxpitch+7;
+      dx = (dir=="down")?0:abselem.heads[0].w;
+      width = (dir=="down")?1:-1;
+      abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+    }
+    
   }
-
-  for (var p=0; p<elem.pitches.length; p++) {
-    var pitch = elem.pitches[p].pitch;
-    var extraflags = false;
-
-    var dot=0;
-    for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
-
-    var c = "";
-    if (elem.rest) {
-      pitch = 7;
-      switch(elem.rest.type) {
-      case "rest": c = chartable["rest"][-durlog]; elem.averagepitch=7; break; // TODO rests in bars is now broken
-      case "invisible":
-      case "spacer":
-	c="";
-      }
-    } else if (!nostem) {
-      if ((dir=="down" && p!=0) || (dir=="up" && p!=pp-1)) { // not the stemmed elem of the chord
-	extraflags = false;
-      } else {
-	extraflags = true;
-      }
-      c = chartable["note"][-durlog];
-    } else {
-      c="noteheads.quarter";
-    }
     
-    
-    
-    
-    if (c === undefined)
-      abselem.addChild(new ABCRelativeElement("chartable[??][" + (-durlog) + '] is undefined', 0, 0, 0, {type:"debug"}));
-    else if (c==="") {
-      notehead = new ABCRelativeElement(null, 0, 0, pitch);
-      abselem.addHead(notehead);
-    } else {
-      var headx = 0;
-      if (elem.pitches[p].printer_shift) {
-	adjust = (elem.pitches[p].printer_shift="same")?1:0;
-	headx = (dir=="down")?-this.glyphs.getSymbolWidth(c)+adjust:this.glyphs.getSymbolWidth(c)-adjust;
-      }
-      notehead = new ABCRelativeElement(c, headx, this.glyphs.getSymbolWidth(c), pitch);
-      abselem.addHead(notehead);
-      if (extraflags) {
-	var pos = pitch+((dir=="down")?-7:7);
-	var flag = chartable[(dir=="down")?"dflags":"uflags"][-durlog];
-	var xdelta = (dir=="down")?0:this.glyphs.getSymbolWidth(c)-0.6;
-	if (flag) abselem.addRight(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag), pos));
-      }
-      for (;dot>0;dot--) {
-	var dotadjust = (1-pitch%2); //TODO don't adjust when above or below stave?
-	abselem.addRight(new ABCRelativeElement("dots.dot", notehead.w+dotshift-2+5*dot, this.glyphs.getSymbolWidth("dots.dot"), pitch+dotadjust));
-      }
-    }
 
-    if (elem.pitches[p].accidental !== undefined && elem.pitches[p].accidental !== 'none') {
-      var symb; 
-      switch (elem.pitches[p].accidental) {
-      case "quartersharp":
-	symb = "accidentals.halfsharp";
-	break;
-      case "dblsharp":
-	symb = "accidentals.dblsharp";
-	break;
-      case "sharp":
-	symb = "accidentals.sharp";
-	break;
-      case "quarterflat":
-	symb = "accidentals.halfflat";
-	break;
-      case "flat":
-	symb = "accidentals.flat";
-	break;
-      case "dblflat":
-	symb = "accidentals.dblflat";
-	break;
-      case "natural":
-	symb = "accidentals.nat";
-      }
-      roomtaken += (this.glyphs.getSymbolWidth(symb)+2);
-      abselem.addExtra(new ABCRelativeElement(symb, -roomtaken, this.glyphs.getSymbolWidth(symb), pitch));
-    }
-
-    if (elem.pitches[p].endTie) {
-      if (this.ties[0]) {
-        this.ties[0].anchor2=notehead;
-        this.ties = this.ties.slice(1,this.ties.length);
-	  }
-    }
-
-    if (elem.pitches[p].startTie) {
-      var tie = new ABCTieElem(notehead, null, (dir=="down"));
-      this.ties[this.ties.length]=tie;
-      this.staff.addOther(tie);
-    }
-
-  }
-  
-  // draw stem from the furthest note to a pitch above/below the stemmed note
-  if (!nostem && durlog<=-1 && !elem.rest) {
-    var p1 = (dir=="down") ? elem.pitches[0].pitch-7 : elem.pitches[0].pitch+1/3;
-    var p2 = (dir=="down") ? elem.pitches[elem.pitches.length-1].pitch-1/3 : elem.pitches[elem.pitches.length-1].pitch+7;
-    var dx = (dir=="down")?0:abselem.heads[0].w;
-    var width = (dir=="down")?1:-1;
-    abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
-  }
 
   
   if (elem.lyric !== undefined) {
@@ -359,70 +306,76 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
     var gracescale = 3/5;
     var gracebeam = null;
     if (elem.gracenotes.length>1) {
-      gracebeam = new ABCBeamElem("grace");
+      gracebeam = new ABCBeamElem("grace",this.isBagpipes);
     }
-    for (var i=elem.gracenotes.length-1; i>=0; i--) {
-      var gracepitch = elem.gracenotes[i].pitch
-      roomtaken +=10; // hardcoded
-      var grace = new ABCRelativeElement("noteheads.quarter", -roomtaken, this.glyphs.getSymbolWidth("noteheads.quarter")*gracescale, gracepitch, {scalex:gracescale, scaley: gracescale});
+    for (i=elem.gracenotes.length-1; i>=0; i--) {
+      var gracepitch = elem.gracenotes[i].verticalPos;
+      this.roomtaken +=10; // hardcoded
+//       var grace = new ABCRelativeElement("noteheads.quarter", -this.roomtaken, this.glyphs.getSymbolWidth("noteheads.quarter")*gracescale, gracepitch, {scalex:gracescale, scaley: gracescale});
+
+      flag = (gracebeam) ? null : this.chartable["uflags"][(this.isBagpipes)?5:3]; 
+      grace = this.printNoteHead(abselem, "noteheads.quarter",  elem.gracenotes[i], "up", -this.roomtaken, flag, 0, 0, gracescale);
       abselem.addExtra(grace);
-      if (gracebeam) {
+
+      if (gracebeam) { // give the beam the necessary info
 	var pseudoabselem = {heads:[grace], 
-			     abcelem:{duration: 1/16, pitches:[{pitch:gracepitch}], averagepitch: gracepitch},
-			     duration:1/16};
+			     abcelem:{averagepitch: gracepitch, minpitch: gracepitch, maxpitch: gracepitch},
+			     duration:(this.isBagpipes)?1/32:1/16};
 	gracebeam.add(pseudoabselem);
+      } else { // draw the stem
+	p1 = gracepitch+1/5;
+	p2 = gracepitch+7*gracescale;
+	dx = grace.dx + grace.w;
+	width = -0.6;
+	abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
       }
       
+//       if (elem.gracenotes[i].accidental) {
+// 	var symb; 
+// 	switch (elem.gracenotes[i].accidental) {
+// 	case "quartersharp":
+// 	  symb = "accidentals.halfsharp";
+// 	  break;
+// 	case "dblsharp":
+// 	  symb = "accidentals.dblsharp";
+// 	  break;
+// 	case "sharp":
+// 	  symb = "accidentals.sharp";
+// 	  break;
+// 	case "quarterflat":
+// 	  symb = "accidentals.halfflat";
+// 	  break;
+// 	case "flat":
+// 	  symb = "accidentals.flat";
+// 	  break;
+// 	case "dblflat":
+// 	  symb = "accidentals.dblflat";
+// 	  break;
+// 	case "natural":
+// 	  symb = "accidentals.nat";
+// 	}
+// 	this.roomtaken += (this.glyphs.getSymbolWidth(symb)*gracescale+2);
+// 	abselem.addExtra(new ABCRelativeElement(symb, -this.roomtaken, 
+// 						this.glyphs.getSymbolWidth(symb)*gracescale, gracepitch, {scalex:gracescale, scaley: gracescale}));
+//       }
       
-      if (elem.gracenotes[i].accidental) {
-	var symb; 
-	switch (elem.gracenotes[i].accidental) {
-	case "quartersharp":
-	  symb = "accidentals.halfsharp";
-	  break;
-	case "dblsharp":
-	  symb = "accidentals.dblsharp";
-	  break;
-	case "sharp":
-	  symb = "accidentals.sharp";
-	  break;
-	case "quarterflat":
-	  symb = "accidentals.halfflat";
-	  break;
-	case "flat":
-	  symb = "accidentals.flat";
-	  break;
-	case "dblflat":
-	  symb = "accidentals.dblflat";
-	  break;
-	case "natural":
-	  symb = "accidentals.nat";
-	}
-	roomtaken += (this.glyphs.getSymbolWidth(symb)*gracescale+2);
-	abselem.addExtra(new ABCRelativeElement(symb, -roomtaken, 
-						this.glyphs.getSymbolWidth(symb)*gracescale, elem.gracenotes[i].pitch, {scalex:gracescale, scaley: gracescale}));
-      }
-      if (i==0) this.staff.addOther(new ABCTieElem(grace, notehead, false));
     }
+
+    if (!this.isBagpipes) this.staff.addOther(new ABCTieElem(grace, notehead, false, true));
+
     if (gracebeam) {
       this.staff.addOther(gracebeam);
     } else {
-      
-      var p1 = gracepitch+1/5;
-      var p2 = gracepitch+5;
-      var dx = grace.dx + grace.w;
-      var width = -0.6;
-      abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
-      var pos = p2;
-      var flag = chartable["uflags"][3];
-      var xdelta = grace.dx+grace.w+width;
-      abselem.addChild(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag)*gracescale, pos, {scalex:gracescale, scaley: gracescale}));
+      // var pos = p2;
+//       var flag = this.chartable["uflags"][3];
+//       var xdelta = grace.dx+grace.w+width;
+//       abselem.addChild(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag)*gracescale, pos, {scalex:gracescale, scaley: gracescale}));
       
     }
   }
   
   if (elem.decoration) {
-    this.printDecoration(elem.decoration, pitch, (notehead)?notehead.w:0, abselem, roomtaken);
+    this.printDecoration(elem.decoration, elem.maxpitch, (notehead)?notehead.w:0, abselem, this.roomtaken);
   }
   
   if (elem.barNumber) {
@@ -430,13 +383,13 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   }
   
   // ledger lines
-  for (i=elem.pitches[elem.pitches.length-1].pitch; i>11; i--) {
+  for (i=elem.maxpitch; i>11; i--) {
     if (i%2===0 && !elem.rest) {
       abselem.addChild(new ABCRelativeElement(null, -2, this.glyphs.getSymbolWidth(c)+4, i, {type:"ledger"}));
     }
   }
   
-  for (i=elem.pitches[0].pitch; i<1; i++) {
+  for (i=elem.minpitch; i<1; i++) {
     if (i%2===0 && !elem.rest) {
       abselem.addChild(new ABCRelativeElement(null, -2, this.glyphs.getSymbolWidth(c)+4, i, {type:"ledger"}));
     }
@@ -445,25 +398,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   if (elem.chord !== undefined) { //16 -> high E.
     abselem.addChild(new ABCRelativeElement(elem.chord.name, 0, 0, (elem.chord.position=="below")?-3:16, {type:"text"}));
   }
-
-  for (var i=elem.endSlur;i>0;i--) {
-    if (this.slurs.length==0) {
-      abselem.addChild(new ABCRelativeElement("missing begin slur", 0, 0, 0, {type:"debug"}));
-      continue;
-    }
-    this.slurs[this.slurs.length-1].anchor2=notehead;
-    this.slurs = this.slurs.slice(0,this.slurs.length-1);
-  }
-
-  for (var i=elem.startSlur;i>0;i--) {
-    var slur = new ABCTieElem(notehead, null, (dir=="down"));
-    this.slurs[this.slurs.length]=slur;
-    this.staff.addOther(slur);
-  }
-  
-
     
-
 
   if (elem.startTriplet) {
     this.triplet = new ABCTripletElem(elem.startTriplet, notehead, null, true); // above is opposite from case of slurs
@@ -478,17 +413,106 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   return abselem;
 };
 
+ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, flag, dot, dotshiftx, scale) {
+  var pitch = pitchelem.verticalPos;
+  var notehead;
+  var i;
+  if (c === undefined)
+    abselem.addChild(new ABCRelativeElement("pitch is undefined", 0, 0, 0, {type:"debug"}));
+  else if (c==="") {
+    notehead = new ABCRelativeElement(null, 0, 0, pitch);
+    abselem.addHead(notehead);
+  } else {
+    var shiftheadx = headx;
+    if (pitchelem.printer_shift) {
+      var adjust = (pitchelem.printer_shift=="same")?1:0;
+      shiftheadx = (dir=="down")?-this.glyphs.getSymbolWidth(c)*scale+adjust:this.glyphs.getSymbolWidth(c)*scale-adjust;
+    }
+    notehead = new ABCRelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, {scalex:scale, scaley: scale});
+    if (flag) {
+      var pos = pitch+((dir=="down")?-7:7)*scale;
+      var xdelta = (dir=="down")?headx:headx+notehead.w-0.6;
+      abselem.addRight(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));
+    }
+    for (;dot>0;dot--) {
+      var dotadjusty = (1-pitch%2); //TODO don't adjust when above or below stave?
+      abselem.addRight(new ABCRelativeElement("dots.dot", notehead.w+dotshiftx-2+5*dot, this.glyphs.getSymbolWidth("dots.dot"), pitch+dotadjusty));
+    }
+  }
+  
+  if (pitchelem.accidental) {
+    var symb; 
+    switch (pitchelem.accidental) {
+    case "quartersharp":
+      symb = "accidentals.halfsharp";
+	break;
+    case "dblsharp":
+      symb = "accidentals.dblsharp";
+      break;
+    case "sharp":
+      symb = "accidentals.sharp";
+      break;
+    case "quarterflat":
+      symb = "accidentals.halfflat";
+      break;
+    case "flat":
+      symb = "accidentals.flat";
+      break;
+    case "dblflat":
+      symb = "accidentals.dblflat";
+      break;
+    case "natural":
+      symb = "accidentals.nat";
+    }
+    this.roomtaken += (this.glyphs.getSymbolWidth(symb)*scale+2);
+    abselem.addExtra(new ABCRelativeElement(symb, -this.roomtaken, this.glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
+  }
+  
+  if (pitchelem.endTie) {
+    if (this.ties[0]) {
+      this.ties[0].anchor2=notehead;
+      this.ties = this.ties.slice(1,this.ties.length);
+    }
+  }
+  
+  if (pitchelem.startTie) {
+    var tie = new ABCTieElem(notehead, null, (dir=="down"));
+    this.ties[this.ties.length]=tie;
+    this.staff.addOther(tie);
+  }
+
+  for (i=pitchelem.endSlur;i>0;i--) {
+    if (this.slurs.length===0) {
+      abselem.addChild(new ABCRelativeElement("missing begin slur", 0, 0, 0, {type:"debug"}));
+      continue;
+    }
+    this.slurs[this.slurs.length-1].anchor2=notehead;
+    this.slurs = this.slurs.slice(0,this.slurs.length-1);
+  }
+
+  for (i=pitchelem.startSlur;i>0;i--) {
+    var slur = new ABCTieElem(notehead, null, (dir=="down"));
+    this.slurs[this.slurs.length]=slur;
+    this.staff.addOther(slur);
+  }
+  
+  return notehead;
+
+};
+
+
 ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem, roomtaken) {
   var dec;
   var unknowndecs = [];
   var yslot = (pitch>9) ? pitch+3 : 12;
   var ypos;
+  var i;
   roomtaken = roomtaken || 0;
   (pitch===5) && (yslot=14); // avoid upstem of the A
 
-  for (var i=0;i<decoration.length; i++) { // treat staccato first (may need to shift other markers) //TODO, same with tenuto?
+  for (i=0;i<decoration.length; i++) { // treat staccato first (may need to shift other markers) //TODO, same with tenuto?
     if (decoration[i]==="staccato") {
-      ypos = ((this.stemdir=="down" || pitch>=6) && !this.stemdir=="up") ? pitch+2:pitch-2;
+      ypos = ((this.stemdir=="down" || pitch>=6) && this.stemdir!=="up") ? pitch+2:pitch-2;
       (pitch===4) && ypos--; // don't place on a stave line
       ((pitch===6) || (pitch===8)) && ypos++;
       (pitch>9) && yslot++; // take up some room of those that are above
@@ -500,15 +524,15 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
     }
     if (decoration[i]==="slide" && abselem.heads[0]) {
       ypos = abselem.heads[0].pitch;
-      blank1 = new ABCRelativeElement("", -roomtaken-15, 0, ypos-1);
-      blank2 = new ABCRelativeElement("", -roomtaken-5, 0, ypos+1);
+      var blank1 = new ABCRelativeElement("", -roomtaken-15, 0, ypos-1);
+      var blank2 = new ABCRelativeElement("", -roomtaken-5, 0, ypos+1);
       abselem.addChild(blank1);
       abselem.addChild(blank2);
-      this.staff.addOther(new ABCTieElem(blank1, blank2, false))
+      this.staff.addOther(new ABCTieElem(blank1, blank2, false));
     }
   }
 
-  for (var i=0;i<decoration.length; i++) {
+  for (i=0;i<decoration.length; i++) {
     switch(decoration[i]) {
     case "trill":dec="scripts.trill";break;
     case "roll": dec="scripts.roll"; break;
@@ -552,7 +576,7 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
     abselem.addChild(new ABCRelativeElement(dec, deltax, this.glyphs.getSymbolWidth(dec), ypos));
   }
   (unknowndecs.length>0) && abselem.addChild(new ABCRelativeElement(unknowndecs.join(','), 0, 0, 0, {type:"debug"}));
-}
+};
 
 ABCLayout.prototype.printBarLine = function (elem) {
 // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
@@ -577,7 +601,6 @@ ABCLayout.prototype.printBarLine = function (elem) {
   if (firstthin) {
     anchor = new ABCRelativeElement(null, dx, 1, 2, {"type": "stem", "pitch2":10, linewidth:0.6});
     abselem.addRight(anchor);
-    symbscale = 1;
   }
 
   if (elem.decoration) {
@@ -629,8 +652,8 @@ ABCLayout.prototype.printClef = function(elem) {
   case "bass": clef="clefs.F"; pitch=8; break;
   default: abselem.addChild(new ABCRelativeElement("clef="+elem.type, 0, 0, 0, {type:"debug"}));
   }    
-  if (elem.pitch) {
-    pitch = elem.pitch;
+  if (elem.verticalPos) {
+    pitch = elem.verticalPos;
   }
 
   
@@ -641,22 +664,11 @@ ABCLayout.prototype.printClef = function(elem) {
 ABCLayout.prototype.printKeySignature = function(elem) {
   var abselem = new ABCAbsoluteElement(elem,0,10);
   var dx = 0;
-  if (elem.regularKey) {
-	  var FLATS = [6,9,5,8,4,7];
-	  var SHARPS = [10,7,11,8,5,9];
-	  var accidentals = (elem.regularKey.acc !== "sharp") ? FLATS : SHARPS;
-	  var number = elem.regularKey.num;
-	  var symbol = (elem.regularKey.acc !== "sharp") ? "accidentals.flat" : "accidentals.sharp";
-	  for (var i=0; i<number; i++) {
-		abselem.addRight(new ABCRelativeElement(symbol, dx, this.glyphs.getSymbolWidth(symbol), accidentals[i]));
-		dx += this.glyphs.getSymbolWidth(symbol)+2;
-	  }
-  }
   if (elem.extraAccidentals) {
 	  elem.extraAccidentals.each(function(acc) {
 		var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
-		var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
-		abselem.addRight(new ABCRelativeElement(symbol, dx, this.glyphs.getSymbolWidth(symbol), notes[acc.note]));
+		//var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
+		abselem.addRight(new ABCRelativeElement(symbol, dx, this.glyphs.getSymbolWidth(symbol), acc.verticalPos));
 		dx += this.glyphs.getSymbolWidth(symbol)+2;
 	  }, this);
   }

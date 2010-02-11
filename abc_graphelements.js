@@ -14,8 +14,8 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global ABCPrinter */
-/*extern  ABCVoiceElement ABCRelativeElement ABCAbsoluteElement ABCBeamElem ABCEndingElem ABCTripletElem ABCTieElem */
+/*global ABCPrinter, sprintf, AbcSpacing, getDurlog */
+/*extern  ABCVoiceElement ABCRelativeElement ABCAbsoluteElement ABCBeamElem ABCEndingElem ABCTripletElem ABCTieElem ABCStaffGroupElement*/
 
 function ABCStaffGroupElement() {
   this.voices = [];
@@ -35,7 +35,7 @@ ABCStaffGroupElement.prototype.finished = function() {
     if (!this.voices[i].layoutEnded()) return false;
   }
   return true;
-}
+};
 
 ABCStaffGroupElement.prototype.layout = function(spacing) {
   var x = 0;
@@ -48,7 +48,7 @@ ABCStaffGroupElement.prototype.layout = function(spacing) {
     var childx=x;
     var cont=true;
     // find smallest duration to be laid out among candidates across voices
-    var currentduration= null; 
+    currentduration= null; 
     for (var i=0;i<this.voices.length;i++) {
       if (!this.voices[i].layoutEnded() && (!currentduration || this.voices[i].durationindex<currentduration)) currentduration=this.voices[i].durationindex;
     }
@@ -122,7 +122,7 @@ ABCVoiceElement.prototype.addInvisibleChild = function (child) {
 
 ABCVoiceElement.prototype.addOther = function (child) {
   if (child instanceof ABCBeamElem) {
-    this.beams.push(child)
+    this.beams.push(child);
   } else {
     this.otherchildren.push(child);
   }
@@ -136,7 +136,7 @@ ABCVoiceElement.prototype.updateIndices = function () {
 }; 
 
 ABCVoiceElement.prototype.layoutEnded = function () {
-  return !(this.i<this.children.length)
+  return (this.i>=this.children.length);
 };
 
 ABCVoiceElement.prototype.beginLayout = function () {
@@ -173,7 +173,7 @@ ABCVoiceElement.prototype.layoutOneItem = function (x, childx, spacing) {
   this.w = x;
   this.nextx = x;
   return child.x;
-}
+};
 
 ABCVoiceElement.prototype.draw = function (printer) {
   var width = this.w-1;
@@ -255,11 +255,11 @@ ABCAbsoluteElement.prototype.draw = function (printer) {
 
 ABCAbsoluteElement.prototype.highlight = function () {
   this.elemset.attr({fill:"#ff0000"});
-}
+};
 
 ABCAbsoluteElement.prototype.unhighlight = function () {
   this.elemset.attr({fill:"#000000"});
-}
+};
 
 function ABCRelativeElement(c, dx, w, pitch, opt) {
   opt = opt || {};
@@ -320,19 +320,20 @@ ABCEndingElem.prototype.draw = function (printer, linestartx, lineendx) {
   printer.paper.path(sprintf("M %f %f L %f %f",
 			    linestartx, printer.y, lineendx, printer.y)).attr({stroke:"#000000"});
   
-}
+};
 
-function ABCTieElem (anchor1, anchor2, above) {
+function ABCTieElem (anchor1, anchor2, above, force) {
   this.anchor1 = anchor1; // must have a .x and a .pitch, and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
   this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
   this.above = above; // true if the arc curves above
+  this.force = force;
 }
 
 ABCTieElem.prototype.draw = function (printer, linestartx, lineendx) {
   // TODO end and beginning of line
 
   if (this.anchor1 && this.anchor2) {
-    if (this.anchor1.parent.beam && this.anchor2.parent.beam && 
+    if (!this.force && this.anchor1.parent.beam && this.anchor2.parent.beam && 
 	this.anchor1.parent.beam.asc===this.anchor2.parent.beam.asc) {
       this.above = !this.anchor1.parent.beam.asc;
     }
@@ -345,7 +346,7 @@ function ABCTripletElem (number, anchor1, anchor2, above) {
   this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
   this.above = above;
   this.number = number;
-};
+}
 
 ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
   // TODO end and beginning of line
@@ -358,7 +359,7 @@ ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
       this.above = beam.asc;
       ypos = beam.pos;     
     } else {
-      this.drawLine(printer,printer.calcY(ypos))
+      this.drawLine(printer,printer.calcY(ypos));
     }
     var xsum = this.anchor1.x+this.anchor2.x;
     var ydelta = 0;
@@ -380,11 +381,11 @@ ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
 };
 
 ABCTripletElem.prototype.drawLine = function (printer, y) {
-  linestartx = this.anchor1.x;
+  var linestartx = this.anchor1.x;
   printer.paper.path(sprintf("M %f %f L %f %f",
 			     linestartx, y, linestartx, y+5)).attr({stroke:"#000000"});
   
-  lineendx = this.anchor2.x+this.anchor2.w;
+  var lineendx = this.anchor2.x+this.anchor2.w;
   printer.paper.path(sprintf("M %f %f L %f %f",
 			     lineendx, y, lineendx, y+5)).attr({stroke:"#000000"});
   
@@ -396,26 +397,29 @@ ABCTripletElem.prototype.drawLine = function (printer, y) {
 
 };
 
-function ABCBeamElem (type) {
+function ABCBeamElem (type, flat) {
+  this.isflat = (flat);
   this.isgrace = (type && type==="grace");
   this.forceup = (type && type==="up");
   this.forcedown = (type && type==="down");
   this.elems = []; // all the ABCAbsoluteElements
   this.total = 0;
+  this.dy = (this.asc)?AbcSpacing.STEP:-AbcSpacing.STEP;
+  if (this.isgrace) this.dy = this.dy*0.4;
   this.allrests = true;
 }
 
 ABCBeamElem.prototype.add = function(abselem) {
   this.allrests = this.allrests && abselem.abcelem.rest;
   abselem.beam = this;
-  this.elems[this.elems.length] = abselem;
+  this.elems.push(abselem);
   var pitch = abselem.abcelem.averagepitch;
   this.total += pitch; // TODO CHORD (get pitches from abselem.heads)
-  if (!this.min || abselem.abcelem.pitches[0].pitch<this.min) {
-    this.min = abselem.abcelem.pitches[0].pitch;
+  if (!this.min || abselem.abcelem.minpitch<this.min) {
+    this.min = abselem.abcelem.minpitch;
   }
-  if (!this.max || abselem.abcelem.pitches[abselem.abcelem.pitches.length-1].pitch>this.max) {
-    this.max = abselem.abcelem.pitches[abselem.abcelem.pitches.length-1].pitch;
+  if (!this.max || abselem.abcelem.maxpitch>this.max) {
+    this.max = abselem.abcelem.maxpitch;
   }
 };
 
@@ -434,7 +438,7 @@ ABCBeamElem.prototype.draw = function(printer) {
 };
 
 
-ABCBeamElem.prototype.drawBeam = function(paper,basey) {
+ABCBeamElem.prototype.drawBeam = function(printer) {
 
   var average = this.average();
   var barpos = (this.isgrace)? 5:7;
@@ -442,6 +446,7 @@ ABCBeamElem.prototype.drawBeam = function(paper,basey) {
   this.asc = (this.forceup || this.isgrace || average<6) && (!this.forcedown); // hardcoded 6 is B
   this.pos = Math.round(this.asc ? Math.max(average+barpos,this.max+barminpos) : Math.min(average-barpos,this.min-barminpos));
   var slant = this.elems[0].abcelem.averagepitch-this.elems[this.elems.length-1].abcelem.averagepitch;
+  if (this.isflat) slant=0;
   var maxslant = this.elems.length/2;
 
   if (slant>maxslant) slant = maxslant;
@@ -449,15 +454,13 @@ ABCBeamElem.prototype.drawBeam = function(paper,basey) {
   this.starty = printer.calcY(this.pos+Math.floor(slant/2));
   this.endy = printer.calcY(this.pos+Math.floor(-slant/2));
   this.startx = this.elems[0].heads[0].x;
-  if(this.asc) this.startx+=this.elems[0].heads[0].w;
+  if(this.asc) this.startx+=this.elems[0].heads[0].w-0.6;
   this.endx = this.elems[this.elems.length-1].heads[0].x;
-  if(this.asc) this.endx+=this.elems[this.elems.length-1].heads[0].w;
+  if(this.asc) this.endx+=this.elems[this.elems.length-1].heads[0].w-0.6;
 
-  var dy = (this.asc)?AbcSpacing.STEP:-AbcSpacing.STEP;
-  if (this.isgrace) dy = dy/2;
 
   printer.paper.path("M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
-	     "L"+this.endx+" "+(this.endy+dy) +" L"+this.startx+" "+(this.starty+dy)+"z").attr({fill: "#000000"});
+	     "L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z").attr({fill: "#000000"});
 };
 
 ABCBeamElem.prototype.drawStems = function(printer) {
@@ -469,7 +472,7 @@ ABCBeamElem.prototype.drawStems = function(printer) {
     var ovaldelta = (this.isgrace)?1/3:1/5;
     var pitch = furthesthead.pitch + ((this.asc) ? ovaldelta : -ovaldelta);
     var y = printer.calcY(pitch);
-    var x = furthesthead.x + ((this.asc) ? furthesthead.w : 0);
+    var x = furthesthead.x + ((this.asc) ? furthesthead.w: 0);
     var bary=this.getBarYAt(x);
     var dx = (this.asc) ? -0.6 : 0.6;
     printer.printStem(x,dx,y,bary);
@@ -480,7 +483,8 @@ ABCBeamElem.prototype.drawStems = function(printer) {
       if (auxbeams[-4-durlog]) {
 	auxbeams[-4-durlog].single = false;
       } else {
-	auxbeams[-4-durlog] = {x:x, y:bary+sy*(-4-durlog+1), durlog:durlog, single:true};
+	auxbeams[-4-durlog] = {x:x+((this.asc)?-0.6:0), y:bary+sy*(-4-durlog+1), 
+			       durlog:durlog, single:true};
       }
     }
     
@@ -489,15 +493,14 @@ ABCBeamElem.prototype.drawStems = function(printer) {
 	
 	var auxbeamendx = x;
 	var auxbeamendy = bary + sy*(j+1);
-	var dy = (this.asc) ? AbcSpacing.STEP: -AbcSpacing.STEP;
-	if (this.isgrace) dy = dy/2;
+
 
 	if (auxbeams[j].single) {
 	  auxbeamendx = (i===0) ? x+5 : x-5;
 	  auxbeamendy = this.getBarYAt(auxbeamendx) + sy*(j+1);
 	}
 	printer.paper.path("M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
-		   "L"+auxbeamendx+" "+(auxbeamendy+dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+dy)+"z").attr({fill: "#000000"});
+		   "L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z").attr({fill: "#000000"});
 	auxbeams = auxbeams.slice(0,j);
       }
     }
