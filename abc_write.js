@@ -211,9 +211,13 @@ ABCPrinter.prototype.printABC = function(abctune) {
     var abcline = abctune.lines[line];
     if (abcline.staff) {
       var staffgroup = this.layouter.printABCLine(abcline.staff, this.y);
-      staffgroup.layout(this.space);
-      var prop = Math.min(1,this.width/staffgroup.w);
-      staffgroup.layout(this.space*prop);
+      var newspace = this.space;
+      for (var it=0;it<3;it++) {
+	staffgroup.layout(newspace);
+	var relspace = staffgroup.spacingunits*newspace;
+	var constspace = staffgroup.w-relspace;
+	newspace = Math.min(this.space,(this.width-constspace)/staffgroup.spacingunits);
+      }
       staffgroup.draw(this);
       this.staffgroups[this.staffgroups.length] = staffgroup;
       this.y = this.layouter.y;

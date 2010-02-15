@@ -74,26 +74,24 @@ ABCLayout.prototype.printABCStaff = function(abcstaff) {
   var header = "";
   if (abcstaff.bracket) header += "bracket "+abcstaff.bracket+" ";
   if (abcstaff.brace) header += "brace "+abcstaff.brace+" ";
-  if (abcstaff.connectBarLines) header += "bar "+abcstaff.connectBarLines+" ";
   if (abcstaff.title) {
     abcstaff.title.each(function(t) { header += t; });
   }
   
   for (var v = 0; v < abcstaff.voices.length; v++) {
-    this.staff = new ABCVoiceElement(this.y);
+    this.voice = new ABCVoiceElement(this.y);
     if (v===0) {
-      this.staff.header=header;
-      this.staff.addChild(this.printClef(abcstaff.clef));
-      this.staff.addChild(this.printKeySignature(abcstaff.key));
-      if (abcstaff.meter)
-	this.staff.addChild(this.printTimeSignature(abcstaff.meter));
+      this.voice.header=header;
+      this.voice.barfrom = (abcstaff.connectBarLines==="start" || abcstaff.connectBarLines==="continue");
+      this.voice.barto = (abcstaff.connectBarLines==="continue" || abcstaff.connectBarLines==="end");
     } else {
-      this.staff.addInvisibleChild(this.printClef(abcstaff.clef));
-      this.staff.addInvisibleChild(this.printKeySignature(abcstaff.key));
-      if (abcstaff.meter)
-	this.staff.addInvisibleChild(this.printTimeSignature(abcstaff.meter));
+      this.voice.duplicate = true; // barlines and other duplicate info need not be printed
     }
-    this.staffgroup.addVoice(this.printABCVoice(abcstaff.voices[v]));
+    this.voice.addChild(this.printClef(abcstaff.clef));
+    this.voice.addChild(this.printKeySignature(abcstaff.key));
+    if (abcstaff.meter) this.voice.addChild(this.printTimeSignature(abcstaff.meter));
+    this.printABCVoice(abcstaff.voices[v]);
+    this.staffgroup.addVoice(this.voice);
   }
  
 };
@@ -103,17 +101,16 @@ ABCLayout.prototype.printABCVoice = function(abcline) {
   this.abcline = abcline;
   if (this.partstartelem) {
     this.partstartelem = new ABCEndingElem("", null, null);
-    this.staff.addOther(this.partstartelem);
+    this.voice.addOther(this.partstartelem);
   }
   this.slurs = [];
   this.ties = [];
   for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
     var abselems = this.printABCElement();
     for (var i=0; i<abselems.length; i++) {
-      this.staff.addChild(abselems[i]);
+      this.voice.addChild(abselems[i]);
     }
   }
-  return this.staff;
 };
 
 
@@ -127,15 +124,19 @@ ABCLayout.prototype.printABCElement = function() {
     break;
   case "bar":
     elemset[0] = this.printBarLine(elem);
+    if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "meter":
     elemset[0] = this.printTimeSignature(elem);
+    if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "clef":
     elemset[0] = this.printClef(elem);
+    if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "key":
     elemset[0] = this.printKeySignature(elem);
+    if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "stem":
     this.stemdir=elem.direction;
@@ -163,7 +164,7 @@ ABCLayout.prototype.printBeam = function() {
       }
       this.pos++;
     }
-    this.staff.addOther(beamelem);
+    this.voice.addOther(beamelem);
   } else if (this.getNextElem() && this.getNextElem().el_type=="note" && !this.getElem().end_beam) {
     var beamelem = new ABCBeamElem(this.stemdir);
 
@@ -176,7 +177,7 @@ ABCLayout.prototype.printBeam = function() {
       }
       this.pos++;
     }
-    this.staff.addOther(beamelem);
+    this.voice.addOther(beamelem);
   } else {
     abselemset[0] = this.printNote(this.getElem());
   }
@@ -290,9 +291,6 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
     }
     
   }
-    
-
-
   
   if (elem.lyric !== undefined) {
 	  var lyricStr = "";
@@ -330,48 +328,14 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 	abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
       }
       
-//       if (elem.gracenotes[i].accidental) {
-// 	var symb; 
-// 	switch (elem.gracenotes[i].accidental) {
-// 	case "quartersharp":
-// 	  symb = "accidentals.halfsharp";
-// 	  break;
-// 	case "dblsharp":
-// 	  symb = "accidentals.dblsharp";
-// 	  break;
-// 	case "sharp":
-// 	  symb = "accidentals.sharp";
-// 	  break;
-// 	case "quarterflat":
-// 	  symb = "accidentals.halfflat";
-// 	  break;
-// 	case "flat":
-// 	  symb = "accidentals.flat";
-// 	  break;
-// 	case "dblflat":
-// 	  symb = "accidentals.dblflat";
-// 	  break;
-// 	case "natural":
-// 	  symb = "accidentals.nat";
-// 	}
-// 	this.roomtaken += (this.glyphs.getSymbolWidth(symb)*gracescale+2);
-// 	abselem.addExtra(new ABCRelativeElement(symb, -this.roomtaken, 
-// 						this.glyphs.getSymbolWidth(symb)*gracescale, gracepitch, {scalex:gracescale, scaley: gracescale}));
-//       }
       
     }
 
-    if (!this.isBagpipes) this.staff.addOther(new ABCTieElem(grace, notehead, false, true));
+    if (!this.isBagpipes) this.voice.addOther(new ABCTieElem(grace, notehead, false, true));
 
     if (gracebeam) {
-      this.staff.addOther(gracebeam);
-    } else {
-      // var pos = p2;
-//       var flag = this.chartable["uflags"][3];
-//       var xdelta = grace.dx+grace.w+width;
-//       abselem.addChild(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag)*gracescale, pos, {scalex:gracescale, scaley: gracescale}));
-      
-    }
+      this.voice.addOther(gracebeam);
+    } 
   }
   
   if (elem.decoration) {
@@ -402,7 +366,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 
   if (elem.startTriplet) {
     this.triplet = new ABCTripletElem(elem.startTriplet, notehead, null, true); // above is opposite from case of slurs
-    this.staff.addOther(this.triplet);
+    this.voice.addOther(this.triplet);
   }
 
   if (elem.endTriplet) {
@@ -478,7 +442,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
   if (pitchelem.startTie) {
     var tie = new ABCTieElem(notehead, null, (dir=="down"));
     this.ties[this.ties.length]=tie;
-    this.staff.addOther(tie);
+    this.voice.addOther(tie);
   }
 
   for (i=pitchelem.endSlur;i>0;i--) {
@@ -493,7 +457,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
   for (i=pitchelem.startSlur;i>0;i--) {
     var slur = new ABCTieElem(notehead, null, (dir=="down"));
     this.slurs[this.slurs.length]=slur;
-    this.staff.addOther(slur);
+    this.voice.addOther(slur);
   }
   
   return notehead;
@@ -528,7 +492,7 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
       var blank2 = new ABCRelativeElement("", -roomtaken-5, 0, ypos+1);
       abselem.addChild(blank1);
       abselem.addChild(blank2);
-      this.staff.addOther(new ABCTieElem(blank1, blank2, false));
+      this.voice.addOther(new ABCTieElem(blank1, blank2, false));
     }
   }
 
@@ -599,7 +563,7 @@ ABCLayout.prototype.printBarLine = function (elem) {
   }
 
   if (firstthin) {
-    anchor = new ABCRelativeElement(null, dx, 1, 2, {"type": "stem", "pitch2":10, linewidth:0.6});
+    anchor = new ABCRelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":10, linewidth:0.6});
     abselem.addRight(anchor);
   }
 
@@ -609,7 +573,7 @@ ABCLayout.prototype.printBarLine = function (elem) {
 
   if (thick) {
     dx+=6; //3 hardcoded;    
-    anchor = new ABCRelativeElement(null, dx, 4, 2, {"type": "stem", "pitch2":10, scalex:6, linewidth:0.6});
+    anchor = new ABCRelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":10, scalex:6, linewidth:0.6});
     abselem.addRight(anchor);
     dx+=4;
   }
@@ -622,7 +586,7 @@ ABCLayout.prototype.printBarLine = function (elem) {
 
   if (secondthin) {
     dx+=3; //3 hardcoded;
-    anchor = new ABCRelativeElement(null, dx, 1, 2, {"type": "stem", "pitch2":10, linewidth:0.6});
+    anchor = new ABCRelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":10, linewidth:0.6});
     abselem.addRight(anchor); // 3 is hardcoded
   }
 
@@ -634,7 +598,7 @@ ABCLayout.prototype.printBarLine = function (elem) {
 
   if (elem.ending) {
     this.partstartelem = new ABCEndingElem(elem.ending, anchor, null);
-    this.staff.addOther(this.partstartelem);
+    this.voice.addOther(this.partstartelem);
   } 
 
   return abselem;	

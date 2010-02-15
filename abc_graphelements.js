@@ -38,6 +38,7 @@ ABCStaffGroupElement.prototype.finished = function() {
 };
 
 ABCStaffGroupElement.prototype.layout = function(spacing) {
+  this.spacingunits = 0;
   var x = 0;
   var currentduration = 0;
   for (var i=0;i<this.voices.length;i++) {
@@ -47,45 +48,73 @@ ABCStaffGroupElement.prototype.layout = function(spacing) {
   while (!this.finished()) {
     var childx=x;
     var cont=true;
-    // find smallest duration to be laid out among candidates across voices
+    // find first duration level to be laid out among candidates across voices
     currentduration= null; 
     for (var i=0;i<this.voices.length;i++) {
       if (!this.voices[i].layoutEnded() && (!currentduration || this.voices[i].durationindex<currentduration)) currentduration=this.voices[i].durationindex;
     }
 
-    // among the current duration level find the one which needs starting furthest right
+    // isolate voices at current duration level
+    var currentvoices = [];
+    var othervoices = [];
     for (var i=0;i<this.voices.length;i++) {
-      if (this.voices[i].durationindex != currentduration) continue;
-      if (this.voices[i].nextx>x) x=this.voices[i].nextx;
-    }
-    while (cont) {
-      cont = false;
-      for (var i=0;i<this.voices.length;i++) {
-	if (this.voices[i].durationindex != currentduration) continue;
-	var voicechildx = this.voices[i].layoutOneItem(x,childx,spacing);
-	if (voicechildx>childx) {
-	  childx = voicechildx;
-	  cont = true; //TODO not optimised for single cases
-	} 
+      if (this.voices[i].durationindex != currentduration) {
+	othervoices.push(this.voices[i]);
+      } else {
+	currentvoices.push(this.voices[i]);
       }
     }
-    for (var i=0;i<this.voices.length;i++) {
-      var voice = this.voices[i]; 
-      if (voice.durationindex != currentduration) continue;
+
+    // among the current duration level find the one which needs starting furthest right
+    var spacingunit = 0;
+    for (var i=0;i<currentvoices.length;i++) {
+      if (currentvoices[i].nextx>x) {
+	x=currentvoices[i].nextx;
+	spacingunit=currentvoices[i].spacingunits
+      }
+    }
+    this.spacingunits+=spacingunit;
+    
+    // remove the value of already counted spacing units
+    for (var i=0;i<othervoices.length;i++) {
+      if (othervoices[i].spacingunits-=spacingunit);
+    }
+
+    for (var i=0;i<currentvoices.length;i++) {
+      var voicechildx = currentvoices[i].layoutOneItem(x,spacing);
+      var dx = voicechildx-x;
+      if (dx>0) {
+	x = voicechildx; //update x
+	for (var j=0;j<i;j++) { // shift over all previously laid out elements
+	  currentvoices[j].shiftRight(dx);
+	}
+      } 
+    }
+    
+    // update indexes of currently laid out elems
+    for (var i=0;i<currentvoices.length;i++) {
+      var voice = currentvoices[i]; 
       voice.updateIndices();
     }
   }
-  // increment to the greatest x
-  for (var i=0;i<this.voices.length;i++) {
-    if (this.voices[i].nextx>x) x=this.voices[i].nextx;
-  }
 
+
+  // find the greatest remaining x as a base for the width
+  for (var i=0;i<this.voices.length;i++) {
+    if (this.voices[i].nextx>x) {
+      x=this.voices[i].nextx;
+      spacingunit=currentvoices[i].spacingunits
+    }
+  }
+  this.spacingunits+=spacingunit;
   this.w = x;
 };
 
 ABCStaffGroupElement.prototype.draw = function (printer) {
+  var bartop = 0;
   for (var i=0;i<this.voices.length;i++) {
-    this.voices[i].draw(printer);
+    this.voices[i].draw(printer, bartop);
+    if (this.voices[i].barfrom) bartop = this.voices[i].barbottom;
   }
 
   if (this.staffs.length>1) {
@@ -109,15 +138,11 @@ function ABCVoiceElement(y) {
   this.otherchildren = []; // ties, slurs, triplets
   this.w = 0;
   this.y = y;
+  this.duplicate = false;
 }
 
 ABCVoiceElement.prototype.addChild = function (child) {
   this.children[this.children.length] = child;
-};
-
-ABCVoiceElement.prototype.addInvisibleChild = function (child) {
-  child.invisible = true;
-  this.addChild(child);
 };
 
 ABCVoiceElement.prototype.addOther = function (child) {
@@ -132,6 +157,7 @@ ABCVoiceElement.prototype.updateIndices = function () {
   if (!this.layoutEnded()) {
     this.durationindex += this.children[this.i].duration;
     this.i++;
+    this.minx = this.nextminx;
   }
 }; 
 
@@ -143,47 +169,55 @@ ABCVoiceElement.prototype.beginLayout = function () {
   this.i=0;
   this.durationindex=0;
   this.ii=this.children.length;
-  this.extraroom=0;
-  this.durationroom=0;
-  this.room=0;
-  this.nextx=0;
+  this.minx=0; // furthest left to where negatively positioned elements are allowed to go
+  this.nextminx=0;
+  this.nextx=0; // x position where the next element of this voice should be placed assuming no other voices
+  this.spacingunits=0; // units of spacing used in current iteration due to duration
 };
 
-ABCVoiceElement.prototype.layoutOneItem = function (x, childx, spacing) {
+// Try to layout the element at index this.i
+// x - position to try to layout the element at
+// spacing - base spacing
+ABCVoiceElement.prototype.layoutOneItem = function (x, spacing) {
   var child = this.children[this.i];
-  if (!child) return {x: 0, childx: 0};
-  var er = child.getExtraWidth() - this.room;
-  if (er>0) {
-    x+=child.getExtraWidth();
-    this.extraroom+=er;
+  if (!child) return 0;
+  var er = x - this.minx; // available extrawidth to the left
+  if (er<child.getExtraWidth()) { // shift right by needed amound
+    x+=child.getExtraWidth()-er;
   }
-  if (x<childx) x=childx;
   child.x=x;
-  x+=(spacing*Math.sqrt(child.duration*8));
-  er = child.x+child.getMinWidth() - x;
-  if (er > 0) {
-    x = child.x+child.getMinWidth();
-    (this.i!=this.ii-1) && (x+=child.minspacing);
-    this.extraroom+=er;
-    this.room = 0;
+  x+=(spacing*Math.sqrt(child.duration*8)); // add necessary duration space
+  this.nextminx = child.x+child.getMinWidth(); // add necessary layout space
+  (this.i!=this.ii-1) && (this.nextminx+=child.minspacing); // addminimumspacing except on last elem
+  if (this.nextminx > x) {
+    x = this.nextminx;
+    this.spacingunits=0;
   } else {
-    this.room = -er;
-    this.durationroom+=(spacing*Math.sqrt(child.duration*8));
+    this.spacingunits=Math.sqrt(child.duration*8);
   }
-  this.w = x;
   this.nextx = x;
   return child.x;
 };
 
-ABCVoiceElement.prototype.draw = function (printer) {
+ABCVoiceElement.prototype.shiftRight = function (dx) {
+  var child = this.children[this.i];
+  if (!child) return;
+  child.x+=dx;
+  this.nextminx+=dx;
+  this.nextx+=dx;
+}
+
+ABCVoiceElement.prototype.draw = function (printer, bartop) {
   var width = this.w-1;
   printer.setY(this.y);
+  if (this.barfrom) this.barbottom = printer.calcY(2);
+  if (!this.barto) bartop = null;
 
   this.children.each(function(child) {
-      child.draw(printer,10,width);
+      child.draw(printer, bartop);
     });
   this.beams.each(function(beam) {
-      beam.draw(printer,10,width);
+      beam.draw(printer,10,width); // beams must be drawn first for proper printing of triplets, slurs and ties.
     });
   this.otherchildren.each(function(child) {
       child.draw(printer,10,width);
@@ -208,6 +242,7 @@ function ABCAbsoluteElement(abcelem, duration, minspacing) { // spacing which mu
   this.decs = [];
   this.w = 0;
   this.right = [];
+  this.invisible = false;
 }
 
 ABCAbsoluteElement.prototype.getMinWidth = function () { // absolute space taken to the right of the note
@@ -241,11 +276,11 @@ ABCAbsoluteElement.prototype.addChild = function (child) {
   this.children[this.children.length] = child;
 };
 
-ABCAbsoluteElement.prototype.draw = function (printer) {
+ABCAbsoluteElement.prototype.draw = function (printer, bartop) {
   this.elemset = printer.paper.set();
   if (this.invisible) return;
   for (var i=0; i<this.children.length; i++) {
-    this.elemset.push(this.children[i].draw(printer,this.x));
+    this.elemset.push(this.children[i].draw(printer,this.x, bartop));
   }
   var self = this;
   this.elemset.mouseup(function (e) {
@@ -275,7 +310,7 @@ function ABCRelativeElement(c, dx, w, pitch, opt) {
   this.linewidth = opt["linewidth"];
 }
 
-ABCRelativeElement.prototype.draw = function (printer, x) {
+ABCRelativeElement.prototype.draw = function (printer, x, bartop) {
   this.x = x+this.dx;
   switch(this.type) {
   case "symbol":
@@ -287,6 +322,8 @@ ABCRelativeElement.prototype.draw = function (printer, x) {
     this.graphelem = printer.debugMsgLow(this.x, this.c); break;
   case "text":
     this.graphelem = printer.printText(this.x, this.pitch, this.c); break;
+  case "bar":
+    this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); break; // bartop can't be 0
   case "stem":
     this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); break;
   case "ledger":
