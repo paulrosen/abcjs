@@ -199,7 +199,7 @@ function sortPitch(elem) {
 }
 
 ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true for drawing stemless notehead
-  var notehead = null, 
+  var notehead = null;
   var grace= null;
   this.roomtaken = 0; // room needed to the left of the note
   
