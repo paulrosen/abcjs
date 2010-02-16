@@ -242,6 +242,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords + "\n";
   var text = this.paper.text(30, this.y+30, extraText);
   text.translate(0,text.getBBox().height/2);
+  this.paper.setSize(this.width+50,this.y+30+text.getBBox().height);
 };
 
 ABCPrinter.prototype.printSubtitleLine = function(abcline) {

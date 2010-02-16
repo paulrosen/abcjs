@@ -108,6 +108,10 @@ ABCStaffGroupElement.prototype.layout = function(spacing) {
   }
   this.spacingunits+=spacingunit;
   this.w = x;
+
+  for (var i=0;i<this.voices.length;i++) {
+    this.voices[i].w=this.w;
+  }
 };
 
 ABCStaffGroupElement.prototype.draw = function (printer) {
@@ -354,6 +358,7 @@ ABCEndingElem.prototype.draw = function (printer, linestartx, lineendx) {
     printer.paper.path(sprintf("M %f %f L %f %f",
 			   lineendx, printer.y, lineendx, printer.y+10)).attr({stroke:"#000000"});
   }
+
   printer.paper.path(sprintf("M %f %f L %f %f",
 			    linestartx, printer.y, lineendx, printer.y)).attr({stroke:"#000000"});
   
