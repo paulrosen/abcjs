@@ -81,12 +81,13 @@ ABCLayout.prototype.printABCStaff = function(abcstaff) {
   for (var v = 0; v < abcstaff.voices.length; v++) {
     this.voice = new ABCVoiceElement(this.y);
     if (v===0) {
-      this.voice.header=header;
+      this.voice.header=header; //TODO is this in right place?
       this.voice.barfrom = (abcstaff.connectBarLines==="start" || abcstaff.connectBarLines==="continue");
       this.voice.barto = (abcstaff.connectBarLines==="continue" || abcstaff.connectBarLines==="end");
     } else {
       this.voice.duplicate = true; // barlines and other duplicate info need not be printed
     }
+    // TODO make invisible if voice is duplicate
     this.voice.addChild(this.printClef(abcstaff.clef));
     this.voice.addChild(this.printKeySignature(abcstaff.key));
     if (abcstaff.meter) this.voice.addChild(this.printTimeSignature(abcstaff.meter));

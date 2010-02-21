@@ -41,7 +41,7 @@ function findABC(currentset) {
   var cont = false;
   var newcurrentset = currentset.map(function(i,elem){
       var children = $(elem).children().filter(function() {
-	  return $(this).text().match(/^X:/m);
+	  return $(this).text().match(/^\s*X:/m);
 	});
       if (children.length===0) {
 	return elem;

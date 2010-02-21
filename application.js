@@ -110,6 +110,10 @@ function writeOneTune(tune, warnings, count) {
 	paper = Raphael(canvas, 1500, 1500);
 	printer = new ABCPrinter(paper);
 	printer.printABC(tune);
+        if (ABCMidiWriter) {
+	  midiwriter = new ABCMidiWriter();
+	  midiwriter.writeABC(tune);
+	}
 	printer.addSelectListener(editArea);
 	abc_mousemove();
 	}
