@@ -107,7 +107,7 @@ ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
 
 ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
   anchor = anchor || "start";
-  this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor});
+  return this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor});
 };
 
 // assumes this.y is set appropriately
@@ -158,7 +158,7 @@ ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
 };
 
 ABCPrinter.prototype.debugMsg = function(x, msg) {
-  this.paper.text(x, this.y, msg);
+  return this.paper.text(x, this.y, msg);
 };
 
 ABCPrinter.prototype.debugMsgLow = function(x, msg) {

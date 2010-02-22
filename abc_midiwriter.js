@@ -30,16 +30,32 @@ Midi.prototype.play = function() {
   "MTrk%00%00%"+tracklength.substr(0,2)+"%" + tracklength.substr(2,2) +
   this.track + 
   '%00%FF%2F%00';
-  document.body.appendChild(setAttributes(document.createElement('embed'), {
+
+//   var embedContainer = document.createElement("div");
+//   embedContainer.className = "embedContainer";
+//   document.body.appendChild(embedContainer);
+//   embedContainer.innerHTML = '<object id="embed1" classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" codebase="http://www.apple.com/qtactivex/qtplugin.cab"><param name="src" value="' + data + '"></param><param name="Autoplay" value="false"></param><embed name="embed1" src="' + data + '" autostart="false" enablejavascript="true" /></object>';
+//   embed = document["embed1"];
+
+  
+
+  embed = setAttributes(document.createElement('embed'), {
       src : data,
 	  type : 'video/quicktime',
 	  controller : 'false',
 	  autoplay : 'true', 
 	  loop : 'false',
 	  width : '1px',
-	  height : '1px'
-	  }));
-  
+	  height : '1px',
+	  enablejavascript: 'true' 
+	});
+  document.body.appendChild(embed);
+//   window.setTimeout(function() {
+//       embed.Stop();
+//       embed.Rewind();
+//       embed.Play();
+
+//   }, 200);
 };
 
 function toHex(n, padding) {

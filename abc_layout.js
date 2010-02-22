@@ -142,6 +142,11 @@ ABCLayout.prototype.printABCElement = function() {
   case "stem":
     this.stemdir=elem.direction;
     break;
+  case "part":
+    var abselem = new ABCAbsoluteElement(elem,0,0);
+    abselem.addChild(new ABCRelativeElement(elem.title, 0, 0, 20, {type:"text", attributes:{"font-weight":"bold", "font-size":"20px"}}));
+    elemset[0] = abselem;
+    break;
   default: 
     var abselem = new ABCAbsoluteElement(elem,0,0);
     abselem.addChild(new ABCRelativeElement("element type "+elem.el_type, 0, 0, 0, {type:"debug"}));

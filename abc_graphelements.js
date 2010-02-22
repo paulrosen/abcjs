@@ -312,6 +312,7 @@ function ABCRelativeElement(c, dx, w, pitch, opt) {
   this.type = opt["type"] || "symbol"; // cheap types.
   this.pitch2 = opt["pitch2"];
   this.linewidth = opt["linewidth"];
+  this.attributes = opt["attributes"];
 }
 
 ABCRelativeElement.prototype.draw = function (printer, x, bartop) {
@@ -325,7 +326,8 @@ ABCRelativeElement.prototype.draw = function (printer, x, bartop) {
   case "debugLow":
     this.graphelem = printer.debugMsgLow(this.x, this.c); break;
   case "text":
-    this.graphelem = printer.printText(this.x, this.pitch, this.c); break;
+    this.graphelem = printer.printText(this.x, this.pitch, this.c); 
+    break;
   case "bar":
     this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); break; // bartop can't be 0
   case "stem":
@@ -335,6 +337,9 @@ ABCRelativeElement.prototype.draw = function (printer, x, bartop) {
   }
   if (this.scalex!=1 && this.graphelem) {
     this.graphelem.scale(this.scalex, this.scaley, this.x, printer.calcY(this.pitch));
+  }
+  if (this.attributes) {
+    this.graphelem.attr(this.attributes);
   }
   return this.graphelem;
 };
