@@ -23,7 +23,7 @@ Midi.prototype.addNote = function (pitch, loudness, length) {
   this.track += "%"+pitch.toString(16)+"%00";//end note
 };
 
-Midi.prototype.play = function() {
+Midi.prototype.add = function(parent) {
   var tracklength = toHex(this.track.length/3+4,4);
   var data="data:audio/midi," + 
   "MThd%00%00%00%06%00%01%00%01%00%C0"+
@@ -38,18 +38,17 @@ Midi.prototype.play = function() {
 //   embed = document["embed1"];
 
   
-
+  
   embed = setAttributes(document.createElement('embed'), {
-      src : data,
-	  type : 'video/quicktime',
-	  controller : 'false',
-	  autoplay : 'true', 
-	  loop : 'false',
-	  width : '1px',
-	  height : '1px',
-	  enablejavascript: 'true' 
+    src : data,
+	type : 'video/quicktime',
+	controller : 'true',
+	autoplay : 'false', 
+	loop : 'false',
+	enablejavascript: 'true',
+	style:'display:block; height: 20px;'
 	});
-  document.body.appendChild(embed);
+  parent.insertBefore(embed,parent.firstChild);
 //   window.setTimeout(function() {
 //       embed.Stop();
 //       embed.Rewind();
@@ -67,8 +66,8 @@ function toHex(n, padding) {
 }
 
 
-function ABCMidiWriter() {
-
+function ABCMidiWriter(parent) {
+  this.parent = parent;
 };
 
 ABCMidiWriter.prototype.writeABC = function(abctune) {
@@ -80,7 +79,7 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
       this.writeABCLine(abcline.staff);
     }
   }
-  this.midi.play();
+  this.midi.add(this.parent);
 };
 
 ABCMidiWriter.prototype.writeABCLine = function(staffs) {

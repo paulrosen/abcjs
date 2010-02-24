@@ -111,7 +111,7 @@ function writeOneTune(tune, warnings, count) {
 	printer = new ABCPrinter(paper);
 	printer.printABC(tune);
         if (ABCMidiWriter) {
-	  midiwriter = new ABCMidiWriter();
+	  midiwriter = new ABCMidiWriter(canvas);
 	  midiwriter.writeABC(tune);
 	}
 	printer.addSelectListener(editArea);
