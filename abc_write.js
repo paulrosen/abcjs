@@ -192,17 +192,49 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.metaText.author) {this.paper.text(500, this.y, abctune.metaText.author, "end"); this.y+=15;}
   if (abctune.metaText.origin) {this.paper.text(500, this.y, "(" + abctune.metaText.origin + ")", "end");this.y+=15;}
   if (abctune.metaText.tempo) {
-	  var tempo = "";
-	  if (abctune.metaText.tempo.preString) tempo += abctune.metaText.tempo.preString;
-	  tempo += ' | ';
-	  if (abctune.metaText.tempo.duration) {
-		  tempo += abctune.metaText.tempo.duration.join(' ');
-		  tempo += " = " + abctune.metaText.tempo.bpm + " ";
-	  }
-	  tempo += ' | ';
-	  if (abctune.metaText.tempo.postString) tempo += abctune.metaText.tempo.postString;
-	  this.paper.text(100, this.y+20, "Tempo: " + tempo);
-	  this.y+=15;
+    var x = 50;
+    if (abctune.metaText.tempo.preString) {
+      var text = this.paper.text(x, this.y+20, abctune.metaText.tempo.preString).attr({"text-anchor":"start"});
+      x+=(text.getBBox().width+10);
+    }
+    if (abctune.metaText.tempo.duration) {
+      var temposcale = 0.75;
+      var tempopitch = 14.5;
+      var duration = abctune.metaText.tempo.duration[0]; // TODO when multiple durations
+      var abselem = new ABCAbsoluteElement(abctune.metaText.tempo, duration, 1);
+      var durlog = Math.floor(Math.log(duration)/Math.log(2));
+      var dot=0;
+      for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
+      var c = this.layouter.chartable["note"][-durlog];
+      var flag = this.layouter.chartable["uflags"][-durlog];
+      var temponote = this.layouter.printNoteHead(abselem, 
+					 c, 
+					 {verticalPos:tempopitch},
+					 "up",
+					 0,
+					 flag,
+					 dot,
+					 0,
+					 temposcale
+					 );
+      abselem.addHead(temponote);
+      if (duration<1) {
+	var p1 = tempopitch+1/3*temposcale;
+	var p2 = tempopitch+7*temposcale;
+	var dx = temponote.dx + temponote.w;
+	var width = -0.6;
+	abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+      }
+      abselem.x = x;
+      abselem.draw(this,null);
+      x += (abselem.w+5);
+      text = this.paper.text(x, this.y+20, "= " + abctune.metaText.tempo.bpm).attr({"text-anchor":"start"});
+      x +=text.getBBox().width+10;
+    }
+    if (abctune.metaText.tempo.postString) {
+      this.paper.text(x, this.y+20, abctune.metaText.tempo.postString).attr({"text-anchor":"start"});
+    }
+    this.y+=15;
   }
   this.y+=15;
   this.staffgroups = [];

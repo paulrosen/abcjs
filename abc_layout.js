@@ -327,7 +327,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 			     duration:(this.isBagpipes)?1/32:1/16};
 	gracebeam.add(pseudoabselem);
       } else { // draw the stem
-	p1 = gracepitch+1/5;
+	p1 = gracepitch+1/3*gracescale;
 	p2 = gracepitch+7*gracescale;
 	dx = grace.dx + grace.w;
 	width = -0.6;
@@ -384,6 +384,8 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 };
 
 ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, flag, dot, dotshiftx, scale) {
+
+  // TODO scale the dot as well
   var pitch = pitchelem.verticalPos;
   var notehead;
   var i;
