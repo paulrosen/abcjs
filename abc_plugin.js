@@ -93,6 +93,10 @@ function insertScoreBefore(node, abcstring) {
     var paper = Raphael(abcdiv.get(0), 800, 400);
     var printer = new ABCPrinter(paper);
     printer.printABC(tune);
+    if (ABCMidiWriter) {
+      midiwriter = new ABCMidiWriter(abcdiv.get(0));
+      midiwriter.writeABC(tune);
+    }
   } catch (e) {
     abc_plugin_errors+=e;
   }
