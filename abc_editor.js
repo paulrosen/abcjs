@@ -18,10 +18,10 @@ EditArea.prototype.addChangeListener = function(listener) {
 //TODO won't work under IE?
 EditArea.prototype.getSelection = function() {
   return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
-}
+};
 
-EditArea.prototype.highlight = function(abcelem) {
-  this.textarea.setSelectionRange(abcelem.start,abcelem.end);
+EditArea.prototype.setSelection = function(start, end) {
+  this.textarea.setSelectionRange(start,end);
   this.textarea.focus();
 };
 
@@ -127,4 +127,8 @@ ABCEditor.prototype.fireSelectionChanged = function() {
 
 ABCEditor.prototype.fireChanged = function() {
   this.updateRendering();
+};
+
+ABCEditor.prototype.highlight = function(abcelem) {
+  this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
 };
