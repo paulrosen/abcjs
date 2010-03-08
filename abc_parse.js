@@ -33,12 +33,12 @@ function AbcParse() {
 				}
 			}
 			this.iChar = 0;
-			this.key = {extraAccidentals: []};
+			this.key = {accidentals: []};
 			this.meter = {type: 'specified', value: [{num: '4', den: '4'}]};	// if no meter is specified, there is an implied one.
 			this.origMeter = {type: 'specified', value: [{num: '4', den: '4'}]};	// this is for new voices that are created after we set the meter.
 			this.hasMainTitle = false;
 			this.default_length = 0.125;
-			this.clef = { type: 'treble', middle: 6 };
+			this.clef = { type: 'treble', verticalPos: 0 };
 			this.next_note_duration = 0;
 			this.start_new_line = true;
 			this.is_in_header = true;

@@ -47,11 +47,11 @@ function AbcTune() {
 	//	number: 1 or 2: if it is the start of a first or second ending
 	// CLEF: type=treble,bass
 	// KEY-SIG:
-	//		regularKey: { num:0-7 dir:sharp,flat }
-	//		extraAccidentals[]: { acc:sharp|dblsharp|natural|flat|dblflat,  note:a|b|c|d|e|f|g }
+	//		accidentals[]: { acc:sharp|dblsharp|natural|flat|dblflat,  note:a|b|c|d|e|f|g }
 	// METER: type: common_time,cut_time,specified
 	//		if specified, { num: 99, den: 99 }
 	this.reset = function () {
+		this.version = "1.0.0";
 		this.metaText = {};
 		this.formatting = {};
 		this.lines = [];
@@ -143,12 +143,12 @@ function AbcTune() {
 		var This = this;
 		var pushNote = function(hp) {
 			if (hp.pitches !== undefined) {
-				var mid = This.lines[This.lineNum].staff[This.staffNum].clef.middle;
-				hp.pitches.each(function(p) { p.verticalPos = p.pitch + 6 - mid; });	// the -6 is because the pitches start at C=0.
+				var mid = This.lines[This.lineNum].staff[This.staffNum].clef.verticalPos;
+				hp.pitches.each(function(p) { p.verticalPos = p.pitch - mid; });
 			}
 			if (hp.gracenotes !== undefined) {
-				var mid2 = This.lines[This.lineNum].staff[This.staffNum].clef.middle;
-				hp.gracenotes.each(function(p) { p.verticalPos = p.pitch + 6 - mid2; });	// the -6 is because the pitches start at C=0.
+				var mid2 = This.lines[This.lineNum].staff[This.staffNum].clef.verticalPos;
+				hp.gracenotes.each(function(p) { p.verticalPos = p.pitch - mid2; });
 			}
 			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum].push(hp);
 		};

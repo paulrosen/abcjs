@@ -57,23 +57,17 @@ function AbcParserLint() {
 
 	var clefProperties = {
 		type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] },
-		middle: { type: 'number', minimum: -14, maximum: 14 }	// the pitch that goes in the middle of the staff C=0
+		verticalPos: { type: 'number', minimum: -20, maximum: 8 }	// the pitch that goes in the middle of the staff C=0
 	};
 
 	var keyProperties = {
-		extraAccidentals: { type: 'array', optional: true, output: "noindex", items: {
+		accidentals: { type: 'array', optional: true, output: "noindex", items: {
 				type: 'object', properties: {
 					acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ] },
 					note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] },
 					verticalPos: { type: 'number', minimum: 0, maximum: 13 }
 				}
 		} }
-//			regularKey: { type: 'object', optional: true,
-//				properties: {
-//					num: { type: 'number', minimum: 0, maximum: 7 },
-//					acc: { type: 'string', Enum: [ 'sharp', 'flat' ]}
-//				}
-//			}
 	};
 
 	var meterProperties = {
@@ -154,7 +148,7 @@ function AbcParserLint() {
 					divider: { type: 'string', Enum: [ '-', ' ', '_' ]}
 				}}},
 				//pitch: { optional: true, type: 'number', prohibits: [ 'rest', 'pitches' ] },
-				pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'pitch', 'duration', 'rest' ], items: {
+				pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'rest' ], items: {
 						type: 'object', properties: {
 							accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
 							endSlur: { type: 'number', minimum: 1, optional: true },
@@ -165,7 +159,7 @@ function AbcParserLint() {
 							startTie: { type: 'boolean', Enum: [ true ], optional: true }
 						}
 				}},
-				rest: { type: 'object',  optional: true, prohibits: [ 'pitch', 'duration', 'lyric' ], properties: {
+				rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'duration', 'lyric' ], properties: {
 					type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest' ] },
 					endSlur: { type: 'number', minimum: 1, optional: true },
 					endTie: { type: 'boolean', Enum: [ true ], optional: true },
@@ -183,48 +177,96 @@ function AbcParserLint() {
 		description:"ABC Internal Music Representation",
 		type:"object",
 		properties: {
+			version: { type: "string", Enum: [ "1.0.0" ] },
+
 			formatting: {type:"object",
 				properties: {
+					alignbars: { type: "number", optional: true },
+					aligncomposer: { type: "string", Enum: [ 'left', 'center','right' ], optional: true },
+					annotationfont: fontType,
 					auquality: { type: "string", optional: true },
 					bagpipes: { type: "boolean", optional: true },
 					barlabelfont: fontType,
 					barnumberfont: fontType,
+					barsperstaff: { type: "number", optional: true },
 					botmargin: { type: "number", optional: true },
 					botspace: { type: "number", optional: true },
+					bstemdown: { type: "boolean", optional: true },
 					composerfont: fontType,
 					composerspace: { type: "number", optional: true },
+					continueall: { type: "boolean", optional: true },
 					continuous: { type: "string", optional: true },
+					dynalign: { type: "boolean", optional: true },
+					exprabove: { type: "boolean", optional: true },
+					exprbelow: { type: "boolean", optional: true },
+					flatbeams: { type: "boolean", optional: true },
+					footer: { type: "string", optional: true },
+					footerfont: fontType,
+					gchordbox: { type: "boolean", optional: true },
 					gchordfont: fontType,
+					graceslurs: { type: "boolean", optional: true },
+					gracespacebefore: { type: "number", optional: true },
+					gracespaceinside: { type: "number", optional: true },
+					gracespaceafter: { type: "number", optional: true },
+					header: { type: "string", optional: true },
+					headerfont: fontType,
+					historyfont: fontType,
 					indent: { type: "number", optional: true },
+					infofont: fontType,
+					infospace: { type: "number", optional: true },
 					landscape: { type: "boolean", optional: true },
 					leftmargin: { type: "number", optional: true },
 					linesep: { type: "number", optional: true },
+					lineskipfac: { type: "number", optional: true },
+					maxshrink: { type: "number", optional: true },
+					maxstaffsep: { type: "number", optional: true },
+					maxsysstaffsep: { type: "number", optional: true },
+					measurebox: { type: "boolean", optional: true },
+					measurefont: fontType,
 					midi: { type: "string", optional: true },
 					musicspace: { type: "number", optional: true },
 					nobarcheck: { type: "string", optional: true },
+					notespacingfactor: { type: "number", optional: true },
+					pageheight: { type: "number", optional: true },
+					pagewidth: { type: "number", optional: true },
+					parskipfac: { type: "number", optional: true },
+					partsbox: { type: "boolean", optional: true },
 					partsfont: fontType,
 					partsspace: { type: "number", optional: true },
 					playtempo: { type: "string", optional: true },
+					repeatfont: fontType,
+					rightmargin: { type: "number", optional: true },
 					scale: { type: "number", optional: true },
 					score: { type: "string", optional: true },
 					slurgraces: { type: "boolean", optional: true },
+					slurheight: { type: "number", optional: true },
+					splittune: { type: "boolean", optional: true },
+					squarebreve: { type: "boolean", optional: true },
 					staffsep: { type: "number", optional: true },
 					staffwidth: { type: "number", optional: true },
 					staves: { type: "string", optional: true },
+					stemheight: { type: "number", optional: true },
+					straightflags: { type: "boolean", optional: true },
 					stretchlast: { type: "boolean", optional: true },
+					stretchstaff: { type: "boolean", optional: true },
 					subtitlefont: fontType,
 					subtitlespace: { type: "number", optional: true },
 					sysstaffsep: { type: "number", optional: true },
 					systemsep: { type: "number", optional: true },
 					tempofont: fontType,
+					textfont: fontType,
 					textspace: { type: "number", optional: true },
 					titlefont: fontType,
+					titleformat: { type: "string", optional: true },
 					titleleft: { type: "boolean", optional: true },
 					titlespace: { type: "number", optional: true },
 					topmargin: { type: "number", optional: true },
 					topspace: { type: "number", optional: true },
+					vocalabove: { type: "boolean", optional: true },
+					vocalfont: fontType,
 					vocalspace: { type: "number", optional: true },
 					voicefont: fontType,
+					wordsfont: fontType,
 					wordsspace: { type: "number", optional: true }
 				}
 			},

@@ -163,7 +163,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 	};
 
 	var calcMiddle = function(clef, oct) {
-		var mid = 6;
+		var mid = 0;
 		switch(clef) {
 			case 'treble':
 			case 'none':
@@ -176,17 +176,17 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			case 'bass-8':
 			case 'bass+16':
 			case 'bass-16':
-				mid = -6;
+				mid = -12;
 				break;
 			case 'tenor':
-				mid = -2;
+				mid = -8;
 				break;
 			case 'alto2':
 			case 'alto1':
 			case 'alto':
 			case 'alto+8':
 			case 'alto-8':
-				mid = 0;
+				mid = -6;
 				break;
 		}
 		return mid+oct;
@@ -196,9 +196,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 
 	this.addPosToKey = function(clef, key) {
 		var mid = calcMiddle(clef.type, 0);
-		key.extraAccidentals.each(function(acc) {
+		key.accidentals.each(function(acc) {
 			var pitch = pitches[acc.note];
-			pitch = pitch + 6 - mid;
+			pitch = pitch - mid;
 			acc.verticalPos = pitch % 14;	// Always keep this on the two octaves on the staff
 		});
 	};
@@ -215,7 +215,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			if (str[i] === ',') mid -= 7;
 			else if (str[i] === ',') mid += 7;
 		}
-		return mid;
+		return mid - 6;	// We get the note in the middle of the staff. We want the note that appears as the first ledger line below the staff.
 	};
 
 	this.parseKey = function(str)	// (and clef)
@@ -235,13 +235,13 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			str = str.substring(i);
 			if (str.startsWith('m=') || str.startsWith('middle=')) {
 				str = str.substring(str.indexOf('=')+1);
-				multilineVars.clef.middle = parseMiddle(str);
+				multilineVars.clef.verticalPos = parseMiddle(str);
 			}
 		};
 		// check first to see if there is only a clef. If so, just take that, but ignore an error after that.
 		var retClef = tokenizer.getClef(str);
 		if (retClef.token !== undefined && (retClef.explicit === true || retClef.token !== 'none')) {	// none is the only ambiguous marking. We need to assume that's a key
-			multilineVars.clef = { type: retClef.token, middle: calcMiddle(retClef.token, 0) };
+			multilineVars.clef = { type: retClef.token, verticalPos: calcMiddle(retClef.token, 0) };
 			str = str.substring(retClef.len);
 			setMiddle(str);
 			return {foundClef: true};
@@ -265,17 +265,17 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				str = str.substring(retMode.len);
 			}
 			// We need to do a deep copy because we are going to modify it
-			ret.extraAccidentals = [];
+			ret.accidentals = [];
 			keys[key].each(function(k) {
-				ret.extraAccidentals.push(Object.clone(k));
+				ret.accidentals.push(Object.clone(k));
 			});
 		} else if (str.startsWith('HP')) {
 			this.addDirective("bagpipes");
-			ret.extraAccidentals = [];
+			ret.accidentals = [];
 			multilineVars.key = ret;
 			return {foundKey: true};
 		} else if (str.startsWith('Hp')) {
-			ret.extraAccidentals = [ {acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'} ];
+			ret.accidentals = [ {acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'} ];
 			this.addDirective("bagpipes");
 			multilineVars.key = ret;
 			return {foundKey: true};
@@ -283,7 +283,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			var retNone = tokenizer.isMatch(str, 'none');
 			if (retNone > 0) {
 				// we got the none key - that's the same as C to us
-				ret.extraAccidentals = [];
+				ret.accidentals = [];
 				str = str.substring(retNone);
 			}
 		}
@@ -304,9 +304,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				if (retExtra.warn)
 					warn("error parsing extra accidentals:", origStr, 0);
 				else {
-					if (!ret.extraAccidentals)
-						ret.extraAccidentals = [];
-					ret.extraAccidentals.push(retExtra.token);
+					if (!ret.accidentals)
+						ret.accidentals = [];
+					ret.accidentals.push(retExtra.token);
 				}
 			}
 		}
@@ -318,21 +318,20 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				warn("error parsing clef:" + retClef.warn, origStr, 0);
 			else {
 				//ret.clef = retClef.token;
-				multilineVars.clef = { type: retClef.token, middle: calcMiddle(retClef.token, 0) };
+				multilineVars.clef = { type: retClef.token, verticalPos: calcMiddle(retClef.token, 0) };
 				str = str.substring(retClef.len);
 				setMiddle(str);
 			}
 		}
 
-		if (ret.regularKey === undefined && ret.extraAccidentals === undefined && retClef.token === undefined) {
+		if (ret.accidentals === undefined && retClef.token === undefined) {
 			warn("error parsing key: ", origStr, 0);
-			//ret.regularKey = keys.C;
 			return {};
 		}
 		var result = {};
 		if (retClef.token !== undefined)
 			result.foundClef = true;
-		if (ret.regularKey !== undefined || ret.extraAccidentals !== undefined) {
+		if (ret.accidentals !== undefined) {
 			multilineVars.key = ret;
 			result.foundKey = true;
 		}
@@ -388,6 +387,54 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		var scratch = "";
 		switch (cmd)
 		{
+			// The following directives were added to abc_parser_lint, but haven't been implemented here.
+			// Most of them are direct translations from the directives that will be parsed in. See abcm2ps's format.txt for info on each of these.
+			//					alignbars: { type: "number", optional: true },
+			//					aligncomposer: { type: "string", Enum: [ 'left', 'center','right' ], optional: true },
+			//					annotationfont: fontType,
+			//					barsperstaff: { type: "number", optional: true },
+			//					bstemdown: { type: "boolean", optional: true },
+			//					continueall: { type: "boolean", optional: true },
+			//					dynalign: { type: "boolean", optional: true },
+			//					exprabove: { type: "boolean", optional: true },
+			//					exprbelow: { type: "boolean", optional: true },
+			//					flatbeams: { type: "boolean", optional: true },
+			//					footer: { type: "string", optional: true },
+			//					footerfont: fontType,
+			//					gchordbox: { type: "boolean", optional: true },
+			//					graceslurs: { type: "boolean", optional: true },
+			//					gracespacebefore: { type: "number", optional: true },
+			//					gracespaceinside: { type: "number", optional: true },
+			//					gracespaceafter: { type: "number", optional: true },
+			//					header: { type: "string", optional: true },
+			//					headerfont: fontType,
+			//					historyfont: fontType,
+			//					infofont: fontType,
+			//					infospace: { type: "number", optional: true },
+			//					lineskipfac: { type: "number", optional: true },
+			//					maxshrink: { type: "number", optional: true },
+			//					maxstaffsep: { type: "number", optional: true },
+			//					maxsysstaffsep: { type: "number", optional: true },
+			//					measurebox: { type: "boolean", optional: true },
+			//					measurefont: fontType,
+			//					notespacingfactor: { type: "number", optional: true },
+			//					pageheight: { type: "number", optional: true },
+			//					pagewidth: { type: "number", optional: true },
+			//					parskipfac: { type: "number", optional: true },
+			//					partsbox: { type: "boolean", optional: true },
+			//					repeatfont: fontType,
+			//					rightmargin: { type: "number", optional: true },
+			//					slurheight: { type: "number", optional: true },
+			//					splittune: { type: "boolean", optional: true },
+			//					squarebreve: { type: "boolean", optional: true },
+			//					stemheight: { type: "number", optional: true },
+			//					straightflags: { type: "boolean", optional: true },
+			//					stretchstaff: { type: "boolean", optional: true },
+			//					textfont: fontType,
+			//					titleformat: { type: "string", optional: true },
+			//					vocalabove: { type: "boolean", optional: true },
+			//					vocalfont: fontType,
+			//					wordsfont: fontType,
 			case "bagpipes":tune.formatting.bagpipes = true;break;
 			case "landscape":tune.formatting.landscape = true;break;
 			case "slurgraces":tune.formatting.slurgraces = true;break;
@@ -626,7 +673,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 								oct += 14;
 								staffInfo.clef = staffInfo.clef.replace('+16', '');
 							}
-							staffInfo.middle = calcMiddle(staffInfo.clef, oct);
+							staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct);
 						}
 						break;
 					case 'treble':
@@ -661,7 +708,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 //								else if (token.token[iii] === "'") oct2 += 7;
 //							}
 						staffInfo.clef = token.token.replace(/[',]/g, "");
-						staffInfo.middle = calcMiddle(staffInfo.clef, oct2);
+						staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct2);
 						break;
 					case 'staves':
 					case 'stave':
@@ -704,8 +751,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 						break;
 					case 'middle':
 					case 'm':
-						addNextTokenToStaffInfo('middle');
-						staffInfo.middle = parseMiddle(staffInfo.middle);
+						addNextTokenToStaffInfo('verticalPos');
+						staffInfo.verticalPos = parseMiddle(staffInfo.verticalPos);
 						break;
 					case 'gchords':
 					case 'gch':
@@ -742,9 +789,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		var s = multilineVars.staves[multilineVars.voices[id].staffNum];
 		if (!multilineVars.score_is_present)
 			s.numVoices++;
-		if (staffInfo.clef) s.clef = { type: staffInfo.clef, middle: staffInfo.middle };
+		if (staffInfo.clef) s.clef = { type: staffInfo.clef, verticalPos: staffInfo.verticalPos };
 		if (staffInfo.spacing) s.spacing_below_offset = staffInfo.spacing;
-		if (staffInfo.middle) s.middle = staffInfo.middle;
+		if (staffInfo.verticalPos) s.verticalPos = staffInfo.verticalPos;
 
 		if (staffInfo.name) {if (s.name) s.name.push(staffInfo.name); else s.name = [ staffInfo.name ];}
 		if (staffInfo.subname) {if (s.subname) s.subname.push(staffInfo.subname); else s.subname = [ staffInfo.subname ];}

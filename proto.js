@@ -1,17 +1,6 @@
 // A few useful prototype elements so we don't have to load the whole thing.
 
 if (document.Prototype === undefined) {
-	function $(element) {
-		if (arguments.length > 1) {
-			for (var i = 0, elements = [], length = arguments.length; i < length; i++)
-			elements.push($(arguments[i]));
-			return elements;
-		}
-		if (typeof element == "string")
-			element = document.getElementById(element);
-		return element;
-	}
-
 	Object.clone = function(source) {
 		var destination = {};
 		for (var property in source)
@@ -60,12 +49,29 @@ if (document.Prototype === undefined) {
 		if (this.length === 0)
 			return null;
 		return this[this.length-1];
-	}
+	};
+
+	Array.prototype.compact = function() {
+		var output = [];
+		for (var i = 0; i < this.length; i++) {
+			if (this[i])
+				output.push(this[i]);
+		}
+		return output;
+	};
+
+	Array.prototype.detect = function(iterator) {
+		for (var i = 0; i < this.length; i++) {
+			if (iterator(this[i]))
+				return true;
+		}
+		return false;
+	};
 
 	///////////////////////////////////////////////////////////////////////////////////////
 
 	Ajax = {
 		Updater: function() {},
 		Request: function() {}
-	}
+	};
 }
