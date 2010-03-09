@@ -557,6 +557,10 @@ ABCLayout.prototype.printBarLine = function (elem) {
   var anchor = null; // place to attach part lines
   var dx = 0;
 
+	if (elem.endEnding) {
+		// TODO-PER: Put the anchor here.
+	}
+
   var firstdots = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat");
   var firstthin = (elem.type!="bar_left_repeat" && elem.type!="bar_thick_thin");
   var thick = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat" || elem.type==="bar_left_repeat" ||
@@ -604,8 +608,8 @@ ABCLayout.prototype.printBarLine = function (elem) {
     abselem.addRight(new ABCRelativeElement("dots.dot", dx, 1, 5));
   } // 2 is hardcoded
 
-  if (elem.ending) {
-    this.partstartelem = new ABCEndingElem(elem.ending, anchor, null);
+  if (elem.startEnding) {
+    this.partstartelem = new ABCEndingElem(elem.startEnding, anchor, null);
     this.voice.addOther(this.partstartelem);
   } 
 

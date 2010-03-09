@@ -153,8 +153,10 @@ function AbcTune() {
 			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum].push(hp);
 		};
 		hashParams.el_type = type;
-		hashParams.startChar = startChar;
-		hashParams.endChar = endChar;
+		if (startChar !== null)
+			hashParams.startChar = startChar;
+		if (endChar !== null)
+			hashParams.endChar = endChar;
 		if (type === 'note' && (hashParams.rest !== undefined || hashParams.end_beam === undefined)) {
 			// Now, add the end_beam where it is needed.
 			//  end_beam goes on all notes which are followed by a space.  (This case is already done by the parser.)
@@ -250,7 +252,7 @@ function AbcTune() {
 				if (params.subname) {if (!This.lines[This.lineNum].staff[This.staffNum].title) This.lines[This.lineNum].staff[This.staffNum].title = [];This.lines[This.lineNum].staff[This.staffNum].title[This.voiceNum] = params.subname;}
 			}
 			if (params.stem)
-				This.appendElement('stem', -1, -1, {direction: params.stem});
+				This.appendElement('stem', null, null, {direction: params.stem});
 			else if (This.voiceNum > 0) {
 				if (This.lines[This.lineNum].staff[This.staffNum].voices[0]!== undefined) {
 					var found = false;
@@ -259,11 +261,11 @@ function AbcTune() {
 							found = true;
 					}
 					if (!found) {
-						var stem = { el_type: 'stem', startChar: -1, endChar: -1, direction: 'up' };
+						var stem = { el_type: 'stem', direction: 'up' };
 						This.lines[This.lineNum].staff[This.staffNum].voices[0].splice(0,0,stem);
 					}
 				}
-				This.appendElement('stem', -1, -1, {direction: 'down'});
+				This.appendElement('stem', null, null, {direction: 'down'});
 			}
 		};
 		var createStaff = function(params) {

@@ -268,7 +268,7 @@ ABCMidiWriter.prototype.handleBar = function (elem) {
   
   
   var repeat = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat");
-  var skip = (elem.ending)?true:false;
+  var skip = (elem.startEnding)?true:false;
   var setvisited = (repeat || skip);
   var setrepeat = (elem.type==="bar_left_repeat" || elem.type==="bar_dbl_repeat" || elem.type==="bar_thick_thin" || elem.type==="bar_thin_thick");
 

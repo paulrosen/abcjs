@@ -52,6 +52,7 @@ function AbcParse() {
 			this.inTextBlock = false;
 			this.textBlock = "";
 			this.score_is_present = false;	// Can't have original V: lines when there is the score directive
+			this.inEnding = false;
 		}
 	};
 
@@ -189,7 +190,7 @@ function AbcParse() {
 			}
 		}
 		var retRep = tokenizer.getTokenOf(line.substring(curr_pos+ret.len), "1234567890-,");
-		if (retRep.len === 0)
+		if (retRep.len === 0 || retRep.token[0] === '-')
 			return [orig_bar_len, ret.token];
 
 		return [ret.len+retRep.len, ret.token, retRep.token];
@@ -835,8 +836,16 @@ function AbcParse() {
 					if (bar.type.length === 0)
 						warn("Unknown bar type", line, i);
 					else {
-						if (ret[2])
-							bar.ending = ret[2];
+						if (multilineVars.inEnding && bar.type !== 'bar_thin') {
+							bar.endEnding = true;
+							multilineVars.inEnding = false;
+						}
+						if (ret[2]) {
+							bar.startEnding = ret[2];
+							if (multilineVars.inEnding)
+								bar.endEnding = true;
+							multilineVars.inEnding = true;
+						}
 						if (el.decoration !== undefined)
 							bar.decoration = el.decoration;
 						if (el.chord !== undefined)

@@ -38,14 +38,18 @@ function AbcParserLint() {
 		postString: { type: 'string', optional: true}
 	};
 
-	var startChar = { type: 'number' }; //, output: 'hidden' };
-	var endChar = { type: 'number' }; //, output: 'hidden' };
-
 	var appendPositioning = function(properties) {
 		var ret = Object.clone(properties);
-		ret.startChar = startChar;
-		ret.endChar = endChar;
+		ret.startChar = { type: 'number' }; //, output: 'hidden' };
+		ret.endChar = { type: 'number' }; //, output: 'hidden' };
 		return ret;
+	};
+
+	var prependPositioning = function(properties) {
+		var ret = {};
+		ret.startChar = { type: 'number' }; //, output: 'hidden' };
+		ret.endChar = { type: 'number' }; //, output: 'hidden' };
+		return Object.extend(ret, properties);
 	};
 
 	var fontType = {
@@ -58,6 +62,68 @@ function AbcParserLint() {
 	var clefProperties = {
 		type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] },
 		verticalPos: { type: 'number', minimum: -20, maximum: 8 }	// the pitch that goes in the middle of the staff C=0
+	};
+
+	var barProperties = {
+		chord: { type: 'object', optional: true, properties: {
+				name: { type: 'string'},
+				position: { type: 'string'}
+			}
+		},
+		decoration: decorationList,
+		endEnding: { type: 'boolean', Enum: [ true ], optional: true },
+		startEnding: { type: 'string', optional: true },
+		type: { type: 'string', Enum: [ 'bar_dbl_repeat', 'bar_right_repeat', 'bar_left_repeat', 'bar_invisible', 'bar_thick_thin', 'bar_thin_thin', 'bar_thin', 'bar_thin_thick' ] }
+	};
+
+	var noteProperties = {
+		barNumber: { type: 'number', optional: true },
+		chord: { type: 'object', optional: true, properties: {
+				name: { type: 'string'},
+				position: { type: 'string'}
+			}
+		},
+		decoration: decorationList,
+		duration: { type: 'number' },
+		endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
+		end_beam: { type: 'boolean', Enum: [ true ], optional: true },
+		gracenotes: { type: 'array', optional: true, output: "noindex", items: {
+			type: "object", properties: {
+				accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
+				duration: { type: 'number' },
+				end_beam: { type: 'boolean', Enum: [ true ], optional: true },
+				endSlur: { type: 'number', minimum: 1, optional: true },
+				endTie: { type: 'boolean', Enum: [ true ], optional: true },
+				pitch: { type: 'number' },
+				verticalPos: { type: 'number' },
+				startSlur: { type: 'number', minimum: 1, optional: true },
+				startTie: { type: 'boolean', Enum: [ true ], optional: true }
+			}
+		}},
+		lyric: { type: 'array', optional: true, output: "noindex", items: {
+			type: 'object', properties: {
+			syllable: { type :'string' },
+			divider: { type: 'string', Enum: [ '-', ' ', '_' ]}
+		}}},
+		pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'rest' ], items: {
+				type: 'object', properties: {
+					accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
+					endSlur: { type: 'number', minimum: 1, optional: true },
+					endTie: { type: 'boolean', Enum: [ true ], optional: true },
+					pitch: { type: 'number' },
+					verticalPos: { type: 'number' },
+					startSlur: { type: 'number', minimum: 1, optional: true },
+					startTie: { type: 'boolean', Enum: [ true ], optional: true }
+				}
+		}},
+		rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'duration', 'lyric' ], properties: {
+			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest' ] },
+			endSlur: { type: 'number', minimum: 1, optional: true },
+			endTie: { type: 'boolean', Enum: [ true ], optional: true },
+			startSlur: { type: 'number', minimum: 1, optional: true },
+			startTie: { type: 'boolean', Enum: [ true ], optional: true }
+		}},
+		startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }
 	};
 
 	var keyProperties = {
@@ -86,90 +152,17 @@ function AbcParserLint() {
 		field: "el_type",
 		types: [
 			{ value: "clef", properties: appendPositioning(clefProperties) },
-			{ value: "bar", properties: {
-				startChar: startChar,
-				endChar: endChar,
-				chord: { type: 'object', optional: true, properties: {
-						name: { type: 'string'},
-						position: { type: 'string'}
-					}
-				},
-				decoration: decorationList,
-				ending: { type: 'string', optional: true },
-				type: { type: 'string', Enum: [ 'bar_dbl_repeat', 'bar_right_repeat', 'bar_left_repeat', 'bar_invisible', 'bar_thick_thin', 'bar_thin_thin', 'bar_thin', 'bar_thin_thick' ] }
-			} },
+			{ value: "bar", properties: prependPositioning(barProperties) },
 			{ value: "key", properties: appendPositioning(keyProperties) },
 			{ value: "meter", properties: appendPositioning(meterProperties) },
-			{ value: "part", properties: {
-				startChar: startChar,
-				endChar: endChar,
-				title: { type: 'string' }
-			} },
+			{ value: "part", properties: prependPositioning({ title: { type: 'string' } }) },
 
 			{ value: 'stem', properties: {
-				startChar: startChar,
-				endChar: endChar,
 				direction: { type: 'string', Enum: [ 'up', 'down' ] }
 			}},
 			{ value: 'tempo', properties: appendPositioning(tempoProperties) },
 
-			{ value: "note", properties: {
-				startChar: startChar,
-				endChar: endChar,
-				//accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
-				barNumber: { type: 'number', optional: true },
-				chord: { type: 'object', optional: true, properties: {
-						name: { type: 'string'},
-						position: { type: 'string'}
-					}
-				},
-				decoration: decorationList,
-				duration: { type: 'number' },
-//					endSlur: { type: 'number', minimum: 1, optional: true },
-//					endTie: { type: 'boolean', Enum: [ true ], optional: true },
-				endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
-				end_beam: { type: 'boolean', Enum: [ true ], optional: true },
-				gracenotes: { type: 'array', optional: true, output: "noindex", items: {
-					type: "object", properties: {
-						accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
-						duration: { type: 'number' },
-						end_beam: { type: 'boolean', Enum: [ true ], optional: true },
-						endSlur: { type: 'number', minimum: 1, optional: true },
-						endTie: { type: 'boolean', Enum: [ true ], optional: true },
-						pitch: { type: 'number' },
-						verticalPos: { type: 'number' },
-						startSlur: { type: 'number', minimum: 1, optional: true },
-						startTie: { type: 'boolean', Enum: [ true ], optional: true }
-					}
-				}},
-				lyric: { type: 'array', optional: true, output: "noindex", items: {
-					type: 'object', properties: {
-					syllable: { type :'string' },
-					divider: { type: 'string', Enum: [ '-', ' ', '_' ]}
-				}}},
-				//pitch: { optional: true, type: 'number', prohibits: [ 'rest', 'pitches' ] },
-				pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'rest' ], items: {
-						type: 'object', properties: {
-							accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
-							endSlur: { type: 'number', minimum: 1, optional: true },
-							endTie: { type: 'boolean', Enum: [ true ], optional: true },
-							pitch: { type: 'number' },
-							verticalPos: { type: 'number' },
-							startSlur: { type: 'number', minimum: 1, optional: true },
-							startTie: { type: 'boolean', Enum: [ true ], optional: true }
-						}
-				}},
-				rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'duration', 'lyric' ], properties: {
-					type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest' ] },
-					endSlur: { type: 'number', minimum: 1, optional: true },
-					endTie: { type: 'boolean', Enum: [ true ], optional: true },
-					startSlur: { type: 'number', minimum: 1, optional: true },
-					startTie: { type: 'boolean', Enum: [ true ], optional: true }
-				}},
-//					startSlur: { type: 'number', minimum: 1, optional: true },
-//					startTie: { type: 'boolean', Enum: [ true ], optional: true },
-				startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }
-			}}
+			{ value: "note", properties: prependPositioning(noteProperties) }
 		]
 	};
 
