@@ -936,10 +936,10 @@ function AbcParse() {
 										}
 									}
 
-									if (el.startSlur !== undefined) {
-										el.pitches.each(function(pitch) { if (pitch.startSlur === undefined) pitch.startSlur = el.startSlur; else pitch.startSlur += el.startSlur; });
-										delete el.startSlur;
-									}
+//									if (el.startSlur !== undefined) {
+//										el.pitches.each(function(pitch) { if (pitch.startSlur === undefined) pitch.startSlur = el.startSlur; else pitch.startSlur += el.startSlur; });
+//										delete el.startSlur;
+//									}
 
 									var postChordDone = false;
 									while (i < line.length && !postChordDone) {
@@ -1025,10 +1025,10 @@ function AbcParse() {
 								if (el.startTie !== undefined) el.pitches[0].startTie = el.startTie;
 							} else {
 								el.rest = core.rest;
-								if (core.endSlur !== undefined) el.rest.endSlur = core.endSlur;
+								if (core.endSlur !== undefined) el.endSlur = core.endSlur;
 								if (core.endTie !== undefined) el.rest.endTie = core.endTie;
-								if (core.startSlur !== undefined) el.rest.startSlur = core.startSlur;
-								if (el.startSlur !== undefined) el.rest.startSlur = el.startSlur;
+								if (core.startSlur !== undefined) el.startSlur = core.startSlur;
+								if (el.startSlur !== undefined) el.startSlur = el.startSlur;
 								if (core.startTie !== undefined) el.rest.startTie = core.startTie;
 								if (el.startTie !== undefined) el.rest.startTie = el.startTie;
 							}

@@ -156,6 +156,24 @@ ABCLayout.prototype.printABCElement = function() {
   return elemset;
 };
 
+function slurDebug(elem) {
+	var str = "";
+	var i;
+	if (elem.endSlur) {
+		str += "E";
+		for (i = 0; i < elem.endSlur.length; i++)
+			str += elem.endSlur[i];
+	}
+	if (elem.startSlur) {
+		str += "S";
+		for (i = 0; i < elem.startSlur.length; i++)
+			str += elem.startSlur[i];
+	}
+	if (str.length > 0)
+		return new ABCRelativeElement(str, 0, 0, 0, {type:"debug"});
+	return null;
+}
+
 ABCLayout.prototype.printBeam = function() {
   var abselemset = [];
   
@@ -224,6 +242,9 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
   
   var abselem = new ABCAbsoluteElement(elem, duration, 1);
+	var slurEl = slurDebug(elem);
+	if (slurEl)
+		abselem.addChild(slurEl);
   
   if (elem.rest) {
     switch(elem.rest.type) {
@@ -311,6 +332,9 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
     var gracebeam = null;
     if (elem.gracenotes.length>1) {
       gracebeam = new ABCBeamElem("grace",this.isBagpipes);
+		var slurEl = slurDebug(elem.gracenotes);
+		if (slurEl)
+			abselem.addChild(slurEl);
     }
     for (i=elem.gracenotes.length-1; i>=0; i--) {
       var gracepitch = elem.gracenotes[i].verticalPos;
@@ -453,20 +477,23 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
     this.voice.addOther(tie);
   }
 
-  for (i=pitchelem.endSlur;i>0;i--) {
-    if (this.slurs.length===0) {
-      abselem.addChild(new ABCRelativeElement("missing begin slur", 0, 0, 0, {type:"debug"}));
-      continue;
-    }
-    this.slurs[this.slurs.length-1].anchor2=notehead;
-    this.slurs = this.slurs.slice(0,this.slurs.length-1);
-  }
+//  for (i=pitchelem.endSlur;i>0;i--) {
+//    if (this.slurs.length===0) {
+//      abselem.addChild(new ABCRelativeElement("missing begin slur", 0, 0, 0, {type:"debug"}));
+//      continue;
+//    }
+//    this.slurs[this.slurs.length-1].anchor2=notehead;
+//    this.slurs = this.slurs.slice(0,this.slurs.length-1);
+//  }
 
-  for (i=pitchelem.startSlur;i>0;i--) {
-    var slur = new ABCTieElem(notehead, null, (dir=="down"));
-    this.slurs[this.slurs.length]=slur;
-    this.voice.addOther(slur);
-  }
+//  for (i=pitchelem.startSlur;i>0;i--) {
+//    var slur = new ABCTieElem(notehead, null, (dir=="down"));
+//    this.slurs[this.slurs.length]=slur;
+//    this.voice.addOther(slur);
+//  }
+	var slurEl = slurDebug(pitchelem);
+	if (slurEl)
+		abselem.addChild(slurEl);
   
   return notehead;
 

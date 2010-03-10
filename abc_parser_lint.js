@@ -85,6 +85,7 @@ function AbcParserLint() {
 		},
 		decoration: decorationList,
 		duration: { type: 'number' },
+		endSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 		endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
 		end_beam: { type: 'boolean', Enum: [ true ], optional: true },
 		gracenotes: { type: 'array', optional: true, output: "noindex", items: {
@@ -92,11 +93,11 @@ function AbcParserLint() {
 				accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
 				duration: { type: 'number' },
 				end_beam: { type: 'boolean', Enum: [ true ], optional: true },
-				endSlur: { type: 'number', minimum: 1, optional: true },
+				endSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 				endTie: { type: 'boolean', Enum: [ true ], optional: true },
 				pitch: { type: 'number' },
 				verticalPos: { type: 'number' },
-				startSlur: { type: 'number', minimum: 1, optional: true },
+				startSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 				startTie: { type: 'boolean', Enum: [ true ], optional: true }
 			}
 		}},
@@ -108,21 +109,20 @@ function AbcParserLint() {
 		pitches: { type: 'array',  optional: true, output: "noindex", prohibits: [ 'rest' ], items: {
 				type: 'object', properties: {
 					accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
-					endSlur: { type: 'number', minimum: 1, optional: true },
+					endSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 					endTie: { type: 'boolean', Enum: [ true ], optional: true },
 					pitch: { type: 'number' },
 					verticalPos: { type: 'number' },
-					startSlur: { type: 'number', minimum: 1, optional: true },
+					startSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 					startTie: { type: 'boolean', Enum: [ true ], optional: true }
 				}
 		}},
-		rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'duration', 'lyric' ], properties: {
+		rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'lyric' ], properties: {
 			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest' ] },
-			endSlur: { type: 'number', minimum: 1, optional: true },
 			endTie: { type: 'boolean', Enum: [ true ], optional: true },
-			startSlur: { type: 'number', minimum: 1, optional: true },
 			startTie: { type: 'boolean', Enum: [ true ], optional: true }
 		}},
+		startSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 		startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }
 	};
 
