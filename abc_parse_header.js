@@ -17,20 +17,20 @@
 /*extern AbcParseHeader */
 
 function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
-	var key1sharp = { acc: 'sharp', note: 'f' };
-	var key2sharp = { acc: 'sharp', note: 'c' };
-	var key3sharp = { acc: 'sharp', note: 'g' };
-	var key4sharp = { acc: 'sharp', note: 'd' };
-	var key5sharp = { acc: 'sharp', note: 'A' };
-	var key6sharp = { acc: 'sharp', note: 'e' };
-	var key7sharp = { acc: 'sharp', note: 'B' };
-	var key1flat = { acc: 'flat', note: 'B' };
-	var key2flat = { acc: 'flat', note: 'e' };
-	var key3flat = { acc: 'flat', note: 'A' };
-	var key4flat = { acc: 'flat', note: 'd' };
-	var key5flat = { acc: 'flat', note: 'G' };
-	var key6flat = { acc: 'flat', note: 'c' };
-	var key7flat = { acc: 'flat', note: 'f' };
+	var key1sharp = {acc: 'sharp', note: 'f'};
+	var key2sharp = {acc: 'sharp', note: 'c'};
+	var key3sharp = {acc: 'sharp', note: 'g'};
+	var key4sharp = {acc: 'sharp', note: 'd'};
+	var key5sharp = {acc: 'sharp', note: 'A'};
+	var key6sharp = {acc: 'sharp', note: 'e'};
+	var key7sharp = {acc: 'sharp', note: 'B'};
+	var key1flat = {acc: 'flat', note: 'B'};
+	var key2flat = {acc: 'flat', note: 'e'};
+	var key3flat = {acc: 'flat', note: 'A'};
+	var key4flat = {acc: 'flat', note: 'd'};
+	var key5flat = {acc: 'flat', note: 'G'};
+	var key6flat = {acc: 'flat', note: 'c'};
+	var key7flat = {acc: 'flat', note: 'f'};
 
 	var keys = {
 		'C#': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ],
@@ -192,15 +192,34 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		return mid+oct;
 	};
 
+	this.deepCopyKey = function(key) {
+		var ret = { accidentals: [] };
+		key.each(function(k) {
+			ret.accidentals.push(Object.clone(k));
+		});
+		return ret;
+	};
+
 	var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
 
 	this.addPosToKey = function(clef, key) {
-		var mid = calcMiddle(clef.type, 0);
+		// Shift the key signature from the treble positions to whatever position is needed for the clef.
+		// This may put the key signature unnaturally high or low, so if it does, then shift it.
+		var mid = clef.verticalPos;
 		key.accidentals.each(function(acc) {
 			var pitch = pitches[acc.note];
 			pitch = pitch - mid;
-			acc.verticalPos = pitch % 14;	// Always keep this on the two octaves on the staff
+			acc.verticalPos = pitch;
 		});
+		if (mid < -10) {
+			key.accidentals.each(function(acc) {
+				acc.verticalPos -= 14;
+			});
+		} else if (mid < -4) {
+			key.accidentals.each(function(acc) {
+				acc.verticalPos -= 7;
+			});
+		}
 	};
 
 	this.fixKey = function(clef, key) {
@@ -241,7 +260,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		// check first to see if there is only a clef. If so, just take that, but ignore an error after that.
 		var retClef = tokenizer.getClef(str);
 		if (retClef.token !== undefined && (retClef.explicit === true || retClef.token !== 'none')) {	// none is the only ambiguous marking. We need to assume that's a key
-			multilineVars.clef = { type: retClef.token, verticalPos: calcMiddle(retClef.token, 0) };
+			multilineVars.clef = {type: retClef.token, verticalPos: calcMiddle(retClef.token, 0)};
 			str = str.substring(retClef.len);
 			setMiddle(str);
 			return {foundClef: true};
@@ -265,10 +284,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				str = str.substring(retMode.len);
 			}
 			// We need to do a deep copy because we are going to modify it
-			ret.accidentals = [];
-			keys[key].each(function(k) {
-				ret.accidentals.push(Object.clone(k));
-			});
+			ret = this.deepCopyKey(keys[key]);
 		} else if (str.startsWith('HP')) {
 			this.addDirective("bagpipes");
 			ret.accidentals = [];
@@ -318,7 +334,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				warn("error parsing clef:" + retClef.warn, origStr, 0);
 			else {
 				//ret.clef = retClef.token;
-				multilineVars.clef = { type: retClef.token, verticalPos: calcMiddle(retClef.token, 0) };
+				multilineVars.clef = {type: retClef.token, verticalPos: calcMiddle(retClef.token, 0)};
 				str = str.substring(retClef.len);
 				setMiddle(str);
 			}
@@ -439,7 +455,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			case "landscape":tune.formatting.landscape = true;break;
 			case "slurgraces":tune.formatting.slurgraces = true;break;
 			case "stretchlast":tune.formatting.stretchlast = true;break;
-			case "titlecaps": multilineVars.titlecaps = true;break;
+			case "titlecaps":multilineVars.titlecaps = true;break;
 			case "titleleft":tune.formatting.titleleft = true;break;
 
 			case "botmargin":
@@ -510,14 +526,14 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				multilineVars.score_is_present = true;
 				var addVoice = function(id, newStaff, bracket, brace, continueBar) {
 					if (newStaff || multilineVars.staves.length === 0) {
-						multilineVars.staves.push({ index: multilineVars.staves.length, numVoices: 0 });
+						multilineVars.staves.push({index: multilineVars.staves.length, numVoices: 0});
 					}
 					var staff = multilineVars.staves.last();
 					if (bracket !== undefined) staff.bracket = bracket;
 					if (brace !== undefined) staff.brace = brace;
 					if (continueBar) staff.connectBarLines = 'end';
 					if (multilineVars.voices[id] === undefined) {
-						multilineVars.voices[id] = { staffNum: staff.index, index: staff.numVoices};
+						multilineVars.voices[id] = {staffNum: staff.index, index: staff.numVoices};
 						staff.numVoices++;
 					}
 				};
@@ -535,7 +551,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					switch (t.token) {
 						case '(':
 							if (openParen) warn("Can't nest parenthesis in %%score", str, t.start);
-							else { openParen = true; justOpenParen = true; }
+							else {openParen = true;justOpenParen = true;}
 							break;
 						case ')':
 							if (!openParen || justOpenParen) warn("Unexpected close parenthesis in %%score", str, t.start);
@@ -543,19 +559,19 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 							break;
 						case '[':
 							if (openBracket) warn("Can't nest brackets in %%score", str, t.start);
-							else { openBracket = true; justOpenBracket = true; }
+							else {openBracket = true;justOpenBracket = true;}
 							break;
 						case ']':
 							if (!openBracket || justOpenBracket) warn("Unexpected close bracket in %%score", str, t.start);
-							else { openBracket = false; multilineVars.staves[lastVoice.staffNum].bracket = 'end'; }
+							else {openBracket = false;multilineVars.staves[lastVoice.staffNum].bracket = 'end';}
 							break;
 						case '{':
 							if (openBrace ) warn("Can't nest braces in %%score", str, t.start);
-							else { openBrace = true; justOpenBrace = true; }
+							else {openBrace = true;justOpenBrace = true;}
 							break;
 						case '}':
 							if (!openBrace || justOpenBrace) warn("Unexpected close brace in %%score", str, t.start);
-							else { openBrace = false; multilineVars.staves[lastVoice.staffNum].brace = 'end'; }
+							else {openBrace = false;multilineVars.staves[lastVoice.staffNum].brace = 'end';}
 							break;
 						case '|':
 							continueBar = true;
@@ -770,7 +786,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		// now we've filled up staffInfo, figure out what to do with this voice
 		// TODO-PER: It is unclear from the standard and the examples what to do with brace, bracket, and staves, so they are ignored for now.
 		if (staffInfo.startStaff || multilineVars.staves.length === 0) {
-			multilineVars.staves.push({ index: multilineVars.staves.length, meter: multilineVars.origMeter });
+			multilineVars.staves.push({index: multilineVars.staves.length, meter: multilineVars.origMeter});
 			if (!multilineVars.score_is_present)
 				multilineVars.staves[multilineVars.staves.length-1].numVoices = 0;
 		}
@@ -789,7 +805,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		var s = multilineVars.staves[multilineVars.voices[id].staffNum];
 		if (!multilineVars.score_is_present)
 			s.numVoices++;
-		if (staffInfo.clef) s.clef = { type: staffInfo.clef, verticalPos: staffInfo.verticalPos };
+		if (staffInfo.clef) s.clef = {type: staffInfo.clef, verticalPos: staffInfo.verticalPos};
 		if (staffInfo.spacing) s.spacing_below_offset = staffInfo.spacing;
 		if (staffInfo.verticalPos) s.verticalPos = staffInfo.verticalPos;
 
@@ -831,7 +847,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			try {
 				var parseNum = function() {
 					// handles this much: [open_paren] decimal [ plus|dot decimal ]... [close_paren]
-					var ret = { value: 0, num: "" };
+					var ret = {value: 0, num: ""};
 
 					var tok = tokens.shift();
 					if (tok.token === '(')
@@ -873,7 +889,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				while (1) {
 					var ret = parseFraction();
 					totalLength += ret.value;
-					meter.value.push({ num: ret.num, den: ret.den });
+					meter.value.push({num: ret.num, den: ret.den});
 					if (tokens.length === 0) break;
 					var tok = tokens.shift();
 					if (tok.token !== '+') throw "Extra characters in M: line";
@@ -974,7 +990,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				tempo.preString = token.token;
 				token = tokens.shift();
 				if (tokens.length === 0) {	// It's ok to just get a string for the tempo
-					return { type: 'immediate', tempo: tempo };
+					return {type: 'immediate', tempo: tempo};
 				}
 			}
 			if (token.type === 'alpha' && token.token === 'C')	 { // either type 2 or type 3
@@ -1040,10 +1056,10 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				}
 				if (tokens.length !== 0) throw "Unexpected string at end of Q: field";
 			}
-			return { type: delaySet?'delaySet':'immediate', tempo: tempo };
+			return {type: delaySet?'delaySet':'immediate', tempo: tempo};
 		} catch (msg) {
 			warn(msg, line, start);
-			return { type: 'none' };
+			return {type: 'none'};
 		}
 	};
 
@@ -1228,10 +1244,10 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 						case  'V':
 							this.parseVoice(line, 2, line.length);
 							if (!multilineVars.is_in_header)
-								return { newline: true };
+								return {newline: true};
 							break;
 						case  'w':
-							return { words: true };
+							return {words: true};
 						case 'X':
 							break;
 						case 'E':
@@ -1244,16 +1260,16 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 								nextLine = "\x12" + nextLine;
 							//parseRegularMusicLine(line+nextLine);
 							//nextLine = "";
-							return { regular: true, str: line+nextLine };
+							return {regular: true, str: line+nextLine};
 					}
 				}
 				if (nextLine.length > 0)
-					return { recurse: true, str: nextLine };
+					return {recurse: true, str: nextLine};
 				return {};
 			}
 		}
 
 		// If we got this far, we have a regular line of mulsic
-		return { regular: true, str: line };
+		return {regular: true, str: line};
 	};
 }

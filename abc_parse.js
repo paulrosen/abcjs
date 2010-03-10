@@ -562,7 +562,7 @@ function AbcParse() {
 		if (multilineVars.partForNextLine.length)
 			params.part = multilineVars.partForNextLine;
 		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? multilineVars.staves[multilineVars.currentVoice.staffNum].clef : multilineVars.clef ;
-		params.key = Object.clone(multilineVars.key);
+		params.key = header.deepCopyKey(multilineVars.key.accidentals);
 		header.addPosToKey(params.clef, params.key);
 		if (multilineVars.meter !== null) {
 			if (multilineVars.currentVoice) {
