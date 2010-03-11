@@ -567,10 +567,10 @@ function AbcTokenizer() {
 				x = tokens.shift();
 				num = num + '.' + x.token;
 				used++;
+				if (tokens.length === 0) return { used: used, value: parseFloat(num) };
 			}
+			x = tokens.shift();
 		}
-		if (tokens.length === 0) return { used: used, value: parseFloat(num) };
-		x = tokens.shift();
 		switch (x.token) {
 			case 'pt': return { used: used+1, value: parseFloat(num) };
 			case 'cm': return { used: used+1, value: parseFloat(num)*72*2.54 };
