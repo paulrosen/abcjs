@@ -239,7 +239,12 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 
 	this.parseKey = function(str)	// (and clef)
 	{
+		str = tokenizer.stripComment(str);
 		var origStr = str;
+		if (str.length === 0) {
+			// an empty K: field is the same as K:none
+			str = 'none';
+		}
 		// The format is:
 		// [space][tonic[#|b][ ][3-letter-mode][ignored-chars][space]][ accidentals...][ clef=treble|bass|bass3|tenor|alto|alto2|alto1|none [+8|-8]]
 		// -- or -- the key can be "none"
