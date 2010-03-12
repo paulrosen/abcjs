@@ -44,6 +44,8 @@ function ABCLayout(glyphs, bagpipes) {
 		   note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter"},
 		   uflags:{3:"flags.u8th", 4:"flags.u16th", 5:"flags.u32nd", 6:"flags.u64th"},
 		   dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}};
+  this.slurs = {};
+  this.ties = [];
 }
 
 ABCLayout.prototype.getElem = function() {
@@ -104,8 +106,16 @@ ABCLayout.prototype.printABCVoice = function(abcline) {
     this.partstartelem = new ABCEndingElem("", null, null);
     this.voice.addOther(this.partstartelem);
   }
-  this.slurs = [];
-  this.ties = [];
+  for (var slur in this.slurs) {
+    if (this.slurs.hasOwnProperty(slur)) {
+	this.slurs[slur]= new ABCTieElem(null, null, this.slurs[slur].above);
+	this.voice.addOther(this.slurs[slur]);
+    }
+  }
+  for (var i=0; i<this.ties.length; i++) {
+    this.ties[i]=new ABCTieElem(null, null, this.ties[i].above);
+    this.voice.addOther(this.ties[i]);
+  }
   for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
     var abselems = this.printABCElement();
     for (var i=0; i<abselems.length; i++) {
@@ -155,24 +165,6 @@ ABCLayout.prototype.printABCElement = function() {
 
   return elemset;
 };
-
-function slurDebug(elem) {
-	var str = "";
-	var i;
-	if (elem.endSlur) {
-		str += "E";
-		for (i = 0; i < elem.endSlur.length; i++)
-			str += elem.endSlur[i];
-	}
-	if (elem.startSlur) {
-		str += "S";
-		for (i = 0; i < elem.startSlur.length; i++)
-			str += elem.startSlur[i];
-	}
-	if (str.length > 0)
-		return new ABCRelativeElement(str, 0, 0, 0, {type:"debug"});
-	return null;
-}
 
 ABCLayout.prototype.printBeam = function() {
   var abselemset = [];
@@ -242,9 +234,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
   
   var abselem = new ABCAbsoluteElement(elem, duration, 1);
-	var slurEl = slurDebug(elem);
-	if (slurEl)
-		abselem.addChild(slurEl);
+
   
   if (elem.rest) {
     switch(elem.rest.type) {
@@ -303,7 +293,17 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
       } else {
 	c="noteheads.quarter";
       }
-      
+
+      if ((dir=="down" && p==pp-1) || (dir=="up" && p==0)) { // place to put slurs if not already on pitches
+	if (elem.startSlur) {
+	  elem.pitches[p].startSlur = elem.startSlur;
+	}
+
+	if (elem.endSlur) {
+	  elem.pitches[p].endSlur = elem.endSlur; // TODO what if there is a mixture of slurs on elem and slurs on pitches?
+	}
+      }
+
       notehead = this.printNoteHead(abselem, c, elem.pitches[p], dir, 0, flag, dot, dotshiftx, 1);
       if (notehead) abselem.addHead(notehead);
     }
@@ -332,17 +332,14 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
     var gracebeam = null;
     if (elem.gracenotes.length>1) {
       gracebeam = new ABCBeamElem("grace",this.isBagpipes);
-		var slurEl = slurDebug(elem.gracenotes);
-		if (slurEl)
-			abselem.addChild(slurEl);
     }
-    for (i=elem.gracenotes.length-1; i>=0; i--) {
+    for (i=0; i<elem.gracenotes.length; i++) {
       var gracepitch = elem.gracenotes[i].verticalPos;
-      this.roomtaken +=10; // hardcoded
+      var roomtakenoffset = (elem.gracenotes.length-i)*10; // hardcoded
 //       var grace = new ABCRelativeElement("noteheads.quarter", -this.roomtaken, this.glyphs.getSymbolWidth("noteheads.quarter")*gracescale, gracepitch, {scalex:gracescale, scaley: gracescale});
 
       flag = (gracebeam) ? null : this.chartable["uflags"][(this.isBagpipes)?5:3]; 
-      grace = this.printNoteHead(abselem, "noteheads.quarter",  elem.gracenotes[i], "up", -this.roomtaken, flag, 0, 0, gracescale);
+      grace = this.printNoteHead(abselem, "noteheads.quarter",  elem.gracenotes[i], "up", -(this.roomtaken+roomtakenoffset), flag, 0, 0, gracescale);
       abselem.addExtra(grace);
 
       if (gracebeam) { // give the beam the necessary info
@@ -358,10 +355,10 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 	abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
       }
       
-      
+      if (i==0 && !this.isBagpipes) this.voice.addOther(new ABCTieElem(grace, notehead, false, true));
     }
 
-    if (!this.isBagpipes) this.voice.addOther(new ABCTieElem(grace, notehead, false, true));
+    this.roomtaken += (elem.gracenotes.length-i)*10;
 
     if (gracebeam) {
       this.voice.addOther(gracebeam);
@@ -477,28 +474,35 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
     this.voice.addOther(tie);
   }
 
-//  for (i=pitchelem.endSlur;i>0;i--) {
-//    if (this.slurs.length===0) {
-//      abselem.addChild(new ABCRelativeElement("missing begin slur", 0, 0, 0, {type:"debug"}));
-//      continue;
-//    }
-//    this.slurs[this.slurs.length-1].anchor2=notehead;
-//    this.slurs = this.slurs.slice(0,this.slurs.length-1);
-//  }
-
-//  for (i=pitchelem.startSlur;i>0;i--) {
-//    var slur = new ABCTieElem(notehead, null, (dir=="down"));
-//    this.slurs[this.slurs.length]=slur;
-//    this.voice.addOther(slur);
-//  }
-	var slurEl = slurDebug(pitchelem);
-	if (slurEl)
-		abselem.addChild(slurEl);
+  if (pitchelem.endSlur) {
+    for (i=0; i<pitchelem.endSlur.length; i++) {
+      var slurid = pitchelem.endSlur[i];
+      var slur;
+      if (this.slurs[slurid]) {
+	slur = this.slurs[slurid].anchor2=notehead;
+	delete this.slurs[slurid];
+      } else {
+	slur = new ABCTieElem(null, notehead, (dir=="down"));
+	this.voice.addOther(slur);
+      }
+      if (this.startlimitelem) {
+	slur.startlimitelem = this.startlimitelem;
+      }
+    }
+  }
+  
+  if (pitchelem.startSlur) {
+    for (i=0; i<pitchelem.startSlur.length; i++) {
+      var slurid = pitchelem.startSlur[i];
+      var slur = new ABCTieElem(notehead, null, (dir=="down"));
+      this.slurs[slurid]=slur;
+      this.voice.addOther(slur);
+    }
+  }
   
   return notehead;
 
 };
-
 
 ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem, roomtaken) {
   var dec;
@@ -584,9 +588,7 @@ ABCLayout.prototype.printBarLine = function (elem) {
   var anchor = null; // place to attach part lines
   var dx = 0;
 
-	if (elem.endEnding) {
-		// TODO-PER: Put the anchor here.
-	}
+
 
   var firstdots = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat");
   var firstthin = (elem.type!="bar_left_repeat" && elem.type!="bar_thick_thin");
@@ -594,6 +596,16 @@ ABCLayout.prototype.printBarLine = function (elem) {
 	       elem.type==="bar_thin_thick" || elem.type==="bar_thick_thin");
   var secondthin = (elem.type==="bar_left_repeat" || elem.type==="bar_thick_thin" || elem.type==="bar_thin_thin" || elem.type==="bar_dbl_repeat");
   var seconddots = (elem.type==="bar_left_repeat" || elem.type==="bar_dbl_repeat");
+
+  // limit positionning of slurs
+  if (firstdots || seconddots) {
+    for (var slur in this.slurs) {
+      if (this.slurs.hasOwnProperty(slur)) {
+	this.slurs[slur].endlimitelem = abselem;
+      }
+    }
+    this.startlimitelem = abselem;
+  }
 
   if (firstdots) {
     abselem.addRight(new ABCRelativeElement("dots.dot", dx, 1, 7));
@@ -617,11 +629,15 @@ ABCLayout.prototype.printBarLine = function (elem) {
     dx+=4;
   }
   
-  if (this.partstartelem && (thick || (firstthin && secondthin))) { // means end of nth part
+//   if (this.partstartelem && (thick || (firstthin && secondthin))) { // means end of nth part
+//     this.partstartelem.anchor2=anchor;
+//     this.partstartelem = null;
+//   }
+
+  if (elem.endEnding) {
     this.partstartelem.anchor2=anchor;
     this.partstartelem = null;
   }
-
 
   if (secondthin) {
     dx+=3; //3 hardcoded;
@@ -675,6 +691,7 @@ ABCLayout.prototype.printKeySignature = function(elem) {
 		dx += this.glyphs.getSymbolWidth(symbol)+2;
 	  }, this);
   }
+  this.startlimitelem = abselem; // limit ties here
   return abselem;
 };
 
@@ -695,5 +712,6 @@ ABCLayout.prototype.printTimeSignature= function(elem) {
   } else if (elem.type === "cut_time") {
     abselem.addRight(new ABCRelativeElement("timesig.cut", 0, this.glyphs.getSymbolWidth("timesig.cut"), 7));
   }
+  this.startlimitelem = abselem; // limit ties here
   return abselem;
 };

@@ -140,13 +140,15 @@ ABCPrinter.prototype.printSymbol = function(x, offset, symbol, start, end) {
 };
 
 ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
+
+
   x1 = x1 + 6;
   x2 = x2 + 4;
   pitch1 = pitch1 + ((above)?1.5:-1.5);
   pitch2 = pitch2 + ((above)?1.5:-1.5);
   var y1 = this.calcY(pitch1);
   var y2 = this.calcY(pitch2);
-  var dy = Math.max(4, (x2-x1)/5);
+  var dy = Math.min(35, Math.max(4, (x2-x1)/5));
   var controlx1 = x1+(x2-x1)/5;
   var controly1 = y1+ ((above)?-dy:dy);
   var controlx2 = x2-(x2-x1)/5;

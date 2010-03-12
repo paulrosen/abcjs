@@ -102,7 +102,7 @@ ABCEditor.prototype.updateRendering = function() {
   this.printer.printABC(tune);
   if (ABCMidiWriter && this.mididiv) {
     this.mididiv.innerHTML="";
-    midiwriter = new ABCMidiWriter(this.mididiv);
+    var midiwriter = new ABCMidiWriter(this.mididiv);
     midiwriter.writeABC(tune);
   }
   if (this.warningsdiv) {

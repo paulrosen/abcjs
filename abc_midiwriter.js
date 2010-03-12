@@ -178,6 +178,7 @@ ABCMidiWriter.prototype.getElem = function() {
 };
 
 ABCMidiWriter.prototype.writeABC = function(abctune) {
+  try {
   this.midi = new Midi();
   this.baraccidentals = [];
   this.abctune = abctune;
@@ -188,6 +189,9 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
     }
   }
   this.midi.embed(this.parent);
+  } catch (e) {
+    this.parent.innerHTML="Couldn't write midi";
+  }
 };
 
 ABCMidiWriter.prototype.writeABCLine = function() {

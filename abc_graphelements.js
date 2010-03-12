@@ -377,15 +377,42 @@ function ABCTieElem (anchor1, anchor2, above, force) {
 }
 
 ABCTieElem.prototype.draw = function (printer, linestartx, lineendx) {
-  // TODO end and beginning of line
+  var startpitch;
+  var endpitch;
+
+  if (this.startlimitelem) {
+    linestartx = this.startlimitelem.x+this.startlimitelem.w;
+  } 
+
+  if (this.endlimitelem) {
+    lineendx = this.endlimitelem.x;
+  } 
+
+  if (this.anchor1) {
+    linestartx = this.anchor1.x;
+    startpitch = this.anchor1.pitch;
+    if (!this.anchor2) {
+      endpitch = this.anchor1.pitch;
+    }
+  }
+
+  if (this.anchor2) {
+    lineendx = this.anchor2.x;
+    endpitch = this.anchor2.pitch;
+    if (!this.anchor1) {
+      startpitch = this.anchor2.pitch;
+    }
+  }
 
   if (this.anchor1 && this.anchor2) {
     if (!this.force && this.anchor1.parent.beam && this.anchor2.parent.beam && 
 	this.anchor1.parent.beam.asc===this.anchor2.parent.beam.asc) {
       this.above = !this.anchor1.parent.beam.asc;
     }
-    printer.drawArc(this.anchor1.x, this.anchor2.x, this.anchor1.pitch, this.anchor2.pitch,  this.above);
   }
+
+  printer.drawArc(linestartx, lineendx, startpitch, endpitch,  this.above);
+
 };
 
 function ABCTripletElem (number, anchor1, anchor2, above) {
