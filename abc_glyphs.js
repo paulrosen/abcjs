@@ -9,7 +9,7 @@ var ABCGlyphs = function() {
      var pathArray = glyphs[symb].d;
      pathArray[0][1] +=x;
      pathArray[0][2] +=y;
-     var path = paper.path(glyphs[symb].d).attr({fill: "#000", stroke: "none"});
+     var path = paper.path(glyphs[symb].d);
      pathArray[0][1] -=x;
      pathArray[0][2] -=y;
      return path;//.translate(x,y);

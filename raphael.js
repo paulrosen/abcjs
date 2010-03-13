@@ -946,12 +946,14 @@ Raphael = (function () {
         R[toString] = function () {
             return  "Your browser supports SVG.\nYou are running Rapha\xebl " + this.version;
         };
-        var thePath = function (pathString, SVG) {
+        var thePath = function (pathString, SVG, attrs) { // ABCJS
             var el = $("path");
             SVG.canvas && SVG.canvas[appendChild](el);
             var p = new Element(el, SVG);
             p.type = "path";
-            setFillAndStroke(p, {fill: "none", stroke: "#000", path: pathString});
+	    attrs = attrs ||  {fill: "#000", stroke: "none"};
+	    attrs.path = pathString;
+            setFillAndStroke(p, attrs);
             return p;
         };
         var addGradientFill = function (o, gradient, SVG) {
@@ -1654,7 +1656,7 @@ Raphael = (function () {
         R[toString] = function () {
             return  "Your browser doesn\u2019t support SVG. Falling down to VML.\nYou are running Rapha\xebl " + this.version;
         };
-        var thePath = function (pathString, VML) {
+        var thePath = function (pathString, VML, attrs) { //ABCJS added attrs
             var g = createNode("group");
             g.style.cssText = "position:absolute;left:0;top:0;width:" + VML.width + "px;height:" + VML.height + "px";
             g.coordsize = VML.coordsize;
@@ -1670,7 +1672,10 @@ Raphael = (function () {
             p.type = "path";
             p.path = [];
             p.Path = E;
-            pathString && setFillAndStroke(p, {fill: "none", stroke: "#000", path: pathString});
+	    attrs = attrs ||  {fill: "#000", stroke: "none"};
+	    attrs.path = pathString;
+            setFillAndStroke(p, attrs);
+            pathString && setFillAndStroke(p, attrs);
             VML.canvas[appendChild](g);
             return p;
         };
@@ -2471,6 +2476,10 @@ Raphael = (function () {
     Paper[proto].path = function (pathString) {
         pathString && !R.is(pathString, "string") && !R.is(pathString[0], "array") && (pathString += E);
         return thePath(R.format[apply](R, arguments), this);
+    };
+    Paper[proto].quickpath = function (pathString, attrs) {
+        pathString && !R.is(pathString, "string") && !R.is(pathString[0], "array") && (pathString += E);
+        return thePath(R.format[apply](R, [pathString]), this, attrs);
     };
     Paper[proto].image = function (src, x, y, w, h) {
         return theImage(this, src || "about:blank", x || 0, y || 0, w || 0, h || 0);

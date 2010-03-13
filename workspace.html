@@ -4,12 +4,8 @@
 
 
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<title>Draw The Dots: Tune Editor</title>
-	<link href="scaffold.css" media="screen" rel="stylesheet" type="text/css">
-	<link href="music.css" media="screen" rel="stylesheet" type="text/css">
-	<link href="workspace.css" media="screen" rel="stylesheet" type="text/css">
+	<title>Draw The Dots: Tune Editor demo</title>
 
-	<script src="jsonschema-b4.js" type="text/javascript"></script>
 	<script src="proto.js" type="text/javascript"></script>
 
 	<script src="raphael.js" type="text/javascript"></script>
@@ -23,24 +19,25 @@
         <script src="abc_tune.js" type="text/javascript"></script>
 	<script src="abc_tokenizer.js" type="text/javascript"></script>
         <script src="abc_parse.js" type="text/javascript"></script>
-        <script src="abc_parser_lint.js" type="text/javascript"></script>
         <script src="abc_midiwriter.js" type="text/javascript"></script>
 
-	<script src="application.js" type="text/javascript"></script>
+	<script src="abc_editor.js" type="text/javascript"></script>
+        <script type="text/javascript">
+window.onload = function() {
+
+  new ABCEditor("abc", { canvas_id: "canvas",
+                                      midi_id:"midi",
+                                      warnings_id:"warnings",
+                                      parser_params:{}
+                                      });
+}
+
+        </script>
 </head><body>
-<script type="text/javascript">
-//<![CDATA[
-window.authenticity_token = '/7ppFNYyTniT052rHPqqX7tN+rWz9TknC8Y2rA+T2VE='
-//]]>
-</script>
-
-<p style="color: green;"></p>
 
 
-<table>
-	<tbody><tr>
-		<td>
-			<textarea name="abc" id="abc" cols="80" rows="15" onclick="click();" onkeyup="abc_keystroke();" onmousemove="abc_mousemove()">X: 1
+
+<textarea id="abc" cols="80" rows="15">X: 1
 T: Cooley's
 M: 4/4
 L: 1/8
@@ -50,52 +47,7 @@ K: Emin
 EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
 |:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
 eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|</textarea>
-		</td>
-		<td>
-			<ul class="NoBulletNoIndent">
-				<li><select onkeyup="pickTune(this.options[this.selectedIndex].value);" onchange="pickTune(this.options[this.selectedIndex].value);">
-					<option selected="selected" value="X:1`nT:Untitled`nC:Author`nS:Copyright`nM:4/4`nL:1/8`nQ:112`nR:rhythm`nK:C`n">New Tune</option>
-										<option value="X:1`nT:Critter`as Gone to Texas`nM:4/4`nL:1/8`nQ:116`nC:Paul Rosen`nS:Copyright 2008, Paul Rosen`nR:old time`nK:C`nef|:&quot;C&quot;g2g2 a3a|ge3- e2 ef|g2g2 a2ag|&quot;G7&quot;f4-f2ff|f2ff d2dd|B2BB G4|`nf2f2 edB2|1&quot;C&quot;c6ef:|2&quot;C&quot;c6cB[|:&quot;Am&quot;AE2E E2EE|GE2E E2EE|&quot;G&quot;D2DE DCB,2|&quot;Am&quot;A,2A,A, A,2A,A,|`n&quot;G&quot;G,2B,2 D2E2|GABc d2dd|f2f2 edB2|1&quot;C&quot;c6cB:|2&quot;C&quot;c6ef||`n`n">Critter's Gone to Texas
-</option>
-										<option value="X:1`nT:Dancing Susan`nC:Paul Rosen`nS:Copyright 2005, Paul Rosen`nM:6/8`nL:1/8`nQ:112`nR:Circus Jig`nK:D`n&quot;D&quot;dcd f2d|B2A F2A|&quot;Em&quot;BAG B2G|&quot;A7&quot;cBA c2A|&quot;D&quot;dcd f2d|B2A F2A|&quot;G&quot;B2c &quot;A7&quot;edc|&quot;D&quot;d3 d3:|`n|:&quot;B7&quot;Bc^d Bcd|&quot;E7&quot;e2f ^g3|&quot;A&quot;a^ga bag|&quot;A7&quot;a2e c2e|&quot;D&quot;dcd f3|&quot;G&quot;dcd g3|&quot;A7&quot;B2c edc|&quot;D&quot;d3 d3:|`nT: Harmony (by Rya Martin)`n&quot;D&quot;fef a2f|d2=cA2c|&quot;Em&quot;d=cB d2B|&quot;A7&quot;edc e2c|&quot;D&quot;fef a2f|d2=cA2c|&quot;G&quot;d2e &quot;A7&quot;gfe|&quot;D&quot;f3f3:|`n|:&quot;B7&quot;^def def|&quot;E7&quot;^g2a b3|&quot;A&quot;c`abc`a d`ac`ab|&quot;A7&quot;c`a2g e2g|&quot;D&quot;fef a2f|&quot;G&quot;bab d`a2b|&quot;A7&quot;g2a gfe|&quot;D&quot;f3 f3:|`n`n">Dancing Susan
-</option>
-										<option value="X:1`nT:Money Lost`nM:3/4`nL:1/8`nQ:80`nC:Paul Rosen`nS:Copyright 2007, Paul Rosen`nR:Klezmer`nK:Dm`nAde|:&quot;Dm&quot;(f2d)e gf|&quot;A7&quot;e2^c4|&quot;Gm&quot;B&gt;&gt;^c BA BG|&quot;A&quot;A3Ade|&quot;Dm&quot;(f2d)e gf|&quot;A7&quot;e2^c4|`n&quot;Gm&quot;A&gt;&gt;B &quot;A7&quot;AG FE|1&quot;Dm&quot;D3Ade:|2&quot;Dm&quot;D3DEF||:&quot;Gm&quot;(G2D)E FG|&quot;Dm&quot;A2F4|&quot;Gm&quot;B&gt;&gt;c &quot;A7&quot;BA BG|`n&quot;Dm&quot;A3 DEF|&quot;Gm&quot;(G2D)EFG|&quot;Dm&quot;A2F4|&quot;A7 (Edim)&quot;E&gt;&gt;Fx &quot;(A7)&quot;ED^C2|1&quot;Dm&quot;D3DEF:|2&quot;Dm&quot;D6|`nT:Harmony`ndfg|:&quot;Dm&quot;(a2f)g ba|&quot;A7&quot;g2e4|&quot;Gm&quot;d&gt;&gt;e d^c dB|&quot;A&quot;^c3dfg|&quot;Dm&quot;(a2f)g ba|&quot;A7&quot;g2e4|`n&quot;Gm&quot;d&gt;&gt;e &quot;A7&quot;dB AG|1&quot;Dm&quot;F3dfg:|2&quot;Dm&quot;F3FGA||:&quot;Gm&quot;(B2F)G AB|&quot;Dm&quot;d2A4|&quot;Gm&quot;d&gt;&gt;e &quot;A7&quot;dc dB|`n&quot;Dm&quot;d3 FGA|&quot;Gm&quot;(B2F)GAB|&quot;Dm&quot;d2A4|&quot;A7 (Edim)&quot;G&gt;&gt;Ax &quot;(A7)&quot;GFE2|1&quot;Dm&quot;F3FGA:|2&quot;Dm&quot;F6|`n`n">Money Lost
-</option>
-										<option value="X:1`nT:Pretty Little Liza`nC:Paul Rosen`nS:Copyright 2005, Paul Rosen`nM:4/4`nL:1/8`nQ:106`nR:old time`nK:Am`n&quot;Am&quot;A2AA c2dd|e2eg e2dc|A2AA c2dd|e2cc A2cc|&quot;Em (G)&quot;B2BB B2BB|`nB2BB B2BB|&quot;Am&quot;A2AA c2dd|e2eg e2c2|&quot;D&quot;d2dd d2dd|d2dd d2cd|`n&quot;Am&quot;e2cc A2c2|&quot;G&quot;BAG2 BAG2|&quot;Am&quot;A2AA A2AA|A2AA A2AA|:&quot;Am&quot;e4 a3e|&quot;G&quot;g2d2- d2eg|`n&quot;Am&quot;a2aa ged2|&quot;Em&quot;e2ee e2ee|&quot;Am&quot;e4 a3e|&quot;G&quot;g2d2- d2Bc|&quot;Em&quot;d2e2 dcB2|&quot;Am&quot;A2AA A2AA:|`n`n">Pretty Little Liza
-</option>
-									</select></li>
-				<li>Zoom: <select onkeyup="magnify(this.options[this.selectedIndex].value);" onchange="magnify(this.options[this.selectedIndex].value);">
-					<option value=".5">1</option>
-					<option value=".6">2</option>
-					<option value=".7" selected="selected">3</option>
-					<option value=".8">4</option>
-					<option value=".9">5</option>
-					<option value="1">6</option>
-				</select></li>
-				<li><a href="#" onclick="createPDF();; return false;">Create PDF</a></li>
-				<li><a href="#" onclick="createMIDI();; return false;">Create MIDI</a></li>
-				<li><a href="#" onclick="save();; return false;">Save</a></li>
-				<li><a href="http://drawthedots.performantsoftware.com/comparison">Go to parser testing page</a></li>
-				<li><a href="http://drawthedots.performantsoftware.com/about">About</a></li>
-				<li><input id="playButton" value="Play" onclick="play();" type="button"> <input id="stopButton" value="Stop" onclick="stopPlay();" disabled="disabled" type="button"></li>
-				<li><div id="ajax_status"></div></li>
-				<li><div id="players"></div></li>
-			</ul>
-		</td>
-	</tr>
-</tbody></table>
-<span class="explanation">NOTE: The representation of the music below is approximate. Use "Create PDF" to
-see what it will actually look like.</span>
-            
-<hr>
-<div id="main_title">&nbsp;</div>
-<div id="author">&nbsp;</div>
 <div id="warnings"></div>
-<div id="music"></div>
-<div id="canvas0"></div>
-<div id="canvas1"></div>
-<div id="canvas2"></div>
-<div id="canvas3"></div>
-
-
-<i style="display: none; color: rgb(0, 0, 0);" class="Raphaël Colour Picker"></i></body></html>
+<hr>
+<div id="midi"></div>
+<div id="canvas"></div>

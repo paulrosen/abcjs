@@ -353,19 +353,22 @@ function ABCEndingElem (text, anchor1, anchor2) {
 ABCEndingElem.prototype.draw = function (printer, linestartx, lineendx) {
   if (this.anchor1) {
     linestartx = this.anchor1.x+this.anchor1.w;
-    printer.paper.path(sprintf("M %f %f L %f %f",
-			       linestartx, printer.y, linestartx, printer.y+10)).attr({stroke:"#000000"});
+    printer.paper.quickpath(sprintf("M %f %f L %f %f",
+				    linestartx, printer.y, linestartx, printer.y+10),
+  {stroke:"#000000", fill:"#000000"});
     printer.printText(linestartx+5, 18.5, this.text);
   }
 
   if (this.anchor2) {
     lineendx = this.anchor2.x;
-    printer.paper.path(sprintf("M %f %f L %f %f",
-			   lineendx, printer.y, lineendx, printer.y+10)).attr({stroke:"#000000"});
+    printer.paper.quickpath(sprintf("M %f %f L %f %f",
+			       lineendx, printer.y, lineendx, printer.y+10),
+  {stroke:"#000000", fill:"#000000"});
   }
 
-  printer.paper.path(sprintf("M %f %f L %f %f",
-			    linestartx, printer.y, lineendx, printer.y)).attr({stroke:"#000000"});
+  printer.paper.quickpath(sprintf("M %f %f L %f %f",
+				  linestartx, printer.y, lineendx, printer.y),
+  {stroke:"#000000", fill:"#000000"});
   
 };
 
@@ -456,17 +459,17 @@ ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
 
 ABCTripletElem.prototype.drawLine = function (printer, y) {
   var linestartx = this.anchor1.x;
-  printer.paper.path(sprintf("M %f %f L %f %f",
+  printer.paper.quickpath(sprintf("M %f %f L %f %f",
 			     linestartx, y, linestartx, y+5)).attr({stroke:"#000000"});
   
   var lineendx = this.anchor2.x+this.anchor2.w;
-  printer.paper.path(sprintf("M %f %f L %f %f",
+  printer.paper.quickpath(sprintf("M %f %f L %f %f",
 			     lineendx, y, lineendx, y+5)).attr({stroke:"#000000"});
   
-  printer.paper.path(sprintf("M %f %f L %f %f",
+  printer.paper.quickpath(sprintf("M %f %f L %f %f",
 			     linestartx, y, (linestartx+lineendx)/2-5, y)).attr({stroke:"#000000"});
 
-  printer.paper.path(sprintf("M %f %f L %f %f",
+  printer.paper.quickpath(sprintf("M %f %f L %f %f",
 			    (linestartx+lineendx)/2+5, y, lineendx, y)).attr({stroke:"#000000"});
 
 };
@@ -533,8 +536,9 @@ ABCBeamElem.prototype.drawBeam = function(printer) {
   if(this.asc) this.endx+=this.elems[this.elems.length-1].heads[0].w-0.6;
 
 
-  printer.paper.path("M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
-	     "L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z").attr({fill: "#000000"});
+  printer.paper.quickpath("M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
+	     "L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z",
+  {stroke:"#000000", fill:"#000000"});
 };
 
 ABCBeamElem.prototype.drawStems = function(printer) {
@@ -573,8 +577,9 @@ ABCBeamElem.prototype.drawStems = function(printer) {
 	  auxbeamendx = (i===0) ? x+5 : x-5;
 	  auxbeamendy = this.getBarYAt(auxbeamendx) + sy*(j+1);
 	}
-	printer.paper.path("M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
-		   "L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z").attr({fill: "#000000"});
+	printer.paper.quickpath("M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
+		   "L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z",
+  {stroke:"#000000", fill:"#000000"});
 	auxbeams = auxbeams.slice(0,j);
       }
     }
