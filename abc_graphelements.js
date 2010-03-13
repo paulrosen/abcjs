@@ -38,7 +38,7 @@ ABCStaffGroupElement.prototype.finished = function() {
 };
 
 ABCStaffGroupElement.prototype.layout = function(spacing) {
-  this.spacingunits = 0;
+  this.spacingunits = 0; // number of space units taken up (as opposed to fixed width). Layout engine then decides how many a pixels a space unit should be
   var x = 0;
   var currentduration = 0;
   for (var i=0;i<this.voices.length;i++) {
@@ -103,7 +103,7 @@ ABCStaffGroupElement.prototype.layout = function(spacing) {
   for (var i=0;i<this.voices.length;i++) {
     if (this.voices[i].nextx>x) {
       x=this.voices[i].nextx;
-      spacingunit=currentvoices[i].spacingunits
+      spacingunit=this.voices[i].spacingunits
     }
   }
   this.spacingunits+=spacingunit;

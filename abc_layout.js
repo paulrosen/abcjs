@@ -154,7 +154,7 @@ ABCLayout.prototype.printABCElement = function() {
     break;
   case "part":
     var abselem = new ABCAbsoluteElement(elem,0,0);
-    abselem.addChild(new ABCRelativeElement(elem.title, 0, 0, 20, {type:"text", attributes:{"font-weight":"bold", "font-size":"20px"}}));
+    abselem.addChild(new ABCRelativeElement(elem.title, 0, 0, 20, {type:"text", attributes:{"font-weight":"bold", "font-size":"16px", "font-family":"serif"}}));
     elemset[0] = abselem;
     break;
   default: 
@@ -248,8 +248,9 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
     case "spacer":
       c="";
     }
-    notehead = this.printNoteHead(abselem, c, {verticalPos:7}, null, 0, null, dot, 0, 1);
+    notehead = this.printNoteHead(abselem, c, {verticalPos:7}, null, 0, -this.roomtaken, null, dot, 0, 1);
     if (notehead) abselem.addHead(notehead);
+    this.roomtaken+=this.accidentalshiftx;
 
   } else {
     sortPitch(elem);
@@ -304,8 +305,9 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 	}
       }
 
-      notehead = this.printNoteHead(abselem, c, elem.pitches[p], dir, 0, flag, dot, dotshiftx, 1);
+      notehead = this.printNoteHead(abselem, c, elem.pitches[p], dir, 0, -this.roomtaken, flag, dot, dotshiftx, 1);
       if (notehead) abselem.addHead(notehead);
+      this.roomtaken += this.accidentalshiftx;
     }
       
     // draw stem from the furthest note to a pitch above/below the stemmed note
@@ -333,13 +335,21 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
     if (elem.gracenotes.length>1) {
       gracebeam = new ABCBeamElem("grace",this.isBagpipes);
     }
+
+    var graceoffsets = [];
+    for (i=elem.gracenotes.length-1; i>=0; i--) { // figure out where to place each gracenote
+      this.roomtaken+=10;
+      graceoffsets[i] = this.roomtaken;
+      if (elem.gracenotes[i].accidental) {
+	this.roomtaken+=7;
+      }
+    }
+
     for (i=0; i<elem.gracenotes.length; i++) {
       var gracepitch = elem.gracenotes[i].verticalPos;
-      var roomtakenoffset = (elem.gracenotes.length-i)*10; // hardcoded
-//       var grace = new ABCRelativeElement("noteheads.quarter", -this.roomtaken, this.glyphs.getSymbolWidth("noteheads.quarter")*gracescale, gracepitch, {scalex:gracescale, scaley: gracescale});
 
       flag = (gracebeam) ? null : this.chartable["uflags"][(this.isBagpipes)?5:3]; 
-      grace = this.printNoteHead(abselem, "noteheads.quarter",  elem.gracenotes[i], "up", -(this.roomtaken+roomtakenoffset), flag, 0, 0, gracescale);
+      grace = this.printNoteHead(abselem, "noteheads.quarter",  elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale);
       abselem.addExtra(grace);
 
       if (gracebeam) { // give the beam the necessary info
@@ -357,8 +367,6 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
       
       if (i==0 && !this.isBagpipes) this.voice.addOther(new ABCTieElem(grace, notehead, false, true));
     }
-
-    this.roomtaken += (elem.gracenotes.length-i)*10;
 
     if (gracebeam) {
       this.voice.addOther(gracebeam);
@@ -404,17 +412,17 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   return abselem;
 };
 
-ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, flag, dot, dotshiftx, scale) {
+ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale) {
 
   // TODO scale the dot as well
   var pitch = pitchelem.verticalPos;
   var notehead;
   var i;
+  this.accidentalshiftx = 0;
   if (c === undefined)
     abselem.addChild(new ABCRelativeElement("pitch is undefined", 0, 0, 0, {type:"debug"}));
   else if (c==="") {
     notehead = new ABCRelativeElement(null, 0, 0, pitch);
-    abselem.addHead(notehead);
   } else {
     var shiftheadx = headx;
     if (pitchelem.printer_shift) {
@@ -457,8 +465,8 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
     case "natural":
       symb = "accidentals.nat";
     }
-    this.roomtaken += (this.glyphs.getSymbolWidth(symb)*scale+2);
-    abselem.addExtra(new ABCRelativeElement(symb, -this.roomtaken, this.glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
+    this.accidentalshiftx = (this.glyphs.getSymbolWidth(symb)*scale+2);
+    abselem.addExtra(new ABCRelativeElement(symb, extrax-this.accidentalshiftx, this.glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
   }
   
   if (pitchelem.endTie) {
@@ -634,7 +642,7 @@ ABCLayout.prototype.printBarLine = function (elem) {
 //     this.partstartelem = null;
 //   }
 
-  if (elem.endEnding) {
+  if (this.partstartelem && elem.endEnding) {
     this.partstartelem.anchor2=anchor;
     this.partstartelem = null;
   }

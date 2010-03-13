@@ -107,7 +107,7 @@ ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
 
 ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
   anchor = anchor || "start";
-  return this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor});
+  return this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor, "font-size":12});
 };
 
 // assumes this.y is set appropriately
@@ -189,7 +189,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
     this.width=700;
   }
   if (abctune.formatting.scale) { this.paper.text(200, this.y, "Format: scale="+abctune.formatting.scale); this.y += 20; }
-  this.paper.text(350, this.y, abctune.metaText.title).attr({"font-size":20});
+  this.paper.text(this.width/2, this.y, abctune.metaText.title).attr({"font-size":20});
   this.y+=20;
   if (abctune.metaText.author) {this.paper.text(500, this.y, abctune.metaText.author, "end"); this.y+=15;}
   if (abctune.metaText.origin) {this.paper.text(500, this.y, "(" + abctune.metaText.origin + ")", "end");this.y+=15;}
@@ -210,15 +210,16 @@ ABCPrinter.prototype.printABC = function(abctune) {
       var c = this.layouter.chartable["note"][-durlog];
       var flag = this.layouter.chartable["uflags"][-durlog];
       var temponote = this.layouter.printNoteHead(abselem, 
-					 c, 
-					 {verticalPos:tempopitch},
-					 "up",
-					 0,
-					 flag,
-					 dot,
-					 0,
-					 temposcale
-					 );
+						  c, 
+  {verticalPos:tempopitch},
+						  "up",
+						  0,
+						  0,
+						  flag,
+						  dot,
+						  0,
+						  temposcale
+						  );
       abselem.addHead(temponote);
       if (duration<1) {
 	var p1 = tempopitch+1/3*temposcale;
@@ -240,7 +241,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
   }
   this.y+=15;
   this.staffgroups = [];
-
+  var maxwidth = this.width;
   for(var line=0; line<abctune.lines.length; line++) {
     var abcline = abctune.lines[line];
     if (abcline.staff) {
@@ -253,6 +254,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
 	newspace = Math.min(this.space,(this.width-constspace)/staffgroup.spacingunits);
       }
       staffgroup.draw(this);
+      if (staffgroup.w>maxwidth) maxwidth = staffgroup.w;
       this.staffgroups[this.staffgroups.length] = staffgroup;
       this.y = this.layouter.y;
       this.y+=AbcSpacing.STAVEHEIGHT;
@@ -276,7 +278,8 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords + "\n";
   var text = this.paper.text(30, this.y+30, extraText);
   text.translate(0,text.getBBox().height/2);
-  this.paper.setSize(this.width+50,this.y+30+text.getBBox().height);
+  this.paper.setSize(maxwidth+50,this.y+30+text.getBBox().height);
+  this.paper.canvas.parentNode.setAttribute("style","width:"+(maxwidth+50));
 };
 
 ABCPrinter.prototype.printSubtitleLine = function(abcline) {
