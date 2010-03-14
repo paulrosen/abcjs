@@ -347,8 +347,6 @@ function AbcParse() {
 
 	// TODO-PER: make this a method in el.
 	var addEndBeam = function(el) {
-//			if (el.pitch !== undefined && el.duration < 0.25)
-//				el.end_beam = true;
 		if (el.duration !== undefined && el.duration < 0.25)
 			el.end_beam = true;
 		return el;

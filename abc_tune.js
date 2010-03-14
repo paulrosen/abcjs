@@ -61,6 +61,7 @@ function AbcTune() {
 	};
 
 	this.cleanUp = function() {
+		this.closeLine();	// Close the last line.
 		// Remove any blank lines
 		var anyDeleted = false;
 		for (var i = 0; i < this.lines.length; i++) {
@@ -155,8 +156,8 @@ function AbcTune() {
 		for (this.lineNum = 0; this.lineNum < this.lines.length; this.lineNum++) {
 			if (this.lines[this.lineNum].staff) for (this.staffNum = 0; this.staffNum < this.lines[this.lineNum].staff.length; this.staffNum++) {
 				for (this.voiceNum = 0; this.voiceNum < this.lines[this.lineNum].staff[this.staffNum].voices.length; this.voiceNum++) {
-					var el = this.getLastNote();
-					if (el) el.end_beam = true;
+//					var el = this.getLastNote();
+//					if (el) el.end_beam = true;
 					cleanUpSlursInLine(this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum]);
 				}
 			}
@@ -165,6 +166,8 @@ function AbcTune() {
 		delete this.staffNum;
 		delete this.voiceNum;
 		delete this.lineNum;
+		delete this.potentialStartBeam;
+		delete this.potentialEndBeam;
 	};
 
 	this.reset();
@@ -198,6 +201,15 @@ function AbcTune() {
 		return 0;
 	};
 
+	this.closeLine = function() {
+		if (this.potentialStartBeam && this.potentialEndBeam) {
+			this.potentialStartBeam.startBeam = true;
+			this.potentialEndBeam.endBeam = true;
+		}
+		delete this.potentialStartBeam;
+		delete this.potentialEndBeam;
+	};
+
 	this.appendElement = function(type, startChar, endChar, hashParams)
 	{
 		var This = this;
@@ -217,27 +229,58 @@ function AbcTune() {
 			hashParams.startChar = startChar;
 		if (endChar !== null)
 			hashParams.endChar = endChar;
-		if (type === 'note' && (hashParams.rest !== undefined || hashParams.end_beam === undefined)) {
-			// Now, add the end_beam where it is needed.
-			//  end_beam goes on all notes which are followed by a space.  (This case is already done by the parser.)
-			// end_beam goes on all notes that are 1/4 or longer (regardless of spacing).
-			var dur = this.getDuration(hashParams);
-			if (dur >= 0.25) {
-				hashParams.end_beam = true;
-				//  end_beam goes on notes which _precede_ a note which is 1/4 or longer.
-				var el = this.getLastNote();
-				if (el) el.end_beam = true;
+		var endBeamHere = function() {
+			This.potentialStartBeam.startBeam = true;
+			hashParams.endBeam = true;
+			delete This.potentialStartBeam;
+			delete This.potentialEndBeam;
+		};
+		var endBeamLast = function() {
+			if (This.potentialStartBeam !== undefined && This.potentialEndBeam !== undefined) {	// Do we have a set of notes to beam?
+				This.potentialStartBeam.startBeam = true;
+				This.potentialEndBeam.endBeam = true;
+			}
+			delete This.potentialStartBeam;
+			delete This.potentialEndBeam;
+		};
+		if (type === 'note') { // && (hashParams.rest !== undefined || hashParams.end_beam === undefined)) {
+			// Now, add the startBeam and endBeam where it is needed.
+			// end_beam is already set on the places where there is a forced end_beam. We'll remove that here after using that info.
+			// this.potentialStartBeam either points to null or the start beam.
+			// this.potentialEndBeam either points to null or the start beam.
+			// If we have a beam break (note is longer than a quarter, or an end_beam is on this element), then set the beam if we have one.
+			// reset the variables for the next notes.
+			var dur = This.getDuration(hashParams);
+			if (dur >= 0.25) {	// The beam ends on the note before this.
+				endBeamLast();
+			} else if (hashParams.end_beam && This.potentialStartBeam != undefined) {	// the beam is forced to end on this note, probably because of a space in the ABC
+				if (hashParams.rest === undefined)
+					endBeamHere();
+				else
+					endBeamLast();
+			} else if (hashParams.rest === undefined) {	// this a short note and we aren't about to end the beam
+				if (This.potentialStartBeam === undefined) {	// We aren't collecting notes for a beam, so start here.
+					if (!hashParams.end_beam) {
+						This.potentialStartBeam = hashParams;
+						delete This.potentialEndBeam;
+					}
+				} else {
+					This.potentialEndBeam = hashParams;	// Continue the beaming, look for the end next note.
+				}
 			}
 
 			//  end_beam goes on rests and notes which precede rests _except_ when a rest (or set of adjacent rests) has normal notes on both sides (no spaces)
-			if (hashParams.rest !== undefined)
-			{
-				hashParams.end_beam = true;
-				var el2 = this.getLastNote();
-				if (el2) el2.end_beam = true;
-				// TODO-PER: implement exception mentioned in the comment.
-			}
+//			if (hashParams.rest !== undefined)
+//			{
+//				hashParams.end_beam = true;
+//				var el2 = this.getLastNote();
+//				if (el2) el2.end_beam = true;
+//				// TODO-PER: implement exception mentioned in the comment.
+//			}
+		} else {	// It's not a note, so there definitely isn't beaming after it.
+			endBeamLast();
 		}
+		delete hashParams.end_beam;	// We don't want this temporary variable hanging around.
 		pushNote(hashParams);
 	};
 
@@ -304,6 +347,7 @@ function AbcTune() {
 		// If the pointed to line doesn't exist, just create that. If the line does exist, but doesn't have any music on it, just use it.
 		// If it does exist and has music, then increment the line number. If the new element doesn't exist, create it.
 		var This = this;
+		this.closeLine();	// Close the previous line.
 		var createVoice = function(params) {
 			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum] = [];
 			if (This.isFirstLine(This.lineNum)) {
