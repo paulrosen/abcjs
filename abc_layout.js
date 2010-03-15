@@ -169,7 +169,7 @@ ABCLayout.prototype.printABCElement = function() {
 ABCLayout.prototype.printBeam = function() {
   var abselemset = [];
   
-  if (this.getElem().startBeam) {
+  if (this.getElem().startBeam && !this.getElem().endBeam) {
     var beamelem = new ABCBeamElem(this.stemdir);
     while (this.getElem()) {
       var abselem = this.printNote(this.getElem(),true);
@@ -181,20 +181,22 @@ ABCLayout.prototype.printBeam = function() {
       this.pos++;
     }
     this.voice.addOther(beamelem);
-  } else if (this.getNextElem() && this.getNextElem().el_type=="note" && !this.getElem().end_beam) {
-    var beamelem = new ABCBeamElem(this.stemdir);
+  } 
+// else if (this.getNextElem() && this.getNextElem().el_type=="note" && !this.getElem().end_beam) {
+//     var beamelem = new ABCBeamElem(this.stemdir);
 
-    while (this.getElem()) {
-      var abselem = this.printNote(this.getElem(),true);
-      abselemset[abselemset.length] = abselem;
-      beamelem.add(abselem);
-      if (!this.getNextElem() || this.getNextElem().el_type!=="note" || this.getElem().end_beam) {
-		break;
-      }
-      this.pos++;
-    }
-    this.voice.addOther(beamelem);
-  } else {
+//     while (this.getElem()) {
+//       var abselem = this.printNote(this.getElem(),true);
+//       abselemset[abselemset.length] = abselem;
+//       beamelem.add(abselem);
+//       if (!this.getNextElem() || this.getNextElem().el_type!=="note" || this.getElem().end_beam) {
+// 		break;
+//       }
+//       this.pos++;
+//     }
+//     this.voice.addOther(beamelem);
+//   }
+  else {
     abselemset[0] = this.printNote(this.getElem());
   }
   return abselemset;
