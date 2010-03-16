@@ -276,7 +276,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
   if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
   if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords + "\n";
-  var text = this.paper.text(30, this.y+30, extraText);
+  var text = this.paper.text(10, this.y+25, extraText).attr({"text-anchor":"start"});
   text.translate(0,text.getBBox().height/2);
   this.paper.setSize(maxwidth+50,this.y+30+text.getBBox().height);
   this.paper.canvas.parentNode.setAttribute("style","width:"+(maxwidth+50));
