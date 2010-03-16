@@ -95,14 +95,15 @@ ABCPrinter.prototype.rangeHighlight = function(start,end)
 ABCPrinter.prototype.printStaveLine = function (x1,x2, pitch) {
   var dy = 0.35;
   var y = this.calcY(pitch);
-  return this.paper.path(sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
-		       x2, y+dy, x1, y+dy));
+  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
+			   x2, y+dy, x1, y+dy);
+  return this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
 };
 
 ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
-  return this.paper.path(sprintf("M %f %f L %f %f L %f %f L %f %f z", x-0.3, y1, x-0.3, y2,
-		       x+dx, y2, x+dx, y1));
-
+  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x-0.3, y1, x-0.3, y2,
+			   x+dx, y2, x+dx, y1);
+  return this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
 };
 
 ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
@@ -154,9 +155,10 @@ ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
   var controlx2 = x2-(x2-x1)/5;
   var controly2 = y2+ ((above)?-dy:dy);
   var thickness = 2;
-  return this.paper.path(sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1, 
-				 controlx1, controly1, controlx2, controly2, x2, y2, 
-				 controlx2, controly2+thickness, controlx1, controly1+thickness, x1, y1));
+  var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1, 
+			   controlx1, controly1, controlx2, controly2, x2, y2, 
+			   controlx2, controly2+thickness, controlx1, controly1+thickness, x1, y1);
+  return this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
 };
 
 ABCPrinter.prototype.debugMsg = function(x, msg) {

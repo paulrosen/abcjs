@@ -353,25 +353,26 @@ function ABCEndingElem (text, anchor1, anchor2) {
 }
 
 ABCEndingElem.prototype.draw = function (printer, linestartx, lineendx) {
+  var pathString;
   if (this.anchor1) {
     linestartx = this.anchor1.x+this.anchor1.w;
-    printer.paper.quickpath(sprintf("M %f %f L %f %f",
-				    linestartx, printer.y, linestartx, printer.y+10),
-  {stroke:"#000000", fill:"#000000"});
+    pathString = sprintf("M %f %f L %f %f",
+			     linestartx, printer.y, linestartx, printer.y+10); 
+    printer.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000"});
     printer.printText(linestartx+5, 18.5, this.text).attr({"font-size":"10px"});
   }
 
   if (this.anchor2) {
     lineendx = this.anchor2.x;
-    printer.paper.quickpath(sprintf("M %f %f L %f %f",
-			       lineendx, printer.y, lineendx, printer.y+10),
-  {stroke:"#000000", fill:"#000000"});
+    pathString = sprintf("M %f %f L %f %f",
+			 lineendx, printer.y, lineendx, printer.y+10); 
+    printer.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000"});
   }
 
-  printer.paper.quickpath(sprintf("M %f %f L %f %f",
-				  linestartx, printer.y, lineendx, printer.y),
-  {stroke:"#000000", fill:"#000000"});
-  
+
+  pathString = sprintf("M %f %f L %f %f",
+				  linestartx, printer.y, lineendx, printer.y); 
+  printer.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000"});  
 };
 
 function ABCTieElem (anchor1, anchor2, above, force) {
@@ -460,19 +461,25 @@ ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
 };
 
 ABCTripletElem.prototype.drawLine = function (printer, y) {
+  var pathString;
   var linestartx = this.anchor1.x;
-  printer.paper.quickpath(sprintf("M %f %f L %f %f",
-			     linestartx, y, linestartx, y+5)).attr({stroke:"#000000"});
+  pathString = sprintf("M %f %f L %f %f",
+		       linestartx, y, linestartx, y+5); 
+  printer.paper.path().attr({path:pathString, stroke:"#000000"});
   
   var lineendx = this.anchor2.x+this.anchor2.w;
-  printer.paper.quickpath(sprintf("M %f %f L %f %f",
-			     lineendx, y, lineendx, y+5)).attr({stroke:"#000000"});
+  pathString = sprintf("M %f %f L %f %f",
+		       lineendx, y, lineendx, y+5); 
+  printer.paper.path().attr({path:pathString, stroke:"#000000"});
   
-  printer.paper.quickpath(sprintf("M %f %f L %f %f",
-			     linestartx, y, (linestartx+lineendx)/2-5, y)).attr({stroke:"#000000"});
+  pathString = sprintf("M %f %f L %f %f",
+		       linestartx, y, (linestartx+lineendx)/2-5, y); 
+  printer.paper.path().attr({path:pathString, stroke:"#000000"});
 
-  printer.paper.quickpath(sprintf("M %f %f L %f %f",
-			    (linestartx+lineendx)/2+5, y, lineendx, y)).attr({stroke:"#000000"});
+
+  pathString = sprintf("M %f %f L %f %f",
+		       (linestartx+lineendx)/2+5, y, lineendx, y); 
+  printer.paper.path().attr({path:pathString, stroke:"#000000"});
 
 };
 
@@ -540,10 +547,9 @@ ABCBeamElem.prototype.drawBeam = function(printer) {
   this.endx = endhead.x;
   if(this.asc) this.endx+=endhead.w-0.6;
 
-
-  printer.paper.quickpath("M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
-	     "L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z",
-  {stroke:"#000000", fill:"#000000"});
+  var pathString = "M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
+  "L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z";
+  printer.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000"});
 };
 
 ABCBeamElem.prototype.drawStems = function(printer) {
@@ -583,9 +589,10 @@ ABCBeamElem.prototype.drawStems = function(printer) {
 	  auxbeamendy = this.getBarYAt(auxbeamendx) + sy*(j+1);
 	}
 	// TODO I think they are drawn from front to back, hence the small x difference with the main beam
-	printer.paper.quickpath("M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
-		   "L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z",
-  {stroke:"#000000", fill:"#000000"});
+
+	var pathString ="M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
+	  "L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z";
+	printer.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000"});
 	auxbeams = auxbeams.slice(0,j);
       }
     }
