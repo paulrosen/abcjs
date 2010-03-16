@@ -154,7 +154,7 @@ ABCLayout.prototype.printABCElement = function() {
     break;
   case "part":
     var abselem = new ABCAbsoluteElement(elem,0,0);
-    abselem.addChild(new ABCRelativeElement(elem.title, 0, 0, 20, {type:"text", attributes:{"font-weight":"bold", "font-size":"16px", "font-family":"serif"}}));
+    abselem.addChild(new ABCRelativeElement(elem.title, 0, 0, 18, {type:"text", attributes:{"font-weight":"bold", "font-size":"16px", "font-family":"serif"}}));
     elemset[0] = abselem;
     break;
   default: 

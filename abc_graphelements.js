@@ -39,6 +39,7 @@ ABCStaffGroupElement.prototype.finished = function() {
 
 ABCStaffGroupElement.prototype.layout = function(spacing) {
   this.spacingunits = 0; // number of space units taken up (as opposed to fixed width). Layout engine then decides how many a pixels a space unit should be
+  this.minspace = 1000; // a big number to start off with
   var x = 0;
   var currentduration = 0;
   for (var i=0;i<this.voices.length;i++) {
@@ -74,6 +75,7 @@ ABCStaffGroupElement.prototype.layout = function(spacing) {
       }
     }
     this.spacingunits+=spacingunit;
+    this.minspace = Math.min(this.minspace,spacingunit);
     
     // remove the value of already counted spacing units
     for (var i=0;i<othervoices.length;i++) {
@@ -356,7 +358,7 @@ ABCEndingElem.prototype.draw = function (printer, linestartx, lineendx) {
     printer.paper.quickpath(sprintf("M %f %f L %f %f",
 				    linestartx, printer.y, linestartx, printer.y+10),
   {stroke:"#000000", fill:"#000000"});
-    printer.printText(linestartx+5, 18.5, this.text);
+    printer.printText(linestartx+5, 18.5, this.text).attr({"font-size":"10px"});
   }
 
   if (this.anchor2) {
@@ -452,7 +454,7 @@ ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
     }
     
     
-    printer.printText(xsum/2, ypos+ydelta, this.number, "middle");
+    printer.printText(xsum/2, ypos+ydelta, this.number, "middle").attr({"font-size":"10px"});
 
   }
 };
@@ -530,10 +532,13 @@ ABCBeamElem.prototype.drawBeam = function(printer) {
   if (slant<-maxslant) slant = -maxslant;
   this.starty = printer.calcY(this.pos+Math.floor(slant/2));
   this.endy = printer.calcY(this.pos+Math.floor(-slant/2));
-  this.startx = this.elems[0].heads[0].x;
-  if(this.asc) this.startx+=this.elems[0].heads[0].w-0.6;
-  this.endx = this.elems[this.elems.length-1].heads[0].x;
-  if(this.asc) this.endx+=this.elems[this.elems.length-1].heads[0].w-0.6;
+
+  var starthead = this.elems[0].heads[(this.asc)? 0: this.elems[0].heads.length-1];
+  var endhead = this.elems[this.elems.length-1].heads[(this.asc)? 0: this.elems[this.elems.length-1].heads.length-1];
+  this.startx = starthead.x;
+  if(this.asc) this.startx+=starthead.w-0.6;
+  this.endx = endhead.x;
+  if(this.asc) this.endx+=endhead.w-0.6;
 
 
   printer.paper.quickpath("M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
@@ -577,6 +582,7 @@ ABCBeamElem.prototype.drawStems = function(printer) {
 	  auxbeamendx = (i===0) ? x+5 : x-5;
 	  auxbeamendy = this.getBarYAt(auxbeamendx) + sy*(j+1);
 	}
+	// TODO I think they are drawn from front to back, hence the small x difference with the main beam
 	printer.paper.quickpath("M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
 		   "L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z",
   {stroke:"#000000", fill:"#000000"});

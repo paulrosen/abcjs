@@ -164,7 +164,7 @@ ABCPrinter.prototype.debugMsg = function(x, msg) {
 };
 
 ABCPrinter.prototype.debugMsgLow = function(x, msg) {
-  this.paper.text(x, this.y+80, msg);
+  this.paper.text(x, this.y+80, msg).attr({"font-family":"serif", "font-size":12});
 };
 
 ABCPrinter.prototype.calcY = function(ofs) {
@@ -189,10 +189,19 @@ ABCPrinter.prototype.printABC = function(abctune) {
     this.width=700;
   }
   if (abctune.formatting.scale) { this.paper.text(200, this.y, "Format: scale="+abctune.formatting.scale); this.y += 20; }
-  this.paper.text(this.width/2, this.y, abctune.metaText.title).attr({"font-size":20});
+  this.paper.text(this.width/2, this.y, abctune.metaText.title).attr({"font-size":20, "font-family":"serif"});
   this.y+=20;
-  if (abctune.metaText.author) {this.paper.text(500, this.y, abctune.metaText.author, "end"); this.y+=15;}
-  if (abctune.metaText.origin) {this.paper.text(500, this.y, "(" + abctune.metaText.origin + ")", "end");this.y+=15;}
+  if (abctune.lines[0].subtitle) {
+    this.printSubtitleLine(abctune.lines[0]);
+    this.y+=20;
+  }
+  if (abctune.metaText.rhythm) {
+    this.paper.text(0, this.y, abctune.metaText.rhythm).attr({"text-anchor":"start","font-style":"italic","font-family":"serif", "font-size":12}); 
+    !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.y+=15);
+  }
+  if (abctune.metaText.author) {this.paper.text(this.width, this.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12}); this.y+=15;}
+  if (abctune.metaText.origin) {this.paper.text(this.width, this.y, "(" + abctune.metaText.origin + ")").attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12});this.y+=15;}
+  if (abctune.metaText.composer) {this.paper.text(this.width, this.y, abctune.metaText.composer).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12});this.y+=15;}
   if (abctune.metaText.tempo) {
     var x = 50;
     if (abctune.metaText.tempo.preString) {
@@ -239,7 +248,6 @@ ABCPrinter.prototype.printABC = function(abctune) {
     }
     this.y+=15;
   }
-  this.y+=15;
   this.staffgroups = [];
   var maxwidth = this.width;
   for(var line=0; line<abctune.lines.length; line++) {
@@ -249,16 +257,22 @@ ABCPrinter.prototype.printABC = function(abctune) {
       var newspace = this.space;
       for (var it=0;it<3;it++) {
 	staffgroup.layout(newspace);
+	if (line && line==abctune.lines.length-1 && staffgroup.w/this.width<0.66) break; // don't stretch last line too much unless it is 1st
 	var relspace = staffgroup.spacingunits*newspace;
 	var constspace = staffgroup.w-relspace;
-	newspace = Math.min(this.space,(this.width-constspace)/staffgroup.spacingunits);
+	if (staffgroup.spacingunits>0) {
+	  newspace = (this.width-constspace)/staffgroup.spacingunits;
+	  if (newspace*staffgroup.minspace>50) {
+	    newspace = 50/staffgroup.minspace;
+	  }
+	}
       }
       staffgroup.draw(this);
       if (staffgroup.w>maxwidth) maxwidth = staffgroup.w;
       this.staffgroups[this.staffgroups.length] = staffgroup;
       this.y = this.layouter.y;
       this.y+=AbcSpacing.STAVEHEIGHT;
-    } else if (abcline.subtitle) {
+    } else if (abcline.subtitle && line!=0) {
       this.printSubtitleLine(abcline);
       this.y+=20; //hardcoded
     } else if (abcline.text) {
@@ -276,14 +290,14 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
   if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
   if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords + "\n";
-  var text = this.paper.text(10, this.y+25, extraText).attr({"text-anchor":"start"});
+  var text = this.paper.text(5, this.y+25, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":12});
   text.translate(0,text.getBBox().height/2);
   this.paper.setSize(maxwidth+50,this.y+30+text.getBBox().height);
   this.paper.canvas.parentNode.setAttribute("style","width:"+(maxwidth+50));
 };
 
 ABCPrinter.prototype.printSubtitleLine = function(abcline) {
-  this.paper.text(100, this.y, abcline.subtitle);
+  this.paper.text(this.width/2, this.y, abcline.subtitle).attr({"font-size":16});
 };
 
 
