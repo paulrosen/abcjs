@@ -13,6 +13,12 @@ EditArea.prototype.addChangeListener = function(listener) {
   this.textarea.onkeyup = function() {
     listener.fireChanged();
   }
+  this.textarea.onmouseup = function() {
+    listener.fireChanged();
+  }
+  this.textarea.onchange = function() {
+    listener.fireChanged();
+  }
 };
 
 //TODO won't work under IE?

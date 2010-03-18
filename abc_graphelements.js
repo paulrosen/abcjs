@@ -37,13 +37,25 @@ ABCStaffGroupElement.prototype.finished = function() {
   return true;
 };
 
-ABCStaffGroupElement.prototype.layout = function(spacing) {
+ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
   this.spacingunits = 0; // number of space units taken up (as opposed to fixed width). Layout engine then decides how many a pixels a space unit should be
   this.minspace = 1000; // a big number to start off with
   var x = 0;
+
+  // find out how much space will be taken up by voice headers
+  for (var i=0;i<this.voices.length;i++) {
+    if(this.voices[i].header) {
+      var t = printer.paper.text(100, this.y, this.voices[i].header).attr({"font-size":12, "font-family":"serif"}); // code duplicated below
+      x = Math.max(x,t.getBBox().width);
+      t.remove();
+    }
+  }
+  x=x*1.1; // 10% of 0 is 0
+  this.startx=x;
+
   var currentduration = 0;
   for (var i=0;i<this.voices.length;i++) {
-    this.voices[i].beginLayout();
+    this.voices[i].beginLayout(x);
   }
 
   while (!this.finished()) {
@@ -128,23 +140,25 @@ ABCStaffGroupElement.prototype.draw = function (printer) {
     var top = printer.calcY(10);
     printer.setY(this.staffs[this.staffs.length-1]);
     var bottom = printer.calcY(2);
-    printer.printStem(0, 0.6, top, bottom);
+    printer.printStem(this.startx, 0.6, top, bottom);
   }
 
   for (var i=0;i<this.staffs.length;i++) {
     printer.setY(this.staffs[i]);
-    printer.printStave(this.w);
+    printer.printStave(this.startx,this.w);
   }
   printer.unSetY();
 };
 
-function ABCVoiceElement(y) {
+function ABCVoiceElement(y, voicenumber, voicetotal) {
   this.children = [];
   this.beams = []; 
   this.otherchildren = []; // ties, slurs, triplets
   this.w = 0;
   this.y = y;
   this.duplicate = false;
+  this.voicenumber = voicenumber; //number of the voice on a given stave (not staffgroup)
+  this.voicetotal = voicetotal;
 }
 
 ABCVoiceElement.prototype.addChild = function (child) {
@@ -171,13 +185,14 @@ ABCVoiceElement.prototype.layoutEnded = function () {
   return (this.i>=this.children.length);
 };
 
-ABCVoiceElement.prototype.beginLayout = function () {
+ABCVoiceElement.prototype.beginLayout = function (startx) {
   this.i=0;
   this.durationindex=0;
   this.ii=this.children.length;
-  this.minx=0; // furthest left to where negatively positioned elements are allowed to go
-  this.nextminx=0;
-  this.nextx=0; // x position where the next element of this voice should be placed assuming no other voices
+  this.startx=startx;
+  this.minx=startx; // furthest left to where negatively positioned elements are allowed to go
+  this.nextminx=startx;
+  this.nextx=startx; // x position where the next element of this voice should be placed assuming no other voices
   this.spacingunits=0; // units of spacing used in current iteration due to duration
 };
 
@@ -230,7 +245,8 @@ ABCVoiceElement.prototype.draw = function (printer, bartop) {
     });
 
   if (this.header) {
-    printer.paper.text(100, this.y, this.header);
+    var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
+    printer.paper.text(this.startx/2, printer.calcY(textpitch), this.header).attr({"font-size":12, "font-family":"serif"}); // code duplicated above
   }
   printer.unSetY();
 };

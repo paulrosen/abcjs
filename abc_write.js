@@ -173,12 +173,12 @@ ABCPrinter.prototype.calcY = function(ofs) {
   return this.y+((AbcSpacing.TOPNOTE-ofs)*AbcSpacing.STEP);
 };
 
-ABCPrinter.prototype.printStave = function (width) {
-  this.printStaveLine(0,width,2);
-  this.printStaveLine(0,width,4);
-  this.printStaveLine(0,width,6);
-  this.printStaveLine(0,width,8);
-  this.printStaveLine(0,width,10);
+ABCPrinter.prototype.printStave = function (startx, endx) {
+  this.printStaveLine(startx,endx,2);
+  this.printStaveLine(startx,endx,4);
+  this.printStaveLine(startx,endx,6);
+  this.printStaveLine(startx,endx,8);
+  this.printStaveLine(startx,endx,10);
 };
 
 ABCPrinter.prototype.printABC = function(abctune) {
@@ -193,7 +193,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.formatting.scale) { this.paper.text(200, this.y, "Format: scale="+abctune.formatting.scale); this.y += 20; }
   this.paper.text(this.width/2, this.y, abctune.metaText.title).attr({"font-size":20, "font-family":"serif"});
   this.y+=20;
-  if (abctune.lines[0].subtitle) {
+  if (abctune.lines[0] && abctune.lines[0].subtitle) {
     this.printSubtitleLine(abctune.lines[0]);
     this.y+=20;
   }
@@ -258,7 +258,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
       var staffgroup = this.layouter.printABCLine(abcline.staff, this.y);
       var newspace = this.space;
       for (var it=0;it<3;it++) {
-	staffgroup.layout(newspace);
+	staffgroup.layout(newspace,this);
 	if (line && line==abctune.lines.length-1 && staffgroup.w/this.width<0.66) break; // don't stretch last line too much unless it is 1st
 	var relspace = staffgroup.spacingunits*newspace;
 	var constspace = staffgroup.w-relspace;
