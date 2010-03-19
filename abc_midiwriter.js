@@ -120,6 +120,7 @@ function ABCMidiWriter(parent) {
   this.scale = [0,2,4,5,7,9,11];
   this.restart = {line:0, staff:0, voice:0, pos:0};
   this.visited = {};
+  this.multiplier =1;
 };
 
 ABCMidiWriter.prototype.getMark = function() {
@@ -230,7 +231,12 @@ ABCMidiWriter.prototype.writeABCElement = function(elem) {
 
 
 ABCMidiWriter.prototype.writeNote = function(elem) {
-  var mididuration = elem.duration*512;
+
+  if (elem.startTriplet) {
+    this.multiplier=2/3;
+  }
+
+  var mididuration = elem.duration*512*this.multiplier;
   if (elem.pitches) {
     var note = elem.pitches[0];
     var pitch= note.pitch;
@@ -265,6 +271,11 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
   } else {
     this.midi.addRest(mididuration);
   }
+
+  if (elem.startTriplet) {
+    this.multiplier=1;
+  }
+
 };
 
 ABCMidiWriter.prototype.handleBar = function (elem) {
