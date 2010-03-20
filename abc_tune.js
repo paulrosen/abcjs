@@ -153,12 +153,45 @@ function AbcTune() {
 			}
 		}
 
+		// TODO-PER: This could be done faster as we go instead of as the last step.
+		function fixClefPlacement(el) {
+			//if (el.el_type === 'clef') {
+				var min = -2;
+				var max = 5;
+				switch(el.type) {
+					case 'tenor': el.verticalPos+=2; min += 6; max += 6; break;
+					case 'bass': el.verticalPos--; min += 6; max += 6; break;
+					case 'alto': el.verticalPos-=2; min += 4; max += 4; break;
+					case 'treble+8': break;
+					case 'tenor+8': el.verticalPos+=2; min += 6; max += 6; break;
+					case 'bass+8': el.verticalPos--; min += 6; max += 6; break;
+					case 'alto+8': el.verticalPos-=2; min += 4; max += 4; break;
+					case 'treble-8': break;
+					case 'tenor-8': el.verticalPos+=2; min += 6; max += 6; break;
+					case 'bass-8': el.verticalPos--; min += 6; max += 6; break;
+					case 'alto-8': el.verticalPos-=2; min += 4; max += 4; break;
+				}
+				if (el.verticalPos < min) {
+					while (el.verticalPos < min)
+						el.verticalPos += 7;
+				} else if (el.verticalPos > max) {
+					while (el.verticalPos > max)
+						el.verticalPos -= 7;
+				}
+			//}
+		}
+
 		for (this.lineNum = 0; this.lineNum < this.lines.length; this.lineNum++) {
 			if (this.lines[this.lineNum].staff) for (this.staffNum = 0; this.staffNum < this.lines[this.lineNum].staff.length; this.staffNum++) {
+				if (this.lines[this.lineNum].staff[this.staffNum].clef)
+					fixClefPlacement(this.lines[this.lineNum].staff[this.staffNum].clef);
 				for (this.voiceNum = 0; this.voiceNum < this.lines[this.lineNum].staff[this.staffNum].voices.length; this.voiceNum++) {
 //					var el = this.getLastNote();
 //					if (el) el.end_beam = true;
 					cleanUpSlursInLine(this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum]);
+					for (var j = 0; j < this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum].length; j++)
+						if (this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum][j].el_type === 'clef')
+							fixClefPlacement(this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum][j]);
 				}
 			}
 		}
