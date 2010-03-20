@@ -677,6 +677,14 @@ ABCLayout.prototype.printClef = function(elem) {
   case "tenor": clef="clefs.C"; pitch=8; break;
   case "alto": clef="clefs.C"; pitch=6; break;
   case "bass": clef="clefs.F"; pitch=8; break;
+  case 'treble+8': break;
+  case 'tenor+8':clef="clefs.C"; pitch=8; break;
+  case 'bass+8': clef="clefs.F"; pitch=8; break;
+  case 'alto+8': clef="clefs.C"; pitch=6; break;
+  case 'treble-8': break;
+  case 'tenor-8':clef="clefs.C"; pitch=8; break;
+  case 'bass-8': clef="clefs.F"; pitch=8; break;
+  case 'alto-8': clef="clefs.C"; pitch=6; break;
   default: abselem.addChild(new ABCRelativeElement("clef="+elem.type, 0, 0, 0, {type:"debug"}));
   }    
   if (elem.verticalPos) {
