@@ -324,7 +324,9 @@ ABCMidiWriter.prototype.setKeySignature = function(elem) {
   if (!elem.accidentals) return;
   elem.accidentals.each(function(acc) {
 		var d = (acc.acc === "sharp") ? 1 : (acc.acc === "natural") ?0 : -1;
-		var note = this.extractNote(acc.note.charCodeAt(0)-'c'.charCodeAt(0));
+
+		var lowercase = acc.note.toLowerCase();
+		var note = this.extractNote(lowercase.charCodeAt(0)-'c'.charCodeAt(0));
 		this.accidentals[note]+=d;
 	  }, this);
 
