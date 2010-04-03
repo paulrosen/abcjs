@@ -17,6 +17,10 @@
 
 //    requires: abcjs, raphael, jquery
 
+var abc_plugin = {
+ show_midi : true
+};
+
 $(document).ready(start_abc);
 
 function start_abc() {
@@ -93,7 +97,7 @@ function insertScoreBefore(node, abcstring) {
     var paper = Raphael(abcdiv.get(0), 800, 400);
     var printer = new ABCPrinter(paper);
     printer.printABC(tune);
-    if (ABCMidiWriter) {
+    if (ABCMidiWriter && abc_plugin.show_midi) {
       midiwriter = new ABCMidiWriter(abcdiv.get(0));
       midiwriter.writeABC(tune);
     }
