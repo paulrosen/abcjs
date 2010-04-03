@@ -23,7 +23,7 @@
 function AbcTokenizer() {
 	this.skipWhiteSpace = function(str) {
 		for (var i = 0; i < str.length; i++) {
-			if (!this.isWhiteSpace(str[i]))
+		  if (!this.isWhiteSpace(str.charAt(i)))
 				return i;
 		}
 		return str.length;	// It must have been all white space
@@ -33,7 +33,7 @@ function AbcTokenizer() {
 	};
 	this.eatWhiteSpace = function(line, index) {
 		for (var i = index; i < line.length; i++) {
-			if (!this.isWhiteSpace(line[i]))
+		  if (!this.isWhiteSpace(line.charAt(i)))
 				return i-index;
 		}
 		return i-index;
@@ -44,7 +44,7 @@ function AbcTokenizer() {
 		var i = this.skipWhiteSpace(str);
 		if (finished(str, i))
 			return {len: 0};
-		switch (str[i]) {
+		switch (str.charAt(i)) {
 			case 'A':return {len: i+1, token: 'A'};
 			case 'B':return {len: i+1, token: 'B'};
 			case 'C':return {len: i+1, token: 'C'};
@@ -65,7 +65,7 @@ function AbcTokenizer() {
 
 	// This just gets the basic accidental, ignoring leading spaces, and only the ones that appear in a key
 	this.getSharpFlat = function(str) {
-		switch (str[0]) {
+	        switch (str.charAt(0)) {
 			case '#':return {len: 1, token: '#'};
 			case 'b':return {len: 1, token: 'b'};
 		}
@@ -75,7 +75,7 @@ function AbcTokenizer() {
 	this.getMode = function(str) {
 		var skipAlpha = function(str, start) {
 			// This returns the index of the next non-alphabetic char, or the entire length of the string if not found.
-			while (start < str.length && ((str[start] >= 'a' && str[start] <= 'z') || (str[start] >= 'A' && str[start] <= 'Z')))
+		  while (start < str.length && ((str.charAt(start) >= 'a' && str.charAt(start) <= 'z') || (str.charAt(start) >= 'A' && str.charAt(start) <= 'Z')))
 				start++;
 			return start;
 		};
@@ -84,7 +84,7 @@ function AbcTokenizer() {
 		if (finished(str, i))
 			return {len: 0};
 		var firstThree = str.substring(i,i+3).toLowerCase();
-		if (firstThree.length > 1 && firstThree[1] === ' ' || firstThree[1] === '^' || firstThree[1] === '_' || firstThree[1] === '=') firstThree = firstThree[0];	// This will handle the case of 'm'
+		if (firstThree.length > 1 && firstThree.charAt(1) === ' ' || firstThree.charAt(1) === '^' || firstThree.charAt(1) === '_' || firstThree.charAt(1) === '=') firstThree = firstThree.charAt(1);	// This will handle the case of 'm'
 		switch (firstThree) {
 			case 'mix':return {len: skipAlpha(str, i), token: 'Mix'};
 			case 'dor':return {len: skipAlpha(str, i), token: 'Dor'};
@@ -158,14 +158,14 @@ function AbcTokenizer() {
 	// This returns one of the legal bar lines
 	// This is called alot and there is no obvious tokenable items, so this is broken apart.
 	this.getBarLine = function(line, i) {
-		switch (line[i]) {
+		switch (line.charAt(i)) {
 			case ']':
 				++i;
-				switch (line[i]) {
+				switch (line.charAt(i)) {
 					case '|': return {len: 2, token: "bar_thick_thin"};
 					case '[':
 						++i;
-						if ((line[i] >= '1' && line[i] <= '9') || line[i] === '"')
+						if ((line.charAt(i) >= '1' && line.charAt(i) <= '9') || line.charAt(i) === '"')
 							return {len: 2, token: "bar_invisible"};
 						return {len: 1, warn: "Unknown bar symbol"};
 					default:
@@ -174,17 +174,17 @@ function AbcTokenizer() {
 				break;
 			case ':':
 				++i;
-				switch (line[i]) {
+				switch (line.charAt(i)) {
 					case ':': return {len: 2, token: "bar_dbl_repeat"};
 					case '|':	// :|
 						++i;
-						switch (line[i]) {
+						switch (line.charAt(i)) {
 							case ']':	// :|]
 								++i;
-								switch (line[i]) {
+								switch (line.charAt(i)) {
 									case '|':	// :|]|
 										++i;
-										if (line[i] === ':')  return {len: 5, token: "bar_dbl_repeat"};
+										if (line.charAt(i) === ':')  return {len: 5, token: "bar_dbl_repeat"};
 										return {len: 3, token: "bar_right_repeat"};
 									default:
 										return {len: 3, token: "bar_right_repeat"};
@@ -192,7 +192,7 @@ function AbcTokenizer() {
 								break;
 							case '|':	// :||
 								++i;
-								if (line[i] === ':')  return {len: 4, token: "bar_dbl_repeat"};
+								if (line.charAt(i) === ':')  return {len: 4, token: "bar_dbl_repeat"};
 								return {len: 3, token: "bar_right_repeat"};
 							default:
 								return {len: 2, token: "bar_right_repeat"};
@@ -204,30 +204,30 @@ function AbcTokenizer() {
 				break;
 			case '[':	// [
 				++i;
-				if (line[i] === '|') {	// [|
+				if (line.charAt(i) === '|') {	// [|
 					++i;
-					switch (line[i]) {
+					switch (line.charAt(i)) {
 						case ':': return {len: 3, token: "bar_left_repeat"};
 						case ']': return {len: 3, token: "bar_invisible"};
 						default: return {len: 2, token: "bar_thick_thin"};
 					}
 				} else {
-					if ((line[i] >= '1' && line[i] <= '9') || line[i] === '"')
+					if ((line.charAt(i) >= '1' && line.charAt(i) <= '9') || line.charAt(i) === '"')
 						return {len: 1, token: "bar_invisible"};
 					return {len: 0};
 				}
 				break;
 			case '|':	// |
 				++i;
-				switch (line[i]) {
+				switch (line.charAt(i)) {
 					case ']': return {len: 2, token: "bar_thin_thick"};
 					case '|': // ||
 						++i;
-						if (line[i] === ':') return {len: 3, token: "bar_left_repeat"};
+						if (line.charAt(i) === ':') return {len: 3, token: "bar_left_repeat"};
 						return {len: 2, token: "bar_thin_thin"};
 					case ':':	// |:
 						var colons = 0;
-						while (line[i+colons] === ':') colons++;
+						while (line.charAt(i+colons) === ':') colons++;
 						return { len: 1+colons, token: "bar_left_repeat"};
 					default: return {len: 1, token: "bar_thin"};
 				}
@@ -239,7 +239,7 @@ function AbcTokenizer() {
 	// this returns all the characters in the string that match one of the characters in the legalChars string
 	this.getTokenOf = function(str, legalChars) {
 		for (var i = 0; i < str.length; i++) {
-			if (legalChars.indexOf(str[i]) < 0)
+			if (legalChars.indexOf(str.charAt(i)) < 0)
 				return {len: i, token: str.substring(0, i)};
 		}
 		return {len: i, token: str};
@@ -248,7 +248,7 @@ function AbcTokenizer() {
 	this.getToken = function(str, start, end) {
 		// This returns the next set of chars that doesn't contain spaces
 		var i = start;
-		while (i < end && !this.isWhiteSpace(str[i]))
+		while (i < end && !this.isWhiteSpace(str.charAt(i)))
 			i++;
 		return str.substring(start, i);
 	};
@@ -278,19 +278,19 @@ function AbcTokenizer() {
 		if (finished(str, i))
 			return {len: 0};
 		var acc = null;
-		switch (str[i])
+		switch (str.charAt(i))
 		{
 			case '^':
 			case '_':
 			case '=':
-				acc = str[i];
+				acc = str.charAt(i);
 				break;
 			default:return {len: 0};
 		}
 		i++;
 		if (finished(str, i))
 			return {len: 1, warn: 'Expected note name after accidental'};
-		switch (str[i])
+		switch (str.charAt(i))
 		{
 			case 'a':
 			case 'b':
@@ -306,15 +306,15 @@ function AbcTokenizer() {
 			case 'E':
 			case 'F':
 			case 'G':
-				return {len: i+1, token: {acc: accTranslation[acc], note: str[i]}};
+				return {len: i+1, token: {acc: accTranslation[acc], note: str.charAt(i)}};
 			case '^':
 			case '_':
 			case '/':
-				acc += str[i];
+				acc += str.charAt(i);
 				i++;
 				if (finished(str, i))
 					return {len: 2, warn: 'Expected note name after accidental'};
-				switch (str[i])
+				switch (str.charAt(i))
 				{
 					case 'a':
 					case 'b':
@@ -330,7 +330,7 @@ function AbcTokenizer() {
 					case 'E':
 					case 'F':
 					case 'G':
-						return {len: i+1, token: {acc: accTranslation[acc], note: str[i]}};
+						return {len: i+1, token: {acc: accTranslation[acc], note: str.charAt(i)}};
 					default:
 						return {len: 2, warn: 'Expected note name after accidental'};
 				}
@@ -350,9 +350,9 @@ function AbcTokenizer() {
 		var comment = line.indexOf('%', start);
 		if (comment >= 0 && comment < end)
 			end = comment;
-		while (start < end && (line[start] === ' ' || line[start] === '\t' || line[start] === '\x12'))
+		while (start < end && (line.charAt(start) === ' ' || line.charAt(start) === '\t' || line.charAt(start) === '\x12'))
 			start++;
-		while (start < end && (line[end-1] === ' ' || line[end-1] === '\t' || line[end-1] === '\x12'))
+		while (start < end && (line.charAt(end-1) === ' ' || line.charAt(end-1) === '\t' || line.charAt(end-1) === '\x12'))
 			end--;
 		return {start: start, end: end};
 	};
@@ -375,25 +375,25 @@ function AbcTokenizer() {
 		var tokens = [];
 		var i;
 		while (start < end) {
-			if (line[start] === '"') {
+			if (line.charAt(start) === '"') {
 				i = start+1;
-				while (i < end && line[i] !== '"') i++;
+				while (i < end && line.charAt(i) !== '"') i++;
 				tokens.push({ type: 'quote', token: line.substring(start+1, i), start: start+1, end: i});
 				i++;
-			} else if (isLetter(line[start])) {
+			} else if (isLetter(line.charAt(start))) {
 				i = start+1;
-				while (i < end && isLetter(line[i])) i++;
-				tokens.push({ type: 'alpha', token: line.substring(start, i), continueId: isNumber(line[i]), start: start, end: i});
+				while (i < end && isLetter(line.charAt(i))) i++;
+				tokens.push({ type: 'alpha', token: line.substring(start, i), continueId: isNumber(line.charAt(i)), start: start, end: i});
 				start = i + 1;
-			} else if (isNumber(line[start])) {
+			} else if (isNumber(line.charAt(start))) {
 				i = start+1;
-				while (i < end && isNumber(line[i])) i++;
-				tokens.push({ type: 'number', token: line.substring(start, i), continueId: isLetter(line[i]), start: start, end: i});
+				while (i < end && isNumber(line.charAt(i))) i++;
+				tokens.push({ type: 'number', token: line.substring(start, i), continueId: isLetter(line.charAt(i)), start: start, end: i});
 				start = i + 1;
-			} else if (line[start] === ' ') {
+			} else if (line.charAt(start) === ' ') {
 				i = start+1;
 			} else {
-				tokens.push({ type: 'punct', token: line[start], start: start, end: start+1});
+				tokens.push({ type: 'punct', token: line.charAt(start), start: start, end: start+1});
 				i = start+1;
 			}
 			start = i;
@@ -404,17 +404,17 @@ function AbcTokenizer() {
 	this.getVoiceToken = function(line, start, end) {
 		// This finds the next token. A token is delimited by a space or an equal sign. If it starts with a quote, then the portion between the quotes is returned.
 		var i = start;
-		while (i < end && this.isWhiteSpace(line[i]) || line[i] === '=')
+		while (i < end && this.isWhiteSpace(line.charAt(i)) || line.charAt(i) === '=')
 			i++;
 
-		if (line[i] === '"') {
+		if (line.charAt(i) === '"') {
 			var close = line.indexOf('"', i+1);
 			if (close === -1 || close >= end)
 				return {len: 1, err: "Missing close quote"};
 			return {len: close-start+1, token: this.translateString(line.substring(i+1, close))};
 		} else {
 			var ii = i;
-			while (ii < end && !this.isWhiteSpace(line[ii]) && line[ii] !== '=')
+			while (ii < end && !this.isWhiteSpace(line.charAt(ii)) && line.charAt(ii) !== '=')
 				ii++;
 			return {len: ii-start+1, token: line.substring(i, ii)};
 		}
@@ -469,7 +469,7 @@ function AbcTokenizer() {
 	var getNumber = function(line, index) {
 		var num = 0;
 		while (index < line.length) {
-			switch (line[index]) {
+			switch (line.charAt(index)) {
 				case '0':num = num*10;index++;break;
 				case '1':num = num*10+1;index++;break;
 				case '2':num = num*10+2;index++;break;
@@ -490,16 +490,16 @@ function AbcTokenizer() {
 	this.getFraction = function(line, index) {
 		var num = 1;
 		var den = 1;
-		if (line[index] !== '/') {
+		if (line.charAt(index) !== '/') {
 			var ret = getNumber(line, index);
 			num = ret.num;
 			index = ret.index;
 		}
-		if (line[index] === '/') {
+		if (line.charAt(index) === '/') {
 			index++;
-			if (line[index] === '/') {
+			if (line.charAt(index) === '/') {
 				var div = 0.5;
-				while (line[index++] === '/')
+				while (line.charAt(index++) === '/')
 					div = div /2;
 				return {value: num * div, index: index-1};
 			} else {
@@ -596,11 +596,11 @@ function AbcTokenizer() {
 		// It returns the substring and the number of characters consumed.
 		// The number of characters consumed is normally two more than the size of the substring,
 		// but in the error case it might not be.
-		var matchChar = _matchChar || line[i];
+		var matchChar = _matchChar || line.charAt(i);
 		var pos = i+1;
-		while ((pos < line.length) && (line[pos] !== matchChar))
+		while ((pos < line.length) && (line.charAt(pos) !== matchChar))
 			++pos;
-		if (line[pos] === matchChar)
+		if (line.charAt(pos) === matchChar)
 			return [pos-i+1,substInChord(line.substring(i+1, pos)), true];
 		else	// we hit the end of line, so we'll just pick an arbitrary num of chars so the line doesn't disappear.
 		{

@@ -229,10 +229,10 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 	};
 
 	var parseMiddle = function(str) {
-		var mid = pitches[str[0]];
+	  var mid = pitches[str.charAt(0)];
 		for (var i = 1; i < str.length; i++) {
-			if (str[i] === ',') mid -= 7;
-			else if (str[i] === ',') mid += 7;
+			if (str.charAt(i) === ',') mid -= 7;
+			else if (str.charAt(i) === ',') mid += 7;
 		}
 		return mid - 6;	// We get the note in the middle of the staff. We want the note that appears as the first ledger line below the staff.
 	};
@@ -662,7 +662,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			var attr = tokenizer.getVoiceToken(line, start, end);
 			if (attr.warn !== undefined)
 				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
-			else if (attr.token.length === 0 && line[start] !== '"')
+			else if (attr.token.length === 0 && line.charAt(start) !== '"')
 				warn("Expected value for " + name + " in voice", line, start);
 			else
 				staffInfo[name] = attr.token;
@@ -689,7 +689,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 //								else if (staffInfo.clef[ii] === "'") oct += 7;
 //							}
 						if (staffInfo.clef !== undefined) {
-							staffInfo.clef = staffInfo.clef.replace(/[',]/g, "");
+						  staffInfo.clef = staffInfo.clef.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
 							if (staffInfo.clef.indexOf('+16') !== -1) {
 								oct += 14;
 								staffInfo.clef = staffInfo.clef.replace('+16', '');
@@ -728,7 +728,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 //								if (token.token[iii] === ',') oct2 -= 7;
 //								else if (token.token[iii] === "'") oct2 += 7;
 //							}
-						staffInfo.clef = token.token.replace(/[',]/g, "");
+											  staffInfo.clef = token.token.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
 						staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct2);
 						break;
 					case 'staves':
@@ -1072,7 +1072,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 	{
 		var ws = tokenizer.eatWhiteSpace(line, i);
 		i +=ws;
-		if (line.length >= i+5 && line[i] === '[' && line[i+2] === ':') {
+		if (line.length >= i+5 && line.charAt(i) === '[' && line.charAt(i+2) === ':') {
 			var e = line.indexOf(']', i);
 			switch(line.substring(i, i+3))
 			{
@@ -1103,14 +1103,14 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 						var tempo = this.setTempo(line, i+3, e);
 						if (tempo.type === 'delaySet') tune.appendElement('tempo', -1, -1, this.calcTempo(tempo.tempo));
 						else if (tempo.type === 'immediate') tune.appendElement('tempo', -1, -1, tempo.tempo);
-						return [ e-i+1+ws, line[i+1], line.substring(i+3, e)];
+						return [ e-i+1+ws, line.charAt(i+1), line.substring(i+3, e)];
 					}
 					break;
 				case "[V:":
 					if (e > 0) {
 						this.parseVoice(line, i+3, e);
 						//startNewLine();
-						return [ e-i+1+ws, line[i+1], line.substring(i+3, e)];
+						return [ e-i+1+ws, line.charAt(i+1), line.substring(i+3, e)];
 					}
 					break;
 
@@ -1155,11 +1155,11 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					var tempo = this.setTempo(line, i+2, e);
 					if (tempo.type === 'delaySet') tune.appendElement('tempo', -1, -1, this.calcTempo(tempo.tempo));
 					else if (tempo.type === 'immediate') tune.appendElement('tempo', -1, -1, tempo.tempo);
-					return [ e, line[i], line.substring(i+2).strip()];
+				return [ e, line.charAt(i), line.substring(i+2).strip()];
 				case "V:":
 					this.parseVoice(line, 2, line.length);
 //						startNewLine();
-					return [ line.length, line[i], line.substring(i+2).strip()];
+					return [ line.length, line.charAt(i), line.substring(i+2).strip()];
 				default:
 					// TODO: complain about unhandled header
 			}
@@ -1193,18 +1193,18 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			return {};
 
 		if (line.length >= 2) {
-			if (line[1] === ':') {
+			if (line.charAt(1) === ':') {
 				var nextLine = "";
-				if (line.indexOf('\x12') >= 0 && line[0] !== 'w') {	// w: is the only header field that can have a continuation.
+				if (line.indexOf('\x12') >= 0 && line.charAt(0) !== 'w') {	// w: is the only header field that can have a continuation.
 					nextLine = line.substring(line.indexOf('\x12')+1);
 					line = line.substring(0, line.indexOf('\x12'));	//This handles a continuation mark on a header field
 				}
-				var field = metaTextHeaders[line[0]];
+				var field = metaTextHeaders[line.charAt(0)];
 				if (field !== undefined) {
 					tune.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
 					return {};
 				} else {
-					switch(line[0])
+					switch(line.charAt(0))
 					{
 						case  'H':
 							tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));

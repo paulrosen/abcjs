@@ -63,7 +63,7 @@ function AbcParse() {
 	};
 
 	var warn = function(str, line, col_num) {
-		var bad_char = line[col_num];
+	  var bad_char = line.charAt(col_num);
 		if (bad_char === ' ')
 			bad_char = "SPACE";
 		var clean_line = line.substring(0, col_num).gsub('\x12', ' ') + '\n' + bad_char + '\n' + line.substring(col_num+1).gsub('\x12', ' ');
@@ -78,7 +78,7 @@ function AbcParse() {
 
 	var letter_to_chord = function(line, i)
 	{
-		if (line[i] === '"')
+		if (line.charAt(i) === '"')
 		{
 			var chord = tokenizer.getBrackettedSubstring(line, i, 5);
 			if (!chord[2])
@@ -86,10 +86,10 @@ function AbcParse() {
 			// If it starts with ^, then the chord appears above.
 			// If it starts with _ then the chord appears below.
 			// (note that the 2.0 draft standard defines them as not chords, but annotations and also defines < > and @.)
-			if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '^') {
+			if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '^') {
 				chord[1] = chord[1].substring(1);
 				chord[2] = 'above';
-			} else if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '_') {
+			} else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '_') {
 				chord[1] = chord[1].substring(1);
 				chord[2] = 'below';
 			} else
@@ -107,19 +107,19 @@ function AbcParse() {
 		"upbow", "downbow" ];
 	var letter_to_accent = function(line, i)
 	{
-		var macro = multilineVars.macros[line[i]];
+		var macro = multilineVars.macros[line.charAt(i)];
 
 		if (macro !== undefined) {
-			if (macro[0] === '!' || macro[0] === '+')
+			if (macro.charAt(0) === '!' || macro.charAt(0) === '+')
 				macro = macro.substring(1);
-			if (macro[macro.length-1] === '!' || macro[macro.length-1] === '+')
+			if (macro.charAt(macro.length-1) === '!' || macro.charAt(macro.length-1) === '+')
 				macro = macro.substring(0, macro.length-1);
 			if (legalAccents.detect(function(acc) {
 				return (macro === acc);
 			}))
 			return [ 1, macro ];
 		}
-		switch (line[i])
+		switch (line.charAt(i))
 		{
 			case '.':return [1, 'staccato'];
 			case 'u':return [1, 'upbow'];
@@ -129,7 +129,7 @@ function AbcParse() {
 			case '+':
 				var ret = tokenizer.getBrackettedSubstring(line, i, 5);
 				// Be sure that the accent is recognizable.
-				if (ret[1].length > 0 && (ret[1][0] === '^' || ret[1][0] ==='_'))
+			if (ret[1].length > 0 && (ret[1].charAt(0) === '^' || ret[1].charAt(0) ==='_'))
 					ret[1] = ret[1].substring(1);	// TODO-PER: The test files have indicators forcing the orniment to the top or bottom, but that isn't in the standard. We'll just ignore them.
 				if (legalAccents.detect(function(acc) {
 					return (ret[1] === acc);
@@ -137,7 +137,7 @@ function AbcParse() {
 					return ret;
 				// We didn't find the accent in the list, so consume the space, but don't return an accent.
 				// Although it is possible that ! was used as a line break, so accept that.
-				if (line[i] === '!' && (ret[0] === 1 || line[i+ret[0]-1] !== '!'))
+			if (line.charAt(i) === '!' && (ret[0] === 1 || line.charAt(i+ret[0]-1) !== '!'))
 					return [1, null ];
 				warn("Unknown decoration: " + ret[1], line, i);
 				ret[1] = "";
@@ -154,7 +154,7 @@ function AbcParse() {
 	var letter_to_spacer = function(line, i)
 	{
 		var start = i;
-		while (tokenizer.isWhiteSpace(line[i]))
+		while (tokenizer.isWhiteSpace(line.charAt(i)))
 			i++;
 		return [ i-start ];
 	};
@@ -178,13 +178,13 @@ function AbcParse() {
 		// It can also optionally start with '[', which is ignored.
 		// Also, it can have white space before the '['.
 		for (var ws = 0; ws < line.length; ws++)
-			if (line[curr_pos+ret.len+ws] !== ' ')
+		  if (line.charAt(curr_pos+ret.len+ws) !== ' ')
 				break;
 		var orig_bar_len = ret.len;
-		if (line[curr_pos+ret.len+ws] === '[') {
+		if (line.charAt(curr_pos+ret.len+ws) === '[') {
 			ret.len += ws + 1;
 			// It can also be a quoted string. It is unclear whether that construct requires '[', but it seems like it would. otherwise it would be confused with a regular chord.
-			if (line[curr_pos+ret.len] === '"') {
+			if (line.charAt(curr_pos+ret.len) === '"') {
 				var ending = tokenizer.getBrackettedSubstring(line, curr_pos+ret.len, 5);
 				return [ret.len+ending[0], ret.token, ending[1]];
 			}
@@ -201,27 +201,27 @@ function AbcParse() {
 		// that is a triplet. Otherwise that is a slur. Collect all the slurs and the first triplet.
 		var ret = {};
 		var start = i;
-		while (line[i] === '(' || tokenizer.isWhiteSpace(line[i])) {
-			if (line[i] === '(') {
-				if (i+1 < line.length && (line[i+1] >= '2' && line[i+1] <= '9')) {
+		while (line.charAt(i) === '(' || tokenizer.isWhiteSpace(line.charAt(i))) {
+			if (line.charAt(i) === '(') {
+				if (i+1 < line.length && (line.charAt(i+1) >= '2' && line.charAt(i+1) <= '9')) {
 					if (ret.triplet !== undefined)
 						warn("Can't nest triplets", line, i);
 					else {
-						ret.triplet = line[i+1] - '0';
-						if (i+2 < line.length && line[i+2] === ':') {
+						ret.triplet = line.charAt(i+1) - '0';
+						if (i+2 < line.length && line.charAt(i+2) === ':') {
 							// We are expecting "(p:q:r" or "(p:q" or "(p::r" we are only interested in the first number (p) and the number of notes (r)
 							// if r is missing, then it is equal to p.
-							if (i+3 < line.length && line[i+3] === ':') {
-								if (i+4 < line.length && (line[i+4] >= '1' && line[i+4] <= '9')) {
-									ret.num_notes = line[i+4] - '0';
+							if (i+3 < line.length && line.charAt(i+3) === ':') {
+								if (i+4 < line.length && (line.charAt(i+4) >= '1' && line.charAt(i+4) <= '9')) {
+									ret.num_notes = line.charAt(i+4) - '0';
 									i += 3;
 								} else
 									warn("expected number after the two colons after the triplet to mark the duration", line, i);
-							} else if (i+3 < line.length && (line[i+3] >= '1' && line[i+3] <= '9')) {
+							} else if (i+3 < line.length && (line.charAt(i+3) >= '1' && line.charAt(i+3) <= '9')) {
 								// ignore this middle number
-								if (i+4 < line.length && line[i+4] === ':') {
-									if (i+5 < line.length && (line[i+5] >= '1' && line[i+5] <= '9')) {
-										ret.num_notes = line[i+5] - '0';
+								if (i+4 < line.length && line.charAt(i+4) === ':') {
+									if (i+5 < line.length && (line.charAt(i+5) >= '1' && line.charAt(i+5) <= '9')) {
+										ret.num_notes = line - '0';
 										i += 4;
 									}
 								} else {
@@ -250,7 +250,7 @@ function AbcParse() {
 	var addWords = function(line, words) {
 		if (!line) { warn("Can't add words before the first line of mulsic", line, 0); return; }
 		words = words.strip();
-		if (words[words.length-1] !== '-')
+		if (words.charAt(words.length-1) !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
 		var word_list = [];
 		// first make a list of words from the string we are passed. A word is divided on either a space or dash.
@@ -262,7 +262,7 @@ function AbcParse() {
 			if (word.length > 0) {
 				if (replace)
 					word = word.gsub('~', ' ');
-				var div = words[i];
+				var div = words.charAt(i);
 				if (div !== '_' && div !== '-')
 					div = ' ';
 				word_list.push({syllable: tokenizer.translateString(word), divider: div});
@@ -272,7 +272,7 @@ function AbcParse() {
 			return false;
 		};
 		for (var i = 0; i < words.length; i++) {
-			switch (words[i]) {
+			switch (words.charAt(i)) {
 				case ' ':
 				case '\x12':
 					addWord(i);
@@ -328,15 +328,15 @@ function AbcParse() {
 	};
 
 	var getBrokenRhythm = function(line, index) {
-		switch (line[index]) {
+		switch (line.charAt(index)) {
 			case '>':
-				if (index < line.length - 1 && line[index+1] === '>')	// double >>
+			if (index < line.length - 1 && line.charAt(index+1) === '>')	// double >>
 					return [2, 1.75, 0.25];
 				else
 					return [1, 1.5, 0.5];
 				break;
 			case '<':
-				if (index < line.length - 1 && line[index+1] === '<')	// double <<
+			if (index < line.length - 1 && line.charAt(index+1) === '<')	// double <<
 					return [2, 0.25, 1.75];
 				else
 					return [1, 0.5, 1.5];
@@ -362,7 +362,7 @@ function AbcParse() {
 		var state = 'startSlur';
 		var durationSetByPreviousNote = false;
 		while (1) {
-			switch(line[index]) {
+			switch(line.charAt(index)) {
 				case '(':
 					if (state === 'startSlur') {
 						if (el.startSlur === undefined) el.startSlur = 1; else el.startSlur++;
@@ -406,7 +406,7 @@ function AbcParse() {
 				case 'f':
 				case 'g':
 					if (state === 'startSlur' || state === 'sharp2' || state === 'flat2' || state === 'pitch') {
-						el.pitch = pitches[line[index]];
+						el.pitch = pitches[line.charAt(index)];
 						state = 'octave';
 						// At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
 						if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
@@ -432,7 +432,7 @@ function AbcParse() {
 				case 'y':
 				case 'z':
 					if (state === 'startSlur') {
-						el.rest = { type: rests[line[index]] };
+						el.rest = { type: rests[line.charAt(index)] };
 						// There shouldn't be some of the properties that notes have. If some sneak in due to bad syntax in the abc file,
 						// just nix them here.
 						delete el.accidental;
@@ -470,8 +470,8 @@ function AbcParse() {
 							el.duration = el.duration * fraction.value;
 						// TODO-PER: We can test the returned duration here and give a warning if it isn't the one expected.
 						el.endChar = fraction.index;
-						while (fraction.index < line.length && (tokenizer.isWhiteSpace(line[fraction.index]) || line[fraction.index] === '-')) {
-							if (line[fraction.index] === '-')
+						while (fraction.index < line.length && (tokenizer.isWhiteSpace(line.charAt(fraction.index)) || line.charAt(fraction.index) === '-')) {
+						  if (line.charAt(fraction.index) === '-')
 								el.startTie = true;
 							else
 								el = addEndBeam(el);
@@ -496,7 +496,7 @@ function AbcParse() {
 							state = 'broken_rhythm';
 						else {
 							// Peek ahead to the next character. If it is a space, then we have an end beam.
-							if (tokenizer.isWhiteSpace(line[index+1]))
+						  if (tokenizer.isWhiteSpace(line.charAt(index+1)))
 								addEndBeam(el);
 							el.endChar = index+1;
 							return el;
@@ -510,12 +510,12 @@ function AbcParse() {
 						el.end_beam = true;
 						// look ahead to see if there is a tie
 						do {
-							if (line[index] === '-')
+						  if (line.charAt(index) === '-')
 								el.startTie = true;
 							index++;
-						} while (index < line.length && (tokenizer.isWhiteSpace(line[index]) || line[index] === '-'));
+						} while (index < line.length && (tokenizer.isWhiteSpace(line.charAt(index)) || line.charAt(index) === '-'));
 						el.endChar = index;
-						if (!durationSetByPreviousNote && canHaveBrokenRhythm && (line[index] === '<' || line[index] === '>')) {	// TODO-PER: Don't need the test for < and >, but that makes the endChar work out for the regression test.
+						if (!durationSetByPreviousNote && canHaveBrokenRhythm && (line.charAt(index) === '<' || line.charAt(index) === '>')) {	// TODO-PER: Don't need the test for < and >, but that makes the endChar work out for the regression test.
 							index--;
 							state = 'broken_rhythm';
 						} else
@@ -603,7 +603,7 @@ function AbcParse() {
 
 	var letter_to_grace =  function(line, i) {
 		// Grace notes are an array of: startslur, note, endslur, space; where note is accidental, pitch, duration
-		if (line[i] === '{') {
+		if (line.charAt(i) === '{') {
 			// fetch the gracenotes string and consume that into the array
 			var gra = tokenizer.getBrackettedSubstring(line, i, 1, '}');
 			if (!gra[2])
@@ -629,11 +629,11 @@ function AbcParse() {
 				}
 				else {
 					// We shouldn't get anything but notes or a space here, so report an error
-					if (gra[1][ii] === ' ') {
+					if (gra[1].charAt(ii) === ' ') {
 						if (gracenotes.length > 0)
 							gracenotes[gracenotes.length-1].end_beam = true;
 					} else
-						warn("Unknown character '" + gra[1][ii] + "' while parsing grace note", line, i);
+						warn("Unknown character '" + gra[1].charAt(ii) + "' while parsing grace note", line, i);
 					ii++;
 				}
 			}
@@ -716,9 +716,9 @@ function AbcParse() {
 		var i = 0;
 		var startOfLine = multilineVars.iChar;
 		// see if there is nothing but a comment on this line. If so, just ignore it. A full line comment is optional white space followed by %
-		while (tokenizer.isWhiteSpace(line[i]) && i < line.length)
+		while (tokenizer.isWhiteSpace(line.charAt(i)) && i < line.length)
 			i++;
-		if (i === line.length || line[i] === '%')
+		if (i === line.length || line.charAt(i) === '%')
 			return;
 
 		// Start with the standard staff, clef and key symbols on each line
@@ -743,7 +743,7 @@ function AbcParse() {
 		while (i < line.length)
 		{
 			var startI = i;
-			if (line[i] === '%')
+			if (line.charAt(i) === '%')
 				break;
 
 			var retInlineHeader = header.letter_to_inline_header(line, i);
@@ -773,7 +773,7 @@ function AbcParse() {
 					if (ret > 0) {
 						i += ret;
 					}
-					if (i > 0 && line[i-1] === '\x12') {
+					if (i > 0 && line.charAt(i-1) === '\x12') {
 						// there is one case where a line continuation isn't the same as being on the same line, and that is if the next character after it is a header.
 						ret = header.letter_to_body_header(line, i);
 						if (ret[0] > 0) {
@@ -795,7 +795,7 @@ function AbcParse() {
 						i += ret[0];
 						i += tokenizer.skipWhiteSpace(line.substring(i));
 					} else {
-						if (nonDecorations.indexOf(line[i]) === -1)
+						if (nonDecorations.indexOf(line.charAt(i)) === -1)
 							ret = letter_to_accent(line, i);
 						else ret = [ 0 ];
 						if (ret[0] > 0) {
@@ -877,7 +877,7 @@ function AbcParse() {
 					}
 
 					// handle chords.
-					if (line[i] === '[') {
+					if (line.charAt(i) === '[') {
 						i++;
 						var chordDuration = null;
 
@@ -905,12 +905,12 @@ function AbcParse() {
 
 								i  = chordNote.endChar;
 								delete chordNote.endChar;
-							} else if (line[i] === ' ') {
+							} else if (line.charAt(i) === ' ') {
 								// Spaces are not allowed in chords, but we can recover from it by ignoring it.
 								warn("Spaces are not allowed in chords", line, i);
 								i++;
 							} else {
-								if (i < line.length && line[i] === ']') {
+								if (i < line.length && line.charAt(i) === ']') {
 									// consume the close bracket
 									i++;
 
@@ -941,7 +941,7 @@ function AbcParse() {
 
 									var postChordDone = false;
 									while (i < line.length && !postChordDone) {
-										switch (line[i]) {
+										switch (line.charAt(i)) {
 											case ' ':
 											case '\t':
 												addEndBeam(el);
@@ -1067,7 +1067,7 @@ function AbcParse() {
 					}
 
 					if (i === startI) {	// don't know what this is, so ignore it.
-						if (line[i] !== ' ' && line[i] !== '`')
+						if (line.charAt(i) !== ' ' && line.charAt(i) !== '`')
 							warn("Unknown character ignored", line, i);
 						i++;
 					}
@@ -1102,7 +1102,7 @@ function AbcParse() {
 			lines.pop();
 		lines.each( function(line) {
 			if (multilineVars.is_in_history) {
-				if (line[1] === ':') {
+				if (line.charAt(1) === ':') {
 					multilineVars.is_in_history = false;
 					parseLine(line);
 				} else
