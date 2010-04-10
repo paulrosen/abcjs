@@ -292,10 +292,17 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
   if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
   if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords + "\n";
-  var text = this.paper.text(5, this.y+25, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":12});
-  text.translate(0,text.getBBox().height/2);
-  this.paper.setSize(maxwidth+50,this.y+30+text.getBBox().height);
-  this.paper.canvas.parentNode.setAttribute("style","width:"+(maxwidth+50));
+  var text2 = this.paper.text(5, this.y+25, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":12});
+  var height = text2.getBBox().height;
+  text2.translate(0,height/2);
+  this.paper.setSize(maxwidth+50,this.y+30+height);
+  // Correct for IE problem in calculating height
+  var isIE=/*@cc_on!@*/false;//IE detector
+  if (isIE) {
+    this.paper.canvas.parentNode.style.width=(maxwidth+50)+"px";
+    this.paper.canvas.parentNode.style.height="1000px";
+  } else
+    this.paper.canvas.parentNode.setAttribute("style","width:"+(maxwidth+50)+"px");
 };
 
 ABCPrinter.prototype.printSubtitleLine = function(abcline) {
