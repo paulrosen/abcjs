@@ -717,10 +717,10 @@ ABCLayout.prototype.printTimeSignature= function(elem) {
   if (elem.type === "specified") {
     //TODO make the alignment for time signatures centered
     for (var i = 0; i < elem.value.length; i++) {
-      if (i !== 0)	// TODO-PER: I used '9' where it should be + to make if visible for now.
+      if (i !== 0)
         abselem.addRight(new ABCRelativeElement('+', i*20-9, this.glyphs.getSymbolWidth("+"), 7));
-      abselem.addRight(new ABCRelativeElement(elem.value[i].num, i*20, this.glyphs.getSymbolWidth(elem.value[i].num[0])*elem.value[i].num.length, 9));
-      abselem.addRight(new ABCRelativeElement(elem.value[i].den, i*20, this.glyphs.getSymbolWidth(elem.value[i].den[0])*elem.value[i].den.length, 5));
+      abselem.addRight(new ABCRelativeElement(elem.value[i].num, i*20, this.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 9));
+      abselem.addRight(new ABCRelativeElement(elem.value[i].den, i*20, this.glyphs.getSymbolWidth(elem.value[i].den.charAt(0))*elem.value[i].den.length, 5));
     }
   } else if (elem.type === "common_time") {
     abselem.addRight(new ABCRelativeElement("timesig.common", 0, this.glyphs.getSymbolWidth("timesig.common"), 7));

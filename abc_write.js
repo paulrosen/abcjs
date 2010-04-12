@@ -119,11 +119,11 @@ ABCPrinter.prototype.printSymbol = function(x, offset, symbol, start, end) {
     var elemset = this.paper.set();
     var dx =0;
     for (var i=0; i<symbol.length; i++) {
-      var ycorr = this.glyphs.getYCorr(symbol[i]);
-      var el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol[i], this.paper);
+      var ycorr = this.glyphs.getYCorr(symbol.charAt(i));
+      var el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol.charAt(i), this.paper);
       if (el) {
 	elemset.push(el);
-	dx+=this.glyphs.getSymbolWidth(symbol[i]);
+	dx+=this.glyphs.getSymbolWidth(symbol.charAt(i));
       } else {
 	this.debugMsg(x,"no symbol:" +symbol);
       }
