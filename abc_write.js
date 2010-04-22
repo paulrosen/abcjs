@@ -103,7 +103,7 @@ ABCPrinter.prototype.printStaveLine = function (x1,x2, pitch) {
   var y = this.calcY(pitch);
   var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
 			   x2, y+dy, x1, y+dy);
-  return this.paper.path().attr({path:pathString, stroke:"none", fill:fill});
+  return this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
 };
 
 ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
@@ -116,7 +116,7 @@ ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
   }
   var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x-dy, y1, x-dy, y2,
 			   x+dy, y2, x+dy, y1); //TODO dys should be dxs
-  return this.paper.path().attr({path:pathString, stroke:"none", fill:fill});
+  return this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
 };
 
 ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
