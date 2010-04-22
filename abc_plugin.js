@@ -41,11 +41,16 @@ function start_abc() {
   
 }
 
+function getABCText(elem) {
+  return elem.textContent || elem.innerText || elem.nodeValue || "";
+}
+
 function findABC(currentset) {
   var cont = false;
   var newcurrentset = currentset.map(function(i,elem){
       var children = $(elem).children().filter(function() {
-	  return $(this).text().match(/^\s*X:/m);
+          var str = getABCText(this);
+	  return getABCText(this).match(/^\s*X:/m);
 	});
       if (children.length===0) {
 	return elem;
@@ -64,7 +69,7 @@ function ABCConversion(elem) {
   var abctext = "";
   var inabc = false;
   contents.each(function(i,node){
-      var text = $(node).text();
+      var text = getABCText(node);
       if (inabc) {
 	if (node.nodeType==3 && !text.match(/^\s*$/)) {
 	  abctext += text.replace(/\n$/,"").replace(/^\n/,"");
@@ -94,9 +99,19 @@ function insertScoreBefore(node, abcstring) {
     var abcParser = new AbcParse();
     abcParser.parse(tunebook.tunes[0].abc);
     var tune = abcParser.getTune();
-    var paper = Raphael(abcdiv.get(0), 800, 400);
-    var printer = new ABCPrinter(paper);
-    printer.printABC(tune);
+
+    try {
+      var paper = Raphael(abcdiv.get(0), 800, 400);
+      var printer = new ABCPrinter(paper);
+      printer.printABC(tune);
+    } catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
+      abcdiv.remove();
+      abcdiv = $("<div></div>");
+      var paper = Raphael(abcdiv.get(0), 800, 400);
+      var printer = new ABCPrinter(paper);
+      printer.printABC(tune);
+      $(node).before(abcdiv);
+    }
     if (ABCMidiWriter && abc_plugin.show_midi) {
       midiwriter = new ABCMidiWriter(abcdiv.get(0));
       midiwriter.writeABC(tune);

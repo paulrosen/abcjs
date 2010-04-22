@@ -93,17 +93,30 @@ ABCPrinter.prototype.rangeHighlight = function(start,end)
 };
 
 ABCPrinter.prototype.printStaveLine = function (x1,x2, pitch) {
+  var isIE=/*@cc_on!@*/false;//IE detector
   var dy = 0.35;
+  var fill = "#000000";
+  if (isIE) {
+    dy = 1;
+    fill = "#666666";
+  }
   var y = this.calcY(pitch);
   var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
 			   x2, y+dy, x1, y+dy);
-  return this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
+  return this.paper.path().attr({path:pathString, stroke:"none", fill:fill});
 };
 
 ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
-  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x-0.3, y1, x-0.3, y2,
-			   x+dx, y2, x+dx, y1);
-  return this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
+  var isIE=/*@cc_on!@*/false;//IE detector
+  var dy = 0.3;
+  var fill = "#000000";
+  if (isIE) {
+    dy = 1;
+    fill = "#666666";
+  }
+  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x-dy, y1, x-dy, y2,
+			   x+dy, y2, x+dy, y1); //TODO dys should be dxs
+  return this.paper.path().attr({path:pathString, stroke:"none", fill:fill});
 };
 
 ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
@@ -300,7 +313,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
   var isIE=/*@cc_on!@*/false;//IE detector
   if (isIE) {
     this.paper.canvas.parentNode.style.width=(maxwidth+50)+"px";
-    this.paper.canvas.parentNode.style.height="1000px";
+    this.paper.canvas.parentNode.style.height=""+(this.y+30+height)+"px";
   } else
     this.paper.canvas.parentNode.setAttribute("style","width:"+(maxwidth+50)+"px");
 };
