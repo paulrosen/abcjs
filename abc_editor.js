@@ -86,6 +86,8 @@ function ABCEditor(editarea, params) {
 }
 
 ABCEditor.prototype.updateRendering = function() {
+  if (this.bIsPaused)
+    return;
   if (this.bReentry)
     return; // TODO is this likely?
   this.bReentry = true;
@@ -94,30 +96,40 @@ ABCEditor.prototype.updateRendering = function() {
     this.updateSelection();
     this.bReentry = false; 
     return;
-  } else {
-    this.oldt = t;
   }
-  // clear out any old tune
-  this.div.innerHTML = "";
-  var tunebook = new AbcTuneBook(t);
-  var abcParser = new AbcParse(this.parserparams);
-  abcParser.parse(tunebook.tunes[0].abc); //TODO handle multiple tunes
-  var tune = abcParser.getTune();
-  var paper = Raphael(this.div, 800, 400);
-  this.printer = new ABCPrinter(paper);
-  this.printer.printABC(tune);
-  if (ABCMidiWriter && this.mididiv) {
-    (this.mididiv != this.div) && (this.mididiv.innerHTML="");
-    var midiwriter = new ABCMidiWriter(this.mididiv);
-    midiwriter.writeABC(tune);
-  }
-  if (this.warningsdiv) {
-    var warnings = abcParser.getWarnings();
-    this.warningsdiv.innerHTML = (warnings) ? warnings.join("<br />") : "No errors";
-  }
-  this.printer.addSelectListener(this);
-  this.updateSelection();
-  this.bReentry = false;
+
+  // only render once the user has quit typing, so wait a little while and do the update on a timer.
+  var This = this;
+  var doRendering = function() {
+	  This.timerId = null;
+	  t = This.editarea.getString();	// need to get the text again because it might have changed since the callback.
+	  This.oldt = t;
+	  // clear out any old tune
+	  This.div.innerHTML = "";
+	  var tunebook = new AbcTuneBook(t);
+	  var abcParser = new AbcParse(This.parserparams);
+	  abcParser.parse(tunebook.tunes[0].abc); //TODO handle multiple tunes
+	  var tune = abcParser.getTune();
+	  var paper = Raphael(This.div, 800, 400);
+	  This.printer = new ABCPrinter(paper);
+	  This.printer.printABC(tune);
+	  if (ABCMidiWriter && This.mididiv) {
+		(This.mididiv != This.div) && (This.mididiv.innerHTML="");
+		var midiwriter = new ABCMidiWriter(This.mididiv);
+		midiwriter.writeABC(tune);
+	  }
+	  if (This.warningsdiv) {
+		var warnings = abcParser.getWarnings();
+		This.warningsdiv.innerHTML = (warnings) ? warnings.join("<br />") : "No errors";
+	  }
+	  This.printer.addSelectListener(This);
+	  This.updateSelection();
+	  This.bReentry = false;
+  };
+  
+	if (this.timerId)	// If the user is still typing, cancel the update
+		clearTimeout(this.timerId);
+	this.timerId = setTimeout(doRendering, 300);	// Is this a good comprimise between responsiveness and not redrawing too much?
 };
 
 ABCEditor.prototype.updateSelection = function() {
@@ -137,4 +149,10 @@ ABCEditor.prototype.fireChanged = function() {
 
 ABCEditor.prototype.highlight = function(abcelem) {
   this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
+};
+
+ABCEditor.prototype.pause = function(shouldPause) {
+	this.bIsPaused = shouldPause;
+	if (!shouldPause)
+		this.updateRendering();
 };
