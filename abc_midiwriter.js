@@ -183,6 +183,19 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
   this.midi = new Midi();
   this.baraccidentals = [];
   this.abctune = abctune;
+  this.baseduration = 380;
+  if (abctune.metaText.tempo) {
+    var duration = 1/4;
+    if (abctune.metaText.tempo.duration) {
+      duration = abctune.metaText.tempo.duration[0];
+    }
+    var bpm = 60;
+    if (abctune.metaText.tempo.bpm) {
+      bpm = abctune.metaText.tempo.bpm;
+    }
+    var wholeduration = (60/bpm)/duration;
+    this.baseduration = this.baseduration*wholeduration;
+  }
   for(this.line=0; this.line<abctune.lines.length; this.line++) {
     var abcline = abctune.lines[this.line];
     if (this.getLine().staff) {
@@ -236,7 +249,7 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
     this.multiplier=2/3;
   }
 
-  var mididuration = elem.duration*512*this.multiplier;
+  var mididuration = elem.duration*this.baseduration*this.multiplier;
   if (elem.pitches) {
     var note = elem.pitches[0];
     var pitch= note.pitch;
