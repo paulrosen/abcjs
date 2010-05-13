@@ -221,7 +221,7 @@ function AbcParse() {
 								// ignore this middle number
 								if (i+4 < line.length && line.charAt(i+4) === ':') {
 									if (i+5 < line.length && (line.charAt(i+5) >= '1' && line.charAt(i+5) <= '9')) {
-										ret.num_notes = line - '0';
+										ret.num_notes = line.charAt(i+5) - '0';
 										i += 4;
 									}
 								} else {
@@ -947,7 +947,8 @@ function AbcParse() {
 												addEndBeam(el);
 												break;
 											case ')':
-												el.pitches.each(function(pitch) { if (pitch.endSlur === undefined) pitch.endSlur = 1; else pitch.endSlur++; });
+												if (el.endSlur === undefined) el.endSlur = 1; else el.endSlur++;
+												//el.pitches.each(function(pitch) { if (pitch.endSlur === undefined) pitch.endSlur = 1; else pitch.endSlur++; });
 												break;
 											case '-':
 												el.pitches.each(function(pitch) { pitch.startTie = true; });

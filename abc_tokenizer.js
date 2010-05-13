@@ -84,7 +84,7 @@ function AbcTokenizer() {
 		if (finished(str, i))
 			return {len: 0};
 		var firstThree = str.substring(i,i+3).toLowerCase();
-		if (firstThree.length > 1 && firstThree.charAt(1) === ' ' || firstThree.charAt(1) === '^' || firstThree.charAt(1) === '_' || firstThree.charAt(1) === '=') firstThree = firstThree.charAt(1);	// This will handle the case of 'm'
+		if (firstThree.length > 1 && firstThree.charAt(1) === ' ' || firstThree.charAt(1) === '^' || firstThree.charAt(1) === '_' || firstThree.charAt(1) === '=') firstThree = firstThree.charAt(0);	// This will handle the case of 'm'
 		switch (firstThree) {
 			case 'mix':return {len: skipAlpha(str, i), token: 'Mix'};
 			case 'dor':return {len: skipAlpha(str, i), token: 'Dor'};
