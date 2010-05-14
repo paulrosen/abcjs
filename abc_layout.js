@@ -631,10 +631,10 @@ ABCLayout.prototype.printBarLine = function (elem) {
   }
 
   if (thick) {
-    dx+=6; //3 hardcoded;    
-    anchor = new ABCRelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":10, scalex:6, linewidth:0.6});
+    dx+=4; //3 hardcoded;    
+    anchor = new ABCRelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":10, scalex:8, linewidth:0.6});
     abselem.addRight(anchor);
-    dx+=4;
+    dx+=5;
   }
   
 //   if (this.partstartelem && (thick || (firstthin && secondthin))) { // means end of nth part

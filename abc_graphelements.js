@@ -40,7 +40,7 @@ ABCStaffGroupElement.prototype.finished = function() {
 ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
   this.spacingunits = 0; // number of space units taken up (as opposed to fixed width). Layout engine then decides how many a pixels a space unit should be
   this.minspace = 1000; // a big number to start off with
-  var x = 0;
+  var x = AbcSpacing.MARGINLEFT;
 
   // find out how much space will be taken up by voice headers
   for (var i=0;i<this.voices.length;i++) {
@@ -506,7 +506,7 @@ function ABCBeamElem (type, flat) {
   this.forcedown = (type && type==="down");
   this.elems = []; // all the ABCAbsoluteElements
   this.total = 0;
-  this.dy = (this.asc)?AbcSpacing.STEP:-AbcSpacing.STEP;
+  this.dy = (this.asc)?AbcSpacing.STEP*1.2:-AbcSpacing.STEP*1.2;
   if (this.isgrace) this.dy = this.dy*0.4;
   this.allrests = true;
 }
@@ -561,11 +561,11 @@ ABCBeamElem.prototype.drawBeam = function(printer) {
   this.startx = starthead.x;
   if(this.asc) this.startx+=starthead.w-0.6;
   this.endx = endhead.x;
-  if(this.asc) this.endx+=endhead.w-0.6;
+  if(this.asc) this.endx+=endhead.w;
 
   var pathString = "M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
   "L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z";
-  printer.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000"});
+  printer.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
 };
 
 ABCBeamElem.prototype.drawStems = function(printer) {
@@ -608,7 +608,7 @@ ABCBeamElem.prototype.drawStems = function(printer) {
 
 	var pathString ="M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
 	  "L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z";
-	printer.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000"});
+	printer.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
 	auxbeams = auxbeams.slice(0,j);
       }
     }
