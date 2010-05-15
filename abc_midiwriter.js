@@ -218,6 +218,7 @@ ABCMidiWriter.prototype.writeABCLine = function() {
 ABCMidiWriter.prototype.writeABCVoiceLine = function () {
   for (this.pos=0; this.pos<this.getVoice().length; this.pos++) {
     this.writeABCElement(this.getElem());
+    if (!this.getLine().staff) return;
   }
 };
 
@@ -298,7 +299,7 @@ ABCMidiWriter.prototype.handleBar = function (elem) {
   var repeat = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat");
   var skip = (elem.startEnding)?true:false;
   var setvisited = (repeat || skip);
-  var setrepeat = (elem.type==="bar_left_repeat" || elem.type==="bar_dbl_repeat" || elem.type==="bar_thick_thin" || elem.type==="bar_thin_thick");
+  var setrepeat = (elem.type==="bar_left_repeat" || elem.type==="bar_dbl_repeat" || elem.type==="bar_thick_thin" || elem.type==="bar_thin_thick" || elem.type==="bar_thin_thin");
 
   var next = null;
 
@@ -306,7 +307,7 @@ ABCMidiWriter.prototype.handleBar = function (elem) {
     next = this.getJumpMark();
   } else {
 
-    if (skip) {
+    if (skip || repeat) {
       if (this.visited[this.lastmark] === true) {
 	this.setJumpMark(this.getMark());
       }  
