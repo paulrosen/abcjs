@@ -105,6 +105,7 @@ function AbcParse() {
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
 		"p", "pp", "f", "ff", "mf", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 		"upbow", "downbow" ];
+	var accentPsuedonyms = [ ["/", "slide"], ["<", "accent"], [">", "accent"], ["tr", "trill"] ];
 	var letter_to_accent = function(line, i)
 	{
 		var macro = multilineVars.macros[line.charAt(i)];
@@ -135,6 +136,16 @@ function AbcParse() {
 					return (ret[1] === acc);
 				}))
 					return ret;
+
+				if (accentPsuedonyms.detect(function(acc) {
+					if (ret[1] === acc[0]) {
+						ret[1] = acc[1];
+						return true;
+					} else
+						return false;
+				}))
+					return ret;
+
 				// We didn't find the accent in the list, so consume the space, but don't return an accent.
 				// Although it is possible that ! was used as a line break, so accept that.
 			if (line.charAt(i) === '!' && (ret[0] === 1 || line.charAt(i+ret[0]-1) !== '!'))
