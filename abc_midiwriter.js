@@ -12,6 +12,10 @@ function Midi() {
   this.silencelength = "%00";
 }
 
+Midi.prototype.setInstrument = function (number) {
+  this.track = "%00%C0"+toHex(number,2)+this.track;
+}
+
 // length as a log value, 1 is shortest
 Midi.prototype.addNote = function (pitch, loudness, length) {
   this.startNote(pitch,loudness);
@@ -121,6 +125,7 @@ function ABCMidiWriter(parent) {
   this.restart = {line:0, staff:0, voice:0, pos:0};
   this.visited = {};
   this.multiplier =1;
+  this.next = null;
 };
 
 ABCMidiWriter.prototype.getMark = function() {
@@ -128,9 +133,10 @@ ABCMidiWriter.prototype.getMark = function() {
 	  voice:this.voice, pos:this.pos};
 };
 
-ABCMidiWriter.prototype.getMarkString = function() {
-  return "line"+this.line+"staff"+this.staff+ 
-	  "voice"+this.voice+"pos"+this.pos;
+ABCMidiWriter.prototype.getMarkString = function(mark) {
+  mark = mark || this;
+  return "line"+mark.line+"staff"+mark.staff+ 
+	  "voice"+mark.voice+"pos"+mark.pos;
 };
 
 ABCMidiWriter.prototype.goToMark = function(mark) {
@@ -184,6 +190,11 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
   this.baraccidentals = [];
   this.abctune = abctune;
   this.baseduration = 380;
+  if (abctune.formatting.midi) {
+    this.midi.setInstrument(Number(abctune.formatting.midi.substring(8)));
+  } else {
+    this.midi.setInstrument(2);
+  }
   if (abctune.metaText.tempo) {
     var duration = 1/4;
     if (abctune.metaText.tempo.duration) {
@@ -204,7 +215,7 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
   }
   this.midi.embed(this.parent);
   } catch (e) {
-    this.parent.innerHTML="Couldn't write midi";
+    this.parent.innerHTML="Couldn't write midi: "+e;
   }
 };
 
@@ -216,9 +227,16 @@ ABCMidiWriter.prototype.writeABCLine = function() {
 };
 
 ABCMidiWriter.prototype.writeABCVoiceLine = function () {
-  for (this.pos=0; this.pos<this.getVoice().length; this.pos++) {
+  this.pos=0;
+  while (this.pos<this.getVoice().length) {
     this.writeABCElement(this.getElem());
-    if (!this.getLine().staff) return;
+    if (this.next) {
+      this.goToMark(this.next);
+      this.next = null;
+      if (!this.getLine().staff) return;
+    } else {
+      this.pos++;
+    }
   }
 };
 
@@ -299,7 +317,7 @@ ABCMidiWriter.prototype.handleBar = function (elem) {
   var repeat = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat");
   var skip = (elem.startEnding)?true:false;
   var setvisited = (repeat || skip);
-  var setrepeat = (elem.type==="bar_left_repeat" || elem.type==="bar_dbl_repeat" || elem.type==="bar_thick_thin" || elem.type==="bar_thin_thick" || elem.type==="bar_thin_thin");
+  var setrestart = (elem.type==="bar_left_repeat" || elem.type==="bar_dbl_repeat" || elem.type==="bar_thick_thin" || elem.type==="bar_thin_thick" || elem.type==="bar_thin_thin" || elem.type==="bar_right_repeat");
 
   var next = null;
 
@@ -323,12 +341,12 @@ ABCMidiWriter.prototype.handleBar = function (elem) {
     }
   }
 
-  if (setrepeat) {
+  if (setrestart) {
     this.restart = this.getMark();
   }
 
-  if (next) {
-    this.goToMark(next);
+  if (next && this.getMarkString(next)!==this.getMarkString()) {
+    this.next = next;
   }
 
 }
