@@ -162,15 +162,25 @@ ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
   pitch2 = pitch2 + ((above)?1.5:-1.5);
   var y1 = this.calcY(pitch1);
   var y2 = this.calcY(pitch2);
-  var dy = Math.min(35, Math.max(4, (x2-x1)/5));
-  var controlx1 = x1+(x2-x1)/5;
-  var controly1 = y1+ ((above)?-dy:dy);
-  var controlx2 = x2-(x2-x1)/5;
-  var controly2 = y2+ ((above)?-dy:dy);
+
+  //unit direction vector
+  var dx = x2-x1;
+  var dy = y2-y1;
+  var norm= Math.sqrt(dx*dx+dy*dy);
+  var ux = dx/norm;
+  var uy = dy/norm;
+
+  var flatten = norm/5;
+  var curve = ((above)?-1:1)*Math.min(35, Math.max(4, flatten));
+
+  var controlx1 = x1+flatten*ux-curve*uy;
+  var controly1 = y1+flatten*uy+curve*ux;
+  var controlx2 = x2-flatten*ux-curve*uy;
+  var controly2 = y2-flatten*uy+curve*ux;
   var thickness = 2;
   var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1, 
 			   controlx1, controly1, controlx2, controly2, x2, y2, 
-			   controlx2, controly2+thickness, controlx1, controly1+thickness, x1, y1);
+			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
   return this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
 };
 
