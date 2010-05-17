@@ -68,15 +68,19 @@ function ABCConversion(elem) {
   var contents = $(elem).contents();
   var abctext = "";
   var inabc = false;
+  var brcount = 0;
   contents.each(function(i,node){
       var text = getABCText(node);
       if (inabc) {
 	if (node.nodeType==3 && !text.match(/^\s*$/)) {
 	  abctext += text.replace(/\n$/,"").replace(/^\n/,"");
-	} else if($(node).is("br")) {
+	  brcount=0;
+	} else if($(node).is("br") && brcount==0) {
 	  abctext += "\n";
+	  brcount++;
 	} else {
 	  inabc = false;
+	  brcount=0;
 	  insertScoreBefore(node,abctext);
 	}
       } else {
@@ -87,14 +91,24 @@ function ABCConversion(elem) {
       }
     });
   if (inabc) {
-    insertScoreBefore(contents.last(),abctext);
+    appendScoreTo(elem,abctext);
   }
 }
 
+function appendScoreTo(node,abcstring) {
+  var abcdiv = $("<div></div>");
+  $(node).append(abcdiv);
+  addScore(abcdiv,abcstring);
+}
+
 function insertScoreBefore(node, abcstring) {
+  var abcdiv = $("<div></div>");
+  $(node).before(abcdiv);
+  addScore(abcdiv,abcstring);
+}
+
+function addScore(abcdiv, abcstring) {
   try {
-    var abcdiv = $("<div></div>");
-    $(node).before(abcdiv);
     var tunebook = new AbcTuneBook(abcstring);
     var abcParser = new AbcParse();
     abcParser.parse(tunebook.tunes[0].abc);
@@ -105,6 +119,8 @@ function insertScoreBefore(node, abcstring) {
       var printer = new ABCPrinter(paper);
       printer.printABC(tune);
     } catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
+      // can't remember why we don't do this in the general case, but there was a good reason
+      var node = abcdiv.parent();
       abcdiv.remove();
       abcdiv = $("<div></div>");
       var paper = Raphael(abcdiv.get(0), 800, 400);
