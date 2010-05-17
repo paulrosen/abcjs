@@ -527,6 +527,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				return getGlobalFont(cmd, tokens);
 			case "barnumfont":
 				return getGlobalFont("barnumberfont", tokens);
+			case "staves":
 			case "score":
 				multilineVars.score_is_present = true;
 				var addVoice = function(id, newStaff, bracket, brace, continueBar) {
@@ -551,6 +552,18 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				var justOpenBrace = false;
 				var continueBar = false;
 				var lastVoice = undefined;
+				var addContinueBar = function() {
+					continueBar = true;
+					if (lastVoice) {
+						var ty = 'start';
+						if (lastVoice.staffNum > 0) {
+							if (multilineVars.staves[lastVoice.staffNum-1].connectBarLines === 'start' ||
+								multilineVars.staves[lastVoice.staffNum-1].connectBarLines === 'continue')
+								ty = 'continue';
+						}
+						multilineVars.staves[lastVoice.staffNum].connectBarLines = ty;
+					}
+				};
 				while (tokens.length) {
 					var t = tokens.shift();
 					switch (t.token) {
@@ -579,16 +592,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 							else {openBrace = false;multilineVars.staves[lastVoice.staffNum].brace = 'end';}
 							break;
 						case '|':
-							continueBar = true;
-							if (lastVoice) {
-								var ty = 'start';
-								if (lastVoice.staffNum > 0) {
-									if (multilineVars.staves[lastVoice.staffNum-1].connectBarLines === 'start' ||
-										multilineVars.staves[lastVoice.staffNum-1].connectBarLines === 'continue')
-										ty = 'continue';
-								}
-								multilineVars.staves[lastVoice.staffNum].connectBarLines = ty;
-							}
+							addContinueBar();
 							break;
 						default:
 							var vc = "";
@@ -608,6 +612,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 							justOpenBrace = false;
 							continueBar = false;
 							lastVoice = multilineVars.voices[vc];
+							if (cmd === 'staves')
+								addContinueBar();
 							break;
 					}
 				}
@@ -619,7 +625,6 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			case "auquality":
 			case "continuous":
 			case "nobarcheck":
-			case "staves":
 				// TODO-PER: Actually handle the parameters of these
 				tune.formatting[cmd] = restOfString;
 				break;
