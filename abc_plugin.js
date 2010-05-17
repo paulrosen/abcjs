@@ -35,7 +35,7 @@ function start_abc() {
 //     return;
 //   }
   abc_plugin_errors="";
-  findABC($("body")).each(function(i,elem){
+  getABCContainingElements($("body")).each(function(i,elem){
 	ABCConversion(elem);
     });
   
@@ -43,6 +43,23 @@ function start_abc() {
 
 function getABCText(elem) {
   return elem.textContent || elem.innerText || elem.nodeValue || "";
+}
+
+// returns a jquery set of the descendants (including self) of elem which have a text node which matches "X:"
+function getABCContainingElements(elem) {
+  var results = $();
+  var includeself = false;
+  $(elem).contents().each(function() { 
+      if (this.nodeType == 3 && !includeself) {
+	if (this.nodeValue.match(/^\s*X:/m)) {
+	  results = results.add($(elem));
+	  includeself = true;
+	}
+      } else if (this.nodeType==1) {
+	results = results.add(getABCContainingElements(this));
+      }
+    });
+  return results;
 }
 
 function findABC(currentset) {
@@ -70,24 +87,23 @@ function ABCConversion(elem) {
   var inabc = false;
   var brcount = 0;
   contents.each(function(i,node){
-      var text = getABCText(node);
-      if (inabc) {
-	if (node.nodeType==3 && !text.match(/^\s*$/)) {
-	  abctext += text.replace(/\n$/,"").replace(/^\n/,"");
-	  brcount=0;
-	} else if($(node).is("br") && brcount==0) {
-	  abctext += "\n";
-	  brcount++;
-	} else {
-	  inabc = false;
-	  brcount=0;
-	  insertScoreBefore(node,abctext);
-	}
-      } else {
-	if (text.match(/^X:/m)) {
+      if (node.nodeType==3 && !node.nodeValue.match(/^\s*$/)) {
+	brcount=0;
+	var text = node.nodeValue;
+	if (text.match(/^\s*X:/m)) {
 	  inabc=true;
-	  abctext=text.replace(/\n$/,"").replace(/^\n/,"");
+	  abctext="";
 	}
+	if (inabc) {
+	  abctext += text.replace(/\n$/,"").replace(/^\n/,"");
+	} 
+      } else if (inabc && $(node).is("br") && brcount==0) {
+	abctext += "\n";
+	brcount++;
+      } else if (inabc) { // second br or whitespace textnode
+	inabc = false;
+	brcount=0;
+	insertScoreBefore(node,abctext);
       }
     });
   if (inabc) {
