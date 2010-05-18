@@ -1100,7 +1100,10 @@ function AbcParse() {
 			parseLine(ret.str);
 	};
 
-	this.parse = function(strTune) {
+	this.parse = function(strTune, switches) {
+		// the switches are optional and cause a difference in the way the tune is parsed.
+		// switches.header_only : stop parsing when the header is finished
+		// switches.stop_on_warning : stop at the first warning encountered.
 		tune.reset();
 		multilineVars.reset();
 		// Take care of whatever line endings come our way
@@ -1112,24 +1115,35 @@ function AbcParse() {
 		var lines = strTune.split('\n');
 		if (lines.last().length === 0)	// remove the blank line we added above.
 			lines.pop();
-		lines.each( function(line) {
-			if (multilineVars.is_in_history) {
-				if (line.charAt(1) === ':') {
-					multilineVars.is_in_history = false;
-					parseLine(line);
-				} else
-					tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
-			} else if (multilineVars.inTextBlock) {
-				if (line.startsWith("%%endtext")) {
-					tune.addMetaText("textBlock", multilineVars.textBlock);
-					multilineVars.inTextBlock = false;
+		try {
+			lines.each( function(line) {
+				if (switches) {
+					if (switches.header_only && multilineVars.is_in_header === false)
+						throw "normal_abort";
+					if (switches.stop_on_warning && multilineVars.warnings)
+						throw "normal_abort";
 				}
-				else
-					multilineVars.textBlock += ' ' + line;
-			} else
-				parseLine(line);
-			multilineVars.iChar += line.length + 1;
-		});
-		tune.cleanUp();
+				if (multilineVars.is_in_history) {
+					if (line.charAt(1) === ':') {
+						multilineVars.is_in_history = false;
+						parseLine(line);
+					} else
+						tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
+				} else if (multilineVars.inTextBlock) {
+					if (line.startsWith("%%endtext")) {
+						tune.addMetaText("textBlock", multilineVars.textBlock);
+						multilineVars.inTextBlock = false;
+					}
+					else
+						multilineVars.textBlock += ' ' + line;
+				} else
+					parseLine(line);
+				multilineVars.iChar += line.length + 1;
+			});
+			tune.cleanUp();
+		} catch (err) {
+			if (err !== "normal_abort")
+				throw err;
+		}
 	};
 }
