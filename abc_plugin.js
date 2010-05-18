@@ -95,7 +95,7 @@ function ABCConversion(elem) {
 	if (text.match(/^\s*X:/m)) {
 	  inabc=true;
 	  abctext="";
-	  abcspan=$("<span></span>");
+	  abcspan=$("<span class='abctext'></span>");
 	  $(node).before(abcspan);
 	  if (abc_plugin.hide_abc) {
 	    abcspan.hide();
@@ -121,13 +121,13 @@ function ABCConversion(elem) {
 }
 
 function appendScoreTo(node,abcstring) {
-  var abcdiv = $("<div></div>");
+  var abcdiv = $("<div class='abcrendered'></div>");
   $(node).append(abcdiv);
   addScore(abcdiv,abcstring);
 }
 
 function insertScoreBefore(node, abcstring) {
-  var abcdiv = $("<div></div>");
+  var abcdiv = $("<div class='abcrendered'></div>");
   $(node).before(abcdiv);
   addScore(abcdiv,abcstring);
 }
@@ -147,7 +147,7 @@ function addScore(abcdiv, abcstring) {
       // can't remember why we don't do this in the general case, but there was a good reason
       var node = abcdiv.parent();
       abcdiv.remove();
-      abcdiv = $("<div></div>");
+      abcdiv = $("<div class='abcrendered'></div>");
       var paper = Raphael(abcdiv.get(0), 800, 400);
       var printer = new ABCPrinter(paper);
       printer.printABC(tune);
