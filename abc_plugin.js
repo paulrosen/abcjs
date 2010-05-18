@@ -18,7 +18,8 @@
 //    requires: abcjs, raphael, jquery
 
 var abc_plugin = {
- show_midi : true
+ show_midi : true,
+ hide_abc : false
 };
 
 $(document).ready(start_abc);
@@ -84,6 +85,7 @@ function findABC(currentset) {
 function ABCConversion(elem) {
   var contents = $(elem).contents();
   var abctext = "";
+  var abcspan = null;
   var inabc = false;
   var brcount = 0;
   contents.each(function(i,node){
@@ -93,12 +95,19 @@ function ABCConversion(elem) {
 	if (text.match(/^\s*X:/m)) {
 	  inabc=true;
 	  abctext="";
+	  abcspan=$("<span></span>");
+	  $(node).before(abcspan);
+	  if (abc_plugin.hide_abc) {
+	    abcspan.hide();
+	  } 
 	}
 	if (inabc) {
 	  abctext += text.replace(/\n$/,"").replace(/^\n/,"");
+	  abcspan.append($(node));
 	} 
       } else if (inabc && $(node).is("br") && brcount==0) {
 	abctext += "\n";
+	abcspan.append($(node));
 	brcount++;
       } else if (inabc) { // second br or whitespace textnode
 	inabc = false;

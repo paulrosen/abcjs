@@ -189,7 +189,7 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
   this.midi = new Midi();
   this.baraccidentals = [];
   this.abctune = abctune;
-  this.baseduration = 380;
+  this.baseduration = 360;
   if (abctune.formatting.midi) {
     this.midi.setInstrument(Number(abctune.formatting.midi.substring(8)));
   } else {
@@ -206,6 +206,8 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
     }
     var wholeduration = (60/bpm)/duration;
     this.baseduration = this.baseduration*wholeduration;
+  } else {
+    this.baseduration = this.baseduration*3/2;
   }
   for(this.line=0; this.line<abctune.lines.length; this.line++) {
     var abcline = abctune.lines[this.line];

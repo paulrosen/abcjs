@@ -46,7 +46,28 @@ function ABCLayout(glyphs, bagpipes) {
 		   dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}};
   this.slurs = {};
   this.ties = [];
+  this.slursbyvoice = {};
+  this.tiesbyvoice = {};
+  this.endingsbyvoice = {};
+  this.s = 0; // current staff number
+  this.v = 0; // current voice number on current staff
 }
+
+ABCLayout.prototype.getCurrentVoiceId = function() {
+  return "s"+this.s+"v"+this.v;
+};
+
+ABCLayout.prototype.pushCrossLineElems = function() {
+  this.slursbyvoice[this.getCurrentVoiceId()] = this.slurs;
+  this.tiesbyvoice[this.getCurrentVoiceId()] = this.ties;
+  this.endingsbyvoice[this.getCurrentVoiceId()] = this.partstartelem;
+};
+
+ABCLayout.prototype.popCrossLineElems = function() {
+  this.slurs = this.slursbyvoice[this.getCurrentVoiceId()] || {};
+  this.ties = this.tiesbyvoice[this.getCurrentVoiceId()] || [];
+  this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId()];
+};
 
 ABCLayout.prototype.getElem = function() {
   if (this.abcline.length <= this.pos)
@@ -63,9 +84,9 @@ ABCLayout.prototype.getNextElem = function() {
 ABCLayout.prototype.printABCLine = function(staffs, y) {
   this.y = y;
   this.staffgroup = new ABCStaffGroupElement();
-  for (var s = 0; s < staffs.length; s++) {
-    this.printABCStaff(staffs[s]);
-    if (s !== staffs.length-1)
+  for (this.s = 0; this.s < staffs.length; this.s++) {
+    this.printABCStaff(staffs[this.s]);
+    if (this.s !== staffs.length-1)
       this.y+= (AbcSpacing.STAVEHEIGHT*0.8); // staffgroups a bit closer than others
   }
   return this.staffgroup;
@@ -78,26 +99,27 @@ ABCLayout.prototype.printABCStaff = function(abcstaff) {
   if (abcstaff.brace) header += "brace "+abcstaff.brace+" ";
 
   
-  for (var v = 0; v < abcstaff.voices.length; v++) {
-    this.voice = new ABCVoiceElement(this.y,v,abcstaff.voices.length);
-    if (v===0) {
+  for (this.v = 0; this.v < abcstaff.voices.length; this.v++) {
+    this.voice = new ABCVoiceElement(this.y,this.v,abcstaff.voices.length);
+    if (this.v===0) {
       this.voice.barfrom = (abcstaff.connectBarLines==="start" || abcstaff.connectBarLines==="continue");
       this.voice.barto = (abcstaff.connectBarLines==="continue" || abcstaff.connectBarLines==="end");
     } else {
       this.voice.duplicate = true; // barlines and other duplicate info need not be printed
     }
-    if (abcstaff.title && abcstaff.title[v]) this.voice.header=abcstaff.title[v];
+    if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
     // TODO make invisible if voice is duplicate
     this.voice.addChild(this.printClef(abcstaff.clef));
     this.voice.addChild(this.printKeySignature(abcstaff.key));
     if (abcstaff.meter) this.voice.addChild(this.printTimeSignature(abcstaff.meter));
-    this.printABCVoice(abcstaff.voices[v]);
+    this.printABCVoice(abcstaff.voices[this.v]);
     this.staffgroup.addVoice(this.voice);
   }
  
 };
 
 ABCLayout.prototype.printABCVoice = function(abcline) {
+  this.popCrossLineElems();
   this.stemdir = (this.isBagpipes)?"down":null;
   this.abcline = abcline;
   if (this.partstartelem) {
@@ -120,6 +142,7 @@ ABCLayout.prototype.printABCVoice = function(abcline) {
       this.voice.addChild(abselems[i]);
     }
   }
+  this.pushCrossLineElems();
 };
 
 
