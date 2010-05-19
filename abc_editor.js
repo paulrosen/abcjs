@@ -78,7 +78,8 @@ function ABCEditor(editarea, params) {
     }
   }
   
-  this.parserparams = params["parser_params"] || {};
+  this.parserparams = params["parser_options"] || {};
+  this.midiparams = params["midi_options"] || {};
 
   this.oldt = "";
   this.bReentry = false;
@@ -115,7 +116,7 @@ ABCEditor.prototype.updateRendering = function() {
 	  This.printer.printABC(tune);
 	  if (ABCMidiWriter && This.mididiv) {
 		(This.mididiv != This.div) && (This.mididiv.innerHTML="");
-		var midiwriter = new ABCMidiWriter(This.mididiv);
+		var midiwriter = new ABCMidiWriter(This.mididiv,This.midiparams);
 		midiwriter.writeABC(tune);
 	  }
 	  if (This.warningsdiv) {

@@ -17,39 +17,46 @@
 
 //    requires: abcjs, raphael, jquery
 
-var abc_plugin = {
- show_midi : true,
- hide_abc : false
-};
+function ABCPlugin() {
+  this.show_midi = true;
+  this.hide_abc = false;
+  this.render_before = false;
+  this.midi_options = {};
+  this.parse_options = {};
+  this.render_options = {};
+  this.render_classname = "abcrendered";
+  this.text_classname = "abctext";
+  this.auto_render_threshold = 20;
+  this.show_text = "show score for: "
+  this.hide_text = "hide score for: "
+}
+var abc_plugin = new ABCPlugin();
 
 $(document).ready(start_abc);
 
 function start_abc() {
-  // var userlogout = $("a.mainmenu:last").text();
-//   if (userlogout == "Connexion") {
-//     //GM_log("User not logged in");
-//     return;
-//   }
-//   var username = /\[\s(.*)\s\]/.exec(userlogout)[1];
-  
-//   if (username != "Tirno") {
-//     return;
-//   }
-  abc_plugin_errors="";
-  getABCContainingElements($("body")).each(function(i,elem){
-	ABCConversion(elem);
-    });
-  
+  abc_plugin.start();  
 }
 
-function getABCText(elem) {
-  return elem.textContent || elem.innerText || elem.nodeValue || "";
-}
+ABCPlugin.prototype.start = function() {
+  this.errors="";
+  var elems = this.getABCContainingElements($("body"));
+  var self = this;
+  var divs = elems.map(function(i,elem){
+      return self.convertToDivs(elem);
+    });
+  this.auto_render = (divs.size()<=this.auto_render_threshold);
+  divs.each(function(i,elem){
+      self.render(elem,$(elem).data("abctext"));
+    });
+};
 
 // returns a jquery set of the descendants (including self) of elem which have a text node which matches "X:"
-function getABCContainingElements(elem) {
+ABCPlugin.prototype.getABCContainingElements = function(elem) {
   var results = $();
   var includeself = false;
+  var self = this;
+  // TODO maybe look to see whether it's even worth it by using textContent ?
   $(elem).contents().each(function() { 
       if (this.nodeType == 3 && !includeself) {
 	if (this.nodeValue.match(/^\s*X:/m)) {
@@ -57,37 +64,24 @@ function getABCContainingElements(elem) {
 	  includeself = true;
 	}
       } else if (this.nodeType==1) {
-	results = results.add(getABCContainingElements(this));
+	results = results.add(self.getABCContainingElements(this));
       }
     });
   return results;
-}
-
-function findABC(currentset) {
-  var cont = false;
-  var newcurrentset = currentset.map(function(i,elem){
-      var children = $(elem).children().filter(function() {
-          var str = getABCText(this);
-	  return getABCText(this).match(/^\s*X:/m);
-	});
-      if (children.length===0) {
-	return elem;
-      } else {
-	cont = true;
-	return children.get();
-      }
-    });
-  return (cont) ? findABC(newcurrentset) : currentset;
-}
+};
 
 // in this element there are one or more pieces of abc 
 // (and it is not in a subelem)
-function ABCConversion(elem) {
+// for each abc piece, we surround it with a div, store the abctext in the 
+// div's data("abctext") and return an array 
+ABCPlugin.prototype.convertToDivs = function (elem) {
+  var self = this;
   var contents = $(elem).contents();
   var abctext = "";
-  var abcspan = null;
+  var abcdiv = null;
   var inabc = false;
   var brcount = 0;
+  var results = $();
   contents.each(function(i,node){
       if (node.nodeType==3 && !node.nodeValue.match(/^\s*$/)) {
 	brcount=0;
@@ -95,69 +89,87 @@ function ABCConversion(elem) {
 	if (text.match(/^\s*X:/m)) {
 	  inabc=true;
 	  abctext="";
-	  abcspan=$("<span class='abctext'></span>");
-	  $(node).before(abcspan);
-	  if (abc_plugin.hide_abc) {
-	    abcspan.hide();
+	  abcdiv=$("<div class='"+this.text_classname+"'></div>");
+	  $(node).before(abcdiv);
+	  if (self.hide_abc) {
+	    abcdiv.hide();
 	  } 
 	}
 	if (inabc) {
 	  abctext += text.replace(/\n$/,"").replace(/^\n/,"");
-	  abcspan.append($(node));
+	  abcdiv.append($(node));
 	} 
       } else if (inabc && $(node).is("br") && brcount==0) {
 	abctext += "\n";
-	abcspan.append($(node));
+	abcdiv.append($(node));
 	brcount++;
       } else if (inabc) { // second br or whitespace textnode
 	inabc = false;
 	brcount=0;
-	insertScoreBefore(node,abctext);
+	abcdiv.data("abctext",abctext);
+	results = results.add(abcdiv);
       }
     });
   if (inabc) {
-    appendScoreTo(elem,abctext);
+    abcdiv.data("abctext",abctext);
+    results = results.add(abcdiv);
   }
+  return results.get();
 }
 
-function appendScoreTo(node,abcstring) {
-  var abcdiv = $("<div class='abcrendered'></div>");
-  $(node).append(abcdiv);
-  addScore(abcdiv,abcstring);
-}
-
-function insertScoreBefore(node, abcstring) {
-  var abcdiv = $("<div class='abcrendered'></div>");
-  $(node).before(abcdiv);
-  addScore(abcdiv,abcstring);
-}
-
-function addScore(abcdiv, abcstring) {
+ABCPlugin.prototype.render = function (contextnode, abcstring) {
+  var abcdiv = $("<div class='"+this.render_classname+"'></div>");
+  if (this.render_before) {
+    $(contextnode).before(abcdiv);
+  } else {
+    $(contextnode).after(abcdiv);
+  }
+  var self = this;
   try {
     var tunebook = new AbcTuneBook(abcstring);
     var abcParser = new AbcParse();
     abcParser.parse(tunebook.tunes[0].abc);
     var tune = abcParser.getTune();
 
-    try {
-      var paper = Raphael(abcdiv.get(0), 800, 400);
-      var printer = new ABCPrinter(paper);
-      printer.printABC(tune);
-    } catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
-      // can't remember why we don't do this in the general case, but there was a good reason
-      var node = abcdiv.parent();
-      abcdiv.remove();
-      abcdiv = $("<div class='abcrendered'></div>");
-      var paper = Raphael(abcdiv.get(0), 800, 400);
-      var printer = new ABCPrinter(paper);
-      printer.printABC(tune);
-      $(node).before(abcdiv);
+    var doPrint = function() {
+	try {
+	  var paper = Raphael(abcdiv.get(0), 800, 400);
+	  var printer = new ABCPrinter(paper,self.render_options);
+	  printer.printABC(tune);
+	} catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
+	  // can't remember why we don't do this in the general case, but there was a good reason
+	  abcdiv.remove();
+	  abcdiv = $("<div class='"+self.render_classname+"'></div>");
+	  paper = Raphael(abcdiv.get(0), 800, 400);
+	  printer = new ABCPrinter(paper);
+	  printer.printABC(tune);
+	  if (self.render_before) {
+	    $(contextnode).before(abcdiv);
+	  } else {
+	    $(contextnode).after(abcdiv);
+	  }
+	}
+	if (ABCMidiWriter && self.show_midi) {
+	  midiwriter = new ABCMidiWriter(abcdiv.get(0),self.midi_options);
+	  midiwriter.writeABC(tune);
+	}
+      };
+
+    var showtext = "<a class='abcshow' href='#'>"+this.show_text+(tune.metaText.title||"untitled")+"</a>";
+    
+    if (this.auto_render) {
+      doPrint();
+    } else {
+      var showspan = $(showtext);
+      showspan.click(function(){
+	  doPrint();
+	  showspan.hide();
+	  return false;
+	});
+      abcdiv.before(showspan);
     }
-    if (ABCMidiWriter && abc_plugin.show_midi) {
-      midiwriter = new ABCMidiWriter(abcdiv.get(0));
-      midiwriter.writeABC(tune);
-    }
-  } catch (e) {
-    abc_plugin_errors+=e;
-  }
+
+    } catch (e) {
+    this.errors+=e;
+   }
 }

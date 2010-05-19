@@ -119,13 +119,16 @@ function toDurationHex(n) {
   return toHex(res, padding);
 }
 
-function ABCMidiWriter(parent) {
+function ABCMidiWriter(parent, options) {
+  var options = options || {};
   this.parent = parent;
   this.scale = [0,2,4,5,7,9,11];
   this.restart = {line:0, staff:0, voice:0, pos:0};
   this.visited = {};
   this.multiplier =1;
   this.next = null;
+  this.qpm = options["qpm"] || 180;
+  this.program = options["program"] || 2;
 };
 
 ABCMidiWriter.prototype.getMark = function() {
@@ -189,12 +192,15 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
   this.midi = new Midi();
   this.baraccidentals = [];
   this.abctune = abctune;
-  this.baseduration = 360;
+  this.baseduration = 384;
+
   if (abctune.formatting.midi) {
     this.midi.setInstrument(Number(abctune.formatting.midi.substring(8)));
   } else {
-    this.midi.setInstrument(2);
+    this.midi.setInstrument(this.program);
   }
+
+  var wholeduration = (60/this.qpm)*4;
   if (abctune.metaText.tempo) {
     var duration = 1/4;
     if (abctune.metaText.tempo.duration) {
@@ -205,10 +211,9 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
       bpm = abctune.metaText.tempo.bpm;
     }
     var wholeduration = (60/bpm)/duration;
-    this.baseduration = this.baseduration*wholeduration;
-  } else {
-    this.baseduration = this.baseduration*3/2;
-  }
+    
+  } 
+  this.baseduration = this.baseduration*wholeduration;
   for(this.line=0; this.line<abctune.lines.length; this.line++) {
     var abcline = abctune.lines[this.line];
     if (this.getLine().staff) {
