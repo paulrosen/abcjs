@@ -89,7 +89,7 @@ ABCPlugin.prototype.convertToDivs = function (elem) {
 	if (text.match(/^\s*X:/m)) {
 	  inabc=true;
 	  abctext="";
-	  abcdiv=$("<div class='"+this.text_classname+"'></div>");
+	  abcdiv=$("<div class='"+self.text_classname+"'></div>");
 	  $(node).before(abcdiv);
 	  if (self.hide_abc) {
 	    abcdiv.hide();
