@@ -53,6 +53,8 @@ function AbcParse() {
 			this.textBlock = "";
 			this.score_is_present = false;	// Can't have original V: lines when there is the score directive
 			this.inEnding = false;
+			this.inTie = false;
+			this.inTieChord = {};
 		}
 	};
 
@@ -103,7 +105,7 @@ function AbcParse() {
 		"emphasis", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
-		"p", "pp", "f", "ff", "mf", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
+		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 		"upbow", "downbow" ];
 	var accentPsuedonyms = [ ["/", "slide"], ["<", "accent"], [">", "accent"], ["tr", "trill"] ];
 	var letter_to_accent = function(line, i)
@@ -740,8 +742,8 @@ function AbcParse() {
 		multilineVars.start_new_line = true;
 		var tripletNotesLeft = 0;
 		//var tripletMultiplier = 0;
-		var inTie = false;
-		var inTieChord = {};
+//		var inTie = false;
+//		var inTieChord = {};
 
 		// See if the line starts with a header field
 		var retHeader = header.letter_to_body_header(line, i);
@@ -907,12 +909,12 @@ function AbcParse() {
 									el.pitches.push(chordNote);
 								delete chordNote.duration;
 
-								if (inTieChord[el.pitches.length]) {
+								if (multilineVars.inTieChord[el.pitches.length]) {
 									chordNote.endTie = true;
-									inTieChord[el.pitches.length] = undefined;
+									multilineVars.inTieChord[el.pitches.length] = undefined;
 								}
 								if (chordNote.startTie)
-									inTieChord[el.pitches.length] = true;
+									multilineVars.inTieChord[el.pitches.length] = true;
 
 								i  = chordNote.endChar;
 								delete chordNote.endChar;
@@ -933,9 +935,9 @@ function AbcParse() {
 										multilineVars.next_note_duration = 0;
 									}
 
-									if (inTie) {
+									if (multilineVars.inTie) {
 										el.pitches.each(function(pitch) { pitch.endTie = true; });
-										inTie = false;
+										multilineVars.inTie = false;
 									}
 
 									if (tripletNotesLeft > 0) {
@@ -963,7 +965,7 @@ function AbcParse() {
 												break;
 											case '-':
 												el.pitches.each(function(pitch) { pitch.startTie = true; });
-												inTie = true;
+												multilineVars.inTie = true;
 												break;
 											case '>':
 											case '<':
@@ -1020,7 +1022,7 @@ function AbcParse() {
 						// Single pitch
 						var el2 = {};
 						var core = getCoreNote(line, i, el2, true);
-						if (el2.endTie !== undefined) inTie = true;
+						if (el2.endTie !== undefined) multilineVars.inTie = true;
 						if (core !== null) {
 							if (core.pitch !== undefined) {
 								el.pitches = [ { } ];
@@ -1048,15 +1050,15 @@ function AbcParse() {
 							if (core.decoration !== undefined) el.decoration = core.decoration;
 							if (core.graceNotes !== undefined) el.graceNotes = core.graceNotes;
 							delete el.startSlur;
-							if (inTie) {
+							if (multilineVars.inTie) {
 								if (el.pitches !== undefined)
 									el.pitches[0].endTie = true;
 								else
 									el.rest.endTie = true;
-								inTie = false;
+								multilineVars.inTie = false;
 							}
 							if (core.startTie || el.startTie)
-								inTie = true;
+								multilineVars.inTie = true;
 							i  = core.endChar;
 
 							if (tripletNotesLeft > 0) {
