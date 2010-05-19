@@ -573,7 +573,7 @@ function AbcTokenizer() {
 		}
 		switch (x.token) {
 			case 'pt': return { used: used+1, value: parseFloat(num) };
-			case 'cm': return { used: used+1, value: parseFloat(num)*72*2.54 };
+			case 'cm': return { used: used+1, value: parseFloat(num)/2.54*72 };
 			case 'in': return { used: used+1, value: parseFloat(num)*72 };
 		}
 		return { used: 0 };
