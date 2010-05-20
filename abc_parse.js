@@ -1113,7 +1113,12 @@ function AbcParse() {
 		strTune = strTune.gsub('\r', '\n');
 		strTune += '\n';	// Tacked on temporarily to make the last line continuation work
 		strTune = strTune.replace(/\n\\.*\n/g, "\n");	// get rid of latex commands.
-		strTune = strTune.replace(/\\([ \t]*)\n/g, "$1 \x12");	// take care of line continuations right away, but keep the same number of characters
+		var continuationReplacement = function(all, backslash, comment){
+			var spaces = "                                                                                                                                                                                                     ";
+			var padding = comment ? spaces.substring(0, comment.length) : "";
+			return backslash + " \x12" + padding;
+		}
+		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
 		var lines = strTune.split('\n');
 		if (lines.last().length === 0)	// remove the blank line we added above.
 			lines.pop();
