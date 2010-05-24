@@ -87,13 +87,19 @@ function AbcParse() {
 				warn("Missing the closing quote while parsing the chord symbol", line , i);
 			// If it starts with ^, then the chord appears above.
 			// If it starts with _ then the chord appears below.
-			// (note that the 2.0 draft standard defines them as not chords, but annotations and also defines < > and @.)
+			// (note that the 2.0 draft standard defines them as not chords, but annotations and also defines @.)
 			if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '^') {
 				chord[1] = chord[1].substring(1);
 				chord[2] = 'above';
 			} else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '_') {
 				chord[1] = chord[1].substring(1);
 				chord[2] = 'below';
+			} else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '<') {
+				chord[1] = chord[1].substring(1);
+				chord[2] = 'left';
+			} else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '>') {
+				chord[1] = chord[1].substring(1);
+				chord[2] = 'right';
 			} else
 				chord[2] = 'default';
 			return chord;
@@ -803,8 +809,11 @@ function AbcParse() {
 
 					ret = letter_to_chord(line, i);
 					if (ret[0] > 0) {
-						// TODO-PER: There could be more than one chord here if they have different positions.
-						el.chord = {name: tokenizer.translateString(ret[1]), position: ret[2]};
+						// There could be more than one chord here if they have different positions.
+						if (!el.chord)
+							el.chord = [];
+						el.chord.push({name: tokenizer.translateString(ret[1]), position: ret[2]});
+
 						i += ret[0];
 						i += tokenizer.skipWhiteSpace(line.substring(i));
 					} else {

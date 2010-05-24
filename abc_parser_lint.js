@@ -27,7 +27,7 @@ function AbcParserLint() {
 		"emphasis", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
-		"p", "pp", "f", "ff", "mf", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
+		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 		"upbow", "downbow", "staccato"
 	] } };
 
@@ -64,12 +64,15 @@ function AbcParserLint() {
 		verticalPos: { type: 'number', minimum: -20, maximum: 8 }	// the pitch that goes in the middle of the staff C=0
 	};
 
+	var chordProperties = {
+		type: "object", properties: {
+			name: { type: 'string'},
+			position: { type: 'string', Enum: [ 'above', 'below', 'left', 'right', 'default' ] }
+		}
+	};
+
 	var barProperties = {
-		chord: { type: 'object', optional: true, properties: {
-				name: { type: 'string'},
-				position: { type: 'string'}
-			}
-		},
+		chord: { type: 'array', optional: true, output: "noindex", items: chordProperties },
 		decoration: decorationList,
 		endEnding: { type: 'boolean', Enum: [ true ], optional: true },
 		startEnding: { type: 'string', optional: true },
@@ -78,11 +81,7 @@ function AbcParserLint() {
 
 	var noteProperties = {
 		barNumber: { type: 'number', optional: true },
-		chord: { type: 'object', optional: true, properties: {
-				name: { type: 'string'},
-				position: { type: 'string'}
-			}
-		},
+		chord: { type: 'array', optional: true, output: "noindex", items: chordProperties },
 		decoration: decorationList,
 		duration: { type: 'number' },
 		endBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'startBeam' ], optional: true },
@@ -238,7 +237,6 @@ function AbcParserLint() {
 					squarebreve: { type: "boolean", optional: true },
 					staffsep: { type: "number", optional: true },
 					staffwidth: { type: "number", optional: true },
-					staves: { type: "string", optional: true },
 					stemheight: { type: "number", optional: true },
 					straightflags: { type: "boolean", optional: true },
 					stretchlast: { type: "boolean", optional: true },
