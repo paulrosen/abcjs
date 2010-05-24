@@ -95,22 +95,26 @@ function AbcTune() {
 			});
 		}
 		function cleanUpSlursInLine(line) {
-			var currSlur = 0;
+			var currSlur = [];
 			var x;
 
-			var addEndSlur = function(obj, num) {
+			var addEndSlur = function(obj, num, chordPos) {
 				obj.endSlur = [];
+				if (currSlur[chordPos] === undefined)
+					currSlur[chordPos] = chordPos*100;
 				for (var i = 0; i < num; i++) {
-					obj.endSlur.push(currSlur);
-					if (currSlur > 0) --currSlur;
+					obj.endSlur.push(currSlur[chordPos]);
+					if (currSlur[chordPos] > 0) --currSlur[chordPos];
 				}
 			};
 
-			var addStartSlur = function(obj, num) {
+			var addStartSlur = function(obj, num, chordPos) {
 				obj.startSlur = [];
+				if (currSlur[chordPos] === undefined)
+					currSlur[chordPos] = chordPos*100;
 				for (var i = 0; i < num; i++) {
-					++currSlur;
-					obj.startSlur.push(currSlur);
+					++currSlur[chordPos];
+					obj.startSlur.push(currSlur[chordPos]);
 				}
 			};
 
@@ -121,31 +125,31 @@ function AbcTune() {
 						for (var g = 0; g < el.gracenotes.length; g++) {
 							if (el.gracenotes[g].endSlur) {
 								x = el.gracenotes[g].endSlur;
-								addEndSlur(el.gracenotes[g], x);
+								addEndSlur(el.gracenotes[g], x, 1);
 							}
 							if (el.gracenotes[g].startSlur) {
 								x = el.gracenotes[g].startSlur;
-								addStartSlur(el.gracenotes[g], x);
+								addStartSlur(el.gracenotes[g], x, 1);
 							}
 						}
 					}
 					if (el.endSlur) {
 						x = el.endSlur;
-						addEndSlur(el, x);
+						addEndSlur(el, x, 1);
 					}
 					if (el.startSlur) {
 						x = el.startSlur;
-						addStartSlur(el, x);
+						addStartSlur(el, x, 1);
 					}
 					if (el.pitches) {
 						for (var p = 0; p < el.pitches.length; p++) {
 							if (el.pitches[p].endSlur) {
 								x = el.pitches[p].endSlur;
-								addEndSlur(el.pitches[p], x);
+								addEndSlur(el.pitches[p], x, p+1);
 							}
 							if (el.pitches[p].startSlur) {
 								x = el.pitches[p].startSlur;
-								addStartSlur(el.pitches[p], x);
+								addStartSlur(el.pitches[p], x, p+1);
 							}
 						}
 					}
