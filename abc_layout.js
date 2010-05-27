@@ -418,8 +418,24 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   }
   
   if (elem.chord !== undefined) { //16 -> high E.
-	for (i = 0; i < elem.chord.length; i++)
-	    abselem.addChild(new ABCRelativeElement(elem.chord[i].name, (elem.chord[i].position=="left")?-10:0, 0, (elem.chord[i].position=="below")?-3:16, {type:"text"}));
+	for (i = 0; i < elem.chord.length; i++) {
+		var x = 0;
+		var y = 16;
+		switch (elem.chord[i].position) {
+			case "left":
+				x = -7;	// TODO-PER: This is just a guess from trial and error
+				y = elem.averagepitch;
+				break;
+			case "right":
+				x = 13;// TODO-PER: This is just a guess from trial and error
+				y = elem.averagepitch;
+				break;
+			case "below":
+				y = -3;
+				break;
+		}
+	    abselem.addChild(new ABCRelativeElement(elem.chord[i].name, x, 0, y, {type:"text"}));
+	}
   }
     
 
