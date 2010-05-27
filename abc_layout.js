@@ -623,7 +623,7 @@ ABCLayout.prototype.printBarLine = function (elem) {
 
 
   var firstdots = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat");
-  var firstthin = (elem.type!="bar_left_repeat" && elem.type!="bar_thick_thin");
+  var firstthin = (elem.type!="bar_left_repeat" && elem.type!="bar_thick_thin" && elem.type!="bar_invisible");
   var thick = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat" || elem.type==="bar_left_repeat" ||
 	       elem.type==="bar_thin_thick" || elem.type==="bar_thick_thin");
   var secondthin = (elem.type==="bar_left_repeat" || elem.type==="bar_thick_thin" || elem.type==="bar_thin_thin" || elem.type==="bar_dbl_repeat");
@@ -647,6 +647,11 @@ ABCLayout.prototype.printBarLine = function (elem) {
 
   if (firstthin) {
     anchor = new ABCRelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":10, linewidth:0.6});
+    abselem.addRight(anchor);
+  }
+
+  if (elem.type==="bar_invisible") {
+    anchor = new ABCRelativeElement(null, dx, 1, 2, {"type": "none", "pitch2":10, linewidth:0.6});
     abselem.addRight(anchor);
   }
 
