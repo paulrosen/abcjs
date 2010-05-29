@@ -189,7 +189,7 @@ ABCPrinter.prototype.debugMsg = function(x, msg) {
 };
 
 ABCPrinter.prototype.debugMsgLow = function(x, msg) {
-  this.paper.text(x, this.y+80, msg).attr({"font-family":"serif", "font-size":12});
+  this.paper.text(x, this.y+100, msg).attr({"font-family":"serif", "font-size":12,"text-anchor":"begin"});
 };
 
 ABCPrinter.prototype.calcY = function(ofs) {

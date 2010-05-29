@@ -332,11 +332,11 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   }
   
   if (elem.lyric !== undefined) {
-	  var lyricStr = "";
-	  elem.lyric.each(function(ly) {
+    var lyricStr = "";
+    elem.lyric.each(function(ly) {
 	      lyricStr += ly.syllable + ly.divider + "\n";
-	    });
-    abselem.addChild(new ABCRelativeElement(lyricStr, 0, 0, 0, {type:"debugLow"}));
+      });
+    abselem.addRight(new ABCRelativeElement(lyricStr, 0, lyricStr.length*5, 0, {type:"debugLow"}));
   }
   
   if (elem.gracenotes !== undefined) {
