@@ -360,6 +360,9 @@ ABCMidiWriter.prototype.handleBar = function (elem) {
 
 ABCMidiWriter.prototype.setKeySignature = function(elem) {
   this.accidentals = [0,0,0,0,0,0,0];
+  if (this.abctune.formatting.bagpipes) {
+    elem.accidentals=[{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}];
+  }
   if (!elem.accidentals) return;
   elem.accidentals.each(function(acc) {
 		var d = (acc.acc === "sharp") ? 1 : (acc.acc === "natural") ?0 : -1;
