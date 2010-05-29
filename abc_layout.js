@@ -202,22 +202,7 @@ ABCLayout.prototype.printBeam = function() {
       this.pos++;
     }
     this.voice.addOther(beamelem);
-  } 
-// else if (this.getNextElem() && this.getNextElem().el_type=="note" && !this.getElem().end_beam) {
-//     var beamelem = new ABCBeamElem(this.stemdir);
-
-//     while (this.getElem()) {
-//       var abselem = this.printNote(this.getElem(),true);
-//       abselemset[abselemset.length] = abselem;
-//       beamelem.add(abselem);
-//       if (!this.getNextElem() || this.getNextElem().el_type!=="note" || this.getElem().end_beam) {
-// 		break;
-//       }
-//       this.pos++;
-//     }
-//     this.voice.addOther(beamelem);
-//   }
-  else {
+  } else {
     abselemset[0] = this.printNote(this.getElem());
   }
   return abselemset;
@@ -242,7 +227,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   var notehead = null;
   var grace= null;
   this.roomtaken = 0; // room needed to the left of the note
-  
+  this.roomtakenright = 0; // room needed to the right of the note
   var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
   var c="";
   var flag = null;
@@ -274,6 +259,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
     notehead = this.printNoteHead(abselem, c, {verticalPos:7}, null, 0, -this.roomtaken, null, dot, 0, 1);
     if (notehead) abselem.addHead(notehead);
     this.roomtaken+=this.accidentalshiftx;
+    this.roomtakenright = Math.max(this.roomtakenright,this.dotshiftx);
 
   } else {
     sortPitch(elem);
@@ -331,6 +317,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
       notehead = this.printNoteHead(abselem, c, elem.pitches[p], dir, 0, -this.roomtaken, flag, dot, dotshiftx, 1);
       if (notehead) abselem.addHead(notehead);
       this.roomtaken += this.accidentalshiftx;
+      this.roomtakenright = Math.max(this.roomtakenright,this.dotshiftx); 
     }
       
     // draw stem from the furthest note to a pitch above/below the stemmed note
@@ -418,24 +405,28 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   }
   
   if (elem.chord !== undefined) { //16 -> high E.
-	for (i = 0; i < elem.chord.length; i++) {
-		var x = 0;
-		var y = 16;
-		switch (elem.chord[i].position) {
-			case "left":
-				x = -7;	// TODO-PER: This is just a guess from trial and error
-				y = elem.averagepitch;
-				break;
-			case "right":
-				x = 13;// TODO-PER: This is just a guess from trial and error
-				y = elem.averagepitch;
-				break;
-			case "below":
-				y = -3;
-				break;
-		}
-	    abselem.addChild(new ABCRelativeElement(elem.chord[i].name, x, 0, y, {type:"text"}));
-	}
+    for (i = 0; i < elem.chord.length; i++) {
+      var x = 0;
+      var y = 16;
+      switch (elem.chord[i].position) {
+      case "left":
+	this.roomtaken+=7;
+	x = -this.roomtaken;	// TODO-PER: This is just a guess from trial and error
+	y = elem.averagepitch;
+	abselem.addExtra(new ABCRelativeElement(elem.chord[i].name, x, this.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
+	break;
+      case "right":
+	this.roomtakenright+=4;
+	x = this.roomtakenright;// TODO-PER: This is just a guess from trial and error
+	y = elem.averagepitch;
+	abselem.addRight(new ABCRelativeElement(elem.chord[i].name, x, this.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
+	break;
+      case "below":
+	y = -3;
+      default:
+	abselem.addChild(new ABCRelativeElement(elem.chord[i].name, x, 0, y, {type:"text"}));
+      }
+    }
   }
     
 
@@ -459,6 +450,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
   var notehead;
   var i;
   this.accidentalshiftx = 0;
+  this.dotshiftx = 0;
   if (c === undefined)
     abselem.addChild(new ABCRelativeElement("pitch is undefined", 0, 0, 0, {type:"debug"}));
   else if (c==="") {
@@ -475,6 +467,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
       var xdelta = (dir=="down")?headx:headx+notehead.w-0.6;
       abselem.addRight(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));
     }
+    this.dotshiftx = notehead.w+dotshiftx-2+5*dot;
     for (;dot>0;dot--) {
       var dotadjusty = (1-pitch%2); //TODO don't adjust when above or below stave?
       abselem.addRight(new ABCRelativeElement("dots.dot", notehead.w+dotshiftx-2+5*dot, this.glyphs.getSymbolWidth("dots.dot"), pitch+dotadjusty));
