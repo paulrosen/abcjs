@@ -353,6 +353,22 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		if (retClef.token !== undefined)
 			result.foundClef = true;
 		if (ret.accidentals !== undefined) {
+			// Adjust the octave of the accidentals, if necessary
+			ret.accidentals.each(function(acc) {
+				if (retClef.token === 'bass') {
+					//if (acc.note === 'A') acc.note = 'a';
+					//if (acc.note === 'B') acc.note = 'b';
+					if (acc.note === 'C') acc.note = 'c';
+					if (acc.note === 'D' && acc.acc !== 'flat') acc.note = 'd';
+					if (acc.note === 'E' && acc.acc !== 'flat') acc.note = 'e';
+					if (acc.note === 'F' && acc.acc !== 'flat') acc.note = 'f';
+					if (acc.note === 'G' && acc.acc !== 'flat') acc.note = 'g';
+				} else {
+					if (acc.note === 'a') acc.note = 'A';
+					if (acc.note === 'b') acc.note = 'B';
+					if (acc.note === 'C') acc.note = 'c';
+				}
+			});
 			multilineVars.key = ret;
 			result.foundKey = true;
 		}
@@ -1178,6 +1194,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		C: 'composer',
 		D: 'discography',
 		F: 'url',
+		G: 'group',
 		I: 'instruction',
 		N: 'notes',
 		O: 'origin',
