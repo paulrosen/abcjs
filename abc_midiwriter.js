@@ -16,7 +16,6 @@ Midi.prototype.setInstrument = function (number) {
   this.track = "%00%C0"+toHex(number,2)+this.track;
 }
 
-// length as a log value, 1 is shortest
 Midi.prototype.addNote = function (pitch, loudness, length) {
   this.startNote(pitch,loudness);
   this.endNote(pitch,length);
@@ -277,35 +276,47 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
 
   var mididuration = elem.duration*this.baseduration*this.multiplier;
   if (elem.pitches) {
-    var note = elem.pitches[0];
-    var pitch= note.pitch;
-    if (note.accidental) {
-      switch(note.accidental) {
-      case "sharp": 
-	this.baraccidentals[pitch]=1; break;
-      case "flat": 
-	this.baraccidentals[pitch]=-1; break;
-      case "nat":
-	this.baraccidentals[pitch]=0; break;
+    var midipitches = [];
+    for (var i=0; i<elem.pitches.length; i++) {
+      var note = elem.pitches[i];
+      var pitch= note.pitch;
+      if (note.accidental) {
+	switch(note.accidental) {
+	case "sharp": 
+	  this.baraccidentals[pitch]=1; break;
+	case "flat": 
+	  this.baraccidentals[pitch]=-1; break;
+	case "nat":
+	  this.baraccidentals[pitch]=0; break;
+	}
       }
+      
+      midipitches[i] = 60 + 12*this.extractOctave(pitch)+this.scale[this.extractNote(pitch)];
+      
+      if (this.baraccidentals[pitch]!==undefined) {
+	midipitches[i] += this.baraccidentals[pitch];
+      } else { // use normal accidentals
+	midipitches[i] += this.accidentals[this.extractNote(pitch)];
+      }
+      
+      this.midi.startNote(midipitches[i],64);
+
+      if (note.startTie) {
+	this.tieduration=mididuration;
+      } 
     }
 
-    var midipitch = 60 + 12*this.extractOctave(pitch)+this.scale[this.extractNote(pitch)];
-
-    if (this.baraccidentals[pitch]!==undefined) {
-      midipitch += this.baraccidentals[pitch];
-    } else { // use normal accidentals
-      midipitch += this.accidentals[this.extractNote(pitch)]
-    }
-    
-    if (note.startTie) {
-      this.midi.startNote(midipitch,64);
-      this.tieduration=mididuration;
-    } else if (note.endTie) {
-      this.midi.endNote(midipitch,mididuration+this.tieduration);
+    for (i=0; i<elem.pitches.length; i++) {
+      var note = elem.pitches[i];
+      var pitch= note.pitch;
+      if (note.startTie) continue; // don't terminate it
+      if (note.endTie) {
+	this.midi.endNote(midipitches[i],mididuration+this.tieduration);
+      } else {
+	this.midi.endNote(midipitches[i],mididuration)
+      }
+      mididuration = 0; // put these to zero as we've moved forward in the midi
       this.tieduration=0;
-    } else {
-      this.midi.addNote(midipitch,64,mididuration);
     }
   } else {
     this.midi.addRest(mididuration);
