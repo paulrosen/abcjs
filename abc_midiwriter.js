@@ -311,7 +311,7 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
     this.midi.addRest(mididuration);
   }
 
-  if (elem.startTriplet) {
+  if (elem.endTriplet) {
     this.multiplier=1;
   }
 
