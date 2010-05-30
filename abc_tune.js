@@ -290,6 +290,8 @@ function AbcTune() {
 			var dur = This.getDuration(hashParams);
 			if (dur >= 0.25) {	// The beam ends on the note before this.
 				endBeamLast();
+			} else if (hashParams.force_end_beam_last && This.potentialStartBeam != undefined) {
+				endBeamLast();
 			} else if (hashParams.end_beam && This.potentialStartBeam != undefined) {	// the beam is forced to end on this note, probably because of a space in the ABC
 				if (hashParams.rest === undefined)
 					endBeamHere();
@@ -318,6 +320,7 @@ function AbcTune() {
 			endBeamLast();
 		}
 		delete hashParams.end_beam;	// We don't want this temporary variable hanging around.
+		delete hashParams.force_end_beam_last;	// We don't want this temporary variable hanging around.
 		pushNote(hashParams);
 	};
 

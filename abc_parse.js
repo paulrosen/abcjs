@@ -815,7 +815,10 @@ function AbcParse() {
 						el.chord.push({name: tokenizer.translateString(ret[1]), position: ret[2]});
 
 						i += ret[0];
-						i += tokenizer.skipWhiteSpace(line.substring(i));
+						var ii = tokenizer.skipWhiteSpace(line.substring(i));
+						if (ii > 0)
+							el.force_end_beam_last = true;
+						i += ii;
 					} else {
 						if (nonDecorations.indexOf(line.charAt(i)) === -1)
 							ret = letter_to_accent(line, i);
