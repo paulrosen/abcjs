@@ -6,27 +6,47 @@ function setAttributes(elm, attrs){
 
 
 function Midi() {
-  this.tracks=[];
-  this.track = "%00%90";
-  this.first = true;
-  this.silencelength = "%00";
+  this.trackstrings="";
+  this.trackcount = 0;
+}
+
+Midi.prototype.setTempo = function (qpm) {
+  if (this.trackcount==0) {
+    this.startTrack();
+    this.track+="%00%FF%51%03"+toHex(Math.round(60000000/qpm),6);
+    this.endTrack();
+  }
+}
+
+Midi.prototype.startTrack = function () {
+  this.track = "";
+  this.silencelength = 0;
+  this.trackcount++;
+  this.first=true;
+  if (this.instrument) {
+    this.setInstrument(this.instrument);
+  }
+};
+
+Midi.prototype.endTrack = function () {
+  var tracklength = toHex(this.track.length/3+4,8);
+  this.track = "MTrk"+tracklength+ // track header
+  this.track +  
+  '%00%FF%2F%00'; // track end
+  this.trackstrings += this.track;
 }
 
 Midi.prototype.setInstrument = function (number) {
   this.track = "%00%C0"+toHex(number,2)+this.track;
-}
-
-Midi.prototype.addNote = function (pitch, loudness, length) {
-  this.startNote(pitch,loudness);
-  this.endNote(pitch,length);
+  this.instrument=number;
 };
 
 Midi.prototype.startNote = function (pitch, loudness) {
+  this.track+=toDurationHex(this.silencelength); // only need to shift by amout of silence (if there is any)
+  this.silencelength = 0;
   if (this.first) {
     this.first = false;
-  } else {
-    this.track+=this.silencelength; // only need to shift by amout of silence
-    this.silencelength = "%00";
+    this.track+="%90";
   }
   this.track += "%"+pitch.toString(16)+"%"+loudness; //note
 };
@@ -37,16 +57,14 @@ Midi.prototype.endNote = function (pitch, length) {
 };
 
 Midi.prototype.addRest = function (length) {
-  this.silencelength = toDurationHex(length);
+  this.silencelength += length;
 };
 
 Midi.prototype.embed = function(parent) {
-  var tracklength = toHex(this.track.length/3+4,8);
+
   var data="data:audio/midi," + 
-  "MThd%00%00%00%06%00%01%00%01%00%C0"+ // header
-  "MTrk"+tracklength+ // track header
-  this.track +  
-  '%00%FF%2F%00'; // track end
+  "MThd%00%00%00%06%00%01"+toHex(this.trackcount,4)+"%01%e0"+ // header
+  this.trackstrings;
 
 //   var embedContainer = document.createElement("div");
 //   embedContainer.className = "embedContainer";
@@ -191,7 +209,7 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
   this.midi = new Midi();
   this.baraccidentals = [];
   this.abctune = abctune;
-  this.baseduration = 384;
+  this.baseduration = 480*4; // nice and divisible
 
   if (abctune.formatting.midi) {
     this.midi.setInstrument(Number(abctune.formatting.midi.substring(8)));
@@ -199,7 +217,6 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
     this.midi.setInstrument(this.program);
   }
 
-  var wholeduration = (60/this.qpm)*4;
   if (abctune.metaText.tempo) {
     var duration = 1/4;
     if (abctune.metaText.tempo.duration) {
@@ -209,16 +226,29 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
     if (abctune.metaText.tempo.bpm) {
       bpm = abctune.metaText.tempo.bpm;
     }
-    var wholeduration = (60/bpm)/duration;
-    
+    this.qpm = bpm*duration*4;
   } 
-  this.baseduration = this.baseduration*wholeduration;
-  for(this.line=0; this.line<abctune.lines.length; this.line++) {
-    var abcline = abctune.lines[this.line];
-    if (this.getLine().staff) {
-      this.writeABCLine();
+  this.midi.setTempo(this.qpm);
+
+  // visit each voice completely in turn
+  // "problematic" because it means visiting only one staff+voice for each line each time
+  this.staffcount=1; // we'll know the actual number once we enter the code
+  for(this.staff=0;this.staff<this.staffcount;this.staff++) {
+    this.voicecount=1;
+    for(this.voice=0;this.voice<this.voicecount;this.voice++) {
+      this.midi.startTrack();
+      this.restart = {line:0, staff:this.staff, voice:this.voice, pos:0};
+      this.next= null;
+      for(this.line=0; this.line<abctune.lines.length; this.line++) {
+	var abcline = abctune.lines[this.line];
+	if (this.getLine().staff) {
+	  this.writeABCLine();
+	}
+      }
+      this.midi.endTrack();
     }
   }
+
   this.midi.embed(this.parent);
   } catch (e) {
     this.parent.innerHTML="Couldn't write midi: "+e;
@@ -226,8 +256,8 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
 };
 
 ABCMidiWriter.prototype.writeABCLine = function() {
-  this.staff=0;
-  this.voice=0;
+  this.staffcount = this.getLine().staff.length;
+  this.voicecount = this.getStaff().voices.length;
   this.setKeySignature(this.getStaff().key);
   this.writeABCVoiceLine();
 };
