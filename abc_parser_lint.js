@@ -307,6 +307,7 @@ function AbcParserLint() {
 					book: { type: "string", optional: true },
 					composer: { type: "string", optional: true },
 					discography: { type: "string", optional: true },
+					group: { type: "string", optional: true },
 					history: { type: "string", optional: true },
 					instruction: { type: "string", optional: true },
 					notes: { type: "string", optional: true },
