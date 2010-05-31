@@ -17,7 +17,8 @@
 
 //    requires: abcjs, raphael, jquery
 
-function ABCPlugin() {
+function ABCPlugin(jq) {
+  this.$ = jq;
   this.show_midi = true;
   this.hide_abc = false;
   this.render_before = false;
@@ -30,9 +31,9 @@ function ABCPlugin() {
   this.show_text = "show score for: "
   this.hide_text = "hide score for: "
 }
-var abc_plugin = new ABCPlugin();
+var abc_plugin = new ABCPlugin(jQuery);
 
-$(document).ready(start_abc);
+jQuery(document).ready(start_abc);
 
 function start_abc() {
   abc_plugin.start();  
@@ -40,30 +41,30 @@ function start_abc() {
 
 ABCPlugin.prototype.start = function() {
   this.errors="";
-  var elems = this.getABCContainingElements($("body"));
+  var elems = this.getABCContainingElements(this.$("body"));
   var self = this;
   var divs = elems.map(function(i,elem){
       return self.convertToDivs(elem);
     });
   this.auto_render = (divs.size()<=this.auto_render_threshold);
   divs.each(function(i,elem){
-      self.render(elem,$(elem).data("abctext"));
+      self.render(elem,self.$(elem).data("abctext"));
     });
 };
 
 // returns a jquery set of the descendants (including self) of elem which have a text node which matches "X:"
 ABCPlugin.prototype.getABCContainingElements = function(elem) {
-  var results = $();
-  var includeself = false;
+  var results = this.$();
+  var includeself = false; // whether self is already included (no need to include it again)
   var self = this;
   // TODO maybe look to see whether it's even worth it by using textContent ?
-  $(elem).contents().each(function() { 
+  this.$(elem).contents().each(function() { 
       if (this.nodeType == 3 && !includeself) {
 	if (this.nodeValue.match(/^\s*X:/m)) {
-	  results = results.add($(elem));
+	  results = results.add(self.$(elem));
 	  includeself = true;
 	}
-      } else if (this.nodeType==1) {
+      } else if (this.nodeType==1 && !self.$(this).is("textarea")) {
 	results = results.add(self.getABCContainingElements(this));
       }
     });
@@ -76,12 +77,12 @@ ABCPlugin.prototype.getABCContainingElements = function(elem) {
 // div's data("abctext") and return an array 
 ABCPlugin.prototype.convertToDivs = function (elem) {
   var self = this;
-  var contents = $(elem).contents();
+  var contents = this.$(elem).contents();
   var abctext = "";
   var abcdiv = null;
   var inabc = false;
   var brcount = 0;
-  var results = $();
+  var results = this.$();
   contents.each(function(i,node){
       if (node.nodeType==3 && !node.nodeValue.match(/^\s*$/)) {
 	brcount=0;
@@ -89,19 +90,19 @@ ABCPlugin.prototype.convertToDivs = function (elem) {
 	if (text.match(/^\s*X:/m)) {
 	  inabc=true;
 	  abctext="";
-	  abcdiv=$("<div class='"+self.text_classname+"'></div>");
-	  $(node).before(abcdiv);
+	  abcdiv=self.$("<div class='"+self.text_classname+"'></div>");
+	  self.$(node).before(abcdiv);
 	  if (self.hide_abc) {
 	    abcdiv.hide();
 	  } 
 	}
 	if (inabc) {
 	  abctext += text.replace(/\n$/,"").replace(/^\n/,"");
-	  abcdiv.append($(node));
+	  abcdiv.append(self.$(node));
 	} 
-      } else if (inabc && $(node).is("br") && brcount==0) {
+      } else if (inabc && self.$(node).is("br") && brcount==0) {
 	abctext += "\n";
-	abcdiv.append($(node));
+	abcdiv.append(self.$(node));
 	brcount++;
       } else if (inabc) { // second br or whitespace textnode
 	inabc = false;
@@ -118,11 +119,11 @@ ABCPlugin.prototype.convertToDivs = function (elem) {
 }
 
 ABCPlugin.prototype.render = function (contextnode, abcstring) {
-  var abcdiv = $("<div class='"+this.render_classname+"'></div>");
+  var abcdiv = this.$("<div class='"+this.render_classname+"'></div>");
   if (this.render_before) {
-    $(contextnode).before(abcdiv);
+    this.$(contextnode).before(abcdiv);
   } else {
-    $(contextnode).after(abcdiv);
+    this.$(contextnode).after(abcdiv);
   }
   var self = this;
   try {
@@ -139,14 +140,14 @@ ABCPlugin.prototype.render = function (contextnode, abcstring) {
 	} catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
 	  // can't remember why we don't do this in the general case, but there was a good reason
 	  abcdiv.remove();
-	  abcdiv = $("<div class='"+self.render_classname+"'></div>");
+	  abcdiv = this.$("<div class='"+self.render_classname+"'></div>");
 	  paper = Raphael(abcdiv.get(0), 800, 400);
 	  printer = new ABCPrinter(paper);
 	  printer.printABC(tune);
 	  if (self.render_before) {
-	    $(contextnode).before(abcdiv);
+	    this.$(contextnode).before(abcdiv);
 	  } else {
-	    $(contextnode).after(abcdiv);
+	    this.$(contextnode).after(abcdiv);
 	  }
 	}
 	if (ABCMidiWriter && self.show_midi) {
@@ -160,7 +161,7 @@ ABCPlugin.prototype.render = function (contextnode, abcstring) {
     if (this.auto_render) {
       doPrint();
     } else {
-      var showspan = $(showtext);
+      var showspan = this.$(showtext);
       showspan.click(function(){
 	  doPrint();
 	  showspan.hide();
