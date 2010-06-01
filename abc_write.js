@@ -38,6 +38,7 @@ function ABCPrinter(paper) {
   this.glyphs = new ABCGlyphs();
   this.listeners = [];
   this.selected = [];
+  this.ingroup = false;
 }
 
 ABCPrinter.prototype.setY = function(y) {
@@ -92,6 +93,36 @@ ABCPrinter.prototype.rangeHighlight = function(start,end)
   }
 };
 
+ABCPrinter.prototype.beginGroup = function () {
+  this.path = [];
+  this.lastM = [0,0];
+  this.ingroup = true;
+};
+
+ABCPrinter.prototype.addPath = function (path) {
+  path = path || [];
+  if (path.length==0) return;
+  path[0][0]="m";
+  path[0][1]-=this.lastM[0];
+  path[0][2]-=this.lastM[1];
+  this.lastM[0]+=path[0][1];
+  this.lastM[1]+=path[0][2];
+  this.path.push(path[0]);
+  for (var i=1,ii=path.length;i<ii;i++) {
+    if (path[i][0]=="m") {
+      this.lastM[0]+=path[i][1];
+      this.lastM[1]+=path[i][2];
+    }
+    this.path.push(path[i]);
+  }
+};
+
+ABCPrinter.prototype.endGroup = function () {
+  this.ingroup = false;
+  if (this.path.length==0) return null;
+  return this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000"});
+};
+
 ABCPrinter.prototype.printStaveLine = function (x1,x2, pitch) {
   var isIE=/*@cc_on!@*/false;//IE detector
   var dy = 0.35;
@@ -107,16 +138,24 @@ ABCPrinter.prototype.printStaveLine = function (x1,x2, pitch) {
 };
 
 ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
+  if (dx<0) { // correct path "handedness" for intersection with other elements
+    var tmp = y2;
+    y2 = y1;
+    y1 = tmp;
+  }
   var isIE=/*@cc_on!@*/false;//IE detector
   var fill = "#000000";
-  if (isIE) {
+  if (isIE && dx<1) {
     dx = 1;
     fill = "#666666";
   }
   if (~~x === x) x+=0.05; // raphael does weird rounding (for VML)
-  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x, y1, x, y2,
-			   x+dx, y2, x+dx, y1); //TODO dys should be dxs
-  return this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
+  var pathArray = [["M",x,y1],["L", x, y2],["L", x+dx, y2],["L",x+dx,y1],["z"]];
+  if (!isIE && this.ingroup) {
+    this.addPath(pathArray);
+  } else {
+    return this.paper.path().attr({path:pathArray, stroke:"none", fill:fill}).toBack();
+  }
 };
 
 ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
@@ -126,7 +165,8 @@ ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
 
 // assumes this.y is set appropriately
 // if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
-ABCPrinter.prototype.printSymbol = function(x, offset, symbol, start, end) {
+// not scaled if not in printgroup
+ABCPrinter.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
   if (!symbol) return null;
   if (symbol.length>0 && symbol.indexOf(".")<0) {
     var elemset = this.paper.set();
@@ -144,11 +184,15 @@ ABCPrinter.prototype.printSymbol = function(x, offset, symbol, start, end) {
     return elemset;
   } else {
     var ycorr = this.glyphs.getYCorr(symbol);
-    var el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper);
-    if (el) {
-      return el;
-    } else
-      this.debugMsg(x,"no symbol:" +symbol);
+    if (this.ingroup) {
+      this.addPath(this.glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
+    } else {
+      var el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper);
+      if (el) {
+	return el;
+      } else
+	this.debugMsg(x,"no symbol:" +symbol);
+    }
     return null;    
   }
 };

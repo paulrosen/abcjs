@@ -5,16 +5,27 @@ var ABCGlyphs = function() {
 
 
   this.printSymbol = function (x,y,symb,paper) {
-     if (!glyphs[symb]) return null;
-     var pathArray = glyphs[symb].d;
-     pathArray[0][1] +=x;
-     pathArray[0][2] +=y;
-     var path = paper.path().attr({path:glyphs[symb].d, stroke:"none", fill:"#000000"});
-     pathArray[0][1] -=x;
-     pathArray[0][2] -=y;
-     return path;//.translate(x,y);
+    if (!glyphs[symb]) return null;
+    var pathArray = this.pathClone(glyphs[symb].d);
+    pathArray[0][1] +=x;
+    pathArray[0][2] +=y;
+    var path = paper.path().attr({path:pathArray, stroke:"none", fill:"#000000"});
+    
+    return path;//.translate(x,y);
    };
-   
+  
+  this.getPathForSymbol = function (x,y,symb,scalex, scaley) {
+    var scalex = scalex || 1;
+    var scaley = scaley || 1;
+    if (!glyphs[symb]) return null;
+    var pathArray = this.pathClone(glyphs[symb].d);
+    if (scalex!=1 || scaley!=1) this.pathScale(pathArray,scalex,scaley);
+    pathArray[0][1] +=x;
+    pathArray[0][2] +=y;
+
+    return pathArray;
+  };
+  
   this.getSymbolWidth = function (symbol) {
     if (glyphs[symbol]) return glyphs[symbol].w;
     return 0;
@@ -31,6 +42,26 @@ var ABCGlyphs = function() {
       return "center";
     }
     return "left";
+  };
+
+  this.pathClone = function (pathArray) {
+    var res = [];
+    for (var i = 0, ii = pathArray.length; i < ii; i++) {
+      res[i] = [];
+      for (var j = 0, jj = pathArray[i].length; j < jj; j++) {
+	res[i][j] = pathArray[i][j];
+      }
+    }
+    return res;
+  };
+
+  this.pathScale = function (pathArray, kx, ky) {
+    for (var i = 0, ii = pathArray.length; i < ii; i++) {
+      var p = pathArray[i];
+      for (j = 1, jj = p.length; j < jj; j++) {
+	p[j] *= (j % 2) ? kx : ky;
+      }
+    }
   };
    
   this.getYCorr = function (symbol) {

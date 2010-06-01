@@ -670,7 +670,7 @@ ABCLayout.prototype.printBarLine = function (elem) {
 
   if (thick) {
     dx+=4; //3 hardcoded;    
-    anchor = new ABCRelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":10, scalex:8, linewidth:0.6});
+    anchor = new ABCRelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":10, linewidth:4});
     abselem.addRight(anchor);
     dx+=5;
   }

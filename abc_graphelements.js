@@ -301,9 +301,11 @@ ABCAbsoluteElement.prototype.addChild = function (child) {
 ABCAbsoluteElement.prototype.draw = function (printer, bartop) {
   this.elemset = printer.paper.set();
   if (this.invisible) return;
+  printer.beginGroup();
   for (var i=0; i<this.children.length; i++) {
     this.elemset.push(this.children[i].draw(printer,this.x, bartop));
   }
+  this.elemset.push(printer.endGroup());
   var self = this;
   this.elemset.mouseup(function (e) {
       printer.notifySelect(self);
@@ -330,7 +332,7 @@ function ABCRelativeElement(c, dx, w, pitch, opt) {
   this.type = opt["type"] || "symbol"; // cheap types.
   this.pitch2 = opt["pitch2"];
   this.linewidth = opt["linewidth"];
-  this.attributes = opt["attributes"];
+  this.attributes = opt["attributes"]; // only present on textual elements
 }
 
 ABCRelativeElement.prototype.draw = function (printer, x, bartop) {
@@ -338,7 +340,7 @@ ABCRelativeElement.prototype.draw = function (printer, x, bartop) {
   switch(this.type) {
   case "symbol":
     if (this.c===null) return null;
-    this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, 0, 0); break;
+    this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley); break;
   case "debug":
     this.graphelem = printer.debugMsg(this.x, this.c); break;
   case "debugLow":
@@ -570,6 +572,7 @@ ABCBeamElem.prototype.drawBeam = function(printer) {
 
 ABCBeamElem.prototype.drawStems = function(printer) {
   var auxbeams = [];  // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
+  printer.beginGroup();
   for (var i=0,ii=this.elems.length; i<ii; i++) {
     if (this.elems[i].abcelem.rest)
       continue;
@@ -613,6 +616,7 @@ ABCBeamElem.prototype.drawStems = function(printer) {
       }
     }
   }
+  printer.endGroup();
 };
 
 ABCBeamElem.prototype.getBarYAt = function(x) {
