@@ -22,12 +22,12 @@ function ABCStaffGroupElement() {
   this.staffs = [];
 }
 
-ABCStaffGroupElement.prototype.addVoice = function (voice) {
+ABCStaffGroupElement.prototype.addVoice = function (voice, staffnumber) {
   this.voices[this.voices.length] = voice;
-  for (var i=0; i<this.staffs.length;i++) {
-    if (this.staffs[i]==voice.y) return;
+  if (!this.staffs[staffnumber]) {
+    this.staffs[this.staffs.length] = {top:0, highest: 7, lowest: 7};
   }
-  this.staffs[this.staffs.length] = voice.y;
+  voice.staff = this.staffs[staffnumber];
 };
 
 ABCStaffGroupElement.prototype.finished = function() {
@@ -45,7 +45,7 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
   // find out how much space will be taken up by voice headers
   for (var i=0;i<this.voices.length;i++) {
     if(this.voices[i].header) {
-      var t = printer.paper.text(100, this.y, this.voices[i].header).attr({"font-size":12, "font-family":"serif"}); // code duplicated below
+      var t = printer.paper.text(100, -10, this.voices[i].header).attr({"font-size":12, "font-family":"serif"}); // code duplicated below
       x = Math.max(x,t.getBBox().width);
       t.remove();
     }
@@ -59,19 +59,18 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
   }
 
   while (!this.finished()) {
-    var childx=x;
-    var cont=true;
     // find first duration level to be laid out among candidates across voices
-    currentduration= null; 
+    currentduration= null; // candidate smallest duration level
     for (var i=0;i<this.voices.length;i++) {
-      if (!this.voices[i].layoutEnded() && (!currentduration || this.voices[i].durationindex<currentduration)) currentduration=this.voices[i].durationindex;
+      if (!this.voices[i].layoutEnded() && (!currentduration || this.voices[i].getDurationIndex()<currentduration)) 
+	currentduration=this.voices[i].getDurationIndex();
     }
 
     // isolate voices at current duration level
     var currentvoices = [];
     var othervoices = [];
     for (var i=0;i<this.voices.length;i++) {
-      if (this.voices[i].durationindex != currentduration) {
+      if (this.voices[i].getDurationIndex() != currentduration) {
 	othervoices.push(this.voices[i]);
       } else {
 	currentvoices.push(this.voices[i]);
@@ -79,7 +78,7 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
     }
 
     // among the current duration level find the one which needs starting furthest right
-    var spacingunit = 0;
+    var spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
     for (var i=0;i<currentvoices.length;i++) {
       if (currentvoices[i].nextx>x) {
 	x=currentvoices[i].nextx;
@@ -89,7 +88,7 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
     this.spacingunits+=spacingunit;
     this.minspace = Math.min(this.minspace,spacingunit);
     
-    // remove the value of already counted spacing units
+    // remove the value of already counted spacing units in other voices (e.g. if a voice had planned to use up 5 spacing units but is not in line to be laid out at this duration level - where we've used 2 spacing units - then we must use up 3 spacing units, not 5)
     for (var i=0;i<othervoices.length;i++) {
       if (othervoices[i].spacingunits-=spacingunit);
     }
@@ -110,7 +109,7 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
       var voice = currentvoices[i]; 
       voice.updateIndices();
     }
-  }
+  } // finished laying out
 
 
   // find the greatest remaining x as a base for the width
@@ -128,34 +127,47 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
   }
 };
 
-ABCStaffGroupElement.prototype.draw = function (printer) {
+ABCStaffGroupElement.prototype.draw = function (printer, y) {
+
+  this.y = y;
+  for (var i=0;i<this.staffs.length;i++) {
+    var shiftabove = this.staffs[i].highest - ((i==0)? 20 : 15);
+    var shiftbelow = this.staffs[i].lowest - ((i==this.staffs.length-1)? 0 : 0);
+    this.staffs[i].top = y;
+    if (shiftabove > 0) y+= shiftabove*AbcSpacing.STEP;
+    this.staffs[i].y = y;
+    y+= AbcSpacing.STAVEHEIGHT*0.9;
+    if (shiftbelow < 0) y-= shiftbelow*AbcSpacing.STEP;
+    this.staffs[i].bottom = y;
+  }
+  this.height = y-this.y;
+
   var bartop = 0;
   for (var i=0;i<this.voices.length;i++) {
     this.voices[i].draw(printer, bartop);
-    if (this.voices[i].barfrom) bartop = this.voices[i].barbottom;
+    bartop = this.voices[i].barbottom;
   }
 
   if (this.staffs.length>1) {
-    printer.setY(this.staffs[0]);
+    printer.y = this.staffs[0].y;
     var top = printer.calcY(10);
-    printer.setY(this.staffs[this.staffs.length-1]);
+    printer.y = this.staffs[this.staffs.length-1].y;
     var bottom = printer.calcY(2);
     printer.printStem(this.startx, 0.6, top, bottom);
   }
 
   for (var i=0;i<this.staffs.length;i++) {
-    printer.setY(this.staffs[i]);
+    printer.y = this.staffs[i].y;
     printer.printStave(this.startx,this.w);
   }
-  printer.unSetY();
+  
 };
 
-function ABCVoiceElement(y, voicenumber, voicetotal) {
+function ABCVoiceElement(voicenumber, voicetotal) {
   this.children = [];
   this.beams = []; 
   this.otherchildren = []; // ties, slurs, triplets
   this.w = 0;
-  this.y = y;
   this.duplicate = false;
   this.voicenumber = voicenumber; //number of the voice on a given stave (not staffgroup)
   this.voicetotal = voicetotal;
@@ -183,6 +195,10 @@ ABCVoiceElement.prototype.updateIndices = function () {
 
 ABCVoiceElement.prototype.layoutEnded = function () {
   return (this.i>=this.children.length);
+};
+
+ABCVoiceElement.prototype.getDurationIndex = function () {
+  return this.durationindex - ((this.children[this.i].duration>0)?0:0.0000005); // if the ith element doesn't have a duration (is not a note), it's duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
 };
 
 ABCVoiceElement.prototype.beginLayout = function (startx) {
@@ -217,6 +233,9 @@ ABCVoiceElement.prototype.layoutOneItem = function (x, spacing) {
     this.spacingunits=Math.sqrt(child.duration*8);
   }
   this.nextx = x;
+  // contribute to staff y position
+  this.staff.highest = Math.max(child.top,this.staff.highest);
+  this.staff.lowest = Math.min(child.bottom,this.staff.lowest);
   return child.x;
 };
 
@@ -230,25 +249,25 @@ ABCVoiceElement.prototype.shiftRight = function (dx) {
 
 ABCVoiceElement.prototype.draw = function (printer, bartop) {
   var width = this.w-1;
-  printer.setY(this.y);
-  if (this.barfrom) this.barbottom = printer.calcY(2);
-  if (!this.barto) bartop = null;
+  printer.y = this.staff.y;
+  printer.staffbottom = this.staff.bottom;
+  this.barbottom = printer.calcY(2);
 
-  this.children.each(function(child) {
-      child.draw(printer, bartop);
-    });
-  this.beams.each(function(beam) {
-      beam.draw(printer,10,width); // beams must be drawn first for proper printing of triplets, slurs and ties.
-    });
-  this.otherchildren.each(function(child) {
-      child.draw(printer,10,width);
-    });
-
-  if (this.header) {
+  if (this.header) { // print voice name
     var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
     printer.paper.text(this.startx/2, printer.calcY(textpitch), this.header).attr({"font-size":12, "font-family":"serif"}); // code duplicated above
   }
-  printer.unSetY();
+
+  for (var i=0, ii=this.children.length; i<ii; i++) {
+    this.children[i].draw(printer, (this.barto || i==ii-1)?bartop:0);
+  }
+  this.beams.each(function(beam) {
+      beam.draw(printer); // beams must be drawn first for proper printing of triplets, slurs and ties.
+    });
+  this.otherchildren.each(function(child) {
+      child.draw(printer,this.startx+10,width);
+    });
+
 };
 
 
@@ -265,6 +284,8 @@ function ABCAbsoluteElement(abcelem, duration, minspacing) { // spacing which mu
   this.w = 0;
   this.right = [];
   this.invisible = false;
+  this.bottom = 7;
+  this.top = 7;
 }
 
 ABCAbsoluteElement.prototype.getMinWidth = function () { // absolute space taken to the right of the note
@@ -296,6 +317,16 @@ ABCAbsoluteElement.prototype.addRight = function (right) {
 ABCAbsoluteElement.prototype.addChild = function (child) {
   child.parent = this;
   this.children[this.children.length] = child;
+  this.pushTop(child.top);
+  this.pushBottom(child.bottom);
+};
+
+ABCAbsoluteElement.prototype.pushTop = function (top) {
+  this.top = Math.max(top, this.top);
+};
+
+ABCAbsoluteElement.prototype.pushBottom = function (bottom) {
+  this.bottom = Math.min(bottom, this.bottom);
 };
 
 ABCAbsoluteElement.prototype.draw = function (printer, bartop) {
@@ -333,6 +364,8 @@ function ABCRelativeElement(c, dx, w, pitch, opt) {
   this.pitch2 = opt["pitch2"];
   this.linewidth = opt["linewidth"];
   this.attributes = opt["attributes"]; // only present on textual elements
+  this.top = pitch + ((opt["extreme"]=="above")? 7 : 0);
+  this.bottom = pitch - ((opt["extreme"]=="below")? 7 : 0);
 }
 
 ABCRelativeElement.prototype.draw = function (printer, x, bartop) {

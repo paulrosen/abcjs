@@ -41,15 +41,6 @@ function ABCPrinter(paper) {
   this.ingroup = false;
 }
 
-ABCPrinter.prototype.setY = function(y) {
-  this.backupy=this.y;
-  this.y = y;
-};
-
-ABCPrinter.prototype.unSetY = function(y) {
-  this.y = this.backupy;
-};
-
 ABCPrinter.prototype.notifySelect = function (abselem) {
   this.clearSelection();
   this.selected = [abselem];
@@ -233,7 +224,7 @@ ABCPrinter.prototype.debugMsg = function(x, msg) {
 };
 
 ABCPrinter.prototype.debugMsgLow = function(x, msg) {
-  this.paper.text(x, this.y+100, msg).attr({"font-family":"serif", "font-size":12,"text-anchor":"begin"});
+  this.paper.text(x, this.staffbottom, msg).attr({"font-family":"serif", "font-size":12,"text-anchor":"begin"});
 };
 
 ABCPrinter.prototype.calcY = function(ofs) {
@@ -323,7 +314,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
   for(var line=0; line<abctune.lines.length; line++) {
     var abcline = abctune.lines[line];
     if (abcline.staff) {
-      var staffgroup = this.layouter.printABCLine(abcline.staff, this.y);
+      var staffgroup = this.layouter.printABCLine(abcline.staff);
       var newspace = this.space;
       for (var it=0;it<3;it++) {
 	staffgroup.layout(newspace,this);
@@ -337,11 +328,11 @@ ABCPrinter.prototype.printABC = function(abctune) {
 	  }
 	}
       }
-      staffgroup.draw(this);
+      staffgroup.draw(this,this.y);
       if (staffgroup.w>maxwidth) maxwidth = staffgroup.w;
       this.staffgroups[this.staffgroups.length] = staffgroup;
-      this.y = this.layouter.y;
-      this.y+=AbcSpacing.STAVEHEIGHT;
+      this.y = staffgroup.y+staffgroup.height; 
+      this.y+=AbcSpacing.STAVEHEIGHT*0.2;
     } else if (abcline.subtitle && line!=0) {
       this.printSubtitleLine(abcline);
       this.y+=20; //hardcoded

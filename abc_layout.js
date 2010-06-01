@@ -81,13 +81,10 @@ ABCLayout.prototype.getNextElem = function() {
     return this.abcline[this.pos+1];
 };
 
-ABCLayout.prototype.printABCLine = function(staffs, y) {
-  this.y = y;
+ABCLayout.prototype.printABCLine = function(staffs) {
   this.staffgroup = new ABCStaffGroupElement();
   for (this.s = 0; this.s < staffs.length; this.s++) {
     this.printABCStaff(staffs[this.s]);
-    if (this.s !== staffs.length-1)
-      this.y+= (AbcSpacing.STAVEHEIGHT*0.8); // staffgroups a bit closer than others
   }
   return this.staffgroup;
 };
@@ -100,7 +97,7 @@ ABCLayout.prototype.printABCStaff = function(abcstaff) {
 
   
   for (this.v = 0; this.v < abcstaff.voices.length; this.v++) {
-    this.voice = new ABCVoiceElement(this.y,this.v,abcstaff.voices.length);
+    this.voice = new ABCVoiceElement(this.v,abcstaff.voices.length);
     if (this.v===0) {
       this.voice.barfrom = (abcstaff.connectBarLines==="start" || abcstaff.connectBarLines==="continue");
       this.voice.barto = (abcstaff.connectBarLines==="continue" || abcstaff.connectBarLines==="end");
@@ -113,7 +110,7 @@ ABCLayout.prototype.printABCStaff = function(abcstaff) {
     this.voice.addChild(this.printKeySignature(abcstaff.key));
     if (abcstaff.meter) this.voice.addChild(this.printTimeSignature(abcstaff.meter));
     this.printABCVoice(abcstaff.voices[this.v]);
-    this.staffgroup.addVoice(this.voice);
+    this.staffgroup.addVoice(this.voice,this.s);
   }
  
 };
@@ -461,7 +458,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
       var adjust = (pitchelem.printer_shift=="same")?1:0;
       shiftheadx = (dir=="down")?-this.glyphs.getSymbolWidth(c)*scale+adjust:this.glyphs.getSymbolWidth(c)*scale-adjust;
     }
-    notehead = new ABCRelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, {scalex:scale, scaley: scale});
+    notehead = new ABCRelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, {scalex:scale, scaley: scale, extreme: ((dir=="down")?"below":"above")});
     if (flag) {
       var pos = pitch+((dir=="down")?-7:7)*scale;
       var xdelta = (dir=="down")?headx:headx+notehead.w-0.6;

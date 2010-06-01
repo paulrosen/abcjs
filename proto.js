@@ -42,7 +42,7 @@ if (document.Prototype === undefined) {
 
 	Array.prototype.each = function(iterator, context) {
 		for (var i = 0, length = this.length; i < length; i++)
-			iterator.apply(context, [this[i]]);
+		  iterator.apply(context, [this[i],i]);
 	};
 
 	Array.prototype.last = function() {
