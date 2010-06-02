@@ -163,7 +163,9 @@ function AbcParse() {
 				return ret;
 			case 'H':return [1, 'fermata'];
 			case 'J':return [1, 'slide'];
+			case 'L':return [1, 'accent'];
 			case 'M':return [1, 'mordent'];
+			case 'P':return[1, 'pralltriller']
 			case 'R':return [1, 'roll'];
 			case 'T':return [1, 'trill'];
 		}
