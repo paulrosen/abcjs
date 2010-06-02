@@ -125,14 +125,15 @@ ABCLayout.prototype.printABCVoice = function(abcline) {
   }
   for (var slur in this.slurs) {
     if (this.slurs.hasOwnProperty(slur)) {
-	this.slurs[slur]= new ABCTieElem(null, null, this.slurs[slur].above);
+      this.slurs[slur]= new ABCTieElem(null, null, this.slurs[slur].above, this.slurs[slur].force);
 	this.voice.addOther(this.slurs[slur]);
     }
   }
   for (var i=0; i<this.ties.length; i++) {
-    this.ties[i]=new ABCTieElem(null, null, this.ties[i].above);
+    this.ties[i]=new ABCTieElem(null, null, this.ties[i].above, this.ties[i].force);
     this.voice.addOther(this.ties[i]);
   }
+
   for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
     var abselems = this.printABCElement();
     for (var i=0; i<abselems.length; i++) {
@@ -242,18 +243,21 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 
   
   if (elem.rest) {
+    var restpitch = 7;
+    if (this.stemdir=="down") restpitch = 3;
+    if (this.stemdir=="up") restpitch = 11;
     switch(elem.rest.type) {
     case "rest": 
       c = this.chartable["rest"][-durlog]; 
-      elem.averagepitch=7; 
-      elem.minpitch=7;
-      elem.maxpitch=7;
+      elem.averagepitch=restpitch; 
+      elem.minpitch=restpitch;
+      elem.maxpitch=restpitch;
       break; // TODO rests in bars is now broken
     case "invisible":
     case "spacer":
       c="";
     }
-    notehead = this.printNoteHead(abselem, c, {verticalPos:7}, null, 0, -this.roomtaken, null, dot, 0, 1);
+    notehead = this.printNoteHead(abselem, c, {verticalPos:restpitch}, null, 0, -this.roomtaken, null, dot, 0, 1);
     if (notehead) abselem.addHead(notehead);
     this.roomtaken+=this.accidentalshiftx;
     this.roomtakenright = Math.max(this.roomtakenright,this.dotshiftx);
@@ -301,7 +305,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 	c="noteheads.quarter";
       }
 
-      if ((dir=="down" && p==pp-1) || (dir=="up" && p==0)) { // place to put slurs if not already on pitches
+      if (((this.stemdir=="up" || dir=="down") && p==pp-1) || ((this.stemdir=="down" || dir=="up") && p==0)) { // place to put slurs if not already on pitches
 	if (elem.startSlur) {
 	  elem.pitches[p].startSlur = elem.startSlur;
 	}
@@ -440,6 +444,9 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   return abselem;
 };
 
+
+
+
 ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale) {
 
   // TODO scale the dot as well
@@ -507,7 +514,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
   }
   
   if (pitchelem.startTie) {
-    var tie = new ABCTieElem(notehead, null, (dir=="down"));
+    var tie = new ABCTieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
     this.ties[this.ties.length]=tie;
     this.voice.addOther(tie);
   }
@@ -520,7 +527,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
 	slur = this.slurs[slurid].anchor2=notehead;
 	delete this.slurs[slurid];
       } else {
-	slur = new ABCTieElem(null, notehead, (dir=="down"));
+	slur = new ABCTieElem(null, notehead, dir=="down",(this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
 	this.voice.addOther(slur);
       }
       if (this.startlimitelem) {
@@ -532,7 +539,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
   if (pitchelem.startSlur) {
     for (i=0; i<pitchelem.startSlur.length; i++) {
       var slurid = pitchelem.startSlur[i];
-      var slur = new ABCTieElem(notehead, null, (dir=="down"));
+      var slur = new ABCTieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
       this.slurs[slurid]=slur;
       this.voice.addOther(slur);
     }

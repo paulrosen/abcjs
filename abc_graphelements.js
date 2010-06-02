@@ -136,7 +136,7 @@ ABCStaffGroupElement.prototype.draw = function (printer, y) {
     this.staffs[i].top = y;
     if (shiftabove > 0) y+= shiftabove*AbcSpacing.STEP;
     this.staffs[i].y = y;
-    y+= AbcSpacing.STAVEHEIGHT*0.9;
+    y+= AbcSpacing.STAVEHEIGHT*0.9; // position of the words
     if (shiftbelow < 0) y-= shiftbelow*AbcSpacing.STEP;
     this.staffs[i].bottom = y;
   }
@@ -198,7 +198,7 @@ ABCVoiceElement.prototype.layoutEnded = function () {
 };
 
 ABCVoiceElement.prototype.getDurationIndex = function () {
-  return this.durationindex - ((this.children[this.i].duration>0)?0:0.0000005); // if the ith element doesn't have a duration (is not a note), it's duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
+  return this.durationindex - (this.children[this.i] && (this.children[this.i].duration>0)?0:0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
 };
 
 ABCVoiceElement.prototype.beginLayout = function (startx) {
@@ -426,11 +426,12 @@ ABCEndingElem.prototype.draw = function (printer, linestartx, lineendx) {
   printer.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000"});  
 };
 
-function ABCTieElem (anchor1, anchor2, above, force) {
+function ABCTieElem (anchor1, anchor2, above, forceandshift) {
   this.anchor1 = anchor1; // must have a .x and a .pitch, and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
   this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
   this.above = above; // true if the arc curves above
-  this.force = force;
+  this.force = forceandshift; // force the arc curve, regardless of beaming if true
+                      // move by +7 "up" by -7 if "down"
 }
 
 ABCTieElem.prototype.draw = function (printer, linestartx, lineendx) {
@@ -462,13 +463,19 @@ ABCTieElem.prototype.draw = function (printer, linestartx, lineendx) {
   }
 
   if (this.anchor1 && this.anchor2) {
-    if (!this.force && this.anchor1.parent.beam && this.anchor2.parent.beam && 
-	this.anchor1.parent.beam.asc===this.anchor2.parent.beam.asc) {
+    if ((!this.force && this.anchor1.parent.beam && this.anchor2.parent.beam && 
+	 this.anchor1.parent.beam.asc===this.anchor2.parent.beam.asc) ||
+	((this.force=="up") || this.force=="down") && this.anchor1.parent.beam && this.anchor2.parent.beam && this.anchor1.parent.beam==this.anchor2.parent.beam) {
       this.above = !this.anchor1.parent.beam.asc;
+      var preservebeamdir = true;
     }
   }
 
-  printer.drawArc(linestartx, lineendx, startpitch, endpitch,  this.above);
+  var pitchshift = 0;
+  if (this.force=="up" && !preservebeamdir) pitchshift = 7;
+  if (this.force=="down" && !preservebeamdir) pitchshift = -7;
+
+  printer.drawArc(linestartx, lineendx, startpitch+pitchshift, endpitch+pitchshift,  this.above);
 
 };
 

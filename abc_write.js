@@ -206,7 +206,7 @@ ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
   var uy = dy/norm;
 
   var flatten = norm/5;
-  var curve = ((above)?-1:1)*Math.min(35, Math.max(4, flatten));
+  var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
 
   var controlx1 = x1+flatten*ux-curve*uy;
   var controly1 = y1+flatten*uy+curve*ux;
@@ -246,7 +246,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.formatting.staffwidth) { 
     this.width=abctune.formatting.staffwidth; 
   } else {
-    this.width=700;
+    this.width=740;
   }
   this.width+=AbcSpacing.MARGINLEFT; // margin
   if (abctune.formatting.scale) { this.paper.text(200, this.y, "Format: scale="+abctune.formatting.scale); this.y += 20; }
