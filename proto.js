@@ -67,11 +67,4 @@ if (document.Prototype === undefined) {
 		}
 		return false;
 	};
-
-	///////////////////////////////////////////////////////////////////////////////////////
-
-	Ajax = {
-		Updater: function() {},
-		Request: function() {}
-	};
 }
