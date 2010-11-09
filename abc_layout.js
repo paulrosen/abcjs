@@ -306,13 +306,13 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
       }
 
       if (((this.stemdir=="up" || dir=="down") && p==pp-1) || ((this.stemdir=="down" || dir=="up") && p==0)) { // place to put slurs if not already on pitches
-	if (elem.startSlur) {
-	  elem.pitches[p].startSlur = elem.startSlur;
-	}
+        if (elem.startSlur) {
+          elem.pitches[p].startSlur = elem.startSlur;
+        }
 
-	if (elem.endSlur) {
-	  elem.pitches[p].endSlur = elem.endSlur; // TODO what if there is a mixture of slurs on elem and slurs on pitches?
-	}
+        if (elem.endSlur) {
+          elem.pitches[p].endSlur = elem.endSlur; // TODO what if there is a mixture of slurs on elem and slurs on pitches?
+        }
       }
 
       notehead = this.printNoteHead(abselem, c, elem.pitches[p], dir, 0, -this.roomtaken, flag, dot, dotshiftx, 1);
