@@ -4,6 +4,200 @@ function setAttributes(elm, attrs){
   return elm;
 }
 
+window.onbeforeunload = function() { 
+	if(MIDIPlugin) { 
+		MIDIPlugin.closePlugin();
+	}
+};
+
+
+function MidiProxy(javamidi,qtmidi) {
+  this.javamidi = javamidi;
+  this.qtmidi = qtmidi;
+}
+
+MidiProxy.prototype.setTempo = function (qpm) {
+  this.javamidi.setTempo(qpm);
+  this.qtmidi.setTempo(qpm);
+}
+
+MidiProxy.prototype.startTrack = function () {
+  this.javamidi.startTrack();
+  this.qtmidi.startTrack();
+};
+
+MidiProxy.prototype.endTrack = function () {
+  this.javamidi.endTrack();
+  this.qtmidi.endTrack();
+}
+
+MidiProxy.prototype.setInstrument = function (number) {
+  this.javamidi.setInstrument(number);
+  this.qtmidi.setInstrument(number);
+};
+
+MidiProxy.prototype.startNote = function (pitch, loudness, abcelem) {
+  this.javamidi.startNote(pitch, loudness, abcelem);
+  this.qtmidi.startNote(pitch, loudness, abcelem);
+};
+
+MidiProxy.prototype.endNote = function (pitch, length) {
+  this.javamidi.endNote(pitch, length);
+  this.qtmidi.endNote(pitch, length);
+};
+
+MidiProxy.prototype.addRest = function (length) {
+  this.javamidi.addRest(length);
+  this.qtmidi.addRest(length);
+};
+
+MidiProxy.prototype.embed = function(parent) {
+  this.javamidi.embed(parent);
+  this.qtmidi.embed(parent,true);
+};
+
+function JavaMidi(midiwriter) {
+  this.playlist = []; // contains {time:t,funct:f} pairs
+  this.trackcount = 0;
+  this.timecount = 0;
+  this.tempo = 60;
+  this.midiapi = MIDIPlugin;
+  this.midiwriter = midiwriter;
+}
+
+JavaMidi.prototype.setTempo = function (qpm) {
+  this.tempo = qpm;
+}
+
+JavaMidi.prototype.startTrack = function () {
+  this.silencelength = 0;
+  this.trackcount++;
+  this.timecount=0;
+  this.playlistpos=0;
+  this.first=true;
+  if (this.instrument) {
+    this.setInstrument(this.instrument);
+  }
+};
+
+JavaMidi.prototype.endTrack = function () {
+  // need to do anything?
+}
+
+JavaMidi.prototype.setInstrument = function (number) {
+  this.instrument=number;
+  this.midiapi.setInstrument(number);
+  //TODO push this into the playlist?
+};
+
+JavaMidi.prototype.updatePos = function() {
+  while(this.playlist[this.playlistpos] && 
+	this.playlist[this.playlistpos].time<this.timecount) {
+    this.playlistpos++;
+  }
+};
+
+JavaMidi.prototype.startNote = function (pitch, loudness, abcelem) {
+  this.timecount+=this.silencelength;
+  this.silencelength = 0;
+  if (this.first) {
+    //nothing special if first?
+  }
+  this.updatePos();
+  var self=this;
+  this.playlist.splice(this.playlistpos,0, {   
+    time:this.timecount,
+	funct:function() {
+	self.midiapi.playNote(pitch);
+	self.midiwriter.notifySelect(abcelem);
+      }
+    });
+};
+
+JavaMidi.prototype.endNote = function (pitch, length) {
+  this.timecount+=length;
+  this.updatePos();
+  var self=this;
+  this.playlist.splice(this.playlistpos, 0, {   
+    time:this.timecount,
+	funct:	function() {
+	self.midiapi.stopNote(pitch);
+      }
+    });
+};
+
+JavaMidi.prototype.addRest = function (length) {
+  this.silencelength += length;
+};
+
+JavaMidi.prototype.embed = function(parent) {
+
+  
+  this.playlink = setAttributes(document.createElement('a'), {
+    style: "border:1px solid black; margin:3px;"
+    });  
+  this.playlink.innerHTML = "play";
+  var self = this;
+  this.playlink.onmousedown = function() {
+    if (self.playing) {
+      this.innerHTML = "play";
+      self.pausePlay();
+    } else {
+      this.innerHTML = "pause";
+      self.startPlay();
+    }
+  };
+  parent.appendChild(this.playlink);
+
+  stoplink = setAttributes(document.createElement('a'), {
+    style: "border:1px solid black; margin:3px;"
+    });  
+  stoplink.innerHTML = "stop";
+  var self = this;
+  stoplink.onmousedown = function() {
+    self.stopPlay(); 
+  };
+  parent.appendChild(stoplink);
+  this.i=0;
+  this.currenttime=0;
+  this.playing = false;
+};
+
+JavaMidi.prototype.stopPlay = function() {
+  this.i=0;
+  this.currenttime=0;
+  this.pausePlay();
+  this.playlink.innerHTML = "play"
+}
+
+JavaMidi.prototype.startPlay = function() {
+  this.playing = true;
+  var self = this;
+  // repeat every 16th note TODO see the min in the piece
+  this.ticksperinterval = 480/4;
+  this.doPlay();
+  this.playinterval = window.setInterval(function() {self.doPlay()},
+					 (60000/(this.tempo*4)));
+};
+
+JavaMidi.prototype.pausePlay = function() {
+  this.playing = false;
+  window.clearInterval(this.playinterval);
+  this.midiapi.stopAllNotes();
+};
+
+JavaMidi.prototype.doPlay = function() {
+  while(this.playlist[this.i] && 
+	this.playlist[this.i].time <= this.currenttime) {
+    this.playlist[this.i].funct();
+    this.i++;
+  } 
+  if (this.playlist[this.i]) {
+    this.currenttime+=this.ticksperinterval;
+  } else {
+    this.stopPlay();
+  }
+}
 
 function Midi() {
   this.trackstrings="";
@@ -60,7 +254,7 @@ Midi.prototype.addRest = function (length) {
   this.silencelength += length;
 };
 
-Midi.prototype.embed = function(parent) {
+Midi.prototype.embed = function(parent, noplayer) {
 
   var data="data:audio/midi," + 
   "MThd%00%00%00%06%00%01"+toHex(this.trackcount,4)+"%01%e0"+ // header
@@ -73,8 +267,15 @@ Midi.prototype.embed = function(parent) {
 //   embed = document["embed1"];
 
   
-  
-  embed = setAttributes(document.createElement('embed'), {
+  var link = setAttributes(document.createElement('a'), {
+    href: data
+    });  
+  link.innerHTML = "download midi";
+  parent.insertBefore(link,parent.firstChild);
+
+  if (noplayer) return;
+
+  var embed = setAttributes(document.createElement('embed'), {
     src : data,
 	type : 'video/quicktime',
 	controller : 'true',
@@ -84,12 +285,6 @@ Midi.prototype.embed = function(parent) {
 	style:'display:block; height: 20px;'
 	});
   parent.insertBefore(embed,parent.firstChild);
-//   window.setTimeout(function() {
-//       embed.Stop();
-//       embed.Rewind();
-//       embed.Play();
-
-//   }, 200);
 };
 
 // s is assumed to be of even length
@@ -146,6 +341,34 @@ function ABCMidiWriter(parent, options) {
   this.next = null;
   this.qpm = options["qpm"] || 180;
   this.program = options["program"] || 2;
+  this.javamidi = options["type"]=="java" || false;
+  this.listeners = [];
+  if (this.javamidi) {
+    MIDIPlugin = document.MIDIPlugin;
+    setTimeout(function() { // run on next event loop (once MIDIPlugin is loaded)
+	try { // activate MIDIPlugin
+	  MIDIPlugin.openPlugin();
+       
+	} catch(e) { // plugin not supported (download externals)
+	  var a = document.createElement("a");
+	  a.href = "http://java.sun.com/products/java-media/sound/soundbanks.html";
+	  a.target = "_blank";
+	  a.appendChild(document.createTextNode("Download Soundbank"));
+	  parent.appendChild(a);
+	}
+      }, 0);
+  }
+  
+};
+
+ABCMidiWriter.prototype.addListener = function(listener) {
+  this.listeners.push(listener);
+};
+
+ABCMidiWriter.prototype.notifySelect = function (abcelem) {
+  for (var i=0; i<this.listeners.length;i++) {
+    this.listeners[i].notifySelect(abcelem.abselem);
+  }
 };
 
 ABCMidiWriter.prototype.getMark = function() {
@@ -206,50 +429,52 @@ ABCMidiWriter.prototype.getElem = function() {
 
 ABCMidiWriter.prototype.writeABC = function(abctune) {
   try {
-  this.midi = new Midi();
-  this.baraccidentals = [];
-  this.abctune = abctune;
-  this.baseduration = 480*4; // nice and divisible
-
-  if (abctune.formatting.midi) {
-    this.midi.setInstrument(Number(abctune.formatting.midi.substring(8)));
-  } else {
-    this.midi.setInstrument(this.program);
-  }
-
-  if (abctune.metaText.tempo) {
-    var duration = 1/4;
-    if (abctune.metaText.tempo.duration) {
-      duration = abctune.metaText.tempo.duration[0];
+    this.midi = (this.javamidi) 
+    ? new MidiProxy(new JavaMidi(this), new Midi()) 
+    : new Midi();
+    this.baraccidentals = [];
+    this.abctune = abctune;
+    this.baseduration = 480*4; // nice and divisible, equals 1 whole note
+    
+    if (abctune.formatting.midi) {
+      this.midi.setInstrument(Number(abctune.formatting.midi.substring(8)));
+    } else {
+      this.midi.setInstrument(this.program);
     }
-    var bpm = 60;
-    if (abctune.metaText.tempo.bpm) {
-      bpm = abctune.metaText.tempo.bpm;
-    }
-    this.qpm = bpm*duration*4;
-  } 
-  this.midi.setTempo(this.qpm);
-
-  // visit each voice completely in turn
-  // "problematic" because it means visiting only one staff+voice for each line each time
-  this.staffcount=1; // we'll know the actual number once we enter the code
-  for(this.staff=0;this.staff<this.staffcount;this.staff++) {
-    this.voicecount=1;
-    for(this.voice=0;this.voice<this.voicecount;this.voice++) {
-      this.midi.startTrack();
-      this.restart = {line:0, staff:this.staff, voice:this.voice, pos:0};
-      this.next= null;
-      for(this.line=0; this.line<abctune.lines.length; this.line++) {
-	var abcline = abctune.lines[this.line];
-	if (this.getLine().staff) {
-	  this.writeABCLine();
-	}
+    
+    if (abctune.metaText.tempo) {
+      var duration = 1/4;
+      if (abctune.metaText.tempo.duration) {
+	duration = abctune.metaText.tempo.duration[0];
       }
-      this.midi.endTrack();
+      var bpm = 60;
+      if (abctune.metaText.tempo.bpm) {
+	bpm = abctune.metaText.tempo.bpm;
+      }
+      this.qpm = bpm*duration*4;
+    } 
+    this.midi.setTempo(this.qpm);
+    
+    // visit each voice completely in turn
+    // "problematic" because it means visiting only one staff+voice for each line each time
+    this.staffcount=1; // we'll know the actual number once we enter the code
+    for(this.staff=0;this.staff<this.staffcount;this.staff++) {
+      this.voicecount=1;
+      for(this.voice=0;this.voice<this.voicecount;this.voice++) {
+	this.midi.startTrack();
+	this.restart = {line:0, staff:this.staff, voice:this.voice, pos:0};
+	this.next= null;
+	for(this.line=0; this.line<abctune.lines.length; this.line++) {
+	  var abcline = abctune.lines[this.line];
+	  if (this.getLine().staff) {
+	    this.writeABCLine();
+	  }
+	}
+	this.midi.endTrack();
+      }
     }
-  }
-
-  this.midi.embed(this.parent);
+    
+    this.midi.embed(this.parent);
   } catch (e) {
     this.parent.innerHTML="Couldn't write midi: "+e;
   }
@@ -311,12 +536,12 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
       var note = elem.pitches[i];
       var pitch= note.pitch;
       if (note.accidental) {
-	switch(note.accidental) {
+	switch(note.accidental) { // change that pitch (not other octaves) for the rest of the bar
 	case "sharp": 
 	  this.baraccidentals[pitch]=1; break;
 	case "flat": 
 	  this.baraccidentals[pitch]=-1; break;
-	case "nat":
+	case "natural":
 	  this.baraccidentals[pitch]=0; break;
 	}
       }
@@ -329,7 +554,7 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
 	midipitches[i] += this.accidentals[this.extractNote(pitch)];
       }
       
-      this.midi.startNote(midipitches[i],64);
+      this.midi.startNote(midipitches[i], 64, elem);
 
       if (note.startTie) {
 	this.tieduration=mididuration;
