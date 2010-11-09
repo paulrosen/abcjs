@@ -80,6 +80,7 @@ function ABCEditor(editarea, params) {
   
   this.parserparams = params["parser_options"] || {};
   this.midiparams = params["midi_options"] || {};
+  this.printerparams = params["render_options"] || {};
   
   if (params["gui"]) {
     this.target = document.getElementById(editarea);
@@ -98,7 +99,7 @@ ABCEditor.prototype.modelChanged = function() {
   this.timerId = null;
   this.div.innerHTML = "";
   var paper = Raphael(this.div, 800, 400);
-  this.printer = new ABCPrinter(paper);
+  this.printer = new ABCPrinter(paper, this.printerparams);
   this.printer.printABC(this.tune);
   if (ABCMidiWriter && this.mididiv) {
     (this.mididiv != this.div) && (this.mididiv.innerHTML="");

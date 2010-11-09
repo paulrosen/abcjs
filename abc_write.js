@@ -26,12 +26,12 @@ AbcSpacing.STEP = AbcSpacing.FONTSIZE*93/720;
 AbcSpacing.SPACE = 10;
 AbcSpacing.TOPNOTE = 20;
 AbcSpacing.STAVEHEIGHT = 100;
-AbcSpacing.MARGINLEFT = 15;
 
 
 //--------------------------------------------------------------------PRINTER
 
-function ABCPrinter(paper) {
+function ABCPrinter(paper, params) {
+  params = params || {};
   this.y = 0;
   this.paper = paper;
   this.space = 3*AbcSpacing.SPACE;
@@ -39,7 +39,12 @@ function ABCPrinter(paper) {
   this.listeners = [];
   this.selected = [];
   this.ingroup = false;
-  this.scale = 1.5;
+  this.scale = 1;
+  this.staffwidth = params["staffwidth"] || 740; 
+  this.paddingtop = params["paddingtop"] || 15;
+  this.paddingbottom = params["paddingbottom"] || 30;
+  this.paddingright = params["paddingright"] || 50;
+  this.paddingleft = params["paddingleft"] || 15;
 }
 
 // notify all listeners that a graphical element has been selected
@@ -280,14 +285,14 @@ ABCPrinter.prototype.printStave = function (startx, endx) {
 
 ABCPrinter.prototype.printABC = function(abctune) {
   this.layouter = new ABCLayout(this.glyphs, abctune.formatting.bagpipes);
-  this.y = 15;
+  this.y = this.paddingtop;
   if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
   if (abctune.formatting.staffwidth) { 
     this.width=abctune.formatting.staffwidth; 
   } else {
-    this.width=740;
+    this.width=this.staffwidth;
   }
-  this.width+=AbcSpacing.MARGINLEFT; // margin
+  this.width+=this.paddingleft;
   this.width = this.width;
   if (abctune.formatting.scale) { this.paper.text(200, this.y, "Format: scale="+abctune.formatting.scale); this.y += 20; }
   this.paper.text(this.width/2, this.y, abctune.metaText.title).attr({"font-size":20, "font-family":"serif"});
@@ -297,7 +302,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
     this.y+=20;
   }
   if (abctune.metaText.rhythm) {
-    this.paper.text(AbcSpacing.MARGINLEFT, this.y, abctune.metaText.rhythm).attr({"text-anchor":"start","font-style":"italic","font-family":"serif", "font-size":12}); 
+    this.paper.text(this.paddingleft, this.y, abctune.metaText.rhythm).attr({"text-anchor":"start","font-style":"italic","font-family":"serif", "font-size":12}); 
     !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.y+=15);
   }
   if (abctune.metaText.author) {this.paper.text(this.width, this.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12}); this.y+=15;}
@@ -390,10 +395,10 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
   if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
   if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords + "\n";
-  var text2 = this.paper.text(AbcSpacing.MARGINLEFT, this.y+25, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":13});
+  var text2 = this.paper.text(this.paddingleft, this.y+25, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":13});
   var height = text2.getBBox().height;
   text2.translate(0,height/2);
-  var sizetoset = {w: maxwidth*this.scale+50,h: this.y*this.scale+30+height};
+  var sizetoset = {w: maxwidth*this.scale+this.paddingright,h: this.y*this.scale+this.paddingbottom+height};
   this.paper.setSize(sizetoset.w,sizetoset.h);
   // Correct for IE problem in calculating height
   var isIE=/*@cc_on!@*/false;//IE detector

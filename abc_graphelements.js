@@ -40,17 +40,18 @@ ABCStaffGroupElement.prototype.finished = function() {
 ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
   this.spacingunits = 0; // number of space units taken up (as opposed to fixed width). Layout engine then decides how many a pixels a space unit should be
   this.minspace = 1000; // a big number to start off with
-  var x = AbcSpacing.MARGINLEFT;
+  var x = printer.paddingleft;
 
   // find out how much space will be taken up by voice headers
+  var voiceheaderw = 0;
   for (var i=0;i<this.voices.length;i++) {
     if(this.voices[i].header) {
       var t = printer.paper.text(100, -10, this.voices[i].header).attr({"font-size":12, "font-family":"serif"}); // code duplicated below  // don't scale this as we ask for the bbox
-      x = Math.max(x,t.getBBox().width);
+     voiceheaderw = Math.max(voiceheaderw,t.getBBox().width);
       t.remove();
     }
   }
-  x=x*1.1; // 10% of 0 is 0
+  x=x+voiceheaderw*1.1; // 10% of 0 is 0
   this.startx=x;
 
   var currentduration = 0;
@@ -255,7 +256,7 @@ ABCVoiceElement.prototype.draw = function (printer, bartop) {
 
   if (this.header) { // print voice name
     var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
-    printer.paper.text(this.startx/2, printer.calcY(textpitch), this.header).attr({"font-size":12, "font-family":"serif"}); // code duplicated above //TODO scale
+    printer.paper.text((this.startx-printer.paddingleft)/2+printer.paddingleft, printer.calcY(textpitch), this.header).attr({"font-size":12, "font-family":"serif"}); // code duplicated above //TODO scale
   }
 
   for (var i=0, ii=this.children.length; i<ii; i++) {
