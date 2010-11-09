@@ -45,7 +45,7 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
   // find out how much space will be taken up by voice headers
   for (var i=0;i<this.voices.length;i++) {
     if(this.voices[i].header) {
-      var t = printer.paper.text(100, -10, this.voices[i].header).attr({"font-size":12, "font-family":"serif"}); // code duplicated below
+      var t = printer.paper.text(100, -10, this.voices[i].header).attr({"font-size":12, "font-family":"serif"}); // code duplicated below  // don't scale this as we ask for the bbox
       x = Math.max(x,t.getBBox().width);
       t.remove();
     }
@@ -255,7 +255,7 @@ ABCVoiceElement.prototype.draw = function (printer, bartop) {
 
   if (this.header) { // print voice name
     var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
-    printer.paper.text(this.startx/2, printer.calcY(textpitch), this.header).attr({"font-size":12, "font-family":"serif"}); // code duplicated above
+    printer.paper.text(this.startx/2, printer.calcY(textpitch), this.header).attr({"font-size":12, "font-family":"serif"}); // code duplicated above //TODO scale
   }
 
   for (var i=0, ii=this.children.length; i<ii; i++) {
@@ -339,8 +339,31 @@ ABCAbsoluteElement.prototype.draw = function (printer, bartop) {
   this.elemset.push(printer.endGroup());
   var self = this;
   this.elemset.mouseup(function (e) {
-      printer.notifySelect(self);
+    printer.notifySelect(self);
     });
+  this.abcelem.abselem = this;
+  
+  var spacing = AbcSpacing.STEP*printer.scale;
+
+  var start = function () {
+    // storing original relative coordinates
+    this.dy = 0;
+  },
+  move = function (dx, dy) {
+    // move will be called with dx and dy
+    dy = Math.round(dy/spacing)*spacing;
+    this.translate(0, -this.dy);
+    this.dy = dy;
+    this.translate(0,this.dy);
+  },
+  up = function () {
+    var delta = -Math.round(this.dy/spacing);
+    self.abcelem.pitches[0].pitch += delta;
+    self.abcelem.pitches[0].verticalPos += delta;
+    printer.notifyChange();
+  };
+  if (this.abcelem.el_type=="note")
+    this.elemset.drag(move, start, up);
 };
 
 ABCAbsoluteElement.prototype.highlight = function () {
@@ -409,7 +432,7 @@ ABCEndingElem.prototype.draw = function (printer, linestartx, lineendx) {
     linestartx = this.anchor1.x+this.anchor1.w;
     pathString = sprintf("M %f %f L %f %f",
 			     linestartx, printer.y, linestartx, printer.y+10); 
-    printer.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000"});
+    printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"}); //TODO scale
     printer.printText(linestartx+5, 18.5, this.text).attr({"font-size":"10px"});
   }
 
@@ -417,13 +440,13 @@ ABCEndingElem.prototype.draw = function (printer, linestartx, lineendx) {
     lineendx = this.anchor2.x;
     pathString = sprintf("M %f %f L %f %f",
 			 lineendx, printer.y, lineendx, printer.y+10); 
-    printer.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000"});
+    printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"}); // TODO scale
   }
 
 
   pathString = sprintf("M %f %f L %f %f",
 				  linestartx, printer.y, lineendx, printer.y); 
-  printer.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000"});  
+  printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"});  // TODO scale
 };
 
 function ABCTieElem (anchor1, anchor2, above, forceandshift) {
@@ -523,21 +546,21 @@ ABCTripletElem.prototype.drawLine = function (printer, y) {
   var linestartx = this.anchor1.x;
   pathString = sprintf("M %f %f L %f %f",
 		       linestartx, y, linestartx, y+5); 
-  printer.paper.path().attr({path:pathString, stroke:"#000000"});
+  printer.printPath({path:pathString, stroke:"#000000"});
   
   var lineendx = this.anchor2.x+this.anchor2.w;
   pathString = sprintf("M %f %f L %f %f",
 		       lineendx, y, lineendx, y+5); 
-  printer.paper.path().attr({path:pathString, stroke:"#000000"});
+  printer.printPath({path:pathString, stroke:"#000000"});
   
   pathString = sprintf("M %f %f L %f %f",
 		       linestartx, y, (linestartx+lineendx)/2-5, y); 
-  printer.paper.path().attr({path:pathString, stroke:"#000000"});
+  printer.printPath({path:pathString, stroke:"#000000"});
 
 
   pathString = sprintf("M %f %f L %f %f",
 		       (linestartx+lineendx)/2+5, y, lineendx, y); 
-  printer.paper.path().attr({path:pathString, stroke:"#000000"});
+  printer.printPath({path:pathString, stroke:"#000000"});
 
 };
 
@@ -607,7 +630,7 @@ ABCBeamElem.prototype.drawBeam = function(printer) {
 
   var pathString = "M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
   "L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z";
-  printer.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
+  printer.printPath({path:pathString, stroke:"none", fill:"#000000"});
 };
 
 ABCBeamElem.prototype.drawStems = function(printer) {
@@ -651,7 +674,7 @@ ABCBeamElem.prototype.drawStems = function(printer) {
 
 	var pathString ="M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
 	  "L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z";
-	printer.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
+	printer.printPath({path:pathString, stroke:"none", fill:"#000000"});
 	auxbeams = auxbeams.slice(0,j);
       }
     }
