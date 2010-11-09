@@ -39,14 +39,22 @@ function ABCPrinter(paper) {
   this.listeners = [];
   this.selected = [];
   this.ingroup = false;
+  this.scale = 1.5;
 }
 
+// notify all listeners that a graphical element has been selected
 ABCPrinter.prototype.notifySelect = function (abselem) {
   this.clearSelection();
   this.selected = [abselem];
   abselem.highlight();
   for (var i=0; i<this.listeners.length;i++) {
     this.listeners[i].highlight(abselem.abcelem);
+  }
+};
+
+ABCPrinter.prototype.notifyChange = function (abselem) {
+  for (var i=0; i<this.listeners.length;i++) {
+    this.listeners[i].modelChanged();
   }
 };
 
@@ -63,25 +71,24 @@ ABCPrinter.prototype.addSelectListener = function (listener) {
 
 ABCPrinter.prototype.rangeHighlight = function(start,end)
 {
-  this.clearSelection();
-  for (var line=0;line<this.staffgroups.length; line++) {
-    var voices = this.staffgroups[line].voices;
-    for (var voice=0;voice<voices.length;voice++) {
-      var elems = voices[voice].children;
-      for (var elem=0; elem<elems.length; elem++) {
-		  // Since the user can highlight more than an element, or part of an element, a hit is if any of the endpoints
-		  // is inside the other range.
-		  var elStart = elems[elem].abcelem.startChar;
-		  var elEnd = elems[elem].abcelem.endChar;
-		  if ((elStart <= start && start <= elEnd) || (elStart <= end && end <= elEnd) ||
-			  (start <= elStart && elStart <= end) || (start <= elEnd && elEnd <= end)) {
-//		if (elems[elem].abcelem.startChar>=start && elems[elem].abcelem.endChar<=end) {
-		  this.selected[this.selected.length]=elems[elem];
-		  elems[elem].highlight();
+    this.clearSelection();
+    for (var line=0;line<this.staffgroups.length; line++) {
+	var voices = this.staffgroups[line].voices;
+	for (var voice=0;voice<voices.length;voice++) {
+	    var elems = voices[voice].children;
+	    for (var elem=0; elem<elems.length; elem++) {
+		// Since the user can highlight more than an element, or part of an element, a hit is if any of the endpoints
+		// is inside the other range.
+		var elStart = elems[elem].abcelem.startChar;
+		var elEnd = elems[elem].abcelem.endChar;
+		if ((end>elStart && start<elEnd) || ((end==start) && end==elEnd)) {
+		    //		if (elems[elem].abcelem.startChar>=start && elems[elem].abcelem.endChar<=end) {
+		    this.selected[this.selected.length]=elems[elem];
+		    elems[elem].highlight();
 		}
-      }
+	    }
+	}
     }
-  }
 };
 
 ABCPrinter.prototype.beginGroup = function () {
@@ -111,7 +118,11 @@ ABCPrinter.prototype.addPath = function (path) {
 ABCPrinter.prototype.endGroup = function () {
   this.ingroup = false;
   if (this.path.length==0) return null;
-  return this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000"});
+  var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000"});
+  if (this.scale!==1) {
+    ret.scale(this.scale, this.scale, 0, 0);
+  }
+  return ret;
 };
 
 ABCPrinter.prototype.printStaveLine = function (x1,x2, pitch) {
@@ -125,7 +136,11 @@ ABCPrinter.prototype.printStaveLine = function (x1,x2, pitch) {
   var y = this.calcY(pitch);
   var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
 			   x2, y+dy, x1, y+dy);
-  return this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
+  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
+  if (this.scale!==1) {
+    ret.scale(this.scale, this.scale, 0, 0);
+  }
+  return ret;
 };
 
 ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
@@ -145,13 +160,21 @@ ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
   if (!isIE && this.ingroup) {
     this.addPath(pathArray);
   } else {
-    return this.paper.path().attr({path:pathArray, stroke:"none", fill:fill}).toBack();
+    var ret = this.paper.path().attr({path:pathArray, stroke:"none", fill:fill}).toBack();
+    if (this.scale!==1) {
+      ret.scale(this.scale, this.scale, 0, 0);
+    }
+    return ret;
   }
 };
 
 ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
   anchor = anchor || "start";
-  return this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor, "font-size":12});
+  var ret = this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor, "font-size":12});
+  if (this.scale!==1) {
+    ret.scale(this.scale, this.scale, 0, 0);
+  }
+  return ret;
 };
 
 // assumes this.y is set appropriately
@@ -172,6 +195,9 @@ ABCPrinter.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
 	this.debugMsg(x,"no symbol:" +symbol);
       }
     }
+    if (this.scale!==1) {
+      elemset.scale(this.scale, this.scale, 0, 0);
+    }
     return elemset;
   } else {
     var ycorr = this.glyphs.getYCorr(symbol);
@@ -180,6 +206,9 @@ ABCPrinter.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
     } else {
       var el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper);
       if (el) {
+	if (this.scale!==1) {
+	  el.scale(this.scale, this.scale, 0, 0);
+	}
 	return el;
       } else
 	this.debugMsg(x,"no symbol:" +symbol);
@@ -187,6 +216,12 @@ ABCPrinter.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
     return null;    
   }
 };
+
+ABCPrinter.prototype.printPath = function (attrs) {
+  ret = this.paper.path().attr(attrs);
+  (this.scale==1) || ret.scale(this.scale, this.scale, 0, 0);
+  return ret;
+}
 
 ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
 
@@ -216,15 +251,19 @@ ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
   var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1, 
 			   controlx1, controly1, controlx2, controly2, x2, y2, 
 			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-  return this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
+  ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
+  if (this.scale!==1) {
+    ret.scale(this.scale, this.scale, 0, 0);
+  }
+  return ret;
 };
 
 ABCPrinter.prototype.debugMsg = function(x, msg) {
-  return this.paper.text(x, this.y, msg);
+  return this.paper.text(x, this.y, msg).scale(this.scale, this.scale, 0, 0);
 };
 
 ABCPrinter.prototype.debugMsgLow = function(x, msg) {
-  this.paper.text(x, this.staffbottom, msg).attr({"font-family":"serif", "font-size":12,"text-anchor":"begin"});
+  return this.paper.text(x, this.staffbottom, msg).attr({"font-family":"serif", "font-size":12,"text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
 };
 
 ABCPrinter.prototype.calcY = function(ofs) {
@@ -249,6 +288,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
     this.width=740;
   }
   this.width+=AbcSpacing.MARGINLEFT; // margin
+  this.width = this.width;
   if (abctune.formatting.scale) { this.paper.text(200, this.y, "Format: scale="+abctune.formatting.scale); this.y += 20; }
   this.paper.text(this.width/2, this.y, abctune.metaText.title).attr({"font-size":20, "font-family":"serif"});
   this.y+=20;
@@ -353,18 +393,19 @@ ABCPrinter.prototype.printABC = function(abctune) {
   var text2 = this.paper.text(AbcSpacing.MARGINLEFT, this.y+25, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":13});
   var height = text2.getBBox().height;
   text2.translate(0,height/2);
-  this.paper.setSize(maxwidth+50,this.y+30+height);
+  var sizetoset = {w: maxwidth*this.scale+50,h: this.y*this.scale+30+height};
+  this.paper.setSize(sizetoset.w,sizetoset.h);
   // Correct for IE problem in calculating height
   var isIE=/*@cc_on!@*/false;//IE detector
   if (isIE) {
-    this.paper.canvas.parentNode.style.width=(maxwidth+50)+"px";
-    this.paper.canvas.parentNode.style.height=""+(this.y+30+height)+"px";
+    this.paper.canvas.parentNode.style.width=sizetoset.w+"px";
+    this.paper.canvas.parentNode.style.height=""+sizetoset.h+"px";
   } else
-    this.paper.canvas.parentNode.setAttribute("style","width:"+(maxwidth+50)+"px");
+    this.paper.canvas.parentNode.setAttribute("style","width:"+sizetoset.w+"px");
 };
 
 ABCPrinter.prototype.printSubtitleLine = function(abcline) {
-  this.paper.text(this.width/2, this.y, abcline.subtitle).attr({"font-size":16});
+  this.paper.text(this.width/2, this.y, abcline.subtitle).attr({"font-size":16}).scale(this.scale, this.scale, 0,0);
 };
 
 

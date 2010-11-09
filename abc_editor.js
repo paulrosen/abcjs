@@ -80,57 +80,58 @@ function ABCEditor(editarea, params) {
   
   this.parserparams = params["parser_options"] || {};
   this.midiparams = params["midi_options"] || {};
-
+  
+  if (params["gui"]) {
+    this.target = document.getElementById(editarea);
+  } 
   this.oldt = "";
   this.bReentry = false;
-  this.updateRendering();
+  this.parseABC();
+  this.modelChanged();
 }
 
-ABCEditor.prototype.updateRendering = function() {
-  if (this.bIsPaused)
-    return;
+ABCEditor.prototype.modelChanged = function() {
+
   if (this.bReentry)
-    return; // TODO is this likely?
+    return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
   this.bReentry = true;
+  this.timerId = null;
+  this.div.innerHTML = "";
+  var paper = Raphael(this.div, 800, 400);
+  this.printer = new ABCPrinter(paper);
+  this.printer.printABC(this.tune);
+  if (ABCMidiWriter && this.mididiv) {
+    (this.mididiv != this.div) && (this.mididiv.innerHTML="");
+    var midiwriter = new ABCMidiWriter(this.mididiv,this.midiparams);
+    midiwriter.addListener(this.printer);
+    midiwriter.writeABC(this.tune);
+  }
+  if (this.warningsdiv) {
+    this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
+  } 
+  if (this.target) {
+    var textprinter = new ABCTextPrinter(this.target, true);
+    textprinter.printABC(this.tune);
+  }
+  this.printer.addSelectListener(this);
+  this.updateSelection();
+  this.bReentry = false;
+};
+
+// return true if the model has changed
+ABCEditor.prototype.parseABC = function() {
   var t = this.editarea.getString();
   if (t===this.oldt) {
     this.updateSelection();
-    this.bReentry = false; 
-    return;
+    return false;
   }
-
-  // only render once the user has quit typing, so wait a little while and do the update on a timer.
-  var This = this;
-  var doRendering = function() {
-	  This.timerId = null;
-	  t = This.editarea.getString();	// need to get the text again because it might have changed since the callback.
-	  This.oldt = t;
-	  // clear out any old tune
-	  This.div.innerHTML = "";
-	  var tunebook = new AbcTuneBook(t);
-	  var abcParser = new AbcParse(This.parserparams);
-	  abcParser.parse(tunebook.tunes[0].abc); //TODO handle multiple tunes
-	  var tune = abcParser.getTune();
-	  var paper = Raphael(This.div, 800, 400);
-	  This.printer = new ABCPrinter(paper);
-	  This.printer.printABC(tune);
-	  if (ABCMidiWriter && This.mididiv) {
-		(This.mididiv != This.div) && (This.mididiv.innerHTML="");
-		var midiwriter = new ABCMidiWriter(This.mididiv,This.midiparams);
-		midiwriter.writeABC(tune);
-	  }
-	  if (This.warningsdiv) {
-		var warnings = abcParser.getWarnings();
-		This.warningsdiv.innerHTML = (warnings) ? warnings.join("<br />") : "No errors";
-	  }
-	  This.printer.addSelectListener(This);
-	  This.updateSelection();
-	  This.bReentry = false;
-  };
   
-	if (this.timerId)	// If the user is still typing, cancel the update
-		clearTimeout(this.timerId);
-	this.timerId = setTimeout(doRendering, 300);	// Is this a good comprimise between responsiveness and not redrawing too much?
+  this.oldt = t;
+  var tunebook = new AbcTuneBook(t);
+  var abcParser = new AbcParse(this.parserparams);
+  abcParser.parse(tunebook.tunes[0].abc); //TODO handle multiple tunes
+  this.tune = abcParser.getTune();
+  this.warnings = abcParser.getWarnings();
 };
 
 ABCEditor.prototype.updateSelection = function() {
@@ -144,8 +145,18 @@ ABCEditor.prototype.fireSelectionChanged = function() {
   this.updateSelection();
 };
 
+// call when abc text is changed and needs re-parsing
 ABCEditor.prototype.fireChanged = function() {
-  this.updateRendering();
+  if (this.bIsPaused)
+    return;
+  if (this.parseABC()) {
+    var self = this;
+    if (this.timerId)	// If the user is still typing, cancel the update
+      clearTimeout(this.timerId);
+    this.timerId = setTimeout(function () {
+      self.modelChanged();
+    }, 300);	// Is this a good comprimise between responsiveness and not redrawing too much?  
+  }
 };
 
 ABCEditor.prototype.highlight = function(abcelem) {
