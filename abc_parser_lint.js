@@ -126,14 +126,17 @@ function AbcParserLint() {
 		startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true }
 	};
 
-	var keyProperties = {
+	var keyProperties = { // change deepCopyKey (in parse_header) if there are changes around here
 		accidentals: { type: 'array', optional: true, output: "noindex", items: {
 				type: 'object', properties: {
 					acc: { type: 'string', Enum: [ 'flat', 'natural', 'sharp', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ] },
 					note: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'a', 'b', 'c', 'd', 'e', 'f', 'g' ] },
 					verticalPos: { type: 'number', minimum: 0, maximum: 13 }
 				}
-		} }
+		} },
+	        tonic: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'HP', 'Hp', 'none']},
+	        acc: { type: 'string', Enum: ['', '#', 'b']},
+	        mode: { type: 'string', Enum: ['', 'm', 'Dor', 'Mix', 'Loc', 'Phr', 'Lyd']} 
 	};
 
 	var meterProperties = {

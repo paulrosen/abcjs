@@ -134,7 +134,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		'AbMix': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
 		'EbDor': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
 		'FPhr': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
-		'GgLyd': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
+		'GbLyd': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
 		'CLoc': [ key1flat, key2flat, key3flat, key4flat, key5flat ],
 
 		'Gb': [ key1flat, key2flat, key3flat, key4flat, key5flat, key6flat ],
@@ -193,11 +193,11 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 	};
 
 	this.deepCopyKey = function(key) {
-		var ret = { accidentals: [] };
-		key.each(function(k) {
-			ret.accidentals.push(Object.clone(k));
-		});
-		return ret;
+	    var ret = { accidentals: [], root: key.root, acc: key.acc, mode: key.mode };
+	    key.accidentals.each(function(k) {
+		ret.accidentals.push(Object.clone(k));
+	    });
+	    return ret;
 	};
 
 	var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
@@ -253,6 +253,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		// Then see if there is a mode modifier. Add or subtract to the index.
 		// Then do a mod 12 on the index and return the key.
 		// TODO: This may leave unparsed characters at the end after something reasonable was found.
+	        // TODO: The above description does not seem to be valid as key names rather than indexes are used -- GD
 
 		var setMiddle = function(str) {
 			var i = tokenizer.skipWhiteSpace(str);
@@ -269,8 +270,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			str = str.substring(retClef.len);
 			setMiddle(str);
 			return {foundClef: true};
+		        //TODO multilinevars.key is not set - is this normal? -- GD
 		}
-
 		var ret = {};
 
 		var retPitch = tokenizer.getKeyPitch(str);
@@ -289,15 +290,24 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				str = str.substring(retMode.len);
 			}
 			// We need to do a deep copy because we are going to modify it
-			ret = this.deepCopyKey(keys[key]);
+		        ret = this.deepCopyKey({accidentals: keys[key]});
+		        ret.root = retPitch.token;
+		        ret.acc = retAcc.token || "";
+		        ret.mode = retMode.token || "";
 		} else if (str.startsWith('HP')) {
 			this.addDirective("bagpipes");
 			ret.accidentals = [];
+		        ret.root = "HP";
+		        ret.acc = "";
+		        ret.mode = "";
 			multilineVars.key = ret;
 			return {foundKey: true};
 		} else if (str.startsWith('Hp')) {
 			ret.accidentals = [ {acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'} ];
 			this.addDirective("bagpipes");
+		        ret.root = "Hp";
+		        ret.acc = "";
+		        ret.mode = "";
 			multilineVars.key = ret;
 			return {foundKey: true};
 		} else {
@@ -305,6 +315,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			if (retNone > 0) {
 				// we got the none key - that's the same as C to us
 				ret.accidentals = [];
+			        ret.root = "none";
+			        ret.acc = "";
+		                ret.mode = "";
 				str = str.substring(retNone);
 			}
 		}
