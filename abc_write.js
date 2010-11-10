@@ -39,7 +39,7 @@ function ABCPrinter(paper, params) {
   this.listeners = [];
   this.selected = [];
   this.ingroup = false;
-  this.scale = 1;
+  this.scale = params["scale"] || 1;
   this.staffwidth = params["staffwidth"] || 740; 
   this.paddingtop = params["paddingtop"] || 15;
   this.paddingbottom = params["paddingbottom"] || 30;
