@@ -165,7 +165,7 @@ function AbcParse() {
 			case 'J':return [1, 'slide'];
 			case 'L':return [1, 'accent'];
 			case 'M':return [1, 'mordent'];
-			case 'P':return[1, 'pralltriller']
+			case 'P':return[1, 'pralltriller'];
 			case 'R':return [1, 'roll'];
 			case 'T':return [1, 'trill'];
 		}
@@ -884,6 +884,10 @@ function AbcParse() {
 						el = {};
 					}
 					i += ret[0];
+				} else if (line[i] === '&') {	// backtrack to beginning of measure
+					warn("Overlay not yet supported", line, i);
+					i++;
+
 				} else {
 					// This is definitely a note group
 					//
@@ -1120,7 +1124,10 @@ function AbcParse() {
 		// the switches are optional and cause a difference in the way the tune is parsed.
 		// switches.header_only : stop parsing when the header is finished
 		// switches.stop_on_warning : stop at the first warning encountered.
+		// switches.print: format for the page instead of the browser.
 		tune.reset();
+		if (switches && switches.print)
+			tune.media = 'print';
 		multilineVars.reset();
 		// Take care of whatever line endings come our way
 		strTune = strTune.gsub('\r\n', '\n');
@@ -1131,7 +1138,7 @@ function AbcParse() {
 			var spaces = "                                                                                                                                                                                                     ";
 			var padding = comment ? spaces.substring(0, comment.length) : "";
 			return backslash + " \x12" + padding;
-		}
+		};
 		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
 		var lines = strTune.split('\n');
 		if (lines.last().length === 0)	// remove the blank line we added above.
@@ -1161,7 +1168,19 @@ function AbcParse() {
 					parseLine(line);
 				multilineVars.iChar += line.length + 1;
 			});
-			tune.cleanUp();
+			var ph = 11*72;
+			var pl = 8.5*72;
+			switch (multilineVars.papersize) {
+				//case "letter": ph = 11*72; pl = 8.5*72; break;
+				case "legal": ph = 14*72; pl = 8.5*72; break;
+				case "A4": ph = 11.7*72; pl = 8.3*72; break;
+			}
+			if (multilineVars.landscape) {
+				var x = ph;
+				ph = pl;
+				pl = x;
+			}
+			tune.cleanUp(pl, ph);
 		} catch (err) {
 			if (err !== "normal_abort")
 				throw err;
