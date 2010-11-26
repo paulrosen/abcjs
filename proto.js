@@ -1,3 +1,5 @@
+/*extern document */
+/*global Ajax */
 // A few useful prototype elements so we don't have to load the whole thing.
 
 if (document.Prototype === undefined) {
@@ -6,7 +8,7 @@ if (document.Prototype === undefined) {
 		for (var property in source)
 			destination[property] = source[property];
 		return destination;
-	}
+	};
 
 	Object.keys = function(object) {
 		var keys = [];

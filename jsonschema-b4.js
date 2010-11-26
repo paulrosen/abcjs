@@ -302,4 +302,4 @@ JSONSchema = {
 	newFromSchema : function() {
 	}
 */
-}
+};
