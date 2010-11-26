@@ -51,7 +51,8 @@ function AbcTune() {
 	// METER: type: common_time,cut_time,specified
 	//		if specified, { num: 99, den: 99 }
 	this.reset = function () {
-		this.version = "1.0.0";
+		this.version = "1.0.1";
+		this.media = "screen";
 		this.metaText = {};
 		this.formatting = {};
 		this.lines = [];
@@ -60,7 +61,7 @@ function AbcTune() {
 		this.lineNum = 0;
 	};
 
-	this.cleanUp = function() {
+	this.cleanUp = function(defWidth, defLength) {
 		this.closeLine();	// Close the last line.
 		// Remove any blank lines
 		var anyDeleted = false;
@@ -199,6 +200,12 @@ function AbcTune() {
 				}
 			}
 		}
+
+		if (!this.formatting.pagewidth)
+			this.formatting.pagewidth = defWidth;
+		if (!this.formatting.pageheight)
+			this.formatting.pageheight = defLength;
+
 		// Remove temporary variables that the outside doesn't need to know about
 		delete this.staffNum;
 		delete this.voiceNum;
@@ -290,9 +297,9 @@ function AbcTune() {
 			var dur = This.getDuration(hashParams);
 			if (dur >= 0.25) {	// The beam ends on the note before this.
 				endBeamLast();
-			} else if (hashParams.force_end_beam_last && This.potentialStartBeam != undefined) {
+			} else if (hashParams.force_end_beam_last && This.potentialStartBeam !== undefined) {
 				endBeamLast();
-			} else if (hashParams.end_beam && This.potentialStartBeam != undefined) {	// the beam is forced to end on this note, probably because of a space in the ABC
+			} else if (hashParams.end_beam && This.potentialStartBeam !== undefined) {	// the beam is forced to end on this note, probably because of a space in the ABC
 				if (hashParams.rest === undefined)
 					endBeamHere();
 				else
@@ -357,6 +364,10 @@ function AbcTune() {
 
 	this.addSubtitle = function(str) {
 		this.lines.push({subtitle: str});
+	};
+
+	this.addNewPage = function(num) {
+		this.lines.push({newpage: num});
 	};
 
 	this.addSeparator = function(spaceAbove, spaceBelow, lineLength) {

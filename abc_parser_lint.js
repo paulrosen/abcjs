@@ -21,6 +21,29 @@
 /*global JSONSchema */
 /*extern AbcParserLint */
 
+// Changes for V1.0.1:
+//
+// Added:
+// media: screen | print
+// infoline: boolean
+//"abc-copyright": string
+//"abc-creator": string
+//"abc-version": string
+//"abc-charset": string
+//"abc-edited-by": string
+//image: string
+//multicol: string
+//newpage: string
+//staffbreak: number
+// chord: { root, type }
+// added { tonic, acc, mode } to keyProperties
+//
+// Changed from optional to manditory:
+// pagewidth and pageheight
+//
+// Expanded:
+// MIDI is now { cmd, param }
+
 function AbcParserLint() {
 	var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
 		"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
@@ -67,6 +90,11 @@ function AbcParserLint() {
 	var chordProperties = {
 		type: "object", properties: {
 			name: { type: 'string'},
+			chord: { type: 'object', optional: true, properties: {
+				root: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G' ]},
+				type: { type: 'string', Enum: [ 'm', '7', 'm7', 'maj7', 'M7', '6', 'm6', 'aug', '+', 'aug7', 'dim', 'dim7', '9', 'm9', 'maj9', 'M9', '11', 'dim9', 'sus', 'sus9', '7sus4', '7sus9', '5' ]}
+				}
+			},
 			position: { type: 'string', Enum: [ 'above', 'below', 'left', 'right', 'default' ] }
 		}
 	};
@@ -173,7 +201,8 @@ function AbcParserLint() {
 		description:"ABC Internal Music Representation",
 		type:"object",
 		properties: {
-			version: { type: "string", Enum: [ "1.0.0" ] },
+			version: { type: "string", Enum: [ "1.0.1" ] },
+			media: { type: "string", Enum: [ "screen", "print" ] },
 
 			formatting: {type:"object",
 				properties: {
@@ -209,8 +238,9 @@ function AbcParserLint() {
 					historyfont: fontType,
 					indent: { type: "number", optional: true },
 					infofont: fontType,
+					infoline: { type: "boolean", optional: true },
 					infospace: { type: "number", optional: true },
-					landscape: { type: "boolean", optional: true },
+//					landscape: { type: "boolean", optional: true },
 					leftmargin: { type: "number", optional: true },
 					linesep: { type: "number", optional: true },
 					lineskipfac: { type: "number", optional: true },
@@ -219,12 +249,20 @@ function AbcParserLint() {
 					maxsysstaffsep: { type: "number", optional: true },
 					measurebox: { type: "boolean", optional: true },
 					measurefont: fontType,
-					midi: { type: "string", optional: true },
+					midi: { type: "object", optional: true, properties: {
+							cmd: { type: 'string', Enum: [ 'barlines', 'bassprog', 'bassvol', 'beat', 'beataccents', 'beatmod', 'beatstring', 'c', 'channel', 'chordattack',
+								'chordname', 'chordprog', 'chordvol', 'control', 'deltaloudness', 'drone', 'droneoff', 'droneon', 'drum', 'drumbars', 'drummap', 'drumoff',
+								'drumon', 'fermatafixed', 'fermataproportional', 'gchord', 'gchordon', 'gchordoff', 'grace', 'gracedivider', 'makechordchannels', 'nobarlines',
+								'nobeataccents', 'noportamento', 'pitchbend', 'program', 'portamento', 'randomchordattack', 'ratio', 'rtranspose', 'temperament', 'temperamentlinear',
+								'temperamentnormal', 'transpose', 'voice'
+							]},
+							param: { type: 'string', optional: true }
+					}},
 					musicspace: { type: "number", optional: true },
 					nobarcheck: { type: "string", optional: true },
 					notespacingfactor: { type: "number", optional: true },
-					pageheight: { type: "number", optional: true },
-					pagewidth: { type: "number", optional: true },
+					pageheight: { type: "number" },
+					pagewidth: { type: "number" },
 					parskipfac: { type: "number", optional: true },
 					partsbox: { type: "boolean", optional: true },
 					partsfont: fontType,
@@ -234,6 +272,10 @@ function AbcParserLint() {
 					rightmargin: { type: "number", optional: true },
 					scale: { type: "number", optional: true },
 					score: { type: "string", optional: true },
+//%%setfont-1        <font name>  <size>
+//%%setfont-2        <font name>  <size>
+//%%setfont-3        <font name>  <size>
+//%%setfont-4        <font name>  <size>
 					slurgraces: { type: "boolean", optional: true },
 					slurheight: { type: "number", optional: true },
 					splittune: { type: "boolean", optional: true },
@@ -270,6 +312,10 @@ function AbcParserLint() {
 				description: "This is an array of horizontal elements. It is usually a staff of music. For multi-stave music, each staff is an element, just like single-staff. The difference is the connector properties.",
 				items: { type: "object",
 					properties: {
+						image: { type: 'string', optional: true },	// Corresponds to %%EPS directive.
+						multicol: { type: 'string', optional: true, Enum: [ "start", "new", "end" ] },
+						newpage: { type: 'number', optional: true },
+						staffbreak: { type: 'number', optional: true },
 						separator: { type: 'object', optional: true, prohibits: [ 'staff', 'text', 'subtitle' ],
 							properties: {
 								lineLength: { type: 'number', optional: true },
@@ -306,11 +352,18 @@ function AbcParserLint() {
 
 			metaText: {type:"object",
 				properties: {
+					"abc-copyright": { type: "string", optional: true },
+					"abc-creator": { type: "string", optional: true },
+					"abc-version": { type: "string", optional: true },
+					"abc-charset": { type: "string", optional: true },
+					"abc-edited-by": { type: "string", optional: true },
 					author: { type: "string", optional: true },
 					book: { type: "string", optional: true },
 					composer: { type: "string", optional: true },
 					discography: { type: "string", optional: true },
+					footer: { type: "string", optional: true },
 					group: { type: "string", optional: true },
+					header: { type: "string", optional: true },
 					history: { type: "string", optional: true },
 					instruction: { type: "string", optional: true },
 					notes: { type: "string", optional: true },
