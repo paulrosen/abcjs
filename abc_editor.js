@@ -1,24 +1,56 @@
+// abc_editor.js
+// ABCEditor is the interface class for the area that contains the ABC text. It is responsible for
+// holding the text of the tune and calling the parser and the rendering engines.
+//
+// EditArea is an example of using a textarea as the control that is shown to the user. As long as
+// the same interface is used, ABCEditor can use a different type of object.
+//
+// EditArea:
+// - constructor(textareaid)
+//		This contains the id of a textarea control that will be used.
+// - addSelectionListener(listener)
+//		A callback class that contains the entry point fireSelectionChanged()
+// - addChangeListener(listener)
+//		A callback class that contains the entry point fireChanged()
+// - getSelection()
+//		returns the object { start: , end: } with the current selection in characters
+// - setSelection(start, end)
+//		start and end are the character positions that should be selected.
+// - getString()
+//		returns the ABC text that is currently displayed.
+// - setString(str)
+//		sets the ABC text that is currently displayed, and resets the initialText variable
+// - getElem()
+//		returns the textarea element
+// - string initialText
+//		Contains the starting text. This can be compared against the current text to see if anything changed.
+//
+
+/*global document, clearTimeout, setTimeout */
+/*extern ABCMidiWriter, AbcTuneBook, AbcParse, Raphael, ABCPrinter, ABCTextPrinter */
+
 function EditArea(textareaid) {
-  this.textarea = document.getElementById(textareaid); 
+  this.textarea = document.getElementById(textareaid);
+  this.initialText = this.textarea.value;
 }
 
 EditArea.prototype.addSelectionListener = function(listener) {
   this.textarea.onmousemove = function() {
     listener.fireSelectionChanged();
-  }
+  };
 };
 
 EditArea.prototype.addChangeListener = function(listener) {
   this.changelistener = listener;
   this.textarea.onkeyup = function() {
     listener.fireChanged();
-  }
+  };
   this.textarea.onmouseup = function() {
     listener.fireChanged();
-  }
+  };
   this.textarea.onchange = function() {
     listener.fireChanged();
-  }
+  };
 };
 
 //TODO won't work under IE?
@@ -37,6 +69,7 @@ EditArea.prototype.getString = function() {
 
 EditArea.prototype.setString = function(str) {
   this.textarea.value = str;
+  this.initialText = this.getString();
   if (this.changelistener) {
     this.changelistener.fireChanged();
   }
@@ -44,10 +77,59 @@ EditArea.prototype.setString = function(str) {
 
 EditArea.prototype.getElem = function() {
   return this.textarea;
-} 
+};
+
+//
+// ABCEditor:
+//
+// constructor(editarea, params)
+//		if editarea is a string, then it is an HTML id of a textarea control.
+//		Otherwise, it should be an instantiation of an object that expresses the EditArea interface.
+//
+//		params is a hash of:
+//		canvas_id: or paper_id: HTML id to draw in. If not present, then the drawing happens just below the editor.
+//		generate_midi: if present, then midi is generated.
+//		midi_id: if present, the HTML id to place the midi control. Otherwise it is placed in the same div as the paper.
+//		generate_warnings: if present, then parser warnings are displayed on the page.
+//		warnings_id: if present, the HTML id to place the warnings. Otherwise they are placed in the same div as the paper.
+//		onchange: if present, the callback function to call whenever there has been a change.
+//		gui: if present, the paper can send changes back to the editor (presumably because the user changed something directly.)
+//		parser_options: options to send to the parser engine.
+//		midi_options: options to send to the midi engine.
+//		render_options: options to send to the render engine.
+//
+// - setReadOnly(bool)
+//		adds or removes the class abc_textarea_readonly, and adds or removes the attribute readonly=yes
+// - setDirtyStyle(bool)
+//		adds or removes the class abc_textarea_dirty
+// - renderTune(abc, parserparams, div)
+//		Immediately renders the tune. (Useful for creating the SVG output behind the scenes, if div is hidden)
+//		string abc: the ABC text
+//		parserparams: params to send to the parser
+//		div: the HTML id to render to.
+// - modelChanged()
+//		Called when the ABC text has changed.
+// - parseABC()
+//		Called internally by fireChanged()
+//		returns true if there has been a change since last call.
+// - updateSelection()
+//		Called when the user has changed the selection. This calls the printer to show the selection.
+// - fireSelectionChanged()
+//		Called by the textarea object when the user has changed the selection.
+// - fireChanged()
+//		Called by the textarea object when the user has changed something.
+// - setNotDirty()
+//		Called by the client app to reset the dirty flag
+// - isDirty()
+//		Returns true or false, whether the textarea contains the same text that it started with.
+// - highlight(abcelem)
+//		Called by the printer to highlight an area.
+// - pause(bool)
+//		Stops the automatic rendering when the user is typing.
+//
 
 function ABCEditor(editarea, params) {
-  if (typeof editarea == "string") {
+  if (typeof editarea === "string") {
     this.editarea = new EditArea(editarea);
   } else {
     this.editarea = editarea;
@@ -55,43 +137,93 @@ function ABCEditor(editarea, params) {
   this.editarea.addSelectionListener(this);
   this.editarea.addChangeListener(this);
 
-  if (params["canvas_id"]) {
-    this.div = document.getElementById(params["canvas_id"]);
+  if (params.canvas_id) {
+    this.div = document.getElementById(params.canvas_id);
+  } else if (params.paper_id) {
+    this.div = document.getElementById(params.paper_id);
   } else {
     this.div = document.createElement("DIV");
     this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem());
   }
   
-  if (params["generate_midi"] || params["midi_id"]) {
-    if (params["midi_id"]) {
-      this.mididiv = document.getElementById(params["midi_id"]);
+  if (params.generate_midi || params.midi_id) {
+    if (params.midi_id) {
+      this.mididiv = document.getElementById(params.midi_id);
     } else {
       this.mididiv = this.div;
     }
   }
   
-  if (params["generate_warnings"] || params["warnings_id"]) {
-    if (params["warnings_id"]) {
-      this.warningsdiv = document.getElementById(params["warnings_id"]);
+  if (params.generate_warnings || params.warnings_id) {
+    if (params.warnings_id) {
+      this.warningsdiv = document.getElementById(params.warnings_id);
     } else {
       this.warningsdiv = this.div;
     }
   }
   
-  this.parserparams = params["parser_options"] || {};
-  this.midiparams = params["midi_options"] || {};
-  this.printerparams = params["render_options"] || {};
+  this.parserparams = params.parser_options || {};
+  this.midiparams = params.midi_options || {};
+  this.onchangeCallback = params.onchange;
+
+  this.printerparams = params.render_options || {};
   
-  if (params["gui"]) {
+  if (params.gui) {
     this.target = document.getElementById(editarea);
   } 
   this.oldt = "";
   this.bReentry = false;
   this.parseABC();
   this.modelChanged();
+
+  var addClassName = function(element, className) {
+    var hasClassName = function(element, className) {
+      var elementClassName = element.className;
+      return (elementClassName.length > 0 && (elementClassName === className ||
+        new RegExp("(^|\\s)" + className + "(\\s|$)").test(elementClassName)));
+    };
+
+    if (!hasClassName(element, className))
+      element.className += (element.className ? ' ' : '') + className;
+    return element;
+  };
+
+  var removeClassName = function(element, className) {
+    element.className = element.className.replace(
+      new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' ').strip();
+    return element;
+  };
+
+  this.setReadOnly = function(readOnly) {
+	  var readonlyClass = 'abc_textarea_readonly';
+	  var el = this.editarea.getElem();
+    if (readOnly) {
+      el.setAttribute('readonly', 'yes');
+	  addClassName(el, readonlyClass);
+	} else {
+      el.removeAttribute('readonly');
+	  removeClassName(el, readonlyClass);
+    }
+  };
 }
 
+ABCEditor.prototype.renderTune = function(abc, params, div) {
+  var tunebook = new AbcTuneBook(abc);
+  var abcParser = new AbcParse(params);
+  abcParser.parse(tunebook.tunes[0].abc); //TODO handle multiple tunes
+  var tune = abcParser.getTune();
+  var paper = Raphael(div, 800, 400);
+  var printer = new ABCPrinter(paper, {});	// TODO: handle printer params
+  printer.printABC(tune);
+};
+
 ABCEditor.prototype.modelChanged = function() {
+  if (this.tune === undefined) {
+    if (this.mididiv !== undefined && this.mididiv !== this.div)
+		this.mididiv.innerHTML = "";
+    this.div.innerHTML = "";
+	return;
+  }
 
   if (this.bReentry)
     return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
@@ -102,7 +234,8 @@ ABCEditor.prototype.modelChanged = function() {
   this.printer = new ABCPrinter(paper, this.printerparams);
   this.printer.printABC(this.tune);
   if (ABCMidiWriter && this.mididiv) {
-    (this.mididiv != this.div) && (this.mididiv.innerHTML="");
+    if (this.mididiv != this.div)
+		this.mididiv.innerHTML = "";
     var midiwriter = new ABCMidiWriter(this.mididiv,this.midiparams);
     midiwriter.addListener(this.printer);
     midiwriter.writeABC(this.tune);
@@ -128,11 +261,17 @@ ABCEditor.prototype.parseABC = function() {
   }
   
   this.oldt = t;
+  if (t === "") {
+	this.tune = undefined;
+	this.warnings = "";
+	return true;
+  }
   var tunebook = new AbcTuneBook(t);
   var abcParser = new AbcParse(this.parserparams);
   abcParser.parse(tunebook.tunes[0].abc); //TODO handle multiple tunes
   this.tune = abcParser.getTune();
   this.warnings = abcParser.getWarnings();
+  return true;
 };
 
 ABCEditor.prototype.updateSelection = function() {
@@ -146,6 +285,34 @@ ABCEditor.prototype.fireSelectionChanged = function() {
   this.updateSelection();
 };
 
+ABCEditor.prototype.setDirtyStyle = function(isDirty) {
+  var addClassName = function(element, className) {
+    var hasClassName = function(element, className) {
+      var elementClassName = element.className;
+      return (elementClassName.length > 0 && (elementClassName === className ||
+        new RegExp("(^|\\s)" + className + "(\\s|$)").test(elementClassName)));
+    };
+
+    if (!hasClassName(element, className))
+      element.className += (element.className ? ' ' : '') + className;
+    return element;
+  };
+
+  var removeClassName = function(element, className) {
+    element.className = element.className.replace(
+      new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' ').strip();
+    return element;
+  };
+  
+	var readonlyClass = 'abc_textarea_dirty';
+	var el = this.editarea.getElem();
+	if (isDirty) {
+		addClassName(el, readonlyClass);
+	} else {
+		removeClassName(el, readonlyClass);
+    }
+};
+
 // call when abc text is changed and needs re-parsing
 ABCEditor.prototype.fireChanged = function() {
   if (this.bIsPaused)
@@ -157,7 +324,24 @@ ABCEditor.prototype.fireChanged = function() {
     this.timerId = setTimeout(function () {
       self.modelChanged();
     }, 300);	// Is this a good comprimise between responsiveness and not redrawing too much?  
-  }
+	  var isDirty = this.isDirty();
+	  if (this.wasDirty !== isDirty) {
+		  this.wasDirty = isDirty;
+		  this.setDirtyStyle(isDirty);
+	  }
+	  if (this.onchangeCallback)
+		  this.onchangeCallback(this);
+	  }
+};
+
+ABCEditor.prototype.setNotDirty = function() {
+	this.editarea.initialText = this.editarea.getString();
+	this.wasDirty = false;
+	this.setDirtyStyle(false);
+};
+
+ABCEditor.prototype.isDirty = function() {
+	return this.editarea.initialText !== this.editarea.getString();
 };
 
 ABCEditor.prototype.highlight = function(abcelem) {
