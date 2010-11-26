@@ -272,6 +272,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			return {foundClef: true};
 		        //TODO multilinevars.key is not set - is this normal? -- GD
 		}
+
 		var ret = {};
 
 		var retPitch = tokenizer.getKeyPitch(str);
@@ -468,8 +469,6 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			//					measurebox: { type: "boolean", optional: true },
 			//					measurefont: fontType,
 			//					notespacingfactor: { type: "number", optional: true },
-			//					pageheight: { type: "number", optional: true },
-			//					pagewidth: { type: "number", optional: true },
 			//					parskipfac: { type: "number", optional: true },
 			//					partsbox: { type: "boolean", optional: true },
 			//					repeatfont: fontType,
@@ -486,7 +485,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			//					vocalfont: fontType,
 			//					wordsfont: fontType,
 			case "bagpipes":tune.formatting.bagpipes = true;break;
-			case "landscape":tune.formatting.landscape = true;break;
+			case "landscape":multilineVars.landscape = true;break;
+			case "papersize":multilineVars.papersize = restOfString;break;
 			case "slurgraces":tune.formatting.slurgraces = true;break;
 			case "stretchlast":tune.formatting.stretchlast = true;break;
 			case "titlecaps":multilineVars.titlecaps = true;break;
@@ -500,6 +500,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			case "linesep":
 			case "musicspace":
 			case "partsspace":
+			case "pageheight":
+			case "pagewidth":
+			case "rightmargin":
 			case "staffsep":
 			case "staffwidth":
 			case "subtitlespace":
@@ -648,7 +651,75 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				}
 				break;
 
+			case "newpage":
+				var pgNum = tokenizer.getInt(restOfString);
+				tune.addNewPage(pgNum.digits === 0 ? -1 : pgNum.value);
+				break;
+
+			case "abc-copyright":
+			case "abc-creator":
+			case "abc-version":
+			case "abc-charset":
+			case "abc-edited-by":
+			case "header":
+			case "footer":
+				tune.addMetaText(cmd, restOfString);
+				break;
+
 			case "midi":
+				var midiCmd = restOfString.split(' ')[0];
+				var midiParam = restOfString.substring(midiCmd.length+1);
+				tune.formatting[cmd] = { cmd: midiCmd };
+				if (midiParam.length > 0)
+					tune.formatting[cmd].param = midiParam;
+//%%MIDI barlines: deactivates %%nobarlines.
+//%%MIDI bassprog n
+//%%MIDI bassvol n
+//%%MIDI beat ⟨int1⟩ ⟨int2⟩ ⟨int3⟩ ⟨int4⟩: controls the volumes of the notes in a measure. The first note in a bar has volume ⟨int1⟩; other ‘strong’ notes have volume ⟨int2⟩ and all the rest have volume ⟨int3⟩. These values must be in the range 0–127. The parameter ⟨int4⟩ determines which notes are ‘strong’. If the time signature is x/y, then each note is given a position number k = 0, 1, 2. . . x-1 within each bar. If k is a multiple of ⟨int4⟩, then the note is ‘strong’.
+//%%MIDI beataccents: reverts to normally emphasised notes. See also %%MIDI nobeat-
+//%%MIDI beatmod ⟨int⟩: increments the velocities as defined by %%MIDI beat
+//%%MIDI beatstring ⟨string⟩: similar to %%MIDI beat, but indicated with an fmp string.
+//%%MIDI c ⟨int⟩: specifies the MIDI pitch which corresponds to	. The default is 60.
+//%%MIDI channel ⟨int⟩: selects the melody channel ⟨int⟩ (1–16).
+//%%MIDI chordattack ⟨int⟩: delays the start of chord notes by ⟨int⟩ MIDI units.
+//%%MIDI chordname ⟨string int1 int2 int3 int4 int5 int6⟩: defines new chords or re-defines existing ones as was seen in Section 12.8.
+//%%MIDI chordprog 20 % Church organ
+//%%MIDI chordvol ⟨int⟩: sets the volume (velocity) of the chord notes to ⟨int⟩ (0–127).
+//%%MIDI control ⟨bass/chord⟩ ⟨int1 int2⟩: generates a MIDI control event. If %%control is followed by ⟨bass⟩ or ⟨chord⟩, the event apply to the bass or chord channel, otherwise it will be applied to the melody channel. ⟨int1⟩ is the MIDI control number (0–127) and ⟨int2⟩ the value (0–127).
+//%%MIDI deltaloudness⟨int⟩: bydefault,!crescendo!and!dimuendo!modifythebe- at variables ⟨vol1⟩ ⟨vol2⟩ ⟨vol3⟩ 15 volume units. This command allows the user to change this default.
+//%%MIDI drone ⟨int1 int2 int3 int4 int5⟩: specifies a two-note drone accompaniment. ⟨int1⟩ is the drone MIDI instrument, ⟨int2⟩ the MIDI pitch 1, ⟨int3⟩ the MIDI pitch 2, ⟨int4⟩ the MIDI volume 1, ⟨int5⟩ the MIDI volume 2. Default values are 70 45 33 80 80.
+//%%MIDI droneoff: turns the drone accompaniment off.
+//%%MIDI droneon: turns the drone accompaniment on.
+//%%MIDI drum string [drum programs] [drum velocities]
+//%%MIDI drumbars ⟨int⟩: specifies the number of bars over which a drum pattern string is spread. Default is 1.
+//%%MIDI drummap ⟨str⟩ ⟨int⟩: associates the note ⟨str⟩ (in ABC notation) to the a percussion instrument, as listed in Section H.2.
+//%%MIDI drumoff turns drum accompaniment off.
+//%%MIDI drumon turns drum accompaniment on.
+//%%MIDI fermatafixed: expands a !fermata! by one unit length; that is, GC3 becomes
+//%%MIDI fermataproportional: doubles the length of a note preceded by !fermata!;
+//%%MIDI gchord string
+//%%MIDI gchord str
+//%%MIDI gchordon
+//%%MIDI gchordoff
+//%%MIDI grace ⟨float⟩: sets the fraction of the next note that grace notes will take up. ⟨float⟩ must be a fraction such as 1/6.
+//%%MIDI gracedivider ⟨int⟩: sets the grace note length as 1/⟨int⟩th of the following note.
+//%%MIDI makechordchannels⟨int⟩: thisisaverycomplexcommandusedinchordscon-
+//%%MIDI nobarlines
+//%%MIDI nobeataccents: forces the ⟨int2⟩ volume (see %%MIDI beat) for each note in a bar, regardless of their position.
+//%%MIDI noportamento: turns off the portamento controller on the current channel.
+//%%MIDI pitchbend [bass/chord] <high byte> <low byte>
+//%%MIDI program 2 75
+//%%MIDI portamento ⟨int⟩: turns on the portamento controller on the current channel and set it to ⟨int⟩. Experts only.
+//%%MIDI randomchordattack: delays the start of chord notes by a random number of MIDI units.
+//%%MIDI ratio n m
+//%%MIDI rtranspose ⟨int1⟩: transposes relatively to a prior %%transpose command by ⟨int1⟩ semitones; the total transposition will be ⟨int1 + int2⟩ semitones.
+//%%MIDI temperament ⟨int1⟩ ⟨int2⟩: TO BE WRITTEN
+//%%MIDI temperamentlinear ⟨float1 float2⟩: changes the temperament of the scale. ⟨fl- oat1⟩ specifies the size of an octave in cents of a semitone, or 1/1200 of an octave. ⟨float2⟩ specifies in the size of a fifth (normally 700 cents).
+//%%MIDI temperamentnormal: restores normal temperament.
+//%%MIDI transpose n
+//%%MIDI voice [<ID>] [instrument=<integer> [bank=<integer>]] [mute]
+				break;
+
 			case "indent":
 			case "playtempo":
 			case "auquality":
