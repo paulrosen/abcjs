@@ -45,6 +45,7 @@ function ABCPrinter(paper, params) {
   this.paddingbottom = params["paddingbottom"] || 30;
   this.paddingright = params["paddingright"] || 50;
   this.paddingleft = params["paddingleft"] || 15;
+  this.editable = params["editable"] || false;
 }
 
 // notify all listeners that a graphical element has been selected

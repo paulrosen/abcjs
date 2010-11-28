@@ -52,6 +52,7 @@ var glyphnames = {
   "\ue193":"clefs.C",
   "\ue195":"clefs.F",
   "\ue197":"clefs.G",
+  "\ue199":"clefs.perc",
   "\ue19d":"timesig.common",
   "\ue19e":"timesig.cut",
   "0":"0",

@@ -712,6 +712,7 @@ ABCLayout.prototype.printBarLine = function (elem) {
 
 ABCLayout.prototype.printClef = function(elem) {
   var clef = "clefs.G";
+  var octave = 0;
   var pitch = 4;
   var abselem = new ABCAbsoluteElement(elem,0,10);
   switch (elem.type) {
@@ -719,14 +720,16 @@ ABCLayout.prototype.printClef = function(elem) {
   case "tenor": clef="clefs.C"; pitch=8; break;
   case "alto": clef="clefs.C"; pitch=6; break;
   case "bass": clef="clefs.F"; pitch=8; break;
-  case 'treble+8': break;
+  case 'treble+8': octave = 1; break;
   case 'tenor+8':clef="clefs.C"; pitch=8; break;
   case 'bass+8': clef="clefs.F"; pitch=8; break;
   case 'alto+8': clef="clefs.C"; pitch=6; break;
-  case 'treble-8': break;
+  case 'treble-8': octave = -1; break;
   case 'tenor-8':clef="clefs.C"; pitch=8; break;
   case 'bass-8': clef="clefs.F"; pitch=8; break;
   case 'alto-8': clef="clefs.C"; pitch=6; break;
+  case 'none': clef=""; break;
+  case 'perc': clef="clefs.perc"; pitch=7; break;
   default: abselem.addChild(new ABCRelativeElement("clef="+elem.type, 0, 0, 0, {type:"debug"}));
   }    
   if (elem.verticalPos) {
@@ -735,7 +738,14 @@ ABCLayout.prototype.printClef = function(elem) {
 
   
   var dx =10;
-  abselem.addRight(new ABCRelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), pitch));
+  if (clef!=="") {
+    abselem.addRight(new ABCRelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), pitch));
+  }
+  if (octave!==0) {
+    var scale= 2/3;
+    var adjustspacing = (this.glyphs.getSymbolWidth(clef)-this.glyphs.getSymbolWidth("8")*scale)/2;
+    abselem.addRight(new ABCRelativeElement("8", dx+adjustspacing, this.glyphs.getSymbolWidth("8")*scale, (octave>0)?16:-2, {scalex:scale, scaley:scale}));
+  }
   return abselem;
 };
 ABCLayout.prototype.printKeySignature = function(elem) {
