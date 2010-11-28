@@ -222,6 +222,10 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			key.accidentals.each(function(acc) {
 				acc.verticalPos -= 7;
 			});
+		} else if (mid >= 7) {
+			key.accidentals.each(function(acc) {
+				acc.verticalPos += 7;
+			});
 		}
 	};
 
