@@ -140,6 +140,8 @@ function AbcTokenizer() {
 			name = 'alto';
 		else if (strClef.startsWith('none'))
 			name = 'none';
+		else if (strClef.startsWith('perc'))
+			name = 'perc';
 		else
 			return {len: i+5, warn: "Unknown clef specified: " + strOrig};
 

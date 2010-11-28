@@ -166,6 +166,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		var mid = 0;
 		switch(clef) {
 			case 'treble':
+			case 'perc':
 			case 'none':
 			case 'treble+8':
 			case 'treble-8':
@@ -213,7 +214,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		});
 		if (mid < -10) {
 			key.accidentals.each(function(acc) {
-				acc.verticalPos -= 14;
+				acc.verticalPos -= 7;
+				if (acc.verticalPos >= 11 || (acc.verticalPos === 10 && acc.acc === 'flat'))
+					acc.verticalPos -= 7;
 			});
 		} else if (mid < -4) {
 			key.accidentals.each(function(acc) {
@@ -255,7 +258,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		// TODO: This may leave unparsed characters at the end after something reasonable was found.
 	        // TODO: The above description does not seem to be valid as key names rather than indexes are used -- GD
 
-		var setMiddle = function(str) {
+		var setClefMiddle = function(str) {
 			var i = tokenizer.skipWhiteSpace(str);
 			str = str.substring(i);
 			if (str.startsWith('m=') || str.startsWith('middle=')) {
@@ -268,12 +271,12 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		if (retClef.token !== undefined && (retClef.explicit === true || retClef.token !== 'none')) {	// none is the only ambiguous marking. We need to assume that's a key
 			multilineVars.clef = {type: retClef.token, verticalPos: calcMiddle(retClef.token, 0)};
 			str = str.substring(retClef.len);
-			setMiddle(str);
+			setClefMiddle(str);
 			return {foundClef: true};
 		        //TODO multilinevars.key is not set - is this normal? -- GD
 		}
 
-		var ret = {};
+		var ret = { root: 'none', acc: '', mode: '' };
 
 		var retPitch = tokenizer.getKeyPitch(str);
 		if (retPitch.len > 0) {
@@ -291,24 +294,20 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				str = str.substring(retMode.len);
 			}
 			// We need to do a deep copy because we are going to modify it
-		        ret = this.deepCopyKey({accidentals: keys[key]});
-		        ret.root = retPitch.token;
-		        ret.acc = retAcc.token || "";
-		        ret.mode = retMode.token || "";
+			ret = this.deepCopyKey({accidentals: keys[key]});
+			ret.root = retPitch.token;
+			ret.acc = retAcc.token || "";
+			ret.mode = retMode.token || "";
 		} else if (str.startsWith('HP')) {
 			this.addDirective("bagpipes");
 			ret.accidentals = [];
-		        ret.root = "HP";
-		        ret.acc = "";
-		        ret.mode = "";
+			ret.root = "HP";
 			multilineVars.key = ret;
 			return {foundKey: true};
 		} else if (str.startsWith('Hp')) {
 			ret.accidentals = [ {acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'} ];
 			this.addDirective("bagpipes");
-		        ret.root = "Hp";
-		        ret.acc = "";
-		        ret.mode = "";
+			ret.root = "Hp";
 			multilineVars.key = ret;
 			return {foundKey: true};
 		} else {
@@ -316,9 +315,6 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			if (retNone > 0) {
 				// we got the none key - that's the same as C to us
 				ret.accidentals = [];
-			        ret.root = "none";
-			        ret.acc = "";
-		                ret.mode = "";
 				str = str.substring(retNone);
 			}
 		}
@@ -355,7 +351,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				//ret.clef = retClef.token;
 				multilineVars.clef = {type: retClef.token, verticalPos: calcMiddle(retClef.token, 0)};
 				str = str.substring(retClef.len);
-				setMiddle(str);
+				setClefMiddle(str);
 			}
 		}
 

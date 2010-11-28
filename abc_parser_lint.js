@@ -83,7 +83,7 @@ function AbcParserLint() {
 	};
 
 	var clefProperties = {
-		type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none' ] },
+		type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none', 'perc' ] },
 		verticalPos: { type: 'number', minimum: -20, maximum: 8 }	// the pitch that goes in the middle of the staff C=0
 	};
 
@@ -162,7 +162,7 @@ function AbcParserLint() {
 					verticalPos: { type: 'number', minimum: 0, maximum: 13 }
 				}
 		} },
-	        tonic: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'HP', 'Hp', 'none']},
+	        root: { type: 'string', Enum: [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'HP', 'Hp', 'none']},
 	        acc: { type: 'string', Enum: ['', '#', 'b']},
 	        mode: { type: 'string', Enum: ['', 'm', 'Dor', 'Mix', 'Loc', 'Phr', 'Lyd']} 
 	};
