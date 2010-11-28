@@ -84,7 +84,7 @@ function AbcParserLint() {
 
 	var clefProperties = {
 		type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none', 'perc' ] },
-		verticalPos: { type: 'number', minimum: -20, maximum: 8 }	// the pitch that goes in the middle of the staff C=0
+		verticalPos: { type: 'number', minimum: -20, maximum: 10 }	// the pitch that goes in the middle of the staff C=0
 	};
 
 	var chordProperties = {
