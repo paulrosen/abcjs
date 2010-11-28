@@ -51,6 +51,7 @@ function ABCLayout(glyphs, bagpipes) {
   this.endingsbyvoice = {};
   this.s = 0; // current staff number
   this.v = 0; // current voice number on current staff
+  this.stafflines = 5;
 }
 
 ABCLayout.prototype.getCurrentVoiceId = function() {
@@ -110,7 +111,7 @@ ABCLayout.prototype.printABCStaff = function(abcstaff) {
     this.voice.addChild(this.printKeySignature(abcstaff.key));
     if (abcstaff.meter) this.voice.addChild(this.printTimeSignature(abcstaff.meter));
     this.printABCVoice(abcstaff.voices[this.v]);
-    this.staffgroup.addVoice(this.voice,this.s);
+    this.staffgroup.addVoice(this.voice,this.s,this.stafflines);
   }
  
 };
@@ -252,7 +253,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
       elem.averagepitch=restpitch; 
       elem.minpitch=restpitch;
       elem.maxpitch=restpitch;
-      break; // TODO rests in bars is now broken
+      break; 
     case "invisible":
     case "spacer":
       c="";
@@ -307,11 +308,27 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 
       if (((this.stemdir=="up" || dir=="down") && p==pp-1) || ((this.stemdir=="down" || dir=="up") && p==0)) { // place to put slurs if not already on pitches
         if (elem.startSlur) {
-          elem.pitches[p].startSlur = elem.startSlur;
+          if (elem.pitches[p].startSlur) { //TODO possibly redundant, provided array is not optional
+	    for (var i=0; i<elem.startSlur.length; i++) {
+	      elem.pitches[p].startSlur.push(elem.startSlur[i]);
+	    }
+	  } else {
+	    elem.pitches[p].startSlur = elem.startSlur;
+	  }
         }
 
         if (elem.endSlur) {
-          elem.pitches[p].endSlur = elem.endSlur; // TODO what if there is a mixture of slurs on elem and slurs on pitches?
+          if (elem.pitches[p].endSlur) { //TODO possibly redundant, provided array is not optional
+	    for (var i=0; i<elem.endSlur.length; i++) {
+	      elem.pitches[p].endSlur.push(elem.endSlur[i]);
+	    }
+	  } else {
+	    elem.pitches[p].endSlur = elem.endSlur;
+	  }
+        }
+
+        if (elem.endSlur) {
+          elem.pitches[p].endSlur = elem.endSlur;
         }
       }
 
@@ -324,7 +341,9 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
     // draw stem from the furthest note to a pitch above/below the stemmed note
     if (!nostem && durlog<=-1) {
       p1 = (dir=="down") ? elem.minpitch-7 : elem.minpitch+1/3;
+      if (p1>6) p1=6;
       p2 = (dir=="down") ? elem.maxpitch-1/3 : elem.maxpitch+7;
+      if (p2<6) p2=6;
       dx = (dir=="down")?0:abselem.heads[0].w;
       width = (dir=="down")?1:-1;
       abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
@@ -468,6 +487,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
     notehead = new ABCRelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, {scalex:scale, scaley: scale, extreme: ((dir=="down")?"below":"above")});
     if (flag) {
       var pos = pitch+((dir=="down")?-7:7)*scale;
+      if (scale=1 & (dir=="down")?(pos>6):(pos<6)) pos=6;
       var xdelta = (dir=="down")?headx:headx+notehead.w-0.6;
       abselem.addRight(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));
     }
@@ -729,13 +749,12 @@ ABCLayout.prototype.printClef = function(elem) {
   case 'bass-8': clef="clefs.F"; pitch=8; break;
   case 'alto-8': clef="clefs.C"; pitch=6; break;
   case 'none': clef=""; break;
-  case 'perc': clef="clefs.perc"; pitch=7; break;
+  case 'perc': clef="clefs.perc"; pitch=6; break;
   default: abselem.addChild(new ABCRelativeElement("clef="+elem.type, 0, 0, 0, {type:"debug"}));
   }    
   if (elem.verticalPos) {
     pitch = elem.verticalPos;
   }
-
   
   var dx =10;
   if (clef!=="") {
@@ -746,8 +765,17 @@ ABCLayout.prototype.printClef = function(elem) {
     var adjustspacing = (this.glyphs.getSymbolWidth(clef)-this.glyphs.getSymbolWidth("8")*scale)/2;
     abselem.addRight(new ABCRelativeElement("8", dx+adjustspacing, this.glyphs.getSymbolWidth("8")*scale, (octave>0)?16:-2, {scalex:scale, scaley:scale}));
   }
+
+  if (elem.stafflines===0) {
+    this.stafflines = 0;
+  } else {
+    this.stafflines =5;
+  }
+
   return abselem;
 };
+
+
 ABCLayout.prototype.printKeySignature = function(elem) {
   var abselem = new ABCAbsoluteElement(elem,0,10);
   var dx = 0;

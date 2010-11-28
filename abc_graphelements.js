@@ -20,12 +20,14 @@
 function ABCStaffGroupElement() {
   this.voices = [];
   this.staffs = [];
+  this.stafflines = [];
 }
 
-ABCStaffGroupElement.prototype.addVoice = function (voice, staffnumber) {
+ABCStaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines) {
   this.voices[this.voices.length] = voice;
   if (!this.staffs[staffnumber]) {
     this.staffs[this.staffs.length] = {top:0, highest: 7, lowest: 7};
+    this.stafflines[this.stafflines.length] = stafflines;
   }
   voice.staff = this.staffs[staffnumber];
 };
@@ -158,6 +160,7 @@ ABCStaffGroupElement.prototype.draw = function (printer, y) {
   }
 
   for (var i=0;i<this.staffs.length;i++) {
+    if (this.stafflines[i] === 0) continue;
     printer.y = this.staffs[i].y;
     printer.printStave(this.startx,this.w);
   }
@@ -578,6 +581,8 @@ function ABCBeamElem (type, flat) {
 }
 
 ABCBeamElem.prototype.add = function(abselem) {
+  var pitch = abselem.abcelem.averagepitch;
+  if (pitch===undefined) return; // don't include elements like spacers in beams
   this.allrests = this.allrests && abselem.abcelem.rest;
   abselem.beam = this;
   this.elems.push(abselem);

@@ -90,7 +90,6 @@ var ABCGlyphs = function() {
     case "rests.16th": return -1;
     case "rests.32nd": return -1;
     case "rests.64th": return -1;
-    case "clefs.perc": return -1;
     default: return 0;
     }
   };
