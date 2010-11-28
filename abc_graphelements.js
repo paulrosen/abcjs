@@ -363,7 +363,7 @@ ABCAbsoluteElement.prototype.draw = function (printer, bartop) {
     self.abcelem.pitches[0].verticalPos += delta;
     printer.notifyChange();
   };
-  if (this.abcelem.el_type=="note")
+  if (this.abcelem.el_type=="note" && printer.editable)
     this.elemset.drag(move, start, up);
 };
 

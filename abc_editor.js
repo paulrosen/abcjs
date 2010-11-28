@@ -108,7 +108,7 @@ EditArea.prototype.getElem = function() {
 //		parserparams: params to send to the parser
 //		div: the HTML id to render to.
 // - modelChanged()
-//		Called when the ABC text has changed.
+//		Called when the model has been changed to trigger re-rendering
 // - parseABC()
 //		Called internally by fireChanged()
 //		returns true if there has been a change since last call.
@@ -170,6 +170,7 @@ function ABCEditor(editarea, params) {
   
   if (params.gui) {
     this.target = document.getElementById(editarea);
+    this.printerparams.editable = true;
   } 
   this.oldt = "";
   this.bReentry = false;
