@@ -32,11 +32,13 @@
 function EditArea(textareaid) {
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
+  this.isDragging = false;
 }
 
 EditArea.prototype.addSelectionListener = function(listener) {
-  this.textarea.onmousemove = function() {
-    listener.fireSelectionChanged();
+  this.textarea.onmousemove = function(ev) {
+	  if (this.isDragging)
+	    listener.fireSelectionChanged();
   };
 };
 
@@ -45,7 +47,12 @@ EditArea.prototype.addChangeListener = function(listener) {
   this.textarea.onkeyup = function() {
     listener.fireChanged();
   };
+  this.textarea.onmousedown = function() {
+	this.isDragging = true;
+    listener.fireSelectionChanged();
+  };
   this.textarea.onmouseup = function() {
+	this.isDragging = false;
     listener.fireChanged();
   };
   this.textarea.onchange = function() {
@@ -97,6 +104,7 @@ EditArea.prototype.getElem = function() {
 //		parser_options: options to send to the parser engine.
 //		midi_options: options to send to the midi engine.
 //		render_options: options to send to the render engine.
+//		indicate_changed: the dirty flag is set if this is true.
 //
 // - setReadOnly(bool)
 //		adds or removes the class abc_textarea_readonly, and adds or removes the attribute readonly=yes
@@ -129,6 +137,8 @@ EditArea.prototype.getElem = function() {
 //
 
 function ABCEditor(editarea, params) {
+	if (params.indicate_changed)
+		this.indicate_changed = true;
   if (typeof editarea === "string") {
     this.editarea = new EditArea(editarea);
   } else {
@@ -287,6 +297,8 @@ ABCEditor.prototype.fireSelectionChanged = function() {
 };
 
 ABCEditor.prototype.setDirtyStyle = function(isDirty) {
+	if (this.indicate_changed === undefined)
+		return;
   var addClassName = function(element, className) {
     var hasClassName = function(element, className) {
       var elementClassName = element.className;
@@ -342,6 +354,8 @@ ABCEditor.prototype.setNotDirty = function() {
 };
 
 ABCEditor.prototype.isDirty = function() {
+	if (this.indicate_changed === undefined)
+		return false;
 	return this.editarea.initialText !== this.editarea.getString();
 };
 
