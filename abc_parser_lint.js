@@ -37,6 +37,7 @@
 //staffbreak: number
 // chord: { root, type }
 // added { tonic, acc, mode } to keyProperties
+// stafflines and transpose to clef
 //
 // Changed from optional to manditory:
 // pagewidth and pageheight
@@ -83,6 +84,8 @@ function AbcParserLint() {
 	};
 
 	var clefProperties = {
+		stafflines: { type: 'number', optional: true, minimum: 0, maximum: 10 },
+		transpose: { type: 'number', minimum: -11, maximum: 11, optional: true },
 		type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none', 'perc' ] },
 		verticalPos: { type: 'number', minimum: -20, maximum: 10 }	// the pitch that goes in the middle of the staff C=0
 	};

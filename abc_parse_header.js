@@ -240,8 +240,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		for (var i = 1; i < str.length; i++) {
 			if (str.charAt(i) === ',') mid -= 7;
 			else if (str.charAt(i) === ',') mid += 7;
+			else break;
 		}
-		return mid - 6;	// We get the note in the middle of the staff. We want the note that appears as the first ledger line below the staff.
+		return { mid: mid - 6, str: str.substring(i) };	// We get the note in the middle of the staff. We want the note that appears as the first ledger line below the staff.
 	};
 
 	this.parseKey = function(str)	// (and clef)
@@ -253,7 +254,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			str = 'none';
 		}
 		// The format is:
-		// [space][tonic[#|b][ ][3-letter-mode][ignored-chars][space]][ accidentals...][ clef=treble|bass|bass3|tenor|alto|alto2|alto1|none [+8|-8]]
+		// [space][tonic[#|b][ ][3-letter-mode][ignored-chars][space]][ accidentals...][ clef=treble|bass|bass3|tenor|alto|alto2|alto1|none [+8|-8] [middle=note] [transpose=num] [stafflines=num] ]
 		// -- or -- the key can be "none"
 		// First get the key letter: turn that into a index into the key array (0-11)
 		// Then see if there is a sharp or flat. Increment or decrement.
@@ -267,7 +268,29 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			str = str.substring(i);
 			if (str.startsWith('m=') || str.startsWith('middle=')) {
 				str = str.substring(str.indexOf('=')+1);
-				multilineVars.clef.verticalPos = parseMiddle(str);
+				var mid = parseMiddle(str);
+				multilineVars.clef.verticalPos = mid.mid;
+				str = mid.str;
+			}
+			i = tokenizer.skipWhiteSpace(str);
+			str = str.substring(i);
+			if (str.startsWith('transpose=')) {
+				str = str.substring(str.indexOf('=')+1);
+				var num = tokenizer.getInt(str);
+				if (num.digits > 0) {
+					str = str.substring(num.digits);
+					multilineVars.clef.transpose = num.value;
+				}
+			}
+			i = tokenizer.skipWhiteSpace(str);
+			str = str.substring(i);
+			if (str.startsWith('stafflines=')) {
+				str = str.substring(str.indexOf('=')+1);
+				var num2 = tokenizer.getInt(str);
+				if (num2.digits > 0) {
+					str = str.substring(num2.digits);
+					multilineVars.clef.stafflines = num2.value;
+				}
 			}
 		};
 		// check first to see if there is only a clef. If so, just take that, but ignore an error after that.
@@ -878,7 +901,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					case 'middle':
 					case 'm':
 						addNextTokenToStaffInfo('verticalPos');
-						staffInfo.verticalPos = parseMiddle(staffInfo.verticalPos);
+						staffInfo.verticalPos = parseMiddle(staffInfo.verticalPos).mid;
 						break;
 					case 'gchords':
 					case 'gch':
