@@ -156,11 +156,11 @@ function AbcTune() {
 					}
 					if (el.endSlur) {
 						x = el.endSlur;
-						addEndSlur(el, x, 1);
+						addEndSlur(el, x, 0);
 					}
 					if (el.startSlur) {
 						x = el.startSlur;
-						addStartSlur(el, x, 1);
+						addStartSlur(el, x, 0);
 					}
 					if (el.pitches) {
 						var usedNums = [];
