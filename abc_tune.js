@@ -101,21 +101,39 @@ function AbcTune() {
 
 			var addEndSlur = function(obj, num, chordPos) {
 				obj.endSlur = [];
-				if (currSlur[chordPos] === undefined)
-					currSlur[chordPos] = chordPos*100;
-				for (var i = 0; i < num; i++) {
-					obj.endSlur.push(currSlur[chordPos]);
-					if (currSlur[chordPos] > 0) --currSlur[chordPos];
+				if (currSlur[chordPos] === undefined) {
+					// There isn't an exact match for note position, but we'll take any other open slur.
+					for (x = 0; x < currSlur.length; x++) {
+						if (currSlur[x] !== undefined) {
+							chordPos = x;
+							break;
+						}
+					}
+					if (currSlur[chordPos] === undefined)
+						currSlur[chordPos] = [chordPos*100];
 				}
+				var slurNum = currSlur[chordPos].pop();
+				for (var i = 0; i < num; i++) {
+					obj.endSlur.push(slurNum);
+				}
+				if (currSlur[chordPos].length === 0)
+					delete currSlur[chordPos];
+				return slurNum;
 			};
 
-			var addStartSlur = function(obj, num, chordPos) {
+			var addStartSlur = function(obj, num, chordPos, usedNums) {
 				obj.startSlur = [];
-				if (currSlur[chordPos] === undefined)
-					currSlur[chordPos] = chordPos*100;
+				if (currSlur[chordPos] === undefined) {
+					currSlur[chordPos] = [];
+				}
+				var nextNum = chordPos*100+1;
 				for (var i = 0; i < num; i++) {
-					++currSlur[chordPos];
-					obj.startSlur.push(currSlur[chordPos]);
+					if (usedNums) {
+						usedNums.each(function(x) { if (nextNum === x) ++nextNum; })
+					}
+					currSlur[chordPos].push(nextNum);
+					obj.startSlur.push(nextNum);
+					nextNum++;
 				}
 			};
 
@@ -128,6 +146,8 @@ function AbcTune() {
 								x = el.gracenotes[g].endSlur;
 								addEndSlur(el.gracenotes[g], x, 1);
 							}
+						}
+						for (g = 0; g < el.gracenotes.length; g++) {
 							if (el.gracenotes[g].startSlur) {
 								x = el.gracenotes[g].startSlur;
 								addStartSlur(el.gracenotes[g], x, 1);
@@ -143,14 +163,18 @@ function AbcTune() {
 						addStartSlur(el, x, 1);
 					}
 					if (el.pitches) {
+						var usedNums = [];
 						for (var p = 0; p < el.pitches.length; p++) {
 							if (el.pitches[p].endSlur) {
 								x = el.pitches[p].endSlur;
-								addEndSlur(el.pitches[p], x, p+1);
+								var slurNum = addEndSlur(el.pitches[p], x, p+1);
+								usedNums.push(slurNum);
 							}
+						}
+						for (p = 0; p < el.pitches.length; p++) {
 							if (el.pitches[p].startSlur) {
 								x = el.pitches[p].startSlur;
-								addStartSlur(el.pitches[p], x, p+1);
+								addStartSlur(el.pitches[p], x, p+1, usedNums);
 							}
 						}
 					}
@@ -164,17 +188,24 @@ function AbcTune() {
 				var min = -2;
 				var max = 5;
 				switch(el.type) {
-					case 'tenor': el.verticalPos+=2; min += 6; max += 6; break;
-					case 'bass': el.verticalPos--; min += 6; max += 6; break;
-					case 'alto': el.verticalPos-=2; min += 4; max += 4; break;
-					case 'treble+8': break;
-					case 'tenor+8': el.verticalPos+=2; min += 6; max += 6; break;
-					case 'bass+8': el.verticalPos--; min += 6; max += 6; break;
-					case 'alto+8': el.verticalPos-=2; min += 4; max += 4; break;
-					case 'treble-8': break;
-					case 'tenor-8': el.verticalPos+=2; min += 6; max += 6; break;
-					case 'bass-8': el.verticalPos--; min += 6; max += 6; break;
-					case 'alto-8': el.verticalPos-=2; min += 4; max += 4; break;
+					case 'treble+8':
+					case 'treble-8':
+						break;
+					case 'bass':
+					case 'bass+8':
+					case 'bass-8':
+						el.verticalPos--; min += 6; max += 6; break;
+					case 'tenor':
+					case 'tenor+8':
+					case 'tenor-8':
+						el.verticalPos = - el.verticalPos; min = -40; max = 40;
+//						el.verticalPos+=2; min += 6; max += 6;
+						break;
+					case 'alto':
+					case 'alto+8':
+					case 'alto-8':
+						el.verticalPos = - el.verticalPos; min = -40; max = 40;
+//						el.verticalPos-=2; min += 4; max += 4;
 				}
 				if (el.verticalPos < min) {
 					while (el.verticalPos < min)
@@ -232,7 +263,7 @@ function AbcTune() {
 	this.addTieToLastNote = function() {
 		// TODO-PER: if this is a chord, which note?
 		var el = this.getLastNote();
-		if (el) {
+		if (el && el.pitches && el.pitches.length > 0) {
 			el.pitches[0].startTie = true;
 			return true;
 		}
