@@ -98,9 +98,9 @@ function AbcTune() {
 		function cleanUpSlursInLine(line) {
 			var currSlur = [];
 			var x;
+//			var lyr = null;	// TODO-PER: debugging.
 
 			var addEndSlur = function(obj, num, chordPos) {
-				obj.endSlur = [];
 				if (currSlur[chordPos] === undefined) {
 					// There isn't an exact match for note position, but we'll take any other open slur.
 					for (x = 0; x < currSlur.length; x++) {
@@ -109,12 +109,16 @@ function AbcTune() {
 							break;
 						}
 					}
-					if (currSlur[chordPos] === undefined)
-						currSlur[chordPos] = [chordPos*100];
+					if (currSlur[chordPos] === undefined) {
+						var offNum = chordPos*100;
+						obj.endSlur.each(function(x) { if (offNum === x) --offNum; })
+						currSlur[chordPos] = [offNum];
+					}
 				}
-				var slurNum = currSlur[chordPos].pop();
 				for (var i = 0; i < num; i++) {
+					var slurNum = currSlur[chordPos].pop();
 					obj.endSlur.push(slurNum);
+//					lyr.syllable += '<' + slurNum;	// TODO-PER: debugging
 				}
 				if (currSlur[chordPos].length === 0)
 					delete currSlur[chordPos];
@@ -130,32 +134,43 @@ function AbcTune() {
 				for (var i = 0; i < num; i++) {
 					if (usedNums) {
 						usedNums.each(function(x) { if (nextNum === x) ++nextNum; })
+						usedNums.each(function(x) { if (nextNum === x) ++nextNum; })
+						usedNums.each(function(x) { if (nextNum === x) ++nextNum; })
 					}
+					currSlur[chordPos].each(function(x) { if (nextNum === x) ++nextNum; })
+					currSlur[chordPos].each(function(x) { if (nextNum === x) ++nextNum; })
+
 					currSlur[chordPos].push(nextNum);
 					obj.startSlur.push(nextNum);
+//					lyr.syllable += ' ' + nextNum + '>';	// TODO-PER:debugging
 					nextNum++;
 				}
 			};
 
 			for (var i = 0; i < line.length; i++) {
 				var el = line[i];
+//				if (el.lyric === undefined)	// TODO-PER: debugging
+//					el.lyric = [{ divider: '-' }];	// TODO-PER: debugging
+//				lyr = el.lyric[0];	// TODO-PER: debugging
+//				lyr.syllable = '';	// TODO-PER: debugging
 				if (el.el_type === 'note') {
 					if (el.gracenotes) {
 						for (var g = 0; g < el.gracenotes.length; g++) {
 							if (el.gracenotes[g].endSlur) {
-								x = el.gracenotes[g].endSlur;
-								addEndSlur(el.gracenotes[g], x, 1);
+								var gg = el.gracenotes[g].endSlur;
+								el.gracenotes[g].endSlur = [];
+								for (var ggg = 0; ggg < gg; ggg++)
+									addEndSlur(el.gracenotes[g], 1, 20);
 							}
-						}
-						for (g = 0; g < el.gracenotes.length; g++) {
 							if (el.gracenotes[g].startSlur) {
 								x = el.gracenotes[g].startSlur;
-								addStartSlur(el.gracenotes[g], x, 1);
+								addStartSlur(el.gracenotes[g], x, 20);
 							}
 						}
 					}
 					if (el.endSlur) {
 						x = el.endSlur;
+						el.endSlur = [];
 						addEndSlur(el, x, 0);
 					}
 					if (el.startSlur) {
@@ -166,9 +181,12 @@ function AbcTune() {
 						var usedNums = [];
 						for (var p = 0; p < el.pitches.length; p++) {
 							if (el.pitches[p].endSlur) {
-								x = el.pitches[p].endSlur;
-								var slurNum = addEndSlur(el.pitches[p], x, p+1);
-								usedNums.push(slurNum);
+								var k = el.pitches[p].endSlur;
+								el.pitches[p].endSlur = [];
+								for (var j = 0; j < k; j++) {
+									var slurNum = addEndSlur(el.pitches[p], 1, p+1);
+									usedNums.push(slurNum);
+								}
 							}
 						}
 						for (p = 0; p < el.pitches.length; p++) {
