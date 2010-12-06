@@ -122,11 +122,12 @@ function AbcParserLint() {
 			type: "object", properties: {
 				accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
 				duration: { type: 'number' },
-				end_beam: { type: 'boolean', Enum: [ true ], optional: true },
+				endBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'startBeam' ], optional: true },
 				endSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 				endTie: { type: 'boolean', Enum: [ true ], optional: true },
 				pitch: { type: 'number' },
 				verticalPos: { type: 'number' },
+				startBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'endBeam' ], optional: true },
 				startSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 				startTie: { type: 'boolean', Enum: [ true ], optional: true }
 			}
