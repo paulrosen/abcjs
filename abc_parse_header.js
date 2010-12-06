@@ -1040,7 +1040,13 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 	};
 
 	this.calcTempo = function(relTempo) {
-		var dur = multilineVars.default_length ? multilineVars.default_length : 1;
+		var dur = 1/4;
+		if (multilineVars.meter && multilineVars.meter.type === 'specified') {
+			dur = 1 / parseInt(multilineVars.meter.value[0].den);
+		} else if (multilineVars.origMeter && multilineVars.origMeter.type === 'specified') {
+			dur = 1 / parseInt(multilineVars.origMeter.value[0].den);
+		}
+		//var dur = multilineVars.default_length ? multilineVars.default_length : 1;
 		for (var i = 0; i < relTempo.duration; i++)
 			relTempo.duration[i] = dur * relTempo.duration[i];
 		return relTempo;
@@ -1097,17 +1103,17 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 	};
 
 	this.setTempo = function(line, start, end) {
-		//Q - tempo; can be used to specify the notes per minute, e.g.   if
-		//the  default  note length is an eighth note then Q:120 or Q:C=120
-		//is 120 eighth notes per minute. Similarly  Q:C3=40  would  be  40
-		//dotted  quarter  notes per minute.  An absolute tempo may also be
-		//set,  e.g.  Q:1/8=120  is  also  120  eighth  notes  per  minute,
-		//irrespective of the default note length.
+		//Q - tempo; can be used to specify the notes per minute, e.g. If
+		//the meter denominator is a 4 note then Q:120 or Q:C=120
+		//is 120 quarter notes per minute. Similarly  Q:C3=40 would be 40
+		//dotted half notes per minute. An absolute tempo may also be
+		//set, e.g. Q:1/8=120 is 120 eighth notes per minute,
+		//irrespective of the meter's denominator.
 		//
 		// This is either a number, "C=number", "Cnumber=number", or fraction [fraction...]=number
-		// It depends on the L: field, which may either not be present, or may appear after this.
-		// If L: is not present, an eighth note is used.
-		// That means that this field can't be calculated until the end, if it is the first three types, since we don't know if we'll see an L: field.
+		// It depends on the M: field, which may either not be present, or may appear after this.
+		// If M: is not present, an eighth note is used.
+		// That means that this field can't be calculated until the end, if it is the first three types, since we don't know if we'll see an M: field.
 		// So, if it is the fourth type, set it here, otherwise, save the info in the multilineVars.
 		// The temporary variables we keep are the duration and the bpm. In the first two forms, the duration is 1.
 		// In addition, a quoted string may both precede and follow. If a quoted string is present, then the duration part is optional.
