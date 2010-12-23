@@ -141,7 +141,7 @@ function AbcTune() {
 					currSlur[chordPos].each(function(x) { if (nextNum === x) ++nextNum; })
 
 					currSlur[chordPos].push(nextNum);
-					obj.startSlur.push(nextNum);
+					obj.startSlur.push({ label: nextNum });
 //					lyr.syllable += ' ' + nextNum + '>';	// TODO-PER:debugging
 					nextNum++;
 				}
@@ -194,6 +194,24 @@ function AbcTune() {
 								x = el.pitches[p].startSlur;
 								addStartSlur(el.pitches[p], x, p+1, usedNums);
 							}
+						}
+						// Correct for the weird gracenote case where ({g}a) should match.
+						// The end slur was already assigned to the note, and needs to be moved to the first note of the graces.
+						if (el.gracenotes && el.pitches[0].endSlur && el.pitches[0].endSlur[0] === 100 && el.pitches[0].startSlur) {
+							if (el.gracenotes[0].endSlur)
+								el.gracenotes[0].endSlur.push(el.pitches[0].startSlur[0].label);
+							else
+								el.gracenotes[0].endSlur = [el.pitches[0].startSlur[0].label];
+							if (el.pitches[0].endSlur.length === 1)
+								delete el.pitches[0].endSlur;
+							else if (el.pitches[0].endSlur[0] === 100)
+								el.pitches[0].endSlur.shift();
+							else if (el.pitches[0].endSlur[el.pitches[0].endSlur.length-1] === 100)
+								el.pitches[0].endSlur.pop();
+							if (currSlur[1].length === 1)
+								delete currSlur[1];
+							else
+								currSlur[1].pop();
 						}
 					}
 				}
@@ -282,7 +300,7 @@ function AbcTune() {
 		// TODO-PER: if this is a chord, which note?
 		var el = this.getLastNote();
 		if (el && el.pitches && el.pitches.length > 0) {
-			el.pitches[0].startTie = true;
+			el.pitches[0].startTie = {};
 			return true;
 		}
 		return false;
@@ -538,5 +556,12 @@ function AbcTune() {
 			this.metaText[key] = value;
 		else
 			this.metaText[key] += "\n" + value;
+	};
+
+	this.addMetaTextArray = function(key, value) {
+		if (this.metaText[key] === undefined)
+			this.metaText[key] = [value];
+		else
+			this.metaText[key].push(value);
 	};
 }
