@@ -193,6 +193,30 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		return mid+oct;
 	};
 
+	this.parseFontChangeLine = function(textstr) {
+		var textParts = textstr.split('$');
+		if (textParts.length > 1 && multilineVars.setfont) {
+			var textarr = [ { text: textParts[0] }];
+			for (var i = 1; i < textParts.length; i++) {
+				if (textParts[i].charAt(0) === '0')
+					textarr.push({ text: textParts[i].substring(1) });
+				else if (textParts[i].charAt(0) === '1' && multilineVars.setfont[1])
+					textarr.push({font: multilineVars.setfont[1], text: textParts[i].substring(1) });
+				else if (textParts[i].charAt(0) === '2' && multilineVars.setfont[2])
+					textarr.push({font: multilineVars.setfont[2], text: textParts[i].substring(1) });
+				else if (textParts[i].charAt(0) === '3' && multilineVars.setfont[3])
+					textarr.push({font: multilineVars.setfont[3], text: textParts[i].substring(1) });
+				else if (textParts[i].charAt(0) === '4' && multilineVars.setfont[4])
+					textarr.push({font: multilineVars.setfont[4], text: textParts[i].substring(1) });
+				else
+					textarr[textarr.length-1].text += '$' + textParts[i];
+			}
+			if (textarr.length > 1)
+				return textarr;
+		}
+		return textstr;
+	}
+
 	this.deepCopyKey = function(key) {
 	    var ret = { accidentals: [], root: key.root, acc: key.acc, mode: key.mode };
 	    key.accidentals.each(function(k) {
@@ -566,7 +590,35 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				multilineVars.inTextBlock = true;
 				break;
 			case "text":
-				tune.addText(tokenizer.translateString(restOfString));	// display secondary title
+				var textstr = tokenizer.translateString(restOfString);
+				tune.addText(this.parseFontChangeLine(textstr));
+				break;
+			case "font":
+				// don't need to do anything for this; it is a useless directive
+				break;
+			case "setfont":
+				var sfTokens = tokenizer.tokenize(restOfString, 0, restOfString.length);
+				var sfDone = false;
+				if (sfTokens.length >= 4) {
+					if (sfTokens[0].token === '-' && sfTokens[1].type === 'number') {
+						var sfNum = parseInt(sfTokens[1].token);
+						if (sfNum >= 1 && sfNum <= 4) {
+							if (!multilineVars.setfont)
+								multilineVars.setfont = [];
+							var sfSize = sfTokens.pop();
+							if (sfSize.type === 'number') {
+								sfSize = parseInt(sfSize.token);
+								var sfFontName = '';
+								for (var sfi = 2; sfi < sfTokens.length; sfi++)
+									sfFontName += sfTokens[sfi].token;
+								multilineVars.setfont[sfNum] = { font: sfFontName, size: sfSize };
+								sfDone = true;
+							}
+						}
+					}
+				}
+				if (!sfDone)
+					return "Bad parameters: " + cmd;
 				break;
 			case "gchordfont":
 			case "partsfont":
@@ -1336,7 +1388,10 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				}
 				var field = metaTextHeaders[line.charAt(0)];
 				if (field !== undefined) {
-					tune.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+					if (field === 'unalignedWords')
+						tune.addMetaTextArray(field, this.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))));
+					else
+						tune.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
 					return {};
 				} else {
 					switch(line.charAt(0))
