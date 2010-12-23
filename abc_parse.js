@@ -112,8 +112,11 @@ function AbcParse() {
 		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
 		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
-		"upbow", "downbow" ];
-	var accentPsuedonyms = [ ["/", "slide"], ["<", "accent"], [">", "accent"], ["tr", "trill"] ];
+		"upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4",
+		"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio"
+	];
+	var accentPsuedonyms = [ ["<", "accent"], [">", "accent"], ["tr", "trill"], ["<(", "crescendo("], ["<)", "crescendo)"],
+		[">(", "diminuendo("], [">)", "diminuendo)"], ["plus", "+"] ];
 	var letter_to_accent = function(line, i)
 	{
 		var macro = multilineVars.macros[line.charAt(i)];
@@ -493,7 +496,7 @@ function AbcParse() {
 						el.endChar = fraction.index;
 						while (fraction.index < line.length && (tokenizer.isWhiteSpace(line.charAt(fraction.index)) || line.charAt(fraction.index) === '-')) {
 						  if (line.charAt(fraction.index) === '-')
-								el.startTie = true;
+								el.startTie = {};
 							else
 								el = addEndBeam(el);
 							fraction.index++;
@@ -512,7 +515,7 @@ function AbcParse() {
 						tune.addTieToLastNote();
 						el.endTie = true;
 					} else if (state === 'octave' || state === 'duration' || state === 'end_slur') {
-						el.startTie = true;
+						el.startTie = {};
 						if (!durationSetByPreviousNote && canHaveBrokenRhythm)
 							state = 'broken_rhythm';
 						else {
@@ -532,7 +535,7 @@ function AbcParse() {
 						// look ahead to see if there is a tie
 						do {
 						  if (line.charAt(index) === '-')
-								el.startTie = true;
+								el.startTie = {};
 							index++;
 						} while (index < line.length && (tokenizer.isWhiteSpace(line.charAt(index)) || line.charAt(index) === '-'));
 						el.endChar = index;
@@ -982,7 +985,7 @@ function AbcParse() {
 												//el.pitches.each(function(pitch) { if (pitch.endSlur === undefined) pitch.endSlur = 1; else pitch.endSlur++; });
 												break;
 											case '-':
-												el.pitches.each(function(pitch) { pitch.startTie = true; });
+												el.pitches.each(function(pitch) { pitch.startTie = {}; });
 												multilineVars.inTie = true;
 												break;
 											case '>':
