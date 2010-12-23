@@ -383,7 +383,15 @@ ABCPrinter.prototype.printABC = function(abctune) {
       this.printSubtitleLine(abcline);
       this.y+=20; //hardcoded
     } else if (abcline.text) {
-      this.paper.text(100, this.y, "TEXT: " + abcline.text);
+		if (typeof abcline.text === 'string')
+	      this.paper.text(100, this.y, "TEXT: " + abcline.text);
+	  else {
+		  var str = "";
+		  for (var i = 0; i < abcline.text.length; i++) {
+			  str += " FONT " + abcline.text[i].text;
+		  }
+	      this.paper.text(100, this.y, "TEXT: " + str);
+	  }
       this.y+=20; //hardcoded
     }
   }
@@ -395,7 +403,19 @@ ABCPrinter.prototype.printABC = function(abctune) {
   if (abctune.metaText.transcription) extraText += "Transcription: " + abctune.metaText.transcription + "\n";
   if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
   if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
-  if (abctune.metaText.unalignedWords) extraText += "Words:\n" + abctune.metaText.unalignedWords + "\n";
+  if (abctune.metaText.unalignedWords) {
+    extraText += "Words:\n";
+    for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
+      if (typeof abctune.metaText.unalignedWords[j] === 'string')
+        extraText += abctune.metaText.unalignedWords[j] + "\n";
+      else {
+        for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
+          extraText += " FONT " + abctune.metaText.unalignedWords[j][k].text;
+	    }
+        extraText += "\n";
+	  }
+	}
+  }
   var text2 = this.paper.text(this.paddingleft, this.y+25, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":13});
   var height = text2.getBBox().height;
   text2.translate(0,height/2);
