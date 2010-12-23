@@ -310,10 +310,10 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
         if (elem.startSlur) {
           if (elem.pitches[p].startSlur) { //TODO possibly redundant, provided array is not optional
 	    for (var i=0; i<elem.startSlur.length; i++) {
-	      elem.pitches[p].startSlur.push(elem.startSlur[i]);
+	      elem.pitches[p].startSlur.push(elem.startSlur[i].label);
 	    }
 	  } else {
-	    elem.pitches[p].startSlur = elem.startSlur;
+	    elem.pitches[p].startSlur = elem.startSlur.label;
 	  }
         }
 
@@ -558,7 +558,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
   
   if (pitchelem.startSlur) {
     for (i=0; i<pitchelem.startSlur.length; i++) {
-      var slurid = pitchelem.startSlur[i];
+      var slurid = pitchelem.startSlur[i].label;
       var slur = new ABCTieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
       this.slurs[slurid]=slur;
       this.voice.addOther(slur);
