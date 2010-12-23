@@ -23,6 +23,7 @@ empty list will be returned. A validation error will have two properties:
  * added union type so that enums can specify what other data is in an object.
  * added printout of the object as output.
  * added prohibits, which is the opposite of requires.
+ * added stringorarray, which allows either a string, or the array specified.
  */
 
 /*extern JSONSchema */
@@ -98,7 +99,10 @@ JSONSchema = {
 				if(typeof type === 'string' && type !== 'any' &&
 						(type === 'null' ? value !== null : typeof value !== type) &&
 						!(value instanceof Array && type === 'array') &&
-						!(type === 'integer' && value%1===0)){
+						!(type === 'integer' && value%1===0) &&
+						!(type === 'string' && typeof value === 'string') &&
+						!(type === 'stringorarray' && (typeof value === 'string' || value instanceof Array))
+				){
 					return [{property:path,message:(typeof value) + " value found, but a " + type + " is required"}];
 				}
 				if(type instanceof Array){
