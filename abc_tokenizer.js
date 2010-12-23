@@ -392,7 +392,7 @@ function AbcTokenizer() {
 				while (i < end && isNumber(line.charAt(i))) i++;
 				tokens.push({ type: 'number', token: line.substring(start, i), continueId: isLetter(line.charAt(i)), start: start, end: i});
 				start = i + 1;
-			} else if (line.charAt(start) === ' ') {
+			} else if (line.charAt(start) === ' ' || line.charAt(start) === '\t') {
 				i = start+1;
 			} else {
 				tokens.push({ type: 'punct', token: line.charAt(start), start: start, end: start+1});
