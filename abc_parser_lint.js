@@ -43,8 +43,9 @@
 // added { tonic, acc, mode } to keyProperties
 // transpose to clef
 // stafflines and scaling
-// note head shape
+// style: note head shape
 // decorations: tremolos: / // ///
+// decorations: xstem - extend the stem to the staff above
 // rel_position for chord
 // slur: direction and style
 // note.noStem
@@ -72,7 +73,8 @@ function AbcParserLint() {
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
 		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 		"upbow", "downbow", "staccato", "trem1", "trem2", "trem3", "trem4",
-		"/", "//", "//", "///", "turnx", "invertedturn", "invertedturnx", "arpeggio", "trill(", "trill)"
+		"/", "//", "//", "///", "turnx", "invertedturn", "invertedturnx", "arpeggio", "trill(", "trill)", "xstem",
+		"style=normal", "style=harmonic", "style=rhythm", "style=x"
 	] } };
 
 	var tempoProperties =  {
@@ -168,7 +170,6 @@ function AbcParserLint() {
 				startTie: tieProperties
 			}
 		}},
-		head: { type: 'string', optional: true, Enum: ['normal', 'small', 'diamond', 'slash' ]},
 		lyric: { type: 'array', optional: true, output: "noindex", items: {
 			type: 'object', properties: {
 			syllable: { type :'string' },
@@ -187,7 +188,7 @@ function AbcParserLint() {
 				}
 		}},
 		rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'lyric' ], properties: {
-			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest' ] },
+			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest', 'multimeasure' ] },	// multimeasure requires duration to be the number of measures.
 			endTie: { type: 'boolean', Enum: [ true ], optional: true },
 			startTie: tieProperties
 		}},
@@ -237,15 +238,17 @@ function AbcParserLint() {
 			{ value: "clef", properties: appendPositioning(clefProperties) },
 			{ value: "bar", properties: prependPositioning(barProperties) },
 			{ value: "gap", properties: { type: "number", optional: true } },	// staffbreak
-			{ value: "head", properties:  { type: 'string', Enum: ['normal', 'small', 'harmonic', 'rhythm' ]} },
 			{ value: "key", properties: appendPositioning(keyProperties) },
 			{ value: "meter", properties: appendPositioning(meterProperties) },
 			{ value: "overlay", properties: { type: 'array', items: {	// This goes back to the last measure to start the notes in this note array.
 				type: prependPositioning(noteProperties)} } },
 			{ value: "part", properties: prependPositioning({ title: { type: 'string' } }) },
-
+			{ value: "scale", properties: { size: {type: "number", optional: true, minimum: 0.5, maximum: 2 } } },
 			{ value: 'stem', properties: {
 				direction: { type: 'string', Enum: [ 'up', 'down', 'auto', 'none' ] }
+			}},
+			{ value: 'style', properties: {
+				head: { type: 'string', Enum: [ 'normal', 'harmonic', 'rhythm', 'x' ] }
 			}},
 			{ value: 'tempo', properties: appendPositioning(tempoProperties) },
 
@@ -257,7 +260,8 @@ function AbcParserLint() {
 		items: {
 			type: 'object', properties: {
 				font: fontType,
-				text: { type: 'string' }
+				text: { type: 'string' },
+				center: { type: 'boolean', Enum: [ true ], optional: true }
 			}
 		}
 	};

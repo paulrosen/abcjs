@@ -52,20 +52,22 @@ function AbcTokenizer() {
 			case 'E':return {len: i+1, token: 'E'};
 			case 'F':return {len: i+1, token: 'F'};
 			case 'G':return {len: i+1, token: 'G'};
-			case 'a':return {len: i+1, token: 'A'};
-			case 'b':return {len: i+1, token: 'B'};
-			case 'c':return {len: i+1, token: 'C'};
-			case 'd':return {len: i+1, token: 'D'};
-			case 'e':return {len: i+1, token: 'E'};
-			case 'f':return {len: i+1, token: 'F'};
-			case 'g':return {len: i+1, token: 'G'};
+//			case 'a':return {len: i+1, token: 'A'};
+//			case 'b':return {len: i+1, token: 'B'};
+//			case 'c':return {len: i+1, token: 'C'};
+//			case 'd':return {len: i+1, token: 'D'};
+//			case 'e':return {len: i+1, token: 'E'};
+//			case 'f':return {len: i+1, token: 'F'};
+//			case 'g':return {len: i+1, token: 'G'};
 		}
 		return {len: 0};
 	};
 
 	// This just gets the basic accidental, ignoring leading spaces, and only the ones that appear in a key
 	this.getSharpFlat = function(str) {
-	        switch (str.charAt(0)) {
+		if (str === 'bass')
+			return {len: 0};
+		switch (str.charAt(0)) {
 			case '#':return {len: 1, token: '#'};
 			case 'b':return {len: 1, token: 'b'};
 		}
@@ -100,7 +102,7 @@ function AbcTokenizer() {
 		return {len: 0};
 	};
 
-	this.getClef = function(str) {
+	this.getClef = function(str, bExplicitOnly) {
 		var strOrig = str;
 		var i = this.skipWhiteSpace(str);
 		if (finished(str, i))
@@ -138,10 +140,16 @@ function AbcTokenizer() {
 			name = 'alto1';
 		else if (strClef.startsWith('alto'))
 			name = 'alto';
-		else if (strClef.startsWith('none'))
+		else if (!bExplicitOnly && (needsClef && strClef.startsWith('none')))
 			name = 'none';
 		else if (strClef.startsWith('perc'))
 			name = 'perc';
+		else if (!bExplicitOnly && (needsClef && strClef.startsWith('C')))
+			name = 'tenor';
+		else if (!bExplicitOnly && (needsClef && strClef.startsWith('F')))
+			name = 'bass';
+		else if (!bExplicitOnly && (needsClef && strClef.startsWith('G')))
+			name = 'treble';
 		else
 			return {len: i+5, warn: "Unknown clef specified: " + strOrig};
 
@@ -263,6 +271,84 @@ function AbcTokenizer() {
 		if (str.substring(i).startsWith(match))
 			return i+match.length;
 		return 0;
+	};
+
+	this.getPitchFromTokens = function(tokens) {
+		var ret = { };
+		var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
+		ret.position = pitches[tokens[0].token];
+		if (ret.position === undefined)
+			return { warn: "Pitch expected. Found: " + tokens[0].token };
+		tokens.shift();
+		while (tokens.length) {
+			switch (tokens[0].token) {
+				case ',': ret.position -= 7; tokens.shift(); break;
+				case '\'': ret.position += 7; tokens.shift(); break;
+				default: return ret;
+			}
+		}
+		return ret;
+	}
+
+	this.getKeyAccidentals2 = function(tokens) {
+		var accs;
+		// find and strip off all accidentals in the token list
+		while (tokens.length > 0) {
+			var acc;
+			if (tokens[0].token === '^') {
+				acc = 'sharp';
+				tokens.shift();
+				if (tokens.length === 0) return {accs: accs, warn: 'Expected note name after ' + acc};
+				switch (tokens[0].token) {
+					case '^': acc = 'dblsharp'; tokens.shift(); break;
+					case '/': acc = 'quartersharp'; tokens.shift(); break;
+				}
+			} else if (tokens[0].token === '=') {
+				acc = 'natural';
+				tokens.shift();
+			} else if (tokens[0].token === '_') {
+				acc = 'flat';
+				tokens.shift();
+				if (tokens.length === 0) return {accs: accs, warn: 'Expected note name after ' + acc};
+				switch (tokens[0].token) {
+					case '_': acc = 'dblflat'; tokens.shift(); break;
+					case '/': acc = 'quarterflat'; tokens.shift(); break;
+				}
+			} else {
+				// Not an accidental, we'll assume that a later parse will recognize it.
+				return { accs: accs };
+			}
+			if (tokens.length === 0) return {accs: accs, warn: 'Expected note name after ' + acc};
+			switch (tokens[0].token.charAt(0))
+			{
+				case 'a':
+				case 'b':
+				case 'c':
+				case 'd':
+				case 'e':
+				case 'f':
+				case 'g':
+				case 'A':
+				case 'B':
+				case 'C':
+				case 'D':
+				case 'E':
+				case 'F':
+				case 'G':
+					if (accs === undefined)
+						accs = [];
+					accs.push({ acc: acc, note: tokens[0].token.charAt(0) });
+					if (tokens[0].token.length === 1)
+						tokens.shift();
+					else
+						tokens[0].token = tokens[0].token.substring(1);
+					break;
+				default:
+					return {accs: accs, warn: 'Expected note name after ' + acc + ' Found: ' + tokens[0].token };
+					break;
+			}
+		}
+		return { accs: accs };
 	};
 
 	// This gets an accidental marking for the key signature. It has the accidental then the pitch letter.
@@ -441,9 +527,24 @@ function AbcTokenizer() {
 
 // More chars: Ñ Ĳ ĳ Ď ď Đ đ Ĝ ĝ Ğ ğ Ġ ġ Ģ ģ Ĥ ĥ Ħ ħ Ĵ ĵ Ķ ķ ĸ Ĺ ĺ Ļ ļ Ľ ľ Ŀ ŀ Ł ł Ń ń Ņ ņ Ň ň ŉ Ŋ ŋ   Ŕ ŕ Ŗ ŗ Ř ř Ś ś Ŝ ŝ Ş ş Š Ţ ţ Ť ť Ŧ ŧ Ŵ ŵ Ŷ ŷ Ÿ ÿ Ÿ Ź ź Ż ż Ž 
 	};
-	var charMap2 = {
-		"251": "©"
+	var charMap1 = {
+		"#": "♯",
+		"b": "♭",
+		"=": "♮"
 	};
+	var charMap2 = {
+		"201": "♯",
+		"202": "♭",
+		"203": "♮",
+		"241": "¡",
+ 		"242": "¢", "252": "a", "262": "2", "272": "o", "302": "Â", "312": "Ê", "322": "Ò", "332": "Ú", "342": "â", "352": "ê", "362": "ò", "372": "ú",
+ 		"243": "£", "253": "«", "263": "3", "273": "»", "303": "Ã", "313": "Ë", "323": "Ó", "333": "Û", "343": "ã", "353": "ë", "363": "ó", "373": "û",
+ 		"244": "¤", "254": "¬", "264": "  ́", "274": "1⁄4", "304": "Ä", "314": "Ì", "324": "Ô", "334": "Ü", "344": "ä", "354": "ì", "364": "ô", "374": "ü",
+ 		"245": "¥", "255": "-", "265": "μ", "275": "1⁄2", "305": "Å", "315": "Í", "325": "Õ", "335": "Ý",  "345": "å", "355": "í", "365": "õ", "375": "ý",
+ 		"246": "¦", "256": "®", "266": "¶", "276": "3⁄4", "306": "Æ", "316": "Î", "326": "Ö", "336": "Þ", "346": "æ", "356": "î", "366": "ö", "376": "þ",
+ 		"247": "§", "257": " ̄", "267": "·", "277": "¿", "307": "Ç", "317": "Ï", "327": "×", "337": "ß", "347": "ç", "357": "ï", "367": "÷", "377": "ÿ",
+		"250": " ̈", "260": "°", "270": " ̧", "300": "À", "310": "È", "320": "Ð", "330": "Ø", "340": "à", "350": "è", "360": "ð", "370": "ø",
+ 		"251": "©", "261": "±", "271": "1", "301": "Á", "311": "É", "321": "Ñ", "331": "Ù", "341": "á", "351": "é", "361": "ñ", "371": "ù" };
 	this.translateString = function(str) {
 		var arr = str.split('\\');
 		if (arr.length === 1) return str;
@@ -451,8 +552,6 @@ function AbcTokenizer() {
 		arr.each(function(s) {
 			if (out === null)
 				out = s;
-			else if (s.length < 2)
-				out += "\\" + s;
 			else {
 				var c = charMap[s.substring(0, 2)];
 				if (c !== undefined)
@@ -461,14 +560,19 @@ function AbcTokenizer() {
 					c = charMap2[s.substring(0, 3)];
 					if (c !== undefined)
 						out += c + s.substring(3);
-					else
-						out += "\\" + s;
+					else {
+						c = charMap1[s.substring(0, 1)];
+						if (c !== undefined)
+							out += c + s.substring(1);
+						else
+							out += "\\" + s;
+					}
 				}
 			}
 		});
 		return out;
 	};
-	var getNumber = function(line, index) {
+	this.getNumber = function(line, index) {
 		var num = 0;
 		while (index < line.length) {
 			switch (line.charAt(index)) {
@@ -493,7 +597,7 @@ function AbcTokenizer() {
 		var num = 1;
 		var den = 1;
 		if (line.charAt(index) !== '/') {
-			var ret = getNumber(line, index);
+			var ret = this.getNumber(line, index);
 			num = ret.num;
 			index = ret.index;
 		}
@@ -506,7 +610,7 @@ function AbcTokenizer() {
 				return {value: num * div, index: index-1};
 			} else {
 				var iSave = index;
-				var ret2 = getNumber(line, index);
+				var ret2 = this.getNumber(line, index);
 				if (ret2.num === 0 && iSave === index)	// If we didn't use any characters, it is an implied 2
 					ret2.num = 2;
 				if (ret2.num !== 0)
@@ -557,11 +661,17 @@ function AbcTokenizer() {
 
 	this.getMeasurement = function(tokens) {
 		if (tokens.length === 0) return { used: 0 };
-		if (tokens[0].type !== 'number') return { used: 0 };
-		var num = tokens.shift().token;
+		var used = 1;
+		var num = '';
+		if (tokens[0].token === '-') {
+			tokens.shift();
+			num = '-';
+			used++;
+		}
+		else if (tokens[0].type !== 'number') return { used: 0 };
+		num += tokens.shift().token;
 		if (tokens.length === 0) return { used: 1, value: parseInt(num) };
 		var x = tokens.shift();
-		var used = 1;
 		if (x.token === '.') {
 			used++;
 			if (tokens.length === 0) return { used: used, value: parseInt(num) };
@@ -577,6 +687,7 @@ function AbcTokenizer() {
 			case 'pt': return { used: used+1, value: parseFloat(num) };
 			case 'cm': return { used: used+1, value: parseFloat(num)/2.54*72 };
 			case 'in': return { used: used+1, value: parseFloat(num)*72 };
+			default: tokens.unshift(x); return { used: used, value: parseFloat(num) };
 		}
 		return { used: 0 };
 	};

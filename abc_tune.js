@@ -279,6 +279,7 @@ function AbcTune() {
 		delete this.lineNum;
 		delete this.potentialStartBeam;
 		delete this.potentialEndBeam;
+		delete this.vskipPending;
 	};
 
 	this.reset();
@@ -429,20 +430,36 @@ function AbcTune() {
 		return this.lines.length;
 	};
 
+	this.pushLine = function(hash) {
+		if (this.vskipPending) {
+			hash.vskip = this.vskipPending;
+			delete this.vskipPending;
+		}
+		this.lines.push(hash);
+	}
+
 	this.addSubtitle = function(str) {
-		this.lines.push({subtitle: str});
+		this.pushLine({subtitle: str});
+	};
+
+	this.addSpacing = function(num) {
+		this.vskipPending = num;
 	};
 
 	this.addNewPage = function(num) {
-		this.lines.push({newpage: num});
+		this.pushLine({newpage: num});
 	};
 
 	this.addSeparator = function(spaceAbove, spaceBelow, lineLength) {
-		this.lines.push({separator: {spaceAbove: spaceAbove, spaceBelow: spaceBelow, lineLength: lineLength}});
+		this.pushLine({separator: {spaceAbove: spaceAbove, spaceBelow: spaceBelow, lineLength: lineLength}});
 	};
 
 	this.addText = function(str) {
-		this.lines.push({text: str});
+		this.pushLine({text: str});
+	};
+
+	this.addCentered = function(str) {
+		this.pushLine({text: [{text: str, center: true }]});
 	};
 
 	this.containsNotes = function(voice) {
@@ -473,6 +490,8 @@ function AbcTune() {
 			} else {
 				if (params.subname) {if (!This.lines[This.lineNum].staff[This.staffNum].title) This.lines[This.lineNum].staff[This.staffNum].title = [];This.lines[This.lineNum].staff[This.staffNum].title[This.voiceNum] = params.subname;}
 			}
+			if (params.style)
+				This.appendElement('style', null, null, {head: params.style});
 			if (params.stem)
 				This.appendElement('stem', null, null, {direction: params.stem});
 			else if (This.voiceNum > 0) {
@@ -489,6 +508,8 @@ function AbcTune() {
 				}
 				This.appendElement('stem', null, null, {direction: 'down'});
 			}
+			if (params.scale)
+				This.appendElement('scale', null, null, { size: params.scale} );
 		};
 		var createStaff = function(params) {
 			This.lines[This.lineNum].staff[This.staffNum] = {voices: [ ], clef: params.clef, key: params.key};

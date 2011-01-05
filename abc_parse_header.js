@@ -159,7 +159,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		'B#': [],
 		'D#': [ key1flat, key2flat, key3flat ],
 		'E#': [ key1flat ],
-		'G#': [ key1flat, key2flat, key3flat, key4flat ]
+		'G#': [ key1flat, key2flat, key3flat, key4flat ],
+		'Gbm': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ]
 	};
 
 	var calcMiddle = function(clef, oct) {
@@ -269,7 +270,260 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		return { mid: mid - 6, str: str.substring(i) };	// We get the note in the middle of the staff. We want the note that appears as the first ledger line below the staff.
 	};
 
+	var normalizeAccidentals = function(accs) {
+		for (var i = 0; i < accs.length; i++) {
+			if (accs[i].note === 'b')
+				accs[i].note = 'B';
+			else if (accs[i].note === 'a')
+				accs[i].note = 'A';
+			else if (accs[i].note === 'F')
+				accs[i].note = 'f';
+			else if (accs[i].note === 'E')
+				accs[i].note = 'e';
+			else if (accs[i].note === 'D')
+				accs[i].note = 'd';
+			else if (accs[i].note === 'C')
+				accs[i].note = 'c';
+			else if (accs[i].note === 'G' && accs[i].acc === 'sharp')
+				accs[i].note = 'g';
+			else if (accs[i].note === 'g' && accs[i].acc === 'flat')
+				accs[i].note = 'G';
+		}
+	};
+
 	this.parseKey = function(str)	// (and clef)
+	{
+		// returns:
+		//		{ foundClef: true, foundKey: true }
+		// Side effects: 
+		//		calls warn() when there is a syntax error
+		//		sets these members of multilineVars:
+		//			clef
+		//			key
+		//			style
+		//
+		// The format is:
+		// K: [⟨key⟩] [⟨modifiers⟩*]
+		// modifiers are any of the following in any order:
+		//  [⟨clef⟩] [middle=⟨pitch⟩] [transpose=[-]⟨number⟩] [stafflines=⟨number⟩] [staffscale=⟨number⟩][style=⟨style⟩]
+		// key is none|HP|Hp|⟨specified_key⟩
+		// clef is [clef=] [⟨clef type⟩] [⟨line number⟩] [+8|-8]
+		// specified_key is ⟨pitch⟩[#|b][mode(first three chars are significant)][accidentals*]
+		if (str.length === 0) {
+			// an empty K: field is the same as K:none
+			str = 'none';
+		}
+		var tokens = tokenizer.tokenize(str, 0, str.length);
+		var ret = {};
+
+		// first the key
+		switch (tokens[0].token) {
+			case 'HP':
+				this.addDirective("bagpipes");
+				multilineVars.key = { root: "HP", accidentals: [], acc: "", mode: "" };
+				ret.foundKey = true;
+				tokens.shift();
+				break;
+			case 'Hp':
+				this.addDirective("bagpipes");
+				multilineVars.key = { root: "Hp", accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}], acc: "", mode: "" };
+				ret.foundKey = true;
+				tokens.shift();
+				break;
+			case 'none':
+				// we got the none key - that's the same as C to us
+				multilineVars.key = { root: "none", accidentals: [], acc: "", mode: "" };
+				ret.foundKey = true;
+				tokens.shift();
+				break;
+			default:
+				var retPitch = tokenizer.getKeyPitch(tokens[0].token);
+				if (retPitch.len > 0) {
+					ret.foundKey = true;
+					var acc = "";
+					var mode = "";
+					// The accidental and mode might be attached to the pitch, so we might want to just remove the first character.
+					if (tokens[0].token.length > 1)
+						tokens[0].token = tokens[0].token.substring(1);
+					else
+						tokens.shift();
+					var key = retPitch.token;
+					// We got a pitch to start with, so we might also have an accidental and a mode
+					if (tokens.length > 0) {
+						var retAcc = tokenizer.getSharpFlat(tokens[0].token);
+						if (retAcc.len > 0) {
+							if (tokens[0].token.length > 1)
+								tokens[0].token = tokens[0].token.substring(1);
+							else
+								tokens.shift();
+							key += retAcc.token;
+							acc = retAcc.token;
+						}
+						if (tokens.length > 0) {
+							var retMode = tokenizer.getMode(tokens[0].token);
+							if (retMode.len > 0) {
+								tokens.shift();
+								key += retMode.token;
+								mode = retMode.token;
+							}
+						}
+					}
+					// We need to do a deep copy because we are going to modify it
+					multilineVars.key = this.deepCopyKey({accidentals: keys[key]});
+					multilineVars.key.root = retPitch.token;
+					multilineVars.key.acc = acc;
+					multilineVars.key.mode = mode;
+				}
+				break;
+		}
+
+		// There are two special cases of deprecated syntax. Ignore them if they occur
+		if (tokens.length === 0) return ret;
+		if (tokens[0].token === 'exp') tokens.shift();
+		if (tokens.length === 0) return ret;
+		if (tokens[0].token === 'oct') tokens.shift();
+
+		// now see if there are extra accidentals
+		if (tokens.length === 0) return ret;
+		var accs = tokenizer.getKeyAccidentals2(tokens);
+		if (accs.warn)
+			warn(accs.warn, str, 0);
+		// If we have extra accidentals, first replace ones that are of the same pitch before adding them to the end.
+		if (accs.accs) {
+			if (!ret.foundKey) {		// if there are only extra accidentals, make sure this is set.
+				ret.foundKey = true;
+				multilineVars.key = { root: "none", acc: "", mode: "", accidentals: [] };
+			}
+			normalizeAccidentals(accs.accs);
+			for (var i = 0; i < accs.accs.length; i++) {
+				var found = false;
+				for (var j = 0; j < multilineVars.key.accidentals.length && !found; j++) {
+					if (multilineVars.key.accidentals[j].note === accs.accs[i].note) {
+						found = true;
+						multilineVars.key.accidentals[j].acc = accs.accs[i].acc;
+					}
+				}
+				if (!found)
+					multilineVars.key.accidentals.push(accs.accs[i]);
+			}
+		}
+
+		// Now see if any optional parameters are present. They have the form "key=value", except that "clef=" is optional
+		var token;
+		while (tokens.length > 0) {
+			switch (tokens[0].token) {
+				case "m":
+				case "middle":
+					tokens.shift();
+					if (tokens.length === 0) { warn("Expected = after middle", str, 0); return ret; }
+					token = tokens.shift();
+					if (token.token !== "=") { warn("Expected = after middle", str, 0); break; }
+					if (tokens.length === 0) { warn("Expected parameter after middle=", str, 0); return ret; }
+					var pitch = tokenizer.getPitchFromTokens(tokens);
+					if (pitch.warn)
+						warn(pitch.warn, str, 0);
+					if (pitch.position)
+						multilineVars.clef.verticalPos = pitch.position - 6;	// we get the position from the middle line, but want to offset it to the first ledger line.
+					break;
+				case "transpose":
+					tokens.shift();
+					if (tokens.length === 0) { warn("Expected = after transpose", str, 0); return ret; }
+					token = tokens.shift();
+					if (token.token !== "=") { warn("Expected = after transpose", str, 0); break; }
+					if (tokens.length === 0) { warn("Expected parameter after transpose=", str, 0); return ret; }
+					if (tokens[0].type !== 'number') { warn("Expected number after transpose", str, 0); break; }
+					multilineVars.clef.transpose = parseInt(tokens[0].token);
+					tokens.shift();
+					break;
+				case "stafflines":
+					tokens.shift();
+					if (tokens.length === 0) { warn("Expected = after stafflines", str, 0); return ret; }
+					token = tokens.shift();
+					if (token.token !== "=") { warn("Expected = after stafflines", str, 0); break; }
+					if (tokens.length === 0) { warn("Expected parameter after stafflines=", str, 0); return ret; }
+					if (tokens[0].type !== 'number') { warn("Expected number after stafflines", str, 0); break; }
+					multilineVars.clef.stafflines = parseInt(tokens[0].token);
+					tokens.shift();
+					break;
+				case "staffscale":
+					tokens.shift();
+					if (tokens.length === 0) { warn("Expected = after staffscale", str, 0); return ret; }
+					token = tokens.shift();
+					if (token.token !== "=") { warn("Expected = after staffscale", str, 0); break; }
+					if (tokens.length === 0) { warn("Expected parameter after staffscale=", str, 0); return ret; }
+					if (tokens[0].type !== 'number') { warn("Expected number after staffscale", str, 0); break; }
+					multilineVars.clef.staffscale = parseInt(tokens[0].token);
+					tokens.shift();
+					break;
+				case "style":
+					tokens.shift();
+					if (tokens.length === 0) { warn("Expected = after style", str, 0); return ret; }
+					token = tokens.shift();
+					if (token.token !== "=") { warn("Expected = after style", str, 0); break; }
+					if (tokens.length === 0) { warn("Expected parameter after style=", str, 0); return ret; }
+					switch (tokens[0].token) {
+						case "normal":
+						case "harmonic":
+						case "rhythm":
+						case "x":
+							multilineVars.style = tokens[0].token;
+							tokens.shift();
+							break;
+						default:
+							warn("error parsing style element: " + tokens[0].token, str, 0);
+							break;
+					}
+					break;
+				case "clef":
+					tokens.shift();
+					if (tokens.length === 0) { warn("Expected = after clef", str, 0); return ret; }
+					token = tokens.shift();
+					if (token.token !== "=") { warn("Expected = after clef", str, 0); break; }
+					if (tokens.length === 0) { warn("Expected parameter after clef=", str, 0); return ret; }
+					//break; yes, we want to fall through. That allows "clef=" to be optional.
+				case "treble":
+				case "bass":
+				case "alto":
+				case "tenor":
+				case "perc":
+					// clef is [clef=] [⟨clef type⟩] [⟨line number⟩] [+8|-8]
+					var clef = tokens.shift();
+					switch (clef.token) {
+						case 'treble':
+						case 'tenor':
+						case 'alto':
+						case 'bass':
+						case 'perc':
+						case 'none':
+							break;
+						case 'C': clef.token = 'tenor'; break;
+						case 'F': clef.token = 'bass'; break;
+						case 'G': clef.token = 'treble'; break;
+						default:
+							warn("Expected clef name. Found " + clef.token, str, 0);
+							break;
+					}
+					if (tokens.length > 0 && tokens[0].type === 'number') {
+						clef.token += tokens[0].token;
+						tokens.shift();
+					}
+					if (tokens.length > 1 && (tokens[0].token === '-' || tokens[0].token === '+') && tokens[1].token === '8') {
+						clef.token += tokens[0].token + tokens[1].token;
+						tokens.shift();
+						tokens.shift();
+					}
+					multilineVars.clef = {type: clef.token, verticalPos: calcMiddle(clef.token, 0)};
+					ret.foundClef = true;
+					break;
+				default:
+					warn("Unknown parameter: " + tokens[0].token, str, 0);
+					tokens.shift();
+			}
+		}
+		return ret;
+	};
+
+	this.parseKeyOld = function(str)	// (and clef)
 	{
 		str = tokenizer.stripComment(str);
 		var origStr = str;
@@ -279,6 +533,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		}
 		// The format is:
 		// [space][tonic[#|b][ ][3-letter-mode][ignored-chars][space]][ accidentals...][ clef=treble|bass|bass3|tenor|alto|alto2|alto1|none [+8|-8] [middle=note] [transpose=num] [stafflines=num] ]
+		// K: ⟨key⟩ [[clef=] [clef type] [line number] [+8|-8]] [middle=⟨pitch⟩] [transpose=] [stafflines=⟨number⟩] [staffscale=⟨number⟩][style=⟨style⟩]
+		// V: ⟨voice name⟩ [clef=] [clef type] [name=] [sname=] [merge] [stem=] [up | down | auto] [gstem=] [up | down | auto] [dyn=] [up | down | auto] [lyrics=] [up | down | auto] [gchord=] [up | down | auto] [scale=] [staffscale=] [stafflines=]
 		// -- or -- the key can be "none"
 		// First get the key letter: turn that into a index into the key array (0-11)
 		// Then see if there is a sharp or flat. Increment or decrement.
@@ -318,8 +574,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			}
 		};
 		// check first to see if there is only a clef. If so, just take that, but ignore an error after that.
-		var retClef = tokenizer.getClef(str);
-		if (retClef.token !== undefined && (retClef.explicit === true || retClef.token !== 'none')) {	// none is the only ambiguous marking. We need to assume that's a key
+		var retClef = tokenizer.getClef(str, true);
+		if (retClef.token !== undefined && (retClef.explicit === true || retClef.token !== 'none')) {	// none, C, F, and G are the only ambiguous marking. We need to assume that's a key
 			multilineVars.clef = {type: retClef.token, verticalPos: calcMiddle(retClef.token, 0)};
 			str = str.substring(retClef.len);
 			setClefMiddle(str);
@@ -394,7 +650,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		}
 
 		// now see if there is a clef
-		retClef = tokenizer.getClef(str);
+		retClef = tokenizer.getClef(str, false);
 		if (retClef.len > 0) {
 			if (retClef.warn)
 				warn("error parsing clef:" + retClef.warn, origStr, 0);
@@ -406,10 +662,29 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			}
 		}
 
-		if (ret.accidentals === undefined && retClef.token === undefined) {
-			warn("error parsing key: ", origStr, 0);
-			return {};
+		// now see if there is a note style
+		i = tokenizer.skipWhiteSpace(str);
+		str = str.substring(i);
+		if (str.startsWith('style=')) {
+			var style = tokenizer.getToken(str, 6, str.length);
+			switch (style) {
+				case "normal":
+				case "harmonic":
+				case "rhythm":
+				case "x":
+					multilineVars.style = style;
+					break;
+				default:
+					warn("error parsing style element of key: ", origStr, 0);
+					break;
+			}
+			str = str.substring(6+style.length);
 		}
+
+//		if (ret.accidentals === undefined && retClef.token === undefined) {
+//			warn("error parsing key: ", origStr, 0);
+//			return {};
+//		}
 		var result = {};
 		if (retClef.token !== undefined)
 			result.foundClef = true;
@@ -437,6 +712,12 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 	};
 
 	this.addDirective = function(str) {
+		var getRequiredMeasurement = function(cmd, tokens) {
+			var points = tokenizer.getMeasurement(tokens);
+			if (points.used === 0 || tokens.length !== 0)
+				return { error: "Directive \"" + cmd + "\" requires a measurement as a parameter."};
+			return points.value;
+		};
 		var oneParameterMeasurement = function(cmd, tokens) {
 			var points = tokenizer.getMeasurement(tokens);
 			if (points.used === 0 || tokens.length !== 0)
@@ -538,6 +819,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			case "stretchlast":tune.formatting.stretchlast = true;break;
 			case "titlecaps":multilineVars.titlecaps = true;break;
 			case "titleleft":tune.formatting.titleleft = true;break;
+			case "measurebox":tune.formatting.measurebox = true;break;
 
 			case "botmargin":
 			case "botspace":
@@ -562,6 +844,13 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			case "vocalspace":
 			case "wordsspace":
 				return oneParameterMeasurement(cmd, tokens);
+			case "vskip":
+				var vskip = getRequiredMeasurement(cmd, tokens);
+				if (vskip.error)
+					return vskip.error;
+				tune.addSpacing(vskip);
+				return null;
+				break;
 			case "scale":
 				scratch = "";
 				tokens.each(function(tok) {
@@ -576,10 +865,27 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				if (tokens.length === 0)
 					tune.addSeparator();
 				else {
-					if (tokens.length !== 3 || tokens[0].type !== 'number' || tokens[1].type !== 'number' || tokens[2].type !== 'number')
+					var points = tokenizer.getMeasurement(tokens);
+					if (points.used === 0)
 						return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
-					tune.addSeparator(parseInt(tokens[0].token), parseInt(tokens[1].token), parseInt(tokens[2].token));
+					var spaceAbove = points.value;
+
+					points = tokenizer.getMeasurement(tokens);
+					if (points.used === 0)
+						return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
+					var spaceBelow = points.value;
+
+					points = tokenizer.getMeasurement(tokens);
+					if (points.used === 0 || tokens.length !== 0)
+						return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
+					var lenLine = points.value;
+					tune.addSeparator(spaceAbove, spaceBelow, lenLine);
 				}
+				break;
+			case "measurenb":
+				if (tokens.length !== 1 || tokens[0].type !== 'number')
+					return "Directive \"" + cmd + "\" requires a number as a parameter.";
+				multilineVars.barNumbers = parseInt(tokens[0].token);
 				break;
 			case "barnumbers":
 				if (tokens.length !== 1 || tokens[0].type !== 'number')
@@ -589,9 +895,22 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			case "begintext":
 				multilineVars.inTextBlock = true;
 				break;
+			case "beginps":
+				multilineVars.inPsBlock = true;
+				warn("Postscript ignored", str, 0);
+				break;
+			case "deco":
+				if (restOfString.length > 0)
+					multilineVars.ignoredDecorations.push(restOfString.substring(0, restOfString.indexOf(' ')));
+				warn("Decoration redefinition ignored", str, 0);
+				break;
 			case "text":
 				var textstr = tokenizer.translateString(restOfString);
 				tune.addText(this.parseFontChangeLine(textstr));
+				break;
+			case "center":
+				var centerstr = tokenizer.translateString(restOfString);
+				tune.addCentered(this.parseFontChangeLine(centerstr));
 				break;
 			case "font":
 				// don't need to do anything for this; it is a useless directive
@@ -623,6 +942,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			case "gchordfont":
 			case "partsfont":
 			case "vocalfont":
+			case "textfont":
 				return getChangingFont(cmd, tokens);
 			case "barlabelfont":
 			case "barnumberfont":
@@ -736,6 +1056,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			case "abc-version":
 			case "abc-charset":
 			case "abc-edited-by":
+				tune.addMetaText(cmd, restOfString);
+				break;
 			case "header":
 			case "footer":
 				tune.addMetaText(cmd, restOfString);
@@ -846,6 +1168,19 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				warn("Expected value for " + name + " in voice", line, start);
 			else
 				staffInfo[name] = attr.token;
+			start += attr.len;
+		};
+		var addNextTokenToVoiceInfo = function(id, name, type) {
+			var attr = tokenizer.getVoiceToken(line, start, end);
+			if (attr.warn !== undefined)
+				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
+			else if (attr.token.length === 0 && line.charAt(start) !== '"')
+				warn("Expected value for " + name + " in voice", line, start);
+			else {
+				if (type === 'number')
+					attr.token = parseFloat(attr.token);
+				multilineVars.voices[id][name] = attr.token;
+			}
 			start += attr.len;
 		};
 
@@ -962,6 +1297,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					case 'space':
 					case 'spc':
 						addNextTokenToStaffInfo('spacing');
+						break;
+					case 'scale':
+						addNextTokenToVoiceInfo(id, 'scale', 'number');
 						break;
 				}
 			}
@@ -1126,9 +1464,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			warn("Macro definitions can only be one character", line, start);
 			return;
 		}
-		var legalChars = "HIJKLMNOPQRSTUVWhijklmnopqrstuvw~";
+		var legalChars = "HIJKLMNOPQRSTUVWXYhijklmnopqrstuvw~";
 		if (legalChars.indexOf(before) === -1) {
-			warn("Macro definitions must be H-W, h-w, or tilde", line, start);
+			warn("Macro definitions must be H-Y, h-w, or tilde", line, start);
 			return;
 		}
 		if (after.length === 0) {
@@ -1441,6 +1779,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 							if (!multilineVars.is_in_header)
 								return {newline: true};
 							break;
+						case  's':
+							return {symbols: true};
 						case  'w':
 							return {words: true};
 						case 'X':

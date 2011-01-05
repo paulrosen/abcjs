@@ -50,6 +50,8 @@ function AbcParse() {
 			this.macros = {};
 			this.currBarNumber = 1;
 			this.inTextBlock = false;
+			this.inPsBlock = false;
+			this.ignoredDecorations = [];
 			this.textBlock = "";
 			this.score_is_present = false;	// Can't have original V: lines when there is the score directive
 			this.inEnding = false;
@@ -113,7 +115,8 @@ function AbcParse() {
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
 		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 		"upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4",
-		"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio"
+		"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem",
+		"style=normal", "style=harmonic", "style=rhythm", "style=x"
 	];
 	var accentPsuedonyms = [ ["<", "accent"], [">", "accent"], ["tr", "trill"], ["<(", "crescendo("], ["<)", "crescendo)"],
 		[">(", "diminuendo("], [">)", "diminuendo)"], ["plus", "+"] ];
@@ -127,9 +130,16 @@ function AbcParse() {
 			if (macro.charAt(macro.length-1) === '!' || macro.charAt(macro.length-1) === '+')
 				macro = macro.substring(0, macro.length-1);
 			if (legalAccents.detect(function(acc) {
-				return (macro === acc);
-			}))
-			return [ 1, macro ];
+					return (macro === acc);
+				}))
+				return [ 1, macro ];
+			else {
+				if (!multilineVars.ignoredDecorations.detect(function(dec) {
+					return (macro === dec);
+				}))
+					warn("Unknown macro: " + macro, line, i);
+				return [1, '' ];
+			}
 		}
 		switch (line.charAt(i))
 		{
@@ -168,8 +178,10 @@ function AbcParse() {
 			case 'J':return [1, 'slide'];
 			case 'L':return [1, 'accent'];
 			case 'M':return [1, 'mordent'];
+			case 'O':return[1, 'coda'];
 			case 'P':return[1, 'pralltriller'];
 			case 'R':return [1, 'roll'];
+			case 'S':return [1, 'segno'];
 			case 'T':return [1, 'trill'];
 		}
 		return [0, 0];
@@ -343,10 +355,83 @@ function AbcParse() {
 							el.lyric.push(lyric);
 					}
 				}
-//					if (el.endSlur === true || el.endTie === true)
-//						inSlur = false;
-//					if (el.startSlur === true || el.startTie === true)
-//						inSlur = true;
+			}
+		});
+	};
+
+	var addSymbols = function(line, words) {
+		// TODO-PER: Currently copied from w: line. This needs to be read as symbols instead.
+		if (!line) { warn("Can't add symbols before the first line of mulsic", line, 0); return; }
+		words = words.strip();
+		if (words.charAt(words.length-1) !== '-')
+			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
+		var word_list = [];
+		// first make a list of words from the string we are passed. A word is divided on either a space or dash.
+		var last_divider = 0;
+		var replace = false;
+		var addWord = function(i) {
+			var word = words.substring(last_divider, i).strip();
+			last_divider = i+1;
+			if (word.length > 0) {
+				if (replace)
+					word = word.gsub('~', ' ');
+				var div = words.charAt(i);
+				if (div !== '_' && div !== '-')
+					div = ' ';
+				word_list.push({syllable: tokenizer.translateString(word), divider: div});
+				replace = false;
+				return true;
+			}
+			return false;
+		};
+		for (var i = 0; i < words.length; i++) {
+			switch (words.charAt(i)) {
+				case ' ':
+				case '\x12':
+					addWord(i);
+					break;
+				case '-':
+					if (!addWord(i) && word_list.length > 0) {
+						word_list.last().divider = '-';
+						word_list.push({skip: true, to: 'next'});
+					}
+					break;
+				case '_':
+					addWord(i);
+					word_list.push({skip: true, to: 'slur'});
+					break;
+				case '*':
+					addWord(i);
+					word_list.push({skip: true, to: 'next'});
+					break;
+				case '|':
+					addWord(i);
+					word_list.push({skip: true, to: 'bar'});
+					break;
+				case '~':
+					replace = true;
+					break;
+			}
+		}
+
+		var inSlur = false;
+		line.each(function(el) {
+			if (word_list.length !== 0) {
+				if (word_list[0].skip) {
+					switch (word_list[0].to) {
+						case 'next': if (el.el_type === 'note' && el.pitches !== null && !inSlur) word_list.shift(); break;
+						case 'slur': if (el.el_type === 'note' && el.pitches !== null) word_list.shift(); break;
+						case 'bar': if (el.el_type === 'bar') word_list.shift(); break;
+					}
+				} else {
+					if (el.el_type === 'note' && el.rest === undefined && !inSlur) {
+						var lyric = word_list.shift();
+						if (el.lyric === undefined)
+							el.lyric = [ lyric ];
+						else
+							el.lyric.push(lyric);
+					}
+				}
 			}
 		});
 	};
@@ -377,11 +462,11 @@ function AbcParse() {
 	};
 
 	var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
-	var rests = {x: 'invisible', y: 'spacer', z: 'rest'};
+	var rests = {x: 'invisible', y: 'spacer', z: 'rest', Z: 'multimeasure' };
 	var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 		//var el = { startChar: index };
 		var isComplete = function(state) {
-			return (state === 'octave' || state === 'duration' || state === 'broken_rhythm' || state === 'end_slur');
+			return (state === 'octave' || state === 'duration' || state === 'Zduration' || state === 'broken_rhythm' || state === 'end_slur');
 		};
 		var state = 'startSlur';
 		var durationSetByPreviousNote = false;
@@ -455,6 +540,7 @@ function AbcParse() {
 				case 'x':
 				case 'y':
 				case 'z':
+				case 'Z':
 					if (state === 'startSlur') {
 						el.rest = { type: rests[line.charAt(index)] };
 						// There shouldn't be some of the properties that notes have. If some sneak in due to bad syntax in the abc file,
@@ -467,13 +553,18 @@ function AbcParse() {
 						delete el.end_beam;
 						delete el.grace_notes;
 						// At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
-						if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
-							el.duration = multilineVars.next_note_duration;
-							multilineVars.next_note_duration = 0;
-							durationSetByPreviousNote = true;
-						} else
-							el.duration = multilineVars.default_length;
-						state = 'duration';
+						if (el.rest.type === 'multimeasure') {
+							el.duration = 1;
+							state = 'Zduration';
+						} else {
+							if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
+								el.duration = multilineVars.next_note_duration;
+								multilineVars.next_note_duration = 0;
+								durationSetByPreviousNote = true;
+							} else
+								el.duration = multilineVars.default_length;
+							state = 'duration';
+						}
 					} else if (isComplete(state)) {el.endChar = index;return el;}
 					else return null;
 					break;
@@ -507,6 +598,11 @@ function AbcParse() {
 						el.accidental = 'quartersharp';state = 'pitch';
 					} else if (state === 'flat2') {
 						el.accidental = 'quarterflat';state = 'pitch';
+					} else if (state === 'Zduration') {
+						var num = tokenizer.getNumber(line, index);
+						el.duration = num.num;
+						el.endChar = num.index;
+						return el;
 					} else return null;
 					break;
 				case '-':
@@ -605,6 +701,8 @@ function AbcParse() {
 			params.name = multilineVars.currentVoice.name;
 		if (multilineVars.vocalfont)
 			params.vocalfont = multilineVars.vocalfont;
+		if (multilineVars.style)
+			params.style = multilineVars.style;
 		if (multilineVars.currentVoice) {
 			var staff = multilineVars.staves[multilineVars.currentVoice.staffNum];
 			if (staff.brace) params.brace = staff.brace;
@@ -614,6 +712,10 @@ function AbcParse() {
 			if (staff.subname) params.subname = staff.subname[multilineVars.currentVoice.index];
 			if (multilineVars.currentVoice.stem)
 				params.stem = multilineVars.currentVoice.stem;
+			if (multilineVars.currentVoice.scale)
+				params.scale = multilineVars.currentVoice.scale;
+			if (multilineVars.currentVoice.style)
+				params.style = multilineVars.currentVoice.style;
 		}
 		tune.startNewLine(params);
 
@@ -731,7 +833,7 @@ function AbcParse() {
 	// double-quote: chord symbol
 	// less-than, greater-than, slash: duration
 	// back-tick, space, tab: space
-	var nonDecorations = "ABCDEFGabcdefg[]|^_{";	// use this to prescreen so we don't have to look for a decoration at every note.
+	var nonDecorations = "ABCDEFGabcdefgxyzZ[]|^_{";	// use this to prescreen so we don't have to look for a decoration at every note.
 
 	var parseRegularMusicLine = function(line) {
 		header.resolveTempo();
@@ -815,9 +917,20 @@ function AbcParse() {
 					ret = letter_to_chord(line, i);
 					if (ret[0] > 0) {
 						// There could be more than one chord here if they have different positions.
+						// If two chords have the same position, then connect them with newline.
 						if (!el.chord)
 							el.chord = [];
-						el.chord.push({name: tokenizer.translateString(ret[1]), position: ret[2]});
+						var chordName = tokenizer.translateString(ret[1]);
+						chordName = chordName.replace(/;/g, "\n");
+						var addedChord = false;
+						for (var ci = 0; ci < el.chord.length; ci++) {
+							if (el.chord[ci].position === ret[2]) {
+								addedChord = true;
+								el.chord[ci].name += "\n" + chordName;
+							}
+						}
+						if (addedChord === false)
+							el.chord.push({name: chordName, position: ret[2]});
 
 						i += ret[0];
 						var ii = tokenizer.skipWhiteSpace(line.substring(i));
@@ -1119,6 +1232,8 @@ function AbcParse() {
 			startNewLine();
 		if (ret.words)
 			addWords(tune.getCurrentVoice(), line.substring(2));
+		if (ret.symbols)
+			addSymbols(tune.getCurrentVoice(), line.substring(2));
 		if (ret.recurse)
 			parseLine(ret.str);
 	};
@@ -1162,8 +1277,16 @@ function AbcParse() {
 						tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
 				} else if (multilineVars.inTextBlock) {
 					if (line.startsWith("%%endtext")) {
-						tune.addMetaText("textBlock", multilineVars.textBlock);
+						//tune.addMetaText("textBlock", multilineVars.textBlock);
+						tune.addText(multilineVars.textBlock);
 						multilineVars.inTextBlock = false;
+					}
+					else
+						multilineVars.textBlock += ' ' + line;
+				} else if (multilineVars.inPsBlock) {
+					if (line.startsWith("%%endps")) {
+						// Just ignore postscript
+						multilineVars.inPsBlock = false;
 					}
 					else
 						multilineVars.textBlock += ' ' + line;
