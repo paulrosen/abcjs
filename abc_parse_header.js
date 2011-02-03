@@ -496,9 +496,12 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 						case 'perc':
 						case 'none':
 							break;
-						case 'C': clef.token = 'tenor'; break;
+						case 'C': clef.token = 'alto'; break;
 						case 'F': clef.token = 'bass'; break;
 						case 'G': clef.token = 'treble'; break;
+						case 'c': clef.token = 'alto'; break;
+						case 'f': clef.token = 'bass'; break;
+						case 'g': clef.token = 'treble'; break;
 						default:
 							warn("Expected clef name. Found " + clef.token, str, 0);
 							break;
@@ -1060,15 +1063,39 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				break;
 			case "header":
 			case "footer":
-				tune.addMetaText(cmd, restOfString);
+				var footerStr = tokenizer.getMeat(restOfString, 0, restOfString.length);
+				footerStr = restOfString.substring(footerStr.start, footerStr.end);
+				if (footerStr.charAt(0) === '"' && footerStr.charAt(footerStr.length-1) === '"' )
+					footerStr = footerStr.substring(1, footerStr.length-2);
+				var footerArr = footerStr.split('\t');
+				var footer = {};
+				if (footerArr.length === 1)
+					footer = { left: "", center: footerArr[0], right: "" };
+				else if (footerArr.length === 2)
+					footer = { left: footerArr[0], center: footerArr[1], right: "" };
+				else
+					footer = { left: footerArr[0], center: footerArr[1], right: footerArr[2] };
+				 if (footerArr.length > 3)
+					 warn("Too many tabs in "+cmd+": "+footerArr.length+" found.", restOfString, 0);
+
+				tune.addMetaTextObj(cmd, footer);
 				break;
 
 			case "midi":
-				var midiCmd = restOfString.split(' ')[0];
-				var midiParam = restOfString.substring(midiCmd.length+1);
-				tune.formatting[cmd] = { cmd: midiCmd };
-				if (midiParam.length > 0)
-					tune.formatting[cmd].param = midiParam;
+				var midi = tokenizer.tokenize(restOfString, 0, restOfString.length);
+				if (midi.length > 0 && midi[0].token === '=')
+					midi.shift();
+				if (midi.length === 0)
+					warn("Expected midi command", restOfString, 0);
+				else {
+//				var midiCmd = restOfString.split(' ')[0];
+//				var midiParam = restOfString.substring(midiCmd.length+1);
+					// TODO-PER: make sure the command is legal
+					tune.formatting[cmd] = { cmd: midi.shift().token };
+					if (midi.length > 0)
+						tune.formatting[cmd].param = midi.shift().token;
+					// TODO-PER: save all the parameters, not just the first.
+				}
 //%%MIDI barlines: deactivates %%nobarlines.
 //%%MIDI bassprog n
 //%%MIDI bassvol n
@@ -1154,7 +1181,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			multilineVars.voices[id] = {};
 			isNew = true;
 			if (multilineVars.score_is_present)
-				warn("Can't have an unknown V: id when the %score directive is present", line, i);
+				warn("Can't have an unknown V: id when the %score directive is present", line, start);
 		}
 		start += id.length;
 		start += tokenizer.eatWhiteSpace(line, start);

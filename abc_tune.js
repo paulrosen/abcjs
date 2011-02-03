@@ -230,7 +230,8 @@ function AbcTune() {
 					case 'bass':
 					case 'bass+8':
 					case 'bass-8':
-						el.verticalPos--; min += 6; max += 6; break;
+						el.verticalPos = 20 + el.verticalPos; min += 6; max += 6; break;
+						break;
 					case 'tenor':
 					case 'tenor+8':
 					case 'tenor-8':
@@ -242,6 +243,7 @@ function AbcTune() {
 					case 'alto-8':
 						el.verticalPos = - el.verticalPos; min = -40; max = 40;
 //						el.verticalPos-=2; min += 4; max += 4;
+						break;
 				}
 				if (el.verticalPos < min) {
 					while (el.verticalPos < min)
@@ -584,5 +586,8 @@ function AbcTune() {
 			this.metaText[key] = [value];
 		else
 			this.metaText[key].push(value);
+	};
+	this.addMetaTextObj = function(key, value) {
+		this.metaText[key] = value;
 	};
 }

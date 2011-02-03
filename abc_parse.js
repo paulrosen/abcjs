@@ -102,8 +102,11 @@ function AbcParse() {
 			} else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '>') {
 				chord[1] = chord[1].substring(1);
 				chord[2] = 'right';
-			} else
+			} else {
+				chord[1] = chord[1].replace(/([ABCDEFG])b/g, "$1♭");
+				chord[1] = chord[1].replace(/([ABCDEFG])#/g, "$1♯");
 				chord[2] = 'default';
+			}
 			return chord;
 		}
 		return [0, ""];
@@ -679,7 +682,7 @@ function AbcParse() {
 		var params = { startChar: -1, endChar: -1};
 		if (multilineVars.partForNextLine.length)
 			params.part = multilineVars.partForNextLine;
-		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? multilineVars.staves[multilineVars.currentVoice.staffNum].clef : multilineVars.clef ;
+		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? Object.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : Object.clone(multilineVars.clef) ;
 		params.key = header.deepCopyKey(multilineVars.key);
 		header.addPosToKey(params.clef, params.key);
 		if (multilineVars.meter !== null) {
@@ -1217,6 +1220,7 @@ function AbcParse() {
 					if (i === startI) {	// don't know what this is, so ignore it.
 						if (line.charAt(i) !== ' ' && line.charAt(i) !== '`')
 							warn("Unknown character ignored", line, i);
+//							warn("Unknown character ignored (" + line.charCodeAt(i) + ")", line, i);
 						i++;
 					}
 				}
@@ -1281,8 +1285,12 @@ function AbcParse() {
 						tune.addText(multilineVars.textBlock);
 						multilineVars.inTextBlock = false;
 					}
-					else
-						multilineVars.textBlock += ' ' + line;
+					else {
+						if (line.startsWith("%%"))
+							multilineVars.textBlock += ' ' + line.substring(2);
+						else
+							multilineVars.textBlock += ' ' + line;
+					}
 				} else if (multilineVars.inPsBlock) {
 					if (line.startsWith("%%endps")) {
 						// Just ignore postscript
