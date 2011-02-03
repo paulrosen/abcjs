@@ -344,7 +344,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
       if (p1>6) p1=6;
       p2 = (dir=="down") ? elem.maxpitch-1/3 : elem.maxpitch+7;
       if (p2<6) p2=6;
-      dx = (dir=="down")?0:abselem.heads[0].w;
+      dx = (dir==="down" || abselem.heads.length === 0)?0:abselem.heads[0].w;
       width = (dir=="down")?1:-1;
       abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
     }
