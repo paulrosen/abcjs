@@ -737,6 +737,11 @@ function AbcParse() {
 			var gra = tokenizer.getBrackettedSubstring(line, i, 1, '}');
 			if (!gra[2])
 				warn("Missing the closing '}' while parsing grace note", line, i);
+			// If there is a slur after the grace construction, then move it to the last note inside the grace construction
+			if (line[i+gra[0]] === ')') {
+				gra[0]++;
+				gra[1] += ')';
+			}
 
 			var gracenotes = [];
 			var ii = 0;
@@ -974,6 +979,7 @@ function AbcParse() {
 						el.rest = { type: 'spacer' };
 						el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
 						tune.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el);
+						multilineVars.measureNotEmpty = true;
 						el = {};
 					}
 					var bar = {type: ret[1]};
@@ -994,12 +1000,19 @@ function AbcParse() {
 							bar.decoration = el.decoration;
 						if (el.chord !== undefined)
 							bar.chord = el.chord;
-						if (bar.type !== 'bar_invisible') {
+						if (bar.startEnding && multilineVars.barFirstEndingNum === undefined)
+							multilineVars.barFirstEndingNum = multilineVars.currBarNumber;
+						else if (bar.startEnding && bar.endEnding && multilineVars.barFirstEndingNum)
+							multilineVars.currBarNumber = multilineVars.barFirstEndingNum;
+						else if (bar.endEnding)
+							multilineVars.barFirstEndingNum = undefined;
+						if (bar.type !== 'bar_invisible' && multilineVars.measureNotEmpty) {
 							multilineVars.currBarNumber++;
 							if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0)
 								multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
 						}
 						tune.appendElement('bar', startOfLine+i, startOfLine+i+ret[0], bar);
+						multilineVars.measureNotEmpty = false;
 						el = {};
 					}
 					i += ret[0];
@@ -1149,6 +1162,7 @@ function AbcParse() {
 										multilineVars.barNumOnNextNote = null;
 									}
 									tune.appendElement('note', startOfLine+i, startOfLine+i, el);
+									multilineVars.measureNotEmpty = true;
 									el = {};
 								}
 								done = true;
@@ -1213,6 +1227,7 @@ function AbcParse() {
 								multilineVars.barNumOnNextNote = null;
 							}
 							tune.appendElement('note', startOfLine+startI, startOfLine+i, el);
+							multilineVars.measureNotEmpty = true;
 							el = {};
 						}
 					}
