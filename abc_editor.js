@@ -187,7 +187,7 @@ function ABCEditor(editarea, params) {
   this.parseABC();
   this.modelChanged();
 
-  var addClassName = function(element, className) {
+  this.addClassName = function(element, className) {
     var hasClassName = function(element, className) {
       var elementClassName = element.className;
       return (elementClassName.length > 0 && (elementClassName === className ||
@@ -199,7 +199,7 @@ function ABCEditor(editarea, params) {
     return element;
   };
 
-  var removeClassName = function(element, className) {
+  this.removeClassName = function(element, className) {
     element.className = element.className.replace(
       new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' ').strip();
     return element;
@@ -210,10 +210,10 @@ function ABCEditor(editarea, params) {
 	  var el = this.editarea.getElem();
     if (readOnly) {
       el.setAttribute('readonly', 'yes');
-	  addClassName(el, readonlyClass);
+	  this.addClassName(el, readonlyClass);
 	} else {
       el.removeAttribute('readonly');
-	  removeClassName(el, readonlyClass);
+	  this.removeClassName(el, readonlyClass);
     }
   };
 }
@@ -367,4 +367,16 @@ ABCEditor.prototype.pause = function(shouldPause) {
 	this.bIsPaused = shouldPause;
 	if (!shouldPause)
 		this.updateRendering();
+};
+
+ABCEditor.prototype.pauseMidi = function(shouldPause) {
+	if (shouldPause && this.mididiv) {
+		this.mididivSave = this.mididiv;
+		this.addClassName(this.mididiv, 'hidden');
+		this.mididiv = null;
+	} else if (!shouldPause && this.mididivSave) {
+		this.mididiv = this.mididivSave;
+		this.removeClassName(this.mididiv, 'hidden');
+		this.mididivSave = null;
+	}
 };
