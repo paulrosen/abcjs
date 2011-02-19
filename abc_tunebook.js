@@ -14,7 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*extern AbcTuneBook */
+/*extern AbcTuneBook, renderAbc */
 
 function AbcTuneBook(book) {
 	var This = this;
@@ -48,4 +48,61 @@ function AbcTuneBook(book) {
 			tune.abc = tune.abc.substring(0, end);
 		tune.abc = directives + tune.abc;
 	});
+}
+
+// A quick way to render a tune from javascript when interactivity is not required.
+// This is used when a javascript routine has some abc text that it wants to render
+// in a div or collection of divs. One tune or many can be rendered.
+//
+// parameters:
+//		output: an array of divs that the individual tunes are rendered to.
+//			If the number of tunes exceeds the number of divs in the array, then
+//			only the first tunes are rendered. If the number of divs exceeds the number
+//			of tunes, then the unused divs are cleared. The divs can be passed as either
+//			elements or strings of ids. If ids are passed, then the div MUST exist already.
+// 		(if a single element is passed, then it is an implied array of length one.)
+//			(if a null is passed for an element, or the element doesn't exist, then that tune is skipped.)
+//		abc: text representing a tune or an entire tune book in ABC notation.
+//		renderParams: hash of:
+//			startingTune: an index, starting at zero, representing which tune to start rendering at.
+//				(If this element is not present, then rendering starts at zero.)
+function renderAbc(output, abc, parserParams, printerParams, renderParams) {
+    var isArray = function(testObject) {
+        return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
+    };
+
+	// check and normalize input parameters
+	if (output === undefined || abc === undefined)
+		return;
+	if (!isArray(output))
+		output = [ output ];
+	if (parserParams === undefined)
+		parserParams = {};
+	if (printerParams === undefined)
+		printerParams = {};
+	if (renderParams === undefined)
+		renderParams = {};
+	var currentTune = renderParams.startingTune ? renderParams.startingTune : 0;
+
+	// parse the abc string
+	var book = new AbcTuneBook(abc);
+	var abcParser = new AbcParse(parserParams);
+
+	// output each tune, if it exists. Otherwise clear the div.
+	for (var i = 0; i < output.length; i++) {
+		var div = output[i];
+		if (typeof(div) === "string")
+			div = document.getElementById(div);
+		if (div) {
+			div.innerHTML = "";
+			if (currentTune < book.tunes.length) {
+				abcParser.parse(book.tunes[currentTune].abc);
+				var tune = abcParser.getTune();
+				var paper = Raphael(div, 800, 400);
+				var printer = new ABCPrinter(paper, printerParams);
+				printer.printABC(tune);
+			}
+		}
+		currentTune++;
+	}
 }
