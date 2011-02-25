@@ -286,6 +286,18 @@ ABCPrinter.prototype.printStave = function (startx, endx) {
 
 ABCPrinter.prototype.printABC = function(abctune) {
   this.layouter = new ABCLayout(this.glyphs, abctune.formatting.bagpipes);
+  this.y=0;
+  if (abctune.media === 'print') {
+       // TODO create the page the size of
+    //  tune.formatting.pageheight by tune.formatting.pagewidth
+       // create margins the size of
+    this.y+=tune.formatting.topmargin;
+    // TODO tune.formatting.botmargin
+    this.paddingleft = tune.formatting.leftmargin;
+    this.paddingright = tune.formatting.rightmargin;
+    // If any of the above are not defined, I'm not sure what the
+    // default should be, but how about 1 inch?
+  }
   this.y = this.paddingtop;
   if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
   if (abctune.formatting.staffwidth) { 
