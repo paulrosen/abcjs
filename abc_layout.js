@@ -395,7 +395,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 	abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
       }
       
-      if (i==0 && !this.isBagpipes) this.voice.addOther(new ABCTieElem(grace, notehead, false, true));
+      if (i==0 && !this.isBagpipes && !(elem.rest && (elem.rest.type=="spacer"||elem.rest.type=="invisible"))) this.voice.addOther(new ABCTieElem(grace, notehead, false, true));
     }
 
     if (gracebeam) {
