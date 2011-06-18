@@ -33,8 +33,6 @@ function ABCPlugin(jq) {
 }
 var abc_plugin = new ABCPlugin(jQuery);
 
-jQuery(document).ready(start_abc);
-
 function start_abc() {
   abc_plugin.start();  
 }
@@ -174,3 +172,5 @@ ABCPlugin.prototype.render = function (contextnode, abcstring) {
     this.errors+=e;
    }
 }
+
+jQuery(document).ready(start_abc);
