@@ -308,22 +308,16 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 
       if (((this.stemdir=="up" || dir=="down") && p==pp-1) || ((this.stemdir=="down" || dir=="up") && p==0)) { // place to put slurs if not already on pitches
         if (elem.startSlur) {
-          if (elem.pitches[p].startSlur) { //TODO possibly redundant, provided array is not optional
-	    for (var i=0; i<elem.startSlur.length; i++) {
-	      elem.pitches[p].startSlur.push(elem.startSlur[i].label);
-	    }
-	  } else {
-	    elem.pitches[p].startSlur = elem.startSlur.label;
+          if (!elem.pitches[p].startSlur) elem.pitches[p].startSlur = []; //TODO possibly redundant, provided array is not optional
+	  for (var i=0; i<elem.startSlur.length; i++) {
+	    elem.pitches[p].startSlur.push(elem.startSlur[i]);
 	  }
         }
 
         if (elem.endSlur) {
-          if (elem.pitches[p].endSlur) { //TODO possibly redundant, provided array is not optional
-	    for (var i=0; i<elem.endSlur.length; i++) {
-	      elem.pitches[p].endSlur.push(elem.endSlur[i]);
-	    }
-	  } else {
-	    elem.pitches[p].endSlur = elem.endSlur;
+          if (elem.pitches[p].endSlur)  elem.pitches[p].endSlur = [];  //TODO possibly redundant, provided array is not optional
+	  for (var i=0; i<elem.endSlur.length; i++) {
+	    elem.pitches[p].endSlur.push(elem.endSlur[i]);
 	  }
         }
 
@@ -603,7 +597,8 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
   for (i=0;i<decoration.length; i++) {
     switch(decoration[i]) {
     case "trill":dec="scripts.trill";break;
-    case "roll": dec="scripts.roll"; break;
+    case "roll": dec="scripts.roll"; break; //TODO put abc2ps roll in here
+    case "irishroll": dec="scripts.roll"; break;
     case "marcato": dec="scripts.umarcato"; break;
     case "marcato2": dec="scriopts.dmarcato"; break;//other marcato
     case "turn": dec="scripts.turn"; break;
@@ -802,13 +797,13 @@ ABCLayout.prototype.printTimeSignature= function(elem) {
       if (elem.value[i].den) {
         abselem.addRight(new ABCRelativeElement(elem.value[i].num, i*20, this.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 9));
         abselem.addRight(new ABCRelativeElement(elem.value[i].den, i*20, this.glyphs.getSymbolWidth(elem.value[i].den.charAt(0))*elem.value[i].den.length, 5));
-	  } else {
+      } else {
         abselem.addRight(new ABCRelativeElement(elem.value[i].num, i*20, this.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 7));
-	  }
+      }
     }
   } else if (elem.type === "common_time") {
     abselem.addRight(new ABCRelativeElement("timesig.common", 0, this.glyphs.getSymbolWidth("timesig.common"), 7));
-
+    
   } else if (elem.type === "cut_time") {
     abselem.addRight(new ABCRelativeElement("timesig.cut", 0, this.glyphs.getSymbolWidth("timesig.cut"), 7));
   }
