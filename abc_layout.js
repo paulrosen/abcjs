@@ -315,14 +315,10 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
         }
 
         if (elem.endSlur) {
-          if (elem.pitches[p].endSlur)  elem.pitches[p].endSlur = [];  //TODO possibly redundant, provided array is not optional
+          if (!elem.pitches[p].endSlur)  elem.pitches[p].endSlur = [];  //TODO possibly redundant, provided array is not optional
 	  for (var i=0; i<elem.endSlur.length; i++) {
 	    elem.pitches[p].endSlur.push(elem.endSlur[i]);
 	  }
-        }
-
-        if (elem.endSlur) {
-          elem.pitches[p].endSlur = elem.endSlur;
         }
       }
 
