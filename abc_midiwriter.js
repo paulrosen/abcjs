@@ -4,10 +4,12 @@ function setAttributes(elm, attrs){
   return elm;
 }
 
-window.onbeforeunload = function() { 
-	if(MIDIPlugin) { 
-		MIDIPlugin.closePlugin();
-	}
+oldunload = window.onbeforeunload;
+window.onbeforeunload = function() {
+  oldunload();
+  if(MIDIPlugin) { 
+    MIDIPlugin.closePlugin();
+  }
 };
 
 
