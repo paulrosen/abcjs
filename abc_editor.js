@@ -220,8 +220,8 @@ function ABCEditor(editarea, params) {
 
 ABCEditor.prototype.renderTune = function(abc, params, div) {
   var tunebook = new AbcTuneBook(abc);
-  var abcParser = new AbcParse(params);
-  abcParser.parse(tunebook.tunes[0].abc); //TODO handle multiple tunes
+  var abcParser = new AbcParse();
+  abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
   var printer = new ABCPrinter(paper, {});	// TODO: handle printer params
@@ -278,8 +278,8 @@ ABCEditor.prototype.parseABC = function() {
 	return true;
   }
   var tunebook = new AbcTuneBook(t);
-  var abcParser = new AbcParse(this.parserparams);
-  abcParser.parse(tunebook.tunes[0].abc); //TODO handle multiple tunes
+  var abcParser = new AbcParse();
+  abcParser.parse(tunebook.tunes[0].abc, this.parserparams); //TODO handle multiple tunes
   this.tune = abcParser.getTune();
   this.warnings = abcParser.getWarnings();
   return true;

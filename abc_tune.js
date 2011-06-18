@@ -61,8 +61,9 @@ function AbcTune() {
 		this.lineNum = 0;
 	};
 
-	this.cleanUp = function(defWidth, defLength) {
+	this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote) {
 		this.closeLine();	// Close the last line.
+
 		// Remove any blank lines
 		var anyDeleted = false;
 		for (var i = 0; i < this.lines.length; i++) {
@@ -95,6 +96,71 @@ function AbcTune() {
 					line.staff = line.staff.compact();
 			});
 		}
+
+		// if we exceeded the number of bars allowed on a line, then force a new line
+		if (barsperstaff) {
+			for (var i = 0; i < this.lines.length; i++) {
+				if (this.lines[i].staff !== undefined) {
+					for (var s = 0; s < this.lines[i].staff.length; s++) {
+						for (var v = 0; v < this.lines[i].staff[s].voices.length; v++) {
+							var barNumThisLine = 0;
+							for (var n = 0; n < this.lines[i].staff[s].voices[v].length; n++) {
+								if (this.lines[i].staff[s].voices[v][n].el_type === 'bar') {
+									barNumThisLine++;
+									if (barNumThisLine >= barsperstaff) {
+										// push everything else to the next line, if there is anything else,
+										// and there is a next line. If there isn't a next line, create one.
+										if (n < this.lines[i].staff[s].voices[v].length - 1) {
+											if (i === this.lines.length - 1) {
+												var cp = JSON.parse(JSON.stringify(this.lines[i]));
+												this.lines.push(Object.clone(cp));
+												for (var ss = 0; ss < this.lines[i+1].staff.length; ss++) {
+													for (var vv = 0; vv < this.lines[i+1].staff[ss].voices.length; vv++)
+														this.lines[i+1].staff[ss].voices[vv] = [];
+												}
+											}
+											var startElement = n + 1;
+											var section = this.lines[i].staff[s].voices[v].slice(startElement);
+											this.lines[i].staff[s].voices[v] = this.lines[i].staff[s].voices[v].slice(0, startElement);
+											this.lines[i+1].staff[s].voices[v] = section.concat(this.lines[i+1].staff[s].voices[v]);
+										}
+									}
+								}
+							}
+
+						}
+					}
+				}
+			}
+		}
+
+		// If we were passed staffnonote, then we want to get rid of all staffs that contain only rests.
+		if (barsperstaff) {
+			anyDeleted = false;
+			for (var i = 0; i < this.lines.length; i++) {
+				if (this.lines[i].staff !== undefined) {
+					for (var s = 0; s < this.lines[i].staff.length; s++) {
+						var keepThis = false;
+						for (var v = 0; v < this.lines[i].staff[s].voices.length; v++) {
+							if (this.containsNotesStrict(this.lines[i].staff[s].voices[v])) {
+								keepThis = true;
+							}
+						}
+						if (!keepThis) {
+							anyDeleted = true;
+							this.lines[i].staff[s] = null;
+						}
+					}
+				}
+			}
+			if (anyDeleted) {
+				this.lines.each(function(line) {
+					if (line.staff)
+						line.staff = line.staff.compact();
+				});
+			}
+		}
+
 		function cleanUpSlursInLine(line) {
 			var currSlur = [];
 			var x;
@@ -403,6 +469,13 @@ function AbcTune() {
 
 	this.appendStartingElement = function(type, startChar, endChar, hashParams2)
 	{
+		// We only ever want implied naturals the first time.
+		var impliedNaturals;
+		if (type === 'key') {
+			impliedNaturals = hashParams2.impliedNaturals;
+			delete hashParams2.impliedNaturals;
+		}
+
 		// Clone the object because it will be sticking around for the next line and we don't want the extra fields in it.
 		var hashParams = Object.clone(hashParams2);
 
@@ -413,6 +486,8 @@ function AbcTune() {
 				hashParams.el_type = type;
 				hashParams.startChar = startChar;
 				hashParams.endChar = endChar;
+				if (impliedNaturals)
+					hashParams.accidentals = impliedNaturals.concat(hashParams.accidentals);
 				voice.push(hashParams);
 				return;
 			}
@@ -420,6 +495,8 @@ function AbcTune() {
 				hashParams.el_type = type;
 				hashParams.startChar = startChar;
 				hashParams.endChar = endChar;
+				if (impliedNaturals)
+					hashParams.accidentals = impliedNaturals.concat(hashParams.accidentals);
 				voice[i] = hashParams;
 				return;
 			}
@@ -467,6 +544,14 @@ function AbcTune() {
 	this.containsNotes = function(voice) {
 		for (var i = 0; i < voice.length; i++) {
 			if (voice[i].el_type === 'note' || voice[i].el_type === 'bar')
+				return true;
+		}
+		return false;
+	};
+
+	this.containsNotesStrict = function(voice) {
+		for (var i = 0; i < voice.length; i++) {
+			if (voice[i].el_type === 'note' && voice[i].rest === undefined)
 				return true;
 		}
 		return false;

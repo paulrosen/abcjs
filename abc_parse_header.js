@@ -237,20 +237,41 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			pitch = pitch - mid;
 			acc.verticalPos = pitch;
 		});
+		if (key.impliedNaturals)
+			key.impliedNaturals.each(function(acc) {
+				var pitch = pitches[acc.note];
+				pitch = pitch - mid;
+				acc.verticalPos = pitch;
+			});
+
 		if (mid < -10) {
 			key.accidentals.each(function(acc) {
 				acc.verticalPos -= 7;
 				if (acc.verticalPos >= 11 || (acc.verticalPos === 10 && acc.acc === 'flat'))
 					acc.verticalPos -= 7;
 			});
+			if (key.impliedNaturals)
+				key.impliedNaturals.each(function(acc) {
+					acc.verticalPos -= 7;
+					if (acc.verticalPos >= 11 || (acc.verticalPos === 10 && acc.acc === 'flat'))
+						acc.verticalPos -= 7;
+				});
 		} else if (mid < -4) {
 			key.accidentals.each(function(acc) {
 				acc.verticalPos -= 7;
 			});
+			if (key.impliedNaturals)
+				key.impliedNaturals.each(function(acc) {
+					acc.verticalPos -= 7;
+				});
 		} else if (mid >= 7) {
 			key.accidentals.each(function(acc) {
 				acc.verticalPos += 7;
 			});
+			if (key.impliedNaturals)
+				key.impliedNaturals.each(function(acc) {
+					acc.verticalPos += 7;
+				});
 		}
 	};
 
@@ -369,10 +390,27 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 						}
 					}
 					// We need to do a deep copy because we are going to modify it
+					var oldKey = this.deepCopyKey(multilineVars.key);
 					multilineVars.key = this.deepCopyKey({accidentals: keys[key]});
 					multilineVars.key.root = retPitch.token;
 					multilineVars.key.acc = acc;
 					multilineVars.key.mode = mode;
+					if (oldKey) {
+						// Add natural in all places that the old key had an accidental.
+						for (var k = 0; k < multilineVars.key.accidentals.length; k++) {
+							for (var kk = 0; kk < oldKey.accidentals.length; kk++) {
+								if (multilineVars.key.accidentals[k].note === oldKey.accidentals[kk].note)
+									oldKey.accidentals[kk].note = null;
+							}
+						}
+						for (kk = 0; kk < oldKey.accidentals.length; kk++) {
+							if (oldKey.accidentals[kk].note) {
+								if (!multilineVars.key.impliedNaturals)
+									multilineVars.key.impliedNaturals = []
+								multilineVars.key.impliedNaturals.push({ acc: 'natural', note: oldKey.accidentals[kk].note });
+							}
+						}
+					}
 				}
 				break;
 		}
@@ -403,8 +441,15 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 						multilineVars.key.accidentals[j].acc = accs.accs[i].acc;
 					}
 				}
-				if (!found)
+				if (!found) {
 					multilineVars.key.accidentals.push(accs.accs[i]);
+					if (multilineVars.key.impliedNaturals) {
+						for (k = 0; k < multilineVars.key.impliedNaturals.length; k++) {
+							if (multilineVars.key.impliedNaturals[k].note === accs.accs[i].note)
+								multilineVars.key.impliedNaturals.splice(k, 1);
+						}
+					}
+				}
 			}
 		}
 
@@ -417,7 +462,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					tokens.shift();
 					if (tokens.length === 0) { warn("Expected = after middle", str, 0); return ret; }
 					token = tokens.shift();
-					if (token.token !== "=") { warn("Expected = after middle", str, 0); break; }
+					if (token.token !== "=") { warn("Expected = after middle", str, token.start); break; }
 					if (tokens.length === 0) { warn("Expected parameter after middle=", str, 0); return ret; }
 					var pitch = tokenizer.getPitchFromTokens(tokens);
 					if (pitch.warn)
@@ -429,9 +474,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					tokens.shift();
 					if (tokens.length === 0) { warn("Expected = after transpose", str, 0); return ret; }
 					token = tokens.shift();
-					if (token.token !== "=") { warn("Expected = after transpose", str, 0); break; }
+					if (token.token !== "=") { warn("Expected = after transpose", str, token.start); break; }
 					if (tokens.length === 0) { warn("Expected parameter after transpose=", str, 0); return ret; }
-					if (tokens[0].type !== 'number') { warn("Expected number after transpose", str, 0); break; }
+					if (tokens[0].type !== 'number') { warn("Expected number after transpose", str, tokens[0].start); break; }
 					multilineVars.clef.transpose = parseInt(tokens[0].token);
 					tokens.shift();
 					break;
@@ -439,9 +484,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					tokens.shift();
 					if (tokens.length === 0) { warn("Expected = after stafflines", str, 0); return ret; }
 					token = tokens.shift();
-					if (token.token !== "=") { warn("Expected = after stafflines", str, 0); break; }
+					if (token.token !== "=") { warn("Expected = after stafflines", str, token.start); break; }
 					if (tokens.length === 0) { warn("Expected parameter after stafflines=", str, 0); return ret; }
-					if (tokens[0].type !== 'number') { warn("Expected number after stafflines", str, 0); break; }
+					if (tokens[0].type !== 'number') { warn("Expected number after stafflines", str, tokens[0].start); break; }
 					multilineVars.clef.stafflines = parseInt(tokens[0].token);
 					tokens.shift();
 					break;
@@ -449,9 +494,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					tokens.shift();
 					if (tokens.length === 0) { warn("Expected = after staffscale", str, 0); return ret; }
 					token = tokens.shift();
-					if (token.token !== "=") { warn("Expected = after staffscale", str, 0); break; }
+					if (token.token !== "=") { warn("Expected = after staffscale", str, token.start); break; }
 					if (tokens.length === 0) { warn("Expected parameter after staffscale=", str, 0); return ret; }
-					if (tokens[0].type !== 'number') { warn("Expected number after staffscale", str, 0); break; }
+					if (tokens[0].type !== 'number') { warn("Expected number after staffscale", str, tokens[0].start); break; }
 					multilineVars.clef.staffscale = parseInt(tokens[0].token);
 					tokens.shift();
 					break;
@@ -459,7 +504,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					tokens.shift();
 					if (tokens.length === 0) { warn("Expected = after style", str, 0); return ret; }
 					token = tokens.shift();
-					if (token.token !== "=") { warn("Expected = after style", str, 0); break; }
+					if (token.token !== "=") { warn("Expected = after style", str, token.start); break; }
 					if (tokens.length === 0) { warn("Expected parameter after style=", str, 0); return ret; }
 					switch (tokens[0].token) {
 						case "normal":
@@ -470,7 +515,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 							tokens.shift();
 							break;
 						default:
-							warn("error parsing style element: " + tokens[0].token, str, 0);
+							warn("error parsing style element: " + tokens[0].token, str, tokens[0].start);
 							break;
 					}
 					break;
@@ -478,7 +523,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					tokens.shift();
 					if (tokens.length === 0) { warn("Expected = after clef", str, 0); return ret; }
 					token = tokens.shift();
-					if (token.token !== "=") { warn("Expected = after clef", str, 0); break; }
+					if (token.token !== "=") { warn("Expected = after clef", str, token.start); break; }
 					if (tokens.length === 0) { warn("Expected parameter after clef=", str, 0); return ret; }
 					//break; yes, we want to fall through. That allows "clef=" to be optional.
 				case "treble":
@@ -503,7 +548,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 						case 'f': clef.token = 'bass'; break;
 						case 'g': clef.token = 'treble'; break;
 						default:
-							warn("Expected clef name. Found " + clef.token, str, 0);
+							warn("Expected clef name. Found " + clef.token, str, clef.start);
 							break;
 					}
 					if (tokens.length > 0 && tokens[0].type === 'number') {
@@ -519,7 +564,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					ret.foundClef = true;
 					break;
 				default:
-					warn("Unknown parameter: " + tokens[0].token, str, 0);
+					warn("Unknown parameter: " + tokens[0].token, str, tokens[0].start);
 					tokens.shift();
 			}
 		}
@@ -774,7 +819,6 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			//					alignbars: { type: "number", optional: true },
 			//					aligncomposer: { type: "string", Enum: [ 'left', 'center','right' ], optional: true },
 			//					annotationfont: fontType,
-			//					barsperstaff: { type: "number", optional: true },
 			//					bstemdown: { type: "boolean", optional: true },
 			//					continueall: { type: "boolean", optional: true },
 			//					dynalign: { type: "boolean", optional: true },
@@ -884,6 +928,16 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					var lenLine = points.value;
 					tune.addSeparator(spaceAbove, spaceBelow, lenLine);
 				}
+				break;
+			case "barsperstaff":
+				if (tokens.length !== 1 || tokens[0].type !== 'number')
+					return "Directive \"" + cmd + "\" requires a number as a parameter.";
+				multilineVars.barsperstaff = parseInt(tokens[0].token);
+				break;
+			case "staffnonote":
+				if (tokens.length !== 1 || tokens[0].type !== 'number')
+					return "Directive \"" + cmd + "\" requires a number as a parameter.";
+				multilineVars.staffnonote = tokens[0].token === "0" ? true : false;
 				break;
 			case "measurenb":
 				if (tokens.length !== 1 || tokens[0].type !== 'number')
@@ -1385,6 +1439,22 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			if (multilineVars.havent_set_length === true)
 				multilineVars.default_length = 0.125;
 			return {type: 'cut_time'};
+		} else if (line === 'o') {
+			if (multilineVars.havent_set_length === true)
+				multilineVars.default_length = 0.125;
+			return {type: 'tempus_perfectum'};
+		} else if (line === 'c') {
+			if (multilineVars.havent_set_length === true)
+				multilineVars.default_length = 0.125;
+			return {type: 'tempus_imperfectum'};
+		} else if (line === 'o.') {
+			if (multilineVars.havent_set_length === true)
+				multilineVars.default_length = 0.125;
+			return {type: 'tempus_perfectum_prolatio'};
+		} else if (line === 'c.') {
+			if (multilineVars.havent_set_length === true)
+				multilineVars.default_length = 0.125;
+			return {type: 'tempus_imperfectum_prolatio'};
 		} else if (line.length === 0 || line.toLowerCase() === 'none') {
 			if (multilineVars.havent_set_length === true)
 				multilineVars.default_length = 0.125;
@@ -1423,7 +1493,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				var parseFraction = function() {
 					// handles this much: parseNum slash decimal
 					var ret = parseNum();
-					if (tokens.length === 0) throw "Expected slash in meter";
+					if (tokens.length === 0) return ret;
 					var tok = tokens.shift();
 					if (tok.token !== '/') throw "Expected slash in meter";
 					tok = tokens.shift();
@@ -1439,10 +1509,13 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				while (1) {
 					var ret = parseFraction();
 					totalLength += ret.value;
-					meter.value.push({num: ret.num, den: ret.den});
+					var mv = { num: ret.num };
+					if (ret.den !== undefined)
+						mv.den = ret.den;
+					meter.value.push(mv);
 					if (tokens.length === 0) break;
 					var tok = tokens.shift();
-					if (tok.token !== '+') throw "Extra characters in M: line";
+					//if (tok.token !== '+') throw "Extra characters in M: line";
 				}
 
 				if (multilineVars.havent_set_length === true) {
@@ -1635,6 +1708,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					var meter = this.setMeter(line.substring(i+3, e));
 					if (tune.hasBeginMusic() && meter)
 						tune.appendStartingElement('meter', -1, -1, meter);
+					else
+						multilineVars.meter = meter;
 					return [ e-i+1+ws ];
 				case "[K:":
 					var result = this.parseKey(line.substring(i+3, e));

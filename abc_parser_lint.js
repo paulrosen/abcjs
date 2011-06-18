@@ -68,8 +68,8 @@
 function AbcParserLint() {
 	var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
 		"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
-		"emphasis", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
-		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
+		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
+		"open", "thumb", "snap", "turn", "roll", "irishroll", "breath", "shortphrase", "mediumphrase", "longphrase",
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
 		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 		"upbow", "downbow", "staccato", "trem1", "trem2", "trem3", "trem4",
@@ -212,8 +212,8 @@ function AbcParserLint() {
 	};
 
 	var meterProperties = {
-		type: { type: 'string', Enum: [ 'common_time', 'cut_time', 'specified', 'tempus perfectum', 'tempus imperfectum', 'prolatio perfecta', 'prolatio imperfecta' ] },
-		// 'tempus perfectum'=o, 'tempus imperfectum'=c, 'prolatio perfecta'=o., 'prolatio imperfecta'=c.
+		type: { type: 'string', Enum: [ 'common_time', 'cut_time', 'specified', 'tempus_perfectum', 'tempus_imperfectum', 'tempus_perfectum_prolatio', 'tempus_imperfectum_prolatio' ] },
+		// 'tempus perfectum'=o, 'tempus imperfectum'=c, 'tempus perfectum prolatio'=o., 'tempus imperfectum prolatio'=c.
 		value: { type: 'array', optional: true, output: 'noindex',	// TODO-PER: Check for type=specified and require these in that case.
 			items: {
 				type: 'object', properties: {
@@ -226,7 +226,7 @@ function AbcParserLint() {
 			items: {
 				type: 'object', properties: {
 					num: { type: 'string' },
-					den: { type: 'string' }
+					den: { type: 'string', optional: true }
 				}
 			}
 		}
@@ -276,7 +276,6 @@ function AbcParserLint() {
 			bagpipes: { type: "boolean", optional: true },
 			barlabelfont: fontType,
 			barnumberfont: fontType,
-			barsperstaff: { type: "number", optional: true },
 			botmargin: { type: "number", optional: true },
 			botspace: { type: "number", optional: true },
 			bstemdown: { type: "boolean", optional: true },

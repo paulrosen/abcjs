@@ -80,7 +80,11 @@ ABCTextPrinter.prototype.getMeterString = function(meter) {
     switch (meter.type) {
     case "cut_time": return "C|";
     case "common_time": return "C";
-    case "specified": return meter.value[0].num+"/"+meter.value[0].den;
+    case "specified":
+      if (meter.value[0].den)
+		return meter.value[0].num+"/"+meter.value[0].den;
+      else
+	    return meter.value[0].num;
     }
     return "";
 };

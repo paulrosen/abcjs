@@ -102,6 +102,24 @@ function AbcParse() {
 			} else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '>') {
 				chord[1] = chord[1].substring(1);
 				chord[2] = 'right';
+			} else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '@') {
+				// @-15,5.7
+				chord[1] = chord[1].substring(1);
+				var x = tokenizer.getFloat(chord[1]);
+				if (x.digits === 0)
+					warn("Missing first position in absolutely positioned annotation.", line , i);
+				chord[1] = chord[1].substring(x.digits);
+				if (chord[1][0] !== ',')
+					warn("Missing comma absolutely positioned annotation.", line , i);
+				chord[1] = chord[1].substring(1);
+				var y = tokenizer.getFloat(chord[1]);
+				if (y.digits === 0)
+					warn("Missing second position in absolutely positioned annotation.", line , i);
+				chord[1] = chord[1].substring(y.digits);
+				var ws = tokenizer.skipWhiteSpace(chord[1]);
+				chord[1] = chord[1].substring(ws);
+				chord[2] = null;
+				chord[3] = { x: x.value, y: y.value };
 			} else {
 				chord[1] = chord[1].replace(/([ABCDEFG])b/g, "$1♭");
 				chord[1] = chord[1].replace(/([ABCDEFG])#/g, "$1♯");
@@ -113,7 +131,7 @@ function AbcParse() {
 	};
 
 	var legalAccents = [ "trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
-		"emphasis", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
+		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
 		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
@@ -122,7 +140,7 @@ function AbcParse() {
 		"style=normal", "style=harmonic", "style=rhythm", "style=x"
 	];
 	var accentPsuedonyms = [ ["<", "accent"], [">", "accent"], ["tr", "trill"], ["<(", "crescendo("], ["<)", "crescendo)"],
-		[">(", "diminuendo("], [">)", "diminuendo)"], ["plus", "+"] ];
+		[">(", "diminuendo("], [">)", "diminuendo)"], ["plus", "+"], [ "emphasis", "accent"] ];
 	var letter_to_accent = function(line, i)
 	{
 		var macro = multilineVars.macros[line.charAt(i)];
@@ -149,7 +167,7 @@ function AbcParse() {
 			case '.':return [1, 'staccato'];
 			case 'u':return [1, 'upbow'];
 			case 'v':return [1, 'downbow'];
-			case '~':return [1, 'roll'];
+			case '~':return [1, 'irishroll'];
 			case '!':
 			case '+':
 				var ret = tokenizer.getBrackettedSubstring(line, i, 5);
@@ -222,11 +240,12 @@ function AbcParse() {
 		var orig_bar_len = ret.len;
 		if (line.charAt(curr_pos+ret.len+ws) === '[') {
 			ret.len += ws + 1;
-			// It can also be a quoted string. It is unclear whether that construct requires '[', but it seems like it would. otherwise it would be confused with a regular chord.
-			if (line.charAt(curr_pos+ret.len) === '"') {
-				var ending = tokenizer.getBrackettedSubstring(line, curr_pos+ret.len, 5);
-				return [ret.len+ending[0], ret.token, ending[1]];
-			}
+		}
+
+		// It can also be a quoted string. It is unclear whether that construct requires '[', but it seems like it would. otherwise it would be confused with a regular chord.
+		if (line.charAt(curr_pos+ret.len) === '"' && line.charAt(curr_pos+ret.len-1) === '[') {
+			var ending = tokenizer.getBrackettedSubstring(line, curr_pos+ret.len, 5);
+			return [ret.len+ending[0], ret.token, ending[1]];
 		}
 		var retRep = tokenizer.getTokenOf(line.substring(curr_pos+ret.len), "1234567890-,");
 		if (retRep.len === 0 || retRep.token[0] === '-')
@@ -937,8 +956,12 @@ function AbcParse() {
 								el.chord[ci].name += "\n" + chordName;
 							}
 						}
-						if (addedChord === false)
-							el.chord.push({name: chordName, position: ret[2]});
+						if (addedChord === false) {
+							if (ret[2] === null && ret[3])
+								el.chord.push({name: chordName, rel_position: ret[3]});
+							else
+								el.chord.push({name: chordName, position: ret[2]});
+						}
 
 						i += ret[0];
 						var ii = tokenizer.skipWhiteSpace(line.substring(i));
@@ -1329,7 +1352,7 @@ function AbcParse() {
 				ph = pl;
 				pl = x;
 			}
-			tune.cleanUp(pl, ph);
+			tune.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote);
 		} catch (err) {
 			if (err !== "normal_abort")
 				throw err;

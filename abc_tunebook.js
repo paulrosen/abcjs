@@ -86,7 +86,7 @@ function renderAbc(output, abc, parserParams, printerParams, renderParams) {
 
 	// parse the abc string
 	var book = new AbcTuneBook(abc);
-	var abcParser = new AbcParse(parserParams);
+	var abcParser = new AbcParse();
 
 	// output each tune, if it exists. Otherwise clear the div.
 	for (var i = 0; i < output.length; i++) {
@@ -96,7 +96,7 @@ function renderAbc(output, abc, parserParams, printerParams, renderParams) {
 		if (div) {
 			div.innerHTML = "";
 			if (currentTune < book.tunes.length) {
-				abcParser.parse(book.tunes[currentTune].abc);
+				abcParser.parse(book.tunes[currentTune].abc, parserParams);
 				var tune = abcParser.getTune();
 				var paper = Raphael(div, 800, 400);
 				var printer = new ABCPrinter(paper, printerParams);

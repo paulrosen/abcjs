@@ -291,14 +291,17 @@ ABCPrinter.prototype.printABC = function(abctune) {
        // TODO create the page the size of
     //  tune.formatting.pageheight by tune.formatting.pagewidth
        // create margins the size of
-    this.y+=tune.formatting.topmargin;
+      // TODO-PER: setting the defaults to 3/4" for now. What is the real value?
+    var m = abctune.formatting.topmargin === undefined ? 54 : abctune.formatting.topmargin;
+    this.y+=m;
     // TODO tune.formatting.botmargin
-    this.paddingleft = tune.formatting.leftmargin;
-    this.paddingright = tune.formatting.rightmargin;
-    // If any of the above are not defined, I'm not sure what the
-    // default should be, but how about 1 inch?
+//    m = abctune.formatting.leftmargin === undefined ? 54 : abctune.formatting.leftmargin;
+//    this.paddingleft = m;
+//      m = abctune.formatting.rightmargin === undefined ? 54 : abctune.formatting.rightmargin;
+//    this.paddingright = m;
   }
-  this.y = this.paddingtop;
+    else
+      this.y = this.paddingtop;
   if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
   if (abctune.formatting.staffwidth) { 
     this.width=abctune.formatting.staffwidth; 
