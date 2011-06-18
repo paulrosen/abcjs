@@ -487,7 +487,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
     notehead = new ABCRelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, {scalex:scale, scaley: scale, extreme: ((dir=="down")?"below":"above")});
     if (flag) {
       var pos = pitch+((dir=="down")?-7:7)*scale;
-      if (scale=1 & (dir=="down")?(pos>6):(pos<6)) pos=6;
+      if (scale==1 & (dir=="down")?(pos>6):(pos<6)) pos=6;
       var xdelta = (dir=="down")?headx:headx+notehead.w-0.6;
       abselem.addRight(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));
     }
