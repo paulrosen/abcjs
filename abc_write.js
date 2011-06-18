@@ -284,9 +284,20 @@ ABCPrinter.prototype.printStave = function (startx, endx) {
   this.printStaveLine(startx,endx,10);
 };
 
-ABCPrinter.prototype.printABC = function(abctune) {
-  this.layouter = new ABCLayout(this.glyphs, abctune.formatting.bagpipes);
+ABCPrinter.prototype.printABC = function(abctunes) {
+  if (abctunes[0]===undefined) {
+    abctunes = [abctunes]
+  }
   this.y=0;
+
+  for (var i = 0; i < abctunes.length; i++) {
+    this.printTune(abctunes[i]);
+  }
+
+};
+
+ABCPrinter.prototype.printTune = function (abctune) {
+  this.layouter = new ABCLayout(this.glyphs, abctune.formatting.bagpipes); 
   if (abctune.media === 'print') {
        // TODO create the page the size of
     //  tune.formatting.pageheight by tune.formatting.pagewidth
@@ -301,7 +312,7 @@ ABCPrinter.prototype.printABC = function(abctune) {
 //    this.paddingright = m;
   }
     else
-      this.y = this.paddingtop;
+      this.y+=this.paddingtop;
   if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
   if (abctune.formatting.staffwidth) { 
     this.width=abctune.formatting.staffwidth; 

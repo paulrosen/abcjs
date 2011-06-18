@@ -229,7 +229,7 @@ ABCEditor.prototype.renderTune = function(abc, params, div) {
 };
 
 ABCEditor.prototype.modelChanged = function() {
-  if (this.tune === undefined) {
+  if (this.tunes === undefined) {
     if (this.mididiv !== undefined && this.mididiv !== this.div)
 		this.mididiv.innerHTML = "";
     this.div.innerHTML = "";
@@ -243,20 +243,20 @@ ABCEditor.prototype.modelChanged = function() {
   this.div.innerHTML = "";
   var paper = Raphael(this.div, 800, 400);
   this.printer = new ABCPrinter(paper, this.printerparams);
-  this.printer.printABC(this.tune);
+  this.printer.printABC(this.tunes);
   if (ABCMidiWriter && this.mididiv) {
     if (this.mididiv != this.div)
 		this.mididiv.innerHTML = "";
     var midiwriter = new ABCMidiWriter(this.mididiv,this.midiparams);
     midiwriter.addListener(this.printer);
-    midiwriter.writeABC(this.tune);
+    midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
   }
   if (this.warningsdiv) {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
   } 
   if (this.target) {
     var textprinter = new ABCTextPrinter(this.target, true);
-    textprinter.printABC(this.tune);
+    textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
   }
   this.printer.addSelectListener(this);
   this.updateSelection();
@@ -273,15 +273,23 @@ ABCEditor.prototype.parseABC = function() {
   
   this.oldt = t;
   if (t === "") {
-	this.tune = undefined;
+	this.tunes = undefined;
 	this.warnings = "";
 	return true;
   }
   var tunebook = new AbcTuneBook(t);
-  var abcParser = new AbcParse();
-  abcParser.parse(tunebook.tunes[0].abc, this.parserparams); //TODO handle multiple tunes
-  this.tune = abcParser.getTune();
-  this.warnings = abcParser.getWarnings();
+  
+  this.tunes = [];
+  this.warnings = [];
+  for (var i=0; i<tunebook.tunes.length; i++) {
+    var abcParser = new AbcParse();
+    abcParser.parse(tunebook.tunes[i].abc, this.parserparams); //TODO handle multiple tunes
+    this.tunes[i] = abcParser.getTune();
+    var warnings = abcParser.getWarnings() || [];
+    for (var j=0; j<warnings.length; j++) {
+      this.warnings.push(warnings[j]);
+    }
+  }
   return true;
 };
 
