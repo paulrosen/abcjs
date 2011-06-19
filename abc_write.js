@@ -313,15 +313,14 @@ ABCPrinter.prototype.printTune = function (abctune) {
   }
     else
       this.y+=this.paddingtop;
-  if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
+  // FIXED BELOW, NEEDS CHECKING if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
   if (abctune.formatting.staffwidth) { 
     this.width=abctune.formatting.staffwidth; 
   } else {
     this.width=this.staffwidth;
   }
   this.width+=this.paddingleft;
-  this.width = this.width;
-  if (abctune.formatting.scale) { this.paper.text(200, this.y, "Format: scale="+abctune.formatting.scale); this.y += 20; }
+  if (abctune.formatting.scale) { this.scale=abctune.formatting.scale }
   this.paper.text(this.width/2, this.y, abctune.metaText.title).attr({"font-size":20, "font-family":"serif"});
   this.y+=20;
   if (abctune.lines[0] && abctune.lines[0].subtitle) {
@@ -390,7 +389,7 @@ ABCPrinter.prototype.printTune = function (abctune) {
       var newspace = this.space;
       for (var it=0;it<3;it++) {
 	staffgroup.layout(newspace,this);
-	if (line && line==abctune.lines.length-1 && staffgroup.w/this.width<0.66) break; // don't stretch last line too much unless it is 1st
+	if (line && line==abctune.lines.length-1 && staffgroup.w/this.width<0.66 && !abctune.formatting.stretchlast) break; // don't stretch last line too much unless it is 1st
 	var relspace = staffgroup.spacingunits*newspace;
 	var constspace = staffgroup.w-relspace;
 	if (staffgroup.spacingunits>0) {
@@ -445,7 +444,8 @@ ABCPrinter.prototype.printTune = function (abctune) {
   var text2 = this.paper.text(this.paddingleft, this.y+25, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":13});
   var height = text2.getBBox().height;
   text2.translate(0,height/2);
-  var sizetoset = {w: maxwidth*this.scale+this.paddingright,h: this.y*this.scale+this.paddingbottom+height};
+  this.y+=25+height;
+  var sizetoset = {w: maxwidth*this.scale+this.paddingright,h: this.y*this.scale+this.paddingbottom};
   this.paper.setSize(sizetoset.w,sizetoset.h);
   // Correct for IE problem in calculating height
   var isIE=/*@cc_on!@*/false;//IE detector
