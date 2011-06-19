@@ -173,7 +173,7 @@ function AbcParse() {
 				var ret = tokenizer.getBrackettedSubstring(line, i, 5);
 				// Be sure that the accent is recognizable.
 			if (ret[1].length > 0 && (ret[1].charAt(0) === '^' || ret[1].charAt(0) ==='_'))
-					ret[1] = ret[1].substring(1);	// TODO-PER: The test files have indicators forcing the orniment to the top or bottom, but that isn't in the standard. We'll just ignore them.
+					ret[1] = ret[1].substring(1);	// TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
 				if (legalAccents.detect(function(acc) {
 					return (ret[1] === acc);
 				}))
@@ -879,7 +879,10 @@ function AbcParse() {
 //			if (multilineVars.start_new_line) {
 //				startNewLine();
 //			}
-		multilineVars.start_new_line = true;
+		if (multilineVars.continueall === undefined)
+			multilineVars.start_new_line = true;
+		else
+			multilineVars.start_new_line = false;
 		var tripletNotesLeft = 0;
 		//var tripletMultiplier = 0;
 //		var inTie = false;
@@ -1270,7 +1273,7 @@ function AbcParse() {
 		var ret = header.parseHeader(line);
 		if (ret.regular)
 			parseRegularMusicLine(ret.str);
-		if (ret.newline)
+		if (ret.newline && multilineVars.continueall === undefined)
 			startNewLine();
 		if (ret.words)
 			addWords(tune.getCurrentVoice(), line.substring(2));

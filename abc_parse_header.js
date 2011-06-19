@@ -952,6 +952,9 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			case "begintext":
 				multilineVars.inTextBlock = true;
 				break;
+			case "continueall":
+				multilineVars.continueall = true;
+				break;
 			case "beginps":
 				multilineVars.inPsBlock = true;
 				warn("Postscript ignored", str, 0);
