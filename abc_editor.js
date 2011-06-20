@@ -124,6 +124,8 @@ EditArea.prototype.getElem = function() {
 //		Called when the user has changed the selection. This calls the printer to show the selection.
 // - fireSelectionChanged()
 //		Called by the textarea object when the user has changed the selection.
+// - paramChanged(printerparams)
+//		Called to signal that the printer params have changed, so re-rendering should occur.
 // - fireChanged()
 //		Called by the textarea object when the user has changed something.
 // - setNotDirty()
@@ -261,6 +263,13 @@ ABCEditor.prototype.modelChanged = function() {
   this.printer.addSelectListener(this);
   this.updateSelection();
   this.bReentry = false;
+};
+
+// Call this to reparse in response to the printing parameters changing
+ABCEditor.prototype.paramChanged = function(printerparams) {
+	this.printerparams = printerparams;
+	this.oldt = "";
+	this.fireChanged();
 };
 
 // return true if the model has changed
