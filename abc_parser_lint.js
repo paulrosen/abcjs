@@ -158,6 +158,7 @@ function AbcParserLint() {
 		vocalfont: fontType,
 		gracenotes: { type: 'array', optional: true, output: "noindex", items: {
 			type: "object", properties: {
+				acciaccatura: { type: 'boolean', Enum: [ true ], optional: true},
 				accidental: { type: 'string', Enum: [ 'sharp', 'flat', 'natural', 'dblsharp', 'dblflat', 'quarterflat', 'quartersharp' ], optional: true },
 				duration: { type: 'number' },
 				endBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'startBeam', 'beambr' ], optional: true },
@@ -251,7 +252,7 @@ function AbcParserLint() {
 				head: { type: 'string', Enum: [ 'normal', 'harmonic', 'rhythm', 'x' ] }
 			}},
 			{ value: 'tempo', properties: appendPositioning(tempoProperties) },
-
+			{ value: 'transpose', properties: { steps: { type: "number" } } },
 			{ value: "note", properties: prependPositioning(noteProperties) }
 		]
 	};
@@ -312,13 +313,56 @@ function AbcParserLint() {
 			measurebox: { type: "boolean", optional: true },
 			measurefont: fontType,
 			midi: { type: "object", optional: true, properties: {
-					cmd: { type: 'string', Enum: [ 'barlines', 'bassprog', 'bassvol', 'beat', 'beataccents', 'beatmod', 'beatstring', 'c', 'channel', 'chordattack',
-						'chordname', 'chordprog', 'chordvol', 'control', 'deltaloudness', 'drone', 'droneoff', 'droneon', 'drum', 'drumbars', 'drummap', 'drumoff',
-						'drumon', 'fermatafixed', 'fermataproportional', 'gchord', 'gchordon', 'gchordoff', 'grace', 'gracedivider', 'makechordchannels', 'nobarlines',
-						'nobeataccents', 'noportamento', 'pitchbend', 'program', 'portamento', 'randomchordattack', 'ratio', 'rtranspose', 'temperament', 'temperamentlinear',
-						'temperamentnormal', 'transpose', 'voice'
-					]},
-					param: { type: 'string', optional: true }
+				barlines: { type: "number", optional: true },
+				bassprog: { type: "number", optional: true },
+				bassvol: { type: "number", optional: true },
+				beat: { type: "number", optional: true },
+				beataccents: { type: "number", optional: true },
+				beatmod: { type: "number", optional: true },
+				beatstring: { type: "number", optional: true },
+				c: { type: "number", optional: true },
+				channel: { type: "number", optional: true },
+				chordattack: { type: "number", optional: true },
+				chordname: { type: "number", optional: true },
+				chordprog: { type: "number", optional: true },
+				chordvol: { type: "number", optional: true },
+				control: { type: "number", optional: true },
+				deltaloudness: { type: "number", optional: true },
+				drone: { type: "number", optional: true },
+				droneoff: { type: "number", optional: true },
+				droneon: { type: "number", optional: true },
+				drum: { type: "number", optional: true },
+				drumbars: { type: "number", optional: true },
+				drummap: { type: "number", optional: true },
+				drumoff: { type: "number", optional: true },
+				drumon: { type: "number", optional: true },
+				fermatafixed: { type: "number", optional: true },
+				fermataproportional: { type: "number", optional: true },
+				gchord: { type: "string", optional: true },
+				gchordon: { type: "number", optional: true },
+				gchordoff: { type: "number", optional: true },
+				grace: { type: "number", optional: true },
+				gracedivider: { type: "number", optional: true },
+				makechordchannels: { type: "number", optional: true },
+				nobarlines: { type: "number", optional: true },
+				nobeataccents: { type: "number", optional: true },
+				noportamento: { type: "number", optional: true },
+				pitchbend: { type: "number", optional: true },
+				program: { type: 'object', optional: true,
+						properties: {
+							channel: { type: "number", optional: true, minimum: 1, maximum: 16},
+							program: { type: "number", minimum: 0, maximum: 127 }
+						}
+					 },
+				portamento: { type: "number", optional: true }, 
+				randomchordattack: { type: "number", optional: true },
+				ratio: { type: "number", optional: true },
+				rtranspose: { type: "number", optional: true },
+				temperament: { type: "number", optional: true },
+				temperamentlinear: { type: "number", optional: true },
+				temperamentnormal: { type: "number", optional: true },
+				transpose: { type: "number", optional: true },
+				voice: { type: "number", optional: true }
 			}},
 			musicspace: { type: "number", optional: true },
 			nobarcheck: { type: "string", optional: true },

@@ -702,8 +702,8 @@ function AbcParse() {
 		if (multilineVars.partForNextLine.length)
 			params.part = multilineVars.partForNextLine;
 		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? Object.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : Object.clone(multilineVars.clef) ;
-		params.key = header.deepCopyKey(multilineVars.key);
-		header.addPosToKey(params.clef, params.key);
+		params.key = parseKeyVoice.deepCopyKey(multilineVars.key);
+		parseKeyVoice.addPosToKey(params.clef, params.key);
 		if (multilineVars.meter !== null) {
 			if (multilineVars.currentVoice) {
 				multilineVars.staves.each(function(st) {
@@ -766,8 +766,15 @@ function AbcParse() {
 			var ii = 0;
 			var inTie = false;
 			while (ii < gra[1].length) {
+				var acciaccatura = false;
+				if (gra[1].charAt(ii) === '/') {
+					acciaccatura = true;
+					ii++;
+				}
 				var note = getCoreNote(gra[1], ii, {}, false);
 				if (note !== null) {
+					if (acciaccatura)
+						note.acciaccatura = true;
 					gracenotes.push(note);
 
 					if (inTie) {

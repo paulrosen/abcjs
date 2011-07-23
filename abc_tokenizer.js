@@ -456,6 +456,8 @@ function AbcTokenizer() {
 	this.tokenize = function(line, start, end) {
 		// this returns all the tokens inside the passed string. A token is a punctuation mark, a string of digits, a string of letters.
 		//  Quoted strings are one token.
+		//  If there is a minus sign next to a number, then it is included in the number.
+		// If there is a period immediately after a number, with a number immediately following, then a float is returned.
 		// The type of token is returned: quote, alpha, number, punct
 		var ret = this.getMeat(line, start, end);
 		start = ret.start;
@@ -473,10 +475,42 @@ function AbcTokenizer() {
 				while (i < end && isLetter(line.charAt(i))) i++;
 				tokens.push({ type: 'alpha', token: line.substring(start, i), continueId: isNumber(line.charAt(i)), start: start, end: i});
 				start = i + 1;
+			} else if (line.charAt(start) === '.' && isNumber(line.charAt(i+1))) {
+				i = start+1;
+				var int = null;
+				var float = null;
+				while (i < end && isNumber(line.charAt(i))) i++;
+
+				float = parseFloat(line.substring(start, i));
+				tokens.push({ type: 'number', token: line.substring(start, i), int: int, float: float, continueId: isLetter(line.charAt(i)), start: start, end: i});
+				start = i + 1;
+			} else if (line.charAt(start) === '-' && isNumber(line.charAt(i+1))) {
+				i = start+1;
+				var int = null;
+				var float = null;
+				while (i < end && isNumber(line.charAt(i))) i++;
+				if (line.charAt(i) === '.' && isNumber(line.charAt(i+1))) {
+					i++;
+					while (i < end && isNumber(line.charAt(i))) i++;
+				} else
+					int = parseInt(line.substring(start, i));
+
+				float = parseFloat(line.substring(start, i));
+				tokens.push({ type: 'number', token: line.substring(start, i), int: int, float: float, continueId: isLetter(line.charAt(i)), start: start, end: i});
+				start = i + 1;
 			} else if (isNumber(line.charAt(start))) {
 				i = start+1;
+				var int = null;
+				var float = null;
 				while (i < end && isNumber(line.charAt(i))) i++;
-				tokens.push({ type: 'number', token: line.substring(start, i), continueId: isLetter(line.charAt(i)), start: start, end: i});
+				if (line.charAt(i) === '.' && isNumber(line.charAt(i+1))) {
+					i++;
+					while (i < end && isNumber(line.charAt(i))) i++;
+				} else
+					int = parseInt(line.substring(start, i));
+
+				float = parseFloat(line.substring(start, i));
+				tokens.push({ type: 'number', token: line.substring(start, i), int: int, float: float, continueId: isLetter(line.charAt(i)), start: start, end: i});
 				start = i + 1;
 			} else if (line.charAt(start) === ' ' || line.charAt(start) === '\t') {
 				i = start+1;

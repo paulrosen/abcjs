@@ -276,12 +276,20 @@ ABCPrinter.prototype.calcY = function(ofs) {
   return this.y+((AbcSpacing.TOPNOTE-ofs)*AbcSpacing.STEP);
 };
 
-ABCPrinter.prototype.printStave = function (startx, endx) {
-  this.printStaveLine(startx,endx,2);
-  this.printStaveLine(startx,endx,4);
-  this.printStaveLine(startx,endx,6);
-  this.printStaveLine(startx,endx,8);
-  this.printStaveLine(startx,endx,10);
+ABCPrinter.prototype.printStave = function (startx, endx, numLines) {	// PER: print out requested number of lines
+	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
+	if (numLines === 1) {
+		this.printStaveLine(startx,endx,6);
+		return;
+	}
+	for (var i = 0; i < numLines; i++) {
+		this.printStaveLine(startx,endx,(i+1)*2);
+	}
+//  this.printStaveLine(startx,endx,2);
+//  this.printStaveLine(startx,endx,4);
+//  this.printStaveLine(startx,endx,6);
+//  this.printStaveLine(startx,endx,8);
+//  this.printStaveLine(startx,endx,10);
 };
 
 ABCPrinter.prototype.printABC = function(abctunes) {

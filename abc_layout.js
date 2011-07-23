@@ -331,9 +331,11 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
     // draw stem from the furthest note to a pitch above/below the stemmed note
     if (!nostem && durlog<=-1) {
       p1 = (dir=="down") ? elem.minpitch-7 : elem.minpitch+1/3;
-      if (p1>6) p1=6;
+		// PER added stemdir test to make the line meet the note.
+      if (p1>6 && !this.stemdir) p1=6;
       p2 = (dir=="down") ? elem.maxpitch-1/3 : elem.maxpitch+7;
-      if (p2<6) p2=6;
+		// PER added stemdir test to make the line meet the note.
+      if (p2<6 && !this.stemdir) p2=6;
       dx = (dir==="down" || abselem.heads.length === 0)?0:abselem.heads[0].w;
       width = (dir=="down")?1:-1;
       abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
@@ -371,7 +373,12 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
       flag = (gracebeam) ? null : this.chartable["uflags"][(this.isBagpipes)?5:3]; 
       grace = this.printNoteHead(abselem, "noteheads.quarter",  elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale);
       abselem.addExtra(grace);
-
+		// PER: added acciaccatura slash
+		if (elem.gracenotes[i].acciaccatura) {
+			var pos = elem.gracenotes[i].verticalPos+7*gracescale;	// the same formula that determines the flag position.
+			var dAcciaccatura = gracebeam ? 5 : 6;	// just an offset to make it line up correctly.
+			abselem.addRight(new ABCRelativeElement("flags.ugrace", -graceoffsets[i]+dAcciaccatura, 0, pos, {scalex:gracescale, scaley: gracescale}));
+		}
       if (gracebeam) { // give the beam the necessary info
 	var pseudoabselem = {heads:[grace], 
 			     abcelem:{averagepitch: gracepitch, minpitch: gracepitch, maxpitch: gracepitch},
@@ -483,7 +490,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
     }
     this.dotshiftx = notehead.w+dotshiftx-2+5*dot;
     for (;dot>0;dot--) {
-      var dotadjusty = (1-pitch%2); //TODO don't adjust when above or below stave?
+      var dotadjusty = (1-Math.abs(pitch)%2); //PER: take abs value of the pitch. And the shift still happens on ledger lines.
       abselem.addRight(new ABCRelativeElement("dots.dot", notehead.w+dotshiftx-2+5*dot, this.glyphs.getSymbolWidth("dots.dot"), pitch+dotadjusty));
     }
   }
@@ -561,6 +568,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
 
 ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem, roomtaken) {
   var dec;
+  var compoundDec;	// PER: for decorations with two symbols
   var unknowndecs = [];
   var yslot = (pitch>9) ? pitch+3 : 12;
   var ypos;
@@ -612,7 +620,11 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
     case "tenuto": dec="scripts.tenuto"; break;
     case "coda": dec="scripts.coda"; break;
     case "segno": dec="scripts.segno"; break;
-    case "p": 
+    case "/": compoundDec=["flags.ugrace", 1]; continue;	// PER: added new decorations
+    case "//": compoundDec=["flags.ugrace", 2]; continue;
+    case "///": compoundDec=["flags.ugrace", 3]; continue;
+    case "////": compoundDec=["flags.ugrace", 4]; continue;
+    case "p":
     case "mp": 
     case "ppp": 
     case "pppp": 
@@ -633,6 +645,15 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
       deltax -= (this.glyphs.getSymbolWidth(dec)/2);
     }
     abselem.addChild(new ABCRelativeElement(dec, deltax, this.glyphs.getSymbolWidth(dec), ypos));
+  }
+  if (compoundDec) {	// PER: added new decorations
+	  ypos = ((this.stemdir=="down" || pitch>=6) && this.stemdir!=="up") ? pitch+1:pitch+9;
+	  deltax = width/2;
+	  deltax += ((this.stemdir=="down" || pitch>=6) && this.stemdir!=="up") ? -5 : 3;
+	  for (var xx = 0; xx < compoundDec[1]; xx++) {
+		  ypos -= 1;
+		  abselem.addChild(new ABCRelativeElement(compoundDec[0], deltax, this.glyphs.getSymbolWidth(compoundDec[0]), ypos));
+	  }
   }
   (unknowndecs.length>0) && abselem.addChild(new ABCRelativeElement(unknowndecs.join(','), 0, 0, 0, {type:"debug"}));
 };
@@ -760,7 +781,7 @@ ABCLayout.prototype.printClef = function(elem) {
   if (elem.stafflines===0) {
     this.stafflines = 0;
   } else {
-    this.stafflines =5;
+    this.stafflines =elem.stafflines;
   }
 
   return abselem;

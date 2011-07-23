@@ -162,7 +162,10 @@ ABCStaffGroupElement.prototype.draw = function (printer, y) {
   for (var i=0;i<this.staffs.length;i++) {
     if (this.stafflines[i] === 0) continue;
     printer.y = this.staffs[i].y;
-    printer.printStave(this.startx,this.w);
+    // TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
+    if (this.stafflines[i] === undefined)
+      this.stafflines[i] = 5;
+    printer.printStave(this.startx,this.w, this.stafflines[i]);
   }
   
 };

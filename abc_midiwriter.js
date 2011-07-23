@@ -345,6 +345,7 @@ function ABCMidiWriter(parent, options) {
   this.program = options["program"] || 2;
   this.javamidi = options["type"]=="java" || false;
   this.listeners = [];
+	this.transpose = 0;	// PER
   if (this.javamidi) {
     MIDIPlugin = document.MIDIPlugin;
     setTimeout(function() { // run on next event loop (once MIDIPlugin is loaded)
@@ -437,9 +438,15 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
     this.baraccidentals = [];
     this.abctune = abctune;
     this.baseduration = 480*4; // nice and divisible, equals 1 whole note
-    
-    if (abctune.formatting.midi) {
-      this.midi.setInstrument(Number(abctune.formatting.midi.substring(8)));
+
+	  // PER: add global transposition.
+	  if (abctune.formatting.midi && abctune.formatting.midi.transpose)
+		  this.transpose = abctune.formatting.midi.transpose;
+
+	  // PER: changed format of the global midi commands from the parser. Using the new definition here.
+	  // TODO-PER: abctune.formatting.midi.program.channel is an optional parameter that is not used, yet.
+    if (abctune.formatting.midi && abctune.formatting.midi.program && abctune.formatting.midi.program.program) {
+      this.midi.setInstrument(abctune.formatting.midi.program.program);
     } else {
       this.midi.setInstrument(this.program);
     }
@@ -536,7 +543,7 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
     var midipitches = [];
     for (var i=0; i<elem.pitches.length; i++) {
       var note = elem.pitches[i];
-      var pitch= note.pitch;
+      var pitch= note.pitch+this.transpose;	// PER
       if (note.accidental) {
 	switch(note.accidental) { // change that pitch (not other octaves) for the rest of the bar
 	case "sharp": 
@@ -565,7 +572,7 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
 
     for (i=0; i<elem.pitches.length; i++) {
       var note = elem.pitches[i];
-      var pitch= note.pitch;
+      var pitch= note.pitch+this.transpose;	// PER
       if (note.startTie) continue; // don't terminate it
       if (note.endTie) {
 	this.midi.endNote(midipitches[i],mididuration+this.tieduration);
