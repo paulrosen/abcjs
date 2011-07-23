@@ -1,4 +1,4 @@
-cat proto.js sprintf.js abc_glyphs.js abc_graphelements.js abc_layout.js abc_write.js abc_tunebook.js abc_parse_header.js abc_tune.js abc_tokenizer.js abc_parse.js abc_midiwriter.js > abcjs-no-raphael.js
+cat proto.js sprintf.js abc_glyphs.js abc_graphelements.js abc_layout.js abc_write.js abc_tunebook.js abc_parse_directive.js abc_parse_key_voice.js abc_parse_header.js abc_tune.js abc_tokenizer.js abc_parse.js abc_midiwriter.js > abcjs-no-raphael.js
 cat raphael.js abcjs-no-raphael.js > abcjs_all.js
 cat abcjs_all.js abc_editor.js > abcjs_editor.js
 cat abcjs_all.js abc_plugin.js > abcjs_plugin.js
