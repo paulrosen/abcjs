@@ -27,7 +27,8 @@
 //
 
 /*global document, clearTimeout, setTimeout */
-/*extern ABCMidiWriter, AbcTuneBook, AbcParse, Raphael, ABCPrinter, ABCTextPrinter */
+/*global ABCMidiWriter, AbcTuneBook, AbcParse, Raphael, ABCPrinter, ABCTextPrinter */
+/*extern EditArea, ABCEditor */
 
 function EditArea(textareaid) {
   this.textarea = document.getElementById(textareaid);
@@ -247,7 +248,7 @@ ABCEditor.prototype.modelChanged = function() {
   this.printer = new ABCPrinter(paper, this.printerparams);
   this.printer.printABC(this.tunes);
   if (ABCMidiWriter && this.mididiv) {
-    if (this.mididiv != this.div)
+    if (this.mididiv !== this.div)
 		this.mididiv.innerHTML = "";
     var midiwriter = new ABCMidiWriter(this.mididiv,this.midiparams);
     midiwriter.addListener(this.printer);

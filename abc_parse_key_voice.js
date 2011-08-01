@@ -1,3 +1,6 @@
+/*extern ABC, parseKeyVoice */
+/*global parseDirective */
+
 // Do the same syntax as YUI so we can expand it later.
 function ABC() {
 	return { use: function(callback) { callback(); } };
@@ -377,8 +380,9 @@ ABC().use(function() {
 					multilineVars.key.mode = mode;
 					if (oldKey) {
 						// Add natural in all places that the old key had an accidental.
+						var kk;
 						for (var k = 0; k < multilineVars.key.accidentals.length; k++) {
-							for (var kk = 0; kk < oldKey.accidentals.length; kk++) {
+							for (kk = 0; kk < oldKey.accidentals.length; kk++) {
 								if (multilineVars.key.accidentals[k].note === oldKey.accidentals[kk].note)
 									oldKey.accidentals[kk].note = null;
 							}
@@ -386,7 +390,7 @@ ABC().use(function() {
 						for (kk = 0; kk < oldKey.accidentals.length; kk++) {
 							if (oldKey.accidentals[kk].note) {
 								if (!multilineVars.key.impliedNaturals)
-									multilineVars.key.impliedNaturals = []
+									multilineVars.key.impliedNaturals = [];
 								multilineVars.key.impliedNaturals.push({ acc: 'natural', note: oldKey.accidentals[kk].note });
 							}
 						}
@@ -424,9 +428,9 @@ ABC().use(function() {
 				if (!found) {
 					multilineVars.key.accidentals.push(accs.accs[i]);
 					if (multilineVars.key.impliedNaturals) {
-						for (k = 0; k < multilineVars.key.impliedNaturals.length; k++) {
-							if (multilineVars.key.impliedNaturals[k].note === accs.accs[i].note)
-								multilineVars.key.impliedNaturals.splice(k, 1);
+						for (var kkk = 0; kkk < multilineVars.key.impliedNaturals.length; kkk++) {
+							if (multilineVars.key.impliedNaturals[kkk].note === accs.accs[i].note)
+								multilineVars.key.impliedNaturals.splice(kkk, 1);
 						}
 					}
 				}
@@ -457,7 +461,7 @@ ABC().use(function() {
 					if (token.token !== "=") { warn("Expected = after transpose", str, token.start); break; }
 					if (tokens.length === 0) { warn("Expected parameter after transpose=", str, 0); return ret; }
 					if (tokens[0].type !== 'number') { warn("Expected number after transpose", str, tokens[0].start); break; }
-					multilineVars.clef.transpose = tokens[0].int;
+					multilineVars.clef.transpose = tokens[0].intt;
 					tokens.shift();
 					break;
 				case "stafflines":
@@ -467,7 +471,7 @@ ABC().use(function() {
 					if (token.token !== "=") { warn("Expected = after stafflines", str, token.start); break; }
 					if (tokens.length === 0) { warn("Expected parameter after stafflines=", str, 0); return ret; }
 					if (tokens[0].type !== 'number') { warn("Expected number after stafflines", str, tokens[0].start); break; }
-					multilineVars.clef.stafflines = tokens[0].int;
+					multilineVars.clef.stafflines = tokens[0].intt;
 					tokens.shift();
 					break;
 				case "staffscale":
@@ -477,7 +481,7 @@ ABC().use(function() {
 					if (token.token !== "=") { warn("Expected = after staffscale", str, token.start); break; }
 					if (tokens.length === 0) { warn("Expected parameter after staffscale=", str, 0); return ret; }
 					if (tokens[0].type !== 'number') { warn("Expected number after staffscale", str, tokens[0].start); break; }
-					multilineVars.clef.staffscale = tokens[0].float;
+					multilineVars.clef.staffscale = tokens[0].floatt;
 					tokens.shift();
 					break;
 				case "style":

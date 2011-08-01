@@ -14,7 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global AbcParseHeader, AbcTokenizer, AbcTune */
+/*global AbcParseHeader, AbcTokenizer, AbcTune, parseKeyVoice, parseDirective */
 /*extern AbcParse */
 
 function AbcParse() {
@@ -931,8 +931,9 @@ function AbcParse() {
 				// Then, if there is a grace-note, we know where to go.
 				// Else see if we have a chord, core-note, slur, triplet, or bar.
 
+				var ret;
 				while (1) {
-					var ret = tokenizer.eatWhiteSpace(line, i);
+					ret = tokenizer.eatWhiteSpace(line, i);
 					if (ret > 0) {
 						i += ret;
 					}

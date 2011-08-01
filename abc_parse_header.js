@@ -15,6 +15,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*extern AbcParseHeader */
+/*global parseKeyVoice, parseDirective */
 
 function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 	parseKeyVoice.initialize(tokenizer, warn, multilineVars, tune);

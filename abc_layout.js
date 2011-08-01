@@ -230,7 +230,8 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
   var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
   var c="";
   var flag = null;
-  
+  var additionalLedgers = []; // PER: handle the case of [bc'], where the b doesn't have a ledger line
+
   var p, i, pp;
   var width, p1, p2, dx;
 
@@ -283,7 +284,10 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
       var curr = elem.pitches[p];
       var delta = (dir=="down")?prev.pitch-curr.pitch:curr.pitch-prev.pitch;
       if (delta<=1 && !prev.printer_shift) {
-	curr.printer_shift=(delta)?"different":"same";
+        curr.printer_shift=(delta)?"different":"same";
+        if (curr.pitch > 11 || curr.pitch < 1) {	// PER: add extra ledger line
+          additionalLedgers.push(curr.pitch - (curr.pitch%2));
+        }
 	if (dir=="down") {
 	  this.roomtaken = this.glyphs.getSymbolWidth(this.chartable["note"][-durlog])+2;
 	} else {
@@ -420,7 +424,13 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
       abselem.addChild(new ABCRelativeElement(null, -2, this.glyphs.getSymbolWidth(c)+4, i, {type:"ledger"}));
     }
   }
-  
+
+  for (i = 0; i < additionalLedgers.length; i++) { // PER: draw additional ledgers
+    var ofs = this.glyphs.getSymbolWidth(c);
+    if (dir === 'down') ofs = -ofs;
+    abselem.addChild(new ABCRelativeElement(null, ofs-2, this.glyphs.getSymbolWidth(c)+4, additionalLedgers[i], {type:"ledger"}));
+  }
+
   if (elem.chord !== undefined) { //16 -> high E.
     for (i = 0; i < elem.chord.length; i++) {
       var x = 0;
@@ -531,7 +541,8 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
   }
   
   if (pitchelem.startTie) {
-    var tie = new ABCTieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
+    //PER: bug fix: var tie = new ABCTieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
+    var tie = new ABCTieElem(notehead, null, (this.stemdir=="down" || dir=="down") && this.stemdir!="up",(this.stemdir=="down" || this.stemdir=="up"));
     this.ties[this.ties.length]=tie;
     this.voice.addOther(tie);
   }
@@ -556,7 +567,8 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
   if (pitchelem.startSlur) {
     for (i=0; i<pitchelem.startSlur.length; i++) {
       var slurid = pitchelem.startSlur[i].label;
-      var slur = new ABCTieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
+      //PER: bug fix: var slur = new ABCTieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
+      var slur = new ABCTieElem(notehead, null, (this.stemdir=="down" || dir=="down") && this.stemdir!="up", false);
       this.slurs[slurid]=slur;
       this.voice.addOther(slur);
     }

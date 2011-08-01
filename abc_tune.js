@@ -66,16 +66,17 @@ function AbcTune() {
 
 		// Remove any blank lines
 		var anyDeleted = false;
-		for (var i = 0; i < this.lines.length; i++) {
+		var i, s, v;
+		for (i = 0; i < this.lines.length; i++) {
 			if (this.lines[i].staff !== undefined) {
 				var hasAny = false;
-				for (var s = 0; s < this.lines[i].staff.length; s++) {
+				for (s = 0; s < this.lines[i].staff.length; s++) {
 					if (this.lines[i].staff[s] === undefined) {
 						anyDeleted = true;
 						this.lines[i].staff[s] = null;
 						//this.lines[i].staff[s] = { voices: []};	// TODO-PER: There was a part missing in the abc music. How should we recover?
 					} else {
-						for (var v = 0; v < this.lines[i].staff[s].voices.length; v++) {
+						for (v = 0; v < this.lines[i].staff[s].voices.length; v++) {
 							if (this.lines[i].staff[s].voices[v] === undefined)
 								this.lines[i].staff[s].voices[v] = [];	// TODO-PER: There was a part missing in the abc music. How should we recover?
 							else
@@ -99,10 +100,10 @@ function AbcTune() {
 
 		// if we exceeded the number of bars allowed on a line, then force a new line
 		if (barsperstaff) {
-			for (var i = 0; i < this.lines.length; i++) {
+			for (i = 0; i < this.lines.length; i++) {
 				if (this.lines[i].staff !== undefined) {
-					for (var s = 0; s < this.lines[i].staff.length; s++) {
-						for (var v = 0; v < this.lines[i].staff[s].voices.length; v++) {
+					for (s = 0; s < this.lines[i].staff.length; s++) {
+						for (v = 0; v < this.lines[i].staff[s].voices.length; v++) {
 							var barNumThisLine = 0;
 							for (var n = 0; n < this.lines[i].staff[s].voices[v].length; n++) {
 								if (this.lines[i].staff[s].voices[v][n].el_type === 'bar') {
@@ -137,11 +138,11 @@ function AbcTune() {
 		// If we were passed staffnonote, then we want to get rid of all staffs that contain only rests.
 		if (barsperstaff) {
 			anyDeleted = false;
-			for (var i = 0; i < this.lines.length; i++) {
+			for (i = 0; i < this.lines.length; i++) {
 				if (this.lines[i].staff !== undefined) {
-					for (var s = 0; s < this.lines[i].staff.length; s++) {
+					for (s = 0; s < this.lines[i].staff.length; s++) {
 						var keepThis = false;
-						for (var v = 0; v < this.lines[i].staff[s].voices.length; v++) {
+						for (v = 0; v < this.lines[i].staff[s].voices.length; v++) {
 							if (this.containsNotesStrict(this.lines[i].staff[s].voices[v])) {
 								keepThis = true;
 							}
@@ -177,12 +178,13 @@ function AbcTune() {
 					}
 					if (currSlur[chordPos] === undefined) {
 						var offNum = chordPos*100;
-						obj.endSlur.each(function(x) { if (offNum === x) --offNum; })
+						obj.endSlur.each(function(x) { if (offNum === x) --offNum; });
 						currSlur[chordPos] = [offNum];
 					}
 				}
+				var slurNum;
 				for (var i = 0; i < num; i++) {
-					var slurNum = currSlur[chordPos].pop();
+					slurNum = currSlur[chordPos].pop();
 					obj.endSlur.push(slurNum);
 //					lyr.syllable += '<' + slurNum;	// TODO-PER: debugging
 				}
@@ -199,12 +201,12 @@ function AbcTune() {
 				var nextNum = chordPos*100+1;
 				for (var i = 0; i < num; i++) {
 					if (usedNums) {
-						usedNums.each(function(x) { if (nextNum === x) ++nextNum; })
-						usedNums.each(function(x) { if (nextNum === x) ++nextNum; })
-						usedNums.each(function(x) { if (nextNum === x) ++nextNum; })
+						usedNums.each(function(x) { if (nextNum === x) ++nextNum; });
+						usedNums.each(function(x) { if (nextNum === x) ++nextNum; });
+						usedNums.each(function(x) { if (nextNum === x) ++nextNum; });
 					}
-					currSlur[chordPos].each(function(x) { if (nextNum === x) ++nextNum; })
-					currSlur[chordPos].each(function(x) { if (nextNum === x) ++nextNum; })
+					currSlur[chordPos].each(function(x) { if (nextNum === x) ++nextNum; });
+					currSlur[chordPos].each(function(x) { if (nextNum === x) ++nextNum; });
 
 					currSlur[chordPos].push(nextNum);
 					obj.startSlur.push({ label: nextNum });
@@ -296,7 +298,7 @@ function AbcTune() {
 					case 'bass':
 					case 'bass+8':
 					case 'bass-8':
-						el.verticalPos = 20 + el.verticalPos; min += 6; max += 6; break;
+						el.verticalPos = 20 + el.verticalPos; min += 6; max += 6;
 						break;
 					case 'tenor':
 					case 'tenor+8':
@@ -515,7 +517,7 @@ function AbcTune() {
 			delete this.vskipPending;
 		}
 		this.lines.push(hash);
-	}
+	};
 
 	this.addSubtitle = function(str) {
 		this.pushLine({subtitle: str});

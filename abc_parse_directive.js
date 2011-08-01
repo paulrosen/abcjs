@@ -3,6 +3,9 @@
 //	return { use: function(callback) { callback(); } };
 //}
 
+/*global ABC */
+/*extern parseDirective */
+
 var parseDirective = {};
 
 ABC().use(function() {
@@ -39,7 +42,7 @@ ABC().use(function() {
 				return textarr;
 		}
 		return textstr;
-	}
+	};
 
 	parseDirective.addDirective = function(str) {
 		var getRequiredMeasurement = function(cmd, tokens) {
@@ -179,7 +182,6 @@ ABC().use(function() {
 					return vskip.error;
 				tune.addSpacing(vskip);
 				return null;
-				break;
 			case "scale":
 				scratch = "";
 				tokens.each(function(tok) {
@@ -214,7 +216,7 @@ ABC().use(function() {
 			case "barsperstaff":
 				if (tokens.length !== 1 || tokens[0].type !== 'number')
 					return "Directive \"" + cmd + "\" requires a number as a parameter.";
-				multilineVars.barsperstaff = tokens[0].int;
+				multilineVars.barsperstaff = tokens[0].intt;
 				break;
 			case "staffnonote":
 				if (tokens.length !== 1 || tokens[0].type !== 'number')
@@ -224,12 +226,12 @@ ABC().use(function() {
 			case "measurenb":
 				if (tokens.length !== 1 || tokens[0].type !== 'number')
 					return "Directive \"" + cmd + "\" requires a number as a parameter.";
-				multilineVars.barNumbers = tokens[0].int;
+				multilineVars.barNumbers = tokens[0].intt;
 				break;
 			case "barnumbers":
 				if (tokens.length !== 1 || tokens[0].type !== 'number')
 					return "Directive \"" + cmd + "\" requires a number as a parameter.";
-				multilineVars.barNumbers = tokens[0].int;
+				multilineVars.barNumbers = tokens[0].intt;
 				break;
 			case "begintext":
 				multilineVars.inTextBlock = true;
@@ -434,7 +436,7 @@ ABC().use(function() {
 							var t = midiToks.shift();
 							var p = t.token;
 							if (t.type === "number")
-								p = t.int;
+								p = t.intt;
 							return p;
 						}
 						else
@@ -449,10 +451,11 @@ ABC().use(function() {
 						var p1 = getNextMidiParam(midi);
 						if (p1) {
 							var p2 = getNextMidiParam(midi);
+							// NOTE: The program number has an off by one error in ABC, so we add one here.
 							if (p2)
-								midi_param = { channel: p1, program: p2};
+								midi_param = { channel: p1, program: p2+1};
 							else
-								midi_param = { program: p1};
+								midi_param = { program: p1+1};
 						}
 					} else {
 						// TODO-PER: handle the params for all MIDI commands

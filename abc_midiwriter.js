@@ -7,7 +7,7 @@ function setAttributes(elm, attrs){
 oldunload = window.onbeforeunload;
 window.onbeforeunload = function() {
   oldunload();
-  if(MIDIPlugin) { 
+  if (typeof(MIDIPlugin) != "undefined" && MIDIPlugin) { // PER: take care of crash in IE 8
     MIDIPlugin.closePlugin();
   }
 };
@@ -345,7 +345,7 @@ function ABCMidiWriter(parent, options) {
   this.program = options["program"] || 2;
   this.javamidi = options["type"]=="java" || false;
   this.listeners = [];
-	this.transpose = 0;	// PER
+  this.transpose = 0;	// PER
   if (this.javamidi) {
     MIDIPlugin = document.MIDIPlugin;
     setTimeout(function() { // run on next event loop (once MIDIPlugin is loaded)
@@ -543,7 +543,7 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
     var midipitches = [];
     for (var i=0; i<elem.pitches.length; i++) {
       var note = elem.pitches[i];
-      var pitch= note.pitch+this.transpose;	// PER
+      var pitch= note.pitch;
       if (note.accidental) {
 	switch(note.accidental) { // change that pitch (not other octaves) for the rest of the bar
 	case "sharp": 
@@ -562,6 +562,7 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
       } else { // use normal accidentals
 	midipitches[i] += this.accidentals[this.extractNote(pitch)];
       }
+    midipitches[i] += this.transpose;	// PER
       
       this.midi.startNote(midipitches[i], 64, elem);
 

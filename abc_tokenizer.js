@@ -288,7 +288,7 @@ function AbcTokenizer() {
 			}
 		}
 		return ret;
-	}
+	};
 
 	this.getKeyAccidentals2 = function(tokens) {
 		var accs;
@@ -345,7 +345,6 @@ function AbcTokenizer() {
 					break;
 				default:
 					return {accs: accs, warn: 'Expected note name after ' + acc + ' Found: ' + tokens[0].token };
-					break;
 			}
 		}
 		return { accs: accs };
@@ -477,40 +476,26 @@ function AbcTokenizer() {
 				start = i + 1;
 			} else if (line.charAt(start) === '.' && isNumber(line.charAt(i+1))) {
 				i = start+1;
-				var int = null;
-				var float = null;
+				var int2 = null;
+				var float2 = null;
 				while (i < end && isNumber(line.charAt(i))) i++;
 
-				float = parseFloat(line.substring(start, i));
-				tokens.push({ type: 'number', token: line.substring(start, i), int: int, float: float, continueId: isLetter(line.charAt(i)), start: start, end: i});
+				float2 = parseFloat(line.substring(start, i));
+				tokens.push({ type: 'number', token: line.substring(start, i), intt: int2, floatt: float2, continueId: isLetter(line.charAt(i)), start: start, end: i});
 				start = i + 1;
-			} else if (line.charAt(start) === '-' && isNumber(line.charAt(i+1))) {
+			} else if (isNumber(line.charAt(start)) || (line.charAt(start) === '-' && isNumber(line.charAt(i+1)))) {
 				i = start+1;
-				var int = null;
-				var float = null;
+				var intt = null;
+				var floatt = null;
 				while (i < end && isNumber(line.charAt(i))) i++;
 				if (line.charAt(i) === '.' && isNumber(line.charAt(i+1))) {
 					i++;
 					while (i < end && isNumber(line.charAt(i))) i++;
 				} else
-					int = parseInt(line.substring(start, i));
+					intt = parseInt(line.substring(start, i));
 
-				float = parseFloat(line.substring(start, i));
-				tokens.push({ type: 'number', token: line.substring(start, i), int: int, float: float, continueId: isLetter(line.charAt(i)), start: start, end: i});
-				start = i + 1;
-			} else if (isNumber(line.charAt(start))) {
-				i = start+1;
-				var int = null;
-				var float = null;
-				while (i < end && isNumber(line.charAt(i))) i++;
-				if (line.charAt(i) === '.' && isNumber(line.charAt(i+1))) {
-					i++;
-					while (i < end && isNumber(line.charAt(i))) i++;
-				} else
-					int = parseInt(line.substring(start, i));
-
-				float = parseFloat(line.substring(start, i));
-				tokens.push({ type: 'number', token: line.substring(start, i), int: int, float: float, continueId: isLetter(line.charAt(i)), start: start, end: i});
+				floatt = parseFloat(line.substring(start, i));
+				tokens.push({ type: 'number', token: line.substring(start, i), intt: intt, floatt: floatt, continueId: isLetter(line.charAt(i)), start: start, end: i});
 				start = i + 1;
 			} else if (line.charAt(start) === ' ' || line.charAt(start) === '\t') {
 				i = start+1;
@@ -571,14 +556,14 @@ function AbcTokenizer() {
 		"202": "♭",
 		"203": "♮",
 		"241": "¡",
- 		"242": "¢", "252": "a", "262": "2", "272": "o", "302": "Â", "312": "Ê", "322": "Ò", "332": "Ú", "342": "â", "352": "ê", "362": "ò", "372": "ú",
- 		"243": "£", "253": "«", "263": "3", "273": "»", "303": "Ã", "313": "Ë", "323": "Ó", "333": "Û", "343": "ã", "353": "ë", "363": "ó", "373": "û",
- 		"244": "¤", "254": "¬", "264": "  ́", "274": "1⁄4", "304": "Ä", "314": "Ì", "324": "Ô", "334": "Ü", "344": "ä", "354": "ì", "364": "ô", "374": "ü",
- 		"245": "¥", "255": "-", "265": "μ", "275": "1⁄2", "305": "Å", "315": "Í", "325": "Õ", "335": "Ý",  "345": "å", "355": "í", "365": "õ", "375": "ý",
- 		"246": "¦", "256": "®", "266": "¶", "276": "3⁄4", "306": "Æ", "316": "Î", "326": "Ö", "336": "Þ", "346": "æ", "356": "î", "366": "ö", "376": "þ",
- 		"247": "§", "257": " ̄", "267": "·", "277": "¿", "307": "Ç", "317": "Ï", "327": "×", "337": "ß", "347": "ç", "357": "ï", "367": "÷", "377": "ÿ",
+		"242": "¢", "252": "a", "262": "2", "272": "o", "302": "Â", "312": "Ê", "322": "Ò", "332": "Ú", "342": "â", "352": "ê", "362": "ò", "372": "ú",
+		"243": "£", "253": "«", "263": "3", "273": "»", "303": "Ã", "313": "Ë", "323": "Ó", "333": "Û", "343": "ã", "353": "ë", "363": "ó", "373": "û",
+		"244": "¤", "254": "¬", "264": "  ́", "274": "1⁄4", "304": "Ä", "314": "Ì", "324": "Ô", "334": "Ü", "344": "ä", "354": "ì", "364": "ô", "374": "ü",
+		"245": "¥", "255": "-", "265": "μ", "275": "1⁄2", "305": "Å", "315": "Í", "325": "Õ", "335": "Ý",  "345": "å", "355": "í", "365": "õ", "375": "ý",
+		"246": "¦", "256": "®", "266": "¶", "276": "3⁄4", "306": "Æ", "316": "Î", "326": "Ö", "336": "Þ", "346": "æ", "356": "î", "366": "ö", "376": "þ",
+		"247": "§", "257": " ̄", "267": "·", "277": "¿", "307": "Ç", "317": "Ï", "327": "×", "337": "ß", "347": "ç", "357": "ï", "367": "÷", "377": "ÿ",
 		"250": " ̈", "260": "°", "270": " ̧", "300": "À", "310": "È", "320": "Ð", "330": "Ø", "340": "à", "350": "è", "360": "ð", "370": "ø",
- 		"251": "©", "261": "±", "271": "1", "301": "Á", "311": "É", "321": "Ñ", "331": "Ù", "341": "á", "351": "é", "361": "ñ", "371": "ù" };
+		"251": "©", "261": "±", "271": "1", "301": "Á", "311": "É", "321": "Ñ", "331": "Ù", "341": "á", "351": "é", "361": "ñ", "371": "ù" };
 	this.translateString = function(str) {
 		var arr = str.split('\\');
 		if (arr.length === 1) return str;

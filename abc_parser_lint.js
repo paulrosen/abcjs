@@ -413,8 +413,8 @@ function AbcParserLint() {
 	var addProhibits = function(obj, arr) {
 		var ret = Object.clone(obj);
 		ret.prohibits = arr;
-		return ret
-	}
+		return ret;
+	};
 
 	var lineProperties = {
 		type:"array",

@@ -14,6 +14,8 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/*extern ABCTextPrinter */
+
 function ABCTextPrinter(elem, reposition) {
     this.elem = elem;
     this.text = "";
@@ -29,12 +31,12 @@ ABCTextPrinter.prototype.printString = function(str, elem) {
 
 ABCTextPrinter.prototype.printNewLine = function () {
     this.text += "\n";
-}
+};
 
 ABCTextPrinter.prototype.printSpace = function () {
     if (this.text[this.text.length-1].match(/\s/)) return; //TODO match whitespace
     this.text += " ";
-}
+};
 
 ABCTextPrinter.prototype.printABC = function(abctune) {
     this.text = "";
@@ -117,7 +119,7 @@ ABCTextPrinter.prototype.printBody = function() {
 	var abcline = this.abctune.lines[line];
 	if (abcline.staff) {
 	    this.printABCLine(abcline.staff);
-	} else if (abcline.subtitle && line!=0) {
+	} else if (abcline.subtitle && line!==0) {
 	    //TODO
 	} else if (abcline.text) {
 	    //TODO
@@ -202,8 +204,9 @@ ABCTextPrinter.prototype.printBeam = function() {
 
 ABCTextPrinter.prototype.printNote = function(elem) {
     var str = "";
+	var i;
     if (elem.chord !== undefined) {
-	for (var i=0; i<elem.chord.length; i++) {
+	for (i=0; i<elem.chord.length; i++) {
 	    str+= '"'+elem.chord[i].name+'"';
 	}
     }
@@ -220,12 +223,11 @@ ABCTextPrinter.prototype.printNote = function(elem) {
 	"mordent" : "M",
 	"pralltriller" : "P",
 	"trill" : "T",
-	"lower" : ".",
-	"staccato" : "."
+	"lower" : "."
     };
 
     if (elem.decoration !== undefined) {
-	for (var i=0; i<elem.decoration.length; i++) {
+	for (i=0; i<elem.decoration.length; i++) {
 	    var dec = elem.decoration[i];
 	    if (decorations[dec]) {
 		str+=decorations[dec];
@@ -238,15 +240,15 @@ ABCTextPrinter.prototype.printNote = function(elem) {
     }
 
     if (elem.gracenotes !== undefined) {
-	str+="{"
-	for (var i=0; i<elem.gracenotes.length; i++) {
+	str+="{";
+	for (i=0; i<elem.gracenotes.length; i++) {
 	    str+=this.getNoteString(elem.gracenotes[i]);
 	}
-	str+="}"
+	str+="}";
     }
 
     var ignoreslur = false;
-    if (elem.pitches.length == 1 && elem.pitches[0].startSlur) {
+    if (elem.pitches.length === 1 && elem.pitches[0].startSlur) {
 	ignoreslur = true;
 	str+=this.multiplyString("(",elem.pitches[0].startSlur.length);
     }
@@ -255,7 +257,7 @@ ABCTextPrinter.prototype.printNote = function(elem) {
 	str+=this.multiplyString("(",elem.startSlur.length);
     }
 
-    if ((elem.pitches.length == 1 && elem.pitches[0].endSlur) || elem.endSlur) {
+    if ((elem.pitches.length === 1 && elem.pitches[0].endSlur) || elem.endSlur) {
 	ignoreslur = true;
     }
 
@@ -265,14 +267,14 @@ ABCTextPrinter.prototype.printNote = function(elem) {
 
     if (elem.pitches) {
 	if (elem.pitches.length > 1) str+="[";
-	for (var i=0; i<elem.pitches.length; i++) {
+	for (i=0; i<elem.pitches.length; i++) {
 	    elem.pitches[i].duration = elem.duration;
 	    str+=this.getNoteString(elem.pitches[i], ignoreslur);
 	}
 	if (elem.pitches.length > 1) str+="]";
     } 
 
-    if (elem.pitches.length == 1 && elem.pitches[0].endSlur) {
+    if (elem.pitches.length === 1 && elem.pitches[0].endSlur) {
 	str+=this.multiplyString(")",elem.pitches[0].endSlur.length);
     }
 
@@ -280,13 +282,13 @@ ABCTextPrinter.prototype.printNote = function(elem) {
 	str+=this.multiplyString(")",elem.endSlur.length);
     }
 
-    this.printString(str,elem)
+    this.printString(str,elem);
 
 };
 
 // accidentals, ties and sometimes slurs, sometimes duration
 ABCTextPrinter.prototype.getNoteString = function(pitchelem, ignoreslur) {
-    str = "";
+    var str = "";
     if (!ignoreslur && pitchelem.startSlur) {
 	str+="(";
     }
@@ -323,12 +325,12 @@ ABCTextPrinter.prototype.getNoteString = function(pitchelem, ignoreslur) {
 	pitchstr = pitchstr.toLowerCase();
 	octave--;
 	while (octave>0) {
-	    pitchstr+="'"
+	    pitchstr+="'";
 	    octave--;
 	}
     } else {
 	while (octave<0) {
-	    pitchstr+=","
+	    pitchstr+=",";
 	    octave++;
 	}
     }
@@ -348,7 +350,7 @@ ABCTextPrinter.prototype.getNoteString = function(pitchelem, ignoreslur) {
     }
 
     return str;
-}
+};
 
 ABCTextPrinter.prototype.getDurationString = function(duration) {
     //TODO detect crooked rhythm
@@ -363,12 +365,12 @@ ABCTextPrinter.prototype.getDurationString = function(duration) {
 	}   
     }
     return ret;
-}
+};
 
 ABCTextPrinter.prototype.extractNote = function(pitch) {
-    var pitch = pitch%7;
-    if (pitch<0) pitch+=7;
-    return pitch;
+    var pitch2 = pitch%7;
+    if (pitch2<0) pitch2+=7;
+    return pitch2;
 };
 
 ABCTextPrinter.prototype.extractOctave = function(pitch) {
@@ -391,7 +393,7 @@ ABCTextPrinter.prototype.printBarLine = function(elem) {
 };
 
 ABCTextPrinter.prototype.multiplyString = function (s, n) {
-    ret = "";
+    var ret = "";
     for (;n>0;n--) ret+=s;
     return ret;
-}
+};

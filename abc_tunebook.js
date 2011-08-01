@@ -15,6 +15,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*extern AbcTuneBook, renderAbc */
+/*global AbcParse, document, Raphael, ABCPrinter */
 
 function AbcTuneBook(book) {
 	var This = this;
@@ -60,7 +61,7 @@ function AbcTuneBook(book) {
 //			only the first tunes are rendered. If the number of divs exceeds the number
 //			of tunes, then the unused divs are cleared. The divs can be passed as either
 //			elements or strings of ids. If ids are passed, then the div MUST exist already.
-// 		(if a single element is passed, then it is an implied array of length one.)
+//			(if a single element is passed, then it is an implied array of length one.)
 //			(if a null is passed for an element, or the element doesn't exist, then that tune is skipped.)
 //		abc: text representing a tune or an entire tune book in ABC notation.
 //		renderParams: hash of:
