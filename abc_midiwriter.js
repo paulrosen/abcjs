@@ -80,6 +80,9 @@ JavaMidi.prototype.startTrack = function () {
   if (this.instrument) {
     this.setInstrument(this.instrument);
   }
+	if (this.channel) {
+	  this.setChannel(this.channel);
+	}
 };
 
 JavaMidi.prototype.endTrack = function () {
@@ -90,6 +93,11 @@ JavaMidi.prototype.setInstrument = function (number) {
   this.instrument=number;
   this.midiapi.setInstrument(number);
   //TODO push this into the playlist?
+};
+
+JavaMidi.prototype.setChannel = function (number) {
+  this.channel=number;
+  this.midiapi.setChannel(number);
 };
 
 JavaMidi.prototype.updatePos = function() {
@@ -233,16 +241,24 @@ Midi.prototype.endTrack = function () {
 }
 
 Midi.prototype.setInstrument = function (number) {
-  this.track = "%00%C0"+toHex(number,2)+this.track;
+	if (this.track)
+	  this.track = "%00%C0"+toHex(number,2)+this.track;
+	else
+		this.track = "%00%C0"+toHex(number,2);
   this.instrument=number;
 };
 
+Midi.prototype.setChannel = function (number) {
+	this.channel=number - 1;
+	this.noteOnAndChannel = "%9" + this.channel.toString(16);
+};
+
 Midi.prototype.startNote = function (pitch, loudness) {
-  this.track+=toDurationHex(this.silencelength); // only need to shift by amout of silence (if there is any)
+  this.track+=toDurationHex(this.silencelength); // only need to shift by amount of silence (if there is any)
   this.silencelength = 0;
   if (this.first) {
     this.first = false;
-    this.track+="%90";
+    this.track+=this.noteOnAndChannel;
   }
   this.track += "%"+pitch.toString(16)+"%"+loudness; //note
 };
@@ -293,7 +309,7 @@ Midi.prototype.embed = function(parent, noplayer) {
 function encodeHex(s) {
   var ret = "";
   for (var i=0; i<s.length; i+=2) {
-    ret += "%"
+    ret += "%";
     ret += s.substr(i,2);
   }
   return ret;
@@ -343,6 +359,7 @@ function ABCMidiWriter(parent, options) {
   this.next = null;
   this.qpm = options["qpm"] || 180;
   this.program = options["program"] || 2;
+	this.noteOnAndChannel = "%90";
   this.javamidi = options["type"]=="java" || false;
   this.listeners = [];
   this.transpose = 0;	// PER
@@ -444,13 +461,15 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
 		  this.transpose = abctune.formatting.midi.transpose;
 
 	  // PER: changed format of the global midi commands from the parser. Using the new definition here.
-	  // TODO-PER: abctune.formatting.midi.program.channel is an optional parameter that is not used, yet.
     if (abctune.formatting.midi && abctune.formatting.midi.program && abctune.formatting.midi.program.program) {
       this.midi.setInstrument(abctune.formatting.midi.program.program);
     } else {
       this.midi.setInstrument(this.program);
     }
-    
+    if (abctune.formatting.midi && abctune.formatting.midi.channel) {
+      this.midi.setChannel(abctune.formatting.midi.channel);
+    }
+
     if (abctune.metaText.tempo) {
       var duration = 1/4;
       if (abctune.metaText.tempo.duration) {
@@ -552,6 +571,10 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
 	  this.baraccidentals[pitch]=-1; break;
 	case "natural":
 	  this.baraccidentals[pitch]=0; break;
+		case "dblsharp":
+			this.baraccidentals[pitch]=2; break;
+		case "dblflat":
+			this.baraccidentals[pitch]=-2; break;
 	}
       }
       

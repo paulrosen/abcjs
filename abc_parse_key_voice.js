@@ -34,7 +34,7 @@ ABC().use(function() {
 		var key4flat = {acc: 'flat', note: 'd'};
 		var key5flat = {acc: 'flat', note: 'G'};
 		var key6flat = {acc: 'flat', note: 'c'};
-		var key7flat = {acc: 'flat', note: 'f'};
+		var key7flat = {acc: 'flat', note: 'F'};
 
 		var keys = {
 			'C#': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ],
@@ -232,20 +232,32 @@ ABC().use(function() {
 				acc.verticalPos -= 7;
 				if (acc.verticalPos >= 11 || (acc.verticalPos === 10 && acc.acc === 'flat'))
 					acc.verticalPos -= 7;
+				if (acc.note === 'A' && acc.acc === 'sharp' )
+					acc.verticalPos -=7;
+				if ((acc.note === 'G' || acc.note === 'F') && acc.acc === 'flat' )
+					acc.verticalPos -=7;
 			});
 			if (key.impliedNaturals)
 				key.impliedNaturals.each(function(acc) {
 					acc.verticalPos -= 7;
 					if (acc.verticalPos >= 11 || (acc.verticalPos === 10 && acc.acc === 'flat'))
 						acc.verticalPos -= 7;
+					if (acc.note === 'A' && acc.acc === 'sharp' )
+						acc.verticalPos -=7;
+					if ((acc.note === 'G' || acc.note === 'F') && acc.acc === 'flat' )
+						acc.verticalPos -=7;
 				});
 		} else if (mid < -4) {
 			key.accidentals.each(function(acc) {
 				acc.verticalPos -= 7;
+				if (mid === -8 && (acc.note === 'f' || acc.note === 'g') && acc.acc === 'sharp' )
+					acc.verticalPos -=7;
 			});
 			if (key.impliedNaturals)
 				key.impliedNaturals.each(function(acc) {
 					acc.verticalPos -= 7;
+					if (mid === -8 && (acc.note === 'f' || acc.note === 'g') && acc.acc === 'sharp' )
+						acc.verticalPos -=7;
 				});
 		} else if (mid >= 7) {
 			key.accidentals.each(function(acc) {
@@ -383,7 +395,7 @@ ABC().use(function() {
 						var kk;
 						for (var k = 0; k < multilineVars.key.accidentals.length; k++) {
 							for (kk = 0; kk < oldKey.accidentals.length; kk++) {
-								if (multilineVars.key.accidentals[k].note === oldKey.accidentals[kk].note)
+								if (oldKey.accidentals[kk].note && multilineVars.key.accidentals[k].note.toLowerCase() === oldKey.accidentals[kk].note.toLowerCase())
 									oldKey.accidentals[kk].note = null;
 							}
 						}

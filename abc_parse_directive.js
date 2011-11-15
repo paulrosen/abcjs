@@ -90,6 +90,25 @@ ABC().use(function() {
 			return null;
 		};
 
+		var addMultilineVar = function(key, cmd, tokens, min, max) {
+			if (tokens.length !== 1 || tokens[0].type !== 'number')
+				return "Directive \"" + cmd + "\" requires a number as a parameter.";
+			var i = tokens[0].intt;
+			if (min !== undefined && i < min)
+				return "Directive \"" + cmd + "\" requires a number greater than or equal to " + min + " as a parameter.";
+			if (max !== undefined && i > max)
+				return "Directive \"" + cmd + "\" requires a number less than or equal to " + max + " as a parameter.";
+			multilineVars[key] = i;
+			return null;
+		};
+
+		var addMultilineVarBool = function(key, cmd, tokens) {
+			var str = addMultilineVar(key, cmd, tokens, 0, 1);
+			if (str !== null) return str;
+			multilineVars[key] = (multilineVars[key] === 1);
+			return null;
+		};
+
 		var tokens = tokenizer.tokenize(str, 0, str.length);	// 3 or more % in a row, or just spaces after %% is just a comment
 		if (tokens.length === 0 || tokens[0].type !== 'alpha') return null;
 		var restOfString = str.substring(str.indexOf(tokens[0].token)+tokens[0].token.length);
@@ -214,24 +233,21 @@ ABC().use(function() {
 				}
 				break;
 			case "barsperstaff":
-				if (tokens.length !== 1 || tokens[0].type !== 'number')
-					return "Directive \"" + cmd + "\" requires a number as a parameter.";
-				multilineVars.barsperstaff = tokens[0].intt;
+				scratch = addMultilineVar('barsperstaff', cmd, tokens);
+				if (scratch !== null) return scratch;
 				break;
 			case "staffnonote":
-				if (tokens.length !== 1 || tokens[0].type !== 'number')
-					return "Directive \"" + cmd + "\" requires a number as a parameter.";
-				multilineVars.staffnonote = tokens[0].token === "0" ? true : false;
+				scratch = addMultilineVarBool('staffnonote', cmd, tokens);
+				if (scratch !== null) return scratch;
+				break;
+			case "printtempo":
+				scratch = addMultilineVarBool('printTempo', cmd, tokens);
+				if (scratch !== null) return scratch;
 				break;
 			case "measurenb":
-				if (tokens.length !== 1 || tokens[0].type !== 'number')
-					return "Directive \"" + cmd + "\" requires a number as a parameter.";
-				multilineVars.barNumbers = tokens[0].intt;
-				break;
 			case "barnumbers":
-				if (tokens.length !== 1 || tokens[0].type !== 'number')
-					return "Directive \"" + cmd + "\" requires a number as a parameter.";
-				multilineVars.barNumbers = tokens[0].intt;
+				scratch = addMultilineVar('barNumbers', cmd, tokens);
+				if (scratch !== null) return scratch;
 				break;
 			case "begintext":
 				multilineVars.inTextBlock = true;
@@ -453,9 +469,9 @@ ABC().use(function() {
 							var p2 = getNextMidiParam(midi);
 							// NOTE: The program number has an off by one error in ABC, so we add one here.
 							if (p2)
-								midi_param = { channel: p1, program: p2+1};
+								midi_param = { channel: p1, program: p2};
 							else
-								midi_param = { program: p1+1};
+								midi_param = { program: p1};
 						}
 					} else {
 						// TODO-PER: handle the params for all MIDI commands

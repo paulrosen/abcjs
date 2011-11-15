@@ -519,7 +519,7 @@ function ABCTripletElem (number, anchor1, anchor2, above) {
 ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
   // TODO end and beginning of line
   if (this.anchor1 && this.anchor2) {
-    var ypos = this.above?14:-1;
+    var ypos = this.above?16:-1;	// PER: Just bumped this up from 14 to make (3z2B2B2 (3B2B2z2 succeed. There's probably a better way.
     
     if (this.anchor1.parent.beam && 
 	this.anchor1.parent.beam===this.anchor2.parent.beam) {
@@ -543,7 +543,7 @@ ABCTripletElem.prototype.draw = function (printer, linestartx, lineendx) {
     }
     
     
-    printer.printText(xsum/2, ypos+ydelta, this.number, "middle").attr({"font-size":"10px"});
+    printer.printText(xsum/2, ypos+ydelta, this.number, "middle").attr({"font-size":"10px", 'font-style': 'italic' });
 
   }
 };
@@ -618,8 +618,8 @@ ABCBeamElem.prototype.drawBeam = function(printer) {
 
   var average = this.average();
   var barpos = (this.isgrace)? 5:7;
-  var barminpos = 5;
   this.asc = (this.forceup || this.isgrace || average<6) && (!this.forcedown); // hardcoded 6 is B
+  var barminpos = this.asc ? 5 : 8;	//PER: I just bumped up the minimum height for notes with descending stems to clear a rest in the middle of them.
   this.pos = Math.round(this.asc ? Math.max(average+barpos,this.max+barminpos) : Math.min(average-barpos,this.min-barminpos));
   var slant = this.elems[0].abcelem.averagepitch-this.elems[this.elems.length-1].abcelem.averagepitch;
   if (this.isflat) slant=0;

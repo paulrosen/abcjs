@@ -288,6 +288,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				}
 				if (tokens.length !== 0) throw "Unexpected string at end of Q: field";
 			}
+			if (multilineVars.printTempo === false)
+				tempo.suppress = true;
 			return {type: delaySet?'delaySet':'immediate', tempo: tempo};
 		} catch (msg) {
 			warn(msg, line, start);

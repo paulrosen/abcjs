@@ -342,7 +342,7 @@ ABCPrinter.prototype.printTune = function (abctune) {
   if (abctune.metaText.author) {this.paper.text(this.width, this.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12}); this.y+=15;}
   if (abctune.metaText.origin) {this.paper.text(this.width, this.y, "(" + abctune.metaText.origin + ")").attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12});this.y+=15;}
   if (abctune.metaText.composer) {this.paper.text(this.width, this.y, abctune.metaText.composer).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12});this.y+=15;}
-  if (abctune.metaText.tempo) {
+  if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
     var x = 50;
     if (abctune.metaText.tempo.preString) {
       var text = this.paper.text(x, this.y+20, abctune.metaText.tempo.preString).attr({"text-anchor":"start"});
