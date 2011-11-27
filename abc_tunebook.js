@@ -51,26 +51,10 @@ function AbcTuneBook(book) {
 	});
 }
 
-// A quick way to render a tune from javascript when interactivity is not required.
-// This is used when a javascript routine has some abc text that it wants to render
-// in a div or collection of divs. One tune or many can be rendered.
-//
-// parameters:
-//		output: an array of divs that the individual tunes are rendered to.
-//			If the number of tunes exceeds the number of divs in the array, then
-//			only the first tunes are rendered. If the number of divs exceeds the number
-//			of tunes, then the unused divs are cleared. The divs can be passed as either
-//			elements or strings of ids. If ids are passed, then the div MUST exist already.
-//			(if a single element is passed, then it is an implied array of length one.)
-//			(if a null is passed for an element, or the element doesn't exist, then that tune is skipped.)
-//		abc: text representing a tune or an entire tune book in ABC notation.
-//		renderParams: hash of:
-//			startingTune: an index, starting at zero, representing which tune to start rendering at.
-//				(If this element is not present, then rendering starts at zero.)
-function renderAbc(output, abc, parserParams, printerParams, renderParams) {
-    var isArray = function(testObject) {
-        return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
-    };
+function renderEngine(callback, output, abc, parserParams, renderParams) {
+	var isArray = function(testObject) {
+		return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
+	};
 
 	// check and normalize input parameters
 	if (output === undefined || abc === undefined)
@@ -79,8 +63,6 @@ function renderAbc(output, abc, parserParams, printerParams, renderParams) {
 		output = [ output ];
 	if (parserParams === undefined)
 		parserParams = {};
-	if (printerParams === undefined)
-		printerParams = {};
 	if (renderParams === undefined)
 		renderParams = {};
 	var currentTune = renderParams.startingTune ? renderParams.startingTune : 0;
@@ -99,11 +81,66 @@ function renderAbc(output, abc, parserParams, printerParams, renderParams) {
 			if (currentTune < book.tunes.length) {
 				abcParser.parse(book.tunes[currentTune].abc, parserParams);
 				var tune = abcParser.getTune();
-				var paper = Raphael(div, 800, 400);
-				var printer = new ABCPrinter(paper, printerParams);
-				printer.printABC(tune);
+				callback(div, tune);
 			}
 		}
 		currentTune++;
 	}
+}
+
+// A quick way to render a tune from javascript when interactivity is not required.
+// This is used when a javascript routine has some abc text that it wants to render
+// in a div or collection of divs. One tune or many can be rendered.
+//
+// parameters:
+//		output: an array of divs that the individual tunes are rendered to.
+//			If the number of tunes exceeds the number of divs in the array, then
+//			only the first tunes are rendered. If the number of divs exceeds the number
+//			of tunes, then the unused divs are cleared. The divs can be passed as either
+//			elements or strings of ids. If ids are passed, then the div MUST exist already.
+//			(if a single element is passed, then it is an implied array of length one.)
+//			(if a null is passed for an element, or the element doesn't exist, then that tune is skipped.)
+//		abc: text representing a tune or an entire tune book in ABC notation.
+//		renderParams: hash of:
+//			startingTune: an index, starting at zero, representing which tune to start rendering at.
+//				(If this element is not present, then rendering starts at zero.)
+//			width: 800 by default. The width in pixels of the output paper
+function renderAbc(output, abc, parserParams, printerParams, renderParams) {
+	function callback(div, tune) {
+		var width = renderParams ? renderParams.width ? renderParams.width : 800 : 800;
+		var paper = Raphael(div, width, 400);
+		if (printerParams === undefined)
+			printerParams = {};
+		var printer = new ABCPrinter(paper, printerParams);
+		printer.printABC(tune);
+	}
+
+	renderEngine(callback, output, abc, parserParams, renderParams);
+}
+
+// A quick way to render a tune from javascript when interactivity is not required.
+// This is used when a javascript routine has some abc text that it wants to render
+// in a div or collection of divs. One tune or many can be rendered.
+//
+// parameters:
+//		output: an array of divs that the individual tunes are rendered to.
+//			If the number of tunes exceeds the number of divs in the array, then
+//			only the first tunes are rendered. If the number of divs exceeds the number
+//			of tunes, then the unused divs are cleared. The divs can be passed as either
+//			elements or strings of ids. If ids are passed, then the div MUST exist already.
+//			(if a single element is passed, then it is an implied array of length one.)
+//			(if a null is passed for an element, or the element doesn't exist, then that tune is skipped.)
+//		abc: text representing a tune or an entire tune book in ABC notation.
+//		renderParams: hash of:
+//			startingTune: an index, starting at zero, representing which tune to start rendering at.
+//				(If this element is not present, then rendering starts at zero.)
+function renderMidi(output, abc, parserParams, midiParams, renderParams) {
+	function callback(div, tune) {
+		if (midiParams === undefined)
+			midiParams = {};
+		var midiwriter = new ABCMidiWriter(div, midiParams);
+		midiwriter.writeABC(tune);
+	}
+
+	renderEngine(callback, output, abc, parserParams, renderParams);
 }

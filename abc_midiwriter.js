@@ -65,6 +65,7 @@ function JavaMidi(midiwriter) {
   this.tempo = 60;
   this.midiapi = MIDIPlugin;
   this.midiwriter = midiwriter;
+	this.noteOnAndChannel = "%90";
 }
 
 JavaMidi.prototype.setTempo = function (qpm) {
@@ -212,6 +213,7 @@ JavaMidi.prototype.doPlay = function() {
 function Midi() {
   this.trackstrings="";
   this.trackcount = 0;
+	this.noteOnAndChannel = "%90";
 }
 
 Midi.prototype.setTempo = function (qpm) {
