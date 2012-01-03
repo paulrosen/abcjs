@@ -67,7 +67,16 @@ EditArea.prototype.getSelection = function() {
 };
 
 EditArea.prototype.setSelection = function(start, end) {
-  this.textarea.setSelectionRange(start,end);
+	if(this.textarea.setSelectionRange)
+	   this.textarea.setSelectionRange(start, end);
+	else if(this.textarea.createTextRange) {
+		// For IE8
+	   var e = this.textarea.createTextRange();
+	   e.collapse(true);
+	   e.moveEnd('character', end);
+	   e.moveStart('character', start);
+	   e.select();
+	}
   this.textarea.focus();
 };
 
