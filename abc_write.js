@@ -246,7 +246,7 @@ ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
   var ux = dx/norm;
   var uy = dy/norm;
 
-  var flatten = norm/5;
+  var flatten = norm/3.5;
   var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
 
   var controlx1 = x1+flatten*ux-curve*uy;

@@ -191,15 +191,33 @@ ABCLayout.prototype.printBeam = function() {
   
   if (this.getElem().startBeam && !this.getElem().endBeam) {
     var beamelem = new ABCBeamElem(this.stemdir);
+	   // PER: need two passes: the first one decides if the stems are up or down.
+	  // TODO-PER: This could be more efficient.
+	  var oldPos = this.pos;
+	  var abselem;
+	  while (this.getElem()) {
+		  abselem = this.printNote(this.getElem(),true,true);
+		  beamelem.add(abselem);
+		  if (this.getElem().endBeam)
+			break;
+		  this.pos++;
+		}
+	  var dir = beamelem.calcDir();
+	  this.pos = oldPos;
+
+	  beamelem = new ABCBeamElem(dir ? "up" : "down");
+	  var oldDir = this.stemdir;
+	  this.stemdir = dir ? "up" : "down";
     while (this.getElem()) {
-      var abselem = this.printNote(this.getElem(),true);
+      abselem = this.printNote(this.getElem(),true);
       abselemset.push(abselem);
-      beamelem.add(abselem);
+		beamelem.add(abselem);
       if (this.getElem().endBeam) {
 		break;
       }
       this.pos++;
     }
+	  this.stemdir = oldDir;
     this.voice.addOther(beamelem);
   } else {
     abselemset[0] = this.printNote(this.getElem());
@@ -222,7 +240,7 @@ function sortPitch(elem) {
   } while (!sorted);
 }
 
-ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true for drawing stemless notehead
+ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var grace= null;
   this.roomtaken = 0; // room needed to the left of the note
@@ -259,6 +277,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
     case "spacer":
       c="";
     }
+	  if (!dontDraw)
     notehead = this.printNoteHead(abselem, c, {verticalPos:restpitch}, null, 0, -this.roomtaken, null, dot, 0, 1);
     if (notehead) abselem.addHead(notehead);
     this.roomtaken+=this.accidentalshiftx;
@@ -310,7 +329,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 	c="noteheads.quarter";
       }
 
-      if (((this.stemdir=="up" || dir=="down") && p==pp-1) || ((this.stemdir=="down" || dir=="up") && p==0)) { // place to put slurs if not already on pitches
+      if (!dontDraw && ((this.stemdir=="up" || dir=="down") && p==pp-1) || ((this.stemdir=="down" || dir=="up") && p==0)) { // place to put slurs if not already on pitches
         if (elem.startSlur) {
           if (!elem.pitches[p].startSlur) elem.pitches[p].startSlur = []; //TODO possibly redundant, provided array is not optional
 	  for (var i=0; i<elem.startSlur.length; i++) {
@@ -318,7 +337,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 	  }
         }
 
-        if (elem.endSlur) {
+        if (!dontDraw && elem.endSlur) {
           if (!elem.pitches[p].endSlur)  elem.pitches[p].endSlur = [];  //TODO possibly redundant, provided array is not optional
 	  for (var i=0; i<elem.endSlur.length; i++) {
 	    elem.pitches[p].endSlur.push(elem.endSlur[i]);
@@ -326,6 +345,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
         }
       }
 
+		if (!dontDraw)
       notehead = this.printNoteHead(abselem, c, elem.pitches[p], dir, 0, -this.roomtaken, flag, dot, dotshiftx, 1);
       if (notehead) abselem.addHead(notehead);
       this.roomtaken += this.accidentalshiftx;
@@ -355,7 +375,7 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
     abselem.addRight(new ABCRelativeElement(lyricStr, 0, lyricStr.length*5, 0, {type:"debugLow"}));
   }
   
-  if (elem.gracenotes !== undefined) {
+  if (!dontDraw && elem.gracenotes !== undefined) {
     var gracescale = 3/5;
     var gracebeam = null;
     if (elem.gracenotes.length>1) {
@@ -396,16 +416,19 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 	abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
       }
       
-      if (i==0 && !this.isBagpipes && !(elem.rest && (elem.rest.type=="spacer"||elem.rest.type=="invisible"))) this.voice.addOther(new ABCTieElem(grace, notehead, false, true));
+      if (i===0 && !this.isBagpipes && !(elem.rest && (elem.rest.type==="spacer"||elem.rest.type==="invisible"))) this.voice.addOther(new ABCTieElem(grace, notehead, false, true));
     }
 
     if (gracebeam) {
       this.voice.addOther(gracebeam);
     } 
   }
-  
+
   if (elem.decoration) {
-    this.printDecoration(elem.decoration, elem.maxpitch, (notehead)?notehead.w:0, abselem, this.roomtaken);
+    var addMark = this.printDecoration(elem.decoration, elem.maxpitch, (notehead)?notehead.w:0, abselem, this.roomtaken);
+	  if (addMark) {
+		  abselem.klass = "mark";
+	  }
   }
   
   if (elem.barNumber) {
@@ -459,10 +482,11 @@ ABCLayout.prototype.printNote = function(elem, nostem) { //stem presence: true f
 
   if (elem.startTriplet) {
     this.triplet = new ABCTripletElem(elem.startTriplet, notehead, null, true); // above is opposite from case of slurs
+	  if (!dontDraw)
     this.voice.addOther(this.triplet);
   }
 
-  if (elem.endTriplet) {
+  if (elem.endTriplet && this.triplet) {
     this.triplet.anchor2 = notehead;
     this.triplet = null;
   }
@@ -584,16 +608,23 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
   var unknowndecs = [];
   var yslot = (pitch>9) ? pitch+3 : 12;
   var ypos;
+	var below = false;	// PER: whether decoration goes above or below.
+	var yslotB = (pitch<1) ? pitch-5 : -3;
   var i;
   roomtaken = roomtaken || 0;
-  (pitch===5) && (yslot=14); // avoid upstem of the A
+  if (pitch===5) yslot=14; // avoid upstem of the A
+	var addMark = false; // PER: to allow the user to add a class whereever
 
   for (i=0;i<decoration.length; i++) { // treat staccato first (may need to shift other markers) //TODO, same with tenuto?
     if (decoration[i]==="staccato") {
       ypos = ((this.stemdir=="down" || pitch>=6) && this.stemdir!=="up") ? pitch+2:pitch-2;
-      (pitch===4) && ypos--; // don't place on a stave line
-      ((pitch===6) || (pitch===8)) && ypos++;
-      (pitch>9) && yslot++; // take up some room of those that are above
+      if (pitch===4 && this.stemdir==="up") ypos--; // don't place on a stave line
+		if (pitch===4 && this.stemdir==="down") ypos++;
+		if (pitch===6 && this.stemdir==="down") ypos++;
+		if (pitch===6 && this.stemdir==="up") ypos--;
+		if (pitch===8 && this.stemdir==="down") ypos++;
+		if (pitch===8 && this.stemdir==="up") ypos--;
+      if (pitch>9) yslot++; // take up some room of those that are above
       var deltax = width/2;
       if (this.glyphs.getSymbolAlign("scripts.staccato")!=="center") {
 	deltax -= (this.glyphs.getSymbolWidth(dec)/2);
@@ -611,6 +642,7 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
   }
 
   for (i=0;i<decoration.length; i++) {
+	  below = false;
     switch(decoration[i]) {
     case "trill":dec="scripts.trill";break;
     case "roll": dec="scripts.roll"; break; //TODO put abc2ps roll in here
@@ -626,7 +658,7 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
     case "downbow": dec="scripts.downbow";break;
     case "upbow": dec="scripts.upbow";break;
     case "fermata": dec="scripts.ufermata"; break;
-    case "invertedfermata": dec="scripts.dfermata"; break;
+    case "invertedfermata": below = true; dec="scripts.dfermata"; break;
     case "breath": dec=","; break;
     case "accent": dec="scripts.sforzato"; break;
     case "tenuto": dec="scripts.tenuto"; break;
@@ -638,20 +670,27 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
     case "////": compoundDec=["flags.ugrace", 4]; continue;
     case "p":
     case "mp": 
-    case "ppp": 
-    case "pppp": 
+    case "pp":
+    case "ppp":
+    case "pppp":
     case "f":
     case "ff": 
     case "fff": 
     case "ffff":
     case "sfz": 
-    case "mf": dec = decoration[i]; break;
+    case "mf": below = true; dec = decoration[i]; break;
+		case "mark": addMark = true;  continue;
     default:
     unknowndecs[unknowndecs.length]=decoration[i];
     continue;
     }
-    ypos=yslot;
-    yslot+=3;
+	  if (below) {
+		  ypos = yslotB;
+		  yslotB -= 4;
+	  } else {
+		  ypos=yslot;
+		  yslot+=3;
+	  }
     var deltax = width/2;
     if (this.glyphs.getSymbolAlign(dec)!=="center") {
       deltax -= (this.glyphs.getSymbolWidth(dec)/2);
@@ -668,6 +707,7 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
 	  }
   }
   (unknowndecs.length>0) && abselem.addChild(new ABCRelativeElement(unknowndecs.join(','), 0, 0, 0, {type:"debug"}));
+	return addMark;
 };
 
 ABCLayout.prototype.printBarLine = function (elem) {

@@ -344,6 +344,8 @@ ABCAbsoluteElement.prototype.draw = function (printer, bartop) {
     this.elemset.push(this.children[i].draw(printer,this.x, bartop));
   }
   this.elemset.push(printer.endGroup());
+	if (this.klass)
+		this.setClass("mark", "", "#00ff00");
   var self = this;
   this.elemset.mouseup(function (e) {
     printer.notifySelect(self);
@@ -373,12 +375,33 @@ ABCAbsoluteElement.prototype.draw = function (printer, bartop) {
     this.elemset.drag(move, start, up);
 };
 
+ABCAbsoluteElement.prototype.isIE=/*@cc_on!@*/false;//IE detector
+
+ABCAbsoluteElement.prototype.setClass = function (addClass, removeClass, color) {
+  this.elemset.attr({fill:color});
+	if (!this.isIE) {
+		for (var i = 0; i < this.elemset.length; i++) {
+			if (this.elemset[i][0].setAttribute) {
+				var kls = this.elemset[i][0].getAttribute("class");
+				if (!kls) kls = "";
+				kls = kls.replace(removeClass, "");
+				kls = kls.replace(addClass, "");
+				if (addClass.length > 0) {
+					if (kls.length > 0 && kls.charAt(kls.length-1) != ' ') kls += " ";
+					kls += addClass;
+				}
+				this.elemset[i][0].setAttribute("class", kls);
+			}
+		}
+	}
+};
+
 ABCAbsoluteElement.prototype.highlight = function () {
-  this.elemset.attr({fill:"#ff0000"});
+	this.setClass("note_selected", "", "#ff0000");
 };
 
 ABCAbsoluteElement.prototype.unhighlight = function () {
-  this.elemset.attr({fill:"#000000"});
+	this.setClass("", "note_selected", "#000000");
 };
 
 function ABCRelativeElement(c, dx, w, pitch, opt) {
@@ -476,36 +499,44 @@ ABCTieElem.prototype.draw = function (printer, linestartx, lineendx) {
     lineendx = this.endlimitelem.x;
   } 
 
+	// PER: We might have to override the natural slur direction if the first and last notes are not in the
+	// save direction. We always put the slur up in this case. The one case that works out wrong is that we always
+	// want the slur to be up when the last note is stem down. We can tell the stem direction if the top is
+	// equal to the pitch: if so, there is no stem above it.
+	if (!this.force && this.anchor2 && this.anchor2.pitch === this.anchor2.top)
+		this.above = true;
+
   if (this.anchor1) {
     linestartx = this.anchor1.x;
-    startpitch = this.anchor1.pitch;
+    startpitch = this.above ? this.anchor1.top : this.anchor1.pitch;
     if (!this.anchor2) {
-      endpitch = this.anchor1.pitch;
+      endpitch = this.above ? this.anchor1.top : this.anchor1.pitch;
     }
   }
 
   if (this.anchor2) {
     lineendx = this.anchor2.x;
-    endpitch = this.anchor2.pitch;
+    endpitch = this.above ? this.anchor2.top : this.anchor2.pitch;
     if (!this.anchor1) {
-      startpitch = this.anchor2.pitch;
+      startpitch = this.above ? this.anchor2.top : this.anchor2.pitch;
     }
   }
 
-  if (this.anchor1 && this.anchor2) {
-    if ((!this.force && this.anchor1.parent.beam && this.anchor2.parent.beam && 
-	 this.anchor1.parent.beam.asc===this.anchor2.parent.beam.asc) ||
-	((this.force=="up") || this.force=="down") && this.anchor1.parent.beam && this.anchor2.parent.beam && this.anchor1.parent.beam==this.anchor2.parent.beam) {
-      this.above = !this.anchor1.parent.beam.asc;
-      var preservebeamdir = true;
-    }
-  }
+//  if (this.anchor1 && this.anchor2) {
+//    if ((!this.force && this.anchor1.parent.beam && this.anchor2.parent.beam &&
+//	 this.anchor1.parent.beam.asc===this.anchor2.parent.beam.asc) ||
+//	((this.force==="up") || this.force==="down") && this.anchor1.parent.beam && this.anchor2.parent.beam && this.anchor1.parent.beam===this.anchor2.parent.beam) {
+//      this.above = !this.anchor1.parent.beam.asc;
+//      preservebeamdir = true;
+//    }
+//  }
 
-  var pitchshift = 0;
-  if (this.force=="up" && !preservebeamdir) pitchshift = 7;
-  if (this.force=="down" && !preservebeamdir) pitchshift = -7;
+//  var pitchshift = 0;
+//  if (this.force==="up" && !preservebeamdir) pitchshift = 7;
+//  if (this.force==="down" && !preservebeamdir) pitchshift = -7;
 
-  printer.drawArc(linestartx, lineendx, startpitch+pitchshift, endpitch+pitchshift,  this.above);
+//	printer.debugMsgLow(linestartx, debugMsg);
+  printer.drawArc(linestartx, lineendx, startpitch, endpitch,  this.above);
 
 };
 
@@ -589,7 +620,7 @@ ABCBeamElem.prototype.add = function(abselem) {
   this.allrests = this.allrests && abselem.abcelem.rest;
   abselem.beam = this;
   this.elems.push(abselem);
-  var pitch = abselem.abcelem.averagepitch;
+  //var pitch = abselem.abcelem.averagepitch;
   this.total += pitch; // TODO CHORD (get pitches from abselem.heads)
   if (!this.min || abselem.abcelem.minpitch<this.min) {
     this.min = abselem.abcelem.minpitch;
@@ -613,12 +644,18 @@ ABCBeamElem.prototype.draw = function(printer) {
   this.drawStems(printer);
 };
 
+ABCBeamElem.prototype.calcDir = function() {
+	var average = this.average();
+//	var barpos = (this.isgrace)? 5:7;
+	this.asc = (this.forceup || this.isgrace || average<6) && (!this.forcedown); // hardcoded 6 is B
+	return this.asc;
+}
 
 ABCBeamElem.prototype.drawBeam = function(printer) {
+	var average = this.average();
+	var barpos = (this.isgrace)? 5:7;
+	this.calcDir();
 
-  var average = this.average();
-  var barpos = (this.isgrace)? 5:7;
-  this.asc = (this.forceup || this.isgrace || average<6) && (!this.forcedown); // hardcoded 6 is B
   var barminpos = this.asc ? 5 : 8;	//PER: I just bumped up the minimum height for notes with descending stems to clear a rest in the middle of them.
   this.pos = Math.round(this.asc ? Math.max(average+barpos,this.max+barminpos) : Math.min(average-barpos,this.min-barminpos));
   var slant = this.elems[0].abcelem.averagepitch-this.elems[this.elems.length-1].abcelem.averagepitch;
@@ -636,6 +673,15 @@ ABCBeamElem.prototype.drawBeam = function(printer) {
   if(this.asc) this.startx+=starthead.w-0.6;
   this.endx = endhead.x;
   if(this.asc) this.endx+=endhead.w;
+
+	// PER: if the notes are too high or too low, make the beam go down to the middle
+	if (this.asc && this.pos < 6) {
+		this.starty = printer.calcY(6);
+		this.endy = printer.calcY(6);
+	} else if (!this.asc && this.pos > 6) {
+		this.starty = printer.calcY(6);
+		this.endy = printer.calcY(6);
+	}
 
   var pathString = "M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
   "L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z";
