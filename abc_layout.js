@@ -608,8 +608,9 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
   var unknowndecs = [];
   var yslot = (pitch>9) ? pitch+3 : 12;
   var ypos;
+	var dir = (this.stemdir==="down" || pitch>=6) && this.stemdir!=="up";
 	var below = false;	// PER: whether decoration goes above or below.
-	var yslotB = (pitch<1) ? pitch-5 : -3;
+	var yslotB = (pitch<1) ? pitch-9 : -6;
   var i;
   roomtaken = roomtaken || 0;
   if (pitch===5) yslot=14; // avoid upstem of the A
@@ -617,7 +618,7 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
 
   for (i=0;i<decoration.length; i++) { // treat staccato first (may need to shift other markers) //TODO, same with tenuto?
     if (decoration[i]==="staccato") {
-      ypos = ((this.stemdir=="down" || pitch>=6) && this.stemdir!=="up") ? pitch+2:pitch-2;
+      ypos = (dir) ? pitch+2:pitch-2;
       if (pitch===4 && this.stemdir==="up") ypos--; // don't place on a stave line
 		if (pitch===4 && this.stemdir==="down") ypos++;
 		if (pitch===6 && this.stemdir==="down") ypos++;
@@ -698,9 +699,9 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
     abselem.addChild(new ABCRelativeElement(dec, deltax, this.glyphs.getSymbolWidth(dec), ypos));
   }
   if (compoundDec) {	// PER: added new decorations
-	  ypos = ((this.stemdir=="down" || pitch>=6) && this.stemdir!=="up") ? pitch+1:pitch+9;
+	  ypos = (dir) ? pitch+1:pitch+9;
 	  deltax = width/2;
-	  deltax += ((this.stemdir=="down" || pitch>=6) && this.stemdir!=="up") ? -5 : 3;
+	  deltax += (dir) ? -5 : 3;
 	  for (var xx = 0; xx < compoundDec[1]; xx++) {
 		  ypos -= 1;
 		  abselem.addChild(new ABCRelativeElement(compoundDec[0], deltax, this.glyphs.getSymbolWidth(compoundDec[0]), ypos));
