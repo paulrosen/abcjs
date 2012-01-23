@@ -83,6 +83,7 @@ ABCLayout.prototype.getNextElem = function() {
 };
 
 ABCLayout.prototype.printABCLine = function(staffs) {
+    this.minY = 2;  // PER: This is the lowest that any note reaches. It will be used to set the dynamics row.
   this.staffgroup = new ABCStaffGroupElement();
   for (this.s = 0; this.s < staffs.length; this.s++) {
     this.printABCStaff(staffs[this.s]);
@@ -293,6 +294,7 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
     }
     elem.averagepitch = sum/elem.pitches.length;
     elem.minpitch = elem.pitches[0].verticalPos;
+      this.minY = Math.min(elem.minpitch, this.minY);
     elem.maxpitch = elem.pitches[elem.pitches.length-1].verticalPos;
     var dir = (elem.averagepitch>=6) ? "down": "up";
     if (this.stemdir) dir=this.stemdir;
@@ -363,6 +365,8 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
       dx = (dir==="down" || abselem.heads.length === 0)?0:abselem.heads[0].w;
       width = (dir=="down")?1:-1;
       abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+        this.minY = Math.min(p1, this.minY);
+        this.minY = Math.min(p2, this.minY);
     }
     
   }
@@ -424,7 +428,7 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
     } 
   }
 
-  if (elem.decoration) {
+  if (!dontDraw && elem.decoration) {
     var addMark = this.printDecoration(elem.decoration, elem.maxpitch, (notehead)?notehead.w:0, abselem, this.roomtaken);
 	  if (addMark) {
 		  abselem.klass = "mark";
@@ -605,12 +609,14 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
 ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem, roomtaken) {
   var dec;
   var compoundDec;	// PER: for decorations with two symbols
+  var diminuendo;
+    var crescendo;
   var unknowndecs = [];
   var yslot = (pitch>9) ? pitch+3 : 12;
   var ypos;
 	var dir = (this.stemdir==="down" || pitch>=6) && this.stemdir!=="up";
 	var below = false;	// PER: whether decoration goes above or below.
-	var yslotB = (pitch<1) ? pitch-9 : -6;
+	var yslotB = this.minY - 4; // (pitch<1) ? pitch-9 : -6;
   var i;
   roomtaken = roomtaken || 0;
   if (pitch===5) yslot=14; // avoid upstem of the A
@@ -679,8 +685,27 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
     case "fff": 
     case "ffff":
     case "sfz": 
-    case "mf": below = true; dec = decoration[i]; break;
+    case "mf":
+        var elem = new ABCDynamicDecoration(abselem, decoration[i]);
+        this.voice.addOther(elem);
+        continue;
 		case "mark": addMark = true;  continue;
+        case "diminuendo(":
+            ABCLayout.prototype.startDiminuendoX = abselem;
+            diminuendo = undefined;
+            continue;
+        case "diminuendo)":
+            diminuendo = { start: ABCLayout.prototype.startDiminuendoX, stop: abselem};
+            ABCLayout.prototype.startDiminuendoX = undefined;
+            continue;
+        case "crescendo(":
+            ABCLayout.prototype.startCrescendoX = abselem;
+            crescendo = undefined;
+            continue;
+        case "crescendo)":
+            crescendo = { start: ABCLayout.prototype.startCrescendoX, stop: abselem};
+            ABCLayout.prototype.startCrescendoX = undefined;
+            continue;
     default:
     unknowndecs[unknowndecs.length]=decoration[i];
     continue;
@@ -707,7 +732,16 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
 		  abselem.addChild(new ABCRelativeElement(compoundDec[0], deltax, this.glyphs.getSymbolWidth(compoundDec[0]), ypos));
 	  }
   }
-  (unknowndecs.length>0) && abselem.addChild(new ABCRelativeElement(unknowndecs.join(','), 0, 0, 0, {type:"debug"}));
+    if (diminuendo) {
+        var elem = new ABCCrescendoElem(diminuendo.start, diminuendo.stop, ">");
+        this.voice.addOther(elem);
+    }
+    if (crescendo) {
+        var elem = new ABCCrescendoElem(crescendo.start, crescendo.stop, "<");
+        this.voice.addOther(elem);
+    }
+  if (unknowndecs.length>0)
+      abselem.addChild(new ABCRelativeElement(unknowndecs.join(','), 0, 0, 0, {type:"debug"}));
 	return addMark;
 };
 

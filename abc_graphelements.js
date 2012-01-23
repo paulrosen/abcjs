@@ -430,7 +430,7 @@ ABCRelativeElement.prototype.draw = function (printer, x, bartop) {
   case "debug":
     this.graphelem = printer.debugMsg(this.x, this.c); break;
   case "debugLow":
-    this.graphelem = printer.debugMsgLow(this.x, this.c); break;
+    this.graphelem = printer.printLyrics(this.x, this.c); break;
   case "text":
     this.graphelem = printer.printText(this.x, this.pitch, this.c); 
     break;
@@ -539,6 +539,41 @@ ABCTieElem.prototype.draw = function (printer, linestartx, lineendx) {
   printer.drawArc(linestartx, lineendx, startpitch, endpitch,  this.above);
 
 };
+
+function ABCDynamicDecoration(anchor, dec) {
+    this.anchor = anchor;
+    this.dec = dec;
+}
+
+ABCDynamicDecoration.prototype.draw = function(printer, linestartx, lineendx) {
+    var ypos = printer.layouter.minY - 7;
+    var scalex = 1; // TODO-PER: do the scaling
+    var scaley = 1;
+    printer.printSymbol(this.anchor.x, ypos, this.dec, scalex, scaley);
+}
+
+function ABCCrescendoElem (anchor1, anchor2, dir) {
+    this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
+    this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
+    this.dir = dir; // either "<" or ">"
+}
+
+ABCCrescendoElem.prototype.draw = function (printer, linestartx, lineendx) {
+    if (this.dir === "<") {
+        this.drawLine(printer, 0, -4);
+        this.drawLine(printer, 0, 4);
+    } else {
+        this.drawLine(printer, -4, 0);
+        this.drawLine(printer, 4, 0);
+    }
+}
+
+ABCCrescendoElem.prototype.drawLine = function (printer, y1, y2) {
+    var ypos = printer.layouter.minY - 7;
+    var pathString = sprintf("M %f %f L %f %f",
+        this.anchor1.x, printer.calcY(ypos)+y1-4, this.anchor2.x, printer.calcY(ypos)+y2-4);
+    printer.printPath({path:pathString, stroke:"#000000"});
+}
 
 function ABCTripletElem (number, anchor1, anchor2, above) {
   this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)

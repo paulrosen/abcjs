@@ -269,7 +269,13 @@ ABCPrinter.prototype.debugMsg = function(x, msg) {
 };
 
 ABCPrinter.prototype.debugMsgLow = function(x, msg) {
-  return this.paper.text(x, this.staffbottom, msg).attr({"font-family":"serif", "font-size":12,"text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
+    return this.paper.text(x, this.calcY(this.layouter.minY-7), msg).attr({"font-family":"serif", "font-size":12, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
+};
+
+ABCPrinter.prototype.printLyrics = function(x, msg) {
+    var el = this.paper.text(x, this.calcY(this.layouter.minY-7), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
+    el[0].setAttribute("class", "abc-lyric");
+    return el;
 };
 
 ABCPrinter.prototype.calcY = function(ofs) {
