@@ -4,9 +4,10 @@ function setAttributes(elm, attrs){
   return elm;
 }
 
-oldunload = window.onbeforeunload;
+window.oldunload = window.onbeforeunload;
 window.onbeforeunload = function() {
-  oldunload();
+    if (window.oldunload)
+        window.oldunload();
   if (typeof(MIDIPlugin) != "undefined" && MIDIPlugin) { // PER: take care of crash in IE 8
     MIDIPlugin.closePlugin();
   }
@@ -608,7 +609,7 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
       mididuration = 0; // put these to zero as we've moved forward in the midi
       this.tieduration=0;
     }
-  } else {
+  } else if (elem.rest && elem.rest.type !== 'spacer') {
     this.midi.addRest(mididuration);
   }
 
