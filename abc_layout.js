@@ -331,7 +331,9 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
 	c="noteheads.quarter";
       }
 
-      if (!dontDraw && ((this.stemdir=="up" || dir=="down") && p==pp-1) || ((this.stemdir=="down" || dir=="up") && p==0)) { // place to put slurs if not already on pitches
+		var isTopWhenStemIsDown = (this.stemdir=="up" || dir=="up") && p==0;
+		var isBottomWhenStemIsUp = (this.stemdir=="down" || dir=="down") && p==pp-1;
+      if (!dontDraw && (isTopWhenStemIsDown || isBottomWhenStemIsUp)) { // place to put slurs if not already on pitches
         if (elem.startSlur) {
           if (!elem.pitches[p].startSlur) elem.pitches[p].startSlur = []; //TODO possibly redundant, provided array is not optional
 	  for (var i=0; i<elem.startSlur.length; i++) {
@@ -429,7 +431,7 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
   }
 
   if (!dontDraw && elem.decoration) {
-    var addMark = this.printDecoration(elem.decoration, elem.maxpitch, (notehead)?notehead.w:0, abselem, this.roomtaken);
+    var addMark = this.printDecoration(elem.decoration, elem.maxpitch, (notehead)?notehead.w:0, abselem, this.roomtaken, dir, elem.minpitch);
 	  if (addMark) {
 		  abselem.klass = "mark";
 	  }
@@ -606,7 +608,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
 
 };
 
-ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem, roomtaken) {
+ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem, roomtaken, dir, minPitch) {
   var dec;
   var compoundDec;	// PER: for decorations with two symbols
   var diminuendo;
@@ -614,7 +616,7 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
   var unknowndecs = [];
   var yslot = (pitch>9) ? pitch+3 : 12;
   var ypos;
-	var dir = (this.stemdir==="down" || pitch>=6) && this.stemdir!=="up";
+	//var dir = (this.stemdir==="down" || pitch>=6) && this.stemdir!=="up";
 	var below = false;	// PER: whether decoration goes above or below.
 	var yslotB = this.minY - 4; // (pitch<1) ? pitch-9 : -6;
   var i;
@@ -624,13 +626,18 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
 
   for (i=0;i<decoration.length; i++) { // treat staccato first (may need to shift other markers) //TODO, same with tenuto?
     if (decoration[i]==="staccato") {
-      ypos = (dir) ? pitch+2:pitch-2;
-      if (pitch===4 && this.stemdir==="up") ypos--; // don't place on a stave line
-		if (pitch===4 && this.stemdir==="down") ypos++;
-		if (pitch===6 && this.stemdir==="down") ypos++;
-		if (pitch===6 && this.stemdir==="up") ypos--;
-		if (pitch===8 && this.stemdir==="down") ypos++;
-		if (pitch===8 && this.stemdir==="up") ypos--;
+      ypos = (dir==="down") ? pitch+2:minPitch-2;
+		// don't place on a stave line. The stave lines are 2,4,6,8,10
+		switch (ypos) {
+			case 2:
+			case 4:
+			case 6:
+			case 8:
+			case 10:
+					if (dir === "up") ypos--;
+					else ypos++;
+				break;
+		}
       if (pitch>9) yslot++; // take up some room of those that are above
       var deltax = width/2;
       if (this.glyphs.getSymbolAlign("scripts.staccato")!=="center") {
@@ -686,8 +693,8 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
     case "ffff":
     case "sfz": 
     case "mf":
-        var elem = new ABCDynamicDecoration(abselem, decoration[i]);
-        this.voice.addOther(elem);
+        var ddelem = new ABCDynamicDecoration(abselem, decoration[i]);
+        this.voice.addOther(ddelem);
         continue;
 		case "mark": addMark = true;  continue;
         case "diminuendo(":
@@ -733,12 +740,12 @@ ABCLayout.prototype.printDecoration = function(decoration, pitch, width, abselem
 	  }
   }
     if (diminuendo) {
-        var elem = new ABCCrescendoElem(diminuendo.start, diminuendo.stop, ">");
-        this.voice.addOther(elem);
+        var delem = new ABCCrescendoElem(diminuendo.start, diminuendo.stop, ">");
+        this.voice.addOther(delem);
     }
     if (crescendo) {
-        var elem = new ABCCrescendoElem(crescendo.start, crescendo.stop, "<");
-        this.voice.addOther(elem);
+        var celem = new ABCCrescendoElem(crescendo.start, crescendo.stop, "<");
+        this.voice.addOther(celem);
     }
   if (unknowndecs.length>0)
       abselem.addChild(new ABCRelativeElement(unknowndecs.join(','), 0, 0, 0, {type:"debug"}));
@@ -788,7 +795,7 @@ ABCLayout.prototype.printBarLine = function (elem) {
   }
 
   if (elem.decoration) {
-    this.printDecoration(elem.decoration, 12, (thick)?3:1, abselem);
+    this.printDecoration(elem.decoration, 12, (thick)?3:1, abselem, 0, "down", 2);
   }
 
   if (thick) {
