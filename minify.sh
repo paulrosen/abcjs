@@ -6,4 +6,6 @@ java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o abcjs_basic_$1-min.js ab
 java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o abcjs_editor_$1-min.js abcjs_editor.js
 java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o abcjs_plugin-nojquery_$1-min.js abcjs_plugin.js
 cat jquery-1.5.min.js abcjs_plugin-nojquery_$1-min.js > abcjs_plugin_$1-min.js
+cat greasemonkey.js abcjs_plugin_$1-min.js > abcjs_plugin_$1.user.js
+#cat greasemonkey.js jquery-1.5.min.js abcjs_plugin.js > abcjs_plugin_$1.user.js
 

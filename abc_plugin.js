@@ -19,17 +19,22 @@
 
 function ABCPlugin(jq) {
   this.$ = jq;
-  this.show_midi = true;
+	var is_user_script = false;
+	try {
+		is_user_script = abcjs_is_user_script;
+	} catch (ex) {
+	}
+  this.show_midi = !is_user_script || this.$.browser.mozilla;	// midi currently only works in Firefox, so in the userscript, don't complicate it.
   this.hide_abc = false;
   this.render_before = false;
   this.midi_options = {};
-  this.parse_options = {};
+  //this.parse_options = {};
   this.render_options = {};
   this.render_classname = "abcrendered";
   this.text_classname = "abctext";
   this.auto_render_threshold = 20;
-  this.show_text = "show score for: "
-  this.hide_text = "hide score for: "
+  this.show_text = "show score for: ";
+  //this.hide_text = "hide score for: ";
 }
 var abc_plugin = new ABCPlugin(jQuery);
 
@@ -59,8 +64,10 @@ ABCPlugin.prototype.getABCContainingElements = function(elem) {
   this.$(elem).contents().each(function() { 
       if (this.nodeType == 3 && !includeself) {
 	if (this.nodeValue.match(/^\s*X:/m)) {
-	  results = results.add(self.$(elem));
-	  includeself = true;
+		if (this.parentNode.tagName.toLowerCase() !== 'textarea') {
+		  results = results.add(self.$(elem));
+		  includeself = true;
+		}
 	}
       } else if (this.nodeType==1 && !self.$(this).is("textarea")) {
 	results = results.add(self.getABCContainingElements(this));
@@ -95,26 +102,32 @@ ABCPlugin.prototype.convertToDivs = function (elem) {
 	  } 
 	}
 	if (inabc) {
-	  abctext += text.replace(/\n$/,"").replace(/^\n/,"");
+	  abctext += text.replace(/\n+/,"");
 	  abcdiv.append(self.$(node));
 	} 
-      } else if (inabc && self.$(node).is("br") && brcount==0) {
+      } else if (inabc && self.$(node).is("br")) {
 	abctext += "\n";
 	abcdiv.append(self.$(node));
 	brcount++;
+	  } else if (inabc && node.nodeType === 1) {
+		  abctext += "\n";
+		 	abcdiv.append(self.$(node));
+		  // just swallow this.
       } else if (inabc) { // second br or whitespace textnode
 	inabc = false;
 	brcount=0;
+	abctext = abctext.replace(/\n+/,"\n"); // get rid of extra blank lines
 	abcdiv.data("abctext",abctext);
 	results = results.add(abcdiv);
       }
     });
   if (inabc) {
+	  abctext = abctext.replace(/\n+$/,"\n").replace(/^\n+/,"\n"); // get rid of extra blank lines
     abcdiv.data("abctext",abctext);
     results = results.add(abcdiv);
   }
   return results.get();
-}
+};
 
 ABCPlugin.prototype.render = function (contextnode, abcstring) {
   var abcdiv = this.$("<div class='"+this.render_classname+"'></div>");
@@ -149,7 +162,7 @@ ABCPlugin.prototype.render = function (contextnode, abcstring) {
 	  }
 	}
 	if (ABCMidiWriter && self.show_midi) {
-	  midiwriter = new ABCMidiWriter(abcdiv.get(0),self.midi_options);
+	  var midiwriter = new ABCMidiWriter(abcdiv.get(0),self.midi_options);
 	  midiwriter.writeABC(tune);
 	}
       };
@@ -171,6 +184,16 @@ ABCPlugin.prototype.render = function (contextnode, abcstring) {
     } catch (e) {
     this.errors+=e;
    }
+};
+
+// There may be a variable defined which controls whether to automatically run the script. If it isn't
+// there then it will throw an exception, so we'll catch it here.
+var autostart = true;
+try {
+	autostart = abcjs_plugin_autostart;
+} catch (ex) {
+	// It's ok to fail, and we don't have to do anything.
 }
 
-jQuery(document).ready(start_abc);
+if (autostart)
+	jQuery(document).ready(start_abc);

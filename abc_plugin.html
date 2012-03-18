@@ -6,14 +6,18 @@
         <script src="http://code.jquery.com/jquery-1.4.2.min.js" type="text/javascript"></script>
 	<script src="raphael.js" type="text/javascript"></script>
 	<script src="sprintf.js" type="text/javascript"></script>
+	<script src="abc_graphelements.js" type="text/javascript"></script>
+	<script src="scalefont.js" type="text/javascript"></script>
+	<script src="scalefontemmentaler.js" type="text/javascript"></script>
         <script src="abc_glyphs.js" type="text/javascript"></script>
-        <script src="abc_graphelements.js" type="text/javascript"></script>
         <script src="abc_layout.js" type="text/javascript"></script>
         <script src="abc_write.js" type="text/javascript"></script>
 	<script src="abc_tunebook.js" type="text/javascript"></script>
-        <script src="abc_parse_header.js" type="text/javascript"></script>
-        <script src="abc_tune.js" type="text/javascript"></script>
-	<script src="abc_tokenizer.js" type="text/javascript"></script>
+	<script src="abc_parse_key_voice.js" type="text/javascript"></script>
+	<script src="abc_parse_directive.js" type="text/javascript"></script>
+	<script src="abc_tune.js" type="text/javascript"></script>
+<script src="abc_tokenizer.js" type="text/javascript"></script>
+	<script src="abc_parse_header.js" type="text/javascript"></script>
         <script src="abc_parse.js" type="text/javascript"></script>
         <script src="abc_midiwriter.js" type="text/javascript"></script>
 
@@ -39,6 +43,32 @@ background-color:#eea;
 
 <body>
 <div class="content">I've just installed 1.0.1. Then I tried editing the previous post but it still wasn't showing when I put the tune in the middle (although it fixed your post).<br /><br />Here's another attempt<br /><br />X:1<br />T: 1 Speed the Plough<br />M:4/4<br />L:1/8<br />C:Trad<br />K:G<br />|:GABc dedB|dedB dedB|c2ec B2dB|c2A2A2BA|<br />|GABc dedB|dedB dedB|c2ec B2dB|A2F2G4:|<br />|:g2gf g2Bd|g2fe dBGB|c2ec B2dB|c2A2A2df|<br />|g2gfg2Bd|g2fe dBGB|c2ec B2dB|A2F2G4:|<br /><br />Chris</div>
+
+from thesession:
+<p>
+X: 1<br />
+T: Me Mother Won't Let Me Marry<br />
+M: 6/8<br />
+L: 1/8<br />
+R: jig<br />
+K: Dmaj<br />
+DFA B2A|FGF F2E|DFA B2A|G3-G2 F|<br />
+
+EGE EFG|c2c c2B|A^GA B2A|F3-F2 E|<br />
+
+DFA B2A|F=GF F2E|DFA B2A|G3-G2 F|<br />
+
+E2E EFG|c2c c2B|A^GA ABc|d3 e2 z|]<br />
+
+f2f f2e|d2d d2e|ded c2d|e3-e2 f|<br />
+
+g2g g2e|c2c c2B|A^GA B2A|F3-F2 d|<br />
+
+f2f f2e|d2d d2e|ded c2d|e3-e2 f|<br />
+
+g2g g2e|c2c c2B|A^GA ABc|d3-d2 z|]<br />
+
+</p>
 
 In this document, small bits of abc are interpreted
 <br>
@@ -105,7 +135,7 @@ G
 </span>
 
 <textarea name="wpTextbox1" id="wpTextbox1" cols="80" rows="25" tabindex="1" accesskey=",">X:1 
-T:Ciaran Ó Raghallaigh
+T:Ciaran ï¿½ Raghallaigh
 T:Master Seamus
 C:Charlie Lennon
 M:4/4
