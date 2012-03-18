@@ -17,6 +17,13 @@
 /*extern AbcTuneBook, renderAbc */
 /*global AbcParse, document, Raphael, ABCPrinter */
 
+function abcNumberOfTunes(abc) {
+	var tunes = abc.split("\nX:");
+	var num = tunes.length;
+	if (num === 0) num = 1;
+	return num;
+}
+
 function AbcTuneBook(book) {
 	var This = this;
 	var directives = "";
