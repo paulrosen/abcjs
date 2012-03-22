@@ -317,9 +317,14 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
       }
     }
     
-    
+   	// The accidentalSlot will hold a list of all the accidentals on this chord. Each element is a vertical place,
+   	// and contains a pitch, which is the last pitch that contains an accidental in that slot. The slots are numbered
+	 // from closest to the note to farther left. We only need to know the last accidental we placed because
+	  // we know that the pitches are sorted by now.
+    this.accidentalSlot = [];
+
     for (p=0; p<elem.pitches.length; p++) {
-      
+
       if (!nostem) {
 	if ((dir=="down" && p!==0) || (dir=="up" && p!=pp-1)) { // not the stemmed elem of the chord
 	  flag = null;
@@ -559,8 +564,23 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
     case "natural":
       symb = "accidentals.nat";
     }
-    this.accidentalshiftx = (this.glyphs.getSymbolWidth(symb)*scale+2);
-    abselem.addExtra(new ABCRelativeElement(symb, extrax-this.accidentalshiftx, this.glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
+	  // if a note is at least a sixth away, it can share a slot with another accidental
+	  var accSlotFound = false;
+	  var accPlace = extrax;
+	  for (var j = 0; j < this.accidentalSlot.length; j++) {
+		  if (pitch - this.accidentalSlot[j][0] >= 6) {
+			  this.accidentalSlot[j][0] = pitch;
+			  accPlace = this.accidentalSlot[j][1];
+			  accSlotFound = true;
+			  break;
+		  }
+	  }
+	  if  (accSlotFound === false) {
+		  accPlace -= (this.glyphs.getSymbolWidth(symb)*scale+2);
+		  this.accidentalSlot.push([pitch,accPlace]);
+		  this.accidentalshiftx = (this.glyphs.getSymbolWidth(symb)*scale+2);
+	  }
+    abselem.addExtra(new ABCRelativeElement(symb, accPlace, this.glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
   }
   
   if (pitchelem.endTie) {
