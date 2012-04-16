@@ -178,6 +178,9 @@ ABCLayout.prototype.printABCElement = function() {
     abselem.addChild(new ABCRelativeElement(elem.title, 0, 0, 18, {type:"text", attributes:{"font-weight":"bold", "font-size":"16px", "font-family":"serif"}}));
     elemset[0] = abselem;
     break;
+//	  case "tempo":
+//		this.printer.y = this.printer.printTempo(elem, this.printer.paper, this.printer.layouter, this.printer.y, this.printer, this.printer.x);
+//		break;
   default: 
     var abselem = new ABCAbsoluteElement(elem,0,0);
     abselem.addChild(new ABCRelativeElement("element type "+elem.el_type, 0, 0, 0, {type:"debug"}));
@@ -336,10 +339,19 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
 	c="noteheads.quarter";
       }
 
+		// The highest position for the sake of placing slurs is itself if the slur is internal. It is the highest position possible if the slur is for the whole chord.
+		// If the note is the only one in the chord, then any slur it has counts as if it were on the whole chord.
+		elem.pitches[p].highestVert = elem.pitches[p].verticalPos;
 		var isTopWhenStemIsDown = (this.stemdir=="up" || dir=="up") && p==0;
 		var isBottomWhenStemIsUp = (this.stemdir=="down" || dir=="down") && p==pp-1;
       if (!dontDraw && (isTopWhenStemIsDown || isBottomWhenStemIsUp)) { // place to put slurs if not already on pitches
-        if (elem.startSlur) {
+
+		  if (elem.startSlur || pp === 1) {
+		  elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
+		  if (this.stemdir=="up" || dir=="up")
+					elem.pitches[p].highestVert += 6;	// If the stem is up, then compensate for the length of the stem
+		  }
+			  if (elem.startSlur) {
           if (!elem.pitches[p].startSlur) elem.pitches[p].startSlur = []; //TODO possibly redundant, provided array is not optional
 	  for (var i=0; i<elem.startSlur.length; i++) {
 	    elem.pitches[p].startSlur.push(elem.startSlur[i]);
@@ -347,6 +359,9 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
         }
 
         if (!dontDraw && elem.endSlur) {
+			elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
+			if (this.stemdir=="up" || dir=="up")
+				elem.pitches[p].highestVert += 6;	// If the stem is up, then compensate for the length of the stem
           if (!elem.pitches[p].endSlur)  elem.pitches[p].endSlur = [];  //TODO possibly redundant, provided array is not optional
 	  for (var i=0; i<elem.endSlur.length; i++) {
 	    elem.pitches[p].endSlur.push(elem.endSlur[i]);
@@ -539,6 +554,8 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
       abselem.addRight(new ABCRelativeElement("dots.dot", notehead.w+dotshiftx-2+5*dot, this.glyphs.getSymbolWidth("dots.dot"), pitch+dotadjusty));
     }
   }
+	if (notehead)
+		notehead.highestVert = pitchelem.highestVert;
   
   if (pitchelem.accidental) {
     var symb; 

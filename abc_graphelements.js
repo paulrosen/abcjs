@@ -498,7 +498,6 @@ ABCTieElem.prototype.draw = function (printer, linestartx, lineendx) {
   if (this.endlimitelem) {
     lineendx = this.endlimitelem.x;
   } 
-
 	// PER: We might have to override the natural slur direction if the first and last notes are not in the
 	// save direction. We always put the slur up in this case. The one case that works out wrong is that we always
 	// want the slur to be up when the last note is stem down. We can tell the stem direction if the top is
@@ -508,17 +507,17 @@ ABCTieElem.prototype.draw = function (printer, linestartx, lineendx) {
 
   if (this.anchor1) {
     linestartx = this.anchor1.x;
-    startpitch = this.above ? this.anchor1.top : this.anchor1.pitch;
+    startpitch = this.above ? this.anchor1.highestVert : this.anchor1.pitch;
     if (!this.anchor2) {
-      endpitch = this.above ? this.anchor1.top : this.anchor1.pitch;
+      endpitch = this.above ? this.anchor1.highestVert : this.anchor1.pitch;
     }
   }
 
   if (this.anchor2) {
     lineendx = this.anchor2.x;
-    endpitch = this.above ? this.anchor2.top : this.anchor2.pitch;
+    endpitch = this.above ? this.anchor2.highestVert : this.anchor2.pitch;
     if (!this.anchor1) {
-      startpitch = this.above ? this.anchor2.top : this.anchor2.pitch;
+      startpitch = this.above ? this.anchor2.highestVert : this.anchor2.pitch;
     }
   }
 

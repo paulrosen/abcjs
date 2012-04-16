@@ -310,8 +310,56 @@ ABCPrinter.prototype.printABC = function(abctunes) {
 
 };
 
+ABCPrinter.prototype.printTempo = function (tempo, paper, layouter, y, printer, x) {
+	if (tempo.preString) {
+		var text = paper.text(x, y + 20, tempo.preString).attr({"text-anchor":"start"});
+		x += (text.getBBox().width + 10);
+	}
+	if (tempo.duration) {
+		var temposcale = 0.75;
+		var tempopitch = 14.5;
+		var duration = tempo.duration[0]; // TODO when multiple durations
+		var abselem = new ABCAbsoluteElement(tempo, duration, 1);
+		var durlog = Math.floor(Math.log(duration) / Math.log(2));
+		var dot = 0;
+		for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
+		var c = layouter.chartable["note"][-durlog];
+		var flag = layouter.chartable["uflags"][-durlog];
+		var temponote = layouter.printNoteHead(abselem,
+				c,
+				{verticalPos:tempopitch},
+				"up",
+				0,
+				0,
+				flag,
+				dot,
+				0,
+				temposcale
+		);
+		abselem.addHead(temponote);
+		if (duration < 1) {
+			var p1 = tempopitch + 1 / 3 * temposcale;
+			var p2 = tempopitch + 7 * temposcale;
+			var dx = temponote.dx + temponote.w;
+			var width = -0.6;
+			abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type":"stem", "pitch2":p2, linewidth:width}));
+		}
+		abselem.x = x;
+		abselem.draw(printer, null);
+		x += (abselem.w + 5);
+		text = paper.text(x, y + 20, "= " + tempo.bpm).attr({"text-anchor":"start"});
+		x += text.getBBox().width + 10;
+	}
+	if (tempo.postString) {
+		paper.text(x, y + 20, tempo.postString).attr({"text-anchor":"start"});
+	}
+	y += 15;
+	return y;
+};
+
 ABCPrinter.prototype.printTune = function (abctune) {
-  this.layouter = new ABCLayout(this.glyphs, abctune.formatting.bagpipes); 
+  this.layouter = new ABCLayout(this.glyphs, abctune.formatting.bagpipes);
+	this.layouter.printer = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
   if (abctune.media === 'print') {
        // TODO create the page the size of
     //  tune.formatting.pageheight by tune.formatting.pagewidth
@@ -349,50 +397,7 @@ ABCPrinter.prototype.printTune = function (abctune) {
   if (abctune.metaText.origin) {this.paper.text(this.width, this.y, "(" + abctune.metaText.origin + ")").attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12});this.y+=15;}
   if (abctune.metaText.composer) {this.paper.text(this.width, this.y, abctune.metaText.composer).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12});this.y+=15;}
   if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
-    var x = 50;
-    if (abctune.metaText.tempo.preString) {
-      var text = this.paper.text(x, this.y+20, abctune.metaText.tempo.preString).attr({"text-anchor":"start"});
-      x+=(text.getBBox().width+10);
-    }
-    if (abctune.metaText.tempo.duration) {
-      var temposcale = 0.75;
-      var tempopitch = 14.5;
-      var duration = abctune.metaText.tempo.duration[0]; // TODO when multiple durations
-      var abselem = new ABCAbsoluteElement(abctune.metaText.tempo, duration, 1);
-      var durlog = Math.floor(Math.log(duration)/Math.log(2));
-      var dot=0;
-      for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
-      var c = this.layouter.chartable["note"][-durlog];
-      var flag = this.layouter.chartable["uflags"][-durlog];
-      var temponote = this.layouter.printNoteHead(abselem, 
-						  c, 
-  {verticalPos:tempopitch},
-						  "up",
-						  0,
-						  0,
-						  flag,
-						  dot,
-						  0,
-						  temposcale
-						  );
-      abselem.addHead(temponote);
-      if (duration<1) {
-	var p1 = tempopitch+1/3*temposcale;
-	var p2 = tempopitch+7*temposcale;
-	var dx = temponote.dx + temponote.w;
-	var width = -0.6;
-	abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
-      }
-      abselem.x = x;
-      abselem.draw(this,null);
-      x += (abselem.w+5);
-      text = this.paper.text(x, this.y+20, "= " + abctune.metaText.tempo.bpm).attr({"text-anchor":"start"});
-      x +=text.getBBox().width+10;
-    }
-    if (abctune.metaText.tempo.postString) {
-      this.paper.text(x, this.y+20, abctune.metaText.tempo.postString).attr({"text-anchor":"start"});
-    }
-    this.y+=15;
+	  this.y = this.printTempo(abctune.metaText.tempo, this.paper, this.layouter, this.y, this, 50);
   }
   this.staffgroups = [];
   var maxwidth = this.width;
