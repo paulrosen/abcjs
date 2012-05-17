@@ -6,6 +6,11 @@
 /*global ABC */
 /*extern parseDirective */
 
+// Do the same syntax as YUI so we can expand it later.
+function ABC() {
+	return { use: function(callback) { callback(); } };
+}
+
 var parseDirective = {};
 
 ABC().use(function() {

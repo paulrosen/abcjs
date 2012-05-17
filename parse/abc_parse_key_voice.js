@@ -1,11 +1,6 @@
 /*extern ABC, parseKeyVoice */
 /*global parseDirective */
 
-// Do the same syntax as YUI so we can expand it later.
-function ABC() {
-	return { use: function(callback) { callback(); } };
-}
-
 var parseKeyVoice = {};
 
 ABC().use(function() {
