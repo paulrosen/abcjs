@@ -160,8 +160,8 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			return;
 		}
 
-		var before = line.substring(start, equals).strip();
-		var after = line.substring(equals+1).strip();
+		var before = window.ABCJS.parse.strip(line.substring(start, equals));
+		var after = window.ABCJS.parse.strip(line.substring(equals+1));
 
 		if (before.length !== 1) {
 			warn("Macro definitions can only be one character", line, start);
@@ -182,7 +182,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 	};
 
 	this.setDefaultLength = function(line, start, end) {
-		var len = line.substring(start, end).gsub(" ", "");
+		var len = window.ABCJS.parse.gsub(line.substring(start, end), " ", "");
 		var len_arr = len.split('/');
 		if (len_arr.length === 2) {
 			var n = parseInt(len_arr[0]);
@@ -386,11 +386,11 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					var tempo = this.setTempo(line, i+2, e);
 					if (tempo.type === 'delaySet') tune.appendElement('tempo', -1, -1, this.calcTempo(tempo.tempo));
 					else if (tempo.type === 'immediate') tune.appendElement('tempo', -1, -1, tempo.tempo);
-				return [ e, line.charAt(i), line.substring(i+2).strip()];
+				return [ e, line.charAt(i), window.ABCJS.parse.strip(line.substring(i+2))];
 				case "V:":
 					parseKeyVoice.parseVoice(line, 2, line.length);
 //						startNewLine();
-					return [ line.length, line.charAt(i), line.substring(i+2).strip()];
+					return [ line.length, line.charAt(i), window.ABCJS.parse(line.substring(i+2))];
 				default:
 					// TODO: complain about unhandled header
 			}
@@ -415,7 +415,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 	};
 
 	this.parseHeader = function(line) {
-		if (line.startsWith('%%')) {
+		if (window.ABCJS.parse.startsWith(line, '%%')) {
 			var err = parseDirective.addDirective(line.substring(2));
 			if (err) warn(err, line, 2);
 			return {};

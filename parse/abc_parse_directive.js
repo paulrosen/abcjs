@@ -65,14 +65,14 @@ ABC().use(function() {
 		};
 		var getFontParameter = function(tokens) {
 			var font = {};
-			var token = tokens.last();
+			var token = window.ABCJS.parse.last(tokens);
 			if (token.type === 'number') {
 				font.size = parseInt(token.token);
 				tokens.pop();
 			}
 			if (tokens.length > 0) {
 				var scratch = "";
-				tokens.each(function(tok) {
+				window.ABCJS.parse.each(tokens, function(tok) {
 					if (tok.token !== '-') {
 						if (scratch.length > 0) scratch += ' ';
 						scratch += tok.token;
@@ -208,7 +208,7 @@ ABC().use(function() {
 				return null;
 			case "scale":
 				scratch = "";
-				tokens.each(function(tok) {
+				window.ABCJS.parse.each(tokens, function(tok) {
 					scratch += tok.token;
 				});
 				num = parseFloat(scratch);
@@ -326,7 +326,7 @@ ABC().use(function() {
 					if (newStaff || multilineVars.staves.length === 0) {
 						multilineVars.staves.push({index: multilineVars.staves.length, numVoices: 0});
 					}
-					var staff = multilineVars.staves.last();
+					var staff = window.ABCJS.parse.last(multilineVars.staves);
 					if (bracket !== undefined) staff.bracket = bracket;
 					if (brace !== undefined) staff.brace = brace;
 					if (continueBar) staff.connectBarLines = 'end';

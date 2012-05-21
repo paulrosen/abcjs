@@ -212,8 +212,8 @@ function ABCEditor(editarea, params) {
   };
 
   this.removeClassName = function(element, className) {
-    element.className = element.className.replace(
-      new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' ').strip();
+    element.className = window.ABCJS.parse.strip(element.className.replace(
+      new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
     return element;
   };
 
@@ -339,8 +339,8 @@ ABCEditor.prototype.setDirtyStyle = function(isDirty) {
   };
 
   var removeClassName = function(element, className) {
-    element.className = element.className.replace(
-      new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' ').strip();
+    element.className = window.ABCJS.parse.strip(element.className.replace(
+      new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
     return element;
   };
   

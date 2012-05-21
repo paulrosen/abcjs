@@ -666,7 +666,7 @@ ABCMidiWriter.prototype.setKeySignature = function(elem) {
     elem.accidentals=[{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}];
   }
   if (!elem.accidentals) return;
-  elem.accidentals.each(function(acc) {
+	window.ABCJS.parse.each(elem.accidentals, function(acc) {
 		var d = (acc.acc === "sharp") ? 1 : (acc.acc === "natural") ?0 : -1;
 
 		var lowercase = acc.note.toLowerCase();

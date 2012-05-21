@@ -91,10 +91,10 @@ function AbcTune() {
 			}
 		}
 		if (anyDeleted) {
-			this.lines = this.lines.compact();
-			this.lines.each(function(line) {
+			this.lines = window.ABCJS.parse.compact(this.lines);
+			window.ABCJS.parse.each(this.lines, function(line) {
 				if (line.staff)
-					line.staff = line.staff.compact();
+					line.staff = window.ABCJS.parse.compact(line.staff);
 			});
 		}
 
@@ -114,7 +114,7 @@ function AbcTune() {
 										if (n < this.lines[i].staff[s].voices[v].length - 1) {
 											if (i === this.lines.length - 1) {
 												var cp = JSON.parse(JSON.stringify(this.lines[i]));
-												this.lines.push(Object.clone(cp));
+												this.lines.push(window.ABCJS.parse.clone(cp));
 												for (var ss = 0; ss < this.lines[i+1].staff.length; ss++) {
 													for (var vv = 0; vv < this.lines[i+1].staff[ss].voices.length; vv++)
 														this.lines[i+1].staff[ss].voices[vv] = [];
@@ -155,9 +155,9 @@ function AbcTune() {
 				}
 			}
 			if (anyDeleted) {
-				this.lines.each(function(line) {
+				window.ABCJS.parse.each(this.lines, function(line) {
 					if (line.staff)
-						line.staff = line.staff.compact();
+						line.staff = window.ABCJS.parse.compact(line.staff);
 				});
 			}
 		}
@@ -178,7 +178,7 @@ function AbcTune() {
 					}
 					if (currSlur[chordPos] === undefined) {
 						var offNum = chordPos*100;
-						obj.endSlur.each(function(x) { if (offNum === x) --offNum; });
+						window.ABCJS.parse.each(obj.endSlur, function(x) { if (offNum === x) --offNum; });
 						currSlur[chordPos] = [offNum];
 					}
 				}
@@ -201,12 +201,12 @@ function AbcTune() {
 				var nextNum = chordPos*100+1;
 				for (var i = 0; i < num; i++) {
 					if (usedNums) {
-						usedNums.each(function(x) { if (nextNum === x) ++nextNum; });
-						usedNums.each(function(x) { if (nextNum === x) ++nextNum; });
-						usedNums.each(function(x) { if (nextNum === x) ++nextNum; });
+						window.ABCJS.parse.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
+						window.ABCJS.parse.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
+						window.ABCJS.parse.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
 					}
-					currSlur[chordPos].each(function(x) { if (nextNum === x) ++nextNum; });
-					currSlur[chordPos].each(function(x) { if (nextNum === x) ++nextNum; });
+					window.ABCJS.parse.each(currSlur[chordPos], function(x) { if (nextNum === x) ++nextNum; });
+					window.ABCJS.parse.each(currSlur[chordPos], function(x) { if (nextNum === x) ++nextNum; });
 
 					currSlur[chordPos].push(nextNum);
 					obj.startSlur.push({ label: nextNum });
@@ -398,11 +398,11 @@ function AbcTune() {
 		var pushNote = function(hp) {
 			if (hp.pitches !== undefined) {
 				var mid = This.lines[This.lineNum].staff[This.staffNum].clef.verticalPos;
-				hp.pitches.each(function(p) { p.verticalPos = p.pitch - mid; });
+				window.ABCJS.parse.each(hp.pitches, function(p) { p.verticalPos = p.pitch - mid; });
 			}
 			if (hp.gracenotes !== undefined) {
 				var mid2 = This.lines[This.lineNum].staff[This.staffNum].clef.verticalPos;
-				hp.gracenotes.each(function(p) { p.verticalPos = p.pitch - mid2; });
+				window.ABCJS.parse.each(hp.gracenotes, function(p) { p.verticalPos = p.pitch - mid2; });
 			}
 			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum].push(hp);
 		};
@@ -479,7 +479,7 @@ function AbcTune() {
 		}
 
 		// Clone the object because it will be sticking around for the next line and we don't want the extra fields in it.
-		var hashParams = Object.clone(hashParams2);
+		var hashParams = window.ABCJS.parse.clone(hashParams2);
 
 		// These elements should not be added twice, so if the element exists on this line without a note or bar before it, just replace the staff version.
 		var voice = this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum];

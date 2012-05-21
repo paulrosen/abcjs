@@ -87,7 +87,7 @@ function AbcParserLint() {
 	};
 
 	var appendPositioning = function(properties) {
-		var ret = Object.clone(properties);
+		var ret = window.ABCJS.parse.clone(properties);
 		ret.startChar = { type: 'number' }; //, output: 'hidden' };
 		ret.endChar = { type: 'number' }; //, output: 'hidden' };
 		return ret;
@@ -414,7 +414,7 @@ function AbcParserLint() {
 	};
 
 	var addProhibits = function(obj, arr) {
-		var ret = Object.clone(obj);
+		var ret = window.ABCJS.parse.clone(obj);
 		ret.prohibits = arr;
 		return ret;
 	};
@@ -533,14 +533,14 @@ function AbcParserLint() {
 	this.lint = function(tune, warnings) {
 		var ret = JSONSchema.validate(tune, musicSchema);
 		var err = "";
-		ret.errors.each(function(e) {
+		window.ABCJS.parse.each(ret.errors, function(e) {
 			err += e.property + ": " + e.message + "\n";
 		});
 		var out = ret.output.join("\n");
 
 		var warn = warnings === undefined ? "No errors" : warnings.join('\n');
-		warn = warn.gsub('<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">', '$$$$');
-		warn = warn.gsub('</span>', '$$$$');
+		warn = window.ABCJS.parse.gsub(warn, '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">', '$$$$');
+		warn = window.ABCJS.parse.gsub(warn, '</span>', '$$$$');
 		return "Error:------\n" + err + "\nObj:-------\n" + out + "\nWarn:------\n" + warn;
 	};
 }

@@ -268,10 +268,10 @@ ABCVoiceElement.prototype.draw = function (printer, bartop) {
   for (var i=0, ii=this.children.length; i<ii; i++) {
     this.children[i].draw(printer, (this.barto || i==ii-1)?bartop:0);
   }
-  this.beams.each(function(beam) {
+	window.ABCJS.parse.each(this.beams, function(beam) {
       beam.draw(printer); // beams must be drawn first for proper printing of triplets, slurs and ties.
     });
-  this.otherchildren.each(function(child) {
+	window.ABCJS.parse.each(this.otherchildren, function(child) {
       child.draw(printer,this.startx+10,width);
     });
 

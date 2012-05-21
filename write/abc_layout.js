@@ -395,7 +395,7 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
   
   if (elem.lyric !== undefined) {
     var lyricStr = "";
-    elem.lyric.each(function(ly) {
+	  window.ABCJS.parse.each(elem.lyric, function(ly) {
 	      lyricStr += ly.syllable + ly.divider + "\n";
       });
     abselem.addRight(new ABCRelativeElement(lyricStr, 0, lyricStr.length*5, 0, {type:"debugLow"}));
@@ -923,7 +923,7 @@ ABCLayout.prototype.printKeySignature = function(elem) {
   var abselem = new ABCAbsoluteElement(elem,0,10);
   var dx = 0;
   if (elem.accidentals) {
-	  elem.accidentals.each(function(acc) {
+	  window.ABCJS.parse.each(elem.accidentals, function(acc) {
 		var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
 		//var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
 		abselem.addRight(new ABCRelativeElement(symbol, dx, this.glyphs.getSymbolWidth(symbol), acc.verticalPos));

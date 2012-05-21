@@ -110,7 +110,7 @@ function AbcTokenizer() {
 		// The word 'clef' is optional, but if it appears, a clef MUST appear
 		var needsClef = false;
 		var strClef = str.substring(i);
-		if (strClef.startsWith('clef=')) {
+		if (window.ABCJS.parse.startsWith(strClef, 'clef=')) {
 			needsClef = true;
 			strClef = strClef.substring(5);
 			i += 5;
@@ -126,29 +126,29 @@ function AbcTokenizer() {
 			strClef = strClef.substring(j);
 		}
 		var name = null;
-		if (strClef.startsWith('treble'))
+		if (window.ABCJS.parse.startsWith(strClef, 'treble'))
 			name = 'treble';
-		else if (strClef.startsWith('bass3'))
+		else if (window.ABCJS.parse.startsWith(strClef, 'bass3'))
 			name = 'bass3';
-		else if (strClef.startsWith('bass'))
+		else if (window.ABCJS.parse.startsWith(strClef, 'bass'))
 			name = 'bass';
-		else if (strClef.startsWith('tenor'))
+		else if (window.ABCJS.parse.startsWith(strClef, 'tenor'))
 			name = 'tenor';
-		else if (strClef.startsWith('alto2'))
+		else if (window.ABCJS.parse.startsWith(strClef, 'alto2'))
 			name = 'alto2';
-		else if (strClef.startsWith('alto1'))
+		else if (window.ABCJS.parse.startsWith(strClef, 'alto1'))
 			name = 'alto1';
-		else if (strClef.startsWith('alto'))
+		else if (window.ABCJS.parse.startsWith(strClef, 'alto'))
 			name = 'alto';
-		else if (!bExplicitOnly && (needsClef && strClef.startsWith('none')))
+		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'none')))
 			name = 'none';
-		else if (strClef.startsWith('perc'))
+		else if (window.ABCJS.parse.startsWith(strClef, 'perc'))
 			name = 'perc';
-		else if (!bExplicitOnly && (needsClef && strClef.startsWith('C')))
+		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'C')))
 			name = 'tenor';
-		else if (!bExplicitOnly && (needsClef && strClef.startsWith('F')))
+		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'F')))
 			name = 'bass';
-		else if (!bExplicitOnly && (needsClef && strClef.startsWith('G')))
+		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'G')))
 			name = 'treble';
 		else
 			return {len: i+5, warn: "Unknown clef specified: " + strOrig};
@@ -268,7 +268,7 @@ function AbcTokenizer() {
 		var i = this.skipWhiteSpace(str);
 		if (finished(str, i))
 			return 0;
-		if (str.substring(i).startsWith(match))
+		if (window.ABCJS.parse.startsWith(str.substring(i), match))
 			return i+match.length;
 		return 0;
 	};
@@ -568,7 +568,7 @@ function AbcTokenizer() {
 		var arr = str.split('\\');
 		if (arr.length === 1) return str;
 		var out = null;
-		arr.each(function(s) {
+		window.ABCJS.parse.each(arr, function(s) {
 			if (out === null)
 				out = s;
 			else {
@@ -642,9 +642,9 @@ function AbcTokenizer() {
 	};
 
 	this.theReverser = function(str) {
-		if (str.endsWith(", The"))
+		if (window.ABCJS.parse.endsWith(str, ", The"))
 			return "The " + str.substring(0, str.length-5);
-		if (str.endsWith(", A"))
+		if (window.ABCJS.parse.endsWith(str, ", A"))
 			return "A " + str.substring(0, str.length-3);
 		return str;
 	};
@@ -652,8 +652,8 @@ function AbcTokenizer() {
 	this.stripComment = function(str) {
 		var i = str.indexOf('%');
 		if (i >= 0)
-			return str.substring(0, i).strip();
-		return str.strip();
+			return window.ABCJS.parse.strip(str.substring(0, i));
+		return window.ABCJS.parse.strip(str);
 	};
 
 	this.getInt = function(str) {

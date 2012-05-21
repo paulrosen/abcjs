@@ -66,12 +66,20 @@ function AbcParse() {
 		multilineVars.warnings.push(str);
 	};
 
+	var encode = function(str) {
+		var ret = window.ABCJS.parse.gsub(str, '\x12', ' ');
+		ret = window.ABCJS.parse.gsub(ret, '&', '&amp;');
+		ret = window.ABCJS.parse.gsub(ret, '<', '&lt;');
+		return window.ABCJS.parse.gsub(ret, '>', '&gt;');
+	};
+
 	var warn = function(str, line, col_num) {
 	  var bad_char = line.charAt(col_num);
 		if (bad_char === ' ')
 			bad_char = "SPACE";
-		var clean_line = line.substring(0, col_num).gsub('\x12', ' ') + '\n' + bad_char + '\n' + line.substring(col_num+1).gsub('\x12', ' ');
-		clean_line = clean_line.gsub('&', '&amp;').gsub('<', '&lt;').gsub('>', '&gt;').replace('\n', '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">').replace('\n', '</span>');
+		var clean_line = encode(line.substring(0, col_num)) +
+			'<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' +
+			encode(line.substring(col_num+1));
 		addWarning("Music Line:" + tune.getNumLines() + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
 	};
 	var header = new AbcParseHeader(tokenizer, warn, multilineVars, tune);
@@ -150,12 +158,12 @@ function AbcParse() {
 				macro = macro.substring(1);
 			if (macro.charAt(macro.length-1) === '!' || macro.charAt(macro.length-1) === '+')
 				macro = macro.substring(0, macro.length-1);
-			if (legalAccents.detect(function(acc) {
+			if (window.ABCJS.parse.detect(legalAccents, function(acc) {
 					return (macro === acc);
 				}))
 				return [ 1, macro ];
 			else {
-				if (!multilineVars.ignoredDecorations.detect(function(dec) {
+				if (!window.ABCJS.parse.detect(multilineVars.ignoredDecorations, function(dec) {
 					return (macro === dec);
 				}))
 					warn("Unknown macro: " + macro, line, i);
@@ -174,12 +182,12 @@ function AbcParse() {
 				// Be sure that the accent is recognizable.
 			if (ret[1].length > 0 && (ret[1].charAt(0) === '^' || ret[1].charAt(0) ==='_'))
 					ret[1] = ret[1].substring(1);	// TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
-				if (legalAccents.detect(function(acc) {
+				if (window.ABCJS.parse.detect(legalAccents, function(acc) {
 					return (ret[1] === acc);
 				}))
 					return ret;
 
-				if (accentPsuedonyms.detect(function(acc) {
+				if (window.ABCJS.parse.detect(accentPsuedonyms, function(acc) {
 					if (ret[1] === acc[0]) {
 						ret[1] = acc[1];
 						return true;
@@ -307,7 +315,7 @@ function AbcParse() {
 
 	var addWords = function(line, words) {
 		if (!line) { warn("Can't add words before the first line of mulsic", line, 0); return; }
-		words = words.strip();
+		words = window.ABCJS.parse.strip(words);
 		if (words.charAt(words.length-1) !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
 		var word_list = [];
@@ -315,11 +323,11 @@ function AbcParse() {
 		var last_divider = 0;
 		var replace = false;
 		var addWord = function(i) {
-			var word = words.substring(last_divider, i).strip();
+			var word = window.ABCJS.parse.strip(words.substring(last_divider, i));
 			last_divider = i+1;
 			if (word.length > 0) {
 				if (replace)
-					word = word.gsub('~', ' ');
+					word = window.ABCJS.parse.gsub(word,'~', ' ');
 				var div = words.charAt(i);
 				if (div !== '_' && div !== '-')
 					div = ' ';
@@ -337,7 +345,7 @@ function AbcParse() {
 					break;
 				case '-':
 					if (!addWord(i) && word_list.length > 0) {
-						word_list.last().divider = '-';
+						window.ABCJS.parse.last(word_list).divider = '-';
 						word_list.push({skip: true, to: 'next'});
 					}
 					break;
@@ -360,7 +368,7 @@ function AbcParse() {
 		}
 
 		var inSlur = false;
-		line.each(function(el) {
+		window.ABCJS.parse.each(line, function(el) {
 			if (word_list.length !== 0) {
 				if (word_list[0].skip) {
 					switch (word_list[0].to) {
@@ -384,7 +392,7 @@ function AbcParse() {
 	var addSymbols = function(line, words) {
 		// TODO-PER: Currently copied from w: line. This needs to be read as symbols instead.
 		if (!line) { warn("Can't add symbols before the first line of mulsic", line, 0); return; }
-		words = words.strip();
+		words = window.ABCJS.parse.strip(words);
 		if (words.charAt(words.length-1) !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
 		var word_list = [];
@@ -392,11 +400,11 @@ function AbcParse() {
 		var last_divider = 0;
 		var replace = false;
 		var addWord = function(i) {
-			var word = words.substring(last_divider, i).strip();
+			var word = window.ABCJS.parse.strip(words.substring(last_divider, i));
 			last_divider = i+1;
 			if (word.length > 0) {
 				if (replace)
-					word = word.gsub('~', ' ');
+					word = window.ABCJS.parse.gsub(word, '~', ' ');
 				var div = words.charAt(i);
 				if (div !== '_' && div !== '-')
 					div = ' ';
@@ -414,7 +422,7 @@ function AbcParse() {
 					break;
 				case '-':
 					if (!addWord(i) && word_list.length > 0) {
-						word_list.last().divider = '-';
+						window.ABCJS.parse.last(word_list).divider = '-';
 						word_list.push({skip: true, to: 'next'});
 					}
 					break;
@@ -437,7 +445,7 @@ function AbcParse() {
 		}
 
 		var inSlur = false;
-		line.each(function(el) {
+		window.ABCJS.parse.each(line, function(el) {
 			if (word_list.length !== 0) {
 				if (word_list[0].skip) {
 					switch (word_list[0].to) {
@@ -701,12 +709,12 @@ function AbcParse() {
 		var params = { startChar: -1, endChar: -1};
 		if (multilineVars.partForNextLine.length)
 			params.part = multilineVars.partForNextLine;
-		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? Object.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : Object.clone(multilineVars.clef) ;
+		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? window.ABCJS.parse.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : window.ABCJS.parse.clone(multilineVars.clef) ;
 		params.key = parseKeyVoice.deepCopyKey(multilineVars.key);
 		parseKeyVoice.addPosToKey(params.clef, params.key);
 		if (multilineVars.meter !== null) {
 			if (multilineVars.currentVoice) {
-				multilineVars.staves.each(function(st) {
+				window.ABCJS.parse.each(multilineVars.staves, function(st) {
 					st.meter = multilineVars.meter;
 				});
 				params.meter = multilineVars.staves[multilineVars.currentVoice.staffNum].meter;
@@ -1113,14 +1121,14 @@ function AbcParse() {
 
 									if (multilineVars.next_note_duration !== 0) {
 										el.duration = el.duration * multilineVars.next_note_duration;
-//											el.pitches.each(function(p) {
+//											window.ABCJS.parse.each(el.pitches, function(p) {
 //												p.duration = p.duration * multilineVars.next_note_duration;
 //											});
 										multilineVars.next_note_duration = 0;
 									}
 
 									if (multilineVars.inTie) {
-										el.pitches.each(function(pitch) { pitch.endTie = true; });
+										window.ABCJS.parse.each(el.pitches, function(pitch) { pitch.endTie = true; });
 										multilineVars.inTie = false;
 									}
 
@@ -1132,7 +1140,7 @@ function AbcParse() {
 									}
 
 //									if (el.startSlur !== undefined) {
-//										el.pitches.each(function(pitch) { if (pitch.startSlur === undefined) pitch.startSlur = el.startSlur; else pitch.startSlur += el.startSlur; });
+//										window.ABCJS.parse.each(el.pitches, function(pitch) { if (pitch.startSlur === undefined) pitch.startSlur = el.startSlur; else pitch.startSlur += el.startSlur; });
 //										delete el.startSlur;
 //									}
 
@@ -1145,10 +1153,10 @@ function AbcParse() {
 												break;
 											case ')':
 												if (el.endSlur === undefined) el.endSlur = 1; else el.endSlur++;
-												//el.pitches.each(function(pitch) { if (pitch.endSlur === undefined) pitch.endSlur = 1; else pitch.endSlur++; });
+												//window.ABCJS.parse.each(el.pitches, function(pitch) { if (pitch.endSlur === undefined) pitch.endSlur = 1; else pitch.endSlur++; });
 												break;
 											case '-':
-												el.pitches.each(function(pitch) { pitch.startTie = {}; });
+												window.ABCJS.parse.each(el.pitches, function(pitch) { pitch.startTie = {}; });
 												multilineVars.inTie = true;
 												break;
 											case '>':
@@ -1187,7 +1195,7 @@ function AbcParse() {
 								if (el.pitches !== undefined) {
 									if (chordDuration !== null) {
 										el.duration = el.duration * chordDuration;
-//											el.pitches.each(function(p) {
+//											window.ABCJS.parse.each(el.pitches, function(p) {
 //												p.duration = p.duration * chordDuration;
 //											});
 									}
@@ -1301,8 +1309,8 @@ function AbcParse() {
 			tune.media = 'print';
 		multilineVars.reset();
 		// Take care of whatever line endings come our way
-		strTune = strTune.gsub('\r\n', '\n');
-		strTune = strTune.gsub('\r', '\n');
+		strTune = window.ABCJS.parse.gsub(strTune, '\r\n', '\n');
+		strTune = window.ABCJS.parse.gsub(strTune, '\r', '\n');
 		strTune += '\n';	// Tacked on temporarily to make the last line continuation work
 		strTune = strTune.replace(/\n\\.*\n/g, "\n");	// get rid of latex commands.
 		var continuationReplacement = function(all, backslash, comment){
@@ -1312,10 +1320,10 @@ function AbcParse() {
 		};
 		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
 		var lines = strTune.split('\n');
-		if (lines.last().length === 0)	// remove the blank line we added above.
+		if (window.ABCJS.parse.last(lines).length === 0)	// remove the blank line we added above.
 			lines.pop();
 		try {
-			lines.each( function(line) {
+			window.ABCJS.parse.each(lines,  function(line) {
 				if (switches) {
 					if (switches.header_only && multilineVars.is_in_header === false)
 						throw "normal_abort";
@@ -1329,19 +1337,19 @@ function AbcParse() {
 					} else
 						tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
 				} else if (multilineVars.inTextBlock) {
-					if (line.startsWith("%%endtext")) {
+					if (window.ABCJS.parse.startsWith(line, "%%endtext")) {
 						//tune.addMetaText("textBlock", multilineVars.textBlock);
 						tune.addText(multilineVars.textBlock);
 						multilineVars.inTextBlock = false;
 					}
 					else {
-						if (line.startsWith("%%"))
+						if (window.ABCJS.parse.startsWith(line, "%%"))
 							multilineVars.textBlock += ' ' + line.substring(2);
 						else
 							multilineVars.textBlock += ' ' + line;
 					}
 				} else if (multilineVars.inPsBlock) {
-					if (line.startsWith("%%endps")) {
+					if (window.ABCJS.parse.startsWith(line, "%%endps")) {
 						// Just ignore postscript
 						multilineVars.inPsBlock = false;
 					}

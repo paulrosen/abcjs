@@ -1,5 +1,5 @@
 echo "Concatenating all files..."
-cat parse/proto.js parse/abc_parse.js parse/abc_parse_directive.js parse/abc_parse_header.js parse/abc_parse_key_voice.js parse/abc_tokenizer.js > tmp/parse.js
+cat parse/abc_common.js parse/abc_parse.js parse/abc_parse_directive.js parse/abc_parse_header.js parse/abc_parse_key_voice.js parse/abc_tokenizer.js > tmp/parse.js
 cat write/abc_glyphs.js write/abc_graphelements.js write/abc_layout.js write/abc_write.js write/sprintf.js > tmp/write.js
 cat api/abc_tunebook.js data/abc_tune.js midi/abc_midiwriter.js tmp/parse.js tmp/write.js > tmp/abcjs-no-raphael.js
 cat write/raphael.js tmp/abcjs-no-raphael.js > tmp/abcjs_all.js
