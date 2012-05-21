@@ -22,8 +22,9 @@
 /*global ABCTripletElem */
 /*global ABCTieElem */
 /*global ABCStaffGroupElement */ 
-/*global AbcSpacing */
+/*global AbcSpacing, ABCDynamicDecoration, ABCCrescendoElem */
 /*extern ABCLayout getDuration getDurlog */
+/*global window */
 
 var getDuration = function(elem) {
   var d = 0;
@@ -138,7 +139,7 @@ ABCLayout.prototype.printABCVoice = function(abcline) {
 
   for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
     var abselems = this.printABCElement();
-    for (var i=0; i<abselems.length; i++) {
+    for (i=0; i<abselems.length; i++) {
       this.voice.addChild(abselems[i]);
     }
   }
@@ -182,9 +183,9 @@ ABCLayout.prototype.printABCElement = function() {
 //		this.printer.y = this.printer.printTempo(elem, this.printer.paper, this.printer.layouter, this.printer.y, this.printer, this.printer.x);
 //		break;
   default: 
-    var abselem = new ABCAbsoluteElement(elem,0,0);
-    abselem.addChild(new ABCRelativeElement("element type "+elem.el_type, 0, 0, 0, {type:"debug"}));
-    elemset[0] = abselem;
+    var abselem2 = new ABCAbsoluteElement(elem,0,0);
+    abselem2.addChild(new ABCRelativeElement("element type "+elem.el_type, 0, 0, 0, {type:"debug"}));
+    elemset[0] = abselem2;
   }
 
   return elemset;
@@ -268,11 +269,11 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
   
   if (elem.rest) {
     var restpitch = 7;
-    if (this.stemdir=="down") restpitch = 3;
-    if (this.stemdir=="up") restpitch = 11;
+    if (this.stemdir==="down") restpitch = 3;
+    if (this.stemdir==="up") restpitch = 11;
     switch(elem.rest.type) {
     case "rest": 
-      c = this.chartable["rest"][-durlog]; 
+      c = this.chartable.rest[-durlog];
       elem.averagepitch=restpitch; 
       elem.minpitch=restpitch;
       elem.maxpitch=restpitch;
@@ -303,19 +304,19 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
     if (this.stemdir) dir=this.stemdir;
     
     // determine elements of chords which should be shifted
-    for (p=(dir=="down")?elem.pitches.length-2:1; (dir=="down")?p>=0:p<elem.pitches.length; p=(dir=="down")?p-1:p+1) {
-      var prev = elem.pitches[(dir=="down")?p+1:p-1];
+    for (p=(dir==="down")?elem.pitches.length-2:1; (dir==="down")?p>=0:p<elem.pitches.length; p=(dir==="down")?p-1:p+1) {
+      var prev = elem.pitches[(dir==="down")?p+1:p-1];
       var curr = elem.pitches[p];
-      var delta = (dir=="down")?prev.pitch-curr.pitch:curr.pitch-prev.pitch;
+      var delta = (dir==="down")?prev.pitch-curr.pitch:curr.pitch-prev.pitch;
       if (delta<=1 && !prev.printer_shift) {
         curr.printer_shift=(delta)?"different":"same";
         if (curr.pitch > 11 || curr.pitch < 1) {	// PER: add extra ledger line
           additionalLedgers.push(curr.pitch - (curr.pitch%2));
         }
-	if (dir=="down") {
-	  this.roomtaken = this.glyphs.getSymbolWidth(this.chartable["note"][-durlog])+2;
+	if (dir==="down") {
+	  this.roomtaken = this.glyphs.getSymbolWidth(this.chartable.note[-durlog])+2;
 	} else {
-	  dotshiftx = this.glyphs.getSymbolWidth(this.chartable["note"][-durlog])+2;
+	  dotshiftx = this.glyphs.getSymbolWidth(this.chartable.note[-durlog])+2;
 	}
       }
     }
@@ -329,12 +330,12 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
     for (p=0; p<elem.pitches.length; p++) {
 
       if (!nostem) {
-	if ((dir=="down" && p!==0) || (dir=="up" && p!=pp-1)) { // not the stemmed elem of the chord
+	if ((dir==="down" && p!==0) || (dir==="up" && p!==pp-1)) { // not the stemmed elem of the chord
 	  flag = null;
 	} else {
-	  flag = this.chartable[(dir=="down")?"dflags":"uflags"][-durlog];
+	  flag = this.chartable[(dir==="down")?"dflags":"uflags"][-durlog];
 	}
-	c = this.chartable["note"][-durlog];
+	c = this.chartable.note[-durlog];
       } else {
 	c="noteheads.quarter";
       }
@@ -342,28 +343,28 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
 		// The highest position for the sake of placing slurs is itself if the slur is internal. It is the highest position possible if the slur is for the whole chord.
 		// If the note is the only one in the chord, then any slur it has counts as if it were on the whole chord.
 		elem.pitches[p].highestVert = elem.pitches[p].verticalPos;
-		var isTopWhenStemIsDown = (this.stemdir=="up" || dir=="up") && p==0;
-		var isBottomWhenStemIsUp = (this.stemdir=="down" || dir=="down") && p==pp-1;
+		var isTopWhenStemIsDown = (this.stemdir==="up" || dir==="up") && p===0;
+		var isBottomWhenStemIsUp = (this.stemdir==="down" || dir==="down") && p===pp-1;
       if (!dontDraw && (isTopWhenStemIsDown || isBottomWhenStemIsUp)) { // place to put slurs if not already on pitches
 
 		  if (elem.startSlur || pp === 1) {
 		  elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
-		  if (this.stemdir=="up" || dir=="up")
+		  if (this.stemdir==="up" || dir==="up")
 					elem.pitches[p].highestVert += 6;	// If the stem is up, then compensate for the length of the stem
 		  }
 			  if (elem.startSlur) {
           if (!elem.pitches[p].startSlur) elem.pitches[p].startSlur = []; //TODO possibly redundant, provided array is not optional
-	  for (var i=0; i<elem.startSlur.length; i++) {
+	  for (i=0; i<elem.startSlur.length; i++) {
 	    elem.pitches[p].startSlur.push(elem.startSlur[i]);
 	  }
         }
 
         if (!dontDraw && elem.endSlur) {
 			elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
-			if (this.stemdir=="up" || dir=="up")
+			if (this.stemdir==="up" || dir==="up")
 				elem.pitches[p].highestVert += 6;	// If the stem is up, then compensate for the length of the stem
           if (!elem.pitches[p].endSlur)  elem.pitches[p].endSlur = [];  //TODO possibly redundant, provided array is not optional
-	  for (var i=0; i<elem.endSlur.length; i++) {
+	  for (i=0; i<elem.endSlur.length; i++) {
 	    elem.pitches[p].endSlur.push(elem.endSlur[i]);
 	  }
         }
@@ -378,14 +379,14 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
       
     // draw stem from the furthest note to a pitch above/below the stemmed note
     if (!nostem && durlog<=-1) {
-      p1 = (dir=="down") ? elem.minpitch-7 : elem.minpitch+1/3;
+      p1 = (dir==="down") ? elem.minpitch-7 : elem.minpitch+1/3;
 		// PER added stemdir test to make the line meet the note.
       if (p1>6 && !this.stemdir) p1=6;
-      p2 = (dir=="down") ? elem.maxpitch-1/3 : elem.maxpitch+7;
+      p2 = (dir==="down") ? elem.maxpitch-1/3 : elem.maxpitch+7;
 		// PER added stemdir test to make the line meet the note.
       if (p2<6 && !this.stemdir) p2=6;
       dx = (dir==="down" || abselem.heads.length === 0)?0:abselem.heads[0].w;
-      width = (dir=="down")?1:-1;
+      width = (dir==="down")?1:-1;
       abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
         this.minY = Math.min(p1, this.minY);
         this.minY = Math.min(p2, this.minY);
@@ -420,7 +421,7 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
     for (i=0; i<elem.gracenotes.length; i++) {
       var gracepitch = elem.gracenotes[i].verticalPos;
 
-      flag = (gracebeam) ? null : this.chartable["uflags"][(this.isBagpipes)?5:3]; 
+      flag = (gracebeam) ? null : this.chartable.uflags[(this.isBagpipes)?5:3];
       grace = this.printNoteHead(abselem, "noteheads.quarter",  elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale);
       abselem.addExtra(grace);
 		// PER: added acciaccatura slash
@@ -499,6 +500,8 @@ ABCLayout.prototype.printNote = function(elem, nostem, dontDraw) { //stem presen
 	break;
       case "below":
 	y = -3;
+    abselem.addChild(new ABCRelativeElement(elem.chord[i].name, x, 0, y, {type:"text"}));
+    break;
       default:
 	abselem.addChild(new ABCRelativeElement(elem.chord[i].name, x, 0, y, {type:"text"}));
       }
@@ -538,14 +541,14 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
   } else {
     var shiftheadx = headx;
     if (pitchelem.printer_shift) {
-      var adjust = (pitchelem.printer_shift=="same")?1:0;
-      shiftheadx = (dir=="down")?-this.glyphs.getSymbolWidth(c)*scale+adjust:this.glyphs.getSymbolWidth(c)*scale-adjust;
+      var adjust = (pitchelem.printer_shift==="same")?1:0;
+      shiftheadx = (dir==="down")?-this.glyphs.getSymbolWidth(c)*scale+adjust:this.glyphs.getSymbolWidth(c)*scale-adjust;
     }
-    notehead = new ABCRelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, {scalex:scale, scaley: scale, extreme: ((dir=="down")?"below":"above")});
+    notehead = new ABCRelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, {scalex:scale, scaley: scale, extreme: ((dir==="down")?"below":"above")});
     if (flag) {
-      var pos = pitch+((dir=="down")?-7:7)*scale;
-      if (scale==1 & (dir=="down")?(pos>6):(pos<6)) pos=6;
-      var xdelta = (dir=="down")?headx:headx+notehead.w-0.6;
+      var pos = pitch+((dir==="down")?-7:7)*scale;
+      if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;
+      var xdelta = (dir==="down")?headx:headx+notehead.w-0.6;
       abselem.addRight(new ABCRelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));
     }
     this.dotshiftx = notehead.w+dotshiftx-2+5*dot;
@@ -609,7 +612,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
   
   if (pitchelem.startTie) {
     //PER: bug fix: var tie = new ABCTieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
-    var tie = new ABCTieElem(notehead, null, (this.stemdir=="down" || dir=="down") && this.stemdir!="up",(this.stemdir=="down" || this.stemdir=="up"));
+    var tie = new ABCTieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up",(this.stemdir==="down" || this.stemdir==="up"));
     this.ties[this.ties.length]=tie;
     this.voice.addOther(tie);
   }
@@ -622,7 +625,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
 	slur = this.slurs[slurid].anchor2=notehead;
 	delete this.slurs[slurid];
       } else {
-	slur = new ABCTieElem(null, notehead, dir=="down",(this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
+	slur = new ABCTieElem(null, notehead, dir==="down",(this.stemdir==="up" || dir==="down") && this.stemdir!=="down", this.stemdir);
 	this.voice.addOther(slur);
       }
       if (this.startlimitelem) {
@@ -635,7 +638,7 @@ ABCLayout.prototype.printNoteHead = function(abselem, c, pitchelem, dir, headx, 
     for (i=0; i<pitchelem.startSlur.length; i++) {
       var slurid = pitchelem.startSlur[i].label;
       //PER: bug fix: var slur = new ABCTieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
-      var slur = new ABCTieElem(notehead, null, (this.stemdir=="down" || dir=="down") && this.stemdir!="up", false);
+      var slur = new ABCTieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", false);
       this.slurs[slurid]=slur;
       this.voice.addOther(slur);
     }
@@ -799,7 +802,7 @@ ABCLayout.prototype.printBarLine = function (elem) {
 
 
   var firstdots = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat");
-  var firstthin = (elem.type!="bar_left_repeat" && elem.type!="bar_thick_thin" && elem.type!="bar_invisible");
+  var firstthin = (elem.type!=="bar_left_repeat" && elem.type!=="bar_thick_thin" && elem.type!=="bar_invisible");
   var thick = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat" || elem.type==="bar_left_repeat" ||
 	       elem.type==="bar_thin_thick" || elem.type==="bar_thick_thin");
   var secondthin = (elem.type==="bar_left_repeat" || elem.type==="bar_thick_thin" || elem.type==="bar_thin_thin" || elem.type==="bar_dbl_repeat");

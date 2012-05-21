@@ -15,7 +15,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-/*global Math, sprintf, ABCGlyphs, ABCLayout*/
+/*global Math, sprintf, ABCGlyphs, ABCLayout, ABCAbsoluteElement, ABCRelativeElement*/
 /*extern ABCPrinter, AbcSpacing */
 
 
@@ -39,13 +39,13 @@ function ABCPrinter(paper, params) {
   this.listeners = [];
   this.selected = [];
   this.ingroup = false;
-  this.scale = params["scale"] || 1;
-  this.staffwidth = params["staffwidth"] || 740; 
-  this.paddingtop = params["paddingtop"] || 15;
-  this.paddingbottom = params["paddingbottom"] || 30;
-  this.paddingright = params["paddingright"] || 50;
-  this.paddingleft = params["paddingleft"] || 15;
-  this.editable = params["editable"] || false;
+  this.scale = params.scale || 1;
+  this.staffwidth = params.staffwidth || 740;
+  this.paddingtop = params.paddingtop || 15;
+  this.paddingbottom = params.paddingbottom || 30;
+  this.paddingright = params.paddingright || 50;
+  this.paddingleft = params.paddingleft || 15;
+  this.editable = params.editable || false;
 }
 
 // notify all listeners that a graphical element has been selected
@@ -87,7 +87,7 @@ ABCPrinter.prototype.rangeHighlight = function(start,end)
 		// is inside the other range.
 		var elStart = elems[elem].abcelem.startChar;
 		var elEnd = elems[elem].abcelem.endChar;
-		if ((end>elStart && start<elEnd) || ((end==start) && end==elEnd)) {
+		if ((end>elStart && start<elEnd) || ((end===start) && end===elEnd)) {
 		    //		if (elems[elem].abcelem.startChar>=start && elems[elem].abcelem.endChar<=end) {
 		    this.selected[this.selected.length]=elems[elem];
 		    elems[elem].highlight();
@@ -105,7 +105,7 @@ ABCPrinter.prototype.beginGroup = function () {
 
 ABCPrinter.prototype.addPath = function (path) {
   path = path || [];
-  if (path.length==0) return;
+  if (path.length===0) return;
   path[0][0]="m";
   path[0][1]-=this.lastM[0];
   path[0][2]-=this.lastM[1];
@@ -113,7 +113,7 @@ ABCPrinter.prototype.addPath = function (path) {
   this.lastM[1]+=path[0][2];
   this.path.push(path[0]);
   for (var i=1,ii=path.length;i<ii;i++) {
-    if (path[i][0]=="m") {
+    if (path[i][0]==="m") {
       this.lastM[0]+=path[i][1];
       this.lastM[1]+=path[i][2];
     }
@@ -123,7 +123,7 @@ ABCPrinter.prototype.addPath = function (path) {
 
 ABCPrinter.prototype.endGroup = function () {
   this.ingroup = false;
-  if (this.path.length==0) return null;
+  if (this.path.length===0) return null;
   var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000"});
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
@@ -187,13 +187,14 @@ ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
 // if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
 // not scaled if not in printgroup
 ABCPrinter.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
+	var el;
   if (!symbol) return null;
   if (symbol.length>0 && symbol.indexOf(".")<0) {
     var elemset = this.paper.set();
     var dx =0;
     for (var i=0; i<symbol.length; i++) {
       var ycorr = this.glyphs.getYCorr(symbol.charAt(i));
-      var el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol.charAt(i), this.paper);
+      el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol.charAt(i), this.paper);
       if (el) {
 	elemset.push(el);
 	dx+=this.glyphs.getSymbolWidth(symbol.charAt(i));
@@ -210,7 +211,7 @@ ABCPrinter.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
     if (this.ingroup) {
       this.addPath(this.glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
     } else {
-      var el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper);
+      el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper);
       if (el) {
 	if (this.scale!==1) {
 	  el.scale(this.scale, this.scale, 0, 0);
@@ -224,10 +225,10 @@ ABCPrinter.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
 };
 
 ABCPrinter.prototype.printPath = function (attrs) {
-  ret = this.paper.path().attr(attrs);
-  (this.scale==1) || ret.scale(this.scale, this.scale, 0, 0);
+  var ret = this.paper.path().attr(attrs);
+  if (this.scale!==1) ret.scale(this.scale, this.scale, 0, 0);
   return ret;
-}
+};
 
 ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
 
@@ -257,7 +258,7 @@ ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
   var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1, 
 			   controlx1, controly1, controlx2, controly2, x2, y2, 
 			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-  ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
+  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
@@ -300,7 +301,7 @@ ABCPrinter.prototype.printStave = function (startx, endx, numLines) {	// PER: pr
 
 ABCPrinter.prototype.printABC = function(abctunes) {
   if (abctunes[0]===undefined) {
-    abctunes = [abctunes]
+    abctunes = [abctunes];
   }
   this.y=0;
 
@@ -323,8 +324,8 @@ ABCPrinter.prototype.printTempo = function (tempo, paper, layouter, y, printer, 
 		var durlog = Math.floor(Math.log(duration) / Math.log(2));
 		var dot = 0;
 		for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
-		var c = layouter.chartable["note"][-durlog];
-		var flag = layouter.chartable["uflags"][-durlog];
+		var c = layouter.chartable.note[-durlog];
+		var flag = layouter.chartable.uflags[-durlog];
 		var temponote = layouter.printNoteHead(abselem,
 				c,
 				{verticalPos:tempopitch},
@@ -382,7 +383,7 @@ ABCPrinter.prototype.printTune = function (abctune) {
     this.width=this.staffwidth;
   }
   this.width+=this.paddingleft;
-  if (abctune.formatting.scale) { this.scale=abctune.formatting.scale }
+  if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; }
   this.paper.text(this.width/2, this.y, abctune.metaText.title).attr({"font-size":20, "font-family":"serif"});
   this.y+=20;
   if (abctune.lines[0] && abctune.lines[0].subtitle) {
@@ -408,7 +409,7 @@ ABCPrinter.prototype.printTune = function (abctune) {
       var newspace = this.space;
       for (var it=0;it<3;it++) {
 	staffgroup.layout(newspace,this);
-	if (line && line==abctune.lines.length-1 && staffgroup.w/this.width<0.66 && !abctune.formatting.stretchlast) break; // don't stretch last line too much unless it is 1st
+	if (line && line===abctune.lines.length-1 && staffgroup.w/this.width<0.66 && !abctune.formatting.stretchlast) break; // don't stretch last line too much unless it is 1st
 	var relspace = staffgroup.spacingunits*newspace;
 	var constspace = staffgroup.w-relspace;
 	if (staffgroup.spacingunits>0) {
@@ -423,7 +424,7 @@ ABCPrinter.prototype.printTune = function (abctune) {
       this.staffgroups[this.staffgroups.length] = staffgroup;
       this.y = staffgroup.y+staffgroup.height; 
       this.y+=AbcSpacing.STAVEHEIGHT*0.2;
-    } else if (abcline.subtitle && line!=0) {
+    } else if (abcline.subtitle && line!==0) {
       this.printSubtitleLine(abcline);
       this.y+=20; //hardcoded
     } else if (abcline.text) {

@@ -16,6 +16,7 @@
 
 /*extern AbcParseHeader */
 /*global parseKeyVoice, parseDirective */
+/*global window */
 
 function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 	parseKeyVoice.initialize(tokenizer, warn, multilineVars, tune);
@@ -117,7 +118,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 						mv.den = ret.den;
 					meter.value.push(mv);
 					if (tokens.length === 0) break;
-					var tok = tokens.shift();
+					//var tok = tokens.shift();
 					//if (tok.token !== '+') throw "Extra characters in M: line";
 				}
 

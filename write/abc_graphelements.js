@@ -14,7 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global ABCPrinter, sprintf, AbcSpacing, getDurlog */
+/*global ABCPrinter, sprintf, AbcSpacing, getDurlog, window */
 /*extern  ABCVoiceElement ABCRelativeElement ABCAbsoluteElement ABCBeamElem ABCEndingElem ABCTripletElem ABCTieElem ABCStaffGroupElement*/
 
 function ABCStaffGroupElement() {
@@ -57,14 +57,14 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
   this.startx=x;
 
   var currentduration = 0;
-  for (var i=0;i<this.voices.length;i++) {
+  for (i=0;i<this.voices.length;i++) {
     this.voices[i].beginLayout(x);
   }
 
   while (!this.finished()) {
     // find first duration level to be laid out among candidates across voices
     currentduration= null; // candidate smallest duration level
-    for (var i=0;i<this.voices.length;i++) {
+    for (i=0;i<this.voices.length;i++) {
       if (!this.voices[i].layoutEnded() && (!currentduration || this.voices[i].getDurationIndex()<currentduration)) 
 	currentduration=this.voices[i].getDurationIndex();
     }
@@ -72,8 +72,8 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
     // isolate voices at current duration level
     var currentvoices = [];
     var othervoices = [];
-    for (var i=0;i<this.voices.length;i++) {
-      if (this.voices[i].getDurationIndex() != currentduration) {
+    for (i=0;i<this.voices.length;i++) {
+      if (this.voices[i].getDurationIndex() !== currentduration) {
 	othervoices.push(this.voices[i]);
       } else {
 	currentvoices.push(this.voices[i]);
@@ -82,21 +82,21 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
 
     // among the current duration level find the one which needs starting furthest right
     var spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
-    for (var i=0;i<currentvoices.length;i++) {
+    for (i=0;i<currentvoices.length;i++) {
       if (currentvoices[i].nextx>x) {
 	x=currentvoices[i].nextx;
-	spacingunit=currentvoices[i].spacingunits
+	spacingunit=currentvoices[i].spacingunits;
       }
     }
     this.spacingunits+=spacingunit;
     this.minspace = Math.min(this.minspace,spacingunit);
     
     // remove the value of already counted spacing units in other voices (e.g. if a voice had planned to use up 5 spacing units but is not in line to be laid out at this duration level - where we've used 2 spacing units - then we must use up 3 spacing units, not 5)
-    for (var i=0;i<othervoices.length;i++) {
+    for (i=0;i<othervoices.length;i++) {
       if (othervoices[i].spacingunits-=spacingunit);
     }
 
-    for (var i=0;i<currentvoices.length;i++) {
+    for (i=0;i<currentvoices.length;i++) {
       var voicechildx = currentvoices[i].layoutOneItem(x,spacing);
       var dx = voicechildx-x;
       if (dx>0) {
@@ -108,7 +108,7 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
     }
     
     // update indexes of currently laid out elems
-    for (var i=0;i<currentvoices.length;i++) {
+    for (i=0;i<currentvoices.length;i++) {
       var voice = currentvoices[i]; 
       voice.updateIndices();
     }
@@ -116,16 +116,16 @@ ABCStaffGroupElement.prototype.layout = function(spacing, printer) {
 
 
   // find the greatest remaining x as a base for the width
-  for (var i=0;i<this.voices.length;i++) {
+  for (i=0;i<this.voices.length;i++) {
     if (this.voices[i].nextx>x) {
       x=this.voices[i].nextx;
-      spacingunit=this.voices[i].spacingunits
+      spacingunit=this.voices[i].spacingunits;
     }
   }
   this.spacingunits+=spacingunit;
   this.w = x;
 
-  for (var i=0;i<this.voices.length;i++) {
+  for (i=0;i<this.voices.length;i++) {
     this.voices[i].w=this.w;
   }
 };
@@ -134,8 +134,8 @@ ABCStaffGroupElement.prototype.draw = function (printer, y) {
 
   this.y = y;
   for (var i=0;i<this.staffs.length;i++) {
-    var shiftabove = this.staffs[i].highest - ((i==0)? 20 : 15);
-    var shiftbelow = this.staffs[i].lowest - ((i==this.staffs.length-1)? 0 : 0);
+    var shiftabove = this.staffs[i].highest - ((i===0)? 20 : 15);
+    var shiftbelow = this.staffs[i].lowest - ((i===this.staffs.length-1)? 0 : 0);
     this.staffs[i].top = y;
     if (shiftabove > 0) y+= shiftabove*AbcSpacing.STEP;
     this.staffs[i].y = y;
@@ -146,7 +146,7 @@ ABCStaffGroupElement.prototype.draw = function (printer, y) {
   this.height = y-this.y;
 
   var bartop = 0;
-  for (var i=0;i<this.voices.length;i++) {
+  for (i=0;i<this.voices.length;i++) {
     this.voices[i].draw(printer, bartop);
     bartop = this.voices[i].barbottom;
   }
@@ -159,7 +159,7 @@ ABCStaffGroupElement.prototype.draw = function (printer, y) {
     printer.printStem(this.startx, 0.6, top, bottom);
   }
 
-  for (var i=0;i<this.staffs.length;i++) {
+  for (i=0;i<this.staffs.length;i++) {
     if (this.stafflines[i] === 0) continue;
     printer.y = this.staffs[i].y;
     // TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
@@ -232,7 +232,7 @@ ABCVoiceElement.prototype.layoutOneItem = function (x, spacing) {
   child.x=x;
   x+=(spacing*Math.sqrt(child.duration*8)); // add necessary duration space
   this.nextminx = child.x+child.getMinWidth(); // add necessary layout space
-  (this.i!=this.ii-1) && (this.nextminx+=child.minspacing); // addminimumspacing except on last elem
+  if (this.i!==this.ii-1) this.nextminx+=child.minspacing; // add minimumspacing except on last elem
   if (this.nextminx > x) {
     x = this.nextminx;
     this.spacingunits=0;
@@ -252,7 +252,7 @@ ABCVoiceElement.prototype.shiftRight = function (dx) {
   child.x+=dx;
   this.nextminx+=dx;
   this.nextx+=dx;
-}
+};
 
 ABCVoiceElement.prototype.draw = function (printer, bartop) {
   var width = this.w-1;
@@ -266,7 +266,7 @@ ABCVoiceElement.prototype.draw = function (printer, bartop) {
   }
 
   for (var i=0, ii=this.children.length; i<ii; i++) {
-    this.children[i].draw(printer, (this.barto || i==ii-1)?bartop:0);
+    this.children[i].draw(printer, (this.barto || i===ii-1)?bartop:0);
   }
 	window.ABCJS.parse.each(this.beams, function(beam) {
       beam.draw(printer); // beams must be drawn first for proper printing of triplets, slurs and ties.
@@ -371,7 +371,7 @@ ABCAbsoluteElement.prototype.draw = function (printer, bartop) {
     self.abcelem.pitches[0].verticalPos += delta;
     printer.notifyChange();
   };
-  if (this.abcelem.el_type=="note" && printer.editable)
+  if (this.abcelem.el_type==="note" && printer.editable)
     this.elemset.drag(move, start, up);
 };
 
@@ -387,7 +387,7 @@ ABCAbsoluteElement.prototype.setClass = function (addClass, removeClass, color) 
 				kls = kls.replace(removeClass, "");
 				kls = kls.replace(addClass, "");
 				if (addClass.length > 0) {
-					if (kls.length > 0 && kls.charAt(kls.length-1) != ' ') kls += " ";
+					if (kls.length > 0 && kls.charAt(kls.length-1) !== ' ') kls += " ";
 					kls += addClass;
 				}
 				this.elemset[i][0].setAttribute("class", kls);
@@ -411,14 +411,14 @@ function ABCRelativeElement(c, dx, w, pitch, opt) {
   this.dx = dx;    // relative x position
   this.w = w;      // minimum width taken up by this element (can include gratuitous space)
   this.pitch = pitch; // relative y position by pitch
-  this.scalex = opt["scalex"] || 1; // should the character/path be scaled?
-  this.scaley = opt["scaley"] || 1; // should the character/path be scaled?
-  this.type = opt["type"] || "symbol"; // cheap types.
-  this.pitch2 = opt["pitch2"];
-  this.linewidth = opt["linewidth"];
-  this.attributes = opt["attributes"]; // only present on textual elements
-  this.top = pitch + ((opt["extreme"]=="above")? 7 : 0);
-  this.bottom = pitch - ((opt["extreme"]=="below")? 7 : 0);
+  this.scalex = opt.scalex || 1; // should the character/path be scaled?
+  this.scaley = opt.scaley || 1; // should the character/path be scaled?
+  this.type = opt.type || "symbol"; // cheap types.
+  this.pitch2 = opt.pitch2;
+  this.linewidth = opt.linewidth;
+  this.attributes = opt.attributes; // only present on textual elements
+  this.top = pitch + ((opt.extreme==="above")? 7 : 0);
+  this.bottom = pitch - ((opt.extreme==="below")? 7 : 0);
 }
 
 ABCRelativeElement.prototype.draw = function (printer, x, bartop) {
@@ -441,7 +441,7 @@ ABCRelativeElement.prototype.draw = function (printer, x, bartop) {
   case "ledger":
     this.graphelem = printer.printStaveLine(this.x, this.x+this.w, this.pitch); break;
   }
-  if (this.scalex!=1 && this.graphelem) {
+  if (this.scalex!==1 && this.graphelem) {
     this.graphelem.scale(this.scalex, this.scaley, this.x, printer.calcY(this.pitch));
   }
   if (this.attributes) {
@@ -549,7 +549,7 @@ ABCDynamicDecoration.prototype.draw = function(printer, linestartx, lineendx) {
     var scalex = 1; // TODO-PER: do the scaling
     var scaley = 1;
     printer.printSymbol(this.anchor.x, ypos, this.dec, scalex, scaley);
-}
+};
 
 function ABCCrescendoElem (anchor1, anchor2, dir) {
     this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
@@ -565,14 +565,14 @@ ABCCrescendoElem.prototype.draw = function (printer, linestartx, lineendx) {
         this.drawLine(printer, -4, 0);
         this.drawLine(printer, 4, 0);
     }
-}
+};
 
 ABCCrescendoElem.prototype.drawLine = function (printer, y1, y2) {
     var ypos = printer.layouter.minY - 7;
     var pathString = sprintf("M %f %f L %f %f",
         this.anchor1.x, printer.calcY(ypos)+y1-4, this.anchor2.x, printer.calcY(ypos)+y2-4);
     printer.printPath({path:pathString, stroke:"#000000"});
-}
+};
 
 function ABCTripletElem (number, anchor1, anchor2, above) {
   this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
@@ -683,7 +683,7 @@ ABCBeamElem.prototype.calcDir = function() {
 //	var barpos = (this.isgrace)? 5:7;
 	this.asc = (this.forceup || this.isgrace || average<6) && (!this.forcedown); // hardcoded 6 is B
 	return this.asc;
-}
+};
 
 ABCBeamElem.prototype.drawBeam = function(printer) {
 	var average = this.average();
@@ -738,7 +738,7 @@ ABCBeamElem.prototype.drawStems = function(printer) {
     printer.printStem(x,dx,y,bary);
 
     var sy = (this.asc) ? 1.5*AbcSpacing.STEP: -1.5*AbcSpacing.STEP;
-    (this.isgrace) && (sy = sy*2/3);
+    if (this.isgrace) sy = sy*2/3;
     for (var durlog=getDurlog(this.elems[i].duration); durlog<-3; durlog++) {
       if (auxbeams[-4-durlog]) {
 	auxbeams[-4-durlog].single = false;

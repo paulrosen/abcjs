@@ -14,6 +14,8 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/*global window */
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
@@ -23,7 +25,8 @@ if (!window.ABCJS.parse)
 window.ABCJS.parse.clone = function(source) {
 	var destination = {};
 	for (var property in source)
-		destination[property] = source[property];
+		if (source.hasOwnProperty(property))
+			destination[property] = source[property];
 	return destination;
 };
 

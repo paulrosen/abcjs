@@ -26,7 +26,7 @@
 //		Contains the starting text. This can be compared against the current text to see if anything changed.
 //
 
-/*global document, clearTimeout, setTimeout */
+/*global document, window, clearTimeout, setTimeout */
 /*global ABCMidiWriter, AbcTuneBook, AbcParse, Raphael, ABCPrinter, ABCTextPrinter */
 /*extern EditArea, ABCEditor */
 

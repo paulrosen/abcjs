@@ -15,11 +15,11 @@ var ABCGlyphs = function() {
    };
   
   this.getPathForSymbol = function (x,y,symb,scalex, scaley) {
-    var scalex = scalex || 1;
-    var scaley = scaley || 1;
+    scalex = scalex || 1;
+    scaley = scaley || 1;
     if (!glyphs[symb]) return null;
     var pathArray = this.pathClone(glyphs[symb].d);
-    if (scalex!=1 || scaley!=1) this.pathScale(pathArray,scalex,scaley);
+    if (scalex!==1 || scaley!==1) this.pathScale(pathArray,scalex,scaley);
     pathArray[0][1] +=x;
     pathArray[0][2] +=y;
 
@@ -58,6 +58,7 @@ var ABCGlyphs = function() {
   this.pathScale = function (pathArray, kx, ky) {
     for (var i = 0, ii = pathArray.length; i < ii; i++) {
       var p = pathArray[i];
+      var j, jj;
       for (j = 1, jj = p.length; j < jj; j++) {
 	p[j] *= (j % 2) ? kx : ky;
       }

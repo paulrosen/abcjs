@@ -15,7 +15,8 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*extern AbcTuneBook, renderAbc */
-/*global AbcParse, document, Raphael, ABCPrinter */
+/*global AbcParse, document, Raphael, ABCPrinter, ABCMidiWriter */
+/*global window */
 
 function abcNumberOfTunes(abc) {
 	var tunes = abc.split("\nX:");

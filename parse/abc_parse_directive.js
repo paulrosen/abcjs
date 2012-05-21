@@ -4,6 +4,7 @@
 //}
 
 /*global ABC */
+/*global window */
 /*extern parseDirective */
 
 // Do the same syntax as YUI so we can expand it later.
@@ -343,7 +344,7 @@ ABC().use(function() {
 				var justOpenBracket = false;
 				var justOpenBrace = false;
 				var continueBar = false;
-				var lastVoice = undefined;
+				var lastVoice;
 				var addContinueBar = function() {
 					continueBar = true;
 					if (lastVoice) {

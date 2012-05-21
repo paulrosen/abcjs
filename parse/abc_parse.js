@@ -15,6 +15,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*global AbcParseHeader, AbcTokenizer, AbcTune, parseKeyVoice, parseDirective */
+/*global window */
 /*extern AbcParse */
 
 function AbcParse() {

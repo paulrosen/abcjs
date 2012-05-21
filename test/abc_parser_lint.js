@@ -19,6 +19,7 @@
 //for regression tests.
 
 /*global JSONSchema */
+/*global window */
 /*extern AbcParserLint */
 
 // Changes for V1.0.1:

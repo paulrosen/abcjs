@@ -1,5 +1,6 @@
 /*extern ABC, parseKeyVoice */
 /*global parseDirective */
+/*global window */
 
 var parseKeyVoice = {};
 

@@ -15,6 +15,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*extern AbcTune */
+/*global window */
 
 // This is the data for a single ABC tune. It is created and populated by the AbcParse class.
 function AbcTune() {

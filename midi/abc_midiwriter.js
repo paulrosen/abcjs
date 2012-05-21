@@ -1,6 +1,9 @@
+/*global window, document, setTimeout */
+
 function setAttributes(elm, attrs){
   for(var attr in attrs)
-    elm.setAttribute(attr, attrs[attr]);
+    if (attrs.hasOwnProperty(attr))
+      elm.setAttribute(attr, attrs[attr]);
   return elm;
 }
 
@@ -8,7 +11,7 @@ window.oldunload = window.onbeforeunload;
 window.onbeforeunload = function() {
     if (window.oldunload)
         window.oldunload();
-  if (typeof(MIDIPlugin) != "undefined" && MIDIPlugin) { // PER: take care of crash in IE 8
+  if (typeof(MIDIPlugin) !== "undefined" && MIDIPlugin) { // PER: take care of crash in IE 8
     MIDIPlugin.closePlugin();
   }
 };
@@ -22,7 +25,7 @@ function MidiProxy(javamidi,qtmidi) {
 MidiProxy.prototype.setTempo = function (qpm) {
   this.javamidi.setTempo(qpm);
   this.qtmidi.setTempo(qpm);
-}
+};
 
 MidiProxy.prototype.startTrack = function () {
   this.javamidi.startTrack();
@@ -32,7 +35,7 @@ MidiProxy.prototype.startTrack = function () {
 MidiProxy.prototype.endTrack = function () {
   this.javamidi.endTrack();
   this.qtmidi.endTrack();
-}
+};
 
 MidiProxy.prototype.setInstrument = function (number) {
   this.javamidi.setInstrument(number);
@@ -71,7 +74,7 @@ function JavaMidi(midiwriter) {
 
 JavaMidi.prototype.setTempo = function (qpm) {
   this.tempo = qpm;
-}
+};
 
 JavaMidi.prototype.startTrack = function () {
   this.silencelength = 0;
@@ -89,7 +92,7 @@ JavaMidi.prototype.startTrack = function () {
 
 JavaMidi.prototype.endTrack = function () {
   // need to do anything?
-}
+};
 
 JavaMidi.prototype.setInstrument = function (number) {
   this.instrument=number;
@@ -161,11 +164,11 @@ JavaMidi.prototype.embed = function(parent) {
   };
   parent.appendChild(this.playlink);
 
-  stoplink = setAttributes(document.createElement('a'), {
+  var stoplink = setAttributes(document.createElement('a'), {
     style: "border:1px solid black; margin:3px;"
     });  
   stoplink.innerHTML = "stop";
-  var self = this;
+  //var self = this;
   stoplink.onmousedown = function() {
     self.stopPlay(); 
   };
@@ -179,8 +182,8 @@ JavaMidi.prototype.stopPlay = function() {
   this.i=0;
   this.currenttime=0;
   this.pausePlay();
-  this.playlink.innerHTML = "play"
-}
+  this.playlink.innerHTML = "play";
+};
 
 JavaMidi.prototype.startPlay = function() {
   this.playing = true;
@@ -188,7 +191,7 @@ JavaMidi.prototype.startPlay = function() {
   // repeat every 16th note TODO see the min in the piece
   this.ticksperinterval = 480/4;
   this.doPlay();
-  this.playinterval = window.setInterval(function() {self.doPlay()},
+  this.playinterval = window.setInterval(function() {self.doPlay(); },
 					 (60000/(this.tempo*4)));
 };
 
@@ -209,7 +212,7 @@ JavaMidi.prototype.doPlay = function() {
   } else {
     this.stopPlay();
   }
-}
+};
 
 function Midi() {
   this.trackstrings="";
@@ -218,12 +221,12 @@ function Midi() {
 }
 
 Midi.prototype.setTempo = function (qpm) {
-  if (this.trackcount==0) {
+  if (this.trackcount===0) {
     this.startTrack();
     this.track+="%00%FF%51%03"+toHex(Math.round(60000000/qpm),6);
     this.endTrack();
   }
-}
+};
 
 Midi.prototype.startTrack = function () {
   this.track = "";
@@ -241,7 +244,7 @@ Midi.prototype.endTrack = function () {
   this.track +  
   '%00%FF%2F%00'; // track end
   this.trackstrings += this.track;
-}
+};
 
 Midi.prototype.setInstrument = function (number) {
 	if (this.track)
@@ -331,7 +334,7 @@ function toDurationHex(n) {
   var a = [];
 
   // cut up into 7 bit chunks;
-  while (n!=0) {
+  while (n!==0) {
     a.push(n & 0x7F);
     n = n>>7;
   }
@@ -353,17 +356,17 @@ function toDurationHex(n) {
 }
 
 function ABCMidiWriter(parent, options) {
-  var options = options || {};
+  options = options || {};
   this.parent = parent;
   this.scale = [0,2,4,5,7,9,11];
   this.restart = {line:0, staff:0, voice:0, pos:0};
   this.visited = {};
   this.multiplier =1;
   this.next = null;
-  this.qpm = options["qpm"] || 180;
-  this.program = options["program"] || 2;
+  this.qpm = options.qpm || 180;
+  this.program = options.program || 2;
 	this.noteOnAndChannel = "%90";
-  this.javamidi = options["type"]=="java" || false;
+  this.javamidi = options.type ==="java" || false;
   this.listeners = [];
   this.transpose = 0;	// PER
   if (this.javamidi) {
@@ -382,7 +385,7 @@ function ABCMidiWriter(parent, options) {
       }, 0);
   }
   
-};
+}
 
 ABCMidiWriter.prototype.addListener = function(listener) {
   this.listeners.push(listener);
@@ -452,9 +455,7 @@ ABCMidiWriter.prototype.getElem = function() {
 
 ABCMidiWriter.prototype.writeABC = function(abctune) {
   try {
-    this.midi = (this.javamidi) 
-    ? new MidiProxy(new JavaMidi(this), new Midi()) 
-    : new Midi();
+    this.midi = (this.javamidi) ? new MidiProxy(new JavaMidi(this), new Midi()) : new Midi();
     this.baraccidentals = [];
     this.abctune = abctune;
     this.baseduration = 480*4; // nice and divisible, equals 1 whole note
@@ -544,10 +545,11 @@ ABCMidiWriter.prototype.writeABCElement = function(elem) {
     break;
   case "bar":
     this.handleBar(elem);
+	  break;
   case "meter":
-    
   case "clef":
-  default: 
+    break;
+  default:
     
   }
   
@@ -604,7 +606,7 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
       if (note.endTie) {
 	this.midi.endNote(midipitches[i],mididuration+this.tieduration);
       } else {
-	this.midi.endNote(midipitches[i],mididuration)
+	this.midi.endNote(midipitches[i],mididuration);
       }
       mididuration = 0; // put these to zero as we've moved forward in the midi
       this.tieduration=0;
@@ -658,7 +660,7 @@ ABCMidiWriter.prototype.handleBar = function (elem) {
     this.next = next;
   }
 
-}
+};
 
 ABCMidiWriter.prototype.setKeySignature = function(elem) {
   this.accidentals = [0,0,0,0,0,0,0];
@@ -677,7 +679,7 @@ ABCMidiWriter.prototype.setKeySignature = function(elem) {
 };
 
 ABCMidiWriter.prototype.extractNote = function(pitch) {
-  var pitch = pitch%7;
+  pitch = pitch%7;
   if (pitch<0) pitch+=7;
   return pitch;
 };
