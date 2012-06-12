@@ -14,18 +14,21 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*extern AbcTuneBook, renderAbc */
-/*global document, Raphael, ABCPrinter, ABCMidiWriter */
+/*global document, Raphael */
 /*global window */
 
-function abcNumberOfTunes(abc) {
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+(function() {
+ABCJS.numberOfTunes = function(abc) {
 	var tunes = abc.split("\nX:");
 	var num = tunes.length;
 	if (num === 0) num = 1;
 	return num;
-}
+};
 
-function AbcTuneBook(book) {
+ABCJS.TuneBook = function(book) {
 	var This = this;
 	var directives = "";
 	book = window.ABCJS.parse.strip(book);
@@ -57,7 +60,7 @@ function AbcTuneBook(book) {
 			tune.abc = tune.abc.substring(0, end);
 		tune.abc = directives + tune.abc;
 	});
-}
+};
 
 function renderEngine(callback, output, abc, parserParams, renderParams) {
 	var isArray = function(testObject) {
@@ -76,7 +79,7 @@ function renderEngine(callback, output, abc, parserParams, renderParams) {
 	var currentTune = renderParams.startingTune ? renderParams.startingTune : 0;
 
 	// parse the abc string
-	var book = new AbcTuneBook(abc);
+	var book = new ABCJS.TuneBook(abc);
 	var abcParser = new window.ABCJS.parse.Parse();
 
 	// output each tune, if it exists. Otherwise clear the div.
@@ -113,18 +116,18 @@ function renderEngine(callback, output, abc, parserParams, renderParams) {
 //			startingTune: an index, starting at zero, representing which tune to start rendering at.
 //				(If this element is not present, then rendering starts at zero.)
 //			width: 800 by default. The width in pixels of the output paper
-function renderAbc(output, abc, parserParams, printerParams, renderParams) {
+ABCJS.renderAbc = function(output, abc, parserParams, printerParams, renderParams) {
 	function callback(div, tune) {
 		var width = renderParams ? renderParams.width ? renderParams.width : 800 : 800;
 		var paper = Raphael(div, width, 400);
 		if (printerParams === undefined)
 			printerParams = {};
-		var printer = new ABCPrinter(paper, printerParams);
+		var printer = new ABCJS.write.Printer(paper, printerParams);
 		printer.printABC(tune);
 	}
 
 	renderEngine(callback, output, abc, parserParams, renderParams);
-}
+};
 
 // A quick way to render a tune from javascript when interactivity is not required.
 // This is used when a javascript routine has some abc text that it wants to render
@@ -142,13 +145,14 @@ function renderAbc(output, abc, parserParams, printerParams, renderParams) {
 //		renderParams: hash of:
 //			startingTune: an index, starting at zero, representing which tune to start rendering at.
 //				(If this element is not present, then rendering starts at zero.)
-function renderMidi(output, abc, parserParams, midiParams, renderParams) {
+ABCJS.renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
 	function callback(div, tune) {
 		if (midiParams === undefined)
 			midiParams = {};
-		var midiwriter = new ABCMidiWriter(div, midiParams);
+		var midiwriter = new ABCJS.midi.MidiWriter(div, midiParams);
 		midiwriter.writeABC(tune);
 	}
 
 	renderEngine(callback, output, abc, parserParams, renderParams);
-}
+};
+})();

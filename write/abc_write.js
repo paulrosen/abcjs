@@ -15,27 +15,31 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-/*global Math, sprintf, ABCGlyphs, ABCLayout, ABCAbsoluteElement, ABCRelativeElement*/
-/*extern ABCPrinter, AbcSpacing */
+/*global window, ABCJS, Math */
 
+if (!window.ABCJS)
+	window.ABCJS = {};
 
-var AbcSpacing = function() {};
-AbcSpacing.FONTEM = 360;
-AbcSpacing.FONTSIZE = 30;
-AbcSpacing.STEP = AbcSpacing.FONTSIZE*93/720;
-AbcSpacing.SPACE = 10;
-AbcSpacing.TOPNOTE = 20;
-AbcSpacing.STAVEHEIGHT = 100;
+if (!window.ABCJS.write)
+	window.ABCJS.write = {};
+
+ABCJS.write.spacing = function() {};
+ABCJS.write.spacing.FONTEM = 360;
+ABCJS.write.spacing.FONTSIZE = 30;
+ABCJS.write.spacing.STEP = ABCJS.write.spacing.FONTSIZE*93/720;
+ABCJS.write.spacing.SPACE = 10;
+ABCJS.write.spacing.TOPNOTE = 20;
+ABCJS.write.spacing.STAVEHEIGHT = 100;
 
 
 //--------------------------------------------------------------------PRINTER
 
-function ABCPrinter(paper, params) {
+ABCJS.write.Printer = function(paper, params) {
   params = params || {};
   this.y = 0;
   this.paper = paper;
-  this.space = 3*AbcSpacing.SPACE;
-  this.glyphs = new ABCGlyphs();
+  this.space = 3*ABCJS.write.spacing.SPACE;
+  this.glyphs = new ABCJS.write.Glyphs();
   this.listeners = [];
   this.selected = [];
   this.ingroup = false;
@@ -46,10 +50,10 @@ function ABCPrinter(paper, params) {
   this.paddingright = params.paddingright || 50;
   this.paddingleft = params.paddingleft || 15;
   this.editable = params.editable || false;
-}
+};
 
 // notify all listeners that a graphical element has been selected
-ABCPrinter.prototype.notifySelect = function (abselem) {
+ABCJS.write.Printer.prototype.notifySelect = function (abselem) {
   this.clearSelection();
   this.selected = [abselem];
   abselem.highlight();
@@ -58,24 +62,24 @@ ABCPrinter.prototype.notifySelect = function (abselem) {
   }
 };
 
-ABCPrinter.prototype.notifyChange = function (abselem) {
+ABCJS.write.Printer.prototype.notifyChange = function (abselem) {
   for (var i=0; i<this.listeners.length;i++) {
     this.listeners[i].modelChanged();
   }
 };
 
-ABCPrinter.prototype.clearSelection = function () {
+ABCJS.write.Printer.prototype.clearSelection = function () {
   for (var i=0;i<this.selected.length;i++) {
     this.selected[i].unhighlight();
   }
   this.selected = [];
 };
 
-ABCPrinter.prototype.addSelectListener = function (listener) {
+ABCJS.write.Printer.prototype.addSelectListener = function (listener) {
   this.listeners[this.listeners.length] = listener;
 };
 
-ABCPrinter.prototype.rangeHighlight = function(start,end)
+ABCJS.write.Printer.prototype.rangeHighlight = function(start,end)
 {
     this.clearSelection();
     for (var line=0;line<this.staffgroups.length; line++) {
@@ -97,13 +101,13 @@ ABCPrinter.prototype.rangeHighlight = function(start,end)
     }
 };
 
-ABCPrinter.prototype.beginGroup = function () {
+ABCJS.write.Printer.prototype.beginGroup = function () {
   this.path = [];
   this.lastM = [0,0];
   this.ingroup = true;
 };
 
-ABCPrinter.prototype.addPath = function (path) {
+ABCJS.write.Printer.prototype.addPath = function (path) {
   path = path || [];
   if (path.length===0) return;
   path[0][0]="m";
@@ -121,7 +125,7 @@ ABCPrinter.prototype.addPath = function (path) {
   }
 };
 
-ABCPrinter.prototype.endGroup = function () {
+ABCJS.write.Printer.prototype.endGroup = function () {
   this.ingroup = false;
   if (this.path.length===0) return null;
   var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000"});
@@ -131,7 +135,7 @@ ABCPrinter.prototype.endGroup = function () {
   return ret;
 };
 
-ABCPrinter.prototype.printStaveLine = function (x1,x2, pitch) {
+ABCJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch) {
   var isIE=/*@cc_on!@*/false;//IE detector
   var dy = 0.35;
   var fill = "#000000";
@@ -140,7 +144,7 @@ ABCPrinter.prototype.printStaveLine = function (x1,x2, pitch) {
     fill = "#666666";
   }
   var y = this.calcY(pitch);
-  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
+  var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
 			   x2, y+dy, x1, y+dy);
   var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
   if (this.scale!==1) {
@@ -149,7 +153,7 @@ ABCPrinter.prototype.printStaveLine = function (x1,x2, pitch) {
   return ret;
 };
 
-ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
+ABCJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
   if (dx<0) { // correct path "handedness" for intersection with other elements
     var tmp = y2;
     y2 = y1;
@@ -174,7 +178,7 @@ ABCPrinter.prototype.printStem = function (x, dx, y1, y2) {
   }
 };
 
-ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
+ABCJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
   anchor = anchor || "start";
   var ret = this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor, "font-size":12});
   if (this.scale!==1) {
@@ -186,7 +190,7 @@ ABCPrinter.prototype.printText = function (x, offset, text, anchor) {
 // assumes this.y is set appropriately
 // if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
 // not scaled if not in printgroup
-ABCPrinter.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
+ABCJS.write.Printer.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
 	var el;
   if (!symbol) return null;
   if (symbol.length>0 && symbol.indexOf(".")<0) {
@@ -224,13 +228,13 @@ ABCPrinter.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
   }
 };
 
-ABCPrinter.prototype.printPath = function (attrs) {
+ABCJS.write.Printer.prototype.printPath = function (attrs) {
   var ret = this.paper.path().attr(attrs);
   if (this.scale!==1) ret.scale(this.scale, this.scale, 0, 0);
   return ret;
 };
 
-ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
+ABCJS.write.Printer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
 
 
   x1 = x1 + 6;
@@ -255,7 +259,7 @@ ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
   var controlx2 = x2-flatten*ux-curve*uy;
   var controly2 = y2-flatten*uy+curve*ux;
   var thickness = 2;
-  var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1, 
+  var pathString = ABCJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
 			   controlx1, controly1, controlx2, controly2, x2, y2, 
 			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
   var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
@@ -265,25 +269,25 @@ ABCPrinter.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
   return ret;
 };
 
-ABCPrinter.prototype.debugMsg = function(x, msg) {
+ABCJS.write.Printer.prototype.debugMsg = function(x, msg) {
   return this.paper.text(x, this.y, msg).scale(this.scale, this.scale, 0, 0);
 };
 
-ABCPrinter.prototype.debugMsgLow = function(x, msg) {
+ABCJS.write.Printer.prototype.debugMsgLow = function(x, msg) {
     return this.paper.text(x, this.calcY(this.layouter.minY-7), msg).attr({"font-family":"serif", "font-size":12, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
 };
 
-ABCPrinter.prototype.printLyrics = function(x, msg) {
+ABCJS.write.Printer.prototype.printLyrics = function(x, msg) {
     var el = this.paper.text(x, this.calcY(this.layouter.minY-7), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
     el[0].setAttribute("class", "abc-lyric");
     return el;
 };
 
-ABCPrinter.prototype.calcY = function(ofs) {
-  return this.y+((AbcSpacing.TOPNOTE-ofs)*AbcSpacing.STEP);
+ABCJS.write.Printer.prototype.calcY = function(ofs) {
+  return this.y+((ABCJS.write.spacing.TOPNOTE-ofs)*ABCJS.write.spacing.STEP);
 };
 
-ABCPrinter.prototype.printStave = function (startx, endx, numLines) {	// PER: print out requested number of lines
+ABCJS.write.Printer.prototype.printStave = function (startx, endx, numLines) {	// PER: print out requested number of lines
 	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
 	if (numLines === 1) {
 		this.printStaveLine(startx,endx,6);
@@ -299,7 +303,7 @@ ABCPrinter.prototype.printStave = function (startx, endx, numLines) {	// PER: pr
 //  this.printStaveLine(startx,endx,10);
 };
 
-ABCPrinter.prototype.printABC = function(abctunes) {
+ABCJS.write.Printer.prototype.printABC = function(abctunes) {
   if (abctunes[0]===undefined) {
     abctunes = [abctunes];
   }
@@ -311,7 +315,7 @@ ABCPrinter.prototype.printABC = function(abctunes) {
 
 };
 
-ABCPrinter.prototype.printTempo = function (tempo, paper, layouter, y, printer, x) {
+ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, printer, x) {
 	if (tempo.preString) {
 		var text = paper.text(x, y + 20, tempo.preString).attr({"text-anchor":"start"});
 		x += (text.getBBox().width + 10);
@@ -320,7 +324,7 @@ ABCPrinter.prototype.printTempo = function (tempo, paper, layouter, y, printer, 
 		var temposcale = 0.75;
 		var tempopitch = 14.5;
 		var duration = tempo.duration[0]; // TODO when multiple durations
-		var abselem = new ABCAbsoluteElement(tempo, duration, 1);
+		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1);
 		var durlog = Math.floor(Math.log(duration) / Math.log(2));
 		var dot = 0;
 		for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
@@ -343,7 +347,7 @@ ABCPrinter.prototype.printTempo = function (tempo, paper, layouter, y, printer, 
 			var p2 = tempopitch + 7 * temposcale;
 			var dx = temponote.dx + temponote.w;
 			var width = -0.6;
-			abselem.addExtra(new ABCRelativeElement(null, dx, 0, p1, {"type":"stem", "pitch2":p2, linewidth:width}));
+			abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type":"stem", "pitch2":p2, linewidth:width}));
 		}
 		abselem.x = x;
 		abselem.draw(printer, null);
@@ -358,8 +362,8 @@ ABCPrinter.prototype.printTempo = function (tempo, paper, layouter, y, printer, 
 	return y;
 };
 
-ABCPrinter.prototype.printTune = function (abctune) {
-  this.layouter = new ABCLayout(this.glyphs, abctune.formatting.bagpipes);
+ABCJS.write.Printer.prototype.printTune = function (abctune) {
+  this.layouter = new ABCJS.write.Layout(this.glyphs, abctune.formatting.bagpipes);
 	this.layouter.printer = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
   if (abctune.media === 'print') {
        // TODO create the page the size of
@@ -423,7 +427,7 @@ ABCPrinter.prototype.printTune = function (abctune) {
       if (staffgroup.w>maxwidth) maxwidth = staffgroup.w;
       this.staffgroups[this.staffgroups.length] = staffgroup;
       this.y = staffgroup.y+staffgroup.height; 
-      this.y+=AbcSpacing.STAVEHEIGHT*0.2;
+      this.y+=ABCJS.write.spacing.STAVEHEIGHT*0.2;
     } else if (abcline.subtitle && line!==0) {
       this.printSubtitleLine(abcline);
       this.y+=20; //hardcoded
@@ -476,7 +480,7 @@ ABCPrinter.prototype.printTune = function (abctune) {
     this.paper.canvas.parentNode.setAttribute("style","width:"+sizetoset.w+"px");
 };
 
-ABCPrinter.prototype.printSubtitleLine = function(abcline) {
+ABCJS.write.Printer.prototype.printSubtitleLine = function(abcline) {
   this.paper.text(this.width/2, this.y, abcline.subtitle).attr({"font-size":16}).scale(this.scale, this.scale, 0,0);
 };
 

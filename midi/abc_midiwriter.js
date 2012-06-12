@@ -1,5 +1,12 @@
 /*global window, document, setTimeout */
 
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+if (!window.ABCJS.midi)
+	window.ABCJS.midi = {};
+
+(function() {
 function setAttributes(elm, attrs){
   for(var attr in attrs)
     if (attrs.hasOwnProperty(attr))
@@ -7,14 +14,15 @@ function setAttributes(elm, attrs){
   return elm;
 }
 
-window.oldunload = window.onbeforeunload;
-window.onbeforeunload = function() {
-    if (window.oldunload)
-        window.oldunload();
-  if (typeof(MIDIPlugin) !== "undefined" && MIDIPlugin) { // PER: take care of crash in IE 8
-    MIDIPlugin.closePlugin();
-  }
-};
+//TODO-PER: put this back in when the MIDIPlugin works again.
+//window.oldunload = window.onbeforeunload;
+//window.onbeforeunload = function() {
+//    if (window.oldunload)
+//        window.oldunload();
+//  if (typeof(MIDIPlugin) !== "undefined" && MIDIPlugin) { // PER: take care of crash in IE 8
+//    MIDIPlugin.closePlugin();
+//  }
+//};
 
 
 function MidiProxy(javamidi,qtmidi) {
@@ -355,7 +363,7 @@ function toDurationHex(n) {
   return toHex(res, padding);
 }
 
-function ABCMidiWriter(parent, options) {
+ABCJS.midi.MidiWriter = function(parent, options) {
   options = options || {};
   this.parent = parent;
   this.scale = [0,2,4,5,7,9,11];
@@ -385,59 +393,59 @@ function ABCMidiWriter(parent, options) {
       }, 0);
   }
   
-}
+};
 
-ABCMidiWriter.prototype.addListener = function(listener) {
+ABCJS.midi.MidiWriter.prototype.addListener = function(listener) {
   this.listeners.push(listener);
 };
 
-ABCMidiWriter.prototype.notifySelect = function (abcelem) {
+ABCJS.midi.MidiWriter.prototype.notifySelect = function (abcelem) {
   for (var i=0; i<this.listeners.length;i++) {
     this.listeners[i].notifySelect(abcelem.abselem);
   }
 };
 
-ABCMidiWriter.prototype.getMark = function() {
+ABCJS.midi.MidiWriter.prototype.getMark = function() {
   return {line:this.line, staff:this.staff, 
 	  voice:this.voice, pos:this.pos};
 };
 
-ABCMidiWriter.prototype.getMarkString = function(mark) {
+ABCJS.midi.MidiWriter.prototype.getMarkString = function(mark) {
   mark = mark || this;
   return "line"+mark.line+"staff"+mark.staff+ 
 	  "voice"+mark.voice+"pos"+mark.pos;
 };
 
-ABCMidiWriter.prototype.goToMark = function(mark) {
+ABCJS.midi.MidiWriter.prototype.goToMark = function(mark) {
   this.line=mark.line;
   this.staff=mark.staff;
   this.voice=mark.voice;
   this.pos=mark.pos;
 };
 
-ABCMidiWriter.prototype.markVisited = function() {
+ABCJS.midi.MidiWriter.prototype.markVisited = function() {
   this.lastmark = this.getMarkString();
   this.visited[this.lastmark] = true;
 };
 
-ABCMidiWriter.prototype.isVisited = function() {
+ABCJS.midi.MidiWriter.prototype.isVisited = function() {
   if (this.visited[this.getMarkString()]) return true;
   return false;
 };
 
-ABCMidiWriter.prototype.setJumpMark = function(mark) {
+ABCJS.midi.MidiWriter.prototype.setJumpMark = function(mark) {
   this.visited[this.lastmark] = mark;
 };
 
-ABCMidiWriter.prototype.getJumpMark = function() {
+ABCJS.midi.MidiWriter.prototype.getJumpMark = function() {
   return this.visited[this.getMarkString()];
 };
 
-ABCMidiWriter.prototype.getLine = function() {
+ABCJS.midi.MidiWriter.prototype.getLine = function() {
   return this.abctune.lines[this.line];
 };
 
-ABCMidiWriter.prototype.getStaff = function() {
+ABCJS.midi.MidiWriter.prototype.getStaff = function() {
   try {
   return this.getLine().staff[this.staff];
   } catch (e) {
@@ -445,15 +453,15 @@ ABCMidiWriter.prototype.getStaff = function() {
   }
 };
 
-ABCMidiWriter.prototype.getVoice = function() {
+ABCJS.midi.MidiWriter.prototype.getVoice = function() {
   return this.getStaff().voices[this.voice];
 };
 
-ABCMidiWriter.prototype.getElem = function() {
+ABCJS.midi.MidiWriter.prototype.getElem = function() {
   return this.getVoice()[this.pos];
 };
 
-ABCMidiWriter.prototype.writeABC = function(abctune) {
+ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
   try {
     this.midi = (this.javamidi) ? new MidiProxy(new JavaMidi(this), new Midi()) : new Midi();
     this.baraccidentals = [];
@@ -512,14 +520,14 @@ ABCMidiWriter.prototype.writeABC = function(abctune) {
   }
 };
 
-ABCMidiWriter.prototype.writeABCLine = function() {
+ABCJS.midi.MidiWriter.prototype.writeABCLine = function() {
   this.staffcount = this.getLine().staff.length;
   this.voicecount = this.getStaff().voices.length;
   this.setKeySignature(this.getStaff().key);
   this.writeABCVoiceLine();
 };
 
-ABCMidiWriter.prototype.writeABCVoiceLine = function () {
+ABCJS.midi.MidiWriter.prototype.writeABCVoiceLine = function () {
   this.pos=0;
   while (this.pos<this.getVoice().length) {
     this.writeABCElement(this.getElem());
@@ -533,7 +541,7 @@ ABCMidiWriter.prototype.writeABCVoiceLine = function () {
   }
 };
 
-ABCMidiWriter.prototype.writeABCElement = function(elem) {
+ABCJS.midi.MidiWriter.prototype.writeABCElement = function(elem) {
   var foo;
   switch (elem.el_type) {
   case "note":
@@ -556,7 +564,7 @@ ABCMidiWriter.prototype.writeABCElement = function(elem) {
 };
 
 
-ABCMidiWriter.prototype.writeNote = function(elem) {
+ABCJS.midi.MidiWriter.prototype.writeNote = function(elem) {
 
   if (elem.startTriplet) {
     this.multiplier=2/3;
@@ -621,7 +629,7 @@ ABCMidiWriter.prototype.writeNote = function(elem) {
 
 };
 
-ABCMidiWriter.prototype.handleBar = function (elem) {
+ABCJS.midi.MidiWriter.prototype.handleBar = function (elem) {
   this.baraccidentals = [];
   
   
@@ -662,7 +670,7 @@ ABCMidiWriter.prototype.handleBar = function (elem) {
 
 };
 
-ABCMidiWriter.prototype.setKeySignature = function(elem) {
+ABCJS.midi.MidiWriter.prototype.setKeySignature = function(elem) {
   this.accidentals = [0,0,0,0,0,0,0];
   if (this.abctune.formatting.bagpipes) {
     elem.accidentals=[{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}];
@@ -678,12 +686,13 @@ ABCMidiWriter.prototype.setKeySignature = function(elem) {
 
 };
 
-ABCMidiWriter.prototype.extractNote = function(pitch) {
+ABCJS.midi.MidiWriter.prototype.extractNote = function(pitch) {
   pitch = pitch%7;
   if (pitch<0) pitch+=7;
   return pitch;
 };
 
-ABCMidiWriter.prototype.extractOctave = function(pitch) {
+ABCJS.midi.MidiWriter.prototype.extractOctave = function(pitch) {
   return Math.floor(pitch/7);
 };
+})();

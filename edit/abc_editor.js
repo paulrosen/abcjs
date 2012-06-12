@@ -27,7 +27,7 @@
 //
 
 /*global document, window, clearTimeout, setTimeout */
-/*global ABCMidiWriter, AbcTuneBook, Raphael, ABCPrinter */
+/*global Raphael */
 
 if (!window.ABCJS)
 	window.ABCJS = {};
@@ -236,12 +236,12 @@ window.ABCJS.edit.Editor = function(editarea, params) {
 }
 
 window.ABCJS.edit.Editor.prototype.renderTune = function(abc, params, div) {
-  var tunebook = new AbcTuneBook(abc);
+  var tunebook = new ABCJS.TuneBook(abc);
   var abcParser = window.ABCJS.parse.Parse();
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
-  var printer = new ABCPrinter(paper, {});	// TODO: handle printer params
+  var printer = new ABCJS.write.Printer(paper, {});	// TODO: handle printer params
   printer.printABC(tune);
 };
 
@@ -259,12 +259,12 @@ window.ABCJS.edit.Editor.prototype.modelChanged = function() {
   this.timerId = null;
   this.div.innerHTML = "";
   var paper = Raphael(this.div, 800, 400);
-  this.printer = new ABCPrinter(paper, this.printerparams);
+  this.printer = new ABCJS.write.Printer(paper, this.printerparams);
   this.printer.printABC(this.tunes);
-  if (ABCMidiWriter && this.mididiv) {
+  if (ABCJS.midi.MidiWriter && this.mididiv) {
     if (this.mididiv !== this.div)
 		this.mididiv.innerHTML = "";
-    var midiwriter = new ABCMidiWriter(this.mididiv,this.midiparams);
+    var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv,this.midiparams);
     midiwriter.addListener(this.printer);
     midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
   }
@@ -301,7 +301,7 @@ window.ABCJS.edit.Editor.prototype.parseABC = function() {
 	this.warnings = "";
 	return true;
   }
-  var tunebook = new AbcTuneBook(t);
+  var tunebook = new ABCJS.TuneBook(t);
   
   this.tunes = [];
   this.warnings = [];

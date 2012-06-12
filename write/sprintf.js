@@ -19,9 +19,15 @@
  * Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-function str_repeat(i, m) { for (var o = []; m > 0; o[--m] = i); return(o.join('')); }
+//function str_repeat(i, m) { for (var o = []; m > 0; o[--m] = i); return(o.join('')); }
 
-function sprintf () {
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+if (!window.ABCJS.write)
+	window.ABCJS.write = {};
+
+ABCJS.write.sprintf = function() {
   var i = 0, a, f = arguments[i++], o = [], m, p, c, x;
   while (f) {
     if (m = /^[^\x25]+/.exec(f)) o.push(m[0]);
@@ -52,4 +58,4 @@ function sprintf () {
     f = f.substring(m[0].length);
   }
   return o.join('');
-}
+};
