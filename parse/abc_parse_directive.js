@@ -1,32 +1,26 @@
-// Do the same syntax as YUI so we can expand it later.
-//function ABC() {
-//	return { use: function(callback) { callback(); } };
-//}
-
-/*global ABC */
 /*global window */
-/*extern parseDirective */
 
-// Do the same syntax as YUI so we can expand it later.
-function ABC() {
-	return { use: function(callback) { callback(); } };
-}
+if (!window.ABCJS)
+	window.ABCJS = {};
 
-var parseDirective = {};
+if (!window.ABCJS.parse)
+	window.ABCJS.parse = {};
 
-ABC().use(function() {
+window.ABCJS.parse.parseDirective = {};
+
+(function() {
 	var tokenizer;
 	var warn;
 	var multilineVars;
 	var tune;
-	parseDirective.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
+	window.ABCJS.parse.parseDirective.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
 		tokenizer = tokenizer_;
 		warn = warn_;
 		multilineVars = multilineVars_;
 		tune = tune_;
 	};
 
-	parseDirective.parseFontChangeLine = function(textstr) {
+	window.ABCJS.parse.parseDirective.parseFontChangeLine = function(textstr) {
 		var textParts = textstr.split('$');
 		if (textParts.length > 1 && multilineVars.setfont) {
 			var textarr = [ { text: textParts[0] }];
@@ -50,7 +44,7 @@ ABC().use(function() {
 		return textstr;
 	};
 
-	parseDirective.addDirective = function(str) {
+	window.ABCJS.parse.parseDirective.addDirective = function(str) {
 		var getRequiredMeasurement = function(cmd, tokens) {
 			var points = tokenizer.getMeasurement(tokens);
 			if (points.used === 0 || tokens.length !== 0)
@@ -272,11 +266,11 @@ ABC().use(function() {
 				break;
 			case "text":
 				var textstr = tokenizer.translateString(restOfString);
-				tune.addText(parseDirective.parseFontChangeLine(textstr));
+				tune.addText(window.ABCJS.parse.parseDirective.parseFontChangeLine(textstr));
 				break;
 			case "center":
 				var centerstr = tokenizer.translateString(restOfString);
-				tune.addCentered(parseDirective.parseFontChangeLine(centerstr));
+				tune.addCentered(window.ABCJS.parse.parseDirective.parseFontChangeLine(centerstr));
 				break;
 			case "font":
 				// don't need to do anything for this; it is a useless directive
@@ -536,7 +530,6 @@ ABC().use(function() {
 	//%%MIDI voice [<ID>] [instrument=<integer> [bank=<integer>]] [mute]
 				break;
 
-			case "indent":
 			case "playtempo":
 			case "auquality":
 			case "continuous":
@@ -550,4 +543,4 @@ ABC().use(function() {
 		return null;
 	};
 
-});
+})();

@@ -14,11 +14,16 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*extern AbcTune */
 /*global window */
 
-// This is the data for a single ABC tune. It is created and populated by the AbcParse class.
-function AbcTune() {
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+if (!window.ABCJS.data)
+	window.ABCJS.data = {};
+
+// This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
+window.ABCJS.data.Tune = function() {
 	// The structure consists of a hash with the following two items:
 	// metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...
 	// tempo: { noteLength: number (e.g. .125), bpm: number }

@@ -14,13 +14,17 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*extern AbcParseHeader */
-/*global parseKeyVoice, parseDirective */
 /*global window */
 
-function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
-	parseKeyVoice.initialize(tokenizer, warn, multilineVars, tune);
-	parseDirective.initialize(tokenizer, warn, multilineVars, tune);
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+if (!window.ABCJS.parse)
+	window.ABCJS.parse = {};
+
+window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) {
+	window.ABCJS.parse.parseKeyVoice.initialize(tokenizer, warn, multilineVars, tune);
+	window.ABCJS.parse.parseDirective.initialize(tokenizer, warn, multilineVars, tune);
 
 
 	this.setTitle = function(title) {
@@ -189,8 +193,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			var n = parseInt(len_arr[0]);
 			var d = parseInt(len_arr[1]);
 			if (d > 0) {
-				var q = n / d;
-				multilineVars.default_length = q;	// a whole note is 1
+				multilineVars.default_length = n / d;	// a whole note is 1
 				multilineVars.havent_set_length = false;
 			}
 		}
@@ -307,7 +310,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			switch(line.substring(i, i+3))
 			{
 				case "[I:":
-					var err = parseDirective.addDirective(line.substring(i+3, e));
+					var err = window.ABCJS.parse.parseDirective.addDirective(line.substring(i+3, e));
 					if (err) warn(err, line, i);
 					return [ e-i+1+ws ];
 				case "[M:":
@@ -318,11 +321,11 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 						multilineVars.meter = meter;
 					return [ e-i+1+ws ];
 				case "[K:":
-					var result = parseKeyVoice.parseKey(line.substring(i+3, e));
+					var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(i+3, e));
 					if (result.foundClef && tune.hasBeginMusic())
 						tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
 					if (result.foundKey && tune.hasBeginMusic())
-						tune.appendStartingElement('key', -1, -1, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
+						tune.appendStartingElement('key', -1, -1, window.ABCJS.parse.parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
 					return [ e-i+1+ws ];
 				case "[P:":
 					tune.appendElement('part', -1, -1, {title: line.substring(i+3, e)});
@@ -340,7 +343,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					break;
 				case "[V:":
 					if (e > 0) {
-						parseKeyVoice.parseVoice(line, i+3, e);
+						window.ABCJS.parse.parseKeyVoice.parseVoice(line, i+3, e);
 						//startNewLine();
 						return [ e-i+1+ws, line.charAt(i+1), line.substring(i+3, e)];
 					}
@@ -359,7 +362,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 			switch(line.substring(i, i+2))
 			{
 				case "I:":
-					var err = parseDirective.addDirective(line.substring(i+2));
+					var err = window.ABCJS.parse.parseDirective.addDirective(line.substring(i+2));
 					if (err) warn(err, line, i);
 					return [ line.length ];
 				case "M:":
@@ -368,11 +371,11 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 						tune.appendStartingElement('meter', -1, -1, meter);
 					return [ line.length ];
 				case "K:":
-					var result = parseKeyVoice.parseKey(line.substring(i+2));
+					var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(i+2));
 					if (result.foundClef && tune.hasBeginMusic())
 						tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
 					if (result.foundKey && tune.hasBeginMusic())
-						tune.appendStartingElement('key', -1, -1, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
+						tune.appendStartingElement('key', -1, -1, window.ABCJS.parse.parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
 					return [ line.length ];
 				case "P:":
 					if (tune.hasBeginMusic())
@@ -389,7 +392,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 					else if (tempo.type === 'immediate') tune.appendElement('tempo', -1, -1, tempo.tempo);
 				return [ e, line.charAt(i), window.ABCJS.parse.strip(line.substring(i+2))];
 				case "V:":
-					parseKeyVoice.parseVoice(line, 2, line.length);
+					window.ABCJS.parse.parseKeyVoice.parseVoice(line, 2, line.length);
 //						startNewLine();
 					return [ line.length, line.charAt(i), window.ABCJS.parse(line.substring(i+2))];
 				default:
@@ -417,7 +420,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 
 	this.parseHeader = function(line) {
 		if (window.ABCJS.parse.startsWith(line, '%%')) {
-			var err = parseDirective.addDirective(line.substring(2));
+			var err = window.ABCJS.parse.parseDirective.addDirective(line.substring(2));
 			if (err) warn(err, line, 2);
 			return {};
 		}
@@ -435,7 +438,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 				var field = metaTextHeaders[line.charAt(0)];
 				if (field !== undefined) {
 					if (field === 'unalignedWords')
-						tune.addMetaTextArray(field, parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))));
+						tune.addMetaTextArray(field, window.ABCJS.parse.parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))));
 					else
 						tune.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
 					return {};
@@ -449,12 +452,12 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 						case  'K':
 							// since the key is the last thing that can happen in the header, we can resolve the tempo now
 							this.resolveTempo();
-							var result = parseKeyVoice.parseKey(line.substring(2));
+							var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(2));
 							if (!multilineVars.is_in_header && tune.hasBeginMusic()) {
 								if (result.foundClef)
 									tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
 								if (result.foundKey)
-									tune.appendStartingElement('key', -1, -1, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
+									tune.appendStartingElement('key', -1, -1, window.ABCJS.parse.parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
 							}
 							multilineVars.is_in_header = false;	// The first key signifies the end of the header.
 							break;
@@ -483,7 +486,7 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 							this.addUserDefinition(line, 2, line.length);
 							break;
 						case  'V':
-							parseKeyVoice.parseVoice(line, 2, line.length);
+							window.ABCJS.parse.parseKeyVoice.parseVoice(line, 2, line.length);
 							if (!multilineVars.is_in_header)
 								return {newline: true};
 							break;
@@ -515,4 +518,4 @@ function AbcParseHeader(tokenizer, warn, multilineVars, tune) {
 		// If we got this far, we have a regular line of mulsic
 		return {regular: true, str: line};
 	};
-}
+};

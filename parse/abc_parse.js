@@ -14,13 +14,17 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global AbcParseHeader, AbcTokenizer, AbcTune, parseKeyVoice, parseDirective */
 /*global window */
-/*extern AbcParse */
 
-function AbcParse() {
-	var tune = new AbcTune();
-	var tokenizer = new AbcTokenizer();
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+if (!window.ABCJS.parse)
+	window.ABCJS.parse = {};
+
+window.ABCJS.parse.Parse = function() {
+	var tune = new window.ABCJS.data.Tune();
+	var tokenizer = new window.ABCJS.parse.tokenizer();
 
 	this.getTune = function() {
 		return tune;
@@ -83,7 +87,7 @@ function AbcParse() {
 			encode(line.substring(col_num+1));
 		addWarning("Music Line:" + tune.getNumLines() + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
 	};
-	var header = new AbcParseHeader(tokenizer, warn, multilineVars, tune);
+	var header = new window.ABCJS.parse.ParseHeader(tokenizer, warn, multilineVars, tune);
 
 	this.getWarnings = function() {
 		return multilineVars.warnings;
@@ -711,8 +715,8 @@ function AbcParse() {
 		if (multilineVars.partForNextLine.length)
 			params.part = multilineVars.partForNextLine;
 		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? window.ABCJS.parse.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : window.ABCJS.parse.clone(multilineVars.clef) ;
-		params.key = parseKeyVoice.deepCopyKey(multilineVars.key);
-		parseKeyVoice.addPosToKey(params.clef, params.key);
+		params.key = window.ABCJS.parse.parseKeyVoice.deepCopyKey(multilineVars.key);
+		window.ABCJS.parse.parseKeyVoice.addPosToKey(params.clef, params.key);
 		if (multilineVars.meter !== null) {
 			if (multilineVars.currentVoice) {
 				window.ABCJS.parse.each(multilineVars.staves, function(st) {
@@ -1234,7 +1238,7 @@ function AbcParse() {
 								if (core.endSlur !== undefined) el.endSlur = core.endSlur;
 								if (core.endTie !== undefined) el.rest.endTie = core.endTie;
 								if (core.startSlur !== undefined) el.startSlur = core.startSlur;
-								if (el.startSlur !== undefined) el.startSlur = el.startSlur;
+								//if (el.startSlur !== undefined) el.startSlur = el.startSlur;
 								if (core.startTie !== undefined) el.rest.startTie = core.startTie;
 								if (el.startTie !== undefined) el.rest.startTie = el.startTie;
 							}
@@ -1378,4 +1382,4 @@ function AbcParse() {
 				throw err;
 		}
 	};
-}
+};

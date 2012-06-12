@@ -1,22 +1,26 @@
-/*extern ABC, parseKeyVoice */
-/*global parseDirective */
 /*global window */
 
-var parseKeyVoice = {};
+if (!window.ABCJS)
+	window.ABCJS = {};
 
-ABC().use(function() {
+if (!window.ABCJS.parse)
+	window.ABCJS.parse = {};
+
+window.ABCJS.parse.parseKeyVoice = {};
+
+(function() {
 	var tokenizer;
 	var warn;
 	var multilineVars;
 	var tune;
-	parseKeyVoice.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
+	window.ABCJS.parse.parseKeyVoice.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
 		tokenizer = tokenizer_;
 		warn = warn_;
 		multilineVars = multilineVars_;
 		tune = tune_;
 	};
 
-	parseKeyVoice.standardKey = function(keyName) {
+	window.ABCJS.parse.parseKeyVoice.standardKey = function(keyName) {
 		var key1sharp = {acc: 'sharp', note: 'f'};
 		var key2sharp = {acc: 'sharp', note: 'c'};
 		var key3sharp = {acc: 'sharp', note: 'g'};
@@ -197,7 +201,7 @@ ABC().use(function() {
 		return mid+oct;
 	};
 
-	parseKeyVoice.deepCopyKey = function(key) {
+	window.ABCJS.parse.parseKeyVoice.deepCopyKey = function(key) {
 		var ret = { accidentals: [], root: key.root, acc: key.acc, mode: key.mode };
 		window.ABCJS.parse.each(key.accidentals, function(k) {
 		ret.accidentals.push(window.ABCJS.parse.clone(k));
@@ -207,7 +211,7 @@ ABC().use(function() {
 
 	var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
 
-	parseKeyVoice.addPosToKey = function(clef, key) {
+	window.ABCJS.parse.parseKeyVoice.addPosToKey = function(clef, key) {
 		// Shift the key signature from the treble positions to whatever position is needed for the clef.
 		// This may put the key signature unnaturally high or low, so if it does, then shift it.
 		var mid = clef.verticalPos;
@@ -266,9 +270,9 @@ ABC().use(function() {
 		}
 	};
 
-	parseKeyVoice.fixKey = function(clef, key) {
+	window.ABCJS.parse.parseKeyVoice.fixKey = function(clef, key) {
 		var fixedKey = window.ABCJS.parse.clone(key);
-		parseKeyVoice.addPosToKey(clef, fixedKey);
+		window.ABCJS.parse.parseKeyVoice.addPosToKey(clef, fixedKey);
 		return fixedKey;
 	};
 
@@ -303,7 +307,7 @@ ABC().use(function() {
 		}
 	};
 
-	parseKeyVoice.parseKey = function(str)	// (and clef)
+	window.ABCJS.parse.parseKeyVoice.parseKey = function(str)	// (and clef)
 	{
 		// returns:
 		//		{ foundClef: true, foundKey: true }
@@ -331,13 +335,13 @@ ABC().use(function() {
 		// first the key
 		switch (tokens[0].token) {
 			case 'HP':
-				parseDirective.addDirective("bagpipes");
+				window.ABCJS.parse.parseDirective.addDirective("bagpipes");
 				multilineVars.key = { root: "HP", accidentals: [], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
 				break;
 			case 'Hp':
-				parseDirective.addDirective("bagpipes");
+				window.ABCJS.parse.parseDirective.addDirective("bagpipes");
 				multilineVars.key = { root: "Hp", accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
@@ -381,8 +385,8 @@ ABC().use(function() {
 						}
 					}
 					// We need to do a deep copy because we are going to modify it
-					var oldKey = parseKeyVoice.deepCopyKey(multilineVars.key);
-					multilineVars.key = parseKeyVoice.deepCopyKey({accidentals: parseKeyVoice.standardKey(key)});
+					var oldKey = window.ABCJS.parse.parseKeyVoice.deepCopyKey(multilineVars.key);
+					multilineVars.key = window.ABCJS.parse.parseKeyVoice.deepCopyKey({accidentals: window.ABCJS.parse.parseKeyVoice.standardKey(key)});
 					multilineVars.key.root = retPitch.token;
 					multilineVars.key.acc = acc;
 					multilineVars.key.mode = mode;
@@ -568,7 +572,7 @@ ABC().use(function() {
 		tune.setCurrentVoice(multilineVars.currentVoice.staffNum, multilineVars.currentVoice.index);
 	};
 
-	parseKeyVoice.parseVoice = function(line, i, e) {
+	window.ABCJS.parse.parseKeyVoice.parseVoice = function(line, i, e) {
 		//First truncate the string to the first non-space character after V: through either the
 		//end of the line or a % character. Then remove trailing spaces, too.
 		var ret = tokenizer.getMeat(line, i, e);
@@ -773,5 +777,5 @@ ABC().use(function() {
 		setCurrentVoice(id);
 	};
 
-});
+})();
 

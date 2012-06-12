@@ -15,7 +15,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*extern AbcTuneBook, renderAbc */
-/*global AbcParse, document, Raphael, ABCPrinter, ABCMidiWriter */
+/*global document, Raphael, ABCPrinter, ABCMidiWriter */
 /*global window */
 
 function abcNumberOfTunes(abc) {
@@ -77,7 +77,7 @@ function renderEngine(callback, output, abc, parserParams, renderParams) {
 
 	// parse the abc string
 	var book = new AbcTuneBook(abc);
-	var abcParser = new AbcParse();
+	var abcParser = new window.ABCJS.parse.Parse();
 
 	// output each tune, if it exists. Otherwise clear the div.
 	for (var i = 0; i < output.length; i++) {

@@ -14,14 +14,19 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*extern AbcTokenizer */
 /*global window */
+
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+if (!window.ABCJS.parse)
+	window.ABCJS.parse = {};
 
 // this is a series of functions that get a particular element out of the passed stream.
 // the return is the number of characters consumed, so 0 means that the element wasn't found.
 // also returned is the element found. This may be a different length because spaces may be consumed that aren't part of the string.
 // The return structure for most calls is { len: num_chars_consumed, token: str }
-function AbcTokenizer() {
+window.ABCJS.parse.tokenizer = function() {
 	this.skipWhiteSpace = function(str) {
 		for (var i = 0; i < str.length; i++) {
 		  if (!this.isWhiteSpace(str.charAt(i)))
@@ -743,4 +748,4 @@ function AbcTokenizer() {
 			return [pos-i+1, substInChord(line.substring(i+1, pos)), false];
 		}
 	};
-}
+};

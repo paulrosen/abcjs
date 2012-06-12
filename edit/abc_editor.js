@@ -27,7 +27,7 @@
 //
 
 /*global document, window, clearTimeout, setTimeout */
-/*global ABCMidiWriter, AbcTuneBook, AbcParse, Raphael, ABCPrinter, ABCTextPrinter */
+/*global ABCMidiWriter, AbcTuneBook, Raphael, ABCPrinter, ABCTextPrinter */
 /*extern EditArea, ABCEditor */
 
 function EditArea(textareaid) {
@@ -232,7 +232,7 @@ function ABCEditor(editarea, params) {
 
 ABCEditor.prototype.renderTune = function(abc, params, div) {
   var tunebook = new AbcTuneBook(abc);
-  var abcParser = new AbcParse();
+  var abcParser = window.ABCJS.parse.Parse();
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
@@ -301,7 +301,7 @@ ABCEditor.prototype.parseABC = function() {
   this.tunes = [];
   this.warnings = [];
   for (var i=0; i<tunebook.tunes.length; i++) {
-    var abcParser = new AbcParse();
+    var abcParser = new window.ABCJS.parse.Parse();
     abcParser.parse(tunebook.tunes[i].abc, this.parserparams); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
     var warnings = abcParser.getWarnings() || [];
