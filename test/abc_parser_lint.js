@@ -18,9 +18,7 @@
 //unexpected elements in it. It also returns a person-readable version of it that is suitable
 //for regression tests.
 
-/*global JSONSchema */
 /*global window */
-/*extern AbcParserLint */
 
 // Changes for V1.0.1:
 //
@@ -66,7 +64,13 @@
 // Expanded:
 // MIDI is now { cmd, param }
 
-function AbcParserLint() {
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+if (!window.ABCJS.test)
+	window.ABCJS.test = {};
+
+window.ABCJS.test.ParserLint = function() {
 	var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
 		"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
 		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
@@ -532,7 +536,7 @@ function AbcParserLint() {
 	};
 
 	this.lint = function(tune, warnings) {
-		var ret = JSONSchema.validate(tune, musicSchema);
+		var ret = window.ABCJS.test.JSONSchema.validate(tune, musicSchema);
 		var err = "";
 		window.ABCJS.parse.each(ret.errors, function(e) {
 			err += e.property + ": " + e.message + "\n";

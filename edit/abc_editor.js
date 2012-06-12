@@ -1,9 +1,9 @@
 // abc_editor.js
-// ABCEditor is the interface class for the area that contains the ABC text. It is responsible for
+// window.ABCJS.edit.Editor is the interface class for the area that contains the ABC text. It is responsible for
 // holding the text of the tune and calling the parser and the rendering engines.
 //
 // EditArea is an example of using a textarea as the control that is shown to the user. As long as
-// the same interface is used, ABCEditor can use a different type of object.
+// the same interface is used, window.ABCJS.edit.Editor can use a different type of object.
 //
 // EditArea:
 // - constructor(textareaid)
@@ -27,23 +27,28 @@
 //
 
 /*global document, window, clearTimeout, setTimeout */
-/*global ABCMidiWriter, AbcTuneBook, Raphael, ABCPrinter, ABCTextPrinter */
-/*extern EditArea, ABCEditor */
+/*global ABCMidiWriter, AbcTuneBook, Raphael, ABCPrinter */
 
-function EditArea(textareaid) {
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+if (!window.ABCJS.edit)
+	window.ABCJS.edit = {};
+
+window.ABCJS.edit.EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
   this.isDragging = false;
 }
 
-EditArea.prototype.addSelectionListener = function(listener) {
+window.ABCJS.edit.EditArea.prototype.addSelectionListener = function(listener) {
   this.textarea.onmousemove = function(ev) {
 	  if (this.isDragging)
 	    listener.fireSelectionChanged();
   };
 };
 
-EditArea.prototype.addChangeListener = function(listener) {
+window.ABCJS.edit.EditArea.prototype.addChangeListener = function(listener) {
   this.changelistener = listener;
   this.textarea.onkeyup = function() {
     listener.fireChanged();
@@ -62,11 +67,11 @@ EditArea.prototype.addChangeListener = function(listener) {
 };
 
 //TODO won't work under IE?
-EditArea.prototype.getSelection = function() {
+window.ABCJS.edit.EditArea.prototype.getSelection = function() {
   return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
 };
 
-EditArea.prototype.setSelection = function(start, end) {
+window.ABCJS.edit.EditArea.prototype.setSelection = function(start, end) {
 	if(this.textarea.setSelectionRange)
 	   this.textarea.setSelectionRange(start, end);
 	else if(this.textarea.createTextRange) {
@@ -80,11 +85,11 @@ EditArea.prototype.setSelection = function(start, end) {
   this.textarea.focus();
 };
 
-EditArea.prototype.getString = function() {
+window.ABCJS.edit.EditArea.prototype.getString = function() {
   return this.textarea.value;
 };
 
-EditArea.prototype.setString = function(str) {
+window.ABCJS.edit.EditArea.prototype.setString = function(str) {
   this.textarea.value = str;
   this.initialText = this.getString();
   if (this.changelistener) {
@@ -92,12 +97,12 @@ EditArea.prototype.setString = function(str) {
   }
 };
 
-EditArea.prototype.getElem = function() {
+window.ABCJS.edit.EditArea.prototype.getElem = function() {
   return this.textarea;
 };
 
 //
-// ABCEditor:
+// window.ABCJS.edit.Editor:
 //
 // constructor(editarea, params)
 //		if editarea is a string, then it is an HTML id of a textarea control.
@@ -148,11 +153,11 @@ EditArea.prototype.getElem = function() {
 //		Stops the automatic rendering when the user is typing.
 //
 
-function ABCEditor(editarea, params) {
+window.ABCJS.edit.Editor = function(editarea, params) {
 	if (params.indicate_changed)
 		this.indicate_changed = true;
   if (typeof editarea === "string") {
-    this.editarea = new EditArea(editarea);
+    this.editarea = new window.ABCJS.edit.EditArea(editarea);
   } else {
     this.editarea = editarea;
   }
@@ -230,7 +235,7 @@ function ABCEditor(editarea, params) {
   };
 }
 
-ABCEditor.prototype.renderTune = function(abc, params, div) {
+window.ABCJS.edit.Editor.prototype.renderTune = function(abc, params, div) {
   var tunebook = new AbcTuneBook(abc);
   var abcParser = window.ABCJS.parse.Parse();
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
@@ -240,7 +245,7 @@ ABCEditor.prototype.renderTune = function(abc, params, div) {
   printer.printABC(tune);
 };
 
-ABCEditor.prototype.modelChanged = function() {
+window.ABCJS.edit.Editor.prototype.modelChanged = function() {
   if (this.tunes === undefined) {
     if (this.mididiv !== undefined && this.mididiv !== this.div)
 		this.mididiv.innerHTML = "";
@@ -267,7 +272,7 @@ ABCEditor.prototype.modelChanged = function() {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
   } 
   if (this.target) {
-    var textprinter = new ABCTextPrinter(this.target, true);
+    var textprinter = new window.ABCJS.transform.TextPrinter(this.target, true);
     textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
   }
   this.printer.addSelectListener(this);
@@ -276,14 +281,14 @@ ABCEditor.prototype.modelChanged = function() {
 };
 
 // Call this to reparse in response to the printing parameters changing
-ABCEditor.prototype.paramChanged = function(printerparams) {
+window.ABCJS.edit.Editor.prototype.paramChanged = function(printerparams) {
 	this.printerparams = printerparams;
 	this.oldt = "";
 	this.fireChanged();
 };
 
 // return true if the model has changed
-ABCEditor.prototype.parseABC = function() {
+window.ABCJS.edit.Editor.prototype.parseABC = function() {
   var t = this.editarea.getString();
   if (t===this.oldt) {
     this.updateSelection();
@@ -312,18 +317,18 @@ ABCEditor.prototype.parseABC = function() {
   return true;
 };
 
-ABCEditor.prototype.updateSelection = function() {
+window.ABCJS.edit.Editor.prototype.updateSelection = function() {
   var selection = this.editarea.getSelection();
   try {
     this.printer.rangeHighlight(selection.start, selection.end);
   } catch (e) {} // maybe printer isn't defined yet?
 };
 
-ABCEditor.prototype.fireSelectionChanged = function() {
+window.ABCJS.edit.Editor.prototype.fireSelectionChanged = function() {
   this.updateSelection();
 };
 
-ABCEditor.prototype.setDirtyStyle = function(isDirty) {
+window.ABCJS.edit.Editor.prototype.setDirtyStyle = function(isDirty) {
 	if (this.indicate_changed === undefined)
 		return;
   var addClassName = function(element, className) {
@@ -354,7 +359,7 @@ ABCEditor.prototype.setDirtyStyle = function(isDirty) {
 };
 
 // call when abc text is changed and needs re-parsing
-ABCEditor.prototype.fireChanged = function() {
+window.ABCJS.edit.Editor.prototype.fireChanged = function() {
   if (this.bIsPaused)
     return;
   if (this.parseABC()) {
@@ -374,29 +379,29 @@ ABCEditor.prototype.fireChanged = function() {
 	  }
 };
 
-ABCEditor.prototype.setNotDirty = function() {
+window.ABCJS.edit.Editor.prototype.setNotDirty = function() {
 	this.editarea.initialText = this.editarea.getString();
 	this.wasDirty = false;
 	this.setDirtyStyle(false);
 };
 
-ABCEditor.prototype.isDirty = function() {
+window.ABCJS.edit.Editor.prototype.isDirty = function() {
 	if (this.indicate_changed === undefined)
 		return false;
 	return this.editarea.initialText !== this.editarea.getString();
 };
 
-ABCEditor.prototype.highlight = function(abcelem) {
+window.ABCJS.edit.Editor.prototype.highlight = function(abcelem) {
   this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
 };
 
-ABCEditor.prototype.pause = function(shouldPause) {
+window.ABCJS.edit.Editor.prototype.pause = function(shouldPause) {
 	this.bIsPaused = shouldPause;
 	if (!shouldPause)
 		this.updateRendering();
 };
 
-ABCEditor.prototype.pauseMidi = function(shouldPause) {
+window.ABCJS.edit.Editor.prototype.pauseMidi = function(shouldPause) {
 	if (shouldPause && this.mididiv) {
 		this.mididivSave = this.mididiv;
 		this.addClassName(this.mididiv, 'hidden');
