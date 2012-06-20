@@ -17,8 +17,10 @@
 
 //    requires: abcjs, raphael, jquery
 
-function ABCPlugin(jq) {
-  this.$ = jq;
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+window.ABCJS.Plugin = function() {
 	var is_user_script = false;
 	try {
 		is_user_script = abcjs_is_user_script;
@@ -35,14 +37,11 @@ function ABCPlugin(jq) {
   this.auto_render_threshold = 20;
   this.show_text = "show score for: ";
   //this.hide_text = "hide score for: ";
-}
-var abc_plugin = new ABCPlugin(jQuery);
+};
 
-function start_abc() {
-  abc_plugin.start();  
-}
-
-ABCPlugin.prototype.start = function() {
+window.ABCJS.Plugin.prototype.start = function(jq) {
+	this.$ = jq;
+	var body = jq("body");
   this.errors="";
   var elems = this.getABCContainingElements(this.$("body"));
   var self = this;
@@ -56,7 +55,7 @@ ABCPlugin.prototype.start = function() {
 };
 
 // returns a jquery set of the descendants (including self) of elem which have a text node which matches "X:"
-ABCPlugin.prototype.getABCContainingElements = function(elem) {
+window.ABCJS.Plugin.prototype.getABCContainingElements = function(elem) {
   var results = this.$();
   var includeself = false; // whether self is already included (no need to include it again)
   var self = this;
@@ -80,7 +79,7 @@ ABCPlugin.prototype.getABCContainingElements = function(elem) {
 // (and it is not in a subelem)
 // for each abc piece, we surround it with a div, store the abctext in the 
 // div's data("abctext") and return an array 
-ABCPlugin.prototype.convertToDivs = function (elem) {
+window.ABCJS.Plugin.prototype.convertToDivs = function (elem) {
   var self = this;
   var contents = this.$(elem).contents();
   var abctext = "";
@@ -129,7 +128,7 @@ ABCPlugin.prototype.convertToDivs = function (elem) {
   return results.get();
 };
 
-ABCPlugin.prototype.render = function (contextnode, abcstring) {
+window.ABCJS.Plugin.prototype.render = function (contextnode, abcstring) {
   var abcdiv = this.$("<div class='"+this.render_classname+"'></div>");
   if (this.render_before) {
     this.$(contextnode).before(abcdiv);
@@ -138,22 +137,22 @@ ABCPlugin.prototype.render = function (contextnode, abcstring) {
   }
   var self = this;
   try {
-    var tunebook = new AbcTuneBook(abcstring);
-    var abcParser = new AbcParse();
+    var tunebook = new ABCJS.TuneBook(abcstring);
+    var abcParser = new ABCJS.parse.Parse();
     abcParser.parse(tunebook.tunes[0].abc);
     var tune = abcParser.getTune();
 
     var doPrint = function() {
 	try {
 	  var paper = Raphael(abcdiv.get(0), 800, 400);
-	  var printer = new ABCPrinter(paper,self.render_options);
+	  var printer = new ABCJS.write.Printer(paper,self.render_options);
 	  printer.printABC(tune);
 	} catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
 	  // can't remember why we don't do this in the general case, but there was a good reason
 	  abcdiv.remove();
 	  abcdiv = this.$("<div class='"+self.render_classname+"'></div>");
 	  paper = Raphael(abcdiv.get(0), 800, 400);
-	  printer = new ABCPrinter(paper);
+	  printer = new ABCJS.write.Printer(paper);
 	  printer.printABC(tune);
 	  if (self.render_before) {
 	    this.$(contextnode).before(abcdiv);
@@ -161,8 +160,8 @@ ABCPlugin.prototype.render = function (contextnode, abcstring) {
 	    this.$(contextnode).after(abcdiv);
 	  }
 	}
-	if (ABCMidiWriter && self.show_midi) {
-	  var midiwriter = new ABCMidiWriter(abcdiv.get(0),self.midi_options);
+	if (ABCJS.MidiWriter && self.show_midi) {
+	  var midiwriter = new ABCJS.midi.MidiWriter(abcdiv.get(0),self.midi_options);
 	  midiwriter.writeABC(tune);
 	}
       };
@@ -186,14 +185,17 @@ ABCPlugin.prototype.render = function (contextnode, abcstring) {
    }
 };
 
+window.ABCJS.plugin = new window.ABCJS.Plugin();
+
 // There may be a variable defined which controls whether to automatically run the script. If it isn't
 // there then it will throw an exception, so we'll catch it here.
-var autostart = true;
-try {
-	autostart = abcjs_plugin_autostart;
-} catch (ex) {
-	// It's ok to fail, and we don't have to do anything.
-}
-
-if (autostart)
-	jQuery(document).ready(start_abc);
+$(document).ready(function() {
+	var autostart = true;
+	try {
+		autostart = abcjs_plugin_autostart;
+	} catch (ex) {
+		// It's ok to fail, and we don't have to do anything.
+	}
+	if (autostart)
+		jQuery(document).ready(ABCJS.plugin.start(jQuery));
+})();
