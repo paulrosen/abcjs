@@ -168,6 +168,14 @@ window.ABCJS.data.Tune = function() {
 			}
 		}
 
+		// Remove the temporary working variables
+		for (i = 0; i < this.lines.length; i++) {
+			if (this.lines[i].staff) {
+				for (s = 0; s < this.lines[i].staff.length; s++)
+						delete this.lines[i].staff[s].workingClef;
+			}
+		}
+
 		function cleanUpSlursInLine(line) {
 			var currSlur = [];
 			var x;
@@ -403,11 +411,11 @@ window.ABCJS.data.Tune = function() {
 		var This = this;
 		var pushNote = function(hp) {
 			if (hp.pitches !== undefined) {
-				var mid = This.lines[This.lineNum].staff[This.staffNum].clef.verticalPos;
+				var mid = This.lines[This.lineNum].staff[This.staffNum].workingClef.verticalPos;
 				window.ABCJS.parse.each(hp.pitches, function(p) { p.verticalPos = p.pitch - mid; });
 			}
 			if (hp.gracenotes !== undefined) {
-				var mid2 = This.lines[This.lineNum].staff[This.staffNum].clef.verticalPos;
+				var mid2 = This.lines[This.lineNum].staff[This.staffNum].workingClef.verticalPos;
 				window.ABCJS.parse.each(hp.gracenotes, function(p) { p.verticalPos = p.pitch - mid2; });
 			}
 			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum].push(hp);
@@ -477,6 +485,9 @@ window.ABCJS.data.Tune = function() {
 
 	this.appendStartingElement = function(type, startChar, endChar, hashParams2)
 	{
+		// If we're in the middle of beaming, then end the beam.
+		this.closeLine();
+
 		// We only ever want implied naturals the first time.
 		var impliedNaturals;
 		if (type === 'key') {
@@ -486,6 +497,12 @@ window.ABCJS.data.Tune = function() {
 
 		// Clone the object because it will be sticking around for the next line and we don't want the extra fields in it.
 		var hashParams = window.ABCJS.parse.clone(hashParams2);
+
+		// If this is a clef type, then we replace the working clef on the line. This is kept separate from
+		// the clef in case there is an inline clef field. We need to know what the current position for
+		// the note is.
+		if (type === 'clef')
+			this.lines[this.lineNum].staff[this.staffNum].workingClef = hashParams;
 
 		// These elements should not be added twice, so if the element exists on this line without a note or bar before it, just replace the staff version.
 		var voice = this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum];
@@ -607,7 +624,7 @@ window.ABCJS.data.Tune = function() {
 				This.appendElement('scale', null, null, { size: params.scale} );
 		};
 		var createStaff = function(params) {
-			This.lines[This.lineNum].staff[This.staffNum] = {voices: [ ], clef: params.clef, key: params.key};
+			This.lines[This.lineNum].staff[This.staffNum] = {voices: [ ], clef: params.clef, key: params.key, workingClef: params.clef };
 			if (params.vocalfont) This.lines[This.lineNum].staff[This.staffNum].vocalfont = params.vocalfont;
 			if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
 			if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;
@@ -683,4 +700,4 @@ window.ABCJS.data.Tune = function() {
 	this.addMetaTextObj = function(key, value) {
 		this.metaText[key] = value;
 	};
-}
+};
