@@ -53,12 +53,20 @@ ABCJS.TuneBook = function(book) {
 				directives += line + '\n';
 		});
 	}
+	This.header = directives;
+
 	// Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
 	window.ABCJS.parse.each(This.tunes, function(tune) {
 		var end = tune.abc.indexOf('\n\n');
 		if (end > 0)
 			tune.abc = tune.abc.substring(0, end);
+		tune.pure = tune.abc;
 		tune.abc = directives + tune.abc;
+
+		// for the user's convenience, parse and store the title separately. The title is between the first T: and the next \n
+		var title = tune.pure.split("T:");
+		title = title[1].split("\n");
+		tune.title = title[0];
 	});
 };
 
