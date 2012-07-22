@@ -66,8 +66,28 @@ ABCJS.TuneBook = function(book) {
 		// for the user's convenience, parse and store the title separately. The title is between the first T: and the next \n
 		var title = tune.pure.split("T:");
 		title = title[1].split("\n");
-		tune.title = title[0];
+		tune.title = title[0].replace(/^\s+|\s+$/g, '');;
+
+		// for the user's convenience, parse and store the id separately. The id is between the first X: and the next \n
+		var id = tune.pure.substring(2,tune.pure.indexOf("\n"));
+		tune.id = id.replace(/^\s+|\s+$/g, '');
 	});
+};
+
+ABCJS.TuneBook.prototype.getTuneById = function (id) {
+	for (var i = 0; i < this.tunes.length; i++) {
+		if (this.tunes[i].id === id)
+			return this.tunes[i];
+	}
+	return null;
+};
+
+ABCJS.TuneBook.prototype.getTuneByTitle = function (title) {
+	for (var i = 0; i < this.tunes.length; i++) {
+		if (this.tunes[i].title === title)
+			return this.tunes[i];
+	}
+	return null;
 };
 
 function renderEngine(callback, output, abc, parserParams, renderParams) {
