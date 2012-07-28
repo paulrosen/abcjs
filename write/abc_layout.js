@@ -306,8 +306,8 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
       var delta = (dir==="down")?prev.pitch-curr.pitch:curr.pitch-prev.pitch;
       if (delta<=1 && !prev.printer_shift) {
         curr.printer_shift=(delta)?"different":"same";
-        if (curr.pitch > 11 || curr.pitch < 1) {	// PER: add extra ledger line
-          additionalLedgers.push(curr.pitch - (curr.pitch%2));
+        if (curr.verticalPos > 11 || curr.verticalPos < 1) {	// PER: add extra ledger line
+          additionalLedgers.push(curr.verticalPos - (curr.verticalPos%2));
         }
 	if (dir==="down") {
 	  this.roomtaken = this.glyphs.getSymbolWidth(this.chartable.note[-durlog])+2;
