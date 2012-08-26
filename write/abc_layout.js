@@ -495,8 +495,13 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
 	abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, x, this.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
 	break;
       case "below":
-	y = -3;
-    abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x, 0, y, {type:"text"}));
+	y = elem.minpitch-4;
+			  if (y > -3) y = -3;
+			  var eachLine = elem.chord[i].name.split("\n");
+			  for (var ii = 0; ii < eachLine.length; ii++) {
+				abselem.addChild(new ABCJS.write.RelativeElement(eachLine[ii], x, 0, y, {type:"text"}));
+				  y -= 3;	// TODO-PER: This should actually be based on the font height.
+			  }
     break;
       default:
 			  if (elem.chord[i].rel_position)
