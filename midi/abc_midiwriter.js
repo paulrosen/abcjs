@@ -567,7 +567,10 @@ ABCJS.midi.MidiWriter.prototype.writeABCElement = function(elem) {
 ABCJS.midi.MidiWriter.prototype.writeNote = function(elem) {
 
   if (elem.startTriplet) {
-    this.multiplier=2/3;
+	  if (elem.startTriplet === 2)
+		  this.multiplier = 3/2;
+	  else
+	    this.multiplier=(elem.startTriplet-1)/elem.startTriplet;
   }
 
   var mididuration = elem.duration*this.baseduration*this.multiplier;
