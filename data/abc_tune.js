@@ -302,38 +302,39 @@ window.ABCJS.data.Tune = function() {
 
 		// TODO-PER: This could be done faster as we go instead of as the last step.
 		function fixClefPlacement(el) {
+			window.ABCJS.parse.parseKeyVoice.fixClef(el);
 			//if (el.el_type === 'clef') {
-				var min = -2;
-				var max = 5;
-				switch(el.type) {
-					case 'treble+8':
-					case 'treble-8':
-						break;
-					case 'bass':
-					case 'bass+8':
-					case 'bass-8':
-						el.verticalPos = 20 + el.verticalPos; min += 6; max += 6;
-						break;
-					case 'tenor':
-					case 'tenor+8':
-					case 'tenor-8':
-						el.verticalPos = - el.verticalPos; min = -40; max = 40;
-//						el.verticalPos+=2; min += 6; max += 6;
-						break;
-					case 'alto':
-					case 'alto+8':
-					case 'alto-8':
-						el.verticalPos = - el.verticalPos; min = -40; max = 40;
-//						el.verticalPos-=2; min += 4; max += 4;
-						break;
-				}
-				if (el.verticalPos < min) {
-					while (el.verticalPos < min)
-						el.verticalPos += 7;
-				} else if (el.verticalPos > max) {
-					while (el.verticalPos > max)
-						el.verticalPos -= 7;
-				}
+//				var min = -2;
+//				var max = 5;
+//				switch(el.type) {
+//					case 'treble+8':
+//					case 'treble-8':
+//						break;
+//					case 'bass':
+//					case 'bass+8':
+//					case 'bass-8':
+//						el.verticalPos = 20 + el.verticalPos; min += 6; max += 6;
+//						break;
+//					case 'tenor':
+//					case 'tenor+8':
+//					case 'tenor-8':
+//						el.verticalPos = - el.verticalPos; min = -40; max = 40;
+////						el.verticalPos+=2; min += 6; max += 6;
+//						break;
+//					case 'alto':
+//					case 'alto+8':
+//					case 'alto-8':
+//						el.verticalPos = - el.verticalPos; min = -40; max = 40;
+////						el.verticalPos-=2; min += 4; max += 4;
+//						break;
+//				}
+//				if (el.verticalPos < min) {
+//					while (el.verticalPos < min)
+//						el.verticalPos += 7;
+//				} else if (el.verticalPos > max) {
+//					while (el.verticalPos > max)
+//						el.verticalPos -= 7;
+//				}
 			//}
 		}
 

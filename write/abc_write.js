@@ -426,7 +426,7 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
       staffgroup.draw(this,this.y);
       if (staffgroup.w>maxwidth) maxwidth = staffgroup.w;
       this.staffgroups[this.staffgroups.length] = staffgroup;
-      this.y = staffgroup.y+staffgroup.height; 
+      this.y = staffgroup.y+staffgroup.height;
       this.y+=ABCJS.write.spacing.STAVEHEIGHT*0.2;
     } else if (abcline.subtitle && line!==0) {
       this.printSubtitleLine(abcline);

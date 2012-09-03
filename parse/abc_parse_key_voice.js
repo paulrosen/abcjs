@@ -170,35 +170,55 @@ window.ABCJS.parse.parseKeyVoice = {};
 		return keys[keyName];
 	};
 
+	var clefLines = {
+		'treble': { clef: 'treble', pitch: 4, mid: 0 },
+		'treble+8': { clef: 'treble+8', pitch: 4, mid: 0 },
+		'treble-8': { clef: 'treble-8', pitch: 4, mid: 0 },
+		'treble1': { clef: 'treble', pitch: 2, mid: 2 },
+		'treble2': { clef: 'treble', pitch: 4, mid: 0 },
+		'treble3': { clef: 'treble', pitch: 6, mid: -2 },
+		'treble4': { clef: 'treble', pitch: 8, mid: -4 },
+		'treble5': { clef: 'treble', pitch: 10, mid: -6 },
+		'perc': { clef: 'perc', pitch: 6, mid: 0 },
+		'none': { clef: 'none', mid: 0 },
+		'bass': { clef: 'bass', pitch: 8, mid: -12 },
+		'bass+8': { clef: 'bass+8', pitch: 8, mid: -12 },
+		'bass-8': { clef: 'bass-8', pitch: 8, mid: -12 },
+		'bass+16': { clef: 'bass', pitch: 8, mid: -12 },
+		'bass-16': { clef: 'bass', pitch: 8, mid: -12 },
+		'bass1': { clef: 'bass', pitch: 2, mid: -6 },
+		'bass2': { clef: 'bass', pitch: 4, mid: -8 },
+		'bass3': { clef: 'bass', pitch: 6, mid: -10 },
+		'bass4': { clef: 'bass', pitch: 8, mid: -12 },
+		'bass5': { clef: 'bass', pitch: 10, mid: -14 },
+		'tenor': { clef: 'alto', pitch: 8, mid: -8 },
+		'tenor1': { clef: 'alto', pitch: 2, mid: -2 },
+		'tenor2': { clef: 'alto', pitch: 4, mid: -4 },
+		'tenor3': { clef: 'alto', pitch: 6, mid: -6 },
+		'tenor4': { clef: 'alto', pitch: 8, mid: -8 },
+		'tenor5': { clef: 'alto', pitch: 10, mid: -10 },
+		'alto': { clef: 'alto', pitch: 6, mid: -6 },
+		'alto1': { clef: 'alto', pitch: 2, mid: -2 },
+		'alto2': { clef: 'alto', pitch: 4, mid: -4 },
+		'alto3': { clef: 'alto', pitch: 6, mid: -6 },
+		'alto4': { clef: 'alto', pitch: 8, mid: -8 },
+		'alto5': { clef: 'alto', pitch: 10, mid: -10 },
+		'alto+8': { clef: 'alto+8', pitch: 6, mid: -6 },
+		'alto-8': { clef: 'alto-8', pitch: 6, mid: -6 }
+	};
+
 	var calcMiddle = function(clef, oct) {
-		var mid = 0;
-		switch(clef) {
-			case 'treble':
-			case 'perc':
-			case 'none':
-			case 'treble+8':
-			case 'treble-8':
-				break;
-			case 'bass3':
-			case 'bass':
-			case 'bass+8':
-			case 'bass-8':
-			case 'bass+16':
-			case 'bass-16':
-				mid = -12;
-				break;
-			case 'tenor':
-				mid = -8;
-				break;
-			case 'alto2':
-			case 'alto1':
-			case 'alto':
-			case 'alto+8':
-			case 'alto-8':
-				mid = -6;
-				break;
-		}
+		var value = clefLines[clef];
+		var mid = value ? value.mid : 0;
 		return mid+oct;
+	};
+
+	window.ABCJS.parse.parseKeyVoice.fixClef = function(clef) {
+		var value = clefLines[clef.type];
+		if (value) {
+			clef.clefPos = value.pitch;
+			clef.type = value.clef;
+		}
 	};
 
 	window.ABCJS.parse.parseKeyVoice.deepCopyKey = function(key) {
