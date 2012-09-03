@@ -1313,6 +1313,8 @@ window.ABCJS.parse.Parse = function() {
 		if (switches && switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
+		header.reset(tokenizer, warn, multilineVars, tune);
+
 		// Take care of whatever line endings come our way
 		strTune = window.ABCJS.parse.gsub(strTune, '\r\n', '\n');
 		strTune = window.ABCJS.parse.gsub(strTune, '\r', '\n');

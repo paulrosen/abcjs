@@ -23,9 +23,11 @@ if (!window.ABCJS.parse)
 	window.ABCJS.parse = {};
 
 window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) {
-	window.ABCJS.parse.parseKeyVoice.initialize(tokenizer, warn, multilineVars, tune);
-	window.ABCJS.parse.parseDirective.initialize(tokenizer, warn, multilineVars, tune);
-
+	this.reset = function(tokenizer, warn, multilineVars, tune) {
+		window.ABCJS.parse.parseKeyVoice.initialize(tokenizer, warn, multilineVars, tune);
+		window.ABCJS.parse.parseDirective.initialize(tokenizer, warn, multilineVars, tune);
+	};
+	this.reset(tokenizer, warn, multilineVars, tune);
 
 	this.setTitle = function(title) {
 		if (multilineVars.hasMainTitle)
