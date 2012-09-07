@@ -49,6 +49,7 @@ ABCJS.write.Layout = function(glyphs, bagpipes) {
   this.s = 0; // current staff number
   this.v = 0; // current voice number on current staff
   this.stafflines = 5;
+  this.tripletmultiplier = 1;
 };
 
 ABCJS.write.Layout.prototype.getCurrentVoiceId = function() {
@@ -256,14 +257,23 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
 
   var duration = ABCJS.write.getDuration(elem);
   if (duration === 0) { duration = 0.25; nostem = true; }	//PER: zero duration will draw a quarter note head.
-  var durlog = Math.floor(Math.log(duration)/Math.log(2));
+  var durlog = Math.floor(Math.log(duration)/Math.log(2));  //TODO use getDurlog
   var dot=0;
 
   for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
   
-  var abselem = new ABCJS.write.AbsoluteElement(elem, duration, 1);
-
   
+  if (elem.startTriplet) {
+	  if (elem.startTriplet === 2)
+	    this.tripletmultiplier = 3/2;
+	  else
+	    this.tripletmultiplier=(elem.startTriplet-1)/elem.startTriplet;
+  }
+  
+
+  var abselem = new ABCJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1);
+  
+
   if (elem.rest) {
     var restpitch = 7;
     if (this.stemdir==="down") restpitch = 3;
@@ -523,6 +533,7 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
   if (elem.endTriplet && this.triplet) {
     this.triplet.anchor2 = notehead;
     this.triplet = null;
+    this.tripletmultiplier = 1;
   }
 
   return abselem;

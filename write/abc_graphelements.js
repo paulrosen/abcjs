@@ -44,7 +44,7 @@ ABCJS.write.StaffGroupElement.prototype.finished = function() {
   return true;
 };
 
-ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer) {
+ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debug) {
   this.spacingunits = 0; // number of space units taken up (as opposed to fixed width). Layout engine then decides how many a pixels a space unit should be
   this.minspace = 1000; // a big number to start off with
   var x = printer.paddingleft;
@@ -62,6 +62,7 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer) {
   this.startx=x;
 
   var currentduration = 0;
+  if (debug) console.log("init layout");
   for (i=0;i<this.voices.length;i++) {
     this.voices[i].beginLayout(x);
   }
@@ -73,6 +74,8 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer) {
       if (!this.voices[i].layoutEnded() && (!currentduration || this.voices[i].getDurationIndex()<currentduration)) 
 	currentduration=this.voices[i].getDurationIndex();
     }
+    if (debug) console.log("currentduration: ",currentduration);
+
 
     // isolate voices at current duration level
     var currentvoices = [];
@@ -80,8 +83,10 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer) {
     for (i=0;i<this.voices.length;i++) {
       if (this.voices[i].getDurationIndex() !== currentduration) {
 	othervoices.push(this.voices[i]);
+	console.log("out: voice ",i);
       } else {
 	currentvoices.push(this.voices[i]);
+	if (debug) console.log("in: voice ",i);
       }
     }
 
@@ -200,6 +205,7 @@ ABCJS.write.VoiceElement.prototype.addOther = function (child) {
 ABCJS.write.VoiceElement.prototype.updateIndices = function () {
   if (!this.layoutEnded()) {
     this.durationindex += this.children[this.i].duration;
+    if (this.children[this.i].duration===0) this.durationindex = Math.round(this.durationindex*64)/64; // everytime we meet a barline, do rounding to nearest 64th
     this.i++;
     this.minx = this.nextminx;
   }
@@ -282,8 +288,9 @@ ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
 
 };
 
-
-ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing) { // spacing which must be taken on top of the width
+// duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
+// minspacing - spacing which must be taken on top of the width defined by the duration
+ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing) { 
   this.abcelem = abcelem;
   this.duration = duration;
   this.minspacing = minspacing || 0;
@@ -744,7 +751,7 @@ ABCJS.write.BeamElem.prototype.drawStems = function(printer) {
 
     var sy = (this.asc) ? 1.5*ABCJS.write.spacing.STEP: -1.5*ABCJS.write.spacing.STEP;
     if (this.isgrace) sy = sy*2/3;
-    for (var durlog=ABCJS.write.getDurlog(this.elems[i].duration); durlog<-3; durlog++) {
+    for (var durlog=ABCJS.write.getDurlog(this.elems[i].abcelem.duration); durlog<-3; durlog++) { // get the duration via abcelem because of triplets
       if (auxbeams[-4-durlog]) {
 	auxbeams[-4-durlog].single = false;
       } else {
@@ -754,7 +761,7 @@ ABCJS.write.BeamElem.prototype.drawStems = function(printer) {
     }
     
     for (var j=auxbeams.length-1;j>=0;j--) {
-      if (i===ii-1 || ABCJS.write.getDurlog(this.elems[i+1].duration)>(-j-4)) {
+      if (i===ii-1 || ABCJS.write.getDurlog(this.elems[i+1].abcelem.duration)>(-j-4)) {
 	
 	var auxbeamendx = x;
 	var auxbeamendy = bary + sy*(j+1);
