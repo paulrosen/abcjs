@@ -787,9 +787,9 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
     abselem.addChild(new ABCJS.write.RelativeElement(dec, deltax, this.glyphs.getSymbolWidth(dec), ypos));
   }
   if (compoundDec) {	// PER: added new decorations
-	  ypos = (dir) ? pitch+1:pitch+9;
+	  ypos = (dir === 'down') ? pitch+1:pitch+9;
 	  deltax = width/2;
-	  deltax += (dir) ? -5 : 3;
+	  deltax += (dir === 'down') ? -5 : 3;
 	  for (var xx = 0; xx < compoundDec[1]; xx++) {
 		  ypos -= 1;
 		  abselem.addChild(new ABCJS.write.RelativeElement(compoundDec[0], deltax, this.glyphs.getSymbolWidth(compoundDec[0]), ypos));
