@@ -505,6 +505,16 @@ window.ABCJS.data.Tune = function() {
 		if (type === 'clef')
 			this.lines[this.lineNum].staff[this.staffNum].workingClef = hashParams;
 
+		// If this is the first item in this staff, then we might have to initialize the staff, first.
+		if (this.lines[this.lineNum].staff.length <= this.staffNum) {
+			this.lines[this.lineNum].staff[this.staffNum] = {};
+			this.lines[this.lineNum].staff[this.staffNum].clef = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].clef);
+			this.lines[this.lineNum].staff[this.staffNum].key = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].key);
+			this.lines[this.lineNum].staff[this.staffNum].meter = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].meter);
+			this.lines[this.lineNum].staff[this.staffNum].workingClef = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].workingClef);
+			this.lines[this.lineNum].staff[this.staffNum].voices = [[]];
+		}
+
 		// These elements should not be added twice, so if the element exists on this line without a note or bar before it, just replace the staff version.
 		var voice = this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum];
 		for (var i = 0; i < voice.length; i++) {
