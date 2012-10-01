@@ -83,7 +83,7 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
     for (i=0;i<this.voices.length;i++) {
       if (this.voices[i].getDurationIndex() !== currentduration) {
 	othervoices.push(this.voices[i]);
-	console.log("out: voice ",i);
+	//console.log("out: voice ",i);
       } else {
 	currentvoices.push(this.voices[i]);
 	if (debug) console.log("in: voice ",i);
