@@ -1184,7 +1184,10 @@ window.ABCJS.parse.Parse = function() {
 												var fraction = tokenizer.getFraction(line, i);
 												chordDuration = fraction.value;
 												i = fraction.index;
-												postChordDone = true;
+												if (line.charAt(i) === '-' || line.charAt(i) === ')')
+													i--; // Subtracting one because one is automatically added below
+												else
+													postChordDone = true;
 												break;
 											default:
 												postChordDone = true;
