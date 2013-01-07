@@ -180,10 +180,10 @@ ABCJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
 
 ABCJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
   anchor = anchor || "start";
-  var ret = this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor, "font-size":12});
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
+  var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":12*this.scale});
+//  if (this.scale!==1) {
+//    ret.scale(this.scale, this.scale, 0, 0);
+//  }
   return ret;
 };
 
@@ -316,12 +316,13 @@ ABCJS.write.Printer.prototype.printABC = function(abctunes) {
 };
 
 ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, printer, x) {
+	var fontStyle = {"text-anchor":"start", 'font-size':12*printer.scale, 'font-weight':'bold'};
 	if (tempo.preString) {
-		var text = paper.text(x, y + 20, tempo.preString).attr({"text-anchor":"start"});
-		x += (text.getBBox().width + 10);
+		var text = paper.text(x*printer.scale, y*printer.scale + 20*printer.scale, tempo.preString).attr(fontStyle);
+		x += (text.getBBox().width + 20*printer.scale);
 	}
 	if (tempo.duration) {
-		var temposcale = 0.75;
+		var temposcale = 0.75*printer.scale;
 		var tempopitch = 14.5;
 		var duration = tempo.duration[0]; // TODO when multiple durations
 		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1);
@@ -346,19 +347,19 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 			var p1 = tempopitch + 1 / 3 * temposcale;
 			var p2 = tempopitch + 7 * temposcale;
 			var dx = temponote.dx + temponote.w;
-			var width = -0.6;
+			var width = -0.6*printer.scale;
 			abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type":"stem", "pitch2":p2, linewidth:width}));
 		}
-		abselem.x = x;
+		abselem.x = x*(1/printer.scale); // TODO-PER: For some reason it scales this element twice, so just compensate.
 		abselem.draw(printer, null);
-		x += (abselem.w + 5);
-		text = paper.text(x, y + 20, "= " + tempo.bpm).attr({"text-anchor":"start"});
-		x += text.getBBox().width + 10;
+		x += (abselem.w + 5*printer.scale);
+		text = paper.text(x, y*printer.scale + 20*printer.scale, "= " + tempo.bpm).attr(fontStyle);
+		x += text.getBBox().width + 10*printer.scale;
 	}
 	if (tempo.postString) {
-		paper.text(x, y + 20, tempo.postString).attr({"text-anchor":"start"});
+		paper.text(x, y*printer.scale + 20*printer.scale, tempo.postString).attr(fontStyle);
 	}
-	y += 15;
+	y += 15*printer.scale;
 	return y;
 };
 
@@ -387,22 +388,25 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
     this.width=this.staffwidth;
   }
   this.width+=this.paddingleft;
-  if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; }
-  this.paper.text(this.width/2, this.y, abctune.metaText.title).attr({"font-size":20, "font-family":"serif"});
-  this.y+=20;
+  if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; } else this.scale = 1;
+  this.paper.text(this.width*this.scale/2, this.y, abctune.metaText.title).attr({"font-size":20*this.scale, "font-family":"serif"});
+  this.y+=20*this.scale;
   if (abctune.lines[0] && abctune.lines[0].subtitle) {
     this.printSubtitleLine(abctune.lines[0]);
-    this.y+=20;
+    this.y+=20*this.scale;
   }
   if (abctune.metaText.rhythm) {
-    this.paper.text(this.paddingleft, this.y, abctune.metaText.rhythm).attr({"text-anchor":"start","font-style":"italic","font-family":"serif", "font-size":12}); 
-    !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.y+=15);
+    this.paper.text(this.paddingleft, this.y, abctune.metaText.rhythm).attr({"text-anchor":"start","font-style":"italic","font-family":"serif", "font-size":12*this.scale});
+    !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.y+=15*this.scale);
   }
-  if (abctune.metaText.author) {this.paper.text(this.width, this.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12}); this.y+=15;}
-  if (abctune.metaText.origin) {this.paper.text(this.width, this.y, "(" + abctune.metaText.origin + ")").attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12});this.y+=15;}
-  if (abctune.metaText.composer) {this.paper.text(this.width, this.y, abctune.metaText.composer).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12});this.y+=15;}
+	var composerLine = "";
+	if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
+	if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
+  if (composerLine.length > 0) {this.paper.text(this.width*this.scale, this.y, composerLine).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale});this.y+=15;}
+	if (abctune.metaText.author) {this.paper.text(this.width*this.scale, this.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale}); this.y+=15;}
   if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
 	  this.y = this.printTempo(abctune.metaText.tempo, this.paper, this.layouter, this.y, this, 50);
+	  this.y += 20*this.scale;
   }
   this.staffgroups = [];
   var maxwidth = this.width;
@@ -430,7 +434,7 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
       this.y+=ABCJS.write.spacing.STAVEHEIGHT*0.2;
     } else if (abcline.subtitle && line!==0) {
       this.printSubtitleLine(abcline);
-      this.y+=20; //hardcoded
+      this.y+=20*this.scale; //hardcoded
     } else if (abcline.text) {
 		if (typeof abcline.text === 'string')
 	      this.paper.text(100, this.y, "TEXT: " + abcline.text);
@@ -441,35 +445,41 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
 		  }
 	      this.paper.text(100, this.y, "TEXT: " + str);
 	  }
-      this.y+=20; //hardcoded
+      this.y+=20*this.scale; //hardcoded
     }
   }
-  var extraText = "";	// TODO-PER: This is just an easy way to display this info for now.
+  var extraText = "";
+	var text2;
+	var height;
   if (abctune.metaText.partOrder) extraText += "Part Order: " + abctune.metaText.partOrder + "\n";
-  if (abctune.metaText.notes) extraText += "Notes:\n" + abctune.metaText.notes + "\n";
-  if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
-  if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
-  if (abctune.metaText.transcription) extraText += "Transcription: " + abctune.metaText.transcription + "\n";
-  if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
-  if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
-  if (abctune.metaText.unalignedWords) {
-    extraText += "Words:\n";
-    for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
-      if (typeof abctune.metaText.unalignedWords[j] === 'string')
-        extraText += abctune.metaText.unalignedWords[j] + "\n";
-      else {
-        for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
-          extraText += " FONT " + abctune.metaText.unalignedWords[j][k].text;
-	    }
-        extraText += "\n";
-	  }
-	}
+	if (abctune.metaText.unalignedWords) {
+   for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
+     if (typeof abctune.metaText.unalignedWords[j] === 'string')
+       extraText += abctune.metaText.unalignedWords[j] + "\n";
+     else {
+       for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
+         extraText += " FONT " + abctune.metaText.unalignedWords[j][k].text;
+    }
+       extraText += "\n";
   }
-  var text2 = this.paper.text(this.paddingleft, this.y+25, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":13});
-  var height = text2.getBBox().height;
+}
+ text2 = this.paper.text(this.paddingleft*this.scale+50*this.scale, this.y*this.scale+25*this.scale, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":17*this.scale});
+  height = text2.getBBox().height + 17*this.scale;
   text2.translate(0,height/2);
-  this.y+=25+height;
-  var sizetoset = {w: maxwidth*this.scale+this.paddingright,h: this.y*this.scale+this.paddingbottom};
+  this.y+=height;
+		extraText = "";
+ }
+	if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
+	if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
+	if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
+  if (abctune.metaText.notes) extraText += "Notes: " + abctune.metaText.notes + "\n";
+  if (abctune.metaText.transcription) extraText += "Transcription: " + abctune.metaText.transcription + "\n";
+  if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
+  text2 = this.paper.text(this.paddingleft, this.y*this.scale+25*this.scale, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":17*this.scale});
+  height = text2.getBBox().height;
+  text2.translate(0,height/2);
+  this.y+=25*this.scale+height*this.scale;
+  var sizetoset = {w: (maxwidth+this.paddingright)*this.scale,h: this.y+this.paddingbottom*this.scale};
   this.paper.setSize(sizetoset.w,sizetoset.h);
   // Correct for IE problem in calculating height
   var isIE=/*@cc_on!@*/false;//IE detector

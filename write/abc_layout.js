@@ -173,7 +173,7 @@ ABCJS.write.Layout.prototype.printABCElement = function() {
     break;
   case "part":
     var abselem = new ABCJS.write.AbsoluteElement(elem,0,0);
-    abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, 18, {type:"text", attributes:{"font-weight":"bold", "font-size":"16px", "font-family":"serif"}}));
+    abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, 18, {type:"text", attributes:{"font-weight":"bold", "font-size":""+16*this.printer.scale+"px", "font-family":"serif"}}));
     elemset[0] = abselem;
     break;
 //	  case "tempo":

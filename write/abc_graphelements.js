@@ -47,18 +47,18 @@ ABCJS.write.StaffGroupElement.prototype.finished = function() {
 ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debug) {
   this.spacingunits = 0; // number of space units taken up (as opposed to fixed width). Layout engine then decides how many a pixels a space unit should be
   this.minspace = 1000; // a big number to start off with
-  var x = printer.paddingleft;
+  var x = printer.paddingleft*printer.scale;
 
   // find out how much space will be taken up by voice headers
   var voiceheaderw = 0;
   for (var i=0;i<this.voices.length;i++) {
     if(this.voices[i].header) {
-      var t = printer.paper.text(100, -10, this.voices[i].header).attr({"font-size":12, "font-family":"serif"}); // code duplicated below  // don't scale this as we ask for the bbox
+      var t = printer.paper.text(100*printer.scale, -10*printer.scale, this.voices[i].header).attr({"font-size":12*printer.scale, "font-family":"serif", 'font-weight':'bold'}); // code duplicated below  // don't scale this as we ask for the bbox
      voiceheaderw = Math.max(voiceheaderw,t.getBBox().width);
       t.remove();
     }
   }
-  x=x+voiceheaderw*1.1; // 10% of 0 is 0
+  x=x+voiceheaderw*(1/printer.scale)*1.1; // 10% of 0 is 0
   this.startx=x;
 
   var currentduration = 0;
@@ -273,7 +273,9 @@ ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
 
   if (this.header) { // print voice name
     var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
-    printer.paper.text((this.startx-printer.paddingleft)/2+printer.paddingleft, printer.calcY(textpitch), this.header).attr({"font-size":12, "font-family":"serif"}); // code duplicated above //TODO scale
+	  var headerX = (this.startx-printer.paddingleft)/2+printer.paddingleft;
+	  headerX = headerX*printer.scale;
+    printer.paper.text(headerX, printer.calcY(textpitch)*printer.scale, this.header).attr({"font-size":12*printer.scale, "font-family":"serif", 'font-weight':'bold'}); // code duplicated above
   }
 
   for (var i=0, ii=this.children.length; i<ii; i++) {
@@ -475,7 +477,7 @@ ABCJS.write.EndingElem.prototype.draw = function (printer, linestartx, lineendx)
     pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 			     linestartx, printer.y, linestartx, printer.y+10); 
     printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"}); //TODO scale
-    printer.printText(linestartx+5, 18.5, this.text).attr({"font-size":"10px"});
+    printer.printText(linestartx+5*printer.scale, 18.5, this.text).attr({"font-size":""+10*printer.scale+"px"});
   }
 
   if (this.anchor2) {
