@@ -4,11 +4,13 @@ cat write/abc_glyphs.js write/abc_graphelements.js write/abc_layout.js write/abc
 cat api/abc_tunebook.js data/abc_tune.js midi/abc_midiwriter.js tmp/parse.js tmp/write.js > tmp/abcjs-no-raphael.js
 cat write/raphael.js tmp/abcjs-no-raphael.js > tmp/abcjs_all.js
 cat tmp/abcjs_all.js edit/abc_editor.js > tmp/abcjs_editor.js
+cat tmp/abcjs-no-raphael.js edit/abc_editor.js > tmp/abcjs_editor-no-raphael.js
 cat tmp/abcjs_all.js plugin/abc_plugin.js > tmp/abcjs_plugin.js
 echo "Compressing basic..."
 java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcjs_basic_$1-min.js tmp/abcjs_all.js
 echo "Compressing editor..."
 java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcjs_editor_$1-min.js tmp/abcjs_editor.js
+java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcjs_editor_no_raphael$1-min.js tmp/abcjs_editor-no-raphael.js
 echo "Compressing plugin..."
 java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcjs_plugin-nojquery_$1-min.js tmp/abcjs_plugin.js
 cat jquery-1.7.2.min.js bin/abcjs_plugin-nojquery_$1-min.js > bin/abcjs_plugin_$1-min.js
