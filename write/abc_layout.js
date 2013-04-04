@@ -31,6 +31,12 @@ ABCJS.write.getDuration = function(elem) {
 };
 
 ABCJS.write.getDurlog = function(duration) {
+	// TODO-PER: This is a hack to prevent a Chrome lockup. Duration should have been defined already,
+	// but there's definitely a case where it isn't. [Probably something to do with triplets.]
+	if (duration === undefined) {
+		return 0;
+	}
+//	console.log("getDurlog: " + duration);
   return Math.floor(Math.log(duration)/Math.log(2));
 };
 

@@ -413,25 +413,8 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
   for(var line=0; line<abctune.lines.length; line++) {
     var abcline = abctune.lines[line];
     if (abcline.staff) {
-      var staffgroup = this.layouter.printABCLine(abcline.staff);
-      var newspace = this.space;
-      for (var it=0;it<3;it++) { // TODO shouldn't need this triple pass any more
-	staffgroup.layout(newspace,this, false);
-	if (line && line===abctune.lines.length-1 && staffgroup.w/this.width<0.66 && !abctune.formatting.stretchlast) break; // don't stretch last line too much unless it is 1st
-	var relspace = staffgroup.spacingunits*newspace;
-	var constspace = staffgroup.w-relspace;
-	if (staffgroup.spacingunits>0) {
-	  newspace = (this.width-constspace)/staffgroup.spacingunits;
-	  if (newspace*staffgroup.minspace>50) {
-	    newspace = 50/staffgroup.minspace;
-	  }
-	}
-      }
-      staffgroup.draw(this,this.y);
-      if (staffgroup.w>maxwidth) maxwidth = staffgroup.w;
-      this.staffgroups[this.staffgroups.length] = staffgroup;
-      this.y = staffgroup.y+staffgroup.height;
-      this.y+=ABCJS.write.spacing.STAVEHEIGHT*0.2;
+		staffgroup = this.printStaffLine(abctune, abcline, line);
+		if (staffgroup.w > maxwidth) maxwidth = staffgroup.w;
     } else if (abcline.subtitle && line!==0) {
       this.printSubtitleLine(abcline);
       this.y+=20*this.scale; //hardcoded
@@ -494,4 +477,24 @@ ABCJS.write.Printer.prototype.printSubtitleLine = function(abcline) {
   this.paper.text(this.width/2, this.y, abcline.subtitle).attr({"font-size":16}).scale(this.scale, this.scale, 0,0);
 };
 
-
+ABCJS.write.Printer.prototype.printStaffLine = function (abctune, abcline, line) {
+	var staffgroup = this.layouter.printABCLine(abcline.staff);
+	var newspace = this.space;
+	for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
+		staffgroup.layout(newspace, this, false);
+		if (line && line === abctune.lines.length - 1 && staffgroup.w / this.width < 0.66 && !abctune.formatting.stretchlast) break; // don't stretch last line too much unless it is 1st
+		var relspace = staffgroup.spacingunits * newspace;
+		var constspace = staffgroup.w - relspace;
+		if (staffgroup.spacingunits > 0) {
+			newspace = (this.width - constspace) / staffgroup.spacingunits;
+			if (newspace * staffgroup.minspace > 50) {
+				newspace = 50 / staffgroup.minspace;
+			}
+		}
+	}
+	staffgroup.draw(this, this.y);
+	this.staffgroups[this.staffgroups.length] = staffgroup;
+	this.y = staffgroup.y + staffgroup.height;
+	this.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;
+	return staffgroup;
+}
