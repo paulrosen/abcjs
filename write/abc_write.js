@@ -388,8 +388,9 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
     this.width=this.staffwidth;
   }
   this.width+=this.paddingleft;
-  if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; } else this.scale = 1;
-  this.paper.text(this.width*this.scale/2, this.y, abctune.metaText.title).attr({"font-size":20*this.scale, "font-family":"serif"});
+  if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; }
+	if (abctune.metaText.title)
+	  this.paper.text(this.width*this.scale/2, this.y, abctune.metaText.title).attr({"font-size":20*this.scale, "font-family":"serif"});
   this.y+=20*this.scale;
   if (abctune.lines[0] && abctune.lines[0].subtitle) {
     this.printSubtitleLine(abctune.lines[0]);
