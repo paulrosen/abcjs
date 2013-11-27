@@ -738,6 +738,7 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
     case "breath": dec=","; break;
     case "accent": dec="scripts.sforzato"; break;
     case "tenuto": dec="scripts.tenuto"; break;
+    case "umarcato": dec="scripts.umarcato"; break;
     case "coda": dec="scripts.coda"; break;
     case "segno": dec="scripts.segno"; break;
     case "/": compoundDec=["flags.ugrace", 1]; continue;	// PER: added new decorations
@@ -830,7 +831,7 @@ ABCJS.write.Layout.prototype.printBarLine = function (elem) {
   var secondthin = (elem.type==="bar_left_repeat" || elem.type==="bar_thick_thin" || elem.type==="bar_thin_thin" || elem.type==="bar_dbl_repeat");
   var seconddots = (elem.type==="bar_left_repeat" || elem.type==="bar_dbl_repeat");
 
-  // limit positionning of slurs
+  // limit positioning of slurs
   if (firstdots || seconddots) {
     for (var slur in this.slurs) {
       if (this.slurs.hasOwnProperty(slur)) {

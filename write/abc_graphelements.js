@@ -237,7 +237,7 @@ ABCJS.write.VoiceElement.prototype.layoutOneItem = function (x, spacing) {
   var child = this.children[this.i];
   if (!child) return 0;
   var er = x - this.minx; // available extrawidth to the left
-  if (er<child.getExtraWidth()) { // shift right by needed amound
+  if (er<child.getExtraWidth()) { // shift right by needed amount
     x+=child.getExtraWidth()-er;
   }
   child.x=x;
