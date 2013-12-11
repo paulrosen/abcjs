@@ -686,8 +686,9 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
   if (pitch===5) yslot=14; // avoid upstem of the A
 	var addMark = false; // PER: to allow the user to add a class whereever
 
-  for (i=0;i<decoration.length; i++) { // treat staccato first (may need to shift other markers) //TODO, same with tenuto?
-    if (decoration[i]==="staccato") {
+  for (i=0;i<decoration.length; i++) { // treat staccato and tenuto first (may need to shift other markers) //TODO, same with tenuto?
+    if (decoration[i]==="staccato" || decoration[i]==="tenuto") {
+		var symbol = "scripts." + decoration[i];
       ypos = (dir==="down") ? pitch+2:minPitch-2;
 		// don't place on a stave line. The stave lines are 2,4,6,8,10
 		switch (ypos) {
@@ -702,10 +703,10 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
 		}
       if (pitch>9) yslot++; // take up some room of those that are above
       var deltax = width/2;
-      if (this.glyphs.getSymbolAlign("scripts.staccato")!=="center") {
+      if (this.glyphs.getSymbolAlign(symbol)!=="center") {
 	deltax -= (this.glyphs.getSymbolWidth(dec)/2);
       }
-      abselem.addChild(new ABCJS.write.RelativeElement("scripts.staccato", deltax, this.glyphs.getSymbolWidth("scripts.staccato"), ypos));
+      abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltax, this.glyphs.getSymbolWidth(symbol), ypos));
     }
     if (decoration[i]==="slide" && abselem.heads[0]) {
       ypos = abselem.heads[0].pitch;
@@ -730,6 +731,7 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
     case "mordent":
     case "lowermordent": dec="scripts.mordent"; break;
     case "staccato":
+    case "tenuto":
     case "slide": continue;
     case "downbow": dec="scripts.downbow";break;
     case "upbow": dec="scripts.upbow";break;
@@ -737,7 +739,6 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
     case "invertedfermata": below = true; dec="scripts.dfermata"; break;
     case "breath": dec=","; break;
     case "accent": dec="scripts.sforzato"; break;
-    case "tenuto": dec="scripts.tenuto"; break;
     case "umarcato": dec="scripts.umarcato"; break;
     case "coda": dec="scripts.coda"; break;
     case "segno": dec="scripts.segno"; break;
