@@ -102,7 +102,7 @@ window.ABCJS.test.ParserLint = function() {
 		var ret = {};
 		ret.startChar = { type: 'number' }; //, output: 'hidden' };
 		ret.endChar = { type: 'number' }; //, output: 'hidden' };
-		return Object.extend(ret, properties);
+		return $.extend(ret, properties);
 	};
 
 	var fontType = {
@@ -362,7 +362,7 @@ window.ABCJS.test.ParserLint = function() {
 							channel: { type: "number", optional: true, minimum: 1, maximum: 16},
 							program: { type: "number", minimum: 0, maximum: 127 }
 						}
-					 },
+					},
 				portamento: { type: "number", optional: true }, 
 				randomchordattack: { type: "number", optional: true },
 				ratio: { type: "number", optional: true },
@@ -549,4 +549,4 @@ window.ABCJS.test.ParserLint = function() {
 		warn = window.ABCJS.parse.gsub(warn, '</span>', '$$$$');
 		return "Error:------\n" + err + "\nObj:-------\n" + out + "\nWarn:------\n" + warn;
 	};
-}
+};
