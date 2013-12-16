@@ -74,8 +74,8 @@ tune = book.getTuneByTitle(title);
 ```
 
 ```
-tunebook	This is contents of the text file containing one or more ABC-formatted tunes, plus global header info, and inter-tune text.
-book.header	This is all of the text that appears before the first tune starts in the file.
+tunebook		This is contents of the text file containing one or more ABC-formatted tunes, plus global header info, and inter-tune text.
+book.header		This is all of the text that appears before the first tune starts in the file.
 book.tunes.length	This is how many tunes are in that file.
 book.tunes[i].title	This is the first title found for the particular tune. White space is trimmed from both the beginning and end.
 book.tunes[i].abc	This is the particular tune with the global header information added to it. This is what should be passed to the parser in most cases.
@@ -97,12 +97,12 @@ window.ABCJS
 This means that you will have to modify your pages to use the new syntax. All of the old entry points are still available with a slightly different name. Here is a list of all recommended entry points:
 
 ```
-New name						Old name
+New name			Old name
 ABCJS.numberOfTunes	numberOfTunes
-ABCJS.renderAbc			renderABC
-ABCJS.renderMidi			renderMidi
-ABCJS.Editor					ABCEditor
-ABCJS.plugin					abc_plugin
+ABCJS.renderAbc		renderABC
+ABCJS.renderMidi	renderMidi
+ABCJS.Editor		ABCEditor
+ABCJS.plugin		abc_plugin
 ```
 
 abcjs editor
@@ -170,7 +170,7 @@ The options available in abc_plugin are:
     auto_render_threshold -- number of tunes beyond which auto rendering is disabled; instead, each tune is accompanied by a "show" button (default value is 20) since 1.0.2
     show_text -- text to be included on the "show" button before the tune title (default value is "show score for: ") since 1.0.2 
 
-When abcjs plugin finds an abctune, it wraps a div.abctext around it and renders it into a div.abcrendered. The show button is an a.abcshow. These hooks can be used for styling. since 1.0.2
+When abcjs plugin finds an abctune, it wraps a `div.abctext` around it and renders it into a `div.abcrendered`. The show button is an `a.abcshow`. These hooks can be used for styling. since 1.0.2
 Basic abcjs
 
 You can also run your own abcjs webapp using the abcjs_basic lib.
@@ -218,8 +218,8 @@ Using abcjs without bundled libraries
 
 ```
 By default, abcjs libraries come bundled with the following libraries.
-abcjs_editor: 	 raphael.js
-abcjs_plugin: 	raphael.js, JQuery
+abcjs_editor: raphael.js
+abcjs_plugin: raphael.js, JQuery
 abcjs_plugin-nojquery: raphael.js
 ```
 
