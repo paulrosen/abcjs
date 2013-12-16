@@ -31,7 +31,29 @@ If you already have ABC notation on your page and don't want to modify the page 
 
 If you are looking at someone else's website and see ABC on the page and want to see what it looks like in standard notation, you can install the greasemonkey script in FireFox or Chrome and it will render the ABC for you.
 
-Websites using abcjs:
+Downloads:
+---
+Here are the latest versions. You can just download these:
+
+Basic:
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_1.8-min.js
+
+Editor:
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_1.8-min.js
+
+Plugin:
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.8-min.js
+
+Greasemonkey script:
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.8.user.js
+
+Editor without Raphael:
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_no_raphael1.8-min.js
+
+Plugin without JQuery:
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin-nojquery_1.8-min.js
+
+Partial list of some websites using abcjs:
 ---
 
     http://www.drawthedots.com (editor)
