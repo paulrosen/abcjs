@@ -25,6 +25,8 @@ If you are writing significant JavaScript on your site, and you are generating t
 
 If you are allowing the user to enter music using ABC notation, whether a whole tune or a fragment, then you probably want to use `abcjs-editor`. This is just like the basic version, except that it adds the ability for the music generator to watch a textarea and output what the user puts there.
 
+If you are using Rails, you can just use this gem: https://github.com/paulrosen/abcjs-rails This is the same code, but it has been packaged for you to use with the asset pipeline.
+
 If you already have ABC notation on your page and don't want to modify the page more than you have to, then you can use `abcjs-plugin`, which will render all ABC that it finds on the page on page load, simply by including one line: the line to include the script.
 
 If you are looking at someone else's website and see ABC on the page and want to see what it looks like in standard notation, you can install the greasemonkey script in FireFox or Chrome and it will render the ABC for you.
@@ -74,8 +76,8 @@ tune = book.getTuneByTitle(title);
 ```
 
 ```
-tunebook		This is contents of the text file containing one or more ABC-formatted tunes, plus global header info, and inter-tune text.
-book.header		This is all of the text that appears before the first tune starts in the file.
+tunebook			This is contents of the text file containing one or more ABC-formatted tunes, plus global header info, and inter-tune text.
+book.header			This is all of the text that appears before the first tune starts in the file.
 book.tunes.length	This is how many tunes are in that file.
 book.tunes[i].title	This is the first title found for the particular tune. White space is trimmed from both the beginning and end.
 book.tunes[i].abc	This is the particular tune with the global header information added to it. This is what should be passed to the parser in most cases.
