@@ -1,46 +1,26 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<html> <head>
-<title>Demo of abc_plugin</title>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>abcjs: Plugin Demo</title>
 
-<script src="http://code.jquery.com/jquery-1.7.2.min.js" type="text/javascript"></script>
+	<script src="jquery-1.10.2.min.js" type="text/javascript"></script>
+	<script src="bin/abcjs_plugin_nojquery_1.9-min.js" type="text/javascript"></script>
 
-<script src="write/raphael.js" type="text/javascript"></script>
-<script src="write/sprintf.js" type="text/javascript"></script>
-<script src="write/abc_graphelements.js" type="text/javascript"></script>
-<script src="scalefont.js" type="text/javascript"></script>
-<script src="scalefontemmentaler.js" type="text/javascript"></script>
-<script src="write/abc_glyphs.js" type="text/javascript"></script>
-<script src="write/abc_layout.js" type="text/javascript"></script>
-<script src="write/abc_write.js" type="text/javascript"></script>
-<script src="api/abc_tunebook.js" type="text/javascript"></script>
-<script src="parse/abc_common.js" type="text/javascript"></script>
-<script src="parse/abc_parse_key_voice.js" type="text/javascript"></script>
-<script src="parse/abc_parse_directive.js" type="text/javascript"></script>
-<script src="data/abc_tune.js" type="text/javascript"></script>
-<script src="parse/abc_tokenizer.js" type="text/javascript"></script>
-<script src="parse/abc_parse_header.js" type="text/javascript"></script>
-<script src="parse/abc_parse.js" type="text/javascript"></script>
-<script src="midi/abc_midiwriter.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		window.ABCJS.plugin.render_before = true;
+		window.ABCJS.plugin.midi_options = {program: 41};
+	</script>
 
-<script src="plugin/abc_plugin.js" type="text/javascript"></script>
-
-
-<script type="text/javascript">
-jQuery.noConflict();
-window.ABCJS.plugin.render_before=true;
-window.ABCJS.plugin.midi_options={program:41};
-</script>
-
-<style type="text/css">
-.abcrendered {
-background-color:#eea;
-
-}
-</style>
+	<style type="text/css">
+		.abcrendered {
+			background-color: #eea;
+		}
+	</style>
 </head>
 
 <body>
-<div class="content">I've just installed 1.0.1. Then I tried editing the previous post but it still wasn't showing when I put the tune in the middle (although it fixed your post).<br /><br />Here's another attempt<br /><br />X:1<br />T: 1 Speed the Plough<br />M:4/4<br />L:1/8<br />C:Trad<br />K:G<br />|:GABc dedB|dedB dedB|c2ec B2dB|c2A2A2BA|<br />|GABc dedB|dedB dedB|c2ec B2dB|A2F2G4:|<br />|:g2gf g2Bd|g2fe dBGB|c2ec B2dB|c2A2A2df|<br />|g2gfg2Bd|g2fe dBGB|c2ec B2dB|A2F2G4:|<br /><br />Chris</div>
+<div class="content"><br /><br />X:1<br />T: 1 Speed the Plough<br />M:4/4<br />L:1/8<br />C:Trad<br />K:G<br />|:GABc dedB|dedB dedB|c2ec B2dB|c2A2A2BA|<br />|GABc dedB|dedB dedB|c2ec B2dB|A2F2G4:|<br />|:g2gf g2Bd|g2fe dBGB|c2ec B2dB|c2A2A2df|<br />|g2gfg2Bd|g2fe dBGB|c2ec B2dB|A2F2G4:|<br /><br />Chris</div>
 
 from thesession:
 <p>
@@ -95,7 +75,7 @@ L: 1/8
 K: Emin
 |:D2|EB
 </pre>
-<div class="content">X:1<br />T: 7 begin<br />G<br /><br />Thanks for the vote of confidence. I am just testing why stuff isn't showing right.<br />X:1<br />T:8 middle<br />G<br /><br />X:1<br />T:9 blank lines on either side<br />G<br /><br />in the middle it should work<br />X:1<br />T:10 end<br />G</div>
+<div class="content">X:1<br />T: 7 begin<br />G<br /><br />This is mid-line.<br />X:1<br />T:8 middle<br />G<br /><br />X:1<br />T:9 blank lines on either side<br />G<br /><br />in the middle it should work<br />X:1<br />T:10 end<br />G</div>
 <span class="postbody">X:1
 <br />
 T:11 begin
@@ -104,7 +84,7 @@ G
 <br />
 
 <br />
-Thanks for the vote of confidence. I am just testing why stuff isn't showing right.
+Here is some text between tunes.
 <br />
 X:1
 <br />
@@ -145,5 +125,5 @@ DG,B,D GB,DG|ECDE GCEG|FADF AcBA|1 GFAF G2:|2 GEDB, G,2||
 Bc|dggf gdBd|eccB ceag|fddc dfc'b|agfe dcBc|
 d2 Bd gdBd|~c2 Bc ABAF|EccB cBAG|FDCA, G,2:||
 </textarea>
-<a href="#" onClick="launch()">launch</launch>
-</body> </html>
+</body>
+</html>
