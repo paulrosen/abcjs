@@ -45,8 +45,8 @@ ABCJS.write.StaffGroupElement.prototype.finished = function() {
 };
 
 ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debug) {
-  this.spacingunits = 0; // number of space units taken up (as opposed to fixed width). Layout engine then decides how many a pixels a space unit should be
-  this.minspace = 1000; // a big number to start off with
+  this.spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
+  this.minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
   var x = printer.paddingleft*printer.scale;
 
   // find out how much space will be taken up by voice headers
@@ -92,19 +92,16 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
 
     // among the current duration level find the one which needs starting furthest right
     var spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
+    var spacingduration = 0;
     for (i=0;i<currentvoices.length;i++) {
-      if (currentvoices[i].nextx>x) {
-	x=currentvoices[i].nextx;
-	spacingunit=currentvoices[i].spacingunits;
+      if (currentvoices[i].getNextX()>x) {
+	x=currentvoices[i].getNextX();
+	spacingunit=currentvoices[i].getSpacingUnits();
+	spacingduration = currentvoices[i].spacingduration;
       }
     }
     this.spacingunits+=spacingunit;
     this.minspace = Math.min(this.minspace,spacingunit);
-    
-    // remove the value of already counted spacing units in other voices (e.g. if a voice had planned to use up 5 spacing units but is not in line to be laid out at this duration level - where we've used 2 spacing units - then we must use up 3 spacing units, not 5)
-    for (i=0;i<othervoices.length;i++) {
-      if (othervoices[i].spacingunits-=spacingunit);
-    }
 
     for (i=0;i<currentvoices.length;i++) {
       var voicechildx = currentvoices[i].layoutOneItem(x,spacing);
@@ -115,6 +112,12 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
 	  currentvoices[j].shiftRight(dx);
 	}
       } 
+    }
+
+    // remove the value of already counted spacing units in other voices (e.g. if a voice had planned to use up 5 spacing units but is not in line to be laid out at this duration level - where we've used 2 spacing units - then we must use up 3 spacing units, not 5)
+    for (i=0;i<othervoices.length;i++) {
+      othervoices[i].spacingduration-=spacingduration;
+      othervoices[i].updateNextX(x,spacing); // adjust other voices expectations
     }
     
     // update indexes of currently laid out elems
@@ -127,9 +130,9 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
 
   // find the greatest remaining x as a base for the width
   for (i=0;i<this.voices.length;i++) {
-    if (this.voices[i].nextx>x) {
-      x=this.voices[i].nextx;
-      spacingunit=this.voices[i].spacingunits;
+    if (this.voices[i].getNextX()>x) {
+      x=this.voices[i].getNextX();
+      spacingunit=this.voices[i].getSpacingUnits();
     }
   }
   this.spacingunits+=spacingunit;
@@ -207,7 +210,6 @@ ABCJS.write.VoiceElement.prototype.updateIndices = function () {
     this.durationindex += this.children[this.i].duration;
     if (this.children[this.i].duration===0) this.durationindex = Math.round(this.durationindex*64)/64; // everytime we meet a barline, do rounding to nearest 64th
     this.i++;
-    this.minx = this.nextminx;
   }
 }; 
 
@@ -219,20 +221,30 @@ ABCJS.write.VoiceElement.prototype.getDurationIndex = function () {
   return this.durationindex - (this.children[this.i] && (this.children[this.i].duration>0)?0:0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
 };
 
+// number of spacing units expected for next positioning
+ABCJS.write.VoiceElement.prototype.getSpacingUnits = function () {
+  return (this.minx<this.nextx) ? Math.sqrt(this.spacingduration*8) : 0; // we haven't used any spacing units if we end up using minx
+};
+
+//
+ABCJS.write.VoiceElement.prototype.getNextX = function () {
+  return Math.max(this.minx, this.nextx);
+};
+
 ABCJS.write.VoiceElement.prototype.beginLayout = function (startx) {
   this.i=0;
   this.durationindex=0;
   this.ii=this.children.length;
   this.startx=startx;
   this.minx=startx; // furthest left to where negatively positioned elements are allowed to go
-  this.nextminx=startx;
-  this.nextx=startx; // x position where the next element of this voice should be placed assuming no other voices
-  this.spacingunits=0; // units of spacing used in current iteration due to duration
+  this.nextx=startx; // x position where the next element of this voice should be placed assuming no other voices and no fixed width constraints
+  this.spacingduration=0; // duration left to be laid out in current iteration (omitting additional spacing due to other aspects, such as bars, dots, sharps and flats)
 };
 
 // Try to layout the element at index this.i
 // x - position to try to layout the element at
 // spacing - base spacing
+// can't call this function more than once per iteration
 ABCJS.write.VoiceElement.prototype.layoutOneItem = function (x, spacing) {
   var child = this.children[this.i];
   if (!child) return 0;
@@ -240,28 +252,32 @@ ABCJS.write.VoiceElement.prototype.layoutOneItem = function (x, spacing) {
   if (er<child.getExtraWidth()) { // shift right by needed amount
     x+=child.getExtraWidth()-er;
   }
-  child.x=x;
-  x+=(spacing*Math.sqrt(child.duration*8)); // add necessary duration space
-  this.nextminx = child.x+child.getMinWidth(); // add necessary layout space
-  if (this.i!==this.ii-1) this.nextminx+=child.minspacing; // add minimumspacing except on last elem
-  if (this.nextminx > x) {
-    x = this.nextminx;
-    this.spacingunits=0;
-  } else {
-    this.spacingunits=Math.sqrt(child.duration*8);
-  }
-  this.nextx = x;
+  child.x=x; // place child at x
+
+  this.spacingduration = child.duration;
+  //update minx
+  this.minx = x+child.getMinWidth(); // add necessary layout space
+  if (this.i!==this.ii-1) this.minx+=child.minspacing; // add minimumspacing except on last elem
+  
+  this.updateNextX(x, spacing);
+
   // contribute to staff y position
   this.staff.highest = Math.max(child.top,this.staff.highest);
   this.staff.lowest = Math.min(child.bottom,this.staff.lowest);
-  return child.x;
+
+  return x; // where we end up having placed the child
+};
+
+// call when spacingduration has been updated
+ABCJS.write.VoiceElement.prototype.updateNextX = function (x, spacing) {
+  this.nextx= x + (spacing*Math.sqrt(this.spacingduration*8));
 };
 
 ABCJS.write.VoiceElement.prototype.shiftRight = function (dx) {
   var child = this.children[this.i];
   if (!child) return;
   child.x+=dx;
-  this.nextminx+=dx;
+  this.minx+=dx;
   this.nextx+=dx;
 };
 
