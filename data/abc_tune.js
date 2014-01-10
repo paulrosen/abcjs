@@ -22,7 +22,11 @@ if (!window.ABCJS)
 if (!window.ABCJS.data)
 	window.ABCJS.data = {};
 
-// This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
+/**
+ * This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
+ * Also known as the ABCJS Abstract Syntax Tree
+ * @alternateClassName ABCJS.Tune
+ */
 window.ABCJS.data.Tune = function() {
 	// The structure consists of a hash with the following two items:
 	// metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...

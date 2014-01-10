@@ -32,17 +32,16 @@ ABCJS.write.spacing.STAVEHEIGHT = 100;
  * @class
  * Controlls the engraving process, from ABCJS Abstract Syntax Tree (ABCJS AST) to rendered score sheet
  *
- * Call engraveABC to run the process. This creates a graphelems ABCJS Abstract Rendering Structure (ABCJS ARS) that can be accessed through this.staffgroups
+ * Call engraveABC to run the process. This creates a graphelems ABCJS Abstract Engraving Structure (ABCJS AES) that can be accessed through this.staffgroups
  * this data structure is first laid out (giving the graphelems x and y coordinates) and then drawn onto the renderer
- * each ABCJS ARS represents a single staffgroup - all elements that are not in a staffgroup are rendered directly by the controller
+ * each ABCJS AES represents a single staffgroup - all elements that are not in a staffgroup are rendered directly by the controller
  *
- * elements in ABCJS ARS know their "source data" in the ABCJS AST, and their "target shape" 
+ * elements in ABCJS AES know their "source data" in the ABCJS AST, and their "target shape" 
  * in the renderer for highlighting purposes
  *
- * renderer - API onto SVG/Raphael/whatever mechanism does the final rendering
- * params - all the params TODO-GD Document them. 
+ * @param {Object} paper SVG like object with methods path, text, etc.
+ * @param {Object} params all the params -- documented on github //TODO-GD move some of that documentation here
  */
-
 ABCJS.write.EngraverController = function(paper, params) {
   params = params || {};
   this.space = 3*ABCJS.write.spacing.SPACE;
@@ -68,8 +67,8 @@ ABCJS.write.EngraverController = function(paper, params) {
 };
 
 /**
- * run the engraving process on abctunes (can be a single or array of ABCJS AST)
- *
+ * run the engraving process
+ * @param {ABCJS.Tune|ABCJS.Tune[]} abctunes 
  */
 ABCJS.write.EngraverController.prototype.engraveABC = function(abctunes) {
   if (abctunes[0]===undefined) {
@@ -82,6 +81,10 @@ ABCJS.write.EngraverController.prototype.engraveABC = function(abctunes) {
   }
 };
 
+/**
+ * Run the engraving process on a single tune
+ * @param {ABCJS.Tune} abctune 
+ */
 ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
   this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
   this.engraver.controller = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
@@ -132,6 +135,13 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
     this.renderer.paper.canvas.parentNode.setAttribute("style","width:"+sizetoset.w+"px");
 };
 
+/**
+ * Engrave a single line (a group of related staffs)
+ * @param {ABCJS.Tune} abctune an ABCJS AST
+ * @param {Object} abcline an abcline from the AST, has a staff 
+ * @param {number} line the line number
+ * @private
+ */
 ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, abcline, line) {
   var staffgroup = this.engraver.createABCLine(abcline.staff);
   this.renderer.minY = this.engraver.minY; // use this value of minY to set things that need to be below everything else //TODO-GD fix it, horrible hack
@@ -155,6 +165,10 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
   return staffgroup;
 };
 
+/**
+ * Text that goes above the score
+ * @private
+ */
 ABCJS.write.EngraverController.prototype.engraveTopText = function(abctune) {
  if (abctune.media === 'print') {
        // TODO create the page the size of
@@ -197,6 +211,10 @@ ABCJS.write.EngraverController.prototype.engraveTopText = function(abctune) {
 
 };
 
+/**
+ * Text that goes below the score
+ * @private
+ */
 ABCJS.write.EngraverController.prototype.engraveExtraText = function(abctune) {
   var extraText = "";
   var text2;
@@ -232,6 +250,10 @@ ABCJS.write.EngraverController.prototype.engraveExtraText = function(abctune) {
   this.renderer.y+=25*this.scale+height*this.scale;
 };
 
+/**
+ *
+ * @private
+ */
 ABCJS.write.EngraverController.prototype.engraveTempo = function (tempo, y, x) {
 	var fontStyle = {"text-anchor":"start", 'font-size':12*this.scale, 'font-weight':'bold'};
 	if (tempo.preString) {
@@ -280,12 +302,18 @@ ABCJS.write.EngraverController.prototype.engraveTempo = function (tempo, y, x) {
 	return y;
 };
 
+/**
+ *
+ * @private
+ */
 ABCJS.write.EngraverController.prototype.engraveSubtitleLine = function(abcline) {
   this.renderer.paper.text(this.width/2, this.renderer.y, abcline.subtitle).attr({"font-size":16}).scale(this.scale, this.scale, 0,0);
 };
 
-// below, methods dealing with hightlighting
-// notify all listeners that a graphical element has been selected
+/**
+ * Called by the Abstract Engraving Structure to say it was selected (notehead clicked on)
+ * @protected
+ */
 ABCJS.write.EngraverController.prototype.notifySelect = function (abselem) {
   this.clearSelection();
   this.selected = [abselem];
@@ -295,12 +323,20 @@ ABCJS.write.EngraverController.prototype.notifySelect = function (abselem) {
   }
 };
 
+/**
+ * Called by the Abstract Engraving Structure to say it was modified (e.g. notehead dragged)
+ * @protected
+ */
 ABCJS.write.EngraverController.prototype.notifyChange = function (abselem) {
   for (var i=0; i<this.listeners.length;i++) {
     this.listeners[i].modelChanged();
   }
 };
 
+/**
+ *
+ * @private
+ */
 ABCJS.write.EngraverController.prototype.clearSelection = function () {
   for (var i=0;i<this.selected.length;i++) {
     this.selected[i].unhighlight();
@@ -308,10 +344,20 @@ ABCJS.write.EngraverController.prototype.clearSelection = function () {
   this.selected = [];
 };
 
+/**
+ * @param {Object} listener
+ * @param {Function} listener.modelChanged the model the listener passed to this controller has changed
+ * @param {Function} listener.highlight the abcelem of the model the listener passed to this controller should be highlighted
+ */
 ABCJS.write.EngraverController.prototype.addSelectListener = function (listener) {
   this.listeners[this.listeners.length] = listener;
 };
 
+/**
+ * Tell the controller to highlight some noteheads of its engraved score
+ * @param {number} start the character in the source abc where highlighting should start
+ * @param {number} end the character in the source abc where highlighting should end
+ */
 ABCJS.write.EngraverController.prototype.rangeHighlight = function(start,end)
 {
     this.clearSelection();

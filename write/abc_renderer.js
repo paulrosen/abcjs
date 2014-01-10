@@ -25,6 +25,8 @@ if (!window.ABCJS.write)
 
 /**
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
+ * @param {Object} paper
+ * @param {ABCJS.write.Glyphs} glyphs
  */
 ABCJS.write.Renderer = function(paper, glyphs) {
   this.paper = paper;
@@ -38,13 +40,20 @@ ABCJS.write.Renderer = function(paper, glyphs) {
 };
 
 
-
+/**
+ * Begin a group of glyphs that will always be moved, scaled and higlighted together
+ */
 ABCJS.write.Renderer.prototype.beginGroup = function () {
   this.path = [];
   this.lastM = [0,0];
   this.ingroup = true;
 };
 
+/**
+ * Add a path to the current group
+ * @param {Array} path
+ * @private
+ */
 ABCJS.write.Renderer.prototype.addPath = function (path) {
   path = path || [];
   if (path.length===0) return;
@@ -63,6 +72,9 @@ ABCJS.write.Renderer.prototype.addPath = function (path) {
   }
 };
 
+/**
+ * End a group of glyphs that will always be moved, scaled and higlighted together
+ */
 ABCJS.write.Renderer.prototype.endGroup = function () {
   this.ingroup = false;
   if (this.path.length===0) return null;
@@ -73,6 +85,12 @@ ABCJS.write.Renderer.prototype.endGroup = function () {
   return ret;
 };
 
+/**
+ * gets scaled
+ * @param {number} x1 start x
+ * @param {number} x2 end x
+ * @param {number} pitch pitch the stave line is drawn at
+ */
 ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch) {
   var isIE=/*@cc_on!@*/false;//IE detector
   var dy = 0.35;
@@ -91,6 +109,13 @@ ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch) {
   return ret;
 };
 
+/**
+ * gets scaled if not in a group
+ * @param {number} x1 x coordinate of the stem
+ * @param {number} dx stem width
+ * @param {number} y1 y coordinate of the stem bottom
+ * @param {number} y2 y coordinate of the stem top
+ */
 ABCJS.write.Renderer.prototype.printStem = function (x, dx, y1, y2) {
   if (dx<0) { // correct path "handedness" for intersection with other elements
     var tmp = y2;
@@ -116,6 +141,13 @@ ABCJS.write.Renderer.prototype.printStem = function (x, dx, y1, y2) {
   }
 };
 
+/**
+ * print text that gets scaled regardless
+ * @param {number} x
+ * @param {number} offset pitch at which the text should be placed
+ * @param {String} text
+ * @param {"start"|"middle"|"end"} anchor 
+ */
 ABCJS.write.Renderer.prototype.printText = function (x, offset, text, anchor) {
   anchor = anchor || "start";
   var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":12*this.scale});
@@ -125,9 +157,11 @@ ABCJS.write.Renderer.prototype.printText = function (x, offset, text, anchor) {
   return ret;
 };
 
-// assumes this.y is set appropriately
-// if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
-// not scaled if not in printgroup
+/** 
+ * assumes this.y is set appropriately
+ * if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
+ * not scaled if not in printgroup
+ */
 ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
 	var el;
   if (!symbol) return null;
@@ -165,6 +199,7 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
     return null;    
   }
 };
+
 
 ABCJS.write.Renderer.prototype.printPath = function (attrs) {
   var ret = this.paper.path().attr(attrs);
@@ -215,18 +250,27 @@ ABCJS.write.Renderer.prototype.debugMsgLow = function(x, msg) {
     return this.paper.text(x, this.calcY(this.minY - 7), msg).attr({"font-family":"serif", "font-size":12, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
 };
 
+/*
+ * Gets scaled regardless
+ */
 ABCJS.write.Renderer.prototype.printLyrics = function(x, pitch, msg) {
     var el = this.paper.text(x, this.calcY(this.minY - 7), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
     el[0].setAttribute("class", "abc-lyric");
     return el;
 };
 
+/**
+ * Calculates the y for a given pitch value (relative to the stave the renderer is currently printing)
+ * @param {number} ofs pitch value (bottom C on a G clef = 0, D=1, etc.)
+ */
 ABCJS.write.Renderer.prototype.calcY = function(ofs) {
   return this.y+((ABCJS.write.spacing.TOPNOTE-ofs)*ABCJS.write.spacing.STEP);
 };
 
-ABCJS.write.Renderer.prototype.printStave = function (startx, endx, numLines) {	// PER: print out requested number of lines
-	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
+/**
+ * Print @param {number} numLines. If there is 1 line it is the B line. Otherwise the bottom line is the E line.
+ */
+ABCJS.write.Renderer.prototype.printStave = function (startx, endx, numLines) {
 	if (numLines === 1) {
 		this.printStaveLine(startx,endx,6);
 		return;
@@ -234,11 +278,6 @@ ABCJS.write.Renderer.prototype.printStave = function (startx, endx, numLines) {	
 	for (var i = 0; i < numLines; i++) {
 		this.printStaveLine(startx,endx,(i+1)*2);
 	}
-//  this.printStaveLine(startx,endx,2);
-//  this.printStaveLine(startx,endx,4);
-//  this.printStaveLine(startx,endx,6);
-//  this.printStaveLine(startx,endx,8);
-//  this.printStaveLine(startx,endx,10);
 };
 
 
