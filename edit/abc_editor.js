@@ -136,11 +136,11 @@ window.ABCJS.edit.EditArea.prototype.getElem = function() {
 //		Called internally by fireChanged()
 //		returns true if there has been a change since last call.
 // - updateSelection()
-//		Called when the user has changed the selection. This calls the printer to show the selection.
+//		Called when the user has changed the selection. This calls the engraver_controller to show the selection.
 // - fireSelectionChanged()
 //		Called by the textarea object when the user has changed the selection.
-// - paramChanged(printerparams)
-//		Called to signal that the printer params have changed, so re-rendering should occur.
+// - paramChanged(engraverparams)
+//		Called to signal that the engraver params have changed, so re-rendering should occur.
 // - fireChanged()
 //		Called by the textarea object when the user has changed something.
 // - setNotDirty()
@@ -148,7 +148,7 @@ window.ABCJS.edit.EditArea.prototype.getElem = function() {
 // - isDirty()
 //		Returns true or false, whether the textarea contains the same text that it started with.
 // - highlight(abcelem)
-//		Called by the printer to highlight an area.
+//		Called by the engraver_controller to highlight an area.
 // - pause(bool)
 //		Stops the automatic rendering when the user is typing.
 //
@@ -193,11 +193,11 @@ window.ABCJS.Editor = function(editarea, params) {
   this.midiparams = params.midi_options || {};
   this.onchangeCallback = params.onchange;
 
-  this.printerparams = params.render_options || {};
+  this.engraverparams = params.render_options || {};
   
   if (params.gui) {
     this.target = document.getElementById(editarea);
-    this.printerparams.editable = true;
+    this.engraverparams.editable = true;
   } 
   this.oldt = "";
   this.bReentry = false;
@@ -241,8 +241,8 @@ window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
-  var printer = new ABCJS.write.Printer(paper, {});	// TODO: handle printer params
-  printer.printABC(tune);
+  var engraver_controller = new ABCJS.write.EngraverController(paper, {});	// TODO: handle engraver params
+  engraver_controller.engraveABC(tune);
 };
 
 window.ABCJS.Editor.prototype.modelChanged = function() {
@@ -259,13 +259,13 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
   this.timerId = null;
   this.div.innerHTML = "";
   var paper = Raphael(this.div, 800, 400);
-  this.printer = new ABCJS.write.Printer(paper, this.printerparams);
-  this.printer.printABC(this.tunes);
+  this.engraver_controller = new ABCJS.write.EngraverController(paper, this.engraverparams);
+  this.engraver_controller.engraveABC(this.tunes);
   if (ABCJS.midi.MidiWriter && this.mididiv) {
     if (this.mididiv !== this.div)
 		this.mididiv.innerHTML = "";
     var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv,this.midiparams);
-    midiwriter.addListener(this.printer);
+    midiwriter.addListener(this.engraver_controller);
     midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
   }
   if (this.warningsdiv) {
@@ -275,14 +275,14 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
     var textprinter = new window.ABCJS.transform.TextPrinter(this.target, true);
     textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
   }
-  this.printer.addSelectListener(this);
+  this.engraver_controller.addSelectListener(this);
   this.updateSelection();
   this.bReentry = false;
 };
 
 // Call this to reparse in response to the printing parameters changing
-window.ABCJS.Editor.prototype.paramChanged = function(printerparams) {
-	this.printerparams = printerparams;
+window.ABCJS.Editor.prototype.paramChanged = function(engraverparams) {
+	this.engraverparams = engraverparams;
 	this.oldt = "";
 	this.fireChanged();
 };
@@ -320,7 +320,7 @@ window.ABCJS.Editor.prototype.parseABC = function() {
 window.ABCJS.Editor.prototype.updateSelection = function() {
   var selection = this.editarea.getSelection();
   try {
-    this.printer.rangeHighlight(selection.start, selection.end);
+    this.engraver_controller.rangeHighlight(selection.start, selection.end);
   } catch (e) {} // maybe printer isn't defined yet?
 };
 
