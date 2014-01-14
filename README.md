@@ -36,30 +36,30 @@ Downloads:
 Here are the latest versions. You can just download these:
 
 Basic:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_1.10-min.js
 
 Editor:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_1.10-min.js
 
 Plugin:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.10-min.js
 
 Greasemonkey script:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.9.user.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.10.user.js
 
 And here are versions packaged without the standard libraries. To use these, you need to include those libraries yourself:
 
 Basic without Raphael:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_1.10-min.js
 
 Editor without Raphael:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_1.10-min.js
 
 Plugin without JQuery:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin-nojquery_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin-nojquery_1.10-min.js
 
 Plugin without JQuery or Raphael:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_1.10-min.js
 
 Partial list of some websites using abcjs:
 ---
