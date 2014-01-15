@@ -311,15 +311,18 @@ ABCJS.write.EngraverController.prototype.engraveSubtitleLine = function(abcline)
 };
 
 /**
- * Called by the Abstract Engraving Structure to say it was selected (notehead clicked on)
+ * Called by the Abstract Engraving Structure or any other (e.g. midi playback) to say it was selected (notehead clicked on)
  * @protected
  */
 ABCJS.write.EngraverController.prototype.notifySelect = function (abselem) {
   this.clearSelection();
-  this.selected = [abselem];
-  abselem.highlight();
+  if (abselem.highlight) {
+    this.selected = [abselem];
+    abselem.highlight();
+  }
+  var abcelem = abselem.abcelem || {};
   for (var i=0; i<this.listeners.length;i++) {
-    this.listeners[i].highlight(abselem.abcelem);
+    this.listeners[i].highlight(abcelem);
   }
 };
 
