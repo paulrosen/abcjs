@@ -7,6 +7,8 @@ javascript for rendering abc music notation
 
 This library makes it easy to incorporate sheet music into your websites. You can also turn visible ABC text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of this javascript file.
 
+License: GNU GPL v3
+
 For a demo of what this can do, see the following:
 ---
 
