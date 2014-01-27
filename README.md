@@ -3,13 +3,20 @@ abcjs
 
 javascript for rendering abc music notation
 
+<a href="http://abcjs.net/index.html">Home page</a>
+
 This library makes it easy to incorporate sheet music into your websites. You can also turn visible ABC text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of this javascript file.
+
+License: GNU GPL v3
 
 For a demo of what this can do, see the following:
 ---
 
-    http://drawthedots.com/abcjs
-    http://drawthedots.com/abcplugin
+<a href="http://abcjs.net/abcjs-basic.html">Basic</a>
+
+<a href="http://abcjs.net/abcjs-editor.html">Editor</a>
+
+<a href="http://abcjs.net/abcjs-plugin.html">Plugin</a>
 
 The abcjs libraries come in three basic flavors:
 ---
@@ -36,30 +43,30 @@ Downloads:
 Here are the latest versions. You can just download these:
 
 Basic:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_1.10-min.js
 
 Editor:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_1.10-min.js
 
 Plugin:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.10-min.js
 
 Greasemonkey script:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.9.user.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.10.user.js
 
 And here are versions packaged without the standard libraries. To use these, you need to include those libraries yourself:
 
 Basic without Raphael:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_1.10-min.js
 
 Editor without Raphael:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_1.10-min.js
 
 Plugin without JQuery:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin-nojquery_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin-nojquery_1.10-min.js
 
 Plugin without JQuery or Raphael:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_1.9-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_1.10-min.js
 
 Partial list of some websites using abcjs:
 ---
@@ -140,7 +147,7 @@ ABCJS.plugin		abc_plugin
 abcjs editor
 ---
 
-The abcjs editor transforms an html textarea into an area for editing abc. See: http://drawthedots.com/abcjs
+The abcjs editor transforms an html textarea into an area for editing abc. See: http://abcjs.net/abcjs-editor.html
 
 Typical usage would be:
 
@@ -168,7 +175,7 @@ The ABCJS.Editor constructor takes the following parameters:
 abcjs plugin
 ---
 
-The abcjs plugin renders all the abc in a page (determined as a new line beginning with X:). See: http://drawthedots.com/abcplugin
+The abcjs plugin renders all the abc in a page (determined as a new line beginning with X:). See: http://abcjs.net/abcjs-editor.html
 
 To use, include the plugin version in the page:
 
