@@ -16,6 +16,8 @@
 
 /*global window, ABCJS */
 
+var contador = 20;
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
@@ -145,6 +147,8 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
 
 ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
 
+  //if( contador > 0 )  alert( contador-- +' ABCJS.write.StaffGroupElement.prototype.draw');
+
   this.y = y;
   for (var i=0;i<this.staffs.length;i++) {
     var shiftabove = this.staffs[i].highest - ((i===0)? 20 : 15);
@@ -157,7 +161,6 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
     this.staffs[i].bottom = y;
   }
   this.height = y-this.y;
-
   var bartop = 0;
   for (i=0;i<this.voices.length;i++) {
     this.voices[i].draw(printer, bartop);
@@ -177,7 +180,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
     printer.y = this.staffs[i].y;
     // TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
     if (this.stafflines[i] === undefined)
-      this.stafflines[i] = 5;
+      this.stafflines[i] =  printer.grandStaff ? 13 : 5;
     printer.printStave(this.startx,this.w, this.stafflines[i]);
   }
   
@@ -287,6 +290,8 @@ ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
   printer.staffbottom = this.staff.bottom;
   this.barbottom = printer.calcY(2);
 
+  //if( contador > 0 )  alert( contador-- +' ABCJS.write.VoiceElement.prototype.draw');
+
   if (this.header) { // print voice name
     var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
 	  var headerX = (this.startx-printer.paddingleft)/2+printer.paddingleft;
@@ -367,12 +372,21 @@ ABCJS.write.AbsoluteElement.prototype.pushBottom = function (bottom) {
 };
 
 ABCJS.write.AbsoluteElement.prototype.draw = function (printer, bartop) {
+
+
   this.elemset = printer.paper.set();
   if (this.invisible) return;
   printer.beginGroup();
   for (var i=0; i<this.children.length; i++) {
+/*
+    if( contador > 0 && (this.children[i].type == 'stem' || this.children[i].type == 'symbol') ) 
+       //alert( contador-- +' ABCJS.write.AbsoluteElement.prototype.draw' + this.children[i].type);
+    else {
+     // alert( this.children[i].type );
+    }
+*/
     this.elemset.push(this.children[i].draw(printer,this.x, bartop));
-  }
+}
   this.elemset.push(printer.endGroup());
 	if (this.klass)
 		this.setClass("mark", "", "#00ff00");
@@ -452,11 +466,15 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 };
 
 ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
+
+  //  if( contador > 0 )  alert( contador-- +' ABCJS.write.RelativeElement.prototype.draw');
+
   this.x = x+this.dx;
   switch(this.type) {
   case "symbol":
     if (this.c===null) return null;
-    this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley); break;
+    this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley); 
+    break;
   case "debug":
     this.graphelem = printer.debugMsg(this.x, this.c); break;
   case "debugLow":
@@ -487,6 +505,9 @@ ABCJS.write.EndingElem = function(text, anchor1, anchor2) {
 };
 
 ABCJS.write.EndingElem.prototype.draw = function (printer, linestartx, lineendx) {
+
+  //if( contador > 0 )  alert( contador-- +' ABCJS.write.EndingElem.prototype.draw');
+
   var pathString;
   if (this.anchor1) {
     linestartx = this.anchor1.x+this.anchor1.w;
@@ -518,6 +539,9 @@ ABCJS.write.TieElem = function(anchor1, anchor2, above, forceandshift) {
 };
 
 ABCJS.write.TieElem.prototype.draw = function (printer, linestartx, lineendx) {
+
+  //if( contador > 0 )  alert( contador-- +' ABCJS.write.TieElem.prototype.draw');
+
   var startpitch;
   var endpitch;
 
@@ -703,6 +727,7 @@ ABCJS.write.BeamElem.prototype.average = function() {
 };
 
 ABCJS.write.BeamElem.prototype.draw = function(printer) {
+
   if (this.elems.length === 0 || this.allrests) return;
   this.drawBeam(printer);
   this.drawStems(printer);

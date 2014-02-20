@@ -50,6 +50,7 @@ ABCJS.write.Printer = function(paper, params) {
   this.paddingright = params.paddingright || 50;
   this.paddingleft = params.paddingleft || 15;
   this.editable = params.editable || false;
+  this.grandStaff = params.grandStaff || false;
 };
 
 // notify all listeners that a graphical element has been selected
@@ -135,6 +136,17 @@ ABCJS.write.Printer.prototype.endGroup = function () {
   return ret;
 };
 
+ABCJS.write.Printer.prototype.printStave = function (startx, endx, numLines) {	// PER: print out requested number of lines
+	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
+	if (numLines === 1) {
+		this.printStaveLine(startx,endx,6);
+		return;
+	}
+	for (var i = 0; i < numLines; i++) {
+		this.printStaveLine(startx,endx,(i-(numLines-6))*2);
+	}
+};
+
 ABCJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch) {
   var isIE=/*@cc_on!@*/false;//IE detector
   var dy = 0.35;
@@ -143,10 +155,18 @@ ABCJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch) {
     dy = 1;
     fill = "#666666";
   }
+  
   var y = this.calcY(pitch);
-  var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
-			   x2, y+dy, x1, y+dy);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
+  var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy, x2, y+dy, x1, y+dy);
+  
+  if( pitch !== 0 && pitch !== -12 && pitch !== -14  ) {
+    var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
+  } else {
+    var ret = this.paper.path().attr({path:pathString, 'stroke-dasharray': "-..", fill:fill}).toBack();
+  }
+
+//alert( 'ABCJS.write.Printer.prototype.printStaveLine');
+   
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
@@ -287,22 +307,6 @@ ABCJS.write.Printer.prototype.calcY = function(ofs) {
   return this.y+((ABCJS.write.spacing.TOPNOTE-ofs)*ABCJS.write.spacing.STEP);
 };
 
-ABCJS.write.Printer.prototype.printStave = function (startx, endx, numLines) {	// PER: print out requested number of lines
-	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
-	if (numLines === 1) {
-		this.printStaveLine(startx,endx,6);
-		return;
-	}
-	for (var i = 0; i < numLines; i++) {
-		this.printStaveLine(startx,endx,(i+1)*2);
-	}
-//  this.printStaveLine(startx,endx,2);
-//  this.printStaveLine(startx,endx,4);
-//  this.printStaveLine(startx,endx,6);
-//  this.printStaveLine(startx,endx,8);
-//  this.printStaveLine(startx,endx,10);
-};
-
 ABCJS.write.Printer.prototype.printABC = function(abctunes) {
   if (abctunes[0]===undefined) {
     abctunes = [abctunes];
@@ -420,9 +424,9 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
       this.printSubtitleLine(abcline);
       this.y+=20*this.scale; //hardcoded
     } else if (abcline.text) {
-		if (typeof abcline.text === 'string')
+		if (typeof abcline.text === 'string') {
 	      this.paper.text(100, this.y, "TEXT: " + abcline.text);
-	  else {
+	  } else {
 		  var str = "";
 		  for (var i = 0; i < abcline.text.length; i++) {
 			  str += " FONT " + abcline.text[i].text;
@@ -494,7 +498,7 @@ ABCJS.write.Printer.prototype.printStaffLine = function (abctune, abcline, line)
 			}
 		}
 	}
-	staffgroup.draw(this, this.y);
+  staffgroup.draw(this, this.y);
 	this.staffgroups[this.staffgroups.length] = staffgroup;
 	this.y = staffgroup.y + staffgroup.height;
 	this.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;

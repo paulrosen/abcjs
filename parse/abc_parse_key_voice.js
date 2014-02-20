@@ -171,6 +171,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 	};
 
 	var clefLines = {
+		'grand': { clef: 'grand', pitch: 4, mid: 0 },
 		'treble': { clef: 'treble', pitch: 4, mid: 0 },
 		'treble+8': { clef: 'treble+8', pitch: 4, mid: 0 },
 		'treble-8': { clef: 'treble-8', pitch: 4, mid: 0 },
@@ -543,6 +544,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 					if (tokens.length === 0) { warn("Expected parameter after clef=", str, 0); return ret; }
 					//break; yes, we want to fall through. That allows "clef=" to be optional.
 				case "treble":
+				case "grand":
 				case "bass":
 				case "alto":
 				case "tenor":
@@ -550,6 +552,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 					// clef is [clef=] [⟨clef type⟩] [⟨line number⟩] [+8|-8]
 					var clef = tokens.shift();
 					switch (clef.token) {
+						case 'grand':
 						case 'treble':
 						case 'tenor':
 						case 'alto':
@@ -668,6 +671,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 							staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct);
 						}
 						break;
+					case 'grand':
 					case 'treble':
 					case 'bass':
 					case 'tenor':

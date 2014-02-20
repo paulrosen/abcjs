@@ -16,6 +16,8 @@
 
 /*global window, ABCJS */
 
+var ja=false;
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
@@ -71,7 +73,7 @@ ABCJS.write.Layout.prototype.pushCrossLineElems = function() {
 ABCJS.write.Layout.prototype.popCrossLineElems = function() {
   this.slurs = this.slursbyvoice[this.getCurrentVoiceId()] || {};
   this.ties = this.tiesbyvoice[this.getCurrentVoiceId()] || [];
-  this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId()];
+  this.partstartelempartstartelem = this.endingsbyvoice[this.getCurrentVoiceId()];
 };
 
 ABCJS.write.Layout.prototype.getElem = function() {
@@ -94,6 +96,7 @@ ABCJS.write.Layout.prototype.printABCLine = function(staffs) {
   }
   return this.staffgroup;
 };
+
 
 ABCJS.write.Layout.prototype.printABCStaff = function(abcstaff) {
 
