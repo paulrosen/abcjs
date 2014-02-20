@@ -146,7 +146,7 @@ ABCJS.write.Printer.prototype.printStave = function (startx, endx, numLines) {	/
 		this.printStaveLine(startx,endx,(i-(numLines-6))*2);
 	}
 };
-
+// flavio - pt3. - desenhas as linhas
 ABCJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch) {
   var isIE=/*@cc_on!@*/false;//IE detector
   var dy = 0.35;
@@ -498,7 +498,8 @@ ABCJS.write.Printer.prototype.printStaffLine = function (abctune, abcline, line)
 			}
 		}
 	}
-  staffgroup.draw(this, this.y);
+        // flavio - pt1.
+        staffgroup.draw(this, this.y);
 	this.staffgroups[this.staffgroups.length] = staffgroup;
 	this.y = staffgroup.y + staffgroup.height;
 	this.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;

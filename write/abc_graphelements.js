@@ -162,6 +162,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
   }
   this.height = y-this.y;
   var bartop = 0;
+  // flavio - pt2. - desenha as notas (e otros simbolos)
   for (i=0;i<this.voices.length;i++) {
     this.voices[i].draw(printer, bartop);
     bartop = this.voices[i].barbottom;
