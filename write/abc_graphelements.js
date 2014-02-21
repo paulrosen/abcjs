@@ -180,8 +180,8 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
     if (this.stafflines[i] === 0) continue;
     printer.y = this.staffs[i].y;
     // TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
-    if (this.stafflines[i] === undefined)
-      this.stafflines[i] =  printer.grandStaff ? 13 : 5;
+    /*if (this.stafflines[i] === undefined)
+      this.stafflines[i] =  printer.grandStaff ? 13 : 5; flavio */
     printer.printStave(this.startx,this.w, this.stafflines[i]);
   }
   

@@ -552,7 +552,6 @@ window.ABCJS.parse.parseKeyVoice = {};
 					// clef is [clef=] [⟨clef type⟩] [⟨line number⟩] [+8|-8]
 					var clef = tokens.shift();
 					switch (clef.token) {
-						case 'grand':
 						case 'treble':
 						case 'tenor':
 						case 'alto':
@@ -560,6 +559,8 @@ window.ABCJS.parse.parseKeyVoice = {};
 						case 'perc':
 						case 'none':
 							break;
+                                                // flavio - pt 5 - criei token grand
+						case 'grand': clef.token = 'grand'; break;
 						case 'C': clef.token = 'alto'; break;
 						case 'F': clef.token = 'bass'; break;
 						case 'G': clef.token = 'treble'; break;

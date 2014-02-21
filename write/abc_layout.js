@@ -115,8 +115,24 @@ ABCJS.write.Layout.prototype.printABCStaff = function(abcstaff) {
     }
     if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
     // TODO make invisible if voice is duplicate
+/*    
+    // flavio - pt7 - vou usar a grandstaf to imprimir as duas claves
+    if(abcstaff.clef.type === 'grand') {
+      c = abcstaff.clef;
+      c.type = 'treble';
+      c.stafflines = 0;
+      this.voice.addChild(this.printClef(c));
+      c.type = 'bass';
+      c.clefPos = -4;
+      c.stafflines = 13;
+      this.voice.addChild(this.printClef(c));
+      this.voice.addChild(this.printKeySignature(abcstaff.key));
+  } else  {
+    }
+         */
     this.voice.addChild(this.printClef(abcstaff.clef));
-    this.voice.addChild(this.printKeySignature(abcstaff.key));
+    this.voice.addChild(this.printKeySignature(abcstaff));
+    
     if (abcstaff.meter) this.voice.addChild(this.printTimeSignature(abcstaff.meter));
     this.printABCVoice(abcstaff.voices[this.v]);
     this.staffgroup.addVoice(this.voice,this.s,this.stafflines);
@@ -908,6 +924,7 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
   var octave = 0;
   var abselem = new ABCJS.write.AbsoluteElement(elem,0,10);
   switch (elem.type) {
+  case "grand":
   case "treble": break;
   case "tenor": clef="clefs.C"; break;
   case "alto": clef="clefs.C"; break;
@@ -927,28 +944,43 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
 //  if (elem.verticalPos) {
 //    pitch = elem.verticalPos;
 //  }
+//  
+  //flavio - pt6 - 
   var dx =10;
-  if (clef!=="") {
-    abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
+  if(elem.type === 'grand') {
+      clef = "clefs.G";
+      elem.type = 'treble';
+      abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
+      clef = "clefs.F";
+      elem.type = 'bass';
+      elem.clefPos = -4;
+      elem.stafflines = 13;
+      abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
+  } else {
+    if (clef!=="") {
+      abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
+    }
+    if (octave!==0) {
+      var scale= 2/3;
+      var adjustspacing = (this.glyphs.getSymbolWidth(clef)-this.glyphs.getSymbolWidth("8")*scale)/2;
+      abselem.addRight(new ABCJS.write.RelativeElement("8", dx+adjustspacing, this.glyphs.getSymbolWidth("8")*scale, (octave>0)?16:-2, {scalex:scale, scaley:scale}));
+    }
   }
-  if (octave!==0) {
-    var scale= 2/3;
-    var adjustspacing = (this.glyphs.getSymbolWidth(clef)-this.glyphs.getSymbolWidth("8")*scale)/2;
-    abselem.addRight(new ABCJS.write.RelativeElement("8", dx+adjustspacing, this.glyphs.getSymbolWidth("8")*scale, (octave>0)?16:-2, {scalex:scale, scaley:scale}));
-  }
-
+  // flavio - test for undefined
   if (elem.stafflines===0) {
     this.stafflines = 0;
+  } else if( typeof(elem.stafflines) === 'undefined')  {
+    this.stafflines = 5;
   } else {
     this.stafflines =elem.stafflines;
   }
-
+  
   return abselem;
 };
 
 
 ABCJS.write.Layout.prototype.printKeySignature = function(elem) {
-  var abselem = new ABCJS.write.AbsoluteElement(elem,0,10);
+  var abselem = new ABCJS.write.AbsoluteElement(elem.key,0,10);
   var dx = 0;
   if (elem.accidentals) {
 	  window.ABCJS.parse.each(elem.accidentals, function(acc) {
