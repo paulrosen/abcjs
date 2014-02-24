@@ -488,7 +488,7 @@ ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
   case "stem":
     this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); break;
   case "ledger":
-    this.graphelem = printer.printStaveLine(this.x, this.x+this.w, this.pitch); break;
+    this.graphelem = printer.printLedger(this.x, this.x+this.w, this.pitch); break;
   }
   if (this.scalex!==1 && this.graphelem) {
     this.graphelem.scale(this.scalex, this.scaley, this.x, printer.calcY(this.pitch));

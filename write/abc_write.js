@@ -50,7 +50,6 @@ ABCJS.write.Printer = function(paper, params) {
   this.paddingright = params.paddingright || 50;
   this.paddingleft = params.paddingleft || 15;
   this.editable = params.editable || false;
-  this.grandStaff = params.grandStaff || false;
 };
 
 // notify all listeners that a graphical element has been selected
@@ -147,7 +146,17 @@ ABCJS.write.Printer.prototype.printStave = function (startx, endx, numLines) {	/
 	}
 };
 // flavio - pt3. - desenhas as linhas
+ABCJS.write.Printer.prototype.printLedger = function (x1,x2, pitch) {
+    x = this.abctune;
+    return  this.doPrintStaveLine(x1,x2,pitch, true);
+};
 ABCJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch) {
+    return  this.doPrintStaveLine(x1,x2,pitch, false);
+}
+
+
+// flavio - pt3. - desenhas as linhas
+ABCJS.write.Printer.prototype.doPrintStaveLine = function (x1,x2, pitch, isLedger ) {
   var isIE=/*@cc_on!@*/false;//IE detector
   var dy = 0.35;
   var fill = "#000000";
@@ -158,11 +167,12 @@ ABCJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch) {
   
   var y = this.calcY(pitch);
   var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy, x2, y+dy, x1, y+dy);
-  
-  if( pitch !== 0 && pitch !== -12 && pitch !== -14  ) {
-    var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
+  var ret;
+  if( (!isLedger && pitch !== 0 && pitch !== -12 && pitch !== -14) || ( isLedger && (pitch === 0 || pitch === -12 ||pitch === -14)) ) {
+    ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
   } else {
-    var ret = this.paper.path().attr({path:pathString, 'stroke-dasharray': "-..", fill:fill}).toBack();
+    ret = null;
+    //ret = this.paper.path().attr({path:pathString, 'stroke-dasharray': ". .", fill:"none"}).toBack();
   }
 
 //alert( 'ABCJS.write.Printer.prototype.printStaveLine');
@@ -172,6 +182,7 @@ ABCJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch) {
   }
   return ret;
 };
+
 
 ABCJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
   if (dx<0) { // correct path "handedness" for intersection with other elements
@@ -368,6 +379,8 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 };
 
 ABCJS.write.Printer.prototype.printTune = function (abctune) {
+  //flavio
+  this.abctune = abctune;
   this.layouter = new ABCJS.write.Layout(this.glyphs, abctune.formatting.bagpipes);
 	this.layouter.printer = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
   if (abctune.media === 'print') {
@@ -504,4 +517,4 @@ ABCJS.write.Printer.prototype.printStaffLine = function (abctune, abcline, line)
 	this.y = staffgroup.y + staffgroup.height;
 	this.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;
 	return staffgroup;
-}
+};

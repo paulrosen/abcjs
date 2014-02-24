@@ -115,21 +115,7 @@ ABCJS.write.Layout.prototype.printABCStaff = function(abcstaff) {
     }
     if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
     // TODO make invisible if voice is duplicate
-/*    
-    // flavio - pt7 - vou usar a grandstaf to imprimir as duas claves
-    if(abcstaff.clef.type === 'grand') {
-      c = abcstaff.clef;
-      c.type = 'treble';
-      c.stafflines = 0;
-      this.voice.addChild(this.printClef(c));
-      c.type = 'bass';
-      c.clefPos = -4;
-      c.stafflines = 13;
-      this.voice.addChild(this.printClef(c));
-      this.voice.addChild(this.printKeySignature(abcstaff.key));
-  } else  {
-    }
-         */
+
     this.voice.addChild(this.printClef(abcstaff.clef));
     this.voice.addChild(this.printKeySignature(abcstaff));
     
@@ -982,8 +968,8 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
 ABCJS.write.Layout.prototype.printKeySignature = function(elem) {
   var abselem = new ABCJS.write.AbsoluteElement(elem.key,0,10);
   var dx = 0;
-  if (elem.accidentals) {
-	  window.ABCJS.parse.each(elem.accidentals, function(acc) {
+  if (elem.key.accidentals) {
+	  window.ABCJS.parse.each(elem.key.accidentals, function(acc) {
 		var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
 		//var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
 		abselem.addRight(new ABCJS.write.RelativeElement(symbol, dx, this.glyphs.getSymbolWidth(symbol), acc.verticalPos));
