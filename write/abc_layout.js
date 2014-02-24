@@ -935,10 +935,8 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
   var dx =10;
   if(elem.type === 'grand') {
       clef = "clefs.G";
-      elem.type = 'treble';
       abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
       clef = "clefs.F";
-      elem.type = 'bass';
       elem.clefPos = -4;
       elem.stafflines = 13;
       abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));

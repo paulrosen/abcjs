@@ -299,7 +299,7 @@ ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
 	  headerX = headerX*printer.scale;
     printer.paper.text(headerX, printer.calcY(textpitch)*printer.scale, this.header).attr({"font-size":12*printer.scale, "font-family":"serif", 'font-weight':'bold'}); // code duplicated above
   }
-
+// flavio - pt7 - realmente é aqui que os simbolos são desenhados
   for (var i=0, ii=this.children.length; i<ii; i++) {
     this.children[i].draw(printer, (this.barto || i===ii-1)?bartop:0);
   }
@@ -484,9 +484,18 @@ ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
     this.graphelem = printer.printText(this.x, this.pitch, this.c); 
     break;
   case "bar":
-    this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); break; // bartop can't be 0
+    this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); // bartop can't be 0
+    if( printer.abctune.lines[0].staff[0].clef.type === "grand" ) {
+      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch-12), (bartop)?bartop-8:printer.calcY(this.pitch2-8  ));  // bartop can't be 0
+    } break;
   case "stem":
-    this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); break;
+    //if( printer.abctune.lines[0].staff[0].clef.type === "grand" ) {
+    //  this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch+6));
+    //  this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch2), printer.calcY(this.pitch2-6));
+    //} else  {
+      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); break;
+    //}
+     break;
   case "ledger":
     this.graphelem = printer.printLedger(this.x, this.x+this.w, this.pitch); break;
   }
