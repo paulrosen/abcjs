@@ -933,7 +933,7 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
 //  
   //flavio - pt6 - 
   var dx =10;
-  if(elem.type === 'grand') {
+  if(elem.type === 'grand-flavio-not-working') {
       clef = "clefs.G";
       abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
       clef = "clefs.F";

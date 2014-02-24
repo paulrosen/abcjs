@@ -485,9 +485,10 @@ ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
     break;
   case "bar":
     this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); // bartop can't be 0
-    if( printer.abctune.lines[0].staff[0].clef.type === "grand" ) {
-      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch-12), (bartop)?bartop-8:printer.calcY(this.pitch2-8  ));  // bartop can't be 0
-    } break;
+//    if( printer.abctune.lines[0].staff[0].clef.type === "grand" ) {
+//      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch-12), (bartop)?bartop-8:printer.calcY(this.pitch2-8  ));  // bartop can't be 0
+//    } 
+    break;
   case "stem":
     //if( printer.abctune.lines[0].staff[0].clef.type === "grand" ) {
     //  this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch+6));

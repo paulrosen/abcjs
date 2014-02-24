@@ -194,7 +194,6 @@ window.ABCJS.Editor = function(editarea, params) {
   this.onchangeCallback = params.onchange;
 
   this.printerparams = params.render_options || {};
-  this.printerparams.grandStaff = params.grandStaff || false;
   
   if (params.gui) {
     this.target = document.getElementById(editarea);

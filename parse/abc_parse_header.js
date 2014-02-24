@@ -453,7 +453,6 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 							break;
 						case  'K':
 							// since the key is the last thing that can happen in the header, we can resolve the tempo now
-                                                        // flavio - pt4 - parse grand staf stars here
 							this.resolveTempo();
 							var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(2));
 							if (!multilineVars.is_in_header && tune.hasBeginMusic()) {
