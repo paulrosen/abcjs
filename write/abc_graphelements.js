@@ -27,14 +27,14 @@ if (!window.ABCJS.write)
 ABCJS.write.StaffGroupElement = function() {
   this.voices = [];
   this.staffs = [];
-  this.stafflines = [];
+ // this.stafflines = [];
 };
 
-ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines) {
+ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines, staffclef) {
   this.voices[this.voices.length] = voice;
   if (!this.staffs[staffnumber]) {
-    this.staffs[this.staffs.length] = {top:0, highest: 7, lowest: 7};
-    this.stafflines[this.stafflines.length] = stafflines;
+    this.staffs[this.staffs.length] = {top:0, highest: 7, lowest: 7, clef: staffclef, numLines: stafflines};
+//    this.stafflines[this.stafflines.length] = stafflines;
   }
   voice.staff = this.staffs[staffnumber];
 };
@@ -156,7 +156,11 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
     this.staffs[i].top = y;
     if (shiftabove > 0) y+= shiftabove*ABCJS.write.spacing.STEP;
     this.staffs[i].y = y;
-    y+= ABCJS.write.spacing.STAVEHEIGHT*0.9; // position of the words
+    if( printer.firstStaff.clef.type === "grand") {
+      y+= ABCJS.write.spacing.STAVEHEIGHT*0.6; // a voz do baixo proximo a voz da melodia
+    } else {
+      y+= ABCJS.write.spacing.STAVEHEIGHT*0.9; // position of the words
+    }
     if (shiftbelow < 0) y-= shiftbelow*ABCJS.write.spacing.STEP;
     this.staffs[i].bottom = y;
   }
@@ -168,21 +172,24 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
     bartop = this.voices[i].barbottom;
   }
 
-  if (this.staffs.length>1) {
+  if (this.staffs.length>1 || printer.firstStaff.clef.type === "grand") {
     printer.y = this.staffs[0].y;
     var top = printer.calcY(10);
     printer.y = this.staffs[this.staffs.length-1].y;
     var bottom = printer.calcY(2);
     printer.printStem(this.startx, 0.6, top, bottom);
+
+      for (i=0;i<this.voices[0].children.length;i++) {
+        if( this.voices[0].children[i].abcelem.el_type === "bar" )
+          printer.printStem(this.voices[0].children[i].children[0].x, 0.6, top, bottom);
+      }
   }
+   
 
   for (i=0;i<this.staffs.length;i++) {
-    if (this.stafflines[i] === 0) continue;
+    if (this.staffs[i].numLines === 0) continue;
     printer.y = this.staffs[i].y;
-    // TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
-    /*if (this.stafflines[i] === undefined)
-      this.stafflines[i] =  printer.grandStaff ? 13 : 5; flavio */
-    printer.printStave(this.startx,this.w, this.stafflines[i]);
+    printer.printStave( this.startx, this.w, this.staffs[i]);
   }
   
 };
@@ -289,7 +296,7 @@ ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
   var width = this.w-1;
   printer.y = this.staff.y;
   printer.staffbottom = this.staff.bottom;
-  this.barbottom = printer.calcY(2);
+  this.barbottom = printer.calcY(2) ; //flavio;
 
   //if( contador > 0 )  alert( contador-- +' ABCJS.write.VoiceElement.prototype.draw');
 
@@ -484,7 +491,8 @@ ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
     this.graphelem = printer.printText(this.x, this.pitch, this.c); 
     break;
   case "bar":
-    this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); // bartop can't be 0
+    if( printer.firstStaff.clef.type !== "grand")
+      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); // bartop can't be 0
 //    if( printer.abctune.lines[0].staff[0].clef.type === "grand" ) {
 //      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch-12), (bartop)?bartop-8:printer.calcY(this.pitch2-8  ));  // bartop can't be 0
 //    } 

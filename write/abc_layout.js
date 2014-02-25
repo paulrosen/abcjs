@@ -121,7 +121,7 @@ ABCJS.write.Layout.prototype.printABCStaff = function(abcstaff) {
     
     if (abcstaff.meter) this.voice.addChild(this.printTimeSignature(abcstaff.meter));
     this.printABCVoice(abcstaff.voices[this.v]);
-    this.staffgroup.addVoice(this.voice,this.s,this.stafflines);
+    this.staffgroup.addVoice(this.voice,this.s,this.stafflines, abcstaff.clef);
   }
  
 };
@@ -910,6 +910,9 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
   var octave = 0;
   var abselem = new ABCJS.write.AbsoluteElement(elem,0,10);
   switch (elem.type) {
+  case "accordionTab":
+      elem.stafflines = 4;
+      break;
   case "grand":
   case "treble": break;
   case "tenor": clef="clefs.C"; break;
@@ -926,30 +929,22 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
   case 'none': clef=""; break;
   case 'perc': clef="clefs.perc"; break;
   default: abselem.addChild(new ABCJS.write.RelativeElement("clef="+elem.type, 0, 0, 0, {type:"debug"}));
-  }    
-//  if (elem.verticalPos) {
-//    pitch = elem.verticalPos;
-//  }
-//  
-  //flavio - pt6 - 
-  var dx =10;
-  if(elem.type === 'grand-flavio-not-working') {
-      clef = "clefs.G";
-      abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
-      clef = "clefs.F";
-      elem.clefPos = -4;
-      elem.stafflines = 13;
-      abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
-  } else {
-    if (clef!=="") {
-      abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
-    }
-    if (octave!==0) {
-      var scale= 2/3;
-      var adjustspacing = (this.glyphs.getSymbolWidth(clef)-this.glyphs.getSymbolWidth("8")*scale)/2;
-      abselem.addRight(new ABCJS.write.RelativeElement("8", dx+adjustspacing, this.glyphs.getSymbolWidth("8")*scale, (octave>0)?16:-2, {scalex:scale, scaley:scale}));
-    }
   }
+  
+  //  if (elem.verticalPos) { 
+  //    pitch = elem.verticalPos;
+  //  }
+    
+  var dx =10;
+  if (clef!=="") {
+    abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos)); 
+  }
+  if (octave!==0) {
+    var scale= 2/3;
+    var adjustspacing = (this.glyphs.getSymbolWidth(clef)-this.glyphs.getSymbolWidth("8")*scale)/2;
+    abselem.addRight(new ABCJS.write.RelativeElement("8", dx+adjustspacing, this.glyphs.getSymbolWidth("8")*scale, (octave>0)?16:-2, {scalex:scale, scaley:scale}));
+  }
+  
   // flavio - test for undefined
   if (elem.stafflines===0) {
     this.stafflines = 0;

@@ -26,8 +26,9 @@ if (!window.ABCJS.write)
 ABCJS.write.spacing = function() {};
 ABCJS.write.spacing.FONTEM = 360;
 ABCJS.write.spacing.FONTSIZE = 30;
-ABCJS.write.spacing.STEP = ABCJS.write.spacing.FONTSIZE*93/720;
+ABCJS.write.spacing.STEP = ABCJS.write.spacing.FONTSIZE*(93)/720;
 ABCJS.write.spacing.SPACE = 10;
+ABCJS.write.spacing.VSPACE = 10; // 20;
 ABCJS.write.spacing.TOPNOTE = 20;
 ABCJS.write.spacing.STAVEHEIGHT = 100;
 
@@ -135,15 +136,10 @@ ABCJS.write.Printer.prototype.endGroup = function () {
   return ret;
 };
 
-ABCJS.write.Printer.prototype.printStave = function (startx, endx, numLines) {	// PER: print out requested number of lines
-	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
-	if (numLines === 1) {
-		this.printStaveLine(startx,endx,6);
-		return;
-	}
-	for (var i = 0; i < numLines; i++) {
-		this.printStaveLine(startx,endx,(i-(numLines-6))*2);
-	}
+ABCJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
+    for (var i = 0; i < staff.numLines; i++) {
+      this.printStaveLine(startx,endx,(i-(staff.numLines===4?-0.6:-1))*(staff.numLines === 4?4:2));
+    }
 };
 // flavio - pt3. - desenhas as linhas
 ABCJS.write.Printer.prototype.printLedger = function (x1,x2, pitch) {
@@ -315,8 +311,8 @@ ABCJS.write.Printer.prototype.printLyrics = function(x, msg) {
 };
 
 ABCJS.write.Printer.prototype.calcY = function(ofs) {
-  return this.y+((ABCJS.write.spacing.TOPNOTE-ofs)*ABCJS.write.spacing.STEP);
-};
+  return this.y+((ABCJS.write.spacing.TOPNOTE-ofs)*ABCJS.write.spacing.STEP); // flavio
+    };
 
 ABCJS.write.Printer.prototype.printABC = function(abctunes) {
   if (abctunes[0]===undefined) {
@@ -380,7 +376,8 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 
 ABCJS.write.Printer.prototype.printTune = function (abctune) {
   //flavio
-  this.abctune = abctune;
+  //this.abctune = abctune;
+  this.firstStaff = typeof(abctune.lines[0].staff)==="undefined"?abctune.lines[1].staff[0]:abctune.lines[0].staff[0];
   this.layouter = new ABCJS.write.Layout(this.glyphs, abctune.formatting.bagpipes);
 	this.layouter.printer = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
   if (abctune.media === 'print') {
@@ -435,7 +432,7 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
 		if (staffgroup.w > maxwidth) maxwidth = staffgroup.w;
     } else if (abcline.subtitle && line!==0) {
       this.printSubtitleLine(abcline);
-      this.y+=20*this.scale; //hardcoded
+      this.y+=ABCJS.write.spacing.VSPACE*this.scale; //hardcoded
     } else if (abcline.text) {
 		if (typeof abcline.text === 'string') {
 	      this.paper.text(100, this.y, "TEXT: " + abcline.text);
@@ -446,7 +443,7 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
 		  }
 	      this.paper.text(100, this.y, "TEXT: " + str);
 	  }
-      this.y+=20*this.scale; //hardcoded
+      this.y+=ABCJS.write.spacing.VSPACE*this.scale; //hardcoded
     }
   }
   var extraText = "";

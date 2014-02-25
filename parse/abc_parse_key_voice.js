@@ -172,6 +172,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 
 	var clefLines = {
 		'grand': { clef: 'grand', pitch: 4, mid: 0 },
+		'accordionTab': { clef: 'accordionTab', pitch: 4, mid: 0 },
 		'treble': { clef: 'treble', pitch: 4, mid: 0 },
 		'treble+8': { clef: 'treble+8', pitch: 4, mid: 0 },
 		'treble-8': { clef: 'treble-8', pitch: 4, mid: 0 },
@@ -545,6 +546,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 					//break; yes, we want to fall through. That allows "clef=" to be optional.
 				case "treble":
 				case "grand":
+                                case "accordionTab":
 				case "bass":
 				case "alto":
 				case "tenor":
@@ -560,6 +562,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 						case 'none':
 							break;
                                                 // flavio - pt 5 - criei token grand
+						case 'accordionTab': clef.token = 'accordionTab'; break;
 						case 'grand': clef.token = 'grand'; break;
 						case 'C': clef.token = 'alto'; break;
 						case 'F': clef.token = 'bass'; break;
@@ -673,6 +676,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 						}
 						break;
 					case 'grand':
+                                        case 'accordionTab':
 					case 'treble':
 					case 'bass':
 					case 'tenor':
