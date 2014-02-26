@@ -30,12 +30,12 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 	this.reset(tokenizer, warn, multilineVars, tune);
 
 	this.setTitle = function(title) {
-		if (multilineVars.hasMainTitle)
-			tune.addSubtitle(tokenizer.translateString(tokenizer.stripComment(title)));	// display secondary title
-		else
-		{
-			tune.addMetaText("title", tokenizer.translateString(tokenizer.theReverser(tokenizer.stripComment(title))));
-			multilineVars.hasMainTitle = true;
+		if (multilineVars.hasMainTitle) {
+                  multilineVars.subtitle = tokenizer.translateString(tokenizer.stripComment(title))
+		  tune.addSubtitle(multilineVars.subtitle);	// display secondary title
+                } else {
+		  tune.addMetaText("title", tokenizer.translateString(tokenizer.theReverser(tokenizer.stripComment(title))));
+		  multilineVars.hasMainTitle = true;
 		}
 	};
 

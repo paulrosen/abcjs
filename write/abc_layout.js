@@ -89,7 +89,7 @@ ABCJS.write.Layout.prototype.getNextElem = function() {
 };
 
 ABCJS.write.Layout.prototype.printABCLine = function(staffs) {
-    this.minY = 2;  // PER: This is the lowest that any note reaches. It will be used to set the dynamics row.
+  this.minY = 2;  // PER: This is the lowest that any note reaches. It will be used to set the dynamics row.
   this.staffgroup = new ABCJS.write.StaffGroupElement();
   for (this.s = 0; this.s < staffs.length; this.s++) {
     this.printABCStaff(staffs[this.s]);
@@ -104,6 +104,7 @@ ABCJS.write.Layout.prototype.printABCStaff = function(abcstaff) {
   if (abcstaff.bracket) header += "bracket "+abcstaff.bracket+" ";
   if (abcstaff.brace) header += "brace "+abcstaff.brace+" ";
 
+  //this.subtitle = abcstaff.subtitle;
   
   for (this.v = 0; this.v < abcstaff.voices.length; this.v++) {
     this.voice = new ABCJS.write.VoiceElement(this.v,abcstaff.voices.length);
@@ -121,7 +122,7 @@ ABCJS.write.Layout.prototype.printABCStaff = function(abcstaff) {
     
     if (abcstaff.meter) this.voice.addChild(this.printTimeSignature(abcstaff.meter));
     this.printABCVoice(abcstaff.voices[this.v]);
-    this.staffgroup.addVoice(this.voice,this.s,this.stafflines, abcstaff.clef);
+    this.staffgroup.addVoice(this.voice,this.s,this.stafflines, abcstaff);
   }
  
 };

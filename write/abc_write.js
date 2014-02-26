@@ -29,7 +29,7 @@ ABCJS.write.spacing.FONTSIZE = 30;
 ABCJS.write.spacing.STEP = ABCJS.write.spacing.FONTSIZE*(93)/720;
 ABCJS.write.spacing.SPACE = 10;
 ABCJS.write.spacing.VSPACE = 10; // 20;
-ABCJS.write.spacing.TOPNOTE = 20;
+ABCJS.write.spacing.TOPNOTE = 10;
 ABCJS.write.spacing.STAVEHEIGHT = 100;
 
 
@@ -164,7 +164,7 @@ ABCJS.write.Printer.prototype.doPrintStaveLine = function (x1,x2, pitch, isLedge
   var y = this.calcY(pitch);
   var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy, x2, y+dy, x1, y+dy);
   var ret;
-  if( (!isLedger && pitch !== 0 && pitch !== -12 && pitch !== -14) || ( isLedger && (pitch === 0 || pitch === -12 ||pitch === -14)) ) {
+  if( (!isLedger && ( pitch >= 2 && pitch <= 10 ) ) || ( isLedger && (pitch < 2 || pitch > 10) ) ) {
     ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
   } else {
     ret = null;
@@ -406,8 +406,9 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
 	if (abctune.metaText.title)
 	  this.paper.text(this.width*this.scale/2, this.y, abctune.metaText.title).attr({"font-size":20*this.scale, "font-family":"serif"});
   this.y+=20*this.scale;
-  if (abctune.lines[0] && abctune.lines[0].subtitle) {
-    this.printSubtitleLine(abctune.lines[0]);
+  if (abctune.lines[0].staff[0].subtitle) {
+  //if (abctune.lines[0] && abctune.lines[0].subtitle) {
+    this.printSubtitleLine(abctune.lines[0].staff[0].subtitle);
     this.y+=20*this.scale;
   }
   if (abctune.metaText.rhythm) {
@@ -428,15 +429,12 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
   for(var line=0; line<abctune.lines.length; line++) {
     var abcline = abctune.lines[line];
     if (abcline.staff) {
-		staffgroup = this.printStaffLine(abctune, abcline, line);
-		if (staffgroup.w > maxwidth) maxwidth = staffgroup.w;
-    } else if (abcline.subtitle && line!==0) {
-      this.printSubtitleLine(abcline);
-      this.y+=ABCJS.write.spacing.VSPACE*this.scale; //hardcoded
+	staffgroup = this.printStaffLine(abctune, abcline, line);
+	if (staffgroup.w > maxwidth) maxwidth = staffgroup.w;
     } else if (abcline.text) {
-		if (typeof abcline.text === 'string') {
-	      this.paper.text(100, this.y, "TEXT: " + abcline.text);
-	  } else {
+	if (typeof abcline.text === 'string') {
+	     this.paper.text(100, this.y, "TEXT: " + abcline.text);
+	} else {
 		  var str = "";
 		  for (var i = 0; i < abcline.text.length; i++) {
 			  str += " FONT " + abcline.text[i].text;
@@ -489,8 +487,8 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
     this.paper.canvas.parentNode.setAttribute("style","width:"+sizetoset.w+"px");
 };
 
-ABCJS.write.Printer.prototype.printSubtitleLine = function(abcline) {
-  this.paper.text(this.width/2, this.y, abcline.subtitle).attr({"font-size":16}).scale(this.scale, this.scale, 0,0);
+ABCJS.write.Printer.prototype.printSubtitleLine = function(subtitle) {
+  this.paper.text(this.width/2, this.y, subtitle).attr({"font-size":16}).scale(this.scale, this.scale, 0,0);
 };
 
 ABCJS.write.Printer.prototype.printStaffLine = function (abctune, abcline, line) {

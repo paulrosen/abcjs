@@ -30,10 +30,10 @@ ABCJS.write.StaffGroupElement = function() {
  // this.stafflines = [];
 };
 
-ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines, staffclef) {
+ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines, staff) {
   this.voices[this.voices.length] = voice;
   if (!this.staffs[staffnumber]) {
-    this.staffs[this.staffs.length] = {top:0, highest: 7, lowest: 7, clef: staffclef, numLines: stafflines};
+    this.staffs[this.staffs.length] = {top:0, highest: 7, lowest: 7, clef: staff.clef, numLines: stafflines, subtitle: staff.subtitle};
 //    this.stafflines[this.stafflines.length] = stafflines;
   }
   voice.staff = this.staffs[staffnumber];
@@ -150,26 +150,31 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
   //if( contador > 0 )  alert( contador-- +' ABCJS.write.StaffGroupElement.prototype.draw');
 
   this.y = y;
+  this.height = 0;
+  
   for (var i=0;i<this.staffs.length;i++) {
-    var shiftabove = this.staffs[i].highest - ((i===0)? 20 : 15);
-    var shiftbelow = this.staffs[i].lowest - ((i===this.staffs.length-1)? 0 : 0);
+    var shiftabove = this.staffs[i].highest;
+    var shiftbelow = this.staffs[i].lowest;
+    // flavio - pt8
     this.staffs[i].top = y;
-    if (shiftabove > 0) y+= shiftabove*ABCJS.write.spacing.STEP;
-    this.staffs[i].y = y;
-    if( printer.firstStaff.clef.type === "grand") {
-      y+= ABCJS.write.spacing.STAVEHEIGHT*0.6; // a voz do baixo proximo a voz da melodia
-    } else {
-      y+= ABCJS.write.spacing.STAVEHEIGHT*0.9; // position of the words
-    }
-    if (shiftbelow < 0) y-= shiftbelow*ABCJS.write.spacing.STEP;
-    this.staffs[i].bottom = y;
+    this.staffs[i].y = y + (shiftabove>ABCJS.write.spacing.TOPNOTE?shiftabove-10:0)*ABCJS.write.spacing.STEP;
+    h = (shiftabove-shiftbelow)*ABCJS.write.spacing.STEP;
+    y += h;
+    this.height += h;
+    y += ABCJS.write.spacing.VSPACE;
+    this.staffs[i].bottom = y ;
   }
-  this.height = y-this.y;
-  var bartop = 0;
   // flavio - pt2. - desenha as notas (e otros simbolos)
+  var bartop = 0;
+
   for (i=0;i<this.voices.length;i++) {
+    bartop = this.voices[i].staff.y;  
+    if( i > 0 && this.voices[i].staff.subtitle)  {
+      printer.y = this.voices[i].staff.y;
+      printer.printSubtitleLine(this.voices[i].staff.subtitle);
+      bartop += 20*printer.scale; // hardcoded
+    }
     this.voices[i].draw(printer, bartop);
-    bartop = this.voices[i].barbottom;
   }
 
   if (this.staffs.length>1 || printer.firstStaff.clef.type === "grand") {
@@ -294,7 +299,7 @@ ABCJS.write.VoiceElement.prototype.shiftRight = function (dx) {
 
 ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
   var width = this.w-1;
-  printer.y = this.staff.y;
+  printer.y = bartop;
   printer.staffbottom = this.staff.bottom;
   this.barbottom = printer.calcY(2) ; //flavio;
 
@@ -308,7 +313,8 @@ ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
   }
 // flavio - pt7 - realmente é aqui que os simbolos são desenhados
   for (var i=0, ii=this.children.length; i<ii; i++) {
-    this.children[i].draw(printer, (this.barto || i===ii-1)?bartop:0);
+    //this.children[i].draw(printer, (this.barto || i===ii-1)?bartop:0); 
+    this.children[i].draw(printer, bartop); // flavio
   }
 	window.ABCJS.parse.each(this.beams, function(beam) {
       beam.draw(printer); // beams must be drawn first for proper printing of triplets, slurs and ties.

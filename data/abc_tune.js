@@ -65,6 +65,7 @@ window.ABCJS.data.Tune = function() {
 		this.staffNum = 0;
 		this.voiceNum = 0;
 		this.lineNum = 0;
+                this.subtitle = "";
 	};
 
 	this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote) {
@@ -554,7 +555,7 @@ window.ABCJS.data.Tune = function() {
 	};
 
 	this.addSubtitle = function(str) {
-		this.pushLine({subtitle: str});
+		this.subtitle = str;
 	};
 
 	this.addSpacing = function(num) {
@@ -635,7 +636,7 @@ window.ABCJS.data.Tune = function() {
 				This.appendElement('scale', null, null, { size: params.scale} );
 		};
 		var createStaff = function(params) {
-			This.lines[This.lineNum].staff[This.staffNum] = {voices: [ ], clef: params.clef, key: params.key, workingClef: params.clef };
+			This.lines[This.lineNum].staff[This.staffNum] = {voices: [ ], clef: params.clef, key: params.key, workingClef: params.clef, subtitle: params.subtitle };
 			if (params.vocalfont) This.lines[This.lineNum].staff[This.staffNum].vocalfont = params.vocalfont;
 			if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
 			if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;
@@ -696,7 +697,7 @@ window.ABCJS.data.Tune = function() {
 	};
 
 	this.addMetaText = function(key, value) {
-		if (this.metaText[key] === undefined)
+    		if (this.metaText[key] === undefined)
 			this.metaText[key] = value;
 		else
 			this.metaText[key] += "\n" + value;

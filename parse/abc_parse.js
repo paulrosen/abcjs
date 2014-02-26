@@ -44,6 +44,7 @@ window.ABCJS.parse.Parse = function() {
 			this.hasMainTitle = false;
 			this.default_length = 0.125;
 			this.clef = { type: 'treble', verticalPos: 0 };
+                        this.subtitle = "";
 			this.next_note_duration = 0;
 			this.start_new_line = true;
 			this.is_in_header = true;
@@ -745,6 +746,10 @@ window.ABCJS.parse.Parse = function() {
 			if (staff.connectBarLines) params.connectBarLines = staff.connectBarLines;
 			if (staff.name) params.name = staff.name[multilineVars.currentVoice.index];
 			if (staff.subname) params.subname = staff.subname[multilineVars.currentVoice.index];
+			if (multilineVars.subtitle) {
+			   params.subtitle = multilineVars.subtitle;
+			   multilineVars.subtitle = "";
+                        }        
 			if (multilineVars.currentVoice.stem)
 				params.stem = multilineVars.currentVoice.stem;
 			if (multilineVars.currentVoice.scale)
