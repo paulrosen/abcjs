@@ -319,8 +319,8 @@ window.ABCJS.parse.Parse = function() {
 		return ret;
 	};
 
-	var addWords = function(line, words) {
-		if (!line) { warn("Can't add words before the first line of mulsic", line, 0); return; }
+	var addWords = function(staff, line, words) {
+		if (!line) { warn("Can't add words before the first line of music", line, 0); return; }
 		words = window.ABCJS.parse.strip(words);
 		if (words.charAt(words.length-1) !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
@@ -339,6 +339,7 @@ window.ABCJS.parse.Parse = function() {
 					div = ' ';
 				word_list.push({syllable: tokenizer.translateString(word), divider: div});
 				replace = false;
+                                staff.hasLyrics = true;
 				return true;
 			}
 			return false;
@@ -1304,8 +1305,8 @@ window.ABCJS.parse.Parse = function() {
 			parseRegularMusicLine(ret.str);
 		if (ret.newline && multilineVars.continueall === undefined)
 			startNewLine();
-		if (ret.words)
-			addWords(tune.getCurrentVoice(), line.substring(2));
+		if (ret.words) 
+			addWords(tune.getCurrentStaff(), tune.getCurrentVoice(), line.substring(2));
 		if (ret.symbols)
 			addSymbols(tune.getCurrentVoice(), line.substring(2));
 		if (ret.recurse)

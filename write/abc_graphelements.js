@@ -33,7 +33,7 @@ ABCJS.write.StaffGroupElement = function() {
 ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines, staff) {
   this.voices[this.voices.length] = voice;
   if (!this.staffs[staffnumber]) {
-    this.staffs[this.staffs.length] = {top:0, highest: 7, lowest: 7, clef: staff.clef, numLines: stafflines, subtitle: staff.subtitle};
+    this.staffs[this.staffs.length] = {top:0, highest: 0, lowest: 5, clef: staff.clef, numLines: stafflines, subtitle: staff.subtitle, hasLyrics: staff.hasLyrics};
 //    this.stafflines[this.stafflines.length] = stafflines;
   }
   voice.staff = this.staffs[staffnumber];
@@ -145,42 +145,57 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
   }
 };
 
+// flavio - pt2 - desenha os elementos da partitura
 ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
-
-  //if( contador > 0 )  alert( contador-- +' ABCJS.write.StaffGroupElement.prototype.draw');
 
   this.y = y;
   this.height = 0;
   
   for (var i=0;i<this.staffs.length;i++) {
     var shiftabove = this.staffs[i].highest;
-    var shiftbelow = this.staffs[i].lowest;
+    var shiftbelow = this.staffs[i].lowest > -2 ? -2 : this.staffs[i].lowest;
     // flavio - pt8
-    this.staffs[i].top = y;
-    this.staffs[i].y = y + (shiftabove>ABCJS.write.spacing.TOPNOTE?shiftabove-10:0)*ABCJS.write.spacing.STEP;
-    h = (shiftabove-shiftbelow)*ABCJS.write.spacing.STEP;
+    var ht = 0;
+    if( i > 0 && this.staffs[i].subtitle) {
+        ht = 7*ABCJS.write.spacing.STEP;
+        y += ht;
+    } 
+    
+    var h = 0;  
+    if( this.staffs[i].clef.type==="accordionTab") {
+      this.staffs[i].top = y;
+      this.staffs[i].y = y + 8 *ABCJS.write.spacing.STEP;
+      h += 16*ABCJS.write.spacing.STEP;
+    } else {
+      this.staffs[i].top = y;
+      this.staffs[i].y = y + (shiftabove>ABCJS.write.spacing.TOPNOTE?shiftabove-ABCJS.write.spacing.TOPNOTE+2:2)*ABCJS.write.spacing.STEP;
+      h += (shiftabove-shiftbelow)*ABCJS.write.spacing.STEP;
+    }
+    
+    if(this.staffs[i].hasLyrics) {
+        h += 4*ABCJS.write.spacing.STEP;
+    }
+     
     y += h;
-    this.height += h;
+    this.height += ht+  h;
     y += ABCJS.write.spacing.VSPACE;
     this.staffs[i].bottom = y ;
   }
-  // flavio - pt2. - desenha as notas (e otros simbolos)
+  
   var bartop = 0;
 
   for (i=0;i<this.voices.length;i++) {
     bartop = this.voices[i].staff.y;  
     if( i > 0 && this.voices[i].staff.subtitle)  {
-      printer.y = this.voices[i].staff.y;
+      printer.y = this.voices[i].staff.top -14;
       printer.printSubtitleLine(this.voices[i].staff.subtitle);
-      bartop += 20*printer.scale; // hardcoded
     }
     this.voices[i].draw(printer, bartop);
   }
 
   if (this.staffs.length>1 || printer.firstStaff.clef.type === "grand") {
-    printer.y = this.staffs[0].y;
-    var top = printer.calcY(10);
-    printer.y = this.staffs[this.staffs.length-1].y;
+    var top = this.staffs[0].y;
+    var bottom = this.staffs[this.staffs.length-1].top;
     var bottom = printer.calcY(2);
     printer.printStem(this.startx, 0.6, top, bottom);
 
@@ -189,7 +204,6 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
           printer.printStem(this.voices[0].children[i].children[0].x, 0.6, top, bottom);
       }
   }
-   
 
   for (i=0;i<this.staffs.length;i++) {
     if (this.staffs[i].numLines === 0) continue;

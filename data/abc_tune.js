@@ -675,6 +675,12 @@ window.ABCJS.data.Tune = function() {
 		return true;
 	};
 
+	this.getCurrentStaff = function() {
+		if (this.lines[this.lineNum] !== undefined && this.lines[this.lineNum].staff[this.staffNum] !== undefined )
+			return this.lines[this.lineNum].staff[this.staffNum];
+		else return null;
+	};
+
 	this.getCurrentVoice = function() {
 		if (this.lines[this.lineNum] !== undefined && this.lines[this.lineNum].staff[this.staffNum] !== undefined && this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum] !== undefined)
 			return this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum];

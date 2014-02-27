@@ -29,7 +29,7 @@ ABCJS.write.spacing.FONTSIZE = 30;
 ABCJS.write.spacing.STEP = ABCJS.write.spacing.FONTSIZE*(93)/720;
 ABCJS.write.spacing.SPACE = 10;
 ABCJS.write.spacing.VSPACE = 10; // 20;
-ABCJS.write.spacing.TOPNOTE = 10;
+ABCJS.write.spacing.TOPNOTE = 10; // 20
 ABCJS.write.spacing.STAVEHEIGHT = 100;
 
 
@@ -138,7 +138,7 @@ ABCJS.write.Printer.prototype.endGroup = function () {
 
 ABCJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
     for (var i = 0; i < staff.numLines; i++) {
-      this.printStaveLine(startx,endx,(i-(staff.numLines===4?-0.6:-1))*(staff.numLines === 4?4:2));
+      this.printStaveLine(startx,endx,(i+(staff.numLines === 4?0.5:1))*(staff.numLines === 4?4:2));
     }
 };
 // flavio - pt3. - desenhas as linhas
@@ -164,7 +164,7 @@ ABCJS.write.Printer.prototype.doPrintStaveLine = function (x1,x2, pitch, isLedge
   var y = this.calcY(pitch);
   var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy, x2, y+dy, x1, y+dy);
   var ret;
-  if( (!isLedger && ( pitch >= 2 && pitch <= 10 ) ) || ( isLedger && (pitch < 2 || pitch > 10) ) ) {
+  if( (!isLedger /*&& ( pitch >= 2 && pitch <= 10 )*/ ) || ( isLedger && (pitch < 2 || pitch > 10) ) ) {
     ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
   } else {
     ret = null;
@@ -305,7 +305,7 @@ ABCJS.write.Printer.prototype.debugMsgLow = function(x, msg) {
 };
 
 ABCJS.write.Printer.prototype.printLyrics = function(x, msg) {
-    var el = this.paper.text(x, this.calcY(this.layouter.minY-7), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
+    var el = this.paper.text(x, this.calcY(this.layouter.minY-3), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
     el[0].setAttribute("class", "abc-lyric");
     return el;
 };
