@@ -334,7 +334,7 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 	}
 	if (tempo.duration) {
 		var temposcale = 0.75*printer.scale;
-		var tempopitch = 14.5;
+    		var tempopitch = 4.5; // flavio 14.5;
 		var duration = tempo.duration[0]; // TODO when multiple durations
 		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1);
 		var durlog = Math.floor(Math.log(duration) / Math.log(2));
@@ -429,7 +429,7 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
   for(var line=0; line<abctune.lines.length; line++) {
     var abcline = abctune.lines[line];
     if (abcline.staff) {
-	staffgroup = this.printStaffLine(abctune, abcline, line);
+    	staffgroup = this.printStaffLine(abctune, abcline, line);
 	if (staffgroup.w > maxwidth) maxwidth = staffgroup.w;
     } else if (abcline.text) {
 	if (typeof abcline.text === 'string') {

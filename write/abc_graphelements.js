@@ -199,9 +199,25 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
     var bottom = printer.calcY(2);
     printer.printStem(this.startx, 0.6, top, bottom);
 
-      for (i=0;i<this.voices[0].children.length;i++) {
-        if( this.voices[0].children[i].abcelem.el_type === "bar" )
-          printer.printStem(this.voices[0].children[i].children[0].x, 0.6, top, bottom);
+      //this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); break;
+          for (i=0;i<this.voices[0].children.length;i++) {
+        if( this.voices[0].children[i].abcelem.el_type === "bar" ) {
+            for(j=0;j<this.voices[0].children[i].children.length;j++) {
+              el = this.voices[0].children[i].children[j];
+              if(printer.firstStaff.clef.type === "grand"){
+                // printer.printStem(el.x, el.linewidth, top, bottom);
+              //    else {
+              for(k=0;k<this.staffs.length; k++) {
+                  printer.y = this.staffs[k].y;
+                  if(this.staffs[k].clef.type ==="accordionTab"){
+                    printer.printStem(el.x, el.linewidth, printer.calcY(el.pitch), printer.calcY(14));
+                } else {
+                    printer.printStem(el.x, el.linewidth, printer.calcY(el.pitch), printer.calcY(el.pitch2));
+                  }
+              }
+             }
+           }
+        }
       }
   }
 
