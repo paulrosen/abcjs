@@ -418,11 +418,12 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
 	var composerLine = "";
 	if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
 	if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
-  if (composerLine.length > 0) {this.paper.text(this.width*this.scale, this.y, composerLine).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale});this.y+=15;}
+// flavio delta - acertar o espacamento com autor e tempo ou sem ambos...
+    if (composerLine.length > 0) {this.paper.text(this.width*this.scale, this.y, composerLine).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale});this.y+=15;}
 	if (abctune.metaText.author) {this.paper.text(this.width*this.scale, this.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale}); this.y+=15;}
   if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
 	  this.y = this.printTempo(abctune.metaText.tempo, this.paper, this.layouter, this.y, this, 50);
-	  this.y += 20*this.scale;
+	  this.y += 16*this.scale;
   }
   this.staffgroups = [];
   var maxwidth = this.width;

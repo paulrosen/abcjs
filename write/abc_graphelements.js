@@ -329,6 +329,7 @@ ABCJS.write.VoiceElement.prototype.shiftRight = function (dx) {
 
 ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
   var width = this.w-1;
+  var ve = this;
   printer.y = bartop;
   printer.staffbottom = this.staff.bottom;
   this.barbottom = printer.calcY(2) ; //flavio;
@@ -350,7 +351,7 @@ ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
       beam.draw(printer); // beams must be drawn first for proper printing of triplets, slurs and ties.
     });
 	window.ABCJS.parse.each(this.otherchildren, function(child) {
-      child.draw(printer,this.startx+10,width);
+      child.draw(printer,this.startx+10,width, ve.staff);
     });
 
 };
@@ -559,17 +560,24 @@ ABCJS.write.EndingElem = function(text, anchor1, anchor2) {
   this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
 };
 
-ABCJS.write.EndingElem.prototype.draw = function (printer, linestartx, lineendx) {
+ABCJS.write.EndingElem.prototype.draw = function (printer, linestartx, lineendx, staff) {
 
   //if( contador > 0 )  alert( contador-- +' ABCJS.write.EndingElem.prototype.draw');
 
   var pathString;
+  var y = printer.y;
+  var delta = 0; // flavio delta
+  if(staff.highest) {
+      printer.y = printer.calcY(staff.highest+2);
+      delta = staff.highest-ABCJS.write.spacing.TOPNOTE - 2;
+  }
   if (this.anchor1) {
     linestartx = this.anchor1.x+this.anchor1.w;
     pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 			     linestartx, printer.y, linestartx, printer.y+10); 
     printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"}); //TODO scale
-    printer.printText(linestartx+5*printer.scale, 18.5, this.text).attr({"font-size":""+10*printer.scale+"px"});
+    printer.printText(linestartx+5*printer.scale, delta, this.text).attr({"font-size":""+10*printer.scale+"px"});
+    
   }
 
   if (this.anchor2) {
@@ -583,6 +591,7 @@ ABCJS.write.EndingElem.prototype.draw = function (printer, linestartx, lineendx)
   pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 				  linestartx, printer.y, lineendx, printer.y); 
   printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"});  // TODO scale
+  printer.y = y;
 };
 
 ABCJS.write.TieElem = function(anchor1, anchor2, above, forceandshift) {
