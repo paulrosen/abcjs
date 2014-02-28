@@ -172,7 +172,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 
 	var clefLines = {
 		'grand': { clef: 'grand', pitch: 4, mid: 0 },
-		'accordionTab': { clef: 'accordionTab', pitch: 6, mid: 0 },
+		'accordionTab': { clef: 'accordionTab', pitch: 8, mid: 0 },
 		'treble': { clef: 'treble', pitch: 4, mid: 0 },
 		'treble+8': { clef: 'treble+8', pitch: 4, mid: 0 },
 		'treble-8': { clef: 'treble-8', pitch: 4, mid: 0 },

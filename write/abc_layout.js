@@ -88,10 +88,18 @@ ABCJS.write.Layout.prototype.getNextElem = function() {
     return this.abcline[this.pos+1];
 };
 
-ABCJS.write.Layout.prototype.printABCLine = function(staffs) {
+ABCJS.write.Layout.prototype.printABCLine = function(abctune, line) {
+    
+  this.tune = abctune;
+  this.tuneCurrLine = line;
   this.minY = 2;  // PER: This is the lowest that any note reaches. It will be used to set the dynamics row.
+
+  var staffs = this.tune.lines[this.tuneCurrLine].staff;
+
   this.staffgroup = new ABCJS.write.StaffGroupElement();
+  
   for (this.s = 0; this.s < staffs.length; this.s++) {
+    this.tuneCurrStaff = this.s;
     this.printABCStaff(staffs[this.s]);
   }
   return this.staffgroup;
@@ -825,11 +833,14 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
 ABCJS.write.Layout.prototype.printBarLine = function (elem) {
 // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
 
+  var currClefType = this.tune.lines[this.tuneCurrLine].staff[this.tuneCurrStaff].clef.type;
+
+  var topbar = currClefType === "accordionTab" ? 14 : 10;
+ 
   var abselem = new ABCJS.write.AbsoluteElement(elem, 0, 10);
   var anchor = null; // place to attach part lines
   var dx = 0;
-
-
+ 
 
   var firstdots = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat");
   var firstthin = (elem.type!=="bar_left_repeat" && elem.type!=="bar_thick_thin" && elem.type!=="bar_invisible");
@@ -850,17 +861,17 @@ ABCJS.write.Layout.prototype.printBarLine = function (elem) {
 
   if (firstdots) {
     abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", dx, 1, 7));
-    abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", dx, 1, 5));
+    abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", dx, 1, topbar-5));
     dx+=6; //2 hardcoded, twice;
   }
 
   if (firstthin) {
-    anchor = new ABCJS.write.RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":10, linewidth:0.6});
+    anchor = new ABCJS.write.RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":topbar, linewidth:0.6});
     abselem.addRight(anchor);
   }
 
   if (elem.type==="bar_invisible") {
-    anchor = new ABCJS.write.RelativeElement(null, dx, 1, 2, {"type": "none", "pitch2":10, linewidth:0.6});
+    anchor = new ABCJS.write.RelativeElement(null, dx, 1, 2, {"type": "none", "pitch2":topbar, linewidth:0.6});
     abselem.addRight(anchor);
   }
 
@@ -870,7 +881,7 @@ ABCJS.write.Layout.prototype.printBarLine = function (elem) {
 
   if (thick) {
     dx+=4; //3 hardcoded;    
-    anchor = new ABCJS.write.RelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":10, linewidth:4});
+    anchor = new ABCJS.write.RelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":topbar, linewidth:4});
     abselem.addRight(anchor);
     dx+=5;
   }
@@ -887,14 +898,14 @@ ABCJS.write.Layout.prototype.printBarLine = function (elem) {
 
   if (secondthin) {
     dx+=3; //3 hardcoded;
-    anchor = new ABCJS.write.RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":10, linewidth:0.6});
+    anchor = new ABCJS.write.RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":topbar, linewidth:0.6});
     abselem.addRight(anchor); // 3 is hardcoded
   }
 
   if (seconddots) {
     dx+=3; //3 hardcoded;
     abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", dx, 1, 7));
-    abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", dx, 1, 5));
+    abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", dx, 1, topbar-5));
   } // 2 is hardcoded
 
   if (elem.startEnding) {
@@ -912,6 +923,7 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
   var abselem = new ABCJS.write.AbsoluteElement(elem,0,10);
   switch (elem.type) {
   case "accordionTab":
+      clef="clefs.C"; 
       elem.stafflines = 4;
       break;
   case "grand":

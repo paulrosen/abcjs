@@ -146,87 +146,90 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
 };
 
 // flavio - pt2 - desenha os elementos da partitura
-ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
+ABCJS.write.StaffGroupElement.prototype.draw = function(printer, y) {
 
-  this.y = y;
-  this.height = 0;
-  
-  for (var i=0;i<this.staffs.length;i++) {
-    var shiftabove = this.staffs[i].highest;
-    var shiftbelow = this.staffs[i].lowest > -2 ? -2 : this.staffs[i].lowest;
-    // flavio - pt8
-    var ht = 0;
-    if( i > 0 && this.staffs[i].subtitle) {
-        ht = 7*ABCJS.write.spacing.STEP;
-        y += ht;
-    } 
-    
-    var h = 0;  
-    if( this.staffs[i].clef.type==="accordionTab") {
-      this.staffs[i].top = y;
-      this.staffs[i].y = y + 8 *ABCJS.write.spacing.STEP;
-      h += 16*ABCJS.write.spacing.STEP;
-    } else {
-      this.staffs[i].top = y;
-      this.staffs[i].y = y + (shiftabove>ABCJS.write.spacing.TOPNOTE?shiftabove-ABCJS.write.spacing.TOPNOTE+2:2)*ABCJS.write.spacing.STEP;
-      h += (shiftabove-shiftbelow)*ABCJS.write.spacing.STEP;
-    }
-    
-    if(this.staffs[i].hasLyrics) {
-        h += 4*ABCJS.write.spacing.STEP;
-    }
-     
-    y += h;
-    this.height += ht+  h;
-    y += ABCJS.write.spacing.VSPACE;
-    this.staffs[i].bottom = y ;
-  }
-  
-  var bartop = 0;
+    this.y = y;
+    this.height = 0;
 
-  for (i=0;i<this.voices.length;i++) {
-    bartop = this.voices[i].staff.y;  
-    if( i > 0 && this.voices[i].staff.subtitle)  {
-      printer.y = this.voices[i].staff.top -14;
-      printer.printSubtitleLine(this.voices[i].staff.subtitle);
-    }
-    this.voices[i].draw(printer, bartop);
-  }
+    for (var i = 0; i < this.staffs.length; i++) {
+        var shiftabove = this.staffs[i].highest;
+        var shiftbelow = this.staffs[i].lowest > -2 ? -2 : this.staffs[i].lowest;
 
-  if (this.staffs.length>1 || printer.firstStaff.clef.type === "grand") {
-    var top = this.staffs[0].y;
-    var bottom = this.staffs[this.staffs.length-1].top;
-    var bottom = printer.calcY(2);
-    printer.printStem(this.startx, 0.6, top, bottom);
-
-      //this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); break;
-          for (i=0;i<this.voices[0].children.length;i++) {
-        if( this.voices[0].children[i].abcelem.el_type === "bar" ) {
-            for(j=0;j<this.voices[0].children[i].children.length;j++) {
-              el = this.voices[0].children[i].children[j];
-              if(printer.firstStaff.clef.type === "grand"){
-                // printer.printStem(el.x, el.linewidth, top, bottom);
-              //    else {
-              for(k=0;k<this.staffs.length; k++) {
-                  printer.y = this.staffs[k].y;
-                  if(this.staffs[k].clef.type ==="accordionTab"){
-                    printer.printStem(el.x, el.linewidth, printer.calcY(el.pitch), printer.calcY(14));
-                } else {
-                    printer.printStem(el.x, el.linewidth, printer.calcY(el.pitch), printer.calcY(el.pitch2));
-                  }
-              }
-             }
-           }
+        var ht = 0;
+        if (i > 0 && this.staffs[i].subtitle) {
+            ht = 7 * ABCJS.write.spacing.STEP;
+            y += ht;
         }
-      }
-  }
 
-  for (i=0;i<this.staffs.length;i++) {
-    if (this.staffs[i].numLines === 0) continue;
-    printer.y = this.staffs[i].y;
-    printer.printStave( this.startx, this.w, this.staffs[i]);
-  }
-  
+        var h = 0;
+        if (this.staffs[i].clef.type === "accordionTab") {
+            this.staffs[i].top = y;
+            this.staffs[i].y = y + 8 * ABCJS.write.spacing.STEP;
+            h += 16 * ABCJS.write.spacing.STEP;
+        } else {
+            this.staffs[i].top = y;
+            this.staffs[i].y = y + (shiftabove > ABCJS.write.spacing.TOPNOTE ? shiftabove - ABCJS.write.spacing.TOPNOTE + 2 : 2) * ABCJS.write.spacing.STEP;
+            h += (shiftabove - shiftbelow) * ABCJS.write.spacing.STEP;
+        }
+
+        if (this.staffs[i].hasLyrics) {
+            h += 4 * ABCJS.write.spacing.STEP;
+        }
+
+        y += h;
+        this.height += ht + h;
+        y += ABCJS.write.spacing.VSPACE;
+        this.staffs[i].bottom = y;
+    }
+
+    var bartop = 0;
+
+    for (i = 0; i < this.voices.length; i++) {
+        bartop = this.voices[i].staff.y;
+        if (i > 0 && this.voices[i].staff.subtitle) {
+            printer.y = this.voices[i].staff.top - 14;
+            printer.printSubtitleLine(this.voices[i].staff.subtitle);
+        }
+        this.voices[i].draw(printer, bartop);
+    }
+    
+    if (this.staffs.length > 1 || printer.firstStaff.clef.type === "grand") {
+        var top = this.staffs[0].y;
+        var bottom = this.staffs[this.staffs.length - 1].top;
+        var bottom = printer.calcY(2);
+        printer.printStem(this.startx, 0.6, top, bottom);
+        printer.printStem(this.w - 1, 0.6, top, bottom);
+
+        for (i = 0; i < this.voices[0].children.length; i++) {
+            if (this.voices[0].children[i].abcelem.el_type === "bar") {
+                for (j = 0; j < this.voices[0].children[i].children.length; j++) {
+                    el = this.voices[0].children[i].children[j];
+                    if (printer.firstStaff.clef.type === "grand") {
+//                        printer.printSymbol(el.x, el.pitch, el.c, el.scalex, el.scaley); 
+//                        printer.printStem(el.x, el.linewidth, top, bottom);
+                        //    else {
+//                    for (k = 0; k < this.staffs.length; k++) {
+//                        printer.y = this.staffs[k].y;
+//                        if (this.staffs[k].clef.type === "accordionTab") {
+//                            //printer.printStem(el.x, el.linewidth, printer.calcY(el.pitch), printer.calcY(14));
+//                        } else {
+//                            //printer.printStem(el.x, el.linewidth, printer.calcY(el.pitch), printer.calcY(el.pitch2));
+//                        }
+//                    }
+                    }
+                }
+            }
+        }
+    }
+    
+
+    for (i = 0; i < this.staffs.length; i++) {
+        if (this.staffs[i].numLines === 0)
+            continue;
+        printer.y = this.staffs[i].y;
+        printer.printStave(this.startx, this.w, this.staffs[i]);
+    }
+
 };
 
 ABCJS.write.VoiceElement = function(voicenumber, voicetotal) {
@@ -334,8 +337,6 @@ ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
   printer.staffbottom = this.staff.bottom;
   this.barbottom = printer.calcY(2) ; //flavio;
 
-  //if( contador > 0 )  alert( contador-- +' ABCJS.write.VoiceElement.prototype.draw');
-
   if (this.header) { // print voice name
     var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
 	  var headerX = (this.startx-printer.paddingleft)/2+printer.paddingleft;
@@ -345,13 +346,13 @@ ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
 // flavio - pt7 - realmente é aqui que os simbolos são desenhados
   for (var i=0, ii=this.children.length; i<ii; i++) {
     //this.children[i].draw(printer, (this.barto || i===ii-1)?bartop:0); 
-    this.children[i].draw(printer, bartop); // flavio
+    this.children[i].draw(printer, bartop); // flavio delta
   }
 	window.ABCJS.parse.each(this.beams, function(beam) {
       beam.draw(printer); // beams must be drawn first for proper printing of triplets, slurs and ties.
     });
 	window.ABCJS.parse.each(this.otherchildren, function(child) {
-      child.draw(printer,this.startx+10,width, ve.staff);
+      child.draw( printer, ve.startx+10, width, ve.staff );
     });
 
 };
@@ -518,7 +519,8 @@ ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
   switch(this.type) {
   case "symbol":
     if (this.c===null) return null;
-    this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley); 
+    if( this.c !== 'dots.dot' || printer.firstStaff.clef.type !== "grand" )
+      this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley); 
     break;
   case "debug":
     this.graphelem = printer.debugMsg(this.x, this.c); break;
@@ -529,7 +531,8 @@ ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
     break;
   case "bar":
     if( printer.firstStaff.clef.type !== "grand")
-      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); // bartop can't be 0
+      //this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); // bartop can't be 0
+      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); // bartop can't be 0
 //    if( printer.abctune.lines[0].staff[0].clef.type === "grand" ) {
 //      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch-12), (bartop)?bartop-8:printer.calcY(this.pitch2-8  ));  // bartop can't be 0
 //    } 
@@ -562,34 +565,26 @@ ABCJS.write.EndingElem = function(text, anchor1, anchor2) {
 
 ABCJS.write.EndingElem.prototype.draw = function (printer, linestartx, lineendx, staff) {
 
-  //if( contador > 0 )  alert( contador-- +' ABCJS.write.EndingElem.prototype.draw');
-
   var pathString;
   var y = printer.y;
-  var delta = 0; // flavio delta
-  if(staff.highest) {
+  
+  if(staff.highest) 
       printer.y = printer.calcY(staff.highest+2);
-      delta = staff.highest-ABCJS.write.spacing.TOPNOTE - 2;
-  }
+  
   if (this.anchor1) {
     linestartx = this.anchor1.x+this.anchor1.w;
-    pathString = ABCJS.write.sprintf("M %f %f L %f %f",
-			     linestartx, printer.y, linestartx, printer.y+10); 
+    pathString = ABCJS.write.sprintf("M %f %f L %f %f", linestartx, printer.y, linestartx, printer.y+10); 
     printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"}); //TODO scale
-    printer.printText(linestartx+5*printer.scale, delta, this.text).attr({"font-size":""+10*printer.scale+"px"});
-    
+    printer.paper.text(linestartx+5*printer.scale, printer.y-8, this.text).attr({"font-size":""+10*printer.scale+"px"});
   }
 
   if (this.anchor2) {
     lineendx = this.anchor2.x;
-    pathString = ABCJS.write.sprintf("M %f %f L %f %f",
-			 lineendx, printer.y, lineendx, printer.y+10); 
+    pathString = ABCJS.write.sprintf("M %f %f L %f %f", lineendx, printer.y, lineendx, printer.y+10); 
     printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"}); // TODO scale
   }
 
-
-  pathString = ABCJS.write.sprintf("M %f %f L %f %f",
-				  linestartx, printer.y, lineendx, printer.y); 
+  pathString = ABCJS.write.sprintf("M %f %f L %f %f", linestartx, printer.y, lineendx, printer.y); 
   printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"});  // TODO scale
   printer.y = y;
 };
@@ -603,8 +598,6 @@ ABCJS.write.TieElem = function(anchor1, anchor2, above, forceandshift) {
 };
 
 ABCJS.write.TieElem.prototype.draw = function (printer, linestartx, lineendx) {
-
-  //if( contador > 0 )  alert( contador-- +' ABCJS.write.TieElem.prototype.draw');
 
   var startpitch;
   var endpitch;

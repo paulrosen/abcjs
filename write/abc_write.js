@@ -45,7 +45,7 @@ ABCJS.write.Printer = function(paper, params) {
   this.selected = [];
   this.ingroup = false;
   this.scale = params.scale || 1;
-  this.staffwidth = params.staffwidth || 740;
+  this.staffwidth = params.staffwidth || 1024;
   this.paddingtop = params.paddingtop || 15;
   this.paddingbottom = params.paddingbottom || 30;
   this.paddingright = params.paddingright || 50;
@@ -305,7 +305,7 @@ ABCJS.write.Printer.prototype.debugMsgLow = function(x, msg) {
 };
 
 ABCJS.write.Printer.prototype.printLyrics = function(x, msg) {
-    var el = this.paper.text(x, this.calcY(this.layouter.minY-3), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
+    var el = this.paper.text(x, this.calcY(this.layouter.minY-2), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
     el[0].setAttribute("class", "abc-lyric");
     return el;
 };
@@ -375,62 +375,77 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 };
 
 ABCJS.write.Printer.prototype.printTune = function (abctune) {
-  //flavio
-  //this.abctune = abctune;
   this.firstStaff = typeof(abctune.lines[0].staff)==="undefined"?abctune.lines[1].staff[0]:abctune.lines[0].staff[0];
   this.layouter = new ABCJS.write.Layout(this.glyphs, abctune.formatting.bagpipes);
 	this.layouter.printer = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
   if (abctune.media === 'print') {
-       // TODO create the page the size of
+    // TODO create the page the size of
     //  tune.formatting.pageheight by tune.formatting.pagewidth
-       // create margins the size of
-      // TODO-PER: setting the defaults to 3/4" for now. What is the real value?
+    // create margins the size of
+    // TODO-PER: setting the defaults to 3/4" for now. What is the real value?
     var m = abctune.formatting.topmargin === undefined ? 54 : abctune.formatting.topmargin;
     this.y+=m;
     // TODO tune.formatting.botmargin
-//    m = abctune.formatting.leftmargin === undefined ? 54 : abctune.formatting.leftmargin;
-//    this.paddingleft = m;
-//      m = abctune.formatting.rightmargin === undefined ? 54 : abctune.formatting.rightmargin;
-//    this.paddingright = m;
+    //    m = abctune.formatting.leftmargin === undefined ? 54 : abctune.formatting.leftmargin;
+    //    this.paddingleft = m;
+    //      m = abctune.formatting.rightmargin === undefined ? 54 : abctune.formatting.rightmargin;
+    //    this.paddingright = m;
   }
     else
       this.y+=this.paddingtop;
+
   // FIXED BELOW, NEEDS CHECKING if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
   if (abctune.formatting.staffwidth) { 
     this.width=abctune.formatting.staffwidth; 
   } else {
     this.width=this.staffwidth;
   }
+  
   this.width+=this.paddingleft;
+  
   if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; }
-	if (abctune.metaText.title)
-	  this.paper.text(this.width*this.scale/2, this.y, abctune.metaText.title).attr({"font-size":20*this.scale, "font-family":"serif"});
+  if (abctune.metaText.title)
+      this.paper.text(this.width*this.scale/2, this.y, abctune.metaText.title).attr({"font-size":20*this.scale, "font-family":"serif"});
+  
   this.y+=20*this.scale;
+  
   if (abctune.lines[0].staff[0].subtitle) {
-  //if (abctune.lines[0] && abctune.lines[0].subtitle) {
     this.printSubtitleLine(abctune.lines[0].staff[0].subtitle);
     this.y+=20*this.scale;
   }
+  
   if (abctune.metaText.rhythm) {
     this.paper.text(this.paddingleft, this.y, abctune.metaText.rhythm).attr({"text-anchor":"start","font-style":"italic","font-family":"serif", "font-size":12*this.scale});
     !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.y+=15*this.scale);
   }
-	var composerLine = "";
-	if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
-	if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
-// flavio delta - acertar o espacamento com autor e tempo ou sem ambos...
-    if (composerLine.length > 0) {this.paper.text(this.width*this.scale, this.y, composerLine).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale});this.y+=15;}
-	if (abctune.metaText.author) {this.paper.text(this.width*this.scale, this.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale}); this.y+=15;}
-  if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
-	  this.y = this.printTempo(abctune.metaText.tempo, this.paper, this.layouter, this.y, this, 50);
-	  this.y += 16*this.scale;
+  
+  var composerLine = "";
+  var meta = false;
+  if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
+  if (abctune.metaText.origin)   composerLine += ' (' + abctune.metaText.origin + ')';
+  
+  if (composerLine.length > 0) {
+      this.paper.text(this.width*this.scale, this.y, composerLine).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale});this.y+=15;
+      meta = true;
   }
+  if (abctune.metaText.author) {
+      this.paper.text(this.width*this.scale, this.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale}); this.y+=15;
+      meta = true;
+  }
+  
+  if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
+    this.y = this.printTempo(abctune.metaText.tempo, this.paper, this.layouter, this.y, this, this.paddingleft+10);
+     meta = true;
+  }
+  
+  (meta) && (this.y+=15*this.scale);
+  
   this.staffgroups = [];
   var maxwidth = this.width;
   for(var line=0; line<abctune.lines.length; line++) {
     var abcline = abctune.lines[line];
     if (abcline.staff) {
-    	staffgroup = this.printStaffLine(abctune, abcline, line);
+    	staffgroup = this.printStaffLine(abctune, line);
 	if (staffgroup.w > maxwidth) maxwidth = staffgroup.w;
     } else if (abcline.text) {
 	if (typeof abcline.text === 'string') {
@@ -444,7 +459,12 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
 	  }
       this.y+=ABCJS.write.spacing.VSPACE*this.scale; //hardcoded
     }
+      this.y+=ABCJS.write.spacing.VSPACE*3*this.scale; //espaco entre os grupos de pautas
   }
+  
+  //var sizetoset = {w: (maxwidth+this.paddingright)*this.scale,h: (this.y+this.paddingbottom)*this.scale};
+  //this.paper.setSize(sizetoset.w,sizetoset.h);
+  
   var extraText = "";
 	var text2;
 	var height;
@@ -492,8 +512,8 @@ ABCJS.write.Printer.prototype.printSubtitleLine = function(subtitle) {
   this.paper.text(this.width/2, this.y, subtitle).attr({"font-size":16}).scale(this.scale, this.scale, 0,0);
 };
 
-ABCJS.write.Printer.prototype.printStaffLine = function (abctune, abcline, line) {
-	var staffgroup = this.layouter.printABCLine(abcline.staff);
+ABCJS.write.Printer.prototype.printStaffLine = function (abctune, line) {
+	var staffgroup = this.layouter.printABCLine(abctune, line);
 	var newspace = this.space;
 	for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
 		staffgroup.layout(newspace, this, false);
