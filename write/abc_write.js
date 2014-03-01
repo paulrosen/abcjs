@@ -528,7 +528,7 @@ ABCJS.write.Printer.prototype.printStaffLine = function (abctune, line) {
 		}
 	}
         // flavio - pt1.
-        staffgroup.draw(this, this.y);
+        staffgroup.draw(this);
 	this.staffgroups[this.staffgroups.length] = staffgroup;
 	this.y = staffgroup.y + staffgroup.height;
 	this.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;

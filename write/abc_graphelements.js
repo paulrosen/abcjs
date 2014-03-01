@@ -146,8 +146,9 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
 };
 
 // flavio - pt2 - desenha os elementos da partitura
-ABCJS.write.StaffGroupElement.prototype.draw = function(printer, y) {
-
+ABCJS.write.StaffGroupElement.prototype.draw = function( printer ) {
+    
+    var y = printer.y;
     this.y = y;
     this.height = 0;
 
@@ -182,44 +183,21 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, y) {
         this.staffs[i].bottom = y;
     }
 
-    var bartop = 0;
-
     for (i = 0; i < this.voices.length; i++) {
-        bartop = this.voices[i].staff.y;
         if (i > 0 && this.voices[i].staff.subtitle) {
             printer.y = this.voices[i].staff.top - 14;
             printer.printSubtitleLine(this.voices[i].staff.subtitle);
         }
-        this.voices[i].draw(printer, bartop);
+        this.voices[i].draw( printer );
     }
     
-    if (this.staffs.length > 1 || printer.firstStaff.clef.type === "grand") {
+    if (this.staffs.length > 1 ) {
         var top = this.staffs[0].y;
         var bottom = this.staffs[this.staffs.length - 1].top;
         var bottom = printer.calcY(2);
         printer.printStem(this.startx, 0.6, top, bottom);
         printer.printStem(this.w - 1, 0.6, top, bottom);
 
-        for (i = 0; i < this.voices[0].children.length; i++) {
-            if (this.voices[0].children[i].abcelem.el_type === "bar") {
-                for (j = 0; j < this.voices[0].children[i].children.length; j++) {
-                    el = this.voices[0].children[i].children[j];
-                    if (printer.firstStaff.clef.type === "grand") {
-//                        printer.printSymbol(el.x, el.pitch, el.c, el.scalex, el.scaley); 
-//                        printer.printStem(el.x, el.linewidth, top, bottom);
-                        //    else {
-//                    for (k = 0; k < this.staffs.length; k++) {
-//                        printer.y = this.staffs[k].y;
-//                        if (this.staffs[k].clef.type === "accordionTab") {
-//                            //printer.printStem(el.x, el.linewidth, printer.calcY(el.pitch), printer.calcY(14));
-//                        } else {
-//                            //printer.printStem(el.x, el.linewidth, printer.calcY(el.pitch), printer.calcY(el.pitch2));
-//                        }
-//                    }
-                    }
-                }
-            }
-        }
     }
     
 
@@ -330,34 +308,38 @@ ABCJS.write.VoiceElement.prototype.shiftRight = function (dx) {
   this.nextx+=dx;
 };
 
-ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
-  var width = this.w-1;
-  var ve = this;
-  printer.y = bartop;
-  printer.staffbottom = this.staff.bottom;
-  this.barbottom = printer.calcY(2) ; //flavio;
+ABCJS.write.VoiceElement.prototype.draw = function( printer ) {
+    var width = this.w - 1;
+    var ve = this;
+    printer.y = this.staff.y;
+    printer.staffbottom = this.staff.bottom;
+    this.barbottom = printer.calcY(2); //flavio;
 
-  if (this.header) { // print voice name
-    var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
-	  var headerX = (this.startx-printer.paddingleft)/2+printer.paddingleft;
-	  headerX = headerX*printer.scale;
-    printer.paper.text(headerX, printer.calcY(textpitch)*printer.scale, this.header).attr({"font-size":12*printer.scale, "font-family":"serif", 'font-weight':'bold'}); // code duplicated above
-  }
-// flavio - pt7 - realmente é aqui que os simbolos são desenhados
-  for (var i=0, ii=this.children.length; i<ii; i++) {
-    //this.children[i].draw(printer, (this.barto || i===ii-1)?bartop:0); 
-    this.children[i].draw(printer, bartop); // flavio delta
-  }
-	window.ABCJS.parse.each(this.beams, function(beam) {
-      beam.draw(printer); // beams must be drawn first for proper printing of triplets, slurs and ties.
+    if (this.header) { // print voice name
+        var textpitch = 12 - (this.voicenumber + 1) * (12 / (this.voicetotal + 1));
+        var headerX = (this.startx - printer.paddingleft) / 2 + printer.paddingleft;
+        headerX = headerX * printer.scale;
+        printer.paper.text(headerX, printer.calcY(textpitch) * printer.scale, this.header)
+                .attr({"font-size": 12 * printer.scale, "font-family": "serif", 'font-weight': 'bold'}); 
+                // code duplicated above
+    }
+    // flavio - pt7 - realmente é aqui que os simbolos são desenhados
+    for (var i = 0, ii = this.children.length; i < ii; i++) {
+        this.children[i].draw( printer );
+    }
+    
+    window.ABCJS.parse.each(this.beams, function(beam) {
+        beam.draw(printer); // beams must be drawn first for proper printing of triplets, slurs and ties.
     });
-	window.ABCJS.parse.each(this.otherchildren, function(child) {
-      child.draw( printer, ve.startx+10, width, ve.staff );
+    
+    window.ABCJS.parse.each(this.otherchildren, function(child) {
+        child.draw(printer, ve.startx + 10, width, ve.staff);
     });
 
 };
 
-// duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
+// duration - actual musical duration - different from notehead duration in triplets. 
+// refer to abcelem to get the notehead duration
 // minspacing - spacing which must be taken on top of the width defined by the duration
 ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing) { 
   this.abcelem = abcelem;
@@ -376,11 +358,13 @@ ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing) {
   this.top = 7;
 };
 
-ABCJS.write.AbsoluteElement.prototype.getMinWidth = function () { // absolute space taken to the right of the note
+ABCJS.write.AbsoluteElement.prototype.getMinWidth = function () { 
+  // absolute space taken to the right of the note
   return this.w;
 };
 
-ABCJS.write.AbsoluteElement.prototype.getExtraWidth = function () { // space needed to the left of the note
+ABCJS.write.AbsoluteElement.prototype.getExtraWidth = function () { 
+  // space needed to the left of the note
   return -this.extraw;
 };
 
@@ -417,22 +401,15 @@ ABCJS.write.AbsoluteElement.prototype.pushBottom = function (bottom) {
   this.bottom = Math.min(bottom, this.bottom);
 };
 
-ABCJS.write.AbsoluteElement.prototype.draw = function (printer, bartop) {
+ABCJS.write.AbsoluteElement.prototype.draw = function (printer) {
 
 
   this.elemset = printer.paper.set();
   if (this.invisible) return;
   printer.beginGroup();
   for (var i=0; i<this.children.length; i++) {
-/*
-    if( contador > 0 && (this.children[i].type == 'stem' || this.children[i].type == 'symbol') ) 
-       //alert( contador-- +' ABCJS.write.AbsoluteElement.prototype.draw' + this.children[i].type);
-    else {
-     // alert( this.children[i].type );
-    }
-*/
-    this.elemset.push(this.children[i].draw(printer,this.x, bartop));
-}
+    this.elemset.push(this.children[i].draw(printer, this.x));
+  }
   this.elemset.push(printer.endGroup());
 	if (this.klass)
 		this.setClass("mark", "", "#00ff00");
@@ -511,16 +488,13 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
   this.bottom = pitch - ((opt.extreme==="below")? 7 : 0);
 };
 
-ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
-
-  //  if( contador > 0 )  alert( contador-- +' ABCJS.write.RelativeElement.prototype.draw');
+ABCJS.write.RelativeElement.prototype.draw = function (printer, x ) {
 
   this.x = x+this.dx;
   switch(this.type) {
   case "symbol":
     if (this.c===null) return null;
-    if( this.c !== 'dots.dot' || printer.firstStaff.clef.type !== "grand" )
-      this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley); 
+    this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley); 
     break;
   case "debug":
     this.graphelem = printer.debugMsg(this.x, this.c); break;
@@ -530,21 +504,11 @@ ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
     this.graphelem = printer.printText(this.x, this.pitch, this.c); 
     break;
   case "bar":
-    if( printer.firstStaff.clef.type !== "grand")
-      //this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); // bartop can't be 0
-      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); // bartop can't be 0
-//    if( printer.abctune.lines[0].staff[0].clef.type === "grand" ) {
-//      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch-12), (bartop)?bartop-8:printer.calcY(this.pitch2-8  ));  // bartop can't be 0
-//    } 
+    this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2));
     break;
   case "stem":
-    //if( printer.abctune.lines[0].staff[0].clef.type === "grand" ) {
-    //  this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch+6));
-    //  this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch2), printer.calcY(this.pitch2-6));
-    //} else  {
-      this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); break;
-    //}
-     break;
+    this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); break;
+    break;
   case "ledger":
     this.graphelem = printer.printLedger(this.x, this.x+this.w, this.pitch); break;
   }

@@ -73,7 +73,7 @@ ABCJS.write.Layout.prototype.pushCrossLineElems = function() {
 ABCJS.write.Layout.prototype.popCrossLineElems = function() {
   this.slurs = this.slursbyvoice[this.getCurrentVoiceId()] || {};
   this.ties = this.tiesbyvoice[this.getCurrentVoiceId()] || [];
-  this.partstartelempartstartelem = this.endingsbyvoice[this.getCurrentVoiceId()];
+  this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId()];
 };
 
 ABCJS.write.Layout.prototype.getElem = function() {
@@ -922,11 +922,6 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
   var octave = 0;
   var abselem = new ABCJS.write.AbsoluteElement(elem,0,10);
   switch (elem.type) {
-  case "accordionTab":
-      clef="clefs.C"; 
-      elem.stafflines = 4;
-      break;
-  case "grand":
   case "treble": break;
   case "tenor": clef="clefs.C"; break;
   case "alto": clef="clefs.C"; break;
@@ -939,15 +934,12 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
   case 'tenor-8':clef="clefs.C"; octave = -1; break;
   case 'bass-8': clef="clefs.F"; octave = -1; break;
   case 'alto-8': clef="clefs.C"; octave = -1; break;
+  case "accordionTab": clef="clefs.C"; elem.stafflines = 4;break;
   case 'none': clef=""; break;
   case 'perc': clef="clefs.perc"; break;
   default: abselem.addChild(new ABCJS.write.RelativeElement("clef="+elem.type, 0, 0, 0, {type:"debug"}));
   }
   
-  //  if (elem.verticalPos) { 
-  //    pitch = elem.verticalPos;
-  //  }
-    
   var dx =10;
   if (clef!=="") {
     abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos)); 
