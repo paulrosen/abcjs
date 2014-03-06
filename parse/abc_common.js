@@ -23,7 +23,8 @@ if (!window.ABCJS.parse)
 	window.ABCJS.parse = {};
 
 window.ABCJS.parse.clone = function(source) {
-	var destination = {};
+     
+      var destination = {};
 	for (var property in source)
 		if (source.hasOwnProperty(property))
 			destination[property] = source[property];

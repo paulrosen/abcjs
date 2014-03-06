@@ -204,6 +204,11 @@ ABCJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
     return ret;
   }
 };
+ABCJS.write.Printer.prototype.printTabText = function (x, offset, text, anchor) {
+  anchor = anchor || "start";
+  var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":14*this.scale});
+  return ret;
+};
 
 ABCJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
   anchor = anchor || "start";
@@ -377,7 +382,7 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 ABCJS.write.Printer.prototype.printTune = function (abctune) {
   this.firstStaff = typeof(abctune.lines[0].staff)==="undefined"?abctune.lines[1].staff[0]:abctune.lines[0].staff[0];
   this.layouter = new ABCJS.write.Layout(this.glyphs, abctune.formatting.bagpipes);
-	this.layouter.printer = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
+  this.layouter.printer = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
   if (abctune.media === 'print') {
     // TODO create the page the size of
     //  tune.formatting.pageheight by tune.formatting.pagewidth

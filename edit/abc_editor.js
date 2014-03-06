@@ -262,7 +262,7 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
   this.bReentry = true;
   this.timerId = null;
   this.div.innerHTML = "";
-  var paper = Raphael(this.div, 800, 400);
+  var paper = Raphael(this.div, 1024, 700);
   this.printer = new ABCJS.write.Printer(paper, this.printerparams);
   this.printer.printABC(this.tunes);
   if (ABCJS.midi.MidiWriter && this.mididiv) {

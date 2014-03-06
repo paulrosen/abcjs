@@ -503,6 +503,9 @@ ABCJS.write.RelativeElement.prototype.draw = function (printer, x ) {
   case "text":
     this.graphelem = printer.printText(this.x, this.pitch, this.c); 
     break;
+  case "tabText":
+    this.graphelem = printer.printTabText(this.x, this.pitch, this.c); 
+    break;
   case "bar":
     this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2));
     break;

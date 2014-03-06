@@ -54,14 +54,20 @@ ABCJS.write.Layout = function(glyphs, bagpipes) {
   this.slursbyvoice = {};
   this.tiesbyvoice = {};
   this.endingsbyvoice = {};
-  this.s = 0; // current staff number
-  this.v = 0; // current voice number on current staff
+  this.staffgroup = {};
+  this.tune = {};
+  this.tuneCurrLine = 0;
+  this.tuneCurrStaff = 0; // current staff number
+  this.tuneCurrVoice = 0; // current voice number on current staff
   this.stafflines = 5;
   this.tripletmultiplier = 1;
+  this.minY = 0;  // PER: This is the lowest that any note reaches. 
+                 //It will be used to set the dynamics row.
+
 };
 
 ABCJS.write.Layout.prototype.getCurrentVoiceId = function() {
-  return "s"+this.s+"v"+this.v;
+  return "s"+this.tuneCurrStaff+"v"+this.tuneCurrVoice;
 };
 
 ABCJS.write.Layout.prototype.pushCrossLineElems = function() {
@@ -93,14 +99,12 @@ ABCJS.write.Layout.prototype.printABCLine = function(abctune, line) {
   this.tune = abctune;
   this.tuneCurrLine = line;
   this.minY = 2;  // PER: This is the lowest that any note reaches. It will be used to set the dynamics row.
+  this.staffgroup = new ABCJS.write.StaffGroupElement();
 
   var staffs = this.tune.lines[this.tuneCurrLine].staff;
-
-  this.staffgroup = new ABCJS.write.StaffGroupElement();
-  
-  for (this.s = 0; this.s < staffs.length; this.s++) {
-    this.tuneCurrStaff = this.s;
-    this.printABCStaff(staffs[this.s]);
+ 
+  for (this.tuneCurrStaff = 0; this.tuneCurrStaff < staffs.length; this.tuneCurrStaff++) {
+    this.printABCStaff(staffs[this.tuneCurrStaff]);
   }
   return this.staffgroup;
 };
@@ -114,28 +118,65 @@ ABCJS.write.Layout.prototype.printABCStaff = function(abcstaff) {
 
   //this.subtitle = abcstaff.subtitle;
   
-  for (this.v = 0; this.v < abcstaff.voices.length; this.v++) {
-    this.voice = new ABCJS.write.VoiceElement(this.v,abcstaff.voices.length);
-    if (this.v===0) {
+  for (this.tuneCurrVoice = 0; this.tuneCurrVoice < abcstaff.voices.length; this.tuneCurrVoice++) {
+    this.voice = new ABCJS.write.VoiceElement(this.tuneCurrVoice,abcstaff.voices.length);
+    if (this.tuneCurrVoice===0) {
       this.voice.barfrom = (abcstaff.connectBarLines==="start" || abcstaff.connectBarLines==="continue");
       this.voice.barto = (abcstaff.connectBarLines==="continue" || abcstaff.connectBarLines==="end");
     } else {
       this.voice.duplicate = true; // barlines and other duplicate info need not be printed
     }
-    if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
+    if (abcstaff.title && abcstaff.title[this.tuneCurrVoice]) this.voice.header=abcstaff.title[this.tuneCurrVoice];
     // TODO make invisible if voice is duplicate
-
-    this.voice.addChild(this.printClef(abcstaff.clef));
-    this.voice.addChild(this.printKeySignature(abcstaff));
-    
-    if (abcstaff.meter) this.voice.addChild(this.printTimeSignature(abcstaff.meter));
-    this.printABCVoice(abcstaff.voices[this.v]);
-    this.staffgroup.addVoice(this.voice,this.s,this.stafflines, abcstaff);
+    if (abcstaff.clef.type !== "accordionTab") {
+      this.voice.addChild(this.printClef(abcstaff.clef));
+      this.voice.addChild(this.printKeySignature(abcstaff));
+      (abcstaff.meter) && this.voice.addChild(this.printTimeSignature(abcstaff.meter));
+      this.printABCVoice(abcstaff.voices[this.tuneCurrVoice]);
+    } else {
+      this.voice.addChild(this.printClef(abcstaff.clef));
+      this.voice.addChild(new ABCJS.write.AbsoluteElement(abcstaff.key,0,10));
+      (abcstaff.meter) && this.voice.addChild(this.printTablatureSignature(abcstaff.meter));
+      if(this.tuneCurrStaff!==2) {
+          //alert( "Accordion Tablature should be the 3rd staff!")
+      }
+      var voz = abcstaff.voices[this.tuneCurrVoice];
+      if( voz.length === 0) {
+          this.inferTabVoice(2, 1, 0);
+          for( t = 1; this.tuneCurrLine === 0 && t < this.tune.lines.length; t ++ ) {
+              // garante a tablatura em todas as linhas
+              //obj = eval(uneval(this.tune.lines[0].staff[2]));
+              this.tune.lines[t].staff[2] = {
+                   clef: this.tune.lines[0].staff[2].clef
+                  ,key:this.tune.lines[0].staff[2].key
+                  ,meter:null
+                  ,subtitle:this.tune.lines[0].staff[2].subtitle
+                  ,voices:[[]]};
+              
+              
+                      //jQuery.extend(true, {}, this.tune.lines[0].staff[2]);
+          }
+      } else {
+        this.printABCVoice(abcstaff.voices[this.tuneCurrVoice]);
+      }
+    } 
+    this.staffgroup.addVoice(this.voice,this.tuneCurrStaff,this.stafflines, abcstaff);
   }
  
 };
 
-ABCJS.write.Layout.prototype.printABCVoice = function(abcline) {
+ABCJS.write.Layout.prototype.inferTabVoice = function(vtab,vbass,vmel) {
+   
+   for (i=this.voice.children.length; i < this.staffgroup.voices[vbass].children.length; i++) {
+    var abselems = this.staffgroup.voices[vbass].children[i];
+    this.voice.addChild(abselems);
+    //for (j=0; j<abselems.children.length; j++) {
+    //  this.voice.addChild(abselems.children[j]);
+   // }
+  }
+}
+
+    ABCJS.write.Layout.prototype.printABCVoice = function(abcline) {
   this.popCrossLineElems();
   this.stemdir = (this.isBagpipes)?"down":null;
   this.abcline = abcline;
@@ -934,7 +975,7 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
   case 'tenor-8':clef="clefs.C"; octave = -1; break;
   case 'bass-8': clef="clefs.F"; octave = -1; break;
   case 'alto-8': clef="clefs.C"; octave = -1; break;
-  case "accordionTab": clef="clefs.C"; elem.stafflines = 4;break;
+  case "accordionTab": clef="clefs.tab"; elem.stafflines = 4;break;
   case 'none': clef=""; break;
   case 'perc': clef="clefs.perc"; break;
   default: abselem.addChild(new ABCJS.write.RelativeElement("clef="+elem.type, 0, 0, 0, {type:"debug"}));
@@ -978,8 +1019,18 @@ ABCJS.write.Layout.prototype.printKeySignature = function(elem) {
   return abselem;
 };
 
-ABCJS.write.Layout.prototype.printTimeSignature= function(elem) {
+ABCJS.write.Layout.prototype.printTablatureSignature= function(elem) {
+  var abselem = new ABCJS.write.AbsoluteElement(elem,0,20);
+  
+  abselem.addRight(new ABCJS.write.RelativeElement('Bass', 0, 15, 12, {type:"tabText"} ) );
+  abselem.addRight(new ABCJS.write.RelativeElement('>><<', 0, 15, 8, {type:"tabText"} ) );
+  abselem.addRight(new ABCJS.write.RelativeElement('<<>>', 0, 15, 4, {type:"tabText"} ) );
+  
+  this.startlimitelem = abselem; // limit ties here
+  return abselem;
+};
 
+ABCJS.write.Layout.prototype.printTimeSignature= function(elem) {
   var abselem = new ABCJS.write.AbsoluteElement(elem,0,20);
   if (elem.type === "specified") {
     //TODO make the alignment for time signatures centered

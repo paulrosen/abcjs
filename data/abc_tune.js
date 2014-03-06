@@ -636,7 +636,8 @@ window.ABCJS.data.Tune = function() {
 				This.appendElement('scale', null, null, { size: params.scale} );
 		};
 		var createStaff = function(params) {
-			This.lines[This.lineNum].staff[This.staffNum] = {voices: [ ], clef: params.clef, key: params.key, workingClef: params.clef, subtitle: params.subtitle };
+                        This.lines[This.lineNum].staff[This.staffNum] = 
+                                {voices: [ ], clef: params.clef, key: params.key, workingClef: params.clef, subtitle: params.subtitle };
 			if (params.vocalfont) This.lines[This.lineNum].staff[This.staffNum].vocalfont = params.vocalfont;
 			if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
 			if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;
@@ -645,7 +646,7 @@ window.ABCJS.data.Tune = function() {
 			// Some stuff just happens for the first voice
 			if (params.part)
 				This.appendElement('part', params.startChar, params.endChar, {title: params.part});
-			if (params.meter !== undefined) This.lines[This.lineNum].staff[This.staffNum].meter = params.meter;
+/*flavio meter*/	if (params.meter !== undefined) This.lines[This.lineNum].staff[This.staffNum].meter = params.meter;
 		};
 		var createLine = function(params) {
 			This.lines[This.lineNum] = {staff: []};
