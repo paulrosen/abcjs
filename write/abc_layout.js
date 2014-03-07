@@ -136,6 +136,7 @@ ABCJS.write.Layout.prototype.printABCLine = function(abctune, line) {
                     this.inferTabVoice(1, 0);
                 else
                     this.printABCVoice();
+                if(this.voice.otherchildren) this.voice.otherchildren = []; 
             }
             this.staffgroup.addVoice(this.voice, this.tuneCurrStaff, this.stafflines, abcstaff);
         }
@@ -143,30 +144,65 @@ ABCJS.write.Layout.prototype.printABCLine = function(abctune, line) {
     return this.staffgroup;
 };
 
-ABCJS.write.Layout.prototype.inferTabVoice = function(vbass, vmel) {
-    for (v = this.voice.children.length; v < this.staffgroup.voices[vbass].children.length; v++) {
-        var the_elem = this.staffgroup.voices[vbass].children[v].abcelem;
-        var abselem = new ABCJS.write.AbsoluteElement(the_elem, 0, 0);
+ABCJS.write.Layout.prototype.noteName= function(note) {
+  notes = ['C','D','E','F','G','A','B'];
+  return notes[note];
+};
 
-        switch (the_elem.el_type) {
-            case "note":
-                abselem = this.printNote(the_elem, true, false);
-                while(abselem.children.length >1) {
-                    abselem.children.pop();
-                }
-                abselem.children[0].pitch = 12;
-                abselem.children[0].c = 'C';
-                abselem.children[0].type = 'tabText';
-                
-                break
-            case "bar":
-                abselem = this.printBarLine(the_elem);
-                if (this.voice.duplicate) abselem.invisible = true;
-                break;
-            default:
-                abselem.addChild(new ABCJS.write.RelativeElement("element type " + the_elem.el_type, 0, 0, 0, {type: "debug"}));
+ABCJS.write.Layout.prototype.extractNote = function(pitch) {
+  pitch = pitch%7;
+  if (pitch<0) pitch+=7;
+  return pitch;
+};
+
+ABCJS.write.Layout.prototype.extractOctave = function(pitch) {
+  return Math.floor((28+pitch)/7);
+};
+
+
+ABCJS.write.Layout.prototype.inferTabVoice = function(vbass, vtreb) {
+    var balance = 0;
+    var trebDuration = 0;
+    var bassDuration = 0;
+    var idxTreb = this.voice.children.length;
+    var idxBass = this.voice.children.length;
+    var maxTreb = this.staffgroup.voices[vtreb].children.length;
+    var maxBass = this.staffgroup.voices[vbass].children.length;
+    var yPosTreb = this.staffgroup.voices[vtreb].staff.clef.verticalPos;
+    var yPosBass = this.staffgroup.voices[vbass].staff.clef.verticalPos;
+
+    while( idxTreb < maxTreb || idxBass < maxBass ) {
+       var absTrebElem;
+       var absBassElem;
+        
+        if(idxTreb < maxTreb && balance >= 0 ) {
+          absTrebElem = this.printTABElement(this.staffgroup.voices[vtreb].children[idxTreb].abcelem,yPosTreb);
+          trebDuration += absTrebElem.duration;
         }
-        this.voice.addChild(abselem);
+        if(idxBass < maxBass && balance <= 0) {
+          absBassElem = this.printTABElement(this.staffgroup.voices[vbass].children[idxBass].abcelem,yPosBass);
+          bassDuration += absBassElem.duration;
+        }
+       
+        if( balance === 0) {
+            idxTreb ++;
+            idxBass ++;
+            if(bassDuration > trebDuration) {
+              absTrebElem.children.push(absBassElem.children[0]);
+              this.voice.addChild(absTrebElem);
+            } else {
+              absBassElem.children.push(absTrebElem.children[0]);
+              this.voice.addChild(absBassElem);
+            }
+        } else if ( balance > 0 ) {
+            this.voice.addChild(absTrebElem);
+            idxTreb ++;
+        } else {
+            this.voice.addChild(absBassElem);
+            idxBass ++;
+        }
+        
+        balance = bassDuration - trebDuration;
     }
 };
 
@@ -195,6 +231,46 @@ ABCJS.write.Layout.prototype.printABCVoice = function() {
     }
   }
   this.pushCrossLineElems();
+};
+
+//retorna um elemento absoluto
+ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos) {
+    var abselem = new ABCJS.write.AbsoluteElement(the_elem, 0, 0);
+
+    switch (the_elem.el_type) {
+        case "note":
+            abselem = this.printNote(the_elem, true, false);
+            r = 0;
+            while ( r < abselem.children.length ) {
+                if(! abselem.children[r].c || abselem.children[r].c.substr(0,9) !== 'noteheads') 
+                   abselem.children.splice(r,1); 
+                else
+                   r++;
+            }
+            if(! abselem.children[0]) {
+              abselem = this.printNote(the_elem, true, false);
+            } else {
+            var p = abselem.children[0].pitch + verticalPos;
+            var note = this.noteName(this.extractNote(p));
+            var oitava = this.extractOctave(p);
+            if(verticalPos < 0) 
+               note = (oitava < 3 ? note : note.toLowerCase());
+            else
+               note += oitava;
+            abselem.children[0].c = note;
+            abselem.children[0].pitch = verticalPos < 0 ? 12 : 8;
+            abselem.children[0].type = 'tabText';
+            }
+            break
+        case "bar":
+            abselem = this.printBarLine(the_elem);
+            if (this.voice.duplicate)
+                abselem.invisible = true;
+            break;
+        default:
+            abselem.addChild(new ABCJS.write.RelativeElement("element type " + the_elem.el_type, 0, 0, 0, {type: "debug"}));
+    }
+    return abselem;
 };
 
 // return an array of ABCJS.write.AbsoluteElement
