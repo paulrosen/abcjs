@@ -34,12 +34,13 @@ if (!window.ABCJS)
 
 if (!window.ABCJS.edit)
 	window.ABCJS.edit = {};
+    
 
 window.ABCJS.edit.EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
   this.isDragging = false;
-}
+};
 
 window.ABCJS.edit.EditArea.prototype.addSelectionListener = function(listener) {
   this.textarea.onmousemove = function(ev) {

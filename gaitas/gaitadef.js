@@ -1,0 +1,139 @@
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+if (!window.ABCJS.tablatura)
+	window.ABCJS.tablatura = {};
+
+ABCJS.tablatura.Gaita = function() {
+    //TODO: Permitir escolher a gaita, de alguma forma
+    this.noteToButtonsOpen  = {}; 
+    this.noteToButtonsClose  = {}; 
+    this.minNote         = 0x15; //  A0 = first note
+    this.maxNote         = 0x6C; //  C8 = last note
+    this.number2key      = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"];
+    this.number2keyflat  = ["C", "D♭", "D", "D♯", "E", "F", "G♭", "G", "A♭", "A", "A♯", "B"];
+    this.number2key_br   = ["Dó", "Dó♯", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Sol♯", "Lá", "Si♭", "Si"];
+    this.gaitas          = [GAITA_HOHNER_GC, GAITA_HOHNER_CLUB, GAITA_CLUB_BR, GAITA_HOHNER_CORONA];
+    this.selected        = 0;
+
+    for( var r = 0; r < this.gaitas[this.selected].keyboard.keys.open.length; r ++ ) {
+        var rowOpen = this.gaitas[this.selected].keyboard.keys.open[r];
+        var rowClose = this.gaitas[this.selected].keyboard.keys.close[r];
+        
+        for(var button = 0; button < rowOpen.length; button++) {
+           if(! this.noteToButtonsOpen[ rowOpen[button]] )  this.noteToButtonsOpen[rowOpen[button]] = [];
+           this.noteToButtonsOpen[rowOpen[button]].push( (button+1) + Array(r+1).join("'"));
+           if(! this.noteToButtonsClose[ rowClose[button]] )  this.noteToButtonsClose[rowClose[button]] = [];
+           this.noteToButtonsClose[rowClose[button]].push( (button+1) + Array(r+1).join("'"));
+        }
+    }
+    
+    nRows = this.gaitas[this.selected].keyboard.keys.close.length 
+                ;
+       
+    for( var r = 0; r < this.gaitas[this.selected].keyboard.basses.open.length; r ++ ) {
+        var rowOpen = this.gaitas[this.selected].keyboard.basses.open[r];
+        var rowClose = this.gaitas[this.selected].keyboard.basses.close[r];
+        
+        for(var button = 0; button < rowOpen.length; button++) {
+           if(! this.noteToButtonsOpen[ rowOpen[button]] )  this.noteToButtonsOpen[rowOpen[button]] = [];
+           this.noteToButtonsOpen[rowOpen[button]].push( (button+1) + Array(nRows+r+1).join("'"));
+           if(! this.noteToButtonsClose[ rowClose[button]] )  this.noteToButtonsClose[rowClose[button]] = [];
+           this.noteToButtonsClose[rowClose[button]].push( (button+1) + Array(nRows+r+1).join("'"));
+        }
+    }
+
+};
+
+ABCJS.tablatura.Gaita.prototype.getButtons = function (note) {
+// retorna a lista de botões possíveis para uma nota cromatica
+  return {open:this.noteToButtonsOpen[note],close:this.noteToButtonsClose[note]};    
+};
+
+ABCJS.tablatura.Gaita.prototype.extractCromaticNote = function(pitch, deltapitch, acc, keyAcc) {
+// mapeia 
+//  de: nota da pauta + acidentes (tanto da clave, quanto locais)
+//  para: nota nomeada no modelo cromatico com oitava
+
+    var n = this.staffNoteToCromatic(this.extractStaffNote(pitch + deltapitch));
+    var staffNote = this.number2key[n];
+    var oitava = this.extractStaffOctave(pitch + deltapitch);
+    var a = acc[pitch];
+    var ka = this.getKeyAccOffset(staffNote, keyAcc);
+    if (typeof(ka) !== "undefined")
+        n += ka;
+    if (typeof(a) !== "undefined") {
+        if (a === 0) {
+            if (typeof(ka) !== "undefined")
+                n -= ka;
+        } else {
+            n += a;
+        }
+    }
+    oitava += (n < 0 ? -1 : (n > 11 ? 1 : 0 ));
+    n       = (n < 0 ? 12-n : (n > 11 ? n%12 : 0 ) );
+    return this.number2key[n] + oitava;
+};
+
+ABCJS.tablatura.Gaita.prototype.getKeyAccOffset = function(note, keyAcc)
+// recupera os acidentes da clave e retorna um offset no modelo cromatico
+{
+  for( a = 0; a < keyAcc.length; a ++) {
+      if( keyAcc[a].note.toLowerCase() === note.toLowerCase() ) {
+          return this.getAccOffset(keyAcc[a].acc);
+      }
+  }
+  return undefined;    
+};
+    
+ABCJS.tablatura.Gaita.prototype.getAccOffset = function(txtAcc)
+// a partir do nome do acidente, retorna o offset no modelo cromatico
+{
+    var ret = 0;
+
+    switch (txtAcc) {
+        case 'accidentals.dblsharp':
+        case 'dblsharp':
+            ret = 2;
+            break;
+        case 'accidentals.sharp':
+        case 'sharp':
+            ret = 1;
+            break;
+        case 'accidentals.nat':
+        case 'nat':
+            ret = 0;
+            break;
+        case 'accidentals.flat':
+        case 'flat':
+            ret = -1;
+            break;
+        case 'accidentals.dblflat':
+        case 'dblflat':
+            ret = -2;
+            break;
+    }
+    return ret;
+};
+                  
+ABCJS.tablatura.Gaita.prototype.staffNoteToCromatic = function (note) {
+  return note*2 + (note>2?-1:0);
+};
+
+ABCJS.tablatura.Gaita.prototype.extractStaffNote = function(pitch) {
+    pitch = pitch % 7;
+    if (pitch < 0)
+        pitch += 7;
+    return pitch;
+};
+
+ABCJS.tablatura.Gaita.prototype.extractStaffOctave = function(pitch) {
+    return Math.floor((28 + pitch) / 7);
+};
+

@@ -145,23 +145,6 @@ ABCJS.write.Layout.prototype.printABCLine = function(abctune, line) {
     return this.staffgroup;
 };
 
-ABCJS.write.Layout.prototype.noteName = function(note) {
-    notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-    return notes[note];
-};
-
-ABCJS.write.Layout.prototype.extractNote = function(pitch) {
-    pitch = pitch % 7;
-    if (pitch < 0)
-        pitch += 7;
-    return pitch;
-};
-
-ABCJS.write.Layout.prototype.extractOctave = function(pitch) {
-    return Math.floor((28 + pitch) / 7);
-};
-
-
 ABCJS.write.Layout.prototype.inferTabVoice = function(vbass, vtreb) {
     
     var balance = 0;
@@ -171,35 +154,26 @@ ABCJS.write.Layout.prototype.inferTabVoice = function(vbass, vtreb) {
     var idxBass = this.voice.children.length;
     var yPosTreb = this.staffgroup.voices[vtreb].staff.clef.verticalPos;
     var yPosBass = this.staffgroup.voices[vbass].staff.clef.verticalPos;
-    var untilBarTreb = false;
-    var untilBarBass = false;
-
+    
+    var accTrebKey = this.tune.lines[this.tuneCurrLine].staff[vtreb].key.accidentals;
+    var accBassKey = this.tune.lines[this.tuneCurrLine].staff[vbass].key.accidentals;
+    
+    if(!this.gaita) this.gaita = new window.ABCJS.tablatura.Gaita();
+    
     while (idxTreb < this.staffgroup.voices[vtreb].children.length || idxBass < this.staffgroup.voices[vbass].children.length ) {
         var absTrebElem;
         var absBassElem;
         var leu = 0;
-        if (idxTreb < this.staffgroup.voices[vtreb].children.length && ! untilBarBass && ( untilBarTreb || balance >= 0)) {
-            absTrebElem = this.printTABElement(this.staffgroup.voices[vtreb].children[idxTreb].abcelem, yPosTreb, true);
+        
+        if (idxTreb < this.staffgroup.voices[vtreb].children.length && balance >= 0 ) {
+            absTrebElem = this.printTABElement(this.staffgroup.voices[vtreb].children[idxTreb].abcelem, yPosTreb, true, accTrebKey);
             trebDuration += absTrebElem.duration;
             leu++;
-            if( untilBarTreb && absTrebElem.abcelem.el_type === 'bar' ) {
-                untilBarTreb = false;
-                balance = 0;
-                bassDuration = 0;
-                trebDuration = 0;
-            }
         }
-        if (idxBass < this.staffgroup.voices[vbass].children.length && ! untilBarTreb && ( untilBarBass || balance <= 0)) {
-            absBassElem = this.printTABElement(this.staffgroup.voices[vbass].children[idxBass].abcelem, yPosBass, false);
+        if (idxBass < this.staffgroup.voices[vbass].children.length && balance <= 0 ) {
+            absBassElem = this.printTABElement(this.staffgroup.voices[vbass].children[idxBass].abcelem, yPosBass, false, accBassKey);
             bassDuration += absBassElem.duration;
             leu++;
-           if(untilBarBass && absBassElem.abcelem.el_type === 'bar') {
-               untilBarBass = false;
-               balance = 0;
-               bassDuration = 0;
-               trebDuration = 0;
-           }
-            
         }
 
         if (balance === 0) {
@@ -225,52 +199,38 @@ ABCJS.write.Layout.prototype.inferTabVoice = function(vbass, vtreb) {
                 this.voice.addChild(absBassElem);
             }
         } else if (balance > 0) {
-            if( untilBarBass ) { // if nunca usado, apenas o else
-               this.voice.addChild(absBassElem);
-               idxBass++;
-            }else{
-                if (absTrebElem.abcelem.el_type === 'bar') {
-                    // encontrou nota faltando na melodia - deveria preencher com pausas?
-                    this.staffgroup.voices[vtreb].children.splice(idxTreb, 0, this.addMissingRest(balance, 0, true) );
-                    idxTreb++;
-                    trebDuration += balance;
-                    // por hora, continua lendo baixo apenas
-                    //untilBarBass = true;
-                } else {
-                  this.voice.addChild(absTrebElem);
-                  idxTreb++;
-                }  
-            }
-        } else {
-            if( untilBarTreb ) { // if nunca usado, apenas o else
+            if (absTrebElem.abcelem.el_type === 'bar') {
+                // encontrou nota faltando na melodia - preenche com pausas
+                this.staffgroup.voices[vtreb].children.splice(idxTreb, 0, this.addMissingRest(balance, 0, true) );
+                idxTreb++;
+                trebDuration += balance;
+            } else {
               this.voice.addChild(absTrebElem);
               idxTreb++;
+            }  
+        } else {
+            if (absBassElem.abcelem.el_type === 'bar') {
+                // encontrou nota faltando no baixo - preenche com pausas
+                this.staffgroup.voices[vbass].children.splice(idxBass, 0, this.addMissingRest(-balance, 0, false) );
+                idxBass++;
+                bassDuration -= balance;
             } else {
-                if (absBassElem.abcelem.el_type === 'bar') {
-                    // encontrou nota faltando no baixo - deveria preencher com pausas?
-                    this.staffgroup.voices[vbass].children.splice(idxBass, 0, this.addMissingRest(-balance, 0, false) );
-                    idxBass++;
-                    bassDuration -= balance;
-                    // por hora, continua lendo melodia apenas
-                    //untilBarTreb = true;
-                } else {
-                   this.voice.addChild(absBassElem);
-                   idxBass++;
-               }         
-            }
+               this.voice.addChild(absBassElem);
+               idxBass++;
+           }         
         }
 
         balance = bassDuration - trebDuration;
 
         if (leu === 0) {
-            // se chegar aqui é problema ou as linhas de música e baixo não são equivalentes
+            // se chegar aqui é problema ou as linhas de melodia e baixo não são equivalentes
             idxTreb = maxTreb;
             idxBass = maxBass;
         }
     }
 };
 
-ABCJS.write.Layout.prototype.addMissingRest = function(p_duration, p_verticalPos, p_isTreble)
+ABCJS.write.Layout.prototype.addMissingRest = function(p_duration, p_verticalPos, p_isTreble, keyAcc)
 {
     var the_elem = {
         averagepitch: 7,
@@ -287,17 +247,23 @@ ABCJS.write.Layout.prototype.addMissingRest = function(p_duration, p_verticalPos
 
 };
 
-
 //retorna um elemento absoluto
-ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos, isTreble ) {
+ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos, isTreble, keyAcc ) {
+    //TODO: Tratar os acordes do baixo
+    //TODO: Tratar os acordes na melodia
+  
     var abselem = new ABCJS.write.AbsoluteElement(the_elem, 0, 0);
-
+    var acc = {};
     switch (the_elem.el_type) {
         case "note":
+            
             abselem = this.printNote(the_elem, true, false);
             r = 0;
             while ( r < abselem.children.length ) {
                 ch = abselem.children[r];
+                if(ch.c &&  ch.c.substr(0,11) === "accidentals") {
+                  acc[ch.pitch] = this.gaita.getAccOffset(ch.c);
+                }
                 if( ! ch.c || ( ch.c.substr(0,9) !== 'noteheads' && ch.c.substr(0,5) !== 'rests' ) )
                    abselem.children.splice(r,1); 
                 else
@@ -305,17 +271,21 @@ ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos, i
             }
             
             if(abselem.children[0].c.substr(0,9) === 'noteheads') {
-               // aqui deve tratar todas as notas, não só a primeira
-                var p = abselem.children[0].pitch + verticalPos;
-                var note = this.noteName(this.extractNote(p));
-                var oitava = this.extractOctave(p);
-                if(verticalPos < 0) 
-                   note = (oitava < 3 ? note : note.toLowerCase());
-                else
-                   note += oitava;
+               // TODO: tratar todas as notas, não só a primeira
+               var note = this.gaita.extractCromaticNote(abselem.children[0].pitch,verticalPos, acc, keyAcc);
+
+                if(verticalPos < 0 && abselem.children.length >1) {
+                   note = note.toLowerCase();
+                  //tornar invisiveis as outas notas do acorde
+                  //abselem.children[2].invisible = true;
+                } 
+                
+                abselem.children[0].buttons = this.gaita.getButtons(note);
+                abselem.children[0].note = note;
                 abselem.children[0].c = note;
                 abselem.children[0].pitch = verticalPos < 0 ? 12 : 8;
                 abselem.children[0].type = 'tabText';
+                
             } else if(abselem.children[0].c.substr(0,5) === 'rests' ) {
                 abselem.children[0].pitch = verticalPos < 0 ? 13 : 9;
             }
@@ -1165,7 +1135,7 @@ ABCJS.write.Layout.prototype.printKeySignature = function(elem) {
   if (elem.key.accidentals) {
 	  window.ABCJS.parse.each(elem.key.accidentals, function(acc) {
 		var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
-		//var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
+    		//var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
 		abselem.addRight(new ABCJS.write.RelativeElement(symbol, dx, this.glyphs.getSymbolWidth(symbol), acc.verticalPos));
 		dx += this.glyphs.getSymbolWidth(symbol)+2;
 	  }, this);
