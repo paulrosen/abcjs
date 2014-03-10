@@ -452,7 +452,7 @@ window.ABCJS.parse.Parse = function() {
 		}
 
 		var inSlur = false;
-		window.ABCJS.acach(line, function(el) {
+		window.ABCJS.each(line, function(el) {
 			if (word_list.length !== 0) {
 				if (word_list[0].skip) {
 					switch (word_list[0].to) {
