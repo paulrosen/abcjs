@@ -51,19 +51,25 @@ ABCJS.tablatura.Gaita = function() {
 
 };
 
+ABCJS.tablatura.Gaita.prototype.identifyChord = function (children, verticalPos, acc, keyAcc, transpose) {
+    //TODO: tratar adequadamente os acordes (de baixo)      
+    var note = this.extractCromaticNote(children[0].pitch, verticalPos, acc, keyAcc, transpose );
+    return children.length > 1 ? note.toLowerCase() : note;
+};
+
 ABCJS.tablatura.Gaita.prototype.getButtons = function (note) {
 // retorna a lista de botões possíveis para uma nota cromatica
   return {open:this.noteToButtonsOpen[note],close:this.noteToButtonsClose[note]};    
 };
 
-ABCJS.tablatura.Gaita.prototype.extractCromaticNote = function(pitch, deltapitch, acc, keyAcc) {
+ABCJS.tablatura.Gaita.prototype.extractCromaticNote = function(pitch, deltapitch, acc, keyAcc, transpose) {
 // mapeia 
 //  de: nota da pauta + acidentes (tanto da clave, quanto locais)
 //  para: nota nomeada no modelo cromatico com oitava
-
-    var n = this.staffNoteToCromatic(this.extractStaffNote(pitch + deltapitch));
+    var p = pitch + deltapitch + (transpose?transpose:0);
+    var n = this.staffNoteToCromatic(this.extractStaffNote(p));
     var staffNote = this.number2key[n];
-    var oitava = this.extractStaffOctave(pitch + deltapitch);
+    var oitava = this.extractStaffOctave(p);
     var a = acc[pitch];
     var ka = this.getKeyAccOffset(staffNote, keyAcc);
     if (typeof(ka) !== "undefined")
@@ -77,7 +83,7 @@ ABCJS.tablatura.Gaita.prototype.extractCromaticNote = function(pitch, deltapitch
         }
     }
     oitava += (n < 0 ? -1 : (n > 11 ? 1 : 0 ));
-    n       = (n < 0 ? 12-n : (n > 11 ? n%12 : 0 ) );
+    n       = (n < 0 ? 12+n : (n > 11 ? n%12 : n ) );
     return this.number2key[n] + oitava;
 };
 

@@ -39,7 +39,7 @@
         window.onload = function() {
         debug=false;
         new ABCJS.Editor("abc", { canvas_id: "canvas",
-                                  midi_id:false,
+                                  midi_id:"midi",
                                   warnings_id:"warnings",
                                   midi_options:{program:21, qpm:150, type:"qt"},
                                   render_options:{},
@@ -49,9 +49,10 @@
 
         </script>
 
-<!--applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="MIDIPlugin.jar" height="1" width="1"></applet-->
+<!--applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="http://dl.dropbox.com/u/223827/abcjs/MIDIPlugin.jar" height="1" width="1"></applet-->
+<applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="MIDIPlugin.jar" height="2" width="1"></applet>
 
-<textarea id="abc" cols="120" rows="10" style="display:true;">
+<textarea id="abcx" cols="120" rows="10" style="display:none;">
 X:1
 T:J'ai vu le loup, le renard et la belette
 T:Eu vi o lobo, a raposa e a doninha
@@ -63,32 +64,43 @@ L:1/8
 M:2/4
 V:melodia
 K:C treble 
-|: [c2]BA | G2AB | cBcd | e2c2 | c2BA | G2AB | c2d2 | c2z2  :|
-w:J'ai vu le~loup| la re-nard|
+|: [c2e2g2]BA | [G2B2]AB | cBcd | e2c2 | c2BA | G2AB | c2d2 | c2z2  :|
+w:J'ai vu le loup la re-nard la ba-le-tte * J'ai  vu le loup la  re-nard dan-ser
 |: c2d2 | e2f2 | e2d2 | e2z2 | c2cB | A2AG | A2B2 |1 A2G2 :|2 c2z2  | 
-V:baixo
-K:C bass
-|: C,,2[C,,2E,,2G,,2] | C,,2[G,,2B,,2D,3] | G,,2[G,,2B,,2D,3] | C,,2[C,,2E,,2G,,2] | C,,2[C,,2E,,2G,,2] | F,,2F,2 | G,,2G,2 | C,,2C,2 :|
-|: C,,2C,2 | F,,2F,2 | G,,2G,2 | C,,2C,2 | C,,2C,2 | F,,2F,2 | F,,2F,2 | G,,2G,2 :| C,,2C,2 | 
-V:tablatura
-K:none accordionTab
-%|: z4 | z4 | z4 | z4 | z4 | z4 | z4 | z4 :|
-%|: z4 | z4 | z4 | z4 | z4 | z4 | z4 | z4 :| z4 | 
+%V:baixo
+%K:C bass
+%|: C,2[C,2E,2G,2] | C,2[G,,2B,,2D,2] | G,,2[G,,2B,,2D,2] | C,2[C,2E,2G,2] | C,2[C,2E,2G,2] \
+%| F,,2[F,,2A,,2C,2] | G,,2[G,,2B,,2D,2] | C,2[C,2E,2G,2] :|
+%|: C,2[C,2E,2G,2] | F,,2[F,,2A,,2C,2] | G,,2[G,,2B,,2D,2] | C,2[C,2E,2G,2] | C,2[C,2E,2G,2] \
+%| F,,2[F,,2A,,2C,2] | F,,2[F,,2A,,2C,2] | G,,2[G,,2B,,2D,2] :| C,2[C,2E,2G,2] |
+%V:tablatura
+%K:none accordionTab
 </textarea>
 
 
-<textarea id="abcx" cols="120" rows="15" style="display:none;">
+<textarea id="abc" cols="120" rows="10" style="display:true;">
 X:1
-T:J'ai vu le loup, le renard et la belette
-C:Traditionnel, fichier abc : Bernard Loffet
+T:Maitia, nun zira?
+C:Folclore Basco
+C:versão de José Uruñuela.
+N:Transcrito por Flávio
 L:1/8
-Q: "Allegro" 1/4=164
-M:2/4
-V:Reed Organ
-K:A# 
-|: [c2C,,2] [BC,]A | [G2C,,2] [AG,]B | [cG,,]B [cG,]d | [e2C,,2] [c2C,2] | [c2C,,2] [BC,]A | 
- [G2F,,2] [AF,]B | [c2G,,2] [d2G,2] | [c2C,,2] C,2 :||: [c2C,,2] [d2C,2] | [e2F,,2] [f2F,2] | 
- [e2G,,2] [d2G,2] | [e2C,,2] C,2 | [c2C,,2] [cC,]B | [A2F,,2] [AF,]G | [A2F,,2] [B2F,2] |1 [A2G,,2] [G2G,2] :|2 [c2C,,2] C,2 | 
+Q:"Allegro" 1/4=164
+M:6/8
+K:G
+V:melodia
+z4zB |: B2A A2G | G3 z2A | B2B B2c | d3 d2B | A2A A2B | c3 B2B |
+| B2A AGF |1 G6 | z4 z B :|2 G6 | d3 efg | B3 A3 | G6 | z4zd |
+|: g2g g2f | e3 e3 | fga f2e | d4zc | B2B B2c | d3 d2B | A2A A2B |
+| c3 B2B | B2A AGF |1 G4zd :|2 G6 | d3 efg | B3 A3 | G6 | z4zB |
+%V:baixo
+%K:G bass
+%| z6 |:  z6  |  z6 |  z6  | z6  |  z6  |  z6  |  z6  |
+%|  z6  |  z6  |  z6 :| z6  |  z6  |  z6  |  z6  | 
+% z6  |:  z6  |  z6  |  z6  |  z6  |  z6  |  z6  |  z6  | 
+%|  z6 |  z6  :|  z6  |  z6  |  z6  |  z6 |  z6  | 
+%V:tablatura
+%K:none accordionTab
 </textarea>
 <div id="warnings"></div>
 <hr>

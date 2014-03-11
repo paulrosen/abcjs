@@ -137,8 +137,21 @@ ABCJS.write.Printer.prototype.endGroup = function () {
 };
 
 ABCJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
-    for (var i = 0; i < staff.numLines; i++) {
-      this.printStaveLine(startx,endx,(i+(staff.numLines === 4?0.5:1))*(staff.numLines === 4?4:2));
+    if(staff.numLines === 4) {
+      // para 3 elementos  
+      this.printStaveLine(startx,endx,2); 
+      this.printStaveLine(startx,endx,8.5); 
+      
+      // para 1 ou 2 elementos
+      //this.printStaveLine(startx,endx,0); 
+      //this.printStaveLine(startx,endx,5); 
+      
+      this.printStaveLine(startx,endx,15); 
+      this.printStaveLine(startx,endx,19.5); 
+    } else {
+      for (var i = 0; i < staff.numLines; i++) {
+        this.printStaveLine(startx,endx,(i+1)*2);
+      }
     }
 };
 // flavio - pt3. - desenhas as linhas
@@ -204,10 +217,20 @@ ABCJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
     return ret;
   }
 };
-ABCJS.write.Printer.prototype.printTabText = function (x, offset, text, anchor) {
+
+ABCJS.write.Printer.prototype.printTabText = function (x, offset, text, size, anchor) {
   anchor = anchor || "start";
-  var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":14*this.scale});
+  size = size || 14;
+  var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":size*this.scale});
   return ret;
+};
+
+ABCJS.write.Printer.prototype.printTabText2 = function (x, offset, text, size, anchor) {
+    this.printTabText(x, offset, text, 12, anchor);
+};
+
+ABCJS.write.Printer.prototype.printTabText3 = function (x, offset, text, size, anchor) {
+    this.printTabText(x, offset, text, 10, anchor);
 };
 
 ABCJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
@@ -310,7 +333,7 @@ ABCJS.write.Printer.prototype.debugMsgLow = function(x, msg) {
 };
 
 ABCJS.write.Printer.prototype.printLyrics = function(x, msg) {
-    var el = this.paper.text(x, this.calcY(this.layouter.minY-2), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
+    var el = this.paper.text(x, this.calcY(this.layouter.minY-2.5), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
     el[0].setAttribute("class", "abc-lyric");
     return el;
 };

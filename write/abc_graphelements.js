@@ -165,8 +165,8 @@ ABCJS.write.StaffGroupElement.prototype.draw = function( printer ) {
         var h = 0;
         if (this.staffs[i].clef.type === "accordionTab") {
             this.staffs[i].top = y;
-            this.staffs[i].y = y + 8 * ABCJS.write.spacing.STEP;
-            h += 16 * ABCJS.write.spacing.STEP;
+            this.staffs[i].y = y + 13.5 * ABCJS.write.spacing.STEP;
+            h += 21.5 * ABCJS.write.spacing.STEP;
         } else {
             this.staffs[i].top = y;
             this.staffs[i].y = y + (shiftabove > ABCJS.write.spacing.TOPNOTE ? shiftabove - ABCJS.write.spacing.TOPNOTE + 2 : 2) * ABCJS.write.spacing.STEP;
@@ -505,6 +505,12 @@ ABCJS.write.RelativeElement.prototype.draw = function (printer, x ) {
     break;
   case "tabText":
     this.graphelem = printer.printTabText(this.x, this.pitch, this.c); 
+    break;
+  case "tabText2":
+    this.graphelem = printer.printTabText2(this.x, this.pitch, this.c); 
+    break;
+  case "tabText3":
+    this.graphelem = printer.printTabText3(this.x, this.pitch, this.c); 
     break;
   case "bar":
     this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2));
