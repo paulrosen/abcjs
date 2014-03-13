@@ -35,7 +35,7 @@ ABCJS.write.spacing.STAVEHEIGHT = 100;
 
 //--------------------------------------------------------------------PRINTER
 
-ABCJS.write.Printer = function(paper, params) {
+ABCJS.write.Printer = function(paper, params, accordion) {
   params = params || {};
   this.y = 0;
   this.paper = paper;
@@ -51,6 +51,7 @@ ABCJS.write.Printer = function(paper, params) {
   this.paddingright = params.paddingright || 50;
   this.paddingleft = params.paddingleft || 15;
   this.editable = params.editable || false;
+  this.accordion = accordion;
 };
 
 // notify all listeners that a graphical element has been selected
@@ -333,7 +334,8 @@ ABCJS.write.Printer.prototype.debugMsgLow = function(x, msg) {
 };
 
 ABCJS.write.Printer.prototype.printLyrics = function(x, msg) {
-    var el = this.paper.text(x, this.calcY(this.layouter.minY-2.5), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
+    var y = this.calcY(this.layouter.minY-5);
+    var el = this.paper.text(x, y, msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
     el[0].setAttribute("class", "abc-lyric");
     return el;
 };
@@ -403,8 +405,7 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 };
 
 ABCJS.write.Printer.prototype.printTune = function (abctune) {
-  this.firstStaff = typeof(abctune.lines[0].staff)==="undefined"?abctune.lines[1].staff[0]:abctune.lines[0].staff[0];
-  this.layouter = new ABCJS.write.Layout(this.glyphs, abctune.formatting.bagpipes);
+  this.layouter = new ABCJS.write.Layout(this.glyphs, abctune.formatting.bagpipes, this.accordion );
   this.layouter.printer = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
   if (abctune.media === 'print') {
     // TODO create the page the size of
@@ -542,8 +543,10 @@ ABCJS.write.Printer.prototype.printSubtitleLine = function(subtitle) {
 
 ABCJS.write.Printer.prototype.printStaffLine = function (abctune, line) {
 	var staffgroup = this.layouter.printABCLine(abctune, line);
+	this.staffgroups[this.staffgroups.length] = staffgroup;
 	var newspace = this.space;
-	for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
+        
+	for (var it = 0; it < 2; it++) { // TODO shouldn't need this triple pass any more
 		staffgroup.layout(newspace, this, false);
 		if (line && line === abctune.lines.length - 1 && staffgroup.w / this.width < 0.66 && !abctune.formatting.stretchlast) break; // don't stretch last line too much unless it is 1st
 		var relspace = staffgroup.spacingunits * newspace;
@@ -556,7 +559,7 @@ ABCJS.write.Printer.prototype.printStaffLine = function (abctune, line) {
 		}
 	}
         // flavio - pt1.
-        staffgroup.draw(this);
+        staffgroup.draw(this, line );
 	this.staffgroups[this.staffgroups.length] = staffgroup;
 	this.y = staffgroup.y + staffgroup.height;
 	this.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;

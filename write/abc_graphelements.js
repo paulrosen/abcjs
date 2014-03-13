@@ -33,7 +33,7 @@ ABCJS.write.StaffGroupElement = function() {
 ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines, staff) {
   this.voices[this.voices.length] = voice;
   if (!this.staffs[staffnumber]) {
-    this.staffs[this.staffs.length] = {top:0, highest: 0, lowest: 5, clef: staff.clef, numLines: stafflines, subtitle: staff.subtitle, hasLyrics: staff.hasLyrics};
+    this.staffs[this.staffs.length] = {top:0, highest: 0, lowest: 5, clef: staff.clef, numLines: stafflines, subtitle: staff.subtitle, lyricsRows: staff.lyricsRows};
 //    this.stafflines[this.stafflines.length] = stafflines;
   }
   voice.staff = this.staffs[staffnumber];
@@ -67,6 +67,14 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
   if (debug) console.log("init layout");
   for (i=0;i<this.voices.length;i++) {
     this.voices[i].beginLayout(x);
+    // flavio - tentativa de encontrar lowe
+    for( b = 0; b < this.voices[i].beams.length; b ++ ) {
+        for( be = 0; be < this.voices[i].beams[b].elems.length; be ++ ) {
+            var elem = this.voices[i].beams[b].elems[be];
+            this.staffs[i].highest = Math.max(elem.top,this.staffs[i].highest);
+            this.staffs[i].lowest = Math.min(elem.bottom,this.staffs[i].lowest);
+        }
+    }
   }
 
   while (!this.finished()) {
@@ -106,7 +114,7 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
     this.minspace = Math.min(this.minspace,spacingunit);
 
     for (i=0;i<currentvoices.length;i++) {
-      var voicechildx = currentvoices[i].layoutOneItem(x,spacing);
+      var voicechildx = currentvoices[i].layoutOneItem(x,spacing, this.staffs[i]);
       var dx = voicechildx-x;
       if (dx>0) {
 	x = voicechildx; //update x
@@ -146,7 +154,7 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
 };
 
 // flavio - pt2 - desenha os elementos da partitura
-ABCJS.write.StaffGroupElement.prototype.draw = function( printer ) {
+ABCJS.write.StaffGroupElement.prototype.draw = function( printer, groupNumber ) {
     
     var y = printer.y;
     this.y = y;
@@ -155,7 +163,6 @@ ABCJS.write.StaffGroupElement.prototype.draw = function( printer ) {
     for (var i = 0; i < this.staffs.length; i++) {
         var shiftabove = this.staffs[i].highest;
         var shiftbelow = this.staffs[i].lowest > -2 ? -2 : this.staffs[i].lowest;
-
         var ht = 0;
         if (i > 0 && this.staffs[i].subtitle) {
             ht = 7 * ABCJS.write.spacing.STEP;
@@ -173,9 +180,8 @@ ABCJS.write.StaffGroupElement.prototype.draw = function( printer ) {
             h += (shiftabove - shiftbelow) * ABCJS.write.spacing.STEP;
         }
 
-        if (this.staffs[i].hasLyrics) {
-            h += 4 * ABCJS.write.spacing.STEP;
-        }
+        // cria espaço para as linhas de texto
+        h += 5 * ABCJS.write.spacing.STEP * this.staffs[i].lyricsRows;
 
         y += h;
         this.height += ht + h;
@@ -184,10 +190,11 @@ ABCJS.write.StaffGroupElement.prototype.draw = function( printer ) {
     }
 
     for (i = 0; i < this.voices.length; i++) {
-        if (i > 0 && this.voices[i].staff.subtitle) {
+        if ( ( i > 0 || groupNumber > 0 ) && this.voices[i].staff.subtitle) {
             printer.y = this.voices[i].staff.top - 14;
             printer.printSubtitleLine(this.voices[i].staff.subtitle);
         }
+        printer.layouter.minY = this.staffs[i].lowest;
         this.voices[i].draw( printer );
     }
     
@@ -272,7 +279,7 @@ ABCJS.write.VoiceElement.prototype.beginLayout = function (startx) {
 // x - position to try to layout the element at
 // spacing - base spacing
 // can't call this function more than once per iteration
-ABCJS.write.VoiceElement.prototype.layoutOneItem = function (x, spacing) {
+ABCJS.write.VoiceElement.prototype.layoutOneItem = function (x, spacing, staff ) {
   var child = this.children[this.i];
   if (!child) return 0;
   var er = x - this.minx; // available extrawidth to the left
@@ -312,8 +319,8 @@ ABCJS.write.VoiceElement.prototype.draw = function( printer ) {
     var width = this.w - 1;
     var ve = this;
     printer.y = this.staff.y;
-    printer.staffbottom = this.staff.bottom;
-    this.barbottom = printer.calcY(2); //flavio;
+    //printer.staffbottom = this.staff.bottom;
+    //this.barbottom = printer.calcY(2); //flavio;
 
     if (this.header) { // print voice name
         var textpitch = 12 - (this.voicenumber + 1) * (12 / (this.voicetotal + 1));
@@ -401,45 +408,45 @@ ABCJS.write.AbsoluteElement.prototype.pushBottom = function (bottom) {
   this.bottom = Math.min(bottom, this.bottom);
 };
 
-ABCJS.write.AbsoluteElement.prototype.draw = function (printer) {
+ABCJS.write.AbsoluteElement.prototype.draw = function(printer) {
 
-
-  this.elemset = printer.paper.set();
-  if (this.invisible) return;
-  printer.beginGroup();
-  for (var i=0; i<this.children.length; i++) {
-    this.elemset.push(this.children[i].draw(printer, this.x));
-  }
-  this.elemset.push(printer.endGroup());
-	if (this.klass)
-		this.setClass("mark", "", "#00ff00");
-  var self = this;
-  this.elemset.mouseup(function (e) {
-    printer.notifySelect(self);
+    this.elemset = printer.paper.set();
+    if (this.invisible)
+        return;
+    printer.beginGroup();
+    for (var i = 0; i < this.children.length; i++) {
+        this.elemset.push(this.children[i].draw(printer, this.x));
+    }
+    this.elemset.push(printer.endGroup());
+    if (this.klass)
+        this.setClass("mark", "", "#00ff00");
+    var self = this;
+    this.elemset.mouseup(function(e) {
+        printer.notifySelect(self);
     });
-  this.abcelem.abselem = this;
-  
-  var spacing = ABCJS.write.spacing.STEP*printer.scale;
+    this.abcelem.abselem = this;
 
-  var start = function () {
-    // storing original relative coordinates
-    this.dy = 0;
-  },
-  move = function (dx, dy) {
-    // move will be called with dx and dy
-    dy = Math.round(dy/spacing)*spacing;
-    this.translate(0, -this.dy);
-    this.dy = dy;
-    this.translate(0,this.dy);
-  },
-  up = function () {
-    var delta = -Math.round(this.dy/spacing);
-    self.abcelem.pitches[0].pitch += delta;
-    self.abcelem.pitches[0].verticalPos += delta;
-    printer.notifyChange();
-  };
-  if (this.abcelem.el_type==="note" && printer.editable)
-    this.elemset.drag(move, start, up);
+    var spacing = ABCJS.write.spacing.STEP * printer.scale;
+
+    var start = function() {
+        // storing original relative coordinates
+        this.dy = 0;
+    },
+            move = function(dx, dy) {
+                // move will be called with dx and dy
+                dy = Math.round(dy / spacing) * spacing;
+                this.translate(0, -this.dy);
+                this.dy = dy;
+                this.translate(0, this.dy);
+            },
+            up = function() {
+                var delta = -Math.round(this.dy / spacing);
+                self.abcelem.pitches[0].pitch += delta;
+                self.abcelem.pitches[0].verticalPos += delta;
+                printer.notifyChange();
+            };
+    if (this.abcelem.el_type === "note" && printer.editable)
+        this.elemset.drag(move, start, up);
 };
 
 ABCJS.write.AbsoluteElement.prototype.isIE=/*@cc_on!@*/false;//IE detector
@@ -542,7 +549,7 @@ ABCJS.write.EndingElem.prototype.draw = function (printer, linestartx, lineendx,
   var y = printer.y;
   
   if(staff.highest) 
-      printer.y = printer.calcY(staff.highest+2);
+      printer.y = printer.calcY(staff.highest+3);
   
   if (this.anchor1) {
     linestartx = this.anchor1.x+this.anchor1.w;
@@ -641,20 +648,20 @@ ABCJS.write.CrescendoElem = function(anchor1, anchor2, dir) {
     this.dir = dir; // either "<" or ">"
 };
 
-ABCJS.write.CrescendoElem.prototype.draw = function (printer, linestartx, lineendx) {
+ABCJS.write.CrescendoElem.prototype.draw = function (printer, linestartx, lineendx, staff) {
+    var ypos = printer.calcY(staff.highest+1);
+    
     if (this.dir === "<") {
-        this.drawLine(printer, 0, -4);
-        this.drawLine(printer, 0, 4);
+        this.drawLine(printer, ypos, ypos-4);
+        this.drawLine(printer, ypos, ypos+4);
     } else {
-        this.drawLine(printer, -4, 0);
-        this.drawLine(printer, 4, 0);
+        this.drawLine(printer, ypos-4, ypos);
+        this.drawLine(printer, ypos+4, ypos);
     }
 };
 
 ABCJS.write.CrescendoElem.prototype.drawLine = function (printer, y1, y2) {
-    var ypos = printer.layouter.minY - 7;
-    var pathString = ABCJS.write.sprintf("M %f %f L %f %f",
-        this.anchor1.x, printer.calcY(ypos)+y1-4, this.anchor2.x, printer.calcY(ypos)+y2-4);
+    var pathString = ABCJS.write.sprintf("M %f %f L %f %f", this.anchor1.x, y1, this.anchor2.x, y2);
     printer.printPath({path:pathString, stroke:"#000000"});
 };
 
@@ -771,40 +778,45 @@ ABCJS.write.BeamElem.prototype.calcDir = function() {
 };
 
 ABCJS.write.BeamElem.prototype.drawBeam = function(printer) {
-	var average = this.average();
-	var barpos = (this.isgrace)? 5:7;
-	this.calcDir();
+    var average = this.average();
+    var barpos = (this.isgrace) ? 5 : 7;
+    this.calcDir();
 
-  var barminpos = this.asc ? 5 : 8;	//PER: I just bumped up the minimum height for notes with descending stems to clear a rest in the middle of them.
-  this.pos = Math.round(this.asc ? Math.max(average+barpos,this.max+barminpos) : Math.min(average-barpos,this.min-barminpos));
-  var slant = this.elems[0].abcelem.averagepitch-this.elems[this.elems.length-1].abcelem.averagepitch;
-  if (this.isflat) slant=0;
-  var maxslant = this.elems.length/2;
+    var barminpos = this.asc ? 5 : 8;	//PER: I just bumped up the minimum height for notes with descending stems to clear a rest in the middle of them.
+    this.pos = Math.round(this.asc ? Math.max(average + barpos, this.max + barminpos) : Math.min(average - barpos, this.min - barminpos));
+    var slant = this.elems[0].abcelem.averagepitch - this.elems[this.elems.length - 1].abcelem.averagepitch;
+    if (this.isflat)
+        slant = 0;
+    var maxslant = this.elems.length / 2;
 
-  if (slant>maxslant) slant = maxslant;
-  if (slant<-maxslant) slant = -maxslant;
-  this.starty = printer.calcY(this.pos+Math.floor(slant/2));
-  this.endy = printer.calcY(this.pos+Math.floor(-slant/2));
+    if (slant > maxslant)
+        slant = maxslant;
+    if (slant < -maxslant)
+        slant = -maxslant;
+    this.starty = printer.calcY(this.pos + Math.floor(slant / 2));
+    this.endy = printer.calcY(this.pos + Math.floor(-slant / 2));
 
-  var starthead = this.elems[0].heads[(this.asc)? 0: this.elems[0].heads.length-1];
-  var endhead = this.elems[this.elems.length-1].heads[(this.asc)? 0: this.elems[this.elems.length-1].heads.length-1];
-  this.startx = starthead.x;
-  if(this.asc) this.startx+=starthead.w-0.6;
-  this.endx = endhead.x;
-  if(this.asc) this.endx+=endhead.w;
+    var starthead = this.elems[0].heads[(this.asc) ? 0 : this.elems[0].heads.length - 1];
+    var endhead = this.elems[this.elems.length - 1].heads[(this.asc) ? 0 : this.elems[this.elems.length - 1].heads.length - 1];
+    this.startx = starthead.x;
+    if (this.asc)
+        this.startx += starthead.w - 0.6;
+    this.endx = endhead.x;
+    if (this.asc)
+        this.endx += endhead.w;
 
-	// PER: if the notes are too high or too low, make the beam go down to the middle
-	if (this.asc && this.pos < 6) {
-		this.starty = printer.calcY(6);
-		this.endy = printer.calcY(6);
-	} else if (!this.asc && this.pos > 6) {
-		this.starty = printer.calcY(6);
-		this.endy = printer.calcY(6);
-	}
+    // PER: if the notes are too high or too low, make the beam go down to the middle
+    if (this.asc && this.pos < 6) {
+        this.starty = printer.calcY(6);
+        this.endy = printer.calcY(6);
+    } else if (!this.asc && this.pos > 6) {
+        this.starty = printer.calcY(6);
+        this.endy = printer.calcY(6);
+    }
 
-  var pathString = "M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
-  "L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z";
-  printer.printPath({path:pathString, stroke:"none", fill:"#000000"});
+    var pathString = "M" + this.startx + " " + this.starty + " L" + this.endx + " " + this.endy +
+            "L" + this.endx + " " + (this.endy + this.dy) + " L" + this.startx + " " + (this.starty + this.dy) + "z";
+    printer.printPath({path: pathString, stroke: "none", fill: "#000000"});
 };
 
 ABCJS.write.BeamElem.prototype.drawStems = function(printer) {

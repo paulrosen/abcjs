@@ -1,17 +1,17 @@
-﻿c_close=0;
+c_close=0;
 c_open=1;
 
-KEYS_HOHNER_CF_br  = [ 
-  [["F♯3", "E3", "G3", "C4", "E4", "G4", "C5", "E5", "G5", "C6", "E6", "G6"], ["F3",  "A3", "C4", "F4", "A4",  "C5", "F5", "A5",  "C6",  "F6", "A6"], ["E♭4", "B♭4", "F♯4", "E♭5",  "D5", "F♯5", "E♭6"]]
- ,[["G♯3", "G3", "B3", "D4", "F4", "A4", "B4", "D5", "F5", "A5", "B5", "D6"], ["B♭3", "C4", "E4", "G4", "B♭4", "C5", "E5", "G5", "B♭5", "C6", "E6"], ["C♯4", "F♯4", "G♯4", "C♯5", "E♭5", "G♯5", "C♯6"]]
-];
+KEYS_HOHNER_CF_br  = { 
+  close: [["F♯3", "E3", "G3", "C4", "E4", "G4", "C5", "E5", "G5", "C6", "E6", "G6"], ["F3",  "A3", "C4", "F4", "A4",  "C5", "F5", "A5",  "C6",  "F6", "A6"], ["E♭4", "B♭4", "F♯4", "E♭5",  "D5", "F♯5", "E♭6"]]
+ ,open:  [["G♯3", "G3", "B3", "D4", "F4", "A4", "B4", "D5", "F5", "A5", "B5", "D6"], ["B♭3", "C4", "E4", "G4", "B♭4", "C5", "E5", "G5", "B♭5", "C6", "E6"], ["C♯4", "F♯4", "G♯4", "C♯5", "E♭5", "G♯5", "C♯6"]]
+ };
 
-BASS_HOHNER_CF_br = [
-   [["a2",   "A2", "e♭2", "E♭2"], ["c3", "C3", "f2", "F2"]]
-  ,[["d3:m", "D3", "b♭2", "B♭2"], ["g2", "G2", "c3", "C3"]]
-];
+BASS_HOHNER_CF_br = {
+   close: [["a1",   "A1", "e♭1", "E♭1"], ["c2", "C2", "f1", "F1"]]
+  ,open: [["d2:m", "D2", "b♭1", "B♭1"], ["g1", "G1", "c2", "C2"]]
+  };
 
-KEYBOARD_HOHNER_CF_br = [KEYS_HOHNER_CF_br, BASS_HOHNER_CF_br, [ 0, 0.5, 3]]
+KEYBOARD_HOHNER_CF_br = { keys: KEYS_HOHNER_CF_br, basses:BASS_HOHNER_CF_br, layout:[ 0, 0.5, 3]};
 
 CHORDS_HOHNER_CF_br = [
     ["F", [
@@ -155,4 +155,13 @@ ESCALA_HOHNER_CF_br=[
      ]]
  ];
 
-GAITA_CLUB_BR = ['Hohner Club IIIM - 30/8 botões (afinação natural brasileira)', ["C","F"], [1,5], KEYBOARD_HOHNER_CF_br, CHORDS_HOHNER_CF_br, ESCALA_HOHNER_CF_br, 'img/Hohner.Club IIIM.gif' ]
+GAITA_HOHNER_CLUB_IIIM_BR = {
+    nome:'Hohner Club IIIM - 30/8 botões (BR)'
+   ,afinacao: ["C","F"]
+   ,pedal:[1,5]
+   ,keyboard: KEYBOARD_HOHNER_CF_br
+   ,chords:CHORDS_HOHNER_CF_br
+   ,scales:ESCALA_HOHNER_CF_br
+   ,image:'img/Hohner.Club IIIM.gif' 
+}; 
+

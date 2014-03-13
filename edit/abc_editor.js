@@ -36,10 +36,23 @@ if (!window.ABCJS.edit)
 	window.ABCJS.edit = {};
     
 
+window.ABCJS.edit.AccordionSelector = function(textareaid) {
+  this.selector = document.getElementById(textareaid);
+};
+
+window.ABCJS.edit.AccordionSelector.prototype.addChangeListener = function(editor) {
+  this.selector.onchange = function() {
+    editor.accordion.load(parseInt(this.value));
+    editor.fireChanged( 0, "force" );
+  };
+};
+
+
 window.ABCJS.edit.EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
   this.isDragging = false;
+  this.changeListener;
 };
 
 window.ABCJS.edit.EditArea.prototype.addSelectionListener = function(listener) {
@@ -155,13 +168,24 @@ window.ABCJS.edit.EditArea.prototype.getElem = function() {
 //
 
 window.ABCJS.Editor = function(editarea, params) {
-	if (params.indicate_changed)
-		this.indicate_changed = true;
+  if (params.indicate_changed)
+    this.indicate_changed = true;
+
   if (typeof editarea === "string") {
     this.editarea = new window.ABCJS.edit.EditArea(editarea);
   } else {
     this.editarea = editarea;
   }
+
+  if(params.refreshController_id)  
+    this.refreshController  = document.getElementById(params.refreshController_id);
+
+  if(params.accordionSelector_id)  {
+    this.accordionSelector  = new window.ABCJS.edit.AccordionSelector(params.accordionSelector_id);
+    this.accordion = new window.ABCJS.tablatura.Gaita(this.accordionSelector.selector);
+    this.accordionSelector.addChangeListener(this);
+  }
+
   this.editarea.addSelectionListener(this);
   this.editarea.addChangeListener(this);
 
@@ -236,10 +260,6 @@ window.ABCJS.Editor = function(editarea, params) {
   };
 };
 
-window.ABCJS.Editor.getTipoStaff = function() {
-    return this.printerparams
-;}
-
 window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
   var tunebook = new ABCJS.TuneBook(abc);
   var abcParser = window.ABCJS.parse.Parse();
@@ -264,7 +284,7 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
   this.timerId = null;
   this.div.innerHTML = "";
   var paper = Raphael(this.div, 1024, 700);
-  this.printer = new ABCJS.write.Printer(paper, this.printerparams);
+  this.printer = new ABCJS.write.Printer(paper, this.printerparams, this.accordion );
   this.printer.printABC(this.tunes);
   if (ABCJS.midi.MidiWriter && this.mididiv) {
     if (this.mididiv !== this.div)
@@ -293,9 +313,9 @@ window.ABCJS.Editor.prototype.paramChanged = function(printerparams) {
 };
 
 // return true if the model has changed
-window.ABCJS.Editor.prototype.parseABC = function() {
+window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
   var t = this.editarea.getString();
-  if (t===this.oldt) {
+  if (t===this.oldt && typeof(force) === "undefined" ) {
     this.updateSelection();
     return false;
   }
@@ -313,7 +333,7 @@ window.ABCJS.Editor.prototype.parseABC = function() {
   this.warnings = [];
   for (var i=0; i<tunebook.tunes.length; i++) {
     var abcParser = new window.ABCJS.parse.Parse();
-    abcParser.parse(tunebook.tunes[i].abc, this.parserparams); //TODO handle multiple tunes
+    abcParser.parse(tunebook.tunes[i].abc, this.parserparams, transpose); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
     
     // verifica se a linha zero tem tablatura para accordion
@@ -340,7 +360,7 @@ window.ABCJS.Editor.prototype.parseABC = function() {
               ,key:this.tunes[i].lines[0].staff[staffTab].key
               ,meter:null
               ,inferTablature:true
-              ,subtitle:this.tunes[i].lines[0].staff[staffTab].subtitle
+              ,subtitle:"" // para acompanhar as staffs normais: subtitulo só na primeira linha
               ,voices:[[]]};
         }
       } else {
@@ -398,10 +418,14 @@ window.ABCJS.Editor.prototype.setDirtyStyle = function(isDirty) {
 };
 
 // call when abc text is changed and needs re-parsing
-window.ABCJS.Editor.prototype.fireChanged = function() {
+window.ABCJS.Editor.prototype.fireChanged = function(transpose, force) {
+    
+  if( typeof(force) ==="undefined" && this.refreshController && ! this.refreshController.checked ) 
+      return;
+    
   if (this.bIsPaused)
     return;
-  if (this.parseABC()) {
+  if (this.parseABC(transpose, force)) {
     var self = this;
     if (this.timerId)	// If the user is still typing, cancel the update
       clearTimeout(this.timerId);

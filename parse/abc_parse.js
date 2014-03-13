@@ -325,6 +325,7 @@ window.ABCJS.parse.Parse = function() {
 		if (words.charAt(words.length-1) !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
 		var word_list = [];
+                staff.lyricsRows ++;
 		// first make a list of words from the string we are passed. A word is divided on either a space or dash.
 		var last_divider = 0;
 		var replace = false;
@@ -339,7 +340,6 @@ window.ABCJS.parse.Parse = function() {
 					div = ' ';
 				word_list.push({syllable: tokenizer.translateString(word), divider: div});
 				replace = false;
-                                staff.hasLyrics = true;
 				return true;
 			}
 			return false;

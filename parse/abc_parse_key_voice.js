@@ -171,7 +171,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 	};
 
 	var clefLines = {
-		'accordionTab': { clef: 'accordionTab', pitch: 11.5, mid: 0 },
+		'accordionTab': { clef: 'accordionTab', pitch: 11, mid: 0 },
 		'treble': { clef: 'treble', pitch: 4, mid: 0 },
 		'treble+8': { clef: 'treble+8', pitch: 4, mid: 0 },
 		'treble-8': { clef: 'treble-8', pitch: 4, mid: 0 },

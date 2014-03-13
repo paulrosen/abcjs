@@ -10,7 +10,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.tablatura)
 	window.ABCJS.tablatura = {};
 
-ABCJS.tablatura.Gaita = function() {
+ABCJS.tablatura.Gaita = function(selector) {
     //TODO: Permitir escolher a gaita, de alguma forma
     this.noteToButtonsOpen  = {}; 
     this.noteToButtonsClose  = {}; 
@@ -19,10 +19,28 @@ ABCJS.tablatura.Gaita = function() {
     this.number2key      = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"];
     this.number2keyflat  = ["C", "D♭", "D", "D♯", "E", "F", "G♭", "G", "A♭", "A", "A♯", "B"];
     this.number2key_br   = ["Dó", "Dó♯", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Sol♯", "Lá", "Si♭", "Si"];
-    this.gaitas          = [GAITA_HOHNER_GC, GAITA_HOHNER_CLUB, GAITA_CLUB_BR, GAITA_HOHNER_CORONA];
+    this.gaitas          = [GAITA_HOHNER_GC, GAITA_HOHNER_CLUB_IIIM_BR];
     this.selected        = 0;
+    
+    if( selector ) {
+        for(var i = 0; i < this.gaitas.length; i++) {
+            var opt = document.createElement('option');
+            opt.innerHTML = this.gaitas[i].nome;
+            opt.value = i;
+            selector.appendChild(opt);
+        }   
+    }
+    
+    this.load(0);
 
-    for( var r = 0; r < this.gaitas[this.selected].keyboard.keys.open.length; r ++ ) {
+};
+
+ABCJS.tablatura.Gaita.prototype.load = function (sel) {
+        this.selected = sel;
+        this.noteToButtonsOpen  = {}; 
+        this.noteToButtonsClose  = {}; 
+        
+        for( var r = 0; r < this.gaitas[this.selected].keyboard.keys.open.length; r ++ ) {
         var rowOpen = this.gaitas[this.selected].keyboard.keys.open[r];
         var rowClose = this.gaitas[this.selected].keyboard.keys.close[r];
         
@@ -34,8 +52,7 @@ ABCJS.tablatura.Gaita = function() {
         }
     }
     
-    nRows = this.gaitas[this.selected].keyboard.keys.close.length 
-                ;
+    var nRows = this.gaitas[this.selected].keyboard.keys.close.length;
        
     for( var r = 0; r < this.gaitas[this.selected].keyboard.basses.open.length; r ++ ) {
         var rowOpen = this.gaitas[this.selected].keyboard.basses.open[r];
