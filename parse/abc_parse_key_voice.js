@@ -328,7 +328,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 		}
 	};
 
-	window.ABCJS.parse.parseKeyVoice.parseKey = function(str)	// (and clef)
+	window.ABCJS.parse.parseKeyVoice.parseKey = function( str, transporter_, line, lineNumber )	
 	{
 		// returns:
 		//		{ foundClef: true, foundKey: true }
@@ -369,11 +369,15 @@ window.ABCJS.parse.parseKeyVoice = {};
 				break;
 			case 'none':
 				// we got the none key - that's the same as C to us
+                                //tokens[0].token = 'C';
 				multilineVars.key = { root: "none", accidentals: [], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
 				break;
 			default:
+                                if(transporter_) 
+                                  tokens = transporter_.transposeKey( tokenizer, str, line, lineNumber);
+                                
 				var retPitch = tokenizer.getKeyPitch(tokens[0].token);
 				if (retPitch.len > 0) {
 					ret.foundKey = true;

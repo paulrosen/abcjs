@@ -36,8 +36,18 @@ if (!window.ABCJS.edit)
 	window.ABCJS.edit = {};
     
 
-window.ABCJS.edit.AccordionSelector = function(textareaid) {
-  this.selector = document.getElementById(textareaid);
+window.ABCJS.edit.KeySelector = function(id) {
+  this.selector = document.getElementById(id);
+};
+
+window.ABCJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
+  this.selector.onchange = function() {
+  //editor.fireChanged( 0, "force" );
+  };
+};
+
+window.ABCJS.edit.AccordionSelector = function(id) {
+  this.selector = document.getElementById(id);
 };
 
 window.ABCJS.edit.AccordionSelector.prototype.addChangeListener = function(editor) {
@@ -103,10 +113,10 @@ window.ABCJS.edit.EditArea.prototype.getString = function() {
   return this.textarea.value;
 };
 
-window.ABCJS.edit.EditArea.prototype.setString = function(str) {
+window.ABCJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
   this.textarea.value = str;
   this.initialText = this.getString();
-  if (this.changelistener) {
+  if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
     this.changelistener.fireChanged();
   }
 };
@@ -185,6 +195,10 @@ window.ABCJS.Editor = function(editarea, params) {
     this.accordion = new window.ABCJS.tablatura.Gaita(this.accordionSelector.selector);
     this.accordionSelector.addChangeListener(this);
   }
+  if(params.keySelector_id) {  
+    this.keySelector  = new window.ABCJS.edit.KeySelector(params.keySelector_id);
+    this.keySelector.addChangeListener(this);
+  }  
 
   this.editarea.addSelectionListener(this);
   this.editarea.addChangeListener(this);
@@ -331,10 +345,23 @@ window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
   
   this.tunes = [];
   this.warnings = [];
+  
+  if(typeof transpose !== "undefined") {
+      if( this.transporter )
+        this.transporter.offSet = transpose;
+      else
+        this.transporter = this.transporter = new window.ABCJS.parse.Transport( transpose );
+  }
+  
   for (var i=0; i<tunebook.tunes.length; i++) {
-    var abcParser = new window.ABCJS.parse.Parse();
-    abcParser.parse(tunebook.tunes[i].abc, this.parserparams, transpose); //TODO handle multiple tunes
+    var abcParser = new window.ABCJS.parse.Parse(this.transporter);
+    abcParser.parse(tunebook.tunes[i].abc, this.parserparams ); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
+    
+    if( this.transporter ) {
+        var lines = abcParser.tuneHouseKeeping(tunebook.tunes[i].abc);
+        this.editarea.setString( this.transporter.updateEditor( lines ), "norefresh" );
+    }
     
     // verifica se a linha zero tem tablatura para accordion
     var staffTab = -1;

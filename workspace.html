@@ -41,6 +41,7 @@
 
 
         <select id="selGaitas" ></select>
+        <select id="selKey" ></select>
         <input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);">
         <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);">
         <input type="submit" id="forceRefresh" value="Force Refresh" onclick="javascript:doForceRefresh();">
@@ -125,15 +126,15 @@ K:none accordionTab
                     debug=false;
                     myEditor = new ABCJS.Editor(
                             "abc", { 
-                                canvas_id: "canvas",
-                                midi_id:false,
-                                //midi_id:"midi",
-                                warnings_id:"warnings",
-                                refreshController_id:"chkAutoRefresh",
-                                accordionSelector_id:"selGaitas",
-                                midi_options:{program:21, qpm:150, type:"qt"},
-                                render_options:{},
-                                gui: false
+                                 canvas_id: "canvas"
+                                //,midi_id: "midi"
+                                ,warnings_id: "warnings"
+                                ,refreshController_id: "chkAutoRefresh"
+                                ,accordionSelector_id: "selGaitas"
+                                ,keySelector_id: "selKey"
+                                ,midi_options:{ program:21, qpm:150, type:"qt" }
+                                ,render_options:{}
+                                ,gui: false
                              });
                 };
                 

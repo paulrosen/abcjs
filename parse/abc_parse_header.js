@@ -323,7 +323,7 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 						multilineVars.meter = meter;
 					return [ e-i+1+ws ];
 				case "[K:":
-					var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(i+3, e));
+					var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(i+3, e), tune.transporter);
 					if (result.foundClef && tune.hasBeginMusic())
 						tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
 					if (result.foundKey && tune.hasBeginMusic())
@@ -373,7 +373,7 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 						tune.appendStartingElement('meter', -1, -1, meter);
 					return [ line.length ];
 				case "K:":
-					var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(i+2));
+					var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(i+2), tune.transporter);
 					if (result.foundClef && tune.hasBeginMusic())
 						tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
 					if (result.foundKey && tune.hasBeginMusic())
@@ -420,7 +420,7 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 		Z: 'transcription'
 	};
 
-	this.parseHeader = function(line) {
+	this.parseHeader = function(line, lineNumber ) {
 		if (window.ABCJS.parse.startsWith(line, '%%')) {
 			var err = window.ABCJS.parse.parseDirective.addDirective(line.substring(2));
 			if (err) warn(err, line, 2);
@@ -454,7 +454,7 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 						case  'K':
 							// since the key is the last thing that can happen in the header, we can resolve the tempo now
 							this.resolveTempo();
-							var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(2));
+							var result = window.ABCJS.parse.parseKeyVoice.parseKey( line.substring(2), tune.transporter, line, lineNumber );
 							if (!multilineVars.is_in_header && tune.hasBeginMusic()) {
 								if (result.foundClef)
 									tune.appendStartingElement('clef', -1, -1, multilineVars.clef);

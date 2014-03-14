@@ -22,24 +22,66 @@ if (!window.ABCJS)
 if (!window.ABCJS.parse)
 	window.ABCJS.parse = {};
     
-window.ABCJS.parse.Transport = function () {
-    this.pitches        = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6, 
-                             c: 7, d: 8, e: 9, f: 10, g: 11, a: 12, b: 13 };
+window.ABCJS.parse.Transport = function ( offset_ ) {
+    this.changedLines  = [];
+    this.offSet          = offset_
     this.minNote         = 0x15; //  A0 = first note
     this.maxNote         = 0x6C; //  C8 = last note
+    this.pitches        = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6, 
+                             c: 7, d: 8, e: 9, f: 10, g: 11, a: 12, b: 13 };
     this.number2key      = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"];
-
-    this.number2staff    = [    {note:"C", acc:""}, {note:"C", acc:"sharp"}, 
-                                {note:"D", acc:""}, {note:"E", acc:"flat"}, 
-                                {note:"E", acc:""}, 
-                                {note:"F", acc:""}, {note:"F", acc:"sharp"}, 
-                                {note:"G", acc:""}, {note:"G", acc:"sharp"}, 
-                                {note:"A", acc:""}, {note:"B", acc:"flat"}, 
-                                {note:"B", acc:""}
-                            ];
-      
     this.number2keyflat  = ["C", "D♭", "D", "D♯", "E", "F", "G♭", "G", "A♭", "A", "A♯", "B"];
     this.number2key_br   = ["Dó", "Dó♯", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Sol♯", "Lá", "Si♭", "Si"];
+    this.number2staff    = [    
+                {note:"C", acc:""}, {note:"C", acc:"sharp"}, 
+                {note:"D", acc:""}, {note:"E", acc:"flat" }, 
+                {note:"E", acc:""}, 
+                {note:"F", acc:""}, {note:"F", acc:"sharp"}, 
+                {note:"G", acc:""}, {note:"G", acc:"sharp"}, 
+                {note:"A", acc:""}, {note:"B", acc:"flat" }, 
+                {note:"B", acc:""}
+    ];
+};
+
+window.ABCJS.parse.Transport.prototype.updateEditor = function ( lines ) {
+    for( i = 0; i < this.changedLines.length; i++ ){
+        lines[this.changedLines[i].line] = this.changedLines[i].text;
+    }
+    var newStr = lines[0];
+    for( i = 1; i < lines.length; i++ ){
+        newStr += '\n' + lines[i];
+    }
+    return newStr;
+};
+
+window.ABCJS.parse.Transport.prototype.normalizeAcc = function ( cKey ) {
+    return cKey.replace(/#/g,'♯').replace(/b/g,'♭');
+};
+
+window.ABCJS.parse.Transport.prototype.denormalizeAcc = function ( cKey ) {
+    return cKey.replace(/♯/g,'#').replace(/♭/g,'b');
+};
+
+
+window.ABCJS.parse.Transport.prototype.transposeKey = function ( tokenizer, str, line, lineNumber ) {
+    var tokens = tokenizer.tokenize(str, 0, str.length);
+    
+    alert('tratar quando o pitch é zero...');
+    var pitch = tokenizer.getKeyPitch(tokens[0].token);
+    
+    var cKey = tokens[0].token;
+    
+    if(tokens[1].type === "punct") {
+        cKey += tokens[1].token;
+    }
+    
+    var newKey = this.keyToNumber(this.normalizeAcc( cKey )  );
+    var cNewKey = this.denormalizeAcc( this.numberToKey(newKey + this.offSet ));
+    var newStr  = str.replace(cKey, cNewKey );
+    tokens = tokenizer.tokenize(newStr, 0, newStr.length);
+    var newLine = line.substr( 0, line.indexOf(str) ) + newStr;
+    this.changedLines[ this.changedLines.length ] = { line:lineNumber, text: newLine };
+    return tokens;
 };
 
 window.ABCJS.parse.Transport.prototype.transpose = function(pitch, txtAcc, Ki, trans, Kf)
@@ -130,14 +172,31 @@ window.ABCJS.parse.Transport.prototype.extractStaffOctave = function(pitch) {
     return Math.floor((28 + pitch) / 7);
 };
 
+window.ABCJS.parse.Transport.prototype.numberToKey = function(number) {
+    number %= this.number2key.length;
+    if( number < 0 ) number += this.number2key.length;
+    return this.number2key[number];
+};
+
+window.ABCJS.parse.Transport.prototype.keyToNumber = function(key) {
+    for(i=0; i <this.number2key.length; i++ ) {
+        if(this.number2key[i] === key ) return i;
+    }
+    return -1;
+};
+
+window.ABCJS.parse.Transport.prototype.numbertoStaff = function(number) {
+    return this.number2staff[number];
+};
 
 
-window.ABCJS.parse.Parse = function() {
-	var tune = new window.ABCJS.data.Tune();
+window.ABCJS.parse.Parse = function(transporter_) {
+    
+        if( transporter_ )  this.transporter = transporter_;
+        
+	var tune = new window.ABCJS.data.Tune( this.transporter );
 	var tokenizer = new window.ABCJS.parse.tokenizer();
         
-        this.transpose = 0;
-
 	this.getTune = function() {
 		return tune;
 	};
@@ -1143,7 +1202,7 @@ window.ABCJS.parse.Parse = function() {
 						// Attach the grace note to an invisible note
 						el.rest = { type: 'spacer' };
 						el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
-						tune.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el,this.transpose);
+						tune.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el );
 						multilineVars.measureNotEmpty = true;
 						el = {};
 					}
@@ -1329,7 +1388,7 @@ window.ABCJS.parse.Parse = function() {
 										el.barNumber = multilineVars.barNumOnNextNote;
 										multilineVars.barNumOnNextNote = null;
 									}
-									tune.appendElement('note', startOfLine+i, startOfLine+i, el,this.transpose);
+									tune.appendElement('note', startOfLine+i, startOfLine+i, el);
 									multilineVars.measureNotEmpty = true;
 									el = {};
 								}
@@ -1394,7 +1453,7 @@ window.ABCJS.parse.Parse = function() {
 								el.barNumber = multilineVars.barNumOnNextNote;
 								multilineVars.barNumOnNextNote = null;
 							}
-							tune.appendElement('note', startOfLine+startI, startOfLine+i, el, this.transpose );
+							tune.appendElement('note', startOfLine+startI, startOfLine+i, el );
 							multilineVars.measureNotEmpty = true;
 							el = {};
 						}
@@ -1411,8 +1470,8 @@ window.ABCJS.parse.Parse = function() {
 		}
 	};
 
-	var parseLine = function(line) {
-		var ret = header.parseHeader(line);
+	var parseLine = function(line, lineNumber ) {
+		var ret = header.parseHeader(line, lineNumber );
 		if (ret.regular)
 			parseRegularMusicLine(ret.str);
 		if (ret.newline && multilineVars.continueall === undefined)
@@ -1424,35 +1483,41 @@ window.ABCJS.parse.Parse = function() {
 		if (ret.recurse)
 			parseLine(ret.str);
 	};
+        
+        this.tuneHouseKeeping = function ( strTune ) {
+            // Take care of whatever line endings come our way
+            strTune = window.ABCJS.parse.gsub(strTune, '\r\n', '\n');
+            strTune = window.ABCJS.parse.gsub(strTune, '\r', '\n');
+            strTune += '\n';	// Tacked on temporarily to make the last line continuation work
+            strTune = strTune.replace(/\n\\.*\n/g, "\n");	// get rid of latex commands.
+            var continuationReplacement = function(all, backslash, comment){
+                    var spaces = "                                                                                                                                                                                                     ";
+                    var padding = comment ? spaces.substring(0, comment.length) : "";
+                    return backslash + " \x12" + padding;
+            };
+            strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
+            var lines = strTune.split('\n');
+	    if (window.ABCJS.parse.last(lines).length === 0)	// remove the blank line we added above.
+		lines.pop();
+            return lines;
+        };
 
-	this.parse = function(strTune, switches, transpose ) {
+	this.parse = function(strTune, switches ) {
 		// the switches are optional and cause a difference in the way the tune is parsed.
 		// switches.header_only : stop parsing when the header is finished
 		// switches.stop_on_warning : stop at the first warning encountered.
 		// switches.print: format for the page instead of the browser.
-                this.transpose = transpose;
+                //window.ABCJS.parse.transpose = transpose;
 		tune.reset();
 		if (switches && switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
 		header.reset(tokenizer, warn, multilineVars, tune);
-
-		// Take care of whatever line endings come our way
-		strTune = window.ABCJS.parse.gsub(strTune, '\r\n', '\n');
-		strTune = window.ABCJS.parse.gsub(strTune, '\r', '\n');
-		strTune += '\n';	// Tacked on temporarily to make the last line continuation work
-		strTune = strTune.replace(/\n\\.*\n/g, "\n");	// get rid of latex commands.
-		var continuationReplacement = function(all, backslash, comment){
-			var spaces = "                                                                                                                                                                                                     ";
-			var padding = comment ? spaces.substring(0, comment.length) : "";
-			return backslash + " \x12" + padding;
-		};
-		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
-		var lines = strTune.split('\n');
-		if (window.ABCJS.parse.last(lines).length === 0)	// remove the blank line we added above.
-			lines.pop();
+                
+                var lines = this.tuneHouseKeeping(strTune);
+                
 		try {
-			window.ABCJS.parse.each(lines,  function(line) {
+			window.ABCJS.parse.each(lines,  function( line, lineNumber ) {
 				if (switches) {
 					if (switches.header_only && multilineVars.is_in_header === false)
 						throw "normal_abort";
@@ -1485,7 +1550,7 @@ window.ABCJS.parse.Parse = function() {
 					else
 						multilineVars.textBlock += ' ' + line;
 				} else
-					parseLine(line);
+					parseLine( line, lineNumber );
 				multilineVars.iChar += line.length + 1;
 			});
 			var ph = 11*72;

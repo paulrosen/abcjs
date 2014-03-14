@@ -10,16 +10,12 @@ if (!window.ABCJS)
 if (!window.ABCJS.tablatura)
 	window.ABCJS.tablatura = {};
 
-ABCJS.tablatura.Gaita = function(selector) {
-    this.transporter = new window.ABCJS.parse.Transport();
+ABCJS.tablatura.Gaita = function( selector ) {
     
     this.noteToButtonsOpen  = {}; 
     this.noteToButtonsClose  = {}; 
-    this.minNote         = 0x15; //  A0 = first note
-    this.maxNote         = 0x6C; //  C8 = last note
-    this.number2key      = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"];
-    this.number2keyflat  = ["C", "D♭", "D", "D♯", "E", "F", "G♭", "G", "A♭", "A", "A♯", "B"];
-    this.number2key_br   = ["Dó", "Dó♯", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Sol♯", "Lá", "Si♭", "Si"];
+    
+    this.transporter     = new window.ABCJS.parse.Transport();
     this.gaitas          = [GAITA_HOHNER_GC, GAITA_HOHNER_CLUB_IIIM_BR];
     this.selected        = 0;
     
@@ -32,7 +28,7 @@ ABCJS.tablatura.Gaita = function(selector) {
         }   
     }
     
-    this.load(0);
+    this.load(this.selected);
 
 };
 
@@ -75,7 +71,7 @@ ABCJS.tablatura.Gaita.prototype.getButtons = function (note) {
 };
 
 ABCJS.tablatura.Gaita.prototype.identifyChord = function (children, verticalPos, acc, keyAcc, transpose) {
-    //TODO: tratar adequadamente os acordes (de baixo)      
+//TODO: tratar adequadamente os acordes (de baixo)      
     var note = this.extractCromaticNote(children[0].pitch, verticalPos, acc, keyAcc, transpose );
     return children.length > 1 ? note.toLowerCase() : note;
 };
@@ -86,7 +82,7 @@ ABCJS.tablatura.Gaita.prototype.extractCromaticNote = function(pitch, deltapitch
 //  para: nota nomeada no modelo cromatico com oitava
     var p = pitch + deltapitch + (transpose?transpose:0);
     var n = this.transporter.staffNoteToCromatic(this.transporter.extractStaffNote(p));
-    var staffNote = this.number2key[n];
+    var staffNote = this.transporter.numberToKey(n);
     var oitava = this.transporter.extractStaffOctave(p);
     var a = acc[pitch];
     var ka = this.transporter.getKeyAccOffset(staffNote, keyAcc);
@@ -102,5 +98,5 @@ ABCJS.tablatura.Gaita.prototype.extractCromaticNote = function(pitch, deltapitch
     }
     oitava += (n < 0 ? -1 : (n > 11 ? 1 : 0 ));
     n       = (n < 0 ? 12+n : (n > 11 ? n%12 : n ) );
-    return this.number2key[n] + oitava;
+    return this.transporter.numberToKey(n) + oitava;
 };
