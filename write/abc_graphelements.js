@@ -67,7 +67,7 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
   if (debug) console.log("init layout");
   for (i=0;i<this.voices.length;i++) {
     this.voices[i].beginLayout(x);
-    // flavio - tentativa de encontrar lowe
+    // flavio - tentativa de encontrar lowest
     for( b = 0; b < this.voices[i].beams.length; b ++ ) {
         for( be = 0; be < this.voices[i].beams[b].elems.length; be ++ ) {
             var elem = this.voices[i].beams[b].elems[be];
@@ -153,7 +153,7 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
   }
 };
 
-// flavio - pt2 - desenha os elementos da partitura
+// flavio - desenha os elementos da partitura
 ABCJS.write.StaffGroupElement.prototype.draw = function( printer, groupNumber ) {
     
     var y = printer.y;
@@ -319,8 +319,6 @@ ABCJS.write.VoiceElement.prototype.draw = function( printer ) {
     var width = this.w - 1;
     var ve = this;
     printer.y = this.staff.y;
-    //printer.staffbottom = this.staff.bottom;
-    //this.barbottom = printer.calcY(2); //flavio;
 
     if (this.header) { // print voice name
         var textpitch = 12 - (this.voicenumber + 1) * (12 / (this.voicetotal + 1));
@@ -330,7 +328,7 @@ ABCJS.write.VoiceElement.prototype.draw = function( printer ) {
                 .attr({"font-size": 12 * printer.scale, "font-family": "serif", 'font-weight': 'bold'}); 
                 // code duplicated above
     }
-    // flavio - pt7 - realmente é aqui que os simbolos são desenhados
+    // flavio - realmente é aqui que os simbolos são desenhados
     for (var i = 0, ii = this.children.length; i < ii; i++) {
         this.children[i].draw( printer );
     }

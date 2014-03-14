@@ -21,10 +21,122 @@ if (!window.ABCJS)
 
 if (!window.ABCJS.parse)
 	window.ABCJS.parse = {};
+    
+window.ABCJS.parse.Transport = function () {
+    this.pitches        = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6, 
+                             c: 7, d: 8, e: 9, f: 10, g: 11, a: 12, b: 13 };
+    this.minNote         = 0x15; //  A0 = first note
+    this.maxNote         = 0x6C; //  C8 = last note
+    this.number2key      = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"];
+
+    this.number2staff    = [    {note:"C", acc:""}, {note:"C", acc:"sharp"}, 
+                                {note:"D", acc:""}, {note:"E", acc:"flat"}, 
+                                {note:"E", acc:""}, 
+                                {note:"F", acc:""}, {note:"F", acc:"sharp"}, 
+                                {note:"G", acc:""}, {note:"G", acc:"sharp"}, 
+                                {note:"A", acc:""}, {note:"B", acc:"flat"}, 
+                                {note:"B", acc:""}
+                            ];
+      
+    this.number2keyflat  = ["C", "D♭", "D", "D♯", "E", "F", "G♭", "G", "A♭", "A", "A♯", "B"];
+    this.number2key_br   = ["Dó", "Dó♯", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Sol♯", "Lá", "Si♭", "Si"];
+};
+
+window.ABCJS.parse.Transport.prototype.transpose = function(pitch, txtAcc, Ki, trans, Kf)
+{
+/*
+ * Staff        Cromatic        F            Cromatic  Staff      F#
+ *       Pitch  Note     Acc    Ki   Trans   NewNote       a      Kf d    ESPERADO
+ *  Bb   6      11       0      -1   1       11        B   0      0  0    B
+ *  B    6      11       NAT    -1   1       0         C   0      1  1   =C
+ *  C    7      0        0       0   1       1         C#  1      1  0    C
+ *  C#   7      0        1       0   1       2         D   0      1  1   =D
+ *  D    8      2        0       0   1       3         Eb -1      1  2    D
+ *  D#   8      2        1       0   1       4         E   0      1  1   =E 
+ *  E    9      4        0       0   1       5         F   0      1  1   =F
+ *  
+ *  Parei no ponto onde se verificam as diferenças (d=abs(Kf-a)) entre o acidente da nova nota e o acidente da nova clave
+ *
+ *      <-  nota
+ *      <-  clave ->
+ *          nota  ->
+ *
+ */
+
+    
+  var note    = this.staffNoteToCromatic(this.extractStaffNote(pitch));
+  var dAcc    = this.getAccOffset(txtAcc);
+  var dKi     = this.getKeyAccOffset(note, Ki);
+  var newNote = note + dAcc + dKi + trans;
+  var dKf     = this.getKeyAccOffset(newNote, Kf);
+  
+  return undefined;    
+};
+
+window.ABCJS.parse.Transport.prototype.getKeyAccOffset = function(note, keyAcc)
+// recupera os acidentes da clave e retorna um offset no modelo cromatico
+{
+  for( a = 0; a < keyAcc.length; a ++) {
+      if( keyAcc[a].note.toLowerCase() === note.toLowerCase() ) {
+          return this.getAccOffset(keyAcc[a].acc);
+      }
+  }
+  return undefined;    
+};
+    
+
+window.ABCJS.parse.Transport.prototype.getAccOffset = function(txtAcc)
+// a partir do nome do acidente, retorna o offset no modelo cromatico
+{
+    var ret = 0;
+
+    switch (txtAcc) {
+        case 'accidentals.dblsharp':
+        case 'dblsharp':
+            ret = 2;
+            break;
+        case 'accidentals.sharp':
+        case 'sharp':
+            ret = 1;
+            break;
+        case 'accidentals.nat':
+        case 'nat':
+            ret = 0;
+            break;
+        case 'accidentals.flat':
+        case 'flat':
+            ret = -1;
+            break;
+        case 'accidentals.dblflat':
+        case 'dblflat':
+            ret = -2;
+            break;
+    }
+    return ret;
+};
+                  
+window.ABCJS.parse.Transport.prototype.staffNoteToCromatic = function (note) {
+  return note*2 + (note>2?-1:0);
+};
+
+window.ABCJS.parse.Transport.prototype.extractStaffNote = function(pitch) {
+    pitch = pitch % 7;
+    if (pitch < 0)
+        pitch += 7;
+    return pitch;
+};
+
+window.ABCJS.parse.Transport.prototype.extractStaffOctave = function(pitch) {
+    return Math.floor((28 + pitch) / 7);
+};
+
+
 
 window.ABCJS.parse.Parse = function() {
 	var tune = new window.ABCJS.data.Tune();
 	var tokenizer = new window.ABCJS.parse.tokenizer();
+        
+        this.transpose = 0;
 
 	this.getTune = function() {
 		return tune;
@@ -1031,7 +1143,7 @@ window.ABCJS.parse.Parse = function() {
 						// Attach the grace note to an invisible note
 						el.rest = { type: 'spacer' };
 						el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
-						tune.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el);
+						tune.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el,this.transpose);
 						multilineVars.measureNotEmpty = true;
 						el = {};
 					}
@@ -1217,7 +1329,7 @@ window.ABCJS.parse.Parse = function() {
 										el.barNumber = multilineVars.barNumOnNextNote;
 										multilineVars.barNumOnNextNote = null;
 									}
-									tune.appendElement('note', startOfLine+i, startOfLine+i, el);
+									tune.appendElement('note', startOfLine+i, startOfLine+i, el,this.transpose);
 									multilineVars.measureNotEmpty = true;
 									el = {};
 								}
@@ -1282,7 +1394,7 @@ window.ABCJS.parse.Parse = function() {
 								el.barNumber = multilineVars.barNumOnNextNote;
 								multilineVars.barNumOnNextNote = null;
 							}
-							tune.appendElement('note', startOfLine+startI, startOfLine+i, el);
+							tune.appendElement('note', startOfLine+startI, startOfLine+i, el, this.transpose );
 							multilineVars.measureNotEmpty = true;
 							el = {};
 						}
@@ -1313,11 +1425,12 @@ window.ABCJS.parse.Parse = function() {
 			parseLine(ret.str);
 	};
 
-	this.parse = function(strTune, switches) {
+	this.parse = function(strTune, switches, transpose ) {
 		// the switches are optional and cause a difference in the way the tune is parsed.
 		// switches.header_only : stop parsing when the header is finished
 		// switches.stop_on_warning : stop at the first warning encountered.
 		// switches.print: format for the page instead of the browser.
+                this.transpose = transpose;
 		tune.reset();
 		if (switches && switches.print)
 			tune.media = 'print';

@@ -41,10 +41,22 @@
 
 
         <select id="selGaitas" ></select>
-        <input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(-0.5);">
-        <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-0.5);">
+        <input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);">
+        <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);">
         <input type="submit" id="forceRefresh" value="Force Refresh" onclick="javascript:doForceRefresh();">
         <input type="checkbox" id="chkAutoRefresh"> Auto refresh
+
+<textarea id="abct" cols="120" rows="10" style="display:none; float:left;">
+X:1
+T:Eu vi o lobo, a raposa e a doninha
+C:Tradicional 
+Q:"Allegro" 1/4=164
+L:1/8
+M:2/4
+V:melodia
+K:F treble 
+|: B^c :|
+</textarea>
 
 <textarea id="abc" cols="120" rows="10" style="display:true; float:left;">
 X:1
@@ -72,7 +84,6 @@ K:C bass
 V:tablatura
 K:none accordionTab
 </textarea>
-
 
 <textarea id="abcx" cols="120" rows="10" style="display:none; float:left;">
 X:1
@@ -127,7 +138,7 @@ K:none accordionTab
                 };
                 
                 function doTranspose( value ) {
-                    myEditor.fireChanged(value);
+                    myEditor.fireChanged(value, "force" );
                 }
                 
                 function doForceRefresh() {

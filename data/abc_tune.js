@@ -408,7 +408,7 @@ window.ABCJS.data.Tune = function() {
 		delete this.potentialEndBeam;
 	};
 
-	this.appendElement = function(type, startChar, endChar, hashParams)
+	this.appendElement = function(type, startChar, endChar, hashParams, transpose)
 	{
 		var This = this;
 		var pushNote = function(hp) {

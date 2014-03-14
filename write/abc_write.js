@@ -28,8 +28,8 @@ ABCJS.write.spacing.FONTEM = 360;
 ABCJS.write.spacing.FONTSIZE = 30;
 ABCJS.write.spacing.STEP = ABCJS.write.spacing.FONTSIZE*(93)/720;
 ABCJS.write.spacing.SPACE = 10;
-ABCJS.write.spacing.VSPACE = 10; // 20;
-ABCJS.write.spacing.TOPNOTE = 10; // 20
+ABCJS.write.spacing.VSPACE = 10; // was 20;
+ABCJS.write.spacing.TOPNOTE = 10; // was 20
 ABCJS.write.spacing.STAVEHEIGHT = 100;
 
 
@@ -155,17 +155,14 @@ ABCJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
       }
     }
 };
-// flavio - pt3. - desenhas as linhas
 ABCJS.write.Printer.prototype.printLedger = function (x1,x2, pitch) {
     x = this.abctune;
     return  this.doPrintStaveLine(x1,x2,pitch, true);
 };
 ABCJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch) {
     return  this.doPrintStaveLine(x1,x2,pitch, false);
-}
+};
 
-
-// flavio - pt3. - desenhas as linhas
 ABCJS.write.Printer.prototype.doPrintStaveLine = function (x1,x2, pitch, isLedger ) {
   var isIE=/*@cc_on!@*/false;//IE detector
   var dy = 0.35;
@@ -342,7 +339,7 @@ ABCJS.write.Printer.prototype.printLyrics = function(x, msg) {
 
 ABCJS.write.Printer.prototype.calcY = function(ofs) {
   return this.y+((ABCJS.write.spacing.TOPNOTE-ofs)*ABCJS.write.spacing.STEP); // flavio
-    };
+};
 
 ABCJS.write.Printer.prototype.printABC = function(abctunes) {
   if (abctunes[0]===undefined) {
@@ -363,8 +360,8 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 		x += (text.getBBox().width + 20*printer.scale);
 	}
 	if (tempo.duration) {
-		var temposcale = 0.75*printer.scale;
-    		var tempopitch = 4.5; // flavio 14.5;
+		var temposcale = 0.75 * printer.scale;
+    		var tempopitch = 4.5; // flavio - was 14.5;
 		var duration = tempo.duration[0]; // TODO when multiple durations
 		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1);
 		var durlog = Math.floor(Math.log(duration) / Math.log(2));
@@ -546,7 +543,7 @@ ABCJS.write.Printer.prototype.printStaffLine = function (abctune, line) {
 	this.staffgroups[this.staffgroups.length] = staffgroup;
 	var newspace = this.space;
         
-	for (var it = 0; it < 2; it++) { // TODO shouldn't need this triple pass any more
+	for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
 		staffgroup.layout(newspace, this, false);
 		if (line && line === abctune.lines.length - 1 && staffgroup.w / this.width < 0.66 && !abctune.formatting.stretchlast) break; // don't stretch last line too much unless it is 1st
 		var relspace = staffgroup.spacingunits * newspace;
@@ -558,7 +555,6 @@ ABCJS.write.Printer.prototype.printStaffLine = function (abctune, line) {
 			}
 		}
 	}
-        // flavio - pt1.
         staffgroup.draw(this, line );
 	this.staffgroups[this.staffgroups.length] = staffgroup;
 	this.y = staffgroup.y + staffgroup.height;
