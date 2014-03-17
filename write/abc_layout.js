@@ -133,7 +133,6 @@ ABCJS.write.Layout.prototype.printABCLine = function(abctune, line) {
                 (abcstaff.meter) && this.voice.addChild(this.printTablatureSignature(abcstaff.meter));
                 if (abcstaff.inferTablature) {
                    if(this.accordion) {
-                       //this.accordion = new window.ABCJS.tablatura.Gaita();
                        this.inferTabVoice();
                        if(this.voice.otherchildren) this.voice.otherchildren = []; 
                    } else {
@@ -342,7 +341,7 @@ ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos, i
             while ( r < abselem.children.length ) {
                 ch = abselem.children[r];
                 if(ch.c &&  ch.c.substr(0,11) === "accidentals") {
-                  acc[ch.pitch] = this.accordion.getAccOffset(ch.c);
+                  acc[ch.pitch] = this.accordion.transporter.getAccOffset(ch.c);
                 }
                 if( ! ch.c || ( ch.c.substr(0,9) !== 'noteheads' && ch.c.substr(0,5) !== 'rests' ) )
                    abselem.children.splice(r,1); 

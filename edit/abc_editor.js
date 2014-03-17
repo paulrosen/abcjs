@@ -37,18 +37,39 @@ if (!window.ABCJS.edit)
     
 
 window.ABCJS.edit.KeySelector = function(id) {
+  var transporter = new window.ABCJS.parse.Transport( 0 );  
+  //var staffKey = ["C","D","E","F","G","A","B"];  
+  
   this.selector = document.getElementById(id);
+  if( this.selector ) {
+    for(var i = 0; i < transporter.number2key.length; i++) {
+        var opt = document.createElement('option');
+        opt.innerHTML = transporter.number2key[i];
+        opt.value = i;
+       this.selector.appendChild(opt);
+    }   
+}
+
 };
 
 window.ABCJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
   this.selector.onchange = function() {
-  //editor.fireChanged( 0, "force" );
+    editor.fireChanged( this.value - editor.keySelector.oldValue, "force" );
   };
 };
 
+window.ABCJS.edit.KeySelector.prototype.set = function(value) {
+    this.oldValue = value;
+    this.selector.value = value;
+};
+
+//window.ABCJS.edit.KeySelector.prototype.get = function() {
+//  return this.selector.value;
+//};
+
 window.ABCJS.edit.AccordionSelector = function(id) {
   this.selector = document.getElementById(id);
-};
+    };
 
 window.ABCJS.edit.AccordionSelector.prototype.addChangeListener = function(editor) {
   this.selector.onchange = function() {
@@ -192,7 +213,7 @@ window.ABCJS.Editor = function(editarea, params) {
 
   if(params.accordionSelector_id)  {
     this.accordionSelector  = new window.ABCJS.edit.AccordionSelector(params.accordionSelector_id);
-    this.accordion = new window.ABCJS.tablatura.Gaita(this.accordionSelector.selector);
+    this.accordion = new window.ABCJS.tablature.Accordion(this.accordionSelector.selector);
     this.accordionSelector.addChangeListener(this);
   }
   if(params.keySelector_id) {  
@@ -240,7 +261,7 @@ window.ABCJS.Editor = function(editarea, params) {
   } 
   this.oldt = "";
   this.bReentry = false;
-  this.parseABC();
+  this.parseABC(0);
   this.modelChanged();
 
   this.addClassName = function(element, className) {
@@ -285,38 +306,38 @@ window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
 };
 
 window.ABCJS.Editor.prototype.modelChanged = function() {
-  if (this.tunes === undefined) {
-    if (this.mididiv !== undefined && this.mididiv !== this.div)
-		this.mididiv.innerHTML = "";
-    this.div.innerHTML = "";
-	return;
-  }
+    if (this.tunes === undefined) {
+        if (this.mididiv !== undefined && this.mididiv !== this.div)
+            this.mididiv.innerHTML = "";
+        this.div.innerHTML = "";
+        return;
+    }
 
-  if (this.bReentry)
-    return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
-  this.bReentry = true;
-  this.timerId = null;
-  this.div.innerHTML = "";
-  var paper = Raphael(this.div, 1024, 700);
-  this.printer = new ABCJS.write.Printer(paper, this.printerparams, this.accordion );
-  this.printer.printABC(this.tunes);
-  if (ABCJS.midi.MidiWriter && this.mididiv) {
-    if (this.mididiv !== this.div)
-		this.mididiv.innerHTML = "";
-    var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv,this.midiparams);
-    midiwriter.addListener(this.printer);
-    midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
-  }
-  if (this.warningsdiv) {
-    this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
-  } 
-  if (this.target) {
-    var textprinter = new window.ABCJS.transform.TextPrinter(this.target, true);
-    textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
-  }
-  this.printer.addSelectListener(this);
-  this.updateSelection();
-  this.bReentry = false;
+    if (this.bReentry)
+        return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
+    this.bReentry = true;
+    this.timerId = null;
+    this.div.innerHTML = "";
+    var paper = Raphael(this.div, 1024, 700);
+    this.printer = new ABCJS.write.Printer(paper, this.printerparams, this.accordion);
+    this.printer.printABC(this.tunes);
+    if (ABCJS.midi.MidiWriter && this.mididiv) {
+        if (this.mididiv !== this.div)
+            this.mididiv.innerHTML = "";
+        var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv, this.midiparams);
+        midiwriter.addListener(this.printer);
+        midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
+    }
+    if (this.warningsdiv) {
+        this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
+    }
+    if (this.target) {
+        var textprinter = new window.ABCJS.transform.TextPrinter(this.target, true);
+        textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
+    }
+    this.printer.addSelectListener(this);
+    this.updateSelection();
+    this.bReentry = false;
 };
 
 // Call this to reparse in response to the printing parameters changing
@@ -348,9 +369,9 @@ window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
   
   if(typeof transpose !== "undefined") {
       if( this.transporter )
-        this.transporter.offSet = transpose;
+        this.transporter.reset(transpose);
       else
-        this.transporter = this.transporter = new window.ABCJS.parse.Transport( transpose );
+        this.transporter = new window.ABCJS.parse.Transport( transpose );
   }
   
   for (var i=0; i<tunebook.tunes.length; i++) {
@@ -358,9 +379,13 @@ window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
     abcParser.parse(tunebook.tunes[i].abc, this.parserparams ); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
     
-    if( this.transporter ) {
-        var lines = abcParser.tuneHouseKeeping(tunebook.tunes[i].abc);
-        this.editarea.setString( this.transporter.updateEditor( lines ), "norefresh" );
+    if( this.transporter ) { 
+        if( this.transporter.offSet !== 0 ) {
+          var lines = abcParser.tuneHouseKeeping(tunebook.tunes[i].abc);
+          this.editarea.setString( this.transporter.updateEditor( lines ), "norefresh" );
+        }
+        if(this.keySelector) 
+            this.keySelector.set( this.transporter.keyToNumber( this.transporter.getKeyVoice(0) ) );       
     }
     
     // verifica se a linha zero tem tablatura para accordion

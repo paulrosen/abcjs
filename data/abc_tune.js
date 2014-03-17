@@ -23,7 +23,8 @@ if (!window.ABCJS.data)
 	window.ABCJS.data = {};
 
 // This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
-window.ABCJS.data.Tune = function(transporter_) {
+// flavio - aparentement não é mais necessario o transporter aqui.
+window.ABCJS.data.Tune = function(/*transporter_*/) {
 	// The structure consists of a hash with the following two items:
 	// metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...
 	// tempo: { noteLength: number (e.g. .125), bpm: number }
@@ -56,7 +57,7 @@ window.ABCJS.data.Tune = function(transporter_) {
 	//		accidentals[]: { acc:sharp|dblsharp|natural|flat|dblflat,  note:a|b|c|d|e|f|g }
 	// METER: type: common_time,cut_time,specified
 	//		if specified, { num: 99, den: 99 }
-        this.transporter = transporter_;
+        // flavio this.transporter = transporter_;
 	this.reset = function () {
 		this.version = "1.0.1";
 		this.media = "screen";
@@ -409,7 +410,7 @@ window.ABCJS.data.Tune = function(transporter_) {
 		delete this.potentialEndBeam;
 	};
 
-	this.appendElement = function(type, startChar, endChar, hashParams, usr_this_transporter)
+	this.appendElement = function(type, startChar, endChar, hashParams )
 	{
 		var This = this;
 		var pushNote = function(hp) {

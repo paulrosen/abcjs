@@ -22,16 +22,15 @@
 	<script src="parse/abc_parse_key_voice.js" type="text/javascript"></script>
 	<script src="parse/abc_parse_directive.js" type="text/javascript"></script>
         <script src="parse/abc_parse.js" type="text/javascript"></script>
+        <script src="parse/abc_transport.js" type="text/javascript"></script>
 	<script src="parse/abc_common.js" type="text/javascript"></script>
         <script src="midi/abc_midiwriter.js" type="text/javascript"></script>
 
         <!-- modelos de gaitas disponíveis -->
-        <script type="text/javascript" src="gaitas/gaita.hohner.gc.js"></script>
-        <script type="text/javascript" src="gaitas/gaita.hohner.clubIIIM.js"></script>
-        <script type="text/javascript" src="gaitas/gaita.hohner.clubIIIM.br.js"></script>
-        <script type="text/javascript" src="gaitas/gaita.hohner.coronaII.js"></script>
+        <script type="text/javascript" src="tablature/accordion.hohner.gc.js"></script>
+        <script type="text/javascript" src="tablature/accordion.hohner.clubIIIM.br.js"></script>
         
-        <script type="text/javascript" src="gaitas/gaitadef.js"></script>
+        <script type="text/javascript" src="tablature/accordion_map.js"></script>
         
  	<script src="edit/abc_editor.js" type="text/javascript"></script>
         
@@ -39,27 +38,28 @@
         <!--applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="MIDIPlugin.jar" height="2" width="1"></applet-->
         <!--textarea id="target" cols="80" rows="15"></textarea-->
 
-
         <select id="selGaitas" ></select>
         <select id="selKey" ></select>
+        <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);">
         <input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);">
         <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);">
-        <input type="submit" id="forceRefresh" value="Force Refresh" onclick="javascript:doForceRefresh();">
+        <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);">
+        <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();">
         <input type="checkbox" id="chkAutoRefresh"> Auto refresh
 
-<textarea id="abct" cols="120" rows="10" style="display:none; float:left;">
+<textarea id="teste" cols="120" rows="10" style="display:none; float:left;">
 X:1
-T:Eu vi o lobo, a raposa e a doninha
-C:Tradicional 
-Q:"Allegro" 1/4=164
 L:1/8
 M:2/4
 V:melodia
-K:F treble 
-|: B^c :|
+%K:F treble 
+%|: _b'[Bd]=Bc^cd_ee :|
+K:treble
+%^G'cdef
+^G'cdef
 </textarea>
 
-<textarea id="abc" cols="120" rows="10" style="display:true; float:left;">
+<textarea id="abcy" cols="120" rows="10" style="display:none; float:left;">
 X:1
 T:J'ai vu le loup, le renard et la belette
 T:Eu vi o lobo, a raposa e a doninha
@@ -86,7 +86,7 @@ V:tablatura
 K:none accordionTab
 </textarea>
 
-<textarea id="abcx" cols="120" rows="10" style="display:none; float:left;">
+<textarea id="abc" cols="120" rows="10" style="display:true; float:left;">
 X:1
 T:Maitia, nun zira?
 C:Folclore Basco
@@ -109,8 +109,8 @@ K:G bass
 | z6  |z6  | z6  :| z6 | z6  | z6  | z6 | z6  |
 |: z6  | z6 | z6  | z6  | z6  | z6  | z6 |
 | z6  | z6  | z6  :|z6 | z6  | z6  | z6  | z6  |
-V:tablatura
-K:none accordionTab
+%V:tablatura
+%K:none accordionTab
 </textarea>
 
         <div id="warnings"></div>
