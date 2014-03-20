@@ -40,13 +40,12 @@ ABCJS.write.getDurlog = function(duration) {
   return Math.floor(Math.log(duration)/Math.log(2));
 };
 
-ABCJS.write.Layout = function(glyphs, bagpipes, accordion) {
-  this.glyphs = glyphs;
-  this.isBagpipes = bagpipes;
+ABCJS.write.Layout = function(printer, bagpipes ) {
   this.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
 		   note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter"},
 		   uflags:{3:"flags.u8th", 4:"flags.u16th", 5:"flags.u32nd", 6:"flags.u64th"},
 		   dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}};
+  this.isBagpipes = bagpipes;
   this.slurs = {};
   this.ties = [];
   this.slursbyvoice = {};
@@ -57,11 +56,10 @@ ABCJS.write.Layout = function(glyphs, bagpipes, accordion) {
   this.tuneCurrLine = 0;
   this.tuneCurrStaff = 0; // current staff number
   this.tuneCurrVoice = 0; // current voice number on current staff
-  this.stafflines = 5;
   this.tripletmultiplier = 1;
-  this.minY = -2;  // PER: This is the lowest that any note reaches. - It will be used to set the dynamics row.
-  this.accordion = accordion;
-
+  this.printer = printer;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
+  this.accordion = printer.accordion;
+  this.glyphs = printer.glyphs;
 };
 
 ABCJS.write.Layout.prototype.getCurrentVoiceId = function() {
@@ -92,16 +90,14 @@ ABCJS.write.Layout.prototype.getNextElem = function() {
     return this.currVoice[this.pos + 1];
 };
 
-ABCJS.write.Layout.prototype.printABCLine = function(abctune, line) {
+ABCJS.write.Layout.prototype.layoutABCLine = function( abctune, line ) {
 
     this.tune = abctune;
     this.tuneCurrLine = line;
     this.staffgroup = new ABCJS.write.StaffGroupElement();
 
-    var staffs = this.tune.lines[this.tuneCurrLine].staff;
-
-    for (this.tuneCurrStaff = 0; this.tuneCurrStaff < staffs.length; this.tuneCurrStaff++) {
-        var abcstaff = staffs[this.tuneCurrStaff];
+    for (this.tuneCurrStaff = 0; this.tuneCurrStaff < this.tune.lines[this.tuneCurrLine].staffs.length; this.tuneCurrStaff++) {
+        var abcstaff = this.tune.lines[this.tuneCurrLine].staffs[this.tuneCurrStaff];
         var header = "";
         
         if (abcstaff.bracket)
@@ -111,7 +107,8 @@ ABCJS.write.Layout.prototype.printABCLine = function(abctune, line) {
 
         for (this.tuneCurrVoice = 0; this.tuneCurrVoice < abcstaff.voices.length; this.tuneCurrVoice++) {
             this.currVoice = abcstaff.voices[this.tuneCurrVoice];
-            this.voice = new ABCJS.write.VoiceElement(this.tuneCurrVoice, abcstaff.voices.length);
+            this.voice = new ABCJS.write.VoiceElement( this.tuneCurrVoice, abcstaff );
+            
             if (this.tuneCurrVoice === 0) {
                 this.voice.barfrom = (abcstaff.connectBarLines === "start" || abcstaff.connectBarLines === "continue");
                 this.voice.barto = (abcstaff.connectBarLines === "continue" || abcstaff.connectBarLines === "end");
@@ -131,6 +128,7 @@ ABCJS.write.Layout.prototype.printABCLine = function(abctune, line) {
                 this.voice.addChild(this.printClef(abcstaff.clef));
                 this.voice.addChild(new ABCJS.write.AbsoluteElement(abcstaff.key, 0, 10));
                 (abcstaff.meter) && this.voice.addChild(this.printTablatureSignature(abcstaff.meter));
+                this.printABCVoice();
                 if (abcstaff.inferTablature) {
                    if(this.accordion) {
                        this.inferTabVoice();
@@ -142,23 +140,47 @@ ABCJS.write.Layout.prototype.printABCLine = function(abctune, line) {
                     this.printABCVoice();
                 }
             }
-            this.staffgroup.addVoice(this.voice, this.tuneCurrStaff, this.stafflines, abcstaff);
+            
+            this.staffgroup.addVoice(this.voice);
         }
     }
+    this.layoutStaffGroup();
+    
     return this.staffgroup;
 };
 
+ABCJS.write.Layout.prototype.layoutStaffGroup = function() {
+    var newspace = this.printer.space;
+
+    for (var it = 0; it < 2; it++) { // TODO shouldn't need this triple pass any more
+        this.staffgroup.layout(newspace, this.printer, false);
+        if (this.tuneCurrLine && this.tuneCurrLine === this.tune.lines.length - 1 &&
+                this.staffgroup.w / this.width < 0.66
+                && !this.tune.formatting.stretchlast)
+            break; // don't stretch last line too much unless it is 1st
+        var relspace = this.staffgroup.spacingunits * newspace;
+        var constspace = this.staffgroup.w - relspace;
+        if (this.staffgroup.spacingunits > 0) {
+            newspace = (this.printer.width - constspace) / this.staffgroup.spacingunits;
+            if (newspace * this.staffgroup.minspace > 50) {
+                newspace = 50 / this.staffgroup.minspace;
+            }
+        }
+    }
+    
+};
+
 ABCJS.write.Layout.prototype.inferTabVoice = function() {
-    this.mergeNotesFromTrebleNBass(1, 0);
+    this.mergeNotesFromTrebleNBass();
     this.generateTab();
 };
     
 ABCJS.write.Layout.prototype.generateTab = function() {
     var count = 0;
-    var limit = 6; // invert o movimento do fole - deveria ser baseado no tempo das notas.
+    var limit = 6; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
     var offset = -6.4; // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
     
-    this.lastButton = -1;
+    this.voice.lastButton = -1;
 
     for (var i = 0; i < this.voice.children.length; i++) {
         var allOpen = true;
@@ -223,107 +245,120 @@ ABCJS.write.Layout.prototype.generateTab = function() {
             }
         }
     }
+    delete this.voice.lastButton;
+
 };
 
 // tenta encontrar o botão mais próximo do último
-ABCJS.write.Layout.prototype.elegeBotao = function( array, last ) {
+ABCJS.write.Layout.prototype.elegeBotao = function( array ) {
     if(typeof(array) === "undefined" ) return "x";
 
     var b    = array[0];
     var v    = parseInt(isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2));
-    var min  = Math.abs(v-this.lastButton);
+    var min  = Math.abs(v-this.voice.lastButton);
     
     for( var a = 1; a < array.length; a ++ ) {
         v    = parseInt(isNaN(array[a].substr(0,2))? array[a].substr(0,1): array[a].substr(0,2));
-        if( Math.abs(v-this.lastButton) < min ) {
+        if( Math.abs(v-this.voice.lastButton) < min ) {
            b = array[a];
-           min  = Math.abs(v-this.lastButton);
+           min  = Math.abs(v-this.voice.lastButton);
         }
     }
-    this.lastButton = parseInt( isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2) );
+    this.voice.lastButton = parseInt( isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2) );
     return b;
 };
 
 
-ABCJS.write.Layout.prototype.mergeNotesFromTrebleNBass = function(vbass, vtreb) {
+ABCJS.write.Layout.prototype.mergeNotesFromTrebleNBass = function() {
     
-    var balance = 0;
+    if( this.tune.tabStaffPos < 1 ) return; // we expect to find at leas a melody line above tablature, otherwise, we cannot infer it.
+    
+    var balance = 0; // só faz sentido quando há duas vozes: baixo e melodia
     var trebDuration = 0;
     var bassDuration = 0;
     var idxTreb = this.voice.children.length;
     var idxBass = this.voice.children.length;
-    var yPosTreb = this.staffgroup.voices[vtreb].staff.clef.verticalPos;
-    var yPosBass = this.staffgroup.voices[vbass].staff.clef.verticalPos;
     
-    var accTrebKey = this.tune.lines[this.tuneCurrLine].staff[vtreb].key.accidentals;
-    var accBassKey = this.tune.lines[this.tuneCurrLine].staff[vbass].key.accidentals;
+    var trebVoice  = this.staffgroup.voices[0];
+    var accTrebKey = this.tune.lines[this.tuneCurrLine].staffs[0].key.accidentals;
+    
+    if( this.tune.tabStaffPos === 2 ) {
+      var bassVoice  = this.staffgroup.voices[1];
+      var accBassKey = this.tune.lines[this.tuneCurrLine].staffs[1].key.accidentals;
+    }  
    
-    while (idxTreb < this.staffgroup.voices[vtreb].children.length || idxBass < this.staffgroup.voices[vbass].children.length ) {
+    while (idxTreb < trebVoice.children.length || ( bassVoice && idxBass < bassVoice.children.length ) ) {
+        
         var absTrebElem;
         var absBassElem;
-        var leu = 0;
+        var leu = false;
         
-        if (idxTreb < this.staffgroup.voices[vtreb].children.length && balance >= 0 ) {
-            absTrebElem = this.printTABElement(this.staffgroup.voices[vtreb].children[idxTreb].abcelem, yPosTreb, true, accTrebKey);
+        if (idxTreb < trebVoice.children.length && balance >= 0 ) {
+            var yPosTreb = trebVoice.stave.clef.verticalPos;
+            absTrebElem = this.printTABElement(trebVoice.children[idxTreb].abcelem, yPosTreb, true, accTrebKey);
             trebDuration += absTrebElem.duration;
-            leu++;
+            leu = true;
         }
-        if (idxBass < this.staffgroup.voices[vbass].children.length && balance <= 0 ) {
-            absBassElem = this.printTABElement(this.staffgroup.voices[vbass].children[idxBass].abcelem, yPosBass, false, accBassKey);
+        if (bassVoice && idxBass < bassVoice.children.length && balance <= 0 ) {
+            var yPosBass = bassVoice.stave.clef.verticalPos;
+            absBassElem = this.printTABElement(bassVoice.children[idxBass].abcelem, yPosBass, false, accBassKey);
             bassDuration += absBassElem.duration;
-            leu++;
+            leu = true;
         }
-
-        if (balance === 0) {
-            idxTreb++;
-            idxBass++;
-            if (absBassElem.abcelem.el_type === 'bar'&& absTrebElem.abcelem.el_type === 'bar') {
-                this.voice.addChild(absBassElem);
-            } else if (absBassElem.abcelem.el_type === 'bar') {    
-                this.voice.addChild(absTrebElem);
-                idxBass--;
-            } else if (absTrebElem.abcelem.el_type === 'bar') {    
-                this.voice.addChild(absBassElem);
-                idxTreb--;
-            } else if (bassDuration > trebDuration) {
-                for( var c = 0; c < absBassElem.children.length; c++ ) {
-                  absTrebElem.children.push(absBassElem.children[c]);
-                }  
-                this.voice.addChild(absTrebElem);
-            } else {
-                for( var c = 0; c < absTrebElem.children.length; c++ ) {
-                  absBassElem.children.push(absTrebElem.children[c]);
-                }  
-                this.voice.addChild(absBassElem);
-            }
-        } else if (balance > 0) {
-            if (absTrebElem.abcelem.el_type === 'bar') {
-                // encontrou nota faltando na melodia - preenche com pausas
-                this.staffgroup.voices[vtreb].children.splice(idxTreb, 0, this.addMissingRest(balance) );
-                idxTreb++;
-                trebDuration += balance;
-            } else {
-              this.voice.addChild(absTrebElem);
-              idxTreb++;
-            }  
-        } else {
-            if (absBassElem.abcelem.el_type === 'bar') {
-                // encontrou nota faltando no baixo - preenche com pausas
-                this.staffgroup.voices[vbass].children.splice(idxBass, 0, this.addMissingRest(-balance) );
-                idxBass++;
-                bassDuration -= balance;
-            } else {
-               this.voice.addChild(absBassElem);
-               idxBass++;
-           }         
-        }
-
-        balance = bassDuration - trebDuration;
-
-        if (leu === 0) {
+        if (! leu ) {
             // se chegar aqui é problema ou as linhas de melodia e baixo não são equivalentes
-            idxTreb = this.staffgroup.voices[vtreb].children.length;
-            idxBass = this.staffgroup.voices[vbass].children.length;
+            idxTreb = trebVoice.children.length;
+            idxBass = bassVoice? bassVoice.children.length : 0;
+            continue;
+        }
+        if (!bassVoice) {
+            idxTreb++;
+            this.voice.addChild(absTrebElem);
+        } else {
+            if (balance === 0) {
+                idxTreb++;
+                idxBass++;
+                if (absBassElem.abcelem.el_type === 'bar' && absTrebElem.abcelem.el_type === 'bar') {
+                    this.voice.addChild(absBassElem);
+                } else if (absBassElem.abcelem.el_type === 'bar') {
+                    this.voice.addChild(absTrebElem);
+                    idxBass--;
+                } else if (absTrebElem.abcelem.el_type === 'bar') {
+                    this.voice.addChild(absBassElem);
+                    idxTreb--;
+                } else if (bassDuration > trebDuration) {
+                    for (var c = 0; c < absBassElem.children.length; c++) {
+                        absTrebElem.children.push(absBassElem.children[c]);
+                    }
+                    this.voice.addChild(absTrebElem);
+                } else {
+                    for (var c = 0; c < absTrebElem.children.length; c++) {
+                        absBassElem.children.push(absTrebElem.children[c]);
+                    }
+                    this.voice.addChild(absBassElem);
+                }
+            } else if (balance > 0) {
+                if (absTrebElem.abcelem.el_type === 'bar') {
+                    // encontrou nota faltando na melodia - preenche com pausas
+                    trebVoice.children.splice(idxTreb, 0, this.addMissingRest(balance));
+                    idxTreb++;
+                    trebDuration += balance;
+                } else {
+                    this.voice.addChild(absTrebElem);
+                    idxTreb++;
+                }
+            } else {
+                if (absBassElem.abcelem.el_type === 'bar') {
+                    // encontrou nota faltando no baixo - preenche com pausas
+                    bassVoice.children.splice(idxBass, 0, this.addMissingRest(-balance));
+                    idxBass++;
+                    bassDuration -= balance;
+                } else {
+                    this.voice.addChild(absBassElem);
+                    idxBass++;
+                }
+            }
+            balance = bassDuration - trebDuration;
         }
     }
 };
@@ -607,7 +642,6 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
         }
         elem.averagepitch = sum / elem.pitches.length;
         elem.minpitch = elem.pitches[0].verticalPos;
-        //this.minY = Math.min(elem.minpitch, this.minY);
         elem.maxpitch = elem.pitches[elem.pitches.length - 1].verticalPos;
         var dir = (elem.averagepitch >= 6) ? "down" : "up";
         if (this.stemdir)
@@ -703,18 +737,19 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
             dx = (dir === "down" || abselem.heads.length === 0) ? 0 : abselem.heads[0].w;
             width = (dir === "down") ? 1 : -1;
             abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2": p2, linewidth: width}));
-            //this.minY = Math.min(p1, this.minY);
-            //this.minY = Math.min(p2, this.minY);
         }
 
     }
 
     if (elem.lyric !== undefined) {
         var lyricStr = "";
+        var maxLen = 0;
         window.ABCJS.parse.each(elem.lyric, function(ly) {
-            lyricStr += ly.syllable + ly.divider + "\n";
+            lyricStr += "\n" + ly.syllable + ly.divider ;
+            maxLen = Math.max( maxLen, (ly.syllable + ly.divider).length );
         });
-        abselem.addRight(new ABCJS.write.RelativeElement(lyricStr, 0, lyricStr.length * 5, 0, {type: "debugLow"}));
+        lyricStr = lyricStr.substr(1); // remove the first linefeed
+        abselem.addRight(new ABCJS.write.RelativeElement(lyricStr, 0, maxLen * 5, 0, {type: "lyrics"}));
     }
 
     if (!dontDraw && elem.gracenotes !== undefined) {
@@ -976,138 +1011,188 @@ ABCJS.write.Layout.prototype.printNoteHead = function(abselem, c, pitchelem, dir
 };
 
 ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width, abselem, roomtaken, dir, minPitch) {
-  var dec;
-  var compoundDec;	// PER: for decorations with two symbols
-  var diminuendo;
+    var dec;
+    var compoundDec;	// PER: for decorations with two symbols
+    var diminuendo;
     var crescendo;
-  var unknowndecs = [];
-  var yslot = (pitch>9) ? pitch+3 : 12;
-  var ypos;
-	//var dir = (this.stemdir==="down" || pitch>=6) && this.stemdir!=="up";
-	var below = false;	// PER: whether decoration goes above or below.
-	var yslotB = this.minY - 4; // (pitch<1) ? pitch-9 : -6;
-  var i;
-  roomtaken = roomtaken || 0;
-  if (pitch===5) yslot=14; // avoid upstem of the A
-	var addMark = false; // PER: to allow the user to add a class whereever
+    var unknowndecs = [];
+    var yslot = (pitch > 9) ? pitch + 3 : 12;
+    var ypos;
+    //var dir = (this.stemdir==="down" || pitch>=6) && this.stemdir!=="up";
+    var below = false;	// PER: whether decoration goes above or below.
+    var yslotB = -6; // neste ponto min-Y era sempre -2 - min-Y foi eliminado this.min-Y - 4; // (pitch<1) ? pitch-9 : -6;
+    var i;
+    roomtaken = roomtaken || 0;
+    if (pitch === 5)
+        yslot = 14; // avoid upstem of the A
+    var addMark = false; // PER: to allow the user to add a class whereever
 
-  for (i=0;i<decoration.length; i++) { // treat staccato and tenuto first (may need to shift other markers) //TODO, same with tenuto?
-    if (decoration[i]==="staccato" || decoration[i]==="tenuto") {
-		var symbol = "scripts." + decoration[i];
-      ypos = (dir==="down") ? pitch+2:minPitch-2;
-		// don't place on a stave line. The stave lines are 2,4,6,8,10
-		switch (ypos) {
-			case 2:
-			case 4:
-			case 6:
-			case 8:
-			case 10:
-					if (dir === "up") ypos--;
-					else ypos++;
-				break;
-		}
-      if (pitch>9) yslot++; // take up some room of those that are above
-      var deltax = width/2;
-      if (this.glyphs.getSymbolAlign(symbol)!=="center") {
-	deltax -= (this.glyphs.getSymbolWidth(dec)/2);
-      }
-      abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltax, this.glyphs.getSymbolWidth(symbol), ypos));
+    for (i = 0; i < decoration.length; i++) { // treat staccato and tenuto first (may need to shift other markers) //TODO, same with tenuto?
+        if (decoration[i] === "staccato" || decoration[i] === "tenuto") {
+            var symbol = "scripts." + decoration[i];
+            ypos = (dir === "down") ? pitch + 2 : minPitch - 2;
+            // don't place on a stave line. The stave lines are 2,4,6,8,10
+            switch (ypos) {
+                case 2:
+                case 4:
+                case 6:
+                case 8:
+                case 10:
+                    if (dir === "up")
+                        ypos--;
+                    else
+                        ypos++;
+                    break;
+            }
+            if (pitch > 9)
+                yslot++; // take up some room of those that are above
+            var deltax = width / 2;
+            if (this.glyphs.getSymbolAlign(symbol) !== "center") {
+                deltax -= (this.glyphs.getSymbolWidth(dec) / 2);
+            }
+            abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltax, this.glyphs.getSymbolWidth(symbol), ypos));
+        }
+        if (decoration[i] === "slide" && abselem.heads[0]) {
+            ypos = abselem.heads[0].pitch;
+            var blank1 = new ABCJS.write.RelativeElement("", -roomtaken - 15, 0, ypos - 1);
+            var blank2 = new ABCJS.write.RelativeElement("", -roomtaken - 5, 0, ypos + 1);
+            abselem.addChild(blank1);
+            abselem.addChild(blank2);
+            this.voice.addOther(new ABCJS.write.TieElem(blank1, blank2, false));
+        }
     }
-    if (decoration[i]==="slide" && abselem.heads[0]) {
-      ypos = abselem.heads[0].pitch;
-      var blank1 = new ABCJS.write.RelativeElement("", -roomtaken-15, 0, ypos-1);
-      var blank2 = new ABCJS.write.RelativeElement("", -roomtaken-5, 0, ypos+1);
-      abselem.addChild(blank1);
-      abselem.addChild(blank2);
-      this.voice.addOther(new ABCJS.write.TieElem(blank1, blank2, false));
-    }
-  }
 
-  for (i=0;i<decoration.length; i++) {
-	  below = false;
-    switch(decoration[i]) {
-    case "trill":dec="scripts.trill";break;
-    case "roll": dec="scripts.roll"; break; //TODO put abc2ps roll in here
-    case "irishroll": dec="scripts.roll"; break;
-    case "marcato": dec="scripts.umarcato"; break;
-    case "marcato2": dec="scriopts.dmarcato"; break;//other marcato
-    case "turn": dec="scripts.turn"; break;
-    case "uppermordent": dec="scripts.prall"; break;
-    case "mordent":
-    case "lowermordent": dec="scripts.mordent"; break;
-    case "staccato":
-    case "tenuto":
-    case "slide": continue;
-    case "downbow": dec="scripts.downbow";break;
-    case "upbow": dec="scripts.upbow";break;
-    case "fermata": dec="scripts.ufermata"; break;
-    case "invertedfermata": below = true; dec="scripts.dfermata"; break;
-    case "breath": dec=","; break;
-    case "accent": dec="scripts.sforzato"; break;
-    case "umarcato": dec="scripts.umarcato"; break;
-    case "coda": dec="scripts.coda"; break;
-    case "segno": dec="scripts.segno"; break;
-    case "/": compoundDec=["flags.ugrace", 1]; continue;	// PER: added new decorations
-    case "//": compoundDec=["flags.ugrace", 2]; continue;
-    case "///": compoundDec=["flags.ugrace", 3]; continue;
-    case "////": compoundDec=["flags.ugrace", 4]; continue;
-    case "p":
-    case "mp": 
-    case "pp":
-    case "ppp":
-    case "pppp":
-    case "f":
-    case "ff": 
-    case "fff": 
-    case "ffff":
-    case "sfz": 
-    case "mf":
-        var ddelem = new ABCJS.write.DynamicDecoration(abselem, decoration[i]);
-        this.voice.addOther(ddelem);
-        continue;
-		case "mark": addMark = true;  continue;
-        case "diminuendo(":
-			ABCJS.write.Layout.prototype.startDiminuendoX = abselem;
-            diminuendo = undefined;
-            continue;
-        case "diminuendo)":
-            diminuendo = { start: ABCJS.write.Layout.prototype.startDiminuendoX, stop: abselem};
-			ABCJS.write.Layout.prototype.startDiminuendoX = undefined;
-            continue;
-        case "crescendo(":
-			ABCJS.write.Layout.prototype.startCrescendoX = abselem;
-            crescendo = undefined;
-            continue;
-        case "crescendo)":
-            crescendo = { start: ABCJS.write.Layout.prototype.startCrescendoX, stop: abselem};
-			ABCJS.write.Layout.prototype.startCrescendoX = undefined;
-            continue;
-    default:
-    unknowndecs[unknowndecs.length]=decoration[i];
-    continue;
+    for (i = 0; i < decoration.length; i++) {
+        below = false;
+        switch (decoration[i]) {
+            case "trill":
+                dec = "scripts.trill";
+                break;
+            case "roll":
+                dec = "scripts.roll";
+                break; //TODO put abc2ps roll in here
+            case "irishroll":
+                dec = "scripts.roll";
+                break;
+            case "marcato":
+                dec = "scripts.umarcato";
+                break;
+            case "marcato2":
+                dec = "scriopts.dmarcato";
+                break;//other marcato
+            case "turn":
+                dec = "scripts.turn";
+                break;
+            case "uppermordent":
+                dec = "scripts.prall";
+                break;
+            case "mordent":
+            case "lowermordent":
+                dec = "scripts.mordent";
+                break;
+            case "staccato":
+            case "tenuto":
+            case "slide":
+                continue;
+            case "downbow":
+                dec = "scripts.downbow";
+                break;
+            case "upbow":
+                dec = "scripts.upbow";
+                break;
+            case "fermata":
+                dec = "scripts.ufermata";
+                break;
+            case "invertedfermata":
+                below = true;
+                dec = "scripts.dfermata";
+                break;
+            case "breath":
+                dec = ",";
+                break;
+            case "accent":
+                dec = "scripts.sforzato";
+                break;
+            case "umarcato":
+                dec = "scripts.umarcato";
+                break;
+            case "coda":
+                dec = "scripts.coda";
+                break;
+            case "segno":
+                dec = "scripts.segno";
+                break;
+            case "/":
+                compoundDec = ["flags.ugrace", 1];
+                continue;	// PER: added new decorations
+            case "//":
+                compoundDec = ["flags.ugrace", 2];
+                continue;
+            case "///":
+                compoundDec = ["flags.ugrace", 3];
+                continue;
+            case "////":
+                compoundDec = ["flags.ugrace", 4];
+                continue;
+            case "p":
+            case "mp":
+            case "pp":
+            case "ppp":
+            case "pppp":
+            case "f":
+            case "ff":
+            case "fff":
+            case "ffff":
+            case "sfz":
+            case "mf":
+                var ddelem = new ABCJS.write.DynamicDecoration(abselem, decoration[i]);
+                this.voice.addOther(ddelem);
+                continue;
+            case "mark":
+                addMark = true;
+                continue;
+            case "diminuendo(":
+                ABCJS.write.Layout.prototype.startDiminuendoX = abselem;
+                diminuendo = undefined;
+                continue;
+            case "diminuendo)":
+                diminuendo = {start: ABCJS.write.Layout.prototype.startDiminuendoX, stop: abselem};
+                ABCJS.write.Layout.prototype.startDiminuendoX = undefined;
+                continue;
+            case "crescendo(":
+                ABCJS.write.Layout.prototype.startCrescendoX = abselem;
+                crescendo = undefined;
+                continue;
+            case "crescendo)":
+                crescendo = {start: ABCJS.write.Layout.prototype.startCrescendoX, stop: abselem};
+                ABCJS.write.Layout.prototype.startCrescendoX = undefined;
+                continue;
+            default:
+                unknowndecs[unknowndecs.length] = decoration[i];
+                continue;
+        }
+        if (below) {
+            ypos = yslotB;
+            yslotB -= 4;
+        } else {
+            ypos = yslot;
+            yslot += 3;
+        }
+        var deltax = width / 2;
+        if (this.glyphs.getSymbolAlign(dec) !== "center") {
+            deltax -= (this.glyphs.getSymbolWidth(dec) / 2);
+        }
+        abselem.addChild(new ABCJS.write.RelativeElement(dec, deltax, this.glyphs.getSymbolWidth(dec), ypos));
     }
-	  if (below) {
-		  ypos = yslotB;
-		  yslotB -= 4;
-	  } else {
-		  ypos=yslot;
-		  yslot+=3;
-	  }
-    var deltax = width/2;
-    if (this.glyphs.getSymbolAlign(dec)!=="center") {
-      deltax -= (this.glyphs.getSymbolWidth(dec)/2);
+    if (compoundDec) {	// PER: added new decorations
+        ypos = (dir === 'down') ? pitch + 1 : pitch + 9;
+        deltax = width / 2;
+        deltax += (dir === 'down') ? -5 : 3;
+        for (var xx = 0; xx < compoundDec[1]; xx++) {
+            ypos -= 1;
+            abselem.addChild(new ABCJS.write.RelativeElement(compoundDec[0], deltax, this.glyphs.getSymbolWidth(compoundDec[0]), ypos));
+        }
     }
-    abselem.addChild(new ABCJS.write.RelativeElement(dec, deltax, this.glyphs.getSymbolWidth(dec), ypos));
-  }
-  if (compoundDec) {	// PER: added new decorations
-	  ypos = (dir === 'down') ? pitch+1:pitch+9;
-	  deltax = width/2;
-	  deltax += (dir === 'down') ? -5 : 3;
-	  for (var xx = 0; xx < compoundDec[1]; xx++) {
-		  ypos -= 1;
-		  abselem.addChild(new ABCJS.write.RelativeElement(compoundDec[0], deltax, this.glyphs.getSymbolWidth(compoundDec[0]), ypos));
-	  }
-  }
     if (diminuendo) {
         var delem = new ABCJS.write.CrescendoElem(diminuendo.start, diminuendo.stop, ">");
         this.voice.addOther(delem);
@@ -1116,15 +1201,15 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
         var celem = new ABCJS.write.CrescendoElem(crescendo.start, crescendo.stop, "<");
         this.voice.addOther(celem);
     }
-  if (unknowndecs.length>0)
-      abselem.addChild(new ABCJS.write.RelativeElement(unknowndecs.join(','), 0, 0, 0, {type:"debug"}));
-	return addMark;
+    if (unknowndecs.length > 0)
+        abselem.addChild(new ABCJS.write.RelativeElement(unknowndecs.join(','), 0, 0, 0, {type: "debug"}));
+    return addMark;
 };
 
 ABCJS.write.Layout.prototype.printBarLine = function (elem) {
 // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
 
-  var currClefType = this.tune.lines[this.tuneCurrLine].staff[this.tuneCurrStaff].clef.type;
+  var currClefType = this.tune.lines[this.tuneCurrLine].staffs[this.tuneCurrStaff].clef.type;
 
   var topbar = currClefType === "accordionTab" ? 19.5 : 10;
   var yDot   = currClefType === "accordionTab" ? 10.5 :  5;
@@ -1226,7 +1311,7 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
   case 'tenor-8':clef="clefs.C"; octave = -1; break;
   case 'bass-8': clef="clefs.F"; octave = -1; break;
   case 'alto-8': clef="clefs.C"; octave = -1; break;
-  case "accordionTab": clef="clefs.tab"; elem.stafflines = 4;break;
+  case "accordionTab": clef="clefs.tab"; break;
   case 'none': clef=""; break;
   case 'perc': clef="clefs.perc"; break;
   default: abselem.addChild(new ABCJS.write.RelativeElement("clef="+elem.type, 0, 0, 0, {type:"debug"}));
@@ -1241,16 +1326,6 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
     var adjustspacing = (this.glyphs.getSymbolWidth(clef)-this.glyphs.getSymbolWidth("8")*scale)/2;
     abselem.addRight(new ABCJS.write.RelativeElement("8", dx+adjustspacing, this.glyphs.getSymbolWidth("8")*scale, (octave>0)?16:-2, {scalex:scale, scaley:scale}));
   }
-  
-  // flavio - test for undefined
-  if (elem.stafflines===0) {
-    this.stafflines = 0;
-  } else if( typeof(elem.stafflines) === 'undefined')  {
-    this.stafflines = 5;
-  } else {
-    this.stafflines =elem.stafflines;
-  }
-  
   return abselem;
 };
 

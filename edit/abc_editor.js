@@ -37,18 +37,17 @@ if (!window.ABCJS.edit)
     
 
 window.ABCJS.edit.KeySelector = function(id) {
-  var transporter = new window.ABCJS.parse.Transport( 0 );  
-  //var staffKey = ["C","D","E","F","G","A","B"];  
-  
-  this.selector = document.getElementById(id);
-  if( this.selector ) {
-    for(var i = 0; i < transporter.number2key.length; i++) {
-        var opt = document.createElement('option');
-        opt.innerHTML = transporter.number2key[i];
-        opt.value = i;
-       this.selector.appendChild(opt);
-    }   
-}
+    var transporter = new window.ABCJS.parse.Transport(0);
+
+    this.selector = document.getElementById(id);
+    if (this.selector) {
+        for (var i = 0; i < transporter.number2key.length; i++) {
+            var opt = document.createElement('option');
+            opt.innerHTML = transporter.number2key[i];
+            opt.value = i;
+            this.selector.appendChild(opt);
+        }
+    }
 
 };
 
@@ -63,10 +62,6 @@ window.ABCJS.edit.KeySelector.prototype.set = function(value) {
     this.selector.value = value;
 };
 
-//window.ABCJS.edit.KeySelector.prototype.get = function() {
-//  return this.selector.value;
-//};
-
 window.ABCJS.edit.AccordionSelector = function(id) {
   this.selector = document.getElementById(id);
     };
@@ -77,7 +72,6 @@ window.ABCJS.edit.AccordionSelector.prototype.addChangeListener = function(edito
     editor.fireChanged( 0, "force" );
   };
 };
-
 
 window.ABCJS.edit.EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
@@ -318,7 +312,7 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
     this.bReentry = true;
     this.timerId = null;
     this.div.innerHTML = "";
-    var paper = Raphael(this.div, 1024, 700);
+    var paper = Raphael(this.div, 1100, 700);
     this.printer = new ABCJS.write.Printer(paper, this.printerparams, this.accordion);
     this.printer.printABC(this.tunes);
     if (ABCJS.midi.MidiWriter && this.mididiv) {
@@ -386,38 +380,6 @@ window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
         }
         if(this.keySelector) 
             this.keySelector.set( this.transporter.keyToNumber( this.transporter.getKeyVoice(0) ) );       
-    }
-    
-    // verifica se a linha zero tem tablatura para accordion
-    var staffTab = -1;
-    this.tunes[i].hasTablature = false;
-    this.tunes[i].tabStaffPos = -1;
-    for( var r = 0; r < this.tunes[i].lines[0].staff.length; r++ )  {
-       if(this.tunes[i].lines[0].staff[r].clef.type === "accordionTab") {
-           this.tunes[i].hasTablature = true;
-           this.tunes[i].tabStaffPos = r;
-           staffTab = r;
-       }
-    }
-    if( this.tunes[i].hasTablature ) { 
-      // necessário inferir a tablatura
-      if( this.tunes[i].lines[0].staff[staffTab].voices[0].length === 0 ) {
-        this.tunes[i].lines[0].staff[staffTab].inferTablature = true;
-        // para a tablatura de accordion, sempre se esperam 3 vozes (staffs): uma para melodia, uma para o baixo e a terceira para a tablatura
-        (staffTab !== 2) && this.warnings.push("+Warn: Accordion Tablature should be the 3rd staff!");
-        for( t = 1; t < this.tunes[i].lines.length; t ++ ) {
-           //se for necessário inferir a tablatura, garante que todas as linhas tenham uma staff apropriada
-           this.tunes[i].lines[t].staff[staffTab] = {
-               clef: this.tunes[i].lines[0].staff[staffTab].clef
-              ,key:this.tunes[i].lines[0].staff[staffTab].key
-              ,meter:null
-              ,inferTablature:true
-              ,subtitle:"" // para acompanhar as staffs normais: subtitulo só na primeira linha
-              ,voices:[[]]};
-        }
-      } else {
-        this.tunes[i].lines[0].staff[staffTab].inferTablature = false;
-      }
     }
     
     var warnings = abcParser.getWarnings() || [];

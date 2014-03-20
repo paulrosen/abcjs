@@ -58,13 +58,6 @@ window.ABCJS.parse.tokenizer = function() {
 			case 'E':return {len: i+1, token: 'E'};
 			case 'F':return {len: i+1, token: 'F'};
 			case 'G':return {len: i+1, token: 'G'};
-//			case 'a':return {len: i+1, token: 'A'};
-//			case 'b':return {len: i+1, token: 'B'};
-//			case 'c':return {len: i+1, token: 'C'};
-//			case 'd':return {len: i+1, token: 'D'};
-//			case 'e':return {len: i+1, token: 'E'};
-//			case 'f':return {len: i+1, token: 'F'};
-//			case 'g':return {len: i+1, token: 'G'};
 		}
 		return {len: 0};
 	};

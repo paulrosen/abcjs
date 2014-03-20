@@ -14,9 +14,17 @@ if (!window.ABCJS.parse)
     
 window.ABCJS.parse.Transport = function ( offSet_ ) {
     
-    alert('Tratar a duração e as ligaduras');
-
-    this.reset(offSet_);
+    this.reset = function(offSet_){
+        this.offSet           = offSet_;
+        this.currKey          = [];
+        this.newKeyAcc        = [];
+        this.oldKeyAcc        = [];
+        this.changedLines     = [];
+        this.newX             =  0;
+        this.workingX         =  0;
+        this.workingLine      = -1;
+        this.workingLineIdx  = -1;
+    };
     
     this.minNote        = 0x15; //  A0 = first note
     this.maxNote        = 0x6C; //  C8 = last note
@@ -35,41 +43,78 @@ window.ABCJS.parse.Transport = function ( offSet_ ) {
                 {note:"B", acc:""}
     ];
     
-    
-    //var test = [-3,14,-15,26,0,11,12,-12,-1];
-    //var test = [-13,-12,-1,0,1,11,12,14];
-    //for( t = 0; t < test.length; t++){
-    //    alert( test[t] + ' ' +this.extractCromaticNote(test[t]) + ' ' + this.extractCromaticOctave(test[t]) );
-    //}
+    this.reset(offSet_);
    
 };
 
-window.ABCJS.parse.Transport.prototype.reset = function(offSet_){
-    this.offSet           = offSet_;
-    this.currKey          = [];
-    this.newKeyAcc        = [];
-    this.oldKeyAcc        = [];
-    this.changedLines     = [];
-    this.newX             =  0;
-    this.workingX         =  0;
-    this.workingLine      = -1;
-    this.workingLineIdx  = -1;
+
+window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str, line, lineNumber) {
+
+    if( str !== line ) alert( "window.ABCJS.parse.Transport.prototype.TransposeRegularMusicLine: isto não devia acontecer! ");
+    
+    var index = 0;
+    var found = false;
+    var inside = false;
+    var state = 0;
+    var lastState = 0;
+    var xi = -1;
+    var xf = -1;
+    var accSyms = "^_=";  // state 1
+    var pitSyms = "ABCDEFGabcdefg"; // state 2
+    var octSyms = ",\'"; // state 3
+    var exclusionSyms = "!+"; 
+    var exclusionZone = false;
+    
+    this.workingLine = line;
+    this.workingLineIdx = this.changedLines.length;
+    this.changedLines[ this.workingLineIdx ] = { line:lineNumber, text: line };
+    this.workingX = 0;
+    this.newX =0;
+    
+    while (index < line.length) {
+        found = false;
+        inside = false;
+        lastState = 0;
+        while (index < line.length && !found) {
+
+            // ignora o conteúdo de accents
+            if( exclusionSyms.indexOf(line.charAt(index)) >= 0 ) {
+                var nextPos = line.substr( index+1 ).indexOf(line.charAt(index));
+                if( nextPos < 0 ) {
+                    index = line.length;
+                } else {
+                    index += nextPos + 2;
+                }
+                continue;
+            }
+            
+            state = 
+              accSyms.indexOf(line.charAt(index)) >= 0 ? 1 : 
+              pitSyms.indexOf(line.charAt(index)) >= 0 ? 2 :
+              octSyms.indexOf(line.charAt(index)) >= 0 ? 3 : 0;
+            
+            if( ( state < lastState && inside ) || (lastState === 2 && state === 2 && inside ) ) {
+               found = true;
+               xf = index;
+            } else if( state > lastState && !inside) {
+              inside = true;
+              xi = index;
+            }
+            
+            lastState = state;
+            state = 0;
+            
+            if (found) {
+                this.transposeNote(xi, xf - xi);
+            } else {
+              index++;
+            }   
+        }
+    }
+    return this.changedLines[ this.workingLineIdx ].text;
 };
 
-window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str, line, lineNumber){
-  // apenas registra a linha que será alterada, nota a nota
-  
-  //este teste é uma precaução: caso a str que está sendo analisada seja diferente da linha original, as notas
-  // transpostas ficarão em local indevido
-  if( str !== line ) alert( "window.ABCJS.parse.Transport.prototype.TransposeRegularMusicLine: isto não devia acontecer! ");
-  this.workingX = 0;
-  this.newX =0;
-  this.workingLine = line;
-  this.workingLineIdx = this.changedLines.length;
-  this.changedLines[ this.workingLineIdx ] = { line:lineNumber, text: "" };
-};
-
-window.ABCJS.parse.Transport.prototype.transposeNote = function(elem, xi, size)
+window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size)
 {
 /*
  * Staff        Cromatic        F            Cromatic  Staff      F#
@@ -82,29 +127,16 @@ window.ABCJS.parse.Transport.prototype.transposeNote = function(elem, xi, size)
  *  D#   8      2        1       0   1       4         E   0      1  1   =E 
  *  E    9      4        0       0   1       5         F   0      1  1   =F
  *  
- *  Parei no ponto onde se verificam as diferenças (d=abs(Kf-a)) entre o acidente da nova nota e o acidente da nova clave
- *
- *      <-  nota
- *      <-  clave ->
- *          nota  ->
- *
  */
-  if(elem.rest) {
-    var newElem  = window.ABCJS.parse.clone(elem);
-    var p0 = this.changedLines[this.workingLineIdx].text.substr( 0, this.newX ); 
-    var p1 = this.workingLine.substr(this.workingX); 
-    this.newX += ((xi+size)-this.workingX);
-    this.workingX = xi + size;
-    this.changedLines[this.workingLineIdx].text = p0 + p1;
-    return newElem;    
-      
-  } 
+
   
-  var pitch    = elem.pitches[0].pitch;
+  var abcNote  = this.workingLine.substr(xi, size);
+  var elem     = this.makeElem(abcNote);
+  var pitch    = elem.pitch;
   var oct      = this.extractStaffOctave(pitch);
   var crom     = this.staffNoteToCromatic(this.extractStaffNote(pitch));
 
-  var txtAcc   = elem.pitches[0].accidental;  
+  var txtAcc   = elem.accidental;  
   var dAcc     = this.getAccOffset(txtAcc);
   
   var dKi      = this.getKeyAccOffset(this.numberToKey(crom), this.oldKeyAcc);
@@ -123,14 +155,14 @@ window.ABCJS.parse.Transport.prototype.transposeNote = function(elem, xi, size)
   
   if( dAcc === 0 ) {
     if( dKf === 0)  
-      delete newElem.pitches[0].accidental;
+      delete newElem.accidental;
     else
-      newElem.pitches[0].accidental =  'natural';
+      newElem.accidental =  'natural';
   } else if( dKf === 0 && dAcc !== 0 ) {
-    newElem.pitches[0].accidental = newStaff.acc;
+    newElem.accidental = newStaff.acc;
   } else { //both had value
     if((dAcc - dKf) === 0 ) { // they are the simetric
-      delete newElem.pitches[0].accidental;
+      delete newElem.accidental;
     } else { // they are oposed -- não tratei todos os casos
       if( pitch === 0 ) throw "decreasing zero pitch"; 
       pitch --;
@@ -138,19 +170,19 @@ window.ABCJS.parse.Transport.prototype.transposeNote = function(elem, xi, size)
       dAcc = dKf;
       dKf  = this.getKeyAccOffset(this.numberToKey(crom), this.newKeyAcc);
       if( dKf === 0 ) {
-        newElem.pitches[0].accidental = this.getAccName(dAcc);
+        newElem.accidental = this.getAccName(dAcc);
       } else {
-        delete newElem.pitches[0].accidental;
+        delete newElem.accidental;
       }
     }  
   }
 
-  newElem.pitches[0].pitch = pitch;
+  newElem.pitch = pitch;
   
   oct  = this.extractStaffOctave(pitch);
   var key = this.numberToKey(this.staffNoteToCromatic(this.extractStaffNote(pitch)));
-  txtAcc = newElem.pitches[0].accidental;
-  var abcNote = this.getAbcNote(key,txtAcc,oct);
+  txtAcc = newElem.accidental;
+  abcNote = this.getAbcNote(key,txtAcc,oct);
   var p0 = this.changedLines[this.workingLineIdx].text.substr( 0, this.newX ); 
   var p1 = this.workingLine.substr( this.workingX, xi-this.workingX ); 
   var p2 = this.workingLine.substr( xi + size ); 
@@ -174,65 +206,49 @@ window.ABCJS.parse.Transport.prototype.getAbcNote = function( key, txtAcc, oct) 
    return this.accNameToABC(txtAcc) + key + cOct;
 };
 
-window.ABCJS.parse.Transport.prototype.getPitch = function( staff, octave) {
-   return this.pitches[staff] + (octave - 4) * 7; 
+window.ABCJS.parse.Transport.prototype.registerKey = function ( tokenizer, str ) {
+    var cKey = "C";
+    var tokens = tokenizer.tokenize(str, 0, str.length);
+    var retPitch = tokenizer.getKeyPitch(tokens[0].token);
+
+    if (retPitch.len > 0) {
+        // The accidental and mode might be attached to the pitch, so we might want to just remove the first character.
+        cKey = retPitch.token;
+        if (tokens[0].token.length > 1)
+            tokens[0].token = tokens[0].token.substring(1);
+        else
+            tokens.shift();
+        // We got a pitch to start with, so we might also have an accidental and a mode
+        if (tokens.length > 0) {
+            var retAcc = tokenizer.getSharpFlat(tokens[0].token);
+            if (retAcc.len > 0) {
+                cKey += retAcc.token;
+            }
+        }
+    }
+    
+    this.currKey[this.currKey.length] = cKey;
+    
+    return cKey;
 };
 
 window.ABCJS.parse.Transport.prototype.transposeKey = function ( tokenizer, str, line, lineNumber ) {
-    var tokens = tokenizer.tokenize(str, 0, str.length);
     
-    var pitch = tokenizer.getKeyPitch(tokens[0].token);
-    if( pitch.len === 0 ) {
-        return tokens;
-    }
-    var cKey = tokens[0].token;
-    
-    if( tokens.length > 1 ) {
-       var retAcc = tokenizer.getSharpFlat(tokens[1].token);        
-    
-       if( retAcc.len > 0 ) {
-          cKey += retAcc.token;
-       }
-    }
-    
+    var cKey = this.registerKey( tokenizer, str );
     var newKey = this.keyToNumber( cKey );
     var cNewKey = this.denormalizeAcc( this.numberToKey(newKey + this.offSet ));
-    var newStr  = str.replace(cKey, cNewKey );
-
-    this.currKey[this.currKey.length] = cNewKey;
-
-    tokens = tokenizer.tokenize(newStr, 0, newStr.length);
     
+    this.currKey[this.currKey.length-1] = cNewKey;
+
+    var newStr  = str.replace(cKey, cNewKey );
     var newLine = line.substr( 0, line.indexOf(str) ) + newStr;
     
     this.changedLines[ this.changedLines.length ] = { line:lineNumber, text: newLine };
+
     this.oldKeyAcc = window.ABCJS.parse.parseKeyVoice.standardKey(cKey);
     this.newKeyAcc = window.ABCJS.parse.parseKeyVoice.standardKey(cNewKey);
     
-    return tokens;
-};
-
-window.ABCJS.parse.Transport.prototype.registerKey = function ( tokenizer, str ) {
-    //alert( 'verificar quando não começa em C')
-    var tokens = tokenizer.tokenize(str, 0, str.length);
-    
-    var pitch = tokenizer.getKeyPitch(tokens[0].token);
-    if( pitch.len === 0 ) {
-        this.currKey[this.currKey.length] = "C";
-        return tokens;
-    }
-    var cKey = tokens[0].token;
-    
-    if( tokens.length > 1 ) {
-       var retAcc = tokenizer.getSharpFlat(tokens[1].token);        
-    
-       if( retAcc.len > 0 ) {
-          cKey += retAcc.token;
-       }
-    }
-  
-    this.currKey[this.currKey.length] = cKey;
-    
+    return tokenizer.tokenize(newStr, 0, newStr.length);
 };
 
 window.ABCJS.parse.Transport.prototype.updateEditor = function ( lines ) {
@@ -268,8 +284,6 @@ window.ABCJS.parse.Transport.prototype.getKeyAccOffset = function(note, keyAcc)
   }
   return 0;    
 };
-    
-
                
 window.ABCJS.parse.Transport.prototype.staffNoteToCromatic = function (note) {
   return note*2 + (note>2?-1:0);
@@ -377,9 +391,55 @@ window.ABCJS.parse.Transport.prototype.accNameToABC = function(txtAcc)
     return ret;
 };
 
+window.ABCJS.parse.Transport.prototype.accAbcToName = function(abc)
+// a partir do nome do acidente, retorna o offset no modelo cromatico
+{
+    var ret = "";
+
+    switch (abc) {
+        case '^^':
+            ret = "dblsharp";
+            break;
+        case '^':
+            ret = 'sharp';
+            break;
+        case '=':
+            ret = "natural";
+            break;
+        case '_':
+            ret = 'flat';
+            break;
+        case '__':
+            ret = 'dblflat';
+            break;
+    }
+    return ret;
+};
+
 window.ABCJS.parse.Transport.prototype.getAccName = function(offset)
 {
     var names = ['dblflat','flat','natural','sharp','dblsharp'];
     return names[offset+2];
 };
 
+window.ABCJS.parse.Transport.prototype.getPitch = function( staff, octave) {
+   return this.pitches[staff] + (octave - 4) * 7; 
+};
+
+window.ABCJS.parse.Transport.prototype.makeElem = function(abcNote){
+   var pitSyms = "ABCDEFGabcdefg"; // 2
+   var i = 0;
+   while( pitSyms.indexOf(abcNote.charAt(i)) === -1 ) {
+       i++;
+   }
+   var acc = this.accAbcToName(abcNote.substr(0,i));
+   var pitch = this.pitches[abcNote.charAt(i)];
+   while( i < abcNote.length ) {
+      switch ( abcNote.charAt(i) ) {
+          case "'": pitch +=7; break;
+          case "," : pitch -=7; break;
+      }
+      i++;
+   }
+   return ( acc ? { pitch: pitch, accidental: acc } : { pitch: pitch } );
+};
