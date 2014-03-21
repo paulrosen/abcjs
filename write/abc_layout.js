@@ -100,6 +100,8 @@ ABCJS.write.Layout.prototype.layoutABCLine = function( abctune, line ) {
         var abcstaff = this.tune.lines[this.tuneCurrLine].staffs[this.tuneCurrStaff];
         var header = "";
         
+        if(!abcstaff) continue ;
+        
         if (abcstaff.bracket)
             header += "bracket " + abcstaff.bracket + " ";
         if (abcstaff.brace)
@@ -128,11 +130,13 @@ ABCJS.write.Layout.prototype.layoutABCLine = function( abctune, line ) {
                 this.voice.addChild(this.printClef(abcstaff.clef));
                 this.voice.addChild(new ABCJS.write.AbsoluteElement(abcstaff.key, 0, 10));
                 (abcstaff.meter) && this.voice.addChild(this.printTablatureSignature(abcstaff.meter));
-                this.printABCVoice();
+                //this.printABCVoice();
                 if (abcstaff.inferTablature) {
                    if(this.accordion) {
                        this.inferTabVoice();
-                       if(this.voice.otherchildren) this.voice.otherchildren = []; 
+                       //tablatura não possui ties - por hora estou eliminando - talvez tenha q usar
+                       this.voice.otherchildren = [];
+                       this.voice.beams = [];
                    } else {
                        alert( "Accordion not defined: cannot infer tablature!");
                    }
@@ -177,7 +181,7 @@ ABCJS.write.Layout.prototype.inferTabVoice = function() {
     
 ABCJS.write.Layout.prototype.generateTab = function() {
     var count = 0;
-    var limit = 6; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
+    var limit = 5; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
     var offset = -6.4; // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
     
     this.voice.lastButton = -1;
@@ -234,7 +238,10 @@ ABCJS.write.Layout.prototype.generateTab = function() {
             }
             // segunda passada: altera o que será exibido, conforme definições da primeira passada
             for (var c = 0; c < column.length; c++) {
-                if (c !== baixo && column[c].c.substr(0,5) !== "rests") {
+                if( column[c].c.substr(0,4) === "dots" || column[c].c.substr(0,5) === "rests" ) {
+                    if(!closing && c!==baixo)
+                        column[c].pitch += offset;
+                } else if ( c!==baixo ){
                     if (!closing) {
                         column[c].pitch += offset;
                         column[c].c = this.elegeBotao( column[c].buttons.open  );
@@ -311,7 +318,7 @@ ABCJS.write.Layout.prototype.mergeNotesFromTrebleNBass = function() {
             idxBass = bassVoice? bassVoice.children.length : 0;
             continue;
         }
-        if (!bassVoice) {
+        if (!bassVoice || !absBassElem ) {
             idxTreb++;
             this.voice.addChild(absTrebElem);
         } else {
@@ -319,7 +326,7 @@ ABCJS.write.Layout.prototype.mergeNotesFromTrebleNBass = function() {
                 idxTreb++;
                 idxBass++;
                 if (absBassElem.abcelem.el_type === 'bar' && absTrebElem.abcelem.el_type === 'bar') {
-                    this.voice.addChild(absBassElem);
+                    this.voice.addChild(absTrebElem);
                 } else if (absBassElem.abcelem.el_type === 'bar') {
                     this.voice.addChild(absTrebElem);
                     idxBass--;
@@ -364,60 +371,86 @@ ABCJS.write.Layout.prototype.mergeNotesFromTrebleNBass = function() {
 };
 
 //retorna um elemento absoluto para a tablatura
-ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos, isTreble, keyAcc ) {
-  
+ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos, isTreble, keyAcc) {
+
     var abselem = new ABCJS.write.AbsoluteElement(the_elem, 0, 0);
     var acc = {};
+
+    //tablatura não possui ties - por hora estou eliminando - talvez tenha q usar
+    if (abselem.abcelem.pitches) {
+        for (var i = 0; i < abselem.abcelem.pitches.length; i++) {
+            delete abselem.abcelem.pitches[i].startTie;
+            delete abselem.abcelem.pitches[i].endTie;
+        }
+    }
     switch (the_elem.el_type) {
         case "note":
-            
+
             abselem = this.printNote(the_elem, true, false);
             r = 0;
-            while ( r < abselem.children.length ) {
+            while (r < abselem.children.length) {
                 ch = abselem.children[r];
-                if(ch.c &&  ch.c.substr(0,11) === "accidentals") {
-                  acc[ch.pitch] = this.accordion.transporter.getAccOffset(ch.c);
+                if (ch.c && ch.c.substr(0, 11) === "accidentals") {
+                    acc[ch.pitch] = this.accordion.transporter.getAccOffset(ch.c);
                 }
-                if( ! ch.c || ( ch.c.substr(0,9) !== 'noteheads' && ch.c.substr(0,5) !== 'rests' ) )
-                   abselem.children.splice(r,1); 
+                if (!ch.c || (ch.c.substr(0, 9) !== 'noteheads' && ch.c.substr(0, 5) !== 'rests' && ch.c.substr(0, 4) !== 'dots'))
+                    abselem.children.splice(r, 1);
                 else
-                   r++;
+                    r++;
             }
-            
-            if(abselem.children[0].c.substr(0,9) === 'noteheads') {
-               var qtd = abselem.children.length;
-               if(isTreble) {
-                 for(var c = 0; c < qtd; c ++) {
-                   var note = this.accordion.extractCromaticNote(abselem.children[c].pitch, verticalPos, acc, keyAcc);
-                   abselem.children[c].buttons = this.accordion.getButtons(note);
-                   abselem.children[c].note = note;
-                   abselem.children[c].c = note;
-                   var d = (qtd-1)-c; // pela organização da accordion as notas graves ficam melhor se impressas antes, admitindo que foi escrito em ordem crescente no arquivo abc
-                   abselem.children[c].pitch = (qtd===1?11.7:qtd===2?10.6+d*2.5:9.7+d*2.1);
-                   abselem.children[c].type = "tabText" + (qtd>1?qtd:"");
-                 }
-               } else {
-                   if(qtd > 1 ) {
-                     // TODO: keep track of minor chords (and 7th)
-                     var note = this.accordion.identifyChord(abselem.children, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
-                     abselem.children.splice(1,qtd-1);
-                   } else {
-                     var note = this.accordion.extractCromaticNote(abselem.children[0].pitch, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
-                   }
-                   abselem.children[0].buttons = this.accordion.getButtons(note);
-                   abselem.children[0].note = note;
-                   // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
-                   abselem.children[0].c = note.substr(0, note.length-1);
-                   abselem.children[0].pitch = 17.5;
-                   abselem.children[0].type = 'tabText';
-                   abselem.children[0].bass = true;
-               }
-            } else if(abselem.children[0].c.substr(0,5) === 'rests' ) {
-                abselem.children[0].pitch = isTreble ?  13.5 : 19;
+
+            var qtd = abselem.children.length;
+            var note = "";
+            if (abselem.abcelem.pitches) {
+                if (isTreble) {
+                    for (var c = 0; c < qtd; c++) {
+                        var d = (qtd - 1) - c; // pela organização da accordion as notas graves ficam melhor se impressas antes, admitindo que foi escrito em ordem crescente no arquivo abc
+                        if (abselem.children[c].c === "dots.dot") {
+                            abselem.children[c].pitch = (qtd === 1 ? 11.7 : qtd === 2 ? 10.6 + d * 2.5 : 9.7 + d * 2.1);
+                        } else {
+                            note = this.accordion.extractCromaticNote(abselem.children[c].pitch, verticalPos, acc, keyAcc);
+                            abselem.children[c].buttons = this.accordion.getButtons(note);
+                            abselem.children[c].note = note;
+                            abselem.children[c].c = note;
+                            abselem.children[c].pitch = (qtd === 1 ? 11.7 : qtd === 2 ? 10.6 + d * 2.5 : 9.7 + d * 2.1);
+                            abselem.children[c].type = "tabText" + (qtd > 1 ? qtd : "");
+                        }
+                    }
+                } else {
+                    for (var c = 0; c < qtd; c++) {
+                        if (abselem.children[c].c === "dots.dot") {
+                            abselem.children[c].pitch = isTreble ? 13.5 : 19;
+                        } else {
+                            if (qtd > 1) {
+                                // TODO: keep track of minor chords (and 7th)
+                                note = this.accordion.identifyChord(abselem.children, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
+                                abselem.children.splice(1, qtd - 1);
+                            } else {
+                                note = this.accordion.extractCromaticNote(abselem.children[0].pitch, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
+                            }
+                            abselem.children[0].buttons = this.accordion.getButtons(note);
+                            abselem.children[0].note = note;
+                            // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
+                            abselem.children[0].c = note.substr(0, note.length - 1);
+                            abselem.children[0].pitch = 17.5;
+                            abselem.children[0].type = 'tabText';
+                            abselem.children[0].bass = true;
+                        }
+                    }
+                }
+            } else if (abselem.abcelem.rest) {
+                for (var c = 0; c < qtd; c++) {
+                    if (abselem.children[c].c === "dots.dot") {
+                        abselem.children[c].pitch = isTreble ? 13.5 : 19;
+                    } else {
+                        abselem.children[c].pitch = isTreble ? 13.5 : 19;
+                    }
+                }
             }
-            break
+            break;
         case "bar":
-            if( isTreble ) break;
+            if (!isTreble)
+                break;
             abselem = this.printBarLine(the_elem);
             if (this.voice.duplicate)
                 abselem.invisible = true;
@@ -1331,9 +1364,10 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
 
 
 ABCJS.write.Layout.prototype.printKeySignature = function(elem) {
+  if(!elem.key) throw "Missing key element!";
   var abselem = new ABCJS.write.AbsoluteElement(elem.key,0,10);
   var dx = 0;
-  if (elem.key.accidentals) {
+  if ( elem.key.accidentals) {
 	  window.ABCJS.parse.each(elem.key.accidentals, function(acc) {
 		var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
     		//var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };

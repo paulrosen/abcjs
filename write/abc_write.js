@@ -28,8 +28,7 @@ ABCJS.write.spacing.FONTEM = 360;
 ABCJS.write.spacing.FONTSIZE = 30;
 ABCJS.write.spacing.STEP = ABCJS.write.spacing.FONTSIZE*(93)/720;
 ABCJS.write.spacing.SPACE = 10;
-ABCJS.write.spacing.VSPACE = 10; // was 20;
-ABCJS.write.spacing.TOPNOTE = 10; // was 20
+ABCJS.write.spacing.TOPNOTE = 10; 
 ABCJS.write.spacing.STAVEHEIGHT = 100;
 
 

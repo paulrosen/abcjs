@@ -158,31 +158,25 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
     this.height = 0;
    
     for (i = 0; i < this.voices.length; i++) {
-        var shiftabove = this.voices[i].stave.highest +2;
-        var shiftbelow = this.voices[i].stave.lowest -2;
-        var ht = 0;
-        if (i > 0 && this.voices[i].stave.subtitle) {
-            ht = 7 * ABCJS.write.spacing.STEP;
-            y += ht;
-        }
-
+        var shiftabove = Math.max( this.voices[i].stave.highest, ABCJS.write.spacing.TOPNOTE) 
+                            - ABCJS.write.spacing.TOPNOTE + 4; 
         var h = 0;
-        if (this.voices[i].stave.clef.type === "accordionTab") {
-            this.voices[i].stave.top = y;
-            this.voices[i].stave.y = y + 13.5 * ABCJS.write.spacing.STEP;
-            h += 21.5 * ABCJS.write.spacing.STEP;
-        } else {
-            this.voices[i].stave.top = y;
-            this.voices[i].stave.y = y + (shiftabove > ABCJS.write.spacing.TOPNOTE ? shiftabove - ABCJS.write.spacing.TOPNOTE + 2 : 2) * ABCJS.write.spacing.STEP;
-            h += (shiftabove - shiftbelow) * ABCJS.write.spacing.STEP;
+        
+        if (i > 0 && this.voices[i].stave.subtitle) {
+            h += 7 * ABCJS.write.spacing.STEP;
+            y += h;
         }
 
-        // cria espaço para as linhas de texto
-        h += ABCJS.write.spacing.STEP * 5 * this.voices[i].stave.lyricsRows;
+        this.voices[i].stave.top = y;
+        this.voices[i].stave.y = y + shiftabove * ABCJS.write.spacing.STEP;
+        // calculo da altura da stave
+        h += (this.voices[i].stave.highest - this.voices[i].stave.lowest +4) * ABCJS.write.spacing.STEP;
+        // inclui espaço para as linhas de texto
+        h += ABCJS.write.spacing.STEP * 8 * this.voices[i].stave.lyricsRows;
 
+        this.height += h;
+        
         y += h;
-        this.height += ht + h;
-        y += ABCJS.write.spacing.VSPACE;
         this.voices[i].stave.bottom = y;
     }
 
@@ -216,14 +210,13 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         }  
         printer.printStave(this.startx, this.w, this.voices[i].stave);
     }
-
-    printer.y = this.y + this.height 
-       + ABCJS.write.spacing.STAVEHEIGHT * 0.2 + ABCJS.write.spacing.VSPACE*3*printer.scale; //espaco entre os grupos de pautas
+    
+    //espaco entre os grupos de pautas
+    printer.y = this.y + this.height + ABCJS.write.spacing.STEP*8*printer.scale; 
     
 };
 
 ABCJS.write.VoiceElement = function(voicenumber, abcstaff) {
-    var numLines = (abcstaff.clef.type === "accordionTab" ) ? 4 : abcstaff.clef.staffLines || 5;
     this.children = [];
     this.beams = [];
     this.otherchildren = []; // ties, slurs, triplets
@@ -232,13 +225,15 @@ ABCJS.write.VoiceElement = function(voicenumber, abcstaff) {
     this.voicenumber = voicenumber; //number of the voice on a given stave (not staffgroup)
     this.voicetotal = abcstaff.voices.length;
     this.stave = {
-        top: 0
-       ,highest: 0
-       ,lowest: 5
+        y: 0
+       ,top: 0
+       ,bottom: 0
        ,clef: abcstaff.clef
-       ,numLines: numLines
        ,subtitle: abcstaff.subtitle
        ,lyricsRows: abcstaff.lyricsRows
+       ,highest: (abcstaff.clef.type === "accordionTab" ) ? 19.5 : 10
+       ,lowest: (abcstaff.clef.type === "accordionTab" ) ? 0 : 0
+       ,numLines: (abcstaff.clef.type === "accordionTab" ) ? 4 : abcstaff.clef.staffLines || 5
     };
 };
 
@@ -573,7 +568,7 @@ ABCJS.write.TieElem = function(anchor1, anchor2, above, forceandshift) {
     // move by +7 "up" by -7 if "down"
 };
 
-ABCJS.write.TieElem.prototype.draw = function(printer, linestartx, lineendx) {
+ABCJS.write.TieElem.prototype.draw = function(printer, linestartx, lineendx, staveInfo) {
 
     var startpitch;
     var endpitch;
