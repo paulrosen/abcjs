@@ -179,103 +179,6 @@ ABCJS.write.Layout.prototype.inferTabVoice = function() {
     this.generateTab();
 };
     
-ABCJS.write.Layout.prototype.generateTab = function() {
-    var count = 0;
-    var limit = 5; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
-    var offset = -6.4; // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
-    
-    this.voice.lastButton = -1;
-
-    for (var i = 0; i < this.voice.children.length; i++) {
-        var allOpen = true;
-        var allClose = true;
-        var wasClosing = false;
-        var closing = true;
-        var bidirecional = false;
-        var baixo = -1;
-        if (this.voice.children[i].abcelem.el_type === "note") {
-            var column = this.voice.children[i].children;
-            // primeira passada: identifica o baixo, define direcao, verifica se notas estao conforme baixo.
-            for (var c = 0; c < column.length; c++) {
-                if (column[c].bass) {
-                    baixo = c;
-                    bidirecional = typeof (column[c].buttons.close) !== "undefined" && typeof (column[c].buttons.open) !== "undefined";
-                    closing = bidirecional ? closing : typeof (column[c].buttons.close) !== "undefined";
-                    if (wasClosing === closing) {
-                        if (count >= limit && bidirecional) {
-                            count = 1;
-                            closing = !closing;
-                            wasClosing = closing;
-                        } else {
-                            // pode ser que a contagem esteja alem de limit mas o baixo não permite inverter.
-                            count++;
-                        }
-                    } else {
-                        count = 1;
-                        wasClosing = closing;
-                    }
-                } else {
-                    if(typeof (column[c].buttons) !== "undefined" ) {
-                        allOpen = allOpen ? typeof (column[c].buttons.open) !== "undefined" : false;
-                        allClose = allClose ? typeof (column[c].buttons.close) !== "undefined" : false;
-                    }
-                }
-            }
-            if (closing && allClose) {
-                // keep close
-            } else if (!closing && allOpen) {
-                // keep open
-            } else if (!closing && allClose && (bidirecional || baixo === -1)) {
-                count = 1;
-                closing = !closing;
-                wasClosing = closing;
-            } else if (closing && allOpen && (bidirecional || baixo === -1)) {
-                count = 1;
-                closing = !closing;
-                wasClosing = closing;
-            } else {
-                // impasse: o baixo não é compativel com todas notas
-            }
-            // segunda passada: altera o que será exibido, conforme definições da primeira passada
-            for (var c = 0; c < column.length; c++) {
-                if( column[c].c.substr(0,4) === "dots" || column[c].c.substr(0,5) === "rests" ) {
-                    if(!closing && c!==baixo)
-                        column[c].pitch += offset;
-                } else if ( c!==baixo ){
-                    if (!closing) {
-                        column[c].pitch += offset;
-                        column[c].c = this.elegeBotao( column[c].buttons.open  );
-                    } else {
-                        column[c].c = this.elegeBotao( column[c].buttons.close );
-                    }
-                }
-            }
-        }
-    }
-    delete this.voice.lastButton;
-
-};
-
-// tenta encontrar o botão mais próximo do último
-ABCJS.write.Layout.prototype.elegeBotao = function( array ) {
-    if(typeof(array) === "undefined" ) return "x";
-
-    var b    = array[0];
-    var v    = parseInt(isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2));
-    var min  = Math.abs(v-this.voice.lastButton);
-    
-    for( var a = 1; a < array.length; a ++ ) {
-        v    = parseInt(isNaN(array[a].substr(0,2))? array[a].substr(0,1): array[a].substr(0,2));
-        if( Math.abs(v-this.voice.lastButton) < min ) {
-           b = array[a];
-           min  = Math.abs(v-this.voice.lastButton);
-        }
-    }
-    this.voice.lastButton = parseInt( isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2) );
-    return b;
-};
-
-
 ABCJS.write.Layout.prototype.mergeNotesFromTrebleNBass = function() {
     
     if( this.tune.tabStaffPos < 1 ) return; // we expect to find at leas a melody line above tablature, otherwise, we cannot infer it.
@@ -376,7 +279,9 @@ ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos, i
     var abselem = new ABCJS.write.AbsoluteElement(the_elem, 0, 0);
     var acc = {};
 
-    //tablatura não possui ties - por hora estou eliminando - talvez tenha q usar
+    //tablatura não possui varios elementos - por hora estou eliminando - talvez tenha q usar
+    delete abselem.abcelem.decoration;
+    
     if (abselem.abcelem.pitches) {
         for (var i = 0; i < abselem.abcelem.pitches.length; i++) {
             delete abselem.abcelem.pitches[i].startTie;
@@ -388,63 +293,63 @@ ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos, i
 
             abselem = this.printNote(the_elem, true, false);
             r = 0;
+            var note = "";
+            var aNotes = [];
+            
             while (r < abselem.children.length) {
                 ch = abselem.children[r];
-                if (ch.c && ch.c.substr(0, 11) === "accidentals") {
+                if (!ch.c || (ch.c.substr(0, 9) !== 'noteheads' && ch.c.substr(0, 5) !== 'rests' && ch.c.substr(0, 4) !== 'dots')) {
+                    abselem.children.splice(r, 1);
+                    continue;
+                }
+                if (ch.c.substr(0, 4) === "dots" ) {  
+                    if( abselem.children[r+1].c.substr(0,5) === "rests" ) {
+                        abselem.children[r].pitch = isTreble ? 13.5 : 19;
+                    } else {
+                        abselem.children.splice(r, 1);
+                        continue;
+                    }
+                }
+                if (ch.c.substr(0, 5) === "rests") {
+                    abselem.children[r].pitch = isTreble ? 13.5 : 19;
+                }
+                
+                if (ch.c.substr(0, 9) === 'noteheads') {
+                    aNotes[aNotes.length] = r;
+                }
+
+                if (ch.c.substr(0, 11) === "accidentals") {
                     acc[ch.pitch] = this.accordion.transporter.getAccOffset(ch.c);
                 }
-                if (!ch.c || (ch.c.substr(0, 9) !== 'noteheads' && ch.c.substr(0, 5) !== 'rests' && ch.c.substr(0, 4) !== 'dots'))
-                    abselem.children.splice(r, 1);
-                else
-                    r++;
+                r++;
             }
-
-            var qtd = abselem.children.length;
-            var note = "";
-            if (abselem.abcelem.pitches) {
-                if (isTreble) {
-                    for (var c = 0; c < qtd; c++) {
-                        var d = (qtd - 1) - c; // pela organização da accordion as notas graves ficam melhor se impressas antes, admitindo que foi escrito em ordem crescente no arquivo abc
-                        if (abselem.children[c].c === "dots.dot") {
-                            abselem.children[c].pitch = (qtd === 1 ? 11.7 : qtd === 2 ? 10.6 + d * 2.5 : 9.7 + d * 2.1);
-                        } else {
-                            note = this.accordion.extractCromaticNote(abselem.children[c].pitch, verticalPos, acc, keyAcc);
-                            abselem.children[c].buttons = this.accordion.getButtons(note);
-                            abselem.children[c].note = note;
-                            abselem.children[c].c = note;
-                            abselem.children[c].pitch = (qtd === 1 ? 11.7 : qtd === 2 ? 10.6 + d * 2.5 : 9.7 + d * 2.1);
-                            abselem.children[c].type = "tabText" + (qtd > 1 ? qtd : "");
-                        }
-                    }
-                } else {
-                    for (var c = 0; c < qtd; c++) {
-                        if (abselem.children[c].c === "dots.dot") {
-                            abselem.children[c].pitch = isTreble ? 13.5 : 19;
-                        } else {
-                            if (qtd > 1) {
-                                // TODO: keep track of minor chords (and 7th)
-                                note = this.accordion.identifyChord(abselem.children, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
-                                abselem.children.splice(1, qtd - 1);
-                            } else {
-                                note = this.accordion.extractCromaticNote(abselem.children[0].pitch, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
-                            }
-                            abselem.children[0].buttons = this.accordion.getButtons(note);
-                            abselem.children[0].note = note;
-                            // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
-                            abselem.children[0].c = note.substr(0, note.length - 1);
-                            abselem.children[0].pitch = 17.5;
-                            abselem.children[0].type = 'tabText';
-                            abselem.children[0].bass = true;
-                        }
-                    }
-                }
-            } else if (abselem.abcelem.rest) {
+            
+            var qtd = aNotes.length;
+            if (isTreble) {
                 for (var c = 0; c < qtd; c++) {
-                    if (abselem.children[c].c === "dots.dot") {
-                        abselem.children[c].pitch = isTreble ? 13.5 : 19;
-                    } else {
-                        abselem.children[c].pitch = isTreble ? 13.5 : 19;
-                    }
+                    var d = (qtd - 1) - c; // pela organização da accordion as notas graves ficam melhor se impressas antes, admitindo que foi escrito em ordem crescente no arquivo abc
+                    note = this.accordion.extractCromaticNote(abselem.children[aNotes[c]].pitch, verticalPos, acc, keyAcc);
+                    abselem.children[aNotes[c]].buttons = this.accordion.getButtons(note);
+                    abselem.children[aNotes[c]].note = note;
+                    abselem.children[aNotes[c]].c = note;
+                    abselem.children[aNotes[c]].pitch = (qtd === 1 ? 11.7 : qtd === 2 ? 10.6 + d * 2.5 : 9.7 + d * 2.1);
+                    abselem.children[aNotes[c]].type = "tabText" + (qtd > 1 ? qtd : "");
+                }
+            } else {
+                if(qtd > 0 ) {
+                    note = this.accordion.extractCromaticNote(abselem.children[aNotes[0]].pitch, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
+                    if (qtd > 1) {
+                        abselem.children.splice(1, qtd - 1);
+                        // TODO: keep track of minor chords (and 7th)
+                        // note = this.accordion.identifyChord(abselem.children, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
+                    } 
+                    abselem.children[0].buttons = this.accordion.getButtons(note);
+                    abselem.children[0].note = note;
+                    // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
+                    abselem.children[0].c = note.substr(0, note.length - 1);
+                    abselem.children[0].pitch = 17.5;
+                    abselem.children[0].type = 'tabText';
+                    abselem.children[0].bass = true;
                 }
             }
             break;
@@ -460,6 +365,103 @@ ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos, i
     }
     return abselem;
 };
+
+ABCJS.write.Layout.prototype.generateTab = function() {
+    var count = 0;
+    var limit = 5; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
+    var offset = -6.4; // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
+    
+    this.voice.lastButton = -1;
+
+    for (var i = 0; i < this.voice.children.length; i++) {
+        var allOpen = true;
+        var allClose = true;
+        var wasClosing = false;
+        var closing = true;
+        var bidirecional = false;
+        var baixo = -1;
+        if (this.voice.children[i].abcelem.el_type === "note") {
+            var column = this.voice.children[i].children;
+            // primeira passada: identifica o baixo, define direcao, verifica se notas estao conforme baixo.
+            for (var c = 0; c < column.length; c++) {
+                if (column[c].bass) {
+                    baixo = c;
+                    bidirecional = typeof (column[c].buttons.close) !== "undefined" && typeof (column[c].buttons.open) !== "undefined";
+                    closing = bidirecional ? closing : typeof (column[c].buttons.close) !== "undefined";
+                    if (wasClosing === closing) {
+                        if (count >= limit && bidirecional) {
+                            count = 1;
+                            closing = !closing;
+                            wasClosing = closing;
+                        } else {
+                            // pode ser que a contagem esteja alem de limit mas o baixo não permite inverter.
+                            count++;
+                        }
+                    } else {
+                        count = 1;
+                        wasClosing = closing;
+                    }
+                } else {
+                    if(typeof (column[c].buttons) !== "undefined" ) {
+                        allOpen = allOpen ? typeof (column[c].buttons.open) !== "undefined" : false;
+                        allClose = allClose ? typeof (column[c].buttons.close) !== "undefined" : false;
+                    }
+                }
+            }
+            if (closing && allClose) {
+                // keep close
+            } else if (!closing && allOpen) {
+                // keep open
+            } else if (!closing && allClose && (bidirecional || baixo === -1)) {
+                count = 1;
+                closing = !closing;
+                wasClosing = closing;
+            } else if (closing && allOpen && (bidirecional || baixo === -1)) {
+                count = 1;
+                closing = !closing;
+                wasClosing = closing;
+            } else {
+                // impasse: o baixo não é compativel com todas notas
+            }
+            // segunda passada: altera o que será exibido, conforme definições da primeira passada
+            for (var c = 0; c < column.length; c++) {
+                if( column[c].c.substr(0,4) === "dots" || column[c].c.substr(0,5) === "rests" ) {
+                    if(!closing && c!==baixo)
+                        column[c].pitch += offset;
+                } else if ( c!==baixo ){
+                    if (!closing) {
+                        column[c].pitch += offset;
+                        column[c].c = this.elegeBotao( column[c].buttons.open  );
+                    } else {
+                        column[c].c = this.elegeBotao( column[c].buttons.close );
+                    }
+                }
+            }
+        }
+    }
+    delete this.voice.lastButton;
+
+};
+
+// tenta encontrar o botão mais próximo do último
+ABCJS.write.Layout.prototype.elegeBotao = function( array ) {
+    if(typeof(array) === "undefined" ) return "x";
+
+    var b    = array[0];
+    var v    = parseInt(isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2));
+    var min  = Math.abs(v-this.voice.lastButton);
+    
+    for( var a = 1; a < array.length; a ++ ) {
+        v    = parseInt(isNaN(array[a].substr(0,2))? array[a].substr(0,1): array[a].substr(0,2));
+        if( Math.abs(v-this.voice.lastButton) < min ) {
+           b = array[a];
+           min  = Math.abs(v-this.voice.lastButton);
+        }
+    }
+    this.voice.lastButton = parseInt( isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2) );
+    return b;
+};
+
 
 // tentativa de tornar iguais os compassos da melodia e do baixo, para a tablatura ficar melhor
 ABCJS.write.Layout.prototype.addMissingRest = function(p_duration)
