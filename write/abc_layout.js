@@ -188,6 +188,10 @@ ABCJS.write.Layout.prototype.mergeNotesFromTrebleNBass = function() {
     var bassDuration = 0;
     var idxTreb = this.voice.children.length;
     var idxBass = this.voice.children.length;
+    var remainingBass = undefined;
+    var remainingTreb = undefined;
+    var inTieBass = false;
+    var inTieTreb = false;
     
     var trebVoice  = this.staffgroup.voices[0];
     var accTrebKey = this.tune.lines[this.tuneCurrLine].staffs[0].key.accidentals;
@@ -223,54 +227,88 @@ ABCJS.write.Layout.prototype.mergeNotesFromTrebleNBass = function() {
         }
         if (!bassVoice || !absBassElem ) {
             idxTreb++;
-            this.voice.addChild(absTrebElem);
+            this.addTABChild(absTrebElem, inTieTreb, inTieBass);
+            inTieTreb = typeof( absTrebElem.abcelem.inTie ) === "undefined"? inTieTreb : absTrebElem.abcelem.inTie; 
         } else {
             if (balance === 0) {
                 idxTreb++;
                 idxBass++;
                 if (absBassElem.abcelem.el_type === 'bar' && absTrebElem.abcelem.el_type === 'bar') {
-                    this.voice.addChild(absTrebElem);
+                    this.addTABChild(absTrebElem, inTieTreb, inTieBass);
                 } else if (absBassElem.abcelem.el_type === 'bar') {
-                    this.voice.addChild(absTrebElem);
+                    this.addTABChild(absTrebElem, inTieTreb, inTieBass);
                     idxBass--;
                 } else if (absTrebElem.abcelem.el_type === 'bar') {
-                    this.voice.addChild(absBassElem);
+                    this.addTABChild(absBassElem, inTieTreb, inTieBass);
                     idxTreb--;
                 } else if (bassDuration > trebDuration) {
+                    remainingBass = this.cloneChildren(absBassElem.children);
                     for (var c = 0; c < absBassElem.children.length; c++) {
                         absTrebElem.children.push(absBassElem.children[c]);
                     }
-                    this.voice.addChild(absTrebElem);
+                    this.addTABChild(absTrebElem, inTieTreb, inTieBass);
+                } else if( bassDuration < trebDuration) {
+                    remainingTreb = this.cloneChildren(absTrebElem.children);
+                    for (var c = 0; c < absTrebElem.children.length; c++) {
+                        absBassElem.children.push(absTrebElem.children[c]);
+                    }
+                    this.addTABChild(absBassElem, inTieTreb, inTieBass);
                 } else {
                     for (var c = 0; c < absTrebElem.children.length; c++) {
                         absBassElem.children.push(absTrebElem.children[c]);
                     }
-                    this.voice.addChild(absBassElem);
+                    this.addTABChild(absBassElem, inTieTreb, inTieBass);
                 }
             } else if (balance > 0) {
                 if (absTrebElem.abcelem.el_type === 'bar') {
                     // encontrou nota faltando na melodia - preenche com pausas
                     trebVoice.children.splice(idxTreb, 0, this.addMissingRest(balance));
+                    this.addTABChild(this.addMissingRest(balance), inTieTreb, inTieBass);
                     idxTreb++;
                     trebDuration += balance;
                 } else {
-                    this.voice.addChild(absTrebElem);
+                    if(remainingBass) {
+                        for (var c = 0; c < remainingBass.length; c++) {
+                            absTrebElem.children.push(remainingBass[c]);
+                        }
+                        delete remainingBass;
+                    }
+                    this.addTABChild(absTrebElem, inTieTreb, inTieBass);
                     idxTreb++;
                 }
             } else {
                 if (absBassElem.abcelem.el_type === 'bar') {
                     // encontrou nota faltando no baixo - preenche com pausas
                     bassVoice.children.splice(idxBass, 0, this.addMissingRest(-balance));
+                    this.addTABChild(this.addMissingRest(-balance), inTieTreb, inTieBass);
                     idxBass++;
                     bassDuration -= balance;
                 } else {
-                    this.voice.addChild(absBassElem);
+                    if(remainingTreb) {
+                        for (var c = 0; c < remainingTreb.length; c++) {
+                            absBassElem.children.push(remainingTreb[c]);
+                        }
+                        delete remainingTreb;
+                    }
+                    this.addTABChild(absBassElem, inTieTreb, inTieBass);
                     idxBass++;
                 }
             }
             balance = bassDuration - trebDuration;
+            inTieBass = typeof( absBassElem.abcelem.inTie ) === "undefined"? inTieBass : absBassElem.abcelem.inTie; 
+            inTieTreb = typeof( absTrebElem.abcelem.inTie ) === "undefined"? inTieTreb : absTrebElem.abcelem.inTie; 
         }
     }
+};
+
+ABCJS.write.Layout.prototype.addTABChild = function(child, inTieTreb, inTieBass) {
+  if(inTieTreb) {
+      child.inTieTreb = true;
+  }
+  if(inTieBass) {
+      child.inTieBass = true;
+  }
+  this.voice.addChild(child);
 };
 
 //retorna um elemento absoluto para a tablatura
@@ -284,8 +322,14 @@ ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos, i
     
     if (abselem.abcelem.pitches) {
         for (var i = 0; i < abselem.abcelem.pitches.length; i++) {
-            delete abselem.abcelem.pitches[i].startTie;
-            delete abselem.abcelem.pitches[i].endTie;
+            if(abselem.abcelem.pitches[i].startTie) {
+              delete abselem.abcelem.pitches[i].startTie;
+              abselem.abcelem.inTie = true;
+            }  
+            if(abselem.abcelem.pitches[i].endTie) {
+              delete abselem.abcelem.pitches[i].endTie;
+              abselem.abcelem.inTie = false;
+            }  
         }
     }
     switch (the_elem.el_type) {
@@ -337,12 +381,13 @@ ABCJS.write.Layout.prototype.printTABElement = function(the_elem, verticalPos, i
                 }
             } else {
                 if(qtd > 0 ) {
-                    note = this.accordion.extractCromaticNote(abselem.children[aNotes[0]].pitch, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
                     if (qtd > 1) {
-                        abselem.children.splice(1, qtd - 1);
                         // TODO: keep track of minor chords (and 7th)
-                        // note = this.accordion.identifyChord(abselem.children, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
-                    } 
+                        note = this.accordion.identifyChord(abselem.children, aNotes, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
+                        abselem.children.splice(1, qtd - 1);
+                    } else {
+                      note = this.accordion.extractCromaticNote(abselem.children[aNotes[0]].pitch, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
+                    }
                     abselem.children[0].buttons = this.accordion.getButtons(note);
                     abselem.children[0].note = note;
                     // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
@@ -382,6 +427,7 @@ ABCJS.write.Layout.prototype.generateTab = function() {
         var baixo = -1;
         if (this.voice.children[i].abcelem.el_type === "note") {
             var column = this.voice.children[i].children;
+            var inTieTreb = this.voice.children[i].inTieTreb;
             // primeira passada: identifica o baixo, define direcao, verifica se notas estao conforme baixo.
             for (var c = 0; c < column.length; c++) {
                 if (column[c].bass) {
@@ -431,9 +477,16 @@ ABCJS.write.Layout.prototype.generateTab = function() {
                 } else if ( c!==baixo ){
                     if (!closing) {
                         column[c].pitch += offset;
-                        column[c].c = this.elegeBotao( column[c].buttons.open  );
+                        if(! column[c].remaining && !inTieTreb )
+                          column[c].c = this.elegeBotao( column[c].buttons.open  );
+                        else
+                          column[c].c = '--->'
+                            
                     } else {
-                        column[c].c = this.elegeBotao( column[c].buttons.close );
+                        if(! column[c].remaining && !inTieTreb )
+                          column[c].c = this.elegeBotao( column[c].buttons.close );
+                        else
+                          column[c].c = '--->'
                     }
                 }
             }
@@ -462,6 +515,22 @@ ABCJS.write.Layout.prototype.elegeBotao = function( array ) {
     return b;
 };
 
+ABCJS.write.Layout.prototype.cloneChildren = function(source) {
+
+    var destination = [];
+    for(var r = 0; r<source.length;r++)
+       var o = source[r];
+       var cp = new ABCJS.write.RelativeElement(o.c, o.dx, o.w, o.pitch, {type:o.type, pitch2:o.pitch2, linewidth:o.linewidth, attributes:o.attributes});
+       cp.note = o.note;
+       cp.buttons = o.buttons;
+       if(o.bass) cp.bass = o.bass;
+       cp.c = '--->';
+       cp.remaining = true;
+       destination[destination.length] =  cp;
+    return destination;
+};
+
+
 
 // tentativa de tornar iguais os compassos da melodia e do baixo, para a tablatura ficar melhor
 ABCJS.write.Layout.prototype.addMissingRest = function(p_duration)
@@ -473,6 +542,32 @@ ABCJS.write.Layout.prototype.addMissingRest = function(p_duration)
         endChar: 0,
         maxpitch: 7,
         minpitch: 7,
+        rest: {type: 'rest'},
+        startChar: 0
+    };
+
+    return this.printNote(the_elem, true, false);
+
+};
+
+ABCJS.write.Layout.prototype.addContinuation = function(p_duration)
+{
+    var the_elem = new ABCJS.write.RelativeElement('note', 0, 0, 18, 
+      {type:"tabTtext", attributes:{"font-weight":"bold", "font-size":""+16*this.printer.scale+"px", "font-family":"serif"}});
+   
+                    abselem.children[aNotes[c]].buttons = this.accordion.getButtons(note);
+                    abselem.children[aNotes[c]].note = note;
+                    abselem.children[aNotes[c]].c = note;
+                    abselem.children[aNotes[c]].pitch = (qtd === 1 ? 11.7 : qtd === 2 ? 10.6 + d * 2.5 : 9.7 + d * 2.1);
+                    abselem.children[aNotes[c]].type = "tabText" + (qtd > 1 ? qtd : "");
+  
+    var the_elem = {
+        averagepitch: 5,
+        duration: p_duration,
+        el_type: 'note',
+        endChar: 0,
+        maxpitch: 5,
+        minpitch: 5,
         rest: {type: 'rest'},
         startChar: 0
     };

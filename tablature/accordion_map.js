@@ -70,9 +70,9 @@ ABCJS.tablature.Accordion.prototype.getButtons = function (note) {
   return {open:this.noteToButtonsOpen[note],close:this.noteToButtonsClose[note]};    
 };
 
-ABCJS.tablature.Accordion.prototype.identifyChord = function (children, verticalPos, acc, keyAcc, transpose) {
+ABCJS.tablature.Accordion.prototype.identifyChord = function (children, aNotes, verticalPos, acc, keyAcc, transpose) {
 //TODO: tratar adequadamente os acordes (de baixo)      
-    var note = this.extractCromaticNote(children[0].pitch, verticalPos, acc, keyAcc, transpose );
+    var note = this.extractCromaticNote(children[aNotes[0]].pitch, verticalPos, acc, keyAcc, transpose );
     return children.length > 1 ? note.toLowerCase() : note;
 };
 
