@@ -199,6 +199,8 @@ window.ABCJS.parse.tokenizer = function() {
 										return {len: 3, token: "bar_right_repeat"};
 								}
 								break;
+							case ':':	// :|:
+								return {len: 3, token: "bar_dbl_repeat"};
 							case '|':	// :||
 								++i;
 								if (line.charAt(i) === ':')  return {len: 4, token: "bar_dbl_repeat"};

@@ -35,11 +35,46 @@
              done: Tablatura: gerar mesmo sem o baixo
              done: Layout:    Revisar a impressão dos elementos ending, accents e lyrics
              done: Layout:    Revisar a de linhas de texto, quando há mais de uma linha
+             done: Tablatura: imprimir os de pausas adequadamente no baixo
         
              Tablatura: melhorar a relação open/close do fole na melodia
-             Tablatura: imprimir os de pausas adequadamente no baixo
              Tablatura: combinar tempos de notas da melodia com notas do baixo
              Tablatura: revisar a impressão de múltiplas notas na mesma coluna
+        
+        
+        
+           Definição da sintaxe para tablatura
+        
+           " |: G1/2 +5'2g-6>-5 | G-3'2d-5d-[678]1/2 | G+5d-5d-> | G-xd-5d-6 | +{786'}2 | +11/2 | c+ac+b |"
+        
+           Linha de tablatura ::= { <comentario> | <barra> | <coluna> }*
+        
+           comentario := "%[texto]"
+
+           barra ::=  "|", "||", ":|", "|:", ":|:", ":||:", "::", ":||", ":||", "[|", "|]", "|[|", "|]|" 
+        
+           coluna ::=  { [<baixo>]<melodia> }*
+        
+           baixo ::=  <singleBassNote>[<duration>] 
+        
+           singleBassNote ::=  { "abcdefgABCDEFG>x" }
+        
+           duration ::=  number|fracao 
+        
+           melodia ::= <bellows><note>[<duration>]
+          
+           bellows ::= "-"|"+" 
+        
+           note ::= <button>[<row>] | chord | groupedNotes 
+        
+           chord ::= "[" {<note>}* "]" 
+        
+           groupedNotes ::= "{" {<note>}* "}"
+        
+           button ::=  {hexDigit} | "x" | ">"
+        
+           row ::= { "'" }*
+        
         -->
 	<title>Draw The Dots: Tune Editor demo</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
@@ -71,6 +106,8 @@
         <script type="text/javascript" src="tablature/accordion.hohner.gc.js"></script>
         <script type="text/javascript" src="tablature/accordion.hohner.clubIIIM.br.js"></script>
         <script type="text/javascript" src="tablature/accordion_map.js"></script>
+        <script type="text/javascript" src="tablature/accordion_layout.js"></script>
+        <script type="text/javascript" src="tablature/accordion_parse.js"></script>
         
  	<script type="text/javascript" src="edit/abc_editor.js" ></script>
         
@@ -88,6 +125,14 @@
         <input type="checkbox" id="chkAutoRefresh"></input>Auto refresh 
         <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();"></input>Debug
 
+<textarea id="abc" cols="120" rows="10" style="display:true; float:left;">
+%%scale 1.0
+X:1
+L:1/8
+M:2/4
+%|: c2BA | c2B2 | c-cB2 |
+</textarea>
+
 <textarea id="abcx" cols="120" rows="10" style="display:none; float:left;">
 %%scale 1.0
 X:1
@@ -98,14 +143,27 @@ C:(transcrição: Bernard Loffet)
 Q:"Allegro" 1/4=164
 L:1/8
 M:2/4
+%|: c2BA | c2B2 | c-cB2 |
+%|: C,2[C,2E,2G,2] | C,[G,,B,,D,] C,[G,,B,,D,] | G,,2[G,,2B,,2D,2] |
 V:melodia
 K:C treble 
-%|: [c2e2g2]BA | [G2B2]AB | +<(+ cBcd +<)+|  +>(+ e2c2 +>)+ | c2BA | G2AB | c2d2 | c2z2  :|
-|: !pp! [c2e2g2]BA | [G2B2]AB |  cBcd |  e2c2  | c2BA | G2AB | c2d2 | c2z2  :|
-w:J'ai vu le loup la re-nard la ba-le-tte * J'ai  vu le loup la  re-nard dan-ser
-%|: c2d2 | e2f2 | e2d2 | e2z2 |  c2cB | A2AG | A2B2 |1 A2G2 :|2 c2z2  | 
-|: c2d2 | e2f2 | e2d2 | e2z2 |1 +<(+ c2c'B | A2AG | A2B2 +<)+| +>(+ A2G2 +>)+ :|2 c2z2  | 
-w:J'ai vu le loup la re-nard la ba-le-tte * J'ai  vu le loup la  re-nard dan-ser
+|: c2BA | G2AB |  cBcd |  e2c2  | c2BA | G2AB | c2d2 | c2z2  :|
+%(Chorus)
+w:J'ai vu le loup la re-na-rd la ba-le-tte J'ai  vu le loup la  re-nard dan-ser
+|: c2d2 | e2f2 | e2d2 | e2z2 | c2cB | A2AG | A2B2 |1 A2G2 :|2 c2z2  | 
+w:Je les ai vue taper leurs mains Je les ai vue ta-per le-urs ma-ins pieds
+%Je les ai vue taper leurs pieds
+%Je les ai vue taper leurs pieds
+%(Chorus 2x)
+%Je les ai vue qu'ils s’embrassaient
+%Je les ai vue qu'ils s’embrassaient
+%Je les ai vue qu'ils se caressaient
+%Je les ai vue qu'ils se caressaient
+%(Chorus 2x)
+%Je les ai vue avec une enfant
+%Je les ai vue avec une enfant
+%Merci bon dieu c'était pas la mienne
+%Merci bon dieu c'était pas la mienne
 V:baixo
 K:C bass
 |: C,2[C,2E,2G,2] | C,2[G,,2B,,2D,2] | G,,2[G,,2B,,2D,2] | C,2[C,2E,2G,2] | C,2[C,2E,2G,2] \
@@ -116,7 +174,7 @@ V:tablatura
 K:none accordionTab
 </textarea>
 
-<textarea id="abc" cols="120" rows="10" style="display:true; float:left;">
+<textarea id="abcx" cols="120" rows="10" style="display:none; float:left;">
 X:1
 T:Maitia, nun zira?
 C:Folclore Basco
@@ -153,6 +211,10 @@ K:none accordionTab
 
                 window.onload = function() {
                     debug=false;
+                    
+                    p = new ABCJS.tablature.Parse();
+                    p.parse();
+                    
                     myEditor = new ABCJS.Editor(
                             "abc", { 
                                  canvas_id: "canvas"

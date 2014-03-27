@@ -162,6 +162,10 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
                             - ABCJS.write.spacing.TOPNOTE + 4; 
         var h = 0;
         
+//        if (i > 0 && this.voices[i].stave.clef.type === "accordionTab") {
+//            this.voices[i].stave.lowest = 0;
+//        }
+        
         if (i > 0 && this.voices[i].stave.subtitle) {
             h += 7 * ABCJS.write.spacing.STEP;
             y += h;
@@ -172,10 +176,9 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         // calculo da altura da stave
         h += (this.voices[i].stave.highest - this.voices[i].stave.lowest +4) * ABCJS.write.spacing.STEP;
         // inclui espaço para as linhas de texto
-        h += ABCJS.write.spacing.STEP * 8 * this.voices[i].stave.lyricsRows;
+        h += ABCJS.write.spacing.STEP * 7 * this.voices[i].stave.lyricsRows;
 
         this.height += h;
-        
         y += h;
         this.voices[i].stave.bottom = y;
     }
@@ -203,10 +206,15 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         printer.y = this.voices[i].stave.y;
         if( debug ) {
           printer.printDebugLine(this.startx, this.w, this.voices[i].stave.y, "#ff0000"); 
+          printer.printDebugMsg( this.startx-5, this.voices[i].stave.y, 'y' );
           printer.printDebugLine(this.startx, this.w, this.voices[i].stave.top, "#00ff00"); 
+          printer.printDebugMsg( this.startx-5, this.voices[i].stave.top, 'top' );
           printer.printDebugLine(this.startx, this.w, this.voices[i].stave.bottom, "#00ff00"); 
+          printer.printDebugMsg( this.startx+50, this.voices[i].stave.bottom, 'bottom' );
           printer.printDebugLine(this.startx, this.w, printer.calcY(this.voices[i].stave.highest), "#0000ff"); 
+          printer.printDebugMsg( this.w-50, printer.calcY(this.voices[i].stave.highest), 'highest' );
           printer.printDebugLine(this.startx, this.w, printer.calcY(this.voices[i].stave.lowest), "#0000ff"); 
+          printer.printDebugMsg( this.w-50, printer.calcY(this.voices[i].stave.lowest), 'lowest' );
         }  
         printer.printStave(this.startx, this.w, this.voices[i].stave);
     }

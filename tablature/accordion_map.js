@@ -32,6 +32,16 @@ ABCJS.tablature.Accordion = function( selector ) {
 
 };
 
+ABCJS.tablature.Accordion.prototype.inferTabVoice = function( abc_layouter ) {
+    this.layouter = new ABCJS.tablature.Layout(abc_layouter);
+    
+    this.layouter.mergeNotesFromTrebleNBass();
+    //this.layouter.generateTab();
+    //tablatura não possui ties - por hora estou eliminando - talvez tenha q usar
+    abc_layouter.voice.otherchildren = [];
+    abc_layouter.voice.beams = [];
+};
+
 ABCJS.tablature.Accordion.prototype.load = function (sel) {
         this.selected = sel;
         this.noteToButtonsOpen  = {}; 
@@ -50,20 +60,28 @@ ABCJS.tablature.Accordion.prototype.load = function (sel) {
     }
     
     var nRows = this.accordions[this.selected].keyboard.keys.close.length;
-       
+     
+    // as notas de baixo não se repetem em oitavas diferentes, então, para simplificar, são ignoradas
     for( var r = 0; r < this.accordions[this.selected].keyboard.basses.open.length; r ++ ) {
         var rowOpen = this.accordions[this.selected].keyboard.basses.open[r];
         var rowClose = this.accordions[this.selected].keyboard.basses.close[r];
         
         for(var button = 0; button < rowOpen.length; button++) {
-           if(! this.noteToButtonsOpen[ rowOpen[button]] )  this.noteToButtonsOpen[rowOpen[button]] = [];
-           this.noteToButtonsOpen[rowOpen[button]].push( (button+1) + Array(nRows+r+1).join("'"));
-           if(! this.noteToButtonsClose[ rowClose[button]] )  this.noteToButtonsClose[rowClose[button]] = [];
-           this.noteToButtonsClose[rowClose[button]].push( (button+1) + Array(nRows+r+1).join("'"));
+           var b = this.getBassNote( rowOpen[button] );
+           if(! this.noteToButtonsOpen[ b ] )  this.noteToButtonsOpen[ b ] = [];
+           this.noteToButtonsOpen[ b ].push( (button+1) + Array(nRows+r+1).join("'"));
+           b = this.getBassNote( rowClose[button] );
+           if(! this.noteToButtonsClose[ b ] )  this.noteToButtonsClose [ b ] = [];
+           this.noteToButtonsClose[ b ].push( (button+1) + Array(nRows+r+1).join("'"));
         }
     }
 
 };
+
+ABCJS.tablature.Accordion.prototype.getBassNote = function (note) {
+    var n = note.split(":");
+    return n[0].substr( 0, n[0].length-1);
+}
 
 ABCJS.tablature.Accordion.prototype.getButtons = function (note) {
 // retorna a lista de botões possíveis para uma nota cromatica

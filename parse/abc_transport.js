@@ -50,7 +50,8 @@ window.ABCJS.parse.Transport = function ( offSet_ ) {
 
 window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str, line, lineNumber) {
 
-    if( str !== line ) alert( "window.ABCJS.parse.Transport.prototype.TransposeRegularMusicLine: isto não devia acontecer! ");
+    if( str.trim() !== line.trim() ) 
+        alert( "window.ABCJS.parse.Transport.prototype.TransposeRegularMusicLine: isto não devia acontecer!\nstr.:"+str+".\nline:"+line+".");
     
     var index = 0;
     var found = false;

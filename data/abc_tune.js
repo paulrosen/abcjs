@@ -360,11 +360,13 @@ window.ABCJS.data.Tune = function(/*transporter_*/) {
         
         // verifica se a linha zero tem tablatura para accordion
         var staffTab = -1;
-        for (var r = 0; r < this.lines[0].staffs.length; r++) {
-            if (this.lines[0].staffs[r].clef.type === "accordionTab") {
-                this.hasTablature = true;
-                this.tabStaffPos = r;
-                staffTab = r;
+        if(this.lines.length > 0) {
+            for (var r = 0; r < this.lines[0].staffs.length; r++) {
+                if (this.lines[0].staffs[r].clef.type === "accordionTab") {
+                    this.hasTablature = true;
+                    this.tabStaffPos = r;
+                    staffTab = r;
+                }
             }
         }
         if (this.hasTablature) {

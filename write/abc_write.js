@@ -140,15 +140,15 @@ ABCJS.write.Printer.prototype.endGroup = function () {
 ABCJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
     if(staff.numLines === 4) {
       // para 3 elementos  
-      this.printStaveLine(startx,endx,2); 
-      this.printStaveLine(startx,endx,8.5); 
+      this.printStaveLine(startx,endx,2); // 2
+      this.printStaveLine(startx,endx,8.5); // 8.5
       
       // para 1 ou 2 elementos
       //this.printStaveLine(startx,endx,0); 
       //this.printStaveLine(startx,endx,5); 
       
-      this.printStaveLine(startx,endx,15); 
-      this.printStaveLine(startx,endx,19.5); 
+      this.printStaveLine(startx,endx,15); // 15
+      this.printStaveLine(startx,endx,19.5); // 19.5
     } else {
       for (var i = 0; i < staff.numLines; i++) {
         this.printStaveLine(startx,endx,(i+1)*2);
@@ -267,7 +267,7 @@ ABCJS.write.Printer.prototype.printSymbol = function(x, offset, symbol, scalex, 
 	elemset.push(el);
 	dx+=this.glyphs.getSymbolWidth(symbol.charAt(i));
       } else {
-	this.debugMsg(x, 10, "no symbol:" +symbol);
+	this.printDebugMsg(x, this.calcY(offset), "no symbol:" +symbol);
       }
     }
     if (this.scale!==1) {
@@ -286,7 +286,7 @@ ABCJS.write.Printer.prototype.printSymbol = function(x, offset, symbol, scalex, 
 	}
 	return el;
       } else
-	this.debugMsg(x, 10, "no symbol:" +symbol);
+	this.printDebugMsg(x, this.calcY(offset), "no symbol:" +symbol);
     }
     return null;    
   }
@@ -333,8 +333,7 @@ ABCJS.write.Printer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) 
   return ret;
 };
 
-ABCJS.write.Printer.prototype.debugMsg = function(x, ypos, msg ) {
-    var y = this.calcY(ypos);
+ABCJS.write.Printer.prototype.printDebugMsg = function(x, y, msg ) {
   return this.paper.text(x, y, msg).scale(this.scale, this.scale, 0, 0);
 };
 
@@ -410,6 +409,9 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 };
 
 ABCJS.write.Printer.prototype.printTune = function(abctune) {
+    
+    if( abctune.lines.length === 0 ) return;
+    
     this.layouter = new ABCJS.write.Layout( this, abctune.formatting.bagpipes );
     if (abctune.media === 'print') {
         // TODO create the page the size of
