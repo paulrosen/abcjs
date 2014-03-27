@@ -374,6 +374,7 @@ window.ABCJS.data.Tune = function(/*transporter_*/) {
             if (this.lines[0].staffs[staffTab].voices[0].length === 0) {
                 this.lines[0].staffs[staffTab].inferTablature = true;
                 // para a tablatura de accordion, sempre se esperam 3 vozes (staffs): uma para melodia, uma para o baixo e a terceira para a tablatura
+                // opcionalmente, a linha de baixo, não precisa existir
                 (staffTab === 0) && this.warnings.push("+Warn: Accordion Tablature should not be the first staff!");
                 for (t = 1; t < this.lines.length; t++) {
                     //se for necessário inferir a tablatura, garante que todas as linhas tenham uma staff apropriada

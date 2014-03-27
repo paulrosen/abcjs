@@ -19,6 +19,7 @@ ABCJS.tablature.Layout.prototype.mergeNotesFromTrebleNBass = function() {
     
     if( this.abcLayouter.tune.tabStaffPos < 1 ) return; // we expect to find at least the melody line above tablature, otherwise, we cannot infer it.
     
+    this.producedLine = "";
     this.count = 0;
     this.limit = 5; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
     this.lastButton = -1;

@@ -456,8 +456,9 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune, 
 							this.resolveTempo();
 							var result = window.ABCJS.parse.parseKeyVoice.parseKey( line.substring(2), transporter, line, lineNumber );
 							if (!multilineVars.is_in_header && tune.hasBeginMusic()) {
-								if (result.foundClef)
+								if (result.foundClef) {
 									tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
+                                                                    }        
 								if (result.foundKey)
 									tune.appendStartingElement('key', -1, -1, window.ABCJS.parse.parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
 							}

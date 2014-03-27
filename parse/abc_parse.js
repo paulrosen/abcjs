@@ -944,9 +944,6 @@ window.ABCJS.parse.Parse = function(transporter_) {
     };
 
     this.addTuneElement = function(type, startOfLine, xi, xf, elem) {
-        // if (type === 'note' && this.transporter && this.transporter.offSet !== 0) {
-        //     elem = this.transporter.transposeNote(elem, xi, xf-xi );
-        // }
         tune.appendElement(type, startOfLine + xi, startOfLine + xf, elem);
     };
 
@@ -1454,7 +1451,10 @@ window.ABCJS.parse.Parse = function(transporter_) {
             if (this.transporter && this.transporter.offSet !== 0) {
                 ret.str = this.transporter.transposeRegularMusicLine(ret.str, line, lineNumber);
             }
-            this.parseRegularMusicLine(ret.str);
+            if(multilineVars.clef.type === "accordionTab" )
+              this.parseAccordionTab(ret.str);
+            else
+              this.parseRegularMusicLine(ret.str);
         }
         if (ret.newline && multilineVars.continueall === undefined)
             startNewLine();
@@ -1464,6 +1464,17 @@ window.ABCJS.parse.Parse = function(transporter_) {
             addSymbols(tune.getCurrentVoice(), line.substring(2));
         if (ret.recurse)
             this.parseLine(ret.str);
+    };
+    
+    this.parseAccordionTab = function (str) {
+        var p = new ABCJS.tablature.Parse( str );
+        var tab = p.parse();
+        for( var i = 0; i < tab.children.length; i++ ) {
+            // flavio registar o parse da tablatura
+            // this.addTuneElement('note', startOfLine, startI, i, el);
+            // this.addTuneElement('bar', startOfLine, i, i + ret[0], bar);
+         }     
+
     };
 
     this.tuneHouseKeeping = function(strTune) {

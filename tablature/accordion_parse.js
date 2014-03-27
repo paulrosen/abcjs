@@ -15,27 +15,21 @@
 
            barra ::=  "|", "||", ":|", "|:", ":|:", ":||:", "::", ":||", ":||", "[|", "|]", "|[|", "|]|" 
         
-           coluna ::=  { [<baixo>]<melodia> }*
+           coluna ::=  [<singleBassNote>]<bellows><note>[<duration>] 
         
-           baixo ::=  <singleBassNote>[<duration>] 
-        
-           singleBassNote ::=  { "abcdefgABCDEFG>x" }
-        
-           duration ::=  number|fracao 
-        
-           melodia ::= <bellows><note>[<duration>]
+           singleBassNote ::=  { "abcdefgABCDEFG>xz" }
           
            bellows ::= "-"|"+" 
         
-           note ::= <button>[<row>] | chord | groupedNotes 
+           note ::= <button>[<row>] | chord 
         
-           chord ::= "[" {<note>}* "]" 
+           chord ::= "[" {<button>[<row>]}* "]" 
         
-           groupedNotes ::= "{" {<note>}* "}"
-        
-           button ::=  {hexDigit} | "x" | ">"
+           button ::=  {hexDigit} | "x" | "z" | ">"
         
            row ::= { "'" }*
+
+           duration ::=  number|fracao 
 
  */
 
@@ -45,43 +39,69 @@ if (!window.ABCJS)
 if (!window.ABCJS.tablature)
 	window.ABCJS.tablature = {};
 
-ABCJS.tablature.Parse = function( ) {
-  this.line =  "| G1/2-{67[54]8}1/2 |: G1/2 +5'2g-6>-5 | G+5d-5d-> | G-xd-5d-6 | +{786'}2 | +11/2 | c+ac+b |";
-  this.bassNoteSyms = "abcdefgABCDEFG>x";
-  this.trebNoteSyms = "0123456789abcdefABCDEF>x";
-  this.durSyms = "0123456789/.";
-  this.belSyms = "+-";
-  this.barSyms = ":]|";
-  
-   this.warn = function( str ) {
-     // registrar o warning
-   };
-  
+ABCJS.tablature.Parse = function( str ) {
+    this.invalid = false;
+    this.finished = false;
+    this.warnings = [];
+    this.line = str;
+    this.bassNoteSyms = "abcdefgABCDEFG>xz";
+    this.trebNoteSyms = "0123456789abcdefABCDEF>xz";
+    this.durSyms = "0123456789/.";
+    this.belSyms = "+-";
+    this.barSyms = ":]|";
+
+    this.warn = function(str) {
+        var bad_char = this.line.charAt(this.i);
+        if (bad_char === ' ')
+            bad_char = "SPACE";
+        var clean_line = encode(this.line.substring(0, this.i)) +
+                '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' +
+                encode(this.line.substring(this.i + 1));
+        //addWarning("Music Line:" + tune.getNumLines() + ":" + (this.i + 1) + ': ' + str + ": " + clean_line);
+        addWarning("Music Line:" + 0 + ":" + (this.i + 1) + ': ' + str + ": " + clean_line);
+    };
+    
+    var addWarning = function(str) {
+        this.warnings.push(str);
+    };
+    
+    var encode = function(str) {
+        var ret = window.ABCJS.parse.gsub(str, '\x12', ' ');
+        ret = window.ABCJS.parse.gsub(ret, '&', '&amp;');
+        ret = window.ABCJS.parse.gsub(ret, '<', '&lt;');
+        return window.ABCJS.parse.gsub(ret, '>', '&gt;');
+    };
+
 };
 
 ABCJS.tablature.Parse.prototype.parse = function( ) {
+    var tab  = { children: [] };
     this.i = 0;
-    var token = { type: "unrecognized", finished: false };
+    var token = { type: "unrecognized" };
     
-    while (this.i < this.line.length && !token.finished) {
+    while (this.i < this.line.length && !this.finished) {
         token = this.getToken();
         switch (token.type) {
             case "bar":
-            case "bassNote":
-            case "melodyNote":
+            case "column":
             case "comment":
             case "unrecognized":
             default:
+                if( ! this.invalid )
+                  tab.children[tab.children.length] = token;
                 break;
         }
     }
+    return tab;
 };
 
 ABCJS.tablature.Parse.prototype.getToken = function() {
+    this.invalid = false;
     this.parseMultiCharToken( ' \t' );
     switch(this.line.charAt(this.i)) {
         case '%':
-          return { type:"comment",  token: this.line.substr( this.i+1 ), finished: true };
+          this.finished = true;  
+          return { type:"comment",  token: this.line.substr( this.i+1 ) };
         case '|':
         case ':':
           return this.getBarLine();
@@ -102,47 +122,60 @@ ABCJS.tablature.Parse.prototype.parseMultiCharToken = function( syms ) {
 };
 
 ABCJS.tablature.Parse.prototype.getBarLine = function() {
-  //  barra ::= { |, ||, :|, |:, :|:, :||:, ::, :||, :|| [|, |], |[|, |]| }
-  var token = { type:"bar",  token: undefined, finished: false };
+  var validBars = { 
+        "|"   : "bar_thin"
+      , "||"  : "bar_thin_thin"
+      , "[|"  : "bar_thick_thin"
+      , "|]"  : "bar_thin_thick"
+      , ":|:" : "bar_dbl_repeat"
+      , ":||:": "bar_dbl_repeat"
+      , "::"  : "bar_dbl_repeat" 
+      , "|:"  : "bar_left_repeat"
+      , "||:" : "bar_left_repeat"
+      , "[|:" : "bar_left_repeat"
+      , ":|"  : "bar_right_repeat"
+      , ":||" : "bar_right_repeat"
+      , ":|]" : "bar_right_repeat"
+  };
+  
+  var token = { type:"bar",  token: undefined };
   var p = this.i;
   
   this.parseMultiCharToken(this.barSyms);
   
   token.token = this.line.substr( p, this.i-p );
-  token.finished =  this.i >= this.line.length;
+  this.finished =  this.i >= this.line.length;
   
   // validar o tipo de barra
+  token.type = validBars[token.token];
+  this.invalid = !token.type;
   return token;
 };
 
 ABCJS.tablature.Parse.prototype.getColumn = function() {
-  switch( this.line.charAt(this.i) ) {
-      case '+':
-      case '-':
-          return this.getMelodyNotes();
-      default:    
-          return this.getBass();
-          
-  }
+    var token = {type: "column", bassNote: undefined, bellows: "", buttons: [], duration: 1};
+
+    if (this.belSyms.indexOf(this.line.charAt(this.i)) < 0) {
+        token.bassNote = this.getSingleBassNote();
+    }
+    token.bellows = this.getBelows();
+    token.buttons = this.getNote();
+    token.duration = this.getDuration();
+    this.finished = this.i >= this.line.length;
+    return token;
+
 };
 
-ABCJS.tablature.Parse.prototype.getBass = function() {
-  var token = { type:"bassNote",  note: undefined, duration: 1, finished: false };
-  if( this.bassNoteSyms.indexOf(this.line.charAt(this.i)) === -1 ) {
-    this.warn( "Expected Bass Note but found " + this.line.charAt(this.i) );
-    token.type = "unrecognized";
-    token.finished =  this.i >= this.line.length;
-  } else {
-    token.note = this.getSingleBassNote();
-    token.duration = this.getDuration();
-    token.finished =  this.i >= this.line.length;
-  }
-  return token;
-};
 
 ABCJS.tablature.Parse.prototype.getSingleBassNote = function() {
+  var note = "";
+  if( this.bassNoteSyms.indexOf(this.line.charAt(this.i)) < 0 ) {
+    this.warn( "Expected Bass Note but found " + this.line.charAt(this.i) );
+  } else {
+    note = this.line.charAt(this.i);
     this.i++;
-    return this.line.charAt(this.i-1);
+  }
+  return note;
 };
 
 ABCJS.tablature.Parse.prototype.getDuration = function() {
@@ -162,18 +195,10 @@ ABCJS.tablature.Parse.prototype.getDuration = function() {
     return dur;
 };
 
-ABCJS.tablature.Parse.prototype.getMelodyNotes = function() {
-  var token = { type:"melodyNote",  bellows: "", buttons: [], duration: 1, finished: false };
-  token.bellows  = this.getBelows();
-  this.getNote( token );
-  token.duration = this.getDuration();
-  token.finished =  this.i >= this.line.length;
-  return token;
-};
-
 ABCJS.tablature.Parse.prototype.getBelows = function() {
     if(this.belSyms.indexOf(this.line.charAt(this.i)) < 0 ) {
        this.warn( "Expected belows information, but found " + this.line.charAt(this.i) );
+       this.invalid = true;
        return '+';
     } else {
         this.i++;
@@ -181,47 +206,37 @@ ABCJS.tablature.Parse.prototype.getBelows = function() {
     }
 };
 
-ABCJS.tablature.Parse.prototype.getNote = function(token) {
+ABCJS.tablature.Parse.prototype.getNote = function() {
+  var b = [];
   switch( this.line.charAt(this.i) ) {
       case '[':
          this.i++;
-         token.chord = true;
-         this.getChord( token );
-         break;
-      case '{':
-         this.i++;
-         this.getGroupedNotes( token );
-         token.group = true;
+         b = this.getChord();
          break;
       default: 
-         token.buttons[token.buttons.length] = this.getButton() + this.getRow() ;
+         b[b.length] = this.getButton();
   }
+  return b;
 };
 
 ABCJS.tablature.Parse.prototype.getChord = function( token ) {
+    var b = [];
     while (this.i < this.line.length && this.line.charAt(this.i) !== ']' ) {
-        this.getNote( token );
+        b[b.length] = this.getButton();
     }
     if( this.line.charAt(this.i) !== ']' ) {
        this.warn( "Expected end of chord - ']'");
+       this.invalid = true;
     } else {
         this.i++;
     }
-};
-
-ABCJS.tablature.Parse.prototype.getGroupedNotes = function(token) {
-    while (this.i < this.line.length && this.line.charAt(this.i) !== '}' ) {
-        this.getNote( token );
-    }
-    if( this.line.charAt(this.i) !== '}' ) {
-       this.warn( "Expected end of group - '}'");
-    } else {
-        this.i++;
-    }
+    return b;
 };
 
 ABCJS.tablature.Parse.prototype.getButton = function() {
     var c = "x";
+    var row = "";
+    
     if(this.trebNoteSyms.indexOf(this.line.charAt(this.i)) < 0 ) {
        this.warn( "Expected button number, but found " + this.line.charAt(this.i));
     } else {
@@ -229,17 +244,14 @@ ABCJS.tablature.Parse.prototype.getButton = function() {
         switch(c) {
             case '>':
             case 'x':
+            case 'z':
                break;
             default:   
                 c = isNaN(parseInt(c, 16))? 'x': parseInt(c, 16).toString();
         }
     }
     this.i++;
-    return c;
-};
-
-ABCJS.tablature.Parse.prototype.getRow = function() {
-    var row = "";
+    
     var p = this.i;
 
     this.parseMultiCharToken("'");
@@ -247,5 +259,15 @@ ABCJS.tablature.Parse.prototype.getRow = function() {
     if (p !== this.i) 
         row = this.line.substr(p, this.i - p);
         
-    return row;
+    return c + row;
 };
+
+    var warn = function(str, line, col_num) {
+        var bad_char = line.charAt(col_num);
+        if (bad_char === ' ')
+            bad_char = "SPACE";
+        var clean_line = encode(line.substring(0, col_num)) +
+                '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' +
+                encode(line.substring(col_num + 1));
+        addWarning("Music Line:" + tune.getNumLines() + ":" + (col_num + 1) + ': ' + str + ":  " + clean_line);
+    };
