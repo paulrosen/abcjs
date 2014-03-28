@@ -15,7 +15,7 @@ ABCJS.tablature.Layout = function( abc_layouter ) {
    this.abcLayouter = abc_layouter;
 };
 
-ABCJS.tablature.Layout.prototype.mergeNotesFromTrebleNBass = function() {
+ABCJS.tablature.Layout.prototype.generateTab = function() {
     
     if( this.abcLayouter.tune.tabStaffPos < 1 ) return; // we expect to find at least the melody line above tablature, otherwise, we cannot infer it.
     
@@ -150,12 +150,15 @@ ABCJS.tablature.Layout.prototype.mergeNotesFromTrebleNBass = function() {
     delete this.limit;
     delete this.lastButton;
     delete this.closing;
+    
+    return this.producedLine;
 };
 
 ABCJS.tablature.Layout.prototype.addTABChild = function(child, inTieTreb, inTieBass) {
 
     if (child.abcelem.el_type !== "note") {
         this.abcLayouter.voice.addChild(child);
+        this.producedLine += this.abcLayouter.accordion.abcText.substr(child.abcelem.startChar,child.abcelem.endChar-child.abcelem.startChar) + " ";
         return;
     }
 
@@ -180,8 +183,10 @@ ABCJS.tablature.Layout.prototype.addTABChild = function(child, inTieTreb, inTieB
         item = column[c];
         if (item.type === "tabText") {
             if (item.bass) {
+                bass = item;
                 if (inTieBass)
                     item.c = '--->';
+                this.producedLine += item.c==='--->'?'>':item.c;
                 baixoOpen = typeof (item.buttons.open) !== "undefined";
                 baixoClose = typeof (item.buttons.close) !== "undefined";
             } else {
@@ -226,6 +231,9 @@ ABCJS.tablature.Layout.prototype.addTABChild = function(child, inTieTreb, inTieB
         }
     }
 
+    var qtNotes = bass? column.length-1:column.length;
+    this.producedLine += this.closing?"+":"-";
+    this.producedLine += qtNotes>1?"[":"";
     // segunda passada: altera o que será exibido, conforme definições da primeira passada
     for (var c = 0; c < column.length; c++) {
         item = column[c];
@@ -238,8 +246,14 @@ ABCJS.tablature.Layout.prototype.addTABChild = function(child, inTieTreb, inTieB
             if (!inTieTreb)
                 item.c = this.elegeBotao(this.closing ? item.buttons.close : item.buttons.open);
         }
+        if (!item.bass) {
+           this.producedLine += item.c==='--->'?'>':item.c;
+        }
     }
-
+    this.producedLine += qtNotes>1?"]":"";
+    var dur = child.abcelem.duration / this.abcLayouter.accordion.vars.default_length;
+    this.producedLine += dur===1?" ":dur.toString() + " ";
+    
     this.abcLayouter.voice.addChild(child);
 };
 

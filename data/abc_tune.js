@@ -23,15 +23,13 @@ if (!window.ABCJS.data)
     window.ABCJS.data = {};
 
 // This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
-// flavio - aparentement não é mais necessario o transporter aqui.
-window.ABCJS.data.Tune = function(/*transporter_*/) {
+window.ABCJS.data.Tune = function() {
     // The structure consists of a hash with the following two items:
     // metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...
     // tempo: { noteLength: number (e.g. .125), bpm: number }
     // lines: an array of elements, or one of the following:
-    //
-    // STAFFS: array of elements
-    // SUBTITLE: string - flavio removed this kind of line (it is now one of the staff's attributes)
+    //      STAFFS: array of elements
+    //      SUBTITLE: string - flavio removed this kind of line (it is now one of the staff's attributes)
     //
     // TODO: actually, the start and end char should modify each part of the note type
     // The elements all have a type field and a start and end char
@@ -52,24 +50,21 @@ window.ABCJS.data.Tune = function(/*transporter_*/) {
     //		decoration: upbow, downbow, accent
     // BAR: type=bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
     //	number: 1 or 2: if it is the start of a first or second ending
-    // CLEF: type=treble,bass
+    // CLEF: type=treble,bass,accordionTab
     // KEY-SIG:
     //		accidentals[]: { acc:sharp|dblsharp|natural|flat|dblflat,  note:a|b|c|d|e|f|g }
     // METER: type: common_time,cut_time,specified
     //		if specified, { num: 99, den: 99 }
-    // flavio this.transporter = transporter_;
+    
     this.reset = function() {
-        this.version = "1.0.1";
-        this.media = "screen";
         this.metaText = {};
         this.formatting = {};
         this.lines = [];
-        this.staffNum = 0;
-        this.voiceNum = 0;
-        this.lineNum = 0;
+        this.media = "screen";
+        this.version = "1.0.1";
         this.subtitle = "";
-        this.hasTablature = false;
         this.tabStaffPos = -1;
+        this.hasTablature = false;
     };
 
     this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote) {
@@ -358,36 +353,6 @@ window.ABCJS.data.Tune = function(/*transporter_*/) {
         delete this.potentialEndBeam;
         delete this.vskipPending;
         
-        // verifica se a linha zero tem tablatura para accordion
-        var staffTab = -1;
-        if(this.lines.length > 0) {
-            for (var r = 0; r < this.lines[0].staffs.length; r++) {
-                if (this.lines[0].staffs[r].clef.type === "accordionTab") {
-                    this.hasTablature = true;
-                    this.tabStaffPos = r;
-                    staffTab = r;
-                }
-            }
-        }
-        if (this.hasTablature) {
-            // necessário inferir a tablatura
-            if (this.lines[0].staffs[staffTab].voices[0].length === 0) {
-                this.lines[0].staffs[staffTab].inferTablature = true;
-                // para a tablatura de accordion, sempre se esperam 3 vozes (staffs): uma para melodia, uma para o baixo e a terceira para a tablatura
-                // opcionalmente, a linha de baixo, não precisa existir
-                (staffTab === 0) && this.warnings.push("+Warn: Accordion Tablature should not be the first staff!");
-                for (t = 1; t < this.lines.length; t++) {
-                    //se for necessário inferir a tablatura, garante que todas as linhas tenham uma staff apropriada
-                    if (!this.lines[t].staffs[staffTab]) {
-                        this.lines[t].staffs[staffTab] = window.ABCJS.parse.clone(this.lines[0].staffs[staffTab]);
-                        this.lines[t].staffs[staffTab].meter = null;
-                        this.lines[t].staffs[staffTab].subtitle = "";
-                    }
-                }
-            } else {
-                this.lines[0].staffs[staffTab].inferTablature = false;
-            }
-        }
     };
 
     this.reset();

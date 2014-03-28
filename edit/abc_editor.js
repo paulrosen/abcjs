@@ -136,6 +136,14 @@ window.ABCJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
   }
 };
 
+window.ABCJS.edit.EditArea.prototype.appendString = function(str, noRefresh ) {
+  this.textarea.value += str;
+  this.initialText = this.getString();
+  if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
+    this.changelistener.fireChanged();
+  }
+};
+
 window.ABCJS.edit.EditArea.prototype.getElem = function() {
   return this.textarea;
 };
@@ -290,13 +298,15 @@ window.ABCJS.Editor = function(editarea, params) {
 };
 
 window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
+/*
   var tunebook = new ABCJS.TuneBook(abc);
-  var abcParser = window.ABCJS.parse.Parse();
+  var abcParser = new window.ABCJS.parse.Parse();
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
   var printer = new ABCJS.write.Printer(paper, {});	// TODO: handle printer params
   printer.printABC(tune);
+ */ 
 };
 
 window.ABCJS.Editor.prototype.modelChanged = function() {
@@ -313,8 +323,14 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
     this.timerId = null;
     this.div.innerHTML = "";
     var paper = Raphael(this.div, 1100, 700);
+    // verificar a necessidade da impressora connheer o accordion
     this.printer = new ABCJS.write.Printer(paper, this.printerparams, this.accordion);
     this.printer.printABC(this.tunes);
+    
+  //  if( this.accordion ) { 
+  //      this.editarea.appendString( this.accordion.appendEditor(), "norefresh" );
+  //  }
+    
     if (ABCJS.midi.MidiWriter && this.mididiv) {
         if (this.mididiv !== this.div)
             this.mididiv.innerHTML = "";
@@ -369,9 +385,13 @@ window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
   }
   
   for (var i=0; i<tunebook.tunes.length; i++) {
-    var abcParser = new window.ABCJS.parse.Parse(this.transporter);
+    var abcParser = new window.ABCJS.parse.Parse( this.transporter, this.accordion );
     abcParser.parse(tunebook.tunes[i].abc, this.parserparams ); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
+    
+    //if( this.accordion ) { 
+    //    this.accordion.setAbc(tunebook.tunes[i].abc, abcParser.getMultilineVars() );
+    //}
     
     if( this.transporter ) { 
         if( this.transporter.offSet !== 0 ) {

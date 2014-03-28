@@ -18,6 +18,9 @@ ABCJS.tablature.Accordion = function( selector ) {
     this.transporter     = new window.ABCJS.parse.Transport();
     this.accordions      = [GAITA_HOHNER_GC, GAITA_HOHNER_CLUB_IIIM_BR];
     this.selected        = 0;
+    this.abcText         = "";
+    this.vars           = {};
+    this.tabLines       = [];
     
     if( selector ) {
         for(var i = 0; i < this.accordions.length; i++) {
@@ -32,14 +35,29 @@ ABCJS.tablature.Accordion = function( selector ) {
 
 };
 
-ABCJS.tablature.Accordion.prototype.inferTabVoice = function( abc_layouter ) {
-    this.layouter = new ABCJS.tablature.Layout(abc_layouter);
+
+ABCJS.tablature.Accordion.prototype.inferTabVoice = function( line, tune, strTUne, vars ) {
+    var infer = new ABCJS.tablature.Infer( this, tune, strTUne, vars );
     
-    this.layouter.mergeNotesFromTrebleNBass();
-    //this.layouter.generateTab();
-    //tablatura não possui ties - por hora estou eliminando - talvez tenha q usar
-    abc_layouter.voice.otherchildren = [];
-    abc_layouter.voice.beams = [];
+    return infer.accordionTabVoice( line );
+    
+//    this.layouter = new ABCJS.tablature.Layout(abc_layouter);
+//    
+//    this.tabLines[ this.tabLines.length ] = this.layouter.generateTab();
+//    //tablatura não possui outros elementos
+//    abc_layouter.voice.otherchildren = [];
+//    abc_layouter.voice.beams = [];
+};
+
+ABCJS.tablature.Accordion.prototype.appendEditor = function () {
+//eliminar
+    var ret = "";
+    for(var l = 0; l < this.tabLines.length; l ++ ) {
+        if(this.tabLines[l].length>0){
+            ret = this.tabLines[l]+"\n";
+        }
+    }
+    return ret;
 };
 
 ABCJS.tablature.Accordion.prototype.load = function (sel) {
@@ -81,7 +99,7 @@ ABCJS.tablature.Accordion.prototype.load = function (sel) {
 ABCJS.tablature.Accordion.prototype.getBassNote = function (note) {
     var n = note.split(":");
     return n[0].substr( 0, n[0].length-1);
-}
+};
 
 ABCJS.tablature.Accordion.prototype.getButtons = function (note) {
 // retorna a lista de botões possíveis para uma nota cromatica
