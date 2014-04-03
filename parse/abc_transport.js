@@ -260,6 +260,7 @@ window.ABCJS.parse.Transport.prototype.updateEditor = function ( lines ) {
     for( i = 1; i < lines.length; i++ ){
         newStr += '\n' + lines[i];
     }
+    this.changedLines = [];
     return newStr;
 };
 

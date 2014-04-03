@@ -15,7 +15,7 @@ ABCJS.tablature.Layout = function( abc_layouter ) {
    this.abcLayouter = abc_layouter;
 };
 
-ABCJS.tablature.Layout.prototype.generateTab = function() {
+ABCJS.tablature.Layout.prototype.UNUSEDgenerateTab = function() {
     
     if( this.abcLayouter.tune.tabStaffPos < 1 ) return; // we expect to find at least the melody line above tablature, otherwise, we cannot infer it.
     
@@ -154,7 +154,7 @@ ABCJS.tablature.Layout.prototype.generateTab = function() {
     return this.producedLine;
 };
 
-ABCJS.tablature.Layout.prototype.addTABChild = function(child, inTieTreb, inTieBass) {
+ABCJS.tablature.Layout.prototype.UNUSEDaddTABChild = function(child, inTieTreb, inTieBass) {
 
     if (child.abcelem.el_type !== "note") {
         this.abcLayouter.voice.addChild(child);
@@ -259,7 +259,7 @@ ABCJS.tablature.Layout.prototype.addTABChild = function(child, inTieTreb, inTieB
 
 
 //retorna um elemento absoluto para a tablatura
-ABCJS.tablature.Layout.prototype.printTABElement = function(the_elem, verticalPos, isTreble, keyAcc) {
+ABCJS.tablature.Layout.prototype.UNUSEDprintTABElement = function(the_elem, verticalPos, isTreble, keyAcc) {
 
     var abselem = new ABCJS.write.AbsoluteElement(the_elem, 0, 0);
     var acc = {};
@@ -358,7 +358,7 @@ ABCJS.tablature.Layout.prototype.printTABElement = function(the_elem, verticalPo
 };
 
 // tenta encontrar o botão mais próximo do último
-ABCJS.tablature.Layout.prototype.elegeBotao = function( array ) {
+ABCJS.tablature.Layout.prototype.UNUSEDelegeBotao = function( array ) {
     if(typeof(array) === "undefined" ) return "x";
 
     var b    = array[0];
@@ -376,7 +376,7 @@ ABCJS.tablature.Layout.prototype.elegeBotao = function( array ) {
     return b;
 };
 
-ABCJS.tablature.Layout.prototype.cloneChildren = function(source) {
+ABCJS.tablature.Layout.prototype.UNUSEDcloneChildren = function(source) {
 
     var destination = [];
     for(var r = 0; r<source.length;r++) {

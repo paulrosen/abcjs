@@ -389,9 +389,10 @@ window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
     abcParser.parse(tunebook.tunes[i].abc, this.parserparams ); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
     
-    //if( this.accordion ) { 
-    //    this.accordion.setAbc(tunebook.tunes[i].abc, abcParser.getMultilineVars() );
-    //}
+    if( this.accordion ) { 
+        // obtem possiveis linhas inferidas para tablatura
+        this.editarea.appendString( this.accordion.updateEditor() );
+    }
     
     if( this.transporter ) { 
         if( this.transporter.offSet !== 0 ) {

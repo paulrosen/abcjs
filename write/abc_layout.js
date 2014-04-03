@@ -130,16 +130,7 @@ ABCJS.write.Layout.prototype.layoutABCLine = function( abctune, line ) {
                 this.voice.addChild(this.printClef(abcstaff.clef));
                 this.voice.addChild(new ABCJS.write.AbsoluteElement(abcstaff.key, 0, 10));
                 (abcstaff.meter) && this.voice.addChild(this.printTablatureSignature(abcstaff.meter));
-                //this.printABCVoice();
-                if (abcstaff.inferTablature) {
-                   if(this.accordion) {
-                       this.accordion.inferTabVoice( this );
-                   } else {
-                       alert( "Accordion not defined: cannot infer tablature!");
-                   }
-                } else {
-                    this.printABCVoice();
-                }
+                this.printTABVoice();
             }
             
             this.staffgroup.addVoice(this.voice);
@@ -169,6 +160,138 @@ ABCJS.write.Layout.prototype.layoutStaffGroup = function() {
         }
     }
     
+};
+
+ABCJS.write.Layout.prototype.printTABVoice = function() {
+  for (this.pos=0; this.pos<this.currVoice.length; this.pos++) {
+    var abselems = this.printTABElement();
+    for (i=0; i<abselems.length; i++) {
+      this.voice.addChild(abselems[i]);
+    }
+  }
+};
+
+// return an array of ABCJS.write.AbsoluteElement
+ABCJS.write.Layout.prototype.printTABElement = function() {
+  var elemset = [];
+  var elem = this.getElem();
+  
+  switch (elem.el_type) {
+  case "note":
+    elemset[0] = this.printTabNote(elem);
+    break;
+  case "bar":
+    elemset[0] = this.printBarLine(elem);
+    if (this.voice.duplicate) elemset[0].invisible = true;
+    break;
+  default: 
+    var abselem2 = new ABCJS.write.AbsoluteElement(elem,0,0);
+    abselem2.addChild(new ABCJS.write.RelativeElement("element type "+elem.el_type, 0, 0, 0, {type:"debug"}));
+    elemset[0] = abselem2;
+  }
+
+  return elemset;
+};
+
+ABCJS.write.Layout.prototype.printTabNote = function(elem, nostem, dontDraw) { //stem presence: true for drawing stemless notehead
+    var notehead = null;
+    
+    this.roomtaken = 0; // room needed to the left of the note
+    this.roomtakenright = 0; // room needed to the right of the note
+    var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
+    var c = "";
+
+    var p,pp;
+
+    var duration = ABCJS.write.getDuration(elem);
+    if (duration === 0) {
+        duration = 0.25;
+        nostem = true;
+    }   // PER: zero duration will draw a quarter note head.
+    var durlog = ABCJS.write.getDurlog(duration) ;
+    var dot = 0;
+
+    for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2)
+        ;
+
+    if (elem.rest) {
+        var restpitch = 7;
+        if (this.stemdir === "down")
+            restpitch = 3;
+        if (this.stemdir === "up")
+            restpitch = 11;
+        switch (elem.rest.type) {
+            case "rest":
+                c = this.chartable.rest[-durlog];
+                elem.averagepitch = restpitch;
+                elem.minpitch = restpitch;
+                elem.maxpitch = restpitch;
+                break;
+            case "invisible":
+            case "spacer":
+                c = "";
+        }
+        if (!dontDraw)
+            notehead = this.printNoteHead(abselem, c, {verticalPos: restpitch}, null, 0, -this.roomtaken, null, dot, 0, 1);
+        if (notehead)
+            abselem.addHead(notehead);
+        this.roomtaken += this.accidentalshiftx;
+        this.roomtakenright = Math.max(this.roomtakenright, this.dotshiftx);
+
+    } else {
+        
+    }
+
+    var abselem = new ABCJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1);
+
+    // determine averagepitch, minpitch, maxpitch and stem direction
+    var sum = 0;
+    for (p = 0, pp = elem.pitches.length; p < pp; p++) {
+        sum += elem.pitches[p].verticalPos;
+    }
+    
+    elem.averagepitch = sum / elem.pitches.length;
+    elem.minpitch = elem.pitches[0].verticalPos;
+    elem.maxpitch = elem.pitches[elem.pitches.length - 1].verticalPos;
+ 
+    for (p = 0; p < elem.pitches.length; p++) {
+        var curr = elem.pitches[p];
+        var note = new ABCJS.write.RelativeElement(null, 0, 0, curr.pitch);
+        note.c = curr.c;
+        note.note = curr.note;
+        note.type = curr.type;
+        abselem.addHead(note);
+    }
+
+    return abselem;
+};
+
+
+ABCJS.write.Layout.prototype.printABCVoice = function() {
+  this.popCrossLineElems();
+  this.stemdir = (this.isBagpipes)?"down":null;
+  if (this.partstartelem) {
+    this.partstartelem = new ABCJS.write.EndingElem("", null, null);
+    this.voice.addOther(this.partstartelem);
+  }
+  for (var slur in this.slurs) {
+    if (this.slurs.hasOwnProperty(slur)) {
+      this.slurs[slur]= new ABCJS.write.TieElem(null, null, this.slurs[slur].above, this.slurs[slur].force);
+	this.voice.addOther(this.slurs[slur]);
+    }
+  }
+  for (var i=0; i<this.ties.length; i++) {
+    this.ties[i]=new ABCJS.write.TieElem(null, null, this.ties[i].above, this.ties[i].force);
+    this.voice.addOther(this.ties[i]);
+  }
+
+  for (this.pos=0; this.pos<this.currVoice.length; this.pos++) {
+    var abselems = this.printABCElement();
+    for (i=0; i<abselems.length; i++) {
+      this.voice.addChild(abselems[i]);
+    }
+  }
+  this.pushCrossLineElems();
 };
 
 ABCJS.write.Layout.prototype.printABCVoice = function() {
@@ -320,14 +443,6 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
 
     for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2)
         ;
-
-
-    if (elem.startTriplet) {
-        if (elem.startTriplet === 2)
-            this.tripletmultiplier = 3 / 2;
-        else
-            this.tripletmultiplier = (elem.startTriplet - 1) / elem.startTriplet;
-    }
 
 
     var abselem = new ABCJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1);

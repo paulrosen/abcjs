@@ -7,7 +7,7 @@
  
             Definição da sintaxe para tablatura
         
-           " |: G1/2 +5'2g-6>-5 | G-3'2d-5d-[678]1/2 | G+5d-5d-> | G-xd-5d-6 | +{786'}2 | +11/2 | c+ac+b |"
+           " |: G+5'2g-6>-5 | G-3'2d-5d-[678]1/2 | G+5d-5d-> | G-xd-5d-6 | +{786'}2 | +11/2 | c+ac+b |"
         
            Linha de tablatura ::= { <comentario> | <barra> | <coluna> }*
         
@@ -39,11 +39,12 @@ if (!window.ABCJS)
 if (!window.ABCJS.tablature)
 	window.ABCJS.tablature = {};
 
-ABCJS.tablature.Parse = function( str ) {
+ABCJS.tablature.Parse = function( str, vars ) {
     this.invalid = false;
     this.finished = false;
     this.warnings = [];
     this.line = str;
+    this.vars = vars;
     this.bassNoteSyms = "abcdefgABCDEFG>xz";
     this.trebNoteSyms = "0123456789abcdefABCDEF>xz";
     this.durSyms = "0123456789/.";
@@ -57,8 +58,7 @@ ABCJS.tablature.Parse = function( str ) {
         var clean_line = encode(this.line.substring(0, this.i)) +
                 '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' +
                 encode(this.line.substring(this.i + 1));
-        //addWarning("Music Line:" + tune.getNumLines() + ":" + (this.i + 1) + ': ' + str + ": " + clean_line);
-        addWarning("Music Line:" + 0 + ":" + (this.i + 1) + ': ' + str + ": " + clean_line);
+        addWarning("Music Line:" + /*line*/ 0 + ":" + /*column*/(this.i + 1) + ': ' + str + ": " + clean_line);
     };
     
     var addWarning = function(str) {
@@ -75,24 +75,41 @@ ABCJS.tablature.Parse = function( str ) {
 };
 
 ABCJS.tablature.Parse.prototype.parse = function( ) {
-    var tab  = { children: [] };
+    var voice  = [];
     this.i = 0;
-    var token = { type: "unrecognized" };
+    var token = { el_type: "unrecognized" };
     
     while (this.i < this.line.length && !this.finished) {
         token = this.getToken();
-        switch (token.type) {
+        switch (token.el_type) {
             case "bar":
-            case "column":
+                if( ! this.invalid )
+                  voice[voice.length] = {type:token.type, el_type: token.el_type, startChar:0, endChar:0};
+                break;
+            case "note":
+                if( ! this.invalid )
+                  voice[voice.length] = this.formatToken(token);
+                break;
             case "comment":
             case "unrecognized":
             default:
-                if( ! this.invalid )
-                  tab.children[tab.children.length] = token;
                 break;
         }
     }
-    return tab;
+    return voice;
+};
+ABCJS.tablature.Parse.prototype.formatToken = function(token) {
+  var el = {el_type: token.el_type, startChar:0, endChar:0};
+  el.pitches = [];
+  el.duration = token.duration * this.vars.default_length;
+  if(token.bassNote) {
+    el.pitches[0] = { bass:true, type: "tabText", c: token.bassNote, pitch: 17.5};
+  }
+  for(var b = 0; b < token.buttons.length; b ++ ) {
+    var n = el.pitches.length;
+    el.pitches[n] = { c: token.buttons[b], type: "tabText", pitch: token.bellows === "+"? 11.7 : 11.7-6.4  };
+  }
+  return el ;
 };
 
 ABCJS.tablature.Parse.prototype.getToken = function() {
@@ -101,7 +118,7 @@ ABCJS.tablature.Parse.prototype.getToken = function() {
     switch(this.line.charAt(this.i)) {
         case '%':
           this.finished = true;  
-          return { type:"comment",  token: this.line.substr( this.i+1 ) };
+          return { el_type:"comment",  token: this.line.substr( this.i+1 ) };
         case '|':
         case ':':
           return this.getBarLine();
@@ -138,7 +155,7 @@ ABCJS.tablature.Parse.prototype.getBarLine = function() {
       , ":|]" : "bar_right_repeat"
   };
   
-  var token = { type:"bar",  token: undefined };
+  var token = { el_type:"bar", type:"bar", token: undefined };
   var p = this.i;
   
   this.parseMultiCharToken(this.barSyms);
@@ -153,7 +170,7 @@ ABCJS.tablature.Parse.prototype.getBarLine = function() {
 };
 
 ABCJS.tablature.Parse.prototype.getColumn = function() {
-    var token = {type: "column", bassNote: undefined, bellows: "", buttons: [], duration: 1};
+    var token = {el_type: "note", type: "note", bassNote: undefined, bellows: "", buttons: [], duration: 1};
 
     if (this.belSyms.indexOf(this.line.charAt(this.i)) < 0) {
         token.bassNote = this.getSingleBassNote();
@@ -165,7 +182,6 @@ ABCJS.tablature.Parse.prototype.getColumn = function() {
     return token;
 
 };
-
 
 ABCJS.tablature.Parse.prototype.getSingleBassNote = function() {
   var note = "";
@@ -271,6 +287,38 @@ ABCJS.tablature.Infer = function( accordion, tune, strTune, vars ) {
     this.voice = [];
 };
 
+ABCJS.tablature.Infer.prototype.abcElem2TabElem = function(elem, bass) {
+    var cp = ABCJS.parse.clone(elem);
+    if (cp.rest ) {
+        if(!cp.pitches) {
+            cp.pitches =  [];
+        }
+        cp.rest.pitch = 0;
+        cp.rest.verticalPos = 0;
+        cp.rest.type="rest";
+        cp.pitches[cp.pitches.length] = ABCJS.parse.clone(cp.rest);
+        delete clone.rest;
+    }
+    
+    if(! cp.pitches ) return cp;
+    
+    for(var e = 0; e < cp.pitches.length; e ++ ){
+      cp.inTie = cp.pitches[e].startTie?true:cp.pitches[e].endTie?false:undefined;
+      delete cp.pitches[e].startTie;
+      delete cp.pitches[e].endTie;
+    }
+    if(bass) {
+        if( cp.pitches.length > 1 ) {
+          // TODO: keep track of minor chords (and 7th)
+          // note = this.accordion.identifyChord(abselem.children, aNotes, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
+          ABCJS.write.sortPitch(cp);
+          cp.pitches.splice(1, cp.pitches.length - 1);
+        }
+        cp.pitches[0].bass = true;
+    }   
+    return cp;
+};
+
 ABCJS.tablature.Infer.prototype.accordionTabVoice = function(line) {
     
     if( this.tune.tabStaffPos < 1 ) return; // we expect to find at least the melody line above tablature, otherwise, we cannot infer it.
@@ -294,43 +342,28 @@ ABCJS.tablature.Infer.prototype.accordionTabVoice = function(line) {
     
     var trebVoice  = this.tune.lines[this.tuneCurrLine].staffs[0].voices[0];
     this.accTrebKey = this.tune.lines[this.tuneCurrLine].staffs[0].key.accidentals;
+    this.vposTrebStave = this.tune.lines[this.tuneCurrLine].staffs[0].clef.verticalPos;
     
     if( this.tune.tabStaffPos === 2 ) {
       var bassVoice  = this.tune.lines[this.tuneCurrLine].staffs[1].voices[0];
       this.accBassKey = this.tune.lines[this.tuneCurrLine].staffs[1].key.accidentals;
+      this.vposBassStave = this.tune.lines[this.tuneCurrLine].staffs[0].clef.verticalPos;
     }  
    
     while (idxTreb < trebVoice.length || ( bassVoice && idxBass < bassVoice.length ) ) {
         
-        var absTrebElem;
-        var absBassElem;
+        var abcTrebElem = {};
+        var abcBassElem = {};
         var leu = false;
         
         if (idxTreb < trebVoice.length && balance >= 0 ) {
-            absTrebElem = ABCJS.parse.clone(trebVoice[idxTreb]);
-            if( absTrebElem.pitches ) {
-                for(var e = 0; e < absTrebElem.pitches.length; e ++ ){
-                  absTrebElem.inTie = absTrebElem.pitches[e].startTie? true:absTrebElem.pitches[e].endTie?false:undefined;
-                }
-            }    
-            
-            trebDuration += absTrebElem.duration|| 0;
+            abcTrebElem = this.abcElem2TabElem(trebVoice[idxTreb], false);
+            trebDuration += abcTrebElem.duration|| 0;
             leu = true;
         }
         if (bassVoice && idxBass < bassVoice.length && balance <= 0 ) {
-            absBassElem = ABCJS.parse.clone(bassVoice[idxBass]);
-            if( absBassElem.pitches ) {
-                for(var e = 0; e < absBassElem.pitches.length; e ++ ){
-                  absBassElem.inTie = absBassElem.pitches[e].startTie?true:absBassElem.pitches[e].endTie?false:undefined;
-                }
-                if( absBassElem.pitches.length > 1 ) {
-                  // TODO: keep track of minor chords (and 7th)
-                  // note = this.accordion.identifyChord(abselem.children, aNotes, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
-                  absBassElem.pitches.splice(1, absBassElem.pitches.length - 1);
-                }
-                absBassElem.pitches[0].bass = true;
-            }
-            bassDuration += absBassElem.duration||0;
+            abcBassElem = this.abcElem2TabElem(bassVoice[idxBass], true );
+            bassDuration += abcBassElem.duration||0;
             leu = true;
         }
         if (! leu ) {
@@ -339,93 +372,99 @@ ABCJS.tablature.Infer.prototype.accordionTabVoice = function(line) {
             idxBass = bassVoice? bassVoice.length : 0;
             continue;
         }
-        if (!bassVoice || !absBassElem ) {
+        if (!bassVoice || !abcBassElem ) {
             idxTreb++;
-            this.addTABChild(absTrebElem, inTieTreb, inTieBass);
-            inTieTreb = typeof( absTrebElem.inTie ) === "undefined"? inTieTreb : absTrebElem.inTie; 
+            this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
+            inTieTreb = typeof( abcTrebElem.inTie ) === "undefined"? inTieTreb : abcTrebElem.inTie; 
         } else {
             if (balance === 0) {
                 idxTreb++;
                 idxBass++;
-                if (absBassElem.el_type === 'bar' && absTrebElem.el_type === 'bar') {
-                    this.addTABChild(absTrebElem, inTieTreb, inTieBass);
-                } else if (absBassElem.el_type === 'bar') {
-                    this.addTABChild(absTrebElem, inTieTreb, inTieBass);
+                if (abcBassElem.el_type === 'bar' && abcTrebElem.el_type === 'bar') {
+                    this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
+                } else if (abcBassElem.el_type === 'bar') {
+                    this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
                     idxBass--;
-                } else if (absTrebElem.el_type === 'bar') {
-                    this.addTABChild(absBassElem, inTieTreb, inTieBass);
+                } else if (abcTrebElem.el_type === 'bar') {
+                    this.addTABChild(abcBassElem, inTieTreb, inTieBass);
                     idxTreb--;
                 } else if (bassDuration > trebDuration) {
-                    remainingBass = this.cloneChildren(absBassElem.pitches);
-                    for (var c = 0; c < absBassElem.pitches.length; c++) {
-                        //absTrebElem.pitches.push(absBassElem.pitches[c]);
-                        absTrebElem.pitches.splice( c, 0, absBassElem.pitches[c] );
+                    remainingBass = ABCJS.parse.clone(abcBassElem.pitches);
+                    for (var c = 0; c < abcBassElem.pitches.length; c++) {
+                        //abcTrebElem.pitches.push(abcBassElem.pitches[c]);
+                        abcTrebElem.pitches.splice( c, 0, abcBassElem.pitches[c] );
                     }
-                    this.addTABChild(absTrebElem, inTieTreb, inTieBass);
+                    this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
                 } else if( bassDuration < trebDuration) {
-                    remainingTreb = this.cloneChildren(absTrebElem.pitches);
-                    for (var c = 0; c < absTrebElem.pitches.length; c++) {
-                        absBassElem.pitches.push(absTrebElem.pitches[c]);
+                    remainingTreb = ABCJS.parse.clone(abcTrebElem.pitches);
+                    for (var c = 0; c < abcTrebElem.pitches.length; c++) {
+                        abcBassElem.pitches.push(abcTrebElem.pitches[c]);
                     }
-                    this.addTABChild(absBassElem, inTieTreb, inTieBass);
+                    this.addTABChild(abcBassElem, inTieTreb, inTieBass);
                 } else {
-                    for (var c = 0; c < absTrebElem.pitches.length; c++) {
-                        absBassElem.pitches.push(absTrebElem.pitches[c]);
+                    for (var c = 0; c < abcTrebElem.pitches.length; c++) {
+                        abcBassElem.pitches.push(abcTrebElem.pitches[c]);
                     }
-                    this.addTABChild(absBassElem, inTieTreb, inTieBass);
+                    this.addTABChild(abcBassElem, inTieTreb, inTieBass);
                 }
             } else if (balance > 0) {
-                if (absTrebElem.el_type === 'bar') {
+                if (abcTrebElem.el_type === 'bar') {
                     // encontrou nota faltando na melodia - preenche com pausas
-                    trebVoice.splice(idxTreb, 0, this.addMissingRest(balance));
-                    this.addTABChild(this.addMissingRest(balance), inTieTreb, inTieBass);
+                    //trebVoice.splice(idxTreb, 0, this.addMissingRest(balance));
+                    //this.addTABChild(this.addMissingRest(balance), inTieTreb, inTieBass);
                     idxTreb++;
                     trebDuration += balance;
                 } else {
                     var remaining = typeof( remainingBass ) !== "undefined";
                     if(remaining) {
                         for (var c = 0; c < remainingBass.length; c++) {
-                            //absTrebElem.pitches.push(remainingBass[c]);
-                            absTrebElem.pitches.splice( c, 0,  remainingBass[c] );
+                            //abcTrebElem.pitches.push(remainingBass[c]);
+                            abcTrebElem.pitches.splice( c, 0,  remainingBass[c] );
                         }
                     }
-                    this.addTABChild(absTrebElem, inTieTreb, inTieBass || remaining );
+                    this.addTABChild(abcTrebElem, inTieTreb, inTieBass || remaining );
                     delete remainingBass;
                     idxTreb++;
                 }
             } else {
-                if (absBassElem.el_type === 'bar') {
+                if (abcBassElem.el_type === 'bar') {
                     // encontrou nota faltando no baixo - preenche com pausas
-                    bassVoice.splice(idxBass, 0, this.addMissingRest(-balance));
-                    this.addTABChild(this.addMissingRest(-balance), inTieTreb, inTieBass);
+                    //bassVoice.splice(idxBass, 0, this.addMissingRest(-balance));
+                    //this.addTABChild(this.addMissingRest(-balance), inTieTreb, inTieBass);
                     idxBass++;
                     bassDuration -= balance;
                 } else {
                     var remaining = typeof( remainingTreb) !== "undefined";
                     if( remaining ) {
                         for (var c = 0; c < remainingTreb.length; c++) {
-                            absBassElem.pitches.push(remainingTreb[c]);
+                            abcBassElem.pitches.push(remainingTreb[c]);
                         }
                     }
-                    this.addTABChild(absBassElem, inTieTreb || remaining, inTieBass );
+                    this.addTABChild(abcBassElem, inTieTreb || remaining, inTieBass );
                     delete remainingTreb;
                     idxBass++;
                 }
             }
             balance = bassDuration - trebDuration;
-            inTieBass = typeof( absBassElem.inTie ) === "undefined"? inTieBass : absBassElem.inTie; 
-            inTieTreb = typeof( absTrebElem.inTie ) === "undefined"? inTieTreb : absTrebElem.inTie; 
+            inTieBass = typeof( abcBassElem.inTie ) === "undefined"? inTieBass : abcBassElem.inTie; 
+            inTieTreb = typeof( abcTrebElem.inTie ) === "undefined"? inTieTreb : abcTrebElem.inTie; 
         }
     }
     
+    this.accordion.setTabLine(this.producedLine);
+    this.tune.lines[this.tuneCurrLine].staffs[this.tune.tabStaffPos].inferTablature = false;
+
     delete this.count;
     delete this.limit;
     delete this.lastButton;
     delete this.closing;
     delete this.accTrebKey;
     delete this.accBassKey;
+    delete this.vposTrebStave;
+    delete this.vposBassStave;
+    delete this.producedLine;
     
-    return this.producedLine;
+    return this.voice;
 };
 
 //TODO: tratar startChar e endChar
@@ -466,11 +505,11 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
     for (var c = 0; c < column.length; c++) {
         item = column[c];
         acc[item.pitch] = this.accordion.transporter.getAccOffset(item.accidental);
-        var note = this.accordion.extractCromaticNote(item.pitch, item.verticalPos, acc, (item.bass? this.accBassKey : this.accTrebKey));
-        if (item.rest) {
+        if (item.type === "rest" ) {
                 item.pitch = item.bass? 17.5 : 11.7;
         } else {
             if (item.bass) {
+                var note = this.accordion.extractCromaticNote(item.pitch, this.vposBassStave, acc, this.accBassKey );
                 item.buttons = this.accordion.getButtons(this.accordion.getBassNote(note));
                 item.note = note;
                 // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
@@ -478,6 +517,7 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
                 item.pitch = 17.5;
                 item.type = 'tabText';
             } else {
+                var note = this.accordion.extractCromaticNote(item.pitch, this.vposTrebStave, acc, this.accTrebKey);
                 d--;
                 item.buttons = this.accordion.getButtons(note);
                 item.note = note;
@@ -543,7 +583,7 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
     // segunda passada: altera o que será exibido, conforme definições da primeira passada
     for (var c = 0; c < column.length; c++) {
         item = column[c];
-        if (item.c.substr(0, 4) === "dots" || item.c.substr(0, 5) === "rests") {
+        if (/*item.c.substr(0, 4) === "dots" ||*/ item.type === "rest" ) {
             if (!this.closing && !item.bass)
                 item.pitch += offset;
         } else if (!item.bass) {
@@ -560,7 +600,8 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
     var dur = child.duration / this.vars.default_length;
     this.producedLine += dur===1?" ":dur.toString() + " ";
     
-    //this.voice.addChild(child);
+    this.voice.push(child);
+    
 };
 
 
@@ -637,7 +678,7 @@ ABCJS.tablature.Infer.prototype.UNUSEDprintTABElement = function(the_elem, verti
                     if (qtd > 1) {
                         // TODO: keep track of minor chords (and 7th)
                         note = this.abcLayouter.accordion.identifyChord(abselem.children, aNotes, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
-                        abselem.children.splice(1, qtd - 1);
+                        abselem.children.splice(1, qtd - live1);
                     } else {
                       note = this.abcLayouter.accordion.extractCromaticNote(abselem.children[aNotes[0]].pitch, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
                     }
@@ -681,22 +722,6 @@ ABCJS.tablature.Infer.prototype.elegeBotao = function( array ) {
     this.lastButton = parseInt( isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2) );
     return b;
 };
-
-ABCJS.tablature.Infer.prototype.cloneChildren = function(source) {
-
-    var destination = [];
-    for(var r = 0; r<source.length;r++) {
-       var o = source[r];
-       var cp = new ABCJS.write.RelativeElement(o.c, o.dx, o.w, o.pitch, {type:o.type, pitch2:o.pitch2, linewidth:o.linewidth, attributes:o.attributes});
-       cp.note = o.note;
-       cp.buttons = o.buttons;
-       if(o.bass) cp.bass = o.bass;
-       destination[destination.length] =  cp;
-    }   
-    return destination;
-};
-
-
 
 // tentativa de tornar iguais os compassos da melodia e do baixo, para a tablatura ficar melhor
 ABCJS.tablature.Infer.prototype.addMissingRest = function(p_duration)

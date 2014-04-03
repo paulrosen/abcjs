@@ -1474,14 +1474,13 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
     };
     
     this.parseAccordionTab = function (str) {
-        var p = new ABCJS.tablature.Parse( str );
-        var tab = p.parse();
-        for( var i = 0; i < tab.children.length; i++ ) {
+        var startOfLine = 0;
+        var p = new ABCJS.tablature.Parse( str, this.getMultilineVars() );
+        var voice = p.parse();
+        for( var i = 0; i < voice.length; i++ ) {
             // flavio registar o parse da tablatura
-            // this.addTuneElement('note', startOfLine, startI, i, el);
-            // this.addTuneElement('bar', startOfLine, i, i + ret[0], bar);
+            tune.appendElement(voice[i].el_type, startOfLine + voice[i].startChar, startOfLine + voice[i].endChar, voice[i]);
          }     
-
     };
 
     this.tuneHouseKeeping = function(strTune) {
@@ -1601,7 +1600,7 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                     }
                     for (var t = 0; t < tune.lines.length; t++) {
                        // inferir a tablatura em tempo de parse
-                       tune.lines[t].staffs[tune.tabStaffPos].voices.push( this.accordion.inferTabVoice( t, tune, strTune, multilineVars ) );
+                       tune.lines[t].staffs[tune.tabStaffPos].voices[0] = this.accordion.inferTabVoice( t, tune, strTune, multilineVars ) ;
                     }
                 } else {
                     tune.lines[0].staffs[tune.tabStaffPos].inferTablature = false;

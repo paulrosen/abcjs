@@ -18,8 +18,6 @@ ABCJS.tablature.Accordion = function( selector ) {
     this.transporter     = new window.ABCJS.parse.Transport();
     this.accordions      = [GAITA_HOHNER_GC, GAITA_HOHNER_CLUB_IIIM_BR];
     this.selected        = 0;
-    this.abcText         = "";
-    this.vars           = {};
     this.tabLines       = [];
     
     if( selector ) {
@@ -40,25 +38,24 @@ ABCJS.tablature.Accordion.prototype.inferTabVoice = function( line, tune, strTUn
     var infer = new ABCJS.tablature.Infer( this, tune, strTUne, vars );
     
     return infer.accordionTabVoice( line );
-    
-//    this.layouter = new ABCJS.tablature.Layout(abc_layouter);
-//    
-//    this.tabLines[ this.tabLines.length ] = this.layouter.generateTab();
-//    //tablatura não possui outros elementos
-//    abc_layouter.voice.otherchildren = [];
-//    abc_layouter.voice.beams = [];
+
 };
 
-ABCJS.tablature.Accordion.prototype.appendEditor = function () {
-//eliminar
+ABCJS.tablature.Accordion.prototype.updateEditor = function () {
     var ret = "";
     for(var l = 0; l < this.tabLines.length; l ++ ) {
         if(this.tabLines[l].length>0){
             ret = this.tabLines[l]+"\n";
         }
     }
+    this.tabLines = [];
     return ret;
 };
+
+ABCJS.tablature.Accordion.prototype.setTabLine = function (line) {
+    this.tabLines[this.tabLines.length] = line.trim();
+};
+
 
 ABCJS.tablature.Accordion.prototype.load = function (sel) {
         this.selected = sel;
