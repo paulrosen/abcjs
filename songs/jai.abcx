@@ -1,0 +1,39 @@
+%%scale 1.0
+X:1
+T:J'ai vu le loup, le renard et la belette
+T:Eu vi o lobo, a raposa e a doninha
+C:Tradicional 
+C:(transcrição: Bernard Loffet)
+Q:"Allegro" 1/4=164
+L:1/8
+M:2/4
+%|: c2BA | c2B2 | c-cB2 |
+%|: C,2[C,2E,2G,2] | C,[G,,B,,D,] C,[G,,B,,D,] | G,,2[G,,2B,,2D,2] |
+V:melodia
+K:G treble
+|: G2FE | D2EF |  GFGA |  B2G2  | G2FE | D2EF | G2A2 | G2z2  :|
+%(Chorus)
+w:J'ai vu le loup la re-na-rd la ba-le-tte J'ai  vu le loup la  re-nard dan-ser
+|: G2A2 | B2c2 | B2A2 | B2z2 | G2GF | E2ED | E2F2 |1 E2D2 :|2 G2z2  | 
+w:Je les ai vue taper leurs mains Je les ai vue ta-per le-urs ma-ins pieds
+%Je les ai vue taper leurs pieds
+%Je les ai vue taper leurs pieds
+%(Chorus 2x)
+%Je les ai vue qu'ils s’embrassaient
+%Je les ai vue qu'ils s’embrassaient
+%Je les ai vue qu'ils se caressaient
+%Je les ai vue qu'ils se caressaient
+%(Chorus 2x)
+%Je les ai vue avec une enfant
+%Je les ai vue avec une enfant
+%Merci bon dieu c'était pas la mienne
+%Merci bon dieu c'était pas la mienne
+V:baixo
+K:G bass
+|: G,,2[G,,2B,,2D,2] | G,,2[D,,2F,,2A,,2] | D,,2[D,,2F,,2A,,2] | G,,2[G,,2B,,2D,2] | G,,2[G,,2B,,2D,2] \
+| C,,2[C,,2E,,2G,,2] | D,,2[D,,2F,,2A,,2] | G,,2[G,,2B,,2D,2] :|
+|: G,,2[G,,2B,,2D,2] | C,,2[C,,2E,,2G,,2] | D,,2[D,,2F,,2A,,2] | G,,2[G,,2B,,2D,2] | G,,2[G,,2B,,2D,2] \
+| C,,2[C,,2E,,2G,,2] | C,,2[C,,2E,,2G,,2] | D,,2[D,,2F,,2A,,2] :| G,,2[G,,2B,,2D,2] |
+V:tablatura
+K:none accordionTab
+

@@ -235,19 +235,16 @@ ABCJS.write.Printer.prototype.printTabText = function (x, offset, text, size, an
 };
 
 ABCJS.write.Printer.prototype.printTabText2 = function (x, offset, text, size, anchor) {
-    this.printTabText(x, offset, text, 12, anchor);
+    return this.printTabText(x, offset, text, 12, anchor);
 };
 
 ABCJS.write.Printer.prototype.printTabText3 = function (x, offset, text, size, anchor) {
-    this.printTabText(x, offset, text, 10, anchor);
+    return this.printTabText(x, offset, text, 10, anchor);
 };
 
 ABCJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
   anchor = anchor || "start";
   var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":12*this.scale});
-//  if (this.scale!==1) {
-//    ret.scale(this.scale, this.scale, 0, 0);
-//  }
   return ret;
 };
 
@@ -374,8 +371,8 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 		var durlog = Math.floor(Math.log(duration) / Math.log(2));
 		var dot = 0;
 		for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
-		var c = layouter.chartable.note[-durlog];
-		var flag = layouter.chartable.uflags[-durlog];
+		var c = ABCJS.write.chartable.note[-durlog];
+		var flag = ABCJS.write.chartable.uflags[-durlog];
 		var temponote = layouter.printNoteHead(abselem,
 				c,
 				{verticalPos:tempopitch},

@@ -1455,13 +1455,25 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
     this.parseLine = function(line, lineNumber) {
         var ret = header.parseHeader(line, lineNumber);
         if (ret.regular) {
-            if (this.transporter && this.transporter.offSet !== 0) {
-                ret.str = this.transporter.transposeRegularMusicLine(ret.str, line, lineNumber);
+            if (multilineVars.clef.type === "accordionTab") {
+                var startOfLine = this.getMultilineVars().iChar;
+                if (this.accordion) {
+                    var voice = this.accordion.parseTabVoice(ret.str, this.getMultilineVars(), this.getTune());
+                    if (voice.length > 0) {
+                        startNewLine();
+                        for (var i = 0; i < voice.length; i++) {
+                            tune.appendElement(voice[i].el_type, startOfLine + voice[i].startChar, startOfLine + voice[i].endChar, voice[i]);
+                        }
+                    }
+                } else {
+                    addWarning("+Warn: Cannot parse tablature line: no accordion defined!");
+                }
+            } else {
+                if (this.transporter && this.transporter.offSet !== 0) {
+                    ret.str = this.transporter.transposeRegularMusicLine(ret.str, line, lineNumber);
+                }
+                this.parseRegularMusicLine(ret.str);
             }
-            if(multilineVars.clef.type === "accordionTab" )
-              this.parseAccordionTab(ret.str);
-            else
-              this.parseRegularMusicLine(ret.str);
         }
         if (ret.newline && multilineVars.continueall === undefined)
             startNewLine();
@@ -1471,16 +1483,6 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
             addSymbols(tune.getCurrentVoice(), line.substring(2));
         if (ret.recurse)
             this.parseLine(ret.str);
-    };
-    
-    this.parseAccordionTab = function (str) {
-        var startOfLine = 0;
-        var p = new ABCJS.tablature.Parse( str, this.getMultilineVars() );
-        var voice = p.parse();
-        for( var i = 0; i < voice.length; i++ ) {
-            // flavio registar o parse da tablatura
-            tune.appendElement(voice[i].el_type, startOfLine + voice[i].startChar, startOfLine + voice[i].endChar, voice[i]);
-         }     
     };
 
     this.tuneHouseKeeping = function(strTune) {
@@ -1586,10 +1588,9 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
             if (tune.hasTablature) {
                 // necessário inferir a tablatura
                 if (tune.lines[0].staffs[tune.tabStaffPos].voices[0].length === 0) {
-                    tune.lines[0].staffs[tune.tabStaffPos].inferTablature = true;
                     // para a tablatura de accordion, sempre se esperam 3 vozes (staffs): uma para melodia, uma para o baixo e a terceira para a tablatura
                     // opcionalmente, a linha de baixo, não precisa existir
-                    (tune.tabStaffPos === 0) && tune.warnings.push("+Warn: Accordion Tablature should not be the first staff!");
+                    (tune.tabStaffPos === 0) && addWarning("+Warn: Accordion Tablature should not be the first staff!");
                     for (var t = 1; t < tune.lines.length; t++) {
                         //se for necessário inferir a tablatura, garante que todas as linhas tenham uma staff apropriada
                         if (!tune.lines[t].staffs[tune.tabStaffPos]) {
@@ -1598,12 +1599,16 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                             tune.lines[t].staffs[tune.tabStaffPos].subtitle = "";
                         }
                     }
-                    for (var t = 0; t < tune.lines.length; t++) {
-                       // inferir a tablatura em tempo de parse
-                       tune.lines[t].staffs[tune.tabStaffPos].voices[0] = this.accordion.inferTabVoice( t, tune, strTune, multilineVars ) ;
+                    if (this.accordion) {
+                        for (var t = 0; t < tune.lines.length; t++) {
+                            var voice = this.accordion.inferTabVoice(t, tune, strTune, multilineVars);
+                            if (voice.length > 0) {
+                                tune.lines[t].staffs[tune.tabStaffPos].voices[0] = voice;
+                            }
+                        }
+                    } else {
+                        addWarning("+Warn: Cannot infer tablature line: no accordion defined!");
                     }
-                } else {
-                    tune.lines[0].staffs[tune.tabStaffPos].inferTablature = false;
                 }
             }
 

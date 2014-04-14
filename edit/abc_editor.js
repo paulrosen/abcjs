@@ -210,6 +210,11 @@ window.ABCJS.Editor = function(editarea, params) {
     this.editarea = editarea;
   }
 
+  if (params.abcText && typeof params.abcText === "string") {
+     this.editarea.setString(params.abcText, "noRefresh" ) ;
+  }
+
+
   if(params.refreshController_id)  
     this.refreshController  = document.getElementById(params.refreshController_id);
 
@@ -298,15 +303,15 @@ window.ABCJS.Editor = function(editarea, params) {
 };
 
 window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
-/*
+
   var tunebook = new ABCJS.TuneBook(abc);
-  var abcParser = new window.ABCJS.parse.Parse();
+  var abcParser = new window.ABCJS.parse.Parse(this.transporter, this.accordion);
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
-  var printer = new ABCJS.write.Printer(paper, {});	// TODO: handle printer params
+  var printer = new ABCJS.write.Printer(paper, {});// TODO: handle printer params
   printer.printABC(tune);
- */ 
+ 
 };
 
 window.ABCJS.Editor.prototype.modelChanged = function() {
@@ -327,11 +332,7 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
     this.printer = new ABCJS.write.Printer(paper, this.printerparams, this.accordion);
     this.printer.printABC(this.tunes);
     
-  //  if( this.accordion ) { 
-  //      this.editarea.appendString( this.accordion.appendEditor(), "norefresh" );
-  //  }
-    
-    if (ABCJS.midi.MidiWriter && this.mididiv) {
+    if (ABCJS.midi && ABCJS.midi.MidiWriter && this.mididiv) {
         if (this.mididiv !== this.div)
             this.mididiv.innerHTML = "";
         var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv, this.midiparams);

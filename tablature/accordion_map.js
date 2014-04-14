@@ -16,14 +16,20 @@ ABCJS.tablature.Accordion = function( selector ) {
     this.noteToButtonsClose  = {}; 
     
     this.transporter     = new window.ABCJS.parse.Transport();
-    this.accordions      = [GAITA_HOHNER_GC, GAITA_HOHNER_CLUB_IIIM_BR];
-    this.selected        = 0;
+    this.selected        = -1;
     this.tabLines       = [];
+    
+    if( ! window.DIATONIC.map ) {
+       this.accordions  = [];
+    } else {
+        this.accordions = window.DIATONIC.map.models;
+        this.selected   = 0;
+    }
     
     if( selector ) {
         for(var i = 0; i < this.accordions.length; i++) {
             var opt = document.createElement('option');
-            opt.innerHTML = this.accordions[i].nome;
+            opt.innerHTML = this.accordions[i].getName();
             opt.value = i;
             selector.appendChild(opt);
         }   
@@ -33,38 +39,18 @@ ABCJS.tablature.Accordion = function( selector ) {
 
 };
 
-
-ABCJS.tablature.Accordion.prototype.inferTabVoice = function( line, tune, strTUne, vars ) {
-    var infer = new ABCJS.tablature.Infer( this, tune, strTUne, vars );
-    
-    return infer.accordionTabVoice( line );
-
-};
-
-ABCJS.tablature.Accordion.prototype.updateEditor = function () {
-    var ret = "";
-    for(var l = 0; l < this.tabLines.length; l ++ ) {
-        if(this.tabLines[l].length>0){
-            ret = this.tabLines[l]+"\n";
-        }
-    }
-    this.tabLines = [];
-    return ret;
-};
-
-ABCJS.tablature.Accordion.prototype.setTabLine = function (line) {
-    this.tabLines[this.tabLines.length] = line.trim();
-};
-
-
 ABCJS.tablature.Accordion.prototype.load = function (sel) {
         this.selected = sel;
         this.noteToButtonsOpen  = {}; 
         this.noteToButtonsClose  = {}; 
         
-        for( var r = 0; r < this.accordions[this.selected].keyboard.keys.open.length; r ++ ) {
-        var rowOpen = this.accordions[this.selected].keyboard.keys.open[r];
-        var rowClose = this.accordions[this.selected].keyboard.keys.close[r];
+        if ( this.selected < 0 ) return;
+        
+        var nRows = this.accordions[this.selected].getNumKeysRows();
+        
+        for( var r = 0; r < nRows; r ++ ) {
+        var rowOpen = this.accordions[this.selected].getKeysOpenRow(r);
+        var rowClose = this.accordions[this.selected].getKeysCloseRow(r);
         
         for(var button = 0; button < rowOpen.length; button++) {
            if(! this.noteToButtonsOpen[ rowOpen[button]] )  this.noteToButtonsOpen[rowOpen[button]] = [];
@@ -73,13 +59,11 @@ ABCJS.tablature.Accordion.prototype.load = function (sel) {
            this.noteToButtonsClose[rowClose[button]].push( (button+1) + Array(r+1).join("'"));
         }
     }
-    
-    var nRows = this.accordions[this.selected].keyboard.keys.close.length;
      
-    // as notas de baixo não se repetem em oitavas diferentes, então, para simplificar, são ignoradas
-    for( var r = 0; r < this.accordions[this.selected].keyboard.basses.open.length; r ++ ) {
-        var rowOpen = this.accordions[this.selected].keyboard.basses.open[r];
-        var rowClose = this.accordions[this.selected].keyboard.basses.close[r];
+    // as notas de baixo não se repetem em oitavas diferentes, então, para simplificar, oitavas são ignoradas
+    for( var r = 0; r < this.accordions[this.selected].getNumBassesRows(); r ++ ) {
+        var rowOpen = this.accordions[this.selected].getBassOpenRow(r);
+        var rowClose = this.accordions[this.selected].getBassCloseRow(r);
         
         for(var button = 0; button < rowOpen.length; button++) {
            var b = this.getBassNote( rowOpen[button] );
@@ -90,7 +74,6 @@ ABCJS.tablature.Accordion.prototype.load = function (sel) {
            this.noteToButtonsClose[ b ].push( (button+1) + Array(nRows+r+1).join("'"));
         }
     }
-
 };
 
 ABCJS.tablature.Accordion.prototype.getBassNote = function (note) {
@@ -132,4 +115,30 @@ ABCJS.tablature.Accordion.prototype.extractCromaticNote = function(pitch, deltap
     oitava += (n < 0 ? -1 : (n > 11 ? 1 : 0 ));
     n       = (n < 0 ? 12+n : (n > 11 ? n%12 : n ) );
     return this.transporter.numberToKey(n) + oitava;
+};
+
+ABCJS.tablature.Accordion.prototype.inferTabVoice = function( line, tune, strTUne, vars ) {
+    var i = new ABCJS.tablature.Infer( this, tune, strTUne, vars );
+    return i.inferTabVoice( line );
+
+};
+
+ABCJS.tablature.Accordion.prototype.parseTabVoice = function(str, vars ) {
+    var p = new ABCJS.tablature.Parse(str, vars);
+    return p.parseTabVoice();
+};
+
+ABCJS.tablature.Accordion.prototype.setTabLine = function (line) {
+    this.tabLines[this.tabLines.length] = line.trim();
+};
+
+ABCJS.tablature.Accordion.prototype.updateEditor = function () {
+    var ret = "";
+    for(var l = 0; l < this.tabLines.length; l ++ ) {
+        if(this.tabLines[l].length>0){
+            ret += this.tabLines[l]+"\n";
+        }
+    }
+    this.tabLines = [];
+    return ret;
 };

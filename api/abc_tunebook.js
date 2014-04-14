@@ -180,8 +180,10 @@ ABCJS.renderMidi = function(output, abc, parserParams, midiParams, renderParams)
 	function callback(div, tune) {
 		if (midiParams === undefined)
 			midiParams = {};
-		var midiwriter = new ABCJS.midi.MidiWriter(div, midiParams);
-		midiwriter.writeABC(tune);
+               if (ABCJS.midi && ABCJS.midi.MidiWriter && typeof div !== "undefined" ) {
+  		  var midiwriter = new ABCJS.midi.MidiWriter(div, midiParams);
+		  midiwriter.writeABC(tune);
+               }   
 	}
 
 	renderEngine(callback, output, abc, parserParams, renderParams);

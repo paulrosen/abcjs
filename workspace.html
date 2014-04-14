@@ -1,7 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <!-- 
+    <link href="workspace.css" rel="stylesheet"></link>
+            <!-- 
           MAIN DATA STRUCTURES
         
             Tune
@@ -28,23 +29,29 @@
                highest
                lowest
         
-           TODO:
-             done: Verificar o transporte de keys com modos min e maj
-             done: Verificar os limites máximo e mínimos para transporte de keys
-             done: Ignorar Accents na transposição
-             done: Tablatura: gerar mesmo sem o baixo
-             done: Layout:    Revisar a impressão dos elementos ending, accents e lyrics
-             done: Layout:    Revisar a de linhas de texto, quando há mais de uma linha
-             done: Tablatura: imprimir os de pausas adequadamente no baixo
-             done: Tablatura: parse
+           DONE:
+             Verificar o transporte de keys com modos min e maj
+             Verificar os limites máximo e mínimos para transporte de keys
+             Ignorar Accents na transposição
+             Tablatura: gerar mesmo sem o baixo
+             Layout:    Revisar a impressão dos elementos ending, accents e lyrics
+             Layout:    Revisar a de linhas de texto, quando há mais de uma linha
+             Tablatura: imprimir os de pausas adequadamente no baixo
+             Tablatura: parse
+                tratar numeros hexa
+                tratar a adicao de pausas - continuacao
+                tratar acordes
+                tratar startChar e endChar
+                registar o parse da tablatura
+                gerar a linha durante a inferencia
+                imprimir baseado na linha existente
         
-             Tablatura: flavio registar o parse da tablatura
-             Tablatura: gerar a linha durante a inferencia
-             Tablatura: imprimir baseado na linha existente
-             Tablatura: promover a inversão do fole se a posição do botao for melhor
-             Tablatura: melhorar a relação open/close do fole na melodia
-             Tablatura: combinar tempos de notas da melodia com notas do baixo
-             Tablatura: revisar a impressão de múltiplas notas na mesma coluna
+           TODO:
+             Tablatura: 
+                tratar adequadamente os acordes (de baixo)      
+                promover a inversão do fole se a posição do botao for melhor
+                melhorar a relação open/close do fole na melodia
+                revisar a impressão de múltiplas notas na mesma coluna
         
         -->
 	<title>Draw The Dots: Tune Editor demo</title>
@@ -53,6 +60,7 @@
     <body>
 
 	<script type="text/javascript" src="proto_noconflict.js" ></script>
+	<script type="text/javascript" src="jquery-1.10.2.min.js" ></script>
 
         <script type="text/javascript" src="data/abc_tune.js" ></script>
 	<script type="text/javascript" src="api/abc_tunebook.js" ></script>
@@ -73,43 +81,41 @@
         <script type="text/javascript" src="parse/abc_transport.js" ></script>
 	<script type="text/javascript" src="parse/abc_common.js" ></script>
 
-        <!-- modelos de gaitas disponíveis -->
-        <script type="text/javascript" src="tablature/accordion.hohner.gc.js"></script>
-        <script type="text/javascript" src="tablature/accordion.hohner.clubIIIM.br.js"></script>
+        <!-- diatonic accordion map -->
+        <script type="text/javascript" src="diatonic/diatonic-map.js"></script>
+        <script type="text/javascript" src="diatonic/accordion.hohner.gc.js"></script>
+        <script type="text/javascript" src="diatonic/accordion.hohner.clubIIIM.br.js"></script>
+        <script type="text/javascript" src="diatonic/accordion.hohner.clubIIIM.js"></script>
+        <script type="text/javascript" src="diatonic/accordion.hohner.coronaII.js"></script>
+        
+        <!-- support for diatonic accordion tablature -->
         <script type="text/javascript" src="tablature/accordion_map.js"></script>
-        <script type="text/javascript" src="tablature/accordion_layout.js"></script>
+        <script type="text/javascript" src="tablature/accordion_infer.js"></script>
         <script type="text/javascript" src="tablature/accordion_parse.js"></script>
+        <script type="text/javascript" src="tablature/accordion_layout.js"></script>
         
  	<script type="text/javascript" src="edit/abc_editor.js" ></script>
-        
+
         <!--applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="http://dl.dropbox.com/u/223827/abcjs/MIDIPlugin.jar" height="1" width="1"></applet-->
         <!--applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="MIDIPlugin.jar" height="2" width="1"></applet-->
         <!--textarea id="target" cols="80" rows="15"></textarea-->
 
-        <select id="selGaitas" ></select>
-        <select id="selKey" ></select>
-        <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);"></input>
-        <input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);"></input>
-        <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);"></input>
-        <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);"></input>
-        <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();"></input>
-        <input type="checkbox" id="chkAutoRefresh"></input>Auto refresh 
-        <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();"></input>Debug
-
-<textarea id="abc" cols="120" rows="10" style="display:true; float:left; width: 1110px">
+<div id="editControl"> 
+           
+<textarea id="abcx" cols="120" rows="10" style="display:none; float:left; width: 1110px">
 %%scale 1.0
 X:1
 L:1/8
 M:2/4
 V:melodia
-K:G treble
-|: G2-G-G :| 
+K:E treble
+|: [c2e2g2] [g2b2d'2]| e2e'3 :|: e2e'2 :| 
 V:baixo
-K:G bass
-|: G,,2[G,,2B,,2D,2] :| 
+K:E bass
+|: G,2 C,2 | E,2[E,2G,2B,2] :|: E,2z3 :| 
 V:tablatura
 K: none accordionTab
-%|: "G+5'2 G+> >+> :|
+|: G+[6'7'8']2 C+[8'ab]2 | E+7'2 e+a'2 z+> :|: E+7'2 z+a'2 z+z :|
 </textarea>
 
 <textarea id="abcx" cols="120" rows="10" style="display:none; float:left;">
@@ -125,11 +131,11 @@ M:2/4
 %|: c2BA | c2B2 | c-cB2 |
 %|: C,2[C,2E,2G,2] | C,[G,,B,,D,] C,[G,,B,,D,] | G,,2[G,,2B,,2D,2] |
 V:melodia
-K:C treble 
-|: c2BA | G2AB |  cBcd |  e2c2  | c2BA | G2AB | c2d2 | c2z2  :|
+K:G treble
+|: G2FE | D2EF |  GFGA |  B2G2  | G2FE | D2EF | G2A2 | G2z2  :|
 %(Chorus)
 w:J'ai vu le loup la re-na-rd la ba-le-tte J'ai  vu le loup la  re-nard dan-ser
-|: c2d2 | e2f2 | e2d2 | e2z2 | c2cB | A2AG | A2B2 |1 A2G2 :|2 c2z2  | 
+|: G2A2 | B2c2 | B2A2 | B2z2 | G2GF | E2ED | E2F2 |1 E2D2 :|2 G2z2  | 
 w:Je les ai vue taper leurs mains Je les ai vue ta-per le-urs ma-ins pieds
 %Je les ai vue taper leurs pieds
 %Je les ai vue taper leurs pieds
@@ -144,16 +150,16 @@ w:Je les ai vue taper leurs mains Je les ai vue ta-per le-urs ma-ins pieds
 %Merci bon dieu c'était pas la mienne
 %Merci bon dieu c'était pas la mienne
 V:baixo
-K:C bass
-|: C,2[C,2E,2G,2] | C,2[G,,2B,,2D,2] | G,,2[G,,2B,,2D,2] | C,2[C,2E,2G,2] | C,2[C,2E,2G,2] \
-| F,,2[F,,2A,,2C,2] | G,,2[G,,2B,,2D,2] | C,2[C,2E,2G,2] :|
-|: C,2[C,2E,2G,2] | F,,2[F,,2A,,2C,2] | G,,2[G,,2B,,2D,2] | C,2[C,2E,2G,2] | C,2[C,2E,2G,2] \
-| F,,2[F,,2A,,2C,2] | F,,2[F,,2A,,2C,2] | G,,2[G,,2B,,2D,2] :| C,2[C,2E,2G,2] |
+K:G bass
+|: G,,2[G,,2B,,2D,2] | G,,2[D,,2F,,2A,,2] | D,,2[D,,2F,,2A,,2] | G,,2[G,,2B,,2D,2] | G,,2[G,,2B,,2D,2] \
+| C,,2[C,,2E,,2G,,2] | D,,2[D,,2F,,2A,,2] | G,,2[G,,2B,,2D,2] :|
+|: G,,2[G,,2B,,2D,2] | C,,2[C,,2E,,2G,,2] | D,,2[D,,2F,,2A,,2] | G,,2[G,,2B,,2D,2] | G,,2[G,,2B,,2D,2] \
+| C,,2[C,,2E,,2G,,2] | C,,2[C,,2E,,2G,,2] | D,,2[D,,2F,,2A,,2] :| G,,2[G,,2B,,2D,2] |
 V:tablatura
 K:none accordionTab
 </textarea>
-
-<textarea id="abcx" cols="120" rows="10" style="display:none; float:left;">
+       
+<textarea id="abc" cols="120" rows="10" style="display:true; float:left;">
 X:1
 T:Maitia, nun zira?
 C:Folclore Basco
@@ -172,51 +178,100 @@ w:rat gal du * zi ra
 | c3 B2B | B2A AGF |1 G4zd :|2 G6 | d3 efg | B3 A3 | G6 | z4zB |
 %V:baixo
 %K:G bass
-%|z6 |:z6 |z6 | z6 |z6 | z6 | z6 |
-%| z6  |z6  | z6  :| z6 | z6  | z6  | z6 | z6  |
-%|: z6  | z6 | z6  | z6  | z6  | z6  | z6 |
-%| z6  | z6  | z6  :|z6 | z6  | z6  | z6  | z6  |
+%|z6  |: z6  | z6  | z6  | z6  | z6  | z6 |
+%| z6 |1 z6  | z6  :|2 z6  | z6  | z6  | z6  | z6  |
+%|: z6  | z6  | z6  | z6  | z6  | z6  | z6  |
+%| z6  | z6  |1 z6  :|2 z6  | z6  | z6  | z6  | z6  |
 V:tablatura
 K:none accordionTab
+| +z4 +z +8 |: +82 -8 -82 -6' | -6'3 -> -z -8 | +82 +8 +82 +7' | +93 -8'2 -7' | -82 +8 +82 +7' | -8'3 -92 -9 |
+| +7'2 +8 +8 +6' +7 |1 -86 | -z4 -z -9 :|2 -86 | +8'3 -b -a' +9' | +7'3 +83 | +6'6 | +z4 -z -9' |
+|: +9'2 +9' +9'2 +a | -b3 -b3 | -a' +9' +b +a2 -b | -9'4 -z -8' | -92 +7' +7'2 -8' | -9'3 -9'2 -9 | -7'2 +8 +82 +7' |
+| -8'3 -92 -9 | -92 -7' +8 +6' +7 |1 +6'4 +z -9' :|2 -86 | -9'3 -b -a' +9' | +7'3 +83 | +6'6 | +z4 -z -9 |
 </textarea>
+        <select id="selGaitas" ></select>
+        <select id="selKey" ></select>
+        <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
+        <!--input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);" />
+        <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);" /-->
+        <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
+        <input type="button" id="printBtn" value="Print Preview" />
+        <input type="button" id="renderBtn" value="Render" />
+        <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
+        <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
+        <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
+        
+        </div>
+        
         <div id="warnings"></div>
         <div id="midi"></div>
         <div id="canvas" style="overflow-y: scroll; float:left;"></div>
+        
+        <div id="renderDiv" style="float:left; display:none;">
+           <input type="button" id="renderCloseBtn" value="Back" />
+           <div id="renderCanvas" style="overflow-y: scroll; float:left;"></div>
+        </div>   
 
         <script type="text/javascript">
+            window.myEditor = {};
+            window.printButton = document.getElementById("printBtn");
+            window.renderButton = document.getElementById("renderBtn");
+            window.renderCloseButton = document.getElementById("renderCloseBtn");
             
-                window.myEditor = {};
+            window.addEventListener('load', initApp, false);
+
+            function initApp() {
+
+                debug = false;
+
+                myEditor = new ABCJS.Editor(
+                        "abc", {
+                            canvas_id: "canvas"
+                                    //,midi_id: "midi"
+                            , warnings_id: "warnings"
+                            , refreshController_id: "chkAutoRefresh"
+                            , accordionSelector_id: "selGaitas"
+                            , keySelector_id: "selKey"
+                            , midi_options: {program: 21, qpm: 150, type: "qt"}
+                            , render_options: {}
+                            , gui: false
+                        });
 
 
-                window.onload = function() {
-                    debug=false;
-                    
-                    myEditor = new ABCJS.Editor(
-                            "abc", { 
-                                 canvas_id: "canvas"
-                                //,midi_id: "midi"
-                                ,warnings_id: "warnings"
-                                ,refreshController_id: "chkAutoRefresh"
-                                ,accordionSelector_id: "selGaitas"
-                                ,keySelector_id: "selKey"
-                                ,midi_options:{ program:21, qpm:150, type:"qt" }
-                                ,render_options:{}
-                                ,gui: false
-                             });
-                };
+                        
+                printButton.addEventListener("click", function() {
+                    document.getElementById("editControl").style.display = "none";
+                    window.print();
+                    document.getElementById("editControl").style.display = "inline";
+                }, false);
                 
-                function doTranspose( value ) {
-                    myEditor.fireChanged(value, "force" );
-                }
+                renderButton.addEventListener("click", function() {
+                    document.getElementById("editControl").style.display = "none";
+                    document.getElementById("canvas").style.display = "none";
+                    document.getElementById("renderDiv").style.display = "inline";
+                    myEditor.renderTune(myEditor.accordion.accordions[0].songs["Maitia, nun zira?"], {}, "renderCanvas");
+                }, false);
                 
-                function doForceRefresh() {
-                    myEditor.fireChanged( 0, "force" );
-                }
-                function doCheckDebug() {
-                    debug=document.getElementById("chkDebug").checked;
-                    myEditor.fireChanged( 0, "force" );
-                }
-                
+                renderCloseButton.addEventListener("click", function() {
+                    document.getElementById("renderDiv").style.display = "none";
+                    document.getElementById("canvas").style.display = "inline";
+                    document.getElementById("editControl").style.display = "inline";
+                }, false);
+            }
+
+            function doTranspose(value) {
+                myEditor.fireChanged(value, "force");
+            };
+
+            function doForceRefresh() {
+                myEditor.fireChanged(0, "force");
+            };
+
+            function doCheckDebug() {
+                debug = document.getElementById("chkDebug").checked;
+                myEditor.fireChanged(0, "force");
+            };
+
         </script>
 
     </body>

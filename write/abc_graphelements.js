@@ -162,9 +162,8 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
                             - ABCJS.write.spacing.TOPNOTE + 4; 
         var h = 0;
         
-//        if (i > 0 && this.voices[i].stave.clef.type === "accordionTab") {
-//            this.voices[i].stave.lowest = 0;
-//        }
+        if( this.voices[i].stave.lyricsRows === 0 )
+            this.voices[i].stave.lowest -=2;
         
         if (i > 0 && this.voices[i].stave.subtitle) {
             h += 7 * ABCJS.write.spacing.STEP;
@@ -204,7 +203,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         if (this.voices[i].stave.numLines === 0)
             continue;
         printer.y = this.voices[i].stave.y;
-        if( debug ) {
+        if( typeof(debug) !== 'undefined' && debug ) {
           printer.printDebugLine(this.startx, this.w, this.voices[i].stave.y, "#ff0000"); 
           printer.printDebugMsg( this.startx-5, this.voices[i].stave.y, 'y' );
           printer.printDebugLine(this.startx, this.w, this.voices[i].stave.top, "#00ff00"); 

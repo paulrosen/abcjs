@@ -1,0 +1,15 @@
+%%scale .9
+X:1
+T:Teste
+L:1/8
+M:2/4
+V:melodia
+K:E treble
+|: [c2e2g2] [g2b2d'2]| e2e'2 :|: e2e'2 :| 
+V:baixo
+K:E bass
+|: G,2 C,2 | E,2[E,2G,2B,2] :|: E,2z2 :| 
+V:tablatura
+K: none accordionTab
+%|: G+[6'7'8']2 C+[8'ab]2 | E+7'2 e+a'2 z+> :|: E+7'2 z+a'2 z+z :|
+
