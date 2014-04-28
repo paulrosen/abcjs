@@ -122,23 +122,25 @@ K:G bass
 V:tablatura
 K:none accordionTab
 </textarea>
-        <select id="selGaitas" ></select>
-        <select id="selKey" ></select>
-        <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
-        <!--input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);" />
-        <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);" /-->
-        <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
-        <input type="button" id="printBtn" value="Print Preview" />
-        <input type="button" id="renderBtn" value="Render" />
-        <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
-        <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
-        <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
+        <div id="outrosControles" style="display:true; float:left;">
+            <select id="selGaitas" ></select>
+            <select id="selKey" ></select>
+            <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
+            <!--input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);" />
+            <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);" /-->
+            <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
+            <input type="button" id="printBtn" value="Print Preview" />
+            <input type="button" id="renderBtn" value="Render" />
+            <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
+            <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
+            <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
         
+            <div id="warnings"></div>
+            <div id="midi"></div>
+            <div id="canvas" style="overflow-y: scroll; float:left;"></div>
         </div>
-        
-        <div id="warnings"></div>
-        <div id="midi"></div>
-        <div id="canvas" style="overflow-y: scroll; float:left;"></div>
+    
+     </div>
         
         <div id="renderDiv" style="float:left; display:none;">
            <input type="button" id="renderCloseBtn" value="Back" />
@@ -160,14 +162,14 @@ K:none accordionTab
                 myEditor = new ABCJS.Editor(
                         "abc", {
                             canvas_id: "canvas"
-                                    //,midi_id: "midi"
-                            , warnings_id: "warnings"
-                            , refreshController_id: "chkAutoRefresh"
-                            , accordionSelector_id: "selGaitas"
-                            , keySelector_id: "selKey"
-                            , midi_options: {program: 21, qpm: 150, type: "qt"}
-                            , render_options: {}
-                            , gui: false
+                            ,midi_id: "midi"
+                            ,warnings_id: "warnings"
+                            ,refreshController_id: "chkAutoRefresh"
+                            ,accordionSelector_id: "selGaitas"
+                            ,keySelector_id: "selKey"
+                            ,midi_options: {program: 21, qpm: 150, type: "qt"}
+                            ,render_options: {}
+                            ,gui: false
                         });
 
 

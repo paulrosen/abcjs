@@ -441,13 +441,17 @@ ABCJS.midi.MidiWriter.prototype.getJumpMark = function() {
   return this.visited[this.getMarkString()];
 };
 
+ABCJS.midi.MidiWriter.prototype.hasTablature = function() {
+  return this.abctune.hasTablature;
+};
+
 ABCJS.midi.MidiWriter.prototype.getLine = function() {
   return this.abctune.lines[this.line];
 };
 
 ABCJS.midi.MidiWriter.prototype.getStaff = function() {
   try {
-  return this.getLine().staff[this.staff];
+  return this.getLine().staffs[this.staff];
   } catch (e) {
 
   }
@@ -497,6 +501,7 @@ ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
     
     // visit each voice completely in turn
     // "problematic" because it means visiting only one staff+voice for each line each time
+    // one more problem: we expect the last staff to be the tablature
     this.staffcount=1; // we'll know the actual number once we enter the code
     for(this.staff=0;this.staff<this.staffcount;this.staff++) {
       this.voicecount=1;
@@ -505,8 +510,8 @@ ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
 	this.restart = {line:0, staff:this.staff, voice:this.voice, pos:0};
 	this.next= null;
 	for(this.line=0; this.line<abctune.lines.length; this.line++) {
-	  var abcline = abctune.lines[this.line];
-	  if (this.getLine().staff) {
+          var s =this.getStaff();
+	  if (s.clef.type !== "accordionTab") {
 	    this.writeABCLine();
 	  }
 	}
@@ -521,7 +526,7 @@ ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
 };
 
 ABCJS.midi.MidiWriter.prototype.writeABCLine = function() {
-  this.staffcount = this.getLine().staff.length;
+  this.staffcount = this.getLine().staffs.length + (this.hasTablature()?-1:0);
   this.voicecount = this.getStaff().voices.length;
   this.setKeySignature(this.getStaff().key);
   this.writeABCVoiceLine();
@@ -534,7 +539,7 @@ ABCJS.midi.MidiWriter.prototype.writeABCVoiceLine = function () {
     if (this.next) {
       this.goToMark(this.next);
       this.next = null;
-      if (!this.getLine().staff) return;
+      //if (!this.getLine().staffs) return;
     } else {
       this.pos++;
     }
@@ -542,7 +547,6 @@ ABCJS.midi.MidiWriter.prototype.writeABCVoiceLine = function () {
 };
 
 ABCJS.midi.MidiWriter.prototype.writeABCElement = function(elem) {
-  var foo;
   switch (elem.el_type) {
   case "note":
     this.writeNote(elem);
