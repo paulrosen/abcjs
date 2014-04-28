@@ -142,7 +142,7 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     this.addTABChild(abcBassElem, inTieTreb, inTieBass);
                 }
             } else if (balance > 0) {
-                var remaining = typeof( remainingBass ) !== "undefined";
+                var remaining = typeof( remainingBass ) !== "undefined" && remainingBass.length > 0;
                 if (abcTrebElem.el_type === 'bar') {
                     // encontrou nota faltando na melodia - preenche com pausas
                     var rest = this.addMissingRest(balance);
@@ -156,7 +156,6 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     this.addTABChild(tabelem, inTieTreb, inTieBass|| remaining);
                     trebDuration += balance;
                 } else {
-                    var remaining = typeof( remainingBass ) !== "undefined";
                     if(remaining) {
                         for (var c = 0; c < remainingBass.length; c++) {
                             abcTrebElem.pitches.splice( c, 0,  remainingBass[c] );
@@ -165,9 +164,9 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     this.addTABChild(abcTrebElem, inTieTreb, inTieBass || remaining );
                 }
                 idxTreb++;
-                delete remainingBass;
+                remainingBass = [];
             } else {
-                var remaining = typeof( remainingTreb) !== "undefined";
+                var remaining = typeof( remainingTreb) !== "undefined" && remainingTreb.length > 0;
                 if (abcBassElem.el_type === 'bar') {
                     // encontrou nota faltando no baixo - preenche com pausas
                     var rest = this.addMissingRest(-balance);
@@ -189,7 +188,7 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     this.addTABChild(abcBassElem, inTieTreb || remaining, inTieBass );
                 }
                 idxBass++;
-                delete remainingTreb;
+                remainingTreb = [];
             }
             balance = bassDuration - trebDuration;
             inTieBass = typeof( abcBassElem.inTie ) === "undefined"? inTieBass : abcBassElem.inTie; 
@@ -278,7 +277,7 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
                 item.pitch = 17.5;
                 item.type = 'tabText';
             } else {
-                var note = this.accordion.extractCromaticNote(item.pitch, this.vposTrebStave, acc, this.accTrebKey);
+                    var note = this.accordion.extractCromaticNote(item.pitch, this.vposTrebStave, acc, this.accTrebKey);
                 d--;
                 item.buttons = this.accordion.getButtons(note);
                 item.note = note;
