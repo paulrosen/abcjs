@@ -298,12 +298,19 @@ Midi.prototype.embed = function(parent, noplayer) {
 //   embedContainer.innerHTML = '<object id="embed1" classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" codebase="http://www.apple.com/qtactivex/qtplugin.cab"><param name="src" value="' + data + '"></param><param name="Autoplay" value="false"></param><embed name="embed1" src="' + data + '" autostart="false" enablejavascript="true" /></object>';
 //   embed = document["embed1"];
 
+  var form = setAttributes(document.createElement('form'), {
+    action: data
+    ,method: "get"
+    });  
   
-  var link = setAttributes(document.createElement('a'), {
-    href: data
+  var link = setAttributes(document.createElement('button'), {
+    style:'height: 22px; margin-top:5px;'
     });  
   link.innerHTML = "download midi";
-  parent.insertBefore(link,parent.firstChild);
+  
+  form.insertBefore(link,form.firstChild);
+  
+  parent.insertBefore(form,parent.firstChild);
 
   if (noplayer) return;
 
@@ -314,7 +321,7 @@ Midi.prototype.embed = function(parent, noplayer) {
 	autoplay : 'false', 
 	loop : 'false',
 	enablejavascript: 'true',
-	style:'display:block; height: 20px;'
+	style:'display:inline; height: 28px; float:left; padding:2px;'
 	});
   parent.insertBefore(embed,parent.firstChild);
 };
