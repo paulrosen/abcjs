@@ -124,13 +124,15 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     this.addTABChild(abcBassElem, inTieTreb, inTieBass);
                     idxTreb--;
                 } else if (bassDuration > trebDuration) {
-                    remainingBass = ABCJS.parse.clone(abcBassElem.pitches);
+                    remainingBass = ABCJS.parse.clone(abcBassElem);
+                    remainingBass.duration = abcBassElem.duration - abcTrebElem.duration;
                     for (var c = 0; c < abcBassElem.pitches.length; c++) {
                         abcTrebElem.pitches.splice( c, 0, abcBassElem.pitches[c] );
                     }
                     this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
                 } else if( bassDuration < trebDuration) {
-                    remainingTreb = ABCJS.parse.clone(abcTrebElem.pitches);
+                    remainingTreb = ABCJS.parse.clone(abcTrebElem);
+                    remainingTreb.duration = abcTrebElem.duration - abcBassElem.duration;
                     for (var c = 0; c < abcTrebElem.pitches.length; c++) {
                         abcBassElem.pitches.push(abcTrebElem.pitches[c]);
                     }
@@ -142,53 +144,67 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     this.addTABChild(abcBassElem, inTieTreb, inTieBass);
                 }
             } else if (balance > 0) {
-                var remaining = typeof( remainingBass ) !== "undefined" && remainingBass.length > 0;
+                var remaining = typeof(remainingBass ) !== "undefined"; // && remainingBass.pitches.length > 0;
+                var dura = 0;
                 if (abcTrebElem.el_type === 'bar') {
                     // encontrou nota faltando na melodia - preenche com pausas
                     var rest = this.addMissingRest(balance);
+                    dura = balance;
                     trebVoice.splice(idxTreb, 0, rest);
                     var tabelem = this.abcElem2TabElem(rest, false);
                     if( remaining ) {
-                        for (var c = 0; c < remainingBass.length; c++) {
-                            tabelem.pitches.push(remainingBass[c]);
+                        for (var c = 0; c < remainingBass.pitches.length; c++) {
+                            tabelem.pitches.push(ABCJS.parse.clone(remainingBass.pitches[c]));
                         }
                     }
                     this.addTABChild(tabelem, inTieTreb, inTieBass|| remaining);
                     trebDuration += balance;
                 } else {
                     if(remaining) {
-                        for (var c = 0; c < remainingBass.length; c++) {
-                            abcTrebElem.pitches.splice( c, 0,  remainingBass[c] );
+                        dura = abcTrebElem.duration;
+                        for (var c = 0; c < remainingBass.pitches.length; c++) {
+                            abcTrebElem.pitches.splice( c, 0, ABCJS.parse.clone(remainingBass.pitches[c]) );
                         }
                     }
+                    //trebDuration += dura;
                     this.addTABChild(abcTrebElem, inTieTreb, inTieBass || remaining );
                 }
                 idxTreb++;
-                remainingBass = [];
+                if(remaining) {
+                  remainingBass.duration -= dura;
+                  if(remainingBass.duration <= 0 ) remainingBass = undefined;
+              }  
             } else {
-                var remaining = typeof( remainingTreb) !== "undefined" && remainingTreb.length > 0;
+                var remaining = typeof(remainingTreb) !== "undefined"; // && remainingTreb.pitches.length > 0;
+                var dura = 0;
                 if (abcBassElem.el_type === 'bar') {
                     // encontrou nota faltando no baixo - preenche com pausas
                     var rest = this.addMissingRest(-balance);
+                    dura = -balance;
                     bassVoice.splice(idxBass, 0, rest );
-                    var tabelem = this.abcElem2TabElem(rest, true)
+                    var tabelem = this.abcElem2TabElem(rest, true);
                     if( remaining ) {
-                        for (var c = 0; c < remainingTreb.length; c++) {
-                            tabelem.pitches.push(remainingTreb[c]);
+                        for (var c = 0; c < remainingTreb.pitches.length; c++) {
+                            tabelem.pitches.push(ABCJS.parse.clone(remainingTreb.pitches[c]));
                         }
                     }
                     this.addTABChild(tabelem, inTieTreb || remaining, inTieBass);
                     bassDuration -= balance;
                 } else {
                     if( remaining ) {
-                        for (var c = 0; c < remainingTreb.length; c++) {
-                            abcBassElem.pitches.push(remainingTreb[c]);
+                        dura = abcBassElem.duration;
+                        for (var c = 0; c < remainingTreb.pitches.length; c++) {
+                            abcBassElem.pitches.push(ABCJS.parse.clone(remainingTreb.pitches[c]));
                         }
                     }
+                    //bassDuration += dura;
                     this.addTABChild(abcBassElem, inTieTreb || remaining, inTieBass );
                 }
                 idxBass++;
-                remainingTreb = [];
+                if(remaining) {
+                  remainingTreb.duration -= dura;
+                  if(remainingTreb.duration <= 0 ) remainingTreb = undefined;
+                }  
             }
             balance = bassDuration - trebDuration;
             inTieBass = typeof( abcBassElem.inTie ) === "undefined"? inTieBass : abcBassElem.inTie; 
@@ -292,7 +308,7 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
                 bass = item;
                 this.registerLine('z');
             }
-        } else if (item.type === "tabText") {
+        } else if (item.type.indexOf("tabText") >=0) {
             if (item.bass) {
                 bass = item;
                 if (inTieBass)

@@ -100,10 +100,10 @@
         <!--applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="MIDIPlugin.jar" height="2" width="1"></applet-->
         <!--textarea id="target" cols="80" rows="15"></textarea-->
 
-<div id="editControl"> 
+<div id="editControl" style="display:true; float:left;"> 
            
        
-<textarea id="abc" cols="120" rows="10" style="display:true; float:left;">
+<textarea id="abc" cols="120" rows="10" >
 X:1
 T:Valsa Sertaneja
 C:Cezar Ferreira
@@ -117,7 +117,7 @@ K:G
 | zB, CD E=F | [B6G6] | [=F2A2] [E2G2] [D2F2] | [E6C6] :|
 V:baixo
 K:G bass
-|: z6 | C,2 [E,G,c,]z [E,G,c,]z | z6 | G,,2 [G,B,d,]z [G,B,d,]z |
+|: z6 | C,2 [c,E,G,]z [c,E,G,]z | z6 | G,,2 [G,B,d,]z [G,B,d,]z |
 | G,,2 [G,B,d,]z [G,B,d,]z | G,,2 [G,B,d,]z [G,B,d,]z | G,,2 [G,B,d,]z [G,B,d,]z | C,2 [E,G,c,]z [E,G,c,]z :|
 V:tablatura
 K:none accordionTab
@@ -130,28 +130,20 @@ K:none accordionTab
             <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);" /-->
             <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
             <input type="button" id="printBtn" value="Print Preview" />
-            <input type="button" id="renderBtn" value="Render" />
             <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
             <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
             <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
         
             <div id="warnings"></div>
             <div id="midi"></div>
-            <div id="canvas" style="overflow-y: scroll; float:left;"></div>
         </div>
     
      </div>
+     <div id="canvas" style="overflow-y: scroll; float:left;"></div>
         
-        <div id="renderDiv" style="float:left; display:none;">
-           <input type="button" id="renderCloseBtn" value="Back" />
-           <div id="renderCanvas" style="overflow-y: scroll; float:left;"></div>
-        </div>   
-
         <script type="text/javascript">
             window.myEditor = {};
             window.printButton = document.getElementById("printBtn");
-            window.renderButton = document.getElementById("renderBtn");
-            window.renderCloseButton = document.getElementById("renderCloseBtn");
             
             window.addEventListener('load', initApp, false);
 
@@ -180,18 +172,6 @@ K:none accordionTab
                     document.getElementById("editControl").style.display = "inline";
                 }, false);
                 
-                renderButton.addEventListener("click", function() {
-                    document.getElementById("editControl").style.display = "none";
-                    document.getElementById("canvas").style.display = "none";
-                    document.getElementById("renderDiv").style.display = "inline";
-                    myEditor.renderTune(myEditor.accordion.accordions[0].songs["Maitia, nun zira?"], {}, "renderCanvas");
-                }, false);
-                
-                renderCloseButton.addEventListener("click", function() {
-                    document.getElementById("renderDiv").style.display = "none";
-                    document.getElementById("canvas").style.display = "inline";
-                    document.getElementById("editControl").style.display = "inline";
-                }, false);
             }
 
             function doTranspose(value) {
