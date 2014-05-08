@@ -361,7 +361,8 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
     var qtNotes = bass ? column.length - 1 : column.length;
     this.registerLine(this.closing ? "+" : "-");
     this.registerLine(qtNotes > 1 ? "[" : "");
-    
+    child.bellows = this.closing ? "+" : "-";
+
     // segunda passada: altera o que será exibido, conforme definições da primeira passada
     for (var c = 0; c < column.length; c++) {
         item = column[c];

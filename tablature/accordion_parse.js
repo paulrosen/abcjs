@@ -105,6 +105,7 @@ ABCJS.tablature.Parse.prototype.formatToken = function(token) {
   var el = {el_type: token.el_type, startChar:this.xi, endChar:this.i};
   el.pitches = [];
   el.duration = token.duration * this.vars.default_length;
+  el.bellows = token.bellows;
   if(token.bassNote) {
     if(token.bassNote === "z")
       el.pitches[0] = { bass:true, type: "rest", c: '', pitch: 18};

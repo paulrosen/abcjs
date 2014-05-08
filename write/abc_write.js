@@ -56,12 +56,18 @@ ABCJS.write.Printer = function(paper, params, accordion) {
 
 // notify all listeners that a graphical element has been selected
 ABCJS.write.Printer.prototype.notifySelect = function (abselem) {
-  this.clearSelection();
-  this.selected = [abselem];
+  //this.selected = [abselem];
+  this.selected[this.selected.length]=abselem;
   abselem.highlight();
   for (var i=0; i<this.listeners.length;i++) {
     this.listeners[i].highlight(abselem.abcelem);
   }
+};
+
+// notify all listeners that a graphical element has been selected
+ABCJS.write.Printer.prototype.notifyClearNSelect = function (abselem) {
+  this.clearSelection();
+  this.notifySelect(abselem);
 };
 
 ABCJS.write.Printer.prototype.notifyChange = function (abselem) {

@@ -448,6 +448,7 @@ ABCJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
         printer.notifySelect(self);
     });
     this.abcelem.abselem = this;
+    this.abcelem.abselem.y = printer.y;
 
     var spacing = ABCJS.write.spacing.STEP * printer.scale;
 
