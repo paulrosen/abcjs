@@ -388,7 +388,7 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
 
 ABCJS.tablature.Infer.prototype.button2Hex = function( b ) {
     if(b === 'x') return b;
-    var p = parseInt( isNaN(b.substr(0,2))? 1 : 2 );
+    var p = parseInt( isNaN(b.substr(0,2)) || b.length === 1 ? 1 : 2 );
     var n = b.substr(0, p);
     return (+n).toString(16) + b.substr(p);
 };
