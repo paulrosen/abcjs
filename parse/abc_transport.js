@@ -158,7 +158,6 @@ window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size )
     newElem.pitch = pitch;
     if(newStaff.acc !== '' ) newElem.accidental = newStaff.acc;
 
-
     //var newElem = window.ABCJS.parse.clone(elem);
 /*
     if (dKf === 0 && dAcc === 0) {
