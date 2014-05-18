@@ -64,13 +64,14 @@ window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str,
     var pitSyms = "ABCDEFGabcdefg"; // state 2
     var octSyms = ",\'"; // state 3
     var exclusionSyms = "!+"; 
-    var exclusionZone = false;
     
     this.workingLine = line;
     this.workingLineIdx = this.changedLines.length;
     this.changedLines[ this.workingLineIdx ] = { line:lineNumber, text: line };
     this.workingX = 0;
     this.newX =0;
+    this.baraccidentals = [];
+    this.baraccidentalsNew = [];
     
     while (index < line.length) {
         found = false;
@@ -87,6 +88,11 @@ window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str,
                     index += nextPos + 2;
                 }
                 continue;
+            }
+            
+            if(line.charAt(index) === '|'){
+                this.baraccidentals = [];
+                this.baraccidentalsNew = [];
             }
             
             state = 
@@ -115,84 +121,95 @@ window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str,
     return this.changedLines[ this.workingLineIdx ].text;
 };
 
-window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size)
+window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size )
 {
+    var abcNote = this.workingLine.substr(xi, size);
+    var elem = this.makeElem(abcNote);
+    var pitch = elem.pitch;
+    var oct = this.extractStaffOctave(pitch);
+    var crom = this.staffNoteToCromatic(this.extractStaffNote(pitch));
+
+    var txtAcc = elem.accidental;
+    var dAcc = this.getAccOffset(txtAcc);
+    
+    if(elem.accidental) {
+        this.baraccidentals[pitch] = dAcc;
+    }
+
+    var dKi = this.getKeyAccOffset(this.numberToKey(crom), this.oldKeyAcc);
+
+    var newNote = 0;
+    if (this.baraccidentals[pitch] !== undefined) {
+        newNote = crom + this.baraccidentals[pitch] + this.offSet;
+    } else { // use normal accidentals
+        newNote = crom + dKi + this.offSet;
+    }
+
+    var newOct = this.extractCromaticOctave(newNote);
+    var newNote = this.extractCromaticNote(newNote);
+
+    var newStaff = this.numberToStaff(newNote);
+    var dKf = this.getKeyAccOffset(newStaff.note, this.newKeyAcc);
+
+    pitch = this.getPitch(newStaff.note, oct + newOct);
+    dAcc = this.getAccOffset(newStaff.acc);
+
+    var newElem = {};
+    newElem.pitch = pitch;
+    if(newStaff.acc !== '' ) newElem.accidental = newStaff.acc;
+
+    //var newElem = window.ABCJS.parse.clone(elem);
 /*
- * Staff        Cromatic        F            Cromatic  Staff      F#
- *       Pitch  Note     Acc    Ki   Trans   NewNote       a      Kf d    ESPERADO
- *  Bb   6      11       0      -1   1       11        B   0      0  0    B
- *  B    6      11       NAT    -1   1       0         C   0      1  1   =C
- *  C    7      0        0       0   1       1         C#  1      1  0    C
- *  C#   7      0        1       0   1       2         D   0      1  1   =D
- *  D    8      2        0       0   1       3         Eb -1      1  2    D
- *  D#   8      2        1       0   1       4         E   0      1  1   =E 
- *  E    9      4        0       0   1       5         F   0      1  1   =F
- *  
- */
-
-  
-  var abcNote  = this.workingLine.substr(xi, size);
-  var elem     = this.makeElem(abcNote);
-  var pitch    = elem.pitch;
-  var oct      = this.extractStaffOctave(pitch);
-  var crom     = this.staffNoteToCromatic(this.extractStaffNote(pitch));
-
-  var txtAcc   = elem.accidental;  
-  var dAcc     = this.getAccOffset(txtAcc);
-  
-  var dKi      = this.getKeyAccOffset(this.numberToKey(crom), this.oldKeyAcc);
-  
-  var newNote  = crom + dAcc + (txtAcc==="natural"?0:dKi) + this.offSet;
-  var newOct   = this.extractCromaticOctave(newNote);
-  var newNote  = this.extractCromaticNote(newNote);
-  
-  var newStaff = this.numberToStaff( newNote );
-  var dKf      = this.getKeyAccOffset(newStaff.note, this.newKeyAcc);
-  
-  pitch        = this.getPitch( newStaff.note, oct + newOct );
-  dAcc         = this.getAccOffset(newStaff.acc);
-   
-  var newElem  = window.ABCJS.parse.clone(elem);
-  
-  if( dAcc === 0 ) {
-    if( dKf === 0)  
-      delete newElem.accidental;
-    else
-      newElem.accidental =  'natural';
-  } else if( dKf === 0 && dAcc !== 0 ) {
-    newElem.accidental = newStaff.acc;
-  } else { //both had value
-    if((dAcc - dKf) === 0 ) { // they are the simetric
-      delete newElem.accidental;
-    } else { // they are oposed -- não tratei todos os casos
-      if( pitch === 0 ) throw "decreasing zero pitch"; 
-      pitch --;
-      crom = this.staffNoteToCromatic(this.extractStaffNote(pitch));
-      dAcc = dKf;
-      dKf  = this.getKeyAccOffset(this.numberToKey(crom), this.newKeyAcc);
-      if( dKf === 0 ) {
-        newElem.accidental = this.getAccName(dAcc);
-      } else {
+    if (dKf === 0 && dAcc === 0) {
         delete newElem.accidental;
-      }
-    }  
-  }
+    } else if (dKf !== 0 && dAcc === 0) {
+        if (this.baraccidentalsNew[pitch] === undefined) {
+          newElem.accidental = 'natural';
+          this.baraccidentalsNew[pitch]= 'natural';
+        } else {
+          delete newElem.accidental;
+        }
+    } else if (dKf === 0 && dAcc !== 0) {
+        if (this.baraccidentalsNew[pitch] === undefined) {
+          newElem.accidental = newStaff.acc;
+          this.baraccidentalsNew[pitch]= newStaff.acc;
+        } else {
+          delete newElem.accidental;
+        }
+    } else {  //both had value  
+        if (dAcc === dKf) { // they are equal
+            delete newElem.accidental;
+        } else { // they are oposed
+            pitch--;
+            crom = this.staffNoteToCromatic(this.extractStaffNote(pitch));
+            dAcc = dKf;
+            dKf = this.getKeyAccOffset(this.numberToKey(crom), this.newKeyAcc);
+            if (dKf === 0) {
+                if (this.baraccidentalsNew[pitch] === undefined) {
+                  newElem.accidental = this.getAccName(dAcc);
+                  this.baraccidentalsNew[pitch]= newElem.accidental;
+                } else {
+                  delete newElem.accidental;
+                }
+            } else {
+                delete newElem.accidental;
+            }
+        }
+    }
+*/
+    oct = this.extractStaffOctave(pitch);
+    var key = this.numberToKey(this.staffNoteToCromatic(this.extractStaffNote(pitch)));
+    txtAcc = newElem.accidental;
+    abcNote = this.getAbcNote(key, txtAcc, oct);
+    var p0 = this.changedLines[this.workingLineIdx].text.substr(0, this.newX);
+    var p1 = this.workingLine.substr(this.workingX, xi - this.workingX);
+    var p2 = this.workingLine.substr(xi + size);
+    this.workingX = xi + size;
+    this.changedLines[this.workingLineIdx].text = p0 + p1 + abcNote;
+    this.newX = this.changedLines[this.workingLineIdx].text.length;
+    this.changedLines[this.workingLineIdx].text += p2;
+    return newElem;
 
-  newElem.pitch = pitch;
-  
-  oct  = this.extractStaffOctave(pitch);
-  var key = this.numberToKey(this.staffNoteToCromatic(this.extractStaffNote(pitch)));
-  txtAcc = newElem.accidental;
-  abcNote = this.getAbcNote(key,txtAcc,oct);
-  var p0 = this.changedLines[this.workingLineIdx].text.substr( 0, this.newX ); 
-  var p1 = this.workingLine.substr( this.workingX, xi-this.workingX ); 
-  var p2 = this.workingLine.substr( xi + size ); 
-  this.workingX = xi + size;
-  this.changedLines[this.workingLineIdx].text = p0 + p1 + abcNote;
-  this.newX = this.changedLines[this.workingLineIdx].text.length;
-  this.changedLines[this.workingLineIdx].text += p2;
-  return newElem;    
-  
 };
 
 window.ABCJS.parse.Transport.prototype.getAbcNote = function( key, txtAcc, oct) {
