@@ -133,7 +133,8 @@ ABCJS.tablature.Accordion.prototype.setTabLine = function (line) {
 };
 
 ABCJS.tablature.Accordion.prototype.updateEditor = function () {
-    var ret = "";
+    var ret = "\n";
+    if(this.tabLines.length === 0) return "";
     for(var l = 0; l < this.tabLines.length; l ++ ) {
         if(this.tabLines[l].length>0){
             ret += this.tabLines[l]+"\n";
