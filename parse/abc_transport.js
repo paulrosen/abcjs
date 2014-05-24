@@ -30,17 +30,37 @@ window.ABCJS.parse.Transport = function ( offSet_ ) {
     this.maxNote        = 0x6C; //  C8 = last note
     this.pitches       = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6, 
                             c: 7, d: 8, e: 9, f: 10, g: 11, a: 12, b: 13 };
-    this.number2key     = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"];
-    this.number2keyflat = ["C", "D♭", "D", "D♯", "E", "F", "G♭", "G", "A♭", "A", "A♯", "B"];
-    this.number2key_br  = ["Dó", "Dó♯", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Sol♯", "Lá", "Si♭", "Si"];
+    this.number2key      = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"];
+    this.number2keysharp = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+    this.number2key_br  = ["Dó", "Ré♭", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Lá♭", "Lá", "Si♭", "Si"];
     this.number2staff   = [    
-                {note:"C", acc:""}, {note:"C", acc:"sharp"}, 
-                {note:"D", acc:""}, {note:"E", acc:"flat" }, 
-                {note:"E", acc:""}, 
-                {note:"F", acc:""}, {note:"F", acc:"sharp"}, 
-                {note:"G", acc:""}, {note:"G", acc:"sharp"}, 
-                {note:"A", acc:""}, {note:"B", acc:"flat" }, 
-                {note:"B", acc:""}
+                 {note:"C", acc:""}
+                ,{note:"D", acc:"flat"} 
+                ,{note:"D", acc:""}
+                ,{note:"E", acc:"flat"} 
+                ,{note:"E", acc:""} 
+                ,{note:"F", acc:""}
+                ,{note:"G", acc:"flat"} 
+                ,{note:"G", acc:""} 
+                ,{note:"A", acc:"flat"} 
+                ,{note:"A", acc:""} 
+                ,{note:"B", acc:"flat"} 
+                ,{note:"B", acc:""}
+    ];
+    
+    this.number2staffSharp   = [    
+                 {note:"C", acc:""}
+                ,{note:"C", acc:"sharp"}
+                ,{note:"D", acc:""} 
+                ,{note:"D", acc:"sharp"}
+                ,{note:"E", acc:""} 
+                ,{note:"F", acc:""} 
+                ,{note:"F", acc:"sharp"}
+                ,{note:"G", acc:""} 
+                ,{note:"G", acc:"sharp"} 
+                ,{note:"A", acc:""} 
+                ,{note:"A", acc:"sharp"} 
+                ,{note:"B", acc:""} 
     ];
     
     this.reset(offSet_);
@@ -117,6 +137,8 @@ window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str,
               index++;
             }   
         }
+        if(inside && !found)
+          this.transposeNote(xi, index - xi);
     }
     return this.changedLines[ this.workingLineIdx ].text;
 };
@@ -148,7 +170,7 @@ window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size )
     var newOct = this.extractCromaticOctave(newNote);
     var newNote = this.extractCromaticNote(newNote);
 
-    var newStaff = this.numberToStaff(newNote);
+    var newStaff = this.numberToStaff(newNote, this.newKeyAcc);
     var dKf = this.getKeyAccOffset(newStaff.note, this.newKeyAcc);
 
     pitch = this.getPitch(newStaff.note, oct + newOct);
@@ -157,46 +179,63 @@ window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size )
     var newElem = {};
     newElem.pitch = pitch;
     if(newStaff.acc !== '' ) newElem.accidental = newStaff.acc;
-
-    //var newElem = window.ABCJS.parse.clone(elem);
-/*
-    if (dKf === 0 && dAcc === 0) {
-        delete newElem.accidental;
-    } else if (dKf !== 0 && dAcc === 0) {
-        if (this.baraccidentalsNew[pitch] === undefined) {
+    
+    // se a nota sair com um acidente (inclusive natural) registrar acidente na barra para o pitch.
+    var dBarAcc = this.baraccidentalsNew[newElem.pitch] ;
+    if(dAcc === 0) {
+        if( dBarAcc && dBarAcc !==0 || dKf !== 0) {
           newElem.accidental = 'natural';
-          this.baraccidentalsNew[pitch]= 'natural';
-        } else {
-          delete newElem.accidental;
         }
-    } else if (dKf === 0 && dAcc !== 0) {
-        if (this.baraccidentalsNew[pitch] === undefined) {
-          newElem.accidental = newStaff.acc;
-          this.baraccidentalsNew[pitch]= newStaff.acc;
-        } else {
-          delete newElem.accidental;
-        }
-    } else {  //both had value  
-        if (dAcc === dKf) { // they are equal
-            delete newElem.accidental;
-        } else { // they are oposed
-            pitch--;
-            crom = this.staffNoteToCromatic(this.extractStaffNote(pitch));
-            dAcc = dKf;
-            dKf = this.getKeyAccOffset(this.numberToKey(crom), this.newKeyAcc);
-            if (dKf === 0) {
-                if (this.baraccidentalsNew[pitch] === undefined) {
-                  newElem.accidental = this.getAccName(dAcc);
-                  this.baraccidentalsNew[pitch]= newElem.accidental;
-                } else {
-                  delete newElem.accidental;
-                }
-            } else {
-                delete newElem.accidental;
-            }
+    } else {
+        if( dBarAcc && dBarAcc !== 0 ) {
+           if(dBarAcc === dAcc ) delete newElem.accidental;
+        } else if(dKf !== 0) {
+           if(dKf === dAcc ) delete newElem.accidental;
         }
     }
-*/
+    
+    if( newElem.accidental ) {
+      this.baraccidentalsNew[newElem.pitch] = newElem.accidental;
+    }
+    
+//
+//    if (dKf === 0 && dAcc === 0) {
+//        delete newElem.accidental;
+//    } else if (dKf !== 0 && dAcc === 0) {
+//        if (this.baraccidentalsNew[pitch] === undefined) {
+//          newElem.accidental = 'natural';
+//          this.baraccidentalsNew[pitch]= 'natural';
+//        } else {
+//          delete newElem.accidental;
+//        }
+//    } else if (dKf === 0 && dAcc !== 0) {
+//        if (this.baraccidentalsNew[pitch] === undefined) {
+//          newElem.accidental = newStaff.acc;
+//          this.baraccidentalsNew[pitch]= newStaff.acc;
+//        } else {
+//          delete newElem.accidental;
+//        }
+//    } else {  //both had value  
+//        if (dAcc === dKf) { // they are equal
+//            delete newElem.accidental;
+//        } else { // they are oposed
+//            pitch--;
+//            crom = this.staffNoteToCromatic(this.extractStaffNote(pitch));
+//            dAcc = dKf;
+//            dKf = this.getKeyAccOffset(this.numberToKey(crom), this.newKeyAcc);
+//            if (dKf === 0) {
+//                if (this.baraccidentalsNew[pitch] === undefined) {
+//                  newElem.accidental = this.getAccName(dAcc);
+//                  this.baraccidentalsNew[pitch]= newElem.accidental;
+//                } else {
+//                  delete newElem.accidental;
+//                }
+//            } else {
+//                delete newElem.accidental;
+//            }
+//        }
+//    }
+
     oct = this.extractStaffOctave(pitch);
     var key = this.numberToKey(this.staffNoteToCromatic(this.extractStaffNote(pitch)));
     txtAcc = newElem.accidental;
@@ -344,8 +383,11 @@ window.ABCJS.parse.Transport.prototype.keyToNumber = function(key) {
     return -1;
 };
 
-window.ABCJS.parse.Transport.prototype.numberToStaff = function(number) {
-    return this.number2staff[number];
+window.ABCJS.parse.Transport.prototype.numberToStaff = function(number, newKacc) {
+    if(newKacc.length > 0 && newKacc[0].acc === 'flat')
+        return this.number2staff[number];
+    else
+        return this.number2staffSharp[number];
 };
 
 window.ABCJS.parse.Transport.prototype.getAccOffset = function(txtAcc)

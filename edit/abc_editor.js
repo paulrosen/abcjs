@@ -37,29 +37,45 @@ if (!window.ABCJS.edit)
     
 
 window.ABCJS.edit.KeySelector = function(id) {
-    var transporter = new window.ABCJS.parse.Transport(0);
 
     this.selector = document.getElementById(id);
+    this.cromaticLength = 12;
     if (this.selector) {
-        for (var i = 0; i < transporter.number2key.length; i++) {
-            var opt = document.createElement('option');
-            opt.innerHTML = transporter.number2key[i];
-            opt.value = i;
-            this.selector.appendChild(opt);
-        }
+        this.populate(0);
     }
 
+};
+
+window.ABCJS.edit.KeySelector.prototype.populate = function(offSet) {
+    
+    var transporter = new window.ABCJS.parse.Transport(0);
+
+    while( this.selector.options.length > 0 ) {
+        this.selector.remove(0);
+    }            
+        
+    for (var i = this.cromaticLength+offSet; i >= -this.cromaticLength+2+offSet; i--) {
+        var opt = document.createElement('option');
+        if(i-1 > offSet) 
+            opt.innerHTML = transporter.number2keysharp[(i+this.cromaticLength-1)%this.cromaticLength] ;
+        else
+            opt.innerHTML = transporter.number2key[(i+this.cromaticLength-1)%this.cromaticLength] ;
+        opt.value = (i+this.cromaticLength-1)
+        this.selector.appendChild(opt);
+    }
+    this.oldValue = offSet+this.cromaticLength;
+    this.selector.value = offSet+this.cromaticLength;
+};
+
+window.ABCJS.edit.KeySelector.prototype.set = function(value) {
+    this.populate(value);
+    
 };
 
 window.ABCJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
   this.selector.onchange = function() {
     editor.fireChanged( this.value - editor.keySelector.oldValue, "force" );
   };
-};
-
-window.ABCJS.edit.KeySelector.prototype.set = function(value) {
-    this.oldValue = value;
-    this.selector.value = value;
 };
 
 window.ABCJS.edit.AccordionSelector = function(id) {
