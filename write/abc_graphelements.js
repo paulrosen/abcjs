@@ -165,7 +165,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         if( this.voices[i].stave.lyricsRows === 0 )
             this.voices[i].stave.lowest -=2;
         
-        if (i > 0 && this.voices[i].stave.subtitle) {
+        if (groupNumber > 0 && i === 0 && this.voices[i].stave.subtitle) {
             h += 7 * ABCJS.write.spacing.STEP;
             y += h;
         }
@@ -183,7 +183,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
     }
 
     for (i = 0; i < this.voices.length; i++) {
-        if ((i > 0 || groupNumber > 0) && this.voices[i].stave.subtitle) {
+        if (groupNumber > 0 && i === 0 && this.voices[i].stave.subtitle) {
             printer.y = this.voices[i].stave.top - 14;
             printer.printSubtitleLine(this.voices[i].stave.subtitle);
         }

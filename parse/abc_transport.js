@@ -67,6 +67,45 @@ window.ABCJS.parse.Transport = function ( offSet_ ) {
    
 };
 
+window.ABCJS.parse.Transport.prototype.numberToStaff = function(number, newKacc) {
+    var s ;
+    if(newKacc.length > 0 && newKacc[0].acc === 'flat')
+        s = this.number2staff[number];
+    else
+        s = this.number2staffSharp[number];
+    
+    // octave can be altered below
+    s.octVar = 0;
+    
+    if(s.acc === "" && ("EFBC").indexOf(s.note) >= 0 ) {
+        var o ;
+        switch(s.note) {
+            case 'E':
+                //procurar Fflat
+                o = {note:'F',acc:'flat', octVar:0};
+                break;
+            case 'F':
+                //procurar Esharp
+                o = {note:'E',acc:'sharp', octVar:0};
+                break;
+            case 'B':
+                //procurar Cflat
+                o = {note:'C',acc:'flat', octVar:1};
+                break;
+            case 'C':
+                //procurar Bsharp
+                o = {note:'B',acc:'sharp', octVar:-1};
+                break;
+        }
+        for( var a = 0; a < newKacc.length; a ++ ) {
+            if( newKacc[a].note.toUpperCase() === o.note && newKacc[a].acc === o.acc ){
+                s = o;
+                break;
+            }
+        }
+    }
+    return s;
+};
 
 window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str, line, lineNumber) {
 
@@ -173,7 +212,7 @@ window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size )
     var newStaff = this.numberToStaff(newNote, this.newKeyAcc);
     var dKf = this.getKeyAccOffset(newStaff.note, this.newKeyAcc);
 
-    pitch = this.getPitch(newStaff.note, oct + newOct);
+    pitch = this.getPitch(newStaff.note, oct + newOct + newStaff.octVar );
     dAcc = this.getAccOffset(newStaff.acc);
 
     var newElem = {};
@@ -198,43 +237,6 @@ window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size )
       this.baraccidentalsNew[newElem.pitch] = newElem.accidental;
     }
     
-//
-//    if (dKf === 0 && dAcc === 0) {
-//        delete newElem.accidental;
-//    } else if (dKf !== 0 && dAcc === 0) {
-//        if (this.baraccidentalsNew[pitch] === undefined) {
-//          newElem.accidental = 'natural';
-//          this.baraccidentalsNew[pitch]= 'natural';
-//        } else {
-//          delete newElem.accidental;
-//        }
-//    } else if (dKf === 0 && dAcc !== 0) {
-//        if (this.baraccidentalsNew[pitch] === undefined) {
-//          newElem.accidental = newStaff.acc;
-//          this.baraccidentalsNew[pitch]= newStaff.acc;
-//        } else {
-//          delete newElem.accidental;
-//        }
-//    } else {  //both had value  
-//        if (dAcc === dKf) { // they are equal
-//            delete newElem.accidental;
-//        } else { // they are oposed
-//            pitch--;
-//            crom = this.staffNoteToCromatic(this.extractStaffNote(pitch));
-//            dAcc = dKf;
-//            dKf = this.getKeyAccOffset(this.numberToKey(crom), this.newKeyAcc);
-//            if (dKf === 0) {
-//                if (this.baraccidentalsNew[pitch] === undefined) {
-//                  newElem.accidental = this.getAccName(dAcc);
-//                  this.baraccidentalsNew[pitch]= newElem.accidental;
-//                } else {
-//                  delete newElem.accidental;
-//                }
-//            } else {
-//                delete newElem.accidental;
-//            }
-//        }
-//    }
 
     oct = this.extractStaffOctave(pitch);
     var key = this.numberToKey(this.staffNoteToCromatic(this.extractStaffNote(pitch)));
@@ -381,13 +383,6 @@ window.ABCJS.parse.Transport.prototype.keyToNumber = function(key) {
         if(this.number2key[i] === key ) return i;
     }
     return -1;
-};
-
-window.ABCJS.parse.Transport.prototype.numberToStaff = function(number, newKacc) {
-    if(newKacc.length > 0 && newKacc[0].acc === 'flat')
-        return this.number2staff[number];
-    else
-        return this.number2staffSharp[number];
 };
 
 window.ABCJS.parse.Transport.prototype.getAccOffset = function(txtAcc)
