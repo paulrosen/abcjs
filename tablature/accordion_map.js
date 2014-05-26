@@ -39,6 +39,14 @@ ABCJS.tablature.Accordion = function( selector ) {
 
 };
 
+ABCJS.tablature.Accordion.prototype.loadById = function (id) {
+  for( var g = 0; g < this.accordions.length; g ++)
+      if(this.accordions[g].id === id ) {
+        this.load(g); 
+        break;
+      }
+};
+
 ABCJS.tablature.Accordion.prototype.load = function (sel) {
         this.selected = sel;
         this.noteToButtonsOpen  = {}; 

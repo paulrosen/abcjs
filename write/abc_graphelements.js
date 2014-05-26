@@ -16,8 +16,6 @@
 
 /*global window, ABCJS */
 
-var contador = 20;
-
 if (!window.ABCJS)
     window.ABCJS = {};
 
@@ -165,10 +163,11 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         if( this.voices[i].stave.lyricsRows === 0 )
             this.voices[i].stave.lowest -=2;
         
-        if (groupNumber > 0 && i === 0 && this.voices[i].stave.subtitle) {
-            h += 7 * ABCJS.write.spacing.STEP;
-            y += h;
-        }
+//        not necessary: group 0 has enough space above it
+//        if (groupNumber > 0 && i === 0 && this.voices[i].stave.subtitle) {
+//            h += 0 * ABCJS.write.spacing.STEP;
+//            y += h;
+//        }
 
         this.voices[i].stave.top = y;
         this.voices[i].stave.y = y + shiftabove * ABCJS.write.spacing.STEP;
@@ -184,7 +183,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
 
     for (i = 0; i < this.voices.length; i++) {
         if (groupNumber > 0 && i === 0 && this.voices[i].stave.subtitle) {
-            printer.y = this.voices[i].stave.top - 14;
+            printer.y = this.voices[i].stave.top - 18;
             printer.printSubtitleLine(this.voices[i].stave.subtitle);
         }
         this.voices[i].draw(printer);

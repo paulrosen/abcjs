@@ -84,7 +84,8 @@ window.ABCJS.edit.AccordionSelector = function(id) {
 
 window.ABCJS.edit.AccordionSelector.prototype.addChangeListener = function(editor) {
   this.selector.onchange = function() {
-    editor.accordion.load(parseInt(this.value));
+    //editor.accordion.load(parseInt(this.value));
+    editor.accordion.loadById('GAITA_HOHNER_CLUB_IIIM_BR');
     editor.fireChanged( 0, "force" );
   };
 };
