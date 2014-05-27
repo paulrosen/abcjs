@@ -84,10 +84,18 @@ window.ABCJS.edit.AccordionSelector = function(id) {
 
 window.ABCJS.edit.AccordionSelector.prototype.addChangeListener = function(editor) {
   this.selector.onchange = function() {
-    //editor.accordion.load(parseInt(this.value));
-    editor.accordion.loadById('GAITA_HOHNER_CLUB_IIIM_BR');
+    editor.accordion.load(parseInt(this.value));
     editor.fireChanged( 0, "force" );
   };
+};
+
+window.ABCJS.edit.AccordionSelector.prototype.populate = function(accordion) {
+    for (var i = 0; i < accordion.accordions.length; i++) {
+        var opt = document.createElement('option');
+        opt.innerHTML = accordion.accordions[i].getName();
+        opt.value = i;
+        this.selector.appendChild(opt);
+    }
 };
 
 window.ABCJS.edit.EditArea = function(textareaid) {
@@ -233,15 +241,16 @@ window.ABCJS.Editor = function(editarea, params) {
 
 
   if(params.refreshController_id)  
-    this.refreshController  = document.getElementById(params.refreshController_id);
+    this.refreshController = document.getElementById(params.refreshController_id);
 
   if(params.accordionSelector_id)  {
-    this.accordionSelector  = new window.ABCJS.edit.AccordionSelector(params.accordionSelector_id);
-    this.accordion = new window.ABCJS.tablature.Accordion(this.accordionSelector.selector);
+    this.accordion = new window.ABCJS.tablature.Accordion();
+    this.accordionSelector = new window.ABCJS.edit.AccordionSelector(params.accordionSelector_id);
+    this.accordionSelector.populate(this.accordion);
     this.accordionSelector.addChangeListener(this);
   }
   if(params.keySelector_id) {  
-    this.keySelector  = new window.ABCJS.edit.KeySelector(params.keySelector_id);
+    this.keySelector = new window.ABCJS.edit.KeySelector(params.keySelector_id);
     this.keySelector.addChangeListener(this);
   }  
 

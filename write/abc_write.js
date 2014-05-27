@@ -445,6 +445,7 @@ ABCJS.write.Printer.prototype.printTune = function(abctune) {
         this.scale = abctune.formatting.scale;
     }
     if (abctune.metaText.title) {
+        this.y += 5 * this.scale;
         this.paper.text(this.width * this.scale / 2, this.y, abctune.metaText.title).attr({"font-size": 20 * this.scale, "font-family": "serif"});
         this.y += 20 * this.scale;
     }    

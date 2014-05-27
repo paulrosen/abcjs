@@ -163,11 +163,9 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         if( this.voices[i].stave.lyricsRows === 0 )
             this.voices[i].stave.lowest -=2;
         
-//        not necessary: group 0 has enough space above it
-//        if (groupNumber > 0 && i === 0 && this.voices[i].stave.subtitle) {
-//            h += 0 * ABCJS.write.spacing.STEP;
-//            y += h;
-//        }
+        if (groupNumber > 0 && i === 0 && this.voices[i].stave.subtitle) {
+            y += 5 * printer.scale;
+        }
 
         this.voices[i].stave.top = y;
         this.voices[i].stave.y = y + shiftabove * ABCJS.write.spacing.STEP;

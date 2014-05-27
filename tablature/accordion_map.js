@@ -10,7 +10,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.tablature)
 	window.ABCJS.tablature = {};
 
-ABCJS.tablature.Accordion = function( selector ) {
+ABCJS.tablature.Accordion = function( id ) {
     
     this.noteToButtonsOpen  = {}; 
     this.noteToButtonsClose  = {}; 
@@ -23,19 +23,12 @@ ABCJS.tablature.Accordion = function( selector ) {
        this.accordions  = [];
     } else {
         this.accordions = window.DIATONIC.map.models;
-        this.selected   = 0;
     }
     
-    if( selector ) {
-        for(var i = 0; i < this.accordions.length; i++) {
-            var opt = document.createElement('option');
-            opt.innerHTML = this.accordions[i].getName();
-            opt.value = i;
-            selector.appendChild(opt);
-        }   
-    }
-    
-    this.load(this.selected);
+    if( id )
+        this.loadById( id )
+    else
+        this.load(0);
 
 };
 
