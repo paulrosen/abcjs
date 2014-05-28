@@ -34,7 +34,7 @@ ABCJS.write.spacing.STAVEHEIGHT = 100;
 
 //--------------------------------------------------------------------PRINTER
 
-ABCJS.write.Printer = function(paper, params, accordion) {
+ABCJS.write.Printer = function(paper, params ) {
   params = params || {};
   this.y = 0;
   this.paper = paper;
@@ -50,7 +50,7 @@ ABCJS.write.Printer = function(paper, params, accordion) {
   this.paddingright = params.paddingright || 50;
   this.paddingleft = params.paddingleft || 15;
   this.editable = params.editable || false;
-  this.accordion = accordion;
+  //this.accordion = accordion;
   this.staffgroups = [];
 };
 

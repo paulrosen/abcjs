@@ -239,7 +239,6 @@ window.ABCJS.Editor = function(editarea, params) {
      this.editarea.setString(params.abcText, "noRefresh" ) ;
   }
 
-
   if(params.refreshController_id)  
     this.refreshController = document.getElementById(params.refreshController_id);
 
@@ -284,6 +283,7 @@ window.ABCJS.Editor = function(editarea, params) {
   
   this.parserparams = params.parser_options || {};
   this.midiparams = params.midi_options || {};
+  
   this.onchangeCallback = params.onchange;
 
   this.printerparams = params.render_options || {};
@@ -294,8 +294,6 @@ window.ABCJS.Editor = function(editarea, params) {
   } 
   this.oldt = "";
   this.bReentry = false;
-  this.parseABC(0);
-  this.modelChanged();
 
   this.addClassName = function(element, className) {
     var hasClassName = function(element, className) {
@@ -326,6 +324,19 @@ window.ABCJS.Editor = function(editarea, params) {
 	  this.removeClassName(el, readonlyClass);
     }
   };
+  
+  if( this.parseABC(0) ) {
+      this.showUp();
+  }
+
+};
+
+window.ABCJS.Editor.prototype.setString = function(text, noRefresh) {
+    this.editarea.setString( text, noRefresh );
+};
+
+window.ABCJS.Editor.prototype.showUp = function() {
+  this.modelChanged();
 };
 
 window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
@@ -355,7 +366,7 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
     this.div.innerHTML = "";
     var paper = Raphael(this.div, 1100, 700);
     // verificar a necessidade da impressora connheer o accordion
-    this.printer = new ABCJS.write.Printer(paper, this.printerparams, this.accordion);
+    this.printer = new ABCJS.write.Printer(paper, this.printerparams );
     this.printer.printABC(this.tunes);
     
     if (ABCJS.midi && ABCJS.midi.MidiWriter && this.mididiv) {
@@ -387,7 +398,7 @@ window.ABCJS.Editor.prototype.paramChanged = function(printerparams) {
 // return true if the model has changed
 window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
   var t = this.editarea.getString();
-  if (t===this.oldt && typeof(force) === "undefined" ) {
+  if ( (t.length || t===this.oldt ) && typeof(force) === "undefined" ) {
     this.updateSelection();
     return false;
   }
