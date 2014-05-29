@@ -365,7 +365,6 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
     this.timerId = null;
     this.div.innerHTML = "";
     var paper = Raphael(this.div, 1100, 700);
-    // verificar a necessidade da impressora connheer o accordion
     this.printer = new ABCJS.write.Printer(paper, this.printerparams );
     this.printer.printABC(this.tunes);
     
@@ -398,7 +397,7 @@ window.ABCJS.Editor.prototype.paramChanged = function(printerparams) {
 // return true if the model has changed
 window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
   var t = this.editarea.getString();
-  if ( (t.length || t===this.oldt ) && typeof(force) === "undefined" ) {
+  if ( (t.length === 0 || t===this.oldt ) && typeof(force) === "undefined" ) {
     this.updateSelection();
     return false;
   }
