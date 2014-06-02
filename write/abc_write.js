@@ -551,12 +551,12 @@ ABCJS.write.Printer.prototype.printTune = function(abctune) {
 };
 
 ABCJS.write.Printer.prototype.printSubtitleLine = function(subtitle) {
-  this.paper.text(this.width/2, this.y, subtitle).attr({"font-size":16}).scale(this.scale, this.scale, 0,0);
+    this.paper.text(this.width * this.scale / 2, this.y, subtitle).attr({"font-size": 16 * this.scale, "font-family": "serif"});
 };
 
 ABCJS.write.Printer.prototype.printStaffLine = function (abctune, line) {
-        var n = this.staffgroups.length;
-        this.staffgroups[n] = this.layouter.layoutABCLine(abctune, line);
-        this.staffgroups[n].draw( this, line );
-	return this.staffgroups[n];
+    var n = this.staffgroups.length;
+    this.staffgroups[n] = this.layouter.layoutABCLine(abctune, line);
+    this.staffgroups[n].draw( this, line );
+    return this.staffgroups[n];
 };

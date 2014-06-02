@@ -26,7 +26,7 @@ ABCJS.tablature.Accordion = function( id ) {
     }
     
     if( id )
-        this.loadById( id )
+        this.loadById( id );
     else
         this.load(0);
 
@@ -54,10 +54,12 @@ ABCJS.tablature.Accordion.prototype.load = function (sel) {
         var rowClose = this.accordions[this.selected].getKeysCloseRow(r);
         
         for(var button = 0; button < rowOpen.length; button++) {
-           if(! this.noteToButtonsOpen[ rowOpen[button]] )  this.noteToButtonsOpen[rowOpen[button]] = [];
-           this.noteToButtonsOpen[rowOpen[button]].push( (button+1) + Array(r+1).join("'"));
-           if(! this.noteToButtonsClose[ rowClose[button]] )  this.noteToButtonsClose[rowClose[button]] = [];
-           this.noteToButtonsClose[rowClose[button]].push( (button+1) + Array(r+1).join("'"));
+           var b = this.getNoteVal( rowOpen[button], false );
+           if(! this.noteToButtonsOpen[ b ] )  this.noteToButtonsOpen[ b ] = [];
+           this.noteToButtonsOpen[ b ].push( (button+1) + Array(r+1).join("'"));
+           b = this.getNoteVal( rowClose[button], false );
+           if(! this.noteToButtonsClose[ b ] )  this.noteToButtonsClose [ b ] = [];
+           this.noteToButtonsClose[ b ].push( (button+1) + Array(r+1).join("'"));
         }
     }
      
@@ -67,55 +69,35 @@ ABCJS.tablature.Accordion.prototype.load = function (sel) {
         var rowClose = this.accordions[this.selected].getBassCloseRow(r);
         
         for(var button = 0; button < rowOpen.length; button++) {
-           var b = this.getBassNote( rowOpen[button] );
+           var b = this.getNoteVal( rowOpen[button], true );
            if(! this.noteToButtonsOpen[ b ] )  this.noteToButtonsOpen[ b ] = [];
            this.noteToButtonsOpen[ b ].push( (button+1) + Array(nRows+r+1).join("'"));
-           b = this.getBassNote( rowClose[button] );
+           b = this.getNoteVal( rowClose[button], true );
            if(! this.noteToButtonsClose[ b ] )  this.noteToButtonsClose [ b ] = [];
            this.noteToButtonsClose[ b ].push( (button+1) + Array(nRows+r+1).join("'"));
         }
     }
 };
 
-ABCJS.tablature.Accordion.prototype.getBassNote = function (note) {
+//ABCJS.tablature.Accordion.prototype.getBassNote = function (note) {
+//    var n = note.split(":");
+//    return n[0].substr( 0, n[0].length-1);
+//};
+
+ABCJS.tablature.Accordion.prototype.getNoteVal = function (note, bass) {
+//não vou tratar acordes menores e com sétima
+//para os baixos, retorna o valor sem a oitava
     var n = note.split(":");
-    return n[0].substr( 0, n[0].length-1);
+    var k = this.transporter.keyToNumber(n[0].substr( 0, n[0].length-1));
+    var o = parseInt(n[0].substr( n[0].length-1));
+    return (bass?k:k+o*12);
 };
 
-ABCJS.tablature.Accordion.prototype.getButtons = function (note) {
-// retorna a lista de botões possíveis para uma nota cromatica
-  return {open:this.noteToButtonsOpen[note],close:this.noteToButtonsClose[note]};    
-};
 
-ABCJS.tablature.Accordion.prototype.identifyChord = function (children, aNotes, verticalPos, acc, keyAcc, transpose) {
-//TODO: tratar adequadamente os acordes (de baixo)      
-    var note = this.extractCromaticNote(children[aNotes[0]].pitch, verticalPos, acc, keyAcc, transpose );
-    return children.length > 1 ? note.toLowerCase() : note;
-};
-
-ABCJS.tablature.Accordion.prototype.extractCromaticNote = function(pitch, deltapitch, acc, keyAcc, transpose) {
-// mapeia 
-//  de: nota da pauta + acidentes (tanto da clave, quanto locais)
-//  para: nota nomeada no modelo cromatico com oitava
-    var p = pitch + deltapitch + (transpose?transpose:0);
-    var n = this.transporter.staffNoteToCromatic(this.transporter.extractStaffNote(p));
-    var staffNote = this.transporter.numberToKey(n);
-    var oitava = this.transporter.extractStaffOctave(p);
-    var a = acc[pitch];
-    var ka = this.transporter.getKeyAccOffset(staffNote, keyAcc);
-    if (typeof(ka) !== "undefined")
-        n += ka;
-    if (typeof(a) !== "undefined") {
-        if (a === 0) {
-            if (typeof(ka) !== "undefined")
-                n -= ka;
-        } else {
-            n += a;
-        }
-    }
-    oitava += (n < 0 ? -1 : (n > 11 ? 1 : 0 ));
-    n       = (n < 0 ? 12+n : (n > 11 ? n%12 : n ) );
-    return this.transporter.numberToKey(n) + oitava;
+ABCJS.tablature.Accordion.prototype.getButtons = function (note, bass) {
+  // retorna a lista de botões possíveis para uma valor de nota
+  var val = this.getNoteVal(note, bass);
+  return {open:this.noteToButtonsOpen[val],close:this.noteToButtonsClose[val]};    
 };
 
 ABCJS.tablature.Accordion.prototype.inferTabVoice = function( line, tune, strTUne, vars ) {

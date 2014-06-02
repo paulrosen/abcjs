@@ -63,6 +63,9 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     this.lastButton = -1;
     this.closing = true;
     
+    this.bassBarAcc = [];
+    this.trebBarAcc = [];
+    
     var balance = 0; // só faz sentido quando há duas vozes: baixo e melodia
     var trebDuration  = 0;
     var bassDuration  = 0;
@@ -115,14 +118,16 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                 idxBass++;
                 if (abcBassElem.el_type === 'bar' && abcTrebElem.el_type === 'bar') {
                     this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
-                } else if (abcBassElem.el_type === 'bar') {
-                    alert( "ABCJS.tablature.Infer.prototype.accordionTabVoice - abcBassElem.el_type === bar: não devia passar aqui... ");
-                    this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
-                    idxBass--;
-                } else if (abcTrebElem.el_type === 'bar') {
-                    alert( "ABCJS.tablature.Infer.prototype.accordionTabVoice - abcBassTreb.el_type === bar: não devia passar aqui... ");
-                    this.addTABChild(abcBassElem, inTieTreb, inTieBass);
-                    idxTreb--;
+                    this.bassBarAcc = [];
+                    this.trebBarAcc = [];
+//                } else if (abcBassElem.el_type === 'bar') {
+//                    alert( "ABCJS.tablature.Infer.prototype.accordionTabVoice - abcBassElem.el_type === bar: não devia passar aqui... ");
+//                    this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
+//                    idxBass--;
+//                } else if (abcTrebElem.el_type === 'bar') {
+//                    alert( "ABCJS.tablature.Infer.prototype.accordionTabVoice - abcBassTreb.el_type === bar: não devia passar aqui... ");
+//                    this.addTABChild(abcBassElem, inTieTreb, inTieBass);
+//                    idxTreb--;
                 } else if (bassDuration > trebDuration) {
                     remainingBass = ABCJS.parse.clone(abcBassElem);
                     remainingBass.duration = abcBassElem.duration - abcTrebElem.duration;
@@ -159,6 +164,7 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     }
                     this.addTABChild(tabelem, inTieTreb, inTieBass|| remaining);
                     trebDuration += balance;
+                    this.trebBarAcc = [];
                 } else {
                     if(remaining) {
                         dura = abcTrebElem.duration;
@@ -190,6 +196,7 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     }
                     this.addTABChild(tabelem, inTieTreb || remaining, inTieBass);
                     bassDuration -= balance;
+                    this.bassBarAcc = [];
                 } else {
                     if( remaining ) {
                         dura = abcBassElem.duration;
@@ -223,8 +230,44 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     delete this.vposTrebStave;
     delete this.vposBassStave;
     delete this.producedLine;
+    delete this.bassBarAcc;
+    delete this.trebBarAcc;
     
     return this.voice;
+};
+
+//ABCJS.tablature.Infer.prototype.identifyChord = function (children, aNotes, verticalPos, acc, keyAcc, transpose) {
+//TODO: tratar adequadamente os acordes (de baixo)      
+//    var note = this.onvertToCromaticNote(children[aNotes[0]].pitch, verticalPos, acc, keyAcc, transpose );
+//    return children.length > 1 ? note.toLowerCase() : note;
+//};
+
+ABCJS.tablature.Infer.prototype.getNoteName = function(item, deltapitch, keyAcc, barAcc ) {
+// mapeia 
+//  de: nota da pauta + acidentes (tanto da clave, quanto locais)
+//  para: valor da nota cromatica (com oitava)
+
+    var p = item.pitch + deltapitch;
+    var n = this.accordion.transporter.staffNoteToCromatic(this.accordion.transporter.extractStaffNote(p));
+    var oitava = this.accordion.transporter.extractStaffOctave(p);
+    var staffNote = this.accordion.transporter.numberToKey(n);
+    
+    if(item.accidental) {
+        barAcc[item.pitch] = this.accordion.transporter.getAccOffset(item.accidental);
+        n += barAcc[item.pitch];
+    } else {
+        if(typeof(barAcc[item.pitch]) !== "undefined") {
+          n += barAcc[item.pitch];
+        } else {
+          n += this.accordion.transporter.getKeyAccOffset(staffNote, keyAcc);
+        }
+    }
+    
+    oitava += (n < 0 ? -1 : (n > 11 ? 1 : 0 ));
+    n       = (n < 0 ? 12+n : (n > 11 ? n%12 : n ) );
+    
+    //return n + oitava;
+    return this.accordion.transporter.numberToKey(n) + oitava;
 };
 
 ABCJS.tablature.Infer.prototype.getXi = function() {
@@ -260,7 +303,6 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
     var allClose = true;
     var baixoClose = true;
     var baixoOpen = true;
-    var acc = {};
 
     child.inTieTreb = inTieTreb;
     child.inTieBass = inTieBass;
@@ -278,13 +320,13 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
     for (var c = 0; c < column.length; c++) {
         item = column[c];
         bass = bass ? bass : item.bass;
-        acc[item.pitch] = this.accordion.transporter.getAccOffset(item.accidental);
         if (item.type === "rest") {
             item.pitch = item.bass ? 18 : 12.2;
         } else {
             if (item.bass) {
-                var note = this.accordion.extractCromaticNote(item.pitch, this.vposBassStave, acc, this.accBassKey);
-                item.buttons = this.accordion.getButtons(this.accordion.getBassNote(note));
+                //merda...preciso do valor e também da letra
+                var note = this.getNoteName(item, this.vposBassStave, this.accBassKey, this.bassBarAcc);
+                item.buttons = this.accordion.getButtons(note, true);
                 item.note = note;
                 // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
                 item.c = note.substr(0, note.length - 1);
@@ -293,9 +335,9 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
                 item.pitch = 17.5;
                 item.type = 'tabText';
             } else {
-                    var note = this.accordion.extractCromaticNote(item.pitch, this.vposTrebStave, acc, this.accTrebKey);
+                var note = this.getNoteName(item, this.vposTrebStave, this.accTrebKey, this.trebBarAcc);
                 d--;
-                item.buttons = this.accordion.getButtons(note);
+                item.buttons = this.accordion.getButtons(note, false);
                 item.note = note;
                 item.c = note;
                 item.pitch = ((qtd === 1 ? 11.7 : (qtd === 2 ? 10.6 + d * 2.5 : 9.7 + d * 2.1)));

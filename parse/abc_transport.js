@@ -30,6 +30,20 @@ window.ABCJS.parse.Transport = function ( offSet_ ) {
     this.maxNote        = 0x6C; //  C8 = last note
     this.pitches       = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6, 
                             c: 7, d: 8, e: 9, f: 10, g: 11, a: 12, b: 13 };
+                        
+    this.key2number      = {"C":0
+                            ,"C♯":1, "D♭":1
+                            ,"D":2
+                            ,"D♯":3, "E♭":3
+                            ,"E":4 
+                            ,"F":5
+                            ,"F♯":6 ,"G♭":6
+                            ,"G":7
+                            ,"G♯":8 ,"A♭":8
+                            ,"A":9
+                            ,"A♯":10,"B♭":10
+                            ,"B":11};
+    
     this.number2key      = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"];
     this.number2keysharp = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
     this.number2key_br  = ["Dó", "Ré♭", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Lá♭", "Lá", "Si♭", "Si"];
@@ -379,10 +393,7 @@ window.ABCJS.parse.Transport.prototype.numberToKey = function(number) {
 
 window.ABCJS.parse.Transport.prototype.keyToNumber = function(key) {
     key = this.normalizeAcc(key);
-    for(i=0; i <this.number2key.length; i++ ) {
-        if(this.number2key[i] === key ) return i;
-    }
-    return -1;
+    return this.key2number[key];
 };
 
 window.ABCJS.parse.Transport.prototype.getAccOffset = function(txtAcc)
