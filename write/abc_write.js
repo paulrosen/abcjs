@@ -485,8 +485,8 @@ ABCJS.write.Printer.prototype.printTune = function(abctune) {
     (meta) && (this.y += 15 * this.scale);
 
     var maxwidth = this.width;
-    var d = new Date();
-    console.log("pre-linhas"+d.getTime() + " #" + abctune.lines.length);
+    //var d = new Date();
+    //console.log("pre-linhas"+d.getTime() + " #" + abctune.lines.length);
     for (var line = 0; line < abctune.lines.length; line++) {
         var abcline = abctune.lines[line];
         var staffgroup = this.printStaffLine(abctune, line);
@@ -496,8 +496,8 @@ ABCJS.write.Printer.prototype.printTune = function(abctune) {
             alert('abcline.text should should no longer exists!');
         }
     }
-    var d = new Date();
-    console.log("pos-linhas"+d.getTime());
+    //var d = new Date();
+    //console.log("pos-linhas"+d.getTime());
 
     var extraText = "";
     var text2;

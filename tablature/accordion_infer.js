@@ -111,6 +111,8 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
         if (!bassVoice || !abcBassElem ) {
             idxTreb++;
             this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
+            if(abcTrebElem.el_type === 'bar')
+                    this.trebBarAcc = [];
             inTieTreb = typeof( abcTrebElem.inTie ) === "undefined"? inTieTreb : abcTrebElem.inTie; 
         } else {
             if (balance === 0) {
@@ -326,12 +328,13 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
             if (item.bass) {
                 //merda...preciso do valor e também da letra
                 var note = this.getNoteName(item, this.vposBassStave, this.accBassKey, this.bassBarAcc);
-                item.buttons = this.accordion.getButtons(note, true);
-                item.note = note;
-                // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
-                item.c = note.substr(0, note.length - 1);
                 if (item.chord)
-                    item.c = item.c.toLowerCase();
+                    note = note.toLowerCase();
+                // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
+                item.buttons = this.accordion.getButtons(note, true);
+                note = note.substr(0, note.length - 1);
+                item.note = note;
+                item.c = note;
                 item.pitch = 17.5;
                 item.type = 'tabText';
             } else {
@@ -424,7 +427,7 @@ ABCJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBa
         }
     }
     var dur = child.duration / this.vars.default_length;
-    var xf = this.registerLine((qtNotes > 1 ? "]" : "") + (dur > 1 ? dur.toString() : "") + " ");
+    var xf = this.registerLine((qtNotes > 1 ? "]" : "") + (dur !== 1 ? dur.toString() : "") + " ");
     this.add(child, xi, xf-1);
 };
 

@@ -88,7 +88,7 @@ window.ABCJS.edit.AccordionSelector.prototype.addChangeListener = function(edito
     editor.fireChanged( 0, "force" );
   };
 };
-
+    
 window.ABCJS.edit.AccordionSelector.prototype.populate = function(accordion) {
     for (var i = 0; i < accordion.accordions.length; i++) {
         var opt = document.createElement('option');
@@ -96,6 +96,10 @@ window.ABCJS.edit.AccordionSelector.prototype.populate = function(accordion) {
         opt.value = i;
         this.selector.appendChild(opt);
     }
+};
+
+window.ABCJS.edit.AccordionSelector.prototype.set = function(val) {
+    this.selector.value = val;
 };
 
 window.ABCJS.edit.EditArea = function(textareaid) {

@@ -136,7 +136,7 @@ window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str,
     var accSyms = "^_=";  // state 1
     var pitSyms = "ABCDEFGabcdefg"; // state 2
     var octSyms = ",\'"; // state 3
-    var exclusionSyms = "!+"; 
+    var exclusionSyms = '"!+'; 
     
     this.workingLine = line;
     this.workingLineIdx = this.changedLines.length;
@@ -146,18 +146,24 @@ window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str,
     this.baraccidentals = [];
     this.baraccidentalsNew = [];
     
+    
     while (index < line.length) {
         found = false;
         inside = false;
         lastState = 0;
         while (index < line.length && !found) {
-
+            
             // ignora o conteúdo de accents
             if( exclusionSyms.indexOf(line.charAt(index)) >= 0 ) {
                 var nextPos = line.substr( index+1 ).indexOf(line.charAt(index));
                 if( nextPos < 0 ) {
                     index = line.length;
                 } else {
+                    if(line.charAt(index)==='"') {
+                        //transpor acorde textual - aqui não está tratando bemois e sustenidos...
+                        //alem disso, trata com abc note, ou seja, tem maiusculas e minusculas
+                        this.transposeNote(index+1, 1);
+                    }
                     index += nextPos + 2;
                 }
                 continue;

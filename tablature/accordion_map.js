@@ -88,9 +88,10 @@ ABCJS.tablature.Accordion.prototype.getNoteVal = function (note, bass) {
 //não vou tratar acordes menores e com sétima
 //para os baixos, retorna o valor sem a oitava
     var n = note.split(":");
-    var k = this.transporter.keyToNumber(n[0].substr( 0, n[0].length-1));
+    var b = n[0].substr( 0, n[0].length-1); // nota sem a oitava - tal e qual foi escrita
+    var k = this.transporter.keyToNumber(b);
     var o = parseInt(n[0].substr( n[0].length-1));
-    return (bass?k:k+o*12);
+    return (bass?b:k+o*12);
 };
 
 
