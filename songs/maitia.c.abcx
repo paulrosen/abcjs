@@ -1,0 +1,29 @@
+%%scale 1.0
+X:1
+T:Maitia, nun zira?
+C:Folclore Basco
+C:versão de José Uruñuela.
+N:Transcrito por Flávio
+L:1/8
+Q:"Allegro" 1/4=118
+M:6/8
+K:C
+V:melodia
+|z4ze |: e2d d2c | c3-cz d | e2e e2f | g3 g2e | d2d d2e | f3 e2e |
+w:Mai ti a nun zi ra * Nik et zu tuk i kuz ten ez be ti rik ja ki ten Nu
+| e2d (dc)B |1 c6 | z4 z e :|2 c6 | g3 abc' | e3 d3 | c6 | z4zg |
+w:rat gal du * zi ra 
+|: c'2c' c'2b | a3 a3 | bc'd' b2a | g4zf | e2e e2f | g3 g2e | d2d d2e |
+| f3 e2e | e2d dcB |1 c4zg :|2 c6 | g3 abc' | e3 d3 | c6 |
+V:baixo
+K:C bass
+|z6  |: z6  | z6  | z6  | z6  | z6  | z6 |
+| z6 |1 z6  | z6  :|2 z6  | z6  | z6  | z6  | z6  |
+|: z6  | z6  | z6  | z6  | z6  | z6  | z6  |
+| z6  | z6  |1 z6  :|2 z6  | z6  | z6  | z6  | 
+V:tablatura
+K:none accordionTab
+%| z+z4 z+z z+8 |: z+82 z-8 z-82 z+6' | z-6'3 z-> z-z z-8 | z-7'2 z-7' z-7'2 z-9 | z+93 z+92 z+8 | z-82 z-8 z-82 z+8 | z-93 z-7'2 z-7' |
+%| z+82 z-8 z-8 z+6' z-7 |1 z-6'6 | z-z4 z-z z-7' :|2 z+76 | z+93 z+8' z-b z-a' | z-7'3 z-83 | z-6'6 | z+z4 z+z z+9 |
+%|: z+9'2 z+9' z+9'2 z-b | z-a3 z-a3 | z-b z-a' z-c z-b2 z-a | z+94 z+z z+7' | z+82 z+8 z+82 z+7' | z-8'3 z-8'2 z-7' | z-82 z-8 z-82 z-7' |
+%| z+7'3 z+82 z+8 | z+82 z-8 z-8 z+6' z-7 |1 z-6'4 z-z z-8' :|2 z-6'6 | z+93 z+8' z-b z-a' | z-7'3 z-83 | z-6'6 |
