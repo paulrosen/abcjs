@@ -240,7 +240,7 @@ window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size )
     if(newStaff.acc !== '' ) newElem.accidental = newStaff.acc;
     
     // se a nota sair com um acidente (inclusive natural) registrar acidente na barra para o pitch.
-    var dBarAcc = this.baraccidentalsNew[newElem.pitch] ;
+    var dBarAcc = this.getAccOffset( this.baraccidentalsNew[newElem.pitch] );
     if(dAcc === 0) {
         if( dBarAcc && dBarAcc !==0 || dKf !== 0) {
           newElem.accidental = 'natural';
@@ -256,7 +256,6 @@ window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size )
     if( newElem.accidental ) {
       this.baraccidentalsNew[newElem.pitch] = newElem.accidental;
     }
-    
 
     oct = this.extractStaffOctave(pitch);
     var key = this.numberToKey(this.staffNoteToCromatic(this.extractStaffNote(pitch)));

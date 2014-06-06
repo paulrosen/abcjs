@@ -441,19 +441,36 @@ ABCJS.tablature.Infer.prototype.button2Hex = function( b ) {
 ABCJS.tablature.Infer.prototype.elegeBotao = function( array ) {
     if(typeof(array) === "undefined" ) return "x";
 
-    var b    = array[0];
-    var v    = parseInt(isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2));
-    var min  = Math.abs(v-this.lastButton);
+    var b     = array[0];
+    var v,l,i = b.indexOf("'");
+    
+    if( i >= 0 ) {
+        v = b.substr(0, i);
+        l = b.length - i;
+    } else {
+        v = parseInt(b);
+        l = 0;
+    }
+    
+    var min  = Math.abs((l>1?v+12:v)-this.lastButton);
     
     for( var a = 1; a < array.length; a ++ ) {
-        v    = parseInt(isNaN(array[a].substr(0,2))? array[a].substr(0,1): array[a].substr(0,2));
-        if( Math.abs(v-this.lastButton) < min ) {
+        i = array[a].indexOf("'");
+
+        if( i >= 0 ) {
+            v = array[a].substr(0, i);
+            l = array[a].length - i;
+        } else {
+            v = parseInt(array[a]);
+            l = 0;
+        }
+        
+        if( Math.abs((l>1?v+12:v)-this.lastButton) < min ) {
            b = array[a];
-           min  = Math.abs(v-this.lastButton);
+           min = Math.abs((l>1?v+12:v)-this.lastButton);
         }
     }
     this.lastButton = parseInt(isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2));
-    
     return b;
 };
 
