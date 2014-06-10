@@ -528,7 +528,7 @@ ABCJS.write.RelativeElement.prototype.draw = function(printer, x, staveInfo ) {
             this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley);
             break;
         case "debug":
-            this.graphelem = printer.debugMsg(this.x, staveInfo.highest+2, this.c);
+            this.graphelem = printer.printDebugMsg(this.x, staveInfo.highest+2, this.c);
             break;
         case "lyrics":
             this.graphelem = printer.printLyrics(this.x, staveInfo.lowest-(4*staveInfo.lyricsRows)+(staveInfo.lyricsRows-1), this.c);
