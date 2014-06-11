@@ -351,14 +351,14 @@ ABCJS.write.Printer.prototype.calcY = function(ofs) {
   return this.y+((ABCJS.write.spacing.TOPNOTE-ofs)*ABCJS.write.spacing.STEP); // flavio
 };
 
-ABCJS.write.Printer.prototype.printABC = function(abctunes, loader) {
+ABCJS.write.Printer.prototype.printABC = function(abctunes) {
   if (abctunes[0]===undefined) {
     abctunes = [abctunes];
   }
   this.y=0;
 
   for (var i = 0; i < abctunes.length; i++) {
-    this.printTune(abctunes[i], loader);
+    this.printTune(abctunes[i]);
   }
 
 };
@@ -411,7 +411,7 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 	return y;
 };
 
-ABCJS.write.Printer.prototype.printTune = function(abctune,loader) {
+ABCJS.write.Printer.prototype.printTune = function(abctune) {
     
     if( abctune.lines.length === 0 ) return;
     this.layouter = new ABCJS.write.Layout( this, abctune.formatting.bagpipes );
@@ -488,7 +488,6 @@ ABCJS.write.Printer.prototype.printTune = function(abctune,loader) {
     //var d = new Date();
     //console.log("pre-linhas"+d.getTime() + " #" + abctune.lines.length);
     for (var line = 0; line < abctune.lines.length; line++) {
-        if( loader ) loader.update( null, "Aguarde..." );
         var abcline = abctune.lines[line];
         var staffgroup = this.printStaffLine(abctune, line);
         if (staffgroup.w > maxwidth)
