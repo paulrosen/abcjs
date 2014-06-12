@@ -65,6 +65,9 @@ window.ABCJS.data.Tune = function() {
         this.subtitle = "";
         this.tabStaffPos = -1;
         this.hasTablature = false;
+        this.staffNum = 0;
+        this.voiceNum = 0;
+        this.lineNum = 0;
     };
 
     this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote) {

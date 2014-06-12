@@ -938,7 +938,7 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
         this.voice.addOther(celem);
     }
     if (unknowndecs.length > 0)
-        abselem.addChild(new ABCJS.write.RelativeElement(unknowndecs.join(','), 0, 0, 0, {type: "debug"}));
+        abselem.addChild(new ABCJS.write.RelativeElement(unknowndecs.join(','), 0, 0, 19, {type: "text"}));
     return addMark;
 };
 

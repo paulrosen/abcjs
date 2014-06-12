@@ -184,6 +184,9 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
             printer.y = this.voices[i].stave.top - 18;
             printer.printSubtitleLine(this.voices[i].stave.subtitle);
         }
+        if( this.voices[i].duplicate ) {
+            this.voices[i].stave.y = this.voices[0].stave.y;
+        }
         this.voices[i].draw(printer);
     }
 
