@@ -154,8 +154,10 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
     var y = printer.y;
     this.y = y;
     this.height = 0;
-   
+
+    
     for (i = 0; i < this.voices.length; i++) {
+
         var shiftabove = Math.max( this.voices[i].stave.highest, ABCJS.write.spacing.TOPNOTE) 
                             - ABCJS.write.spacing.TOPNOTE + 4; 
         var h = 0;
@@ -174,18 +176,22 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         // inclui espaço para as linhas de texto
         h += ABCJS.write.spacing.STEP * 7 * this.voices[i].stave.lyricsRows;
 
-        this.height += h;
-        y += h;
-        this.voices[i].stave.bottom = y;
+        //this.height += (this.voices[i].duplicate? 0:h);
+        if( this.voices[i].duplicate ) {
+            this.voices[i].stave.y = this.voices[i-1].stave.y;
+            this.voices[i].stave.bottom = this.voices[i-1].stave.bottom;
+        } else {
+           this.height += h;
+           y += h;
+           this.voices[i].stave.bottom = y;
+        }
+        
     }
 
     for (i = 0; i < this.voices.length; i++) {
         if (groupNumber > 0 && i === 0 && this.voices[i].stave.subtitle) {
             printer.y = this.voices[i].stave.top - 18;
             printer.printSubtitleLine(this.voices[i].stave.subtitle);
-        }
-        if( this.voices[i].duplicate ) {
-            this.voices[i].stave.y = this.voices[0].stave.y;
         }
         this.voices[i].draw(printer);
     }

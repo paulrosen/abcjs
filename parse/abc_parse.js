@@ -28,6 +28,7 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
     if (accordion_)
         this.accordion = accordion_;
 
+    this.barCount = 0;
     var tune = new window.ABCJS.data.Tune();
     var tokenizer = new window.ABCJS.parse.tokenizer();
 
@@ -1157,6 +1158,7 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                     // This is definitely a bar
                     if (el.gracenotes !== undefined) {
                         // Attach the grace note to an invisible note
+                        el.number =  this.barCount++;
                         el.rest = {type: 'spacer'};
                         el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
                         this.addTuneElement('note', startOfLine, i, i + ret[0], el);
