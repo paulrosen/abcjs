@@ -28,7 +28,6 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
     if (accordion_)
         this.accordion = accordion_;
 
-    this.barCount = 0;
     var tune = new window.ABCJS.data.Tune();
     var tokenizer = new window.ABCJS.parse.tokenizer();
 
@@ -883,10 +882,14 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
         tune.startNewLine(params);
 
         multilineVars.partForNextLine = "";
-        if (multilineVars.currentVoice === undefined || (multilineVars.currentVoice.staffNum === multilineVars.staves.length - 1 && multilineVars.staves[multilineVars.currentVoice.staffNum].numVoices - 1 === multilineVars.currentVoice.index)) {
+//        if (multilineVars.currentVoice === undefined || 
+//                (multilineVars.currentVoice.staffNum === multilineVars.staves.length - 1 
+//                && multilineVars.staves[multilineVars.currentVoice.staffNum].numVoices - 1 === multilineVars.currentVoice.index)) {
+        if (multilineVars.currentVoice === undefined || (multilineVars.start_new_line && multilineVars.currentVoice.staffNum === 0 ) ){
             //multilineVars.meter = null;
-            if (multilineVars.barNumbers === 0)
-                multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
+            multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
+            if (multilineVars.barNumbers === 1 || ( multilineVars.barNumbers === 0 && multilineVars.currBarNumber > 1 ))
+                multilineVars.barNumOnNextNoteVisible = true;
         }
     }
 
@@ -1158,7 +1161,6 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                     // This is definitely a bar
                     if (el.gracenotes !== undefined) {
                         // Attach the grace note to an invisible note
-                        el.number =  this.barCount++;
                         el.rest = {type: 'spacer'};
                         el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
                         this.addTuneElement('note', startOfLine, i, i + ret[0], el);
@@ -1189,10 +1191,11 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                             multilineVars.currBarNumber = multilineVars.barFirstEndingNum;
                         else if (bar.endEnding)
                             multilineVars.barFirstEndingNum = undefined;
-                        if (bar.type !== 'bar_invisible' && multilineVars.measureNotEmpty) {
+                        if (bar.type !== 'bar_invisible' && multilineVars.measureNotEmpty && multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0) {
                             multilineVars.currBarNumber++;
-                            if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0)
                                 multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
+                            if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0)
+                                multilineVars.barNumOnNextNoteVisible = true;
                         }
                         this.addTuneElement('bar', startOfLine, i, i + ret[0], bar);
                         multilineVars.measureNotEmpty = false;
@@ -1350,9 +1353,11 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
 //												p.duration = p.duration * chordDuration;
 //											});
                                     }
-                                    if (multilineVars.barNumOnNextNote) {
+                                    if (multilineVars.barNumOnNextNote ) {
                                         el.barNumber = multilineVars.barNumOnNextNote;
+                                        el.barNumberVisible = ( multilineVars.barNumOnNextNoteVisible && multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0 );
                                         multilineVars.barNumOnNextNote = null;
+                                        multilineVars.barNumOnNextNoteVisible = null;
                                     }
                                     this.addTuneElement('note', startOfLine, startI, i, el);
                                     // flavio this.addTuneElement('note', startOfLine, i, i, el);
@@ -1435,7 +1440,9 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
 
                             if (multilineVars.barNumOnNextNote) {
                                 el.barNumber = multilineVars.barNumOnNextNote;
+                                el.barNumberVisible = ( multilineVars.barNumOnNextNoteVisible && multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0 );
                                 multilineVars.barNumOnNextNote = null;
+                                multilineVars.barNumOnNextNoteVisible = null;
                             }
                             this.addTuneElement('note', startOfLine, startI, i, el);
                             multilineVars.measureNotEmpty = true;

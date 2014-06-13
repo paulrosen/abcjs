@@ -104,6 +104,20 @@
            
        
 <textarea id="abc" cols="120" rows="10" >
+%%barnumbers 1
+V:um
+K:C
+ ABc | def || ABc | def |
+ gab | bag || ABc | def |
+ gab | bag || ABc | def |
+V:dois
+K:C bass
+ A,B,c, | d,e,f, || A,B,c, | d,e,f, |
+ g,a,b, | b,a,g, || A,B,c, | d,e,f, |
+ g,a,b, | b,a,g, || A,B,c, | d,e,f, |
+</textarea>
+<textarea id="abcx" cols="120" rows="10" >
+%%barnumbers 0
 %%score (T1 T2) (B1 B2)
 V:T1 clef=treble-8 name="v1" snm="v1"
 V:T2 clef=treble-8 name="v2" snm="v2"
@@ -111,6 +125,8 @@ V:B1 middle=D, clef=bass name="Basso I" snm="B.I" transpose=-24
 V:B2 middle=D, clef=bass name="Basso II" snm="B.II" transpose=-24
 % End of header, start of tune body:
 % 1
+[V:T1] [G,,16g16] | [G,,16g16] |[g G,, G, G] C D E F G A B c d e f g a b c'|
+[V:T2] z16 | z16 | D F F F =F F F D D D D D D D D D |
 [V:T1] [G,,16g16] | [G,,16g16] |[g G,, G, G] C D E F G A B c d e f g a b c'|
 [V:T2] z16 | z16 | D F F F =F F F D D D D D D D D D |
 </textarea>

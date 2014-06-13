@@ -63,6 +63,7 @@ ABCJS.write.Layout = function(printer, bagpipes ) {
   this.printer = printer;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
   this.accordion = printer.accordion;
   this.glyphs = printer.glyphs;
+  this.lastAbs = undefined; // this is intented to be the place to put bar numbers (if present)
 };
 
 ABCJS.write.Layout.prototype.getCurrentVoiceId = function() {
@@ -545,8 +546,12 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
         }
     }
 
-    if (elem.barNumber) {
-        abselem.addChild(new ABCJS.write.RelativeElement(elem.barNumber, -10, 0, 0, {type: "debug"}));
+    if (elem.barNumber && elem.barNumberVisible) {
+        if(this.lastAbs) {
+          this.lastAbs.addChild(new ABCJS.write.RelativeElement(elem.barNumber, (elem.barNumber > 10?-8:-4), 0, 13, {type: "text"}));
+        } else {
+          abselem.addChild(new ABCJS.write.RelativeElement(elem.barNumber, (elem.barNumber > 10?8:4), 0, 13, {type: "text"}));
+        }
     }
 
     // ledger lines
@@ -952,6 +957,7 @@ ABCJS.write.Layout.prototype.printBarLine = function (elem) {
   var anchor = null; // place to attach part lines
   var dx = 0;
  
+  this.lastAbs = abselem;
 
   var firstdots = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat");
   var firstthin = (elem.type!=="bar_left_repeat" && elem.type!=="bar_thick_thin" && elem.type!=="bar_invisible");
@@ -1027,6 +1033,7 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
   var clef = "clefs.G";
   var octave = 0;
   var abselem = new ABCJS.write.AbsoluteElement(elem,0,10);
+  this.lastAbs = abselem;
   switch (elem.type) {
   case "treble": break;
   case "tenor": clef="clefs.C"; break;
