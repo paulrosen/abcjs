@@ -1185,15 +1185,15 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                             bar.decoration = el.decoration;
                         if (el.chord !== undefined)
                             bar.chord = el.chord;
-                        if (bar.startEnding && multilineVars.barFirstEndingNum === undefined)
-                            multilineVars.barFirstEndingNum = multilineVars.currBarNumber;
-                        else if (bar.startEnding && bar.endEnding && multilineVars.barFirstEndingNum)
-                            multilineVars.currBarNumber = multilineVars.barFirstEndingNum;
-                        else if (bar.endEnding)
-                            multilineVars.barFirstEndingNum = undefined;
+                        //if (bar.startEnding && multilineVars.barFirstEndingNum === undefined)
+                        //    multilineVars.barFirstEndingNum = multilineVars.currBarNumber;
+                        //else if (bar.startEnding && bar.endEnding && multilineVars.barFirstEndingNum)
+                        //    multilineVars.currBarNumber = multilineVars.barFirstEndingNum;
+                        //else if (bar.endEnding)
+                        //    multilineVars.barFirstEndingNum = undefined;
                         if (bar.type !== 'bar_invisible' && multilineVars.measureNotEmpty && multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0) {
                             multilineVars.currBarNumber++;
-                                multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
+                            multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
                             if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0)
                                 multilineVars.barNumOnNextNoteVisible = true;
                         }
@@ -1360,7 +1360,6 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                                         multilineVars.barNumOnNextNoteVisible = null;
                                     }
                                     this.addTuneElement('note', startOfLine, startI, i, el);
-                                    // flavio this.addTuneElement('note', startOfLine, i, i, el);
                                     multilineVars.measureNotEmpty = true;
                                     el = {};
                                 }
