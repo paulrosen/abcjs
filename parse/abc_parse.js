@@ -887,7 +887,9 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
 //                && multilineVars.staves[multilineVars.currentVoice.staffNum].numVoices - 1 === multilineVars.currentVoice.index)) {
         if (multilineVars.currentVoice === undefined || (multilineVars.start_new_line && multilineVars.currentVoice.staffNum === 0 ) ){
             //multilineVars.meter = null;
+            if ( multilineVars.measureNotEmpty ) multilineVars.currBarNumber++;
             multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
+            
             if (multilineVars.barNumbers === 1 || ( multilineVars.barNumbers === 0 && multilineVars.currBarNumber > 1 ))
                 multilineVars.barNumOnNextNoteVisible = true;
         }
@@ -1191,7 +1193,10 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                         //    multilineVars.currBarNumber = multilineVars.barFirstEndingNum;
                         //else if (bar.endEnding)
                         //    multilineVars.barFirstEndingNum = undefined;
-                        if (bar.type !== 'bar_invisible' && multilineVars.measureNotEmpty && multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0) {
+                        var mc = multilineVars.currentVoice; 
+                        if (bar.type !== 'bar_invisible' 
+                                && multilineVars.measureNotEmpty 
+                                && ( mc === undefined || ( mc.staffNum === 0 && mc.index === 0) ) ) {
                             multilineVars.currBarNumber++;
                             multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
                             if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0)
@@ -1233,27 +1238,31 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                         var done = false;
                         while (!done) {
                             var chordNote = getCoreNote(line, i, {}, false);
-                            if (chordNote !== null) {
+                            if (chordNote !== null ) { 
                                 if (chordNote.end_beam) {
                                     el.end_beam = true;
                                     delete chordNote.end_beam;
                                 }
-                                if (el.pitches === undefined) {
-                                    el.duration = chordNote.duration;
-                                    el.pitches = [chordNote];
-                                } else	// Just ignore the note lengths of all but the first note. The standard isn't clear here, but this seems less confusing.
-                                    el.pitches.push(chordNote);
-                                delete chordNote.duration;
+                                if( chordNote.rest) {
+                                  warn("Rests among notes are not considered in chords", line, i);
+                                }  else {
+                                    if (el.pitches === undefined) {
+                                        el.duration = chordNote.duration;
+                                        el.pitches = [chordNote];
+                                    } else	// Just ignore the note lengths of all but the first note. The standard isn't clear here, but this seems less confusing.
+                                        el.pitches.push(chordNote);
 
-                                if (multilineVars.inTieChord[el.pitches.length]) {
-                                    chordNote.endTie = true;
-                                    multilineVars.inTieChord[el.pitches.length] = undefined;
+                                    if (multilineVars.inTieChord[el.pitches.length]) {
+                                        chordNote.endTie = true;
+                                        multilineVars.inTieChord[el.pitches.length] = undefined;
+                                    }
+                                    if (chordNote.startTie)
+                                        multilineVars.inTieChord[el.pitches.length] = true;
+
                                 }
-                                if (chordNote.startTie)
-                                    multilineVars.inTieChord[el.pitches.length] = true;
-
                                 i = chordNote.endChar;
                                 delete chordNote.endChar;
+                                delete chordNote.duration;
                             } else if (line.charAt(i) === ' ') {
                                 // Spaces are not allowed in chords, but we can recover from it by ignoring it.
                                 warn("Spaces are not allowed in chords", line, i);
@@ -1354,8 +1363,9 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
 //											});
                                     }
                                     if (multilineVars.barNumOnNextNote ) {
+                                        var mc = multilineVars.currentVoice; 
                                         el.barNumber = multilineVars.barNumOnNextNote;
-                                        el.barNumberVisible = ( multilineVars.barNumOnNextNoteVisible && multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0 );
+                                        el.barNumberVisible = ( multilineVars.barNumOnNextNoteVisible && ( mc === undefined || (mc.staffNum === 0 && mc.index === 0 )));
                                         multilineVars.barNumOnNextNote = null;
                                         multilineVars.barNumOnNextNoteVisible = null;
                                     }
@@ -1438,8 +1448,9 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                                 addEndBeam(el);
 
                             if (multilineVars.barNumOnNextNote) {
+                                var mc = multilineVars.currentVoice; 
                                 el.barNumber = multilineVars.barNumOnNextNote;
-                                el.barNumberVisible = ( multilineVars.barNumOnNextNoteVisible && multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0 );
+                                el.barNumberVisible = ( multilineVars.barNumOnNextNoteVisible && ( mc === undefined || (mc.staffNum === 0 && mc.index === 0 )));
                                 multilineVars.barNumOnNextNote = null;
                                 multilineVars.barNumOnNextNoteVisible = null;
                             }

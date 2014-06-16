@@ -704,8 +704,8 @@ window.ABCJS.data.Tune = function() {
     };
 
     this.setCurrentVoice = function(staffNum, voiceNum) {
-        this.staffNum = staffNum;
-        this.voiceNum = voiceNum;
+        this.staffNum = staffNum || 0;
+        this.voiceNum = voiceNum || 0;
         for (var i = 0; i < this.lines.length; i++) {
             if (this.lines[i].staffs) {
                 if (this.lines[i].staffs[staffNum] === undefined || this.lines[i].staffs[staffNum].voices[voiceNum] === undefined ||
