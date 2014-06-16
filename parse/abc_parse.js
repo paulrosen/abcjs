@@ -1244,7 +1244,7 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                                     delete chordNote.end_beam;
                                 }
                                 if( chordNote.rest) {
-                                  warn("Rests among notes are not considered in chords", line, i);
+                                  //warn("Rests among notes are not considered in chords", line, i);
                                 }  else {
                                     if (el.pitches === undefined) {
                                         el.duration = chordNote.duration;
