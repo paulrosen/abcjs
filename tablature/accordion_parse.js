@@ -13,7 +13,7 @@
         
            comentario := "%[texto]"
 
-           barra ::=  "|", "||", ":|", "|:", ":|:", ":||:", "::", ":||", ":||", "[|", "|]", "|[|", "|]|" 
+           barra ::=  "|", "||", ":|", "|:", ":|:", ":||:", "::", ":||", ":||", "[|", "|]", "|[|", "|]|" [endings]
         
            coluna ::=  [<singleBassNote>]<bellows><note>[<duration>] 
         
@@ -85,8 +85,10 @@ ABCJS.tablature.Parse.prototype.parseTabVoice = function( ) {
         token = this.getToken();
         switch (token.el_type) {
             case "bar":
+                token.startChar = this.xi;
+                token.endChar = this.i;
                 if( ! this.invalid )
-                  voice[voice.length] = {type:token.type, el_type: token.el_type, startChar:this.xi, endChar:this.i};
+                  voice[voice.length] = token;
                 break;
             case "note":
                 if( ! this.invalid )
@@ -163,6 +165,7 @@ ABCJS.tablature.Parse.prototype.parseMultiCharToken = function( syms ) {
 };
 
 ABCJS.tablature.Parse.prototype.getBarLine = function() {
+  var endings  =   '1234567890-,';
   var validBars = { 
         "|"   : "bar_thin"
       , "||"  : "bar_thin_thin"
@@ -190,6 +193,21 @@ ABCJS.tablature.Parse.prototype.getBarLine = function() {
   // validar o tipo de barra
   token.type = validBars[token.token];
   this.invalid = !token.type;
+
+  if(! this.invalid) {
+    this.parseMultiCharToken( ' \t' );
+    if (this.vars.inEnding && token.type !== 'bar_thin') {
+        token.endEnding = true;
+        this.vars.inEnding = false;
+    }
+    if(endings.indexOf(this.line.charAt(this.i))>=0) {
+        token.startEnding = this.line.charAt(this.i);
+        if (this.vars.inEnding)
+            token.endEnding = true;
+        this.vars.inEnding = true;
+        this.i++;
+    }
+  }
   return token;
 };
 
@@ -301,3 +319,4 @@ ABCJS.tablature.Parse.prototype.getButton = function() {
         
     return c + row;
 };
+

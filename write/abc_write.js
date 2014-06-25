@@ -342,6 +342,10 @@ ABCJS.write.Printer.prototype.printDebugMsg = function(x, y, msg ) {
 
 ABCJS.write.Printer.prototype.printLyrics = function(x, ypos, msg) {
     var y = this.calcY(ypos);
+    // para manter alinhado, quando uma das linhas for vazia, imprimo 3 pontos
+    var i = msg.indexOf( "\n " );
+    if( i >= 0) msg = msg.substr(0, i) + "\n...";
+    
     var el = this.paper.text(x, y, msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"start"}).scale(this.scale, this.scale, 0, 0);
     el[0].setAttribute("class", "abc-lyric");
     return el;

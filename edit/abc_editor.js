@@ -166,6 +166,11 @@ window.ABCJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
 };
 
 window.ABCJS.edit.EditArea.prototype.appendString = function(str, noRefresh ) {
+  //retira \n ao final  
+  while( this.textarea.value.charAt(this.textarea.value.length-1) === '\n' ) {
+    this.textarea.value = this.textarea.value.substr(0,this.textarea.value.length-1);
+  }
+      
   this.textarea.value += str;
   this.initialText = this.getString();
   if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
