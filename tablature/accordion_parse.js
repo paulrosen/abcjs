@@ -126,6 +126,8 @@ ABCJS.tablature.Parse.prototype.formatToken = function(token) {
       var p = (qtd === 1 ? 11.7 : (qtd === 2 ? 10.6 + d * 2.5 : 9.7 + d * 2.1)) + (token.bellows === "+"? 0 : -6.4 );
       el.pitches[n] = { c: this.getTabSymbol(token.buttons[i]), type: "tabText"+(qtd>1?qtd:""), pitch: p };
     } 
+    if(token.buttons[i] === ">" ) el.inTieTreb = true;
+    if(token.bassNote  === ">" )  el.inTieBass = true;
   }
   return el ;
 };
