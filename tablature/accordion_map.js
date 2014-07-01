@@ -15,7 +15,7 @@ ABCJS.tablature.Accordion = function( id ) {
     this.noteToButtonsOpen  = {}; 
     this.noteToButtonsClose  = {}; 
     
-    this.transporter     = new window.ABCJS.parse.Transport();
+    this.transposer     = new window.ABCJS.parse.Transposer();
     this.selected        = -1;
     this.tabLines       = [];
     
@@ -89,7 +89,7 @@ ABCJS.tablature.Accordion.prototype.getNoteVal = function (note, bass) {
 //para os baixos, retorna o valor sem a oitava
     var n = note.split(":");
     var b = n[0].substr( 0, n[0].length-1); // nota sem a oitava - tal e qual foi escrita
-    var k = this.transporter.keyToNumber(b);
+    var k = this.transposer.keyToNumber(b);
     var o = parseInt(n[0].substr( n[0].length-1));
     return (bass?b:k+o*12);
 };

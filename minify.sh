@@ -10,7 +10,7 @@ echo "Concatenating all files..."
 
 cat parse/abc_common.js parse/abc_parse.js parse/abc_parse_directive.js \
     parse/abc_parse_header.js parse/abc_parse_key_voice.js \
-    parse/abc_tokenizer.js parse/abc_transport.js > tmp/parse.js
+    parse/abc_tokenizer.js parse/abc_transposer.js > tmp/parse.js
 
 cat tablature/accordion_map.js tablature/accordion_parse.js \
     tablature/accordion_infer.js tablature/accordion_layout.js > tmp/tablature.js

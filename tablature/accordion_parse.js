@@ -167,7 +167,7 @@ ABCJS.tablature.Parse.prototype.parseMultiCharToken = function( syms ) {
 };
 
 ABCJS.tablature.Parse.prototype.getBarLine = function() {
-  var endings  =   '1234567890-,';
+  var endings  =   '1234567890,'; // due syntax conflict I will not consider the  dash '-'.
   var validBars = { 
         "|"   : "bar_thin"
       , "||"  : "bar_thin_thin"

@@ -22,7 +22,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.parse)
 	window.ABCJS.parse = {};
 
-window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune, transporter) {
+window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune, transposer) {
 	this.reset = function(tokenizer, warn, multilineVars, tune) {
 		window.ABCJS.parse.parseKeyVoice.initialize(tokenizer, warn, multilineVars, tune);
 		window.ABCJS.parse.parseDirective.initialize(tokenizer, warn, multilineVars, tune);
@@ -323,7 +323,7 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune, 
 						multilineVars.meter = meter;
 					return [ e-i+1+ws ];
 				case "[K:":
-					var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(i+3, e), transporter );
+					var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(i+3, e), transposer );
 					if (result.foundClef && tune.hasBeginMusic())
 						tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
 					if (result.foundKey && tune.hasBeginMusic())
@@ -373,7 +373,7 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune, 
 						tune.appendStartingElement('meter', -1, -1, meter);
 					return [ line.length ];
 				case "K:":
-					var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(i+2), transporter);
+					var result = window.ABCJS.parse.parseKeyVoice.parseKey(line.substring(i+2), transposer);
 					if (result.foundClef && tune.hasBeginMusic())
 						tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
 					if (result.foundKey && tune.hasBeginMusic())
@@ -454,7 +454,7 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune, 
 						case  'K':
 							// since the key is the last thing that can happen in the header, we can resolve the tempo now
 							this.resolveTempo();
-							var result = window.ABCJS.parse.parseKeyVoice.parseKey( line.substring(2), transporter, line, lineNumber );
+							var result = window.ABCJS.parse.parseKeyVoice.parseKey( line.substring(2), transposer, line, lineNumber );
 							if (!multilineVars.is_in_header && tune.hasBeginMusic()) {
 								if (result.foundClef) {
 									tune.appendStartingElement('clef', -1, -1, multilineVars.clef);

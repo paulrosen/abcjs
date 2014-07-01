@@ -250,18 +250,18 @@ ABCJS.tablature.Infer.prototype.getNoteName = function(item, deltapitch, keyAcc,
 //  para: valor da nota cromatica (com oitava)
 
     var p = item.pitch + deltapitch;
-    var n = this.accordion.transporter.staffNoteToCromatic(this.accordion.transporter.extractStaffNote(p));
-    var oitava = this.accordion.transporter.extractStaffOctave(p);
-    var staffNote = this.accordion.transporter.numberToKey(n);
+    var n = this.accordion.transposer.staffNoteToCromatic(this.accordion.transposer.extractStaffNote(p));
+    var oitava = this.accordion.transposer.extractStaffOctave(p);
+    var staffNote = this.accordion.transposer.numberToKey(n);
     
     if(item.accidental) {
-        barAcc[item.pitch] = this.accordion.transporter.getAccOffset(item.accidental);
+        barAcc[item.pitch] = this.accordion.transposer.getAccOffset(item.accidental);
         n += barAcc[item.pitch];
     } else {
         if(typeof(barAcc[item.pitch]) !== "undefined") {
           n += barAcc[item.pitch];
         } else {
-          n += this.accordion.transporter.getKeyAccOffset(staffNote, keyAcc);
+          n += this.accordion.transposer.getKeyAccOffset(staffNote, keyAcc);
         }
     }
     
@@ -269,7 +269,7 @@ ABCJS.tablature.Infer.prototype.getNoteName = function(item, deltapitch, keyAcc,
     n       = (n < 0 ? 12+n : (n > 11 ? n%12 : n ) );
     
     //return n + oitava;
-    return this.accordion.transporter.numberToKey(n) + oitava;
+    return this.accordion.transposer.numberToKey(n) + oitava;
 };
 
 ABCJS.tablature.Infer.prototype.getXi = function() {

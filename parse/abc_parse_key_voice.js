@@ -328,7 +328,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 		}
 	};
 
-	window.ABCJS.parse.parseKeyVoice.parseKey = function( str, transporter, line, lineNumber )	
+	window.ABCJS.parse.parseKeyVoice.parseKey = function( str, transposer, line, lineNumber )	
 	{
 		// returns:
 		//		{ foundClef: true, foundKey: true }
@@ -374,11 +374,11 @@ window.ABCJS.parse.parseKeyVoice = {};
 				tokens.shift();
 				break;
 			default:
-                                if( transporter ) {
-                                   if( transporter.offSet !== 0 ) 
-                                     tokens = transporter.transposeKey( tokenizer, str, line, lineNumber);
+                                if( transposer ) {
+                                   if( transposer.offSet !== 0 ) 
+                                     tokens = transposer.transposeKey( tokenizer, str, line, lineNumber);
                                    else 
-                                     transporter.registerKey( tokenizer, str);  
+                                     transposer.registerKey( tokenizer, str);  
                                 } 
                                 
 				var retPitch = tokenizer.getKeyPitch(tokens[0].token);

@@ -23,7 +23,7 @@ if (!window.ABCJS.parse)
 window.ABCJS.parse.Parse = function(transporter_, accordion_) {
 
     if (transporter_)
-        this.transporter = transporter_;
+        this.transposer = transporter_;
     
     if (accordion_)
         this.accordion = accordion_;
@@ -93,7 +93,7 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                 encode(line.substring(col_num + 1));
         addWarning("Music Line:" + tune.getNumLines() + ":" + (col_num + 1) + ': ' + str + ":  " + clean_line);
     };
-    var header = new window.ABCJS.parse.ParseHeader(tokenizer, warn, multilineVars, tune, this.transporter);
+    var header = new window.ABCJS.parse.ParseHeader(tokenizer, warn, multilineVars, tune, this.transposer);
 
     this.getWarnings = function() {
         return multilineVars.warnings;
@@ -1488,8 +1488,8 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                     addWarning("+Warn: Cannot parse tablature line: no accordion defined!");
                 }
             } else {
-                if (this.transporter && this.transporter.offSet !== 0) {
-                    ret.str = this.transporter.transposeRegularMusicLine(ret.str, line, lineNumber);
+                if (this.transposer && this.transposer.offSet !== 0) {
+                    ret.str = this.transposer.transposeRegularMusicLine(ret.str, line, lineNumber);
                 }
                 this.parseRegularMusicLine(ret.str);
             }

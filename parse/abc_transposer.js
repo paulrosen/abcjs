@@ -12,7 +12,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.parse)
 	window.ABCJS.parse = {};
     
-window.ABCJS.parse.Transport = function ( offSet_ ) {
+window.ABCJS.parse.Transposer = function ( offSet_ ) {
     
     this.reset = function(offSet_){
         this.offSet           = offSet_;
@@ -81,7 +81,7 @@ window.ABCJS.parse.Transport = function ( offSet_ ) {
    
 };
 
-window.ABCJS.parse.Transport.prototype.numberToStaff = function(number, newKacc) {
+window.ABCJS.parse.Transposer.prototype.numberToStaff = function(number, newKacc) {
     var s ;
     if(newKacc.length > 0 && newKacc[0].acc === 'flat')
         s = this.number2staff[number];
@@ -121,10 +121,10 @@ window.ABCJS.parse.Transport.prototype.numberToStaff = function(number, newKacc)
     return s;
 };
 
-window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str, line, lineNumber) {
+window.ABCJS.parse.Transposer.prototype.transposeRegularMusicLine = function(str, line, lineNumber) {
 
     if( str.trim() !== line.trim() ) 
-        alert( "window.ABCJS.parse.Transport.prototype.TransposeRegularMusicLine: isto não devia acontecer!\nstr.:"+str+".\nline:"+line+".");
+        alert( "window.ABCJS.parse.Transposer.prototype.TransposeRegularMusicLine: isto não devia acontecer!\nstr.:"+str+".\nline:"+line+".");
     
     var index = 0;
     var found = false;
@@ -202,7 +202,7 @@ window.ABCJS.parse.Transport.prototype.transposeRegularMusicLine = function(str,
     return this.changedLines[ this.workingLineIdx ].text;
 };
 
-window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size )
+window.ABCJS.parse.Transposer.prototype.transposeNote = function(xi, size )
 {
     var abcNote = this.workingLine.substr(xi, size);
     var elem = this.makeElem(abcNote);
@@ -272,7 +272,7 @@ window.ABCJS.parse.Transport.prototype.transposeNote = function(xi, size )
 
 };
 
-window.ABCJS.parse.Transport.prototype.getAbcNote = function( key, txtAcc, oct) {
+window.ABCJS.parse.Transposer.prototype.getAbcNote = function( key, txtAcc, oct) {
    var cOct = "";
    if( oct >= 5 ) {
        key = key.toLowerCase();  
@@ -284,7 +284,7 @@ window.ABCJS.parse.Transport.prototype.getAbcNote = function( key, txtAcc, oct) 
    return this.accNameToABC(txtAcc) + key + cOct;
 };
 
-window.ABCJS.parse.Transport.prototype.registerKey = function ( tokenizer, str ) {
+window.ABCJS.parse.Transposer.prototype.registerKey = function ( tokenizer, str ) {
     var cKey = "C";
     var tokens = tokenizer.tokenize(str, 0, str.length);
     var retPitch = tokenizer.getKeyPitch(tokens[0].token);
@@ -310,7 +310,7 @@ window.ABCJS.parse.Transport.prototype.registerKey = function ( tokenizer, str )
     return cKey;
 };
 
-window.ABCJS.parse.Transport.prototype.transposeKey = function ( tokenizer, str, line, lineNumber ) {
+window.ABCJS.parse.Transposer.prototype.transposeKey = function ( tokenizer, str, line, lineNumber ) {
     
     var cKey = this.registerKey( tokenizer, str );
     var newKey = this.keyToNumber( cKey );
@@ -329,7 +329,7 @@ window.ABCJS.parse.Transport.prototype.transposeKey = function ( tokenizer, str,
     return tokenizer.tokenize(newStr, 0, newStr.length);
 };
 
-window.ABCJS.parse.Transport.prototype.updateEditor = function ( lines ) {
+window.ABCJS.parse.Transposer.prototype.updateEditor = function ( lines ) {
     for( i = 0; i < this.changedLines.length; i++ ){
         lines[this.changedLines[i].line] = this.changedLines[i].text;
     }
@@ -341,19 +341,19 @@ window.ABCJS.parse.Transport.prototype.updateEditor = function ( lines ) {
     return newStr;
 };
 
-window.ABCJS.parse.Transport.prototype.getKeyVoice = function ( idx ) {
+window.ABCJS.parse.Transposer.prototype.getKeyVoice = function ( idx ) {
 return (this.currKey[idx]?this.currKey[idx]:"C");
 };
 
-window.ABCJS.parse.Transport.prototype.normalizeAcc = function ( cKey ) {
+window.ABCJS.parse.Transposer.prototype.normalizeAcc = function ( cKey ) {
     return cKey.replace(/#/g,'♯').replace(/b/g,'♭');
 };
 
-window.ABCJS.parse.Transport.prototype.denormalizeAcc = function ( cKey ) {
+window.ABCJS.parse.Transposer.prototype.denormalizeAcc = function ( cKey ) {
     return cKey.replace(/♯/g,'#').replace(/♭/g,'b');
 };
 
-window.ABCJS.parse.Transport.prototype.getKeyAccOffset = function(note, keyAcc)
+window.ABCJS.parse.Transposer.prototype.getKeyAccOffset = function(note, keyAcc)
 // recupera os acidentes da clave e retorna um offset no modelo cromatico
 {
   for( var a = 0; a < keyAcc.length; a ++) {
@@ -364,44 +364,44 @@ window.ABCJS.parse.Transport.prototype.getKeyAccOffset = function(note, keyAcc)
   return 0;    
 };
                
-window.ABCJS.parse.Transport.prototype.staffNoteToCromatic = function (note) {
+window.ABCJS.parse.Transposer.prototype.staffNoteToCromatic = function (note) {
   return note*2 + (note>2?-1:0);
 };
 
-//window.ABCJS.parse.Transport.prototype.cromaticToStaffNote = function (note) {
+//window.ABCJS.parse.Transposer.prototype.cromaticToStaffNote = function (note) {
 //  return (note>5?note+1:note)/2;
 //};
 
-window.ABCJS.parse.Transport.prototype.extractStaffNote = function(pitch) {
+window.ABCJS.parse.Transposer.prototype.extractStaffNote = function(pitch) {
     pitch = pitch % 7;
     return pitch<0? pitch+=7:pitch;
 };
 
-window.ABCJS.parse.Transport.prototype.extractCromaticOctave = function(pitch) {
+window.ABCJS.parse.Transposer.prototype.extractCromaticOctave = function(pitch) {
     return Math.floor(pitch/12) ;
 };
 
-window.ABCJS.parse.Transport.prototype.extractCromaticNote = function(pitch) {
+window.ABCJS.parse.Transposer.prototype.extractCromaticNote = function(pitch) {
     pitch = pitch % 12;
     return pitch<0? pitch+=12:pitch;
 };
 
-window.ABCJS.parse.Transport.prototype.extractStaffOctave = function(pitch) {
+window.ABCJS.parse.Transposer.prototype.extractStaffOctave = function(pitch) {
     return Math.floor((28 + pitch) / 7);
 };
 
-window.ABCJS.parse.Transport.prototype.numberToKey = function(number) {
+window.ABCJS.parse.Transposer.prototype.numberToKey = function(number) {
     number %= this.number2key.length;
     if( number < 0 ) number += this.number2key.length;
     return this.number2key[number];
 };
 
-window.ABCJS.parse.Transport.prototype.keyToNumber = function(key) {
+window.ABCJS.parse.Transposer.prototype.keyToNumber = function(key) {
     key = this.normalizeAcc(key);
     return this.key2number[key];
 };
 
-window.ABCJS.parse.Transport.prototype.getAccOffset = function(txtAcc)
+window.ABCJS.parse.Transposer.prototype.getAccOffset = function(txtAcc)
 // a partir do nome do acidente, retorna o offset no modelo cromatico
 {
     var ret = 0;
@@ -432,7 +432,7 @@ window.ABCJS.parse.Transport.prototype.getAccOffset = function(txtAcc)
     return ret;
 };
 
-window.ABCJS.parse.Transport.prototype.accNameToABC = function(txtAcc)
+window.ABCJS.parse.Transposer.prototype.accNameToABC = function(txtAcc)
 // a partir do nome do acidente, retorna o offset no modelo cromatico
 {
     var ret = "";
@@ -463,7 +463,7 @@ window.ABCJS.parse.Transport.prototype.accNameToABC = function(txtAcc)
     return ret;
 };
 
-window.ABCJS.parse.Transport.prototype.accAbcToName = function(abc)
+window.ABCJS.parse.Transposer.prototype.accAbcToName = function(abc)
 // a partir do nome do acidente, retorna o offset no modelo cromatico
 {
     var ret = "";
@@ -488,17 +488,17 @@ window.ABCJS.parse.Transport.prototype.accAbcToName = function(abc)
     return ret;
 };
 
-window.ABCJS.parse.Transport.prototype.getAccName = function(offset)
+window.ABCJS.parse.Transposer.prototype.getAccName = function(offset)
 {
     var names = ['dblflat','flat','natural','sharp','dblsharp'];
     return names[offset+2];
 };
 
-window.ABCJS.parse.Transport.prototype.getPitch = function( staff, octave) {
+window.ABCJS.parse.Transposer.prototype.getPitch = function( staff, octave) {
    return this.pitches[staff] + (octave - 4) * 7; 
 };
 
-window.ABCJS.parse.Transport.prototype.makeElem = function(abcNote){
+window.ABCJS.parse.Transposer.prototype.makeElem = function(abcNote){
    var pitSyms = "ABCDEFGabcdefg"; // 2
    var i = 0;
    while( pitSyms.indexOf(abcNote.charAt(i)) === -1 ) {

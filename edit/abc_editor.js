@@ -48,7 +48,7 @@ window.ABCJS.edit.KeySelector = function(id) {
 
 window.ABCJS.edit.KeySelector.prototype.populate = function(offSet) {
     
-    var transporter = new window.ABCJS.parse.Transport(0);
+    var transposer = new window.ABCJS.parse.Transposer(0);
 
     while( this.selector.options.length > 0 ) {
         this.selector.remove(0);
@@ -57,9 +57,9 @@ window.ABCJS.edit.KeySelector.prototype.populate = function(offSet) {
     for (var i = this.cromaticLength+offSet; i >= -this.cromaticLength+2+offSet; i--) {
         var opt = document.createElement('option');
         if(i-1 > offSet) 
-            opt.innerHTML = transporter.number2keysharp[(i+this.cromaticLength-1)%this.cromaticLength] ;
+            opt.innerHTML = transposer.number2keysharp[(i+this.cromaticLength-1)%this.cromaticLength] ;
         else
-            opt.innerHTML = transporter.number2key[(i+this.cromaticLength-1)%this.cromaticLength] ;
+            opt.innerHTML = transposer.number2key[(i+this.cromaticLength-1)%this.cromaticLength] ;
         opt.value = (i+this.cromaticLength-1)
         this.selector.appendChild(opt);
     }
@@ -351,7 +351,7 @@ window.ABCJS.Editor.prototype.showUp = function() {
 window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
 
   var tunebook = new ABCJS.TuneBook(abc);
-  var abcParser = new window.ABCJS.parse.Parse(this.transporter, this.accordion);
+  var abcParser = new window.ABCJS.parse.Parse(this.transposer, this.accordion);
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
@@ -424,14 +424,14 @@ window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
   this.warnings = [];
   
   if(typeof transpose !== "undefined") {
-      if( this.transporter )
-        this.transporter.reset(transpose);
+      if( this.transposer )
+        this.transposer.reset(transpose);
       else
-        this.transporter = new window.ABCJS.parse.Transport( transpose );
+        this.transposer = new window.ABCJS.parse.Transposer( transpose );
   }
   
   for (var i=0; i<tunebook.tunes.length; i++) {
-    var abcParser = new window.ABCJS.parse.Parse( this.transporter, this.accordion );
+    var abcParser = new window.ABCJS.parse.Parse( this.transposer, this.accordion );
     abcParser.parse(tunebook.tunes[i].abc, this.parserparams ); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
     
@@ -440,13 +440,13 @@ window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
         this.editarea.appendString( this.accordion.updateEditor() );
     }
     
-    if( this.transporter ) { 
-        if( this.transporter.offSet !== 0 ) {
+    if( this.transposer ) { 
+        if( this.transposer.offSet !== 0 ) {
           var lines = abcParser.tuneHouseKeeping(tunebook.tunes[i].abc);
-          this.editarea.setString( this.transporter.updateEditor( lines ), "norefresh" );
+          this.editarea.setString( this.transposer.updateEditor( lines ), "norefresh" );
         }
         if(this.keySelector) 
-            this.keySelector.set( this.transporter.keyToNumber( this.transporter.getKeyVoice(0) ) );       
+            this.keySelector.set( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
     }
     
     var warnings = abcParser.getWarnings() || [];
