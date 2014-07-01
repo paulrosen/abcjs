@@ -1,69 +1,190 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en"><head>
-
-
-
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<title>Draw The Dots: Tune Editor demo</title>
-
-	<script src="proto_noconflict.js" type="text/javascript"></script>
-
-	<script src="write/raphael.js" type="text/javascript"></script>
-	<script src="write/sprintf.js" type="text/javascript"></script>
-        <script src="write/abc_glyphs.js" type="text/javascript"></script>
-        <script src="write/abc_graphelements.js" type="text/javascript"></script>
-        <script src="write/abc_layout.js" type="text/javascript"></script>
-        <script src="write/abc_write.js" type="text/javascript"></script>
-	<script src="api/abc_tunebook.js" type="text/javascript"></script>
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+    <link href="workspace.css" rel="stylesheet"></link>
+            <!-- 
+          MAIN DATA STRUCTURES
         
-        <script src="data/abc_tune.js">type="text/javascript"></script>
-        <script src="parse/abc_parse_header.js" type="text/javascript"></script>
-	<script src="parse/abc_tokenizer.js" type="text/javascript"></script>
-	<script src="parse/abc_parse_key_voice.js" type="text/javascript"></script>
-	<script src="parse/abc_parse_directive.js" type="text/javascript"></script>
-        <script src="parse/abc_parse.js" type="text/javascript"></script>
-	<script src="parse/abc_common.js" type="text/javascript"></script>
-        <script src="transform/abc2abc_write.js" type="text/javascript"></script>
-        <script src="midi/abc_midiwriter.js" type="text/javascript"></script>
+            Tune
+              lines[]
+                staffs[]
+                   voices[]
 
-	<script src="edit/abc_editor.js" type="text/javascript"></script>
+            Printer
+              layouter  Layout {}
+              staffgroups[] Staffgroup {}
+
+            Layout 
+              Staffgroup {}
+                 voices[]
+                   beams[]
+                   children[]
+                   otherchildren[]
+                   stave {}
+
+            stave {}
+               y
+               top
+               bottom
+               highest
+               lowest
+        
+           DONE:
+             Verificar o transporte de keys com modos min e maj
+             Verificar os limites máximo e mínimos para transporte de keys
+             Ignorar Accents na transposição
+             Tablatura: gerar mesmo sem o baixo
+             Layout:    Revisar a impressão dos elementos ending, accents e lyrics
+             Layout:    Revisar a de linhas de texto, quando há mais de uma linha
+             Tablatura: imprimir os de pausas adequadamente no baixo
+             Tablatura: parse
+                tratar numeros hexa
+                tratar a adicao de pausas - continuacao
+                tratar acordes
+                tratar startChar e endChar
+                registar o parse da tablatura
+                gerar a linha durante a inferencia
+                imprimir baseado na linha existente
+        
+           TODO:
+             Tablatura: 
+                tratar adequadamente os acordes (de baixo)      
+                promover a inversão do fole se a posição do botao for melhor
+                melhorar a relação open/close do fole na melodia
+                revisar a impressão de múltiplas notas na mesma coluna
+        
+        -->
+	<title>Draw The Dots: Tune Editor demo</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
+    </head>
+    <body>
+
+	<script type="text/javascript" src="proto_noconflict.js" ></script>
+	<script type="text/javascript" src="jquery-1.10.2.min.js" ></script>
+
+        <script type="text/javascript" src="data/abc_tune.js" ></script>
+	<script type="text/javascript" src="api/abc_tunebook.js" ></script>
+        <script type="text/javascript" src="midi/abc_midiwriter.js" ></script>
+
+        <script type="text/javascript" src="write/raphael.js" ></script>
+	<script type="text/javascript" src="write/sprintf.js" ></script>
+        <script type="text/javascript" src="write/abc_glyphs.js" ></script>
+        <script type="text/javascript" src="write/abc_graphelements.js" ></script>
+        <script type="text/javascript" src="write/abc_layout.js" ></script>
+        <script type="text/javascript" src="write/abc_write.js" ></script>
+
+        <script type="text/javascript" src="parse/abc_parse_header.js" ></script>
+	<script type="text/javascript" src="parse/abc_tokenizer.js" ></script>
+	<script type="text/javascript" src="parse/abc_parse_key_voice.js" ></script>
+	<script type="text/javascript" src="parse/abc_parse_directive.js" ></script>
+        <script type="text/javascript" src="parse/abc_parse.js" ></script>
+        <script type="text/javascript" src="parse/abc_transposer.js" ></script>
+	<script type="text/javascript" src="parse/abc_common.js" ></script>
+
+        <!-- diatonic accordion map -->
+        <script type="text/javascript" src="diatonic/diatonic-map.js"></script>
+        <script type="text/javascript" src="diatonic/accordion.hohner.gc.js"></script>
+        <script type="text/javascript" src="diatonic/accordion.hohner.clubIIIM.br.js"></script>
+        <script type="text/javascript" src="diatonic/accordion.hohner.clubIIIM.js"></script>
+        <script type="text/javascript" src="diatonic/accordion.hohner.coronaII.js"></script>
+        
+        <!-- support for diatonic accordion tablature -->
+        <script type="text/javascript" src="tablature/accordion_map.js"></script>
+        <script type="text/javascript" src="tablature/accordion_infer.js"></script>
+        <script type="text/javascript" src="tablature/accordion_parse.js"></script>
+        <script type="text/javascript" src="tablature/accordion_layout.js"></script>
+        
+ 	<script type="text/javascript" src="edit/abc_editor.js" ></script>
+
+        <!--applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="http://dl.dropbox.com/u/223827/abcjs/MIDIPlugin.jar" height="1" width="1"></applet-->
+        <!--applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="MIDIPlugin.jar" height="2" width="1"></applet-->
+        <!--textarea id="target" cols="80" rows="15"></textarea-->
+
+<div id="editControl" style="display:true; float:left;"> 
+           
+       
+<textarea id="abc" cols="120" rows="10" >
+%%barnumbers 1
+X:1
+L:1/8
+Q:140
+M:4/4
+V:melo
+K:C
+| g2 e3/2d1/2 c2 d3/2e1/2 | 
+V:bass
+K:C bass
+| C,2 [C,E,G,] 2 C,2 [C,E,G,] 2 | 
+V:tab
+K:none accordionTab
+%| C+92 c+7'1.5 >+80.5 C+6'2 c+81.5 >+7'0.5 | G-7'2 g-5'2 G->2 g-z2 |
+</textarea>
+        <div id="outrosControles" style="display:true; float:left;">
+                <select id="selGaitas" ></select>
+            <select id="selKey" ></select>
+            <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
+            <!--input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);" />
+            <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);" /-->
+            <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
+            <input type="button" id="printBtn" value="Print Preview" />
+            <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
+            <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
+            <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
+        
+            <div id="warnings"></div>
+            <div id="midi"></div>
+        </div>
+    
+     </div>
+     <div id="canvas" style="overflow-y: scroll; float:left;"></div>
+        
         <script type="text/javascript">
+            window.myEditor = {};
+            window.printButton = document.getElementById("printBtn");
+            
+            window.addEventListener('load', initApp, false);
 
+            function initApp() {
 
+                debug = false;
 
-function load() {
-  debug=true;
-  new ABCJS.Editor("abc", { canvas_id: "canvas",
-                            midi_id:"midi",
-                                      warnings_id:"warnings",
-                                      midi_options:{program:1,
-                                      qpm:150, type:"qt"},
-                                      render_options:{},
-                                      gui: false
-                                      });
-}
+                myEditor = new ABCJS.Editor(
+                        "abc", {
+                            canvas_id: "canvas"
+                            //,midi_id: "midi"
+                            ,warnings_id: "warnings"
+                            ,refreshController_id: "chkAutoRefresh"
+                            ,accordionSelector_id: "selGaitas"
+                            ,keySelector_id: "selKey"
+                            ,midi_options: {program: 21, qpm: 150, type: "qt"}
+                            ,render_options: {}
+                            ,gui: false
+                        });
+
+                        
+                printButton.addEventListener("click", function() {
+                    document.getElementById("editControl").style.display = "none";
+                    window.print();
+                    document.getElementById("editControl").style.display = "inline";
+                }, false);
+                
+            }
+
+            function doTranspose(value) {
+                myEditor.fireChanged(value, "force");
+            };
+
+            function doForceRefresh() {
+                myEditor.fireChanged(0, "force");
+            };
+
+            function doCheckDebug() {
+                debug = document.getElementById("chkDebug").checked;
+                myEditor.fireChanged(0, "force");
+            };
+
 
         </script>
-</head><body>
 
-
-<applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="http://dl.dropbox.com/u/223827/abcjs/MIDIPlugin.jar" height="1" width="1"></applet>
-
-<textarea id="abc" cols="80" rows="15">X: 1
-T: Cooley's
-M: 4/4
-L: 1/8
-R: reel
-K: Emin
-|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
-EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
-|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
-eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|</textarea>
-<div id="warnings"></div>
-<div onmousedown="load();">Run</div>
-<hr>
-<div id="midi"></div>
-<div id="canvas"></div>
-<!--textarea id="target" cols="80" rows="15"></textarea-->
-</body>
+    </body>
 </html>

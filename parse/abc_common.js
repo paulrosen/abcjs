@@ -22,12 +22,47 @@ if (!window.ABCJS)
 if (!window.ABCJS.parse)
 	window.ABCJS.parse = {};
 
-window.ABCJS.parse.clone = function(source) {
-	var destination = {};
-	for (var property in source)
-		if (source.hasOwnProperty(property))
-			destination[property] = source[property];
-	return destination;
+// implemented below a more secure form o copy
+//window.ABCJS.parse.clone = function(source) {
+//     
+//      var destination = {};
+//	for (var property in source)
+//		if (source.hasOwnProperty(property))
+//			destination[property] = source[property];
+//	return destination;
+//};
+
+// implemented below a more secure form o copy
+window.ABCJS.parse.clone = function(obj) {
+    // Handle the 3 simple types, and null or undefined
+    if (null === obj || "object" !== typeof obj) return obj;
+
+    // Handle Date
+    if (obj instanceof Date) {
+        var copy = new Date();
+        copy.setTime(obj.getTime());
+        return copy;
+    }
+
+    // Handle Array
+    if (obj instanceof Array) {
+        var copy = [];
+        for (var i = 0, len = obj.length; i < len; i++) {
+            copy[i] = window.ABCJS.parse.clone(obj[i]);
+        }
+        return copy;
+    }
+    
+    // Handle Object
+    if (obj instanceof Object) {
+        var copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) copy[attr] = window.ABCJS.parse.clone(obj[attr]);
+        }
+        return copy;
+    }
+    
+    throw new Error("Unable to copy obj! Its type isn't supported.");
 };
 
 window.ABCJS.parse.gsub = function(source, pattern, replacement) {

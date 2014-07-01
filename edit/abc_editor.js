@@ -34,12 +34,80 @@ if (!window.ABCJS)
 
 if (!window.ABCJS.edit)
 	window.ABCJS.edit = {};
+    
+
+window.ABCJS.edit.KeySelector = function(id) {
+
+    this.selector = document.getElementById(id);
+    this.cromaticLength = 12;
+    if (this.selector) {
+        this.populate(0);
+    }
+
+};
+
+window.ABCJS.edit.KeySelector.prototype.populate = function(offSet) {
+    
+    var transposer = new window.ABCJS.parse.Transposer(0);
+
+    while( this.selector.options.length > 0 ) {
+        this.selector.remove(0);
+    }            
+        
+    for (var i = this.cromaticLength+offSet; i >= -this.cromaticLength+2+offSet; i--) {
+        var opt = document.createElement('option');
+        if(i-1 > offSet) 
+            opt.innerHTML = transposer.number2keysharp[(i+this.cromaticLength-1)%this.cromaticLength] ;
+        else
+            opt.innerHTML = transposer.number2key[(i+this.cromaticLength-1)%this.cromaticLength] ;
+        opt.value = (i+this.cromaticLength-1)
+        this.selector.appendChild(opt);
+    }
+    this.oldValue = offSet+this.cromaticLength;
+    this.selector.value = offSet+this.cromaticLength;
+};
+
+window.ABCJS.edit.KeySelector.prototype.set = function(value) {
+    this.populate(value);
+    
+};
+
+window.ABCJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
+  this.selector.onchange = function() {
+    editor.fireChanged( this.value - editor.keySelector.oldValue, "force" );
+  };
+};
+
+window.ABCJS.edit.AccordionSelector = function(id) {
+  this.selector = document.getElementById(id);
+    };
+
+window.ABCJS.edit.AccordionSelector.prototype.addChangeListener = function(editor) {
+  this.selector.onchange = function() {
+    editor.accordion.load(parseInt(this.value));
+    editor.fireChanged( 0, "force" );
+  };
+};
+    
+window.ABCJS.edit.AccordionSelector.prototype.populate = function(accordion) {
+    for (var i = 0; i < accordion.accordions.length; i++) {
+        var opt = document.createElement('option');
+        opt.innerHTML = accordion.accordions[i].getName();
+        opt.value = i;
+        this.selector.appendChild(opt);
+    }
+};
+
+window.ABCJS.edit.AccordionSelector.prototype.set = function(val) {
+    this.selector.value = val;
+};
 
 window.ABCJS.edit.EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
   this.isDragging = false;
-}
+  this.changeListener;
+};
 
 window.ABCJS.edit.EditArea.prototype.addSelectionListener = function(listener) {
   this.textarea.onmousemove = function(ev) {
@@ -89,10 +157,23 @@ window.ABCJS.edit.EditArea.prototype.getString = function() {
   return this.textarea.value;
 };
 
-window.ABCJS.edit.EditArea.prototype.setString = function(str) {
+window.ABCJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
   this.textarea.value = str;
   this.initialText = this.getString();
-  if (this.changelistener) {
+  if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
+    this.changelistener.fireChanged();
+  }
+};
+
+window.ABCJS.edit.EditArea.prototype.appendString = function(str, noRefresh ) {
+  //retira \n ao final  
+  while( this.textarea.value.charAt(this.textarea.value.length-1) === '\n' ) {
+    this.textarea.value = this.textarea.value.substr(0,this.textarea.value.length-1);
+  }
+      
+  this.textarea.value += str;
+  this.initialText = this.getString();
+  if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
     this.changelistener.fireChanged();
   }
 };
@@ -154,13 +235,33 @@ window.ABCJS.edit.EditArea.prototype.getElem = function() {
 //
 
 window.ABCJS.Editor = function(editarea, params) {
-	if (params.indicate_changed)
-		this.indicate_changed = true;
+  if (params.indicate_changed)
+    this.indicate_changed = true;
+
   if (typeof editarea === "string") {
     this.editarea = new window.ABCJS.edit.EditArea(editarea);
   } else {
     this.editarea = editarea;
   }
+
+  if (params.abcText && typeof params.abcText === "string") {
+     this.editarea.setString(params.abcText, "noRefresh" ) ;
+  }
+
+  if(params.refreshController_id)  
+    this.refreshController = document.getElementById(params.refreshController_id);
+
+  if(params.accordionSelector_id)  {
+    this.accordion = new window.ABCJS.tablature.Accordion();
+    this.accordionSelector = new window.ABCJS.edit.AccordionSelector(params.accordionSelector_id);
+    this.accordionSelector.populate(this.accordion);
+    this.accordionSelector.addChangeListener(this);
+  }
+  if(params.keySelector_id) {  
+    this.keySelector = new window.ABCJS.edit.KeySelector(params.keySelector_id);
+    this.keySelector.addChangeListener(this);
+  }  
+
   this.editarea.addSelectionListener(this);
   this.editarea.addChangeListener(this);
 
@@ -191,6 +292,7 @@ window.ABCJS.Editor = function(editarea, params) {
   
   this.parserparams = params.parser_options || {};
   this.midiparams = params.midi_options || {};
+  
   this.onchangeCallback = params.onchange;
 
   this.printerparams = params.render_options || {};
@@ -201,8 +303,6 @@ window.ABCJS.Editor = function(editarea, params) {
   } 
   this.oldt = "";
   this.bReentry = false;
-  this.parseABC();
-  this.modelChanged();
 
   this.addClassName = function(element, className) {
     var hasClassName = function(element, className) {
@@ -233,51 +333,67 @@ window.ABCJS.Editor = function(editarea, params) {
 	  this.removeClassName(el, readonlyClass);
     }
   };
-}
+  
+  if( this.parseABC(0) ) {
+      this.showUp();
+  }
+
+};
+
+window.ABCJS.Editor.prototype.setString = function(text, noRefresh) {
+    this.editarea.setString( text, noRefresh );
+};
+
+window.ABCJS.Editor.prototype.showUp = function() {
+  this.modelChanged();
+};
 
 window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
+
   var tunebook = new ABCJS.TuneBook(abc);
-  var abcParser = window.ABCJS.parse.Parse();
+  var abcParser = new window.ABCJS.parse.Parse(this.transposer, this.accordion);
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
-  var printer = new ABCJS.write.Printer(paper, {});	// TODO: handle printer params
+  var printer = new ABCJS.write.Printer(paper, {});// TODO: handle printer params
   printer.printABC(tune);
+ 
 };
 
 window.ABCJS.Editor.prototype.modelChanged = function() {
-  if (this.tunes === undefined) {
-    if (this.mididiv !== undefined && this.mididiv !== this.div)
-		this.mididiv.innerHTML = "";
-    this.div.innerHTML = "";
-	return;
-  }
+    if (this.tunes === undefined) {
+        if (this.mididiv !== undefined && this.mididiv !== this.div)
+            this.mididiv.innerHTML = "";
+        this.div.innerHTML = "";
+        return;
+    }
 
-  if (this.bReentry)
-    return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
-  this.bReentry = true;
-  this.timerId = null;
-  this.div.innerHTML = "";
-  var paper = Raphael(this.div, 800, 400);
-  this.printer = new ABCJS.write.Printer(paper, this.printerparams);
-  this.printer.printABC(this.tunes);
-  if (ABCJS.midi.MidiWriter && this.mididiv) {
-    if (this.mididiv !== this.div)
-		this.mididiv.innerHTML = "";
-    var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv,this.midiparams);
-    midiwriter.addListener(this.printer);
-    midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
-  }
-  if (this.warningsdiv) {
-    this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
-  } 
-  if (this.target) {
-    var textprinter = new window.ABCJS.transform.TextPrinter(this.target, true);
-    textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
-  }
-  this.printer.addSelectListener(this);
-  this.updateSelection();
-  this.bReentry = false;
+    if (this.bReentry)
+        return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
+    this.bReentry = true;
+    this.timerId = null;
+    this.div.innerHTML = "";
+    var paper = Raphael(this.div, 1100, 700);
+    this.printer = new ABCJS.write.Printer(paper, this.printerparams );
+    this.printer.printABC(this.tunes);
+    
+    if (ABCJS.midi && ABCJS.midi.MidiWriter && this.mididiv) {
+        if (this.mididiv !== this.div)
+            this.mididiv.innerHTML = "";
+        var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv, this.midiparams);
+        midiwriter.addListener(this.printer);
+        midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
+    }
+    if (this.warningsdiv) {
+        this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
+    }
+    if (this.target) {
+        var textprinter = new window.ABCJS.transform.TextPrinter(this.target, true);
+        textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
+    }
+    this.printer.addSelectListener(this);
+    this.updateSelection();
+    this.bReentry = false;
 };
 
 // Call this to reparse in response to the printing parameters changing
@@ -288,9 +404,9 @@ window.ABCJS.Editor.prototype.paramChanged = function(printerparams) {
 };
 
 // return true if the model has changed
-window.ABCJS.Editor.prototype.parseABC = function() {
+window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
   var t = this.editarea.getString();
-  if (t===this.oldt) {
+  if ( (t.length === 0 || t===this.oldt ) && typeof(force) === "undefined" ) {
     this.updateSelection();
     return false;
   }
@@ -301,14 +417,38 @@ window.ABCJS.Editor.prototype.parseABC = function() {
 	this.warnings = "";
 	return true;
   }
+  
   var tunebook = new ABCJS.TuneBook(t);
   
   this.tunes = [];
   this.warnings = [];
+  
+  if(typeof transpose !== "undefined") {
+      if( this.transposer )
+        this.transposer.reset(transpose);
+      else
+        this.transposer = new window.ABCJS.parse.Transposer( transpose );
+  }
+  
   for (var i=0; i<tunebook.tunes.length; i++) {
-    var abcParser = new window.ABCJS.parse.Parse();
-    abcParser.parse(tunebook.tunes[i].abc, this.parserparams); //TODO handle multiple tunes
+    var abcParser = new window.ABCJS.parse.Parse( this.transposer, this.accordion );
+    abcParser.parse(tunebook.tunes[i].abc, this.parserparams ); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
+    
+    if( this.accordion ) { 
+        // obtem possiveis linhas inferidas para tablatura
+        this.editarea.appendString( this.accordion.updateEditor() );
+    }
+    
+    if( this.transposer ) { 
+        if( this.transposer.offSet !== 0 ) {
+          var lines = abcParser.tuneHouseKeeping(tunebook.tunes[i].abc);
+          this.editarea.setString( this.transposer.updateEditor( lines ), "norefresh" );
+        }
+        if(this.keySelector) 
+            this.keySelector.set( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
+    }
+    
     var warnings = abcParser.getWarnings() || [];
     for (var j=0; j<warnings.length; j++) {
       this.warnings.push(warnings[j]);
@@ -359,10 +499,14 @@ window.ABCJS.Editor.prototype.setDirtyStyle = function(isDirty) {
 };
 
 // call when abc text is changed and needs re-parsing
-window.ABCJS.Editor.prototype.fireChanged = function() {
+window.ABCJS.Editor.prototype.fireChanged = function(transpose, force) {
+    
+  if( typeof(force) ==="undefined" && this.refreshController && ! this.refreshController.checked ) 
+      return;
+    
   if (this.bIsPaused)
     return;
-  if (this.parseABC()) {
+  if (this.parseABC(transpose, force)) {
     var self = this;
     if (this.timerId)	// If the user is still typing, cancel the update
       clearTimeout(this.timerId);

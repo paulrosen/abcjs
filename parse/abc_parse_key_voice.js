@@ -171,6 +171,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 	};
 
 	var clefLines = {
+		'accordionTab': { clef: 'accordionTab', pitch: 11, mid: 0 },
 		'treble': { clef: 'treble', pitch: 4, mid: 0 },
 		'treble+8': { clef: 'treble+8', pitch: 4, mid: 0 },
 		'treble-8': { clef: 'treble-8', pitch: 4, mid: 0 },
@@ -327,7 +328,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 		}
 	};
 
-	window.ABCJS.parse.parseKeyVoice.parseKey = function(str)	// (and clef)
+	window.ABCJS.parse.parseKeyVoice.parseKey = function( str, transposer, line, lineNumber )	
 	{
 		// returns:
 		//		{ foundClef: true, foundKey: true }
@@ -373,6 +374,13 @@ window.ABCJS.parse.parseKeyVoice = {};
 				tokens.shift();
 				break;
 			default:
+                                if( transposer ) {
+                                   if( transposer.offSet !== 0 ) 
+                                     tokens = transposer.transposeKey( tokenizer, str, line, lineNumber);
+                                   else 
+                                     transposer.registerKey( tokenizer, str);  
+                                } 
+                                
 				var retPitch = tokenizer.getKeyPitch(tokens[0].token);
 				if (retPitch.len > 0) {
 					ret.foundKey = true;
@@ -543,6 +551,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 					if (tokens.length === 0) { warn("Expected parameter after clef=", str, 0); return ret; }
 					//break; yes, we want to fall through. That allows "clef=" to be optional.
 				case "treble":
+                                case "accordionTab":
 				case "bass":
 				case "alto":
 				case "tenor":
@@ -557,6 +566,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 						case 'perc':
 						case 'none':
 							break;
+						case 'accordionTab': clef.token = 'accordionTab'; break;
 						case 'C': clef.token = 'alto'; break;
 						case 'F': clef.token = 'bass'; break;
 						case 'G': clef.token = 'treble'; break;
@@ -654,7 +664,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 					case 'cl':
 						addNextTokenToStaffInfo('clef');
 						// TODO-PER: check for a legal clef; do octavizing
-						var oct = 0;
+						var oct = 0;    
 	//							for (var ii = 0; ii < staffInfo.clef.length; ii++) {
 	//								if (staffInfo.clef[ii] === ',') oct -= 7;
 	//								else if (staffInfo.clef[ii] === "'") oct += 7;
@@ -668,6 +678,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 							staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct);
 						}
 						break;
+                                        case 'accordionTab':
 					case 'treble':
 					case 'bass':
 					case 'tenor':
