@@ -686,9 +686,10 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
   if (pitch===5) yslot=14; // avoid upstem of the A
 	var addMark = false; // PER: to allow the user to add a class whereever
 
-  for (i=0;i<decoration.length; i++) { // treat staccato and tenuto first (may need to shift other markers) //TODO, same with tenuto?
-    if (decoration[i]==="staccato" || decoration[i]==="tenuto") {
+  for (i=0;i<decoration.length; i++) { // treat staccato, accent, and tenuto first (may need to shift other markers)
+    if (decoration[i]==="staccato" || decoration[i]==="tenuto" || decoration[i] === "accent") {
 		var symbol = "scripts." + decoration[i];
+		if (decoration[i] === "accent") symbol = "scripts.sforzato";
       ypos = (dir==="down") ? pitch+2:minPitch-2;
 		// don't place on a stave line. The stave lines are 2,4,6,8,10
 		switch (ypos) {
@@ -731,6 +732,7 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
     case "mordent":
     case "lowermordent": dec="scripts.mordent"; break;
     case "staccato":
+    case "accent":
     case "tenuto":
     case "slide": continue;
     case "downbow": dec="scripts.downbow";break;
@@ -738,7 +740,7 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
     case "fermata": dec="scripts.ufermata"; break;
     case "invertedfermata": below = true; dec="scripts.dfermata"; break;
     case "breath": dec=","; break;
-    case "accent": dec="scripts.sforzato"; break;
+//    case "accent": dec="scripts.sforzato"; break;
     case "umarcato": dec="scripts.umarcato"; break;
     case "coda": dec="scripts.coda"; break;
     case "segno": dec="scripts.segno"; break;
