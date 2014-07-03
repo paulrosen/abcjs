@@ -479,6 +479,25 @@ ABCJS.write.Printer.prototype.printSubtitleLine = function(abcline) {
   this.paper.text(this.width/2, this.y, abcline.subtitle).attr({"font-size":16}).scale(this.scale, this.scale, 0,0);
 };
 
+function centerWholeRests(voices) {
+	// whole rests are a special case: if they are by themselves in a measure, then they should be centered.
+	// (If they are not by themselves, that is probably a user error, but we'll just center it between the two items to either side of it.)
+	for (var i = 0; i < voices.length; i++) {
+		var voice = voices[i];
+		// Look through all of the elements except for the first and last. If the whole note appears there then there isn't anything to center it between anyway.
+		for (var j = 1; j < voice.children.length-1; j++) {
+			var absElem = voice.children[j];
+			if (absElem.abcelem.rest && absElem.abcelem.duration === 1) {
+				var before = voice.children[j-1];
+				var after = voice.children[j+1];
+				var midpoint = (after.x - before.x) / 2 + before.x;
+				absElem.x = midpoint - absElem.w / 2;
+
+			}
+		}
+	}
+}
+
 ABCJS.write.Printer.prototype.printStaffLine = function (abctune, abcline, line) {
 	var staffgroup = this.layouter.printABCLine(abcline.staff);
 	var newspace = this.space;
@@ -494,9 +513,10 @@ ABCJS.write.Printer.prototype.printStaffLine = function (abctune, abcline, line)
 			}
 		}
 	}
+	centerWholeRests(staffgroup.voices);
 	staffgroup.draw(this, this.y);
 	this.staffgroups[this.staffgroups.length] = staffgroup;
 	this.y = staffgroup.y + staffgroup.height;
 	this.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;
 	return staffgroup;
-}
+};
