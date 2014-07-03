@@ -690,7 +690,10 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
     if (decoration[i]==="staccato" || decoration[i]==="tenuto" || decoration[i] === "accent") {
 		var symbol = "scripts." + decoration[i];
 		if (decoration[i] === "accent") symbol = "scripts.sforzato";
-      ypos = (dir==="down") ? pitch+2:minPitch-2;
+		if (ypos === undefined)
+	      ypos = (dir==="down") ? pitch+2:minPitch-2;
+		else
+			ypos = (dir==="down") ? ypos+2:ypos-2;
 		// don't place on a stave line. The stave lines are 2,4,6,8,10
 		switch (ypos) {
 			case 2:
@@ -710,14 +713,16 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
       abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltax, this.glyphs.getSymbolWidth(symbol), ypos));
     }
     if (decoration[i]==="slide" && abselem.heads[0]) {
-      ypos = abselem.heads[0].pitch;
-      var blank1 = new ABCJS.write.RelativeElement("", -roomtaken-15, 0, ypos-1);
-      var blank2 = new ABCJS.write.RelativeElement("", -roomtaken-5, 0, ypos+1);
+      var ypos2 = abselem.heads[0].pitch;
+      var blank1 = new ABCJS.write.RelativeElement("", -roomtaken-15, 0, ypos2-1);
+      var blank2 = new ABCJS.write.RelativeElement("", -roomtaken-5, 0, ypos2+1);
       abselem.addChild(blank1);
       abselem.addChild(blank2);
       this.voice.addOther(new ABCJS.write.TieElem(blank1, blank2, false));
     }
   }
+	// If ypos is set at this point it means that there were "close" decorations. Those might be encroaching on where the rest of the decorations go, so they need to be bumped up.
+	if (ypos+2 > yslot) yslot = ypos+2;
 
   for (i=0;i<decoration.length; i++) {
 	  below = false;
@@ -729,6 +734,7 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
     case "marcato2": dec="scriopts.dmarcato"; break;//other marcato
     case "turn": dec="scripts.turn"; break;
     case "uppermordent": dec="scripts.prall"; break;
+    case "pralltriller": dec="scripts.prall"; break;
     case "mordent":
     case "lowermordent": dec="scripts.mordent"; break;
     case "staccato":
@@ -785,10 +791,10 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
     }
 	  if (below) {
 		  ypos = yslotB;
-		  yslotB -= 4;
+		  yslotB -= 5;
 	  } else {
 		  ypos=yslot;
-		  yslot+=3;
+		  yslot+=5;
 	  }
     var deltax = width/2;
     if (this.glyphs.getSymbolAlign(dec)!=="center") {
