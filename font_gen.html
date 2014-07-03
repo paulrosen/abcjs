@@ -24,8 +24,8 @@
 
 				try {
 					symb = paper.path(font.glyphs[glyph].d).attr({fill: "#000", stroke: "none"});
-					symb.scale(scale, scale, 0, 0);
-					symb.translate(x + 30, y);
+					symb.scale(scale, scale, x + 30, y);
+//					symb.translate(x + 30, y);
 					paper.text(x, y, glyph.charCodeAt(0).toString(16));
 				} catch (e) {
 
