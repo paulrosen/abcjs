@@ -95,6 +95,33 @@ ABCJS.write.Layout.prototype.printABCLine = function(staffs) {
   return this.staffgroup;
 };
 
+function adjustChordVerticalPosition(staffgroup) {
+	var yPlacement = 16; // no lower than high E
+	var chordList = [];
+	for (var i = 0; i < staffgroup.voices.length; i++) {
+		for (var j = 0; j < staffgroup.voices[i].children.length; j++) {
+			var absElem = staffgroup.voices[i].children[j];
+			if (absElem.top+5 > yPlacement)
+				yPlacement = absElem.top+5;
+			for (var k = 0; k < absElem.children.length; k++) {
+				var relElem = absElem.children[k];
+				if (relElem.type === 'chord')
+					chordList.push(relElem);
+			}
+		}
+	}
+	for (i = 0; i < chordList.length; i++) {
+		var elem = chordList[i];
+		if (elem.top < yPlacement) {
+			elem.top = yPlacement;
+			elem.pitch = yPlacement;
+			elem.bottom = yPlacement;
+			if (elem.parent.top < yPlacement)
+				elem.parent.top = yPlacement;
+		}
+	}
+}
+
 ABCJS.write.Layout.prototype.printABCStaff = function(abcstaff) {
 
   var header = "";
@@ -118,6 +145,7 @@ ABCJS.write.Layout.prototype.printABCStaff = function(abcstaff) {
     this.printABCVoice(abcstaff.voices[this.v]);
     this.staffgroup.addVoice(this.voice,this.s,this.stafflines);
   }
+	adjustChordVerticalPosition(this.staffgroup);
  
 };
 
@@ -494,10 +522,10 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
     abselem.addChild(new ABCJS.write.RelativeElement(null, ofs-2, this.glyphs.getSymbolWidth(c)+4, additionalLedgers[i], {type:"ledger"}));
   }
 
-  if (elem.chord !== undefined) { //16 -> high E.
+  if (elem.chord !== undefined) {
     for (i = 0; i < elem.chord.length; i++) {
       var x = 0;
-      var y = 16;
+      var y;
       switch (elem.chord[i].position) {
       case "left":
 	this.roomtaken+=7;
@@ -523,8 +551,10 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
       default:
 			  if (elem.chord[i].rel_position)
 				  abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x+elem.chord[i].rel_position.x, 0, elem.minpitch+elem.chord[i].rel_position.y/ABCJS.write.spacing.STEP, {type:"text"}));
-			  else
-				  abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x, 0, y, {type:"text"}));
+			  else {
+				  // setting the y-coordinate to zero for now: it will be overwritten later one, after we figure out what the highest element on the line is.
+				  abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x, 0, 0, {type: "chord"}));
+			  }
       }
     }
   }
