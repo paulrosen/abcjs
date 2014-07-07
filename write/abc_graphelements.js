@@ -187,7 +187,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         }
         
     }
-
+    
     for (i = 0; i < this.voices.length; i++) {
         if (groupNumber > 0 && i === 0 && this.voices[i].stave.subtitle) {
             printer.y = this.voices[i].stave.top - 18;
@@ -224,10 +224,34 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         printer.printStave(this.startx, this.w, this.voices[i].stave);
     }
     
-    //espaco entre os grupos de pautas
-    printer.y = this.y + this.height + ABCJS.write.spacing.STEP*8*printer.scale; 
+    if(!printer.pageNumber) {
+        printer.pageNumber = 1;
+        printer.groupHeightAvg = 0;
+        printer.groupHeightSum = 0;
+    }
+    printer.groupHeightSum += this.height;
+    printer.groupHeightAvg = printer.groupHeightSum/(groupNumber+1);
+    
+    var ph = 1535;
+    var nexty = this.y + this.height + ABCJS.write.spacing.STEP*8*printer.scale + printer.groupHeightAvg; 
+    
+    if( nexty >= ph*printer.pageNumber )  {
+        //nova pagina
+        printer.y = ph*printer.pageNumber + printer.paddingtop;
+        printer.pageNumber++;
+    } else {
+     // ou espaco entre os grupos de pautas
+      printer.y = this.y + this.height + ABCJS.write.spacing.STEP*8*printer.scale; 
+    }
     
 };
+
+ABCJS.write.StaffGroupElement.prototype.pageBreak = function(parent) {
+    var div = document.createElement("div");
+    div.class = "page-break";
+    div.innerHTML = "page-break";
+    parent.appendChild(div);
+}
 
 ABCJS.write.VoiceElement = function(voicenumber, abcstaff) {
     this.children = [];

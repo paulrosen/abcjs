@@ -493,11 +493,17 @@ ABCJS.write.Printer.prototype.printTune = function(abctune) {
     //console.log("pre-linhas"+d.getTime() + " #" + abctune.lines.length);
     for (var line = 0; line < abctune.lines.length; line++) {
         var abcline = abctune.lines[line];
-        var staffgroup = this.printStaffLine(abctune, line);
-        if (staffgroup.w > maxwidth)
-            maxwidth = staffgroup.w;
         if (abcline.text) {
             alert('abcline.text should should no longer exists!');
+            continue;
+        }
+        if(abcline.newpage) {
+            this.skipPage();
+            continue;
+        }
+        if(abcline.staffs) {
+            var staffgroup = this.printStaffLine(abctune, line);
+            maxwidth = Math.max(staffgroup.w, maxwidth);
         }
     }
     //var d = new Date();
