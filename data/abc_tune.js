@@ -69,8 +69,47 @@ window.ABCJS.data.Tune = function() {
         this.voiceNum = 0;
         this.lineNum = 0;
     };
+    
+    this.setFormat = function(vars) {
+        var ph, pw;
+        var ps = vars.papersize || 'letter';
+        var ls = vars.landscape || false;
+        
+        switch (ps.toLowerCase()) {
+            case "letter":
+                ph = 11 * 72;
+                pw = 8.5 * 72;
+            case "legal":
+                ph = 14 * 72;
+                pw = 8.5 * 72;
+                break;
+            case "a4":
+                ph = 11.7 * 72;
+                pw = 8.3 * 72;
+                break;
+        }
+        if (ls) {
+            var x = ph;
+            ph = pw;
+            pw = x;
+        }
 
-    this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote) {
+        if (!this.formatting.landscape)
+            this.formatting.landscape = ls;
+        if (!this.formatting.papersize)
+            this.formatting.papersize = ps.toLowerCase();
+        if (!this.formatting.pagewidth)
+            this.formatting.pagewidth = pw;
+        if (!this.formatting.pageheight)
+            this.formatting.pageheight = ph;
+        
+        if(ls)
+            this.formatting.pageratio = ph/pw; 
+        else
+            this.formatting.pageratio = (ph-(1.5*72))/(pw-(1.5*72)); // ???
+    };
+
+    this.cleanUp = function( barsperstaff, staffnonote) {
         this.closeLine();	// Close the last line.
 
         // Remove any blank lines
@@ -342,11 +381,6 @@ window.ABCJS.data.Tune = function() {
                     }
                 }
         }
-
-        if (!this.formatting.pagewidth)
-            this.formatting.pagewidth = defWidth;
-        if (!this.formatting.pageheight)
-            this.formatting.pageheight = defLength;
 
         // Remove temporary variables that the outside doesn't need to know about
         delete this.staffNum;

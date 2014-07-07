@@ -50,8 +50,16 @@ ABCJS.write.Printer = function(paper, params ) {
   this.paddingright = params.paddingright || 50;
   this.paddingleft = params.paddingleft || 15;
   this.editable = params.editable || false;
-  //this.accordion = accordion;
   this.staffgroups = [];
+  this.reset();
+  
+};
+
+ABCJS.write.Printer.prototype.reset = function () {
+  this.pageNumber = 1;
+  this.groupHeightAvg = 0;
+  this.groupHeightSum = 0;
+  this.estimatedPageLength = 0;
 };
 
 // notify all listeners that a graphical element has been selected
@@ -415,9 +423,17 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 	return y;
 };
 
+ABCJS.write.Printer.prototype.skipPage = function() {
+    this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop;
+    this.pageNumber++;
+};
+
 ABCJS.write.Printer.prototype.printTune = function(abctune) {
     
     if( abctune.lines.length === 0 ) return;
+    
+    this.reset();
+    
     this.layouter = new ABCJS.write.Layout( this, abctune.formatting.bagpipes );
     if (abctune.media === 'print') {
         // TODO create the page the size of
@@ -443,6 +459,8 @@ ABCJS.write.Printer.prototype.printTune = function(abctune) {
     }
 
     this.width += this.paddingleft;
+    
+    this.estimatedPageLength = this.width*abctune.formatting.pageratio;
 
     if (abctune.formatting.scale) {
         this.scale = abctune.formatting.scale;

@@ -1574,26 +1574,9 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                     this.parseLine(line, lineNumber);
                 multilineVars.iChar += line.length + 1;
             }
-            var ph = 11 * 72;
-            var pl = 8.5 * 72;
-            switch (multilineVars.papersize) {
-                //case "letter": ph = 11*72; pl = 8.5*72; break;
-                case "legal":
-                    ph = 14 * 72;
-                    pl = 8.5 * 72;
-                    break;
-                case "A4":
-                    ph = 11.7 * 72;
-                    pl = 8.3 * 72;
-                    break;
-            }
-            if (multilineVars.landscape) {
-                var x = ph;
-                ph = pl;
-                pl = x;
-            }
+            tune.setFormat(multilineVars);
             
-            tune.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote);
+            tune.cleanUp(multilineVars.barsperstaff, multilineVars.staffnonote);
             
             // verifica se a linha zero tem tablatura para accordion
             if(tune.lines.length > 0) {

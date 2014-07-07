@@ -201,7 +201,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         var bottom = this.voices[this.voices.length - 1].stave.top;
         var bottom = printer.calcY(2);
         printer.printStem(this.startx, 0.6, top, bottom);
-        printer.printStem(this.w - 1, 0.6, top, bottom);
+        printer.printStem(this.w-1, 0.6, top, bottom);
 
     }
 
@@ -221,24 +221,16 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
           printer.printDebugLine(this.startx, this.w, printer.calcY(this.voices[i].stave.lowest), "#0000ff"); 
           printer.printDebugMsg( this.w-50, printer.calcY(this.voices[i].stave.lowest), 'lowest' );
         }  
-        printer.printStave(this.startx, this.w, this.voices[i].stave);
+        printer.printStave(this.startx, this.w-1, this.voices[i].stave);
     }
     
-    if(!printer.pageNumber) {
-        printer.pageNumber = 1;
-        printer.groupHeightAvg = 0;
-        printer.groupHeightSum = 0;
-    }
     printer.groupHeightSum += this.height;
     printer.groupHeightAvg = printer.groupHeightSum/(groupNumber+1);
     
-    var ph = 1535;
     var nexty = this.y + this.height + ABCJS.write.spacing.STEP*8*printer.scale + printer.groupHeightAvg; 
     
-    if( nexty >= ph*printer.pageNumber )  {
-        //nova pagina
-        printer.y = ph*printer.pageNumber + printer.paddingtop;
-        printer.pageNumber++;
+    if( nexty >= printer.estimatedPageLength*printer.pageNumber )  {
+        printer.skipPage();
     } else {
      // ou espaco entre os grupos de pautas
       printer.y = this.y + this.height + ABCJS.write.spacing.STEP*8*printer.scale; 
