@@ -238,13 +238,6 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
     
 };
 
-ABCJS.write.StaffGroupElement.prototype.pageBreak = function(parent) {
-    var div = document.createElement("div");
-    div.class = "page-break";
-    div.innerHTML = "page-break";
-    parent.appendChild(div);
-}
-
 ABCJS.write.VoiceElement = function(voicenumber, abcstaff) {
     this.children = [];
     this.beams = [];
