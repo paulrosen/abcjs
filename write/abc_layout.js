@@ -731,16 +731,22 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
 	      ypos = (dir==="down") ? pitch+2:minPitch-2;
 		else
 			ypos = (dir==="down") ? ypos+2:ypos-2;
-		// don't place on a stave line. The stave lines are 2,4,6,8,10
-		switch (ypos) {
-			case 2:
-			case 4:
-			case 6:
-			case 8:
-			case 10:
+		if (decoration[i] === "accent") {
+			// Always place the accent three pitches away, no matter whether that is a line or space.
+			if (dir === "up") ypos--;
+			else ypos++;
+		} else {
+			// don't place on a stave line. The stave lines are 2,4,6,8,10
+			switch (ypos) {
+				case 2:
+				case 4:
+				case 6:
+				case 8:
+				case 10:
 					if (dir === "up") ypos--;
 					else ypos++;
-				break;
+					break;
+			}
 		}
       if (pitch>9) yslot++; // take up some room of those that are above
       var deltax = width/2;
