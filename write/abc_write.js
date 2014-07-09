@@ -487,7 +487,7 @@ function centerWholeRests(voices) {
 		// Look through all of the elements except for the first and last. If the whole note appears there then there isn't anything to center it between anyway.
 		for (var j = 1; j < voice.children.length-1; j++) {
 			var absElem = voice.children[j];
-			if (absElem.abcelem.rest && absElem.abcelem.duration === 1) {
+			if (absElem.abcelem.rest && absElem.abcelem.rest.type === 'whole') {
 				var before = voice.children[j-1];
 				var after = voice.children[j+1];
 				var midpoint = (after.x - before.x) / 2 + before.x;

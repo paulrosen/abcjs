@@ -313,7 +313,14 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
     if (this.stemdir==="down") restpitch = 3;
     if (this.stemdir==="up") restpitch = 11;
     switch(elem.rest.type) {
-    case "rest": 
+		case "whole":
+			c = this.chartable.rest[0];
+			elem.averagepitch=restpitch;
+			elem.minpitch=restpitch;
+			elem.maxpitch=restpitch;
+			dot = 0;
+			break;
+    case "rest":
       c = this.chartable.rest[-durlog];
       elem.averagepitch=restpitch; 
       elem.minpitch=restpitch;
