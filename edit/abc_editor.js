@@ -398,7 +398,7 @@ window.ABCJS.Editor.prototype.highlight = function(abcelem) {
 window.ABCJS.Editor.prototype.pause = function(shouldPause) {
 	this.bIsPaused = shouldPause;
 	if (!shouldPause)
-		this.updateRendering();
+		this.fireChanged();
 };
 
 window.ABCJS.Editor.prototype.pauseMidi = function(shouldPause) {
