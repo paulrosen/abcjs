@@ -826,7 +826,7 @@ window.ABCJS.parse.Parse = function() {
 	function durationOfMeasure(multilineVars) {
 		// TODO-PER: This could be more complicated if one of the unusual measures is used.
 		var meter = multilineVars.origMeter;
-		if (meter.type !== 'specified')
+		if (!meter || meter.type !== 'specified')
 			return 1;
 		if (!meter.value || meter.value.length === 0)
 			return 1;
