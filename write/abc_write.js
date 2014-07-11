@@ -15,7 +15,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-/*global window, ABCJS, Math */
+/*global window, ABCJS, Math, Raphael */
 
 if (!window.ABCJS)
 	window.ABCJS = {};
@@ -50,6 +50,10 @@ ABCJS.write.Printer = function(paper, params) {
   this.paddingright = params.paddingright || 50;
   this.paddingleft = params.paddingleft || 15;
   this.editable = params.editable || false;
+	// HACK-PER: Raphael doesn't support setting the class of an element, so this adds that support. This doesn't work on IE8 or less, though.
+	this.usingSvg = (window.SVGAngle || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1") ? true : false); // Same test Raphael uses
+	if (this.usingSvg)
+		Raphael._availableAttrs['class'] = "";
 };
 
 // notify all listeners that a graphical element has been selected
@@ -128,7 +132,7 @@ ABCJS.write.Printer.prototype.addPath = function (path) {
 ABCJS.write.Printer.prototype.endGroup = function () {
   this.ingroup = false;
   if (this.path.length===0) return null;
-  var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000"});
+  var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000", 'class': 'group l'+this.lineNumber});
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
@@ -146,7 +150,7 @@ ABCJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch) {
   var y = this.calcY(pitch);
   var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
 			   x2, y+dy, x1, y+dy);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
+  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': 'staff l'+this.lineNumber}).toBack();
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
@@ -170,7 +174,7 @@ ABCJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
   if (!isIE && this.ingroup) {
     this.addPath(pathArray);
   } else {
-    var ret = this.paper.path().attr({path:pathArray, stroke:"none", fill:fill}).toBack();
+    var ret = this.paper.path().attr({path:pathArray, stroke:"none", fill:fill, 'class': 'stem l'+this.lineNumber}).toBack();
     if (this.scale!==1) {
       ret.scale(this.scale, this.scale, 0, 0);
     }
@@ -180,7 +184,7 @@ ABCJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
 
 ABCJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
   anchor = anchor || "start";
-  var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":12*this.scale});
+  var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":12*this.scale, 'class': 'text printText l'+this.lineNumber});
 //  if (this.scale!==1) {
 //    ret.scale(this.scale, this.scale, 0, 0);
 //  }
@@ -190,7 +194,7 @@ ABCJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
 // assumes this.y is set appropriately
 // if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
 // not scaled if not in printgroup
-ABCJS.write.Printer.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
+ABCJS.write.Printer.prototype.printSymbol = function(x, offset, symbol, scalex, scaley, klass) {
 	var el;
   if (!symbol) return null;
   if (symbol.length>0 && symbol.indexOf(".")<0) {
@@ -198,7 +202,7 @@ ABCJS.write.Printer.prototype.printSymbol = function(x, offset, symbol, scalex, 
     var dx =0;
     for (var i=0; i<symbol.length; i++) {
       var ycorr = this.glyphs.getYCorr(symbol.charAt(i));
-      el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol.charAt(i), this.paper);
+      el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol.charAt(i), this.paper, klass);
       if (el) {
 	elemset.push(el);
 	dx+=this.glyphs.getSymbolWidth(symbol.charAt(i));
@@ -215,7 +219,7 @@ ABCJS.write.Printer.prototype.printSymbol = function(x, offset, symbol, scalex, 
     if (this.ingroup) {
       this.addPath(this.glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
     } else {
-      el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper);
+      el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper, klass);
       if (el) {
 	if (this.scale!==1) {
 	  el.scale(this.scale, this.scale, 0, 0);
@@ -262,7 +266,7 @@ ABCJS.write.Printer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) 
   var pathString = ABCJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
 			   controlx1, controly1, controlx2, controly2, x2, y2, 
 			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
+  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000", 'class': 'slur l'+this.lineNumber});
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
@@ -270,15 +274,15 @@ ABCJS.write.Printer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) 
 };
 
 ABCJS.write.Printer.prototype.debugMsg = function(x, msg) {
-  return this.paper.text(x, this.y, msg).scale(this.scale, this.scale, 0, 0);
+  return this.paper.text(x, this.y, msg).scale(this.scale, this.scale, 0, 0).attr({'class': 'text debug-msg l'+this.lineNumber});
 };
 
 ABCJS.write.Printer.prototype.debugMsgLow = function(x, msg) {
-    return this.paper.text(x, this.calcY(this.layouter.minY-7), msg).attr({"font-family":"serif", "font-size":12, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
+    return this.paper.text(x, this.calcY(this.layouter.minY-7), msg).attr({"font-family":"serif", "font-size":12, "text-anchor":"begin", 'class': 'text debug-msg-low l'+this.lineNumber}).scale(this.scale, this.scale, 0, 0);
 };
 
 ABCJS.write.Printer.prototype.printLyrics = function(x, msg) {
-    var el = this.paper.text(x, this.calcY(this.layouter.minY-7), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin"}).scale(this.scale, this.scale, 0, 0);
+    var el = this.paper.text(x, this.calcY(this.layouter.minY-7), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin", 'class': 'text lyrics l'+this.lineNumber}).scale(this.scale, this.scale, 0, 0);
     el[0].setAttribute("class", "abc-lyric");
     return el;
 };
@@ -316,7 +320,7 @@ ABCJS.write.Printer.prototype.printABC = function(abctunes) {
 };
 
 ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, printer, x) {
-	var fontStyle = {"text-anchor":"start", 'font-size':12*printer.scale, 'font-weight':'bold'};
+	var fontStyle = {"text-anchor":"start", 'font-size':12*printer.scale, 'font-weight':'bold', 'class': 'tempo l'+this.lineNumber};
 	if (tempo.preString) {
 		var text = paper.text(x*printer.scale, y*printer.scale + 20*printer.scale, tempo.preString).attr(fontStyle);
 		x += (text.getBBox().width + 20*printer.scale);
@@ -364,6 +368,7 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 };
 
 ABCJS.write.Printer.prototype.printTune = function (abctune) {
+	this.lineNumber = '-before';
   this.layouter = new ABCJS.write.Layout(this.glyphs, abctune.formatting.bagpipes);
 	this.layouter.printer = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
   if (abctune.media === 'print') {
@@ -390,28 +395,29 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
   this.width+=this.paddingleft;
   if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; }
 	if (abctune.metaText.title)
-	  this.paper.text(this.width*this.scale/2, this.y, abctune.metaText.title).attr({"font-size":20*this.scale, "font-family":"serif"});
+	  this.paper.text(this.width*this.scale/2, this.y, abctune.metaText.title).attr({"font-size":20*this.scale, "font-family":"serif", 'class': 'text title meta-top l'+this.lineNumber});
   this.y+=20*this.scale;
   if (abctune.lines[0] && abctune.lines[0].subtitle) {
     this.printSubtitleLine(abctune.lines[0]);
     this.y+=20*this.scale;
   }
   if (abctune.metaText.rhythm) {
-    this.paper.text(this.paddingleft, this.y, abctune.metaText.rhythm).attr({"text-anchor":"start","font-style":"italic","font-family":"serif", "font-size":12*this.scale});
+    this.paper.text(this.paddingleft, this.y, abctune.metaText.rhythm).attr({"text-anchor":"start","font-style":"italic","font-family":"serif", "font-size":12*this.scale, 'class': 'text meta-top l'+this.lineNumber});
     !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.y+=15*this.scale);
   }
 	var composerLine = "";
 	if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
 	if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
-  if (composerLine.length > 0) {this.paper.text(this.width*this.scale, this.y, composerLine).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale});this.y+=15;}
-	if (abctune.metaText.author) {this.paper.text(this.width*this.scale, this.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale}); this.y+=15;}
+  if (composerLine.length > 0) {this.paper.text(this.width*this.scale, this.y, composerLine).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale, 'class': 'text meta-top l'+this.lineNumber});this.y+=15;}
+	if (abctune.metaText.author) {this.paper.text(this.width*this.scale, this.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale, 'class': 'text meta-top l'+this.lineNumber}); this.y+=15;}
   if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
-	  this.y = this.printTempo(abctune.metaText.tempo, this.paper, this.layouter, this.y, this, 50);
+	  this.y = this.printTempo(abctune.metaText.tempo, this.paper, this.layouter, this.y, this, 50, -1);
 	  this.y += 20*this.scale;
   }
   this.staffgroups = [];
   var maxwidth = this.width;
   for(var line=0; line<abctune.lines.length; line++) {
+	  this.lineNumber = line;
     var abcline = abctune.lines[line];
     if (abcline.staff) {
 		staffgroup = this.printStaffLine(abctune, abcline, line);
@@ -421,18 +427,19 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
       this.y+=20*this.scale; //hardcoded
     } else if (abcline.text) {
 		if (typeof abcline.text === 'string')
-	      this.paper.text(100, this.y, "TEXT: " + abcline.text);
+	      this.paper.text(100, this.y, "TEXT: " + abcline.text).attr({'class': 'text defined-text l'+this.lineNumber});
 	  else {
 		  var str = "";
 		  for (var i = 0; i < abcline.text.length; i++) {
 			  str += " FONT " + abcline.text[i].text;
 		  }
-	      this.paper.text(100, this.y, "TEXT: " + str);
+	      this.paper.text(100, this.y, "TEXT: " + str).attr({'class': 'text defined-text l'+this.lineNumber});
 	  }
       this.y+=20*this.scale; //hardcoded
     }
   }
-  var extraText = "";
+	this.lineNumber = '-after';
+	var extraText = "";
 	var text2;
 	var height;
   if (abctune.metaText.partOrder) extraText += "Part Order: " + abctune.metaText.partOrder + "\n";
@@ -447,7 +454,7 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
        extraText += "\n";
   }
 }
- text2 = this.paper.text(this.paddingleft*this.scale+50*this.scale, this.y*this.scale+25*this.scale, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":17*this.scale});
+ text2 = this.paper.text(this.paddingleft*this.scale+50*this.scale, this.y*this.scale+25*this.scale, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":17*this.scale, 'class': 'text meta-bottom l'+this.lineNumber});
   height = text2.getBBox().height + 17*this.scale;
   text2.translate(0,height/2);
   this.y+=height;
@@ -459,7 +466,7 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
   if (abctune.metaText.notes) extraText += "Notes: " + abctune.metaText.notes + "\n";
   if (abctune.metaText.transcription) extraText += "Transcription: " + abctune.metaText.transcription + "\n";
   if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
-  text2 = this.paper.text(this.paddingleft, this.y*this.scale+25*this.scale, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":17*this.scale});
+  text2 = this.paper.text(this.paddingleft, this.y*this.scale+25*this.scale, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":17*this.scale, 'class': 'text meta-bottom l'+this.lineNumber});
   height = text2.getBBox().height;
 	if (!height) height = 25*this.scale;	// TODO-PER: Hack! Don't know why Raphael chokes on this sometimes and returns NaN. Perhaps only when printing to PDF? Possibly if the SVG is hidden?
   text2.translate(0,height/2);
@@ -476,7 +483,7 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
 };
 
 ABCJS.write.Printer.prototype.printSubtitleLine = function(abcline) {
-  this.paper.text(this.width/2, this.y, abcline.subtitle).attr({"font-size":16}).scale(this.scale, this.scale, 0,0);
+  this.paper.text(this.width/2, this.y, abcline.subtitle).attr({"font-size":16, 'class': 'text meta-top'}).scale(this.scale, this.scale, 0,0);
 };
 
 function centerWholeRests(voices) {
@@ -514,6 +521,7 @@ ABCJS.write.Printer.prototype.printStaffLine = function (abctune, abcline, line)
 		}
 	}
 	centerWholeRests(staffgroup.voices);
+	this.measureNumber = 0;
 	staffgroup.draw(this, this.y);
 	this.staffgroups[this.staffgroups.length] = staffgroup;
 	this.y = staffgroup.y + staffgroup.height;

@@ -130,7 +130,7 @@ ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
     var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
 	  var headerX = (this.startx-printer.paddingleft)/2+printer.paddingleft;
 	  headerX = headerX*printer.scale;
-    printer.paper.text(headerX, printer.calcY(textpitch)*printer.scale, this.header).attr({"font-size":12*printer.scale, "font-family":"serif", 'font-weight':'bold'}); // code duplicated above
+    printer.paper.text(headerX, printer.calcY(textpitch)*printer.scale, this.header).attr({"font-size":12*printer.scale, "font-family":"serif", 'font-weight':'bold', 'class': 'text l'+printer.lineNumber}); // code duplicated above
   }
 
   for (var i=0, ii=this.children.length; i<ii; i++) {
@@ -295,7 +295,7 @@ ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
   switch(this.type) {
   case "symbol":
     if (this.c===null) return null;
-    this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley); break;
+    this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, 'symbol l'+printer.lineNumber); break;
   case "debug":
     this.graphelem = printer.debugMsg(this.x, this.c); break;
   case "debugLow":
@@ -332,7 +332,7 @@ ABCJS.write.EndingElem.prototype.draw = function (printer, linestartx, lineendx)
     linestartx = this.anchor1.x+this.anchor1.w;
     pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 			     linestartx, printer.y, linestartx, printer.y+10); 
-    printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"}); //TODO scale
+    printer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': 'path l'+printer.lineNumber}); //TODO scale
     printer.printText(linestartx+5*printer.scale, 18.5, this.text).attr({"font-size":""+10*printer.scale+"px"});
   }
 
@@ -340,13 +340,13 @@ ABCJS.write.EndingElem.prototype.draw = function (printer, linestartx, lineendx)
     lineendx = this.anchor2.x;
     pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 			 lineendx, printer.y, lineendx, printer.y+10); 
-    printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"}); // TODO scale
+    printer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': 'path l'+printer.lineNumber}); // TODO scale
   }
 
 
   pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 				  linestartx, printer.y, lineendx, printer.y); 
-  printer.printPath({path:pathString, stroke:"#000000", fill:"#000000"});  // TODO scale
+  printer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': 'path l'+printer.lineNumber});  // TODO scale
 };
 
 ABCJS.write.TieElem = function(anchor1, anchor2, above, forceandshift) {
@@ -418,7 +418,7 @@ ABCJS.write.DynamicDecoration.prototype.draw = function(printer, linestartx, lin
     var ypos = printer.layouter.minY - 7;
     var scalex = 1; // TODO-PER: do the scaling
     var scaley = 1;
-    printer.printSymbol(this.anchor.x, ypos, this.dec, scalex, scaley);
+    printer.printSymbol(this.anchor.x, ypos, this.dec, scalex, scaley, 'decoration l'+printer.lineNumber);
 };
 
 ABCJS.write.CrescendoElem = function(anchor1, anchor2, dir) {
@@ -441,7 +441,7 @@ ABCJS.write.CrescendoElem.prototype.drawLine = function (printer, y1, y2) {
     var ypos = printer.layouter.minY - 7;
     var pathString = ABCJS.write.sprintf("M %f %f L %f %f",
         this.anchor1.x, printer.calcY(ypos)+y1-4, this.anchor2.x, printer.calcY(ypos)+y2-4);
-    printer.printPath({path:pathString, stroke:"#000000"});
+    printer.printPath({path:pathString, stroke:"#000000", 'class': 'decoration l'+printer.lineNumber});
 };
 
 ABCJS.write.TripletElem = function(number, anchor1, anchor2, above) {
@@ -488,21 +488,21 @@ ABCJS.write.TripletElem.prototype.drawLine = function (printer, y) {
   var linestartx = this.anchor1.x;
   pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		       linestartx, y, linestartx, y+5); 
-  printer.printPath({path:pathString, stroke:"#000000"});
+  printer.printPath({path:pathString, stroke:"#000000", 'class': 'path triplet-elem l'+printer.lineNumber});
   
   var lineendx = this.anchor2.x+this.anchor2.w;
   pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		       lineendx, y, lineendx, y+5); 
-  printer.printPath({path:pathString, stroke:"#000000"});
+  printer.printPath({path:pathString, stroke:"#000000", 'class': 'path triplet-elem l'+printer.lineNumber});
   
   pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		       linestartx, y, (linestartx+lineendx)/2-5, y); 
-  printer.printPath({path:pathString, stroke:"#000000"});
+  printer.printPath({path:pathString, stroke:"#000000", 'class': 'path triplet-elem l'+printer.lineNumber});
 
 
   pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		       (linestartx+lineendx)/2+5, y, lineendx, y); 
-  printer.printPath({path:pathString, stroke:"#000000"});
+  printer.printPath({path:pathString, stroke:"#000000", 'class': 'path triplet-elem l'+printer.lineNumber});
 
 };
 
@@ -589,7 +589,7 @@ ABCJS.write.BeamElem.prototype.drawBeam = function(printer) {
 
   var pathString = "M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
   "L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z";
-  printer.printPath({path:pathString, stroke:"none", fill:"#000000"});
+  printer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': 'path beam-elem l'+printer.lineNumber});
 };
 
 ABCJS.write.BeamElem.prototype.drawStems = function(printer) {
@@ -633,7 +633,7 @@ ABCJS.write.BeamElem.prototype.drawStems = function(printer) {
 
 	var pathString ="M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
 	  "L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z";
-	printer.printPath({path:pathString, stroke:"none", fill:"#000000"});
+	printer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': 'path beam-stem-elem l'+printer.lineNumber});
 	auxbeams = auxbeams.slice(0,j);
       }
     }

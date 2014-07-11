@@ -12,13 +12,13 @@ ABCJS.write.Glyphs = function() {
 
 
 
-  this.printSymbol = function (x,y,symb,paper) {
+  this.printSymbol = function (x,y,symb,paper, klass) {
     if (!glyphs[symb]) return null;
     var pathArray = this.pathClone(glyphs[symb].d);
     pathArray[0][1] +=x;
     pathArray[0][2] +=y;
-    var path = paper.path().attr({path:pathArray, stroke:"none", fill:"#000000"});
-    
+    var path = paper.path().attr({path:pathArray, stroke:"none", fill:"#000000", 'class': klass });
+
     return path;//.translate(x,y);
    };
   
