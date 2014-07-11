@@ -52,7 +52,7 @@ ABCJS.write.Printer = function(paper, params) {
   this.editable = params.editable || false;
 	// HACK-PER: Raphael doesn't support setting the class of an element, so this adds that support. This doesn't work on IE8 or less, though.
 	this.usingSvg = (window.SVGAngle || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1") ? true : false); // Same test Raphael uses
-	if (this.usingSvg)
+	if (this.usingSvg && params.add_classes)
 		Raphael._availableAttrs['class'] = "";
 };
 

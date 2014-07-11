@@ -241,7 +241,7 @@ window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
-  var printer = new ABCJS.write.Printer(paper, {});	// TODO: handle printer params
+  var printer = new ABCJS.write.Printer(paper, this.printerparams);
   printer.printABC(tune);
 };
 
