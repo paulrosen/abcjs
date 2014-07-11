@@ -185,14 +185,24 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
 		y+= ABCJS.write.spacing.STAVEHEIGHT*0.9; // position of the words
 		if (shiftbelow < 0) y-= shiftbelow*ABCJS.write.spacing.STEP;
 		this.staffs[i].bottom = y;
+
+		if (this.stafflines[i] !== 0) {
+			printer.y = this.staffs[i].y;
+			// TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
+			if (this.stafflines[i] === undefined)
+				this.stafflines[i] = 5;
+			printer.printStave(this.startx, this.w, this.stafflines[i]);
+		}
 	}
 	this.height = y-this.y;
 
 	var bartop = 0;
+	printer.measureNumber = null;
 	for (i=0;i<this.voices.length;i++) {
 		this.voices[i].draw(printer, bartop);
 		bartop = this.voices[i].barbottom;
 	}
+	printer.measureNumber = null;
 
 	if (this.staffs.length>1) {
 		printer.y = this.staffs[0].y;
@@ -202,14 +212,14 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
 		printer.printStem(this.startx, 0.6, top, bottom);
 	}
 
-	for (i=0;i<this.staffs.length;i++) {
-		if (this.stafflines[i] === 0) continue;
-		printer.y = this.staffs[i].y;
-		// TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
-		if (this.stafflines[i] === undefined)
-			this.stafflines[i] = 5;
-		printer.printStave(this.startx,this.w, this.stafflines[i]);
-	}
+//	for (i=0;i<this.staffs.length;i++) {
+//		if (this.stafflines[i] === 0) continue;
+//		printer.y = this.staffs[i].y;
+//		// TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
+//		if (this.stafflines[i] === undefined)
+//			this.stafflines[i] = 5;
+//		printer.printStave(this.startx,this.w, this.stafflines[i]);
+//	}
 
 };
 

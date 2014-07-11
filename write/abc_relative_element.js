@@ -44,14 +44,16 @@ ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
 	switch(this.type) {
 		case "symbol":
 			if (this.c===null) return null;
-			this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, 'symbol l'+printer.lineNumber); break;
+			this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, printer.addClasses('symbol')); break;
 		case "debug":
 			this.graphelem = printer.debugMsg(this.x, this.c); break;
 		case "debugLow":
 			this.graphelem = printer.printLyrics(this.x, this.c); break;
 		case "chord":
+			this.graphelem = printer.printText(this.x, this.pitch, this.c, "start", "chord");
+			break;
 		case "text":
-			this.graphelem = printer.printText(this.x, this.pitch, this.c);
+			this.graphelem = printer.printText(this.x, this.pitch, this.c, "start", "annotation");
 			break;
 		case "bar":
 			this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); break; // bartop can't be 0

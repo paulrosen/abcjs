@@ -34,20 +34,20 @@ ABCJS.write.EndingElem.prototype.draw = function (printer, linestartx, lineendx)
 		linestartx = this.anchor1.x+this.anchor1.w;
 		pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 			linestartx, printer.y, linestartx, printer.y+10);
-		printer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': 'path l'+printer.lineNumber}); //TODO scale
-		printer.printText(linestartx+5*printer.scale, 18.5, this.text).attr({"font-size":""+10*printer.scale+"px"});
+		printer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': printer.addClasses('ending')}); //TODO scale
+		printer.printText(linestartx+5*printer.scale, 18.5, this.text, "start", 'ending').attr({"font-size":""+10*printer.scale+"px"});
 	}
 
 	if (this.anchor2) {
 		lineendx = this.anchor2.x;
 		pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 			lineendx, printer.y, lineendx, printer.y+10);
-		printer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': 'path l'+printer.lineNumber}); // TODO scale
+		printer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': printer.addClasses('ending')}); // TODO scale
 	}
 
 
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		linestartx, printer.y, lineendx, printer.y);
-	printer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': 'path l'+printer.lineNumber});  // TODO scale
+	printer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': printer.addClasses('ending')});  // TODO scale
 };
 

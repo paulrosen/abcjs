@@ -206,7 +206,7 @@ ABCJS.write.Layout.prototype.printABCElement = function() {
     this.stemdir=elem.direction;
     break;
   case "part":
-    var abselem = new ABCJS.write.AbsoluteElement(elem,0,0);
+    var abselem = new ABCJS.write.AbsoluteElement(elem,0,0, 'part');
     abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, 18, {type:"text", attributes:{"font-weight":"bold", "font-size":""+16*this.printer.scale+"px", "font-family":"serif"}}));
     elemset[0] = abselem;
     break;
@@ -214,7 +214,7 @@ ABCJS.write.Layout.prototype.printABCElement = function() {
 //		this.printer.y = this.printer.printTempo(elem, this.printer.paper, this.printer.layouter, this.printer.y, this.printer, this.printer.x);
 //		break;
   default: 
-    var abselem2 = new ABCJS.write.AbsoluteElement(elem,0,0);
+    var abselem2 = new ABCJS.write.AbsoluteElement(elem,0,0, 'unsupported');
     abselem2.addChild(new ABCJS.write.RelativeElement("element type "+elem.el_type, 0, 0, 0, {type:"debug"}));
     elemset[0] = abselem2;
   }
@@ -305,7 +305,7 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
   }
   
 
-  var abselem = new ABCJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1);
+  var abselem = new ABCJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1, 'note');
   
 
   if (elem.rest) {
@@ -870,7 +870,7 @@ ABCJS.write.Layout.prototype.printDecoration = function(decoration, pitch, width
 ABCJS.write.Layout.prototype.printBarLine = function (elem) {
 // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
 
-  var abselem = new ABCJS.write.AbsoluteElement(elem, 0, 10);
+  var abselem = new ABCJS.write.AbsoluteElement(elem, 0, 10, 'bar');
   var anchor = null; // place to attach part lines
   var dx = 0;
 
@@ -954,7 +954,7 @@ ABCJS.write.Layout.prototype.printBarLine = function (elem) {
 ABCJS.write.Layout.prototype.printClef = function(elem) {
   var clef = "clefs.G";
   var octave = 0;
-  var abselem = new ABCJS.write.AbsoluteElement(elem,0,10);
+  var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra');
   switch (elem.type) {
   case "treble": break;
   case "tenor": clef="clefs.C"; break;
@@ -996,7 +996,7 @@ ABCJS.write.Layout.prototype.printClef = function(elem) {
 
 
 ABCJS.write.Layout.prototype.printKeySignature = function(elem) {
-  var abselem = new ABCJS.write.AbsoluteElement(elem,0,10);
+  var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra');
   var dx = 0;
   if (elem.accidentals) {
 	  window.ABCJS.parse.each(elem.accidentals, function(acc) {
@@ -1012,7 +1012,7 @@ ABCJS.write.Layout.prototype.printKeySignature = function(elem) {
 
 ABCJS.write.Layout.prototype.printTimeSignature= function(elem) {
 
-  var abselem = new ABCJS.write.AbsoluteElement(elem,0,20);
+  var abselem = new ABCJS.write.AbsoluteElement(elem,0,20, 'staff-extra');
   if (elem.type === "specified") {
     //TODO make the alignment for time signatures centered
     for (var i = 0; i < elem.value.length; i++) {

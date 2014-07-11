@@ -105,7 +105,7 @@ ABCJS.write.BeamElem.prototype.drawBeam = function(printer) {
 
 	var pathString = "M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
 		"L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z";
-	printer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': 'path beam-elem l'+printer.lineNumber});
+	printer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': printer.addClasses('beam-elem')});
 };
 
 ABCJS.write.BeamElem.prototype.drawStems = function(printer) {
@@ -149,12 +149,12 @@ ABCJS.write.BeamElem.prototype.drawStems = function(printer) {
 
 				var pathString ="M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
 					"L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z";
-				printer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': 'path beam-stem-elem l'+printer.lineNumber});
+				printer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': printer.addClasses('beam-elem')});
 				auxbeams = auxbeams.slice(0,j);
 			}
 		}
 	}
-	printer.endGroup();
+	printer.endGroup('beam-elem');
 };
 
 ABCJS.write.BeamElem.prototype.getBarYAt = function(x) {

@@ -42,5 +42,5 @@ ABCJS.write.CrescendoElem.prototype.drawLine = function (printer, y1, y2) {
 	var ypos = printer.layouter.minY - 7;
 	var pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		this.anchor1.x, printer.calcY(ypos)+y1-4, this.anchor2.x, printer.calcY(ypos)+y2-4);
-	printer.printPath({path:pathString, stroke:"#000000", 'class': 'decoration l'+printer.lineNumber});
+	printer.printPath({path:pathString, stroke:"#000000", 'class': printer.addClasses('decoration')});
 };

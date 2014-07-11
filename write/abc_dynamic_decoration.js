@@ -31,6 +31,6 @@ ABCJS.write.DynamicDecoration.prototype.draw = function(printer, linestartx, lin
 	var ypos = printer.layouter.minY - 7;
 	var scalex = 1; // TODO-PER: do the scaling
 	var scaley = 1;
-	printer.printSymbol(this.anchor.x, ypos, this.dec, scalex, scaley, 'decoration l'+printer.lineNumber);
+	printer.printSymbol(this.anchor.x, ypos, this.dec, scalex, scaley, printer.addClasses('decoration'));
 };
 

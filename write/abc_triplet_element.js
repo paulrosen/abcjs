@@ -56,7 +56,7 @@ ABCJS.write.TripletElem.prototype.draw = function (printer, linestartx, lineendx
 		}
 
 
-		printer.printText(xsum/2, ypos+ydelta, this.number, "middle").attr({"font-size":"10px", 'font-style': 'italic' });
+		printer.printText(xsum/2, ypos+ydelta, this.number, "middle", 'triplet').attr({"font-size":"10px", 'font-style': 'italic' });
 
 	}
 };
@@ -66,20 +66,20 @@ ABCJS.write.TripletElem.prototype.drawLine = function (printer, y) {
 	var linestartx = this.anchor1.x;
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		linestartx, y, linestartx, y+5);
-	printer.printPath({path:pathString, stroke:"#000000", 'class': 'path triplet-elem l'+printer.lineNumber});
+	printer.printPath({path:pathString, stroke:"#000000", 'class': printer.addClasses('triplet')});
 
 	var lineendx = this.anchor2.x+this.anchor2.w;
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		lineendx, y, lineendx, y+5);
-	printer.printPath({path:pathString, stroke:"#000000", 'class': 'path triplet-elem l'+printer.lineNumber});
+	printer.printPath({path:pathString, stroke:"#000000", 'class': printer.addClasses('triplet')});
 
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		linestartx, y, (linestartx+lineendx)/2-5, y);
-	printer.printPath({path:pathString, stroke:"#000000", 'class': 'path triplet-elem l'+printer.lineNumber});
+	printer.printPath({path:pathString, stroke:"#000000", 'class': printer.addClasses('triplet')});
 
 
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 			(linestartx+lineendx)/2+5, y, lineendx, y);
-	printer.printPath({path:pathString, stroke:"#000000", 'class': 'path triplet-elem l'+printer.lineNumber});
+	printer.printPath({path:pathString, stroke:"#000000", 'class': printer.addClasses('triplet')});
 
 };
