@@ -1,4 +1,4 @@
-//    abc_staff_group_elements.js: Definition of the StaffGroupElement class.
+//    abc_staff_group_element.js: Definition of the StaffGroupElement class.
 //    Copyright (C) 2010,2014 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
 //
 //    This program is free software: you can redistribute it and/or modify
