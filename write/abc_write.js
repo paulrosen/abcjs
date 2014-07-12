@@ -91,26 +91,58 @@ ABCJS.write.Printer.prototype.addSelectListener = function (listener) {
   this.listeners[this.listeners.length] = listener;
 };
 
-ABCJS.write.Printer.prototype.rangeHighlight = function(start,end)
+ABCJS.write.Printer.prototype.rangeHighlight = function(start, end)
 {
     this.clearSelection();
+    this.rangeHighlightMore(start, end)
+}
+
+ABCJS.write.Printer.prototype.rangeHighlightMore = function(start, end)
+{
+     this.highlightElements(this.getElementsByRange(start, end))
+}
+
+ABCJS.write.Printer.prototype.rangeUnhighlightMore = function(start, end)
+{
+     this.unhighlightElements(this.getElementsByRange(start, end))
+}
+
+ABCJS.write.Printer.prototype.highlightElements = function(elements)
+{
+  for (var i=0;i<elements.length;i++) {
+    elements[i].highlight();
+    this.selected[this.selected.length]=elements[i];
+  }
+}
+
+ABCJS.write.Printer.prototype.unhighlightElements = function(elements)
+{
+  for (var i=0;i<elements.length;i++) {
+    elements[i].unhighlight();
+    // todo: we should remove the unhighlighted object from [selected]
+  }
+}
+
+ABCJS.write.Printer.prototype.getElementsByRange = function(start,end)
+{
+    result = [];
     for (var line=0;line<this.staffgroups.length; line++) {
-	var voices = this.staffgroups[line].voices;
-	for (var voice=0;voice<voices.length;voice++) {
-	    var elems = voices[voice].children;
-	    for (var elem=0; elem<elems.length; elem++) {
-		// Since the user can highlight more than an element, or part of an element, a hit is if any of the endpoints
-		// is inside the other range.
-		var elStart = elems[elem].abcelem.startChar;
-		var elEnd = elems[elem].abcelem.endChar;
-		if ((end>elStart && start<elEnd) || ((end===start) && end===elEnd)) {
-		    //		if (elems[elem].abcelem.startChar>=start && elems[elem].abcelem.endChar<=end) {
-		    this.selected[this.selected.length]=elems[elem];
-		    elems[elem].highlight();
-		}
-	    }
-	}
+        var voices = this.staffgroups[line].voices;
+        for (var voice=0;voice<voices.length;voice++) {
+            var elems = voices[voice].children;
+            for (var elem=0; elem<elems.length; elem++) {
+                // Since the user can highlight more than an element, or part of an element, a hit is if any of the endpoints
+                // is inside the other range.
+                var elStart = elems[elem].abcelem.startChar;
+                var elEnd = elems[elem].abcelem.endChar;
+                if ((end>elStart && start<elEnd) || ((end===start) && end===elEnd)) {
+                    //		if (elems[elem].abcelem.startChar>=start && elems[elem].abcelem.endChar<=end) {
+                    result[result.length] = elems[elem];
+                }
+            }
+        }
     }
+ return result;
 };
 
 ABCJS.write.Printer.prototype.beginGroup = function () {
