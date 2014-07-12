@@ -1595,7 +1595,7 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                     (tune.tabStaffPos === 0) && addWarning("+Warn: Accordion Tablature should not be the first staff!");
                     for (var t = 1; t < tune.lines.length; t++) {
                         //se for necessário inferir a tablatura, garante que todas as linhas tenham uma staff apropriada
-                        if (!tune.lines[t].staffs[tune.tabStaffPos]) {
+                        if (tune.lines[t].staffs && !tune.lines[t].staffs[tune.tabStaffPos]) {
                             tune.lines[t].staffs[tune.tabStaffPos] = window.ABCJS.parse.clone(tune.lines[0].staffs[tune.tabStaffPos]);
                             tune.lines[t].staffs[tune.tabStaffPos].meter = null;
                             tune.lines[t].staffs[tune.tabStaffPos].subtitle = "";
@@ -1603,10 +1603,12 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
                     }
                     if (this.accordion) {
                         for (var t = 0; t < tune.lines.length; t++) {
-                            var voice = this.accordion.inferTabVoice(t, tune, strTune, multilineVars);
-                            if (voice.length > 0) {
-                                tune.lines[t].staffs[tune.tabStaffPos].voices[0] = voice;
-                            }
+                           if (tune.lines[t].staffs ) {
+                              var voice = this.accordion.inferTabVoice(t, tune, strTune, multilineVars);
+                              if (voice.length > 0) {
+                                  tune.lines[t].staffs[tune.tabStaffPos].voices[0] = voice;
+                              }
+                           }  
                         }
                     } else {
                         addWarning("+Warn: Cannot infer tablature line: no accordion defined!");

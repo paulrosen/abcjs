@@ -54,7 +54,8 @@ ABCJS.tablature.Infer.prototype.abcElem2TabElem = function(elem, bass) {
 
 ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     
-    if( this.tune.tabStaffPos < 1 ) return; // we expect to find at least the melody line above tablature, otherwise, we cannot infer it.
+    if( this.tune.tabStaffPos < 1 || 
+        ! this.tune.lines[line].staffs    ) return; // we expect to find at least the melody line above tablature, otherwise, we cannot infer it.
     
     this.tuneCurrLine = line;
     this.producedLine = "";
