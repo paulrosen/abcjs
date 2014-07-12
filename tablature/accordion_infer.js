@@ -94,11 +94,19 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
         
         if (idxTreb < trebVoice.length && balance >= 0 ) {
             abcTrebElem = this.abcElem2TabElem(trebVoice[idxTreb], false);
+            if(abcTrebElem.title){
+                idxTreb++;
+                continue;
+            }  
             trebDuration += abcTrebElem.duration|| 0;
             leu = true;
         }
         if (bassVoice && idxBass < bassVoice.length && balance <= 0 ) {
             abcBassElem = this.abcElem2TabElem(bassVoice[idxBass], true );
+            if(abcBassElem.title){
+                idxBass++;
+                continue;
+            }  
             bassDuration += abcBassElem.duration||0;
             leu = true;
         }
