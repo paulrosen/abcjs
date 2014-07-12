@@ -5,7 +5,7 @@ die () {
 }
 
 [ "$#" -eq 1 ] || die "Call with a version number argument in the form x.y"
-echo $1 | grep -E -q '^[1-9]\.[0-9ab]+$' || die "Version number argument required (x.y), $1 provided"
+echo $1 | grep -E -q '^[1-9]\.[0-9ab]+(\.[a-zA-Z0-9_]+)?$' || die "Version number argument required (x.y[.w+]), $1 provided"
 echo "Concatenating all files..."
 cat parse/*.js write/*.js > tmp/parse.js
 cat api/*.js data/*.js midi/*.js parse/*.js write/*.js > tmp/abcjs-noraphael.js
