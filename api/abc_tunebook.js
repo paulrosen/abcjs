@@ -15,7 +15,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*global document, Raphael */
-/*global window, ABCJS */
+/*global window, ABCJS, console */
 
 if (!window.ABCJS)
 	window.ABCJS = {};
@@ -207,19 +207,10 @@ if (!window.ABCJS)
 		return ret;
 	}
 
-	// This is a way to manipulate the written music on a timer. Their are two ways to manipulate the music: turn off each measure as it goes by,
-	// and put a vertical cursor before the next note to play. The timer works at the speed of the original tempo of the music unless it is overwritten
-	// in the options parameter.
-	//
-	// parameters:
-	// paper: the output div that the music is in.
-	// tune: the tune object returned by renderAbc.
-	// options: a hash containing the following:
-	//    hideFinishedMeasures: true or false [ false is the default ]
-	//    showCursor: true or false [ false is the default ]
-	//    bpm: number of beats per minute [ the default is whatever is in the Q: field ]
-	var timerHandle = null;
-	ABCJS.startCursor = function(paper, tune, options) {
+	function getTimerValues(tune, options) {
+		// We either want to run the timer once per measure or once per beat. If we run it once per beat we need a multiplier for the measures.
+		// So, first we figure out the beats per minute and the beats per measure, then depending on the type of animation, we can
+		// calculate the desired interval (ret.tick) and the number of ticks before we want to run the measure
 		var bpm;
 		if (options.bpm)
 			bpm = options.bpm;
@@ -233,11 +224,47 @@ if (!window.ABCJS)
 		if (!beats) // If this is either unmetered, or otherwise a strange piece, we'll just set the beats to 4 so something happens.
 			beats = 4;
 		var measuresPerMinute = bpm / beats;
-		var interval = 60000 / measuresPerMinute;
+		var ret = {};
+		if (options.showCursor)
+			ret.tick = 60000 / bpm;
+		else if (options.hideFinishedMeasures)
+			ret.tick = 60000 / measuresPerMinute;
+
+		ret.measureMultiplier = options.showCursor && options.hideFinishedMeasures ? beats : 1;
+		return ret;
+	}
+
+	// This is a way to manipulate the written music on a timer. Their are two ways to manipulate the music: turn off each measure as it goes by,
+	// and put a vertical cursor before the next note to play. The timer works at the speed of the original tempo of the music unless it is overwritten
+	// in the options parameter.
+	//
+	// parameters:
+	// paper: the output div that the music is in.
+	// tune: the tune object returned by renderAbc.
+	// options: a hash containing the following:
+	//    hideFinishedMeasures: true or false [ false is the default ]
+	//    showCursor: true or false [ false is the default ]
+	//    bpm: number of beats per minute [ the default is whatever is in the Q: field ]
+	var timerHandle = null;
+	ABCJS.startAnimation = function(paper, tune, options) {
+		if (paper.getElementsByClassName === undefined) {
+			console.error("ABCJS.startAnimation: The first parameter must be a regular DOM element. (Did you pass a jQuery object or an ID?)");
+			return;
+		}
+		if (tune.getBeatsPerMeasure === undefined) {
+			console.error("ABCJS.startAnimation: The second parameter must be a single tune. (Did you pass the entire array of tunes?)");
+			return;
+		}
+
+		var timerValues = getTimerValues(tune, options);
 
 		var currentLine = 0;
 		var currentMeasure = 0;
+		var measureCounter = 0;
 		function processNext() {
+			if (++measureCounter < timerValues.measureMultiplier)
+				return;
+			measureCounter = 0;
 			var els = getAllElementsByClasses(paper, "l"+currentLine, "m"+currentMeasure);
 			if (els.length === 0) {
 				currentLine++;
@@ -255,9 +282,9 @@ if (!window.ABCJS)
 			} else
 				clearInterval(timerHandle);
 		}
-		timerHandle = setInterval(processNext, interval);
+		timerHandle = setInterval(processNext, timerValues.tick);
 	};
-	ABCJS.stopCursor = function() {
+	ABCJS.stopAnimation = function() {
 		clearInterval(timerHandle);
 	};
 
