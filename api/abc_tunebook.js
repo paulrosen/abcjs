@@ -45,7 +45,7 @@ ABCJS.TuneBook = function(book) {
 	if (This.tunes.length > 1 && !window.ABCJS.parse.startsWith(This.tunes[0].abc, 'X:')) {	// If there is only one tune, the X: might be missing, otherwise assume the top of the file is "intertune"
 		// There could be file-wide directives in this, if so, we need to insert it into each tune. We can probably get away with
 		// just looking for file-wide directives here (before the first tune) and inserting them at the bottom of each tune, since
-		// the tune is parsed all at once. The directives will be seen before the printer begins processing.
+		// the tune is parsed all at once. The directives will be seen before the engraver begins processing.
 		var dir = This.tunes.shift();
 		var arrDir = dir.abc.split('\n');
 		window.ABCJS.parse.each(arrDir, function(line) {
@@ -147,14 +147,14 @@ function renderEngine(callback, output, abc, parserParams, renderParams) {
 //			startingTune: an index, starting at zero, representing which tune to start rendering at.
 //				(If this element is not present, then rendering starts at zero.)
 //			width: 800 by default. The width in pixels of the output paper
-ABCJS.renderAbc = function(output, abc, parserParams, printerParams, renderParams) {
+ABCJS.renderAbc = function(output, abc, parserParams, engraverParams, renderParams) {
 	function callback(div, tune) {
 		var width = renderParams ? renderParams.width ? renderParams.width : 800 : 800;
 		var paper = Raphael(div, width, 400);
-		if (printerParams === undefined)
-			printerParams = {};
-		var printer = new ABCJS.write.Printer(paper, printerParams);
-		printer.printABC(tune);
+		if (engraverParams === undefined)
+			engraverParams = {};
+		var engraver_controller = new ABCJS.write.Printer(paper, engraverParams);
+		engraver_controller.printABC(tune);
 	}
 
 	renderEngine(callback, output, abc, parserParams, renderParams);

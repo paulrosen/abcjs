@@ -28,19 +28,19 @@ ABCJS.write.CrescendoElem = function(anchor1, anchor2, dir) {
 	this.dir = dir; // either "<" or ">"
 };
 
-ABCJS.write.CrescendoElem.prototype.draw = function (printer) {
+ABCJS.write.CrescendoElem.prototype.draw = function (renderer) {
 	if (this.dir === "<") {
-		this.drawLine(printer, 0, -4);
-		this.drawLine(printer, 0, 4);
+		this.drawLine(renderer, 0, -4);
+		this.drawLine(renderer, 0, 4);
 	} else {
-		this.drawLine(printer, -4, 0);
-		this.drawLine(printer, 4, 0);
+		this.drawLine(renderer, -4, 0);
+		this.drawLine(renderer, 4, 0);
 	}
 };
 
-ABCJS.write.CrescendoElem.prototype.drawLine = function (printer, y1, y2) {
-	var ypos = printer.layouter.minY - 7;
+ABCJS.write.CrescendoElem.prototype.drawLine = function (renderer, y1, y2) {
+	var ypos = renderer.layouter.minY - 7;
 	var pathString = ABCJS.write.sprintf("M %f %f L %f %f",
-		this.anchor1.x, printer.calcY(ypos)+y1-4, this.anchor2.x, printer.calcY(ypos)+y2-4);
-	printer.printPath({path:pathString, stroke:"#000000", 'class': printer.addClasses('decoration')});
+		this.anchor1.x, renderer.calcY(ypos)+y1-4, this.anchor2.x, renderer.calcY(ypos)+y2-4);
+	renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('decoration')});
 };

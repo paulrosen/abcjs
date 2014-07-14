@@ -120,36 +120,36 @@ ABCJS.write.VoiceElement.prototype.shiftRight = function (dx) {
 	this.nextx+=dx;
 };
 
-ABCJS.write.VoiceElement.prototype.draw = function (printer, bartop) {
+ABCJS.write.VoiceElement.prototype.draw = function (renderer, bartop) {
 	var width = this.w-1;
-	printer.y = this.staff.y;
-	printer.staffbottom = this.staff.bottom;
-	this.barbottom = printer.calcY(2);
+	renderer.y = this.staff.y;
+	renderer.staffbottom = this.staff.bottom;
+	this.barbottom = renderer.calcY(2);
 
 	if (this.header) { // print voice name
 		var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
-		var headerX = (this.startx-printer.paddingleft)/2+printer.paddingleft;
-		headerX = headerX*printer.scale;
-		printer.paper.text(headerX, printer.calcY(textpitch)*printer.scale, this.header).attr({"font-size":12*printer.scale, "font-family":"serif", 'font-weight':'bold', 'class': printer.addClasses('staff-extra voice-name')}); // code duplicated above
+		var headerX = (this.startx-renderer.paddingleft)/2+renderer.paddingleft;
+		headerX = headerX*renderer.scale;
+		renderer.paper.text(headerX, renderer.calcY(textpitch)*renderer.scale, this.header).attr({"font-size":12*renderer.scale, "font-family":"serif", 'font-weight':'bold', 'class': renderer.addClasses('staff-extra voice-name')}); // code duplicated above
 	}
 
 	for (var i=0, ii=this.children.length; i<ii; i++) {
 		var child = this.children[i];
 		var justInitializedMeasureNumber = false;
-		if (child.type !== 'staff-extra' && printer.measureNumber === null) {
-			printer.measureNumber = 0;
+		if (child.type !== 'staff-extra' && renderer.measureNumber === null) {
+			renderer.measureNumber = 0;
 			justInitializedMeasureNumber = true;
 		}
-		child.draw(printer, (this.barto || i===ii-1)?bartop:0);
+		child.draw(renderer, (this.barto || i===ii-1)?bartop:0);
 		if (child.type === 'bar' && !justInitializedMeasureNumber)
-			printer.measureNumber++;
+			renderer.measureNumber++;
 	}
 	window.ABCJS.parse.each(this.beams, function(beam) {
-		beam.draw(printer); // beams must be drawn first for proper printing of triplets, slurs and ties.
+		beam.draw(renderer); // beams must be drawn first for proper printing of triplets, slurs and ties.
 	});
 	var self = this;
 	window.ABCJS.parse.each(this.otherchildren, function(child) {
-		child.draw(printer,self.startx+10,width);
+		child.draw(renderer,self.startx+10,width);
 	});
 
 };

@@ -145,15 +145,15 @@ window.ABCJS.Plugin.prototype.render = function (contextnode, abcstring) {
     var doPrint = function() {
 	try {
 	  var paper = Raphael(abcdiv.get(0), 800, 400);
-	  var printer = new ABCJS.write.Printer(paper,self.render_options);
-	  printer.printABC(tune);
+	  var engraver_controller = new ABCJS.write.Printer(paper,self.render_options);
+	  engraver_controller.printABC(tune);
 	} catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
 	  // can't remember why we don't do this in the general case, but there was a good reason
 	  abcdiv.remove();
 	  abcdiv = this.$("<div class='"+self.render_classname+"'></div>");
 	  paper = Raphael(abcdiv.get(0), 800, 400);
-	  printer = new ABCJS.write.Printer(paper);
-	  printer.printABC(tune);
+	  engraver_controller = new ABCJS.write.Printer(paper);
+	  engraver_controller.printABC(tune);
 	  if (self.render_before) {
 	    this.$(contextnode).before(abcdiv);
 	  } else {

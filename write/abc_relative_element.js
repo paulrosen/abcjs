@@ -39,31 +39,31 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 	this.bottom = pitch - ((opt.extreme==="below")? 7 : 0);
 };
 
-ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
+ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
 	this.x = x+this.dx;
 	switch(this.type) {
 		case "symbol":
 			if (this.c===null) return null;
-			this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, printer.addClasses('symbol')); break;
+			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.addClasses('symbol')); break;
 		case "debug":
-			this.graphelem = printer.debugMsg(this.x, this.c); break;
+			this.graphelem = renderer.debugMsg(this.x, this.c); break;
 		case "debugLow":
-			this.graphelem = printer.printLyrics(this.x, this.c); break;
+			this.graphelem = renderer.printLyrics(this.x, this.c); break;
 		case "chord":
-			this.graphelem = printer.printText(this.x, this.pitch, this.c, "start", "chord");
+			this.graphelem = renderer.printText(this.x, this.pitch, this.c, "start", "chord");
 			break;
 		case "text":
-			this.graphelem = printer.printText(this.x, this.pitch, this.c, "start", "annotation");
+			this.graphelem = renderer.printText(this.x, this.pitch, this.c, "start", "annotation");
 			break;
 		case "bar":
-			this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); break; // bartop can't be 0
+			this.graphelem = renderer.printStem(this.x, this.linewidth, renderer.calcY(this.pitch), (bartop)?bartop:renderer.calcY(this.pitch2)); break; // bartop can't be 0
 		case "stem":
-			this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); break;
+			this.graphelem = renderer.printStem(this.x, this.linewidth, renderer.calcY(this.pitch), renderer.calcY(this.pitch2)); break;
 		case "ledger":
-			this.graphelem = printer.printStaveLine(this.x, this.x+this.w, this.pitch); break;
+			this.graphelem = renderer.printStaveLine(this.x, this.x+this.w, this.pitch); break;
 	}
 	if (this.scalex!==1 && this.graphelem) {
-		this.graphelem.scale(this.scalex, this.scaley, this.x, printer.calcY(this.pitch));
+		this.graphelem.scale(this.scalex, this.scaley, this.x, renderer.calcY(this.pitch));
 	}
 	if (this.attributes) {
 		this.graphelem.attr(this.attributes);

@@ -30,7 +30,7 @@ ABCJS.write.TieElem = function(anchor1, anchor2, above, forceandshift) {
 	// move by +7 "up" by -7 if "down"
 };
 
-ABCJS.write.TieElem.prototype.draw = function (printer, linestartx, lineendx) {
+ABCJS.write.TieElem.prototype.draw = function (renderer, linestartx, lineendx) {
 	var startpitch;
 	var endpitch;
 
@@ -77,7 +77,7 @@ ABCJS.write.TieElem.prototype.draw = function (printer, linestartx, lineendx) {
 	//  if (this.force==="up" && !preservebeamdir) pitchshift = 7;
 	//  if (this.force==="down" && !preservebeamdir) pitchshift = -7;
 
-	//	printer.debugMsgLow(linestartx, debugMsg);
-	printer.drawArc(linestartx, lineendx, startpitch, endpitch,  this.above);
+	//	renderer.debugMsgLow(linestartx, debugMsg);
+	renderer.drawArc(linestartx, lineendx, startpitch, endpitch,  this.above);
 
 };

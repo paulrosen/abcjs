@@ -73,21 +73,21 @@ ABCJS.write.StaffGroupElement.prototype.finished = function() {
 	return true;
 };
 
-ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debug) {
+ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, controller, debug) {
 	this.spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
 	this.minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
-	var x = printer.paddingleft*printer.scale;
+	var x = controller.paddingleft*controller.scale;
 
 	// find out how much space will be taken up by voice headers
 	var voiceheaderw = 0;
 	for (var i=0;i<this.voices.length;i++) {
 		if(this.voices[i].header) {
-			var t = printer.paper.text(100*printer.scale, -10*printer.scale, this.voices[i].header).attr({"font-size":12*printer.scale, "font-family":"serif", 'font-weight':'bold'}); // code duplicated below  // don't scale this as we ask for the bbox
+			var t = controller.paper.text(100*controller.scale, -10*controller.scale, this.voices[i].header).attr({"font-size":12*controller.scale, "font-family":"serif", 'font-weight':'bold'}); // code duplicated below  // don't scale this as we ask for the bbox
 			voiceheaderw = Math.max(voiceheaderw,t.getBBox().width);
 			t.remove();
 		}
 	}
-	x=x+voiceheaderw*(1/printer.scale)*1.1; // 10% of 0 is 0
+	x=x+voiceheaderw*(1/controller.scale)*1.1; // 10% of 0 is 0
 	this.startx=x;
 
 	var currentduration = 0;
@@ -173,7 +173,7 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, debu
 	}
 };
 
-ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
+ABCJS.write.StaffGroupElement.prototype.draw = function (renderer, y) {
 
 	this.y = y;
 	for (var i=0;i<this.staffs.length;i++) {
@@ -187,38 +187,38 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (printer, y) {
 		this.staffs[i].bottom = y;
 
 		if (this.stafflines[i] !== 0) {
-			printer.y = this.staffs[i].y;
+			renderer.y = this.staffs[i].y;
 			// TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
 			if (this.stafflines[i] === undefined)
 				this.stafflines[i] = 5;
-			printer.printStave(this.startx, this.w, this.stafflines[i]);
+			renderer.printStave(this.startx, this.w, this.stafflines[i]);
 		}
 	}
 	this.height = y-this.y;
 
 	var bartop = 0;
-	printer.measureNumber = null;
+	renderer.measureNumber = null;
 	for (i=0;i<this.voices.length;i++) {
-		this.voices[i].draw(printer, bartop);
+		this.voices[i].draw(renderer, bartop);
 		bartop = this.voices[i].barbottom;
 	}
-	printer.measureNumber = null;
+	renderer.measureNumber = null;
 
 	if (this.staffs.length>1) {
-		printer.y = this.staffs[0].y;
-		var top = printer.calcY(10);
-		printer.y = this.staffs[this.staffs.length-1].y;
-		var bottom = printer.calcY(2);
-		printer.printStem(this.startx, 0.6, top, bottom);
+		renderer.y = this.staffs[0].y;
+		var top = renderer.calcY(10);
+		renderer.y = this.staffs[this.staffs.length-1].y;
+		var bottom = renderer.calcY(2);
+		renderer.printStem(this.startx, 0.6, top, bottom);
 	}
 
 //	for (i=0;i<this.staffs.length;i++) {
 //		if (this.stafflines[i] === 0) continue;
-//		printer.y = this.staffs[i].y;
+//		renderer.y = this.staffs[i].y;
 //		// TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
 //		if (this.stafflines[i] === undefined)
 //			this.stafflines[i] = 5;
-//		printer.printStave(this.startx,this.w, this.stafflines[i]);
+//		renderer.printStave(this.startx,this.w, this.stafflines[i]);
 //	}
 
 };

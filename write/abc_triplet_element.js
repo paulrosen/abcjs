@@ -29,7 +29,7 @@ ABCJS.write.TripletElem = function(number, anchor1, anchor2, above) {
 	this.number = number;
 };
 
-ABCJS.write.TripletElem.prototype.draw = function (printer, linestartx, lineendx) {
+ABCJS.write.TripletElem.prototype.draw = function (renderer, linestartx, lineendx) {
 	// TODO end and beginning of line
 	if (this.anchor1 && this.anchor2) {
 		var ypos = this.above?16:-1;	// PER: Just bumped this up from 14 to make (3z2B2B2 (3B2B2z2 succeed. There's probably a better way.
@@ -40,7 +40,7 @@ ABCJS.write.TripletElem.prototype.draw = function (printer, linestartx, lineendx
 			this.above = beam.asc;
 			ypos = beam.pos;
 		} else {
-			this.drawLine(printer,printer.calcY(ypos));
+			this.drawLine(renderer,renderer.calcY(ypos));
 		}
 		var xsum = this.anchor1.x+this.anchor2.x;
 		var ydelta = 0;
@@ -56,30 +56,30 @@ ABCJS.write.TripletElem.prototype.draw = function (printer, linestartx, lineendx
 		}
 
 
-		printer.printText(xsum/2, ypos+ydelta, this.number, "middle", 'triplet').attr({"font-size":"10px", 'font-style': 'italic' });
+		renderer.printText(xsum/2, ypos+ydelta, this.number, "middle", 'triplet').attr({"font-size":"10px", 'font-style': 'italic' });
 
 	}
 };
 
-ABCJS.write.TripletElem.prototype.drawLine = function (printer, y) {
+ABCJS.write.TripletElem.prototype.drawLine = function (renderer, y) {
 	var pathString;
 	var linestartx = this.anchor1.x;
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		linestartx, y, linestartx, y+5);
-	printer.printPath({path:pathString, stroke:"#000000", 'class': printer.addClasses('triplet')});
+	renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('triplet')});
 
 	var lineendx = this.anchor2.x+this.anchor2.w;
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		lineendx, y, lineendx, y+5);
-	printer.printPath({path:pathString, stroke:"#000000", 'class': printer.addClasses('triplet')});
+	renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('triplet')});
 
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		linestartx, y, (linestartx+lineendx)/2-5, y);
-	printer.printPath({path:pathString, stroke:"#000000", 'class': printer.addClasses('triplet')});
+	renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('triplet')});
 
 
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 			(linestartx+lineendx)/2+5, y, lineendx, y);
-	printer.printPath({path:pathString, stroke:"#000000", 'class': printer.addClasses('triplet')});
+	renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('triplet')});
 
 };

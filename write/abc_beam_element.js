@@ -58,10 +58,10 @@ ABCJS.write.BeamElem.prototype.average = function() {
 	}
 };
 
-ABCJS.write.BeamElem.prototype.draw = function(printer) {
+ABCJS.write.BeamElem.prototype.draw = function(renderer) {
 	if (this.elems.length === 0 || this.allrests) return;
-	this.drawBeam(printer);
-	this.drawStems(printer);
+	this.drawBeam(renderer);
+	this.drawStems(renderer);
 };
 
 ABCJS.write.BeamElem.prototype.calcDir = function() {
@@ -71,7 +71,7 @@ ABCJS.write.BeamElem.prototype.calcDir = function() {
 	return this.asc;
 };
 
-ABCJS.write.BeamElem.prototype.drawBeam = function(printer) {
+ABCJS.write.BeamElem.prototype.drawBeam = function(renderer) {
 	var average = this.average();
 	var barpos = (this.isgrace)? 5:7;
 	this.calcDir();
@@ -84,8 +84,8 @@ ABCJS.write.BeamElem.prototype.drawBeam = function(printer) {
 
 	if (slant>maxslant) slant = maxslant;
 	if (slant<-maxslant) slant = -maxslant;
-	this.starty = printer.calcY(this.pos+Math.floor(slant/2));
-	this.endy = printer.calcY(this.pos+Math.floor(-slant/2));
+	this.starty = renderer.calcY(this.pos+Math.floor(slant/2));
+	this.endy = renderer.calcY(this.pos+Math.floor(-slant/2));
 
 	var starthead = this.elems[0].heads[(this.asc)? 0: this.elems[0].heads.length-1];
 	var endhead = this.elems[this.elems.length-1].heads[(this.asc)? 0: this.elems[this.elems.length-1].heads.length-1];
@@ -96,32 +96,32 @@ ABCJS.write.BeamElem.prototype.drawBeam = function(printer) {
 
 	// PER: if the notes are too high or too low, make the beam go down to the middle
 	if (this.asc && this.pos < 6) {
-		this.starty = printer.calcY(6);
-		this.endy = printer.calcY(6);
+		this.starty = renderer.calcY(6);
+		this.endy = renderer.calcY(6);
 	} else if (!this.asc && this.pos > 6) {
-		this.starty = printer.calcY(6);
-		this.endy = printer.calcY(6);
+		this.starty = renderer.calcY(6);
+		this.endy = renderer.calcY(6);
 	}
 
 	var pathString = "M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
 		"L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z";
-	printer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': printer.addClasses('beam-elem')});
+	renderer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': renderer.addClasses('beam-elem')});
 };
 
-ABCJS.write.BeamElem.prototype.drawStems = function(printer) {
+ABCJS.write.BeamElem.prototype.drawStems = function(renderer) {
 	var auxbeams = [];  // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
-	printer.beginGroup();
+	renderer.beginGroup();
 	for (var i=0,ii=this.elems.length; i<ii; i++) {
 		if (this.elems[i].abcelem.rest)
 			continue;
 		var furthesthead = this.elems[i].heads[(this.asc)? 0: this.elems[i].heads.length-1];
 		var ovaldelta = (this.isgrace)?1/3:1/5;
 		var pitch = furthesthead.pitch + ((this.asc) ? ovaldelta : -ovaldelta);
-		var y = printer.calcY(pitch);
+		var y = renderer.calcY(pitch);
 		var x = furthesthead.x + ((this.asc) ? furthesthead.w: 0);
 		var bary=this.getBarYAt(x);
 		var dx = (this.asc) ? -0.6 : 0.6;
-		printer.printStem(x,dx,y,bary);
+		renderer.printStem(x,dx,y,bary);
 
 		var sy = (this.asc) ? 1.5*ABCJS.write.spacing.STEP: -1.5*ABCJS.write.spacing.STEP;
 		if (this.isgrace) sy = sy*2/3;
@@ -149,12 +149,12 @@ ABCJS.write.BeamElem.prototype.drawStems = function(printer) {
 
 				var pathString ="M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
 					"L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z";
-				printer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': printer.addClasses('beam-elem')});
+				renderer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': renderer.addClasses('beam-elem')});
 				auxbeams = auxbeams.slice(0,j);
 			}
 		}
 	}
-	printer.endGroup('beam-elem');
+	renderer.endGroup('beam-elem');
 };
 
 ABCJS.write.BeamElem.prototype.getBarYAt = function(x) {
