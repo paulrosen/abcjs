@@ -15,7 +15,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*global document, Raphael */
-/*global window */
+/*global window, ABCJS */
 
 if (!window.ABCJS)
 	window.ABCJS = {};
@@ -67,7 +67,7 @@ ABCJS.TuneBook = function(book) {
 		var title = tune.pure.split("T:");
 		if (title.length > 1) {
 			title = title[1].split("\n");
-			tune.title = title[0].replace(/^\s+|\s+$/g, '');;
+			tune.title = title[0].replace(/^\s+|\s+$/g, '');
 		} else
 			tune.title = "";
 
@@ -94,6 +94,7 @@ ABCJS.TuneBook.prototype.getTuneByTitle = function (title) {
 };
 
 function renderEngine(callback, output, abc, parserParams, renderParams) {
+	var ret = [];
 	var isArray = function(testObject) {
 		return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
 	};
@@ -123,11 +124,13 @@ function renderEngine(callback, output, abc, parserParams, renderParams) {
 			if (currentTune < book.tunes.length) {
 				abcParser.parse(book.tunes[currentTune].abc, parserParams);
 				var tune = abcParser.getTune();
+				ret.push(tune);
 				callback(div, tune);
 			}
 		}
 		currentTune++;
 	}
+	return ret;
 }
 
 // A quick way to render a tune from javascript when interactivity is not required.
@@ -157,7 +160,7 @@ ABCJS.renderAbc = function(output, abc, parserParams, engraverParams, renderPara
 		engraver_controller.printABC(tune);
 	}
 
-	renderEngine(callback, output, abc, parserParams, renderParams);
+	return renderEngine(callback, output, abc, parserParams, renderParams);
 };
 
 // A quick way to render a tune from javascript when interactivity is not required.
@@ -184,6 +187,6 @@ ABCJS.renderMidi = function(output, abc, parserParams, midiParams, renderParams)
 		midiwriter.writeABC(tune);
 	}
 
-	renderEngine(callback, output, abc, parserParams, renderParams);
+	return renderEngine(callback, output, abc, parserParams, renderParams);
 };
 })();
