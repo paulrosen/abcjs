@@ -153,7 +153,7 @@ if (!window.ABCJS)
 	ABCJS.renderAbc = function(output, abc, parserParams, engraverParams, renderParams) {
 		function callback(div, tune) {
 			var width = renderParams ? renderParams.width ? renderParams.width : 800 : 800;
-			var paper = Raphael(div, width, 400);
+			/* jshint -W064 */ var paper = Raphael(div, width, 400); /* jshint +W064 */
 			if (engraverParams === undefined)
 				engraverParams = {};
 			var engraver_controller = new ABCJS.write.Printer(paper, engraverParams);
@@ -189,4 +189,76 @@ if (!window.ABCJS)
 
 		return renderEngine(callback, output, abc, parserParams, renderParams);
 	};
+
+	function hasClass(element, cls) {
+		var elClass = element.getAttribute("class");
+		var rclass = /[\t\r\n\f]/g;
+		var className = " " + cls + " ";
+		return (element.nodeType === 1 && (" " + elClass + " ").replace(rclass, " ").indexOf(className) >= 0);
+	}
+
+	function getAllElementsByClasses(startingEl, class1, class2) {
+		var els = startingEl.getElementsByClassName(class1);
+		var ret = [];
+		for (var i = 0; i < els.length; i++) {
+			if (hasClass(els[i], class2))
+				ret.push(els[i]);
+		}
+		return ret;
+	}
+
+	// This is a way to manipulate the written music on a timer. Their are two ways to manipulate the music: turn off each measure as it goes by,
+	// and put a vertical cursor before the next note to play. The timer works at the speed of the original tempo of the music unless it is overwritten
+	// in the options parameter.
+	//
+	// parameters:
+	// paper: the output div that the music is in.
+	// tune: the tune object returned by renderAbc.
+	// options: a hash containing the following:
+	//    hideFinishedMeasures: true or false [ false is the default ]
+	//    showCursor: true or false [ false is the default ]
+	//    bpm: number of beats per minute [ the default is whatever is in the Q: field ]
+	var timerHandle = null;
+	ABCJS.startCursor = function(paper, tune, options) {
+		var bpm;
+		if (options.bpm)
+			bpm = options.bpm;
+		else {
+			if (tune && tune.metaText && tune.metaText.tempo && tune.metaText.tempo.bpm)
+				bpm = tune.metaText.tempo.bpm;
+			else
+				bpm = 120;
+		}
+		var beats = tune.getBeatsPerMeasure();
+		if (!beats) // If this is either unmetered, or otherwise a strange piece, we'll just set the beats to 4 so something happens.
+			beats = 4;
+		var measuresPerMinute = bpm / beats;
+		var interval = 60000 / measuresPerMinute;
+
+		var currentLine = 0;
+		var currentMeasure = 0;
+		function processNext() {
+			var els = getAllElementsByClasses(paper, "l"+currentLine, "m"+currentMeasure);
+			if (els.length === 0) {
+				currentLine++;
+				currentMeasure = 0;
+				els = getAllElementsByClasses(paper, "l"+currentLine, "m"+currentMeasure);
+			}
+
+			if (els.length > 0) {
+				for (var i = 0; i < els.length; i++) {
+					var el = els[i];
+					if (!hasClass(el, "bar"))
+						el.style.display = "none";
+				}
+				currentMeasure++;
+			} else
+				clearInterval(timerHandle);
+		}
+		timerHandle = setInterval(processNext, interval);
+	};
+	ABCJS.stopCursor = function() {
+		clearInterval(timerHandle);
+	};
+
 })();

@@ -60,6 +60,27 @@ window.ABCJS.data.Tune = function() {
 	//		accidentals[]: { acc:sharp|dblsharp|natural|flat|dblflat,  note:a|b|c|d|e|f|g }
 	// METER: type: common_time,cut_time,specified
 	//		if specified, { num: 99, den: 99 }
+
+	this.getBeatsPerMeasure = function() {
+		for (var i = 0; i < this.lines.length; i++) {
+			if (this.lines[i].staff) {
+				for (var j = 0; j < this.lines[i].staff.length; j++) {
+					if (this.lines[i].staff[j].meter) {
+						if (this.lines[i].staff[j].meter.type === "specified") {
+							if (this.lines[i].staff[j].meter.value.den)
+								return this.lines[i].staff[j].meter.value.den;
+							else
+								return null;
+						} else {
+							return 4; // TODO-PER: this works for common and cut time, but not for the ancient meters.
+						}
+					}
+				}
+			}
+		}
+		return null;
+	};
+
 	this.reset = function () {
 		this.version = "1.0.1";
 		this.media = "screen";
