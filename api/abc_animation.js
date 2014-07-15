@@ -88,16 +88,8 @@ if (!window.ABCJS)
 
 		var startTime;
 
-		var currentLine = 0;
-		var currentMeasure = 0;
-
-		function processMeasureHider() {
-			var els = getAllElementsByClasses(paper, "l"+currentLine, "m"+currentMeasure);
-			if (els.length === 0) {
-				currentLine++;
-				currentMeasure = 0;
-				els = getAllElementsByClasses(paper, "l"+currentLine, "m"+currentMeasure);
-			}
+		function processMeasureHider(lineNum, measureNum) {
+			var els = getAllElementsByClasses(paper, "l"+lineNum, "m"+measureNum);
 
 			if (els.length > 0) {
 				for (var i = 0; i < els.length; i++) {
@@ -105,7 +97,6 @@ if (!window.ABCJS)
 					if (!hasClass(el, "bar"))
 						el.style.display = "none";
 				}
-				currentMeasure++;
 			}
 		}
 
@@ -127,8 +118,23 @@ if (!window.ABCJS)
 							time += element.duration;
 						}
 						if (element.type === 'bar') {
-							if (timingEvents.length === 0 || timingEvents[timingEvents.length-1] !== 'bar')
-								timingEvents.push({ type: "bar", time: time });
+							if (timingEvents.length === 0 || timingEvents[timingEvents.length-1] !== 'bar') {
+								if (element.elemset && element.elemset.length > 0 && element.elemset[0].attrs) {
+									var klass = element.elemset[0].attrs['class'];
+									var arr = klass.split(' ');
+									var lineNum;
+									var measureNum;
+									for (var i = 0; i < arr.length; i++) {
+										var match = /m(\d+)/.exec(arr[i]);
+										if (match)
+											measureNum = match[1];
+										match = /l(\d+)/.exec(arr[i]);
+										if (match)
+											lineNum = match[1];
+									}
+									timingEvents.push({ type: "bar", time: time, lineNum: lineNum, measureNum: measureNum });
+								}
+							}
 						}
 					}
 				}
@@ -144,7 +150,7 @@ if (!window.ABCJS)
 			}
 			if (currentNote.type === "bar") {
 				if (options.hideFinishedMeasures)
-					processMeasureHider();
+					processMeasureHider(currentNote.lineNum, currentNote.measureNum);
 				return processShowCursor();
 			}
 			if (options.showCursor)
