@@ -126,7 +126,8 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 ABCJS.write.AbsoluteElement.prototype.isIE=/*@cc_on!@*/false;//IE detector
 
 ABCJS.write.AbsoluteElement.prototype.setClass = function (addClass, removeClass, color) {
-	this.elemset.attr({fill:color});
+	if (color !== null)
+		this.elemset.attr({fill:color});
 	if (!this.isIE) {
 		for (var i = 0; i < this.elemset.length; i++) {
 			if (this.elemset[i][0].setAttribute) {
@@ -144,11 +145,19 @@ ABCJS.write.AbsoluteElement.prototype.setClass = function (addClass, removeClass
 	}
 };
 
-ABCJS.write.AbsoluteElement.prototype.highlight = function () {
-	this.setClass("note_selected", "", "#ff0000");
+ABCJS.write.AbsoluteElement.prototype.highlight = function (klass, color) {
+	if (klass === undefined)
+		klass = "note_selected";
+	if (color === undefined)
+		color = "#ff0000";
+	this.setClass(klass, "", color);
 };
 
-ABCJS.write.AbsoluteElement.prototype.unhighlight = function () {
-	this.setClass("", "note_selected", "#000000");
+ABCJS.write.AbsoluteElement.prototype.unhighlight = function (klass, color) {
+	if (klass === undefined)
+		klass = "note_selected";
+	if (color === undefined)
+		color = "#000000";
+	this.setClass("", klass, color);
 };
 
