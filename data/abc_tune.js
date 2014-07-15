@@ -61,18 +61,25 @@ window.ABCJS.data.Tune = function() {
 	// METER: type: common_time,cut_time,specified
 	//		if specified, { num: 99, den: 99 }
 
-	this.getBeatsPerMeasure = function() {
+	this.getBeatLength = function() {
 		for (var i = 0; i < this.lines.length; i++) {
 			if (this.lines[i].staff) {
 				for (var j = 0; j < this.lines[i].staff.length; j++) {
 					if (this.lines[i].staff[j].meter) {
-						if (this.lines[i].staff[j].meter.type === "specified") {
-							if (this.lines[i].staff[j].meter.value.den)
-								return this.lines[i].staff[j].meter.value.den;
+						var meter = this.lines[i].staff[j].meter;
+						if (meter.type === "specified") {
+							if (meter.value.length > 0) {
+								var den = parseInt(meter.value[0].den, 10);
+								if (den === 4) return 1/4;
+								if (den === 6) return 3/8;
+								if (den === 8) return 1/8;
+								if (den === 12) return 3/8;
+								return 1/den;
+							}
 							else
 								return null;
 						} else {
-							return 4; // TODO-PER: this works for common and cut time, but not for the ancient meters.
+							return 1/4; // TODO-PER: this works for common and cut time, but not for the ancient meters.
 						}
 					}
 				}
