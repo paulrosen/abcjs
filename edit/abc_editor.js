@@ -233,7 +233,7 @@ window.ABCJS.Editor = function(editarea, params) {
 	  this.removeClassName(el, readonlyClass);
     }
   };
-}
+};
 
 window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
   var tunebook = new ABCJS.TuneBook(abc);
@@ -261,6 +261,7 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
   var paper = Raphael(this.div, 800, 400);
   this.engraver_controller = new ABCJS.write.Printer(paper, this.engraverparams);
   this.engraver_controller.printABC(this.tunes);
+	this.tunes[0].engraver = this.engraver_controller;	// TODO-PER: We actually want an output object for each tune, not the entire controller. When refactoring, don't save data in the controller.
   if (ABCJS.midi.MidiWriter && this.mididiv) {
     if (this.mididiv !== this.div)
 		this.mididiv.innerHTML = "";
