@@ -158,6 +158,7 @@ if (!window.ABCJS)
 				engraverParams = {};
 			var engraver_controller = new ABCJS.write.Printer(paper, engraverParams);
 			engraver_controller.printABC(tune);
+			tune.engraver = engraver_controller;
 		}
 
 		return renderEngine(callback, output, abc, parserParams, renderParams);
@@ -189,103 +190,4 @@ if (!window.ABCJS)
 
 		return renderEngine(callback, output, abc, parserParams, renderParams);
 	};
-
-	function hasClass(element, cls) {
-		var elClass = element.getAttribute("class");
-		var rclass = /[\t\r\n\f]/g;
-		var className = " " + cls + " ";
-		return (element.nodeType === 1 && (" " + elClass + " ").replace(rclass, " ").indexOf(className) >= 0);
-	}
-
-	function getAllElementsByClasses(startingEl, class1, class2) {
-		var els = startingEl.getElementsByClassName(class1);
-		var ret = [];
-		for (var i = 0; i < els.length; i++) {
-			if (hasClass(els[i], class2))
-				ret.push(els[i]);
-		}
-		return ret;
-	}
-
-	function getTimerValues(tune, options) {
-		// We either want to run the timer once per measure or once per beat. If we run it once per beat we need a multiplier for the measures.
-		// So, first we figure out the beats per minute and the beats per measure, then depending on the type of animation, we can
-		// calculate the desired interval (ret.tick) and the number of ticks before we want to run the measure
-		var bpm;
-		if (options.bpm)
-			bpm = options.bpm;
-		else {
-			if (tune && tune.metaText && tune.metaText.tempo && tune.metaText.tempo.bpm)
-				bpm = tune.metaText.tempo.bpm;
-			else
-				bpm = 120;
-		}
-		var beats = tune.getBeatsPerMeasure();
-		if (!beats) // If this is either unmetered, or otherwise a strange piece, we'll just set the beats to 4 so something happens.
-			beats = 4;
-		var measuresPerMinute = bpm / beats;
-		var ret = {};
-		if (options.showCursor)
-			ret.tick = 60000 / bpm;
-		else if (options.hideFinishedMeasures)
-			ret.tick = 60000 / measuresPerMinute;
-
-		ret.measureMultiplier = options.showCursor && options.hideFinishedMeasures ? beats : 1;
-		return ret;
-	}
-
-	// This is a way to manipulate the written music on a timer. Their are two ways to manipulate the music: turn off each measure as it goes by,
-	// and put a vertical cursor before the next note to play. The timer works at the speed of the original tempo of the music unless it is overwritten
-	// in the options parameter.
-	//
-	// parameters:
-	// paper: the output div that the music is in.
-	// tune: the tune object returned by renderAbc.
-	// options: a hash containing the following:
-	//    hideFinishedMeasures: true or false [ false is the default ]
-	//    showCursor: true or false [ false is the default ]
-	//    bpm: number of beats per minute [ the default is whatever is in the Q: field ]
-	var timerHandle = null;
-	ABCJS.startAnimation = function(paper, tune, options) {
-		if (paper.getElementsByClassName === undefined) {
-			console.error("ABCJS.startAnimation: The first parameter must be a regular DOM element. (Did you pass a jQuery object or an ID?)");
-			return;
-		}
-		if (tune.getBeatsPerMeasure === undefined) {
-			console.error("ABCJS.startAnimation: The second parameter must be a single tune. (Did you pass the entire array of tunes?)");
-			return;
-		}
-
-		var timerValues = getTimerValues(tune, options);
-
-		var currentLine = 0;
-		var currentMeasure = 0;
-		var measureCounter = 0;
-		function processNext() {
-			if (++measureCounter < timerValues.measureMultiplier)
-				return;
-			measureCounter = 0;
-			var els = getAllElementsByClasses(paper, "l"+currentLine, "m"+currentMeasure);
-			if (els.length === 0) {
-				currentLine++;
-				currentMeasure = 0;
-				els = getAllElementsByClasses(paper, "l"+currentLine, "m"+currentMeasure);
-			}
-
-			if (els.length > 0) {
-				for (var i = 0; i < els.length; i++) {
-					var el = els[i];
-					if (!hasClass(el, "bar"))
-						el.style.display = "none";
-				}
-				currentMeasure++;
-			} else
-				clearInterval(timerHandle);
-		}
-		timerHandle = setInterval(processNext, timerValues.tick);
-	};
-	ABCJS.stopAnimation = function() {
-		clearInterval(timerHandle);
-	};
-
 })();
