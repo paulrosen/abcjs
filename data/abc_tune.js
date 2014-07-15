@@ -69,17 +69,19 @@ window.ABCJS.data.Tune = function() {
 						var meter = this.lines[i].staff[j].meter;
 						if (meter.type === "specified") {
 							if (meter.value.length > 0) {
+								var num = parseInt(meter.value[0].num, 10);
 								var den = parseInt(meter.value[0].den, 10);
-								if (den === 4) return 1/4;
-								if (den === 6) return 3/8;
-								if (den === 8) return 1/8;
-								if (den === 12) return 3/8;
+								if (num === 6 && den === 8) return 3/8;
+								if (num === 9 && den === 8) return 3/8;
+								if (num === 12 && den === 8) return 3/8;
 								return 1/den;
 							}
 							else
 								return null;
+						} else if (meter.type === 'cut_time') {
+							return 1/2;
 						} else {
-							return 1/4; // TODO-PER: this works for common and cut time, but not for the ancient meters.
+							return 1/4; // TODO-PER: this works for common time, but not for the ancient meters.
 						}
 					}
 				}
