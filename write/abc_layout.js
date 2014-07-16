@@ -674,6 +674,10 @@ ABCJS.write.Layout.prototype.printNoteHead = function(abselem, c, pitchelem, dir
     var tie = new ABCJS.write.TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up",(this.stemdir==="down" || this.stemdir==="up"));
     this.ties[this.ties.length]=tie;
     this.voice.addOther(tie);
+	  // HACK-PER: For the animation, we need to know if a note is tied to the next one, so here's a flag.
+	  // Unfortunately, only some of the notes in the current event might be tied, but this will consider it
+	  // tied if any one of them is. That will work for most cases.
+	  abselem.startTie = true;
   }
 
   if (pitchelem.endSlur) {

@@ -104,6 +104,7 @@ if (!window.ABCJS)
 		function setupEvents(engraver) {
 			// The time is the number of measures from the beginning of the piece.
 			var time = 0;
+			var isTiedState = false;
 			for (var line=0;line<engraver.staffgroups.length; line++) {
 				var group = engraver.staffgroups[line];
 				var voices = group.voices;
@@ -114,7 +115,19 @@ if (!window.ABCJS)
 					for (var elem=0; elem<elements.length; elem++) {
 						var element = elements[elem];
 						if (element.duration > 0) {
-							timingEvents.push({ type: "event", time: time, top: top, height: height, left: element.x, width: element.w });
+							// There are 3 possibilities here: the note could stand on its own, the note could be tied to the next,
+							// the note could be tied to the previous, and the note could be tied on both sides.
+							var isTiedToNext = element.startTie;
+							if (isTiedState) {
+								if (!isTiedToNext)
+									isTiedState = false;
+								// If the note is tied on both sides it can just be ignored.
+							} else {
+								// the last note wasn't tied.
+								timingEvents.push({ type: "event", time: time, top: top, height: height, left: element.x, width: element.w });
+								if (isTiedToNext)
+									isTiedState = true;
+							}
 							time += element.duration;
 						}
 						if (element.type === 'bar') {
