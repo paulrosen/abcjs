@@ -227,13 +227,18 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
     printer.groupHeightSum += this.height;
     printer.groupHeightAvg = printer.groupHeightSum/(groupNumber+1);
     
-    var nexty = this.y + this.height + ABCJS.write.spacing.STEP*8*printer.scale + printer.groupHeightAvg; 
-    
-    if( nexty >= printer.estimatedPageLength*printer.pageNumber )  {
-        printer.skipPage();
+    // para o último grupo o salto é menor ou se a proxima linha é um page break
+    if( groupNumber === printer.layouter.tune.lines.length-1 || ( printer.layouter.tune.lines[groupNumber+1] && printer.layouter.tune.lines[groupNumber+1].newpage ) ) {
+          printer.y = this.y + this.height + ABCJS.write.spacing.STEP*3*printer.scale; 
     } else {
-     // ou espaco entre os grupos de pautas
-      printer.y = this.y + this.height + ABCJS.write.spacing.STEP*8*printer.scale; 
+        //para os demais grupos, verifica se é o caso de iniciar nova pagica
+        var nexty = this.y + this.height + ABCJS.write.spacing.STEP*8*printer.scale + printer.groupHeightAvg; 
+        if( nexty >= printer.estimatedPageLength*printer.pageNumber )  {
+            printer.skipPage();
+        } else {
+         // ou espaco entre os grupos de pautas
+          printer.y = this.y + this.height + ABCJS.write.spacing.STEP*8*printer.scale; 
+        }
     }
     
 };

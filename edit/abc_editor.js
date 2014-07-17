@@ -340,6 +340,10 @@ window.ABCJS.Editor = function(editarea, params) {
 
 };
 
+window.ABCJS.Editor.prototype.getString = function() {
+    return this.editarea.getString();
+};
+
 window.ABCJS.Editor.prototype.setString = function(text, noRefresh) {
     this.editarea.setString( text, noRefresh );
 };

@@ -1,7 +1,7 @@
 echo "Concatenating all files..."
 
 set versao=%1
-set versao=2.07
+set versao=2.11
 
 cat parse\abc_common.js parse\abc_parse.js parse\abc_parse_directive.js ^
     parse\abc_parse_header.js parse\abc_parse_key_voice.js ^
