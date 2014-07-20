@@ -40,33 +40,35 @@ If you are looking at someone else's website and see ABC on the page and want to
 
 Downloads:
 ---
+[Release Notes](RELEASE.md)
+
 Here are the latest versions. You can just download these:
 
 Basic:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_1.10-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_1.11-min.js
 
 Editor:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_1.10-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_1.11-min.js
 
 Plugin:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.10-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.11-min.js
 
 Greasemonkey script:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.10.user.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.11.user.js
 
 And here are versions packaged without the standard libraries. To use these, you need to include those libraries yourself:
 
 Basic without Raphael:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_1.10-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_1.11-min.js
 
 Editor without Raphael:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_1.10-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_1.11-min.js
 
 Plugin without JQuery:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin-nojquery_1.10-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_nojquery_1.11-min.js
 
 Plugin without JQuery or Raphael:
-https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_1.10-min.js
+https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_1.11-min.js
 
 Partial list of some websites using abcjs:
 ---
@@ -85,11 +87,31 @@ Partial list of some websites using abcjs:
 Some notes:
 ---
 
-    ABC 1.6 is pretty much implemented
-    Very simple multi-voice ABC and other features beyond ABC 1.6 are slowly making their way in, based on the behaviour of abcm2ps
-    Midi playback is at a very early stage and does not yet feature ornamentation, dynamics, chords or multi voice.
-    Midi playback will not work in Internet Explorer 
-    
+* ABC 1.6 is pretty much implemented
+* Very simple multi-voice ABC and other features beyond ABC 1.6 are slowly making their way in, based on the behaviour of abcm2ps
+* Midi playback is at a very early stage and does not yet feature ornamentation, dynamics, chords or multi voice.
+* Midi playback will not work in Internet Explorer 
+
+API Changes for Version 1.11
+===
+
+"Bouncing Ball" cursor:
+
+	ABCJS.startAnimation(paper, tune, options)
+		paper: the output div that the music is in.
+		tune: the tune object returned by renderAbc.
+		options: a hash containing the following:
+			hideFinishedMeasures: true or false [ false is the default ]
+			showCursor: true or false [ false is the default ]
+			bpm: number of beats per minute [ the default is whatever is in the Q: field ]
+
+renderABC() now returns the object that was created by the process. This allows further processing.
+
+highlight() and unhighlight() now can be passed an optional class name and color.
+
+Descriptive classes to all SVG elements: If you include { add_classes: true } in the rendering params,
+then a set of classes are applied to each SVG element so they can be manipulated with css.
+
 API Changes for Version 1.3
 ===
 
@@ -152,7 +174,7 @@ The abcjs editor transforms an html textarea into an area for editing abc. See: 
 Typical usage would be:
 
 ```html
-<script src="abcjs_editor_X.X-min.js" type="text/javascript"></script>
+<script src="abcjs_editor_1.11-min.js" type="text/javascript"></script>
 <script type="text/javascript">
         window.onload = function() {
                 abc_editor = new ABCJS.Editor("abc", { canvas_id: "canvas0", midi_id:"midi", warnings_id:"warnings" });
@@ -171,7 +193,7 @@ The ABCJS.Editor constructor takes the following parameters:
         warnings_id -- the id of the html element within which abc syntax warnings should be added (if this key is present, generate_warnings is assumed to be true)
         parser_options -- a hashtable of options to pass to the parser
         midi_options -- a hashtable of options to pass to the midi creator (see MidiOptions) since 1.0.2 
-
+        render_options -- a hashtable of options to pass to the printing engine. (since 1.11)
 abcjs plugin
 ---
 
@@ -180,7 +202,7 @@ The abcjs plugin renders all the abc in a page (determined as a new line beginni
 To use, include the plugin version in the page:
 
 ```html
-<script src="abcjs_plugin_X.X-min.js" type="text/javascript"></script>
+<script src="abcjs_plugin_1.11-min.js" type="text/javascript"></script>
 ```
 
 The abcjs plugin currently uses the JQuery library and may conflict with other libraries. If you are using other libraries which expose a $ function, you can include (since 1.0.2):
@@ -243,6 +265,7 @@ printerParams
 	paddingright 	50 	the spacing that the music should have on the webpage
 	paddingleft 	15 	the spacing that the music should have on the webpage
 	editable 	false 	if true, then when a note is clicked, it is highlighted and a callback allows the editor to move the cursor
+	add_classes false if true, then each element that is drawn on the SVG will have an identifying class with it that you can use to style, move, or hide the element.
 midiParams
 	qpm 	180 	the tempo, if not specified in abcString
 	program 	2 	the midi program to use, if not specified in abcString
