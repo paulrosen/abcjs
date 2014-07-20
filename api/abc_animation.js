@@ -100,8 +100,23 @@ if (!window.ABCJS)
 			}
 		}
 
+		function makeSortedArray(hash) {
+			var arr = [];
+			for (var k in hash) {
+				if (hash.hasOwnProperty(k))
+					arr.push(hash[k]);
+			}
+			arr = arr.sort(function(a,b) {
+				return a.time - b.time;
+			});
+			for (var i = 0; i < arr.length; i++)
+				console.log(arr[i].type, arr[i].time, arr[i].left);
+			return arr;
+		}
+
 		var timingEvents = [];
 		function setupEvents(engraver) {
+			var eventHash = {};
 			// The time is the number of measures from the beginning of the piece.
 			var time = 0;
 			var isTiedState = false;
@@ -110,8 +125,11 @@ if (!window.ABCJS)
 				var voices = group.voices;
 				var top = group.y;
 				var height = group.height;
-				if (voices.length > 0) {	// Only consider the top voice. TODO-PER: Is this what we want, or do we need to merge the voices?
-					var elements = voices[0].children;
+				var maxVoiceTime = 0;
+				// Put in the notes for all voices, then sort them, then remove duplicates
+				for (var v = 0; v < voices.length; v++) {
+					var voiceTime = time;
+					var elements = voices[v].children;
 					for (var elem=0; elem<elements.length; elem++) {
 						var element = elements[elem];
 						if (element.duration > 0) {
@@ -124,11 +142,12 @@ if (!window.ABCJS)
 								// If the note is tied on both sides it can just be ignored.
 							} else {
 								// the last note wasn't tied.
-								timingEvents.push({ type: "event", time: time, top: top, height: height, left: element.x, width: element.w });
+								eventHash["event"+voiceTime] = { type: "event", time: voiceTime, top: top, height: height, left: element.x, width: element.w };
+								console.log("RAW:", "event"+voiceTime, element.x);
 								if (isTiedToNext)
 									isTiedState = true;
 							}
-							time += element.duration;
+							voiceTime += element.duration;
 						}
 						if (element.type === 'bar') {
 							if (timingEvents.length === 0 || timingEvents[timingEvents.length-1] !== 'bar') {
@@ -145,13 +164,18 @@ if (!window.ABCJS)
 										if (match)
 											lineNum = match[1];
 									}
-									timingEvents.push({ type: "bar", time: time, lineNum: lineNum, measureNum: measureNum });
+									eventHash["bar"+voiceTime] = { type: "bar", time: voiceTime, lineNum: lineNum, measureNum: measureNum };
+									console.log("RAW:", "bar"+voiceTime, lineNum, measureNum);
 								}
 							}
 						}
 					}
+					maxVoiceTime = Math.max(maxVoiceTime, voiceTime);
 				}
+				time = maxVoiceTime;
 			}
+			// now we have all the events, but if there are multiple voices then there may be events out of order or duplicated, so normalize it.
+			timingEvents = makeSortedArray(eventHash);
 		}
 		setupEvents(tune.engraver);
 
