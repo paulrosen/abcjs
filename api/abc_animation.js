@@ -109,8 +109,6 @@ if (!window.ABCJS)
 			arr = arr.sort(function(a,b) {
 				return a.time - b.time;
 			});
-			for (var i = 0; i < arr.length; i++)
-				console.log(arr[i].type, arr[i].time, arr[i].left);
 			return arr;
 		}
 
@@ -143,7 +141,6 @@ if (!window.ABCJS)
 							} else {
 								// the last note wasn't tied.
 								eventHash["event"+voiceTime] = { type: "event", time: voiceTime, top: top, height: height, left: element.x, width: element.w };
-								console.log("RAW:", "event"+voiceTime, element.x);
 								if (isTiedToNext)
 									isTiedState = true;
 							}
@@ -165,7 +162,6 @@ if (!window.ABCJS)
 											lineNum = match[1];
 									}
 									eventHash["bar"+voiceTime] = { type: "bar", time: voiceTime, lineNum: lineNum, measureNum: measureNum };
-									console.log("RAW:", "bar"+voiceTime, lineNum, measureNum);
 								}
 							}
 						}
