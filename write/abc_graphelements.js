@@ -243,13 +243,14 @@ ABCJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
     
 };
 
-ABCJS.write.VoiceElement = function(voicenumber, abcstaff) {
+ABCJS.write.VoiceElement = function(voicenumber, staffnumber, abcstaff) {
     this.children = [];
     this.beams = [];
     this.otherchildren = []; // ties, slurs, triplets
     this.w = 0;
     this.duplicate = false;
     this.voicenumber = voicenumber; //number of the voice on a given stave (not staffgroup)
+    this.staffnumber = staffnumber; // number of the staff in the staffgroup
     this.voicetotal = abcstaff.voices.length;
     this.stave = {
         y: 0
@@ -380,7 +381,7 @@ ABCJS.write.VoiceElement.prototype.draw = function(printer) {
     });
 
     window.ABCJS.parse.each(this.otherchildren, function(child) {
-        child.draw(printer, ve.startx + 10, width, ve.stave );
+        child.draw(printer, ve.startx + 10, width, ve.stave, ve.staffnumber );
     });
 
 };
@@ -664,7 +665,8 @@ ABCJS.write.EndingElem = function(text, anchor1, anchor2) {
     this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
 };
 
-ABCJS.write.EndingElem.prototype.draw = function(printer, linestartx, lineendx, staveInfo) {
+ABCJS.write.EndingElem.prototype.draw = function(printer, linestartx, lineendx, staveInfo, staffnumber) {
+    if(staffnumber > 0 ) return;
 
     var pathString;
     var y = printer.calcY(staveInfo.highest + 4);

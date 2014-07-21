@@ -11,11 +11,12 @@ if (!window.ABCJS)
 if (!window.ABCJS.tablature)
 	window.ABCJS.tablature = {};
     
-ABCJS.tablature.Layout = function( tuneCurrVoice, abcstaff, glyphs ) {
+ABCJS.tablature.Layout = function( tuneCurrVoice, tuneCurrStaff, abcstaff, glyphs ) {
    this.pos = 0;
    this.voice = {};
    this.currvoice = [];
    this.tuneCurrVoice = tuneCurrVoice;
+   this.tuneCurrStaff = tuneCurrStaff;
    this.abcstaff = abcstaff;
    this.glyphs = glyphs;
 };
@@ -28,7 +29,7 @@ ABCJS.tablature.Layout.prototype.getElem = function() {
 
 ABCJS.tablature.Layout.prototype.printTABVoice = function() {
     this.currVoice = this.abcstaff.voices[this.tuneCurrVoice];
-    this.voice = new ABCJS.write.VoiceElement(this.tuneCurrVoice, this.abcstaff);
+    this.voice = new ABCJS.write.VoiceElement(this.tuneCurrVoice, this.tuneCurrStaff, this.abcstaff);
 
     this.voice.addChild(this.printClef(this.abcstaff.clef));
     this.voice.addChild(new ABCJS.write.AbsoluteElement(this.abcstaff.key, 0, 10));

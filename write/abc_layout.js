@@ -113,7 +113,7 @@ ABCJS.write.Layout.prototype.layoutABCLine = function( abctune, line ) {
 
         for (this.tuneCurrVoice = 0; this.tuneCurrVoice < abcstaff.voices.length; this.tuneCurrVoice++) {
             this.currVoice = abcstaff.voices[this.tuneCurrVoice];
-            this.voice = new ABCJS.write.VoiceElement( this.tuneCurrVoice, abcstaff );
+            this.voice = new ABCJS.write.VoiceElement( this.tuneCurrVoice, this.tuneCurrStaff, abcstaff );
             
             if (this.tuneCurrVoice === 0) {
                 this.voice.barfrom = (abcstaff.connectBarLines === "start" || abcstaff.connectBarLines === "continue");
@@ -131,7 +131,7 @@ ABCJS.write.Layout.prototype.layoutABCLine = function( abctune, line ) {
                 (abcstaff.meter) && this.voice.addChild(this.printTimeSignature(abcstaff.meter));
                 this.printABCVoice();
             } else {
-                var p = new ABCJS.tablature.Layout(this.tuneCurrVoice, abcstaff, this.glyphs );
+                var p = new ABCJS.tablature.Layout(this.tuneCurrVoice, this.tuneCurrStaff, abcstaff, this.glyphs );
                 this.voice = p.printTABVoice();
             }
             
