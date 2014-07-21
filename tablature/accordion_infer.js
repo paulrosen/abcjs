@@ -131,28 +131,42 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
                     this.bassBarAcc = [];
                     this.trebBarAcc = [];
-//                } else if (abcBassElem.el_type === 'bar') {
-//                    alert( "ABCJS.tablature.Infer.prototype.accordionTabVoice - abcBassElem.el_type === bar: não devia passar aqui... ");
-//                    this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
-//                    idxBass--;
-//                } else if (abcTrebElem.el_type === 'bar') {
-//                    alert( "ABCJS.tablature.Infer.prototype.accordionTabVoice - abcBassTreb.el_type === bar: não devia passar aqui... ");
-//                    this.addTABChild(abcBassElem, inTieTreb, inTieBass);
-//                    idxTreb--;
                 } else if (bassDuration > trebDuration) {
-                    remainingBass = ABCJS.parse.clone(abcBassElem);
-                    remainingBass.duration = abcBassElem.duration - abcTrebElem.duration;
-                    for (var c = 0; c < abcBassElem.pitches.length; c++) {
-                        abcTrebElem.pitches.splice( c, 0, abcBassElem.pitches[c] );
-                    }
-                    this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
+                    if(!abcTrebElem.pitches ) {
+                        var rest = this.addMissingRest(abcBassElem.duration);
+                        trebVoice.splice(idxTreb-1, 0, rest);
+                        var tabelem = this.abcElem2TabElem(rest, false);
+                        for (var c = 0; c < abcBassElem.pitches.length; c++) {
+                            tabelem.pitches.push(ABCJS.parse.clone(abcBassElem.pitches[c]));
+                        }
+                        this.addTABChild(tabelem, inTieTreb, inTieBass);
+                        trebDuration += abcBassElem.duration;
+                    } else {
+                        remainingBass = ABCJS.parse.clone(abcBassElem);
+                        remainingBass.duration = abcBassElem.duration - abcTrebElem.duration;
+                        for (var c = 0; c < abcBassElem.pitches.length; c++) {
+                            abcTrebElem.pitches.splice( c, 0, abcBassElem.pitches[c] );
+                        }
+                        this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
+                    }    
                 } else if( bassDuration < trebDuration) {
-                    remainingTreb = ABCJS.parse.clone(abcTrebElem);
-                    remainingTreb.duration = abcTrebElem.duration - abcBassElem.duration;
-                    for (var c = 0; c < abcTrebElem.pitches.length; c++) {
-                        abcBassElem.pitches.push(abcTrebElem.pitches[c]);
+                    if(!abcBassElem.pitches ) {
+                        var rest = this.addMissingRest(abcTrebElem.duration);
+                        bassVoice.splice(idxBass-1, 0, rest);
+                        var tabelem = this.abcElem2TabElem(rest, true);
+                        for (var c = 0; c < abcTrebElem.pitches.length; c++) {
+                            tabelem.pitches.push(ABCJS.parse.clone(abcTrebElem.pitches[c]));
+                        }
+                        this.addTABChild(tabelem, inTieTreb, inTieBass);
+                        bassDuration += abcTrebElem.duration;
+                    } else {
+                        remainingTreb = ABCJS.parse.clone(abcTrebElem);
+                        remainingTreb.duration = abcTrebElem.duration - abcBassElem.duration;
+                        for (var c = 0; c < abcTrebElem.pitches.length; c++) {
+                            abcBassElem.pitches.push(abcTrebElem.pitches[c]);
+                        }
+                       this.addTABChild(abcBassElem, inTieTreb, inTieBass);
                     }
-                    this.addTABChild(abcBassElem, inTieTreb, inTieBass);
                 } else {
                     for (var c = 0; c < abcTrebElem.pitches.length; c++) {
                         abcBassElem.pitches.push(abcTrebElem.pitches[c]);
@@ -178,12 +192,19 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     this.trebBarAcc = [];
                 } else {
                     if(remaining) {
-                        dura = abcTrebElem.duration;
+                        if(abcTrebElem.duration > remainingBass.duration) {
+                            remainingTreb = ABCJS.parse.clone(abcTrebElem);
+                            dura = remainingBass.duration;
+                            abcTrebElem.duration = dura;
+                            remainingTreb.duration -= dura;
+                            //trebDuration -= remainingTreb.duration;
+                        } else {
+                            dura = abcTrebElem.duration;
+                        }  
                         for (var c = 0; c < remainingBass.pitches.length; c++) {
                             abcTrebElem.pitches.splice( c, 0, ABCJS.parse.clone(remainingBass.pitches[c]) );
                         }
                     }
-                    //trebDuration += dura;
                     this.addTABChild(abcTrebElem, inTieTreb, inTieBass || remaining );
                 }
                 idxTreb++;
@@ -210,12 +231,19 @@ ABCJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     this.bassBarAcc = [];
                 } else {
                     if( remaining ) {
-                        dura = abcBassElem.duration;
+                        if(abcBassElem.duration > remainingTreb.duration) {
+                            remainingBass = ABCJS.parse.clone(abcBassElem);
+                            dura = remainingTreb.duration;
+                            abcBassElem.duration = dura;
+                            remainingBass.duration -= dura;
+                            //bassDuration -= remainingBass.duration;
+                        } else {
+                            dura = abcBassElem.duration;
+                        }  
                         for (var c = 0; c < remainingTreb.pitches.length; c++) {
                             abcBassElem.pitches.push(ABCJS.parse.clone(remainingTreb.pitches[c]));
                         }
                     }
-                    //bassDuration += dura;
                     this.addTABChild(abcBassElem, inTieTreb || remaining, inTieBass );
                 }
                 idxBass++;

@@ -619,7 +619,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 		if (multilineVars.voices[id] === undefined) {
 			multilineVars.voices[id] = {};
 			isNew = true;
-			if (multilineVars.score_is_present)
+			if (multilineVars.score_is_present && id.toLowerCase().substr(0,3) !== "tab")
 				warn("Can't have an unknown V: id when the %score directive is present", line, start);
 		}
 		start += id.length;

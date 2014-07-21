@@ -882,10 +882,11 @@ window.ABCJS.parse.Parse = function(transporter_, accordion_) {
         tune.startNewLine(params);
 
         multilineVars.partForNextLine = "";
+        var mc = multilineVars.currentVoice;
 //        if (multilineVars.currentVoice === undefined || 
 //                (multilineVars.currentVoice.staffNum === multilineVars.staves.length - 1 
 //                && multilineVars.staves[multilineVars.currentVoice.staffNum].numVoices - 1 === multilineVars.currentVoice.index)) {
-        if (multilineVars.currentVoice === undefined || (multilineVars.start_new_line && multilineVars.currentVoice.staffNum === 0 ) ){
+        if (mc === undefined || (multilineVars.start_new_line && mc.staffNum === 0 ) ){
             //multilineVars.meter = null;
             if ( multilineVars.measureNotEmpty ) multilineVars.currBarNumber++;
             multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
