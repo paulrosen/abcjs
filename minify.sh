@@ -15,8 +15,6 @@ cat parse/abc_common.js parse/abc_parse.js parse/abc_parse_directive.js \
 cat tablature/accordion_map.js tablature/accordion_parse.js \
     tablature/accordion_infer.js tablature/accordion_layout.js > tmp/tablature.js
 
-cat diatonic/diatonic-map.js diatonic/accordion* > tmp/diatonic.js
-
 cat write/abc_glyphs.js write/abc_graphelements.js write/abc_layout.js \
     write/abc_write.js write/sprintf.js > tmp/write.js
 
