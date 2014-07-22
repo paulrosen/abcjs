@@ -82,11 +82,7 @@
 	<script type="text/javascript" src="parse/abc_common.js" ></script>
 
         <!-- diatonic accordion map -->
-        <script type="text/javascript" src="diatonic/diatonic-map.js"></script>
-        <script type="text/javascript" src="diatonic/accordion.hohner.gc.js"></script>
-        <script type="text/javascript" src="diatonic/accordion.hohner.clubIIIM.br.js"></script>
-        <script type="text/javascript" src="diatonic/accordion.hohner.clubIIIM.js"></script>
-        <script type="text/javascript" src="diatonic/accordion.hohner.coronaII.js"></script>
+        <script type="text/javascript" src="../diatonic-map/diatonic/diatonic-map.js"></script>
         
         <!-- support for diatonic accordion tablature -->
         <script type="text/javascript" src="tablature/accordion_map.js"></script>
@@ -143,11 +139,41 @@ K:none accordionTab
         
         <script type="text/javascript">
             window.myEditor = {};
+            window.accordionMaps = [];
             window.printButton = document.getElementById("printBtn");
             
             window.addEventListener('load', initApp, false);
 
+            function loadAccordions( files, cb )  {
+                var toLoad = 0;
+                for( var f = 0; f <  files.length; f ++ ) {
+                    toLoad ++;
+                    $.getJSON( files[f], {  format: "json"  })
+                        .done(function( data ) {
+                            window.accordionMaps.push( new DIATONIC.map.Accordion(data) );
+                        })
+                        .fail(function( data, textStatus, error ) {
+                            var err = textStatus + ", " + error;
+                            console.log( "Accordion Load Failed:\nLoading: " + data.responseText.substr(1,40) + '...\nError:\n ' + err );
+                        })
+                        .always(function() {
+                            toLoad --;
+                            if( toLoad === 0 && cb ) cb();
+                        });
+                }
+            };
+            
             function initApp() {
+                loadAccordions(
+                    [
+                       'accordions/hohner.gc.accordion'
+                      ,'accordions/hohner.cf.club.br.accordion'
+                    ]
+                    ,initApp1 // call back after loading
+                );
+            }
+            
+            function initApp1() {
 
                 debug = false;
 
@@ -158,6 +184,7 @@ K:none accordionTab
                             ,warnings_id: "warnings"
                             ,refreshController_id: "chkAutoRefresh"
                             ,accordionSelector_id: "selGaitas"
+                            ,accordionMaps: window.accordionMaps
                             ,keySelector_id: "selKey"
                             ,midi_options: {program: 21, qpm: 150, type: "qt"}
                             ,render_options: {}

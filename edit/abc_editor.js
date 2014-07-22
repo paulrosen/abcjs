@@ -252,7 +252,7 @@ window.ABCJS.Editor = function(editarea, params) {
     this.refreshController = document.getElementById(params.refreshController_id);
 
   if(params.accordionSelector_id)  {
-    this.accordion = new window.ABCJS.tablature.Accordion();
+    this.accordion = new window.ABCJS.tablature.Accordion({id: undefined, accordionMaps: params.accordionMaps});
     this.accordionSelector = new window.ABCJS.edit.AccordionSelector(params.accordionSelector_id);
     this.accordionSelector.populate(this.accordion);
     this.accordionSelector.addChangeListener(this);

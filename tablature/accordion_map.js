@@ -10,7 +10,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.tablature)
 	window.ABCJS.tablature = {};
 
-ABCJS.tablature.Accordion = function( id ) {
+ABCJS.tablature.Accordion = function( params ) {
     
     this.noteToButtonsOpen  = {}; 
     this.noteToButtonsClose  = {}; 
@@ -19,14 +19,14 @@ ABCJS.tablature.Accordion = function( id ) {
     this.selected        = -1;
     this.tabLines       = [];
     
-    if( ! window.DIATONIC.map ) {
-       this.accordions  = [];
+    if( params.accordionMaps ) {
+       this.accordions = params.accordionMaps;
     } else {
-        this.accordions = window.DIATONIC.map.models;
+        this.accordions = [];
     }
     
-    if( id )
-        this.loadById( id );
+    if( params.id )
+        this.loadById( params.id );
     else
         this.load(0);
 
