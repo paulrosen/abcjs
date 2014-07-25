@@ -78,9 +78,20 @@ window.ABCJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
   };
 };
 
-window.ABCJS.edit.AccordionSelector = function(id) {
+    //this.editor.accordionSelector.updateAccordionList();
+
+
+window.ABCJS.edit.AccordionSelector = function(id, accordion) {
   this.selector = document.getElementById(id);
-    };
+  this.accordion = accordion;
+};
+
+window.ABCJS.edit.AccordionSelector.prototype.updateAccordionList = function() {
+    while(this.selector.options.length > 0){                
+        this.selector.remove(0);
+    }    
+    this.populate();
+};
 
 window.ABCJS.edit.AccordionSelector.prototype.addChangeListener = function(editor) {
   this.selector.onchange = function() {
@@ -89,10 +100,10 @@ window.ABCJS.edit.AccordionSelector.prototype.addChangeListener = function(edito
   };
 };
     
-window.ABCJS.edit.AccordionSelector.prototype.populate = function(accordion) {
-    for (var i = 0; i < accordion.accordions.length; i++) {
+window.ABCJS.edit.AccordionSelector.prototype.populate = function() {
+    for (var i = 0; i < this.accordion.accordions.length; i++) {
         var opt = document.createElement('option');
-        opt.innerHTML = accordion.accordions[i].getName();
+        opt.innerHTML = this.accordion.accordions[i].getName();
         opt.value = i;
         this.selector.appendChild(opt);
     }
@@ -253,8 +264,8 @@ window.ABCJS.Editor = function(editarea, params) {
 
   if(params.accordionSelector_id)  {
     this.accordion = new window.ABCJS.tablature.Accordion({id: undefined, accordionMaps: params.accordionMaps});
-    this.accordionSelector = new window.ABCJS.edit.AccordionSelector(params.accordionSelector_id);
-    this.accordionSelector.populate(this.accordion);
+    this.accordionSelector = new window.ABCJS.edit.AccordionSelector(params.accordionSelector_id, this.accordion);
+    this.accordionSelector.populate();
     this.accordionSelector.addChangeListener(this);
   }
   if(params.keySelector_id) {  
