@@ -75,7 +75,7 @@ Partial list of some websites using abcjs:
 
     http://www.drawthedots.com (editor)
     http://www.tradzone.net/forum (plugin) (sample page)
-    http://http://abcnotation.com/forums (plugin) (sample page)
+    http://abcnotation.com/forums (plugin) (sample page)
     http://www.pmwiki.org/wiki/Cookbook/AbcTunebook (plugin and editor) (this is an addon for pmwiki for creating tune books)
     http://www.tunepal.org (basic)
     http://people.opera.com/howcome/2010/video/norway/ (Demoed during a keynote at Google I/O 2010 by Håkon Wium Lie, CTO of Opera)
