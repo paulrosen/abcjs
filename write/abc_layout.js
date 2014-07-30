@@ -506,7 +506,7 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
 	  }
   }
   
-  if (elem.barNumber) {
+  if (elem.barNumber && (this.v == 0) && (this.s == 0)) {
     abselem.addChild(new ABCJS.write.RelativeElement(elem.barNumber, -10, 0, 0, {type:"debug"}));
   }
   
