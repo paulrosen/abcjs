@@ -70,7 +70,7 @@ MidiProxy.prototype.embed = function(parent) {
   this.qtmidi.embed(parent,true);
 };
 
-MidiProxy.prototype.getData = function() {   //DJH
+MidiProxy.prototype.getData = function() {
   return this.qtmidi.getData();
 }
 
@@ -517,7 +517,7 @@ ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
       }
     }
     
-    this.options.embed ? this.options.embed(this.parent, abctune, this.midi.getData()) : this.midi.embed(this.parent); //DJH
+    this.options.embed ? this.options.embed(this.parent, abctune, this.midi.getData()) : this.midi.embed(this.parent);
   } catch (e) {
     this.parent.innerHTML="Couldn't write midi: "+e;
   }
