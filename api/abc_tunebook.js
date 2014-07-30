@@ -114,18 +114,23 @@ if (!window.ABCJS)
 		var book = new ABCJS.TuneBook(abc);
 		var abcParser = new window.ABCJS.parse.Parse();
 
-		// output each tune, if it exists. Otherwise clear the div.
+		// output each tune, if it exists.
+        //  The following special actions are taken based on the type of output object
+        //      string: name of an element in the HTML document. The element is looked up.
+        //      DOM node (nodeType exists): the DOM node innerHTML is cleared
+        //      other: no special action
 		for (var i = 0; i < output.length; i++) {
-			var div = output[i];
-			if (typeof(div) === "string")
-				div = document.getElementById(div);
-			if (div) {
-				div.innerHTML = "";
+			var outputObject = output[i];
+			if (typeof(outputObject) === "string")
+				outputObject = document.getElementById(outputObject);
+			if (outputObject !== null && outputObject !== undefined) {
+				if(outputObject.nodeType)
+                    outputObject.innerHTML = "";
 				if (currentTune < book.tunes.length) {
 					abcParser.parse(book.tunes[currentTune].abc, parserParams);
 					var tune = abcParser.getTune();
 					ret.push(tune);
-					callback(div, tune);
+					callback(outputObject, tune);
 				}
 			}
 			currentTune++;
