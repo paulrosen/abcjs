@@ -95,14 +95,11 @@ if (!window.ABCJS)
 
 	function renderEngine(callback, output, abc, parserParams, renderParams) {
 		var ret = [];
-		var isArray = function(testObject) {
-			return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
-		};
 
 		// check and normalize input parameters
 		if (output === undefined || abc === undefined)
 			return;
-		if (!isArray(output))
+		if (!ABCJS.isArray(output))
 			output = [ output ];
 		if (parserParams === undefined)
 			parserParams = {};
@@ -161,6 +158,7 @@ if (!window.ABCJS)
 			/* jshint -W064 */ var paper = Raphael(div, width, 400); /* jshint +W064 */
 			if (engraverParams === undefined)
 				engraverParams = {};
+engraverParams.add_classes = true; // DJH temporary                
 			var engraver_controller = new ABCJS.write.Printer(paper, engraverParams);
 			engraver_controller.printABC(tune);
 			tune.engraver = engraver_controller;
@@ -195,4 +193,9 @@ if (!window.ABCJS)
 
 		return renderEngine(callback, output, abc, parserParams, renderParams);
 	};
+    
+    ABCJS.isArray = function(testObject) {
+			return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
+	};
+
 })();

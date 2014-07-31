@@ -25,7 +25,7 @@ if (!window.ABCJS.write)
 // duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
 // minspacing - spacing which must be taken on top of the width defined by the duration
 // type is a meta-type for the element. It is not necessary for drawing, but it is useful to make semantic sense of the element. For instance, it can be used in the element's class name.
-ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing, type) {
+ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing, type, opt) {
 	this.abcelem = abcelem;
 	this.duration = duration;
 	this.minspacing = minspacing || 0;
@@ -41,6 +41,7 @@ ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing, type) {
 	this.bottom = 7;
 	this.top = 7;
 	this.type = type;
+    this.voice = (opt !== undefined && opt.voice) || null; 
 };
 
 ABCJS.write.AbsoluteElement.prototype.getMinWidth = function () { // absolute space taken to the right of the note
@@ -94,6 +95,12 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	this.elemset.push(renderer.endGroup(this.type));
 	if (this.klass)
 		this.setClass("mark", "", "#00ff00");
+        
+     if(this.voice != null) {
+        this.setClass("V" + this.voice.number, "", null);
+        this.setClass("S" + this.voice.staff + "V" + this.voice.staffvoice, "", null);
+     }
+     
 	var self = this;
 	this.elemset.mouseup(function () {
 		renderer.notifySelect(self);

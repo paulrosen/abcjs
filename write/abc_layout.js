@@ -226,7 +226,7 @@ ABCJS.write.Layout.prototype.printBeam = function() {
   var abselemset = [];
   
   if (this.getElem().startBeam && !this.getElem().endBeam) {
-    var beamelem = new ABCJS.write.BeamElem(this.stemdir);
+    var beamelem = new ABCJS.write.BeamElem(this.stemdir, undefined, {voice:{number:this.voice.voicenumber, staff:this.s, staffvoice:this.v}});
 	   // PER: need two passes: the first one decides if the stems are up or down.
 	  // TODO-PER: This could be more efficient.
 	  var oldPos = this.pos;
@@ -241,7 +241,7 @@ ABCJS.write.Layout.prototype.printBeam = function() {
 	  var dir = beamelem.calcDir();
 	  this.pos = oldPos;
 
-	  beamelem = new ABCJS.write.BeamElem(dir ? "up" : "down");
+	  beamelem = new ABCJS.write.BeamElem(dir ? "up" : "down", undefined, {voice:{number:this.voice.voicenumber, staff:this.s, staffvoice:this.v}});
 	  var oldDir = this.stemdir;
 	  this.stemdir = dir ? "up" : "down";
     while (this.getElem()) {
@@ -305,7 +305,7 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
   }
   
 
-  var abselem = new ABCJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1, 'note');
+  var abselem = new ABCJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1, 'note', {voice:{number:this.voice.voicenumber, staff:this.s, staffvoice:this.v}});
   
 
   if (elem.rest) {
@@ -435,7 +435,7 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
       if (p2<6 && !this.stemdir) p2=6;
       dx = (dir==="down" || abselem.heads.length === 0)?0:abselem.heads[0].w;
       width = (dir==="down")?1:-1;
-      abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+      abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width, voice:{number:this.voice.voicenumber, staff:this.s, staffvoice:this.v}}));
         this.minY = Math.min(p1, this.minY);
         this.minY = Math.min(p2, this.minY);
     }
@@ -454,7 +454,7 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
     var gracescale = 3/5;
     var gracebeam = null;
     if (elem.gracenotes.length>1) {
-      gracebeam = new ABCJS.write.BeamElem("grace",this.isBagpipes);
+      gracebeam = new ABCJS.write.BeamElem("grace",this.isBagpipes, {voice:{number:this.voice.voicenumber, staff:this.s, staffvoice:this.v}});
     }
 
     var graceoffsets = [];

@@ -22,7 +22,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
 	window.ABCJS.write = {};
 
-ABCJS.write.BeamElem = function(type, flat) {
+ABCJS.write.BeamElem = function(type, flat, opt) {
 	this.isflat = (flat);
 	this.isgrace = (type && type==="grace");
 	this.forceup = (type && type==="up");
@@ -32,6 +32,8 @@ ABCJS.write.BeamElem = function(type, flat) {
 	this.dy = (this.asc)?ABCJS.write.spacing.STEP*1.2:-ABCJS.write.spacing.STEP*1.2;
 	if (this.isgrace) this.dy = this.dy*0.4;
 	this.allrests = true;
+    
+    this.voice = (opt !== undefined && opt.voice) || null;
 };
 
 ABCJS.write.BeamElem.prototype.add = function(abselem) {
@@ -105,7 +107,10 @@ ABCJS.write.BeamElem.prototype.drawBeam = function(renderer) {
 
 	var pathString = "M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
 		"L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z";
-	renderer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': renderer.addClasses('beam-elem')});
+        
+    var classes = ['beam-elem'];
+    if(this.voice) classes = classes.concat(["V" + this.voice.number, "S" + this.voice.staff + "V" + this.voice.staffvoice]);
+	renderer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': renderer.addClasses(classes)});
 };
 
 ABCJS.write.BeamElem.prototype.drawStems = function(renderer) {
@@ -134,6 +139,9 @@ ABCJS.write.BeamElem.prototype.drawStems = function(renderer) {
 			}
 		}
 
+        var classes = ['beam-elem'];
+        if(this.voice) classes = classes.concat(["V" + this.voice.number, "S" + this.voice.staff + "V" + this.voice.staffvoice]);
+        
 		for (var j=auxbeams.length-1;j>=0;j--) {
 			if (i===ii-1 || ABCJS.write.getDurlog(this.elems[i+1].abcelem.duration)>(-j-4)) {
 
@@ -149,12 +157,13 @@ ABCJS.write.BeamElem.prototype.drawStems = function(renderer) {
 
 				var pathString ="M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
 					"L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z";
-				renderer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': renderer.addClasses('beam-elem')});
+                    
+				renderer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': renderer.addClasses(classes)});
 				auxbeams = auxbeams.slice(0,j);
 			}
 		}
 	}
-	renderer.endGroup('beam-elem');
+	renderer.endGroup(classes);
 };
 
 ABCJS.write.BeamElem.prototype.getBarYAt = function(x) {
