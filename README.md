@@ -15,7 +15,7 @@ License: [The MIT License (MIT)](http://opensource.org/licenses/MIT)
 ## The abcjs libraries come in three basic flavors:
 
 | Library Name | Description | Demo |
-| -- | -- | -- |
+| ------------- | ----------- | ----------- |
 | abcjs basic | Call the library from javascript, passing the abc string to it. | [Basic](http://abcjs.net/abcjs-basic.html) |
 | abcjs editor | Transforms a textarea into an abc editor with score sheet and audio. | [Editor](http://abcjs.net/abcjs-editor.html) |
 | abcjs plugin | Adds onto an existing webpage, rendering all abc it finds. | [Plugin](http://abcjs.net/abcjs-plugin.html) |
@@ -61,7 +61,7 @@ And here are the latest versions packaged without the standard libraries. To use
 ## Partial list of some websites using abcjs:
 
 | Site | Notes |
-| -- | -- | -- |
+| ------------- | ----------- |
 | http://www.drawthedots.com | (editor) |
 | http://www.tradzone.net/forum | (plugin) (sample page) |
 | http://abcnotation.com/forums | (plugin) (sample page) |
@@ -127,7 +127,7 @@ tune = book.getTuneByTitle(title);
 The variable `book` contains:
 
 | Member | Description |
-| -- | -- | -- |
+| ------------- | ----------- |
 | book.header | This is all of the text that appears before the first tune starts in the file. |
 | book.tunes.length | This is how many tunes are in that file. |
 | book.tunes[i].title | This is the first title found for the particular tune. White space is trimmed from both the beginning and end. |
@@ -149,7 +149,7 @@ window.ABCJS
 This means that you will have to modify your pages to use the new syntax. All of the old entry points are still available with a slightly different name. Here is a list of all recommended entry points:
 
 |New name|Old name|
-| -- | -- |
+| ------------- | ----------- |
 |ABCJS.numberOfTunes|numberOfTunes|
 |ABCJS.renderAbc|renderABC|
 |ABCJS.renderMidi|renderMidi|
