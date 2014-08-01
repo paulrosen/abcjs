@@ -4,6 +4,8 @@
 
 [abcjs Home page](http://abcjs.net)
 
+[API Documentation](/api.md)
+
 This library makes it easy to incorporate **sheet music** into your **websites**. You can also turn visible **ABC** text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of this javascript file.
 
 **NOTE: We are changing the release license to the MIT License, effective immediately. Let us know if this causes any problems, but we're hoping that it solves some. Our goal is that you can use this library in a convenient way, as long as you give us credit for it.**
