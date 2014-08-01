@@ -5,7 +5,7 @@
 The main entry point is `ABCJS.renderAbc`. Many users won't need to make any other call. That is enough to turn an arbitrary JavaScript string into an SVG image of sheet music.
  
 | ABCJS Entry Points | Description |
-| -- | -- |
+| ------------- | ----------- |
 | `integer = ABCJS.numberOfTunes(tunebookString)` | Returns the number of tunes found in the tunebook. |
 | `tunebook = new ABCJS.TuneBook(tunebookString)` | Returns a `TuneBook` object, describing the tunebook passed in. |
 | `tuneObjectArray = ABCJS.renderAbc(output, tunebookString, parserParams, engraverParams, renderParams)` | Completely renders the tunebook. |
@@ -14,7 +14,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `ABCJS.stopAnimation()` | Stops the animation that was started with `startAnimation`. |
 
 | Parameters | Description |
-| -- | -- |
+| ------------- | ----------- |
 | `tunebookString` | A plain text string in ABC syntax that corresponds to either a single ABC tune or a list of ABC tunes. |
 | `output` | If this is a string, it is the ID of an element on the DOM. Or it could be the DOM element itself. Or it could be an array of strings or DOM elements. |
 | `outputElement` | This is the DOM element that was originally passed in when the tune was rendered. |
@@ -23,13 +23,13 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | All items ending in `Params` | A hash of values. See below for the possible keys. |
 
 | `parserParams` | Default | Description |
-| -- | -- | -- |
+| ------------- | ----------- | ----------- |
 | `print` | false | pay attention to margins and other formatting commands that don't make sense in a web page |
 | `header_only` | false |only parse the header |
 | `stop_on_warning` | false | only parse until the first warning is encountered |
 
 | `engraverParams` | Default | Description |
-| -- | -- | -- |
+| ------------- | ----------- | ----------- |
 | `scale` | 1 | If the number passed is between zero and one, then the music is printed smaller, if above one, then it is printed bigger. |
 | `staffwidth` | 740 | The width of the music, in pixels. |
 | `paddingtop` | 15 | The spacing that the music should have on the webpage. |
@@ -41,29 +41,32 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 
 
 | `midiParams` | Default | Description |
-| -- | -- |
+| ------------- | ----------- | ----------- |
 | `qpm` | 180 | The tempo, if not specified in abcString. |
 | `program` | 2 | The midi program to use, if not specified in abcString. |
 
 | `renderParams` | Default | Description |
-| -- | -- |
+| ------------- | ----------- | ----------- |
 | `startingTune` | 0 | The index of the tune in the tunebook to render (starting at zero for the first tune). |
 
-| `animationParams` | Description |
-| -- | -- |
-TODO
+| `animationParams` | Default | Description |
+| ------------- | ----------- | ----------- |
+| hideFinishedMeasures | false | true or false |
+| showCursor | false | true or false |
+| bpm | whatever is in the Q: field | number of beats per minute. |
+
 
 The following assumes you've created a `TuneBook` object like this: `var tunebook = ABCJS.TuneBook(tunebookString)`:
 
 | `TuneBook` Object | Description |
-| -- | -- |
+| ------------- | ----------- |
 | `tuneHash = tunebook.getTuneById(id)` | The `id` is the value in the tune's `X:` field. The returns the **first** occurrence of a tune with that ID. |
 | `tuneHash = tunebook.getTuneByTitle(title)` | The `title` is the value in the tune's first `T:` field. The returns the **first** occurrence of a tune with that title.  |
 | `tunebook.tunes` | Array of `tune` hash. |
 | `tunebook.header` | Any ABC `%%directives` that appear at the top of the `tunebookString`, before the first tune. |
 
 | `tuneHash` | description |
-| -- | -- |
+| ------------- | ----------- |
 | `abc` |  String in ABC format. |
 | `startPos` | Character position (zero-based) in the original tunebook where the tune starts. |
 
@@ -81,7 +84,7 @@ Typical usage is:
 	</script>
 
 | Editor entry points | Description |
-| -- | -- |
+| ------------- | ----------- |
 | `abc_editor = new ABCJS.Editor(editArea, editorParams)` | constructor of the editor object |
 | `setReadOnly(bool)` |adds or removes the class abc_textarea_readonly, and adds or removes the attribute readonly=yes |
 | `setDirtyStyle(bool)` | adds or removes the class abc_textarea_dirty |
@@ -99,12 +102,12 @@ Typical usage is:
 | `pauseMidi(shouldPause)` | Stops the automatic re-rendering of the MIDI. |
 
 | Edit parameters | Description |
-| -- | -- |
+| ------------- | ----------- |
 | `editArea` | If it is a string, then it is an HTML id of a textarea control. Otherwise, it should be an instantiation of an object that expresses the `EditArea` interface. |
 | `editorParams` | Hash of parameters for the editor. |
 
 | editorParams | Description |
-| -- | -- |
+| ------------- | ----------- |
 | `canvas_id or paper_id` | HTML id to draw in. If not present, then the drawing happens just below the editor. |
 | `generate_midi` | if present, then midi is generated. |
 | `midi_id` | if present, the HTML id to place the midi control. Otherwise it is placed in the same div as the paper. |
@@ -138,7 +141,7 @@ Certain options for the plugin can be changed like this, if executed on page loa
 The options available in abc_plugin are:
 
 | Option | Description |
-| -- | -- |
+| ------------- | ----------- |
 | `show_midi` | Whether midi should be rendered or not. (true by default) |
 | `hide_abc` | Whether the abc text should be hidden or not. (false by default) since 1.0.2 |
 | `render_before` | Whether the rendered score should appear before the abc text. (false by default) since 1.0.2 |
