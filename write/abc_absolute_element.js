@@ -89,9 +89,16 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	this.elemset = renderer.paper.set();
 	if (this.invisible) return;
 	renderer.beginGroup();
+    // Draw  the notehead out first, so that the SVG paths all start with the position of the notehead, simplifying post-processing of the SVG
 	for (var i=0; i<this.children.length; i++) {
-		this.elemset.push(this.children[i].draw(renderer,this.x, bartop));
+        var child = this.children[i];
+        if(typeof(child.c)=="string" && child.c.substring(0,4) == 'note') this.elemset.push(child.draw(renderer,this.x, bartop));
 	}
+	for (var i=0; i<this.children.length; i++) {
+        var child = this.children[i];
+        if(typeof(child.c) != "string" || child.c.substring(0,4) != 'note') this.elemset.push(child.draw(renderer,this.x, bartop));
+	}
+
 	this.elemset.push(renderer.endGroup(this.type));
 	if (this.klass)
 		this.setClass("mark", "", "#00ff00");
