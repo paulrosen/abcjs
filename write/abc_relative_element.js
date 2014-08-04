@@ -37,6 +37,8 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 	this.attributes = opt.attributes; // only present on textual elements
 	this.top = pitch + ((opt.extreme==="above")? 7 : 0);
 	this.bottom = pitch - ((opt.extreme==="below")? 7 : 0);
+    
+    this.voice = (opt !== undefined && opt.voice) || null;
 };
 
 ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
@@ -58,7 +60,13 @@ ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
 		case "bar":
 			this.graphelem = renderer.printStem(this.x, this.linewidth, renderer.calcY(this.pitch), (bartop)?bartop:renderer.calcY(this.pitch2)); break; // bartop can't be 0
 		case "stem":
-			this.graphelem = renderer.printStem(this.x, this.linewidth, renderer.calcY(this.pitch), renderer.calcY(this.pitch2)); break;
+			this.graphelem = renderer.printStem(this.x, this.linewidth, renderer.calcY(this.pitch), renderer.calcY(this.pitch2));
+            if(this.graphelem && this.voice != null) {
+                this.setClass("V" + this.voice.number, "", null);
+                this.setClass("S" + this.voice.staff + "V" + this.voice.staffvoice, "", null);
+            }
+                
+            break;
 		case "ledger":
 			this.graphelem = renderer.printStaveLine(this.x, this.x+this.w, this.pitch); break;
 	}
@@ -68,5 +76,27 @@ ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
 	if (this.attributes) {
 		this.graphelem.attr(this.attributes);
 	}
+    
 	return this.graphelem;
+};
+
+ABCJS.write.RelativeElement.prototype.setClass = function (addClass, removeClass, color) {
+	if (color !== null)
+		this.graphelem.attr({fill:color});
+	if (!this.isIE) {
+        for(i=0; i < this.graphelem.length; ++i) {
+            var elem = this.graphelem[i];
+            if (elem.setAttribute) {
+                var kls = elem.getAttribute("class");
+                if (!kls) kls = "";
+                kls = kls.replace(removeClass, "");
+                kls = kls.replace(addClass, "");
+                if (addClass.length > 0) {
+                    if (kls.length > 0 && kls.charAt(kls.length-1) !== ' ') kls += " ";
+                    kls += addClass;
+                }
+                elem.setAttribute("class", kls);
+            }
+        }
+	}
 };

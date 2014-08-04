@@ -70,6 +70,10 @@ MidiProxy.prototype.embed = function(parent) {
   this.qtmidi.embed(parent,true);
 };
 
+MidiProxy.prototype.getData = function() {
+  return this.qtmidi.getData();
+}
+
 function JavaMidi(midiwriter) {
   this.playlist = []; // contains {time:t,funct:f} pairs
   this.trackcount = 0;
@@ -154,8 +158,6 @@ JavaMidi.prototype.addRest = function (length) {
 };
 
 JavaMidi.prototype.embed = function(parent) {
-
-  
   this.playlink = setAttributes(document.createElement('a'), {
     style: "border:1px solid black; margin:3px;"
     });  
@@ -286,11 +288,12 @@ Midi.prototype.addRest = function (length) {
   this.silencelength += length;
 };
 
-Midi.prototype.embed = function(parent, noplayer) {
+Midi.prototype.getData = function() {
+  return "MThd%00%00%00%06%00%01" + toHex(this.trackcount,4)+"%01%e0" + this.trackstrings;
+}
 
-  var data="data:audio/midi," + 
-  "MThd%00%00%00%06%00%01"+toHex(this.trackcount,4)+"%01%e0"+ // header
-  this.trackstrings;
+Midi.prototype.embed = function(parent, noplayer) {
+  var data = "data:audio/midi," + this.getData();
 
 //   var embedContainer = document.createElement("div");
 //   embedContainer.className = "embedContainer";
@@ -364,7 +367,7 @@ function toDurationHex(n) {
 }
 
 ABCJS.midi.MidiWriter = function(parent, options) {
-  options = options || {};
+  this.options = options || {};
   this.parent = parent;
   this.scale = [0,2,4,5,7,9,11];
   this.restart = {line:0, staff:0, voice:0, pos:0};
@@ -485,11 +488,11 @@ ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
     if (abctune.metaText.tempo) {
       var duration = 1/4;
       if (abctune.metaText.tempo.duration) {
-	duration = abctune.metaText.tempo.duration[0];
+        duration = abctune.metaText.tempo.duration[0];
       }
       var bpm = 60;
       if (abctune.metaText.tempo.bpm) {
-	bpm = abctune.metaText.tempo.bpm;
+        bpm = abctune.metaText.tempo.bpm;
       }
       this.qpm = bpm*duration*4;
     } 
@@ -501,20 +504,20 @@ ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
     for(this.staff=0;this.staff<this.staffcount;this.staff++) {
       this.voicecount=1;
       for(this.voice=0;this.voice<this.voicecount;this.voice++) {
-	this.midi.startTrack();
-	this.restart = {line:0, staff:this.staff, voice:this.voice, pos:0};
-	this.next= null;
-	for(this.line=0; this.line<abctune.lines.length; this.line++) {
-	  var abcline = abctune.lines[this.line];
-	  if (this.getLine().staff) {
-	    this.writeABCLine();
-	  }
-	}
-	this.midi.endTrack();
+        this.midi.startTrack();
+        this.restart = {line:0, staff:this.staff, voice:this.voice, pos:0};
+        this.next= null;
+        for(this.line=0; this.line<abctune.lines.length; this.line++) {
+          var abcline = abctune.lines[this.line];
+          if (this.getLine().staff) {
+            this.writeABCLine();
+          }
+        }
+        this.midi.endTrack();
       }
     }
     
-    this.midi.embed(this.parent);
+    this.options.embed ? this.options.embed(this.parent, abctune, this.midi.getData()) : this.midi.embed(this.parent);
   } catch (e) {
     this.parent.innerHTML="Couldn't write midi: "+e;
   }

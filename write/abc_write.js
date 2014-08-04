@@ -56,9 +56,13 @@ ABCJS.write.Printer = function(paper, params) {
 		Raphael._availableAttrs['class'] = "";
 };
 
-ABCJS.write.Printer.prototype.addClasses = function (c) {
+ABCJS.write.Printer.prototype.addClasses = function (c, voice) {
 	var ret = [];
-	if (c.length > 0) ret.push(c);
+    if(ABCJS.isArray(c))
+        ret = ret.concat(c);
+     else if (c.length > 0) 
+        ret.push(c);
+     
 	if (this.lineNumber !== null) ret.push("l"+this.lineNumber);
 	if (this.measureNumber !== null) ret.push("m"+this.measureNumber);
 	return ret.join(' ');
