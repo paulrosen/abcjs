@@ -411,12 +411,20 @@ window.ABCJS.parse.parseDirective = {};
 				tune.addNewPage(pgNum.digits === 0 ? -1 : pgNum.value);
 				break;
 
-			case "abc-copyright":
-			case "abc-creator":
-			case "abc-version":
-			case "abc-charset":
-			case "abc-edited-by":
-				tune.addMetaText(cmd, restOfString);
+			case "abc":
+				var arr = restOfString.split(' ');
+				switch (arr[0]) {
+					case "-copyright":
+					case "-creator":
+					case "-edited-by":
+					case "-version":
+					case "-charset":
+						var subCmd = arr.shift();
+						tune.addMetaText(cmd+subCmd, arr.join(' '));
+						break;
+					default:
+						return "Unknown directive: " + cmd+arr[0];
+				}
 				break;
 			case "header":
 			case "footer":
@@ -432,8 +440,8 @@ window.ABCJS.parse.parseDirective = {};
 					footer = { left: footerArr[0], center: footerArr[1], right: "" };
 				else
 					footer = { left: footerArr[0], center: footerArr[1], right: footerArr[2] };
-				 if (footerArr.length > 3)
-					 warn("Too many tabs in "+cmd+": "+footerArr.length+" found.", restOfString, 0);
+				if (footerArr.length > 3)
+					warn("Too many tabs in " + cmd + ": " + footerArr.length + " found.", restOfString, 0);
 
 				tune.addMetaTextObj(cmd, footer);
 				break;
