@@ -1,8 +1,12 @@
-Version 1.11
-===
+# Version 1.12
 
-Features
----
+* Improved documentation.
+
+* Accept `%%abc-*` meta commands.
+
+# Version 1.11
+
+## Features
 
 * Added new entry points: ABCJS.startAnimation() and ABCJS.stopAnimation(), which allow for a bouncing ball-type cursor.
 
