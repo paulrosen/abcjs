@@ -78,9 +78,6 @@ window.ABCJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
   };
 };
 
-    //this.editor.accordionSelector.updateAccordionList();
-
-
 window.ABCJS.edit.AccordionSelector = function(id, accordion) {
   this.selector = document.getElementById(id);
   this.accordion = accordion;
@@ -450,11 +447,6 @@ window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
     abcParser.parse(tunebook.tunes[i].abc, this.parserparams ); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
     
-    if( this.accordion ) { 
-        // obtem possiveis linhas inferidas para tablatura
-        this.editarea.appendString( this.accordion.updateEditor() );
-    }
-    
     if( this.transposer ) { 
         if( this.transposer.offSet !== 0 ) {
           var lines = abcParser.tuneHouseKeeping(tunebook.tunes[i].abc);
@@ -462,6 +454,11 @@ window.ABCJS.Editor.prototype.parseABC = function(transpose, force ) {
         }
         if(this.keySelector) 
             this.keySelector.set( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
+    }
+    
+    if( this.accordion ) { 
+        // obtem possiveis linhas inferidas para tablatura
+        this.editarea.appendString( this.accordion.updateEditor() );
     }
     
     var warnings = abcParser.getWarnings() || [];

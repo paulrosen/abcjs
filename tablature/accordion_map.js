@@ -79,11 +79,6 @@ ABCJS.tablature.Accordion.prototype.load = function (sel) {
     }
 };
 
-//ABCJS.tablature.Accordion.prototype.getBassNote = function (note) {
-//    var n = note.split(":");
-//    return n[0].substr( 0, n[0].length-1);
-//};
-
 ABCJS.tablature.Accordion.prototype.getNoteVal = function (note, bass) {
 //não vou tratar acordes menores e com sétima
 //para os baixos, retorna o valor sem a oitava
@@ -93,7 +88,6 @@ ABCJS.tablature.Accordion.prototype.getNoteVal = function (note, bass) {
     var o = parseInt(n[0].substr( n[0].length-1));
     return (bass?b:k+o*12);
 };
-
 
 ABCJS.tablature.Accordion.prototype.getButtons = function (note, bass) {
   // retorna a lista de botões possíveis para uma valor de nota
