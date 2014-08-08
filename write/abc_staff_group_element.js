@@ -82,7 +82,7 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, controller, d
 	var voiceheaderw = 0;
 	for (var i=0;i<this.voices.length;i++) {
 		if(this.voices[i].header) {
-			var t = controller.paper.text(100*controller.scale, -10*controller.scale, this.voices[i].header).attr({"font-size":12*controller.scale, "font-family":"serif", 'font-weight':'bold'}); // code duplicated below  // don't scale this as we ask for the bbox
+			var t = controller.renderText(100, this.y-10, this.voices[i].header, 'voicefont', ''); // code duplicated below  // don't scale this as we ask for the bbox
 			voiceheaderw = Math.max(voiceheaderw,t.getBBox().width);
 			t.remove();
 		}

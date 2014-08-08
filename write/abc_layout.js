@@ -447,7 +447,7 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
 	  window.ABCJS.parse.each(elem.lyric, function(ly) {
 	      lyricStr += ly.syllable + ly.divider + "\n";
       });
-    abselem.addRight(new ABCJS.write.RelativeElement(lyricStr, 0, lyricStr.length*5, 0, {type:"debugLow"}));
+    abselem.addRight(new ABCJS.write.RelativeElement(lyricStr, 0, lyricStr.length*5, 0, {type:"lyric"}));
   }
   
   if (!dontDraw && elem.gracenotes !== undefined) {
@@ -507,7 +507,7 @@ ABCJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //st
   }
   
   if (elem.barNumber) {
-    abselem.addChild(new ABCJS.write.RelativeElement(elem.barNumber, -10, 0, 0, {type:"debug"}));
+    abselem.addChild(new ABCJS.write.RelativeElement(elem.barNumber, -15, 0, 13, {type:"barNumber"}));
   }
   
   // ledger lines

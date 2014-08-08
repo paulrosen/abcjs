@@ -35,7 +35,7 @@ ABCJS.write.EndingElem.prototype.draw = function (renderer, linestartx, lineendx
 		pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 			linestartx, renderer.y, linestartx, renderer.y+10);
 		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')}); //TODO scale
-		renderer.printText(linestartx+5*renderer.scale, 18.5, this.text, "start", 'ending').attr({"font-size":""+10*renderer.scale+"px"});
+		renderer.renderText(linestartx+5, renderer.calcY(18.5), this.text, 'repeatfont', 'ending',"start");
 	}
 
 	if (this.anchor2) {

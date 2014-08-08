@@ -142,7 +142,7 @@ ABCJS.write.VoiceElement.prototype.draw = function (renderer, bartop) {
 		var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
 		var headerX = (this.startx-renderer.paddingleft)/2+renderer.paddingleft;
 		headerX = headerX*renderer.scale;
-		renderer.paper.text(headerX, renderer.calcY(textpitch)*renderer.scale, this.header).attr({"font-size":12*renderer.scale, "font-family":"serif", 'font-weight':'bold', 'class': renderer.addClasses('staff-extra voice-name')}); // code duplicated above
+		renderer.renderText(headerX, renderer.calcY(textpitch), this.header, 'voicefont', 'staff-extra voice-name');
 	}
 
 	for (var i=0, ii=this.children.length; i<ii; i++) {

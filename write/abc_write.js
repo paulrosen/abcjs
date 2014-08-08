@@ -54,6 +54,7 @@ ABCJS.write.Printer = function(paper, params) {
 	this.usingSvg = (window.SVGAngle || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1") ? true : false); // Same test Raphael uses
 	if (this.usingSvg && params.add_classes)
 		Raphael._availableAttrs['class'] = "";
+	Raphael._availableAttrs['text-decoration'] = "";
 };
 
 ABCJS.write.Printer.prototype.addClasses = function (c) {
@@ -190,15 +191,6 @@ ABCJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
   }
 };
 
-ABCJS.write.Printer.prototype.printText = function (x, offset, text, anchor, extraClass) {
-  anchor = anchor || "start";
-  var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":12*this.scale, 'class': this.addClasses(extraClass)});
-//  if (this.scale!==1) {
-//    ret.scale(this.scale, this.scale, 0, 0);
-//  }
-  return ret;
-};
-
 // assumes this.y is set appropriately
 // if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
 // not scaled if not in printgroup
@@ -215,7 +207,7 @@ ABCJS.write.Printer.prototype.printSymbol = function(x, offset, symbol, scalex, 
 	elemset.push(el);
 	dx+=this.glyphs.getSymbolWidth(symbol.charAt(i));
       } else {
-	this.debugMsg(x,"no symbol:" +symbol);
+	this.renderText(x, this.y, "no symbol:" +symbol, "debugfont", 'debug-msg', 'start');
       }
     }
     if (this.scale!==1) {
@@ -234,7 +226,7 @@ ABCJS.write.Printer.prototype.printSymbol = function(x, offset, symbol, scalex, 
 	}
 	return el;
       } else
-	this.debugMsg(x,"no symbol:" +symbol);
+	this.renderText(x, this.y, "no symbol:" +symbol, "debugfont", 'debug-msg', 'start');
     }
     return null;    
   }
@@ -281,18 +273,16 @@ ABCJS.write.Printer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) 
   return ret;
 };
 
-ABCJS.write.Printer.prototype.debugMsg = function(x, msg) {
-  return this.paper.text(x, this.y, msg).scale(this.scale, this.scale, 0, 0).attr({'class': this.addClasses('debug-msg')});
-};
-
-ABCJS.write.Printer.prototype.debugMsgLow = function(x, msg) {
-    return this.paper.text(x, this.calcY(this.layouter.minY-7), msg).attr({"font-family":"serif", "font-size":12, "text-anchor":"begin", 'class': this.addClasses('debug-msg')}).scale(this.scale, this.scale, 0, 0);
-};
-
-ABCJS.write.Printer.prototype.printLyrics = function(x, msg) {
-    var el = this.paper.text(x, this.calcY(this.layouter.minY-7), msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"begin", 'class': this.addClasses('lyrics')}).scale(this.scale, this.scale, 0, 0);
-    el[0].setAttribute("class", "abc-lyric");
-    return el;
+ABCJS.write.Printer.prototype.renderText = function(x, y, text, type, klass, anchor) {
+	var font = this.abctune.formatting[type];
+	if (!font)
+		font = { face: "Arial", size: 12, decoration: "underline", style: "normal", weight: "normal" };
+	var attr = {"font-size": font.size*this.scale,
+		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
+		'class': this.addClasses(klass) };
+	if (anchor)
+		attr["text-anchor"] = anchor;
+	return this.paper.text(x, y*this.scale, text).attr(attr);
 };
 
 ABCJS.write.Printer.prototype.calcY = function(ofs) {
@@ -328,9 +318,8 @@ ABCJS.write.Printer.prototype.printABC = function(abctunes) {
 };
 
 ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, printer, x) {
-	var fontStyle = {"text-anchor":"start", 'font-size':12*printer.scale, 'font-weight':'bold', 'class': this.addClasses('tempo')};
 	if (tempo.preString) {
-		var text = paper.text(x*printer.scale, y*printer.scale + 20*printer.scale, tempo.preString).attr(fontStyle);
+		var text = this.renderText(x, this.y+20, tempo.preString, 'tempofont', 'tempo',"start");
 		x += (text.getBBox().width + 20*printer.scale);
 	}
 	if (tempo.duration) {
@@ -365,11 +354,11 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 		abselem.x = x*(1/printer.scale); // TODO-PER: For some reason it scales this element twice, so just compensate.
 		abselem.draw(printer, null);
 		x += (abselem.w + 5*printer.scale);
-		text = paper.text(x, y*printer.scale + 20*printer.scale, "= " + tempo.bpm).attr(fontStyle);
+		text = this.renderText(x, this.y+20, "= " + tempo.bpm, 'tempofont', 'tempo',"start");
 		x += text.getBBox().width + 10*printer.scale;
 	}
 	if (tempo.postString) {
-		paper.text(x, y*printer.scale + 20*printer.scale, tempo.postString).attr(fontStyle);
+		this.renderText(x, this.y+20, tempo.postString, 'tempofont', 'tempo',"start");
 	}
 	y += 15*printer.scale;
 	return y;
@@ -377,6 +366,7 @@ ABCJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, 
 
 ABCJS.write.Printer.prototype.printTune = function (abctune) {
 	this.lineNumber = null;
+	this.abctune = abctune;
 	this.measureNumber = null;
   this.layouter = new ABCJS.write.Layout(this.glyphs, abctune.formatting.bagpipes);
 	this.layouter.printer = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
@@ -395,8 +385,7 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
   }
     else
       this.y+=this.paddingtop;
-  // FIXED BELOW, NEEDS CHECKING if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
-  if (abctune.formatting.staffwidth) { 
+  if (abctune.formatting.staffwidth) {
     this.width=abctune.formatting.staffwidth; 
   } else {
     this.width=this.staffwidth;
@@ -404,26 +393,34 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
   this.width+=this.paddingleft;
   if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; }
 	if (abctune.metaText.title)
-	  this.paper.text(this.width*this.scale/2, this.y, abctune.metaText.title).attr({"font-size":20*this.scale, "font-family":"serif", 'class': this.addClasses('title meta-top')});
+      this.renderText(this.width/2, this.y, abctune.metaText.title, 'titlefont', 'title meta-top');
   this.y+=20*this.scale;
   if (abctune.lines[0] && abctune.lines[0].subtitle) {
     this.printSubtitleLine(abctune.lines[0]);
     this.y+=20*this.scale;
   }
   if (abctune.metaText.rhythm) {
-    this.paper.text(this.paddingleft, this.y, abctune.metaText.rhythm).attr({"text-anchor":"start","font-style":"italic","font-family":"serif", "font-size":12*this.scale, 'class': this.addClasses('meta-top')});
-    !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.y+=15*this.scale);
+    this.renderText(this.paddingleft, this.y, abctune.metaText.rhythm, 'infofont', 'meta-top', "start");
+    if (!abctune.metaText.author && !abctune.metaText.origin && !abctune.metaText.composer)
+		this.y+=15*this.scale;
   }
 	var composerLine = "";
 	if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
 	if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
-  if (composerLine.length > 0) {this.paper.text(this.width*this.scale, this.y, composerLine).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale, 'class': this.addClasses('meta-top')});this.y+=15;}
-	if (abctune.metaText.author) {this.paper.text(this.width*this.scale, this.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale, 'class': this.addClasses('meta-top')}); this.y+=15;}
+  if (composerLine.length > 0) {
+      this.renderText(this.width, this.y, composerLine, 'composerfont', 'meta-top', "end");
+      this.y+=15;
+  }
+	if (abctune.metaText.author) {
+		this.renderText(this.width, this.y, abctune.metaText.author, 'composerfont', 'meta-top', "end");
+		this.y+=15;
+	}
   if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
 	  this.y = this.printTempo(abctune.metaText.tempo, this.paper, this.layouter, this.y, this, 50, -1);
 	  this.y += 20*this.scale;
   }
   this.staffgroups = [];
+	var text2;
   var maxwidth = this.width;
   for(var line=0; line<abctune.lines.length; line++) {
 	  this.lineNumber = line;
@@ -436,40 +433,39 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
       this.y+=20*this.scale; //hardcoded
     } else if (abcline.text) {
 		if (typeof abcline.text === 'string')
-	      this.paper.text(100, this.y, "TEXT: " + abcline.text).attr({'class': this.addClasses('defined-text')});
-	  else {
-		  var str = "";
-		  for (var i = 0; i < abcline.text.length; i++) {
-			  str += " FONT " + abcline.text[i].text;
-		  }
-	      this.paper.text(100, this.y, "TEXT: " + str).attr({'class': this.addClasses('defined-text')});
-	  }
-      this.y+=20*this.scale; //hardcoded
-    }
+			text2 = this.renderText(this.paddingleft, this.y, abcline.text, "textfont", 'defined-text', "start");
+		else {
+			var str = "";
+			for (var i = 0; i < abcline.text.length; i++) {
+				str += " FONT " + abcline.text[i].text;
+			}
+			text2 = this.renderText(this.paddingleft, this.y, str, "textfont", 'defined-text', "start");
+		}
+		this.y += text2.getBBox().height + 10 * this.scale;
+	}
   }
 	this.lineNumber = null;
 	this.measureNumber = null;
+	if (abctune.metaText.partOrder) {
+		text2 = this.renderText(this.paddingleft, this.y, "Part Order: " + abctune.metaText.partOrder, 'partsfont', 'meta-bottom');
+		this.y += text2.getBBox().height + 10 * this.scale;
+	}
 	var extraText = "";
-	var text2;
-	var height;
-  if (abctune.metaText.partOrder) extraText += "Part Order: " + abctune.metaText.partOrder + "\n";
 	if (abctune.metaText.unalignedWords) {
-   for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
-     if (typeof abctune.metaText.unalignedWords[j] === 'string')
-       extraText += abctune.metaText.unalignedWords[j] + "\n";
-     else {
-       for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
-         extraText += " FONT " + abctune.metaText.unalignedWords[j][k].text;
-    }
-       extraText += "\n";
-  }
-}
- text2 = this.paper.text(this.paddingleft*this.scale+50*this.scale, this.y*this.scale+25*this.scale, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":17*this.scale, 'class': this.addClasses('meta-bottom')});
-  height = text2.getBBox().height + 17*this.scale;
-  text2.translate(0,height/2);
-  this.y+=height;
+		for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
+			if (typeof abctune.metaText.unalignedWords[j] === 'string')
+				extraText += abctune.metaText.unalignedWords[j] + "\n";
+			else {
+				for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
+					extraText += " FONT " + abctune.metaText.unalignedWords[j][k].text;
+				}
+				extraText += "\n";
+			}
+		}
+		text2 = this.renderText(this.paddingleft + 50, this.y, extraText, 'wordsfont', 'meta-bottom', "start");
+		this.y += text2.getBBox().height + 10 * this.scale;
 		extraText = "";
- }
+	}
 	if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
 	if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
 	if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
@@ -479,11 +475,8 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
   if (abctune.metaText['abc-copyright']) extraText += "Copyright: " + abctune.metaText['abc-copyright'] + "\n";
   if (abctune.metaText['abc-creator']) extraText += "Creator: " + abctune.metaText['abc-creator'] + "\n";
   if (abctune.metaText['abc-edited-by']) extraText += "Edited By: " + abctune.metaText['abc-edited-by'] + "\n";
-  text2 = this.paper.text(this.paddingleft, this.y*this.scale+25*this.scale, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":17*this.scale, 'class': this.addClasses('meta-bottom')});
-  height = text2.getBBox().height;
-	if (!height) height = 25*this.scale;	// TODO-PER: Hack! Don't know why Raphael chokes on this sometimes and returns NaN. Perhaps only when printing to PDF? Possibly if the SVG is hidden?
-  text2.translate(0,height/2);
-  this.y+=25*this.scale+height*this.scale;
+	text2 = this.renderText(this.paddingleft, this.y, extraText, 'historyfont', 'meta-bottom', "start");
+	this.y += text2.getBBox().height + 10 * this.scale;
   var sizetoset = {w: (maxwidth+this.paddingright)*this.scale,h: (this.y+this.paddingbottom)*this.scale};
   this.paper.setSize(sizetoset.w,sizetoset.h);
   // Correct for IE problem in calculating height
@@ -496,7 +489,7 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
 };
 
 ABCJS.write.Printer.prototype.printSubtitleLine = function(abcline) {
-  this.paper.text(this.width/2, this.y, abcline.subtitle).attr({"font-size":16, 'class': 'text meta-top'}).scale(this.scale, this.scale, 0,0);
+	this.renderText(this.width/2, this.y, abcline.subtitle, "subtitlefont", 'text meta-top');
 };
 
 function centerWholeRests(voices) {

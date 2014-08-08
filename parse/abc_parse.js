@@ -1329,8 +1329,10 @@ window.ABCJS.parse.Parse = function() {
 		// switches.header_only : stop parsing when the header is finished
 		// switches.stop_on_warning : stop at the first warning encountered.
 		// switches.print: format for the page instead of the browser.
+		// switches.format: a hash of the desired formatting commands.
+		if (!switches) switches = {};
 		tune.reset();
-		if (switches && switches.print)
+		if (switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
 		header.reset(tokenizer, warn, multilineVars, tune);
@@ -1350,13 +1352,14 @@ window.ABCJS.parse.Parse = function() {
 		if (window.ABCJS.parse.last(lines).length === 0)	// remove the blank line we added above.
 			lines.pop();
 		try {
+			if (switches.format) {
+				window.ABCJS.parse.parseDirective.globalFormatting(switches.format);
+			}
 			window.ABCJS.parse.each(lines,  function(line) {
-				if (switches) {
-					if (switches.header_only && multilineVars.is_in_header === false)
-						throw "normal_abort";
-					if (switches.stop_on_warning && multilineVars.warnings)
-						throw "normal_abort";
-				}
+				if (switches.header_only && multilineVars.is_in_header === false)
+					throw "normal_abort";
+				if (switches.stop_on_warning && multilineVars.warnings)
+					throw "normal_abort";
 				if (multilineVars.is_in_history) {
 					if (line.charAt(1) === ':') {
 						multilineVars.is_in_history = false;
