@@ -14,6 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+/*global window, ABCJS, Math, Raphael */
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
@@ -27,6 +30,7 @@ ABCJS.write.spacing.STEP = ABCJS.write.spacing.FONTSIZE*93/720;
 ABCJS.write.spacing.SPACE = 10;
 ABCJS.write.spacing.TOPNOTE = 20;
 ABCJS.write.spacing.STAVEHEIGHT = 100;
+ABCJS.write.spacing.INDENT = 50;
 
 /**
  * @class
@@ -58,12 +62,19 @@ ABCJS.write.EngraverController = function(paper, params) {
   this.editable = params.editable || false;
   this.staffgroups = null;
 
+	// HACK-PER: Raphael doesn't support setting the class of an element, so this adds that support. This doesn't work on IE8 or less, though.
+	this.usingSvg = (window.SVGAngle || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1") ? true : false); // Same test Raphael uses
+	if (this.usingSvg && params.add_classes)
+		Raphael._availableAttrs['class'] = "";
+	Raphael._availableAttrs['text-decoration'] = "";
+
   //TODO-GD factor out all calls directly made to renderer.paper and fix all the coupling issues below
   this.renderer=new ABCJS.write.Renderer(paper, this.glyphs);
   this.renderer.y = 0; // TODO-GD should manage renderer's y through an API
   this.renderer.scale = this.scale; // TODO-GD should manage scale in only one place (probably renderer)
   this.renderer.controller = this; // TODO-GD needed for highlighting
   this.renderer.paddingleft = this.paddingleft; //TODO-GD used in VoiceElement.draw
+	this.renderer.space = 3*ABCJS.write.spacing.SPACE;
 };
 
 /**
@@ -86,38 +97,56 @@ ABCJS.write.EngraverController.prototype.engraveABC = function(abctunes) {
  * @param {ABCJS.Tune} abctune 
  */
 ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
+	this.lineNumber = null;
+	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
+	this.measureNumber = null;
   this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
   this.engraver.controller = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
-
-  // FIXED BELOW, NEEDS CHECKING if (abctune.formatting.stretchlast) { this.renderer.paper.text(200, this.renderer.y, "Format: stretchlast"); this.renderer.y += 20; }
-  this.width = abctune.formatting.staffwidth || this.staffwidth;
+	if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; }
+	this.renderer.scale = this.scale;
+	if (abctune.media === 'print') {
+		// TODO create the page the size of
+		//  tune.formatting.pageheight by tune.formatting.pagewidth
+		// create margins the size of
+		// TODO-PER: setting the defaults to 3/4" for now. What is the real value?
+		this.renderer.skipSpaceY(abctune.formatting.topmargin === undefined ? 54 : abctune.formatting.topmargin);
+		// TODO tune.formatting.botmargin
+		//    m = abctune.formatting.leftmargin === undefined ? 54 : abctune.formatting.leftmargin;
+		//    this.paddingleft = m;
+		//      m = abctune.formatting.rightmargin === undefined ? 54 : abctune.formatting.rightmargin;
+		//    this.paddingright = m;
+	}
+	else
+		this.renderer.skipSpaceY(this.paddingtop);
+	if (abctune.formatting.staffwidth) {
+		this.width=abctune.formatting.staffwidth;
+	} else {
+		this.width=this.staffwidth;
+	}
   this.width+=this.paddingleft;
-  this.scale = abctune.formatting.scale || this.scale;
-  this.renderer.scale = this.scale;
 
   this.engraveTopText(abctune);
 
   this.staffgroups = [];
   var maxwidth = this.width;
   for(var line=0; line<abctune.lines.length; line++) {
+		this.lineNumber = line;
     var abcline = abctune.lines[line];
     if (abcline.staff) {
-		staffgroup = this.engraveStaffLine(abctune, abcline, line); //TODO-GD factor out generating the staffgroup, from laying it out, from rendering it
+		var staffgroup = this.engraveStaffLine(abctune, abcline, line); //TODO-GD factor out generating the staffgroup, from laying it out, from rendering it
 		if (staffgroup.w > maxwidth) maxwidth = staffgroup.w;
     } else if (abcline.subtitle && line!==0) {
-      this.engraveSubtitleLine(abcline);
-      this.renderer.y+=20*this.scale; //hardcoded
+			this.renderer.outputTextIf(this.width / 2, abcline.subtitle, 'subtitlefont', 'text meta-top', 0);
     } else if (abcline.text) {
 		if (typeof abcline.text === 'string')
-	      this.renderer.paper.text(100, this.renderer.y, "TEXT: " + abcline.text);
+				this.renderer.outputTextIf(this.paddingleft, abcline.text, 'textfont', 'defined-text', 1, "start");
 	  else {
 		  var str = "";
 		  for (var i = 0; i < abcline.text.length; i++) {
 			  str += " FONT " + abcline.text[i].text;
 		  }
-	      this.renderer.paper.text(100, this.renderer.y, "TEXT: " + str);
+				this.renderer.outputTextIf(this.paddingleft, str, 'textfont', 'defined-text', 1, "start");
 	  }
-      this.renderer.y+=20*this.scale; //hardcoded
     }
   }
 
@@ -158,6 +187,7 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
       }
     }
   }
+	centerWholeRests(staffgroup.voices);
   staffgroup.draw(this.renderer, this.renderer.y);
   this.staffgroups[this.staffgroups.length] = staffgroup;
   this.renderer.y = staffgroup.y + staffgroup.height;
@@ -170,43 +200,35 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
  * @private
  */
 ABCJS.write.EngraverController.prototype.engraveTopText = function(abctune) {
- if (abctune.media === 'print') {
-       // TODO create the page the size of
-    //  tune.formatting.pageheight by tune.formatting.pagewidth
-       // create margins the size of
-      // TODO-PER: setting the defaults to 3/4" for now. What is the real value?
-    var m = abctune.formatting.topmargin === undefined ? 54 : abctune.formatting.topmargin;
-    this.renderer.y+=m;
-    // TODO tune.formatting.botmargin
-//    m = abctune.formatting.leftmargin === undefined ? 54 : abctune.formatting.leftmargin;
-//    this.paddingleft = m;
-//      m = abctune.formatting.rightmargin === undefined ? 54 : abctune.formatting.rightmargin;
-//    this.paddingright = m;
-  }
-  else {
-      this.renderer.y+=this.paddingtop;
-  }
+	var space;
+	if (abctune.metaText.header) {
+		space = this.renderer.outputTextIf(this.width / 2, abctune.metaText.header.left, 'headerfont', 'header meta-top', null, 'start');
+		var space2 = this.renderer.outputTextIf(this.width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', null, 'middle');
+		var space3 = this.renderer.outputTextIf(this.width / 2, abctune.metaText.header.right, 'headerfont', 'header meta-top', null, 'end');
+		var em = Math.max(space[1], space2[1], space3[1]);
+		this.renderer.moveY(em, 2);
+	}
+	this.renderer.outputTextIf(this.width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', 0);
+	if (abctune.lines[0])
+		this.renderer.outputTextIf(this.width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', 0);
 
-  if (abctune.metaText.title) {
-    this.renderer.paper.text(this.width*this.scale/2, this.renderer.y, abctune.metaText.title).attr({"font-size":20*this.scale, "font-family":"serif"});
-  }
-  this.renderer.y+=20*this.scale;
-  if (abctune.lines[0] && abctune.lines[0].subtitle) {
-    this.engraveSubtitleLine(abctune.lines[0]);
-    this.renderer.y+=20*this.scale;
-  }
-  if (abctune.metaText.rhythm) {
-    this.renderer.paper.text(this.paddingleft, this.renderer.y, abctune.metaText.rhythm).attr({"text-anchor":"start","font-style":"italic","font-family":"serif", "font-size":12*this.scale});
-    !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.renderer.y+=15*this.scale);
-  }
+	if (abctune.metaText.rhythm || abctune.metaText.origin || abctune.metaText.composer) {
+		this.renderer.outputTextIf(this.paddingleft, abctune.metaText.rhythm, 'infofont', 'meta-top', null, "start");
+
 	var composerLine = "";
 	if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
 	if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
-  if (composerLine.length > 0) {this.renderer.paper.text(this.width*this.scale, this.renderer.y, composerLine).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale});this.renderer.y+=15;}
-	if (abctune.metaText.author) {this.renderer.paper.text(this.width*this.scale, this.renderer.y, abctune.metaText.author).attr({"text-anchor":"end","font-style":"italic","font-family":"serif", "font-size":12*this.scale}); this.renderer.y+=15;}
+		space = this.renderer.outputTextIf(this.width, composerLine, 'composerfont', 'meta-top', null, "end");
+		this.renderer.moveY(space[1], 1);
+	}
+
+	this.renderer.outputTextIf(this.width, abctune.metaText.author, 'composerfont', 'meta-top', 0, "end");
+	this.renderer.skipSpaceY();
+
+	this.renderer.outputTextIf(this.paddingleft, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, "start");
+
   if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
-	  this.renderer.y = this.engraveTempo(abctune.metaText.tempo, this.renderer.y, 50);
-	  this.renderer.y += 20*this.scale;
+		this.engraveTempo(this.paddingleft + ABCJS.write.spacing.INDENT*this.scale, abctune.metaText.tempo);
   }
 
 };
@@ -216,11 +238,12 @@ ABCJS.write.EngraverController.prototype.engraveTopText = function(abctune) {
  * @private
  */
 ABCJS.write.EngraverController.prototype.engraveExtraText = function(abctune) {
-  var extraText = "";
-  var text2;
-  var height;
-  if (abctune.metaText.partOrder) extraText += "Part Order: " + abctune.metaText.partOrder + "\n";
+	this.lineNumber = null;
+	this.measureNumber = null;
+
+	var extraText;
   if (abctune.metaText.unalignedWords) {
+		extraText = "";
     for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
       if (typeof abctune.metaText.unalignedWords[j] === 'string')
 	extraText += abctune.metaText.unalignedWords[j] + "\n";
@@ -231,40 +254,49 @@ ABCJS.write.EngraverController.prototype.engraveExtraText = function(abctune) {
 	extraText += "\n";
       }
     }
-    text2 = this.renderer.paper.text(this.paddingleft*this.scale+50*this.scale, this.renderer.y*this.scale+25*this.scale, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":17*this.scale});
-    height = text2.getBBox().height + 17*this.scale;
-    text2.translate(0,height/2);
-    this.renderer.y+=height;
-    extraText = "";
-  }
+		this.renderer.outputTextIf(this.paddingleft + ABCJS.write.spacing.INDENT*this.scale, extraText, 'wordsfont', 'meta-bottom', 2, "start");
+	}
+
+	extraText = "";
   if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
   if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
   if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
   if (abctune.metaText.notes) extraText += "Notes: " + abctune.metaText.notes + "\n";
   if (abctune.metaText.transcription) extraText += "Transcription: " + abctune.metaText.transcription + "\n";
   if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
-  text2 = this.renderer.paper.text(this.paddingleft, this.renderer.y*this.scale+25*this.scale, extraText).attr({"text-anchor":"start", "font-family":"serif", "font-size":17*this.scale});
-  height = text2.getBBox().height;
-  if (!height) height = 25*this.scale;	// TODO-PER: Hack! Don't know why Raphael chokes on this sometimes and returns NaN. Perhaps only when printing to PDF? Possibly if the SVG is hidden?
-  text2.translate(0,height/2);
-  this.renderer.y+=25*this.scale+height*this.scale;
+	if (abctune.metaText['abc-copyright']) extraText += "Copyright: " + abctune.metaText['abc-copyright'] + "\n";
+	if (abctune.metaText['abc-creator']) extraText += "Creator: " + abctune.metaText['abc-creator'] + "\n";
+	if (abctune.metaText['abc-edited-by']) extraText += "Edited By: " + abctune.metaText['abc-edited-by'] + "\n";
+	this.renderer.outputTextIf(this.paddingleft, extraText, 'historyfont', 'meta-bottom', 0, "start");
+
+	if (abctune.metaText.footer) {
+		var space = this.renderer.outputTextIf(this.width / 2, abctune.metaText.footer.left, 'footerfont', 'header meta-bottom', null, 'start');
+		var space2 = this.renderer.outputTextIf(this.width / 2, abctune.metaText.footer.center, 'footerfont', 'header meta-bottom', null, 'middle');
+		var space3 = this.renderer.outputTextIf(this.width / 2, abctune.metaText.footer.right, 'footerfont', 'header meta-bottom', null, 'end');
+		this.renderer.y += Math.max(space[1], space2[1], space3[1]);
+	}
 };
 
 /**
  *
  * @private
  */
-ABCJS.write.EngraverController.prototype.engraveTempo = function (tempo, y, x) {
-	var fontStyle = {"text-anchor":"start", 'font-size':12*this.scale, 'font-weight':'bold'};
+ABCJS.write.EngraverController.prototype.engraveTempo = function (x, tempo) {
+	var text;
+	var noteHeight = 20*this.scale; // the note height of 20 was just determined empirically.
+	var totalHeight = noteHeight;
 	if (tempo.preString) {
-		var text = this.renderer.paper.text(x*this.scale, y*this.scale + 20*this.scale, tempo.preString).attr(fontStyle);
-		x += (text.getBBox().width + 20*this.scale);
+		text = this.renderer.renderText(x, this.renderer.y+noteHeight, tempo.preString, 'tempofont', 'tempo',"start");
+		var preWidth = text.getBBox().width;
+		var charWidth = preWidth / tempo.preString.length; // Just get some average number to increase the spacing.
+		x += preWidth + charWidth;
+		totalHeight = Math.max(totalHeight, text.getBBox().height);
 	}
 	if (tempo.duration) {
 		var temposcale = 0.75*this.scale;
-		var tempopitch = 14.5;
+		var tempopitch = 13;
 		var duration = tempo.duration[0]; // TODO when multiple durations
-		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1);
+		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1, 'tempo');
 		var durlog = Math.floor(Math.log(duration) / Math.log(2));
 		var dot = 0;
 		for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
@@ -292,22 +324,18 @@ ABCJS.write.EngraverController.prototype.engraveTempo = function (tempo, y, x) {
 		abselem.x = x*(1/this.scale); // TODO-PER: For some reason it scales this element twice, so just compensate.
 		abselem.draw(this.renderer, null);
 		x += (abselem.w + 5*this.scale);
-		text = this.renderer.paper.text(x, y*this.scale + 20*this.scale, "= " + tempo.bpm).attr(fontStyle);
-		x += text.getBBox().width + 10*this.scale;
+		var str = "= " + tempo.bpm;
+		text = this.renderer.renderText(x, this.renderer.y+noteHeight, str, 'tempofont', 'tempo',"start");
+		var postWidth = text.getBBox().width;
+		var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
+		x += postWidth + charWidth2;
+		totalHeight = Math.max(totalHeight, text.getBBox().height);
 	}
 	if (tempo.postString) {
-		this.renderer.paper.text(x, y*this.scale + 20*this.scale, tempo.postString).attr(fontStyle);
+		this.renderer.renderText(x, this.renderer.y+noteHeight, tempo.postString, 'tempofont', 'tempo',"start");
+		totalHeight = Math.max(totalHeight, text.getBBox().height);
 	}
-	y += 15*this.scale;
-	return y;
-};
-
-/**
- *
- * @private
- */
-ABCJS.write.EngraverController.prototype.engraveSubtitleLine = function(abcline) {
-  this.renderer.paper.text(this.width/2, this.renderer.y, abcline.subtitle).attr({"font-size":16}).scale(this.scale, this.scale, 0,0);
+	this.renderer.moveY(totalHeight, 2.5);
 };
 
 /**
@@ -330,7 +358,7 @@ ABCJS.write.EngraverController.prototype.notifySelect = function (abselem) {
  * Called by the Abstract Engraving Structure to say it was modified (e.g. notehead dragged)
  * @protected
  */
-ABCJS.write.EngraverController.prototype.notifyChange = function (abselem) {
+ABCJS.write.EngraverController.prototype.notifyChange = function (/*abselem*/) {
   for (var i=0; i<this.listeners.length;i++) {
     this.listeners[i].modelChanged();
   }
@@ -382,3 +410,24 @@ ABCJS.write.EngraverController.prototype.rangeHighlight = function(start,end)
 	}
     }
 };
+
+
+function centerWholeRests(voices) {
+	// whole rests are a special case: if they are by themselves in a measure, then they should be centered.
+	// (If they are not by themselves, that is probably a user error, but we'll just center it between the two items to either side of it.)
+	for (var i = 0; i < voices.length; i++) {
+		var voice = voices[i];
+		// Look through all of the elements except for the first and last. If the whole note appears there then there isn't anything to center it between anyway.
+		for (var j = 1; j < voice.children.length-1; j++) {
+			var absElem = voice.children[j];
+			if (absElem.abcelem.rest && absElem.abcelem.rest.type === 'whole') {
+				var before = voice.children[j-1];
+				var after = voice.children[j+1];
+				var midpoint = (after.x - before.x) / 2 + before.x;
+				absElem.x = midpoint - absElem.w / 2;
+
+			}
+		}
+	}
+}
+

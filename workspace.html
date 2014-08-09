@@ -1,52 +1,25 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en"><head>
-
-
-
+<!DOCTYPE html>
+<html>
+<head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<title>Draw The Dots: Tune Editor demo</title>
+	<title>abcjs: Tune Editor demo</title>
+	<script src="bin/abcjs_editor_latest-min.js" type="text/javascript"></script>
+	<script type="text/javascript">
 
-	<script src="proto_noconflict.js" type="text/javascript"></script>
+		function load() {
+			new ABCJS.Editor("abc", { canvas_id: "canvas",
+				midi_id: "midi",
+				warnings_id: "warnings",
+				midi_options: {program: 1,
+					qpm: 150, type: "qt"},
+				render_options: {},
+				gui: false
+			});
+		}
 
-	<script src="write/raphael.js" type="text/javascript"></script>
-	<script src="write/sprintf.js" type="text/javascript"></script>
-        <script src="write/abc_glyphs.js" type="text/javascript"></script>
-        <script src="write/abc_graphelements.js" type="text/javascript"></script>
-        <script src="write/abc_abstract_engraver.js" type="text/javascript"></script>
-        <script src="write/abc_engraver_controller.js" type="text/javascript"></script>
-        <script src="write/abc_renderer.js" type="text/javascript"></script>
-	<script src="api/abc_tunebook.js" type="text/javascript"></script>
-        
-        <script src="data/abc_tune.js">type="text/javascript"></script>
-        <script src="parse/abc_parse_header.js" type="text/javascript"></script>
-	<script src="parse/abc_tokenizer.js" type="text/javascript"></script>
-	<script src="parse/abc_parse_key_voice.js" type="text/javascript"></script>
-	<script src="parse/abc_parse_directive.js" type="text/javascript"></script>
-        <script src="parse/abc_parse.js" type="text/javascript"></script>
-	<script src="parse/abc_common.js" type="text/javascript"></script>
-        <script src="transform/abc2abc_write.js" type="text/javascript"></script>
-        <script src="midi/abc_midiwriter.js" type="text/javascript"></script>
-
-	<script src="edit/abc_editor.js" type="text/javascript"></script>
-        <script type="text/javascript">
-
-
-
-function load() {
-  debug=true;
-  new ABCJS.Editor("abc", { canvas_id: "canvas",
-                            midi_id:"midi",
-                                      warnings_id:"warnings",
-                                      midi_options:{program:1,
-                                      qpm:150, type:"qt"},
-                                      render_options:{},
-                                      gui: false
-                                      });
-}
-
-        </script>
-</head><body>
-
+	</script>
+</head>
+<body>
 
 <applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="http://dl.dropbox.com/u/223827/abcjs/MIDIPlugin.jar" height="1" width="1"></applet>
 
@@ -61,7 +34,7 @@ EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
 |:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
 eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|</textarea>
 <div id="warnings"></div>
-<div onmousedown="load();">Run</div>
+<button onmousedown="load();">Run</button>
 <hr>
 <div id="midi"></div>
 <div id="canvas"></div>

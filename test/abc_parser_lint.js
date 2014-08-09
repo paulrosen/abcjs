@@ -107,7 +107,10 @@ window.ABCJS.test.ParserLint = function() {
 
 	var fontType = {
 		type: 'object', optional: true, properties: {
-			font: { type: 'string', optional: true },
+			face: { type: 'string', optional: true },
+			weight: { type: 'string', Enum: [ 'bold', 'normal' ], optional: true },
+			style: { type: 'string',Enum: [ 'italic', 'normal' ],  optional: true },
+			decoration: { type: 'string', Enum: [ 'underline', 'none' ], optional: true },
 			size: { type: 'number', optional: true }
 		}
 	};
@@ -198,7 +201,7 @@ window.ABCJS.test.ParserLint = function() {
 				}
 		}},
 		rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'lyric' ], properties: {
-			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest', 'multimeasure' ] },	// multimeasure requires duration to be the number of measures.
+			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest', 'multimeasure', 'whole' ] },	// multimeasure requires duration to be the number of measures.
 			endTie: { type: 'boolean', Enum: [ true ], optional: true },
 			startTie: tieProperties
 		}},

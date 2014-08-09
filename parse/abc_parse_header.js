@@ -426,7 +426,11 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 			if (err) warn(err, line, 2);
 			return {};
 		}
-		line = tokenizer.stripComment(line);
+		var i = line.indexOf('%');
+		if (i >= 0)
+			line = line.substring(0, i);
+		line = line.replace(/\s+$/, '');
+
 		if (line.length === 0)
 			return {};
 

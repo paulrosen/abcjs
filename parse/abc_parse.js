@@ -79,7 +79,7 @@ window.ABCJS.parse.Parse = function() {
 	};
 
 	var warn = function(str, line, col_num) {
-	  var bad_char = line.charAt(col_num);
+		var bad_char = line.charAt(col_num);
 		if (bad_char === ' ')
 			bad_char = "SPACE";
 		var clean_line = encode(line.substring(0, col_num)) +
@@ -248,7 +248,7 @@ window.ABCJS.parse.Parse = function() {
 		// It can also optionally start with '[', which is ignored.
 		// Also, it can have white space before the '['.
 		for (var ws = 0; ws < line.length; ws++)
-		  if (line.charAt(curr_pos+ret.len+ws) !== ' ')
+			if (line.charAt(curr_pos + ret.len + ws) !== ' ')
 				break;
 		var orig_bar_len = ret.len;
 		if (line.charAt(curr_pos+ret.len+ws) === '[') {
@@ -621,7 +621,7 @@ window.ABCJS.parse.Parse = function() {
 						// TODO-PER: We can test the returned duration here and give a warning if it isn't the one expected.
 						el.endChar = fraction.index;
 						while (fraction.index < line.length && (tokenizer.isWhiteSpace(line.charAt(fraction.index)) || line.charAt(fraction.index) === '-')) {
-						  if (line.charAt(fraction.index) === '-')
+							if (line.charAt(fraction.index) === '-')
 								el.startTie = {};
 							else
 								el = addEndBeam(el);
@@ -651,7 +651,7 @@ window.ABCJS.parse.Parse = function() {
 							state = 'broken_rhythm';
 						else {
 							// Peek ahead to the next character. If it is a space, then we have an end beam.
-						  if (tokenizer.isWhiteSpace(line.charAt(index+1)))
+							if (tokenizer.isWhiteSpace(line.charAt(index + 1)))
 								addEndBeam(el);
 							el.endChar = index+1;
 							return el;
@@ -665,7 +665,7 @@ window.ABCJS.parse.Parse = function() {
 						el.end_beam = true;
 						// look ahead to see if there is a tie
 						do {
-						  if (line.charAt(index) === '-')
+							if (line.charAt(index) === '-')
 								el.startTie = {};
 							index++;
 						} while (index < line.length && (tokenizer.isWhiteSpace(line.charAt(index)) || line.charAt(index) === '-'));
@@ -822,6 +822,16 @@ window.ABCJS.parse.Parse = function() {
 		}
 		return [ 0 ];
 	};
+
+	function durationOfMeasure(multilineVars) {
+		// TODO-PER: This could be more complicated if one of the unusual measures is used.
+		var meter = multilineVars.origMeter;
+		if (!meter || meter.type !== 'specified')
+			return 1;
+		if (!meter.value || meter.value.length === 0)
+			return 1;
+		return parseInt(meter.value[0].num, 10) / parseInt(meter.value[0].den, 10);
+	}
 
 	//
 	// Parse line of music
@@ -998,7 +1008,7 @@ window.ABCJS.parse.Parse = function() {
 						else ret = [ 0 ];
 						if (ret[0] > 0) {
 							if (ret[1] === null) {
-								 if (i+1 < line.length)
+								if (i + 1 < line.length)
 									startNewLine();	// There was a ! in the middle of the line. Start a new line if there is anything after it.
 							} else if (ret[1].length > 0) {
 								if (el.decoration === undefined)
@@ -1272,6 +1282,13 @@ window.ABCJS.parse.Parse = function() {
 							if (core.end_beam)
 								addEndBeam(el);
 
+							// If there is a whole rest, then it should be the duration of the measure, not it's own duration. We need to special case it.
+							if (el.rest && el.rest.type === 'rest' && el.duration === 1) {
+								el.rest.type = 'whole';
+
+								el.duration = durationOfMeasure(multilineVars);
+							}
+
 							if (multilineVars.barNumOnNextNote) {
 								el.barNumber = multilineVars.barNumOnNextNote;
 								multilineVars.barNumOnNextNote = null;
@@ -1312,8 +1329,10 @@ window.ABCJS.parse.Parse = function() {
 		// switches.header_only : stop parsing when the header is finished
 		// switches.stop_on_warning : stop at the first warning encountered.
 		// switches.print: format for the page instead of the browser.
+		// switches.format: a hash of the desired formatting commands.
+		if (!switches) switches = {};
 		tune.reset();
-		if (switches && switches.print)
+		if (switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
 		header.reset(tokenizer, warn, multilineVars, tune);
@@ -1333,13 +1352,14 @@ window.ABCJS.parse.Parse = function() {
 		if (window.ABCJS.parse.last(lines).length === 0)	// remove the blank line we added above.
 			lines.pop();
 		try {
+			if (switches.format) {
+				window.ABCJS.parse.parseDirective.globalFormatting(switches.format);
+			}
 			window.ABCJS.parse.each(lines,  function(line) {
-				if (switches) {
-					if (switches.header_only && multilineVars.is_in_header === false)
-						throw "normal_abort";
-					if (switches.stop_on_warning && multilineVars.warnings)
-						throw "normal_abort";
-				}
+				if (switches.header_only && multilineVars.is_in_header === false)
+					throw "normal_abort";
+				if (switches.stop_on_warning && multilineVars.warnings)
+					throw "normal_abort";
 				if (multilineVars.is_in_history) {
 					if (line.charAt(1) === ':') {
 						multilineVars.is_in_history = false;
