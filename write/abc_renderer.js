@@ -264,7 +264,7 @@ ABCJS.write.Renderer.prototype.getFontAndAttr = function(type, klass, scale) {
 	var font = this.abctune.formatting[type];
 	if (!font)
 		font = { face: "Arial", size: 12, decoration: "underline", style: "normal", weight: "normal" };
-	var attr = {"font-size": font.size*scale,
+	var attr = {"font-size": font.size*scale, 'font-style': font.style,
 		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
 		'class': this.addClasses(klass) };
 	return { font: font, attr: attr };
@@ -282,11 +282,17 @@ ABCJS.write.Renderer.prototype.renderText = function(x, y, text, type, klass, an
 	var hash = this.getFontAndAttr(type, klass, this.scale);
 	if (anchor)
 		hash.attr["text-anchor"] = anchor;
+	text = text.replace(/\n\n/g, "\n \n");
 	var el = this.paper.text(x, y*this.scale, text).attr(hash.attr);
+	// The text will be placed centered in vertical alignment, so we need to move the box down so that
+	// the top of the text is where we've requested.
+	var size = el.getBBox();
+	el.attr({ "y": y*this.scale+size.height/2 });
 	if (hash.font.box) {
-		var size = el.getBBox();
 		this.paper.rect(size.x-1,size.y-1,size.width+2,size.height+2).attr({"stroke":"#cccccc"});
 	}
+	if (type === 'debugfont')
+		el.attr({ stroke: "#ff0000"});
 	return el;
 };
 
@@ -313,3 +319,15 @@ ABCJS.write.Renderer.prototype.outputTextIf = function(x, str, kind, klass, marg
 	return [0,0];
 };
 
+// For debugging, it is sometimes useful to know where you are vertically.
+ABCJS.write.Renderer.prototype.printHorizontalLine = function () {
+	var dy = 0.35;
+	var fill = "#0000aa";
+	var y = this.y;
+	this.paper.text(10, y, ""+Math.round(y)).attr({"text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
+	var x1 = 50;
+	var x2 = 100;
+	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
+		x2, y+dy, x1, y+dy);
+	this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
+};

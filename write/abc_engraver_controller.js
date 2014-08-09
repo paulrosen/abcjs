@@ -97,9 +97,9 @@ ABCJS.write.EngraverController.prototype.engraveABC = function(abctunes) {
  * @param {ABCJS.Tune} abctune 
  */
 ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
-	this.lineNumber = null;
+	this.renderer.lineNumber = null;
 	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
-	this.measureNumber = null;
+	this.renderer.measureNumber = null;
   this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
   this.engraver.controller = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
 	if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; }
@@ -130,7 +130,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
   this.staffgroups = [];
   var maxwidth = this.width;
   for(var line=0; line<abctune.lines.length; line++) {
-		this.lineNumber = line;
+		this.renderer.lineNumber = line;
     var abcline = abctune.lines[line];
     if (abcline.staff) {
 		var staffgroup = this.engraveStaffLine(abctune, abcline, line); //TODO-GD factor out generating the staffgroup, from laying it out, from rendering it
@@ -175,9 +175,10 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
   var staffgroup = this.engraver.createABCLine(abcline.staff);
   this.renderer.minY = this.engraver.minY; // use this value of minY to set things that need to be below everything else //TODO-GD fix it, horrible hack
   var newspace = this.space;
-  for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
+  for (var it = 0; it < 2; it++) { // TODO shouldn't need this triple pass any more
     staffgroup.layout(newspace, this, false);
-    if (line && line === abctune.lines.length - 1 && staffgroup.w / this.width < 0.66 && !abctune.formatting.stretchlast) break; // don't stretch last line too much unless it is 1st
+    // TODO-PER: This used to stretch the first line when it is the only line, but I'm not sure why. abcm2ps doesn't do that
+    if (line === abctune.lines.length - 1 && staffgroup.w / this.width < 0.66 && !abctune.formatting.stretchlast) break; // don't stretch last line too much
     var relspace = staffgroup.spacingunits * newspace;
     var constspace = staffgroup.w - relspace;
     if (staffgroup.spacingunits > 0) {
@@ -188,10 +189,14 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
     }
   }
 	centerWholeRests(staffgroup.voices);
+	this.renderer.printHorizontalLine();
+	var oldY = this.renderer.y; // The following call modifies the y position, so we need to save the old one to restore it.
   staffgroup.draw(this.renderer, this.renderer.y);
+	this.renderer.y = oldY;
   this.staffgroups[this.staffgroups.length] = staffgroup;
-  this.renderer.y = staffgroup.y + staffgroup.height;
-  this.renderer.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;
+//  this.renderer.y = staffgroup.y + staffgroup.height;
+//  this.renderer.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;
+	this.renderer.y += staffgroup.height;
   return staffgroup;
 };
 
@@ -238,8 +243,8 @@ ABCJS.write.EngraverController.prototype.engraveTopText = function(abctune) {
  * @private
  */
 ABCJS.write.EngraverController.prototype.engraveExtraText = function(abctune) {
-	this.lineNumber = null;
-	this.measureNumber = null;
+	this.renderer.lineNumber = null;
+	this.renderer.measureNumber = null;
 
 	var extraText;
   if (abctune.metaText.unalignedWords) {
@@ -294,7 +299,7 @@ ABCJS.write.EngraverController.prototype.engraveTempo = function (x, tempo) {
 	}
 	if (tempo.duration) {
 		var temposcale = 0.75*this.scale;
-		var tempopitch = 13;
+		var tempopitch = 11;
 		var duration = tempo.duration[0]; // TODO when multiple durations
 		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1, 'tempo');
 		var durlog = Math.floor(Math.log(duration) / Math.log(2));

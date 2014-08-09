@@ -207,7 +207,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     break;
   case "part":
     var abselem = new ABCJS.write.AbsoluteElement(elem,0,0, 'part');
-    abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, 18, {type:"text", attributes:{"font-weight":"bold", "font-size":""+16*this.controller.scale+"px", "font-family":"serif"}}));
+    abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, 18, {type:"part"}));
     elemset[0] = abselem;
     break;
 //         case "tempo":
@@ -479,9 +479,10 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
                         abselem.addRight(new ABCJS.write.RelativeElement("flags.ugrace", -graceoffsets[i]+dAcciaccatura, 0, pos, {scalex:gracescale, scaley: gracescale}));
                 }
       if (gracebeam) { // give the beam the necessary info
+          var graceDuration = elem.gracenotes[i].duration / 2;
+          if (this.isBagpipes) graceDuration /= 2;
         var pseudoabselem = {heads:[grace],
-                         abcelem:{averagepitch: gracepitch, minpitch: gracepitch, maxpitch: gracepitch},
-                         duration:(this.isBagpipes)?1/32:1/16};
+                         abcelem:{averagepitch: gracepitch, minpitch: gracepitch, maxpitch: gracepitch, duration: graceDuration }};
         gracebeam.add(pseudoabselem);
       } else { // draw the stem
         p1 = gracepitch+1/3*gracescale;
@@ -507,7 +508,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   }
   
   if (elem.barNumber) {
-    abselem.addChild(new ABCJS.write.RelativeElement(elem.barNumber, -10, 0, 0, {type:"debug"}));
+    abselem.addChild(new ABCJS.write.RelativeElement(elem.barNumber, -10, 0, 0, {type:"barNumber"}));
   }
   
   // ledger lines
