@@ -15,7 +15,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-/*global window, ABCJS, Math */
+/*global window, ABCJS, Math, console */
 
 if (!window.ABCJS)
 	window.ABCJS = {};
@@ -28,7 +28,7 @@ if (!window.ABCJS.write)
  * @param {Object} paper
  * @param {ABCJS.write.Glyphs} glyphs
  */
-ABCJS.write.Renderer = function(paper, glyphs) {
+ABCJS.write.Renderer = function(paper, glyphs, doRegression) {
   this.paper = paper;
   this.glyphs = glyphs;
   this.controller = null; //TODO-GD only used when drawing the ABCJS ARS to connect the controller with the elements for highlighting
@@ -37,6 +37,9 @@ ABCJS.write.Renderer = function(paper, glyphs) {
   this.minY = null; // set at each drawing of a stave by the controller - place for lyrics, crescendo and other dynamics
   this.scale = null; // renderer's scale is managed by the controller
   this.padding = null; // renderer's padding is managed by the controller
+  this.doRegression = doRegression;
+  if (this.doRegression)
+    this.regressionLines = [];
 };
 
 
@@ -52,6 +55,8 @@ ABCJS.write.Renderer.prototype.setPaperSize = function (sizetoset) {
 		this.paper.canvas.parentNode.style.height=""+sizetoset.h+"px";
 	} else
 		this.paper.canvas.parentNode.setAttribute("style","width:"+sizetoset.w+"px");
+	if (this.doRegression)
+		this.regressionLines.push("PAPER SIZE: ("+sizetoset.w+","+sizetoset.h+")");
 };
 
 /**
@@ -96,6 +101,8 @@ ABCJS.write.Renderer.prototype.endGroup = function (klass) {
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
+  if (this.doRegression) this.addToRegression(ret);
+
   return ret;
 };
 
@@ -120,6 +127,8 @@ ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch) {
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
+  if (this.doRegression) this.addToRegression(ret);
+
   return ret;
 };
 
@@ -151,6 +160,8 @@ ABCJS.write.Renderer.prototype.printStem = function (x, dx, y1, y2) {
     if (this.scale!==1) {
       ret.scale(this.scale, this.scale, 0, 0);
     }
+    if (this.doRegression) this.addToRegression(ret);
+
     return ret;
   }
 };
@@ -203,6 +214,7 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
 ABCJS.write.Renderer.prototype.printPath = function (attrs) {
   var ret = this.paper.path().attr(attrs);
   if (this.scale!==1) ret.scale(this.scale, this.scale, 0, 0);
+  if (this.doRegression) this.addToRegression(ret);
   return ret;
 };
 
@@ -238,6 +250,8 @@ ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above)
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
+  if (this.doRegression) this.addToRegression(ret);
+
   return ret;
 };
 /**
@@ -305,8 +319,11 @@ ABCJS.write.Renderer.prototype.renderText = function(x, y, text, type, klass, an
 	if (hash.font.box) {
 		this.paper.rect(size.x-1,size.y-1,size.width+2,size.height+2).attr({"stroke":"#cccccc"});
 	}
-	if (type === 'debugfont')
+	if (type === 'debugfont') {
+		console.log("Debug msg: " + text);
 		el.attr({ stroke: "#ff0000"});
+	}
+	if (this.doRegression) this.addToRegression(el);
 	return el;
 };
 
@@ -344,4 +361,25 @@ ABCJS.write.Renderer.prototype.printHorizontalLine = function () {
 	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
 		x2, y+dy, x1, y+dy);
 	this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
+};
+
+/**
+ * @private
+ */
+ABCJS.write.Renderer.prototype.addToRegression = function (el) {
+	var box = el.getBBox();
+	//var str = "("+box.x+","+box.y+")["+box.width+","+box.height+"] "
+	var str = el.type + ' ' + box.toString() + ' ';
+	var attrs = [];
+	for (var key in el.attrs) {
+		if (el.attrs.hasOwnProperty(key)) {
+			if (key === 'class')
+				str = el.attrs[key] + " " + str;
+			else
+				attrs.push(key+": "+el.attrs[key]);
+		}
+	}
+	attrs.sort();
+	str += "{ " +attrs.join(" ") + " }";
+	this.regressionLines.push(str);
 };

@@ -69,7 +69,7 @@ ABCJS.write.EngraverController = function(paper, params) {
 	Raphael._availableAttrs['text-decoration'] = "";
 
   //TODO-GD factor out all calls directly made to renderer.paper and fix all the coupling issues below
-  this.renderer=new ABCJS.write.Renderer(paper, this.glyphs);
+  this.renderer=new ABCJS.write.Renderer(paper, this.glyphs, params.regression);
   this.renderer.y = 0; // TODO-GD should manage renderer's y through an API
   this.renderer.scale = this.scale; // TODO-GD should manage scale in only one place (probably renderer)
   this.renderer.controller = this; // TODO-GD needed for highlighting
@@ -90,6 +90,8 @@ ABCJS.write.EngraverController.prototype.engraveABC = function(abctunes) {
   for (var i = 0; i < abctunes.length; i++) {
     this.engraveTune(abctunes[i]);
   }
+	if (this.renderer.doRegression)
+		return this.renderer.regressionLines.join("\n");
 };
 
 /**
