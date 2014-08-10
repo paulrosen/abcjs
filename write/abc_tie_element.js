@@ -64,6 +64,13 @@ ABCJS.write.TieElem.prototype.draw = function (renderer, linestartx, lineendx) {
 		}
 	}
 
+	if(!this.anchor1 && !this.anchor2) {
+		// This is the case where the slur covers the entire line.
+		// TODO-PER: figure out where the real top and bottom of the line are.
+		startpitch = this.above ? 14 : 0;
+		endpitch = this.above ? 14 : 0;
+	}
+
 	//  if (this.anchor1 && this.anchor2) {
 	//    if ((!this.force && this.anchor1.parent.beam && this.anchor2.parent.beam &&
 	//	 this.anchor1.parent.beam.asc===this.anchor2.parent.beam.asc) ||
