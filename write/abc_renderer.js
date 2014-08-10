@@ -41,6 +41,20 @@ ABCJS.write.Renderer = function(paper, glyphs) {
 
 
 /**
+ * Set the size of the canvas.
+ */
+ABCJS.write.Renderer.prototype.setPaperSize = function (sizetoset) {
+	this.paper.setSize(sizetoset.w,sizetoset.h);
+	// Correct for IE problem in calculating height
+	var isIE=/*@cc_on!@*/false;//IE detector
+	if (isIE) {
+		this.paper.canvas.parentNode.style.width=sizetoset.w+"px";
+		this.paper.canvas.parentNode.style.height=""+sizetoset.h+"px";
+	} else
+		this.paper.canvas.parentNode.setAttribute("style","width:"+sizetoset.w+"px");
+};
+
+/**
  * Begin a group of glyphs that will always be moved, scaled and higlighted together
  */
 ABCJS.write.Renderer.prototype.beginGroup = function () {
@@ -73,7 +87,7 @@ ABCJS.write.Renderer.prototype.addPath = function (path) {
 };
 
 /**
- * End a group of glyphs that will always be moved, scaled and higlighted together
+ * End a group of glyphs that will always be moved, scaled and highlighted together
  */
 ABCJS.write.Renderer.prototype.endGroup = function (klass) {
   this.ingroup = false;

@@ -154,14 +154,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
   
 
   var sizetoset = {w: (maxwidth+this.paddingright)*this.scale,h: (this.renderer.y+this.paddingbottom)*this.scale};
-  this.renderer.paper.setSize(sizetoset.w,sizetoset.h);
-  // Correct for IE problem in calculating height
-  var isIE=/*@cc_on!@*/false;//IE detector
-  if (isIE) {
-    this.renderer.paper.canvas.parentNode.style.width=sizetoset.w+"px";
-    this.renderer.paper.canvas.parentNode.style.height=""+sizetoset.h+"px";
-  } else
-    this.renderer.paper.canvas.parentNode.setAttribute("style","width:"+sizetoset.w+"px");
+  this.renderer.setPaperSize(sizetoset);
 };
 
 /**
