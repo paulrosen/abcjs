@@ -194,7 +194,7 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
     }
   }
 	centerWholeRests(staffgroup.voices);
-	this.renderer.printHorizontalLine();
+	//this.renderer.printHorizontalLine();
 	var oldY = this.renderer.y; // The following call modifies the y position, so we need to save the old one to restore it.
   staffgroup.draw(this.renderer, this.renderer.y);
 	this.renderer.y = oldY;
