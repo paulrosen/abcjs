@@ -1539,10 +1539,10 @@
     var paths = function (ps) {
         var p = paths.ps = paths.ps || {};
         if (p[ps]) {
-            p[ps].sleep = 100;
+            p[ps].sleep = 1;
         } else {
             p[ps] = {
-                sleep: 100
+                sleep: 1
             };
         }
         setTimeout(function () {

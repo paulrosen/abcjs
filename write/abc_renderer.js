@@ -44,6 +44,7 @@ ABCJS.write.Renderer = function(paper, glyphs, doRegression) {
 
 ABCJS.write.Renderer.prototype.reset = function() {
 
+	this.paper.clear();
 	this.y = 0;
 	this.abctune = null;
 	this.lastM = null;
@@ -51,6 +52,12 @@ ABCJS.write.Renderer.prototype.reset = function() {
 	this.path = null;
 	if (this.doRegression)
 		this.regressionLines = [];
+	// HACK-PER: There was a problem in Raphael where every path string that was sent to it was cached.
+	// That was causing the browser's memory to steadily grow until the browser went slower and slower until
+	// it crashed. The fix to that was a patch to Raphael, so it is only patched on the versions of this library that
+	// bundle Raphael with it. Also, if Raphael gets an update, then that patch will be lost. On version 2.1.2 of Raphael,
+	// the patch is on line 1542 and 1545 and it is:
+	//             p[ps].sleep = 1;
 };
 
 /**
@@ -111,6 +118,7 @@ ABCJS.write.Renderer.prototype.endGroup = function (klass) {
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
+	this.path = [];
   if (this.doRegression) this.addToRegression(ret);
 
   return ret;
@@ -192,6 +200,7 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
       ycorr = this.glyphs.getYCorr(symbol.charAt(i));
       el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol.charAt(i), this.paper, klass);
       if (el) {
+	if (this.doRegression) this.addToRegression(el);
 	elemset.push(el);
 	dx+=this.glyphs.getSymbolWidth(symbol.charAt(i));
       } else {
@@ -212,6 +221,7 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
 	if (this.scale!==1) {
       el.scale(this.scale, this.scale, 0, 0);
 	}
+	if (this.doRegression) this.addToRegression(el);
 	return el;
       } else
 				this.renderText(x, this.y, "no symbol:" +symbol, "debugfont", 'debug-msg', 'start');
