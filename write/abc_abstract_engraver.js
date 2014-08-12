@@ -47,15 +47,34 @@ ABCJS.write.AbstractEngraver = function(glyphs, bagpipes) {
                  note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter"},
                  uflags:{3:"flags.u8th", 4:"flags.u16th", 5:"flags.u32nd", 6:"flags.u64th"},
                  dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}};
-  this.slurs = {};
-  this.ties = [];
-  this.slursbyvoice = {};
-  this.tiesbyvoice = {};
-  this.endingsbyvoice = {};
-  this.s = 0; // current staff number
-  this.v = 0; // current voice number on current staff
-  this.stafflines = 5;
-  this.tripletmultiplier = 1;
+	this.reset();
+};
+
+ABCJS.write.AbstractEngraver.prototype.reset = function() {
+	this.slurs = {};
+	this.ties = [];
+	this.slursbyvoice = {};
+	this.tiesbyvoice = {};
+	this.endingsbyvoice = {};
+	this.s = 0; // current staff number
+	this.v = 0; // current voice number on current staff
+	this.stafflines = 5;
+	this.tripletmultiplier = 1;
+
+	this.abcline = undefined;
+	this.accidentalSlot = undefined;
+	this.accidentalshiftx = undefined;
+	this.controller = undefined;
+	this.dotshiftx = undefined;
+	this.minY = undefined;
+	this.partstartelem = undefined;
+	this.pos = undefined;
+	this.roomtaken = undefined;
+	this.roomtakenright = undefined;
+	this.staffgroup = undefined;
+	this.startlimitelem = undefined;
+	this.stemdir = undefined;
+	this.voice = undefined;
 };
 
 ABCJS.write.AbstractEngraver.prototype.getCurrentVoiceId = function() {

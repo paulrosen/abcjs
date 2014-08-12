@@ -50,9 +50,6 @@ ABCJS.write.EngraverController = function(paper, params) {
   params = params || {};
   this.space = 3*ABCJS.write.spacing.SPACE;
   this.glyphs = new ABCJS.write.Glyphs(); // we need the glyphs for layout information
-  this.listeners = [];
-  this.selected = [];
-  this.ingroup = false;
   this.scale = params.scale || 1;
   this.staffwidth = params.staffwidth || 740;
   this.paddingtop = params.paddingtop || 15;
@@ -60,7 +57,6 @@ ABCJS.write.EngraverController = function(paper, params) {
   this.paddingright = params.paddingright || 50;
   this.paddingleft = params.paddingleft || 15;
   this.editable = params.editable || false;
-  this.staffgroups = null;
 
 	// HACK-PER: Raphael doesn't support setting the class of an element, so this adds that support. This doesn't work on IE8 or less, though.
 	this.usingSvg = (window.SVGAngle || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1") ? true : false); // Same test Raphael uses
@@ -75,6 +71,19 @@ ABCJS.write.EngraverController = function(paper, params) {
   this.renderer.controller = this; // TODO-GD needed for highlighting
   this.renderer.paddingleft = this.paddingleft; //TODO-GD used in VoiceElement.draw
 	this.renderer.space = 3*ABCJS.write.spacing.SPACE;
+
+	this.reset();
+};
+
+ABCJS.write.EngraverController.prototype.reset = function() {
+	this.listeners = [];
+	this.selected = [];
+	this.ingroup = false;
+	this.staffgroups = [];
+	if (this.engraver)
+		this.engraver.reset();
+	this.engraver = null;
+	this.renderer.reset();
 };
 
 /**
@@ -85,6 +94,7 @@ ABCJS.write.EngraverController.prototype.engraveABC = function(abctunes) {
   if (abctunes[0]===undefined) {
     abctunes = [abctunes];
   }
+	this.reset();
   this.renderer.y=0;
 
   for (var i = 0; i < abctunes.length; i++) {

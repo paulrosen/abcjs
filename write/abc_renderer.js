@@ -42,6 +42,16 @@ ABCJS.write.Renderer = function(paper, glyphs, doRegression) {
     this.regressionLines = [];
 };
 
+ABCJS.write.Renderer.prototype.reset = function() {
+
+	this.y = 0;
+	this.abctune = null;
+	this.lastM = null;
+	this.ingroup = false;
+	this.path = null;
+	if (this.doRegression)
+		this.regressionLines = [];
+};
 
 /**
  * Set the size of the canvas.
