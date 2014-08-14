@@ -50,17 +50,17 @@ ABCJS.write.TieElem.prototype.draw = function (renderer, linestartx, lineendx) {
 
 	if (this.anchor1) {
 		linestartx = this.anchor1.x;
-		startpitch = this.above ? this.anchor1.highestVert : this.anchor1.pitch;
+		startpitch = this.above && this.anchor1.highestVert !== undefined ? this.anchor1.highestVert : this.anchor1.pitch;
 		if (!this.anchor2) {
-			endpitch = this.above ? this.anchor1.highestVert : this.anchor1.pitch;
+			endpitch = this.above && this.anchor1.highestVert !== undefined ? this.anchor1.highestVert : this.anchor1.pitch;
 		}
 	}
 
 	if (this.anchor2) {
 		lineendx = this.anchor2.x;
-		endpitch = this.above ? this.anchor2.highestVert : this.anchor2.pitch;
+		endpitch = this.above && this.anchor1.highestVert !== undefined ? this.anchor2.highestVert : this.anchor2.pitch;
 		if (!this.anchor1) {
-			startpitch = this.above ? this.anchor2.highestVert : this.anchor2.pitch;
+			startpitch = this.above && this.anchor1.highestVert !== undefined ? this.anchor2.highestVert : this.anchor2.pitch;
 		}
 	}
 

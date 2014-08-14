@@ -348,6 +348,9 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     case "invisible":
     case "spacer":
       c="";
+		elem.averagepitch=restpitch;
+		elem.minpitch=restpitch;
+		elem.maxpitch=restpitch;
     }
          if (!dontDraw)
     notehead = this.createNoteHead(abselem, c, {verticalPos:restpitch}, null, 0, -this.roomtaken, null, dot, 0, 1);
@@ -798,7 +801,7 @@ ABCJS.write.AbstractEngraver.prototype.createDecoration = function(decoration, p
     case "roll": dec="scripts.roll"; break; //TODO put abc2ps roll in here
     case "irishroll": dec="scripts.roll"; break;
     case "marcato": dec="scripts.umarcato"; break;
-    case "marcato2": dec="scriopts.dmarcato"; break;//other marcato
+    case "dmarcato": dec="scripts.dmarcato"; break;//other marcato
     case "turn": dec="scripts.turn"; break;
     case "uppermordent": dec="scripts.prall"; break;
     case "pralltriller": dec="scripts.prall"; break;
