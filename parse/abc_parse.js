@@ -147,13 +147,14 @@ window.ABCJS.parse.Parse = function() {
 		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
-		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
+		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "slide", "^", "marcato",
 		"upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4",
 		"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato",
 		"style=normal", "style=harmonic", "style=rhythm", "style=x"
 	];
 	var accentPsuedonyms = [ ["<", "accent"], [">", "accent"], ["tr", "trill"], ["<(", "crescendo("], ["<)", "crescendo)"],
-		[">(", "diminuendo("], [">)", "diminuendo)"], ["plus", "+"], [ "emphasis", "accent"] ];
+		[">(", "diminuendo("], [">)", "diminuendo)"], ["plus", "+"], [ "emphasis", "accent"],
+		[ "^", "umarcato" ], [ "marcato", "umarcato" ] ];
 	var letter_to_accent = function(line, i)
 	{
 		var macro = multilineVars.macros[line.charAt(i)];
