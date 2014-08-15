@@ -1,3 +1,5 @@
+/*global Raphael */
+
 var glyphnames = {
   "\ue100":"rests.whole", // whole
   "\ue101":"rests.half", // half
@@ -74,15 +76,22 @@ var glyphnames = {
   "+":"+",
   ",":",",
   "-":"-",
-  ".":"."
+  ".":".",
+	"\ue120": "scripts.wedge",
+	"\ue15a": "scripts.thumb",
+	"\ue165": "scripts.open",
+	"\ue1b6": "scripts.longphrase",
+	"\ue1b7": "scripts.mediumphrase",
+	"\ue1b8": "scripts.shortphrase",
+	"\ue14e": "scripts.snap"
 };
 
 Raphael.fn.toRelative = function(pathArray) {
   var R = this.raphael;
   var push = "push";
   var length = "length";
-  var proto = "prototype"
-  var lowerCase = String[ proto].toLowerCase
+  var proto = "prototype";
+  var lowerCase = String[ proto].toLowerCase;
   var toString = "toString";
   if (!R.is(pathArray, "array") || !R.is(pathArray && pathArray[0], "array")) { // rough assumption
                 pathArray = R.parsePathString(pathArray);
@@ -93,7 +102,7 @@ Raphael.fn.toRelative = function(pathArray) {
                 mx = 0,
                 my = 0,
                 start = 0;
-            if (pathArray[0][0] == "M") {
+            if (pathArray[0][0] === "M") {
                 x = pathArray[0][1];
                 y = pathArray[0][2];
                 mx = x;
@@ -104,7 +113,7 @@ Raphael.fn.toRelative = function(pathArray) {
             for (var i = start, ii = pathArray[length]; i < ii; i++) {
                 var r = res[i] = [],
                     pa = pathArray[i];
-                if (pa[0] != lowerCase.call(pa[0])) {
+                if (pa[0] !== lowerCase.call(pa[0])) {
                     r[0] = lowerCase.call(pa[0]);
                     switch (r[0]) {
                         case "a":
@@ -129,7 +138,7 @@ Raphael.fn.toRelative = function(pathArray) {
                     }
                 } else {
                     r = res[i] = [];
-                    if (pa[0] == "m") {
+                    if (pa[0] === "m") {
                         mx = pa[1] + x;
                         my = pa[2] + y;
                     }
@@ -156,48 +165,46 @@ Raphael.fn.toRelative = function(pathArray) {
             }
             res[toString] = R._path2string;
             return res;
-}
+};
 
-function scale_font(font, size, raphael) {
-  var scale = size / font.face["units-per-em"];
-  var res = [];
-  for (var glyph in glyphnames) {
-    var symb;
-    try {
-      symb = raphael.path(font.glyphs[glyph].d).attr({fill: "#000", stroke: "none"});
-      symb.scale(scale,scale,0,0);
-    } catch (e) {continue;}
-      var path = symb.attrs["path"];
-      if (path == null) {
-	continue;
-      }
-      path = raphael.toRelative(path);
-      path[0][1]=+path[0][1].toFixed(3); // round out the M part
-      path[0][2]=+path[0][2].toFixed(3);
-      var w = Math.round(symb.getBBox().width*1000)/1000;
-      var h = Math.round(symb.getBBox().height*1000)/1000;
-      gstr= "'";
-      gstr+=glyphnames[glyph];
-      gstr += "':{d:";
-      gstr += path.toSource();
-      gstr +=",w:"+w+",h:"+h+"}";
-      res[res.length] = gstr;
-    
-  }
-  document.write("{"+res.join(",")+"}");
-} 
-
-
-function old() {
-      gstr += "':{d:'"
-      for (var i=0; i<path.length; i++) {
-        gstr+=path[i][0];
-	for (var j=1, pathpart=path[i]; j<pathpart.length; j++) {
-	  gstr+=" ";
-	  pathpart[j] = Math.round(pathpart[j]*1000)/1000;
-	  gstr+=(""+pathpart[j]);
+window.scale_font = function(font, size, raphael) {
+	var scale = size / font.face["units-per-em"];
+	var res = [];
+	for (var glyph in glyphnames) {
+		if (glyphnames.hasOwnProperty(glyph)) {
+			var symb;
+			try {
+				symb = raphael.path(font.glyphs[glyph].d).attr({fill: "#000", stroke: "none"});
+				//symb.scale(scale,scale,0,0);
+			} catch (e) {continue;}
+			var path = symb.attrs.path;
+			if (path === null) {
+				continue;
+			}
+			path = raphael.toRelative(path);
+			// Do the scaling
+			for (var i = 0; i < path.length; i++) {
+				path[i][0] = "'" + path[i][0] + "'";
+				for (var j = 1; j < path[i].length; j++) {
+					path[i][j] = (path[i][j] * scale).toFixed(2);
+				}
+			}
+//			path[0][1] = +path[0][1].toFixed(3); // round out the M part
+//			path[0][2] = +path[0][2].toFixed(3);
+			var w = Math.round(symb.getBBox().width * scale * 1000) / 1000;
+			var h = Math.round(symb.getBBox().height * scale * 1000) / 1000;
+			var gstr = "'";
+			gstr += glyphnames[glyph];
+			gstr += "':{d:";
+			var arr = [];
+			for (i = 0; i < path.length; i++) {
+				arr.push('[' + path[i].join(',') + ']');
+			}
+			gstr += '[' + arr.join(',') + ']';
+			gstr += ",w:" + w + ",h:" + h + "}";
+			res[res.length] = gstr;
+		}
 	}
-      }
-      gstr +="',w:"+w+",h:"+h+"}";
-
-}
+	var div = document.getElementById('generated-font');
+	div.innerHTML = "{" + res.join(",<br>") + "};";
+} ;

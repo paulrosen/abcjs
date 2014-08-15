@@ -1,5 +1,4 @@
-<?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
 	<title>abcjs: Font Generator</title>
 	<script src="raphael.js"></script>
@@ -24,9 +23,9 @@
 
 				try {
 					symb = paper.path(font.glyphs[glyph].d).attr({fill: "#000", stroke: "none"});
-					symb.scale(scale, scale, x + 30, y);
+					symb.scale(scale, scale, x + 50, y);
 //					symb.translate(x + 30, y);
-					paper.text(x, y, glyph.charCodeAt(0).toString(16));
+					paper.text(x+20, y, glyph.charCodeAt(0).toString(16)).attr("text-anchor", "left");
 				} catch (e) {
 
 				}
@@ -37,6 +36,13 @@
 	</script>
 </head>
 <body onload="showFont();">
+<h1>abcjs Character Table</h1>
+<p>These are all the characters available to <b>abcjs</b>. Not all of them are used, however. The actual
+	characters that are in abcjs are listed in <b>scalefontemmentaler.js</b> in the object <b>glyphnames</b>.
+	Click here to generate the code that should be put into <b>abc_glyphs.js</b> to make the characters available.
+	<button onclick="doScale();">Generate Font Code</button>
+</p>
+<div id="generated-font" style="overflow: scroll;white-space: nowrap;"></div>
 <div id="canvas"></div>
 </body>
 </html>
