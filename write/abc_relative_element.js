@@ -50,10 +50,13 @@ ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
 			this.graphelem = renderer.renderText(this.x, renderer.calcY(this.pitch), ""+this.c, "measurefont", 'bar-number', "start");
 			break;
 		case "lyric":
-			this.graphelem = renderer.renderText(this.x, renderer.calcY(renderer.minY-7), this.c, "vocalfont", 'abc-lyric'); //TODO-GD print lyrics at the "correct" pitch
+			this.graphelem = renderer.renderText(this.x, renderer.calcY(renderer.minY-2), this.c, "vocalfont", 'abc-lyric'); //TODO-GD print lyrics at the "correct" pitch
 			break;
 		case "chord":
 			this.graphelem = renderer.renderText(this.x, renderer.calcY(this.pitch), this.c, 'gchordfont', "chord", "start");
+			break;
+		case "decoration":
+			this.graphelem = renderer.renderText(this.x, renderer.calcY(this.pitch), this.c, 'annotationfont', "annotation", "middle");
 			break;
 		case "text":
 			this.graphelem = renderer.renderText(this.x, renderer.calcY(this.pitch), this.c, 'annotationfont', "annotation", "start");

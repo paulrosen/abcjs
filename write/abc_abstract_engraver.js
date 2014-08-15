@@ -469,7 +469,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
          window.ABCJS.parse.each(elem.lyric, function(ly) {
          lyricStr += ly.syllable + ly.divider + "\n";
       });
-    abselem.addRight(new ABCJS.write.RelativeElement(lyricStr, 0, lyricStr.length*5, 0, {type:"lyric"}));
+    abselem.addRight(new ABCJS.write.RelativeElement(lyricStr, 0, lyricStr.length*5, undefined, {type:"lyric"}));
   }
   
   if (!dontDraw && elem.gracenotes !== undefined) {
@@ -739,11 +739,13 @@ ABCJS.write.AbstractEngraver.prototype.createDecoration = function(decoration, p
   var compoundDec;        // PER: for decorations with two symbols
   var diminuendo;
     var crescendo;
+  var textDecs = [];
   var unknowndecs = [];
   var yslot = (pitch>9) ? pitch+3 : 12;
   var ypos;
         //var dir = (this.stemdir==="down" || pitch>=6) && this.stemdir!=="up";
         var below = false;        // PER: whether decoration goes above or below.
+        var isText = false;        // PER: whether decoration is just rendered as regular text
         var yslotB = this.minY - 4; // (pitch<1) ? pitch-9 : -6;
   var i;
   roomtaken = roomtaken || 0;
@@ -796,7 +798,32 @@ ABCJS.write.AbstractEngraver.prototype.createDecoration = function(decoration, p
 
   for (i=0;i<decoration.length; i++) {
          below = false;
+         isText = false;
     switch(decoration[i]) {
+		case "0":
+		case "1":
+		case "2":
+		case "3":
+		case "4":
+		case "5":
+		case "D.C.":
+		case "D.S.":
+			dec = decoration[i];
+			isText = true;
+			break;
+		case "fine":
+			dec = "FINE";
+			isText = true;
+			break;
+		case "+":dec="scripts.stopped";break;
+		case "open":dec="scripts.open";break;
+		case "snap":dec="scripts.snap";break;
+		case "wedge":dec="scripts.wedge";break;
+		case "thumb":dec="scripts.thumb";break;
+		case "shortphrase":dec="scripts.shortphrase";break;
+		case "mediumphrase":dec="scripts.mediumphrase";break;
+		case "longphrase":dec="scripts.longphrase";break;
+
     case "trill":dec="scripts.trill";break;
     case "roll": dec="scripts.roll"; break; //TODO put abc2ps roll in here
     case "irishroll": dec="scripts.roll"; break;
@@ -867,10 +894,14 @@ ABCJS.write.AbstractEngraver.prototype.createDecoration = function(decoration, p
 		  yslot+=5;
          }
     var deltax = width/2;
-    if (this.glyphs.getSymbolAlign(dec)!=="center") {
-      deltax -= (this.glyphs.getSymbolWidth(dec)/2);
-    }
-    abselem.addChild(new ABCJS.write.RelativeElement(dec, deltax, this.glyphs.getSymbolWidth(dec), ypos));
+	  if (isText) {
+		  abselem.addChild(new ABCJS.write.RelativeElement(dec, 0, 0, ypos+2, {type:"decoration"})); // TODO-PER: This is just approximate placement for this type of element.
+	  } else {
+		  if (this.glyphs.getSymbolAlign(dec) !== "center") {
+			  deltax -= (this.glyphs.getSymbolWidth(dec) / 2);
+		  }
+		  abselem.addChild(new ABCJS.write.RelativeElement(dec, deltax, this.glyphs.getSymbolWidth(dec), ypos));
+	  }
   }
   if (compoundDec) {        // PER: added new decorations
          ypos = (dir === 'down') ? pitch+1:pitch+9;
