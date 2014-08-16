@@ -77,6 +77,152 @@ ABCJS.write.Renderer.prototype.setPaperSize = function (sizetoset) {
 };
 
 /**
+ * Text that goes above the score
+ * @param {number} width
+ * @param {object} abctune
+ */
+ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
+	var space;
+	if (abctune.metaText.header) {
+		space = this.outputTextIf(width / 2, abctune.metaText.header.left, 'headerfont', 'header meta-top', null, 'start');
+		var space2 = this.outputTextIf(width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', null, 'middle');
+		var space3 = this.outputTextIf(width / 2, abctune.metaText.header.right, 'headerfont', 'header meta-top', null, 'end');
+		var em = Math.max(space[1], space2[1], space3[1]);
+		this.moveY(em, 2);
+	}
+	this.outputTextIf(width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', 0);
+	if (abctune.lines[0])
+		this.outputTextIf(width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', 0);
+
+	if (abctune.metaText.rhythm || abctune.metaText.origin || abctune.metaText.composer) {
+		this.outputTextIf(this.paddingleft, abctune.metaText.rhythm, 'infofont', 'meta-top', null, "start");
+
+		var composerLine = "";
+		if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
+		if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
+		space = this.outputTextIf(width, composerLine, 'composerfont', 'meta-top', null, "end");
+		this.moveY(space[1], 1);
+	}
+
+	this.outputTextIf(width, abctune.metaText.author, 'composerfont', 'meta-top', 0, "end");
+	this.skipSpaceY();
+
+	this.outputTextIf(this.paddingleft, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, "start");
+
+	this.engraveTempo(this.paddingleft + ABCJS.write.spacing.INDENT*this.scale, abctune.metaText.tempo);
+};
+
+/**
+ * Text that goes below the score
+ * @param {number} width
+ * @param {object} abctune
+ */
+ABCJS.write.Renderer.prototype.engraveExtraText = function(width, abctune) {
+	this.lineNumber = null;
+	this.measureNumber = null;
+
+	var extraText;
+	if (abctune.metaText.unalignedWords) {
+		extraText = "";
+		for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
+			if (typeof abctune.metaText.unalignedWords[j] === 'string')
+				extraText += abctune.metaText.unalignedWords[j] + "\n";
+			else {
+				for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
+					extraText += " FONT " + abctune.metaText.unalignedWords[j][k].text;
+				}
+				extraText += "\n";
+			}
+		}
+		this.outputTextIf(this.paddingleft + ABCJS.write.spacing.INDENT*this.scale, extraText, 'wordsfont', 'meta-bottom', 2, "start");
+	}
+
+	extraText = "";
+	if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
+	if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
+	if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
+	if (abctune.metaText.notes) extraText += "Notes: " + abctune.metaText.notes + "\n";
+	if (abctune.metaText.transcription) extraText += "Transcription: " + abctune.metaText.transcription + "\n";
+	if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
+	if (abctune.metaText['abc-copyright']) extraText += "Copyright: " + abctune.metaText['abc-copyright'] + "\n";
+	if (abctune.metaText['abc-creator']) extraText += "Creator: " + abctune.metaText['abc-creator'] + "\n";
+	if (abctune.metaText['abc-edited-by']) extraText += "Edited By: " + abctune.metaText['abc-edited-by'] + "\n";
+	this.outputTextIf(this.paddingleft, extraText, 'historyfont', 'meta-bottom', 0, "start");
+
+	if (abctune.metaText.footer) {
+		var space = this.outputTextIf(width / 2, abctune.metaText.footer.left, 'footerfont', 'header meta-bottom', null, 'start');
+		var space2 = this.outputTextIf(width / 2, abctune.metaText.footer.center, 'footerfont', 'header meta-bottom', null, 'middle');
+		var space3 = this.outputTextIf(width / 2, abctune.metaText.footer.right, 'footerfont', 'header meta-bottom', null, 'end');
+		this.y += Math.max(space[1], space2[1], space3[1]);
+	}
+};
+
+/**
+ *
+ * The tempo marking
+ * @param {number} x
+ * @param {object} tempo
+ */
+ABCJS.write.Renderer.prototype.engraveTempo = function (x, tempo) {
+	if (!tempo || tempo.suppress) return;
+
+	var text;
+	var noteHeight = 20*this.scale; // the note height of 20 was just determined empirically.
+	var totalHeight = noteHeight;
+	if (tempo.preString) {
+		text = this.renderText(x, this.y+noteHeight, tempo.preString, 'tempofont', 'tempo',"start");
+		var preWidth = text.getBBox().width;
+		var charWidth = preWidth / tempo.preString.length; // Just get some average number to increase the spacing.
+		x += preWidth + charWidth;
+		totalHeight = Math.max(totalHeight, text.getBBox().height);
+	}
+	if (tempo.duration) {
+		var temposcale = 0.75*this.scale;
+		var tempopitch = 11;
+		var duration = tempo.duration[0]; // TODO when multiple durations
+		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1, 'tempo');
+		var durlog = Math.floor(Math.log(duration) / Math.log(2));
+		var dot = 0;
+		for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
+		var c = this.engraver.chartable.note[-durlog];
+		var flag = this.engraver.chartable.uflags[-durlog];
+		var temponote = this.engraver.createNoteHead(abselem,
+			c,
+			{verticalPos:tempopitch},
+			"up",
+			0,
+			0,
+			flag,
+			dot,
+			0,
+			temposcale
+		);
+		abselem.addHead(temponote);
+		if (duration < 1) {
+			var p1 = tempopitch + 1 / 3 * temposcale;
+			var p2 = tempopitch + 7 * temposcale;
+			var dx = temponote.dx + temponote.w;
+			var width = -0.6*this.scale;
+			abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type":"stem", "pitch2":p2, linewidth:width}));
+		}
+		abselem.x = x*(1/this.scale); // TODO-PER: For some reason it scales this element twice, so just compensate.
+		abselem.draw(this, null);
+		x += (abselem.w + 5*this.scale);
+		var str = "= " + tempo.bpm;
+		text = this.renderText(x, this.y+noteHeight, str, 'tempofont', 'tempo',"start");
+		var postWidth = text.getBBox().width;
+		var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
+		x += postWidth + charWidth2;
+		totalHeight = Math.max(totalHeight, text.getBBox().height);
+	}
+	if (tempo.postString) {
+		this.renderText(x, this.y+noteHeight, tempo.postString, 'tempofont', 'tempo',"start");
+		totalHeight = Math.max(totalHeight, text.getBBox().height);
+	}
+	this.moveY(totalHeight, 2.5);
+};
+
+/**
  * Begin a group of glyphs that will always be moved, scaled and higlighted together
  */
 ABCJS.write.Renderer.prototype.beginGroup = function () {

@@ -114,6 +114,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	this.renderer.measureNumber = null;
   this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
   this.engraver.controller = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
+	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; }
 	this.renderer.scale = this.scale;
 	if (abctune.media === 'print') {
@@ -137,7 +138,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	}
   this.width+=this.paddingleft;
 
-  this.engraveTopText(abctune);
+  this.renderer.engraveTopText(this.width, abctune);
 
   this.staffgroups = [];
   var maxwidth = this.width;
@@ -162,7 +163,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
     }
   }
 
-  this.engraveExtraText(abctune);
+  this.renderer.engraveExtraText(this.width, abctune);
   
 
   var sizetoset = {w: (maxwidth+this.paddingright)*this.scale,h: (this.renderer.y+this.paddingbottom)*this.scale};
@@ -194,7 +195,7 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
     }
   }
 	centerWholeRests(staffgroup.voices);
-	//this.renderer.printHorizontalLine();
+	this.renderer.printHorizontalLine();
 	var oldY = this.renderer.y; // The following call modifies the y position, so we need to save the old one to restore it.
   staffgroup.draw(this.renderer, this.renderer.y);
 	this.renderer.y = oldY;
@@ -203,149 +204,6 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
 //  this.renderer.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;
 	this.renderer.y += staffgroup.height;
   return staffgroup;
-};
-
-/**
- * Text that goes above the score
- * @private
- */
-ABCJS.write.EngraverController.prototype.engraveTopText = function(abctune) {
-	var space;
-	if (abctune.metaText.header) {
-		space = this.renderer.outputTextIf(this.width / 2, abctune.metaText.header.left, 'headerfont', 'header meta-top', null, 'start');
-		var space2 = this.renderer.outputTextIf(this.width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', null, 'middle');
-		var space3 = this.renderer.outputTextIf(this.width / 2, abctune.metaText.header.right, 'headerfont', 'header meta-top', null, 'end');
-		var em = Math.max(space[1], space2[1], space3[1]);
-		this.renderer.moveY(em, 2);
-	}
-	this.renderer.outputTextIf(this.width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', 0);
-	if (abctune.lines[0])
-		this.renderer.outputTextIf(this.width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', 0);
-
-	if (abctune.metaText.rhythm || abctune.metaText.origin || abctune.metaText.composer) {
-		this.renderer.outputTextIf(this.paddingleft, abctune.metaText.rhythm, 'infofont', 'meta-top', null, "start");
-
-	var composerLine = "";
-	if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
-	if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
-		space = this.renderer.outputTextIf(this.width, composerLine, 'composerfont', 'meta-top', null, "end");
-		this.renderer.moveY(space[1], 1);
-	}
-
-	this.renderer.outputTextIf(this.width, abctune.metaText.author, 'composerfont', 'meta-top', 0, "end");
-	this.renderer.skipSpaceY();
-
-	this.renderer.outputTextIf(this.paddingleft, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, "start");
-
-  if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
-		this.engraveTempo(this.paddingleft + ABCJS.write.spacing.INDENT*this.scale, abctune.metaText.tempo);
-  }
-
-};
-
-/**
- * Text that goes below the score
- * @private
- */
-ABCJS.write.EngraverController.prototype.engraveExtraText = function(abctune) {
-	this.renderer.lineNumber = null;
-	this.renderer.measureNumber = null;
-
-	var extraText;
-  if (abctune.metaText.unalignedWords) {
-		extraText = "";
-    for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
-      if (typeof abctune.metaText.unalignedWords[j] === 'string')
-	extraText += abctune.metaText.unalignedWords[j] + "\n";
-      else {
-	for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
-          extraText += " FONT " + abctune.metaText.unalignedWords[j][k].text;
-	}
-	extraText += "\n";
-      }
-    }
-		this.renderer.outputTextIf(this.paddingleft + ABCJS.write.spacing.INDENT*this.scale, extraText, 'wordsfont', 'meta-bottom', 2, "start");
-	}
-
-	extraText = "";
-  if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
-  if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
-  if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
-  if (abctune.metaText.notes) extraText += "Notes: " + abctune.metaText.notes + "\n";
-  if (abctune.metaText.transcription) extraText += "Transcription: " + abctune.metaText.transcription + "\n";
-  if (abctune.metaText.history) extraText += "History: " + abctune.metaText.history + "\n";
-	if (abctune.metaText['abc-copyright']) extraText += "Copyright: " + abctune.metaText['abc-copyright'] + "\n";
-	if (abctune.metaText['abc-creator']) extraText += "Creator: " + abctune.metaText['abc-creator'] + "\n";
-	if (abctune.metaText['abc-edited-by']) extraText += "Edited By: " + abctune.metaText['abc-edited-by'] + "\n";
-	this.renderer.outputTextIf(this.paddingleft, extraText, 'historyfont', 'meta-bottom', 0, "start");
-
-	if (abctune.metaText.footer) {
-		var space = this.renderer.outputTextIf(this.width / 2, abctune.metaText.footer.left, 'footerfont', 'header meta-bottom', null, 'start');
-		var space2 = this.renderer.outputTextIf(this.width / 2, abctune.metaText.footer.center, 'footerfont', 'header meta-bottom', null, 'middle');
-		var space3 = this.renderer.outputTextIf(this.width / 2, abctune.metaText.footer.right, 'footerfont', 'header meta-bottom', null, 'end');
-		this.renderer.y += Math.max(space[1], space2[1], space3[1]);
-	}
-};
-
-/**
- *
- * @private
- */
-ABCJS.write.EngraverController.prototype.engraveTempo = function (x, tempo) {
-	var text;
-	var noteHeight = 20*this.scale; // the note height of 20 was just determined empirically.
-	var totalHeight = noteHeight;
-	if (tempo.preString) {
-		text = this.renderer.renderText(x, this.renderer.y+noteHeight, tempo.preString, 'tempofont', 'tempo',"start");
-		var preWidth = text.getBBox().width;
-		var charWidth = preWidth / tempo.preString.length; // Just get some average number to increase the spacing.
-		x += preWidth + charWidth;
-		totalHeight = Math.max(totalHeight, text.getBBox().height);
-	}
-	if (tempo.duration) {
-		var temposcale = 0.75*this.scale;
-		var tempopitch = 11;
-		var duration = tempo.duration[0]; // TODO when multiple durations
-		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1, 'tempo');
-		var durlog = Math.floor(Math.log(duration) / Math.log(2));
-		var dot = 0;
-		for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
-		var c = this.engraver.chartable.note[-durlog];
-		var flag = this.engraver.chartable.uflags[-durlog];
-		var temponote = this.engraver.createNoteHead(abselem,
-				c,
-				{verticalPos:tempopitch},
-				"up",
-				0,
-				0,
-				flag,
-				dot,
-				0,
-				temposcale
-		);
-		abselem.addHead(temponote);
-		if (duration < 1) {
-			var p1 = tempopitch + 1 / 3 * temposcale;
-			var p2 = tempopitch + 7 * temposcale;
-			var dx = temponote.dx + temponote.w;
-			var width = -0.6*this.scale;
-			abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type":"stem", "pitch2":p2, linewidth:width}));
-		}
-		abselem.x = x*(1/this.scale); // TODO-PER: For some reason it scales this element twice, so just compensate.
-		abselem.draw(this.renderer, null);
-		x += (abselem.w + 5*this.scale);
-		var str = "= " + tempo.bpm;
-		text = this.renderer.renderText(x, this.renderer.y+noteHeight, str, 'tempofont', 'tempo',"start");
-		var postWidth = text.getBBox().width;
-		var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
-		x += postWidth + charWidth2;
-		totalHeight = Math.max(totalHeight, text.getBBox().height);
-	}
-	if (tempo.postString) {
-		this.renderer.renderText(x, this.renderer.y+noteHeight, tempo.postString, 'tempofont', 'tempo',"start");
-		totalHeight = Math.max(totalHeight, text.getBBox().height);
-	}
-	this.renderer.moveY(totalHeight, 2.5);
 };
 
 /**
