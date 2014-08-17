@@ -73,20 +73,20 @@ ABCJS.write.StaffGroupElement.prototype.finished = function() {
 	return true;
 };
 
-ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, controller, debug) {
+ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 	this.spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
 	this.minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
-	var x = controller.renderer.padding.left*controller.scale;
+	var x = renderer.padding.left;
 
 	// find out how much space will be taken up by voice headers
 	var voiceheaderw = 0;
 	for (var i=0;i<this.voices.length;i++) {
 		if(this.voices[i].header) {
-			var size = controller.renderer.getTextSize(this.voices[i].header, 'voicefont', '');
+			var size = renderer.getTextSize(this.voices[i].header, 'voicefont', '');
 			voiceheaderw = Math.max(voiceheaderw,size.width);
 		}
 	}
-	x=x+voiceheaderw*(1/controller.scale)*1.1; // 10% of 0 is 0
+	x=x+voiceheaderw*1.1; // When there is no voice header, 110% of 0 is 0
 	this.startx=x;
 
 	var currentduration = 0;

@@ -64,7 +64,6 @@ ABCJS.write.AbstractEngraver.prototype.reset = function() {
 	this.abcline = undefined;
 	this.accidentalSlot = undefined;
 	this.accidentalshiftx = undefined;
-	this.controller = undefined;
 	this.dotshiftx = undefined;
 	this.minY = undefined;
 	this.partstartelem = undefined;
