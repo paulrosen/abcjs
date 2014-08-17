@@ -103,8 +103,8 @@ ABCJS.write.Renderer.prototype.setPaperSize = function (maxwidth, scale) {
  */
 ABCJS.write.Renderer.prototype.setPadding = function(params) {
 	this.padding.top = params.paddingtop || 15;
-	this.padding.bottom = params.paddingbottom || 30;
-	this.padding.right = params.paddingright || 50;
+	this.padding.bottom = params.paddingbottom || 15;
+	this.padding.right = params.paddingright || 15;
 	this.padding.left = params.paddingleft || 15;
 };
 
@@ -574,16 +574,29 @@ ABCJS.write.Renderer.prototype.outputTextIf = function(x, str, kind, klass, marg
 };
 
 // For debugging, it is sometimes useful to know where you are vertically.
-ABCJS.write.Renderer.prototype.printHorizontalLine = function () {
+ABCJS.write.Renderer.prototype.printHorizontalLine = function (width) {
 	var dy = 0.35;
 	var fill = "#0000aa";
 	var y = this.y;
 	this.paper.text(10, y, ""+Math.round(y)).attr({"text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
 	var x1 = 50;
-	var x2 = 100;
+	var x2 = width;
 	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
 		x2, y+dy, x1, y+dy);
 	this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
+	for (var i = 1; i < width/100; i++) {
+		pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", i*100-dy, y-5, i*100-dy, y+5,
+			i*100+dy, y-5, i*100+dy, y+5);
+		this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
+	}
+};
+
+ABCJS.write.Renderer.prototype.printVerticalLine = function (x, y1, y2) {
+	var dy = 0.35;
+	var fill = "#0000aa";
+	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x - dy, y1, x - dy, y2,
+			x + dy, y1, x + dy, y2);
+	this.paper.path().attr({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')}).toBack();
 };
 
 /**
