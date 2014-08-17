@@ -105,7 +105,6 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
 	this.renderer.measureNumber = null;
   this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
-  this.engraver.controller = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
     this.renderer.topMargin(abctune);
@@ -138,6 +137,22 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
   this.renderer.setPaperSize(maxwidth, scale);
 };
 
+function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace) {
+	// TODO-PER: This used to stretch the first line when it is the only line, but I'm not sure why. abcm2ps doesn't do that
+	if (isLastLine && lineWidth / targetWidth < 0.66 && !stretchLast) return null; // don't stretch last line too much
+	if (Math.abs(targetWidth-lineWidth) < 2) return null; // if we are already near the target width, we're done.
+	var relSpace = spacingUnits * spacing;
+	var constSpace = lineWidth - relSpace;
+	if (spacingUnits > 0) {
+		spacing = (targetWidth - constSpace) / spacingUnits;
+		if (spacing * minSpace > 50) {
+			spacing = 50 / minSpace;
+		}
+		return spacing;
+	}
+	return null;
+}
+
 /**
  * Engrave a single line (a group of related staffs)
  * @param {ABCJS.Tune} abctune an ABCJS AST
@@ -149,24 +164,19 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
   var staffgroup = this.engraver.createABCLine(abcline.staff);
   this.renderer.minY = this.engraver.minY; // use this value of minY to set things that need to be below everything else //TODO-GD fix it, horrible hack
   var newspace = this.space;
-  for (var it = 0; it < 2; it++) { // TODO shouldn't need this triple pass any more
-    staffgroup.layout(newspace, this, false);
-    // TODO-PER: This used to stretch the first line when it is the only line, but I'm not sure why. abcm2ps doesn't do that
-    if (line === abctune.lines.length - 1 && staffgroup.w / this.width < 0.66 && !abctune.formatting.stretchlast) break; // don't stretch last line too much
-    var relspace = staffgroup.spacingunits * newspace;
-    var constspace = staffgroup.w - relspace;
-    if (staffgroup.spacingunits > 0) {
-      newspace = (this.width - constspace) / staffgroup.spacingunits;
-      if (newspace * staffgroup.minspace > 50) {
-	newspace = 50 / staffgroup.minspace;
-      }
-    }
+  for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
+    staffgroup.layout(newspace, this.renderer, false);
+		//console.log("STAFFGROUP:", line, staffgroup.w, this.width+this.renderer.padding.left, newspace, staffgroup.spacingunits, staffgroup.minspace);
+	  var stretchLast = abctune.formatting.stretchlast ? abctune.formatting.stretchlast : false;
+		newspace = calcHorizontalSpacing(line === abctune.lines.length - 1, stretchLast, this.width+this.renderer.padding.left, staffgroup.w, newspace, staffgroup.spacingunits, staffgroup.minspace);
+		if (newspace === null) break;
   }
 	centerWholeRests(staffgroup.voices);
-	this.renderer.printHorizontalLine();
+	//this.renderer.printHorizontalLine(this.width+this.renderer.padding.left+this.renderer.padding.right);
 	var oldY = this.renderer.y; // The following call modifies the y position, so we need to save the old one to restore it.
   staffgroup.draw(this.renderer, this.renderer.y);
 	this.renderer.y = oldY;
+	//this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+staffgroup.height);
   this.staffgroups[this.staffgroups.length] = staffgroup;
 //  this.renderer.y = staffgroup.y + staffgroup.height;
 //  this.renderer.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;
