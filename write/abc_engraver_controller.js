@@ -34,7 +34,7 @@ ABCJS.write.spacing.INDENT = 50;
 
 /**
  * @class
- * Controlls the engraving process, from ABCJS Abstract Syntax Tree (ABCJS AST) to rendered score sheet
+ * Controls the engraving process, from ABCJS Abstract Syntax Tree (ABCJS AST) to rendered score sheet
  *
  * Call engraveABC to run the process. This creates a graphelems ABCJS Abstract Engraving Structure (ABCJS AES) that can be accessed through this.staffgroups
  * this data structure is first laid out (giving the graphelems x and y coordinates) and then drawn onto the renderer
@@ -52,10 +52,6 @@ ABCJS.write.EngraverController = function(paper, params) {
   this.glyphs = new ABCJS.write.Glyphs(); // we need the glyphs for layout information
   this.scale = params.scale || 1;
   this.staffwidth = params.staffwidth || 740;
-  this.paddingtop = params.paddingtop || 15;
-  this.paddingbottom = params.paddingbottom || 30;
-  this.paddingright = params.paddingright || 50;
-  this.paddingleft = params.paddingleft || 15;
   this.editable = params.editable || false;
 
 	// HACK-PER: Raphael doesn't support setting the class of an element, so this adds that support. This doesn't work on IE8 or less, though.
@@ -66,11 +62,8 @@ ABCJS.write.EngraverController = function(paper, params) {
 
   //TODO-GD factor out all calls directly made to renderer.paper and fix all the coupling issues below
   this.renderer=new ABCJS.write.Renderer(paper, this.glyphs, params.regression);
-  this.renderer.y = 0; // TODO-GD should manage renderer's y through an API
-  this.renderer.scale = this.scale; // TODO-GD should manage scale in only one place (probably renderer)
+	this.renderer.setPadding(params);
   this.renderer.controller = this; // TODO-GD needed for highlighting
-  this.renderer.paddingleft = this.paddingleft; //TODO-GD used in VoiceElement.draw
-	this.renderer.space = 3*ABCJS.write.spacing.SPACE;
 
 	this.reset();
 };
@@ -95,7 +88,6 @@ ABCJS.write.EngraverController.prototype.engraveABC = function(abctunes) {
     abctunes = [abctunes];
   }
 	this.reset();
-  this.renderer.y=0;
 
   for (var i = 0; i < abctunes.length; i++) {
     this.engraveTune(abctunes[i]);
@@ -115,28 +107,13 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
   this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
   this.engraver.controller = this;	// TODO-PER: this is a hack to get access, but it tightens the coupling.
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
-	if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; }
-	this.renderer.scale = this.scale;
-	if (abctune.media === 'print') {
-		// TODO create the page the size of
-		//  tune.formatting.pageheight by tune.formatting.pagewidth
-		// create margins the size of
-		// TODO-PER: setting the defaults to 3/4" for now. What is the real value?
-		this.renderer.skipSpaceY(abctune.formatting.topmargin === undefined ? 54 : abctune.formatting.topmargin);
-		// TODO tune.formatting.botmargin
-		//    m = abctune.formatting.leftmargin === undefined ? 54 : abctune.formatting.leftmargin;
-		//    this.paddingleft = m;
-		//      m = abctune.formatting.rightmargin === undefined ? 54 : abctune.formatting.rightmargin;
-		//    this.paddingright = m;
-	}
-	else
-		this.renderer.skipSpaceY(this.paddingtop);
+	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
+    this.renderer.topMargin(abctune);
 	if (abctune.formatting.staffwidth) {
 		this.width=abctune.formatting.staffwidth;
 	} else {
 		this.width=this.staffwidth;
 	}
-  this.width+=this.paddingleft;
 
   this.renderer.engraveTopText(this.width, abctune);
 
@@ -149,25 +126,16 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 		var staffgroup = this.engraveStaffLine(abctune, abcline, line); //TODO-GD factor out generating the staffgroup, from laying it out, from rendering it
 		if (staffgroup.w > maxwidth) maxwidth = staffgroup.w;
     } else if (abcline.subtitle && line!==0) {
-			this.renderer.outputTextIf(this.width / 2, abcline.subtitle, 'subtitlefont', 'text meta-top', 0);
+		this.renderer.outputSubtitle(this.width, abcline.subtitle);
     } else if (abcline.text) {
-		if (typeof abcline.text === 'string')
-				this.renderer.outputTextIf(this.paddingleft, abcline.text, 'textfont', 'defined-text', 1, "start");
-	  else {
-		  var str = "";
-		  for (var i = 0; i < abcline.text.length; i++) {
-			  str += " FONT " + abcline.text[i].text;
-		  }
-				this.renderer.outputTextIf(this.paddingleft, str, 'textfont', 'defined-text', 1, "start");
-	  }
+		this.renderer.outputFreeText(abcline.text);
     }
   }
 
   this.renderer.engraveExtraText(this.width, abctune);
   
 
-  var sizetoset = {w: (maxwidth+this.paddingright)*this.scale,h: (this.renderer.y+this.paddingbottom)*this.scale};
-  this.renderer.setPaperSize(sizetoset);
+  this.renderer.setPaperSize(maxwidth, scale);
 };
 
 /**

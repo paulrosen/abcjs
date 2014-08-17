@@ -140,7 +140,7 @@ ABCJS.write.VoiceElement.prototype.draw = function (renderer, bartop) {
 	renderer.measureNumber = null;
 	if (this.header) { // print voice name
 		var textpitch = 12 - (this.voicenumber+1)*(12/(this.voicetotal+1));
-		var headerX = (this.startx-renderer.paddingleft)/2+renderer.paddingleft;
+		var headerX = (this.startx-renderer.padding.left)/2+renderer.padding.left;
 		headerX = headerX*renderer.scale;
 		renderer.renderText(headerX, renderer.calcY(textpitch), this.header, 'voicefont', 'staff-extra voice-name');
 	}

@@ -33,13 +33,13 @@ ABCJS.write.Renderer = function(paper, glyphs, doRegression) {
   this.glyphs = glyphs;
   this.controller = null; //TODO-GD only used when drawing the ABCJS ARS to connect the controller with the elements for highlighting
 
-  this.y = null; // renderer's y is managed by the controller
+	this.space = 3*ABCJS.write.spacing.SPACE;
   this.minY = null; // set at each drawing of a stave by the controller - place for lyrics, crescendo and other dynamics
-  this.scale = null; // renderer's scale is managed by the controller
-  this.padding = null; // renderer's padding is managed by the controller
+  this.padding = {}; // renderer's padding is managed by the controller
   this.doRegression = doRegression;
   if (this.doRegression)
     this.regressionLines = [];
+	this.reset();
 };
 
 ABCJS.write.Renderer.prototype.reset = function() {
@@ -62,18 +62,71 @@ ABCJS.write.Renderer.prototype.reset = function() {
 
 /**
  * Set the size of the canvas.
+ * @param {object} maxwidth
+ * @param {object} scale
  */
-ABCJS.write.Renderer.prototype.setPaperSize = function (sizetoset) {
-	this.paper.setSize(sizetoset.w,sizetoset.h);
+ABCJS.write.Renderer.prototype.setPaperSize = function (maxwidth, scale) {
+	var w = (maxwidth+this.padding.right)*scale;
+	var h = (this.y+this.padding.bottom)*scale;
+	if (this.doRegression)
+		this.regressionLines.push("PAPER SIZE: ("+w+","+h+")");
+
+	this.paper.setSize(w/scale,h/scale);
 	// Correct for IE problem in calculating height
 	var isIE=/*@cc_on!@*/false;//IE detector
 	if (isIE) {
-		this.paper.canvas.parentNode.style.width=sizetoset.w+"px";
-		this.paper.canvas.parentNode.style.height=""+sizetoset.h+"px";
+		this.paper.canvas.parentNode.style.width=w+"px";
+		this.paper.canvas.parentNode.style.height=""+h+"px";
 	} else
-		this.paper.canvas.parentNode.setAttribute("style","width:"+sizetoset.w+"px");
-	if (this.doRegression)
-		this.regressionLines.push("PAPER SIZE: ("+sizetoset.w+","+sizetoset.h+")");
+		this.paper.canvas.parentNode.setAttribute("style","width:"+w+"px");
+	if (scale !== 1) {
+		this.paper.canvas.style.transform = "scale("+scale+","+scale+")";
+		this.paper.canvas.style['-ms-tranform'] = "scale("+scale+","+scale+")";
+		this.paper.canvas.style['-webkit-tranform'] = "scale("+scale+","+scale+")";
+		this.paper.canvas.style['transform-origin'] = "0 0";
+		this.paper.canvas.style['-ms-transform-origin-x'] = "0";
+		this.paper.canvas.style['-ms-transform-origin-y'] = "0";
+		this.paper.canvas.style['-webkit-transform-origin-x'] = "0";
+		this.paper.canvas.style['-webkit-transform-origin-y'] = "0";
+	} else {
+		this.paper.canvas.style.transform = "";
+		this.paper.canvas.style['-ms-tranform'] = "";
+		this.paper.canvas.style['-webkit-tranform'] = "";
+	}
+	this.paper.canvas.parentNode.style.overflow="hidden";
+	this.paper.canvas.parentNode.style.height=""+h+"px";
+};
+
+/**
+ * Set the padding
+ * @param {object} params
+ */
+ABCJS.write.Renderer.prototype.setPadding = function(params) {
+	this.padding.top = params.paddingtop || 15;
+	this.padding.bottom = params.paddingbottom || 30;
+	this.padding.right = params.paddingright || 50;
+	this.padding.left = params.paddingleft || 15;
+};
+
+/**
+ * Leave space at the top of the paper
+ * @param {object} abctune
+ */
+ABCJS.write.Renderer.prototype.topMargin = function(abctune) {
+	if (abctune.media === 'print') {
+		// TODO create the page the size of
+		//  tune.formatting.pageheight by tune.formatting.pagewidth
+		// create margins the size of
+		// TODO-PER: setting the defaults to 3/4" for now. What is the real value?
+		this.skipSpaceY(abctune.formatting.topmargin === undefined ? 54 : abctune.formatting.topmargin);
+		// TODO tune.formatting.botmargin
+		//    m = abctune.formatting.leftmargin === undefined ? 54 : abctune.formatting.leftmargin;
+		//    this.padding.left = m;
+		//      m = abctune.formatting.rightmargin === undefined ? 54 : abctune.formatting.rightmargin;
+		//    this.padding.right = m;
+	}
+	else
+		this.skipSpaceY(this.padding.top);
 };
 
 /**
@@ -84,32 +137,32 @@ ABCJS.write.Renderer.prototype.setPaperSize = function (sizetoset) {
 ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
 	var space;
 	if (abctune.metaText.header) {
-		space = this.outputTextIf(width / 2, abctune.metaText.header.left, 'headerfont', 'header meta-top', null, 'start');
-		var space2 = this.outputTextIf(width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', null, 'middle');
-		var space3 = this.outputTextIf(width / 2, abctune.metaText.header.right, 'headerfont', 'header meta-top', null, 'end');
+		space = this.outputTextIf(this.padding.left, abctune.metaText.header.left, 'headerfont', 'header meta-top', null, 'start');
+		var space2 = this.outputTextIf(this.padding.left + width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', null, 'middle');
+		var space3 = this.outputTextIf(this.padding.left + width, abctune.metaText.header.right, 'headerfont', 'header meta-top', null, 'end');
 		var em = Math.max(space[1], space2[1], space3[1]);
 		this.moveY(em, 2);
 	}
-	this.outputTextIf(width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', 0);
+	this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', 0);
 	if (abctune.lines[0])
-		this.outputTextIf(width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', 0);
+		this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', 0);
 
 	if (abctune.metaText.rhythm || abctune.metaText.origin || abctune.metaText.composer) {
-		this.outputTextIf(this.paddingleft, abctune.metaText.rhythm, 'infofont', 'meta-top', null, "start");
+		this.outputTextIf(this.padding.left, abctune.metaText.rhythm, 'infofont', 'meta-top', null, "start");
 
 		var composerLine = "";
 		if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
 		if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
-		space = this.outputTextIf(width, composerLine, 'composerfont', 'meta-top', null, "end");
+		space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top', null, "end");
 		this.moveY(space[1], 1);
 	}
 
-	this.outputTextIf(width, abctune.metaText.author, 'composerfont', 'meta-top', 0, "end");
+	this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, "end");
 	this.skipSpaceY();
 
-	this.outputTextIf(this.paddingleft, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, "start");
+	this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, "start");
 
-	this.engraveTempo(this.paddingleft + ABCJS.write.spacing.INDENT*this.scale, abctune.metaText.tempo);
+	this.engraveTempo(this.padding.left + ABCJS.write.spacing.INDENT, abctune.metaText.tempo);
 };
 
 /**
@@ -134,7 +187,7 @@ ABCJS.write.Renderer.prototype.engraveExtraText = function(width, abctune) {
 				extraText += "\n";
 			}
 		}
-		this.outputTextIf(this.paddingleft + ABCJS.write.spacing.INDENT*this.scale, extraText, 'wordsfont', 'meta-bottom', 2, "start");
+		this.outputTextIf(this.padding.left + ABCJS.write.spacing.INDENT, extraText, 'wordsfont', 'meta-bottom', 2, "start");
 	}
 
 	extraText = "";
@@ -147,12 +200,12 @@ ABCJS.write.Renderer.prototype.engraveExtraText = function(width, abctune) {
 	if (abctune.metaText['abc-copyright']) extraText += "Copyright: " + abctune.metaText['abc-copyright'] + "\n";
 	if (abctune.metaText['abc-creator']) extraText += "Creator: " + abctune.metaText['abc-creator'] + "\n";
 	if (abctune.metaText['abc-edited-by']) extraText += "Edited By: " + abctune.metaText['abc-edited-by'] + "\n";
-	this.outputTextIf(this.paddingleft, extraText, 'historyfont', 'meta-bottom', 0, "start");
+	this.outputTextIf(this.padding.left, extraText, 'historyfont', 'meta-bottom', 0, "start");
 
 	if (abctune.metaText.footer) {
-		var space = this.outputTextIf(width / 2, abctune.metaText.footer.left, 'footerfont', 'header meta-bottom', null, 'start');
-		var space2 = this.outputTextIf(width / 2, abctune.metaText.footer.center, 'footerfont', 'header meta-bottom', null, 'middle');
-		var space3 = this.outputTextIf(width / 2, abctune.metaText.footer.right, 'footerfont', 'header meta-bottom', null, 'end');
+		var space = this.outputTextIf(this.padding.left, abctune.metaText.footer.left, 'footerfont', 'header meta-bottom', null, 'start');
+		var space2 = this.outputTextIf(this.padding.left + width / 2, abctune.metaText.footer.center, 'footerfont', 'header meta-bottom', null, 'middle');
+		var space3 = this.outputTextIf(this.padding.left + width, abctune.metaText.footer.right, 'footerfont', 'header meta-bottom', null, 'end');
 		this.y += Math.max(space[1], space2[1], space3[1]);
 	}
 };
@@ -167,7 +220,7 @@ ABCJS.write.Renderer.prototype.engraveTempo = function (x, tempo) {
 	if (!tempo || tempo.suppress) return;
 
 	var text;
-	var noteHeight = 20*this.scale; // the note height of 20 was just determined empirically.
+	var noteHeight = 20; // the note height of 20 was just determined empirically.
 	var totalHeight = noteHeight;
 	if (tempo.preString) {
 		text = this.renderText(x, this.y+noteHeight, tempo.preString, 'tempofont', 'tempo',"start");
@@ -177,7 +230,7 @@ ABCJS.write.Renderer.prototype.engraveTempo = function (x, tempo) {
 		totalHeight = Math.max(totalHeight, text.getBBox().height);
 	}
 	if (tempo.duration) {
-		var temposcale = 0.75*this.scale;
+		var temposcale = 0.75;
 		var tempopitch = 11;
 		var duration = tempo.duration[0]; // TODO when multiple durations
 		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1, 'tempo');
@@ -202,12 +255,12 @@ ABCJS.write.Renderer.prototype.engraveTempo = function (x, tempo) {
 			var p1 = tempopitch + 1 / 3 * temposcale;
 			var p2 = tempopitch + 7 * temposcale;
 			var dx = temponote.dx + temponote.w;
-			var width = -0.6*this.scale;
+			var width = -0.6;
 			abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type":"stem", "pitch2":p2, linewidth:width}));
 		}
-		abselem.x = x*(1/this.scale); // TODO-PER: For some reason it scales this element twice, so just compensate.
+		abselem.x = x;
 		abselem.draw(this, null);
-		x += (abselem.w + 5*this.scale);
+		x += (abselem.w + 5);
 		var str = "= " + tempo.bpm;
 		text = this.renderText(x, this.y+noteHeight, str, 'tempofont', 'tempo',"start");
 		var postWidth = text.getBBox().width;
@@ -223,7 +276,30 @@ ABCJS.write.Renderer.prototype.engraveTempo = function (x, tempo) {
 };
 
 /**
- * Begin a group of glyphs that will always be moved, scaled and higlighted together
+ * Output text defined with %%text.
+ * @param {array or string} text
+ */
+ABCJS.write.Renderer.prototype.outputFreeText = function (text) {
+	if (typeof text === 'string')
+		this.outputTextIf(this.padding.left, text, 'textfont', 'defined-text', 1, "start");
+	else {
+		var str = "";
+		for (var i = 0; i < text.length; i++) {
+			str += " FONT " + text[i].text;
+		}
+		this.outputTextIf(this.padding.left, str, 'textfont', 'defined-text', 1, "start");
+	}
+};
+
+/**
+ * Output an extra subtitle that is defined later in the tune.
+ */
+ABCJS.write.Renderer.prototype.outputSubtitle = function (width, subtitle) {
+	this.renderer.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text meta-top', 0);
+};
+
+/**
+ * Begin a group of glyphs that will always be moved, scaled and highlighted together
  */
 ABCJS.write.Renderer.prototype.beginGroup = function () {
   this.path = [];
@@ -261,9 +337,6 @@ ABCJS.write.Renderer.prototype.endGroup = function (klass) {
   this.ingroup = false;
   if (this.path.length===0) return null;
   var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
 	this.path = [];
   if (this.doRegression) this.addToRegression(ret);
 
@@ -288,9 +361,6 @@ ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch) {
   var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
      x2, y+dy, x1, y+dy);
   var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
   if (this.doRegression) this.addToRegression(ret);
 
   return ret;
@@ -321,9 +391,6 @@ ABCJS.write.Renderer.prototype.printStem = function (x, dx, y1, y2) {
     this.addPath(pathArray);
   } else {
     var ret = this.paper.path().attr({path:pathArray, stroke:"none", fill:fill, 'class': this.addClasses('stem')}).toBack();
-    if (this.scale!==1) {
-      ret.scale(this.scale, this.scale, 0, 0);
-    }
     if (this.doRegression) this.addToRegression(ret);
 
     return ret;
@@ -353,9 +420,6 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
 				this.renderText(x, this.y, "no symbol:" +symbol, "debugfont", 'debug-msg', 'start');
       }
     }
-    if (this.scale!==1) {
-      elemset.scale(this.scale, this.scale, 0, 0);
-    }
     return elemset;
   } else {
     ycorr = this.glyphs.getYCorr(symbol);
@@ -364,9 +428,6 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
     } else {
       el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper, klass);
       if (el) {
-	if (this.scale!==1) {
-      el.scale(this.scale, this.scale, 0, 0);
-	}
 	if (this.doRegression) this.addToRegression(el);
 	return el;
       } else
@@ -379,7 +440,6 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
 
 ABCJS.write.Renderer.prototype.printPath = function (attrs) {
   var ret = this.paper.path().attr(attrs);
-  if (this.scale!==1) ret.scale(this.scale, this.scale, 0, 0);
   if (this.doRegression) this.addToRegression(ret);
   return ret;
 };
@@ -413,9 +473,6 @@ ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above)
      controlx1, controly1, controlx2, controly2, x2, y2,
      controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
   var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000", 'class': this.addClasses('slur')});
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
   if (this.doRegression) this.addToRegression(ret);
 
   return ret;
@@ -454,18 +511,18 @@ ABCJS.write.Renderer.prototype.addClasses = function (c) {
 	return ret.join(' ');
 };
 
-ABCJS.write.Renderer.prototype.getFontAndAttr = function(type, klass, scale) {
+ABCJS.write.Renderer.prototype.getFontAndAttr = function(type, klass) {
 	var font = this.abctune.formatting[type];
 	if (!font)
 		font = { face: "Arial", size: 12, decoration: "underline", style: "normal", weight: "normal" };
-	var attr = {"font-size": font.size*scale, 'font-style': font.style,
+	var attr = {"font-size": font.size, 'font-style': font.style,
 		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
 		'class': this.addClasses(klass) };
 	return { font: font, attr: attr };
 };
 
 ABCJS.write.Renderer.prototype.getTextSize = function(text, type, klass) {
-	var hash = this.getFontAndAttr(type, klass, this.scale);
+	var hash = this.getFontAndAttr(type, klass);
 	var el = this.paper.text(0,0, text).attr(hash.attr);
 	var size = el.getBBox();
 	el.remove();
@@ -473,15 +530,15 @@ ABCJS.write.Renderer.prototype.getTextSize = function(text, type, klass) {
 };
 
 ABCJS.write.Renderer.prototype.renderText = function(x, y, text, type, klass, anchor) {
-	var hash = this.getFontAndAttr(type, klass, this.scale);
+	var hash = this.getFontAndAttr(type, klass);
 	if (anchor)
 		hash.attr["text-anchor"] = anchor;
 	text = text.replace(/\n\n/g, "\n \n");
-	var el = this.paper.text(x, y*this.scale, text).attr(hash.attr);
+	var el = this.paper.text(x, y, text).attr(hash.attr);
 	// The text will be placed centered in vertical alignment, so we need to move the box down so that
 	// the top of the text is where we've requested.
 	var size = el.getBBox();
-	el.attr({ "y": y*this.scale+size.height/2 });
+	el.attr({ "y": y+size.height/2 });
 	if (hash.font.box) {
 		this.paper.rect(size.x-1,size.y-1,size.width+2,size.height+2).attr({"stroke":"#cccccc"});
 	}
@@ -498,7 +555,7 @@ ABCJS.write.Renderer.prototype.moveY = function (em, numLines) {
 };
 
 ABCJS.write.Renderer.prototype.skipSpaceY = function () {
-	this.y += this.space*this.scale;
+	this.y += this.space;
 };
 
 // Call with 'kind' being the font type to use,

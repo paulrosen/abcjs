@@ -76,7 +76,7 @@ ABCJS.write.StaffGroupElement.prototype.finished = function() {
 ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, controller, debug) {
 	this.spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
 	this.minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
-	var x = controller.paddingleft*controller.scale;
+	var x = controller.renderer.padding.left*controller.scale;
 
 	// find out how much space will be taken up by voice headers
 	var voiceheaderw = 0;
