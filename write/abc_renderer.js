@@ -101,11 +101,35 @@ ABCJS.write.Renderer.prototype.setPaperSize = function (maxwidth, scale) {
  * Set the padding
  * @param {object} params
  */
-ABCJS.write.Renderer.prototype.setPadding = function(params) {
-	this.padding.top = params.paddingtop || 15;
-	this.padding.bottom = params.paddingbottom || 15;
-	this.padding.right = params.paddingright || 15;
-	this.padding.left = params.paddingleft || 15;
+ABCJS.write.Renderer.prototype.setPaddingOverride = function(params) {
+	this.paddingOverride = { top: params.paddingtop, bottom: params.paddingbottom,
+		right: params.paddingright, left: params.paddingleft };
+};
+
+/**
+ * Set the padding
+ * @param {object} params
+ */
+ABCJS.write.Renderer.prototype.setPadding = function(abctune) {
+	// If the padding is set in the tune, then use that.
+	// Otherwise, if the padding is set in the override, use that.
+	// Otherwise, use the defaults (there are a different set of defaults for screen and print.)
+	function setPaddingVariable(self, paddingKey, formattingKey, printDefault, screenDefault) {
+		if (abctune.formatting[formattingKey] !== undefined)
+			self.padding[paddingKey] = abctune.formatting[formattingKey];
+		else if (self.paddingOverride[paddingKey] !== undefined)
+			self.padding[paddingKey] = self.paddingOverride[paddingKey];
+		else if (abctune.media === 'print')
+			self.padding[paddingKey] = printDefault;
+		else
+			self.padding[paddingKey] = screenDefault;
+	}
+	// 1cm x 0.393701in/cm x 72pt/in x 1.33px/pt = 38px
+	// 1.8cm x 0.393701in/cm x 72pt/in x 1.33px/pt = 68px
+	setPaddingVariable(this, 'top', 'topmargin', 38, 15);
+	setPaddingVariable(this, 'bottom', 'bottommargin', 38, 15);
+	setPaddingVariable(this, 'left', 'leftmargin', 68, 15);
+	setPaddingVariable(this, 'right', 'rightmargin', 68, 15);
 };
 
 /**
@@ -113,19 +137,6 @@ ABCJS.write.Renderer.prototype.setPadding = function(params) {
  * @param {object} abctune
  */
 ABCJS.write.Renderer.prototype.topMargin = function(abctune) {
-	if (abctune.media === 'print') {
-		// TODO create the page the size of
-		//  tune.formatting.pageheight by tune.formatting.pagewidth
-		// create margins the size of
-		// TODO-PER: setting the defaults to 3/4" for now. What is the real value?
-		this.skipSpaceY(abctune.formatting.topmargin === undefined ? 54 : abctune.formatting.topmargin);
-		// TODO tune.formatting.botmargin
-		//    m = abctune.formatting.leftmargin === undefined ? 54 : abctune.formatting.leftmargin;
-		//    this.padding.left = m;
-		//      m = abctune.formatting.rightmargin === undefined ? 54 : abctune.formatting.rightmargin;
-		//    this.padding.right = m;
-	}
-	else
 		this.skipSpaceY(this.padding.top);
 };
 
@@ -515,9 +526,12 @@ ABCJS.write.Renderer.prototype.getFontAndAttr = function(type, klass) {
 	var font = this.abctune.formatting[type];
 	if (!font)
 		font = { face: "Arial", size: 12, decoration: "underline", style: "normal", weight: "normal" };
+	// Raphael deliberately changes the font units to pixels for some reason, so we need to change points to pixels here.
+	font.size = font.size *4/3;
 	var attr = {"font-size": font.size, 'font-style': font.style,
 		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
 		'class': this.addClasses(klass) };
+	attr.font = "";	// There is a spurious font definition that is put on all text elements. This overwrites it.
 	return { font: font, attr: attr };
 };
 

@@ -51,7 +51,7 @@ ABCJS.write.EngraverController = function(paper, params) {
   this.space = 3*ABCJS.write.spacing.SPACE;
   this.glyphs = new ABCJS.write.Glyphs(); // we need the glyphs for layout information
   this.scale = params.scale || 1;
-  this.staffwidth = params.staffwidth || 740;
+  this.staffwidth = params.staffwidth || 680; // was:740; The number of pixels in 8.5", after 1cm of margin has been removed.
   this.editable = params.editable || false;
 
 	// HACK-PER: Raphael doesn't support setting the class of an element, so this adds that support. This doesn't work on IE8 or less, though.
@@ -62,7 +62,7 @@ ABCJS.write.EngraverController = function(paper, params) {
 
   //TODO-GD factor out all calls directly made to renderer.paper and fix all the coupling issues below
   this.renderer=new ABCJS.write.Renderer(paper, this.glyphs, params.regression);
-	this.renderer.setPadding(params);
+	this.renderer.setPaddingOverride(params);
   this.renderer.controller = this; // TODO-GD needed for highlighting
 
 	this.reset();
@@ -104,6 +104,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	this.renderer.lineNumber = null;
 	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
 	this.renderer.measureNumber = null;
+	this.renderer.setPadding(abctune);
   this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
