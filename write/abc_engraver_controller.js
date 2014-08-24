@@ -128,6 +128,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 
 	this.renderer.topMargin(abctune);
   this.renderer.engraveTopText(this.width, abctune);
+	this.renderer.addMusicPadding();
 
   this.staffgroups = [];
   var maxwidth = this.width;

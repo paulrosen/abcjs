@@ -155,13 +155,16 @@ ABCJS.write.Renderer.prototype.adjustNonScaledItems = function (scale) {
 	this.padding.bottom /= scale;
 	this.padding.left /= scale;
 	this.padding.right /= scale;
+	this.abctune.formatting.headerfont.size /= scale;
+	this.abctune.formatting.footerfont.size /= scale;
 };
 
 /**
  * Set the the values for all the configurable vertical space options.
  */
 ABCJS.write.Renderer.prototype.initVerticalSpace = function() {
-	// conversion: 37.7953 = conversion factor for cm to px
+	// conversion: 37.7953 = conversion factor for cm to px.
+	// All of the following values are in px.
 	this.spacing = {
 		composer: 7.56, // Set the vertical space above the composer.
 		graceBefore: 8.67, // Define the space before, inside and after the grace notes.
@@ -170,16 +173,6 @@ ABCJS.write.Renderer.prototype.initVerticalSpace = function() {
 		info: 0, // Set the vertical space above the infoline.
 		lineSkipFactor: 1.1, // Set the factor for spacing between lines of text. (multiply this by the font size)
 		music: 7.56, // Set the vertical space above the first staff.
-		// This next value is used to compute the natural spacing of
-		// the notes. The base spacing of the crotchet is always
-		// 40 pts. When the duration of a note type is twice the
-		// duration of an other note type, its spacing is multiplied
-		// by this factor.
-		// The default value causes the note spacing to be multiplied
-		// by 2 when its duration is multiplied by 4, i.e. the
-		// space of the semibreve is 80 pts and the space of the
-		// semiquaver is 20 pts.
-		// Setting this value to 1 sets all note spacing to 40 pts.
 		paragraphSkipFactor: 0.4, // Set the factor for spacing between text paragraphs. (multiply this by the font size)
 		parts: 11.33, // Set the vertical space above a new part.
 		slurHeight: 1.0, // Set the slur height factor.
@@ -201,7 +194,17 @@ are automatic.
 <float> must be between 0 (natural spacing)
 and 1 (max shrinking).
 
-	 noteSpacingFactor: 1.414, // Set the note spacing factor to <float> (range 1..2).
+// This next value is used to compute the natural spacing of
+// the notes. The base spacing of the crotchet is always
+// 40 pts. When the duration of a note type is twice the
+// duration of an other note type, its spacing is multiplied
+// by this factor.
+// The default value causes the note spacing to be multiplied
+// by 2 when its duration is multiplied by 4, i.e. the
+// space of the semibreve is 80 pts and the space of the
+// semiquaver is 20 pts.
+// Setting this value to 1 sets all note spacing to 40 pts.
+noteSpacingFactor: 1.414, // Set the note spacing factor to <float> (range 1..2).
 
 scale <float> Default: 0.75 Set the page scale factor. Note that the header and footer are not scaled.
 
@@ -217,7 +220,14 @@ the <float> fraction of the page width.
  * @param {object} abctune
  */
 ABCJS.write.Renderer.prototype.topMargin = function(abctune) {
-		this.skipSpaceY(this.padding.top);
+		this.moveY(this.padding.top);
+};
+
+/**
+ * Leave space before printing the music
+ */
+ABCJS.write.Renderer.prototype.addMusicPadding = function() {
+		this.moveY(this.spacing.music);
 };
 
 /**
@@ -226,16 +236,19 @@ ABCJS.write.Renderer.prototype.topMargin = function(abctune) {
  * @param {object} abctune
  */
 ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
-	var space;
 	if (abctune.metaText.header && this.isPrint) {
 		// Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
+		// This text goes above the margin, so we'll temporarily move up.
+		var headerTextHeight = this.getTextSize("XXXX", "headerfont", 'header meta-top').height;
+		this.y -=headerTextHeight;
 		this.outputTextIf(this.padding.left, abctune.metaText.header.left, 'headerfont', 'header meta-top', 0, null, 'start');
 		this.outputTextIf(this.padding.left + width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', 0, null, 'middle');
 		this.outputTextIf(this.padding.left + width, abctune.metaText.header.right, 'headerfont', 'header meta-top', 0, null, 'end');
+		this.y += headerTextHeight;
 	}
 	if (this.isPrint)
 		this.moveY(this.spacing.top);
-	this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', this.spacing.title, 0, 'start');
+	this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', this.spacing.title, 0, 'middle');
 	if (abctune.lines[0])
 		this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'start');
 
@@ -246,12 +259,12 @@ ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
 		var composerLine = "";
 		if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
 		if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
-		space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top', 0, null, "end");
+		var space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top', 0, null, "end");
 		this.moveY(space[1]);
 	}
 
 	this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, 0, "end");
-	this.skipSpaceY();
+	//this.skipSpaceY();
 
 	this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, 0, "start");
 
