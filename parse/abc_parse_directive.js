@@ -33,6 +33,7 @@ window.ABCJS.parse.parseDirective = {};
 		multilineVars.vocalfont  = { face: "\"Times New Roman\"", size: 13, weight: "bold", style: "normal", decoration: "none" };
 		multilineVars.wordsfont  = { face: "\"Times New Roman\"", size: 16, weight: "normal", style: "normal", decoration: "none" };
 
+		// These fonts are global for the entire tune.
 		tune.formatting.composerfont  = { face: "\"Times New Roman\"", size: 14, weight: "normal", style: "italic", decoration: "none" };
 		tune.formatting.subtitlefont  = { face: "\"Times New Roman\"", size: 16, weight: "normal", style: "normal", decoration: "none" };
 		tune.formatting.tempofont  = { face: "\"Times New Roman\"", size: 15, weight: "bold", style: "normal", decoration: "none" };
@@ -40,6 +41,18 @@ window.ABCJS.parse.parseDirective = {};
 		tune.formatting.footerfont  = { face: "\"Times New Roman\"", size: 12, weight: "normal", style: "normal", decoration: "none" };
 		tune.formatting.headerfont  = { face: "\"Times New Roman\"", size: 12, weight: "normal", style: "normal", decoration: "none" };
 		tune.formatting.voicefont  = { face: "\"Times New Roman\"", size: 13, weight: "bold", style: "normal", decoration: "none" };
+
+		// these are the default fonts for these element types. In the printer, these fonts might change as the tune progresses.
+		tune.formatting.annotationfont  = multilineVars.annotationfont;
+		tune.formatting.gchordfont  = multilineVars.gchordfont;
+		tune.formatting.historyfont  = multilineVars.historyfont;
+		tune.formatting.infofont  = multilineVars.infofont;
+		tune.formatting.measurefont  = multilineVars.measurefont;
+		tune.formatting.partsfont  = multilineVars.partsfont;
+		tune.formatting.repeatfont  = multilineVars.repeatfont;
+		tune.formatting.textfont  = multilineVars.textfont;
+		tune.formatting.vocalfont  = multilineVars.vocalfont;
+		tune.formatting.wordsfont  = multilineVars.wordsfont;
 	}
 
 	var fontTypeCanHaveBox = { gchordfont: true, measurefont: true, partsfont: true };
