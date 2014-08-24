@@ -1032,7 +1032,7 @@ ABCJS.write.AbstractEngraver.prototype.createClef = function(elem) {
 // if (elem.verticalPos) {
 // pitch = elem.verticalPos;
 // }
-  var dx =10;
+  var dx =5;
   if (clef!=="") {
     abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
   }
