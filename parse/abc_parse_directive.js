@@ -688,7 +688,7 @@ window.ABCJS.parse.parseDirective = {};
 				var footerStr = tokenizer.getMeat(restOfString, 0, restOfString.length);
 				footerStr = restOfString.substring(footerStr.start, footerStr.end);
 				if (footerStr.charAt(0) === '"' && footerStr.charAt(footerStr.length-1) === '"' )
-					footerStr = footerStr.substring(1, footerStr.length-2);
+					footerStr = footerStr.substring(1, footerStr.length-1);
 				var footerArr = footerStr.split('\t');
 				var footer = {};
 				if (footerArr.length === 1)
