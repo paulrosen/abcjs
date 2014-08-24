@@ -50,7 +50,7 @@ ABCJS.write.EngraverController = function(paper, params) {
   params = params || {};
   this.space = 3*ABCJS.write.spacing.SPACE;
   this.glyphs = new ABCJS.write.Glyphs(); // we need the glyphs for layout information
-  this.scale = params.scale || 1;
+  this.scale = params.scale || undefined;
   this.staffwidth = params.staffwidth || 680; // was:740; The number of pixels in 8.5", after 1cm of margin has been removed.
   this.editable = params.editable || false;
 
@@ -97,24 +97,36 @@ ABCJS.write.EngraverController.prototype.engraveABC = function(abctunes) {
 };
 
 /**
+ * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
+ * @param {float} scale
+ */
+ABCJS.write.EngraverController.prototype.adjustNonScaledItems = function (scale) {
+	this.width /= scale;
+	this.renderer.adjustNonScaledItems(scale);
+};
+
+/**
  * Run the engraving process on a single tune
- * @param {ABCJS.Tune} abctune 
+ * @param {ABCJS.Tune} abctune
  */
 ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	this.renderer.lineNumber = null;
 	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
 	this.renderer.measureNumber = null;
+	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
+	if (scale === undefined) scale = abctune.media === 'print' ? .75 : 1;
+	this.renderer.setPrintMode(abctune.media === 'print');
 	this.renderer.setPadding(abctune);
   this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
-	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
-    this.renderer.topMargin(abctune);
 	if (abctune.formatting.staffwidth) {
 		this.width=abctune.formatting.staffwidth;
 	} else {
 		this.width=this.staffwidth;
 	}
+	this.adjustNonScaledItems(scale);
 
+	this.renderer.topMargin(abctune);
   this.renderer.engraveTopText(this.width, abctune);
 
   this.staffgroups = [];
@@ -173,11 +185,11 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
 		if (newspace === null) break;
   }
 	centerWholeRests(staffgroup.voices);
-	//this.renderer.printHorizontalLine(this.width+this.renderer.padding.left+this.renderer.padding.right);
+	this.renderer.printHorizontalLine(this.width+this.renderer.padding.left+this.renderer.padding.right);
 	var oldY = this.renderer.y; // The following call modifies the y position, so we need to save the old one to restore it.
   staffgroup.draw(this.renderer, this.renderer.y);
 	this.renderer.y = oldY;
-	//this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+staffgroup.height);
+	this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+staffgroup.height);
   this.staffgroups[this.staffgroups.length] = staffgroup;
 //  this.renderer.y = staffgroup.y + staffgroup.height;
 //  this.renderer.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;

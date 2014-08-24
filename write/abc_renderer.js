@@ -27,6 +27,7 @@ if (!window.ABCJS.write)
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
  * @param {Object} paper
  * @param {ABCJS.write.Glyphs} glyphs
+ * @param {bool} doRegression
  */
 ABCJS.write.Renderer = function(paper, glyphs, doRegression) {
   this.paper = paper;
@@ -50,6 +51,8 @@ ABCJS.write.Renderer.prototype.reset = function() {
 	this.lastM = null;
 	this.ingroup = false;
 	this.path = null;
+	this.isPrint = false;
+	this.initVerticalSpace();
 	if (this.doRegression)
 		this.regressionLines = [];
 	// HACK-PER: There was a problem in Raphael where every path string that was sent to it was cached.
@@ -61,6 +64,14 @@ ABCJS.write.Renderer.prototype.reset = function() {
 };
 
 /**
+ * Set whether we are formatting this for the screen, or as a preview for creating a PDF version.
+ * @param {bool} isPrint
+ */
+ABCJS.write.Renderer.prototype.setPrintMode = function (isPrint) {
+	this.isPrint = isPrint;
+};
+
+/**
  * Set the size of the canvas.
  * @param {object} maxwidth
  * @param {object} scale
@@ -68,6 +79,9 @@ ABCJS.write.Renderer.prototype.reset = function() {
 ABCJS.write.Renderer.prototype.setPaperSize = function (maxwidth, scale) {
 	var w = (maxwidth+this.padding.right)*scale;
 	var h = (this.y+this.padding.bottom)*scale;
+	if (this.isPrint)
+		h = Math.max(h, 1056); // 11in x 72pt/in x 1.33px/pt
+	// TODO-PER: We are letting the page get as long as it needs now, but eventually that should go to a second page.
 	if (this.doRegression)
 		this.regressionLines.push("PAPER SIZE: ("+w+","+h+")");
 
@@ -133,6 +147,72 @@ ABCJS.write.Renderer.prototype.setPadding = function(abctune) {
 };
 
 /**
+ * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
+ * @param {float} scale
+ */
+ABCJS.write.Renderer.prototype.adjustNonScaledItems = function (scale) {
+	this.padding.top /= scale;
+	this.padding.bottom /= scale;
+	this.padding.left /= scale;
+	this.padding.right /= scale;
+};
+
+/**
+ * Set the the values for all the configurable vertical space options.
+ */
+ABCJS.write.Renderer.prototype.initVerticalSpace = function() {
+	// conversion: 37.7953 = conversion factor for cm to px
+	this.spacing = {
+		composer: 7.56, // Set the vertical space above the composer.
+		graceBefore: 8.67, // Define the space before, inside and after the grace notes.
+		graceInside: 10.67,
+		graceAfter: 16,
+		info: 0, // Set the vertical space above the infoline.
+		lineSkipFactor: 1.1, // Set the factor for spacing between lines of text. (multiply this by the font size)
+		music: 7.56, // Set the vertical space above the first staff.
+		// This next value is used to compute the natural spacing of
+		// the notes. The base spacing of the crotchet is always
+		// 40 pts. When the duration of a note type is twice the
+		// duration of an other note type, its spacing is multiplied
+		// by this factor.
+		// The default value causes the note spacing to be multiplied
+		// by 2 when its duration is multiplied by 4, i.e. the
+		// space of the semibreve is 80 pts and the space of the
+		// semiquaver is 20 pts.
+		// Setting this value to 1 sets all note spacing to 40 pts.
+		paragraphSkipFactor: 0.4, // Set the factor for spacing between text paragraphs. (multiply this by the font size)
+		parts: 11.33, // Set the vertical space above a new part.
+		slurHeight: 1.0, // Set the slur height factor.
+		staffSeparation: 61.33, // Do not put a staff system closer than <unit> from the previous system.
+		stemHeight: 26.67, // Set the stem height.
+		subtitle: 3.78, // Set the vertical space above the subtitle.
+		systemStaffSeparation: 48, // Do not place the staves closer than <unit> inside a system. * This values applies to all staves when in the tune header. Otherwise, it applies to the next staff
+		text: 18.9, // Set the vertical space above the history.
+		title: 7.56, // Set the vertical space above the title.
+		top: 30.24, //Set the vertical space above the tunes and on the top of the continuation pages.
+		vocal: 30.67, // Set the vertical space above the lyrics under the staves.
+		words: 0 // Set the vertical space above the lyrics at the end of the tune.
+	};
+	/*
+	TODO-PER: Handle the x-coordinate spacing items, too.
+maxshrink <float>Default: 0.65
+Set how much to compress horizontally when music line breaks
+are automatic.
+<float> must be between 0 (natural spacing)
+and 1 (max shrinking).
+
+	 noteSpacingFactor: 1.414, // Set the note spacing factor to <float> (range 1..2).
+
+scale <float> Default: 0.75 Set the page scale factor. Note that the header and footer are not scaled.
+
+stretchlast <float>Default: 0.8
+Stretch the last music line of a tune when it exceeds
+the <float> fraction of the page width.
+<float> range is 0.0 to 1.0.
+	 */
+};
+
+/**
  * Leave space at the top of the paper
  * @param {object} abctune
  */
@@ -147,12 +227,11 @@ ABCJS.write.Renderer.prototype.topMargin = function(abctune) {
  */
 ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
 	var space;
-	if (abctune.metaText.header) {
-		space = this.outputTextIf(this.padding.left, abctune.metaText.header.left, 'headerfont', 'header meta-top', null, 'start');
-		var space2 = this.outputTextIf(this.padding.left + width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', null, 'middle');
-		var space3 = this.outputTextIf(this.padding.left + width, abctune.metaText.header.right, 'headerfont', 'header meta-top', null, 'end');
-		var em = Math.max(space[1], space2[1], space3[1]);
-		this.moveY(em, 2);
+	if (abctune.metaText.header && this.isPrint) {
+		// Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
+		this.outputTextIf(this.padding.left, abctune.metaText.header.left, 'headerfont', 'header meta-top', null, 'start');
+		this.outputTextIf(this.padding.left + width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', null, 'middle');
+		this.outputTextIf(this.padding.left + width, abctune.metaText.header.right, 'headerfont', 'header meta-top', null, 'end');
 	}
 	this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', 0);
 	if (abctune.lines[0])
@@ -213,7 +292,7 @@ ABCJS.write.Renderer.prototype.engraveExtraText = function(width, abctune) {
 	if (abctune.metaText['abc-edited-by']) extraText += "Edited By: " + abctune.metaText['abc-edited-by'] + "\n";
 	this.outputTextIf(this.padding.left, extraText, 'historyfont', 'meta-bottom', 0, "start");
 
-	if (abctune.metaText.footer) {
+	if (abctune.metaText.footer && this.isPrint) {
 		var space = this.outputTextIf(this.padding.left, abctune.metaText.footer.left, 'footerfont', 'header meta-bottom', null, 'start');
 		var space2 = this.outputTextIf(this.padding.left + width / 2, abctune.metaText.footer.center, 'footerfont', 'header meta-bottom', null, 'middle');
 		var space3 = this.outputTextIf(this.padding.left + width, abctune.metaText.footer.right, 'footerfont', 'header meta-bottom', null, 'end');
@@ -524,10 +603,12 @@ ABCJS.write.Renderer.prototype.addClasses = function (c) {
 
 ABCJS.write.Renderer.prototype.getFontAndAttr = function(type, klass) {
 	var font = this.abctune.formatting[type];
-	if (!font)
-		font = { face: "Arial", size: 12, decoration: "underline", style: "normal", weight: "normal" };
 	// Raphael deliberately changes the font units to pixels for some reason, so we need to change points to pixels here.
-	font.size = font.size *4/3;
+	if (!font)
+		font = { face: font.face, size: font.size*4/3, decoration: font.decoration, style: font.style, weight: font.weight };
+	else
+		font = { face: "Arial", size: 12*4/3, decoration: "underline", style: "normal", weight: "normal" };
+
 	var attr = {"font-size": font.size, 'font-style': font.style,
 		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
 		'class': this.addClasses(klass) };
