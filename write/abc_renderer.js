@@ -374,13 +374,13 @@ ABCJS.write.Renderer.prototype.engraveTempo = function (x, tempo) {
  */
 ABCJS.write.Renderer.prototype.outputFreeText = function (text) {
 	if (typeof text === 'string')
-		this.outputTextIf(this.padding.left, text, 'textfont', 'defined-text', 1, "start");
+		this.outputTextIf(this.padding.left, text, 'textfont', 'defined-text', 0, 1, "start");
 	else {
 		var str = "";
 		for (var i = 0; i < text.length; i++) {
 			str += " FONT " + text[i].text;
 		}
-		this.outputTextIf(this.padding.left, str, 'textfont', 'defined-text', 1, "start");
+		this.outputTextIf(this.padding.left, str, 'textfont', 'defined-text', 0, 1, "start");
 	}
 };
 
@@ -388,7 +388,7 @@ ABCJS.write.Renderer.prototype.outputFreeText = function (text) {
  * Output an extra subtitle that is defined later in the tune.
  */
 ABCJS.write.Renderer.prototype.outputSubtitle = function (width, subtitle) {
-	this.renderer.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text meta-top', 0, 'start');
+	this.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'start');
 };
 
 /**
@@ -607,7 +607,7 @@ ABCJS.write.Renderer.prototype.addClasses = function (c) {
 ABCJS.write.Renderer.prototype.getFontAndAttr = function(type, klass) {
 	var font = this.abctune.formatting[type];
 	// Raphael deliberately changes the font units to pixels for some reason, so we need to change points to pixels here.
-	if (!font)
+	if (font)
 		font = { face: font.face, size: font.size*4/3, decoration: font.decoration, style: font.style, weight: font.weight };
 	else
 		font = { face: "Arial", size: 12*4/3, decoration: "underline", style: "normal", weight: "normal" };
