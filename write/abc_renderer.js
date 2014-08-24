@@ -229,28 +229,31 @@ ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
 	var space;
 	if (abctune.metaText.header && this.isPrint) {
 		// Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
-		this.outputTextIf(this.padding.left, abctune.metaText.header.left, 'headerfont', 'header meta-top', null, 'start');
-		this.outputTextIf(this.padding.left + width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', null, 'middle');
-		this.outputTextIf(this.padding.left + width, abctune.metaText.header.right, 'headerfont', 'header meta-top', null, 'end');
+		this.outputTextIf(this.padding.left, abctune.metaText.header.left, 'headerfont', 'header meta-top', 0, null, 'start');
+		this.outputTextIf(this.padding.left + width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', 0, null, 'middle');
+		this.outputTextIf(this.padding.left + width, abctune.metaText.header.right, 'headerfont', 'header meta-top', 0, null, 'end');
 	}
-	this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', 0);
+	if (this.isPrint)
+		this.moveY(this.spacing.top);
+	this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', this.spacing.title, 0, 'start');
 	if (abctune.lines[0])
-		this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', 0);
+		this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'start');
 
 	if (abctune.metaText.rhythm || abctune.metaText.origin || abctune.metaText.composer) {
-		this.outputTextIf(this.padding.left, abctune.metaText.rhythm, 'infofont', 'meta-top', null, "start");
+		this.moveY(this.spacing.composer);
+		this.outputTextIf(this.padding.left, abctune.metaText.rhythm, 'infofont', 'meta-top', 0, null, "start");
 
 		var composerLine = "";
 		if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
 		if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
-		space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top', null, "end");
-		this.moveY(space[1], 1);
+		space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top', 0, null, "end");
+		this.moveY(space[1]);
 	}
 
-	this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, "end");
+	this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, 0, "end");
 	this.skipSpaceY();
 
-	this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, "start");
+	this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, 0, "start");
 
 	this.engraveTempo(this.padding.left + ABCJS.write.spacing.INDENT, abctune.metaText.tempo);
 };
@@ -277,7 +280,7 @@ ABCJS.write.Renderer.prototype.engraveExtraText = function(width, abctune) {
 				extraText += "\n";
 			}
 		}
-		this.outputTextIf(this.padding.left + ABCJS.write.spacing.INDENT, extraText, 'wordsfont', 'meta-bottom', 2, "start");
+		this.outputTextIf(this.padding.left + ABCJS.write.spacing.INDENT, extraText, 'wordsfont', 'meta-bottom', this.spacing.words, 2, "start");
 	}
 
 	extraText = "";
@@ -290,13 +293,13 @@ ABCJS.write.Renderer.prototype.engraveExtraText = function(width, abctune) {
 	if (abctune.metaText['abc-copyright']) extraText += "Copyright: " + abctune.metaText['abc-copyright'] + "\n";
 	if (abctune.metaText['abc-creator']) extraText += "Creator: " + abctune.metaText['abc-creator'] + "\n";
 	if (abctune.metaText['abc-edited-by']) extraText += "Edited By: " + abctune.metaText['abc-edited-by'] + "\n";
-	this.outputTextIf(this.padding.left, extraText, 'historyfont', 'meta-bottom', 0, "start");
+	this.outputTextIf(this.padding.left, extraText, 'historyfont', 'meta-bottom', this.spacing.info, 0, "start");
 
 	if (abctune.metaText.footer && this.isPrint) {
-		var space = this.outputTextIf(this.padding.left, abctune.metaText.footer.left, 'footerfont', 'header meta-bottom', null, 'start');
-		var space2 = this.outputTextIf(this.padding.left + width / 2, abctune.metaText.footer.center, 'footerfont', 'header meta-bottom', null, 'middle');
-		var space3 = this.outputTextIf(this.padding.left + width, abctune.metaText.footer.right, 'footerfont', 'header meta-bottom', null, 'end');
-		this.y += Math.max(space[1], space2[1], space3[1]);
+		// Note: whether there is a footer or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
+		this.outputTextIf(this.padding.left, abctune.metaText.footer.left, 'footerfont', 'header meta-bottom', 0, null, 'start');
+		this.outputTextIf(this.padding.left + width / 2, abctune.metaText.footer.center, 'footerfont', 'header meta-bottom', 0, null, 'middle');
+		this.outputTextIf(this.padding.left + width, abctune.metaText.footer.right, 'footerfont', 'header meta-bottom', 0, null, 'end');
 	}
 };
 
@@ -385,7 +388,7 @@ ABCJS.write.Renderer.prototype.outputFreeText = function (text) {
  * Output an extra subtitle that is defined later in the tune.
  */
 ABCJS.write.Renderer.prototype.outputSubtitle = function (width, subtitle) {
-	this.renderer.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text meta-top', 0);
+	this.renderer.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text meta-top', 0, 'start');
 };
 
 /**
@@ -646,6 +649,7 @@ ABCJS.write.Renderer.prototype.renderText = function(x, y, text, type, klass, an
 };
 
 ABCJS.write.Renderer.prototype.moveY = function (em, numLines) {
+	if (numLines === undefined) numLines = 1;
 	this.y += em*numLines;
 };
 
@@ -654,14 +658,16 @@ ABCJS.write.Renderer.prototype.skipSpaceY = function () {
 };
 
 // Call with 'kind' being the font type to use,
-// if margin === null then don't increment the Y after printing, otherwise that is the extra number of em's to leave below the line.
+// if marginBottom === null then don't increment the Y after printing, otherwise that is the extra number of em's to leave below the line.
 // and alignment being "start", "middle", or "end".
-ABCJS.write.Renderer.prototype.outputTextIf = function(x, str, kind, klass, margin, alignment) {
+ABCJS.write.Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, marginBottom, alignment) {
 	if (str) {
+		if (marginTop)
+			this.moveY(marginTop);
 		var el = this.renderText(x, this.y, str, kind, klass, alignment);
-		if (margin !== null) {
+		if (marginBottom !== null) {
 			var numLines = str.split("\n").length;
-			this.moveY(el.getBBox().height/numLines, (numLines + margin));
+			this.moveY(el.getBBox().height/numLines, (numLines + marginBottom));
 		}
 		return [el.getBBox().width, el.getBBox().height];
 	}
