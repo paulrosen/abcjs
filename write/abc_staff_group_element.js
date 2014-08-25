@@ -198,6 +198,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer, y) {
 	var bartop = 0;
 	renderer.measureNumber = null;
 	for (i=0;i<this.voices.length;i++) {
+		renderer.y = this.voices[i].staff.y;
 		this.voices[i].draw(renderer, bartop);
 		bartop = this.voices[i].barbottom;
 	}

@@ -45,7 +45,7 @@ ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
 			if (this.c===null) return null;
 			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.addClasses('symbol')); break;
 		case "debug":
-			this.graphelem = renderer.renderText(this.x, renderer.y, ""+this.c, "debugfont", 'debug-msg', 'start'); break;
+			this.graphelem = renderer.renderText(this.x, renderer.calcY(15), ""+this.c, "debugfont", 'debug-msg', 'start'); break;
 		case "barNumber":
 			this.graphelem = renderer.renderText(this.x, renderer.calcY(this.pitch), ""+this.c, "measurefont", 'bar-number', "start");
 			break;
