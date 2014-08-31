@@ -176,8 +176,7 @@ function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, 
  */
 ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, abcline, line) {
   var staffgroup = this.engraver.createABCLine(abcline.staff);
-  this.renderer.minY = this.engraver.minY; // use this value of minY to set things that need to be below everything else //TODO-GD fix it, horrible hack
-  var newspace = this.space;
+   var newspace = this.space;
   for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
     staffgroup.layout(newspace, this.renderer, false);
 		//console.log("STAFFGROUP:", line, staffgroup.w, this.width+this.renderer.padding.left, newspace, staffgroup.spacingunits, staffgroup.minspace);
@@ -187,6 +186,7 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
   }
 	centerWholeRests(staffgroup.voices);
 	this.renderer.printHorizontalLine(this.width+this.renderer.padding.left+this.renderer.padding.right);
+	this.renderer.addStaffPadding();
 	var oldY = this.renderer.y; // The following call modifies the y position, so we need to save the old one to restore it.
   staffgroup.draw(this.renderer, this.renderer.y);
 	this.renderer.y = oldY;

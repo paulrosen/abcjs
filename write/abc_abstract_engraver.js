@@ -58,7 +58,6 @@ ABCJS.write.AbstractEngraver.prototype.reset = function() {
 	this.endingsbyvoice = {};
 	this.s = 0; // current staff number
 	this.v = 0; // current voice number on current staff
-	this.stafflines = 5;
 	this.tripletmultiplier = 1;
 
 	this.abcline = undefined;
@@ -113,31 +112,64 @@ ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs) {
   return this.staffgroup;
 };
 
-function adjustChordVerticalPosition(staffgroup) {
-	var yPlacement = 16; // no lower than high E
-	var chordList = [];
-	for (var i = 0; i < staffgroup.voices.length; i++) {
-		for (var j = 0; j < staffgroup.voices[i].children.length; j++) {
-			var absElem = staffgroup.voices[i].children[j];
-			if (absElem.top+5 > yPlacement)
-				yPlacement = absElem.top+5;
-			for (var k = 0; k < absElem.children.length; k++) {
-				var relElem = absElem.children[k];
-				if (relElem.type === 'chord')
-					chordList.push(relElem);
-			}
+//function adjustChordVerticalPosition(staffgroup) {
+//	var yPlacement = 16; // no lower than high E
+//	var chordList = [];
+//	for (var i = 0; i < staffgroup.voices.length; i++) {
+//		for (var j = 0; j < staffgroup.voices[i].children.length; j++) {
+//			var absElem = staffgroup.voices[i].children[j];
+//			if (absElem.top+5 > yPlacement)
+//				yPlacement = absElem.top+5;
+//			for (var k = 0; k < absElem.children.length; k++) {
+//				var relElem = absElem.children[k];
+//				if (relElem.type === 'chord')
+//					chordList.push(relElem);
+//			}
+//		}
+//	}
+//	for (i = 0; i < chordList.length; i++) {
+//		var elem = chordList[i];
+//		if (elem.top < yPlacement) {
+//			elem.top = yPlacement;
+//			elem.pitch = yPlacement;
+//			elem.bottom = yPlacement;
+//			if (elem.parent.top < yPlacement)
+//				elem.parent.top = yPlacement;
+//		}
+//	}
+//}
+
+function setUpperAndLowerElements(staffgroup) {
+	// Each staff already has the top and bottom set, now we see if there are elements that are always on top and bottom, and resolve their pitch.
+	for (var i = 0; i < staffgroup.staffs.length; i++) {
+		var staff = staffgroup.staffs[i];
+		// hasHighest1 is the top most position, hasHighest2 is the second topmost, so resolve them in that order. Likewise for hasLowest1, hasLowest2
+		var highest1Pitch;
+		var highest2Pitch;
+		var lowest1Pitch;
+		var lowest2Pitch;
+		if (staff.hasHighest2) {
+			highest2Pitch = staff.top + 5;
+			staff.top += 5;
+		}
+		if (staff.hasHighest1) {
+			highest1Pitch = staff.top + 5;
+			staff.top += 5;
+		}
+		if (staff.hasLowest2) {
+			lowest2Pitch = staff.bottom - 5;
+			staff.bottom -= 5;
+		}
+		if (staff.hasLowest1) {
+			lowest1Pitch = staff.bottom - 5;
+			staff.bottom -= 5;
+		}
+		for (var j = 0; j < staff.voices.length; j++) {
+			var voice = staffgroup.voices[staff.voices[j]];
+			voice.setUpperAndLowerElements(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch);
 		}
 	}
-	for (i = 0; i < chordList.length; i++) {
-		var elem = chordList[i];
-		if (elem.top < yPlacement) {
-			elem.top = yPlacement;
-			elem.pitch = yPlacement;
-			elem.bottom = yPlacement;
-			if (elem.parent.top < yPlacement)
-				elem.parent.top = yPlacement;
-		}
-	}
+
 }
 
 ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff) {
@@ -153,7 +185,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff) {
       this.voice.barfrom = (abcstaff.connectBarLines==="start" || abcstaff.connectBarLines==="continue");
       this.voice.barto = (abcstaff.connectBarLines==="continue" || abcstaff.connectBarLines==="end");
     } else {
-      this.voice.duplicate = true; // barlines and other duplicate info need not be createed
+      this.voice.duplicate = true; // bar lines and other duplicate info need not be created
     }
     if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
     // TODO make invisible if voice is duplicate
@@ -161,9 +193,10 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff) {
     this.voice.addChild(this.createKeySignature(abcstaff.key));
     if (abcstaff.meter) this.voice.addChild(this.createTimeSignature(abcstaff.meter));
     this.createABCVoice(abcstaff.voices[this.v]);
-    this.staffgroup.addVoice(this.voice,this.s,this.stafflines);
+    var staffLines = abcstaff.clef.stafflines ? abcstaff.clef.stafflines : 5;
+    this.staffgroup.addVoice(this.voice,this.s,staffLines);
   }
-	adjustChordVerticalPosition(this.staffgroup);
+	setUpperAndLowerElements(this.staffgroup);
  
 };
 
@@ -225,7 +258,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     break;
   case "part":
     var abselem = new ABCJS.write.AbsoluteElement(elem,0,0, 'part');
-    abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, 18, {type:"part"}));
+    abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, undefined, {type:"part"}));
     elemset[0] = abselem;
     break;
 //         case "tempo":
@@ -233,7 +266,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
 //                break;
   default:
     var abselem2 = new ABCJS.write.AbsoluteElement(elem,0,0, 'unsupported');
-    abselem2.addChild(new ABCJS.write.RelativeElement("element type "+elem.el_type, 0, 0, 0, {type:"debug"}));
+    abselem2.addChild(new ABCJS.write.RelativeElement("element type "+elem.el_type, 0, 0, undefined, {type:"debug"}));
     elemset[0] = abselem2;
   }
 
@@ -468,6 +501,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
          window.ABCJS.parse.each(elem.lyric, function(ly) {
          lyricStr += ly.syllable + ly.divider + "\n";
       });
+	  // TODO-PER: get the width of the lyric and use that for "0, lyricStr.length*5" below.
     abselem.addRight(new ABCJS.write.RelativeElement(lyricStr, 0, lyricStr.length*5, undefined, {type:"lyric"}));
   }
   
@@ -522,10 +556,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   }
 
   if (!dontDraw && elem.decoration) {
-    var addMark = this.createDecoration(elem.decoration, elem.maxpitch, (notehead)?notehead.w:0, abselem, this.roomtaken, dir, elem.minpitch);
-         if (addMark) {
-                 abselem.klass = "mark";
-         }
+    this.createDecoration(elem.decoration, elem.maxpitch, (notehead)?notehead.w:0, abselem, this.roomtaken, dir, elem.minpitch);
   }
   
   if (elem.barNumber) {
@@ -560,12 +591,14 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
         this.roomtaken+=7;
         x = -this.roomtaken;        // TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
+		  // TODO-PER: get the width of the lyric and use that for "0, lyricStr.length*5" below.
         abselem.addExtra(new ABCJS.write.RelativeElement(elem.chord[i].name, x, this.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
         break;
       case "right":
         this.roomtakenright+=4;
         x = this.roomtakenright;// TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
+		  // TODO-PER: get the width of the lyric and use that for "0, lyricStr.length*5" below.
         abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, x, this.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
         break;
       case "below":
@@ -582,7 +615,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
                                  abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x+elem.chord[i].rel_position.x, 0, elem.minpitch+elem.chord[i].rel_position.y/ABCJS.write.spacing.STEP, {type:"text"}));
 			  else {
 				  // setting the y-coordinate to zero for now: it will be overwritten later one, after we figure out what the highest element on the line is.
-				  abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x, 0, 0, {type: "chord"}));
+				  abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x, 0, undefined, {type: "chord"}));
 			  }
       }
     }
@@ -749,7 +782,6 @@ ABCJS.write.AbstractEngraver.prototype.createDecoration = function(decoration, p
   var i;
   roomtaken = roomtaken || 0;
   if (pitch===5) yslot=14; // avoid upstem of the A
-        var addMark = false; // PER: to allow the user to add a class whereever
 
   for (i=0;i<decoration.length; i++) { // treat staccato, accent, and tenuto first (may need to shift other markers)
     if (decoration[i]==="staccato" || decoration[i]==="tenuto" || decoration[i] === "accent") {
@@ -864,7 +896,7 @@ ABCJS.write.AbstractEngraver.prototype.createDecoration = function(decoration, p
         var ddelem = new ABCJS.write.DynamicDecoration(abselem, decoration[i]);
         this.voice.addOther(ddelem);
         continue;
-                case "mark": addMark = true; continue;
+                case "mark": abselem.klass = "mark"; continue;
         case "diminuendo(":
                         ABCJS.write.AbstractEngraver.prototype.startDiminuendoX = abselem;
             diminuendo = undefined;
@@ -920,8 +952,7 @@ ABCJS.write.AbstractEngraver.prototype.createDecoration = function(decoration, p
         this.voice.addOther(celem);
     }
   if (unknowndecs.length>0)
-      abselem.addChild(new ABCJS.write.RelativeElement(unknowndecs.join(','), 0, 0, 0, {type:"debug"}));
-        return addMark;
+      abselem.addChild(new ABCJS.write.RelativeElement(unknowndecs.join(','), 0, 0, undefined, {type:"debug"}));
 };
 
 ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
@@ -1027,7 +1058,7 @@ ABCJS.write.AbstractEngraver.prototype.createClef = function(elem) {
   case 'alto-8': clef="clefs.C"; octave = -1; break;
   case 'none': clef=""; break;
   case 'perc': clef="clefs.perc"; break;
-  default: abselem.addChild(new ABCJS.write.RelativeElement("clef="+elem.type, 0, 0, 0, {type:"debug"}));
+  default: abselem.addChild(new ABCJS.write.RelativeElement("clef="+elem.type, 0, 0, undefined, {type:"debug"}));
   }
 // if (elem.verticalPos) {
 // pitch = elem.verticalPos;
@@ -1040,12 +1071,6 @@ ABCJS.write.AbstractEngraver.prototype.createClef = function(elem) {
     var scale= 2/3;
     var adjustspacing = (this.glyphs.getSymbolWidth(clef)-this.glyphs.getSymbolWidth("8")*scale)/2;
     abselem.addRight(new ABCJS.write.RelativeElement("8", dx+adjustspacing, this.glyphs.getSymbolWidth("8")*scale, (octave>0)?16:-2, {scalex:scale, scaley:scale}));
-  }
-
-  if (elem.stafflines===0) {
-    this.stafflines = 0;
-  } else {
-    this.stafflines =elem.stafflines;
   }
 
   return abselem;
@@ -1076,6 +1101,7 @@ ABCJS.write.AbstractEngraver.prototype.createTimeSignature= function(elem) {
       if (i !== 0)
         abselem.addRight(new ABCJS.write.RelativeElement('+', i*20-9, this.glyphs.getSymbolWidth("+"), 7));
       if (elem.value[i].den) {
+		  // TODO-PER: get real widths here, also center the num and den.
         abselem.addRight(new ABCJS.write.RelativeElement(elem.value[i].num, i*20, this.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 9));
         abselem.addRight(new ABCJS.write.RelativeElement(elem.value[i].den, i*20, this.glyphs.getSymbolWidth(elem.value[i].den.charAt(0))*elem.value[i].den.length, 5));
       } else {

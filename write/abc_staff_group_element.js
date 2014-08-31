@@ -35,8 +35,6 @@ if (!window.ABCJS.write)
 // Members:
 // staffs: an array of all the staves in this group. Each staff contains the following elements:
 //    { top, bottom, highest, lowest, y }
-// stafflines: an array of the same length as staffs. It contains an integer with the number of lines.
-//   TODO-PER: stafflines should actually be an element of staffs, I think.
 // voices: array of VoiceElement objects. This is mostly passed in, but the VoiceElement objects are modified here.
 //
 // spacingunits: number of relative x-units in the line. Used by the calling function to pass back in as the "spacing" input parameter.
@@ -54,16 +52,24 @@ if (!window.ABCJS.write)
 ABCJS.write.StaffGroupElement = function() {
 	this.voices = [];
 	this.staffs = [];
-	this.stafflines = [];
 };
 
 ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines) {
-	this.voices[this.voices.length] = voice;
-	if (!this.staffs[staffnumber]) {
-		this.staffs[this.staffs.length] = {top:0, highest: 7, lowest: 7};
-		this.stafflines[this.stafflines.length] = stafflines;
+	var voiceNum = this.voices.length;
+	this.voices[voiceNum] = voice;
+	if (this.staffs[staffnumber])
+		this.staffs[staffnumber].voices.push(voiceNum);
+	else {
+		// TODO-PER: how does the min/max change when stafflines is not 5?
+		this.staffs[this.staffs.length] = {top: 10, bottom: 2, hasHighest1: false, hasHighest2: false, hasLowest1: false, hasLowest2: false, lines: stafflines, voices: [voiceNum] };
 	}
 	voice.staff = this.staffs[staffnumber];
+	voice.staff.top = Math.max(voice.staff.top, voice.top);
+	voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
+	if (voice.hasHighest1) voice.staff.hasHighest1 = true;
+	if (voice.hasHighest2) voice.staff.hasHighest2 = true;
+	if (voice.hasLowest1) voice.staff.hasLowest1 = true;
+	if (voice.hasLowest2) voice.staff.hasLowest2 = true;
 };
 
 ABCJS.write.StaffGroupElement.prototype.finished = function() {
@@ -123,12 +129,14 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, renderer, deb
 		spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
 		var spacingduration = 0;
 		for (i=0;i<currentvoices.length;i++) {
+			//console.log("greatest spacing unit", x, currentvoices[i].getNextX(), currentvoices[i].getSpacingUnits(), currentvoices[i].spacingduration);
 			if (currentvoices[i].getNextX()>x) {
 				x=currentvoices[i].getNextX();
 				spacingunit=currentvoices[i].getSpacingUnits();
 				spacingduration = currentvoices[i].spacingduration;
 			}
 		}
+		//console.log("new spacingunit", spacingunit, this.spacingunits, "="+(spacingunit+ this.spacingunits));
 		this.spacingunits+=spacingunit;
 		this.minspace = Math.min(this.minspace,spacingunit);
 
@@ -164,6 +172,7 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, renderer, deb
 			spacingunit=this.voices[i].getSpacingUnits();
 		}
 	}
+	//console.log("greatest remaining",spacingunit,x);
 	this.spacingunits+=spacingunit;
 	this.w = x;
 
@@ -176,8 +185,8 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer, y) {
 
 	this.y = y;
 	for (var i=0;i<this.staffs.length;i++) {
-		var shiftabove = this.staffs[i].highest - ((i===0)? 20 : 15);
-		var shiftbelow = this.staffs[i].lowest - ((i===this.staffs.length-1)? 0 : 0);
+		var shiftabove = this.staffs[i].top - ((i===0)? 20 : 15);
+		var shiftbelow = this.staffs[i].bottom - ((i===this.staffs.length-1)? 0 : 0);
 		this.staffs[i].top = y;
 		if (shiftabove > 0) y+= shiftabove*ABCJS.write.spacing.STEP;
 		this.staffs[i].y = y;
@@ -185,12 +194,9 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer, y) {
 		if (shiftbelow < 0) y-= shiftbelow*ABCJS.write.spacing.STEP;
 		this.staffs[i].bottom = y;
 
-		if (this.stafflines[i] !== 0) {
+		if (this.staffs[i].lines !== 0) {
 			renderer.y = this.staffs[i].y;
-			// TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
-			if (this.stafflines[i] === undefined)
-				this.stafflines[i] = 5;
-			renderer.printStave(this.startx, this.w, this.stafflines[i]);
+			renderer.printStave(this.startx, this.w, this.staffs[i].lines);
 		}
 	}
 	this.height = y-this.y;
@@ -204,6 +210,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer, y) {
 	}
 	renderer.measureNumber = null;
 
+	// connect all the staves together with a vertical line
 	if (this.staffs.length>1) {
 		renderer.y = this.staffs[0].y;
 		var top = renderer.calcY(10);
@@ -211,15 +218,5 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer, y) {
 		var bottom = renderer.calcY(2);
 		renderer.printStem(this.startx, 0.6, top, bottom);
 	}
-
-//	for (i=0;i<this.staffs.length;i++) {
-//		if (this.stafflines[i] === 0) continue;
-//		renderer.y = this.staffs[i].y;
-//		// TODO-PER: stafflines should always have been set somewhere, so this shouldn't be necessary.
-//		if (this.stafflines[i] === undefined)
-//			this.stafflines[i] = 5;
-//		renderer.printStave(this.startx,this.w, this.stafflines[i]);
-//	}
-
 };
 

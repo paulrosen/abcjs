@@ -26,28 +26,37 @@ ABCJS.write.EndingElem = function(text, anchor1, anchor2) {
 	this.text = text; // text to be displayed top left
 	this.anchor1 = anchor1; // must have a .x property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
+	this.hasHighest2 = true;
+	this.pitch = undefined; // This will be set later
+};
+
+ABCJS.write.EndingElem.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
+	this.pitch = highest2Pitch;
 };
 
 ABCJS.write.EndingElem.prototype.draw = function (renderer, linestartx, lineendx) {
+	if (this.pitch === undefined)
+		window.console.error("Ending Element y-coordinate not set.");
+	var y = renderer.calcY(this.pitch);
 	var pathString;
 	if (this.anchor1) {
 		linestartx = this.anchor1.x+this.anchor1.w;
 		pathString = ABCJS.write.sprintf("M %f %f L %f %f",
-			linestartx, renderer.y, linestartx, renderer.y+10);
+			linestartx, y, linestartx, y+10);
 		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')}); //TODO scale
-		renderer.renderText(linestartx+5, renderer.calcY(18.5), this.text, 'repeatfont', 'ending',"start");
+		renderer.renderText(linestartx+5, renderer.calcY(this.pitch-1), this.text, 'repeatfont', 'ending',"start");
 	}
 
 	if (this.anchor2) {
 		lineendx = this.anchor2.x;
 		pathString = ABCJS.write.sprintf("M %f %f L %f %f",
-			lineendx, renderer.y, lineendx, renderer.y+10);
+			lineendx, y, lineendx, y+10);
 		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')}); // TODO scale
 	}
 
 
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
-		linestartx, renderer.y, lineendx, renderer.y);
+		linestartx, y, lineendx, y);
 	renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});  // TODO scale
 };
 

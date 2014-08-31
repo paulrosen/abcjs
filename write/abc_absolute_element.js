@@ -41,6 +41,20 @@ ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing, type) {
 	this.bottom = 7;
 	this.top = 7;
 	this.type = type;
+	this.hasHighest1 = false; // For the Part and Tempo designations
+	this.hasHighest2 = false; // For the endings and chords
+	this.hasLowest1 = false; // For the lyrics
+	this.hasLowest2 = false; // For the dynamic marks.
+};
+
+ABCJS.write.AbsoluteElement.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
+	for (var i = 0; i < this.children.length; i++) {
+		var child = this.children[i];
+		if (child.hasHighest1) child.pitch = highest1Pitch;
+		if (child.hasHighest2) child.pitch = highest2Pitch;
+		if (child.hasLowest1) child.pitch = lowest1Pitch;
+		if (child.hasLowest2) child.pitch = lowest2Pitch;
+	}
 };
 
 ABCJS.write.AbsoluteElement.prototype.getMinWidth = function () { // absolute space taken to the right of the note
@@ -74,14 +88,20 @@ ABCJS.write.AbsoluteElement.prototype.addChild = function (child) {
 	this.children[this.children.length] = child;
 	this.pushTop(child.top);
 	this.pushBottom(child.bottom);
+	if (child.hasHighest1) this.hasHighest1 = true;
+	if (child.hasHighest2) this.hasHighest2 = true;
+	if (child.hasLowest1) this.hasLowest1 = true;
+	if (child.hasLowest2) this.hasLowest2 = true;
 };
 
 ABCJS.write.AbsoluteElement.prototype.pushTop = function (top) {
-	this.top = Math.max(top, this.top);
+	if (top)
+		this.top = Math.max(top, this.top);
 };
 
 ABCJS.write.AbsoluteElement.prototype.pushBottom = function (bottom) {
-	this.bottom = Math.min(bottom, this.bottom);
+	if (bottom)
+		this.bottom = Math.min(bottom, this.bottom);
 };
 
 ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
@@ -101,7 +121,7 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	});
 	this.abcelem.abselem = this;
 
-	var spacing = ABCJS.write.spacing.STEP*renderer.scale;
+	var spacing = ABCJS.write.spacing.STEP;
 
 	var start = function () {
 			// storing original relative coordinates

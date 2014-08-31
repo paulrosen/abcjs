@@ -25,12 +25,20 @@ if (!window.ABCJS.write)
 ABCJS.write.DynamicDecoration = function(anchor, dec) {
 	this.anchor = anchor;
 	this.dec = dec;
+	this.hasLowest2 = true;
+	this.pitch = undefined; // This will be set later
+};
+
+ABCJS.write.DynamicDecoration.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
+	this.pitch = lowest2Pitch;
 };
 
 ABCJS.write.DynamicDecoration.prototype.draw = function(renderer, linestartx, lineendx) {
-	var ypos = renderer.minY - 7;
-	var scalex = 1; // TODO-PER: do the scaling
+	if (this.pitch === undefined)
+		window.console.error("Dynamic Element y-coordinate not set.");
+	var y = renderer.calcY(this.pitch);
+	var scalex = 1;
 	var scaley = 1;
-	renderer.printSymbol(this.anchor.x, ypos, this.dec, scalex, scaley, renderer.addClasses('decoration'));
+	renderer.printSymbol(this.anchor.x, y, this.dec, scalex, scaley, renderer.addClasses('decoration'));
 };
 

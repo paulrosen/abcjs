@@ -30,6 +30,12 @@ ABCJS.write.VoiceElement = function(voicenumber, voicetotal) {
 	this.duplicate = false;
 	this.voicenumber = voicenumber; //number of the voice on a given stave (not staffgroup)
 	this.voicetotal = voicetotal;
+	this.bottom = 7;
+	this.top = 7;
+	this.hasHighest1 = false;
+	this.hasHighest2 = false;
+	this.hasLowest1 = false;
+	this.hasLowest2 = false;
 };
 
 ABCJS.write.VoiceElement.prototype.addChild = function (child) {
@@ -45,6 +51,31 @@ ABCJS.write.VoiceElement.prototype.addChild = function (child) {
 		}
 	}
 	this.children[this.children.length] = child;
+	this.setRange(child);
+};
+
+ABCJS.write.VoiceElement.prototype.setRange = function(child) {
+	if (child.bottom !== undefined)
+		this.bottom = Math.min(this.bottom, child.bottom);
+	if (child.top !== undefined)
+		this.top = Math.max(this.top, child.top);
+	if (child.hasHighest1) this.hasHighest1 = true;
+	if (child.hasHighest2) this.hasHighest2 = true;
+	if (child.hasLowest1) this.hasLowest1 = true;
+	if (child.hasLowest2) this.hasLowest2 = true;
+};
+
+ABCJS.write.VoiceElement.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
+	var i;
+	for (i = 0; i < this.children.length; i++) {
+		var abselem = this.children[i];
+		abselem.setUpperAndLowerElements(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch);
+	}
+	for (i = 0; i < this.otherchildren.length; i++) {
+		var abselem = this.otherchildren[i];
+		if (typeof abselem !== 'string')
+			abselem.setUpperAndLowerElements(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch);
+	}
 };
 
 ABCJS.write.VoiceElement.prototype.addOther = function (child) {
@@ -52,6 +83,7 @@ ABCJS.write.VoiceElement.prototype.addOther = function (child) {
 		this.beams.push(child);
 	} else {
 		this.otherchildren.push(child);
+		this.setRange(child);
 	}
 };
 
@@ -86,7 +118,7 @@ ABCJS.write.VoiceElement.prototype.getNextX = function () {
 ABCJS.write.VoiceElement.prototype.beginLayout = function (startx) {
 	this.i=0;
 	this.durationindex=0;
-	this.ii=this.children.length;
+	//this.ii=this.children.length;
 	this.startx=startx;
 	this.minx=startx; // furthest left to where negatively positioned elements are allowed to go
 	this.nextx=startx; // x position where the next element of this voice should be placed assuming no other voices and no fixed width constraints
@@ -109,13 +141,13 @@ ABCJS.write.VoiceElement.prototype.layoutOneItem = function (x, spacing) {
 	this.spacingduration = child.duration;
 	//update minx
 	this.minx = x+child.getMinWidth(); // add necessary layout space
-	if (this.i!==this.ii-1) this.minx+=child.minspacing; // add minimumspacing except on last elem
+	if (this.i!==this.children.length-1) this.minx+=child.minspacing; // add minimumspacing except on last elem
 
 	this.updateNextX(x, spacing);
 
 	// contribute to staff y position
-	this.staff.highest = Math.max(child.top,this.staff.highest);
-	this.staff.lowest = Math.min(child.bottom,this.staff.lowest);
+	this.staff.top = Math.max(child.top,this.staff.top);
+	this.staff.bottom = Math.min(child.bottom,this.staff.bottom);
 
 	return x; // where we end up having placed the child
 };

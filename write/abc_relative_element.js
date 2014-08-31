@@ -34,11 +34,23 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 	this.type = opt.type || "symbol"; // cheap types.
 	this.pitch2 = opt.pitch2;
 	this.linewidth = opt.linewidth;
-	this.top = pitch + ((opt.extreme==="above")? 7 : 0);
-	this.bottom = pitch - ((opt.extreme==="below")? 7 : 0);
+	if (pitch) {
+		this.top = pitch + ((opt.extreme === "above") ? 7 : 0);
+		this.bottom = pitch - ((opt.extreme === "below") ? 7 : 0);
+	}
+	switch (this.type) {
+		case "debug": this.hasLowest2 = true; break;
+		case "lyric": this.hasLowest1 = true; break;
+		case "chord":
+		case "text": this.hasHighest2 = true; break;
+		case "part": this.hasHighest1 = true; break;
+	}
 };
 
 ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
+	if (this.pitch === undefined)
+		window.console.error(this.type + " Relative Element y-coordinate not set.");
+	var y = renderer.calcY(this.pitch);
 	this.x = x+this.dx;
 	switch(this.type) {
 		case "symbol":
@@ -47,32 +59,32 @@ ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
 		case "debug":
 			this.graphelem = renderer.renderText(this.x, renderer.calcY(15), ""+this.c, "debugfont", 'debug-msg', 'start'); break;
 		case "barNumber":
-			this.graphelem = renderer.renderText(this.x, renderer.calcY(this.pitch), ""+this.c, "measurefont", 'bar-number', "start");
+			this.graphelem = renderer.renderText(this.x, y, ""+this.c, "measurefont", 'bar-number', "start");
 			break;
 		case "lyric":
-			this.graphelem = renderer.renderText(this.x, renderer.calcY(renderer.minY-2), this.c, "vocalfont", 'abc-lyric'); //TODO-GD print lyrics at the "correct" pitch
+			this.graphelem = renderer.renderText(this.x, y, this.c, "vocalfont", 'abc-lyric'); //TODO-GD print lyrics at the "correct" pitch
 			break;
 		case "chord":
-			this.graphelem = renderer.renderText(this.x, renderer.calcY(this.pitch), this.c, 'gchordfont', "chord", "start");
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'gchordfont', "chord", "start");
 			break;
 		case "decoration":
-			this.graphelem = renderer.renderText(this.x, renderer.calcY(this.pitch), this.c, 'annotationfont', "annotation", "middle");
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "middle");
 			break;
 		case "text":
-			this.graphelem = renderer.renderText(this.x, renderer.calcY(this.pitch), this.c, 'annotationfont', "annotation", "start");
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "start");
 			break;
 		case "part":
-			this.graphelem = renderer.renderText(this.x, renderer.calcY(this.pitch), this.c, 'partsfont', "part", "middle");
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'partsfont', "part", "middle");
 			break;
 		case "bar":
-			this.graphelem = renderer.printStem(this.x, this.linewidth, renderer.calcY(this.pitch), (bartop)?bartop:renderer.calcY(this.pitch2)); break; // bartop can't be 0
+			this.graphelem = renderer.printStem(this.x, this.linewidth, y, (bartop)?bartop:renderer.calcY(this.pitch2)); break; // bartop can't be 0
 		case "stem":
-			this.graphelem = renderer.printStem(this.x, this.linewidth, renderer.calcY(this.pitch), renderer.calcY(this.pitch2)); break;
+			this.graphelem = renderer.printStem(this.x, this.linewidth, y, renderer.calcY(this.pitch2)); break;
 		case "ledger":
 			this.graphelem = renderer.printStaveLine(this.x, this.x+this.w, this.pitch); break;
 	}
 	if (this.scalex!==1 && this.graphelem) {
-		this.graphelem.scale(this.scalex, this.scaley, this.x, renderer.calcY(this.pitch));
+		this.graphelem.scale(this.scalex, this.scaley, this.x, y);
 	}
 	return this.graphelem;
 };

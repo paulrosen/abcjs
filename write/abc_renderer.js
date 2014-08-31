@@ -35,7 +35,6 @@ ABCJS.write.Renderer = function(paper, glyphs, doRegression) {
   this.controller = null; //TODO-GD only used when drawing the ABCJS ARS to connect the controller with the elements for highlighting
 
 	this.space = 3*ABCJS.write.spacing.SPACE;
-  this.minY = null; // set at each drawing of a stave by the controller - place for lyrics, crescendo and other dynamics
   this.padding = {}; // renderer's padding is managed by the controller
   this.doRegression = doRegression;
   if (this.doRegression)
@@ -228,6 +227,13 @@ ABCJS.write.Renderer.prototype.topMargin = function(abctune) {
  */
 ABCJS.write.Renderer.prototype.addMusicPadding = function() {
 		this.moveY(this.spacing.music);
+};
+
+/**
+ * Leave space before printing a staff system
+ */
+ABCJS.write.Renderer.prototype.addStaffPadding = function() {
+		this.moveY(this.spacing.staffSeparation);
 };
 
 /**
