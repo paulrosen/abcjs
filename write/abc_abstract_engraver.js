@@ -75,6 +75,10 @@ ABCJS.write.AbstractEngraver.prototype.reset = function() {
 	this.voice = undefined;
 };
 
+ABCJS.write.AbstractEngraver.prototype.setStemHeight = function(heightInPixels) {
+	this.stemHeight = heightInPixels / ABCJS.write.spacing.STEP;
+};
+
 ABCJS.write.AbstractEngraver.prototype.getCurrentVoiceId = function() {
   return "s"+this.s+"v"+this.v;
 };
@@ -141,6 +145,8 @@ ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs) {
 
 function setUpperAndLowerElements(staffgroup) {
 	// Each staff already has the top and bottom set, now we see if there are elements that are always on top and bottom, and resolve their pitch.
+	// Also, get the overall height of the all the staves in this group.
+	var heightInPitches = 0;
 	for (var i = 0; i < staffgroup.staffs.length; i++) {
 		var staff = staffgroup.staffs[i];
 		// hasHighest1 is the top most position, hasHighest2 is the second topmost, so resolve them in that order. Likewise for hasLowest1, hasLowest2
@@ -168,8 +174,12 @@ function setUpperAndLowerElements(staffgroup) {
 			var voice = staffgroup.voices[staff.voices[j]];
 			voice.setUpperAndLowerElements(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch);
 		}
+		// Now we need a little margin on the top, so we'll just through that in.
+		staff.top += 4;
+		heightInPitches += staff.top - staff.bottom;
 	}
-
+	// TODO-PER: also add the space between staves.
+	staffgroup.height = heightInPitches * ABCJS.write.spacing.STEP;
 }
 
 ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff) {
@@ -273,30 +283,36 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
   return elemset;
 };
 
+ABCJS.write.AbstractEngraver.prototype.calcBeamDir = function() {
+	if (this.stemdir) // If the user or voice is forcing the stem direction, we already know the answer.
+		return this.stemdir;
+	var beamelem = new ABCJS.write.BeamElem(this.stemdir);
+	// PER: need two passes: the first one decides if the stems are up or down.
+	var oldPos = this.pos;
+	var abselem;
+	while (this.getElem()) {
+		abselem = this.createNote(this.getElem(), true, true);
+		beamelem.add(abselem);
+		if (this.getElem().endBeam)
+			break;
+		this.pos++;
+	}
+	var dir = beamelem.calcDir();
+	this.pos = oldPos;
+	return dir ? "up" : "down";
+};
+
 ABCJS.write.AbstractEngraver.prototype.createBeam = function() {
   var abselemset = [];
   
   if (this.getElem().startBeam && !this.getElem().endBeam) {
-    var beamelem = new ABCJS.write.BeamElem(this.stemdir);
-         // PER: need two passes: the first one decides if the stems are up or down.
-         // TODO-PER: This could be more efficient.
-         var oldPos = this.pos;
-         var abselem;
-         while (this.getElem()) {
-                 abselem = this.createNote(this.getElem(),true,true);
-                 beamelem.add(abselem);
-                 if (this.getElem().endBeam)
-                        break;
-                 this.pos++;
-                }
-         var dir = beamelem.calcDir();
-         this.pos = oldPos;
-
-         beamelem = new ABCJS.write.BeamElem(dir ? "up" : "down");
+	  var dir = this.calcBeamDir();
+         var beamelem = new ABCJS.write.BeamElem(dir);
+	  beamelem.setStemHeight(this.stemHeight);
          var oldDir = this.stemdir;
-         this.stemdir = dir ? "up" : "down";
+         this.stemdir = dir;
     while (this.getElem()) {
-      abselem = this.createNote(this.getElem(),true);
+      var abselem = this.createNote(this.getElem(),true);
       abselemset.push(abselem);
                 beamelem.add(abselem);
       if (this.getElem().endBeam) {
@@ -510,6 +526,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     var gracebeam = null;
     if (elem.gracenotes.length>1) {
       gracebeam = new ABCJS.write.BeamElem("grace",this.isBagpipes);
+		beamelem.setStemHeight(this.stemHeight*gracescale);
     }
 
     var graceoffsets = [];
@@ -658,7 +675,7 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
       var adjust = (pitchelem.printer_shift==="same")?1:0;
       shiftheadx = (dir==="down")?-this.glyphs.getSymbolWidth(c)*scale+adjust:this.glyphs.getSymbolWidth(c)*scale-adjust;
     }
-    notehead = new ABCJS.write.RelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, {scalex:scale, scaley: scale, extreme: ((dir==="down")?"below":"above")});
+    notehead = new ABCJS.write.RelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, {scalex:scale, scaley: scale, stemHeight: ((dir==="down")?-this.stemHeight:this.stemHeight)});
     if (flag) {
       var pos = pitch+((dir==="down")?-7:7)*scale;
       if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;
@@ -1094,7 +1111,7 @@ ABCJS.write.AbstractEngraver.prototype.createKeySignature = function(elem) {
 
 ABCJS.write.AbstractEngraver.prototype.createTimeSignature= function(elem) {
 
-  var abselem = new ABCJS.write.AbsoluteElement(elem,0,20, 'staff-extra');
+  var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra');
   if (elem.type === "specified") {
     //TODO make the alignment for time signatures centered
     for (var i = 0; i < elem.value.length; i++) {

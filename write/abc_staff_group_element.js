@@ -183,40 +183,64 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, renderer, deb
 
 ABCJS.write.StaffGroupElement.prototype.draw = function (renderer, y) {
 
-	this.y = y;
-	for (var i=0;i<this.staffs.length;i++) {
-		var shiftabove = this.staffs[i].top - ((i===0)? 20 : 15);
-		var shiftbelow = this.staffs[i].bottom - ((i===this.staffs.length-1)? 0 : 0);
-		this.staffs[i].top = y;
-		if (shiftabove > 0) y+= shiftabove*ABCJS.write.spacing.STEP;
-		this.staffs[i].y = y;
-		y+= ABCJS.write.spacing.STAVEHEIGHT*0.9; // position of the words
-		if (shiftbelow < 0) y-= shiftbelow*ABCJS.write.spacing.STEP;
-		this.staffs[i].bottom = y;
+//	this.y = y;
+//	for (var i=0;i<this.staffs.length;i++) {
+//		var shiftabove = this.staffs[i].top - ((i===0)? 20 : 15);
+//		var shiftbelow = this.staffs[i].bottom - ((i===this.staffs.length-1)? 0 : 0);
+//		this.staffs[i].top = y;
+//		if (shiftabove > 0) y+= shiftabove*ABCJS.write.spacing.STEP;
+//		this.staffs[i].y = y;
+//		y+= ABCJS.write.spacing.STAVEHEIGHT*0.9; // position of the words
+//		if (shiftbelow < 0) y-= shiftbelow*ABCJS.write.spacing.STEP;
+//		this.staffs[i].bottom = y;
 
-		if (this.staffs[i].lines !== 0) {
-			renderer.y = this.staffs[i].y;
-			renderer.printStave(this.startx, this.w, this.staffs[i].lines);
-		}
-	}
-	this.height = y-this.y;
+//		if (this.staffs[i].lines !== 0) {
+//			renderer.y = this.staffs[i].y;
+//			renderer.printStave(this.startx, this.w, this.staffs[i].lines);
+//		}
+//	}
+	//this.height = y-this.y;
+
+	// We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
+	// All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
+	// renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
+	// If there are multiple staves, then renderer.y will be incremented for each new staff.
+
+	var startY = renderer.y; // So that it can be restored after we're done.
+	var topLine; // these are to connect multiple staves. We need to remember where they are.
+	var bottomLine;
 
 	var bartop = 0;
+	var height;
 	renderer.measureNumber = null;
-	for (i=0;i<this.voices.length;i++) {
-		renderer.y = this.voices[i].staff.y;
+	for (var i=0;i<this.voices.length;i++) {
+		var staff = this.voices[i].staff;
+		//renderer.y = staff.y;
+		// offset for starting the counting at middle C
+		if (!this.voices[i].duplicate) {
+			renderer.moveY(ABCJS.write.spacing.STEP, staff.top);
+			height = (staff.top - staff.bottom) * ABCJS.write.spacing.STEP;
+			if (!topLine) topLine  = renderer.calcY(10);
+			bottomLine  = renderer.calcY(2);
+			if (staff.lines !== 0)
+				renderer.printStave(this.startx, this.w, staff.lines);
+		}
 		this.voices[i].draw(renderer, bartop);
-		bartop = this.voices[i].barbottom;
+		if (!this.voices[i].duplicate) {
+			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
+			//renderer.y += height;
+		}
 	}
 	renderer.measureNumber = null;
 
 	// connect all the staves together with a vertical line
 	if (this.staffs.length>1) {
-		renderer.y = this.staffs[0].y;
-		var top = renderer.calcY(10);
-		renderer.y = this.staffs[this.staffs.length-1].y;
-		var bottom = renderer.calcY(2);
-		renderer.printStem(this.startx, 0.6, top, bottom);
+//		renderer.y = this.staffs[0].y;
+//		var top = renderer.calcY(10);
+//		renderer.y = this.staffs[this.staffs.length-1].y;
+//		var bottom = renderer.calcY(2);
+		renderer.printStem(this.startx, 0.6, topLine, bottomLine);
 	}
+	renderer.y = startY;
 };
 

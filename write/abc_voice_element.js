@@ -168,7 +168,7 @@ ABCJS.write.VoiceElement.prototype.shiftRight = function (dx) {
 ABCJS.write.VoiceElement.prototype.draw = function (renderer, bartop) {
 	var width = this.w-1;
 	renderer.staffbottom = this.staff.bottom;
-	this.barbottom = renderer.calcY(2);
+	//this.barbottom = renderer.calcY(2);
 
 	renderer.measureNumber = null;
 	if (this.header) { // print voice name

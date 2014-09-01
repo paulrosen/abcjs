@@ -23,15 +23,18 @@ if (!window.ABCJS.write)
 	window.ABCJS.write = {};
 
 ABCJS.write.BeamElem = function(type, flat) {
+	// type is "grace", "up", "down", or undefined.
 	this.isflat = (flat);
 	this.isgrace = (type && type==="grace");
 	this.forceup = (type && type==="up");
 	this.forcedown = (type && type==="down");
 	this.elems = []; // all the ABCJS.write.AbsoluteElements
 	this.total = 0;
-	this.dy = (this.asc)?ABCJS.write.spacing.STEP*1.2:-ABCJS.write.spacing.STEP*1.2;
-	if (this.isgrace) this.dy = this.dy*0.4;
 	this.allrests = true;
+};
+
+ABCJS.write.BeamElem.prototype.setStemHeight = function(stemHeight) {
+	this.stemHeight = stemHeight;
 };
 
 ABCJS.write.BeamElem.prototype.add = function(abselem) {
@@ -66,17 +69,18 @@ ABCJS.write.BeamElem.prototype.draw = function(renderer) {
 
 ABCJS.write.BeamElem.prototype.calcDir = function() {
 	var average = this.average();
-	//	var barpos = (this.isgrace)? 5:7;
 	this.asc = (this.forceup || this.isgrace || average<6) && (!this.forcedown); // hardcoded 6 is B
+	this.dy = (this.asc)?ABCJS.write.spacing.STEP*1.2:-ABCJS.write.spacing.STEP*1.2;
+	if (this.isgrace) this.dy = this.dy*0.4;
 	return this.asc;
 };
 
 ABCJS.write.BeamElem.prototype.drawBeam = function(renderer) {
 	var average = this.average();
-	var barpos = (this.isgrace)? 5:7;
+	var barpos = this.stemHeight-2; // (this.isgrace)? 5:7;
 	this.calcDir();
 
-	var barminpos = this.asc ? 5 : 8;	//PER: I just bumped up the minimum height for notes with descending stems to clear a rest in the middle of them.
+	var barminpos = this.asc ? this.stemHeight-2 : this.stemHeight;
 	this.pos = Math.round(this.asc ? Math.max(average+barpos,this.max+barminpos) : Math.min(average-barpos,this.min-barminpos));
 	var slant = this.elems[0].abcelem.averagepitch-this.elems[this.elems.length-1].abcelem.averagepitch;
 	if (this.isflat) slant=0;

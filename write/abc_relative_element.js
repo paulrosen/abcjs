@@ -34,9 +34,13 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 	this.type = opt.type || "symbol"; // cheap types.
 	this.pitch2 = opt.pitch2;
 	this.linewidth = opt.linewidth;
-	if (pitch) {
-		this.top = pitch + ((opt.extreme === "above") ? 7 : 0);
-		this.bottom = pitch - ((opt.extreme === "below") ? 7 : 0);
+	this.top = pitch;
+	this.bottom = pitch;
+	if (opt.stemHeight) {
+		if (opt.stemHeight > 0)
+			this.top += opt.stemHeight;
+		else
+			this.bottom += opt.stemHeight;
 	}
 	switch (this.type) {
 		case "debug": this.hasLowest2 = true; break;

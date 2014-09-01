@@ -118,6 +118,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	this.renderer.setPrintMode(abctune.media === 'print');
 	this.renderer.setPadding(abctune);
   this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
+	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	if (abctune.formatting.staffwidth) {
 		this.width=abctune.formatting.staffwidth;
@@ -185,11 +186,10 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
 		if (newspace === null) break;
   }
 	centerWholeRests(staffgroup.voices);
-	this.renderer.printHorizontalLine(this.width+this.renderer.padding.left+this.renderer.padding.right);
-	this.renderer.addStaffPadding();
-	var oldY = this.renderer.y; // The following call modifies the y position, so we need to save the old one to restore it.
+	//this.renderer.printHorizontalLine(this.width+this.renderer.padding.left+this.renderer.padding.right);
+	if (line !== 0)
+		this.renderer.addStaffPadding(this.staffgroups[line-1], staffgroup);
   staffgroup.draw(this.renderer, this.renderer.y);
-	this.renderer.y = oldY;
 	this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+staffgroup.height);
   this.staffgroups[this.staffgroups.length] = staffgroup;
 //  this.renderer.y = staffgroup.y + staffgroup.height;

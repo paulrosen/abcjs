@@ -232,8 +232,14 @@ ABCJS.write.Renderer.prototype.addMusicPadding = function() {
 /**
  * Leave space before printing a staff system
  */
-ABCJS.write.Renderer.prototype.addStaffPadding = function() {
-		this.moveY(this.spacing.staffSeparation);
+ABCJS.write.Renderer.prototype.addStaffPadding = function(lastStaffGroup, thisStaffGroup) {
+	var lastStaff = lastStaffGroup.staffs[lastStaffGroup.staffs.length-1];
+	var lastBottomLine = -(lastStaff.bottom - 2); // The 2 is because the scale goes to 2 below the last line.
+	var nextTopLine = thisStaffGroup.staffs[0].top - 10; // Because 10 represents the top line.
+	var naturalSeparation = nextTopLine + lastBottomLine; // This is how far apart they'd be without extra spacing
+	var separationInPixels = naturalSeparation * ABCJS.write.spacing.STEP;
+	if (separationInPixels < this.spacing.staffSeparation)
+		this.moveY(this.spacing.staffSeparation-separationInPixels);
 };
 
 /**
@@ -594,7 +600,7 @@ ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above)
  * @param {number} ofs pitch value (bottom C on a G clef = 0, D=1, etc.)
  */
 ABCJS.write.Renderer.prototype.calcY = function(ofs) {
-  return this.y+((ABCJS.write.spacing.TOPNOTE-ofs)*ABCJS.write.spacing.STEP);
+  return this.y - ofs*ABCJS.write.spacing.STEP;
 };
 
 /**
@@ -713,10 +719,17 @@ ABCJS.write.Renderer.prototype.printHorizontalLine = function (width) {
 
 ABCJS.write.Renderer.prototype.printVerticalLine = function (x, y1, y2) {
 	var dy = 0.35;
-	var fill = "#0000aa";
+	var fill = "#00aaaa";
 	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x - dy, y1, x - dy, y2,
 			x + dy, y1, x + dy, y2);
 	this.paper.path().attr({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')}).toBack();
+	pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x - 20, y1, x - 20, y1+3,
+		x, y1, x, y1+3);
+	this.paper.path().attr({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')}).toBack();
+	pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x + 20, y2, x + 20, y2+3,
+		x, y2, x, y2+3);
+	this.paper.path().attr({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')}).toBack();
+
 };
 
 /**
