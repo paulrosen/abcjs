@@ -338,7 +338,7 @@ ABCJS.write.Renderer.prototype.engraveTempo = function (x, tempo) {
 	if (!tempo || tempo.suppress) return;
 
 	var text;
-	var noteHeight = 20; // the note height of 20 was just determined empirically.
+	var noteHeight = -12; // the note height was just determined empirically.
 	var totalHeight = noteHeight;
 	if (tempo.preString) {
 		text = this.renderText(x, this.y+noteHeight, tempo.preString, 'tempofont', 'tempo',"start");
@@ -349,7 +349,7 @@ ABCJS.write.Renderer.prototype.engraveTempo = function (x, tempo) {
 	}
 	if (tempo.duration) {
 		var temposcale = 0.75;
-		var tempopitch = 11;
+		var tempopitch = -1; // note: placement determined empirically
 		var duration = tempo.duration[0]; // TODO when multiple durations
 		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1, 'tempo');
 		var durlog = Math.floor(Math.log(duration) / Math.log(2));
