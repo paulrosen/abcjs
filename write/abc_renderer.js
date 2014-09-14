@@ -262,7 +262,7 @@ ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
 		this.moveY(this.spacing.top);
 	this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', this.spacing.title, 0, 'middle');
 	if (abctune.lines[0])
-		this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'start');
+		this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'middle');
 
 	if (abctune.metaText.rhythm || abctune.metaText.origin || abctune.metaText.composer) {
 		this.moveY(this.spacing.composer);
@@ -390,7 +390,7 @@ ABCJS.write.Renderer.prototype.engraveTempo = function (x, tempo) {
 		this.renderText(x, this.y+noteHeight, tempo.postString, 'tempofont', 'tempo',"start");
 		totalHeight = Math.max(totalHeight, text.getBBox().height);
 	}
-	this.moveY(totalHeight, 2.5);
+	//this.moveY(totalHeight, 1);
 };
 
 /**
@@ -413,7 +413,7 @@ ABCJS.write.Renderer.prototype.outputFreeText = function (text) {
  * Output an extra subtitle that is defined later in the tune.
  */
 ABCJS.write.Renderer.prototype.outputSubtitle = function (width, subtitle) {
-	this.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'start');
+	this.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'middle');
 };
 
 /**

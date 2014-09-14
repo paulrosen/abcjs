@@ -51,7 +51,7 @@ ABCJS.write.EngraverController = function(paper, params) {
   this.space = 3*ABCJS.write.spacing.SPACE;
   this.glyphs = new ABCJS.write.Glyphs(); // we need the glyphs for layout information
   this.scale = params.scale || undefined;
-  this.staffwidth = params.staffwidth || 680; // was:740; The number of pixels in 8.5", after 1cm of margin has been removed.
+  this.staffwidth = params.staffwidth ? params.staffwidth * 1.33 : 680; // was:740; The number of pixels in 8.5", after 1cm of margin has been removed.
   this.editable = params.editable || false;
 
 	// HACK-PER: Raphael doesn't support setting the class of an element, so this adds that support. This doesn't work on IE8 or less, though.
@@ -73,6 +73,7 @@ ABCJS.write.EngraverController.prototype.reset = function() {
 	this.selected = [];
 	this.ingroup = false;
 	this.staffgroups = [];
+	this.lastStaffGroupIndex = -1;
 	if (this.engraver)
 		this.engraver.reset();
 	this.engraver = null;
@@ -121,7 +122,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	if (abctune.formatting.staffwidth) {
-		this.width=abctune.formatting.staffwidth;
+		this.width=abctune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
 	} else {
 		this.width=this.staffwidth;
 	}
@@ -132,6 +133,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	this.renderer.addMusicPadding();
 
   this.staffgroups = [];
+	this.lastStaffGroupIndex = -1;
   var maxwidth = this.width;
   for(var line=0; line<abctune.lines.length; line++) {
 		this.renderer.lineNumber = line;
@@ -186,12 +188,12 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, a
 		if (newspace === null) break;
   }
 	centerWholeRests(staffgroup.voices);
-	//this.renderer.printHorizontalLine(this.width+this.renderer.padding.left+this.renderer.padding.right);
-	if (line !== 0)
-		this.renderer.addStaffPadding(this.staffgroups[line-1], staffgroup);
+	if (this.lastStaffGroupIndex > -1)
+		this.renderer.addStaffPadding(this.staffgroups[this.lastStaffGroupIndex], staffgroup);
   staffgroup.draw(this.renderer, this.renderer.y);
 	this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+staffgroup.height);
   this.staffgroups[this.staffgroups.length] = staffgroup;
+	this.lastStaffGroupIndex = this.staffgroups.length-1;
 //  this.renderer.y = staffgroup.y + staffgroup.height;
 //  this.renderer.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;
 	this.renderer.y += staffgroup.height;

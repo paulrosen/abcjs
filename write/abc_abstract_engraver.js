@@ -154,27 +154,28 @@ function setUpperAndLowerElements(staffgroup) {
 		var highest2Pitch;
 		var lowest1Pitch;
 		var lowest2Pitch;
+		var ySpacing = 7;
 		if (staff.hasHighest2) {
-			highest2Pitch = staff.top + 5;
-			staff.top += 5;
+			highest2Pitch = staff.top + ySpacing;
+			staff.top += ySpacing;
 		}
 		if (staff.hasHighest1) {
-			highest1Pitch = staff.top + 5;
-			staff.top += 5;
+			highest1Pitch = staff.top + ySpacing;
+			staff.top += ySpacing;
 		}
 		if (staff.hasLowest2) {
-			lowest2Pitch = staff.bottom - 5;
-			staff.bottom -= 5;
+			lowest2Pitch = staff.bottom - ySpacing;
+			staff.bottom -= ySpacing;
 		}
 		if (staff.hasLowest1) {
-			lowest1Pitch = staff.bottom - 5;
-			staff.bottom -= 5;
+			lowest1Pitch = staff.bottom - ySpacing;
+			staff.bottom -= ySpacing;
 		}
 		for (var j = 0; j < staff.voices.length; j++) {
 			var voice = staffgroup.voices[staff.voices[j]];
 			voice.setUpperAndLowerElements(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch);
 		}
-		// Now we need a little margin on the top, so we'll just through that in.
+		// Now we need a little margin on the top, so we'll just throw that in.
 		staff.top += 4;
 		heightInPitches += staff.top - staff.bottom;
 	}
@@ -526,7 +527,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     var gracebeam = null;
     if (elem.gracenotes.length>1) {
       gracebeam = new ABCJS.write.BeamElem("grace",this.isBagpipes);
-		beamelem.setStemHeight(this.stemHeight*gracescale);
+		gracebeam.setStemHeight(this.stemHeight*gracescale);
     }
 
     var graceoffsets = [];
