@@ -277,9 +277,11 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, undefined, {type:"part"}));
     elemset[0] = abselem;
     break;
-//         case "tempo":
-//                this.printer.y = this.printer.printTempo(elem, this.printer.paper, this.printer.layouter, this.printer.y, this.printer, this.printer.x);
-//                break;
+  case "tempo":
+    var abselem3 = new ABCJS.write.AbsoluteElement(elem,0,0, 'tempo');
+    abselem3.addChild(new ABCJS.write.TempoElement(elem));
+    elemset[0] = abselem3;
+    break;
   default:
     var abselem2 = new ABCJS.write.AbsoluteElement(elem,0,0, 'unsupported');
     abselem2.addChild(new ABCJS.write.RelativeElement("element type "+elem.el_type, 0, 0, undefined, {type:"debug"}));
