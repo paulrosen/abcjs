@@ -273,14 +273,17 @@ ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
 		if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
 		var space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top', 0, null, "end");
 		this.moveY(space[1]);
+	} else if (this.isPrint) {
+		// abcm2ps adds this space whether there is anything to write or not.
+		this.moveY(this.spacing.composer);
+		var space2 = this.getTextSize("M", 'composerfont', 'meta-top');
+		this.moveY(space2.height);
 	}
 
 	this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, 0, "end");
 	//this.skipSpaceY();
 
 	this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, 0, "start");
-
-	this.engraveTempo(this.padding.left + ABCJS.write.spacing.INDENT, abctune.metaText.tempo);
 };
 
 /**
@@ -326,71 +329,6 @@ ABCJS.write.Renderer.prototype.engraveExtraText = function(width, abctune) {
 		this.outputTextIf(this.padding.left + width / 2, abctune.metaText.footer.center, 'footerfont', 'header meta-bottom', 0, null, 'middle');
 		this.outputTextIf(this.padding.left + width, abctune.metaText.footer.right, 'footerfont', 'header meta-bottom', 0, null, 'end');
 	}
-};
-
-/**
- *
- * The tempo marking
- * @param {number} x
- * @param {object} tempo
- */
-ABCJS.write.Renderer.prototype.engraveTempo = function (x, tempo) {
-	if (!tempo || tempo.suppress) return;
-
-	var text;
-	var noteHeight = -12; // the note height was just determined empirically.
-	var totalHeight = noteHeight;
-	if (tempo.preString) {
-		text = this.renderText(x, this.y+noteHeight, tempo.preString, 'tempofont', 'tempo',"start");
-		var preWidth = text.getBBox().width;
-		var charWidth = preWidth / tempo.preString.length; // Just get some average number to increase the spacing.
-		x += preWidth + charWidth;
-		totalHeight = Math.max(totalHeight, text.getBBox().height);
-	}
-	if (tempo.duration) {
-		var temposcale = 0.75;
-		var tempopitch = -1; // note: placement determined empirically
-		var duration = tempo.duration[0]; // TODO when multiple durations
-		var abselem = new ABCJS.write.AbsoluteElement(tempo, duration, 1, 'tempo');
-		var durlog = Math.floor(Math.log(duration) / Math.log(2));
-		var dot = 0;
-		for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
-		var c = this.engraver.chartable.note[-durlog];
-		var flag = this.engraver.chartable.uflags[-durlog];
-		var temponote = this.engraver.createNoteHead(abselem,
-			c,
-			{verticalPos:tempopitch},
-			"up",
-			0,
-			0,
-			flag,
-			dot,
-			0,
-			temposcale
-		);
-		abselem.addHead(temponote);
-		if (duration < 1) {
-			var p1 = tempopitch + 1 / 3 * temposcale;
-			var p2 = tempopitch + 7 * temposcale;
-			var dx = temponote.dx + temponote.w;
-			var width = -0.6;
-			abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type":"stem", "pitch2":p2, linewidth:width}));
-		}
-		abselem.x = x;
-		abselem.draw(this, null);
-		x += (abselem.w + 5);
-		var str = "= " + tempo.bpm;
-		text = this.renderText(x, this.y+noteHeight, str, 'tempofont', 'tempo',"start");
-		var postWidth = text.getBBox().width;
-		var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
-		x += postWidth + charWidth2;
-		totalHeight = Math.max(totalHeight, text.getBBox().height);
-	}
-	if (tempo.postString) {
-		this.renderText(x, this.y+noteHeight, tempo.postString, 'tempofont', 'tempo',"start");
-		totalHeight = Math.max(totalHeight, text.getBBox().height);
-	}
-	//this.moveY(totalHeight, 1);
 };
 
 /**

@@ -178,7 +178,7 @@ function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, 
  * @private
  */
 ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, abcline, line) {
-  var staffgroup = this.engraver.createABCLine(abcline.staff);
+  var staffgroup = this.engraver.createABCLine(abcline.staff, this.lastStaffGroupIndex === -1 ? abctune.metaText.tempo: null);
    var newspace = this.space;
   for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
     staffgroup.layout(newspace, this.renderer, false);

@@ -107,11 +107,11 @@ ABCJS.write.AbstractEngraver.prototype.getNextElem = function() {
     return this.abcline[this.pos+1];
 };
 
-ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs) {
+ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
     this.minY = 2; // PER: This is the lowest that any note reaches. It will be used to set the dynamics row.
   this.staffgroup = new ABCJS.write.StaffGroupElement();
   for (this.s = 0; this.s < staffs.length; this.s++) {
-    this.createABCStaff(staffs[this.s]);
+    this.createABCStaff(staffs[this.s], tempo);
   }
   return this.staffgroup;
 };
@@ -183,8 +183,8 @@ function setUpperAndLowerElements(staffgroup) {
 	staffgroup.height = heightInPitches * ABCJS.write.spacing.STEP;
 }
 
-ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff) {
-
+ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo) {
+// If the tempo is passed in, then the first element should get the tempo attached to it.
   var header = "";
   if (abcstaff.bracket) header += "bracket "+abcstaff.bracket+" ";
   if (abcstaff.brace) header += "brace "+abcstaff.brace+" ";
@@ -203,7 +203,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff) {
     this.voice.addChild(this.createClef(abcstaff.clef));
     this.voice.addChild(this.createKeySignature(abcstaff.key));
     if (abcstaff.meter) this.voice.addChild(this.createTimeSignature(abcstaff.meter));
-    this.createABCVoice(abcstaff.voices[this.v]);
+    this.createABCVoice(abcstaff.voices[this.v],tempo);
     var staffLines = abcstaff.clef.stafflines ? abcstaff.clef.stafflines : 5;
     this.staffgroup.addVoice(this.voice,this.s,staffLines);
   }
@@ -211,7 +211,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff) {
  
 };
 
-ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline) {
+ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline, tempo) {
   this.popCrossLineElems();
   this.stemdir = (this.isBagpipes)?"down":null;
   this.abcline = abcline;
@@ -230,9 +230,14 @@ ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline) {
     this.voice.addOther(this.ties[i]);
   }
 
+  var tempoSet = false;
   for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
     var abselems = this.createABCElement();
     for (i=0; i<abselems.length; i++) {
+      if (!tempoSet && tempo && !tempo.suppress) {
+        tempoSet = true;
+        abselems[i].addChild(new ABCJS.write.TempoElement(tempo));
+      }
       this.voice.addChild(abselems[i]);
     }
   }
