@@ -214,6 +214,32 @@ the <float> fraction of the page width.
 	 */
 };
 
+ABCJS.write.Renderer.prototype.setVerticalSpace = function(formatting) {
+	// conversion from pts to px 4/3
+	if (formatting.staffsep !== undefined)
+		this.spacing.staffSeparation = formatting.staffsep *4/3;
+	if (formatting.composerspace !== undefined)
+		this.spacing.composer = formatting.composerspace *4/3;
+	if (formatting.partsspace !== undefined)
+		this.spacing.parts = formatting.partsspace *4/3;
+	if (formatting.textspace !== undefined)
+		this.spacing.text = formatting.textspace *4/3;
+	if (formatting.musicspace !== undefined)
+		this.spacing.music = formatting.musicspace *4/3;
+	if (formatting.titlespace !== undefined)
+		this.spacing.title = formatting.titlespace *4/3;
+	if (formatting.sysstaffsep !== undefined)
+		this.spacing.systemStaffSeparation = formatting.sysstaffsep *4/3;
+	if (formatting.subtitlespace !== undefined)
+		this.spacing.subtitle = formatting.subtitlespace *4/3;
+	if (formatting.topspace !== undefined)
+		this.spacing.top = formatting.topspace *4/3;
+	if (formatting.vocalspace !== undefined)
+		this.spacing.vocal = formatting.vocalspace *4/3;
+	if (formatting.wordsspace !== undefined)
+		this.spacing.words = formatting.wordsspace *4/3;
+};
+
 /**
  * Leave space at the top of the paper
  * @param {object} abctune
