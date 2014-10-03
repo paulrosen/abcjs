@@ -43,11 +43,11 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 			this.bottom += opt.stemHeight;
 	}
 	switch (this.type) {
-		case "debug": this.hasLowest2 = true; break;
-		case "lyric": this.hasLowest1 = true; break;
+		case "debug": this.hasLowest2 = 3; break;
+		case "lyric": this.hasLowest1 = 3; break;
 		case "chord":
-		case "text": this.hasHighest2 = true; break;
-		case "part": this.hasHighest1 = true; break;
+		case "text": this.hasHighest2 = 3; break;
+		case "part": this.hasHighest1 = 3; break;
 	}
 };
 
@@ -66,7 +66,7 @@ ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
 			this.graphelem = renderer.renderText(this.x, y, ""+this.c, "measurefont", 'bar-number', "start");
 			break;
 		case "lyric":
-			this.graphelem = renderer.renderText(this.x, y, this.c, "vocalfont", 'abc-lyric'); //TODO-GD print lyrics at the "correct" pitch
+			this.graphelem = renderer.renderText(this.x, y, this.c, "vocalfont", 'abc-lyric', "middle");
 			break;
 		case "chord":
 			this.graphelem = renderer.renderText(this.x, y, this.c, 'gchordfont', "chord", "start");

@@ -26,7 +26,7 @@ if (!window.ABCJS.write)
 	"use strict";
 	ABCJS.write.TempoElement = function(tempo) {
 		this.tempo = tempo;
-		this.hasHighest1 = true;
+		this.hasHighest1 = 5;
 		this.pitch = undefined; // This will be set later
 	};
 

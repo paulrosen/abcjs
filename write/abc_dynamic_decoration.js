@@ -25,7 +25,7 @@ if (!window.ABCJS.write)
 ABCJS.write.DynamicDecoration = function(anchor, dec) {
 	this.anchor = anchor;
 	this.dec = dec;
-	this.hasLowest2 = true;
+	this.hasLowest2 = 3;
 	this.pitch = undefined; // This will be set later
 };
 

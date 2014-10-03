@@ -54,6 +54,14 @@ ABCJS.write.StaffGroupElement = function() {
 	this.staffs = [];
 };
 
+ABCJS.write.StaffGroupElement.prototype.setLimit = function(member, voice) {
+	if (!voice[member]) return;
+	if (!voice.staff[member])
+		voice.staff[member] = voice[member];
+	else
+		voice.staff[member] = Math.max(voice.staff[member], voice[member]);
+};
+
 ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines) {
 	var voiceNum = this.voices.length;
 	this.voices[voiceNum] = voice;
@@ -66,10 +74,10 @@ ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber,
 	voice.staff = this.staffs[staffnumber];
 	voice.staff.top = Math.max(voice.staff.top, voice.top);
 	voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
-	if (voice.hasHighest1) voice.staff.hasHighest1 = true;
-	if (voice.hasHighest2) voice.staff.hasHighest2 = true;
-	if (voice.hasLowest1) voice.staff.hasLowest1 = true;
-	if (voice.hasLowest2) voice.staff.hasLowest2 = true;
+	this.setLimit('hasHighest1', voice);
+	this.setLimit('hasHighest2', voice);
+	this.setLimit('hasLowest1', voice);
+	this.setLimit('hasLowest2', voice);
 };
 
 ABCJS.write.StaffGroupElement.prototype.finished = function() {

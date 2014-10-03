@@ -54,15 +54,23 @@ ABCJS.write.VoiceElement.prototype.addChild = function (child) {
 	this.setRange(child);
 };
 
+ABCJS.write.VoiceElement.prototype.setLimit = function(member, child) {
+	if (!child[member]) return;
+	if (!this[member])
+		this[member] = child[member];
+	else
+		this[member] = Math.max(this[member], child[member]);
+};
+
 ABCJS.write.VoiceElement.prototype.setRange = function(child) {
 	if (child.bottom !== undefined)
 		this.bottom = Math.min(this.bottom, child.bottom);
 	if (child.top !== undefined)
 		this.top = Math.max(this.top, child.top);
-	if (child.hasHighest1) this.hasHighest1 = true;
-	if (child.hasHighest2) this.hasHighest2 = true;
-	if (child.hasLowest1) this.hasLowest1 = true;
-	if (child.hasLowest2) this.hasLowest2 = true;
+	this.setLimit('hasHighest1', child);
+	this.setLimit('hasHighest2', child);
+	this.setLimit('hasLowest1', child);
+	this.setLimit('hasLowest2', child);
 };
 
 ABCJS.write.VoiceElement.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {

@@ -83,15 +83,23 @@ ABCJS.write.AbsoluteElement.prototype.addRight = function (right) {
 	this.addChild(right);
 };
 
+ABCJS.write.AbsoluteElement.prototype.setLimit = function(member, child) {
+	if (!child[member]) return;
+	if (!this[member])
+		this[member] = child[member];
+	else
+		this[member] = Math.max(this[member], child[member]);
+};
+
 ABCJS.write.AbsoluteElement.prototype.addChild = function (child) {
 	child.parent = this;
 	this.children[this.children.length] = child;
 	this.pushTop(child.top);
 	this.pushBottom(child.bottom);
-	if (child.hasHighest1) this.hasHighest1 = true;
-	if (child.hasHighest2) this.hasHighest2 = true;
-	if (child.hasLowest1) this.hasLowest1 = true;
-	if (child.hasLowest2) this.hasLowest2 = true;
+	this.setLimit('hasHighest1', child);
+	this.setLimit('hasHighest2', child);
+	this.setLimit('hasLowest1', child);
+	this.setLimit('hasLowest2', child);
 };
 
 ABCJS.write.AbsoluteElement.prototype.pushTop = function (top) {

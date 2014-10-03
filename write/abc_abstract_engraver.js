@@ -154,22 +154,22 @@ function setUpperAndLowerElements(staffgroup) {
 		var highest2Pitch;
 		var lowest1Pitch;
 		var lowest2Pitch;
-		var ySpacing = 7;
+		var fudge = 3; // TODO-PER: For some reason, these extra elements are offset.
 		if (staff.hasHighest2) {
-			highest2Pitch = staff.top + ySpacing;
-			staff.top += ySpacing;
+			highest2Pitch = staff.top + staff.hasHighest2 + fudge;
+			staff.top += staff.hasHighest2;
 		}
 		if (staff.hasHighest1) {
-			highest1Pitch = staff.top + ySpacing;
-			staff.top += ySpacing;
+			highest1Pitch = staff.top + staff.hasHighest1 + fudge;
+			staff.top += staff.hasHighest1;
 		}
 		if (staff.hasLowest2) {
-			lowest2Pitch = staff.bottom - ySpacing;
-			staff.bottom -= ySpacing;
+			lowest2Pitch = staff.bottom; // - staff.hasLowest2;
+			staff.bottom -= staff.hasLowest2;
 		}
 		if (staff.hasLowest1) {
-			lowest1Pitch = staff.bottom - ySpacing;
-			staff.bottom -= ySpacing;
+			lowest1Pitch = staff.bottom; // - staff.hasLowest1;
+			staff.bottom -= staff.hasLowest1;
 		}
 		for (var j = 0; j < staff.voices.length; j++) {
 			var voice = staffgroup.voices[staff.voices[j]];
@@ -177,7 +177,7 @@ function setUpperAndLowerElements(staffgroup) {
 		}
 		// Now we need a little margin on the top, so we'll just throw that in.
 		staff.top += 4;
-		heightInPitches += staff.top - staff.bottom;
+		heightInPitches += staff.top - staff.bottom + 4; // add in the top margin.
 	}
 	// TODO-PER: also add the space between staves.
 	staffgroup.height = heightInPitches * ABCJS.write.spacing.STEP;
