@@ -1092,10 +1092,15 @@ ABCJS.write.AbstractEngraver.prototype.createClef = function(elem) {
   if (clef!=="") {
     abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
   }
+	if (clef === 'clefs.G') {
+		abselem.top = 13;
+		abselem.bottom = -1;
+	}
   if (octave!==0) {
     var scale= 2/3;
     var adjustspacing = (this.glyphs.getSymbolWidth(clef)-this.glyphs.getSymbolWidth("8")*scale)/2;
     abselem.addRight(new ABCJS.write.RelativeElement("8", dx+adjustspacing, this.glyphs.getSymbolWidth("8")*scale, (octave>0)?16:-2, {scalex:scale, scaley:scale}));
+	  abselem.top += 2;
   }
 
   return abselem;
