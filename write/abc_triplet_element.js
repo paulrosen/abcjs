@@ -58,7 +58,8 @@ ABCJS.write.TripletElem.prototype.draw = function (renderer, linestartx, lineend
 			xsum += this.anchor2.w;
 		}
 
-		renderer.renderText(xsum/2, renderer.calcY(ypos+ydelta), ""+this.number, 'annotationfont', "middle", "triplet"); // TODO-PER: There doesn't seem to be a tripletfont defined.
+		var fudge = 2; // TODO-PER: don't know why this is needed.
+		renderer.renderText(xsum/2, renderer.calcY(ypos+ydelta+fudge), ""+this.number, 'tripletfont', "middle", "triplet");
 	}
 };
 

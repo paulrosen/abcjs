@@ -112,6 +112,8 @@ ABCJS.write.EngraverController.prototype.adjustNonScaledItems = function (scale)
  */
 ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	this.renderer.lineNumber = null;
+	abctune.formatting.tripletfont  = { face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none" }; // TODO-PER: This font isn't defined in the standard, so it's hardcoded here for now.
+
 	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
 	this.renderer.measureNumber = null;
 	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
