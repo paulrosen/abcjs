@@ -204,7 +204,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
     this.voice.addChild(this.createKeySignature(abcstaff.key));
     if (abcstaff.meter) this.voice.addChild(this.createTimeSignature(abcstaff.meter));
     this.createABCVoice(abcstaff.voices[this.v],tempo);
-    var staffLines = abcstaff.clef.stafflines ? abcstaff.clef.stafflines : 5;
+    var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
     this.staffgroup.addVoice(this.voice,this.s,staffLines);
   }
 	setUpperAndLowerElements(this.staffgroup);
