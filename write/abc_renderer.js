@@ -292,13 +292,17 @@ ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
 
 	if (abctune.metaText.rhythm || abctune.metaText.origin || abctune.metaText.composer) {
 		this.moveY(this.spacing.composer);
-		this.outputTextIf(this.padding.left, abctune.metaText.rhythm, 'infofont', 'meta-top', 0, null, "start");
+		var rSpace = this.outputTextIf(this.padding.left, abctune.metaText.rhythm, 'infofont', 'meta-top', 0, null, "start");
 
 		var composerLine = "";
 		if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
 		if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
-		var space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top', 0, null, "end");
-		this.moveY(space[1]);
+		if (composerLine.length > 0) {
+			var space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top', 0, null, "end");
+			this.moveY(space[1]);
+		} else {
+			this.moveY(rSpace[1]);
+		}
 		// TODO-PER: The following is a hack to make the elements line up with abcm2ps. Don't know where the extra space is coming from.
 		this.moveY(-6);
 //	} else if (this.isPrint) {
