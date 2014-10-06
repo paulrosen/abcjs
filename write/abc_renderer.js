@@ -622,18 +622,20 @@ ABCJS.write.Renderer.prototype.getTextSize = function(text, type, klass) {
 	return size;
 };
 
-ABCJS.write.Renderer.prototype.renderText = function(x, y, text, type, klass, anchor) {
+ABCJS.write.Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, centerVertically) {
 	var hash = this.getFontAndAttr(type, klass);
 	if (anchor)
 		hash.attr["text-anchor"] = anchor;
 	text = text.replace(/\n\n/g, "\n \n");
 	var el = this.paper.text(x, y, text).attr(hash.attr);
-	// The text will be placed centered in vertical alignment, so we need to move the box down so that
-	// the top of the text is where we've requested.
-	var size = el.getBBox();
-	el.attr({ "y": y+size.height/2 });
-	if (hash.font.box) {
-		this.paper.rect(size.x-1,size.y-1,size.width+2,size.height+2).attr({"stroke":"#cccccc"});
+	if (!centerVertically) {
+		// The text will be placed centered in vertical alignment, so we need to move the box down so that
+		// the top of the text is where we've requested.
+		var size = el.getBBox();
+		el.attr({ "y": y + size.height / 2 });
+		if (hash.font.box) {
+			this.paper.rect(size.x - 1, size.y - 1, size.width + 2, size.height + 2).attr({"stroke": "#cccccc"});
+		}
 	}
 	if (type === 'debugfont') {
 		console.log("Debug msg: " + text);

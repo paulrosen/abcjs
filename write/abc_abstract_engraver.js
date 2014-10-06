@@ -635,13 +635,18 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
                                  y -= 3;        // TODO-PER: This should actually be based on the font height.
                          }
     break;
+		case "above":
+			// setting the y-coordinate to undefined for now: it will be overwritten later one, after we figure out what the highest element on the line is.
+			abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x, 0, undefined, {type: "text"}));
+			break;
       default:
-                         if (elem.chord[i].rel_position)
-                                 abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x+elem.chord[i].rel_position.x, 0, elem.minpitch+elem.chord[i].rel_position.y/ABCJS.write.spacing.STEP, {type:"text"}));
-			  else {
-				  // setting the y-coordinate to zero for now: it will be overwritten later one, after we figure out what the highest element on the line is.
-				  abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x, 0, undefined, {type: "chord"}));
-			  }
+		if (elem.chord[i].rel_position) {
+			var relPositionY = elem.chord[i].rel_position.y + 3*ABCJS.write.spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
+			abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x + elem.chord[i].rel_position.x, 0, elem.minpitch + relPositionY / ABCJS.write.spacing.STEP, {type: "text"}));
+		} else {
+			// setting the y-coordinate to undefined for now: it will be overwritten later one, after we figure out what the highest element on the line is.
+			abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x, 0, undefined, {type: "chord"}));
+		}
       }
     }
   }

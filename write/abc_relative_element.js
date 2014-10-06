@@ -42,11 +42,17 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 		else
 			this.bottom += opt.stemHeight;
 	}
+	this.centerVertically = false;
 	switch (this.type) {
 		case "debug": this.hasLowest2 = 3; break;
 		case "lyric": this.hasLowest1 = 3; break;
-		case "chord":
-		case "text": this.hasHighest2 = 3; break;
+		case "chord": this.hasHighest2 = 3; break;
+		case "text":
+			if (this.pitch === undefined)
+				this.hasHighest2 = 3;
+			else
+				this.centerVertically = true;
+			break;
 		case "part": this.hasHighest1 = 3; break;
 	}
 };
@@ -69,16 +75,16 @@ ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
 			this.graphelem = renderer.renderText(this.x, y, this.c, "vocalfont", 'abc-lyric', "middle");
 			break;
 		case "chord":
-			this.graphelem = renderer.renderText(this.x, y, this.c, 'gchordfont', "chord", "start");
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'gchordfont', "chord", "middle");
 			break;
 		case "decoration":
 			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "middle");
 			break;
 		case "text":
-			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "start");
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "start", this.centerVertically);
 			break;
 		case "part":
-			this.graphelem = renderer.renderText(this.x, y, this.c, 'partsfont', "part", "middle");
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'partsfont', "part", "start");
 			break;
 		case "bar":
 			this.graphelem = renderer.printStem(this.x, this.linewidth, y, (bartop)?bartop:renderer.calcY(this.pitch2)); break; // bartop can't be 0
