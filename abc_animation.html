@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>abcjs: Plugin Demo</title>
+    <!-- midi.js package -->
+    <script src="vendor/AudioDetect.js" type="text/javascript"></script>
+    <script src="vendor/LoadPlugin.js" type="text/javascript"></script>
+    <script src="vendor/Plugin.js" type="text/javascript"></script>
+    <script src="vendor/Player.js" type="text/javascript"></script>
+    <script src="vendor/DOMLoader.XMLHttp.js" type="text/javascript"></script>
+    <script src="vendor/Base64.js" type="text/javascript"></script>
+    <script src="vendor/base64binary.js" type="text/javascript"></script>
+    <!-- abcjs -->
+    <script src="bin/abcjs_basic_latest-min.js" type="text/javascript"></script>
+    <script src="midi/abc_midiwriter.js" type="text/javascript"></script>
+    <script src="jquery-1.11.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        song = "X:1\nT: test\nK:Bb\nM: 4/4\nL: 1/4\nR: reel\nK: Emin\nA,B,C,D|cdef|gab|"; // *
+        $( document ).ready(function() {
+             MIDI.loadPlugin({
+                 soundfontUrl: "vendor/soundfont/",
+                 instrument: "acoustic_grand_piano",
+                 callback: function(){}
+             })
+
+            playnote = function(note, vol){
+                MIDI.setVolume(0, vol);
+                MIDI.noteOn(0, note, 127, 0);
+                MIDI.noteOff(0, note, 0.75);
+            }
+
+            start = function() {
+                song = "X:1\nM: 4/4\nK:Bb\n|^C,D,E,F, G,A,B,C2D2 E/2FGAB_c_defgac|cbc'd'e'f'g'a'b' aaaa aaaa aaaa aaaa\na aaaa"
+                tuneObjectArray = window.ABCJS.renderAbc("score" , song, {}, { add_classes:true });
+                window.ABCJS.startAnimation($("#score")[0], tuneObjectArray[0],{showCursor: true, bpm: 80})
+            }
+        });
+
+    </script>
+    <style>
+        .cursor {
+            display: inline-block;
+            width: 20px;
+            height: 50px;
+            background-color: blue;
+            opacity: 0.2;
+            margin-top: 20px; // Note 5
+            margin-left: 14px;
+        }
+    </style>
+</head>
+<body>
+<script type="text/javascript">
+</script>
+<a onclick = start()>click to play</a>
+<div id='score'></div>
+</body>
+</html>

@@ -16,10 +16,27 @@
 
 /*global ABCJS, console */
 
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
 (function() {
+
+    function notes2Midi() {
+        var noteAdders = [2, 2, 1, 2, 2, 2, 1]
+        var notes = {}
+        var noteNr = -7
+        var midi = 24
+
+        for (octave = 1; octave < 5; octave++) {
+            for (n = 0; n < 7; n++) {
+                notes[noteNr] = midi
+                noteNr = noteNr + 1
+                midi = midi + noteAdders[n]
+            }
+        }
+        return notes
+    }
 
 	function hasClass(element, cls) {
 		var elClass = element.getAttribute("class");
@@ -62,12 +79,14 @@ if (!window.ABCJS)
 	// paper: the output div that the music is in.
 	// tune: the tune object returned by renderAbc.
 	// options: a hash containing the following:
-	//    hideFinishedMeasures: true or false [ false is the default ]
 	//    showCursor: true or false [ false is the default ]
 	//    bpm: number of beats per minute [ the default is whatever is in the Q: field ]
 	var stopNextTime = false;
 	var cursor;
 	ABCJS.startAnimation = function(paper, tune, options) {
+
+        var notes2midiMap = notes2Midi();
+
 		if (paper.getElementsByClassName === undefined) {
 			console.error("ABCJS.startAnimation: The first parameter must be a regular DOM element. (Did you pass a jQuery object or an ID?)");
 			return;
@@ -88,22 +107,10 @@ if (!window.ABCJS)
 
 		var startTime;
 
-		function processMeasureHider(lineNum, measureNum) {
-			var els = getAllElementsByClasses(paper, "l"+lineNum, "m"+measureNum);
-
-			if (els.length > 0) {
-				for (var i = 0; i < els.length; i++) {
-					var el = els[i];
-					if (!hasClass(el, "bar"))
-						el.style.display = "none";
-				}
-			}
-		}
-
 		function makeSortedArray(hash) {
 			var arr = [];
 			for (var k in hash) {
-				if (hash.hasOwnProperty(k))
+				if (hash.hasOwnProperty(k) && hash[k].type == 'event')
 					arr.push(hash[k]);
 			}
 			arr = arr.sort(function(a,b) {
@@ -114,16 +121,20 @@ if (!window.ABCJS)
 
 		var timingEvents = [];
 		function setupEvents(engraver) {
+            tuneSharps = []
+            tuneFlats = []
 			var eventHash = {};
 			// The time is the number of measures from the beginning of the piece.
 			var time = 0;
 			var isTiedState = false;
 			for (var line=0;line<engraver.staffgroups.length; line++) {
+
 				var group = engraver.staffgroups[line];
 				var voices = group.voices;
 				var top = group.y;
 				var height = group.height;
 				var maxVoiceTime = 0;
+                measureSharps = []; measureFlats = []
 				// Put in the notes for all voices, then sort them, then remove duplicates
 				for (var v = 0; v < voices.length; v++) {
 					var voiceTime = time;
@@ -140,13 +151,39 @@ if (!window.ABCJS)
 								// If the note is tied on both sides it can just be ignored.
 							} else {
 								// the last note wasn't tied.
-								eventHash["event"+voiceTime] = { type: "event", time: voiceTime, top: top, height: height, left: element.x, width: element.w };
+                                note = element.abcelem.averagepitch
+                                if(element.abcelem.pitches){
+                                    vol = 123
+                                    if (accidental = element.abcelem.pitches[0].accidental) {
+                                        switch (accidental) {
+                                            case "sharp":
+                                                measureSharps.push(note);
+                                            case "flat":
+                                                measureFlats.push(note);
+                                        }
+                                    }
+                                }else{
+                                   vol = 0
+                                }
+
+                                eventParams = { type: "event", time: voiceTime, top: top, height: height, left: element.x, width: element.w, note: note, vol: vol }
+
+                                if(measureSharps.indexOf(note)!=-1){
+                                    eventParams["accidental"] = 'sharp'
+                                }else{
+                                    if(measureFlats.indexOf(note)!=-1){
+                                      eventParams["accidental"] = 'flat'
+                                    }
+                                }
+
+								eventHash["event"+voiceTime] = eventParams;
 								if (isTiedToNext)
 									isTiedState = true;
 							}
 							voiceTime += element.duration;
 						}
 						if (element.type === 'bar') {
+                            measureSharps = []; measureFlats = [] //when we pass a bar we reset sharps and flats for the previous meassure
 							if (timingEvents.length === 0 || timingEvents[timingEvents.length-1] !== 'bar') {
 								if (element.elemset && element.elemset.length > 0 && element.elemset[0].attrs) {
 									var klass = element.elemset[0].attrs['class'];
@@ -165,6 +202,25 @@ if (!window.ABCJS)
 								}
 							}
 						}
+
+
+                        if (element.type === 'staff-extra') {
+                            var children = element.children;
+                            for (var c=0; c<children.length; c++) {
+                                var child = children[c];
+                                switch(child.c) {
+                                    case "accidentals.flat":
+                                        tuneFlats = tuneFlats.concat([child.pitch, child.pitch-7, child.pitch-14, child.pitch+7, child.pitch+14])
+                                        break;
+                                    case "accidentals.sharp":
+                                        tuneSharps = tuneSharps.concat([child.pitch, child.pitch-7, child.pitch-14, child.pitch+7, child.pitch+14])
+                                        break;
+                                    default:
+                                                                      }
+                            }
+
+                        }
+
 					}
 					maxVoiceTime = Math.max(maxVoiceTime, voiceTime);
 				}
@@ -181,13 +237,25 @@ if (!window.ABCJS)
 				stopNextTime = true;
 				return 0;
 			}
-			if (currentNote.type === "bar") {
-				if (options.hideFinishedMeasures)
-					processMeasureHider(currentNote.lineNum, currentNote.measureNum);
-				return processShowCursor();
-			}
 			if (options.showCursor)
-				cursor.css({ left: currentNote.left + "px", top: currentNote.top + "px", width: currentNote.width + "px", height: currentNote.height + "px" });
+                midiNote = notes2midiMap[currentNote.note]
+                if(currentNote.accidental == "sharp"){
+                    midiNote += 1
+                    console.log(midiNote + "sharp")
+                }else{
+                    if(currentNote.accidental == "flat"){
+                        midiNote -= 1
+                    }
+                }
+                if(tuneSharps.indexOf(currentNote.note)!=-1){
+                    midiNote += 1
+                }else{
+                    if(tuneFlats.indexOf(currentNote.note)!=-1) {
+                        midiNote -= 1
+                    }
+                }
+                playnote(midiNote, currentNote.vol)
+				cursor.css({ left: currentNote.left + "px", top: currentNote.top + "px", height: currentNote.height + "px" });
 			if (timingEvents.length > 0)
 				return timingEvents[0].time / beatLength;
 			stopNextTime = true;
@@ -204,10 +272,7 @@ if (!window.ABCJS)
 			var currentTime = new Date();
 			currentTime = currentTime.getTime();
 			var interval = startTime + nextTimeInMilliseconds - currentTime;
-			if (interval <= 0)
-				processNext();
-			else
-				setTimeout(processNext, interval);
+    		setTimeout(processNext, interval);
 		}
 		startTime = new Date();
 		startTime = startTime.getTime();
