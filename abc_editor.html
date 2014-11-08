@@ -23,7 +23,7 @@
             callback: function(){}
             })
 
-        playnote = function(note){
+        playnote = function(note, vol){
             MIDI.setVolume(0, vol);
             MIDI.noteOn(0, note, 127, 0);
             MIDI.noteOff(0, note, 0.75);

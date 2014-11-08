@@ -153,7 +153,7 @@ if (!window.ABCJS)
 								// the last note wasn't tied.
                                 note = element.abcelem.averagepitch
                                 if(element.abcelem.pitches){
-                                    vol = 123
+                                    var vol = 123
                                     if (accidental = element.abcelem.pitches[0].accidental) {
                                         switch (accidental) {
                                             case "sharp":
@@ -163,7 +163,7 @@ if (!window.ABCJS)
                                         }
                                     }
                                 }else{
-                                   vol = 0
+                                   var vol = 0
                                 }
 
                                 eventParams = { type: "event", time: voiceTime, top: top, height: height, left: element.x, width: element.w, note: note, vol: vol }
