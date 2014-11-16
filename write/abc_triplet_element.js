@@ -42,7 +42,7 @@ ABCJS.write.TripletElem.prototype.draw = function (renderer, linestartx, lineend
 		} else {
 			this.drawLine(renderer,renderer.calcY(ypos));
 		}
-		var xsum = this.anchor1.x+this.anchor2.x;
+		var xsum = (this.anchor1.x+this.anchor2.x)*renderer.scale;
 		var ydelta = 0;
 		if (beam) {
 			if (this.above) {
