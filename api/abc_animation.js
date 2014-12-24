@@ -107,7 +107,14 @@ if (!window.ABCJS)
 					arr.push(hash[k]);
 			}
 			arr = arr.sort(function(a,b) {
-				return a.time - b.time;
+				var diff = a.time - b.time;
+				// if the events have the same time, make sure a bar comes before a note
+				if (diff !== 0) {
+					return diff;
+				}
+				else {
+					return a.type === "bar" ? -1 : 1;
+				}
 			});
 			return arr;
 		}
