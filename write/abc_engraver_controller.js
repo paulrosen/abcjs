@@ -112,49 +112,67 @@ ABCJS.write.EngraverController.prototype.adjustNonScaledItems = function (scale)
  */
 ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	this.renderer.lineNumber = null;
-	abctune.formatting.tripletfont  = { face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none" }; // TODO-PER: This font isn't defined in the standard, so it's hardcoded here for now.
+	abctune.formatting.tripletfont = {face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none"}; // TODO-PER: This font isn't defined in the standard, so it's hardcoded here for now.
 
 	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
 	this.renderer.setVerticalSpace(abctune.formatting);
 	this.renderer.measureNumber = null;
 	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
-	if (scale === undefined) scale = abctune.media === 'print' ? .75 : 1;
+	if (scale === undefined) scale = abctune.media === 'print' ? 0.75 : 1;
 	this.renderer.setPrintMode(abctune.media === 'print');
 	this.renderer.setPadding(abctune);
-  this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
+	this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	if (abctune.formatting.staffwidth) {
-		this.width=abctune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
+		this.width = abctune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
 	} else {
-		this.width=this.staffwidth;
+		this.width = this.staffwidth;
 	}
 	this.adjustNonScaledItems(scale);
 
+	// Generate the raw staff line data
+	var i;
+	var abcLine;
+	for(i=0; i<abctune.lines.length; i++) {
+		abcLine = abctune.lines[i];
+		if (abcLine.staff) {
+			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, this.lastStaffGroupIndex === -1 ? abctune.metaText.tempo: null);
+		}
+	}
+
+	// Adjust the x-coordinates to their absolute positions
+	var maxWidth = this.width;
+	for(i=0; i<abctune.lines.length; i++) {
+		abcLine = abctune.lines[i];
+		if (abcLine.staff) {
+			this.setXSpacing(abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1);
+			if (abcLine.staffGroup.w > maxWidth) maxWidth = abcLine.staffGroup.w;
+		}
+	}
+
+	// Do all the writing to output
 	this.renderer.topMargin(abctune);
-  this.renderer.engraveTopText(this.width, abctune);
+	this.renderer.printHorizontalLine(this.width + this.renderer.padding.left + this.renderer.padding.right);
+	this.renderer.engraveTopText(this.width, abctune);
 	this.renderer.addMusicPadding();
 
-  this.staffgroups = [];
+	this.staffgroups = [];
 	this.lastStaffGroupIndex = -1;
-  var maxwidth = this.width;
-  for(var line=0; line<abctune.lines.length; line++) {
+	for (var line = 0; line < abctune.lines.length; line++) {
 		this.renderer.lineNumber = line;
-    var abcline = abctune.lines[line];
-    if (abcline.staff) {
-		var staffgroup = this.engraveStaffLine(abctune, abcline, line); //TODO-GD factor out generating the staffgroup, from laying it out, from rendering it
-		if (staffgroup.w > maxwidth) maxwidth = staffgroup.w;
-    } else if (abcline.subtitle && line!==0) {
-		this.renderer.outputSubtitle(this.width, abcline.subtitle);
-    } else if (abcline.text) {
-		this.renderer.outputFreeText(abcline.text);
-    }
-  }
+		abcLine = abctune.lines[line];
+		if (abcLine.staff) {
+			this.engraveStaffLine(abcLine.staffGroup);
+		} else if (abcLine.subtitle && line !== 0) {
+			this.renderer.outputSubtitle(this.width, abcLine.subtitle);
+		} else if (abcLine.text) {
+			this.renderer.outputFreeText(abcLine.text);
+		}
+	}
 
-  this.renderer.engraveExtraText(this.width, abctune);
-  
-
-  this.renderer.setPaperSize(maxwidth, scale);
+	this.renderer.engraveExtraText(this.width, abctune);
+	this.renderer.setPaperSize(maxWidth, scale);
 };
 
 function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace) {
@@ -174,33 +192,41 @@ function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, 
 }
 
 /**
- * Engrave a single line (a group of related staffs)
+ * Do the x-axis positioning for a single line (a group of related staffs)
  * @param {ABCJS.Tune} abctune an ABCJS AST
- * @param {Object} abcline an abcline from the AST, has a staff 
- * @param {number} line the line number
+ * @param {Object} staffGroup an staffGroup
+ * @param {Object} formatting an formatting
+ * @param {boolean} isLastLine is this the last line to be printed?
  * @private
  */
-ABCJS.write.EngraverController.prototype.engraveStaffLine = function (abctune, abcline, line) {
-  var staffgroup = this.engraver.createABCLine(abcline.staff, this.lastStaffGroupIndex === -1 ? abctune.metaText.tempo: null);
+ABCJS.write.EngraverController.prototype.setXSpacing = function (staffGroup, formatting, isLastLine) {
    var newspace = this.space;
   for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
-    staffgroup.layout(newspace, this.renderer, false);
-		//console.log("STAFFGROUP:", line, staffgroup.w, this.width+this.renderer.padding.left, newspace, staffgroup.spacingunits, staffgroup.minspace);
-	  var stretchLast = abctune.formatting.stretchlast ? abctune.formatting.stretchlast : false;
-		newspace = calcHorizontalSpacing(line === abctune.lines.length - 1, stretchLast, this.width+this.renderer.padding.left, staffgroup.w, newspace, staffgroup.spacingunits, staffgroup.minspace);
+	  staffGroup.layout(newspace, this.renderer, false);
+	  var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
+		newspace = calcHorizontalSpacing(isLastLine, stretchLast, this.width+this.renderer.padding.left, staffGroup.w, newspace, staffGroup.spacingunits, staffGroup.minspace);
 		if (newspace === null) break;
   }
-	centerWholeRests(staffgroup.voices);
+	centerWholeRests(staffGroup.voices);
+	this.renderer.printHorizontalLine(this.width);
+};
+
+/**
+ * Engrave a single line (a group of related staffs)
+ * @param {ABCJS.Tune} abctune an ABCJS AST
+ * @param {Object} staffGroup an staffGroup
+ * @private
+ */
+ABCJS.write.EngraverController.prototype.engraveStaffLine = function (staffGroup) {
 	if (this.lastStaffGroupIndex > -1)
-		this.renderer.addStaffPadding(this.staffgroups[this.lastStaffGroupIndex], staffgroup);
-  staffgroup.draw(this.renderer, this.renderer.y);
-	this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+staffgroup.height);
-  this.staffgroups[this.staffgroups.length] = staffgroup;
+		this.renderer.addStaffPadding(this.staffgroups[this.lastStaffGroupIndex], staffGroup);
+	staffGroup.draw(this.renderer, this.renderer.y);
+	this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+staffGroup.height);
+  this.staffgroups[this.staffgroups.length] = staffGroup;
 	this.lastStaffGroupIndex = this.staffgroups.length-1;
 //  this.renderer.y = staffgroup.y + staffgroup.height;
 //  this.renderer.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;
-	this.renderer.y += staffgroup.height;
-  return staffgroup;
+	this.renderer.y += staffGroup.height;
 };
 
 /**
