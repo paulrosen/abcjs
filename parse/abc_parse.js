@@ -79,6 +79,7 @@ window.ABCJS.parse.Parse = function() {
 	};
 
 	var warn = function(str, line, col_num) {
+		if (!line) line = " ";
 		var bad_char = line.charAt(col_num);
 		if (bad_char === ' ')
 			bad_char = "SPACE";
@@ -320,7 +321,7 @@ window.ABCJS.parse.Parse = function() {
 	};
 
 	var addWords = function(line, words) {
-		if (!line) { warn("Can't add words before the first line of mulsic", line, 0); return; }
+		if (!line) { warn("Can't add words before the first line of music", line, 0); return; }
 		words = window.ABCJS.parse.strip(words);
 		if (words.charAt(words.length-1) !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
