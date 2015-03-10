@@ -113,6 +113,8 @@ ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
   for (this.s = 0; this.s < staffs.length; this.s++) {
     this.createABCStaff(staffs[this.s], tempo);
   }
+	setUpperAndLowerElements(this.staffgroup);
+
   return this.staffgroup;
 };
 
@@ -207,8 +209,6 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
     var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
     this.staffgroup.addVoice(this.voice,this.s,staffLines);
   }
-	setUpperAndLowerElements(this.staffgroup);
- 
 };
 
 ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline, tempo) {
