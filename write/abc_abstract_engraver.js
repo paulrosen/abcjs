@@ -179,7 +179,7 @@ function setUpperAndLowerElements(staffgroup) {
 		}
 		// Now we need a little margin on the top, so we'll just throw that in.
 		staff.top += 4;
-		heightInPitches += staff.top - staff.bottom + 4; // add in the top margin.
+		heightInPitches += staff.top - staff.bottom; // + 4; // add in the top margin.
 	}
 	// TODO-PER: also add the space between staves.
 	staffgroup.height = heightInPitches * ABCJS.write.spacing.STEP;
