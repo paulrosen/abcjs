@@ -38,7 +38,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `paddingleft` | 15 | The spacing that the music should have on the webpage. |
 | `editable` | false | If true, then when a note is clicked, it is highlighted and a callback allows the editor to move the cursor. |
 | `add_classes` | false | If true, then each element that is drawn on the SVG will have an identifying class with it that you can use to style, move, or hide the element. |
-
+| `listener` | null | This is an object containing up to two functions. The format is: `{ highlight: function(abcElem) {}, modelChanged: function(abcElem) {} }` The highlight function is called whenever the user clicks on a note or selects a series of notes. The modelChanged function is called whenever the user has changed the music visually. |
 
 | `midiParams` | Default | Description |
 | ------------- | ----------- | ----------- |
@@ -71,6 +71,9 @@ The following assumes you've created a `TuneBook` object like this: `var tuneboo
 | `startPos` | Character position (zero-based) in the original tunebook where the tune starts. |
 
 `tuneObject` contains a structure which is a machine-friendly version of the abc string that it was created from. It is the class `ABCJS.data.Tune` and is basically some meta-information and an array of each line in the tune. The format of that data is subject to change. 
+
+| css classes (assuming the SVG element is `.paper`) | Description |
+| `.paper path.note_selected, .paper text.note_selected` | The color that the selected note or other element is |
 
 # abcjs editor
 

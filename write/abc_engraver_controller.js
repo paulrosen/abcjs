@@ -53,6 +53,9 @@ ABCJS.write.EngraverController = function(paper, params) {
   this.scale = params.scale || undefined;
   this.staffwidth = params.staffwidth ? params.staffwidth * 1.33 : 680; // was:740; The number of pixels in 8.5", after 1cm of margin has been removed.
   this.editable = params.editable || false;
+	this.listeners = [];
+	if (params.listener)
+		this.addSelectListener(params.listener);
 
 	// HACK-PER: Raphael doesn't support setting the class of an element, so this adds that support. This doesn't work on IE8 or less, though.
 	this.usingSvg = (window.SVGAngle || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1") ? true : false); // Same test Raphael uses
@@ -69,7 +72,6 @@ ABCJS.write.EngraverController = function(paper, params) {
 };
 
 ABCJS.write.EngraverController.prototype.reset = function() {
-	this.listeners = [];
 	this.selected = [];
 	this.ingroup = false;
 	this.staffgroups = [];
@@ -241,7 +243,8 @@ ABCJS.write.EngraverController.prototype.notifySelect = function (abselem) {
   }
   var abcelem = abselem.abcelem || {};
   for (var i=0; i<this.listeners.length;i++) {
-    this.listeners[i].highlight(abcelem);
+	  if (this.listeners[i].highlight)
+		  this.listeners[i].highlight(abcelem);
   }
 };
 
@@ -251,7 +254,8 @@ ABCJS.write.EngraverController.prototype.notifySelect = function (abselem) {
  */
 ABCJS.write.EngraverController.prototype.notifyChange = function (/*abselem*/) {
   for (var i=0; i<this.listeners.length;i++) {
-    this.listeners[i].modelChanged();
+    if (this.listeners[i].modelChanged)
+      this.listeners[i].modelChanged();
   }
 };
 

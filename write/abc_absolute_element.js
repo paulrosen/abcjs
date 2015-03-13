@@ -143,10 +143,12 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 			this.translate(0,this.dy);
 		},
 		up = function () {
-			var delta = -Math.round(this.dy/spacing);
-			self.abcelem.pitches[0].pitch += delta;
-			self.abcelem.pitches[0].verticalPos += delta;
-			controller.notifyChange();
+			if (self.abcelem.pitches) {
+				var delta = -Math.round(this.dy / spacing);
+				self.abcelem.pitches[0].pitch += delta;
+				self.abcelem.pitches[0].verticalPos += delta;
+				controller.notifyChange();
+			}
 		};
 	if (this.abcelem.el_type==="note" && controller.editable)
 		this.elemset.drag(move, start, up);
