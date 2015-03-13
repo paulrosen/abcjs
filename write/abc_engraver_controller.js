@@ -136,10 +136,12 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	// Generate the raw staff line data
 	var i;
 	var abcLine;
+	var hasPrintedTempo = false;
 	for(i=0; i<abctune.lines.length; i++) {
 		abcLine = abctune.lines[i];
 		if (abcLine.staff) {
-			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, this.lastStaffGroupIndex === -1 ? abctune.metaText.tempo: null);
+			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abctune.metaText.tempo: null);
+			hasPrintedTempo = true;
 		}
 	}
 
@@ -155,7 +157,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 
 	// Do all the writing to output
 	this.renderer.topMargin(abctune);
-	this.renderer.printHorizontalLine(this.width + this.renderer.padding.left + this.renderer.padding.right);
+	//this.renderer.printHorizontalLine(this.width + this.renderer.padding.left + this.renderer.padding.right);
 	this.renderer.engraveTopText(this.width, abctune);
 	this.renderer.addMusicPadding();
 
@@ -210,7 +212,7 @@ ABCJS.write.EngraverController.prototype.setXSpacing = function (staffGroup, for
 		if (newspace === null) break;
   }
 	centerWholeRests(staffGroup.voices);
-	this.renderer.printHorizontalLine(this.width);
+	//this.renderer.printHorizontalLine(this.width);
 };
 
 /**
@@ -223,7 +225,7 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (staffGroup
 	if (this.lastStaffGroupIndex > -1)
 		this.renderer.addStaffPadding(this.staffgroups[this.lastStaffGroupIndex], staffGroup);
 	staffGroup.draw(this.renderer, this.renderer.y);
-	this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+staffGroup.height);
+	//this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+staffGroup.height);
   this.staffgroups[this.staffgroups.length] = staffGroup;
 	this.lastStaffGroupIndex = this.staffgroups.length-1;
 //  this.renderer.y = staffgroup.y + staffgroup.height;
