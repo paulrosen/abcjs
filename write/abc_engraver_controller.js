@@ -175,6 +175,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 		}
 	}
 
+	this.renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
 	this.renderer.engraveExtraText(this.width, abctune);
 	this.renderer.setPaperSize(maxWidth, scale);
 };

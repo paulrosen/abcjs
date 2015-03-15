@@ -26,7 +26,7 @@ ABCJS.write.BeamElem = function(type, flat) {
 	// type is "grace", "up", "down", or undefined.
 	this.isflat = (flat);
 	this.isgrace = (type && type==="grace");
-	this.forceup = (type && type==="up");
+	this.forceup = this.isgrace || (type && type==="up");
 	this.forcedown = (type && type==="down");
 	this.elems = []; // all the ABCJS.write.AbsoluteElements
 	this.total = 0;
@@ -69,7 +69,7 @@ ABCJS.write.BeamElem.prototype.draw = function(renderer) {
 
 ABCJS.write.BeamElem.prototype.calcDir = function() {
 	var average = this.average();
-	this.asc = (this.forceup || this.isgrace || average<6) && (!this.forcedown); // hardcoded 6 is B
+	this.asc = (this.forceup || average<6) && (!this.forcedown); // hardcoded 6 is B
 	this.dy = (this.asc)?ABCJS.write.spacing.STEP*1.2:-ABCJS.write.spacing.STEP*1.2;
 	if (this.isgrace) this.dy = this.dy*0.4;
 	return this.asc;
@@ -99,12 +99,14 @@ ABCJS.write.BeamElem.prototype.drawBeam = function(renderer) {
 	if(this.asc) this.endx+=endhead.w;
 
 	// PER: if the notes are too high or too low, make the beam go down to the middle
-	if (this.asc && this.pos < 6) {
-		this.starty = renderer.calcY(6);
-		this.endy = renderer.calcY(6);
-	} else if (!this.asc && this.pos > 6) {
-		this.starty = renderer.calcY(6);
-		this.endy = renderer.calcY(6);
+	if (!this.isgrace) {
+		if (this.asc && this.pos < 6) {
+			this.starty = renderer.calcY(6);
+			this.endy = renderer.calcY(6);
+		} else if (!this.asc && this.pos > 6) {
+			this.starty = renderer.calcY(6);
+			this.endy = renderer.calcY(6);
+		}
 	}
 
 	var pathString = "M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
@@ -119,7 +121,7 @@ ABCJS.write.BeamElem.prototype.drawStems = function(renderer) {
 		if (this.elems[i].abcelem.rest)
 			continue;
 		var furthesthead = this.elems[i].heads[(this.asc)? 0: this.elems[i].heads.length-1];
-		var ovaldelta = (this.isgrace)?1/3:1/5;
+		var ovaldelta = 1/5;//(this.isgrace)?1/3:1/5;
 		var pitch = furthesthead.pitch + ((this.asc) ? ovaldelta : -ovaldelta);
 		var y = renderer.calcY(pitch);
 		var x = furthesthead.x + ((this.asc) ? furthesthead.w: 0);
@@ -128,7 +130,7 @@ ABCJS.write.BeamElem.prototype.drawStems = function(renderer) {
 		renderer.printStem(x,dx,y,bary);
 
 		var sy = (this.asc) ? 1.5*ABCJS.write.spacing.STEP: -1.5*ABCJS.write.spacing.STEP;
-		if (this.isgrace) sy = sy*2/3;
+		if (this.isgrace) sy = sy*2/3; // This makes the second beam on grace notes closer to the first one.
 		for (var durlog=ABCJS.write.getDurlog(this.elems[i].abcelem.duration); durlog<-3; durlog++) { // get the duration via abcelem because of triplets
 			if (auxbeams[-4-durlog]) {
 				auxbeams[-4-durlog].single = false;

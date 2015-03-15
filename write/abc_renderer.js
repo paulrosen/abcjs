@@ -176,7 +176,7 @@ ABCJS.write.Renderer.prototype.initVerticalSpace = function() {
 		parts: 11.33, // Set the vertical space above a new part.
 		slurHeight: 1.0, // Set the slur height factor.
 		staffSeparation: 61.33, // Do not put a staff system closer than <unit> from the previous system.
-		stemHeight: 26.67, // Set the stem height.
+		stemHeight: 26.67+10, // Set the stem height.
 		subtitle: 3.78, // Set the vertical space above the subtitle.
 		systemStaffSeparation: 48, // Do not place the staves closer than <unit> inside a system. * This values applies to all staves when in the tune header. Otherwise, it applies to the next staff
 		text: 18.9, // Set the vertical space above the history.

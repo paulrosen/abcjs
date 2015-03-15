@@ -531,10 +531,11 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   
   if (!dontDraw && elem.gracenotes !== undefined) {
     var gracescale = 3/5;
+    var graceScaleStem = 3.5/5; // TODO-PER: empirically found constant.
     var gracebeam = null;
     if (elem.gracenotes.length>1) {
       gracebeam = new ABCJS.write.BeamElem("grace",this.isBagpipes);
-		gracebeam.setStemHeight(this.stemHeight*gracescale);
+		gracebeam.setStemHeight(this.stemHeight*graceScaleStem);
     }
 
     var graceoffsets = [];
