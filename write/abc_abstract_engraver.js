@@ -205,9 +205,9 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
     this.voice.addChild(this.createClef(abcstaff.clef));
     this.voice.addChild(this.createKeySignature(abcstaff.key));
     if (abcstaff.meter) this.voice.addChild(this.createTimeSignature(abcstaff.meter));
-    this.createABCVoice(abcstaff.voices[this.v],tempo);
     var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
     this.staffgroup.addVoice(this.voice,this.s,staffLines);
+	  this.createABCVoice(abcstaff.voices[this.v],tempo);
   }
 };
 
@@ -387,6 +387,14 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     var restpitch = 7;
     if (this.stemdir==="down") restpitch = 3;
     if (this.stemdir==="up") restpitch = 11;
+	  // There is special placement for the percussion staff. If there is one staff line, then move the rest position.
+	  var numLines = this.staffgroup.staffs[this.staffgroup.staffs.length-1].lines;
+	  if (numLines === 1) {
+		  if (duration < 0.5)
+			  restpitch = 7;
+		  else
+			  restpitch = 6;
+	  }
     switch(elem.rest.type) {
 		case "whole":
 			c = this.chartable.rest[0];
