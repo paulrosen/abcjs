@@ -51,7 +51,13 @@ ABCJS.write.EngraverController = function(paper, params) {
   this.space = 3*ABCJS.write.spacing.SPACE;
   this.glyphs = new ABCJS.write.Glyphs(); // we need the glyphs for layout information
   this.scale = params.scale || undefined;
-  this.staffwidth = params.staffwidth ? params.staffwidth * 1.33 : 680; // was:740; The number of pixels in 8.5", after 1cm of margin has been removed.
+	if (params.staffwidth) {
+		this.staffwidthScreen = params.staffwidth * 1.33;
+		this.staffwidthPrint = params.staffwidth * 1.33;
+	} else {
+		this.staffwidthScreen = 740; // TODO-PER: Not sure where this number comes from, but this is how it's always been.
+		this.staffwidthPrint = 680; // The number of pixels in 8.5", after 1cm of margin has been removed.
+	}
   this.editable = params.editable || false;
 	this.listeners = [];
 	if (params.listener)
@@ -129,7 +135,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	if (abctune.formatting.staffwidth) {
 		this.width = abctune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
 	} else {
-		this.width = this.staffwidth;
+		this.width = abctune.media === 'print' ? this.staffwidthPrint : this.staffwidthScreen;
 	}
 	this.adjustNonScaledItems(scale);
 
