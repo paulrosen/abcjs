@@ -74,6 +74,9 @@ ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber,
 	voice.staff = this.staffs[staffnumber];
 	voice.staff.top = Math.max(voice.staff.top, voice.top);
 	voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
+};
+
+ABCJS.write.StaffGroupElement.prototype.setStaffLimits = function (voice) {
 	this.setLimit('hasHighest1', voice);
 	this.setLimit('hasHighest2', voice);
 	this.setLimit('hasLowest1', voice);

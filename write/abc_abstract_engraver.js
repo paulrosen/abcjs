@@ -147,7 +147,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
 
 function setUpperAndLowerElements(staffgroup) {
 	// Each staff already has the top and bottom set, now we see if there are elements that are always on top and bottom, and resolve their pitch.
-	// Also, get the overall height of the all the staves in this group.
+	// Also, get the overall height of all the staves in this group.
 	var heightInPitches = 0;
 	for (var i = 0; i < staffgroup.staffs.length; i++) {
 		var staff = staffgroup.staffs[i];
@@ -180,9 +180,11 @@ function setUpperAndLowerElements(staffgroup) {
 		// Now we need a little margin on the top, so we'll just throw that in.
 		staff.top += 4;
 		heightInPitches += staff.top - staff.bottom; // + 4; // add in the top margin.
+		//console.log("Staff Y: ",i,heightInPitches,staff.top,staff.bottom);
 	}
 	// TODO-PER: also add the space between staves.
 	staffgroup.height = heightInPitches * ABCJS.write.spacing.STEP;
+	//console.log("Staff Height: ",heightInPitches,staffgroup.height);
 }
 
 ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo) {
@@ -208,6 +210,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
     var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
     this.staffgroup.addVoice(this.voice,this.s,staffLines);
 	  this.createABCVoice(abcstaff.voices[this.v],tempo);
+	  this.staffgroup.setStaffLimits(this.voice);
   }
 };
 
