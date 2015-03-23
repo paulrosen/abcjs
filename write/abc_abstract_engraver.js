@@ -395,10 +395,13 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
 	  // There is special placement for the percussion staff. If there is one staff line, then move the rest position.
 	  var numLines = this.staffgroup.staffs[this.staffgroup.staffs.length-1].lines;
 	  if (numLines === 1) {
+		  // The half and whole rests are attached to different lines normally, so we need to tweak their position to get them to both be attached to the same one.
 		  if (duration < 0.5)
 			  restpitch = 7;
+		  else if (duration < 1)
+			restpitch = 6.8;	// half rest
 		  else
-			  restpitch = 6;
+		  	restpitch = 4.8; // whole rest
 	  }
     switch(elem.rest.type) {
 		case "whole":
