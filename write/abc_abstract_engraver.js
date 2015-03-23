@@ -148,7 +148,6 @@ ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
 function setUpperAndLowerElements(staffgroup) {
 	// Each staff already has the top and bottom set, now we see if there are elements that are always on top and bottom, and resolve their pitch.
 	// Also, get the overall height of all the staves in this group.
-	var heightInPitches = 0;
 	for (var i = 0; i < staffgroup.staffs.length; i++) {
 		var staff = staffgroup.staffs[i];
 		// hasHighest1 is the top most position, hasHighest2 is the second topmost, so resolve them in that order. Likewise for hasLowest1, hasLowest2
@@ -179,11 +178,8 @@ function setUpperAndLowerElements(staffgroup) {
 		}
 		// Now we need a little margin on the top, so we'll just throw that in.
 		staff.top += 4;
-		heightInPitches += staff.top - staff.bottom; // + 4; // add in the top margin.
 		//console.log("Staff Y: ",i,heightInPitches,staff.top,staff.bottom);
 	}
-	// TODO-PER: also add the space between staves.
-	staffgroup.height = heightInPitches * ABCJS.write.spacing.STEP;
 	//console.log("Staff Height: ",heightInPitches,staffgroup.height);
 }
 
@@ -706,7 +702,7 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
       var adjust = (pitchelem.printer_shift==="same")?1:0;
       shiftheadx = (dir==="down")?-this.glyphs.getSymbolWidth(c)*scale+adjust:this.glyphs.getSymbolWidth(c)*scale-adjust;
     }
-    notehead = new ABCJS.write.RelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, {scalex:scale, scaley: scale, stemHeight: ((dir==="down")?-this.stemHeight:this.stemHeight)});
+    notehead = new ABCJS.write.RelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, {scalex:scale, scaley: scale, stemHeight: ((dir==="down")?-this.stemHeight:this.stemHeight), thickness: 2*scale });
     if (flag) {
       var pos = pitch+((dir==="down")?-7:7)*scale;
       if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;

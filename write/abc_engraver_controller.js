@@ -161,6 +161,14 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 		}
 	}
 
+	// Set the staff spacing
+	// TODO-PER: we should have been able to do this by the time we called setUpperAndLowerElements, but for some reason the "bottom" element seems to be set as a side effect of setting the X spacing.
+	for(i=0; i<abctune.lines.length; i++) {
+		abcLine = abctune.lines[i];
+		if (abcLine.staffGroup) {
+			abcLine.staffGroup.height = abcLine.staffGroup.calcHeight();
+		}
+	}
 	// Do all the writing to output
 	this.renderer.topMargin(abctune);
 	//this.renderer.printHorizontalLine(this.width + this.renderer.padding.left + this.renderer.padding.right);
@@ -231,13 +239,12 @@ ABCJS.write.EngraverController.prototype.setXSpacing = function (staffGroup, for
 ABCJS.write.EngraverController.prototype.engraveStaffLine = function (staffGroup) {
 	if (this.lastStaffGroupIndex > -1)
 		this.renderer.addStaffPadding(this.staffgroups[this.lastStaffGroupIndex], staffGroup);
-	staffGroup.draw(this.renderer, this.renderer.y);
-	//this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+staffGroup.height);
+	staffGroup.draw(this.renderer);
+	var height = staffGroup.height * ABCJS.write.spacing.STEP;
+	//this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+height);
   this.staffgroups[this.staffgroups.length] = staffGroup;
 	this.lastStaffGroupIndex = this.staffgroups.length-1;
-//  this.renderer.y = staffgroup.y + staffgroup.height;
-//  this.renderer.y += ABCJS.write.spacing.STAVEHEIGHT * 0.2;
-	this.renderer.y += staffGroup.height;
+	this.renderer.y += height;
 };
 
 /**
