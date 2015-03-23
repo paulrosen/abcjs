@@ -207,7 +207,7 @@ ABCJS.write.StaffGroupElement.prototype.calcHeight = function () {
 	return height;
 };
 
-ABCJS.write.StaffGroupElement.prototype.draw = function (renderer, y) {
+ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 	// We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
 	// All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
 	// renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
