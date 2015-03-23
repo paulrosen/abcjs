@@ -205,7 +205,9 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
     if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
     // TODO make invisible if voice is duplicate
     this.voice.addChild(this.createClef(abcstaff.clef));
-    this.voice.addChild(this.createKeySignature(abcstaff.key));
+	  var keySig = this.createKeySignature(abcstaff.key);
+	  if (keySig)
+	    this.voice.addChild(keySig);
     if (abcstaff.meter) this.voice.addChild(this.createTimeSignature(abcstaff.meter));
     var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
     this.staffgroup.addVoice(this.voice,this.s,staffLines);
@@ -236,12 +238,14 @@ ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline, tempo)
   var tempoSet = false;
   for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
     var abselems = this.createABCElement();
+	  if (abselems) {
     for (i=0; i<abselems.length; i++) {
       if (!tempoSet && tempo && !tempo.suppress) {
         tempoSet = true;
         abselems[i].addChild(new ABCJS.write.TempoElement(tempo));
       }
       this.voice.addChild(abselems[i]);
+    }
     }
   }
   this.pushCrossLineElems();
@@ -269,7 +273,9 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "key":
-    elemset[0] = this.createKeySignature(elem);
+	  var absKey = this.createKeySignature(elem);
+	  if (absKey)
+	    elemset[0] = absKey;
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "stem":
@@ -1125,16 +1131,16 @@ ABCJS.write.AbstractEngraver.prototype.createClef = function(elem) {
 
 
 ABCJS.write.AbstractEngraver.prototype.createKeySignature = function(elem) {
+	if (!elem.accidentals || elem.accidentals.length === 0)
+		return null;
   var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra');
   var dx = 0;
-  if (elem.accidentals) {
          window.ABCJS.parse.each(elem.accidentals, function(acc) {
                 var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
                 //var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
                 abselem.addRight(new ABCJS.write.RelativeElement(symbol, dx, this.glyphs.getSymbolWidth(symbol), acc.verticalPos));
                 dx += this.glyphs.getSymbolWidth(symbol)+2;
          }, this);
-  }
   this.startlimitelem = abselem; // limit ties here
   return abselem;
 };
