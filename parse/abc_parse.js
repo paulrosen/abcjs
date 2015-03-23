@@ -23,6 +23,7 @@ if (!window.ABCJS.parse)
 	window.ABCJS.parse = {};
 
 window.ABCJS.parse.Parse = function() {
+	"use strict";
 	var tune = new window.ABCJS.data.Tune();
 	var tokenizer = new window.ABCJS.parse.tokenizer();
 
@@ -788,6 +789,8 @@ window.ABCJS.parse.Parse = function() {
 				}
 				var note = getCoreNote(gra[1], ii, {}, false);
 				if (note !== null) {
+					// The grace note durations should not be affected by the default length: they should be based on 1/16, so if that isn't the default, then multiply here.
+					note.duration = note.duration / (multilineVars.default_length * 8);
 					if (acciaccatura)
 						note.acciaccatura = true;
 					gracenotes.push(note);
