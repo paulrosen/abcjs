@@ -29,7 +29,7 @@ ABCJS.write.TripletElem = function(number, anchor1, anchor2, above) {
 	this.number = number;
 };
 
-ABCJS.write.TripletElem.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
+ABCJS.write.TripletElem.prototype.setUpperAndLowerElements = function(positionY) {
 };
 
 ABCJS.write.TripletElem.prototype.draw = function (renderer, linestartx, lineendx) {

@@ -9,6 +9,7 @@ if (!window.ABCJS.parse)
 window.ABCJS.parse.parseDirective = {};
 
 (function() {
+	"use strict";
 	var tokenizer;
 	var warn;
 	var multilineVars;
@@ -276,8 +277,8 @@ window.ABCJS.parse.parseDirective = {};
 			if (!currentSetting) {
 				warn("Must specify the size of the font since there is no default value.", str, position);
 				size = 12;
-			}
-			size = currentSetting.size;
+			} else
+				size = currentSetting.size;
 		} else
 			size = parseFloat(size);
 
@@ -362,6 +363,21 @@ window.ABCJS.parse.parseDirective = {};
 		return null;
 	};
 
+	var addMultilineVarOneParamChoice = function(key, cmd, tokens, choices) {
+		if (tokens.length !== 1)
+			return "Directive \"" + cmd + "\" requires one of [ " + choices.join(", ") + " ] as a parameter.";
+		var choice = tokens[0].token;
+		var found = false;
+		for (var i = 0; !found && i < choices.length; i++) {
+			if (choices[i] === choice)
+				found = true;
+		}
+		if (!found)
+			return "Directive \"" + cmd + "\" requires one of [ " + choices.join(", ") + " ] as a parameter.";
+		multilineVars[key] = choice;
+		return null;
+	};
+
 	window.ABCJS.parse.parseDirective.parseFontChangeLine = function(textstr) {
 		var textParts = textstr.split('$');
 		if (textParts.length > 1 && multilineVars.setfont) {
@@ -386,6 +402,7 @@ window.ABCJS.parse.parseDirective = {};
 		return textstr;
 	};
 
+	var positionChoices = [ 'auto', 'above', 'below', 'hidden' ];
 	window.ABCJS.parse.parseDirective.addDirective = function(str) {
 		var tokens = tokenizer.tokenize(str, 0, str.length);	// 3 or more % in a row, or just spaces after %% is just a comment
 		if (tokens.length === 0 || tokens[0].type !== 'alpha') return null;
@@ -424,7 +441,6 @@ window.ABCJS.parse.parseDirective = {};
 			//					straightflags: { type: "boolean", optional: true },
 			//					stretchstaff: { type: "boolean", optional: true },
 			//					titleformat: { type: "string", optional: true },
-			//					vocalabove: { type: "boolean", optional: true },
 			case "bagpipes":tune.formatting.bagpipes = true;break;
 			case "landscape":multilineVars.landscape = true;break;
 			case "papersize":multilineVars.papersize = restOfString;break;
@@ -433,6 +449,12 @@ window.ABCJS.parse.parseDirective = {};
 			case "titlecaps":multilineVars.titlecaps = true;break;
 			case "titleleft":tune.formatting.titleleft = true;break;
 			case "measurebox":tune.formatting.measurebox = true;break;
+
+			case "vocal": return addMultilineVarOneParamChoice("vocalPosition", cmd, tokens, positionChoices);
+			case "dynamic": return addMultilineVarOneParamChoice("dynamicPosition", cmd, tokens, positionChoices);
+			case "gchord": return addMultilineVarOneParamChoice("chordPosition", cmd, tokens, positionChoices);
+			case "ornament": return addMultilineVarOneParamChoice("ornamentPosition", cmd, tokens, positionChoices);
+			case "volume": return addMultilineVarOneParamChoice("volumePosition", cmd, tokens, positionChoices);
 
 			case "botmargin":
 			case "botspace":

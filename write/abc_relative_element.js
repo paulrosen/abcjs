@@ -47,17 +47,33 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 			this.bottom += opt.stemHeight;
 	}
 	this.centerVertically = false;
+	// TODO-PER: this should use the current font to determine the height. That requires the font to be passed in here, so refactor to store the font now instead of resolving it at draw time. This will allow the font to be changed mid-line, too.
 	switch (this.type) {
-		case "debug": this.hasLowest2 = 3; break;
-		case "lyric": this.hasLowest1 = 3; break;
-		case "chord": this.hasHighest2 = 3; break;
-		case "text":
-			if (this.pitch === undefined)
-				this.hasHighest2 = 3;
+		case "debug":
+			this.chordHeightAbove = 3;
+			break;
+		case "lyric":
+			if (opt.position && opt.position === 'below')
+				this.lyricHeightBelow = 3;
 			else
+				this.lyricHeightAbove = 3;
+			break;
+		case "chord":
+			if (opt.position && opt.position === 'below')
+				this.chordHeightBelow = 3;
+			else
+				this.chordHeightAbove = 3;
+			break;
+		case "text":
+			if (this.pitch === undefined) {
+				if (opt.position && opt.position === 'below')
+					this.chordHeightBelow = 3;
+				else
+					this.chordHeightAbove = 3;
+			} else
 				this.centerVertically = true;
 			break;
-		case "part": this.hasHighest1 = 3; break;
+		case "part": this.partHeightAbove = 3; break;
 	}
 };
 

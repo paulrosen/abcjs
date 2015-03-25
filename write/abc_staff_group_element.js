@@ -55,11 +55,11 @@ ABCJS.write.StaffGroupElement = function() {
 };
 
 ABCJS.write.StaffGroupElement.prototype.setLimit = function(member, voice) {
-	if (!voice[member]) return;
-	if (!voice.staff[member])
-		voice.staff[member] = voice[member];
+	if (!voice.specialY[member]) return;
+	if (!voice.staff.specialY[member])
+		voice.staff.specialY[member] = voice.specialY[member];
 	else
-		voice.staff[member] = Math.max(voice.staff[member], voice[member]);
+		voice.staff.specialY[member] = Math.max(voice.staff.specialY[member], voice.specialY[member]);
 };
 
 ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines) {
@@ -69,18 +69,44 @@ ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber,
 		this.staffs[staffnumber].voices.push(voiceNum);
 	else {
 		// TODO-PER: how does the min/max change when stafflines is not 5?
-		this.staffs[this.staffs.length] = {top: 10, bottom: 2, hasHighest1: false, hasHighest2: false, hasLowest1: false, hasLowest2: false, lines: stafflines, voices: [voiceNum] };
+		this.staffs[this.staffs.length] = {
+			top: 10,
+			bottom: 2,
+			lines: stafflines,
+			voices: [voiceNum],
+			specialY: {
+				tempoHeightAbove: 0,
+				partHeightAbove: 0,
+				volumeHeightAbove: 0,
+				dynamicHeightAbove: 0,
+				endingHeightAbove: 0,
+				chordHeightAbove: 0,
+				lyricHeightAbove: 0,
+
+				lyricHeightBelow: 0,
+				chordHeightBelow: 0,
+				volumeHeightBelow: 0,
+				dynamicHeightBelow: 0
+			}
+		};
 	}
 	voice.staff = this.staffs[staffnumber];
-	voice.staff.top = Math.max(voice.staff.top, voice.top);
-	voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
 };
 
 ABCJS.write.StaffGroupElement.prototype.setStaffLimits = function (voice) {
-	this.setLimit('hasHighest1', voice);
-	this.setLimit('hasHighest2', voice);
-	this.setLimit('hasLowest1', voice);
-	this.setLimit('hasLowest2', voice);
+	voice.staff.top = Math.max(voice.staff.top, voice.top);
+	voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
+	this.setLimit('tempoHeightAbove', voice);
+	this.setLimit('partHeightAbove', voice);
+	this.setLimit('volumeHeightAbove', voice);
+	this.setLimit('dynamicHeightAbove', voice);
+	this.setLimit('endingHeightAbove', voice);
+	this.setLimit('chordHeightAbove', voice);
+	this.setLimit('lyricHeightAbove', voice);
+	this.setLimit('lyricHeightBelow', voice);
+	this.setLimit('chordHeightBelow', voice);
+	this.setLimit('volumeHeightBelow', voice);
+	this.setLimit('dynamicHeightBelow', voice);
 };
 
 ABCJS.write.StaffGroupElement.prototype.finished = function() {

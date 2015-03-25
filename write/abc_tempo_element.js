@@ -26,12 +26,12 @@ if (!window.ABCJS.write)
 	"use strict";
 	ABCJS.write.TempoElement = function(tempo) {
 		this.tempo = tempo;
-		this.hasHighest1 = 5;
+		this.tempoHeightAbove = 5;
 		this.pitch = undefined; // This will be set later
 	};
 
-	ABCJS.write.TempoElement.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
-		this.pitch = highest1Pitch;
+	ABCJS.write.TempoElement.prototype.setUpperAndLowerElements = function(positionY) {
+		this.pitch = positionY.tempoHeightAbove;
 	};
 
 	ABCJS.write.TempoElement.prototype.draw = function(renderer, x) {

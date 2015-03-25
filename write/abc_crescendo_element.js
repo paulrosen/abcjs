@@ -22,16 +22,19 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
 	window.ABCJS.write = {};
 
-ABCJS.write.CrescendoElem = function(anchor1, anchor2, dir) {
+ABCJS.write.CrescendoElem = function(anchor1, anchor2, dir, positioning) {
 	this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
 	this.dir = dir; // either "<" or ">"
-	this.hasLowest2 = 4;
+	if (positioning === 'above')
+		this.dynamicHeightAbove = 4;
+	else
+		this.dynamicHeightBelow = 4;
 	this.pitch = undefined; // This will be set later
 };
 
-ABCJS.write.CrescendoElem.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
-	this.pitch = lowest2Pitch;
+ABCJS.write.CrescendoElem.prototype.setUpperAndLowerElements = function(positionY) {
+	this.pitch = positionY.dynamicHeightAbove;
 };
 
 ABCJS.write.CrescendoElem.prototype.draw = function (renderer) {

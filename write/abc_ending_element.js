@@ -26,12 +26,12 @@ ABCJS.write.EndingElem = function(text, anchor1, anchor2) {
 	this.text = text; // text to be displayed top left
 	this.anchor1 = anchor1; // must have a .x property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
-	this.hasHighest2 = 3;
+	this.endingHeightAbove = 3;
 	this.pitch = undefined; // This will be set later
 };
 
-ABCJS.write.EndingElem.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
-	this.pitch = highest2Pitch;
+ABCJS.write.EndingElem.prototype.setUpperAndLowerElements = function(positionY) {
+	this.pitch = positionY.endingHeightAbove;
 };
 
 ABCJS.write.EndingElem.prototype.draw = function (renderer, linestartx, lineendx) {

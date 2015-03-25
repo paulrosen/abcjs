@@ -32,10 +32,20 @@ ABCJS.write.VoiceElement = function(voicenumber, voicetotal) {
 	this.voicetotal = voicetotal;
 	this.bottom = 7;
 	this.top = 7;
-	this.hasHighest1 = false;
-	this.hasHighest2 = false;
-	this.hasLowest1 = false;
-	this.hasLowest2 = false;
+	this.specialY = {
+		tempoHeightAbove: 0,
+		partHeightAbove: 0,
+		volumeHeightAbove: 0,
+		dynamicHeightAbove: 0,
+		endingHeightAbove: 0,
+		chordHeightAbove: 0,
+		lyricHeightAbove: 0,
+
+		lyricHeightBelow: 0,
+		chordHeightBelow: 0,
+		volumeHeightBelow: 0,
+		dynamicHeightBelow: 0
+	};
 };
 
 ABCJS.write.VoiceElement.prototype.addChild = function (child) {
@@ -55,11 +65,16 @@ ABCJS.write.VoiceElement.prototype.addChild = function (child) {
 };
 
 ABCJS.write.VoiceElement.prototype.setLimit = function(member, child) {
-	if (!child[member]) return;
-	if (!this[member])
-		this[member] = child[member];
+	// Sometimes we get an absolute element in here and sometimes we get some type of relative element.
+	// If there is a "specialY" element, then assume it is an absolute element. If that doesn't exist, look for the
+	// same members at the top level, because that's where they are in relative elements.
+	var specialY = child.specialY;
+	if (!specialY) specialY = child;
+	if (!specialY[member]) return;
+	if (!this.specialY[member])
+		this.specialY[member] = specialY[member];
 	else
-		this[member] = Math.max(this[member], child[member]);
+		this.specialY[member] = Math.max(this.specialY[member], specialY[member]);
 };
 
 ABCJS.write.VoiceElement.prototype.setRange = function(child) {
@@ -67,22 +82,29 @@ ABCJS.write.VoiceElement.prototype.setRange = function(child) {
 		this.bottom = Math.min(this.bottom, child.bottom);
 	if (child.top !== undefined)
 		this.top = Math.max(this.top, child.top);
-	this.setLimit('hasHighest1', child);
-	this.setLimit('hasHighest2', child);
-	this.setLimit('hasLowest1', child);
-	this.setLimit('hasLowest2', child);
+	this.setLimit('tempoHeightAbove', child);
+	this.setLimit('partHeightAbove', child);
+	this.setLimit('volumeHeightAbove', child);
+	this.setLimit('dynamicHeightAbove', child);
+	this.setLimit('endingHeightAbove', child);
+	this.setLimit('chordHeightAbove', child);
+	this.setLimit('lyricHeightAbove', child);
+	this.setLimit('lyricHeightBelow', child);
+	this.setLimit('chordHeightBelow', child);
+	this.setLimit('volumeHeightBelow', child);
+	this.setLimit('dynamicHeightBelow', child);
 };
 
-ABCJS.write.VoiceElement.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
+ABCJS.write.VoiceElement.prototype.setUpperAndLowerElements = function(positionY) {
 	var i;
 	for (i = 0; i < this.children.length; i++) {
 		var abselem = this.children[i];
-		abselem.setUpperAndLowerElements(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch);
+		abselem.setUpperAndLowerElements(positionY);
 	}
 	for (i = 0; i < this.otherchildren.length; i++) {
 		var abselem = this.otherchildren[i];
 		if (typeof abselem !== 'string')
-			abselem.setUpperAndLowerElements(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch);
+			abselem.setUpperAndLowerElements(positionY);
 	}
 };
 

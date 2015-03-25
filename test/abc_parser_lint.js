@@ -107,6 +107,7 @@ window.ABCJS.test.ParserLint = function() {
 
 	var fontType = {
 		type: 'object', optional: true, properties: {
+			box: { type: 'boolean', Enum: [ true ], optional: true },
 			face: { type: 'string', optional: true },
 			weight: { type: 'string', Enum: [ 'bold', 'normal' ], optional: true },
 			style: { type: 'string',Enum: [ 'italic', 'normal' ],  optional: true },
@@ -167,7 +168,13 @@ window.ABCJS.test.ParserLint = function() {
 		endBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'startBeam', 'beambr' ], optional: true },
 		endSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 		endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
-		vocalfont: fontType,
+		fonts: { type: 'object', optional: true, properties: {
+			annotationfont: fontType,
+			gchordfont: fontType,
+			measurefont: fontType,
+			repeatfont: fontType,
+			vocalfont: fontType
+		}},
 		gracenotes: { type: 'array', optional: true, output: "noindex", items: {
 			type: "object", properties: {
 				acciaccatura: { type: 'boolean', Enum: [ true ], optional: true},
@@ -199,6 +206,13 @@ window.ABCJS.test.ParserLint = function() {
 					startSlur: slurProperties,
 					startTie: tieProperties
 				}
+		}},
+		positioning: { type: 'object', optional: true, properties: {
+			chordPosition: { type: 'string', Enum: [ 'above', 'below', 'hidden' ], optional: true},
+			dynamicPosition: { type: 'string', Enum: [ 'above', 'below', 'hidden' ], optional: true},
+			ornamentPosition: { type: 'string', Enum: [ 'above', 'below', 'hidden' ], optional: true},
+			vocalPosition: { type: 'string', Enum: [ 'above', 'below', 'hidden' ], optional: true},
+			volumePosition: { type: 'string', Enum: [ 'above', 'below', 'hidden' ], optional: true}
 		}},
 		rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'lyric' ], properties: {
 			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest', 'multimeasure', 'whole' ] },	// multimeasure requires duration to be the number of measures.

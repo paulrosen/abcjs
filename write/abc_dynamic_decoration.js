@@ -22,23 +22,28 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
 	window.ABCJS.write = {};
 
-ABCJS.write.DynamicDecoration = function(anchor, dec) {
+ABCJS.write.DynamicDecoration = function(anchor, dec, position) {
 	this.anchor = anchor;
 	this.dec = dec;
-	this.hasLowest2 = 3;
+	if (position === 'below')
+		this.volumeHeightBelow = 3;
+	else
+		this.volumeHeightAbove = 3;
 	this.pitch = undefined; // This will be set later
 };
 
-ABCJS.write.DynamicDecoration.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
-	this.pitch = lowest2Pitch;
+ABCJS.write.DynamicDecoration.prototype.setUpperAndLowerElements = function(positionY) {
+	if (this.volumeHeightAbove)
+		this.pitch = positionY.volumeHeightAbove;
+	else
+		this.pitch = positionY.volumeHeightBelow;
 };
 
 ABCJS.write.DynamicDecoration.prototype.draw = function(renderer, linestartx, lineendx) {
 	if (this.pitch === undefined)
 		window.console.error("Dynamic Element y-coordinate not set.");
-	var y = renderer.calcY(this.pitch);
 	var scalex = 1;
 	var scaley = 1;
-	renderer.printSymbol(this.anchor.x, y, this.dec, scalex, scaley, renderer.addClasses('decoration'));
+	renderer.printSymbol(this.anchor.x, this.pitch, this.dec, scalex, scaley, renderer.addClasses('decoration'));
 };
 

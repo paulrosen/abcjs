@@ -26,6 +26,7 @@ if (!window.ABCJS.write)
 // minspacing - spacing which must be taken on top of the width defined by the duration
 // type is a meta-type for the element. It is not necessary for drawing, but it is useful to make semantic sense of the element. For instance, it can be used in the element's class name.
 ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing, type) {
+	console.log("Absolute:",abcelem, type);
 	this.abcelem = abcelem;
 	this.duration = duration;
 	this.minspacing = minspacing || 0;
@@ -41,19 +42,40 @@ ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing, type) {
 	this.bottom = 7;
 	this.top = 7;
 	this.type = type;
-	this.hasHighest1 = false; // For the Part and Tempo designations
-	this.hasHighest2 = false; // For the endings and chords
-	this.hasLowest1 = false; // For the lyrics
-	this.hasLowest2 = false; // For the dynamic marks.
+	// these are the heights of all of the vertical elements that can't be placed until the end of the line.
+	// the vertical order of elements that are above is: tempo, part, volume/dynamic, ending/chord, lyric
+	// the vertical order of elements that are below is: lyric, chord, volume/dynamic
+	this.specialY = {
+		tempoHeightAbove: 0,
+		partHeightAbove: 0,
+		volumeHeightAbove: 0,
+		dynamicHeightAbove: 0,
+		endingHeightAbove: 0,
+		chordHeightAbove: 0,
+		lyricHeightAbove: 0,
+
+		lyricHeightBelow: 0,
+		chordHeightBelow: 0,
+		volumeHeightBelow: 0,
+		dynamicHeightBelow: 0
+	};
 };
 
-ABCJS.write.AbsoluteElement.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
+// For each of the relative elements that can't be placed in advance (because their vertical placement depends on everything
+// else on the line), this iterates through them and sets their pitch. By the time this is called, specialYResolved contains a
+// hash with the vertical placement (in pitch units) for each type.
+// TODO-PER: I think this needs to be separated by "above" and "below". How do we know that for dynamics at the point where they are being defined, though? We need a pass through all the relative elements to set "above" and "below".
+ABCJS.write.AbsoluteElement.prototype.setUpperAndLowerElements = function(specialYResolved) {
+	// specialYResolved contains the actual pitch for each of the classes of elements.
 	for (var i = 0; i < this.children.length; i++) {
 		var child = this.children[i];
-		if (child.hasHighest1) child.pitch = highest1Pitch;
-		if (child.hasHighest2) child.pitch = highest2Pitch;
-		if (child.hasLowest1) child.pitch = lowest1Pitch;
-		if (child.hasLowest2) child.pitch = lowest2Pitch;
+		for (var key in this.specialY) { // for each class of element that needs to be placed vertically
+			if (this.specialY.hasOwnProperty(key)) {
+				if (child[key]) { // If this relative element has defined a height for this class of element
+					child.pitch = specialYResolved[key];
+				}
+			}
+		}
 	}
 };
 
@@ -85,21 +107,29 @@ ABCJS.write.AbsoluteElement.prototype.addRight = function (right) {
 
 ABCJS.write.AbsoluteElement.prototype.setLimit = function(member, child) {
 	if (!child[member]) return;
-	if (!this[member])
-		this[member] = child[member];
+	if (!this.specialY[member])
+		this.specialY[member] = child[member];
 	else
-		this[member] = Math.max(this[member], child[member]);
+		this.specialY[member] = Math.max(this.specialY[member], child[member]);
 };
 
 ABCJS.write.AbsoluteElement.prototype.addChild = function (child) {
+	console.log("Relative:",child);
 	child.parent = this;
 	this.children[this.children.length] = child;
 	this.pushTop(child.top);
 	this.pushBottom(child.bottom);
-	this.setLimit('hasHighest1', child);
-	this.setLimit('hasHighest2', child);
-	this.setLimit('hasLowest1', child);
-	this.setLimit('hasLowest2', child);
+	this.setLimit('tempoHeightAbove', child);
+	this.setLimit('partHeightAbove', child);
+	this.setLimit('volumeHeightAbove', child);
+	this.setLimit('dynamicHeightAbove', child);
+	this.setLimit('endingHeightAbove', child);
+	this.setLimit('chordHeightAbove', child);
+	this.setLimit('lyricHeightAbove', child);
+	this.setLimit('lyricHeightBelow', child);
+	this.setLimit('chordHeightBelow', child);
+	this.setLimit('volumeHeightBelow', child);
+	this.setLimit('dynamicHeightBelow', child);
 };
 
 ABCJS.write.AbsoluteElement.prototype.pushTop = function (top) {

@@ -31,6 +31,16 @@ window.ABCJS.parse.Parse = function() {
 		return tune;
 	};
 
+	function addPositioning(el, type, value) {
+		if (!el.positioning) el.positioning = {};
+		el.positioning[type] = value;
+	}
+
+	function addFont(el, type, value) {
+		if (!el.fonts) el.fonts = {};
+		el.fonts[type] = value;
+	}
+
 	var multilineVars = {
 		reset: function() {
 			for (var property in this) {
@@ -63,6 +73,38 @@ window.ABCJS.parse.Parse = function() {
 			this.inEnding = false;
 			this.inTie = false;
 			this.inTieChord = {};
+			this.vocalPosition = "auto";
+			this.dynamicPosition = "auto";
+			this.chordPosition = "auto";
+			this.ornamentPosition = "auto";
+			this.volumePosition = "auto";
+		},
+		differentFont: function(type, defaultFonts) {
+			if (this[type].decoration !== defaultFonts[type].decoration) return true;
+			if (this[type].face !== defaultFonts[type].face) return true;
+			if (this[type].size !== defaultFonts[type].size) return true;
+			if (this[type].style !== defaultFonts[type].style) return true;
+			if (this[type].weight !== defaultFonts[type].weight) return true;
+			return false;
+		},
+		addFormattingOptions: function(el, defaultFonts, elType) {
+			if (elType === 'note') {
+				if (this.vocalPosition !== 'auto') addPositioning(el, 'vocalPosition', this.vocalPosition);
+				if (this.dynamicPosition !== 'auto') addPositioning(el, 'dynamicPosition', this.dynamicPosition);
+				if (this.chordPosition !== 'auto') addPositioning(el, 'chordPosition', this.chordPosition);
+				if (this.ornamentPosition !== 'auto') addPositioning(el, 'ornamentPosition', this.ornamentPosition);
+				if (this.volumePosition !== 'auto') addPositioning(el, 'volumePosition', this.volumePosition);
+				if (this.differentFont("annotationfont", defaultFonts)) addFont(el, 'annotationfont', this.annotationfont);
+				if (this.differentFont("gchordfont", defaultFonts)) addFont(el, 'gchordfont', this.gchordfont);
+				if (this.differentFont("vocalfont", defaultFonts)) addFont(el, 'vocalfont', this.vocalfont);
+			} else if (elType === 'bar') {
+				if (this.dynamicPosition !== 'auto') addPositioning(el, 'dynamicPosition', this.dynamicPosition);
+				if (this.chordPosition !== 'auto') addPositioning(el, 'chordPosition', this.chordPosition);
+				if (this.ornamentPosition !== 'auto') addPositioning(el, 'ornamentPosition', this.ornamentPosition);
+				if (this.volumePosition !== 'auto') addPositioning(el, 'volumePosition', this.volumePosition);
+				if (this.differentFont("measurefont", defaultFonts)) addFont(el, 'measurefont', this.measurefont);
+				if (this.differentFont("repeatfont", defaultFonts)) addFont(el, 'repeatfont', this.repeatfont);
+			}
 		}
 	};
 
@@ -1040,6 +1082,7 @@ window.ABCJS.parse.Parse = function() {
 						// Attach the grace note to an invisible note
 						el.rest = { type: 'spacer' };
 						el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
+						multilineVars.addFormattingOptions(el, tune.formatting, 'note');
 						tune.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el);
 						multilineVars.measureNotEmpty = true;
 						el = {};
@@ -1073,6 +1116,7 @@ window.ABCJS.parse.Parse = function() {
 							if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0)
 								multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
 						}
+						multilineVars.addFormattingOptions(el, tune.formatting, 'bar');
 						tune.appendElement('bar', startOfLine+i, startOfLine+i+ret[0], bar);
 						multilineVars.measureNotEmpty = false;
 						el = {};
@@ -1226,6 +1270,7 @@ window.ABCJS.parse.Parse = function() {
 										el.barNumber = multilineVars.barNumOnNextNote;
 										multilineVars.barNumOnNextNote = null;
 									}
+									multilineVars.addFormattingOptions(el, tune.formatting, 'note');
 									tune.appendElement('note', startOfLine+i, startOfLine+i, el);
 									multilineVars.measureNotEmpty = true;
 									el = {};
@@ -1298,6 +1343,7 @@ window.ABCJS.parse.Parse = function() {
 								el.barNumber = multilineVars.barNumOnNextNote;
 								multilineVars.barNumOnNextNote = null;
 							}
+							multilineVars.addFormattingOptions(el, tune.formatting, 'note');
 							tune.appendElement('note', startOfLine+startI, startOfLine+i, el);
 							multilineVars.measureNotEmpty = true;
 							el = {};

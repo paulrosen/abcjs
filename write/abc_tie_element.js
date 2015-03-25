@@ -30,7 +30,7 @@ ABCJS.write.TieElem = function(anchor1, anchor2, above, forceandshift) {
 	// move by +7 "up" by -7 if "down"
 };
 
-ABCJS.write.TieElem.prototype.setUpperAndLowerElements = function(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch) {
+ABCJS.write.TieElem.prototype.setUpperAndLowerElements = function(positionY) {
 	// Doesn't depend on the highest and lowest, so there's nothing to do here.
 };
 

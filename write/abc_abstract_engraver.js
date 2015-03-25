@@ -22,6 +22,9 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
         window.ABCJS.write = {};
 
+(function() {
+	"use strict";
+
 ABCJS.write.getDuration = function(elem) {
   var d = 0;
   if (elem.duration) {
@@ -42,6 +45,7 @@ ABCJS.write.getDurlog = function(duration) {
 
 ABCJS.write.AbstractEngraver = function(glyphs, bagpipes) {
   this.glyphs = glyphs;
+	this.decoration = new ABCJS.write.Decoration(glyphs);
   this.isBagpipes = bagpipes;
   this.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
                  note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter"},
@@ -150,31 +154,39 @@ function setUpperAndLowerElements(staffgroup) {
 	// Also, get the overall height of all the staves in this group.
 	for (var i = 0; i < staffgroup.staffs.length; i++) {
 		var staff = staffgroup.staffs[i];
-		// hasHighest1 is the top most position, hasHighest2 is the second topmost, so resolve them in that order. Likewise for hasLowest1, hasLowest2
-		var highest1Pitch;
-		var highest2Pitch;
-		var lowest1Pitch;
-		var lowest2Pitch;
-		var fudge = 3; // TODO-PER: For some reason, these extra elements are offset.
-		if (staff.hasHighest2) {
-			highest2Pitch = staff.top + staff.hasHighest2 + fudge;
-			staff.top += staff.hasHighest2;
-		}
-		if (staff.hasHighest1) {
-			highest1Pitch = staff.top + staff.hasHighest1 + fudge;
-			staff.top += staff.hasHighest1;
-		}
-		if (staff.hasLowest2) {
-			lowest2Pitch = staff.bottom; // - staff.hasLowest2;
-			staff.bottom -= staff.hasLowest2;
-		}
-		if (staff.hasLowest1) {
-			lowest1Pitch = staff.bottom; // - staff.hasLowest1;
-			staff.bottom -= staff.hasLowest1;
-		}
+		// the vertical order of elements that are above is: tempo, part, volume/dynamic, ending/chord, lyric
+		// the vertical order of elements that are below is: lyric, chord, volume/dynamic
+		var positionY = {
+			tempoHeightAbove: 0,
+			partHeightAbove: 0,
+			volumeHeightAbove: 0,
+			dynamicHeightAbove: 0,
+			endingHeightAbove: 0,
+			chordHeightAbove: 0,
+			lyricHeightAbove: 0,
+
+			lyricHeightBelow: 0,
+			chordHeightBelow: 0,
+			volumeHeightBelow: 0,
+			dynamicHeightBelow: 0
+		};
+
+		if (staff.specialY.lyricHeightAbove) { staff.top += staff.specialY.lyricHeightAbove; positionY.lyricHeightAbove = staff.top; }
+		if (staff.specialY.chordHeightAbove) { staff.top += staff.specialY.chordHeightAbove; positionY.chordHeightAbove = staff.top; }
+		if (staff.specialY.endingHeightAbove) { staff.top += staff.specialY.endingHeightAbove; positionY.endingHeightAbove = staff.top; }
+		if (staff.specialY.dynamicHeightAbove) { staff.top += staff.specialY.dynamicHeightAbove; positionY.dynamicHeightAbove = staff.top; }
+		if (staff.specialY.volumeHeightAbove) { staff.top += staff.specialY.volumeHeightAbove; positionY.volumeHeightAbove = staff.top; }
+		if (staff.specialY.partHeightAbove) { staff.top += staff.specialY.partHeightAbove; positionY.partHeightAbove = staff.top; }
+		if (staff.specialY.tempoHeightAbove) { staff.top += staff.specialY.tempoHeightAbove; positionY.tempoHeightAbove = staff.top; }
+
+		if (staff.specialY.lyricHeightBelow) { staff.bottom -= staff.specialY.lyricHeightBelow; positionY.lyricHeightBelow = staff.bottom; }
+		if (staff.specialY.chordHeightBelow) { staff.bottom -= staff.specialY.chordHeightBelow; positionY.chordHeightBelow = staff.bottom; }
+		if (staff.specialY.volumeHeightBelow) { staff.bottom -= staff.specialY.volumeHeightBelow; positionY.volumeHeightBelow = staff.bottom; }
+		if (staff.specialY.dynamicHeightBelow) { staff.bottom -= staff.specialY.dynamicHeightBelow; positionY.dynamicHeightBelow = staff.bottom; }
+
 		for (var j = 0; j < staff.voices.length; j++) {
 			var voice = staffgroup.voices[staff.voices[j]];
-			voice.setUpperAndLowerElements(lowest1Pitch, lowest2Pitch, highest1Pitch, highest2Pitch);
+			voice.setUpperAndLowerElements(positionY);
 		}
 		// Now we need a little margin on the top, so we'll just throw that in.
 		staff.top += 4;
@@ -542,7 +554,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
          lyricStr += ly.syllable + ly.divider + "\n";
       });
 	  // TODO-PER: get the width of the lyric and use that for "0, lyricStr.length*5" below.
-    abselem.addRight(new ABCJS.write.RelativeElement(lyricStr, 0, lyricStr.length*5, undefined, {type:"lyric"}));
+    abselem.addRight(new ABCJS.write.RelativeElement(lyricStr, 0, lyricStr.length*5, undefined, {type:"lyric", position: elem.positioning.vocalPosition }));
   }
   
   if (!dontDraw && elem.gracenotes !== undefined) {
@@ -598,7 +610,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   }
 
   if (!dontDraw && elem.decoration) {
-    this.createDecoration(elem.decoration, elem.maxpitch, (notehead)?notehead.w:0, abselem, this.roomtaken, dir, elem.minpitch);
+	  this.decoration.createDecoration(this.voice, elem.decoration, elem.maxpitch, (notehead)?notehead.w:0, abselem, this.roomtaken, dir, elem.minpitch, elem.positioning);
   }
   
   if (elem.barNumber) {
@@ -659,10 +671,10 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
       default:
 		if (elem.chord[i].rel_position) {
 			var relPositionY = elem.chord[i].rel_position.y + 3*ABCJS.write.spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
-			abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x + elem.chord[i].rel_position.x, 0, elem.minpitch + relPositionY / ABCJS.write.spacing.STEP, {type: "text"}));
+			abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x + elem.chord[i].rel_position.x, 0, elem.minpitch + relPositionY / ABCJS.write.spacing.STEP, {type: "text", position: elem.positioning.chordPosition}));
 		} else {
 			// setting the y-coordinate to undefined for now: it will be overwritten later one, after we figure out what the highest element on the line is.
-			abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x, 0, undefined, {type: "chord"}));
+			abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x, 0, undefined, {type: "chord", position: elem.positioning.chordPosition}));
 		}
       }
     }
@@ -813,195 +825,6 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
 
 };
 
-ABCJS.write.AbstractEngraver.prototype.createDecoration = function(decoration, pitch, width, abselem, roomtaken, dir, minPitch) {
-  var dec;
-  var compoundDec;        // PER: for decorations with two symbols
-  var diminuendo;
-    var crescendo;
-  var textDecs = [];
-  var unknowndecs = [];
-  var yslot = (pitch>9) ? pitch+3 : 12;
-  var ypos;
-        //var dir = (this.stemdir==="down" || pitch>=6) && this.stemdir!=="up";
-        var below = false;        // PER: whether decoration goes above or below.
-        var isText = false;        // PER: whether decoration is just rendered as regular text
-        var yslotB = this.minY - 4; // (pitch<1) ? pitch-9 : -6;
-  var i;
-  roomtaken = roomtaken || 0;
-  if (pitch===5) yslot=14; // avoid upstem of the A
-
-  for (i=0;i<decoration.length; i++) { // treat staccato, accent, and tenuto first (may need to shift other markers)
-    if (decoration[i]==="staccato" || decoration[i]==="tenuto" || decoration[i] === "accent") {
-		var symbol = "scripts." + decoration[i];
-		if (decoration[i] === "accent") symbol = "scripts.sforzato";
-		if (ypos === undefined)
-	      ypos = (dir==="down") ? pitch+2:minPitch-2;
-		else
-			ypos = (dir==="down") ? ypos+2:ypos-2;
-		if (decoration[i] === "accent") {
-			// Always place the accent three pitches away, no matter whether that is a line or space.
-			if (dir === "up") ypos--;
-			else ypos++;
-		} else {
-                // don't place on a stave line. The stave lines are 2,4,6,8,10
-                switch (ypos) {
-                        case 2:
-                        case 4:
-                        case 6:
-                        case 8:
-                        case 10:
-                                        if (dir === "up") ypos--;
-                                        else ypos++;
-                                break;
-                }
-		}
-      if (pitch>9) yslot++; // take up some room of those that are above
-      var deltax = width/2;
-      if (this.glyphs.getSymbolAlign(symbol)!=="center") {
-        deltax -= (this.glyphs.getSymbolWidth(dec)/2);
-      }
-      abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltax, this.glyphs.getSymbolWidth(symbol), ypos));
-    }
-    if (decoration[i]==="slide" && abselem.heads[0]) {
-      var ypos2 = abselem.heads[0].pitch;
-      var blank1 = new ABCJS.write.RelativeElement("", -roomtaken-15, 0, ypos2-1);
-      var blank2 = new ABCJS.write.RelativeElement("", -roomtaken-5, 0, ypos2+1);
-      abselem.addChild(blank1);
-      abselem.addChild(blank2);
-      this.voice.addOther(new ABCJS.write.TieElem(blank1, blank2, false));
-    }
-  }
-	// If ypos is set at this point it means that there were "close" decorations. Those might be encroaching on where the rest of the decorations go, so they need to be bumped up.
-	if (ypos+2 > yslot) yslot = ypos+2;
-
-  for (i=0;i<decoration.length; i++) {
-         below = false;
-         isText = false;
-    switch(decoration[i]) {
-		case "0":
-		case "1":
-		case "2":
-		case "3":
-		case "4":
-		case "5":
-		case "D.C.":
-		case "D.S.":
-			dec = decoration[i];
-			isText = true;
-			break;
-		case "fine":
-			dec = "FINE";
-			isText = true;
-			break;
-		case "+":dec="scripts.stopped";break;
-		case "open":dec="scripts.open";break;
-		case "snap":dec="scripts.snap";break;
-		case "wedge":dec="scripts.wedge";break;
-		case "thumb":dec="scripts.thumb";break;
-		case "shortphrase":dec="scripts.shortphrase";break;
-		case "mediumphrase":dec="scripts.mediumphrase";break;
-		case "longphrase":dec="scripts.longphrase";break;
-
-    case "trill":dec="scripts.trill";break;
-    case "roll": dec="scripts.roll"; break; //TODO put abc2ps roll in here
-    case "irishroll": dec="scripts.roll"; break;
-    case "marcato": dec="scripts.umarcato"; break;
-    case "dmarcato": dec="scripts.dmarcato"; break;//other marcato
-    case "turn": dec="scripts.turn"; break;
-    case "uppermordent": dec="scripts.prall"; break;
-    case "pralltriller": dec="scripts.prall"; break;
-    case "mordent":
-    case "lowermordent": dec="scripts.mordent"; break;
-    case "staccato":
-    case "accent":
-    case "tenuto":
-    case "slide": continue;
-    case "downbow": dec="scripts.downbow";break;
-    case "upbow": dec="scripts.upbow";break;
-    case "fermata": dec="scripts.ufermata"; break;
-    case "invertedfermata": below = true; dec="scripts.dfermata"; break;
-    case "breath": dec=","; break;
-//    case "accent": dec="scripts.sforzato"; break;
-    case "umarcato": dec="scripts.umarcato"; break;
-    case "coda": dec="scripts.coda"; break;
-    case "segno": dec="scripts.segno"; break;
-    case "/": compoundDec=["flags.ugrace", 1]; continue;        // PER: added new decorations
-    case "//": compoundDec=["flags.ugrace", 2]; continue;
-    case "///": compoundDec=["flags.ugrace", 3]; continue;
-    case "////": compoundDec=["flags.ugrace", 4]; continue;
-    case "p":
-    case "mp":
-    case "pp":
-    case "ppp":
-    case "pppp":
-    case "f":
-    case "ff":
-    case "fff":
-    case "ffff":
-    case "sfz":
-    case "mf":
-        var ddelem = new ABCJS.write.DynamicDecoration(abselem, decoration[i]);
-        this.voice.addOther(ddelem);
-        continue;
-                case "mark": abselem.klass = "mark"; continue;
-        case "diminuendo(":
-                        ABCJS.write.AbstractEngraver.prototype.startDiminuendoX = abselem;
-            diminuendo = undefined;
-            continue;
-        case "diminuendo)":
-            diminuendo = { start: ABCJS.write.AbstractEngraver.prototype.startDiminuendoX, stop: abselem};
-                        ABCJS.write.AbstractEngraver.prototype.startDiminuendoX = undefined;
-            continue;
-        case "crescendo(":
-                        ABCJS.write.AbstractEngraver.prototype.startCrescendoX = abselem;
-            crescendo = undefined;
-            continue;
-        case "crescendo)":
-            crescendo = { start: ABCJS.write.AbstractEngraver.prototype.startCrescendoX, stop: abselem};
-                        ABCJS.write.AbstractEngraver.prototype.startCrescendoX = undefined;
-            continue;
-    default:
-    unknowndecs[unknowndecs.length]=decoration[i];
-    continue;
-    }
-         if (below) {
-                 ypos = yslotB;
-		  yslotB -= 5;
-         } else {
-                 ypos=yslot;
-		  yslot+=5;
-         }
-    var deltax = width/2;
-	  if (isText) {
-		  abselem.addChild(new ABCJS.write.RelativeElement(dec, 0, 0, ypos+2, {type:"decoration"})); // TODO-PER: This is just approximate placement for this type of element.
-	  } else {
-		  if (this.glyphs.getSymbolAlign(dec) !== "center") {
-			  deltax -= (this.glyphs.getSymbolWidth(dec) / 2);
-		  }
-		  abselem.addChild(new ABCJS.write.RelativeElement(dec, deltax, this.glyphs.getSymbolWidth(dec), ypos));
-	  }
-  }
-  if (compoundDec) {        // PER: added new decorations
-         ypos = (dir === 'down') ? pitch+1:pitch+9;
-         deltax = width/2;
-         deltax += (dir === 'down') ? -5 : 3;
-         for (var xx = 0; xx < compoundDec[1]; xx++) {
-                 ypos -= 1;
-                 abselem.addChild(new ABCJS.write.RelativeElement(compoundDec[0], deltax, this.glyphs.getSymbolWidth(compoundDec[0]), ypos));
-         }
-  }
-    if (diminuendo) {
-        var delem = new ABCJS.write.CrescendoElem(diminuendo.start, diminuendo.stop, ">");
-        this.voice.addOther(delem);
-    }
-    if (crescendo) {
-        var celem = new ABCJS.write.CrescendoElem(crescendo.start, crescendo.stop, "<");
-        this.voice.addOther(celem);
-    }
-  if (unknowndecs.length>0)
-      abselem.addChild(new ABCJS.write.RelativeElement(unknowndecs.join(','), 0, 0, undefined, {type:"debug"}));
-};
-
 ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
 // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
 
@@ -1045,7 +868,7 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
   }
 
   if (elem.decoration) {
-    this.createDecoration(elem.decoration, 12, (thick)?3:1, abselem, 0, "down", 2);
+    this.decoration.createDecoration(this.voice, elem.decoration, 12, (thick)?3:1, abselem, 0, "down", 2, elem.positioning);
   }
 
   if (thick) {
@@ -1078,6 +901,7 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
   } // 2 is hardcoded
 
   if (elem.startEnding) {
+	  abselem.minspacing += 40; // Give plenty of room for the ending number. TODO-PER: what should this magic number be?
     this.partstartelem = new ABCJS.write.EndingElem(elem.startEnding, anchor, null);
     this.voice.addOther(this.partstartelem);
   }
@@ -1169,3 +993,4 @@ ABCJS.write.AbstractEngraver.prototype.createTimeSignature= function(elem) {
   this.startlimitelem = abselem; // limit ties here
   return abselem;
 };
+})();
