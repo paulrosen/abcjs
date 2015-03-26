@@ -183,6 +183,12 @@ ABCJS.write.Glyphs = function() {
     case "rests.16th": return -1;
     case "rests.32nd": return -1;
     case "rests.64th": return -1;
+		case "f":
+		case "m":
+		case "p":
+		case "s":
+		case "z":
+			return -4;
     default: return 0;
     }
   };

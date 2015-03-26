@@ -205,6 +205,7 @@ function setUpperAndLowerElements(staffgroup) {
 		if (staff.specialY.volumeHeightBelow) { positionY.volumeHeightBelow = staff.bottom; staff.bottom -= staff.specialY.volumeHeightBelow+extraSpace; }
 		if (staff.specialY.dynamicHeightBelow) { positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow+extraSpace; }
 
+		staff.positionY = positionY; // This is just being stored for debugging purposes.
 		for (var j = 0; j < staff.voices.length; j++) {
 			var voice = staffgroup.voices[staff.voices[j]];
 			voice.setUpperAndLowerElements(positionY);

@@ -492,6 +492,8 @@ function kernSymbols(lastSymbol, thisSymbol, lastSymbolWidth) {
 		width = width*2/3;
 	if (lastSymbol === 'p' && thisSymbol === 'p')
 		width = width*5/6;
+	if (lastSymbol === 'f' && thisSymbol === 'z')
+		width = width*5/8;
 	return width;
 }
 
@@ -684,14 +686,16 @@ ABCJS.write.Renderer.prototype.outputTextIf = function(x, str, kind, klass, marg
 };
 
 // For debugging, it is sometimes useful to know where you are vertically.
-ABCJS.write.Renderer.prototype.printHorizontalLine = function (width) {
+ABCJS.write.Renderer.prototype.printHorizontalLine = function (width, vertical, comment) {
 	var dy = 0.35;
 	var fill = "#0000aa";
 	var y = this.y;
+	if (vertical) y = vertical;
+	y = Math.round(y);
 	this.paper.text(10, y, ""+Math.round(y)).attr({"text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
 	var x1 = 50;
 	var x2 = width;
-	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
+	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
 		x2, y+dy, x1, y+dy);
 	this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
 	for (var i = 1; i < width/100; i++) {
@@ -699,6 +703,8 @@ ABCJS.write.Renderer.prototype.printHorizontalLine = function (width) {
 			i*100+dy, y-5, i*100+dy, y+5);
 		this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
 	}
+	if (comment)
+		this.paper.text(width+70, y, comment).attr({"text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
 };
 
 ABCJS.write.Renderer.prototype.printVerticalLine = function (x, y1, y2) {
