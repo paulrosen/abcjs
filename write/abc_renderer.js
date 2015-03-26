@@ -485,7 +485,17 @@ ABCJS.write.Renderer.prototype.printStem = function (x, dx, y1, y2) {
   }
 };
 
-/** 
+function kernSymbols(lastSymbol, thisSymbol, lastSymbolWidth) {
+	// This is just some adjustments to make it look better.
+	var width = lastSymbolWidth;
+	if (lastSymbol === 'f' && thisSymbol === 'f')
+		width = width*2/3;
+	if (lastSymbol === 'p' && thisSymbol === 'p')
+		width = width*5/6;
+	return width;
+}
+
+/**
  * assumes this.y is set appropriately
  * if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
  * not scaled if not in printgroup
@@ -498,13 +508,15 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
     var elemset = this.paper.set();
     var dx =0;
     for (var i=0; i<symbol.length; i++) {
-      ycorr = this.glyphs.getYCorr(symbol.charAt(i));
-      el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol.charAt(i), this.paper, klass);
-      if (el) {
-	if (this.doRegression) this.addToRegression(el);
-	elemset.push(el);
-	dx+=this.glyphs.getSymbolWidth(symbol.charAt(i));
-      } else {
+        var s = symbol.charAt(i);
+        ycorr = this.glyphs.getYCorr(s);
+			el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), s, this.paper, klass);
+			if (el) {
+				if (this.doRegression) this.addToRegression(el);
+				elemset.push(el);
+				if (i < symbol.length-1)
+					dx+= kernSymbols(s, symbol.charAt(i+1), this.glyphs.getSymbolWidth(s));
+			} else {
 				this.renderText(x, this.y, "no symbol:" +symbol, "debugfont", 'debug-msg', 'start');
       }
     }

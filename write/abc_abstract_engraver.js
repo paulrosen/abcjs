@@ -179,10 +179,11 @@ function setUpperAndLowerElements(staffgroup) {
 		if (staff.specialY.partHeightAbove) { staff.top += staff.specialY.partHeightAbove; positionY.partHeightAbove = staff.top; }
 		if (staff.specialY.tempoHeightAbove) { staff.top += staff.specialY.tempoHeightAbove; positionY.tempoHeightAbove = staff.top; }
 
-		if (staff.specialY.lyricHeightBelow) { staff.bottom -= staff.specialY.lyricHeightBelow; positionY.lyricHeightBelow = staff.bottom; }
-		if (staff.specialY.chordHeightBelow) { staff.bottom -= staff.specialY.chordHeightBelow; positionY.chordHeightBelow = staff.bottom; }
-		if (staff.specialY.volumeHeightBelow) { staff.bottom -= staff.specialY.volumeHeightBelow; positionY.volumeHeightBelow = staff.bottom; }
-		if (staff.specialY.dynamicHeightBelow) { staff.bottom -= staff.specialY.dynamicHeightBelow; positionY.dynamicHeightBelow = staff.bottom; }
+		var extraSpace = 3; // TODO-PER: don't know why this fudge factor is needed.
+		if (staff.specialY.lyricHeightBelow) { positionY.lyricHeightBelow = staff.bottom; staff.bottom -= staff.specialY.lyricHeightBelow+extraSpace; }
+		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= staff.specialY.chordHeightBelow+extraSpace; }
+		if (staff.specialY.volumeHeightBelow) { positionY.volumeHeightBelow = staff.bottom; staff.bottom -= staff.specialY.volumeHeightBelow+extraSpace; }
+		if (staff.specialY.dynamicHeightBelow) { positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow+extraSpace; }
 
 		for (var j = 0; j < staff.voices.length; j++) {
 			var voice = staffgroup.voices[staff.voices[j]];

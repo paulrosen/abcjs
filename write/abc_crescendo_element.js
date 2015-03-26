@@ -34,7 +34,10 @@ ABCJS.write.CrescendoElem = function(anchor1, anchor2, dir, positioning) {
 };
 
 ABCJS.write.CrescendoElem.prototype.setUpperAndLowerElements = function(positionY) {
-	this.pitch = positionY.dynamicHeightAbove;
+	if (this.dynamicHeightAbove)
+		this.pitch = positionY.dynamicHeightAbove;
+	else
+		this.pitch = positionY.dynamicHeightBelow;
 };
 
 ABCJS.write.CrescendoElem.prototype.draw = function (renderer) {
