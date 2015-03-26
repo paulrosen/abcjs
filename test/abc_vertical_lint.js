@@ -155,16 +155,26 @@ window.ABCJS.test.verticalLint = function(tunes) {
 		return str;
 	}
 
+	function setSpecialY(obj) {
+		var ret = {};
+		for (var key in obj) {
+			if (obj.hasOwnProperty(key)) {
+				if (obj[ret])
+					ret[key] = obj[ret];
+			}
+		}
+		return ret;
+	}
+
 	function extractPositioningInfo(staffGroup, lineNum) {
 		var ret = { height: staffGroup.height, minSpace: staffGroup.minspace, spacingUnits: staffGroup.spacingunits, width: staffGroup.w, startX: staffGroup.startX, staffs: [], voices: [] };
 		for (var i = 0; i < staffGroup.staffs.length; i++) {
 			var staff = staffGroup.staffs[i];
-			ret.staffs.push({bottom: staff.bottom, top: staff.top, hasLowest1: staff.hasLowest1, hasLowest2: staff.hasLowest2, hasHighest1: staff.hasHighest1, hasHighest2: staff.hasHighest2 });
+			ret.staffs.push({bottom: staff.bottom, top: staff.top, specialY: setSpecialY(staff) });
 		}
 		for (i = 0; i < staffGroup.voices.length; i++) {
 			var voice = staffGroup.voices[i];
-			var obj = { bottom: voice.bottom, top: voice.top, hasLowest1: voice.hasLowest1, hasLowest2: voice.hasLowest2,
-				hasHighest1: voice.hasHighest1, hasHighest2: voice.hasHighest2, width: voice.w, startX: voice.startX, voiceChildren: [] };
+			var obj = { bottom: voice.bottom, top: voice.top, specialY: setSpecialY(voice), width: voice.w, startX: voice.startX, voiceChildren: [] };
 			for (var j = 0; j < voice.children.length; j++) {
 				var child = voice.children[j];
 				var type = child.type;
@@ -177,8 +187,7 @@ window.ABCJS.test.verticalLint = function(tunes) {
 						type += "(rest)";
 					if (child.abcelem.lyric && child.abcelem.lyric.length > 0) type += " " + child.abcelem.lyric[0].syllable;
 				}
-				var obj2 = { $type: type, bottom: child.bottom, top: child.top, hasLowest1: child.hasLowest1, hasLowest2: child.hasLowest2,
-					hasHighest1: child.hasHighest1, hasHighest2: child.hasHighest2, minSpacing: child.minspacing, duration: child.duration, width: child.w, x: child.x };
+				var obj2 = { $type: type, bottom: child.bottom, top: child.top, specialY: setSpecialY(child), minSpacing: child.minspacing, duration: child.duration, width: child.w, x: child.x };
 				obj2.elem = [];
 				if (child.children.length) {
 					for (var k = 0; k < child.children.length; k++) {

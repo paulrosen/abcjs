@@ -26,7 +26,7 @@ if (!window.ABCJS.write)
 // minspacing - spacing which must be taken on top of the width defined by the duration
 // type is a meta-type for the element. It is not necessary for drawing, but it is useful to make semantic sense of the element. For instance, it can be used in the element's class name.
 ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing, type) {
-	console.log("Absolute:",abcelem, type);
+	//console.log("Absolute:",abcelem, type);
 	this.abcelem = abcelem;
 	this.duration = duration;
 	this.minspacing = minspacing || 0;
@@ -114,7 +114,7 @@ ABCJS.write.AbsoluteElement.prototype.setLimit = function(member, child) {
 };
 
 ABCJS.write.AbsoluteElement.prototype.addChild = function (child) {
-	console.log("Relative:",child);
+	//console.log("Relative:",child);
 	child.parent = this;
 	this.children[this.children.length] = child;
 	this.pushTop(child.top);

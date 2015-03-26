@@ -283,7 +283,9 @@ if (!window.ABCJS.write)
 		}
 	};
 
-	ABCJS.write.Decoration.prototype.createDecoration = function(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, positioning) {
+	ABCJS.write.Decoration.prototype.createDecoration = function(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, positioning, hasVocals) {
+		if (!positioning)
+			positioning = { ornamentPosition: 'above', volumePosition: hasVocals ? 'above' :'below', dynamicPosition: hasVocals ? 'above' : 'below' };
 		// These decorations don't affect the placement of other decorations
 		volumeDecoration(voice, decoration, abselem, positioning.volumePosition);
 		this.dynamicDecoration(voice, decoration, abselem, positioning.dynamicPosition);

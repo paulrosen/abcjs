@@ -240,6 +240,14 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 	// If there are multiple staves, then renderer.y will be incremented for each new staff.
 
 	var startY = renderer.y; // So that it can be restored after we're done.
+	// Set the absolute Y position for each staff here, so the voice drawing below can just use if.
+	for (var j = 0; j < this.staffs.length; j++) {
+		var staff1 = this.staffs[j];
+		renderer.moveY(ABCJS.write.spacing.STEP, staff1.top);
+		staff1.absoluteY = renderer.y;
+		if (staff1.bottom < 0)
+			renderer.moveY(ABCJS.write.spacing.STEP, -staff1.bottom);
+	}
 	var topLine; // these are to connect multiple staves. We need to remember where they are.
 	var bottomLine;
 
@@ -247,10 +255,11 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 	renderer.measureNumber = null;
 	for (var i=0;i<this.voices.length;i++) {
 		var staff = this.voices[i].staff;
+		renderer.y = staff.absoluteY;
 		//renderer.y = staff.y;
 		// offset for starting the counting at middle C
 		if (!this.voices[i].duplicate) {
-			renderer.moveY(ABCJS.write.spacing.STEP, staff.top);
+//			renderer.moveY(ABCJS.write.spacing.STEP, staff.top);
 			if (!topLine) topLine  = renderer.calcY(10);
 			bottomLine  = renderer.calcY(2);
 			if (staff.lines !== 0)
@@ -259,8 +268,8 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 		this.voices[i].draw(renderer, bartop);
 		if (!this.voices[i].duplicate) {
 			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
-			if (staff.bottom < 0)
-				renderer.moveY(ABCJS.write.spacing.STEP, -staff.bottom);
+//			if (staff.bottom < 0)
+//				renderer.moveY(ABCJS.write.spacing.STEP, -staff.bottom);
 		}
 	}
 	renderer.measureNumber = null;
