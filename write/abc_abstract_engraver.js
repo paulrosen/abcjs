@@ -49,6 +49,9 @@ ABCJS.write.AbstractEngraver = function(glyphs, bagpipes) {
   this.isBagpipes = bagpipes;
   this.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
                  note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter"},
+                 rhythm:{"-1": "noteheads.slash.whole", 0:"noteheads.slash.whole", 1:"noteheads.slash.half", 2:"noteheads.slash.quarter", 3:"noteheads.slash.quarter", 4:"noteheads.slash.quarter", 5:"noteheads.slash.quarter", 6:"noteheads.slash.quarter"},
+                 x:{"-1": "noteheads.indeterminate", 0:"noteheads.indeterminate", 1:"noteheads.indeterminate", 2:"noteheads.indeterminate", 3:"noteheads.indeterminate", 4:"noteheads.indeterminate", 5:"noteheads.indeterminate", 6:"noteheads.indeterminate"},
+                 harmonic:{"-1": "noteheads.harmonic.whole", 0:"noteheads.harmonic.whole", 1:"noteheads.harmonic.whole", 2:"noteheads.harmonic.quarter", 3:"noteheads.harmonic.quarter", 4:"noteheads.harmonic.quarter", 5:"noteheads.harmonic.quarter", 6:"noteheads.harmonic.quarter"},
                  uflags:{3:"flags.u8th", 4:"flags.u16th", 5:"flags.u32nd", 6:"flags.u64th"},
                  dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}};
 	this.reset();
@@ -320,6 +323,12 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     abselem3.addChild(new ABCJS.write.TempoElement(elem));
     elemset[0] = abselem3;
     break;
+	  case "style":
+		  if (elem.head === "normal")
+			  delete this.style;
+		  else
+			  this.style = elem.head;
+		  break;
   default:
     var abselem2 = new ABCJS.write.AbsoluteElement(elem,0,0, 'unsupported');
     abselem2.addChild(new ABCJS.write.RelativeElement("element type "+elem.el_type, 0, 0, undefined, {type:"debug"}));
@@ -477,7 +486,14 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     elem.maxpitch = elem.pitches[elem.pitches.length-1].verticalPos;
     var dir = (elem.averagepitch>=6) ? "down": "up";
     if (this.stemdir) dir=this.stemdir;
-    
+
+	  var noteSymbol = this.chartable.note[-durlog];
+	  var style = elem.style ? elem.style : this.style; // get the style of note head.
+	  if (!style || style === "normal") style = "note";
+	  noteSymbol = this.chartable[style][-durlog];
+	  if (nostem)
+		  noteSymbol = this.chartable[style][2]; // 2 is the quarter note position
+
     // determine elements of chords which should be shifted
     for (p=(dir==="down")?elem.pitches.length-2:1; (dir==="down")?p>=0:p<elem.pitches.length; p=(dir==="down")?p-1:p+1) {
       var prev = elem.pitches[(dir==="down")?p+1:p-1];
@@ -489,9 +505,9 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
           additionalLedgers.push(curr.verticalPos - (curr.verticalPos%2));
         }
         if (dir==="down") {
-         this.roomtaken = this.glyphs.getSymbolWidth(this.chartable.note[-durlog])+2;
+         this.roomtaken = this.glyphs.getSymbolWidth(noteSymbol)+2;
         } else {
-         dotshiftx = this.glyphs.getSymbolWidth(this.chartable.note[-durlog])+2;
+         dotshiftx = this.glyphs.getSymbolWidth(noteSymbol)+2;
         }
       }
     }
@@ -510,11 +526,8 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
         } else {
          flag = this.chartable[(dir==="down")?"dflags":"uflags"][-durlog];
         }
-        c = this.chartable.note[-durlog];
-      } else {
-        c="noteheads.quarter";
       }
-
+		c = noteSymbol;
                 // The highest position for the sake of placing slurs is itself if the slur is internal. It is the highest position possible if the slur is for the whole chord.
                 // If the note is the only one in the chord, then any slur it has counts as if it were on the whole chord.
                 elem.pitches[p].highestVert = elem.pitches[p].verticalPos;

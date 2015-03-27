@@ -18,7 +18,7 @@
 //unexpected elements in it. It also returns a person-readable version of it that is suitable
 //for regression tests.
 
-/*global window */
+/*global $ */
 
 // Changes for V1.0.1:
 //
@@ -71,6 +71,7 @@ if (!window.ABCJS.test)
 	window.ABCJS.test = {};
 
 window.ABCJS.test.ParserLint = function() {
+	"use strict";
 	var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
 		"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
 		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
@@ -79,8 +80,7 @@ window.ABCJS.test.ParserLint = function() {
 		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 		"upbow", "downbow", "staccato", "trem1", "trem2", "trem3", "trem4",
 		"/", "//", "//", "///", "turnx", "invertedturn", "invertedturnx", "arpeggio", "trill(", "trill)", "xstem",
-		"mark", "umarcato",
-		"style=normal", "style=harmonic", "style=rhythm", "style=x"
+		"mark", "umarcato"
 	] } };
 
 	var tempoProperties =  {
@@ -222,8 +222,9 @@ window.ABCJS.test.ParserLint = function() {
 		startBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'endBeam', 'beambr' ], optional: true },
 		startSlur: slurProperties,
 		startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true },
-		stemConnectsToAbove: { type: 'boolean', Enum: [ true ], optional: true }
-	};
+		stemConnectsToAbove: { type: 'boolean', Enum: [ true ], optional: true },
+		style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x'], optional: true }
+};
 
 	var keyProperties = { // change deepCopyKey (in parse_header) if there are changes around here
 		accidentals: { type: 'array', optional: true, output: "noindex", items: {

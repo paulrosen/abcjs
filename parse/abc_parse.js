@@ -441,7 +441,7 @@ window.ABCJS.parse.Parse = function() {
 
 	var addSymbols = function(line, words) {
 		// TODO-PER: Currently copied from w: line. This needs to be read as symbols instead.
-		if (!line) { warn("Can't add symbols before the first line of mulsic", line, 0); return; }
+		if (!line) { warn("Can't add symbols before the first line of music", line, 0); return; }
 		words = window.ABCJS.parse.strip(words);
 		if (words.charAt(words.length-1) !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
@@ -1058,9 +1058,13 @@ window.ABCJS.parse.Parse = function() {
 								if (i + 1 < line.length)
 									startNewLine();	// There was a ! in the middle of the line. Start a new line if there is anything after it.
 							} else if (ret[1].length > 0) {
-								if (el.decoration === undefined)
-									el.decoration = [];
-								el.decoration.push(ret[1]);
+								if (ret[1].indexOf("style=") === 0) {
+									el.style = ret[1].substr(6);
+								} else {
+									if (el.decoration === undefined)
+										el.decoration = [];
+									el.decoration.push(ret[1]);
+								}
 							}
 							i += ret[0];
 						} else {
