@@ -52,8 +52,10 @@ ABCJS.write.EngraverController = function(paper, params) {
   this.glyphs = new ABCJS.write.Glyphs(); // we need the glyphs for layout information
   this.scale = params.scale || undefined;
 	if (params.staffwidth) {
-		this.staffwidthScreen = params.staffwidth * 1.33;
-		this.staffwidthPrint = params.staffwidth * 1.33;
+		// Note: Normally all measurements to the engraver are in POINTS. However, if a person is formatting for the
+		// screen and directly inputting the width, then it is more logical to have the measurement in pixels.
+		this.staffwidthScreen = params.staffwidth * 1.66;
+		this.staffwidthPrint = params.staffwidth * 1.66;
 	} else {
 		this.staffwidthScreen = 740; // TODO-PER: Not sure where this number comes from, but this is how it's always been.
 		this.staffwidthPrint = 680; // The number of pixels in 8.5", after 1cm of margin has been removed.
