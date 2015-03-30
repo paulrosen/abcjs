@@ -171,6 +171,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 			abcLine.staffGroup.height = abcLine.staffGroup.calcHeight();
 		}
 	}
+
 	// Do all the writing to output
 	this.renderer.topMargin(abctune);
 	//this.renderer.printHorizontalLine(this.width + this.renderer.padding.left + this.renderer.padding.right);
