@@ -190,15 +190,20 @@ window.ABCJS.parse.Parse = function() {
 	var legalAccents = [ "trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
 		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
-		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
-		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "slide", "^", "marcato",
+		"segno", "coda", "D.S.", "D.C.", "fine",
+		"slide", "^", "marcato",
 		"upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4",
 		"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato",
 		"style=normal", "style=harmonic", "style=rhythm", "style=x"
 	];
-	var accentPsuedonyms = [ ["<", "accent"], [">", "accent"], ["tr", "trill"], ["<(", "crescendo("], ["<)", "crescendo)"],
-		[">(", "diminuendo("], [">)", "diminuendo)"], ["plus", "+"], [ "emphasis", "accent"],
+	var volumeDecorations = [ "p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz" ];
+	var dynamicDecorations = ["crescendo(", "crescendo)", "diminuendo(", "diminuendo)"];
+
+	var accentPseudonyms = [ ["<", "accent"], [">", "accent"], ["tr", "trill"],
+		["plus", "+"], [ "emphasis", "accent"],
 		[ "^", "umarcato" ], [ "marcato", "umarcato" ] ];
+	var accentDynamicPseudonyms = [ ["<(", "crescendo("], ["<)", "crescendo)"],
+		[">(", "diminuendo("], [">)", "diminuendo)"] ];
 	var letter_to_accent = function(line, i)
 	{
 		var macro = multilineVars.macros[line.charAt(i)];
@@ -212,7 +217,19 @@ window.ABCJS.parse.Parse = function() {
 					return (macro === acc);
 				}))
 				return [ 1, macro ];
-			else {
+			else if (window.ABCJS.parse.detect(volumeDecorations, function(acc) {
+					return (macro === acc);
+				})) {
+				if (multilineVars.volumePosition === 'hidden')
+					macro = "";
+				return [1, macro];
+			} else if (window.ABCJS.parse.detect(dynamicDecorations, function(acc) {
+					if (multilineVars.dynamicPosition === 'hidden')
+						macro = "";
+					return (macro === acc);
+				})) {
+				return [1, macro];
+			} else {
 				if (!window.ABCJS.parse.detect(multilineVars.ignoredDecorations, function(dec) {
 					return (macro === dec);
 				}))
@@ -236,8 +253,22 @@ window.ABCJS.parse.Parse = function() {
 					return (ret[1] === acc);
 				}))
 					return ret;
+				if (window.ABCJS.parse.detect(volumeDecorations, function(acc) {
+						return (ret[1] === acc);
+					})) {
+					if (multilineVars.volumePosition === 'hidden' )
+						ret[1] = '';
+						return ret;
+				}
+				if (window.ABCJS.parse.detect(dynamicDecorations, function(acc) {
+						return (ret[1] === acc);
+					})) {
+					if (multilineVars.dynamicPosition === 'hidden' )
+						ret[1] = '';
+						return ret;
+				}
 
-				if (window.ABCJS.parse.detect(accentPsuedonyms, function(acc) {
+				if (window.ABCJS.parse.detect(accentPseudonyms, function(acc) {
 					if (ret[1] === acc[0]) {
 						ret[1] = acc[1];
 						return true;
@@ -246,6 +277,17 @@ window.ABCJS.parse.Parse = function() {
 				}))
 					return ret;
 
+				if (window.ABCJS.parse.detect(accentDynamicPseudonyms, function(acc) {
+					if (ret[1] === acc[0]) {
+						ret[1] = acc[1];
+						return true;
+					} else
+						return false;
+				})) {
+					if (multilineVars.dynamicPosition === 'hidden' )
+						ret[1] = '';
+						return ret;
+				}
 				// We didn't find the accent in the list, so consume the space, but don't return an accent.
 				// Although it is possible that ! was used as a line break, so accept that.
 			if (line.charAt(i) === '!' && (ret[0] === 1 || line.charAt(i+ret[0]-1) !== '!'))
