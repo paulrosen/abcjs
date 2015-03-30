@@ -1,48 +1,36 @@
+<!DOCTYPE html>
 <html>
 <head>
+	<meta charset='utf-8'>
+	<meta http-equiv="Content-Language" content="en">
 	<title>abcjs: Font Generator</title>
 	<script src="raphael.js"></script>
 	<script src="font_generator/Emmentaler_400.font.js"></script>
+	<script src="font_generator/abcjs.font.js"></script>
 	<script src="write/sprintf.js"></script>
-	<script src="font_generator/scalefontemmentaler.js"></script>
+	<script src="font_generator/scale_font.js"></script>
 
 	<script>
-		function doScale() {
-			var paper = Raphael(document.getElementById("canvas"), 1000, 600);
-			var font = paper.getFont("Emmentaler", 500);
-			scale_font(font, 30, paper);
-		}
-
-		function showFont() {
-			var paper = Raphael(document.getElementById("canvas"), 1000, 10000);
-			var font = paper.getFont("Emmentaler", 500);
-			var scale = 30 / 1000;
-			var x = 0;
-			var y = 50;
-			for (glyph in font.glyphs) {
-
-				try {
-					symb = paper.path(font.glyphs[glyph].d).attr({fill: "#000", stroke: "none"});
-					symb.scale(scale, scale, x + 50, y);
-//					symb.translate(x + 30, y);
-					paper.text(x+20, y, glyph.charCodeAt(0).toString(16)).attr("text-anchor", "left");
-				} catch (e) {
-
-				}
-				x = (x + 100) % 900;
-				if (x == 0) y += 50;
-			}
+		function showFonts() {
+			showFont("canvas-abcjs", "abcjs");
+			showFont("canvas-emmentaler", "Emmentaler");
 		}
 	</script>
 </head>
-<body onload="showFont();">
+<body onload="showFonts();">
 <h1>abcjs Character Table</h1>
 <p>These are all the characters available to <b>abcjs</b>. Not all of them are used, however. The actual
-	characters that are in abcjs are listed in <b>scalefontemmentaler.js</b> in the object <b>glyphnames</b>.
-	Click here to generate the code that should be put into <b>abc_glyphs.js</b> to make the characters available.
-	<button onclick="doScale();">Generate Font Code</button>
+	characters that are in abcjs are listed in <b>scale_font.js</b> in the object <b>glyphnames</b>.
+	Click "Generate Font Code" to generate the code that should be put into <b>abc_glyphs.js</b> to make the characters available.
 </p>
-<div id="generated-font" style="overflow: scroll;white-space: nowrap;"></div>
-<div id="canvas"></div>
+<h2>abcjs Font:</h2>
+<button onclick='doScale("canvas-scratch", "generated-font-abcjs", "abcjs");'>Generate Font Code</button>
+<div id="generated-font-abcjs" style="overflow: scroll;white-space: nowrap;"></div>
+<div id="canvas-abcjs"></div>
+<h2>Emmentaler Font:</h2>
+<button onclick='doScale("canvas-scratch", "generated-font-emmentaler", "Emmentaler");'>Generate Font Code</button>
+<div id="generated-font-emmentaler" style="overflow: scroll;white-space: nowrap;"></div>
+<div id="canvas-emmentaler"></div>
+<div id="canvas-scratch"></div>
 </body>
 </html>
