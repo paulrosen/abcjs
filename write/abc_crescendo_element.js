@@ -43,13 +43,14 @@ ABCJS.write.CrescendoElem.prototype.setUpperAndLowerElements = function(position
 ABCJS.write.CrescendoElem.prototype.draw = function (renderer) {
 	if (this.pitch === undefined)
 		window.console.error("Crescendo Element y-coordinate not set.");
-	var y = renderer.calcY(this.pitch);
+	var y = renderer.calcY(this.pitch) + 2; // This is the top pixel to use (it is offset a little so that it looks good with the volume marks.)
+	var height = 8;
 	if (this.dir === "<") {
-		this.drawLine(renderer, y, y-4);
-		this.drawLine(renderer, y, y+4);
+		this.drawLine(renderer, y+height/2, y);
+		this.drawLine(renderer, y+height/2, y+height);
 	} else {
-		this.drawLine(renderer, y-4, y);
-		this.drawLine(renderer, y+4, y);
+		this.drawLine(renderer, y, y+height/2);
+		this.drawLine(renderer, y+height, y+height/2);
 	}
 };
 
