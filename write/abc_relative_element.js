@@ -35,7 +35,9 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 	this.pitch2 = opt.pitch2;
 	this.linewidth = opt.linewidth;
 	this.top = pitch;
+	if (this.pitch2 !== undefined && this.pitch2 > this.top) this.top = this.pitch2;
 	this.bottom = pitch;
+	if (this.pitch2 !== undefined && this.pitch2 < this.bottom) this.bottom = this.pitch2;
 	if (opt.thickness) {
 		this.top += opt.thickness/2;
 		this.bottom -= opt.thickness/2;

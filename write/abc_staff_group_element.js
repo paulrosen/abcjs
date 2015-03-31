@@ -239,30 +239,34 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 	// renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
 	// If there are multiple staves, then renderer.y will be incremented for each new staff.
 
-	//function debugPrint(staff, key) {
-	//	if (staff.positionY[key])
-	//		renderer.printHorizontalLine(50, renderer.calcY(staff.positionY[key]), key.substr(0,4) +" " + Math.round(staff.positionY[key]));
-	//}
+	if (ABCJS.write.debugPlacement) {
+		var debugPrint = function(staff, key) {
+			if (staff.positionY[key])
+				renderer.printHorizontalLine(50, renderer.calcY(staff.positionY[key]), key.substr(0, 4) + " " + Math.round(staff.positionY[key]));
+		};
+	}
 
 	var startY = renderer.y; // So that it can be restored after we're done.
 	// Set the absolute Y position for each staff here, so the voice drawing below can just use if.
 	for (var j = 0; j < this.staffs.length; j++) {
 		var staff1 = this.staffs[j];
-		//renderer.printHorizontalLine(50, renderer.y, "top");
+		//renderer.printHorizontalLine(50, renderer.y, "start");
 		renderer.moveY(ABCJS.write.spacing.STEP, staff1.top);
 		staff1.absoluteY = renderer.y;
-		//debugPrint(staff1, 'chordHeightAbove');
-		//debugPrint(staff1, 'chordHeightBelow');
-		//debugPrint(staff1, 'dynamicHeightAbove');
-		//debugPrint(staff1, 'dynamicHeightBelow');
-		//debugPrint(staff1, 'endingHeightAbove');
-		//debugPrint(staff1, 'lyricHeightAbove');
-		//debugPrint(staff1, 'lyricHeightBelow');
-		//debugPrint(staff1, 'partHeightAbove');
-		//debugPrint(staff1, 'tempoHeightAbove');
-		//debugPrint(staff1, 'volumeHeightAbove');
-		//debugPrint(staff1, 'volumeHeightBelow');
-
+		if (ABCJS.write.debugPlacement) {
+			renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff1.originalTop), renderer.controller.width, renderer.calcY(staff1.originalBottom)-renderer.calcY(staff1.originalTop),0.1);
+			debugPrint(staff1, 'chordHeightAbove');
+			debugPrint(staff1, 'chordHeightBelow');
+			debugPrint(staff1, 'dynamicHeightAbove');
+			debugPrint(staff1, 'dynamicHeightBelow');
+			debugPrint(staff1, 'endingHeightAbove');
+			debugPrint(staff1, 'lyricHeightAbove');
+			debugPrint(staff1, 'lyricHeightBelow');
+			debugPrint(staff1, 'partHeightAbove');
+			debugPrint(staff1, 'tempoHeightAbove');
+			debugPrint(staff1, 'volumeHeightAbove');
+			debugPrint(staff1, 'volumeHeightBelow');
+		}
 		if (staff1.bottom < 0)
 			renderer.moveY(ABCJS.write.spacing.STEP, -staff1.bottom);
 	}

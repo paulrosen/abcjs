@@ -32,6 +32,8 @@ ABCJS.write.spacing.TOPNOTE = 15;
 ABCJS.write.spacing.STAVEHEIGHT = 100;
 ABCJS.write.spacing.INDENT = 50;
 
+ABCJS.write.debugPlacement = false; // Set this to true to get lots of lines and boxes on the page to make sense of the placement.
+
 /**
  * @class
  * Controls the engraving process, from ABCJS Abstract Syntax Tree (ABCJS AST) to rendered score sheet

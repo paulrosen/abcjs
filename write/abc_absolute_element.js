@@ -133,16 +133,20 @@ ABCJS.write.AbsoluteElement.prototype.addChild = function (child) {
 };
 
 ABCJS.write.AbsoluteElement.prototype.pushTop = function (top) {
-	if (top)
+	if (top !== undefined)
 		this.top = Math.max(top, this.top);
 };
 
 ABCJS.write.AbsoluteElement.prototype.pushBottom = function (bottom) {
-	if (bottom)
+	if (bottom !== undefined)
 		this.bottom = Math.min(bottom, this.bottom);
 };
 
 ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
+	if (ABCJS.write.debugPlacement) {
+		renderer.printShadedBox(this.x, renderer.calcY(this.top), this.w, renderer.calcY(this.bottom)-renderer.calcY(this.top), 0.3);
+	}
+
 	this.elemset = renderer.paper.set();
 	if (this.invisible) return;
 	renderer.beginGroup();
