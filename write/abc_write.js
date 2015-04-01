@@ -393,7 +393,7 @@ ABCJS.write.Printer.prototype.printTune = function (abctune) {
   this.width+=this.paddingleft;
   if (abctune.formatting.scale) { this.scale=abctune.formatting.scale; }
 	if (abctune.metaText.title)
-      this.renderText(this.width/2, this.y, abctune.metaText.title, 'titlefont', 'title meta-top');
+      this.renderText(this.width/2*this.scale, this.y, abctune.metaText.title, 'titlefont', 'title meta-top');
   this.y+=20*this.scale;
   if (abctune.lines[0] && abctune.lines[0].subtitle) {
     this.printSubtitleLine(abctune.lines[0]);

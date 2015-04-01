@@ -629,6 +629,7 @@ ABCJS.midi.MidiWriter.prototype.writeNote = function(elem) {
   if (elem.endTriplet) {
     this.multiplier=1;
   }
+  mp = midipitches
 
 };
 
