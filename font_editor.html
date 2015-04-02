@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'>
+	<meta http-equiv="Content-Language" content="en">
+	<title>abcjs: Font Generator</title>
+	<script src="raphael.js"></script>
+	<script src="font_generator/scale_font.js"></script>
+
+	<style media="screen" type="text/css">
+		textarea {
+			width: 800px;
+			height: 200px;
+			margin-bottom: 12px;
+		}
+
+	</style>
+
+	<script>
+		function testFont() {
+			var el = document.getElementById("character-definition");
+			var text = el.value;
+			Raphael.registerFont({
+				"w": 250,
+				"face": {
+					"font-family": "abcjs",
+					"font-weight": 400,
+					"font-stretch": "normal",
+					"units-per-em": "1000",
+					"panose-1": "2 0 5 3 0 0 0 0 0 0",
+					"ascent": "800",
+					"descent": "-200",
+					"x-height": "25",
+					"bbox": "-513.5 -1248.89 800.126 1323.13",
+					"underline-thickness": "50",
+					"underline-position": "-75",
+					"unicode-range": "U+E300-U+E310"
+				},
+				"glyphs": {
+					"\ue301": {
+						"d": text,
+						"w": 500
+					}
+				}
+			});
+			el = document.getElementById("canvas-abcjs");
+			el.innerHTML = "";
+			showFont("canvas-abcjs", "abcjs");
+		}
+	</script>
+</head>
+<body>
+<h1>abcjs Font Editor</h1>
+<p>
+</p>
+<textarea id="character-definition" onkeyup="testFont();"></textarea>
+<div id="canvas-abcjs"></div>
+</body>
+</html>
