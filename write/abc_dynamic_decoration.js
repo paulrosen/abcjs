@@ -26,9 +26,9 @@ ABCJS.write.DynamicDecoration = function(anchor, dec, position) {
 	this.anchor = anchor;
 	this.dec = dec;
 	if (position === 'below')
-		this.volumeHeightBelow = 3;
+		this.volumeHeightBelow = 5;
 	else
-		this.volumeHeightAbove = 3;
+		this.volumeHeightAbove = 5;
 	this.pitch = undefined; // This will be set later
 };
 

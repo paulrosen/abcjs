@@ -239,10 +239,18 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 	// renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
 	// If there are multiple staves, then renderer.y will be incremented for each new staff.
 
+	var debugPrint;
+	var colorIndex;
 	if (ABCJS.write.debugPlacement) {
-		var debugPrint = function(staff, key) {
-			if (staff.positionY[key])
-				renderer.printHorizontalLine(50, renderer.calcY(staff.positionY[key]), key.substr(0, 4) + " " + Math.round(staff.positionY[key]));
+		var colors = [ "rgba(207,27,36,0.4)", "rgba(168,214,80,0.4)", "rgba(110,161,224,0.4)", "rgba(191,119,218,0.4)", "rgba(195,30,151,0.4)",
+			"rgba(31,170,177,0.4)", "rgba(220,166,142,0.4)" ];
+		debugPrint = function(staff, key) {
+			if (staff.positionY[key]) {
+				//renderer.printHorizontalLine(50, renderer.calcY(staff.positionY[key]), key.substr(0, 4) + " " + Math.round(staff.positionY[key]));
+				var height = staff.specialY[key] * ABCJS.write.spacing.STEP;
+				renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff.positionY[key]), renderer.controller.width, height,colors[colorIndex], key.substr(0, 4));
+				colorIndex += 1; if (colorIndex > 6) colorIndex = 0;
+			}
 		};
 	}
 
@@ -254,7 +262,8 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 		renderer.moveY(ABCJS.write.spacing.STEP, staff1.top);
 		staff1.absoluteY = renderer.y;
 		if (ABCJS.write.debugPlacement) {
-			renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff1.originalTop), renderer.controller.width, renderer.calcY(staff1.originalBottom)-renderer.calcY(staff1.originalTop),0.1);
+			colorIndex = 0;
+			renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff1.originalTop), renderer.controller.width, renderer.calcY(staff1.originalBottom)-renderer.calcY(staff1.originalTop),"rgba(0,0,0,0.1)");
 			debugPrint(staff1, 'chordHeightAbove');
 			debugPrint(staff1, 'chordHeightBelow');
 			debugPrint(staff1, 'dynamicHeightAbove');

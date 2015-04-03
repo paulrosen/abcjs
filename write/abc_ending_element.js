@@ -26,7 +26,7 @@ ABCJS.write.EndingElem = function(text, anchor1, anchor2) {
 	this.text = text; // text to be displayed top left
 	this.anchor1 = anchor1; // must have a .x property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
-	this.endingHeightAbove = 3;
+	this.endingHeightAbove = 5;
 	this.pitch = undefined; // This will be set later
 };
 
@@ -38,25 +38,26 @@ ABCJS.write.EndingElem.prototype.draw = function (renderer, linestartx, lineendx
 	if (this.pitch === undefined)
 		window.console.error("Ending Element y-coordinate not set.");
 	var y = renderer.calcY(this.pitch);
+	var height = 20;
 	var pathString;
 	if (this.anchor1) {
 		linestartx = this.anchor1.x+this.anchor1.w;
 		pathString = ABCJS.write.sprintf("M %f %f L %f %f",
-			linestartx, y, linestartx, y+10);
-		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')}); //TODO scale
-		renderer.renderText(linestartx+5, renderer.calcY(this.pitch-1), this.text, 'repeatfont', 'ending',"start");
+			linestartx, y, linestartx, y+height);
+		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});
+		renderer.renderText(linestartx+5, renderer.calcY(this.pitch-0.5), this.text, 'repeatfont', 'ending',"start");
 	}
 
 	if (this.anchor2) {
 		lineendx = this.anchor2.x;
 		pathString = ABCJS.write.sprintf("M %f %f L %f %f",
-			lineendx, y, lineendx, y+10);
-		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')}); // TODO scale
+			lineendx, y, lineendx, y+height);
+		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});
 	}
 
 
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
 		linestartx, y, lineendx, y);
-	renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});  // TODO scale
+	renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});
 };
 

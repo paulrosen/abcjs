@@ -688,7 +688,7 @@ ABCJS.write.Renderer.prototype.outputTextIf = function(x, str, kind, klass, marg
 // For debugging, it is sometimes useful to know where you are vertically.
 ABCJS.write.Renderer.prototype.printHorizontalLine = function (width, vertical, comment) {
 	var dy = 0.35;
-	var fill = "#0000aa";
+	var fill = "rgba(0,0,255,.4)";
 	var y = this.y;
 	if (vertical) y = vertical;
 	y = Math.round(y);
@@ -707,8 +707,10 @@ ABCJS.write.Renderer.prototype.printHorizontalLine = function (width, vertical, 
 		this.paper.text(width+70, y, comment).attr({"text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
 };
 
-ABCJS.write.Renderer.prototype.printShadedBox = function (x, y, width, height, opacity) {
-	this.paper.rect(x, y, width, height).attr({fill: "rgba(0,0,0,"+opacity+")", stroke: "rgba(0,0,0,"+opacity+")" });
+ABCJS.write.Renderer.prototype.printShadedBox = function (x, y, width, height, color, comment) {
+	this.paper.rect(x, y, width, height).attr({fill: color, stroke: color });
+	if (comment)
+		this.paper.text(0, y+7, comment).attr({"text-anchor": "start", "font-size":"14px", fill: "rgba(0,0,255,.4)", stroke: "rgba(0,0,255,.4)" });
 };
 
 ABCJS.write.Renderer.prototype.printVerticalLine = function (x, y1, y2) {

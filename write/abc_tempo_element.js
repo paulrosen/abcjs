@@ -24,13 +24,15 @@ if (!window.ABCJS.write)
 
 (function() {
 	"use strict";
+	var totalHeightInPitches = 5;
+
 	ABCJS.write.TempoElement = function(tempo) {
 		this.tempo = tempo;
-		this.tempoHeightAbove = 5;
+		this.tempoHeightAbove = totalHeightInPitches;
 		this.pitch = undefined; // This will be set later
 	};
 
-	ABCJS.write.TempoElement.prototype.setUpperAndLowerElements = function(positionY) {
+	ABCJS.write.TempoElement.prototype.setUpperAndLowerElements = function(positionY) { // TODO-PER: This might not be called.
 		this.pitch = positionY.tempoHeightAbove;
 	};
 
@@ -40,18 +42,15 @@ if (!window.ABCJS.write)
 
 		var y = renderer.calcY(this.pitch);
 		var text;
-		var noteHeight = -12; // the note height was just determined empirically.
-		//var totalHeight = noteHeight;
 		if (this.tempo.preString) {
-			text = renderer.renderText(x, y + noteHeight, this.tempo.preString, 'tempofont', 'tempo', "start");
+			text = renderer.renderText(x, y, this.tempo.preString, 'tempofont', 'tempo', "start");
 			var preWidth = text.getBBox().width;
 			var charWidth = preWidth / this.tempo.preString.length; // Just get some average number to increase the spacing.
 			x += preWidth + charWidth;
-			//totalHeight = Math.max(totalHeight, text.getBBox().height);
 		}
 		if (this.tempo.duration) {
 			var temposcale = 0.75;
-			var tempopitch = this.pitch; // note: placement determined empirically
+			var tempopitch = this.pitch - totalHeightInPitches + 1; // The pitch we receive is the top of the allotted area: change that to practically the bottom.
 			var duration = this.tempo.duration[0]; // TODO when multiple durations
 			var abselem = new ABCJS.write.AbsoluteElement(this.tempo, duration, 1, 'tempo');
 			var durlog = Math.floor(Math.log(duration) / Math.log(2));
@@ -59,7 +58,7 @@ if (!window.ABCJS.write)
 			for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
 			var c = renderer.engraver.chartable.note[-durlog];
 			var flag = renderer.engraver.chartable.uflags[-durlog];
-			var temponote = renderer.engraver.createNoteHead(abselem,
+			var temponote = renderer.engraver.createNoteHead(abselem, // TODO-PER: This seems late to be creating this element. Shouldn't it happen before draw?
 				c,
 				{verticalPos: tempopitch},
 				"up",
@@ -81,21 +80,18 @@ if (!window.ABCJS.write)
 				abselem.addExtra(stem);
 			}
 			abselem.x = x;
-			//abselem.draw(renderer, null);
 			temponote.draw(renderer, x);
 			if (stem)
 				stem.draw(renderer, x);
 			x += (abselem.w + 5);
 			var str = "= " + this.tempo.bpm;
-			text = renderer.renderText(x, y + noteHeight, str, 'tempofont', 'tempo', "start");
+			text = renderer.renderText(x, y, str, 'tempofont', 'tempo', "start");
 			var postWidth = text.getBBox().width;
 			var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
 			x += postWidth + charWidth2;
-			//totalHeight = Math.max(totalHeight, text.getBBox().height);
 		}
 		if (this.tempo.postString) {
-			renderer.renderText(x, y + noteHeight, this.tempo.postString, 'tempofont', 'tempo', "start");
-			//totalHeight = Math.max(totalHeight, text.getBBox().height);
+			renderer.renderText(x, y, this.tempo.postString, 'tempofont', 'tempo', "start");
 		}
 	};
 })();

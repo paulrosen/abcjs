@@ -144,7 +144,7 @@ ABCJS.write.AbsoluteElement.prototype.pushBottom = function (bottom) {
 
 ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	if (ABCJS.write.debugPlacement) {
-		renderer.printShadedBox(this.x, renderer.calcY(this.top), this.w, renderer.calcY(this.bottom)-renderer.calcY(this.top), 0.3);
+		renderer.printShadedBox(this.x, renderer.calcY(this.top), this.w, renderer.calcY(this.bottom)-renderer.calcY(this.top), "rgba(0,0,0,0.3)");
 	}
 
 	this.elemset = renderer.paper.set();

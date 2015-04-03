@@ -65,21 +65,21 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 		case "chord":
 			multiplier = this.c.split("\n").length;
 			if (opt.position && opt.position === 'below')
-				this.chordHeightBelow = 3*multiplier;
+				this.chordHeightBelow = 4*multiplier;
 			else
-				this.chordHeightAbove = 3*multiplier;
+				this.chordHeightAbove = 4*multiplier;
 			break;
 		case "text":
 			multiplier = this.c.split("\n").length;
 			if (this.pitch === undefined) {
 				if (opt.position && opt.position === 'below')
-					this.chordHeightBelow = 3*multiplier;
+					this.chordHeightBelow = 4*multiplier;
 				else
-					this.chordHeightAbove = 3*multiplier;
+					this.chordHeightAbove = 4*multiplier;
 			} else
 				this.centerVertically = true;
 			break;
-		case "part": this.partHeightAbove = 3; break;
+		case "part": this.partHeightAbove = 6; break;
 	}
 };
 
