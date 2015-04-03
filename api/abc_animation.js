@@ -20,6 +20,7 @@ if (!window.ABCJS)
 	window.ABCJS = {};
 
 (function() {
+	"use strict";
 
 	function hasClass(element, cls) {
 		var elClass = element.getAttribute("class");
@@ -79,6 +80,7 @@ if (!window.ABCJS)
 		if (options.showCursor) {
 			cursor = $('<div class="cursor" style="position: absolute;"></div>');
 			$(paper).append(cursor);
+			$(paper).css({ position: "relative" });
 		}
 
 		stopNextTime = false;
@@ -107,7 +109,14 @@ if (!window.ABCJS)
 					arr.push(hash[k]);
 			}
 			arr = arr.sort(function(a,b) {
-				return a.time - b.time;
+				var diff = a.time - b.time;
+				// if the events have the same time, make sure a bar comes before a note
+				if (diff !== 0) {
+					return diff;
+				}
+				else {
+					return a.type === "bar" ? -1 : 1;
+				}
 			});
 			return arr;
 		}
@@ -121,8 +130,10 @@ if (!window.ABCJS)
 			for (var line=0;line<engraver.staffgroups.length; line++) {
 				var group = engraver.staffgroups[line];
 				var voices = group.voices;
-				var top = group.y;
-				var height = group.height;
+				var firstStaff = group.staffs[0];
+				var middleC = firstStaff.absoluteY;
+				var top = middleC - firstStaff.top*ABCJS.write.spacing.STEP;
+				var height = (firstStaff.top - firstStaff.bottom)*ABCJS.write.spacing.STEP;
 				var maxVoiceTime = 0;
 				// Put in the notes for all voices, then sort them, then remove duplicates
 				for (var v = 0; v < voices.length; v++) {
@@ -184,7 +195,9 @@ if (!window.ABCJS)
 			if (currentNote.type === "bar") {
 				if (options.hideFinishedMeasures)
 					processMeasureHider(currentNote.lineNum, currentNote.measureNum);
-				return processShowCursor();
+				if (timingEvents.length > 0)
+					return timingEvents[0].time / beatLength;
+				return 0;
 			}
 			if (options.showCursor)
 				cursor.css({ left: currentNote.left + "px", top: currentNote.top + "px", width: currentNote.width + "px", height: currentNote.height + "px" });
