@@ -26,12 +26,10 @@ if (!window.ABCJS.write)
 /**
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
  * @param {Object} paper
- * @param {ABCJS.write.Glyphs} glyphs
  * @param {bool} doRegression
  */
-ABCJS.write.Renderer = function(paper, glyphs, doRegression) {
+ABCJS.write.Renderer = function(paper, doRegression) {
   this.paper = paper;
-  this.glyphs = glyphs;
   this.controller = null; //TODO-GD only used when drawing the ABCJS ARS to connect the controller with the elements for highlighting
 
 	this.space = 3*ABCJS.write.spacing.SPACE;
@@ -511,24 +509,24 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
     var dx =0;
     for (var i=0; i<symbol.length; i++) {
         var s = symbol.charAt(i);
-        ycorr = this.glyphs.getYCorr(s);
-			el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), s, this.paper, klass);
+        ycorr = ABCJS.write.glyphs.getYCorr(s);
+			el = ABCJS.write.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), s, this.paper, klass);
 			if (el) {
 				if (this.doRegression) this.addToRegression(el);
 				elemset.push(el);
 				if (i < symbol.length-1)
-					dx+= kernSymbols(s, symbol.charAt(i+1), this.glyphs.getSymbolWidth(s));
+					dx+= kernSymbols(s, symbol.charAt(i+1), ABCJS.write.glyphs.getSymbolWidth(s));
 			} else {
 				this.renderText(x, this.y, "no symbol:" +symbol, "debugfont", 'debug-msg', 'start');
       }
     }
     return elemset;
   } else {
-    ycorr = this.glyphs.getYCorr(symbol);
+    ycorr = ABCJS.write.glyphs.getYCorr(symbol);
     if (this.ingroup) {
-      this.addPath(this.glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
+      this.addPath(ABCJS.write.glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
     } else {
-      el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper, klass);
+      el = ABCJS.write.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper, klass);
       if (el) {
 	if (this.doRegression) this.addToRegression(el);
 	return el;

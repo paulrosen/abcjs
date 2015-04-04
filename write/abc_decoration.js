@@ -25,15 +25,14 @@ if (!window.ABCJS.write)
 (function() {
 	"use strict";
 
-	ABCJS.write.Decoration = function(glyphs) {
-		this.glyphs = glyphs;
+	ABCJS.write.Decoration = function() {
 		this.startDiminuendoX = undefined;
 		this.startCrescendoX = undefined;
 		this.minTop = 12;	// TODO-PER: this is assuming a 5-line staff. Pass that info in.
 		this.minBottom = 0;
 	};
 
-	var closeDecoration = function(voice, glyphs, decoration, pitch, width, abselem, roomtaken, dir, minPitch) {
+	var closeDecoration = function(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch) {
 		var yPos;
 		for (var i=0;i<decoration.length; i++) {
 			if (decoration[i]==="staccato" || decoration[i]==="tenuto" || decoration[i] === "accent") {
@@ -62,10 +61,10 @@ if (!window.ABCJS.write)
 				}
 				if (pitch>9) yPos++; // take up some room of those that are above
 				var deltaX = width/2;
-				if (glyphs.getSymbolAlign(symbol)!=="center") {
-					deltaX -= (glyphs.getSymbolWidth(symbol)/2);
+				if (ABCJS.write.glyphs.getSymbolAlign(symbol)!=="center") {
+					deltaX -= (ABCJS.write.glyphs.getSymbolWidth(symbol)/2);
 				}
-				abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), yPos));
+				abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, ABCJS.write.glyphs.getSymbolWidth(symbol), yPos));
 			}
 			if (decoration[i]==="slide" && abselem.heads[0]) {
 				var yPos2 = abselem.heads[0].pitch;
@@ -103,14 +102,14 @@ if (!window.ABCJS.write)
 		}
 	};
 
-	var compoundDecoration = function(glyphs, decoration, pitch, width, abselem, dir) {
+	var compoundDecoration = function(decoration, pitch, width, abselem, dir) {
 		function compoundDecoration(symbol, count) {
 			var placement = (dir === 'down') ? pitch+1:pitch+9;
 			var deltaX = width/2;
 			deltaX += (dir === 'down') ? -5 : 3;
 			for (var i = 0; i < count; i++) {
 				placement -= 1;
-				abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), placement));
+				abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, ABCJS.write.glyphs.getSymbolWidth(symbol), placement));
 			}
 		}
 
@@ -124,7 +123,7 @@ if (!window.ABCJS.write)
 		}
 	};
 
-	var stackedDecoration = function(glyphs, decoration, width, abselem, yPos, positioning, minTop, minBottom) {
+	var stackedDecoration = function(decoration, width, abselem, yPos, positioning, minTop, minBottom) {
 		function incrementPlacement(placement, height) {
 			if (placement === 'above')
 				yPos.above += height;
@@ -154,13 +153,13 @@ if (!window.ABCJS.write)
 		}
 		function symbolDecoration(symbol, placement) {
 			var deltaX = width/2;
-			if (glyphs.getSymbolAlign(symbol) !== "center") {
-				deltaX -= (glyphs.getSymbolWidth(symbol) / 2);
+			if (ABCJS.write.glyphs.getSymbolAlign(symbol) !== "center") {
+				deltaX -= (ABCJS.write.glyphs.getSymbolWidth(symbol) / 2);
 			}
-			var height = glyphs.getSymbolHeight(symbol) / ABCJS.write.spacing.STEP + 1; // adding a little padding so nothing touches.
+			var height = ABCJS.write.glyphs.getSymbolHeight(symbol) / ABCJS.write.spacing.STEP + 1; // adding a little padding so nothing touches.
 			var y = getPlacement(placement);
 			y = (placement === 'above') ? y + height/2 : y - height/2;// Center the element vertically.
-			abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), y));
+			abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, ABCJS.write.glyphs.getSymbolWidth(symbol), y));
 
 			incrementPlacement(placement, height);
 		}
@@ -289,13 +288,13 @@ if (!window.ABCJS.write)
 		// These decorations don't affect the placement of other decorations
 		volumeDecoration(voice, decoration, abselem, positioning.volumePosition);
 		this.dynamicDecoration(voice, decoration, abselem, positioning.dynamicPosition);
-		compoundDecoration(this.glyphs, decoration, pitch, width, abselem, dir);
+		compoundDecoration(decoration, pitch, width, abselem, dir);
 
 		// treat staccato, accent, and tenuto first (may need to shift other markers)
-		var yPos = closeDecoration(voice, this.glyphs, decoration, pitch, width, abselem, roomtaken, dir, minPitch);
+		var yPos = closeDecoration(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch);
 		// yPos is an object containing 'above' and 'below'. That is the placement of the next symbol on either side.
 
-		var hasOne = stackedDecoration(this.glyphs, decoration, width, abselem, yPos, positioning.ornamentPosition, this.minTop, this.minBottom);
+		var hasOne = stackedDecoration(decoration, width, abselem, yPos, positioning.ornamentPosition, this.minTop, this.minBottom);
 		if (hasOne) {
 			abselem.top = Math.max(yPos.above + 3, abselem.top); // TODO-PER: Not sure why we need this fudge factor.
 		}

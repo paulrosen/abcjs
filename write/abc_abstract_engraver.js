@@ -43,9 +43,8 @@ ABCJS.write.getDurlog = function(duration) {
   return Math.floor(Math.log(duration)/Math.log(2));
 };
 
-ABCJS.write.AbstractEngraver = function(glyphs, bagpipes, renderer) {
-  this.glyphs = glyphs;
-	this.decoration = new ABCJS.write.Decoration(glyphs);
+ABCJS.write.AbstractEngraver = function(bagpipes, renderer) {
+	this.decoration = new ABCJS.write.Decoration();
 	this.renderer = renderer;
   this.isBagpipes = bagpipes;
   this.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
@@ -531,9 +530,9 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
           additionalLedgers.push(curr.verticalPos - (curr.verticalPos%2));
         }
         if (dir==="down") {
-         this.roomtaken = this.glyphs.getSymbolWidth(noteSymbol)+2;
+         this.roomtaken = ABCJS.write.glyphs.getSymbolWidth(noteSymbol)+2;
         } else {
-         dotshiftx = this.glyphs.getSymbolWidth(noteSymbol)+2;
+         dotshiftx = ABCJS.write.glyphs.getSymbolWidth(noteSymbol)+2;
         }
       }
     }
@@ -682,20 +681,20 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   // ledger lines
   for (i=elem.maxpitch; i>11; i--) {
     if (i%2===0 && !elem.rest) {
-      abselem.addChild(new ABCJS.write.RelativeElement(null, -2, this.glyphs.getSymbolWidth(c)+4, i, {type:"ledger"}));
+      abselem.addChild(new ABCJS.write.RelativeElement(null, -2, ABCJS.write.glyphs.getSymbolWidth(c)+4, i, {type:"ledger"}));
     }
   }
   
   for (i=elem.minpitch; i<1; i++) {
     if (i%2===0 && !elem.rest) {
-      abselem.addChild(new ABCJS.write.RelativeElement(null, -2, this.glyphs.getSymbolWidth(c)+4, i, {type:"ledger"}));
+      abselem.addChild(new ABCJS.write.RelativeElement(null, -2, ABCJS.write.glyphs.getSymbolWidth(c)+4, i, {type:"ledger"}));
     }
   }
 
   for (i = 0; i < additionalLedgers.length; i++) { // PER: draw additional ledgers
-    var ofs = this.glyphs.getSymbolWidth(c);
+    var ofs = ABCJS.write.glyphs.getSymbolWidth(c);
     if (dir === 'down') ofs = -ofs;
-    abselem.addChild(new ABCJS.write.RelativeElement(null, ofs-2, this.glyphs.getSymbolWidth(c)+4, additionalLedgers[i], {type:"ledger"}));
+    abselem.addChild(new ABCJS.write.RelativeElement(null, ofs-2, ABCJS.write.glyphs.getSymbolWidth(c)+4, additionalLedgers[i], {type:"ledger"}));
   }
 
   if (elem.chord !== undefined) {
@@ -708,14 +707,14 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
         x = -this.roomtaken;        // TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
 		  // TODO-PER: get the width of the lyric and use that for "0, lyricStr.length*5" below.
-        abselem.addExtra(new ABCJS.write.RelativeElement(elem.chord[i].name, x, this.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
+        abselem.addExtra(new ABCJS.write.RelativeElement(elem.chord[i].name, x, ABCJS.write.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
         break;
       case "right":
         this.roomtakenright+=4;
         x = this.roomtakenright;// TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
 		  // TODO-PER: get the width of the lyric and use that for "0, lyricStr.length*5" below.
-        abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, x, this.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
+        abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, x, ABCJS.write.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
         break;
       case "below":
 		  // setting the y-coordinate to undefined for now: it will be overwritten later one, after we figure out what the highest element on the line is.
@@ -779,22 +778,22 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
     var shiftheadx = headx;
     if (pitchelem.printer_shift) {
       var adjust = (pitchelem.printer_shift==="same")?1:0;
-      shiftheadx = (dir==="down")?-this.glyphs.getSymbolWidth(c)*scale+adjust:this.glyphs.getSymbolWidth(c)*scale-adjust;
+      shiftheadx = (dir==="down")?-ABCJS.write.glyphs.getSymbolWidth(c)*scale+adjust:ABCJS.write.glyphs.getSymbolWidth(c)*scale-adjust;
     }
-	  var opts = {scalex:scale, scaley: scale, thickness: 2*scale };
+	  var opts = {scalex:scale, scaley: scale, thickness: ABCJS.write.glyphs.getSymbolHeight(c)/ABCJS.write.spacing.STEP*scale };
 	  //if (dir)
 	  //	opts.stemHeight = ((dir==="down")?-this.stemHeight:this.stemHeight);
-    notehead = new ABCJS.write.RelativeElement(c, shiftheadx, this.glyphs.getSymbolWidth(c)*scale, pitch, opts);
+    notehead = new ABCJS.write.RelativeElement(c, shiftheadx, ABCJS.write.glyphs.getSymbolWidth(c)*scale, pitch, opts);
     if (flag) {
       var pos = pitch+((dir==="down")?-7:7)*scale;
       if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;
       var xdelta = (dir==="down")?headx:headx+notehead.w-0.6;
-      abselem.addRight(new ABCJS.write.RelativeElement(flag, xdelta, this.glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));
+      abselem.addRight(new ABCJS.write.RelativeElement(flag, xdelta, ABCJS.write.glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));
     }
     this.dotshiftx = notehead.w+dotshiftx-2+5*dot;
     for (;dot>0;dot--) {
       var dotadjusty = (1-Math.abs(pitch)%2); //PER: take abs value of the pitch. And the shift still happens on ledger lines.
-      abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", notehead.w+dotshiftx-2+5*dot, this.glyphs.getSymbolWidth("dots.dot"), pitch+dotadjusty));
+      abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", notehead.w+dotshiftx-2+5*dot, ABCJS.write.glyphs.getSymbolWidth("dots.dot"), pitch+dotadjusty));
     }
   }
         if (notehead)
@@ -836,11 +835,11 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
                  }
          }
          if (accSlotFound === false) {
-                 accPlace -= (this.glyphs.getSymbolWidth(symb)*scale+2);
+                 accPlace -= (ABCJS.write.glyphs.getSymbolWidth(symb)*scale+2);
                  this.accidentalSlot.push([pitch,accPlace]);
-                 this.accidentalshiftx = (this.glyphs.getSymbolWidth(symb)*scale+2);
+                 this.accidentalshiftx = (ABCJS.write.glyphs.getSymbolWidth(symb)*scale+2);
          }
-    abselem.addExtra(new ABCJS.write.RelativeElement(symb, accPlace, this.glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
+    abselem.addExtra(new ABCJS.write.RelativeElement(symb, accPlace, ABCJS.write.glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
   }
   
   if (pitchelem.endTie) {
@@ -1004,7 +1003,7 @@ ABCJS.write.AbstractEngraver.prototype.createClef = function(elem) {
 // }
   var dx =5;
   if (clef) {
-	  abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos));
+	  abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, ABCJS.write.glyphs.getSymbolWidth(clef), elem.clefPos));
 
 	  if (clef === 'clefs.G') {
 		  abselem.top = 13;
@@ -1015,8 +1014,8 @@ ABCJS.write.AbstractEngraver.prototype.createClef = function(elem) {
 	  }
 	  if (octave !== 0) {
 		  var scale = 2 / 3;
-		  var adjustspacing = (this.glyphs.getSymbolWidth(clef) - this.glyphs.getSymbolWidth("8") * scale) / 2;
-		  abselem.addRight(new ABCJS.write.RelativeElement("8", dx + adjustspacing, this.glyphs.getSymbolWidth("8") * scale, (octave > 0) ? abselem.top + 3 : abselem.bottom - 1, {
+		  var adjustspacing = (ABCJS.write.glyphs.getSymbolWidth(clef) - ABCJS.write.glyphs.getSymbolWidth("8") * scale) / 2;
+		  abselem.addRight(new ABCJS.write.RelativeElement("8", dx + adjustspacing, ABCJS.write.glyphs.getSymbolWidth("8") * scale, (octave > 0) ? abselem.top + 3 : abselem.bottom - 1, {
 			  scalex: scale,
 			  scaley: scale
 		  }));
@@ -1027,7 +1026,7 @@ ABCJS.write.AbstractEngraver.prototype.createClef = function(elem) {
 };
 
 	ABCJS.write.AbstractEngraver.prototype.symbolHeightInPitches = function(symbol) {
-		return this.glyphs.getSymbolHeight(symbol) / ABCJS.write.spacing.STEP;
+		return ABCJS.write.glyphs.getSymbolHeight(symbol) / ABCJS.write.spacing.STEP;
 	};
 
 ABCJS.write.AbstractEngraver.prototype.createKeySignature = function(elem) {
@@ -1038,8 +1037,8 @@ ABCJS.write.AbstractEngraver.prototype.createKeySignature = function(elem) {
          window.ABCJS.parse.each(elem.accidentals, function(acc) {
                 var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
                 //var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
-                abselem.addRight(new ABCJS.write.RelativeElement(symbol, dx, this.glyphs.getSymbolWidth(symbol), acc.verticalPos, { thickness: this.symbolHeightInPitches(symbol) }));
-                dx += this.glyphs.getSymbolWidth(symbol)+2;
+                abselem.addRight(new ABCJS.write.RelativeElement(symbol, dx, ABCJS.write.glyphs.getSymbolWidth(symbol), acc.verticalPos, { thickness: this.symbolHeightInPitches(symbol) }));
+                dx += ABCJS.write.glyphs.getSymbolWidth(symbol)+2;
          }, this);
   this.startlimitelem = abselem; // limit ties here
   return abselem;
@@ -1052,20 +1051,20 @@ ABCJS.write.AbstractEngraver.prototype.createTimeSignature= function(elem) {
     //TODO make the alignment for time signatures centered
     for (var i = 0; i < elem.value.length; i++) {
       if (i !== 0)
-        abselem.addRight(new ABCJS.write.RelativeElement('+', i*20-9, this.glyphs.getSymbolWidth("+"), 7, { thickness: this.symbolHeightInPitches("+") }));
+        abselem.addRight(new ABCJS.write.RelativeElement('+', i*20-9, ABCJS.write.glyphs.getSymbolWidth("+"), 7, { thickness: this.symbolHeightInPitches("+") }));
       if (elem.value[i].den) {
 		  // TODO-PER: get real widths here, also center the num and den.
-        abselem.addRight(new ABCJS.write.RelativeElement(elem.value[i].num, i*20, this.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 9, { thickness: this.symbolHeightInPitches(elem.value[i].num.charAt(0)) }));
-        abselem.addRight(new ABCJS.write.RelativeElement(elem.value[i].den, i*20, this.glyphs.getSymbolWidth(elem.value[i].den.charAt(0))*elem.value[i].den.length, 5, { thickness: this.symbolHeightInPitches(elem.value[i].den.charAt(0)) }));
+        abselem.addRight(new ABCJS.write.RelativeElement(elem.value[i].num, i*20, ABCJS.write.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 9, { thickness: this.symbolHeightInPitches(elem.value[i].num.charAt(0)) }));
+        abselem.addRight(new ABCJS.write.RelativeElement(elem.value[i].den, i*20, ABCJS.write.glyphs.getSymbolWidth(elem.value[i].den.charAt(0))*elem.value[i].den.length, 5, { thickness: this.symbolHeightInPitches(elem.value[i].den.charAt(0)) }));
       } else {
-        abselem.addRight(new ABCJS.write.RelativeElement(elem.value[i].num, i*20, this.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 7, { thickness: this.symbolHeightInPitches(elem.value[i].num.charAt(0)) }));
+        abselem.addRight(new ABCJS.write.RelativeElement(elem.value[i].num, i*20, ABCJS.write.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 7, { thickness: this.symbolHeightInPitches(elem.value[i].num.charAt(0)) }));
       }
     }
   } else if (elem.type === "common_time") {
-    abselem.addRight(new ABCJS.write.RelativeElement("timesig.common", 0, this.glyphs.getSymbolWidth("timesig.common"), 7, { thickness: this.symbolHeightInPitches("timesig.common") }));
+    abselem.addRight(new ABCJS.write.RelativeElement("timesig.common", 0, ABCJS.write.glyphs.getSymbolWidth("timesig.common"), 7, { thickness: this.symbolHeightInPitches("timesig.common") }));
     
   } else if (elem.type === "cut_time") {
-    abselem.addRight(new ABCJS.write.RelativeElement("timesig.cut", 0, this.glyphs.getSymbolWidth("timesig.cut"), 7, { thickness: this.symbolHeightInPitches("timesig.cut") }));
+    abselem.addRight(new ABCJS.write.RelativeElement("timesig.cut", 0, ABCJS.write.glyphs.getSymbolWidth("timesig.cut"), 7, { thickness: this.symbolHeightInPitches("timesig.cut") }));
   }
   this.startlimitelem = abselem; // limit ties here
   return abselem;

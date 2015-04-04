@@ -48,6 +48,11 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 		else
 			this.bottom += opt.stemHeight;
 	}
+	if (this.type === "symbol") {
+		var offset = ABCJS.write.glyphs.getYCorr(this.c);
+		this.top += offset;
+		this.bottom += offset;
+	}
 	this.centerVertically = false;
 	// TODO-PER: this should use the current font to determine the height. That requires the font to be passed in here, so refactor to store the font now instead of resolving it at draw time. This will allow the font to be changed mid-line, too.
 	var multiplier;

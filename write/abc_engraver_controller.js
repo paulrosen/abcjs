@@ -51,7 +51,6 @@ ABCJS.write.debugPlacement = false; // Set this to true to get lots of lines and
 ABCJS.write.EngraverController = function(paper, params) {
   params = params || {};
   this.space = 3*ABCJS.write.spacing.SPACE;
-  this.glyphs = new ABCJS.write.Glyphs(); // we need the glyphs for layout information
   this.scale = params.scale || undefined;
 	if (params.staffwidth) {
 		// Note: Normally all measurements to the engraver are in POINTS. However, if a person is formatting for the
@@ -74,7 +73,7 @@ ABCJS.write.EngraverController = function(paper, params) {
 	Raphael._availableAttrs['text-decoration'] = "";
 
   //TODO-GD factor out all calls directly made to renderer.paper and fix all the coupling issues below
-  this.renderer=new ABCJS.write.Renderer(paper, this.glyphs, params.regression);
+  this.renderer=new ABCJS.write.Renderer(paper, params.regression);
 	this.renderer.setPaddingOverride(params);
   this.renderer.controller = this; // TODO-GD needed for highlighting
 
@@ -133,7 +132,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	if (scale === undefined) scale = abctune.media === 'print' ? 0.75 : 1;
 	this.renderer.setPrintMode(abctune.media === 'print');
 	this.renderer.setPadding(abctune);
-	this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes,this.renderer);
+	this.engraver = new ABCJS.write.AbstractEngraver(abctune.formatting.bagpipes,this.renderer);
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	if (abctune.formatting.staffwidth) {
