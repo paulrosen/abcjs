@@ -156,7 +156,7 @@ if (!window.ABCJS.write)
 			if (ABCJS.write.glyphs.getSymbolAlign(symbol) !== "center") {
 				deltaX -= (ABCJS.write.glyphs.getSymbolWidth(symbol) / 2);
 			}
-			var height = ABCJS.write.glyphs.getSymbolHeight(symbol) / ABCJS.write.spacing.STEP + 1; // adding a little padding so nothing touches.
+			var height = ABCJS.write.glyphs.symbolHeightInPitches(symbol) + 1; // adding a little padding so nothing touches.
 			var y = getPlacement(placement);
 			y = (placement === 'above') ? y + height/2 : y - height/2;// Center the element vertically.
 			abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, ABCJS.write.glyphs.getSymbolWidth(symbol), y));

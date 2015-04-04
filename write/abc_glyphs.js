@@ -134,7 +134,11 @@ ABCJS.write.Glyphs = function() {
     if (glyphs[symbol]) return glyphs[symbol].h;
     return 0;
   };
-  
+
+	this.symbolHeightInPitches = function(symbol) {
+		return this.getSymbolHeight(symbol) / ABCJS.write.spacing.STEP;
+	};
+
   this.getSymbolAlign = function (symbol) {
     if (symbol.substring(0,7)==="scripts" && 
 	symbol!=="scripts.roll") {
