@@ -133,7 +133,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	if (scale === undefined) scale = abctune.media === 'print' ? 0.75 : 1;
 	this.renderer.setPrintMode(abctune.media === 'print');
 	this.renderer.setPadding(abctune);
-	this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes);
+	this.engraver = new ABCJS.write.AbstractEngraver(this.glyphs, abctune.formatting.bagpipes,this.renderer);
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	if (abctune.formatting.staffwidth) {

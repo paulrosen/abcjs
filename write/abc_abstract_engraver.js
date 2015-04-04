@@ -43,9 +43,10 @@ ABCJS.write.getDurlog = function(duration) {
   return Math.floor(Math.log(duration)/Math.log(2));
 };
 
-ABCJS.write.AbstractEngraver = function(glyphs, bagpipes) {
+ABCJS.write.AbstractEngraver = function(glyphs, bagpipes, renderer) {
   this.glyphs = glyphs;
 	this.decoration = new ABCJS.write.Decoration(glyphs);
+	this.renderer = renderer;
   this.isBagpipes = bagpipes;
   this.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
                  note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter"},
@@ -201,7 +202,13 @@ function setUpperAndLowerElements(staffgroup) {
 
 		if (staff.specialY.lyricHeightAbove) { staff.top += staff.specialY.lyricHeightAbove; positionY.lyricHeightAbove = staff.top; }
 		if (staff.specialY.chordHeightAbove) { staff.top += staff.specialY.chordHeightAbove; positionY.chordHeightAbove = staff.top; }
-		if (staff.specialY.endingHeightAbove) { staff.top += staff.specialY.endingHeightAbove; positionY.endingHeightAbove = staff.top; }
+		if (staff.specialY.endingHeightAbove) {
+			if (staff.specialY.chordHeightAbove)
+				staff.top += 2;
+			else
+				staff.top += staff.specialY.endingHeightAbove;
+			positionY.endingHeightAbove = staff.top;
+		}
 		if (staff.specialY.dynamicHeightAbove && staff.specialY.volumeHeightAbove) {
 			staff.top += Math.max(staff.specialY.dynamicHeightAbove, staff.specialY.volumeHeightAbove);
 			positionY.dynamicHeightAbove = staff.top;
@@ -711,12 +718,10 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
         abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, x, this.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
         break;
       case "below":
-        y = elem.minpitch-4;
-                         if (y > -3) y = -3;
+		  // setting the y-coordinate to undefined for now: it will be overwritten later one, after we figure out what the highest element on the line is.
                          var eachLine = elem.chord[i].name.split("\n");
                          for (var ii = 0; ii < eachLine.length; ii++) {
-                                abselem.addChild(new ABCJS.write.RelativeElement(eachLine[ii], x, 0, y, {type:"text"}));
-                                 y -= 3;        // TODO-PER: This should actually be based on the font height.
+                                abselem.addChild(new ABCJS.write.RelativeElement(eachLine[ii], x, 0, undefined, {type:"text", position: "below"}));
                          }
     break;
 		case "above":
@@ -963,7 +968,8 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
   } // 2 is hardcoded
 
   if (elem.startEnding) {
-	  abselem.minspacing += 40; // Give plenty of room for the ending number. TODO-PER: what should this magic number be?
+	  var textWidth = this.renderer.getTextSize(elem.startEnding, "repeatfont", '').width;
+	  abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
     this.partstartelem = new ABCJS.write.EndingElem(elem.startEnding, anchor, null);
     this.voice.addOther(this.partstartelem);
   }
