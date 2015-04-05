@@ -34,6 +34,7 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 	this.type = opt.type || "symbol"; // cheap types.
 	this.pitch2 = opt.pitch2;
 	this.linewidth = opt.linewidth;
+	this.klass = opt.klass;
 	this.top = pitch;
 	if (this.pitch2 !== undefined && this.pitch2 > this.top) this.top = this.pitch2;
 	this.bottom = pitch;
@@ -48,11 +49,11 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 		else
 			this.bottom += opt.stemHeight;
 	}
-	if (this.type === "symbol") {
-		var offset = ABCJS.write.glyphs.getYCorr(this.c);
-		this.top += offset;
-		this.bottom += offset;
-	}
+	//if (this.type === "symbol") {
+	//	var offset = ABCJS.write.glyphs.getYCorr(this.c);
+	//	this.top += offset;
+	//	this.bottom += offset;
+	//}
 	this.centerVertically = false;
 	// TODO-PER: this should use the current font to determine the height. That requires the font to be passed in here, so refactor to store the font now instead of resolving it at draw time. This will allow the font to be changed mid-line, too.
 	var multiplier;
@@ -96,7 +97,9 @@ ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
 	switch(this.type) {
 		case "symbol":
 			if (this.c===null) return null;
-			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.addClasses('symbol')); break;
+			var klass = "symbol";
+			if (this.klass) klass += " " + this.klass;
+			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.addClasses(klass)); break;
 		case "debug":
 			this.graphelem = renderer.renderText(this.x, renderer.calcY(15), ""+this.c, "debugfont", 'debug-msg', 'start'); break;
 		case "barNumber":
@@ -109,7 +112,7 @@ ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
 			this.graphelem = renderer.renderText(this.x, y, this.c, 'gchordfont', "chord", "middle");
 			break;
 		case "decoration":
-			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "middle");
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "middle", true);
 			break;
 		case "text":
 			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "start", this.centerVertically);

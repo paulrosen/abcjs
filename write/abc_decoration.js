@@ -147,7 +147,8 @@ if (!window.ABCJS.write)
 			var y = getPlacement(placement);
 			var textFudge = 2;
 			var textHeight = 5;
-			abselem.addChild(new ABCJS.write.RelativeElement(text, 0, 0, y+textFudge, {type:"decoration"}));
+			// TODO-PER: Get the height of the current font and use that for the thickness.
+			abselem.addChild(new ABCJS.write.RelativeElement(text, 0, 0, y+textFudge, {type:"decoration", klass: 'ornament', thickness: 3}));
 
 			incrementPlacement(placement, textHeight);
 		}
@@ -159,7 +160,7 @@ if (!window.ABCJS.write)
 			var height = ABCJS.write.glyphs.symbolHeightInPitches(symbol) + 1; // adding a little padding so nothing touches.
 			var y = getPlacement(placement);
 			y = (placement === 'above') ? y + height/2 : y - height/2;// Center the element vertically.
-			abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, ABCJS.write.glyphs.getSymbolWidth(symbol), y));
+			abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, ABCJS.write.glyphs.getSymbolWidth(symbol), y, { klass: 'ornament', thickness: ABCJS.write.glyphs.symbolHeightInPitches(symbol) }));
 
 			incrementPlacement(placement, height);
 		}

@@ -180,9 +180,9 @@ ABCJS.write.Glyphs = function() {
     case "7":
     case "8":
     case "9":
-    case "+": return -3;
+    case "+": return -2;
     case "timesig.common":
-    case "timesig.cut": return -1;
+    case "timesig.cut": return 0;
     case "flags.d32nd": return -1;
     case "flags.d64th": return -2;
     case "flags.u32nd": return 1;
@@ -200,6 +200,18 @@ ABCJS.write.Glyphs = function() {
 		case "s":
 		case "z":
 			return -4;
+		case "scripts.trill":
+		case "scripts.upbow":
+		case "scripts.downbow":
+			return -2;
+		case "scripts.ufermata":
+		case "scripts.wedge":
+		case "scripts.roll":
+		case "scripts.shortphrase":
+		case "scripts.longphrase":
+			return -1;
+		case "scripts.dfermata":
+			return 1;
     default: return 0;
     }
   };
