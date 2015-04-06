@@ -151,10 +151,6 @@ ABCJS.write.AbsoluteElement.prototype.pushBottom = function (bottom) {
 };
 
 ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
-	if (ABCJS.write.debugPlacement) {
-		renderer.printShadedBox(this.x, renderer.calcY(this.top), this.w, renderer.calcY(this.bottom)-renderer.calcY(this.top), "rgba(0,0,0,0.3)");
-	}
-
 	this.elemset = renderer.paper.set();
 	if (this.invisible) return;
 	renderer.beginGroup();
@@ -168,9 +164,12 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	this.elemset.push(renderer.endGroup(this.type));
 	if (this.klass)
 		this.setClass("mark", "", "#00ff00");
+	var color = ABCJS.write.debugPlacement ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0)"; // Create transparent box that encompasses the element, and not so transparent to debug it.
+	var target = renderer.printShadedBox(this.x, renderer.calcY(this.top), this.w, renderer.calcY(this.bottom)-renderer.calcY(this.top), color);
 	var self = this;
 	var controller = renderer.controller;
-	this.elemset.mouseup(function () {
+//	this.elemset.mouseup(function () {
+	target.mouseup(function () {
 		controller.notifySelect(self);
 	});
 	this.abcelem.abselem = this;

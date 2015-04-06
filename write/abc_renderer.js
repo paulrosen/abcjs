@@ -706,9 +706,10 @@ ABCJS.write.Renderer.prototype.printHorizontalLine = function (width, vertical, 
 };
 
 ABCJS.write.Renderer.prototype.printShadedBox = function (x, y, width, height, color, comment) {
-	this.paper.rect(x, y, width, height).attr({fill: color, stroke: color });
+	var box = this.paper.rect(x, y, width, height).attr({fill: color, stroke: color });
 	if (comment)
 		this.paper.text(0, y+7, comment).attr({"text-anchor": "start", "font-size":"14px", fill: "rgba(0,0,255,.4)", stroke: "rgba(0,0,255,.4)" });
+	return box;
 };
 
 ABCJS.write.Renderer.prototype.printVerticalLine = function (x, y1, y2) {
