@@ -260,7 +260,9 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
       this.voice.duplicate = true; // bar lines and other duplicate info need not be created
     }
     if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
-    this.voice.addChild(this.createClef(abcstaff.clef));
+	  var clef = this.createClef(abcstaff.clef)
+	  if (clef)
+    this.voice.addChild(clef);
 	  var keySig = this.createKeySignature(abcstaff.key);
 	  if (keySig)
 	    this.voice.addChild(keySig);
@@ -327,6 +329,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     break;
   case "clef":
     elemset[0] = this.createClef(elem);
+	  if (!elemset[0]) return null;
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "key":
@@ -994,7 +997,7 @@ ABCJS.write.AbstractEngraver.prototype.createClef = function(elem) {
   case 'tenor-8':clef="clefs.C"; octave = -1; break;
   case 'bass-8': clef="clefs.F"; octave = -1; break;
   case 'alto-8': clef="clefs.C"; octave = -1; break;
-  case 'none': break;
+  case 'none': return null; break;
   case 'perc': clef="clefs.perc"; break;
   default: abselem.addChild(new ABCJS.write.RelativeElement("clef="+elem.type, 0, 0, undefined, {type:"debug"}));
   }
