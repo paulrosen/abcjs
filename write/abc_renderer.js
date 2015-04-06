@@ -313,7 +313,7 @@ ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
 	this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, 0, "end");
 	//this.skipSpaceY();
 
-	this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', -6, null, "start");	// TODO-PER: don't know where the extra space is coming from.
+	this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, 0, "start");
 };
 
 /**

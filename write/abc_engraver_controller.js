@@ -164,6 +164,16 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 		}
 	}
 
+	// Add the stems to the beamed notes.
+	for(i=0; i<abctune.lines.length; i++) {
+		abcLine = abctune.lines[i];
+		if (abcLine.staffGroup && abcLine.staffGroup.voices) {
+			for (var j = 0; j < abcLine.staffGroup.voices.length; j++)
+				abcLine.staffGroup.voices[j].addStemsToBeamedNotes(this.renderer);
+			abcLine.staffGroup.setUpperAndLowerElements();
+		}
+	}
+
 	// Set the staff spacing
 	// TODO-PER: we should have been able to do this by the time we called setUpperAndLowerElements, but for some reason the "bottom" element seems to be set as a side effect of setting the X spacing.
 	for(i=0; i<abctune.lines.length; i++) {

@@ -77,11 +77,15 @@ ABCJS.write.VoiceElement.prototype.setLimit = function(member, child) {
 		this.specialY[member] = Math.max(this.specialY[member], specialY[member]);
 };
 
-ABCJS.write.VoiceElement.prototype.setRange = function(child) {
+ABCJS.write.VoiceElement.prototype.adjustRange = function(child) {
 	if (child.bottom !== undefined)
 		this.bottom = Math.min(this.bottom, child.bottom);
 	if (child.top !== undefined)
 		this.top = Math.max(this.top, child.top);
+};
+
+ABCJS.write.VoiceElement.prototype.setRange = function(child) {
+	this.adjustRange(child);
 	this.setLimit('tempoHeightAbove', child);
 	this.setLimit('partHeightAbove', child);
 	this.setLimit('volumeHeightAbove', child);
@@ -235,4 +239,18 @@ ABCJS.write.VoiceElement.prototype.draw = function (renderer, bartop) {
 			child.draw(renderer,self.startx+10,width);
 	});
 
+};
+
+ABCJS.write.VoiceElement.prototype.addStemsToBeamedNotes = function(renderer) {
+	for (var i = 0; i < this.beams.length; i++) {
+		if (this.beams[i].addStems) {
+			this.beams[i].addStems(renderer);
+			// The above will change the top and bottom of the abselem children, so see if we need to expand our range.
+			for (var j = 0; j < this.beams[i].elems.length; j++) {
+				this.adjustRange(this.beams[i].elems[j]);
+			}
+		}
+	}
+	this.staff.top = Math.max(this.staff.top, this.top);
+	this.staff.bottom = Math.min(this.staff.bottom, this.bottom);
 };

@@ -140,7 +140,6 @@ ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
   for (this.s = 0; this.s < staffs.length; this.s++) {
     this.createABCStaff(staffs[this.s], tempo);
   }
-	setUpperAndLowerElements(this.staffgroup);
 
   return this.staffgroup;
 };
@@ -171,79 +170,6 @@ ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
 //		}
 //	}
 //}
-
-function setUpperAndLowerElements(staffgroup) {
-	// Each staff already has the top and bottom set, now we see if there are elements that are always on top and bottom, and resolve their pitch.
-	// Also, get the overall height of all the staves in this group.
-	for (var i = 0; i < staffgroup.staffs.length; i++) {
-		var staff = staffgroup.staffs[i];
-		// the vertical order of elements that are above is: tempo, part, volume/dynamic, ending/chord, lyric
-		// the vertical order of elements that are below is: lyric, chord, volume/dynamic
-		var positionY = {
-			tempoHeightAbove: 0,
-			partHeightAbove: 0,
-			volumeHeightAbove: 0,
-			dynamicHeightAbove: 0,
-			endingHeightAbove: 0,
-			chordHeightAbove: 0,
-			lyricHeightAbove: 0,
-
-			lyricHeightBelow: 0,
-			chordHeightBelow: 0,
-			volumeHeightBelow: 0,
-			dynamicHeightBelow: 0
-		};
-
-		if (ABCJS.write.debugPlacement) {
-			staff.originalTop = staff.top; // This is just being stored for debugging purposes.
-			staff.originalBottom = staff.bottom; // This is just being stored for debugging purposes.
-		}
-
-		if (staff.specialY.lyricHeightAbove) { staff.top += staff.specialY.lyricHeightAbove; positionY.lyricHeightAbove = staff.top; }
-		if (staff.specialY.chordHeightAbove) { staff.top += staff.specialY.chordHeightAbove; positionY.chordHeightAbove = staff.top; }
-		if (staff.specialY.endingHeightAbove) {
-			if (staff.specialY.chordHeightAbove)
-				staff.top += 2;
-			else
-				staff.top += staff.specialY.endingHeightAbove;
-			positionY.endingHeightAbove = staff.top;
-		}
-		if (staff.specialY.dynamicHeightAbove && staff.specialY.volumeHeightAbove) {
-			staff.top += Math.max(staff.specialY.dynamicHeightAbove, staff.specialY.volumeHeightAbove);
-			positionY.dynamicHeightAbove = staff.top;
-			positionY.volumeHeightAbove = staff.top;
-		} else if (staff.specialY.dynamicHeightAbove) {
-			staff.top += staff.specialY.dynamicHeightAbove; positionY.dynamicHeightAbove = staff.top;
-		} else if (staff.specialY.volumeHeightAbove) { staff.top += staff.specialY.volumeHeightAbove; positionY.volumeHeightAbove = staff.top; }
-		if (staff.specialY.partHeightAbove) { staff.top += staff.specialY.partHeightAbove; positionY.partHeightAbove = staff.top; }
-		if (staff.specialY.tempoHeightAbove) { staff.top += staff.specialY.tempoHeightAbove; positionY.tempoHeightAbove = staff.top; }
-
-		var extraSpace = 0; // TODO-PER: don't know why this fudge factor is needed.
-		if (staff.specialY.lyricHeightBelow) { positionY.lyricHeightBelow = staff.bottom; staff.bottom -= staff.specialY.lyricHeightBelow+extraSpace; }
-		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= staff.specialY.chordHeightBelow+extraSpace; }
-		if (staff.specialY.volumeHeightBelow && staff.specialY.dynamicHeightBelow) {
-			positionY.volumeHeightBelow = staff.bottom;
-			positionY.dynamicHeightBelow = staff.bottom;
-			staff.bottom -= Math.max(staff.specialY.volumeHeightBelow, staff.specialY.dynamicHeightBelow)+extraSpace;
-		} else if (staff.specialY.volumeHeightBelow) {
-			positionY.volumeHeightBelow = staff.bottom; staff.bottom -= staff.specialY.volumeHeightBelow+extraSpace;
-		} else if (staff.specialY.dynamicHeightBelow) {
-			positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow+extraSpace;
-		}
-
-		if (ABCJS.write.debugPlacement)
-			staff.positionY = positionY; // This is just being stored for debugging purposes.
-
-		for (var j = 0; j < staff.voices.length; j++) {
-			var voice = staffgroup.voices[staff.voices[j]];
-			voice.setUpperAndLowerElements(positionY);
-		}
-		// Now we need a little margin on the top, so we'll just throw that in.
-		//staff.top += 4;
-		//console.log("Staff Y: ",i,heightInPitches,staff.top,staff.bottom);
-	}
-	//console.log("Staff Height: ",heightInPitches,staffgroup.height);
-}
 
 ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo) {
 // If the tempo is passed in, then the first element should get the tempo attached to it.
@@ -628,6 +554,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     if (elem.gracenotes.length>1) {
       gracebeam = new ABCJS.write.BeamElem("grace",this.isBagpipes);
 		gracebeam.setStemHeight(this.stemHeight*graceScaleStem);
+		gracebeam.mainNote = abselem;	// this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
     }
 
     var graceoffsets = [];
