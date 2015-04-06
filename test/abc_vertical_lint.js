@@ -27,8 +27,18 @@ if (!window.ABCJS.test)
 window.ABCJS.test.verticalLint = function(tunes) {
 	"use strict";
 
+	function fixed2(num) {
+		if (num === undefined)
+			return "undefined";
+		var str = num.toFixed(2);
+		if (str.indexOf(".00") > 0)
+			return ''+num;
+		if (str[str.length-1] === '0')
+			str = str.substr(0,str.length-1);
+		return str;
+	}
 	function formatY(obj) {
-		return "y= ( " + obj.bottom.toFixed(2) + ' , ' + obj.top.toFixed(2) + " )";
+		return "y= ( " + fixed2(obj.bottom) + ' , ' + fixed2(obj.top) + " )";
 	}
 	function formatArrayStart(tabs, i) {
 		return tabs + i + ": ";
@@ -49,6 +59,20 @@ window.ABCJS.test.verticalLint = function(tunes) {
 						return "Time Cut";
 				}
 			} else if (obj.elem.length === 2) {
+				switch(obj.elem[0]) {
+					case "symbol clefs.G":
+						if (obj.elem[1] === 'symbol 8')
+							return "Treble Clef 8";
+						break;
+					case "symbol clefs.F":
+						if (obj.elem[1] === 'symbol 8')
+							return "Bass Clef 8";
+						break;
+					case "symbol clefs.C":
+						if (obj.elem[1] === 'symbol 8')
+							return "C Clef 8";
+						break;
+				}
 				var left = obj.elem[0].replace("symbol ", "");
 				var right = obj.elem[1].replace("symbol ", "");
 				left = parseInt(left,10);
@@ -58,12 +82,18 @@ window.ABCJS.test.verticalLint = function(tunes) {
 			}
 			if (obj.elem[0] === "symbol accidentals.sharp" || obj.elem[0] === "symbol accidentals.flat" || obj.elem[0] === "symbol accidentals.nat")
 				return "Key Sig";
+			if (obj.elem.length > 0) {
+				if (obj.elem[0] === 'symbol 1' || obj.elem[0] === 'symbol 2' || obj.elem[0] === 'symbol 3' || obj.elem[0] === 'symbol 4' || obj.elem[0] === 'symbol 5' || obj.elem[0] === 'symbol 6' || obj.elem[0] === 'symbol 7' || obj.elem[0] === 'symbol 8' || obj.elem[0] === 'symbol 9')
+				return "Time Sig (odd): " + obj.elem.join('').replace(/symbol /g,"");
+			}
 		} else if (obj.$type.indexOf("note") === 0) {
 			return obj.$type + " " + obj.duration + ' ' + obj.elem.join(" ").replace(/symbol /g,"").replace(/\n/g, "\\n");
 		} else if (obj.$type === 'bar')
 			return "Bar";
 		else if (obj.$type === 'part')
 			return obj.elem[0];
+		else if (obj.$type === 'tempo')
+			return "Tempo " + obj.elem[0];
 		return "unknown";
 	}
 
@@ -149,7 +179,7 @@ window.ABCJS.test.verticalLint = function(tunes) {
 
 	function formatLine(line, lineNum) {
 		var str = "";
-		str += "Line: " + lineNum + ": (" + line.height + ")\n";
+		str += "Line: " + lineNum + ": (" + fixed2(line.height) + ")\n";
 		str += "staffs: " + formatStaffs(line.staffs, 1);
 		str += "voices: " + formatVoices(line.voices, 1);
 		return str;
@@ -189,7 +219,11 @@ window.ABCJS.test.verticalLint = function(tunes) {
 				}
 				var obj2 = { $type: type, bottom: child.bottom, top: child.top, specialY: setSpecialY(child), minSpacing: child.minspacing, duration: child.duration, width: child.w, x: child.x };
 				obj2.elem = [];
-				if (child.children.length) {
+				if (type === 'tempo') {
+					var tempo = child.children[0].tempo;
+					obj2.elem.push(tempo.preString + ' ' + tempo.duration + ' ' + tempo.postString);
+				}
+				else if (child.children.length) {
 					for (var k = 0; k < child.children.length; k++) {
 						var str = child.children[k].type;
 						if (child.children[k].c)
