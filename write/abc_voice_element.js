@@ -176,8 +176,8 @@ ABCJS.write.VoiceElement.prototype.layoutOneItem = function (x, spacing) {
 	this.updateNextX(x, spacing);
 
 	// contribute to staff y position
-	this.staff.top = Math.max(child.top,this.staff.top);
-	this.staff.bottom = Math.min(child.bottom,this.staff.bottom);
+	//this.staff.top = Math.max(child.top,this.staff.top);
+	//this.staff.bottom = Math.min(child.bottom,this.staff.bottom);
 
 	return x; // where we end up having placed the child
 };

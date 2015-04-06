@@ -39,8 +39,8 @@ ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing, type) {
 	this.w = 0;
 	this.right = [];
 	this.invisible = false;
-	this.bottom = 7;
-	this.top = 7;
+	this.bottom = undefined;
+	this.top = undefined;
 	this.type = type;
 	// these are the heights of all of the vertical elements that can't be placed until the end of the line.
 	// the vertical order of elements that are above is: tempo, part, volume/dynamic, ending/chord, lyric
@@ -133,13 +133,21 @@ ABCJS.write.AbsoluteElement.prototype.addChild = function (child) {
 };
 
 ABCJS.write.AbsoluteElement.prototype.pushTop = function (top) {
-	if (top !== undefined)
-		this.top = Math.max(top, this.top);
+	if (top !== undefined) {
+		if (this.top === undefined)
+			this.top = top;
+		else
+			this.top = Math.max(top, this.top);
+	}
 };
 
 ABCJS.write.AbsoluteElement.prototype.pushBottom = function (bottom) {
-	if (bottom !== undefined)
-		this.bottom = Math.min(bottom, this.bottom);
+	if (bottom !== undefined) {
+		if (this.bottom === undefined)
+			this.bottom = bottom;
+		else
+			this.bottom = Math.min(bottom, this.bottom);
+	}
 };
 
 ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
