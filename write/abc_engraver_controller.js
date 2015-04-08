@@ -170,7 +170,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 		if (abcLine.staffGroup && abcLine.staffGroup.voices) {
 			for (var j = 0; j < abcLine.staffGroup.voices.length; j++)
 				abcLine.staffGroup.voices[j].addStemsToBeamedNotes(this.renderer);
-			abcLine.staffGroup.setUpperAndLowerElements();
+			abcLine.staffGroup.setUpperAndLowerElements(this.renderer);
 		}
 	}
 

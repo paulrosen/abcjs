@@ -109,9 +109,10 @@ ABCJS.write.StaffGroupElement.prototype.setStaffLimits = function (voice) {
 	this.setLimit('dynamicHeightBelow', voice);
 };
 
-ABCJS.write.StaffGroupElement.prototype.setUpperAndLowerElements = function() {
+ABCJS.write.StaffGroupElement.prototype.setUpperAndLowerElements = function(renderer) {
 	// Each staff already has the top and bottom set, now we see if there are elements that are always on top and bottom, and resolve their pitch.
 	// Also, get the overall height of all the staves in this group.
+	var lastStaffBottom;
 	for (var i = 0; i < this.staffs.length; i++) {
 		var staff = this.staffs[i];
 		// the vertical order of elements that are above is: tempo, part, volume/dynamic, ending/chord, lyric
@@ -155,17 +156,16 @@ ABCJS.write.StaffGroupElement.prototype.setUpperAndLowerElements = function() {
 		if (staff.specialY.partHeightAbove) { staff.top += staff.specialY.partHeightAbove; positionY.partHeightAbove = staff.top; }
 		if (staff.specialY.tempoHeightAbove) { staff.top += staff.specialY.tempoHeightAbove; positionY.tempoHeightAbove = staff.top; }
 
-		var extraSpace = 0; // TODO-PER: don't know why this fudge factor is needed.
-		if (staff.specialY.lyricHeightBelow) { positionY.lyricHeightBelow = staff.bottom; staff.bottom -= staff.specialY.lyricHeightBelow+extraSpace; }
-		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= staff.specialY.chordHeightBelow+extraSpace; }
+		if (staff.specialY.lyricHeightBelow) { positionY.lyricHeightBelow = staff.bottom; staff.bottom -= staff.specialY.lyricHeightBelow; }
+		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= staff.specialY.chordHeightBelow; }
 		if (staff.specialY.volumeHeightBelow && staff.specialY.dynamicHeightBelow) {
 			positionY.volumeHeightBelow = staff.bottom;
 			positionY.dynamicHeightBelow = staff.bottom;
-			staff.bottom -= Math.max(staff.specialY.volumeHeightBelow, staff.specialY.dynamicHeightBelow)+extraSpace;
+			staff.bottom -= Math.max(staff.specialY.volumeHeightBelow, staff.specialY.dynamicHeightBelow);
 		} else if (staff.specialY.volumeHeightBelow) {
-			positionY.volumeHeightBelow = staff.bottom; staff.bottom -= staff.specialY.volumeHeightBelow+extraSpace;
+			positionY.volumeHeightBelow = staff.bottom; staff.bottom -= staff.specialY.volumeHeightBelow;
 		} else if (staff.specialY.dynamicHeightBelow) {
-			positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow+extraSpace;
+			positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow;
 		}
 
 		if (ABCJS.write.debugPlacement)
@@ -175,6 +175,18 @@ ABCJS.write.StaffGroupElement.prototype.setUpperAndLowerElements = function() {
 			var voice = this.voices[staff.voices[j]];
 			voice.setUpperAndLowerElements(positionY);
 		}
+		// We might need a little space in between staves if the staves haven't been pushed far enough apart by notes or extra vertical stuff.
+		// Only try to put in extra space if this isn't the top staff.
+		if (lastStaffBottom !== undefined) {
+			var thisStaffTop = staff.top - 10;
+			var forcedSpacingBetween = lastStaffBottom + thisStaffTop;
+			var minSpacingInPitches = renderer.spacing.systemStaffSeparation/ABCJS.write.spacing.STEP;
+			var addedSpace = minSpacingInPitches - forcedSpacingBetween;
+			if (addedSpace > 0)
+				staff.top += addedSpace;
+		}
+		lastStaffBottom = 2 - staff.bottom; // the staff starts at position 2 and the bottom variable is negative. Therefore to find out how large the bottom is, we reverse the sign of the bottom, and add the 2 in.
+
 		// Now we need a little margin on the top, so we'll just throw that in.
 		//staff.top += 4;
 		//console.log("Staff Y: ",i,heightInPitches,staff.top,staff.bottom);
