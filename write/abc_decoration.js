@@ -103,8 +103,24 @@ if (!window.ABCJS.write)
 	};
 
 	var compoundDecoration = function(decoration, pitch, width, abselem, dir) {
+		function highestPitch() {
+			if (abselem.heads.length === 0)
+				return 10;	// TODO-PER: I don't know if this can happen, but we'll return the top of the staff if so.
+			var pitch = abselem.heads[0].pitch;
+			for (var i = 1; i < abselem.heads.length; i++)
+				pitch = Math.max(pitch, abselem.heads[i].pitch);
+			return pitch;
+		}
+		function lowestPitch() {
+			if (abselem.heads.length === 0)
+				return 2;	// TODO-PER: I don't know if this can happen, but we'll return the bottom of the staff if so.
+			var pitch = abselem.heads[0].pitch;
+			for (var i = 1; i < abselem.heads.length; i++)
+				pitch = Math.min(pitch, abselem.heads[i].pitch);
+			return pitch;
+		}
 		function compoundDecoration(symbol, count) {
-			var placement = (dir === 'down') ? pitch+1:pitch+9;
+			var placement = (dir === 'down') ? lowestPitch()+1:highestPitch()+9;
 			var deltaX = width/2;
 			deltaX += (dir === 'down') ? -5 : 3;
 			for (var i = 0; i < count; i++) {
