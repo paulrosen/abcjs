@@ -154,7 +154,12 @@ if (!window.ABCJS)
 								// If the note is tied on both sides it can just be ignored.
 							} else {
 								// the last note wasn't tied.
-								eventHash["event"+voiceTime] = { type: "event", time: voiceTime, top: top, height: height, left: element.x, width: element.w };
+								if (!eventHash["event"+voiceTime])
+									eventHash["event"+voiceTime] = { type: "event", time: voiceTime, top: top, height: height, left: element.x, width: element.w };
+								else {
+									// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
+									eventHash["event"+voiceTime].left = Math.min(eventHash["event"+voiceTime].left, element.x);
+								}
 								if (isTiedToNext)
 									isTiedState = true;
 							}
