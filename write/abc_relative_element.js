@@ -89,11 +89,14 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 	}
 };
 
-ABCJS.write.RelativeElement.prototype.draw = function (renderer, x, bartop) {
+ABCJS.write.RelativeElement.prototype.setX = function (x) {
+	this.x = x+this.dx;
+};
+
+ABCJS.write.RelativeElement.prototype.draw = function (renderer, bartop) {
 	if (this.pitch === undefined)
 		window.console.error(this.type + " Relative Element y-coordinate not set.");
 	var y = renderer.calcY(this.pitch);
-	this.x = x+this.dx;
 	switch(this.type) {
 		case "symbol":
 			if (this.c===null) return null;

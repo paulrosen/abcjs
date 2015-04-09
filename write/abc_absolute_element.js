@@ -150,6 +150,12 @@ ABCJS.write.AbsoluteElement.prototype.pushBottom = function (bottom) {
 	}
 };
 
+ABCJS.write.AbsoluteElement.prototype.setX = function (x) {
+	this.x = x;
+	for (var i=0; i<this.children.length; i++)
+		this.children[i].setX(x);
+};
+
 ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	this.elemset = renderer.paper.set();
 	if (this.invisible) return;
@@ -159,7 +165,7 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 			if (this.children[i].klass === 'ornament')
 				renderer.printShadedBox(this.x, renderer.calcY(this.children[i].top), this.w, renderer.calcY(this.children[i].bottom)-renderer.calcY(this.children[i].top), "rgba(0,0,200,0.3)");
 		}
-		this.elemset.push(this.children[i].draw(renderer,this.x, bartop));
+		this.elemset.push(this.children[i].draw(renderer,bartop));
 	}
 	this.elemset.push(renderer.endGroup(this.type));
 	if (this.klass)

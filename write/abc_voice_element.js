@@ -170,7 +170,7 @@ ABCJS.write.VoiceElement.prototype.layoutOneItem = function (x, spacing) {
 	if (er<child.getExtraWidth()) { // shift right by needed amount
 		x+=child.getExtraWidth()-er;
 	}
-	child.x=x; // place child at x
+	child.setX(x);
 
 	this.spacingduration = child.duration;
 	//update minx
@@ -194,7 +194,7 @@ ABCJS.write.VoiceElement.prototype.updateNextX = function (x, spacing) {
 ABCJS.write.VoiceElement.prototype.shiftRight = function (dx) {
 	var child = this.children[this.i];
 	if (!child) return;
-	child.x+=dx;
+	child.setX(child.x+dx);
 	this.minx+=dx;
 	this.nextx+=dx;
 };
