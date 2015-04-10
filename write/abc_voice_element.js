@@ -241,10 +241,10 @@ ABCJS.write.VoiceElement.prototype.draw = function (renderer, bartop) {
 
 };
 
-ABCJS.write.VoiceElement.prototype.addStemsToBeamedNotes = function(renderer) {
+ABCJS.write.VoiceElement.prototype.layoutBeams = function() {
 	for (var i = 0; i < this.beams.length; i++) {
-		if (this.beams[i].addStems) {
-			this.beams[i].addStems(renderer);
+		if (this.beams[i].layout) {
+			this.beams[i].layout();
 			// The above will change the top and bottom of the abselem children, so see if we need to expand our range.
 			for (var j = 0; j < this.beams[i].elems.length; j++) {
 				this.adjustRange(this.beams[i].elems[j]);

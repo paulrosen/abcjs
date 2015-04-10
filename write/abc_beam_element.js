@@ -31,22 +31,26 @@ if (!window.ABCJS.write)
 // Then, after the horizontal layout is complete, all of the BeamElem are iterated to set the beam position, then all of the notes that are beamed are given
 // stems. After that, we are ready for the drawing step.
 
+// There are three phases: the setup phase, when new elements are being discovered, the layout phase, when everything is calculated, and the drawing phase,
+// when the object is not changed, but is used to put the elements on the page.
+
 (function() {
 	"use strict";
 
-	ABCJS.write.BeamElem = function(type, flat) {
-		// type is "grace", "up", "down", or undefined.
-		this.isflat = (flat);
+	//
+	// Setup phase
+	//
+	ABCJS.write.BeamElem = function(stemHeight, type, flat) {
+		// type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
+		this.isflat = flat;
 		this.isgrace = (type && type === "grace");
 		this.forceup = this.isgrace || (type && type === "up");
 		this.forcedown = (type && type === "down");
-		this.elems = []; // all the ABCJS.write.AbsoluteElements
+		this.elems = []; // all the ABCJS.write.AbsoluteElements that this beam touches. It may include embedded rests.
 		this.total = 0;
 		this.allrests = true;
-	};
-
-	ABCJS.write.BeamElem.prototype.setStemHeight = function(stemHeight) {
 		this.stemHeight = stemHeight;
+		this.beams = []; // During the layout phase, this will become a list of the beams that need to be drawn.
 	};
 
 	ABCJS.write.BeamElem.prototype.add = function(abselem) {
@@ -65,170 +69,202 @@ if (!window.ABCJS.write)
 		}
 	};
 
-	ABCJS.write.BeamElem.prototype.average = function() {
-		try {
-			return this.total / this.elems.length;
-		} catch (e) {
-			return 0;
-		}
-	};
-
-	ABCJS.write.BeamElem.prototype.draw = function(renderer) {
-		if (this.elems.length === 0 || this.allrests) return;
-		this.drawBeam(renderer);
-		this.drawStems(renderer);
-	};
+	var middleLine = 6;	// hardcoded 6 is B
 
 	ABCJS.write.BeamElem.prototype.calcDir = function() {
-		var average = this.average();
-		this.asc = (this.forceup || average < 6) && (!this.forcedown); // hardcoded 6 is B
-		this.dy = (this.asc) ? ABCJS.write.spacing.STEP * 1.2 : -ABCJS.write.spacing.STEP * 1.2;
-		if (this.isgrace) this.dy = this.dy * 0.4;
-		return this.asc;
+		if (this.forceup) return true;
+		if (this.forcedown) return false;
+		var average = calcAverage(this.total, this.elems.length);
+		return average <= middleLine;
 	};
 
-	ABCJS.write.BeamElem.prototype.placeBeam = function(renderer) {
-		var average = this.average();
-		var barpos = this.stemHeight - 2; // (this.isgrace)? 5:7;
-		this.calcDir();
+	//
+	// layout phase
+	//
+	ABCJS.write.BeamElem.prototype.layout = function() {
+		if (this.elems.length === 0 || this.allrests) return;
 
-		var barminpos = this.asc ? this.stemHeight - 2 : this.stemHeight;
-		this.pos = Math.round(this.asc ? Math.max(average + barpos, this.max + barminpos) : Math.min(average - barpos, this.min - barminpos));
-		var slant = this.elems[0].abcelem.averagepitch - this.elems[this.elems.length - 1].abcelem.averagepitch;
-		if (this.isflat) slant = 0;
-		var maxslant = this.elems.length / 2;
+		var asc = this.calcDir(); // True means the stems are facing up.
+		var dy = calcDy(asc, this.isgrace); // This is the width of the beam line.
 
-		if (slant > maxslant) slant = maxslant;
-		if (slant < -maxslant) slant = -maxslant;
-		this.starty = renderer.calcY(this.pos + Math.floor(slant / 2));
-		this.endy = renderer.calcY(this.pos + Math.floor(-slant / 2));
-		this.startyInPitches = this.pos + Math.floor(slant / 2);
-		this.endyInPitches = this.pos + Math.floor(-slant / 2);
+		// create the main beam
+		var firstElement = this.elems[0];
+		var lastElement = this.elems[this.elems.length - 1];
+		var yPos = calcYPos(this.total, this.elems.length, this.stemHeight, asc, firstElement.abcelem.averagepitch, lastElement.abcelem.averagepitch, this.isflat, this.min, this.max, this.isgrace);
+		var xPos = calcXPos(asc, firstElement, lastElement);
+		this.beams.push({ startX: xPos[0], endX: xPos[1], startY: yPos[0], endY: yPos[1], dy: dy });
 
-		var starthead = this.elems[0].heads[(this.asc) ? 0 : this.elems[0].heads.length - 1];
-		var endhead = this.elems[this.elems.length - 1].heads[(this.asc) ? 0 : this.elems[this.elems.length - 1].heads.length - 1];
-		this.startx = starthead.x;
-		if (this.asc) this.startx += starthead.w - 0.6;
-		this.endx = endhead.x;
-		if (this.asc) this.endx += endhead.w;
+		// create the rest of the beams (in the case of 1/16th notes, etc.
+		var beams = createAdditionalBeams(this.elems, asc, this.beams[0], this.isgrace, dy);
+		for (var i = 0; i < beams.length; i++)
+			this.beams.push(beams[i]);
 
-		// PER: if the notes are too high or too low, make the beam go down to the middle
-		if (!this.isgrace) {
-			if (this.asc && this.pos < 6) {
-				this.starty = 6;
-				this.endy = 6;
-			} else if (!this.asc && this.pos > 6) {
-				this.starty = 6;
-				this.endy = 6;
-			}
+		// Now that the main beam is defined, we know how tall the stems should be, so create them and attach them to the original notes.
+		createStems(this.elems, asc, this.beams[0], dy, this.mainNote);
+	};
+
+	//
+	// Drawing phase
+	//
+	ABCJS.write.BeamElem.prototype.draw = function(renderer) {
+		if (this.beams.length === 0) return;
+
+		renderer.beginGroup();
+		for (var i = 0; i < this.beams.length; i++) {
+			var beam = this.beams[i];
+			drawBeam(renderer, beam.startX, beam.startY, beam.endX, beam.endY, beam.dy);
 		}
+		renderer.endGroup('beam-elem');
 	};
 
-	ABCJS.write.BeamElem.prototype.addStems = function(renderer) {
-		this.placeBeam(renderer);
-		for (var i = 0, ii = this.elems.length; i < ii; i++) {
-			if (this.elems[i].abcelem.rest)
-				continue;
-			var furthesthead = this.elems[i].heads[(this.asc) ? 0 : this.elems[i].heads.length - 1];
-			var ovaldelta = 1 / 5;//(this.isgrace)?1/3:1/5;
-			var pitch = furthesthead.pitch + ((this.asc) ? ovaldelta : -ovaldelta);
-			var x = furthesthead.x + ((this.asc) ? furthesthead.w : 0);
-			var bary = this.getBarYAtPitches(i, ii); // TODO-PER: This is what it was originally: this.getBarYAt(x);
-			var dx = (this.asc) ? -0.6 : 0.6;
-			if (!this.asc)
-				bary -= (this.dy / 2) / ABCJS.write.spacing.STEP;	// TODO-PER: This is just a fudge factor so the down-pointing stems don't overlap.
-			// TODO-PER: This is odd. If it is a regular beam then elems is an array of AbsoluteElements, if it is a grace beam then it is an array of objects , so we directly attach the element to the parent.
-			if (this.elems[i].addExtra)
-				this.elems[i].addExtra(new ABCJS.write.RelativeElement(null, x, 0, pitch, {
-					"type": "stem",
-					"pitch2": bary,
-					linewidth: dx
-				}));
-			else // For grace notes, add the stem to the main note, but use the grace note's dx so that it gets placed with the grace note.
-				this.mainNote.addExtra(new ABCJS.write.RelativeElement(null, x + this.elems[i].heads[0].dx, 0, pitch, {
-					"type": "stem",
-					"pitch2": bary,
-					linewidth: dx
-				}));
+	//
+	// private functions
+	//
+	function calcSlant(leftAveragePitch, rightAveragePitch, numStems, isFlat) {
+		if (isFlat)
+			return 0;
+		var slant = leftAveragePitch - rightAveragePitch;
+		var maxSlant = numStems / 2;
 
-			//renderer.printStem(x, dx, y, bary);
-		}
-	};
+		if (slant > maxSlant) slant = maxSlant;
+		if (slant < -maxSlant) slant = -maxSlant;
+		return slant;
+	}
 
-	ABCJS.write.BeamElem.prototype.drawBeam = function(renderer) {
-		this.placeBeam(renderer);
-		var pathString = "M" + this.startx + " " + this.starty + " L" + this.endx + " " + this.endy +
-			"L" + this.endx + " " + (this.endy + this.dy) + " L" + this.startx + " " + (this.starty + this.dy) + "z";
+	function calcAverage(total, numElements) {
+		if (!numElements)
+			return 0;
+		return total / numElements;
+	}
+
+	function getBarYAt(startx, starty, endx, endy, x) {
+		return starty + (endy - starty) / (endx - startx) * (x - startx);
+	}
+
+	function calcDy(asc, isGrace) {
+		var dy = (asc) ? ABCJS.write.spacing.STEP : -ABCJS.write.spacing.STEP;
+		if (isGrace) dy = dy * 0.4;
+		return dy;
+	}
+
+	function drawBeam(renderer, startX, startY, endX, endY, dy) {
+		// the X coordinates are actual coordinates, but the Y coordinates are in pitches.
+		startY = renderer.calcY(startY);
+		endY = renderer.calcY(endY);
+		var pathString = "M" + startX + " " + startY + " L" + endX + " " + endY +
+			"L" + endX + " " + (endY + dy) + " L" + startX + " " + (startY + dy) + "z";
 		renderer.printPath({
 			path: pathString,
 			stroke: "none",
 			fill: "#000000",
 			'class': renderer.addClasses('beam-elem')
 		});
-	};
+	}
 
-	ABCJS.write.BeamElem.prototype.drawStems = function(renderer) {
-		var auxbeams = [];  // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
-		renderer.beginGroup();
-		for (var i = 0, ii = this.elems.length; i < ii; i++) {
-			if (this.elems[i].abcelem.rest)
+	function calcXPos(asc, firstElement, lastElement) {
+		var starthead = firstElement.heads[asc ? 0 : firstElement.heads.length - 1];
+		var endhead = lastElement.heads[asc ? 0 : lastElement.heads.length - 1];
+		var startX = starthead.x;
+		if (asc) startX += starthead.w - 0.6;
+		var endX = endhead.x;
+		if (asc) endX += endhead.w;
+		return [ startX, endX ];
+	}
+
+	function calcYPos(total, numElements, stemHeight, asc, firstAveragePitch, lastAveragePitch, isFlat, minPitch, maxPitch, isGrace) {
+		var average = calcAverage(total, numElements); // This is the average pitch for the all the notes that will be beamed.
+		var barpos = stemHeight - 2; // (isGrace)? 5:7;
+		var barminpos = stemHeight - 2;
+		var pos = Math.round(asc ? Math.max(average + barpos, maxPitch + barminpos) : Math.min(average - barpos, minPitch - barminpos));
+
+		var slant = calcSlant(firstAveragePitch, lastAveragePitch, numElements, isFlat);
+		var startY = pos + Math.floor(slant / 2);
+		var endY = pos + Math.floor(-slant / 2);
+
+		// If the notes are too high or too low, make the beam go down to the middle
+		if (!isGrace) {
+			if (asc && pos < 6) {
+				startY = 6;
+				endY = 6;
+			} else if (!asc && pos > 6) {
+				startY = 6;
+				endY = 6;
+			}
+		}
+
+		return [ startY, endY];
+	}
+
+	function createStems(elems, asc, beam, dy, mainNote) {
+		for (var i = 0; i < elems.length; i++) {
+			var elem = elems[i];
+			if (elem.abcelem.rest)
 				continue;
-			var furthesthead = this.elems[i].heads[(this.asc) ? 0 : this.elems[i].heads.length - 1];
-			//		var ovaldelta = 1/5;//(this.isgrace)?1/3:1/5;
-			//		var pitch = furthesthead.pitch + ((this.asc) ? ovaldelta : -ovaldelta);
-			//		var y = renderer.calcY(pitch);
-			var x = furthesthead.x + ((this.asc) ? furthesthead.w : 0);
-			var bary = this.getBarYAt(x);
-			//		var dx = (this.asc) ? -0.6 : 0.6;
-			//		renderer.printStem(x,dx,y,bary);
+			// TODO-PER: This is odd. If it is a regular beam then elems is an array of AbsoluteElements, if it is a grace beam then it is an array of objects , so we directly attach the element to the parent. We tell it if is a grace note because they are passed in as a generic object instead of an AbsoluteElement.
+			var isGrace = elem.addExtra ? false : true;
+			var parent = isGrace ? mainNote : elem;
+			var furthestHead = elem.heads[(asc) ? 0 : elem.heads.length - 1];
+			var ovalDelta = 1 / 5;//(isGrace)?1/3:1/5;
+			var pitch = furthestHead.pitch + ((asc) ? ovalDelta : -ovalDelta);
+			var dx = asc ? furthestHead.w : 0; // down-pointing stems start on the left side of the note, up-pointing stems start on the right side, so we offset by the note width.
+			var x = furthestHead.x + dx; // this is now the actual x location in pixels.
+			var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
+			var lineWidth = (asc) ? -0.6 : 0.6;
+			if (!asc)
+				bary -= (dy / 2) / ABCJS.write.spacing.STEP;	// TODO-PER: This is just a fudge factor so the down-pointing stems don't overlap.
+			if (isGrace)
+				dx += elem.heads[0].dx;
+			var stem = new ABCJS.write.RelativeElement(null, dx, 0, pitch, {
+				"type": "stem",
+				"pitch2": bary,
+				linewidth: lineWidth
+			});
+			stem.setX(parent.x); // This is after the x coordinates were set, so we have to set it directly.
+			parent.addExtra(stem);
+		}
 
-			var sy = (this.asc) ? 1.5 * ABCJS.write.spacing.STEP : -1.5 * ABCJS.write.spacing.STEP;
-			if (this.isgrace) sy = sy * 2 / 3; // This makes the second beam on grace notes closer to the first one.
-			for (var durlog = ABCJS.write.getDurlog(this.elems[i].abcelem.duration); durlog < -3; durlog++) { // get the duration via abcelem because of triplets
-				if (auxbeams[-4 - durlog]) {
-					auxbeams[-4 - durlog].single = false;
+	}
+
+	function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
+		var beams = [];
+		var auxBeams = [];  // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
+		for (var i = 0; i < elems.length; i++) {
+			var elem = elems[i];
+			if (elem.abcelem.rest)
+				continue;
+			var furthestHead = elem.heads[(asc) ? 0 : elem.heads.length - 1];
+			var x = furthestHead.x + ((asc) ? furthestHead.w : 0);
+			var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
+
+			var sy = (asc) ? -1.5 : 1.5;
+			if (isGrace) sy = sy * 2 / 3; // This makes the second beam on grace notes closer to the first one.
+			for (var durlog = ABCJS.write.getDurlog(elem.abcelem.duration); durlog < -3; durlog++) { // get the duration via abcelem because of triplets
+				if (auxBeams[-4 - durlog]) {
+					auxBeams[-4 - durlog].single = false;
 				} else {
-					auxbeams[-4 - durlog] = {
-						x: x + ((this.asc) ? -0.6 : 0), y: bary + sy * (-4 - durlog + 1),
+					auxBeams[-4 - durlog] = {
+						x: x + ((asc) ? -0.6 : 0), y: bary + sy * (-4 - durlog + 1),
 						durlog: durlog, single: true
 					};
 				}
 			}
 
-			for (var j = auxbeams.length - 1; j >= 0; j--) {
-				if (i === ii - 1 || ABCJS.write.getDurlog(this.elems[i + 1].abcelem.duration) > (-j - 4)) {
+			for (var j = auxBeams.length - 1; j >= 0; j--) {
+				if (i === elems.length - 1 || ABCJS.write.getDurlog(elems[i + 1].abcelem.duration) > (-j - 4)) {
 
-					var auxbeamendx = x;
-					var auxbeamendy = bary + sy * (j + 1);
+					var auxBeamEndX = x;
+					var auxBeamEndY = bary + sy * (j + 1);
 
 
-					if (auxbeams[j].single) {
-						auxbeamendx = (i === 0) ? x + 5 : x - 5;
-						auxbeamendy = this.getBarYAt(auxbeamendx) + sy * (j + 1);
+					if (auxBeams[j].single) {
+						auxBeamEndX = (i === 0) ? x + 5 : x - 5;
+						auxBeamEndY = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, auxBeamEndX) + sy * (j + 1);
 					}
-					// TODO I think they are drawn from front to back, hence the small x difference with the main beam
-
-					var pathString = "M" + auxbeams[j].x + " " + auxbeams[j].y + " L" + auxbeamendx + " " + auxbeamendy +
-						"L" + auxbeamendx + " " + (auxbeamendy + this.dy) + " L" + auxbeams[j].x + " " + (auxbeams[j].y + this.dy) + "z";
-					renderer.printPath({
-						path: pathString,
-						stroke: "none",
-						fill: "#000000",
-						'class': renderer.addClasses('beam-elem')
-					});
-					auxbeams = auxbeams.slice(0, j);
+					beams.push({ startX: auxBeams[j].x, endX: auxBeamEndX, startY: auxBeams[j].y, endY: auxBeamEndY, dy: dy });
+					auxBeams = auxBeams.slice(0, j);
 				}
 			}
 		}
-		renderer.endGroup('beam-elem');
-	};
-
-	ABCJS.write.BeamElem.prototype.getBarYAtPitches = function(x, num) {
-		// TODO-PER: This calculation is just approx. and will cause the stems to not end in exactly the right place. We need to use the actual x positions to be more accurate.
-		return this.startyInPitches + (this.endyInPitches-this.startyInPitches)/num*(x);
-	};
-
-	ABCJS.write.BeamElem.prototype.getBarYAt = function(x) {
-		return this.starty + (this.endy - this.starty) / (this.endx - this.startx) * (x - this.startx);
-	};
+		return beams;
+	}
 })();

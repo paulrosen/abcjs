@@ -164,12 +164,12 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 		}
 	}
 
-	// Add the stems to the beamed notes.
+	// Layout the beams and add the stems to the beamed notes.
 	for(i=0; i<abctune.lines.length; i++) {
 		abcLine = abctune.lines[i];
 		if (abcLine.staffGroup && abcLine.staffGroup.voices) {
 			for (var j = 0; j < abcLine.staffGroup.voices.length; j++)
-				abcLine.staffGroup.voices[j].addStemsToBeamedNotes(this.renderer);
+				abcLine.staffGroup.voices[j].layoutBeams();
 			abcLine.staffGroup.setUpperAndLowerElements(this.renderer);
 		}
 	}

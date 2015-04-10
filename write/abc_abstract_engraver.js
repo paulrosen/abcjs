@@ -295,7 +295,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
 ABCJS.write.AbstractEngraver.prototype.calcBeamDir = function() {
 	if (this.stemdir) // If the user or voice is forcing the stem direction, we already know the answer.
 		return this.stemdir;
-	var beamelem = new ABCJS.write.BeamElem(this.stemdir);
+	var beamelem = new ABCJS.write.BeamElem(this.stemHeight, this.stemdir);
 	// PER: need two passes: the first one decides if the stems are up or down.
 	var oldPos = this.pos;
 	var abselem;
@@ -316,8 +316,7 @@ ABCJS.write.AbstractEngraver.prototype.createBeam = function() {
   
   if (this.getElem().startBeam && !this.getElem().endBeam) {
 	  var dir = this.calcBeamDir();
-         var beamelem = new ABCJS.write.BeamElem(dir);
-	  beamelem.setStemHeight(this.stemHeight);
+         var beamelem = new ABCJS.write.BeamElem(this.stemHeight, dir);
          var oldDir = this.stemdir;
          this.stemdir = dir;
     while (this.getElem()) {
@@ -552,8 +551,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     var graceScaleStem = 3.5/5; // TODO-PER: empirically found constant.
     var gracebeam = null;
     if (elem.gracenotes.length>1) {
-      gracebeam = new ABCJS.write.BeamElem("grace",this.isBagpipes);
-		gracebeam.setStemHeight(this.stemHeight*graceScaleStem);
+      gracebeam = new ABCJS.write.BeamElem(this.stemHeight*graceScaleStem, "grace",this.isBagpipes);
 		gracebeam.mainNote = abselem;	// this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
     }
 
