@@ -350,7 +350,8 @@ function centerWholeRests(voices) {
 				var after = voice.children[j+1];
 				var midpoint = (after.x - before.x) / 2 + before.x;
 				absElem.x = midpoint - absElem.w / 2;
-
+				for (var k = 0; k < absElem.children.length; k++)
+					absElem.children[k].x = absElem.x;
 			}
 		}
 	}
