@@ -36,7 +36,12 @@ if (!window.ABCJS.write)
 		this.pitch = positionY.tempoHeightAbove;
 	};
 
-	ABCJS.write.TempoElement.prototype.draw = function(renderer, x) {
+	ABCJS.write.TempoElement.prototype.setX = function (x) {
+		this.x = x;
+	};
+
+	ABCJS.write.TempoElement.prototype.draw = function(renderer) {
+		var x = this.x;
 		if (this.pitch === undefined)
 			window.console.error("Tempo Element y-coordinate not set.");
 
@@ -77,9 +82,11 @@ if (!window.ABCJS.write)
 				var dx = temponote.dx + temponote.w;
 				var width = -0.6;
 				stem = new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2": p2, linewidth: width});
+				stem.setX(x);
 				abselem.addExtra(stem);
 			}
 			abselem.x = x;
+			temponote.setX(x);
 			temponote.draw(renderer, x);
 			if (stem)
 				stem.draw(renderer, x);
