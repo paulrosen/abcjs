@@ -84,23 +84,41 @@ if (!window.ABCJS.write)
 	ABCJS.write.BeamElem.prototype.layout = function() {
 		if (this.elems.length === 0 || this.allrests) return;
 
-		var asc = this.calcDir(); // True means the stems are facing up.
-		var dy = calcDy(asc, this.isgrace); // This is the width of the beam line.
+		this.stemsUp = this.calcDir(); // True means the stems are facing up.
+		var dy = calcDy(this.stemsUp, this.isgrace); // This is the width of the beam line.
 
 		// create the main beam
 		var firstElement = this.elems[0];
 		var lastElement = this.elems[this.elems.length - 1];
-		var yPos = calcYPos(this.total, this.elems.length, this.stemHeight, asc, firstElement.abcelem.averagepitch, lastElement.abcelem.averagepitch, this.isflat, this.min, this.max, this.isgrace);
-		var xPos = calcXPos(asc, firstElement, lastElement);
+		var yPos = calcYPos(this.total, this.elems.length, this.stemHeight, this.stemsUp, firstElement.abcelem.averagepitch, lastElement.abcelem.averagepitch, this.isflat, this.min, this.max, this.isgrace);
+		var xPos = calcXPos(this.stemsUp, firstElement, lastElement);
 		this.beams.push({ startX: xPos[0], endX: xPos[1], startY: yPos[0], endY: yPos[1], dy: dy });
 
 		// create the rest of the beams (in the case of 1/16th notes, etc.
-		var beams = createAdditionalBeams(this.elems, asc, this.beams[0], this.isgrace, dy);
+		var beams = createAdditionalBeams(this.elems, this.stemsUp, this.beams[0], this.isgrace, dy);
 		for (var i = 0; i < beams.length; i++)
 			this.beams.push(beams[i]);
 
 		// Now that the main beam is defined, we know how tall the stems should be, so create them and attach them to the original notes.
-		createStems(this.elems, asc, this.beams[0], dy, this.mainNote);
+		createStems(this.elems, this.stemsUp, this.beams[0], dy, this.mainNote);
+	};
+
+	ABCJS.write.BeamElem.prototype.isAbove = function() {
+		return this.stemsUp;
+	};
+
+	ABCJS.write.BeamElem.prototype.heightAtMidpoint = function() {
+		if (this.beams.length === 0)
+			return 0;
+		var beam = this.beams[0];
+		var midPoint = beam.startX + (beam.endX - beam.startX) / 2;
+		return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, midPoint);
+	};
+
+	ABCJS.write.BeamElem.prototype.xAtMidpoint = function() {
+		if (this.beams.length === 0)
+			return 0;
+		return this.beams[0].startX + (this.beams[0].endX - this.beams[0].startX)/2;
 	};
 
 	//

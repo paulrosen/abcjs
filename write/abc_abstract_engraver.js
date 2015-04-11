@@ -679,7 +679,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   }
 
   if (elem.endTriplet && this.triplet) {
-    this.triplet.anchor2 = notehead;
+    this.triplet.setCloseAnchor(notehead);
     this.triplet = null;
     this.tripletmultiplier = 1;
   }
