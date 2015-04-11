@@ -75,7 +75,7 @@ if (!window.ABCJS.write)
 		if (this.forceup) return true;
 		if (this.forcedown) return false;
 		var average = calcAverage(this.total, this.elems.length);
-		return average <= middleLine;
+		return average < middleLine;
 	};
 
 	//
