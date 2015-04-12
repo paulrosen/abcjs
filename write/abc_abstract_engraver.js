@@ -144,39 +144,8 @@ ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
   return this.staffgroup;
 };
 
-//function adjustChordVerticalPosition(staffgroup) {
-//	var yPlacement = 16; // no lower than high E
-//	var chordList = [];
-//	for (var i = 0; i < staffgroup.voices.length; i++) {
-//		for (var j = 0; j < staffgroup.voices[i].children.length; j++) {
-//			var absElem = staffgroup.voices[i].children[j];
-//			if (absElem.top+5 > yPlacement)
-//				yPlacement = absElem.top+5;
-//			for (var k = 0; k < absElem.children.length; k++) {
-//				var relElem = absElem.children[k];
-//				if (relElem.type === 'chord')
-//					chordList.push(relElem);
-//			}
-//		}
-//	}
-//	for (i = 0; i < chordList.length; i++) {
-//		var elem = chordList[i];
-//		if (elem.top < yPlacement) {
-//			elem.top = yPlacement;
-//			elem.pitch = yPlacement;
-//			elem.bottom = yPlacement;
-//			if (elem.parent.top < yPlacement)
-//				elem.parent.top = yPlacement;
-//		}
-//	}
-//}
-
 ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo) {
 // If the tempo is passed in, then the first element should get the tempo attached to it.
-  var header = "";
-  if (abcstaff.bracket) header += "bracket "+abcstaff.bracket+" ";
-  if (abcstaff.brace) header += "brace "+abcstaff.brace+" ";
-
   for (this.v = 0; this.v < abcstaff.voices.length; this.v++) {
     this.voice = new ABCJS.write.VoiceElement(this.v,abcstaff.voices.length);
     if (this.v===0) {
@@ -186,13 +155,19 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
       this.voice.duplicate = true; // bar lines and other duplicate info need not be created
     }
     if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
-	  var clef = this.createClef(abcstaff.clef)
+	  var clef = ABCJS.write.createClef(abcstaff.clef);
 	  if (clef)
     this.voice.addChild(clef);
-	  var keySig = this.createKeySignature(abcstaff.key);
-	  if (keySig)
-	    this.voice.addChild(keySig);
-    if (abcstaff.meter) this.voice.addChild(this.createTimeSignature(abcstaff.meter));
+	  var keySig = ABCJS.write.createKeySignature(abcstaff.key);
+	  if (keySig) {
+		  this.voice.addChild(keySig);
+		  this.startlimitelem = keySig; // limit ties here
+	  }
+    if (abcstaff.meter) {
+		var ts = ABCJS.write.createTimeSignature(abcstaff.meter);
+		this.voice.addChild(ts);
+		this.startlimitelem = ts; // limit ties here
+	}
 	  if (this.voice.duplicate)
 	  	this.voice.children = []; // we shouldn't reprint the above if we're reusing the same staff. We just created them to get the right spacing.
     var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
@@ -250,18 +225,21 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "meter":
-    elemset[0] = this.createTimeSignature(elem);
+    elemset[0] = ABCJS.write.createTimeSignature(elem);
+	  this.startlimitelem = elemset[0]; // limit ties here
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "clef":
-    elemset[0] = this.createClef(elem);
+    elemset[0] = ABCJS.write.createClef(elem);
 	  if (!elemset[0]) return null;
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "key":
-	  var absKey = this.createKeySignature(elem);
-	  if (absKey)
-	    elemset[0] = absKey;
+	  var absKey = ABCJS.write.createKeySignature(elem);
+	  if (absKey) {
+		  elemset[0] = absKey;
+		  this.startlimitelem = elemset[0]; // limit ties here
+	  }
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "stem":
@@ -445,7 +423,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
 	  if (!style || style === "normal") style = "note";
 	  noteSymbol = this.chartable[style][-durlog];
 	  if (nostem)
-		  noteSymbol = this.chartable[style]['nostem'];
+		  noteSymbol = this.chartable[style].nostem;
 
     // determine elements of chords which should be shifted
     for (p=(dir==="down")?elem.pitches.length-2:1; (dir==="down")?p>=0:p<elem.pitches.length; p=(dir==="down")?p-1:p+1) {
@@ -905,92 +883,5 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
 
 };
 
-ABCJS.write.AbstractEngraver.prototype.createClef = function(elem) {
-  var clef;
-  var octave = 0;
-  var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra');
-  switch (elem.type) {
-  case "treble": clef = "clefs.G"; break;
-  case "tenor": clef="clefs.C"; break;
-  case "alto": clef="clefs.C"; break;
-  case "bass": clef="clefs.F"; break;
-  case 'treble+8': clef = "clefs.G"; octave = 1; break;
-  case 'tenor+8':clef="clefs.C"; octave = 1; break;
-  case 'bass+8': clef="clefs.F"; octave = 1; break;
-  case 'alto+8': clef="clefs.C"; octave = 1; break;
-  case 'treble-8': clef = "clefs.G"; octave = -1; break;
-  case 'tenor-8':clef="clefs.C"; octave = -1; break;
-  case 'bass-8': clef="clefs.F"; octave = -1; break;
-  case 'alto-8': clef="clefs.C"; octave = -1; break;
-  case 'none': return null; break;
-  case 'perc': clef="clefs.perc"; break;
-  default: abselem.addChild(new ABCJS.write.RelativeElement("clef="+elem.type, 0, 0, undefined, {type:"debug"}));
-  }
-// if (elem.verticalPos) {
-// pitch = elem.verticalPos;
-// }
-  var dx =5;
-  if (clef) {
-	  abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, ABCJS.write.glyphs.getSymbolWidth(clef), elem.clefPos));
 
-	  if (clef === 'clefs.G') {
-		  abselem.top = 13;
-		  abselem.bottom = -1;
-	  } else {
-		  abselem.top = 10;
-		  abselem.bottom = 2;
-	  }
-	  if (octave !== 0) {
-		  var scale = 2 / 3;
-		  var adjustspacing = (ABCJS.write.glyphs.getSymbolWidth(clef) - ABCJS.write.glyphs.getSymbolWidth("8") * scale) / 2;
-		  abselem.addRight(new ABCJS.write.RelativeElement("8", dx + adjustspacing, ABCJS.write.glyphs.getSymbolWidth("8") * scale, (octave > 0) ? abselem.top + 3 : abselem.bottom - 1, {
-			  scalex: scale,
-			  scaley: scale
-		  }));
-		  abselem.top += 2;
-	  }
-  }
-  return abselem;
-};
-
-ABCJS.write.AbstractEngraver.prototype.createKeySignature = function(elem) {
-	if (!elem.accidentals || elem.accidentals.length === 0)
-		return null;
-  var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra');
-  var dx = 0;
-         window.ABCJS.parse.each(elem.accidentals, function(acc) {
-                var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
-                //var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
-                abselem.addRight(new ABCJS.write.RelativeElement(symbol, dx, ABCJS.write.glyphs.getSymbolWidth(symbol), acc.verticalPos, { thickness: ABCJS.write.glyphs.symbolHeightInPitches(symbol) }));
-                dx += ABCJS.write.glyphs.getSymbolWidth(symbol)+2;
-         }, this);
-  this.startlimitelem = abselem; // limit ties here
-  return abselem;
-};
-
-ABCJS.write.AbstractEngraver.prototype.createTimeSignature= function(elem) {
-
-  var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra');
-  if (elem.type === "specified") {
-    //TODO make the alignment for time signatures centered
-    for (var i = 0; i < elem.value.length; i++) {
-      if (i !== 0)
-        abselem.addRight(new ABCJS.write.RelativeElement('+', i*20-9, ABCJS.write.glyphs.getSymbolWidth("+"), 6, { thickness: ABCJS.write.glyphs.symbolHeightInPitches("+") }));
-      if (elem.value[i].den) {
-		  // TODO-PER: get real widths here, also center the num and den.
-        abselem.addRight(new ABCJS.write.RelativeElement(elem.value[i].num, i*20, ABCJS.write.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 8, { thickness: ABCJS.write.glyphs.symbolHeightInPitches(elem.value[i].num.charAt(0)) }));
-        abselem.addRight(new ABCJS.write.RelativeElement(elem.value[i].den, i*20, ABCJS.write.glyphs.getSymbolWidth(elem.value[i].den.charAt(0))*elem.value[i].den.length, 4, { thickness: ABCJS.write.glyphs.symbolHeightInPitches(elem.value[i].den.charAt(0)) }));
-      } else {
-        abselem.addRight(new ABCJS.write.RelativeElement(elem.value[i].num, i*20, ABCJS.write.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 6, { thickness: ABCJS.write.glyphs.symbolHeightInPitches(elem.value[i].num.charAt(0)) }));
-      }
-    }
-  } else if (elem.type === "common_time") {
-    abselem.addRight(new ABCJS.write.RelativeElement("timesig.common", 0, ABCJS.write.glyphs.getSymbolWidth("timesig.common"), 6, { thickness: ABCJS.write.glyphs.symbolHeightInPitches("timesig.common") }));
-    
-  } else if (elem.type === "cut_time") {
-    abselem.addRight(new ABCJS.write.RelativeElement("timesig.cut", 0, ABCJS.write.glyphs.getSymbolWidth("timesig.cut"), 6, { thickness: ABCJS.write.glyphs.symbolHeightInPitches("timesig.cut") }));
-  }
-  this.startlimitelem = abselem; // limit ties here
-  return abselem;
-};
 })();
