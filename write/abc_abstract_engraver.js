@@ -48,10 +48,10 @@ ABCJS.write.AbstractEngraver = function(bagpipes, renderer) {
 	this.renderer = renderer;
   this.isBagpipes = bagpipes;
   this.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
-                 note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter", 'nostem':"noteheads.quarter"},
-                 rhythm:{"-1": "noteheads.slash.whole", 0:"noteheads.slash.whole", 1:"noteheads.slash.half", 2:"noteheads.slash.quarter", 3:"noteheads.slash.quarter", 4:"noteheads.slash.quarter", 5:"noteheads.slash.quarter", 6:"noteheads.slash.quarter", nostem: "noteheads.slash.nostem"},
-                 x:{"-1": "noteheads.indeterminate", 0:"noteheads.indeterminate", 1:"noteheads.indeterminate", 2:"noteheads.indeterminate", 3:"noteheads.indeterminate", 4:"noteheads.indeterminate", 5:"noteheads.indeterminate", 6:"noteheads.indeterminate", nostem: "noteheads.indeterminate"},
-                 harmonic:{"-1": "noteheads.harmonic.whole", 0:"noteheads.harmonic.whole", 1:"noteheads.harmonic.whole", 2:"noteheads.harmonic.quarter", 3:"noteheads.harmonic.quarter", 4:"noteheads.harmonic.quarter", 5:"noteheads.harmonic.quarter", 6:"noteheads.harmonic.quarter", nostem: "noteheads.harmonic.quarter"},
+                 note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter", 7:"noteheads.quarter", 'nostem':"noteheads.quarter"},
+                 rhythm:{"-1": "noteheads.slash.whole", 0:"noteheads.slash.whole", 1:"noteheads.slash.whole", 2:"noteheads.slash.quarter", 3:"noteheads.slash.quarter", 4:"noteheads.slash.quarter", 5:"noteheads.slash.quarter", 6:"noteheads.slash.quarter", 7:"noteheads.slash.quarter", nostem: "noteheads.slash.nostem"},
+                 x:{"-1": "noteheads.indeterminate", 0:"noteheads.indeterminate", 1:"noteheads.indeterminate", 2:"noteheads.indeterminate", 3:"noteheads.indeterminate", 4:"noteheads.indeterminate", 5:"noteheads.indeterminate", 6:"noteheads.indeterminate", 7:"noteheads.indeterminate", nostem: "noteheads.indeterminate"},
+                 harmonic:{"-1": "noteheads.harmonic.quarter", 0:"noteheads.harmonic.quarter", 1:"noteheads.harmonic.quarter", 2:"noteheads.harmonic.quarter", 3:"noteheads.harmonic.quarter", 4:"noteheads.harmonic.quarter", 5:"noteheads.harmonic.quarter", 6:"noteheads.harmonic.quarter", 7:"noteheads.harmonic.quarter", nostem: "noteheads.harmonic.quarter"},
                  uflags:{3:"flags.u8th", 4:"flags.u16th", 5:"flags.u32nd", 6:"flags.u64th"},
                  dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}};
 	this.reset();
@@ -343,7 +343,8 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   var width, p1, p2, dx;
 
   var duration = ABCJS.write.getDuration(elem);
-  if (duration === 0) { duration = 0.25; nostem = true; }        //PER: zero duration will draw a quarter note head.
+	var zeroDuration = false;
+  if (duration === 0) { zeroDuration = true; duration = 0.25; nostem = true; }        //PER: zero duration will draw a quarter note head.
   var durlog = Math.floor(Math.log(duration)/Math.log(2)); //TODO use getDurlog
   var dot=0;
 
@@ -418,12 +419,15 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     var dir = (elem.averagepitch>=6) ? "down": "up";
     if (this.stemdir) dir=this.stemdir;
 
-	  var noteSymbol = this.chartable.note[-durlog];
 	  var style = elem.style ? elem.style : this.style; // get the style of note head.
 	  if (!style || style === "normal") style = "note";
-	  noteSymbol = this.chartable[style][-durlog];
-	  if (nostem)
+	  var noteSymbol;
+	  if (zeroDuration)
 		  noteSymbol = this.chartable[style].nostem;
+		else
+		  noteSymbol = this.chartable[style][-durlog];
+	  if (!noteSymbol)
+	  	console.log("noteSymbol:", style, durlog, zeroDuration);
 
     // determine elements of chords which should be shifted
     for (p=(dir==="down")?elem.pitches.length-2:1; (dir==="down")?p>=0:p<elem.pitches.length; p=(dir==="down")?p-1:p+1) {
