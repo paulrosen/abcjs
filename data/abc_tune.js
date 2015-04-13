@@ -101,7 +101,7 @@ window.ABCJS.data.Tune = function() {
 		this.lineNum = 0;
 	};
 
-	this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote) {
+	this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote, currSlur) {
 		this.closeLine();	// Close the last line.
 
 		// Remove any blank lines
@@ -211,7 +211,6 @@ window.ABCJS.data.Tune = function() {
 		}
 
 		function cleanUpSlursInLine(line) {
-			var currSlur = [];
 			var x;
 //			var lyr = null;	// TODO-PER: debugging.
 
@@ -225,7 +224,7 @@ window.ABCJS.data.Tune = function() {
 						}
 					}
 					if (currSlur[chordPos] === undefined) {
-						var offNum = chordPos*100;
+						var offNum = chordPos*100+1;
 						window.ABCJS.parse.each(obj.endSlur, function(x) { if (offNum === x) --offNum; });
 						currSlur[chordPos] = [offNum];
 					}
@@ -399,6 +398,8 @@ window.ABCJS.data.Tune = function() {
 		delete this.potentialStartBeam;
 		delete this.potentialEndBeam;
 		delete this.vskipPending;
+
+		return currSlur;
 	};
 
 	this.reset();

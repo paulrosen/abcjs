@@ -78,6 +78,7 @@ window.ABCJS.parse.Parse = function() {
 			this.chordPosition = "auto";
 			this.ornamentPosition = "auto";
 			this.volumePosition = "auto";
+			this.openSlurs = [];
 		},
 		differentFont: function(type, defaultFonts) {
 			if (this[type].decoration !== defaultFonts[type].decoration) return true;
@@ -1498,7 +1499,7 @@ window.ABCJS.parse.Parse = function() {
 				ph = pl;
 				pl = x;
 			}
-			tune.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote);
+			multilineVars.openSlurs = tune.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
 		} catch (err) {
 			if (err !== "normal_abort")
 				throw err;
