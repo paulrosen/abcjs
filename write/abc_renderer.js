@@ -435,7 +435,10 @@ ABCJS.write.Renderer.prototype.endGroup = function (klass) {
  * @param {number} x2 end x
  * @param {number} pitch pitch the stave line is drawn at
  */
-ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch) {
+ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
+	var extraClass = "staff";
+	if (klass !== undefined)
+		extraClass += " " + klass;
   var isIE=/*@cc_on!@*/false;//IE detector
   var dy = 0.35;
   var fill = "#000000";
@@ -446,7 +449,7 @@ ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch) {
   var y = this.calcY(pitch);
   var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
      x2, y+dy, x1, y+dy);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
+  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses(extraClass)}).toBack();
   if (this.doRegression) this.addToRegression(ret);
 
   return ret;
@@ -589,13 +592,15 @@ ABCJS.write.Renderer.prototype.calcY = function(ofs) {
  * Print @param {number} numLines. If there is 1 line it is the B line. Otherwise the bottom line is the E line.
  */
 ABCJS.write.Renderer.prototype.printStave = function (startx, endx, numLines) {
+	var klass = "top-line";
 	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
 	if (numLines === 1) {
-		this.printStaveLine(startx,endx,6);
+		this.printStaveLine(startx,endx,6, klass);
 		return;
 	}
-	for (var i = 0; i < numLines; i++) {
-		this.printStaveLine(startx,endx,(i+1)*2);
+	for (var i = numLines-1; i >= 0; i--) {
+		this.printStaveLine(startx,endx,(i+1)*2, klass);
+		klass = undefined;
 	}
 };
 
