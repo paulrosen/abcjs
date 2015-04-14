@@ -47,8 +47,9 @@ if (!window.ABCJS.write)
 			if (hasBeam) {
 				// If there is a beam then we don't need to draw anything except the text. The beam could either be above or below.
 				var beam = this.anchor1.parent.beam;
-				xTextPos = beam.xAtMidpoint();
-				yTextPos = beam.heightAtMidpoint();
+				var left = beam.isAbove() ? this.anchor1.x + this.anchor1.w : this.anchor1.x;
+				xTextPos = beam.xAtMidpoint(left,  this.anchor2.x);
+				yTextPos = beam.heightAtMidpoint(left,  this.anchor2.x);
 				yTextPos += beam.isAbove() ? 4 : -4; // This creates some space between the beam and the number.
 			} else {
 				// If there isn't a beam, then we need to draw the bracket and the text. The bracket is always above.

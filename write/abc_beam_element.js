@@ -107,18 +107,17 @@ if (!window.ABCJS.write)
 		return this.stemsUp;
 	};
 
-	ABCJS.write.BeamElem.prototype.heightAtMidpoint = function() {
+	// We can't just use the entire beam for the calculation. The range has to be passed in, because the beam might extend into some unrelated notes. for instance, (3_a'f'e'f'2 when L:16
+	ABCJS.write.BeamElem.prototype.heightAtMidpoint = function(startX, endX) {
 		if (this.beams.length === 0)
 			return 0;
 		var beam = this.beams[0];
-		var midPoint = beam.startX + (beam.endX - beam.startX) / 2;
+		var midPoint = startX + (endX - startX) / 2;
 		return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, midPoint);
 	};
 
-	ABCJS.write.BeamElem.prototype.xAtMidpoint = function() {
-		if (this.beams.length === 0)
-			return 0;
-		return this.beams[0].startX + (this.beams[0].endX - this.beams[0].startX)/2;
+	ABCJS.write.BeamElem.prototype.xAtMidpoint = function(startX, endX) {
+		return startX + (endX - startX)/2;
 	};
 
 	//
