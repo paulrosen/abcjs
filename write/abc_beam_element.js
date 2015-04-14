@@ -232,6 +232,13 @@ if (!window.ABCJS.write)
 				bary -= (dy / 2) / ABCJS.write.spacing.STEP;	// TODO-PER: This is just a fudge factor so the down-pointing stems don't overlap.
 			if (isGrace)
 				dx += elem.heads[0].dx;
+			// TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
+			if (furthestHead.c === 'noteheads.slash.quarter') {
+				if (asc)
+					pitch += 1;
+				else
+					pitch -= 1;
+			}
 			var stem = new ABCJS.write.RelativeElement(null, dx, 0, pitch, {
 				"type": "stem",
 				"pitch2": bary,

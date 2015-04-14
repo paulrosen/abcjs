@@ -511,6 +511,13 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
       if (p2<6 && !this.stemdir) p2=6;
       dx = (dir==="down" || abselem.heads.length === 0)?0:abselem.heads[0].w;
       width = (dir==="down")?1:-1;
+		// TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
+		if (notehead.c === 'noteheads.slash.quarter') {
+			if (dir === 'down')
+				p2 -= 1;
+			else
+				p1 += 1;
+		}
       abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
         this.minY = Math.min(p1, this.minY);
         this.minY = Math.min(p2, this.minY);
