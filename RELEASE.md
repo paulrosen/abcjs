@@ -1,3 +1,13 @@
+# Version 2.0
+
+* Many bug fixes.
+
+* Much work on vertical spacing of elements.
+
+* Much refactoring of the codebase to make future maintenance easier.
+
+* Beginning support of "print" mode, that lays out music in a way suitable for creating printable PDFs.
+
 # Version 1.12
 
 * Improved documentation.

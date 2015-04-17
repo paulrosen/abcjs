@@ -6,6 +6,8 @@
 
 [API Documentation](/api.md)
 
+[ABC Music Notation](/abc-notation.md)
+
 This library makes it easy to incorporate **sheet music** into your **websites**. You can also turn visible **ABC** text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of this javascript file.
 
 **NOTE: We are changing the release license to the MIT License, effective immediately. Let us know if this causes any problems, but we're hoping that it solves some. Our goal is that you can use this library in a convenient way, as long as you give us credit for it.**
@@ -40,25 +42,27 @@ If you are looking at someone else's website and see ABC on the page and want to
 
 Here are the latest versions. You can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_1.12-min.js)
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_2.0-min.js)
 
-- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_1.12-min.js)
+- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_2.0-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.12-min.js)
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_2.0-min.js)
 
-- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_1.12.user.js)
+- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_2.0.user.js)
 
 And here are the latest versions packaged without the standard libraries. To use these, you need to include those libraries yourself:
 
-- [Basic without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_1.12-min.js)
+- [Basic without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_2.0-min.js)
 
-- [Editor without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_1.12-min.js)
+- [Editor without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_2.0-min.js)
 
-- [Plugin without JQuery](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_nojquery_1.12-min.js)
+- [Plugin without JQuery](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_nojquery_2.0-min.js)
 
-- [Plugin without JQuery or Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_1.12-min.js)
+- [Plugin without JQuery or Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_2.0-min.js)
 
 **NOTE: Do NOT link to these files directly! Upload them to your own server! [Here's why.](https://github.com/blog/1482-heads-up-nosniff-header-support-coming-to-chrome-and-firefox)**
+
+** A special thanks to [Sight Reading Factory](https://sightreadingfactory.com) for their great encouragement and support of this project. **
 
 ## Partial list of some websites using abcjs:
 
@@ -81,8 +85,7 @@ Let us know if you want to be listed!
 
 * ABC 1.6 is pretty much implemented.
 * Many of the new features of ABC 2.1 are being implemented now.
-* Midi playback is at a very early stage and does not yet feature ornamentation, dynamics, chords or multi voice.
-* Midi playback will not work in Internet Explorer.
+* Because of browser and Quicktime changes in the last few years, midi support is spotty. The midi data is created and can be downloaded, but may not be able to play in the browser.
 
 # API Changes for Version 1.11
 
