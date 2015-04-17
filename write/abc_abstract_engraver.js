@@ -187,12 +187,12 @@ ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline, tempo)
   }
   for (var slur in this.slurs) {
     if (this.slurs.hasOwnProperty(slur)) {
-      this.slurs[slur]= new ABCJS.write.TieElem(null, null, this.slurs[slur].above, this.slurs[slur].force);
+      this.slurs[slur]= new ABCJS.write.TieElem(null, null, this.slurs[slur].above, this.slurs[slur].force, false);
         this.voice.addOther(this.slurs[slur]);
     }
   }
   for (var i=0; i<this.ties.length; i++) {
-    this.ties[i]=new ABCJS.write.TieElem(null, null, this.ties[i].above, this.ties[i].force);
+    this.ties[i]=new ABCJS.write.TieElem(null, null, this.ties[i].above, this.ties[i].force, true);
     this.voice.addOther(this.ties[i]);
   }
 
@@ -579,7 +579,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
         abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
       }
       
-      if (i===0 && !this.isBagpipes && !(elem.rest && (elem.rest.type==="spacer"||elem.rest.type==="invisible"))) this.voice.addOther(new ABCJS.write.TieElem(grace, notehead, false, true));
+      if (i===0 && !this.isBagpipes && !(elem.rest && (elem.rest.type==="spacer"||elem.rest.type==="invisible"))) this.voice.addOther(new ABCJS.write.TieElem(grace, notehead, false, true, false));
     }
 
     if (gracebeam) {
@@ -761,14 +761,14 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
   
   if (pitchelem.endTie) {
     if (this.ties[0]) {
-      this.ties[0].anchor2=notehead;
+      this.ties[0].setEndAnchor(notehead);
       this.ties = this.ties.slice(1,this.ties.length);
     }
   }
   
   if (pitchelem.startTie) {
     //PER: bug fix: var tie = new ABCJS.write.TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
-    var tie = new ABCJS.write.TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up",(this.stemdir==="down" || this.stemdir==="up"));
+    var tie = new ABCJS.write.TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up",(this.stemdir==="down" || this.stemdir==="up"), true);
     this.ties[this.ties.length]=tie;
     this.voice.addOther(tie);
 	  // HACK-PER: For the animation, we need to know if a note is tied to the next one, so here's a flag.
@@ -782,14 +782,15 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
       var slurid = pitchelem.endSlur[i];
       var slur;
       if (this.slurs[slurid]) {
-        slur = this.slurs[slurid].anchor2=notehead;
+        slur = this.slurs[slurid];
+		  slur.setEndAnchor(notehead);
         delete this.slurs[slurid];
       } else {
-        slur = new ABCJS.write.TieElem(null, notehead, dir==="down",(this.stemdir==="up" || dir==="down") && this.stemdir!=="down", this.stemdir);
+        slur = new ABCJS.write.TieElem(null, notehead, dir==="down",(this.stemdir==="up" || dir==="down") && this.stemdir!=="down", false);
         this.voice.addOther(slur);
       }
       if (this.startlimitelem) {
-        slur.startlimitelem = this.startlimitelem;
+        slur.setStartX(this.startlimitelem);
       }
     }
   }
@@ -798,7 +799,7 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
     for (i=0; i<pitchelem.startSlur.length; i++) {
       var slurid = pitchelem.startSlur[i].label;
       //PER: bug fix: var slur = new ABCJS.write.TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
-      var slur = new ABCJS.write.TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", false);
+      var slur = new ABCJS.write.TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", false, false);
       this.slurs[slurid]=slur;
       this.voice.addOther(slur);
     }
@@ -828,7 +829,7 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
   if (firstdots || seconddots) {
     for (var slur in this.slurs) {
       if (this.slurs.hasOwnProperty(slur)) {
-        this.slurs[slur].endlimitelem = abselem;
+        this.slurs[slur].setEndX(abselem);
       }
     }
     this.startlimitelem = abselem;

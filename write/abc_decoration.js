@@ -73,7 +73,7 @@ if (!window.ABCJS.write)
 				var blank2 = new ABCJS.write.RelativeElement("", -roomtaken-5, 0, yPos2+1);
 				abselem.addChild(blank1);
 				abselem.addChild(blank2);
-				voice.addOther(new ABCJS.write.TieElem(blank1, blank2, false));
+				voice.addOther(new ABCJS.write.TieElem(blank1, blank2, false, false, false));
 			}
 		}
 		if (yPos === undefined)
