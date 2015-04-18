@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">/*global window */
+
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+if (!window.ABCJS.parse)
+	window.ABCJS.parse = {};
+
+window.ABCJS.parse.parseDirective = {};
+
+(function() {
+	var tokenizer;
+	var warn;
+	var multilineVars;
+	var tune;
+	window.ABCJS.parse.parseDirective.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
+		tokenizer = tokenizer_;
+		warn = warn_;
+		multilineVars = multilineVars_;
+		tune = tune_;
+	};
+
+	window.ABCJS.parse.parseDirective.parseFontChangeLine = function(textstr) {
+		var textParts = textstr.split('$');
+		if (textParts.length &gt; 1 &amp;&amp; multilineVars.setfont) {
+			var textarr = [ { text: textParts[0] }];
+			for (var i = 1; i &lt; textParts.length; i++) {
+				if (textParts[i].charAt(0) === '0')
+					textarr.push({ text: textParts[i].substring(1) });
+				else if (textParts[i].charAt(0) === '1' &amp;&amp; multilineVars.setfont[1])
+					textarr.push({font: multilineVars.setfont[1], text: textParts[i].substring(1) });
+				else if (textParts[i].charAt(0) === '2' &amp;&amp; multilineVars.setfont[2])
+					textarr.push({font: multilineVars.setfont[2], text: textParts[i].substring(1) });
+				else if (textParts[i].charAt(0) === '3' &amp;&amp; multilineVars.setfont[3])
+					textarr.push({font: multilineVars.setfont[3], text: textParts[i].substring(1) });
+				else if (textParts[i].charAt(0) === '4' &amp;&amp; multilineVars.setfont[4])
+					textarr.push({font: multilineVars.setfont[4], text: textParts[i].substring(1) });
+				else
+					textarr[textarr.length-1].text += '$' + textParts[i];
+			}
+			if (textarr.length &gt; 1)
+				return textarr;
+		}
+		return textstr;
+	};
+
+	window.ABCJS.parse.parseDirective.addDirective = function(str) {
+		var getRequiredMeasurement = function(cmd, tokens) {
+			var points = tokenizer.getMeasurement(tokens);
+			if (points.used === 0 || tokens.length !== 0)
+				return { error: &quot;Directive \&quot;&quot; + cmd + &quot;\&quot; requires a measurement as a parameter.&quot;};
+			return points.value;
+		};
+		var oneParameterMeasurement = function(cmd, tokens) {
+			var points = tokenizer.getMeasurement(tokens);
+			if (points.used === 0 || tokens.length !== 0)
+				return &quot;Directive \&quot;&quot; + cmd + &quot;\&quot; requires a measurement as a parameter.&quot;;
+			tune.formatting[cmd] = points.value;
+			return null;
+		};
+		var getFontParameter = function(tokens) {
+			var font = {};
+			var token = window.ABCJS.parse.last(tokens);
+			if (token.type === 'number') {
+				font.size = parseInt(token.token);
+				tokens.pop();
+			}
+			if (tokens.length &gt; 0) {
+				var scratch = &quot;&quot;;
+				window.ABCJS.parse.each(tokens, function(tok) {
+					if (tok.token !== '-') {
+						if (scratch.length &gt; 0) scratch += ' ';
+						scratch += tok.token;
+					}
+				});
+				font.font = scratch;
+			}
+			return font;
+		};
+		var getChangingFont = function(cmd, tokens) {
+			if (tokens.length === 0)
+				return &quot;Directive \&quot;&quot; + cmd + &quot;\&quot; requires a font as a parameter.&quot;;
+			multilineVars[cmd] = getFontParameter(tokens);
+			return null;
+		};
+		var getGlobalFont = function(cmd, tokens) {
+			if (tokens.length === 0)
+				return &quot;Directive \&quot;&quot; + cmd + &quot;\&quot; requires a font as a parameter.&quot;;
+			tune.formatting[cmd] = getFontParameter(tokens);
+			return null;
+		};
+
+		var addMultilineVar = function(key, cmd, tokens, min, max) {
+			if (tokens.length !== 1 || tokens[0].type !== 'number')
+				return &quot;Directive \&quot;&quot; + cmd + &quot;\&quot; requires a number as a parameter.&quot;;
+			var i = tokens[0].intt;
+			if (min !== undefined &amp;&amp; i &lt; min)
+				return &quot;Directive \&quot;&quot; + cmd + &quot;\&quot; requires a number greater than or equal to &quot; + min + &quot; as a parameter.&quot;;
+			if (max !== undefined &amp;&amp; i &gt; max)
+				return &quot;Directive \&quot;&quot; + cmd + &quot;\&quot; requires a number less than or equal to &quot; + max + &quot; as a parameter.&quot;;
+			multilineVars[key] = i;
+			return null;
+		};
+
+		var addMultilineVarBool = function(key, cmd, tokens) {
+			var str = addMultilineVar(key, cmd, tokens, 0, 1);
+			if (str !== null) return str;
+			multilineVars[key] = (multilineVars[key] === 1);
+			return null;
+		};
+
+		var tokens = tokenizer.tokenize(str, 0, str.length);	// 3 or more % in a row, or just spaces after %% is just a comment
+		if (tokens.length === 0 || tokens[0].type !== 'alpha') return null;
+		var restOfString = str.substring(str.indexOf(tokens[0].token)+tokens[0].token.length);
+		restOfString = tokenizer.stripComment(restOfString);
+		var cmd = tokens.shift().token.toLowerCase();
+		var num;
+		var scratch = &quot;&quot;;
+		switch (cmd)
+		{
+			// The following directives were added to abc_parser_lint, but haven't been implemented here.
+			// Most of them are direct translations from the directives that will be parsed in. See abcm2ps's format.txt for info on each of these.
+			//					alignbars: { type: &quot;number&quot;, optional: true },
+			//					aligncomposer: { type: &quot;string&quot;, Enum: [ 'left', 'center','right' ], optional: true },
+			//					annotationfont: fontType,
+			//					bstemdown: { type: &quot;boolean&quot;, optional: true },
+			//					continueall: { type: &quot;boolean&quot;, optional: true },
+			//					dynalign: { type: &quot;boolean&quot;, optional: true },
+			//					exprabove: { type: &quot;boolean&quot;, optional: true },
+			//					exprbelow: { type: &quot;boolean&quot;, optional: true },
+			//					flatbeams: { type: &quot;boolean&quot;, optional: true },
+			//					footer: { type: &quot;string&quot;, optional: true },
+			//					footerfont: fontType,
+			//					gchordbox: { type: &quot;boolean&quot;, optional: true },
+			//					graceslurs: { type: &quot;boolean&quot;, optional: true },
+			//					gracespacebefore: { type: &quot;number&quot;, optional: true },
+			//					gracespaceinside: { type: &quot;number&quot;, optional: true },
+			//					gracespaceafter: { type: &quot;number&quot;, optional: true },
+			//					header: { type: &quot;string&quot;, optional: true },
+			//					headerfont: fontType,
+			//					historyfont: fontType,
+			//					infofont: fontType,
+			//					infospace: { type: &quot;number&quot;, optional: true },
+			//					lineskipfac: { type: &quot;number&quot;, optional: true },
+			//					maxshrink: { type: &quot;number&quot;, optional: true },
+			//					maxstaffsep: { type: &quot;number&quot;, optional: true },
+			//					maxsysstaffsep: { type: &quot;number&quot;, optional: true },
+			//					measurebox: { type: &quot;boolean&quot;, optional: true },
+			//					measurefont: fontType,
+			//					notespacingfactor: { type: &quot;number&quot;, optional: true },
+			//					parskipfac: { type: &quot;number&quot;, optional: true },
+			//					partsbox: { type: &quot;boolean&quot;, optional: true },
+			//					repeatfont: fontType,
+			//					rightmargin: { type: &quot;number&quot;, optional: true },
+			//					slurheight: { type: &quot;number&quot;, optional: true },
+			//					splittune: { type: &quot;boolean&quot;, optional: true },
+			//					squarebreve: { type: &quot;boolean&quot;, optional: true },
+			//					stemheight: { type: &quot;number&quot;, optional: true },
+			//					straightflags: { type: &quot;boolean&quot;, optional: true },
+			//					stretchstaff: { type: &quot;boolean&quot;, optional: true },
+			//					textfont: fontType,
+			//					titleformat: { type: &quot;string&quot;, optional: true },
+			//					vocalabove: { type: &quot;boolean&quot;, optional: true },
+			//					vocalfont: fontType,
+			//					wordsfont: fontType,
+			case &quot;bagpipes&quot;:tune.formatting.bagpipes = true;break;
+			case &quot;landscape&quot;:multilineVars.landscape = true;break;
+			case &quot;papersize&quot;:multilineVars.papersize = restOfString;break;
+			case &quot;slurgraces&quot;:tune.formatting.slurgraces = true;break;
+			case &quot;stretchlast&quot;:tune.formatting.stretchlast = true;break;
+			case &quot;titlecaps&quot;:multilineVars.titlecaps = true;break;
+			case &quot;titleleft&quot;:tune.formatting.titleleft = true;break;
+			case &quot;measurebox&quot;:tune.formatting.measurebox = true;break;
+
+			case &quot;botmargin&quot;:
+			case &quot;botspace&quot;:
+			case &quot;composerspace&quot;:
+			case &quot;indent&quot;:
+			case &quot;leftmargin&quot;:
+			case &quot;linesep&quot;:
+			case &quot;musicspace&quot;:
+			case &quot;partsspace&quot;:
+			case &quot;pageheight&quot;:
+			case &quot;pagewidth&quot;:
+			case &quot;rightmargin&quot;:
+			case &quot;staffsep&quot;:
+			case &quot;staffwidth&quot;:
+			case &quot;subtitlespace&quot;:
+			case &quot;sysstaffsep&quot;:
+			case &quot;systemsep&quot;:
+			case &quot;textspace&quot;:
+			case &quot;titlespace&quot;:
+			case &quot;topmargin&quot;:
+			case &quot;topspace&quot;:
+			case &quot;vocalspace&quot;:
+			case &quot;wordsspace&quot;:
+				return oneParameterMeasurement(cmd, tokens);
+			case &quot;vskip&quot;:
+				var vskip = getRequiredMeasurement(cmd, tokens);
+				if (vskip.error)
+					return vskip.error;
+				tune.addSpacing(vskip);
+				return null;
+			case &quot;scale&quot;:
+				scratch = &quot;&quot;;
+				window.ABCJS.parse.each(tokens, function(tok) {
+					scratch += tok.token;
+				});
+				num = parseFloat(scratch);
+				if (isNaN(num) || num === 0)
+					return &quot;Directive \&quot;&quot; + cmd + &quot;\&quot; requires a number as a parameter.&quot;;
+				tune.formatting.scale = num;
+				break;
+			case &quot;sep&quot;:
+				if (tokens.length === 0)
+					tune.addSeparator();
+				else {
+					var points = tokenizer.getMeasurement(tokens);
+					if (points.used === 0)
+						return &quot;Directive \&quot;&quot; + cmd + &quot;\&quot; requires 3 numbers: space above, space below, length of line&quot;;
+					var spaceAbove = points.value;
+
+					points = tokenizer.getMeasurement(tokens);
+					if (points.used === 0)
+						return &quot;Directive \&quot;&quot; + cmd + &quot;\&quot; requires 3 numbers: space above, space below, length of line&quot;;
+					var spaceBelow = points.value;
+
+					points = tokenizer.getMeasurement(tokens);
+					if (points.used === 0 || tokens.length !== 0)
+						return &quot;Directive \&quot;&quot; + cmd + &quot;\&quot; requires 3 numbers: space above, space below, length of line&quot;;
+					var lenLine = points.value;
+					tune.addSeparator(spaceAbove, spaceBelow, lenLine);
+				}
+				break;
+			case &quot;barsperstaff&quot;:
+				scratch = addMultilineVar('barsperstaff', cmd, tokens);
+				if (scratch !== null) return scratch;
+				break;
+			case &quot;staffnonote&quot;:
+				scratch = addMultilineVarBool('staffnonote', cmd, tokens);
+				if (scratch !== null) return scratch;
+				break;
+			case &quot;printtempo&quot;:
+				scratch = addMultilineVarBool('printTempo', cmd, tokens);
+				if (scratch !== null) return scratch;
+				break;
+			case &quot;measurenb&quot;:
+			case &quot;barnumbers&quot;:
+				scratch = addMultilineVar('barNumbers', cmd, tokens);
+				if (scratch !== null) return scratch;
+				break;
+			case &quot;begintext&quot;:
+				multilineVars.inTextBlock = true;
+				break;
+			case &quot;continueall&quot;:
+				multilineVars.continueall = true;
+				break;
+			case &quot;beginps&quot;:
+				multilineVars.inPsBlock = true;
+				warn(&quot;Postscript ignored&quot;, str, 0);
+				break;
+			case &quot;deco&quot;:
+				if (restOfString.length &gt; 0)
+					multilineVars.ignoredDecorations.push(restOfString.substring(0, restOfString.indexOf(' ')));
+				warn(&quot;Decoration redefinition ignored&quot;, str, 0);
+				break;
+			case &quot;text&quot;:
+				var textstr = tokenizer.translateString(restOfString);
+				tune.addText(window.ABCJS.parse.parseDirective.parseFontChangeLine(textstr));
+				break;
+			case &quot;center&quot;:
+				var centerstr = tokenizer.translateString(restOfString);
+				tune.addCentered(window.ABCJS.parse.parseDirective.parseFontChangeLine(centerstr));
+				break;
+			case &quot;font&quot;:
+				// don't need to do anything for this; it is a useless directive
+				break;
+			case &quot;setfont&quot;:
+				var sfTokens = tokenizer.tokenize(restOfString, 0, restOfString.length);
+				var sfDone = false;
+				if (sfTokens.length &gt;= 4) {
+					if (sfTokens[0].token === '-' &amp;&amp; sfTokens[1].type === 'number') {
+						var sfNum = parseInt(sfTokens[1].token);
+						if (sfNum &gt;= 1 &amp;&amp; sfNum &lt;= 4) {
+							if (!multilineVars.setfont)
+								multilineVars.setfont = [];
+							var sfSize = sfTokens.pop();
+							if (sfSize.type === 'number') {
+								sfSize = parseInt(sfSize.token);
+								var sfFontName = '';
+								for (var sfi = 2; sfi &lt; sfTokens.length; sfi++)
+									sfFontName += sfTokens[sfi].token;
+								multilineVars.setfont[sfNum] = { font: sfFontName, size: sfSize };
+								sfDone = true;
+							}
+						}
+					}
+				}
+				if (!sfDone)
+					return &quot;Bad parameters: &quot; + cmd;
+				break;
+			case &quot;gchordfont&quot;:
+			case &quot;partsfont&quot;:
+			case &quot;vocalfont&quot;:
+			case &quot;textfont&quot;:
+				return getChangingFont(cmd, tokens);
+			case &quot;barlabelfont&quot;:
+			case &quot;barnumberfont&quot;:
+			case &quot;composerfont&quot;:
+			case &quot;subtitlefont&quot;:
+			case &quot;tempofont&quot;:
+			case &quot;titlefont&quot;:
+			case &quot;voicefont&quot;:
+				return getGlobalFont(cmd, tokens);
+			case &quot;barnumfont&quot;:
+				return getGlobalFont(&quot;barnumberfont&quot;, tokens);
+			case &quot;staves&quot;:
+			case &quot;score&quot;:
+				multilineVars.score_is_present = true;
+				var addVoice = function(id, newStaff, bracket, brace, continueBar) {
+					if (newStaff || multilineVars.staves.length === 0) {
+						multilineVars.staves.push({index: multilineVars.staves.length, numVoices: 0});
+					}
+					var staff = window.ABCJS.parse.last(multilineVars.staves);
+					if (bracket !== undefined) staff.bracket = bracket;
+					if (brace !== undefined) staff.brace = brace;
+					if (continueBar) staff.connectBarLines = 'end';
+					if (multilineVars.voices[id] === undefined) {
+						multilineVars.voices[id] = {staffNum: staff.index, index: staff.numVoices};
+						staff.numVoices++;
+					}
+				};
+
+				var openParen = false;
+				var openBracket = false;
+				var openBrace = false;
+				var justOpenParen = false;
+				var justOpenBracket = false;
+				var justOpenBrace = false;
+				var continueBar = false;
+				var lastVoice;
+				var addContinueBar = function() {
+					continueBar = true;
+					if (lastVoice) {
+						var ty = 'start';
+						if (lastVoice.staffNum &gt; 0) {
+							if (multilineVars.staves[lastVoice.staffNum-1].connectBarLines === 'start' ||
+								multilineVars.staves[lastVoice.staffNum-1].connectBarLines === 'continue')
+								ty = 'continue';
+						}
+						multilineVars.staves[lastVoice.staffNum].connectBarLines = ty;
+					}
+				};
+				while (tokens.length) {
+					var t = tokens.shift();
+					switch (t.token) {
+						case '(':
+							if (openParen) warn(&quot;Can't nest parenthesis in %%score&quot;, str, t.start);
+							else {openParen = true;justOpenParen = true;}
+							break;
+						case ')':
+							if (!openParen || justOpenParen) warn(&quot;Unexpected close parenthesis in %%score&quot;, str, t.start);
+							else openParen = false;
+							break;
+						case '[':
+							if (openBracket) warn(&quot;Can't nest brackets in %%score&quot;, str, t.start);
+							else {openBracket = true;justOpenBracket = true;}
+							break;
+						case ']':
+							if (!openBracket || justOpenBracket) warn(&quot;Unexpected close bracket in %%score&quot;, str, t.start);
+							else {openBracket = false;multilineVars.staves[lastVoice.staffNum].bracket = 'end';}
+							break;
+						case '{':
+							if (openBrace ) warn(&quot;Can't nest braces in %%score&quot;, str, t.start);
+							else {openBrace = true;justOpenBrace = true;}
+							break;
+						case '}':
+							if (!openBrace || justOpenBrace) warn(&quot;Unexpected close brace in %%score&quot;, str, t.start);
+							else {openBrace = false;multilineVars.staves[lastVoice.staffNum].brace = 'end';}
+							break;
+						case '|':
+							addContinueBar();
+							break;
+						default:
+							var vc = &quot;&quot;;
+							while (t.type === 'alpha' || t.type === 'number') {
+								vc += t.token;
+								if (t.continueId)
+									t = tokens.shift();
+								else
+									break;
+							}
+							var newStaff = !openParen || justOpenParen;
+							var bracket = justOpenBracket ? 'start' : openBracket ? 'continue' : undefined;
+							var brace = justOpenBrace ? 'start' : openBrace ? 'continue' : undefined;
+							addVoice(vc, newStaff, bracket, brace, continueBar);
+							justOpenParen = false;
+							justOpenBracket = false;
+							justOpenBrace = false;
+							continueBar = false;
+							lastVoice = multilineVars.voices[vc];
+							if (cmd === 'staves')
+								addContinueBar();
+							break;
+					}
+				}
+				break;
+
+			case &quot;newpage&quot;:
+				var pgNum = tokenizer.getInt(restOfString);
+				tune.addNewPage(pgNum.digits === 0 ? -1 : pgNum.value);
+				break;
+
+			case &quot;abc-copyright&quot;:
+			case &quot;abc-creator&quot;:
+			case &quot;abc-version&quot;:
+			case &quot;abc-charset&quot;:
+			case &quot;abc-edited-by&quot;:
+				tune.addMetaText(cmd, restOfString);
+				break;
+			case &quot;header&quot;:
+			case &quot;footer&quot;:
+				var footerStr = tokenizer.getMeat(restOfString, 0, restOfString.length);
+				footerStr = restOfString.substring(footerStr.start, footerStr.end);
+				if (footerStr.charAt(0) === '&quot;' &amp;&amp; footerStr.charAt(footerStr.length-1) === '&quot;' )
+					footerStr = footerStr.substring(1, footerStr.length-2);
+				var footerArr = footerStr.split('\t');
+				var footer = {};
+				if (footerArr.length === 1)
+					footer = { left: &quot;&quot;, center: footerArr[0], right: &quot;&quot; };
+				else if (footerArr.length === 2)
+					footer = { left: footerArr[0], center: footerArr[1], right: &quot;&quot; };
+				else
+					footer = { left: footerArr[0], center: footerArr[1], right: footerArr[2] };
+				 if (footerArr.length &gt; 3)
+					 warn(&quot;Too many tabs in &quot;+cmd+&quot;: &quot;+footerArr.length+&quot; found.&quot;, restOfString, 0);
+
+				tune.addMetaTextObj(cmd, footer);
+				break;
+
+			case &quot;midi&quot;:
+				var midi = tokenizer.tokenize(restOfString, 0, restOfString.length);
+				if (midi.length &gt; 0 &amp;&amp; midi[0].token === '=')
+					midi.shift();
+				if (midi.length === 0)
+					warn(&quot;Expected midi command&quot;, restOfString, 0);
+				else {
+	//				var midiCmd = restOfString.split(' ')[0];
+	//				var midiParam = restOfString.substring(midiCmd.length+1);
+					var getNextMidiParam =  function(midiToks) {
+						if (midiToks.length &gt; 0) {
+							var t = midiToks.shift();
+							var p = t.token;
+							if (t.type === &quot;number&quot;)
+								p = t.intt;
+							return p;
+						}
+						else
+							return null;
+					};
+					// TODO-PER: make sure the command is legal
+					if (tune.formatting[cmd] === undefined)
+						tune.formatting[cmd] = {};
+					var midi_cmd = midi.shift().token;
+					var midi_param = true;
+					if (midi_cmd === 'program') {
+						var p1 = getNextMidiParam(midi);
+						if (p1) {
+							var p2 = getNextMidiParam(midi);
+							// NOTE: The program number has an off by one error in ABC, so we add one here.
+							if (p2)
+								midi_param = { channel: p1, program: p2};
+							else
+								midi_param = { program: p1};
+						}
+					} else {
+						// TODO-PER: handle the params for all MIDI commands
+						var p = getNextMidiParam(midi);
+						if (p !== null)
+							midi_param = p;
+					}
+					tune.formatting[cmd][midi_cmd] = midi_param;
+					// TODO-PER: save all the parameters, not just the first.
+				}
+	//%%MIDI barlines: deactivates %%nobarlines.
+	//%%MIDI bassprog n
+	//%%MIDI bassvol n
+	//%%MIDI beat ⟨int1⟩ ⟨int2⟩ ⟨int3⟩ ⟨int4⟩: controls the volumes of the notes in a measure. The first note in a bar has volume ⟨int1⟩; other ‘strong’ notes have volume ⟨int2⟩ and all the rest have volume ⟨int3⟩. These values must be in the range 0–127. The parameter ⟨int4⟩ determines which notes are ‘strong’. If the time signature is x/y, then each note is given a position number k = 0, 1, 2. . . x-1 within each bar. If k is a multiple of ⟨int4⟩, then the note is ‘strong’.
+	//%%MIDI beataccents: reverts to normally emphasised notes. See also %%MIDI nobeat-
+	//%%MIDI beatmod ⟨int⟩: increments the velocities as defined by %%MIDI beat
+	//%%MIDI beatstring ⟨string⟩: similar to %%MIDI beat, but indicated with an fmp string.
+	//%%MIDI c ⟨int⟩: specifies the MIDI pitch which corresponds to	. The default is 60.
+	//%%MIDI channel ⟨int⟩: selects the melody channel ⟨int⟩ (1–16).
+	//%%MIDI chordattack ⟨int⟩: delays the start of chord notes by ⟨int⟩ MIDI units.
+	//%%MIDI chordname ⟨string int1 int2 int3 int4 int5 int6⟩: defines new chords or re-defines existing ones as was seen in Section 12.8.
+	//%%MIDI chordprog 20 % Church organ
+	//%%MIDI chordvol ⟨int⟩: sets the volume (velocity) of the chord notes to ⟨int⟩ (0–127).
+	//%%MIDI control ⟨bass/chord⟩ ⟨int1 int2⟩: generates a MIDI control event. If %%control is followed by ⟨bass⟩ or ⟨chord⟩, the event apply to the bass or chord channel, otherwise it will be applied to the melody channel. ⟨int1⟩ is the MIDI control number (0–127) and ⟨int2⟩ the value (0–127).
+	//%%MIDI deltaloudness⟨int⟩: bydefault,!crescendo!and!dimuendo!modifythebe- at variables ⟨vol1⟩ ⟨vol2⟩ ⟨vol3⟩ 15 volume units. This command allows the user to change this default.
+	//%%MIDI drone ⟨int1 int2 int3 int4 int5⟩: specifies a two-note drone accompaniment. ⟨int1⟩ is the drone MIDI instrument, ⟨int2⟩ the MIDI pitch 1, ⟨int3⟩ the MIDI pitch 2, ⟨int4⟩ the MIDI volume 1, ⟨int5⟩ the MIDI volume 2. Default values are 70 45 33 80 80.
+	//%%MIDI droneoff: turns the drone accompaniment off.
+	//%%MIDI droneon: turns the drone accompaniment on.
+	//%%MIDI drum string [drum programs] [drum velocities]
+	//%%MIDI drumbars ⟨int⟩: specifies the number of bars over which a drum pattern string is spread. Default is 1.
+	//%%MIDI drummap ⟨str⟩ ⟨int⟩: associates the note ⟨str⟩ (in ABC notation) to the a percussion instrument, as listed in Section H.2.
+	//%%MIDI drumoff turns drum accompaniment off.
+	//%%MIDI drumon turns drum accompaniment on.
+	//%%MIDI fermatafixed: expands a !fermata! by one unit length; that is, GC3 becomes
+	//%%MIDI fermataproportional: doubles the length of a note preceded by !fermata!;
+	//%%MIDI gchord string
+	//%%MIDI gchord str
+	//%%MIDI gchordon
+	//%%MIDI gchordoff
+	//%%MIDI grace ⟨float⟩: sets the fraction of the next note that grace notes will take up. ⟨float⟩ must be a fraction such as 1/6.
+	//%%MIDI gracedivider ⟨int⟩: sets the grace note length as 1/⟨int⟩th of the following note.
+	//%%MIDI makechordchannels⟨int⟩: thisisaverycomplexcommandusedinchordscon-
+	//%%MIDI nobarlines
+	//%%MIDI nobeataccents: forces the ⟨int2⟩ volume (see %%MIDI beat) for each note in a bar, regardless of their position.
+	//%%MIDI noportamento: turns off the portamento controller on the current channel.
+	//%%MIDI pitchbend [bass/chord] &lt;high byte&gt; &lt;low byte&gt;
+	//%%MIDI program 2 75
+	//%%MIDI portamento ⟨int⟩: turns on the portamento controller on the current channel and set it to ⟨int⟩. Experts only.
+	//%%MIDI randomchordattack: delays the start of chord notes by a random number of MIDI units.
+	//%%MIDI ratio n m
+	//%%MIDI rtranspose ⟨int1⟩: transposes relatively to a prior %%transpose command by ⟨int1⟩ semitones; the total transposition will be ⟨int1 + int2⟩ semitones.
+	//%%MIDI temperament ⟨int1⟩ ⟨int2⟩: TO BE WRITTEN
+	//%%MIDI temperamentlinear ⟨float1 float2⟩: changes the temperament of the scale. ⟨fl- oat1⟩ specifies the size of an octave in cents of a semitone, or 1/1200 of an octave. ⟨float2⟩ specifies in the size of a fifth (normally 700 cents).
+	//%%MIDI temperamentnormal: restores normal temperament.
+	//%%MIDI transpose n
+	//%%MIDI voice [&lt;ID&gt;] [instrument=&lt;integer&gt; [bank=&lt;integer&gt;]] [mute]
+				break;
+
+			case &quot;playtempo&quot;:
+			case &quot;auquality&quot;:
+			case &quot;continuous&quot;:
+			case &quot;nobarcheck&quot;:
+				// TODO-PER: Actually handle the parameters of these
+				tune.formatting[cmd] = restOfString;
+				break;
+			default:
+				return &quot;Unknown directive: &quot; + cmd;
+		}
+		return null;
+	};
+
+})();
+</pre>
+</body>
+</html>

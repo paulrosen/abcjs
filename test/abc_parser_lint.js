@@ -18,7 +18,7 @@
 //unexpected elements in it. It also returns a person-readable version of it that is suitable
 //for regression tests.
 
-/*global window */
+/*global $ */
 
 // Changes for V1.0.1:
 //
@@ -71,6 +71,7 @@ if (!window.ABCJS.test)
 	window.ABCJS.test = {};
 
 window.ABCJS.test.ParserLint = function() {
+	"use strict";
 	var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
 		"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
 		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
@@ -79,8 +80,7 @@ window.ABCJS.test.ParserLint = function() {
 		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 		"upbow", "downbow", "staccato", "trem1", "trem2", "trem3", "trem4",
 		"/", "//", "//", "///", "turnx", "invertedturn", "invertedturnx", "arpeggio", "trill(", "trill)", "xstem",
-		"mark", "umarcato",
-		"style=normal", "style=harmonic", "style=rhythm", "style=x"
+		"mark", "umarcato"
 	] } };
 
 	var tempoProperties =  {
@@ -107,7 +107,11 @@ window.ABCJS.test.ParserLint = function() {
 
 	var fontType = {
 		type: 'object', optional: true, properties: {
-			font: { type: 'string', optional: true },
+			box: { type: 'boolean', Enum: [ true ], optional: true },
+			face: { type: 'string', optional: true },
+			weight: { type: 'string', Enum: [ 'bold', 'normal' ], optional: true },
+			style: { type: 'string',Enum: [ 'italic', 'normal' ],  optional: true },
+			decoration: { type: 'string', Enum: [ 'underline', 'none' ], optional: true },
 			size: { type: 'number', optional: true }
 		}
 	};
@@ -164,7 +168,13 @@ window.ABCJS.test.ParserLint = function() {
 		endBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'startBeam', 'beambr' ], optional: true },
 		endSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 		endTriplet: { type: 'boolean', Enum: [ true ], optional: true },
-		vocalfont: fontType,
+		fonts: { type: 'object', optional: true, properties: {
+			annotationfont: fontType,
+			gchordfont: fontType,
+			measurefont: fontType,
+			repeatfont: fontType,
+			vocalfont: fontType
+		}},
 		gracenotes: { type: 'array', optional: true, output: "noindex", items: {
 			type: "object", properties: {
 				acciaccatura: { type: 'boolean', Enum: [ true ], optional: true},
@@ -197,6 +207,13 @@ window.ABCJS.test.ParserLint = function() {
 					startTie: tieProperties
 				}
 		}},
+		positioning: { type: 'object', optional: true, properties: {
+			chordPosition: { type: 'string', Enum: [ 'above', 'below', 'hidden' ], optional: true},
+			dynamicPosition: { type: 'string', Enum: [ 'above', 'below', 'hidden' ], optional: true},
+			ornamentPosition: { type: 'string', Enum: [ 'above', 'below', 'hidden' ], optional: true},
+			vocalPosition: { type: 'string', Enum: [ 'above', 'below', 'hidden' ], optional: true},
+			volumePosition: { type: 'string', Enum: [ 'above', 'below', 'hidden' ], optional: true}
+		}},
 		rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'lyric' ], properties: {
 			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest', 'multimeasure', 'whole' ] },	// multimeasure requires duration to be the number of measures.
 			endTie: { type: 'boolean', Enum: [ true ], optional: true },
@@ -205,8 +222,9 @@ window.ABCJS.test.ParserLint = function() {
 		startBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'endBeam', 'beambr' ], optional: true },
 		startSlur: slurProperties,
 		startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true },
-		stemConnectsToAbove: { type: 'boolean', Enum: [ true ], optional: true }
-	};
+		stemConnectsToAbove: { type: 'boolean', Enum: [ true ], optional: true },
+		style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x'], optional: true }
+};
 
 	var keyProperties = { // change deepCopyKey (in parse_header) if there are changes around here
 		accidentals: { type: 'array', optional: true, output: "noindex", items: {

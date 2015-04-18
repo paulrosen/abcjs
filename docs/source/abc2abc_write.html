@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">//    abc2abc_write.js: Prints an abc file in text format parsed by abc_parse.js
+//    Copyright (C) 2010 Gregory Dyke (gregdyke at gmail dot com)
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+
+if (!window.ABCJS)
+	window.ABCJS = {};
+
+if (!window.ABCJS.transform)
+	window.ABCJS.transform = {};
+
+
+window.ABCJS.transform.TextPrinter = function(elem, reposition) {
+    this.elem = elem;
+    this.text = &quot;&quot;;
+    this.l = 1/8;
+    this.reposition = reposition || false;
+}
+
+window.ABCJS.transform.TextPrinter.prototype.printString = function(str, elem) {
+    if (this.reposition &amp;&amp; elem) elem.startChar = this.text.length;
+    this.text += str;
+    if (this.reposition &amp;&amp; elem) elem.endChar = this.text.length;
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printNewLine = function () {
+    this.text += &quot;\n&quot;;
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printSpace = function () {
+    if (this.text[this.text.length-1].match(/\s/)) return; //TODO match whitespace
+    this.text += &quot; &quot;;
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printABC = function(abctune) {
+    this.text = &quot;&quot;;
+    this.abctune = abctune;
+    //TODO formatting
+    this.printHeader();
+    this.printBody();
+    this.elem.value=this.text;
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printHeader = function() {
+    // much of this info is duplicated in metaTextHEaders in abc_parse_header.js
+    this.printHeaderLine(&quot;x&quot;,&quot;X&quot;,&quot;1&quot;);
+    this.printHeaderLine(&quot;title&quot;,&quot;T&quot;);
+    this.printHeaderLine(&quot;composer&quot;,&quot;C&quot;);
+    this.printHeaderLine(&quot;history&quot;,&quot;H&quot;);
+    this.printHeaderLine(&quot;author&quot;,&quot;A&quot;);
+    this.printHeaderLine(&quot;book&quot;,&quot;B&quot;);  
+    this.printHeaderLine(&quot;discography&quot;,&quot;D&quot;);  
+    this.printHeaderLine(&quot;url&quot;,&quot;F&quot;);
+    this.printHeaderLine(&quot;group&quot;,&quot;G&quot;);
+    this.printHeaderLine(&quot;instruction&quot;,&quot;I&quot;);
+    this.printHeaderLine(&quot;notes&quot;,&quot;N&quot;);
+    this.printHeaderLine(&quot;origin&quot;,&quot;O&quot;);
+    this.printHeaderLine(&quot;rhythm&quot;,&quot;R&quot;);
+    this.printHeaderLine(&quot;source&quot;,&quot;S&quot;);
+    this.printHeaderLine(&quot;unalignedwords&quot;,&quot;W&quot;);
+    this.printHeaderLine(&quot;transcription&quot;,&quot;Z&quot;);
+    //TODO part order
+    //TODO Q tempo
+    //TODO textBlock
+    this.printHeaderLine(&quot;NULL&quot;,&quot;L&quot;,&quot;1/8&quot;); //TODO L
+
+    this.printHeaderLine(&quot;NULL&quot;,&quot;M&quot;,this.getMeterString(this.abctune.lines[0].staff[0].meter));
+    this.printHeaderLine(&quot;NULL&quot;,&quot;K&quot;,this.getKeyString(this.abctune.lines[0].staff[0].key));//TODO K
+};
+
+window.ABCJS.transform.TextPrinter.prototype.getKeyString = function(key) {
+    return key.root+key.acc+key.mode;
+};
+
+window.ABCJS.transform.TextPrinter.prototype.getMeterString = function(meter) {
+    switch (meter.type) {
+    case &quot;cut_time&quot;: return &quot;C|&quot;;
+    case &quot;common_time&quot;: return &quot;C&quot;;
+    case &quot;specified&quot;:
+      if (meter.value[0].den)
+		return meter.value[0].num+&quot;/&quot;+meter.value[0].den;
+      else
+	    return meter.value[0].num;
+    }
+    return &quot;&quot;;
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printHeaderLine = function(fieldname, abcfield, defaut) {
+    var val = this.abctune.metaText[fieldname] || defaut;
+    if (val !== undefined) {
+	var valarray = val.split(&quot;\n&quot;);
+	for (var i=0; i&lt;valarray.length; i++) {
+	    this.printString(abcfield+&quot;: &quot;+valarray[i]);
+	    this.printNewLine();
+	} 
+    }
+};
+
+window.ABCJS.transform.TextPrinter.prototype.getElem = function() {
+    if (this.abcline.length &lt;= this.pos)
+	return null;
+    return this.abcline[this.pos];
+};
+
+window.ABCJS.transform.TextPrinter.prototype.getNextElem = function() {
+    if (this.abcline.length &lt;= this.pos+1)
+	return null;
+    return this.abcline[this.pos+1];
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printBody = function() {
+    for(var line=0; line&lt;this.abctune.lines.length; line++) {
+	var abcline = this.abctune.lines[line];
+	if (abcline.staff) {
+	    this.printABCLine(abcline.staff);
+	} else if (abcline.subtitle &amp;&amp; line!==0) {
+	    //TODO
+	} else if (abcline.text) {
+	    //TODO
+	}
+    }
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printABCLine = function(staffs) {
+    for (this.s = 0; this.s &lt; staffs.length; this.s++) {
+	this.printABCStaff(staffs[this.s]);
+    }
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printABCStaff = function(abcstaff) {
+    
+    // TODO if (abcstaff.bracket) header += &quot;bracket &quot;+abcstaff.bracket+&quot; &quot;;
+    // TODO if (abcstaff.brace) header += &quot;brace &quot;+abcstaff.brace+&quot; &quot;;
+    
+    
+    for (this.v = 0; this.v &lt; abcstaff.voices.length; this.v++) {
+	// TODO stuff about voices
+	
+	// TODO this is where key sig is this.voice.addChild(this.printClef(abcstaff.clef));
+	// this.voice.addChild(this.printKeySignature(abcstaff.key));
+	// if (abcstaff.meter) this.voice.addChild(this.printTimeSignature(abcstaff.meter));
+	this.printABCVoice(abcstaff.voices[this.v]);
+    }
+    
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printABCVoice = function(abcline) {
+    this.abcline = abcline;
+    for (this.pos=0; this.pos&lt;this.abcline.length; this.pos++) {
+	this.printABCElement();
+    }
+    this.printNewLine();
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printABCElement = function() {
+    var elem = this.getElem();
+    switch (elem.el_type) {
+    case &quot;note&quot;:
+	this.printBeam();
+	break;
+    case &quot;bar&quot;:
+	this.printBarLine(elem);
+	break;
+    case &quot;meter&quot;:
+	//TODO this.printTimeSignature(elem);
+	break;
+    case &quot;clef&quot;:
+	//TODO this.printClef(elem);
+	break;
+    case &quot;key&quot;:
+	//TODO this.printKeySignature(elem);
+    case &quot;stem&quot;:
+	//TODO do nothing?
+	break;
+    case &quot;part&quot;:
+	//TODO print part
+	break;
+    default:
+	//TODO show we're missing something
+    }
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printBeam = function() {
+    this.printSpace();
+    if (this.getElem().startBeam &amp;&amp; !this.getElem().endBeam) {
+	while (this.getElem()) {
+	    this.printNote(this.getElem());
+	    if (this.getElem().endBeam) {
+		break;
+	    }
+	    this.pos++;
+	}
+    } else {
+	this.printNote(this.getElem());
+    }
+    this.printSpace();
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printNote = function(elem) {
+    var str = &quot;&quot;;
+	var i;
+    if (elem.chord !== undefined) {
+	for (i=0; i&lt;elem.chord.length; i++) {
+	    str+= '&quot;'+elem.chord[i].name+'&quot;';
+	}
+    }
+    
+    //TODO unify map between names and symbols (to be used with abcparse?)
+    var decorations = {
+	&quot;staccato&quot; : &quot;.&quot;,
+	&quot;upbow&quot; : &quot;u&quot;,
+	&quot;downbow&quot; : &quot;v&quot;,
+	&quot;roll&quot; : &quot;~&quot;,
+	&quot;fermata&quot; : &quot;H&quot;,
+	&quot;slide&quot; : &quot;J&quot;,
+	&quot;accent&quot; : &quot;L&quot;,
+	&quot;mordent&quot; : &quot;M&quot;,
+	&quot;pralltriller&quot; : &quot;P&quot;,
+	&quot;trill&quot; : &quot;T&quot;,
+	&quot;lower&quot; : &quot;.&quot;
+    };
+
+    if (elem.decoration !== undefined) {
+	for (i=0; i&lt;elem.decoration.length; i++) {
+	    var dec = elem.decoration[i];
+	    if (decorations[dec]) {
+		str+=decorations[dec];
+	    } else {
+		str+=&quot;!&quot;; //TODO hardcoded
+		str+=dec;
+		str+=&quot;!&quot;; //TODO hardcoded
+	    }
+	}
+    }
+
+    if (elem.gracenotes !== undefined) {
+	str+=&quot;{&quot;;
+	for (i=0; i&lt;elem.gracenotes.length; i++) {
+	    str+=this.getNoteString(elem.gracenotes[i]);
+	}
+	str+=&quot;}&quot;;
+    }
+
+    var ignoreslur = false;
+    if (elem.pitches.length === 1 &amp;&amp; elem.pitches[0].startSlur) {
+	ignoreslur = true;
+	str+=this.multiplyString(&quot;(&quot;,elem.pitches[0].startSlur.length);
+    }
+
+    if (elem.startSlur) {
+	str+=this.multiplyString(&quot;(&quot;,elem.startSlur.length);
+    }
+
+    if ((elem.pitches.length === 1 &amp;&amp; elem.pitches[0].endSlur) || elem.endSlur) {
+	ignoreslur = true;
+    }
+
+    if (elem.startTriplet) {
+	str+=&quot;(3&quot;;
+    }
+
+    if (elem.pitches) {
+	if (elem.pitches.length &gt; 1) str+=&quot;[&quot;;
+	for (i=0; i&lt;elem.pitches.length; i++) {
+	    elem.pitches[i].duration = elem.duration;
+	    str+=this.getNoteString(elem.pitches[i], ignoreslur);
+	}
+	if (elem.pitches.length &gt; 1) str+=&quot;]&quot;;
+    } 
+
+    if (elem.pitches.length === 1 &amp;&amp; elem.pitches[0].endSlur) {
+	str+=this.multiplyString(&quot;)&quot;,elem.pitches[0].endSlur.length);
+    }
+
+    if (elem.endSlur) {
+	str+=this.multiplyString(&quot;)&quot;,elem.endSlur.length);
+    }
+
+    this.printString(str,elem);
+
+};
+
+// accidentals, ties and sometimes slurs, sometimes duration
+window.ABCJS.transform.TextPrinter.prototype.getNoteString = function(pitchelem, ignoreslur) {
+    var str = &quot;&quot;;
+    if (!ignoreslur &amp;&amp; pitchelem.startSlur) {
+	str+=&quot;(&quot;;
+    }
+
+    var symb = &quot;&quot;;
+    switch (pitchelem.accidental) {
+    case &quot;quartersharp&quot;:
+	symb = &quot;^/&quot;;
+	break;
+    case &quot;dblsharp&quot;:
+	symb = &quot;^^&quot;;
+	break;
+    case &quot;sharp&quot;:
+	symb = &quot;^&quot;;
+	break;
+    case &quot;quarterflat&quot;:
+	symb = &quot;_/&quot;;
+	break;
+    case &quot;flat&quot;:
+	symb = &quot;_&quot;;
+	break;
+    case &quot;dblflat&quot;:
+	symb = &quot;__&quot;;
+	break;
+    case &quot;natural&quot;:
+	symb = &quot;=&quot;;
+    }
+    str+=symb;
+
+    var pitches = [&quot;C&quot;,&quot;D&quot;,&quot;E&quot;,&quot;F&quot;,&quot;G&quot;,&quot;A&quot;,&quot;B&quot;];
+    var pitchstr = pitches[this.extractNote(pitchelem.pitch)];
+    var octave = this.extractOctave(pitchelem.pitch);
+    if (octave&gt;0) {
+	pitchstr = pitchstr.toLowerCase();
+	octave--;
+	while (octave&gt;0) {
+	    pitchstr+=&quot;'&quot;;
+	    octave--;
+	}
+    } else {
+	while (octave&lt;0) {
+	    pitchstr+=&quot;,&quot;;
+	    octave++;
+	}
+    }
+    
+    str+=pitchstr;
+    
+    if (pitchelem.duration) {
+	str+=this.getDurationString(pitchelem.duration);
+    }
+
+    if (!ignoreslur &amp;&amp; pitchelem.endSlur) {
+	str+=&quot;)&quot;;
+    }
+
+    if (pitchelem.startTie) {
+	str+=&quot;-&quot;;
+    }
+
+    return str;
+};
+
+window.ABCJS.transform.TextPrinter.prototype.getDurationString = function(duration) {
+    //TODO detect crooked rhythm
+    if (duration/this.l &gt; 1) {
+	return duration/this.l;
+    } 
+    var ret = &quot;&quot;;
+    if (this.l/duration&gt;1) {
+	ret+=&quot;/&quot;;
+	if (this.l/duration&gt;2) {
+	    ret+=this.l/duration;
+	}   
+    }
+    return ret;
+};
+
+window.ABCJS.transform.TextPrinter.prototype.extractNote = function(pitch) {
+    var pitch2 = pitch%7;
+    if (pitch2&lt;0) pitch2+=7;
+    return pitch2;
+};
+
+window.ABCJS.transform.TextPrinter.prototype.extractOctave = function(pitch) {
+    return Math.floor(pitch/7);
+};
+
+window.ABCJS.transform.TextPrinter.prototype.printBarLine = function(elem) {
+    var barstr = &quot;&quot;;
+    switch (elem.type) {
+    case &quot;bar_thin&quot;: barstr+=&quot;|&quot;; break;
+    case &quot;bar_thin_thick&quot;: barstr+=&quot;|]&quot;; break;
+    case &quot;bar_thin_thin&quot;: barstr+=&quot;||&quot;; break;
+    case &quot;bar_thick_thin&quot;: barstr+=&quot;[|&quot;; break;
+    case &quot;bar_dbl_repeat&quot;: barstr+=&quot;:||:&quot;; break;
+    case &quot;bar_left_repeat&quot;: barstr+=&quot;|:&quot;; break;
+    case &quot;bar_right_repeat&quot;: barstr+=&quot;:|&quot;; break;
+    case &quot;bar_invisible&quot;: barstr+=&quot;&quot;; break;
+    }
+    this.printString(barstr,elem);
+};
+
+window.ABCJS.transform.TextPrinter.prototype.multiplyString = function (s, n) {
+    var ret = &quot;&quot;;
+    for (;n&gt;0;n--) ret+=s;
+    return ret;
+};</pre>
+</body>
+</html>
