@@ -23,12 +23,23 @@ if (!window.ABCJS.parse)
 	window.ABCJS.parse = {};
 
 window.ABCJS.parse.Parse = function() {
+	"use strict";
 	var tune = new window.ABCJS.data.Tune();
 	var tokenizer = new window.ABCJS.parse.tokenizer();
 
 	this.getTune = function() {
 		return tune;
 	};
+
+	function addPositioning(el, type, value) {
+		if (!el.positioning) el.positioning = {};
+		el.positioning[type] = value;
+	}
+
+	function addFont(el, type, value) {
+		if (!el.fonts) el.fonts = {};
+		el.fonts[type] = value;
+	}
 
 	var multilineVars = {
 		reset: function() {
@@ -62,6 +73,39 @@ window.ABCJS.parse.Parse = function() {
 			this.inEnding = false;
 			this.inTie = false;
 			this.inTieChord = {};
+			this.vocalPosition = "auto";
+			this.dynamicPosition = "auto";
+			this.chordPosition = "auto";
+			this.ornamentPosition = "auto";
+			this.volumePosition = "auto";
+			this.openSlurs = [];
+		},
+		differentFont: function(type, defaultFonts) {
+			if (this[type].decoration !== defaultFonts[type].decoration) return true;
+			if (this[type].face !== defaultFonts[type].face) return true;
+			if (this[type].size !== defaultFonts[type].size) return true;
+			if (this[type].style !== defaultFonts[type].style) return true;
+			if (this[type].weight !== defaultFonts[type].weight) return true;
+			return false;
+		},
+		addFormattingOptions: function(el, defaultFonts, elType) {
+			if (elType === 'note') {
+				if (this.vocalPosition !== 'auto') addPositioning(el, 'vocalPosition', this.vocalPosition);
+				if (this.dynamicPosition !== 'auto') addPositioning(el, 'dynamicPosition', this.dynamicPosition);
+				if (this.chordPosition !== 'auto') addPositioning(el, 'chordPosition', this.chordPosition);
+				if (this.ornamentPosition !== 'auto') addPositioning(el, 'ornamentPosition', this.ornamentPosition);
+				if (this.volumePosition !== 'auto') addPositioning(el, 'volumePosition', this.volumePosition);
+				if (this.differentFont("annotationfont", defaultFonts)) addFont(el, 'annotationfont', this.annotationfont);
+				if (this.differentFont("gchordfont", defaultFonts)) addFont(el, 'gchordfont', this.gchordfont);
+				if (this.differentFont("vocalfont", defaultFonts)) addFont(el, 'vocalfont', this.vocalfont);
+			} else if (elType === 'bar') {
+				if (this.dynamicPosition !== 'auto') addPositioning(el, 'dynamicPosition', this.dynamicPosition);
+				if (this.chordPosition !== 'auto') addPositioning(el, 'chordPosition', this.chordPosition);
+				if (this.ornamentPosition !== 'auto') addPositioning(el, 'ornamentPosition', this.ornamentPosition);
+				if (this.volumePosition !== 'auto') addPositioning(el, 'volumePosition', this.volumePosition);
+				if (this.differentFont("measurefont", defaultFonts)) addFont(el, 'measurefont', this.measurefont);
+				if (this.differentFont("repeatfont", defaultFonts)) addFont(el, 'repeatfont', this.repeatfont);
+			}
 		}
 	};
 
@@ -79,6 +123,7 @@ window.ABCJS.parse.Parse = function() {
 	};
 
 	var warn = function(str, line, col_num) {
+		if (!line) line = " ";
 		var bad_char = line.charAt(col_num);
 		if (bad_char === ' ')
 			bad_char = "SPACE";
@@ -146,14 +191,20 @@ window.ABCJS.parse.Parse = function() {
 	var legalAccents = [ "trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
 		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
-		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
-		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
+		"segno", "coda", "D.S.", "D.C.", "fine",
+		"slide", "^", "marcato",
 		"upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4",
 		"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato",
 		"style=normal", "style=harmonic", "style=rhythm", "style=x"
 	];
-	var accentPsuedonyms = [ ["<", "accent"], [">", "accent"], ["tr", "trill"], ["<(", "crescendo("], ["<)", "crescendo)"],
-		[">(", "diminuendo("], [">)", "diminuendo)"], ["plus", "+"], [ "emphasis", "accent"] ];
+	var volumeDecorations = [ "p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz" ];
+	var dynamicDecorations = ["crescendo(", "crescendo)", "diminuendo(", "diminuendo)"];
+
+	var accentPseudonyms = [ ["<", "accent"], [">", "accent"], ["tr", "trill"],
+		["plus", "+"], [ "emphasis", "accent"],
+		[ "^", "umarcato" ], [ "marcato", "umarcato" ] ];
+	var accentDynamicPseudonyms = [ ["<(", "crescendo("], ["<)", "crescendo)"],
+		[">(", "diminuendo("], [">)", "diminuendo)"] ];
 	var letter_to_accent = function(line, i)
 	{
 		var macro = multilineVars.macros[line.charAt(i)];
@@ -167,7 +218,19 @@ window.ABCJS.parse.Parse = function() {
 					return (macro === acc);
 				}))
 				return [ 1, macro ];
-			else {
+			else if (window.ABCJS.parse.detect(volumeDecorations, function(acc) {
+					return (macro === acc);
+				})) {
+				if (multilineVars.volumePosition === 'hidden')
+					macro = "";
+				return [1, macro];
+			} else if (window.ABCJS.parse.detect(dynamicDecorations, function(acc) {
+					if (multilineVars.dynamicPosition === 'hidden')
+						macro = "";
+					return (macro === acc);
+				})) {
+				return [1, macro];
+			} else {
 				if (!window.ABCJS.parse.detect(multilineVars.ignoredDecorations, function(dec) {
 					return (macro === dec);
 				}))
@@ -191,8 +254,22 @@ window.ABCJS.parse.Parse = function() {
 					return (ret[1] === acc);
 				}))
 					return ret;
+				if (window.ABCJS.parse.detect(volumeDecorations, function(acc) {
+						return (ret[1] === acc);
+					})) {
+					if (multilineVars.volumePosition === 'hidden' )
+						ret[1] = '';
+						return ret;
+				}
+				if (window.ABCJS.parse.detect(dynamicDecorations, function(acc) {
+						return (ret[1] === acc);
+					})) {
+					if (multilineVars.dynamicPosition === 'hidden' )
+						ret[1] = '';
+						return ret;
+				}
 
-				if (window.ABCJS.parse.detect(accentPsuedonyms, function(acc) {
+				if (window.ABCJS.parse.detect(accentPseudonyms, function(acc) {
 					if (ret[1] === acc[0]) {
 						ret[1] = acc[1];
 						return true;
@@ -201,6 +278,17 @@ window.ABCJS.parse.Parse = function() {
 				}))
 					return ret;
 
+				if (window.ABCJS.parse.detect(accentDynamicPseudonyms, function(acc) {
+					if (ret[1] === acc[0]) {
+						ret[1] = acc[1];
+						return true;
+					} else
+						return false;
+				})) {
+					if (multilineVars.dynamicPosition === 'hidden' )
+						ret[1] = '';
+						return ret;
+				}
 				// We didn't find the accent in the list, so consume the space, but don't return an accent.
 				// Although it is possible that ! was used as a line break, so accept that.
 			if (line.charAt(i) === '!' && (ret[0] === 1 || line.charAt(i+ret[0]-1) !== '!'))
@@ -319,7 +407,7 @@ window.ABCJS.parse.Parse = function() {
 	};
 
 	var addWords = function(line, words) {
-		if (!line) { warn("Can't add words before the first line of mulsic", line, 0); return; }
+		if (!line) { warn("Can't add words before the first line of music", line, 0); return; }
 		words = window.ABCJS.parse.strip(words);
 		if (words.charAt(words.length-1) !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
@@ -396,7 +484,7 @@ window.ABCJS.parse.Parse = function() {
 
 	var addSymbols = function(line, words) {
 		// TODO-PER: Currently copied from w: line. This needs to be read as symbols instead.
-		if (!line) { warn("Can't add symbols before the first line of mulsic", line, 0); return; }
+		if (!line) { warn("Can't add symbols before the first line of music", line, 0); return; }
 		words = window.ABCJS.parse.strip(words);
 		if (words.charAt(words.length-1) !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
@@ -786,6 +874,8 @@ window.ABCJS.parse.Parse = function() {
 				}
 				var note = getCoreNote(gra[1], ii, {}, false);
 				if (note !== null) {
+					// The grace note durations should not be affected by the default length: they should be based on 1/16, so if that isn't the default, then multiply here.
+					note.duration = note.duration / (multilineVars.default_length * 8);
 					if (acciaccatura)
 						note.acciaccatura = true;
 					gracenotes.push(note);
@@ -1011,9 +1101,13 @@ window.ABCJS.parse.Parse = function() {
 								if (i + 1 < line.length)
 									startNewLine();	// There was a ! in the middle of the line. Start a new line if there is anything after it.
 							} else if (ret[1].length > 0) {
-								if (el.decoration === undefined)
-									el.decoration = [];
-								el.decoration.push(ret[1]);
+								if (ret[1].indexOf("style=") === 0) {
+									el.style = ret[1].substr(6);
+								} else {
+									if (el.decoration === undefined)
+										el.decoration = [];
+									el.decoration.push(ret[1]);
+								}
 							}
 							i += ret[0];
 						} else {
@@ -1035,6 +1129,7 @@ window.ABCJS.parse.Parse = function() {
 						// Attach the grace note to an invisible note
 						el.rest = { type: 'spacer' };
 						el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
+						multilineVars.addFormattingOptions(el, tune.formatting, 'note');
 						tune.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el);
 						multilineVars.measureNotEmpty = true;
 						el = {};
@@ -1068,6 +1163,7 @@ window.ABCJS.parse.Parse = function() {
 							if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0)
 								multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
 						}
+						multilineVars.addFormattingOptions(el, tune.formatting, 'bar');
 						tune.appendElement('bar', startOfLine+i, startOfLine+i+ret[0], bar);
 						multilineVars.measureNotEmpty = false;
 						el = {};
@@ -1221,6 +1317,7 @@ window.ABCJS.parse.Parse = function() {
 										el.barNumber = multilineVars.barNumOnNextNote;
 										multilineVars.barNumOnNextNote = null;
 									}
+									multilineVars.addFormattingOptions(el, tune.formatting, 'note');
 									tune.appendElement('note', startOfLine+i, startOfLine+i, el);
 									multilineVars.measureNotEmpty = true;
 									el = {};
@@ -1293,6 +1390,7 @@ window.ABCJS.parse.Parse = function() {
 								el.barNumber = multilineVars.barNumOnNextNote;
 								multilineVars.barNumOnNextNote = null;
 							}
+							multilineVars.addFormattingOptions(el, tune.formatting, 'note');
 							tune.appendElement('note', startOfLine+startI, startOfLine+i, el);
 							multilineVars.measureNotEmpty = true;
 							el = {};
@@ -1329,8 +1427,10 @@ window.ABCJS.parse.Parse = function() {
 		// switches.header_only : stop parsing when the header is finished
 		// switches.stop_on_warning : stop at the first warning encountered.
 		// switches.print: format for the page instead of the browser.
+		// switches.format: a hash of the desired formatting commands.
+		if (!switches) switches = {};
 		tune.reset();
-		if (switches && switches.print)
+		if (switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
 		header.reset(tokenizer, warn, multilineVars, tune);
@@ -1350,13 +1450,14 @@ window.ABCJS.parse.Parse = function() {
 		if (window.ABCJS.parse.last(lines).length === 0)	// remove the blank line we added above.
 			lines.pop();
 		try {
+			if (switches.format) {
+				window.ABCJS.parse.parseDirective.globalFormatting(switches.format);
+			}
 			window.ABCJS.parse.each(lines,  function(line) {
-				if (switches) {
-					if (switches.header_only && multilineVars.is_in_header === false)
-						throw "normal_abort";
-					if (switches.stop_on_warning && multilineVars.warnings)
-						throw "normal_abort";
-				}
+				if (switches.header_only && multilineVars.is_in_header === false)
+					throw "normal_abort";
+				if (switches.stop_on_warning && multilineVars.warnings)
+					throw "normal_abort";
 				if (multilineVars.is_in_history) {
 					if (line.charAt(1) === ':') {
 						multilineVars.is_in_history = false;
@@ -1398,7 +1499,7 @@ window.ABCJS.parse.Parse = function() {
 				ph = pl;
 				pl = x;
 			}
-			tune.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote);
+			multilineVars.openSlurs = tune.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
 		} catch (err) {
 			if (err !== "normal_abort")
 				throw err;

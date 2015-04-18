@@ -34,39 +34,104 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 	this.type = opt.type || "symbol"; // cheap types.
 	this.pitch2 = opt.pitch2;
 	this.linewidth = opt.linewidth;
-	this.attributes = opt.attributes; // only present on textual elements
-	this.top = pitch + ((opt.extreme==="above")? 7 : 0);
-	this.bottom = pitch - ((opt.extreme==="below")? 7 : 0);
+	this.klass = opt.klass;
+	this.top = pitch;
+	if (this.pitch2 !== undefined && this.pitch2 > this.top) this.top = this.pitch2;
+	this.bottom = pitch;
+	if (this.pitch2 !== undefined && this.pitch2 < this.bottom) this.bottom = this.pitch2;
+	if (opt.thickness) {
+		this.top += opt.thickness/2;
+		this.bottom -= opt.thickness/2;
+	}
+	if (opt.stemHeight) {
+		if (opt.stemHeight > 0)
+			this.top += opt.stemHeight;
+		else
+			this.bottom += opt.stemHeight;
+	}
+	//if (this.type === "symbol") {
+	//	var offset = ABCJS.write.glyphs.getYCorr(this.c);
+	//	this.top += offset;
+	//	this.bottom += offset;
+	//}
+	this.centerVertically = false;
+	// TODO-PER: this should use the current font to determine the height. That requires the font to be passed in here, so refactor to store the font now instead of resolving it at draw time. This will allow the font to be changed mid-line, too.
+	var multiplier;
+	switch (this.type) {
+		case "debug":
+			this.chordHeightAbove = 3;
+			break;
+		case "lyric":
+			multiplier = this.c.split("\n").length;
+			if (opt.position && opt.position === 'below')
+				this.lyricHeightBelow = 3*multiplier;
+			else
+				this.lyricHeightAbove = 3*multiplier;
+			break;
+		case "chord":
+			multiplier = this.c.split("\n").length;
+			if (opt.position && opt.position === 'below')
+				this.chordHeightBelow = 4*multiplier;
+			else
+				this.chordHeightAbove = 4*multiplier;
+			break;
+		case "text":
+			multiplier = this.c.split("\n").length;
+			if (this.pitch === undefined) {
+				if (opt.position && opt.position === 'below')
+					this.chordHeightBelow = 4*multiplier;
+				else
+					this.chordHeightAbove = 4*multiplier;
+			} else
+				this.centerVertically = true;
+			break;
+		case "part": this.partHeightAbove = 6; break;
+	}
 };
 
-ABCJS.write.RelativeElement.prototype.draw = function (printer, x, bartop) {
+ABCJS.write.RelativeElement.prototype.setX = function (x) {
 	this.x = x+this.dx;
+};
+
+ABCJS.write.RelativeElement.prototype.draw = function (renderer, bartop) {
+	if (this.pitch === undefined)
+		window.console.error(this.type + " Relative Element y-coordinate not set.");
+	var y = renderer.calcY(this.pitch);
 	switch(this.type) {
 		case "symbol":
 			if (this.c===null) return null;
-			this.graphelem = printer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, printer.addClasses('symbol')); break;
+			var klass = "symbol";
+			if (this.klass) klass += " " + this.klass;
+			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.addClasses(klass)); break;
 		case "debug":
-			this.graphelem = printer.debugMsg(this.x, this.c); break;
-		case "debugLow":
-			this.graphelem = printer.printLyrics(this.x, this.c); break;
+			this.graphelem = renderer.renderText(this.x, renderer.calcY(15), ""+this.c, "debugfont", 'debug-msg', 'start'); break;
+		case "barNumber":
+			this.graphelem = renderer.renderText(this.x, y, ""+this.c, "measurefont", 'bar-number', "start");
+			break;
+		case "lyric":
+			this.graphelem = renderer.renderText(this.x, y, this.c, "vocalfont", 'abc-lyric', "middle");
+			break;
 		case "chord":
-			this.graphelem = printer.printText(this.x, this.pitch, this.c, "start", "chord");
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'gchordfont', "chord", "middle");
+			break;
+		case "decoration":
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "middle", true);
 			break;
 		case "text":
-			this.graphelem = printer.printText(this.x, this.pitch, this.c, "start", "annotation");
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "start", this.centerVertically);
+			break;
+		case "part":
+			this.graphelem = renderer.renderText(this.x, y, this.c, 'partsfont', "part", "start");
 			break;
 		case "bar":
-			this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), (bartop)?bartop:printer.calcY(this.pitch2)); break; // bartop can't be 0
+			this.graphelem = renderer.printStem(this.x, this.linewidth, y, (bartop)?bartop:renderer.calcY(this.pitch2)); break; // bartop can't be 0
 		case "stem":
-			this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2)); break;
+			this.graphelem = renderer.printStem(this.x, this.linewidth, y, renderer.calcY(this.pitch2)); break;
 		case "ledger":
-			this.graphelem = printer.printStaveLine(this.x, this.x+this.w, this.pitch); break;
+			this.graphelem = renderer.printStaveLine(this.x, this.x+this.w, this.pitch); break;
 	}
 	if (this.scalex!==1 && this.graphelem) {
-		this.graphelem.scale(this.scalex, this.scaley, this.x, printer.calcY(this.pitch));
-	}
-	if (this.attributes) {
-		this.graphelem.attr(this.attributes);
+		this.graphelem.scale(this.scalex, this.scaley, this.x, y);
 	}
 	return this.graphelem;
 };

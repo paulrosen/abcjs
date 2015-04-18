@@ -22,15 +22,28 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
 	window.ABCJS.write = {};
 
-ABCJS.write.DynamicDecoration = function(anchor, dec) {
+ABCJS.write.DynamicDecoration = function(anchor, dec, position) {
 	this.anchor = anchor;
 	this.dec = dec;
+	if (position === 'below')
+		this.volumeHeightBelow = 5;
+	else
+		this.volumeHeightAbove = 5;
+	this.pitch = undefined; // This will be set later
 };
 
-ABCJS.write.DynamicDecoration.prototype.draw = function(printer, linestartx, lineendx) {
-	var ypos = printer.layouter.minY - 7;
-	var scalex = 1; // TODO-PER: do the scaling
+ABCJS.write.DynamicDecoration.prototype.setUpperAndLowerElements = function(positionY) {
+	if (this.volumeHeightAbove)
+		this.pitch = positionY.volumeHeightAbove;
+	else
+		this.pitch = positionY.volumeHeightBelow;
+};
+
+ABCJS.write.DynamicDecoration.prototype.draw = function(renderer, linestartx, lineendx) {
+	if (this.pitch === undefined)
+		window.console.error("Dynamic Element y-coordinate not set.");
+	var scalex = 1;
 	var scaley = 1;
-	printer.printSymbol(this.anchor.x, ypos, this.dec, scalex, scaley, printer.addClasses('decoration'));
+	renderer.printSymbol(this.anchor.x, this.pitch, this.dec, scalex, scaley, renderer.addClasses('decoration'));
 };
 
