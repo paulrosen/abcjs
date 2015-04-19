@@ -103,7 +103,7 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 
 Typical usage is:
 
-	<script src="abcjs_editor_1.11-min.js" type="text/javascript"></script>
+	<script src="abcjs_editor_2.0-min.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		window.onload = function() {
 			abc_editor = new ABCJS.Editor("abc", { canvas_id: "canvas0", midi_id:"midi", warnings_id:"warnings" });
