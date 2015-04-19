@@ -158,11 +158,11 @@ if (!window.ABCJS.write)
 		return starty + (endy - starty) / (endx - startx) * (x - startx);
 	}
 
-ABCJS.write.BeamElem.prototype.draw = function(printer) {
-	if (this.elems.length === 0 || this.allrests) return;
-	this.drawBeam(printer);
-	this.drawStems(printer);
-};
+	function calcDy(asc, isGrace) {
+		var dy = (asc) ? ABCJS.write.spacing.STEP : -ABCJS.write.spacing.STEP;
+		if (isGrace) dy = dy * 0.4;
+		return dy;
+	}
 
 	function drawBeam(renderer, startX, startY, endX, endY, dy) {
 		// the X coordinates are actual coordinates, but the Y coordinates are in pitches.
@@ -178,10 +178,15 @@ ABCJS.write.BeamElem.prototype.draw = function(printer) {
 		});
 	}
 
-ABCJS.write.BeamElem.prototype.drawBeam = function(printer) {
-	var average = this.average();
-	var barpos = (this.isgrace)? 5:7;
-	this.calcDir();
+	function calcXPos(asc, firstElement, lastElement) {
+		var starthead = firstElement.heads[asc ? 0 : firstElement.heads.length - 1];
+		var endhead = lastElement.heads[asc ? 0 : lastElement.heads.length - 1];
+		var startX = starthead.x;
+		if (asc) startX += starthead.w - 0.6;
+		var endX = endhead.x;
+		if (asc) endX += endhead.w;
+		return [ startX, endX ];
+	}
 
 	function calcYPos(total, numElements, stemHeight, asc, firstAveragePitch, lastAveragePitch, isFlat, minPitch, maxPitch, isGrace) {
 		var average = calcAverage(total, numElements); // This is the average pitch for the all the notes that will be beamed.
@@ -189,10 +194,9 @@ ABCJS.write.BeamElem.prototype.drawBeam = function(printer) {
 		var barminpos = stemHeight - 2;
 		var pos = Math.round(asc ? Math.max(average + barpos, maxPitch + barminpos) : Math.min(average - barpos, minPitch - barminpos));
 
-	if (slant>maxslant) slant = maxslant;
-	if (slant<-maxslant) slant = -maxslant;
-	this.starty = printer.calcY(this.pos+Math.floor(slant/2));
-	this.endy = printer.calcY(this.pos+Math.floor(-slant/2));
+		var slant = calcSlant(firstAveragePitch, lastAveragePitch, numElements, isFlat);
+		var startY = pos + Math.floor(slant / 2);
+		var endY = pos + Math.floor(-slant / 2);
 
 		// If the notes are too high or too low, make the beam go down to the middle
 		if (!isGrace) {
@@ -205,34 +209,45 @@ ABCJS.write.BeamElem.prototype.drawBeam = function(printer) {
 			}
 		}
 
-	// PER: if the notes are too high or too low, make the beam go down to the middle
-	if (this.asc && this.pos < 6) {
-		this.starty = printer.calcY(6);
-		this.endy = printer.calcY(6);
-	} else if (!this.asc && this.pos > 6) {
-		this.starty = printer.calcY(6);
-		this.endy = printer.calcY(6);
+		return [ startY, endY];
 	}
 
-	var pathString = "M"+this.startx+" "+this.starty+" L"+this.endx+" "+this.endy+
-		"L"+this.endx+" "+(this.endy+this.dy) +" L"+this.startx+" "+(this.starty+this.dy)+"z";
-	printer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': printer.addClasses('beam-elem')});
-};
+	function createStems(elems, asc, beam, dy, mainNote) {
+		for (var i = 0; i < elems.length; i++) {
+			var elem = elems[i];
+			if (elem.abcelem.rest)
+				continue;
+			// TODO-PER: This is odd. If it is a regular beam then elems is an array of AbsoluteElements, if it is a grace beam then it is an array of objects , so we directly attach the element to the parent. We tell it if is a grace note because they are passed in as a generic object instead of an AbsoluteElement.
+			var isGrace = elem.addExtra ? false : true;
+			var parent = isGrace ? mainNote : elem;
+			var furthestHead = elem.heads[(asc) ? 0 : elem.heads.length - 1];
+			var ovalDelta = 1 / 5;//(isGrace)?1/3:1/5;
+			var pitch = furthestHead.pitch + ((asc) ? ovalDelta : -ovalDelta);
+			var dx = asc ? furthestHead.w : 0; // down-pointing stems start on the left side of the note, up-pointing stems start on the right side, so we offset by the note width.
+			var x = furthestHead.x + dx; // this is now the actual x location in pixels.
+			var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
+			var lineWidth = (asc) ? -0.6 : 0.6;
+			if (!asc)
+				bary -= (dy / 2) / ABCJS.write.spacing.STEP;	// TODO-PER: This is just a fudge factor so the down-pointing stems don't overlap.
+			if (isGrace)
+				dx += elem.heads[0].dx;
+			// TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
+			if (furthestHead.c === 'noteheads.slash.quarter') {
+				if (asc)
+					pitch += 1;
+				else
+					pitch -= 1;
+			}
+			var stem = new ABCJS.write.RelativeElement(null, dx, 0, pitch, {
+				"type": "stem",
+				"pitch2": bary,
+				linewidth: lineWidth
+			});
+			stem.setX(parent.x); // This is after the x coordinates were set, so we have to set it directly.
+			parent.addExtra(stem);
+		}
 
-ABCJS.write.BeamElem.prototype.drawStems = function(printer) {
-	var auxbeams = [];  // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
-	printer.beginGroup();
-	for (var i=0,ii=this.elems.length; i<ii; i++) {
-		if (this.elems[i].abcelem.rest)
-			continue;
-		var furthesthead = this.elems[i].heads[(this.asc)? 0: this.elems[i].heads.length-1];
-		var ovaldelta = (this.isgrace)?1/3:1/5;
-		var pitch = furthesthead.pitch + ((this.asc) ? ovaldelta : -ovaldelta);
-		var y = printer.calcY(pitch);
-		var x = furthesthead.x + ((this.asc) ? furthesthead.w: 0);
-		var bary=this.getBarYAt(x);
-		var dx = (this.asc) ? -0.6 : 0.6;
-		printer.printStem(x,dx,y,bary);
+	}
 
 	function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
 		var beams = [];
@@ -272,19 +287,8 @@ ABCJS.write.BeamElem.prototype.drawStems = function(printer) {
 					beams.push({ startX: auxBeams[j].x, endX: auxBeamEndX, startY: auxBeams[j].y, endY: auxBeamEndY, dy: dy });
 					auxBeams = auxBeams.slice(0, j);
 				}
-				// TODO I think they are drawn from front to back, hence the small x difference with the main beam
-
-				var pathString ="M"+auxbeams[j].x+" "+auxbeams[j].y+" L"+auxbeamendx+" "+auxbeamendy+
-					"L"+auxbeamendx+" "+(auxbeamendy+this.dy) +" L"+auxbeams[j].x+" "+(auxbeams[j].y+this.dy)+"z";
-				printer.printPath({path:pathString, stroke:"none", fill:"#000000", 'class': printer.addClasses('beam-elem')});
-				auxbeams = auxbeams.slice(0,j);
 			}
 		}
 		return beams;
 	}
-	printer.endGroup('beam-elem');
-};
-
-ABCJS.write.BeamElem.prototype.getBarYAt = function(x) {
-	return this.starty + (this.endy-this.starty)/(this.endx-this.startx)*(x-this.startx);
-};
+})();
