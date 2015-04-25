@@ -620,18 +620,19 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
       var y;
       switch (elem.chord[i].position) {
       case "left":
-        this.roomtaken+=7;
+		  var chordWidth = this.renderer.getTextSize(elem.chord[i].name, 'annotationfont', "annotation").width;
+        this.roomtaken+=chordWidth+7;
         x = -this.roomtaken;        // TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
-		  // TODO-PER: get the width of the lyric and use that for "0, lyricStr.length*5" below.
-        abselem.addExtra(new ABCJS.write.RelativeElement(elem.chord[i].name, x, ABCJS.write.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
+        abselem.addExtra(new ABCJS.write.RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text"}));
         break;
       case "right":
+		  var chordWidth2 = this.renderer.getTextSize(elem.chord[i].name, 'annotationfont', "annotation").width;
         this.roomtakenright+=4;
         x = this.roomtakenright;// TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
 		  // TODO-PER: get the width of the lyric and use that for "0, lyricStr.length*5" below.
-        abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, x, ABCJS.write.glyphs.getSymbolWidth(elem.chord[i].name[0])+4, y, {type:"text"}));
+        abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, x, chordWidth2+4, y, {type:"text"}));
         break;
       case "below":
 		  // setting the y-coordinate to undefined for now: it will be overwritten later one, after we figure out what the highest element on the line is.

@@ -457,7 +457,7 @@ ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
 
 /**
  * gets scaled if not in a group
- * @param {number} x1 x coordinate of the stem
+ * @param {number} x x coordinate of the stem
  * @param {number} dx stem width
  * @param {number} y1 y coordinate of the stem bottom
  * @param {number} y2 y coordinate of the stem top
