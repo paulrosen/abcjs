@@ -1194,6 +1194,7 @@ window.ABCJS.parse.Parse = function() {
 
 					// handle chords.
 					if (line.charAt(i) === '[') {
+						var chordStartChar = i;
 						i++;
 						var chordDuration = null;
 
@@ -1318,7 +1319,7 @@ window.ABCJS.parse.Parse = function() {
 										multilineVars.barNumOnNextNote = null;
 									}
 									multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-									tune.appendElement('note', startOfLine+i, startOfLine+i, el);
+									tune.appendElement('note', startOfLine+chordStartChar, startOfLine+i, el);
 									multilineVars.measureNotEmpty = true;
 									el = {};
 								}
