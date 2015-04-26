@@ -116,6 +116,11 @@ if (!window.ABCJS.write)
 		return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, midPoint);
 	};
 
+	ABCJS.write.BeamElem.prototype.yAtNote = function(element) {
+		var beam = this.beams[0];
+		return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, element.x);
+	};
+
 	ABCJS.write.BeamElem.prototype.xAtMidpoint = function(startX, endX) {
 		return startX + (endX - startX)/2;
 	};
