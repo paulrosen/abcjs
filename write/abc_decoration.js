@@ -164,7 +164,7 @@ if (!window.ABCJS.write)
 			var textFudge = 2;
 			var textHeight = 5;
 			// TODO-PER: Get the height of the current font and use that for the thickness.
-			abselem.addChild(new ABCJS.write.RelativeElement(text, 0, 0, y+textFudge, {type:"decoration", klass: 'ornament', thickness: 3}));
+			abselem.addChild(new ABCJS.write.RelativeElement(text, width/2, 0, y+textFudge, {type:"decoration", klass: 'ornament', thickness: 3}));
 
 			incrementPlacement(placement, textHeight);
 		}
@@ -311,9 +311,10 @@ if (!window.ABCJS.write)
 		var yPos = closeDecoration(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch);
 		// yPos is an object containing 'above' and 'below'. That is the placement of the next symbol on either side.
 
+		yPos.above = Math.max(yPos.above, this.minTop);
 		var hasOne = stackedDecoration(decoration, width, abselem, yPos, positioning.ornamentPosition, this.minTop, this.minBottom);
 		if (hasOne) {
-			abselem.top = Math.max(yPos.above + 3, abselem.top); // TODO-PER: Not sure why we need this fudge factor.
+//			abselem.top = Math.max(yPos.above + 3, abselem.top); // TODO-PER: Not sure why we need this fudge factor.
 		}
 	};
 

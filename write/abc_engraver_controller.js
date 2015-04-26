@@ -234,7 +234,7 @@ function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, 
  */
 ABCJS.write.EngraverController.prototype.setXSpacing = function (staffGroup, formatting, isLastLine) {
    var newspace = this.space;
-  for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
+  for (var it = 0; it < 3; it++) { // TODO-PER: shouldn't need this triple pass any more, but it does slightly affect the coordinates.
 	  staffGroup.layout(newspace, this.renderer, false);
 	  var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
 		newspace = calcHorizontalSpacing(isLastLine, stretchLast, this.width+this.renderer.padding.left, staffGroup.w, newspace, staffGroup.spacingunits, staffGroup.minspace);
