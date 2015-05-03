@@ -202,6 +202,7 @@ ABCJS.write.StaffGroupElement.prototype.finished = function() {
 };
 
 ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
+	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
 	this.spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
 	this.minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
 	var x = renderer.padding.left;
@@ -238,7 +239,9 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, renderer, deb
 		var currentvoices = [];
 		var othervoices = [];
 		for (i=0;i<this.voices.length;i++) {
-			if (this.voices[i].getDurationIndex() !== currentduration) {
+			var durationIndex = this.voices[i].getDurationIndex();
+			// PER: Because of the inexactness of JS floating point math, we just get close.
+			if (durationIndex - currentduration > epsilon) {
 				othervoices.push(this.voices[i]);
 				//console.log("out: voice ",i);
 			} else {
