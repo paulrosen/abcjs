@@ -642,7 +642,7 @@ window.ABCJS.parse.Parse = function() {
 						state = 'octave';
 						// At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
 						if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
-							el.duration = multilineVars.next_note_duration;
+							el.duration = multilineVars.default_length * multilineVars.next_note_duration;
 							multilineVars.next_note_duration = 0;
 							durationSetByPreviousNote = true;
 						} else
@@ -681,7 +681,7 @@ window.ABCJS.parse.Parse = function() {
 							state = 'Zduration';
 						} else {
 							if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
-								el.duration = multilineVars.next_note_duration;
+								el.duration = multilineVars.default_length * multilineVars.next_note_duration;
 								multilineVars.next_note_duration = 0;
 								durationSetByPreviousNote = true;
 							} else
@@ -704,7 +704,7 @@ window.ABCJS.parse.Parse = function() {
 				case '/':
 					if (state === 'octave' || state === 'duration') {
 						var fraction = tokenizer.getFraction(line, index);
-						if (!durationSetByPreviousNote)
+						//if (!durationSetByPreviousNote)
 							el.duration = el.duration * fraction.value;
 						// TODO-PER: We can test the returned duration here and give a warning if it isn't the one expected.
 						el.endChar = fraction.index;
@@ -772,7 +772,7 @@ window.ABCJS.parse.Parse = function() {
 						if (canHaveBrokenRhythm) {
 							var br2 = getBrokenRhythm(line, index);
 							index += br2[0] - 1;	// index gets incremented below, so we'll let that happen
-							multilineVars.next_note_duration = br2[2]*el.duration;
+							multilineVars.next_note_duration = br2[2];
 							el.duration = br2[1]*el.duration;
 							state = 'end_slur';
 						} else {
@@ -902,13 +902,6 @@ window.ABCJS.parse.Parse = function() {
 			}
 			if (gracenotes.length)
 				return [gra[0], gracenotes];
-//				for (var ret = letter_to_pitch(gra[1], ii); ret[0]>0 && ii<gra[1].length;
-//					ret = letter_to_pitch(gra[1], ii)) {
-//					//todo get other stuff that could be in a grace note
-//					ii += ret[0];
-//					gracenotes.push({el_type:"gracenote",pitch:ret[1]});
-//				}
-//				return [ gra[0], gracenotes ];
 		}
 		return [ 0 ];
 	};
@@ -996,17 +989,11 @@ window.ABCJS.parse.Parse = function() {
 
 		// Start with the standard staff, clef and key symbols on each line
 		var delayStartNewLine = multilineVars.start_new_line;
-//			if (multilineVars.start_new_line) {
-//				startNewLine();
-//			}
 		if (multilineVars.continueall === undefined)
 			multilineVars.start_new_line = true;
 		else
 			multilineVars.start_new_line = false;
 		var tripletNotesLeft = 0;
-		//var tripletMultiplier = 0;
-//		var inTie = false;
-//		var inTieChord = {};
 
 		// See if the line starts with a header field
 		var retHeader = header.letter_to_body_header(line, i);
@@ -1033,7 +1020,6 @@ window.ABCJS.parse.Parse = function() {
 					startNewLine();
 					delayStartNewLine = false;
 				}
-//					var el = { };
 
 				// We need to decide if the following characters are a bar-marking or a note-group.
 				// Unfortunately, that is ambiguous. Both can contain chord symbols and decorations.
@@ -1233,9 +1219,6 @@ window.ABCJS.parse.Parse = function() {
 
 									if (multilineVars.next_note_duration !== 0) {
 										el.duration = el.duration * multilineVars.next_note_duration;
-//											window.ABCJS.parse.each(el.pitches, function(p) {
-//												p.duration = p.duration * multilineVars.next_note_duration;
-//											});
 										multilineVars.next_note_duration = 0;
 									}
 
@@ -1251,11 +1234,6 @@ window.ABCJS.parse.Parse = function() {
 										}
 									}
 
-//									if (el.startSlur !== undefined) {
-//										window.ABCJS.parse.each(el.pitches, function(pitch) { if (pitch.startSlur === undefined) pitch.startSlur = el.startSlur; else pitch.startSlur += el.startSlur; });
-//										delete el.startSlur;
-//									}
-
 									var postChordDone = false;
 									while (i < line.length && !postChordDone) {
 										switch (line.charAt(i)) {
@@ -1265,7 +1243,6 @@ window.ABCJS.parse.Parse = function() {
 												break;
 											case ')':
 												if (el.endSlur === undefined) el.endSlur = 1; else el.endSlur++;
-												//window.ABCJS.parse.each(el.pitches, function(pitch) { if (pitch.endSlur === undefined) pitch.endSlur = 1; else pitch.endSlur++; });
 												break;
 											case '-':
 												window.ABCJS.parse.each(el.pitches, function(pitch) { pitch.startTie = {}; });
@@ -1276,7 +1253,10 @@ window.ABCJS.parse.Parse = function() {
 												var br2 = getBrokenRhythm(line, i);
 												i += br2[0] - 1;	// index gets incremented below, so we'll let that happen
 												multilineVars.next_note_duration = br2[2];
-												chordDuration = br2[1];
+												if (chordDuration)
+													chordDuration = chordDuration * br2[1];
+												else
+													chordDuration = br2[1];
 												break;
 											case '1':
 											case '2':
@@ -1291,7 +1271,7 @@ window.ABCJS.parse.Parse = function() {
 												var fraction = tokenizer.getFraction(line, i);
 												chordDuration = fraction.value;
 												i = fraction.index;
-												if (line.charAt(i) === '-' || line.charAt(i) === ')')
+												if (line.charAt(i) === '-' || line.charAt(i) === ')' || line.charAt(i) === ' ' || line.charAt(i) === '<' || line.charAt(i) === '>')
 													i--; // Subtracting one because one is automatically added below
 												else
 													postChordDone = true;
@@ -1310,9 +1290,6 @@ window.ABCJS.parse.Parse = function() {
 								if (el.pitches !== undefined) {
 									if (chordDuration !== null) {
 										el.duration = el.duration * chordDuration;
-//											window.ABCJS.parse.each(el.pitches, function(p) {
-//												p.duration = p.duration * chordDuration;
-//											});
 									}
 									if (multilineVars.barNumOnNextNote) {
 										el.barNumber = multilineVars.barNumOnNextNote;
@@ -1349,7 +1326,6 @@ window.ABCJS.parse.Parse = function() {
 								if (core.endSlur !== undefined) el.endSlur = core.endSlur;
 								if (core.endTie !== undefined) el.rest.endTie = core.endTie;
 								if (core.startSlur !== undefined) el.startSlur = core.startSlur;
-								//if (el.startSlur !== undefined) el.startSlur = el.startSlur;
 								if (core.startTie !== undefined) el.rest.startTie = core.startTie;
 								if (el.startTie !== undefined) el.rest.startTie = el.startTie;
 							}
@@ -1401,7 +1377,6 @@ window.ABCJS.parse.Parse = function() {
 					if (i === startI) {	// don't know what this is, so ignore it.
 						if (line.charAt(i) !== ' ' && line.charAt(i) !== '`')
 							warn("Unknown character ignored", line, i);
-//							warn("Unknown character ignored (" + line.charCodeAt(i) + ")", line, i);
 						i++;
 					}
 				}
