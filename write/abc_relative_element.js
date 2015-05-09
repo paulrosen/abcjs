@@ -54,38 +54,34 @@ ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 	//	this.top += offset;
 	//	this.bottom += offset;
 	//}
+	var height = opt.height ? opt.height : 4; // The +1 is to give a little bit of padding.
 	this.centerVertically = false;
-	// TODO-PER: this should use the current font to determine the height. That requires the font to be passed in here, so refactor to store the font now instead of resolving it at draw time. This will allow the font to be changed mid-line, too.
-	var multiplier;
 	switch (this.type) {
 		case "debug":
-			this.chordHeightAbove = 3;
+			this.chordHeightAbove = height;
 			break;
 		case "lyric":
-			multiplier = this.c.split("\n").length;
 			if (opt.position && opt.position === 'below')
-				this.lyricHeightBelow = 3*multiplier;
+				this.lyricHeightBelow = height;
 			else
-				this.lyricHeightAbove = 3*multiplier;
+				this.lyricHeightAbove = height;
 			break;
 		case "chord":
-			multiplier = this.c.split("\n").length;
 			if (opt.position && opt.position === 'below')
-				this.chordHeightBelow = 4*multiplier;
+				this.chordHeightBelow = height;
 			else
-				this.chordHeightAbove = 4*multiplier;
+				this.chordHeightAbove = height;
 			break;
 		case "text":
-			multiplier = this.c.split("\n").length;
 			if (this.pitch === undefined) {
 				if (opt.position && opt.position === 'below')
-					this.chordHeightBelow = 4*multiplier;
+					this.chordHeightBelow = height;
 				else
-					this.chordHeightAbove = 4*multiplier;
+					this.chordHeightAbove = height;
 			} else
 				this.centerVertically = true;
 			break;
-		case "part": this.partHeightAbove = 6; break;
+		case "part": this.partHeightAbove = height; break;
 	}
 };
 

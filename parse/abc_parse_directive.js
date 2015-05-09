@@ -306,11 +306,11 @@ window.ABCJS.parse.parseDirective = {};
 	};
 
 	var getChangingFont = function(cmd, tokens, str) {
-		if (multilineVars.is_in_header) // If the font appears in the header, then it becomes the default font.
-			return getGlobalFont(cmd, tokens, str);
 		if (tokens.length === 0)
 			return "Directive \"" + cmd + "\" requires a font as a parameter.";
 		multilineVars[cmd] = getFontParameter(tokens, multilineVars[cmd], str, 0, cmd);
+		if (multilineVars.is_in_header) // If the font appears in the header, then it becomes the default font.
+			tune.formatting[cmd] = multilineVars[cmd];
 		return null;
 	};
 	var getGlobalFont = function(cmd, tokens, str) {

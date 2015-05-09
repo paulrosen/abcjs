@@ -105,6 +105,15 @@ ABCJS.write.AbsoluteElement.prototype.addRight = function (right) {
 	this.addChild(right);
 };
 
+ABCJS.write.AbsoluteElement.prototype.addCentered = function (elem) {
+	var half = elem.w/2;
+	if (-half<this.extraw) this.extraw = -half;
+	this.extra[this.extra.length] = elem;
+	if (elem.dx+half>this.w) this.w = elem.dx+half;
+	this.right[this.right.length] = elem;
+	this.addChild(elem);
+};
+
 ABCJS.write.AbsoluteElement.prototype.setLimit = function(member, child) {
 	if (!child[member]) return;
 	if (!this.specialY[member])

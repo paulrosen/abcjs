@@ -247,7 +247,8 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     break;
   case "part":
     var abselem = new ABCJS.write.AbsoluteElement(elem,0,0, 'part');
-    abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, undefined, {type:"part"}));
+	  var dim = this.renderer.getTextSize(elem.title, 'partsfont', "part");
+    abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, undefined, {type:"part", height: dim.height/ABCJS.write.spacing.STEP}));
     elemset[0] = abselem;
     break;
   case "tempo":
@@ -530,9 +531,9 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
          window.ABCJS.parse.each(elem.lyric, function(ly) {
          lyricStr += ly.syllable + ly.divider + "\n";
       });
-	  // TODO-PER: get the width of the lyric and use that for "0, lyricStr.length*5" below.
+	  var lyricDim = this.renderer.getTextSize(lyricStr, 'vocalfont', "abc-lyric");
 	  var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
-    abselem.addRight(new ABCJS.write.RelativeElement(lyricStr, 0, lyricStr.length*5, undefined, {type:"lyric", position: position }));
+    abselem.addCentered(new ABCJS.write.RelativeElement(lyricStr, 0, lyricDim.width, undefined, {type:"lyric", position: position, height: lyricDim.height / ABCJS.write.spacing.STEP }));
   }
   
   if (!dontDraw && elem.gracenotes !== undefined) {
@@ -618,42 +619,47 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     for (i = 0; i < elem.chord.length; i++) {
       var x = 0;
       var y;
-		var chordWidth = this.renderer.getTextSize(elem.chord[i].name, 'annotationfont', "annotation").width;
+		var dim = this.renderer.getTextSize(elem.chord[i].name, 'annotationfont', "annotation");
+		var chordWidth = dim.width;
+		var chordHeight = dim.height / ABCJS.write.spacing.STEP;
       switch (elem.chord[i].position) {
       case "left":
         this.roomtaken+=chordWidth+7;
         x = -this.roomtaken;        // TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
-        abselem.addExtra(new ABCJS.write.RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text"}));
+        abselem.addExtra(new ABCJS.write.RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
         break;
       case "right":
         this.roomtakenright+=4;
         x = this.roomtakenright;// TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
-        abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text"}));
+        abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
         break;
       case "below":
 		  // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
                          var eachLine = elem.chord[i].name.split("\n");
                          for (var ii = 0; ii < eachLine.length; ii++) {
-                                abselem.addRight(new ABCJS.write.RelativeElement(eachLine[ii], x, chordWidth+chordMargin, undefined, {type:"text", position: "below"}));
+                                abselem.addRight(new ABCJS.write.RelativeElement(eachLine[ii], x, chordWidth+chordMargin, undefined, {type:"text", position: "below", height: chordHeight}));
                          }
     break;
 		case "above":
 			// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-			abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, 0, chordWidth+chordMargin, undefined, {type: "text"}));
+			abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, 0, chordWidth+chordMargin, undefined, {type: "text", height: chordHeight}));
 			break;
       default:
 		if (elem.chord[i].rel_position) {
 			var relPositionY = elem.chord[i].rel_position.y + 3*ABCJS.write.spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
-			abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x + elem.chord[i].rel_position.x, 0, elem.minpitch + relPositionY / ABCJS.write.spacing.STEP, {type: "text"}));
+			abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x + elem.chord[i].rel_position.x, 0, elem.minpitch + relPositionY / ABCJS.write.spacing.STEP, {type: "text", height: chordHeight}));
 		} else {
 			// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
 			var pos2 = 'above';
 			if (elem.positioning && elem.positioning.chordPosition)
 				pos2 = elem.positioning.chordPosition;
 
-			abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x, 0, undefined, {type: "chord", position: pos2 }));
+			dim = this.renderer.getTextSize(elem.chord[i].name, 'gchordfont', "chord");
+			chordHeight = dim.height / ABCJS.write.spacing.STEP;
+			chordWidth = dim.width; // Since the chord is centered, we only use half the width.
+			abselem.addCentered(new ABCJS.write.RelativeElement(elem.chord[i].name, x, chordWidth, undefined, {type: "chord", position: pos2, height: chordHeight }));
 		}
       }
     }
