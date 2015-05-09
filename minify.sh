@@ -37,6 +37,6 @@ cp bin/abcjs_basic_$1-min.js bin/abcjs_basic_latest-min.js
 cp bin/abcjs_editor_$1-min.js bin/abcjs_editor_latest-min.js
 cp bin/abcjs_plugin_$1-min.js bin/abcjs_plugin_latest-min.js
 echo "Fix readme..."
-perl -pi -e "s/abcjs_(.+)_1([^-]+)-min.js/abcjs_\$1_$1-min.js/" README.md
-perl -pi -e "s/abcjs_(.+)_1([^-]+).user.js/abcjs_\$1_$1.user.js/" README.md
+perl -pi -e "s/abcjs_(.+)_2([^-]+)-min.js/abcjs_\$1_$1-min.js/" README.md
+perl -pi -e "s/abcjs_(.+)_2([^-]+).user.js/abcjs_\$1_$1.user.js/" README.md
 
