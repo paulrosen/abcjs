@@ -82,3 +82,12 @@ GAB2 !style=harmonic![gb]4|GAB2 [K: style=harmonic]gbgb|
 C/A,/ C/C/E C/zz2|
 w:Rock-y did-n't like that
 ```
+
+### marcato:
+
+A new decoration is supported:
+
+```
+!marcato!
+```
+
