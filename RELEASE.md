@@ -17,6 +17,8 @@
 * Add some debugging capability to the plugin. 	4313963
 
 * Implement gchordfont; make the extra spacing respect the font height.
+
+* Upgrade bundled version of jQuery to 1.11.3.
 	
 # Version 2.0
 
