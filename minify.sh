@@ -30,7 +30,7 @@ java -jar yuicompressor-2.4.7.jar  --line-break 7000 -o bin/abcjs_editor_norapha
 echo "Compressing plugin..."
 java -jar yuicompressor-2.4.7.jar  --line-break 7000 -o bin/abcjs_plugin_noraphael_nojquery_$1-min.js tmp/abcjs_plugin-noraphael-stamped.js
 java -jar yuicompressor-2.4.7.jar  --line-break 7000 -o bin/abcjs_plugin_nojquery_$1-min.js tmp/abcjs_plugin-stamped.js
-cat jquery-1.11.1.min.js bin/abcjs_plugin_nojquery_$1-min.js > bin/abcjs_plugin_$1-min.js
+cat jquery-1.11.3.min.js bin/abcjs_plugin_nojquery_$1-min.js > bin/abcjs_plugin_$1-min.js
 cat plugin/greasemonkey.js bin/abcjs_plugin_$1-min.js > bin/abcjs_plugin_$1.user.js
 echo "Creating latest..."
 cp bin/abcjs_basic_$1-min.js bin/abcjs_basic_latest-min.js

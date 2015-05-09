@@ -83,8 +83,7 @@ Let us know if you want to be listed!
 
 * ABC 1.6 is pretty much implemented.
 * Many of the new features of ABC 2.1 are being implemented now.
-* Midi playback is at a very early stage and does not yet feature ornamentation, dynamics, chords or multi voice.
-* Midi playback will not work in Internet Explorer.
+* Midi playback has been mostly broken by newer browsers.
 
 # API Changes for Version 1.11
 

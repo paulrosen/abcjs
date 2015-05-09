@@ -1,3 +1,23 @@
+# Version 2.1
+
+* Fix startChar for chords.
+
+* Fix placement of left annotation, that is: "< text"
+
+* Updated compressor version (note: 2.4.8 has a bug and doesn't work, so using 2.4.7)
+
+* Some improvements to decoration placement.
+
+* Fix triplet not lining up properly in multiple voices bug.
+
+* Fix note lengths when chords and broken rhythms interact.
+
+* If a font appears in the header, then it becomes the default font.
+
+* Add some debugging capability to the plugin. 	4313963
+
+* Implement gchordfont; make the extra spacing respect the font height.
+	
 # Version 2.0
 
 * Many bug fixes.
