@@ -375,6 +375,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 	for (var i=0;i<this.voices.length;i++) {
 		var staff = this.voices[i].staff;
 		renderer.y = staff.absoluteY;
+		renderer.voiceNumber = i;
 		//renderer.y = staff.y;
 		// offset for starting the counting at middle C
 		if (!this.voices[i].duplicate) {

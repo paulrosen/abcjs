@@ -253,6 +253,7 @@ ABCJS.write.EngraverController.prototype.setXSpacing = function (staffGroup, for
 ABCJS.write.EngraverController.prototype.engraveStaffLine = function (staffGroup) {
 	if (this.lastStaffGroupIndex > -1)
 		this.renderer.addStaffPadding(this.staffgroups[this.lastStaffGroupIndex], staffGroup);
+	this.renderer.voiceNumber = null;
 	staffGroup.draw(this.renderer);
 	var height = staffGroup.height * ABCJS.write.spacing.STEP;
 	//this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+height);
