@@ -85,11 +85,10 @@ if (!window.ABCJS.write)
 				stem.setX(x);
 				abselem.addExtra(stem);
 			}
-			abselem.x = x;
-			temponote.setX(x);
-			temponote.draw(renderer, x);
-			if (stem)
-				stem.draw(renderer, x);
+			abselem.setX(x);
+			abselem.draw(renderer, x);
+			//if (stem)
+			//	stem.draw(renderer, x);
 			x += (abselem.w + 5);
 			var str = "= " + this.tempo.bpm;
 			text = renderer.renderText(x, y, str, 'tempofont', 'tempo', "start");
