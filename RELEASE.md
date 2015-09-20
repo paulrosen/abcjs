@@ -2,6 +2,8 @@
 
 * Fix drawing of tempo indicator.
 
+* Add voice number to the css classes.
+
 # Version 2.1
 
 * Fix startChar for chords.
