@@ -1,3 +1,7 @@
+# Version 2.2
+
+* Fix drawing of tempo indicator.
+
 # Version 2.1
 
 * Fix startChar for chords.
