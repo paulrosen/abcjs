@@ -86,7 +86,8 @@ if (!window.ABCJS.write)
 				abselem.addExtra(stem);
 			}
 			abselem.setX(x);
-			abselem.draw(renderer, x);
+			for (var i = 0; i < abselem.children.length; i++)
+				abselem.children[i].draw(renderer, x);
 			//if (stem)
 			//	stem.draw(renderer, x);
 			x += (abselem.w + 5);
