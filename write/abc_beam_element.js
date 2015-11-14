@@ -267,7 +267,9 @@ if (!window.ABCJS.write)
 
 			var sy = (asc) ? -1.5 : 1.5;
 			if (isGrace) sy = sy * 2 / 3; // This makes the second beam on grace notes closer to the first one.
-			for (var durlog = ABCJS.write.getDurlog(elem.abcelem.duration); durlog < -3; durlog++) { // get the duration via abcelem because of triplets
+			var duration = elem.abcelem.duration; // get the duration via abcelem because of triplets
+			if (duration === 0) duration = 0.25; // if this is stemless, then we use quarter note as the duration.
+			for (var durlog = ABCJS.write.getDurlog(duration); durlog < -3; durlog++) {
 				if (auxBeams[-4 - durlog]) {
 					auxBeams[-4 - durlog].single = false;
 				} else {
