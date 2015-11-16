@@ -461,12 +461,41 @@ ABCJS.midi.MidiWriter.prototype.getElem = function() {
   return this.getVoice()[this.pos];
 };
 
+	ABCJS.midi.MidiWriter.prototype.lookAheadToNextNote = function() {
+		// look ahead to find the next rest or the next note. This might be on the next line, but it will be on the same staff number and same voice.
+		var voice = this.getVoice();
+		var pos = this.pos + 1;
+		while (voice.length > pos) {
+			if (voice[pos].el_type === 'note')
+				return voice[pos];
+			pos++;
+		}
+		// If we got this far, then we didn't find a following note. There may be one on the next line.
+		var nextLine = this.abctune.lines[this.line+1];
+		if (!nextLine || !nextLine.staff)
+			return null;
+		var nextStaff = nextLine.staff[this.staff];
+		if (!nextStaff)
+			return null;
+		voice = nextStaff[this.voice];
+		if (!voice)
+			return null;
+		pos = 0;
+		while (voice.length > pos) {
+			if (voice[pos].el_type === 'note')
+				return voice[pos];
+			pos++;
+		}
+		return null;
+	};
+
 ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
   try {
     this.midi = (this.javamidi) ? new MidiProxy(new JavaMidi(this), new Midi()) : new Midi();
     this.baraccidentals = [];
     this.abctune = abctune;
     this.baseduration = 480*4; // nice and divisible, equals 1 whole note
+	  this.bagpipes = abctune.formatting.bagpipes; // If it is bagpipes, then the gracenotes are played on top of the main note.
 
 	  // PER: add global transposition.
 	  if (abctune.formatting.midi && abctune.formatting.midi.transpose)
@@ -610,9 +639,23 @@ ABCJS.midi.MidiWriter.prototype.writeNote = function(elem) {
       } 
     }
 
+	  // if there are grace notes, then also play them.
+	  // I'm not sure there is an exact rule for the length of the notes. My rule, unless I find
+	  // a better one is: the grace notes cannot take more than 1/2 of the main note's value.
+	  // A grace note (of 1/8 note duration) takes 1/8 of the main note's value.
+	  // If there are grace notes on the next note, then end this note early.
+	  var nextNote = this.lookAheadToNextNote();
+	  var graceDuration;
+	  if (nextNote && nextNote.gracenotes && nextNote.gracenotes.length > 0) {
+		  // shorten this note so that the grace notes can fit in.
+		  var numGraces = nextNote.gracenotes.length;
+		  graceDuration = numGraces < 4 ? mididuration/8 : mididuration/2 / numGraces;
+		  mididuration -= (graceDuration*numGraces);
+	  }
+
     for (i=0; i<elem.pitches.length; i++) {
       var note = elem.pitches[i];
-      var pitch= note.pitch+this.transpose;	// PER
+      //var pitch= note.pitch+this.transpose;	// PER
       if (note.startTie) continue; // don't terminate it
       if (note.endTie) {
 	this.midi.endNote(midipitches[i],mididuration+this.tieduration);
@@ -622,6 +665,15 @@ ABCJS.midi.MidiWriter.prototype.writeNote = function(elem) {
       mididuration = 0; // put these to zero as we've moved forward in the midi
       this.tieduration=0;
     }
+	  // Do the grace notes now to fill out the time.
+	  if (nextNote && nextNote.gracenotes && nextNote.gracenotes.length > 0) {
+		  for (var g = 0; g < nextNote.gracenotes.length; g++) {
+			  var gn = nextNote.gracenotes[g];
+			  var gpitch = 60 + 12*this.extractOctave(gn.pitch+this.transpose)+this.scale[this.extractNote(gn.pitch+this.transpose)];
+			  this.midi.startNote(gpitch, 64, elem);
+			  this.midi.endNote(gpitch,graceDuration);
+		  }
+	  }
   } else if (elem.rest && elem.rest.type !== 'spacer') {
     this.midi.addRest(mididuration);
   }
