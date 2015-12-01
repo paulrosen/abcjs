@@ -365,7 +365,7 @@ if (!window.ABCJS.midi)
 				return undefined;
 			root = name.substring(0,1);
 		}
-		var bass = basses[root];
+		var bass = basses[root] + transpose;
 		if (!bass)	// If the bass note isn't listed, then this was an unknown root. Only A-G are accepted.
 			return undefined;
 		var bass2 = bass - 5;	// The alternating bass is a 4th below
@@ -386,7 +386,7 @@ if (!window.ABCJS.midi)
 		var arr = remaining.split('/');
 		chick = chordNotes(bass, arr[0]);
 		if (arr.length === 2) {
-			bass = basses[arr[1]];
+			bass = basses[arr[1]] + transpose;
 			bass2 = bass;
 		}
 		return { boom: bass, boom2: bass2, chick: chick };
