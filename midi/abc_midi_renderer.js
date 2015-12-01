@@ -1,3 +1,19 @@
+//    abc_midi_renderer.js: Create the actual format for the midi.
+//    Copyright (C) 2010,2015 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
@@ -229,6 +245,7 @@ if (!window.ABCJS.midi)
 	}
 
 	Midi.prototype.setTempo = function(qpm) {
+		//console.log("setTempo",qpm);
 		if (this.trackcount === 0) {
 			this.startTrack();
 			this.track += "%00%FF%51%03" + toHex(Math.round(60000000 / qpm), 6);
@@ -236,7 +253,25 @@ if (!window.ABCJS.midi)
 		}
 	};
 
+	Midi.prototype.setGlobalInfo = function(qpm, name) {
+		//console.log("setGlobalInfo",qpm, key, time, name);
+		if (this.trackcount === 0) {
+			this.startTrack();
+			this.track += "%00%FF%51%03" + toHex(Math.round(60000000 / qpm), 6);
+			// TODO-PER: we could also store the key and time signatures, something like:
+			//00 FF 5902 03 00 - key signature
+			//00 FF 5804 04 02 30 08 - time signature
+			if (name) {
+				this.track += "%00%FF%03" + toHex(name.length, 2);
+				for (var i = 0; i < name.length; i++)
+					this.track += toHex(name.charCodeAt(i), 2);
+			}
+			this.endTrack();
+		}
+	};
+
 	Midi.prototype.startTrack = function() {
+		//console.log("startTrack");
 		this.track = "";
 		this.silencelength = 0;
 		this.trackcount++;
@@ -247,6 +282,7 @@ if (!window.ABCJS.midi)
 	};
 
 	Midi.prototype.endTrack = function() {
+		//console.log("endTrack");
 		var tracklength = toHex(this.track.length / 3 + 4, 8);
 		this.track = "MTrk" + tracklength + // track header
 			this.track +
@@ -255,6 +291,7 @@ if (!window.ABCJS.midi)
 	};
 
 	Midi.prototype.setInstrument = function(number) {
+		//console.log("setInstrument", number);
 		if (this.track)
 			this.track = "%00%C0" + toHex(number, 2) + this.track;
 		else
@@ -263,41 +300,44 @@ if (!window.ABCJS.midi)
 	};
 
 	Midi.prototype.setChannel = function(number) {
+		//console.log("setChannel", number);
 		this.channel = number - 1;
 		this.noteOnAndChannel = "%9" + this.channel.toString(16);
 	};
 
 	Midi.prototype.startNote = function(pitch, loudness) {
+		//console.log("startNote", pitch, loudness);
 		this.track += toDurationHex(this.silencelength); // only need to shift by amount of silence (if there is any)
 		this.silencelength = 0;
 		if (this.first) {
 			this.first = false;
 			this.track += this.noteOnAndChannel;
 		}
-		this.track += "%" + pitch.toString(16) + "%" + loudness; //note
+		this.track += "%" + pitch.toString(16) + toHex(loudness, 2); //note
 	};
 
 	Midi.prototype.endNote = function(pitch, length) {
-		this.track += toDurationHex(length); //duration
+		//console.log("endNote", pitch, length);
+		this.track += toDurationHex(this.silencelength+length); // only need to shift by amount of silence (if there is any)
+		this.silencelength = 0;
+//		this.track += toDurationHex(length); //duration
 		this.track += "%" + pitch.toString(16) + "%00";//end note
 	};
 
 	Midi.prototype.addRest = function(length) {
+		//console.log("addRest", length);
 		this.silencelength += length;
+	};
+
+	Midi.prototype.getData = function() {
+		return "data:audio/midi," +
+			"MThd%00%00%00%06%00%01" + toHex(this.trackcount, 4) + "%01%e0" + // header
+			this.trackstrings;
 	};
 
 	Midi.prototype.embed = function(parent, noplayer) {
 
-		var data = "data:audio/midi," +
-			"MThd%00%00%00%06%00%01" + toHex(this.trackcount, 4) + "%01%e0" + // header
-			this.trackstrings;
-
-		//   var embedContainer = document.createElement("div");
-		//   embedContainer.className = "embedContainer";
-		//   document.body.appendChild(embedContainer);
-		//   embedContainer.innerHTML = '<object id="embed1" classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" codebase="http://www.apple.com/qtactivex/qtplugin.cab"><param name="src" value="' + data + '"></param><param name="Autoplay" value="false"></param><embed name="embed1" src="' + data + '" autostart="false" enablejavascript="true" /></object>';
-		//   embed = document["embed1"];
-
+		var data = this.getData();
 
 		var link = setAttributes(document.createElement('a'), {
 			href: data

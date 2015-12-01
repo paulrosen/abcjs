@@ -262,12 +262,17 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
   this.engraver_controller = new ABCJS.write.EngraverController(paper, this.engraverparams);
   this.engraver_controller.engraveABC(this.tunes);
 	this.tunes[0].engraver = this.engraver_controller;	// TODO-PER: We actually want an output object for each tune, not the entire controller. When refactoring, don't save data in the controller.
-  if (ABCJS.midi.MidiWriter && this.mididiv) {
-    if (this.mididiv !== this.div)
-		this.mididiv.innerHTML = "";
-    var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv,this.midiparams);
-    midiwriter.addListener(this.engraver_controller);
-    midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
+  if (window.ABCJS.midi && this.mididiv) {
+//    if (this.mididiv !== this.div)
+//		this.mididiv.innerHTML = "";
+	  var midi = window.ABCJS.midi.create(this.tunes[0], this.midiParams); //TODO handle multiple tunes
+	  var title = this.tunes[0].metaText.title;
+	  if (title)
+		  title = title.toLowerCase().replace(/\W/g, '_');
+	  this.mididiv.innerHTML = '<a download="' + title + '.midi" href="' + midi + '">download midi</a>';
+//	  var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv,this.midiparams);
+//    midiwriter.addListener(this.engraver_controller);
+//    midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
   }
   if (this.warningsdiv) {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";

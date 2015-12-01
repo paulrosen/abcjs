@@ -184,8 +184,11 @@ if (!window.ABCJS)
 		function callback(div, tune) {
 			if (midiParams === undefined)
 				midiParams = {};
-			var midiwriter = new ABCJS.midi.MidiWriter(div, midiParams);
-			midiwriter.writeABC(tune);
+			var midi = window.ABCJS.midi.create(tune, midiParams);
+			var title = tune.metaText.title;
+			if (title)
+				title = title.toLowerCase().replace(/\W/g, '_');
+			div.innerHTML = '<a download="' + title + '.midi" href="' + midi + '">download midi</a>';
 		}
 
 		return renderEngine(callback, output, abc, parserParams, renderParams);
