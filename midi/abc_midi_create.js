@@ -35,7 +35,7 @@ if (!window.ABCJS.midi)
 		if (commands.channel !== undefined)
 			midi.setChannel(commands.channel);
 		var title = abcTune.metaText ? abcTune.metaText.title : undefined;
-		if (title.length > 128)
+		if (title && title.length > 128)
 			title = title.substring(0,124) + '...';
 		midi.setGlobalInfo(commands.tempo, title);
 

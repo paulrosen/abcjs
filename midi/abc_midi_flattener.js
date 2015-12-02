@@ -155,6 +155,7 @@ if (!window.ABCJS.midi)
 	// - If there is a chord on the second beat, play a chord for the first beat instead of a bass note.
 	// - Likewise, if there is a chord on the fourth beat of 4/4, play a chord on the third beat instead of a bass note.
 	//
+	var breakSynonyms = [ 'break', '(break)', 'no chord', 'n.c.', 'tacet'];
 
 	function writeNote(elem) {
 		//
@@ -165,7 +166,7 @@ if (!window.ABCJS.midi)
 		// If there are guitar chords, then they are put in a separate track, but they have the same format.
 		//
 
-		var hasChord = (!chordTrackFinished && elem.chord && elem.chord.length > 0 && (elem.chord[0].position === 'default' ||  elem.chord[0].name === 'break'));
+		var hasChord = (!chordTrackFinished && elem.chord && elem.chord.length > 0 && (elem.chord[0].position === 'default' || breakSynonyms.indexOf(elem.chord[0].name.toLowerCase()) >= 0));
 		if (hasChord) {
 			// If we ever have a chord in this voice, then we add the chord track.
 			// However, if there are chords on more than one voice, then just use the first voice.
@@ -183,6 +184,8 @@ if (!window.ABCJS.midi)
 
 			// TODO-PER: Just using the first chord if there are more than one.
 			var chordName = elem.chord[0].name;
+			if (elem.chord[0].position !== 'default')	// It must be a break: normalize it.
+				chordName = 'break';
 			lastChord = interpretChord(chordName);
 			currentChords.push({chord: lastChord, beat: barBeat });
 		}
@@ -210,11 +213,15 @@ if (!window.ABCJS.midi)
 			var stealFromDuration = stealFromCurrent ? duration : currentTrack[lastNoteDurationPosition].duration;
 			graces = processGraceNotes(elem.gracenotes, stealFromDuration);
 			if (!bagpipes) {
-				duration = writeGraceNotes(graces, stealFromCurrent, duration, null);
+				duration = writeGraceNotes(graces, stealFromCurrent, duration);
 			}
 		}
 
 		if (elem.pitches) {
+			if (graces && bagpipes) {
+				// If it is bagpipes, then the graces are played with the note. If the grace has the same pitch as the note, then we just skip it.
+				duration = writeGraceNotes(graces, true, duration);
+			}
 			var pitches = [];
 			for (var i=0; i<elem.pitches.length; i++) {
 				var note = elem.pitches[i];
@@ -227,13 +234,8 @@ if (!window.ABCJS.midi)
 
 				if (note.startTie)
 					pitchesTied[''+actualPitch] = true;
-
-				if (note.endTie)
+				else if (note.endTie)
 					pitchesTied[''+actualPitch] = false;
-			}
-			if (graces && bagpipes) {
-				// If it is bagpipes, then the graces are played with the note. If the grace has the same pitch as the note, then we just skip it.
-				writeGraceNotes(graces, true, duration, adjustPitch(elem.pitches[0]));
 			}
 			currentTrack.push({ cmd: 'move', duration: duration-normalBreakBetweenNotes });
 			lastNoteDurationPosition = currentTrack.length-1;
@@ -322,10 +324,9 @@ if (!window.ABCJS.midi)
 			currentTrack.push({cmd: 'move', duration: graces[g].duration});
 			if (gp !== skipNote)
 				currentTrack.push({cmd: 'stop', pitch: gp});
-			if (stealFromCurrent)
-				duration -= graces[g].duration;
-			else
+			if (!stealFromCurrent)
 				currentTrack[lastNoteDurationPosition].duration -= graces[g].duration;
+			duration -= graces[g].duration;
 		}
 		return duration;
 	}
@@ -477,7 +478,7 @@ if (!window.ABCJS.midi)
 			currentChords.push({ beat: 0, chord: lastChord});
 		}
 		if (currentChords[0].beat !== 0 && lastChord) { // this is the case where there is a chord declared in the measure, but not on its first beat.
-			currentChords.shift({ beat: 0, chord: lastChord});
+			currentChords.unshift({ beat: 0, chord: lastChord});
 		}
 		if (currentChords.length === 1) {
 			for (var m = 0; m < pattern.length; m++) {

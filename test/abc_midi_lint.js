@@ -27,6 +27,7 @@ if (!window.ABCJS.test)
 window.ABCJS.test.midiSequencerLint = function(tune) {
 	"use strict";
 
+	var breakSynonyms = [ 'break', '(break)', 'no chord', 'n.c.', 'tacet'];
 	var ret = "";
 	for (var i = 0; i < tune.length; i++) {
 		var voice = tune[i];
@@ -44,7 +45,7 @@ window.ABCJS.test.midiSequencerLint = function(tune) {
 						for (var c = 0; c < element.chord.length; c++) {
 							if (element.chord[c].position === 'default') {
 								ret += element.chord[c].name + ' ';
-							} else if (element.chord[c].name === 'break') {
+							} else if (breakSynonyms.indexOf(element.chord[c].name.toLowerCase()) >= 0) {
 								ret += element.chord[c].name + ' ';
 							}
 						}

@@ -106,14 +106,17 @@ if (!window.ABCJS.midi)
 							staff.clef.el_type = 'clef';
 							voices[voiceNumber].push({ el_type: 'transpose', transpose: staff.clef.transpose });
 						}
+						var noteEventsInBar = 0;
 						for (var v = 0; v < voice.length; v++) {
 							// For each element in a voice
 							var elem = voice[v];
 							switch (elem.el_type) {
 								case "note":
 									// regular items are just pushed.
-									if (!elem.rest || elem.rest.type !== 'spacer')
+									if (!elem.rest || elem.rest.type !== 'spacer') {
 										voices[voiceNumber].push(elem);
+										noteEventsInBar++;
+									}
 									break;
 								case "key":
 									if (elem.root === 'HP')
@@ -133,7 +136,9 @@ if (!window.ABCJS.midi)
 									voices[voiceNumber].push({ el_type: 'tempo', qpm: qpm });
 									break;
 								case "bar":
-									voices[voiceNumber].push({ el_type: 'bar' }); // We need the bar marking to reset the accidentals.
+									if (noteEventsInBar > 0) // don't add two bars in a row.
+										voices[voiceNumber].push({ el_type: 'bar' }); // We need the bar marking to reset the accidentals.
+									noteEventsInBar = 0;
 									// figure out repeats and endings --
 									// The important part is where there is a start repeat, and end repeat, or a first ending.
 									var endRepeat = (elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat");
