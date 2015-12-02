@@ -266,10 +266,11 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
 //    if (this.mididiv !== this.div)
 //		this.mididiv.innerHTML = "";
 	  var midi = window.ABCJS.midi.create(this.tunes[0], this.midiParams); //TODO handle multiple tunes
-	  var title = this.tunes[0].metaText.title;
+	  var title = this.tunes[0].metaText && this.tunes[0].metaText.title ? this.tunes[0].metaText.title : 'Untitled';
+	  var linkTitle = "Download MIDI for \"" + title +  "\"";
 	  if (title)
-		  title = title.toLowerCase().replace(/\W/g, '_');
-	  this.mididiv.innerHTML = '<a download="' + title + '.midi" href="' + midi + '">download midi</a>';
+		  title = title.toLowerCase().replace(/'/g, '').replace(/\W/g, '_').replace(/__/g, '_');
+	  this.mididiv.innerHTML = '<a download="' + title + '.midi" href="' + midi + '">' + linkTitle + '</a>';
 //	  var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv,this.midiparams);
 //    midiwriter.addListener(this.engraver_controller);
 //    midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
