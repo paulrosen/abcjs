@@ -157,6 +157,22 @@ if (!window.ABCJS.midi)
 	//
 	var breakSynonyms = [ 'break', '(break)', 'no chord', 'n.c.', 'tacet'];
 
+	function findChord(elem) {
+		// TODO-PER: Just using the first chord if there are more than one.
+		if (chordTrackFinished || !elem.chord || elem.chord.length === 0)
+			return null;
+
+		// Return the first annotation that is a regular chord: that is, it is in the default place or is a recognized "tacit" phrase.
+		for (var i = 0; i < elem.chord.length; i++) {
+			var ch = elem.chord[i];
+			if (ch.position === 'default')
+				return ch.name;
+			if (breakSynonyms.indexOf(ch.name.toLowerCase()) >= 0)
+				return 'break';
+		}
+		return null;
+	}
+
 	function writeNote(elem) {
 		//
 		// Create a series of note events to append to the current track.
@@ -166,8 +182,8 @@ if (!window.ABCJS.midi)
 		// If there are guitar chords, then they are put in a separate track, but they have the same format.
 		//
 
-		var hasChord = (!chordTrackFinished && elem.chord && elem.chord.length > 0 && (elem.chord[0].position === 'default' || breakSynonyms.indexOf(elem.chord[0].name.toLowerCase()) >= 0));
-		if (hasChord) {
+		var chord = findChord(elem);
+		if (chord) {
 			// If we ever have a chord in this voice, then we add the chord track.
 			// However, if there are chords on more than one voice, then just use the first voice.
 			if (chordTrack.length === 0) {
@@ -182,12 +198,11 @@ if (!window.ABCJS.midi)
 					chordTrack.push({ cmd: 'move', duration: distance });
 			}
 
-			// TODO-PER: Just using the first chord if there are more than one.
-			var chordName = elem.chord[0].name;
-			if (elem.chord[0].position !== 'default')	// It must be a break: normalize it.
-				chordName = 'break';
-			lastChord = interpretChord(chordName);
-			currentChords.push({chord: lastChord, beat: barBeat });
+			var c = interpretChord(chord);
+			if (c) {
+				lastChord = c;
+				currentChords.push({chord: lastChord, beat: barBeat });
+			}
 		}
 
 		if (elem.startTriplet) {
@@ -366,9 +381,10 @@ if (!window.ABCJS.midi)
 				return undefined;
 			root = name.substring(0,1);
 		}
-		var bass = basses[root] + transpose;
+		var bass = basses[root];
 		if (!bass)	// If the bass note isn't listed, then this was an unknown root. Only A-G are accepted.
 			return undefined;
+		bass  += transpose;
 		var bass2 = bass - 5;	// The alternating bass is a 4th below
 		var chick;
 		if (name.length === 1)
