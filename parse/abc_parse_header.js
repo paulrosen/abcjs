@@ -330,7 +330,10 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 						tune.appendStartingElement('key', -1, -1, window.ABCJS.parse.parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
 					return [ e-i+1+ws ];
 				case "[P:":
-					tune.appendElement('part', -1, -1, {title: line.substring(i+3, e)});
+					if (tune.lines.length <= tune.lineNum)
+						multilineVars.partForNextLine = line.substring(i+3, e);
+					else
+						tune.appendElement('part', -1, -1, {title: line.substring(i+3, e)});
 					return [ e-i+1+ws ];
 				case "[L:":
 					this.setDefaultLength(line, i+3, e);
