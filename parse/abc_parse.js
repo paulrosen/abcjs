@@ -1336,11 +1336,13 @@ window.ABCJS.parse.Parse = function() {
 							if (core.graceNotes !== undefined) el.graceNotes = core.graceNotes;
 							delete el.startSlur;
 							if (multilineVars.inTie) {
-								if (el.pitches !== undefined)
+								if (el.pitches !== undefined) {
 									el.pitches[0].endTie = true;
-								else
+									multilineVars.inTie = false;
+								} else if (el.rest.type !== 'spacer') {
 									el.rest.endTie = true;
-								multilineVars.inTie = false;
+									multilineVars.inTie = false;
+								}
 							}
 							if (core.startTie || el.startTie)
 								multilineVars.inTie = true;
