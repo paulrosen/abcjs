@@ -486,7 +486,9 @@ if (!window.ABCJS.midi)
 		var beatLength = 1/den;
 		var pattern = rhythmPatterns[num+'/'+den];
 		var thisMeasureLength = parseInt(num,10)/parseInt(den,10);
-		if (!pattern || thisMeasureLength !== barBeat) { // If it is an unsupported meter, or this isn't a full bar, just chick on each beat.
+		// See if this is a full measure: unfortunately, with triplets, there isn't an exact match, what with the floating point, so we just see if it is "close".
+		var portionOfAMeasure = Math.abs(thisMeasureLength - barBeat);
+		if (!pattern || portionOfAMeasure > 0.0078125) { // If it is an unsupported meter, or this isn't a full bar, just chick on each beat.
 			pattern = [];
 			var beatsPresent = barBeat / beatLength;
 			for (var p = 0; p < beatsPresent; p++)
