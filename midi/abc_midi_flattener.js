@@ -484,9 +484,11 @@ if (!window.ABCJS.midi)
 		var den = meter.den;
 		var beatLength = 1/den;
 		var pattern = rhythmPatterns[num+'/'+den];
-		if (!pattern) {
+		var thisMeasureLength = parseInt(num,10)/parseInt(den,10);
+		if (!pattern || thisMeasureLength !== barBeat) { // If it is an unsupported meter, or this isn't a full bar, just chick on each beat.
 			pattern = [];
-			for (var p = 0; p < num; p++)
+			var beatsPresent = barBeat / beatLength;
+			for (var p = 0; p < beatsPresent; p++)
 				pattern.push("chick");
 		}
 
