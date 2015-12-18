@@ -91,3 +91,14 @@ A new decoration is supported:
 !marcato!
 ```
 
+### Chord Break:
+
+If you want to skip a chord, then use one of the following as the chord:
+
+"^break"
+"^(break)"
+"^no chord"
+"^n.c."
+"^tacet"
+
+These are case-insensitive.

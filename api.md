@@ -44,6 +44,8 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | ------------- | ----------- | ----------- |
 | `qpm` | 180 | The tempo, if not specified in abcString. |
 | `program` | 2 | The midi program to use, if not specified in abcString. |
+| `channel` | 0 | The midi channel to use, if not specified in abcString. |
+| `transpose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
 
 | `renderParams` | Default | Description |
 | ------------- | ----------- | ----------- |

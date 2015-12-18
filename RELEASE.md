@@ -1,3 +1,15 @@
+# Version 2.3
+
+* Completely refactor the midi processing: now supports chords and grace notes and embeds the tune's title.
+
+* Remove the automatic generation of the QuickTime element.
+
+* Fix crash when a triplet with a 0 duration is created. That is: (3B0BB
+
+* Fix having a spacer 'y' between two notes that are tied.
+
+* Fix starting first line with [P:A] 
+
 # Version 2.2
 
 * Fix drawing of tempo indicator.

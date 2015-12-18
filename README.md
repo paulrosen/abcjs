@@ -42,23 +42,23 @@ If you are looking at someone else's website and see ABC on the page and want to
 
 Here are the latest versions. You can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_2.2-min.js)
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_2.3-min.js)
 
-- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_2.2-min.js)
+- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_2.3-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_2.2-min.js)
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_2.3-min.js)
 
-- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_2.2.user.js)
+- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_2.3.user.js)
 
 And here are the latest versions packaged without the standard libraries. To use these, you need to include those libraries yourself:
 
-- [Basic without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_2.2-min.js)
+- [Basic without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_2.3-min.js)
 
-- [Editor without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_2.2-min.js)
+- [Editor without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_2.3-min.js)
 
-- [Plugin without JQuery](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_nojquery_2.2-min.js)
+- [Plugin without JQuery](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_nojquery_2.3-min.js)
 
-- [Plugin without JQuery or Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_2.2-min.js)
+- [Plugin without JQuery or Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_2.3-min.js)
 
 **NOTE: Do NOT link to these files directly! Upload them to your own server! [Here's why.](https://github.com/blog/1482-heads-up-nosniff-header-support-coming-to-chrome-and-firefox)**
 
@@ -83,7 +83,6 @@ Let us know if you want to be listed!
 
 * ABC 1.6 is pretty much implemented.
 * Many of the new features of ABC 2.1 are being implemented now.
-* Midi playback has been mostly broken by newer browsers.
 
 # API Changes for Version 1.11
 
