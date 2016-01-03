@@ -274,16 +274,28 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
   this.engraver_controller = new ABCJS.write.EngraverController(paper, this.engraverparams);
   this.engraver_controller.engraveABC(this.tunes);
 	this.tunes[0].engraver = this.engraver_controller;	// TODO-PER: We actually want an output object for each tune, not the entire controller. When refactoring, don't save data in the controller.
-	var midiHtml = "";
+	var downloadMidiHtml = "";
+	var inlineMidiHtml = "";
 	if (this.midiParams && !this.midiPause) {
 		for (var i = 0; i < this.tunes.length; i++) {
 			var midi = window.ABCJS.midi.create(this.tunes[i], this.midiParams);
-			midiHtml += window.ABCJS.midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midi, i);
+
+			if (this.midiParams.generateInline && this.midiParams.generateDownload) {
+				downloadMidiHtml += window.ABCJS.midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midi.download, i);
+				inlineMidiHtml += window.ABCJS.midi.generateMidiControls(this.tunes[i], this.midiParams, midi.inline, i);
+			} else if (this.midiParams.generateInline)
+				inlineMidiHtml += window.ABCJS.midi.generateMidiControls(this.tunes[i], this.midiParams, midi, i);
+			else
+				downloadMidiHtml += window.ABCJS.midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midi, i);
 		}
 		if (this.downloadMidi)
-			this.downloadMidi.innerHTML = midiHtml;
+			this.downloadMidi.innerHTML = downloadMidiHtml;
 		else
-			this.div.innerHTML += midiHtml;
+			this.div.innerHTML += downloadMidiHtml;
+		if (this.inlineMidi)
+			this.inlineMidi.innerHTML = inlineMidiHtml;
+		else
+			this.div.innerHTML += inlineMidiHtml;
 	}
   if (this.warningsdiv) {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";

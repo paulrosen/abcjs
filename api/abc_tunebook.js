@@ -181,15 +181,21 @@ if (!window.ABCJS)
 	//			startingTune: an index, starting at zero, representing which tune to start rendering at.
 	//				(If this element is not present, then rendering starts at zero.)
 	ABCJS.renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
+		if (midiParams === undefined)
+			midiParams = {};
+		if (midiParams.generateInline === undefined) // default is to generate inline controls.
+			midiParams.generateInline = true;
+
 		function callback(div, tune, index) {
-			if (midiParams === undefined)
-				midiParams = {};
+			var html = "";
 			var midi = window.ABCJS.midi.create(tune, midiParams);
-			div.innerHTML = window.ABCJS.midi.generateMidiDownloadLink(tune, midiParams, midi, index);
+			if (midiParams.generateInline)
+				html += window.ABCJS.midi.generateMidiControls(tune, midiParams, midi, index);
+			if (midiParams.generateDownload)
+				html += window.ABCJS.midi.generateMidiDownloadLink(tune, midiParams, midi, index);
+			div.innerHTML = html;
 		}
 
-		if (output.download)
-			output = output.download;
 		return renderEngine(callback, output, abc, parserParams, renderParams);
 	};
 })();

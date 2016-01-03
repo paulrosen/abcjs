@@ -26,9 +26,10 @@ if (!window.ABCJS.midi)
 	var baseDuration = 480*4; // nice and divisible, equals 1 whole note
 
 	window.ABCJS.midi.create = function(abcTune, options) {
+		if (options === undefined) options = {};
 		var sequence = window.ABCJS.midi.sequence(abcTune, options);
 		var commands = window.ABCJS.midi.flatten(sequence);
-		var midi = window.ABCJS.midi.rendererFactory(false);
+		var midi = window.ABCJS.midi.rendererFactory();
 
 		if (commands.instrument !== undefined)
 			midi.setInstrument(commands.instrument);
@@ -63,7 +64,17 @@ if (!window.ABCJS.midi)
 			midi.endTrack();
 		}
 
-		return midi.getData();
+		// TODO-PER: probably do this backwards: change the midi generation to NOT escape, then call escape for the download version.
+		var midiFile = midi.getData();
+		var midiInline = unescape(midiFile.substring(16));
+		if (options.generateInline === undefined) // default is to generate inline controls.
+			options.generateInline = true;
+		if (options.generateInline && options.generateDownload)
+			return { download: midiFile, inline: midiInline };
+		else if (options.generateInline)
+			return midiInline;
+		else
+			return midiFile;
 	};
 
 	function convertPitch(pitch) {
@@ -92,5 +103,9 @@ if (!window.ABCJS.midi)
 		if (midiParams.postTextDownload)
 			html += midiParams.postTextDownload;
 		return html + "</div>";
+	};
+
+	window.ABCJS.midi.generateMidiControls = function(tune, midiParams, midi, index) {
+		return "<div>MIDICONTROLS</div>";
 	};
 })();
