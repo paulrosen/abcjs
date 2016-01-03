@@ -112,6 +112,7 @@ window.ABCJS.edit.EditArea.prototype.getElem = function() {
 //		canvas_id: or paper_id: HTML id to draw in. If not present, then the drawing happens just below the editor.
 //		generate_midi: if present, then midi is generated.
 //		midi_id: if present, the HTML id to place the midi control. Otherwise it is placed in the same div as the paper.
+//		midi_download_id: if present, the HTML id to place the midi download link. Otherwise it is placed in the same div as the paper.
 //		generate_warnings: if present, then parser warnings are displayed on the page.
 //		warnings_id: if present, the HTML id to place the warnings. Otherwise they are placed in the same div as the paper.
 //		onchange: if present, the callback function to call whenever there has been a change.
@@ -172,15 +173,25 @@ window.ABCJS.Editor = function(editarea, params) {
     this.div = document.createElement("DIV");
     this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem());
   }
-  
-  if (params.generate_midi || params.midi_id) {
-    if (params.midi_id) {
-      this.mididiv = document.getElementById(params.midi_id);
-    } else {
-      this.mididiv = this.div;
-    }
-  }
-  
+
+	// If the user wants midi, then store the elements that it will be written to. The element could either be passed in as an id,
+	// an element, or nothing. If nothing is passed in, then just put the midi on top of the generated music.
+	if (params.generate_midi) {
+		this.midiParams = params.midi_options || {};
+		if (this.midiParams.generateDownload) {
+			if (typeof params.midi_download_id === 'string')
+				this.downloadMidi = document.getElementById(params.midi_download_id);
+			else if (params.midi_download_id) // assume, if the var is not a string it is an element. If not, it will crash soon enough.
+				this.downloadMidi = params.midi_download_id;
+		}
+		if (this.midiParams.generateInline !== false) { // The default for this is true, so undefined is also true.
+			if (typeof params.midi_id === 'string')
+				this.inlineMidi = document.getElementById(params.midi_id);
+			else if (params.midi_id) // assume, if the var is not a string it is an element. If not, it will crash soon enough.
+				this.inlineMidi = params.midi_id;
+		}
+	}
+
   if (params.generate_warnings || params.warnings_id) {
     if (params.warnings_id) {
       this.warningsdiv = document.getElementById(params.warnings_id);
@@ -190,7 +201,6 @@ window.ABCJS.Editor = function(editarea, params) {
   }
   
   this.parserparams = params.parser_options || {};
-  this.midiparams = params.midi_options || {};
   this.onchangeCallback = params.onchange;
 
   this.engraverparams = params.render_options || {};
@@ -247,8 +257,10 @@ window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
 
 window.ABCJS.Editor.prototype.modelChanged = function() {
   if (this.tunes === undefined) {
-    if (this.mididiv !== undefined && this.mididiv !== this.div)
-		this.mididiv.innerHTML = "";
+    if (this.downloadMidi !== undefined)
+		this.downloadMidi.innerHTML = "";
+    if (this.inlineMidi !== undefined)
+		this.inlineMidi.innerHTML = "";
     this.div.innerHTML = "";
 	return;
   }
@@ -262,19 +274,17 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
   this.engraver_controller = new ABCJS.write.EngraverController(paper, this.engraverparams);
   this.engraver_controller.engraveABC(this.tunes);
 	this.tunes[0].engraver = this.engraver_controller;	// TODO-PER: We actually want an output object for each tune, not the entire controller. When refactoring, don't save data in the controller.
-  if (window.ABCJS.midi && this.mididiv) {
-//    if (this.mididiv !== this.div)
-//		this.mididiv.innerHTML = "";
-	  var midi = window.ABCJS.midi.create(this.tunes[0], this.midiParams); //TODO handle multiple tunes
-	  var title = this.tunes[0].metaText && this.tunes[0].metaText.title ? this.tunes[0].metaText.title : 'Untitled';
-	  var linkTitle = "Download MIDI for \"" + title +  "\"";
-	  if (title)
-		  title = title.toLowerCase().replace(/'/g, '').replace(/\W/g, '_').replace(/__/g, '_');
-	  this.mididiv.innerHTML = '<a download="' + title + '.midi" href="' + midi + '">' + linkTitle + '</a>';
-//	  var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv,this.midiparams);
-//    midiwriter.addListener(this.engraver_controller);
-//    midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
-  }
+	var midiHtml = "";
+	if (this.midiParams && !this.midiPause) {
+		for (var i = 0; i < this.tunes.length; i++) {
+			var midi = window.ABCJS.midi.create(this.tunes[i], this.midiParams);
+			midiHtml += window.ABCJS.midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midi, i);
+		}
+		if (this.downloadMidi)
+			this.downloadMidi.innerHTML = midiHtml;
+		else
+			this.div.innerHTML += midiHtml;
+	}
   if (this.warningsdiv) {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
   } 
@@ -409,13 +419,5 @@ window.ABCJS.Editor.prototype.pause = function(shouldPause) {
 };
 
 window.ABCJS.Editor.prototype.pauseMidi = function(shouldPause) {
-	if (shouldPause && this.mididiv) {
-		this.mididivSave = this.mididiv;
-		this.addClassName(this.mididiv, 'hidden');
-		this.mididiv = null;
-	} else if (!shouldPause && this.mididivSave) {
-		this.mididiv = this.mididivSave;
-		this.removeClassName(this.mididiv, 'hidden');
-		this.mididivSave = null;
-	}
+	this.midiPause = shouldPause;
 };

@@ -125,7 +125,7 @@ if (!window.ABCJS)
 					abcParser.parse(book.tunes[currentTune].abc, parserParams);
 					var tune = abcParser.getTune();
 					ret.push(tune);
-					callback(div, tune);
+					callback(div, tune, i);
 				}
 			}
 			currentTune++;
@@ -181,16 +181,15 @@ if (!window.ABCJS)
 	//			startingTune: an index, starting at zero, representing which tune to start rendering at.
 	//				(If this element is not present, then rendering starts at zero.)
 	ABCJS.renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
-		function callback(div, tune) {
+		function callback(div, tune, index) {
 			if (midiParams === undefined)
 				midiParams = {};
 			var midi = window.ABCJS.midi.create(tune, midiParams);
-			var title = tune.metaText.title;
-			if (title)
-				title = title.toLowerCase().replace(/\W/g, '_');
-			div.innerHTML = '<a download="' + title + '.midi" href="' + midi + '">download midi</a>';
+			div.innerHTML = window.ABCJS.midi.generateMidiDownloadLink(tune, midiParams, midi, index);
 		}
 
+		if (output.download)
+			output = output.download;
 		return renderEngine(callback, output, abc, parserParams, renderParams);
 	};
 })();
