@@ -31,7 +31,7 @@ if (!window.ABCJS.midi)
 		// Global options
 		options = options || {};
 		var qpm = options.qpm || 180;	// The tempo if there isn't a tempo specified.
-		var program = options.program || 2;	// The program if there isn't a program specified.
+		var program = options.program || 0;	// The program if there isn't a program specified.
 		var transpose = options.transpose || 0;
 		var channel = options.channel || 0;
 

@@ -190,7 +190,7 @@ if (!window.ABCJS.midi)
 				// If we ever have a chord in this voice, then we add the chord track.
 				// However, if there are chords on more than one voice, then just use the first voice.
 				if (chordTrack.length === 0) {
-					chordTrack.push({cmd: 'instrument', instrument: 2});
+					chordTrack.push({cmd: 'instrument', instrument: 0});
 					// need to figure out how far in time the chord started: if there are pickup notes before the chords start, we need pauses.
 					var distance = 0;
 					for (var ct = 0; ct < currentTrack.length; ct++) {
