@@ -80,32 +80,4 @@ if (!window.ABCJS.midi)
 	function convertPitch(pitch) {
 		return 60 + pitch;
 	}
-
-	function isFunction(functionToCheck) {
-		var getType = {};
-		return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
-	}
-
-	window.ABCJS.midi.generateMidiDownloadLink = function(tune, midiParams, midi, index) {
-		var html = '<div class="download-midi midi-' + index + '">';
-		if (midiParams.preTextDownload)
-			html += midiParams.preTextDownload;
-		var title = tune.metaText && tune.metaText.title ? tune.metaText.title : 'Untitled';
-		var label;
-		if (midiParams.downloadLabel && isFunction(midiParams.downloadLabel))
-			label = midiParams.downloadLabel(tune, index);
-		else if (midiParams.downloadLabel)
-			label = midiParams.downloadLabel.replace(/%T/, title);
-		else
-			label = "Download MIDI for \"" + title +  "\"";
-		title = title.toLowerCase().replace(/'/g, '').replace(/\W/g, '_').replace(/__/g, '_');
-		html += '<a download="' + title + '.midi" href="' + midi + '">' + label + '</a>';
-		if (midiParams.postTextDownload)
-			html += midiParams.postTextDownload;
-		return html + "</div>";
-	};
-
-	window.ABCJS.midi.generateMidiControls = function(tune, midiParams, midi, index) {
-		return "<div>MIDICONTROLS</div>";
-	};
 })();
