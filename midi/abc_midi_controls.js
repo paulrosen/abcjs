@@ -66,7 +66,7 @@ if (!window.ABCJS.midi)
 		if (options.loopToggle)
 			html += '<button class="abcjs-midi-loop abcjs-btn"></button>';
 		if (options.standard)
-			html += '<button class="abcjs-midi-reset abcjs-btn"></button><button class="abcjs-midi-start abcjs-btn"></button><button class="abcjs-midi-progress abcjs-btn"></button>';
+			html += '<button class="abcjs-midi-reset abcjs-btn"></button><button class="abcjs-midi-start abcjs-btn"></button><button class="abcjs-midi-progress-background"><span class="abcjs-midi-progress-indicator"></span></button>';
 		if (options.tempo) {
 			var startTempo = tune && tune.metaText && tune.metaText.tempo ? tune.metaText.tempo.bpm : 180;
 			html += '<span class="abcjs-tempo-wrapper"><input class="abcjs-midi-tempo" value="100" type="number" min="1" max="300" />% (<span class="abcjs-midi-current-tempo"></span>' + startTempo + ' BPM)</span>';
@@ -206,7 +206,7 @@ if (!window.ABCJS.midi)
 					onLoop(target);
 				else if (hasClass(target, 'abcjs-midi-reset'))
 					onReset(target);
-				else if (hasClass(target, 'abcjs-midi-progress'))
+				else if (hasClass(target, 'abcjs-midi-progress-background'))
 					onProgress(target);
 				target = target.parentNode;
 			}
