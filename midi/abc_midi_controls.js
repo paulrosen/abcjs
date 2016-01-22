@@ -69,7 +69,7 @@ if (!window.ABCJS.midi)
 			html += '<button class="abcjs-midi-reset abcjs-btn"></button><button class="abcjs-midi-start abcjs-btn"></button><button class="abcjs-midi-progress-background"><span class="abcjs-midi-progress-indicator"></span></button>';
 		if (options.tempo) {
 			var startTempo = tune && tune.metaText && tune.metaText.tempo ? tune.metaText.tempo.bpm : 180;
-			html += '<span class="abcjs-tempo-wrapper"><input class="abcjs-midi-tempo" value="100" type="number" min="1" max="300" />% (<span class="abcjs-midi-current-tempo"></span>' + startTempo + ' BPM)</span>';
+			html += '<span class="abcjs-tempo-wrapper"><input class="abcjs-midi-tempo" value="100" type="number" min="1" max="300" data-start-tempo="' + startTempo + '" />% (<span class="abcjs-midi-current-tempo">' + startTempo + '</span> BPM)</span>';
 		}
 
 		if (midiParams.postTextInline)
@@ -189,8 +189,14 @@ if (!window.ABCJS.midi)
 
 	}
 
-	function onTempo() {
+	function onTempo(el) {
+		var percent = parseInt(el.value, 10);
+		var startTempo = parseInt(el.getAttribute("data-start-tempo", 10));
 
+		while (el && !hasClass(el, 'abcjs-midi-current-tempo')) {
+			el = el.nextSibling;
+		}
+		el.innerHTML = Math.floor(percent*startTempo/100);
 	}
 
 	function addDelegates() {
@@ -199,15 +205,15 @@ if (!window.ABCJS.midi)
 			var target = event.target || event.srcElement;
 			while (target !== document.body) {
 				if (hasClass(target, 'abcjs-midi-start'))
-					onStart(target);
+					onStart(target, event);
 				else if (hasClass(target, 'abcjs-midi-selection'))
-					onSelection(target);
+					onSelection(target, event);
 				else if (hasClass(target, 'abcjs-midi-loop'))
-					onLoop(target);
+					onLoop(target, event);
 				else if (hasClass(target, 'abcjs-midi-reset'))
-					onReset(target);
+					onReset(target, event);
 				else if (hasClass(target, 'abcjs-midi-progress-background'))
-					onProgress(target);
+					onProgress(target, event);
 				target = target.parentNode;
 			}
 		});
@@ -216,7 +222,7 @@ if (!window.ABCJS.midi)
 			var target = event.target || event.srcElement;
 			while (target !== document.body) {
 				if (hasClass(target, 'abcjs-midi-tempo'))
-					onTempo(target);
+					onTempo(target, event);
 				target = target.parentNode;
 			}
 		});
