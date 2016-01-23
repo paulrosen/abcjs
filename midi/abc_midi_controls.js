@@ -92,6 +92,13 @@ if (!window.ABCJS.midi)
 		element.className = element.className.replace(cls, "").trim().replace("  ", " ");
 	}
 
+	function toggleClass(element, cls) {
+		if (hasClass(element, cls))
+			removeClass(element, cls);
+		else
+			addClass(element, cls);
+	}
+
 	function closest(element, cls) {
 		// This finds the closest parent that contains the class passed in.
 		while (element !== document.body) {
@@ -149,6 +156,42 @@ if (!window.ABCJS.midi)
 		}
 	}
 
+	var lastNow;
+	function midiJsListener(currentNote) {
+		// currentNote is a hash containing: { channel, end, message, note, now, velocity }
+		var midiControl;
+		if (currentNote.end > 0 && lastNow !== currentNote.now) {
+			lastNow = currentNote.now;
+			var currentPosition = currentNote.now / currentNote.end; // This returns a number between 0 and 1.
+			midiControl = find(document, "abcjs-midi-current");
+			if (midiControl) {
+				var progressBackground = find(midiControl, "abcjs-midi-progress-background");
+				var totalWidth = progressBackground.offsetWidth;
+				var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
+				var scaled = totalWidth * currentPosition; // The number of pixels
+				progressIndicator.style.left = scaled + "px";
+			}
+		}
+		if (currentNote.now === currentNote.end) {
+			// The playback is stopping. We need to either indicate that
+			// it has stopped, or start over at the beginning.
+			midiControl = find(document, "abcjs-midi-current");
+			var loopControl = find(midiControl, "abcjs-midi-loop");
+
+			var finishedResetting = function() {
+				if (loopControl && hasClass(loopControl, "abcjs-pushed")) {
+						onStart(find(midiControl, "abcjs-midi-start"));
+				}
+			};
+
+			// midi.js is not quite finished: it still will process the last event, so we wait a minimum amount of time
+			// before doing another action.
+			setTimeout(function() {
+				doReset(midiControl, finishedResetting);
+			}, 1);
+		}
+	}
+
 	function onStart(target) {
 		// If this midi is already playing,
 		if (hasClass(target, 'abcjs-pushed')) {
@@ -176,24 +219,34 @@ if (!window.ABCJS.midi)
 			// Change the element so that the pause icon is shown.
 			addClass(target, "abcjs-pushed");
 		}
+		// This replaces the old callback. It really only needs to be called once, but it doesn't hurt to set it every time.
+		MIDI.Player.addListener(midiJsListener);
 	}
 
-	function onSelection() {
-
+	function onSelection(target) {
+		toggleClass(target, 'abcjs-pushed');
 	}
 
-	function onLoop() {
-
+	function onLoop(target) {
+		toggleClass(target, 'abcjs-pushed');
 	}
 
-	function onReset(target) {
+	function doReset(target, callback) {
+		var parent = closest(target, "abcjs-inline-midi");
 		function onsuccess() {
 			addClass(parent, 'abcjs-midi-current');
+			var progressIndicator = find(parent, "abcjs-midi-progress-indicator");
+			progressIndicator.style.left = "0px";
+			if (callback)
+				callback();
 		}
 		// If the tune is playing, stop it.
 		deselectMidiControl();
-		var parent = closest(target, "abcjs-inline-midi");
 		loadMidi(parent, onsuccess);
+	}
+
+	function onReset(target) {
+		doReset(target);
 	}
 
 	function onProgress() {
