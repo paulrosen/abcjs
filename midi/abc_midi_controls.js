@@ -123,11 +123,7 @@ if (!window.ABCJS.midi)
 		}
 	}
 
-	function loadMidi(target) {
-		function onsuccess() {
-			MIDI.Player.start();
-			addClass(target, 'abcjs-midi-current');
-		}
+	function loadMidi(target, onsuccess) {
 		function onprogress(/*state, progress*/) {
 		}
 		function onerror(e) {
@@ -143,13 +139,23 @@ if (!window.ABCJS.midi)
 		MIDI.Player.loadMidiFile(onsuccess, onprogress, onerror);
 	}
 
+	function deselectMidiControl() {
+		var otherMidi = find(document, "abcjs-midi-current");
+		if (otherMidi) {
+			MIDI.Player.stop();
+			removeClass(otherMidi, "abcjs-midi-current");
+			var otherMidiStart = find(otherMidi, "abcjs-midi-start");
+			removeClass(otherMidiStart, "abcjs-pushed");
+		}
+	}
+
 	function onStart(target) {
 		// If this midi is already playing,
-		if (hasClass(target, 'abcjs-pause')) {
+		if (hasClass(target, 'abcjs-pushed')) {
 			// Stop it.
 			MIDI.Player.pause();
 			// Change the element so that the start icon is shown.
-			removeClass(target, "abcjs-pause");
+			removeClass(target, "abcjs-pushed");
 		} else { // Else,
 			// If some other midi is running, turn it off.
 			var parent = closest(target, "abcjs-inline-midi");
@@ -158,18 +164,17 @@ if (!window.ABCJS.midi)
 				// Start this tune playing from wherever it had stopped.
 				MIDI.Player.start();
 			else {
-				var otherMidi = find(document, "abcjs-midi-current");
-				if (otherMidi) {
-					MIDI.Player.stop();
-					removeClass(otherMidi, "abcjs-midi-current");
-					var otherMidiStart = find(otherMidi, "abcjs-midi-start");
-					removeClass(otherMidiStart, "abcjs-pause");
-				}
+				deselectMidiControl();
+
 				// else, load this midi from scratch.
-				loadMidi(parent);
+				var onsuccess = function() {
+					MIDI.Player.start();
+					addClass(parent, 'abcjs-midi-current');
+				};
+				loadMidi(parent, onsuccess);
 			}
 			// Change the element so that the pause icon is shown.
-			addClass(target, "abcjs-pause");
+			addClass(target, "abcjs-pushed");
 		}
 	}
 
@@ -181,8 +186,14 @@ if (!window.ABCJS.midi)
 
 	}
 
-	function onReset() {
-
+	function onReset(target) {
+		function onsuccess() {
+			addClass(parent, 'abcjs-midi-current');
+		}
+		// If the tune is playing, stop it.
+		deselectMidiControl();
+		var parent = closest(target, "abcjs-inline-midi");
+		loadMidi(parent, onsuccess);
 	}
 
 	function onProgress() {
@@ -204,16 +215,22 @@ if (!window.ABCJS.midi)
 			event = event || window.event;
 			var target = event.target || event.srcElement;
 			while (target !== document.body) {
-				if (hasClass(target, 'abcjs-midi-start'))
+				if (hasClass(target, 'abcjs-midi-start')) {
 					onStart(target, event);
-				else if (hasClass(target, 'abcjs-midi-selection'))
+					return;
+				} else if (hasClass(target, 'abcjs-midi-selection')) {
 					onSelection(target, event);
-				else if (hasClass(target, 'abcjs-midi-loop'))
+					return;
+				} else if (hasClass(target, 'abcjs-midi-loop')) {
 					onLoop(target, event);
-				else if (hasClass(target, 'abcjs-midi-reset'))
+					return;
+				} else if (hasClass(target, 'abcjs-midi-reset')) {
 					onReset(target, event);
-				else if (hasClass(target, 'abcjs-midi-progress-background'))
+					return;
+				} else if (hasClass(target, 'abcjs-midi-progress-background')) {
 					onProgress(target, event);
+					return;
+				}
 				target = target.parentNode;
 			}
 		});
