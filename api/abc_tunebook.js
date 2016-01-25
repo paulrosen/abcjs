@@ -189,10 +189,14 @@ if (!window.ABCJS)
 		function callback(div, tune, index) {
 			var html = "";
 			var midi = window.ABCJS.midi.create(tune, midiParams);
-			if (midiParams.generateInline)
-				html += window.ABCJS.midi.generateMidiControls(tune, midiParams, midi, index);
-			if (midiParams.generateDownload)
-				html += window.ABCJS.midi.generateMidiDownloadLink(tune, midiParams, midi, index);
+			if (midiParams.generateInline) {
+				var inlineMidi = midi.inline ? midi.inline : midi;
+				html += window.ABCJS.midi.generateMidiControls(tune, midiParams, inlineMidi, index);
+			}
+			if (midiParams.generateDownload) {
+				var downloadMidi = midi.download ? midi.download : midi;
+				html += window.ABCJS.midi.generateMidiDownloadLink(tune, midiParams, downloadMidi, index);
+			}
 			div.innerHTML = html;
 		}
 
