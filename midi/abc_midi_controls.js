@@ -56,20 +56,27 @@ if (!window.ABCJS.midi)
 		var options = midiParams.inlineControls || {};
 		if (options.standard === undefined) options.standard = true;
 
+		if (options.tooltipSelection === undefined) options.tooltipSelection = "Click to toggle play selection/play all.";
+		if (options.tooltipLoop === undefined) options.tooltipLoop = "Click to toggle play once/repeat.";
+		if (options.tooltipReset === undefined) options.tooltipReset = "Click to go to beginning.";
+		if (options.tooltipPlay === undefined) options.tooltipPlay = "Click to play/pause.";
+		if (options.tooltipProgress === undefined) options.tooltipProgress = "Click to change the playback position.";
+		if (options.tooltipTempo === undefined) options.tooltipTempo = "Change the playback speed.";
+
 		var html = '<div class="abcjs-inline-midi abcjs-midi-' + index + '">';
 		html += '<span class="abcjs-data" style="display:none;">' + escape(midi) + '</span>';
 		if (midiParams.preTextInline)
 			html += midiParams.preTextInline;
 
 		if (options.selectionToggle)
-			html += '<button class="abcjs-midi-selection abcjs-btn"></button>';
+			html += '<button class="abcjs-midi-selection abcjs-btn" title="' + options.tooltipSelection + '"></button>';
 		if (options.loopToggle)
-			html += '<button class="abcjs-midi-loop abcjs-btn"></button>';
+			html += '<button class="abcjs-midi-loop abcjs-btn" title="' + options.tooltipLoop + '"></button>';
 		if (options.standard)
-			html += '<button class="abcjs-midi-reset abcjs-btn"></button><button class="abcjs-midi-start abcjs-btn"></button><button class="abcjs-midi-progress-background"><span class="abcjs-midi-progress-indicator"></span></button>';
+			html += '<button class="abcjs-midi-reset abcjs-btn" title="' + options.tooltipReset + '"></button><button class="abcjs-midi-start abcjs-btn" title="' + options.tooltipPlay + '"></button><button class="abcjs-midi-progress-background" title="' + options.tooltipProgress + '"><span class="abcjs-midi-progress-indicator"></span></button>';
 		if (options.tempo) {
 			var startTempo = tune && tune.metaText && tune.metaText.tempo ? tune.metaText.tempo.bpm : 180;
-			html += '<span class="abcjs-tempo-wrapper"><input class="abcjs-midi-tempo" value="100" type="number" min="1" max="300" data-start-tempo="' + startTempo + '" />% (<span class="abcjs-midi-current-tempo">' + startTempo + '</span> BPM)</span>';
+			html += '<span class="abcjs-tempo-wrapper"><input class="abcjs-midi-tempo" value="100" type="number" min="1" max="300" data-start-tempo="' + startTempo + '" title="' + options.tooltipTempo + '" />% (<span class="abcjs-midi-current-tempo">' + startTempo + '</span> BPM)</span>';
 		}
 
 		if (midiParams.postTextInline)
@@ -142,6 +149,18 @@ if (!window.ABCJS.midi)
 		MIDI.Player.currentData = unescape(data);
 		MIDI.Player.currentTime = 0;
 		MIDI.Player.restart = 0;
+
+		// See if the tempo changer is present, and use that tempo if so.
+		var tempoEl = find(target, "abcjs-midi-tempo");
+		if (tempoEl) {
+			// Time warp is a multiplier: the larger the number, the longer the time. Therefore,
+			// it is opposite of the percentage. That is, playing at 50% is actually multiplying the time by 2.
+			if (percent > 0)
+				MIDI.Player.timeWarp = 100 / percent;
+			else
+				MIDI.Player.timeWarp = 1;
+		} else
+			MIDI.Player.timeWarp = 1;
 
 		MIDI.Player.loadMidiFile(onsuccess, onprogress, onerror);
 	}
@@ -250,7 +269,7 @@ if (!window.ABCJS.midi)
 	}
 
 	function onProgress() {
-
+		// TODO-PER: You can modify currentTime when playback is paused.
 	}
 
 	function onTempo(el) {
@@ -261,6 +280,17 @@ if (!window.ABCJS.midi)
 			el = el.nextSibling;
 		}
 		el.innerHTML = Math.floor(percent*startTempo/100);
+		// Time warp is a multiplier: the larger the number, the longer the time. Therefore,
+		// it is opposite of the percentage. That is, playing at 50% is actually multiplying the time by 2.
+		if (percent > 0)
+			MIDI.Player.timeWarp = 100 / percent;
+		else
+			MIDI.Player.timeWarp = 1;
+		//var saveTime = MIDI.Player.currentTime;
+		//var saveRestart = MIDI.Player.restart;
+		//loadMidi(closest(el, "abcjs-inline-midi", onsuccess));
+		//MIDI.Player.currentTime = saveTime;
+		//MIDI.Player.restart = saveRestart;
 	}
 
 	function addDelegates() {
