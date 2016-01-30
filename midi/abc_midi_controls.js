@@ -68,7 +68,10 @@ if (!window.ABCJS.midi)
 		if (options.tooltipProgress === undefined) options.tooltipProgress = "Click to change the playback position.";
 		if (options.tooltipTempo === undefined) options.tooltipTempo = "Change the playback speed.";
 
-		var html = '<div class="abcjs-inline-midi abcjs-midi-' + index + '">';
+		var style = "";
+		if (options.hide)
+			style = ' style="display:none;"';
+		var html = '<div class="abcjs-inline-midi abcjs-midi-' + index + '"' + style + '>';
 		html += '<span class="abcjs-data" style="display:none;">' + escape(midi) + '</span>';
 		if (midiParams.preTextInline)
 			html += '<span class="abcjs-midi-pre">'+ preprocessLabel(midiParams.preTextInline, title) + '</span>';
@@ -257,6 +260,10 @@ if (!window.ABCJS.midi)
 		// This replaces the old callback. It really only needs to be called once, but it doesn't hurt to set it every time.
 		MIDI.Player.addListener(midiJsListener);
 	}
+
+	window.ABCJS.midi.startPlaying = function(target) {
+		onStart(target);
+	};
 
 	function onSelection(target) {
 		toggleClass(target, 'abcjs-pushed');
