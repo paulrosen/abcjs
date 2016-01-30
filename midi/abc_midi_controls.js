@@ -73,7 +73,7 @@ if (!window.ABCJS.midi)
 		if (options.loopToggle)
 			html += '<button class="abcjs-midi-loop abcjs-btn" title="' + options.tooltipLoop + '"></button>';
 		if (options.standard)
-			html += '<button class="abcjs-midi-reset abcjs-btn" title="' + options.tooltipReset + '"></button><button class="abcjs-midi-start abcjs-btn" title="' + options.tooltipPlay + '"></button><button class="abcjs-midi-progress-background" title="' + options.tooltipProgress + '"><span class="abcjs-midi-progress-indicator"></span></button>';
+			html += '<button class="abcjs-midi-reset abcjs-btn" title="' + options.tooltipReset + '"></button><button class="abcjs-midi-start abcjs-btn" title="' + options.tooltipPlay + '"></button><button class="abcjs-midi-progress-background" title="' + options.tooltipProgress + '"><span class="abcjs-midi-progress-indicator"></span></button><span class="abcjs-midi-clock"> 0:00</span>';
 		if (options.tempo) {
 			var startTempo = tune && tune.metaText && tune.metaText.tempo ? tune.metaText.tempo.bpm : 180;
 			html += '<span class="abcjs-tempo-wrapper"><input class="abcjs-midi-tempo" value="100" type="number" min="1" max="300" data-start-tempo="' + startTempo + '" title="' + options.tooltipTempo + '" />% (<span class="abcjs-midi-current-tempo">' + startTempo + '</span> BPM)</span>';
@@ -149,18 +149,20 @@ if (!window.ABCJS.midi)
 		MIDI.Player.currentData = unescape(data);
 		MIDI.Player.currentTime = 0;
 		MIDI.Player.restart = 0;
+		MIDI.Player.BPM = undefined; // This fixes the problem with the tempo. We don't want to override.
 
 		// See if the tempo changer is present, and use that tempo if so.
+		var timeWarp = 1;
 		var tempoEl = find(target, "abcjs-midi-tempo");
 		if (tempoEl) {
 			// Time warp is a multiplier: the larger the number, the longer the time. Therefore,
 			// it is opposite of the percentage. That is, playing at 50% is actually multiplying the time by 2.
+			var percent = parseInt(tempoEl.value, 10);
 			if (percent > 0)
-				MIDI.Player.timeWarp = 100 / percent;
-			else
-				MIDI.Player.timeWarp = 1;
-		} else
-			MIDI.Player.timeWarp = 1;
+				timeWarp = 100 / percent;
+		}
+		MIDI.Player.timeWarp = timeWarp;
+
 
 		MIDI.Player.loadMidiFile(onsuccess, onprogress, onerror);
 	}
@@ -189,6 +191,15 @@ if (!window.ABCJS.midi)
 				var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
 				var scaled = totalWidth * currentPosition; // The number of pixels
 				progressIndicator.style.left = scaled + "px";
+				var clock = find(midiControl, "abcjs-midi-clock");
+				if (clock) {
+					var seconds = Math.floor(currentNote.now / 1000);
+					var minutes = Math.floor(seconds / 60);
+					seconds = seconds % 60;
+					if (seconds < 10) seconds = "0" + seconds;
+					if (minutes < 10) minutes = " " + minutes;
+					clock.innerHTML = minutes + ":" + seconds;
+				}
 			}
 		}
 		if (currentNote.now === currentNote.end) {
@@ -256,6 +267,8 @@ if (!window.ABCJS.midi)
 			addClass(parent, 'abcjs-midi-current');
 			var progressIndicator = find(parent, "abcjs-midi-progress-indicator");
 			progressIndicator.style.left = "0px";
+			var clock = find(parent, "abcjs-midi-clock");
+			clock.innerHTML = " 0:00";
 			if (callback)
 				callback();
 		}
@@ -268,8 +281,36 @@ if (!window.ABCJS.midi)
 		doReset(target);
 	}
 
-	function onProgress() {
-		// TODO-PER: You can modify currentTime when playback is paused.
+	function relMouseX(target, event){
+		var totalOffsetX = 0;
+		var canvasX = 0;
+
+		do{
+			totalOffsetX += target.offsetLeft - target.scrollLeft;
+		}
+		while(target = target.offsetParent);
+
+		canvasX = event.pageX - totalOffsetX;
+
+		return canvasX;
+	}
+
+	function onProgress(target, event) {
+		var parent = closest(target, "abcjs-inline-midi");
+		if (hasClass(parent, "abcjs-midi-current")) {
+			var play = find(parent, "abcjs-midi-start");
+			play = hasClass(play, "abcjs-pushed");
+			var width = target.offsetWidth;
+			var offset = relMouseX(target, event);
+			var ratio = offset / width;
+			var endTime = MIDI.Player.endTime;
+			if (play)
+				MIDI.Player.pause();
+			MIDI.Player.currentTime = endTime * ratio;
+			// TODO-PER: if the control is currently paused, then the thumb won't jump to the right place: move it manually.
+			if (play)
+				MIDI.Player.start();
+		}
 	}
 
 	function onTempo(el) {
