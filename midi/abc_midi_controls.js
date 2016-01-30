@@ -47,12 +47,17 @@ if (!window.ABCJS.midi)
 		return html + "</div>";
 	};
 
+	function preprocessLabel(label, title) {
+		return label.replace(/%T/g, title);
+	}
+
 	window.ABCJS.midi.generateMidiControls = function(tune, midiParams, midi, index) {
 		if (window.ABCJS.midiInlineInitialized === 'failed')
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">ERROR</div>';
 		if (window.ABCJS.midiInlineInitialized === 'not loaded')
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">MIDI NOT PRESENT</div>';
 
+		var title = tune.metaText && tune.metaText.title ? tune.metaText.title : 'Untitled';
 		var options = midiParams.inlineControls || {};
 		if (options.standard === undefined) options.standard = true;
 
@@ -66,7 +71,7 @@ if (!window.ABCJS.midi)
 		var html = '<div class="abcjs-inline-midi abcjs-midi-' + index + '">';
 		html += '<span class="abcjs-data" style="display:none;">' + escape(midi) + '</span>';
 		if (midiParams.preTextInline)
-			html += midiParams.preTextInline;
+			html += '<span class="abcjs-midi-pre">'+ preprocessLabel(midiParams.preTextInline, title) + '</span>';
 
 		if (options.selectionToggle)
 			html += '<button class="abcjs-midi-selection abcjs-btn" title="' + options.tooltipSelection + '"></button>';
@@ -80,7 +85,7 @@ if (!window.ABCJS.midi)
 		}
 
 		if (midiParams.postTextInline)
-			html += midiParams.postTextInline;
+			html += '<span class="abcjs-midi-post">'+ preprocessLabel(midiParams.postTextInline, title) + '</span>';
 		return html + "</div>";
 	};
 
