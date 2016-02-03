@@ -292,10 +292,29 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
 			this.downloadMidi.innerHTML = downloadMidiHtml;
 		else
 			this.div.innerHTML += downloadMidiHtml;
-		if (this.inlineMidi)
+		var find = function(element, cls) {
+			var els = element.getElementsByClassName(cls);
+			if (els.length === 0)
+				return null;
+			return els[0];
+		};
+		var inlineDiv;
+		if (this.inlineMidi) {
 			this.inlineMidi.innerHTML = inlineMidiHtml;
-		else
+			inlineDiv = this.inlineMidi;
+		} else {
 			this.div.innerHTML += inlineMidiHtml;
+			inlineDiv = this.div;
+		}
+		if (this.midiParams.generateInline && (this.midiParams.animate || this.midiParams.listener)) {
+			for (i = 0; i < this.tunes.length; i++) {
+				var parent = find(inlineDiv, "abcjs-midi-" + i);
+				parent.tune = this.tunes[i];
+				parent.listener = this.midiParams.listener;
+				parent.animate = this.midiParams.animate;
+			}
+		}
+
 	}
   if (this.warningsdiv) {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";

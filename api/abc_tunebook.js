@@ -198,6 +198,23 @@ if (!window.ABCJS)
 				html += window.ABCJS.midi.generateMidiDownloadLink(tune, midiParams, downloadMidi, index);
 			}
 			div.innerHTML = html;
+			var find = function(element, cls) {
+				var els = element.getElementsByClassName(cls);
+				if (els.length === 0)
+					return null;
+				return els[0];
+			};
+			if (midiParams.generateInline && (midiParams.animate || midiParams.listener)) {
+				var parent = find(div, "abcjs-inline-midi");
+				parent.tune = tune;
+				parent.listener = midiParams.listener;
+				parent.animate = midiParams.animate;
+			}
+			if (midiParams.generateInline && midiParams.inlineControls && midiParams.inlineControls.startPlaying) {
+				var startButton = find(div, "abcjs-midi-start");
+				window.ABCJS.midi.startPlaying(startButton);
+			}
+
 		}
 
 		return renderEngine(callback, output, abc, parserParams, renderParams);

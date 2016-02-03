@@ -208,6 +208,8 @@ if (!window.ABCJS.midi)
 					if (minutes < 10) minutes = " " + minutes;
 					clock.innerHTML = minutes + ":" + seconds;
 				}
+				if (midiControl.listener)
+					midiControl.listener(midiControl, currentNote);
 			}
 		}
 		if (currentNote.now === currentNote.end) {
