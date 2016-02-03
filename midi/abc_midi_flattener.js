@@ -404,8 +404,11 @@ if (!window.ABCJS.midi)
 		var arr = remaining.split('/');
 		chick = chordNotes(bass, arr[0]);
 		if (arr.length === 2) {
-			bass = basses[arr[1]] + transpose;
-			bass2 = bass;
+			var explicitBass = basses[arr[1]];
+			if (explicitBass) {
+				bass = basses[arr[1]] + transpose;
+				bass2 = bass;
+			}
 		}
 		return { boom: bass, boom2: bass2, chick: chick };
 	}
