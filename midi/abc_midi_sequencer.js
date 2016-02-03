@@ -34,6 +34,11 @@ if (!window.ABCJS.midi)
 		var program = options.program || 0;	// The program if there isn't a program specified.
 		var transpose = options.transpose || 0;
 		var channel = options.channel || 0;
+		// All of the above overrides need to be integers
+		qpm = parseInt(qpm, 10);
+		program = parseInt(program, 10);
+		transpose = parseInt(transpose, 10);
+		channel = parseInt(channel, 10);
 
 		var bagpipes = abctune.formatting.bagpipes; // If it is bagpipes, then the gracenotes are played on top of the main note.
 		if (bagpipes)
@@ -142,7 +147,7 @@ if (!window.ABCJS.midi)
 									// figure out repeats and endings --
 									// The important part is where there is a start repeat, and end repeat, or a first ending.
 									var endRepeat = (elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat");
-									var startEnding = (elem.startEnding) ? true : false;
+									var startEnding = (elem.startEnding === '1');
 									var startRepeat = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat" || elem.type === "bar_thick_thin" || elem.type === "bar_thin_thick" || elem.type === "bar_thin_thin" || elem.type === "bar_right_repeat");
 									if (endRepeat) {
 										var s = startRepeatPlaceholder[voiceNumber];
@@ -150,6 +155,9 @@ if (!window.ABCJS.midi)
 										var e = skipEndingPlaceholder[voiceNumber];
 										if (!e) e = voices[voiceNumber].length; // If there wasn't a first ending marker, then we copy everything.
 										voices[voiceNumber] = voices[voiceNumber].concat(voices[voiceNumber].slice(s, e));
+										// reset these in case there is a second repeat later on.
+										skipEndingPlaceholder[voiceNumber] = undefined;
+										startRepeatPlaceholder[voiceNumber] = undefined;
 									}
 									if (startEnding)
 										skipEndingPlaceholder[voiceNumber] = voices[voiceNumber].length;
