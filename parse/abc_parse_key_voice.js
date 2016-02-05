@@ -403,6 +403,11 @@ window.ABCJS.parse.parseKeyVoice = {};
 								mode = retMode.token;
 							}
 						}
+						// Be sure that the key specified is in the list: not all keys are physically possible, like Cbmin.
+						if (window.ABCJS.parse.parseKeyVoice.standardKey(key) === undefined) {
+							warn("Unsupported key signature: " + key, str, 0);
+							return ret;
+						}
 					}
 					// We need to do a deep copy because we are going to modify it
 					var oldKey = window.ABCJS.parse.parseKeyVoice.deepCopyKey(multilineVars.key);
