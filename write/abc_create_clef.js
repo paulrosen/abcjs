@@ -25,10 +25,10 @@ if (!window.ABCJS.write)
 (function() {
 	"use strict";
 
-	ABCJS.write.createClef = function(elem) {
+	ABCJS.write.createClef = function(elem, tuneNumber) {
 		var clef;
 		var octave = 0;
-		var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra');
+		var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra', tuneNumber);
 		switch (elem.type) {
 			case "treble": clef = "clefs.G"; break;
 			case "tenor": clef="clefs.C"; break;

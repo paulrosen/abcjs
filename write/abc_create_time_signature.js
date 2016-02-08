@@ -25,8 +25,8 @@ if (!window.ABCJS.write)
 (function() {
 	"use strict";
 
-	ABCJS.write.createTimeSignature = function(elem) {
-		var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra');
+	ABCJS.write.createTimeSignature = function(elem, tuneNumber) {
+		var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra', tuneNumber);
 		if (elem.type === "specified") {
 			//TODO make the alignment for time signatures centered
 			for (var i = 0; i < elem.value.length; i++) {

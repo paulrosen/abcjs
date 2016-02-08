@@ -102,7 +102,7 @@ ABCJS.write.EngraverController.prototype.engraveABC = function(abctunes) {
 	this.reset();
 
   for (var i = 0; i < abctunes.length; i++) {
-    this.engraveTune(abctunes[i]);
+    this.engraveTune(abctunes[i], i);
   }
 	if (this.renderer.doRegression)
 		return this.renderer.regressionLines.join("\n");
@@ -121,7 +121,7 @@ ABCJS.write.EngraverController.prototype.adjustNonScaledItems = function (scale)
  * Run the engraving process on a single tune
  * @param {ABCJS.Tune} abctune
  */
-ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
+ABCJS.write.EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.lineNumber = null;
 	abctune.formatting.tripletfont = {face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none"}; // TODO-PER: This font isn't defined in the standard, so it's hardcoded here for now.
 
@@ -132,7 +132,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune) {
 	if (scale === undefined) scale = abctune.media === 'print' ? 0.75 : 1;
 	this.renderer.setPrintMode(abctune.media === 'print');
 	this.renderer.setPadding(abctune);
-	this.engraver = new ABCJS.write.AbstractEngraver(abctune.formatting.bagpipes,this.renderer);
+	this.engraver = new ABCJS.write.AbstractEngraver(abctune.formatting.bagpipes,this.renderer, tuneNumber);
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	if (abctune.formatting.staffwidth) {
@@ -266,7 +266,7 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (staffGroup
  * Called by the Abstract Engraving Structure or any other (e.g. midi playback) to say it was selected (notehead clicked on)
  * @protected
  */
-ABCJS.write.EngraverController.prototype.notifySelect = function (abselem) {
+ABCJS.write.EngraverController.prototype.notifySelect = function (abselem, tuneNumber) {
   this.clearSelection();
   if (abselem.highlight) {
     this.selected = [abselem];
@@ -275,7 +275,7 @@ ABCJS.write.EngraverController.prototype.notifySelect = function (abselem) {
   var abcelem = abselem.abcelem || {};
   for (var i=0; i<this.listeners.length;i++) {
 	  if (this.listeners[i].highlight)
-		  this.listeners[i].highlight(abcelem);
+		  this.listeners[i].highlight(abcelem, tuneNumber);
   }
 };
 

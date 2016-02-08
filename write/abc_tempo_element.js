@@ -26,8 +26,9 @@ if (!window.ABCJS.write)
 	"use strict";
 	var totalHeightInPitches = 5;
 
-	ABCJS.write.TempoElement = function(tempo) {
+	ABCJS.write.TempoElement = function(tempo, tuneNumber) {
 		this.tempo = tempo;
+		this.tuneNumber = tuneNumber;
 		this.tempoHeightAbove = totalHeightInPitches;
 		this.pitch = undefined; // This will be set later
 	};
@@ -57,7 +58,7 @@ if (!window.ABCJS.write)
 			var temposcale = 0.75;
 			var tempopitch = this.pitch - totalHeightInPitches + 1; // The pitch we receive is the top of the allotted area: change that to practically the bottom.
 			var duration = this.tempo.duration[0]; // TODO when multiple durations
-			var abselem = new ABCJS.write.AbsoluteElement(this.tempo, duration, 1, 'tempo');
+			var abselem = new ABCJS.write.AbsoluteElement(this.tempo, duration, 1, 'tempo', this.tuneNumber);
 			var durlog = Math.floor(Math.log(duration) / Math.log(2));
 			var dot = 0;
 			for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);

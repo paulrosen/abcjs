@@ -25,8 +25,9 @@ if (!window.ABCJS.write)
 // duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
 // minspacing - spacing which must be taken on top of the width defined by the duration
 // type is a meta-type for the element. It is not necessary for drawing, but it is useful to make semantic sense of the element. For instance, it can be used in the element's class name.
-ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing, type) {
+ABCJS.write.AbsoluteElement = function(abcelem, duration, minspacing, type, tuneNumber) {
 	//console.log("Absolute:",abcelem, type);
+	this.tuneNumber = tuneNumber;
 	this.abcelem = abcelem;
 	this.duration = duration;
 	this.minspacing = minspacing || 0;
@@ -185,7 +186,7 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	var controller = renderer.controller;
 //	this.elemset.mouseup(function () {
 	target.mouseup(function () {
-		controller.notifySelect(self);
+		controller.notifySelect(self, self.tuneNumber);
 	});
 	this.abcelem.abselem = this;
 

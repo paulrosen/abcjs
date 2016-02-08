@@ -288,33 +288,36 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
 			else
 				downloadMidiHtml += window.ABCJS.midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midi, i);
 		}
-		if (this.downloadMidi)
-			this.downloadMidi.innerHTML = downloadMidiHtml;
-		else
-			this.div.innerHTML += downloadMidiHtml;
+		if (this.midiParams.generateDownload) {
+			if (this.downloadMidi)
+				this.downloadMidi.innerHTML = downloadMidiHtml;
+			else
+				this.div.innerHTML += downloadMidiHtml;
+		}
 		var find = function(element, cls) {
 			var els = element.getElementsByClassName(cls);
 			if (els.length === 0)
 				return null;
 			return els[0];
 		};
-		var inlineDiv;
-		if (this.inlineMidi) {
-			this.inlineMidi.innerHTML = inlineMidiHtml;
-			inlineDiv = this.inlineMidi;
-		} else {
-			this.div.innerHTML += inlineMidiHtml;
-			inlineDiv = this.div;
-		}
-		if (this.midiParams.generateInline && (this.midiParams.animate || this.midiParams.listener)) {
-			for (i = 0; i < this.tunes.length; i++) {
-				var parent = find(inlineDiv, "abcjs-midi-" + i);
-				parent.tune = this.tunes[i];
-				parent.listener = this.midiParams.listener;
-				parent.animate = this.midiParams.animate;
+		if (this.midiParams.generateInline) {
+			var inlineDiv;
+			if (this.inlineMidi) {
+				this.inlineMidi.innerHTML = inlineMidiHtml;
+				inlineDiv = this.inlineMidi;
+			} else {
+				this.div.innerHTML += inlineMidiHtml;
+				inlineDiv = this.div;
+			}
+			if (this.midiParams.animate || this.midiParams.listener) {
+				for (i = 0; i < this.tunes.length; i++) {
+					var parent = find(inlineDiv, "abcjs-midi-" + i);
+					parent.abcjsTune = this.tunes[i];
+					parent.abcjsListener = this.midiParams.listener;
+					parent.abcjsAnimate = this.midiParams.animate;
+				}
 			}
 		}
-
 	}
   if (this.warningsdiv) {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
@@ -352,11 +355,13 @@ window.ABCJS.Editor.prototype.parseABC = function() {
   var tunebook = new ABCJS.TuneBook(t);
   
   this.tunes = [];
+  this.startPos = [];
   this.warnings = [];
   for (var i=0; i<tunebook.tunes.length; i++) {
     var abcParser = new window.ABCJS.parse.Parse();
-    abcParser.parse(tunebook.tunes[i].abc, this.parserparams); //TODO handle multiple tunes
+    abcParser.parse(tunebook.tunes[i].abc, this.parserparams);
     this.tunes[i] = abcParser.getTune();
+	  this.startPos[i] = tunebook.tunes[i].startPos;
     var warnings = abcParser.getWarnings() || [];
     for (var j=0; j<warnings.length; j++) {
       this.warnings.push(warnings[j]);
@@ -439,8 +444,11 @@ window.ABCJS.Editor.prototype.isDirty = function() {
 	return this.editarea.initialText !== this.editarea.getString();
 };
 
-window.ABCJS.Editor.prototype.highlight = function(abcelem) {
-  this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
+window.ABCJS.Editor.prototype.highlight = function(abcelem, tuneNumber) {
+	// TODO-PER: The marker appears to get off by one for each tune parsed. I'm not sure why, but adding the tuneNumber in corrects it for the time being.
+	var offset = (tuneNumber !== undefined) ? this.startPos[tuneNumber] + tuneNumber : 0;
+
+  this.editarea.setSelection(offset + abcelem.startChar, offset + abcelem.endChar);
 };
 
 window.ABCJS.Editor.prototype.pause = function(shouldPause) {

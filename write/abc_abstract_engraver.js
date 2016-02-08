@@ -43,9 +43,10 @@ ABCJS.write.getDurlog = function(duration) {
   return Math.floor(Math.log(duration)/Math.log(2));
 };
 
-ABCJS.write.AbstractEngraver = function(bagpipes, renderer) {
+ABCJS.write.AbstractEngraver = function(bagpipes, renderer, tuneNumber) {
 	this.decoration = new ABCJS.write.Decoration();
 	this.renderer = renderer;
+	this.tuneNumber = tuneNumber;
   this.isBagpipes = bagpipes;
   this.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
                  note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter", 7:"noteheads.quarter", 'nostem':"noteheads.quarter"},
@@ -155,16 +156,16 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
       this.voice.duplicate = true; // bar lines and other duplicate info need not be created
     }
     if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
-	  var clef = ABCJS.write.createClef(abcstaff.clef);
+	  var clef = ABCJS.write.createClef(abcstaff.clef, this.tuneNumber);
 	  if (clef)
     this.voice.addChild(clef);
-	  var keySig = ABCJS.write.createKeySignature(abcstaff.key);
+	  var keySig = ABCJS.write.createKeySignature(abcstaff.key, this.tuneNumber);
 	  if (keySig) {
 		  this.voice.addChild(keySig);
 		  this.startlimitelem = keySig; // limit ties here
 	  }
     if (abcstaff.meter) {
-		var ts = ABCJS.write.createTimeSignature(abcstaff.meter);
+		var ts = ABCJS.write.createTimeSignature(abcstaff.meter, this.tuneNumber);
 		this.voice.addChild(ts);
 		this.startlimitelem = ts; // limit ties here
 	}
@@ -202,7 +203,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline, tempo)
     for (i=0; i<abselems.length; i++) {
       if (!this.tempoSet && tempo && !tempo.suppress) {
         this.tempoSet = true;
-        abselems[i].addChild(new ABCJS.write.TempoElement(tempo));
+        abselems[i].addChild(new ABCJS.write.TempoElement(tempo, this.tuneNumber));
       }
       this.voice.addChild(abselems[i]);
     }
@@ -225,17 +226,17 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "meter":
-    elemset[0] = ABCJS.write.createTimeSignature(elem);
+    elemset[0] = ABCJS.write.createTimeSignature(elem, this.tuneNumber);
 	  this.startlimitelem = elemset[0]; // limit ties here
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "clef":
-    elemset[0] = ABCJS.write.createClef(elem);
+    elemset[0] = ABCJS.write.createClef(elem, this.tuneNumber);
 	  if (!elemset[0]) return null;
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "key":
-	  var absKey = ABCJS.write.createKeySignature(elem);
+	  var absKey = ABCJS.write.createKeySignature(elem, this.tuneNumber);
 	  if (absKey) {
 		  elemset[0] = absKey;
 		  this.startlimitelem = elemset[0]; // limit ties here
@@ -246,14 +247,14 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     this.stemdir=elem.direction;
     break;
   case "part":
-    var abselem = new ABCJS.write.AbsoluteElement(elem,0,0, 'part');
+    var abselem = new ABCJS.write.AbsoluteElement(elem,0,0, 'part', this.tuneNumber);
 	  var dim = this.renderer.getTextSize(elem.title, 'partsfont', "part");
     abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, undefined, {type:"part", height: dim.height/ABCJS.write.spacing.STEP}));
     elemset[0] = abselem;
     break;
   case "tempo":
-    var abselem3 = new ABCJS.write.AbsoluteElement(elem,0,0, 'tempo');
-    abselem3.addChild(new ABCJS.write.TempoElement(elem));
+    var abselem3 = new ABCJS.write.AbsoluteElement(elem,0,0, 'tempo', this.tuneNumber);
+    abselem3.addChild(new ABCJS.write.TempoElement(elem, this.tuneNumber));
     elemset[0] = abselem3;
     break;
 	  case "style":
@@ -263,7 +264,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
 			  this.style = elem.head;
 		  break;
   default:
-    var abselem2 = new ABCJS.write.AbsoluteElement(elem,0,0, 'unsupported');
+    var abselem2 = new ABCJS.write.AbsoluteElement(elem,0,0, 'unsupported', this.tuneNumber);
     abselem2.addChild(new ABCJS.write.RelativeElement("element type "+elem.el_type, 0, 0, undefined, {type:"debug"}));
     elemset[0] = abselem2;
   }
@@ -360,7 +361,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   }
   
 
-  var abselem = new ABCJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1, 'note');
+  var abselem = new ABCJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1, 'note', this.tuneNumber);
   
 
   if (elem.rest) {
@@ -817,7 +818,7 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
 ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
 // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
 
-  var abselem = new ABCJS.write.AbsoluteElement(elem, 0, 10, 'bar');
+  var abselem = new ABCJS.write.AbsoluteElement(elem, 0, 10, 'bar', this.tuneNumber);
   var anchor = null; // place to attach part lines
   var dx = 0;
 
