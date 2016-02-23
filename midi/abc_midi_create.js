@@ -30,38 +30,50 @@ if (!window.ABCJS.midi)
 		var sequence = window.ABCJS.midi.sequence(abcTune, options);
 		var commands = window.ABCJS.midi.flatten(sequence);
 		var midi = window.ABCJS.midi.rendererFactory();
+		var midiJs = new window.ABCJS.midi.Preparer();
 
-		if (commands.instrument !== undefined)
+		if (commands.instrument !== undefined) {
 			midi.setInstrument(commands.instrument);
-		if (commands.channel !== undefined)
+			midiJs.setInstrument(commands.instrument);
+		}
+		if (commands.channel !== undefined) {
 			midi.setChannel(commands.channel);
+			midiJs.setChannel(commands.channel);
+		}
 		var title = abcTune.metaText ? abcTune.metaText.title : undefined;
 		if (title && title.length > 128)
 			title = title.substring(0,124) + '...';
 		midi.setGlobalInfo(commands.tempo, title);
+		midiJs.setGlobalInfo(commands.tempo, title);
 
 		for (var i = 0; i < commands.tracks.length; i++) {
 			midi.startTrack();
+			midiJs.startTrack();
 			for (var j = 0; j < commands.tracks[i].length; j++) {
 				var event = commands.tracks[i][j];
 				switch (event.cmd) {
 					case 'instrument':
 						midi.setInstrument(event.instrument);
+						midiJs.setInstrument(event.instrument);
 						break;
 					case 'start':
 						midi.startNote(convertPitch(event.pitch), event.volume);
+						midiJs.startNote(convertPitch(event.pitch), event.volume);
 						break;
 					case 'stop':
 						midi.endNote(convertPitch(event.pitch), 0); // TODO-PER: Refactor: the old midi used a duration here.
+						midiJs.endNote(convertPitch(event.pitch));
 						break;
 					case 'move':
 						midi.addRest(event.duration * baseDuration);
+						midiJs.addRest(event.duration * baseDuration);
 						break;
 					default:
 						console.log("MIDI create Unknown: " + event.cmd);
 				}
 			}
 			midi.endTrack();
+			midiJs.endTrack();
 		}
 
 		// TODO-PER: probably do this backwards: change the midi generation to NOT escape, then call escape for the download version.

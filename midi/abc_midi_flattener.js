@@ -34,7 +34,7 @@ if (!window.ABCJS.midi)
 	var multiplier;
 	var tracks;
 	var startingTempo;
-	var currentTempo;
+	var tempoChangeFactor = 1;
 	var instrument;
 	var channel;
 	var currentTrack;
@@ -58,7 +58,7 @@ if (!window.ABCJS.midi)
 		multiplier = 1;
 		tracks = [];
 		startingTempo = undefined;
-		currentTempo = undefined;
+		tempoChangeFactor = 1;
 		instrument = undefined;
 		channel = undefined;
 		currentTrack = undefined;
@@ -93,7 +93,7 @@ if (!window.ABCJS.midi)
 						if (!startingTempo)
 							startingTempo = element.qpm;
 						else
-							currentTempo = element.qpm;
+							tempoChangeFactor = element.qpm ? startingTempo / element.qpm : 1;
 						break;
 					case "transpose":
 						transpose = element.transpose;
@@ -198,7 +198,7 @@ if (!window.ABCJS.midi)
 							distance += currentTrack[ct].duration;
 					}
 					if (distance > 0)
-						chordTrack.push({cmd: 'move', duration: distance});
+						chordTrack.push({cmd: 'move', duration: distance*tempoChangeFactor });
 				}
 
 				lastChord = c;
@@ -253,16 +253,16 @@ if (!window.ABCJS.midi)
 				else if (note.endTie)
 					pitchesTied[''+actualPitch] = false;
 			}
-			currentTrack.push({ cmd: 'move', duration: duration-normalBreakBetweenNotes });
+			currentTrack.push({ cmd: 'move', duration: (duration-normalBreakBetweenNotes)*tempoChangeFactor });
 			lastNoteDurationPosition = currentTrack.length-1;
 
 			for (var ii = 0; ii < pitches.length; ii++) {
 				if (!pitchesTied[''+pitches[ii].pitch])
 					currentTrack.push({ cmd: 'stop', pitch: pitches[ii].pitch });
 			}
-			currentTrack.push({ cmd: 'move', duration: normalBreakBetweenNotes });
+			currentTrack.push({ cmd: 'move', duration: normalBreakBetweenNotes*tempoChangeFactor });
 		} else if (elem.rest) {
-			currentTrack.push({ cmd: 'move', duration: duration });
+			currentTrack.push({ cmd: 'move', duration: duration*tempoChangeFactor });
 		}
 
 		if (elem.endTriplet) {
@@ -337,7 +337,7 @@ if (!window.ABCJS.midi)
 			var gp = adjustPitch(graces[g]);
 			if (gp !== skipNote)
 				currentTrack.push({cmd: 'start', pitch: gp, volume: 64});
-			currentTrack.push({cmd: 'move', duration: graces[g].duration});
+			currentTrack.push({cmd: 'move', duration: graces[g].duration*tempoChangeFactor });
 			if (gp !== skipNote)
 				currentTrack.push({cmd: 'stop', pitch: gp});
 			if (!stealFromCurrent)
@@ -461,19 +461,19 @@ if (!window.ABCJS.midi)
 		// undefined means there is a stop time.
 		if (boom !== undefined)
 			chordTrack.push({cmd: 'start', pitch: boom, volume: 64});
-		chordTrack.push({ cmd: 'move', duration: beatLength/2 });
+		chordTrack.push({ cmd: 'move', duration: (beatLength/2)*tempoChangeFactor });
 		if (boom !== undefined)
 			chordTrack.push({ cmd: 'stop', pitch: boom });
-		chordTrack.push({ cmd: 'move', duration: beatLength/2 });
+		chordTrack.push({ cmd: 'move', duration: (beatLength/2)*tempoChangeFactor });
 	}
 
 	function writeChick(chick, beatLength) {
 		for (var c = 0; c < chick.length; c++)
 			chordTrack.push({cmd: 'start', pitch: chick[c], volume: 48});
-		chordTrack.push({ cmd: 'move', duration: beatLength/2 });
+		chordTrack.push({ cmd: 'move', duration: (beatLength/2)*tempoChangeFactor });
 		for (c = 0; c < chick.length; c++)
 			chordTrack.push({ cmd: 'stop', pitch: chick[c] });
-		chordTrack.push({ cmd: 'move', duration: beatLength/2 });
+		chordTrack.push({ cmd: 'move', duration: (beatLength/2)*tempoChangeFactor });
 	}
 
 	var rhythmPatterns = { "2/2": [ 'boom', 'chick' ],
@@ -517,7 +517,7 @@ if (!window.ABCJS.midi)
 						writeChick(currentChords[0].chord.chick, beatLength);
 						break;
 					case '':
-						chordTrack.push({ cmd: 'move', duration: beatLength });
+						chordTrack.push({ cmd: 'move', duration: beatLength*tempoChangeFactor });
 						break;
 				}
 			}
@@ -560,7 +560,7 @@ if (!window.ABCJS.midi)
 					if (beats[''+m2])	// If there is an explicit chord on this beat, play it.
 						writeChick(thisChord.chord.chick, beatLength);
 					else
-						chordTrack.push({cmd: 'move', duration: beatLength});
+						chordTrack.push({cmd: 'move', duration: beatLength*tempoChangeFactor });
 					break;
 			}
 		}

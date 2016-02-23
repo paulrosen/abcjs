@@ -95,19 +95,27 @@ if (!window.ABCJS.midi)
 	window.ABCJS.midi.soundfontUrl = "/soundfont/";
 
 	function hasClass(element, cls) {
+		if (!element)
+			return false;
 		return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 	}
 
 	function addClass(element, cls) {
+		if (!element)
+			return;
 		if (!hasClass(element, cls))
 			element.className = element.className + " "+cls;
 	}
 
 	function removeClass(element, cls) {
+		if (!element)
+			return;
 		element.className = element.className.replace(cls, "").trim().replace("  ", " ");
 	}
 
 	function toggleClass(element, cls) {
+		if (!element)
+			return;
 		if (hasClass(element, cls))
 			removeClass(element, cls);
 		else
@@ -116,6 +124,8 @@ if (!window.ABCJS.midi)
 
 	function closest(element, cls) {
 		// This finds the closest parent that contains the class passed in.
+		if (!element)
+			return null;
 		while (element !== document.body) {
 			if (hasClass(element, cls))
 				return element;
@@ -125,6 +135,8 @@ if (!window.ABCJS.midi)
 	}
 
 	function find(element, cls) {
+		if (!element)
+			return null;
 		var els = element.getElementsByClassName(cls);
 		if (els.length === 0)
 			return null;
@@ -144,6 +156,43 @@ if (!window.ABCJS.midi)
 			};
 		}
 	}
+
+	var getLength = function(data) {
+		var length = data.length;
+		var totalTime = 0.5;
+		for (var n = 0; n < length; n++) {
+			totalTime += data[n][1];
+		}
+		return totalTime;
+	};
+
+	var getFileInstruments = function(data) {
+		var instruments = {};
+		var programs = {};
+		for (var n = 0; n < data.length; n ++) {
+			var event = data[n][0].event;
+			if (event.type !== 'channel') {
+				continue;
+			}
+			var channel = event.channel;
+			switch(event.subtype) {
+				case 'programChange':
+					programs[channel] = event.programNumber;
+					break;
+				case 'noteOn':
+					var program = programs[channel];
+					var gm = MIDI.GM.byId[isFinite(program) ? program : channel];
+					instruments[gm.id] = true;
+					break;
+			}
+		}
+		var ret = [];
+		for (var key in instruments) {
+			if (instruments.hasOwnProperty(key))
+				ret.push(key);
+		}
+		return ret;
+	};
 
 	function loadMidi(target, onsuccess) {
 		function onprogress(/*state, progress*/) {
@@ -171,8 +220,20 @@ if (!window.ABCJS.midi)
 		}
 		MIDI.Player.timeWarp = timeWarp;
 
-
+		//var what = MidiFile(unescape(data));
+		//var replayer = new Replayer(what, MIDI.Player.timeWarp, null);
+		//var whatWhat = replayer.getData();
+		//console.log(JSON.stringify(what));
+		//console.log(JSON.stringify(whatWhat));
 		MIDI.Player.loadMidiFile(onsuccess, onprogress, onerror);
+//		MIDI.Player.endTime = getLength(whatWhat);
+
+		//MIDI.loadPlugin({
+		//	instruments: getFileInstruments(whatWhat),
+		//	onsuccess: onsuccess,
+		//	onprogress: onprogress,
+		//	onerror: onerror
+		//});
 	}
 
 	function deselectMidiControl() {
@@ -186,6 +247,7 @@ if (!window.ABCJS.midi)
 	}
 
 	var lastNow;
+	var tempSelection = 109;
 	function midiJsListener(currentNote) {
 		// currentNote is a hash containing: { channel, end, message, note, now, velocity }
 		var midiControl;
@@ -208,8 +270,16 @@ if (!window.ABCJS.midi)
 					if (minutes < 10) minutes = " " + minutes;
 					clock.innerHTML = minutes + ":" + seconds;
 				}
-				if (midiControl.listener)
-					midiControl.listener(midiControl, currentNote);
+				if (midiControl.abcjsListener)
+					midiControl.abcjsListener(midiControl, currentNote);
+				if (midiControl.abcjsAnimate) {
+					if (currentNote.velocity > 0) {
+						midiControl.abcjsTune.engraver.rangeHighlight(tempSelection, tempSelection + 1);
+						tempSelection++;
+						if (tempSelection > 343)
+							tempSelection = 109;
+					}
+				}
 			}
 		}
 		if (currentNote.now === currentNote.end) {
@@ -352,7 +422,7 @@ if (!window.ABCJS.midi)
 		document.body.addEventListener("click", function(event) {
 			event = event || window.event;
 			var target = event.target || event.srcElement;
-			while (target !== document.body) {
+			while (target && target !== document.body) {
 				if (hasClass(target, 'abcjs-midi-start')) {
 					onStart(target, event);
 					return;

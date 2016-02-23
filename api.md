@@ -1,5 +1,3 @@
-**NOTE: We're working on better documentation of the API. Here's a start, and there will be more coming soon!**
-
 # abcjs Basic
 
 The main entry point is `ABCJS.renderAbc`. Many users won't need to make any other call. That is enough to turn an arbitrary JavaScript string into an SVG image of sheet music.
@@ -16,7 +14,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | Parameters | Description |
 | ------------- | ----------- |
 | `tunebookString` | A plain text string in ABC syntax that corresponds to either a single ABC tune or a list of ABC tunes. |
-| `output` | If this is a string, it is the ID of an element on the DOM. Or it could be the DOM element itself. Or it could be an array of strings or DOM elements. |
+| `output` | If this is a string, it is the ID of an element on the DOM. Or it could be the DOM element itself. Or it could be an array of strings or DOM elements. In the case of `renderMidi()`, when both MIDI types are created, they are both created in the same element. |
 | `outputElement` | This is the DOM element that was originally passed in when the tune was rendered. |
 | `tuneObject` | This is the object that is created by the rendering process. |
 | `tuneObjectArray` | An array of `tuneObject`. |
@@ -43,9 +41,34 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `midiParams` | Default | Description |
 | ------------- | ----------- | ----------- |
 | `qpm` | 180 | The tempo, if not specified in abcString. |
-| `program` | 2 | The midi program to use, if not specified in abcString. |
+| `program` | 0 | The midi program to use, if not specified in abcString. |
 | `channel` | 0 | The midi channel to use, if not specified in abcString. |
 | `transpose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
+| `generateDownload` | false | Whether to generate a download MIDI link. |
+| `generateInline` | true | Whether to generate the inline MIDI controls. |
+| `downloadLabel` | "download midi" | The text for the MIDI download. If it contains `%T` then that is replaced with the first title. If this is a function, then the result of that function is called. The function takes two parameters: the parsed tune and the zero-based index of the tune in the tunebook. |
+| `preTextDownload` | "" | Text that appears right before the download link (can contain HTML markup). |
+| `postTextDownload` | "" | Text that appears right after the download link (can contain HTML markup). |
+| `preTextInline` | "" | Text that appears right before the MIDI controls (can contain HTML markup). If it contains `%T` then that is replaced with the first title. |
+| `postTextInline` | "" | Text that appears right after the MIDI controls (can contain HTML markup). If it contains `%T` then that is replaced with the first title. |
+| `listener` | null | Function that is called for each midi event. The parameters are the current abcjs element and the current MIDI event. |
+| `animate` | false | Whether to do a "bouncing ball" effect on the visual music. |
+| `inlineControls` | { selectionToggle: false, loopToggle: false, standard: true, tempo: false, startPlaying: false } | These are the options for which buttons and functionality appear in the inline controls. This is a hash, and is defined below. |
+
+| `inlineControls` | Default | Description |
+| ------------- | ----------- | ----------- |
+| `selectionToggle` | false | Show a latched push button to play only the current selection. |
+| `loopToggle` | false | Show a a latched push button to start playing again when the end is reached. |
+| `standard` | true | Show the start, pause, reset, and progress controls. |
+| `hide` | false | Whether to show the control at all. |
+| `startPlaying` | false | Whether to start the MIDI as soon as it is available. (Not available in the Editor. Only available when calling `ABCJS.renderMidi` ) |
+| `tempo` | false | Show the tempo change controls. This is a spinner that starts at 100%. There is an absolute tempo printed next to it. |
+| `tooltipSelection` | "Click to toggle play selection/play all." | The text of the tooltip. |
+| `tooltipLoop` | "Click to toggle play once/repeat." | The text of the tooltip. |
+| `tooltipReset` | "Click to go to beginning." | The text of the tooltip. |
+| `tooltipPlay` | "Click to play/pause." | The text of the tooltip. |
+| `tooltipProgress` | "Click to change the playback position." | The text of the tooltip. |
+| `tooltipTempo` | "Change the playback speed." | The text of the tooltip. |
 
 | `renderParams` | Default | Description |
 | ------------- | ----------- | ----------- |
@@ -137,9 +160,10 @@ Typical usage is:
 
 | editorParams | Description |
 | ------------- | ----------- |
-| `canvas_id or paper_id` | HTML id to draw in. If not present, then the drawing happens just below the editor. |
+| `canvas_id` or `paper_id` | HTML id to draw in. If not present, then the drawing happens just below the editor. |
 | `generate_midi` | if present, then midi is generated. |
-| `midi_id` | if present, the HTML id to place the midi control. Otherwise it is placed in the same div as the paper. |
+| `midi_id` | if present, the HTML id to place the midi control. Otherwise it is placed in the same div as the paper. An encompassing `div` surrounds each control with the class in the format `"inline-midi midi-%d"`. |
+| `midi_download_id` | if present, the HTML id to place the midi download link. Otherwise, if `midi_id` is present it is placed there, otherwise it is placed in the same div as the paper. An encompassing `div` surrounds each control with the class in the format `"download-midi midi-%d"`.|
 | `generate_warnings` | if present, then parser warnings are displayed on the page. |
 | `warnings_id` | if present, the HTML id to place the warnings. Otherwise they are placed in the same div as the paper. |
 | `onchange` | if present, the callback function to call whenever there has been a change. |

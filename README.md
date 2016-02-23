@@ -10,8 +10,6 @@
 
 This library makes it easy to incorporate **sheet music** into your **websites**. You can also turn visible **ABC** text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of this javascript file.
 
-**NOTE: We are changing the release license to the MIT License, effective immediately. Let us know if this causes any problems, but we're hoping that it solves some. Our goal is that you can use this library in a convenient way, as long as you give us credit for it.**
-
 License: [The MIT License (MIT)](http://opensource.org/licenses/MIT)
 
 **For a demo of what this library can do, see the following:**
@@ -35,6 +33,10 @@ If you are using Rails, you can just use this gem: [abcjs-rails](https://github.
 If you already have ABC notation on your page and don't want to modify the page more than you have to, then you can use `abcjs-plugin`, which will render all ABC that it finds on the page on page load, simply by including one line: the line to include the script. Another use of this is if you have a comment section on a blog, then you can allow users to post ABC tunes and they will appear as sheet music automatically.
 
 If you are looking at someone else's website and see ABC on the page and want to see what it looks like in standard notation, you can install the greasemonkey script in FireFox or Chrome and it will render the ABC for you.
+
+## MIDI considerations
+
+**NOTE: The mechanism for generating MIDI has changed. You can create a download link for MIDI without extra preparation, but if you'd like to have MIDI controls for listening inline, then see [MIDI Setup](/midi.md)
 
 ## Downloads:
 
@@ -83,6 +85,12 @@ Let us know if you want to be listed!
 
 * ABC 1.6 is pretty much implemented.
 * Many of the new features of ABC 2.1 are being implemented now.
+
+# API Changes for Version 2.4
+
+* The default MIDI program has been changed to "0".
+
+* There are a number of new MIDI parameters. 
 
 # API Changes for Version 1.11
 

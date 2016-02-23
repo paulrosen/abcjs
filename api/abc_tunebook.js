@@ -206,9 +206,9 @@ if (!window.ABCJS)
 			};
 			if (midiParams.generateInline && (midiParams.animate || midiParams.listener)) {
 				var parent = find(div, "abcjs-inline-midi");
-				parent.tune = tune;
-				parent.listener = midiParams.listener;
-				parent.animate = midiParams.animate;
+				parent.abcjsTune = tune;
+				parent.abcjsListener = midiParams.listener;
+				parent.abcjsAnimate = midiParams.animate;
 			}
 			if (midiParams.generateInline && midiParams.inlineControls && midiParams.inlineControls.startPlaying) {
 				var startButton = find(div, "abcjs-midi-start");
