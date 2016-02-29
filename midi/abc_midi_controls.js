@@ -72,7 +72,7 @@ if (!window.ABCJS.midi)
 		if (options.hide)
 			style = ' style="display:none;"';
 		var html = '<div class="abcjs-inline-midi abcjs-midi-' + index + '"' + style + '>';
-		html += '<span class="abcjs-data" style="display:none;">' + escape(midi) + '</span>';
+		html += '<span class="abcjs-data" style="display:none;">' + JSON.stringify(midi) + '</span>';
 		if (midiParams.preTextInline)
 			html += '<span class="abcjs-midi-pre">'+ preprocessLabel(midiParams.preTextInline, title) + '</span>';
 
@@ -202,8 +202,8 @@ if (!window.ABCJS.midi)
 		}
 
 		var dataEl = find(target, "abcjs-data");
-		var data = dataEl.innerHTML;
-		MIDI.Player.currentData = unescape(data);
+		var data = JSON.parse(dataEl.innerHTML);
+//		MIDI.Player.currentData = unescape(data);
 		MIDI.Player.currentTime = 0;
 		MIDI.Player.restart = 0;
 		MIDI.Player.BPM = undefined; // This fixes the problem with the tempo. We don't want to override.
@@ -225,7 +225,15 @@ if (!window.ABCJS.midi)
 		//var whatWhat = replayer.getData();
 		//console.log(JSON.stringify(what));
 		//console.log(JSON.stringify(whatWhat));
-		MIDI.Player.loadMidiFile(onsuccess, onprogress, onerror);
+//		MIDI.Player.loadMidiFile(onsuccess, onprogress, onerror);
+//		MIDI.Player.replayer = new Replayer(data, MIDI.Player.timeWarp, null, undefined);
+		MIDI.Player.data = data;
+		MIDI.Player.replayer = {
+			getData: function() {
+				return MIDI.Player.data;
+			}
+		};
+		onsuccess();
 //		MIDI.Player.endTime = getLength(whatWhat);
 
 		//MIDI.loadPlugin({

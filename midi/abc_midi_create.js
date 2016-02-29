@@ -32,6 +32,12 @@ if (!window.ABCJS.midi)
 		var midi = window.ABCJS.midi.rendererFactory();
 		var midiJs = new window.ABCJS.midi.Preparer();
 
+		var title = abcTune.metaText ? abcTune.metaText.title : undefined;
+		if (title && title.length > 128)
+			title = title.substring(0,124) + '...';
+		midi.setGlobalInfo(commands.tempo, title);
+		midiJs.setGlobalInfo(commands.tempo, title);
+
 		if (commands.instrument !== undefined) {
 			midi.setInstrument(commands.instrument);
 			midiJs.setInstrument(commands.instrument);
@@ -40,12 +46,6 @@ if (!window.ABCJS.midi)
 			midi.setChannel(commands.channel);
 			midiJs.setChannel(commands.channel);
 		}
-		var title = abcTune.metaText ? abcTune.metaText.title : undefined;
-		if (title && title.length > 128)
-			title = title.substring(0,124) + '...';
-		midi.setGlobalInfo(commands.tempo, title);
-		midiJs.setGlobalInfo(commands.tempo, title);
-
 		for (var i = 0; i < commands.tracks.length; i++) {
 			midi.startTrack();
 			midiJs.startTrack();
@@ -78,7 +78,7 @@ if (!window.ABCJS.midi)
 
 		// TODO-PER: probably do this backwards: change the midi generation to NOT escape, then call escape for the download version.
 		var midiFile = midi.getData();
-		var midiInline = unescape(midiFile.substring(16));
+		var midiInline = midiJs.getData(); // unescape(midiFile.substring(16));
 		if (options.generateInline === undefined) // default is to generate inline controls.
 			options.generateInline = true;
 		if (options.generateInline && options.generateDownload)
