@@ -80,6 +80,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | showCursor | false | true or false |
 | bpm | whatever is in the Q: field | number of beats per minute. |
 
+NOTE: To use animation, you MUST have `{ add_classes: true }` in the `engraverParams`. Also, the cursor is not visible unless you add some css. Often this will be something like either `.cursor { background-color: #ffffc0; opacity: 0.5 }` or `.cursor { border-left: 1px solid black; }`
 
 The following assumes you've created a `TuneBook` object like this: `var tunebook = ABCJS.TuneBook(tunebookString)`:
 
