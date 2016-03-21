@@ -55,7 +55,10 @@ ABCJS.write.CrescendoElem.prototype.draw = function (renderer) {
 };
 
 ABCJS.write.CrescendoElem.prototype.drawLine = function (renderer, y1, y2) {
+	// TODO-PER: This is just a quick hack to make the dynamic marks not crash if they are mismatched. See the slur treatment for the way to get the beginning and end.
+	var left = this.anchor1 ? this.anchor1.x : 0;
+	var right = this.anchor2 ? this.anchor2.x : 800;
 	var pathString = ABCJS.write.sprintf("M %f %f L %f %f",
-		this.anchor1.x, y1, this.anchor2.x, y2);
+		left, y1, right, y2);
 	renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('decoration')});
 };
