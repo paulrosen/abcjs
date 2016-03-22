@@ -133,6 +133,22 @@ if (!window.ABCJS)
 		return ret;
 	}
 
+	var resizeDivs = {};
+	function resizeOuter() {
+		var width = window.innerWidth;
+		for (var id in resizeDivs) {
+			if (resizeDivs.hasOwnProperty(id)) {
+				var outer = resizeDivs[id];
+				var ofs = outer.offsetLeft;
+				width -= ofs * 2;
+				outer.style.width = width + "px";
+			}
+		}
+	}
+
+	window.addEventListener("resize", resizeOuter);
+	window.addEventListener("orientationChange", resizeOuter);
+
 	// A quick way to render a tune from javascript when interactivity is not required.
 	// This is used when a javascript routine has some abc text that it wants to render
 	// in a div or collection of divs. One tune or many can be rendered.
@@ -151,8 +167,21 @@ if (!window.ABCJS)
 	//				(If this element is not present, then rendering starts at zero.)
 	//			width: 800 by default. The width in pixels of the output paper
 	ABCJS.renderAbc = function(output, abc, parserParams, engraverParams, renderParams) {
+		if (renderParams === undefined)
+			renderParams = {};
 		function callback(div, tune) {
-			var width = renderParams ? renderParams.width ? renderParams.width : 800 : 800;
+			var width = renderParams.width ? renderParams.width : 800;
+			if (renderParams.viewportHorizontal) {
+				// Create an inner div that holds the music, so that the passed in div will be the viewport.
+				div.innerHTML = '<div class="abcjs-inner"></div>';
+				if (renderParams.scrollHorizontal) {
+					div.style.overflowX = "auto";
+					div.style.overflowY = "hidden";
+				} else
+					div.style.overflow = "hidden";
+				resizeDivs[div.id] = div; // We use a hash on the element's id so that multiple calls won't keep adding to the list.
+				div = div.children[0]; // The music should be rendered in the inner div.
+			}
 			/* jshint -W064 */ var paper = Raphael(div, width, 400); /* jshint +W064 */
 			if (engraverParams === undefined)
 				engraverParams = {};
