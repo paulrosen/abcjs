@@ -39,7 +39,7 @@ if (!window.ABCJS.midi)
 		else if (midiParams.downloadLabel)
 			label = midiParams.downloadLabel.replace(/%T/, title);
 		else
-			label = "Download MIDI for \"" + title +  "\"";
+			label = "Download MIDI for \"" + title + "\"";
 		title = title.toLowerCase().replace(/'/g, '').replace(/\W/g, '_').replace(/__/g, '_');
 		html += '<a download="' + title + '.midi" href="' + midi + '">' + label + '</a>';
 		if (midiParams.postTextDownload)
@@ -74,7 +74,7 @@ if (!window.ABCJS.midi)
 		var html = '<div class="abcjs-inline-midi abcjs-midi-' + index + '"' + style + '>';
 		html += '<span class="abcjs-data" style="display:none;">' + JSON.stringify(midi) + '</span>';
 		if (midiParams.preTextInline)
-			html += '<span class="abcjs-midi-pre">'+ preprocessLabel(midiParams.preTextInline, title) + '</span>';
+			html += '<span class="abcjs-midi-pre">' + preprocessLabel(midiParams.preTextInline, title) + '</span>';
 
 		if (options.selectionToggle)
 			html += '<button class="abcjs-midi-selection abcjs-btn" title="' + options.tooltipSelection + '"></button>';
@@ -88,10 +88,11 @@ if (!window.ABCJS.midi)
 		}
 
 		if (midiParams.postTextInline)
-			html += '<span class="abcjs-midi-post">'+ preprocessLabel(midiParams.postTextInline, title) + '</span>';
+			html += '<span class="abcjs-midi-post">' + preprocessLabel(midiParams.postTextInline, title) + '</span>';
 		return html + "</div>";
 	};
 
+	// The default location for the sound font files. Simply set this to a different value if the files are served in a different place.
 	window.ABCJS.midi.soundfontUrl = "/soundfont/";
 
 	function hasClass(element, cls) {
@@ -104,7 +105,7 @@ if (!window.ABCJS.midi)
 		if (!element)
 			return;
 		if (!hasClass(element, cls))
-			element.className = element.className + " "+cls;
+			element.className = element.className + " " + cls;
 	}
 
 	function removeClass(element, cls) {
@@ -157,56 +158,98 @@ if (!window.ABCJS.midi)
 		}
 	}
 
-	var getLength = function(data) {
-		var length = data.length;
-		var totalTime = 0.5;
-		for (var n = 0; n < length; n++) {
-			totalTime += data[n][1];
+	// From midi.js - this is similar to the same named function except that it doesn't use a global variable.
+	var getFileInstruments = function(_midiEvents) {
+		var instruments = {};
+		var programChange = {};
+		for (var n = 0; n < _midiEvents.length; n++) {
+			var event = _midiEvents[n][0].event;
+			if (event.type === 'channel') {
+				var channel = event.channel;
+				switch (event.subtype) {
+					case 'programChange':
+						programChange[channel] = event.programNumber;
+						break;
+					case 'noteOn':
+						var programId = programChange[channel];
+						if (Number.isFinite(programId)) {
+							var program = MIDI.getProgram(programId);
+							instruments[program.nameId] = true;
+						}
+						break;
+				}
+			}
 		}
-		return totalTime;
+		return instruments;
 	};
 
-	var getFileInstruments = function(data) {
-		var instruments = {};
-		var programs = {};
-		for (var n = 0; n < data.length; n ++) {
-			var event = data[n][0].event;
-			if (event.type !== 'channel') {
-				continue;
-			}
-			var channel = event.channel;
-			switch(event.subtype) {
-				case 'programChange':
-					programs[channel] = event.programNumber;
-					break;
-				case 'noteOn':
-					var program = programs[channel];
-					var gm = MIDI.GM.byId[isFinite(program) ? program : channel];
-					instruments[gm.id] = true;
-					break;
-			}
+	var midiJsInitialized = false;
+
+	function afterSetup(timeWarp, data) {
+		MIDI.player.currentTime = 0;
+		MIDI.player.restart = 0;
+		MIDI.player.bpm = undefined; // This fixes the problem with the tempo. We don't want to override.
+		MIDI.player.warp = timeWarp;
+
+		MIDI.player.load({ events: data });
+	}
+
+	function setCurrentMidiTune(timeWarp, data, onsuccess) {
+		MIDI.player.instruments = getFileInstruments(data);
+		if (!midiJsInitialized) {
+			MIDI.setup({
+				debug: true,
+				instruments: MIDI.player.instruments,
+				soundfontUrl: window.ABCJS.midi.soundfontUrl
+			}).then(function() {
+				midiJsInitialized = true;
+				afterSetup(timeWarp, data);
+				onsuccess();
+			});
+		} else {
+			afterSetup(timeWarp, data);
+			onsuccess();
 		}
-		var ret = [];
-		for (var key in instruments) {
-			if (instruments.hasOwnProperty(key))
-				ret.push(key);
-		}
-		return ret;
-	};
+	}
+
+	function startCurrentlySelectedTune() {
+		MIDI.player.start(MIDI.player.currentTime);
+	}
+
+	function stopCurrentlyPlayingTune() {
+		MIDI.player.stop();
+	}
+
+	function pauseCurrentlyPlayingTune() {
+		MIDI.player.pause();
+	}
+
+	function setMidiCallback(midiJsListener) {
+		MIDI.player.setAnimation(midiJsListener);
+	}
+
+	function jumpToMidiPosition(play, offset, width) {
+		var ratio = offset / width;
+		var endTime = MIDI.player.duration; // MIDI.Player.endTime;
+		if (play)
+			MIDI.player.pause();
+		MIDI.player.currentTime = endTime * ratio;
+		if (play)
+			MIDI.player.start();
+	}
+
+	function setTimeWarp(percent) {
+		// Time warp is a multiplier: the larger the number, the longer the time. Therefore,
+		// it is opposite of the percentage. That is, playing at 50% is actually multiplying the time by 2.
+		if (percent > 0)
+			MIDI.player.warp = 100 / percent;
+		else
+			MIDI.player.warp = 1;
+	}
 
 	function loadMidi(target, onsuccess) {
-		function onprogress(/*state, progress*/) {
-		}
-		function onerror(e) {
-			console.error("loadMidi: " + e);
-		}
-
 		var dataEl = find(target, "abcjs-data");
 		var data = JSON.parse(dataEl.innerHTML);
-//		MIDI.Player.currentData = unescape(data);
-		MIDI.Player.currentTime = 0;
-		MIDI.Player.restart = 0;
-		MIDI.Player.BPM = undefined; // This fixes the problem with the tempo. We don't want to override.
 
 		// See if the tempo changer is present, and use that tempo if so.
 		var timeWarp = 1;
@@ -218,36 +261,13 @@ if (!window.ABCJS.midi)
 			if (percent > 0)
 				timeWarp = 100 / percent;
 		}
-		MIDI.Player.timeWarp = timeWarp;
-
-		//var what = MidiFile(unescape(data));
-		//var replayer = new Replayer(what, MIDI.Player.timeWarp, null);
-		//var whatWhat = replayer.getData();
-		//console.log(JSON.stringify(what));
-		//console.log(JSON.stringify(whatWhat));
-//		MIDI.Player.loadMidiFile(onsuccess, onprogress, onerror);
-//		MIDI.Player.replayer = new Replayer(data, MIDI.Player.timeWarp, null, undefined);
-		MIDI.Player.data = data;
-		MIDI.Player.replayer = {
-			getData: function() {
-				return MIDI.Player.data;
-			}
-		};
-		onsuccess();
-//		MIDI.Player.endTime = getLength(whatWhat);
-
-		//MIDI.loadPlugin({
-		//	instruments: getFileInstruments(whatWhat),
-		//	onsuccess: onsuccess,
-		//	onprogress: onprogress,
-		//	onerror: onerror
-		//});
+		setCurrentMidiTune(timeWarp, data, onsuccess);
 	}
 
 	function deselectMidiControl() {
 		var otherMidi = find(document, "abcjs-midi-current");
 		if (otherMidi) {
-			MIDI.Player.stop();
+			stopCurrentlyPlayingTune();
 			removeClass(otherMidi, "abcjs-midi-current");
 			var otherMidiStart = find(otherMidi, "abcjs-midi-start");
 			removeClass(otherMidiStart, "abcjs-pushed");
@@ -255,23 +275,23 @@ if (!window.ABCJS.midi)
 	}
 
 	var lastNow;
-	var tempSelection = 109;
-	function midiJsListener(currentNote) {
-		// currentNote is a hash containing: { channel, end, message, note, now, velocity }
+	//var tempSelection = 109;
+
+	function midiJsListener(position) {
+		// { currentTime: in seconds, duration: total length in seconds, progress: percent between 0 and 1 }
 		var midiControl;
-		if (currentNote.end > 0 && lastNow !== currentNote.now) {
-			lastNow = currentNote.now;
-			var currentPosition = currentNote.now / currentNote.end; // This returns a number between 0 and 1.
+		if (position.duration > 0 && lastNow !== position.progress) {
+			lastNow = position.progress;
 			midiControl = find(document, "abcjs-midi-current");
 			if (midiControl) {
 				var progressBackground = find(midiControl, "abcjs-midi-progress-background");
 				var totalWidth = progressBackground.offsetWidth;
 				var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
-				var scaled = totalWidth * currentPosition; // The number of pixels
+				var scaled = totalWidth * lastNow; // The number of pixels
 				progressIndicator.style.left = scaled + "px";
 				var clock = find(midiControl, "abcjs-midi-clock");
 				if (clock) {
-					var seconds = Math.floor(currentNote.now / 1000);
+					var seconds = Math.floor(position.currentTime);
 					var minutes = Math.floor(seconds / 60);
 					seconds = seconds % 60;
 					if (seconds < 10) seconds = "0" + seconds;
@@ -279,18 +299,18 @@ if (!window.ABCJS.midi)
 					clock.innerHTML = minutes + ":" + seconds;
 				}
 				if (midiControl.abcjsListener)
-					midiControl.abcjsListener(midiControl, currentNote);
-				if (midiControl.abcjsAnimate) {
-					if (currentNote.velocity > 0) {
-						midiControl.abcjsTune.engraver.rangeHighlight(tempSelection, tempSelection + 1);
-						tempSelection++;
-						if (tempSelection > 343)
-							tempSelection = 109;
-					}
-				}
+					midiControl.abcjsListener(midiControl, position);
+				//if (midiControl.abcjsAnimate) {
+				//	if (currentNote.velocity > 0) {
+				//		midiControl.abcjsTune.engraver.rangeHighlight(tempSelection, tempSelection + 1);
+				//		tempSelection++;
+				//		if (tempSelection > 343)
+				//			tempSelection = 109;
+				//	}
+				//}
 			}
 		}
-		if (currentNote.now === currentNote.end) {
+		if (position.progress === 1) {
 			// The playback is stopping. We need to either indicate that
 			// it has stopped, or start over at the beginning.
 			midiControl = find(document, "abcjs-midi-current");
@@ -298,7 +318,7 @@ if (!window.ABCJS.midi)
 
 			var finishedResetting = function() {
 				if (loopControl && hasClass(loopControl, "abcjs-pushed")) {
-						onStart(find(midiControl, "abcjs-midi-start"));
+					onStart(find(midiControl, "abcjs-midi-start"));
 				}
 			};
 
@@ -310,11 +330,68 @@ if (!window.ABCJS.midi)
 		}
 	}
 
+	//function midiJsListener(currentNote, b, c) {
+	//	console.log("listener ==>", currentNote, b, c);
+	//	return;
+	//	// { currentTime, duration, progress }
+	//	// currentNote is a hash containing: { channel, end, message, note, now, velocity }
+	//	var midiControl;
+	//	if (currentNote.end > 0 && lastNow !== currentNote.now) {
+	//		lastNow = currentNote.now;
+	//		var currentPosition = currentNote.now / currentNote.end; // This returns a number between 0 and 1.
+	//		midiControl = find(document, "abcjs-midi-current");
+	//		if (midiControl) {
+	//			var progressBackground = find(midiControl, "abcjs-midi-progress-background");
+	//			var totalWidth = progressBackground.offsetWidth;
+	//			var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
+	//			var scaled = totalWidth * currentPosition; // The number of pixels
+	//			progressIndicator.style.left = scaled + "px";
+	//			var clock = find(midiControl, "abcjs-midi-clock");
+	//			if (clock) {
+	//				var seconds = Math.floor(currentNote.now / 1000);
+	//				var minutes = Math.floor(seconds / 60);
+	//				seconds = seconds % 60;
+	//				if (seconds < 10) seconds = "0" + seconds;
+	//				if (minutes < 10) minutes = " " + minutes;
+	//				clock.innerHTML = minutes + ":" + seconds;
+	//			}
+	//			if (midiControl.abcjsListener)
+	//				midiControl.abcjsListener(midiControl, currentNote);
+	//			if (midiControl.abcjsAnimate) {
+	//				if (currentNote.velocity > 0) {
+	//					midiControl.abcjsTune.engraver.rangeHighlight(tempSelection, tempSelection + 1);
+	//					tempSelection++;
+	//					if (tempSelection > 343)
+	//						tempSelection = 109;
+	//				}
+	//			}
+	//		}
+	//	}
+	//	if (currentNote.now === currentNote.end) {
+	//		// The playback is stopping. We need to either indicate that
+	//		// it has stopped, or start over at the beginning.
+	//		midiControl = find(document, "abcjs-midi-current");
+	//		var loopControl = find(midiControl, "abcjs-midi-loop");
+	//
+	//		var finishedResetting = function() {
+	//			if (loopControl && hasClass(loopControl, "abcjs-pushed")) {
+	//				onStart(find(midiControl, "abcjs-midi-start"));
+	//			}
+	//		};
+	//
+	//		// midi.js is not quite finished: it still will process the last event, so we wait a minimum amount of time
+	//		// before doing another action.
+	//		setTimeout(function() {
+	//			doReset(midiControl, finishedResetting);
+	//		}, 1);
+	//	}
+	//}
+	//
 	function onStart(target) {
 		// If this midi is already playing,
 		if (hasClass(target, 'abcjs-pushed')) {
 			// Stop it.
-			MIDI.Player.pause();
+			pauseCurrentlyPlayingTune();
 			// Change the element so that the start icon is shown.
 			removeClass(target, "abcjs-pushed");
 		} else { // Else,
@@ -322,14 +399,14 @@ if (!window.ABCJS.midi)
 			var parent = closest(target, "abcjs-inline-midi");
 			// If this is the current midi, just continue.
 			if (hasClass(parent, "abcjs-midi-current"))
-				// Start this tune playing from wherever it had stopped.
-				MIDI.Player.start();
+			// Start this tune playing from wherever it had stopped.
+				startCurrentlySelectedTune();
 			else {
 				deselectMidiControl();
 
 				// else, load this midi from scratch.
 				var onsuccess = function() {
-					MIDI.Player.start();
+					startCurrentlySelectedTune();
 					addClass(parent, 'abcjs-midi-current');
 				};
 				loadMidi(parent, onsuccess);
@@ -338,11 +415,15 @@ if (!window.ABCJS.midi)
 			addClass(target, "abcjs-pushed");
 		}
 		// This replaces the old callback. It really only needs to be called once, but it doesn't hurt to set it every time.
-		MIDI.Player.addListener(midiJsListener);
+		setMidiCallback(midiJsListener);
 	}
 
 	window.ABCJS.midi.startPlaying = function(target) {
 		onStart(target);
+	};
+
+	window.ABCJS.midi.stopPlaying = function() {
+		stopCurrentlyPlayingTune();
 	};
 
 	function onSelection(target) {
@@ -355,6 +436,7 @@ if (!window.ABCJS.midi)
 
 	function doReset(target, callback) {
 		var parent = closest(target, "abcjs-inline-midi");
+
 		function onsuccess() {
 			addClass(parent, 'abcjs-midi-current');
 			var progressIndicator = find(parent, "abcjs-midi-progress-indicator");
@@ -364,23 +446,35 @@ if (!window.ABCJS.midi)
 			if (callback)
 				callback();
 		}
+
 		// If the tune is playing, stop it.
 		deselectMidiControl();
 		loadMidi(parent, onsuccess);
 	}
 
 	function onReset(target) {
-		doReset(target);
+		var parent = closest(target, "abcjs-inline-midi");
+		var playEl = find(parent, "abcjs-midi-start");
+		var play = hasClass(playEl, "abcjs-pushed");
+		function keepPlaying() {
+			if (play) {
+				MIDI.player.start();
+				addClass(playEl, 'abcjs-pushed');
+			}
+		}
+		if (hasClass(parent, "abcjs-midi-current")) // Only listen to the reset for the currently playing tune.
+			doReset(target, keepPlaying);
 	}
 
-	function relMouseX(target, event){
+	function relMouseX(target, event) {
 		var totalOffsetX = 0;
 		var canvasX = 0;
 
-		do{
+		do {
 			totalOffsetX += target.offsetLeft - target.scrollLeft;
+			target = target.offsetParent;
 		}
-		while(target = target.offsetParent);
+		while (target);
 
 		canvasX = event.pageX - totalOffsetX;
 
@@ -394,14 +488,7 @@ if (!window.ABCJS.midi)
 			play = hasClass(play, "abcjs-pushed");
 			var width = target.offsetWidth;
 			var offset = relMouseX(target, event);
-			var ratio = offset / width;
-			var endTime = MIDI.Player.endTime;
-			if (play)
-				MIDI.Player.pause();
-			MIDI.Player.currentTime = endTime * ratio;
-			// TODO-PER: if the control is currently paused, then the thumb won't jump to the right place: move it manually.
-			if (play)
-				MIDI.Player.start();
+			jumpToMidiPosition(play, offset, width);
 		}
 	}
 
@@ -412,18 +499,8 @@ if (!window.ABCJS.midi)
 		while (el && !hasClass(el, 'abcjs-midi-current-tempo')) {
 			el = el.nextSibling;
 		}
-		el.innerHTML = Math.floor(percent*startTempo/100);
-		// Time warp is a multiplier: the larger the number, the longer the time. Therefore,
-		// it is opposite of the percentage. That is, playing at 50% is actually multiplying the time by 2.
-		if (percent > 0)
-			MIDI.Player.timeWarp = 100 / percent;
-		else
-			MIDI.Player.timeWarp = 1;
-		//var saveTime = MIDI.Player.currentTime;
-		//var saveRestart = MIDI.Player.restart;
-		//loadMidi(closest(el, "abcjs-inline-midi", onsuccess));
-		//MIDI.Player.currentTime = saveTime;
-		//MIDI.Player.restart = saveRestart;
+		el.innerHTML = Math.floor(percent * startTempo / 100);
+		setTimeWarp(percent);
 	}
 
 	function addDelegates() {
@@ -459,26 +536,12 @@ if (!window.ABCJS.midi)
 				target = target.parentNode;
 			}
 		});
-		function midiLoaded() {
-			window.ABCJS.midi.midiInlineInitialized = 'succeeded';
-		}
-		function midiNotLoaded(e) {
-			console.error(e);
-			//var xhr = this;
-			//console.log("onerror: " + xhr.status + " " + xhr.statusText);
-
-			window.ABCJS.midi.midiInlineInitialized = 'failed';
-			var els = document.getElementsByClassName('abcjs-inline-midi');
-			for (var i = 0; i < els.length; i++)
-				els[i].innerHTML = "ERROR";
-		}
 		if (window.MIDI === undefined) {
 			window.ABCJS.midi.midiInlineInitialized = 'not loaded';
 			var els = document.getElementsByClassName('abcjs-inline-midi');
 			for (var i = 0; i < els.length; i++)
 				els[i].innerHTML = "MIDI NOT PRESENT";
-		} else
-			MIDI.loadPlugin({ soundfontUrl: window.ABCJS.midi.soundfontUrl, onsuccess: midiLoaded, onerror: midiNotLoaded });
+		}
 	}
 
 	addLoadEvent(addDelegates);
