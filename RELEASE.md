@@ -1,3 +1,35 @@
+# Version 3.0 Beta
+
+MIDI:
+
+* Update documentation for using MIDI.
+
+* Update creating a release to package the MIDI.
+
+* Integrate midi.js and remove the old MIDI attempts.
+
+* Create MIDI output for both download and playing through midi.js.
+
+* Create the html for an interactive audio control and implement standard functionality.
+
+* Make the default midi instrument "0" instead of "2"
+
+* Don't crash if a chord containing a slash doesn't contain a bass note.
+
+* Fix playing second repeat; allow strings as parameters.
+
+Bug fixes:
+
+* Fix crash when encountering Cbm or other theoretical-only keys.
+
+* Report the tune number on clicking the absolute element
+
+* Fix crash when there is no start or end point for a dynamic mark.
+
+* Clarify how to use the animation() functionality.
+
+* Added viewPortHorizontal and scrollHorizontal to the renderParams
+	
 # Version 2.3
 
 * Completely refactor the midi processing: now supports chords and grace notes and embeds the tune's title.
