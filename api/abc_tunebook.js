@@ -214,6 +214,8 @@ if (!window.ABCJS)
 			midiParams = {};
 		if (midiParams.generateInline === undefined) // default is to generate inline controls.
 			midiParams.generateInline = true;
+		if (midiParams.inlineControls)
+			midiParams.inlineControls.selectionToggle = false; // Override the selection option because there is no selection in the Basic call.
 
 		function callback(div, tune, index) {
 			var html = "";
