@@ -158,48 +158,19 @@ if (!window.ABCJS.midi)
 		}
 	}
 
-	// From midi.js - this is similar to the same named function except that it doesn't use a global variable.
-	var getFileInstruments = function(_midiEvents) {
-		var instruments = {};
-		var programChange = {};
-		for (var n = 0; n < _midiEvents.length; n++) {
-			var event = _midiEvents[n][0].event;
-			if (event.type === 'channel') {
-				var channel = event.channel;
-				switch (event.subtype) {
-					case 'programChange':
-						programChange[channel] = event.programNumber;
-						break;
-					case 'noteOn':
-						var programId = programChange[channel];
-						if (Number.isFinite(programId)) {
-							var program = MIDI.getProgram(programId);
-							instruments[program.nameId] = true;
-						}
-						break;
-				}
-			}
-		}
-		return instruments;
-	};
-
 	var midiJsInitialized = false;
 
 	function afterSetup(timeWarp, data) {
 		MIDI.player.currentTime = 0;
-		MIDI.player.restart = 0;
-		MIDI.player.bpm = undefined; // This fixes the problem with the tempo. We don't want to override.
 		MIDI.player.warp = timeWarp;
 
 		MIDI.player.load({ events: data });
 	}
 
 	function setCurrentMidiTune(timeWarp, data, onsuccess) {
-		MIDI.player.instruments = getFileInstruments(data);
 		if (!midiJsInitialized) {
 			MIDI.setup({
 				debug: true,
-				instruments: MIDI.player.instruments,
 				soundfontUrl: window.ABCJS.midi.soundfontUrl
 			}).then(function() {
 				midiJsInitialized = true;
@@ -232,19 +203,17 @@ if (!window.ABCJS.midi)
 		var ratio = offset / width;
 		var endTime = MIDI.player.duration; // MIDI.Player.endTime;
 		if (play)
-			MIDI.player.pause();
+			pauseCurrentlyPlayingTune();
 		MIDI.player.currentTime = endTime * ratio;
 		if (play)
-			MIDI.player.start();
+			startCurrentlySelectedTune();
 	}
 
 	function setTimeWarp(percent) {
 		// Time warp is a multiplier: the larger the number, the longer the time. Therefore,
 		// it is opposite of the percentage. That is, playing at 50% is actually multiplying the time by 2.
-		if (percent > 0)
-			MIDI.player.warp = 100 / percent;
-		else
-			MIDI.player.warp = 1;
+		var warp = (percent > 0) ? 100 / percent : 1;
+		MIDI.player.warp = warp;
 	}
 
 	function loadMidi(target, onsuccess) {
@@ -458,7 +427,7 @@ if (!window.ABCJS.midi)
 		var play = hasClass(playEl, "abcjs-pushed");
 		function keepPlaying() {
 			if (play) {
-				MIDI.player.start();
+				startCurrentlySelectedTune();
 				addClass(playEl, 'abcjs-pushed');
 			}
 		}
