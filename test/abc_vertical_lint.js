@@ -1,5 +1,5 @@
 //    abc_vertical_lint.js: Analyzes the vertical position of the output object.
-//    Copyright (C) 2015 Paul Rosen (paul at paulrosen dot net)
+//    Copyright (C) 2015-2016 Paul Rosen (paul at paulrosen dot net)
 //
 //    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by

@@ -1,5 +1,5 @@
 // abc_decoration.js: Creates a data structure suitable for printing a line of abc
-// Copyright (C) 2010-2015 Gregory Dyke (gregdyke at gmail dot com) & Paul Rosen
+// Copyright (C) 2010-2016 Gregory Dyke (gregdyke at gmail dot com) & Paul Rosen
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
