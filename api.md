@@ -57,18 +57,18 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 
 | `inlineControls` | Default | Description |
 | ------------- | ----------- | ----------- |
-| `selectionToggle` | false | Show a latched push button to play only the current selection. |
+| `selectionToggle` | false | Show a latched push button to play only the current selection. **Not yet implemented** |
 | `loopToggle` | false | Show a a latched push button to start playing again when the end is reached. |
 | `standard` | true | Show the start, pause, reset, and progress controls. |
 | `hide` | false | Whether to show the control at all. |
 | `startPlaying` | false | Whether to start the MIDI as soon as it is available. (Not available in the Editor. Only available when calling `ABCJS.renderMidi` ) |
-| `tempo` | false | Show the tempo change controls. This is a spinner that starts at 100%. There is an absolute tempo printed next to it. |
-| `tooltipSelection` | "Click to toggle play selection/play all." | The text of the tooltip. |
+| `tempo` | false | Show the tempo change controls. This is a spinner that starts at 100%. There is an absolute tempo printed next to it.  **Not yet implemented** |
+| `tooltipSelection` | "Click to toggle play selection/play all." | The text of the tooltip.  **Not yet implemented** |
 | `tooltipLoop` | "Click to toggle play once/repeat." | The text of the tooltip. |
 | `tooltipReset` | "Click to go to beginning." | The text of the tooltip. |
 | `tooltipPlay` | "Click to play/pause." | The text of the tooltip. |
 | `tooltipProgress` | "Click to change the playback position." | The text of the tooltip. |
-| `tooltipTempo` | "Change the playback speed." | The text of the tooltip. |
+| `tooltipTempo` | "Change the playback speed." | The text of the tooltip.  **Not yet implemented** |
 
 | `renderParams` | Default | Description |
 | ------------- | ----------- | ----------- |

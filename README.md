@@ -2,6 +2,8 @@
 
 **javascript for rendering abc music notation**
 
+**Special notes for Version 3.0 Beta 1: [MIDI](/midi.md)**
+
 [abcjs Home page](http://abcjs.net)
 
 [API Documentation](/api.md)
@@ -52,6 +54,16 @@ Here are the latest versions. You can just download one of these:
 
 - [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_2.3.user.js)
 
+To include the necessary parts of midi.js so that inline MIDI is available, you can just download one of these:
+
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_midi_2.3-min.js)
+
+- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_midi_2.3-min.js)
+
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_midi_2.3-min.js)
+
+**Great big thanks to [mudcube](https://github.com/mudcube/MIDI.js) for the excellent work on midi.js!**
+
 And here are the latest versions packaged without the standard libraries. To use these, you need to include those libraries yourself:
 
 - [Basic without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_2.3-min.js)
@@ -68,6 +80,7 @@ And here are the latest versions packaged without the standard libraries. To use
 
 | Site | Notes |
 | ------------- | ----------- |
+| https://sightreadingfactory.com | (Educational) |
 | http://www.drawthedots.com | (editor) |
 | http://www.tradzone.net/forum | (plugin) (sample page) |
 | http://abcnotation.com/forums | (plugin) (sample page) |
@@ -76,7 +89,6 @@ And here are the latest versions packaged without the standard libraries. To use
 | http://people.opera.com/howcome/2010/video/norway/ | (Demoed during a keynote at Google I/O 2010 by Håkon Wium Lie, CTO of Opera) |
 | http://www.bestmusicteacher.com/ | > left menu > music theory (Educational) |
 | http://www.eastofcleveland.com/flashcards/notereading.php | (Educational) |
-| https://sightreadingfactory.com | (Educational) |
 | http://tunearch.org | |
 
 Let us know if you want to be listed!
@@ -85,8 +97,9 @@ Let us know if you want to be listed!
 
 * ABC 1.6 is pretty much implemented.
 * Many of the new features of ABC 2.1 are being implemented now.
+* The old support for MIDI using QuickTime is removed and midi.js is used instead.
 
-# API Changes for Version 2.4
+# API Changes for Version 3.0 Beta
 
 * The default MIDI program has been changed to "0".
 
