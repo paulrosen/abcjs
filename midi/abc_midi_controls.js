@@ -70,8 +70,8 @@ if (!window.ABCJS.midi)
 
 		var style = "";
 		if (options.hide)
-			style = ' style="display:none;"';
-		var html = '<div class="abcjs-inline-midi abcjs-midi-' + index + '"' + style + '>';
+			style = 'style="display:none;"';
+		var html = '<div class="abcjs-inline-midi abcjs-midi-' + index + '" ' + style + '>';
 		html += '<span class="abcjs-data" style="display:none;">' + JSON.stringify(midi) + '</span>';
 		if (midiParams.preTextInline)
 			html += '<span class="abcjs-midi-pre">' + preprocessLabel(midiParams.preTextInline, title) + '</span>';
@@ -145,13 +145,13 @@ if (!window.ABCJS.midi)
 	}
 
 	function addLoadEvent(func) {
-		var oldonload = window.onload;
+		var oldOnLoad = window.onload;
 		if (typeof window.onload !== 'function') {
 			window.onload = func;
 		} else {
 			window.onload = function() {
-				if (oldonload) {
-					oldonload();
+				if (oldOnLoad) {
+					oldOnLoad();
 				}
 				func();
 			};
@@ -160,26 +160,25 @@ if (!window.ABCJS.midi)
 
 	var midiJsInitialized = false;
 
-	function afterSetup(timeWarp, data) {
+	function afterSetup(timeWarp, data, onSuccess) {
 		MIDI.player.currentTime = 0;
 		MIDI.player.warp = timeWarp;
 
 		MIDI.player.load({ events: data });
+		onSuccess();
 	}
 
-	function setCurrentMidiTune(timeWarp, data, onsuccess) {
+	function setCurrentMidiTune(timeWarp, data, onSuccess) {
 		if (!midiJsInitialized) {
 			MIDI.setup({
 				debug: true,
 				soundfontUrl: window.ABCJS.midi.soundfontUrl
 			}).then(function() {
 				midiJsInitialized = true;
-				afterSetup(timeWarp, data);
-				onsuccess();
+				afterSetup(timeWarp, data, onSuccess);
 			});
 		} else {
-			afterSetup(timeWarp, data);
-			onsuccess();
+			afterSetup(timeWarp, data, onSuccess);
 		}
 	}
 
@@ -212,11 +211,10 @@ if (!window.ABCJS.midi)
 	function setTimeWarp(percent) {
 		// Time warp is a multiplier: the larger the number, the longer the time. Therefore,
 		// it is opposite of the percentage. That is, playing at 50% is actually multiplying the time by 2.
-		var warp = (percent > 0) ? 100 / percent : 1;
-		MIDI.player.warp = warp;
+		MIDI.player.warp = (percent > 0) ? 100 / percent : 1;
 	}
 
-	function loadMidi(target, onsuccess) {
+	function loadMidi(target, onSuccess) {
 		var dataEl = find(target, "abcjs-data");
 		var data = JSON.parse(dataEl.innerHTML);
 
@@ -230,7 +228,7 @@ if (!window.ABCJS.midi)
 			if (percent > 0)
 				timeWarp = 100 / percent;
 		}
-		setCurrentMidiTune(timeWarp, data, onsuccess);
+		setCurrentMidiTune(timeWarp, data, onSuccess);
 	}
 
 	function deselectMidiControl() {
@@ -374,11 +372,11 @@ if (!window.ABCJS.midi)
 				deselectMidiControl();
 
 				// else, load this midi from scratch.
-				var onsuccess = function() {
+				var onSuccess = function() {
 					startCurrentlySelectedTune();
 					addClass(parent, 'abcjs-midi-current');
 				};
-				loadMidi(parent, onsuccess);
+				loadMidi(parent, onSuccess);
 			}
 			// Change the element so that the pause icon is shown.
 			addClass(target, "abcjs-pushed");
@@ -406,7 +404,7 @@ if (!window.ABCJS.midi)
 	function doReset(target, callback) {
 		var parent = closest(target, "abcjs-inline-midi");
 
-		function onsuccess() {
+		function onSuccess() {
 			addClass(parent, 'abcjs-midi-current');
 			var progressIndicator = find(parent, "abcjs-midi-progress-indicator");
 			progressIndicator.style.left = "0px";
@@ -418,7 +416,7 @@ if (!window.ABCJS.midi)
 
 		// If the tune is playing, stop it.
 		deselectMidiControl();
-		loadMidi(parent, onsuccess);
+		loadMidi(parent, onSuccess);
 	}
 
 	function onReset(target) {
@@ -437,7 +435,6 @@ if (!window.ABCJS.midi)
 
 	function relMouseX(target, event) {
 		var totalOffsetX = 0;
-		var canvasX = 0;
 
 		do {
 			totalOffsetX += target.offsetLeft - target.scrollLeft;
@@ -445,9 +442,7 @@ if (!window.ABCJS.midi)
 		}
 		while (target);
 
-		canvasX = event.pageX - totalOffsetX;
-
-		return canvasX;
+		return event.pageX - totalOffsetX;
 	}
 
 	function onProgress(target, event) {
@@ -463,7 +458,7 @@ if (!window.ABCJS.midi)
 
 	function onTempo(el) {
 		var percent = parseInt(el.value, 10);
-		var startTempo = parseInt(el.getAttribute("data-start-tempo", 10));
+		var startTempo = parseInt(el.getAttribute("data-start-tempo"), 10);
 
 		while (el && !hasClass(el, 'abcjs-midi-current-tempo')) {
 			el = el.nextSibling;

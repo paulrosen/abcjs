@@ -228,15 +228,6 @@ if (!window.ABCJS.midi)
 	}
 
 	Preparer.prototype.getData = function() {
-		//return {
-		//	header: {ticksPerBeat: Math.round((1.0/this.tempo)*60000000)},
-		//	tracks: this.tracks
-		//};
-		// merge all the tracks so the notes are in sequence.
-		//var output = [];
-		//for (var i = 0; i < this.tracks.length; i++)
-		//	output = output.concat(this.tracks[i]);
-		//return output;
 		return weaveTracks(this.tracks);
 	};
 })();
