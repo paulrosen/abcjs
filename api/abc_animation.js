@@ -55,6 +55,9 @@ if (!window.ABCJS)
 		return bpm;
 	}
 
+	var scrollTimer;
+	var animateTimer;
+
 	// This is a way to manipulate the written music on a timer. Their are two ways to manipulate the music: turn off each measure as it goes by,
 	// and put a vertical cursor before the next note to play. The timer works at the speed of the original tempo of the music unless it is overwritten
 	// in the options parameter.
@@ -66,6 +69,12 @@ if (!window.ABCJS)
 	//    hideFinishedMeasures: true or false [ false is the default ]
 	//    showCursor: true or false [ false is the default ]
 	//    bpm: number of beats per minute [ the default is whatever is in the Q: field ]
+	//    scrollHorizontal: true or false [ false is the default ]
+	//    scrollVertical: true or false [ false is the default ]
+	//
+	// If scrollHorizontal is present, then we expect that the music was rendered with the viewportHorizontal parameter so there is a viewport wrapping the music div. (Note that this only works when there is a single line of music and there are no repeats, signo, or codas.)
+	// If scrollVertical is present, then we expect that the music was rendered with the viewportVertical parameter so there is a viewport wrapping the music div.
+	// If the music is larger than the viewport, then it scrolls as the music is being played.
 	var stopNextTime = false;
 	var cursor;
 	ABCJS.startAnimation = function(paper, tune, options) {
@@ -77,6 +86,19 @@ if (!window.ABCJS)
 			console.error("ABCJS.startAnimation: The second parameter must be a single tune. (Did you pass the entire array of tunes?)");
 			return;
 		}
+		if (options.scrollHorizontal || options.scrollVertical) {
+			// We assume that there is an extra div in this case, so adjust the paper if needed.
+			// This can be called either with the outer div or the inner div.
+			if (!hasClass(paper, 'abcjs-inner'))
+				paper = paper.children[0]; // Must be the outer div; move in.
+			if (!hasClass(paper, 'abcjs-inner')) {
+				console.error("ABCJS.startAnimation: When using scrollHorizontal/scrollVertical, the music must have been rendered using viewportHorizontal/viewportVertical.");
+				return;
+			}
+		}
+		// Can only have one animation at a time, so make sure that it has been stopped.
+		ABCJS.stopAnimation();
+
 		if (options.showCursor) {
 			cursor = $('<div class="cursor" style="position: absolute;"></div>');
 			$(paper).append(cursor);
@@ -87,8 +109,38 @@ if (!window.ABCJS)
 		var beatsPerMinute = getBeatsPerMinute(tune, options);
 		var beatsPerMillisecond = beatsPerMinute / 60000;
 		var beatLength = tune.getBeatLength(); // This is the same units as the duration is stored in.
+		var totalBeats = 0;
+
+		var millisecondsPerHalfMeasure;
+		if (options.scrollVertical) {
+			var millisecondsPerBeat = 1/beatsPerMillisecond;
+			var beatsPerMeasure = 1/beatLength;
+			var millisecondsPerMeasure = millisecondsPerBeat * beatsPerMeasure;
+			millisecondsPerHalfMeasure = millisecondsPerMeasure / 2;
+		}
 
 		var startTime;
+
+		var initialWait = 2700;
+		var interval = 11;
+		var distance = 1;
+		var outer = paper.parentNode;
+		function scrolling() {
+			var currentPosition = paper.style.marginLeft;
+			if (currentPosition === "")
+				currentPosition = 0;
+			else
+				currentPosition = parseInt(currentPosition);
+			currentPosition -= distance;
+			paper.style.marginLeft = currentPosition + "px";
+			if (currentPosition > outer.offsetWidth -  paper.scrollWidth)
+				scrollTimer = setTimeout(scrolling, interval);
+		}
+
+		if (options.scrollHorizontal) {
+			paper.style.marginLeft = "0px";
+			scrollTimer = setTimeout(scrolling, initialWait);
+		}
 
 		function processMeasureHider(lineNum, measureNum) {
 			var els = getAllElementsByClasses(paper, "l"+lineNum, "m"+measureNum);
@@ -98,6 +150,22 @@ if (!window.ABCJS)
 					var el = els[i];
 					if (!hasClass(el, "bar"))
 						el.style.display = "none";
+				}
+			}
+		}
+
+		function addVerticalInfo(timingEvents) {
+			// Add vertical info to the bar events: put the next event's top, and the event after the next measure's top.
+			var lastBarTop;
+			var lastEventTop;
+			for (var e = timingEvents.length-1; e >= 0; e--) {
+				var ev = timingEvents[e];
+				if (ev.type === 'bar') {
+					ev.top = lastEventTop;
+					ev.nextTop = lastBarTop;
+					lastBarTop = lastEventTop;
+				} else if (ev.type === 'event') {
+					lastEventTop = ev.top;
 				}
 			}
 		}
@@ -191,9 +259,14 @@ if (!window.ABCJS)
 			}
 			// now we have all the events, but if there are multiple voices then there may be events out of order or duplicated, so normalize it.
 			timingEvents = makeSortedArray(eventHash);
+			totalBeats = timingEvents[timingEvents.length-1].time / beatLength;
+			if (options.scrollVertical) {
+				addVerticalInfo(timingEvents);
+			}
 		}
 		setupEvents(tune.engraver);
 
+		var lastTop = -1;
 		function processShowCursor() {
 			var currentNote = timingEvents.shift();
 			if (!currentNote) {
@@ -201,14 +274,33 @@ if (!window.ABCJS)
 				return 0;
 			}
 			if (currentNote.type === "bar") {
+				if (options.scrollVertical) {
+					if (currentNote.top !== currentNote.nextTop && currentNote.nextTop !== undefined) {
+						setTimeout(function() {
+							var inner = $("#scroll-v-output").find(".abcjs-inner");
+							inner[0].style.marginTop = '-' + currentNote.nextTop + 'px';
+						}, millisecondsPerHalfMeasure);
+					}
+				}
 				if (options.hideFinishedMeasures)
 					processMeasureHider(currentNote.lineNum, currentNote.measureNum);
 				if (timingEvents.length > 0)
 					return timingEvents[0].time / beatLength;
 				return 0;
 			}
-			if (options.showCursor)
-				cursor.css({ left: currentNote.left + "px", top: currentNote.top + "px", width: currentNote.width + "px", height: currentNote.height + "px" });
+			//if (options.scrollVertical && lastTop !== currentNote.top) {
+			//	lastTop = currentNote.top;
+			//	var inner = $("#scroll-v-output").find(".abcjs-inner");
+			//	inner[0].style.marginTop = '-' + lastTop + 'px';
+			//}
+			if (options.showCursor) {
+				cursor.css({
+					left: currentNote.left + "px",
+					top: currentNote.top + "px",
+					width: currentNote.width + "px",
+					height: currentNote.height + "px"
+				});
+			}
 			if (timingEvents.length > 0)
 				return timingEvents[0].time / beatLength;
 			stopNextTime = true;
@@ -228,7 +320,7 @@ if (!window.ABCJS)
 			if (interval <= 0)
 				processNext();
 			else
-				setTimeout(processNext, interval);
+				animateTimer = setTimeout(processNext, interval);
 		}
 		startTime = new Date();
 		startTime = startTime.getTime();
@@ -236,7 +328,8 @@ if (!window.ABCJS)
 	};
 
 	ABCJS.stopAnimation = function() {
-		stopNextTime = true;
+		clearTimeout(animateTimer);
+		clearTimeout(scrollTimer);
 		if (cursor) {
 			cursor.remove();
 			cursor = null;

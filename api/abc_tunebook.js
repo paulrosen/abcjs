@@ -182,12 +182,28 @@ if (!window.ABCJS)
 				resizeDivs[div.id] = div; // We use a hash on the element's id so that multiple calls won't keep adding to the list.
 				div = div.children[0]; // The music should be rendered in the inner div.
 			}
+			else if (renderParams.viewportVertical) {
+				// Create an inner div that holds the music, so that the passed in div will be the viewport.
+				div.innerHTML = '<div class="abcjs-inner"></div>';
+				if (renderParams.scrollVertical) {
+					div.style.overflowX = "hidden";
+					div.style.overflowY = "auto";
+				} else
+					div.style.overflow = "hidden";
+				div = div.children[0]; // The music should be rendered in the inner div.
+			}
 			/* jshint -W064 */ var paper = Raphael(div, width, 400); /* jshint +W064 */
 			if (engraverParams === undefined)
 				engraverParams = {};
 			var engraver_controller = new ABCJS.write.EngraverController(paper, engraverParams);
 			engraver_controller.engraveABC(tune);
 			tune.engraver = engraver_controller;
+			if (renderParams.viewportVertical || renderParams.viewportHorizontal) {
+				// If we added a wrapper around the div, then we need to size the wrapper, too.
+				var parent = div.parentNode;
+				parent.style.width = div.style.width;
+
+			}
 		}
 
 		return renderEngine(callback, output, abc, parserParams, renderParams);
