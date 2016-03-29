@@ -32,6 +32,18 @@ NOTE: You can put the sound fonts in another location. If you do, then include t
 
 The trailing slash is required.
 
+There is also some CSS required to make the MIDI control look right. You can use the example CSS in this repository and modify it to match your site. The example CSS uses Font Awesome. Include these two lines:
+
+`<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">`
+`<link rel="stylesheet" href="abcjs-midi.css" media="all" type="text/css" />`
+
+# Creating the MIDI
+
+After doing the above steps to load the CSS and the sound fonts, the simplest way to produce the MIDI is:
+
+`window.ABCJS.renderMidi("id-of-div-to-place-midi-controls", abcString, {}, { generateInline: true }, {});`
+
+
 # Example
 
 See the examples in this repository. They contain the prerequisite files. [Editor](/abc_editor.html), [Plugin](/abc_plugin.html).

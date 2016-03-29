@@ -1,0 +1,117 @@
+/* Some basic CSS to make the MIDI controls in abcjs presentable. */
+
+.abcjs-inline-midi {
+	height: 26px;
+	padding: 2px 5px;
+	border-radius: 3px;
+	color: #f4f4f4;
+	background-color: #424242;
+	display: flex;
+}
+
+.abcjs-inline-midi .abcjs-btn {
+	width: 28px;
+	height: 26px;
+	display: inline-block;
+	margin-right: 2px;
+	float: left;
+
+	background: none;
+	font: normal normal normal 14px/1 FontAwesome;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	color: #f4f4f4;
+	border: 1px solid transparent;
+}
+
+.abcjs-inline-midi .abcjs-btn:hover {
+	color: #cccccc;
+}
+
+.abcjs-inline-midi .abcjs-midi-selection:before {
+	content: ""; // fa-arrows-h [&#xf07e;]
+}
+
+.abcjs-inline-midi .abcjs-midi-selection.abcjs-pushed {
+	border: 1px solid #cccccc;
+	background-color: #666666;
+}
+
+.abcjs-inline-midi .abcjs-midi-loop:before {
+	content: ""; //   fa-refresh [&#xf021;]
+}
+
+.abcjs-inline-midi .abcjs-midi-loop.abcjs-pushed {
+	border: 1px solid #cccccc;
+	background-color: #666666;
+}
+
+.abcjs-inline-midi .abcjs-midi-reset:before {
+	content: ""; //   fa-step-backward [&#xf048;]
+}
+
+.abcjs-inline-midi .abcjs-midi-reset.abcjs-pushed {
+	border: 1px solid #cccccc;
+	background-color: #666666;
+}
+
+.abcjs-inline-midi .abcjs-midi-start:before {
+	content: ""; //   fa-play [&#xf04b;]    fa-pause [&#xf04c;]
+}
+
+.abcjs-inline-midi .abcjs-midi-start.abcjs-pushed:before {
+	content: ""; //   fa-play [&#xf04b;]    fa-pause [&#xf04c;]
+}
+
+.abcjs-inline-midi .abcjs-midi-progress-background {
+	background-color: #424242;
+	height: 10px;
+	border-radius: 5px;
+	border: 2px solid #cccccc;
+	margin: 8px 0 0 15px;
+	position: relative;
+	flex: 1;
+}
+
+.abcjs-inline-midi .abcjs-midi-progress-indicator {
+	width: 20px;
+	margin-left: -10px; /* half of the width */
+	height: 14px;
+	background-color: #f4f4f4;
+	position: absolute;
+	display: inline-block;
+	border-radius: 6px;
+	top: -4px;
+	left: 0;
+}
+
+.abcjs-inline-midi .abcjs-midi-clock, .abcjs-inline-midi .abcjs-midi-post {
+	margin-left: 4px;
+	margin-top: 4px;
+	display: inline-block;
+	font-family: sans-serif;
+	font-size: 16px;
+}
+
+.abcjs-inline-midi .abcjs-midi-pre {
+	margin-top: 4px;
+	display: inline-block;
+}
+
+.abcjs-inline-midi .abcjs-tempo-wrapper {
+	float: right;
+	font-size: 10px;
+	display: inline-block;
+	color: #f4f4f4;
+	margin-top: 4px;
+}
+
+.abcjs-inline-midi .abcjs-midi-tempo {
+	border-radius: 2px;
+	border: none;
+	margin: 1px 2px 0 4px;
+	width: 30px;
+	padding-left: 2px;
+}
