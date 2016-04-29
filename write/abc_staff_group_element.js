@@ -52,6 +52,7 @@ if (!window.ABCJS.write)
 ABCJS.write.StaffGroupElement = function() {
 	this.voices = [];
 	this.staffs = [];
+	this.brace = undefined; //tony
 };
 
 ABCJS.write.StaffGroupElement.prototype.setLimit = function(member, voice) {
@@ -371,6 +372,11 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 	var bottomLine;
 
 	var bartop = 0;
+
+	var numStavesInBrace; //Tony
+	if(this.brace){
+		numStavesInBrace = this.brace.length;
+	}
 	renderer.measureNumber = null;
 	for (var i=0;i<this.voices.length;i++) {
 		var staff = this.voices[i].staff;
@@ -391,8 +397,17 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 //			if (staff.bottom < 0)
 //				renderer.moveY(ABCJS.write.spacing.STEP, -staff.bottom);
 		}
+		if(this.brace) {//Tony
+			if (i === numStavesInBrace - 1) {
+				if (this.brace) {
+					this.brace.draw(renderer, topLine, bottomLine); //tony
+				}
+			}
+		}
 	}
 	renderer.measureNumber = null;
+
+
 
 	// connect all the staves together with a vertical line
 	if (this.staffs.length>1) {

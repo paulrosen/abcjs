@@ -29,14 +29,14 @@ if (!window.ABCJS.write)
  * @param {bool} doRegression
  */
 ABCJS.write.Renderer = function(paper, doRegression) {
-  this.paper = paper;
-  this.controller = null; //TODO-GD only used when drawing the ABCJS ARS to connect the controller with the elements for highlighting
+	this.paper = paper;
+	this.controller = null; //TODO-GD only used when drawing the ABCJS ARS to connect the controller with the elements for highlighting
 
 	this.space = 3*ABCJS.write.spacing.SPACE;
-  this.padding = {}; // renderer's padding is managed by the controller
-  this.doRegression = doRegression;
-  if (this.doRegression)
-    this.regressionLines = [];
+	this.padding = {}; // renderer's padding is managed by the controller
+	this.doRegression = doRegression;
+	if (this.doRegression)
+		this.regressionLines = [];
 	this.reset();
 };
 
@@ -184,31 +184,31 @@ ABCJS.write.Renderer.prototype.initVerticalSpace = function() {
 		words: 0 // Set the vertical space above the lyrics at the end of the tune.
 	};
 	/*
-	TODO-PER: Handle the x-coordinate spacing items, too.
-maxshrink <float>Default: 0.65
-Set how much to compress horizontally when music line breaks
-are automatic.
-<float> must be between 0 (natural spacing)
-and 1 (max shrinking).
+	 TODO-PER: Handle the x-coordinate spacing items, too.
+	 maxshrink <float>Default: 0.65
+	 Set how much to compress horizontally when music line breaks
+	 are automatic.
+	 <float> must be between 0 (natural spacing)
+	 and 1 (max shrinking).
 
-// This next value is used to compute the natural spacing of
-// the notes. The base spacing of the crotchet is always
-// 40 pts. When the duration of a note type is twice the
-// duration of an other note type, its spacing is multiplied
-// by this factor.
-// The default value causes the note spacing to be multiplied
-// by 2 when its duration is multiplied by 4, i.e. the
-// space of the semibreve is 80 pts and the space of the
-// semiquaver is 20 pts.
-// Setting this value to 1 sets all note spacing to 40 pts.
-noteSpacingFactor: 1.414, // Set the note spacing factor to <float> (range 1..2).
+	 // This next value is used to compute the natural spacing of
+	 // the notes. The base spacing of the crotchet is always
+	 // 40 pts. When the duration of a note type is twice the
+	 // duration of an other note type, its spacing is multiplied
+	 // by this factor.
+	 // The default value causes the note spacing to be multiplied
+	 // by 2 when its duration is multiplied by 4, i.e. the
+	 // space of the semibreve is 80 pts and the space of the
+	 // semiquaver is 20 pts.
+	 // Setting this value to 1 sets all note spacing to 40 pts.
+	 noteSpacingFactor: 1.414, // Set the note spacing factor to <float> (range 1..2).
 
-scale <float> Default: 0.75 Set the page scale factor. Note that the header and footer are not scaled.
+	 scale <float> Default: 0.75 Set the page scale factor. Note that the header and footer are not scaled.
 
-stretchlast <float>Default: 0.8
-Stretch the last music line of a tune when it exceeds
-the <float> fraction of the page width.
-<float> range is 0.0 to 1.0.
+	 stretchlast <float>Default: 0.8
+	 Stretch the last music line of a tune when it exceeds
+	 the <float> fraction of the page width.
+	 <float> range is 0.0 to 1.0.
 	 */
 };
 
@@ -243,14 +243,14 @@ ABCJS.write.Renderer.prototype.setVerticalSpace = function(formatting) {
  * @param {object} abctune
  */
 ABCJS.write.Renderer.prototype.topMargin = function(abctune) {
-		this.moveY(this.padding.top);
+	this.moveY(this.padding.top);
 };
 
 /**
  * Leave space before printing the music
  */
 ABCJS.write.Renderer.prototype.addMusicPadding = function() {
-		this.moveY(this.spacing.music);
+	this.moveY(this.spacing.music);
 };
 
 /**
@@ -303,11 +303,11 @@ ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
 		}
 		// TODO-PER: The following is a hack to make the elements line up with abcm2ps. Don't know where the extra space is coming from.
 		this.moveY(-6);
-	//} else if (this.isPrint) {
-	//	// abcm2ps adds this space whether there is anything to write or not.
-	//	this.moveY(this.spacing.composer);
-	//	var space2 = this.getTextSize("M", 'composerfont', 'meta-top');
-	//	this.moveY(space2.height);
+		//} else if (this.isPrint) {
+		//	// abcm2ps adds this space whether there is anything to write or not.
+		//	this.moveY(this.spacing.composer);
+		//	var space2 = this.getTextSize("M", 'composerfont', 'meta-top');
+		//	this.moveY(space2.height);
 	}
 
 	this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, 0, "end");
@@ -389,9 +389,9 @@ ABCJS.write.Renderer.prototype.outputSubtitle = function (width, subtitle) {
  * Begin a group of glyphs that will always be moved, scaled and highlighted together
  */
 ABCJS.write.Renderer.prototype.beginGroup = function () {
-  this.path = [];
-  this.lastM = [0,0];
-  this.ingroup = true;
+	this.path = [];
+	this.lastM = [0,0];
+	this.ingroup = true;
 };
 
 /**
@@ -400,34 +400,34 @@ ABCJS.write.Renderer.prototype.beginGroup = function () {
  * @private
  */
 ABCJS.write.Renderer.prototype.addPath = function (path) {
-  path = path || [];
-  if (path.length===0) return;
-  path[0][0]="m";
-  path[0][1]-=this.lastM[0];
-  path[0][2]-=this.lastM[1];
-  this.lastM[0]+=path[0][1];
-  this.lastM[1]+=path[0][2];
-  this.path.push(path[0]);
-  for (var i=1,ii=path.length;i<ii;i++) {
-    if (path[i][0]==="m") {
-      this.lastM[0]+=path[i][1];
-      this.lastM[1]+=path[i][2];
-    }
-    this.path.push(path[i]);
-  }
+	path = path || [];
+	if (path.length===0) return;
+	path[0][0]="m";
+	path[0][1]-=this.lastM[0];
+	path[0][2]-=this.lastM[1];
+	this.lastM[0]+=path[0][1];
+	this.lastM[1]+=path[0][2];
+	this.path.push(path[0]);
+	for (var i=1,ii=path.length;i<ii;i++) {
+		if (path[i][0]==="m") {
+			this.lastM[0]+=path[i][1];
+			this.lastM[1]+=path[i][2];
+		}
+		this.path.push(path[i]);
+	}
 };
 
 /**
  * End a group of glyphs that will always be moved, scaled and highlighted together
  */
 ABCJS.write.Renderer.prototype.endGroup = function (klass) {
-  this.ingroup = false;
-  if (this.path.length===0) return null;
-  var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
+	this.ingroup = false;
+	if (this.path.length===0) return null;
+	var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
 	this.path = [];
-  if (this.doRegression) this.addToRegression(ret);
+	if (this.doRegression) this.addToRegression(ret);
 
-  return ret;
+	return ret;
 };
 
 /**
@@ -440,20 +440,20 @@ ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
 	var extraClass = "staff";
 	if (klass !== undefined)
 		extraClass += " " + klass;
-  var isIE=/*@cc_on!@*/false;//IE detector
-  var dy = 0.35;
-  var fill = "#000000";
-  if (isIE) {
-    dy = 1;
-    fill = "#666666";
-  }
-  var y = this.calcY(pitch);
-  var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
-     x2, y+dy, x1, y+dy);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses(extraClass)}).toBack();
-  if (this.doRegression) this.addToRegression(ret);
+	var isIE=/*@cc_on!@*/false;//IE detector
+	var dy = 0.35;
+	var fill = "#000000";
+	if (isIE) {
+		dy = 1;
+		fill = "#666666";
+	}
+	var y = this.calcY(pitch);
+	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
+		x2, y+dy, x1, y+dy);
+	var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses(extraClass)}).toBack();
+	if (this.doRegression) this.addToRegression(ret);
 
-  return ret;
+	return ret;
 };
 
 /**
@@ -464,27 +464,27 @@ ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
  * @param {number} y2 y coordinate of the stem top
  */
 ABCJS.write.Renderer.prototype.printStem = function (x, dx, y1, y2) {
-  if (dx<0) { // correct path "handedness" for intersection with other elements
-    var tmp = y2;
-    y2 = y1;
-    y1 = tmp;
-  }
-  var isIE=/*@cc_on!@*/false;//IE detector
-  var fill = "#000000";
-  if (isIE && dx<1) {
-    dx = 1;
-    fill = "#666666";
-  }
-  if (~~x === x) x+=0.05; // raphael does weird rounding (for VML)
-  var pathArray = [["M",x,y1],["L", x, y2],["L", x+dx, y2],["L",x+dx,y1],["z"]];
-  if (!isIE && this.ingroup) {
-    this.addPath(pathArray);
-  } else {
-    var ret = this.paper.path().attr({path:pathArray, stroke:"none", fill:fill, 'class': this.addClasses('stem')}).toBack();
-    if (this.doRegression) this.addToRegression(ret);
+	if (dx<0) { // correct path "handedness" for intersection with other elements
+		var tmp = y2;
+		y2 = y1;
+		y1 = tmp;
+	}
+	var isIE=/*@cc_on!@*/false;//IE detector
+	var fill = "#000000";
+	if (isIE && dx<1) {
+		dx = 1;
+		fill = "#666666";
+	}
+	if (~~x === x) x+=0.05; // raphael does weird rounding (for VML)
+	var pathArray = [["M",x,y1],["L", x, y2],["L", x+dx, y2],["L",x+dx,y1],["z"]];
+	if (!isIE && this.ingroup) {
+		this.addPath(pathArray);
+	} else {
+		var ret = this.paper.path().attr({path:pathArray, stroke:"none", fill:fill, 'class': this.addClasses('stem')}).toBack();
+		if (this.doRegression) this.addToRegression(ret);
 
-    return ret;
-  }
+		return ret;
+	}
 };
 
 function kernSymbols(lastSymbol, thisSymbol, lastSymbolWidth) {
@@ -506,14 +506,14 @@ function kernSymbols(lastSymbol, thisSymbol, lastSymbolWidth) {
  */
 ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex, scaley, klass) {
 	var el;
-    var ycorr;
-  if (!symbol) return null;
-  if (symbol.length>0 && symbol.indexOf(".")<0) {
-    var elemset = this.paper.set();
-    var dx =0;
-    for (var i=0; i<symbol.length; i++) {
-        var s = symbol.charAt(i);
-        ycorr = ABCJS.write.glyphs.getYCorr(s);
+	var ycorr;
+	if (!symbol) return null;
+	if (symbol.length>0 && symbol.indexOf(".")<0) {
+		var elemset = this.paper.set();
+		var dx =0;
+		for (var i=0; i<symbol.length; i++) {
+			var s = symbol.charAt(i);
+			ycorr = ABCJS.write.glyphs.getYCorr(s);
 			el = ABCJS.write.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), s, this.paper, klass);
 			if (el) {
 				if (this.doRegression) this.addToRegression(el);
@@ -522,71 +522,110 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
 					dx+= kernSymbols(s, symbol.charAt(i+1), ABCJS.write.glyphs.getSymbolWidth(s));
 			} else {
 				this.renderText(x, this.y, "no symbol:" +symbol, "debugfont", 'debug-msg', 'start');
-      }
-    }
-    return elemset;
-  } else {
-    ycorr = ABCJS.write.glyphs.getYCorr(symbol);
-    if (this.ingroup) {
-      this.addPath(ABCJS.write.glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
-    } else {
-      el = ABCJS.write.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper, klass);
-      if (el) {
-	if (this.doRegression) this.addToRegression(el);
-	return el;
-      } else
+			}
+		}
+		return elemset;
+	} else {
+		ycorr = ABCJS.write.glyphs.getYCorr(symbol);
+		if (this.ingroup) {
+			this.addPath(ABCJS.write.glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
+		} else {
+			el = ABCJS.write.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper, klass);
+			if (el) {
+				if (this.doRegression) this.addToRegression(el);
+				return el;
+			} else
 				this.renderText(x, this.y, "no symbol:" +symbol, "debugfont", 'debug-msg', 'start');
-    }
-    return null;    
-  }
+		}
+		return null;
+	}
 };
 
 
 ABCJS.write.Renderer.prototype.printPath = function (attrs) {
-  var ret = this.paper.path().attr(attrs);
-  if (this.doRegression) this.addToRegression(ret);
-  return ret;
+	var ret = this.paper.path().attr(attrs);
+	if (this.doRegression) this.addToRegression(ret);
+	return ret;
 };
 
-ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
+ABCJS.write.Renderer.prototype.drawBrace = function(y1, y2) {//Tony
+	// Here we draw the first half of the brace, this will be drawn from the top to the mid point between staves
+	var x1 =12;
+	var x2 = 5;
+	var y3 = y2; //This is now the bottom of the staves
+	var y2 = (y1+y2)/2; //Get the mid point between the staves
+	var controlx1 = x1-15;
+	var controly1 = y1+20;
+	var controlx2 = x2+20;
+	var controly2 = y2-15;
+	var thickness = 2.5;
+	var pathString = ABCJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
+		controlx1, controly1, controlx2, controly2, x2, y2,
+		controlx2-thickness, controly2+thickness, controlx1-thickness, controly1+thickness, x1, y1);
+	var ret1 = this.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000", 'class': this.addClasses('brace')});
+
+	//Now we draw the second half of the brace, this will be drawn from the bottom to the mid point between the staves
+	var controlx1 = x2+18;
+	var controly1 = y2+20;
+	var controlx2 = x1-15;
+	var controly2 = y3-20;
+	var thickness = 2.5;
+	var pathString = ABCJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x2, y2,
+		controlx1, controly1, controlx2, controly2, x1, y3,
+		controlx2+thickness, controly2+thickness, controlx1+thickness, controly1+thickness, x2, y2);
+	var ret2 = this.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000", 'class': this.addClasses('brace')});
 
 
-  x1 = x1 + 6;
-  x2 = x2 + 4;
-  pitch1 = pitch1 + ((above)?1.5:-1.5);
-  pitch2 = pitch2 + ((above)?1.5:-1.5);
-  var y1 = this.calcY(pitch1);
-  var y2 = this.calcY(pitch2);
+	if (this.doRegression){
+		this.addToRegression(ret1);
+		this.addToRegression(ret2);
+	}
+	return ret1 + ret2;
+};//var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", 5, y1, 5, y2, 5+thickness, y2, 5+thickness, y1 );
 
-  //unit direction vector
-  var dx = x2-x1;
-  var dy = y2-y1;
-  var norm= Math.sqrt(dx*dx+dy*dy);
-  var ux = dx/norm;
-  var uy = dy/norm;
+ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass) {
 
-  var flatten = norm/3.5;
-  var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
 
-  var controlx1 = x1+flatten*ux-curve*uy;
-  var controly1 = y1+flatten*uy+curve*ux;
-  var controlx2 = x2-flatten*ux-curve*uy;
-  var controly2 = y2-flatten*uy+curve*ux;
-  var thickness = 2;
-  var pathString = ABCJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
-     controlx1, controly1, controlx2, controly2, x2, y2,
-     controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000", 'class': this.addClasses('slur')});
-  if (this.doRegression) this.addToRegression(ret);
+	x1 = x1 + 6;
+	x2 = x2 + 4;
+	pitch1 = pitch1 + ((above)?1.5:-1.5);
+	pitch2 = pitch2 + ((above)?1.5:-1.5);
+	var y1 = this.calcY(pitch1);
+	var y2 = this.calcY(pitch2);
 
-  return ret;
+	//unit direction vector
+	var dx = x2-x1;
+	var dy = y2-y1;
+	var norm= Math.sqrt(dx*dx+dy*dy);
+	var ux = dx/norm;
+	var uy = dy/norm;
+
+	var flatten = norm/3.5;
+	var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
+
+	var controlx1 = x1+flatten*ux-curve*uy;
+	var controly1 = y1+flatten*uy+curve*ux;
+	var controlx2 = x2-flatten*ux-curve*uy;
+	var controly2 = y2-flatten*uy+curve*ux;
+	var thickness = 2;
+	var pathString = ABCJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
+		controlx1, controly1, controlx2, controly2, x2, y2,
+		controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
+	if (klass)
+		klass += ' slur';
+	else
+		klass = 'slur';
+	var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
+	if (this.doRegression) this.addToRegression(ret);
+
+	return ret;
 };
 /**
  * Calculates the y for a given pitch value (relative to the stave the renderer is currently printing)
  * @param {number} ofs pitch value (bottom C on a G clef = 0, D=1, etc.)
  */
 ABCJS.write.Renderer.prototype.calcY = function(ofs) {
-  return this.y - ofs*ABCJS.write.spacing.STEP;
+	return this.y - ofs*ABCJS.write.spacing.STEP;
 };
 
 /**
@@ -723,7 +762,7 @@ ABCJS.write.Renderer.prototype.printVerticalLine = function (x, y1, y2) {
 	var dy = 0.35;
 	var fill = "#00aaaa";
 	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x - dy, y1, x - dy, y2,
-			x + dy, y1, x + dy, y2);
+		x + dy, y1, x + dy, y2);
 	this.paper.path().attr({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')}).toBack();
 	pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x - 20, y1, x - 20, y1+3,
 		x, y1, x, y1+3);
