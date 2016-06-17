@@ -166,6 +166,10 @@ ABCJS.write.AbsoluteElement.prototype.setX = function (x) {
 		this.children[i].setX(x);
 };
 
+ABCJS.write.AbsoluteElement.prototype.setHint = function () {
+	this.hint = true;
+};
+
 ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	this.elemset = renderer.paper.set();
 	if (this.invisible) return;
@@ -180,6 +184,8 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	this.elemset.push(renderer.endGroup(this.type));
 	if (this.klass)
 		this.setClass("mark", "", "#00ff00");
+	if (this.hint)
+		this.setClass("abcjs-hint", "", null);
 	var color = ABCJS.write.debugPlacement ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0)"; // Create transparent box that encompasses the element, and not so transparent to debug it.
 	var target = renderer.printShadedBox(this.x, renderer.calcY(this.top), this.w, renderer.calcY(this.bottom)-renderer.calcY(this.top), color);
 	var self = this;

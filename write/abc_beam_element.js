@@ -53,6 +53,10 @@ if (!window.ABCJS.write)
 		this.beams = []; // During the layout phase, this will become a list of the beams that need to be drawn.
 	};
 
+	ABCJS.write.BeamElem.prototype.setHint = function () {
+		this.hint = true;
+	};
+
 	ABCJS.write.BeamElem.prototype.add = function(abselem) {
 		var pitch = abselem.abcelem.averagepitch;
 		if (pitch === undefined) return; // don't include elements like spacers in beams
@@ -134,7 +138,7 @@ if (!window.ABCJS.write)
 		renderer.beginGroup();
 		for (var i = 0; i < this.beams.length; i++) {
 			var beam = this.beams[i];
-			drawBeam(renderer, beam.startX, beam.startY, beam.endX, beam.endY, beam.dy);
+			drawBeam(renderer, beam.startX, beam.startY, beam.endX, beam.endY, beam.dy, this.hint);
 		}
 		renderer.endGroup('beam-elem');
 	};
@@ -169,7 +173,11 @@ if (!window.ABCJS.write)
 		return dy;
 	}
 
-	function drawBeam(renderer, startX, startY, endX, endY, dy) {
+	function drawBeam(renderer, startX, startY, endX, endY, dy, isHint) {
+		var klass = 'beam-elem';
+		if (isHint)
+			klass += " abcjs-hint";
+
 		// the X coordinates are actual coordinates, but the Y coordinates are in pitches.
 		startY = renderer.calcY(startY);
 		endY = renderer.calcY(endY);
@@ -179,7 +187,7 @@ if (!window.ABCJS.write)
 			path: pathString,
 			stroke: "none",
 			fill: "#000000",
-			'class': renderer.addClasses('beam-elem')
+			'class': renderer.addClasses(klass)
 		});
 	}
 

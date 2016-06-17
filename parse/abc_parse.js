@@ -1400,12 +1400,57 @@ window.ABCJS.parse.Parse = function() {
 			parseLine(ret.str);
 	};
 
+	function appendLastMeasure(voice, nextVoice) {
+		voice.push({
+			el_type: 'hint'
+		});
+		for (var i = 0; i < nextVoice.length; i++) {
+			var element = nextVoice[i];
+			var hint = window.ABCJS.parse.clone(element);
+			voice.push(hint);
+			if (element.el_type === 'bar')
+					return;
+		}
+	}
+
+	function addHintMeasure(staff, nextStaff) {
+		for (var i = 0; i < staff.length; i++) {
+			var stave = staff[i];
+			var nextStave = nextStaff[i];
+			if (nextStave) { // Be sure there is the same number of staves on the next line.
+				for (var j = 0; j < nextStave.voices.length; j++) {
+					var nextVoice = nextStave.voices[j];
+					var voice = stave.voices[j];
+					if (voice) { // Be sure there are the same number of voices on the previous line.
+						appendLastMeasure(voice, nextVoice);
+					}
+				}
+			}
+		}
+	}
+
+	function addHintMeasures() {
+		for (var i = 0; i < tune.lines.length; i++) {
+			var line = tune.lines[i].staff;
+			if (line) {
+				var j = i+1;
+				while (j < tune.lines.length && tune.lines[j].staff === undefined)
+					j++;
+				if (j < tune.lines.length) {
+					var nextLine = tune.lines[j].staff;
+					addHintMeasure(line, nextLine);
+				}
+			}
+		}
+	}
+
 	this.parse = function(strTune, switches) {
 		// the switches are optional and cause a difference in the way the tune is parsed.
 		// switches.header_only : stop parsing when the header is finished
 		// switches.stop_on_warning : stop at the first warning encountered.
 		// switches.print: format for the page instead of the browser.
 		// switches.format: a hash of the desired formatting commands.
+		// switches.hint_measures: put the next measure at the end of the current line.
 		if (!switches) switches = {};
 		tune.reset();
 		if (switches.print)
@@ -1481,6 +1526,9 @@ window.ABCJS.parse.Parse = function() {
 		} catch (err) {
 			if (err !== "normal_abort")
 				throw err;
+		}
+		if (switches.hint_measures) {
+			addHintMeasures();
 		}
 	};
 };

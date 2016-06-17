@@ -43,6 +43,10 @@ ABCJS.write.TieElem.prototype.setEndX = function(endLimitElem) {
 	this.endLimitX = endLimitElem;
 };
 
+ABCJS.write.TieElem.prototype.setHint = function () {
+	this.hint = true;
+};
+
 ABCJS.write.TieElem.prototype.setUpperAndLowerElements = function(positionY) {
 	// Doesn't depend on the highest and lowest, so there's nothing to do here.
 };
@@ -101,6 +105,9 @@ ABCJS.write.TieElem.prototype.layout = function (lineStartX, lineEndX) {
 ABCJS.write.TieElem.prototype.draw = function (renderer, linestartx, lineendx) {
 	this.layout(linestartx, lineendx);
 
-	renderer.drawArc(this.startX, this.endX, this.startY, this.endY,  this.above);
+	var klass;
+	if (this.hint)
+			klass = "abcjs-hint";
+	renderer.drawArc(this.startX, this.endX, this.startY, this.endY,  this.above, klass);
 
 };

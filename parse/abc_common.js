@@ -30,6 +30,30 @@ window.ABCJS.parse.clone = function(source) {
 	return destination;
 };
 
+window.ABCJS.parse.cloneArray = function(source) {
+	var destination = [];
+	for (var i = 0; i < source.length; i++) {
+		destination.push(ABCJS.parse.clone(source[i]));
+	}
+	return destination;
+};
+
+window.ABCJS.parse.cloneHashOfHash = function(source) {
+	var destination = {};
+	for (var property in source)
+		if (source.hasOwnProperty(property))
+			destination[property] = ABCJS.parse.clone(source[property]);
+	return destination;
+};
+
+window.ABCJS.parse.cloneHashOfArrayOfHash = function(source) {
+	var destination = {};
+	for (var property in source)
+		if (source.hasOwnProperty(property))
+			destination[property] = ABCJS.parse.cloneArray(source[property]);
+	return destination;
+};
+
 window.ABCJS.parse.gsub = function(source, pattern, replacement) {
 	return source.split(pattern).join(replacement);
 };
