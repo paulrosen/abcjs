@@ -184,7 +184,7 @@ if (!window.ABCJS)
 			}
 			else if (renderParams.viewportVertical) {
 				// Create an inner div that holds the music, so that the passed in div will be the viewport.
-				div.innerHTML = '<div class="abcjs-inner"></div>';
+				div.innerHTML = '<div class="abcjs-inner scroll-amount"></div>';
 				if (renderParams.scrollVertical) {
 					div.style.overflowX = "hidden";
 					div.style.overflowY = "auto";

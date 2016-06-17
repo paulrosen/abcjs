@@ -39,6 +39,25 @@ if (!window.ABCJS)
 		return ret;
 	}
 
+	// This finds the place in the stylesheets that contain the rule that matches the selector.
+	// If that selector is not found, then it creates the rule.
+	// We are doing this so that we can use a transition for animating the scrolling.
+	function getCssRule(selector) {
+		var rule;
+		for (var i = 0; i < document.styleSheets.length && rule === undefined; i++) {
+			var css = document.styleSheets[i];
+			for (var j = 0; j < css.rules.length && rule === undefined; j++) {
+				if (css.rules[j].selectorText && css.rules[j].selectorText === selector)
+					rule = css.rules[j];
+			}
+		}
+		if (!rule) {
+			document.styleSheets[0].insertRule(selector + " { }", 1);
+			return getCssRule(selector);
+		}
+		return rule;
+	}
+
 	function getBeatsPerMinute(tune, options) {
 		// We either want to run the timer once per measure or once per beat. If we run it once per beat we need a multiplier for the measures.
 		// So, first we figure out the beats per minute and the beats per measure, then depending on the type of animation, we can
@@ -57,6 +76,7 @@ if (!window.ABCJS)
 
 	var scrollTimer;
 	var animateTimer;
+	var cssRule;
 
 	// This is a way to manipulate the written music on a timer. Their are two ways to manipulate the music: turn off each measure as it goes by,
 	// and put a vertical cursor before the next note to play. The timer works at the speed of the original tempo of the music unless it is overwritten
@@ -71,9 +91,10 @@ if (!window.ABCJS)
 	//    bpm: number of beats per minute [ the default is whatever is in the Q: field ]
 	//    scrollHorizontal: true or false [ false is the default ]
 	//    scrollVertical: true or false [ false is the default ]
+	//    scrollHint: true or false [ false is the default ]
 	//
 	// If scrollHorizontal is present, then we expect that the music was rendered with the viewportHorizontal parameter so there is a viewport wrapping the music div. (Note that this only works when there is a single line of music and there are no repeats, signo, or codas.)
-	// If scrollVertical is present, then we expect that the music was rendered with the viewportVertical parameter so there is a viewport wrapping the music div.
+	// If scrollVertical or scrollHint is present, then we expect that the music was rendered with the viewportVertical parameter so there is a viewport wrapping the music div.
 	// If the music is larger than the viewport, then it scrolls as the music is being played.
 	var stopNextTime = false;
 	var cursor;
@@ -86,13 +107,13 @@ if (!window.ABCJS)
 			console.error("ABCJS.startAnimation: The second parameter must be a single tune. (Did you pass the entire array of tunes?)");
 			return;
 		}
-		if (options.scrollHorizontal || options.scrollVertical) {
+		if (options.scrollHorizontal || options.scrollVertical || options.scrollHint) {
 			// We assume that there is an extra div in this case, so adjust the paper if needed.
 			// This can be called either with the outer div or the inner div.
 			if (!hasClass(paper, 'abcjs-inner'))
 				paper = paper.children[0]; // Must be the outer div; move in.
 			if (!hasClass(paper, 'abcjs-inner')) {
-				console.error("ABCJS.startAnimation: When using scrollHorizontal/scrollVertical, the music must have been rendered using viewportHorizontal/viewportVertical.");
+				console.error("ABCJS.startAnimation: When using scrollHorizontal/scrollVertical/scrollHint, the music must have been rendered using viewportHorizontal/viewportVertical.");
 				return;
 			}
 		}
@@ -117,6 +138,7 @@ if (!window.ABCJS)
 			var beatsPerMeasure = 1/beatLength;
 			var millisecondsPerMeasure = millisecondsPerBeat * beatsPerMeasure;
 			millisecondsPerHalfMeasure = millisecondsPerMeasure / 2;
+			cssRule = getCssRule(".abcjs-inner");
 		}
 
 		var startTime;
@@ -157,15 +179,22 @@ if (!window.ABCJS)
 		function addVerticalInfo(timingEvents) {
 			// Add vertical info to the bar events: put the next event's top, and the event after the next measure's top.
 			var lastBarTop;
+			var lastBarBottom;
 			var lastEventTop;
+			var lastEventBottom;
 			for (var e = timingEvents.length-1; e >= 0; e--) {
 				var ev = timingEvents[e];
 				if (ev.type === 'bar') {
 					ev.top = lastEventTop;
 					ev.nextTop = lastBarTop;
 					lastBarTop = lastEventTop;
+
+					ev.bottom = lastEventBottom;
+					ev.nextBottom = lastBarBottom;
+					lastBarBottom = lastEventBottom;
 				} else if (ev.type === 'event') {
 					lastEventTop = ev.top;
+					lastEventBottom = ev.top +ev.height;
 				}
 			}
 		}
@@ -212,6 +241,8 @@ if (!window.ABCJS)
 					var elements = voices[v].children;
 					for (var elem=0; elem<elements.length; elem++) {
 						var element = elements[elem];
+						if (element.hint)
+								break;
 						if (element.duration > 0) {
 							// There are 3 possibilities here: the note could stand on its own, the note could be tied to the next,
 							// the note could be tied to the previous, and the note could be tied on both sides.
@@ -266,7 +297,29 @@ if (!window.ABCJS)
 		}
 		setupEvents(tune.engraver);
 
+		function isEndOfLine(currentNote) {
+			return currentNote.top !== currentNote.nextTop && currentNote.nextTop !== undefined;
+		}
+
+		function shouldScroll(outer, scrollPos, currentNote) {
+			var height = parseInt(outer.clientHeight, 10);
+			var isVisible = currentNote.nextBottom - scrollPos < height;
+			console.log("SCROLL: ", height, scrollPos, currentNote.nextTop, currentNote.nextBottom, isVisible);
+			return !isVisible;
+		}
+
 		var lastTop = -1;
+		var inner = $(outer).find(".abcjs-inner");
+		var currentMargin = 0;
+
+		function setMargin(margin) {
+			cssRule.style.marginTop = -margin + "px";
+			currentMargin = margin;
+		}
+		if (options.scrollVertical) {
+			setMargin(0); // In case we are calling this a second time.
+		}
+
 		function processShowCursor() {
 			var currentNote = timingEvents.shift();
 			if (!currentNote) {
@@ -275,10 +328,9 @@ if (!window.ABCJS)
 			}
 			if (currentNote.type === "bar") {
 				if (options.scrollVertical) {
-					if (currentNote.top !== currentNote.nextTop && currentNote.nextTop !== undefined) {
+					if (isEndOfLine(currentNote) && shouldScroll(outer, currentMargin, currentNote)) {
 						setTimeout(function() {
-							var inner = $("#scroll-v-output").find(".abcjs-inner");
-							inner[0].style.marginTop = '-' + currentNote.nextTop + 'px';
+							setMargin(currentNote.nextTop);
 						}, millisecondsPerHalfMeasure);
 					}
 				}
@@ -288,11 +340,10 @@ if (!window.ABCJS)
 					return timingEvents[0].time / beatLength;
 				return 0;
 			}
-			//if (options.scrollVertical && lastTop !== currentNote.top) {
-			//	lastTop = currentNote.top;
-			//	var inner = $("#scroll-v-output").find(".abcjs-inner");
-			//	inner[0].style.marginTop = '-' + lastTop + 'px';
-			//}
+			if (options.scrollHint && lastTop !== currentNote.top) {
+				lastTop = currentNote.top;
+				setMargin(lastTop);
+			}
 			if (options.showCursor) {
 				cursor.css({
 					left: currentNote.left + "px",
