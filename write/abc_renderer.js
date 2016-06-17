@@ -548,7 +548,7 @@ ABCJS.write.Renderer.prototype.printPath = function (attrs) {
   return ret;
 };
 
-ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
+ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass) {
 
 
   x1 = x1 + 6;
@@ -576,7 +576,11 @@ ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above)
   var pathString = ABCJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
      controlx1, controly1, controlx2, controly2, x2, y2,
      controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000", 'class': this.addClasses('slur')});
+	if (klass)
+		klass += ' slur';
+	else
+		klass = 'slur';
+  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
   if (this.doRegression) this.addToRegression(ret);
 
   return ret;
