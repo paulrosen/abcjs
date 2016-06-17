@@ -23,8 +23,9 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `parserParams` | Default | Description |
 | ------------- | ----------- | ----------- |
 | `print` | false | pay attention to margins and other formatting commands that don't make sense in a web page |
-| `header_only` | false |only parse the header |
+| `header_only` | false | only parse the header |
 | `stop_on_warning` | false | only parse until the first warning is encountered |
+| `hint_measures` | false | repeat the next measure at the end of the previous line, with a unique css class. |
 
 | `engraverParams` | Default | Description |
 | ------------- | ----------- | ----------- |
