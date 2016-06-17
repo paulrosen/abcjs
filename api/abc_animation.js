@@ -110,8 +110,12 @@ if (!window.ABCJS)
 		if (options.scrollHorizontal || options.scrollVertical || options.scrollHint) {
 			// We assume that there is an extra div in this case, so adjust the paper if needed.
 			// This can be called either with the outer div or the inner div.
-			if (!hasClass(paper, 'abcjs-inner'))
-				paper = paper.children[0]; // Must be the outer div; move in.
+			if (!hasClass(paper, 'abcjs-inner')) {
+				// Must be the outer div; hide the scrollbar and move in.
+				paper.scrollTop = 0; // In case the user has repositioned the scrollbar.
+				paper.style.overflow = "hidden";
+				paper = paper.children[0];
+			}
 			if (!hasClass(paper, 'abcjs-inner')) {
 				console.error("ABCJS.startAnimation: When using scrollHorizontal/scrollVertical/scrollHint, the music must have been rendered using viewportHorizontal/viewportVertical.");
 				return;

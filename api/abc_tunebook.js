@@ -185,11 +185,8 @@ if (!window.ABCJS)
 			else if (renderParams.viewportVertical) {
 				// Create an inner div that holds the music, so that the passed in div will be the viewport.
 				div.innerHTML = '<div class="abcjs-inner scroll-amount"></div>';
-				if (renderParams.scrollVertical) {
-					div.style.overflowX = "hidden";
-					div.style.overflowY = "auto";
-				} else
-					div.style.overflow = "hidden";
+				div.style.overflowX = "hidden";
+				div.style.overflowY = "auto";
 				div = div.children[0]; // The music should be rendered in the inner div.
 			}
 			/* jshint -W064 */ var paper = Raphael(div, width, 400); /* jshint +W064 */
