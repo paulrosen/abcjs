@@ -76,9 +76,8 @@ if (!window.ABCJS.midi)
 			midiJs.endTrack();
 		}
 
-		// TODO-PER: probably do this backwards: change the midi generation to NOT escape, then call escape for the download version.
 		var midiFile = midi.getData();
-		var midiInline = midiJs.getData(); // unescape(midiFile.substring(16));
+		var midiInline = midiJs.getData();
 		if (options.generateInline === undefined) // default is to generate inline controls.
 			options.generateInline = true;
 		if (options.generateInline && options.generateDownload)
