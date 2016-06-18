@@ -46,9 +46,12 @@ if (!window.ABCJS)
 		var rule;
 		for (var i = 0; i < document.styleSheets.length && rule === undefined; i++) {
 			var css = document.styleSheets[i];
-			for (var j = 0; j < css.rules.length && rule === undefined; j++) {
-				if (css.rules[j].selectorText && css.rules[j].selectorText === selector)
-					rule = css.rules[j];
+			var rules = css.rules;
+			if (rules) {
+				for (var j = 0; j < rules.length && rule === undefined; j++) {
+					if (rules[j].selectorText && rules[j].selectorText === selector)
+						rule = rules[j];
+				}
 			}
 		}
 		if (!rule) {
