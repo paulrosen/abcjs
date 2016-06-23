@@ -190,7 +190,6 @@ ABCJS.write.Renderer.prototype.initVerticalSpace = function() {
 	 are automatic.
 	 <float> must be between 0 (natural spacing)
 	 and 1 (max shrinking).
-
 	 // This next value is used to compute the natural spacing of
 	 // the notes. The base spacing of the crotchet is always
 	 // 40 pts. When the duration of a note type is twice the
@@ -202,9 +201,7 @@ ABCJS.write.Renderer.prototype.initVerticalSpace = function() {
 	 // semiquaver is 20 pts.
 	 // Setting this value to 1 sets all note spacing to 40 pts.
 	 noteSpacingFactor: 1.414, // Set the note spacing factor to <float> (range 1..2).
-
 	 scale <float> Default: 0.75 Set the page scale factor. Note that the header and footer are not scaled.
-
 	 stretchlast <float>Default: 0.8
 	 Stretch the last music line of a tune when it exceeds
 	 the <float> fraction of the page width.
@@ -581,7 +578,7 @@ ABCJS.write.Renderer.prototype.drawBrace = function(y1, y2) {//Tony
 		this.addToRegression(ret2);
 	}
 	return ret1 + ret2;
-};//var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", 5, y1, 5, y2, 5+thickness, y2, 5+thickness, y1 );
+};
 
 ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass) {
 

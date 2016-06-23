@@ -372,11 +372,12 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 	var bottomLine;
 
 	var bartop = 0;
-
+	
 	var numStavesInBrace; //Tony
 	if(this.brace){
 		numStavesInBrace = this.brace.length;
 	}
+	
 	renderer.measureNumber = null;
 	for (var i=0;i<this.voices.length;i++) {
 		var staff = this.voices[i].staff;
@@ -407,12 +408,9 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 	}
 	renderer.measureNumber = null;
 
-
-
 	// connect all the staves together with a vertical line
 	if (this.staffs.length>1) {
 		renderer.printStem(this.startx, 0.6, topLine, bottomLine);
 	}
 	renderer.y = startY;
 };
-

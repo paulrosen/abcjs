@@ -82,7 +82,7 @@ if (!window.ABCJS.write)
         this.startlimitelem = undefined;
         this.stemdir = undefined;
         this.voice = undefined;
-        this.brace = undefined; //Tony 
+        this.brace = undefined //Tony
     };
 
     ABCJS.write.AbstractEngraver.prototype.setStemHeight = function(heightInPixels) {
@@ -145,16 +145,14 @@ if (!window.ABCJS.write)
             ABCJS.write.hint = false;
             this.createABCStaff(staffs[this.s], tempo);
         }
-        this.staffgroup.brace = this.brace; //tony
+        this.staffgroup.brace = this.brace; //Tony
         return this.staffgroup;
     };
 
     ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo) {
 // If the tempo is passed in, then the first element should get the tempo attached to it.
         for (this.v = 0; this.v < abcstaff.voices.length; this.v++) {
-
             this.voice = new ABCJS.write.VoiceElement(this.v,abcstaff.voices.length);
-
             if (this.v===0) {
                 this.voice.barfrom = (abcstaff.connectBarLines==="start" || abcstaff.connectBarLines==="continue");
                 this.voice.barto = (abcstaff.connectBarLines==="continue" || abcstaff.connectBarLines==="end");
@@ -181,8 +179,7 @@ if (!window.ABCJS.write)
             this.staffgroup.addVoice(this.voice,this.s,staffLines);
             this.createABCVoice(abcstaff.voices[this.v],tempo);
             this.staffgroup.setStaffLimits(this.voice);
-
-            //Here I am following what braces need to be surrounded by the brace, by incrementing the length of the brace class.
+            //Here I am following what staves need to be surrounded by the brace, by incrementing the length of the brace class.
             //So basically this keeps incementing the number of staff surrounded by the brace until it sees "end".
             //This then gets processed in abc_staff_group_element.js, so that it will have the correct top and bottom coordinates for the brace.
             if (abcstaff.brace) { //
@@ -723,6 +720,9 @@ if (!window.ABCJS.write)
 
         return abselem;
     };
+
+
+
 
     ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale) {
 

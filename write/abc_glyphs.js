@@ -104,115 +104,115 @@ ABCJS.write.Glyphs = function() {
 	glyphs['noteheads.harmonic.quarter'] = {d:[['M',3.63,-4.02],['c',0.09,-0.06,0.18,-0.09,0.24,-0.03],['c',0.03,0.03,0.87,0.93,1.83,2.01],['c',1.50,1.65,1.80,1.98,1.80,2.04],['c',0.00,0.06,-0.30,0.39,-1.80,2.04],['c',-0.96,1.08,-1.80,1.98,-1.83,2.01],['c',-0.06,0.06,-0.15,0.03,-0.24,-0.03],['c',-0.12,-0.09,-3.54,-3.84,-3.60,-3.93],['c',-0.03,-0.03,-0.03,-0.09,-0.03,-0.15],['c',0.03,-0.06,3.45,-3.84,3.63,-3.96],['z']],w:7.5,h:8.165};
 
 
-  this.printSymbol = function (x,y,symb,paper, klass) {
-    if (!glyphs[symb]) return null;
-    var pathArray = this.pathClone(glyphs[symb].d);
-    pathArray[0][1] +=x;
-    pathArray[0][2] +=y;
-    return paper.path().attr({path:pathArray, stroke:"none", fill:"#000000", 'class': klass });
-   };
-  
-  this.getPathForSymbol = function (x,y,symb,scalex, scaley) {
-    scalex = scalex || 1;
-    scaley = scaley || 1;
-    if (!glyphs[symb]) return null;
-    var pathArray = this.pathClone(glyphs[symb].d);
-    if (scalex!==1 || scaley!==1) this.pathScale(pathArray,scalex,scaley);
-    pathArray[0][1] +=x;
-    pathArray[0][2] +=y;
+	this.printSymbol = function (x,y,symb,paper, klass) {
+		if (!glyphs[symb]) return null;
+		var pathArray = this.pathClone(glyphs[symb].d);
+		pathArray[0][1] +=x;
+		pathArray[0][2] +=y;
+		return paper.path().attr({path:pathArray, stroke:"none", fill:"#000000", 'class': klass });
+	};
 
-    return pathArray;
-  };
-  
-  this.getSymbolWidth = function (symbol) {
-    if (glyphs[symbol]) return glyphs[symbol].w;
-    return 0;
-  };
-  
-  this.getSymbolHeight = function (symbol) {
-    if (glyphs[symbol]) return glyphs[symbol].h;
-    return 0;
-  };
+	this.getPathForSymbol = function (x,y,symb,scalex, scaley) {
+		scalex = scalex || 1;
+		scaley = scaley || 1;
+		if (!glyphs[symb]) return null;
+		var pathArray = this.pathClone(glyphs[symb].d);
+		if (scalex!==1 || scaley!==1) this.pathScale(pathArray,scalex,scaley);
+		pathArray[0][1] +=x;
+		pathArray[0][2] +=y;
+
+		return pathArray;
+	};
+
+	this.getSymbolWidth = function (symbol) {
+		if (glyphs[symbol]) return glyphs[symbol].w;
+		return 0;
+	};
+
+	this.getSymbolHeight = function (symbol) {
+		if (glyphs[symbol]) return glyphs[symbol].h;
+		return 0;
+	};
 
 	this.symbolHeightInPitches = function(symbol) {
 		return this.getSymbolHeight(symbol) / ABCJS.write.spacing.STEP;
 	};
 
-  this.getSymbolAlign = function (symbol) {
-    if (symbol.substring(0,7)==="scripts" && 
-	symbol!=="scripts.roll") {
-      return "center";
-    }
-    return "left";
-  };
+	this.getSymbolAlign = function (symbol) {
+		if (symbol.substring(0,7)==="scripts" &&
+			symbol!=="scripts.roll") {
+			return "center";
+		}
+		return "left";
+	};
 
-  this.pathClone = function (pathArray) {
-    var res = [];
-    for (var i = 0, ii = pathArray.length; i < ii; i++) {
-      res[i] = [];
-      for (var j = 0, jj = pathArray[i].length; j < jj; j++) {
-	res[i][j] = pathArray[i][j];
-      }
-    }
-    return res;
-  };
+	this.pathClone = function (pathArray) {
+		var res = [];
+		for (var i = 0, ii = pathArray.length; i < ii; i++) {
+			res[i] = [];
+			for (var j = 0, jj = pathArray[i].length; j < jj; j++) {
+				res[i][j] = pathArray[i][j];
+			}
+		}
+		return res;
+	};
 
-  this.pathScale = function (pathArray, kx, ky) {
-    for (var i = 0, ii = pathArray.length; i < ii; i++) {
-      var p = pathArray[i];
-      var j, jj;
-      for (j = 1, jj = p.length; j < jj; j++) {
-	p[j] *= (j % 2) ? kx : ky;
-      }
-    }
-  };
-   
-  this.getYCorr = function (symbol) {
-    switch(symbol) {
-    case "0":
-    case "1":
-    case "2":
-    case "3":
-    case "4":
-    case "5":
-    case "6":
-    case "7":
-    case "8":
-    case "9":
-    case "+": return -2;
-    case "timesig.common":
-    case "timesig.cut": return 0;
-    case "flags.d32nd": return -1;
-    case "flags.d64th": return -2;
-    case "flags.u32nd": return 1;
-    case "flags.u64th": return 3;
-    case "rests.whole": return 1;
-    case "rests.half": return -1;
-    case "rests.8th": return -1;
-    case "rests.quarter": return -1;
-    case "rests.16th": return -1;
-    case "rests.32nd": return -1;
-    case "rests.64th": return -1;
-		case "f":
-		case "m":
-		case "p":
-		case "s":
-		case "z":
-			return -4;
-		case "scripts.trill":
-		case "scripts.upbow":
-		case "scripts.downbow":
-			return -2;
-		case "scripts.ufermata":
-		case "scripts.wedge":
-		case "scripts.roll":
-		case "scripts.shortphrase":
-		case "scripts.longphrase":
-			return -1;
-		case "scripts.dfermata":
-			return 1;
-    default: return 0;
-    }
-  };
+	this.pathScale = function (pathArray, kx, ky) {
+		for (var i = 0, ii = pathArray.length; i < ii; i++) {
+			var p = pathArray[i];
+			var j, jj;
+			for (j = 1, jj = p.length; j < jj; j++) {
+				p[j] *= (j % 2) ? kx : ky;
+			}
+		}
+	};
+
+	this.getYCorr = function (symbol) {
+		switch(symbol) {
+			case "0":
+			case "1":
+			case "2":
+			case "3":
+			case "4":
+			case "5":
+			case "6":
+			case "7":
+			case "8":
+			case "9":
+			case "+": return -2;
+			case "timesig.common":
+			case "timesig.cut": return 0;
+			case "flags.d32nd": return -1;
+			case "flags.d64th": return -2;
+			case "flags.u32nd": return 1;
+			case "flags.u64th": return 3;
+			case "rests.whole": return 1;
+			case "rests.half": return -1;
+			case "rests.8th": return -1;
+			case "rests.quarter": return -1;
+			case "rests.16th": return -1;
+			case "rests.32nd": return -1;
+			case "rests.64th": return -1;
+			case "f":
+			case "m":
+			case "p":
+			case "s":
+			case "z":
+				return -4;
+			case "scripts.trill":
+			case "scripts.upbow":
+			case "scripts.downbow":
+				return -2;
+			case "scripts.ufermata":
+			case "scripts.wedge":
+			case "scripts.roll":
+			case "scripts.shortphrase":
+			case "scripts.longphrase":
+				return -1;
+			case "scripts.dfermata":
+				return 1;
+			default: return 0;
+		}
+	};
 };
 ABCJS.write.glyphs = new ABCJS.write.Glyphs(); // we need the glyphs for layout information
