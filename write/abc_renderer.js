@@ -641,6 +641,8 @@ ABCJS.write.Renderer.prototype.getTextSize = function(text, type, klass) {
 	var hash = this.getFontAndAttr(type, klass);
 	var el = this.paper.text(0,0, text).attr(hash.attr);
 	var size = el.getBBox();
+	if (isNaN(size.height)) // This can happen if the element isn't visible.
+		size = { width: 0, height: 0};
 	el.remove();
 	return size;
 };
@@ -655,9 +657,13 @@ ABCJS.write.Renderer.prototype.renderText = function(x, y, text, type, klass, an
 		// The text will be placed centered in vertical alignment, so we need to move the box down so that
 		// the top of the text is where we've requested.
 		var size = el.getBBox();
-		el.attr({ "y": y + size.height / 2 });
-		if (hash.font.box) {
-			this.paper.rect(size.x - 1, size.y - 1, size.width + 2, size.height + 2).attr({"stroke": "#cccccc"});
+		if (isNaN(size.height)) // This can happen if the element is hidden.
+			el.attr({ "y": y });
+		else {
+			el.attr({"y": y + size.height / 2});
+			if (hash.font.box) {
+				this.paper.rect(size.x - 1, size.y - 1, size.width + 2, size.height + 2).attr({"stroke": "#cccccc"});
+			}
 		}
 	}
 	if (type === 'debugfont') {
@@ -685,11 +691,15 @@ ABCJS.write.Renderer.prototype.outputTextIf = function(x, str, kind, klass, marg
 		if (marginTop)
 			this.moveY(marginTop);
 		var el = this.renderText(x, this.y, str, kind, klass, alignment);
+		var bb = el.getBBox(); // This can return NaN if the element isn't visible.
+		var width = isNaN(bb.width) ? 0 : bb.width;
+		var height = isNaN(bb.height) ? 0 : bb.height;
 		if (marginBottom !== null) {
 			var numLines = str.split("\n").length;
-			this.moveY(el.getBBox().height/numLines, (numLines + marginBottom));
+			if (!isNaN(bb.height))
+				this.moveY(height/numLines, (numLines + marginBottom));
 		}
-		return [el.getBBox().width, el.getBBox().height];
+		return [width, height];
 	}
 	return [0,0];
 };
