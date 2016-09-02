@@ -311,7 +311,7 @@ if (!window.ABCJS)
 		function shouldScroll(outer, scrollPos, currentNote) {
 			var height = parseInt(outer.clientHeight, 10);
 			var isVisible = currentNote.nextBottom - scrollPos < height;
-			console.log("SCROLL: ", height, scrollPos, currentNote.nextTop, currentNote.nextBottom, isVisible);
+			//console.log("SCROLL: ", height, scrollPos, currentNote.nextTop, currentNote.nextBottom, isVisible);
 			return !isVisible;
 		}
 
@@ -368,6 +368,12 @@ if (!window.ABCJS)
 		function processNext() {
 			if (stopNextTime) {
 				ABCJS.stopAnimation();
+				if (options.scrollVertical || options.scrollHint) {
+					if (paper && paper.parentNode) // If the music was redrawn or otherwise disappeared before the animation was finished, this might be null.
+						paper.parentNode.style.overflowY = "auto";
+					var scrollPos = currentMargin;
+					setMargin(0);
+				}
 				return;
 			}
 			var nextTimeInBeats = processShowCursor();
