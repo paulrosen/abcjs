@@ -80,6 +80,9 @@ if (!window.ABCJS)
 	var scrollTimer;
 	var animateTimer;
 	var cssRule;
+	var currentMargin;
+	var animationTarget;
+	var shouldResetOverflow;
 
 	// This is a way to manipulate the written music on a timer. Their are two ways to manipulate the music: turn off each measure as it goes by,
 	// and put a vertical cursor before the next note to play. The timer works at the speed of the original tempo of the music unless it is overwritten
@@ -101,6 +104,11 @@ if (!window.ABCJS)
 	// If the music is larger than the viewport, then it scrolls as the music is being played.
 	var stopNextTime = false;
 	var cursor;
+
+	function setMargin(margin) {
+		cssRule.style.marginTop = -margin + "px";
+		currentMargin = margin;
+	}
 	ABCJS.startAnimation = function(paper, tune, options) {
 		if (paper.getElementsByClassName === undefined) {
 			console.error("ABCJS.startAnimation: The first parameter must be a regular DOM element. (Did you pass a jQuery object or an ID?)");
@@ -126,6 +134,8 @@ if (!window.ABCJS)
 		}
 		// Can only have one animation at a time, so make sure that it has been stopped.
 		ABCJS.stopAnimation();
+		animationTarget = paper;
+		shouldResetOverflow = options.scrollVertical || options.scrollHint;
 
 		if (options.showCursor) {
 			cursor = $('<div class="cursor" style="position: absolute;"></div>');
@@ -317,12 +327,8 @@ if (!window.ABCJS)
 
 		var lastTop = -1;
 		var inner = $(outer).find(".abcjs-inner");
-		var currentMargin = 0;
+		currentMargin = 0;
 
-		function setMargin(margin) {
-			cssRule.style.marginTop = -margin + "px";
-			currentMargin = margin;
-		}
 		if (options.scrollVertical) {
 			setMargin(0); // In case we are calling this a second time.
 		}
@@ -368,12 +374,6 @@ if (!window.ABCJS)
 		function processNext() {
 			if (stopNextTime) {
 				ABCJS.stopAnimation();
-				if (options.scrollVertical || options.scrollHint) {
-					if (paper && paper.parentNode) // If the music was redrawn or otherwise disappeared before the animation was finished, this might be null.
-						paper.parentNode.style.overflowY = "auto";
-					var scrollPos = currentMargin;
-					setMargin(0);
-				}
 				return;
 			}
 			var nextTimeInBeats = processShowCursor();
@@ -397,6 +397,11 @@ if (!window.ABCJS)
 		if (cursor) {
 			cursor.remove();
 			cursor = null;
+		}
+		if (shouldResetOverflow) {
+			if (animationTarget && animationTarget.parentNode) // If the music was redrawn or otherwise disappeared before the animation was finished, this might be null.
+				animationTarget.parentNode.style.overflowY = "auto";
+			setMargin(0);
 		}
 	};
 })();
