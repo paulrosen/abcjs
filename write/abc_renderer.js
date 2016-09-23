@@ -371,10 +371,17 @@ ABCJS.write.Renderer.prototype.outputFreeText = function (text) {
 		this.outputTextIf(this.padding.left, text, 'textfont', 'defined-text', 0, 1, "start");
 	else {
 		var str = "";
+		var isCentered = false; // The structure is wrong here: it requires an array to do centering, but it shouldn't have.
 		for (var i = 0; i < text.length; i++) {
-			str += " FONT " + text[i].text;
+			if (text[i].font)
+				str += "FONT(" + text[i].font + ")";
+			str += text[i].text;
+			if (text[i].center)
+				isCentered = true;
 		}
-		this.outputTextIf(this.padding.left, str, 'textfont', 'defined-text', 0, 1, "start");
+		var alignment = isCentered ? 'middle' : 'start';
+		var x = isCentered ? this.controller.width / 2 : this.padding.left;
+		this.outputTextIf(x, str, 'textfont', 'defined-text', 0, 1, alignment);
 	}
 };
 
