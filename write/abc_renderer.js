@@ -138,7 +138,7 @@ ABCJS.write.Renderer.prototype.setPadding = function(abctune) {
 	// 1cm x 0.393701in/cm x 72pt/in x 1.33px/pt = 38px
 	// 1.8cm x 0.393701in/cm x 72pt/in x 1.33px/pt = 68px
 	setPaddingVariable(this, 'top', 'topmargin', 38, 15);
-	setPaddingVariable(this, 'bottom', 'bottommargin', 38, 15);
+	setPaddingVariable(this, 'bottom', 'botmargin', 38, 15);
 	setPaddingVariable(this, 'left', 'leftmargin', 68, 15);
 	setPaddingVariable(this, 'right', 'rightmargin', 68, 15);
 };
