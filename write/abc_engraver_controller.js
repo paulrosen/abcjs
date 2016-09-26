@@ -198,7 +198,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune, tuneNu
 			this.engraveStaffLine(abcLine.staffGroup);
 		} else if (abcLine.subtitle && line !== 0) {
 			this.renderer.outputSubtitle(this.width, abcLine.subtitle);
-		} else if (abcLine.text) {
+		} else if (abcLine.text !== undefined) {
 			this.renderer.outputFreeText(abcLine.text);
 		}
 	}

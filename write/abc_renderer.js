@@ -367,7 +367,10 @@ ABCJS.write.Renderer.prototype.engraveExtraText = function(width, abctune) {
  * @param {array or string} text
  */
 ABCJS.write.Renderer.prototype.outputFreeText = function (text) {
-	if (typeof text === 'string')
+	if (text === "") {	// we do want to print out blank lines if they have been specified.
+		var hash = this.getFontAndAttr('textfont', 'defined-text');
+		this.moveY(hash.attr['font-size'] * 2); // move the distance of the line, plus the distance of the margin, which is also one line.
+	} else if (typeof text === 'string')
 		this.outputTextIf(this.padding.left, text, 'textfont', 'defined-text', 0, 1, "start");
 	else {
 		var str = "";
