@@ -102,7 +102,7 @@ ABCJS.write.RelativeElement.prototype.draw = function (renderer, bartop) {
 		case "debug":
 			this.graphelem = renderer.renderText(this.x, renderer.calcY(15), ""+this.c, "debugfont", 'debug-msg', 'start'); break;
 		case "barNumber":
-			this.graphelem = renderer.renderText(this.x, y, ""+this.c, "measurefont", 'bar-number', "start");
+			this.graphelem = renderer.renderText(this.x, y, ""+this.c, "measurefont", 'bar-number', "middle");
 			break;
 		case "lyric":
 			this.graphelem = renderer.renderText(this.x, y, this.c, "vocalfont", 'abc-lyric', "middle");

@@ -840,14 +840,12 @@ window.ABCJS.parse.Parse = function() {
 			if (multilineVars.currentVoice.style)
 				params.style = multilineVars.currentVoice.style;
 		}
+		var isFirstVoice = multilineVars.currentVoice === undefined || (multilineVars.currentVoice.staffNum ===  0 && multilineVars.currentVoice.index ===  0);
+		if (multilineVars.barNumbers === 0 && isFirstVoice && multilineVars.currBarNumber !== 1)
+			params.barNumber = multilineVars.currBarNumber;
 		tune.startNewLine(params);
 
 		multilineVars.partForNextLine = "";
-		if (multilineVars.currentVoice === undefined || (multilineVars.currentVoice.staffNum === multilineVars.staves.length-1 && multilineVars.staves[multilineVars.currentVoice.staffNum].numVoices-1 === multilineVars.currentVoice.index)) {
-			//multilineVars.meter = null;
-			if (multilineVars.barNumbers === 0)
-				multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
-		}
 	}
 
 	var letter_to_grace =  function(line, i) {
@@ -1145,9 +1143,12 @@ window.ABCJS.parse.Parse = function() {
 						else if (bar.endEnding)
 							multilineVars.barFirstEndingNum = undefined;
 						if (bar.type !== 'bar_invisible' && multilineVars.measureNotEmpty) {
-							multilineVars.currBarNumber++;
-							if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0)
-								multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
+							var isFirstVoice = multilineVars.currentVoice === undefined || (multilineVars.currentVoice.staffNum ===  0 && multilineVars.currentVoice.index ===  0);
+							if (isFirstVoice) {
+								multilineVars.currBarNumber++;
+								if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0)
+									bar.barNumber = multilineVars.currBarNumber;
+							}
 						}
 						multilineVars.addFormattingOptions(el, tune.formatting, 'bar');
 						tune.appendElement('bar', startOfLine+i, startOfLine+i+ret[0], bar);
@@ -1291,10 +1292,7 @@ window.ABCJS.parse.Parse = function() {
 									if (chordDuration !== null) {
 										el.duration = el.duration * chordDuration;
 									}
-									if (multilineVars.barNumOnNextNote) {
-										el.barNumber = multilineVars.barNumOnNextNote;
-										multilineVars.barNumOnNextNote = null;
-									}
+
 									multilineVars.addFormattingOptions(el, tune.formatting, 'note');
 									tune.appendElement('note', startOfLine+chordStartChar, startOfLine+i, el);
 									multilineVars.measureNotEmpty = true;
@@ -1365,10 +1363,6 @@ window.ABCJS.parse.Parse = function() {
 								el.duration = durationOfMeasure(multilineVars);
 							}
 
-							if (multilineVars.barNumOnNextNote) {
-								el.barNumber = multilineVars.barNumOnNextNote;
-								multilineVars.barNumOnNextNote = null;
-							}
 							multilineVars.addFormattingOptions(el, tune.formatting, 'note');
 							tune.appendElement('note', startOfLine+startI, startOfLine+i, el);
 							multilineVars.measureNotEmpty = true;

@@ -160,8 +160,12 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
     }
     if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
 	  var clef = ABCJS.write.createClef(abcstaff.clef, this.tuneNumber);
-	  if (clef)
-    this.voice.addChild(clef);
+	  if (clef) {
+		  if (this.v ===0 && abcstaff.barNumber) {
+			  clef.addChild(new ABCJS.write.RelativeElement(abcstaff.barNumber, 0, 0, 16, {type:"barNumber"}));
+		  }
+		  this.voice.addChild(clef);
+	  }
 	  var keySig = ABCJS.write.createKeySignature(abcstaff.key, this.tuneNumber);
 	  if (keySig) {
 		  this.voice.addChild(keySig);
@@ -850,6 +854,9 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
   var anchor = null; // place to attach part lines
   var dx = 0;
 
+	if (elem.barNumber) {
+		abselem.addChild(new ABCJS.write.RelativeElement(elem.barNumber, 0, 0, 16, {type:"barNumber"}));
+	}
 
 
   var firstdots = (elem.type==="bar_right_repeat" || elem.type==="bar_dbl_repeat");

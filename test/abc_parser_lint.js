@@ -152,6 +152,7 @@ window.ABCJS.test.ParserLint = function() {
 	} };
 
 	var barProperties = {
+		barNumber: { type: 'number', optional: true },
 		chord: { type: 'array', optional: true, output: "noindex", items: chordProperties },
 		decoration: decorationList,
 		endEnding: { type: 'boolean', Enum: [ true ], optional: true },
@@ -160,7 +161,6 @@ window.ABCJS.test.ParserLint = function() {
 	};
 
 	var noteProperties = {
-		barNumber: { type: 'number', optional: true },
 		beambr: { type: 'number', minimum: 1, maximum: 5, optional: true },
 		chord: { type: 'array', optional: true, output: "noindex", items: chordProperties },
 		decoration: decorationList,
@@ -471,6 +471,7 @@ window.ABCJS.test.ParserLint = function() {
 				staff: { type: 'array', optional: true, prohibits: [ 'subtitle', 'text', 'separator' ],
 					items: { type: 'object',
 						properties: {
+							barNumber: { type: 'number', optional: true },
 							brace: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 							bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 							clef: { type: 'object', optional: true, properties: clefProperties },
