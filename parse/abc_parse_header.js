@@ -34,7 +34,10 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 			tune.addSubtitle(tokenizer.translateString(tokenizer.stripComment(title)));	// display secondary title
 		else
 		{
-			tune.addMetaText("title", tokenizer.translateString(tokenizer.theReverser(tokenizer.stripComment(title))));
+			var titleStr = tokenizer.translateString(tokenizer.theReverser(tokenizer.stripComment(title)));
+			if (multilineVars.titlecaps)
+				titleStr = titleStr.toUpperCase();
+			tune.addMetaText("title", titleStr);
 			multilineVars.hasMainTitle = true;
 		}
 	};
