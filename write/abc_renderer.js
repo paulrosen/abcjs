@@ -636,7 +636,7 @@ ABCJS.write.Renderer.prototype.getFontAndAttr = function(type, klass) {
 	var font = this.abctune.formatting[type];
 	// Raphael deliberately changes the font units to pixels for some reason, so we need to change points to pixels here.
 	if (font)
-		font = { face: font.face, size: font.size*4/3, decoration: font.decoration, style: font.style, weight: font.weight };
+		font = { face: font.face, size: font.size*4/3, decoration: font.decoration, style: font.style, weight: font.weight, box: font.box };
 	else
 		font = { face: "Arial", size: 12*4/3, decoration: "underline", style: "normal", weight: "normal" };
 
@@ -672,7 +672,7 @@ ABCJS.write.Renderer.prototype.renderText = function(x, y, text, type, klass, an
 		else {
 			el.attr({"y": y + size.height / 2});
 			if (hash.font.box) {
-				this.paper.rect(size.x - 1, size.y - 1, size.width + 2, size.height + 2).attr({"stroke": "#cccccc"});
+				this.paper.rect(size.x - 1, size.y + size.height / 2 - 1, size.width + 2, size.height + 2).attr({"stroke": "#888888"});
 			}
 		}
 	}
