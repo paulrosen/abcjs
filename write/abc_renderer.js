@@ -130,7 +130,7 @@ ABCJS.write.Renderer.prototype.setPadding = function(abctune) {
 			self.padding[paddingKey] = abctune.formatting[formattingKey];
 		else if (self.paddingOverride[paddingKey] !== undefined)
 			self.padding[paddingKey] = self.paddingOverride[paddingKey];
-		else if (abctune.media === 'print')
+		else if (self.isPrint)
 			self.padding[paddingKey] = printDefault;
 		else
 			self.padding[paddingKey] = screenDefault;

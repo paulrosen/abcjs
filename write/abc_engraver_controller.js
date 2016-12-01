@@ -128,9 +128,9 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune, tuneNu
 	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
 	this.renderer.setVerticalSpace(abctune.formatting);
 	this.renderer.measureNumber = null;
-	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
-	if (scale === undefined) scale = abctune.media === 'print' ? 0.75 : 1;
 	this.renderer.setPrintMode(abctune.media === 'print');
+	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
+	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
 	this.renderer.setPadding(abctune);
 	this.engraver = new ABCJS.write.AbstractEngraver(abctune.formatting.bagpipes,this.renderer, tuneNumber);
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
@@ -138,7 +138,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune, tuneNu
 	if (abctune.formatting.staffwidth) {
 		this.width = abctune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
 	} else {
-		this.width = abctune.media === 'print' ? this.staffwidthPrint : this.staffwidthScreen;
+		this.width = this.renderer.isPrint ? this.staffwidthPrint : this.staffwidthScreen;
 	}
 	this.adjustNonScaledItems(scale);
 
