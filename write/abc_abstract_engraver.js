@@ -144,7 +144,6 @@ ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
 	  ABCJS.write.hint = false;
     this.createABCStaff(staffs[this.s], tempo);
   }
-
   return this.staffgroup;
 };
 
@@ -182,6 +181,18 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
     this.staffgroup.addVoice(this.voice,this.s,staffLines);
 	  this.createABCVoice(abcstaff.voices[this.v],tempo);
 	  this.staffgroup.setStaffLimits(this.voice);
+            //Tony: Here I am following what staves need to be surrounded by the brace, by incrementing the length of the brace class.
+            //So basically this keeps incrementing the number of staff surrounded by the brace until it sees "end".
+            //This then gets processed in abc_staff_group_element.js, so that it will have the correct top and bottom coordinates for the brace.
+			if(abcstaff.brace === "start"){
+				this.staffgroup.brace = new ABCJS.write.BraceElem(1, true);
+			}
+			else if(abcstaff.brace === "end" && this.staffgroup.brace) {
+				this.staffgroup.brace.increaseStavesIncluded();
+			}
+			else if(abcstaff.brace === "continue" && this.staffgroup.brace){
+				this.staffgroup.brace.increaseStavesIncluded();
+			}
   }
 };
 

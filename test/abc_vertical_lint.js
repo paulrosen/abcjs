@@ -180,6 +180,8 @@ window.ABCJS.test.verticalLint = function(tunes) {
 	function formatLine(line, lineNum) {
 		var str = "";
 		str += "Line: " + lineNum + ": (" + fixed2(line.height) + ")\n";
+		if (line.brace)
+			str += "brace: " + line.brace.x + " " + formatY(line.brace) + "\n";
 		str += "staffs: " + formatStaffs(line.staffs, 1);
 		str += "voices: " + formatVoices(line.voices, 1);
 		return str;
@@ -198,6 +200,9 @@ window.ABCJS.test.verticalLint = function(tunes) {
 
 	function extractPositioningInfo(staffGroup, lineNum) {
 		var ret = { height: staffGroup.height, minSpace: staffGroup.minspace, spacingUnits: staffGroup.spacingunits, width: staffGroup.w, startX: staffGroup.startX, staffs: [], voices: [] };
+		if (staffGroup.brace) {
+			ret.brace = { x: staffGroup.brace.x, top: staffGroup.brace.startY, bottom: staffGroup.brace.endY };
+		}
 		for (var i = 0; i < staffGroup.staffs.length; i++) {
 			var staff = staffGroup.staffs[i];
 			ret.staffs.push({bottom: staff.bottom, top: staff.top, specialY: setSpecialY(staff) });
