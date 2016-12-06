@@ -59,13 +59,34 @@ if (!window.ABCJS.write)
 			var tempopitch = this.pitch - totalHeightInPitches + 1; // The pitch we receive is the top of the allotted area: change that to practically the bottom.
 			var duration = this.tempo.duration[0]; // TODO when multiple durations
 			var abselem = new ABCJS.write.AbsoluteElement(this.tempo, duration, 1, 'tempo', this.tuneNumber);
-			var durlog = Math.floor(Math.log(duration) / Math.log(2));
-			var dot = 0;
-			for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
-			var c = renderer.engraver.chartable.note[-durlog];
-			var flag = renderer.engraver.chartable.uflags[-durlog];
+			// There aren't an infinite number of note values, but we are passed a float, so just in case something is off upstream,
+			// merge all of the in between points.
+			var dot;
+			var flag;
+			var note;
+			if (duration <= 1/32) { note = "noteheads.quarter"; flag = "flags.u32nd"; dot = 0; }
+			else if (duration <= 1/16) { note = "noteheads.quarter"; flag = "flags.u16th"; dot = 0; }
+			else if (duration <= 3/32) { note = "noteheads.quarter"; flag = "flags.u32nd"; dot = 1; }
+			else if (duration <= 1/8) { note = "noteheads.quarter"; flag = "flags.u8th"; dot = 0; }
+			else if (duration <= 3/16) { note = "noteheads.quarter"; flag = "flags.u16th"; dot = 1; }
+			else if (duration <= 1/4) { note = "noteheads.quarter"; dot = 0; }
+			else if (duration <= 3/8) { note = "noteheads.quarter"; flag = "flags.u8th"; dot = 1; }
+			else if (duration <= 1/2) { note = "noteheads.half"; dot = 0; }
+			else if (duration <= 3/4) { note = "noteheads.quarter"; dot = 1; }
+			else if (duration <= 1) { note = "noteheads.whole"; dot = 0; }
+			else if (duration <= 1.5) { note = "noteheads.half"; dot = 1; }
+			else if (duration <= 2) { note = "noteheads.dbl"; dot = 0; }
+			else if (duration <= 3) { note = "noteheads.whole"; dot = 1; }
+			else { note = "noteheads.dbl"; dot = 1; }
+
+			// TODO-PER: the following had a bug in it when there are dotted notes - so the above code brute forces it.
+			// var durlog = Math.floor(Math.log(duration) / Math.log(2));
+			// var dot = 0;
+			// for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
+			// var note = renderer.engraver.chartable.note[-durlog];
+			// var flag = renderer.engraver.chartable.uflags[-durlog];
 			var temponote = renderer.engraver.createNoteHead(abselem, // TODO-PER: This seems late to be creating this element. Shouldn't it happen before draw?
-				c,
+				note,
 				{verticalPos: tempopitch},
 				"up",
 				0,
@@ -77,7 +98,7 @@ if (!window.ABCJS.write)
 			);
 			abselem.addHead(temponote);
 			var stem;
-			if (duration < 1) {
+			if (note !== "noteheads.whole" && note !== "noteheads.dbl") {
 				var p1 = tempopitch + 1 / 3 * temposcale;
 				var p2 = tempopitch + 7 * temposcale;
 				var dx = temponote.dx + temponote.w;
@@ -89,8 +110,6 @@ if (!window.ABCJS.write)
 			abselem.setX(x);
 			for (var i = 0; i < abselem.children.length; i++)
 				abselem.children[i].draw(renderer, x);
-			//if (stem)
-			//	stem.draw(renderer, x);
 			x += (abselem.w + 5);
 			var str = "= " + this.tempo.bpm;
 			text = renderer.renderText(x, y, str, 'tempofont', 'tempo', "start");
