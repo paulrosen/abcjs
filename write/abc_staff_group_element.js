@@ -348,6 +348,9 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 		};
 	}
 
+	// An invisible marker is useful to be able to find where each system starts.
+	renderer.addInvisibleMarker("abcjs-top-of-system");
+
 	var startY = renderer.y; // So that it can be restored after we're done.
 	// Set the absolute Y position for each staff here, so the voice drawing below can just use if.
 	for (var j = 0; j < this.staffs.length; j++) {

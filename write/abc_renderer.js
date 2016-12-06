@@ -750,6 +750,18 @@ ABCJS.write.Renderer.prototype.outputTextIf = function(x, str, kind, klass, marg
 	return [0,0];
 };
 
+ABCJS.write.Renderer.prototype.addInvisibleMarker = function (className) {
+	var dy = 0.35;
+	var fill = "rgba(0,0,0,0)";
+	var y = this.y;
+	y = Math.round(y);
+	var x1 = 0;
+	var x2 = 100;
+	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
+		x2, y+dy, x1, y+dy);
+	this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses(className), 'data-vertical': y }).toBack();
+};
+
 // For debugging, it is sometimes useful to know where you are vertically.
 ABCJS.write.Renderer.prototype.printHorizontalLine = function (width, vertical, comment) {
 	var dy = 0.35;

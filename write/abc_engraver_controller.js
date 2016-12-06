@@ -71,6 +71,7 @@ ABCJS.write.EngraverController = function(paper, params) {
 	if (this.usingSvg && params.add_classes)
 		Raphael._availableAttrs['class'] = "";
 	Raphael._availableAttrs['text-decoration'] = "";
+	Raphael._availableAttrs['data-vertical'] = "";
 
   //TODO-GD factor out all calls directly made to renderer.paper and fix all the coupling issues below
   this.renderer=new ABCJS.write.Renderer(paper, params.regression);
