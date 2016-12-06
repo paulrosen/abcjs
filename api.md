@@ -76,6 +76,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `startingTune` | 0 | The index of the tune in the tunebook to render (starting at zero for the first tune). |
 | `viewportHorizontal` | false | Should the horizontal width be limited by the device's width? |
 | `scrollHorizontal` | false | Should there be a horizontal scrollbar if the music is wider than the viewport? (requires viewportHorizontal to be true.) |
+| `oneSvgPerLine` | false | Should each system of staves be rendered to a different SVG? This makes controlling with CSS easier, and makes it possible to paginate cleanly.
 
 | `animationParams` | Default | Description |
 | ------------- | ----------- | ----------- |
