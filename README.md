@@ -2,7 +2,7 @@
 
 **javascript for rendering abc music notation**
 
-**Special notes for Version 3.0 Beta 1: [MIDI](/midi.md)**
+**Special notes for Version 3.0: [MIDI](/midi.md)**
 
 [abcjs Home page](http://abcjs.net)
 
@@ -46,33 +46,33 @@ If you are looking at someone else's website and see ABC on the page and want to
 
 Here are the latest versions. You can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_2.3-min.js)
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_3.0-min.js)
 
-- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_2.3-min.js)
+- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_3.0-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_2.3-min.js)
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_3.0-min.js)
 
-- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_2.3.user.js)
+- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_3.0.user.js)
 
 To include the necessary parts of midi.js so that inline MIDI is available, you can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_midi_2.3-min.js)
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_midi_3.0-min.js)
 
-- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_midi_2.3-min.js)
+- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_midi_3.0-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_midi_2.3-min.js)
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_midi_3.0-min.js)
 
 **Great big thanks to [mudcube](https://github.com/mudcube/MIDI.js) for the excellent work on midi.js!**
 
 And here are the latest versions packaged without the standard libraries. To use these, you need to include those libraries yourself:
 
-- [Basic without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_2.3-min.js)
+- [Basic without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_3.0-min.js)
 
-- [Editor without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_2.3-min.js)
+- [Editor without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_3.0-min.js)
 
-- [Plugin without JQuery](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_nojquery_2.3-min.js)
+- [Plugin without JQuery](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_nojquery_3.0-min.js)
 
-- [Plugin without JQuery or Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_2.3-min.js)
+- [Plugin without JQuery or Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_3.0-min.js)
 
 **NOTE: Do NOT link to these files directly! Upload them to your own server! [Here's why.](https://github.com/blog/1482-heads-up-nosniff-header-support-coming-to-chrome-and-firefox)**
 
@@ -98,6 +98,17 @@ Let us know if you want to be listed!
 * ABC 1.6 is pretty much implemented.
 * Many of the new features of ABC 2.1 are being implemented now.
 * The old support for MIDI using QuickTime is removed and midi.js is used instead.
+
+# API Changes for Version 3.0
+
+* Added viewPortHorizontal and scrollHorizontal to the renderParams.
+* Add class "slur" to slurs and ties.
+* Add "hint measure"
+* Allow scrolling in the animation.
+* Handle %%titlecaps directive.
+* Add curly brace to indicate piano part (with inspiration from Anthony P. Pancerella).
+* Add invisible marker to the top of each system so that it can be found easily.
+* Add an option to put each line in a separate svg so that browsers will paginate correctly.
 
 # API Changes for Version 3.0 Beta
 

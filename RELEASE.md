@@ -1,6 +1,37 @@
+# Version 3.0
+
+## Bug fixes:
+* Fix crash when encountering Cbm or other theoretical-only keys.
+* Fix crash when there is no start or end point for a dynamic mark.
+* Don't crash in Firefox if text is written to an element that is not currently visible (Raphael reports NaN for the size.)
+* Don't crash if the music was removed before animation is done.
+* Fix centering text using %%center.
+* Allow blank %%text lines.
+* Misspelled botmargin.
+* Fix bugs in measure numbering: put number over the bar line.
+* Fix placement and style of the measure numbers.
+* Fix crash when there is a key change after a subtitle line in the header.
+* Make the + sign of the meter not lay right on the staff line.
+* Fix note length bugs in the tempo marker.
+
+## Features:
+* Added viewPortHorizontal and scrollHorizontal to the renderParams.
+* Add class "slur" to slurs and ties.
+* Add "hint measure"
+* Allow scrolling in the animation.
+* Handle %%titlecaps directive.
+* Add curly brace to indicate piano part (with inspiration from Anthony P. Pancerella).
+* Add invisible marker to the top of each system so that it can be found easily.
+* Add an option to put each line in a separate svg so that browsers will paginate correctly.
+
+## MIDI:
+* First pass at using a new inline MIDI generator.
+* Make the default MIDI instrument "0" instead of "2" 
+* Implement some MIDI controls: play, pause, reset, tempo, progress bar, BPM, clock, pre- and post-text 
+
 # Version 3.0 Beta
 
-MIDI:
+## MIDI:
 
 * Update documentation for using MIDI.
 
@@ -18,7 +49,7 @@ MIDI:
 
 * Fix playing second repeat; allow strings as parameters.
 
-Bug fixes:
+## Bug fixes:
 
 * Fix crash when encountering Cbm or other theoretical-only keys.
 
