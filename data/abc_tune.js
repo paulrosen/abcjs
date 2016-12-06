@@ -371,17 +371,36 @@ window.ABCJS.data.Tune = function() {
 			//}
 		}
 
+		function getNextMusicLine(lines, currentLine) {
+			currentLine++;
+			while (lines.length > currentLine) {
+				if (lines[currentLine].staff)
+					return lines[currentLine];
+			}
+			return null;
+		}
+
 		for (this.lineNum = 0; this.lineNum < this.lines.length; this.lineNum++) {
-			if (this.lines[this.lineNum].staff) for (this.staffNum = 0; this.staffNum < this.lines[this.lineNum].staff.length; this.staffNum++) {
-				if (this.lines[this.lineNum].staff[this.staffNum].clef)
-					fixClefPlacement(this.lines[this.lineNum].staff[this.staffNum].clef);
-				for (this.voiceNum = 0; this.voiceNum < this.lines[this.lineNum].staff[this.staffNum].voices.length; this.voiceNum++) {
-//					var el = this.getLastNote();
-//					if (el) el.end_beam = true;
-					cleanUpSlursInLine(this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum]);
-					for (var j = 0; j < this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum].length; j++)
-						if (this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum][j].el_type === 'clef')
-							fixClefPlacement(this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum][j]);
+			var staff = this.lines[this.lineNum].staff;
+			if (staff) {
+				for (this.staffNum = 0; this.staffNum < staff.length; this.staffNum++) {
+					if (staff[this.staffNum].clef)
+						fixClefPlacement(staff[this.staffNum].clef);
+					for (this.voiceNum = 0; this.voiceNum < staff[this.staffNum].voices.length; this.voiceNum++) {
+						var voice = staff[this.staffNum].voices[this.voiceNum];
+						cleanUpSlursInLine(voice);
+						for (var j = 0; j < voice.length; j++) {
+							if (voice[j].el_type === 'clef')
+								fixClefPlacement(voice[j]);
+						}
+						if (voice[voice.length-1].barNumber) {
+							// Don't hang a bar number on the last bar line: it should go on the next line.
+							var nextLine = getNextMusicLine(this.lines, this.lineNum);
+							if (nextLine)
+								nextLine.staff[0].barNumber = voice[voice.length-1].barNumber;
+							delete voice[voice.length-1].barNumber;
+						}
+					}
 				}
 			}
 		}
