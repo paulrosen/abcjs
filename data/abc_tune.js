@@ -376,6 +376,7 @@ window.ABCJS.data.Tune = function() {
 			while (lines.length > currentLine) {
 				if (lines[currentLine].staff)
 					return lines[currentLine];
+				currentLine++;
 			}
 			return null;
 		}
