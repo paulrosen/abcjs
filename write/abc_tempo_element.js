@@ -66,17 +66,16 @@ if (!window.ABCJS.write)
 			var note;
 			if (duration <= 1/32) { note = "noteheads.quarter"; flag = "flags.u32nd"; dot = 0; }
 			else if (duration <= 1/16) { note = "noteheads.quarter"; flag = "flags.u16th"; dot = 0; }
-			else if (duration <= 3/32) { note = "noteheads.quarter"; flag = "flags.u32nd"; dot = 1; }
+			else if (duration <= 3/32) { note = "noteheads.quarter"; flag = "flags.u16nd"; dot = 1; }
 			else if (duration <= 1/8) { note = "noteheads.quarter"; flag = "flags.u8th"; dot = 0; }
-			else if (duration <= 3/16) { note = "noteheads.quarter"; flag = "flags.u16th"; dot = 1; }
+			else if (duration <= 3/16) { note = "noteheads.quarter"; flag = "flags.u8th"; dot = 1; }
 			else if (duration <= 1/4) { note = "noteheads.quarter"; dot = 0; }
-			else if (duration <= 3/8) { note = "noteheads.quarter"; flag = "flags.u8th"; dot = 1; }
+			else if (duration <= 3/8) { note = "noteheads.quarter"; dot = 1; }
 			else if (duration <= 1/2) { note = "noteheads.half"; dot = 0; }
-			else if (duration <= 3/4) { note = "noteheads.quarter"; dot = 1; }
+			else if (duration <= 3/4) { note = "noteheads.half"; dot = 1; }
 			else if (duration <= 1) { note = "noteheads.whole"; dot = 0; }
-			else if (duration <= 1.5) { note = "noteheads.half"; dot = 1; }
+			else if (duration <= 1.5) { note = "noteheads.whole"; dot = 1; }
 			else if (duration <= 2) { note = "noteheads.dbl"; dot = 0; }
-			else if (duration <= 3) { note = "noteheads.whole"; dot = 1; }
 			else { note = "noteheads.dbl"; dot = 1; }
 
 			// TODO-PER: the following had a bug in it when there are dotted notes - so the above code brute forces it.
