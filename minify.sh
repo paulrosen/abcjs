@@ -4,8 +4,8 @@ die () {
     exit 1
 }
 
-[ "$#" -eq 1 ] || die "Call with a version number argument in the form x.y"
-echo $1 | grep -E -q '^[1-9]\.[0-9ab]+$' || die "Version number argument required (x.y), $1 provided"
+[ "$#" -eq 1 ] || die "Call with a version number argument in the form x.y.z"
+echo $1 | grep -E -q '^[1-9]\.[0-9]+\.[0-9ab]+$' || die "Version number argument required (x.y.z), $1 provided"
 echo "Concatenating all files..."
 # NOTE: To run this, install uglifier with:
 # npm install uglify-js -g
@@ -50,6 +50,6 @@ cp bin/abcjs_basic_midi_$1-min.js bin/abcjs_basic_latest-min.js
 cp bin/abcjs_editor_midi_$1-min.js bin/abcjs_editor_latest-min.js
 cp bin/abcjs_plugin_$1-min.js bin/abcjs_plugin_latest-min.js
 echo "Fix readme..."
-perl -pi -e "s/abcjs_(.+)_2([^-]+)-min.js/abcjs_\$1_$1-min.js/" README.md
-perl -pi -e "s/abcjs_(.+)_2([^-]+).user.js/abcjs_\$1_$1.user.js/" README.md
+perl -pi -e "s/abcjs_(.+)_3([^-]+)-min.js/abcjs_\$1_$1-min.js/" README.md
+perl -pi -e "s/abcjs_(.+)_3([^-]+).user.js/abcjs_\$1_$1.user.js/" README.md
 
