@@ -225,7 +225,7 @@ if (!window.ABCJS.midi)
 			// There are two cases: if this is bagpipe, the grace notes are played on the beat with the current note.
 			// Normally, the grace notes would be played before the beat. (If this is the first note in the track, however, then it is played on the current beat.)
 			// The reason for the exception on the first note is that it would otherwise move the whole track in time and would affect all the other tracks.
-			var stealFromCurrent = (bagpipes || lastNoteDurationPosition < 0);
+			var stealFromCurrent = (bagpipes || lastNoteDurationPosition < 0 || currentTrack.length === 0);
 			var stealFromDuration = stealFromCurrent ? duration : currentTrack[lastNoteDurationPosition].duration;
 			graces = processGraceNotes(elem.gracenotes, stealFromDuration);
 			if (!bagpipes) {
