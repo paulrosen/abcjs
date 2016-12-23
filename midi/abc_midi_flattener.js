@@ -41,12 +41,16 @@ if (!window.ABCJS.midi)
 	var pitchesTied;
 	var lastNoteDurationPosition;
 
-	var meter;
+	var meter = { num: 4, den: 4 };
 	var chordTrack;
 	var chordTrackFinished;
 	var currentChords;
 	var lastChord;
 	var barBeat;
+
+	var drumTrack;
+	var drumTrackFinished;
+	var drumDefinition = {};
 
 	var normalBreakBetweenNotes = 1.0/128;	// a 128th note of silence between notes for articulation.
 
@@ -66,12 +70,17 @@ if (!window.ABCJS.midi)
 		lastNoteDurationPosition = -1;
 
 		// For resolving chords.
-		meter = undefined;
+		meter = { num: 4, den: 4 };
 		chordTrack = [];
 		chordTrackFinished = false;
 		currentChords = [];
 		lastChord = undefined;
 		barBeat = 0;
+
+		// For the drum/metronome track.
+		drumTrack = [];
+		drumTrackFinished = false;
+		drumDefinition = {};
 
 		for (var i = 0; i < voices.length; i++) {
 			var voice = voices[i];
@@ -105,6 +114,7 @@ if (!window.ABCJS.midi)
 						}
 						barBeat = 0;
 						barAccidentals = [];
+						writeDrum();
 						break;
 					case "bagpipes":
 						bagpipes = true;
@@ -115,6 +125,9 @@ if (!window.ABCJS.midi)
 					case "channel":
 						channel = element.channel;
 						break;
+					case "drum":
+						drumDefinition = normalizeDrumDefinition(element.params);
+						break;
 					default:
 						// This should never happen
 						console.log("MIDI creation. Unknown el_type: " + element.el_type + "\n");// jshint ignore:line
@@ -124,9 +137,13 @@ if (!window.ABCJS.midi)
 			tracks.push(currentTrack);
 			if (chordTrack.length > 0) // Don't do chords on more than one track, so turn off chord detection after we create it.
 				chordTrackFinished = true;
+			if (drumTrack.length > 0) // Don't do drums on more than one track, so turn off drum after we create it.
+				drumTrackFinished = true;
 		}
 		if (chordTrack.length > 0)
 			tracks.push(chordTrack);
+		if (drumTrack.length > 0)
+			tracks.push(drumTrack);
 		return { tempo: startingTempo, instrument: instrument, channel: channel, tracks: tracks };
 	};
 
@@ -173,6 +190,15 @@ if (!window.ABCJS.midi)
 		return null;
 	}
 
+	function timeFromStart() {
+		var distance = 0;
+		for (var ct = 0; ct < currentTrack.length; ct++) {
+			if (currentTrack[ct].cmd === 'move')
+				distance += currentTrack[ct].duration;
+		}
+		return distance;
+	}
+
 	function writeNote(elem) {
 		//
 		// Create a series of note events to append to the current track.
@@ -192,11 +218,7 @@ if (!window.ABCJS.midi)
 				if (chordTrack.length === 0) {
 					chordTrack.push({cmd: 'instrument', instrument: 0});
 					// need to figure out how far in time the chord started: if there are pickup notes before the chords start, we need pauses.
-					var distance = 0;
-					for (var ct = 0; ct < currentTrack.length; ct++) {
-						if (currentTrack[ct].cmd === 'move')
-							distance += currentTrack[ct].duration;
-					}
+					var distance = timeFromStart();
 					if (distance > 0)
 						chordTrack.push({cmd: 'move', duration: distance*tempoChangeFactor });
 				}
@@ -563,6 +585,132 @@ if (!window.ABCJS.midi)
 						chordTrack.push({cmd: 'move', duration: beatLength*tempoChangeFactor });
 					break;
 			}
+		}
+	}
+
+	function normalizeDrumDefinition(params) {
+		// Be very strict with the drum definition. If anything is not perfect,
+		// just turn the drums off.
+		// Perhaps all of this logic belongs in the parser instead.
+		if (params.pattern.length === 0 || params.on === false)
+			return { on: false };
+
+		var str = params.pattern[0];
+		var events = [];
+		var event = "";
+		var totalPlay = 0;
+		for (var i = 0; i < str.length; i++) {
+			if (str[i] === 'd')
+				totalPlay++;
+			if (str[i] === 'd' || str[i] === 'z') {
+				if (event.length !== 0) {
+					events.push(event);
+					event = str[i];
+				} else
+					event = event + str[i];
+			} else {
+				if (event.length === 0) {
+					// there was an error: the string should have started with d or z
+					return {on: false};
+				}
+				event = event + str[i];
+			}
+		}
+
+		if (event.length !== 0)
+			events.push(event);
+
+		// Now the events array should have one item per event.
+		// There should be two more params for each event: the volume and the pitch.
+		if (params.pattern.length !== totalPlay*2 + 1)
+			return { on: false };
+
+		var ret = { on: true, bars: params.bars, pattern: []};
+		var beatLength = 1/meter.den;
+		var playCount = 0;
+		for (var j = 0; j < events.length; j++) {
+			event = events[j];
+			var len = 1;
+			var div = false;
+			var num = 0;
+			for (var k = 1; k < event.length; k++) {
+				switch(event[k]) {
+					case "/":
+						if (num !== 0)
+							len *= num;
+						num = 0;
+						div = true;
+						break;
+					case "1":
+					case "2":
+					case "3":
+					case "4":
+					case "5":
+					case "6":
+					case "7":
+					case "8":
+					case "9":
+						num = num*10 +event[k];
+						break;
+					default:
+						return { on: false };
+				}
+			}
+			if (div) {
+				if (num === 0) num = 2; // a slash by itself is interpreted as "/2"
+				len /= num;
+			} else if (num)
+				len *= num;
+			if (event[0] === 'd') {
+				ret.pattern.push({ len: len * beatLength, pitch: params.pattern[1 + playCount], velocity: params.pattern[1 + playCount + totalPlay]});
+				playCount++;
+			} else
+				ret.pattern.push({ len: len * beatLength, pitch: null});
+		}
+		// Now normalize the pattern to cover the correct number of measures. The note lengths passed are relative to each other and need to be scaled to fit a measure.
+		var totalTime = 0;
+		for (var ii = 0; ii < ret.pattern.length; ii++)
+			totalTime += ret.pattern[ii].len;
+		var numBars = params.bars ? params.bars : 1;
+		var factor = totalTime /  numBars;
+		for (ii = 0; ii < ret.pattern.length; ii++)
+			ret.pattern[ii].len = ret.pattern[ii].len / factor;
+		return ret;
+	}
+
+	function drumBeat(pitch, soundLength, volume) {
+		drumTrack.push({ cmd: 'start', pitch: pitch - 60, volume: volume});
+		drumTrack.push({ cmd: 'move', duration: soundLength });
+		drumTrack.push({ cmd: 'stop', pitch: pitch - 60 });
+	}
+
+	function writeDrum() {
+		if (drumTrack.length === 0 && !drumDefinition.on)
+			return;
+
+		if (drumTrack.length === 0) {
+			drumTrack.push({cmd: 'channel', channel: 10});
+			drumTrack.push({cmd: 'instrument', instrument: 10});
+			// need to figure out how far in time the bar started: if there are pickup notes before the chords start, we need pauses.
+			var distance = timeFromStart();
+			if (distance > 0 && distance < 0.99) { // because of floating point, the measure size might not be exactly 1.
+				drumTrack.push({cmd: 'move', duration: distance * tempoChangeFactor});
+				return;
+			}
+		}
+
+		if (!drumDefinition.on) {
+			// this is the case where there has been a drum track, but it was specifically turned off.
+			var measureLen = meter.num/meter.den * tempoChangeFactor;
+			drumTrack.push({ cmd: 'move', duration: measureLen });
+			return;
+		}
+		for (var i = 0; i < drumDefinition.pattern.length; i++) {
+			var len = drumDefinition.pattern[i].len * tempoChangeFactor;
+			if (drumDefinition.pattern[i].pitch)
+				drumBeat(drumDefinition.pattern[i].pitch, len, drumDefinition.pattern[i].velocity);
+			else
+				drumTrack.push({ cmd: 'move', duration: len });
 		}
 	}
 })();

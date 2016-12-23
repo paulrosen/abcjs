@@ -394,7 +394,7 @@ window.ABCJS.data.Tune = function() {
 							if (voice[j].el_type === 'clef')
 								fixClefPlacement(voice[j]);
 						}
-						if (voice[voice.length-1].barNumber) {
+						if (voice.length > 0 && voice[voice.length-1].barNumber) {
 							// Don't hang a bar number on the last bar line: it should go on the next line.
 							var nextLine = getNextMusicLine(this.lines, this.lineNum);
 							if (nextLine)
@@ -722,7 +722,12 @@ window.ABCJS.data.Tune = function() {
 	};
 
 	this.hasBeginMusic = function() {
-		return this.lines.length > 0;
+		// return true if there exists at least one line that contains "staff"
+		for (var i = 0; i < this.lines.length; i++) {
+			if (this.lines[i].staff)
+				return true;
+		}
+		return false;
 	};
 
 	this.isFirstLine = function(index) {

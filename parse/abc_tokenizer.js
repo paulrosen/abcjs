@@ -458,12 +458,14 @@ window.ABCJS.parse.tokenizer = function() {
 		return (ch >= '0' && ch <= '9');
 	};
 
-	this.tokenize = function(line, start, end) {
+	this.tokenize = function(line, start, end, alphaUntilWhiteSpace) {
 		// this returns all the tokens inside the passed string. A token is a punctuation mark, a string of digits, a string of letters.
 		//  Quoted strings are one token.
 		//  If there is a minus sign next to a number, then it is included in the number.
 		// If there is a period immediately after a number, with a number immediately following, then a float is returned.
 		// The type of token is returned: quote, alpha, number, punct
+		// If alphaUntilWhiteSpace is true, then the behavior of the alpha token changes.
+
 		var ret = this.getMeat(line, start, end);
 		start = ret.start;
 		end = ret.end;
@@ -477,7 +479,10 @@ window.ABCJS.parse.tokenizer = function() {
 				i++;
 			} else if (isLetter(line.charAt(start))) {
 				i = start+1;
-				while (i < end && isLetter(line.charAt(i))) i++;
+				if (alphaUntilWhiteSpace)
+					while (i < end && !this.isWhiteSpace(line.charAt(i))) i++;
+				else
+					while (i < end && isLetter(line.charAt(i))) i++;
 				tokens.push({ type: 'alpha', token: line.substring(start, i), continueId: isNumber(line.charAt(i)), start: start, end: i});
 				start = i + 1;
 			} else if (line.charAt(start) === '.' && isNumber(line.charAt(i+1))) {

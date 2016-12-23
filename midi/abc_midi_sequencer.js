@@ -30,36 +30,71 @@ if (!window.ABCJS.midi)
 	window.ABCJS.midi.sequence = function(abctune, options) {
 		// Global options
 		options = options || {};
-		var qpm = options.qpm || 180;	// The tempo if there isn't a tempo specified.
+		var qpm = 180;	// The tempo if there isn't a tempo specified.
 		var program = options.program || 0;	// The program if there isn't a program specified.
 		var transpose = options.transpose || 0;
 		var channel = options.channel || 0;
+		var drumPattern = options.drum || "";
+		var drumBars = options.drumBars || 1;
+		var drumIntro = options.drumIntro || 0;
+		var drumOn = drumPattern !== "";
+
 		// All of the above overrides need to be integers
-		qpm = parseInt(qpm, 10);
 		program = parseInt(program, 10);
 		transpose = parseInt(transpose, 10);
 		channel = parseInt(channel, 10);
+		drumPattern = drumPattern.split(" ");
+		drumBars = parseInt(drumBars, 10);
+		drumIntro = parseInt(drumIntro, 10);
 
 		var bagpipes = abctune.formatting.bagpipes; // If it is bagpipes, then the gracenotes are played on top of the main note.
 		if (bagpipes)
 			program = 71;
 
-		// %%MIDI formatting options
-		if (abctune.formatting.midi) {
-			if (abctune.formatting.midi.transpose)
-				transpose = abctune.formatting.midi.transpose;
+		// %%MIDI fermatafixed
+		// %%MIDI fermataproportional
+		// %%MIDI deltaloudness n
+		// %%MIDI gracedivider b
+		// %%MIDI ratio n m
+		// %%MIDI beat a b c n
+		// %%MIDI grace a/b
+		// %%MIDI trim x/y
 
-			// PER: changed format of the global midi commands from the parser. Using the new definition here.
-			if (abctune.formatting.midi.program && abctune.formatting.midi.program.program)
-				program = abctune.formatting.midi.program.program;
-			if (abctune.formatting.midi.channel)
-				channel = abctune.formatting.midi.channel;
+		// %MIDI gchordon
+		// %MIDI gchordoff
+		// %%MIDI bassprog 45
+		// %%MIDI chordprog 24
+		// %%MIDI chordname name n1 n2 n3 n4 n5 n6
+
+		//%%MIDI beat ⟨int1⟩ ⟨int2⟩ ⟨int3⟩ ⟨int4⟩: controls the volumes of the notes in a measure. The first note in a bar has volume ⟨int1⟩; other ‘strong’ notes have volume ⟨int2⟩ and all the rest have volume ⟨int3⟩. These values must be in the range 0–127. The parameter ⟨int4⟩ determines which notes are ‘strong’. If the time signature is x/y, then each note is given a position number k = 0, 1, 2. . . x-1 within each bar. If k is a multiple of ⟨int4⟩, then the note is ‘strong’.
+
+		if (abctune.formatting.midi) {
+			//console.log("MIDI Formatting:", abctune.formatting.midi);
+			var globals = abctune.formatting.midi;
+			if (globals.program) {
+				program = globals.program[0];
+				if (globals.program.length > 1)
+					channel = globals.program[1];
+			}
+			if (globals.transpose)
+				transpose = globals.transpose[0];
+			if (globals.channel)
+				channel = globals.channel[0];
+			if (globals.drum)
+				drumPattern = globals.drum;
+			if (globals.drumbars)
+				drumBars = globals.drumbars[0];
+			if (globals.drumon)
+				drumOn = true;
 		}
 
 		// Specified options in abc string.
 
+		// If the tempo was passed in, use that. If the tempo is specified, use that. Otherwise, use the default.
 		if (abctune.metaText.tempo)
 			qpm = interpretTempo(abctune.metaText.tempo);
+		else if (options.qpm)
+			qpm = parseInt(options.qpm, 10);
 
 		var startVoice = [];
 		if (bagpipes)
@@ -96,8 +131,11 @@ if (!window.ABCJS.midi)
 					for (var k = 0; k < staff.voices.length; k++) {
 						// For each voice in a staff line
 						var voice = staff.voices[k];
-						if (!voices[voiceNumber])
+						if (!voices[voiceNumber]) {
 							voices[voiceNumber] = [].concat(startVoice);
+							if (voiceNumber === 0 && drumOn) // drum information is only needed once, so use track 0.
+								voices[voiceNumber].push({el_type: 'drum', params: { pattern: drumPattern, bars: drumBars, intro: drumIntro, on: drumOn}});
+						}
 						if (staff.key) {
 							if (staff.key.root === 'HP')
 								voices[voiceNumber].push({el_type: 'key', accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}]});
@@ -173,6 +211,18 @@ if (!window.ABCJS.midi)
 								case 'stem':
 								case 'scale':
 									// These elements don't affect sound
+									break;
+								case 'midi':
+									//console.log("MIDI inline", elem); // TODO-PER: for debugging. Remove this.
+									var drumChange = false;
+									switch (elem.cmd) {
+										case "drumon": drumOn = true; drumChange = true; break;
+										case "drumoff": drumOn = false; drumChange = true; break;
+										case "drum": drumPattern = elem.params; drumChange = true; break;
+										case "drumbars": drumBars = elem.params[0]; drumChange = true; break;
+									}
+									if (drumChange)
+										voices[0].push({el_type: 'drum', params: { pattern: drumPattern, bars: drumBars, intro: drumIntro, on: drumOn}});
 									break;
 								default:
 									console.log("MIDI: element type " + elem.el_type + " not handled.");

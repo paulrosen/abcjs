@@ -380,6 +380,214 @@ window.ABCJS.parse.parseDirective = {};
 		return null;
 	};
 
+	var midiCmdParam0 = [
+		"nobarlines",
+		"barlines",
+		"beataccents",
+		"nobeataccents",
+		"droneon",
+		"droneoff",
+		"drumon",
+		"drumoff",
+		"fermatafixed",
+		"fermataproportional",
+		"gchordon",
+		"gchordoff",
+		"controlcombo",
+		"temperamentnormal",
+		"noportamento"
+	];
+	var midiCmdParam1String = [
+		"gchord",
+		"ptstress",
+		"beatstring"
+	];
+	var midiCmdParam1Integer = [
+		"bassvol",
+		"chordvol",
+		"c",
+		"channel",
+		"beatmod",
+		"deltaloudness",
+		"drumbars",
+		"gracedivider",
+		"makechordchannels",
+		"randomchordattack",
+		"chordattack",
+		"stressmodel",
+		"transpose",
+		"rtranspose",
+		"volinc"
+	];
+	var midiCmdParam1Integer1OptionalInteger = [
+		"program"
+	];
+	var midiCmdParam2Integer = [
+		"ratio",
+		"snt",
+		"bendvelocity",
+		"pitchbend",
+		"control",
+		"temperamentlinear"
+	];
+	var midiCmdParam4Integer = [
+		"beat"
+	];
+	var midiCmdParam5Integer = [
+		"drone"
+	];
+	var midiCmdParam1IntegerOptionalOctave = [
+		"bassprog",
+		"chordprog"
+	];
+	var midiCmdParam1String1Integer = [
+		"drummap",
+		"portamento"
+	];
+	var midiCmdParamFraction = [
+		"expand",
+		"grace",
+		"trim"
+	];
+	var midiCmdParam1StringVariableIntegers = [
+		"drum",
+		"chordname"
+	];
+
+	var parseMidiCommand = function(midi, tune, restOfString) {
+		var midi_cmd = midi.shift().token;
+		var midi_params = [];
+		if (midiCmdParam0.indexOf(midi_cmd) >= 0) {
+			// NO PARAMETERS
+			if (midi.length !== 0)
+				warn("Unexpected parameter in MIDI " + midi_cmd, restOfString, 0);
+		} else if (midiCmdParam1String.indexOf(midi_cmd) >= 0) {
+			// ONE STRING PARAMETER
+			if (midi.length !== 1)
+				warn("Expected one parameter in MIDI " + midi_cmd, restOfString, 0);
+			else
+				midi_params.push(midi[0].token);
+		} else if (midiCmdParam1Integer.indexOf(midi_cmd) >= 0) {
+			// ONE INT PARAMETER
+			if (midi.length !== 1)
+				warn("Expected one parameter in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi[0].type !== "number")
+				warn("Expected one integer parameter in MIDI " + midi_cmd, restOfString, 0);
+			else
+				midi_params.push(midi[0].intt);
+		} else if (midiCmdParam1Integer1OptionalInteger.indexOf(midi_cmd) >= 0) {
+			// ONE INT PARAMETER, ONE OPTIONAL PARAMETER
+			if (midi.length !== 1 && midi.length !== 2)
+				warn("Expected one or two parameters in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi[0].type !== "number")
+				warn("Expected integer parameter in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi.length === 2 && midi[1].type !== "number")
+				warn("Expected integer parameter in MIDI " + midi_cmd, restOfString, 0);
+			else {
+				midi_params.push(midi[0].intt);
+				if (midi.length === 2)
+					midi_params.push(midi[1].intt);
+			}
+		} else if (midiCmdParam2Integer.indexOf(midi_cmd) >= 0) {
+			// TWO INT PARAMETERS
+			if (midi.length !== 2)
+				warn("Expected two parameters in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi[0].type !== "number" || midi[1].type !== "number")
+				warn("Expected two integer parameters in MIDI " + midi_cmd, restOfString, 0);
+			else {
+				midi_params.push(midi[0].intt);
+				midi_params.push(midi[1].intt);
+			}
+		} else if (midiCmdParam1String1Integer.indexOf(midi_cmd) >= 0) {
+			// ONE STRING PARAMETER, ONE INT PARAMETER
+			if (midi.length !== 2)
+				warn("Expected two parameters in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi[0].type !== "alpha" || midi[1].type !== "number")
+				warn("Expected one string and one integer parameters in MIDI " + midi_cmd, restOfString, 0);
+			else {
+				midi_params.push(midi[0].token);
+				midi_params.push(midi[1].intt);
+			}
+		} else if (midiCmdParamFraction.indexOf(midi_cmd) >= 0) {
+			// ONE FRACTION PARAMETER
+			if (midi.length !== 3)
+				warn("Expected fraction parameter in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi[0].type !== "number" || midi[1].token !== "/" || midi[2].type !== "number")
+				warn("Expected fraction parameter in MIDI " + midi_cmd, restOfString, 0);
+			else {
+				midi_params.push(midi[0].intt);
+				midi_params.push(midi[2].intt);
+			}
+		} else if (midiCmdParam4Integer.indexOf(midi_cmd) >= 0) {
+			// FOUR INT PARAMETERS
+			if (midi.length !== 4)
+				warn("Expected four parameters in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi[0].type !== "number" || midi[1].type !== "number" || midi[2].type !== "number" || midi[3].type !== "number")
+				warn("Expected four integer parameters in MIDI " + midi_cmd, restOfString, 0);
+			else {
+				midi_params.push(midi[0].intt);
+				midi_params.push(midi[1].intt);
+				midi_params.push(midi[2].intt);
+				midi_params.push(midi[3].intt);
+			}
+		} else if (midiCmdParam5Integer.indexOf(midi_cmd) >= 0) {
+			// FIVE INT PARAMETERS
+			if (midi.length !== 5)
+				warn("Expected five parameters in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi[0].type !== "number" || midi[1].type !== "number" || midi[2].type !== "number" || midi[3].type !== "number" || midi[4].type !== "number")
+				warn("Expected five integer parameters in MIDI " + midi_cmd, restOfString, 0);
+			else {
+				midi_params.push(midi[0].intt);
+				midi_params.push(midi[1].intt);
+				midi_params.push(midi[2].intt);
+				midi_params.push(midi[3].intt);
+				midi_params.push(midi[4].intt);
+			}
+		} else if (midiCmdParam1Integer1OptionalInteger.indexOf(midi_cmd) >= 0) {
+			// ONE INT PARAMETER, ONE OPTIONAL OCTAVE PARAMETER
+			if (midi.length !== 1 || midi.length !== 4)
+				warn("Expected one or two parameters in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi[0].type !== "number")
+				warn("Expected integer parameter in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi.length === 4) {
+				if (midi[1].token !== "octave")
+					warn("Expected octave parameter in MIDI " + midi_cmd, restOfString, 0);
+				if (midi[2].token !== "=")
+					warn("Expected octave parameter in MIDI " + midi_cmd, restOfString, 0);
+				if (midi[3].type !== "number")
+					warn("Expected integer parameter for octave in MIDI " + midi_cmd, restOfString, 0);
+			} else {
+				midi_params.push(midi[0].intt);
+				if (midi.length === 4)
+					midi_params.push(midi[3].intt);
+			}
+		} else if (midiCmdParam1StringVariableIntegers.indexOf(midi_cmd) >= 0) {
+			// ONE STRING, VARIABLE INT PARAMETERS
+			if (midi.length < 2)
+				warn("Expected string parameter and at least one integer parameter in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi[0].type !== "alpha")
+				warn("Expected string parameter and at least one integer parameter in MIDI " + midi_cmd, restOfString, 0);
+			else {
+				var p = midi.shift();
+				midi_params.push(p.token);
+				while (midi.length > 0) {
+					p = midi.shift();
+					if (p.type !== "number")
+						warn("Expected integer parameter in MIDI " + midi_cmd, restOfString, 0);
+					midi_params.push(p.intt);
+				}
+			}
+		}
+
+		if (tune.hasBeginMusic())
+			tune.appendElement('midi', -1, -1, { cmd: midi_cmd, params: midi_params });
+		else {
+			if (tune.formatting['midi'] === undefined)
+				tune.formatting['midi'] = {};
+			tune.formatting['midi'][midi_cmd] = midi_params;
+		}
+	};
+
 	window.ABCJS.parse.parseDirective.parseFontChangeLine = function(textstr) {
 		var textParts = textstr.split('$');
 		if (textParts.length > 1 && multilineVars.setfont) {
@@ -741,95 +949,13 @@ window.ABCJS.parse.parseDirective = {};
 				break;
 
 			case "midi":
-				var midi = tokenizer.tokenize(restOfString, 0, restOfString.length);
+				var midi = tokenizer.tokenize(restOfString, 0, restOfString.length, true);
 				if (midi.length > 0 && midi[0].token === '=')
 					midi.shift();
 				if (midi.length === 0)
 					warn("Expected midi command", restOfString, 0);
-				else {
-	//				var midiCmd = restOfString.split(' ')[0];
-	//				var midiParam = restOfString.substring(midiCmd.length+1);
-					var getNextMidiParam =  function(midiToks) {
-						if (midiToks.length > 0) {
-							var t = midiToks.shift();
-							var p = t.token;
-							if (t.type === "number")
-								p = t.intt;
-							return p;
-						}
-						else
-							return null;
-					};
-					// TODO-PER: make sure the command is legal
-					if (tune.formatting[cmd] === undefined)
-						tune.formatting[cmd] = {};
-					var midi_cmd = midi.shift().token;
-					var midi_param = true;
-					if (midi_cmd === 'program') {
-						var p1 = getNextMidiParam(midi);
-						if (p1) {
-							var p2 = getNextMidiParam(midi);
-							// NOTE: The program number has an off by one error in ABC, so we add one here.
-							if (p2)
-								midi_param = { channel: p1, program: p2};
-							else
-								midi_param = { program: p1};
-						}
-					} else {
-						// TODO-PER: handle the params for all MIDI commands
-						var p = getNextMidiParam(midi);
-						if (p !== null)
-							midi_param = p;
-					}
-					tune.formatting[cmd][midi_cmd] = midi_param;
-					// TODO-PER: save all the parameters, not just the first.
-				}
-	//%%MIDI barlines: deactivates %%nobarlines.
-	//%%MIDI bassprog n
-	//%%MIDI bassvol n
-	//%%MIDI beat ⟨int1⟩ ⟨int2⟩ ⟨int3⟩ ⟨int4⟩: controls the volumes of the notes in a measure. The first note in a bar has volume ⟨int1⟩; other ‘strong’ notes have volume ⟨int2⟩ and all the rest have volume ⟨int3⟩. These values must be in the range 0–127. The parameter ⟨int4⟩ determines which notes are ‘strong’. If the time signature is x/y, then each note is given a position number k = 0, 1, 2. . . x-1 within each bar. If k is a multiple of ⟨int4⟩, then the note is ‘strong’.
-	//%%MIDI beataccents: reverts to normally emphasised notes. See also %%MIDI nobeat-
-	//%%MIDI beatmod ⟨int⟩: increments the velocities as defined by %%MIDI beat
-	//%%MIDI beatstring ⟨string⟩: similar to %%MIDI beat, but indicated with an fmp string.
-	//%%MIDI c ⟨int⟩: specifies the MIDI pitch which corresponds to	. The default is 60.
-	//%%MIDI channel ⟨int⟩: selects the melody channel ⟨int⟩ (1–16).
-	//%%MIDI chordattack ⟨int⟩: delays the start of chord notes by ⟨int⟩ MIDI units.
-	//%%MIDI chordname ⟨string int1 int2 int3 int4 int5 int6⟩: defines new chords or re-defines existing ones as was seen in Section 12.8.
-	//%%MIDI chordprog 20 % Church organ
-	//%%MIDI chordvol ⟨int⟩: sets the volume (velocity) of the chord notes to ⟨int⟩ (0–127).
-	//%%MIDI control ⟨bass/chord⟩ ⟨int1 int2⟩: generates a MIDI control event. If %%control is followed by ⟨bass⟩ or ⟨chord⟩, the event apply to the bass or chord channel, otherwise it will be applied to the melody channel. ⟨int1⟩ is the MIDI control number (0–127) and ⟨int2⟩ the value (0–127).
-	//%%MIDI deltaloudness⟨int⟩: bydefault,!crescendo!and!dimuendo!modifythebe- at variables ⟨vol1⟩ ⟨vol2⟩ ⟨vol3⟩ 15 volume units. This command allows the user to change this default.
-	//%%MIDI drone ⟨int1 int2 int3 int4 int5⟩: specifies a two-note drone accompaniment. ⟨int1⟩ is the drone MIDI instrument, ⟨int2⟩ the MIDI pitch 1, ⟨int3⟩ the MIDI pitch 2, ⟨int4⟩ the MIDI volume 1, ⟨int5⟩ the MIDI volume 2. Default values are 70 45 33 80 80.
-	//%%MIDI droneoff: turns the drone accompaniment off.
-	//%%MIDI droneon: turns the drone accompaniment on.
-	//%%MIDI drum string [drum programs] [drum velocities]
-	//%%MIDI drumbars ⟨int⟩: specifies the number of bars over which a drum pattern string is spread. Default is 1.
-	//%%MIDI drummap ⟨str⟩ ⟨int⟩: associates the note ⟨str⟩ (in ABC notation) to the a percussion instrument, as listed in Section H.2.
-	//%%MIDI drumoff turns drum accompaniment off.
-	//%%MIDI drumon turns drum accompaniment on.
-	//%%MIDI fermatafixed: expands a !fermata! by one unit length; that is, GC3 becomes
-	//%%MIDI fermataproportional: doubles the length of a note preceded by !fermata!;
-	//%%MIDI gchord string
-	//%%MIDI gchord str
-	//%%MIDI gchordon
-	//%%MIDI gchordoff
-	//%%MIDI grace ⟨float⟩: sets the fraction of the next note that grace notes will take up. ⟨float⟩ must be a fraction such as 1/6.
-	//%%MIDI gracedivider ⟨int⟩: sets the grace note length as 1/⟨int⟩th of the following note.
-	//%%MIDI makechordchannels⟨int⟩: thisisaverycomplexcommandusedinchordscon-
-	//%%MIDI nobarlines
-	//%%MIDI nobeataccents: forces the ⟨int2⟩ volume (see %%MIDI beat) for each note in a bar, regardless of their position.
-	//%%MIDI noportamento: turns off the portamento controller on the current channel.
-	//%%MIDI pitchbend [bass/chord] <high byte> <low byte>
-	//%%MIDI program 2 75
-	//%%MIDI portamento ⟨int⟩: turns on the portamento controller on the current channel and set it to ⟨int⟩. Experts only.
-	//%%MIDI randomchordattack: delays the start of chord notes by a random number of MIDI units.
-	//%%MIDI ratio n m
-	//%%MIDI rtranspose ⟨int1⟩: transposes relatively to a prior %%transpose command by ⟨int1⟩ semitones; the total transposition will be ⟨int1 + int2⟩ semitones.
-	//%%MIDI temperament ⟨int1⟩ ⟨int2⟩: TO BE WRITTEN
-	//%%MIDI temperamentlinear ⟨float1 float2⟩: changes the temperament of the scale. ⟨fl- oat1⟩ specifies the size of an octave in cents of a semitone, or 1/1200 of an octave. ⟨float2⟩ specifies in the size of a fifth (normally 700 cents).
-	//%%MIDI temperamentnormal: restores normal temperament.
-	//%%MIDI transpose n
-	//%%MIDI voice [<ID>] [instrument=<integer> [bank=<integer>]] [mute]
+				else
+					parseMidiCommand(midi, tune, restOfString);
 				break;
 
 			case "playtempo":

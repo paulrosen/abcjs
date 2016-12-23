@@ -114,6 +114,12 @@ window.ABCJS.test.midiSequencerLint = function(tune) {
 					ret += element.channel;
 					ret += '\n';
 					break;
+				case "drum":
+					var params = element.params;
+					ret += "\t\t";
+					ret += "[" + params.pattern.join(" ") + "] bars=" + params.bars + " intro=" + params.intro + " on=" + params.on;
+					ret += '\n';
+					break;
 				default:
 					ret += "Unknown el_type: " + element.el_type + "\n";
 					break;
@@ -134,6 +140,9 @@ window.ABCJS.test.midiLint = function(tune) {
 			switch (event.cmd) {
 				case 'instrument':
 					ret += "\tInstrument: " + event.instrument + "\n";
+					break;
+				case 'channel':
+					ret += "\tChannel: " + event.channel + "\n";
 					break;
 				case 'start':
 					ret += "\tStart: " + event.pitch + " Volume: " + event.volume + "\n";

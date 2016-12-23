@@ -37,8 +37,7 @@ if (!window.ABCJS.midi)
 	var Preparer = window.ABCJS.midi.Preparer;
 
 	Preparer.prototype.setInstrument = function(instrument) {
-		// TODO-PER: for the first version, there are no channel or instrument changes.
-		//this.currentInstrument = instrument;
+		this.currentInstrument = instrument;
 
 		var ev = [
 			{
@@ -58,8 +57,7 @@ if (!window.ABCJS.midi)
 	};
 
 	Preparer.prototype.setChannel = function(channel) {
-		// TODO-PER: for the first version, there are no channel or instrument changes.
-		//this.currentChannel = channel;
+		this.currentChannel = channel;
 	};
 
 	Preparer.prototype.startTrack = function() {

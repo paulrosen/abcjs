@@ -56,6 +56,10 @@ if (!window.ABCJS.midi)
 						midi.setInstrument(event.instrument);
 						midiJs.setInstrument(event.instrument);
 						break;
+					case 'channel':
+						midi.setChannel(event.channel);
+						midiJs.setChannel(event.channel);
+						break;
 					case 'start':
 						midi.startNote(convertPitch(event.pitch), event.volume);
 						midiJs.startNote(convertPitch(event.pitch), event.volume);

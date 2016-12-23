@@ -24,6 +24,7 @@ empty list will be returned. A validation error will have two properties:
  * added printout of the object as output.
  * added prohibits, which is the opposite of requires.
  * added stringorarray, which allows either a string, or the array specified.
+ * added stringorinteger, which allows either a string or an integer.
  */
 
 if (!window.ABCJS)
@@ -34,6 +35,7 @@ if (!window.ABCJS.test)
 
 window.ABCJS.test.JSONSchema = {
 	validate : function(/*Any*/instance,/*Object*/schema) {
+		"use strict";
 		// Summary:
 		//  	To use the validator call JSONSchema.validate with an instance object and an optional schema object.
 		// 		If a schema is provided, it will be used to validate. If the instance object refers to a schema (self-validating), 
@@ -48,17 +50,8 @@ window.ABCJS.test.JSONSchema = {
 		//
 		return this._validate(instance,schema,false);
 	},
-	checkPropertyChange : function(/*Any*/value,/*Object*/schema, /*String*/ property) {
-		// Summary:
-		// 		The checkPropertyChange method will check to see if an value can legally be in property with the given schema
-		// 		This is slightly different than the validate method in that it will fail if the schema is readonly and it will
-		// 		not check for self-validation, it is assumed that the passed in value is already internally valid.  
-		// 		The checkPropertyChange method will return the same object type as validate, see JSONSchema.validate for 
-		// 		information.
-		//
-		return this._validate(value,schema, property || "property");
-	},
 	_validate : function(/*Any*/instance,/*Object*/schema,/*Boolean*/ _changing) {
+		"use strict";
 	var recursion = -1;
 	var errors = [];
 	var prettyPrint = [];
@@ -105,6 +98,7 @@ window.ABCJS.test.JSONSchema = {
 						!(value instanceof Array && type === 'array') &&
 						!(type === 'integer' && value%1===0) &&
 						!(type === 'string' && typeof value === 'string') &&
+						!(type === 'stringorinteger' && (typeof value === 'string' || value%1===0)) &&
 						!(type === 'stringorarray' && (typeof value === 'string' || value instanceof Array))
 				){
 					return [{property:path,message:(typeof value) + " value found, but a " + type + " is required"}];
@@ -272,7 +266,7 @@ window.ABCJS.test.JSONSchema = {
 
 		checkAllProps(instance,objTypeDef,path,recursion);
 		
-		for(i in instance){
+		for(var i in instance){
 			if(instance.hasOwnProperty(i) && typeof instance[i] !== 'function') {
 				if (objTypeDef[i]) {
 					var requires = objTypeDef[i].requires;

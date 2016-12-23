@@ -300,6 +300,10 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
 		  ABCJS.write.hint = true;
 		  this.saveState();
 		  break;
+	  case "midi":
+		// This has no effect on the visible music, so just skip it.
+		break;
+
   default:
     var abselem2 = new ABCJS.write.AbsoluteElement(elem,0,0, 'unsupported', this.tuneNumber);
     abselem2.addChild(new ABCJS.write.RelativeElement("element type "+elem.el_type, 0, 0, undefined, {type:"debug"}));
