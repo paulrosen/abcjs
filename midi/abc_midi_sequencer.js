@@ -93,7 +93,7 @@ if (!window.ABCJS.midi)
 		// If the tempo was passed in, use that. If the tempo is specified, use that. Otherwise, use the default.
 		if (abctune.metaText.tempo)
 			qpm = interpretTempo(abctune.metaText.tempo);
-		else if (options.qpm)
+		if (options.qpm)
 			qpm = parseInt(options.qpm, 10);
 
 		var startVoice = [];
