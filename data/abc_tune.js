@@ -774,4 +774,46 @@ window.ABCJS.data.Tune = function() {
 	this.addMetaTextObj = function(key, value) {
 		this.metaText[key] = value;
 	};
+
+	this.setTiming = function (bpm) {
+		this.barTimings = [];
+		this.noteTimings = [];
+		var beatLength = this.getBeatLength();
+		var beatsPerSecond = bpm / 60;
+		var currentTime = []; // per voice
+		for (var i = 0; i < this.lines.length; i++) {
+			var line = this.lines[i];
+			if (line.staff) {
+				for (var i2 = 0; i2 < line.staff.length; i2++) {
+					var staff = line.staff[i2];
+					for (var i3 = 0; i3 < staff.voices.length; i3++) {
+						var voice = staff.voices[i3];
+						var voiceNum = i2*line.staff.length+i3;
+						if (!currentTime[voiceNum])
+							currentTime[voiceNum] = 0;
+						for (var i4 = 0; i4 < voice.length; i4++) {
+							var el = voice[i4];
+							switch (el.el_type) {
+								case "bar":
+									this.barTimings.push({seconds: currentTime[voiceNum] / beatLength / beatsPerSecond, elements: el.abselem.elemset});
+									currentTime[voiceNum] += el.abselem.duration;
+									break;
+								case "note":
+								case "rest":
+									this.noteTimings.push({seconds: currentTime[voiceNum] / beatLength / beatsPerSecond, elements: el.abselem.elemset});
+									currentTime[voiceNum] += el.abselem.duration;
+									break;
+							}
+						}
+					}
+				}
+			}
+		}
+		this.barTimings = this.barTimings.sort(function(a,b) {
+			return a.seconds - b.seconds;
+		});
+		this.noteTimings = this.noteTimings.sort(function(a,b) {
+			return a.seconds - b.seconds;
+		});
+	};
 };

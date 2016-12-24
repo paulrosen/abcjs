@@ -337,7 +337,11 @@ if (!window.ABCJS)
 				var parent = find(div, "abcjs-inline-midi");
 				parent.abcjsTune = tune;
 				parent.abcjsListener = midiParams.listener;
-				parent.abcjsAnimate = midiParams.animate;
+				if (midiParams.animate) {
+					parent.abcjsAnimate = midiParams.animate.listener;
+					parent.abcjsTune = midiParams.animate.target; // We need the version of the tune that was drawn: extra info is added during the drawing process.
+					parent.abcjsTune.setTiming(midiParams.animate.qpm);
+				}
 			}
 			if (midiParams.generateInline && midiParams.inlineControls && midiParams.inlineControls.startPlaying) {
 				var startButton = find(div, "abcjs-midi-start");

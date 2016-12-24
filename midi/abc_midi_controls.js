@@ -242,7 +242,52 @@ if (!window.ABCJS.midi)
 	}
 
 	var lastNow;
-	//var tempSelection = 109;
+	var lastRange = [0,-1];
+
+	function allMatches(visualItems,index, currentTime) {
+		var lowerIndex = index;
+		var upperIndex = index;
+		while (visualItems[lowerIndex].seconds - 0.1 >= currentTime && lowerIndex > 0)
+			lowerIndex--;
+		while (visualItems[upperIndex].seconds <= currentTime + 0.1 && upperIndex < visualItems.length-1)
+			upperIndex++;
+		// If we stopped because we ran out of array instead of passed the bounds, then add one
+		if (visualItems[upperIndex].seconds <= currentTime + 0.1)
+			upperIndex++;
+
+		return [lowerIndex, upperIndex];
+	}
+
+	function findElements(visualItems, currentTime) {
+
+		var minIndex = 0;
+		var maxIndex = visualItems.length - 1;
+		var currentIndex;
+		var currentElement;
+
+		while (minIndex <= maxIndex) {
+			currentIndex = (minIndex + maxIndex) / 2 | 0;
+			currentElement = visualItems[currentIndex];
+
+			// A match is if the currentTime is within .1 seconds before the exact time.
+			// We get callback events at somewhat random times, so they won't match up exactly.
+			if (currentElement.seconds - 0.1 < currentTime) {
+				minIndex = currentIndex + 1;
+			}
+			else if (currentElement.seconds - 0.1 > currentTime) {
+				maxIndex = currentIndex - 1;
+			}
+			else {
+				// We have a match! Find all of the elements that match
+				return allMatches(visualItems. currentIndex, currentTime);
+			}
+		}
+
+		// There was no match, so find the closest element that is less than the current time.
+		while (visualItems[currentIndex].seconds - 0.1 >= currentTime && currentIndex > 0)
+			currentIndex--;
+		return allMatches(visualItems, currentIndex, currentTime);
+	}
 
 	function midiJsListener(position) {
 		// { currentTime: in seconds, duration: total length in seconds, progress: percent between 0 and 1 }
@@ -267,14 +312,15 @@ if (!window.ABCJS.midi)
 				}
 				if (midiControl.abcjsListener)
 					midiControl.abcjsListener(midiControl, position);
-				//if (midiControl.abcjsAnimate) {
-				//	if (currentNote.velocity > 0) {
-				//		midiControl.abcjsTune.engraver.rangeHighlight(tempSelection, tempSelection + 1);
-				//		tempSelection++;
-				//		if (tempSelection > 343)
-				//			tempSelection = 109;
-				//	}
-				//}
+				if (midiControl.abcjsAnimate) {
+					var range = findElements(midiControl.abcjsTune.noteTimings, position.currentTime);
+					if (range[0] !== lastRange[0] || range[1] !== lastRange[1]) {
+						midiControl.abcjsAnimate(midiControl.abcjsTune.noteTimings.slice(lastRange[0], lastRange[1]),
+							midiControl.abcjsTune.noteTimings.slice(range[0], range[1]));
+						lastRange[0] = range[0];
+						lastRange[1] = range[1];
+					}
+				}
 			}
 		}
 		if (position.progress === 1) {
@@ -293,67 +339,12 @@ if (!window.ABCJS.midi)
 			// before doing another action.
 			setTimeout(function() {
 				doReset(midiControl, finishedResetting);
+				if (midiControl.abcjsAnimate)
+					midiControl.abcjsAnimate(midiControl.abcjsTune.noteTimings.slice(lastRange[0], lastRange[1]), null);
 			}, 1);
 		}
 	}
 
-	//function midiJsListener(currentNote, b, c) {
-	//	console.log("listener ==>", currentNote, b, c);
-	//	return;
-	//	// { currentTime, duration, progress }
-	//	// currentNote is a hash containing: { channel, end, message, note, now, velocity }
-	//	var midiControl;
-	//	if (currentNote.end > 0 && lastNow !== currentNote.now) {
-	//		lastNow = currentNote.now;
-	//		var currentPosition = currentNote.now / currentNote.end; // This returns a number between 0 and 1.
-	//		midiControl = find(document, "abcjs-midi-current");
-	//		if (midiControl) {
-	//			var progressBackground = find(midiControl, "abcjs-midi-progress-background");
-	//			var totalWidth = progressBackground.offsetWidth;
-	//			var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
-	//			var scaled = totalWidth * currentPosition; // The number of pixels
-	//			progressIndicator.style.left = scaled + "px";
-	//			var clock = find(midiControl, "abcjs-midi-clock");
-	//			if (clock) {
-	//				var seconds = Math.floor(currentNote.now / 1000);
-	//				var minutes = Math.floor(seconds / 60);
-	//				seconds = seconds % 60;
-	//				if (seconds < 10) seconds = "0" + seconds;
-	//				if (minutes < 10) minutes = " " + minutes;
-	//				clock.innerHTML = minutes + ":" + seconds;
-	//			}
-	//			if (midiControl.abcjsListener)
-	//				midiControl.abcjsListener(midiControl, currentNote);
-	//			if (midiControl.abcjsAnimate) {
-	//				if (currentNote.velocity > 0) {
-	//					midiControl.abcjsTune.engraver.rangeHighlight(tempSelection, tempSelection + 1);
-	//					tempSelection++;
-	//					if (tempSelection > 343)
-	//						tempSelection = 109;
-	//				}
-	//			}
-	//		}
-	//	}
-	//	if (currentNote.now === currentNote.end) {
-	//		// The playback is stopping. We need to either indicate that
-	//		// it has stopped, or start over at the beginning.
-	//		midiControl = find(document, "abcjs-midi-current");
-	//		var loopControl = find(midiControl, "abcjs-midi-loop");
-	//
-	//		var finishedResetting = function() {
-	//			if (loopControl && hasClass(loopControl, "abcjs-pushed")) {
-	//				onStart(find(midiControl, "abcjs-midi-start"));
-	//			}
-	//		};
-	//
-	//		// midi.js is not quite finished: it still will process the last event, so we wait a minimum amount of time
-	//		// before doing another action.
-	//		setTimeout(function() {
-	//			doReset(midiControl, finishedResetting);
-	//		}, 1);
-	//	}
-	//}
-	//
 	function onStart(target) {
 		// If this midi is already playing,
 		if (hasClass(target, 'abcjs-pushed')) {
