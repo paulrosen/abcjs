@@ -133,8 +133,6 @@ if (!window.ABCJS.midi)
 						var voice = staff.voices[k];
 						if (!voices[voiceNumber]) {
 							voices[voiceNumber] = [].concat(startVoice);
-							if (voiceNumber === 0 && drumOn) // drum information is only needed once, so use track 0.
-								voices[voiceNumber].push({el_type: 'drum', params: { pattern: drumPattern, bars: drumBars, intro: drumIntro, on: drumOn}});
 						}
 						if (staff.key) {
 							if (staff.key.root === 'HP')
@@ -145,6 +143,8 @@ if (!window.ABCJS.midi)
 						if (staff.meter) {
 							voices[voiceNumber].push(interpretMeter(staff.meter));
 						}
+						if (voiceNumber === 0 && drumOn) // drum information is only needed once, so use track 0.
+							voices[voiceNumber].push({el_type: 'drum', params: { pattern: drumPattern, bars: drumBars, intro: drumIntro, on: drumOn}});
 						if (staff.clef && staff.clef.transpose) {
 							staff.clef.el_type = 'clef';
 							voices[voiceNumber].push({ el_type: 'transpose', transpose: staff.clef.transpose });

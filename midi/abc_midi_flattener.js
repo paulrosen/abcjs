@@ -670,10 +670,11 @@ if (!window.ABCJS.midi)
 		}
 		// Now normalize the pattern to cover the correct number of measures. The note lengths passed are relative to each other and need to be scaled to fit a measure.
 		var totalTime = 0;
+		var measuresPerBeat = meter.num/meter.den;
 		for (var ii = 0; ii < ret.pattern.length; ii++)
 			totalTime += ret.pattern[ii].len;
 		var numBars = params.bars ? params.bars : 1;
-		var factor = totalTime /  numBars;
+		var factor = totalTime /  numBars / measuresPerBeat;
 		for (ii = 0; ii < ret.pattern.length; ii++)
 			ret.pattern[ii].len = ret.pattern[ii].len / factor;
 		return ret;
@@ -689,12 +690,13 @@ if (!window.ABCJS.midi)
 		if (drumTrack.length === 0 && !drumDefinition.on)
 			return;
 
+		var measureLen = meter.num/meter.den;
 		if (drumTrack.length === 0) {
 			drumTrack.push({cmd: 'channel', channel: 10});
 			drumTrack.push({cmd: 'instrument', instrument: 10});
 			// need to figure out how far in time the bar started: if there are pickup notes before the chords start, we need pauses.
 			var distance = timeFromStart();
-			if (distance > 0 && distance < 0.99) { // because of floating point, the measure size might not be exactly 1.
+			if (distance > 0 && distance < measureLen - 0.01) { // because of floating point, adding the notes might not exactly equal the measure size.
 				drumTrack.push({cmd: 'move', duration: distance * tempoChangeFactor});
 				return;
 			}
@@ -702,8 +704,7 @@ if (!window.ABCJS.midi)
 
 		if (!drumDefinition.on) {
 			// this is the case where there has been a drum track, but it was specifically turned off.
-			var measureLen = meter.num/meter.den * tempoChangeFactor;
-			drumTrack.push({ cmd: 'move', duration: measureLen });
+			drumTrack.push({ cmd: 'move', duration: measureLen * tempoChangeFactor });
 			return;
 		}
 		for (var i = 0; i < drumDefinition.pattern.length; i++) {
