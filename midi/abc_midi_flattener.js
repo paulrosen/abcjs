@@ -54,7 +54,7 @@ if (!window.ABCJS.midi)
 
 	var normalBreakBetweenNotes = 1.0/128;	// a 128th note of silence between notes for articulation.
 
-	window.ABCJS.midi.flatten = function(voices) {
+	window.ABCJS.midi.flatten = function(voices, options) {
 		barAccidentals = [];
 		accidentals = [0,0,0,0,0,0,0];
 		transpose = 0;
@@ -90,7 +90,7 @@ if (!window.ABCJS.midi)
 				var element = voice[j];
 				switch (element.el_type) {
 					case "note":
-						writeNote(element);
+						writeNote(element, options.voicesOff);
 						break;
 					case "key":
 						accidentals = setKeySignature(element);
@@ -199,7 +199,7 @@ if (!window.ABCJS.midi)
 		return distance;
 	}
 
-	function writeNote(elem) {
+	function writeNote(elem, voiceOff) {
 		//
 		// Create a series of note events to append to the current track.
 		// The output event is one of: { pitchStart: pitch_in_abc_units, volume: from_1_to_64 }
@@ -208,6 +208,7 @@ if (!window.ABCJS.midi)
 		// If there are guitar chords, then they are put in a separate track, but they have the same format.
 		//
 
+		var velocity = voiceOff ? 0 : 64;
 		var chord = findChord(elem);
 		if (chord) {
 			var c = interpretChord(chord);
@@ -251,14 +252,14 @@ if (!window.ABCJS.midi)
 			var stealFromDuration = stealFromCurrent ? duration : currentTrack[lastNoteDurationPosition].duration;
 			graces = processGraceNotes(elem.gracenotes, stealFromDuration);
 			if (!bagpipes) {
-				duration = writeGraceNotes(graces, stealFromCurrent, duration);
+				duration = writeGraceNotes(graces, stealFromCurrent, duration, velocity);
 			}
 		}
 
 		if (elem.pitches) {
 			if (graces && bagpipes) {
 				// If it is bagpipes, then the graces are played with the note. If the grace has the same pitch as the note, then we just skip it.
-				duration = writeGraceNotes(graces, true, duration);
+				duration = writeGraceNotes(graces, true, duration, velocity);
 			}
 			var pitches = [];
 			for (var i=0; i<elem.pitches.length; i++) {
@@ -268,7 +269,7 @@ if (!window.ABCJS.midi)
 
 				// TODO-PER: should the volume vary depending on whether it is on a beat or measure start?
 				if (!pitchesTied[''+actualPitch])	// If this is the second note of a tie, we don't start it again.
-					currentTrack.push({ cmd: 'start', pitch: actualPitch, volume: 64 });
+					currentTrack.push({ cmd: 'start', pitch: actualPitch, volume: velocity });
 
 				if (note.startTie)
 					pitchesTied[''+actualPitch] = true;
@@ -354,11 +355,11 @@ if (!window.ABCJS.midi)
 		return ret;
 	}
 
-	function writeGraceNotes(graces, stealFromCurrent, duration, skipNote) {
+	function writeGraceNotes(graces, stealFromCurrent, duration, skipNote, velocity) {
 		for (var g = 0; g < graces.length; g++) {
 			var gp = adjustPitch(graces[g]);
 			if (gp !== skipNote)
-				currentTrack.push({cmd: 'start', pitch: gp, volume: 64});
+				currentTrack.push({cmd: 'start', pitch: gp, volume: velocity});
 			currentTrack.push({cmd: 'move', duration: graces[g].duration*tempoChangeFactor });
 			if (gp !== skipNote)
 				currentTrack.push({cmd: 'stop', pitch: gp});
