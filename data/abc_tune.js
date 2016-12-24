@@ -775,7 +775,8 @@ window.ABCJS.data.Tune = function() {
 		this.metaText[key] = value;
 	};
 
-	this.setTiming = function (bpm) {
+	this.setTiming = function (bpm, measuresOfDelay) {
+		var meter;
 		this.barTimings = [];
 		this.noteTimings = [];
 		var beatLength = this.getBeatLength();
@@ -788,9 +789,13 @@ window.ABCJS.data.Tune = function() {
 					var staff = line.staff[i2];
 					for (var i3 = 0; i3 < staff.voices.length; i3++) {
 						var voice = staff.voices[i3];
+						if (staff.meter)
+							meter = staff.meter;
 						var voiceNum = i2*line.staff.length+i3;
-						if (!currentTime[voiceNum])
-							currentTime[voiceNum] = 0;
+						if (!currentTime[voiceNum]) {
+							var measureLength = meter.value[0].num/meter.value[0].den;
+							currentTime[voiceNum] = measureLength * measuresOfDelay / beatsPerSecond;
+						}
 						for (var i4 = 0; i4 < voice.length; i4++) {
 							var el = voice[i4];
 							switch (el.el_type) {

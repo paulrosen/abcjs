@@ -23,6 +23,7 @@ if (!window.ABCJS.midi)
 (function() {
 	"use strict";
 
+	var measureLength;
 	// The abc is provided to us line by line. It might have repeats in it. We want to re arrange the elements to
 	// be an array of voices with all the repeats embedded, and no lines. Then it is trivial to go through the events
 	// one at a time and turn it into midi.
@@ -144,7 +145,7 @@ if (!window.ABCJS.midi)
 							voices[voiceNumber].push(interpretMeter(staff.meter));
 						}
 						if (voiceNumber === 0 && drumOn) // drum information is only needed once, so use track 0.
-							voices[voiceNumber].push({el_type: 'drum', params: { pattern: drumPattern, bars: drumBars, intro: drumIntro, on: drumOn}});
+							voices[voiceNumber].push({el_type: 'drum', params: { pattern: drumPattern, bars: drumBars, on: drumOn}});
 						if (staff.clef && staff.clef.transpose) {
 							staff.clef.el_type = 'clef';
 							voices[voiceNumber].push({ el_type: 'transpose', transpose: staff.clef.transpose });
@@ -233,6 +234,20 @@ if (!window.ABCJS.midi)
 				}
 			}
 		}
+		if (drumIntro) {
+			// add some measures of rests to the start of each track.
+			for (var vv = 0; vv < voices.length; vv++) {
+				var insertPoint = 0;
+				while (voices[vv][insertPoint].el_type !== "note" && voices[vv].length > insertPoint)
+					insertPoint++;
+				if (voices[vv].length > insertPoint) {
+					for (var w = 0; w < drumIntro; w++) {
+						voices[vv].splice(insertPoint, 0, {el_type: "note", rest: {type: "rest"}, duration: measureLength},
+							{ el_type: "bar" });
+					}
+				}
+			}
+		}
 		return voices;
 	};
 
@@ -249,17 +264,23 @@ if (!window.ABCJS.midi)
 	}
 
 	function interpretMeter(element) {
+		var meter;
 		switch (element.type) {
 			case "common_time":
-				return { el_type: 'meter', num: 4, den: 4 };
+				meter = { el_type: 'meter', num: 4, den: 4 };
+				break;
 			case "cut_time":
-				return { el_type: 'meter', num: 2, den: 2 };
+				meter = { el_type: 'meter', num: 2, den: 2 };
+				break;
 			case "specified":
 				// TODO-PER: only taking the first meter, so the complex meters are not handled.
-				return { el_type: 'meter', num: element.value[0].num, den: element.value[0].den };
+				meter = { el_type: 'meter', num: element.value[0].num, den: element.value[0].den };
+				break;
 			default:
 				// This should never happen.
-				return { el_type: 'meter' };
+				meter = { el_type: 'meter' };
 		}
+		measureLength = meter.num/meter.den;
+		return meter;
 	}
 })();

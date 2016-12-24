@@ -279,7 +279,7 @@ if (!window.ABCJS.midi)
 			}
 			else {
 				// We have a match! Find all of the elements that match
-				return allMatches(visualItems. currentIndex, currentTime);
+				return allMatches(visualItems, currentIndex, currentTime);
 			}
 		}
 

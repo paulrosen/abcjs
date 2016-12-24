@@ -55,6 +55,9 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `listener` | null | Function that is called for each midi event. The parameters are the current abcjs element and the current MIDI event. |
 | `animate` | null | Whether to do a "bouncing ball" effect on the visual music. `{ listener: callback, target: output of ABCJS.renderAbc, qpm: tempo }` This calls the listener whenever the current note has changed. It is called with both the last selected note and the newly selected note. The callback parameters are arrays of svg elements. |
 | `inlineControls` | { selectionToggle: false, loopToggle: false, standard: true, tempo: false, startPlaying: false } | These are the options for which buttons and functionality appear in the inline controls. This is a hash, and is defined below. |
+| `drum` | "" | A string formatted like the `%%MIDI drum` specification. Using this parameter also implies `%%MIDI drumon` |
+| `drumBars` | 1 |  How many bars to spread the drum pattern over. |
+| `drumIntro` | 0 | How many bars of drum should precede the music. |
 
 | `inlineControls` | Default | Description |
 | ------------- | ----------- | ----------- |
