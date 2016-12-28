@@ -252,14 +252,14 @@ if (!window.ABCJS.midi)
 			var stealFromDuration = stealFromCurrent ? duration : currentTrack[lastNoteDurationPosition].duration;
 			graces = processGraceNotes(elem.gracenotes, stealFromDuration);
 			if (!bagpipes) {
-				duration = writeGraceNotes(graces, stealFromCurrent, duration, velocity);
+				duration = writeGraceNotes(graces, stealFromCurrent, duration, null, velocity);
 			}
 		}
 
 		if (elem.pitches) {
 			if (graces && bagpipes) {
 				// If it is bagpipes, then the graces are played with the note. If the grace has the same pitch as the note, then we just skip it.
-				duration = writeGraceNotes(graces, true, duration, velocity);
+				duration = writeGraceNotes(graces, true, duration, null, velocity);
 			}
 			var pitches = [];
 			for (var i=0; i<elem.pitches.length; i++) {
