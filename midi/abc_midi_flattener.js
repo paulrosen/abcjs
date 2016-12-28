@@ -67,7 +67,6 @@ if (!window.ABCJS.midi)
 		channel = undefined;
 		currentTrack = undefined;
 		pitchesTied = {};
-		lastNoteDurationPosition = -1;
 
 		// For resolving chords.
 		meter = { num: 4, den: 4 };
@@ -83,6 +82,7 @@ if (!window.ABCJS.midi)
 		drumDefinition = {};
 
 		for (var i = 0; i < voices.length; i++) {
+			lastNoteDurationPosition = -1;
 			var voice = voices[i];
 			currentTrack = [];
 			pitchesTied = {};
@@ -114,7 +114,8 @@ if (!window.ABCJS.midi)
 						}
 						barBeat = 0;
 						barAccidentals = [];
-						writeDrum();
+						if (i === 0) // Only write the drum part on the first voice so that it is not duplicated.
+							writeDrum();
 						break;
 					case "bagpipes":
 						bagpipes = true;
