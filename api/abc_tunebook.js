@@ -342,6 +342,7 @@ if (!window.ABCJS)
 					parent.abcjsAnimate = midiParams.animate.listener;
 					parent.abcjsTune = midiParams.animate.target; // We need the version of the tune that was drawn: extra info is added during the drawing process.
 					parent.abcjsTune.setTiming(midiParams.animate.qpm, drumIntro);
+					parent.abcjsQpm = midiParams.animate.qpm;
 				}
 			}
 			if (midiParams.generateInline && midiParams.inlineControls && midiParams.inlineControls.startPlaying) {

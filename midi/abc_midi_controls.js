@@ -310,8 +310,12 @@ if (!window.ABCJS.midi)
 					if (minutes < 10) minutes = " " + minutes;
 					clock.innerHTML = minutes + ":" + seconds;
 				}
-				if (midiControl.abcjsListener)
+				if (midiControl.abcjsListener) {
+					var thisBeat = Math.floor(position.currentTime/(parseInt(midiControl.abcjsQpm,10)/60));
+					position.newBeat = thisBeat !== midiControl.abcjsLastBeat;
+					midiControl.abcjsLastBeat = thisBeat;
 					midiControl.abcjsListener(midiControl, position);
+				}
 				if (midiControl.abcjsAnimate) {
 					var range = findElements(midiControl.abcjsTune.noteTimings, position.currentTime);
 					if (range[0] !== lastRange[0] || range[1] !== lastRange[1]) {
@@ -373,6 +377,7 @@ if (!window.ABCJS.midi)
 			addClass(target, "abcjs-pushed");
 		}
 		// This replaces the old callback. It really only needs to be called once, but it doesn't hurt to set it every time.
+		parent.abcjsLastBeat = -1;
 		setMidiCallback(midiJsListener);
 	}
 
