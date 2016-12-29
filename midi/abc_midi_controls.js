@@ -242,23 +242,9 @@ if (!window.ABCJS.midi)
 	}
 
 	var lastNow;
-	var lastRange = [0,-1];
+	var lastIndex = -1;
 
-	function allMatches(visualItems,index, currentTime) {
-		var lowerIndex = index;
-		var upperIndex = index;
-		while (visualItems[lowerIndex].seconds - 0.1 >= currentTime && lowerIndex > 0)
-			lowerIndex--;
-		while (visualItems[upperIndex].seconds <= currentTime + 0.1 && upperIndex < visualItems.length-1)
-			upperIndex++;
-		// If we stopped because we ran out of array instead of passed the bounds, then add one
-		if (visualItems[upperIndex].seconds <= currentTime + 0.1)
-			upperIndex++;
-
-		return [lowerIndex, upperIndex];
-	}
-
-	function findElements(visualItems, currentTime) {
+	function findElements(visualItems, currentTime, epsilon) {
 
 		var minIndex = 0;
 		var maxIndex = visualItems.length - 1;
@@ -271,22 +257,22 @@ if (!window.ABCJS.midi)
 
 			// A match is if the currentTime is within .1 seconds before the exact time.
 			// We get callback events at somewhat random times, so they won't match up exactly.
-			if (currentElement.seconds - 0.1 < currentTime) {
+			if (currentElement.seconds - epsilon < currentTime) {
 				minIndex = currentIndex + 1;
 			}
-			else if (currentElement.seconds - 0.1 > currentTime) {
+			else if (currentElement.seconds - epsilon > currentTime) {
 				maxIndex = currentIndex - 1;
 			}
 			else {
-				// We have a match! Find all of the elements that match
-				return allMatches(visualItems, currentIndex, currentTime);
+				// We have a match!
+				return currentIndex;
 			}
 		}
 
 		// There was no match, so find the closest element that is less than the current time.
-		while (visualItems[currentIndex].seconds - 0.1 >= currentTime && currentIndex > 0)
+		while (visualItems[currentIndex].seconds - epsilon >= currentTime && currentIndex > 0)
 			currentIndex--;
-		return allMatches(visualItems, currentIndex, currentTime);
+		return currentIndex;
 	}
 
 	function midiJsListener(position) {
@@ -317,12 +303,13 @@ if (!window.ABCJS.midi)
 					midiControl.abcjsListener(midiControl, position);
 				}
 				if (midiControl.abcjsAnimate) {
-					var range = findElements(midiControl.abcjsTune.noteTimings, position.currentTime);
-					if (range[0] !== lastRange[0] || range[1] !== lastRange[1]) {
-						midiControl.abcjsAnimate(midiControl.abcjsTune.noteTimings.slice(lastRange[0], lastRange[1]),
-							midiControl.abcjsTune.noteTimings.slice(range[0], range[1]));
-						lastRange[0] = range[0];
-						lastRange[1] = range[1];
+					var epsilon = parseInt(midiControl.abcjsQpm,10)/60/64; // The length of a 1/64th note.
+					var index = findElements(midiControl.abcjsTune.noteTimings, position.currentTime, epsilon);
+					if (index !== lastIndex) {
+						var last = lastIndex >= 0 ? midiControl.abcjsTune.noteTimings[lastIndex] : null;
+						midiControl.abcjsAnimate(last,
+							midiControl.abcjsTune.noteTimings[index]);
+						lastIndex = index;
 					}
 				}
 			}
@@ -344,12 +331,13 @@ if (!window.ABCJS.midi)
 			setTimeout(function() {
 				doReset(midiControl, finishedResetting);
 				if (midiControl.abcjsAnimate)
-					midiControl.abcjsAnimate(midiControl.abcjsTune.noteTimings.slice(lastRange[0], lastRange[1]), null);
+					midiControl.abcjsAnimate(midiControl.abcjsTune.noteTimings[lastIndex], null);
 			}, 1);
 		}
 	}
 
 	function onStart(target) {
+		var parent = closest(target, "abcjs-inline-midi");
 		// If this midi is already playing,
 		if (hasClass(target, 'abcjs-pushed')) {
 			// Stop it.
@@ -358,7 +346,7 @@ if (!window.ABCJS.midi)
 			removeClass(target, "abcjs-pushed");
 		} else { // Else,
 			// If some other midi is running, turn it off.
-			var parent = closest(target, "abcjs-inline-midi");
+
 			// If this is the current midi, just continue.
 			if (hasClass(parent, "abcjs-midi-current"))
 			// Start this tune playing from wherever it had stopped.

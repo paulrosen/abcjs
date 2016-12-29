@@ -778,7 +778,7 @@ window.ABCJS.data.Tune = function() {
 	this.setTiming = function (bpm, measuresOfDelay) {
 		var meter;
 		this.barTimings = [];
-		this.noteTimings = [];
+		var noteTimings = {};
 		var beatLength = this.getBeatLength();
 		var beatsPerSecond = bpm / 60;
 		var currentTime = []; // per voice
@@ -805,7 +805,10 @@ window.ABCJS.data.Tune = function() {
 									break;
 								case "note":
 								case "rest":
-									this.noteTimings.push({seconds: currentTime[voiceNum] / beatLength / beatsPerSecond, elements: el.abselem.elemset});
+									var sec = currentTime[voiceNum] / beatLength / beatsPerSecond;
+									if (!noteTimings[sec])
+										noteTimings[sec] = [];
+									noteTimings[sec].push(el.abselem.elemset);
 									currentTime[voiceNum] += el.abselem.duration;
 									break;
 							}
@@ -817,8 +820,13 @@ window.ABCJS.data.Tune = function() {
 		this.barTimings = this.barTimings.sort(function(a,b) {
 			return a.seconds - b.seconds;
 		});
-		this.noteTimings = this.noteTimings.sort(function(a,b) {
-			return a.seconds - b.seconds;
+		this.noteTimings = [];
+		var keys = Object.keys(noteTimings);
+		keys = keys.sort(function(a,b) {
+			return parseFloat(a) - parseFloat(b);
 		});
+		for (var k = 0; k < keys.length; k++)
+			this.noteTimings.push({ seconds: keys[k], elements: noteTimings[""+keys[k]]});
+
 	};
 };
