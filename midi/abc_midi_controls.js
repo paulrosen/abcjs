@@ -242,7 +242,6 @@ if (!window.ABCJS.midi)
 	}
 
 	var lastNow;
-	var lastIndex = -1;
 
 	function findElements(visualItems, currentTime, epsilon) {
 
@@ -272,6 +271,9 @@ if (!window.ABCJS.midi)
 		// There was no match, so find the closest element that is less than the current time.
 		while (visualItems[currentIndex].seconds - epsilon >= currentTime && currentIndex > 0)
 			currentIndex--;
+		// If the time is way before the first element, then we're not ready to select any of them.
+		if (currentIndex === 0 && visualItems[currentIndex].seconds - epsilon >= currentTime)
+			return -1;
 		return currentIndex;
 	}
 
@@ -282,34 +284,37 @@ if (!window.ABCJS.midi)
 			lastNow = position.progress;
 			midiControl = find(document, "abcjs-midi-current");
 			if (midiControl) {
-				var progressBackground = find(midiControl, "abcjs-midi-progress-background");
-				var totalWidth = progressBackground.offsetWidth;
-				var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
-				var scaled = totalWidth * lastNow; // The number of pixels
-				progressIndicator.style.left = scaled + "px";
-				var clock = find(midiControl, "abcjs-midi-clock");
-				if (clock) {
-					var seconds = Math.floor(position.currentTime);
-					var minutes = Math.floor(seconds / 60);
-					seconds = seconds % 60;
-					if (seconds < 10) seconds = "0" + seconds;
-					if (minutes < 10) minutes = " " + minutes;
-					clock.innerHTML = minutes + ":" + seconds;
-				}
-				if (midiControl.abcjsListener) {
-					var thisBeat = Math.floor(position.currentTime/(parseInt(midiControl.abcjsQpm,10)/60));
-					position.newBeat = thisBeat !== midiControl.abcjsLastBeat;
-					midiControl.abcjsLastBeat = thisBeat;
-					midiControl.abcjsListener(midiControl, position);
-				}
-				if (midiControl.abcjsAnimate) {
-					var epsilon = parseInt(midiControl.abcjsQpm,10)/60/64; // The length of a 1/64th note.
-					var index = findElements(midiControl.abcjsTune.noteTimings, position.currentTime, epsilon);
-					if (index !== lastIndex) {
-						var last = lastIndex >= 0 ? midiControl.abcjsTune.noteTimings[lastIndex] : null;
-						midiControl.abcjsAnimate(last,
-							midiControl.abcjsTune.noteTimings[index]);
-						lastIndex = index;
+				var startButton = find(midiControl, 'abcjs-midi-start');
+				if (hasClass(startButton, 'abcjs-pushed')) {
+					var progressBackground = find(midiControl, "abcjs-midi-progress-background");
+					var totalWidth = progressBackground.offsetWidth;
+					var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
+					var scaled = totalWidth * lastNow; // The number of pixels
+					progressIndicator.style.left = scaled + "px";
+					var clock = find(midiControl, "abcjs-midi-clock");
+					if (clock) {
+						var seconds = Math.floor(position.currentTime);
+						var minutes = Math.floor(seconds / 60);
+						seconds = seconds % 60;
+						if (seconds < 10) seconds = "0" + seconds;
+						if (minutes < 10) minutes = " " + minutes;
+						clock.innerHTML = minutes + ":" + seconds;
+					}
+					if (midiControl.abcjsListener) {
+						var thisBeat = Math.floor(position.currentTime / (parseInt(midiControl.abcjsQpm, 10) / 60));
+						position.newBeat = thisBeat !== midiControl.abcjsLastBeat;
+						midiControl.abcjsLastBeat = thisBeat;
+						midiControl.abcjsListener(midiControl, position);
+					}
+					if (midiControl.abcjsAnimate) {
+						var epsilon = parseInt(midiControl.abcjsQpm, 10) / 60 / 64; // The length of a 1/64th note.
+						var index = findElements(midiControl.abcjsTune.noteTimings, position.currentTime, epsilon);
+						if (index !== midiControl.abcjsLastIndex) {
+							var last = midiControl.abcjsLastIndex >= 0 ? midiControl.abcjsTune.noteTimings[midiControl.abcjsLastIndex] : null;
+							midiControl.abcjsAnimate(last,
+								midiControl.abcjsTune.noteTimings[index]);
+							midiControl.abcjsLastIndex = index;
+						}
 					}
 				}
 			}
@@ -331,7 +336,7 @@ if (!window.ABCJS.midi)
 			setTimeout(function() {
 				doReset(midiControl, finishedResetting);
 				if (midiControl.abcjsAnimate)
-					midiControl.abcjsAnimate(midiControl.abcjsTune.noteTimings[lastIndex], null);
+					midiControl.abcjsAnimate(midiControl.abcjsTune.noteTimings[midiControl.abcjsLastIndex], null);
 			}, 1);
 		}
 	}
@@ -366,6 +371,7 @@ if (!window.ABCJS.midi)
 		}
 		// This replaces the old callback. It really only needs to be called once, but it doesn't hurt to set it every time.
 		parent.abcjsLastBeat = -1;
+		parent.abcjsLastIndex = -1;
 		setMidiCallback(midiJsListener);
 	}
 
