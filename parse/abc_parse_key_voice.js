@@ -582,6 +582,8 @@ window.ABCJS.parse.parseKeyVoice = {};
 						tokens.shift();
 					}
 					multilineVars.clef = {type: clef.token, verticalPos: calcMiddle(clef.token, 0)};
+					if (multilineVars.currentVoice.transpose !== undefined)
+						multilineVars.clef.transpose = multilineVars.currentVoice.transpose;
 					ret.foundClef = true;
 					break;
 				default:

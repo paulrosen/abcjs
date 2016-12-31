@@ -839,6 +839,8 @@ window.ABCJS.parse.Parse = function() {
 				params.scale = multilineVars.currentVoice.scale;
 			if (multilineVars.currentVoice.style)
 				params.style = multilineVars.currentVoice.style;
+			if (multilineVars.currentVoice.transpose)
+				params.clef.transpose = multilineVars.currentVoice.transpose;
 		}
 		var isFirstVoice = multilineVars.currentVoice === undefined || (multilineVars.currentVoice.staffNum ===  0 && multilineVars.currentVoice.index ===  0);
 		if (multilineVars.barNumbers === 0 && isFirstVoice && multilineVars.currBarNumber !== 1)

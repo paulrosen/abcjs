@@ -55,9 +55,9 @@ if (!window.ABCJS.midi)
 	var normalBreakBetweenNotes = 1.0/128;	// a 128th note of silence between notes for articulation.
 
 	window.ABCJS.midi.flatten = function(voices, options) {
+		if (!options) options = {};
 		barAccidentals = [];
 		accidentals = [0,0,0,0,0,0,0];
-		transpose = 0;
 		bagpipes = false;
 		multiplier = 1;
 		tracks = [];
@@ -82,6 +82,7 @@ if (!window.ABCJS.midi)
 		drumDefinition = {};
 
 		for (var i = 0; i < voices.length; i++) {
+			transpose = 0;
 			lastNoteDurationPosition = -1;
 			var voice = voices[i];
 			currentTrack = [];

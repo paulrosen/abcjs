@@ -120,6 +120,7 @@ if (!window.ABCJS.midi)
 		var voices = [];
 		var startRepeatPlaceholder = []; // There is a place holder for each voice.
 		var skipEndingPlaceholder = []; // This is the place where the first ending starts.
+		var startingDrumSet = false;
 		for (var i = 0; i < abctune.lines.length; i++) {
 			// For each group of staff lines in the tune.
 			var line = abctune.lines[i];
@@ -144,8 +145,10 @@ if (!window.ABCJS.midi)
 						if (staff.meter) {
 							voices[voiceNumber].push(interpretMeter(staff.meter));
 						}
-						if (voiceNumber === 0 && drumOn) // drum information is only needed once, so use track 0.
-							voices[voiceNumber].push({el_type: 'drum', params: { pattern: drumPattern, bars: drumBars, on: drumOn}});
+						if (!startingDrumSet && drumOn) { // drum information is only needed once, so use the first line and track 0.
+							voices[voiceNumber].push({el_type: 'drum', params: {pattern: drumPattern, bars: drumBars, on: drumOn, intro: drumIntro}});
+							startingDrumSet = true;
+						}
 						if (staff.clef && staff.clef.transpose) {
 							staff.clef.el_type = 'clef';
 							voices[voiceNumber].push({ el_type: 'transpose', transpose: staff.clef.transpose });
@@ -222,8 +225,10 @@ if (!window.ABCJS.midi)
 										case "drum": drumPattern = elem.params; drumChange = true; break;
 										case "drumbars": drumBars = elem.params[0]; drumChange = true; break;
 									}
-									if (drumChange)
+									if (drumChange) {
 										voices[0].push({el_type: 'drum', params: { pattern: drumPattern, bars: drumBars, intro: drumIntro, on: drumOn}});
+										startingDrumSet = true;
+									}
 									break;
 								default:
 									console.log("MIDI: element type " + elem.el_type + " not handled.");

@@ -406,7 +406,8 @@ if (!window.ABCJS.midi)
 
 		// If the tune is playing, stop it.
 		deselectMidiControl();
-		loadMidi(parent, onSuccess);
+		if (parent) // parent can be null if the music was changed while the midi is playing. This is called to stop it, but the object is already gone.
+			loadMidi(parent, onSuccess);
 	}
 
 	function onReset(target) {
