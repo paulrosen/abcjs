@@ -153,6 +153,12 @@ if (!window.ABCJS.midi)
 							staff.clef.el_type = 'clef';
 							voices[voiceNumber].push({ el_type: 'transpose', transpose: staff.clef.transpose });
 						}
+						if (abctune.formatting.midi && abctune.formatting.midi.drumoff) {
+							// If there is a drum off command right at the beginning it is put in the metaText instead of the stream,
+							// so we will just insert it here.
+							voices[voiceNumber].push({ el_type: 'bar' });
+							voices[voiceNumber].push({el_type: 'drum', params: {pattern: "", on: false }});
+						}
 						var noteEventsInBar = 0;
 						for (var v = 0; v < voice.length; v++) {
 							// For each element in a voice
