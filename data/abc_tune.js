@@ -793,7 +793,13 @@ window.ABCJS.data.Tune = function() {
 							meter = staff.meter;
 						var voiceNum = i2*line.staff.length+i3;
 						if (!currentTime[voiceNum]) {
-							var measureLength = meter.value[0].num/meter.value[0].den;
+							var measureLength;
+							switch(meter.type) {
+								case "common_time": measureLength = 1; break;
+								case "cut_time": measureLength = 1; break;
+								default: measureLength = meter.value[0].num/meter.value[0].den;
+							}
+
 							currentTime[voiceNum] = measureLength * measuresOfDelay / beatsPerSecond;
 						}
 						for (var i4 = 0; i4 < voice.length; i4++) {
