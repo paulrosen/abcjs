@@ -737,6 +737,21 @@ window.ABCJS.data.Tune = function() {
 		return true;
 	};
 
+	this.getMeter = function() {
+		for (var i = 0; i < this.lines.length; i++) {
+			var line = this.lines[i];
+			if (line.staff) {
+				for (var j = 0; j < line.staff.length; j++) {
+					var meter = line.staff[j].meter;
+					if (meter) {
+						return meter;
+					}
+				}
+			}
+		}
+		return { type: "common_time", }
+	};
+
 	this.getCurrentVoice = function() {
 		if (this.lines[this.lineNum] !== undefined && this.lines[this.lineNum].staff[this.staffNum] !== undefined && this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum] !== undefined)
 			return this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum];
@@ -775,64 +790,156 @@ window.ABCJS.data.Tune = function() {
 		this.metaText[key] = value;
 	};
 
+	function addVerticalInfo(timingEvents) {
+		// Add vertical info to the bar events: put the next event's top, and the event after the next measure's top.
+		var lastBarTop;
+		var lastBarBottom;
+		var lastEventTop;
+		var lastEventBottom;
+		for (var e = timingEvents.length - 1; e >= 0; e--) {
+			var ev = timingEvents[e];
+			if (ev.type === 'bar') {
+				ev.top = lastEventTop;
+				ev.nextTop = lastBarTop;
+				lastBarTop = lastEventTop;
+
+				ev.bottom = lastEventBottom;
+				ev.nextBottom = lastBarBottom;
+				lastBarBottom = lastEventBottom;
+			} else if (ev.type === 'event') {
+				lastEventTop = ev.top;
+				lastEventBottom = ev.top + ev.height;
+			}
+		}
+	}
+
+	function makeSortedArray(hash) {
+		var arr = [];
+		for (var k in hash) {
+			if (hash.hasOwnProperty(k))
+				arr.push(hash[k]);
+		}
+		arr = arr.sort(function (a, b) {
+			var diff = a.seconds - b.seconds;
+			// if the events have the same time, make sure a bar comes before a note
+			if (diff !== 0) {
+				return diff;
+			}
+			else {
+				return a.type === "bar" ? -1 : 1;
+			}
+		});
+		return arr;
+	}
+
+	this.setupEvents = function(startingDelay, timeDivider) {
+		var timingEvents = [];
+
+		var eventHash = {};
+		// The time is the number of seconds from the beginning of the piece.
+		// The units we are scanning are in notation units (i.e. 0.25 is a quarter note)
+		var time = startingDelay;
+		var isTiedState = false;
+		for (var line = 0; line < this.engraver.staffgroups.length; line++) {
+			var group = this.engraver.staffgroups[line];
+			var voices = group.voices;
+			var firstStaff = group.staffs[0];
+			var middleC = firstStaff.absoluteY;
+			var top = middleC - firstStaff.top * ABCJS.write.spacing.STEP;
+			var lastStaff = group.staffs[group.staffs.length - 1];
+			middleC = lastStaff.absoluteY;
+			var bottom = middleC - lastStaff.bottom * ABCJS.write.spacing.STEP;
+			var height = bottom - top;
+			var maxVoiceTime = 0;
+			// Put in the notes for all voices, then sort them, then remove duplicates
+			for (var v = 0; v < voices.length; v++) {
+				var voiceTime = time;
+				var elements = voices[v].children;
+				for (var elem = 0; elem < elements.length; elem++) {
+					var element = elements[elem];
+					if (element.hint)
+						break;
+					if (element.duration > 0) {
+						// There are 3 possibilities here: the note could stand on its own, the note could be tied to the next,
+						// the note could be tied to the previous, and the note could be tied on both sides.
+						var isTiedToNext = element.startTie;
+						if (isTiedState) {
+							if (!isTiedToNext)
+								isTiedState = false;
+							// If the note is tied on both sides it can just be ignored.
+						} else {
+							// the last note wasn't tied.
+							if (!eventHash["event" + voiceTime])
+								eventHash["event" + voiceTime] = {type: "event", seconds: voiceTime, top: top, height: height, left: element.x, width: element.w, elements: [element.elemset] };
+							else {
+								// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
+								eventHash["event" + voiceTime].left = Math.min(eventHash["event" + voiceTime].left, element.x);
+								eventHash["event" + voiceTime].elements.push(element.elemset);
+							}
+							if (isTiedToNext)
+								isTiedState = true;
+						}
+						voiceTime += element.duration / timeDivider;
+					}
+					// if (element.type === 'bar') {
+					// 	if (timingEvents.length === 0 || timingEvents[timingEvents.length - 1] !== 'bar') {
+					// 		if (element.elemset && element.elemset.length > 0 && element.elemset[0].attrs) {
+					// 			var klass = element.elemset[0].attrs['class'];
+					// 			var arr = klass.split(' ');
+					// 			var lineNum;
+					// 			var measureNum;
+					// 			for (var i = 0; i < arr.length; i++) {
+					// 				var match = /m(\d+)/.exec(arr[i]);
+					// 				if (match)
+					// 					measureNum = match[1];
+					// 				match = /l(\d+)/.exec(arr[i]);
+					// 				if (match)
+					// 					lineNum = match[1];
+					// 			}
+					// 			eventHash["bar" + voiceTime] = {type: "bar", seconds: voiceTime, lineNum: lineNum, measureNum: measureNum};
+					// 		}
+					// 	}
+					// }
+				}
+				maxVoiceTime = Math.max(maxVoiceTime, voiceTime);
+			}
+			time = maxVoiceTime;
+		}
+		// now we have all the events, but if there are multiple voices then there may be events out of order or duplicated, so normalize it.
+		timingEvents = makeSortedArray(eventHash);
+		addVerticalInfo(timingEvents);
+		return timingEvents;
+	};
+
+	function getVertical(group) {
+		var voices = group.voices;
+		var firstStaff = group.staffs[0];
+		var middleC = firstStaff.absoluteY;
+		var top = middleC - firstStaff.top*ABCJS.write.spacing.STEP;
+		var lastStaff = group.staffs[group.staffs.length-1];
+		middleC = lastStaff.absoluteY;
+		var bottom = middleC - lastStaff.bottom*ABCJS.write.spacing.STEP;
+		var height = bottom - top;
+		return { top: top, height: height };
+	}
+
 	this.setTiming = function (bpm, measuresOfDelay) {
-		var meter;
+		var meter = this.getMeter();
 		this.barTimings = [];
-		var noteTimings = {};
 		var beatLength = this.getBeatLength();
 		var beatsPerSecond = bpm / 60;
 		var currentTime = []; // per voice
-		for (var i = 0; i < this.lines.length; i++) {
-			var line = this.lines[i];
-			if (line.staff) {
-				for (var i2 = 0; i2 < line.staff.length; i2++) {
-					var staff = line.staff[i2];
-					for (var i3 = 0; i3 < staff.voices.length; i3++) {
-						var voice = staff.voices[i3];
-						if (staff.meter)
-							meter = staff.meter;
-						var voiceNum = i2*line.staff.length+i3;
-						if (!currentTime[voiceNum]) {
-							var measureLength;
-							switch(meter.type) {
-								case "common_time": measureLength = 1; break;
-								case "cut_time": measureLength = 1; break;
-								default: measureLength = meter.value[0].num/meter.value[0].den;
-							}
 
-							currentTime[voiceNum] = measureLength * measuresOfDelay / beatsPerSecond;
-						}
-						for (var i4 = 0; i4 < voice.length; i4++) {
-							var el = voice[i4];
-							switch (el.el_type) {
-								case "bar":
-									this.barTimings.push({seconds: currentTime[voiceNum] / beatLength / beatsPerSecond, elements: el.abselem.elemset});
-									currentTime[voiceNum] += el.abselem.duration;
-									break;
-								case "note":
-								case "rest":
-									var sec = currentTime[voiceNum] / beatLength / beatsPerSecond;
-									if (!noteTimings[sec])
-										noteTimings[sec] = [];
-									noteTimings[sec].push(el.abselem.elemset);
-									currentTime[voiceNum] += el.abselem.duration;
-									break;
-							}
-						}
-					}
-				}
-			}
+		var measureLength;
+		switch(meter.type) {
+			case "common_time": measureLength = 1; break;
+			case "cut_time": measureLength = 1; break;
+			default: measureLength = meter.value[0].num/meter.value[0].den;
 		}
-		this.barTimings = this.barTimings.sort(function(a,b) {
-			return a.seconds - b.seconds;
-		});
-		this.noteTimings = [];
-		var keys = Object.keys(noteTimings);
-		keys = keys.sort(function(a,b) {
-			return parseFloat(a) - parseFloat(b);
-		});
-		for (var k = 0; k < keys.length; k++)
-			this.noteTimings.push({ seconds: keys[k], elements: noteTimings[""+keys[k]]});
 
+		var startingDelay = measureLength / beatLength * measuresOfDelay / beatsPerSecond;
+		var timeDivider = beatLength * beatsPerSecond;
+
+		this.noteTimings = this.setupEvents(startingDelay, timeDivider);
 	};
 };
