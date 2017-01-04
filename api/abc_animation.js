@@ -159,6 +159,8 @@ if (!window.ABCJS)
 		}
 
 		var startTime;
+		var isPaused = false;
+		var pausedTime;
 
 		var initialWait = 2700;
 		var interval = 11;
@@ -376,6 +378,11 @@ if (!window.ABCJS)
 				ABCJS.stopAnimation();
 				return;
 			}
+			if (isPaused) {
+				// The isPaused flag must have just turned on. If it had been encountered before, we wouldn't be calling processNext
+				pausedTime = new Date().getTime();
+				return;
+			}
 			var nextTimeInBeats = processShowCursor();
 			var nextTimeInMilliseconds = nextTimeInBeats / beatsPerMillisecond;
 			var currentTime = new Date();
@@ -388,7 +395,21 @@ if (!window.ABCJS)
 		}
 		startTime = new Date();
 		startTime = startTime.getTime();
+		isPaused = false;
 		processNext();
+
+		ABCJS.pauseAnimation = function(pause) {
+			if (pause && !isPaused) {
+				isPaused = true;
+			} else if (!pause && isPaused) {
+				var nowTime = new Date().getTime();
+				var elapsedTimeWhenPaused = nowTime - pausedTime;
+				startTime += elapsedTimeWhenPaused;
+				pausedTime = undefined;
+				isPaused = false;
+				processNext();
+			}
+		};
 	};
 
 	ABCJS.stopAnimation = function() {
