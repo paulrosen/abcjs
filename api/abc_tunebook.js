@@ -337,12 +337,12 @@ if (!window.ABCJS)
 				var parent = find(div, "abcjs-inline-midi");
 				parent.abcjsTune = tune;
 				parent.abcjsListener = midiParams.listener;
+				parent.abcjsQpm = midiParams.qpm;
 				if (midiParams.animate) {
 					var drumIntro = midiParams.drumIntro ? midiParams.drumIntro : 0;
 					parent.abcjsAnimate = midiParams.animate.listener;
 					parent.abcjsTune = midiParams.animate.target; // We need the version of the tune that was drawn: extra info is added during the drawing process.
-					parent.abcjsTune.setTiming(midiParams.animate.qpm, drumIntro);
-					parent.abcjsQpm = midiParams.animate.qpm;
+					parent.abcjsTune.setTiming(midiParams.qpm, drumIntro);
 				}
 			}
 			if (midiParams.generateInline && midiParams.inlineControls && midiParams.inlineControls.startPlaying) {
