@@ -161,6 +161,7 @@ if (!window.ABCJS)
 		var startTime;
 		var isPaused = false;
 		var pausedTime;
+		var pausedDifference;
 
 		var initialWait = 2700;
 		var interval = 11;
@@ -378,15 +379,15 @@ if (!window.ABCJS)
 				ABCJS.stopAnimation();
 				return;
 			}
+			var currentTime = new Date().getTime();
 			if (isPaused) {
-				// The isPaused flag must have just turned on. If it had been encountered before, we wouldn't be calling processNext
-				pausedTime = new Date().getTime();
+				// The isPaused flag must have just turned on. If it had been encountered before, we wouldn't be calling processNext.
+				// pausedTime contains the moment that pause was called. There is a delay until here, so the timing will be off by the distance.
+				pausedDifference = currentTime - pausedTime;
 				return;
 			}
 			var nextTimeInBeats = processShowCursor();
 			var nextTimeInMilliseconds = nextTimeInBeats / beatsPerMillisecond;
-			var currentTime = new Date();
-			currentTime = currentTime.getTime();
 			var interval = startTime + nextTimeInMilliseconds - currentTime;
 			if (interval <= 0)
 				processNext();
@@ -401,13 +402,15 @@ if (!window.ABCJS)
 		ABCJS.pauseAnimation = function(pause) {
 			if (pause && !isPaused) {
 				isPaused = true;
+				pausedTime = new Date().getTime();
 			} else if (!pause && isPaused) {
 				var nowTime = new Date().getTime();
 				var elapsedTimeWhenPaused = nowTime - pausedTime;
 				startTime += elapsedTimeWhenPaused;
 				pausedTime = undefined;
 				isPaused = false;
-				processNext();
+				animateTimer = setTimeout(processNext, pausedDifference);
+				pausedDifference = undefined;
 			}
 		};
 	};
