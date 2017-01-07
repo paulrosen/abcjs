@@ -314,10 +314,12 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
 					var parent = find(inlineDiv, "abcjs-midi-" + i);
 					parent.abcjsTune = this.tunes[i];
 					parent.abcjsListener = this.midiParams.listener;
+					parent.abcjsQpm = this.midiParams.qpm;
 					if (this.midiParams.animate) {
+						var drumIntro = this.midiParams.drumIntro ? this.midiParams.drumIntro : 0;
 						parent.abcjsAnimate = this.midiParams.animate.listener;
 						parent.abcjsTune = this.midiParams.animate.target; // We need the version of the tune that was drawn: extra info is added during the drawing process.
-						parent.abcjsTune.setTiming(this.midiParams.animate.qpm);
+						parent.abcjsTune.setTiming(this.midiParams.qpm, drumIntro);
 					}
 				}
 			}
