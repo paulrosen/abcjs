@@ -373,6 +373,26 @@ ABCJS.write.sortPitch = function(elem) {
   } while (!sorted);
 };
 
+ABCJS.write.ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLedgers, dir, dx, scale) {
+	for (var i=maxPitch; i>11; i--) {
+		if (i%2===0 && !isRest) {
+			abselem.addChild(new ABCJS.write.RelativeElement(null, dx, (ABCJS.write.glyphs.getSymbolWidth(c)+4)*scale, i, {type:"ledger"}));
+		}
+	}
+
+	for (i=minPitch; i<1; i++) {
+		if (i%2===0 && !isRest) {
+			abselem.addChild(new ABCJS.write.RelativeElement(null, dx, (ABCJS.write.glyphs.getSymbolWidth(c)+4)*scale, i, {type:"ledger"}));
+		}
+	}
+
+	for (i = 0; i < additionalLedgers.length; i++) { // PER: draw additional ledgers
+		var ofs = ABCJS.write.glyphs.getSymbolWidth(c);
+		if (dir === 'down') ofs = -ofs;
+		abselem.addChild(new ABCJS.write.RelativeElement(null, ofs+dx, (ABCJS.write.glyphs.getSymbolWidth(c)+4)*scale, additionalLedgers[i], {type:"ledger"}));
+	}
+};
+
 ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var grace= null;
@@ -623,7 +643,8 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
         width = -0.6;
         abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
       }
-      
+		ABCJS.write.ledgerLines(abselem, gracepitch, gracepitch, false, "noteheads.quarter", [], true, grace.dx-1, 0.6);
+
       if (i===0 && !this.isBagpipes && !(elem.rest && (elem.rest.type==="spacer"||elem.rest.type==="invisible"))) this.voice.addOther(new ABCJS.write.TieElem(grace, notehead, false, true, false));
     }
 
@@ -641,23 +662,8 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   }
   
   // ledger lines
-  for (i=elem.maxpitch; i>11; i--) {
-    if (i%2===0 && !elem.rest) {
-      abselem.addChild(new ABCJS.write.RelativeElement(null, -2, ABCJS.write.glyphs.getSymbolWidth(c)+4, i, {type:"ledger"}));
-    }
-  }
-  
-  for (i=elem.minpitch; i<1; i++) {
-    if (i%2===0 && !elem.rest) {
-      abselem.addChild(new ABCJS.write.RelativeElement(null, -2, ABCJS.write.glyphs.getSymbolWidth(c)+4, i, {type:"ledger"}));
-    }
-  }
+	ABCJS.write.ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, c, additionalLedgers, dir, -2, 1);
 
-  for (i = 0; i < additionalLedgers.length; i++) { // PER: draw additional ledgers
-    var ofs = ABCJS.write.glyphs.getSymbolWidth(c);
-    if (dir === 'down') ofs = -ofs;
-    abselem.addChild(new ABCJS.write.RelativeElement(null, ofs-2, ABCJS.write.glyphs.getSymbolWidth(c)+4, additionalLedgers[i], {type:"ledger"}));
-  }
 	var chordMargin = 8; // If there are chords next to each other, this is how close they can get.
   if (elem.chord !== undefined) {
     for (i = 0; i < elem.chord.length; i++) {
