@@ -932,9 +932,9 @@ window.ABCJS.data.Tune = function() {
 
 		var measureLength;
 		switch(meter.type) {
-			case "common_time": measureLength = 1; break;
-			case "cut_time": measureLength = 1; break;
-			default: measureLength = meter.value[0].num/meter.value[0].den;
+			case "common_time": measureLength = 1; this.meter = { num: 4, den: 4}; break;
+			case "cut_time": measureLength = 1; this.meter = { num: 2, den: 2}; break;
+			default: measureLength = meter.value[0].num/meter.value[0].den; this.meter = { num: meter.value[0].num, den: meter.value[0].den};
 		}
 
 		var startingDelay = measureLength / beatLength * measuresOfDelay / beatsPerSecond;

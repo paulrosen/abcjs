@@ -300,15 +300,17 @@ if (!window.ABCJS.midi)
 						if (minutes < 10) minutes = " " + minutes;
 						clock.innerHTML = minutes + ":" + seconds;
 					}
+					var beatsPerSecond = parseInt(midiControl.abcjsQpm, 10) / 60;
+					var currentTime = position.currentTime;
 					if (midiControl.abcjsListener) {
-						var thisBeat = Math.floor(position.currentTime / (parseInt(midiControl.abcjsQpm, 10) / 60));
+						var thisBeat = Math.floor(currentTime / beatsPerSecond);
 						position.newBeat = thisBeat !== midiControl.abcjsLastBeat;
 						midiControl.abcjsLastBeat = thisBeat;
 						midiControl.abcjsListener(midiControl, position);
 					}
 					if (midiControl.abcjsAnimate) {
-						var epsilon = parseInt(midiControl.abcjsQpm, 10) / 60 / 64; // The length of a 1/64th note.
-						var index = findElements(midiControl.abcjsTune.noteTimings, position.currentTime, epsilon);
+						var epsilon = beatsPerSecond / 64; // pick a small division to round to. This is called at small, random times.
+						var index = findElements(midiControl.abcjsTune.noteTimings, currentTime, epsilon);
 						if (index !== midiControl.abcjsLastIndex) {
 							var last = midiControl.abcjsLastIndex >= 0 ? midiControl.abcjsTune.noteTimings[midiControl.abcjsLastIndex] : null;
 							midiControl.abcjsAnimate(last,

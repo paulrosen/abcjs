@@ -34,6 +34,7 @@ if (!window.ABCJS.midi)
 	var multiplier;
 	var tracks;
 	var startingTempo;
+	var startingMeter;
 	var tempoChangeFactor = 1;
 	var instrument;
 	var channel;
@@ -62,6 +63,7 @@ if (!window.ABCJS.midi)
 		multiplier = 1;
 		tracks = [];
 		startingTempo = undefined;
+		startingMeter = undefined;
 		tempoChangeFactor = 1;
 		instrument = undefined;
 		channel = undefined;
@@ -97,6 +99,8 @@ if (!window.ABCJS.midi)
 						accidentals = setKeySignature(element);
 						break;
 					case "meter":
+						if (!startingMeter)
+							startingMeter = element;
 						meter = element;
 						break;
 					case "tempo":
@@ -146,6 +150,32 @@ if (!window.ABCJS.midi)
 			tracks.push(chordTrack);
 		if (drumTrack.length > 0)
 			tracks.push(drumTrack);
+		// Adjust the tempo according to the meter. The rules are this:
+		// 1) If the denominator is 2 or 4, then always make a beat be the denominator.
+		//
+		// 2) If the denominator is 8 or 16, then:
+		// a) If the numerator is divisible by 3, the beat is 3*denominator.
+		// b) Otherwise the beat is the denominator.
+		//
+		// 3) If the denominator is anything else, then don't worry about it because it doesn't make sense. Don't modify it and hope for the best.
+		//
+		// Right now, the startingTempo is calculated for a quarter note, so modify it if necessary.
+		var num = parseInt(startingMeter.num, 10);
+		var den = parseInt(startingMeter.den, 10);
+		if (den === 2)
+			startingTempo *= 2;
+		else if (den === 8) {
+			if (parseInt(num, 10) % 3 === 0)
+				startingTempo *= 3/2;
+			else
+				startingTempo /= 2;
+		} else if (den === 16) {
+			if (num % 3 === 0)
+				startingTempo *= 3/4;
+			else
+				startingTempo /= 4;
+		}
+
 		return { tempo: startingTempo, instrument: instrument, channel: channel, tracks: tracks };
 	};
 
