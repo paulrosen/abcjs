@@ -1,3 +1,37 @@
+# Version 3.1.0
+
+## Bug fixes:
+* Fix midi beat length; some improvements to the midi animation.
+* Write ledger lines for grace notes.
+* Fix crash in parsing.
+* qpm was being passed in twice for midi animation.
+* When doing the call back in the midi animation, pass the absolute coordinates of the item that is current.
+* Handle case where there is an intro drum beat, but it ends at the first note.
+* Handle common and cut time when doing midi drum beats.
+* Fix midi transposition.
+* Fix bug in midi animation when starting and stopping the midi.
+* Fix bug in finding the written notes when animating the midi output.
+* Handle creating midi for grace note that appears at the beginning of a part that is not the first part.
+* Fix bug introduced in creating midi for gracenote.
+* Fix when the metronome track starts, and fix the tempo of it when the meter is not 4/4
+* Allow passed in tempo to override the defined tempo.
+* Fix crash when creating midi for multipart music where the first note has a grace.
+* Make midi control's css more stable when combined with other css.
+* Fix bug in displaying note values in tempo field.
+* Fix crash when there are bar numbers on multi-line music. 
+
+## Features:
+* Add "pause/resume" to the standard animation.
+* Report when there is a new beat in the midi listener.
+* Added drum intro to the MIDI, using a new midiParameter.
+* Add midi option "voicesOff" to mute the midi output, while leaving the metronome, guitar chords, and the animation.
+* Implement animation callback when playing MIDI.
+* Completely change the parsing of %%MIDI parameters; support the "%%MIDI drum" parameters; allow setting midi instrument and channel.
+* Allow three digit version numbers.
+
+## Warning:
+* Turn off instrument/channel selection in midi until it is debugged.
+
 # Version 3.0
 
 ## Bug fixes:
