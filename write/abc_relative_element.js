@@ -22,7 +22,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
 	window.ABCJS.write = {};
 
-ABCJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
+ABCJS.write.RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 	opt = opt || {};
 	this.x = 0;
 	this.c = c;      // character or path or string
