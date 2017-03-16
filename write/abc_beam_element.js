@@ -94,7 +94,12 @@ if (!window.ABCJS.write)
 		// create the main beam
 		var firstElement = this.elems[0];
 		var lastElement = this.elems[this.elems.length - 1];
-		var yPos = calcYPos(this.total, this.elems.length, this.stemHeight, this.stemsUp, firstElement.abcelem.averagepitch, lastElement.abcelem.averagepitch, this.isflat, this.min, this.max, this.isgrace);
+		var minStemHeight = 0; // The following is to leave space for "!///!" marks.
+		var referencePitch = this.stemsUp ? firstElement.abcelem.maxpitch : firstElement.abcelem.minpitch;
+		minStemHeight = minStem(firstElement, this.stemsUp, referencePitch, minStemHeight);
+		minStemHeight = minStem(lastElement, this.stemsUp, referencePitch, minStemHeight);
+		minStemHeight = Math.max(this.stemHeight, minStemHeight + 3); // TODO-PER: The 3 is the width of a 16th beam. The actual height of the beam should be used instead.
+		var yPos = calcYPos(this.total, this.elems.length, minStemHeight, this.stemsUp, firstElement.abcelem.averagepitch, lastElement.abcelem.averagepitch, this.isflat, this.min, this.max, this.isgrace);
 		var xPos = calcXPos(this.stemsUp, firstElement, lastElement);
 		this.beams.push({ startX: xPos[0], endX: xPos[1], startY: yPos[0], endY: yPos[1], dy: dy });
 
@@ -146,6 +151,19 @@ if (!window.ABCJS.write)
 	//
 	// private functions
 	//
+	function minStem(element, stemsUp, referencePitch, minStemHeight) {
+		if (!element.children)
+			return minStemHeight;
+		for (var i = 0; i < element.children.length; i++) {
+			var elem = element.children[i];
+			if (stemsUp && elem.top !== undefined && elem.c === "flags.ugrace")
+				minStemHeight = Math.max(minStemHeight, elem.top - referencePitch);
+			else if (!stemsUp && elem.bottom !== undefined && elem.c === "flags.ugrace")
+				minStemHeight = Math.max(minStemHeight, referencePitch - elem.bottom + 7); // The extra 7 is because we are measuring the slash from the top.
+		}
+		return minStemHeight;
+	}
+
 	function calcSlant(leftAveragePitch, rightAveragePitch, numStems, isFlat) {
 		if (isFlat)
 			return 0;
