@@ -596,7 +596,6 @@ ABCJS.write.Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Ton
 
 ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass) {
 	var tie = (pitch1 === pitch2); // If it is a tie vs. a slur, draw it shallower.
-	tie = false;
 	var spacing = tie ? 1.2 : 1.5;
 
   x1 = x1 + 6;
