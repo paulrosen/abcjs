@@ -595,12 +595,14 @@ ABCJS.write.Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Ton
 };
 
 ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass) {
-
+	var tie = (pitch1 === pitch2); // If it is a tie vs. a slur, draw it shallower.
+	tie = false;
+	var spacing = tie ? 1.2 : 1.5;
 
   x1 = x1 + 6;
   x2 = x2 + 4;
-  pitch1 = pitch1 + ((above)?1.5:-1.5);
-  pitch2 = pitch2 + ((above)?1.5:-1.5);
+  pitch1 = pitch1 + ((above)?spacing:-spacing);
+  pitch2 = pitch2 + ((above)?spacing:-spacing);
   var y1 = this.calcY(pitch1);
   var y2 = this.calcY(pitch2);
 
@@ -612,7 +614,8 @@ ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above,
   var uy = dy/norm;
 
   var flatten = norm/3.5;
-  var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
+  var maxFlatten = tie ? 1.5 : 25;  // If it is a tie vs. a slur, draw it shallower.
+  var curve = ((above)?-1:1)*Math.min(maxFlatten, Math.max(4, flatten));
 
   var controlx1 = x1+flatten*ux-curve*uy;
   var controly1 = y1+flatten*uy+curve*ux;

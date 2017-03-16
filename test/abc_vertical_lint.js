@@ -116,6 +116,10 @@ window.ABCJS.test.verticalLint = function(tunes) {
 			var obj = arr[i];
 			str += formatArrayStart(tabs, i) + formatY(obj);
 			str += formatElements(obj.voiceChildren, indent+1);
+			if (obj.otherChildren.length > 0)
+				str += formatOtherChildren(obj.otherChildren, indent+1);
+			if (obj.beams.length > 0)
+				str += formatBeams(obj.beams, indent+1);
 		}
 		return tabs + str;
 	}
@@ -133,6 +137,38 @@ window.ABCJS.test.verticalLint = function(tunes) {
 				str += formatArrayStart(tabs, i) + type + ' ' + formatY(obj) + "\n";
 		}
 		return tabs + str;
+	}
+
+	function formatOtherChildren(arr, indent) {
+		var tabs = "";
+		for (var i = 0; i < indent; i++) tabs += "\t";
+		var str = tabs + "Other Children:\n";
+		for (i = 0; i < arr.length; i++) {
+			str += formatArrayStart(tabs, i);
+			var keys = Object.keys(arr[i].params);
+			keys = keys.sort();
+			var params = "";
+			for (var j = 0; j < keys.length; j++)
+				params += keys[j] + ": " + arr[i].params[keys[j]] + " ";
+			str += arr[i].type + " (" + params + ")\n";
+		}
+		return str + "\n";
+	}
+
+	function formatBeams(arr, indent) {
+		var tabs = "";
+		for (var i = 0; i < indent; i++) tabs += "\t";
+		var str = tabs + "Beams:\n";
+		for (i = 0; i < arr.length; i++) {
+			str += formatArrayStart(tabs, i);
+			var keys = Object.keys(arr[i].params);
+			keys = keys.sort();
+			var params = "";
+			for (var j = 0; j < keys.length; j++)
+				params += keys[j] + ": " + arr[i].params[keys[j]] + " ";
+			str += arr[i].type + " (" + params + ")\n";
+		}
+		return str + "\n";
 	}
 
 	function formatArray(arr, indent) {
@@ -209,7 +245,7 @@ window.ABCJS.test.verticalLint = function(tunes) {
 		}
 		for (i = 0; i < staffGroup.voices.length; i++) {
 			var voice = staffGroup.voices[i];
-			var obj = { bottom: voice.bottom, top: voice.top, specialY: setSpecialY(voice), width: voice.w, startX: voice.startX, voiceChildren: [] };
+			var obj = { bottom: voice.bottom, top: voice.top, specialY: setSpecialY(voice), width: voice.w, startX: voice.startX, voiceChildren: [], otherChildren: [], beams: [] };
 			for (var j = 0; j < voice.children.length; j++) {
 				var child = voice.children[j];
 				var type = child.type;
@@ -237,6 +273,44 @@ window.ABCJS.test.verticalLint = function(tunes) {
 					}
 				}
 				obj.voiceChildren.push(obj2);
+			}
+			for (j = 0; j < voice.otherchildren.length; j++) {
+				var otherChild = voice.otherchildren[j];
+				var className = otherChild.constructor.name;
+				var ch = { type: className, params: {} };
+				if (className === "String")
+					ch.params.value = otherChild;
+				else {
+					for (var key in otherChild) {
+						if (otherChild.hasOwnProperty(key)) {
+							var value = otherChild[key];
+							if (typeof value === "object")
+								ch.params[key] = "object";
+							else
+								ch.params[key] = value;
+						}
+					}
+				}
+				obj.otherChildren.push(ch);
+			}
+			for (j = 0; j < voice.beams.length; j++) {
+				var beam = voice.beams[j];
+				var className2 = beam.constructor.name;
+				var ch2 = { type: className2, params: {} };
+				if (className2 === "String")
+					ch2.params.value = beam;
+				else {
+					for (var key2 in beam) {
+						if (beam.hasOwnProperty(key2)) {
+							var value2 = beam[key2];
+							if (typeof value2 === "object")
+								ch2.params[key2] = "object";
+							else
+								ch2.params[key2] = value2;
+						}
+					}
+				}
+				obj.beams.push(ch2);
 			}
 			// TODO: there is also extra[], heads[], elemset[], and right[] to parse.
 			ret.voices.push(obj);

@@ -22,7 +22,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
 	window.ABCJS.write = {};
 
-ABCJS.write.VoiceElement = function(voicenumber, voicetotal) {
+ABCJS.write.VoiceElement = function VoiceElement(voicenumber, voicetotal) {
 	this.children = [];
 	this.beams = [];
 	this.otherchildren = []; // ties, slurs, triplets

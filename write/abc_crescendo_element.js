@@ -22,7 +22,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
 	window.ABCJS.write = {};
 
-ABCJS.write.CrescendoElem = function(anchor1, anchor2, dir, positioning) {
+ABCJS.write.CrescendoElem = function CrescendoElem(anchor1, anchor2, dir, positioning) {
 	this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
 	this.dir = dir; // either "<" or ">"

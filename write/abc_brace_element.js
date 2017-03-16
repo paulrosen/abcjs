@@ -23,7 +23,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
     window.ABCJS.write = {};
 
-ABCJS.write.BraceElem = function() {
+ABCJS.write.BraceElem = function BraceElem() {
     this.length = 1;
 };
 

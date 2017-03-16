@@ -40,7 +40,7 @@ if (!window.ABCJS.write)
 	//
 	// Setup phase
 	//
-	ABCJS.write.BeamElem = function(stemHeight, type, flat) {
+	ABCJS.write.BeamElem = function BeamElem(stemHeight, type, flat) {
 		// type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
 		this.isflat = flat;
 		this.isgrace = (type && type === "grace");

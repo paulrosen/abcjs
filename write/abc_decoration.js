@@ -25,7 +25,7 @@ if (!window.ABCJS.write)
 (function() {
 	"use strict";
 
-	ABCJS.write.Decoration = function() {
+	ABCJS.write.Decoration = function Decoration() {
 		this.startDiminuendoX = undefined;
 		this.startCrescendoX = undefined;
 		this.minTop = 12;	// TODO-PER: this is assuming a 5-line staff. Pass that info in.

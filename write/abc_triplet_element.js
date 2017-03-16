@@ -25,7 +25,7 @@ if (!window.ABCJS.write)
 (function() {
 	"use strict";
 
-	ABCJS.write.TripletElem = function(number, anchor1) {
+	ABCJS.write.TripletElem = function TripletElem(number, anchor1) {
 		this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
 		this.number = number;
 	};

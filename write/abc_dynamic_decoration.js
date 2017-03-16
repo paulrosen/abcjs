@@ -22,7 +22,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
 	window.ABCJS.write = {};
 
-ABCJS.write.DynamicDecoration = function(anchor, dec, position) {
+ABCJS.write.DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
 	this.anchor = anchor;
 	this.dec = dec;
 	if (position === 'below')

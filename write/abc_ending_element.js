@@ -22,7 +22,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
 	window.ABCJS.write = {};
 
-ABCJS.write.EndingElem = function(text, anchor1, anchor2) {
+ABCJS.write.EndingElem = function EndingElem(text, anchor1, anchor2) {
 	this.text = text; // text to be displayed top left
 	this.anchor1 = anchor1; // must have a .x property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)

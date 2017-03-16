@@ -26,7 +26,7 @@ if (!window.ABCJS.write)
 	"use strict";
 	var totalHeightInPitches = 5;
 
-	ABCJS.write.TempoElement = function(tempo, tuneNumber) {
+	ABCJS.write.TempoElement = function TempoElement(tempo, tuneNumber) {
 		this.tempo = tempo;
 		this.tuneNumber = tuneNumber;
 		this.tempoHeightAbove = totalHeightInPitches;

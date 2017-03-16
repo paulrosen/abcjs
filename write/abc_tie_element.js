@@ -22,7 +22,7 @@ if (!window.ABCJS)
 if (!window.ABCJS.write)
 	window.ABCJS.write = {};
 
-ABCJS.write.TieElem = function(anchor1, anchor2, above, forceandshift, isTie) {
+ABCJS.write.TieElem = function TieElem(anchor1, anchor2, above, forceandshift, isTie) {
 	this.anchor1 = anchor1; // must have a .x and a .pitch, and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
 	this.above = above; // true if the arc curves above
