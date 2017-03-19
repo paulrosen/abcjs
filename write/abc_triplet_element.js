@@ -26,45 +26,61 @@ if (!window.ABCJS.write)
 	"use strict";
 
 	ABCJS.write.TripletElem = function TripletElem(number, anchor1) {
-		this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
+		this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
 		this.number = number;
+	};
+
+	ABCJS.write.TripletElem.prototype.isClosed = function() {
+		return this.anchor2;
 	};
 
 	ABCJS.write.TripletElem.prototype.setCloseAnchor = function(anchor2) {
 		this.anchor2 = anchor2;
+		// TODO-PER: Unfortunately, I don't know if there is a beam above until after the vertical positioning is done,
+		// so I don't know whether to leave room for the number above. Therefore, If there is a beam on the first note, I'll leave room just in case.
+		if (this.anchor1.parent.beam)
+			this.endingHeightAbove = 4;
 	};
 
 	ABCJS.write.TripletElem.prototype.setUpperAndLowerElements = function(/*positionY*/) {
 	};
 
-	ABCJS.write.TripletElem.prototype.draw = function(renderer) {
+	ABCJS.write.TripletElem.prototype.layout = function() {
 		// TODO end and beginning of line (PER: P.S. I'm not sure this can happen: I think the parser will always specify both the start and end points.)
 		if (this.anchor1 && this.anchor2) {
-			var xTextPos;
-			var yTextPos;
-			var hasBeam = this.anchor1.parent.beam && this.anchor1.parent.beam === this.anchor2.parent.beam;
+			this.hasBeam = this.anchor1.parent.beam && this.anchor1.parent.beam === this.anchor2.parent.beam;
 
-			if (hasBeam) {
+			if (this.hasBeam) {
 				// If there is a beam then we don't need to draw anything except the text. The beam could either be above or below.
 				var beam = this.anchor1.parent.beam;
 				var left = beam.isAbove() ? this.anchor1.x + this.anchor1.w : this.anchor1.x;
-				xTextPos = beam.xAtMidpoint(left,  this.anchor2.x);
-				yTextPos = beam.heightAtMidpoint(left,  this.anchor2.x);
-				yTextPos += beam.isAbove() ? 4 : -4; // This creates some space between the beam and the number.
+				this.yTextPos = beam.heightAtMidpoint(left,  this.anchor2.x);
+				this.yTextPos += beam.isAbove() ? 4 : -4; // This creates some space between the beam and the number.
+				if (beam.isAbove())
+					this.endingHeightAbove = 4;
 			} else {
 				// If there isn't a beam, then we need to draw the bracket and the text. The bracket is always above.
 				// The bracket is never lower than the 'a' line, but is 4 pitches above the first and last notes. If there is
 				// a tall note in the middle, the bracket is horizontal and above the highest note.
-				var startNote = Math.max(this.anchor1.parent.top, 9) + 4;
-				var endNote = Math.max(this.anchor2.parent.top, 9) + 4;
+				this.startNote = Math.max(this.anchor1.parent.top, 9) + 4;
+				this.endNote = Math.max(this.anchor2.parent.top, 9) + 4;
 				// TODO-PER: Do the case where the middle note is really high.
-				xTextPos = this.anchor1.x + (this.anchor2.x + this.anchor2.w - this.anchor1.x) / 2;
-				yTextPos = startNote + (endNote - startNote) / 2;
-				drawBracket(renderer, this.anchor1.x, startNote, this.anchor2.x + this.anchor2.w, endNote);
+				this.yTextPos = this.startNote + (this.endNote - this.startNote) / 2;
 			}
 
-			renderer.renderText(xTextPos, renderer.calcY(yTextPos), "" + this.number, 'tripletfont', "triplet", "middle", true);
 		}
+	};
+
+	ABCJS.write.TripletElem.prototype.draw = function(renderer) {
+		var xTextPos;
+		if (this.hasBeam) {
+			var left = this.anchor1.parent.beam.isAbove() ? this.anchor1.x + this.anchor1.w : this.anchor1.x;
+			xTextPos = this.anchor1.parent.beam.xAtMidpoint(left, this.anchor2.x);
+		} else {
+			xTextPos = this.anchor1.x + (this.anchor2.x + this.anchor2.w - this.anchor1.x) / 2;
+			drawBracket(renderer, this.anchor1.x, this.startNote, this.anchor2.x + this.anchor2.w, this.endNote);
+		}
+		renderer.renderText(xTextPos, renderer.calcY(this.yTextPos), "" + this.number, 'tripletfont', "triplet", "middle", true);
 	};
 
 	function drawLine(renderer, l, t, r, b) {
@@ -84,7 +100,7 @@ if (!window.ABCJS.write)
 
 		// figure out midpoints to draw the broken line.
 		var midX = x1 + (x2-x1)/2;
-		var midY = y1 + (y2-y1)/2;
+		//var midY = y1 + (y2-y1)/2;
 		var gapWidth = 8;
 		var slope = (y2 - y1) / (x2 - x1);
 		var leftEndX = midX - gapWidth;

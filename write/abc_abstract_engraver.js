@@ -238,7 +238,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline, tempo)
 		this.slursbyvoiceSave = ABCJS.parse.cloneHashOfHash(this.slursbyvoice);
 		this.tiesbyvoiceSave = ABCJS.parse.cloneHashOfArrayOfHash(this.tiesbyvoice);
 	};
-	
+
 	ABCJS.write.AbstractEngraver.prototype.restoreState = function() {
 		this.ties = ABCJS.parse.cloneArray(this.tiesSave);
 		this.slurs = ABCJS.parse.cloneHashOfHash(this.slursSave);
@@ -334,26 +334,36 @@ ABCJS.write.AbstractEngraver.prototype.calcBeamDir = function() {
 
 ABCJS.write.AbstractEngraver.prototype.createBeam = function() {
   var abselemset = [];
-  
+
   if (this.getElem().startBeam && !this.getElem().endBeam) {
 	  var dir = this.calcBeamDir();
          var beamelem = new ABCJS.write.BeamElem(this.stemHeight, dir);
 	  if (ABCJS.write.hint) beamelem.setHint();
          var oldDir = this.stemdir;
          this.stemdir = dir;
-    while (this.getElem()) {
-      var abselem = this.createNote(this.getElem(),true);
-      abselemset.push(abselem);
-                beamelem.add(abselem);
-      if (this.getElem().endBeam) {
-                break;
-      }
-      this.pos++;
-    }
+	  while (this.getElem()) {
+		  var abselem = this.createNote(this.getElem(), true);
+		  abselemset.push(abselem);
+		  beamelem.add(abselem);
+		  if (this.triplet && this.triplet.isClosed()) {
+			  this.voice.addOther(this.triplet);
+			  this.triplet = null;
+			  this.tripletmultiplier = 1;
+		  }
+		  if (this.getElem().endBeam) {
+			  break;
+		  }
+		  this.pos++;
+	  }
          this.stemdir = oldDir;
-    this.voice.addOther(beamelem);
+    this.voice.addBeam(beamelem);
   } else {
     abselemset[0] = this.createNote(this.getElem());
+	  if (this.triplet && this.triplet.isClosed()) {
+		  this.voice.addOther(this.triplet);
+		  this.triplet = null;
+		  this.tripletmultiplier = 1;
+	  }
   }
   return abselemset;
 };
@@ -413,15 +423,15 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   var dot=0;
 
   for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
-  
-  
+
+
   if (elem.startTriplet) {
          if (elem.startTriplet === 2)
          this.tripletmultiplier = 3/2;
          else
          this.tripletmultiplier=(elem.startTriplet-1)/elem.startTriplet;
   }
-  
+
 
   var abselem = new ABCJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1, 'note', this.tuneNumber);
   if (ABCJS.write.hint) abselem.setHint();
@@ -470,7 +480,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
 
   } else {
          ABCJS.write.sortPitch(elem);
-    
+
     // determine averagepitch, minpitch, maxpitch and stem direction
     var sum=0;
     for (p=0, pp=elem.pitches.length; p<pp; p++) {
@@ -510,7 +520,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
         }
       }
     }
-    
+
            // The accidentalSlot will hold a list of all the accidentals on this chord. Each element is a vertical place,
            // and contains a pitch, which is the last pitch that contains an accidental in that slot. The slots are numbered
          // from closest to the note to farther left. We only need to know the last accidental we placed because
@@ -564,7 +574,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
       this.roomtaken += this.accidentalshiftx;
       this.roomtakenright = Math.max(this.roomtakenright,this.dotshiftx);
     }
-      
+
     // draw stem from the furthest note to a pitch above/below the stemmed note
     if (hasStem) {
       p1 = (dir==="down") ? elem.minpitch-7 : elem.minpitch+1/3;
@@ -586,9 +596,9 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
         this.minY = Math.min(p1, this.minY);
         this.minY = Math.min(p2, this.minY);
     }
-    
+
   }
-  
+
   if (elem.lyric !== undefined) {
     var lyricStr = "";
          window.ABCJS.parse.each(elem.lyric, function(ly) {
@@ -598,7 +608,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
 	  var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
     abselem.addCentered(new ABCJS.write.RelativeElement(lyricStr, 0, lyricDim.width, undefined, {type:"lyric", position: position, height: lyricDim.height / ABCJS.write.spacing.STEP }));
   }
-  
+
   if (!dontDraw && elem.gracenotes !== undefined) {
     var gracescale = 3/5;
     var graceScaleStem = 3.5/5; // TODO-PER: empirically found constant.
@@ -649,18 +659,18 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     }
 
     if (gracebeam) {
-      this.voice.addOther(gracebeam);
+      this.voice.addBeam(gracebeam);
     }
   }
 
   if (!dontDraw && elem.decoration) {
 	  this.decoration.createDecoration(this.voice, elem.decoration, abselem.top, (notehead)?notehead.w:0, abselem, this.roomtaken, dir, abselem.bottom, elem.positioning, this.hasVocals);
   }
-  
+
   if (elem.barNumber) {
     abselem.addChild(new ABCJS.write.RelativeElement(elem.barNumber, -10, 0, 0, {type:"barNumber"}));
   }
-  
+
   // ledger lines
 	ABCJS.write.ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, c, additionalLedgers, dir, -2, 1);
 
@@ -714,18 +724,14 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
       }
     }
   }
-    
 
-  if (elem.startTriplet) {
-    this.triplet = new ABCJS.write.TripletElem(elem.startTriplet, notehead, null, true); // above is opposite from case of slurs
-         if (!dontDraw)
-    this.voice.addOther(this.triplet);
+
+  if (elem.startTriplet && !dontDraw) {
+    this.triplet = new ABCJS.write.TripletElem(elem.startTriplet, notehead); // above is opposite from case of slurs
   }
 
-  if (elem.endTriplet && this.triplet) {
+  if (elem.endTriplet && this.triplet && !dontDraw) {
     this.triplet.setCloseAnchor(notehead);
-    this.triplet = null;
-    this.tripletmultiplier = 1;
   }
 
   return abselem;
@@ -770,7 +776,7 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
   }
         if (notehead)
                 notehead.highestVert = pitchelem.highestVert;
-  
+
   if (pitchelem.accidental) {
     var symb;
     switch (pitchelem.accidental) {
@@ -813,14 +819,14 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
          }
     abselem.addExtra(new ABCJS.write.RelativeElement(symb, accPlace, ABCJS.write.glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
   }
-  
+
   if (pitchelem.endTie) {
     if (this.ties[0]) {
       this.ties[0].setEndAnchor(notehead);
       this.ties = this.ties.slice(1,this.ties.length);
     }
   }
-  
+
   if (pitchelem.startTie) {
     //PER: bug fix: var tie = new ABCJS.write.TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
     var tie = new ABCJS.write.TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up",(this.stemdir==="down" || this.stemdir==="up"), true);
@@ -852,7 +858,7 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
       }
     }
   }
-  
+
   if (pitchelem.startSlur) {
     for (i=0; i<pitchelem.startSlur.length; i++) {
       var slurid = pitchelem.startSlur[i].label;
@@ -863,7 +869,7 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
       this.voice.addOther(slur);
     }
   }
-  
+
   return notehead;
 
 };
@@ -928,7 +934,7 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
     abselem.addRight(anchor);
     dx+=5;
   }
-  
+
 // if (this.partstartelem && (thick || (firstthin && secondthin))) { // means end of nth part
 // this.partstartelem.anchor2=anchor;
 // this.partstartelem = null;
@@ -958,7 +964,7 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
     this.voice.addOther(this.partstartelem);
   }
 
-  return abselem;        
+  return abselem;
 
 };
 

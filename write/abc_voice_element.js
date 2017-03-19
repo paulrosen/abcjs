@@ -136,12 +136,12 @@ ABCJS.write.VoiceElement.prototype.setUpperAndLowerElements = function(positionY
 };
 
 ABCJS.write.VoiceElement.prototype.addOther = function (child) {
-	if (child instanceof ABCJS.write.BeamElem) {
-		this.beams.push(child);
-	} else {
-		this.otherchildren.push(child);
-		this.setRange(child);
-	}
+	this.otherchildren.push(child);
+	this.setRange(child);
+};
+
+ABCJS.write.VoiceElement.prototype.addBeam = function (child) {
+	this.beams.push(child);
 };
 
 ABCJS.write.VoiceElement.prototype.updateIndices = function () {
@@ -274,6 +274,12 @@ ABCJS.write.VoiceElement.prototype.layoutBeams = function() {
 				this.adjustRange(this.beams[i].elems[j]);
 			}
 		}
+	}
+	// Now we can layout the triplets
+	for (i = 0; i < this.otherchildren.length; i++) {
+		var child = this.otherchildren[i];
+		if (child.layout)
+			child.layout();
 	}
 	this.staff.top = Math.max(this.staff.top, this.top);
 	this.staff.bottom = Math.min(this.staff.bottom, this.bottom);
