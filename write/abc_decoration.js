@@ -121,6 +121,8 @@ if (!window.ABCJS.write)
 		}
 		function compoundDecoration(symbol, count) {
 			var placement = (dir === 'down') ? lowestPitch()+1:highestPitch()+9;
+			if (dir !== 'down' && count === 1)
+				placement--;
 			var deltaX = width/2;
 			deltaX += (dir === 'down') ? -5 : 3;
 			for (var i = 0; i < count; i++) {
