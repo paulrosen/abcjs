@@ -32,6 +32,12 @@ ABCJS.write.TieElem = function TieElem(anchor1, anchor2, above, forceandshift, i
 
 ABCJS.write.TieElem.prototype.setEndAnchor = function(anchor2) {
 	this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
+	if (this.isTie) {
+		if (this.anchor1) // this can happen if the tie comes from the previous line.
+			this.anchor1.isTie = true;
+		if (this.anchor2) // this can happen if the tie goes to the next line.
+			this.anchor2.isTie = true;
+	}
 };
 
 // If we encounter a repeat sign, then we don't want to extend either a tie or a slur past it, so these are called to be a limit.
@@ -70,6 +76,18 @@ ABCJS.write.TieElem.prototype.layout = function (lineStartX, lineEndX) {
 	if (!this.force && this.anchor2 && this.anchor2.pitch === this.anchor2.highestVert) // TODO-PER: this is a fragile way to detect that there is no stem going up on this note.
 		this.above = true;
 
+	// There is an exception in the slur direction if there is also a tie on the starting or ending note.
+	if (this.isTie) {
+		if (this.anchor1) // this can happen if the tie comes from the previous line.
+			this.anchor1.tieAbove = this.above;
+		if (this.anchor2) // this can happen if the tie goes to the next line.
+			this.anchor2.tieAbove = this.above;
+	} else {
+		if (this.anchor2 && this.anchor2.isTie)
+			this.above = this.anchor2.tieAbove;
+		else if (this.anchor1 && this.anchor1.isTie)
+			this.above = this.anchor1.tieAbove;
+	}
 	if (this.anchor1)
 		this.startX = this.anchor1.x; // The normal case where there is a starting element to attach to.
 	else if (this.startLimitX)
@@ -108,6 +126,6 @@ ABCJS.write.TieElem.prototype.draw = function (renderer, linestartx, lineendx) {
 	var klass;
 	if (this.hint)
 			klass = "abcjs-hint";
-	renderer.drawArc(this.startX, this.endX, this.startY, this.endY,  this.above, klass);
+	renderer.drawArc(this.startX, this.endX, this.startY, this.endY,  this.above, klass, this.isTie);
 
 };
