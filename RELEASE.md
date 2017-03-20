@@ -1,3 +1,12 @@
+# Version 3.1.1
+
+## Bug fixes:
+
+* Change slur direction if there is a tie on the first or last note.
+* Adjust placement of slash on a note stem; make sure the stem is long enough.
+* Work on placement of triplets.
+* Make tie shallower than slur.
+
 # Version 3.1.0
 
 ## Bug fixes:
