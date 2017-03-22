@@ -88,9 +88,11 @@ ABCJS.write.TieElem.prototype.layout = function (lineStartX, lineEndX) {
 		else if (this.anchor1 && this.anchor1.isTie)
 			this.above = this.anchor1.tieAbove;
 	}
-	if (this.anchor1)
+	if (this.anchor1) {
 		this.startX = this.anchor1.x; // The normal case where there is a starting element to attach to.
-	else if (this.startLimitX)
+		if (this.anchor1.scalex < 1) // this is a grace note - don't offset the tie as much.
+			this.startX -= 3;
+	} else if (this.startLimitX)
 		this.startX = this.startLimitX.x+this.startLimitX.w; // if there is no start element, but there is a repeat mark before the start of the line.
 	else
 		this.startX = lineStartX; // There is no element and no repeat mark: extend to the beginning of the line.

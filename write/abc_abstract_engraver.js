@@ -570,7 +570,11 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
 		var hasStem = !nostem && durlog<=-1;
                 if (!dontDraw)
       notehead = this.createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -this.roomtaken, flag, dot, dotshiftx, 1);
-      if (notehead) abselem.addHead(notehead);
+      if (notehead) {
+      	if (elem.gracenotes && elem.gracenotes.length > 0)
+			notehead.bottom = notehead.bottom - 1;	 // If there is a tie to the grace notes, leave a little more room for the note to avoid collisions.
+		  abselem.addHead(notehead);
+	  }
       this.roomtaken += this.accidentalshiftx;
       this.roomtakenright = Math.max(this.roomtakenright,this.dotshiftx);
     }
@@ -655,7 +659,10 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
       }
 		ABCJS.write.ledgerLines(abselem, gracepitch, gracepitch, false, "noteheads.quarter", [], true, grace.dx-1, 0.6);
 
-      if (i===0 && !this.isBagpipes && !(elem.rest && (elem.rest.type==="spacer"||elem.rest.type==="invisible"))) this.voice.addOther(new ABCJS.write.TieElem(grace, notehead, false, true, false));
+      if (i===0 && !this.isBagpipes && !(elem.rest && (elem.rest.type==="spacer"||elem.rest.type==="invisible"))) {
+      	var isTie = (elem.gracenotes.length === 1 && grace.pitch === notehead.pitch);
+      	this.voice.addOther(new ABCJS.write.TieElem(grace, notehead, false, true, isTie));
+	  }
     }
 
     if (gracebeam) {
