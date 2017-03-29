@@ -7,8 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "build": "browserify index.js -o dist/abc.js",
-    "serve": "watchify index.js -o dist/abc.js",
+    "build": "browserify index.js -o dist/abc.js --standalone ABCJS",
+    "serve": "watchify index.js -o dist/abc.js --standalone ABCJS",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
