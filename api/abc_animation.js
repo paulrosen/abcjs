@@ -14,12 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global ABCJS, console */
+/*global console */
 
 var spacing = require('../write/abc_spacing');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var animation = {};
 
 (function() {
 	"use strict";
@@ -111,7 +110,7 @@ if (!window.ABCJS)
 		cssRule.style.marginTop = -margin + "px";
 		currentMargin = margin;
 	}
-	ABCJS.startAnimation = function(paper, tune, options) {
+	animation.startAnimation = function(paper, tune, options) {
 		if (paper.getElementsByClassName === undefined) {
 			console.error("ABCJS.startAnimation: The first parameter must be a regular DOM element. (Did you pass a jQuery object or an ID?)");
 			return;
@@ -135,7 +134,7 @@ if (!window.ABCJS)
 			}
 		}
 		// Can only have one animation at a time, so make sure that it has been stopped.
-		ABCJS.stopAnimation();
+		animation.stopAnimation();
 		animationTarget = paper;
 		shouldResetOverflow = options.scrollVertical || options.scrollHint;
 
@@ -378,7 +377,7 @@ if (!window.ABCJS)
 
 		function processNext() {
 			if (stopNextTime) {
-				ABCJS.stopAnimation();
+				animation.stopAnimation();
 				return;
 			}
 			var currentTime = new Date().getTime();
@@ -401,7 +400,7 @@ if (!window.ABCJS)
 		isPaused = false;
 		processNext();
 
-		ABCJS.pauseAnimation = function(pause) {
+		animation.pauseAnimation = function(pause) {
 			if (pause && !isPaused) {
 				isPaused = true;
 				pausedTime = new Date().getTime();
@@ -417,7 +416,7 @@ if (!window.ABCJS)
 		};
 	};
 
-	ABCJS.stopAnimation = function() {
+	animation.stopAnimation = function() {
 		clearTimeout(animateTimer);
 		clearTimeout(scrollTimer);
 		if (cursor) {
@@ -431,3 +430,5 @@ if (!window.ABCJS)
 		}
 	};
 })();
+
+module.exports = animation;

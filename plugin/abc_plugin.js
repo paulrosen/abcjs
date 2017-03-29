@@ -18,6 +18,7 @@
 //    requires: abcjs, raphael, jquery
 /*global jQuery, ABCJS, Raphael, abcjs_is_user_script, abcjs_plugin_autostart */
 
+var TuneBook = require('../api/abc_tunebook').TuneBook;
 var Parse = require('../parse/abc_parse');
 var EngraverController = require('../write/abc_engraver_controller');
 
@@ -154,7 +155,7 @@ window.ABCJS.plugin.render = function (contextnode, abcstring) {
 	  if (this.debug) {
 		  alert("About to render:\n\n" + abcstring);
 	  }
-    var tunebook = new ABCJS.TuneBook(abcstring);
+    var tunebook = new TuneBook(abcstring);
     var abcParser = new Parse();
     abcParser.parse(tunebook.tunes[0].abc);
     var tune = abcParser.getTune();
