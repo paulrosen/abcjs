@@ -16,6 +16,8 @@
 
 /*global window, ABCJS */
 
+var parseCommon = require('../parse/abc_common');
+
 if (!window.ABCJS)
         window.ABCJS = {};
 
@@ -233,17 +235,17 @@ ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline, tempo)
 };
 
 	ABCJS.write.AbstractEngraver.prototype.saveState = function() {
-		this.tiesSave = ABCJS.parse.cloneArray(this.ties);
-		this.slursSave = ABCJS.parse.cloneHashOfHash(this.slurs);
-		this.slursbyvoiceSave = ABCJS.parse.cloneHashOfHash(this.slursbyvoice);
-		this.tiesbyvoiceSave = ABCJS.parse.cloneHashOfArrayOfHash(this.tiesbyvoice);
+		this.tiesSave = parseCommon.cloneArray(this.ties);
+		this.slursSave = parseCommon.cloneHashOfHash(this.slurs);
+		this.slursbyvoiceSave = parseCommon.cloneHashOfHash(this.slursbyvoice);
+		this.tiesbyvoiceSave = parseCommon.cloneHashOfArrayOfHash(this.tiesbyvoice);
 	};
 
 	ABCJS.write.AbstractEngraver.prototype.restoreState = function() {
-		this.ties = ABCJS.parse.cloneArray(this.tiesSave);
-		this.slurs = ABCJS.parse.cloneHashOfHash(this.slursSave);
-		this.slursbyvoice = ABCJS.parse.cloneHashOfHash(this.slursbyvoiceSave);
-		this.tiesbyvoice = ABCJS.parse.cloneHashOfArrayOfHash(this.tiesbyvoiceSave);
+		this.ties = parseCommon.cloneArray(this.tiesSave);
+		this.slurs = parseCommon.cloneHashOfHash(this.slursSave);
+		this.slursbyvoice = parseCommon.cloneHashOfHash(this.slursbyvoiceSave);
+		this.tiesbyvoice = parseCommon.cloneHashOfArrayOfHash(this.tiesbyvoiceSave);
 	};
 
 // return an array of ABCJS.write.AbsoluteElement
@@ -605,7 +607,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
 
   if (elem.lyric !== undefined) {
     var lyricStr = "";
-         window.ABCJS.parse.each(elem.lyric, function(ly) {
+         parseCommon.each(elem.lyric, function(ly) {
          lyricStr += ly.syllable + ly.divider + "\n";
       });
 	  var lyricDim = this.renderer.getTextSize(lyricStr, 'vocalfont', "abc-lyric");

@@ -16,6 +16,8 @@
 
 /*globals ABCJS */
 
+var parseCommon = require('../parse/abc_common');
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
@@ -246,7 +248,7 @@ ABCJS.write.VoiceElement.prototype.draw = function (renderer, bartop) {
 	}
 
 	renderer.measureNumber = 0;
-	window.ABCJS.parse.each(this.beams, function(beam) {
+	parseCommon.each(this.beams, function(beam) {
 		if (beam === 'bar')
 			renderer.measureNumber++;
 		else
@@ -255,7 +257,7 @@ ABCJS.write.VoiceElement.prototype.draw = function (renderer, bartop) {
 
 	renderer.measureNumber = 0;
 	var self = this;
-	window.ABCJS.parse.each(this.otherchildren, function(child) {
+	parseCommon.each(this.otherchildren, function(child) {
 		if (child === 'bar')
 			renderer.measureNumber++;
 		else

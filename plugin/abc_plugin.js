@@ -18,6 +18,8 @@
 //    requires: abcjs, raphael, jquery
 /*global jQuery, ABCJS, Raphael, abcjs_is_user_script, abcjs_plugin_autostart */
 
+var Parse = require('../parse/abc_parse');
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
@@ -152,7 +154,7 @@ window.ABCJS.plugin.render = function (contextnode, abcstring) {
 		  alert("About to render:\n\n" + abcstring);
 	  }
     var tunebook = new ABCJS.TuneBook(abcstring);
-    var abcParser = new ABCJS.parse.Parse();
+    var abcParser = new Parse();
     abcParser.parse(tunebook.tunes[0].abc);
     var tune = abcParser.getTune();
 

@@ -17,6 +17,9 @@
 /*global document, Raphael */
 /*global window, ABCJS, console */
 
+var parseCommon = require('../parse/abc_common');
+var Parse = require('../parse/abc_parse');
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
@@ -33,32 +36,32 @@ if (!window.ABCJS)
 	ABCJS.TuneBook = function(book) {
 		var This = this;
 		var directives = "";
-		book = window.ABCJS.parse.strip(book);
+		book = parseCommon.strip(book);
 		var tunes = book.split("\nX:");
 		for (var i = 1; i < tunes.length; i++)	// Put back the X: that we lost when splitting the tunes.
 			tunes[i] = "X:" + tunes[i];
 		// Keep track of the character position each tune starts with.
 		var pos = 0;
 		This.tunes = [];
-		window.ABCJS.parse.each(tunes, function(tune) {
+		parseCommon.each(tunes, function(tune) {
 			This.tunes.push({ abc: tune, startPos: pos});
 			pos += tune.length;
 		});
-		if (This.tunes.length > 1 && !window.ABCJS.parse.startsWith(This.tunes[0].abc, 'X:')) {	// If there is only one tune, the X: might be missing, otherwise assume the top of the file is "intertune"
+		if (This.tunes.length > 1 && !parseCommon.startsWith(This.tunes[0].abc, 'X:')) {	// If there is only one tune, the X: might be missing, otherwise assume the top of the file is "intertune"
 			// There could be file-wide directives in this, if so, we need to insert it into each tune. We can probably get away with
 			// just looking for file-wide directives here (before the first tune) and inserting them at the bottom of each tune, since
 			// the tune is parsed all at once. The directives will be seen before the engraver begins processing.
 			var dir = This.tunes.shift();
 			var arrDir = dir.abc.split('\n');
-			window.ABCJS.parse.each(arrDir, function(line) {
-				if (window.ABCJS.parse.startsWith(line, '%%'))
+			parseCommon.each(arrDir, function(line) {
+				if (parseCommon.startsWith(line, '%%'))
 					directives += line + '\n';
 			});
 		}
 		This.header = directives;
 
 		// Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
-		window.ABCJS.parse.each(This.tunes, function(tune) {
+		parseCommon.each(This.tunes, function(tune) {
 			var end = tune.abc.indexOf('\n\n');
 			if (end > 0)
 				tune.abc = tune.abc.substring(0, end);
@@ -114,7 +117,7 @@ if (!window.ABCJS)
 
 		// parse the abc string
 		var book = new ABCJS.TuneBook(abc);
-		var abcParser = new window.ABCJS.parse.Parse();
+		var abcParser = new Parse();
 
 		// output each tune, if it exists. Otherwise clear the div.
 		for (var i = 0; i < output.length; i++) {
