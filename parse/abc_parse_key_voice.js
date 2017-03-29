@@ -1,26 +1,23 @@
 /*global window */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var parseCommon = require('./abc_common');
+var parseDirective = require('./abc_parse_directive');
 
-if (!window.ABCJS.parse)
-	window.ABCJS.parse = {};
-
-window.ABCJS.parse.parseKeyVoice = {};
+var parseKeyVoice = {};
 
 (function() {
 	var tokenizer;
 	var warn;
 	var multilineVars;
 	var tune;
-	window.ABCJS.parse.parseKeyVoice.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
+	parseKeyVoice.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
 		tokenizer = tokenizer_;
 		warn = warn_;
 		multilineVars = multilineVars_;
 		tune = tune_;
 	};
 
-	window.ABCJS.parse.parseKeyVoice.standardKey = function(keyName) {
+	parseKeyVoice.standardKey = function(keyName) {
 		var key1sharp = {acc: 'sharp', note: 'f'};
 		var key2sharp = {acc: 'sharp', note: 'c'};
 		var key3sharp = {acc: 'sharp', note: 'g'};
@@ -213,7 +210,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 		return mid+oct;
 	};
 
-	window.ABCJS.parse.parseKeyVoice.fixClef = function(clef) {
+	parseKeyVoice.fixClef = function(clef) {
 		var value = clefLines[clef.type];
 		if (value) {
 			clef.clefPos = value.pitch;
@@ -221,34 +218,34 @@ window.ABCJS.parse.parseKeyVoice = {};
 		}
 	};
 
-	window.ABCJS.parse.parseKeyVoice.deepCopyKey = function(key) {
+	parseKeyVoice.deepCopyKey = function(key) {
 		var ret = { accidentals: [], root: key.root, acc: key.acc, mode: key.mode };
-		window.ABCJS.parse.each(key.accidentals, function(k) {
-		ret.accidentals.push(window.ABCJS.parse.clone(k));
+		parseCommon.each(key.accidentals, function(k) {
+		ret.accidentals.push(parseCommon.clone(k));
 		});
 		return ret;
 	};
 
 	var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
 
-	window.ABCJS.parse.parseKeyVoice.addPosToKey = function(clef, key) {
+	parseKeyVoice.addPosToKey = function(clef, key) {
 		// Shift the key signature from the treble positions to whatever position is needed for the clef.
 		// This may put the key signature unnaturally high or low, so if it does, then shift it.
 		var mid = clef.verticalPos;
-		window.ABCJS.parse.each(key.accidentals, function(acc) {
+		parseCommon.each(key.accidentals, function(acc) {
 			var pitch = pitches[acc.note];
 			pitch = pitch - mid;
 			acc.verticalPos = pitch;
 		});
 		if (key.impliedNaturals)
-			window.ABCJS.parse.each(key.impliedNaturals, function(acc) {
+			parseCommon.each(key.impliedNaturals, function(acc) {
 				var pitch = pitches[acc.note];
 				pitch = pitch - mid;
 				acc.verticalPos = pitch;
 			});
 
 		if (mid < -10) {
-			window.ABCJS.parse.each(key.accidentals, function(acc) {
+			parseCommon.each(key.accidentals, function(acc) {
 				acc.verticalPos -= 7;
 				if (acc.verticalPos >= 11 || (acc.verticalPos === 10 && acc.acc === 'flat'))
 					acc.verticalPos -= 7;
@@ -258,7 +255,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 					acc.verticalPos -=7;
 			});
 			if (key.impliedNaturals)
-				window.ABCJS.parse.each(key.impliedNaturals, function(acc) {
+				parseCommon.each(key.impliedNaturals, function(acc) {
 					acc.verticalPos -= 7;
 					if (acc.verticalPos >= 11 || (acc.verticalPos === 10 && acc.acc === 'flat'))
 						acc.verticalPos -= 7;
@@ -268,31 +265,31 @@ window.ABCJS.parse.parseKeyVoice = {};
 						acc.verticalPos -=7;
 				});
 		} else if (mid < -4) {
-			window.ABCJS.parse.each(key.accidentals, function(acc) {
+			parseCommon.each(key.accidentals, function(acc) {
 				acc.verticalPos -= 7;
 				if (mid === -8 && (acc.note === 'f' || acc.note === 'g') && acc.acc === 'sharp' )
 					acc.verticalPos -=7;
 			});
 			if (key.impliedNaturals)
-				window.ABCJS.parse.each(key.impliedNaturals, function(acc) {
+				parseCommon.each(key.impliedNaturals, function(acc) {
 					acc.verticalPos -= 7;
 					if (mid === -8 && (acc.note === 'f' || acc.note === 'g') && acc.acc === 'sharp' )
 						acc.verticalPos -=7;
 				});
 		} else if (mid >= 7) {
-			window.ABCJS.parse.each(key.accidentals, function(acc) {
+			parseCommon.each(key.accidentals, function(acc) {
 				acc.verticalPos += 7;
 			});
 			if (key.impliedNaturals)
-				window.ABCJS.parse.each(key.impliedNaturals, function(acc) {
+				parseCommon.each(key.impliedNaturals, function(acc) {
 					acc.verticalPos += 7;
 				});
 		}
 	};
 
-	window.ABCJS.parse.parseKeyVoice.fixKey = function(clef, key) {
-		var fixedKey = window.ABCJS.parse.clone(key);
-		window.ABCJS.parse.parseKeyVoice.addPosToKey(clef, fixedKey);
+	parseKeyVoice.fixKey = function(clef, key) {
+		var fixedKey = parseCommon.clone(key);
+		parseKeyVoice.addPosToKey(clef, fixedKey);
 		return fixedKey;
 	};
 
@@ -327,7 +324,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 		}
 	};
 
-	window.ABCJS.parse.parseKeyVoice.parseKey = function(str)	// (and clef)
+	parseKeyVoice.parseKey = function(str)	// (and clef)
 	{
 		// returns:
 		//		{ foundClef: true, foundKey: true }
@@ -355,13 +352,13 @@ window.ABCJS.parse.parseKeyVoice = {};
 		// first the key
 		switch (tokens[0].token) {
 			case 'HP':
-				window.ABCJS.parse.parseDirective.addDirective("bagpipes");
+				parseDirective.addDirective("bagpipes");
 				multilineVars.key = { root: "HP", accidentals: [], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
 				break;
 			case 'Hp':
-				window.ABCJS.parse.parseDirective.addDirective("bagpipes");
+				parseDirective.addDirective("bagpipes");
 				multilineVars.key = { root: "Hp", accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
@@ -404,14 +401,14 @@ window.ABCJS.parse.parseKeyVoice = {};
 							}
 						}
 						// Be sure that the key specified is in the list: not all keys are physically possible, like Cbmin.
-						if (window.ABCJS.parse.parseKeyVoice.standardKey(key) === undefined) {
+						if (parseKeyVoice.standardKey(key) === undefined) {
 							warn("Unsupported key signature: " + key, str, 0);
 							return ret;
 						}
 					}
 					// We need to do a deep copy because we are going to modify it
-					var oldKey = window.ABCJS.parse.parseKeyVoice.deepCopyKey(multilineVars.key);
-					multilineVars.key = window.ABCJS.parse.parseKeyVoice.deepCopyKey({accidentals: window.ABCJS.parse.parseKeyVoice.standardKey(key)});
+					var oldKey = parseKeyVoice.deepCopyKey(multilineVars.key);
+					multilineVars.key = parseKeyVoice.deepCopyKey({accidentals: parseKeyVoice.standardKey(key)});
 					multilineVars.key.root = retPitch.token;
 					multilineVars.key.acc = acc;
 					multilineVars.key.mode = mode;
@@ -599,7 +596,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 		tune.setCurrentVoice(multilineVars.currentVoice.staffNum, multilineVars.currentVoice.index);
 	};
 
-	window.ABCJS.parse.parseKeyVoice.parseVoice = function(line, i, e) {
+	parseKeyVoice.parseVoice = function(line, i, e) {
 		//First truncate the string to the first non-space character after V: through either the
 		//end of the line or a % character. Then remove trailing spaces, too.
 		var ret = tokenizer.getMeat(line, i, e);
@@ -806,3 +803,4 @@ window.ABCJS.parse.parseKeyVoice = {};
 
 })();
 
+module.exports = parseKeyVoice;

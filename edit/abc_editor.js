@@ -29,6 +29,9 @@
 /*global document, window, clearTimeout, setTimeout */
 /*global Raphael */
 
+var parseCommon = require('../parse/abc_common');
+var Parse = require('../parse/abc_parse');
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
@@ -227,7 +230,7 @@ window.ABCJS.Editor = function(editarea, params) {
   };
 
   this.removeClassName = function(element, className) {
-    element.className = window.ABCJS.parse.strip(element.className.replace(
+    element.className = parseCommon.strip(element.className.replace(
       new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
     return element;
   };
@@ -247,7 +250,7 @@ window.ABCJS.Editor = function(editarea, params) {
 
 window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
   var tunebook = new ABCJS.TuneBook(abc);
-  var abcParser = window.ABCJS.parse.Parse();
+  var abcParser = Parse();
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
@@ -364,7 +367,7 @@ window.ABCJS.Editor.prototype.parseABC = function() {
   this.startPos = [];
   this.warnings = [];
   for (var i=0; i<tunebook.tunes.length; i++) {
-    var abcParser = new window.ABCJS.parse.Parse();
+    var abcParser = new Parse();
     abcParser.parse(tunebook.tunes[i].abc, this.parserparams);
     this.tunes[i] = abcParser.getTune();
 	  this.startPos[i] = tunebook.tunes[i].startPos;
@@ -403,7 +406,7 @@ window.ABCJS.Editor.prototype.setDirtyStyle = function(isDirty) {
   };
 
   var removeClassName = function(element, className) {
-    element.className = window.ABCJS.parse.strip(element.className.replace(
+    element.className = parseCommon.strip(element.className.replace(
       new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
     return element;
   };
