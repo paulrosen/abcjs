@@ -22,9 +22,11 @@ var ParseHeader = require('./abc_parse_header');
 var parseKeyVoice = require('./abc_parse_key_voice');
 var Tokenizer = require('./abc_tokenizer');
 
+var Tune = require('../data/abc_tune');
+
 var Parse = function() {
 	"use strict";
-	var tune = new window.ABCJS.data.Tune();
+	var tune = new Tune();
 	var tokenizer = new Tokenizer();
 
 	this.getTune = function() {

@@ -19,18 +19,12 @@
 var parseCommon = require('../parse/abc_common');
 var parseKeyVoice = require('../parse/abc_parse_key_voice');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.data)
-	window.ABCJS.data = {};
-
 /**
  * This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
  * Also known as the ABCJS Abstract Syntax Tree
  * @alternateClassName ABCJS.Tune
  */
-window.ABCJS.data.Tune = function() {
+var Tune = function() {
 	// The structure consists of a hash with the following two items:
 	// metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...
 	// tempo: { noteLength: number (e.g. .125), bpm: number }
@@ -947,3 +941,5 @@ window.ABCJS.data.Tune = function() {
 		this.noteTimings = this.setupEvents(startingDelay, timeDivider);
 	};
 };
+
+module.exports = Tune;
