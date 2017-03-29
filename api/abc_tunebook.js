@@ -14,8 +14,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global document, Raphael */
+/*global document */
 /*global window, ABCJS, console */
+
+var Raphael = require('raphael');
 
 var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');

@@ -27,7 +27,8 @@
 //
 
 /*global document, window, clearTimeout, setTimeout */
-/*global Raphael */
+
+var Raphael = require('raphael');
 
 var TuneBook = require('../api/abc_tunebook').TuneBook;
 var parseCommon = require('../parse/abc_common');

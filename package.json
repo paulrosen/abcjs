@@ -29,5 +29,8 @@
   "devDependencies": {
     "browserify": "14.1.0",
     "watchify": "3.9.0"
+  },
+  "dependencies": {
+    "raphael": "2.1.4"
   }
 }
