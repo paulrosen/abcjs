@@ -31,6 +31,7 @@
 
 var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
+var EngraverController = require('../write/abc_engraver_controller');
 
 if (!window.ABCJS)
 	window.ABCJS = {};
@@ -254,7 +255,7 @@ window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
-  var engraver_controller = new ABCJS.write.EngraverController(paper, this.engraverparams);
+  var engraver_controller = new EngraverController(paper, this.engraverparams);
   engraver_controller.engraveABC(tune);
 };
 
@@ -274,7 +275,7 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
   this.timerId = null;
   this.div.innerHTML = "";
   var paper = Raphael(this.div, 800, 400);
-  this.engraver_controller = new ABCJS.write.EngraverController(paper, this.engraverparams);
+  this.engraver_controller = new EngraverController(paper, this.engraverparams);
   this.engraver_controller.engraveABC(this.tunes);
 	this.tunes[0].engraver = this.engraver_controller;	// TODO-PER: We actually want an output object for each tune, not the entire controller. When refactoring, don't save data in the controller.
 	var downloadMidiHtml = "";

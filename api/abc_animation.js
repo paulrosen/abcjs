@@ -16,6 +16,8 @@
 
 /*global ABCJS, console */
 
+var spacing = require('../write/abc_spacing');
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
@@ -265,10 +267,10 @@ if (!window.ABCJS)
 				var voices = group.voices;
 				var firstStaff = group.staffs[0];
 				var middleC = firstStaff.absoluteY;
-				var top = middleC - firstStaff.top*ABCJS.write.spacing.STEP;
+				var top = middleC - firstStaff.top*spacing.STEP;
 				var lastStaff = group.staffs[group.staffs.length-1];
 				middleC = lastStaff.absoluteY;
-				var bottom = middleC - lastStaff.bottom*ABCJS.write.spacing.STEP;
+				var bottom = middleC - lastStaff.bottom*spacing.STEP;
 				var height = bottom - top;
 				var maxVoiceTime = 0;
 				// Put in the notes for all voices, then sort them, then remove duplicates

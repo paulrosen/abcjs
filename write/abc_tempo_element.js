@@ -14,34 +14,30 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS */
+var AbsoluteElement = require('./abc_absolute_element');
+var RelativeElement = require('./abc_relative_element');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
-
+var TempoElement;
 (function() {
 	"use strict";
 	var totalHeightInPitches = 5;
 
-	ABCJS.write.TempoElement = function TempoElement(tempo, tuneNumber) {
+	TempoElement = function TempoElement(tempo, tuneNumber) {
 		this.tempo = tempo;
 		this.tuneNumber = tuneNumber;
 		this.tempoHeightAbove = totalHeightInPitches;
 		this.pitch = undefined; // This will be set later
 	};
 
-	ABCJS.write.TempoElement.prototype.setUpperAndLowerElements = function(positionY) { // TODO-PER: This might not be called.
+	TempoElement.prototype.setUpperAndLowerElements = function(positionY) { // TODO-PER: This might not be called.
 		this.pitch = positionY.tempoHeightAbove;
 	};
 
-	ABCJS.write.TempoElement.prototype.setX = function (x) {
+	TempoElement.prototype.setX = function (x) {
 		this.x = x;
 	};
 
-	ABCJS.write.TempoElement.prototype.draw = function(renderer) {
+	TempoElement.prototype.draw = function(renderer) {
 		var x = this.x;
 		if (this.pitch === undefined)
 			window.console.error("Tempo Element y-coordinate not set.");
@@ -58,7 +54,7 @@ if (!window.ABCJS.write)
 			var temposcale = 0.75;
 			var tempopitch = this.pitch - totalHeightInPitches + 1; // The pitch we receive is the top of the allotted area: change that to practically the bottom.
 			var duration = this.tempo.duration[0]; // TODO when multiple durations
-			var abselem = new ABCJS.write.AbsoluteElement(this.tempo, duration, 1, 'tempo', this.tuneNumber);
+			var abselem = new AbsoluteElement(this.tempo, duration, 1, 'tempo', this.tuneNumber);
 			// There aren't an infinite number of note values, but we are passed a float, so just in case something is off upstream,
 			// merge all of the in between points.
 			var dot;
@@ -102,7 +98,7 @@ if (!window.ABCJS.write)
 				var p2 = tempopitch + 7 * temposcale;
 				var dx = temponote.dx + temponote.w;
 				var width = -0.6;
-				stem = new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2": p2, linewidth: width});
+				stem = new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2": p2, linewidth: width});
 				stem.setX(x);
 				abselem.addExtra(stem);
 			}
@@ -121,3 +117,5 @@ if (!window.ABCJS.write)
 		}
 	};
 })();
+
+module.exports = TempoElement;

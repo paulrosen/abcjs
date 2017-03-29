@@ -15,24 +15,11 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-/*global window, ABCJS, Math, Raphael */
+/*global window, Math, Raphael */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
-
-ABCJS.write.spacing = function() {};
-ABCJS.write.spacing.FONTEM = 360;
-ABCJS.write.spacing.FONTSIZE = 30;
-ABCJS.write.spacing.STEP = ABCJS.write.spacing.FONTSIZE*93/720;
-ABCJS.write.spacing.SPACE = 10;
-ABCJS.write.spacing.TOPNOTE = 15;
-ABCJS.write.spacing.STAVEHEIGHT = 100;
-ABCJS.write.spacing.INDENT = 50;
-
-ABCJS.write.debugPlacement = false; // Set this to true to get lots of lines and boxes on the page to make sense of the placement.
+var spacing = require('./abc_spacing');
+var AbstractEngraver = require('./abc_abstract_engraver');
+var Renderer = require('./abc_renderer');
 
 /**
  * @class
@@ -48,9 +35,9 @@ ABCJS.write.debugPlacement = false; // Set this to true to get lots of lines and
  * @param {Object} paper SVG like object with methods path, text, etc.
  * @param {Object} params all the params -- documented on github //TODO-GD move some of that documentation here
  */
-ABCJS.write.EngraverController = function(paper, params) {
+var EngraverController = function(paper, params) {
   params = params || {};
-  this.space = 3*ABCJS.write.spacing.SPACE;
+  this.space = 3*spacing.SPACE;
   this.scale = params.scale || undefined;
 	if (params.staffwidth) {
 		// Note: Normally all measurements to the engraver are in POINTS. However, if a person is formatting for the
@@ -74,14 +61,14 @@ ABCJS.write.EngraverController = function(paper, params) {
 	Raphael._availableAttrs['data-vertical'] = "";
 
   //TODO-GD factor out all calls directly made to renderer.paper and fix all the coupling issues below
-  this.renderer=new ABCJS.write.Renderer(paper, params.regression);
+  this.renderer=new Renderer(paper, params.regression);
 	this.renderer.setPaddingOverride(params);
   this.renderer.controller = this; // TODO-GD needed for highlighting
 
 	this.reset();
 };
 
-ABCJS.write.EngraverController.prototype.reset = function() {
+EngraverController.prototype.reset = function() {
 	this.selected = [];
 	this.ingroup = false;
 	this.staffgroups = [];
@@ -96,7 +83,7 @@ ABCJS.write.EngraverController.prototype.reset = function() {
  * run the engraving process
  * @param {ABCJS.Tune|ABCJS.Tune[]} abctunes 
  */
-ABCJS.write.EngraverController.prototype.engraveABC = function(abctunes) {
+EngraverController.prototype.engraveABC = function(abctunes) {
   if (abctunes[0]===undefined) {
     abctunes = [abctunes];
   }
@@ -113,7 +100,7 @@ ABCJS.write.EngraverController.prototype.engraveABC = function(abctunes) {
  * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
  * @param {float} scale
  */
-ABCJS.write.EngraverController.prototype.adjustNonScaledItems = function (scale) {
+EngraverController.prototype.adjustNonScaledItems = function (scale) {
 	this.width /= scale;
 	this.renderer.adjustNonScaledItems(scale);
 };
@@ -122,7 +109,7 @@ ABCJS.write.EngraverController.prototype.adjustNonScaledItems = function (scale)
  * Run the engraving process on a single tune
  * @param {ABCJS.Tune} abctune
  */
-ABCJS.write.EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
+EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.lineNumber = null;
 	abctune.formatting.tripletfont = {face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none"}; // TODO-PER: This font isn't defined in the standard, so it's hardcoded here for now.
 
@@ -133,7 +120,7 @@ ABCJS.write.EngraverController.prototype.engraveTune = function (abctune, tuneNu
 	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
 	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
 	this.renderer.setPadding(abctune);
-	this.engraver = new ABCJS.write.AbstractEngraver(abctune.formatting.bagpipes,this.renderer, tuneNumber);
+	this.engraver = new AbstractEngraver(abctune.formatting.bagpipes,this.renderer, tuneNumber);
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	if (abctune.formatting.staffwidth) {
@@ -233,7 +220,7 @@ function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, 
  * @param {boolean} isLastLine is this the last line to be printed?
  * @private
  */
-ABCJS.write.EngraverController.prototype.setXSpacing = function (staffGroup, formatting, isLastLine) {
+EngraverController.prototype.setXSpacing = function (staffGroup, formatting, isLastLine) {
    var newspace = this.space;
   for (var it = 0; it < 3; it++) { // TODO-PER: shouldn't need this triple pass any more, but it does slightly affect the coordinates.
 	  staffGroup.layout(newspace, this.renderer, false);
@@ -251,12 +238,12 @@ ABCJS.write.EngraverController.prototype.setXSpacing = function (staffGroup, for
  * @param {Object} staffGroup an staffGroup
  * @private
  */
-ABCJS.write.EngraverController.prototype.engraveStaffLine = function (staffGroup) {
+EngraverController.prototype.engraveStaffLine = function (staffGroup) {
 	if (this.lastStaffGroupIndex > -1)
 		this.renderer.addStaffPadding(this.staffgroups[this.lastStaffGroupIndex], staffGroup);
 	this.renderer.voiceNumber = null;
 	staffGroup.draw(this.renderer);
-	var height = staffGroup.height * ABCJS.write.spacing.STEP;
+	var height = staffGroup.height * spacing.STEP;
 	//this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+height);
   this.staffgroups[this.staffgroups.length] = staffGroup;
 	this.lastStaffGroupIndex = this.staffgroups.length-1;
@@ -267,7 +254,7 @@ ABCJS.write.EngraverController.prototype.engraveStaffLine = function (staffGroup
  * Called by the Abstract Engraving Structure or any other (e.g. midi playback) to say it was selected (notehead clicked on)
  * @protected
  */
-ABCJS.write.EngraverController.prototype.notifySelect = function (abselem, tuneNumber) {
+EngraverController.prototype.notifySelect = function (abselem, tuneNumber) {
   this.clearSelection();
   if (abselem.highlight) {
     this.selected = [abselem];
@@ -284,7 +271,7 @@ ABCJS.write.EngraverController.prototype.notifySelect = function (abselem, tuneN
  * Called by the Abstract Engraving Structure to say it was modified (e.g. notehead dragged)
  * @protected
  */
-ABCJS.write.EngraverController.prototype.notifyChange = function (/*abselem*/) {
+EngraverController.prototype.notifyChange = function (/*abselem*/) {
   for (var i=0; i<this.listeners.length;i++) {
     if (this.listeners[i].modelChanged)
       this.listeners[i].modelChanged();
@@ -295,7 +282,7 @@ ABCJS.write.EngraverController.prototype.notifyChange = function (/*abselem*/) {
  *
  * @private
  */
-ABCJS.write.EngraverController.prototype.clearSelection = function () {
+EngraverController.prototype.clearSelection = function () {
   for (var i=0;i<this.selected.length;i++) {
     this.selected[i].unhighlight();
   }
@@ -307,7 +294,7 @@ ABCJS.write.EngraverController.prototype.clearSelection = function () {
  * @param {Function} listener.modelChanged the model the listener passed to this controller has changed
  * @param {Function} listener.highlight the abcelem of the model the listener passed to this controller should be highlighted
  */
-ABCJS.write.EngraverController.prototype.addSelectListener = function (listener) {
+EngraverController.prototype.addSelectListener = function (listener) {
   this.listeners[this.listeners.length] = listener;
 };
 
@@ -316,7 +303,7 @@ ABCJS.write.EngraverController.prototype.addSelectListener = function (listener)
  * @param {number} start the character in the source abc where highlighting should start
  * @param {number} end the character in the source abc where highlighting should end
  */
-ABCJS.write.EngraverController.prototype.rangeHighlight = function(start,end)
+EngraverController.prototype.rangeHighlight = function(start,end)
 {
     this.clearSelection();
     for (var line=0;line<this.staffgroups.length; line++) {
@@ -359,3 +346,4 @@ function centerWholeRests(voices) {
 	}
 }
 
+module.exports = EngraverController;

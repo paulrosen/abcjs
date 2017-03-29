@@ -14,13 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS, console */
+/*globals console */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
+var spacing = require('./abc_spacing');
 
 // StaffGroupElement contains all the elements that go together to make one line of music.
 // That might be multiple staves that are tied together, and it might be multiple voices on one staff.
@@ -49,13 +45,13 @@ if (!window.ABCJS.write)
 // height: Set in the draw() method to the height actually used. Used by the calling function to know where to start the next staff group.
 // TODO-PER: This should actually be set in the layout method and passed back as a return value.
 
-ABCJS.write.StaffGroupElement = function() {
+var StaffGroupElement = function() {
 	this.voices = [];
 	this.staffs = [];
 	this.brace = undefined; //tony
 };
 
-ABCJS.write.StaffGroupElement.prototype.setLimit = function(member, voice) {
+StaffGroupElement.prototype.setLimit = function(member, voice) {
 	if (!voice.specialY[member]) return;
 	if (!voice.staff.specialY[member])
 		voice.staff.specialY[member] = voice.specialY[member];
@@ -63,7 +59,7 @@ ABCJS.write.StaffGroupElement.prototype.setLimit = function(member, voice) {
 		voice.staff.specialY[member] = Math.max(voice.staff.specialY[member], voice.specialY[member]);
 };
 
-ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines) {
+StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines) {
 	var voiceNum = this.voices.length;
 	this.voices[voiceNum] = voice;
 	if (this.staffs[staffnumber])
@@ -94,7 +90,7 @@ ABCJS.write.StaffGroupElement.prototype.addVoice = function (voice, staffnumber,
 	voice.staff = this.staffs[staffnumber];
 };
 
-ABCJS.write.StaffGroupElement.prototype.setStaffLimits = function (voice) {
+StaffGroupElement.prototype.setStaffLimits = function (voice) {
 	voice.staff.top = Math.max(voice.staff.top, voice.top);
 	voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
 	this.setLimit('tempoHeightAbove', voice);
@@ -110,7 +106,7 @@ ABCJS.write.StaffGroupElement.prototype.setStaffLimits = function (voice) {
 	this.setLimit('dynamicHeightBelow', voice);
 };
 
-ABCJS.write.StaffGroupElement.prototype.setUpperAndLowerElements = function(renderer) {
+StaffGroupElement.prototype.setUpperAndLowerElements = function(renderer) {
 	// Each staff already has the top and bottom set, now we see if there are elements that are always on top and bottom, and resolve their pitch.
 	// Also, get the overall height of all the staves in this group.
 	var lastStaffBottom;
@@ -133,7 +129,7 @@ ABCJS.write.StaffGroupElement.prototype.setUpperAndLowerElements = function(rend
 			dynamicHeightBelow: 0
 		};
 
-		if (ABCJS.write.debugPlacement) {
+		if (/*ABCJS.write.debugPlacement*/false) {
 			staff.originalTop = staff.top; // This is just being stored for debugging purposes.
 			staff.originalBottom = staff.bottom; // This is just being stored for debugging purposes.
 		}
@@ -169,7 +165,7 @@ ABCJS.write.StaffGroupElement.prototype.setUpperAndLowerElements = function(rend
 			positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow;
 		}
 
-		if (ABCJS.write.debugPlacement)
+		if (/*ABCJS.write.debugPlacement*/false)
 			staff.positionY = positionY; // This is just being stored for debugging purposes.
 
 		for (var j = 0; j < staff.voices.length; j++) {
@@ -181,7 +177,7 @@ ABCJS.write.StaffGroupElement.prototype.setUpperAndLowerElements = function(rend
 		if (lastStaffBottom !== undefined) {
 			var thisStaffTop = staff.top - 10;
 			var forcedSpacingBetween = lastStaffBottom + thisStaffTop;
-			var minSpacingInPitches = renderer.spacing.systemStaffSeparation/ABCJS.write.spacing.STEP;
+			var minSpacingInPitches = renderer.spacing.systemStaffSeparation/spacing.STEP;
 			var addedSpace = minSpacingInPitches - forcedSpacingBetween;
 			if (addedSpace > 0)
 				staff.top += addedSpace;
@@ -195,14 +191,14 @@ ABCJS.write.StaffGroupElement.prototype.setUpperAndLowerElements = function(rend
 	//console.log("Staff Height: ",heightInPitches,this.height);
 };
 
-ABCJS.write.StaffGroupElement.prototype.finished = function() {
+StaffGroupElement.prototype.finished = function() {
 	for (var i=0;i<this.voices.length;i++) {
 		if (!this.voices[i].layoutEnded()) return false;
 	}
 	return true;
 };
 
-ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
+StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
 	this.spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
 	this.minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
@@ -316,7 +312,7 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, renderer, deb
 	}
 };
 
-ABCJS.write.StaffGroupElement.prototype.calcHeight = function () {
+StaffGroupElement.prototype.calcHeight = function () {
 	// the height is calculated here in a parallel way to the drawing below in hopes that both of these functions will be modified together.
 	// TODO-PER: also add the space between staves. (That's systemStaffSeparation, which is the minimum distance between the staff LINES.)
 	var height = 0;
@@ -331,7 +327,7 @@ ABCJS.write.StaffGroupElement.prototype.calcHeight = function () {
 	return height;
 };
 
-ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
+StaffGroupElement.prototype.draw = function (renderer) {
 	// We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
 	// All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
 	// renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
@@ -339,13 +335,13 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 
 	var debugPrint;
 	var colorIndex;
-	if (ABCJS.write.debugPlacement) {
+	if (/*ABCJS.write.debugPlacement*/false) {
 		var colors = [ "rgba(207,27,36,0.4)", "rgba(168,214,80,0.4)", "rgba(110,161,224,0.4)", "rgba(191,119,218,0.4)", "rgba(195,30,151,0.4)",
 			"rgba(31,170,177,0.4)", "rgba(220,166,142,0.4)" ];
 		debugPrint = function(staff, key) {
 			if (staff.positionY[key]) {
 				//renderer.printHorizontalLine(50, renderer.calcY(staff.positionY[key]), key.substr(0, 4) + " " + Math.round(staff.positionY[key]));
-				var height = staff.specialY[key] * ABCJS.write.spacing.STEP;
+				var height = staff.specialY[key] * spacing.STEP;
 				renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff.positionY[key]), renderer.controller.width, height,colors[colorIndex], key.substr(0, 4));
 				colorIndex += 1; if (colorIndex > 6) colorIndex = 0;
 			}
@@ -360,9 +356,9 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 	for (var j = 0; j < this.staffs.length; j++) {
 		var staff1 = this.staffs[j];
 		//renderer.printHorizontalLine(50, renderer.y, "start");
-		renderer.moveY(ABCJS.write.spacing.STEP, staff1.top);
+		renderer.moveY(spacing.STEP, staff1.top);
 		staff1.absoluteY = renderer.y;
-		if (ABCJS.write.debugPlacement) {
+		if (/*ABCJS.write.debugPlacement*/false) {
 			colorIndex = 0;
 			renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff1.originalTop), renderer.controller.width, renderer.calcY(staff1.originalBottom)-renderer.calcY(staff1.originalTop),"rgba(0,0,0,0.1)");
 			debugPrint(staff1, 'chordHeightAbove');
@@ -378,7 +374,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 			debugPrint(staff1, 'volumeHeightBelow');
 		}
 		if (staff1.bottom < 0)
-			renderer.moveY(ABCJS.write.spacing.STEP, -staff1.bottom);
+			renderer.moveY(spacing.STEP, -staff1.bottom);
 	}
 	var topLine; // these are to connect multiple staves. We need to remember where they are.
 	var bottomLine;
@@ -392,7 +388,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 		//renderer.y = staff.y;
 		// offset for starting the counting at middle C
 		if (!this.voices[i].duplicate) {
-//			renderer.moveY(ABCJS.write.spacing.STEP, staff.top);
+//			renderer.moveY(spacing.STEP, staff.top);
 			if (!topLine) topLine  = renderer.calcY(10);
 			bottomLine  = renderer.calcY(2);
 			if (staff.lines !== 0)
@@ -402,7 +398,7 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 		if (!this.voices[i].duplicate) {
 			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
 //			if (staff.bottom < 0)
-//				renderer.moveY(ABCJS.write.spacing.STEP, -staff.bottom);
+//				renderer.moveY(spacing.STEP, -staff.bottom);
 		}
 		if(this.brace) {//Tony
 			if (i === this.brace.length - 1) {
@@ -421,3 +417,4 @@ ABCJS.write.StaffGroupElement.prototype.draw = function (renderer) {
 	renderer.y = startY;
 };
 
+module.exports = StaffGroupElement;

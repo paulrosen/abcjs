@@ -19,6 +19,7 @@
 
 var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
+var EngraverController = require('../write/abc_engraver_controller');
 
 if (!window.ABCJS)
 	window.ABCJS = {};
@@ -177,7 +178,7 @@ if (!window.ABCJS)
 		/* jshint -W064 */ var paper = Raphael(div, width, 400); /* jshint +W064 */
 		if (engraverParams === undefined)
 			engraverParams = {};
-		var engraver_controller = new ABCJS.write.EngraverController(paper, engraverParams);
+		var engraver_controller = new EngraverController(paper, engraverParams);
 		engraver_controller.engraveABC(tune);
 		tune.engraver = engraver_controller;
 		if (renderParams.viewportVertical || renderParams.viewportHorizontal) {
