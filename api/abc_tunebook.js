@@ -21,20 +21,19 @@ var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
 var EngraverController = require('../write/abc_engraver_controller');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var tunebook = {};
 
 (function() {
 	"use strict";
 
-	ABCJS.numberOfTunes = function(abc) {
+	tunebook.numberOfTunes = function(abc) {
 		var tunes = abc.split("\nX:");
 		var num = tunes.length;
 		if (num === 0) num = 1;
 		return num;
 	};
 
-	ABCJS.TuneBook = function(book) {
+	var TuneBook = tunebook.TuneBook = function(book) {
 		var This = this;
 		var directives = "";
 		book = parseCommon.strip(book);
@@ -83,7 +82,7 @@ if (!window.ABCJS)
 		});
 	};
 
-	ABCJS.TuneBook.prototype.getTuneById = function(id) {
+	TuneBook.prototype.getTuneById = function(id) {
 		for (var i = 0; i < this.tunes.length; i++) {
 			if (this.tunes[i].id === id)
 				return this.tunes[i];
@@ -91,7 +90,7 @@ if (!window.ABCJS)
 		return null;
 	};
 
-	ABCJS.TuneBook.prototype.getTuneByTitle = function(title) {
+	TuneBook.prototype.getTuneByTitle = function(title) {
 		for (var i = 0; i < this.tunes.length; i++) {
 			if (this.tunes[i].title === title)
 				return this.tunes[i];
@@ -117,7 +116,7 @@ if (!window.ABCJS)
 		var currentTune = renderParams.startingTune ? renderParams.startingTune : 0;
 
 		// parse the abc string
-		var book = new ABCJS.TuneBook(abc);
+		var book = new TuneBook(abc);
 		var abcParser = new Parse();
 
 		// output each tune, if it exists. Otherwise clear the div.
@@ -282,7 +281,7 @@ if (!window.ABCJS)
 	//			startingTune: an index, starting at zero, representing which tune to start rendering at.
 	//				(If this element is not present, then rendering starts at zero.)
 	//			width: 800 by default. The width in pixels of the output paper
-	ABCJS.renderAbc = function(output, abc, parserParams, engraverParams, renderParams) {
+	tunebook.renderAbc = function(output, abc, parserParams, engraverParams, renderParams) {
 		if (renderParams === undefined)
 			renderParams = {};
 		function callback(div, tune) {
@@ -311,7 +310,7 @@ if (!window.ABCJS)
 	//		renderParams: hash of:
 	//			startingTune: an index, starting at zero, representing which tune to start rendering at.
 	//				(If this element is not present, then rendering starts at zero.)
-	ABCJS.renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
+	tunebook.renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
 		if (midiParams === undefined)
 			midiParams = {};
 		if (midiParams.generateInline === undefined) // default is to generate inline controls.
@@ -359,3 +358,5 @@ if (!window.ABCJS)
 		return renderEngine(callback, output, abc, parserParams, renderParams);
 	};
 })();
+
+module.exports = tunebook;

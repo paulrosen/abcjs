@@ -29,6 +29,7 @@
 /*global document, window, clearTimeout, setTimeout */
 /*global Raphael */
 
+var TuneBook = require('../api/abc_tunebook').TuneBook;
 var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
 var EngraverController = require('../write/abc_engraver_controller');
@@ -244,7 +245,7 @@ var Editor = function(editarea, params) {
 };
 
 Editor.prototype.renderTune = function(abc, params, div) {
-  var tunebook = new ABCJS.TuneBook(abc);
+  var tunebook = new TuneBook(abc);
   var abcParser = Parse();
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
@@ -356,7 +357,7 @@ Editor.prototype.parseABC = function() {
 	this.warnings = "";
 	return true;
   }
-  var tunebook = new ABCJS.TuneBook(t);
+  var tunebook = new TuneBook(t);
   
   this.tunes = [];
   this.startPos = [];
