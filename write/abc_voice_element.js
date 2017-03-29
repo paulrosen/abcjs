@@ -14,17 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS */
-
 var parseCommon = require('../parse/abc_common');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
-
-ABCJS.write.VoiceElement = function VoiceElement(voicenumber, voicetotal) {
+var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
 	this.children = [];
 	this.beams = [];
 	this.otherchildren = []; // ties, slurs, triplets
@@ -50,7 +42,7 @@ ABCJS.write.VoiceElement = function VoiceElement(voicenumber, voicetotal) {
 	};
 };
 
-ABCJS.write.VoiceElement.prototype.addChild = function (child) {
+VoiceElement.prototype.addChild = function (child) {
 	if (child.type === 'bar') {
 		var firstItem = true;
 		for (var i = 0; firstItem && i < this.children.length; i++) {
@@ -66,7 +58,7 @@ ABCJS.write.VoiceElement.prototype.addChild = function (child) {
 	this.setRange(child);
 };
 
-ABCJS.write.VoiceElement.prototype.setLimit = function(member, child) {
+VoiceElement.prototype.setLimit = function(member, child) {
 	// Sometimes we get an absolute element in here and sometimes we get some type of relative element.
 	// If there is a "specialY" element, then assume it is an absolute element. If that doesn't exist, look for the
 	// same members at the top level, because that's where they are in relative elements.
@@ -79,7 +71,7 @@ ABCJS.write.VoiceElement.prototype.setLimit = function(member, child) {
 		this.specialY[member] = Math.max(this.specialY[member], specialY[member]);
 };
 
-ABCJS.write.VoiceElement.prototype.moveDecorations = function(beam) {
+VoiceElement.prototype.moveDecorations = function(beam) {
 	var padding = 1.5; // This is the vertical padding between elements, in pitches.
 	for (var ch = 0; ch < beam.elems.length; ch++) {
 		var child = beam.elems[ch];
@@ -102,14 +94,14 @@ ABCJS.write.VoiceElement.prototype.moveDecorations = function(beam) {
 	}
 };
 
-ABCJS.write.VoiceElement.prototype.adjustRange = function(child) {
+VoiceElement.prototype.adjustRange = function(child) {
 	if (child.bottom !== undefined)
 		this.bottom = Math.min(this.bottom, child.bottom);
 	if (child.top !== undefined)
 		this.top = Math.max(this.top, child.top);
 };
 
-ABCJS.write.VoiceElement.prototype.setRange = function(child) {
+VoiceElement.prototype.setRange = function(child) {
 	this.adjustRange(child);
 	this.setLimit('tempoHeightAbove', child);
 	this.setLimit('partHeightAbove', child);
@@ -124,7 +116,7 @@ ABCJS.write.VoiceElement.prototype.setRange = function(child) {
 	this.setLimit('dynamicHeightBelow', child);
 };
 
-ABCJS.write.VoiceElement.prototype.setUpperAndLowerElements = function(positionY) {
+VoiceElement.prototype.setUpperAndLowerElements = function(positionY) {
 	var i;
 	for (i = 0; i < this.children.length; i++) {
 		var abselem = this.children[i];
@@ -137,16 +129,16 @@ ABCJS.write.VoiceElement.prototype.setUpperAndLowerElements = function(positionY
 	}
 };
 
-ABCJS.write.VoiceElement.prototype.addOther = function (child) {
+VoiceElement.prototype.addOther = function (child) {
 	this.otherchildren.push(child);
 	this.setRange(child);
 };
 
-ABCJS.write.VoiceElement.prototype.addBeam = function (child) {
+VoiceElement.prototype.addBeam = function (child) {
 	this.beams.push(child);
 };
 
-ABCJS.write.VoiceElement.prototype.updateIndices = function () {
+VoiceElement.prototype.updateIndices = function () {
 	if (!this.layoutEnded()) {
 		this.durationindex += this.children[this.i].duration;
 		if (this.children[this.i].duration===0) this.durationindex = Math.round(this.durationindex*64)/64; // everytime we meet a barline, do rounding to nearest 64th
@@ -154,27 +146,27 @@ ABCJS.write.VoiceElement.prototype.updateIndices = function () {
 	}
 };
 
-ABCJS.write.VoiceElement.prototype.layoutEnded = function () {
+VoiceElement.prototype.layoutEnded = function () {
 	return (this.i>=this.children.length);
 };
 
-ABCJS.write.VoiceElement.prototype.getDurationIndex = function () {
+VoiceElement.prototype.getDurationIndex = function () {
 	return this.durationindex - (this.children[this.i] && (this.children[this.i].duration>0)?0:0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
 };
 
 // number of spacing units expected for next positioning
-ABCJS.write.VoiceElement.prototype.getSpacingUnits = function () {
+VoiceElement.prototype.getSpacingUnits = function () {
 	return Math.sqrt(this.spacingduration*8);
 	// TODO-PER: On short lines, this would never trigger, so the spacing was wrong. I just changed this line empirically, though, so I don't know if there are other ramifications.
 	//return (this.minx<this.nextx) ? Math.sqrt(this.spacingduration*8) : 0; // we haven't used any spacing units if we end up using minx
 };
 
 //
-ABCJS.write.VoiceElement.prototype.getNextX = function () {
+VoiceElement.prototype.getNextX = function () {
 	return Math.max(this.minx, this.nextx);
 };
 
-ABCJS.write.VoiceElement.prototype.beginLayout = function (startx) {
+VoiceElement.prototype.beginLayout = function (startx) {
 	this.i=0;
 	this.durationindex=0;
 	//this.ii=this.children.length;
@@ -188,7 +180,7 @@ ABCJS.write.VoiceElement.prototype.beginLayout = function (startx) {
 // x - position to try to layout the element at
 // spacing - base spacing
 // can't call this function more than once per iteration
-ABCJS.write.VoiceElement.prototype.layoutOneItem = function (x, spacing) {
+VoiceElement.prototype.layoutOneItem = function (x, spacing) {
 	var child = this.children[this.i];
 	if (!child) return 0;
 	var er = x - this.minx; // available extrawidth to the left
@@ -212,11 +204,11 @@ ABCJS.write.VoiceElement.prototype.layoutOneItem = function (x, spacing) {
 };
 
 // call when spacingduration has been updated
-ABCJS.write.VoiceElement.prototype.updateNextX = function (x, spacing) {
+VoiceElement.prototype.updateNextX = function (x, spacing) {
 	this.nextx= x + (spacing*Math.sqrt(this.spacingduration*8));
 };
 
-ABCJS.write.VoiceElement.prototype.shiftRight = function (dx) {
+VoiceElement.prototype.shiftRight = function (dx) {
 	var child = this.children[this.i];
 	if (!child) return;
 	child.setX(child.x+dx);
@@ -224,7 +216,7 @@ ABCJS.write.VoiceElement.prototype.shiftRight = function (dx) {
 	this.nextx+=dx;
 };
 
-ABCJS.write.VoiceElement.prototype.draw = function (renderer, bartop) {
+VoiceElement.prototype.draw = function (renderer, bartop) {
 	var width = this.w-1;
 	renderer.staffbottom = this.staff.bottom;
 	//this.barbottom = renderer.calcY(2);
@@ -266,7 +258,7 @@ ABCJS.write.VoiceElement.prototype.draw = function (renderer, bartop) {
 
 };
 
-ABCJS.write.VoiceElement.prototype.layoutBeams = function() {
+VoiceElement.prototype.layoutBeams = function() {
 	for (var i = 0; i < this.beams.length; i++) {
 		if (this.beams[i].layout) {
 			this.beams[i].layout();
@@ -286,3 +278,5 @@ ABCJS.write.VoiceElement.prototype.layoutBeams = function() {
 	this.staff.top = Math.max(this.staff.top, this.top);
 	this.staff.bottom = Math.min(this.staff.bottom, this.bottom);
 };
+
+module.exports = VoiceElement;

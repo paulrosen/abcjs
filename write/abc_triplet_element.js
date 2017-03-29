@@ -14,27 +14,23 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS */
+var sprintf = require('./sprintf');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
+var TripletElem;
 
 (function() {
 	"use strict";
 
-	ABCJS.write.TripletElem = function TripletElem(number, anchor1) {
+	TripletElem = function TripletElem(number, anchor1) {
 		this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
 		this.number = number;
 	};
 
-	ABCJS.write.TripletElem.prototype.isClosed = function() {
+	TripletElem.prototype.isClosed = function() {
 		return this.anchor2;
 	};
 
-	ABCJS.write.TripletElem.prototype.setCloseAnchor = function(anchor2) {
+	TripletElem.prototype.setCloseAnchor = function(anchor2) {
 		this.anchor2 = anchor2;
 		// TODO-PER: Unfortunately, I don't know if there is a beam above until after the vertical positioning is done,
 		// so I don't know whether to leave room for the number above. Therefore, If there is a beam on the first note, I'll leave room just in case.
@@ -42,10 +38,10 @@ if (!window.ABCJS.write)
 			this.endingHeightAbove = 4;
 	};
 
-	ABCJS.write.TripletElem.prototype.setUpperAndLowerElements = function(/*positionY*/) {
+	TripletElem.prototype.setUpperAndLowerElements = function(/*positionY*/) {
 	};
 
-	ABCJS.write.TripletElem.prototype.layout = function() {
+	TripletElem.prototype.layout = function() {
 		// TODO end and beginning of line (PER: P.S. I'm not sure this can happen: I think the parser will always specify both the start and end points.)
 		if (this.anchor1 && this.anchor2) {
 			this.hasBeam = this.anchor1.parent.beam && this.anchor1.parent.beam === this.anchor2.parent.beam;
@@ -71,7 +67,7 @@ if (!window.ABCJS.write)
 		}
 	};
 
-	ABCJS.write.TripletElem.prototype.draw = function(renderer) {
+	TripletElem.prototype.draw = function(renderer) {
 		var xTextPos;
 		if (this.hasBeam) {
 			var left = this.anchor1.parent.beam.isAbove() ? this.anchor1.x + this.anchor1.w : this.anchor1.x;
@@ -84,7 +80,7 @@ if (!window.ABCJS.write)
 	};
 
 	function drawLine(renderer, l, t, r, b) {
-		var pathString = ABCJS.write.sprintf("M %f %f L %f %f",
+		var pathString = sprintf("M %f %f L %f %f",
 			l, t, r, b);
 		renderer.printPath({path: pathString, stroke: "#000000", 'class': renderer.addClasses('triplet')});
 	}
@@ -112,3 +108,4 @@ if (!window.ABCJS.write)
 	}
 })();
 
+module.exports = TripletElem;

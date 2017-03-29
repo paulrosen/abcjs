@@ -14,15 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS */
+var glyphs = require('./abc_glyphs');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
-
-ABCJS.write.RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
+var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 	opt = opt || {};
 	this.x = 0;
 	this.c = c;      // character or path or string
@@ -50,7 +44,7 @@ ABCJS.write.RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 			this.bottom += opt.stemHeight;
 	}
 	//if (this.type === "symbol") {
-	//	var offset = ABCJS.write.glyphs.getYCorr(this.c);
+	//	var offset = glyphs.getYCorr(this.c);
 	//	this.top += offset;
 	//	this.bottom += offset;
 	//}
@@ -85,11 +79,11 @@ ABCJS.write.RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 	}
 };
 
-ABCJS.write.RelativeElement.prototype.setX = function (x) {
+RelativeElement.prototype.setX = function (x) {
 	this.x = x+this.dx;
 };
 
-ABCJS.write.RelativeElement.prototype.draw = function (renderer, bartop) {
+RelativeElement.prototype.draw = function (renderer, bartop) {
 	if (this.pitch === undefined)
 		window.console.error(this.type + " Relative Element y-coordinate not set.");
 	var y = renderer.calcY(this.pitch);
@@ -131,3 +125,5 @@ ABCJS.write.RelativeElement.prototype.draw = function (renderer, bartop) {
 	}
 	return this.graphelem;
 };
+
+module.exports = RelativeElement;

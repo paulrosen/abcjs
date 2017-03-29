@@ -15,24 +15,22 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-/*global window, ABCJS, Math, console */
+/*global Math, console */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
+var glyphs = require('./abc_glyphs');
+var spacing = require('./abc_spacing');
+var sprintf = require('./sprintf');
 
 /**
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
  * @param {Object} paper
  * @param {bool} doRegression
  */
-ABCJS.write.Renderer = function(paper, doRegression) {
+var Renderer = function(paper, doRegression) {
   this.paper = paper;
   this.controller = null; //TODO-GD only used when drawing the ABCJS ARS to connect the controller with the elements for highlighting
 
-	this.space = 3*ABCJS.write.spacing.SPACE;
+	this.space = 3*spacing.SPACE;
   this.padding = {}; // renderer's padding is managed by the controller
   this.doRegression = doRegression;
   if (this.doRegression)
@@ -40,7 +38,7 @@ ABCJS.write.Renderer = function(paper, doRegression) {
 	this.reset();
 };
 
-ABCJS.write.Renderer.prototype.reset = function() {
+Renderer.prototype.reset = function() {
 
 	this.paper.clear();
 	this.y = 0;
@@ -64,7 +62,7 @@ ABCJS.write.Renderer.prototype.reset = function() {
  * Set whether we are formatting this for the screen, or as a preview for creating a PDF version.
  * @param {bool} isPrint
  */
-ABCJS.write.Renderer.prototype.setPrintMode = function (isPrint) {
+Renderer.prototype.setPrintMode = function (isPrint) {
 	this.isPrint = isPrint;
 };
 
@@ -73,7 +71,7 @@ ABCJS.write.Renderer.prototype.setPrintMode = function (isPrint) {
  * @param {object} maxwidth
  * @param {object} scale
  */
-ABCJS.write.Renderer.prototype.setPaperSize = function (maxwidth, scale) {
+Renderer.prototype.setPaperSize = function (maxwidth, scale) {
 	var w = (maxwidth+this.padding.right)*scale;
 	var h = (this.y+this.padding.bottom)*scale;
 	if (this.isPrint)
@@ -112,7 +110,7 @@ ABCJS.write.Renderer.prototype.setPaperSize = function (maxwidth, scale) {
  * Set the padding
  * @param {object} params
  */
-ABCJS.write.Renderer.prototype.setPaddingOverride = function(params) {
+Renderer.prototype.setPaddingOverride = function(params) {
 	this.paddingOverride = { top: params.paddingtop, bottom: params.paddingbottom,
 		right: params.paddingright, left: params.paddingleft };
 };
@@ -121,7 +119,7 @@ ABCJS.write.Renderer.prototype.setPaddingOverride = function(params) {
  * Set the padding
  * @param {object} params
  */
-ABCJS.write.Renderer.prototype.setPadding = function(abctune) {
+Renderer.prototype.setPadding = function(abctune) {
 	// If the padding is set in the tune, then use that.
 	// Otherwise, if the padding is set in the override, use that.
 	// Otherwise, use the defaults (there are a different set of defaults for screen and print.)
@@ -147,7 +145,7 @@ ABCJS.write.Renderer.prototype.setPadding = function(abctune) {
  * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
  * @param {float} scale
  */
-ABCJS.write.Renderer.prototype.adjustNonScaledItems = function (scale) {
+Renderer.prototype.adjustNonScaledItems = function (scale) {
 	this.padding.top /= scale;
 	this.padding.bottom /= scale;
 	this.padding.left /= scale;
@@ -159,7 +157,7 @@ ABCJS.write.Renderer.prototype.adjustNonScaledItems = function (scale) {
 /**
  * Set the the values for all the configurable vertical space options.
  */
-ABCJS.write.Renderer.prototype.initVerticalSpace = function() {
+Renderer.prototype.initVerticalSpace = function() {
 	// conversion: 37.7953 = conversion factor for cm to px.
 	// All of the following values are in px.
 	this.spacing = {
@@ -212,7 +210,7 @@ the <float> fraction of the page width.
 	 */
 };
 
-ABCJS.write.Renderer.prototype.setVerticalSpace = function(formatting) {
+Renderer.prototype.setVerticalSpace = function(formatting) {
 	// conversion from pts to px 4/3
 	if (formatting.staffsep !== undefined)
 		this.spacing.staffSeparation = formatting.staffsep *4/3;
@@ -242,26 +240,26 @@ ABCJS.write.Renderer.prototype.setVerticalSpace = function(formatting) {
  * Leave space at the top of the paper
  * @param {object} abctune
  */
-ABCJS.write.Renderer.prototype.topMargin = function(abctune) {
+Renderer.prototype.topMargin = function(abctune) {
 		this.moveY(this.padding.top);
 };
 
 /**
  * Leave space before printing the music
  */
-ABCJS.write.Renderer.prototype.addMusicPadding = function() {
+Renderer.prototype.addMusicPadding = function() {
 		this.moveY(this.spacing.music);
 };
 
 /**
  * Leave space before printing a staff system
  */
-ABCJS.write.Renderer.prototype.addStaffPadding = function(lastStaffGroup, thisStaffGroup) {
+Renderer.prototype.addStaffPadding = function(lastStaffGroup, thisStaffGroup) {
 	var lastStaff = lastStaffGroup.staffs[lastStaffGroup.staffs.length-1];
 	var lastBottomLine = -(lastStaff.bottom - 2); // The 2 is because the scale goes to 2 below the last line.
 	var nextTopLine = thisStaffGroup.staffs[0].top - 10; // Because 10 represents the top line.
 	var naturalSeparation = nextTopLine + lastBottomLine; // This is how far apart they'd be without extra spacing
-	var separationInPixels = naturalSeparation * ABCJS.write.spacing.STEP;
+	var separationInPixels = naturalSeparation * spacing.STEP;
 	if (separationInPixels < this.spacing.staffSeparation)
 		this.moveY(this.spacing.staffSeparation-separationInPixels);
 };
@@ -271,7 +269,7 @@ ABCJS.write.Renderer.prototype.addStaffPadding = function(lastStaffGroup, thisSt
  * @param {number} width
  * @param {object} abctune
  */
-ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
+Renderer.prototype.engraveTopText = function(width, abctune) {
 	if (abctune.metaText.header && this.isPrint) {
 		// Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
 		// This text goes above the margin, so we'll temporarily move up.
@@ -321,7 +319,7 @@ ABCJS.write.Renderer.prototype.engraveTopText = function(width, abctune) {
  * @param {number} width
  * @param {object} abctune
  */
-ABCJS.write.Renderer.prototype.engraveExtraText = function(width, abctune) {
+Renderer.prototype.engraveExtraText = function(width, abctune) {
 	this.lineNumber = null;
 	this.measureNumber = null;
 	this.voiceNumber = null;
@@ -339,7 +337,7 @@ ABCJS.write.Renderer.prototype.engraveExtraText = function(width, abctune) {
 				extraText += "\n";
 			}
 		}
-		this.outputTextIf(this.padding.left + ABCJS.write.spacing.INDENT, extraText, 'wordsfont', 'meta-bottom', this.spacing.words, 2, "start");
+		this.outputTextIf(this.padding.left + spacing.INDENT, extraText, 'wordsfont', 'meta-bottom', this.spacing.words, 2, "start");
 	}
 
 	extraText = "";
@@ -366,7 +364,7 @@ ABCJS.write.Renderer.prototype.engraveExtraText = function(width, abctune) {
  * Output text defined with %%text.
  * @param {array or string} text
  */
-ABCJS.write.Renderer.prototype.outputFreeText = function (text) {
+Renderer.prototype.outputFreeText = function (text) {
 	if (text === "") {	// we do want to print out blank lines if they have been specified.
 		var hash = this.getFontAndAttr('textfont', 'defined-text');
 		this.moveY(hash.attr['font-size'] * 2); // move the distance of the line, plus the distance of the margin, which is also one line.
@@ -391,14 +389,14 @@ ABCJS.write.Renderer.prototype.outputFreeText = function (text) {
 /**
  * Output an extra subtitle that is defined later in the tune.
  */
-ABCJS.write.Renderer.prototype.outputSubtitle = function (width, subtitle) {
+Renderer.prototype.outputSubtitle = function (width, subtitle) {
 	this.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'middle');
 };
 
 /**
  * Begin a group of glyphs that will always be moved, scaled and highlighted together
  */
-ABCJS.write.Renderer.prototype.beginGroup = function () {
+Renderer.prototype.beginGroup = function () {
   this.path = [];
   this.lastM = [0,0];
   this.ingroup = true;
@@ -409,7 +407,7 @@ ABCJS.write.Renderer.prototype.beginGroup = function () {
  * @param {Array} path
  * @private
  */
-ABCJS.write.Renderer.prototype.addPath = function (path) {
+Renderer.prototype.addPath = function (path) {
   path = path || [];
   if (path.length===0) return;
   path[0][0]="m";
@@ -430,7 +428,7 @@ ABCJS.write.Renderer.prototype.addPath = function (path) {
 /**
  * End a group of glyphs that will always be moved, scaled and highlighted together
  */
-ABCJS.write.Renderer.prototype.endGroup = function (klass) {
+Renderer.prototype.endGroup = function (klass) {
   this.ingroup = false;
   if (this.path.length===0) return null;
   var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
@@ -446,7 +444,7 @@ ABCJS.write.Renderer.prototype.endGroup = function (klass) {
  * @param {number} x2 end x
  * @param {number} pitch pitch the stave line is drawn at
  */
-ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
+Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
 	var extraClass = "staff";
 	if (klass !== undefined)
 		extraClass += " " + klass;
@@ -458,7 +456,7 @@ ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
     fill = "#666666";
   }
   var y = this.calcY(pitch);
-  var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
+  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
      x2, y+dy, x1, y+dy);
   var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses(extraClass)}).toBack();
   if (this.doRegression) this.addToRegression(ret);
@@ -473,7 +471,7 @@ ABCJS.write.Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
  * @param {number} y1 y coordinate of the stem bottom
  * @param {number} y2 y coordinate of the stem top
  */
-ABCJS.write.Renderer.prototype.printStem = function (x, dx, y1, y2) {
+Renderer.prototype.printStem = function (x, dx, y1, y2) {
   if (dx<0) { // correct path "handedness" for intersection with other elements
     var tmp = y2;
     y2 = y1;
@@ -514,7 +512,7 @@ function kernSymbols(lastSymbol, thisSymbol, lastSymbolWidth) {
  * if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
  * not scaled if not in printgroup
  */
-ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex, scaley, klass) {
+Renderer.prototype.printSymbol = function(x, offset, symbol, scalex, scaley, klass) {
 	var el;
     var ycorr;
   if (!symbol) return null;
@@ -523,24 +521,24 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
     var dx =0;
     for (var i=0; i<symbol.length; i++) {
         var s = symbol.charAt(i);
-        ycorr = ABCJS.write.glyphs.getYCorr(s);
-			el = ABCJS.write.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), s, this.paper, klass);
+        ycorr = glyphs.getYCorr(s);
+			el = glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), s, this.paper, klass);
 			if (el) {
 				if (this.doRegression) this.addToRegression(el);
 				elemset.push(el);
 				if (i < symbol.length-1)
-					dx+= kernSymbols(s, symbol.charAt(i+1), ABCJS.write.glyphs.getSymbolWidth(s));
+					dx+= kernSymbols(s, symbol.charAt(i+1), glyphs.getSymbolWidth(s));
 			} else {
 				this.renderText(x, this.y, "no symbol:" +symbol, "debugfont", 'debug-msg', 'start');
       }
     }
     return elemset;
   } else {
-    ycorr = ABCJS.write.glyphs.getYCorr(symbol);
+    ycorr = glyphs.getYCorr(symbol);
     if (this.ingroup) {
-      this.addPath(ABCJS.write.glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
+      this.addPath(glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
     } else {
-      el = ABCJS.write.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper, klass);
+      el = glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper, klass);
       if (el) {
 	if (this.doRegression) this.addToRegression(el);
 	return el;
@@ -552,19 +550,19 @@ ABCJS.write.Renderer.prototype.printSymbol = function(x, offset, symbol, scalex,
 };
 
 
-ABCJS.write.Renderer.prototype.printPath = function (attrs) {
+Renderer.prototype.printPath = function (attrs) {
   var ret = this.paper.path().attr(attrs);
   if (this.doRegression) this.addToRegression(ret);
   return ret;
 };
 
-ABCJS.write.Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Tony
+Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Tony
 	var yHeight = yBottom - yTop;
 
 	var xCurve = [7.5, -8, 21, 0, 18.5, -10.5, 7.5];
 	var yCurve = [0, yHeight/5.5, yHeight/3.14, yHeight/2, yHeight/2.93, yHeight/4.88, 0];
 
-	var pathString = ABCJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
+	var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
 		xLeft+xCurve[0], yTop+yCurve[0],
 		xLeft+xCurve[1], yTop+yCurve[1],
 		xLeft+xCurve[2], yTop+yCurve[2],
@@ -577,7 +575,7 @@ ABCJS.write.Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Ton
 	xCurve = [0, 17.5, -7.5, 6.6, -5, 20, 0];
 	yCurve = [yHeight/2, yHeight/1.46, yHeight/1.22, yHeight, yHeight/1.19, yHeight/1.42, yHeight/2];
 
-	pathString = ABCJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
+	pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
 		xLeft+xCurve[ 0], yTop+yCurve[0],
 		xLeft+xCurve[1], yTop+yCurve[1],
 		xLeft+xCurve[2], yTop+yCurve[2],
@@ -594,7 +592,7 @@ ABCJS.write.Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Ton
 	return ret1 + ret2;
 };
 
-ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass, isTie) {
+Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass, isTie) {
 	// If it is a tie vs. a slur, draw it shallower.
 	var spacing = isTie ? 1.2 : 1.5;
 
@@ -621,7 +619,7 @@ ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above,
   var controlx2 = x2-flatten*ux-curve*uy;
   var controly2 = y2-flatten*uy+curve*ux;
   var thickness = 2;
-  var pathString = ABCJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
+  var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
      controlx1, controly1, controlx2, controly2, x2, y2,
      controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
 	if (klass)
@@ -637,14 +635,14 @@ ABCJS.write.Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above,
  * Calculates the y for a given pitch value (relative to the stave the renderer is currently printing)
  * @param {number} ofs pitch value (bottom C on a G clef = 0, D=1, etc.)
  */
-ABCJS.write.Renderer.prototype.calcY = function(ofs) {
-  return this.y - ofs*ABCJS.write.spacing.STEP;
+Renderer.prototype.calcY = function(ofs) {
+  return this.y - ofs*spacing.STEP;
 };
 
 /**
  * Print @param {number} numLines. If there is 1 line it is the B line. Otherwise the bottom line is the E line.
  */
-ABCJS.write.Renderer.prototype.printStave = function (startx, endx, numLines) {
+Renderer.prototype.printStave = function (startx, endx, numLines) {
 	var klass = "top-line";
 	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
 	if (numLines === 1) {
@@ -661,7 +659,7 @@ ABCJS.write.Renderer.prototype.printStave = function (startx, endx, numLines) {
  *
  * @private
  */
-ABCJS.write.Renderer.prototype.addClasses = function (c) {
+Renderer.prototype.addClasses = function (c) {
 	var ret = [];
 	if (c.length > 0) ret.push(c);
 	if (this.lineNumber !== null) ret.push("l"+this.lineNumber);
@@ -670,7 +668,7 @@ ABCJS.write.Renderer.prototype.addClasses = function (c) {
 	return ret.join(' ');
 };
 
-ABCJS.write.Renderer.prototype.getFontAndAttr = function(type, klass) {
+Renderer.prototype.getFontAndAttr = function(type, klass) {
 	var font = this.abctune.formatting[type];
 	// Raphael deliberately changes the font units to pixels for some reason, so we need to change points to pixels here.
 	if (font)
@@ -685,7 +683,7 @@ ABCJS.write.Renderer.prototype.getFontAndAttr = function(type, klass) {
 	return { font: font, attr: attr };
 };
 
-ABCJS.write.Renderer.prototype.getTextSize = function(text, type, klass) {
+Renderer.prototype.getTextSize = function(text, type, klass) {
 	var hash = this.getFontAndAttr(type, klass);
 	var el = this.paper.text(0,0, text).attr(hash.attr);
 	var size = el.getBBox();
@@ -695,7 +693,7 @@ ABCJS.write.Renderer.prototype.getTextSize = function(text, type, klass) {
 	return size;
 };
 
-ABCJS.write.Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, centerVertically) {
+Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, centerVertically) {
 	var hash = this.getFontAndAttr(type, klass);
 	if (anchor)
 		hash.attr["text-anchor"] = anchor;
@@ -722,19 +720,19 @@ ABCJS.write.Renderer.prototype.renderText = function(x, y, text, type, klass, an
 	return el;
 };
 
-ABCJS.write.Renderer.prototype.moveY = function (em, numLines) {
+Renderer.prototype.moveY = function (em, numLines) {
 	if (numLines === undefined) numLines = 1;
 	this.y += em*numLines;
 };
 
-ABCJS.write.Renderer.prototype.skipSpaceY = function () {
+Renderer.prototype.skipSpaceY = function () {
 	this.y += this.space;
 };
 
 // Call with 'kind' being the font type to use,
 // if marginBottom === null then don't increment the Y after printing, otherwise that is the extra number of em's to leave below the line.
 // and alignment being "start", "middle", or "end".
-ABCJS.write.Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, marginBottom, alignment) {
+Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, marginBottom, alignment) {
 	if (str) {
 		if (marginTop)
 			this.moveY(marginTop);
@@ -752,20 +750,20 @@ ABCJS.write.Renderer.prototype.outputTextIf = function(x, str, kind, klass, marg
 	return [0,0];
 };
 
-ABCJS.write.Renderer.prototype.addInvisibleMarker = function (className) {
+Renderer.prototype.addInvisibleMarker = function (className) {
 	var dy = 0.35;
 	var fill = "rgba(0,0,0,0)";
 	var y = this.y;
 	y = Math.round(y);
 	var x1 = 0;
 	var x2 = 100;
-	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
+	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
 		x2, y+dy, x1, y+dy);
 	this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses(className), 'data-vertical': y }).toBack();
 };
 
 // For debugging, it is sometimes useful to know where you are vertically.
-ABCJS.write.Renderer.prototype.printHorizontalLine = function (width, vertical, comment) {
+Renderer.prototype.printHorizontalLine = function (width, vertical, comment) {
 	var dy = 0.35;
 	var fill = "rgba(0,0,255,.4)";
 	var y = this.y;
@@ -774,11 +772,11 @@ ABCJS.write.Renderer.prototype.printHorizontalLine = function (width, vertical, 
 	this.paper.text(10, y, ""+Math.round(y)).attr({"text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
 	var x1 = 50;
 	var x2 = width;
-	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
+	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
 		x2, y+dy, x1, y+dy);
 	this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
 	for (var i = 1; i < width/100; i++) {
-		pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", i*100-dy, y-5, i*100-dy, y+5,
+		pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", i*100-dy, y-5, i*100-dy, y+5,
 			i*100+dy, y-5, i*100+dy, y+5);
 		this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
 	}
@@ -786,23 +784,23 @@ ABCJS.write.Renderer.prototype.printHorizontalLine = function (width, vertical, 
 		this.paper.text(width+70, y, comment).attr({"text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
 };
 
-ABCJS.write.Renderer.prototype.printShadedBox = function (x, y, width, height, color, comment) {
+Renderer.prototype.printShadedBox = function (x, y, width, height, color, comment) {
 	var box = this.paper.rect(x, y, width, height).attr({fill: color, stroke: color });
 	if (comment)
 		this.paper.text(0, y+7, comment).attr({"text-anchor": "start", "font-size":"14px", fill: "rgba(0,0,255,.4)", stroke: "rgba(0,0,255,.4)" });
 	return box;
 };
 
-ABCJS.write.Renderer.prototype.printVerticalLine = function (x, y1, y2) {
+Renderer.prototype.printVerticalLine = function (x, y1, y2) {
 	var dy = 0.35;
 	var fill = "#00aaaa";
-	var pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x - dy, y1, x - dy, y2,
+	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x - dy, y1, x - dy, y2,
 			x + dy, y1, x + dy, y2);
 	this.paper.path().attr({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')}).toBack();
-	pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x - 20, y1, x - 20, y1+3,
+	pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x - 20, y1, x - 20, y1+3,
 		x, y1, x, y1+3);
 	this.paper.path().attr({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')}).toBack();
-	pathString = ABCJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x + 20, y2, x + 20, y2+3,
+	pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x + 20, y2, x + 20, y2+3,
 		x, y2, x, y2+3);
 	this.paper.path().attr({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')}).toBack();
 
@@ -811,7 +809,7 @@ ABCJS.write.Renderer.prototype.printVerticalLine = function (x, y1, y2) {
 /**
  * @private
  */
-ABCJS.write.Renderer.prototype.addToRegression = function (el) {
+Renderer.prototype.addToRegression = function (el) {
 	var box = el.getBBox();
 	//var str = "("+box.x+","+box.y+")["+box.width+","+box.height+"] "
 	var str = el.type + ' ' + box.toString() + ' ';
@@ -828,3 +826,5 @@ ABCJS.write.Renderer.prototype.addToRegression = function (el) {
 	str += "{ " +attrs.join(" ") + " }";
 	this.regressionLines.push(str);
 };
+
+module.exports = Renderer;

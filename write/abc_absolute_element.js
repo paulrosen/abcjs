@@ -14,18 +14,12 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS */
-
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
+var spacing = require('./abc_spacing');
 
 // duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
 // minspacing - spacing which must be taken on top of the width defined by the duration
 // type is a meta-type for the element. It is not necessary for drawing, but it is useful to make semantic sense of the element. For instance, it can be used in the element's class name.
-ABCJS.write.AbsoluteElement = function AbsoluteElement(abcelem, duration, minspacing, type, tuneNumber) {
+var AbsoluteElement = function AbsoluteElement(abcelem, duration, minspacing, type, tuneNumber) {
 	//console.log("Absolute:",abcelem, type);
 	this.tuneNumber = tuneNumber;
 	this.abcelem = abcelem;
@@ -66,7 +60,7 @@ ABCJS.write.AbsoluteElement = function AbsoluteElement(abcelem, duration, minspa
 // else on the line), this iterates through them and sets their pitch. By the time this is called, specialYResolved contains a
 // hash with the vertical placement (in pitch units) for each type.
 // TODO-PER: I think this needs to be separated by "above" and "below". How do we know that for dynamics at the point where they are being defined, though? We need a pass through all the relative elements to set "above" and "below".
-ABCJS.write.AbsoluteElement.prototype.setUpperAndLowerElements = function(specialYResolved) {
+AbsoluteElement.prototype.setUpperAndLowerElements = function(specialYResolved) {
 	// specialYResolved contains the actual pitch for each of the classes of elements.
 	for (var i = 0; i < this.children.length; i++) {
 		var child = this.children[i];
@@ -80,33 +74,33 @@ ABCJS.write.AbsoluteElement.prototype.setUpperAndLowerElements = function(specia
 	}
 };
 
-ABCJS.write.AbsoluteElement.prototype.getMinWidth = function () { // absolute space taken to the right of the note
+AbsoluteElement.prototype.getMinWidth = function () { // absolute space taken to the right of the note
 	return this.w;
 };
 
-ABCJS.write.AbsoluteElement.prototype.getExtraWidth = function () { // space needed to the left of the note
+AbsoluteElement.prototype.getExtraWidth = function () { // space needed to the left of the note
 	return -this.extraw;
 };
 
-ABCJS.write.AbsoluteElement.prototype.addExtra = function (extra) {
+AbsoluteElement.prototype.addExtra = function (extra) {
 	if (extra.dx<this.extraw) this.extraw = extra.dx;
 	this.extra[this.extra.length] = extra;
 	this.addChild(extra);
 };
 
-ABCJS.write.AbsoluteElement.prototype.addHead = function (head) {
+AbsoluteElement.prototype.addHead = function (head) {
 	if (head.dx<this.extraw) this.extraw = head.dx;
 	this.heads[this.heads.length] = head;
 	this.addRight(head);
 };
 
-ABCJS.write.AbsoluteElement.prototype.addRight = function (right) {
+AbsoluteElement.prototype.addRight = function (right) {
 	if (right.dx+right.w>this.w) this.w = right.dx+right.w;
 	this.right[this.right.length] = right;
 	this.addChild(right);
 };
 
-ABCJS.write.AbsoluteElement.prototype.addCentered = function (elem) {
+AbsoluteElement.prototype.addCentered = function (elem) {
 	var half = elem.w/2;
 	if (-half<this.extraw) this.extraw = -half;
 	this.extra[this.extra.length] = elem;
@@ -115,7 +109,7 @@ ABCJS.write.AbsoluteElement.prototype.addCentered = function (elem) {
 	this.addChild(elem);
 };
 
-ABCJS.write.AbsoluteElement.prototype.setLimit = function(member, child) {
+AbsoluteElement.prototype.setLimit = function(member, child) {
 	if (!child[member]) return;
 	if (!this.specialY[member])
 		this.specialY[member] = child[member];
@@ -123,7 +117,7 @@ ABCJS.write.AbsoluteElement.prototype.setLimit = function(member, child) {
 		this.specialY[member] = Math.max(this.specialY[member], child[member]);
 };
 
-ABCJS.write.AbsoluteElement.prototype.addChild = function (child) {
+AbsoluteElement.prototype.addChild = function (child) {
 	//console.log("Relative:",child);
 	child.parent = this;
 	this.children[this.children.length] = child;
@@ -142,7 +136,7 @@ ABCJS.write.AbsoluteElement.prototype.addChild = function (child) {
 	this.setLimit('dynamicHeightBelow', child);
 };
 
-ABCJS.write.AbsoluteElement.prototype.pushTop = function (top) {
+AbsoluteElement.prototype.pushTop = function (top) {
 	if (top !== undefined) {
 		if (this.top === undefined)
 			this.top = top;
@@ -151,7 +145,7 @@ ABCJS.write.AbsoluteElement.prototype.pushTop = function (top) {
 	}
 };
 
-ABCJS.write.AbsoluteElement.prototype.pushBottom = function (bottom) {
+AbsoluteElement.prototype.pushBottom = function (bottom) {
 	if (bottom !== undefined) {
 		if (this.bottom === undefined)
 			this.bottom = bottom;
@@ -160,22 +154,22 @@ ABCJS.write.AbsoluteElement.prototype.pushBottom = function (bottom) {
 	}
 };
 
-ABCJS.write.AbsoluteElement.prototype.setX = function (x) {
+AbsoluteElement.prototype.setX = function (x) {
 	this.x = x;
 	for (var i=0; i<this.children.length; i++)
 		this.children[i].setX(x);
 };
 
-ABCJS.write.AbsoluteElement.prototype.setHint = function () {
+AbsoluteElement.prototype.setHint = function () {
 	this.hint = true;
 };
 
-ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
+AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	this.elemset = renderer.paper.set();
 	if (this.invisible) return;
 	renderer.beginGroup();
 	for (var i=0; i<this.children.length; i++) {
-		if (ABCJS.write.debugPlacement) {
+		if (/*ABCJS.write.debugPlacement*/false) {
 			if (this.children[i].klass === 'ornament')
 				renderer.printShadedBox(this.x, renderer.calcY(this.children[i].top), this.w, renderer.calcY(this.children[i].bottom)-renderer.calcY(this.children[i].top), "rgba(0,0,200,0.3)");
 		}
@@ -186,7 +180,7 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 		this.setClass("mark", "", "#00ff00");
 	if (this.hint)
 		this.setClass("abcjs-hint", "", null);
-	var color = ABCJS.write.debugPlacement ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0)"; // Create transparent box that encompasses the element, and not so transparent to debug it.
+	var color = /*ABCJS.write.debugPlacement*/false ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0)"; // Create transparent box that encompasses the element, and not so transparent to debug it.
 	var target = renderer.printShadedBox(this.x, renderer.calcY(this.top), this.w, renderer.calcY(this.bottom)-renderer.calcY(this.top), color);
 	var self = this;
 	var controller = renderer.controller;
@@ -196,7 +190,7 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	});
 	this.abcelem.abselem = this;
 
-	var spacing = ABCJS.write.spacing.STEP;
+	var step = spacing.STEP;
 
 	var start = function () {
 			// storing original relative coordinates
@@ -204,14 +198,14 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 		},
 		move = function (dx, dy) {
 			// move will be called with dx and dy
-			dy = Math.round(dy/spacing)*spacing;
+			dy = Math.round(dy/step)*step;
 			this.translate(0, -this.dy);
 			this.dy = dy;
 			this.translate(0,this.dy);
 		},
 		up = function () {
 			if (self.abcelem.pitches) {
-				var delta = -Math.round(this.dy / spacing);
+				var delta = -Math.round(this.dy / step);
 				self.abcelem.pitches[0].pitch += delta;
 				self.abcelem.pitches[0].verticalPos += delta;
 				controller.notifyChange();
@@ -221,9 +215,9 @@ ABCJS.write.AbsoluteElement.prototype.draw = function (renderer, bartop) {
 		this.elemset.drag(move, start, up);
 };
 
-ABCJS.write.AbsoluteElement.prototype.isIE=/*@cc_on!@*/false;//IE detector
+AbsoluteElement.prototype.isIE=/*@cc_on!@*/false;//IE detector
 
-ABCJS.write.AbsoluteElement.prototype.setClass = function (addClass, removeClass, color) {
+AbsoluteElement.prototype.setClass = function (addClass, removeClass, color) {
 	if (color !== null)
 		this.elemset.attr({fill:color});
 	if (!this.isIE) {
@@ -243,7 +237,7 @@ ABCJS.write.AbsoluteElement.prototype.setClass = function (addClass, removeClass
 	}
 };
 
-ABCJS.write.AbsoluteElement.prototype.highlight = function (klass, color) {
+AbsoluteElement.prototype.highlight = function (klass, color) {
 	if (klass === undefined)
 		klass = "note_selected";
 	if (color === undefined)
@@ -251,7 +245,7 @@ ABCJS.write.AbsoluteElement.prototype.highlight = function (klass, color) {
 	this.setClass(klass, "", color);
 };
 
-ABCJS.write.AbsoluteElement.prototype.unhighlight = function (klass, color) {
+AbsoluteElement.prototype.unhighlight = function (klass, color) {
 	if (klass === undefined)
 		klass = "note_selected";
 	if (color === undefined)
@@ -259,3 +253,4 @@ ABCJS.write.AbsoluteElement.prototype.unhighlight = function (klass, color) {
 	this.setClass("", klass, color);
 };
 
+module.exports = AbsoluteElement;

@@ -14,30 +14,30 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS */
+var AbsoluteElement = require('./abc_absolute_element');
+var glyphs = require('./abc_glyphs');
+var RelativeElement = require('./abc_relative_element');
 
 var parseCommon = require('../parse/abc_common');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
+var createKeySignature;
 
 (function() {
 	"use strict";
 
-	ABCJS.write.createKeySignature = function(elem, tuneNumber) {
+	createKeySignature = function(elem, tuneNumber) {
 		if (!elem.accidentals || elem.accidentals.length === 0)
 			return null;
-		var abselem = new ABCJS.write.AbsoluteElement(elem, 0, 10, 'staff-extra', tuneNumber);
+		var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra', tuneNumber);
 		var dx = 0;
 		parseCommon.each(elem.accidentals, function(acc) {
 			var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
 			//var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
-			abselem.addRight(new ABCJS.write.RelativeElement(symbol, dx, ABCJS.write.glyphs.getSymbolWidth(symbol), acc.verticalPos, {thickness: ABCJS.write.glyphs.symbolHeightInPitches(symbol)}));
-			dx += ABCJS.write.glyphs.getSymbolWidth(symbol) + 2;
+			abselem.addRight(new RelativeElement(symbol, dx, glyphs.getSymbolWidth(symbol), acc.verticalPos, {thickness: glyphs.symbolHeightInPitches(symbol)}));
+			dx += glyphs.getSymbolWidth(symbol) + 2;
 		}, this);
 		return abselem;
 	};
 })();
+
+module.exports = createKeySignature;

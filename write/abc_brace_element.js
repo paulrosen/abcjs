@@ -14,38 +14,31 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS */
-
-if (!window.ABCJS)
-    window.ABCJS = {};
-
-
-if (!window.ABCJS.write)
-    window.ABCJS.write = {};
-
-ABCJS.write.BraceElem = function BraceElem() {
+var BraceElem = function BraceElem() {
     this.length = 1;
 };
 
-ABCJS.write.BraceElem.prototype.increaseStavesIncluded = function() {
+BraceElem.prototype.increaseStavesIncluded = function() {
     this.length++;
 };
 
-ABCJS.write.BraceElem.prototype.setLocation = function(x) {
+BraceElem.prototype.setLocation = function(x) {
 	this.x = x;
 };
 
-ABCJS.write.BraceElem.prototype.getWidth = function() {
+BraceElem.prototype.getWidth = function() {
 	return 10; // TODO-PER: right now the drawing function doesn't vary the width at all. If it does in the future then this will change.
 };
 
-ABCJS.write.BraceElem.prototype.layout = function (renderer, top, bottom) {
+BraceElem.prototype.layout = function (renderer, top, bottom) {
     this.startY = top;
     this.endY = bottom;
 };
 
-ABCJS.write.BraceElem.prototype.draw = function (renderer, top, bottom) {
+BraceElem.prototype.draw = function (renderer, top, bottom) {
     this.layout(renderer, top, bottom);
     renderer.drawBrace(this.x,this.startY, this.endY);
 
 };
+
+module.exports = BraceElem;

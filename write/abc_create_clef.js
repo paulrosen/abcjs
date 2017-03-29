@@ -14,21 +14,19 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS */
+var AbsoluteElement = require('./abc_absolute_element');
+var glyphs = require('./abc_glyphs');
+var RelativeElement = require('./abc_relative_element');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
+var createClef;
 
 (function() {
 	"use strict";
 
-	ABCJS.write.createClef = function(elem, tuneNumber) {
+	createClef = function(elem, tuneNumber) {
 		var clef;
 		var octave = 0;
-		var abselem = new ABCJS.write.AbsoluteElement(elem,0,10, 'staff-extra', tuneNumber);
+		var abselem = new AbsoluteElement(elem,0,10, 'staff-extra', tuneNumber);
 		switch (elem.type) {
 			case "treble": clef = "clefs.G"; break;
 			case "tenor": clef="clefs.C"; break;
@@ -44,14 +42,14 @@ if (!window.ABCJS.write)
 			case 'alto-8': clef="clefs.C"; octave = -1; break;
 			case 'none': return null;
 			case 'perc': clef="clefs.perc"; break;
-			default: abselem.addChild(new ABCJS.write.RelativeElement("clef="+elem.type, 0, 0, undefined, {type:"debug"}));
+			default: abselem.addChild(new RelativeElement("clef="+elem.type, 0, 0, undefined, {type:"debug"}));
 		}
 		// if (elem.verticalPos) {
 		// pitch = elem.verticalPos;
 		// }
 		var dx =5;
 		if (clef) {
-			abselem.addRight(new ABCJS.write.RelativeElement(clef, dx, ABCJS.write.glyphs.getSymbolWidth(clef), elem.clefPos));
+			abselem.addRight(new RelativeElement(clef, dx, glyphs.getSymbolWidth(clef), elem.clefPos));
 
 			if (clef === 'clefs.G') {
 				abselem.top = 13;
@@ -62,8 +60,8 @@ if (!window.ABCJS.write)
 			}
 			if (octave !== 0) {
 				var scale = 2 / 3;
-				var adjustspacing = (ABCJS.write.glyphs.getSymbolWidth(clef) - ABCJS.write.glyphs.getSymbolWidth("8") * scale) / 2;
-				abselem.addRight(new ABCJS.write.RelativeElement("8", dx + adjustspacing, ABCJS.write.glyphs.getSymbolWidth("8") * scale, (octave > 0) ? abselem.top + 3 : abselem.bottom - 1, {
+				var adjustspacing = (glyphs.getSymbolWidth(clef) - glyphs.getSymbolWidth("8") * scale) / 2;
+				abselem.addRight(new RelativeElement("8", dx + adjustspacing, glyphs.getSymbolWidth("8") * scale, (octave > 0) ? abselem.top + 3 : abselem.bottom - 1, {
 					scalex: scale,
 					scaley: scale
 				}));
@@ -74,3 +72,5 @@ if (!window.ABCJS.write)
 	};
 
 })();
+
+module.exports = createClef;

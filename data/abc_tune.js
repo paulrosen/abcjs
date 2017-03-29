@@ -14,10 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global window */
-
 var parseCommon = require('../parse/abc_common');
 var parseKeyVoice = require('../parse/abc_parse_key_voice');
+var spacing = require('../write/abc_spacing');
 
 /**
  * This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
@@ -842,10 +841,10 @@ var Tune = function() {
 			var voices = group.voices;
 			var firstStaff = group.staffs[0];
 			var middleC = firstStaff.absoluteY;
-			var top = middleC - firstStaff.top * ABCJS.write.spacing.STEP;
+			var top = middleC - firstStaff.top * spacing.STEP;
 			var lastStaff = group.staffs[group.staffs.length - 1];
 			middleC = lastStaff.absoluteY;
-			var bottom = middleC - lastStaff.bottom * ABCJS.write.spacing.STEP;
+			var bottom = middleC - lastStaff.bottom * spacing.STEP;
 			var height = bottom - top;
 			var maxVoiceTime = 0;
 			// Put in the notes for all voices, then sort them, then remove duplicates
@@ -912,10 +911,10 @@ var Tune = function() {
 		var voices = group.voices;
 		var firstStaff = group.staffs[0];
 		var middleC = firstStaff.absoluteY;
-		var top = middleC - firstStaff.top*ABCJS.write.spacing.STEP;
+		var top = middleC - firstStaff.top*spacing.STEP;
 		var lastStaff = group.staffs[group.staffs.length-1];
 		middleC = lastStaff.absoluteY;
-		var bottom = middleC - lastStaff.bottom*ABCJS.write.spacing.STEP;
+		var bottom = middleC - lastStaff.bottom*spacing.STEP;
 		var height = bottom - top;
 		return { top: top, height: height };
 	}

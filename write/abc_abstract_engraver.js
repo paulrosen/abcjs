@@ -14,20 +14,33 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-/*global window, ABCJS */
+/*global window */
+
+var AbsoluteElement = require('./abc_absolute_element');
+var BeamElem = require('./abc_beam_element');
+var BraceElem = require('./abc_brace_element');
+var createClef = require('./abc_create_clef');
+var createKeySignature = require('./abc_create_key_signature');
+var createTimeSignature = require('./abc_create_time_signature');
+var Decoration = require('./abc_decoration');
+var EndingElem = require('./abc_ending_element');
+var glyphs = require('./abc_glyphs');
+var RelativeElement = require('./abc_relative_element');
+var spacing = require('./abc_spacing');
+var StaffGroupElement = require('./abc_staff_group_element');
+var TempoElement = require('./abc_tempo_element');
+var TieElem = require('./abc_tie_element');
+var TripletElem = require('./abc_triplet_element');
+var VoiceElement = require('./abc_voice_element');
 
 var parseCommon = require('../parse/abc_common');
 
-if (!window.ABCJS)
-        window.ABCJS = {};
-
-if (!window.ABCJS.write)
-        window.ABCJS.write = {};
+var AbstractEngraver;
 
 (function() {
 	"use strict";
 
-ABCJS.write.getDuration = function(elem) {
+var getDuration = function(elem) {
   var d = 0;
   if (elem.duration) {
     d = elem.duration;
@@ -35,18 +48,10 @@ ABCJS.write.getDuration = function(elem) {
   return d;
 };
 
-ABCJS.write.getDurlog = function(duration) {
-        // TODO-PER: This is a hack to prevent a Chrome lockup. Duration should have been defined already,
-        // but there's definitely a case where it isn't. [Probably something to do with triplets.]
-        if (duration === undefined) {
-                return 0;
-        }
-//        console.log("getDurlog: " + duration);
-  return Math.floor(Math.log(duration)/Math.log(2));
-};
+var hint = false;
 
-ABCJS.write.AbstractEngraver = function(bagpipes, renderer, tuneNumber) {
-	this.decoration = new ABCJS.write.Decoration();
+AbstractEngraver = function(bagpipes, renderer, tuneNumber) {
+	this.decoration = new Decoration();
 	this.renderer = renderer;
 	this.tuneNumber = tuneNumber;
   this.isBagpipes = bagpipes;
@@ -60,7 +65,7 @@ ABCJS.write.AbstractEngraver = function(bagpipes, renderer, tuneNumber) {
 	this.reset();
 };
 
-ABCJS.write.AbstractEngraver.prototype.reset = function() {
+AbstractEngraver.prototype.reset = function() {
 	this.slurs = {};
 	this.ties = [];
 	this.slursbyvoice = {};
@@ -86,39 +91,39 @@ ABCJS.write.AbstractEngraver.prototype.reset = function() {
 	this.voice = undefined;
 };
 
-ABCJS.write.AbstractEngraver.prototype.setStemHeight = function(heightInPixels) {
-	this.stemHeight = heightInPixels / ABCJS.write.spacing.STEP;
+AbstractEngraver.prototype.setStemHeight = function(heightInPixels) {
+	this.stemHeight = heightInPixels / spacing.STEP;
 };
 
-ABCJS.write.AbstractEngraver.prototype.getCurrentVoiceId = function() {
+AbstractEngraver.prototype.getCurrentVoiceId = function() {
   return "s"+this.s+"v"+this.v;
 };
 
-ABCJS.write.AbstractEngraver.prototype.pushCrossLineElems = function() {
+AbstractEngraver.prototype.pushCrossLineElems = function() {
   this.slursbyvoice[this.getCurrentVoiceId()] = this.slurs;
   this.tiesbyvoice[this.getCurrentVoiceId()] = this.ties;
   this.endingsbyvoice[this.getCurrentVoiceId()] = this.partstartelem;
 };
 
-ABCJS.write.AbstractEngraver.prototype.popCrossLineElems = function() {
+AbstractEngraver.prototype.popCrossLineElems = function() {
   this.slurs = this.slursbyvoice[this.getCurrentVoiceId()] || {};
   this.ties = this.tiesbyvoice[this.getCurrentVoiceId()] || [];
   this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId()];
 };
 
-ABCJS.write.AbstractEngraver.prototype.getElem = function() {
+AbstractEngraver.prototype.getElem = function() {
   if (this.abcline.length <= this.pos)
     return null;
   return this.abcline[this.pos];
 };
 
-ABCJS.write.AbstractEngraver.prototype.getNextElem = function() {
+AbstractEngraver.prototype.getNextElem = function() {
         if (this.abcline.length <= this.pos+1)
                 return null;
     return this.abcline[this.pos+1];
 };
 
-	ABCJS.write.AbstractEngraver.prototype.containsLyrics = function(staves) {
+	AbstractEngraver.prototype.containsLyrics = function(staves) {
 		for (var i = 0; i < staves.length; i++) {
 			for (var j = 0; j < staves[i].voices.length; j++) {
 				for (var k = 0; k < staves[i].voices[j].length; k++) {
@@ -134,25 +139,25 @@ ABCJS.write.AbstractEngraver.prototype.getNextElem = function() {
 		}
 	};
 
-ABCJS.write.AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
+AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
     this.minY = 2; // PER: This is the lowest that any note reaches. It will be used to set the dynamics row.
 	// See if there are any lyrics on this line.
 	this.containsLyrics(staffs);
-  this.staffgroup = new ABCJS.write.StaffGroupElement();
+  this.staffgroup = new StaffGroupElement();
 	this.tempoSet = false;
   for (this.s = 0; this.s < staffs.length; this.s++) {
-	  if (ABCJS.write.hint)
+	  if (hint)
 		  this.restoreState();
-	  ABCJS.write.hint = false;
+	  hint = false;
     this.createABCStaff(staffs[this.s], tempo);
   }
   return this.staffgroup;
 };
 
-ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo) {
+AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo) {
 // If the tempo is passed in, then the first element should get the tempo attached to it.
   for (this.v = 0; this.v < abcstaff.voices.length; this.v++) {
-    this.voice = new ABCJS.write.VoiceElement(this.v,abcstaff.voices.length);
+    this.voice = new VoiceElement(this.v,abcstaff.voices.length);
     if (this.v===0) {
       this.voice.barfrom = (abcstaff.connectBarLines==="start" || abcstaff.connectBarLines==="continue");
       this.voice.barto = (abcstaff.connectBarLines==="continue" || abcstaff.connectBarLines==="end");
@@ -160,20 +165,20 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
       this.voice.duplicate = true; // bar lines and other duplicate info need not be created
     }
     if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
-	  var clef = ABCJS.write.createClef(abcstaff.clef, this.tuneNumber);
+	  var clef = createClef(abcstaff.clef, this.tuneNumber);
 	  if (clef) {
 		  if (this.v ===0 && abcstaff.barNumber) {
 			  this.addMeasureNumber(abcstaff.barNumber, clef);
 		  }
 		  this.voice.addChild(clef);
 	  }
-	  var keySig = ABCJS.write.createKeySignature(abcstaff.key, this.tuneNumber);
+	  var keySig = createKeySignature(abcstaff.key, this.tuneNumber);
 	  if (keySig) {
 		  this.voice.addChild(keySig);
 		  this.startlimitelem = keySig; // limit ties here
 	  }
     if (abcstaff.meter) {
-		var ts = ABCJS.write.createTimeSignature(abcstaff.meter, this.tuneNumber);
+		var ts = createTimeSignature(abcstaff.meter, this.tuneNumber);
 		this.voice.addChild(ts);
 		this.startlimitelem = ts; // limit ties here
 	}
@@ -187,7 +192,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
             //So basically this keeps incrementing the number of staff surrounded by the brace until it sees "end".
             //This then gets processed in abc_staff_group_element.js, so that it will have the correct top and bottom coordinates for the brace.
 			if(abcstaff.brace === "start"){
-				this.staffgroup.brace = new ABCJS.write.BraceElem(1, true);
+				this.staffgroup.brace = new BraceElem(1, true);
 			}
 			else if(abcstaff.brace === "end" && this.staffgroup.brace) {
 				this.staffgroup.brace.increaseStavesIncluded();
@@ -198,24 +203,24 @@ ABCJS.write.AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo
   }
 };
 
-ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline, tempo) {
+AbstractEngraver.prototype.createABCVoice = function(abcline, tempo) {
   this.popCrossLineElems();
   this.stemdir = (this.isBagpipes)?"down":null;
   this.abcline = abcline;
   if (this.partstartelem) {
-    this.partstartelem = new ABCJS.write.EndingElem("", null, null);
+    this.partstartelem = new EndingElem("", null, null);
     this.voice.addOther(this.partstartelem);
   }
   for (var slur in this.slurs) {
     if (this.slurs.hasOwnProperty(slur)) {
-      this.slurs[slur]= new ABCJS.write.TieElem(null, null, this.slurs[slur].above, this.slurs[slur].force, false);
-		if (ABCJS.write.hint) this.slurs[slur].setHint();
+      this.slurs[slur]= new TieElem(null, null, this.slurs[slur].above, this.slurs[slur].force, false);
+		if (hint) this.slurs[slur].setHint();
         this.voice.addOther(this.slurs[slur]);
     }
   }
   for (var i=0; i<this.ties.length; i++) {
-    this.ties[i]=new ABCJS.write.TieElem(null, null, this.ties[i].above, this.ties[i].force, true);
-	  if (ABCJS.write.hint) this.ties[i].setHint();
+    this.ties[i]=new TieElem(null, null, this.ties[i].above, this.ties[i].force, true);
+	  if (hint) this.ties[i].setHint();
     this.voice.addOther(this.ties[i]);
   }
 
@@ -225,7 +230,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline, tempo)
     for (i=0; i<abselems.length; i++) {
       if (!this.tempoSet && tempo && !tempo.suppress) {
         this.tempoSet = true;
-        abselems[i].addChild(new ABCJS.write.TempoElement(tempo, this.tuneNumber));
+        abselems[i].addChild(new TempoElement(tempo, this.tuneNumber));
       }
       this.voice.addChild(abselems[i]);
     }
@@ -234,22 +239,22 @@ ABCJS.write.AbstractEngraver.prototype.createABCVoice = function(abcline, tempo)
   this.pushCrossLineElems();
 };
 
-	ABCJS.write.AbstractEngraver.prototype.saveState = function() {
+	AbstractEngraver.prototype.saveState = function() {
 		this.tiesSave = parseCommon.cloneArray(this.ties);
 		this.slursSave = parseCommon.cloneHashOfHash(this.slurs);
 		this.slursbyvoiceSave = parseCommon.cloneHashOfHash(this.slursbyvoice);
 		this.tiesbyvoiceSave = parseCommon.cloneHashOfArrayOfHash(this.tiesbyvoice);
 	};
 
-	ABCJS.write.AbstractEngraver.prototype.restoreState = function() {
+	AbstractEngraver.prototype.restoreState = function() {
 		this.ties = parseCommon.cloneArray(this.tiesSave);
 		this.slurs = parseCommon.cloneHashOfHash(this.slursSave);
 		this.slursbyvoice = parseCommon.cloneHashOfHash(this.slursbyvoiceSave);
 		this.tiesbyvoice = parseCommon.cloneHashOfArrayOfHash(this.tiesbyvoiceSave);
 	};
 
-// return an array of ABCJS.write.AbsoluteElement
-ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
+// return an array of AbsoluteElement
+AbstractEngraver.prototype.createABCElement = function() {
   var elemset = [];
   var elem = this.getElem();
   switch (elem.el_type) {
@@ -261,17 +266,17 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "meter":
-    elemset[0] = ABCJS.write.createTimeSignature(elem, this.tuneNumber);
+    elemset[0] = createTimeSignature(elem, this.tuneNumber);
 	  this.startlimitelem = elemset[0]; // limit ties here
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "clef":
-    elemset[0] = ABCJS.write.createClef(elem, this.tuneNumber);
+    elemset[0] = createClef(elem, this.tuneNumber);
 	  if (!elemset[0]) return null;
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "key":
-	  var absKey = ABCJS.write.createKeySignature(elem, this.tuneNumber);
+	  var absKey = createKeySignature(elem, this.tuneNumber);
 	  if (absKey) {
 		  elemset[0] = absKey;
 		  this.startlimitelem = elemset[0]; // limit ties here
@@ -282,14 +287,14 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
     this.stemdir=elem.direction;
     break;
   case "part":
-    var abselem = new ABCJS.write.AbsoluteElement(elem,0,0, 'part', this.tuneNumber);
+    var abselem = new AbsoluteElement(elem,0,0, 'part', this.tuneNumber);
 	  var dim = this.renderer.getTextSize(elem.title, 'partsfont', "part");
-    abselem.addChild(new ABCJS.write.RelativeElement(elem.title, 0, 0, undefined, {type:"part", height: dim.height/ABCJS.write.spacing.STEP}));
+    abselem.addChild(new RelativeElement(elem.title, 0, 0, undefined, {type:"part", height: dim.height/spacing.STEP}));
     elemset[0] = abselem;
     break;
   case "tempo":
-    var abselem3 = new ABCJS.write.AbsoluteElement(elem,0,0, 'tempo', this.tuneNumber);
-    abselem3.addChild(new ABCJS.write.TempoElement(elem, this.tuneNumber));
+    var abselem3 = new AbsoluteElement(elem,0,0, 'tempo', this.tuneNumber);
+    abselem3.addChild(new TempoElement(elem, this.tuneNumber));
     elemset[0] = abselem3;
     break;
 	  case "style":
@@ -299,7 +304,7 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
 			  this.style = elem.head;
 		  break;
 	  case "hint":
-		  ABCJS.write.hint = true;
+		  hint = true;
 		  this.saveState();
 		  break;
 	  case "midi":
@@ -307,18 +312,18 @@ ABCJS.write.AbstractEngraver.prototype.createABCElement = function() {
 		break;
 
   default:
-    var abselem2 = new ABCJS.write.AbsoluteElement(elem,0,0, 'unsupported', this.tuneNumber);
-    abselem2.addChild(new ABCJS.write.RelativeElement("element type "+elem.el_type, 0, 0, undefined, {type:"debug"}));
+    var abselem2 = new AbsoluteElement(elem,0,0, 'unsupported', this.tuneNumber);
+    abselem2.addChild(new RelativeElement("element type "+elem.el_type, 0, 0, undefined, {type:"debug"}));
     elemset[0] = abselem2;
   }
 
   return elemset;
 };
 
-ABCJS.write.AbstractEngraver.prototype.calcBeamDir = function() {
+AbstractEngraver.prototype.calcBeamDir = function() {
 	if (this.stemdir) // If the user or voice is forcing the stem direction, we already know the answer.
 		return this.stemdir;
-	var beamelem = new ABCJS.write.BeamElem(this.stemHeight, this.stemdir);
+	var beamelem = new BeamElem(this.stemHeight, this.stemdir);
 	// PER: need two passes: the first one decides if the stems are up or down.
 	var oldPos = this.pos;
 	var abselem;
@@ -334,13 +339,13 @@ ABCJS.write.AbstractEngraver.prototype.calcBeamDir = function() {
 	return dir ? "up" : "down";
 };
 
-ABCJS.write.AbstractEngraver.prototype.createBeam = function() {
+AbstractEngraver.prototype.createBeam = function() {
   var abselemset = [];
 
   if (this.getElem().startBeam && !this.getElem().endBeam) {
 	  var dir = this.calcBeamDir();
-         var beamelem = new ABCJS.write.BeamElem(this.stemHeight, dir);
-	  if (ABCJS.write.hint) beamelem.setHint();
+         var beamelem = new BeamElem(this.stemHeight, dir);
+	  if (hint) beamelem.setHint();
          var oldDir = this.stemdir;
          this.stemdir = dir;
 	  while (this.getElem()) {
@@ -370,7 +375,7 @@ ABCJS.write.AbstractEngraver.prototype.createBeam = function() {
   return abselemset;
 };
 
-ABCJS.write.sortPitch = function(elem) {
+var sortPitch = function(elem) {
   var sorted;
   do {
     sorted = true;
@@ -385,27 +390,27 @@ ABCJS.write.sortPitch = function(elem) {
   } while (!sorted);
 };
 
-ABCJS.write.ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLedgers, dir, dx, scale) {
+var ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLedgers, dir, dx, scale) {
 	for (var i=maxPitch; i>11; i--) {
 		if (i%2===0 && !isRest) {
-			abselem.addChild(new ABCJS.write.RelativeElement(null, dx, (ABCJS.write.glyphs.getSymbolWidth(c)+4)*scale, i, {type:"ledger"}));
+			abselem.addChild(new RelativeElement(null, dx, (glyphs.getSymbolWidth(c)+4)*scale, i, {type:"ledger"}));
 		}
 	}
 
 	for (i=minPitch; i<1; i++) {
 		if (i%2===0 && !isRest) {
-			abselem.addChild(new ABCJS.write.RelativeElement(null, dx, (ABCJS.write.glyphs.getSymbolWidth(c)+4)*scale, i, {type:"ledger"}));
+			abselem.addChild(new RelativeElement(null, dx, (glyphs.getSymbolWidth(c)+4)*scale, i, {type:"ledger"}));
 		}
 	}
 
 	for (i = 0; i < additionalLedgers.length; i++) { // PER: draw additional ledgers
-		var ofs = ABCJS.write.glyphs.getSymbolWidth(c);
+		var ofs = glyphs.getSymbolWidth(c);
 		if (dir === 'down') ofs = -ofs;
-		abselem.addChild(new ABCJS.write.RelativeElement(null, ofs+dx, (ABCJS.write.glyphs.getSymbolWidth(c)+4)*scale, additionalLedgers[i], {type:"ledger"}));
+		abselem.addChild(new RelativeElement(null, ofs+dx, (glyphs.getSymbolWidth(c)+4)*scale, additionalLedgers[i], {type:"ledger"}));
 	}
 };
 
-ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //stem presence: true for drawing stemless notehead
+AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var grace= null;
   this.roomtaken = 0; // room needed to the left of the note
@@ -418,7 +423,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   var p, i, pp;
   var width, p1, p2, dx;
 
-  var duration = ABCJS.write.getDuration(elem);
+  var duration = getDuration(elem);
 	var zeroDuration = false;
   if (duration === 0) { zeroDuration = true; duration = 0.25; nostem = true; }        //PER: zero duration will draw a quarter note head.
   var durlog = Math.floor(Math.log(duration)/Math.log(2)); //TODO use getDurlog
@@ -435,8 +440,8 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   }
 
 
-  var abselem = new ABCJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1, 'note', this.tuneNumber);
-  if (ABCJS.write.hint) abselem.setHint();
+  var abselem = new AbsoluteElement(elem, duration * this.tripletmultiplier, 1, 'note', this.tuneNumber);
+  if (hint) abselem.setHint();
 
   if (elem.rest) {
     var restpitch = 7;
@@ -481,7 +486,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     this.roomtakenright = Math.max(this.roomtakenright,this.dotshiftx);
 
   } else {
-         ABCJS.write.sortPitch(elem);
+         sortPitch(elem);
 
     // determine averagepitch, minpitch, maxpitch and stem direction
     var sum=0;
@@ -516,9 +521,9 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
           additionalLedgers.push(curr.verticalPos - (curr.verticalPos%2));
         }
         if (dir==="down") {
-         this.roomtaken = ABCJS.write.glyphs.getSymbolWidth(noteSymbol)+2;
+         this.roomtaken = glyphs.getSymbolWidth(noteSymbol)+2;
         } else {
-         dotshiftx = ABCJS.write.glyphs.getSymbolWidth(noteSymbol)+2;
+         dotshiftx = glyphs.getSymbolWidth(noteSymbol)+2;
         }
       }
     }
@@ -598,7 +603,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
 			else
 				p1 += 1;
 		}
-      abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+      abselem.addExtra(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
         this.minY = Math.min(p1, this.minY);
         this.minY = Math.min(p2, this.minY);
     }
@@ -612,7 +617,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
       });
 	  var lyricDim = this.renderer.getTextSize(lyricStr, 'vocalfont', "abc-lyric");
 	  var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
-    abselem.addCentered(new ABCJS.write.RelativeElement(lyricStr, 0, lyricDim.width, undefined, {type:"lyric", position: position, height: lyricDim.height / ABCJS.write.spacing.STEP }));
+    abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, {type:"lyric", position: position, height: lyricDim.height / spacing.STEP }));
   }
 
   if (!dontDraw && elem.gracenotes !== undefined) {
@@ -620,8 +625,8 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
     var graceScaleStem = 3.5/5; // TODO-PER: empirically found constant.
     var gracebeam = null;
     if (elem.gracenotes.length>1) {
-      gracebeam = new ABCJS.write.BeamElem(this.stemHeight*graceScaleStem, "grace",this.isBagpipes);
-		if (ABCJS.write.hint) gracebeam.setHint();
+      gracebeam = new BeamElem(this.stemHeight*graceScaleStem, "grace",this.isBagpipes);
+		if (hint) gracebeam.setHint();
 		gracebeam.mainNote = abselem;	// this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
     }
 
@@ -644,7 +649,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
                 if (elem.gracenotes[i].acciaccatura) {
                         var pos = elem.gracenotes[i].verticalPos+7*gracescale;        // the same formula that determines the flag position.
                         var dAcciaccatura = gracebeam ? 5 : 6;        // just an offset to make it line up correctly.
-                        abselem.addRight(new ABCJS.write.RelativeElement("flags.ugrace", -graceoffsets[i]+dAcciaccatura, 0, pos, {scalex:gracescale, scaley: gracescale}));
+                        abselem.addRight(new RelativeElement("flags.ugrace", -graceoffsets[i]+dAcciaccatura, 0, pos, {scalex:gracescale, scaley: gracescale}));
                 }
       if (gracebeam) { // give the beam the necessary info
           var graceDuration = elem.gracenotes[i].duration / 2;
@@ -657,13 +662,13 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
         p2 = gracepitch+7*gracescale;
         dx = grace.dx + grace.w;
         width = -0.6;
-        abselem.addExtra(new ABCJS.write.RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+        abselem.addExtra(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
       }
-		ABCJS.write.ledgerLines(abselem, gracepitch, gracepitch, false, "noteheads.quarter", [], true, grace.dx-1, 0.6);
+		ledgerLines(abselem, gracepitch, gracepitch, false, "noteheads.quarter", [], true, grace.dx-1, 0.6);
 
       if (i===0 && !this.isBagpipes && !(elem.rest && (elem.rest.type==="spacer"||elem.rest.type==="invisible"))) {
       	var isTie = (elem.gracenotes.length === 1 && grace.pitch === notehead.pitch);
-      	this.voice.addOther(new ABCJS.write.TieElem(grace, notehead, false, true, isTie));
+      	this.voice.addOther(new TieElem(grace, notehead, false, true, isTie));
 	  }
     }
 
@@ -677,11 +682,11 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
   }
 
   if (elem.barNumber) {
-    abselem.addChild(new ABCJS.write.RelativeElement(elem.barNumber, -10, 0, 0, {type:"barNumber"}));
+    abselem.addChild(new RelativeElement(elem.barNumber, -10, 0, 0, {type:"barNumber"}));
   }
 
   // ledger lines
-	ABCJS.write.ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, c, additionalLedgers, dir, -2, 1);
+	ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, c, additionalLedgers, dir, -2, 1);
 
 	var chordMargin = 8; // If there are chords next to each other, this is how close they can get.
   if (elem.chord !== undefined) {
@@ -690,35 +695,35 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
       var y;
 		var dim = this.renderer.getTextSize(elem.chord[i].name, 'annotationfont', "annotation");
 		var chordWidth = dim.width;
-		var chordHeight = dim.height / ABCJS.write.spacing.STEP;
+		var chordHeight = dim.height / spacing.STEP;
       switch (elem.chord[i].position) {
       case "left":
         this.roomtaken+=chordWidth+7;
         x = -this.roomtaken;        // TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
-        abselem.addExtra(new ABCJS.write.RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
+        abselem.addExtra(new RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
         break;
       case "right":
         this.roomtakenright+=4;
         x = this.roomtakenright;// TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
-        abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
+        abselem.addRight(new RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
         break;
       case "below":
 		  // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
                          var eachLine = elem.chord[i].name.split("\n");
                          for (var ii = 0; ii < eachLine.length; ii++) {
-                                abselem.addRight(new ABCJS.write.RelativeElement(eachLine[ii], x, chordWidth+chordMargin, undefined, {type:"text", position: "below", height: chordHeight}));
+                                abselem.addRight(new RelativeElement(eachLine[ii], x, chordWidth+chordMargin, undefined, {type:"text", position: "below", height: chordHeight}));
                          }
     break;
 		case "above":
 			// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-			abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, 0, chordWidth+chordMargin, undefined, {type: "text", height: chordHeight}));
+			abselem.addRight(new RelativeElement(elem.chord[i].name, 0, chordWidth+chordMargin, undefined, {type: "text", height: chordHeight}));
 			break;
       default:
 		if (elem.chord[i].rel_position) {
-			var relPositionY = elem.chord[i].rel_position.y + 3*ABCJS.write.spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
-			abselem.addChild(new ABCJS.write.RelativeElement(elem.chord[i].name, x + elem.chord[i].rel_position.x, 0, elem.minpitch + relPositionY / ABCJS.write.spacing.STEP, {type: "text", height: chordHeight}));
+			var relPositionY = elem.chord[i].rel_position.y + 3*spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
+			abselem.addChild(new RelativeElement(elem.chord[i].name, x + elem.chord[i].rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {type: "text", height: chordHeight}));
 		} else {
 			// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
 			var pos2 = 'above';
@@ -726,9 +731,9 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
 				pos2 = elem.positioning.chordPosition;
 
 			dim = this.renderer.getTextSize(elem.chord[i].name, 'gchordfont', "chord");
-			chordHeight = dim.height / ABCJS.write.spacing.STEP;
+			chordHeight = dim.height / spacing.STEP;
 			chordWidth = dim.width; // Since the chord is centered, we only use half the width.
-			abselem.addCentered(new ABCJS.write.RelativeElement(elem.chord[i].name, x, chordWidth, undefined, {type: "chord", position: pos2, height: chordHeight }));
+			abselem.addCentered(new RelativeElement(elem.chord[i].name, x, chordWidth, undefined, {type: "chord", position: pos2, height: chordHeight }));
 		}
       }
     }
@@ -736,7 +741,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
 
 
   if (elem.startTriplet && !dontDraw) {
-    this.triplet = new ABCJS.write.TripletElem(elem.startTriplet, notehead); // above is opposite from case of slurs
+    this.triplet = new TripletElem(elem.startTriplet, notehead); // above is opposite from case of slurs
   }
 
   if (elem.endTriplet && this.triplet && !dontDraw) {
@@ -749,7 +754,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
 
 
 
-ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale) {
+AbstractEngraver.prototype.createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale) {
 
   // TODO scale the dot as well
   var pitch = pitchelem.verticalPos;
@@ -758,29 +763,29 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
   this.accidentalshiftx = 0;
   this.dotshiftx = 0;
   if (c === undefined)
-    abselem.addChild(new ABCJS.write.RelativeElement("pitch is undefined", 0, 0, 0, {type:"debug"}));
+    abselem.addChild(new RelativeElement("pitch is undefined", 0, 0, 0, {type:"debug"}));
   else if (c==="") {
-    notehead = new ABCJS.write.RelativeElement(null, 0, 0, pitch);
+    notehead = new RelativeElement(null, 0, 0, pitch);
   } else {
     var shiftheadx = headx;
     if (pitchelem.printer_shift) {
       var adjust = (pitchelem.printer_shift==="same")?1:0;
-      shiftheadx = (dir==="down")?-ABCJS.write.glyphs.getSymbolWidth(c)*scale+adjust:ABCJS.write.glyphs.getSymbolWidth(c)*scale-adjust;
+      shiftheadx = (dir==="down")?-glyphs.getSymbolWidth(c)*scale+adjust:glyphs.getSymbolWidth(c)*scale-adjust;
     }
-	  var opts = {scalex:scale, scaley: scale, thickness: ABCJS.write.glyphs.symbolHeightInPitches(c)*scale };
+	  var opts = {scalex:scale, scaley: scale, thickness: glyphs.symbolHeightInPitches(c)*scale };
 	  //if (dir)
 	  //	opts.stemHeight = ((dir==="down")?-this.stemHeight:this.stemHeight);
-    notehead = new ABCJS.write.RelativeElement(c, shiftheadx, ABCJS.write.glyphs.getSymbolWidth(c)*scale, pitch, opts);
+    notehead = new RelativeElement(c, shiftheadx, glyphs.getSymbolWidth(c)*scale, pitch, opts);
     if (flag) {
       var pos = pitch+((dir==="down")?-7:7)*scale;
       if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;
       var xdelta = (dir==="down")?headx:headx+notehead.w-0.6;
-      abselem.addRight(new ABCJS.write.RelativeElement(flag, xdelta, ABCJS.write.glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));
+      abselem.addRight(new RelativeElement(flag, xdelta, glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));
     }
     this.dotshiftx = notehead.w+dotshiftx-2+5*dot;
     for (;dot>0;dot--) {
       var dotadjusty = (1-Math.abs(pitch)%2); //PER: take abs value of the pitch. And the shift still happens on ledger lines.
-      abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", notehead.w+dotshiftx-2+5*dot, ABCJS.write.glyphs.getSymbolWidth("dots.dot"), pitch+dotadjusty));
+      abselem.addRight(new RelativeElement("dots.dot", notehead.w+dotshiftx-2+5*dot, glyphs.getSymbolWidth("dots.dot"), pitch+dotadjusty));
     }
   }
         if (notehead)
@@ -822,11 +827,11 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
                  }
          }
          if (accSlotFound === false) {
-                 accPlace -= (ABCJS.write.glyphs.getSymbolWidth(symb)*scale+2);
+                 accPlace -= (glyphs.getSymbolWidth(symb)*scale+2);
                  this.accidentalSlot.push([pitch,accPlace]);
-                 this.accidentalshiftx = (ABCJS.write.glyphs.getSymbolWidth(symb)*scale+2);
+                 this.accidentalshiftx = (glyphs.getSymbolWidth(symb)*scale+2);
          }
-    abselem.addExtra(new ABCJS.write.RelativeElement(symb, accPlace, ABCJS.write.glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
+    abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
   }
 
   if (pitchelem.endTie) {
@@ -837,9 +842,9 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
   }
 
   if (pitchelem.startTie) {
-    //PER: bug fix: var tie = new ABCJS.write.TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
-    var tie = new ABCJS.write.TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up",(this.stemdir==="down" || this.stemdir==="up"), true);
-	  if (ABCJS.write.hint) tie.setHint();
+    //PER: bug fix: var tie = new TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
+    var tie = new TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up",(this.stemdir==="down" || this.stemdir==="up"), true);
+	  if (hint) tie.setHint();
 
 	  this.ties[this.ties.length]=tie;
     this.voice.addOther(tie);
@@ -858,8 +863,8 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
 		  slur.setEndAnchor(notehead);
         delete this.slurs[slurid];
       } else {
-        slur = new ABCJS.write.TieElem(null, notehead, dir==="down",(this.stemdir==="up" || dir==="down") && this.stemdir!=="down", false);
-		  if (ABCJS.write.hint) slur.setHint();
+        slur = new TieElem(null, notehead, dir==="down",(this.stemdir==="up" || dir==="down") && this.stemdir!=="down", false);
+		  if (hint) slur.setHint();
         this.voice.addOther(slur);
       }
       if (this.startlimitelem) {
@@ -871,9 +876,9 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
   if (pitchelem.startSlur) {
     for (i=0; i<pitchelem.startSlur.length; i++) {
       var slurid = pitchelem.startSlur[i].label;
-      //PER: bug fix: var slur = new ABCJS.write.TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
-      var slur = new ABCJS.write.TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", false, false);
-		if (ABCJS.write.hint) slur.setHint();
+      //PER: bug fix: var slur = new TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
+      var slur = new TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", false, false);
+		if (hint) slur.setHint();
       this.slurs[slurid]=slur;
       this.voice.addOther(slur);
     }
@@ -883,15 +888,15 @@ ABCJS.write.AbstractEngraver.prototype.createNoteHead = function(abselem, c, pit
 
 };
 
-ABCJS.write.AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
+AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
 	var measureNumHeight = this.renderer.getTextSize(number, "measurefont", 'bar-number');
-	abselem.addChild(new ABCJS.write.RelativeElement(number, 0, 0, 11+measureNumHeight.height / ABCJS.write.spacing.STEP, {type:"barNumber"}));
+	abselem.addChild(new RelativeElement(number, 0, 0, 11+measureNumHeight.height / spacing.STEP, {type:"barNumber"}));
 };
 
-ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
+AbstractEngraver.prototype.createBarLine = function (elem) {
 // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
 
-  var abselem = new ABCJS.write.AbsoluteElement(elem, 0, 10, 'bar', this.tuneNumber);
+  var abselem = new AbsoluteElement(elem, 0, 10, 'bar', this.tuneNumber);
   var anchor = null; // place to attach part lines
   var dx = 0;
 
@@ -918,18 +923,18 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
   }
 
   if (firstdots) {
-    abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", dx, 1, 7));
-    abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", dx, 1, 5));
+    abselem.addRight(new RelativeElement("dots.dot", dx, 1, 7));
+    abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
     dx+=6; //2 hardcoded, twice;
   }
 
   if (firstthin) {
-    anchor = new ABCJS.write.RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":10, linewidth:0.6});
+    anchor = new RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":10, linewidth:0.6});
     abselem.addRight(anchor);
   }
 
   if (elem.type==="bar_invisible") {
-    anchor = new ABCJS.write.RelativeElement(null, dx, 1, 2, {"type": "none", "pitch2":10, linewidth:0.6});
+    anchor = new RelativeElement(null, dx, 1, 2, {"type": "none", "pitch2":10, linewidth:0.6});
     abselem.addRight(anchor);
   }
 
@@ -939,7 +944,7 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
 
   if (thick) {
     dx+=4; //3 hardcoded;
-    anchor = new ABCJS.write.RelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":10, linewidth:4});
+    anchor = new RelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":10, linewidth:4});
     abselem.addRight(anchor);
     dx+=5;
   }
@@ -956,20 +961,20 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
 
   if (secondthin) {
     dx+=3; //3 hardcoded;
-    anchor = new ABCJS.write.RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":10, linewidth:0.6});
+    anchor = new RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":10, linewidth:0.6});
     abselem.addRight(anchor); // 3 is hardcoded
   }
 
   if (seconddots) {
     dx+=3; //3 hardcoded;
-    abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", dx, 1, 7));
-    abselem.addRight(new ABCJS.write.RelativeElement("dots.dot", dx, 1, 5));
+    abselem.addRight(new RelativeElement("dots.dot", dx, 1, 7));
+    abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
   } // 2 is hardcoded
 
   if (elem.startEnding) {
 	  var textWidth = this.renderer.getTextSize(elem.startEnding, "repeatfont", '').width;
 	  abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
-    this.partstartelem = new ABCJS.write.EndingElem(elem.startEnding, anchor, null);
+    this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
     this.voice.addOther(this.partstartelem);
   }
 
@@ -979,3 +984,5 @@ ABCJS.write.AbstractEngraver.prototype.createBarLine = function (elem) {
 
 
 })();
+
+module.exports = AbstractEngraver;
