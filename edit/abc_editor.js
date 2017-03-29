@@ -33,26 +33,20 @@ var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
 var EngraverController = require('../write/abc_engraver_controller');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.edit)
-	window.ABCJS.edit = {};
-
-window.ABCJS.edit.EditArea = function(textareaid) {
+var EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
   this.isDragging = false;
 }
 
-window.ABCJS.edit.EditArea.prototype.addSelectionListener = function(listener) {
+EditArea.prototype.addSelectionListener = function(listener) {
   this.textarea.onmousemove = function(ev) {
 	  if (this.isDragging)
 	    listener.fireSelectionChanged();
   };
 };
 
-window.ABCJS.edit.EditArea.prototype.addChangeListener = function(listener) {
+EditArea.prototype.addChangeListener = function(listener) {
   this.changelistener = listener;
   this.textarea.onkeyup = function() {
     listener.fireChanged();
@@ -71,11 +65,11 @@ window.ABCJS.edit.EditArea.prototype.addChangeListener = function(listener) {
 };
 
 //TODO won't work under IE?
-window.ABCJS.edit.EditArea.prototype.getSelection = function() {
+EditArea.prototype.getSelection = function() {
   return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
 };
 
-window.ABCJS.edit.EditArea.prototype.setSelection = function(start, end) {
+EditArea.prototype.setSelection = function(start, end) {
 	if(this.textarea.setSelectionRange)
 	   this.textarea.setSelectionRange(start, end);
 	else if(this.textarea.createTextRange) {
@@ -89,11 +83,11 @@ window.ABCJS.edit.EditArea.prototype.setSelection = function(start, end) {
   this.textarea.focus();
 };
 
-window.ABCJS.edit.EditArea.prototype.getString = function() {
+EditArea.prototype.getString = function() {
   return this.textarea.value;
 };
 
-window.ABCJS.edit.EditArea.prototype.setString = function(str) {
+EditArea.prototype.setString = function(str) {
   this.textarea.value = str;
   this.initialText = this.getString();
   if (this.changelistener) {
@@ -101,7 +95,7 @@ window.ABCJS.edit.EditArea.prototype.setString = function(str) {
   }
 };
 
-window.ABCJS.edit.EditArea.prototype.getElem = function() {
+EditArea.prototype.getElem = function() {
   return this.textarea;
 };
 
@@ -158,11 +152,11 @@ window.ABCJS.edit.EditArea.prototype.getElem = function() {
 //		Stops the automatic rendering when the user is typing.
 //
 
-window.ABCJS.Editor = function(editarea, params) {
+var Editor = function(editarea, params) {
 	if (params.indicate_changed)
 		this.indicate_changed = true;
   if (typeof editarea === "string") {
-    this.editarea = new window.ABCJS.edit.EditArea(editarea);
+    this.editarea = new EditArea(editarea);
   } else {
     this.editarea = editarea;
   }
@@ -249,7 +243,7 @@ window.ABCJS.Editor = function(editarea, params) {
   };
 };
 
-window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
+Editor.prototype.renderTune = function(abc, params, div) {
   var tunebook = new ABCJS.TuneBook(abc);
   var abcParser = Parse();
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
@@ -259,7 +253,7 @@ window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
   engraver_controller.engraveABC(tune);
 };
 
-window.ABCJS.Editor.prototype.modelChanged = function() {
+Editor.prototype.modelChanged = function() {
   if (this.tunes === undefined) {
     if (this.downloadMidi !== undefined)
 		this.downloadMidi.innerHTML = "";
@@ -342,14 +336,14 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
 };
 
 // Call this to reparse in response to the printing parameters changing
-window.ABCJS.Editor.prototype.paramChanged = function(engraverparams) {
+Editor.prototype.paramChanged = function(engraverparams) {
 	this.engraverparams = engraverparams;
 	this.oldt = "";
 	this.fireChanged();
 };
 
 // return true if the model has changed
-window.ABCJS.Editor.prototype.parseABC = function() {
+Editor.prototype.parseABC = function() {
   var t = this.editarea.getString();
   if (t===this.oldt) {
     this.updateSelection();
@@ -380,18 +374,18 @@ window.ABCJS.Editor.prototype.parseABC = function() {
   return true;
 };
 
-window.ABCJS.Editor.prototype.updateSelection = function() {
+Editor.prototype.updateSelection = function() {
   var selection = this.editarea.getSelection();
   try {
     this.engraver_controller.rangeHighlight(selection.start, selection.end);
   } catch (e) {} // maybe printer isn't defined yet?
 };
 
-window.ABCJS.Editor.prototype.fireSelectionChanged = function() {
+Editor.prototype.fireSelectionChanged = function() {
   this.updateSelection();
 };
 
-window.ABCJS.Editor.prototype.setDirtyStyle = function(isDirty) {
+Editor.prototype.setDirtyStyle = function(isDirty) {
 	if (this.indicate_changed === undefined)
 		return;
   var addClassName = function(element, className) {
@@ -422,7 +416,7 @@ window.ABCJS.Editor.prototype.setDirtyStyle = function(isDirty) {
 };
 
 // call when abc text is changed and needs re-parsing
-window.ABCJS.Editor.prototype.fireChanged = function() {
+Editor.prototype.fireChanged = function() {
   if (this.bIsPaused)
     return;
   if (this.parseABC()) {
@@ -442,31 +436,33 @@ window.ABCJS.Editor.prototype.fireChanged = function() {
 	  }
 };
 
-window.ABCJS.Editor.prototype.setNotDirty = function() {
+Editor.prototype.setNotDirty = function() {
 	this.editarea.initialText = this.editarea.getString();
 	this.wasDirty = false;
 	this.setDirtyStyle(false);
 };
 
-window.ABCJS.Editor.prototype.isDirty = function() {
+Editor.prototype.isDirty = function() {
 	if (this.indicate_changed === undefined)
 		return false;
 	return this.editarea.initialText !== this.editarea.getString();
 };
 
-window.ABCJS.Editor.prototype.highlight = function(abcelem, tuneNumber) {
+Editor.prototype.highlight = function(abcelem, tuneNumber) {
 	// TODO-PER: The marker appears to get off by one for each tune parsed. I'm not sure why, but adding the tuneNumber in corrects it for the time being.
 	var offset = (tuneNumber !== undefined) ? this.startPos[tuneNumber] + tuneNumber : 0;
 
   this.editarea.setSelection(offset + abcelem.startChar, offset + abcelem.endChar);
 };
 
-window.ABCJS.Editor.prototype.pause = function(shouldPause) {
+Editor.prototype.pause = function(shouldPause) {
 	this.bIsPaused = shouldPause;
 	if (!shouldPause)
 		this.fireChanged();
 };
 
-window.ABCJS.Editor.prototype.pauseMidi = function(shouldPause) {
+Editor.prototype.pauseMidi = function(shouldPause) {
 	this.midiPause = shouldPause;
 };
+
+module.exports = Editor;
