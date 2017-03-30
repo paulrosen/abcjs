@@ -14,23 +14,24 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var flatten = require('./abc_midi_flattener');
+var Preparer = require('./abc_midi_js_preparer');
+var rendererFactory = require('./abc_midi_renderer');
+var sequence = require('./abc_midi_sequencer');
 
-if (!window.ABCJS.midi)
-	window.ABCJS.midi = {};
+var create;
 
 (function() {
 	"use strict";
 
 	var baseDuration = 480*4; // nice and divisible, equals 1 whole note
 
-	window.ABCJS.midi.create = function(abcTune, options) {
+	create = function(abcTune, options) {
 		if (options === undefined) options = {};
-		var sequence = window.ABCJS.midi.sequence(abcTune, options);
-		var commands = window.ABCJS.midi.flatten(sequence, options);
-		var midi = window.ABCJS.midi.rendererFactory();
-		var midiJs = new window.ABCJS.midi.Preparer();
+		var sequenceInst = sequence(abcTune, options);
+		var commands = flatten(sequenceInst, options);
+		var midi = rendererFactory();
+		var midiJs = new Preparer();
 
 		var title = abcTune.metaText ? abcTune.metaText.title : undefined;
 		if (title && title.length > 128)
@@ -96,3 +97,5 @@ if (!window.ABCJS.midi)
 		return 60 + pitch;
 	}
 })();
+
+module.exports = create;

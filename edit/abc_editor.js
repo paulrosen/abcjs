@@ -31,6 +31,8 @@
 var Raphael = require('raphael');
 
 var TuneBook = require('../api/abc_tunebook').TuneBook;
+var midi = require('../midi/abc_midi_controls');
+var midiCreate = require('../midi/abc_midi_create');
 var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
 var EngraverController = require('../write/abc_engraver_controller');
@@ -278,15 +280,15 @@ Editor.prototype.modelChanged = function() {
 	var inlineMidiHtml = "";
 	if (this.midiParams && !this.midiPause) {
 		for (var i = 0; i < this.tunes.length; i++) {
-			var midi = window.ABCJS.midi.create(this.tunes[i], this.midiParams);
+			var midiInst = midiCreate(this.tunes[i], this.midiParams);
 
 			if (this.midiParams.generateInline && this.midiParams.generateDownload) {
-				downloadMidiHtml += window.ABCJS.midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midi.download, i);
-				inlineMidiHtml += window.ABCJS.midi.generateMidiControls(this.tunes[i], this.midiParams, midi.inline, i);
+				downloadMidiHtml += midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midiInst.download, i);
+				inlineMidiHtml += midi.generateMidiControls(this.tunes[i], this.midiParams, midiInst.inline, i);
 			} else if (this.midiParams.generateInline)
-				inlineMidiHtml += window.ABCJS.midi.generateMidiControls(this.tunes[i], this.midiParams, midi, i);
+				inlineMidiHtml += midi.generateMidiControls(this.tunes[i], this.midiParams, midiInst, i);
 			else
-				downloadMidiHtml += window.ABCJS.midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midi, i);
+				downloadMidiHtml += midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midiInst, i);
 		}
 		if (this.midiParams.generateDownload) {
 			if (this.downloadMidi)
