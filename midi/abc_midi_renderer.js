@@ -14,11 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.midi)
-	window.ABCJS.midi = {};
+var rendererFactory;
 
 (function() {
 	"use strict";
@@ -194,7 +190,9 @@ if (!window.ABCJS.midi)
 		return toHex(res, padding);
 	}
 
-	window.ABCJS.midi.rendererFactory = function() {
+	rendererFactory = function() {
 		return new Midi();
 	};
 })();
+
+module.exports = rendererFactory;

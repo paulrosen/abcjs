@@ -19,6 +19,8 @@
 
 var Raphael = require('raphael');
 
+var midi = require('../midi/abc_midi_controls');
+var midiCreate = require('../midi/abc_midi_create');
 var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
 var EngraverController = require('../write/abc_engraver_controller');
@@ -322,14 +324,14 @@ var tunebook = {};
 
 		function callback(div, tune, index) {
 			var html = "";
-			var midi = window.ABCJS.midi.create(tune, midiParams);
+			var midiInst = midiCreate(tune, midiParams);
 			if (midiParams.generateInline) {
-				var inlineMidi = midi.inline ? midi.inline : midi;
-				html += window.ABCJS.midi.generateMidiControls(tune, midiParams, inlineMidi, index);
+				var inlineMidi = midiInst.inline ? midiInst.inline : midiInst;
+				html += midi.generateMidiControls(tune, midiParams, inlineMidi, index);
 			}
 			if (midiParams.generateDownload) {
-				var downloadMidi = midi.download ? midi.download : midi;
-				html += window.ABCJS.midi.generateMidiDownloadLink(tune, midiParams, downloadMidi, index);
+				var downloadMidi = midiInst.download ? midiInst.download : midiInst;
+				html += midi.generateMidiDownloadLink(tune, midiParams, downloadMidi, index);
 			}
 			div.innerHTML = html;
 			var find = function(element, cls) {
@@ -352,7 +354,7 @@ var tunebook = {};
 			}
 			if (midiParams.generateInline && midiParams.inlineControls && midiParams.inlineControls.startPlaying) {
 				var startButton = find(div, "abcjs-midi-start");
-				window.ABCJS.midi.startPlaying(startButton);
+				midi.startPlaying(startButton);
 			}
 
 		}
