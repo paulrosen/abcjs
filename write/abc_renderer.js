@@ -611,7 +611,7 @@ Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass, isTi
   var uy = dy/norm;
 
   var flatten = norm/3.5;
-  var maxFlatten = isTie ? 3 : 25;  // If it is a tie vs. a slur, draw it shallower.
+  var maxFlatten = isTie ? 10 : 25;  // If it is a tie vs. a slur, draw it shallower.
   var curve = ((above)?-1:1)*Math.min(maxFlatten, Math.max(4, flatten));
 
   var controlx1 = x1+flatten*ux-curve*uy;
