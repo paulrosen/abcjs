@@ -52,9 +52,9 @@ if (!window.ABCJS.midi)
 	}
 
 	window.ABCJS.midi.generateMidiControls = function(tune, midiParams, midi, index) {
-		if (window.ABCJS.midiInlineInitialized === 'failed')
+		if (window.ABCJS.midi.midiInlineInitialized === 'failed')
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">ERROR</div>';
-		if (window.ABCJS.midiInlineInitialized === 'not loaded')
+		if (window.ABCJS.midi.midiInlineInitialized === 'not loaded')
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">MIDI NOT PRESENT</div>';
 
 		var title = tune.metaText && tune.metaText.title ? tune.metaText.title : 'Untitled';
