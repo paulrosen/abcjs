@@ -14,18 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-/*global window, ABCJS */
+/*global window */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var DynamicDecoration = require('./abc_dynamic_decoration');
+var CrescendoElem = require('./abc_crescendo_element');
+var glyphs = require('./abc_glyphs');
+var RelativeElement = require('./abc_relative_element');
+var TieElem = require('./abc_tie_element');
 
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
+var Decoration;
 
 (function() {
 	"use strict";
 
-	ABCJS.write.Decoration = function Decoration() {
+	Decoration = function Decoration() {
 		this.startDiminuendoX = undefined;
 		this.startCrescendoX = undefined;
 		this.minTop = 12;	// TODO-PER: this is assuming a 5-line staff. Pass that info in.
@@ -61,19 +63,19 @@ if (!window.ABCJS.write)
 				}
 				if (pitch>9) yPos++; // take up some room of those that are above
 				var deltaX = width/2;
-				if (ABCJS.write.glyphs.getSymbolAlign(symbol)!=="center") {
-					deltaX -= (ABCJS.write.glyphs.getSymbolWidth(symbol)/2);
+				if (glyphs.getSymbolAlign(symbol)!=="center") {
+					deltaX -= (glyphs.getSymbolWidth(symbol)/2);
 				}
-				abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, ABCJS.write.glyphs.getSymbolWidth(symbol), yPos));
+				abselem.addChild(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), yPos));
 			}
 			if (decoration[i]==="slide" && abselem.heads[0]) {
 				var yPos2 = abselem.heads[0].pitch;
 				yPos2 -= 2; // TODO-PER: not sure what this fudge factor is.
-				var blank1 = new ABCJS.write.RelativeElement("", -roomtaken-15, 0, yPos2-1);
-				var blank2 = new ABCJS.write.RelativeElement("", -roomtaken-5, 0, yPos2+1);
+				var blank1 = new RelativeElement("", -roomtaken-15, 0, yPos2-1);
+				var blank2 = new RelativeElement("", -roomtaken-5, 0, yPos2+1);
 				abselem.addChild(blank1);
 				abselem.addChild(blank2);
-				voice.addOther(new ABCJS.write.TieElem(blank1, blank2, false, false, false));
+				voice.addOther(new TieElem(blank1, blank2, false, false, false));
 			}
 		}
 		if (yPos === undefined)
@@ -96,7 +98,7 @@ if (!window.ABCJS.write)
 				case "ffff":
 				case "sfz":
 				case "mf":
-					var elem = new ABCJS.write.DynamicDecoration(abselem, decoration[i], positioning);
+					var elem = new DynamicDecoration(abselem, decoration[i], positioning);
 					voice.addOther(elem);
 			}
 		}
@@ -127,7 +129,7 @@ if (!window.ABCJS.write)
 			deltaX += (dir === 'down') ? -5 : 3;
 			for (var i = 0; i < count; i++) {
 				placement -= 1;
-				abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, ABCJS.write.glyphs.getSymbolWidth(symbol), placement));
+				abselem.addChild(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), placement));
 			}
 		}
 
@@ -166,19 +168,19 @@ if (!window.ABCJS.write)
 			var textFudge = 2;
 			var textHeight = 5;
 			// TODO-PER: Get the height of the current font and use that for the thickness.
-			abselem.addChild(new ABCJS.write.RelativeElement(text, width/2, 0, y+textFudge, {type:"decoration", klass: 'ornament', thickness: 3}));
+			abselem.addChild(new RelativeElement(text, width/2, 0, y+textFudge, {type:"decoration", klass: 'ornament', thickness: 3}));
 
 			incrementPlacement(placement, textHeight);
 		}
 		function symbolDecoration(symbol, placement) {
 			var deltaX = width/2;
-			if (ABCJS.write.glyphs.getSymbolAlign(symbol) !== "center") {
-				deltaX -= (ABCJS.write.glyphs.getSymbolWidth(symbol) / 2);
+			if (glyphs.getSymbolAlign(symbol) !== "center") {
+				deltaX -= (glyphs.getSymbolWidth(symbol) / 2);
 			}
-			var height = ABCJS.write.glyphs.symbolHeightInPitches(symbol) + 1; // adding a little padding so nothing touches.
+			var height = glyphs.symbolHeightInPitches(symbol) + 1; // adding a little padding so nothing touches.
 			var y = getPlacement(placement);
 			y = (placement === 'above') ? y + height/2 : y - height/2;// Center the element vertically.
-			abselem.addChild(new ABCJS.write.RelativeElement(symbol, deltaX, ABCJS.write.glyphs.getSymbolWidth(symbol), y, { klass: 'ornament', thickness: ABCJS.write.glyphs.symbolHeightInPitches(symbol) }));
+			abselem.addChild(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), y, { klass: 'ornament', thickness: glyphs.symbolHeightInPitches(symbol) }));
 
 			incrementPlacement(placement, height);
 		}
@@ -270,7 +272,7 @@ if (!window.ABCJS.write)
 		return hasOne;
 	};
 
-	ABCJS.write.Decoration.prototype.dynamicDecoration = function(voice, decoration, abselem, positioning) {
+	Decoration.prototype.dynamicDecoration = function(voice, decoration, abselem, positioning) {
 		var diminuendo;
 		var crescendo;
 		for (var i=0;i<decoration.length; i++) {
@@ -294,14 +296,14 @@ if (!window.ABCJS.write)
 			}
 		}
 		if (diminuendo) {
-			voice.addOther(new ABCJS.write.CrescendoElem(diminuendo.start, diminuendo.stop, ">", positioning));
+			voice.addOther(new CrescendoElem(diminuendo.start, diminuendo.stop, ">", positioning));
 		}
 		if (crescendo) {
-			voice.addOther(new ABCJS.write.CrescendoElem(crescendo.start, crescendo.stop, "<", positioning));
+			voice.addOther(new CrescendoElem(crescendo.start, crescendo.stop, "<", positioning));
 		}
 	};
 
-	ABCJS.write.Decoration.prototype.createDecoration = function(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, positioning, hasVocals) {
+	Decoration.prototype.createDecoration = function(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, positioning, hasVocals) {
 		if (!positioning)
 			positioning = { ornamentPosition: 'above', volumePosition: hasVocals ? 'above' :'below', dynamicPosition: hasVocals ? 'above' : 'below' };
 		// These decorations don't affect the placement of other decorations
@@ -322,3 +324,4 @@ if (!window.ABCJS.write)
 
 })();
 
+module.exports = Decoration;

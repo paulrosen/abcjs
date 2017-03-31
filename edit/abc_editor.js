@@ -27,28 +27,30 @@
 //
 
 /*global document, window, clearTimeout, setTimeout */
-/*global Raphael */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var Raphael = require('raphael');
 
-if (!window.ABCJS.edit)
-	window.ABCJS.edit = {};
+var TuneBook = require('../api/abc_tunebook').TuneBook;
+var midi = require('../midi/abc_midi_controls');
+var midiCreate = require('../midi/abc_midi_create');
+var parseCommon = require('../parse/abc_common');
+var Parse = require('../parse/abc_parse');
+var EngraverController = require('../write/abc_engraver_controller');
 
-window.ABCJS.edit.EditArea = function(textareaid) {
+var EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
   this.isDragging = false;
 }
 
-window.ABCJS.edit.EditArea.prototype.addSelectionListener = function(listener) {
+EditArea.prototype.addSelectionListener = function(listener) {
   this.textarea.onmousemove = function(ev) {
 	  if (this.isDragging)
 	    listener.fireSelectionChanged();
   };
 };
 
-window.ABCJS.edit.EditArea.prototype.addChangeListener = function(listener) {
+EditArea.prototype.addChangeListener = function(listener) {
   this.changelistener = listener;
   this.textarea.onkeyup = function() {
     listener.fireChanged();
@@ -67,11 +69,11 @@ window.ABCJS.edit.EditArea.prototype.addChangeListener = function(listener) {
 };
 
 //TODO won't work under IE?
-window.ABCJS.edit.EditArea.prototype.getSelection = function() {
+EditArea.prototype.getSelection = function() {
   return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
 };
 
-window.ABCJS.edit.EditArea.prototype.setSelection = function(start, end) {
+EditArea.prototype.setSelection = function(start, end) {
 	if(this.textarea.setSelectionRange)
 	   this.textarea.setSelectionRange(start, end);
 	else if(this.textarea.createTextRange) {
@@ -85,11 +87,11 @@ window.ABCJS.edit.EditArea.prototype.setSelection = function(start, end) {
   this.textarea.focus();
 };
 
-window.ABCJS.edit.EditArea.prototype.getString = function() {
+EditArea.prototype.getString = function() {
   return this.textarea.value;
 };
 
-window.ABCJS.edit.EditArea.prototype.setString = function(str) {
+EditArea.prototype.setString = function(str) {
   this.textarea.value = str;
   this.initialText = this.getString();
   if (this.changelistener) {
@@ -97,7 +99,7 @@ window.ABCJS.edit.EditArea.prototype.setString = function(str) {
   }
 };
 
-window.ABCJS.edit.EditArea.prototype.getElem = function() {
+EditArea.prototype.getElem = function() {
   return this.textarea;
 };
 
@@ -154,11 +156,11 @@ window.ABCJS.edit.EditArea.prototype.getElem = function() {
 //		Stops the automatic rendering when the user is typing.
 //
 
-window.ABCJS.Editor = function(editarea, params) {
+var Editor = function(editarea, params) {
 	if (params.indicate_changed)
 		this.indicate_changed = true;
   if (typeof editarea === "string") {
-    this.editarea = new window.ABCJS.edit.EditArea(editarea);
+    this.editarea = new EditArea(editarea);
   } else {
     this.editarea = editarea;
   }
@@ -227,7 +229,7 @@ window.ABCJS.Editor = function(editarea, params) {
   };
 
   this.removeClassName = function(element, className) {
-    element.className = window.ABCJS.parse.strip(element.className.replace(
+    element.className = parseCommon.strip(element.className.replace(
       new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
     return element;
   };
@@ -245,17 +247,17 @@ window.ABCJS.Editor = function(editarea, params) {
   };
 };
 
-window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
-  var tunebook = new ABCJS.TuneBook(abc);
-  var abcParser = window.ABCJS.parse.Parse();
+Editor.prototype.renderTune = function(abc, params, div) {
+  var tunebook = new TuneBook(abc);
+  var abcParser = Parse();
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
-  var engraver_controller = new ABCJS.write.EngraverController(paper, this.engraverparams);
+  var engraver_controller = new EngraverController(paper, this.engraverparams);
   engraver_controller.engraveABC(tune);
 };
 
-window.ABCJS.Editor.prototype.modelChanged = function() {
+Editor.prototype.modelChanged = function() {
   if (this.tunes === undefined) {
     if (this.downloadMidi !== undefined)
 		this.downloadMidi.innerHTML = "";
@@ -271,22 +273,22 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
   this.timerId = null;
   this.div.innerHTML = "";
   var paper = Raphael(this.div, 800, 400);
-  this.engraver_controller = new ABCJS.write.EngraverController(paper, this.engraverparams);
+  this.engraver_controller = new EngraverController(paper, this.engraverparams);
   this.engraver_controller.engraveABC(this.tunes);
 	this.tunes[0].engraver = this.engraver_controller;	// TODO-PER: We actually want an output object for each tune, not the entire controller. When refactoring, don't save data in the controller.
 	var downloadMidiHtml = "";
 	var inlineMidiHtml = "";
 	if (this.midiParams && !this.midiPause) {
 		for (var i = 0; i < this.tunes.length; i++) {
-			var midi = window.ABCJS.midi.create(this.tunes[i], this.midiParams);
+			var midiInst = midiCreate(this.tunes[i], this.midiParams);
 
 			if (this.midiParams.generateInline && this.midiParams.generateDownload) {
-				downloadMidiHtml += window.ABCJS.midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midi.download, i);
-				inlineMidiHtml += window.ABCJS.midi.generateMidiControls(this.tunes[i], this.midiParams, midi.inline, i);
+				downloadMidiHtml += midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midiInst.download, i);
+				inlineMidiHtml += midi.generateMidiControls(this.tunes[i], this.midiParams, midiInst.inline, i);
 			} else if (this.midiParams.generateInline)
-				inlineMidiHtml += window.ABCJS.midi.generateMidiControls(this.tunes[i], this.midiParams, midi, i);
+				inlineMidiHtml += midi.generateMidiControls(this.tunes[i], this.midiParams, midiInst, i);
 			else
-				downloadMidiHtml += window.ABCJS.midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midi, i);
+				downloadMidiHtml += midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midiInst, i);
 		}
 		if (this.midiParams.generateDownload) {
 			if (this.downloadMidi)
@@ -338,14 +340,14 @@ window.ABCJS.Editor.prototype.modelChanged = function() {
 };
 
 // Call this to reparse in response to the printing parameters changing
-window.ABCJS.Editor.prototype.paramChanged = function(engraverparams) {
+Editor.prototype.paramChanged = function(engraverparams) {
 	this.engraverparams = engraverparams;
 	this.oldt = "";
 	this.fireChanged();
 };
 
 // return true if the model has changed
-window.ABCJS.Editor.prototype.parseABC = function() {
+Editor.prototype.parseABC = function() {
   var t = this.editarea.getString();
   if (t===this.oldt) {
     this.updateSelection();
@@ -358,13 +360,13 @@ window.ABCJS.Editor.prototype.parseABC = function() {
 	this.warnings = "";
 	return true;
   }
-  var tunebook = new ABCJS.TuneBook(t);
+  var tunebook = new TuneBook(t);
   
   this.tunes = [];
   this.startPos = [];
   this.warnings = [];
   for (var i=0; i<tunebook.tunes.length; i++) {
-    var abcParser = new window.ABCJS.parse.Parse();
+    var abcParser = new Parse();
     abcParser.parse(tunebook.tunes[i].abc, this.parserparams);
     this.tunes[i] = abcParser.getTune();
 	  this.startPos[i] = tunebook.tunes[i].startPos;
@@ -376,18 +378,18 @@ window.ABCJS.Editor.prototype.parseABC = function() {
   return true;
 };
 
-window.ABCJS.Editor.prototype.updateSelection = function() {
+Editor.prototype.updateSelection = function() {
   var selection = this.editarea.getSelection();
   try {
     this.engraver_controller.rangeHighlight(selection.start, selection.end);
   } catch (e) {} // maybe printer isn't defined yet?
 };
 
-window.ABCJS.Editor.prototype.fireSelectionChanged = function() {
+Editor.prototype.fireSelectionChanged = function() {
   this.updateSelection();
 };
 
-window.ABCJS.Editor.prototype.setDirtyStyle = function(isDirty) {
+Editor.prototype.setDirtyStyle = function(isDirty) {
 	if (this.indicate_changed === undefined)
 		return;
   var addClassName = function(element, className) {
@@ -403,7 +405,7 @@ window.ABCJS.Editor.prototype.setDirtyStyle = function(isDirty) {
   };
 
   var removeClassName = function(element, className) {
-    element.className = window.ABCJS.parse.strip(element.className.replace(
+    element.className = parseCommon.strip(element.className.replace(
       new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
     return element;
   };
@@ -418,7 +420,7 @@ window.ABCJS.Editor.prototype.setDirtyStyle = function(isDirty) {
 };
 
 // call when abc text is changed and needs re-parsing
-window.ABCJS.Editor.prototype.fireChanged = function() {
+Editor.prototype.fireChanged = function() {
   if (this.bIsPaused)
     return;
   if (this.parseABC()) {
@@ -438,31 +440,33 @@ window.ABCJS.Editor.prototype.fireChanged = function() {
 	  }
 };
 
-window.ABCJS.Editor.prototype.setNotDirty = function() {
+Editor.prototype.setNotDirty = function() {
 	this.editarea.initialText = this.editarea.getString();
 	this.wasDirty = false;
 	this.setDirtyStyle(false);
 };
 
-window.ABCJS.Editor.prototype.isDirty = function() {
+Editor.prototype.isDirty = function() {
 	if (this.indicate_changed === undefined)
 		return false;
 	return this.editarea.initialText !== this.editarea.getString();
 };
 
-window.ABCJS.Editor.prototype.highlight = function(abcelem, tuneNumber) {
+Editor.prototype.highlight = function(abcelem, tuneNumber) {
 	// TODO-PER: The marker appears to get off by one for each tune parsed. I'm not sure why, but adding the tuneNumber in corrects it for the time being.
 	var offset = (tuneNumber !== undefined) ? this.startPos[tuneNumber] + tuneNumber : 0;
 
   this.editarea.setSelection(offset + abcelem.startChar, offset + abcelem.endChar);
 };
 
-window.ABCJS.Editor.prototype.pause = function(shouldPause) {
+Editor.prototype.pause = function(shouldPause) {
 	this.bIsPaused = shouldPause;
 	if (!shouldPause)
 		this.fireChanged();
 };
 
-window.ABCJS.Editor.prototype.pauseMidi = function(shouldPause) {
+Editor.prototype.pauseMidi = function(shouldPause) {
 	this.midiPause = shouldPause;
 };
+
+module.exports = Editor;

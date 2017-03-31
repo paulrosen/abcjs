@@ -14,51 +14,58 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global document, Raphael */
+/*global document */
 /*global window, ABCJS, console */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var Raphael = require('raphael');
+
+var midi = require('../midi/abc_midi_controls');
+var midiCreate = require('../midi/abc_midi_create');
+var parseCommon = require('../parse/abc_common');
+var Parse = require('../parse/abc_parse');
+var EngraverController = require('../write/abc_engraver_controller');
+
+var tunebook = {};
 
 (function() {
 	"use strict";
 
-	ABCJS.numberOfTunes = function(abc) {
+	tunebook.numberOfTunes = function(abc) {
 		var tunes = abc.split("\nX:");
 		var num = tunes.length;
 		if (num === 0) num = 1;
 		return num;
 	};
 
-	ABCJS.TuneBook = function(book) {
+	var TuneBook = tunebook.TuneBook = function(book) {
 		var This = this;
 		var directives = "";
-		book = window.ABCJS.parse.strip(book);
+		book = parseCommon.strip(book);
 		var tunes = book.split("\nX:");
 		for (var i = 1; i < tunes.length; i++)	// Put back the X: that we lost when splitting the tunes.
 			tunes[i] = "X:" + tunes[i];
 		// Keep track of the character position each tune starts with.
 		var pos = 0;
 		This.tunes = [];
-		window.ABCJS.parse.each(tunes, function(tune) {
+		parseCommon.each(tunes, function(tune) {
 			This.tunes.push({ abc: tune, startPos: pos});
 			pos += tune.length;
 		});
-		if (This.tunes.length > 1 && !window.ABCJS.parse.startsWith(This.tunes[0].abc, 'X:')) {	// If there is only one tune, the X: might be missing, otherwise assume the top of the file is "intertune"
+		if (This.tunes.length > 1 && !parseCommon.startsWith(This.tunes[0].abc, 'X:')) {	// If there is only one tune, the X: might be missing, otherwise assume the top of the file is "intertune"
 			// There could be file-wide directives in this, if so, we need to insert it into each tune. We can probably get away with
 			// just looking for file-wide directives here (before the first tune) and inserting them at the bottom of each tune, since
 			// the tune is parsed all at once. The directives will be seen before the engraver begins processing.
 			var dir = This.tunes.shift();
 			var arrDir = dir.abc.split('\n');
-			window.ABCJS.parse.each(arrDir, function(line) {
-				if (window.ABCJS.parse.startsWith(line, '%%'))
+			parseCommon.each(arrDir, function(line) {
+				if (parseCommon.startsWith(line, '%%'))
 					directives += line + '\n';
 			});
 		}
 		This.header = directives;
 
 		// Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
-		window.ABCJS.parse.each(This.tunes, function(tune) {
+		parseCommon.each(This.tunes, function(tune) {
 			var end = tune.abc.indexOf('\n\n');
 			if (end > 0)
 				tune.abc = tune.abc.substring(0, end);
@@ -79,7 +86,7 @@ if (!window.ABCJS)
 		});
 	};
 
-	ABCJS.TuneBook.prototype.getTuneById = function(id) {
+	TuneBook.prototype.getTuneById = function(id) {
 		for (var i = 0; i < this.tunes.length; i++) {
 			if (this.tunes[i].id === id)
 				return this.tunes[i];
@@ -87,7 +94,7 @@ if (!window.ABCJS)
 		return null;
 	};
 
-	ABCJS.TuneBook.prototype.getTuneByTitle = function(title) {
+	TuneBook.prototype.getTuneByTitle = function(title) {
 		for (var i = 0; i < this.tunes.length; i++) {
 			if (this.tunes[i].title === title)
 				return this.tunes[i];
@@ -113,8 +120,8 @@ if (!window.ABCJS)
 		var currentTune = renderParams.startingTune ? renderParams.startingTune : 0;
 
 		// parse the abc string
-		var book = new ABCJS.TuneBook(abc);
-		var abcParser = new window.ABCJS.parse.Parse();
+		var book = new TuneBook(abc);
+		var abcParser = new Parse();
 
 		// output each tune, if it exists. Otherwise clear the div.
 		for (var i = 0; i < output.length; i++) {
@@ -174,7 +181,7 @@ if (!window.ABCJS)
 		/* jshint -W064 */ var paper = Raphael(div, width, 400); /* jshint +W064 */
 		if (engraverParams === undefined)
 			engraverParams = {};
-		var engraver_controller = new ABCJS.write.EngraverController(paper, engraverParams);
+		var engraver_controller = new EngraverController(paper, engraverParams);
 		engraver_controller.engraveABC(tune);
 		tune.engraver = engraver_controller;
 		if (renderParams.viewportVertical || renderParams.viewportHorizontal) {
@@ -278,7 +285,7 @@ if (!window.ABCJS)
 	//			startingTune: an index, starting at zero, representing which tune to start rendering at.
 	//				(If this element is not present, then rendering starts at zero.)
 	//			width: 800 by default. The width in pixels of the output paper
-	ABCJS.renderAbc = function(output, abc, parserParams, engraverParams, renderParams) {
+	tunebook.renderAbc = function(output, abc, parserParams, engraverParams, renderParams) {
 		if (renderParams === undefined)
 			renderParams = {};
 		function callback(div, tune) {
@@ -307,7 +314,7 @@ if (!window.ABCJS)
 	//		renderParams: hash of:
 	//			startingTune: an index, starting at zero, representing which tune to start rendering at.
 	//				(If this element is not present, then rendering starts at zero.)
-	ABCJS.renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
+	tunebook.renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
 		if (midiParams === undefined)
 			midiParams = {};
 		if (midiParams.generateInline === undefined) // default is to generate inline controls.
@@ -317,14 +324,14 @@ if (!window.ABCJS)
 
 		function callback(div, tune, index) {
 			var html = "";
-			var midi = window.ABCJS.midi.create(tune, midiParams);
+			var midiInst = midiCreate(tune, midiParams);
 			if (midiParams.generateInline) {
-				var inlineMidi = midi.inline ? midi.inline : midi;
-				html += window.ABCJS.midi.generateMidiControls(tune, midiParams, inlineMidi, index);
+				var inlineMidi = midiInst.inline ? midiInst.inline : midiInst;
+				html += midi.generateMidiControls(tune, midiParams, inlineMidi, index);
 			}
 			if (midiParams.generateDownload) {
-				var downloadMidi = midi.download ? midi.download : midi;
-				html += window.ABCJS.midi.generateMidiDownloadLink(tune, midiParams, downloadMidi, index);
+				var downloadMidi = midiInst.download ? midiInst.download : midiInst;
+				html += midi.generateMidiDownloadLink(tune, midiParams, downloadMidi, index);
 			}
 			div.innerHTML = html;
 			var find = function(element, cls) {
@@ -347,7 +354,7 @@ if (!window.ABCJS)
 			}
 			if (midiParams.generateInline && midiParams.inlineControls && midiParams.inlineControls.startPlaying) {
 				var startButton = find(div, "abcjs-midi-start");
-				window.ABCJS.midi.startPlaying(startButton);
+				midi.startPlaying(startButton);
 			}
 
 		}
@@ -355,3 +362,5 @@ if (!window.ABCJS)
 		return renderEngine(callback, output, abc, parserParams, renderParams);
 	};
 })();
+
+module.exports = tunebook;

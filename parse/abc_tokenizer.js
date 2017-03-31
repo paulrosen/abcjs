@@ -14,19 +14,13 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global window */
-
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.parse)
-	window.ABCJS.parse = {};
+var parseCommon = require('./abc_common');
 
 // this is a series of functions that get a particular element out of the passed stream.
 // the return is the number of characters consumed, so 0 means that the element wasn't found.
 // also returned is the element found. This may be a different length because spaces may be consumed that aren't part of the string.
 // The return structure for most calls is { len: num_chars_consumed, token: str }
-window.ABCJS.parse.tokenizer = function() {
+var Tokenizer = function() {
 	this.skipWhiteSpace = function(str) {
 		for (var i = 0; i < str.length; i++) {
 		  if (!this.isWhiteSpace(str.charAt(i)))
@@ -116,7 +110,7 @@ window.ABCJS.parse.tokenizer = function() {
 		// The word 'clef' is optional, but if it appears, a clef MUST appear
 		var needsClef = false;
 		var strClef = str.substring(i);
-		if (window.ABCJS.parse.startsWith(strClef, 'clef=')) {
+		if (parseCommon.startsWith(strClef, 'clef=')) {
 			needsClef = true;
 			strClef = strClef.substring(5);
 			i += 5;
@@ -132,29 +126,29 @@ window.ABCJS.parse.tokenizer = function() {
 			strClef = strClef.substring(j);
 		}
 		var name = null;
-		if (window.ABCJS.parse.startsWith(strClef, 'treble'))
+		if (parseCommon.startsWith(strClef, 'treble'))
 			name = 'treble';
-		else if (window.ABCJS.parse.startsWith(strClef, 'bass3'))
+		else if (parseCommon.startsWith(strClef, 'bass3'))
 			name = 'bass3';
-		else if (window.ABCJS.parse.startsWith(strClef, 'bass'))
+		else if (parseCommon.startsWith(strClef, 'bass'))
 			name = 'bass';
-		else if (window.ABCJS.parse.startsWith(strClef, 'tenor'))
+		else if (parseCommon.startsWith(strClef, 'tenor'))
 			name = 'tenor';
-		else if (window.ABCJS.parse.startsWith(strClef, 'alto2'))
+		else if (parseCommon.startsWith(strClef, 'alto2'))
 			name = 'alto2';
-		else if (window.ABCJS.parse.startsWith(strClef, 'alto1'))
+		else if (parseCommon.startsWith(strClef, 'alto1'))
 			name = 'alto1';
-		else if (window.ABCJS.parse.startsWith(strClef, 'alto'))
+		else if (parseCommon.startsWith(strClef, 'alto'))
 			name = 'alto';
-		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'none')))
+		else if (!bExplicitOnly && (needsClef && parseCommon.startsWith(strClef, 'none')))
 			name = 'none';
-		else if (window.ABCJS.parse.startsWith(strClef, 'perc'))
+		else if (parseCommon.startsWith(strClef, 'perc'))
 			name = 'perc';
-		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'C')))
+		else if (!bExplicitOnly && (needsClef && parseCommon.startsWith(strClef, 'C')))
 			name = 'tenor';
-		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'F')))
+		else if (!bExplicitOnly && (needsClef && parseCommon.startsWith(strClef, 'F')))
 			name = 'bass';
-		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'G')))
+		else if (!bExplicitOnly && (needsClef && parseCommon.startsWith(strClef, 'G')))
 			name = 'treble';
 		else
 			return {len: i+5, warn: "Unknown clef specified: " + strOrig};
@@ -274,7 +268,7 @@ window.ABCJS.parse.tokenizer = function() {
 		var i = this.skipWhiteSpace(str);
 		if (finished(str, i))
 			return 0;
-		if (window.ABCJS.parse.startsWith(str.substring(i), match))
+		if (parseCommon.startsWith(str.substring(i), match))
 			return i+match.length;
 		return 0;
 	};
@@ -579,7 +573,7 @@ window.ABCJS.parse.tokenizer = function() {
 		var arr = str.split('\\');
 		if (arr.length === 1) return str;
 		var out = null;
-		window.ABCJS.parse.each(arr, function(s) {
+		parseCommon.each(arr, function(s) {
 			if (out === null)
 				out = s;
 			else {
@@ -653,9 +647,9 @@ window.ABCJS.parse.tokenizer = function() {
 	};
 
 	this.theReverser = function(str) {
-		if (window.ABCJS.parse.endsWith(str, ", The"))
+		if (parseCommon.endsWith(str, ", The"))
 			return "The " + str.substring(0, str.length-5);
-		if (window.ABCJS.parse.endsWith(str, ", A"))
+		if (parseCommon.endsWith(str, ", A"))
 			return "A " + str.substring(0, str.length-3);
 		return str;
 	};
@@ -663,8 +657,8 @@ window.ABCJS.parse.tokenizer = function() {
 	this.stripComment = function(str) {
 		var i = str.indexOf('%');
 		if (i >= 0)
-			return window.ABCJS.parse.strip(str.substring(0, i));
-		return window.ABCJS.parse.strip(str);
+			return parseCommon.strip(str.substring(0, i));
+		return parseCommon.strip(str);
 	};
 
 	this.getInt = function(str) {
@@ -754,3 +748,5 @@ window.ABCJS.parse.tokenizer = function() {
 		}
 	};
 };
+
+module.exports = Tokenizer;

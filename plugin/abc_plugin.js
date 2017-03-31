@@ -18,6 +18,10 @@
 //    requires: abcjs, raphael, jquery
 /*global jQuery, ABCJS, Raphael, abcjs_is_user_script, abcjs_plugin_autostart */
 
+var TuneBook = require('../api/abc_tunebook').TuneBook;
+var Parse = require('../parse/abc_parse');
+var EngraverController = require('../write/abc_engraver_controller');
+
 if (!window.ABCJS)
 	window.ABCJS = {};
 
@@ -151,22 +155,22 @@ window.ABCJS.plugin.render = function (contextnode, abcstring) {
 	  if (this.debug) {
 		  alert("About to render:\n\n" + abcstring);
 	  }
-    var tunebook = new ABCJS.TuneBook(abcstring);
-    var abcParser = new ABCJS.parse.Parse();
+    var tunebook = new TuneBook(abcstring);
+    var abcParser = new Parse();
     abcParser.parse(tunebook.tunes[0].abc);
     var tune = abcParser.getTune();
 
     var doPrint = function() {
 	try {
 	  var paper = Raphael(abcdiv.get(0), 800, 400);
-	  var engraver_controller = new ABCJS.write.EngraverController(paper,self.render_options);
+	  var engraver_controller = new EngraverController(paper,self.render_options);
 	  engraver_controller.engraveABC(tune);
 	} catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
 	  // can't remember why we don't do this in the general case, but there was a good reason
 	  abcdiv.remove();
 	  abcdiv = $("<div class='"+self.render_classname+"'></div>");
 	  paper = Raphael(abcdiv.get(0), 800, 400);
-	  engraver_controller = new ABCJS.write.EngraverController(paper);
+	  engraver_controller = new EngraverController(paper);
 	  engraver_controller.engraveABC(tune);
 	  if (self.render_before) {
 	    $(contextnode).before(abcdiv);

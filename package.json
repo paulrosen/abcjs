@@ -1,0 +1,37 @@
+{
+  "name": "abcjs",
+  "version": "3.1.1",
+  "description": "Renderer for abc music notation",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "browserify index.js -o dist/abc.js --standalone ABCJS",
+    "serve": "watchify index.js -o dist/abc.js --standalone ABCJS",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dellC/abcjs.git"
+  },
+  "keywords": [
+    "abc",
+    "music",
+    "notation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dellC/abcjs/issues"
+  },
+  "homepage": "https://github.com/dellC/abcjs#readme",
+  "devDependencies": {
+    "browserify": "14.1.0",
+    "watchify": "3.9.0"
+  },
+  "dependencies": {
+    "midi": "git://github.com/paulrosen/MIDI.js.git#abcjs",
+    "raphael": "2.1.4"
+  }
+}

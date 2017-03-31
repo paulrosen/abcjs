@@ -14,15 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS */
-
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
-
-ABCJS.write.TieElem = function TieElem(anchor1, anchor2, above, forceandshift, isTie) {
+var TieElem = function TieElem(anchor1, anchor2, above, forceandshift, isTie) {
 	this.anchor1 = anchor1; // must have a .x and a .pitch, and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
 	this.above = above; // true if the arc curves above
@@ -30,7 +22,7 @@ ABCJS.write.TieElem = function TieElem(anchor1, anchor2, above, forceandshift, i
 	this.isTie = isTie;
 };
 
-ABCJS.write.TieElem.prototype.setEndAnchor = function(anchor2) {
+TieElem.prototype.setEndAnchor = function(anchor2) {
 	this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
 	if (this.isTie) {
 		if (this.anchor1) // this can happen if the tie comes from the previous line.
@@ -41,23 +33,23 @@ ABCJS.write.TieElem.prototype.setEndAnchor = function(anchor2) {
 };
 
 // If we encounter a repeat sign, then we don't want to extend either a tie or a slur past it, so these are called to be a limit.
-ABCJS.write.TieElem.prototype.setStartX = function(startLimitElem) {
+TieElem.prototype.setStartX = function(startLimitElem) {
 	this.startLimitX = startLimitElem;
 };
 
-ABCJS.write.TieElem.prototype.setEndX = function(endLimitElem) {
+TieElem.prototype.setEndX = function(endLimitElem) {
 	this.endLimitX = endLimitElem;
 };
 
-ABCJS.write.TieElem.prototype.setHint = function () {
+TieElem.prototype.setHint = function () {
 	this.hint = true;
 };
 
-ABCJS.write.TieElem.prototype.setUpperAndLowerElements = function(positionY) {
+TieElem.prototype.setUpperAndLowerElements = function(positionY) {
 	// Doesn't depend on the highest and lowest, so there's nothing to do here.
 };
 
-ABCJS.write.TieElem.prototype.layout = function (lineStartX, lineEndX) {
+TieElem.prototype.layout = function (lineStartX, lineEndX) {
 	function getPitch(anchor, isAbove, isTie) {
 		if (isTie) {
 			// Always go to the note
@@ -122,7 +114,7 @@ ABCJS.write.TieElem.prototype.layout = function (lineStartX, lineEndX) {
 	}
 };
 
-ABCJS.write.TieElem.prototype.draw = function (renderer, linestartx, lineendx) {
+TieElem.prototype.draw = function (renderer, linestartx, lineendx) {
 	this.layout(linestartx, lineendx);
 
 	var klass;
@@ -131,3 +123,5 @@ ABCJS.write.TieElem.prototype.draw = function (renderer, linestartx, lineendx) {
 	renderer.drawArc(this.startX, this.endX, this.startY, this.endY,  this.above, klass, this.isTie);
 
 };
+
+module.exports = TieElem;

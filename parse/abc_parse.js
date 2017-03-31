@@ -16,16 +16,18 @@
 
 /*global window */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var parseCommon = require('./abc_common');
+var parseDirective = require('./abc_parse_directive');
+var ParseHeader = require('./abc_parse_header');
+var parseKeyVoice = require('./abc_parse_key_voice');
+var Tokenizer = require('./abc_tokenizer');
 
-if (!window.ABCJS.parse)
-	window.ABCJS.parse = {};
+var Tune = require('../data/abc_tune');
 
-window.ABCJS.parse.Parse = function() {
+var Parse = function() {
 	"use strict";
-	var tune = new window.ABCJS.data.Tune();
-	var tokenizer = new window.ABCJS.parse.tokenizer();
+	var tune = new Tune();
+	var tokenizer = new Tokenizer();
 
 	this.getTune = function() {
 		return tune;
@@ -116,10 +118,10 @@ window.ABCJS.parse.Parse = function() {
 	};
 
 	var encode = function(str) {
-		var ret = window.ABCJS.parse.gsub(str, '\x12', ' ');
-		ret = window.ABCJS.parse.gsub(ret, '&', '&amp;');
-		ret = window.ABCJS.parse.gsub(ret, '<', '&lt;');
-		return window.ABCJS.parse.gsub(ret, '>', '&gt;');
+		var ret = parseCommon.gsub(str, '\x12', ' ');
+		ret = parseCommon.gsub(ret, '&', '&amp;');
+		ret = parseCommon.gsub(ret, '<', '&lt;');
+		return parseCommon.gsub(ret, '>', '&gt;');
 	};
 
 	var warn = function(str, line, col_num) {
@@ -132,7 +134,7 @@ window.ABCJS.parse.Parse = function() {
 			encode(line.substring(col_num+1));
 		addWarning("Music Line:" + tune.getNumLines() + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
 	};
-	var header = new window.ABCJS.parse.ParseHeader(tokenizer, warn, multilineVars, tune);
+	var header = new ParseHeader(tokenizer, warn, multilineVars, tune);
 
 	this.getWarnings = function() {
 		return multilineVars.warnings;
@@ -214,24 +216,24 @@ window.ABCJS.parse.Parse = function() {
 				macro = macro.substring(1);
 			if (macro.charAt(macro.length-1) === '!' || macro.charAt(macro.length-1) === '+')
 				macro = macro.substring(0, macro.length-1);
-			if (window.ABCJS.parse.detect(legalAccents, function(acc) {
+			if (parseCommon.detect(legalAccents, function(acc) {
 					return (macro === acc);
 				}))
 				return [ 1, macro ];
-			else if (window.ABCJS.parse.detect(volumeDecorations, function(acc) {
+			else if (parseCommon.detect(volumeDecorations, function(acc) {
 					return (macro === acc);
 				})) {
 				if (multilineVars.volumePosition === 'hidden')
 					macro = "";
 				return [1, macro];
-			} else if (window.ABCJS.parse.detect(dynamicDecorations, function(acc) {
+			} else if (parseCommon.detect(dynamicDecorations, function(acc) {
 					if (multilineVars.dynamicPosition === 'hidden')
 						macro = "";
 					return (macro === acc);
 				})) {
 				return [1, macro];
 			} else {
-				if (!window.ABCJS.parse.detect(multilineVars.ignoredDecorations, function(dec) {
+				if (!parseCommon.detect(multilineVars.ignoredDecorations, function(dec) {
 					return (macro === dec);
 				}))
 					warn("Unknown macro: " + macro, line, i);
@@ -250,18 +252,18 @@ window.ABCJS.parse.Parse = function() {
 				// Be sure that the accent is recognizable.
 			if (ret[1].length > 0 && (ret[1].charAt(0) === '^' || ret[1].charAt(0) ==='_'))
 					ret[1] = ret[1].substring(1);	// TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
-				if (window.ABCJS.parse.detect(legalAccents, function(acc) {
+				if (parseCommon.detect(legalAccents, function(acc) {
 					return (ret[1] === acc);
 				}))
 					return ret;
-				if (window.ABCJS.parse.detect(volumeDecorations, function(acc) {
+				if (parseCommon.detect(volumeDecorations, function(acc) {
 						return (ret[1] === acc);
 					})) {
 					if (multilineVars.volumePosition === 'hidden' )
 						ret[1] = '';
 						return ret;
 				}
-				if (window.ABCJS.parse.detect(dynamicDecorations, function(acc) {
+				if (parseCommon.detect(dynamicDecorations, function(acc) {
 						return (ret[1] === acc);
 					})) {
 					if (multilineVars.dynamicPosition === 'hidden' )
@@ -269,7 +271,7 @@ window.ABCJS.parse.Parse = function() {
 						return ret;
 				}
 
-				if (window.ABCJS.parse.detect(accentPseudonyms, function(acc) {
+				if (parseCommon.detect(accentPseudonyms, function(acc) {
 					if (ret[1] === acc[0]) {
 						ret[1] = acc[1];
 						return true;
@@ -278,7 +280,7 @@ window.ABCJS.parse.Parse = function() {
 				}))
 					return ret;
 
-				if (window.ABCJS.parse.detect(accentDynamicPseudonyms, function(acc) {
+				if (parseCommon.detect(accentDynamicPseudonyms, function(acc) {
 					if (ret[1] === acc[0]) {
 						ret[1] = acc[1];
 						return true;
@@ -408,7 +410,7 @@ window.ABCJS.parse.Parse = function() {
 
 	var addWords = function(line, words) {
 		if (!line) { warn("Can't add words before the first line of music", line, 0); return; }
-		words = window.ABCJS.parse.strip(words);
+		words = parseCommon.strip(words);
 		if (words.charAt(words.length-1) !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
 		var word_list = [];
@@ -416,11 +418,11 @@ window.ABCJS.parse.Parse = function() {
 		var last_divider = 0;
 		var replace = false;
 		var addWord = function(i) {
-			var word = window.ABCJS.parse.strip(words.substring(last_divider, i));
+			var word = parseCommon.strip(words.substring(last_divider, i));
 			last_divider = i+1;
 			if (word.length > 0) {
 				if (replace)
-					word = window.ABCJS.parse.gsub(word,'~', ' ');
+					word = parseCommon.gsub(word,'~', ' ');
 				var div = words.charAt(i);
 				if (div !== '_' && div !== '-')
 					div = ' ';
@@ -438,7 +440,7 @@ window.ABCJS.parse.Parse = function() {
 					break;
 				case '-':
 					if (!addWord(i) && word_list.length > 0) {
-						window.ABCJS.parse.last(word_list).divider = '-';
+						parseCommon.last(word_list).divider = '-';
 						word_list.push({skip: true, to: 'next'});
 					}
 					break;
@@ -461,7 +463,7 @@ window.ABCJS.parse.Parse = function() {
 		}
 
 		var inSlur = false;
-		window.ABCJS.parse.each(line, function(el) {
+		parseCommon.each(line, function(el) {
 			if (word_list.length !== 0) {
 				if (word_list[0].skip) {
 					switch (word_list[0].to) {
@@ -485,7 +487,7 @@ window.ABCJS.parse.Parse = function() {
 	var addSymbols = function(line, words) {
 		// TODO-PER: Currently copied from w: line. This needs to be read as symbols instead.
 		if (!line) { warn("Can't add symbols before the first line of music", line, 0); return; }
-		words = window.ABCJS.parse.strip(words);
+		words = parseCommon.strip(words);
 		if (words.charAt(words.length-1) !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
 		var word_list = [];
@@ -493,11 +495,11 @@ window.ABCJS.parse.Parse = function() {
 		var last_divider = 0;
 		var replace = false;
 		var addWord = function(i) {
-			var word = window.ABCJS.parse.strip(words.substring(last_divider, i));
+			var word = parseCommon.strip(words.substring(last_divider, i));
 			last_divider = i+1;
 			if (word.length > 0) {
 				if (replace)
-					word = window.ABCJS.parse.gsub(word, '~', ' ');
+					word = parseCommon.gsub(word, '~', ' ');
 				var div = words.charAt(i);
 				if (div !== '_' && div !== '-')
 					div = ' ';
@@ -515,7 +517,7 @@ window.ABCJS.parse.Parse = function() {
 					break;
 				case '-':
 					if (!addWord(i) && word_list.length > 0) {
-						window.ABCJS.parse.last(word_list).divider = '-';
+						parseCommon.last(word_list).divider = '-';
 						word_list.push({skip: true, to: 'next'});
 					}
 					break;
@@ -538,7 +540,7 @@ window.ABCJS.parse.Parse = function() {
 		}
 
 		var inSlur = false;
-		window.ABCJS.parse.each(line, function(el) {
+		parseCommon.each(line, function(el) {
 			if (word_list.length !== 0) {
 				if (word_list[0].skip) {
 					switch (word_list[0].to) {
@@ -802,12 +804,12 @@ window.ABCJS.parse.Parse = function() {
 		var params = { startChar: -1, endChar: -1};
 		if (multilineVars.partForNextLine.length)
 			params.part = multilineVars.partForNextLine;
-		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? window.ABCJS.parse.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : window.ABCJS.parse.clone(multilineVars.clef) ;
-		params.key = window.ABCJS.parse.parseKeyVoice.deepCopyKey(multilineVars.key);
-		window.ABCJS.parse.parseKeyVoice.addPosToKey(params.clef, params.key);
+		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? parseCommon.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : parseCommon.clone(multilineVars.clef) ;
+		params.key = parseKeyVoice.deepCopyKey(multilineVars.key);
+		parseKeyVoice.addPosToKey(params.clef, params.key);
 		if (multilineVars.meter !== null) {
 			if (multilineVars.currentVoice) {
-				window.ABCJS.parse.each(multilineVars.staves, function(st) {
+				parseCommon.each(multilineVars.staves, function(st) {
 					st.meter = multilineVars.meter;
 				});
 				params.meter = multilineVars.staves[multilineVars.currentVoice.staffNum].meter;
@@ -1226,7 +1228,7 @@ window.ABCJS.parse.Parse = function() {
 									}
 
 									if (multilineVars.inTie) {
-										window.ABCJS.parse.each(el.pitches, function(pitch) { pitch.endTie = true; });
+										parseCommon.each(el.pitches, function(pitch) { pitch.endTie = true; });
 										multilineVars.inTie = false;
 									}
 
@@ -1248,7 +1250,7 @@ window.ABCJS.parse.Parse = function() {
 												if (el.endSlur === undefined) el.endSlur = 1; else el.endSlur++;
 												break;
 											case '-':
-												window.ABCJS.parse.each(el.pitches, function(pitch) { pitch.startTie = {}; });
+												parseCommon.each(el.pitches, function(pitch) { pitch.startTie = {}; });
 												multilineVars.inTie = true;
 												break;
 											case '>':
@@ -1402,7 +1404,7 @@ window.ABCJS.parse.Parse = function() {
 		});
 		for (var i = 0; i < nextVoice.length; i++) {
 			var element = nextVoice[i];
-			var hint = window.ABCJS.parse.clone(element);
+			var hint = parseCommon.clone(element);
 			voice.push(hint);
 			if (element.el_type === 'bar')
 					return;
@@ -1455,8 +1457,8 @@ window.ABCJS.parse.Parse = function() {
 		header.reset(tokenizer, warn, multilineVars, tune);
 
 		// Take care of whatever line endings come our way
-		strTune = window.ABCJS.parse.gsub(strTune, '\r\n', '\n');
-		strTune = window.ABCJS.parse.gsub(strTune, '\r', '\n');
+		strTune = parseCommon.gsub(strTune, '\r\n', '\n');
+		strTune = parseCommon.gsub(strTune, '\r', '\n');
 		strTune += '\n';	// Tacked on temporarily to make the last line continuation work
 		strTune = strTune.replace(/\n\\.*\n/g, "\n");	// get rid of latex commands.
 		var continuationReplacement = function(all, backslash, comment){
@@ -1466,13 +1468,13 @@ window.ABCJS.parse.Parse = function() {
 		};
 		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
 		var lines = strTune.split('\n');
-		if (window.ABCJS.parse.last(lines).length === 0)	// remove the blank line we added above.
+		if (parseCommon.last(lines).length === 0)	// remove the blank line we added above.
 			lines.pop();
 		try {
 			if (switches.format) {
-				window.ABCJS.parse.parseDirective.globalFormatting(switches.format);
+				parseDirective.globalFormatting(switches.format);
 			}
-			window.ABCJS.parse.each(lines,  function(line) {
+			parseCommon.each(lines,  function(line) {
 				if (switches.header_only && multilineVars.is_in_header === false)
 					throw "normal_abort";
 				if (switches.stop_on_warning && multilineVars.warnings)
@@ -1484,19 +1486,19 @@ window.ABCJS.parse.Parse = function() {
 					} else
 						tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
 				} else if (multilineVars.inTextBlock) {
-					if (window.ABCJS.parse.startsWith(line, "%%endtext")) {
+					if (parseCommon.startsWith(line, "%%endtext")) {
 						//tune.addMetaText("textBlock", multilineVars.textBlock);
 						tune.addText(multilineVars.textBlock);
 						multilineVars.inTextBlock = false;
 					}
 					else {
-						if (window.ABCJS.parse.startsWith(line, "%%"))
+						if (parseCommon.startsWith(line, "%%"))
 							multilineVars.textBlock += ' ' + line.substring(2);
 						else
 							multilineVars.textBlock += ' ' + line;
 					}
 				} else if (multilineVars.inPsBlock) {
-					if (window.ABCJS.parse.startsWith(line, "%%endps")) {
+					if (parseCommon.startsWith(line, "%%endps")) {
 						// Just ignore postscript
 						multilineVars.inPsBlock = false;
 					}
@@ -1528,3 +1530,5 @@ window.ABCJS.parse.Parse = function() {
 		}
 	};
 };
+
+module.exports = Parse;
