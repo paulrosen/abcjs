@@ -139,9 +139,12 @@ var animation = {};
 		shouldResetOverflow = options.scrollVertical || options.scrollHint;
 
 		if (options.showCursor) {
-			cursor = $('<div class="cursor" style="position: absolute;"></div>');
-			$(paper).append(cursor);
-			$(paper).css({ position: "relative" });
+			cursor = document.createElement('DIV');
+			cursor.className = 'cursor';
+			cursor.style.position = 'absolute';
+
+			paper.appendChild(cursor);
+			paper.style.position = 'relative';
 		}
 
 		stopNextTime = false;
@@ -330,7 +333,7 @@ var animation = {};
 		}
 
 		var lastTop = -1;
-		var inner = $(outer).find(".abcjs-inner");
+		// var inner = outer.querySelectorAll('.abcjs-inner');
 		currentMargin = 0;
 
 		if (options.scrollVertical) {
@@ -362,12 +365,10 @@ var animation = {};
 				setMargin(lastTop);
 			}
 			if (options.showCursor) {
-				cursor.css({
-					left: currentNote.left + "px",
-					top: currentNote.top + "px",
-					width: currentNote.width + "px",
-					height: currentNote.height + "px"
-				});
+				cursor.style.left = currentNote.left + "px";
+				cursor.style.top = currentNote.top + "px";
+				cursor.style.width = currentNote.width + "px";
+				cursor.style.height = currentNote.height + "px";
 			}
 			if (timingEvents.length > 0)
 				return timingEvents[0].time / beatLength;

@@ -5,7 +5,6 @@
 	<title>abcjs animation</title>
 
 	<script src="dist/abc.js" type="text/javascript"></script>
-	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 
 	<style media="screen" type="text/css">
 		.cursor-editor {
@@ -22,22 +21,6 @@
 		}
 	</style>
 
-	<script language="javascript" type="text/javascript">
-		window.onload = function() {
-			var body = $('body');
-			body.on("click", ".do-animation", function() {
-				var el = $(this);
-				var params = el.attr("data-params");
-				params = JSON.parse(params);
-				var paperSelector = el.attr("data-paper");
-				var paper = $(paperSelector)[0];
-				window.ABCJS.startAnimation(paper, abc_editor.tunes[0], params);
-			});
-
-			abc_editor = new window.ABCJS.Editor("abc", { paper_id: "paper0", warnings_id:"warnings",
-				parser_options: {}, render_options: { add_classes: true } });
-		}
-	</script>
 </head>
 
 <body>
@@ -83,5 +66,34 @@ G4 F4 E8|D4 E4 C8-|C8 F8|E4 E4 C8|]
 	</div>
 	<div id="warnings"></div>
 </div>
+
+	<script>
+		var abc_editor = new window.ABCJS.Editor(
+			"abc", {
+				paper_id: "paper0",
+				warnings_id:"warnings",
+				parser_options: {},
+				render_options: {
+					add_classes: true
+				}
+			}
+		);
+
+		var buttons = document.querySelectorAll("BUTTON.do-animation");
+
+		var button_onclick = function () {
+			var params = this.attributes["data-params"].value;
+			params = JSON.parse(params);
+
+			var paperSelector = this.attributes["data-paper"].value;
+			var paper = document.querySelectorAll(paperSelector)[0];
+
+			ABCJS.startAnimation(paper, abc_editor.tunes[0], params);
+		};
+
+		for (var i = 0, ii = buttons.length; i < ii; ++i) {
+			buttons[i].addEventListener('click', button_onclick, false);
+		}
+	</script>
 </body>
 </html>
