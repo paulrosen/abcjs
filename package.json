@@ -11,7 +11,9 @@
     "serve": "watchify index.js -o dist/abc.js --standalone ABCJS",
     "build:plugin": "browserify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS",
     "serve:plugin": "watchify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:test": "browserify test/spec/index.js -o dist/abc-test.js",
+    "serve:test": "watchify test/spec/index.js -o dist/abc-test.js --debug",
+    "test": "npm run build:test && mocha-phantomjs test/index.html"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,10 @@
   "homepage": "https://github.com/dellC/abcjs#readme",
   "devDependencies": {
     "browserify": "14.1.0",
+    "expect": "1.20.2",
+    "expect.js": "0.3.1",
+    "mocha": "^3.2.0",
+    "mocha-phantomjs": "4.1.0",
     "watchify": "3.9.0"
   },
   "dependencies": {
