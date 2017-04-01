@@ -16,16 +16,15 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //    requires: abcjs, raphael, jquery
-/*global jQuery, ABCJS, Raphael, abcjs_is_user_script, abcjs_plugin_autostart */
+/*global jQuery, abcjs_is_user_script, abcjs_plugin_autostart */
+
+var Raphael = require('raphael');
 
 var TuneBook = require('../api/abc_tunebook').TuneBook;
 var Parse = require('../parse/abc_parse');
 var EngraverController = require('../write/abc_engraver_controller');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-window.ABCJS.Plugin = function() {
+var Plugin = function() {
 	"use strict";
 	var is_user_script = false;
 	try {
@@ -45,11 +44,11 @@ window.ABCJS.Plugin = function() {
   //this.hide_text = "hide score for: ";
 	this.debug = false;
 };
-window.ABCJS.plugin = new window.ABCJS.Plugin();
+var plugin = new Plugin();
 
 jQuery(function($) {
 	"use strict";
-window.ABCJS.plugin.start = function() {
+plugin.start = function() {
 	var body = $("body");
   this.errors="";
   var elems = this.getABCContainingElements(body);
@@ -70,7 +69,7 @@ window.ABCJS.plugin.start = function() {
 };
 
 // returns a jquery set of the descendants (including self) of elem which have a text node which matches "X:"
-window.ABCJS.plugin.getABCContainingElements = function(elem) {
+plugin.getABCContainingElements = function(elem) {
   var results = $();
   var includeself = false; // whether self is already included (no need to include it again)
   var self = this;
@@ -94,7 +93,7 @@ window.ABCJS.plugin.getABCContainingElements = function(elem) {
 // (and it is not in a subelem)
 // for each abc piece, we surround it with a div, store the abctext in the 
 // div's data("abctext") and return an array 
-window.ABCJS.plugin.convertToDivs = function (elem) {
+plugin.convertToDivs = function (elem) {
   var self = this;
   var contents = $(elem).contents();
   var abctext = "";
@@ -143,7 +142,7 @@ window.ABCJS.plugin.convertToDivs = function (elem) {
   return results.get();
 };
 
-window.ABCJS.plugin.render = function (contextnode, abcstring) {
+plugin.render = function (contextnode, abcstring) {
   var abcdiv = $("<div class='"+this.render_classname+"'></div>");
   if (this.render_before) {
     $(contextnode).before(abcdiv);
@@ -178,10 +177,10 @@ window.ABCJS.plugin.render = function (contextnode, abcstring) {
 	    $(contextnode).after(abcdiv);
 	  }
 	}
-	if (ABCJS.MidiWriter && self.show_midi) {
-	  var midiwriter = new ABCJS.midi.MidiWriter(abcdiv.get(0),self.midi_options);
-	  midiwriter.writeABC(tune);
-	}
+	// if (ABCJS.MidiWriter && self.show_midi) {
+	//   var midiwriter = new ABCJS.midi.MidiWriter(abcdiv.get(0),self.midi_options);
+	//   midiwriter.writeABC(tune);
+	// }
       };
 
     var showtext = "<a class='abcshow' href='#'>"+this.show_text+(tune.metaText.title||"untitled")+"</a>";
@@ -213,5 +212,7 @@ window.ABCJS.plugin.render = function (contextnode, abcstring) {
 		// It's ok to fail, and we don't have to do anything.
 	}
 	if (autostart)
-		ABCJS.plugin.start();
+		plugin.start();
 });
+
+module.exports = plugin;
