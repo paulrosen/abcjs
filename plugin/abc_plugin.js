@@ -16,16 +16,16 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //    requires: abcjs, raphael, jquery
-/*global jQuery, ABCJS, Raphael, abcjs_is_user_script, abcjs_plugin_autostart */
+/*global abcjs_is_user_script, abcjs_plugin_autostart */
+"use strict";
+
+var Raphael = require('raphael');
 
 var TuneBook = require('../api/abc_tunebook').TuneBook;
 var Parse = require('../parse/abc_parse');
 var EngraverController = require('../write/abc_engraver_controller');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-window.ABCJS.Plugin = function() {
+var Plugin = function() {
 	"use strict";
 	var is_user_script = false;
 	try {
@@ -45,12 +45,10 @@ window.ABCJS.Plugin = function() {
   //this.hide_text = "hide score for: ";
 	this.debug = false;
 };
-window.ABCJS.plugin = new window.ABCJS.Plugin();
+var plugin = new Plugin();
 
-jQuery(function($) {
-	"use strict";
-window.ABCJS.plugin.start = function() {
-	var body = $("body");
+plugin.start = function() {
+  var body = window.document.body;
   this.errors="";
   var elems = this.getABCContainingElements(body);
 	if (this.debug) {
@@ -59,34 +57,37 @@ window.ABCJS.plugin.start = function() {
 			alert(str);
 		}
 	}
-  var self = this;
-  var divs = elems.map(function(i,elem){
-      return self.convertToDivs(elem);
+  var divs = elems.map(this.convertToDivs, this)
+    .reduce(function (a, b) {
+      return a.concat(b);
     });
-  this.auto_render = (divs.size()<=this.auto_render_threshold);
-  divs.each(function(i,elem){
-      self.render(elem,$(elem).data("abctext"));
-    });
+  this.auto_render = (divs.length <= this.auto_render_threshold);
+  divs.forEach(function (elem) {
+    this.render(elem, elem.abctext_);
+  }, this);
 };
 
 // returns a jquery set of the descendants (including self) of elem which have a text node which matches "X:"
-window.ABCJS.plugin.getABCContainingElements = function(elem) {
-  var results = $();
+plugin.getABCContainingElements = function(elem) {
+  var results = [];
   var includeself = false; // whether self is already included (no need to include it again)
-  var self = this;
   // TODO maybe look to see whether it's even worth it by using textContent ?
-  $(elem).contents().each(function() {
-      if (this.nodeType === 3 && !includeself) {
-	if (this.nodeValue.match(/^\s*X:/m)) {
-		if (this.parentNode.tagName.toLowerCase() !== 'textarea') {
-		  results = results.add($(elem));
-		  includeself = true;
-		}
-	}
-      } else if (this.nodeType===1 && !$(this).is("textarea")) {
-	results = results.add(self.getABCContainingElements(this));
+
+  var child;
+  for (var i = 0, ii = elem.childNodes.length; i < ii; ++i) {
+    child = elem.childNodes[i];
+    if (child.nodeType === 3 && !includeself) {
+      if (child.nodeValue.match(/^\s*X:/m)) {
+        if (child.parentNode.tagName !== 'TEXTAREA') {
+          results.push(elem);
+          includeself = true;
+        }
       }
-    });
+    } else if (child.nodeType === 1 && child.tagName !== 'TEXTAREA') {
+      results = results.concat(this.getABCContainingElements(child));
+    }
+  }
+
   return results;
 };
 
@@ -94,124 +95,152 @@ window.ABCJS.plugin.getABCContainingElements = function(elem) {
 // (and it is not in a subelem)
 // for each abc piece, we surround it with a div, store the abctext in the 
 // div's data("abctext") and return an array 
-window.ABCJS.plugin.convertToDivs = function (elem) {
-  var self = this;
-  var contents = $(elem).contents();
+plugin.convertToDivs = function (elem) {
   var abctext = "";
   var abcdiv = null;
   var inabc = false;
   var brcount = 0;
-  var results = $();
-  contents.each(function(i,node){
-      if (node.nodeType===3 && !node.nodeValue.match(/^\s*$/)) {
-	brcount=0;
-	var text = node.nodeValue;
-	if (text.match(/^\s*X:/m)) {
-	  inabc=true;
-	  abctext="";
-	  abcdiv=$("<div class='"+self.text_classname+"'></div>");
-	  $(node).before(abcdiv);
-	  if (self.hide_abc) {
-	    abcdiv.hide();
-	  } 
-	}
-	if (inabc) {
-	  abctext += text.replace(/\n+/,"");
-	  abcdiv.append($(node));
-	} 
-      } else if (inabc && $(node).is("br")) {
-	abctext += "\n";
-	abcdiv.append($(node));
-	brcount++;
-	  } else if (inabc && node.nodeType === 1) {
-		  abctext += "\n";
-		 	abcdiv.append($(node));
-		  // just swallow this.
-      } else if (inabc) { // second br or whitespace textnode
-	inabc = false;
-	brcount=0;
-	abctext = abctext.replace(/\n+/,"\n"); // get rid of extra blank lines
-	abcdiv.data("abctext",abctext);
-	results = results.add(abcdiv);
+  var results = [];
+  var node;
+  var childNodes = Array.prototype.slice.call(elem.childNodes);
+  for (var i = 0, ii = childNodes.length; i < ii; ++i) {
+    node = childNodes[i];
+    if (node.nodeType===3 && !node.nodeValue.match(/^\s*$/)) {
+      brcount=0;
+      var text = node.nodeValue;
+      if (text.match(/^\s*X:/m)) {
+        inabc=true;
+        abctext="";
+        abcdiv = document.createElement("DIV");
+        abcdiv.className = this.text_classname;
+
+        node.parentElement.insertBefore(abcdiv, node);
+
+        if (this.hide_abc) {
+          abcdiv.style.display = 'none';
+        }
       }
-    });
-  if (inabc) {
-	  abctext = abctext.replace(/\n+$/,"\n").replace(/^\n+/,"\n"); // get rid of extra blank lines
-    abcdiv.data("abctext",abctext);
-    results = results.add(abcdiv);
+      if (inabc) {
+        abctext += text.replace(/\n+/,"");
+        abcdiv.appendChild(node)
+      }
+    } else if (inabc && node.tagName === 'BR') {
+      abctext += "\n";
+      abcdiv.appendChild(node)
+      brcount++;
+    } else if (inabc && node.nodeType === 1) {
+      abctext += "\n";
+      abcdiv.appendChild(node)
+      // just swallow this.
+    } else if (inabc) { // second br or whitespace textnode
+      inabc = false;
+      brcount=0;
+      abctext = abctext.replace(/\n+/,"\n"); // get rid of extra blank lines
+      abcdiv.abctext_ = abctext;
+
+      results.push(abcdiv);
+    }
   }
-  return results.get();
+  if (inabc) {
+    abctext = abctext.replace(/\n+$/,"\n").replace(/^\n+/,"\n"); // get rid of extra blank lines
+    abcdiv.abctext_ = abctext;
+    results.push(abcdiv);
+  }
+  return results;
 };
 
-window.ABCJS.plugin.render = function (contextnode, abcstring) {
-  var abcdiv = $("<div class='"+this.render_classname+"'></div>");
+plugin.render = function (contextnode, abcstring) {
+  var abcdiv = document.createElement('DIV');
+  abcdiv.className = this.render_classname;
   if (this.render_before) {
-    $(contextnode).before(abcdiv);
+    contextnode.parentElement.insertBefore(abcdiv, contextnode);
   } else {
-    $(contextnode).after(abcdiv);
+    if (contextnode.nextSibling) {
+      contextnode.parentElement.insertBefore(abcdiv, contextnode.nextSibling);
+    } else {
+      contextnode.parentElement.appendChild(abcdiv);
+    }
   }
   var self = this;
   try {
-	  if (this.debug) {
-		  alert("About to render:\n\n" + abcstring);
-	  }
+    if (this.debug) {
+      alert("About to render:\n\n" + abcstring);
+    }
     var tunebook = new TuneBook(abcstring);
     var abcParser = new Parse();
     abcParser.parse(tunebook.tunes[0].abc);
     var tune = abcParser.getTune();
 
     var doPrint = function() {
-	try {
-	  var paper = Raphael(abcdiv.get(0), 800, 400);
-	  var engraver_controller = new EngraverController(paper,self.render_options);
-	  engraver_controller.engraveABC(tune);
-	} catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
-	  // can't remember why we don't do this in the general case, but there was a good reason
-	  abcdiv.remove();
-	  abcdiv = $("<div class='"+self.render_classname+"'></div>");
-	  paper = Raphael(abcdiv.get(0), 800, 400);
-	  engraver_controller = new EngraverController(paper);
-	  engraver_controller.engraveABC(tune);
-	  if (self.render_before) {
-	    $(contextnode).before(abcdiv);
-	  } else {
-	    $(contextnode).after(abcdiv);
-	  }
-	}
-	if (ABCJS.MidiWriter && self.show_midi) {
-	  var midiwriter = new ABCJS.midi.MidiWriter(abcdiv.get(0),self.midi_options);
-	  midiwriter.writeABC(tune);
-	}
-      };
+      try {
+        var paper = Raphael(abcdiv, 800, 400);
+        var engraver_controller = new EngraverController(paper, self.render_options);
+        engraver_controller.engraveABC(tune);
+      } catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
+        // can't remember why we don't do this in the general case, but there was a good reason
+        abcdiv.remove();
+        abcdiv = document.createElement('DIV');
+        abcdiv.className = self.render_classname;
+        paper = Raphael(abcdiv, 800, 400);
+        engraver_controller = new EngraverController(paper);
+        engraver_controller.engraveABC(tune);
+        if (self.render_before) {
+          contextnode.parentElement.insertBefore(abcdiv, contextnode);
+        } else {
+          if (contextnode.nextSibling) {
+            contextnode.parentElement.insertBefore(abcdiv, contextnode.nextSibling);
+          } else {
+            contextnode.parentElement.appendChild(abcdiv);
+          }
+        }
+      }
+      // if (ABCJS.MidiWriter && self.show_midi) {
+      //   var midiwriter = new ABCJS.midi.MidiWriter(abcdiv.get(0),self.midi_options);
+      //   midiwriter.writeABC(tune);
+      // }
+    };
 
-    var showtext = "<a class='abcshow' href='#'>"+this.show_text+(tune.metaText.title||"untitled")+"</a>";
-    
+    var showtext = document.createElement('A');
+    showtext.className = 'abcshow';
+    showtext.href = '#';
+    showtext.innerHTML = this.show_text + (tune.metaText.title || 'untitled');
+
     if (this.auto_render) {
       doPrint();
     } else {
-      var showspan = $(showtext);
-      showspan.click(function(){
-	  doPrint();
-	  showspan.hide();
-	  return false;
-	});
-      abcdiv.before(showspan);
+      showtext.onclick = function () {
+        doPrint();
+        showtext.remove();
+        return false;
+      };
+
+      abcdiv.parentElement.insertBefore(showtext, abcdiv);
     }
 
-    } catch (e) {
-    this.errors+=e;
-   }
+  } catch (e) {
+    this.errors += e;
+  }
 };
 
 
 // There may be a variable defined which controls whether to automatically run the script. If it isn't
 // there then it will throw an exception, so we'll catch it here.
-	var autostart = true;
-	try {
-		autostart = abcjs_plugin_autostart;
-	} catch (ex) {
-		// It's ok to fail, and we don't have to do anything.
-	}
-	if (autostart)
-		ABCJS.plugin.start();
-});
+var autostart = true;
+if (typeof abcjs_plugin_autostart !== 'undefined') {
+  autostart = abcjs_plugin_autostart;
+}
+
+if (autostart &&
+    typeof window !== 'undefined' &&
+    typeof (window.document) !== 'undefined') {
+
+  if (window.document.readyState !== 'loading') {
+    plugin.start();
+  } else {
+    document.addEventListener('DOMContentLoaded', function () {
+      plugin.start();
+    });
+  }
+}
+
+module.exports = plugin;

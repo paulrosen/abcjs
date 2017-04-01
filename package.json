@@ -9,6 +9,8 @@
   "scripts": {
     "build": "browserify index.js -o dist/abc.js --standalone ABCJS",
     "serve": "watchify index.js -o dist/abc.js --standalone ABCJS",
+    "build:plugin": "browserify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS",
+    "serve:plugin": "watchify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
