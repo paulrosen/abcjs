@@ -1,1 +1,1 @@
-
+require('./parse/common');
