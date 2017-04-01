@@ -15,7 +15,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//    requires: abcjs, raphael, jquery
 /*global abcjs_is_user_script, abcjs_plugin_autostart */
 "use strict";
 
@@ -67,7 +66,7 @@ plugin.start = function() {
   }, this);
 };
 
-// returns a jquery set of the descendants (including self) of elem which have a text node which matches "X:"
+// returns an array of the descendants (including self) of elem which have a text node which matches "X:"
 plugin.getABCContainingElements = function(elem) {
   var results = [];
   var includeself = false; // whether self is already included (no need to include it again)
