@@ -157,16 +157,10 @@ var midi = {};
 	}
 
 	function addLoadEvent(func) {
-		var oldOnLoad = window.onload;
-		if (typeof window.onload !== 'function') {
-			window.onload = func;
+		if (window.document.readyState === 'loading') {
+			window.addEventListener('load', func);
 		} else {
-			window.onload = function() {
-				if (oldOnLoad) {
-					oldOnLoad();
-				}
-				func();
-			};
+			func();
 		}
 	}
 
