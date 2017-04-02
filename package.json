@@ -35,10 +35,11 @@
   "devDependencies": {
     "browserify": "14.1.0",
     "browserify-istanbul": "2.0.0",
+    "coveralls": "2.13.0",
     "expect": "1.20.2",
     "expect.js": "0.3.1",
     "istanbul": "0.4.5",
-    "mocha": "^3.2.0",
+    "mocha": "3.2.0",
     "mocha-phantomjs": "4.1.0",
     "mocha-phantomjs-istanbul": "0.0.2",
     "watchify": "3.9.0"
