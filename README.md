@@ -1,5 +1,8 @@
 # abcjs
 
+[![Build Status](https://travis-ci.org/dellC/abcjs.svg?branch=master)](https://travis-ci.org/dellC/abcjs)
+[![Coverage Status](https://coveralls.io/repos/github/dellC/abcjs/badge.svg?branch=travis-coveralls)](https://coveralls.io/github/dellC/abcjs?branch=travis-coveralls)
+
 **javascript for rendering abc music notation**
 
 **Special notes for Version 3.0: [MIDI](/midi.md)**
