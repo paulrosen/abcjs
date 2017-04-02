@@ -7,8 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "build": "browserify index.js -o dist/abcjs-min.js --standalone ABCJS",
-    "serve": "watchify index.js -o dist/abcjs-min.js --standalone ABCJS",
+    "build": "gulp",
+    "start": "gulp serve",
     "build:plugin": "browserify index-plugin.js -o dist/abcjs-plugin-min.js --standalone ABCJS",
     "serve:plugin": "watchify index-plugin.js -o dist/abcjs-plugin-min.js  --standalone ABCJS",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -34,8 +34,17 @@
   },
   "homepage": "https://github.com/paulrosen/abcjs#readme",
   "devDependencies": {
+    "browser-sync": "2.18.8",
     "browserify": "14.1.0",
+    "gulp": "3.9.1",
+    "gulp-cli": "1.2.2",
+    "gulp-rename": "1.2.2",
+    "gulp-sourcemaps": "2.5.1",
+    "gulp-uglify": "2.1.2",
+    "gulp-util": "3.0.8",
     "uglify-js": "2.8.22",
+    "vinyl-buffer": "1.0.0",
+    "vinyl-source-stream": "1.1.0",
     "watchify": "3.9.0"
   },
   "dependencies": {
