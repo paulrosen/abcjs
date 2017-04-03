@@ -8,11 +8,11 @@
   },
   "scripts": {
     "build": "browserify index.js -o dist/abc.js --standalone ABCJS",
-    "serve": "watchify index.js -o dist/abc.js --standalone ABCJS",
+    "serve": "concurrently \"watchify index.js -o dist/abc.js --standalone ABCJS\" \"live-server --watch=dist",
     "build:plugin": "browserify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS",
-    "serve:plugin": "watchify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS",
+    "serve:plugin": "concurrently \"watchify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS\" \"live-server --watch=dist",
     "build:test": "browserify test/spec/index.js -o dist/abc-test.js",
-    "serve:test": "watchify test/spec/index.js -o dist/abc-test.js --debug",
+    "serve:test": "concurrently \"watchify test/spec/index.js -o dist/abc-test.js --debug\" \"live-server --watch=dist --open=test\"",
     "test": "npm run build:test && mocha-phantomjs test/index.html",
     "build:coverage": "browserify -t browserify-istanbul test/spec/index.js -o dist/abc-test.js",
     "coverage": "npm run build:coverage && mocha-phantomjs test/index.html -k mocha-phantomjs-istanbul --reporter dot && istanbul report"
@@ -35,10 +35,12 @@
   "devDependencies": {
     "browserify": "14.1.0",
     "browserify-istanbul": "2.0.0",
+    "concurrently": "3.4.0",
     "coveralls": "2.13.0",
     "expect": "1.20.2",
     "expect.js": "0.3.1",
     "istanbul": "0.4.5",
+    "live-server": "1.2.0",
     "mocha": "3.2.0",
     "mocha-phantomjs": "4.1.0",
     "mocha-phantomjs-istanbul": "0.0.2",
