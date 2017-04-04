@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "browserify index.js -o dist/abc.js --standalone ABCJS",
-    "serve": "concurrently \"watchify index.js -o dist/abc.js --standalone ABCJS\" \"live-server --watch=dist",
+    "serve": "concurrently \"watchify index.js -o dist/abc.js --standalone ABCJS --debug -x canvas -x nw.gui\" \"live-server --watch=dist",
     "build:plugin": "browserify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS",
     "serve:plugin": "concurrently \"watchify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS\" \"live-server --watch=dist",
     "build:test": "browserify test/spec/index.js -o dist/abc-test.js",
