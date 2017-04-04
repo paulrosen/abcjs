@@ -85,6 +85,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `animationParams` | Default | Description |
 | ------------- | ----------- | ----------- |
 | hideFinishedMeasures | false | true or false |
+| hideCurrentMeasure | false | true or false |
 | showCursor | false | true or false |
 | bpm | whatever is in the Q: field | number of beats per minute. |
 
