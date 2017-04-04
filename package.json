@@ -7,10 +7,10 @@
     "test": "test"
   },
   "scripts": {
-    "build": "browserify index.js -o dist/abc.js --standalone ABCJS",
-    "serve": "watchify index.js -o dist/abc.js --standalone ABCJS",
-    "build:plugin": "browserify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS",
-    "serve:plugin": "watchify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS",
+    "build": "browserify index.js -o dist/abc.js -x canvas -x nw.gui --standalone ABCJS",
+    "serve": "watchify index.js -o dist/abc.js -x canvas -x nw.gui --standalone ABCJS",
+    "build:plugin": "browserify index-plugin.js -o dist/abc-plugin.js -x canvas -x nw.gui --standalone ABCJS",
+    "serve:plugin": "watchify index-plugin.js -o dist/abc-plugin.js -x canvas -x nw.gui --standalone ABCJS",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
