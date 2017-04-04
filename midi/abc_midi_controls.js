@@ -14,22 +14,27 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+if (typeof galactic === 'undefined') galactic = {};
+galactic.loc = {
+  isLocalUrl: function () { return false }
+};
+
 // require('midi/inc/shim/Base64');
 // require('midi/inc/shim/WebAudioAPI');
 // require('midi/inc/shim/WebMIDIAPI');
 // require('midi/inc/dom/request_script');
-// require('midi/inc/dom/request_xhr');
-// require('midi/inc/dom/util');
-// require('midi/inc/AudioSupports');
-// require('midi/inc/EventEmitter');
-// require('midi/js/loader');
-// require('midi/js/adaptors');
-// require('midi/js/adaptors-Audio');
-// require('midi/js/adaptors-AudioAPI');
-// require('midi/js/adaptors-MIDI');
-// require('midi/js/channels');
-// require('midi/js/gm');
-// require('midi/js/player');
+require('midi/inc/dom/request_xhr');
+require('midi/inc/dom/util')(galactic);
+require('midi/inc/AudioSupports');
+require('midi/inc/EventEmitter');
+require('midi/js/loader');
+require('midi/js/adaptors');
+require('midi/js/adaptors-Audio');
+require('midi/js/adaptors-AudioAPI');
+require('midi/js/adaptors-MIDI');
+require('midi/js/channels');
+require('midi/js/gm');
+require('midi/js/player');
 
 var midi = {};
 
@@ -105,6 +110,7 @@ var midi = {};
 	};
 
 	// The default location for the sound font files. Simply set this to a different value if the files are served in a different place.
+	// midi.soundfontUrl = "node_modules/midi/examples/soundfont/";
 	midi.soundfontUrl = "/soundfont/";
 
 	function hasClass(element, cls) {
