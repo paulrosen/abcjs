@@ -216,7 +216,11 @@ ABCJS.write.StaffGroupElement.prototype.layout = function(spacing, renderer, deb
 			voiceheaderw = Math.max(voiceheaderw,size.width);
 		}
 	}
-	x=x+voiceheaderw*1.1; // When there is no voice header, 110% of 0 is 0
+	if (voiceheaderw) {
+		// Give enough spacing to the right - we use the width of an A for the amount of spacing.
+		var sizeW = renderer.getTextSize("A", 'voicefont', '');
+		x = x + voiceheaderw +sizeW.width;
+	}
 	this.startx=x;
 	if (this.brace) {
 		this.brace.setLocation(this.startx);
