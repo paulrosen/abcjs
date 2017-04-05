@@ -402,7 +402,7 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 				case "V:":
 					window.ABCJS.parse.parseKeyVoice.parseVoice(line, 2, line.length);
 //						startNewLine();
-					return [ line.length, line.charAt(i), window.ABCJS.parse(line.substring(i+2))];
+					return [ line.length, line.charAt(i), window.ABCJS.parse.strip(line.substring(i+2))];
 				default:
 					// TODO: complain about unhandled header
 			}
