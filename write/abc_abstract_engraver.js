@@ -704,10 +704,7 @@ ABCJS.write.AbstractEngraver.prototype.createNote = function(elem, nostem, dontD
         break;
       case "below":
 		  // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-                         var eachLine = elem.chord[i].name.split("\n");
-                         for (var ii = 0; ii < eachLine.length; ii++) {
-                                abselem.addRight(new ABCJS.write.RelativeElement(eachLine[ii], x, chordWidth+chordMargin, undefined, {type:"text", position: "below", height: chordHeight}));
-                         }
+		  abselem.addRight(new ABCJS.write.RelativeElement(elem.chord[i].name, 0, chordWidth+chordMargin, undefined, {type: "text", position: "below", height: chordHeight}));
     break;
 		case "above":
 			// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
