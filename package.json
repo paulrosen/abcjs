@@ -7,8 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "build": "browserify index.js -o dist/abc.js --standalone ABCJS",
-    "serve": "concurrently \"watchify index.js -o dist/abc.js --standalone ABCJS --debug -x canvas -x nw.gui\" \"live-server --watch=dist",
+    "build": "gulp",
+    "start": "gulp serve",
     "build:plugin": "browserify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS",
     "serve:plugin": "concurrently \"watchify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS\" \"live-server --watch=dist",
     "build:test": "browserify test/spec/index.js -o dist/abc-test.js",
@@ -33,17 +33,26 @@
   },
   "homepage": "https://github.com/dellC/abcjs#readme",
   "devDependencies": {
+    "browser-sync": "2.18.8",
     "browserify": "14.1.0",
     "browserify-istanbul": "2.0.0",
     "concurrently": "3.4.0",
     "coveralls": "2.13.0",
     "expect": "1.20.2",
     "expect.js": "0.3.1",
+    "gulp": "3.9.1",
+    "gulp-cli": "1.2.2",
+    "gulp-rename": "1.2.2",
+    "gulp-sourcemaps": "2.5.1",
+    "gulp-uglify": "2.1.2",
+    "gulp-util": "3.0.8",
     "istanbul": "0.4.5",
     "live-server": "1.2.0",
     "mocha": "3.2.0",
     "mocha-phantomjs": "4.1.0",
     "mocha-phantomjs-istanbul": "0.0.2",
+    "vinyl-buffer": "1.0.0",
+    "vinyl-source-stream": "1.1.0",
     "watchify": "3.9.0"
   },
   "dependencies": {
