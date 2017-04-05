@@ -94,6 +94,7 @@ var animation = {};
 	// tune: the tune object returned by renderAbc.
 	// options: a hash containing the following:
 	//    hideFinishedMeasures: true or false [ false is the default ]
+	//    hideCurrentMeasure: true or false [ false is the default ]
 	//    showCursor: true or false [ false is the default ]
 	//    bpm: number of beats per minute [ the default is whatever is in the Q: field ]
 	//    scrollHorizontal: true or false [ false is the default ]
@@ -186,6 +187,21 @@ var animation = {};
 		if (options.scrollHorizontal) {
 			paper.style.marginLeft = "0px";
 			scrollTimer = setTimeout(scrolling, initialWait);
+		}
+
+		function nextMeasure(lineNum, measureNum) {
+			lineNum = parseInt(lineNum, 10);
+			measureNum = parseInt(measureNum, 10);
+			measureNum++;
+			var els = getAllElementsByClasses(paper, "l"+lineNum, "m"+measureNum);
+			if (els.length > 0)
+				return [lineNum, measureNum];
+			lineNum++;
+			measureNum = 0;
+			els = getAllElementsByClasses(paper, "l"+lineNum, "m"+measureNum);
+			if (els.length > 0)
+				return [lineNum, measureNum];
+			return null;
 		}
 
 		function processMeasureHider(lineNum, measureNum) {
@@ -354,7 +370,11 @@ var animation = {};
 						}, millisecondsPerHalfMeasure);
 					}
 				}
-				if (options.hideFinishedMeasures)
+				if (options.hideCurrentMeasure) {
+					var next = nextMeasure(currentNote.lineNum, currentNote.measureNum);
+					if (next)
+						processMeasureHider(next[0], next[1]);
+				} else if (options.hideFinishedMeasures)
 					processMeasureHider(currentNote.lineNum, currentNote.measureNum);
 				if (timingEvents.length > 0)
 					return timingEvents[0].time / beatLength;
@@ -399,6 +419,11 @@ var animation = {};
 		startTime = new Date();
 		startTime = startTime.getTime();
 		isPaused = false;
+		if (options.hideCurrentMeasure) {
+			var next = nextMeasure(0, -1);
+			if (next)
+				processMeasureHider(next[0], next[1]);
+		}
 		processNext();
 
 		animation.pauseAnimation = function(pause) {

@@ -1001,6 +1001,8 @@ var Parse = function() {
 		var retHeader = header.letter_to_body_header(line, i);
 		if (retHeader[0] > 0) {
 			i += retHeader[0];
+			if (retHeader[1] === 'V')
+				delayStartNewLine = true; // fixes bug on this: c[V:2]d
 			// TODO-PER: Handle inline headers
 		}
 		var el = { };
@@ -1014,6 +1016,8 @@ var Parse = function() {
 			var retInlineHeader = header.letter_to_inline_header(line, i);
 			if (retInlineHeader[0] > 0) {
 					i += retInlineHeader[0];
+					if (retInlineHeader[1] === 'V')
+						delayStartNewLine = true; // fixes bug on this: c[V:2]d
 					// TODO-PER: Handle inline headers
 					//multilineVars.start_new_line = false;
 			} else {
@@ -1042,6 +1046,8 @@ var Parse = function() {
 						// there is one case where a line continuation isn't the same as being on the same line, and that is if the next character after it is a header.
 						ret = header.letter_to_body_header(line, i);
 						if (ret[0] > 0) {
+							if (ret[1] === 'V')
+								startNewLine(); // fixes bug on this: c\\nV:2]\\nd
 							// TODO: insert header here
 							i = ret[0];
 							multilineVars.start_new_line = false;
