@@ -1,6 +1,7 @@
 var browserify = require('browserify');
 var browserSync = require('browser-sync');
 var gulp = require('gulp');
+var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var rename = require('gulp-rename');
 var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
@@ -14,6 +15,9 @@ const DEFAULT_OUTPUT = 'abc.js';
 
 const PLUGIN_ENTRY = 'index-plugin.js';
 const PLUGIN_OUTPUT = 'abc-plugin.js';
+
+const TEST_ENTRY = 'test/spec/index.js';
+const TEST_OUTPUT = 'abc-test.js';
 
 var defaultBrowserifyOptions = {
   cache: {},
@@ -29,6 +33,9 @@ var defaultBrowserify = browserify(DEFAULT_ENTRY, defaultBrowserifyOptions)
   .external(defaultExternals);
 
 var pluginBrowserify = browserify(PLUGIN_ENTRY, defaultBrowserifyOptions)
+  .external(defaultExternals);
+
+var testBrowserify = browserify(TEST_ENTRY, defaultBrowserifyOptions)
   .external(defaultExternals);
 
 function bundle(browserify, fileName) {
@@ -55,6 +62,10 @@ gulp.task('js:plugin', function () {
   return minify(bundle(pluginBrowserify, PLUGIN_OUTPUT));
 });
 
+gulp.task('js:test', function () {
+  return bundle(testBrowserify, TEST_OUTPUT);
+});
+
 gulp.task('watch', function () {
   var watcher = watchify(defaultBrowserify)
     .on('update', function () {
@@ -62,6 +73,15 @@ gulp.task('watch', function () {
     });
 
   return bundle(watcher, DEFAULT_OUTPUT);
+});
+
+gulp.task('watch:test', function () {
+  var watcher = watchify(testBrowserify)
+    .on('update', function () {
+        return bundle(watcher, TEST_OUTPUT);
+    });
+
+  return bundle(watcher, TEST_OUTPUT);
 });
 
 gulp.task('serve', ['watch'], function () {
@@ -73,6 +93,24 @@ gulp.task('serve', ['watch'], function () {
   });
 
   gulp.watch(['./dist/*.js'], browserSync.reload);
+});
+
+gulp.task('serve:test', ['watch:test'], function () {
+  browserSync({
+    startPath: 'test/index.html',
+    server: {
+      baseDir: '.',
+      directory: true
+    }
+  });
+
+  gulp.watch(['./dist/*.js'], browserSync.reload);
+});
+
+gulp.task('test', ['js:test'], function () {
+  return gulp
+    .src('test/index.html')
+    .pipe(mochaPhantomJS());
 });
 
 gulp.task('default', ['js']);

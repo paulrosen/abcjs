@@ -29,23 +29,16 @@ npm start
 
 ### In browser ###
 
-Run this to build the tests files : 
-````bash
-npm run build:test
-````
+Run this to launch a server to continuously run test in the browser :
 
-Or this command to continuously rebuild at any changes :
 ````bash
-npm run serve:test
+npm run start:test
 ````
-
-Then open your browser to `test/index.html` to see the results and debug the
-errors.
 
 ### In command line ###
 
 ````bash
-npm run test
+npm test
 ````
 
 This will show the test result directly in the command line interface.
