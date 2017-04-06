@@ -10,45 +10,35 @@ npm install
 
 ## Build and develop ##
 
-Simply run this command to build the abcjs to `dist/abc.js` :
+Simply run this command to build the abcjs to `dist/abc.js` and 
+`dist/abc-min.js` :
+
 ````bash
 npm run build
 ````
 
-In development, you can run this command instead to continuously rebuild any
-times a file has been modified :
+In development, you can run this command instead to launch a live-server
+that continuously rebuild and refresh any times a file has been modified :
+
 ````bash
-npm run serve
+npm start
 ````
-
-With these two command, you can add a suffix to choose the version to be build :
-
- - (nothing) : contains everything
- - `:plugin` : plugin only
- - `:test` : for unit test, need mocha and expect.js
 
 
 ## Run test ##
 
 ### In browser ###
 
-Run this to build the tests files : 
-````bash
-npm run build:test
-````
+Run this to launch a server to continuously run test in the browser :
 
-Or this command to continuously rebuild at any changes :
 ````bash
-npm run serve:test
+npm run start:test
 ````
-
-Then open your browser to `test/index.html` to see the results and debug the
-errors.
 
 ### In command line ###
 
 ````bash
-npm run test
+npm test
 ````
 
 This will show the test result directly in the command line interface.
