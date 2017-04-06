@@ -9,8 +9,7 @@
   "scripts": {
     "build": "gulp",
     "start": "gulp serve",
-    "build:plugin": "browserify index-plugin.js -o dist/abcjs-plugin-min.js --standalone ABCJS",
-    "serve:plugin": "watchify index-plugin.js -o dist/abcjs-plugin-min.js  --standalone ABCJS",
+    "build:plugin": "gulp js:plugin",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -12,6 +12,9 @@ var watchify = require('watchify');
 const DEFAULT_ENTRY = 'index.js';
 const DEFAULT_OUTPUT = 'abcjs.js';
 
+const PLUGIN_ENTRY = 'index-plugin.js';
+const PLUGIN_OUTPUT = 'abcjs-plugin.js';
+
 var defaultBrowserifyOptions = {
   cache: {},
   packageCache: {},
@@ -20,6 +23,7 @@ var defaultBrowserifyOptions = {
 };
 
 var defaultBrowserify = browserify(DEFAULT_ENTRY, defaultBrowserifyOptions);
+var pluginBrowserify = browserify(PLUGIN_ENTRY, defaultBrowserifyOptions);
 
 function bundle(browserify, fileName) {
   return browserify.bundle()
@@ -39,6 +43,10 @@ function minify(b) {
 
 gulp.task('js', function () {
   return minify(bundle(defaultBrowserify, DEFAULT_OUTPUT));
+});
+
+gulp.task('js:plugin', function () {
+  return minify(bundle(pluginBrowserify, PLUGIN_OUTPUT));
 });
 
 gulp.task('watch', function () {
@@ -61,4 +69,4 @@ gulp.task('serve', ['watch'], function () {
   gulp.watch(['./dist/*.js'], browserSync.reload);
 });
 
-gulp.task('default', ['js']);
+gulp.task('default', ['js', 'js:plugin']);
