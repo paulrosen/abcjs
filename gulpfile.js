@@ -117,7 +117,11 @@ gulp.task('serve:test', ['watch:test'], function () {
 gulp.task('test', ['js:test'], function () {
   return gulp
     .src('test/index.html')
-    .pipe(mochaPhantomJS());
+    .pipe(mochaPhantomJS({
+      phantomjs: {
+        useColors: true
+      }
+    }));
 });
 
 gulp.task('coverage', ['js:coverage'], function () {
@@ -126,7 +130,8 @@ gulp.task('coverage', ['js:coverage'], function () {
     .pipe(mochaPhantomJS({
       reporter: 'dot',
       phantomjs: {
-        hooks: 'mocha-phantomjs-istanbul'
+        hooks: 'mocha-phantomjs-istanbul',
+        useColors: true
       }
     }));
 });
