@@ -9,8 +9,7 @@
   "scripts": {
     "build": "gulp",
     "start": "gulp serve",
-    "build:plugin": "browserify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS",
-    "serve:plugin": "concurrently \"watchify index-plugin.js -o dist/abc-plugin.js --standalone ABCJS\" \"live-server --watch=dist",
+    "build:plugin": "gulp js:plugin",
     "build:test": "browserify test/spec/index.js -o dist/abc-test.js",
     "serve:test": "concurrently \"watchify test/spec/index.js -o dist/abc-test.js --debug\" \"live-server --watch=dist --open=test\"",
     "test": "npm run build:test && mocha-phantomjs test/index.html",

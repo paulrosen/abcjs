@@ -12,6 +12,9 @@ var watchify = require('watchify');
 const DEFAULT_ENTRY = 'index.js';
 const DEFAULT_OUTPUT = 'abc.js';
 
+const PLUGIN_ENTRY = 'index-plugin.js';
+const PLUGIN_OUTPUT = 'abc-plugin.js';
+
 var defaultBrowserifyOptions = {
   cache: {},
   packageCache: {},
@@ -23,6 +26,9 @@ var defaultBrowserifyOptions = {
 var defaultExternals = ['canvas', 'nw.gui'];
 
 var defaultBrowserify = browserify(DEFAULT_ENTRY, defaultBrowserifyOptions)
+  .external(defaultExternals);
+
+var pluginBrowserify = browserify(PLUGIN_ENTRY, defaultBrowserifyOptions)
   .external(defaultExternals);
 
 function bundle(browserify, fileName) {
@@ -43,6 +49,10 @@ function minify(b) {
 
 gulp.task('js', function () {
   return minify(bundle(defaultBrowserify, DEFAULT_OUTPUT));
+});
+
+gulp.task('js:plugin', function () {
+  return minify(bundle(pluginBrowserify, PLUGIN_OUTPUT));
 });
 
 gulp.task('watch', function () {
