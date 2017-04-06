@@ -1,4 +1,5 @@
 var browserify = require('browserify');
+var browserifyIstanbul = require('browserify-istanbul');
 var browserSync = require('browser-sync');
 var gulp = require('gulp');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
@@ -66,6 +67,12 @@ gulp.task('js:test', function () {
   return bundle(testBrowserify, TEST_OUTPUT);
 });
 
+gulp.task('js:coverage', function () {
+  return bundle(
+    testBrowserify.transform(browserifyIstanbul),
+    TEST_OUTPUT);
+});
+
 gulp.task('watch', function () {
   var watcher = watchify(defaultBrowserify)
     .on('update', function () {
@@ -111,6 +118,17 @@ gulp.task('test', ['js:test'], function () {
   return gulp
     .src('test/index.html')
     .pipe(mochaPhantomJS());
+});
+
+gulp.task('coverage', ['js:coverage'], function () {
+  return gulp
+    .src('test/index.html')
+    .pipe(mochaPhantomJS({
+      reporter: 'dot',
+      phantomjs: {
+        hooks: 'mocha-phantomjs-istanbul'
+      }
+    }));
 });
 
 gulp.task('default', ['js']);
