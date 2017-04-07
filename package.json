@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "version": "gulp && git add -A dist -f",
+    "version": "gulp --env=production && git add -A dist -f",
     "build": "gulp",
     "start": "gulp serve",
     "build:plugin": "gulp js:plugin",
@@ -44,6 +44,7 @@
     "gulp-sourcemaps": "2.5.1",
     "gulp-uglify": "2.1.2",
     "gulp-util": "3.0.8",
+    "minimist": "1.2.0",
     "uglify-js": "2.8.22",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0",

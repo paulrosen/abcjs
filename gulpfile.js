@@ -6,9 +6,20 @@ var rename = require('gulp-rename');
 var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
 var gutil = require('gulp-util');
+var minimist = require('minimist');
 var buffer = require('vinyl-buffer');
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
+
+
+var knownOptions = {
+  string: 'env',
+  default: { env: 'development' }
+};
+
+var options = minimist(process.argv.slice(2), knownOptions);
+
+const DEFAULT_DIST = options.env === 'development' ? 'build': 'dist';
 
 const DEFAULT_ENTRY = 'index.js';
 const DEFAULT_OUTPUT = 'abcjs.js';
@@ -35,7 +46,7 @@ function bundle(browserify, fileName) {
     .on('error', gutil.log.bind(gutil, 'Browserify Error'))
     .pipe(source(fileName))
     .pipe(buffer())
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest(DEFAULT_DIST));
 }
 
 function minify(b) {
@@ -43,7 +54,7 @@ function minify(b) {
     .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(uglify())
     .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest(DEFAULT_DIST));
 }
 
 gulp.task('js', ['clean'], function () {
@@ -75,12 +86,13 @@ gulp.task('serve', ['watch'], function () {
     }
   });
 
-  gulp.watch(['./dist/*.js'], browserSync.reload);
+  gulp.watch(['./build/*.js'], browserSync.reload);
 });
 
 gulp.task('clean', function () {
   return del([
-    'dist'
+    'dist',
+    'build'
   ]);
 });
 
