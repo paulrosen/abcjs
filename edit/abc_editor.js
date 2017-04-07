@@ -35,6 +35,7 @@ var midi = require('../midi/abc_midi_controls');
 var midiCreate = require('../midi/abc_midi_create');
 var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
+var TextPrinter = require('../transform/abc2abc_write');
 var EngraverController = require('../write/abc_engraver_controller');
 
 var EditArea = function(textareaid) {
@@ -331,7 +332,7 @@ Editor.prototype.modelChanged = function() {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
   } 
   if (this.target) {
-    var textprinter = new window.ABCJS.transform.TextPrinter(this.target, true);
+    var textprinter = new TextPrinter(this.target, true);
     textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
   }
   this.engraver_controller.addSelectListener(this);
