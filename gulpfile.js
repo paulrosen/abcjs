@@ -138,4 +138,4 @@ gulp.task('coverage', ['js:coverage'], function () {
     }));
 });
 
-gulp.task('default', ['js']);
+gulp.task('default', ['js', 'js:plugin']);
