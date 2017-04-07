@@ -1,4 +1,4 @@
-var Parse = require('../../../parse/abc_parse');
+var Parse = require('../../../src/parse/parse');
 
 describe('Parse', function () {
 

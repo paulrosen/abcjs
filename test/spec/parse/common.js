@@ -1,4 +1,4 @@
-var parseCommon = require('../../../parse/abc_common');
+var parseCommon = require('../../../src/parse/common');
 
 describe('Parse Common', function () {
 
