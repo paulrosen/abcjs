@@ -11,10 +11,12 @@ var buffer = require('vinyl-buffer');
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
 
-const DEFAULT_ENTRY = 'index.js';
+const DEFAULT_DIST = 'dist';
+
+const DEFAULT_ENTRY = 'src/index.js';
 const DEFAULT_OUTPUT = 'abc.js';
 
-const PLUGIN_ENTRY = 'index-plugin.js';
+const PLUGIN_ENTRY = 'src/index-plugin.js';
 const PLUGIN_OUTPUT = 'abc-plugin.js';
 
 const TEST_ENTRY = 'test/spec/index.js';
@@ -44,7 +46,7 @@ function bundle(browserify, fileName) {
     .on('error', gutil.log.bind(gutil, 'Browserify Error'))
     .pipe(source(fileName))
     .pipe(buffer())
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest(DEFAULT_DIST));
 }
 
 function minify(b) {
@@ -52,7 +54,7 @@ function minify(b) {
     .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(uglify())
     .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest(DEFAULT_DIST));
 }
 
 gulp.task('js', function () {
