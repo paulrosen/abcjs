@@ -2,4 +2,4 @@
 tmp/*
 /node_modules
 /coverage
-/dist
+/build

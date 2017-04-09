@@ -8,11 +8,20 @@ var rename = require('gulp-rename');
 var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
 var gutil = require('gulp-util');
+var minimist = require('minimist');
 var buffer = require('vinyl-buffer');
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
 
-const DEFAULT_DIST = 'dist';
+
+var knownOptions = {
+  string: 'env',
+  default: { env: 'development' }
+};
+
+var options = minimist(process.argv.slice(2), knownOptions);
+
+const DEFAULT_DIST = options.env === 'development' ? 'build': 'dist';
 
 const DEFAULT_ENTRY = 'src/index.js';
 const DEFAULT_OUTPUT = 'abc.js';
@@ -102,7 +111,7 @@ gulp.task('serve', ['watch'], function () {
     }
   });
 
-  gulp.watch(['./dist/*.js'], browserSync.reload);
+  gulp.watch(['./build/*.js'], browserSync.reload);
 });
 
 gulp.task('serve:test', ['watch:test'], function () {
@@ -114,7 +123,7 @@ gulp.task('serve:test', ['watch:test'], function () {
     }
   });
 
-  gulp.watch(['./dist/*.js'], browserSync.reload);
+  gulp.watch(['./build/*.js'], browserSync.reload);
 });
 
 gulp.task('test', ['js:test'], function () {
@@ -141,7 +150,7 @@ gulp.task('coverage', ['js:coverage'], function () {
 
 gulp.task('clean', function () {
   return del([
-    'dist',
+    DEFAULT_DIST,
     'coverage'
   ]);
 });

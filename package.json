@@ -9,7 +9,7 @@
   },
   "scripts": {
     "preversion": "npm test",
-    "version": "gulp && git add -A dist -f",
+    "version": "gulp --env=production && git add -A dist -f",
     "postversion": "git push && git push --tags",
     "build": "gulp",
     "start": "gulp serve",
@@ -54,6 +54,7 @@
     "gulp-util": "3.0.8",
     "istanbul": "0.4.5",
     "live-server": "1.2.0",
+    "minimist": "1.2.0",
     "mocha": "3.2.0",
     "mocha-phantomjs": "4.1.0",
     "mocha-phantomjs-istanbul": "0.0.2",
