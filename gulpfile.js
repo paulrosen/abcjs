@@ -1,5 +1,6 @@
 var browserify = require('browserify');
 var browserSync = require('browser-sync');
+var del = require('del');
 var gulp = require('gulp');
 var rename = require('gulp-rename');
 var sourcemaps = require('gulp-sourcemaps');
@@ -45,15 +46,15 @@ function minify(b) {
     .pipe(gulp.dest('./dist'));
 }
 
-gulp.task('js', function () {
+gulp.task('js', ['clean'], function () {
   return minify(bundle(defaultBrowserify, DEFAULT_OUTPUT));
 });
 
-gulp.task('js:plugin', function () {
+gulp.task('js:plugin', ['clean'], function () {
   return minify(bundle(pluginBrowserify, PLUGIN_OUTPUT));
 });
 
-gulp.task('js:midi', function () {
+gulp.task('js:midi', ['clean'], function () {
   return minify(bundle(pluginBrowserify, MIDI_OUTPUT));
 });
 
@@ -75,6 +76,12 @@ gulp.task('serve', ['watch'], function () {
   });
 
   gulp.watch(['./dist/*.js'], browserSync.reload);
+});
+
+gulp.task('clean', function () {
+  return del([
+    'dist'
+  ]);
 });
 
 gulp.task('default', ['js', 'js:plugin', 'js:midi']);
