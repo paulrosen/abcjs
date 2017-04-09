@@ -2,11 +2,15 @@
   "name": "abcjs",
   "version": "3.1.1",
   "description": "Renderer for abc music notation",
-  "main": "index.js",
+  "main": "src/index.js",
   "directories": {
+    "lib": "src",
     "test": "test"
   },
   "scripts": {
+    "preversion": "npm test",
+    "version": "gulp && git add -A dist -f",
+    "postversion": "git push && git push --tags",
     "build": "gulp",
     "start": "gulp serve",
     "build:plugin": "gulp js:plugin",
@@ -23,7 +27,12 @@
     "music",
     "notation"
   ],
-  "author": "",
+  "author": "Paul Rosen",
+  "contributors": [
+    "Paul Rosen (https://github.com/paulrosen)",
+    "Gregory Dyke (https://github.com/gregdyke)",
+    "Thomas Chandelle (https://github.com/dellC)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/dellC/abcjs/issues"
@@ -35,7 +44,6 @@
     "browserify-istanbul": "2.0.0",
     "coveralls": "2.13.0",
     "del": "2.2.2",
-    "expect": "1.20.2",
     "expect.js": "0.3.1",
     "gulp": "3.9.1",
     "gulp-cli": "1.2.2",
