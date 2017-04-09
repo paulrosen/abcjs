@@ -1,6 +1,7 @@
 var browserify = require('browserify');
 var browserifyIstanbul = require('browserify-istanbul');
 var browserSync = require('browser-sync');
+var del = require('del');
 var gulp = require('gulp');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var rename = require('gulp-rename');
@@ -57,19 +58,19 @@ function minify(b) {
     .pipe(gulp.dest(DEFAULT_DIST));
 }
 
-gulp.task('js', function () {
+gulp.task('js', ['clean'], function () {
   return minify(bundle(defaultBrowserify, DEFAULT_OUTPUT));
 });
 
-gulp.task('js:plugin', function () {
+gulp.task('js:plugin', ['clean'], function () {
   return minify(bundle(pluginBrowserify, PLUGIN_OUTPUT));
 });
 
-gulp.task('js:test', function () {
+gulp.task('js:test', ['clean'], function () {
   return bundle(testBrowserify, TEST_OUTPUT);
 });
 
-gulp.task('js:coverage', function () {
+gulp.task('js:coverage', ['clean'], function () {
   return bundle(
     testBrowserify.transform(browserifyIstanbul),
     TEST_OUTPUT);
@@ -136,6 +137,13 @@ gulp.task('coverage', ['js:coverage'], function () {
         useColors: true
       }
     }));
+});
+
+gulp.task('clean', function () {
+  return del([
+    'dist',
+    'coverage'
+  ]);
 });
 
 gulp.task('default', ['js', 'js:plugin']);
