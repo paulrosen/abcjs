@@ -45,32 +45,46 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 	this.setMeter = function(line) {
 		line = tokenizer.stripComment(line);
 		if (line === 'C') {
-			if (multilineVars.havent_set_length === true)
+			if (multilineVars.havent_set_length === true) {
 				multilineVars.default_length = 0.125;
+				multilineVars.havent_set_length = false;
+			}
 			return {type: 'common_time'};
 		} else if (line === 'C|') {
-			if (multilineVars.havent_set_length === true)
+			if (multilineVars.havent_set_length === true) {
 				multilineVars.default_length = 0.125;
+				multilineVars.havent_set_length = false;
+			}
 			return {type: 'cut_time'};
 		} else if (line === 'o') {
-			if (multilineVars.havent_set_length === true)
+			if (multilineVars.havent_set_length === true) {
 				multilineVars.default_length = 0.125;
+				multilineVars.havent_set_length = false;
+			}
 			return {type: 'tempus_perfectum'};
 		} else if (line === 'c') {
-			if (multilineVars.havent_set_length === true)
+			if (multilineVars.havent_set_length === true) {
 				multilineVars.default_length = 0.125;
+				multilineVars.havent_set_length = false;
+			}
 			return {type: 'tempus_imperfectum'};
 		} else if (line === 'o.') {
-			if (multilineVars.havent_set_length === true)
+			if (multilineVars.havent_set_length === true) {
 				multilineVars.default_length = 0.125;
+				multilineVars.havent_set_length = false;
+			}
 			return {type: 'tempus_perfectum_prolatio'};
 		} else if (line === 'c.') {
-			if (multilineVars.havent_set_length === true)
+			if (multilineVars.havent_set_length === true) {
 				multilineVars.default_length = 0.125;
+				multilineVars.havent_set_length = false;
+			}
 			return {type: 'tempus_imperfectum_prolatio'};
 		} else if (line.length === 0 || line.toLowerCase() === 'none') {
-			if (multilineVars.havent_set_length === true)
+			if (multilineVars.havent_set_length === true) {
 				multilineVars.default_length = 0.125;
+				multilineVars.havent_set_length = false;
+			}
 			return null;
 		}
 		else
@@ -133,6 +147,7 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 
 				if (multilineVars.havent_set_length === true) {
 					multilineVars.default_length = totalLength < 0.75 ? 0.0625 : 0.125;
+					multilineVars.havent_set_length = false;
 				}
 				return meter;
 			} catch (e) {
