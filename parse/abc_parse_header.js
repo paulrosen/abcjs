@@ -201,6 +201,9 @@ window.ABCJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune) 
 				multilineVars.default_length = n / d;	// a whole note is 1
 				multilineVars.havent_set_length = false;
 			}
+		} else if (len_arr.length === 1 && len_arr[0] === '1') {
+			multilineVars.default_length = 1;
+			multilineVars.havent_set_length = false;
 		}
 	};
 
