@@ -562,7 +562,8 @@ var Tune = function() {
 				this.lines[this.lineNum].staff[this.staffNum] = {};
 				this.lines[this.lineNum].staff[this.staffNum].clef = parseCommon.clone(this.lines[this.lineNum].staff[0].clef);
 				this.lines[this.lineNum].staff[this.staffNum].key = parseCommon.clone(this.lines[this.lineNum].staff[0].key);
-				this.lines[this.lineNum].staff[this.staffNum].meter = parseCommon.clone(this.lines[this.lineNum].staff[0].meter);
+				if (this.lines[this.lineNum].staff[0].meter)
+					this.lines[this.lineNum].staff[this.staffNum].meter = parseCommon.clone(this.lines[this.lineNum].staff[0].meter);
 				this.lines[this.lineNum].staff[this.staffNum].workingClef = parseCommon.clone(this.lines[this.lineNum].staff[0].workingClef);
 				this.lines[this.lineNum].staff[this.staffNum].voices = [[]];
 			}
