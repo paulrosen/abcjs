@@ -50,7 +50,7 @@ window.ABCJS.parse.Parse = function() {
 			}
 			this.iChar = 0;
 			this.key = {accidentals: [], root: 'none', acc: '', mode: '' };
-			this.meter = {type: 'specified', value: [{num: '4', den: '4'}]};	// if no meter is specified, there is an implied one.
+			this.meter = null; // if no meter is specified, free meter is assumed
 			this.origMeter = {type: 'specified', value: [{num: '4', den: '4'}]};	// this is for new voices that are created after we set the meter.
 			this.hasMainTitle = false;
 			this.default_length = 0.125;
