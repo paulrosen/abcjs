@@ -1,0 +1,15 @@
+language: node_js
+
+node_js:
+  - "6"
+
+after_success:
+  - "npm run coverage"
+  - "cat coverage/lcov.info | ./node_modules/.bin/coveralls"
+
+branches:
+  only:
+  - master
+
+notifications:
+  email: false

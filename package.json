@@ -1,0 +1,69 @@
+{
+  "name": "abcjs",
+  "version": "3.1.1",
+  "description": "Renderer for abc music notation",
+  "main": "src/index.js",
+  "directories": {
+    "lib": "src",
+    "test": "test"
+  },
+  "scripts": {
+    "preversion": "npm test",
+    "version": "gulp --env=production && git add -A dist -f",
+    "postversion": "git push && git push --tags",
+    "build": "gulp",
+    "start": "gulp serve",
+    "build:plugin": "gulp js:plugin",
+    "start:test": "gulp serve:test",
+    "test": "gulp test",
+    "coverage": "gulp coverage && istanbul"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dellC/abcjs.git"
+  },
+  "keywords": [
+    "abc",
+    "music",
+    "notation"
+  ],
+  "author": "Paul Rosen",
+  "contributors": [
+    "Paul Rosen (https://github.com/paulrosen)",
+    "Gregory Dyke (https://github.com/gregdyke)",
+    "Thomas Chandelle (https://github.com/dellC)"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dellC/abcjs/issues"
+  },
+  "homepage": "https://github.com/dellC/abcjs#readme",
+  "devDependencies": {
+    "browser-sync": "2.18.8",
+    "browserify": "14.1.0",
+    "browserify-istanbul": "2.0.0",
+    "coveralls": "2.13.0",
+    "del": "2.2.2",
+    "expect.js": "0.3.1",
+    "gulp": "3.9.1",
+    "gulp-cli": "1.2.2",
+    "gulp-mocha-phantomjs": "0.12.1",
+    "gulp-rename": "1.2.2",
+    "gulp-sourcemaps": "2.5.1",
+    "gulp-uglify": "2.1.2",
+    "gulp-util": "3.0.8",
+    "istanbul": "0.4.5",
+    "live-server": "1.2.0",
+    "minimist": "1.2.0",
+    "mocha": "3.2.0",
+    "mocha-phantomjs": "4.1.0",
+    "mocha-phantomjs-istanbul": "0.0.2",
+    "vinyl-buffer": "1.0.0",
+    "vinyl-source-stream": "1.1.0",
+    "watchify": "3.9.0"
+  },
+  "dependencies": {
+    "midi": "git://github.com/paulrosen/MIDI.js.git#abcjs",
+    "raphael": "2.1.4"
+  }
+}
