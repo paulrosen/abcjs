@@ -566,7 +566,8 @@ window.ABCJS.data.Tune = function() {
 				this.lines[this.lineNum].staff[this.staffNum] = {};
 				this.lines[this.lineNum].staff[this.staffNum].clef = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].clef);
 				this.lines[this.lineNum].staff[this.staffNum].key = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].key);
-				this.lines[this.lineNum].staff[this.staffNum].meter = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].meter);
+				if (this.lines[this.lineNum].staff[0].meter)
+					this.lines[this.lineNum].staff[this.staffNum].meter = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].meter);
 				this.lines[this.lineNum].staff[this.staffNum].workingClef = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].workingClef);
 				this.lines[this.lineNum].staff[this.staffNum].voices = [[]];
 			}
