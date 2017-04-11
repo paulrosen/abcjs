@@ -1,3 +1,19 @@
+# Version 3.1.2
+
+## Bug fixes:
+* L: 1 (whole note) should be accepted as note length
+* Do not change the default note length when meter is change inline
+* If no meter is specified, free meter is assumed
+* If a default note length is set by a meter, it shouldn't be changed another inline meter
+* Fix crash on inline V:
+* Fix overlapping of low annotations.
+* Fix spacing after voice label.
+* Make ties a little more rounded.
+* Some minor adjustment to drawing ties.
+
+## Features:
+* Add an option to hide the current measure on animation.
+
 # Version 3.1.1
 
 ## Bug fixes:
