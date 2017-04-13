@@ -30,6 +30,7 @@
   "homepage": "https://github.com/dellC/abcjs#readme",
   "devDependencies": {
     "browserify": "14.1.0",
+    "uglify-js": "2.8.22",
     "watchify": "3.9.0"
   },
   "dependencies": {
