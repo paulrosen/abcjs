@@ -160,8 +160,8 @@ if (!window.ABCJS.midi)
 		// 3) If the denominator is anything else, then don't worry about it because it doesn't make sense. Don't modify it and hope for the best.
 		//
 		// Right now, the startingTempo is calculated for a quarter note, so modify it if necessary.
-		var num = parseInt(startingMeter.num, 10);
-		var den = parseInt(startingMeter.den, 10);
+		var num = startingMeter ? parseInt(startingMeter.num, 10) : meter.num;
+		var den = startingMeter ? parseInt(startingMeter.den, 10) : meter.den;
 		if (den === 2)
 			startingTempo *= 2;
 		else if (den === 8) {
