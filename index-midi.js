@@ -12,5 +12,6 @@ Object.keys(tunebook).forEach(function (key) {
 });
 
 abcjs.renderAbc = require('./api/abc_tunebook_svg');
+abcjs.renderMidi = require('./api/abc_tunebook_midi');
 
 module.exports = abcjs;
