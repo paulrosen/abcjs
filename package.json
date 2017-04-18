@@ -35,6 +35,6 @@
   },
   "dependencies": {
     "midi": "git://github.com/paulrosen/MIDI.js.git#abcjs",
-    "raphael": "2.1.4"
+    "raphael": "2.2.1"
   }
 }
