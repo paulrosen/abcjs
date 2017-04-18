@@ -1,33 +1,38 @@
 {
   "name": "abcjs",
-  "version": "3.1.2",
+  "version": "0.0.1",
   "description": "Renderer for abc music notation",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "build": "browserify index.js -o dist/abc.js -x canvas -x nw.gui --standalone ABCJS",
-    "serve": "watchify index.js -o dist/abc.js -x canvas -x nw.gui --standalone ABCJS",
-    "build:plugin": "browserify index-plugin.js -o dist/abc-plugin.js -x canvas -x nw.gui --standalone ABCJS",
-    "serve:plugin": "watchify index-plugin.js -o dist/abc-plugin.js -x canvas -x nw.gui --standalone ABCJS",
+    "build": "browserify index.js -o dist/abcjs-min.js --standalone ABCJS",
+    "serve": "watchify index.js -o dist/abcjs-min.js --standalone ABCJS",
+    "build:plugin": "browserify index-plugin.js -o dist/abcjs-plugin-min.js --standalone ABCJS",
+    "serve:plugin": "watchify index-plugin.js -o dist/abcjs-plugin-min.js  --standalone ABCJS",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dellC/abcjs.git"
+    "url": "git+https://github.com/paulrosen/abcjs.git"
   },
   "keywords": [
     "abc",
     "music",
-    "notation"
+    "notation",
+    "midi"
   ],
-  "author": "",
+  "author": "Paul Rosen <paul@paulrosen.net> (https://abcjs.net)",
+  "contributors": [
+    "Gregory Dyke",
+    "Thomas Chandelle"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dellC/abcjs/issues"
+    "url": "https://github.com/paulrosen/abcjs/issues"
   },
-  "homepage": "https://github.com/dellC/abcjs#readme",
+  "homepage": "https://github.com/paulrosen/abcjs#readme",
   "devDependencies": {
     "browserify": "14.1.0",
     "uglify-js": "2.8.22",
