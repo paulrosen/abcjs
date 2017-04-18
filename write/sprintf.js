@@ -21,13 +21,7 @@
 
 //function str_repeat(i, m) { for (var o = []; m > 0; o[--m] = i); return(o.join('')); }
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
-
-ABCJS.write.sprintf = function() {
+var sprintf = function() {
   var i = 0, a, f = arguments[i++], o = [], m, p, c, x;
   while (f) {
     if (m = /^[^\x25]+/.exec(f)) o.push(m[0]);
@@ -59,3 +53,5 @@ ABCJS.write.sprintf = function() {
   }
   return o.join('');
 };
+
+module.exports = sprintf;

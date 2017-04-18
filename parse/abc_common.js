@@ -14,15 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global window */
+var parseCommon = {};
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.parse)
-	window.ABCJS.parse = {};
-
-window.ABCJS.parse.clone = function(source) {
+parseCommon.clone = function(source) {
 	var destination = {};
 	for (var property in source)
 		if (source.hasOwnProperty(property))
@@ -30,59 +24,59 @@ window.ABCJS.parse.clone = function(source) {
 	return destination;
 };
 
-window.ABCJS.parse.cloneArray = function(source) {
+parseCommon.cloneArray = function(source) {
 	var destination = [];
 	for (var i = 0; i < source.length; i++) {
-		destination.push(ABCJS.parse.clone(source[i]));
+		destination.push(parseCommon.clone(source[i]));
 	}
 	return destination;
 };
 
-window.ABCJS.parse.cloneHashOfHash = function(source) {
+parseCommon.cloneHashOfHash = function(source) {
 	var destination = {};
 	for (var property in source)
 		if (source.hasOwnProperty(property))
-			destination[property] = ABCJS.parse.clone(source[property]);
+			destination[property] = parseCommon.clone(source[property]);
 	return destination;
 };
 
-window.ABCJS.parse.cloneHashOfArrayOfHash = function(source) {
+parseCommon.cloneHashOfArrayOfHash = function(source) {
 	var destination = {};
 	for (var property in source)
 		if (source.hasOwnProperty(property))
-			destination[property] = ABCJS.parse.cloneArray(source[property]);
+			destination[property] = parseCommon.cloneArray(source[property]);
 	return destination;
 };
 
-window.ABCJS.parse.gsub = function(source, pattern, replacement) {
+parseCommon.gsub = function(source, pattern, replacement) {
 	return source.split(pattern).join(replacement);
 };
 
-window.ABCJS.parse.strip = function(str) {
+parseCommon.strip = function(str) {
 	return str.replace(/^\s+/, '').replace(/\s+$/, '');
 };
 
-window.ABCJS.parse.startsWith = function(str, pattern) {
+parseCommon.startsWith = function(str, pattern) {
 	return str.indexOf(pattern) === 0;
 };
 
-window.ABCJS.parse.endsWith = function(str, pattern) {
+parseCommon.endsWith = function(str, pattern) {
 	var d = str.length - pattern.length;
 	return d >= 0 && str.lastIndexOf(pattern) === d;
 };
 
-window.ABCJS.parse.each = function(arr, iterator, context) {
+parseCommon.each = function(arr, iterator, context) {
 	for (var i = 0, length = arr.length; i < length; i++)
 	  iterator.apply(context, [arr[i],i]);
 };
 
-window.ABCJS.parse.last = function(arr) {
+parseCommon.last = function(arr) {
 	if (arr.length === 0)
 		return null;
 	return arr[arr.length-1];
 };
 
-window.ABCJS.parse.compact = function(arr) {
+parseCommon.compact = function(arr) {
 	var output = [];
 	for (var i = 0; i < arr.length; i++) {
 		if (arr[i])
@@ -91,10 +85,12 @@ window.ABCJS.parse.compact = function(arr) {
 	return output;
 };
 
-window.ABCJS.parse.detect = function(arr, iterator) {
+parseCommon.detect = function(arr, iterator) {
 	for (var i = 0; i < arr.length; i++) {
 		if (iterator(arr[i]))
 			return true;
 	}
 	return false;
 };
+
+module.exports = parseCommon;

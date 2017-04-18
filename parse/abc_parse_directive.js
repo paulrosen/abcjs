@@ -1,12 +1,8 @@
 /*global window */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var parseCommon = require('./abc_common');
 
-if (!window.ABCJS.parse)
-	window.ABCJS.parse = {};
-
-window.ABCJS.parse.parseDirective = {};
+var parseDirective = {};
 
 (function() {
 	"use strict";
@@ -14,7 +10,7 @@ window.ABCJS.parse.parseDirective = {};
 	var warn;
 	var multilineVars;
 	var tune;
-	window.ABCJS.parse.parseDirective.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
+	parseDirective.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
 		tokenizer = tokenizer_;
 		warn = warn_;
 		multilineVars = multilineVars_;
@@ -322,7 +318,7 @@ window.ABCJS.parse.parseDirective = {};
 
 	var setScale = function(cmd, tokens) {
 		var scratch = "";
-		window.ABCJS.parse.each(tokens, function(tok) {
+		parseCommon.each(tokens, function(tok) {
 			scratch += tok.token;
 		});
 		var num = parseFloat(scratch);
@@ -588,7 +584,7 @@ window.ABCJS.parse.parseDirective = {};
 		}
 	};
 
-	window.ABCJS.parse.parseDirective.parseFontChangeLine = function(textstr) {
+	parseDirective.parseFontChangeLine = function(textstr) {
 		var textParts = textstr.split('$');
 		if (textParts.length > 1 && multilineVars.setfont) {
 			var textarr = [ { text: textParts[0] }];
@@ -613,7 +609,7 @@ window.ABCJS.parse.parseDirective = {};
 	};
 
 	var positionChoices = [ 'auto', 'above', 'below', 'hidden' ];
-	window.ABCJS.parse.parseDirective.addDirective = function(str) {
+	parseDirective.addDirective = function(str) {
 		var tokens = tokenizer.tokenize(str, 0, str.length);	// 3 or more % in a row, or just spaces after %% is just a comment
 		if (tokens.length === 0 || tokens[0].type !== 'alpha') return null;
 		var restOfString = str.substring(str.indexOf(tokens[0].token)+tokens[0].token.length);
@@ -757,11 +753,11 @@ window.ABCJS.parse.parseDirective = {};
 				break;
 			case "text":
 				var textstr = tokenizer.translateString(restOfString);
-				tune.addText(window.ABCJS.parse.parseDirective.parseFontChangeLine(textstr));
+				tune.addText(parseDirective.parseFontChangeLine(textstr));
 				break;
 			case "center":
 				var centerstr = tokenizer.translateString(restOfString);
-				tune.addCentered(window.ABCJS.parse.parseDirective.parseFontChangeLine(centerstr));
+				tune.addCentered(parseDirective.parseFontChangeLine(centerstr));
 				break;
 			case "font":
 				// don't need to do anything for this; it is a useless directive
@@ -823,7 +819,7 @@ window.ABCJS.parse.parseDirective = {};
 					if (newStaff || multilineVars.staves.length === 0) {
 						multilineVars.staves.push({index: multilineVars.staves.length, numVoices: 0});
 					}
-					var staff = window.ABCJS.parse.last(multilineVars.staves);
+					var staff = parseCommon.last(multilineVars.staves);
 					if (bracket !== undefined) staff.bracket = bracket;
 					if (brace !== undefined) staff.brace = brace;
 					if (continueBar) staff.connectBarLines = 'end';
@@ -970,7 +966,7 @@ window.ABCJS.parse.parseDirective = {};
 		}
 		return null;
 	};
-	window.ABCJS.parse.parseDirective.globalFormatting = function(formatHash) {
+	parseDirective.globalFormatting = function(formatHash) {
 		for (var cmd in formatHash) {
 			if (formatHash.hasOwnProperty(cmd)) {
 				var value = ''+formatHash[cmd];
@@ -995,3 +991,5 @@ window.ABCJS.parse.parseDirective = {};
 		}
 	};
 })();
+
+module.exports = parseDirective;

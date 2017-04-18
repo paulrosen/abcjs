@@ -64,13 +64,10 @@
 // Expanded:
 // MIDI is now { cmd, param }
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var parseCommon = require('../parse/abc_common');
+var JSONSchema = require('./jsonschema-b4');
 
-if (!window.ABCJS.test)
-	window.ABCJS.test = {};
-
-window.ABCJS.test.ParserLint = function() {
+var ParserLint = function() {
 	"use strict";
 	var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
 		"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
@@ -92,7 +89,7 @@ window.ABCJS.test.ParserLint = function() {
 	};
 
 	var appendPositioning = function(properties) {
-		var ret = window.ABCJS.parse.clone(properties);
+		var ret = parseCommon.clone(properties);
 		ret.startChar = { type: 'number' }; //, output: 'hidden' };
 		ret.endChar = { type: 'number' }; //, output: 'hidden' };
 		return ret;
@@ -456,7 +453,7 @@ window.ABCJS.test.ParserLint = function() {
 	};
 
 	var addProhibits = function(obj, arr) {
-		var ret = window.ABCJS.parse.clone(obj);
+		var ret = parseCommon.clone(obj);
 		ret.prohibits = arr;
 		return ret;
 	};
@@ -574,16 +571,18 @@ window.ABCJS.test.ParserLint = function() {
 	};
 
 	this.lint = function(tune, warnings) {
-		var ret = window.ABCJS.test.JSONSchema.validate(tune, musicSchema);
+		var ret = JSONSchema.validate(tune, musicSchema);
 		var err = "";
-		window.ABCJS.parse.each(ret.errors, function(e) {
+		parseCommon.each(ret.errors, function(e) {
 			err += e.property + ": " + e.message + "\n";
 		});
 		var out = ret.output.join("\n");
 
 		var warn = warnings === undefined ? "No errors" : warnings.join('\n');
-		warn = window.ABCJS.parse.gsub(warn, '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">', '$$$$');
-		warn = window.ABCJS.parse.gsub(warn, '</span>', '$$$$');
+		warn = parseCommon.gsub(warn, '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">', '$$$$');
+		warn = parseCommon.gsub(warn, '</span>', '$$$$');
 		return "Error:------\n" + err + "\nObj:-------\n" + out + "\nWarn:------\n" + warn;
 	};
 };
+
+module.exports = ParserLint;

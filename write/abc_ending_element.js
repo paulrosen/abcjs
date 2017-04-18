@@ -14,15 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS */
+var sprintf = require('./sprintf');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
-
-ABCJS.write.EndingElem = function EndingElem(text, anchor1, anchor2) {
+var EndingElem = function EndingElem(text, anchor1, anchor2) {
 	this.text = text; // text to be displayed top left
 	this.anchor1 = anchor1; // must have a .x property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
@@ -30,11 +24,11 @@ ABCJS.write.EndingElem = function EndingElem(text, anchor1, anchor2) {
 	this.pitch = undefined; // This will be set later
 };
 
-ABCJS.write.EndingElem.prototype.setUpperAndLowerElements = function(positionY) {
+EndingElem.prototype.setUpperAndLowerElements = function(positionY) {
 	this.pitch = positionY.endingHeightAbove;
 };
 
-ABCJS.write.EndingElem.prototype.draw = function (renderer, linestartx, lineendx) {
+EndingElem.prototype.draw = function (renderer, linestartx, lineendx) {
 	if (this.pitch === undefined)
 		window.console.error("Ending Element y-coordinate not set.");
 	var y = renderer.calcY(this.pitch);
@@ -42,7 +36,7 @@ ABCJS.write.EndingElem.prototype.draw = function (renderer, linestartx, lineendx
 	var pathString;
 	if (this.anchor1) {
 		linestartx = this.anchor1.x+this.anchor1.w;
-		pathString = ABCJS.write.sprintf("M %f %f L %f %f",
+		pathString = sprintf("M %f %f L %f %f",
 			linestartx, y, linestartx, y+height);
 		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});
 		renderer.renderText(linestartx+5, renderer.calcY(this.pitch-0.5), this.text, 'repeatfont', 'ending',"start");
@@ -50,14 +44,15 @@ ABCJS.write.EndingElem.prototype.draw = function (renderer, linestartx, lineendx
 
 	if (this.anchor2) {
 		lineendx = this.anchor2.x;
-		pathString = ABCJS.write.sprintf("M %f %f L %f %f",
+		pathString = sprintf("M %f %f L %f %f",
 			lineendx, y, lineendx, y+height);
 		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});
 	}
 
 
-	pathString = ABCJS.write.sprintf("M %f %f L %f %f",
+	pathString = sprintf("M %f %f L %f %f",
 		linestartx, y, lineendx, y);
 	renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});
 };
 
+module.exports = EndingElem;

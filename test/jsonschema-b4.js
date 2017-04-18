@@ -27,13 +27,7 @@ empty list will be returned. A validation error will have two properties:
  * added stringorinteger, which allows either a string or an integer.
  */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.test)
-	window.ABCJS.test = {};
-
-window.ABCJS.test.JSONSchema = {
+var JSONSchema = {
 	validate : function(/*Any*/instance,/*Object*/schema) {
 		"use strict";
 		// Summary:
@@ -305,3 +299,5 @@ window.ABCJS.test.JSONSchema = {
 	}
 */
 };
+
+module.exports = JSONSchema;

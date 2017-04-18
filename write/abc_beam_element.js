@@ -14,13 +14,20 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals ABCJS */
+var AbsoluteElement = require('./abc_absolute_element');
+var RelativeElement = require('./abc_relative_element');
+var spacing = require('./abc_spacing');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var getDurlog = function(duration) {
+        // TODO-PER: This is a hack to prevent a Chrome lockup. Duration should have been defined already,
+        // but there's definitely a case where it isn't. [Probably something to do with triplets.]
+        if (duration === undefined) {
+                return 0;
+        }
+//        console.log("getDurlog: " + duration);
+  return Math.floor(Math.log(duration)/Math.log(2));
+};
 
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
 
 // Most elements on the page are related to a particular absolute element -- notes, rests, bars, etc. Beams, however, span multiple elements.
 // This means that beams can't be laid out until the absolute elements are placed. There is the further complication that the stems for beamed
@@ -34,30 +41,32 @@ if (!window.ABCJS.write)
 // There are three phases: the setup phase, when new elements are being discovered, the layout phase, when everything is calculated, and the drawing phase,
 // when the object is not changed, but is used to put the elements on the page.
 
+var BeamElem;
+
 (function() {
 	"use strict";
 
 	//
 	// Setup phase
 	//
-	ABCJS.write.BeamElem = function BeamElem(stemHeight, type, flat) {
+	BeamElem = function BeamElem(stemHeight, type, flat) {
 		// type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
 		this.isflat = flat;
 		this.isgrace = (type && type === "grace");
 		this.forceup = this.isgrace || (type && type === "up");
 		this.forcedown = (type && type === "down");
-		this.elems = []; // all the ABCJS.write.AbsoluteElements that this beam touches. It may include embedded rests.
+		this.elems = []; // all the AbsoluteElements that this beam touches. It may include embedded rests.
 		this.total = 0;
 		this.allrests = true;
 		this.stemHeight = stemHeight;
 		this.beams = []; // During the layout phase, this will become a list of the beams that need to be drawn.
 	};
 
-	ABCJS.write.BeamElem.prototype.setHint = function () {
+	BeamElem.prototype.setHint = function () {
 		this.hint = true;
 	};
 
-	ABCJS.write.BeamElem.prototype.add = function(abselem) {
+	BeamElem.prototype.add = function(abselem) {
 		var pitch = abselem.abcelem.averagepitch;
 		if (pitch === undefined) return; // don't include elements like spacers in beams
 		this.allrests = this.allrests && abselem.abcelem.rest;
@@ -75,7 +84,7 @@ if (!window.ABCJS.write)
 
 	var middleLine = 6;	// hardcoded 6 is B
 
-	ABCJS.write.BeamElem.prototype.calcDir = function() {
+	BeamElem.prototype.calcDir = function() {
 		if (this.forceup) return true;
 		if (this.forcedown) return false;
 		var average = calcAverage(this.total, this.elems.length);
@@ -85,7 +94,7 @@ if (!window.ABCJS.write)
 	//
 	// layout phase
 	//
-	ABCJS.write.BeamElem.prototype.layout = function() {
+	BeamElem.prototype.layout = function() {
 		if (this.elems.length === 0 || this.allrests) return;
 
 		this.stemsUp = this.calcDir(); // True means the stems are facing up.
@@ -112,12 +121,12 @@ if (!window.ABCJS.write)
 		createStems(this.elems, this.stemsUp, this.beams[0], dy, this.mainNote);
 	};
 
-	ABCJS.write.BeamElem.prototype.isAbove = function() {
+	BeamElem.prototype.isAbove = function() {
 		return this.stemsUp;
 	};
 
 	// We can't just use the entire beam for the calculation. The range has to be passed in, because the beam might extend into some unrelated notes. for instance, (3_a'f'e'f'2 when L:16
-	ABCJS.write.BeamElem.prototype.heightAtMidpoint = function(startX, endX) {
+	BeamElem.prototype.heightAtMidpoint = function(startX, endX) {
 		if (this.beams.length === 0)
 			return 0;
 		var beam = this.beams[0];
@@ -125,19 +134,19 @@ if (!window.ABCJS.write)
 		return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, midPoint);
 	};
 
-	ABCJS.write.BeamElem.prototype.yAtNote = function(element) {
+	BeamElem.prototype.yAtNote = function(element) {
 		var beam = this.beams[0];
 		return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, element.x);
 	};
 
-	ABCJS.write.BeamElem.prototype.xAtMidpoint = function(startX, endX) {
+	BeamElem.prototype.xAtMidpoint = function(startX, endX) {
 		return startX + (endX - startX)/2;
 	};
 
 	//
 	// Drawing phase
 	//
-	ABCJS.write.BeamElem.prototype.draw = function(renderer) {
+	BeamElem.prototype.draw = function(renderer) {
 		if (this.beams.length === 0) return;
 
 		renderer.beginGroup();
@@ -186,7 +195,7 @@ if (!window.ABCJS.write)
 	}
 
 	function calcDy(asc, isGrace) {
-		var dy = (asc) ? ABCJS.write.spacing.STEP : -ABCJS.write.spacing.STEP;
+		var dy = (asc) ? spacing.STEP : -spacing.STEP;
 		if (isGrace) dy = dy * 0.4;
 		return dy;
 	}
@@ -259,7 +268,7 @@ if (!window.ABCJS.write)
 			var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
 			var lineWidth = (asc) ? -0.6 : 0.6;
 			if (!asc)
-				bary -= (dy / 2) / ABCJS.write.spacing.STEP;	// TODO-PER: This is just a fudge factor so the down-pointing stems don't overlap.
+				bary -= (dy / 2) / spacing.STEP;	// TODO-PER: This is just a fudge factor so the down-pointing stems don't overlap.
 			if (isGrace)
 				dx += elem.heads[0].dx;
 			// TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
@@ -269,7 +278,7 @@ if (!window.ABCJS.write)
 				else
 					pitch -= 1;
 			}
-			var stem = new ABCJS.write.RelativeElement(null, dx, 0, pitch, {
+			var stem = new RelativeElement(null, dx, 0, pitch, {
 				"type": "stem",
 				"pitch2": bary,
 				linewidth: lineWidth
@@ -295,7 +304,7 @@ if (!window.ABCJS.write)
 			if (isGrace) sy = sy * 2 / 3; // This makes the second beam on grace notes closer to the first one.
 			var duration = elem.abcelem.duration; // get the duration via abcelem because of triplets
 			if (duration === 0) duration = 0.25; // if this is stemless, then we use quarter note as the duration.
-			for (var durlog = ABCJS.write.getDurlog(duration); durlog < -3; durlog++) {
+			for (var durlog = getDurlog(duration); durlog < -3; durlog++) {
 				if (auxBeams[-4 - durlog]) {
 					auxBeams[-4 - durlog].single = false;
 				} else {
@@ -307,7 +316,7 @@ if (!window.ABCJS.write)
 			}
 
 			for (var j = auxBeams.length - 1; j >= 0; j--) {
-				if (i === elems.length - 1 || ABCJS.write.getDurlog(elems[i + 1].abcelem.duration) > (-j - 4)) {
+				if (i === elems.length - 1 || getDurlog(elems[i + 1].abcelem.duration) > (-j - 4)) {
 
 					var auxBeamEndX = x;
 					var auxBeamEndY = bary + sy * (j + 1);
@@ -325,3 +334,5 @@ if (!window.ABCJS.write)
 		return beams;
 	}
 })();
+
+module.exports = BeamElem;

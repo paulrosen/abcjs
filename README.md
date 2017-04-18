@@ -2,6 +2,10 @@
 
 **javascript for rendering abc music notation**
 
+**Special note for Version 4.0:**
+
+The next version will have support for importing into your project using `npm install`. Don't try to do this yet with the master branch! When it is ready, then this message will be replaced with instructions.
+
 **Special notes for Version 3.0: [MIDI](/midi.md)**
 
 [abcjs Home page](http://abcjs.net)

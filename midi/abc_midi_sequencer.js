@@ -14,11 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.midi)
-	window.ABCJS.midi = {};
+var sequence;
 
 (function() {
 	"use strict";
@@ -28,7 +24,7 @@ if (!window.ABCJS.midi)
 	// be an array of voices with all the repeats embedded, and no lines. Then it is trivial to go through the events
 	// one at a time and turn it into midi.
 
-	window.ABCJS.midi.sequence = function(abctune, options) {
+	sequence = function(abctune, options) {
 		// Global options
 		options = options || {};
 		var qpm = 180;	// The tempo if there isn't a tempo specified.
@@ -295,3 +291,5 @@ if (!window.ABCJS.midi)
 		return meter;
 	}
 })();
+
+module.exports = sequence;

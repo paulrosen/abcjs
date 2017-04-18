@@ -14,10 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global ABCJS, console */
+/*global console */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+var spacing = require('../write/abc_spacing');
+
+var animation = {};
 
 (function() {
 	"use strict";
@@ -110,7 +111,7 @@ if (!window.ABCJS)
 		cssRule.style.marginTop = -margin + "px";
 		currentMargin = margin;
 	}
-	ABCJS.startAnimation = function(paper, tune, options) {
+	animation.startAnimation = function(paper, tune, options) {
 		if (paper.getElementsByClassName === undefined) {
 			console.error("ABCJS.startAnimation: The first parameter must be a regular DOM element. (Did you pass a jQuery object or an ID?)");
 			return;
@@ -134,14 +135,17 @@ if (!window.ABCJS)
 			}
 		}
 		// Can only have one animation at a time, so make sure that it has been stopped.
-		ABCJS.stopAnimation();
+		animation.stopAnimation();
 		animationTarget = paper;
 		shouldResetOverflow = options.scrollVertical || options.scrollHint;
 
 		if (options.showCursor) {
-			cursor = $('<div class="cursor" style="position: absolute;"></div>');
-			$(paper).append(cursor);
-			$(paper).css({ position: "relative" });
+			cursor = document.createElement('DIV');
+			cursor.className = 'cursor';
+			cursor.style.position = 'absolute';
+
+			paper.appendChild(cursor);
+			paper.style.position = 'relative';
 		}
 
 		stopNextTime = false;
@@ -265,10 +269,10 @@ if (!window.ABCJS)
 				var voices = group.voices;
 				var firstStaff = group.staffs[0];
 				var middleC = firstStaff.absoluteY;
-				var top = middleC - firstStaff.top*ABCJS.write.spacing.STEP;
+				var top = middleC - firstStaff.top*spacing.STEP;
 				var lastStaff = group.staffs[group.staffs.length-1];
 				middleC = lastStaff.absoluteY;
-				var bottom = middleC - lastStaff.bottom*ABCJS.write.spacing.STEP;
+				var bottom = middleC - lastStaff.bottom*spacing.STEP;
 				var height = bottom - top;
 				var maxVoiceTime = 0;
 				// Put in the notes for all voices, then sort them, then remove duplicates
@@ -345,7 +349,7 @@ if (!window.ABCJS)
 		}
 
 		var lastTop = -1;
-		var inner = $(outer).find(".abcjs-inner");
+		// var inner = outer.querySelectorAll('.abcjs-inner');
 		currentMargin = 0;
 
 		if (options.scrollVertical) {
@@ -381,12 +385,10 @@ if (!window.ABCJS)
 				setMargin(lastTop);
 			}
 			if (options.showCursor) {
-				cursor.css({
-					left: currentNote.left + "px",
-					top: currentNote.top + "px",
-					width: currentNote.width + "px",
-					height: currentNote.height + "px"
-				});
+				cursor.style.left = currentNote.left + "px";
+				cursor.style.top = currentNote.top + "px";
+				cursor.style.width = currentNote.width + "px";
+				cursor.style.height = currentNote.height + "px";
 			}
 			if (timingEvents.length > 0)
 				return timingEvents[0].time / beatLength;
@@ -396,7 +398,7 @@ if (!window.ABCJS)
 
 		function processNext() {
 			if (stopNextTime) {
-				ABCJS.stopAnimation();
+				animation.stopAnimation();
 				return;
 			}
 			var currentTime = new Date().getTime();
@@ -424,7 +426,7 @@ if (!window.ABCJS)
 		}
 		processNext();
 
-		ABCJS.pauseAnimation = function(pause) {
+		animation.pauseAnimation = function(pause) {
 			if (pause && !isPaused) {
 				isPaused = true;
 				pausedTime = new Date().getTime();
@@ -440,7 +442,7 @@ if (!window.ABCJS)
 		};
 	};
 
-	ABCJS.stopAnimation = function() {
+	animation.stopAnimation = function() {
 		clearTimeout(animateTimer);
 		clearTimeout(scrollTimer);
 		if (cursor) {
@@ -454,3 +456,5 @@ if (!window.ABCJS)
 		}
 	};
 })();
+
+module.exports = animation;

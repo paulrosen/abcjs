@@ -14,12 +14,29 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*globals MIDI */
-if (!window.ABCJS)
-	window.ABCJS = {};
+if (typeof galactic === 'undefined') galactic = {};
+galactic.loc = {
+  isLocalUrl: function () { return false }
+};
 
-if (!window.ABCJS.midi)
-	window.ABCJS.midi = {};
+// require('midi/inc/shim/Base64');
+// require('midi/inc/shim/WebAudioAPI');
+// require('midi/inc/shim/WebMIDIAPI');
+// require('midi/inc/dom/request_script');
+require('midi/inc/dom/request_xhr');
+require('midi/inc/dom/util')(galactic);
+require('midi/inc/AudioSupports');
+require('midi/inc/EventEmitter');
+require('midi/js/loader');
+require('midi/js/adaptors');
+require('midi/js/adaptors-Audio');
+require('midi/js/adaptors-AudioAPI');
+require('midi/js/adaptors-MIDI');
+require('midi/js/channels');
+require('midi/js/gm');
+require('midi/js/player');
+
+var midi = {};
 
 (function() {
 	"use strict";
@@ -28,7 +45,7 @@ if (!window.ABCJS.midi)
 		return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 	}
 
-	window.ABCJS.midi.generateMidiDownloadLink = function(tune, midiParams, midi, index) {
+	midi.generateMidiDownloadLink = function(tune, midiParams, midi, index) {
 		var html = '<div class="download-midi midi-' + index + '">';
 		if (midiParams.preTextDownload)
 			html += midiParams.preTextDownload;
@@ -51,10 +68,10 @@ if (!window.ABCJS.midi)
 		return label.replace(/%T/g, title);
 	}
 
-	window.ABCJS.midi.generateMidiControls = function(tune, midiParams, midi, index) {
-		if (window.ABCJS.midi.midiInlineInitialized === 'failed')
+	midi.generateMidiControls = function(tune, midiParams, midi, index) {
+		if (midi.midiInlineInitialized === 'failed')
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">ERROR</div>';
-		if (window.ABCJS.midi.midiInlineInitialized === 'not loaded')
+		if (midi.midiInlineInitialized === 'not loaded')
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">MIDI NOT PRESENT</div>';
 
 		var title = tune.metaText && tune.metaText.title ? tune.metaText.title : 'Untitled';
@@ -93,7 +110,8 @@ if (!window.ABCJS.midi)
 	};
 
 	// The default location for the sound font files. Simply set this to a different value if the files are served in a different place.
-	window.ABCJS.midi.soundfontUrl = "/soundfont/";
+	// midi.soundfontUrl = "node_modules/midi/examples/soundfont/";
+	midi.soundfontUrl = "/soundfont/";
 
 	function hasClass(element, cls) {
 		if (!element)
@@ -145,16 +163,10 @@ if (!window.ABCJS.midi)
 	}
 
 	function addLoadEvent(func) {
-		var oldOnLoad = window.onload;
-		if (typeof window.onload !== 'function') {
-			window.onload = func;
+		if (window.document.readyState === 'loading') {
+			window.addEventListener('load', func);
 		} else {
-			window.onload = function() {
-				if (oldOnLoad) {
-					oldOnLoad();
-				}
-				func();
-			};
+			func();
 		}
 	}
 
@@ -172,7 +184,7 @@ if (!window.ABCJS.midi)
 		if (!midiJsInitialized) {
 			MIDI.setup({
 				debug: true,
-				soundfontUrl: window.ABCJS.midi.soundfontUrl
+				soundfontUrl: midi.soundfontUrl
 			}).then(function() {
 				midiJsInitialized = true;
 				afterSetup(timeWarp, data, onSuccess);
@@ -377,11 +389,11 @@ if (!window.ABCJS.midi)
 		setMidiCallback(midiJsListener);
 	}
 
-	window.ABCJS.midi.startPlaying = function(target) {
+	midi.startPlaying = function(target) {
 		onStart(target);
 	};
 
-	window.ABCJS.midi.stopPlaying = function() {
+	midi.stopPlaying = function() {
 		stopCurrentlyPlayingTune();
 	};
 
@@ -494,7 +506,7 @@ if (!window.ABCJS.midi)
 			}
 		});
 		if (window.MIDI === undefined) {
-			window.ABCJS.midi.midiInlineInitialized = 'not loaded';
+			midi.midiInlineInitialized = 'not loaded';
 			var els = document.getElementsByClassName('abcjs-inline-midi');
 			for (var i = 0; i < els.length; i++)
 				els[i].innerHTML = "MIDI NOT PRESENT";
@@ -504,3 +516,5 @@ if (!window.ABCJS.midi)
 	addLoadEvent(addDelegates);
 
 })();
+
+module.exports = midi;

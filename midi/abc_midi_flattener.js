@@ -18,11 +18,7 @@
 // of the grace notes, decorations, ties, triplets, rests, transpositions, keys, and accidentals into actual note durations.
 // It also extracts guitar chords to a separate voice and resolves their rhythm.
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.midi)
-	window.ABCJS.midi = {};
+var flatten;
 
 (function() {
 	"use strict";
@@ -55,7 +51,7 @@ if (!window.ABCJS.midi)
 
 	var normalBreakBetweenNotes = 1.0/128;	// a 128th note of silence between notes for articulation.
 
-	window.ABCJS.midi.flatten = function(voices, options) {
+	flatten = function(voices, options) {
 		if (!options) options = {};
 		barAccidentals = [];
 		accidentals = [0,0,0,0,0,0,0];
@@ -748,3 +744,5 @@ if (!window.ABCJS.midi)
 		}
 	}
 })();
+
+module.exports = flatten;

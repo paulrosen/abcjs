@@ -14,20 +14,16 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global window */
-
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.data)
-	window.ABCJS.data = {};
+var parseCommon = require('../parse/abc_common');
+var parseKeyVoice = require('../parse/abc_parse_key_voice');
+var spacing = require('../write/abc_spacing');
 
 /**
  * This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
  * Also known as the ABCJS Abstract Syntax Tree
  * @alternateClassName ABCJS.Tune
  */
-window.ABCJS.data.Tune = function() {
+var Tune = function() {
 	// The structure consists of a hash with the following two items:
 	// metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...
 	// tempo: { noteLength: number (e.g. .125), bpm: number }
@@ -131,10 +127,10 @@ window.ABCJS.data.Tune = function() {
 			}
 		}
 		if (anyDeleted) {
-			this.lines = window.ABCJS.parse.compact(this.lines);
-			window.ABCJS.parse.each(this.lines, function(line) {
+			this.lines = parseCommon.compact(this.lines);
+			parseCommon.each(this.lines, function(line) {
 				if (line.staff)
-					line.staff = window.ABCJS.parse.compact(line.staff);
+					line.staff = parseCommon.compact(line.staff);
 			});
 		}
 
@@ -154,7 +150,7 @@ window.ABCJS.data.Tune = function() {
 										if (n < this.lines[i].staff[s].voices[v].length - 1) {
 											if (i === this.lines.length - 1) {
 												var cp = JSON.parse(JSON.stringify(this.lines[i]));
-												this.lines.push(window.ABCJS.parse.clone(cp));
+												this.lines.push(parseCommon.clone(cp));
 												for (var ss = 0; ss < this.lines[i+1].staff.length; ss++) {
 													for (var vv = 0; vv < this.lines[i+1].staff[ss].voices.length; vv++)
 														this.lines[i+1].staff[ss].voices[vv] = [];
@@ -195,9 +191,9 @@ window.ABCJS.data.Tune = function() {
 				}
 			}
 			if (anyDeleted) {
-				window.ABCJS.parse.each(this.lines, function(line) {
+				parseCommon.each(this.lines, function(line) {
 					if (line.staff)
-						line.staff = window.ABCJS.parse.compact(line.staff);
+						line.staff = parseCommon.compact(line.staff);
 				});
 			}
 		}
@@ -225,7 +221,7 @@ window.ABCJS.data.Tune = function() {
 					}
 					if (currSlur[chordPos] === undefined) {
 						var offNum = chordPos*100+1;
-						window.ABCJS.parse.each(obj.endSlur, function(x) { if (offNum === x) --offNum; });
+						parseCommon.each(obj.endSlur, function(x) { if (offNum === x) --offNum; });
 						currSlur[chordPos] = [offNum];
 					}
 				}
@@ -248,12 +244,12 @@ window.ABCJS.data.Tune = function() {
 				var nextNum = chordPos*100+1;
 				for (var i = 0; i < num; i++) {
 					if (usedNums) {
-						window.ABCJS.parse.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
-						window.ABCJS.parse.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
-						window.ABCJS.parse.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
+						parseCommon.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
+						parseCommon.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
+						parseCommon.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
 					}
-					window.ABCJS.parse.each(currSlur[chordPos], function(x) { if (nextNum === x) ++nextNum; });
-					window.ABCJS.parse.each(currSlur[chordPos], function(x) { if (nextNum === x) ++nextNum; });
+					parseCommon.each(currSlur[chordPos], function(x) { if (nextNum === x) ++nextNum; });
+					parseCommon.each(currSlur[chordPos], function(x) { if (nextNum === x) ++nextNum; });
 
 					currSlur[chordPos].push(nextNum);
 					obj.startSlur.push({ label: nextNum });
@@ -335,7 +331,7 @@ window.ABCJS.data.Tune = function() {
 
 		// TODO-PER: This could be done faster as we go instead of as the last step.
 		function fixClefPlacement(el) {
-			window.ABCJS.parse.parseKeyVoice.fixClef(el);
+			parseKeyVoice.fixClef(el);
 			//if (el.el_type === 'clef') {
 //				var min = -2;
 //				var max = 5;
@@ -468,11 +464,11 @@ window.ABCJS.data.Tune = function() {
 		var pushNote = function(hp) {
 			if (hp.pitches !== undefined) {
 				var mid = This.lines[This.lineNum].staff[This.staffNum].workingClef.verticalPos;
-				window.ABCJS.parse.each(hp.pitches, function(p) { p.verticalPos = p.pitch - mid; });
+				parseCommon.each(hp.pitches, function(p) { p.verticalPos = p.pitch - mid; });
 			}
 			if (hp.gracenotes !== undefined) {
 				var mid2 = This.lines[This.lineNum].staff[This.staffNum].workingClef.verticalPos;
-				window.ABCJS.parse.each(hp.gracenotes, function(p) { p.verticalPos = p.pitch - mid2; });
+				parseCommon.each(hp.gracenotes, function(p) { p.verticalPos = p.pitch - mid2; });
 			}
 			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum].push(hp);
 		};
@@ -552,7 +548,7 @@ window.ABCJS.data.Tune = function() {
 		}
 
 		// Clone the object because it will be sticking around for the next line and we don't want the extra fields in it.
-		var hashParams = window.ABCJS.parse.clone(hashParams2);
+		var hashParams = parseCommon.clone(hashParams2);
 
 		if (this.lines[this.lineNum].staff) { // be sure that we are on a music type line before doing the following.
 			// If this is a clef type, then we replace the working clef on the line. This is kept separate from
@@ -564,11 +560,11 @@ window.ABCJS.data.Tune = function() {
 			// If this is the first item in this staff, then we might have to initialize the staff, first.
 			if (this.lines[this.lineNum].staff.length <= this.staffNum) {
 				this.lines[this.lineNum].staff[this.staffNum] = {};
-				this.lines[this.lineNum].staff[this.staffNum].clef = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].clef);
-				this.lines[this.lineNum].staff[this.staffNum].key = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].key);
+				this.lines[this.lineNum].staff[this.staffNum].clef = parseCommon.clone(this.lines[this.lineNum].staff[0].clef);
+				this.lines[this.lineNum].staff[this.staffNum].key = parseCommon.clone(this.lines[this.lineNum].staff[0].key);
 				if (this.lines[this.lineNum].staff[0].meter)
-					this.lines[this.lineNum].staff[this.staffNum].meter = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].meter);
-				this.lines[this.lineNum].staff[this.staffNum].workingClef = window.ABCJS.parse.clone(this.lines[this.lineNum].staff[0].workingClef);
+					this.lines[this.lineNum].staff[this.staffNum].meter = parseCommon.clone(this.lines[this.lineNum].staff[0].meter);
+				this.lines[this.lineNum].staff[this.staffNum].workingClef = parseCommon.clone(this.lines[this.lineNum].staff[0].workingClef);
 				this.lines[this.lineNum].staff[this.staffNum].voices = [[]];
 			}
 
@@ -846,10 +842,10 @@ window.ABCJS.data.Tune = function() {
 			var voices = group.voices;
 			var firstStaff = group.staffs[0];
 			var middleC = firstStaff.absoluteY;
-			var top = middleC - firstStaff.top * ABCJS.write.spacing.STEP;
+			var top = middleC - firstStaff.top * spacing.STEP;
 			var lastStaff = group.staffs[group.staffs.length - 1];
 			middleC = lastStaff.absoluteY;
-			var bottom = middleC - lastStaff.bottom * ABCJS.write.spacing.STEP;
+			var bottom = middleC - lastStaff.bottom * spacing.STEP;
 			var height = bottom - top;
 			var maxVoiceTime = 0;
 			// Put in the notes for all voices, then sort them, then remove duplicates
@@ -916,10 +912,10 @@ window.ABCJS.data.Tune = function() {
 		var voices = group.voices;
 		var firstStaff = group.staffs[0];
 		var middleC = firstStaff.absoluteY;
-		var top = middleC - firstStaff.top*ABCJS.write.spacing.STEP;
+		var top = middleC - firstStaff.top*spacing.STEP;
 		var lastStaff = group.staffs[group.staffs.length-1];
 		middleC = lastStaff.absoluteY;
-		var bottom = middleC - lastStaff.bottom*ABCJS.write.spacing.STEP;
+		var bottom = middleC - lastStaff.bottom*spacing.STEP;
 		var height = bottom - top;
 		return { top: top, height: height };
 	}
@@ -944,3 +940,5 @@ window.ABCJS.data.Tune = function() {
 		this.noteTimings = this.setupEvents(startingDelay, timeDivider);
 	};
 };
+
+module.exports = Tune;

@@ -14,16 +14,12 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.midi)
-	window.ABCJS.midi = {};
+var Preparer;
 
 (function() {
 	"use strict";
 
-	window.ABCJS.midi.Preparer = function() {
+	Preparer = function() {
 		this.tempo = 0;
 		this.timeFactor = 0;
 		this.output = [];
@@ -33,8 +29,6 @@ if (!window.ABCJS.midi)
 		this.nextDuration = 0;
 		this.tracks = [ [] ];
 	};
-
-	var Preparer = window.ABCJS.midi.Preparer;
 
 	Preparer.prototype.setInstrument = function(instrument) {
 //		this.currentInstrument = instrument;
@@ -229,3 +223,5 @@ if (!window.ABCJS.midi)
 		return weaveTracks(this.tracks);
 	};
 })();
+
+module.exports = Preparer;

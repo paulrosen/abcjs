@@ -1,0 +1,45 @@
+{
+  "name": "abcjs",
+  "version": "0.0.1",
+  "description": "Renderer for abc music notation",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "browserify index.js -o dist/abcjs-min.js --standalone ABCJS",
+    "serve": "watchify index.js -o dist/abcjs-min.js --standalone ABCJS",
+    "build:plugin": "browserify index-plugin.js -o dist/abcjs-plugin-min.js --standalone ABCJS",
+    "serve:plugin": "watchify index-plugin.js -o dist/abcjs-plugin-min.js  --standalone ABCJS",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paulrosen/abcjs.git"
+  },
+  "keywords": [
+    "abc",
+    "music",
+    "notation",
+    "midi"
+  ],
+  "author": "Paul Rosen <paul@paulrosen.net> (https://abcjs.net)",
+  "contributors": [
+    "Gregory Dyke",
+    "Thomas Chandelle"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/paulrosen/abcjs/issues"
+  },
+  "homepage": "https://github.com/paulrosen/abcjs#readme",
+  "devDependencies": {
+    "browserify": "14.1.0",
+    "uglify-js": "2.8.22",
+    "watchify": "3.9.0"
+  },
+  "dependencies": {
+    "midi": "git://github.com/paulrosen/MIDI.js.git#abcjs",
+    "raphael": "2.2.1"
+  }
+}
