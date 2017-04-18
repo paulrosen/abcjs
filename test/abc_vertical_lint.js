@@ -18,13 +18,7 @@
 
 /*globals toString */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.test)
-	window.ABCJS.test = {};
-
-window.ABCJS.test.verticalLint = function(tunes) {
+var verticalLint = function(tunes) {
 	"use strict";
 
 	function fixed2(num) {
@@ -328,3 +322,4 @@ window.ABCJS.test.verticalLint = function(tunes) {
 	return positioning;
 };
 
+module.exports = verticalLint;

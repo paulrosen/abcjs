@@ -65,14 +65,9 @@
 // MIDI is now { cmd, param }
 
 var parseCommon = require('../parse/abc_common');
+var JSONSchema = require('./jsonschema-b4');
 
-if (!window.ABCJS)
-	window.ABCJS = {};
-
-if (!window.ABCJS.test)
-	window.ABCJS.test = {};
-
-window.ABCJS.test.ParserLint = function() {
+var ParserLint = function() {
 	"use strict";
 	var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
 		"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
@@ -576,7 +571,7 @@ window.ABCJS.test.ParserLint = function() {
 	};
 
 	this.lint = function(tune, warnings) {
-		var ret = window.ABCJS.test.JSONSchema.validate(tune, musicSchema);
+		var ret = JSONSchema.validate(tune, musicSchema);
 		var err = "";
 		parseCommon.each(ret.errors, function(e) {
 			err += e.property + ": " + e.message + "\n";
@@ -589,3 +584,5 @@ window.ABCJS.test.ParserLint = function() {
 		return "Error:------\n" + err + "\nObj:-------\n" + out + "\nWarn:------\n" + warn;
 	};
 };
+
+module.exports = ParserLint;
