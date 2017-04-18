@@ -19,4 +19,19 @@ abcjs['parse'] = { Parse: parser };
 var engraverController = require('./write/abc_engraver_controller');
 abcjs['write'] = { EngraverController: engraverController };
 
+// TODO-PER: Temporary
+var editor = require('./edit/abc_editor');
+abcjs['Editor'] = editor;
+
+// TODO-PER: Temporary
+var midi = require('./midi/abc_midi_controls');
+abcjs['midi'] = midi;
+
+// TODO-PER: Temporary
+var parserLint = require('./test/abc_parser_lint');
+var verticalLint = require('./test/abc_vertical_lint');
+var midiLint = require('./test/abc_midi_lint');
+var midiSequencerLint = require('./test/abc_midi_sequencer_lint');
+abcjs['test'] = { ParserLint: parserLint, verticalLint: verticalLint, midiLint: midiLint, midiSequencerLint: midiSequencerLint };
+
 module.exports = abcjs;
