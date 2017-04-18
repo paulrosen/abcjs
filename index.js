@@ -13,4 +13,10 @@ Object.keys(tunebook).forEach(function (key) {
 
 abcjs.renderAbc = require('./api/abc_tunebook_svg');
 
+var parser = require('./parse/abc_parse');
+abcjs['parse'] = { Parse: parser };
+
+var engraverController = require('./write/abc_engraver_controller');
+abcjs['write'] = { EngraverController: engraverController };
+
 module.exports = abcjs;
