@@ -117,6 +117,12 @@ var Parse = function() {
 		multilineVars.warnings.push(str);
 	};
 
+	var addWarningObject = function(warningObject) {
+		if (!multilineVars.warningObjects)
+			multilineVars.warningObjects = [];
+		multilineVars.warningObjects.push(warningObject);
+	};
+
 	var encode = function(str) {
 		var ret = parseCommon.gsub(str, '\x12', ' ');
 		ret = parseCommon.gsub(ret, '&', '&amp;');
@@ -133,11 +139,15 @@ var Parse = function() {
 			'<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' +
 			encode(line.substring(col_num+1));
 		addWarning("Music Line:" + tune.getNumLines() + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
+		addWarningObject({message:str, line:line, startChar: multilineVars.iChar + col_num, column: col_num});
 	};
 	var header = new ParseHeader(tokenizer, warn, multilineVars, tune);
 
 	this.getWarnings = function() {
 		return multilineVars.warnings;
+	};
+	this.getWarningObjects = function() {
+		return multilineVars.warningObjects;
 	};
 
 	var letter_to_chord = function(line, i)
