@@ -10,6 +10,7 @@
     "build": "gulp",
     "start": "gulp serve",
     "build:plugin": "gulp js:plugin",
+    "build:midi": "gulp js:midi",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

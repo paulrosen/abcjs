@@ -15,6 +15,9 @@ const DEFAULT_OUTPUT = 'abcjs.js';
 const PLUGIN_ENTRY = 'index-plugin.js';
 const PLUGIN_OUTPUT = 'abcjs-plugin.js';
 
+const MIDI_ENTRY = 'index-midi.js';
+const MIDI_OUTPUT = 'abcjs-midi.js';
+
 var defaultBrowserifyOptions = {
   cache: {},
   packageCache: {},
@@ -24,6 +27,7 @@ var defaultBrowserifyOptions = {
 
 var defaultBrowserify = browserify(DEFAULT_ENTRY, defaultBrowserifyOptions);
 var pluginBrowserify = browserify(PLUGIN_ENTRY, defaultBrowserifyOptions);
+var midiBrowserify = browserify(MIDI_ENTRY, defaultBrowserifyOptions);
 
 function bundle(browserify, fileName) {
   return browserify.bundle()
@@ -49,6 +53,10 @@ gulp.task('js:plugin', function () {
   return minify(bundle(pluginBrowserify, PLUGIN_OUTPUT));
 });
 
+gulp.task('js:midi', function () {
+  return minify(bundle(pluginBrowserify, MIDI_OUTPUT));
+});
+
 gulp.task('watch', function () {
   var watcher = watchify(defaultBrowserify)
     .on('update', function () {
@@ -69,4 +77,4 @@ gulp.task('serve', ['watch'], function () {
   gulp.watch(['./dist/*.js'], browserSync.reload);
 });
 
-gulp.task('default', ['js', 'js:plugin']);
+gulp.task('default', ['js', 'js:plugin', 'js:midi']);
