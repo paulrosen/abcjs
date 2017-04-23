@@ -35,6 +35,8 @@
   },
   "homepage": "https://github.com/paulrosen/abcjs#readme",
   "devDependencies": {
+    "babel-preset-es2015": "6.24.1",
+    "babelify": "7.3.0",
     "browser-sync": "2.18.8",
     "browserify": "14.1.0",
     "del": "2.2.2",

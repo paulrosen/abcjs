@@ -37,9 +37,12 @@ var defaultBrowserifyOptions = {
   debug: true
 };
 
-var defaultBrowserify = browserify(DEFAULT_ENTRY, defaultBrowserifyOptions);
-var pluginBrowserify = browserify(PLUGIN_ENTRY, defaultBrowserifyOptions);
-var midiBrowserify = browserify(MIDI_ENTRY, defaultBrowserifyOptions);
+var defaultBrowserify = browserify(DEFAULT_ENTRY, defaultBrowserifyOptions)
+  .transform('babelify', {presets: ['es2015']});
+var pluginBrowserify = browserify(PLUGIN_ENTRY, defaultBrowserifyOptions)
+  .transform('babelify', {presets: ['es2015']});
+var midiBrowserify = browserify(MIDI_ENTRY, defaultBrowserifyOptions)
+  .transform('babelify', {presets: ['es2015']});
 
 function bundle(browserify, fileName) {
   return browserify.bundle()
