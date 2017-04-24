@@ -32,7 +32,7 @@
 }
 
 .abcjs-inline-midi .abcjs-midi-selection:before {
-	content: "\f07e"; // fa-arrows-h [&#xf07e;]
+	content: "\f07e"; /* fa-arrows-h [&#xf07e;] */
 }
 
 .abcjs-inline-midi .abcjs-midi-selection.abcjs-pushed {
@@ -41,7 +41,7 @@
 }
 
 .abcjs-inline-midi .abcjs-midi-loop:before {
-	content: "\f021"; //   fa-refresh [&#xf021;]
+	content: "\f021"; /*   fa-refresh [&#xf021;] */
 }
 
 .abcjs-inline-midi .abcjs-midi-loop.abcjs-pushed {
@@ -50,7 +50,7 @@
 }
 
 .abcjs-inline-midi .abcjs-midi-reset:before {
-	content: "\f048"; //   fa-step-backward [&#xf048;]
+	content: "\f048"; /*   fa-step-backward [&#xf048;] */
 }
 
 .abcjs-inline-midi .abcjs-midi-reset.abcjs-pushed {
@@ -59,11 +59,11 @@
 }
 
 .abcjs-inline-midi .abcjs-midi-start:before {
-	content: "\f04b"; //   fa-play [&#xf04b;]    fa-pause [&#xf04c;]
+	content: "\f04b"; /*   fa-play [&#xf04b;]    fa-pause [&#xf04c;] */
 }
 
 .abcjs-inline-midi .abcjs-midi-start.abcjs-pushed:before {
-	content: "\f04c"; //   fa-play [&#xf04b;]    fa-pause [&#xf04c;]
+	content: "\f04c"; /*   fa-play [&#xf04b;]    fa-pause [&#xf04c;] */
 }
 
 .abcjs-inline-midi .abcjs-midi-progress-background {
