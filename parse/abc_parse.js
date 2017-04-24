@@ -571,22 +571,29 @@ var Parse = function() {
 		});
 	};
 
+	var brokenRhythmRegxp = /^((>|<)\2*)/;
 	var getBrokenRhythm = function(line, index) {
-		switch (line.charAt(index)) {
-			case '>':
-			if (index < line.length - 1 && line.charAt(index+1) === '>')	// double >>
-					return [2, 1.75, 0.25];
-				else
-					return [1, 1.5, 0.5];
-				break;
-			case '<':
-			if (index < line.length - 1 && line.charAt(index+1) === '<')	// double <<
-					return [2, 0.25, 1.75];
-				else
-					return [1, 0.5, 1.5];
-				break;
+		var match = line.substr(index).match(brokenRhythmRegxp);
+		if (match === null) {
+			return null;
 		}
-		return null;
+
+		var capture = match[1];
+
+		var factor = Math.pow(2, capture.length);
+
+		var ret = [
+			1 / factor
+		];
+		ret[1] = 2 - ret[0];
+
+		if (match[2] === '>') {
+			ret = ret.reverse();
+		}
+
+		ret.unshift(capture.length);
+
+		return ret;
 	};
 
 	// TODO-PER: make this a method in el.
