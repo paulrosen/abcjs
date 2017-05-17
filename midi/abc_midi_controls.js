@@ -349,7 +349,7 @@ var midi = {};
 			// before doing another action.
 			setTimeout(function() {
 				doReset(midiControl, finishedResetting);
-				if (midiControl.abcjsAnimate)
+				if (midiControl && midiControl.abcjsAnimate)
 					midiControl.abcjsAnimate(midiControl.abcjsTune.noteTimings[midiControl.abcjsLastIndex], null);
 			}, 1);
 		}
