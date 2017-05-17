@@ -38,6 +38,10 @@ var Raphael = require('raphael');
  */
 var EngraverController = function(paper, params) {
   params = params || {};
+  if (!paper) {
+  	// if a Raphael object was not passed in, create on here.
+	  paper = Raphael(params.elementId, params.staffwidth, params.staffheight);
+  }
   this.space = 3*spacing.SPACE;
   this.scale = params.scale || undefined;
 	if (params.staffwidth) {
