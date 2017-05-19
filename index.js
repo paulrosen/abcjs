@@ -25,7 +25,11 @@ abcjs['Editor'] = editor;
 
 // TODO-PER: Temporary
 var midi = require('./midi/abc_midi_controls');
+var sequence = require('./midi/abc_midi_sequencer');
+var flatten = require('./midi/abc_midi_flattener');
 abcjs['midi'] = midi;
+abcjs['midi'].sequence = sequence;
+abcjs['midi'].flatten = flatten;
 
 // TODO-PER: Temporary
 var parserLint = require('./test/abc_parser_lint');
