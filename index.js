@@ -12,6 +12,7 @@ Object.keys(tunebook).forEach(function (key) {
 });
 
 abcjs.renderAbc = require('./api/abc_tunebook_svg');
+abcjs.renderMidi = require('./api/abc_tunebook_midi');
 
 var parser = require('./parse/abc_parse');
 abcjs['parse'] = { Parse: parser };
@@ -27,9 +28,11 @@ abcjs['Editor'] = editor;
 var midi = require('./midi/abc_midi_controls');
 var sequence = require('./midi/abc_midi_sequencer');
 var flatten = require('./midi/abc_midi_flattener');
+var midiCreate = require('./midi/abc_midi_create');
 abcjs['midi'] = midi;
 abcjs['midi'].sequence = sequence;
 abcjs['midi'].flatten = flatten;
+abcjs['midi'].create = midiCreate;
 
 // TODO-PER: Temporary
 var parserLint = require('./test/abc_parser_lint');
