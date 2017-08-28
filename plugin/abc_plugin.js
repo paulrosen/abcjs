@@ -120,7 +120,7 @@ plugin.convertToDivs = function (elem) {
         }
       }
       if (inabc) {
-        abctext += text.replace(/\n+/,"");
+        abctext += text.replace(/^\n+/,"");
         abcdiv.appendChild(node)
       }
     } else if (inabc && node.tagName === 'BR') {
