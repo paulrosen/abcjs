@@ -24,11 +24,11 @@ That, in turn, is dependent on a set of sound fonts. A good place to get them is
 
 * Put the sound fonts at this location on your server:
 
-`/soundfonts/`
+`/soundfont/`
 
 NOTE: You can put the sound fonts in another location. If you do, then include the following line right after loading ABCJS:
 
-`window.ABCJS.midi.soundfontUrl = "/path/to/soundfonts/";`
+`window.ABCJS.midi.soundfontUrl = "/path/to/soundfont/";`
 
 The trailing slash is required.
 
