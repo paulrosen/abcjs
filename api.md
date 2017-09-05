@@ -81,6 +81,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `viewportHorizontal` | false | Should the horizontal width be limited by the device's width? |
 | `scrollHorizontal` | false | Should there be a horizontal scrollbar if the music is wider than the viewport? (requires viewportHorizontal to be true.) |
 | `oneSvgPerLine` | false | Should each system of staves be rendered to a different SVG? This makes controlling with CSS easier, and makes it possible to paginate cleanly.
+| `responsive` | undefined | The strategy for responsiveness. `"resize"` will make the svg take up whatever width is available for the container.
 
 | `animationParams` | Default | Description |
 | ------------- | ----------- | ----------- |

@@ -71,7 +71,7 @@ Renderer.prototype.setPrintMode = function (isPrint) {
  * @param {object} maxwidth
  * @param {object} scale
  */
-Renderer.prototype.setPaperSize = function (maxwidth, scale) {
+Renderer.prototype.setPaperSize = function (maxwidth, scale, responsive) {
 	var w = (maxwidth+this.padding.right)*scale;
 	var h = (this.y+this.padding.bottom)*scale;
 	if (this.isPrint)
@@ -80,14 +80,34 @@ Renderer.prototype.setPaperSize = function (maxwidth, scale) {
 	if (this.doRegression)
 		this.regressionLines.push("PAPER SIZE: ("+w+","+h+")");
 
-	this.paper.setSize(w/scale,h/scale);
-	// Correct for IE problem in calculating height
-	var isIE=/*@cc_on!@*/false;//IE detector
-	if (isIE) {
-		this.paper.canvas.parentNode.style.width=w+"px";
-		this.paper.canvas.parentNode.style.height=""+h+"px";
-	} else
-		this.paper.canvas.parentNode.setAttribute("style","width:"+w+"px");
+	if (responsive === 'resize') {
+		// this technique is from: http://thenewcode.com/744/Make-SVG-Responsive, thx to https://github.com/iantresman
+		this.paper.canvas.parentNode.classList.add("abcjs-container");
+		this.paper.canvas.setAttribute("viewBox", "0 0 " + w + " " + h);
+		this.paper.canvas.setAttribute("preserveAspectRatio", "xMinYMin meet");
+		this.paper.canvas.removeAttribute("height");
+		this.paper.canvas.removeAttribute("width");
+		this.paper.canvas.style['display'] = "inline-block";
+		this.paper.canvas.style['position'] = "absolute";
+		this.paper.canvas.style['top'] = "0";
+		this.paper.canvas.style['left'] = "0";
+		this.paper.canvas.parentNode.style['display'] = "inline-block";
+		this.paper.canvas.parentNode.style['position'] = "relative";
+		this.paper.canvas.parentNode.style['width'] = "100%";
+		this.paper.canvas.parentNode.style['padding-bottom'] = "100%";
+		this.paper.canvas.parentNode.style['vertical-align'] = "middle";
+		this.paper.canvas.parentNode.style['overflow'] = "hidden";
+
+	} else {
+		this.paper.setSize(w / scale, h / scale);
+		// Correct for IE problem in calculating height
+		var isIE = /*@cc_on!@*/false;//IE detector
+		if (isIE) {
+			this.paper.canvas.parentNode.style.width = w + "px";
+			this.paper.canvas.parentNode.style.height = "" + h + "px";
+		} else
+			this.paper.canvas.parentNode.setAttribute("style", "width:" + w + "px");
+	}
 	if (scale !== 1) {
 		this.paper.canvas.style.transform = "scale("+scale+","+scale+")";
 		this.paper.canvas.style['-ms-transform'] = "scale("+scale+","+scale+")";
@@ -103,7 +123,8 @@ Renderer.prototype.setPaperSize = function (maxwidth, scale) {
 		this.paper.canvas.style['-webkit-transform'] = "";
 	}
 	this.paper.canvas.parentNode.style.overflow="hidden";
-	this.paper.canvas.parentNode.style.height=""+h+"px";
+	if (responsive !== 'resize')
+		this.paper.canvas.parentNode.style.height=""+h+"px";
 };
 
 /**

@@ -42,6 +42,7 @@ var EngraverController = function(paper, params) {
   	// if a Raphael object was not passed in, create on here.
 	  paper = Raphael(params.elementId, params.staffwidth, params.staffheight);
   }
+  this.responsive = params.responsive;
   this.space = 3*spacing.SPACE;
   this.scale = params.scale || undefined;
 	if (params.staffwidth) {
@@ -198,7 +199,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 
 	this.renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
 	this.renderer.engraveExtraText(this.width, abctune);
-	this.renderer.setPaperSize(maxWidth, scale);
+	this.renderer.setPaperSize(maxWidth, scale, this.responsive);
 };
 
 function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace) {
