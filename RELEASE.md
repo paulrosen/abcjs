@@ -1,3 +1,20 @@
+# Version 3.1.4
+
+## Feature:
+* Added new parameter "responsive=resize" to do responsive SVG.
+
+# Version 3.1.3
+
+## Features:
+* Rearrange the code so that an npm module is created.
+* Provide access to warning messages as objects.
+
+## Bug fixes:
+* Fix crash in generating midi when the meter isn't expressly defined.
+* Don't throw an error if the midi control has been removed from the DOM by the time the midi stops playing.
+* Don't require Raphael to be visible to a client creating an EngraverController.
+* Fix problem with title not showing when using the plugin.
+
 # Version 3.1.2
 
 ## Bug fixes:

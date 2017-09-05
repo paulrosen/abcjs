@@ -50,33 +50,33 @@ If you are looking at someone else's website and see ABC on the page and want to
 
 Here are the latest versions. You can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_3.1.3-min.js)
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_3.1.4-min.js)
 
-- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_3.1.3-min.js)
+- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_3.1.4-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_3.1.3-min.js)
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_3.1.4-min.js)
 
-- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_3.1.3.user.js)
+- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_3.1.4.user.js)
 
 To include the necessary parts of midi.js so that inline MIDI is available, you can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_midi_3.1.3-min.js)
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_midi_3.1.4-min.js)
 
-- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_midi_3.1.3-min.js)
+- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_midi_3.1.4-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_midi_3.1.3-min.js)
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_midi_3.1.4-min.js)
 
 **Great big thanks to [mudcube](https://github.com/mudcube/MIDI.js) for the excellent work on midi.js!**
 
 And here are the latest versions packaged without the standard libraries. To use these, you need to include those libraries yourself:
 
-- [Basic without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_3.1.3-min.js)
+- [Basic without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_3.1.4-min.js)
 
-- [Editor without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_3.1.3-min.js)
+- [Editor without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_3.1.4-min.js)
 
-- [Plugin without JQuery](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_nojquery_3.1.3-min.js)
+- [Plugin without JQuery](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_nojquery_3.1.4-min.js)
 
-- [Plugin without JQuery or Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_3.1.3-min.js)
+- [Plugin without JQuery or Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_3.1.4-min.js)
 
 **NOTE: Do NOT link to these files directly! Upload them to your own server! [Here's why.](https://github.com/blog/1482-heads-up-nosniff-header-support-coming-to-chrome-and-firefox)**
 

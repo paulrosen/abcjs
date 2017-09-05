@@ -39,6 +39,6 @@
     "watchify": "3.9.0"
   },
   "dependencies": {
-    "midi": "git://github.com/paulrosen/MIDI.js.git#abcjs",
+    "midi": "git://github.com/paulrosen/MIDI.js.git#abcjs"
   }
 }
