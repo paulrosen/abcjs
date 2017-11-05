@@ -49,12 +49,16 @@
 			<button class="do-animation" data-paper="#paper0" data-params='{ "showCursor": true }'>
 				Animate</button> { showCursor: true }
 		</div>
+		<div>
+			<button class='pause' disabled>
+				Pause</button>
+		</div>
 	</div>
 	<div id="paper0" class="paper"></div>
 	<div class="cursor-editor">
 	<textarea name='abc' id='abc' cols="80" rows="8" >
 X:1
-T:srf 2 cursor
+T:Animation Demo
 M:4/4
 L:1/16
 Q:1/4=112
@@ -89,11 +93,26 @@ G4 F4 E8|D4 E4 C8-|C8 F8|E4 E4 C8|]
 			var paper = document.querySelectorAll(paperSelector)[0];
 
 			ABCJS.startAnimation(paper, abc_editor.tunes[0], params);
+			pauseButton.disabled = false;
 		};
 
-		for (var i = 0, ii = buttons.length; i < ii; ++i) {
+		for (var i = 0; i < buttons.length; i++) {
 			buttons[i].addEventListener('click', button_onclick, false);
 		}
+
+		var pauseButton = document.querySelectorAll("BUTTON.pause");
+		pauseButton = pauseButton[0];
+
+		var isPaused = false;
+		var pauseText = ["Pause", "Resume"];
+
+		var pause = function () {
+			isPaused = !isPaused;
+			pauseButton.innerText = pauseText[isPaused ? 1 : 0];
+			ABCJS.pauseAnimation(isPaused);
+		};
+
+		pauseButton.addEventListener('click', pause, false);
 	</script>
 </body>
 </html>

@@ -107,6 +107,12 @@ var animation = {};
 	var stopNextTime = false;
 	var cursor;
 
+	var startTime;
+	var isPaused;
+	var pausedTime;
+	var pausedDifference;
+	var processNext;
+
 	function setMargin(margin) {
 		cssRule.style.marginTop = -margin + "px";
 		currentMargin = margin;
@@ -163,11 +169,7 @@ var animation = {};
 			cssRule = getCssRule(".abcjs-inner");
 		}
 
-		var startTime;
-		var isPaused = false;
-		var pausedTime;
-		var pausedDifference;
-
+		isPaused = false;
 		var initialWait = 2700;
 		var interval = 11;
 		var distance = 1;
@@ -396,7 +398,7 @@ var animation = {};
 			return 0;
 		}
 
-		function processNext() {
+		processNext = function() {
 			if (stopNextTime) {
 				animation.stopAnimation();
 				return;
@@ -426,20 +428,26 @@ var animation = {};
 		}
 		processNext();
 
-		animation.pauseAnimation = function(pause) {
-			if (pause && !isPaused) {
-				isPaused = true;
-				pausedTime = new Date().getTime();
-			} else if (!pause && isPaused) {
-				var nowTime = new Date().getTime();
-				var elapsedTimeWhenPaused = nowTime - pausedTime;
-				startTime += elapsedTimeWhenPaused;
-				pausedTime = undefined;
-				isPaused = false;
-				animateTimer = setTimeout(processNext, pausedDifference);
-				pausedDifference = undefined;
-			}
-		};
+	};
+
+	animation.pauseAnimation = function(pause) {
+		if (!processNext) {
+			console.warn("Cannot call pauseAnimation before calling startAnimation");
+			return;
+		}
+
+		if (pause && !isPaused) {
+			isPaused = true;
+			pausedTime = new Date().getTime();
+		} else if (!pause && isPaused) {
+			var nowTime = new Date().getTime();
+			var elapsedTimeWhenPaused = nowTime - pausedTime;
+			startTime += elapsedTimeWhenPaused;
+			pausedTime = undefined;
+			isPaused = false;
+			animateTimer = setTimeout(processNext, pausedDifference);
+			pausedDifference = undefined;
+		}
 	};
 
 	animation.stopAnimation = function() {
