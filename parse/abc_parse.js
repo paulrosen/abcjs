@@ -918,6 +918,16 @@ var Parse = function() {
 		return [ 0 ];
 	};
 
+	function letter_to_overlay(line, i) {
+		if (line.charAt(i) === '&') {
+			var start = i;
+			while (line.charAt(i) && line.charAt(i) !== ':' && line.charAt(i) !== '|')
+				i++;
+			return [ i-start, line.substring(start+1, i) ];
+		}
+		return [ 0 ];
+	}
+
 	function durationOfMeasure(multilineVars) {
 		// TODO-PER: This could be more complicated if one of the unusual measures is used.
 		var meter = multilineVars.origMeter;
@@ -1067,6 +1077,12 @@ var Parse = function() {
 					ret = letter_to_spacer(line, i);
 					if (ret[0] > 0) {
 						i += ret[0];
+					}
+
+					ret = letter_to_overlay(line, i);
+					if (ret[0] > 0) {
+						tune.appendElement('overlay', startOfLine, startOfLine+1, {});
+						i += 1;
 					}
 
 					ret = letter_to_chord(line, i);

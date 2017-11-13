@@ -97,6 +97,62 @@ var Tune = function() {
 		this.lineNum = 0;
 	};
 
+	this.resolveOverlays = function() {
+		for (var i = 0; i < this.lines.length; i++) {
+			var line = this.lines[i];
+			if (line.staff) {
+				for (var j = 0; j < line.staff.length; j++) {
+					var staff = line.staff[j];
+					var overlayVoice = [];
+					for (var k = 0; k < staff.voices.length; k++) {
+						var voice = staff.voices[k];
+						overlayVoice.push({ hasOverlay: false, voice: [], snip: []});
+						var durationThisBar = 0;
+						var inOverlay = false;
+						var snipStart = -1;
+						for (var kk = 0; kk < voice.length; kk++) {
+							var event = voice[kk];
+							if (event.el_type === "overlay") {
+								inOverlay = true;
+								snipStart = kk;
+								overlayVoice[k].hasOverlay = true;
+							} else if (event.el_type === "bar") {
+								if (inOverlay) {
+									// delete the overlay events from this array without messing up this loop.
+									inOverlay = false;
+									overlayVoice[k].snip.push({ start: snipStart, len: kk - snipStart});
+								} else {
+									overlayVoice[k].voice.push({ el_type: "note", duration: durationThisBar, rest: {type: "invisible"}, startChar: event.startChar, endChar: event.endChar });
+									overlayVoice[k].voice.push(event);
+								}
+								durationThisBar = 0;
+							} else if (event.el_type === "note") {
+								if (inOverlay) {
+									overlayVoice[k].voice.push(event);
+								} else {
+									durationThisBar += event.duration;
+								}
+							} else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "style" || event.el_type === "transpose") {
+								// These types of events are duplicated on the overlay layer.
+								overlayVoice[k].voice.push(event);
+							}
+						}
+					}
+					for (k = 0; k < overlayVoice.length; k++) {
+						var ov = overlayVoice[k];
+						if (ov.hasOverlay) {
+							staff.voices.push(ov.voice);
+							for (var kkk = ov.snip.length-1; kkk >= 0; kkk--) {
+								var snip = ov.snip[kkk];
+								staff.voices[k].splice(snip.start, snip.len);
+							}
+						}
+					}
+				}
+			}
+		}
+	};
+
 	this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote, currSlur) {
 		this.closeLine();	// Close the last line.
 
@@ -205,6 +261,9 @@ var Tune = function() {
 						delete this.lines[i].staff[s].workingClef;
 			}
 		}
+
+		// If there are overlays, create new voices for them.
+		this.resolveOverlays();
 
 		function cleanUpSlursInLine(line) {
 			var x;
@@ -746,7 +805,7 @@ var Tune = function() {
 				}
 			}
 		}
-		return { type: "common_time", }
+		return { type: "common_time", };
 	};
 
 	this.getCurrentVoice = function() {
