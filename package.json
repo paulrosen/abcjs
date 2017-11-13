@@ -39,6 +39,8 @@
     "watchify": "3.9.0"
   },
   "dependencies": {
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
     "midi": "git://github.com/paulrosen/MIDI.js.git#abcjs",
     "raphael": "^2.2.7"
   }
