@@ -18,8 +18,6 @@
 //unexpected elements in it. It also returns a person-readable version of it that is suitable
 //for regression tests.
 
-/*global $ */
-
 // Changes for V1.0.1:
 //
 // Added:
@@ -99,7 +97,7 @@ var ParserLint = function() {
 		var ret = {};
 		ret.startChar = { type: 'number' }; //, output: 'hidden' };
 		ret.endChar = { type: 'number' }; //, output: 'hidden' };
-		return $.extend(ret, properties);
+		return Object.assign(ret, properties);
 	};
 
 	var fontType = {
