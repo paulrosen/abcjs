@@ -94,7 +94,10 @@ Renderer.prototype.setPaperSize = function (maxwidth, scale, responsive) {
 		this.paper.canvas.parentNode.style['display'] = "inline-block";
 		this.paper.canvas.parentNode.style['position'] = "relative";
 		this.paper.canvas.parentNode.style['width'] = "100%";
-		this.paper.canvas.parentNode.style['padding-bottom'] = "100%";
+		// PER: I changed the padding from 100% to this through trial and error.
+		// The example was using a square image, but this music might be either wider or taller.
+		var padding = h / w * 100;
+		this.paper.canvas.parentNode.style['padding-bottom'] = padding + "%";
 		this.paper.canvas.parentNode.style['vertical-align'] = "middle";
 		this.paper.canvas.parentNode.style['overflow'] = "hidden";
 
