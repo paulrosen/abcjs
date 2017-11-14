@@ -312,7 +312,12 @@ var midi = {};
 						if (minutes < 10) minutes = " " + minutes;
 						clock.innerHTML = minutes + ":" + seconds;
 					}
-					var beatsPerSecond = parseInt(midiControl.abcjsQpm, 10) / 60;
+					var tempo = midiControl.abcjsQpm;
+					if (!tempo && midiControl.abcjsTune && midiControl.abcjsTune.metaText && midiControl.abcjsTune.metaText.tempo)
+						tempo = midiControl.abcjsTune.metaText.tempo.bpm;
+					if (!tempo)
+						tempo = 180;
+					var beatsPerSecond = parseInt(tempo, 10) / 60;
 					var currentTime = position.currentTime;
 					if (midiControl.abcjsListener) {
 						var thisBeat = Math.floor(currentTime / beatsPerSecond);

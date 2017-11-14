@@ -983,6 +983,10 @@ var Tune = function() {
 		var meter = this.getMeter();
 		this.barTimings = [];
 		var beatLength = this.getBeatLength();
+		if (!bpm && this.metaText && this.metaText.tempo)
+			bpm = this.metaText.tempo.bpm;
+		if (!bpm)
+			bpm = 180;
 		var beatsPerSecond = bpm / 60;
 		var currentTime = []; // per voice
 
