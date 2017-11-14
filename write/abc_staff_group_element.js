@@ -391,10 +391,13 @@ StaffGroupElement.prototype.draw = function (renderer) {
 //			renderer.moveY(spacing.STEP, staff.top);
 			if (!topLine) topLine  = renderer.calcY(10);
 			bottomLine  = renderer.calcY(2);
-			if (staff.lines !== 0)
+			if (staff.lines !== 0) {
+				renderer.measureNumber = null;
 				renderer.printStave(this.startx, this.w, staff.lines);
+			}
 		}
 		this.voices[i].draw(renderer, bartop);
+		renderer.measureNumber = null;
 		if (!this.voices[i].duplicate) {
 			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
 //			if (staff.bottom < 0)
