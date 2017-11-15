@@ -206,10 +206,10 @@ The options available in abc_plugin are:
 
 | Option | Description |
 | ------------- | ----------- |
-| `show_midi` | Whether midi should be rendered or not. (true by default) |
+| `show_midi` | NO LONGER SUPPORTED: This options has been removed. |
 | `hide_abc` | Whether the abc text should be hidden or not. (false by default) since 1.0.2 |
 | `render_before` | Whether the rendered score should appear before the abc text. (false by default) since 1.0.2 |
-| `midi_options` | A hash of options to pass to the midi creator. (see MidiOptions) since 1.0.2 |
+| `midi_options` | NO LONGER SUPPORTED: This options has been removed. |
 | `auto_render_threshold` | Number of tunes beyond which auto rendering is disabled; instead, each tune is accompanied by a "show" button. (default value is 20) since 1.0.2 |
 | `show_text` | Text to be included on the "show" button before the tune title. (default value is "show score for: ") since 1.0.2 |
 | `render_options` | The options to be used for the `engraverParams` |
