@@ -429,7 +429,7 @@ Editor.prototype.fireChanged = function() {
       clearTimeout(this.timerId);
     this.timerId = setTimeout(function () {
       self.modelChanged();
-    }, 300);	// Is this a good comprimise between responsiveness and not redrawing too much?  
+    }, 300);	// Is this a good compromise between responsiveness and not redrawing too much?
 	  var isDirty = this.isDirty();
 	  if (this.wasDirty !== isDirty) {
 		  this.wasDirty = isDirty;
