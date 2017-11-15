@@ -50,6 +50,7 @@ plugin.start = function() {
   var body = window.document.body;
   this.errors="";
   var elems = this.getABCContainingElements(body);
+  if (elems.length === 0) return;
 	if (this.debug) {
 		for (var i = 0; i < elems.length; i++) {
 			var str = "Possible ABC found (" + (i+1) + " of " + elems.length + "):\n\n" + elems[i].innerText;
