@@ -2,12 +2,21 @@
 
 **javascript for rendering abc music notation**
 
-**Special note for Version 4.0:**
+**Special note for Version 3.2.0:**
 
-The next version will have support for importing into your project using `npm install`. Don't try to do this yet with the master branch! When it is ready, then this message will be replaced with instructions.
+abcjs is proud to announce that it can now be installed with `npm`. Instead of including the minimized files on your page, you can use the library by doing the following in your project:
+```bash
+npm install --save abcjs
+```
 
-**Special notes for Version 3.0: [MIDI](/midi.md)**
+Note that the minimized versions will still be maintained, so you can still copy the minimized file to your project.
 
+**Special notes for Version 3.0:**
+
+In-browser [MIDI](/midi.md) is now supported. There are some extra dependencies when using that feature. Downloadable MIDI is still supported with no extra dependencies.
+
+**Important Resources:**
+ 
 [abcjs Home page](http://abcjs.net)
 
 [API Documentation](/api.md)
@@ -30,6 +39,8 @@ License: [The MIT License (MIT)](http://opensource.org/licenses/MIT)
 
 ## Which flavor should you use?
 
+If you are in the node ecosystem, simply install the packaged version with `npm install --save abcjs` and ignore the rest of these instructions.
+
 If you are writing significant JavaScript on your site, and you are generating the music yourself, then you probably want to use `abcjs-basic`. This gives you the most control over the generation.
 
 If you are allowing the user to enter music using ABC notation, whether a whole tune or a fragment, then you probably want to use `abcjs-editor`. This is just like the basic version, except that it adds the ability for the music generator to watch a textarea and output what the user puts there.
@@ -50,33 +61,33 @@ If you are looking at someone else's website and see ABC on the page and want to
 
 Here are the latest versions. You can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_3.1.4-min.js)
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_3.2.0-min.js)
 
-- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_3.1.4-min.js)
+- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_3.2.0-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_3.1.4-min.js)
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_3.2.0-min.js)
 
-- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_3.1.4.user.js)
+- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_3.2.0.user.js)
 
 To include the necessary parts of midi.js so that inline MIDI is available, you can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_midi_3.1.4-min.js)
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_midi_3.2.0-min.js)
 
-- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_midi_3.1.4-min.js)
+- [Editor](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_midi_3.2.0-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_midi_3.1.4-min.js)
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_midi_3.2.0-min.js)
 
 **Great big thanks to [mudcube](https://github.com/mudcube/MIDI.js) for the excellent work on midi.js!**
 
 And here are the latest versions packaged without the standard libraries. To use these, you need to include those libraries yourself:
 
-- [Basic without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_3.1.4-min.js)
+- [Basic without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_noraphael_3.2.0-min.js)
 
-- [Editor without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_3.1.4-min.js)
+- [Editor without Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_editor_noraphael_3.2.0-min.js)
 
-- [Plugin without JQuery](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_nojquery_3.1.4-min.js)
+- [Plugin without JQuery](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_nojquery_3.2.0-min.js)
 
-- [Plugin without JQuery or Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_3.1.4-min.js)
+- [Plugin without JQuery or Raphael](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_noraphael_nojquery_3.2.0-min.js)
 
 **NOTE: Do NOT link to these files directly! Upload them to your own server! [Here's why.](https://github.com/blog/1482-heads-up-nosniff-header-support-coming-to-chrome-and-firefox)**
 

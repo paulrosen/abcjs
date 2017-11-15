@@ -1,3 +1,18 @@
+# Version 3.2.0
+
+## Features:
+* Implement overlay from the ABC standard.
+
+## Bug fixes:
+* Update the license notice in the source code to match the MIT notice.
+* Fix some npm dependencies.
+* When clicking on MIDI control, have the buttons be non-submitting.
+* Fixed missing pauseAnimation function.
+* Fix the height of the SVG when doing the responsive=resize option.
+* Measure number classes should not be placed on the staff lines or the brace.
+* When animating midi, make qpm parameter optional.
+* When animating an editor-type engraving, don't pass in the tune object: the editor already has it.
+
 # Version 3.1.4
 
 ## Feature:
