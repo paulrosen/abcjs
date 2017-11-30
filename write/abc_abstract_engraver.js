@@ -445,8 +445,10 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
 
   if (elem.rest) {
     var restpitch = 7;
-    if (this.stemdir==="down") restpitch = 3;
-    if (this.stemdir==="up") restpitch = 11;
+    if (this.voice.voicetotal > 1) {
+	    if (this.stemdir === "down") restpitch = 3;
+	    if (this.stemdir === "up") restpitch = 11;
+    }
 	  // There is special placement for the percussion staff. If there is one staff line, then move the rest position.
 	  var numLines = this.staffgroup.staffs[this.staffgroup.staffs.length-1].lines;
 	  if (numLines === 1) {
