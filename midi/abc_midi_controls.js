@@ -14,27 +14,26 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-if (typeof galactic === 'undefined') galactic = {};
-galactic.loc = {
-  isLocalUrl: function () { return false }
-};
+// Unfortunately, a few versions of Safari don't support the performance interface. For those browsers, MIDI just won't work.
+if ('performance' in window) {
+	if (typeof galactic === 'undefined') galactic = {};
+	galactic.loc = {
+		isLocalUrl: function () { return false }
+	};
 
-// require('midi/inc/shim/Base64');
-// require('midi/inc/shim/WebAudioAPI');
-// require('midi/inc/shim/WebMIDIAPI');
-// require('midi/inc/dom/request_script');
-require('midi/inc/dom/request_xhr');
-require('midi/inc/dom/util')(galactic);
-require('midi/inc/AudioSupports');
-require('midi/inc/EventEmitter');
-require('midi/js/loader');
-require('midi/js/adaptors');
-require('midi/js/adaptors-Audio');
-require('midi/js/adaptors-AudioAPI');
-require('midi/js/adaptors-MIDI');
-require('midi/js/channels');
-require('midi/js/gm');
-require('midi/js/player');
+	require('midi/inc/dom/request_xhr');
+	require('midi/inc/dom/util')(galactic);
+	require('midi/inc/AudioSupports');
+	require('midi/inc/EventEmitter');
+	require('midi/js/loader');
+	require('midi/js/adaptors');
+	require('midi/js/adaptors-Audio');
+	require('midi/js/adaptors-AudioAPI');
+	require('midi/js/adaptors-MIDI');
+	require('midi/js/channels');
+	require('midi/js/gm');
+	require('midi/js/player');
+}
 
 var midi = {};
 
@@ -69,8 +68,8 @@ var midi = {};
 	}
 
 	midi.generateMidiControls = function(tune, midiParams, midi, index) {
-		if (midi.midiInlineInitialized === 'failed')
-			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">ERROR</div>';
+		if (!('performance' in window))
+			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">ERROR: this browser doesn\'t support window.performance</div>';
 		if (midi.midiInlineInitialized === 'not loaded')
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">MIDI NOT PRESENT</div>';
 
