@@ -1,3 +1,9 @@
+# Version 3.2.1
+
+## Bug fixes:
+* Don't crash if window.performance is not defined.
+* Don't move the position of the rest unless there are more than one voice on a staff.
+
 # Version 3.2.0
 
 ## Features:
