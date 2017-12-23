@@ -7,6 +7,7 @@
 	color: #f4f4f4;
 	background-color: #424242;
 	display: flex;
+	box-sizing: content-box;
 }
 
 .abcjs-inline-midi .abcjs-btn {
@@ -91,7 +92,7 @@
 
 .abcjs-inline-midi .abcjs-midi-clock, .abcjs-inline-midi .abcjs-midi-post {
 	margin-left: 4px;
-	margin-top: 4px;
+	margin-top: 1px;
 	display: inline-block;
 	font-family: sans-serif;
 	font-size: 16px;
