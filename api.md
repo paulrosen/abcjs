@@ -44,8 +44,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `midiParams` | Default | Description |
 | ------------- | ----------- | ----------- |
 | `qpm` | 180 | The tempo, if not specified in abcString. |
-| `program` | 0 | The midi program to use, if not specified in abcString. |
-| `channel` | 0 | The midi channel to use, if not specified in abcString. |
+| `program` | 0 | The midi program (aka "instrument") to use, if not specified in abcString. |
 | `transpose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
 | `generateDownload` | false | Whether to generate a download MIDI link. |
 | `generateInline` | true | Whether to generate the inline MIDI controls. |
@@ -60,6 +59,26 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `drum` | "" | A string formatted like the `%%MIDI drum` specification. Using this parameter also implies `%%MIDI drumon` |
 | `drumBars` | 1 |  How many bars to spread the drum pattern over. |
 | `drumIntro` | 0 | How many bars of drum should precede the music. |
+
+**Note on the drum parameter:**
+See the ABC documentation for the correct way to format the string that is passed as the drum parameter. Here is a table that provides a fairly reasonable default for drum, drumIntro, and drumBars when used as a metronome:
+```
+  const drumBeats = {
+    // the array is [0]=drum [1]=drumIntro
+    "2/4": ["dd 92 90 60 30", 2],
+    "3/4": ["ddd 92 90 90 60 30 30", 1],
+    "4/4": ["dddd 92 90 90 90 60 30 30 30", 1],
+    "5/4": ["ddddd 92 90 90 92 90 60 30 30 60 30", 1],
+    "Cut Time": ["dd 92 90 60 30", 2],
+    "6/8": ["dd 92 90 60 30", 2],
+    "9/8": ["ddd 92 90 90 60 30 30", 1],
+    "12/8": ["dddd 92 90 90 90 60 30 30 30", 1]
+  };
+```
+A more complicated example that has the drum pattern fall over two measures of 2/4 time (This is a typical Bulgar pattern):
+```
+{ drum: "d2dd2ddz", drumBars: 2, drumIntro: 2 }
+```
 
 | `inlineControls` | Default | Description |
 | ------------- | ----------- | ----------- |
