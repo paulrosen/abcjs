@@ -263,17 +263,17 @@ AbstractEngraver.prototype.createABCElement = function() {
     break;
   case "bar":
     elemset[0] = this.createBarLine(elem);
-    if (this.voice.duplicate) elemset[0].invisible = true;
+    if (this.voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
     break;
   case "meter":
     elemset[0] = createTimeSignature(elem, this.tuneNumber);
 	  this.startlimitelem = elemset[0]; // limit ties here
-    if (this.voice.duplicate) elemset[0].invisible = true;
+    if (this.voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
     break;
   case "clef":
     elemset[0] = createClef(elem, this.tuneNumber);
 	  if (!elemset[0]) return null;
-    if (this.voice.duplicate) elemset[0].invisible = true;
+    if (this.voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
     break;
   case "key":
 	  var absKey = createKeySignature(elem, this.tuneNumber);
@@ -281,7 +281,7 @@ AbstractEngraver.prototype.createABCElement = function() {
 		  elemset[0] = absKey;
 		  this.startlimitelem = elemset[0]; // limit ties here
 	  }
-    if (this.voice.duplicate) elemset[0].invisible = true;
+    if (this.voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
     break;
   case "stem":
     this.stemdir=elem.direction;
