@@ -31,7 +31,7 @@ var Preparer;
 	};
 
 	Preparer.prototype.setInstrument = function(instrument) {
-//		this.currentInstrument = instrument;
+		this.currentInstrument = instrument;
 
 		var ev = [
 			{
@@ -51,7 +51,7 @@ var Preparer;
 	};
 
 	Preparer.prototype.setChannel = function(channel) {
-//		this.currentChannel = channel;
+		this.currentChannel = channel;
 	};
 
 	Preparer.prototype.startTrack = function() {

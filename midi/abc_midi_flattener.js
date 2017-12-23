@@ -33,7 +33,7 @@ var flatten;
 	var startingMeter;
 	var tempoChangeFactor = 1;
 	var instrument;
-	var channel;
+	// var channel;
 	var currentTrack;
 	var pitchesTied;
 	var lastNoteDurationPosition;
@@ -62,7 +62,7 @@ var flatten;
 		startingMeter = undefined;
 		tempoChangeFactor = 1;
 		instrument = undefined;
-		channel = undefined;
+		// channel = undefined;
 		currentTrack = undefined;
 		pitchesTied = {};
 
@@ -83,7 +83,7 @@ var flatten;
 			transpose = 0;
 			lastNoteDurationPosition = -1;
 			var voice = voices[i];
-			currentTrack = [];
+			currentTrack = [{ cmd: 'program', channel: i, instrument: instrument ? instrument : 0 }];
 			pitchesTied = {};
 			for (var j = 0; j < voice.length; j++) {
 				var element = voice[j];
@@ -122,11 +122,15 @@ var flatten;
 						bagpipes = true;
 						break;
 					case "instrument":
-						instrument = element.program;
+						if (instrument === undefined)
+							instrument = element.program;
+						currentTrack[0].instrument = element.program;
 						break;
-					case "channel":
-						channel = element.channel;
-						break;
+					// case "channel":
+					// 	if (channel === undefined)
+					// 		channel = element.channel;
+					// 	currentTrack[0].channel = element.channel;
+					// 	break;
 					case "drum":
 						drumDefinition = normalizeDrumDefinition(element.params);
 						break;
@@ -172,7 +176,7 @@ var flatten;
 				startingTempo /= 4;
 		}
 
-		return { tempo: startingTempo, instrument: instrument, channel: channel, tracks: tracks };
+		return { tempo: startingTempo, instrument: instrument, tracks: tracks };
 	};
 
 	//
@@ -721,7 +725,7 @@ var flatten;
 		var measureLen = meter.num/meter.den;
 		if (drumTrack.length === 0) {
 			drumTrack.push({cmd: 'channel', channel: 10});
-			drumTrack.push({cmd: 'instrument', instrument: 10});
+			drumTrack.push({cmd: 'instrument', instrument: 116});
 			// need to figure out how far in time the bar started: if there are pickup notes before the chords start, we need pauses.
 			var distance = timeFromStart();
 			if (distance > 0 && distance < measureLen - 0.01) { // because of floating point, adding the notes might not exactly equal the measure size.

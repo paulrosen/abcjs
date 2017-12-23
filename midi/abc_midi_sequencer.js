@@ -226,6 +226,9 @@ var sequence;
 										case "drumoff": drumOn = false; drumChange = true; break;
 										case "drum": drumPattern = elem.params; drumChange = true; break;
 										case "drumbars": drumBars = elem.params[0]; drumChange = true; break;
+										case "program":
+											voices[voiceNumber].push({ el_type: 'instrument', program: elem.params[0] });
+											break;
 									}
 									if (drumChange) {
 										voices[0].push({el_type: 'drum', params: { pattern: drumPattern, bars: drumBars, intro: drumIntro, on: drumOn}});

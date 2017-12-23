@@ -39,27 +39,17 @@ var create;
 		midi.setGlobalInfo(commands.tempo, title);
 		midiJs.setGlobalInfo(commands.tempo, title);
 
-		if (commands.instrument !== undefined) {
-			midi.setInstrument(commands.instrument);
-			midiJs.setInstrument(commands.instrument);
-		}
-		if (commands.channel !== undefined) {
-			midi.setChannel(commands.channel);
-			midiJs.setChannel(commands.channel);
-		}
 		for (var i = 0; i < commands.tracks.length; i++) {
 			midi.startTrack();
 			midiJs.startTrack();
 			for (var j = 0; j < commands.tracks[i].length; j++) {
 				var event = commands.tracks[i][j];
 				switch (event.cmd) {
-					case 'instrument':
-						midi.setInstrument(event.instrument);
-						midiJs.setInstrument(event.instrument);
-						break;
-					case 'channel':
+					case 'program':
 						midi.setChannel(event.channel);
+						midi.setInstrument(event.instrument);
 						midiJs.setChannel(event.channel);
+						midiJs.setInstrument(event.instrument);
 						break;
 					case 'start':
 						midi.startNote(convertPitch(event.pitch), event.volume);
