@@ -116,7 +116,7 @@ var flatten;
 						barBeat = 0;
 						barAccidentals = [];
 						if (i === 0) // Only write the drum part on the first voice so that it is not duplicated.
-							writeDrum();
+							writeDrum(voices.length);
 						break;
 					case "bagpipes":
 						bagpipes = true;
@@ -718,14 +718,13 @@ var flatten;
 		drumTrack.push({ cmd: 'stop', pitch: pitch - 60 });
 	}
 
-	function writeDrum() {
+	function writeDrum(channel) {
 		if (drumTrack.length === 0 && !drumDefinition.on)
 			return;
 
 		var measureLen = meter.num/meter.den;
 		if (drumTrack.length === 0) {
-			drumTrack.push({cmd: 'channel', channel: 10});
-			drumTrack.push({cmd: 'instrument', instrument: 116});
+			drumTrack.push({cmd: 'program', channel: channel, instrument: 116});
 			// need to figure out how far in time the bar started: if there are pickup notes before the chords start, we need pauses.
 			var distance = timeFromStart();
 			if (distance > 0 && distance < measureLen - 0.01) { // because of floating point, adding the notes might not exactly equal the measure size.
