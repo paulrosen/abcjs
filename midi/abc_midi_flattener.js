@@ -41,6 +41,9 @@ var flatten;
 	var meter = { num: 4, den: 4 };
 	var chordTrack;
 	var chordTrackFinished;
+	var chordChannel;
+	var chordInstrument = 0;
+	var drumInstrument = 116;
 	var currentChords;
 	var lastChord;
 	var barBeat;
@@ -69,6 +72,7 @@ var flatten;
 		// For resolving chords.
 		meter = { num: 4, den: 4 };
 		chordTrack = [];
+		chordChannel = voices.length; // first free channel for chords
 		chordTrackFinished = false;
 		currentChords = [];
 		lastChord = undefined;
@@ -116,7 +120,7 @@ var flatten;
 						barBeat = 0;
 						barAccidentals = [];
 						if (i === 0) // Only write the drum part on the first voice so that it is not duplicated.
-							writeDrum(voices.length);
+							writeDrum(voices.length+1);
 						break;
 					case "bagpipes":
 						bagpipes = true;
@@ -249,7 +253,7 @@ var flatten;
 				// If we ever have a chord in this voice, then we add the chord track.
 				// However, if there are chords on more than one voice, then just use the first voice.
 				if (chordTrack.length === 0) {
-					chordTrack.push({cmd: 'instrument', instrument: 0});
+					chordTrack.push({cmd: 'program', channel: chordChannel, instrument: chordInstrument});
 					// need to figure out how far in time the chord started: if there are pickup notes before the chords start, we need pauses.
 					var distance = timeFromStart();
 					if (distance > 0)
@@ -724,7 +728,7 @@ var flatten;
 
 		var measureLen = meter.num/meter.den;
 		if (drumTrack.length === 0) {
-			drumTrack.push({cmd: 'program', channel: channel, instrument: 116});
+			drumTrack.push({cmd: 'program', channel: channel, instrument: drumInstrument});
 			// need to figure out how far in time the bar started: if there are pickup notes before the chords start, we need pauses.
 			var distance = timeFromStart();
 			if (distance > 0 && distance < measureLen - 0.01) { // because of floating point, adding the notes might not exactly equal the measure size.
