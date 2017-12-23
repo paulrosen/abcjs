@@ -113,7 +113,7 @@ var flatten;
 						transpose = element.transpose;
 						break;
 					case "bar":
-						if (chordTrack.length > 0) {
+						if (chordTrack.length > 0 && i === 0) {
 							resolveChords();
 							currentChords = [];
 						}
