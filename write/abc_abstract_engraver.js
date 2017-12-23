@@ -970,7 +970,7 @@ AbstractEngraver.prototype.createBarLine = function (elem) {
     abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
   } // 2 is hardcoded
 
-  if (elem.startEnding) {
+  if (elem.startEnding && this.s === 0) { // only put the first & second ending marks on the first staff
 	  var textWidth = this.renderer.getTextSize(elem.startEnding, "repeatfont", '').width;
 	  abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
     this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
