@@ -262,15 +262,15 @@ var midi = {};
 		var currentElement;
 
 		while (minIndex <= maxIndex) {
-			currentIndex = (minIndex + maxIndex) / 2 | 0;
+			currentIndex = Math.floor((minIndex + maxIndex) / 2);
 			currentElement = visualItems[currentIndex];
 
 			// A match is if the currentTime is within .1 seconds before the exact time.
 			// We get callback events at somewhat random times, so they won't match up exactly.
-			if (currentElement.seconds - epsilon < currentTime) {
+			if (currentElement.milliseconds/1000 - epsilon < currentTime) {
 				minIndex = currentIndex + 1;
 			}
-			else if (currentElement.seconds - epsilon > currentTime) {
+			else if (currentElement.milliseconds/1000 - epsilon > currentTime) {
 				maxIndex = currentIndex - 1;
 			}
 			else {
@@ -280,10 +280,10 @@ var midi = {};
 		}
 
 		// There was no match, so find the closest element that is less than the current time.
-		while (visualItems[currentIndex].seconds - epsilon >= currentTime && currentIndex > 0)
+		while (visualItems[currentIndex].milliseconds/1000 - epsilon >= currentTime && currentIndex > 0)
 			currentIndex--;
 		// If the time is way before the first element, then we're not ready to select any of them.
-		if (currentIndex === 0 && visualItems[currentIndex].seconds - epsilon >= currentTime)
+		if (currentIndex === 0 && visualItems[currentIndex].milliseconds/1000 - epsilon >= currentTime)
 			return -1;
 		return currentIndex;
 	}

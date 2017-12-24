@@ -876,7 +876,7 @@ var Tune = function() {
 				arr.push(hash[k]);
 		}
 		arr = arr.sort(function (a, b) {
-			var diff = a.seconds - b.seconds;
+			var diff = a.milliseconds - b.milliseconds;
 			// if the events have the same time, make sure a bar comes before a note
 			if (diff !== 0) {
 				return diff;
@@ -910,6 +910,7 @@ var Tune = function() {
 			// Put in the notes for all voices, then sort them, then remove duplicates
 			for (var v = 0; v < voices.length; v++) {
 				var voiceTime = time;
+				var voiceTimeMilliseconds = Math.round(voiceTime*1000);
 				var elements = voices[v].children;
 				for (var elem = 0; elem < elements.length; elem++) {
 					var element = elements[elem];
@@ -925,17 +926,18 @@ var Tune = function() {
 							// If the note is tied on both sides it can just be ignored.
 						} else {
 							// the last note wasn't tied.
-							if (!eventHash["event" + voiceTime])
-								eventHash["event" + voiceTime] = {type: "event", seconds: voiceTime, top: top, height: height, left: element.x, width: element.w, elements: [element.elemset] };
+							if (!eventHash["event" + voiceTimeMilliseconds])
+								eventHash["event" + voiceTimeMilliseconds] = {type: "event", milliseconds: voiceTimeMilliseconds, top: top, height: height, left: element.x, width: element.w, elements: [element.elemset] };
 							else {
 								// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
-								eventHash["event" + voiceTime].left = Math.min(eventHash["event" + voiceTime].left, element.x);
-								eventHash["event" + voiceTime].elements.push(element.elemset);
+								eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);
+								eventHash["event" + voiceTimeMilliseconds].elements.push(element.elemset);
 							}
 							if (isTiedToNext)
 								isTiedState = true;
 						}
 						voiceTime += element.duration / timeDivider;
+						voiceTimeMilliseconds = Math.round(voiceTime*1000);
 					}
 					// if (element.type === 'bar') {
 					// 	if (timingEvents.length === 0 || timingEvents[timingEvents.length - 1] !== 'bar') {
