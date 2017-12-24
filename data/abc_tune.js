@@ -895,7 +895,7 @@ var Tune = function() {
 		// The time is the number of seconds from the beginning of the piece.
 		// The units we are scanning are in notation units (i.e. 0.25 is a quarter note)
 		var time = startingDelay;
-		var isTiedState = false;
+		var isTiedState;
 		for (var line = 0; line < this.engraver.staffgroups.length; line++) {
 			var group = this.engraver.staffgroups[line];
 			var voices = group.voices;
@@ -917,13 +917,13 @@ var Tune = function() {
 					if (element.hint)
 						break;
 					if (element.duration > 0) {
-						// There are 3 possibilities here: the note could stand on its own, the note could be tied to the next,
+						// There are 4 possibilities here: the note could stand on its own, the note could be tied to the next,
 						// the note could be tied to the previous, and the note could be tied on both sides.
 						var isTiedToNext = element.startTie;
-						if (isTiedState) {
+						if (isTiedState !== undefined) {
+							eventHash["event" + isTiedState].elements.push(element.elemset); // Add the tied note to the first note that it is tied to
 							if (!isTiedToNext)
-								isTiedState = false;
-							// If the note is tied on both sides it can just be ignored.
+								isTiedState = undefined;
 						} else {
 							// the last note wasn't tied.
 							if (!eventHash["event" + voiceTimeMilliseconds])
@@ -934,7 +934,7 @@ var Tune = function() {
 								eventHash["event" + voiceTimeMilliseconds].elements.push(element.elemset);
 							}
 							if (isTiedToNext)
-								isTiedState = true;
+								isTiedState = voiceTimeMilliseconds;
 						}
 						voiceTime += element.duration / timeDivider;
 						voiceTimeMilliseconds = Math.round(voiceTime*1000);
