@@ -888,6 +888,39 @@ var Tune = function() {
 		return arr;
 	}
 
+	this.addElementToEvents = function(eventHash, element, voiceTimeMilliseconds, top, height, timeDivider, isTiedState) {
+		if (element.hint)
+			return { isTiedState: undefined, duration: 0 };
+		if (element.duration > 0) {
+			var isTiedToNext = element.startTie;
+			if (isTiedState !== undefined) {
+				eventHash["event" + isTiedState].elements.push(element.elemset); // Add the tied note to the first note that it is tied to
+				if (!isTiedToNext)
+					isTiedState = undefined;
+			} else {
+				// the last note wasn't tied.
+				if (!eventHash["event" + voiceTimeMilliseconds])
+					eventHash["event" + voiceTimeMilliseconds] = {
+						type: "event",
+						milliseconds: voiceTimeMilliseconds,
+						top: top,
+						height: height,
+						left: element.x,
+						width: element.w,
+						elements: [element.elemset]
+					};
+				else {
+					// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
+					eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);
+					eventHash["event" + voiceTimeMilliseconds].elements.push(element.elemset);
+				}
+				if (isTiedToNext)
+					isTiedState = voiceTimeMilliseconds;
+			}
+		}
+		return { isTiedState: isTiedState, duration: element.duration / timeDivider };
+	};
+
 	this.setupEvents = function(startingDelay, timeDivider) {
 		var timingEvents = [];
 
@@ -911,33 +944,33 @@ var Tune = function() {
 			for (var v = 0; v < voices.length; v++) {
 				var voiceTime = time;
 				var voiceTimeMilliseconds = Math.round(voiceTime*1000);
+				var startingRepeatElem = 0;
+				var endingRepeatElem;
 				var elements = voices[v].children;
 				for (var elem = 0; elem < elements.length; elem++) {
 					var element = elements[elem];
-					if (element.hint)
-						break;
-					if (element.duration > 0) {
-						// There are 4 possibilities here: the note could stand on its own, the note could be tied to the next,
-						// the note could be tied to the previous, and the note could be tied on both sides.
-						var isTiedToNext = element.startTie;
-						if (isTiedState !== undefined) {
-							eventHash["event" + isTiedState].elements.push(element.elemset); // Add the tied note to the first note that it is tied to
-							if (!isTiedToNext)
-								isTiedState = undefined;
-						} else {
-							// the last note wasn't tied.
-							if (!eventHash["event" + voiceTimeMilliseconds])
-								eventHash["event" + voiceTimeMilliseconds] = {type: "event", milliseconds: voiceTimeMilliseconds, top: top, height: height, left: element.x, width: element.w, elements: [element.elemset] };
-							else {
-								// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
-								eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);
-								eventHash["event" + voiceTimeMilliseconds].elements.push(element.elemset);
+					var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, top, height, timeDivider, isTiedState);
+					isTiedState = ret.isTiedState;
+					voiceTime += ret.duration;
+					voiceTimeMilliseconds = Math.round(voiceTime*1000);
+					if (element.type === 'bar') {
+						var barType = element.abcelem.type;
+						var endRepeat = (barType === "bar_right_repeat" || barType === "bar_dbl_repeat");
+						var startEnding = (element.abcelem.startEnding === '1');
+						var startRepeat = (barType === "bar_left_repeat" || barType === "bar_dbl_repeat" || barType === "bar_thick_thin" || barType === "bar_thin_thick" || barType === "bar_thin_thin" || barType === "bar_right_repeat");
+						if (endRepeat) {
+							for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
+								element = elements[el2];
+								ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, top, height, timeDivider, isTiedState);
+								isTiedState = ret.isTiedState;
+								voiceTime += ret.duration;
+								voiceTimeMilliseconds = Math.round(voiceTime*1000);
 							}
-							if (isTiedToNext)
-								isTiedState = voiceTimeMilliseconds;
 						}
-						voiceTime += element.duration / timeDivider;
-						voiceTimeMilliseconds = Math.round(voiceTime*1000);
+						if (startEnding)
+							endingRepeatElem = elem;
+						if (startRepeat)
+							startingRepeatElem = elem;
 					}
 					// if (element.type === 'bar') {
 					// 	if (timingEvents.length === 0 || timingEvents[timingEvents.length - 1] !== 'bar') {
