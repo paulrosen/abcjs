@@ -130,11 +130,11 @@ var flatten;
 							instrument = element.program;
 						currentTrack[0].instrument = element.program;
 						break;
-					// case "channel":
+					case "channel":
 					// 	if (channel === undefined)
 					// 		channel = element.channel;
 					// 	currentTrack[0].channel = element.channel;
-					// 	break;
+						break;
 					case "drum":
 						drumDefinition = normalizeDrumDefinition(element.params);
 						break;
@@ -312,14 +312,20 @@ var flatten;
 				else if (note.endTie)
 					pitchesTied[''+actualPitch] = false;
 			}
-			currentTrack.push({ cmd: 'move', duration: (duration-normalBreakBetweenNotes)*tempoChangeFactor });
+			var thisBreakBetweenNotes = normalBreakBetweenNotes;
+			var soundDuration = duration-normalBreakBetweenNotes;
+			if (soundDuration < 0) {
+				soundDuration = 0;
+				thisBreakBetweenNotes = 0;
+			}
+			currentTrack.push({ cmd: 'move', duration: soundDuration*tempoChangeFactor });
 			lastNoteDurationPosition = currentTrack.length-1;
 
 			for (var ii = 0; ii < pitches.length; ii++) {
 				if (!pitchesTied[''+pitches[ii].pitch])
 					currentTrack.push({ cmd: 'stop', pitch: pitches[ii].pitch });
 			}
-			currentTrack.push({ cmd: 'move', duration: normalBreakBetweenNotes*tempoChangeFactor });
+			currentTrack.push({ cmd: 'move', duration: thisBreakBetweenNotes*tempoChangeFactor });
 		} else if (elem.rest) {
 			currentTrack.push({ cmd: 'move', duration: duration*tempoChangeFactor });
 		}
