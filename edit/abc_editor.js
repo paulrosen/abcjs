@@ -318,6 +318,7 @@ Editor.prototype.modelChanged = function() {
 					parent.abcjsTune = this.tunes[i];
 					parent.abcjsListener = this.midiParams.listener;
 					parent.abcjsQpm = this.midiParams.qpm;
+					parent.abcjsContext = midiParams.context;
 					if (this.midiParams.animate) {
 						var drumIntro = this.midiParams.drumIntro ? this.midiParams.drumIntro : 0;
 						parent.abcjsAnimate = this.midiParams.animate.listener;

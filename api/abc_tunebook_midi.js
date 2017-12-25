@@ -50,6 +50,7 @@ var renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
             parent.abcjsTune = tune;
             parent.abcjsListener = midiParams.listener;
             parent.abcjsQpm = midiParams.qpm;
+            parent.abcjsContext = midiParams.context;
             if (midiParams.animate) {
                 var drumIntro = midiParams.drumIntro ? midiParams.drumIntro : 0;
                 parent.abcjsAnimate = midiParams.animate.listener;

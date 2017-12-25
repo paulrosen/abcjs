@@ -322,7 +322,7 @@ var midi = {};
 						var thisBeat = Math.floor(currentTime / beatsPerSecond);
 						position.newBeat = thisBeat !== midiControl.abcjsLastBeat;
 						midiControl.abcjsLastBeat = thisBeat;
-						midiControl.abcjsListener(midiControl, position);
+						midiControl.abcjsListener(midiControl, position, midiControl.abcjsContext);
 					}
 					if (midiControl.abcjsAnimate) {
 						var epsilon = beatsPerSecond / 64; // pick a small division to round to. This is called at small, random times.
@@ -330,7 +330,7 @@ var midi = {};
 						if (index !== midiControl.abcjsLastIndex) {
 							var last = midiControl.abcjsLastIndex >= 0 ? midiControl.abcjsTune.noteTimings[midiControl.abcjsLastIndex] : null;
 							midiControl.abcjsAnimate(last,
-								midiControl.abcjsTune.noteTimings[index]);
+								midiControl.abcjsTune.noteTimings[index], midiControl.abcjsContext);
 							midiControl.abcjsLastIndex = index;
 						}
 					}
@@ -354,7 +354,7 @@ var midi = {};
 			setTimeout(function() {
 				doReset(midiControl, finishedResetting);
 				if (midiControl && midiControl.abcjsAnimate)
-					midiControl.abcjsAnimate(midiControl.abcjsTune.noteTimings[midiControl.abcjsLastIndex], null);
+					midiControl.abcjsAnimate(midiControl.abcjsTune.noteTimings[midiControl.abcjsLastIndex], null, midiControl.abcjsContext);
 			}, 1);
 		}
 	}
