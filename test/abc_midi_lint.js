@@ -21,17 +21,14 @@
 var midiLint = function(tune) {
 	"use strict";
 
-	var ret = "Tempo: " + tune.tempo + "\nInstrument: " + tune.instrument + "\nChannel: " + tune.channel + "\n";
+	var ret = "Tempo: " + tune.tempo + "\nInstrument: " + tune.instrument + "\n";
 	for (var i = 0; i < tune.tracks.length; i++) {
 		ret += "Track " + (i+1) + "\n";
 		for (var j = 0; j < tune.tracks[i].length; j++) {
 			var event = tune.tracks[i][j];
 			switch (event.cmd) {
-				case 'instrument':
-					ret += "\tInstrument: " + event.instrument + "\n";
-					break;
-				case 'channel':
-					ret += "\tChannel: " + event.channel + "\n";
+				case 'program':
+					ret += "\tProgram: ch=" + event.channel + " inst=" + event.instrument + "\n";
 					break;
 				case 'start':
 					ret += "\tStart: " + event.pitch + " Volume: " + event.volume + "\n";
