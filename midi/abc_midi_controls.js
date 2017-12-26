@@ -182,7 +182,7 @@ var midi = {};
 	function setCurrentMidiTune(timeWarp, data, onSuccess) {
 		if (!midiJsInitialized) {
 			MIDI.setup({
-				debug: true,
+				debug: false,
 				soundfontUrl: midi.soundfontUrl
 			}).then(function() {
 				midiJsInitialized = true;
