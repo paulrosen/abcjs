@@ -46,4 +46,4 @@ After doing the above steps to load the CSS and the sound fonts, the simplest wa
 
 # Example
 
-See the examples in this repository. They contain the prerequisite files. [Editor](/abc_editor.html), [Plugin](/abc_plugin.html).
+See the examples in this repository. They contain the prerequisite files. [Editor](/examples/abc_editor.html), [Plugin](/examples/abc_plugin.html).

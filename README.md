@@ -13,15 +13,15 @@ Note that the minimized versions will still be maintained, so you can still copy
 
 **Special notes for Version 3.0:**
 
-In-browser [MIDI](/midi.md) is now supported. There are some extra dependencies when using that feature. Downloadable MIDI is still supported with no extra dependencies.
+In-browser [MIDI](/docs/midi.md) is now supported. There are some extra dependencies when using that feature. Downloadable MIDI is still supported with no extra dependencies.
 
 **Important Resources:**
  
 [abcjs Home page](https://abcjs.net)
 
-[API Documentation](/api.md)
+[API Documentation](/docs/api.md)
 
-[Support of the ABC standard](/abc-notation.md)
+[Support of the ABC standard](/docs/abc-notation.md)
 
 This library makes it easy to incorporate **sheet music** into your **websites**. You can also turn visible **ABC** text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of this javascript file.
 
@@ -53,7 +53,7 @@ If you are looking at someone else's website and see ABC on the page and want to
 
 ## MIDI considerations
 
-**NOTE: The mechanism for generating MIDI has changed. You can create a download link for MIDI without extra preparation, but if you'd like to have MIDI controls for listening inline, then see [MIDI Setup](/midi.md)
+**NOTE: The mechanism for generating MIDI has changed. You can create a download link for MIDI without extra preparation, but if you'd like to have MIDI controls for listening inline, then see [MIDI Setup](/docs/midi.md)
 
 ## Downloads:
 
