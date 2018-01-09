@@ -21,6 +21,8 @@ In-browser [MIDI](/docs/midi.md) is now supported. There are some extra dependen
 
 [API Documentation](/docs/api.md)
 
+[Info for abcjs contributors](/docs/contributing.md)
+
 [Support of the ABC standard](/docs/abc-notation.md)
 
 This library makes it easy to incorporate **sheet music** into your **websites**. You can also turn visible **ABC** text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of this javascript file.
