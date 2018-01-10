@@ -36,6 +36,18 @@ var Parse = require('../parse/abc_parse');
 var TextPrinter = require('../transform/abc2abc_write');
 var EngraverController = require('../write/abc_engraver_controller');
 
+// Polyfill for CustomEvent for old IE versions
+if ( typeof window.CustomEvent !== "function" ) {
+	function CustomEvent(event, params) {
+		params = params || {bubbles: false, cancelable: false, detail: undefined};
+		var evt = document.createEvent('CustomEvent');
+		evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+		return evt;
+	}
+	CustomEvent.prototype = window.Event.prototype;
+	window.CustomEvent = CustomEvent;
+}
+
 var EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
@@ -246,11 +258,6 @@ var Editor = function(editarea, params) {
   };
 };
 
-var midiUiGenerator;
-Editor.setMidiUiGenerator = function(generator) {
-	midiUiGenerator = generator;
-};
-
 Editor.prototype.renderTune = function(abc, params, div) {
   var tunebook = new TuneBook(abc);
   var abcParser = Parse();
@@ -280,10 +287,19 @@ Editor.prototype.modelChanged = function() {
   this.engraver_controller = new EngraverController(paper, this.engraverparams);
   this.engraver_controller.engraveABC(this.tunes);
 	this.tunes[0].engraver = this.engraver_controller;	// TODO-PER: We actually want an output object for each tune, not the entire controller. When refactoring, don't save data in the controller.
-	console.log("testing midiUiGenerator", midiUiGenerator, this.midiParams, !this.midiPause);
-	if (midiUiGenerator && this.midiParams && !this.midiPause) {
-		midiUiGenerator(this.tunes, this.midiParams, this.downloadMidi, this.inlineMidi, this.div);
+	if (this.midiParams && !this.midiPause) {
+		var event = new window.CustomEvent("generateMidi", {
+			detail: {
+				tunes: this.tunes,
+				midiParams: this.midiParams,
+				downloadMidiEl: this.downloadMidi,
+				inlineMidiEl: this.inlineMidi,
+				engravingEl: this.div
+			}
+		});
+		window.dispatchEvent(event);
 	}
+
   if (this.warningsdiv) {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
   } 

@@ -16,58 +16,67 @@
 
 var midi = require('./abc_midi_controls');
 var midiCreate = require('./abc_midi_create');
+var abcMidiUiGenerator;
 
-function abcMidiUiGenerator(tunes, midiParams, downloadMidiEl, inlineMidiEl, engravingEl) {
-	console.log("enter midiuigenerator", tunes, midiParams, downloadMidiEl, inlineMidiEl, engravingEl);
-	var downloadMidiHtml = "";
-	var inlineMidiHtml = "";
-	for (var i = 0; i < tunes.length; i++) {
-		var midiInst = midiCreate(tunes[i], midiParams);
+(function () {
+	"use strict";
 
-		if (midiParams.generateInline && midiParams.generateDownload) {
-			downloadMidiHtml += midi.generateMidiDownloadLink(tunes[i], midiParams, midiInst.download, i);
-			inlineMidiHtml += midi.generateMidiControls(tunes[i], midiParams, midiInst.inline, i);
-		} else if (midiParams.generateInline)
-			inlineMidiHtml += midi.generateMidiControls(tunes[i], midiParams, midiInst, i);
-		else
-			downloadMidiHtml += midi.generateMidiDownloadLink(tunes[i], midiParams, midiInst, i);
-	}
-	if (midiParams.generateDownload) {
-		if (downloadMidiEl)
-			downloadMidiEl.innerHTML = downloadMidiHtml;
-		else
-			engravingEl.innerHTML += downloadMidiHtml;
-	}
-	var find = function(element, cls) {
-		var els = element.getElementsByClassName(cls);
-		if (els.length === 0)
-			return null;
-		return els[0];
-	};
-	if (midiParams.generateInline) {
-		var inlineDiv;
-		if (inlineMidiEl) {
-			inlineMidiEl.innerHTML = inlineMidiHtml;
-			inlineDiv = inlineMidiEl;
-		} else {
-			engravingEl.innerHTML += inlineMidiHtml;
-			inlineDiv = engravingEl;
+	abcMidiUiGenerator = function(tunes, midiParams, downloadMidiEl, inlineMidiEl, engravingEl) {
+		var downloadMidiHtml = "";
+		var inlineMidiHtml = "";
+		for (var i = 0; i < tunes.length; i++) {
+			var midiInst = midiCreate(tunes[i], midiParams);
+
+			if (midiParams.generateInline && midiParams.generateDownload) {
+				downloadMidiHtml += midi.generateMidiDownloadLink(tunes[i], midiParams, midiInst.download, i);
+				inlineMidiHtml += midi.generateMidiControls(tunes[i], midiParams, midiInst.inline, i);
+			} else if (midiParams.generateInline)
+				inlineMidiHtml += midi.generateMidiControls(tunes[i], midiParams, midiInst, i);
+			else
+				downloadMidiHtml += midi.generateMidiDownloadLink(tunes[i], midiParams, midiInst, i);
 		}
-		if (midiParams.animate || midiParams.listener) {
-			for (i = 0; i < tunes.length; i++) {
-				var parent = find(inlineDiv, "abcjs-midi-" + i);
-				parent.abcjsTune = tunes[i];
-				parent.abcjsListener = midiParams.listener;
-				parent.abcjsQpm = midiParams.qpm;
-				parent.abcjsContext = midiParams.context;
-				if (midiParams.animate) {
-					var drumIntro = midiParams.drumIntro ? midiParams.drumIntro : 0;
-					parent.abcjsAnimate = midiParams.animate.listener;
-					parent.abcjsTune.setTiming(midiParams.qpm, drumIntro);
+		if (midiParams.generateDownload) {
+			if (downloadMidiEl)
+				downloadMidiEl.innerHTML = downloadMidiHtml;
+			else
+				engravingEl.innerHTML += downloadMidiHtml;
+		}
+		var find = function (element, cls) {
+			var els = element.getElementsByClassName(cls);
+			if (els.length === 0)
+				return null;
+			return els[0];
+		};
+		if (midiParams.generateInline) {
+			var inlineDiv;
+			if (inlineMidiEl) {
+				inlineMidiEl.innerHTML = inlineMidiHtml;
+				inlineDiv = inlineMidiEl;
+			} else {
+				engravingEl.innerHTML += inlineMidiHtml;
+				inlineDiv = engravingEl;
+			}
+			if (midiParams.animate || midiParams.listener) {
+				for (i = 0; i < tunes.length; i++) {
+					var parent = find(inlineDiv, "abcjs-midi-" + i);
+					parent.abcjsTune = tunes[i];
+					parent.abcjsListener = midiParams.listener;
+					parent.abcjsQpm = midiParams.qpm;
+					parent.abcjsContext = midiParams.context;
+					if (midiParams.animate) {
+						var drumIntro = midiParams.drumIntro ? midiParams.drumIntro : 0;
+						parent.abcjsAnimate = midiParams.animate.listener;
+						parent.abcjsTune.setTiming(midiParams.qpm, drumIntro);
+					}
 				}
 			}
 		}
-	}
-}
+	};
+
+	window.addEventListener("generateMidi", function (e) {
+		var options = e.detail;
+		abcMidiUiGenerator(options.tunes, options.midiParams, options.downloadMidiEl, options.inlineMidiEl, options.engravingEl);
+	});
+})();
 
 module.exports = abcMidiUiGenerator;

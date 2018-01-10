@@ -30,10 +30,10 @@ const sequence = require('./src/midi/abc_midi_sequencer');
 const flatten = require('./src/midi/abc_midi_flattener');
 const midiCreate = require('./src/midi/abc_midi_create');
 const midiUiGenerator = require('./src/midi/abc_midi_ui_generator');
-editor.setMidiUiGenerator(midiUiGenerator);
 abcjs['midi'] = midi;
 abcjs['midi'].sequence = sequence;
 abcjs['midi'].flatten = flatten;
 abcjs['midi'].create = midiCreate;
+abcjs['midi'].midiUiGenerator = midiUiGenerator;
 
 module.exports = abcjs;
