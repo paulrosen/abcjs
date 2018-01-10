@@ -1,16 +1,18 @@
 {
   "name": "abcjs",
-  "version": "3.2.1",
+  "version": "3.3.0",
   "description": "Renderer for abc music notation",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "build": "browserify index.js -o dist/abcjs-min.js --standalone ABCJS",
-    "serve": "watchify index.js -o dist/abcjs-min.js --standalone ABCJS",
-    "build:plugin": "browserify index-plugin.js -o dist/abcjs-plugin-min.js --standalone ABCJS",
-    "serve:plugin": "watchify index-plugin.js -o dist/abcjs-plugin-min.js  --standalone ABCJS",
+    "build": "npm run build:basic && npm run build:midi && npm run build:plugin && npm run build:grease && npm run fix-versions",
+    "build:basic": "webpack --env.type=basic",
+    "build:midi": "webpack --env.type=midi",
+    "build:plugin": "webpack --env.type=plugin",
+    "build:grease": "cat src/plugin/greasemonkey.js bin/abcjs_plugin_3.3.0-min.js > bin/abcjs_plugin_3.3.0.user.js",
+    "fix-versions": "./fix-versions.sh 3.3.0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -32,15 +34,16 @@
   "bugs": {
     "url": "https://github.com/paulrosen/abcjs/issues"
   },
-  "homepage": "https://github.com/paulrosen/abcjs#readme",
+  "homepage": "https://abcjs.net",
   "devDependencies": {
-    "browserify": "14.4.0",
-    "uglify-js": "3.0.28",
-    "watchify": "3.9.0"
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.15.0",
+    "uglifyjs-webpack-plugin": "^1.1.6",
+    "webpack": "^3.10.0"
   },
   "dependencies": {
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
     "midi": "git://github.com/paulrosen/MIDI.js.git#abcjs",
     "raphael": "^2.2.7"
   }
