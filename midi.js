@@ -27,6 +27,8 @@ var midi = require('./src/midi/abc_midi_controls');
 var sequence = require('./src/midi/abc_midi_sequencer');
 var flatten = require('./src/midi/abc_midi_flattener');
 var midiCreate = require('./src/midi/abc_midi_create');
+var midiUiGenerator = require('./src/midi/abc_midi_ui_generator');
+editor.setMidiUiGenerator(midiUiGenerator);
 abcjs['midi'] = midi;
 abcjs['midi'].sequence = sequence;
 abcjs['midi'].flatten = flatten;

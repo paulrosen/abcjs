@@ -31,8 +31,6 @@
 var Raphael = require('raphael');
 
 var TuneBook = require('../api/abc_tunebook').TuneBook;
-var midi = require('../midi/abc_midi_controls');
-var midiCreate = require('../midi/abc_midi_create');
 var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
 var TextPrinter = require('../transform/abc2abc_write');
@@ -248,6 +246,11 @@ var Editor = function(editarea, params) {
   };
 };
 
+var midiUiGenerator;
+Editor.setMidiUiGenerator = function(generator) {
+	midiUiGenerator = generator;
+};
+
 Editor.prototype.renderTune = function(abc, params, div) {
   var tunebook = new TuneBook(abc);
   var abcParser = Parse();
@@ -277,56 +280,9 @@ Editor.prototype.modelChanged = function() {
   this.engraver_controller = new EngraverController(paper, this.engraverparams);
   this.engraver_controller.engraveABC(this.tunes);
 	this.tunes[0].engraver = this.engraver_controller;	// TODO-PER: We actually want an output object for each tune, not the entire controller. When refactoring, don't save data in the controller.
-	var downloadMidiHtml = "";
-	var inlineMidiHtml = "";
-	if (this.midiParams && !this.midiPause) {
-		for (var i = 0; i < this.tunes.length; i++) {
-			var midiInst = midiCreate(this.tunes[i], this.midiParams);
-
-			if (this.midiParams.generateInline && this.midiParams.generateDownload) {
-				downloadMidiHtml += midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midiInst.download, i);
-				inlineMidiHtml += midi.generateMidiControls(this.tunes[i], this.midiParams, midiInst.inline, i);
-			} else if (this.midiParams.generateInline)
-				inlineMidiHtml += midi.generateMidiControls(this.tunes[i], this.midiParams, midiInst, i);
-			else
-				downloadMidiHtml += midi.generateMidiDownloadLink(this.tunes[i], this.midiParams, midiInst, i);
-		}
-		if (this.midiParams.generateDownload) {
-			if (this.downloadMidi)
-				this.downloadMidi.innerHTML = downloadMidiHtml;
-			else
-				this.div.innerHTML += downloadMidiHtml;
-		}
-		var find = function(element, cls) {
-			var els = element.getElementsByClassName(cls);
-			if (els.length === 0)
-				return null;
-			return els[0];
-		};
-		if (this.midiParams.generateInline) {
-			var inlineDiv;
-			if (this.inlineMidi) {
-				this.inlineMidi.innerHTML = inlineMidiHtml;
-				inlineDiv = this.inlineMidi;
-			} else {
-				this.div.innerHTML += inlineMidiHtml;
-				inlineDiv = this.div;
-			}
-			if (this.midiParams.animate || this.midiParams.listener) {
-				for (i = 0; i < this.tunes.length; i++) {
-					var parent = find(inlineDiv, "abcjs-midi-" + i);
-					parent.abcjsTune = this.tunes[i];
-					parent.abcjsListener = this.midiParams.listener;
-					parent.abcjsQpm = this.midiParams.qpm;
-					parent.abcjsContext = midiParams.context;
-					if (this.midiParams.animate) {
-						var drumIntro = this.midiParams.drumIntro ? this.midiParams.drumIntro : 0;
-						parent.abcjsAnimate = this.midiParams.animate.listener;
-						parent.abcjsTune.setTiming(this.midiParams.qpm, drumIntro);
-					}
-				}
-			}
-		}
+	console.log("testing midiUiGenerator", midiUiGenerator, this.midiParams, !this.midiPause);
+	if (midiUiGenerator && this.midiParams && !this.midiPause) {
+		midiUiGenerator(this.tunes, this.midiParams, this.downloadMidi, this.inlineMidi, this.div);
 	}
   if (this.warningsdiv) {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
