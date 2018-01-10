@@ -1,25 +1,27 @@
-var animation = require('./src/api/abc_animation');
-var tunebook = require('./src/api/abc_tunebook');
+const animation = require('./src/api/abc_animation');
+const tuneBook = require('./src/api/abc_tunebook');
 
-var abcjs = {};
+let abcjs = {};
+
+abcjs.signature = "abcjs_basic v3.3.0";
 
 Object.keys(animation).forEach(function (key) {
 	abcjs[key] = animation[key];
 });
 
-Object.keys(tunebook).forEach(function (key) {
-	abcjs[key] = tunebook[key];
+Object.keys(tuneBook).forEach(function (key) {
+	abcjs[key] = tuneBook[key];
 });
 
 abcjs.renderAbc = require('./src/api/abc_tunebook_svg');
 
-var parser = require('./src/parse/abc_parse');
+const parser = require('./src/parse/abc_parse');
 abcjs['parse'] = {Parse: parser};
 
-var engraverController = require('./src/write/abc_engraver_controller');
+const engraverController = require('./src/write/abc_engraver_controller');
 abcjs['write'] = {EngraverController: engraverController};
 
-var editor = require('./src/edit/abc_editor');
+const editor = require('./src/edit/abc_editor');
 abcjs['Editor'] = editor;
 
 module.exports = abcjs;

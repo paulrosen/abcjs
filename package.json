@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "build": "npm run build:basic && npm run build:midi && npm run build:plugin && npm run build:grease && npm run fix-versions",
+    "build": "npm run fix-versions && npm run build:basic && npm run build:midi && npm run build:plugin && npm run build:grease",
     "build:basic": "webpack --env.type=basic",
     "build:midi": "webpack --env.type=midi",
     "build:plugin": "webpack --env.type=plugin",
