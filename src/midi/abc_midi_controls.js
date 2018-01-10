@@ -16,13 +16,14 @@
 
 // Unfortunately, a few versions of Safari don't support the performance interface. For those browsers, MIDI just won't work.
 if ('performance' in window) {
-	if (typeof galactic === 'undefined') galactic = {};
-	galactic.loc = {
+	if (!('galactic' in window))
+		window.galactic = {};
+	window.galactic.loc = {
 		isLocalUrl: function () { return false }
 	};
 
 	require('midi/inc/dom/request_xhr');
-	require('midi/inc/dom/util')(galactic);
+	require('midi/inc/dom/util')(window.galactic);
 	require('midi/inc/AudioSupports');
 	require('midi/inc/EventEmitter');
 	require('midi/js/loader');
