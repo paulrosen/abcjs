@@ -38,7 +38,7 @@ The method of unit testing is to run all of the test files through the various l
 
 Here's an example of how to call the linting functions:
 
-	import abcjs from 'abcjs';
+	import abcjs from 'abcjs/test';
 	doTest(abcString) {
 		const tuneBook = new abcjs.TuneBook(abcString);
 		const abcParser = new abcjs.parse.Parse();
