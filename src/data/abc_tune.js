@@ -232,7 +232,7 @@ var Tune = function() {
 		}
 
 		// If we were passed staffnonote, then we want to get rid of all staffs that contain only rests.
-		if (staffnonote) {
+		if (barsperstaff) {
 			anyDeleted = false;
 			for (i = 0; i < this.lines.length; i++) {
 				if (this.lines[i].staff !== undefined) {
