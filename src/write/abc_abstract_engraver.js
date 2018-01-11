@@ -545,7 +545,10 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
          flag = this.chartable[(dir==="down")?"dflags":"uflags"][-durlog];
         }
       }
-		c = noteSymbol;
+	    if (elem.pitches[p].style) { // There is a style for the whole group of pitches, but there could also be an override for a particular pitch.
+		    c = this.chartable[elem.pitches[p].style][-durlog];
+	    } else
+		    c = noteSymbol;
                 // The highest position for the sake of placing slurs is itself if the slur is internal. It is the highest position possible if the slur is for the whole chord.
                 // If the note is the only one in the chord, then any slur it has counts as if it were on the whole chord.
                 elem.pitches[p].highestVert = elem.pitches[p].verticalPos;

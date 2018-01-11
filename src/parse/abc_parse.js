@@ -1223,8 +1223,20 @@ var Parse = function() {
 
 						var done = false;
 						while (!done) {
+							var accent = letter_to_accent(line, i);
+							if (accent[0] > 0) {
+								i += accent[0];
+							}
+
 							var chordNote = getCoreNote(line, i, {}, false);
 							if (chordNote !== null) {
+								if (accent[0] > 0) { // If we found a decoration above, it modifies the entire chord. "style" is handled below.
+									if (accent[1].indexOf("style=") !== 0) {
+										if (el.decoration === undefined)
+											el.decoration = [];
+										el.decoration.push(accent[1]);
+									}
+								}
 								if (chordNote.end_beam) {
 									el.end_beam = true;
 									delete chordNote.end_beam;
@@ -1235,6 +1247,11 @@ var Parse = function() {
 								} else	// Just ignore the note lengths of all but the first note. The standard isn't clear here, but this seems less confusing.
 									el.pitches.push(chordNote);
 								delete chordNote.duration;
+								if (accent[0] > 0) { // If we found a style above, it modifies the individual pitch, not the entire chord.
+									if (accent[1].indexOf("style=") === 0) {
+										el.pitches[el.pitches.length-1].style = accent[1].substr(6);
+									}
+								}
 
 								if (multilineVars.inTieChord[el.pitches.length]) {
 									chordNote.endTie = true;

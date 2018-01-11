@@ -199,7 +199,8 @@ var ParserLint = function() {
 					pitch: { type: 'number' },
 					verticalPos: { type: 'number' },
 					startSlur: slurProperties,
-					startTie: tieProperties
+					startTie: tieProperties,
+					style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x'], optional: true }
 				}
 		}},
 		positioning: { type: 'object', optional: true, properties: {
