@@ -87,8 +87,7 @@ var rendererFactory;
 	};
 
 	Midi.prototype.setChannel = function(number) {
-		//console.log("setChannel", number);
-		this.channel = number - 1;
+		this.channel = number;
 		this.noteOnAndChannel = "%9" + this.channel.toString(16);
 	};
 
