@@ -195,15 +195,17 @@ var Tune = function() {
 			for (i = 0; i < this.lines.length; i++) {
 				if (this.lines[i].staff !== undefined) {
 					for (s = 0; s < this.lines[i].staff.length; s++) {
+						var permanentItems = [];
 						for (v = 0; v < this.lines[i].staff[s].voices.length; v++) {
+							var voice = this.lines[i].staff[s].voices[v];
 							var barNumThisLine = 0;
-							for (var n = 0; n < this.lines[i].staff[s].voices[v].length; n++) {
-								if (this.lines[i].staff[s].voices[v][n].el_type === 'bar') {
+							for (var n = 0; n < voice.length; n++) {
+								if (voice[n].el_type === 'bar') {
 									barNumThisLine++;
 									if (barNumThisLine >= barsperstaff) {
 										// push everything else to the next line, if there is anything else,
 										// and there is a next line. If there isn't a next line, create one.
-										if (n < this.lines[i].staff[s].voices[v].length - 1) {
+										if (n < voice.length - 1) {
 											if (i === this.lines.length - 1) {
 												var cp = JSON.parse(JSON.stringify(this.lines[i]));
 												this.lines.push(parseCommon.clone(cp));
@@ -215,9 +217,11 @@ var Tune = function() {
 											var startElement = n + 1;
 											var section = this.lines[i].staff[s].voices[v].slice(startElement);
 											this.lines[i].staff[s].voices[v] = this.lines[i].staff[s].voices[v].slice(0, startElement);
-											this.lines[i+1].staff[s].voices[v] = section.concat(this.lines[i+1].staff[s].voices[v]);
+											this.lines[i+1].staff[s].voices[v] = permanentItems.concat(section.concat(this.lines[i+1].staff[s].voices[v]));
 										}
 									}
+								} else if (!voice[n].duration) {
+									permanentItems.push(voice[n]);
 								}
 							}
 
@@ -228,7 +232,7 @@ var Tune = function() {
 		}
 
 		// If we were passed staffnonote, then we want to get rid of all staffs that contain only rests.
-		if (barsperstaff) {
+		if (staffnonote) {
 			anyDeleted = false;
 			for (i = 0; i < this.lines.length; i++) {
 				if (this.lines[i].staff !== undefined) {
