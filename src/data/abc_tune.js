@@ -1020,21 +1020,23 @@ var Tune = function() {
 
 	this.setTiming = function (bpm, measuresOfDelay) {
 		var meter = this.getMeter();
-		this.barTimings = [];
 		var beatLength = this.getBeatLength();
-		if (!bpm && this.metaText && this.metaText.tempo)
+		if (!bpm && this.metaText && this.metaText.tempo) {
 			bpm = this.metaText.tempo.bpm;
+			var statedBeatLength = this.metaText.tempo.duration && this.metaText.tempo.duration.length > 0 ? this.metaText.tempo.duration[0] : beatLength;
+			bpm = bpm * statedBeatLength / beatLength;
+		}
 		if (!bpm)
 			bpm = 180;
 		var beatsPerSecond = bpm / 60;
-		var currentTime = []; // per voice
 
 		var measureLength;
 		switch(meter.type) {
 			case "common_time": measureLength = 1; this.meter = { num: 4, den: 4}; break;
 			case "cut_time": measureLength = 1; this.meter = { num: 2, den: 2}; break;
-			default: measureLength = meter.value[0].num/meter.value[0].den; this.meter = { num: meter.value[0].num, den: meter.value[0].den};
+			default: measureLength = meter.value[0].num/meter.value[0].den; this.meter = { num: parseInt(meter.value[0].num, 10), den: parseInt(meter.value[0].den,10)};
 		}
+
 
 		var startingDelay = measureLength / beatLength * measuresOfDelay / beatsPerSecond;
 		var timeDivider = beatLength * beatsPerSecond;
