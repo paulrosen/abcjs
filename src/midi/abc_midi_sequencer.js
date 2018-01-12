@@ -270,7 +270,9 @@ var sequence;
 		if (element.bpm) {
 			bpm = element.bpm;
 		}
-		return bpm*duration*4;
+		// The tempo is defined with a beat of a 1/4 note, so we need to adjust it if the tempo is expressed with other than a quarter note.
+		// expressedDuration * expressedBeatsPerMinute / lengthOfQuarterNote = quarterNotesPerMinute
+		return duration * bpm / 0.25;
 	}
 
 	function interpretMeter(element) {
