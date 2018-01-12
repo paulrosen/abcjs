@@ -487,8 +487,8 @@ var flatten;
 		'maj7': [ 0, 4, 7, 11 ],
 		'∆7': [ 0, 4, 7, 11 ],
 		'9': [ 0, 4, 7, 10, 14 ],
-		'11': [ 0, 4, 7, 10, 14, 16 ], // TODO-PER: check this one.
-		'13': [ 0, 4, 7, 10, 14, 18 ], // TODO-PER: check this one.
+		'11': [ 0, 4, 7, 10, 14, 16 ],
+		'13': [ 0, 4, 7, 10, 14, 18 ],
 		'+': [ 0, 4, 8 ],
 		'7#5': [ 0, 4, 8, 10 ],
 		'7+5': [ 0, 4, 8, 10 ],
@@ -505,9 +505,9 @@ var flatten;
 		'dim': [ 0, 3, 6 ],
 		'dim7': [ 0, 3, 6, 9 ],
 		'°7': [ 0, 3, 6, 9 ],
-		'ø7': [ 0, 3, 6, 9 ],	// TODO-PER: check this one.
+		'ø7': [ 0, 3, 6, 10 ],
 		'7sus4': [ 0, 5, 7, 10 ],
-		'm7sus4': [ 0, 5, 7, 10 ],	// TODO-PER: check this one.
+		'm7sus4': [ 0, 5, 7, 10 ],
 		'sus4': [ 0, 5, 7 ]
 	};
 	function chordNotes(bass, modifier) {
@@ -545,7 +545,10 @@ var flatten;
 		"2/4": [ 'boom', 'chick' ],
 		"3/4": [ 'boom', 'chick', 'chick' ],
 		"4/4": [ 'boom', 'chick', 'boom2', 'chick' ],
-		"6/8": [ 'boom', '', 'chick', 'boom2', '', 'chick' ]
+		"5/4": [ 'boom', 'chick', 'chick', 'boom2', 'chick' ],
+		"6/8": [ 'boom', '', 'chick', 'boom2', '', 'chick' ],
+		"9/8": [ 'boom', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick' ],
+		"12/8": [ 'boom', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick' ],
 	};
 
 	function resolveChords() {
