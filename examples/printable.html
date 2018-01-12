@@ -55,24 +55,24 @@
 			margin: 0;
 			padding: 20px 20px 20px 0;
 			color: #333;
-			font-size: 50px;
+			font-size: 30px;
 		}
 
 		.logo-wrapper {
 			width: 90px;
-			height: 98px;
+			height: 67px;
 			display: flex;
 			align-items: center;
 			padding-top: 14px;
-			margin-left: 30px;
 		}
 
 		main {
-			margin: 10px 30px 0 30px;
+			margin: 10px 5px 0 5px;
 		}
 
 		.instructions {
 			list-style: none;
+			padding: 0;
 		}
 
 		.input {
@@ -126,13 +126,40 @@
 		}
 
 		footer {
-			padding: 10px 0;
+			padding: 1px 0;
 			margin-top: 20px;
 		}
 		footer ul {
 			list-style: none;
-			margin-left: 4px;
+			padding: 5px;
 		}
+		@media screen and (min-width: 361px) {
+			header h1 {
+				font-size: 35px;
+			}
+			.logo-wrapper {
+				height: 74px;
+			}
+		}
+
+		@media screen and (min-width: 550px) {
+			main {
+				margin: 10px 30px 0 30px;
+			}
+			header, footer {
+				padding-left: 30px;
+			}
+			header h1 {
+				font-size: 50px;
+			}
+			.logo-wrapper {
+				height: 98px;
+			}
+			.instructions {
+				padding-left: 20px;
+			}
+		}
+
 		@media screen {
 			#canvas {
 				border: 2px solid #d6b88c;
