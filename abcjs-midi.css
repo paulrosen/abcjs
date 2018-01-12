@@ -2,12 +2,13 @@
 
 .abcjs-inline-midi {
 	height: 26px;
-	padding: 2px 5px;
+	padding: 0 5px;
 	border-radius: 3px;
 	color: #f4f4f4;
 	background-color: #424242;
 	display: flex;
-	box-sizing: content-box;
+	align-items: center;
+	box-sizing: border-box;
 }
 
 .abcjs-inline-midi .abcjs-btn {
@@ -26,6 +27,7 @@
 	-moz-osx-font-smoothing: grayscale;
 	color: #f4f4f4;
 	border: 1px solid transparent;
+	box-sizing: border-box;
 }
 
 .abcjs-inline-midi .abcjs-btn:hover {
@@ -39,6 +41,7 @@
 .abcjs-inline-midi .abcjs-midi-selection.abcjs-pushed {
 	border: 1px solid #cccccc;
 	background-color: #666666;
+	box-sizing: border-box;
 }
 
 .abcjs-inline-midi .abcjs-midi-loop:before {
@@ -48,6 +51,7 @@
 .abcjs-inline-midi .abcjs-midi-loop.abcjs-pushed {
 	border: 1px solid #cccccc;
 	background-color: #666666;
+	box-sizing: border-box;
 }
 
 .abcjs-inline-midi .abcjs-midi-reset:before {
@@ -57,6 +61,7 @@
 .abcjs-inline-midi .abcjs-midi-reset.abcjs-pushed {
 	border: 1px solid #cccccc;
 	background-color: #666666;
+	box-sizing: border-box;
 }
 
 .abcjs-inline-midi .abcjs-midi-start:before {
@@ -72,10 +77,11 @@
 	height: 10px;
 	border-radius: 5px;
 	border: 2px solid #cccccc;
-	margin: 8px 0 0 15px;
+	margin: 0 8px 0 15px;
 	position: relative;
 	flex: 1;
 	padding: 0;
+	box-sizing: border-box;
 }
 
 .abcjs-inline-midi .abcjs-midi-progress-indicator {
@@ -88,19 +94,22 @@
 	border-radius: 6px;
 	top: -4px;
 	left: 0;
+	box-sizing: border-box;
 }
 
 .abcjs-inline-midi .abcjs-midi-clock, .abcjs-inline-midi .abcjs-midi-post {
 	margin-left: 4px;
-	margin-top: 1px;
+	margin-top: 0;
 	display: inline-block;
 	font-family: sans-serif;
 	font-size: 16px;
+	box-sizing: border-box;
 }
 
 .abcjs-inline-midi .abcjs-midi-pre {
 	margin-top: 4px;
 	display: inline-block;
+	box-sizing: border-box;
 }
 
 .abcjs-inline-midi .abcjs-tempo-wrapper {
@@ -109,6 +118,7 @@
 	display: inline-block;
 	color: #f4f4f4;
 	margin-top: 4px;
+	box-sizing: border-box;
 }
 
 .abcjs-inline-midi .abcjs-midi-tempo {
@@ -117,4 +127,5 @@
 	margin: 1px 2px 0 4px;
 	width: 30px;
 	padding-left: 2px;
+	box-sizing: border-box;
 }
