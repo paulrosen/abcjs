@@ -6,6 +6,10 @@
 
 * The npm version has a new export called "signature" that gives your javascript code some version information.
 
+* The documentation has all been moved to the `/docs` folder.
+
+* The examples have all been moved to the `/examples` folder.
+
 **Special note for Version 3.2.0:**
 
 abcjs is proud to announce that it can now be installed with `npm`. Instead of including the minimized files on your page, you can use the library by doing the following in your project:
