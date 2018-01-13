@@ -1220,6 +1220,7 @@ var Parse = function() {
 						var chordStartChar = i;
 						i++;
 						var chordDuration = null;
+						var rememberEndBeam = false;
 
 						var done = false;
 						while (!done) {
@@ -1325,6 +1326,8 @@ var Parse = function() {
 												var fraction = tokenizer.getFraction(line, i);
 												chordDuration = fraction.value;
 												i = fraction.index;
+												if (line.charAt(i) === ' ')
+													rememberEndBeam = true;
 												if (line.charAt(i) === '-' || line.charAt(i) === ')' || line.charAt(i) === ' ' || line.charAt(i) === '<' || line.charAt(i) === '>')
 													i--; // Subtracting one because one is automatically added below
 												else
@@ -1344,6 +1347,8 @@ var Parse = function() {
 								if (el.pitches !== undefined) {
 									if (chordDuration !== null) {
 										el.duration = el.duration * chordDuration;
+										if (rememberEndBeam)
+											addEndBeam(el);
 									}
 
 									multilineVars.addFormattingOptions(el, tune.formatting, 'note');
