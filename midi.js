@@ -18,5 +18,5 @@ abcjs.renderMidi = require('./src/api/abc_tunebook_midi');
 
 const editor = require('./src/edit/abc_editor');
 abcjs['Editor'] = editor;
-
+require("./src/midi/abc_midi_ui_generator");
 module.exports = abcjs;
