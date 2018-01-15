@@ -6,6 +6,13 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 **Special notes for Version 3.3.0:**
 
+| Important Breaking Change for MIDI users! |
+|  ----------- |
+| If you were previously using the npm version like this: |
+| `import abcjs from "abcjs"` |
+| and using the midi functionality, you need to change that to: |
+| `import abcjs from "abcjs/midi"` |
+
 * The build process has switched over to webpack. The minimization is now done with UglifyJS. This shouldn't cause any side effects.
 
 * This folder structure has changed dramatically. It shouldn't cause any side effects.
