@@ -1,3 +1,103 @@
+# Version 3.3.0
+
+## Bug fixes:
+
+* Only put the first/second ending marker on the top staff of a system.
+
+* Fix crash when voice is incomplete.
+
+* Fix position of the clock on the midi controls; make midi controls aware of box-sizing.
+
+* Only play chords once if there is more than one staff.
+
+* Fix JS math rounding error when figuring out the timing of the notes for MIDI animation.
+
+* Add tied notes to the objects that will get returned during MIDI animation.
+
+* Don't let the MIDI duration be a negative number on really short notes.
+
+* Sequence the repeats correctly when doing MIDI animation.
+
+* Don't put MIDI.js in debug mode.
+
+* Remove dependency on midi for the editor version
+
+* Fix declaration of "galactic".
+
+* Add polyfill for Object.remove() for IE
+
+* Fix creating downloadable midi
+
+* Fix bug where there couldn't be two different note heads on a stem.
+
+* When splitting a line with barsperline, propagate certain control items on the next line.
+
+* Fix some midi control visual conflicts with box-sizing.
+
+* Fix the playback tempo for non-4/4 meters.
+
+* Support a couple more rhythm patterns with generated chords; fix a couple errors in generated chords.
+
+* Fix problem with ending a beam when a chord is the last element.
+
+## Features:
+
+* Add support for "instrument" in midi playback; restrict usage of channel to be one per track.
+
+* Make metronome track use the next free channel.
+
+* Pick a free channel for the chords.
+
+* Add "context" as a parameter to the MIDI controls so that multiple MIDI on a page can be kept separate.
+
+* Set the default soundfont location to the CDN.
+
+* Add a signature/version to the exports so that the client can detect it.
+
+* Add the midi listener for the editor.
+
+## Infrastructure:
+
+* Moved source code into a subfolder.
+
+* Moved examples into a subfolder.
+
+* Moved font generation into a subfolder.
+
+* Moved documentation into a subfolder.
+
+* Removed many no longer used build files.
+
+* Remove "editor" as a separate build.
+
+* Just have three maintained minimized builds: abcjs_basic, abcjs_midi, and abcjs_plugin.
+
+* Create separate entry point for "test" which is only useful for those working on abcjs.
+
+* Create separate npm entry points for "basic" and "midi".
+
+* Switch to webpack for creating static versions of libs.
+
+* Don't need a plugin version under npm - that's just for standalone.
+
+* Remove dependency on midi for the standalone version.
+
+* Remove unneeded public entry points.
+
+* Add old minified versions that were previously missed. 
+
+## Documentation
+
+* Clarified config of "drum" track in midi.
+
+* Updated copyrights
+
+* Create a "contributing" doc page.
+
+* Lots of readme file clean up.
+
+* Create an example that demonstrates formatting for printing.
+
 # Version 3.2.1
 
 ## Bug fixes:
