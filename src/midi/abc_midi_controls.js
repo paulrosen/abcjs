@@ -275,7 +275,7 @@ var midi = {};
 				maxIndex = currentIndex - 1;
 			}
 			else {
-				// We have a match!
+				// We have a match.
 				return currentIndex;
 			}
 		}
