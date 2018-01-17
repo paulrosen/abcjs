@@ -1,3 +1,9 @@
+# Version 3.3.1
+
+## Bug fixes:
+
+* Modify main index.js to avoid using ES6 (is not transpiling, and some testing platforms can fail)
+
 # Version 3.3.0
 
 ## Bug fixes:

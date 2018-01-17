@@ -1,7 +1,7 @@
 const animation = require('./src/api/abc_animation');
 const tuneBook = require('./src/api/abc_tunebook');
 
-let abcjs = {};
+var abcjs = {};
 
 abcjs.signature = "abcjs-basic v3.3.0";
 
