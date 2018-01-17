@@ -84,6 +84,8 @@ To release a new version, this checklist should be followed:
 
 [_] Change the version in [the package file](../package.json) with `npm version patch <-- or minor, or major`.
 
+[_] Find any other hardcoded version numbers in [the package file](../package.json) and change them, too.
+
 [_] Minify the various library versions with `npm run build`.
 
 [_] Update npm with `npm publish`.
