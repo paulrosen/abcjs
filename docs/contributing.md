@@ -88,6 +88,8 @@ To release a new version, this checklist should be followed:
 
 [_] Update npm with `npm publish`.
 
+[_] On github, "Draft a new release".
+
 [_] Also release a new version of the [WordPress plugin](https://wordpress.org/plugins/abc-notation/).
 
 ## Font Info
