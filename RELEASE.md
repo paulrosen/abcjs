@@ -4,6 +4,8 @@
 
 * Modify main index.js to avoid using ES6 (is not transpiling, and some testing platforms can fail)
 
+* Expose the soundfontUrl variable.
+
 # Version 3.3.0
 
 ## Bug fixes:
