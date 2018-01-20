@@ -386,7 +386,7 @@ var animation = {};
 				lastTop = currentNote.top;
 				setMargin(lastTop);
 			}
-			if (options.showCursor) {
+			if (options.showCursor && cursor && cursor.style) {
 				cursor.style.left = currentNote.left + "px";
 				cursor.style.top = currentNote.top + "px";
 				cursor.style.width = currentNote.width + "px";
