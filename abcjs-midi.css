@@ -107,7 +107,6 @@
 }
 
 .abcjs-inline-midi .abcjs-midi-pre {
-	margin-top: 4px;
 	display: inline-block;
 	box-sizing: border-box;
 }
@@ -117,7 +116,6 @@
 	font-size: 10px;
 	display: inline-block;
 	color: #f4f4f4;
-	margin-top: 4px;
 	box-sizing: border-box;
 }
 
@@ -125,7 +123,7 @@
 	border-radius: 2px;
 	border: none;
 	margin: 1px 2px 0 4px;
-	width: 30px;
+	width: 32px;
 	padding-left: 2px;
 	box-sizing: border-box;
 }
