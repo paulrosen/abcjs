@@ -112,7 +112,7 @@ var tunebook = {};
 			parserParams = {};
 		if (renderParams === undefined)
 			renderParams = {};
-		var currentTune = renderParams.startingTune ? renderParams.startingTune : 0;
+		var currentTune = renderParams.startingTune ? parseInt(renderParams.startingTune, 10) : 0;
 
 		// parse the abc string
 		var book = new TuneBook(abc);
@@ -125,7 +125,7 @@ var tunebook = {};
 				div = document.getElementById(div);
 			if (div) {
 				div.innerHTML = "";
-				if (currentTune < book.tunes.length) {
+				if (currentTune >= 0 && currentTune < book.tunes.length) {
 					abcParser.parse(book.tunes[currentTune].abc, parserParams);
 					var tune = abcParser.getTune();
 					ret.push(tune);
