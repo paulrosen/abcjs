@@ -686,9 +686,9 @@ Renderer.prototype.printStave = function (startx, endx, numLines) {
 Renderer.prototype.addClasses = function (c) {
 	var ret = [];
 	if (c.length > 0) ret.push(c);
-	if (this.lineNumber !== null) ret.push("l"+this.lineNumber);
-	if (this.measureNumber !== null) ret.push("m"+this.measureNumber);
-	if (this.voiceNumber !== null) ret.push("v"+this.voiceNumber);
+	if (this.lineNumber !== null && this.lineNumber !== undefined) ret.push("l"+this.lineNumber);
+	if (this.measureNumber !== null && this.measureNumber !== undefined) ret.push("m"+this.measureNumber);
+	if (this.voiceNumber !== null && this.voiceNumber !== undefined) ret.push("v"+this.voiceNumber);
 	return ret.join(' ');
 };
 
