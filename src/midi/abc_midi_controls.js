@@ -111,7 +111,10 @@ var midi = {};
 
 	// The default location for the sound font files. Simply set this to a different value if the files are served in a different place.
 	// midi.soundfontUrl = "node_modules/midi/examples/soundfont/";
-	midi.soundfontUrl = "https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/";
+	var soundfontUrl = "https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/";
+	midi.setSoundFont = function(url) {
+		soundfontUrl = url;
+	};
 
 	function hasClass(element, cls) {
 		if (!element)
@@ -184,7 +187,7 @@ var midi = {};
 		if (!midiJsInitialized) {
 			MIDI.setup({
 				debug: false,
-				soundfontUrl: midi.soundfontUrl
+				soundfontUrl: soundfontUrl
 			}).then(function() {
 				midiJsInitialized = true;
 				afterSetup(timeWarp, data, onSuccess);

@@ -21,6 +21,6 @@ abcjs['Editor'] = editor;
 require("./src/midi/abc_midi_ui_generator");
 
 const midi = require('./src/midi/abc_midi_controls');
-abcjs.midi = { soundfontUrl: midi.soundfontUrl };
+abcjs.midi = { setSoundFont: midi.setSoundFont };
 
 module.exports = abcjs;

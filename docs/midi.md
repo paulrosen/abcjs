@@ -28,7 +28,7 @@ That, in turn, is dependent on a set of sound fonts. A good place to get them is
 
 NOTE: You can put the sound fonts in another location. If you do, then include the following line right after loading ABCJS:
 
-`window.ABCJS.midi.soundfontUrl = "/path/to/soundfont/";`
+`window.ABCJS.midi.setSoundFont("/url/to/soundfont/");`
 
 The trailing slash is required.
 
