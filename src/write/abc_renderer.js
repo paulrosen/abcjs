@@ -80,6 +80,16 @@ Renderer.prototype.setPaperSize = function (maxwidth, scale, responsive) {
 	if (this.doRegression)
 		this.regressionLines.push("PAPER SIZE: ("+w+","+h+")");
 
+	// for accessibility
+	this.paper.canvas.setAttribute("role", "img");
+	var titleEl = document.createElement("title");
+	var text = "Sheet Music";
+	if (this.abctune && this.abctune.metaText && this.abctune.metaText.title)
+		text += " for \"" + this.abctune.metaText.title + '"';
+	var title = document.createTextNode(text);
+	titleEl.appendChild(title);
+	this.paper.canvas.insertBefore(titleEl, this.paper.canvas.firstChild);
+
 	if (responsive === 'resize') {
 		// this technique is from: http://thenewcode.com/744/Make-SVG-Responsive, thx to https://github.com/iantresman
 		this.paper.canvas.parentNode.classList.add("abcjs-container");
