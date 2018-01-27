@@ -346,6 +346,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 Renderer.prototype.engraveExtraText = function(width, abctune) {
 	this.lineNumber = null;
 	this.measureNumber = null;
+	this.noteNumber = null;
 	this.voiceNumber = null;
 
 	var extraText;
@@ -683,12 +684,13 @@ Renderer.prototype.printStave = function (startx, endx, numLines) {
  *
  * @private
  */
-Renderer.prototype.addClasses = function (c) {
+Renderer.prototype.addClasses = function (c, isNote) {
 	var ret = [];
 	if (c.length > 0) ret.push(c);
 	if (this.lineNumber !== null && this.lineNumber !== undefined) ret.push("l"+this.lineNumber);
 	if (this.measureNumber !== null && this.measureNumber !== undefined) ret.push("m"+this.measureNumber);
 	if (this.voiceNumber !== null && this.voiceNumber !== undefined) ret.push("v"+this.voiceNumber);
+	if (c.indexOf('note') >= 0 && this.noteNumber !== null && this.noteNumber !== undefined) ret.push("n"+this.noteNumber);
 	return ret.join(' ');
 };
 

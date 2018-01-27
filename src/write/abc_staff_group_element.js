@@ -381,6 +381,7 @@ StaffGroupElement.prototype.draw = function (renderer) {
 
 	var bartop = 0;
 	renderer.measureNumber = null;
+	renderer.noteNumber = null;
 	for (var i=0;i<this.voices.length;i++) {
 		var staff = this.voices[i].staff;
 		renderer.y = staff.absoluteY;
@@ -393,11 +394,13 @@ StaffGroupElement.prototype.draw = function (renderer) {
 			bottomLine  = renderer.calcY(2);
 			if (staff.lines !== 0) {
 				renderer.measureNumber = null;
+				renderer.noteNumber = null;
 				renderer.printStave(this.startx, this.w, staff.lines);
 			}
 		}
 		this.voices[i].draw(renderer, bartop);
 		renderer.measureNumber = null;
+		renderer.noteNumber = null;
 		if (!this.voices[i].duplicate) {
 			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
 //			if (staff.bottom < 0)
@@ -412,6 +415,7 @@ StaffGroupElement.prototype.draw = function (renderer) {
 		}
 	}
 	renderer.measureNumber = null;
+	renderer.noteNumber = null;
 
 	// connect all the staves together with a vertical line
 	if (this.staffs.length>1) {

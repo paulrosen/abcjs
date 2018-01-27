@@ -222,6 +222,7 @@ VoiceElement.prototype.draw = function (renderer, bartop) {
 	//this.barbottom = renderer.calcY(2);
 
 	renderer.measureNumber = null;
+	renderer.noteNumber = null;
 	if (this.header) { // print voice name
 		var textpitch = 14 - (this.voicenumber+1)*(12/(this.voicetotal+1));
 		renderer.renderText(renderer.padding.left, renderer.calcY(textpitch), this.header, 'voicefont', 'staff-extra voice-name', 'start');
@@ -232,27 +233,36 @@ VoiceElement.prototype.draw = function (renderer, bartop) {
 		var justInitializedMeasureNumber = false;
 		if (child.type !== 'staff-extra' && renderer.measureNumber === null) {
 			renderer.measureNumber = 0;
+			renderer.noteNumber = 0;
 			justInitializedMeasureNumber = true;
 		}
 		child.draw(renderer, (this.barto || i===ii-1)?bartop:0);
-		if (child.type === 'bar' && !justInitializedMeasureNumber)
+		if (child.type === 'note')
+			renderer.noteNumber++;
+		if (child.type === 'bar' && !justInitializedMeasureNumber) {
 			renderer.measureNumber++;
+			renderer.noteNumber = 0;
+		}
 	}
 
 	renderer.measureNumber = 0;
+	renderer.noteNumber = 0;
 	parseCommon.each(this.beams, function(beam) {
-		if (beam === 'bar')
+		if (beam === 'bar') {
 			renderer.measureNumber++;
-		else
+			renderer.noteNumber = 0;
+		} else
 			beam.draw(renderer); // beams must be drawn first for proper printing of triplets, slurs and ties.
 	});
 
 	renderer.measureNumber = 0;
+	renderer.noteNumber = 0;
 	var self = this;
 	parseCommon.each(this.otherchildren, function(child) {
-		if (child === 'bar')
+		if (child === 'bar') {
 			renderer.measureNumber++;
-		else
+			renderer.noteNumber = 0;
+		} else
 			child.draw(renderer,self.startx+10,width);
 	});
 

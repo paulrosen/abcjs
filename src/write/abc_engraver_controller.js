@@ -122,6 +122,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
 	this.renderer.setVerticalSpace(abctune.formatting);
 	this.renderer.measureNumber = null;
+	this.renderer.noteNumber = null;
 	this.renderer.setPrintMode(abctune.media === 'print');
 	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
 	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
