@@ -100,7 +100,7 @@ var midi = {};
 		if (options.standard)
 			html += '<button type="button" class="abcjs-midi-reset abcjs-btn" title="' + options.tooltipReset + '"></button><button type="button" class="abcjs-midi-start abcjs-btn" title="' + options.tooltipPlay + '"></button><button type="button" class="abcjs-midi-progress-background" title="' + options.tooltipProgress + '"><span class="abcjs-midi-progress-indicator"></span></button><span class="abcjs-midi-clock"> 0:00</span>';
 		if (options.tempo) {
-			var startTempo = tune && tune.metaText && tune.metaText.tempo ? tune.metaText.tempo.bpm : 180;
+			var startTempo = tune && tune.metaText && tune.metaText.tempo && tune.metaText.tempo.bpm ? tune.metaText.tempo.bpm : 180;
 			html += '<span class="abcjs-tempo-wrapper"><input class="abcjs-midi-tempo" value="100" type="number" min="1" max="300" data-start-tempo="' + startTempo + '" title="' + options.tooltipTempo + '" />% (<span class="abcjs-midi-current-tempo">' + startTempo + '</span> BPM)</span>';
 		}
 
