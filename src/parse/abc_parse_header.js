@@ -220,6 +220,37 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 		}
 	};
 
+
+	var tempoString = {
+
+		larghissimo: 20,
+		adagissimo: 24,
+		sostenuto: 28,
+		grave: 32,
+		largo: 40,
+		lento: 50,
+		larghetto: 60,
+		adagio: 68,
+		adagietto: 74,
+		andante: 80,
+		andantino: 88,
+		"marcia moderato": 84,
+		"andante moderato": 100,
+		moderato: 112,
+		allegretto: 116,
+		"allegro moderato": 120,
+		allegro: 126,
+		animato: 132,
+		agitato: 140,
+		veloce: 148,
+		"mosso vivo": 156,
+		vivace: 164,
+		vivacissimo: 172,
+		allegrissimo: 176,
+		presto: 184,
+		prestissimo: 210,
+	};
+
 	this.setTempo = function(line, start, end) {
 		//Q - tempo; can be used to specify the notes per minute, e.g. If
 		//the meter denominator is a 4 note then Q:120 or Q:C=120
@@ -247,6 +278,9 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 				tempo.preString = token.token;
 				token = tokens.shift();
 				if (tokens.length === 0) {	// It's ok to just get a string for the tempo
+					// If the string is a well-known tempo, put in the bpm
+					if (tempoString[tempo.preString.toLowerCase()])
+						tempo.bpm = tempoString[tempo.preString.toLowerCase()];
 					return {type: 'immediate', tempo: tempo};
 				}
 			}
