@@ -175,7 +175,17 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 		}
 		this.elemset.push(this.children[i].draw(renderer,bartop));
 	}
-	this.elemset.push(renderer.endGroup(this.type));
+	var klass = this.type;
+	if (this.type === 'note') {
+		klass += ' d' + this.duration;
+		klass = klass.replace(/\./g, '-');
+		if (this.abcelem.pitches) {
+			for (var j = 0; j < this.abcelem.pitches.length; j++) {
+				klass += ' p' + this.abcelem.pitches[j].pitch;
+			}
+		}
+	}
+	this.elemset.push(renderer.endGroup(klass));
 	if (this.klass)
 		this.setClass("mark", "", "#00ff00");
 	if (this.hint)
