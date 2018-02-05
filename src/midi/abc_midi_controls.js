@@ -183,11 +183,22 @@ var midi = {};
 		onSuccess();
 	}
 
+	function listInstruments(data) {
+		var instruments = [];
+		for (var i = 0; i < data.length; i++) {
+			if (data[i][0] && data[i][0].event && data[i][0].event.programNumber) {
+				instruments.push(data[i][0].event.programNumber);
+			}
+		}
+		return instruments;
+	}
+
 	function setCurrentMidiTune(timeWarp, data, onSuccess) {
 		if (!midiJsInitialized) {
 			MIDI.setup({
 				debug: false,
-				soundfontUrl: soundfontUrl
+				soundfontUrl: soundfontUrl,
+				instruments:  listInstruments(data)
 			}).then(function() {
 				midiJsInitialized = true;
 				afterSetup(timeWarp, data, onSuccess);
