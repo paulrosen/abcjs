@@ -398,7 +398,11 @@ var midi = {};
 	}
 
 	midi.startPlaying = function(target) {
-		onStart(target);
+		// This can be called with the target being entire control, and if so, first find the start button.
+		var btn = target;
+		if (hasClass(target, "abcjs-inline-midi"))
+			btn = target.querySelector('.abcjs-midi-start');
+		onStart(btn);
 	};
 
 	midi.stopPlaying = function() {
