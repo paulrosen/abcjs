@@ -44,7 +44,7 @@
     "webpack": "^3.10.0"
   },
   "dependencies": {
-    "midi": "git://github.com/paulrosen/MIDI.js.git#abcjs",
+    "midi": "https://github.com/paulrosen/MIDI.js.git#abcjs",
     "raphael": "^2.2.7"
   }
 }
