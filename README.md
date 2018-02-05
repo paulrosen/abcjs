@@ -25,6 +25,8 @@ This library makes it easy to incorporate **sheet music** into your **websites**
  
 [abcjs Home page](https://abcjs.net) (Overview of what this library does)
 
+[Configurator](https://configurator.abcjs.net) (Experiment with all configuration options)
+
 [API Documentation](docs/api.md) (All the details about using abcjs)
 
 [Special Notes](docs/special-notes.md) (Notes from previous versions)
@@ -41,6 +43,7 @@ License: [The MIT License (MIT)](http://opensource.org/licenses/MIT)
 
 | Description | Demo |
 |  ----------- | ----------- |
+| Demonstration of all configuration options | [Configurator](https://configurator.abcjs.net) |
 | Call the library from javascript, passing the abc string to it. | [Basic](https://abcjs.net/abcjs-basic.html) |
 | Transforms a textarea into an abc editor with score sheet and audio. | [Editor](https://abcjs.net/abcjs-editor.html) |
 | Adds onto an existing webpage, rendering all abc it finds. | [Plugin](https://abcjs.net/abcjs-plugin.html) |
