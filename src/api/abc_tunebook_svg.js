@@ -20,7 +20,7 @@ function resizeOuter() {
 window.addEventListener("resize", resizeOuter);
 window.addEventListener("orientationChange", resizeOuter);
 
-function renderOne(div, tune, renderParams, engraverParams) {
+function renderOne(div, tune, renderParams, engraverParams, tuneNumber) {
     var width = renderParams.width ? renderParams.width : 800;
     if (renderParams.viewportHorizontal) {
         // Create an inner div that holds the music, so that the passed in div will be the viewport.
@@ -44,7 +44,7 @@ function renderOne(div, tune, renderParams, engraverParams) {
     if (engraverParams === undefined)
         engraverParams = {};
     var engraver_controller = new EngraverController(paper, engraverParams);
-    engraver_controller.engraveABC(tune);
+    engraver_controller.engraveABC(tune, tuneNumber);
     tune.engraver = engraver_controller;
     if (renderParams.viewportVertical || renderParams.viewportHorizontal) {
         // If we added a wrapper around the div, then we need to size the wrapper, too.
@@ -53,7 +53,7 @@ function renderOne(div, tune, renderParams, engraverParams) {
     }
 }
 
-function renderEachLineSeparately(div, tune, renderParams, engraverParams) {
+function renderEachLineSeparately(div, tune, renderParams, engraverParams, tuneNumber) {
     function initializeTuneLine(tune) {
         return {
             formatting: tune.formatting,
@@ -114,19 +114,30 @@ function renderEachLineSeparately(div, tune, renderParams, engraverParams) {
     tuneLine.metaText['abc-edited-by'] = tune.metaText['abc-edited-by'];
     tuneLine.metaText.footer = tune.metaText.footer;
 
-    // Now create sub-divs and render each line
-    var eParamsFirst = JSON.parse(JSON.stringify(engraverParams));
-    var eParamsMid = JSON.parse(JSON.stringify(engraverParams));
-    var eParamsLast = JSON.parse(JSON.stringify(engraverParams));
-    eParamsFirst.paddingbottom = -20;
-    eParamsMid.paddingbottom = -20;
-    eParamsMid.paddingtop = 10;
-    eParamsLast.paddingtop = 10;
+    // Now create sub-divs and render each line. Need to copy the params to change the padding for the interior slices.
+    var ep = {};
+    for (var key in engraverParams) {
+        if (engraverParams.hasOwnProperty(key)) {
+            ep[key] = engraverParams[key];
+        }
+    }
+    var origPaddingTop = ep.paddingtop;
+    var origPaddingBottom = ep.paddingbottom;
     for (var k = 0; k < tunes.length; k++) {
         var lineEl = document.createElement("div");
         div.appendChild(lineEl);
-        var ep = (k === 0) ? eParamsFirst : (k === tunes.length-1) ? eParamsLast : eParamsMid;
-        renderOne(lineEl, tunes[k], renderParams, ep);
+
+        if (k === 0) {
+	        ep.paddingtop = origPaddingTop;
+	        ep.paddingbottom = -20;
+        } else if (k === tunes.length-1) {
+	        ep.paddingtop = 10;
+	        ep.paddingbottom = origPaddingBottom;
+        } else {
+	        ep.paddingtop = 10;
+	        ep.paddingbottom = -20;
+        }
+        renderOne(lineEl, tunes[k], renderParams, ep, tuneNumber);
     }
 }
 
@@ -150,11 +161,11 @@ function renderEachLineSeparately(div, tune, renderParams, engraverParams) {
 var renderAbc = function(output, abc, parserParams, engraverParams, renderParams) {
     if (renderParams === undefined)
         renderParams = {};
-    function callback(div, tune) {
+    function callback(div, tune, tuneNumber) {
         if (!renderParams.oneSvgPerLine || tune.lines.length < 2)
-            renderOne(div, tune, renderParams, engraverParams);
+            renderOne(div, tune, renderParams, engraverParams, tuneNumber);
         else
-            renderEachLineSeparately(div, tune, renderParams, engraverParams);
+            renderEachLineSeparately(div, tune, renderParams, engraverParams, tuneNumber);
     }
 
     return tunebook.renderEngine(callback, output, abc, parserParams, renderParams);

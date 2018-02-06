@@ -89,14 +89,16 @@ EngraverController.prototype.reset = function() {
  * run the engraving process
  * @param {ABCJS.Tune|ABCJS.Tune[]} abctunes 
  */
-EngraverController.prototype.engraveABC = function(abctunes) {
+EngraverController.prototype.engraveABC = function(abctunes, tuneNumber) {
   if (abctunes[0]===undefined) {
     abctunes = [abctunes];
   }
 	this.reset();
 
   for (var i = 0; i < abctunes.length; i++) {
-    this.engraveTune(abctunes[i], i);
+  	if (tuneNumber === undefined)
+  		tuneNumber = i;
+    this.engraveTune(abctunes[i], tuneNumber);
   }
 	if (this.renderer.doRegression)
 		return this.renderer.regressionLines.join("\n");
