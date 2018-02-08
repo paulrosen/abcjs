@@ -38,7 +38,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `paddingleft` | 15 | The spacing that the music should have on the web page. |
 | `editable` | false | If true, then when a note is clicked, it is highlighted and a callback allows the editor to move the cursor. |
 | `add_classes` | false | If true, then each element that is drawn on the SVG will have an identifying class with it that you can use to style, move, or hide the element. |
-| `listener` | null | This is an object containing up to two functions. The format is: `{ highlight: function(abcElem) {}, modelChanged: function(abcElem) {} }` The highlight function is called whenever the user clicks on a note or selects a series of notes. The modelChanged function is called whenever the user has changed the music visually. |
+| `listener` | null | This is an object containing up to two functions. The format is: `{ highlight: function(abcElem, tuneNumber, classes) {}, modelChanged: function(abcElem) {} }` The highlight function is called whenever the user clicks on a note or selects a series of notes. The modelChanged function is called whenever the user has changed the music visually. |
 | `responsive` | undefined | The strategy for responsiveness. `"resize"` will make the svg take up whatever width is available for the container.
 
 | `midiParams` | Default | Description |
@@ -180,7 +180,7 @@ Typical usage is:
 | `fireChanged()` | Called by the textarea object when the user has changed something. |
 | `setNotDirty()` | Called by the client app to reset the dirty flag |
 | `isDirty()` | Returns true or false, whether the textarea contains the same text that it started with. |
-| `highlight(abcelem)` | Called by the engraver_controller to highlight an area. |
+| `highlight(abcelem, tuneNumber, classes)` | Called by the engraver_controller to highlight an area. |
 | `pause(bool)` | Stops the automatic rendering when the user is typing. |
 | `pauseMidi(shouldPause)` | Stops the automatic re-rendering of the MIDI. |
 

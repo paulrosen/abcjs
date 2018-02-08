@@ -196,7 +196,15 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	var controller = renderer.controller;
 //	this.elemset.mouseup(function () {
 	target.mouseup(function () {
-		controller.notifySelect(self, self.tuneNumber);
+		var classes = [];
+		if (self.elemset) {
+			for (var j = 0; j < self.elemset.length; j++) {
+				var es = self.elemset[j];
+				if (es.attrs && es.attrs.class)
+					classes.push(es.attrs.class);
+			}
+		}
+		controller.notifySelect(self, self.tuneNumber, classes);
 	});
 	this.abcelem.abselem = this;
 
