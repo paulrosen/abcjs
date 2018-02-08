@@ -61,6 +61,41 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `drumBars` | 1 |  How many bars to spread the drum pattern over. |
 | `drumIntro` | 0 | How many bars of drum should precede the music. |
 
+**Note on tempos:**
+
+If the `qpm` parameter is not supplied, abcjs makes its best guess about what tempo should be used. If there is no tempo indicated at all in the ABC string, then 180 BPM is arbitrarily used.
+
+If an exact tempo line is supplied with the `Q:` line, then that tempo is used. If the `Q:` contains a standard tempo string, that string is used to make a guess at an appropriate tempo. Here is a list of the known tempo strings and their associated tempos. If you would like to make suggestions about other strings to support or changes to these tempos, please get in touch:
+
+|Tempo|BPM|
+|---|---|
+|larghissimo|20|
+|adagissimo|24|
+|sostenuto|28|
+|grave|32|
+|largo|40|
+|lento|50|
+|larghetto|60|
+|adagio|68|
+|adagietto|74|
+|andante|80|
+|andantino|88|
+|"marcia moderato"|84|
+|"andante moderato"|100|
+|moderato|112|
+|allegretto|116|
+|"allegro moderato"|120|
+|allegro|126|
+|animato|132|
+|agitato|140|
+|veloce|148|
+|"mosso vivo"|156|
+|vivace|164|
+|vivacissimo|172|
+|allegrissimo|176|
+|presto|184|
+|prestissimo|210|
+
 **Note on the drum parameter:**
 See the ABC documentation for the correct way to format the string that is passed as the drum parameter. Here is a table that provides a fairly reasonable default for drum, drumIntro, and drumBars when used as a metronome:
 ```
