@@ -1,3 +1,45 @@
+# Version 3.3.2
+
+## Bug fixes:
+
+* Fix the tuneNumber in the listener callback.
+
+* Fix the listener callback with separate SVG for each line.
+
+* Preload all the instruments needed; don't assume the default "piano".
+
+* Allow calling startPlaying() with the target being the parent control.
+
+* Expose the startPlaying and stopPlaying methods.
+
+* Change the midi git line to use https.
+
+* When unpausing the MIDI, immediately redraw the MIDI.
+
+* If a tempo is described as a string, don't let it be undefined in the MIDI tempo control.
+
+* Protect against writing "undefined" in class names.
+
+* Add setSoundFont() entry point.
+
+* Validate the startingTune parameter.
+
+* Add protection in case animation pause is called at an unexpected time.
+
+* Fix midi formatting issues caused by box-sizing change.
+
+## Features:
+
+* Translate some common tempo strings to BPM.
+
+* Do basic accessibility for SVG.
+
+* Add pitch and duration to the classes that notes are tagged with.
+
+* Add note number in a measure to the classes that notes are tagged with.
+
+* Add the element's classes to the listener callback.
+
 # Version 3.3.1
 
 ## Bug fixes:
