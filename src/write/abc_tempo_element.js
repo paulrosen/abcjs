@@ -50,7 +50,7 @@ var TempoElement;
 			var charWidth = preWidth / this.tempo.preString.length; // Just get some average number to increase the spacing.
 			x += preWidth + charWidth;
 		}
-		if (this.tempo.duration) {
+		if (this.tempo.duration && !this.tempo.suppressBpm) {
 			var temposcale = 0.75;
 			var tempopitch = this.pitch - totalHeightInPitches + 1; // The pitch we receive is the top of the allotted area: change that to practically the bottom.
 			var duration = this.tempo.duration[0]; // TODO when multiple durations

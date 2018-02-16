@@ -156,6 +156,10 @@ var Tune = function() {
 	this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote, currSlur) {
 		this.closeLine();	// Close the last line.
 
+		// If the tempo was created with a string like "Allegro", then the duration of a beat needs to be set at the last moment, when it is most likely known.
+		if (this.metaText.tempo && this.metaText.tempo.bpm && !this.metaText.tempo.duration)
+			this.metaText.tempo.duration = [ this.getBeatLength() ];
+
 		// Remove any blank lines
 		var anyDeleted = false;
 		var i, s, v;

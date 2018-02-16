@@ -83,7 +83,8 @@ var ParserLint = function() {
 		bpm: { type: "number", optional: true, requires: [ 'duration'] },
 		preString: { type: 'string', optional: true},
 		postString: { type: 'string', optional: true},
-		suppress: { type: 'boolean', Enum: [ true ], optional: true}
+		suppress: { type: 'boolean', Enum: [ true ], optional: true},
+		suppressBpm: { type: 'boolean', Enum: [ true ], optional: true}
 	};
 
 	var appendPositioning = function(properties) {

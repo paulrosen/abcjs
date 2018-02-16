@@ -279,8 +279,10 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 				token = tokens.shift();
 				if (tokens.length === 0) {	// It's ok to just get a string for the tempo
 					// If the string is a well-known tempo, put in the bpm
-					if (tempoString[tempo.preString.toLowerCase()])
+					if (tempoString[tempo.preString.toLowerCase()]) {
 						tempo.bpm = tempoString[tempo.preString.toLowerCase()];
+						tempo.suppressBpm = true;
+					}
 					return {type: 'immediate', tempo: tempo};
 				}
 			}
