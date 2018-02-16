@@ -16,7 +16,7 @@ There are a number of features described below that are not yet activated. This 
 
 There are two ways to generate MIDI: as a download link, and as an inline control. The download link method is built into ABCJS. The inline control, though, depends on the external library [MIDI.js](https://github.com/mudcube/MIDI.js)
 
-That, in turn, is dependent on a set of sound fonts. A good place to get them is [MIDI.js Soundfonts](https://github.com/gleitz/midi-js-soundfonts)
+That, in turn, is dependent on a set of sound fonts. A good place to get them is [MIDI.js Soundfonts](https://github.com/paulrosen/midi-js-soundfonts)
 
 # Site Setup
 
