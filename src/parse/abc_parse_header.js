@@ -452,7 +452,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 					else if (tempo.type === 'immediate') tune.appendElement('tempo', -1, -1, tempo.tempo);
 				return [ e, line.charAt(i), parseCommon.strip(line.substring(i+2))];
 				case "V:":
-					parseKeyVoice.parseVoice(line, 2, line.length);
+					parseKeyVoice.parseVoice(line, i+2, line.length);
 //						startNewLine();
 					return [ line.length, line.charAt(i), parseCommon.strip(line.substring(i+2))];
 				default:
