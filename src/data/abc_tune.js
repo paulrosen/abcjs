@@ -757,6 +757,10 @@ var Tune = function() {
 		};
 		var createStaff = function(params) {
 			This.lines[This.lineNum].staff[This.staffNum] = {voices: [ ], clef: params.clef, key: params.key, workingClef: params.clef };
+			if (params.stafflines !== undefined) {
+				This.lines[This.lineNum].staff[This.staffNum].clef.stafflines = params.stafflines;
+				This.lines[This.lineNum].staff[This.staffNum].workingClef.stafflines = params.stafflines;
+			}
 			if (params.vocalfont) This.lines[This.lineNum].staff[This.staffNum].vocalfont = params.vocalfont;
 			if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
 			if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;

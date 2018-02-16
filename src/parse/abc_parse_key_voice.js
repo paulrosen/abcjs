@@ -731,6 +731,7 @@ var parseKeyVoice = {};
 					case 'merge':
 						staffInfo.startStaff = false;
 						break;
+					case 'stem':
 					case 'stems':
 						attr = tokenizer.getVoiceToken(line, start, end);
 						if (attr.warn !== undefined)
@@ -764,6 +765,11 @@ var parseKeyVoice = {};
 					case 'transpose':
 						addNextTokenToVoiceInfo(id, 'transpose', 'number');
 						break;
+					case 'stafflines':
+						addNextTokenToVoiceInfo(id, 'stafflines', 'number');
+						break;
+					default:
+						console.log("parse voice", token);
 				}
 			}
 			start += tokenizer.eatWhiteSpace(line, start);

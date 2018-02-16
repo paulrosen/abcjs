@@ -847,6 +847,8 @@ var Parse = function() {
 			if (staff.subname) params.subname = staff.subname[multilineVars.currentVoice.index];
 			if (multilineVars.currentVoice.stem)
 				params.stem = multilineVars.currentVoice.stem;
+			if (multilineVars.currentVoice.stafflines)
+				params.stafflines = multilineVars.currentVoice.stafflines;
 			if (multilineVars.currentVoice.scale)
 				params.scale = multilineVars.currentVoice.scale;
 			if (multilineVars.currentVoice.style)
