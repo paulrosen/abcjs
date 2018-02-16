@@ -676,6 +676,7 @@ var parseKeyVoice = {};
 					case 'bass':
 					case 'tenor':
 					case 'alto':
+					case 'perc':
 					case 'none':
 					case 'treble\'':
 					case 'bass\'':
@@ -754,6 +755,10 @@ var parseKeyVoice = {};
 					case 'gchords':
 					case 'gch':
 						multilineVars.voices[id].suppressChords = true;
+						// gchords can stand on its own, or it could be gchords=0.
+						attr = tokenizer.getVoiceToken(line, start, end);
+						if (attr.token === "0")
+							start = start + attr.len;
 						break;
 					case 'space':
 					case 'spc':
@@ -768,8 +773,21 @@ var parseKeyVoice = {};
 					case 'stafflines':
 						addNextTokenToVoiceInfo(id, 'stafflines', 'number');
 						break;
-					default:
-						console.log("parse voice", token);
+					case 'staffscale':
+						// TODO-PER: This is passed to the engraver, but the engraver ignores it.
+						addNextTokenToVoiceInfo(id, 'staffscale', 'number');
+						break;
+					case 'octave':
+						// TODO-PER: This is accepted, but not implemented, yet.
+						addNextTokenToVoiceInfo(id, 'octave', 'number');
+						break;
+					case 'volume':
+						// TODO-PER: This is accepted, but not implemented, yet.
+						addNextTokenToVoiceInfo(id, 'volume', 'number');
+						break;
+					// default:
+					// Use this to find V: usages that aren't handled.
+					// 	console.log("parse voice", token, tune.metaText.title);
 				}
 			}
 			start += tokenizer.eatWhiteSpace(line, start);

@@ -761,6 +761,9 @@ var Tune = function() {
 				This.lines[This.lineNum].staff[This.staffNum].clef.stafflines = params.stafflines;
 				This.lines[This.lineNum].staff[This.staffNum].workingClef.stafflines = params.stafflines;
 			}
+			if (params.staffscale) {
+				This.lines[This.lineNum].staff[This.staffNum].staffscale = params.staffscale;
+			}
 			if (params.vocalfont) This.lines[This.lineNum].staff[This.staffNum].vocalfont = params.vocalfont;
 			if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
 			if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;
