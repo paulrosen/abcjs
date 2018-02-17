@@ -437,7 +437,6 @@ var parseDirective = {};
 		"chordprog"
 	];
 	var midiCmdParam1String1Integer = [
-		"drummap",
 		"portamento"
 	];
 	var midiCmdParamFraction = [
@@ -503,6 +502,23 @@ var parseDirective = {};
 			else {
 				midi_params.push(midi[0].token);
 				midi_params.push(midi[1].intt);
+			}
+		} else if (midi_cmd === 'drummap') {
+			// BUILD AN OBJECT OF ABC NOTE => MIDI NOTE
+			if (midi.length === 2 && midi[0].type === 'alpha' && midi[1].type === 'number') {
+				if (!tune.formatting) tune.formatting = {};
+				if (!tune.formatting.midi) tune.formatting.midi = {};
+				if (!tune.formatting.midi.drummap) tune.formatting.midi.drummap = {};
+				tune.formatting.midi.drummap[midi[0].token] = midi[1].intt;
+				midi_params = tune.formatting.midi.drummap;
+			} else if (midi.length === 3 && midi[0].type === 'punct' && midi[1].type === 'alpha' && midi[2].type === 'number') {
+				if (!tune.formatting) tune.formatting = {};
+				if (!tune.formatting.midi) tune.formatting.midi = {};
+				if (!tune.formatting.midi.drummap) tune.formatting.midi.drummap = {};
+				tune.formatting.midi.drummap[midi[0].token+midi[1].token] = midi[2].intt;
+				midi_params = tune.formatting.midi.drummap;
+			} else {
+				warn("Expected one note name and one integer parameter in MIDI " + midi_cmd, restOfString, 0);
 			}
 		} else if (midiCmdParamFraction.indexOf(midi_cmd) >= 0) {
 			// ONE FRACTION PARAMETER
@@ -954,6 +970,8 @@ var parseDirective = {};
 					parseMidiCommand(midi, tune, restOfString);
 				break;
 
+			case "map":
+			case "percmap":
 			case "playtempo":
 			case "auquality":
 			case "continuous":
