@@ -40,6 +40,8 @@ var sequence;
 		program = parseInt(program, 10);
 		transpose = parseInt(transpose, 10);
 		channel = parseInt(channel, 10);
+		if (channel === 10)
+			program = 128;
 		drumPattern = drumPattern.split(" ");
 		drumBars = parseInt(drumBars, 10);
 		drumIntro = parseInt(drumIntro, 10);
@@ -83,6 +85,8 @@ var sequence;
 				drumBars = globals.drumbars[0];
 			if (globals.drumon)
 				drumOn = true;
+			if (channel === 10)
+				program = 128;
 		}
 
 		// Specified options in abc string.
