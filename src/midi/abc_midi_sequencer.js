@@ -24,6 +24,8 @@ var sequence;
 	// be an array of voices with all the repeats embedded, and no lines. Then it is trivial to go through the events
 	// one at a time and turn it into midi.
 
+	var PERCUSSION_PROGRAM = 128;
+
 	sequence = function(abctune, options) {
 		// Global options
 		options = options || {};
@@ -41,7 +43,7 @@ var sequence;
 		transpose = parseInt(transpose, 10);
 		channel = parseInt(channel, 10);
 		if (channel === 10)
-			program = 128;
+			program = PERCUSSION_PROGRAM;
 		drumPattern = drumPattern.split(" ");
 		drumBars = parseInt(drumBars, 10);
 		drumIntro = parseInt(drumIntro, 10);
@@ -86,7 +88,7 @@ var sequence;
 			if (globals.drumon)
 				drumOn = true;
 			if (channel === 10)
-				program = 128;
+				program = PERCUSSION_PROGRAM;
 		}
 
 		// Specified options in abc string.
@@ -136,7 +138,12 @@ var sequence;
 						if (!voices[voiceNumber]) {
 							voices[voiceNumber] = [].concat(startVoice);
 						}
-						if (staff.key) {
+						if (staff.clef && staff.clef.type === 'perc') {
+							for (var cl = 0; cl < voices[voiceNumber].length; cl++) {
+								if (voices[voiceNumber][cl].el_type === 'instrument')
+									voices[voiceNumber][cl].program = PERCUSSION_PROGRAM;
+							}
+						} else if (staff.key) {
 							if (staff.key.root === 'HP')
 								voices[voiceNumber].push({el_type: 'key', accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}]});
 							else

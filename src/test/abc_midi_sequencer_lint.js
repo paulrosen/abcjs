@@ -61,9 +61,13 @@ var midiSequencerLint = function(tune) {
 						}
 						ret += 'pitch:';
 						for (var n = 0; n < element.pitches.length; n++) {
-							ret += ' ' + element.pitches[n].pitch;
-							if (element.pitches[n].accidental)
-								ret += ' ' + element.pitches[n].accidental;
+							if (element.pitches[n].midipitch)
+								ret += ' ' + element.pitches[n].midipitch + ' (midi)';
+							else {
+								ret += ' ' + element.pitches[n].pitch;
+								if (element.pitches[n].accidental)
+									ret += ' ' + element.pitches[n].accidental;
+							}
 							if (element.pitches[n].startTie)
 								ret += ' startTie';
 							if (element.pitches[n].endTie)

@@ -337,6 +337,8 @@ var flatten;
 
 	var scale = [0,2,4,5,7,9,11];
 	function adjustPitch(note) {
+		if (note.midipitch)
+			return note.midipitch - 60;
 		var pitch = note.pitch;
 		if (note.accidental) {
 			switch(note.accidental) { // change that pitch (not other octaves) for the rest of the bar
@@ -392,7 +394,8 @@ var flatten;
 
 		for (g = 0; g < graces.length; g++) {
 			grace = graces[g];
-			ret.push({ pitch: grace.pitch, duration: grace.duration/graceDivider*multiplier });
+			var pitch = grace.midipitch ? grace.midipitch - 60 : grace.pitch;
+			ret.push({ pitch: pitch, duration: grace.duration/graceDivider*multiplier });
 		}
 		return ret;
 	}

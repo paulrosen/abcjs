@@ -659,6 +659,16 @@ var Parse = function() {
 							durationSetByPreviousNote = true;
 						} else
 							el.duration = multilineVars.default_length;
+						// If the clef is percussion, there is probably some translation of the pitch to a particular drum kit item.
+						if (multilineVars.clef && multilineVars.clef.type === "perc") {
+							var key = line.charAt(index);
+							if (el.accidental) {
+								var accMap = { 'dblflat': '__', 'flat': '_', 'natural': '=', 'sharp': '^', 'dblsharp': '^^'};
+								key = accMap[el.accidental] + key;
+							}
+							if (tune.formatting && tune.formatting.midi && tune.formatting.midi.drummap)
+								el.midipitch = tune.formatting.midi.drummap[key];
+						}
 					} else if (isComplete(state)) {el.endChar = index;return el;}
 					else return null;
 					break;
@@ -1375,6 +1385,8 @@ var Parse = function() {
 								// TODO-PER: straighten this out so there is not so much copying: getCoreNote shouldn't change e'
 								if (core.accidental !== undefined) el.pitches[0].accidental = core.accidental;
 								el.pitches[0].pitch = core.pitch;
+								if (core.midipitch)
+									el.pitches[0].midipitch = core.midipitch;
 								if (core.endSlur !== undefined) el.pitches[0].endSlur = core.endSlur;
 								if (core.endTie !== undefined) el.pitches[0].endTie = core.endTie;
 								if (core.startSlur !== undefined) el.pitches[0].startSlur = core.startSlur;
