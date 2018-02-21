@@ -21,6 +21,7 @@ var parseDirective = require('./abc_parse_directive');
 var ParseHeader = require('./abc_parse_header');
 var parseKeyVoice = require('./abc_parse_key_voice');
 var Tokenizer = require('./abc_tokenizer');
+var transpose = require('./abc_transpose');
 
 var Tune = require('../data/abc_tune');
 
@@ -194,6 +195,7 @@ var Parse = function() {
 				chord[1] = chord[1].replace(/([ABCDEFG])b/g, "$1♭");
 				chord[1] = chord[1].replace(/([ABCDEFG])#/g, "$1♯");
 				chord[2] = 'default';
+				chord[1] = transpose.chordName(multilineVars, chord[1]);
 			}
 			return chord;
 		}
@@ -651,6 +653,7 @@ var Parse = function() {
 				case 'g':
 					if (state === 'startSlur' || state === 'sharp2' || state === 'flat2' || state === 'pitch') {
 						el.pitch = pitches[line.charAt(index)];
+						transpose.note(multilineVars, el);
 						state = 'octave';
 						// At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
 						if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
@@ -1519,11 +1522,14 @@ var Parse = function() {
 		// switches.print: format for the page instead of the browser.
 		// switches.format: a hash of the desired formatting commands.
 		// switches.hint_measures: put the next measure at the end of the current line.
+		// switches.transpose: change the key signature, chords, and notes by a number of half-steps.
 		if (!switches) switches = {};
 		tune.reset();
 		if (switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
+		if (switches.transpose)
+			multilineVars.globalTranspose = parseInt(switches.transpose);
 		header.reset(tokenizer, warn, multilineVars, tune);
 
 		// Take care of whatever line endings come our way

@@ -2,6 +2,7 @@
 
 var parseCommon = require('./abc_common');
 var parseDirective = require('./abc_parse_directive');
+var transpose = require('./abc_transpose');
 
 var parseKeyVoice = {};
 
@@ -164,7 +165,7 @@ var parseKeyVoice = {};
 			'Gbm': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ]
 		};
 
-		return keys[keyName];
+		return transpose.keySignature(multilineVars, keys, keyName);
 	};
 
 	var clefLines = {
