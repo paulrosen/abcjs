@@ -1528,8 +1528,12 @@ var Parse = function() {
 		if (switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
-		if (switches.transpose)
+		if (switches.transpose) {
 			multilineVars.globalTranspose = parseInt(switches.transpose);
+			if (multilineVars.globalTranspose === 0)
+				multilineVars.globalTranspose = undefined;
+		} else
+			multilineVars.globalTranspose = undefined;
 		header.reset(tokenizer, warn, multilineVars, tune);
 
 		// Take care of whatever line endings come our way
