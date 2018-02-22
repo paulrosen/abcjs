@@ -23,6 +23,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 
 | `parserParams` | Default | Description |
 | ------------- | ----------- | ----------- |
+|`transpose` | 0 | Transposes the written music by the number of half-steps passed. Use a negative number to transpose down in pitch. |
 | `print` | false | pay attention to margins and other formatting commands that don't make sense in a web page |
 | `header_only` | false | only parse the header |
 | `stop_on_warning` | false | only parse until the first warning is encountered |
