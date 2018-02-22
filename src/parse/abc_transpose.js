@@ -164,10 +164,16 @@ function accidentalChange(origPitch, newPitch, accidental, origKeySig, newKeySig
 			newAccidental = accidentals[newKeySig.accidentals[j].acc];
 	}
 	var calcAccidental = delta + newAccidental;
-	calcAccidental = Math.min(calcAccidental, 2);
-	calcAccidental = Math.max(calcAccidental, -2);
+	if (calcAccidental < -2) {
+		newPitch--;
+		calcAccidental += (newPitchLetter === 'c' || newPitchLetter === 'f') ? 1 : 2;
+	}
+	if (calcAccidental > 2) {
+		newPitch++;
+		calcAccidental -= (newPitchLetter === 'b' || newPitchLetter === 'e') ? 1 : 2;
+	}
 	console.log("accidentalChange", origPitchLetter, newPitchLetter, origAccidental, newAccidental, delta, calcAccidental);
-	return calcAccidental;
+	return [newPitch, calcAccidental];
 }
 
 var accidentals = {
@@ -194,8 +200,9 @@ transpose.note = function(multilineVars, el) {
 	el.pitch = el.pitch + multilineVars.globalTransposeVerticalMovement;
 
 	if (el.accidental) {
-		var newAccidental = accidentalChange(origPitch, el.pitch, el.accidental, multilineVars.globalTransposeOrigKeySig, multilineVars.key);
-		el.accidental = accidentals2[newAccidental];
+		var ret = accidentalChange(origPitch, el.pitch, el.accidental, multilineVars.globalTransposeOrigKeySig, multilineVars.key);
+		el.pitch = ret[0];
+		el.accidental = accidentals2[ret[1]];
 	}
 
 };
