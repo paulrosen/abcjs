@@ -295,10 +295,16 @@ var parseKeyVoice = {};
 	};
 
 	var parseMiddle = function(str) {
-	  var mid = pitches[str.charAt(0)];
-		for (var i = 1; i < str.length; i++) {
+		var i = 0;
+		var p = str.charAt(i++);
+		if (p === '^' || p === '_')
+			p = str.charAt(i++);
+	  var mid = pitches[p];
+		if (mid === undefined)
+			mid = 6; // If a legal middle note wasn't received, just ignore it.
+		for ( ; i < str.length; i++) {
 			if (str.charAt(i) === ',') mid -= 7;
-			else if (str.charAt(i) === ',') mid += 7;
+			else if (str.charAt(i) === "'") mid += 7;
 			else break;
 		}
 		return { mid: mid - 6, str: str.substring(i) };	// We get the note in the middle of the staff. We want the note that appears as the first ledger line below the staff.
