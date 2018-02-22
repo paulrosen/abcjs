@@ -38,14 +38,15 @@ var keyIndex = {
 var newKey = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 var newKeyMinor = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
-transpose.keySignature = function(multilineVars, keys, keyName) {
+transpose.keySignature = function(multilineVars, keys, keyName, root, acc) {
 	var k = keys[keyName];
 	if (!k) return k;
 	if (!multilineVars.globalTranspose)
-		return k;
+		return { accidentals: k, root: root, acc: acc };
+	multilineVars.globalTransposeOrigKeySig = k;
 	if (multilineVars.globalTranspose % 12 === 0) {
 		multilineVars.globalTransposeVerticalMovement = (multilineVars.globalTranspose / 12) * 7;
-		return k;
+		return { accidentals: k, root: root, acc: acc };
 	}
 
 	var baseKey = keyName[0];
@@ -57,15 +58,34 @@ transpose.keySignature = function(multilineVars, keys, keyName) {
 	var index = keyIndex[baseKey] + multilineVars.globalTranspose;
 	while (index < 0) index += 12;
 	if (index > 11) index = index % 12;
-	var transposedKey = (keyName[0] === 'm' ? newKeyMinor[index] : newKey[index]) + keyName;
+	var newKeyName = (keyName[0] === 'm' ? newKeyMinor[index] : newKey[index]);
+	var transposedKey = newKeyName + keyName;
 	var newKeySig = keys[transposedKey];
 	if (newKeySig.length > 0 && newKeySig[0].acc === 'flat')
 		multilineVars.globalTransposePreferFlats = true;
 	var distance = transposedKey.charCodeAt(0) - baseKey.charCodeAt(0);
-	if (multilineVars.globalTranspose > 0 && distance < 0)
-		distance += 7;
-	if (multilineVars.globalTranspose < 0 && distance > 0)
-		distance -= 7;
+	if (multilineVars.globalTranspose > 0) {
+		if (distance < 0)
+			distance += 7;
+		else if (distance === 0) {
+			// There's a funny thing that happens when the key changes only an accidental's distance, for instance, from Ab to A.
+			// If the distance is positive (we are raising pitch), and the change is higher (that is, Ab -> A), then raise an octave.
+			// This test is easier because we know the keys are not equal (or we wouldn't get this far), so if the base key is a flat key, then
+			// the transposed key must be higher. Likewise, if the transposed key is sharp, then the base key must be lower. And one
+			// of those two things must be true because they are not both natural.
+			if (baseKey[1] === '#' ||  transposedKey[1] === 'b')
+				distance += 7;
+		}
+	} else if (multilineVars.globalTranspose < 0) {
+		if (distance > 0)
+			distance -= 7;
+		else if (distance === 0) {
+			// There's a funny thing that happens when the key changes only an accidental's distance, for instance, from Ab to A.
+			// If the distance is negative (we are dropping pitch), and the change is lower (that is, A -> Ab), then drop an octave.
+			if (baseKey[1] === 'b' ||  transposedKey[1] === '#')
+				distance -= 7;
+		}
+	}
 
 	if (multilineVars.globalTranspose > 0)
 		multilineVars.globalTransposeVerticalMovement = distance + Math.floor(multilineVars.globalTranspose / 12) * 7;
@@ -79,7 +99,7 @@ transpose.keySignature = function(multilineVars, keys, keyName) {
 		Math.floor(multilineVars.globalTranspose / 12) * 7,
 		Math.ceil(multilineVars.globalTranspose / 12) * 7,
 		multilineVars.globalTransposeVerticalMovement);
-	return newKeySig;
+	return { accidentals: newKeySig, root: newKeyName[0], acc: newKeyName.length > 1 ? newKeyName[1] : "" };
 };
 
 var sharpChords = [ 'C', 'C♯', 'D', "D♯", 'E', 'F', "F♯", 'G', 'G♯', 'A', 'A♯', 'B'];
@@ -125,6 +145,31 @@ transpose.chordName = function(multilineVars, chord) {
 	return chord;
 };
 
+var pitchToLetter = [ 'c', 'd', 'e', 'f', 'g', 'a', 'b' ];
+function accidentalChange(origPitch, newPitch, accidental, origKeySig, newKeySig) {
+	var origPitchLetter = pitchToLetter[(origPitch + 49) % 7]; // Make sure it is a positive pitch before normalizing.
+	var origAccidental = 0;
+	for (var i = 0; i < origKeySig.length; i++) {
+		if (origKeySig[i].note.toLowerCase() === origPitchLetter)
+			origAccidental = accidentals[origKeySig[i].acc];
+	}
+
+	var currentAccidental = accidentals[accidental];
+	var delta = currentAccidental - origAccidental;
+
+	var newPitchLetter = pitchToLetter[(newPitch + 49) % 7]; // Make sure it is a positive pitch before normalizing.
+	var newAccidental = 0;
+	for (var j = 0; j < newKeySig.accidentals.length; j++) {
+		if (newKeySig.accidentals[j].note.toLowerCase() === newPitchLetter)
+			newAccidental = accidentals[newKeySig.accidentals[j].acc];
+	}
+	var calcAccidental = delta + newAccidental;
+	calcAccidental = Math.min(calcAccidental, 2);
+	calcAccidental = Math.max(calcAccidental, -2);
+	console.log("accidentalChange", origPitchLetter, newPitchLetter, origAccidental, newAccidental, delta, calcAccidental);
+	return calcAccidental;
+}
+
 var accidentals = {
 	dblflat: -2,
 	flat: -1,
@@ -132,16 +177,26 @@ var accidentals = {
 	sharp: 1,
 	dblsharp: 2
 };
+var accidentals2 = {
+	"-2": "dblflat",
+	"-1": "flat",
+	"0": "natural",
+	"1": "sharp",
+	"2": "dblsharp",
+};
 transpose.note = function(multilineVars, el) {
 	// the "el" that is passed in has el.accidental, and el.pitch. "pitch" is the vertical position (0=middle C)
 	// globalTranspose is the number of half steps
 	// globalTransposeVerticalMovement is the vertical distance to move.
-
 	if (!multilineVars.globalTranspose)
 		return;
+	var origPitch = el.pitch;
 	el.pitch = el.pitch + multilineVars.globalTransposeVerticalMovement;
 
-	// TODO-PER: Handle accidentals.
+	if (el.accidental) {
+		var newAccidental = accidentalChange(origPitch, el.pitch, el.accidental, multilineVars.globalTransposeOrigKeySig, multilineVars.key);
+		el.accidental = accidentals2[newAccidental];
+	}
 
 };
 

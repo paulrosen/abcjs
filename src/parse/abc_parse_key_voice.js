@@ -18,7 +18,7 @@ var parseKeyVoice = {};
 		tune = tune_;
 	};
 
-	parseKeyVoice.standardKey = function(keyName) {
+	parseKeyVoice.standardKey = function(keyName, root, acc) {
 		var key1sharp = {acc: 'sharp', note: 'f'};
 		var key2sharp = {acc: 'sharp', note: 'c'};
 		var key3sharp = {acc: 'sharp', note: 'g'};
@@ -165,7 +165,7 @@ var parseKeyVoice = {};
 			'Gbm': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ]
 		};
 
-		return transpose.keySignature(multilineVars, keys, keyName);
+		return transpose.keySignature(multilineVars, keys, keyName, root, acc);
 	};
 
 	var clefLines = {
@@ -402,16 +402,14 @@ var parseKeyVoice = {};
 							}
 						}
 						// Be sure that the key specified is in the list: not all keys are physically possible, like Cbmin.
-						if (parseKeyVoice.standardKey(key) === undefined) {
+						if (parseKeyVoice.standardKey(key, retPitch.token, acc) === undefined) {
 							warn("Unsupported key signature: " + key, str, 0);
 							return ret;
 						}
 					}
 					// We need to do a deep copy because we are going to modify it
 					var oldKey = parseKeyVoice.deepCopyKey(multilineVars.key);
-					multilineVars.key = parseKeyVoice.deepCopyKey({accidentals: parseKeyVoice.standardKey(key)});
-					multilineVars.key.root = retPitch.token;
-					multilineVars.key.acc = acc;
+					multilineVars.key = parseKeyVoice.deepCopyKey(parseKeyVoice.standardKey(key, retPitch.token, acc));
 					multilineVars.key.mode = mode;
 					if (oldKey) {
 						// Add natural in all places that the old key had an accidental.
