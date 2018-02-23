@@ -49,6 +49,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `transpose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
 | `generateDownload` | false | Whether to generate a download MIDI link. |
 | `generateInline` | true | Whether to generate the inline MIDI controls. |
+| `downloadClass` | "" | Add classes to the download controls. The classes `download-midi` and `midi-xxx` where `xxx` is the index of the tune are already added. This is appended to those classes. |
 | `downloadLabel` | "download midi" | The text for the MIDI download. If it contains `%T` then that is replaced with the first title. If this is a function, then the result of that function is called. The function takes two parameters: the parsed tune and the zero-based index of the tune in the tunebook. |
 | `preTextDownload` | "" | Text that appears right before the download link (can contain HTML markup). |
 | `postTextDownload` | "" | Text that appears right after the download link (can contain HTML markup). |
