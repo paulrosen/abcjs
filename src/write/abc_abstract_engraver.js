@@ -618,7 +618,8 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
   if (elem.lyric !== undefined) {
     var lyricStr = "";
          parseCommon.each(elem.lyric, function(ly) {
-         lyricStr += ly.syllable + ly.divider + "\n";
+         	var div = ly.divider === ' ' ? "" : ly.divider;
+         lyricStr += ly.syllable + div + "\n";
       });
 	  var lyricDim = this.renderer.getTextSize(lyricStr, 'vocalfont', "abc-lyric");
 	  var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
