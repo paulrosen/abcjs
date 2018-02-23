@@ -73,7 +73,7 @@ var Tune = function() {
 								return 1/den;
 							}
 							else
-								return null;
+								return 1/4; // No meter was specified, so use this default
 						} else if (meter.type === 'cut_time') {
 							return 1/2;
 						} else {
@@ -83,7 +83,7 @@ var Tune = function() {
 				}
 			}
 		}
-		return null;
+		return 1/4; // No meter was specified, so use this default
 	};
 
 	this.reset = function () {
@@ -936,6 +936,32 @@ var Tune = function() {
 		return { isTiedState: isTiedState, duration: element.duration / timeDivider };
 	};
 
+	this.makeVoicesArray = function() {
+		// First make a new array that is arranged by voice so that the repeats that span different lines are handled correctly.
+		var voicesArr = [];
+		for (var line = 0; line < this.engraver.staffgroups.length; line++) {
+			var group = this.engraver.staffgroups[line];
+			var firstStaff = group.staffs[0];
+			var middleC = firstStaff.absoluteY;
+			var top = middleC - firstStaff.top * spacing.STEP;
+			var lastStaff = group.staffs[group.staffs.length - 1];
+			middleC = lastStaff.absoluteY;
+			var bottom = middleC - lastStaff.bottom * spacing.STEP;
+			var height = bottom - top;
+
+			var voices = group.voices;
+			for (var v = 0; v < voices.length; v++) {
+				if (!voicesArr[v])
+					voicesArr[v] = [];
+				var elements = voices[v].children;
+				for (var elem = 0; elem < elements.length; elem++) {
+					voicesArr[v].push({top: top, height: height, elem: elements[elem]});
+				}
+			}
+		}
+		return voicesArr;
+	};
+
 	this.setupEvents = function(startingDelay, timeDivider) {
 		var timingEvents = [];
 
@@ -944,72 +970,39 @@ var Tune = function() {
 		// The units we are scanning are in notation units (i.e. 0.25 is a quarter note)
 		var time = startingDelay;
 		var isTiedState;
-		for (var line = 0; line < this.engraver.staffgroups.length; line++) {
-			var group = this.engraver.staffgroups[line];
-			var voices = group.voices;
-			var firstStaff = group.staffs[0];
-			var middleC = firstStaff.absoluteY;
-			var top = middleC - firstStaff.top * spacing.STEP;
-			var lastStaff = group.staffs[group.staffs.length - 1];
-			middleC = lastStaff.absoluteY;
-			var bottom = middleC - lastStaff.bottom * spacing.STEP;
-			var height = bottom - top;
-			var maxVoiceTime = 0;
-			// Put in the notes for all voices, then sort them, then remove duplicates
-			for (var v = 0; v < voices.length; v++) {
-				var voiceTime = time;
-				var voiceTimeMilliseconds = Math.round(voiceTime*1000);
-				var startingRepeatElem = 0;
-				var endingRepeatElem;
-				var elements = voices[v].children;
-				for (var elem = 0; elem < elements.length; elem++) {
-					var element = elements[elem];
-					var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, top, height, timeDivider, isTiedState);
-					isTiedState = ret.isTiedState;
-					voiceTime += ret.duration;
-					voiceTimeMilliseconds = Math.round(voiceTime*1000);
-					if (element.type === 'bar') {
-						var barType = element.abcelem.type;
-						var endRepeat = (barType === "bar_right_repeat" || barType === "bar_dbl_repeat");
-						var startEnding = (element.abcelem.startEnding === '1');
-						var startRepeat = (barType === "bar_left_repeat" || barType === "bar_dbl_repeat" || barType === "bar_thick_thin" || barType === "bar_thin_thick" || barType === "bar_thin_thin" || barType === "bar_right_repeat");
-						if (endRepeat) {
-							for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
-								element = elements[el2];
-								ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, top, height, timeDivider, isTiedState);
-								isTiedState = ret.isTiedState;
-								voiceTime += ret.duration;
-								voiceTimeMilliseconds = Math.round(voiceTime*1000);
-							}
+		var voices = this.makeVoicesArray();
+		for (var v = 0; v < voices.length; v++) {
+			var voiceTime = time;
+			var voiceTimeMilliseconds = Math.round(voiceTime * 1000);
+			var startingRepeatElem = 0;
+			var endingRepeatElem;
+			var elements = voices[v];
+			for (var elem = 0; elem < elements.length; elem++) {
+				var element = elements[elem].elem;
+				var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, timeDivider, isTiedState);
+				isTiedState = ret.isTiedState;
+				voiceTime += ret.duration;
+				voiceTimeMilliseconds = Math.round(voiceTime * 1000);
+				if (element.type === 'bar') {
+					var barType = element.abcelem.type;
+					var endRepeat = (barType === "bar_right_repeat" || barType === "bar_dbl_repeat");
+					var startEnding = (element.abcelem.startEnding === '1');
+					var startRepeat = (barType === "bar_left_repeat" || barType === "bar_dbl_repeat" || barType === "bar_thick_thin" || barType === "bar_thin_thick" || barType === "bar_thin_thin" || barType === "bar_right_repeat");
+					if (endRepeat) {
+						for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
+							element = elements[el2].elem;
+							ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, timeDivider, isTiedState);
+							isTiedState = ret.isTiedState;
+							voiceTime += ret.duration;
+							voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 						}
-						if (startEnding)
-							endingRepeatElem = elem;
-						if (startRepeat)
-							startingRepeatElem = elem;
 					}
-					// if (element.type === 'bar') {
-					// 	if (timingEvents.length === 0 || timingEvents[timingEvents.length - 1] !== 'bar') {
-					// 		if (element.elemset && element.elemset.length > 0 && element.elemset[0].attrs) {
-					// 			var klass = element.elemset[0].attrs['class'];
-					// 			var arr = klass.split(' ');
-					// 			var lineNum;
-					// 			var measureNum;
-					// 			for (var i = 0; i < arr.length; i++) {
-					// 				var match = /m(\d+)/.exec(arr[i]);
-					// 				if (match)
-					// 					measureNum = match[1];
-					// 				match = /l(\d+)/.exec(arr[i]);
-					// 				if (match)
-					// 					lineNum = match[1];
-					// 			}
-					// 			eventHash["bar" + voiceTime] = {type: "bar", seconds: voiceTime, lineNum: lineNum, measureNum: measureNum};
-					// 		}
-					// 	}
-					// }
+					if (startEnding)
+						endingRepeatElem = elem;
+					if (startRepeat)
+						startingRepeatElem = elem;
 				}
-				maxVoiceTime = Math.max(maxVoiceTime, voiceTime);
 			}
-			time = maxVoiceTime;
 		}
 		// now we have all the events, but if there are multiple voices then there may be events out of order or duplicated, so normalize it.
 		timingEvents = makeSortedArray(eventHash);
