@@ -46,7 +46,10 @@ var midi = {};
 	}
 
 	midi.generateMidiDownloadLink = function(tune, midiParams, midi, index) {
-		var html = '<div class="download-midi midi-' + index + '">';
+		var divClasses = ['download-midi', 'midi-' + index]
+		if (midiParams.downloadClass)
+			divClasses.push(midiParams.downloadClass)
+		var html = '<div class="' + divClasses.join(' ') + '">';
 		if (midiParams.preTextDownload)
 			html += midiParams.preTextDownload;
 		var title = tune.metaText && tune.metaText.title ? tune.metaText.title : 'Untitled';
