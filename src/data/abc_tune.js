@@ -86,6 +86,40 @@ var Tune = function() {
 		return 1/4; // No meter was specified, so use this default
 	};
 
+	this.getPickupLength = function() {
+		var pickupLength = 0;
+		for (var i = 0; i < this.lines.length; i++) {
+			if (this.lines[i].staff) {
+				for (var j = 0; j < this.lines[i].staff.length; j++) {
+					for (v = 0; v < this.lines[i].staff[j].voices.length; v++) {
+						var voice = this.lines[i].staff[j].voices[v];
+						var hasNote = false;
+						for (var el = 0; el < voice.length; el++) {
+							if (voice[el].duration)
+								pickupLength += voice[el].duration;
+							if (pickupLength >= this.getBarLength())
+								pickupLength -= this.getBarLength();
+							if (voice[el].el_type === 'bar')
+								return pickupLength;
+						}
+					}
+				}
+			}
+		}
+		return pickupLength;
+	};
+
+	this.getBarLength = function() {
+		var meter = this.getMeter();
+		var measureLength;
+		switch(meter.type) {
+			case "common_time": measureLength = 1; this.meter = { num: 4, den: 4}; break;
+			case "cut_time": measureLength = 1; this.meter = { num: 2, den: 2}; break;
+			default: measureLength = meter.value[0].num/meter.value[0].den; this.meter = { num: parseInt(meter.value[0].num, 10), den: parseInt(meter.value[0].den,10)};
+		}
+		return measureLength;
+	};
+
 	this.reset = function () {
 		this.version = "1.0.1";
 		this.media = "screen";
@@ -1023,7 +1057,6 @@ var Tune = function() {
 	}
 
 	this.setTiming = function (bpm, measuresOfDelay) {
-		var meter = this.getMeter();
 		var beatLength = this.getBeatLength();
 		if (!bpm && this.metaText && this.metaText.tempo) {
 			bpm = this.metaText.tempo.bpm;
@@ -1034,15 +1067,11 @@ var Tune = function() {
 			bpm = 180;
 		var beatsPerSecond = bpm / 60;
 
-		var measureLength;
-		switch(meter.type) {
-			case "common_time": measureLength = 1; this.meter = { num: 4, den: 4}; break;
-			case "cut_time": measureLength = 1; this.meter = { num: 2, den: 2}; break;
-			default: measureLength = meter.value[0].num/meter.value[0].den; this.meter = { num: parseInt(meter.value[0].num, 10), den: parseInt(meter.value[0].den,10)};
-		}
-
+		var measureLength = this.getBarLength();
 
 		var startingDelay = measureLength / beatLength * measuresOfDelay / beatsPerSecond;
+		if (startingDelay)
+			startingDelay -= this.getPickupLength() / beatLength / beatsPerSecond;
 		var timeDivider = beatLength * beatsPerSecond;
 
 		this.noteTimings = this.setupEvents(startingDelay, timeDivider);

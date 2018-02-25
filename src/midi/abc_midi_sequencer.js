@@ -256,6 +256,7 @@ var sequence;
 			}
 		}
 		if (drumIntro) {
+			var pickups = abctune.getPickupLength();
 			// add some measures of rests to the start of each track.
 			for (var vv = 0; vv < voices.length; vv++) {
 				var insertPoint = 0;
@@ -263,8 +264,13 @@ var sequence;
 					insertPoint++;
 				if (voices[vv].length > insertPoint) {
 					for (var w = 0; w < drumIntro; w++) {
-						voices[vv].splice(insertPoint, 0, {el_type: "note", rest: {type: "rest"}, duration: measureLength},
-							{ el_type: "bar" });
+						// If it is the last measure of intro, subtract the pickups.
+						if (pickups === 0 || w < drumIntro-1)
+							voices[vv].splice(insertPoint, 0, {el_type: "note", rest: {type: "rest"}, duration: measureLength},
+								{ el_type: "bar" });
+						else {
+							voices[vv].splice(insertPoint, 0, {el_type: "note", rest: {type: "rest"}, duration: measureLength-pickups});
+						}
 					}
 				}
 			}
