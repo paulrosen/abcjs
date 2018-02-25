@@ -3,7 +3,7 @@ const tunebook = require('./src/api/abc_tunebook');
 
 let abcjs = {};
 
-abcjs.signature = "abcjs-test v3.3.2";
+abcjs.signature = "abcjs-test v3.3.3";
 
 Object.keys(animation).forEach(function (key) {
 	abcjs[key] = animation[key];
