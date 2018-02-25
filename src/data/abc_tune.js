@@ -956,7 +956,9 @@ var Tune = function() {
 						height: height,
 						left: element.x,
 						width: element.w,
-						elements: [element.elemset]
+						elements: [element.elemset],
+						startChar: element.abcelem.startChar,
+						endChar: element.abcelem.endChar,
 					};
 				else {
 					// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
