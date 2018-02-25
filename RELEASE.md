@@ -1,3 +1,39 @@
+# Version 3.3.3
+
+## Bug fixes:
+
+* Fix parsing when "V:" is inline.
+
+* Allow stafflines on the V: line.
+
+* Add "perc" to clefs recognized by V:
+
+* Fix the parsing of the "middle" parameter.
+
+* Fix centering of lyrics.
+
+* Fix midi animation when repeating over more than one line.
+
+* Take pickup notes into consideration for the lead in metronome beats.
+
+## Features:
+
+* Add transpose parameter for engraving.
+
+* Implement "MIDI drummap". 
+
+* Use percussion channel whenever the clef=perc.
+
+* Change default soundfont location to paulrosen github.
+
+* Add percussion channel to the soundfont.
+
+* Change to percussion track when "channel 10" is specified.
+
+* New parameter for download midi link: "downloadClass".
+
+* Pass the startChar and endChar to the MIDI animate callback.
+
 # Version 3.3.2
 
 ## Bug fixes:
