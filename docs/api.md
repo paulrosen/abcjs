@@ -82,16 +82,16 @@ If an exact tempo line is supplied with the `Q:` line, then that tempo is used. 
 |adagietto|74|
 |andante|80|
 |andantino|88|
-|"marcia moderato"|84|
-|"andante moderato"|100|
+|marcia moderato|84|
+|andante moderato|100|
 |moderato|112|
 |allegretto|116|
-|"allegro moderato"|120|
+|allegro moderato|120|
 |allegro|126|
 |animato|132|
 |agitato|140|
 |veloce|148|
-|"mosso vivo"|156|
+|mosso vivo|156|
 |vivace|164|
 |vivacissimo|172|
 |allegrissimo|176|
