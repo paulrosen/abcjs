@@ -434,7 +434,7 @@ var Parse = function() {
 			last_divider = i+1;
 			if (word.length > 0) {
 				if (replace)
-					word = parseCommon.gsub(word,'~', '\xA0');
+					word = parseCommon.gsub(word,'~', ' ');
 				var div = words.charAt(i);
 				if (div !== '_' && div !== '-')
 					div = ' ';
@@ -483,13 +483,17 @@ var Parse = function() {
 						case 'slur': if (el.el_type === 'note' && el.pitches !== null) word_list.shift(); break;
 						case 'bar': if (el.el_type === 'bar') word_list.shift(); break;
 					}
-					if (el.lyric === undefined)
-						el.lyric = [ {syllable: "", divider: " " } ];
-					else
-						el.lyric.push({syllable: "", divider: " " });
+					if (el.el_type !== 'bar') {
+						if (el.lyric === undefined)
+							el.lyric = [{syllable: "", divider: " "}];
+						else
+							el.lyric.push({syllable: "", divider: " "});
+					}
 				} else {
 					if (el.el_type === 'note' && el.rest === undefined && !inSlur) {
 						var lyric = word_list.shift();
+						if (lyric.syllable)
+							lyric.syllable = lyric.syllable.replace(/ +/g,'\xA0');
 						if (el.lyric === undefined)
 							el.lyric = [ lyric ];
 						else
