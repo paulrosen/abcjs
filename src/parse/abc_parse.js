@@ -483,6 +483,10 @@ var Parse = function() {
 						case 'slur': if (el.el_type === 'note' && el.pitches !== null) word_list.shift(); break;
 						case 'bar': if (el.el_type === 'bar') word_list.shift(); break;
 					}
+					if (el.lyric === undefined)
+						el.lyric = [ {syllable: "", divider: " " } ];
+					else
+						el.lyric.push({syllable: "", divider: " " });
 				} else {
 					if (el.el_type === 'note' && el.rest === undefined && !inSlur) {
 						var lyric = word_list.shift();

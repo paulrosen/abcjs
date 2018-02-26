@@ -734,6 +734,7 @@ Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, center
 	if (anchor)
 		hash.attr["text-anchor"] = anchor;
 	text = text.replace(/\n\n/g, "\n \n");
+	text = text.replace(/^\n/, "\xA0\n");
 	var el = this.paper.text(x, y, text).attr(hash.attr);
 	if (!centerVertically) {
 		// The text will be placed centered in vertical alignment, so we need to move the box down so that
