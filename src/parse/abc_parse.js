@@ -434,7 +434,7 @@ var Parse = function() {
 			last_divider = i+1;
 			if (word.length > 0) {
 				if (replace)
-					word = parseCommon.gsub(word,'~', ' ');
+					word = parseCommon.gsub(word,'~', '\xA0');
 				var div = words.charAt(i);
 				if (div !== '_' && div !== '-')
 					div = ' ';
