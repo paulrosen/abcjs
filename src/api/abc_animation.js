@@ -304,7 +304,8 @@ var animation = {};
 								if (isTiedToNext)
 									isTiedState = true;
 							}
-							voiceTime += element.duration;
+							var duration = element.durationClass ? element.durationClass : element.duration;
+							voiceTime += duration;
 						}
 						if (element.type === 'bar') {
 							if (timingEvents.length === 0 || timingEvents[timingEvents.length-1] !== 'bar') {
