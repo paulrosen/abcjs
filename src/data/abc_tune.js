@@ -940,7 +940,8 @@ var Tune = function() {
 	this.addElementToEvents = function(eventHash, element, voiceTimeMilliseconds, top, height, timeDivider, isTiedState) {
 		if (element.hint)
 			return { isTiedState: undefined, duration: 0 };
-		if (element.duration > 0) {
+		var realDuration = element.durationClass ? element.durationClass : element.duration;
+		if (realDuration > 0) {
 			var isTiedToNext = element.startTie;
 			if (isTiedState !== undefined) {
 				eventHash["event" + isTiedState].elements.push(element.elemset); // Add the tied note to the first note that it is tied to
@@ -969,7 +970,7 @@ var Tune = function() {
 					isTiedState = voiceTimeMilliseconds;
 			}
 		}
-		return { isTiedState: isTiedState, duration: element.duration / timeDivider };
+		return { isTiedState: isTiedState, duration: realDuration / timeDivider };
 	};
 
 	this.makeVoicesArray = function() {

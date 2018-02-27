@@ -272,7 +272,7 @@ var flatten;
 				multiplier=(elem.startTriplet-1)/elem.startTriplet;
 		}
 
-		var duration = elem.duration*multiplier;
+		var duration = (elem.durationClass ? elem.durationClass : elem.duration) *multiplier;
 		barBeat += duration;
 
 		// if there are grace notes, then also play them.
