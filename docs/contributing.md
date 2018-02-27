@@ -97,6 +97,8 @@ To release a new version, this checklist should be followed:
 [_] Update npm with `npm publish`.
 * Test: Go to [npm](https://npmjs.com/package/abcjs). The package number should be updated.
 
+[_] Push the change that npm publish created with `git push`.
+
 [_] On github, "Draft a new release".
 * Click "releases".
 * Click "draft a new release"
