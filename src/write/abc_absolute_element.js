@@ -19,11 +19,14 @@ var spacing = require('./abc_spacing');
 // duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
 // minspacing - spacing which must be taken on top of the width defined by the duration
 // type is a meta-type for the element. It is not necessary for drawing, but it is useful to make semantic sense of the element. For instance, it can be used in the element's class name.
-var AbsoluteElement = function AbsoluteElement(abcelem, duration, minspacing, type, tuneNumber) {
+var AbsoluteElement = function AbsoluteElement(abcelem, duration, minspacing, type, tuneNumber, options) {
 	//console.log("Absolute:",abcelem, type);
+	if (!options)
+		options = {};
 	this.tuneNumber = tuneNumber;
 	this.abcelem = abcelem;
 	this.duration = duration;
+	this.durationClass = options.durationClassOveride ? options.durationClassOveride : this.duration;
 	this.minspacing = minspacing || 0;
 	this.x = 0;
 	this.children = [];
@@ -177,7 +180,7 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	}
 	var klass = this.type;
 	if (this.type === 'note') {
-		klass += ' d' + this.duration;
+		klass += ' d' + this.durationClass;
 		klass = klass.replace(/\./g, '-');
 		if (this.abcelem.pitches) {
 			for (var j = 0; j < this.abcelem.pitches.length; j++) {

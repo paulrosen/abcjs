@@ -55,7 +55,7 @@ AbstractEngraver = function(bagpipes, renderer, tuneNumber) {
 	this.renderer = renderer;
 	this.tuneNumber = tuneNumber;
   this.isBagpipes = bagpipes;
-  this.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
+  this.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th", "multi": "rests.multimeasure"},
                  note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter", 7:"noteheads.quarter", 'nostem':"noteheads.quarter"},
                  rhythm:{"-1": "noteheads.slash.whole", 0:"noteheads.slash.whole", 1:"noteheads.slash.whole", 2:"noteheads.slash.quarter", 3:"noteheads.slash.quarter", 4:"noteheads.slash.quarter", 5:"noteheads.slash.quarter", 6:"noteheads.slash.quarter", 7:"noteheads.slash.quarter", nostem: "noteheads.slash.nostem"},
                  x:{"-1": "noteheads.indeterminate", 0:"noteheads.indeterminate", 1:"noteheads.indeterminate", 2:"noteheads.indeterminate", 3:"noteheads.indeterminate", 4:"noteheads.indeterminate", 5:"noteheads.indeterminate", 6:"noteheads.indeterminate", 7:"noteheads.indeterminate", nostem: "noteheads.indeterminate"},
@@ -439,8 +439,10 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
          this.tripletmultiplier=(elem.startTriplet-1)/elem.startTriplet;
   }
 
-
-  var abselem = new AbsoluteElement(elem, duration * this.tripletmultiplier, 1, 'note', this.tuneNumber);
+  var durationForSpacing = duration * this.tripletmultiplier;
+  if (elem.rest && elem.rest.type === 'multimeasure')
+  	durationForSpacing = 1;
+  var abselem = new AbsoluteElement(elem, durationForSpacing, 1, 'note', this.tuneNumber, { durationClassOveride: elem.duration * this.tripletmultiplier});
   if (hint) abselem.setHint();
 
   if (elem.rest) {
@@ -480,8 +482,19 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
 		elem.averagepitch=restpitch;
 		elem.minpitch=restpitch;
 		elem.maxpitch=restpitch;
+		break;
+	    case "multimeasure":
+	    	c = this.chartable.rest['multi'];
+		    elem.averagepitch=restpitch;
+		    elem.minpitch=restpitch;
+		    elem.maxpitch=restpitch;
+		    dot = 0;
+		    var mmWidth = glyphs.getSymbolWidth(c);
+		    abselem.addChild(new RelativeElement(c, mmWidth, mmWidth, 7 ));
+		    var numMeasures = new RelativeElement(""+elem.duration, mmWidth, mmWidth, 16, {type:"multimeasure-text"});
+		    abselem.addExtra(numMeasures);
     }
-         if (!dontDraw)
+         if (!dontDraw && elem.rest.type !== "multimeasure")
     notehead = this.createNoteHead(abselem, c, {verticalPos:restpitch}, null, 0, -this.roomtaken, null, dot, 0, 1);
     if (notehead) abselem.addHead(notehead);
     this.roomtaken+=this.accidentalshiftx;
