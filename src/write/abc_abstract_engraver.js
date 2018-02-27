@@ -442,7 +442,8 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
   var durationForSpacing = duration * this.tripletmultiplier;
   if (elem.rest && elem.rest.type === 'multimeasure')
   	durationForSpacing = 1;
-  var abselem = new AbsoluteElement(elem, durationForSpacing, 1, 'note', this.tuneNumber, { durationClassOveride: elem.duration * this.tripletmultiplier});
+  var absType = elem.rest ? "rest" : "note";
+  var abselem = new AbsoluteElement(elem, durationForSpacing, 1, absType, this.tuneNumber, { durationClassOveride: elem.duration * this.tripletmultiplier});
   if (hint) abselem.setHint();
 
   if (elem.rest) {
