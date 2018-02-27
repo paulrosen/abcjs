@@ -30,10 +30,10 @@
 				arr[2] = parseFloat(arr[2]) + 30;
 			}
 			path = arr.join(' ');
-			var paper = Raphael(document.getElementById("canvas-abcjs"), 1000, 10000);
+			var paper = Raphael(document.getElementById("canvas-abcjs"), 300, 300);
 			var symb = paper.path(path).attr({fill: "#000", stroke: "none"});
-			paper.canvas.parentNode.style.height=""+1000+"px";
-			paper.setSize(1000,1000);
+			paper.canvas.parentNode.style.height=""+300+"px";
+			paper.setSize(300,300);
 
 		}
 		function testFont() {
@@ -114,5 +114,33 @@
 <textarea id="character-definition" onkeyup="testFont();"></textarea>
 <div id="output"></div>
 <div id="canvas-abcjs"></div>
+<h2>Editor Instructions</h2>
+<div>Use this to play with different character shapes in Raphael. After creating the shape you want, paste the output code into
+	abc_glyphs.js. The legal things to put in the textarea are "M", "l", or "m" followed by two numbers. The last character must be a "z".
+</div>
+<div>
+	The "l" element MUST be lower case (that is, use relative coordinates). The path is calculated from the beginning of the entire SVG, so
+	absolute coordinates will end up in the upper left of the engraving.
+</div>
+<div>
+	For instance, the following is the shape of a whole rest:
+</div>
+<pre>M0.06 0.03
+l0.09 -0.06
+l5.46 0.00
+l5.49 0.00
+l0.09 0.06
+l0.06 0.09
+l0.00 2.19
+l0.00 2.19
+l-0.06 0.09
+l-0.09 0.06
+l-5.49 0.00
+l-5.46 0.00
+l-0.09 -0.06
+l-0.06 -0.09
+l0.00 -2.19
+l0.00 -2.19
+z</pre>
 </body>
 </html>
