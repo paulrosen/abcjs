@@ -490,8 +490,8 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
 		    elem.maxpitch=restpitch;
 		    dot = 0;
 		    var mmWidth = glyphs.getSymbolWidth(c);
-		    abselem.addChild(new RelativeElement(c, mmWidth, mmWidth, 7 ));
-		    var numMeasures = new RelativeElement(""+elem.duration, mmWidth, mmWidth, 16, {type:"multimeasure-text"});
+		    abselem.addHead(new RelativeElement(c, -mmWidth, mmWidth*2, 7 ));
+		    var numMeasures = new RelativeElement(""+elem.duration, 0, mmWidth, 16, {type:"multimeasure-text"});
 		    abselem.addExtra(numMeasures);
     }
          if (!dontDraw && elem.rest.type !== "multimeasure")

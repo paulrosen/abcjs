@@ -111,7 +111,7 @@ RelativeElement.prototype.draw = function (renderer, bartop) {
 			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "start", this.centerVertically);
 			break;
 		case "multimeasure-text":
-			this.graphelem = renderer.renderText(this.x, y, this.c, 'tempofont', "rest", "middle", false);
+			this.graphelem = renderer.renderText(this.x+this.w/2, y, this.c, 'tempofont', "rest", "middle", false);
 			break;
 		case "part":
 			this.graphelem = renderer.renderText(this.x, y, this.c, 'partsfont', "part", "start");
