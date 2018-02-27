@@ -1,3 +1,17 @@
+# Version 3.3.4
+
+## Bug fixes:
+
+* Fix build error causing percussion soundfont to be missing.
+
+* Fix lining up multline lyrics when there is a syllable missing on the first line.
+
+## Features:
+
+* Add "rest" class to all rest objects.
+
+* Add multi-measure rests.
+
 # Version 3.3.3
 
 ## Bug fixes:
