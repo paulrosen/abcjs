@@ -136,7 +136,7 @@ var sequence;
 						// For each voice in a staff line
 						var voice = staff.voices[k];
 						if (!voices[voiceNumber]) {
-							voices[voiceNumber] = [].concat(startVoice);
+							voices[voiceNumber] = [].concat(JSON.parse(JSON.stringify(startVoice)));
 						}
 						if (staff.clef && staff.clef.type === 'perc') {
 							for (var cl = 0; cl < voices[voiceNumber].length; cl++) {
