@@ -91,14 +91,6 @@ transpose.keySignature = function(multilineVars, keys, keyName, root, acc) {
 		multilineVars.globalTransposeVerticalMovement = distance + Math.floor(multilineVars.globalTranspose / 12) * 7;
 	else
 		multilineVars.globalTransposeVerticalMovement = distance + Math.ceil(multilineVars.globalTranspose / 12) * 7;
-	console.log("globalTransposeVerticalMovement", baseKey,
-		transposedKey,
-		multilineVars.globalTranspose,
-		transposedKey.charCodeAt(0) - baseKey.charCodeAt(0),
-		distance,
-		Math.floor(multilineVars.globalTranspose / 12) * 7,
-		Math.ceil(multilineVars.globalTranspose / 12) * 7,
-		multilineVars.globalTransposeVerticalMovement);
 	return { accidentals: newKeySig, root: newKeyName[0], acc: newKeyName.length > 1 ? newKeyName[1] : "" };
 };
 
@@ -172,7 +164,6 @@ function accidentalChange(origPitch, newPitch, accidental, origKeySig, newKeySig
 		newPitch++;
 		calcAccidental -= (newPitchLetter === 'b' || newPitchLetter === 'e') ? 1 : 2;
 	}
-	console.log("accidentalChange", origPitchLetter, newPitchLetter, origAccidental, newAccidental, delta, calcAccidental);
 	return [newPitch, calcAccidental];
 }
 
