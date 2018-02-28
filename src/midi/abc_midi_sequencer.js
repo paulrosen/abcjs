@@ -237,9 +237,17 @@ var sequence;
 										case "drumoff": drumOn = false; drumChange = true; break;
 										case "drum": drumPattern = elem.params; drumChange = true; break;
 										case "drumbars": drumBars = elem.params[0]; drumChange = true; break;
+										case "drummap":
+											// This is handled before getting here so it can be ignored.
+											break;
 										case "program":
 											voices[voiceNumber].push({ el_type: 'instrument', program: elem.params[0] });
 											break;
+										case "transpose":
+											voices[voiceNumber].push({ el_type: 'transpose', transpose: elem.params[0] });
+											break;
+										default:
+											console.log("MIDI seq: midi cmd not handled: ", elem.cmd, elem);
 									}
 									if (drumChange) {
 										voices[0].push({el_type: 'drum', params: { pattern: drumPattern, bars: drumBars, intro: drumIntro, on: drumOn}});
