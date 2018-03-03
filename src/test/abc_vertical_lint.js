@@ -80,7 +80,7 @@ var verticalLint = function(tunes) {
 				if (obj.elem[0] === 'symbol 1' || obj.elem[0] === 'symbol 2' || obj.elem[0] === 'symbol 3' || obj.elem[0] === 'symbol 4' || obj.elem[0] === 'symbol 5' || obj.elem[0] === 'symbol 6' || obj.elem[0] === 'symbol 7' || obj.elem[0] === 'symbol 8' || obj.elem[0] === 'symbol 9')
 				return "Time Sig (odd): " + obj.elem.join('').replace(/symbol /g,"");
 			}
-		} else if (obj.$type.indexOf("note") === 0) {
+		} else if (obj.$type.indexOf("note") === 0 || obj.$type.indexOf("rest") === 0) {
 			return obj.$type + " " + obj.duration + ' ' + obj.elem.join(" ").replace(/symbol /g,"").replace(/\n/g, "\\n");
 		} else if (obj.$type === 'bar')
 			return "Bar";
@@ -243,13 +243,13 @@ var verticalLint = function(tunes) {
 			for (var j = 0; j < voice.children.length; j++) {
 				var child = voice.children[j];
 				var type = child.type;
-				if (type === 'note') {
+				if (type === 'note' || type === 'rest') {
 					if (child.abcelem.pitches) {
 						var pitches = [];
 						for (var ii = 0; ii < child.abcelem.pitches.length; ii++) pitches.push(child.abcelem.pitches[ii].verticalPos);
 						type += "(" + pitches.join(',') + ")";
 					} else
-						type += "(rest)";
+						type = "note(rest)";
 					if (child.abcelem.lyric && child.abcelem.lyric.length > 0) type += " " + child.abcelem.lyric[0].syllable;
 				}
 				var obj2 = { $type: type, bottom: child.bottom, top: child.top, specialY: setSpecialY(child), minSpacing: child.minspacing, duration: child.duration, width: child.w, x: child.x };
