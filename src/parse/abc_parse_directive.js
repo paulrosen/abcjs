@@ -746,6 +746,7 @@ var parseDirective = {};
 			case "partsbox":
 				scratch = addMultilineVarBool('partsBox', cmd, tokens);
 				if (scratch !== null) return scratch;
+				multilineVars.partsfont.box = multilineVars.partsBox;
 				break;
 			case "measurenb":
 			case "barnumbers":
@@ -1001,6 +1002,7 @@ var parseDirective = {};
 					case "partsbox":
 						scratch = addMultilineVarBool('partsBox', cmd, tokens);
 						if (scratch !== null) warn(scratch);
+						multilineVars.partsfont.box = multilineVars.partsBox;
 						break;
 					default:
 						warn("Formatting directive unrecognized: ", cmd, 0);
