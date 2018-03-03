@@ -701,6 +701,15 @@ Renderer.prototype.addClasses = function (c, isNote) {
 	if (this.measureNumber !== null && this.measureNumber !== undefined) ret.push("m"+this.measureNumber);
 	if (this.voiceNumber !== null && this.voiceNumber !== undefined) ret.push("v"+this.voiceNumber);
 	if (c.indexOf('note') >= 0 && this.noteNumber !== null && this.noteNumber !== undefined) ret.push("n"+this.noteNumber);
+	// add a prefix to all classes that abcjs adds.
+	if (ret.length > 0) {
+		ret = ret.join(' '); // Some strings are compound classes - that is, specify more than one class in a string.
+		ret = ret.split(' ');
+		for (var i = 0; i < ret.length; i++) {
+			if (ret[i].indexOf('abcjs-') !== 0 && ret[i].length > 0) // if the prefix doesn't already exist and the class is not blank.
+				ret[i] = 'abcjs-' + ret[i];
+		}
+	}
 	return ret.join(' ');
 };
 
