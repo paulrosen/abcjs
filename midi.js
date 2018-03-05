@@ -1,7 +1,7 @@
 const animation = require('./src/api/abc_animation');
 const tunebook = require('./src/api/abc_tunebook');
 
-let abcjs = {};
+var abcjs = {};
 
 abcjs.signature = "abcjs-midi v3.3.4";
 
