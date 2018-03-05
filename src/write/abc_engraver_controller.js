@@ -127,6 +127,8 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.noteNumber = null;
 	this.renderer.setPrintMode(abctune.media === 'print');
 	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
+	if (this.responsive === "resize") // The resizing will mess with the scaling, so just don't do it explicitly.
+		scale = undefined;
 	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
 	this.renderer.setPadding(abctune);
 	this.engraver = new AbstractEngraver(abctune.formatting.bagpipes,this.renderer, tuneNumber);
