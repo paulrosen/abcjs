@@ -113,3 +113,8 @@ Here are the latest versions. You can just download one of these:
 Let us know if you want to be listed!
 
 **Great big thanks to [mudcube](https://github.com/mudcube/MIDI.js) for the excellent work on midi.js!**
+
+## Supported by BrowserStack
+Thanks to [BrowserStack](https://browserstack.com/) for their support of this open-source project.
+
+![BrowserStack](https://cdn.rawgit.com/paulrosen/abcjs/master/docs/browserstack-logo-600x315.png)
