@@ -735,6 +735,8 @@ Renderer.prototype.getTextSize = function(text, type, klass) {
 	if (isNaN(size.height)) // This can happen if the element isn't visible.
 		size = { width: 0, height: 0};
 	el.remove();
+	if (hash.font.box)
+		size.height += 8;
 	return size;
 };
 
@@ -752,10 +754,13 @@ Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, center
 		if (isNaN(size.height)) // This can happen if the element is hidden.
 			el.attr({ "y": y });
 		else {
-			el.attr({"y": y + size.height / 2});
 			if (hash.font.box) {
-				this.paper.rect(size.x - 1, size.y + size.height / 2 - 1, size.width + 2, size.height + 2).attr({"stroke": "#888888"});
+				var padding = 2;
+				var margin = 2;
+				this.paper.rect(size.x - padding, size.y + size.height / 2 + margin, size.width + padding*2, size.height + padding*2 - margin).attr({"stroke": "#888888"});
+				size.height += 8;
 			}
+			el.attr({"y": y + size.height / 2});
 		}
 	}
 	if (type === 'debugfont') {
