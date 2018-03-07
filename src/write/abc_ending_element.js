@@ -25,7 +25,7 @@ var EndingElem = function EndingElem(text, anchor1, anchor2) {
 };
 
 EndingElem.prototype.setUpperAndLowerElements = function(positionY) {
-	this.pitch = positionY.endingHeightAbove;
+	this.pitch = positionY.endingHeightAbove - 2;
 };
 
 EndingElem.prototype.draw = function (renderer, linestartx, lineendx) {
