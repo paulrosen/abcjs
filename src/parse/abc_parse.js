@@ -1536,8 +1536,8 @@ var Parse = function() {
 		if (switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
-		if (switches.transpose) {
-			multilineVars.globalTranspose = parseInt(switches.transpose);
+		if (switches.visualTranspose) {
+			multilineVars.globalTranspose = parseInt(switches.visualTranspose);
 			if (multilineVars.globalTranspose === 0)
 				multilineVars.globalTranspose = undefined;
 		} else

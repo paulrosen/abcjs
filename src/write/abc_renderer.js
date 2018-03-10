@@ -26,13 +26,14 @@ var sprintf = require('./sprintf');
  * @param {Object} paper
  * @param {bool} doRegression
  */
-var Renderer = function(paper, doRegression) {
+var Renderer = function(paper, doRegression, shouldAddClasses) {
   this.paper = paper;
   this.controller = null; //TODO-GD only used when drawing the ABCJS ARS to connect the controller with the elements for highlighting
 
 	this.space = 3*spacing.SPACE;
   this.padding = {}; // renderer's padding is managed by the controller
   this.doRegression = doRegression;
+  this.shouldAddClasses = shouldAddClasses;
   if (this.doRegression)
     this.regressionLines = [];
 	this.reset();
@@ -695,6 +696,8 @@ Renderer.prototype.printStave = function (startx, endx, numLines) {
  * @private
  */
 Renderer.prototype.addClasses = function (c, isNote) {
+	if (!this.shouldAddClasses)
+		return "";
 	var ret = [];
 	if (c.length > 0) ret.push(c);
 	if (this.lineNumber !== null && this.lineNumber !== undefined) ret.push("l"+this.lineNumber);

@@ -213,27 +213,27 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 
 	var step = spacing.STEP;
 
-	var start = function () {
-			// storing original relative coordinates
-			this.dy = 0;
-		},
-		move = function (dx, dy) {
-			// move will be called with dx and dy
-			dy = Math.round(dy/step)*step;
-			this.translate(0, -this.dy);
-			this.dy = dy;
-			this.translate(0,this.dy);
-		},
-		up = function () {
-			if (self.abcelem.pitches) {
-				var delta = -Math.round(this.dy / step);
-				self.abcelem.pitches[0].pitch += delta;
-				self.abcelem.pitches[0].verticalPos += delta;
-				controller.notifyChange();
-			}
-		};
-	if (this.abcelem.el_type==="note" && controller.editable)
-		this.elemset.drag(move, start, up);
+	// var start = function () {
+	// 		// storing original relative coordinates
+	// 		this.dy = 0;
+	// 	},
+	// 	move = function (dx, dy) {
+	// 		// move will be called with dx and dy
+	// 		dy = Math.round(dy/step)*step;
+	// 		this.translate(0, -this.dy);
+	// 		this.dy = dy;
+	// 		this.translate(0,this.dy);
+	// 	},
+	// 	up = function () {
+	// 		if (self.abcelem.pitches) {
+	// 			var delta = -Math.round(this.dy / step);
+	// 			self.abcelem.pitches[0].pitch += delta;
+	// 			self.abcelem.pitches[0].verticalPos += delta;
+	// 			controller.notifyChange();
+	// 		}
+	// 	};
+	// if (this.abcelem.el_type==="note" && controller.editable)
+	// 	this.elemset.drag(move, start, up);
 };
 
 AbsoluteElement.prototype.isIE=/*@cc_on!@*/false;//IE detector

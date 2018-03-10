@@ -20,23 +20,48 @@ var midiCreate = require('../midi/abc_midi_create');
 //          startingTune: an index, starting at zero, representing which tune to start rendering at.
 //              (If this element is not present, then rendering starts at zero.)
 var renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
-    if (midiParams === undefined)
-        midiParams = {};
-    if (midiParams.generateInline === undefined) // default is to generate inline controls.
-        midiParams.generateInline = true;
-    if (midiParams.inlineControls)
-        midiParams.inlineControls.selectionToggle = false; // Override the selection option because there is no selection in the Basic call.
+	var params = {};
+	var key;
+	if (parserParams) {
+		for (key in parserParams) {
+			if (parserParams.hasOwnProperty(key)) {
+				params[key] = parserParams[key];
+			}
+		}
+	}
+	if (midiParams) {
+		for (key in midiParams) {
+			if (midiParams.hasOwnProperty(key)) {
+				// There is a conflict with the name of the parameter "listener". If it comes in the second parameter, then it is for midi.
+				if (key === "listener")
+					params.midiListener =  midiParams[key];
+				else
+					params[key] = midiParams[key];
+			}
+		}
+	}
+	if (renderParams) {
+		for (key in renderParams) {
+			if (renderParams.hasOwnProperty(key)) {
+				params[key] = renderParams[key];
+			}
+		}
+	}
+    if (params.generateInline === undefined) // default is to generate inline controls.
+	    params.generateInline = true;
+    if (params.inlineControls)
+	    params.inlineControls.selectionToggle = false; // Override the selection option because there is no selection in the Basic call.
 
     function callback(div, tune, index) {
         var html = "";
-        var midiInst = midiCreate(tune, midiParams);
-        if (midiParams.generateInline) {
+        var midiInst = midiCreate(tune, params);
+        if (params.generateInline) {
             var inlineMidi = midiInst.inline ? midiInst.inline : midiInst;
-            html += midi.generateMidiControls(tune, midiParams, inlineMidi, index);
+            html += midi.generateMidiControls(tune, params, inlineMidi, index);
         }
-        if (midiParams.generateDownload) {
+        if (params.generateDownload) {
             var downloadMidi = midiInst.download ? midiInst.download : midiInst;
-            html += midi.generateMidiDownloadLink(tune, midiParams, downloadMidi, index);
+            html += midi.generateMidiDownloadLink(tune, params, downloadMidi, index);
         }
         div.innerHTML = html;
         var find = function(element, cls) {
@@ -45,27 +70,27 @@ var renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
                 return null;
             return els[0];
         };
-        if (midiParams.generateInline && (midiParams.animate || midiParams.listener)) {
+        if (params.generateInline && (params.animate || params.midiListener)) {
             var parent = find(div, "abcjs-inline-midi");
             parent.abcjsTune = tune;
-            parent.abcjsListener = midiParams.listener;
-            parent.abcjsQpm = midiParams.qpm;
-            parent.abcjsContext = midiParams.context;
-            if (midiParams.animate) {
-                var drumIntro = midiParams.drumIntro ? midiParams.drumIntro : 0;
-                parent.abcjsAnimate = midiParams.animate.listener;
-                parent.abcjsTune = midiParams.animate.target; // We need the version of the tune that was drawn: extra info is added during the drawing process.
-                parent.abcjsTune.setTiming(midiParams.qpm, drumIntro);
+            parent.abcjsListener = params.midiListener;
+            parent.abcjsQpm = params.qpm;
+            parent.abcjsContext = params.context;
+            if (params.animate) {
+                var drumIntro = params.drumIntro ? params.drumIntro : 0;
+                parent.abcjsAnimate = params.animate.listener;
+                parent.abcjsTune = params.animate.target; // We need the version of the tune that was drawn: extra info is added during the drawing process.
+                parent.abcjsTune.setTiming(params.qpm, drumIntro);
             }
         }
-        if (midiParams.generateInline && midiParams.inlineControls && midiParams.inlineControls.startPlaying) {
+        if (params.generateInline && params.inlineControls && params.inlineControls.startPlaying) {
             var startButton = find(div, "abcjs-midi-start");
             midi.startPlaying(startButton);
         }
 
     }
 
-    return tunebook.renderEngine(callback, output, abc, parserParams, renderParams);
+    return tunebook.renderEngine(callback, output, abc, params);
 };
 
 module.exports = renderMidi;

@@ -20,12 +20,12 @@ function resizeOuter() {
 window.addEventListener("resize", resizeOuter);
 window.addEventListener("orientationChange", resizeOuter);
 
-function renderOne(div, tune, renderParams, engraverParams, tuneNumber) {
-    var width = renderParams.width ? renderParams.width : 800;
-    if (renderParams.viewportHorizontal) {
+function renderOne(div, tune, params, tuneNumber) {
+    var width = params.width ? params.width : 800;
+    if (params.viewportHorizontal) {
         // Create an inner div that holds the music, so that the passed in div will be the viewport.
         div.innerHTML = '<div class="abcjs-inner"></div>';
-        if (renderParams.scrollHorizontal) {
+        if (params.scrollHorizontal) {
             div.style.overflowX = "auto";
             div.style.overflowY = "hidden";
         } else
@@ -33,7 +33,7 @@ function renderOne(div, tune, renderParams, engraverParams, tuneNumber) {
         resizeDivs[div.id] = div; // We use a hash on the element's id so that multiple calls won't keep adding to the list.
         div = div.children[0]; // The music should be rendered in the inner div.
     }
-    else if (renderParams.viewportVertical) {
+    else if (params.viewportVertical) {
         // Create an inner div that holds the music, so that the passed in div will be the viewport.
         div.innerHTML = '<div class="abcjs-inner scroll-amount"></div>';
         div.style.overflowX = "hidden";
@@ -41,19 +41,17 @@ function renderOne(div, tune, renderParams, engraverParams, tuneNumber) {
         div = div.children[0]; // The music should be rendered in the inner div.
     }
     /* jshint -W064 */ var paper = Raphael(div, width, 400); /* jshint +W064 */
-    if (engraverParams === undefined)
-        engraverParams = {};
-    var engraver_controller = new EngraverController(paper, engraverParams);
+    var engraver_controller = new EngraverController(paper, params);
     engraver_controller.engraveABC(tune, tuneNumber);
     tune.engraver = engraver_controller;
-    if (renderParams.viewportVertical || renderParams.viewportHorizontal) {
+    if (params.viewportVertical || params.viewportHorizontal) {
         // If we added a wrapper around the div, then we need to size the wrapper, too.
         var parent = div.parentNode;
         parent.style.width = div.style.width;
     }
 }
 
-function renderEachLineSeparately(div, tune, renderParams, engraverParams, tuneNumber) {
+function renderEachLineSeparately(div, tune, params, tuneNumber) {
     function initializeTuneLine(tune) {
         return {
             formatting: tune.formatting,
@@ -116,9 +114,9 @@ function renderEachLineSeparately(div, tune, renderParams, engraverParams, tuneN
 
     // Now create sub-divs and render each line. Need to copy the params to change the padding for the interior slices.
     var ep = {};
-    for (var key in engraverParams) {
-        if (engraverParams.hasOwnProperty(key)) {
-            ep[key] = engraverParams[key];
+    for (var key in params) {
+        if (params.hasOwnProperty(key)) {
+            ep[key] = params[key];
         }
     }
     var origPaddingTop = ep.paddingtop;
@@ -137,7 +135,7 @@ function renderEachLineSeparately(div, tune, renderParams, engraverParams, tuneN
 	        ep.paddingtop = 10;
 	        ep.paddingbottom = -20;
         }
-        renderOne(lineEl, tunes[k], renderParams, ep, tuneNumber);
+        renderOne(lineEl, tunes[k], ep, tuneNumber);
     }
 }
 
@@ -159,16 +157,44 @@ function renderEachLineSeparately(div, tune, renderParams, engraverParams, tuneN
 //              (If this element is not present, then rendering starts at zero.)
 //          width: 800 by default. The width in pixels of the output paper
 var renderAbc = function(output, abc, parserParams, engraverParams, renderParams) {
-    if (renderParams === undefined)
-        renderParams = {};
-    function callback(div, tune, tuneNumber) {
-        if (!renderParams.oneSvgPerLine || tune.lines.length < 2)
-            renderOne(div, tune, renderParams, engraverParams, tuneNumber);
-        else
-            renderEachLineSeparately(div, tune, renderParams, engraverParams, tuneNumber);
+    // Note: all parameters have been condensed into the first ones. It doesn't hurt anything to allow the old format, so just copy them here.
+    var params = {};
+    var key;
+    if (parserParams) {
+        for (key in parserParams) {
+            if (parserParams.hasOwnProperty(key)) {
+                params[key] = parserParams[key];
+            }
+        }
+    }
+    if (engraverParams) {
+        for (key in engraverParams) {
+            if (engraverParams.hasOwnProperty(key)) {
+	            // There is a conflict with the name of the parameter "listener". If it is in the second parameter, then it is for click.
+	            if (key === "listener") {
+	            	if (engraverParams[key].highlight)
+		                params.clickListener = engraverParams[key].highlight;
+	            } else
+                    params[key] = engraverParams[key];
+            }
+        }
+    }
+    if (renderParams) {
+        for (key in renderParams) {
+            if (renderParams.hasOwnProperty(key)) {
+                params[key] = renderParams[key];
+            }
+        }
     }
 
-    return tunebook.renderEngine(callback, output, abc, parserParams, renderParams);
+    function callback(div, tune, tuneNumber) {
+        if (!params.oneSvgPerLine || tune.lines.length < 2)
+            renderOne(div, tune, params, tuneNumber);
+        else
+            renderEachLineSeparately(div, tune, params, tuneNumber);
+    }
+
+    return tunebook.renderEngine(callback, output, abc, params);
 };
 
 module.exports = renderAbc;

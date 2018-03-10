@@ -21,21 +21,21 @@ var abcMidiUiGenerator;
 (function () {
 	"use strict";
 
-	abcMidiUiGenerator = function(tunes, midiParams, downloadMidiEl, inlineMidiEl, engravingEl) {
+	abcMidiUiGenerator = function(tunes, abcjsParams, downloadMidiEl, inlineMidiEl, engravingEl) {
 		var downloadMidiHtml = "";
 		var inlineMidiHtml = "";
 		for (var i = 0; i < tunes.length; i++) {
-			var midiInst = midiCreate(tunes[i], midiParams);
+			var midiInst = midiCreate(tunes[i], abcjsParams);
 
-			if (midiParams.generateInline && midiParams.generateDownload) {
-				downloadMidiHtml += midi.generateMidiDownloadLink(tunes[i], midiParams, midiInst.download, i);
-				inlineMidiHtml += midi.generateMidiControls(tunes[i], midiParams, midiInst.inline, i);
-			} else if (midiParams.generateInline)
-				inlineMidiHtml += midi.generateMidiControls(tunes[i], midiParams, midiInst, i);
+			if (abcjsParams.generateInline && abcjsParams.generateDownload) {
+				downloadMidiHtml += midi.generateMidiDownloadLink(tunes[i], abcjsParams, midiInst.download, i);
+				inlineMidiHtml += midi.generateMidiControls(tunes[i], abcjsParams, midiInst.inline, i);
+			} else if (abcjsParams.generateInline)
+				inlineMidiHtml += midi.generateMidiControls(tunes[i], abcjsParams, midiInst, i);
 			else
-				downloadMidiHtml += midi.generateMidiDownloadLink(tunes[i], midiParams, midiInst, i);
+				downloadMidiHtml += midi.generateMidiDownloadLink(tunes[i], abcjsParams, midiInst, i);
 		}
-		if (midiParams.generateDownload) {
+		if (abcjsParams.generateDownload) {
 			if (downloadMidiEl)
 				downloadMidiEl.innerHTML = downloadMidiHtml;
 			else
@@ -47,7 +47,7 @@ var abcMidiUiGenerator;
 				return null;
 			return els[0];
 		};
-		if (midiParams.generateInline) {
+		if (abcjsParams.generateInline) {
 			var inlineDiv;
 			if (inlineMidiEl) {
 				inlineMidiEl.innerHTML = inlineMidiHtml;
@@ -56,17 +56,17 @@ var abcMidiUiGenerator;
 				engravingEl.innerHTML += inlineMidiHtml;
 				inlineDiv = engravingEl;
 			}
-			if (midiParams.animate || midiParams.listener) {
+			if (abcjsParams.animate || abcjsParams.midiListener) {
 				for (i = 0; i < tunes.length; i++) {
 					var parent = find(inlineDiv, "abcjs-midi-" + i);
 					parent.abcjsTune = tunes[i];
-					parent.abcjsListener = midiParams.listener;
-					parent.abcjsQpm = midiParams.qpm;
-					parent.abcjsContext = midiParams.context;
-					if (midiParams.animate) {
-						var drumIntro = midiParams.drumIntro ? midiParams.drumIntro : 0;
-						parent.abcjsAnimate = midiParams.animate.listener;
-						parent.abcjsTune.setTiming(midiParams.qpm, drumIntro);
+					parent.abcjsListener = abcjsParams.midiListener;
+					parent.abcjsQpm = abcjsParams.qpm;
+					parent.abcjsContext = abcjsParams.context;
+					if (abcjsParams.animate) {
+						var drumIntro = abcjsParams.drumIntro ? abcjsParams.drumIntro : 0;
+						parent.abcjsAnimate = abcjsParams.animate.listener;
+						parent.abcjsTune.setTiming(abcjsParams.qpm, drumIntro);
 					}
 				}
 			}
@@ -75,7 +75,7 @@ var abcMidiUiGenerator;
 
 	window.addEventListener("generateMidi", function (e) {
 		var options = e.detail;
-		abcMidiUiGenerator(options.tunes, options.midiParams, options.downloadMidiEl, options.inlineMidiEl, options.engravingEl);
+		abcMidiUiGenerator(options.tunes, options.abcjsParams, options.downloadMidiEl, options.inlineMidiEl, options.engravingEl);
 	});
 })();
 

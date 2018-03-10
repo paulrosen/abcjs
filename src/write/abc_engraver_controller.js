@@ -56,8 +56,8 @@ var EngraverController = function(paper, params) {
 	}
   this.editable = params.editable || false;
 	this.listeners = [];
-	if (params.listener)
-		this.addSelectListener(params.listener);
+	if (params.clickListener)
+		this.addSelectListener(params.clickListener);
 
 	// HACK-PER: Raphael doesn't support setting the class of an element, so this adds that support. This doesn't work on IE8 or less, though.
 	this.usingSvg = (window.SVGAngle || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1") ? true : false); // Same test Raphael uses
@@ -67,7 +67,7 @@ var EngraverController = function(paper, params) {
 	Raphael._availableAttrs['data-vertical'] = "";
 
   //TODO-GD factor out all calls directly made to renderer.paper and fix all the coupling issues below
-  this.renderer=new Renderer(paper, params.regression);
+  this.renderer=new Renderer(paper, params.regression, params.add_classes);
 	this.renderer.setPaddingOverride(params);
   this.renderer.controller = this; // TODO-GD needed for highlighting
 
@@ -273,8 +273,7 @@ EngraverController.prototype.notifySelect = function (abselem, tuneNumber, class
   }
   var abcelem = abselem.abcelem || {};
   for (var i=0; i<this.listeners.length;i++) {
-	  if (this.listeners[i].highlight)
-		  this.listeners[i].highlight(abcelem, tuneNumber, classes);
+	  this.listeners[i](abcelem, tuneNumber, classes);
   }
 };
 
@@ -282,12 +281,12 @@ EngraverController.prototype.notifySelect = function (abselem, tuneNumber, class
  * Called by the Abstract Engraving Structure to say it was modified (e.g. notehead dragged)
  * @protected
  */
-EngraverController.prototype.notifyChange = function (/*abselem*/) {
-  for (var i=0; i<this.listeners.length;i++) {
-    if (this.listeners[i].modelChanged)
-      this.listeners[i].modelChanged();
-  }
-};
+// EngraverController.prototype.notifyChange = function (/*abselem*/) {
+//   for (var i=0; i<this.listeners.length;i++) {
+//     if (this.listeners[i].modelChanged)
+//       this.listeners[i].modelChanged();
+//   }
+// };
 
 /**
  *
@@ -305,8 +304,8 @@ EngraverController.prototype.clearSelection = function () {
  * @param {Function} listener.modelChanged the model the listener passed to this controller has changed
  * @param {Function} listener.highlight the abcelem of the model the listener passed to this controller should be highlighted
  */
-EngraverController.prototype.addSelectListener = function (listener) {
-  this.listeners[this.listeners.length] = listener;
+EngraverController.prototype.addSelectListener = function (clickListener) {
+  this.listeners[this.listeners.length] = clickListener;
 };
 
 /**
