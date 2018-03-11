@@ -4,6 +4,12 @@
 
 This library makes it easy to incorporate **sheet music** into your **websites**. You can also turn visible **ABC** text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of one javascript file. You can also generate **MIDI files** or play them directly in your browser.
 
+**Special notes for Version 4.0.0:**
+
+* **BREAKING CHANGE**: The names of all the classes that are generated are now prefixed with `abcjs-`. Any code that searched for particular class names before will have to be adjusted.
+
+* The parameters have been combined into one set of parameters, instead of three sets like previous versions. The old way of calling the parameters will still work, but you are encouraged to use the new, simplified approach going forward.
+
 **Special notes for Version 3.3.0:**
 
 | Important Breaking Change for MIDI users! |

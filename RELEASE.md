@@ -1,3 +1,39 @@
+# Version 4.0.0
+
+## Breaking Changes:
+
+* Don't generate classes unless requested. (This is a bug fix, but client code might mistakenly been relying on that behavior.)
+
+* Add "abcjs-" as a prefix to all class names that are generated.
+
+## Features:
+
+* Simplify the options used to call `renderAbc` and `renderMidi`.
+
+* Add clearer names for `clickListener`, `midiListener`, and `visualTranspose`.
+
+* Implement "partsBox"
+
+* Add a few missing text encodings.
+
+* Handle "%%MIDI transpose" syntax.
+
+## Bug fixes:
+
+* Remove a few deprecated options that were broken anyway.
+
+* Move first and second ending lines down a little.
+
+* Put a little more spacing around text that has a box around it.
+
+* Remove some ES6 syntax that snuck in.
+
+* Ignore %%scale formatting command if responsive=resize.
+
+* Remove some debug messages.
+
+* Fix bug with setting only one voice to percussion voice. 
+
 # Version 3.3.4
 
 ## Bug fixes:

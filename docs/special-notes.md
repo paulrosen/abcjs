@@ -1,3 +1,8 @@
+**Special notes for Version 4.0.0:**
+* **BREAKING CHANGE**: The names of all the classes that are generated are now prefixed with `abcjs-`. Any code that searched for particular class names before will have to be adjusted.
+
+* The parameters have been combined into one set of parameters, instead of three sets like previous versions. The old way of calling the parameters will still work, but you are encouraged to use the new, simplified approach going forward.
+
 **Special notes for Version 3.3.0:**
 
 * The build process has switched over to webpack. The minimization is now done with UglifyJS. This shouldn't cause any side effects.

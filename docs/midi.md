@@ -22,11 +22,7 @@ That, in turn, is dependent on a set of sound fonts. A good place to get them is
 
 * Use the version of the library that contains midi.js.
 
-* Put the sound fonts at this location on your server:
-
-`/soundfont/`
-
-NOTE: You can put the sound fonts in another location. If you do, then include the following line right after loading ABCJS:
+* The soundfonts, by default, are served from github. If you would like host them yourself, put them on your server in a publicly accessible place and call:
 
 `window.ABCJS.midi.setSoundFont("/url/to/soundfont/");`
 
