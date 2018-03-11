@@ -308,7 +308,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 	if (abctune.metaText.header && this.isPrint) {
 		// Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
 		// This text goes above the margin, so we'll temporarily move up.
-		var headerTextHeight = this.getTextSize("XXXX", "headerfont", 'header meta-top').height;
+		var headerTextHeight = this.getTextSize("XXXX", "headerfont", 'abcjs-header abcjs-meta-top').height;
 		this.y -=headerTextHeight;
 		this.outputTextIf(this.padding.left, abctune.metaText.header.left, 'headerfont', 'header meta-top', 0, null, 'start');
 		this.outputTextIf(this.padding.left + width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', 0, null, 'middle');

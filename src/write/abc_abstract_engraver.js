@@ -635,7 +635,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
          	var div = ly.divider === ' ' ? "" : ly.divider;
          lyricStr += ly.syllable + div + "\n";
       });
-	  var lyricDim = this.renderer.getTextSize(lyricStr, 'vocalfont', "abc-lyric");
+	  var lyricDim = this.renderer.getTextSize(lyricStr, 'vocalfont', "lyric");
 	  var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
     abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, {type:"lyric", position: position, height: lyricDim.height / spacing.STEP }));
   }

@@ -260,7 +260,7 @@ AbsoluteElement.prototype.setClass = function (addClass, removeClass, color) {
 
 AbsoluteElement.prototype.highlight = function (klass, color) {
 	if (klass === undefined)
-		klass = "note_selected";
+		klass = "abcjs-note_selected";
 	if (color === undefined)
 		color = "#ff0000";
 	this.setClass(klass, "", color);
@@ -268,7 +268,7 @@ AbsoluteElement.prototype.highlight = function (klass, color) {
 
 AbsoluteElement.prototype.unhighlight = function (klass, color) {
 	if (klass === undefined)
-		klass = "note_selected";
+		klass = "abcjs-note_selected";
 	if (color === undefined)
 		color = "#000000";
 	this.setClass("", klass, color);

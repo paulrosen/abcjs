@@ -99,7 +99,7 @@ RelativeElement.prototype.draw = function (renderer, bartop) {
 			this.graphelem = renderer.renderText(this.x, y, ""+this.c, "measurefont", 'bar-number', "middle");
 			break;
 		case "lyric":
-			this.graphelem = renderer.renderText(this.x, y, this.c, "vocalfont", 'abc-lyric', "middle");
+			this.graphelem = renderer.renderText(this.x, y, this.c, "vocalfont", 'lyric', "middle");
 			break;
 		case "chord":
 			this.graphelem = renderer.renderText(this.x, y, this.c, 'gchordfont', "chord", "middle");
