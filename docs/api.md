@@ -117,6 +117,8 @@ A more complicated example that has the drum pattern fall over two measures of 2
 { drum: "d2dd2ddz", drumBars: 2, drumIntro: 2 }
 ```
 
+Note that the default soundfont that is used by abcjs contains sounds for pitches **27** through **87**. You can experiment with any of them for different effects.
+
 | `inlineControls` | Default | Description |
 | ------------- | ----------- | ----------- |
 | `selectionToggle` | false | Show a latched push button to play only the current selection. **Not yet implemented** |
