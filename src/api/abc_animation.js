@@ -147,7 +147,7 @@ var animation = {};
 
 		if (options.showCursor) {
 			cursor = document.createElement('DIV');
-			cursor.className = 'cursor';
+			cursor.className = 'abcjs-cursor cursor';
 			cursor.style.position = 'absolute';
 
 			paper.appendChild(cursor);
