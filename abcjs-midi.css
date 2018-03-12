@@ -127,3 +127,26 @@
 	padding-left: 2px;
 	box-sizing: border-box;
 }
+
+/* Adding the class "abcjs-large" will make the control easier on a touch device. */
+.abcjs-large .abcjs-inline-midi {
+	height: 52px;
+}
+.abcjs-large .abcjs-btn {
+	width: 56px;
+	height: 52px;
+	font-size: 28px;
+}
+.abcjs-large .abcjs-midi-progress-background {
+	height: 20px;
+}
+.abcjs-large .abcjs-midi-progress-indicator {
+	height: 28px;
+	top: -6px;
+	width: 40px;
+}
+.abcjs-large .abcjs-midi-clock {
+	font-size: 32px;
+	margin-right: 10px;
+	margin-left: 10px;
+}
