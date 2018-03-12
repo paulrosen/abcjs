@@ -45,7 +45,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | ------------- | ----------- | ----------- |
 | `qpm` | 180 | The tempo, if not specified in abcString. |
 | `program` | 0 | The midi program (aka "instrument") to use, if not specified in abcString. |
-| `transpose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
+| `midiTranspose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
 | `generateDownload` | false | Whether to generate a download MIDI link. |
 | `generateInline` | true | Whether to generate the inline MIDI controls. |
 | `downloadClass` | "" | Add classes to the download controls. The classes `abcjs-download-midi` and `abcjs-midi-xxx` where `xxx` is the index of the tune are already added. This is appended to those classes. |
@@ -261,7 +261,7 @@ Certain options for the plugin can be changed like this, if executed on page loa
 
 ```html
 <script type="text/javascript">
-  ABCJS.plugin.show_midi = false;
+  ABCJS.plugin.hide_abc = true;
 </script>
 ```
 
@@ -269,10 +269,10 @@ The options available in abc_plugin are:
 
 | Option | Description |
 | ------------- | ----------- |
-| `show_midi` | NO LONGER SUPPORTED: This options has been removed. |
+| `show_midi` | NO LONGER SUPPORTED: This option has been removed. |
 | `hide_abc` | Whether the abc text should be hidden or not. (false by default) since 1.0.2 |
 | `render_before` | Whether the rendered score should appear before the abc text. (false by default) since 1.0.2 |
-| `midi_options` | NO LONGER SUPPORTED: This options has been removed. |
+| `midi_options` | NO LONGER SUPPORTED: This option has been removed. |
 | `auto_render_threshold` | Number of tunes beyond which auto rendering is disabled; instead, each tune is accompanied by a "show" button. (default value is 20) since 1.0.2 |
 | `show_text` | Text to be included on the "show" button before the tune title. (default value is "show score for: ") since 1.0.2 |
 | `render_options` | The options to be used for the `engraverParams` |

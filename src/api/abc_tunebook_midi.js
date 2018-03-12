@@ -32,9 +32,11 @@ var renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
 	if (midiParams) {
 		for (key in midiParams) {
 			if (midiParams.hasOwnProperty(key)) {
-				// There is a conflict with the name of the parameter "listener". If it comes in the second parameter, then it is for midi.
+				// There is a conflict with the name of the parameters "listener" and "transpose". If it comes in the second parameter, then it is for midi.
 				if (key === "listener")
 					params.midiListener =  midiParams[key];
+				else if (key === 'transpose')
+					params.midiTranspose = midiParams[key];
 				else
 					params[key] = midiParams[key];
 			}

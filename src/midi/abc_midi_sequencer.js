@@ -31,7 +31,7 @@ var sequence;
 		options = options || {};
 		var qpm = 180;	// The tempo if there isn't a tempo specified.
 		var program = options.program || 0;	// The program if there isn't a program specified.
-		var transpose = options.transpose || 0;
+		var transpose = options.midiTranspose || 0;
 		var channel = options.channel || 0;
 		var drumPattern = options.drum || "";
 		var drumBars = options.drumBars || 1;

@@ -10,13 +10,15 @@
 
 * Simplify the options used to call `renderAbc` and `renderMidi`.
 
-* Add clearer names for `clickListener`, `midiListener`, and `visualTranspose`.
+* Add clearer names for `clickListener`, `midiListener`, `midiTranspose`, and `visualTranspose`.
 
 * Implement "partsBox"
 
 * Add a few missing text encodings.
 
 * Handle "%%MIDI transpose" syntax.
+
+* Add a larger version of the audio control.
 
 ## Bug fixes:
 
