@@ -43,7 +43,7 @@ var flatten;
 	var chordTrackFinished;
 	var chordChannel;
 	var chordInstrument = 0;
-	var drumInstrument = 116;
+	var drumInstrument = 128;
 	var currentChords;
 	var lastChord;
 	var barBeat;

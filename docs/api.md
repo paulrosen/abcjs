@@ -102,14 +102,14 @@ See the ABC documentation for the correct way to format the string that is passe
 ```
   const drumBeats = {
     // the array is [0]=drum [1]=drumIntro
-    "2/4": ["dd 92 90 60 30", 2],
-    "3/4": ["ddd 92 90 90 60 30 30", 1],
-    "4/4": ["dddd 92 90 90 90 60 30 30 30", 1],
-    "5/4": ["ddddd 92 90 90 92 90 60 30 30 60 30", 1],
-    "Cut Time": ["dd 92 90 60 30", 2],
-    "6/8": ["dd 92 90 60 30", 2],
-    "9/8": ["ddd 92 90 90 60 30 30", 1],
-    "12/8": ["dddd 92 90 90 90 60 30 30 30", 1]
+    "2/4": ["dd 76 77 60 30", 2],
+    "3/4": ["ddd 76 77 77 60 30 30", 1],
+    "4/4": ["dddd 76 77 77 77 60 30 30 30", 1],
+    "5/4": ["ddddd 76 77 77 76 77 60 30 30 60 30", 1],
+    "Cut Time": ["dd 76 77 60 30", 2],
+    "6/8": ["dd 76 77 60 30", 2],
+    "9/8": ["ddd 76 77 77 60 30 30", 1],
+    "12/8": ["dddd 76 77 77 77 60 30 30 30", 1]
   };
 ```
 A more complicated example that has the drum pattern fall over two measures of 2/4 time (This is a typical Bulgar pattern):

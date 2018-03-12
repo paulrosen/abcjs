@@ -6,6 +6,8 @@
 
 * Add "abcjs-" as a prefix to all class names that are generated.
 
+* Change the metronome track to use the Channel 10 sounds.
+
 ## Features:
 
 * Simplify the options used to call `renderAbc` and `renderMidi`.
