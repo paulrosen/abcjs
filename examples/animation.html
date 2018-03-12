@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
 	<title>abcjs animation</title>
-	<script src="../bin/abcjs_basic_3.3.4-min.js" type="text/javascript"></script>
+	<script src="../bin/abcjs_basic_4.0.0-min.js" type="text/javascript"></script>
 
 	<style media="screen" type="text/css">
 		.cursor-editor {
@@ -18,7 +18,7 @@
 			margin-bottom: 12px;
 		}
 
-		.paper .cursor {
+		.paper .abcjs-cursor {
 			background-color: rgba(196,196,196,.5);
 		}
 	</style>
@@ -77,8 +77,7 @@ G4 F4 E8|D4 E4 C8-|C8 F8|E4 E4 C8|]
 			"abc", {
 				paper_id: "paper0",
 				warnings_id:"warnings",
-				parser_options: {},
-				render_options: {
+				abcjsParams: {
 					add_classes: true
 				}
 			}
