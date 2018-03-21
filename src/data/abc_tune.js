@@ -91,7 +91,7 @@ var Tune = function() {
 		for (var i = 0; i < this.lines.length; i++) {
 			if (this.lines[i].staff) {
 				for (var j = 0; j < this.lines[i].staff.length; j++) {
-					for (v = 0; v < this.lines[i].staff[j].voices.length; v++) {
+					for (var v = 0; v < this.lines[i].staff[j].voices.length; v++) {
 						var voice = this.lines[i].staff[j].voices[v];
 						var hasNote = false;
 						for (var el = 0; el < voice.length; el++) {
