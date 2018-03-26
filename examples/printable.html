@@ -16,11 +16,13 @@
 				canvas_id: "canvas",
 				generate_midi: true,
 				midi_id: "midi",
+				midi_download_id: "midi-download",
 				warnings_id: "warnings",
+				generateDownload: true,
 				abcjsParams: {
 					responsive: "resize",
 					generateInline: true,
-					generateDownload: false
+					generateDownload: true
 				}
 			});
 			ABCJS.renderAbc("logo", "X:1\n%%staffwidth 90\nK:D\nAB c", { responsive: "resize" });
@@ -80,6 +82,31 @@
 			margin-bottom: 30px;
 		}
 
+		.download {
+			margin-top: 30px;
+		}
+
+		.download a {
+			padding: 5px 20px;
+			border-radius: 8px;
+			color: white;
+			background: #0fb4e7;
+			text-decoration: none;
+		}
+
+		.download a:hover {
+			text-decoration: underline;
+			background-color: #0a9ecc;
+		}
+
+		.muted {
+			color: #0fb4e7;
+			text-decoration: none;
+		}
+		.muted:hover {
+			text-decoration: underline;
+		}
+
 		textarea {
 			width: 100%;
 			font-size: 18px;
@@ -124,6 +151,11 @@
 			margin-top: 5px;
 			color: white;
 			background: #0fb4e7;
+		}
+
+		nav button:hover {
+			text-decoration: underline;
+			background-color: #0a9ecc;
 		}
 
 		footer {
@@ -199,9 +231,11 @@
 			<li><i class="fa fa-hand-o-right" aria-hidden="true"></i>
 				Use the music player to test your input for typos.</li>
 			<li><i class="fa fa-hand-o-right" aria-hidden="true"></i>
-				Click the "print" button to save PDF.</li>
+				Click the "print" button to save as PDF.</li>
 			<li><i class="fa fa-hand-o-right" aria-hidden="true"></i>
-				Tell your friends about abcjs!</li>
+				Copy and paste the abc text you've created into your favorite text editor to save for later.</li>
+			<li><i class="fa fa-hand-o-right" aria-hidden="true"></i>
+				Tell your friends about <a href="https://abcjs.net" target="_blank" class="muted">abcjs</a>!</li>
 		</ul>
 		</p>
 	</section>
@@ -226,6 +260,9 @@ eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
 			<button onclick="window.print()">Print</button>
 		</nav>
 		<div id="canvas"></div>
+	</section>
+	<section class="download">
+		<div id="midi-download"></div>
 	</section>
 </main>
 <footer>
