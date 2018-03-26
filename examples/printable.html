@@ -22,7 +22,7 @@
 					responsive: "resize",
 					generateInline: true,
 					generateDownload: true,
-					downloadLabel: '<i class="fa fa-hand-point-right" aria-hidden="true"></i> Download MIDI for "%T" <i class="fa fa-external-link-alt" aria-hidden="true"></i>',
+					downloadLabel: '<i class="fa fa-external-link-alt" aria-hidden="true"></i> Download MIDI for "%T"',
 				}
 			});
 			ABCJS.renderAbc("logo", "X:1\n%%staffwidth 90\nK:D\nAB c", { responsive: "resize" });
@@ -76,6 +76,14 @@
 		.instructions {
 			list-style: none;
 			padding: 0;
+		}
+
+		.svg-inline--fa {
+			opacity: .8;
+		}
+
+		.instructions .svg-inline--fa {
+			opacity: .6;
 		}
 
 		.input {
@@ -161,11 +169,25 @@
 		footer {
 			padding: 1px 0;
 			margin-top: 20px;
+			line-height: 30px;
 		}
 		footer ul {
 			list-style: none;
 			padding: 5px;
 		}
+
+		footer a {
+			color: black;
+			text-decoration: none;
+			background-color: #F3ECE2;
+			padding: 1px 10px;
+			border-radius: 3px;
+			box-shadow: 2px 2px 0px #aaa;
+		}
+		footer a:hover {
+			text-decoration: underline;
+		}
+
 		@media screen and (min-width: 361px) {
 			header h1 {
 				font-size: 35px;
@@ -257,7 +279,7 @@ eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
 	</section>
 	<section class="output">
 		<nav>
-			<button onclick="window.print()">Print</button>
+			<button onclick="window.print()"><i class="fa fa-print" aria-hidden="true"></i> Print</button>
 		</nav>
 		<div id="canvas"></div>
 	</section>
@@ -267,8 +289,8 @@ eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
 </main>
 <footer>
 	<ul>
-		<li>Demo program courtesy of <a href="https://abcjs.net">abcjs</a></li>
-		<li>Written by <a href="https://paulrosen.net">Paul Rosen</a></li>
+		<li>Demo program courtesy of <a href="https://abcjs.net" target="_blank">abcjs</a></li>
+		<li>Written by <a href="https://paulrosen.net" target="_blank">Paul Rosen</a></li>
 		<li>Copyright &copy; 2018 by Paul Rosen</li>
 	</ul>
 </footer>
