@@ -17,6 +17,7 @@
 /*global console */
 
 var spacing = require('../write/abc_spacing');
+var parseCommon = require('../parse/abc_common');
 
 var animation = {};
 
@@ -260,77 +261,147 @@ var animation = {};
 			return arr;
 		}
 
-		var timingEvents = [];
-		function setupEvents(engraver) {
-			var eventHash = {};
-			// The time is the number of measures from the beginning of the piece.
-			var time = 0;
-			var isTiedState = false;
-			for (var line=0;line<engraver.staffgroups.length; line++) {
-				var group = engraver.staffgroups[line];
-				var voices = group.voices;
+		// Gets the line and measure number from the element's classes
+		function getLineAndMeasure(element) {
+			var klass = element.elemset[0].attrs['class'];
+			var arr = klass.split(' ');
+			var lineNum;
+			var measureNum;
+			for (var i = 0; i < arr.length; i++) {
+				var match = /m(\d+)/.exec(arr[i]);
+				if (match)
+					measureNum = match[1];
+				match = /l(\d+)/.exec(arr[i]);
+				if (match)
+					lineNum = match[1];
+			}
+			return { lineNum: lineNum, measureNum: measureNum };
+		}
+
+		// Switches the music from line-based to voice-based.
+		function convertToVoices(staffGroups) {
+			var voices = [];
+			for (var line=0;line<staffGroups.length; line++) {
+				var group = staffGroups[line];
 				var firstStaff = group.staffs[0];
 				var middleC = firstStaff.absoluteY;
-				var top = middleC - firstStaff.top*spacing.STEP;
-				var lastStaff = group.staffs[group.staffs.length-1];
+				var top = middleC - firstStaff.top * spacing.STEP;
+				var lastStaff = group.staffs[group.staffs.length - 1];
 				middleC = lastStaff.absoluteY;
-				var bottom = middleC - lastStaff.bottom*spacing.STEP;
-				var height = bottom - top;
-				var maxVoiceTime = 0;
+				var bottom = middleC - lastStaff.bottom * spacing.STEP;
 				// Put in the notes for all voices, then sort them, then remove duplicates
-				for (var v = 0; v < voices.length; v++) {
-					var voiceTime = time;
-					var elements = voices[v].children;
-					for (var elem=0; elem<elements.length; elem++) {
+				for (var v = 0; v < group.voices.length; v++) {
+					if (v >= voices.length)
+						voices.push([]);
+					var elements = group.voices[v].children;
+					for (var elem = 0; elem < elements.length; elem++) {
 						var element = elements[elem];
 						if (element.hint)
-								break;
+							break;
 						if (element.duration > 0) {
-							// There are 3 possibilities here: the note could stand on its own, the note could be tied to the next,
-							// the note could be tied to the previous, and the note could be tied on both sides.
-							var isTiedToNext = element.startTie;
-							if (isTiedState) {
-								if (!isTiedToNext)
-									isTiedState = false;
-								// If the note is tied on both sides it can just be ignored.
-							} else {
-								// the last note wasn't tied.
-								if (!eventHash["event"+voiceTime])
-									eventHash["event"+voiceTime] = { type: "event", time: voiceTime, top: top, height: height, left: element.x, width: element.w };
-								else {
-									// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
-									eventHash["event"+voiceTime].left = Math.min(eventHash["event"+voiceTime].left, element.x);
-								}
-								if (isTiedToNext)
-									isTiedState = true;
-							}
-							var duration = element.durationClass ? element.durationClass : element.duration;
-							voiceTime += duration;
+							voices[v].push({ type: "event",
+								top: top,
+								height: bottom - top,
+								left: element.x,
+								width: element.w,
+								duration: element.durationClass ? element.durationClass : element.duration,
+								isTiedToNext: element.startTie !== undefined,
+							});
 						}
+						// Only add a bar if it is not repeated; that is, we don't want two bars in a row.
 						if (element.type === 'bar') {
-							if (timingEvents.length === 0 || timingEvents[timingEvents.length-1] !== 'bar') {
+							if (voices[v].length === 0 || voices[v][voices[v].length-1].type !== 'bar') {
 								if (element.elemset && element.elemset.length > 0 && element.elemset[0].attrs) {
-									var klass = element.elemset[0].attrs['class'];
-									var arr = klass.split(' ');
-									var lineNum;
-									var measureNum;
-									for (var i = 0; i < arr.length; i++) {
-										var match = /m(\d+)/.exec(arr[i]);
-										if (match)
-											measureNum = match[1];
-										match = /l(\d+)/.exec(arr[i]);
-										if (match)
-											lineNum = match[1];
-									}
-									eventHash["bar"+voiceTime] = { type: "bar", time: voiceTime, lineNum: lineNum, measureNum: measureNum };
+									var obj = getLineAndMeasure(element);
+									voices[v].push({ type: "bar",
+										barType: element.abcelem.type,
+										startEnding: element.abcelem.startEnding === "1",
+										lineNum: obj.lineNum,
+										measureNum: obj.measureNum
+									});
 								}
 							}
 						}
 					}
-					maxVoiceTime = Math.max(maxVoiceTime, voiceTime);
 				}
-				time = maxVoiceTime;
 			}
+			return voices;
+		}
+
+		// Duplicates the elements that are repeated.
+		function spreadVoices(voices) {
+			var ret = [];
+			for (var i = 0; i < voices.length; i++) {
+				var voice = voices[i];
+				ret.push([]);
+				var startRepeatIndex = 0; // If there is no explicit start repeat, then it starts at the beginning.
+				var endRepeatIndex = -1;
+				for (var j = 0; j < voice.length; j++) {
+					var elem = voice[j];
+					ret[i].push(voice[j]);
+					var endRepeat = (elem.barType === "bar_right_repeat" || elem.barType === "bar_dbl_repeat");
+					var startEnding = elem.startEnding;
+					var startRepeat = (elem.barType === "bar_left_repeat" || elem.barType === "bar_dbl_repeat" || elem.barType === "bar_thick_thin" || elem.barType === "bar_thin_thick" || elem.barType === "bar_thin_thin" || elem.barType === "bar_right_repeat");
+					if (endRepeat) {
+						if (endRepeatIndex === -1)
+							endRepeatIndex = j;
+						for (var k = startRepeatIndex; k <= endRepeatIndex; k++) {
+							ret[i].push(parseCommon.clone(voice[k]));
+						}
+					}
+					if (startEnding)
+						endRepeatIndex = j;
+					if (startRepeat)
+						startRepeatIndex = j+1;
+				}
+			}
+			return ret;
+		}
+
+		function combineVoices(voiceList) {
+			var eventHash = {};
+			for (var v = 0; v < voiceList.length; v++) {
+				var time = 0;
+				var isTiedState = false;
+				for (var i = 0; i < voiceList[v].length; i++) {
+					var item = voiceList[v][i];
+					item.time = time;
+					if (item.type === "event") {
+						var isTiedToNext = item.isTiedToNext;
+						if (isTiedState) {
+							if (!isTiedToNext)
+								isTiedState = false;
+							// If the note is tied on both sides it can just be ignored.
+						} else {
+							// the last note wasn't tied.
+							if (!eventHash["event"+time])
+								eventHash["event"+time] = item;
+							else {
+								// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
+								eventHash["event"+time].left = Math.min(eventHash["event"+time].left, item.left);
+							}
+							if (isTiedToNext)
+								isTiedState = true;
+						}
+						time += item.duration;
+					} else {
+						eventHash["bar"+time] = item;
+					}
+				}
+			}
+			return eventHash;
+		}
+
+		var timingEvents = [];
+		function setupEvents(engraver) {
+			// First, rearrange the elements to be in voice order (that is, remove the lines.)
+			// Then, for each voice, duplicate the events needed for the repeats.
+			// Then go through each event array and fill in the timingEvents.
+			var voiceList = convertToVoices(engraver.staffgroups);
+			voiceList = spreadVoices(voiceList);
+
+			var eventHash = combineVoices(voiceList);
+
 			// now we have all the events, but if there are multiple voices then there may be events out of order or duplicated, so normalize it.
 			timingEvents = makeSortedArray(eventHash);
 			totalBeats = timingEvents[timingEvents.length-1].time / beatLength;
