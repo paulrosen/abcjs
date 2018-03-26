@@ -1,3 +1,11 @@
+# Version 4.0.1
+
+## Bug fixes:
+
+* Respect repeats in animation.
+
+* Fix crash when using metronome intro in minified version.
+
 # Version 4.0.0
 
 ## Breaking Changes:

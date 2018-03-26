@@ -11,8 +11,8 @@
     "build:basic": "webpack --env.type=basic",
     "build:midi": "webpack --env.type=midi",
     "build:plugin": "webpack --env.type=plugin",
-    "build:grease": "cat src/plugin/greasemonkey.js bin/abcjs_plugin_4.0.0-min.js > bin/abcjs_plugin_4.0.0.user.js",
-    "fix-versions": "./fix-versions.sh 4.0.0",
+    "build:grease": "cat src/plugin/greasemonkey.js bin/abcjs_plugin_4.0.1-min.js > bin/abcjs_plugin_4.0.1.user.js",
+    "fix-versions": "./fix-versions.sh 4.0.1",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -39,8 +39,8 @@
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.6.1",
-    "eslint": "^4.18.2",
-    "uglifyjs-webpack-plugin": "^1.2.3",
+    "eslint": "^4.19.1",
+    "uglifyjs-webpack-plugin": "^1.2.4",
     "webpack": "^3.11.0"
   },
   "dependencies": {
