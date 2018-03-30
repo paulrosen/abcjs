@@ -994,6 +994,21 @@ var parseDirective = {};
 				switch (cmd) {
 					case "titlefont":
 					case "gchordfont":
+					case "composerfont":
+					case "footerfont":
+					case "headerfont":
+					case "historyfont":
+					case "infofont":
+					case "measurefont":
+					case "partsfont":
+					case "repeatfont":
+					case "subtitlefont":
+					case "tempofont":
+					case "textfont":
+					case "voicefont":
+					case "vocalfont":
+					case "wordsfont":
+					case "annotationfont":
 						getChangingFont(cmd, tokens, value);
 						break;
 					case "scale":
