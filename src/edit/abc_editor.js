@@ -469,8 +469,6 @@ Editor.prototype.highlight = function(abcelem, tuneNumber, classes) {
 	var offset = (tuneNumber !== undefined) ? this.startPos[tuneNumber] + tuneNumber : 0;
 
   this.editarea.setSelection(offset + abcelem.startChar, offset + abcelem.endChar);
-  if (this.abcjsParams.clickListener)
-	  this.abcjsParams.clickListener(abcelem, tuneNumber, classes);
 };
 
 Editor.prototype.pause = function(shouldPause) {
