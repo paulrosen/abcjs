@@ -30,6 +30,10 @@
 	box-sizing: border-box;
 }
 
+.fa5 .abcjs-inline-midi .abcjs-btn {
+	font-family: "Font Awesome 5 Free";
+	font-weight: 900;
+}
 .abcjs-inline-midi .abcjs-btn:hover {
 	color: #cccccc;
 }
@@ -139,10 +143,11 @@
 }
 .abcjs-large .abcjs-midi-progress-background {
 	height: 20px;
+	border: 4px solid #cccccc;
 }
 .abcjs-large .abcjs-midi-progress-indicator {
 	height: 28px;
-	top: -6px;
+	top: -8px;
 	width: 40px;
 }
 .abcjs-large .abcjs-midi-clock {
