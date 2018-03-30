@@ -1012,7 +1012,7 @@ var Tune = function() {
 			var voiceTime = time;
 			var voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 			var startingRepeatElem = 0;
-			var endingRepeatElem;
+			var endingRepeatElem = -1;
 			var elements = voices[v];
 			for (var elem = 0; elem < elements.length; elem++) {
 				var element = elements[elem].elem;
@@ -1026,6 +1026,8 @@ var Tune = function() {
 					var startEnding = (element.abcelem.startEnding === '1');
 					var startRepeat = (barType === "bar_left_repeat" || barType === "bar_dbl_repeat" || barType === "bar_thick_thin" || barType === "bar_thin_thick" || barType === "bar_thin_thin" || barType === "bar_right_repeat");
 					if (endRepeat) {
+						if (endingRepeatElem === -1)
+							endingRepeatElem = elem;
 						for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
 							element = elements[el2].elem;
 							ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, timeDivider, isTiedState);
@@ -1033,6 +1035,7 @@ var Tune = function() {
 							voiceTime += ret.duration;
 							voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 						}
+						endingRepeatElem = -1;
 					}
 					if (startEnding)
 						endingRepeatElem = elem;
