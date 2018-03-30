@@ -340,7 +340,7 @@ Editor.prototype.modelChanged = function() {
     var textprinter = new TextPrinter(this.target, true);
     textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
   }
-  this.engraver_controller.addSelectListener(this);
+  this.engraver_controller.addSelectListener(this.highlight.bind(this));
   this.updateSelection();
   this.bReentry = false;
 };
@@ -464,11 +464,13 @@ Editor.prototype.isDirty = function() {
 	return this.editarea.initialText !== this.editarea.getString();
 };
 
-Editor.prototype.highlight = function(abcelem, tuneNumber) {
+Editor.prototype.highlight = function(abcelem, tuneNumber, classes) {
 	// TODO-PER: The marker appears to get off by one for each tune parsed. I'm not sure why, but adding the tuneNumber in corrects it for the time being.
 	var offset = (tuneNumber !== undefined) ? this.startPos[tuneNumber] + tuneNumber : 0;
 
   this.editarea.setSelection(offset + abcelem.startChar, offset + abcelem.endChar);
+  if (this.abcjsParams.clickListener)
+	  this.abcjsParams.clickListener(abcelem, tuneNumber, classes);
 };
 
 Editor.prototype.pause = function(shouldPause) {
