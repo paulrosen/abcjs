@@ -71,13 +71,14 @@ var midi = {};
 		return label.replace(/%T/g, title);
 	}
 
-	midi.generateMidiControls = function(tune, midiParams, midi, index) {
+	midi.generateMidiControls = function(tune, midiParams, midi, index, stopOld) {
 		if (!('performance' in window))
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">ERROR: this browser doesn\'t support window.performance</div>';
 		if (midi.midiInlineInitialized === 'not loaded')
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">MIDI NOT PRESENT</div>';
 
-		stopCurrentlyPlayingTune();
+		if (stopOld)
+			stopCurrentlyPlayingTune();
 		var title = tune.metaText && tune.metaText.title ? tune.metaText.title : 'Untitled';
 		var options = midiParams.inlineControls || {};
 		if (options.standard === undefined) options.standard = true;

@@ -122,13 +122,13 @@ var tunebook = {};
 			if (typeof(div) === "string")
 				div = document.getElementById(div);
 			if (div) {
-				div.innerHTML = "";
 				if (currentTune >= 0 && currentTune < book.tunes.length) {
 					abcParser.parse(book.tunes[currentTune].abc, params);
 					var tune = abcParser.getTune();
 					ret.push(tune);
 					callback(div, tune, i);
-				}
+				} else
+					div.innerHTML = "";
 			}
 			currentTune++;
 		}

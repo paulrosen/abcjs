@@ -121,6 +121,7 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
     }
     var origPaddingTop = ep.paddingtop;
     var origPaddingBottom = ep.paddingbottom;
+    div.innerHTML = "";
     for (var k = 0; k < tunes.length; k++) {
         var lineEl = document.createElement("div");
         div.appendChild(lineEl);

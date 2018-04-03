@@ -27,13 +27,15 @@ var abcMidiUiGenerator;
 		for (var i = 0; i < tunes.length; i++) {
 			var midiInst = midiCreate(tunes[i], abcjsParams);
 
+			var stopOld = !inlineMidiEl || inlineMidiEl.innerHTML.indexOf("abcjs-midi-current") >= 0;
+
 			if (abcjsParams.generateInline && abcjsParams.generateDownload) {
 				downloadMidiHtml += midi.generateMidiDownloadLink(tunes[i], abcjsParams, midiInst.download, i);
-				inlineMidiHtml += midi.generateMidiControls(tunes[i], abcjsParams, midiInst.inline, i);
+				inlineMidiHtml += midi.generateMidiControls(tunes[i], abcjsParams, midiInst.inline, i, stopOld);
 			} else if (abcjsParams.generateInline)
 				inlineMidiHtml += midi.generateMidiControls(tunes[i], abcjsParams, midiInst, i);
 			else
-				downloadMidiHtml += midi.generateMidiDownloadLink(tunes[i], abcjsParams, midiInst, i);
+				downloadMidiHtml += midi.generateMidiDownloadLink(tunes[i], abcjsParams, midiInst, i, stopOld);
 		}
 		if (abcjsParams.generateDownload) {
 			if (downloadMidiEl)

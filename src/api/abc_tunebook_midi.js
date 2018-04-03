@@ -59,7 +59,8 @@ var renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
         var midiInst = midiCreate(tune, params);
         if (params.generateInline) {
             var inlineMidi = midiInst.inline ? midiInst.inline : midiInst;
-            html += midi.generateMidiControls(tune, params, inlineMidi, index);
+            var stopOld = div.innerHTML.indexOf("abcjs-midi-current") >= 0;
+            html += midi.generateMidiControls(tune, params, inlineMidi, index, stopOld);
         }
         if (params.generateDownload) {
             var downloadMidi = midiInst.download ? midiInst.download : midiInst;
