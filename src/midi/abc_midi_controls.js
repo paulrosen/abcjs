@@ -77,6 +77,7 @@ var midi = {};
 		if (midi.midiInlineInitialized === 'not loaded')
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">MIDI NOT PRESENT</div>';
 
+		stopCurrentlyPlayingTune();
 		var title = tune.metaText && tune.metaText.title ? tune.metaText.title : 'Untitled';
 		var options = midiParams.inlineControls || {};
 		if (options.standard === undefined) options.standard = true;
