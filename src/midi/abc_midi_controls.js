@@ -421,7 +421,21 @@ var midi = {};
 
 	midi.stopPlaying = function() {
 		stopCurrentlyPlayingTune();
+		var playingEl = document.querySelector(".abcjs-midi-current");
+		if (playingEl) {
+			resetProgress(playingEl);
+			var startBtn = find(playingEl, "abcjs-midi-start");
+			if (startBtn)
+				removeClass(startBtn, "abcjs-pushed");
+		}
 	};
+
+	function resetProgress(parent) {
+		var progressIndicator = find(parent, "abcjs-midi-progress-indicator");
+		progressIndicator.style.left = "0px";
+		var clock = find(parent, "abcjs-midi-clock");
+		clock.innerHTML = " 0:00";
+	}
 
 	function onSelection(target) {
 		toggleClass(target, 'abcjs-pushed');
@@ -436,10 +450,7 @@ var midi = {};
 
 		function onSuccess() {
 			addClass(parent, 'abcjs-midi-current');
-			var progressIndicator = find(parent, "abcjs-midi-progress-indicator");
-			progressIndicator.style.left = "0px";
-			var clock = find(parent, "abcjs-midi-clock");
-			clock.innerHTML = " 0:00";
+			resetProgress(parent);
 			if (callback)
 				callback();
 		}
