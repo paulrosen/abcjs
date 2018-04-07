@@ -40,6 +40,8 @@ function renderOne(div, tune, params, tuneNumber) {
         div.style.overflowY = "auto";
         div = div.children[0]; // The music should be rendered in the inner div.
     }
+    else
+	    div.innerHTML = "";
     /* jshint -W064 */ var paper = Raphael(div, width, 400); /* jshint +W064 */
     var engraver_controller = new EngraverController(paper, params);
     engraver_controller.engraveABC(tune, tuneNumber);
