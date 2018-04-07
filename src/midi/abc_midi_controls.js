@@ -71,6 +71,14 @@ var midi = {};
 		return label.replace(/%T/g, title);
 	}
 
+	midi.deviceSupportsMidi = function() {
+		if (!('performance' in window))
+			return false;
+		if (midi.midiInlineInitialized === 'not loaded')
+			return false;
+		return true;
+	};
+
 	midi.generateMidiControls = function(tune, midiParams, midi, index, stopOld) {
 		if (!('performance' in window))
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">ERROR: this browser doesn\'t support window.performance</div>';
