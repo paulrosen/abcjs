@@ -947,6 +947,8 @@ var Tune = function() {
 		if (element.hint)
 			return { isTiedState: undefined, duration: 0 };
 		var realDuration = element.durationClass ? element.durationClass : element.duration;
+		if (element.abcelem.rest && element.abcelem.rest.type === "spacer")
+			realDuration = 0;
 		if (realDuration > 0) {
 			var isTiedToNext = element.startTie;
 			if (isTiedState !== undefined) {
