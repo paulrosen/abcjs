@@ -18,7 +18,7 @@ var parseKeyVoice = {};
 		tune = tune_;
 	};
 
-	parseKeyVoice.standardKey = function(keyName, root, acc) {
+	parseKeyVoice.standardKey = function(keyName, root, acc, localTranspose) {
 		var key1sharp = {acc: 'sharp', note: 'f'};
 		var key2sharp = {acc: 'sharp', note: 'c'};
 		var key3sharp = {acc: 'sharp', note: 'g'};
@@ -165,7 +165,7 @@ var parseKeyVoice = {};
 			'Gbm': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ]
 		};
 
-		return transpose.keySignature(multilineVars, keys, keyName, root, acc);
+		return transpose.keySignature(multilineVars, keys, keyName, root, acc, localTranspose);
 	};
 
 	var clefLines = {
@@ -408,14 +408,14 @@ var parseKeyVoice = {};
 							}
 						}
 						// Be sure that the key specified is in the list: not all keys are physically possible, like Cbmin.
-						if (parseKeyVoice.standardKey(key, retPitch.token, acc) === undefined) {
+						if (parseKeyVoice.standardKey(key, retPitch.token, acc, 0) === undefined) {
 							warn("Unsupported key signature: " + key, str, 0);
 							return ret;
 						}
 					}
 					// We need to do a deep copy because we are going to modify it
 					var oldKey = parseKeyVoice.deepCopyKey(multilineVars.key);
-					multilineVars.key = parseKeyVoice.deepCopyKey(parseKeyVoice.standardKey(key, retPitch.token, acc));
+					multilineVars.key = parseKeyVoice.deepCopyKey(parseKeyVoice.standardKey(key, retPitch.token, acc, 0));
 					multilineVars.key.mode = mode;
 					if (oldKey) {
 						// Add natural in all places that the old key had an accidental.
@@ -461,10 +461,19 @@ var parseKeyVoice = {};
 				for (var j = 0; j < multilineVars.key.accidentals.length && !found; j++) {
 					if (multilineVars.key.accidentals[j].note === accs.accs[i].note) {
 						found = true;
-						multilineVars.key.accidentals[j].acc = accs.accs[i].acc;
+						if (multilineVars.key.accidentals[j].acc !== accs.accs[i].acc) {
+							// If the accidental is different, then replace it. If it is the same, then the declaration was redundant, so just ignore it.
+							multilineVars.key.accidentals[j].acc = accs.accs[i].acc;
+							if (!multilineVars.key.explicitAccidentals)
+								multilineVars.key.explicitAccidentals = [];
+							multilineVars.key.explicitAccidentals.push(accs.accs[i]);
+						}
 					}
 				}
 				if (!found) {
+					if (!multilineVars.key.explicitAccidentals)
+						multilineVars.key.explicitAccidentals = [];
+					multilineVars.key.explicitAccidentals.push(accs.accs[i]);
 					multilineVars.key.accidentals.push(accs.accs[i]);
 					if (multilineVars.key.impliedNaturals) {
 						for (var kkk = 0; kkk < multilineVars.key.impliedNaturals.length; kkk++) {
@@ -648,6 +657,27 @@ var parseKeyVoice = {};
 			}
 			start += attr.len;
 		};
+		var addNextNoteTokenToVoiceInfo = function(id, name) {
+			var noteToTransposition = {
+				"_B": 2,
+				"_E": 9,
+				"_b": -10,
+				"_e": -3
+			};
+			var attr = tokenizer.getVoiceToken(line, start, end);
+			if (attr.warn !== undefined)
+				warn("Expected one of (_B, _E, _b, _e) for " + name + " in voice: " + attr.warn, line, start);
+			else if (attr.token.length === 0 && line.charAt(start) !== '"')
+				warn("Expected one of (_B, _E, _b, _e) for " + name + " in voice", line, start);
+			else {
+				var t = noteToTransposition[attr.token];
+				if (!t)
+					warn("Expected one of (_B, _E, _b, _e) for " + name + " in voice", line, start);
+				else
+					multilineVars.voices[id][name] = t;
+			}
+			start += attr.len;
+		};
 
 		//Then the following items can occur in any order:
 		while (start < end) {
@@ -771,6 +801,9 @@ var parseKeyVoice = {};
 						break;
 					case 'scale':
 						addNextTokenToVoiceInfo(id, 'scale', 'number');
+						break;
+					case 'score':
+						addNextNoteTokenToVoiceInfo(id, 'scoreTranspose');
 						break;
 					case 'transpose':
 						addNextTokenToVoiceInfo(id, 'transpose', 'number');

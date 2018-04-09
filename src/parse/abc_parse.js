@@ -835,8 +835,28 @@ var Parse = function() {
 		var params = { startChar: -1, endChar: -1};
 		if (multilineVars.partForNextLine.length)
 			params.part = multilineVars.partForNextLine;
-		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? parseCommon.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : parseCommon.clone(multilineVars.clef) ;
-		params.key = parseKeyVoice.deepCopyKey(multilineVars.key);
+		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? parseCommon.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : parseCommon.clone(multilineVars.clef);
+		var scoreTranspose = multilineVars.currentVoice ? multilineVars.currentVoice.scoreTranspose : 0;
+		params.key = parseKeyVoice.standardKey(multilineVars.key.root+multilineVars.key.acc+multilineVars.key.mode, multilineVars.key.root, multilineVars.key.acc, scoreTranspose);
+		params.key.mode = multilineVars.key.mode;
+		if (multilineVars.key.impliedNaturals)
+			params.key.impliedNaturals = multilineVars.key.impliedNaturals;
+		if (multilineVars.key.explicitAccidentals) {
+			for (var i = 0; i < multilineVars.key.explicitAccidentals.length; i++) {
+				var found = false;
+				for (var j = 0; j < params.key.accidentals.length; j++) {
+					if (params.key.accidentals[j].note === multilineVars.key.explicitAccidentals[i].note) {
+						// If the note is already in the list, override it with the new value
+						params.key.accidentals[j].acc = multilineVars.key.explicitAccidentals[i].acc;
+						found = true;
+					}
+				}
+				if (!found)
+					params.key.accidentals.push(multilineVars.key.explicitAccidentals[i]);
+			}
+		}
+		if (params.key.explicitAccidentals)
+			delete params.key.explicitAccidentals;
 		parseKeyVoice.addPosToKey(params.clef, params.key);
 		if (multilineVars.meter !== null) {
 			if (multilineVars.currentVoice) {
@@ -883,6 +903,8 @@ var Parse = function() {
 		if (multilineVars.barNumbers === 0 && isFirstVoice && multilineVars.currBarNumber !== 1)
 			params.barNumber = multilineVars.currBarNumber;
 		tune.startNewLine(params);
+		if (multilineVars.key.impliedNaturals)
+			delete multilineVars.key.impliedNaturals;
 
 		multilineVars.partForNextLine = "";
 	}

@@ -38,14 +38,19 @@ var keyIndex = {
 var newKey = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 var newKeyMinor = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
-transpose.keySignature = function(multilineVars, keys, keyName, root, acc) {
+transpose.keySignature = function(multilineVars, keys, keyName, root, acc, localTranspose) {
+	if (!localTranspose) localTranspose = 0;
+	multilineVars.localTransposeVerticalMovement = 0;
+	multilineVars.localTransposePreferFlats = false;
 	var k = keys[keyName];
-	if (!k) return k;
-	if (!multilineVars.globalTranspose)
+	if (!k) return multilineVars.key; // If the key isn't in the list, it is non-standard. We won't attempt to transpose it.
+	multilineVars.localTranspose = (multilineVars.globalTranspose ? multilineVars.globalTranspose : 0) + localTranspose;
+
+	if (!multilineVars.localTranspose)
 		return { accidentals: k, root: root, acc: acc };
 	multilineVars.globalTransposeOrigKeySig = k;
-	if (multilineVars.globalTranspose % 12 === 0) {
-		multilineVars.globalTransposeVerticalMovement = (multilineVars.globalTranspose / 12) * 7;
+	if (multilineVars.localTranspose % 12 === 0) {
+		multilineVars.localTransposeVerticalMovement = (multilineVars.localTranspose / 12) * 7;
 		return { accidentals: k, root: root, acc: acc };
 	}
 
@@ -55,16 +60,16 @@ transpose.keySignature = function(multilineVars, keys, keyName, root, acc) {
 		keyName = keyName.substr(2);
 	} else
 		keyName = keyName.substr(1);
-	var index = keyIndex[baseKey] + multilineVars.globalTranspose;
+	var index = keyIndex[baseKey] + multilineVars.localTranspose;
 	while (index < 0) index += 12;
 	if (index > 11) index = index % 12;
 	var newKeyName = (keyName[0] === 'm' ? newKeyMinor[index] : newKey[index]);
 	var transposedKey = newKeyName + keyName;
 	var newKeySig = keys[transposedKey];
 	if (newKeySig.length > 0 && newKeySig[0].acc === 'flat')
-		multilineVars.globalTransposePreferFlats = true;
+		multilineVars.localTransposePreferFlats = true;
 	var distance = transposedKey.charCodeAt(0) - baseKey.charCodeAt(0);
-	if (multilineVars.globalTranspose > 0) {
+	if (multilineVars.localTranspose > 0) {
 		if (distance < 0)
 			distance += 7;
 		else if (distance === 0) {
@@ -76,7 +81,7 @@ transpose.keySignature = function(multilineVars, keys, keyName, root, acc) {
 			if (baseKey[1] === '#' ||  transposedKey[1] === 'b')
 				distance += 7;
 		}
-	} else if (multilineVars.globalTranspose < 0) {
+	} else if (multilineVars.localTranspose < 0) {
 		if (distance > 0)
 			distance -= 7;
 		else if (distance === 0) {
@@ -87,10 +92,10 @@ transpose.keySignature = function(multilineVars, keys, keyName, root, acc) {
 		}
 	}
 
-	if (multilineVars.globalTranspose > 0)
-		multilineVars.globalTransposeVerticalMovement = distance + Math.floor(multilineVars.globalTranspose / 12) * 7;
+	if (multilineVars.localTranspose > 0)
+		multilineVars.localTransposeVerticalMovement = distance + Math.floor(multilineVars.localTranspose / 12) * 7;
 	else
-		multilineVars.globalTransposeVerticalMovement = distance + Math.ceil(multilineVars.globalTranspose / 12) * 7;
+		multilineVars.localTransposeVerticalMovement = distance + Math.ceil(multilineVars.localTranspose / 12) * 7;
 	return { accidentals: newKeySig, root: newKeyName[0], acc: newKeyName.length > 1 ? newKeyName[1] : "" };
 };
 
@@ -98,8 +103,8 @@ var sharpChords = [ 'C', 'C♯', 'D', "D♯", 'E', 'F', "F♯", 'G', 'G♯', 'A'
 var flatChords = [ 'C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
 
 transpose.chordName = function(multilineVars, chord) {
-	if (multilineVars.globalTranspose && (multilineVars.globalTranspose % 12 !== 0)) { // The chords are the same if it is an exact octave change.
-		var transposeFactor = multilineVars.globalTranspose;
+	if (multilineVars.localTranspose && (multilineVars.localTranspose % 12 !== 0)) { // The chords are the same if it is an exact octave change.
+		var transposeFactor = multilineVars.localTranspose;
 		while (transposeFactor < 0) transposeFactor += 12;
 		if (transposeFactor > 11) transposeFactor = transposeFactor % 12;
 		chord = chord.replace(/C♭/g, "`~11`");
@@ -129,7 +134,7 @@ transpose.chordName = function(multilineVars, chord) {
 				var chordNum = parseInt(arr[i].substr(1),10);
 				chordNum += transposeFactor;
 				if (chordNum > 11) chordNum -= 12;
-				arr[i] = multilineVars.globalTransposePreferFlats ? flatChords[chordNum] : sharpChords[chordNum];
+				arr[i] = multilineVars.localTransposePreferFlats ? flatChords[chordNum] : sharpChords[chordNum];
 			}
 		}
 		chord = arr.join("");
@@ -183,12 +188,12 @@ var accidentals2 = {
 };
 transpose.note = function(multilineVars, el) {
 	// the "el" that is passed in has el.accidental, and el.pitch. "pitch" is the vertical position (0=middle C)
-	// globalTranspose is the number of half steps
-	// globalTransposeVerticalMovement is the vertical distance to move.
-	if (!multilineVars.globalTranspose)
+	// localTranspose is the number of half steps
+	// localTransposeVerticalMovement is the vertical distance to move.
+	if (!multilineVars.localTranspose)
 		return;
 	var origPitch = el.pitch;
-	el.pitch = el.pitch + multilineVars.globalTransposeVerticalMovement;
+	el.pitch = el.pitch + multilineVars.localTransposeVerticalMovement;
 
 	if (el.accidental) {
 		var ret = accidentalChange(origPitch, el.pitch, el.accidental, multilineVars.globalTransposeOrigKeySig, multilineVars.key);

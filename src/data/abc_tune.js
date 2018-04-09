@@ -646,6 +646,7 @@ var Tune = function() {
 		if (type === 'key') {
 			impliedNaturals = hashParams2.impliedNaturals;
 			delete hashParams2.impliedNaturals;
+			delete hashParams2.explicitAccidentals;
 		}
 
 		// Clone the object because it will be sticking around for the next line and we don't want the extra fields in it.
@@ -790,6 +791,11 @@ var Tune = function() {
 				This.appendElement('scale', null, null, { size: params.scale} );
 		};
 		var createStaff = function(params) {
+			if (params.key && params.key.impliedNaturals) {
+				params.key.accidentals = params.key.accidentals.concat(params.key.impliedNaturals);
+				delete params.key.impliedNaturals;
+			}
+
 			This.lines[This.lineNum].staff[This.staffNum] = {voices: [ ], clef: params.clef, key: params.key, workingClef: params.clef };
 			if (params.stafflines !== undefined) {
 				This.lines[This.lineNum].staff[This.staffNum].clef.stafflines = params.stafflines;
