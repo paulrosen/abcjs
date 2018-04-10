@@ -472,7 +472,10 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
 			dot = 0;
 			break;
     case "rest":
-      c = this.chartable.rest[-durlog];
+	    if (elem.style === "rhythm") // special case for rhythm: rests are a handy way to express the rhythm.
+		    c = this.chartable.rhythm[-durlog];
+	    else
+		    c = this.chartable.rest[-durlog];
       elem.averagepitch=restpitch;
       elem.minpitch=restpitch;
       elem.maxpitch=restpitch;
