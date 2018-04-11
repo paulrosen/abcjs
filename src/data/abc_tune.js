@@ -1024,6 +1024,12 @@ var Tune = function() {
 			var elements = voices[v];
 			for (var elem = 0; elem < elements.length; elem++) {
 				var element = elements[elem].elem;
+				if (element.abcelem.el_type === "tempo") {
+					var bpm = this.getBpm(element.abcelem);
+					var beatLength = this.getBeatLength();
+					var beatsPerSecond = bpm / 60;
+					timeDivider = beatLength * beatsPerSecond;
+				}
 				var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, timeDivider, isTiedState);
 				isTiedState = ret.isTiedState;
 				voiceTime += ret.duration;
@@ -1070,15 +1076,26 @@ var Tune = function() {
 		return { top: top, height: height };
 	}
 
-	this.setTiming = function (bpm, measuresOfDelay) {
-		var beatLength = this.getBeatLength();
-		if (!bpm && this.metaText && this.metaText.tempo) {
-			bpm = this.metaText.tempo.bpm;
-			var statedBeatLength = this.metaText.tempo.duration && this.metaText.tempo.duration.length > 0 ? this.metaText.tempo.duration[0] : beatLength;
+	this.getBpm = function(tempo) {
+		var bpm;
+		if (tempo) {
+			bpm = tempo.bpm;
+			var beatLength = this.getBeatLength();
+			var statedBeatLength = tempo.duration && tempo.duration.length > 0 ? tempo.duration[0] : beatLength;
 			bpm = bpm * statedBeatLength / beatLength;
 		}
 		if (!bpm)
 			bpm = 180;
+
+		return bpm;
+	};
+
+	this.setTiming = function (bpm, measuresOfDelay) {
+		var tempo = this.metaText ? this.metaText.tempo : null;
+		if (!bpm)
+			bpm = this.getBpm(tempo);
+
+		var beatLength = this.getBeatLength();
 		var beatsPerSecond = bpm / 60;
 
 		var measureLength = this.getBarLength();
