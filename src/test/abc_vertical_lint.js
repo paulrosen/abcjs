@@ -24,9 +24,27 @@ var verticalLint = function(tunes) {
 	function fixed2(num) {
 		if (num === undefined)
 			return "undefined";
+		if (typeof num !== "number")
+			return num;
 		var str = num.toFixed(2);
 		if (str.indexOf(".00") > 0)
-			return ''+num;
+			return str.split('.')[0];
+		if (str[str.length-1] === '0')
+			str = str.substr(0,str.length-1);
+		return str;
+	}
+	function fixed4(num) {
+		if (num === undefined)
+			return "undefined";
+		if (typeof num !== "number")
+			return num;
+		var str = num.toFixed(4);
+		if (str.indexOf(".0000") > 0)
+			return str.split('.')[0];
+		if (str[str.length-1] === '0')
+			str = str.substr(0,str.length-1);
+		if (str[str.length-1] === '0')
+			str = str.substr(0,str.length-1);
 		if (str[str.length-1] === '0')
 			str = str.substr(0,str.length-1);
 		return str;
@@ -81,7 +99,7 @@ var verticalLint = function(tunes) {
 				return "Time Sig (odd): " + obj.elem.join('').replace(/symbol /g,"");
 			}
 		} else if (obj.$type.indexOf("note") === 0 || obj.$type.indexOf("rest") === 0) {
-			return obj.$type + " " + obj.duration + ' ' + obj.elem.join(" ").replace(/symbol /g,"").replace(/\n/g, "\\n");
+			return obj.$type + " " + fixed4(obj.duration) + ' ' + obj.elem.join(" ").replace(/symbol /g,"").replace(/\n/g, "\\n");
 		} else if (obj.$type === 'bar')
 			return "Bar";
 		else if (obj.$type === 'part')
@@ -239,7 +257,7 @@ var verticalLint = function(tunes) {
 		}
 		for (i = 0; i < staffGroup.voices.length; i++) {
 			var voice = staffGroup.voices[i];
-			var obj = { bottom: voice.bottom, top: voice.top, specialY: setSpecialY(voice), width: voice.w, startX: voice.startX, voiceChildren: [], otherChildren: [], beams: [] };
+			var obj = { bottom: voice.bottom, top: fixed2(voice.top), specialY: setSpecialY(voice), width: fixed2(voice.w), startX: voice.startX, voiceChildren: [], otherChildren: [], beams: [] };
 			for (var j = 0; j < voice.children.length; j++) {
 				var child = voice.children[j];
 				var type = child.type;
@@ -280,6 +298,8 @@ var verticalLint = function(tunes) {
 							var value = otherChild[key];
 							if (typeof value === "object")
 								ch.params[key] = "object";
+							else if (typeof value === "number")
+								ch.params[key] = fixed2(value);
 							else
 								ch.params[key] = value;
 						}
