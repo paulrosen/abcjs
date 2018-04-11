@@ -203,7 +203,7 @@ var sequence;
 									// The important part is where there is a start repeat, and end repeat, or a first ending.
 									var endRepeat = (elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat");
 									var startEnding = (elem.startEnding === '1');
-									var startRepeat = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat" || elem.type === "bar_thick_thin" || elem.type === "bar_thin_thick" || elem.type === "bar_thin_thin" || elem.type === "bar_right_repeat");
+									var startRepeat = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat" || elem.type === "bar_right_repeat");
 									if (endRepeat) {
 										var s = startRepeatPlaceholder[voiceNumber];
 										if (!s) s = 0; // If there wasn't a left repeat, then we repeat from the beginning.

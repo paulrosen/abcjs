@@ -1038,7 +1038,7 @@ var Tune = function() {
 					var barType = element.abcelem.type;
 					var endRepeat = (barType === "bar_right_repeat" || barType === "bar_dbl_repeat");
 					var startEnding = (element.abcelem.startEnding === '1');
-					var startRepeat = (barType === "bar_left_repeat" || barType === "bar_dbl_repeat" || barType === "bar_thick_thin" || barType === "bar_thin_thick" || barType === "bar_thin_thin" || barType === "bar_right_repeat");
+					var startRepeat = (barType === "bar_left_repeat" || barType === "bar_dbl_repeat" || barType === "bar_right_repeat");
 					if (endRepeat) {
 						if (endingRepeatElem === -1)
 							endingRepeatElem = elem;
