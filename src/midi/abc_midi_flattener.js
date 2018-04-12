@@ -266,10 +266,7 @@ var flatten;
 		}
 
 		if (elem.startTriplet) {
-			if (elem.startTriplet === 2)
-				multiplier = 3/2;
-			else
-				multiplier=(elem.startTriplet-1)/elem.startTriplet;
+			multiplier = elem.tripletMultiplier;
 		}
 
 		var duration = (elem.durationClass ? elem.durationClass : elem.duration) *multiplier;

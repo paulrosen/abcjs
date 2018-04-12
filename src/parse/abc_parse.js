@@ -369,6 +369,16 @@ var Parse = function() {
 		return [ret.len+retRep.len, ret.token, retRep.token];
 	};
 
+	var tripletQ = {
+		2: 3,
+		3: 2,
+		4: 3,
+		5: 2, // TODO-PER: not handling 6/8 rhythm yet
+		6: 2,
+		7: 2, // TODO-PER: not handling 6/8 rhythm yet
+		8: 3,
+		9: 2 // TODO-PER: not handling 6/8 rhythm yet
+	};
 	var letter_to_open_slurs_and_triplets =  function(line, i) {
 		// consume spaces, and look for all the open parens. If there is a number after the open paren,
 		// that is a triplet. Otherwise that is a slur. Collect all the slurs and the first triplet.
@@ -381,25 +391,37 @@ var Parse = function() {
 						warn("Can't nest triplets", line, i);
 					else {
 						ret.triplet = line.charAt(i+1) - '0';
+						ret.tripletQ = tripletQ[ret.triplet];
+						ret.num_notes = ret.triplet;
 						if (i+2 < line.length && line.charAt(i+2) === ':') {
-							// We are expecting "(p:q:r" or "(p:q" or "(p::r" we are only interested in the first number (p) and the number of notes (r)
+							// We are expecting "(p:q:r" or "(p:q" or "(p::r"
+							// That is: "put p notes into the time of q for the next r notes"
 							// if r is missing, then it is equal to p.
+							// if q is missing, it is determined from this table:
+							// (2 notes in the time of 3
+							// (3 notes in the time of 2
+							// (4 notes in the time of 3
+							// (5 notes in the time of n | if time sig is (6/8, 9/8, 12/8), n=3, else n=2
+							// (6 notes in the time of 2
+							// (7 notes in the time of n
+							// (8 notes in the time of 3
+							// (9 notes in the time of n
 							if (i+3 < line.length && line.charAt(i+3) === ':') {
+								// The second number, 'q', is not present.
 								if (i+4 < line.length && (line.charAt(i+4) >= '1' && line.charAt(i+4) <= '9')) {
 									ret.num_notes = line.charAt(i+4) - '0';
 									i += 3;
 								} else
 									warn("expected number after the two colons after the triplet to mark the duration", line, i);
 							} else if (i+3 < line.length && (line.charAt(i+3) >= '1' && line.charAt(i+3) <= '9')) {
-								// ignore this middle number
+								ret.tripletQ = line.charAt(i+3) - '0';
 								if (i+4 < line.length && line.charAt(i+4) === ':') {
 									if (i+5 < line.length && (line.charAt(i+5) >= '1' && line.charAt(i+5) <= '9')) {
 										ret.num_notes = line.charAt(i+5) - '0';
 										i += 4;
 									}
 								} else {
-									ret.num_notes = ret.triplet;
-									i += 3;
+									i += 2;
 								}
 							} else
 								warn("expected number after the triplet to mark the duration", line, i);
@@ -1256,6 +1278,7 @@ var Parse = function() {
 								warn("Can't nest triplets", line, i);
 							else {
 								el.startTriplet = ret.triplet;
+								el.tripletMultiplier = ret.tripletQ / ret.triplet;
 								tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
 							}
 						}

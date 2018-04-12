@@ -432,12 +432,9 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
   for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
 
 
-  if (elem.startTriplet) {
-         if (elem.startTriplet === 2)
-         this.tripletmultiplier = 3/2;
-         else
-         this.tripletmultiplier=(elem.startTriplet-1)/elem.startTriplet;
-  }
+	if (elem.startTriplet) {
+		this.tripletmultiplier = elem.tripletMultiplier;
+	}
 
   var durationForSpacing = duration * this.tripletmultiplier;
   if (elem.rest && elem.rest.type === 'multimeasure')
