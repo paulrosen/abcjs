@@ -198,31 +198,39 @@ StaffGroupElement.prototype.finished = function() {
 	return true;
 };
 
-StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
-	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
-	this.spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
-	this.minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
+function getLeftEdgeOfStaff(renderer, voices, brace) {
 	var x = renderer.padding.left;
 
 	// find out how much space will be taken up by voice headers
 	var voiceheaderw = 0;
-	for (var i=0;i<this.voices.length;i++) {
-		if(this.voices[i].header) {
-			var size = renderer.getTextSize(this.voices[i].header, 'voicefont', '');
+	for (var i=0;i<voices.length;i++) {
+		if(voices[i].header) {
+			var size = renderer.getTextSize(voices[i].header, 'voicefont', '');
 			voiceheaderw = Math.max(voiceheaderw,size.width);
 		}
 	}
 	if (voiceheaderw) {
 		// Give enough spacing to the right - we use the width of an A for the amount of spacing.
 		var sizeW = renderer.getTextSize("A", 'voicefont', '');
-		x = x + voiceheaderw +sizeW.width;
+		voiceheaderw += voiceheaderw + sizeW.width;
 	}
+	x += voiceheaderw;
+
+	if (brace) {
+		brace.setLocation(x);
+		x += brace.getWidth();
+	}
+	return x;
+}
+
+StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
+	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
+	this.spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
+	this.minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
+
+	var x = getLeftEdgeOfStaff(renderer, this.voices, this.brace);
 	this.startx=x;
-	if (this.brace) {
-		this.brace.setLocation(this.startx);
-		x += this.brace.getWidth();
-		this.startx = x;
-	}
+	var i;
 
 	var currentduration = 0;
 	if (debug) console.log("init layout");

@@ -233,10 +233,13 @@ function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, 
  */
 EngraverController.prototype.setXSpacing = function (staffGroup, formatting, isLastLine) {
    var newspace = this.space;
-  for (var it = 0; it < 3; it++) { // TODO-PER: shouldn't need this triple pass any more, but it does slightly affect the coordinates.
-	  staffGroup.layout(newspace, this.renderer, false);
+   var debug = false;
+  for (var it = 0; it < 8; it++) { // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
+	  staffGroup.layout(newspace, this.renderer, debug);
 	  var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
 		newspace = calcHorizontalSpacing(isLastLine, stretchLast, this.width+this.renderer.padding.left, staffGroup.w, newspace, staffGroup.spacingunits, staffGroup.minspace);
+		if (debug)
+			console.log("setXSpace", it, staffGroup.w, newspace, staffGroup.minspace);
 		if (newspace === null) break;
   }
 	centerWholeRests(staffGroup.voices);
