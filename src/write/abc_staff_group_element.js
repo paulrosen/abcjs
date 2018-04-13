@@ -212,7 +212,7 @@ function getLeftEdgeOfStaff(renderer, voices, brace) {
 	if (voiceheaderw) {
 		// Give enough spacing to the right - we use the width of an A for the amount of spacing.
 		var sizeW = renderer.getTextSize("A", 'voicefont', '');
-		voiceheaderw += voiceheaderw + sizeW.width;
+		voiceheaderw += sizeW.width;
 	}
 	x += voiceheaderw;
 
@@ -233,7 +233,7 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 	var i;
 
 	var currentduration = 0;
-	if (debug) console.log("init layout");
+	if (debug) console.log("init layout", spacing);
 	for (i=0;i<this.voices.length;i++) {
 		this.voices[i].beginLayout(x);
 	}
@@ -246,7 +246,6 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 			if (!this.voices[i].layoutEnded() && (!currentduration || this.voices[i].getDurationIndex()<currentduration))
 				currentduration=this.voices[i].getDurationIndex();
 		}
-		if (debug) console.log("currentduration: ",currentduration);
 
 
 		// isolate voices at current duration level
@@ -260,7 +259,7 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 				//console.log("out: voice ",i);
 			} else {
 				currentvoices.push(this.voices[i]);
-				if (debug) console.log("in: voice ",i);
+				//if (debug) console.log("in: voice ",i);
 			}
 		}
 
@@ -278,6 +277,7 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 		//console.log("new spacingunit", spacingunit, this.spacingunits, "="+(spacingunit+ this.spacingunits));
 		this.spacingunits+=spacingunit;
 		this.minspace = Math.min(this.minspace,spacingunit);
+		if (debug) console.log("currentduration: ",currentduration, this.spacingunits, this.minspace);
 
 		for (i=0;i<currentvoices.length;i++) {
 			var voicechildx = currentvoices[i].layoutOneItem(x,spacing);

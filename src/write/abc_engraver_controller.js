@@ -158,7 +158,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	for(i=0; i<abctune.lines.length; i++) {
 		abcLine = abctune.lines[i];
 		if (abcLine.staff) {
-			this.setXSpacing(abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1);
+			this.setXSpacing(abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
 			if (abcLine.staffGroup.w > maxWidth) maxWidth = abcLine.staffGroup.w;
 		}
 	}
@@ -231,9 +231,9 @@ function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, 
  * @param {boolean} isLastLine is this the last line to be printed?
  * @private
  */
-EngraverController.prototype.setXSpacing = function (staffGroup, formatting, isLastLine) {
+EngraverController.prototype.setXSpacing = function (staffGroup, formatting, isLastLine, debug) {
    var newspace = this.space;
-   var debug = false;
+   //var debug = true;
   for (var it = 0; it < 8; it++) { // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
 	  staffGroup.layout(newspace, this.renderer, debug);
 	  var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
