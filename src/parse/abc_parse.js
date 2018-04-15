@@ -693,7 +693,8 @@ var Parse = function() {
 						} else
 							el.duration = multilineVars.default_length;
 						// If the clef is percussion, there is probably some translation of the pitch to a particular drum kit item.
-						if (multilineVars.clef && multilineVars.clef.type === "perc") {
+						if ((multilineVars.clef && multilineVars.clef.type === "perc") ||
+							(multilineVars.currentVoice && multilineVars.currentVoice.clef === "perc")) {
 							var key = line.charAt(index);
 							if (el.accidental) {
 								var accMap = { 'dblflat': '__', 'flat': '_', 'natural': '=', 'sharp': '^', 'dblsharp': '^^'};

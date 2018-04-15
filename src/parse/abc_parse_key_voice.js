@@ -741,6 +741,7 @@ var parseKeyVoice = {};
 	//							}
 											  staffInfo.clef = token.token.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
 						staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct2);
+						multilineVars.voices[id].clef = token.token;
 						break;
 					case 'staves':
 					case 'stave':
