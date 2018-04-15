@@ -824,6 +824,16 @@ var parseKeyVoice = {};
 						// TODO-PER: This is accepted, but not implemented, yet.
 						addNextTokenToVoiceInfo(id, 'volume', 'number');
 						break;
+					case "style":
+						attr = tokenizer.getVoiceToken(line, start, end);
+						if (attr.warn !== undefined)
+							warn("Expected value for style in voice: " + attr.warn, line, start);
+						else if (attr.token === 'normal' || attr.token === 'harmonic' || attr.token === 'rhythm' || attr.token === 'x')
+							multilineVars.voices[id].style = attr.token;
+						else
+							warn("Expected one of [normal, harmonic, rhythm, x] for voice style", line, start);
+						start += attr.len;
+						break;
 					// default:
 					// Use this to find V: usages that aren't handled.
 					// 	console.log("parse voice", token, tune.metaText.title);
