@@ -76,6 +76,15 @@
 	content: "\f04c"; /*   fa-play [&#xf04b;]    fa-pause [&#xf04c;] */
 }
 
+.abcjs-inline-midi .abcjs-midi-start.abcjs-pushed.abcjs-loading {
+	outline: none;
+	animation: a 1s infinite steps(8);
+}
+
+.abcjs-inline-midi .abcjs-midi-start.abcjs-pushed.abcjs-loading:before {
+	content: "\f110"; /*   fa-loading */
+}
+
 .abcjs-inline-midi .abcjs-midi-progress-background {
 	background-color: #424242;
 	height: 10px;

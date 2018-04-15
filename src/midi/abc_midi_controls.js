@@ -408,8 +408,10 @@ var midi = {};
 				// else, load this midi from scratch.
 				var onSuccess = function() {
 					startCurrentlySelectedTune();
+					removeClass(target, "abcjs-loading");
 					addClass(parent, 'abcjs-midi-current');
 				};
+				addClass(target, "abcjs-loading");
 				loadMidi(parent, onSuccess);
 			}
 			// Change the element so that the pause icon is shown.
