@@ -84,6 +84,8 @@ To release a new version, this checklist should be followed:
 
 [_] Find any hardcoded version numbers in [the package file](../package.json) and change them.
 
+[_] Change the hardcoded version numbers in index.js, midi.js, and test.js.
+
 [_] Minify the various library versions with `npm run build`.
 
 [_] Add the new files: `git add bin/abcjs*_${version-number}-*`.
