@@ -1,3 +1,45 @@
+# Version 4.1.0
+
+## Bug fixes:
+
+* When the perc clef is defined in the voice, add the midimap translation to the pitches (this was already being done when perc is in the key sig.)
+
+* Get lines with lots of notes to align properly.
+
+* Do more edge cases with triplets; fix some triplet bugs.
+
+* Double bar lines were messing up the place for the repeat to return to.
+
+* MIDI animation now follows tempo changes.
+
+* Don't get off on the midi animation when encountering a spacer type rest.
+
+* Be sure the div to be written to is empty before engraving.
+
+* When midi is redrawn, stop playing the old midi.
+
+* After calling midi's stopPlaying, reset the inline midi control.
+
+* Fix midi animation when there are no explicit 1st & 2nd ending marks.
+
+* Add fix for getting the Font Awesome 5 icons to show up in audio control; some cosmetic tweaks to large version on audio control.
+
+* Fix click listener in Editor mode.
+
+## Features:
+
+* Allow "style=" parameter on V: line.
+
+* Add a spinner to the audio play button when the soundfonts are loading.
+
+* Allow rhythm slashes to be placed on rests.
+
+* Add feature to transpose a single voice, using "V: ... score=_B"
+
+* Add public function: midi.deviceSupportsMidi()
+
+* Add all the fonts to the directives that can be specified in the renderAbc call.
+
 # Version 4.0.1
 
 ## Bug fixes:
