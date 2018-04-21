@@ -415,7 +415,9 @@ var parseKeyVoice = {};
 					}
 					// We need to do a deep copy because we are going to modify it
 					var oldKey = parseKeyVoice.deepCopyKey(multilineVars.key);
-					multilineVars.key = parseKeyVoice.deepCopyKey(parseKeyVoice.standardKey(key, retPitch.token, acc, 0));
+					//TODO-PER: HACK! To get the local transpose to work, the transposition is done for each line. This caused the global transposition variable to be factored in twice, so, instead of rewriting that right now, I'm just subtracting one of them here.
+					var keyCompensate = multilineVars.globalTranspose ? -multilineVars.globalTranspose : 0;
+					multilineVars.key = parseKeyVoice.deepCopyKey(parseKeyVoice.standardKey(key, retPitch.token, acc, keyCompensate));
 					multilineVars.key.mode = mode;
 					if (oldKey) {
 						// Add natural in all places that the old key had an accidental.
