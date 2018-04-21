@@ -1,3 +1,9 @@
+# Version 4.1.1
+
+## Bug fixes:
+
+* Fix double transposition of the key signature when transposition is specified in the parameters.
+
 # Version 4.1.0
 
 ## Bug fixes:
