@@ -249,15 +249,15 @@ var verticalLint = function(tunes) {
 	function extractPositioningInfo(staffGroup, lineNum) {
 		var ret = { height: staffGroup.height, minSpace: staffGroup.minspace, spacingUnits: staffGroup.spacingunits, width: staffGroup.w, startX: staffGroup.startX, staffs: [], voices: [] };
 		if (staffGroup.brace) {
-			ret.brace = { x: staffGroup.brace.x, top: staffGroup.brace.startY, bottom: staffGroup.brace.endY };
+			ret.brace = { x: staffGroup.brace.x, top: fixed2(staffGroup.brace.startY), bottom: fixed2(staffGroup.brace.endY) };
 		}
 		for (var i = 0; i < staffGroup.staffs.length; i++) {
 			var staff = staffGroup.staffs[i];
-			ret.staffs.push({bottom: staff.bottom, top: staff.top, specialY: setSpecialY(staff) });
+			ret.staffs.push({bottom: fixed2(staff.bottom), top: fixed2(staff.top), specialY: setSpecialY(staff) });
 		}
 		for (i = 0; i < staffGroup.voices.length; i++) {
 			var voice = staffGroup.voices[i];
-			var obj = { bottom: voice.bottom, top: fixed2(voice.top), specialY: setSpecialY(voice), width: fixed2(voice.w), startX: voice.startX, voiceChildren: [], otherChildren: [], beams: [] };
+			var obj = { bottom: fixed2(voice.bottom), top: fixed2(voice.top), specialY: setSpecialY(voice), width: fixed2(voice.w), startX: voice.startX, voiceChildren: [], otherChildren: [], beams: [] };
 			for (var j = 0; j < voice.children.length; j++) {
 				var child = voice.children[j];
 				var type = child.type;
@@ -270,7 +270,7 @@ var verticalLint = function(tunes) {
 						type = "note(rest)";
 					if (child.abcelem.lyric && child.abcelem.lyric.length > 0) type += " " + child.abcelem.lyric[0].syllable;
 				}
-				var obj2 = { $type: type, bottom: child.bottom, top: child.top, specialY: setSpecialY(child), minSpacing: child.minspacing, duration: child.duration, width: child.w, x: child.x };
+				var obj2 = { $type: type, bottom: fixed2(child.bottom), top: fixed2(child.top), specialY: setSpecialY(child), minSpacing: child.minspacing, duration: child.duration, width: child.w, x: child.x };
 				obj2.elem = [];
 				if (type === 'tempo') {
 					var tempo = child.children[0].tempo;
