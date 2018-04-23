@@ -128,11 +128,12 @@ Svg.prototype.text = function(text, attr) {
 			el.setAttribute(key, attr[key]);
 		}
 	}
-	var lines = text.split("\n");
+	var lines = (""+text).split("\n");
 	for (var i = 0; i < lines.length; i++) {
 		var line = document.createElementNS(svgNS, 'tspan');
 		line.textContent = lines[i];
-		line.setAttribute("x", attr.x);
+		if (attr.x !== undefined)
+			line.setAttribute("x", attr.x);
 		if (i !== 0)
 			line.setAttribute("dy", "1.2em");
 		el.append(line);
