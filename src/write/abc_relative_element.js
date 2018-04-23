@@ -113,8 +113,8 @@ RelativeElement.prototype.setUpperAndLowerElements = function(positionY) {
 			this.bottom = positionY.chordHeightAbove;
 			break;
 	}
-	if (!this.pitch || !this.top)
-		console.log("RelativeElement pos", this.type, this.pitch, this.top, positionY);
+	if (this.pitch === undefined || this.top === undefined)
+		window.console.error("RelativeElement position not set.", this.type, this.pitch, this.top, positionY);
 };
 
 RelativeElement.prototype.draw = function (renderer, bartop) {
