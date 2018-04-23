@@ -43,6 +43,16 @@ var createTimeSignature;
 
 		} else if (elem.type === "cut_time") {
 			abselem.addRight(new RelativeElement("timesig.cut", 0, glyphs.getSymbolWidth("timesig.cut"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.cut") }));
+		} else if (elem.type === "tempus_imperfectum") {
+			abselem.addRight(new RelativeElement("timesig.imperfectum", 0, glyphs.getSymbolWidth("timesig.imperfectum"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.imperfectum") }));
+		} else if (elem.type === "tempus_imperfectum_prolatio") {
+			abselem.addRight(new RelativeElement("timesig.imperfectum2", 0, glyphs.getSymbolWidth("timesig.imperfectum2"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.imperfectum2") }));
+		} else if (elem.type === "tempus_perfectum") {
+			abselem.addRight(new RelativeElement("timesig.perfectum", 0, glyphs.getSymbolWidth("timesig.perfectum"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.perfectum") }));
+		} else if (elem.type === "tempus_perfectum_prolatio") {
+			abselem.addRight(new RelativeElement("timesig.perfectum2", 0, glyphs.getSymbolWidth("timesig.perfectum2"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.perfectum2") }));
+		} else {
+			console.log("time signature:",elem);
 		}
 		return abselem;
 	};
