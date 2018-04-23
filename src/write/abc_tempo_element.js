@@ -31,6 +31,8 @@ var TempoElement;
 
 	TempoElement.prototype.setUpperAndLowerElements = function(positionY) { // TODO-PER: This might not be called.
 		this.pitch = positionY.tempoHeightAbove;
+		this.top = positionY.tempoHeightAbove;
+		this.bottom = positionY.tempoHeightAbove;
 	};
 
 	TempoElement.prototype.setX = function (x) {

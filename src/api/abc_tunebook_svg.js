@@ -1,5 +1,3 @@
-var Raphael = require('raphael');
-
 var tunebook = require('./abc_tunebook');
 
 var EngraverController = require('../write/abc_engraver_controller');
@@ -42,8 +40,7 @@ function renderOne(div, tune, params, tuneNumber) {
     }
     else
 	    div.innerHTML = "";
-    /* jshint -W064 */ var paper = Raphael(div, width, 400); /* jshint +W064 */
-    var engraver_controller = new EngraverController(paper, params);
+    var engraver_controller = new EngraverController(div, params);
     engraver_controller.engraveABC(tune, tuneNumber);
     tune.engraver = engraver_controller;
     if (params.viewportVertical || params.viewportHorizontal) {

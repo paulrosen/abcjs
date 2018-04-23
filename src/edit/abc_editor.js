@@ -28,8 +28,6 @@
 
 /*global document, window, clearTimeout, setTimeout */
 
-var Raphael = require('raphael');
-
 var TuneBook = require('../api/abc_tunebook').TuneBook;
 var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
@@ -292,8 +290,7 @@ Editor.prototype.renderTune = function(abc, params, div) {
   var abcParser = Parse();
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
-  var paper = Raphael(div, 800, 400);
-  var engraver_controller = new EngraverController(paper, this.abcjsParams);
+  var engraver_controller = new EngraverController(div, this.abcjsParams);
   engraver_controller.engraveABC(tune);
 };
 
@@ -327,8 +324,7 @@ Editor.prototype.modelChanged = function() {
   this.bReentry = true;
   this.timerId = null;
   this.div.innerHTML = "";
-  var paper = Raphael(this.div, 800, 400);
-  this.engraver_controller = new EngraverController(paper, this.abcjsParams);
+  this.engraver_controller = new EngraverController(this.div, this.abcjsParams);
   this.engraver_controller.engraveABC(this.tunes);
 	this.tunes[0].engraver = this.engraver_controller;	// TODO-PER: We actually want an output object for each tune, not the entire controller. When refactoring, don't save data in the controller.
 	this.redrawMidi();

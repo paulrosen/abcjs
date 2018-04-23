@@ -20,7 +20,6 @@
 var spacing = require('./abc_spacing');
 var AbstractEngraver = require('./abc_abstract_engraver');
 var Renderer = require('./abc_renderer');
-var Raphael = require('raphael');
 
 /**
  * @class
@@ -33,15 +32,11 @@ var Raphael = require('raphael');
  * elements in ABCJS AES know their "source data" in the ABCJS AST, and their "target shape" 
  * in the renderer for highlighting purposes
  *
- * @param {Object} paper SVG like object with methods path, text, etc.
+ * @param {Object} paper div element that will wrap the SVG
  * @param {Object} params all the params -- documented on github //TODO-GD move some of that documentation here
  */
 var EngraverController = function(paper, params) {
   params = params || {};
-  if (!paper) {
-  	// if a Raphael object was not passed in, create on here.
-	  paper = Raphael(params.elementId, params.staffwidth, params.staffheight);
-  }
   this.responsive = params.responsive;
   this.space = 3*spacing.SPACE;
   this.scale = params.scale || undefined;
@@ -59,14 +54,6 @@ var EngraverController = function(paper, params) {
 	if (params.clickListener)
 		this.addSelectListener(params.clickListener);
 
-	// HACK-PER: Raphael doesn't support setting the class of an element, so this adds that support. This doesn't work on IE8 or less, though.
-	this.usingSvg = (window.SVGAngle || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1") ? true : false); // Same test Raphael uses
-	if (this.usingSvg && params.add_classes)
-		Raphael._availableAttrs['class'] = "";
-	Raphael._availableAttrs['text-decoration'] = "";
-	Raphael._availableAttrs['data-vertical'] = "";
-
-  //TODO-GD factor out all calls directly made to renderer.paper and fix all the coupling issues below
   this.renderer=new Renderer(paper, params.regression, params.add_classes);
 	this.renderer.setPaddingOverride(params);
   this.renderer.controller = this; // TODO-GD needed for highlighting

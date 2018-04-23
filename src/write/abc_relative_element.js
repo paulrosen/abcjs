@@ -48,39 +48,73 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 	//	this.top += offset;
 	//	this.bottom += offset;
 	//}
-	var height = opt.height ? opt.height : 4; // The +1 is to give a little bit of padding.
+	this.height = opt.height ? opt.height : 4; // The +1 is to give a little bit of padding.
 	this.centerVertically = false;
 	switch (this.type) {
 		case "debug":
-			this.chordHeightAbove = height;
+			this.chordHeightAbove = this.height;
 			break;
 		case "lyric":
 			if (opt.position && opt.position === 'below')
-				this.lyricHeightBelow = height;
+				this.lyricHeightBelow = this.height;
 			else
-				this.lyricHeightAbove = height;
+				this.lyricHeightAbove = this.height;
 			break;
 		case "chord":
 			if (opt.position && opt.position === 'below')
-				this.chordHeightBelow = height;
+				this.chordHeightBelow = this.height;
 			else
-				this.chordHeightAbove = height;
+				this.chordHeightAbove = this.height;
 			break;
 		case "text":
 			if (this.pitch === undefined) {
 				if (opt.position && opt.position === 'below')
-					this.chordHeightBelow = height;
+					this.chordHeightBelow = this.height;
 				else
-					this.chordHeightAbove = height;
+					this.chordHeightAbove = this.height;
 			} else
 				this.centerVertically = true;
 			break;
-		case "part": this.partHeightAbove = height; break;
+		case "part": this.partHeightAbove = this.height; break;
 	}
 };
 
 RelativeElement.prototype.setX = function (x) {
 	this.x = x+this.dx;
+};
+
+RelativeElement.prototype.setUpperAndLowerElements = function(positionY) {
+	switch(this.type) {
+		case "part":
+			this.top = positionY.partHeightAbove + this.height;
+			this.bottom = positionY.partHeightAbove;
+			break;
+		case "text":
+		case "chord":
+			if (this.chordHeightAbove) {
+				this.top = positionY.chordHeightAbove;
+				this.bottom = positionY.chordHeightAbove;
+			} else {
+				this.top = positionY.chordHeightBelow;
+				this.bottom = positionY.chordHeightBelow;
+			}
+			break;
+		case "lyric":
+			if (this.lyricHeightAbove) {
+				this.top = positionY.lyricHeightAbove;
+				this.bottom = positionY.lyricHeightAbove;
+			} else {
+				this.top = positionY.lyricHeightBelow;
+				this.bottom = positionY.lyricHeightBelow;
+			}
+			break;
+		case "debug":
+			this.top = positionY.chordHeightAbove;
+			this.bottom = positionY.chordHeightAbove;
+			break;
+	}
+	if (!this.pitch || !this.top)
+		console.log("RelativeElement pos", this.type, this.pitch, this.top, positionY);
 };
 
 RelativeElement.prototype.draw = function (renderer, bartop) {
@@ -124,7 +158,7 @@ RelativeElement.prototype.draw = function (renderer, bartop) {
 			this.graphelem = renderer.printStaveLine(this.x, this.x+this.w, this.pitch); break;
 	}
 	if (this.scalex!==1 && this.graphelem) {
-		this.graphelem.scale(this.scalex, this.scaley, this.x, y);
+		renderer.scaleExistingElem(this.graphelem, this.scalex, this.scaley, this.x, y);
 	}
 	return this.graphelem;
 };

@@ -71,6 +71,11 @@ AbsoluteElement.prototype.setUpperAndLowerElements = function(specialYResolved) 
 			if (this.specialY.hasOwnProperty(key)) {
 				if (child[key]) { // If this relative element has defined a height for this class of element
 					child.pitch = specialYResolved[key];
+					if (child.top === undefined) { // TODO-PER: HACK! Not sure this is the right place to do this.
+						child.setUpperAndLowerElements(specialYResolved);
+						this.pushTop(child.top);
+						this.pushBottom(child.bottom);
+					}
 				}
 			}
 		}
@@ -168,15 +173,17 @@ AbsoluteElement.prototype.setHint = function () {
 };
 
 AbsoluteElement.prototype.draw = function (renderer, bartop) {
-	this.elemset = renderer.paper.set();
 	if (this.invisible) return;
+	this.elemset = [];
 	renderer.beginGroup();
 	for (var i=0; i<this.children.length; i++) {
 		if (/*ABCJS.write.debugPlacement*/false) {
 			if (this.children[i].klass === 'ornament')
 				renderer.printShadedBox(this.x, renderer.calcY(this.children[i].top), this.w, renderer.calcY(this.children[i].bottom)-renderer.calcY(this.children[i].top), "rgba(0,0,200,0.3)");
 		}
-		this.elemset.push(this.children[i].draw(renderer,bartop));
+		var el = this.children[i].draw(renderer,bartop);
+		if (el)
+			this.elemset.push(el);
 	}
 	var klass = this.type;
 	if (this.type === 'note' || this.type === 'rest') {
@@ -197,8 +204,7 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	var target = renderer.printShadedBox(this.x, renderer.calcY(this.top), this.w, renderer.calcY(this.bottom)-renderer.calcY(this.top), color);
 	var self = this;
 	var controller = renderer.controller;
-//	this.elemset.mouseup(function () {
-	target.mouseup(function () {
+	target.addEventListener('mouseup', function () {
 		var classes = [];
 		if (self.elemset) {
 			for (var j = 0; j < self.elemset.length; j++) {
@@ -212,49 +218,23 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	this.abcelem.abselem = this;
 
 	var step = spacing.STEP;
-
-	// var start = function () {
-	// 		// storing original relative coordinates
-	// 		this.dy = 0;
-	// 	},
-	// 	move = function (dx, dy) {
-	// 		// move will be called with dx and dy
-	// 		dy = Math.round(dy/step)*step;
-	// 		this.translate(0, -this.dy);
-	// 		this.dy = dy;
-	// 		this.translate(0,this.dy);
-	// 	},
-	// 	up = function () {
-	// 		if (self.abcelem.pitches) {
-	// 			var delta = -Math.round(this.dy / step);
-	// 			self.abcelem.pitches[0].pitch += delta;
-	// 			self.abcelem.pitches[0].verticalPos += delta;
-	// 			controller.notifyChange();
-	// 		}
-	// 	};
-	// if (this.abcelem.el_type==="note" && controller.editable)
-	// 	this.elemset.drag(move, start, up);
 };
 
 AbsoluteElement.prototype.isIE=/*@cc_on!@*/false;//IE detector
 
 AbsoluteElement.prototype.setClass = function (addClass, removeClass, color) {
-	if (color !== null)
-		this.elemset.attr({fill:color});
-	if (!this.isIE) {
-		for (var i = 0; i < this.elemset.length; i++) {
-			if (this.elemset[i][0].setAttribute) {
-				var kls = this.elemset[i][0].getAttribute("class");
-				if (!kls) kls = "";
-				kls = kls.replace(removeClass, "");
-				kls = kls.replace(addClass, "");
-				if (addClass.length > 0) {
-					if (kls.length > 0 && kls.charAt(kls.length-1) !== ' ') kls += " ";
-					kls += addClass;
-				}
-				this.elemset[i][0].setAttribute("class", kls);
-			}
+	for (var i = 0; i < this.elemset.length; i++) {
+		var el = this.elemset[i];
+		el.setAttribute("fill", color);
+		var kls = el.getAttribute("class");
+		if (!kls) kls = "";
+		kls = kls.replace(removeClass, "");
+		kls = kls.replace(addClass, "");
+		if (addClass.length > 0) {
+			if (kls.length > 0 && kls.charAt(kls.length - 1) !== ' ') kls += " ";
+			kls += addClass;
 		}
+		el.setAttribute("class", kls);
 	}
 };
 
