@@ -11,8 +11,8 @@
     "build:basic": "webpack --env.type=basic",
     "build:midi": "webpack --env.type=midi",
     "build:plugin": "webpack --env.type=plugin",
-    "build:grease": "cat src/plugin/greasemonkey.js bin/abcjs_plugin_4.1.1-min.js > bin/abcjs_plugin_4.1.1.user.js",
-    "fix-versions": "./fix-versions.sh 4.1.1",
+    "build:grease": "cat src/plugin/greasemonkey.js bin/abcjs_plugin_5.0.0-min.js > bin/abcjs_plugin_5.0.0.user.js",
+    "fix-versions": "./fix-versions.sh 5.0.0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -44,7 +44,6 @@
     "webpack": "^3.11.0"
   },
   "dependencies": {
-    "midi": "https://github.com/paulrosen/MIDI.js.git#abcjs",
-    "raphael": "^2.2.7"
+    "midi": "https://github.com/paulrosen/MIDI.js.git#abcjs"
   }
 }
