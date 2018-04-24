@@ -39,7 +39,10 @@ var EngraverController = function(paper, params) {
   params = params || {};
   this.responsive = params.responsive;
   this.space = 3*spacing.SPACE;
-  this.scale = params.scale || undefined;
+  this.scale = params.scale ? parseFloat(params.scale) : 0;
+  if (!(this.scale > 0.1))
+  	this.scale = undefined;
+
 	if (params.staffwidth) {
 		// Note: Normally all measurements to the engraver are in POINTS. However, if a person is formatting for the
 		// screen and directly inputting the width, then it is more logical to have the measurement in pixels.
