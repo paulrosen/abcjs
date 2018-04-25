@@ -196,24 +196,24 @@ var animation = {};
 			lineNum = parseInt(lineNum, 10);
 			measureNum = parseInt(measureNum, 10);
 			measureNum++;
-			var els = getAllElementsByClasses(paper, "l"+lineNum, "m"+measureNum);
+			var els = getAllElementsByClasses(paper, "abcjs-l"+lineNum, "abcjs-m"+measureNum);
 			if (els.length > 0)
 				return [lineNum, measureNum];
 			lineNum++;
 			measureNum = 0;
-			els = getAllElementsByClasses(paper, "l"+lineNum, "m"+measureNum);
+			els = getAllElementsByClasses(paper, "abcjs-l"+lineNum, "abcjs-m"+measureNum);
 			if (els.length > 0)
 				return [lineNum, measureNum];
 			return null;
 		}
 
 		function processMeasureHider(lineNum, measureNum) {
-			var els = getAllElementsByClasses(paper, "l"+lineNum, "m"+measureNum);
+			var els = getAllElementsByClasses(paper, "abcjs-l"+lineNum, "abcjs-m"+measureNum);
 
 			if (els.length > 0) {
 				for (var i = 0; i < els.length; i++) {
 					var el = els[i];
-					if (!hasClass(el, "bar"))
+					if (!hasClass(el, "abcjs-bar"))
 						el.style.display = "none";
 				}
 			}
@@ -263,7 +263,7 @@ var animation = {};
 
 		// Gets the line and measure number from the element's classes
 		function getLineAndMeasure(element) {
-			var klass = element.elemset[0].attrs['class'];
+			var klass = element.elemset[0].getAttribute("class");
 			var arr = klass.split(' ');
 			var lineNum;
 			var measureNum;
@@ -311,7 +311,7 @@ var animation = {};
 						// Only add a bar if it is not repeated; that is, we don't want two bars in a row.
 						if (element.type === 'bar') {
 							if (voices[v].length === 0 || voices[v][voices[v].length-1].type !== 'bar') {
-								if (element.elemset && element.elemset.length > 0 && element.elemset[0].attrs) {
+								if (element.elemset && element.elemset.length > 0) {
 									var obj = getLineAndMeasure(element);
 									voices[v].push({ type: "bar",
 										barType: element.abcelem.type,

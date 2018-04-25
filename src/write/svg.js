@@ -54,7 +54,11 @@ Svg.prototype.setResponsiveWidth = function(w, h) {
 	this.svg.style['left'] = "0";
 
 	if (this.svg.parentNode) {
-		this.svg.parentNode.classList.add("abcjs-container");
+		var cls = this.svg.parentNode.getAttribute("class");
+		if (!cls)
+			this.svg.parentNode.setAttribute("class", "abcjs-container");
+		else if (cls.indexOf("abcjs-container") < 0)
+			this.svg.parentNode.setAttribute("class", cls + " abcjs-container");
 		this.svg.parentNode.style['display'] = "inline-block";
 		this.svg.parentNode.style['position'] = "relative";
 		this.svg.parentNode.style['width'] = "100%";
