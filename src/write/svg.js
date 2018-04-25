@@ -102,7 +102,7 @@ Svg.prototype.setScale = function(scale) {
 };
 
 Svg.prototype.setParentStyles = function(attr) {
-	// TODO-PER: Is this really necessary?
+	// This is needed to get the size right when there is scaling involved.
 	for (var key in attr) {
 		if (attr.hasOwnProperty(key)) {
 			if (this.svg.parentNode)
