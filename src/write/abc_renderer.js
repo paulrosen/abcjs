@@ -787,7 +787,7 @@ Renderer.prototype.addInvisibleMarker = function (className) {
 	var x2 = 100;
 	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
 		x2, y+dy, x1, y+dy);
-	this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses(className), 'data-vertical': y });
+	this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, "fill-opacity": 0, 'class': this.addClasses(className), 'data-vertical': y });
 };
 
 // For debugging, it is sometimes useful to know where you are vertically.
@@ -812,8 +812,8 @@ Renderer.prototype.printHorizontalLine = function (width, vertical, comment) {
 		this.paper.text(comment, {x: width+70, y: y, "text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
 };
 
-Renderer.prototype.printShadedBox = function (x, y, width, height, color, comment) {
-	var box = this.paper.rect({ x: x, y: y, width: width, height: height, fill: color, stroke: color });
+Renderer.prototype.printShadedBox = function (x, y, width, height, color, opacity, comment) {
+	var box = this.paper.rect({ x: x, y: y, width: width, height: height, fill: color, stroke: color, "fill-opacity": opacity, "stroke-opacity": opacity });
 	if (comment)
 		this.paper.text(comment, {x: 0, y: y+7, "text-anchor": "start", "font-size":"14px", fill: "rgba(0,0,255,.4)", stroke: "rgba(0,0,255,.4)" });
 	return box;

@@ -179,7 +179,7 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	for (var i=0; i<this.children.length; i++) {
 		if (/*ABCJS.write.debugPlacement*/false) {
 			if (this.children[i].klass === 'ornament')
-				renderer.printShadedBox(this.x, renderer.calcY(this.children[i].top), this.w, renderer.calcY(this.children[i].bottom)-renderer.calcY(this.children[i].top), "rgba(0,0,200,0.3)");
+				renderer.printShadedBox(this.x, renderer.calcY(this.children[i].top), this.w, renderer.calcY(this.children[i].bottom)-renderer.calcY(this.children[i].top), "rgb(0,0,200)", 0.3);
 		}
 		var el = this.children[i].draw(renderer,bartop);
 		if (el)
@@ -200,8 +200,8 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 		this.setClass("mark", "", "#00ff00");
 	if (this.hint)
 		this.setClass("abcjs-hint", "", null);
-	var color = /*ABCJS.write.debugPlacement*/false ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0)"; // Create transparent box that encompasses the element, and not so transparent to debug it.
-	var target = renderer.printShadedBox(this.x, renderer.calcY(this.top), this.w, renderer.calcY(this.bottom)-renderer.calcY(this.top), color);
+	var opacity = /*ABCJS.write.debugPlacement*/false ? 0.3 : 0; // Create transparent box that encompasses the element, and not so transparent to debug it.
+	var target = renderer.printShadedBox(this.x, renderer.calcY(this.top), this.w, renderer.calcY(this.bottom)-renderer.calcY(this.top), "#000000", opacity);
 	var self = this;
 	var controller = renderer.controller;
 	target.addEventListener('mouseup', function () {
@@ -209,8 +209,8 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 		if (self.elemset) {
 			for (var j = 0; j < self.elemset.length; j++) {
 				var es = self.elemset[j];
-				if (es.attrs && es.attrs.class)
-					classes.push(es.attrs.class);
+				if (es)
+					classes.push(es.getAttribute("class"));
 			}
 		}
 		controller.notifySelect(self, self.tuneNumber, classes);

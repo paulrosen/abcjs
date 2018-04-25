@@ -344,13 +344,13 @@ StaffGroupElement.prototype.draw = function (renderer) {
 	var debugPrint;
 	var colorIndex;
 	if (/*ABCJS.write.debugPlacement*/false) {
-		var colors = [ "rgba(207,27,36,0.4)", "rgba(168,214,80,0.4)", "rgba(110,161,224,0.4)", "rgba(191,119,218,0.4)", "rgba(195,30,151,0.4)",
-			"rgba(31,170,177,0.4)", "rgba(220,166,142,0.4)" ];
+		var colors = [ "rgb(207,27,36)", "rgb(168,214,80)", "rgb(110,161,224)", "rgb(191,119,218)", "rgb(195,30,151)",
+			"rgb(31,170,177)", "rgb(220,166,142)" ];
 		debugPrint = function(staff, key) {
 			if (staff.positionY[key]) {
 				//renderer.printHorizontalLine(50, renderer.calcY(staff.positionY[key]), key.substr(0, 4) + " " + Math.round(staff.positionY[key]));
 				var height = staff.specialY[key] * spacing.STEP;
-				renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff.positionY[key]), renderer.controller.width, height,colors[colorIndex], key.substr(0, 4));
+				renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff.positionY[key]), renderer.controller.width, height,colors[colorIndex], 0.4, key.substr(0, 4));
 				colorIndex += 1; if (colorIndex > 6) colorIndex = 0;
 			}
 		};
@@ -368,7 +368,7 @@ StaffGroupElement.prototype.draw = function (renderer) {
 		staff1.absoluteY = renderer.y;
 		if (/*ABCJS.write.debugPlacement*/false) {
 			colorIndex = 0;
-			renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff1.originalTop), renderer.controller.width, renderer.calcY(staff1.originalBottom)-renderer.calcY(staff1.originalTop),"rgba(0,0,0,0.1)");
+			renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff1.originalTop), renderer.controller.width, renderer.calcY(staff1.originalBottom)-renderer.calcY(staff1.originalTop), "#000000", 0.1);
 			debugPrint(staff1, 'chordHeightAbove');
 			debugPrint(staff1, 'chordHeightBelow');
 			debugPrint(staff1, 'dynamicHeightAbove');
