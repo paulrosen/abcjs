@@ -950,9 +950,15 @@ var Tune = function() {
 		if (element.abcelem.rest && element.abcelem.rest.type === "spacer")
 			realDuration = 0;
 		if (realDuration > 0) {
+			var es = [];
+			// If there is an invisible rest, then there are not elements, so don't push a null one.
+			for (var i = 0; i < element.elemset.length; i++) {
+				if (element.elemset[i] !== null)
+					es.push(element.elemset[i]);
+			}
 			var isTiedToNext = element.startTie;
 			if (isTiedState !== undefined) {
-				eventHash["event" + isTiedState].elements.push(element.elemset); // Add the tied note to the first note that it is tied to
+				eventHash["event" + isTiedState].elements.push(es); // Add the tied note to the first note that it is tied to
 				if (!isTiedToNext)
 					isTiedState = undefined;
 			} else {
@@ -965,14 +971,14 @@ var Tune = function() {
 						height: height,
 						left: element.x,
 						width: element.w,
-						elements: [element.elemset],
+						elements: [es],
 						startChar: element.abcelem.startChar,
-						endChar: element.abcelem.endChar,
+						endChar: element.abcelem.endChar
 					};
 				else {
 					// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
 					eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);
-					eventHash["event" + voiceTimeMilliseconds].elements.push(element.elemset);
+					eventHash["event" + voiceTimeMilliseconds].elements.push(es);
 				}
 				if (isTiedToNext)
 					isTiedState = voiceTimeMilliseconds;
