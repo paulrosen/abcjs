@@ -1,3 +1,19 @@
+# Version 5.0.0
+
+## Bug fixes:
+
+* Don't crash animation when there are invisible rests.
+
+* Don't crash when illegal value for scale is passed in.
+
+* Change guitar chord flat and sharp to the right symbols in a few more cases.
+
+* Begin to support mensural time signatures.
+
+## Features
+
+* Remove dependency on Raphael.
+
 # Version 4.1.1
 
 ## Bug fixes:
