@@ -140,7 +140,7 @@ Svg.prototype.text = function(text, attr) {
 			line.setAttribute("x", attr.x);
 		if (i !== 0)
 			line.setAttribute("dy", "1.2em");
-		el.append(line);
+		el.appendChild(line);
 	}
 	this.append(el);
 	return el;
@@ -151,7 +151,8 @@ Svg.prototype.getTextSize = function(text, attr) {
 	var size = el.getBBox();
 	if (isNaN(size.height)) // This can happen if the element isn't visible.
 		size = { width: 0, height: 0};
-
+	else
+		size = { width: size.width, height: size.height };
 	// TODO-PER: can the size be gotten without inserting and deleting the element?
 	if (this.currentGroup)
 		this.currentGroup.removeChild(el);

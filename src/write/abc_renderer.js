@@ -742,7 +742,7 @@ Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, center
 		var padding = 2;
 		var margin = 2;
 		this.paper.rect({ x: size.x - padding, y: size.y + padding, width: size.width + padding*2, height: size.height + padding*2 - margin,  stroke: "#888888", fill: "transparent"});
-		size.height += 8;
+		//size.height += 8;
 	}
 	if (this.doRegression) this.addToRegression(el);
 	return el;
