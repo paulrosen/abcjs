@@ -14,8 +14,16 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+function performanceOk() {
+	if (!('performance' in window))
+		return false;
+	if (!('now' in window.performance))
+		return false;
+	return true;
+}
+
 // Unfortunately, a few versions of Safari don't support the performance interface. For those browsers, MIDI just won't work.
-if ('performance' in window) {
+if (performanceOk()) {
 	if (!('galactic' in window))
 		window.galactic = {};
 	window.galactic.loc = {
@@ -72,7 +80,7 @@ var midi = {};
 	}
 
 	midi.deviceSupportsMidi = function() {
-		if (!('performance' in window))
+		if (!performanceOk())
 			return false;
 		if (midi.midiInlineInitialized === 'not loaded')
 			return false;
@@ -80,7 +88,7 @@ var midi = {};
 	};
 
 	midi.generateMidiControls = function(tune, midiParams, midi, index, stopOld) {
-		if (!('performance' in window))
+		if (!performanceOk())
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">ERROR: this browser doesn\'t support window.performance</div>';
 		if (midi.midiInlineInitialized === 'not loaded')
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">MIDI NOT PRESENT</div>';
@@ -215,6 +223,8 @@ var midi = {};
 			}).then(function() {
 				midiJsInitialized = true;
 				afterSetup(timeWarp, data, onSuccess);
+			}).catch(function(e) {
+				console.log("MIDI.setup failed:", e.message);
 			});
 		} else {
 			afterSetup(timeWarp, data, onSuccess);
