@@ -1,6 +1,6 @@
 {
   "name": "abcjs",
-  "version": "4.1.1",
+  "version": "5.0.0",
   "description": "Renderer for abc music notation",
   "main": "index.js",
   "directories": {
