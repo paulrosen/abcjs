@@ -1,3 +1,9 @@
+# Version 5.0.1
+
+## Bug fixes:
+
+* Comply with the Chrome change to not play audio unless the AudioContext is resumed inside a user interaction.
+
 # Version 5.0.0
 
 ## Bug fixes:
