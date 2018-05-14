@@ -96,7 +96,7 @@ Renderer.prototype.setPaperSize = function (maxwidth, scale, responsive) {
 		text += " for \"" + this.abctune.metaText.title + '"';
 	this.paper.setTitle(text);
 
-	var parentStyles = { overflow: "hidden" };
+	var parentStyles = { overflow: "hidden", width: "" };
 	if (responsive === 'resize') {
 		this.paper.setResponsiveWidth(w, h);
 	} else {
