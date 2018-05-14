@@ -1,3 +1,9 @@
+# Version 5.1.1
+
+## Bug fixes:
+
+Fix regression for having the SVG responsive.
+
 # Version 5.1.0
 
 ## Bug fixes:
