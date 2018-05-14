@@ -357,8 +357,9 @@ var midi = {};
 					var beatsPerSecond = parseInt(tempo, 10) / 60;
 					var currentTime = position.currentTime;
 					if (midiControl.abcjsListener) {
-						var thisBeat = Math.floor(currentTime / beatsPerSecond);
+						var thisBeat = Math.floor(currentTime * beatsPerSecond);
 						position.newBeat = thisBeat !== midiControl.abcjsLastBeat;
+						position.thisBeat = thisBeat;
 						midiControl.abcjsLastBeat = thisBeat;
 						midiControl.abcjsListener(midiControl, position, midiControl.abcjsContext);
 					}
@@ -450,6 +451,19 @@ var midi = {};
 			if (startBtn)
 				removeClass(startBtn, "abcjs-pushed");
 		}
+	};
+	midi.restartPlaying = function(target) {
+		onReset(target);
+	};
+
+	midi.setLoop = function(target, state) {
+		var loop = target.querySelector('.abcjs-midi-loop');
+		if (!loop)
+			return;
+		if (state)
+			addClass(loop, 'abcjs-pushed');
+		else
+			removeClass(loop, 'abcjs-pushed');
 	};
 
 	function resetProgress(parent) {
