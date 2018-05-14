@@ -8,6 +8,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `tunebook = new ABCJS.TuneBook(tunebookString)` | Returns a `TuneBook` object, describing the tunebook passed in. |
 | `tuneObjectArray = ABCJS.renderAbc(output, tunebookString, params)` | Completely renders the tunebook. |
 | `tuneObjectArray = ABCJS.renderMidi(output, tunebookString, params)` | Completely creates midi for the tunebook. |
+| `tuneObjectArray = ABCJS.parseOnly(tunebookString, params)` | Parses all the tunes in the tunebookString and returns an array of them parsed structure. |
 | `ABCJS.startAnimation(outputElement, tuneObject, animationParams)` | Puts an animated cursor on the rendered music.  |
 | `ABCJS.stopAnimation()` | Stops the animation that was started with `startAnimation`. |
 | `ABCJS.pauseAnimation(pause)` | Pauses/resumes the animation that was started with `startAnimation`. Pass `true` or `false` to pause or resume. |

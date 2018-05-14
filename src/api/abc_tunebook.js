@@ -97,6 +97,21 @@ var tunebook = {};
 		return null;
 	};
 
+	tunebook.parseOnly = function(abc, params) {
+		var tunes = [];
+		var numTunes = tunebook.numberOfTunes(abc);
+
+		// this just needs to be passed in because this tells the engine how many tunes to process.
+		var output = [];
+		for (var i = 0; i < numTunes; i++) {
+			output.push(1);
+		}
+		function callback() {
+			// Don't need to do anything with the parsed tunes.
+		}
+		return tunebook.renderEngine(callback, output, abc, params);
+	};
+
 	tunebook.renderEngine = function (callback, output, abc, params) {
 		var ret = [];
 		var isArray = function(testObject) {
@@ -133,7 +148,7 @@ var tunebook = {};
 			currentTune++;
 		}
 		return ret;
-	}
+	};
 
 })();
 
