@@ -96,16 +96,19 @@ Renderer.prototype.setPaperSize = function (maxwidth, scale, responsive) {
 		text += " for \"" + this.abctune.metaText.title + '"';
 	this.paper.setTitle(text);
 
+	var parentStyles = { overflow: "hidden" };
 	if (responsive === 'resize') {
 		this.paper.setResponsiveWidth(w, h);
 	} else {
-		this.paper.setSize(w / scale, h / scale);
+		parentStyles.height = h + "px";
+		if (scale < 1) {
+			parentStyles.width = w + "px";
+			this.paper.setSize(w / scale, h / scale);
+		} else
+			this.paper.setSize(w, h);
 	}
 	this.paper.setScale(scale);
-	var styles = { overflow: "hidden" };
-	if (responsive !== 'resize')
-		styles.height = h + "px";
-	this.paper.setParentStyles(styles);
+	this.paper.setParentStyles(parentStyles);
 };
 
 /**
