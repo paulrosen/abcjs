@@ -432,7 +432,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
   for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
 
 
-	if (elem.startTriplet) {
+	if (elem.startTriplet && !dontDraw) {
 		this.tripletmultiplier = elem.tripletMultiplier;
 	}
 
