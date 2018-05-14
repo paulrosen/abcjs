@@ -27,7 +27,8 @@ abcjs.midi = {
 	restartPlaying: midi.restartPlaying,
 	stopPlaying: midi.stopPlaying,
 	setLoop: midi.setLoop,
-	deviceSupportsMidi: midi.deviceSupportsMidi
+	deviceSupportsMidi: midi.deviceSupportsMidi,
+	setRandomProgress: midi.setRandomProgress,
 };
 
 module.exports = abcjs;

@@ -12,6 +12,12 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `ABCJS.stopAnimation()` | Stops the animation that was started with `startAnimation`. |
 | `ABCJS.pauseAnimation(pause)` | Pauses/resumes the animation that was started with `startAnimation`. Pass `true` or `false` to pause or resume. |
 | `ABCJS.midi.deviceSupportsMidi()` | Returns true if the device and browser is capable of playing MIDI. |
+| `ABCJS.midi.setSoundFont(url)` | Sets an alternate location for the soundfont. |
+| `ABCJS.midi.startPlaying(targetEl)` | Starts playing the MIDI for the element passed in. If the element is already playing, this pauses it. |
+| `ABCJS.midi.stopPlaying()` | Stops playing whatever is currently playing. |
+| `ABCJS.midi.restartPlaying()` | Moves the progress back to the beginning for whatever is currently playing. |
+| `ABCJS.midi.setRandomProgress(percent)` | Moves the progress to whatever percent is passed in for whatever is currently playing. |
+| `ABCJS.midi.setLoop(targetEl, state)` | Sets the "loop" mode for the element passed in. State should be true or false. |
 
 | Parameters | Description |
 | ------------- | ----------- |

@@ -452,7 +452,8 @@ var midi = {};
 				removeClass(startBtn, "abcjs-pushed");
 		}
 	};
-	midi.restartPlaying = function(target) {
+	midi.restartPlaying = function() {
+		var target = document.querySelector(".abcjs-midi-current");
 		onReset(target);
 	};
 
@@ -464,6 +465,18 @@ var midi = {};
 			addClass(loop, 'abcjs-pushed');
 		else
 			removeClass(loop, 'abcjs-pushed');
+	};
+
+	midi.setRandomProgress = function(percent) {
+		var target = document.querySelector(".abcjs-midi-current");
+		var playEl = find(target, "abcjs-midi-start");
+		var play = hasClass(playEl, "abcjs-pushed");
+		var endTime = MIDI.player.duration;
+		if (play)
+			pauseCurrentlyPlayingTune();
+		MIDI.player.currentTime = endTime * percent;
+		if (play)
+			startCurrentlySelectedTune();
 	};
 
 	function resetProgress(parent) {
