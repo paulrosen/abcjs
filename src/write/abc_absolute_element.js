@@ -195,7 +195,9 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 			}
 		}
 	}
-	this.elemset.push(renderer.endGroup(klass));
+	var g = renderer.endGroup(klass);
+	if (g)
+		this.elemset.push(g);
 	if (this.klass)
 		this.setClass("mark", "", "#00ff00");
 	if (this.hint)

@@ -525,7 +525,7 @@ Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, kl
 	var el;
 	var ycorr;
 	if (!symbol) return null;
-	if (symbol.length > 0 && symbol.indexOf(".") < 0) {
+	if (symbol.length > 1 && symbol.indexOf(".") < 0) {
 		this.paper.openGroup();
 		var dx = 0;
 		for (var i = 0; i < symbol.length; i++) {
