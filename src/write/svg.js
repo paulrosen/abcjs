@@ -136,8 +136,7 @@ Svg.prototype.text = function(text, attr) {
 	for (var i = 0; i < lines.length; i++) {
 		var line = document.createElementNS(svgNS, 'tspan');
 		line.textContent = lines[i];
-		if (attr.x !== undefined)
-			line.setAttribute("x", attr.x);
+		line.setAttribute("x", attr.x ? attr.x : 0);
 		if (i !== 0)
 			line.setAttribute("dy", "1.2em");
 		el.appendChild(line);
