@@ -1,3 +1,9 @@
+# Version 5.1.2
+
+## Bug fixes:
+
+Fix horizontal spacing calculation for multiline text.
+
 # Version 5.1.1
 
 ## Bug fixes:
