@@ -196,10 +196,7 @@ function renderEngine(callback, output, mei, params) {
 	if (typeof(div) === "string")
 		div = document.getElementById(div);
 	if (div) {
-		var json = xml2js.xml2json(mei, {});
-
-		json = JSON.parse(json);
-		var tune = parser(json);
+		var tune = parseMei(mei);
 		ret.push(tune);
 		callback(div, tune);
 	}
@@ -207,4 +204,10 @@ function renderEngine(callback, output, mei, params) {
 	return ret;
 }
 
-module.exports = renderMei;
+function parseMei(mei) {
+	var json = xml2js.xml2json(mei, {});
+	json = JSON.parse(json);
+	return parser(json);
+}
+
+module.exports = { renderMei: renderMei, parseMei: parseMei };

@@ -15,7 +15,9 @@ Object.keys(tunebook).forEach(function (key) {
 
 abcjs.renderAbc = require('./src/api/abc_tunebook_svg');
 abcjs.renderMidi = require('./src/api/abc_tunebook_midi');
-abcjs.renderMei = require('./src/api/mei_tunebook_svg');
+var mei = require('./src/api/mei_tunebook_svg');
+abcjs.renderMei = mei.renderMei;
+abcjs.parseMei = mei.parseMei;
 
 var editor = require('./src/edit/abc_editor');
 abcjs['Editor'] = editor;
@@ -31,5 +33,11 @@ abcjs.midi = {
 	deviceSupportsMidi: midi.deviceSupportsMidi,
 	setRandomProgress: midi.setRandomProgress,
 };
+
+var parserLint = require('./src/test/abc_parser_lint');
+var verticalLint = require('./src/test/abc_vertical_lint');
+var midiLint = require('./src/test/abc_midi_lint');
+var midiSequencerLint = require('./src/test/abc_midi_sequencer_lint');
+abcjs.test = { ParserLint: parserLint, verticalLint: verticalLint, midiLint: midiLint, midiSequencerLint: midiSequencerLint };
 
 module.exports = abcjs;
