@@ -1,5 +1,6 @@
 var Tune = require('../data/abc_tune');
 var parseDirective = require('../parse/abc_parse_directive');
+var multiLineVars = require('../parse/multiline_vars');
 
 function parse(mei) {
 	var tune = new Tune();
@@ -18,6 +19,11 @@ function parse(mei) {
 	}
 	if (meiBody)
 		parse2(tune, meiBody);
+
+	var ph = 11*72;
+	var pl = 8.5*72;
+	tune.cleanUp(pl, ph, multiLineVars.barsperstaff, multiLineVars.staffnonote, multiLineVars.openSlurs);
+
 	return tune;
 }
 
