@@ -559,6 +559,15 @@ var Tune = function() {
 		delete this.potentialEndBeam;
 	};
 
+	this.endBeamOnMostRecentNote = function() {
+		var lastNote = this.getLastNote();
+		if (lastNote && this.potentialStartBeam) {
+			lastNote.endBeam = true;
+			this.potentialStartBeam.startBeam = true;
+			delete this.potentialStartBeam;
+		}
+	};
+
 	this.appendElement = function(type, startChar, endChar, hashParams)
 	{
 		var This = this;
