@@ -5,6 +5,7 @@ var multiLineVars = require('../parse/multiline_vars');
 function parse(mei) {
 	var tune = new Tune();
 	multiLineVars.reset();
+	multiLineVars.noteIds = [];
 	parseDirective.initialize(null, null, {}, tune);
 
 	var meiBody;
@@ -33,10 +34,10 @@ function traverseTree(tune, multiLineVars, elements, breadcrumbs) {
 		var element = elements[i];
 		switch (element.type) {
 			case "element":
-				handleElement(tune, multiLineVars, element.name, element.attributes, breadcrumbs );
+				handleElement(tune, multiLineVars, element.name, element.attributes, breadcrumbs, element.elements !== undefined );
 				break;
 			case "text":
-				handleElement(tune, multiLineVars, "text", element, breadcrumbs );
+				handleElement(tune, multiLineVars, "text", element, breadcrumbs, element.elements !== undefined );
 				break;
 			default:
 				console.log("MEI: element type ignored.", element.type);
@@ -96,7 +97,13 @@ var durationTranslation = {
 	'8': 1/8
 };
 
-function handleElement(tune, multiLineVars, type, attributes, breadcrumbs) {
+var accidentalTranslation = {
+	'f': "flat",
+	'n': "natural",
+	's': "sharp",
+};
+
+function handleElement(tune, multiLineVars, type, attributes, breadcrumbs, hasChildren) {
 	switch (type) {
 		case "body":
 		case "mdiv":
@@ -121,8 +128,17 @@ function handleElement(tune, multiLineVars, type, attributes, breadcrumbs) {
 			if (breadcrumbs.indexOf("pgHead") >= 0) {
 				// TODO-PER: the title isn't clearly marked, so just assume that text in the header is a title.
 				tune.addMetaText('title', attributes.text);
+			} else if (breadcrumbs.indexOf("harm") >= 0) {
+				var target = multiLineVars.noteIds[multiLineVars.harmId];
+				if (target)
+					target.chord = [{name: attributes.text, position: 'default'}];
+				else
+					console.log("MEI Element (no target)", type, attributes, breadcrumbs);
 			} else
 				console.log("MEI Element", type, attributes, breadcrumbs);
+			break;
+		case "harm":
+			multiLineVars.harmId = attributes.startid.substring(1);
 			break;
 		case "sb":
 			tune.startNewLine({ startChar: -1, endChar: -1, clef: multiLineVars.clef, key: multiLineVars.key });
@@ -130,17 +146,25 @@ function handleElement(tune, multiLineVars, type, attributes, breadcrumbs) {
 		case "staffGrp":
 			tune.startNewLine({ startChar: -1, endChar: -1, clef: multiLineVars.clef, key: multiLineVars.key });
 			break;
+		case "accid":
+			if (multiLineVars.partialNote)
+				multiLineVars.partialNote.pitches[0].accidental = accidentalTranslation[attributes.accid];
+			else
+				console.log("ACCID", attributes);
+			break;
 		case "note":
-			//dur: "8", oct: "4", pname: "a"
 			var note= attributes.pname + attributes.oct;
 			var pitch = noteTranslation[note];
 			if (pitch === undefined)
 				console.log("PITCH:", attributes);
-			tune.appendElement('note', -1, -1,
-				{
-					duration: durationTranslation[attributes.dur],
-					pitches: [ { pitch: pitch } ],
-				});
+			var noteObj = {
+				duration: durationTranslation[attributes.dur],
+				pitches: [ { pitch: pitch } ],
+			};
+			if (hasChildren)
+				multiLineVars.partialNote = noteObj;
+			else
+				multiLineVars.noteIds[attributes['xml:id']] = tune.appendElement('note', -1, -1, noteObj);
 			break;
 		default:
 			console.log("MEI Element", type, attributes, breadcrumbs);
@@ -159,6 +183,7 @@ function popElement(tune, multiLineVars, type, attributes, breadcrumbs) {
 		case "staffGrp":
 		case "scoreDef":
 		case "layer":
+		case "harm":
 			// Don't need to do anything for these elements
 			break;
 		case "measure":
@@ -174,6 +199,11 @@ function popElement(tune, multiLineVars, type, attributes, breadcrumbs) {
 			break;
 		case "beam":
 			tune.endBeamOnMostRecentNote();
+			break;
+		case "note":
+			if (multiLineVars.partialNote)
+				multiLineVars.noteIds[attributes['xml:id']] = tune.appendElement('note', -1, -1, multiLineVars.partialNote);
+			delete multiLineVars.partialNote;
 			break;
 		default:
 			console.log("MEI Pop", type, attributes, breadcrumbs);

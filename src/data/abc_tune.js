@@ -643,6 +643,7 @@ var Tune = function() {
 		delete hashParams.end_beam;	// We don't want this temporary variable hanging around.
 		delete hashParams.force_end_beam_last;	// We don't want this temporary variable hanging around.
 		pushNote(hashParams);
+		return hashParams;
 	};
 
 	this.appendStartingElement = function(type, startChar, endChar, hashParams2)
