@@ -103,6 +103,30 @@ var accidentalTranslation = {
 	's': "sharp",
 };
 
+var accidentalTranslation2 = {
+	'f': "b",
+	'n': "",
+	's': "#",
+};
+
+var barTranslation = {
+	'single': 'bar_thin',
+	'end': 'bar_thin_thick',
+};
+
+// TODO-PER: fill in the rest of these.
+var keySigTranslation = {
+	'1f': [{"acc":"flat","note":"B", verticalPos: 6 }],
+	'2f': [{"acc":"flat","note":"B", verticalPos: 6 },{"acc":"flat","note":"e", verticalPos: 9 }],
+	'3f': [{"acc":"flat","note":"B", verticalPos: 6 },{"acc":"flat","note":"e", verticalPos: 9 },{"acc":"flat","note":"A", verticalPos: 5 }],
+};
+
+// TODO-PER: fill in the rest of these.
+var keyModeTranslation = {
+	'major': '',
+	'minor': 'm'
+};
+
 function handleElement(tune, multiLineVars, type, attributes, breadcrumbs, hasChildren) {
 	switch (type) {
 		case "body":
@@ -121,8 +145,16 @@ function handleElement(tune, multiLineVars, type, attributes, breadcrumbs, hasCh
 			break;
 		case "scoreDef":
 			multiLineVars.clef = { type: clefTranslation[attributes["clef.shape"]], verticalPos: 0 };
-			//TODO-PER: use these to create the key: key.mode: "major", key.pname: "c"}
-			multiLineVars.key = {accidentals: [], root: 'none', acc: '', mode: '' };
+			var key = attributes['key.pname'] + attributes['key.accid'] + attributes['key.mode'];
+			if (attributes['meter.sym'] === 'common')
+				multiLineVars.meter = { type: "common_time"};
+			else if (attributes['meter.sym'] === 'cut')
+				multiLineVars.meter = { type: "cut_time"};
+			else if (attributes['meter.count'])
+				multiLineVars.meter = { type: "specified", value: [ { num: attributes['meter.count'], den: attributes['meter.unit'] } ] };
+			if (attributes['key.pname']) {
+				multiLineVars.key = {accidentals: keySigTranslation[attributes['key.sig']], root: attributes['key.pname'].toUpperCase(), acc: accidentalTranslation2[attributes['key.accid']], mode: keyModeTranslation[attributes['key.mode']]};
+			}
 			break;
 		case "text":
 			if (breadcrumbs.indexOf("pgHead") >= 0) {
@@ -138,13 +170,17 @@ function handleElement(tune, multiLineVars, type, attributes, breadcrumbs, hasCh
 				console.log("MEI Element", type, attributes, breadcrumbs);
 			break;
 		case "harm":
-			multiLineVars.harmId = attributes.startid.substring(1);
+			var startid = attributes.startid;
+			if (startid)
+				multiLineVars.harmId = startid.substring(1);
+			else
+				console.log("harm (no id)", attributes);
 			break;
 		case "sb":
-			tune.startNewLine({ startChar: -1, endChar: -1, clef: multiLineVars.clef, key: multiLineVars.key });
+			tune.startNewLine({ startChar: -1, endChar: -1, clef: multiLineVars.clef, key: multiLineVars.key, meter: multiLineVars.meter });
 			break;
 		case "staffGrp":
-			tune.startNewLine({ startChar: -1, endChar: -1, clef: multiLineVars.clef, key: multiLineVars.key });
+			tune.startNewLine({ startChar: -1, endChar: -1, clef: multiLineVars.clef, key: multiLineVars.key, meter: multiLineVars.meter });
 			break;
 		case "accid":
 			if (multiLineVars.partialNote)
@@ -188,8 +224,11 @@ function popElement(tune, multiLineVars, type, attributes, breadcrumbs) {
 			break;
 		case "measure":
 			if (attributes.right) {
-				// TODO-PER: do types of bar lines.
-				tune.appendElement('bar', -1, -1, { type: 'bar_thin' });
+				var barType = barTranslation[attributes.right];
+				if (barType)
+					tune.appendElement('bar', -1, -1, { type: barType });
+				else
+					console.log("MEI Pop (unknown bar type)", type, attributes, breadcrumbs);
 			} else {
 				console.log("MEI Pop", type, attributes, breadcrumbs);
 			}
