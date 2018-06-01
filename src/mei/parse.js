@@ -144,7 +144,10 @@ function handleElement(tune, multiLineVars, type, attributes, breadcrumbs, hasCh
 			// elements that don't have an immediate action.
 			break;
 		case "scoreDef":
-			multiLineVars.clef = { type: clefTranslation[attributes["clef.shape"]], verticalPos: 0 };
+			var clef = attributes["clef.shape"] ? clefTranslation[attributes["clef.shape"]] : 'treble';
+			if (!clef)
+				clef = attributes["clef.shape"];
+			multiLineVars.clef = { type: clef, verticalPos: 0 };
 			var key = attributes['key.pname'] + attributes['key.accid'] + attributes['key.mode'];
 			if (attributes['meter.sym'] === 'common')
 				multiLineVars.meter = { type: "common_time"};
