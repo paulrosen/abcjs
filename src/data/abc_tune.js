@@ -67,6 +67,7 @@ var Tune = function() {
 							if (meter.value.length > 0) {
 								var num = parseInt(meter.value[0].num, 10);
 								var den = parseInt(meter.value[0].den, 10);
+								if (num === 3 && den === 8) return 3/8;
 								if (num === 6 && den === 8) return 3/8;
 								if (num === 9 && den === 8) return 3/8;
 								if (num === 12 && den === 8) return 3/8;

@@ -71,11 +71,32 @@ var animation = {};
 		if (options.bpm)
 			bpm = options.bpm;
 		else {
-			if (tune && tune.metaText && tune.metaText.tempo && tune.metaText.tempo.bpm)
-				bpm = tune.metaText.tempo.bpm;
+			if (tune && tune.metaText && tune.metaText.tempo && tune.metaText.tempo.bpm) {
+				var meter = tune.getMeter();
+				var num = 4;
+				var den = 4;
+				if (meter) {
+					if (meter.type === 'specified') {
+						num = meter.value[0].num;
+						den = meter.value[0].den;
+					} else if (meter.type === 'cut_time') {
+						num = 2;
+						den = 2;
+					} else if (meter.type === 'common_time') {
+						num = 4;
+						den = 4;
+					}
+				}
+				var duration = tune.metaText.tempo.duration[0];
+				var multiplier = den * duration;
+				bpm = tune.metaText.tempo.bpm * multiplier;
+				if (den === 8 || den === "8") // TODO-PER: This is a hack to correct for an unknown problem downstream with compound meters.
+					bpm *= tune.getBeatLength();
+			}
 			else
 				bpm = 120; // Just set it to something. The user should have set this.
 		}
+
 		return bpm;
 	}
 
