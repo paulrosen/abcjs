@@ -39,6 +39,9 @@ function traverseTree(tune, multiLineVars, elements, breadcrumbs) {
 			case "text":
 				handleElement(tune, multiLineVars, "text", element, breadcrumbs, element.elements !== undefined );
 				break;
+			case "comment":
+				// Can just ignore this
+				break;
 			default:
 				console.log("MEI: element type ignored.", element.type);
 		}
@@ -112,6 +115,7 @@ var accidentalTranslation2 = {
 var barTranslation = {
 	'single': 'bar_thin',
 	'end': 'bar_thin_thick',
+	'rptend': 'bar_right_repeat',
 };
 
 // TODO-PER: fill in the rest of these.
@@ -141,6 +145,7 @@ function handleElement(tune, multiLineVars, type, attributes, breadcrumbs, hasCh
 		case "measure":
 		case "beam":
 		case "layer":
+		case 'instrDef': // TODO-PER: This has midi controls and could be handled: { midi.channel: "1", midi.pan: "63", midi.volume: "100" }
 			// elements that don't have an immediate action.
 			break;
 		case "scoreDef":
@@ -205,6 +210,9 @@ function handleElement(tune, multiLineVars, type, attributes, breadcrumbs, hasCh
 			else
 				multiLineVars.noteIds[attributes['xml:id']] = tune.appendElement('note', -1, -1, noteObj);
 			break;
+		case 'ending':
+			multiLineVars.startEnding = attributes.label;
+			break;
 		default:
 			console.log("MEI Element", type, attributes, breadcrumbs);
 			break;
@@ -223,18 +231,23 @@ function popElement(tune, multiLineVars, type, attributes, breadcrumbs) {
 		case "scoreDef":
 		case "layer":
 		case "harm":
+		case "staffDef":
 			// Don't need to do anything for these elements
 			break;
 		case "measure":
-			if (attributes.right) {
-				var barType = barTranslation[attributes.right];
-				if (barType)
-					tune.appendElement('bar', -1, -1, { type: barType });
-				else
-					console.log("MEI Pop (unknown bar type)", type, attributes, breadcrumbs);
-			} else {
-				console.log("MEI Pop", type, attributes, breadcrumbs);
+			var barType = attributes.right ? barTranslation[attributes.right] : 'bar_thin';
+			if (barType) {
+				var attr = {type: barType};
+				if (multiLineVars.startEnding) {
+					attr.startEnding = multiLineVars.startEnding;
+					delete multiLineVars.startEnding;
+				}
+				if (attributes.label)
+					attr.startEnding = attributes.label;
+				tune.appendElement('bar', -1, -1, attr);
 			}
+			else
+				console.log("MEI Pop (unknown bar type)", type, attributes, breadcrumbs);
 			break;
 		case "staff":
 			tune.closeLine();
