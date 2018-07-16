@@ -24,6 +24,7 @@ var TripletElem;
 	TripletElem = function TripletElem(number, anchor1) {
 		this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
 		this.number = number;
+		this.duration = (''+anchor1.parent.durationClass).replace(/\./, '-');
 	};
 
 	TripletElem.prototype.isClosed = function() {
@@ -74,25 +75,25 @@ var TripletElem;
 			xTextPos = this.anchor1.parent.beam.xAtMidpoint(left, this.anchor2.x);
 		} else {
 			xTextPos = this.anchor1.x + (this.anchor2.x + this.anchor2.w - this.anchor1.x) / 2;
-			drawBracket(renderer, this.anchor1.x, this.startNote, this.anchor2.x + this.anchor2.w, this.endNote);
+			drawBracket(renderer, this.anchor1.x, this.startNote, this.anchor2.x + this.anchor2.w, this.endNote, this.duration);
 		}
-		renderer.renderText(xTextPos, renderer.calcY(this.yTextPos), "" + this.number, 'tripletfont', "triplet", "middle", true);
+		renderer.renderText(xTextPos, renderer.calcY(this.yTextPos), "" + this.number, 'tripletfont', renderer.addClasses('triplet d'+this.duration), "middle", true);
 	};
 
-	function drawLine(renderer, l, t, r, b) {
+	function drawLine(renderer, l, t, r, b, duration) {
 		var pathString = sprintf("M %f %f L %f %f",
 			l, t, r, b);
-		renderer.printPath({path: pathString, stroke: "#000000", 'class': renderer.addClasses('triplet')});
+		renderer.printPath({path: pathString, stroke: "#000000", 'class': renderer.addClasses('triplet d'+duration)});
 	}
 
-	function drawBracket(renderer, x1, y1, x2, y2) {
+	function drawBracket(renderer, x1, y1, x2, y2, duration) {
 		y1 = renderer.calcY(y1);
 		y2 = renderer.calcY(y2);
 		var bracketHeight = 5;
 
 		// Draw vertical lines at the beginning and end
-		drawLine(renderer, x1, y1, x1, y1 + bracketHeight);
-		drawLine(renderer, x2, y2, x2, y2 + bracketHeight);
+		drawLine(renderer, x1, y1, x1, y1 + bracketHeight, duration);
+		drawLine(renderer, x2, y2, x2, y2 + bracketHeight, duration);
 
 		// figure out midpoints to draw the broken line.
 		var midX = x1 + (x2-x1)/2;
@@ -101,10 +102,10 @@ var TripletElem;
 		var slope = (y2 - y1) / (x2 - x1);
 		var leftEndX = midX - gapWidth;
 		var leftEndY = y1 + (leftEndX - x1) * slope;
-		drawLine(renderer, x1, y1, leftEndX, leftEndY);
+		drawLine(renderer, x1, y1, leftEndX, leftEndY, duration);
 		var rightStartX = midX + gapWidth;
 		var rightStartY = y1 + (rightStartX - x1) * slope;
-		drawLine(renderer, rightStartX, rightStartY, x2, y2);
+		drawLine(renderer, rightStartX, rightStartY, x2, y2, duration);
 	}
 })();
 
