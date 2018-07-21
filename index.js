@@ -14,6 +14,7 @@ Object.keys(tuneBook).forEach(function (key) {
 });
 
 abcjs.renderAbc = require('./src/api/abc_tunebook_svg');
+abcjs.TimingCallbacks = require('./src/api/abc_timing_callbacks');
 
 var editor = require('./src/edit/abc_editor');
 abcjs['Editor'] = editor;
