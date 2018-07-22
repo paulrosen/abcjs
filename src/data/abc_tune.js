@@ -963,7 +963,7 @@ var Tune = function() {
 		return arr;
 	}
 
-	this.addElementToEvents = function(eventHash, element, voiceTimeMilliseconds, top, height, timeDivider, isTiedState) {
+	this.addElementToEvents = function(eventHash, element, voiceTimeMilliseconds, top, height, timeDivider, isTiedState, nextIsBar) {
 		if (element.hint)
 			return { isTiedState: undefined, duration: 0 };
 		var realDuration = element.durationClass ? element.durationClass : element.duration;
@@ -1000,11 +1000,15 @@ var Tune = function() {
 					eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);
 					eventHash["event" + voiceTimeMilliseconds].elements.push(es);
 				}
+				if (nextIsBar) {
+					eventHash["event" + voiceTimeMilliseconds].measureStart = true;
+					nextIsBar = false;
+				}
 				if (isTiedToNext)
 					isTiedState = voiceTimeMilliseconds;
 			}
 		}
-		return { isTiedState: isTiedState, duration: realDuration / timeDivider };
+		return { isTiedState: isTiedState, duration: realDuration / timeDivider, nextIsBar: nextIsBar || element.type === 'bar' };
 	};
 
 	this.makeVoicesArray = function() {
@@ -1041,6 +1045,7 @@ var Tune = function() {
 		// The units we are scanning are in notation units (i.e. 0.25 is a quarter note)
 		var time = startingDelay;
 		var isTiedState;
+		var nextIsBar = true;
 		var voices = this.makeVoicesArray();
 		for (var v = 0; v < voices.length; v++) {
 			var voiceTime = time;
@@ -1056,8 +1061,9 @@ var Tune = function() {
 					var beatsPerSecond = bpm / 60;
 					timeDivider = beatLength * beatsPerSecond;
 				}
-				var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, timeDivider, isTiedState);
+				var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, timeDivider, isTiedState, nextIsBar);
 				isTiedState = ret.isTiedState;
+				nextIsBar = ret.nextIsBar;
 				voiceTime += ret.duration;
 				voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 				if (element.type === 'bar') {
@@ -1070,8 +1076,9 @@ var Tune = function() {
 							endingRepeatElem = elem;
 						for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
 							element = elements[el2].elem;
-							ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, timeDivider, isTiedState);
+							ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, timeDivider, isTiedState, nextIsBar);
 							isTiedState = ret.isTiedState;
+							nextIsBar = ret.nextIsBar;
 							voiceTime += ret.duration;
 							voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 						}
