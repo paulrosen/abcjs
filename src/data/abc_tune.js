@@ -864,6 +864,25 @@ var Tune = function() {
 		return { type: "common_time", };
 	};
 
+	this.getMeterFraction = function() {
+		var meter = this.getMeter();
+		var num = 4;
+		var den = 4;
+		if (meter) {
+			if (meter.type === 'specified') {
+				num = meter.value[0].num;
+				den = meter.value[0].den;
+			} else if (meter.type === 'cut_time') {
+				num = 2;
+				den = 2;
+			} else if (meter.type === 'common_time') {
+				num = 4;
+				den = 4;
+			}
+		}
+		return { num: num, den: den };
+	};
+
 	this.getCurrentVoice = function() {
 		if (this.lines[this.lineNum] !== undefined && this.lines[this.lineNum].staff[this.staffNum] !== undefined && this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum] !== undefined)
 			return this.lines[this.lineNum].staff[this.staffNum].voices[this.voiceNum];
