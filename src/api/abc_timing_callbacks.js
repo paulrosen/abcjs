@@ -72,6 +72,10 @@ var TimingCallbacks = function(target, params) {
 		self.startTime = null;
 		self.pausedTime = null;
 	};
+	self.stop = function() {
+		self.pause();
+		self.reset();
+	};
 
 };
 
