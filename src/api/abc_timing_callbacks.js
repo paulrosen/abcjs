@@ -24,36 +24,36 @@ var TimingCallbacks = function(target, params) {
 	self.justUnpaused = false;
 
 	self.doTiming = function(timestamp) {
-		if (!self.startTime) self.startTime = timestamp;
-		var currentTime = timestamp - self.startTime;
-		currentTime += 50; // Add a little slop because this function isn't called exactly.
-
-		if (self.isPaused) {
-			self.pausedTime = timestamp;
-		}
-
-		if (self.justUnpaused) {
-			self.justUnpaused = false;
+		if (!self.startTime) {
+			self.startTime = timestamp;
+		} else if (self.justUnpaused) {
 			// Add the amount we paused to the start time to get the right place.
 			var timePaused = (timestamp - self.pausedTime);
 			self.startTime += timePaused;
-			currentTime += timePaused;
 		}
+		self.justUnpaused = false;
 
-		if (self.currentBeat * self.millisecondsPerBeat < currentTime) {
-			if (self.beatCallback)
-				self.beatCallback(self.currentBeat);
-			self.currentBeat++;
+		if (self.isPaused) {
+			self.pausedTime = timestamp;
+		} else {
+			var currentTime = timestamp - self.startTime;
+			currentTime += 50; // Add a little slop because this function isn't called exactly.
+
+			if (self.currentBeat * self.millisecondsPerBeat < currentTime) {
+				if (self.beatCallback)
+					self.beatCallback(self.currentBeat);
+				self.currentBeat++;
+			}
+
+			while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
+				if (self.eventCallback)
+					self.eventCallback(target.noteTimings[self.currentEvent]);
+				self.currentEvent++;
+			}
+
+			if (currentTime < self.lastMoment)
+				requestAnimationFrame(self.doTiming);
 		}
-
-		while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
-			if (self.eventCallback)
-				self.eventCallback(target.noteTimings[self.currentEvent]);
-			self.currentEvent++;
-		}
-
-		if (!self.isPaused && currentTime < self.lastMoment)
-			requestAnimationFrame(self.doTiming);
 	};
 
 	self.start = function() {
