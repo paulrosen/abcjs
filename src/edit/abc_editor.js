@@ -344,7 +344,7 @@ Editor.prototype.modelChanged = function() {
 // Call this to reparse in response to the printing parameters changing
 Editor.prototype.paramChanged = function(engraverParams) {
 	if (engraverParams) {
-		for (key in engraverParams) {
+		for (var key in engraverParams) {
 			if (engraverParams.hasOwnProperty(key)) {
 				this.abcjsParams[key] = engraverParams[key];
 			}
