@@ -19,6 +19,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `ABCJS.midi.restartPlaying()` | Moves the progress back to the beginning for whatever is currently playing. |
 | `ABCJS.midi.setRandomProgress(percent)` | Moves the progress to whatever percent is passed in for whatever is currently playing. |
 | `ABCJS.midi.setLoop(targetEl, state)` | Sets the "loop" mode for the element passed in. State should be true or false. |
+| `new abcjs.TimingCallbacks(outputElement, timingParams)` | returns an object with the properties `start()`, `stop()`, `pause()`, `reset()`. This will cause callback functions to be called for each beat and for each note. (see timingParams for more details) |
 
 | Parameters | Description |
 | ------------- | ----------- |
@@ -150,12 +151,18 @@ Note that the default soundfont that is used by abcjs contains sounds for pitche
 | `scrollHorizontal` | false | Should there be a horizontal scrollbar if the music is wider than the viewport? (requires viewportHorizontal to be true.) |
 | `oneSvgPerLine` | false | Should each system of staves be rendered to a different SVG? This makes controlling with CSS easier, and makes it possible to paginate cleanly.
 
+| `timingParams` | Default | Description |
+| `qpm` | whatever is in the Q: field | Number of beats per minute. |
+| `extraMeasuresAtBeginning` | 0 | Don't start the callbacks right away, but insert these number of measures first. |
+| `beatCallback` | null | Called for each beat passing the beat number (starting at 0). |
+| `eventCallback` | null | Called for each event (either a note, a rest, or a chord, and notes in separate voices are grouped together.) |
+
 | `animationParams` | Default | Description |
 | ------------- | ----------- | ----------- |
 | `hideFinishedMeasures` | false | true or false |
 | `hideCurrentMeasure` | false | true or false |
 | `showCursor` | false | true or false |
-| `bpm` | whatever is in the Q: field | number of beats per minute. |
+| `bpm` | whatever is in the Q: field | Number of beats per minute. |
 
 NOTE: To use animation, you MUST have `{ add_classes: true }` in the `engraverParams`. Also, the cursor is not visible unless you add some css. Often this will be something like either `.cursor { background-color: #ffffc0; opacity: 0.5 }` or `.cursor { border-left: 1px solid black; }`
 

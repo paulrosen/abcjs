@@ -92,17 +92,21 @@ If you want to include MIDI playback, then use `abcjs-midi`. This is a superset 
 
 If you already have ABC notation on your page and don't want to modify the page more than you have to, then you can use `abcjs-plugin`, which will render all ABC that it finds on the page on page load, simply by including one line: the line to include the script. Another use of this is if you have a comment section on a blog, then you can allow users to post ABC tunes and they will appear as sheet music automatically.
 
+If you want to use the plugin, but also want MIDI, you can use `abcjs-plugin-midi`. This only works on relatively modern browsers. This also requires some CSS to be added to see the MIDI control.
+
 If you are looking at someone else's website and see ABC on the page and want to see what it looks like in standard notation, you can install the greasemonkey script in FireFox or Chrome and it will render the ABC for you.
 
 Here are the latest versions. You can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_5.1.2-min.js)
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_5.2.0-min.js)
 
-- [Basic+MIDI](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_midi_5.1.2-min.js)
+- [Basic+MIDI](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_midi_5.2.0-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.1.2-min.js)
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.2.0-min.js)
 
-- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.1.2.user.js)
+- [Plugin+MIDI](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin-midi_5.2.0-min.js)
+
+- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.2.0.user.js)
 
 - [Styles for the MIDI control](https://raw.github.com/paulrosen/abcjs/master/abcjs-midi.css)
 

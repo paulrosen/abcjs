@@ -1,14 +1,32 @@
+# Version 5.2.0
+
+## Features
+
+* Add a version of the plugin that supports midi.
+
+* Add getMeterFraction() convenience function.
+
+* Add a generic timer that provides callbacks in time with the music.
+
+* Small change to classes: add `abcjs-n...` to rests; add duration to triplet marks.
+
+## Bug fixes:
+
+* Correct the speed of animation in 3/8 meter.
+
+* Fix accidentally creating a global variable.
+
 # Version 5.1.2
 
 ## Bug fixes:
 
-Fix horizontal spacing calculation for multiline text.
+* Fix horizontal spacing calculation for multiline text.
 
 # Version 5.1.1
 
 ## Bug fixes:
 
-Fix regression for having the SVG responsive.
+* Fix regression for having the SVG responsive.
 
 # Version 5.1.0
 
