@@ -152,6 +152,7 @@ Note that the default soundfont that is used by abcjs contains sounds for pitche
 | `oneSvgPerLine` | false | Should each system of staves be rendered to a different SVG? This makes controlling with CSS easier, and makes it possible to paginate cleanly.
 
 | `timingParams` | Default | Description |
+| ------------- | ------- | ----------- |
 | `qpm` | whatever is in the Q: field | Number of beats per minute. |
 | `extraMeasuresAtBeginning` | 0 | Don't start the callbacks right away, but insert these number of measures first. |
 | `beatCallback` | null | Called for each beat passing the beat number (starting at 0). |
