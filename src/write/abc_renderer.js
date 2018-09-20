@@ -60,6 +60,15 @@ Renderer.prototype.reset = function() {
 	//             p[ps].sleep = 1;
 };
 
+Renderer.prototype.newTune = function(abcTune) {
+	this.abctune = abcTune; // TODO-PER: this is just to get the font info.
+	this.setVerticalSpace(abcTune.formatting);
+	this.measureNumber = null;
+	this.noteNumber = null;
+	this.setPrintMode(abcTune.media === 'print');
+	this.setPadding(abcTune);
+};
+
 Renderer.prototype.createElemSet = function() {
 	return this.paper.openGroup();
 };

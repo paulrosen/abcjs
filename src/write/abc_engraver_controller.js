@@ -110,16 +110,7 @@ EngraverController.prototype.adjustNonScaledItems = function (scale) {
 EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.lineNumber = null;
 
-	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
-	this.renderer.setVerticalSpace(abctune.formatting);
-	this.renderer.measureNumber = null;
-	this.renderer.noteNumber = null;
-	this.renderer.setPrintMode(abctune.media === 'print');
-	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
-	if (this.responsive === "resize") // The resizing will mess with the scaling, so just don't do it explicitly.
-		scale = undefined;
-	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
-	this.renderer.setPadding(abctune);
+	this.renderer.newTune(abctune);
 	this.engraver = new AbstractEngraver(abctune.formatting.bagpipes,this.renderer, tuneNumber);
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
@@ -128,6 +119,11 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	} else {
 		this.width = this.renderer.isPrint ? this.staffwidthPrint : this.staffwidthScreen;
 	}
+
+	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
+	if (this.responsive === "resize") // The resizing will mess with the scaling, so just don't do it explicitly.
+		scale = undefined;
+	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
 	this.adjustNonScaledItems(scale);
 
 	// Generate the raw staff line data
