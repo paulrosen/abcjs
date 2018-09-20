@@ -3,7 +3,7 @@ var TimingCallbacks = function(target, params) {
 	var self = this;
 	if (!params) params = {};
 	var qpm = params.qpm;
-	var extraMeasuresAtBeginning = params.extraMeasuresAtBeginning;
+	var extraMeasuresAtBeginning = params.extraMeasuresAtBeginning ? params.extraMeasuresAtBeginning : 0;
 	self.beatCallback = params.beatCallback; // This is called for each beat.
 	self.eventCallback = params.eventCallback;   // This is called for each note or rest encountered.
 
