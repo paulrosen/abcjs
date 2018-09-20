@@ -15,7 +15,7 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-/*global window, Math, Raphael */
+/*global Math */
 
 var spacing = require('./abc_spacing');
 var AbstractEngraver = require('./abc_abstract_engraver');
@@ -109,7 +109,6 @@ EngraverController.prototype.adjustNonScaledItems = function (scale) {
  */
 EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.lineNumber = null;
-	abctune.formatting.tripletfont = {face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none"}; // TODO-PER: This font isn't defined in the standard, so it's hardcoded here for now.
 
 	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
 	this.renderer.setVerticalSpace(abctune.formatting);

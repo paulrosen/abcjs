@@ -805,6 +805,7 @@ var Tune = function() {
 			if (params.staffscale) {
 				This.lines[This.lineNum].staff[This.staffNum].staffscale = params.staffscale;
 			}
+			if (params.tripletfont) This.lines[This.lineNum].staff[This.staffNum].tripletfont = params.tripletfont;
 			if (params.vocalfont) This.lines[This.lineNum].staff[This.staffNum].vocalfont = params.vocalfont;
 			if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
 			if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;

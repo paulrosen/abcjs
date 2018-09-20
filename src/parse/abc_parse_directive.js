@@ -27,6 +27,7 @@ var parseDirective = {};
 		multilineVars.partsfont  = { face: "\"Times New Roman\"", size: 15, weight: "normal", style: "normal", decoration: "none" };
 		multilineVars.repeatfont  = { face: "\"Times New Roman\"", size: 13, weight: "normal", style: "normal", decoration: "none" };
 		multilineVars.textfont  = { face: "\"Times New Roman\"", size: 16, weight: "normal", style: "normal", decoration: "none" };
+		multilineVars.tripletfont = {face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none"};
 		multilineVars.vocalfont  = { face: "\"Times New Roman\"", size: 13, weight: "bold", style: "normal", decoration: "none" };
 		multilineVars.wordsfont  = { face: "\"Times New Roman\"", size: 16, weight: "normal", style: "normal", decoration: "none" };
 
@@ -48,6 +49,7 @@ var parseDirective = {};
 		tune.formatting.partsfont  = multilineVars.partsfont;
 		tune.formatting.repeatfont  = multilineVars.repeatfont;
 		tune.formatting.textfont  = multilineVars.textfont;
+		tune.formatting.tripletfont  = multilineVars.tripletfont;
 		tune.formatting.vocalfont  = multilineVars.vocalfont;
 		tune.formatting.wordsfont  = multilineVars.wordsfont;
 	}
@@ -808,6 +810,7 @@ var parseDirective = {};
 				break;
 			case "gchordfont":
 			case "partsfont":
+			case "tripletfont":
 			case "vocalfont":
 			case "textfont":
 			case "annotationfont":
@@ -1006,6 +1009,7 @@ var parseDirective = {};
 					case "tempofont":
 					case "textfont":
 					case "voicefont":
+					case "tripletfont":
 					case "vocalfont":
 					case "wordsfont":
 					case "annotationfont":

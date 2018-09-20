@@ -169,6 +169,7 @@ var ParserLint = function() {
 			gchordfont: fontType,
 			measurefont: fontType,
 			repeatfont: fontType,
+			tripletfont: fontType,
 			vocalfont: fontType
 		}},
 		gracenotes: { type: 'array', optional: true, output: "noindex", items: {
@@ -503,6 +504,7 @@ var ParserLint = function() {
 			titlespace: { type: "number", optional: true },
 			topmargin: { type: "number", optional: true },
 			topspace: { type: "number", optional: true },
+			tripletfont: fontType,
 			vocalabove: { type: "boolean", optional: true },
 			vocalfont: fontType,
 			vocalspace: { type: "number", optional: true },
@@ -551,6 +553,7 @@ var ParserLint = function() {
 							bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 							clef: { type: 'object', optional: true, properties: clefProperties },
 							connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+							tripletfont: fontType,
 							vocalfont: fontType,
 							key: { type: 'object', optional: true, properties: keyProperties },
 							meter: { type: 'object', optional: true, properties: meterProperties },

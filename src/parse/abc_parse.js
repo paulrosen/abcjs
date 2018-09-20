@@ -101,6 +101,7 @@ var Parse = function() {
 				if (this.differentFont("annotationfont", defaultFonts)) addFont(el, 'annotationfont', this.annotationfont);
 				if (this.differentFont("gchordfont", defaultFonts)) addFont(el, 'gchordfont', this.gchordfont);
 				if (this.differentFont("vocalfont", defaultFonts)) addFont(el, 'vocalfont', this.vocalfont);
+				if (this.differentFont("tripletfont", defaultFonts)) addFont(el, 'tripletfont', this.tripletfont);
 			} else if (elType === 'bar') {
 				if (this.dynamicPosition !== 'auto') addPositioning(el, 'dynamicPosition', this.dynamicPosition);
 				if (this.chordPosition !== 'auto') addPositioning(el, 'chordPosition', this.chordPosition);
@@ -900,6 +901,8 @@ var Parse = function() {
 			params.name = multilineVars.currentVoice.name;
 		if (multilineVars.vocalfont)
 			params.vocalfont = multilineVars.vocalfont;
+		if (multilineVars.tripletfont)
+			params.tripletfont = multilineVars.tripletfont;
 		if (multilineVars.style)
 			params.style = multilineVars.style;
 		if (multilineVars.currentVoice) {
