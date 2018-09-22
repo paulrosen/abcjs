@@ -738,8 +738,15 @@ var parseDirective = {};
 				if (scratch !== null) return scratch;
 				break;
 			case "staffnonote":
-				scratch = addMultilineVarBool('staffnonote', cmd, tokens);
-				if (scratch !== null) return scratch;
+				// The sense of the boolean is opposite here. "0" means true.
+				if (tokens.length !== 1)
+					return "Directive staffnonote requires one parameter: 0 or 1";
+				if (tokens[0].token === '0')
+					multilineVars.staffnonote = true;
+				else if (tokens[0].token === '1')
+					multilineVars.staffnonote = false;
+				else
+					return "Directive staffnonote requires one parameter: 0 or 1 (received " + tokens[0].token + ')';
 				break;
 			case "printtempo":
 				scratch = addMultilineVarBool('printTempo', cmd, tokens);
