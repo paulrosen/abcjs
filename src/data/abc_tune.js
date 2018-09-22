@@ -231,47 +231,13 @@ var Tune = function() {
 
 		// if we exceeded the number of bars allowed on a line, then force a new line
 		if (barsperstaff) {
-			for (i = 0; i < this.lines.length; i++) {
-				if (this.lines[i].staff !== undefined) {
-					for (s = 0; s < this.lines[i].staff.length; s++) {
-						var permanentItems = [];
-						for (v = 0; v < this.lines[i].staff[s].voices.length; v++) {
-							var voice = this.lines[i].staff[s].voices[v];
-							var barNumThisLine = 0;
-							for (var n = 0; n < voice.length; n++) {
-								if (voice[n].el_type === 'bar') {
-									barNumThisLine++;
-									if (barNumThisLine >= barsperstaff) {
-										// push everything else to the next line, if there is anything else,
-										// and there is a next line. If there isn't a next line, create one.
-										if (n < voice.length - 1) {
-											if (i === this.lines.length - 1) {
-												var cp = JSON.parse(JSON.stringify(this.lines[i]));
-												this.lines.push(parseCommon.clone(cp));
-												for (var ss = 0; ss < this.lines[i+1].staff.length; ss++) {
-													for (var vv = 0; vv < this.lines[i+1].staff[ss].voices.length; vv++)
-														this.lines[i+1].staff[ss].voices[vv] = [];
-												}
-											}
-											var startElement = n + 1;
-											var section = this.lines[i].staff[s].voices[v].slice(startElement);
-											this.lines[i].staff[s].voices[v] = this.lines[i].staff[s].voices[v].slice(0, startElement);
-											this.lines[i+1].staff[s].voices[v] = permanentItems.concat(section.concat(this.lines[i+1].staff[s].voices[v]));
-										}
-									}
-								} else if (!voice[n].duration) {
-									permanentItems.push(voice[n]);
-								}
-							}
-
-						}
-					}
-				}
+			while (wrapMusicLines(this.lines, barsperstaff)) {
+				// This will keep wrapping until the end of the piece.
 			}
 		}
 
 		// If we were passed staffnonote, then we want to get rid of all staffs that contain only rests.
-		if (barsperstaff) {
+		if (staffnonote) {
 			anyDeleted = false;
 			for (i = 0; i < this.lines.length; i++) {
 				if (this.lines[i].staff !== undefined) {
@@ -467,6 +433,49 @@ var Tune = function() {
 //						el.verticalPos -= 7;
 //				}
 			//}
+		}
+
+		function wrapMusicLines(lines, barsperstaff) {
+			for (i = 0; i < lines.length; i++) {
+				if (lines[i].staff !== undefined) {
+					for (s = 0; s < lines[i].staff.length; s++) {
+						var permanentItems = [];
+						for (v = 0; v < lines[i].staff[s].voices.length; v++) {
+							var voice = lines[i].staff[s].voices[v];
+							var barNumThisLine = 0;
+							for (var n = 0; n < voice.length; n++) {
+								if (voice[n].el_type === 'bar') {
+									barNumThisLine++;
+									if (barNumThisLine >= barsperstaff) {
+										// push everything else to the next line, if there is anything else,
+										// and there is a next line. If there isn't a next line, create one.
+										if (n < voice.length - 1) {
+											var nextLine = getNextMusicLine(lines, i);
+											if (!nextLine) {
+												var cp = JSON.parse(JSON.stringify(lines[i]));
+												lines.push(parseCommon.clone(cp));
+												nextLine = lines[lines.length - 1];
+												for (var ss = 0; ss < nextLine.staff.length; ss++) {
+													for (var vv = 0; vv < nextLine.staff[ss].voices.length; vv++)
+														nextLine.staff[ss].voices[vv] = [];
+												}
+											}
+											var startElement = n + 1;
+											var section = lines[i].staff[s].voices[v].slice(startElement);
+											lines[i].staff[s].voices[v] = lines[i].staff[s].voices[v].slice(0, startElement);
+											nextLine.staff[s].voices[v] = permanentItems.concat(section.concat(nextLine.staff[s].voices[v]));
+											return true;
+										}
+									}
+								} else if (!voice[n].duration) {
+									permanentItems.push(voice[n]);
+								}
+							}
+						}
+					}
+				}
+			}
+			return false;
 		}
 
 		function getNextMusicLine(lines, currentLine) {
