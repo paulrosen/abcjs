@@ -133,6 +133,7 @@ var Tune = function() {
 	};
 
 	this.resolveOverlays = function() {
+		var madeChanges = false;
 		for (var i = 0; i < this.lines.length; i++) {
 			var line = this.lines[i];
 			if (line.staff) {
@@ -147,7 +148,8 @@ var Tune = function() {
 						var snipStart = -1;
 						for (var kk = 0; kk < voice.length; kk++) {
 							var event = voice[kk];
-							if (event.el_type === "overlay") {
+							if (event.el_type === "overlay" && !inOverlay) {
+								madeChanges = true;
 								inOverlay = true;
 								snipStart = kk;
 								overlayVoice[k].hasOverlay = true;
@@ -156,6 +158,7 @@ var Tune = function() {
 									// delete the overlay events from this array without messing up this loop.
 									inOverlay = false;
 									overlayVoice[k].snip.push({ start: snipStart, len: kk - snipStart});
+									overlayVoice[k].voice.push(event); // Also end the overlay with the barline.
 								} else {
 									overlayVoice[k].voice.push({ el_type: "note", duration: durationThisBar, rest: {type: "invisible"}, startChar: event.startChar, endChar: event.endChar });
 									overlayVoice[k].voice.push(event);
@@ -167,10 +170,14 @@ var Tune = function() {
 								} else {
 									durationThisBar += event.duration;
 								}
-							} else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "style" || event.el_type === "transpose") {
+							} else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "overlay" || event.el_type === "style" || event.el_type === "transpose") {
 								// These types of events are duplicated on the overlay layer.
 								overlayVoice[k].voice.push(event);
 							}
+						}
+						if (overlayVoice[k].hasOverlay && overlayVoice[k].snip.length === 0) {
+							// there was no closing bar, so we didn't set the snip amount.
+							overlayVoice[k].snip.push({ start: snipStart, len: voice.length - snipStart});
 						}
 					}
 					for (k = 0; k < overlayVoice.length; k++) {
@@ -186,6 +193,7 @@ var Tune = function() {
 				}
 			}
 		}
+		return madeChanges;
 	};
 
 	this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote, currSlur) {
@@ -272,7 +280,9 @@ var Tune = function() {
 		}
 
 		// If there are overlays, create new voices for them.
-		this.resolveOverlays();
+		while (this.resolveOverlays()) {
+			// keep resolving overlays as long as any are found.
+		}
 
 		function cleanUpSlursInLine(line) {
 			var x;
