@@ -219,6 +219,29 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 | abcjs-top-line | This marks the top line of each staff. This is useful if you are trying to find where on the page the music has been drawn. |
 | abcjs-top-of-system | This marks the top of each set of staves. This is useful if you are trying to find where on the page the music has been drawn. |
 
+To get a visual idea of how these classes are applied, see https://configurator.abcjs.net/classes and experiment.
+
+### changing colors
+
+If you want to just change everything to one other color, you can do something like:
+```
+<style>
+    svg {
+        fill: pink;
+        stroke: pink;
+    }
+<style>
+```
+If you want more control, you can use the classes. For instance, to turn only the horizontal staff lines pink, do this instead:
+```
+<style>
+    svg .abcjs-staff {
+        fill: pink;
+        stroke: pink;
+    }
+<style>
+```
+
 # abcjs editor
 
 Typical usage is:
