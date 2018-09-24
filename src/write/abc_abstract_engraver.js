@@ -83,7 +83,6 @@ AbstractEngraver.prototype.reset = function() {
 	this.roomtakenright = undefined;
 	this.startlimitelem = undefined;
 	this.stemdir = undefined;
-	this.voice = undefined;
 };
 
 AbstractEngraver.prototype.setStemHeight = function(heightInPixels) {
@@ -152,38 +151,38 @@ AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
 AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo, s) {
 // If the tempo is passed in, then the first element should get the tempo attached to it.
   for (var v = 0; v < abcstaff.voices.length; v++) {
-    this.voice = new VoiceElement(v,abcstaff.voices.length);
+    var voice = new VoiceElement(v,abcstaff.voices.length);
     if (v===0) {
-      this.voice.barfrom = (abcstaff.connectBarLines==="start" || abcstaff.connectBarLines==="continue");
-      this.voice.barto = (abcstaff.connectBarLines==="continue" || abcstaff.connectBarLines==="end");
+	    voice.barfrom = (abcstaff.connectBarLines==="start" || abcstaff.connectBarLines==="continue");
+	    voice.barto = (abcstaff.connectBarLines==="continue" || abcstaff.connectBarLines==="end");
     } else {
-      this.voice.duplicate = true; // bar lines and other duplicate info need not be created
+	    voice.duplicate = true; // bar lines and other duplicate info need not be created
     }
-    if (abcstaff.title && abcstaff.title[v]) this.voice.header=abcstaff.title[v];
+    if (abcstaff.title && abcstaff.title[v]) voice.header=abcstaff.title[v];
 	  var clef = createClef(abcstaff.clef, this.tuneNumber);
 	  if (clef) {
 		  if (v ===0 && abcstaff.barNumber) {
 			  this.addMeasureNumber(abcstaff.barNumber, clef);
 		  }
-		  this.voice.addChild(clef);
+		  voice.addChild(clef);
 	  }
 	  var keySig = createKeySignature(abcstaff.key, this.tuneNumber);
 	  if (keySig) {
-		  this.voice.addChild(keySig);
+		  voice.addChild(keySig);
 		  this.startlimitelem = keySig; // limit ties here
 	  }
     if (abcstaff.meter) {
 		var ts = createTimeSignature(abcstaff.meter, this.tuneNumber);
-		this.voice.addChild(ts);
+	    voice.addChild(ts);
 		this.startlimitelem = ts; // limit ties here
 	}
-	  if (this.voice.duplicate)
-	  	this.voice.children = []; // we shouldn't reprint the above if we're reusing the same staff. We just created them to get the right spacing.
+	  if (voice.duplicate)
+		  voice.children = []; // we shouldn't reprint the above if we're reusing the same staff. We just created them to get the right spacing.
     var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
-    staffgroup.addVoice(this.voice,s,staffLines);
+    staffgroup.addVoice(voice,s,staffLines);
 	  var isSingleLineStaff = staffLines === 1;
-	  this.createABCVoice(abcstaff.voices[v],tempo, s, v, isSingleLineStaff);
-	  staffgroup.setStaffLimits(this.voice);
+	  this.createABCVoice(abcstaff.voices[v],tempo, s, v, isSingleLineStaff, voice);
+	  staffgroup.setStaffLimits(voice);
             //Tony: Here I am following what staves need to be surrounded by the brace, by incrementing the length of the brace class.
             //So basically this keeps incrementing the number of staff surrounded by the brace until it sees "end".
             //This then gets processed in abc_staff_group_element.js, so that it will have the correct top and bottom coordinates for the brace.
@@ -199,37 +198,37 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
   }
 };
 
-AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSingleLineStaff) {
+AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSingleLineStaff, voice) {
   this.popCrossLineElems(s,v);
   this.stemdir = (this.isBagpipes)?"down":null;
   this.abcline = abcline;
   if (this.partstartelem) {
     this.partstartelem = new EndingElem("", null, null);
-    this.voice.addOther(this.partstartelem);
+	  voice.addOther(this.partstartelem);
   }
   for (var slur in this.slurs) {
     if (this.slurs.hasOwnProperty(slur)) {
       this.slurs[slur]= new TieElem(null, null, this.slurs[slur].above, this.slurs[slur].force, false);
 		if (hint) this.slurs[slur].setHint();
-        this.voice.addOther(this.slurs[slur]);
+	    voice.addOther(this.slurs[slur]);
     }
   }
   for (var i=0; i<this.ties.length; i++) {
     this.ties[i]=new TieElem(null, null, this.ties[i].above, this.ties[i].force, true);
 	  if (hint) this.ties[i].setHint();
-    this.voice.addOther(this.ties[i]);
+	  voice.addOther(this.ties[i]);
   }
 
   for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
   	var isFirstStaff = (s === 0);
-	  var abselems = this.createABCElement(isFirstStaff, isSingleLineStaff);
+	  var abselems = this.createABCElement(isFirstStaff, isSingleLineStaff, voice);
 	  if (abselems) {
     for (i=0; i<abselems.length; i++) {
       if (!this.tempoSet && tempo && !tempo.suppress) {
         this.tempoSet = true;
         abselems[i].addChild(new TempoElement(tempo, this.tuneNumber));
       }
-      this.voice.addChild(abselems[i]);
+	    voice.addChild(abselems[i]);
     }
     }
   }
@@ -262,27 +261,27 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSin
 	// }
 
 	// return an array of AbsoluteElement
-AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLineStaff) {
+AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLineStaff, voice) {
   var elemset = [];
   var elem = this.getElem();
   switch (elem.el_type) {
   case "note":
-    elemset = this.createBeam(isSingleLineStaff);
+    elemset = this.createBeam(isSingleLineStaff, voice);
     break;
   case "bar":
-    elemset[0] = this.createBarLine(elem, isFirstStaff);
-    if (this.voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
-//	  elemset[0].addChild(writeMeasureWidth(this.voice));
+    elemset[0] = this.createBarLine(voice, elem, isFirstStaff);
+    if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
+//	  elemset[0].addChild(writeMeasureWidth(voice));
     break;
   case "meter":
     elemset[0] = createTimeSignature(elem, this.tuneNumber);
 	  this.startlimitelem = elemset[0]; // limit ties here
-    if (this.voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
+    if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
     break;
   case "clef":
     elemset[0] = createClef(elem, this.tuneNumber);
 	  if (!elemset[0]) return null;
-    if (this.voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
+    if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
     break;
   case "key":
 	  var absKey = createKeySignature(elem, this.tuneNumber);
@@ -290,7 +289,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		  elemset[0] = absKey;
 		  this.startlimitelem = elemset[0]; // limit ties here
 	  }
-    if (this.voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
+    if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
     break;
   case "stem":
     this.stemdir=elem.direction;
@@ -329,7 +328,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
   return elemset;
 };
 
-AbstractEngraver.prototype.calcBeamDir = function(isSingleLineStaff) {
+AbstractEngraver.prototype.calcBeamDir = function(isSingleLineStaff, voice) {
 	if (this.stemdir) // If the user or voice is forcing the stem direction, we already know the answer.
 		return this.stemdir;
 	var beamelem = new BeamElem(this.stemHeight, this.stemdir);
@@ -337,7 +336,7 @@ AbstractEngraver.prototype.calcBeamDir = function(isSingleLineStaff) {
 	var oldPos = this.pos;
 	var abselem;
 	while (this.getElem()) {
-		abselem = this.createNote(this.getElem(), true, true, isSingleLineStaff);
+		abselem = this.createNote(this.getElem(), true, true, isSingleLineStaff, voice);
 		beamelem.add(abselem);
 		if (this.getElem().endBeam)
 			break;
@@ -348,21 +347,21 @@ AbstractEngraver.prototype.calcBeamDir = function(isSingleLineStaff) {
 	return dir ? "up" : "down";
 };
 
-AbstractEngraver.prototype.createBeam = function(isSingleLineStaff) {
+AbstractEngraver.prototype.createBeam = function(isSingleLineStaff, voice) {
   var abselemset = [];
 
   if (this.getElem().startBeam && !this.getElem().endBeam) {
-	  var dir = this.calcBeamDir(isSingleLineStaff);
+	  var dir = this.calcBeamDir(isSingleLineStaff, voice);
          var beamelem = new BeamElem(this.stemHeight, dir);
 	  if (hint) beamelem.setHint();
          var oldDir = this.stemdir;
          this.stemdir = dir;
 	  while (this.getElem()) {
-		  var abselem = this.createNote(this.getElem(), true, false, isSingleLineStaff);
+		  var abselem = this.createNote(this.getElem(), true, false, isSingleLineStaff, voice);
 		  abselemset.push(abselem);
 		  beamelem.add(abselem);
 		  if (this.triplet && this.triplet.isClosed()) {
-			  this.voice.addOther(this.triplet);
+			  voice.addOther(this.triplet);
 			  this.triplet = null;
 			  this.tripletmultiplier = 1;
 		  }
@@ -372,11 +371,11 @@ AbstractEngraver.prototype.createBeam = function(isSingleLineStaff) {
 		  this.pos++;
 	  }
          this.stemdir = oldDir;
-    this.voice.addBeam(beamelem);
+	  voice.addBeam(beamelem);
   } else {
-    abselemset[0] = this.createNote(this.getElem(), false, false, isSingleLineStaff);
+    abselemset[0] = this.createNote(this.getElem(), false, false, isSingleLineStaff, voice);
 	  if (this.triplet && this.triplet.isClosed()) {
-		  this.voice.addOther(this.triplet);
+		  voice.addOther(this.triplet);
 		  this.triplet = null;
 		  this.tripletmultiplier = 1;
 	  }
@@ -419,7 +418,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLed
 	}
 };
 
-AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingleLineStaff) { //stem presence: true for drawing stemless notehead
+AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingleLineStaff, voice) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var grace= null;
   this.roomtaken = 0; // room needed to the left of the note
@@ -454,7 +453,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
 
   if (elem.rest) {
     var restpitch = 7;
-    if (this.voice.voicetotal > 1) {
+    if (voice.voicetotal > 1) {
 	    if (this.stemdir === "down") restpitch = 3;
 	    if (this.stemdir === "up") restpitch = 11;
     }
@@ -605,7 +604,9 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
                 if (!dontDraw)
       notehead = this.createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -this.roomtaken, flag, dot, dotshiftx, 1);
       if (notehead) {
-      	if (elem.gracenotes && elem.gracenotes.length > 0)
+	      this.addSlursAndTies(abselem, elem.pitches[p], notehead, voice, hasStem ? dir : null);
+
+	      if (elem.gracenotes && elem.gracenotes.length > 0)
 			notehead.bottom = notehead.bottom - 1;	 // If there is a tie to the grace notes, leave a little more room for the note to avoid collisions.
 		  abselem.addHead(notehead);
 	  }
@@ -672,7 +673,9 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
 
       flag = (gracebeam) ? null : this.chartable.uflags[(this.isBagpipes)?5:3];
       grace = this.createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale);
-      abselem.addExtra(grace);
+	    this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up");
+
+	    abselem.addExtra(grace);
                 // PER: added acciaccatura slash
                 if (elem.gracenotes[i].acciaccatura) {
                         var pos = elem.gracenotes[i].verticalPos+7*gracescale;        // the same formula that determines the flag position.
@@ -696,17 +699,17 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
 
       if (i===0 && !this.isBagpipes && !(elem.rest && (elem.rest.type==="spacer"||elem.rest.type==="invisible"))) {
       	var isTie = (elem.gracenotes.length === 1 && grace.pitch === notehead.pitch);
-      	this.voice.addOther(new TieElem(grace, notehead, false, true, isTie));
+	      voice.addOther(new TieElem(grace, notehead, false, true, isTie));
 	  }
     }
 
     if (gracebeam) {
-      this.voice.addBeam(gracebeam);
+	    voice.addBeam(gracebeam);
     }
   }
 
   if (!dontDraw && elem.decoration) {
-	  this.decoration.createDecoration(this.voice, elem.decoration, abselem.top, (notehead)?notehead.w:0, abselem, this.roomtaken, dir, abselem.bottom, elem.positioning, this.hasVocals);
+	  this.decoration.createDecoration(voice, elem.decoration, abselem.top, (notehead)?notehead.w:0, abselem, this.roomtaken, dir, abselem.bottom, elem.positioning, this.hasVocals);
   }
 
   if (elem.barNumber) {
@@ -859,66 +862,68 @@ AbstractEngraver.prototype.createNoteHead = function(abselem, c, pitchelem, dir,
     abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
   }
 
-  if (pitchelem.endTie) {
-    if (this.ties[0]) {
-      this.ties[0].setEndAnchor(notehead);
-      this.ties = this.ties.slice(1,this.ties.length);
-    }
-  }
-
-  if (pitchelem.startTie) {
-    //PER: bug fix: var tie = new TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
-    var tie = new TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up",(this.stemdir==="down" || this.stemdir==="up"), true);
-	  if (hint) tie.setHint();
-
-	  this.ties[this.ties.length]=tie;
-    this.voice.addOther(tie);
-	  // HACK-PER: For the animation, we need to know if a note is tied to the next one, so here's a flag.
-	  // Unfortunately, only some of the notes in the current event might be tied, but this will consider it
-	  // tied if any one of them is. That will work for most cases.
-	  abselem.startTie = true;
-  }
-
-  if (pitchelem.endSlur) {
-    for (i=0; i<pitchelem.endSlur.length; i++) {
-      var slurid = pitchelem.endSlur[i];
-      var slur;
-      if (this.slurs[slurid]) {
-        slur = this.slurs[slurid];
-		  slur.setEndAnchor(notehead);
-        delete this.slurs[slurid];
-      } else {
-        slur = new TieElem(null, notehead, dir==="down",(this.stemdir==="up" || dir==="down") && this.stemdir!=="down", false);
-		  if (hint) slur.setHint();
-        this.voice.addOther(slur);
-      }
-      if (this.startlimitelem) {
-        slur.setStartX(this.startlimitelem);
-      }
-    }
-  }
-
-  if (pitchelem.startSlur) {
-    for (i=0; i<pitchelem.startSlur.length; i++) {
-      var slurid = pitchelem.startSlur[i].label;
-      //PER: bug fix: var slur = new TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
-      var slur = new TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", false, false);
-		if (hint) slur.setHint();
-      this.slurs[slurid]=slur;
-      this.voice.addOther(slur);
-    }
-  }
-
   return notehead;
 
 };
+
+	AbstractEngraver.prototype.addSlursAndTies = function(abselem, pitchelem, notehead, voice, dir) {
+		if (pitchelem.endTie) {
+			if (this.ties[0]) {
+				this.ties[0].setEndAnchor(notehead);
+				this.ties = this.ties.slice(1,this.ties.length);
+			}
+		}
+
+		if (pitchelem.startTie) {
+			//PER: bug fix: var tie = new TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
+			var tie = new TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up",(this.stemdir==="down" || this.stemdir==="up"), true);
+			if (hint) tie.setHint();
+
+			this.ties[this.ties.length]=tie;
+			voice.addOther(tie);
+			// HACK-PER: For the animation, we need to know if a note is tied to the next one, so here's a flag.
+			// Unfortunately, only some of the notes in the current event might be tied, but this will consider it
+			// tied if any one of them is. That will work for most cases.
+			abselem.startTie = true;
+		}
+
+		if (pitchelem.endSlur) {
+			for (var i=0; i<pitchelem.endSlur.length; i++) {
+				var slurid = pitchelem.endSlur[i];
+				var slur;
+				if (this.slurs[slurid]) {
+					slur = this.slurs[slurid];
+					slur.setEndAnchor(notehead);
+					delete this.slurs[slurid];
+				} else {
+					slur = new TieElem(null, notehead, dir==="down",(this.stemdir==="up" || dir==="down") && this.stemdir!=="down", false);
+					if (hint) slur.setHint();
+					voice.addOther(slur);
+				}
+				if (this.startlimitelem) {
+					slur.setStartX(this.startlimitelem);
+				}
+			}
+		}
+
+		if (pitchelem.startSlur) {
+			for (i=0; i<pitchelem.startSlur.length; i++) {
+				var slurid = pitchelem.startSlur[i].label;
+				//PER: bug fix: var slur = new TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
+				var slur = new TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", false, false);
+				if (hint) slur.setHint();
+				this.slurs[slurid]=slur;
+				voice.addOther(slur);
+			}
+		}
+	};
 
 AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
 	var measureNumHeight = this.renderer.getTextSize(number, "measurefont", 'bar-number');
 	abselem.addChild(new RelativeElement(number, 0, 0, 11+measureNumHeight.height / spacing.STEP, {type:"barNumber"}));
 };
 
-AbstractEngraver.prototype.createBarLine = function (elem, isFirstStaff) {
+AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) {
 // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
 
   var abselem = new AbsoluteElement(elem, 0, 10, 'bar', this.tuneNumber);
@@ -964,7 +969,7 @@ AbstractEngraver.prototype.createBarLine = function (elem, isFirstStaff) {
   }
 
   if (elem.decoration) {
-    this.decoration.createDecoration(this.voice, elem.decoration, 12, (thick)?3:1, abselem, 0, "down", 2, elem.positioning, this.hasVocals);
+    this.decoration.createDecoration(voice, elem.decoration, 12, (thick)?3:1, abselem, 0, "down", 2, elem.positioning, this.hasVocals);
   }
 
   if (thick) {
@@ -1000,7 +1005,7 @@ AbstractEngraver.prototype.createBarLine = function (elem, isFirstStaff) {
 	  var textWidth = this.renderer.getTextSize(elem.startEnding, "repeatfont", '').width;
 	  abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
     this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
-    this.voice.addOther(this.partstartelem);
+	  voice.addOther(this.partstartelem);
   }
 
   return abselem;
