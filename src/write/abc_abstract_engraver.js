@@ -81,7 +81,6 @@ AbstractEngraver.prototype.reset = function() {
 	this.pos = undefined;
 	this.roomtaken = undefined;
 	this.roomtakenright = undefined;
-	this.staffgroup = undefined;
 	this.startlimitelem = undefined;
 	this.stemdir = undefined;
 	this.voice = undefined;
@@ -136,21 +135,21 @@ AbstractEngraver.prototype.getNextElem = function() {
 	};
 
 AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
-    this.minY = 2; // PER: This is the lowest that any note reaches. It will be used to set the dynamics row.
+    this.minY = 2; // PER: This will be the lowest that any note reaches. It will be used to set the dynamics row.
 	// See if there are any lyrics on this line.
 	this.containsLyrics(staffs);
-  this.staffgroup = new StaffGroupElement();
+  var staffgroup = new StaffGroupElement();
 	this.tempoSet = false;
   for (var s = 0; s < staffs.length; s++) {
 	  if (hint)
 		  this.restoreState();
 	  hint = false;
-    this.createABCStaff(staffs[s], tempo, s);
+    this.createABCStaff(staffgroup, staffs[s], tempo, s);
   }
-  return this.staffgroup;
+  return staffgroup;
 };
 
-AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo, s) {
+AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo, s) {
 // If the tempo is passed in, then the first element should get the tempo attached to it.
   for (var v = 0; v < abcstaff.voices.length; v++) {
     this.voice = new VoiceElement(v,abcstaff.voices.length);
@@ -181,25 +180,26 @@ AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo, s) {
 	  if (this.voice.duplicate)
 	  	this.voice.children = []; // we shouldn't reprint the above if we're reusing the same staff. We just created them to get the right spacing.
     var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
-    this.staffgroup.addVoice(this.voice,s,staffLines);
-	  this.createABCVoice(abcstaff.voices[v],tempo, s, v);
-	  this.staffgroup.setStaffLimits(this.voice);
+    staffgroup.addVoice(this.voice,s,staffLines);
+	  var isSingleLineStaff = staffLines === 1;
+	  this.createABCVoice(abcstaff.voices[v],tempo, s, v, isSingleLineStaff);
+	  staffgroup.setStaffLimits(this.voice);
             //Tony: Here I am following what staves need to be surrounded by the brace, by incrementing the length of the brace class.
             //So basically this keeps incrementing the number of staff surrounded by the brace until it sees "end".
             //This then gets processed in abc_staff_group_element.js, so that it will have the correct top and bottom coordinates for the brace.
 			if(abcstaff.brace === "start"){
-				this.staffgroup.brace = new BraceElem(1, true);
+				staffgroup.brace = new BraceElem(1, true);
 			}
-			else if(abcstaff.brace === "end" && this.staffgroup.brace) {
-				this.staffgroup.brace.increaseStavesIncluded();
+			else if(abcstaff.brace === "end" && staffgroup.brace) {
+				staffgroup.brace.increaseStavesIncluded();
 			}
-			else if(abcstaff.brace === "continue" && this.staffgroup.brace){
-				this.staffgroup.brace.increaseStavesIncluded();
+			else if(abcstaff.brace === "continue" && staffgroup.brace){
+				staffgroup.brace.increaseStavesIncluded();
 			}
   }
 };
 
-AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v) {
+AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSingleLineStaff) {
   this.popCrossLineElems(s,v);
   this.stemdir = (this.isBagpipes)?"down":null;
   this.abcline = abcline;
@@ -222,7 +222,7 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v) {
 
   for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
   	var isFirstStaff = (s === 0);
-    var abselems = this.createABCElement(isFirstStaff);
+	  var abselems = this.createABCElement(isFirstStaff, isSingleLineStaff);
 	  if (abselems) {
     for (i=0; i<abselems.length; i++) {
       if (!this.tempoSet && tempo && !tempo.suppress) {
@@ -262,12 +262,12 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v) {
 	// }
 
 	// return an array of AbsoluteElement
-AbstractEngraver.prototype.createABCElement = function(isFirstStaff) {
+AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLineStaff) {
   var elemset = [];
   var elem = this.getElem();
   switch (elem.el_type) {
   case "note":
-    elemset = this.createBeam();
+    elemset = this.createBeam(isSingleLineStaff);
     break;
   case "bar":
     elemset[0] = this.createBarLine(elem, isFirstStaff);
@@ -329,7 +329,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff) {
   return elemset;
 };
 
-AbstractEngraver.prototype.calcBeamDir = function() {
+AbstractEngraver.prototype.calcBeamDir = function(isSingleLineStaff) {
 	if (this.stemdir) // If the user or voice is forcing the stem direction, we already know the answer.
 		return this.stemdir;
 	var beamelem = new BeamElem(this.stemHeight, this.stemdir);
@@ -337,7 +337,7 @@ AbstractEngraver.prototype.calcBeamDir = function() {
 	var oldPos = this.pos;
 	var abselem;
 	while (this.getElem()) {
-		abselem = this.createNote(this.getElem(), true, true);
+		abselem = this.createNote(this.getElem(), true, true, isSingleLineStaff);
 		beamelem.add(abselem);
 		if (this.getElem().endBeam)
 			break;
@@ -348,17 +348,17 @@ AbstractEngraver.prototype.calcBeamDir = function() {
 	return dir ? "up" : "down";
 };
 
-AbstractEngraver.prototype.createBeam = function() {
+AbstractEngraver.prototype.createBeam = function(isSingleLineStaff) {
   var abselemset = [];
 
   if (this.getElem().startBeam && !this.getElem().endBeam) {
-	  var dir = this.calcBeamDir();
+	  var dir = this.calcBeamDir(isSingleLineStaff);
          var beamelem = new BeamElem(this.stemHeight, dir);
 	  if (hint) beamelem.setHint();
          var oldDir = this.stemdir;
          this.stemdir = dir;
 	  while (this.getElem()) {
-		  var abselem = this.createNote(this.getElem(), true);
+		  var abselem = this.createNote(this.getElem(), true, false, isSingleLineStaff);
 		  abselemset.push(abselem);
 		  beamelem.add(abselem);
 		  if (this.triplet && this.triplet.isClosed()) {
@@ -374,7 +374,7 @@ AbstractEngraver.prototype.createBeam = function() {
          this.stemdir = oldDir;
     this.voice.addBeam(beamelem);
   } else {
-    abselemset[0] = this.createNote(this.getElem());
+    abselemset[0] = this.createNote(this.getElem(), false, false, isSingleLineStaff);
 	  if (this.triplet && this.triplet.isClosed()) {
 		  this.voice.addOther(this.triplet);
 		  this.triplet = null;
@@ -419,7 +419,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLed
 	}
 };
 
-AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //stem presence: true for drawing stemless notehead
+AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingleLineStaff) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var grace= null;
   this.roomtaken = 0; // room needed to the left of the note
@@ -459,15 +459,14 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
 	    if (this.stemdir === "up") restpitch = 11;
     }
 	  // There is special placement for the percussion staff. If there is one staff line, then move the rest position.
-	  var numLines = this.staffgroup.staffs[this.staffgroup.staffs.length-1].lines;
-	  if (numLines === 1) {
+	  if (isSingleLineStaff) {
 		  // The half and whole rests are attached to different lines normally, so we need to tweak their position to get them to both be attached to the same one.
 		  if (duration < 0.5)
 			  restpitch = 7;
 		  else if (duration < 1)
-			restpitch = 6.8;	// half rest
+			restpitch = 7;	// half rest
 		  else
-		  	restpitch = 4.8; // whole rest
+		  	restpitch = 5; // whole rest
 	  }
     switch(elem.rest.type) {
 		case "whole":
