@@ -79,8 +79,6 @@ AbstractEngraver.prototype.reset = function() {
 	this.minY = undefined;
 	this.partstartelem = undefined;
 	this.pos = undefined;
-	this.roomtaken = undefined;
-	this.roomtakenright = undefined;
 	this.startlimitelem = undefined;
 	this.stemdir = undefined;
 };
@@ -421,8 +419,8 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLed
 AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingleLineStaff, voice) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var grace= null;
-  this.roomtaken = 0; // room needed to the left of the note
-  this.roomtakenright = 0; // room needed to the right of the note
+  var roomtaken = 0; // room needed to the left of the note
+  var roomtakenright = 0; // room needed to the right of the note
   var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
   var c="";
   var flag = null;
@@ -503,10 +501,10 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
 		    abselem.addExtra(numMeasures);
     }
          if (!dontDraw && elem.rest.type !== "multimeasure")
-    notehead = this.createNoteHead(abselem, c, {verticalPos:restpitch}, null, 0, -this.roomtaken, null, dot, 0, 1);
+    notehead = this.createNoteHead(abselem, c, {verticalPos:restpitch}, null, 0, -roomtaken, null, dot, 0, 1);
     if (notehead) abselem.addHead(notehead);
-    this.roomtaken+=this.accidentalshiftx;
-    this.roomtakenright = Math.max(this.roomtakenright,this.dotshiftx);
+    roomtaken+=this.accidentalshiftx;
+    roomtakenright = Math.max(roomtakenright,this.dotshiftx);
 
   } else {
          sortPitch(elem);
@@ -544,7 +542,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
           additionalLedgers.push(curr.verticalPos - (curr.verticalPos%2));
         }
         if (dir==="down") {
-         this.roomtaken = glyphs.getSymbolWidth(noteSymbol)+2;
+         roomtaken = glyphs.getSymbolWidth(noteSymbol)+2;
         } else {
          dotshiftx = glyphs.getSymbolWidth(noteSymbol)+2;
         }
@@ -602,7 +600,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
 
 		var hasStem = !nostem && durlog<=-1;
                 if (!dontDraw)
-      notehead = this.createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -this.roomtaken, flag, dot, dotshiftx, 1);
+      notehead = this.createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomtaken, flag, dot, dotshiftx, 1);
       if (notehead) {
 	      this.addSlursAndTies(abselem, elem.pitches[p], notehead, voice, hasStem ? dir : null);
 
@@ -610,8 +608,8 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
 			notehead.bottom = notehead.bottom - 1;	 // If there is a tie to the grace notes, leave a little more room for the note to avoid collisions.
 		  abselem.addHead(notehead);
 	  }
-      this.roomtaken += this.accidentalshiftx;
-      this.roomtakenright = Math.max(this.roomtakenright,this.dotshiftx);
+      roomtaken += this.accidentalshiftx;
+      roomtakenright = Math.max(roomtakenright,this.dotshiftx);
     }
 
     // draw stem from the furthest note to a pitch above/below the stemmed note
@@ -661,10 +659,10 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
 
     var graceoffsets = [];
     for (i=elem.gracenotes.length-1; i>=0; i--) { // figure out where to place each gracenote
-      this.roomtaken+=10;
-      graceoffsets[i] = this.roomtaken;
+      roomtaken+=10;
+      graceoffsets[i] = roomtaken;
       if (elem.gracenotes[i].accidental) {
-        this.roomtaken+=7;
+        roomtaken+=7;
       }
     }
 
@@ -709,7 +707,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
   }
 
   if (!dontDraw && elem.decoration) {
-	  this.decoration.createDecoration(voice, elem.decoration, abselem.top, (notehead)?notehead.w:0, abselem, this.roomtaken, dir, abselem.bottom, elem.positioning, this.hasVocals);
+	  this.decoration.createDecoration(voice, elem.decoration, abselem.top, (notehead)?notehead.w:0, abselem, roomtaken, dir, abselem.bottom, elem.positioning, this.hasVocals);
   }
 
   if (elem.barNumber) {
@@ -729,14 +727,14 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
 		var chordHeight = dim.height / spacing.STEP;
       switch (elem.chord[i].position) {
       case "left":
-        this.roomtaken+=chordWidth+7;
-        x = -this.roomtaken;        // TODO-PER: This is just a guess from trial and error
+        roomtaken+=chordWidth+7;
+        x = -roomtaken;        // TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
         abselem.addExtra(new RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
         break;
       case "right":
-        this.roomtakenright+=4;
-        x = this.roomtakenright;// TODO-PER: This is just a guess from trial and error
+        roomtakenright+=4;
+        x = roomtakenright;// TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
         abselem.addRight(new RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
         break;
