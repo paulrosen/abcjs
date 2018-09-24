@@ -112,6 +112,11 @@ var midiSequencerLint = function(tune) {
 					ret += element.channel;
 					ret += '\n';
 					break;
+				case "gchord":
+					ret += "\t\t";
+					ret += element.tacet ? 'tacet' : 'on';
+					ret += '\n';
+					break;
 				case "drum":
 					var params = element.params;
 					ret += "\t\t";

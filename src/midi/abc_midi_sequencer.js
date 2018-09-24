@@ -246,6 +246,12 @@ var sequence;
 										case "transpose":
 											voices[voiceNumber].push({ el_type: 'transpose', transpose: elem.params[0] });
 											break;
+										case "gchordoff":
+											voices[voiceNumber].push({ el_type: 'gchord', tacet: true });
+											break;
+										case "gchordon":
+											voices[voiceNumber].push({ el_type: 'gchord', tacet: false });
+											break;
 										default:
 											console.log("MIDI seq: midi cmd not handled: ", elem.cmd, elem);
 									}

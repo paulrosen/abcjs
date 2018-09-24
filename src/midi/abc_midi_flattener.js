@@ -47,6 +47,7 @@ var flatten;
 	var currentChords;
 	var lastChord;
 	var barBeat;
+	var gChordTacet = false;
 
 	var drumTrack;
 	var drumTrackFinished;
@@ -77,6 +78,7 @@ var flatten;
 		currentChords = [];
 		lastChord = undefined;
 		barBeat = 0;
+		gChordTacet = false;
 
 		// For the drum/metronome track.
 		drumTrack = [];
@@ -137,6 +139,9 @@ var flatten;
 						break;
 					case "drum":
 						drumDefinition = normalizeDrumDefinition(element.params);
+						break;
+					case "gchord":
+						gChordTacet = element.tacet;
 						break;
 					default:
 						// This should never happen
@@ -211,6 +216,9 @@ var flatten;
 	var breakSynonyms = [ 'break', '(break)', 'no chord', 'n.c.', 'tacet'];
 
 	function findChord(elem) {
+		if (gChordTacet)
+			return 'break';
+
 		// TODO-PER: Just using the first chord if there are more than one.
 		if (chordTrackFinished || !elem.chord || elem.chord.length === 0)
 			return null;
