@@ -69,8 +69,6 @@ AbstractEngraver.prototype.reset = function() {
 	this.slursbyvoice = {};
 	this.tiesbyvoice = {};
 	this.endingsbyvoice = {};
-	this.s = 0; // current staff number
-	this.v = 0; // current voice number on current staff
 	this.tripletmultiplier = 1;
 
 	this.abcline = undefined;
@@ -93,20 +91,20 @@ AbstractEngraver.prototype.setStemHeight = function(heightInPixels) {
 	this.stemHeight = heightInPixels / spacing.STEP;
 };
 
-AbstractEngraver.prototype.getCurrentVoiceId = function() {
-  return "s"+this.s+"v"+this.v;
+AbstractEngraver.prototype.getCurrentVoiceId = function(s,v) {
+  return "s"+s+"v"+v;
 };
 
-AbstractEngraver.prototype.pushCrossLineElems = function() {
-  this.slursbyvoice[this.getCurrentVoiceId()] = this.slurs;
-  this.tiesbyvoice[this.getCurrentVoiceId()] = this.ties;
-  this.endingsbyvoice[this.getCurrentVoiceId()] = this.partstartelem;
+AbstractEngraver.prototype.pushCrossLineElems = function(s,v) {
+  this.slursbyvoice[this.getCurrentVoiceId(s,v)] = this.slurs;
+  this.tiesbyvoice[this.getCurrentVoiceId(s,v)] = this.ties;
+  this.endingsbyvoice[this.getCurrentVoiceId(s,v)] = this.partstartelem;
 };
 
-AbstractEngraver.prototype.popCrossLineElems = function() {
-  this.slurs = this.slursbyvoice[this.getCurrentVoiceId()] || {};
-  this.ties = this.tiesbyvoice[this.getCurrentVoiceId()] || [];
-  this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId()];
+AbstractEngraver.prototype.popCrossLineElems = function(s,v) {
+  this.slurs = this.slursbyvoice[this.getCurrentVoiceId(s,v)] || {};
+  this.ties = this.tiesbyvoice[this.getCurrentVoiceId(s,v)] || [];
+  this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId(s,v)];
 };
 
 AbstractEngraver.prototype.getElem = function() {
@@ -143,29 +141,29 @@ AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
 	this.containsLyrics(staffs);
   this.staffgroup = new StaffGroupElement();
 	this.tempoSet = false;
-  for (this.s = 0; this.s < staffs.length; this.s++) {
+  for (var s = 0; s < staffs.length; s++) {
 	  if (hint)
 		  this.restoreState();
 	  hint = false;
-    this.createABCStaff(staffs[this.s], tempo);
+    this.createABCStaff(staffs[s], tempo, s);
   }
   return this.staffgroup;
 };
 
-AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo) {
+AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo, s) {
 // If the tempo is passed in, then the first element should get the tempo attached to it.
-  for (this.v = 0; this.v < abcstaff.voices.length; this.v++) {
-    this.voice = new VoiceElement(this.v,abcstaff.voices.length);
-    if (this.v===0) {
+  for (var v = 0; v < abcstaff.voices.length; v++) {
+    this.voice = new VoiceElement(v,abcstaff.voices.length);
+    if (v===0) {
       this.voice.barfrom = (abcstaff.connectBarLines==="start" || abcstaff.connectBarLines==="continue");
       this.voice.barto = (abcstaff.connectBarLines==="continue" || abcstaff.connectBarLines==="end");
     } else {
       this.voice.duplicate = true; // bar lines and other duplicate info need not be created
     }
-    if (abcstaff.title && abcstaff.title[this.v]) this.voice.header=abcstaff.title[this.v];
+    if (abcstaff.title && abcstaff.title[v]) this.voice.header=abcstaff.title[v];
 	  var clef = createClef(abcstaff.clef, this.tuneNumber);
 	  if (clef) {
-		  if (this.v ===0 && abcstaff.barNumber) {
+		  if (v ===0 && abcstaff.barNumber) {
 			  this.addMeasureNumber(abcstaff.barNumber, clef);
 		  }
 		  this.voice.addChild(clef);
@@ -183,8 +181,8 @@ AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo) {
 	  if (this.voice.duplicate)
 	  	this.voice.children = []; // we shouldn't reprint the above if we're reusing the same staff. We just created them to get the right spacing.
     var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
-    this.staffgroup.addVoice(this.voice,this.s,staffLines);
-	  this.createABCVoice(abcstaff.voices[this.v],tempo);
+    this.staffgroup.addVoice(this.voice,s,staffLines);
+	  this.createABCVoice(abcstaff.voices[v],tempo, s, v);
 	  this.staffgroup.setStaffLimits(this.voice);
             //Tony: Here I am following what staves need to be surrounded by the brace, by incrementing the length of the brace class.
             //So basically this keeps incrementing the number of staff surrounded by the brace until it sees "end".
@@ -201,8 +199,8 @@ AbstractEngraver.prototype.createABCStaff = function(abcstaff, tempo) {
   }
 };
 
-AbstractEngraver.prototype.createABCVoice = function(abcline, tempo) {
-  this.popCrossLineElems();
+AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v) {
+  this.popCrossLineElems(s,v);
   this.stemdir = (this.isBagpipes)?"down":null;
   this.abcline = abcline;
   if (this.partstartelem) {
@@ -223,7 +221,8 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo) {
   }
 
   for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
-    var abselems = this.createABCElement();
+  	var isFirstStaff = (s === 0);
+    var abselems = this.createABCElement(isFirstStaff);
 	  if (abselems) {
     for (i=0; i<abselems.length; i++) {
       if (!this.tempoSet && tempo && !tempo.suppress) {
@@ -234,7 +233,7 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo) {
     }
     }
   }
-  this.pushCrossLineElems();
+  this.pushCrossLineElems(s,v);
 };
 
 	AbstractEngraver.prototype.saveState = function() {
@@ -251,8 +250,19 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo) {
 		this.tiesbyvoice = parseCommon.cloneHashOfArrayOfHash(this.tiesbyvoiceSave);
 	};
 
-// return an array of AbsoluteElement
-AbstractEngraver.prototype.createABCElement = function() {
+	// function writeMeasureWidth(voice) {
+	// 	var width = 0;
+	// 	for (var i = voice.children.length-1; i >= 0; i--) {
+	// 		var elem = voice.children[i];
+	// 		if (elem.abcelem.el_type === 'bar')
+	// 			break;
+	// 		width += elem.w;
+	// 	}
+	// 	return new RelativeElement(width.toFixed(2), -70, 0, undefined, {type:"debug"});
+	// }
+
+	// return an array of AbsoluteElement
+AbstractEngraver.prototype.createABCElement = function(isFirstStaff) {
   var elemset = [];
   var elem = this.getElem();
   switch (elem.el_type) {
@@ -260,8 +270,9 @@ AbstractEngraver.prototype.createABCElement = function() {
     elemset = this.createBeam();
     break;
   case "bar":
-    elemset[0] = this.createBarLine(elem);
+    elemset[0] = this.createBarLine(elem, isFirstStaff);
     if (this.voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
+//	  elemset[0].addChild(writeMeasureWidth(this.voice));
     break;
   case "meter":
     elemset[0] = createTimeSignature(elem, this.tuneNumber);
@@ -908,7 +919,7 @@ AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
 	abselem.addChild(new RelativeElement(number, 0, 0, 11+measureNumHeight.height / spacing.STEP, {type:"barNumber"}));
 };
 
-AbstractEngraver.prototype.createBarLine = function (elem) {
+AbstractEngraver.prototype.createBarLine = function (elem, isFirstStaff) {
 // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
 
   var abselem = new AbsoluteElement(elem, 0, 10, 'bar', this.tuneNumber);
@@ -986,7 +997,7 @@ AbstractEngraver.prototype.createBarLine = function (elem) {
     abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
   } // 2 is hardcoded
 
-  if (elem.startEnding && this.s === 0) { // only put the first & second ending marks on the first staff
+  if (elem.startEnding && isFirstStaff) { // only put the first & second ending marks on the first staff
 	  var textWidth = this.renderer.getTextSize(elem.startEnding, "repeatfont", '').width;
 	  abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
     this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
