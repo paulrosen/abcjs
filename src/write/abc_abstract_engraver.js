@@ -78,7 +78,6 @@ AbstractEngraver.prototype.reset = function() {
 	this.hasVocals = false;
 	this.minY = undefined;
 	this.partstartelem = undefined;
-	this.pos = undefined;
 	this.startlimitelem = undefined;
 	this.stemdir = undefined;
 };
@@ -101,18 +100,6 @@ AbstractEngraver.prototype.popCrossLineElems = function(s,v) {
   this.slurs = this.slursbyvoice[this.getCurrentVoiceId(s,v)] || {};
   this.ties = this.tiesbyvoice[this.getCurrentVoiceId(s,v)] || [];
   this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId(s,v)];
-};
-
-AbstractEngraver.prototype.getElem = function() {
-  if (this.abcline.length <= this.pos)
-    return null;
-  return this.abcline[this.pos];
-};
-
-AbstractEngraver.prototype.getNextElem = function() {
-        if (this.abcline.length <= this.pos+1)
-                return null;
-    return this.abcline[this.pos+1];
 };
 
 	AbstractEngraver.prototype.containsLyrics = function(staves) {
@@ -196,6 +183,22 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
   }
 };
 
+function getBeamGroup(abcline, pos) {
+	// If there are notes beamed together, they are handled as a group, so find all of them here.
+	var elem = abcline[pos];
+	if (elem.el_type !== 'note' || !elem.startBeam || elem.endBeam)
+		return { count: 1, elem: elem };
+
+	var group = [];
+	while (pos < abcline.length && abcline[pos].el_type === 'note') {
+		group.push(abcline[pos]);
+		if (abcline[pos].endBeam)
+			break;
+		pos++;
+	}
+	return { count: group.length, elem: group };
+}
+
 AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSingleLineStaff, voice) {
   this.popCrossLineElems(s,v);
   this.stemdir = (this.isBagpipes)?"down":null;
@@ -217,20 +220,28 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSin
 	  voice.addOther(this.ties[i]);
   }
 
-  for (this.pos=0; this.pos<this.abcline.length; this.pos++) {
-  	var isFirstStaff = (s === 0);
-	  var abselems = this.createABCElement(isFirstStaff, isSingleLineStaff, voice);
-	  if (abselems) {
-    for (i=0; i<abselems.length; i++) {
-      if (!this.tempoSet && tempo && !tempo.suppress) {
-        this.tempoSet = true;
-        abselems[i].addChild(new TempoElement(tempo, this.tuneNumber));
-      }
-	    voice.addChild(abselems[i]);
-    }
-    }
+  for (var j = 0; j < this.abcline.length; j++) {
+	  setAveragePitch(this.abcline[j]);
+	  this.minY = Math.min(this.abcline[j].minpitch, this.minY);
   }
-  this.pushCrossLineElems(s,v);
+
+	var isFirstStaff = (s === 0);
+	var pos = 0;
+	while (pos < this.abcline.length) {
+		var ret = getBeamGroup(this.abcline, pos);
+		var abselems = this.createABCElement(isFirstStaff, isSingleLineStaff, voice, ret.elem);
+		if (abselems) {
+			for (i = 0; i < abselems.length; i++) {
+				if (!this.tempoSet && tempo && !tempo.suppress) {
+					this.tempoSet = true;
+					abselems[i].addChild(new TempoElement(tempo, this.tuneNumber));
+				}
+				voice.addChild(abselems[i]);
+			}
+		}
+		pos += ret.count;
+	}
+	this.pushCrossLineElems(s, v);
 };
 
 	AbstractEngraver.prototype.saveState = function() {
@@ -259,12 +270,20 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSin
 	// }
 
 	// return an array of AbsoluteElement
-AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLineStaff, voice) {
+AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLineStaff, voice, elem) {
   var elemset = [];
-  var elem = this.getElem();
   switch (elem.el_type) {
+	  case undefined:
+	  	// it is undefined if we were passed an array in - an array means a set of notes that should be beamed together.
+		  elemset = this.createBeam(isSingleLineStaff, voice, elem);
+	  	break;
   case "note":
-    elemset = this.createBeam(isSingleLineStaff, voice);
+	  elemset[0] = this.createNote(elem, false, false, isSingleLineStaff, voice);
+	  if (this.triplet && this.triplet.isClosed()) {
+		  voice.addOther(this.triplet);
+		  this.triplet = null;
+		  this.tripletmultiplier = 1;
+	  }
     break;
   case "bar":
     elemset[0] = this.createBarLine(voice, elem, isFirstStaff);
@@ -326,60 +345,54 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
   return elemset;
 };
 
-AbstractEngraver.prototype.calcBeamDir = function(isSingleLineStaff, voice) {
-	if (this.stemdir) // If the user or voice is forcing the stem direction, we already know the answer.
-		return this.stemdir;
-	var beamelem = new BeamElem(this.stemHeight, this.stemdir);
-	// PER: need two passes: the first one decides if the stems are up or down.
-	var oldPos = this.pos;
-	var abselem;
-	while (this.getElem()) {
-		abselem = this.createNote(this.getElem(), true, true, isSingleLineStaff, voice);
-		beamelem.add(abselem);
-		if (this.getElem().endBeam)
-			break;
-		this.pos++;
+	function setAveragePitch(elem) {
+		if (elem.pitches) {
+			sortPitch(elem);
+			var sum = 0;
+			for (var p = 0; p < elem.pitches.length; p++) {
+				sum += elem.pitches[p].verticalPos;
+			}
+			elem.averagepitch = sum / elem.pitches.length;
+			elem.minpitch = elem.pitches[0].verticalPos;
+			elem.maxpitch = elem.pitches[elem.pitches.length - 1].verticalPos;
+		}
 	}
-	var dir = beamelem.calcDir();
-	this.pos = oldPos;
-	return dir ? "up" : "down";
-};
 
-AbstractEngraver.prototype.createBeam = function(isSingleLineStaff, voice) {
-  var abselemset = [];
+	AbstractEngraver.prototype.calcBeamDir = function (isSingleLineStaff, voice, elems) {
+		if (this.stemdir) // If the user or voice is forcing the stem direction, we already know the answer.
+			return this.stemdir;
+		var beamelem = new BeamElem(this.stemHeight, this.stemdir);
+		for (var i = 0; i < elems.length; i++) {
+			beamelem.add({abcelem: elems[i]}); // This is a hack to call beam elem with just a minimum of processing: for our purposes, we don't need to construct the whole note.
+		}
 
-  if (this.getElem().startBeam && !this.getElem().endBeam) {
-	  var dir = this.calcBeamDir(isSingleLineStaff, voice);
-         var beamelem = new BeamElem(this.stemHeight, dir);
-	  if (hint) beamelem.setHint();
-         var oldDir = this.stemdir;
-         this.stemdir = dir;
-	  while (this.getElem()) {
-		  var abselem = this.createNote(this.getElem(), true, false, isSingleLineStaff, voice);
-		  abselemset.push(abselem);
-		  beamelem.add(abselem);
-		  if (this.triplet && this.triplet.isClosed()) {
-			  voice.addOther(this.triplet);
-			  this.triplet = null;
-			  this.tripletmultiplier = 1;
-		  }
-		  if (this.getElem().endBeam) {
-			  break;
-		  }
-		  this.pos++;
-	  }
-         this.stemdir = oldDir;
-	  voice.addBeam(beamelem);
-  } else {
-    abselemset[0] = this.createNote(this.getElem(), false, false, isSingleLineStaff, voice);
-	  if (this.triplet && this.triplet.isClosed()) {
-		  voice.addOther(this.triplet);
-		  this.triplet = null;
-		  this.tripletmultiplier = 1;
-	  }
-  }
-  return abselemset;
-};
+		var dir = beamelem.calcDir();
+		return dir ? "up" : "down";
+	};
+
+	AbstractEngraver.prototype.createBeam = function (isSingleLineStaff, voice, elems) {
+		var abselemset = [];
+
+		var dir = this.calcBeamDir(isSingleLineStaff, voice, elems);
+		var beamelem = new BeamElem(this.stemHeight, dir);
+		if (hint) beamelem.setHint();
+		var oldDir = this.stemdir;
+		this.stemdir = dir;
+		for (var i = 0; i < elems.length; i++) {
+			var elem = elems[i];
+			var abselem = this.createNote(elem, true, false, isSingleLineStaff, voice);
+			abselemset.push(abselem);
+			beamelem.add(abselem);
+			if (this.triplet && this.triplet.isClosed()) {
+				voice.addOther(this.triplet);
+				this.triplet = null;
+				this.tripletmultiplier = 1;
+			}
+		}
+		this.stemdir = oldDir;
+		voice.addBeam(beamelem);
+		return abselemset;
+	};
 
 var sortPitch = function(elem) {
   var sorted;
@@ -426,7 +439,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
   var flag = null;
   var additionalLedgers = []; // PER: handle the case of [bc'], where the b doesn't have a ledger line
 
-  var p, i, pp;
+  var i;
   var width, p1, p2, dx;
 
   var duration = getDuration(elem);
@@ -507,17 +520,6 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
     roomtakenright = Math.max(roomtakenright,this.dotshiftx);
 
   } else {
-         sortPitch(elem);
-
-    // determine averagepitch, minpitch, maxpitch and stem direction
-    var sum=0;
-    for (p=0, pp=elem.pitches.length; p<pp; p++) {
-      sum += elem.pitches[p].verticalPos;
-    }
-    elem.averagepitch = sum/elem.pitches.length;
-    elem.minpitch = elem.pitches[0].verticalPos;
-      this.minY = Math.min(elem.minpitch, this.minY);
-    elem.maxpitch = elem.pitches[elem.pitches.length-1].verticalPos;
     var dir = (elem.averagepitch>=6) ? "down": "up";
     if (this.stemdir) dir=this.stemdir;
 
@@ -532,6 +534,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
 	  	console.log("noteSymbol:", style, durlog, zeroDuration);
 
     // determine elements of chords which should be shifted
+	  var p;
     for (p=(dir==="down")?elem.pitches.length-2:1; (dir==="down")?p>=0:p<elem.pitches.length; p=(dir==="down")?p-1:p+1) {
       var prev = elem.pitches[(dir==="down")?p+1:p-1];
       var curr = elem.pitches[p];
@@ -555,6 +558,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
          // we know that the pitches are sorted by now.
     this.accidentalSlot = [];
 
+    var pp = elem.pitches.length;
     for (p=0; p<elem.pitches.length; p++) {
 
       if (!nostem) {
