@@ -278,7 +278,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		  elemset = this.createBeam(isSingleLineStaff, voice, elem);
 	  	break;
   case "note":
-	  elemset[0] = this.createNote(elem, false, false, isSingleLineStaff, voice);
+	  elemset[0] = this.createNote(elem, false, isSingleLineStaff, voice);
 	  if (this.triplet && this.triplet.isClosed()) {
 		  voice.addOther(this.triplet);
 		  this.triplet = null;
@@ -380,7 +380,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		this.stemdir = dir;
 		for (var i = 0; i < elems.length; i++) {
 			var elem = elems[i];
-			var abselem = this.createNote(elem, true, false, isSingleLineStaff, voice);
+			var abselem = this.createNote(elem, true, isSingleLineStaff, voice);
 			abselemset.push(abselem);
 			beamelem.add(abselem);
 			if (this.triplet && this.triplet.isClosed()) {
@@ -429,7 +429,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLed
 	}
 };
 
-AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingleLineStaff, voice) { //stem presence: true for drawing stemless notehead
+AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff, voice) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var grace= null;
   var roomtaken = 0; // room needed to the left of the note
@@ -451,7 +451,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
   for (var tot = Math.pow(2,durlog), inc=tot/2; tot<duration; dot++,tot+=inc,inc/=2);
 
 
-	if (elem.startTriplet && !dontDraw) {
+	if (elem.startTriplet) {
 		this.tripletmultiplier = elem.tripletMultiplier;
 	}
 
@@ -513,7 +513,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
 		    var numMeasures = new RelativeElement(""+elem.duration, 0, mmWidth, 16, {type:"multimeasure-text"});
 		    abselem.addExtra(numMeasures);
     }
-         if (!dontDraw && elem.rest.type !== "multimeasure")
+         if (elem.rest.type !== "multimeasure")
     notehead = this.createNoteHead(abselem, c, {verticalPos:restpitch}, null, 0, -roomtaken, null, dot, 0, 1);
     if (notehead) abselem.addHead(notehead);
     roomtaken+=this.accidentalshiftx;
@@ -577,7 +577,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
                 elem.pitches[p].highestVert = elem.pitches[p].verticalPos;
                 var isTopWhenStemIsDown = (this.stemdir==="up" || dir==="up") && p===0;
                 var isBottomWhenStemIsUp = (this.stemdir==="down" || dir==="down") && p===pp-1;
-      if (!dontDraw && (isTopWhenStemIsDown || isBottomWhenStemIsUp)) { // place to put slurs if not already on pitches
+      if (isTopWhenStemIsDown || isBottomWhenStemIsUp) { // place to put slurs if not already on pitches
 
                  if (elem.startSlur || pp === 1) {
                  elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
@@ -591,7 +591,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
          }
         }
 
-        if (!dontDraw && elem.endSlur) {
+        if (elem.endSlur) {
                         elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
                         if (this.stemdir==="up" || dir==="up")
                                 elem.pitches[p].highestVert += 6;        // If the stem is up, then compensate for the length of the stem
@@ -603,7 +603,6 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
       }
 
 		var hasStem = !nostem && durlog<=-1;
-                if (!dontDraw)
       notehead = this.createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomtaken, flag, dot, dotshiftx, 1);
       if (notehead) {
 	      this.addSlursAndTies(abselem, elem.pitches[p], notehead, voice, hasStem ? dir : null);
@@ -651,7 +650,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
     abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, {type:"lyric", position: position, height: lyricDim.height / spacing.STEP }));
   }
 
-  if (!dontDraw && elem.gracenotes !== undefined) {
+  if (elem.gracenotes !== undefined) {
     var gracescale = 3/5;
     var graceScaleStem = 3.5/5; // TODO-PER: empirically found constant.
     var gracebeam = null;
@@ -710,7 +709,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
     }
   }
 
-  if (!dontDraw && elem.decoration) {
+  if (elem.decoration) {
 	  this.decoration.createDecoration(voice, elem.decoration, abselem.top, (notehead)?notehead.w:0, abselem, roomtaken, dir, abselem.bottom, elem.positioning, this.hasVocals);
   }
 
@@ -770,11 +769,11 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw, isSingl
   }
 
 
-  if (elem.startTriplet && !dontDraw) {
+  if (elem.startTriplet) {
     this.triplet = new TripletElem(elem.startTriplet, notehead); // above is opposite from case of slurs
   }
 
-  if (elem.endTriplet && this.triplet && !dontDraw) {
+  if (elem.endTriplet && this.triplet) {
     this.triplet.setCloseAnchor(notehead);
   }
 
