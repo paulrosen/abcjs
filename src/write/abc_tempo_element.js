@@ -22,21 +22,85 @@ var TempoElement;
 	"use strict";
 	var totalHeightInPitches = 5;
 
-	TempoElement = function TempoElement(tempo, tuneNumber) {
+	TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
 		this.tempo = tempo;
 		this.tuneNumber = tuneNumber;
 		this.tempoHeightAbove = totalHeightInPitches;
 		this.pitch = undefined; // This will be set later
+		if (this.tempo.duration && !this.tempo.suppressBpm) {
+			this.note = this.createNote(createNoteHead, tempo, tuneNumber);
+		}
 	};
 
 	TempoElement.prototype.setUpperAndLowerElements = function(positionY) { // TODO-PER: This might not be called.
 		this.pitch = positionY.tempoHeightAbove;
 		this.top = positionY.tempoHeightAbove;
 		this.bottom = positionY.tempoHeightAbove;
+		if (this.note) {
+			var tempoPitch = this.pitch - totalHeightInPitches + 1; // The pitch we receive is the top of the allotted area: change that to practically the bottom.
+			this.note.top = tempoPitch;
+			this.note.bottom = tempoPitch;
+			for (var i = 0; i < this.note.children.length; i++) {
+				var child = this.note.children[i];
+				child.top += tempoPitch;
+				child.bottom += tempoPitch;
+				child.pitch += tempoPitch;
+				if (child.pitch2 !== undefined)
+					child.pitch2 += tempoPitch;
+			}
+		}
 	};
 
 	TempoElement.prototype.setX = function (x) {
 		this.x = x;
+	};
+
+	TempoElement.prototype.createNote = function(createNoteHead, tempo, tuneNumber) {
+		var temposcale = 0.75;
+		var duration = tempo.duration[0]; // TODO when multiple durations
+		var absElem = new AbsoluteElement(tempo, duration, 1, 'tempo', tuneNumber);
+		// There aren't an infinite number of note values, but we are passed a float, so just in case something is off upstream,
+		// merge all of the in between points.
+		var dot;
+		var flag;
+		var note;
+		if (duration <= 1/32) { note = "noteheads.quarter"; flag = "flags.u32nd"; dot = 0; }
+		else if (duration <= 1/16) { note = "noteheads.quarter"; flag = "flags.u16th"; dot = 0; }
+		else if (duration <= 3/32) { note = "noteheads.quarter"; flag = "flags.u16nd"; dot = 1; }
+		else if (duration <= 1/8) { note = "noteheads.quarter"; flag = "flags.u8th"; dot = 0; }
+		else if (duration <= 3/16) { note = "noteheads.quarter"; flag = "flags.u8th"; dot = 1; }
+		else if (duration <= 1/4) { note = "noteheads.quarter"; dot = 0; }
+		else if (duration <= 3/8) { note = "noteheads.quarter"; dot = 1; }
+		else if (duration <= 1/2) { note = "noteheads.half"; dot = 0; }
+		else if (duration <= 3/4) { note = "noteheads.half"; dot = 1; }
+		else if (duration <= 1) { note = "noteheads.whole"; dot = 0; }
+		else if (duration <= 1.5) { note = "noteheads.whole"; dot = 1; }
+		else if (duration <= 2) { note = "noteheads.dbl"; dot = 0; }
+		else { note = "noteheads.dbl"; dot = 1; }
+
+		var ret = createNoteHead(absElem,
+			note,
+			{ verticalPos: 0}, // This is just temporary: we'll offset the vertical positioning when we get the actual vertical spot.
+			"up",
+			0,
+			0,
+			flag,
+			dot,
+			0,
+			temposcale
+		);
+		var tempoNote = ret.notehead;
+		absElem.addHead(tempoNote);
+		var stem;
+		if (note !== "noteheads.whole" && note !== "noteheads.dbl") {
+			var p1 = 1 / 3 * temposcale;
+			var p2 = 7 * temposcale;
+			var dx = tempoNote.dx + tempoNote.w;
+			var width = -0.6;
+			stem = new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2": p2, linewidth: width});
+			absElem.addExtra(stem);
+		}
+		return absElem;
 	};
 
 	TempoElement.prototype.draw = function(renderer) {
@@ -52,62 +116,12 @@ var TempoElement;
 			var charWidth = preWidth / this.tempo.preString.length; // Just get some average number to increase the spacing.
 			x += preWidth + charWidth;
 		}
-		if (this.tempo.duration && !this.tempo.suppressBpm) {
-			var temposcale = 0.75;
-			var tempopitch = this.pitch - totalHeightInPitches + 1; // The pitch we receive is the top of the allotted area: change that to practically the bottom.
-			var duration = this.tempo.duration[0]; // TODO when multiple durations
-			var abselem = new AbsoluteElement(this.tempo, duration, 1, 'tempo', this.tuneNumber);
-			// There aren't an infinite number of note values, but we are passed a float, so just in case something is off upstream,
-			// merge all of the in between points.
-			var dot;
-			var flag;
-			var note;
-			if (duration <= 1/32) { note = "noteheads.quarter"; flag = "flags.u32nd"; dot = 0; }
-			else if (duration <= 1/16) { note = "noteheads.quarter"; flag = "flags.u16th"; dot = 0; }
-			else if (duration <= 3/32) { note = "noteheads.quarter"; flag = "flags.u16nd"; dot = 1; }
-			else if (duration <= 1/8) { note = "noteheads.quarter"; flag = "flags.u8th"; dot = 0; }
-			else if (duration <= 3/16) { note = "noteheads.quarter"; flag = "flags.u8th"; dot = 1; }
-			else if (duration <= 1/4) { note = "noteheads.quarter"; dot = 0; }
-			else if (duration <= 3/8) { note = "noteheads.quarter"; dot = 1; }
-			else if (duration <= 1/2) { note = "noteheads.half"; dot = 0; }
-			else if (duration <= 3/4) { note = "noteheads.half"; dot = 1; }
-			else if (duration <= 1) { note = "noteheads.whole"; dot = 0; }
-			else if (duration <= 1.5) { note = "noteheads.whole"; dot = 1; }
-			else if (duration <= 2) { note = "noteheads.dbl"; dot = 0; }
-			else { note = "noteheads.dbl"; dot = 1; }
-
-			// TODO-PER: the following had a bug in it when there are dotted notes - so the above code brute forces it.
-			// var durlog = Math.floor(Math.log(duration) / Math.log(2));
-			// var dot = 0;
-			// for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
-			// var note = renderer.engraver.chartable.note[-durlog];
-			// var flag = renderer.engraver.chartable.uflags[-durlog];
-			var temponote = renderer.engraver.createNoteHead(abselem, // TODO-PER: This seems late to be creating this element. Shouldn't it happen before draw?
-				note,
-				{verticalPos: tempopitch},
-				"up",
-				0,
-				0,
-				flag,
-				dot,
-				0,
-				temposcale
-			);
-			abselem.addHead(temponote);
-			var stem;
-			if (note !== "noteheads.whole" && note !== "noteheads.dbl") {
-				var p1 = tempopitch + 1 / 3 * temposcale;
-				var p2 = tempopitch + 7 * temposcale;
-				var dx = temponote.dx + temponote.w;
-				var width = -0.6;
-				stem = new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2": p2, linewidth: width});
-				stem.setX(x);
-				abselem.addExtra(stem);
-			}
-			abselem.setX(x);
-			for (var i = 0; i < abselem.children.length; i++)
-				abselem.children[i].draw(renderer, x);
-			x += (abselem.w + 5);
+		if (this.note) {
+			if (this.note)
+				this.note.setX(x);
+			for (var i = 0; i < this.note.children.length; i++)
+				this.note.children[i].draw(renderer, x);
+			x += (this.note.w + 5);
 			var str = "= " + this.tempo.bpm;
 			text = renderer.renderText(x, y, str, 'tempofont', 'tempo', "start");
 			var postWidth = text.getBBox().width;

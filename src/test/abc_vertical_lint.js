@@ -274,7 +274,21 @@ var verticalLint = function(tunes) {
 				obj2.elem = [];
 				if (type === 'tempo') {
 					var tempo = child.children[0].tempo;
-					obj2.elem.push(tempo.preString + ' ' + tempo.duration + ' ' + tempo.postString);
+					var tempoNote = child.children[0].note;
+					var arr = [];
+					if (tempo.preString)
+						arr.push(tempo.preString);
+					else
+						arr.push('*');
+					arr.push(tempo.duration);
+					if (tempo.postString)
+						arr.push(tempo.postString);
+					else
+						arr.push('*');
+					if (tempoNote) {
+						arr.push(' note(' + fixed2(tempoNote.top) + ',' + fixed2(tempoNote.bottom) + ',' + fixed2(tempoNote.x) + ',' + fixed2(tempoNote.w) + ')');
+					}
+					obj2.elem.push(arr.join(' '));
 				}
 				else if (child.children.length) {
 					for (var k = 0; k < child.children.length; k++) {

@@ -48,18 +48,21 @@ var getDuration = function(elem) {
 
 var hint = false;
 
+	var chartable = {
+		rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th", "multi": "rests.multimeasure"},
+		note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter", 7:"noteheads.quarter", 'nostem':"noteheads.quarter"},
+		rhythm:{"-1": "noteheads.slash.whole", 0:"noteheads.slash.whole", 1:"noteheads.slash.whole", 2:"noteheads.slash.quarter", 3:"noteheads.slash.quarter", 4:"noteheads.slash.quarter", 5:"noteheads.slash.quarter", 6:"noteheads.slash.quarter", 7:"noteheads.slash.quarter", nostem: "noteheads.slash.nostem"},
+		x:{"-1": "noteheads.indeterminate", 0:"noteheads.indeterminate", 1:"noteheads.indeterminate", 2:"noteheads.indeterminate", 3:"noteheads.indeterminate", 4:"noteheads.indeterminate", 5:"noteheads.indeterminate", 6:"noteheads.indeterminate", 7:"noteheads.indeterminate", nostem: "noteheads.indeterminate"},
+		harmonic:{"-1": "noteheads.harmonic.quarter", 0:"noteheads.harmonic.quarter", 1:"noteheads.harmonic.quarter", 2:"noteheads.harmonic.quarter", 3:"noteheads.harmonic.quarter", 4:"noteheads.harmonic.quarter", 5:"noteheads.harmonic.quarter", 6:"noteheads.harmonic.quarter", 7:"noteheads.harmonic.quarter", nostem: "noteheads.harmonic.quarter"},
+		uflags:{3:"flags.u8th", 4:"flags.u16th", 5:"flags.u32nd", 6:"flags.u64th"},
+		dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}
+	};
+
 AbstractEngraver = function(bagpipes, renderer, tuneNumber) {
 	this.decoration = new Decoration();
 	this.renderer = renderer;
 	this.tuneNumber = tuneNumber;
   this.isBagpipes = bagpipes;
-  this.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th", "multi": "rests.multimeasure"},
-                 note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter", 7:"noteheads.quarter", 'nostem':"noteheads.quarter"},
-                 rhythm:{"-1": "noteheads.slash.whole", 0:"noteheads.slash.whole", 1:"noteheads.slash.whole", 2:"noteheads.slash.quarter", 3:"noteheads.slash.quarter", 4:"noteheads.slash.quarter", 5:"noteheads.slash.quarter", 6:"noteheads.slash.quarter", 7:"noteheads.slash.quarter", nostem: "noteheads.slash.nostem"},
-                 x:{"-1": "noteheads.indeterminate", 0:"noteheads.indeterminate", 1:"noteheads.indeterminate", 2:"noteheads.indeterminate", 3:"noteheads.indeterminate", 4:"noteheads.indeterminate", 5:"noteheads.indeterminate", 6:"noteheads.indeterminate", 7:"noteheads.indeterminate", nostem: "noteheads.indeterminate"},
-                 harmonic:{"-1": "noteheads.harmonic.quarter", 0:"noteheads.harmonic.quarter", 1:"noteheads.harmonic.quarter", 2:"noteheads.harmonic.quarter", 3:"noteheads.harmonic.quarter", 4:"noteheads.harmonic.quarter", 5:"noteheads.harmonic.quarter", 6:"noteheads.harmonic.quarter", 7:"noteheads.harmonic.quarter", nostem: "noteheads.harmonic.quarter"},
-                 uflags:{3:"flags.u8th", 4:"flags.u16th", 5:"flags.u32nd", 6:"flags.u64th"},
-                 dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}};
 	this.reset();
 };
 
@@ -234,7 +237,7 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSin
 			for (i = 0; i < abselems.length; i++) {
 				if (!this.tempoSet && tempo && !tempo.suppress) {
 					this.tempoSet = true;
-					abselems[i].addChild(new TempoElement(tempo, this.tuneNumber));
+					abselems[i].addChild(new TempoElement(tempo, this.tuneNumber, createNoteHead));
 				}
 				voice.addChild(abselems[i]);
 			}
@@ -319,7 +322,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
     break;
   case "tempo":
     var abselem3 = new AbsoluteElement(elem,0,0, 'tempo', this.tuneNumber);
-    abselem3.addChild(new TempoElement(elem, this.tuneNumber));
+    abselem3.addChild(new TempoElement(elem, this.tuneNumber, createNoteHead));
     elemset[0] = abselem3;
     break;
 	  case "style":
@@ -429,9 +432,75 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLed
 	}
 };
 
+	AbstractEngraver.prototype.addGraceNotes = function (elem, voice, abselem, notehead, stemHeight, isBagpipes, roomtaken) {
+		var gracescale = 3 / 5;
+		var graceScaleStem = 3.5 / 5; // TODO-PER: empirically found constant.
+		var gracebeam = null;
+		var flag;
+
+		if (elem.gracenotes.length > 1) {
+			gracebeam = new BeamElem(stemHeight * graceScaleStem, "grace", isBagpipes);
+			if (hint) gracebeam.setHint();
+			gracebeam.mainNote = abselem;	// this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
+		}
+
+		var graceoffsets = [];
+		for (i = elem.gracenotes.length - 1; i >= 0; i--) { // figure out where to place each gracenote
+			roomtaken += 10;
+			graceoffsets[i] = roomtaken;
+			if (elem.gracenotes[i].accidental) {
+				roomtaken += 7;
+			}
+		}
+
+		var i;
+		for (i = 0; i < elem.gracenotes.length; i++) {
+			var gracepitch = elem.gracenotes[i].verticalPos;
+
+			flag = (gracebeam) ? null : chartable.uflags[(isBagpipes) ? 5 : 3];
+			var accidentalSlot = [];
+			var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale, accidentalSlot);
+			var grace = ret.notehead;
+			this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up");
+
+			abselem.addExtra(grace);
+			// PER: added acciaccatura slash
+			if (elem.gracenotes[i].acciaccatura) {
+				var pos = elem.gracenotes[i].verticalPos + 7 * gracescale;        // the same formula that determines the flag position.
+				var dAcciaccatura = gracebeam ? 5 : 6;        // just an offset to make it line up correctly.
+				abselem.addRight(new RelativeElement("flags.ugrace", -graceoffsets[i] + dAcciaccatura, 0, pos, {scalex: gracescale, scaley: gracescale}));
+			}
+			if (gracebeam) { // give the beam the necessary info
+				var graceDuration = elem.gracenotes[i].duration / 2;
+				if (isBagpipes) graceDuration /= 2;
+				var pseudoabselem = {
+					heads: [grace],
+					abcelem: {averagepitch: gracepitch, minpitch: gracepitch, maxpitch: gracepitch, duration: graceDuration}
+				};
+				gracebeam.add(pseudoabselem);
+			} else { // draw the stem
+				var p1 = gracepitch + 1 / 3 * gracescale;
+				var p2 = gracepitch + 7 * gracescale;
+				var dx = grace.dx + grace.w;
+				var width = -0.6;
+				abselem.addExtra(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2": p2, linewidth: width}));
+			}
+			ledgerLines(abselem, gracepitch, gracepitch, false, "noteheads.quarter", [], true, grace.dx - 1, 0.6);
+
+			if (i === 0 && !isBagpipes && !(elem.rest && (elem.rest.type === "spacer" || elem.rest.type === "invisible"))) {
+				var isTie = (elem.gracenotes.length === 1 && grace.pitch === notehead.pitch);
+				voice.addOther(new TieElem(grace, notehead, false, true, isTie));
+			}
+		}
+
+		if (gracebeam) {
+			voice.addBeam(gracebeam);
+		}
+		return roomtaken;
+	};
+
 AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff, voice) { //stem presence: true for drawing stemless notehead
   var notehead = null;
-  var grace= null;
   var roomtaken = 0; // room needed to the left of the note
   var roomtakenright = 0; // room needed to the right of the note
   var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
@@ -442,7 +511,13 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   var i;
   var width, p1, p2, dx;
 
-  var duration = getDuration(elem);
+	// The accidentalSlot will hold a list of all the accidentals on this chord. Each element is a vertical place,
+	// and contains a pitch, which is the last pitch that contains an accidental in that slot. The slots are numbered
+	// from closest to the note to farther left. We only need to know the last accidental we placed because
+	// we know that the pitches are sorted by now.
+	var accidentalSlot = [];
+
+	var duration = getDuration(elem);
 	var zeroDuration = false;
   if (duration === 0) { zeroDuration = true; duration = 0.25; nostem = true; }        //PER: zero duration will draw a quarter note head.
   var durlog = Math.floor(Math.log(duration)/Math.log(2)); //TODO use getDurlog
@@ -478,46 +553,50 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 		  else
 		  	restpitch = 5; // whole rest
 	  }
-    switch(elem.rest.type) {
-		case "whole":
-			c = this.chartable.rest[0];
-			elem.averagepitch=restpitch;
-			elem.minpitch=restpitch;
-			elem.maxpitch=restpitch;
-			dot = 0;
-			break;
-    case "rest":
-	    if (elem.style === "rhythm") // special case for rhythm: rests are a handy way to express the rhythm.
-		    c = this.chartable.rhythm[-durlog];
-	    else
-		    c = this.chartable.rest[-durlog];
-      elem.averagepitch=restpitch;
-      elem.minpitch=restpitch;
-      elem.maxpitch=restpitch;
-      break;
-    case "invisible":
-    case "spacer":
-      c="";
-		elem.averagepitch=restpitch;
-		elem.minpitch=restpitch;
-		elem.maxpitch=restpitch;
-		break;
-	    case "multimeasure":
-	    	c = this.chartable.rest['multi'];
-		    elem.averagepitch=restpitch;
-		    elem.minpitch=restpitch;
-		    elem.maxpitch=restpitch;
-		    dot = 0;
-		    var mmWidth = glyphs.getSymbolWidth(c);
-		    abselem.addHead(new RelativeElement(c, -mmWidth, mmWidth*2, 7 ));
-		    var numMeasures = new RelativeElement(""+elem.duration, 0, mmWidth, 16, {type:"multimeasure-text"});
-		    abselem.addExtra(numMeasures);
-    }
-         if (elem.rest.type !== "multimeasure")
-    notehead = this.createNoteHead(abselem, c, {verticalPos:restpitch}, null, 0, -roomtaken, null, dot, 0, 1);
-    if (notehead) abselem.addHead(notehead);
-    roomtaken+=this.accidentalshiftx;
-    roomtakenright = Math.max(roomtakenright,this.dotshiftx);
+	  switch (elem.rest.type) {
+		  case "whole":
+			  c = chartable.rest[0];
+			  elem.averagepitch = restpitch;
+			  elem.minpitch = restpitch;
+			  elem.maxpitch = restpitch;
+			  dot = 0;
+			  break;
+		  case "rest":
+			  if (elem.style === "rhythm") // special case for rhythm: rests are a handy way to express the rhythm.
+				  c = chartable.rhythm[-durlog];
+			  else
+				  c = chartable.rest[-durlog];
+			  elem.averagepitch = restpitch;
+			  elem.minpitch = restpitch;
+			  elem.maxpitch = restpitch;
+			  break;
+		  case "invisible":
+		  case "spacer":
+			  c = "";
+			  elem.averagepitch = restpitch;
+			  elem.minpitch = restpitch;
+			  elem.maxpitch = restpitch;
+			  break;
+		  case "multimeasure":
+			  c = chartable.rest['multi'];
+			  elem.averagepitch = restpitch;
+			  elem.minpitch = restpitch;
+			  elem.maxpitch = restpitch;
+			  dot = 0;
+			  var mmWidth = glyphs.getSymbolWidth(c);
+			  abselem.addHead(new RelativeElement(c, -mmWidth, mmWidth * 2, 7));
+			  var numMeasures = new RelativeElement("" + elem.duration, 0, mmWidth, 16, {type: "multimeasure-text"});
+			  abselem.addExtra(numMeasures);
+	  }
+	  if (elem.rest.type !== "multimeasure") {
+		  var ret = createNoteHead(abselem, c, {verticalPos: restpitch}, null, 0, -roomtaken, null, dot, 0, 1, accidentalSlot);
+		  notehead = ret.notehead;
+		  if (notehead) {
+			  abselem.addHead(notehead);
+			  roomtaken += ret.accidentalshiftx;
+			  roomtakenright = Math.max(roomtakenright, ret.dotshiftx);
+		  }
+	  }
 
   } else {
     var dir = (elem.averagepitch>=6) ? "down": "up";
@@ -527,9 +606,9 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 	  if (!style || style === "normal") style = "note";
 	  var noteSymbol;
 	  if (zeroDuration)
-		  noteSymbol = this.chartable[style].nostem;
+		  noteSymbol = chartable[style].nostem;
 		else
-		  noteSymbol = this.chartable[style][-durlog];
+		  noteSymbol = chartable[style][-durlog];
 	  if (!noteSymbol)
 	  	console.log("noteSymbol:", style, durlog, zeroDuration);
 
@@ -552,12 +631,6 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
       }
     }
 
-           // The accidentalSlot will hold a list of all the accidentals on this chord. Each element is a vertical place,
-           // and contains a pitch, which is the last pitch that contains an accidental in that slot. The slots are numbered
-         // from closest to the note to farther left. We only need to know the last accidental we placed because
-         // we know that the pitches are sorted by now.
-    this.accidentalSlot = [];
-
     var pp = elem.pitches.length;
     for (p=0; p<elem.pitches.length; p++) {
 
@@ -565,11 +638,11 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
         if ((dir==="down" && p!==0) || (dir==="up" && p!==pp-1)) { // not the stemmed elem of the chord
          flag = null;
         } else {
-         flag = this.chartable[(dir==="down")?"dflags":"uflags"][-durlog];
+         flag = chartable[(dir==="down")?"dflags":"uflags"][-durlog];
         }
       }
 	    if (elem.pitches[p].style) { // There is a style for the whole group of pitches, but there could also be an override for a particular pitch.
-		    c = this.chartable[elem.pitches[p].style][-durlog];
+		    c = chartable[elem.pitches[p].style][-durlog];
 	    } else
 		    c = noteSymbol;
                 // The highest position for the sake of placing slurs is itself if the slur is internal. It is the highest position possible if the slur is for the whole chord.
@@ -603,7 +676,8 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
       }
 
 		var hasStem = !nostem && durlog<=-1;
-      notehead = this.createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomtaken, flag, dot, dotshiftx, 1);
+      ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomtaken, flag, dot, dotshiftx, 1, accidentalSlot);
+      notehead = ret.notehead;
       if (notehead) {
 	      this.addSlursAndTies(abselem, elem.pitches[p], notehead, voice, hasStem ? dir : null);
 
@@ -611,8 +685,8 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 			notehead.bottom = notehead.bottom - 1;	 // If there is a tie to the grace notes, leave a little more room for the note to avoid collisions.
 		  abselem.addHead(notehead);
 	  }
-      roomtaken += this.accidentalshiftx;
-      roomtakenright = Math.max(roomtakenright,this.dotshiftx);
+      roomtaken += ret.accidentalshiftx;
+      roomtakenright = Math.max(roomtakenright,ret.dotshiftx);
     }
 
     // draw stem from the furthest note to a pitch above/below the stemmed note
@@ -651,62 +725,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   }
 
   if (elem.gracenotes !== undefined) {
-    var gracescale = 3/5;
-    var graceScaleStem = 3.5/5; // TODO-PER: empirically found constant.
-    var gracebeam = null;
-    if (elem.gracenotes.length>1) {
-      gracebeam = new BeamElem(this.stemHeight*graceScaleStem, "grace",this.isBagpipes);
-		if (hint) gracebeam.setHint();
-		gracebeam.mainNote = abselem;	// this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
-    }
-
-    var graceoffsets = [];
-    for (i=elem.gracenotes.length-1; i>=0; i--) { // figure out where to place each gracenote
-      roomtaken+=10;
-      graceoffsets[i] = roomtaken;
-      if (elem.gracenotes[i].accidental) {
-        roomtaken+=7;
-      }
-    }
-
-    for (i=0; i<elem.gracenotes.length; i++) {
-      var gracepitch = elem.gracenotes[i].verticalPos;
-
-      flag = (gracebeam) ? null : this.chartable.uflags[(this.isBagpipes)?5:3];
-      grace = this.createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale);
-	    this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up");
-
-	    abselem.addExtra(grace);
-                // PER: added acciaccatura slash
-                if (elem.gracenotes[i].acciaccatura) {
-                        var pos = elem.gracenotes[i].verticalPos+7*gracescale;        // the same formula that determines the flag position.
-                        var dAcciaccatura = gracebeam ? 5 : 6;        // just an offset to make it line up correctly.
-                        abselem.addRight(new RelativeElement("flags.ugrace", -graceoffsets[i]+dAcciaccatura, 0, pos, {scalex:gracescale, scaley: gracescale}));
-                }
-      if (gracebeam) { // give the beam the necessary info
-          var graceDuration = elem.gracenotes[i].duration / 2;
-          if (this.isBagpipes) graceDuration /= 2;
-        var pseudoabselem = {heads:[grace],
-                         abcelem:{averagepitch: gracepitch, minpitch: gracepitch, maxpitch: gracepitch, duration: graceDuration }};
-        gracebeam.add(pseudoabselem);
-      } else { // draw the stem
-        p1 = gracepitch+1/3*gracescale;
-        p2 = gracepitch+7*gracescale;
-        dx = grace.dx + grace.w;
-        width = -0.6;
-        abselem.addExtra(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
-      }
-		ledgerLines(abselem, gracepitch, gracepitch, false, "noteheads.quarter", [], true, grace.dx-1, 0.6);
-
-      if (i===0 && !this.isBagpipes && !(elem.rest && (elem.rest.type==="spacer"||elem.rest.type==="invisible"))) {
-      	var isTie = (elem.gracenotes.length === 1 && grace.pitch === notehead.pitch);
-	      voice.addOther(new TieElem(grace, notehead, false, true, isTie));
-	  }
-    }
-
-    if (gracebeam) {
-	    voice.addBeam(gracebeam);
-    }
+	roomtaken += this.addGraceNotes(elem, voice, abselem, notehead, this.stemHeight, this.isBagpipes, roomtaken);
   }
 
   if (elem.decoration) {
@@ -783,14 +802,14 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 
 
 
-AbstractEngraver.prototype.createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale) {
+var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot) {
 
   // TODO scale the dot as well
   var pitch = pitchelem.verticalPos;
   var notehead;
   var i;
-  this.accidentalshiftx = 0;
-  this.dotshiftx = 0;
+  var accidentalshiftx = 0;
+  var newDotShiftX = 0;
   if (c === undefined)
     abselem.addChild(new RelativeElement("pitch is undefined", 0, 0, 0, {type:"debug"}));
   else if (c==="") {
@@ -802,8 +821,6 @@ AbstractEngraver.prototype.createNoteHead = function(abselem, c, pitchelem, dir,
       shiftheadx = (dir==="down")?-glyphs.getSymbolWidth(c)*scale+adjust:glyphs.getSymbolWidth(c)*scale-adjust;
     }
 	  var opts = {scalex:scale, scaley: scale, thickness: glyphs.symbolHeightInPitches(c)*scale };
-	  //if (dir)
-	  //	opts.stemHeight = ((dir==="down")?-this.stemHeight:this.stemHeight);
     notehead = new RelativeElement(c, shiftheadx, glyphs.getSymbolWidth(c)*scale, pitch, opts);
     if (flag) {
       var pos = pitch+((dir==="down")?-7:7)*scale;
@@ -811,7 +828,7 @@ AbstractEngraver.prototype.createNoteHead = function(abselem, c, pitchelem, dir,
       var xdelta = (dir==="down")?headx:headx+notehead.w-0.6;
       abselem.addRight(new RelativeElement(flag, xdelta, glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));
     }
-    this.dotshiftx = notehead.w+dotshiftx-2+5*dot;
+	  newDotShiftX = notehead.w+dotshiftx-2+5*dot;
     for (;dot>0;dot--) {
       var dotadjusty = (1-Math.abs(pitch)%2); //PER: take abs value of the pitch. And the shift still happens on ledger lines.
       abselem.addRight(new RelativeElement("dots.dot", notehead.w+dotshiftx-2+5*dot, glyphs.getSymbolWidth("dots.dot"), pitch+dotadjusty));
@@ -847,23 +864,23 @@ AbstractEngraver.prototype.createNoteHead = function(abselem, c, pitchelem, dir,
          // if a note is at least a sixth away, it can share a slot with another accidental
          var accSlotFound = false;
          var accPlace = extrax;
-         for (var j = 0; j < this.accidentalSlot.length; j++) {
-                 if (pitch - this.accidentalSlot[j][0] >= 6) {
-                         this.accidentalSlot[j][0] = pitch;
-                         accPlace = this.accidentalSlot[j][1];
+         for (var j = 0; j < accidentalSlot.length; j++) {
+                 if (pitch - accidentalSlot[j][0] >= 6) {
+                         accidentalSlot[j][0] = pitch;
+                         accPlace = accidentalSlot[j][1];
                          accSlotFound = true;
                          break;
                  }
          }
          if (accSlotFound === false) {
                  accPlace -= (glyphs.getSymbolWidth(symb)*scale+2);
-                 this.accidentalSlot.push([pitch,accPlace]);
-                 this.accidentalshiftx = (glyphs.getSymbolWidth(symb)*scale+2);
+                 accidentalSlot.push([pitch,accPlace]);
+                 accidentalshiftx = (glyphs.getSymbolWidth(symb)*scale+2);
          }
     abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
   }
 
-  return notehead;
+  return { notehead: notehead, accidentalshiftx: accidentalshiftx, dotshiftx: newDotShiftX };
 
 };
 
