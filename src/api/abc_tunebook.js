@@ -141,7 +141,7 @@ var tunebook = {};
 					abcParser.parse(book.tunes[currentTune].abc, params);
 					var tune = abcParser.getTune();
 					ret.push(tune);
-					callback(div, tune, i);
+					callback(div, tune, i, book.tunes[currentTune].abc);
 				} else
 					div.innerHTML = "";
 			}

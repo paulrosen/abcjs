@@ -54,7 +54,7 @@ var renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
     if (params.inlineControls)
 	    params.inlineControls.selectionToggle = false; // Override the selection option because there is no selection in the Basic call.
 
-    function callback(div, tune, index) {
+    function callback(div, tune, index, abcString) {
         var html = "";
         var midiInst = midiCreate(tune, params);
         if (params.generateInline) {
