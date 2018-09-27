@@ -29,6 +29,7 @@ var createKeySignature;
 		if (!elem.accidentals || elem.accidentals.length === 0)
 			return null;
 		var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra', tuneNumber);
+		abselem.isKeySig = true;
 		var dx = 0;
 		parseCommon.each(elem.accidentals, function(acc) {
 			var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
