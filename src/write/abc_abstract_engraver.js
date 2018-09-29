@@ -412,23 +412,23 @@ var sortPitch = function(elem) {
   } while (!sorted);
 };
 
-var ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLedgers, dir, dx, scale) {
+var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, additionalLedgers, dir, dx, scale) {
 	for (var i=maxPitch; i>11; i--) {
 		if (i%2===0 && !isRest) {
-			abselem.addChild(new RelativeElement(null, dx, (glyphs.getSymbolWidth(c)+4)*scale, i, {type:"ledger"}));
+			abselem.addChild(new RelativeElement(null, dx, (symbolWidth+4)*scale, i, {type:"ledger"}));
 		}
 	}
 
 	for (i=minPitch; i<1; i++) {
 		if (i%2===0 && !isRest) {
-			abselem.addChild(new RelativeElement(null, dx, (glyphs.getSymbolWidth(c)+4)*scale, i, {type:"ledger"}));
+			abselem.addChild(new RelativeElement(null, dx, (symbolWidth+4)*scale, i, {type:"ledger"}));
 		}
 	}
 
 	for (i = 0; i < additionalLedgers.length; i++) { // PER: draw additional ledgers
-		var ofs = glyphs.getSymbolWidth(c);
+		var ofs = symbolWidth;
 		if (dir === 'down') ofs = -ofs;
-		abselem.addChild(new RelativeElement(null, ofs+dx, (glyphs.getSymbolWidth(c)+4)*scale, additionalLedgers[i], {type:"ledger"}));
+		abselem.addChild(new RelativeElement(null, ofs+dx, (symbolWidth+4)*scale, additionalLedgers[i], {type:"ledger"}));
 	}
 };
 
@@ -485,7 +485,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLed
 				var width = -0.6;
 				abselem.addExtra(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2": p2, linewidth: width}));
 			}
-			ledgerLines(abselem, gracepitch, gracepitch, false, "noteheads.quarter", [], true, grace.dx - 1, 0.6);
+			ledgerLines(abselem, gracepitch, gracepitch, false, glyphs.getSymbolWidth("noteheads.quarter"), [], true, grace.dx - 1, 0.6);
 
 			if (i === 0 && !isBagpipes && !(elem.rest && (elem.rest.type === "spacer" || elem.rest.type === "invisible"))) {
 				var isTie = (elem.gracenotes.length === 1 && grace.pitch === notehead.pitch);
@@ -567,23 +567,206 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLed
 		return { noteHead: noteHead, roomTaken: roomTaken, roomTakenRight: roomTakenRight };
 	}
 
+	AbstractEngraver.prototype.addNoteToAbcElement = function(abselem, elem, dot, stemdir, style, zeroDuration, durlog, nostem, voice) {
+		var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
+		var noteHead;
+		var roomTaken = 0;
+		var roomTakenRight = 0;
+		var min;
+		var i;
+		var additionalLedgers = [];
+		// The accidentalSlot will hold a list of all the accidentals on this chord. Each element is a vertical place,
+		// and contains a pitch, which is the last pitch that contains an accidental in that slot. The slots are numbered
+		// from closest to the note to farther left. We only need to know the last accidental we placed because
+		// we know that the pitches are sorted by now.
+		var accidentalSlot = [];
+		var symbolWidth = 0;
+
+		var dir = (elem.averagepitch>=6) ? "down": "up";
+		if (stemdir) dir=stemdir;
+
+		style = elem.style ? elem.style : style; // get the style of note head.
+		if (!style || style === "normal") style = "note";
+		var noteSymbol;
+		if (zeroDuration)
+			noteSymbol = chartable[style].nostem;
+		else
+			noteSymbol = chartable[style][-durlog];
+		if (!noteSymbol)
+			console.log("noteSymbol:", style, durlog, zeroDuration);
+
+		// determine elements of chords which should be shifted
+		var p;
+		for (p=(dir==="down")?elem.pitches.length-2:1; (dir==="down")?p>=0:p<elem.pitches.length; p=(dir==="down")?p-1:p+1) {
+			var prev = elem.pitches[(dir==="down")?p+1:p-1];
+			var curr = elem.pitches[p];
+			var delta = (dir==="down")?prev.pitch-curr.pitch:curr.pitch-prev.pitch;
+			if (delta<=1 && !prev.printer_shift) {
+				curr.printer_shift=(delta)?"different":"same";
+				if (curr.verticalPos > 11 || curr.verticalPos < 1) {        // PER: add extra ledger line
+					additionalLedgers.push(curr.verticalPos - (curr.verticalPos%2));
+				}
+				if (dir==="down") {
+					roomTaken = glyphs.getSymbolWidth(noteSymbol)+2;
+				} else {
+					dotshiftx = glyphs.getSymbolWidth(noteSymbol)+2;
+				}
+			}
+		}
+
+		var pp = elem.pitches.length;
+		for (p=0; p<elem.pitches.length; p++) {
+
+			if (!nostem) {
+				var flag;
+				if ((dir==="down" && p!==0) || (dir==="up" && p!==pp-1)) { // not the stemmed elem of the chord
+					flag = null;
+				} else {
+					flag = chartable[(dir==="down")?"dflags":"uflags"][-durlog];
+				}
+			}
+			var c;
+			if (elem.pitches[p].style) { // There is a style for the whole group of pitches, but there could also be an override for a particular pitch.
+				c = chartable[elem.pitches[p].style][-durlog];
+			} else
+				c = noteSymbol;
+			// The highest position for the sake of placing slurs is itself if the slur is internal. It is the highest position possible if the slur is for the whole chord.
+			// If the note is the only one in the chord, then any slur it has counts as if it were on the whole chord.
+			elem.pitches[p].highestVert = elem.pitches[p].verticalPos;
+			var isTopWhenStemIsDown = (stemdir==="up" || dir==="up") && p===0;
+			var isBottomWhenStemIsUp = (stemdir==="down" || dir==="down") && p===pp-1;
+			if (isTopWhenStemIsDown || isBottomWhenStemIsUp) { // place to put slurs if not already on pitches
+
+				if (elem.startSlur || pp === 1) {
+					elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
+					if (stemdir==="up" || dir==="up")
+						elem.pitches[p].highestVert += 6;        // If the stem is up, then compensate for the length of the stem
+				}
+				if (elem.startSlur) {
+					if (!elem.pitches[p].startSlur) elem.pitches[p].startSlur = []; //TODO possibly redundant, provided array is not optional
+					for (i=0; i<elem.startSlur.length; i++) {
+						elem.pitches[p].startSlur.push(elem.startSlur[i]);
+					}
+				}
+
+				if (elem.endSlur) {
+					elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
+					if (stemdir==="up" || dir==="up")
+						elem.pitches[p].highestVert += 6;        // If the stem is up, then compensate for the length of the stem
+					if (!elem.pitches[p].endSlur) elem.pitches[p].endSlur = []; //TODO possibly redundant, provided array is not optional
+					for (i=0; i<elem.endSlur.length; i++) {
+						elem.pitches[p].endSlur.push(elem.endSlur[i]);
+					}
+				}
+			}
+
+			var hasStem = !nostem && durlog<=-1;
+			var ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomTaken, flag, dot, dotshiftx, 1, accidentalSlot);
+			symbolWidth = Math.max(glyphs.getSymbolWidth(c), symbolWidth);
+			noteHead = ret.notehead;
+			if (noteHead) {
+				this.addSlursAndTies(abselem, elem.pitches[p], noteHead, voice, hasStem ? dir : null);
+
+				if (elem.gracenotes && elem.gracenotes.length > 0)
+					noteHead.bottom = noteHead.bottom - 1;	 // If there is a tie to the grace notes, leave a little more room for the note to avoid collisions.
+				abselem.addHead(noteHead);
+			}
+			roomTaken += ret.accidentalshiftx;
+			roomTakenRight = Math.max(roomTakenRight,ret.dotshiftx);
+		}
+
+		// draw stem from the furthest note to a pitch above/below the stemmed note
+		if (hasStem) {
+			var p1 = (dir==="down") ? elem.minpitch-7 : elem.minpitch+1/3;
+			// PER added stemdir test to make the line meet the note.
+			if (p1>6 && !stemdir) p1=6;
+			var p2 = (dir==="down") ? elem.maxpitch-1/3 : elem.maxpitch+7;
+			// PER added stemdir test to make the line meet the note.
+			if (p2<6 && !stemdir) p2=6;
+			var dx = (dir==="down" || abselem.heads.length === 0)?0:abselem.heads[0].w;
+			var width = (dir==="down")?1:-1;
+			// TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
+			if (noteHead.c === 'noteheads.slash.quarter') {
+				if (dir === 'down')
+					p2 -= 1;
+				else
+					p1 += 1;
+			}
+			abselem.addExtra(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+			min = Math.min(p1, p2);
+		}
+		return { noteHead: noteHead, roomTaken: roomTaken, roomTakenRight: roomTakenRight, min: min, additionalLedgers: additionalLedgers, dir: dir, symbolWidth: symbolWidth };
+	};
+
+	AbstractEngraver.prototype.addLyric = function(abselem, elem) {
+		var lyricStr = "";
+		parseCommon.each(elem.lyric, function(ly) {
+			var div = ly.divider === ' ' ? "" : ly.divider;
+			lyricStr += ly.syllable + div + "\n";
+		});
+		var lyricDim = this.renderer.getTextSize(lyricStr, 'vocalfont', "lyric");
+		var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
+		abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, {type:"lyric", position: position, height: lyricDim.height / spacing.STEP }));
+	};
+
+	AbstractEngraver.prototype.addChord = function(abselem, elem, roomTaken, roomTakenRight) {
+		var chordMargin = 8; // If there are chords next to each other, this is how close they can get.
+		for (var i = 0; i < elem.chord.length; i++) {
+			var x = 0;
+			var y;
+			var dim = this.renderer.getTextSize(elem.chord[i].name, 'annotationfont', "annotation");
+			var chordWidth = dim.width;
+			var chordHeight = dim.height / spacing.STEP;
+			switch (elem.chord[i].position) {
+				case "left":
+					roomTaken+=chordWidth+7;
+					x = -roomTaken;        // TODO-PER: This is just a guess from trial and error
+					y = elem.averagepitch;
+					abselem.addExtra(new RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
+					break;
+				case "right":
+					roomTakenRight+=4;
+					x = roomTakenRight;// TODO-PER: This is just a guess from trial and error
+					y = elem.averagepitch;
+					abselem.addRight(new RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
+					break;
+				case "below":
+					// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
+					abselem.addRight(new RelativeElement(elem.chord[i].name, 0, chordWidth+chordMargin, undefined, {type: "text", position: "below", height: chordHeight}));
+					break;
+				case "above":
+					// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
+					abselem.addRight(new RelativeElement(elem.chord[i].name, 0, chordWidth+chordMargin, undefined, {type: "text", height: chordHeight}));
+					break;
+				default:
+					if (elem.chord[i].rel_position) {
+						var relPositionY = elem.chord[i].rel_position.y + 3*spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
+						abselem.addChild(new RelativeElement(elem.chord[i].name, x + elem.chord[i].rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {type: "text", height: chordHeight}));
+					} else {
+						// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
+						var pos2 = 'above';
+						if (elem.positioning && elem.positioning.chordPosition)
+							pos2 = elem.positioning.chordPosition;
+
+						dim = this.renderer.getTextSize(elem.chord[i].name, 'gchordfont', "chord");
+						chordHeight = dim.height / spacing.STEP;
+						chordWidth = dim.width; // Since the chord is centered, we only use half the width.
+						abselem.addCentered(new RelativeElement(elem.chord[i].name, x, chordWidth, undefined, {type: "chord", position: pos2, height: chordHeight }));
+					}
+			}
+		}
+		return { roomTaken: roomTaken, roomTakenRight: roomTakenRight };
+	};
+
 AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff, voice) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var roomtaken = 0; // room needed to the left of the note
   var roomtakenright = 0; // room needed to the right of the note
-  var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
-  var c="";
-  var flag = null;
+  var symbolWidth = 0;
   var additionalLedgers = []; // PER: handle the case of [bc'], where the b doesn't have a ledger line
 
   var i;
-  var width, p1, p2, dx;
-
-	// The accidentalSlot will hold a list of all the accidentals on this chord. Each element is a vertical place,
-	// and contains a pitch, which is the last pitch that contains an accidental in that slot. The slots are numbered
-	// from closest to the note to farther left. We only need to know the last accidental we placed because
-	// we know that the pitches are sorted by now.
-	var accidentalSlot = [];
+  var dir;
 
 	var duration = getDuration(elem);
 	var zeroDuration = false;
@@ -611,129 +794,19 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 	  roomtaken = ret1.roomTaken;
 	  roomtakenright = ret1.roomTakenRight;
   } else {
-    var dir = (elem.averagepitch>=6) ? "down": "up";
-    if (this.stemdir) dir=this.stemdir;
-
-	  var style = elem.style ? elem.style : this.style; // get the style of note head.
-	  if (!style || style === "normal") style = "note";
-	  var noteSymbol;
-	  if (zeroDuration)
-		  noteSymbol = chartable[style].nostem;
-		else
-		  noteSymbol = chartable[style][-durlog];
-	  if (!noteSymbol)
-	  	console.log("noteSymbol:", style, durlog, zeroDuration);
-
-    // determine elements of chords which should be shifted
-	  var p;
-    for (p=(dir==="down")?elem.pitches.length-2:1; (dir==="down")?p>=0:p<elem.pitches.length; p=(dir==="down")?p-1:p+1) {
-      var prev = elem.pitches[(dir==="down")?p+1:p-1];
-      var curr = elem.pitches[p];
-      var delta = (dir==="down")?prev.pitch-curr.pitch:curr.pitch-prev.pitch;
-      if (delta<=1 && !prev.printer_shift) {
-        curr.printer_shift=(delta)?"different":"same";
-        if (curr.verticalPos > 11 || curr.verticalPos < 1) {        // PER: add extra ledger line
-          additionalLedgers.push(curr.verticalPos - (curr.verticalPos%2));
-        }
-        if (dir==="down") {
-         roomtaken = glyphs.getSymbolWidth(noteSymbol)+2;
-        } else {
-         dotshiftx = glyphs.getSymbolWidth(noteSymbol)+2;
-        }
-      }
-    }
-
-    var pp = elem.pitches.length;
-    for (p=0; p<elem.pitches.length; p++) {
-
-      if (!nostem) {
-        if ((dir==="down" && p!==0) || (dir==="up" && p!==pp-1)) { // not the stemmed elem of the chord
-         flag = null;
-        } else {
-         flag = chartable[(dir==="down")?"dflags":"uflags"][-durlog];
-        }
-      }
-	    if (elem.pitches[p].style) { // There is a style for the whole group of pitches, but there could also be an override for a particular pitch.
-		    c = chartable[elem.pitches[p].style][-durlog];
-	    } else
-		    c = noteSymbol;
-                // The highest position for the sake of placing slurs is itself if the slur is internal. It is the highest position possible if the slur is for the whole chord.
-                // If the note is the only one in the chord, then any slur it has counts as if it were on the whole chord.
-                elem.pitches[p].highestVert = elem.pitches[p].verticalPos;
-                var isTopWhenStemIsDown = (this.stemdir==="up" || dir==="up") && p===0;
-                var isBottomWhenStemIsUp = (this.stemdir==="down" || dir==="down") && p===pp-1;
-      if (isTopWhenStemIsDown || isBottomWhenStemIsUp) { // place to put slurs if not already on pitches
-
-                 if (elem.startSlur || pp === 1) {
-                 elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
-                 if (this.stemdir==="up" || dir==="up")
-                                        elem.pitches[p].highestVert += 6;        // If the stem is up, then compensate for the length of the stem
-                 }
-                         if (elem.startSlur) {
-          if (!elem.pitches[p].startSlur) elem.pitches[p].startSlur = []; //TODO possibly redundant, provided array is not optional
-         for (i=0; i<elem.startSlur.length; i++) {
-         elem.pitches[p].startSlur.push(elem.startSlur[i]);
-         }
-        }
-
-        if (elem.endSlur) {
-                        elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
-                        if (this.stemdir==="up" || dir==="up")
-                                elem.pitches[p].highestVert += 6;        // If the stem is up, then compensate for the length of the stem
-          if (!elem.pitches[p].endSlur) elem.pitches[p].endSlur = []; //TODO possibly redundant, provided array is not optional
-         for (i=0; i<elem.endSlur.length; i++) {
-         elem.pitches[p].endSlur.push(elem.endSlur[i]);
-         }
-        }
-      }
-
-		var hasStem = !nostem && durlog<=-1;
-      var ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomtaken, flag, dot, dotshiftx, 1, accidentalSlot);
-      notehead = ret.notehead;
-      if (notehead) {
-	      this.addSlursAndTies(abselem, elem.pitches[p], notehead, voice, hasStem ? dir : null);
-
-	      if (elem.gracenotes && elem.gracenotes.length > 0)
-			notehead.bottom = notehead.bottom - 1;	 // If there is a tie to the grace notes, leave a little more room for the note to avoid collisions.
-		  abselem.addHead(notehead);
-	  }
-      roomtaken += ret.accidentalshiftx;
-      roomtakenright = Math.max(roomtakenright,ret.dotshiftx);
-    }
-
-    // draw stem from the furthest note to a pitch above/below the stemmed note
-    if (hasStem) {
-      p1 = (dir==="down") ? elem.minpitch-7 : elem.minpitch+1/3;
-                // PER added stemdir test to make the line meet the note.
-      if (p1>6 && !this.stemdir) p1=6;
-      p2 = (dir==="down") ? elem.maxpitch-1/3 : elem.maxpitch+7;
-                // PER added stemdir test to make the line meet the note.
-      if (p2<6 && !this.stemdir) p2=6;
-      dx = (dir==="down" || abselem.heads.length === 0)?0:abselem.heads[0].w;
-      width = (dir==="down")?1:-1;
-		// TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
-		if (notehead.c === 'noteheads.slash.quarter') {
-			if (dir === 'down')
-				p2 -= 1;
-			else
-				p1 += 1;
-		}
-      abselem.addExtra(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
-        this.minY = Math.min(p1, this.minY);
-        this.minY = Math.min(p2, this.minY);
-    }
-
+	  var ret2 = this.addNoteToAbcElement(abselem, elem, dot, this.stemdir, this.style, zeroDuration, durlog, nostem, voice);
+	  if (ret2.min !== undefined)
+		  this.minY = Math.min(ret2.min, this.minY);
+	  notehead = ret2.noteHead;
+	  roomtaken = ret2.roomTaken;
+	  roomtakenright = ret2.roomTakenRight;
+	  additionalLedgers = ret2.additionalLedgers;
+	  dir = ret2.dir;
+	  symbolWidth = ret2.symbolWidth;
   }
 
   if (elem.lyric !== undefined) {
-    var lyricStr = "";
-         parseCommon.each(elem.lyric, function(ly) {
-         	var div = ly.divider === ' ' ? "" : ly.divider;
-         lyricStr += ly.syllable + div + "\n";
-      });
-	  var lyricDim = this.renderer.getTextSize(lyricStr, 'vocalfont', "lyric");
-	  var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
-    abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, {type:"lyric", position: position, height: lyricDim.height / spacing.STEP }));
+  	this.addLyric(abselem, elem);
   }
 
   if (elem.gracenotes !== undefined) {
@@ -749,54 +822,12 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   }
 
   // ledger lines
-	ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, c, additionalLedgers, dir, -2, 1);
+	ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
 
-	var chordMargin = 8; // If there are chords next to each other, this is how close they can get.
   if (elem.chord !== undefined) {
-    for (i = 0; i < elem.chord.length; i++) {
-      var x = 0;
-      var y;
-		var dim = this.renderer.getTextSize(elem.chord[i].name, 'annotationfont', "annotation");
-		var chordWidth = dim.width;
-		var chordHeight = dim.height / spacing.STEP;
-      switch (elem.chord[i].position) {
-      case "left":
-        roomtaken+=chordWidth+7;
-        x = -roomtaken;        // TODO-PER: This is just a guess from trial and error
-        y = elem.averagepitch;
-        abselem.addExtra(new RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
-        break;
-      case "right":
-        roomtakenright+=4;
-        x = roomtakenright;// TODO-PER: This is just a guess from trial and error
-        y = elem.averagepitch;
-        abselem.addRight(new RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
-        break;
-      case "below":
-		  // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-		  abselem.addRight(new RelativeElement(elem.chord[i].name, 0, chordWidth+chordMargin, undefined, {type: "text", position: "below", height: chordHeight}));
-    break;
-		case "above":
-			// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-			abselem.addRight(new RelativeElement(elem.chord[i].name, 0, chordWidth+chordMargin, undefined, {type: "text", height: chordHeight}));
-			break;
-      default:
-		if (elem.chord[i].rel_position) {
-			var relPositionY = elem.chord[i].rel_position.y + 3*spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
-			abselem.addChild(new RelativeElement(elem.chord[i].name, x + elem.chord[i].rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {type: "text", height: chordHeight}));
-		} else {
-			// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-			var pos2 = 'above';
-			if (elem.positioning && elem.positioning.chordPosition)
-				pos2 = elem.positioning.chordPosition;
-
-			dim = this.renderer.getTextSize(elem.chord[i].name, 'gchordfont', "chord");
-			chordHeight = dim.height / spacing.STEP;
-			chordWidth = dim.width; // Since the chord is centered, we only use half the width.
-			abselem.addCentered(new RelativeElement(elem.chord[i].name, x, chordWidth, undefined, {type: "chord", position: pos2, height: chordHeight }));
-		}
-      }
-    }
+  	var ret3 = this.addChord(abselem, elem, roomtaken, roomtakenright);
+	  roomtaken = ret3.roomTaken;
+	  roomtakenright = ret3.roomTakenRight;
   }
 
 
