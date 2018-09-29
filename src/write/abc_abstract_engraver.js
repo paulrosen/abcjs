@@ -663,6 +663,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			var hasStem = !nostem && durlog<=-1;
 			var ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomTaken, flag, dot, dotshiftx, 1, accidentalSlot);
 			symbolWidth = Math.max(glyphs.getSymbolWidth(c), symbolWidth);
+			abselem.extraw -= ret.extraLeft;
 			noteHead = ret.notehead;
 			if (noteHead) {
 				this.addSlursAndTies(abselem, elem.pitches[p], noteHead, voice, hasStem ? dir : null);
@@ -853,6 +854,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
   var i;
   var accidentalshiftx = 0;
   var newDotShiftX = 0;
+  var extraLeft = 0;
   if (c === undefined)
     abselem.addChild(new RelativeElement("pitch is undefined", 0, 0, 0, {type:"debug"}));
   else if (c==="") {
@@ -921,9 +923,10 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
                  accidentalshiftx = (glyphs.getSymbolWidth(symb)*scale+2);
          }
     abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
+	  extraLeft = glyphs.getSymbolWidth(symb) / 2; // TODO-PER: We need a little extra width if there is an accidental, but I'm not sure why it isn't the full width of the accidental.
   }
 
-  return { notehead: notehead, accidentalshiftx: accidentalshiftx, dotshiftx: newDotShiftX };
+  return { notehead: notehead, accidentalshiftx: accidentalshiftx, dotshiftx: newDotShiftX, extraLeft: extraLeft };
 
 };
 
