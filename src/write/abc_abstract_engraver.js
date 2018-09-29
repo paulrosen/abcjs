@@ -499,6 +499,74 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, c, additionalLed
 		return roomtaken;
 	};
 
+	function addRestToAbsElement(abselem, elem, duration, dot, isMultiVoice, stemdir, isSingleLineStaff, durlog) {
+		var c;
+		var restpitch = 7;
+		var noteHead;
+		var roomTaken;
+		var roomTakenRight;
+
+		if (isMultiVoice) {
+			if (stemdir === "down") restpitch = 3;
+			if (stemdir === "up") restpitch = 11;
+		}
+		// There is special placement for the percussion staff. If there is one staff line, then move the rest position.
+		if (isSingleLineStaff) {
+			// The half and whole rests are attached to different lines normally, so we need to tweak their position to get them to both be attached to the same one.
+			if (duration < 0.5)
+				restpitch = 7;
+			else if (duration < 1)
+				restpitch = 7;	// half rest
+			else
+				restpitch = 5; // whole rest
+		}
+		switch (elem.rest.type) {
+			case "whole":
+				c = chartable.rest[0];
+				elem.averagepitch = restpitch;
+				elem.minpitch = restpitch;
+				elem.maxpitch = restpitch;
+				dot = 0;
+				break;
+			case "rest":
+				if (elem.style === "rhythm") // special case for rhythm: rests are a handy way to express the rhythm.
+					c = chartable.rhythm[-durlog];
+				else
+					c = chartable.rest[-durlog];
+				elem.averagepitch = restpitch;
+				elem.minpitch = restpitch;
+				elem.maxpitch = restpitch;
+				break;
+			case "invisible":
+			case "spacer":
+				c = "";
+				elem.averagepitch = restpitch;
+				elem.minpitch = restpitch;
+				elem.maxpitch = restpitch;
+				break;
+			case "multimeasure":
+				c = chartable.rest['multi'];
+				elem.averagepitch = restpitch;
+				elem.minpitch = restpitch;
+				elem.maxpitch = restpitch;
+				dot = 0;
+				var mmWidth = glyphs.getSymbolWidth(c);
+				abselem.addHead(new RelativeElement(c, -mmWidth, mmWidth * 2, 7));
+				var numMeasures = new RelativeElement("" + elem.duration, 0, mmWidth, 16, {type: "multimeasure-text"});
+				abselem.addExtra(numMeasures);
+		}
+		if (elem.rest.type !== "multimeasure") {
+			var ret = createNoteHead(abselem, c, {verticalPos: restpitch}, null, 0, 0, null, dot, 0, 1, []);
+			noteHead = ret.notehead;
+			if (noteHead) {
+				abselem.addHead(noteHead);
+				roomTaken = ret.accidentalshiftx;
+				roomTakenRight = ret.dotshiftx;
+			}
+		}
+		return { noteHead: noteHead, roomTaken: roomTaken, roomTakenRight: roomTakenRight };
+	}
+
 AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff, voice) { //stem presence: true for drawing stemless notehead
   var notehead = null;
   var roomtaken = 0; // room needed to the left of the note
@@ -538,66 +606,10 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   if (hint) abselem.setHint();
 
   if (elem.rest) {
-    var restpitch = 7;
-    if (voice.voicetotal > 1) {
-	    if (this.stemdir === "down") restpitch = 3;
-	    if (this.stemdir === "up") restpitch = 11;
-    }
-	  // There is special placement for the percussion staff. If there is one staff line, then move the rest position.
-	  if (isSingleLineStaff) {
-		  // The half and whole rests are attached to different lines normally, so we need to tweak their position to get them to both be attached to the same one.
-		  if (duration < 0.5)
-			  restpitch = 7;
-		  else if (duration < 1)
-			restpitch = 7;	// half rest
-		  else
-		  	restpitch = 5; // whole rest
-	  }
-	  switch (elem.rest.type) {
-		  case "whole":
-			  c = chartable.rest[0];
-			  elem.averagepitch = restpitch;
-			  elem.minpitch = restpitch;
-			  elem.maxpitch = restpitch;
-			  dot = 0;
-			  break;
-		  case "rest":
-			  if (elem.style === "rhythm") // special case for rhythm: rests are a handy way to express the rhythm.
-				  c = chartable.rhythm[-durlog];
-			  else
-				  c = chartable.rest[-durlog];
-			  elem.averagepitch = restpitch;
-			  elem.minpitch = restpitch;
-			  elem.maxpitch = restpitch;
-			  break;
-		  case "invisible":
-		  case "spacer":
-			  c = "";
-			  elem.averagepitch = restpitch;
-			  elem.minpitch = restpitch;
-			  elem.maxpitch = restpitch;
-			  break;
-		  case "multimeasure":
-			  c = chartable.rest['multi'];
-			  elem.averagepitch = restpitch;
-			  elem.minpitch = restpitch;
-			  elem.maxpitch = restpitch;
-			  dot = 0;
-			  var mmWidth = glyphs.getSymbolWidth(c);
-			  abselem.addHead(new RelativeElement(c, -mmWidth, mmWidth * 2, 7));
-			  var numMeasures = new RelativeElement("" + elem.duration, 0, mmWidth, 16, {type: "multimeasure-text"});
-			  abselem.addExtra(numMeasures);
-	  }
-	  if (elem.rest.type !== "multimeasure") {
-		  var ret = createNoteHead(abselem, c, {verticalPos: restpitch}, null, 0, -roomtaken, null, dot, 0, 1, accidentalSlot);
-		  notehead = ret.notehead;
-		  if (notehead) {
-			  abselem.addHead(notehead);
-			  roomtaken += ret.accidentalshiftx;
-			  roomtakenright = Math.max(roomtakenright, ret.dotshiftx);
-		  }
-	  }
-
+	  var ret1 = addRestToAbsElement(abselem, elem, duration, dot, voice.voicetotal > 1, this.stemdir, isSingleLineStaff, durlog);
+	  notehead = ret1.noteHead;
+	  roomtaken = ret1.roomTaken;
+	  roomtakenright = ret1.roomTakenRight;
   } else {
     var dir = (elem.averagepitch>=6) ? "down": "up";
     if (this.stemdir) dir=this.stemdir;
@@ -676,7 +688,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
       }
 
 		var hasStem = !nostem && durlog<=-1;
-      ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomtaken, flag, dot, dotshiftx, 1, accidentalSlot);
+      var ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomtaken, flag, dot, dotshiftx, 1, accidentalSlot);
       notehead = ret.notehead;
       if (notehead) {
 	      this.addSlursAndTies(abselem, elem.pitches[p], notehead, voice, hasStem ? dir : null);
