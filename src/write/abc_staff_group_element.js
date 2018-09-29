@@ -225,8 +225,8 @@ function getLeftEdgeOfStaff(renderer, voices, brace) {
 
 StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
-	this.spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
-	this.minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
+	var spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
+	var minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
 
 	var x = getLeftEdgeOfStaff(renderer, this.voices, this.brace);
 	this.startx=x;
@@ -274,10 +274,9 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 				spacingduration = currentvoices[i].spacingduration;
 			}
 		}
-		//console.log("new spacingunit", spacingunit, this.spacingunits, "="+(spacingunit+ this.spacingunits));
-		this.spacingunits+=spacingunit;
-		this.minspace = Math.min(this.minspace,spacingunit);
-		if (debug) console.log("currentduration: ",currentduration, this.spacingunits, this.minspace);
+		spacingunits+=spacingunit;
+		minspace = Math.min(minspace,spacingunit);
+		if (debug) console.log("currentduration: ",currentduration, spacingunits, minspace);
 
 		for (i=0;i<currentvoices.length;i++) {
 			var voicechildx = currentvoices[i].layoutOneItem(x,spacing);
@@ -312,12 +311,13 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 		}
 	}
 	//console.log("greatest remaining",spacingunit,x);
-	this.spacingunits+=spacingunit;
+	spacingunits+=spacingunit;
 	this.w = x;
 
 	for (i=0;i<this.voices.length;i++) {
 		this.voices[i].w=this.w;
 	}
+	return { spacingUnits: spacingunits, minSpace: minspace };
 };
 
 StaffGroupElement.prototype.calcHeight = function () {

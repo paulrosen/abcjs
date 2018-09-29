@@ -103,6 +103,63 @@ EngraverController.prototype.adjustNonScaledItems = function (scale) {
 	this.renderer.adjustNonScaledItems(scale);
 };
 
+EngraverController.prototype.getMeasureWidths = function(abcTune) {
+	this.reset();
+
+	this.renderer.lineNumber = null;
+
+	this.renderer.newTune(abcTune);
+	this.engraver = new AbstractEngraver(abcTune.formatting.bagpipes,this.renderer, 0);
+	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
+	if (abcTune.formatting.staffwidth) {
+		this.width = abcTune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
+	} else {
+		this.width = this.renderer.isPrint ? this.staffwidthPrint : this.staffwidthScreen;
+	}
+
+	var scale = abcTune.formatting.scale ? abcTune.formatting.scale : this.scale;
+	if (this.responsive === "resize") // The resizing will mess with the scaling, so just don't do it explicitly.
+		scale = undefined;
+	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
+	this.adjustNonScaledItems(scale);
+
+	var ret = { left: 0, measureWidths: [] };
+	var debug = false;
+	var hasPrintedTempo = false;
+	for(var i=0; i<abcTune.lines.length; i++) {
+		var abcLine = abcTune.lines[i];
+		if (abcLine.staff) {
+			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null);
+
+			abcLine.staffGroup.layout(0, this.renderer, debug);
+			for (var j = 0; j < abcLine.staffGroup.voices.length; j++) {
+				var foundNotStaffExtra = false;
+				var left = 0;
+				var lastXPosition = 0;
+				for (var k = 0; k < abcLine.staffGroup.voices[j].children.length; k++) {
+					var child = abcLine.staffGroup.voices[j].children[k];
+					if (!foundNotStaffExtra) {
+						if (child.isClef || child.isKeySig)
+							left = child.x + child.w;
+						else {
+							if (!ret.left)  // TODO-PER: This is only recording the width of the extra staff items on the first line. If there is a V: name= and subname= then the second line might be a different width.
+								ret.left = left;
+							foundNotStaffExtra = true;
+							lastXPosition = left;
+						}
+					}
+					if (child.type === 'bar') {
+						ret.measureWidths.push(child.x - lastXPosition);
+						lastXPosition = child.x;
+					}
+				}
+			}
+			hasPrintedTempo = true;
+		}
+	}
+	return ret;
+};
+
 /**
  * Run the engraving process on a single tune
  * @param {ABCJS.Tune} abctune
@@ -113,7 +170,6 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.newTune(abctune);
 	this.engraver = new AbstractEngraver(abctune.formatting.bagpipes,this.renderer, tuneNumber);
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
-	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	if (abctune.formatting.staffwidth) {
 		this.width = abctune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
 	} else {
@@ -218,11 +274,10 @@ function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, 
  */
 EngraverController.prototype.setXSpacing = function (staffGroup, formatting, isLastLine, debug) {
    var newspace = this.space;
-   //var debug = true;
   for (var it = 0; it < 8; it++) { // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
-	  staffGroup.layout(newspace, this.renderer, debug);
+	  var ret = staffGroup.layout(newspace, this.renderer, debug);
 	  var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
-		newspace = calcHorizontalSpacing(isLastLine, stretchLast, this.width+this.renderer.padding.left, staffGroup.w, newspace, staffGroup.spacingunits, staffGroup.minspace);
+		newspace = calcHorizontalSpacing(isLastLine, stretchLast, this.width+this.renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace);
 		if (debug)
 			console.log("setXSpace", it, staffGroup.w, newspace, staffGroup.minspace);
 		if (newspace === null) break;
