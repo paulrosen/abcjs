@@ -201,6 +201,31 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
     return tunebook.renderEngine(callback, output, abc, params);
 };
 
+function calcLineBreaks(widths, lineBreakPoint) {
+	var lineBreaks = [];
+	var totalThisLine = widths.left;
+	var numBarsThisLine = 0;
+	for (var bar = 0; bar < widths.measureWidths.length; bar++) {
+		var thisBar = widths.measureWidths[bar];
+		if (totalThisLine + thisBar < lineBreakPoint) {
+			totalThisLine += thisBar;
+			numBarsThisLine++;
+		} else {
+			// This measure doesn't fit, so go back and make the last measure the line break.
+			if (numBarsThisLine > 0) { // If the single measure is just too long to fit by itself, we need to use it anyway and let it overflow.
+				bar--;
+				lineBreaks.push(bar);
+				totalThisLine = widths.left + thisBar;
+			} else {
+				lineBreaks.push(bar);
+				totalThisLine = widths.left;
+			}
+			numBarsThisLine = 0;
+		}
+	}
+	return { lineBreaks: lineBreaks, totalThisLine: totalThisLine }
+}
+
 function doLineWrapping(div, tune, tuneNumber, abcString, params) {
 	var engraver_controller = new EngraverController(div, params);
 	var widths = engraver_controller.getMeasureWidths(tune);
@@ -209,39 +234,41 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
     // The scaling works differently: this is done by changing the scaling of the outer SVG, so the scaling needs to be compensated
     // for here, because the actual width will be different from the calculated numbers.
 	var lineBreakPoint = params.staffwidth / params.wrap.minSpacing / params.scale;
-	var minLineSize = params.staffwidth / params.wrap.stretchLimit / params.scale;
-	var lineBreaks = [];
+	var minLineSize = params.staffwidth / params.wrap.onlyLineLimit / params.scale;
+	var minLastLineSize = params.staffwidth / params.wrap.lastLineLimit / params.scale;
 
-	var totalThisLine = widths.left;
-	var numBarsThisLine = 0;
-	for (var bar = 0; bar < widths.measureWidths.length; bar++) {
-        var thisBar = widths.measureWidths[bar];
-        if (totalThisLine + thisBar < lineBreakPoint) {
-	        totalThisLine += thisBar;
-	        numBarsThisLine++;
-        } else {
-            // This measure doesn't fit, so go back and make the last measure the line break.
-            if (numBarsThisLine > 0) { // If the single measure is just too long to fit by itself, we need to use it anyway and let it overflow.
-	            bar--;
-	            lineBreaks.push(bar);
-	            totalThisLine = widths.left + thisBar;
-            } else {
-	            lineBreaks.push(bar);
-	            totalThisLine = widths.left;
-            }
-	        numBarsThisLine = 0;
-        }
-    }
+	var ret = calcLineBreaks(widths, lineBreakPoint);
+
     var staffWidth = params.staffwidth;
-    if (lineBreaks.length === 0 && totalThisLine < minLineSize) {
+    if (ret.lineBreaks.length === 0 && ret.totalThisLine < minLineSize) {
 		// Everything fits on one line, so see if there is TOO much space and the staff width needs to be shortened.
-	    if (minLineSize > 0 && totalThisLine > 0)
-		    staffWidth = staffWidth / (minLineSize / totalThisLine);
+	    if (minLineSize > 0 && ret.totalThisLine > 0)
+		    staffWidth = staffWidth / (minLineSize / ret.totalThisLine);
+    } else if (ret.totalThisLine < minLastLineSize) {
+	    //console.log("Last Line Short", params.wrap.minSpacing, ret.totalThisLine, minLastLineSize);
+    	// the last line is too short, so attempt to redistribute by changing the min.
+	    // We will try more and less space alternatively. The space can't be less than 1.0, and we'll try in 0.1 increments.
+	    var minTrys = [];
+	    var minSpacing = parseFloat(params.wrap.minSpacing);
+	    if (minSpacing > 1.1)
+	    	minTrys.push(minSpacing - 0.1);
+	    minTrys.push(minSpacing + 0.1);
+	    if (minSpacing > 1.2)
+	    	minTrys.push(minSpacing - 0.2);
+	    minTrys.push(minSpacing + 0.2);
+	    if (minSpacing > 1.3)
+	    	minTrys.push(minSpacing - 0.3);
+	    minTrys.push(minSpacing + 0.3);
+	    for (var i = 0; i < minTrys.length && ret.totalThisLine < minLastLineSize; i++) {
+		    lineBreakPoint = params.staffwidth / minTrys[i] / params.scale;
+		    ret = calcLineBreaks(widths, lineBreakPoint);
+		    //console.log("Retry", i, minTrys[i], ret.totalThisLine, minLastLineSize)
+	    }
     }
 
 	var abcParser = new Parse();
 	var revisedParams = {
-	    lineBreaks: lineBreaks,
+	    lineBreaks: ret.lineBreaks,
 		staffwidth: staffWidth
     };
 	for (var key in params) {
