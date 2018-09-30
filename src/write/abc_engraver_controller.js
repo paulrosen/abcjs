@@ -134,19 +134,13 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 			abcLine.staffGroup.layout(0, this.renderer, debug);
 			for (var j = 0; j < abcLine.staffGroup.voices.length; j++) {
 				var foundNotStaffExtra = false;
-				var left = 0;
 				var lastXPosition = 0;
 				for (var k = 0; k < abcLine.staffGroup.voices[j].children.length; k++) {
 					var child = abcLine.staffGroup.voices[j].children[k];
-					if (!foundNotStaffExtra) {
-						if (child.isClef || child.isKeySig)
-							left = child.x + child.w;
-						else {
-							if (!ret.left)  // TODO-PER: This is only recording the width of the extra staff items on the first line. If there is a V: name= and subname= then the second line might be a different width.
-								ret.left = left;
-							foundNotStaffExtra = true;
-							lastXPosition = left;
-						}
+					if (!foundNotStaffExtra && !child.isClef && !child.isKeySig) {
+						foundNotStaffExtra = true;
+						ret.left = child.x;
+						lastXPosition = child.x;
 					}
 					if (child.type === 'bar') {
 						ret.measureWidths.push(child.x - lastXPosition);
