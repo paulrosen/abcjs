@@ -1,6 +1,7 @@
 var tunebook = require('./abc_tunebook');
 
 var EngraverController = require('../write/abc_engraver_controller');
+var Parse = require('../parse/abc_parse');
 
 var resizeDivs = {};
 function resizeOuter() {
@@ -187,8 +188,11 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
         }
     }
 
-    function callback(div, tune, tuneNumber) {
-        if (!params.oneSvgPerLine || tune.lines.length < 2)
+    function callback(div, tune, tuneNumber, abcString) {
+        if (params.wrap && params.staffwidth) {
+	        doLineWrapping(div, tune, tuneNumber, abcString, params);
+        }
+        else if (!params.oneSvgPerLine || tune.lines.length < 2)
             renderOne(div, tune, params, tuneNumber);
         else
             renderEachLineSeparately(div, tune, params, tuneNumber);
@@ -196,5 +200,59 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
 
     return tunebook.renderEngine(callback, output, abc, params);
 };
+
+function doLineWrapping(div, tune, tuneNumber, abcString, params) {
+	var engraver_controller = new EngraverController(div, params);
+	var widths = engraver_controller.getMeasureWidths(tune);
+    // For calculating how much can go on the line, it depends on the width of the line. It is a convenience to just divide it here
+    // by the minimum spacing instead of multiplying the min spacing later.
+    // The scaling works differently: this is done by changing the scaling of the outer SVG, so the scaling needs to be compensated
+    // for here, because the actual width will be different from the calculated numbers.
+	var lineBreakPoint = params.staffwidth / params.wrap.minSpacing / params.scale;
+	var minLineSize = params.staffwidth / params.wrap.stretchLimit / params.scale;
+	var lineBreaks = [];
+
+	var totalThisLine = widths.left;
+	var numBarsThisLine = 0;
+	for (var bar = 0; bar < widths.measureWidths.length; bar++) {
+        var thisBar = widths.measureWidths[bar];
+        if (totalThisLine + thisBar < lineBreakPoint) {
+	        totalThisLine += thisBar;
+	        numBarsThisLine++;
+        } else {
+            // This measure doesn't fit, so go back and make the last measure the line break.
+            if (numBarsThisLine > 0) { // If the single measure is just too long to fit by itself, we need to use it anyway and let it overflow.
+	            bar--;
+	            lineBreaks.push(bar);
+	            totalThisLine = widths.left + thisBar;
+            } else {
+	            lineBreaks.push(bar);
+	            totalThisLine = widths.left;
+            }
+	        numBarsThisLine = 0;
+        }
+    }
+    var staffWidth = params.staffwidth;
+    if (lineBreaks.length === 0 && totalThisLine < minLineSize) {
+		// Everything fits on one line, so see if there is TOO much space and the staff width needs to be shortened.
+	    if (minLineSize > 0 && totalThisLine > 0)
+		    staffWidth = staffWidth / (minLineSize / totalThisLine);
+    }
+
+	var abcParser = new Parse();
+	var revisedParams = {
+	    lineBreaks: lineBreaks,
+		staffwidth: staffWidth
+    };
+	for (var key in params) {
+		if (params.hasOwnProperty(key) && key !== 'wrap' && key !== 'staffwidth') {
+			revisedParams[key] = params[key];
+		}
+	}
+
+	abcParser.parse(abcString, revisedParams);
+	tune = abcParser.getTune();
+	renderOne(div, tune, revisedParams, tuneNumber);
+}
 
 module.exports = renderAbc;

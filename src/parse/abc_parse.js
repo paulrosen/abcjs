@@ -68,6 +68,7 @@ var Parse = function() {
 			this.staves = [];
 			this.macros = {};
 			this.currBarNumber = 1;
+			this.barCounter = {};
 			this.inTextBlock = false;
 			this.inPsBlock = false;
 			this.ignoredDecorations = [];
@@ -1265,6 +1266,15 @@ var Parse = function() {
 						el = {};
 					}
 					i += ret[0];
+					var cv = multilineVars.currentVoice ? multilineVars.currentVoice.staffNum + '-' + multilineVars.currentVoice.index : 'ONLY';
+					if (multilineVars.lineBreaks) {
+						if (!multilineVars.barCounter[cv])
+							multilineVars.barCounter[cv] = 0;
+						var breakNow = multilineVars.lineBreaks[''+multilineVars.barCounter[cv]];
+						multilineVars.barCounter[cv]++;
+						if (breakNow)
+							startNewLine();
+					}
 				} else if (line[i] === '&') {	// backtrack to beginning of measure
 					warn("Overlay not yet supported", line, i);
 					i++;
@@ -1591,6 +1601,12 @@ var Parse = function() {
 				multilineVars.globalTranspose = undefined;
 		} else
 			multilineVars.globalTranspose = undefined;
+		if (switches.lineBreaks) {
+			// change the format of the the line breaks for easy testing.
+			multilineVars.lineBreaks = {};
+			for (var i = 0; i < switches.lineBreaks.length; i++)
+				multilineVars.lineBreaks[''+switches.lineBreaks[i]] = true;
+		}
 		header.reset(tokenizer, warn, multilineVars, tune);
 
 		// Take care of whatever line endings come our way
