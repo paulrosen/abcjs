@@ -252,6 +252,9 @@ var sequence;
 										case "gchordon":
 											voices[voiceNumber].push({ el_type: 'gchord', tacet: false });
 											break;
+										case "beat":
+											voices[voiceNumber].push({ el_type: 'beat', beats: elem.params });
+											break;
 										default:
 											console.log("MIDI seq: midi cmd not handled: ", elem.cmd, elem);
 									}

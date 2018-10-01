@@ -48,6 +48,10 @@ var flatten;
 	var lastChord;
 	var barBeat;
 	var gChordTacet = false;
+	var stressBeat1 = 64;
+	var stressBeatDown = 64;
+	var stressBeatUp = 64;
+	var beatFraction = 0.25;
 
 	var drumTrack;
 	var drumTrackFinished;
@@ -104,6 +108,7 @@ var flatten;
 						if (!startingMeter)
 							startingMeter = element;
 						meter = element;
+						beatFraction = getBeatFraction(meter);
 						break;
 					case "tempo":
 						if (!startingTempo)
@@ -142,6 +147,12 @@ var flatten;
 						break;
 					case "gchord":
 						gChordTacet = element.tacet;
+						break;
+					case "beat":
+						stressBeat1 = element.beats[0];
+						stressBeatDown = element.beats[1];
+						stressBeatUp = element.beats[2];
+						// TODO-PER: also use the last parameter - which changes which beats are strong.
 						break;
 					default:
 						// This should never happen
@@ -188,6 +199,15 @@ var flatten;
 		return { tempo: startingTempo, instrument: instrument, tracks: tracks };
 	};
 
+	function getBeatFraction(meter) {
+		switch (meter.den) {
+			case 2: return 0.5;
+			case 4: return 0.25;
+			case 8: return 0.375;
+			case 16: return 0.125;
+		}
+		return 0.25;
+	}
 	//
 	// The algorithm for chords is:
 	// - The chords are done in a separate track.
@@ -252,7 +272,14 @@ var flatten;
 		// If there are guitar chords, then they are put in a separate track, but they have the same format.
 		//
 
-		var velocity = voiceOff ? 0 : 64;
+		var volume;
+		if (barBeat === 0)
+			volume = stressBeat1;
+		else if (barBeat % beatFraction < 0.001) // A little slop because of JavaScript floating point math.
+			volume = stressBeatDown;
+		else
+			volume = stressBeatUp;
+		var velocity = voiceOff ? 0 : volume;
 		var chord = findChord(elem);
 		if (chord) {
 			var c = interpretChord(chord);
@@ -308,7 +335,6 @@ var flatten;
 				var actualPitch = adjustPitch(note);
 				pitches.push({ pitch: actualPitch, startTie: note.startTie });
 
-				// TODO-PER: should the volume vary depending on whether it is on a beat or measure start?
 				if (!pitchesTied[''+actualPitch])	// If this is the second note of a tie, we don't start it again.
 					currentTrack.push({ cmd: 'start', pitch: actualPitch, volume: velocity });
 
