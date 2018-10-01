@@ -190,12 +190,14 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
 
     function callback(div, tune, tuneNumber, abcString) {
         if (params.wrap && params.staffwidth) {
-	        doLineWrapping(div, tune, tuneNumber, abcString, params);
+	        tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
+	        return tune;
         }
         else if (!params.oneSvgPerLine || tune.lines.length < 2)
             renderOne(div, tune, params, tuneNumber);
         else
             renderEachLineSeparately(div, tune, params, tuneNumber);
+        return null;
     }
 
     return tunebook.renderEngine(callback, output, abc, params);
@@ -280,6 +282,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
 	abcParser.parse(abcString, revisedParams);
 	tune = abcParser.getTune();
 	renderOne(div, tune, revisedParams, tuneNumber);
+	return tune;
 }
 
 module.exports = renderAbc;

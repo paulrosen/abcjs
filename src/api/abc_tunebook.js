@@ -140,8 +140,8 @@ var tunebook = {};
 				if (currentTune >= 0 && currentTune < book.tunes.length) {
 					abcParser.parse(book.tunes[currentTune].abc, params);
 					var tune = abcParser.getTune();
-					ret.push(tune);
-					callback(div, tune, i, book.tunes[currentTune].abc);
+					var override = callback(div, tune, i, book.tunes[currentTune].abc);
+					ret.push(override ? override : tune);
 				} else
 					div.innerHTML = "";
 			}
