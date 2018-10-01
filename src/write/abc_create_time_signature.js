@@ -40,7 +40,6 @@ var createTimeSignature;
 					for (i2 = 0; i2 < elem.value[i].num.length; i2++)
 						denWidth += glyphs.getSymbolWidth(elem.value[i].den.charAt(i2));
 					var maxWidth = Math.max(numWidth, denWidth);
-					console.log("time sig", numWidth, denWidth, elem.value[i])
 					abselem.addRight(new RelativeElement(elem.value[i].num, x+(maxWidth-numWidth)/2, numWidth, 8, { thickness: glyphs.symbolHeightInPitches(elem.value[i].num.charAt(0)) }));
 					abselem.addRight(new RelativeElement(elem.value[i].den, x+(maxWidth-denWidth)/2, denWidth, 4, { thickness: glyphs.symbolHeightInPitches(elem.value[i].den.charAt(0)) }));
 					x += maxWidth
