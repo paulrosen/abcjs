@@ -84,6 +84,11 @@ var flatten;
 		barBeat = 0;
 		gChordTacet = false;
 
+		stressBeat1 = 64;
+		stressBeatDown = 64;
+		stressBeatUp = 64;
+		beatFraction = 0.25;
+
 		// For the drum/metronome track.
 		drumTrack = [];
 		drumTrackFinished = false;
