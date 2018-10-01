@@ -215,11 +215,12 @@ function calcLineBreaks(widths, lineBreakPoint) {
 			if (numBarsThisLine > 0) { // If the single measure is just too long to fit by itself, we need to use it anyway and let it overflow.
 				lineBreaks.push(bar-1);
 				totalThisLine = thisBar;
+				numBarsThisLine = 1;
 			} else {
 				lineBreaks.push(bar);
 				totalThisLine = 0;
+				numBarsThisLine = 0;
 			}
-			numBarsThisLine = 0;
 		}
 	}
 	return { lineBreaks: lineBreaks, totalThisLine: totalThisLine }
