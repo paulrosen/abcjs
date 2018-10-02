@@ -2,18 +2,18 @@
 var TimingCallbacks = function(target, params) {
 	var self = this;
 	if (!params) params = {};
-	var qpm = params.qpm;
-	var extraMeasuresAtBeginning = params.extraMeasuresAtBeginning ? params.extraMeasuresAtBeginning : 0;
+	self.qpm = params.qpm;
+	self.extraMeasuresAtBeginning = params.extraMeasuresAtBeginning ? params.extraMeasuresAtBeginning : 0;
 	self.beatCallback = params.beatCallback; // This is called for each beat.
 	self.eventCallback = params.eventCallback;   // This is called for each note or rest encountered.
 
-	target.setTiming(qpm, extraMeasuresAtBeginning);
+	target.setTiming(self.qpm, self.extraMeasuresAtBeginning);
 	if (target.noteTimings.length === 0)
 		return;
 
 	// noteTimings contains an array of events sorted by time. Events that happen at the same time are in the same element of the array.
 	self.noteTimings = target.noteTimings;
-	self.millisecondsPerBeat = 1000 / (qpm / 60);
+	self.millisecondsPerBeat = 1000 / (self.qpm / 60);
 	self.lastMoment = self.noteTimings[self.noteTimings.length-1].milliseconds;
 
 	self.startTime = null;
@@ -47,12 +47,16 @@ var TimingCallbacks = function(target, params) {
 
 			while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
 				if (self.eventCallback)
-					self.eventCallback(target.noteTimings[self.currentEvent]);
+					self.eventCallback(self.noteTimings[self.currentEvent]);
 				self.currentEvent++;
 			}
 
 			if (currentTime < self.lastMoment)
 				requestAnimationFrame(self.doTiming);
+			else {
+				if (self.eventCallback)
+					self.eventCallback(null);
+			}
 		}
 	};
 
@@ -76,6 +80,12 @@ var TimingCallbacks = function(target, params) {
 		self.pause();
 		self.reset();
 	};
+	self.replaceTarget = function(newTarget) {
+		newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
+		if (newTarget.noteTimings.length === 0)
+			return;
+		self.noteTimings = newTarget.noteTimings;
+	}
 
 };
 
