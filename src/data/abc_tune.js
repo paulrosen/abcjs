@@ -111,14 +111,33 @@ var Tune = function() {
 	};
 
 	this.getBarLength = function() {
-		var meter = this.getMeter();
-		var measureLength;
-		switch(meter.type) {
-			case "common_time": measureLength = 1; this.meter = { num: 4, den: 4}; break;
-			case "cut_time": measureLength = 1; this.meter = { num: 2, den: 2}; break;
-			default: measureLength = meter.value[0].num/meter.value[0].den; this.meter = { num: parseInt(meter.value[0].num, 10), den: parseInt(meter.value[0].den,10)};
+		var meter = this.getMeterFraction();
+		return meter.num / meter.den;
+	};
+
+	this.millisecondsPerMeasure = function(bpmOverride) {
+		var bpm;
+		if (bpmOverride) {
+			bpm = bpmOverride;
+		} else {
+			var tempo = this.metaText ? this.metaText.tempo : null;
+			bpm = this.getBpm(tempo);
 		}
-		return measureLength;
+		if (bpm <= 0)
+			bpm = 1; // I don't think this can happen, but we don't want a possibility of dividing by zero.
+
+		var beatsPerMeasure;
+		var meter = this.getMeterFraction();
+		if (meter.den === 8) {
+			beatsPerMeasure = meter.num / 3;
+		} else {
+			beatsPerMeasure = meter.num;
+		}
+		if (beatsPerMeasure <= 0) // This probably won't happen in any normal case - but it is possible that the meter could be set to something nonsensical.
+			beatsPerMeasure = 1;
+
+		var minutesPerMeasure = beatsPerMeasure / bpm;
+		return minutesPerMeasure * 60000;
 	};
 
 	this.reset = function () {
@@ -890,8 +909,8 @@ var Tune = function() {
 		var den = 4;
 		if (meter) {
 			if (meter.type === 'specified') {
-				num = meter.value[0].num;
-				den = meter.value[0].den;
+				num = parseInt(meter.value[0].num, 10);
+				den = parseInt(meter.value[0].den,10);
 			} else if (meter.type === 'cut_time') {
 				num = 2;
 				den = 2;
@@ -900,7 +919,8 @@ var Tune = function() {
 				den = 4;
 			}
 		}
-		return { num: num, den: den };
+		this.meter = { num: num, den: den };
+		return this.meter; // TODO-PER: is this saved value used anywhere? A get function shouldn't change state.
 	};
 
 	this.getCurrentVoice = function() {

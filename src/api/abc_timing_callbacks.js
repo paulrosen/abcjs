@@ -6,9 +6,21 @@ var TimingCallbacks = function(target, params) {
 	self.extraMeasuresAtBeginning = params.extraMeasuresAtBeginning ? params.extraMeasuresAtBeginning : 0;
 	self.beatCallback = params.beatCallback; // This is called for each beat.
 	self.eventCallback = params.eventCallback;   // This is called for each note or rest encountered.
+	self.lineEndCallback = params.lineEndCallback;   // This is called when the end of a line is approaching.
+	self.lineEndAnticipation = params.lineEndAnticipation ? params.lineEndAnticipation : 0;   // How many milliseconds before the end should the call happen.
 
-	target.setTiming(self.qpm, self.extraMeasuresAtBeginning);
-	if (target.noteTimings.length === 0)
+	self.replaceTarget = function(newTarget) {
+		newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
+		if (newTarget.noteTimings.length === 0)
+			return;
+		if (self.lineEndCallback) {
+			self.lineEndTimings = getLineEndTimings(newTarget.noteTimings, self.lineEndAnticipation);
+		}
+		self.noteTimings = newTarget.noteTimings;
+	};
+
+	self.replaceTarget(target);
+	if (self.noteTimings.length === 0)
 		return;
 
 	// noteTimings contains an array of events sorted by time. Events that happen at the same time are in the same element of the array.
@@ -38,6 +50,8 @@ var TimingCallbacks = function(target, params) {
 		} else {
 			var currentTime = timestamp - self.startTime;
 			currentTime += 50; // Add a little slop because this function isn't called exactly.
+			if (currentTime < self.lastMoment)
+				requestAnimationFrame(self.doTiming);
 
 			if (self.currentBeat * self.millisecondsPerBeat < currentTime) {
 				if (self.beatCallback)
@@ -51,13 +65,14 @@ var TimingCallbacks = function(target, params) {
 				self.currentEvent++;
 			}
 
-			if (currentTime < self.lastMoment)
-				requestAnimationFrame(self.doTiming);
-			else {
-				if (self.eventCallback)
-					self.eventCallback(null);
+			if (self.lineEndCallback && self.lineEndTimings.length && self.lineEndTimings[0].milliseconds <= currentTime) {
+				self.lineEndCallback(self.lineEndTimings[0]);
+				self.lineEndTimings.shift();
 			}
-		}
+
+			if (currentTime >= self.lastMoment &&self.eventCallback)
+				self.eventCallback(null);
+			}
 	};
 
 	self.start = function() {
@@ -75,19 +90,30 @@ var TimingCallbacks = function(target, params) {
 		self.currentEvent = 0;
 		self.startTime = null;
 		self.pausedTime = null;
+		if (self.lineEndCallback) {
+			self.lineEndTimings = getLineEndTimings(self.noteTimings, self.lineEndAnticipation);
+		}
 	};
 	self.stop = function() {
 		self.pause();
 		self.reset();
 	};
-	self.replaceTarget = function(newTarget) {
-		newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
-		if (newTarget.noteTimings.length === 0)
-			return;
-		self.noteTimings = newTarget.noteTimings;
-	}
-
 };
+
+function getLineEndTimings(timings, anticipation) {
+	// Returns an array of milliseconds to call the lineEndCallback.
+	// This figures out the timing of the beginning of each line and subtracts the anticipation from it.
+	var callbackTimes = [];
+	var lastTop = null;
+	for (var i = 0; i < timings.length; i++) {
+		var timing = timings[i];
+		if (timing.top !== lastTop) {
+			callbackTimes.push({ milliseconds: timing.milliseconds - anticipation, top: timing.top, bottom: timing.top+timing.height });
+			lastTop = timing.top;
+		}
+	}
+	return callbackTimes;
+}
 
 module.exports = TimingCallbacks;
 
