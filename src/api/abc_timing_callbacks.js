@@ -3,6 +3,10 @@ var TimingCallbacks = function(target, params) {
 	var self = this;
 	if (!params) params = {};
 	self.qpm = params.qpm;
+	if (!self.qpm) {
+		var tempo = target.metaText ? target.metaText.tempo : null;
+		self.qpm = target.getBpm(tempo);
+	}
 	self.extraMeasuresAtBeginning = params.extraMeasuresAtBeginning ? params.extraMeasuresAtBeginning : 0;
 	self.beatCallback = params.beatCallback; // This is called for each beat.
 	self.eventCallback = params.eventCallback;   // This is called for each note or rest encountered.
