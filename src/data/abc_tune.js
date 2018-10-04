@@ -1166,16 +1166,22 @@ var Tune = function() {
 			var statedBeatLength = tempo.duration && tempo.duration.length > 0 ? tempo.duration[0] : beatLength;
 			bpm = bpm * statedBeatLength / beatLength;
 		}
-		if (!bpm)
+		if (!bpm) {
 			bpm = 180;
-
+			// Compensate for compound meter, where the beat isn't a beat.
+			var meter = this.getMeterFraction();
+			if (meter && meter.den === 8) {
+				bpm = 120;
+			}
+		}
 		return bpm;
 	};
 
 	this.setTiming = function (bpm, measuresOfDelay) {
-		var tempo = this.metaText ? this.metaText.tempo : null;
-		if (!bpm)
+		if (!bpm) {
+			var tempo = this.metaText ? this.metaText.tempo : null;
 			bpm = this.getBpm(tempo);
+		}
 
 		var beatLength = this.getBeatLength();
 		var beatsPerSecond = bpm / 60;
