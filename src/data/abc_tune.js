@@ -1023,7 +1023,7 @@ var Tune = function() {
 					isTiedState = undefined;
 			} else {
 				// the last note wasn't tied.
-				if (!eventHash["event" + voiceTimeMilliseconds])
+				if (!eventHash["event" + voiceTimeMilliseconds]) {
 					eventHash["event" + voiceTimeMilliseconds] = {
 						type: "event",
 						milliseconds: voiceTimeMilliseconds,
@@ -1035,12 +1035,16 @@ var Tune = function() {
 						width: element.w,
 						elements: [es],
 						startChar: element.abcelem.startChar,
-						endChar: element.abcelem.endChar
+						endChar: element.abcelem.endChar,
+						startCharArray: [element.abcelem.startChar],
+						endCharArray: [element.abcelem.endChar]
 					};
-				else {
+				} else {
 					// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
 					eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);
 					eventHash["event" + voiceTimeMilliseconds].elements.push(es);
+					eventHash["event" + voiceTimeMilliseconds].startCharArray.push(element.abcelem.startChar);
+					eventHash["event" + voiceTimeMilliseconds].endCharArray.push(element.abcelem.endChar);
 				}
 				if (nextIsBar) {
 					eventHash["event" + voiceTimeMilliseconds].measureStart = true;
