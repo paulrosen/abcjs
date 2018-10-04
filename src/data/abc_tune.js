@@ -1003,7 +1003,7 @@ var Tune = function() {
 		return arr;
 	}
 
-	this.addElementToEvents = function(eventHash, element, voiceTimeMilliseconds, top, height, timeDivider, isTiedState, nextIsBar) {
+	this.addElementToEvents = function(eventHash, element, voiceTimeMilliseconds, top, height, line, measureNumber, timeDivider, isTiedState, nextIsBar) {
 		if (element.hint)
 			return { isTiedState: undefined, duration: 0 };
 		var realDuration = element.durationClass ? element.durationClass : element.duration;
@@ -1027,6 +1027,8 @@ var Tune = function() {
 					eventHash["event" + voiceTimeMilliseconds] = {
 						type: "event",
 						milliseconds: voiceTimeMilliseconds,
+						line: line,
+						measureNumber: measureNumber,
 						top: top,
 						height: height,
 						left: element.x,
@@ -1066,11 +1068,17 @@ var Tune = function() {
 
 			var voices = group.voices;
 			for (var v = 0; v < voices.length; v++) {
+				var measureNumber = 0;
+				var noteFound = false;
 				if (!voicesArr[v])
 					voicesArr[v] = [];
 				var elements = voices[v].children;
 				for (var elem = 0; elem < elements.length; elem++) {
-					voicesArr[v].push({top: top, height: height, elem: elements[elem]});
+					voicesArr[v].push({top: top, height: height, line: line, measureNumber: measureNumber, elem: elements[elem]});
+					if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
+						measureNumber++;
+					if (elements[elem].type === 'note')
+						noteFound = true;
 				}
 			}
 		}
@@ -1101,7 +1109,7 @@ var Tune = function() {
 					var beatsPerSecond = bpm / 60;
 					timeDivider = beatLength * beatsPerSecond;
 				}
-				var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, timeDivider, isTiedState, nextIsBar);
+				var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, elements[elem].line, elements[elem].measureNumber, timeDivider, isTiedState, nextIsBar);
 				isTiedState = ret.isTiedState;
 				nextIsBar = ret.nextIsBar;
 				voiceTime += ret.duration;
@@ -1115,13 +1123,14 @@ var Tune = function() {
 						if (endingRepeatElem === -1)
 							endingRepeatElem = elem;
 						for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
-							element = elements[el2].elem;
-							ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, timeDivider, isTiedState, nextIsBar);
+							var element2 = elements[el2].elem;
+							ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar);
 							isTiedState = ret.isTiedState;
 							nextIsBar = ret.nextIsBar;
 							voiceTime += ret.duration;
 							voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 						}
+						nextIsBar = true;
 						endingRepeatElem = -1;
 					}
 					if (startEnding)
