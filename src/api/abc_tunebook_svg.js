@@ -235,9 +235,10 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
     // by the minimum spacing instead of multiplying the min spacing later.
     // The scaling works differently: this is done by changing the scaling of the outer SVG, so the scaling needs to be compensated
     // for here, because the actual width will be different from the calculated numbers.
-	var lineBreakPoint = (params.staffwidth - widths.left) / params.wrap.minSpacing / params.scale;
-	var minLineSize = (params.staffwidth - widths.left) / params.wrap.onlyLineLimit / params.scale;
-	var minLastLineSize = (params.staffwidth - widths.left) / params.wrap.lastLineLimit / params.scale;
+	var scale = params.scale ? params.scale : 1;
+	var lineBreakPoint = (params.staffwidth - widths.left) / params.wrap.minSpacing / scale;
+	var minLineSize = (params.staffwidth - widths.left) / params.wrap.onlyLineLimit / scale;
+	var minLastLineSize = (params.staffwidth - widths.left) / params.wrap.lastLineLimit / scale;
 
 	var ret = calcLineBreaks(widths, lineBreakPoint);
 
@@ -262,7 +263,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
 	    	minTrys.push(minSpacing - 0.3);
 	    minTrys.push(minSpacing + 0.3);
 	    for (var i = 0; i < minTrys.length && ret.totalThisLine < minLastLineSize; i++) {
-		    lineBreakPoint = (params.staffwidth - widths.left) / minTrys[i] / params.scale;
+		    lineBreakPoint = (params.staffwidth - widths.left) / minTrys[i] / scale;
 		    ret = calcLineBreaks(widths, lineBreakPoint);
 		    //console.log("Retry", i, minTrys[i], ret.totalThisLine, minLastLineSize)
 	    }
