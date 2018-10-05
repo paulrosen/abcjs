@@ -2,6 +2,60 @@
 
 ## Features
 
+* Add parameter `wrap: { minSpacing, onlyLineLimit, lastLineLimit }` and automatically calc num measures for each line.
+
+* When animating, return an array of start and end chars if there is more than one voice.
+
+* Add line and measure info into the TimingCallbacks for the convenience of the clients.
+
+* Don't require qpm to be passed to TimingCallbacks: look for a qpm in the music.
+
+* In TimingCallbacks, add a callback when it is near the end of a line.
+
+* Add `replaceTarget()` to the timing callback so that re-engraving can happen when the cursor is running.
+
+* Include the original abcString in the callback when rendering.
+
+* Allow multiple overlays in the same measure.
+
+* Add `%%tripletfont` directive.
+
+* Add unicode versions of flats and sharps in midi chords.
+
+* Support `%%MIDI beat` command.
+
+* Support `%%MIDI gchordoff` and `%%MIDI gchordon`.
+
+## Bug fixes:
+
+* The tune positions were off by one because a newline is removed for each tune and was not counted.
+
+* Fix crash in `renderAbc` if the output container isn't an html element.
+
+* Fix default tempo in animation for compound meters to match the MIDI interpretation.
+
+* Refactored the animation to use the TimingCallbacks instead of duplicating code.
+
+* Fix a couple of bugs when sequencing elements for the TimingCallbacks and animation.
+
+* Center the time signature better (particularly 12/8).
+
+* Add extra space to the left of bar lines.
+
+* Add extra space to the width of a note when there is an accidental.
+
+* Lots of refactoring of the engraving code.
+
+* Fix crash when using `barsperstaff`.
+
+* Fix usage of `staffnonote`
+
+* In TimingCallbacks, make `extraMeasuresAtBeginning` default to 0.
+
+# Version 5.2.0
+
+## Features
+
 * Add a version of the plugin that supports midi.
 
 * Add getMeterFraction() convenience function.

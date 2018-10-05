@@ -37,6 +37,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `header_only` | false | only parse the header |
 | `stop_on_warning` | false | only parse until the first warning is encountered |
 | `hint_measures` | false | repeat the next measure at the end of the previous line, with a unique css class. |
+| `wrap` | null | NOTE: this requires the parameter `staffwidth` to be set! To have the parser ignore the line breaks, and figure out the line breaks based on the size of each measure. This is an object of: `minSpacing`: 1 means to pack the notes as close as possible, 2 means to double the spacing, etc., `onlyLineLimit`: if there is very little music and a wide line, then the line is shortened so the notes are not too spread out, `lastLineLimit`: if it works out that there is a single measure on the last line, then try different `minSpacing` values until the last line is no more spread out than this limit. A reasonable default for these values is `{ minSpacing: 1.5, onlyLineLimit: 4, lastLineLimit: 3 }`. |
 
 | `params` (for engraver) | Default | Description |
 | ------------- | ----------- | ----------- |
@@ -157,6 +158,8 @@ Note that the default soundfont that is used by abcjs contains sounds for pitche
 | `extraMeasuresAtBeginning` | 0 | Don't start the callbacks right away, but insert these number of measures first. |
 | `beatCallback` | null | Called for each beat passing the beat number (starting at 0). |
 | `eventCallback` | null | Called for each event (either a note, a rest, or a chord, and notes in separate voices are grouped together.) |
+| `lineEndCallback` | null | Called at the end of each line. (This is useful if you want to be sure the music is scrolled into view at the right time.) See `lineEndAnticipation` for more details. |
+| `lineEndAnticipation` | 0 | The number of milliseconds for the `lineEndCallback` to anticipate end of the line. That is, if you want to get the callback half a second before the end of the line, use 500. |
 
 | `animationParams` | Default | Description |
 | ------------- | ----------- | ----------- |
