@@ -132,11 +132,13 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null);
 
 			abcLine.staffGroup.layout(0, this.renderer, debug);
-			for (var j = 0; j < abcLine.staffGroup.voices.length; j++) {
+			// At this point, the voices are laid out so that the bar lines are even with each other. So we just need to get the placement of the first voice.
+			if (abcLine.staffGroup.voices.length > 0) {
+				var voice = abcLine.staffGroup.voices[0];
 				var foundNotStaffExtra = false;
 				var lastXPosition = 0;
-				for (var k = 0; k < abcLine.staffGroup.voices[j].children.length; k++) {
-					var child = abcLine.staffGroup.voices[j].children[k];
+				for (var k = 0; k < voice.children.length; k++) {
+					var child = voice.children[k];
 					if (!foundNotStaffExtra && !child.isClef && !child.isKeySig) {
 						foundNotStaffExtra = true;
 						ret.left = child.x;
