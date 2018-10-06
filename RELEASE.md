@@ -1,3 +1,13 @@
+# Version 5.3.2
+
+## Bug fixes:
+
+* Test all options in the `wrap` parameter for legal values.
+
+* Ignore the explicit line breaks when using `wrap`.
+
+* Get the amount of spacing more even on each line when using `wrap`.
+
 # Version 5.3.1
 
 ## Bug fixes:
