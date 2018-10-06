@@ -206,26 +206,27 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
 function calcLineBreaks(widths, lineBreakPoint) {
 	var lineBreaks = [];
 	var totalThisLine = 0;
-	var numBarsThisLine = 0;
-	for (var bar = 0; bar < widths.measureWidths.length; bar++) {
-		var thisBar = widths.measureWidths[bar];
-		if (totalThisLine + thisBar < lineBreakPoint) {
-			totalThisLine += thisBar;
-			numBarsThisLine++;
-		} else {
-			// This measure doesn't fit, so go back and make the last measure the line break.
-			if (numBarsThisLine > 0) { // If the single measure is just too long to fit by itself, we need to use it anyway and let it overflow.
-				lineBreaks.push(bar-1);
-				totalThisLine = thisBar;
-				numBarsThisLine = 1;
+	// run through each measure and see if the accumulation is less than the ideal.
+	// if it passes the ideal, then see whether the last or this one is closer to the ideal.
+	for (var i = 0; i < widths.length; i++) {
+		var width = widths[i];
+		var attemptedWidth = totalThisLine + width;
+		if (attemptedWidth < lineBreakPoint)
+			totalThisLine = attemptedWidth;
+		else {
+			// This just passed the ideal, so see whether the previous or the current number of measures is closer.
+			var oldDistance = lineBreakPoint - totalThisLine;
+			var newDistance = attemptedWidth - lineBreakPoint;
+			if (oldDistance < newDistance && totalThisLine > 0) {
+				lineBreaks.push(i - 1);
+				totalThisLine = width;
 			} else {
-				lineBreaks.push(bar);
+				lineBreaks.push(i);
 				totalThisLine = 0;
-				numBarsThisLine = 0;
 			}
 		}
 	}
-	return { lineBreaks: lineBreaks, totalThisLine: totalThisLine }
+	return { lineBreaks: lineBreaks, totalThisLine: totalThisLine };
 }
 
 function doLineWrapping(div, tune, tuneNumber, abcString, params) {
@@ -235,24 +236,25 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
     // by the minimum spacing instead of multiplying the min spacing later.
     // The scaling works differently: this is done by changing the scaling of the outer SVG, so the scaling needs to be compensated
     // for here, because the actual width will be different from the calculated numbers.
-	var scale = params.scale ? params.scale : 1;
-	var lineBreakPoint = (params.staffwidth - widths.left) / params.wrap.minSpacing / scale;
-	var minLineSize = (params.staffwidth - widths.left) / params.wrap.onlyLineLimit / scale;
-	var minLastLineSize = (params.staffwidth - widths.left) / params.wrap.lastLineLimit / scale;
+	var scale = params.scale ? Math.max(params.scale, 0.1) : 1;
+	var minSpacing = params.wrap.minSpacing ? Math.max(parseFloat(params.wrap.minSpacing), 1) : 1;
+	var onlyLineLimit = params.wrap.onlyLineLimit ? Math.max(parseFloat(params.wrap.onlyLineLimit), 1) : 5;
+	var lastLineLimit = params.wrap.lastLineLimit ? Math.max(parseFloat(params.wrap.lastLineLimit), 1) : 5;
+	var lineBreakPoint = (params.staffwidth - widths.left) / minSpacing / scale;
+	var minLineSize = (params.staffwidth - widths.left) / onlyLineLimit / scale;
+	var minLastLineSize = (params.staffwidth - widths.left) / lastLineLimit / scale;
 
-	var ret = calcLineBreaks(widths, lineBreakPoint);
+	var ret = calcLineBreaks(widths.measureWidths, lineBreakPoint);
 
     var staffWidth = params.staffwidth;
-    if (ret.lineBreaks.length === 0 && ret.totalThisLine < minLineSize) {
+    if (ret.lineBreaks.length === 0) {
 		// Everything fits on one line, so see if there is TOO much space and the staff width needs to be shortened.
 	    if (minLineSize > 0 && ret.totalThisLine > 0)
 		    staffWidth = staffWidth / (minLineSize / ret.totalThisLine);
     } else if (ret.totalThisLine < minLastLineSize) {
-	    //console.log("Last Line Short", params.wrap.minSpacing, ret.totalThisLine, minLastLineSize);
     	// the last line is too short, so attempt to redistribute by changing the min.
 	    // We will try more and less space alternatively. The space can't be less than 1.0, and we'll try in 0.1 increments.
 	    var minTrys = [];
-	    var minSpacing = parseFloat(params.wrap.minSpacing);
 	    if (minSpacing > 1.1)
 	    	minTrys.push(minSpacing - 0.1);
 	    minTrys.push(minSpacing + 0.1);
@@ -264,8 +266,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
 	    minTrys.push(minSpacing + 0.3);
 	    for (var i = 0; i < minTrys.length && ret.totalThisLine < minLastLineSize; i++) {
 		    lineBreakPoint = (params.staffwidth - widths.left) / minTrys[i] / scale;
-		    ret = calcLineBreaks(widths, lineBreakPoint);
-		    //console.log("Retry", i, minTrys[i], ret.totalThisLine, minLastLineSize)
+		    ret = calcLineBreaks(widths.measureWidths, lineBreakPoint);
 	    }
     }
 
