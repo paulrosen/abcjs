@@ -1604,6 +1604,7 @@ var Parse = function() {
 		if (switches.lineBreaks) {
 			// change the format of the the line breaks for easy testing.
 			multilineVars.lineBreaks = {};
+			multilineVars.continueall = true;
 			for (var i = 0; i < switches.lineBreaks.length; i++)
 				multilineVars.lineBreaks[''+switches.lineBreaks[i]] = true;
 		}
