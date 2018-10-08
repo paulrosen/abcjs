@@ -249,7 +249,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
     var staffWidth = params.staffwidth;
     if (ret.lineBreaks.length === 0) {
 		// Everything fits on one line, so see if there is TOO much space and the staff width needs to be shortened.
-	    if (minLineSize > 0 && ret.totalThisLine > 0)
+	    if (minLineSize > 0 && ret.totalThisLine > 0 && ret.totalThisLine < minLineSize)
 		    staffWidth = staffWidth / (minLineSize / ret.totalThisLine);
     } else if (ret.totalThisLine < minLastLineSize) {
     	// the last line is too short, so attempt to redistribute by changing the min.
