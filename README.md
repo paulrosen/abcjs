@@ -98,15 +98,15 @@ If you are looking at someone else's website and see ABC on the page and want to
 
 Here are the latest versions. You can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_5.3.2-min.js)
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_5.3.3-min.js)
 
-- [Basic+MIDI](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_midi_5.3.2-min.js)
+- [Basic+MIDI](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_midi_5.3.3-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.3.2-min.js)
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.3.3-min.js)
 
-- [Plugin+MIDI](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin-midi_5.3.2-min.js)
+- [Plugin+MIDI](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin-midi_5.3.3-min.js)
 
-- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.3.2.user.js)
+- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.3.3.user.js)
 
 - [Styles for the MIDI control](https://raw.github.com/paulrosen/abcjs/master/abcjs-midi.css)
 

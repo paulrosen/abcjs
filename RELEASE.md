@@ -1,3 +1,9 @@
+# Version 5.3.3
+
+## Bug fixes:
+
+* Fix test for shrinking the only line when wrapping.
+
 # Version 5.3.2
 
 ## Bug fixes:
