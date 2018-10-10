@@ -215,6 +215,32 @@ var Tune = function() {
 		return madeChanges;
 	};
 
+	function fixTitles(lines) {
+		// We might have name and subname defined. We now know what line everything is on, so we can determine which to use.
+		var firstMusicLine = true;
+		for (var i = 0; i < lines.length; i++) {
+			var line = lines[i];
+			if (line.staff) {
+				for (var j = 0; j < line.staff.length; j++) {
+					var staff = line.staff[j];
+					if (staff.title) {
+						var hasATitle = false;
+						for (var k = 0; k < staff.title.length; k++) {
+							staff.title[k] = (firstMusicLine) ? staff.title[k].name : staff.title[k].subname;
+							if (staff.title[k])
+								hasATitle = true;
+							else
+								staff.title[k] = '';
+						}
+						if (!hasATitle)
+							delete staff.title;
+					}
+				}
+				firstMusicLine = false;
+			}
+		}
+	}
+
 	this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote, currSlur) {
 		this.closeLine();	// Close the last line.
 
@@ -289,6 +315,8 @@ var Tune = function() {
 				});
 			}
 		}
+
+		fixTitles(this.lines);
 
 		// Remove the temporary working variables
 		for (i = 0; i < this.lines.length; i++) {
@@ -692,12 +720,6 @@ var Tune = function() {
 		var hashParams = parseCommon.clone(hashParams2);
 
 		if (this.lines[this.lineNum].staff) { // be sure that we are on a music type line before doing the following.
-			// If this is a clef type, then we replace the working clef on the line. This is kept separate from
-			// the clef in case there is an inline clef field. We need to know what the current position for
-			// the note is.
-			if (type === 'clef')
-				this.lines[this.lineNum].staff[this.staffNum].workingClef = hashParams;
-
 			// If this is the first item in this staff, then we might have to initialize the staff, first.
 			if (this.lines[this.lineNum].staff.length <= this.staffNum) {
 				this.lines[this.lineNum].staff[this.staffNum] = {};
@@ -707,6 +729,12 @@ var Tune = function() {
 					this.lines[this.lineNum].staff[this.staffNum].meter = parseCommon.clone(this.lines[this.lineNum].staff[0].meter);
 				this.lines[this.lineNum].staff[this.staffNum].workingClef = parseCommon.clone(this.lines[this.lineNum].staff[0].workingClef);
 				this.lines[this.lineNum].staff[this.staffNum].voices = [[]];
+			}
+			// If this is a clef type, then we replace the working clef on the line. This is kept separate from
+			// the clef in case there is an inline clef field. We need to know what the current position for
+			// the note is.
+			if (type === 'clef') {
+				this.lines[this.lineNum].staff[this.staffNum].workingClef = hashParams;
 			}
 
 			// These elements should not be added twice, so if the element exists on this line without a note or bar before it, just replace the staff version.
@@ -802,26 +830,25 @@ var Tune = function() {
 		var This = this;
 		this.closeLine();	// Close the previous line.
 		var createVoice = function(params) {
-			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum] = [];
-			if (This.isFirstLine(This.lineNum)) {
-				if (params.name) {if (!This.lines[This.lineNum].staff[This.staffNum].title) This.lines[This.lineNum].staff[This.staffNum].title = [];This.lines[This.lineNum].staff[This.staffNum].title[This.voiceNum] = params.name;}
-			} else {
-				if (params.subname) {if (!This.lines[This.lineNum].staff[This.staffNum].title) This.lines[This.lineNum].staff[This.staffNum].title = [];This.lines[This.lineNum].staff[This.staffNum].title[This.voiceNum] = params.subname;}
-			}
+			var thisStaff = This.lines[This.lineNum].staff[This.staffNum];
+			thisStaff.voices[This.voiceNum] = [];
+			if (!thisStaff.title)
+				thisStaff.title = [];
+			thisStaff.title[This.voiceNum] = { name: params.name, subname: params.subname };
 			if (params.style)
 				This.appendElement('style', null, null, {head: params.style});
 			if (params.stem)
 				This.appendElement('stem', null, null, {direction: params.stem});
 			else if (This.voiceNum > 0) {
-				if (This.lines[This.lineNum].staff[This.staffNum].voices[0]!== undefined) {
+				if (thisStaff.voices[0]!== undefined) {
 					var found = false;
-					for (var i = 0; i < This.lines[This.lineNum].staff[This.staffNum].voices[0].length; i++) {
-						if (This.lines[This.lineNum].staff[This.staffNum].voices[0].el_type === 'stem')
+					for (var i = 0; i < thisStaff.voices[0].length; i++) {
+						if (thisStaff.voices[0].el_type === 'stem')
 							found = true;
 					}
 					if (!found) {
 						var stem = { el_type: 'stem', direction: 'up' };
-						This.lines[This.lineNum].staff[This.staffNum].voices[0].splice(0,0,stem);
+						thisStaff.voices[0].splice(0,0,stem);
 					}
 				}
 				This.appendElement('stem', null, null, {direction: 'down'});

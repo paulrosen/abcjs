@@ -1528,7 +1528,7 @@ var Parse = function() {
 		var ret = header.parseHeader(line);
 		if (ret.regular)
 			parseRegularMusicLine(ret.str);
-		if (ret.newline && multilineVars.continueall === undefined)
+		if (ret.newline)
 			startNewLine();
 		if (ret.words)
 			addWords(tune.getCurrentVoice(), line.substring(2));
