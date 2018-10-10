@@ -1,3 +1,9 @@
+# Version 5.3.4
+
+## Bug fixes:
+
+* Fix crash when doing multi-stave music in wrap mode.
+
 # Version 5.3.3
 
 ## Bug fixes:
