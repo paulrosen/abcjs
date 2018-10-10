@@ -74,8 +74,8 @@ var ParserLint = function() {
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
 		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 		"upbow", "downbow", "staccato", "trem1", "trem2", "trem3", "trem4",
-		"/", "//", "//", "///", "turnx", "invertedturn", "invertedturnx", "arpeggio", "trill(", "trill)", "xstem",
-		"mark", "umarcato"
+		"/", "//", "//", "///", "////", "turnx", "invertedturn", "invertedturnx", "arpeggio", "trill(", "trill)", "xstem",
+		"mark", "marcato", "umarcato"
 	] } };
 
 	var tempoProperties =  {
