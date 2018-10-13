@@ -172,6 +172,8 @@ var parseKeyVoice = {};
 		'treble': { clef: 'treble', pitch: 4, mid: 0 },
 		'treble+8': { clef: 'treble+8', pitch: 4, mid: 0 },
 		'treble-8': { clef: 'treble-8', pitch: 4, mid: 0 },
+		'treble^8': { clef: 'treble+8', pitch: 4, mid: 0 },
+		'treble_8': { clef: 'treble-8', pitch: 4, mid: 0 },
 		'treble1': { clef: 'treble', pitch: 2, mid: 2 },
 		'treble2': { clef: 'treble', pitch: 4, mid: 0 },
 		'treble3': { clef: 'treble', pitch: 6, mid: -2 },
@@ -182,8 +184,12 @@ var parseKeyVoice = {};
 		'bass': { clef: 'bass', pitch: 8, mid: -12 },
 		'bass+8': { clef: 'bass+8', pitch: 8, mid: -12 },
 		'bass-8': { clef: 'bass-8', pitch: 8, mid: -12 },
+		'bass^8': { clef: 'bass+8', pitch: 8, mid: -12 },
+		'bass_8': { clef: 'bass-8', pitch: 8, mid: -12 },
 		'bass+16': { clef: 'bass', pitch: 8, mid: -12 },
 		'bass-16': { clef: 'bass', pitch: 8, mid: -12 },
+		'bass^16': { clef: 'bass', pitch: 8, mid: -12 },
+		'bass_16': { clef: 'bass', pitch: 8, mid: -12 },
 		'bass1': { clef: 'bass', pitch: 2, mid: -6 },
 		'bass2': { clef: 'bass', pitch: 4, mid: -8 },
 		'bass3': { clef: 'bass', pitch: 6, mid: -10 },
@@ -202,7 +208,9 @@ var parseKeyVoice = {};
 		'alto4': { clef: 'alto', pitch: 8, mid: -8 },
 		'alto5': { clef: 'alto', pitch: 10, mid: -10 },
 		'alto+8': { clef: 'alto+8', pitch: 6, mid: -6 },
-		'alto-8': { clef: 'alto-8', pitch: 6, mid: -6 }
+		'alto-8': { clef: 'alto-8', pitch: 6, mid: -6 },
+		'alto^8': { clef: 'alto+8', pitch: 6, mid: -6 },
+		'alto_8': { clef: 'alto-8', pitch: 6, mid: -6 }
 	};
 
 	var calcMiddle = function(clef, oct) {
@@ -589,7 +597,7 @@ var parseKeyVoice = {};
 						clef.token += tokens[0].token;
 						tokens.shift();
 					}
-					if (tokens.length > 1 && (tokens[0].token === '-' || tokens[0].token === '+') && tokens[1].token === '8') {
+					if (tokens.length > 1 && (tokens[0].token === '-' || tokens[0].token === '+' || tokens[0].token === '^' || tokens[0].token === '_') && tokens[1].token === '8') {
 						clef.token += tokens[0].token + tokens[1].token;
 						tokens.shift();
 						tokens.shift();
