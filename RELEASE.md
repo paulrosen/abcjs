@@ -1,3 +1,11 @@
+# Version 5.3.5
+
+## Features:
+
+* Always send start of measure event on TimingCallbacks, even if the measure starts with a tie.
+
+* Support ^8 and _8 for clefs.
+
 # Version 5.3.4
 
 ## Bug fixes:
