@@ -1046,6 +1046,27 @@ var Tune = function() {
 			var isTiedToNext = element.startTie;
 			if (isTiedState !== undefined) {
 				eventHash["event" + isTiedState].elements.push(es); // Add the tied note to the first note that it is tied to
+				if (nextIsBar) {
+					if (!eventHash["event" + voiceTimeMilliseconds]) {
+						eventHash["event" + voiceTimeMilliseconds] = {
+							type: "event",
+							milliseconds: voiceTimeMilliseconds,
+							line: line,
+							measureNumber: measureNumber,
+							top: top,
+							height: height,
+							left: null,
+							width: 0,
+							elements: [],
+							startChar: null,
+							endChar: null,
+							startCharArray: [],
+							endCharArray: []
+						};
+					}
+					eventHash["event" + voiceTimeMilliseconds].measureStart = true;
+					nextIsBar = false;
+				}
 				if (!isTiedToNext)
 					isTiedState = undefined;
 			} else {
@@ -1068,10 +1089,17 @@ var Tune = function() {
 					};
 				} else {
 					// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
-					eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);
+					if (eventHash["event" + voiceTimeMilliseconds].left)
+						eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);
+					else
+						eventHash["event" + voiceTimeMilliseconds].left = element.x;
 					eventHash["event" + voiceTimeMilliseconds].elements.push(es);
 					eventHash["event" + voiceTimeMilliseconds].startCharArray.push(element.abcelem.startChar);
 					eventHash["event" + voiceTimeMilliseconds].endCharArray.push(element.abcelem.endChar);
+					if (eventHash["event" + voiceTimeMilliseconds].startChar === null)
+						eventHash["event" + voiceTimeMilliseconds].startChar =element.abcelem.startChar;
+					if (eventHash["event" + voiceTimeMilliseconds].endChar === null)
+						eventHash["event" + voiceTimeMilliseconds].endChar =element.abcelem.endChar;
 				}
 				if (nextIsBar) {
 					eventHash["event" + voiceTimeMilliseconds].measureStart = true;
