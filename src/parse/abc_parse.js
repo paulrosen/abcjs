@@ -1501,7 +1501,8 @@ var Parse = function() {
 								addEndBeam(el);
 
 							// If there is a whole rest, then it should be the duration of the measure, not it's own duration. We need to special case it.
-							if (el.rest && el.rest.type === 'rest' && el.duration === 1) {
+							// If the time signature length is greater than 4/4, though, then a whole rest has no special treatment.
+							if (el.rest && el.rest.type === 'rest' && el.duration === 1 && durationOfMeasure(multilineVars) <= 1) {
 								el.rest.type = 'whole';
 
 								el.duration = durationOfMeasure(multilineVars);
