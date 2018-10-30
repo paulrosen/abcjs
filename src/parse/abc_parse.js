@@ -22,6 +22,7 @@ var ParseHeader = require('./abc_parse_header');
 var parseKeyVoice = require('./abc_parse_key_voice');
 var Tokenizer = require('./abc_tokenizer');
 var transpose = require('./abc_transpose');
+var wrapLines = require('./wrap_lines');
 
 var Tune = require('../data/abc_tune');
 
@@ -1267,14 +1268,14 @@ var Parse = function() {
 					}
 					i += ret[0];
 					var cv = multilineVars.currentVoice ? multilineVars.currentVoice.staffNum + '-' + multilineVars.currentVoice.index : 'ONLY';
-					if (multilineVars.lineBreaks) {
-						if (!multilineVars.barCounter[cv])
-							multilineVars.barCounter[cv] = 0;
-						var breakNow = multilineVars.lineBreaks[''+multilineVars.barCounter[cv]];
-						multilineVars.barCounter[cv]++;
-						if (breakNow)
-							startNewLine();
-					}
+					// if (multilineVars.lineBreaks) {
+					// 	if (!multilineVars.barCounter[cv])
+					// 		multilineVars.barCounter[cv] = 0;
+					// 	var breakNow = multilineVars.lineBreaks[''+multilineVars.barCounter[cv]];
+					// 	multilineVars.barCounter[cv]++;
+					// 	if (breakNow)
+					// 		startNewLine();
+					// }
 				} else if (line[i] === '&') {	// backtrack to beginning of measure
 					warn("Overlay not yet supported", line, i);
 					i++;
@@ -1605,9 +1606,9 @@ var Parse = function() {
 		if (switches.lineBreaks) {
 			// change the format of the the line breaks for easy testing.
 			multilineVars.lineBreaks = {};
-			multilineVars.continueall = true;
+			//multilineVars.continueall = true;
 			for (var i = 0; i < switches.lineBreaks.length; i++)
-				multilineVars.lineBreaks[''+switches.lineBreaks[i]] = true;
+				multilineVars.lineBreaks[''+(switches.lineBreaks[i]+1)] = true;
 		}
 		header.reset(tokenizer, warn, multilineVars, tune);
 
@@ -1683,6 +1684,8 @@ var Parse = function() {
 		if (switches.hint_measures) {
 			addHintMeasures();
 		}
+
+		wrapLines(tune, multilineVars.lineBreaks);
 	};
 };
 
