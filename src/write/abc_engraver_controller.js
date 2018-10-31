@@ -123,7 +123,9 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
 	this.adjustNonScaledItems(scale);
 
-	var ret = { left: 0, measureWidths: [] };
+	var ret = { left: 0, measureWidths: [], height: 0, total: 0 };
+	// TODO-PER: need to add the height of the title block, too.
+	ret.height = this.renderer.padding.top + this.renderer.spacing.music + this.renderer.padding.bottom + 24; // the 24 is the empirical value added to the bottom of all tunes.
 	var debug = false;
 	var hasPrintedTempo = false;
 	for(var i=0; i<abcTune.lines.length; i++) {
@@ -146,11 +148,13 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 					}
 					if (child.type === 'bar') {
 						ret.measureWidths.push(child.x - lastXPosition);
+						ret.total += (child.x - lastXPosition);
 						lastXPosition = child.x;
 					}
 				}
 			}
 			hasPrintedTempo = true;
+			ret.height += abcLine.staffGroup.calcHeight() * spacing.STEP;
 		}
 	}
 	return ret;
