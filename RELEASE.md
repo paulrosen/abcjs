@@ -1,3 +1,17 @@
+# Version 5.4.0
+
+## Features:
+
+* Add `preferredMeasuresPerLine` as a parameter to the line wrap.
+
+## Bug fixes:
+
+* Improvements to the speed and stability of the line wrapping code.
+
+* Fix lyric placement on wrapped lines.
+
+* Fix the timing of whole rests in the TimingCallback.
+
 # Version 5.3.5
 
 ## Features:
