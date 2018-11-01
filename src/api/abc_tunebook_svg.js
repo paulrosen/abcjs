@@ -2,6 +2,7 @@ var tunebook = require('./abc_tunebook');
 
 var EngraverController = require('../write/abc_engraver_controller');
 var Parse = require('../parse/abc_parse');
+var wrap = require('../parse/wrap_lines');
 
 var resizeDivs = {};
 function resizeOuter() {
@@ -20,7 +21,6 @@ window.addEventListener("resize", resizeOuter);
 window.addEventListener("orientationChange", resizeOuter);
 
 function renderOne(div, tune, params, tuneNumber) {
-    var width = params.width ? params.width : 800;
     if (params.viewportHorizontal) {
         // Create an inner div that holds the music, so that the passed in div will be the viewport.
         div.innerHTML = '<div class="abcjs-inner"></div>';
@@ -203,87 +203,13 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
     return tunebook.renderEngine(callback, output, abc, params);
 };
 
-function calcLineBreaks(widths, lineBreakPoint) {
-	var lineBreaks = [];
-	var totalThisLine = 0;
-	// run through each measure and see if the accumulation is less than the ideal.
-	// if it passes the ideal, then see whether the last or this one is closer to the ideal.
-	for (var i = 0; i < widths.length; i++) {
-		var width = widths[i];
-		var attemptedWidth = totalThisLine + width;
-		if (attemptedWidth < lineBreakPoint)
-			totalThisLine = attemptedWidth;
-		else {
-			// This just passed the ideal, so see whether the previous or the current number of measures is closer.
-			var oldDistance = lineBreakPoint - totalThisLine;
-			var newDistance = attemptedWidth - lineBreakPoint;
-			if (oldDistance < newDistance && totalThisLine > 0) {
-				lineBreaks.push(i - 1);
-				totalThisLine = width;
-			} else {
-				lineBreaks.push(i);
-				totalThisLine = 0;
-			}
-		}
-	}
-	return { lineBreaks: lineBreaks, totalThisLine: totalThisLine };
-}
-
 function doLineWrapping(div, tune, tuneNumber, abcString, params) {
 	var engraver_controller = new EngraverController(div, params);
 	var widths = engraver_controller.getMeasureWidths(tune);
-    // For calculating how much can go on the line, it depends on the width of the line. It is a convenience to just divide it here
-    // by the minimum spacing instead of multiplying the min spacing later.
-    // The scaling works differently: this is done by changing the scaling of the outer SVG, so the scaling needs to be compensated
-    // for here, because the actual width will be different from the calculated numbers.
-	var scale = params.scale ? Math.max(params.scale, 0.1) : 1;
-	var minSpacing = params.wrap.minSpacing ? Math.max(parseFloat(params.wrap.minSpacing), 1) : 1;
-	var onlyLineLimit = params.wrap.onlyLineLimit ? Math.max(parseFloat(params.wrap.onlyLineLimit), 1) : 5;
-	var lastLineLimit = params.wrap.lastLineLimit ? Math.max(parseFloat(params.wrap.lastLineLimit), 1) : 5;
-	var lineBreakPoint = (params.staffwidth - widths.left) / minSpacing / scale;
-	var minLineSize = (params.staffwidth - widths.left) / onlyLineLimit / scale;
-	var minLastLineSize = (params.staffwidth - widths.left) / lastLineLimit / scale;
 
-	var ret = calcLineBreaks(widths.measureWidths, lineBreakPoint);
-
-    var staffWidth = params.staffwidth;
-    if (ret.lineBreaks.length === 0) {
-		// Everything fits on one line, so see if there is TOO much space and the staff width needs to be shortened.
-	    if (minLineSize > 0 && ret.totalThisLine > 0 && ret.totalThisLine < minLineSize)
-		    staffWidth = staffWidth / (minLineSize / ret.totalThisLine);
-    } else if (ret.totalThisLine < minLastLineSize) {
-    	// the last line is too short, so attempt to redistribute by changing the min.
-	    // We will try more and less space alternatively. The space can't be less than 1.0, and we'll try in 0.1 increments.
-	    var minTrys = [];
-	    if (minSpacing > 1.1)
-	    	minTrys.push(minSpacing - 0.1);
-	    minTrys.push(minSpacing + 0.1);
-	    if (minSpacing > 1.2)
-	    	minTrys.push(minSpacing - 0.2);
-	    minTrys.push(minSpacing + 0.2);
-	    if (minSpacing > 1.3)
-	    	minTrys.push(minSpacing - 0.3);
-	    minTrys.push(minSpacing + 0.3);
-	    for (var i = 0; i < minTrys.length && ret.totalThisLine < minLastLineSize; i++) {
-		    lineBreakPoint = (params.staffwidth - widths.left) / minTrys[i] / scale;
-		    ret = calcLineBreaks(widths.measureWidths, lineBreakPoint);
-	    }
-    }
-
-	var abcParser = new Parse();
-	var revisedParams = {
-	    lineBreaks: ret.lineBreaks,
-		staffwidth: staffWidth
-    };
-	for (var key in params) {
-		if (params.hasOwnProperty(key) && key !== 'wrap' && key !== 'staffwidth') {
-			revisedParams[key] = params[key];
-		}
-	}
-
-	abcParser.parse(abcString, revisedParams);
-	tune = abcParser.getTune();
-	renderOne(div, tune, revisedParams, tuneNumber);
+	var ret = wrap.calcLineWraps(tune, widths, abcString, params, Parse, engraver_controller);
+	renderOne(div, ret.tune, ret.revisedParams, tuneNumber);
+	tune.explanation = ret.explanation;
 	return tune;
 }
 

@@ -27,6 +27,7 @@ function wrapLines(tune, lineBreaks) {
 	var startNewLine = [];
 	var currentLine = [];
 	var measureNumber = [];
+	var measureMarker = [];
 
 	for (var i = 0; i < tune.lines.length; i++) {
 		var line = tune.lines[i];
@@ -37,6 +38,7 @@ function wrapLines(tune, lineBreaks) {
 					startNewLine[j] = [];
 					currentLine[j] = [];
 					measureNumber[j] = [];
+					measureMarker[j] = [];
 				}
 				var staff = staffs[j];
 				var voices = staff.voices;
@@ -45,6 +47,7 @@ function wrapLines(tune, lineBreaks) {
 						startNewLine[j][k] = true;
 						currentLine[j][k] = 0;
 						measureNumber[j][k] = 0;
+						measureMarker[j][k] = 0;
 					}
 					var voice = voices[k];
 					for (var e = 0; e < voice.length; e++) {
@@ -60,6 +63,8 @@ function wrapLines(tune, lineBreaks) {
 									}
 								}
 							}
+							if (measureMarker[j][k])
+								newLines[currentLine[j][k]].staff[j].barNumber = measureMarker[j][k];
 							startNewLine[j][k] = false;
 						}
 						var element = voice[e];
@@ -71,6 +76,8 @@ function wrapLines(tune, lineBreaks) {
 							if (lineBreaks[measureNumber[j][k]]) {
 								startNewLine[j][k] = true;
 								currentLine[j][k]++;
+								measureMarker[j][k] = element.barNumber;
+								delete element.barNumber;
 							}
 						}
 					}
@@ -85,4 +92,321 @@ function wrapLines(tune, lineBreaks) {
 	tune.lines = newLines;
 }
 
-module.exports = wrapLines;
+function freeFormLineBreaks(widths, lineBreakPoint) {
+	var lineBreaks = [];
+	var totals = [];
+	var totalThisLine = 0;
+	// run through each measure and see if the accumulation is less than the ideal.
+	// if it passes the ideal, then see whether the last or this one is closer to the ideal.
+	for (var i = 0; i < widths.length; i++) {
+		var width = widths[i];
+		var attemptedWidth = totalThisLine + width;
+		if (attemptedWidth < lineBreakPoint)
+			totalThisLine = attemptedWidth;
+		else {
+			// This just passed the ideal, so see whether the previous or the current number of measures is closer.
+			var oldDistance = lineBreakPoint - totalThisLine;
+			var newDistance = attemptedWidth - lineBreakPoint;
+			if (oldDistance < newDistance && totalThisLine > 0) {
+				lineBreaks.push(i - 1);
+				totals.push(Math.round(totalThisLine - width));
+				totalThisLine = width;
+			} else {
+				lineBreaks.push(i);
+				totals.push(Math.round(totalThisLine));
+				totalThisLine = 0;
+			}
+		}
+	}
+	totals.push(Math.round(totalThisLine));
+	return { lineBreaks: lineBreaks, totals: totals };
+}
+
+// function createLineTestArray(numLines, numMeasures, maxMeasuresPerLine, minMeasuresPerLine) {
+// 	var tries = [];
+// 	// To get all the iterations, it is every digit in a particular base-numbering system.
+// 	// That is, we want to generate every number that is (numLines-1) digits, in base (max-min+1)
+// 	// For instance, for 5 lines where the min is 6 and max is 8, we want ever combination of 4 digits in base 3.
+// 	var base = maxMeasuresPerLine - minMeasuresPerLine + 1;
+// 	var digits = numLines - 1; // The last digit is fixed: it is what ever is needed to sum up to the total number of measures.
+// 	var done = false;
+// 	var iter = 0;
+// 	while (!done) {
+// 		var attempt = [];
+// 		var num = iter;
+// 		var total = 0;
+// 		for (var d = digits - 1; d >= 0; d--) {
+// 			attempt[d] = (num % base) + minMeasuresPerLine;
+// 			num = Math.floor(num / base);
+// 			total += attempt[d];
+// 		}
+// 		if (num > 0)
+// 			done = true; // continue until we exceed the greatest number. We know because there is a remainer.
+// 		else {
+// 			var lastLine = numMeasures - total;
+// 			if (lastLine >= minMeasuresPerLine && lastLine <= maxMeasuresPerLine) {
+// 				attempt[digits] = lastLine;
+// 				tries.push(attempt);
+// 			}
+// 			iter++;
+// 		}
+// 	}
+// 	return tries;
+// }
+
+// function getVariance(attempt, idealLineBreak, widths, allowableOverage) {
+// 	var measureNumber = 0;
+// 	var thisWorstVariance = 0;
+// 	for (var j = 0; j < attempt.length; j++) {
+// 		var lineWidth = 0;
+// 		var measuresThisLine = attempt[j];
+// 		for (var k = 0; k < measuresThisLine; k++) {
+// 			lineWidth += widths[measureNumber++];
+// 		}
+// 		if (lineWidth > allowableOverage)
+// 			return null;
+// 		var variance = Math.abs(lineWidth - idealLineBreak);
+// 		if (variance > thisWorstVariance)
+// 			thisWorstVariance = variance;
+// 	}
+// 	return thisWorstVariance;
+// }
+
+function getMaxVariance(widths, lineBreakPoint, lineBreaks) {
+	var maxVariance = 0;
+	var numLines = lineBreaks.length + 1; // the last line doesn't have an explicit break
+	var measureNumber = 0;
+	for (var i = 0; i <= lineBreaks.length; i++) {
+		var breakMeasure = (i === lineBreaks.length) ? widths.length : lineBreaks[i];
+		var thisTotal = 0;
+		for (var j = measureNumber; j < breakMeasure; j++) {
+			thisTotal += widths[j];
+		}
+		measureNumber = breakMeasure;
+		var thisVariance = Math.abs(lineBreakPoint - thisTotal);
+		maxVariance = Math.max(maxVariance, thisVariance);
+	}
+
+	return maxVariance;
+}
+
+function lineWidth(widths, start, end) {
+	var thisTotal = 0;
+	for (var j = start; j < end; j++)
+		thisTotal += widths[j];
+	return thisTotal;
+}
+
+function optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation) {
+	// Instead of having to try all the different combinations to find the best, we start with an important piece of knowledge about the lineBreaks we are given:
+	// If there is a line too short, it is the last one.
+	// So, let's just do a couple of tweaks to see how it works to add one or two measures to the last line.
+	var maxVariance = getMaxVariance(widths.measureWidths, lineBreakPoint, lineBreaks);
+
+	if (lineBreaks.length === 0)
+		return { failed: true, reason: "Only one line." };
+
+	var lastLineStart = lineBreaks[lineBreaks.length-1];
+	var thisTotal = lineWidth(widths.measureWidths, lastLineStart, widths.measureWidths.length);
+	var thisVariance = Math.abs(lineBreakPoint - thisTotal);
+	if (maxVariance > thisVariance)
+		return { failed: true, reason: "Last line is not too short." };
+
+	// Let's squeeze the line successively until it spills onto an extra line, then take the option with the lowest variance
+	var targetNumLines = lineBreaks.length;
+	var newNumLines = targetNumLines;
+	var tryBreakPoint = lineBreakPoint - 10;
+	var failed = true;
+	while (targetNumLines === newNumLines && tryBreakPoint > 50) {
+		var ff = freeFormLineBreaks(widths.measureWidths, tryBreakPoint);
+		newNumLines = ff.lineBreaks.length;
+		if (newNumLines === targetNumLines) {
+			explanation.attempts.push({type: "Optimize try", tryBreakPoint: tryBreakPoint, lineBreaks: ff.lineBreaks, totals: ff.totals});
+			var maxVariance2 = getMaxVariance(widths.measureWidths, lineBreakPoint, ff.lineBreaks);
+			if (maxVariance2 < maxVariance) {
+				maxVariance = maxVariance2;
+				lineBreaks = ff.lineBreaks;
+				failed = false;
+			}
+		} else {
+			explanation.attempts.push({type: "Optimize try", explanation: "Exceeded number of lines." , tryBreakPoint: tryBreakPoint, lineBreaks: ff.lineBreaks, totals: ff.totals});
+		}
+		tryBreakPoint -= 10;
+	}
+
+	return { failed: failed, lineBreaks: lineBreaks, maxVariance: maxVariance };
+}
+
+// function fixedNumLinesBreaks(widths, numLines, allowOver, allowableVariance) {
+// 	var idealLineBreak = widths.total / numLines;
+// 	// If all the measures had the same amount of stuff, then the ave would be correct.
+// 	// We will test all the combinations from one less to one more than the average.
+// 	var averageMeasuresPerLine = Math.round(widths.measureWidths.length / numLines);
+// 	var minMeasuresPerLine = Math.max(averageMeasuresPerLine - 1, 1);
+// 	var maxMeasuresPerLine = averageMeasuresPerLine + 1;
+// 	var tries = createLineTestArray(numLines, widths.measureWidths.length, maxMeasuresPerLine, minMeasuresPerLine);
+// 	console.log("fixedNumLinesBreaks tests ("+minMeasuresPerLine+'-'+maxMeasuresPerLine+")", numLines, tries.length)
+//
+// 	// For each possible number of measures per line, see which has the closest spacing to the ideal.
+// 	var bestCase = -1;
+// 	var bestCaseVariance = 1000000;
+// 	for (var i = 0 ; i < tries.length; i++) {
+// 		var attempt = tries[i];
+// 		var variance = getVariance(attempt, idealLineBreak, widths.measureWidths, allowOver ? allowableVariance : 0);
+// 		if (variance !== null) {
+// 			if (variance < bestCaseVariance) {
+// 				bestCaseVariance = variance;
+// 				bestCase = i;
+// 			}
+// 		}
+// 	}
+// 	var failed = true;
+// 	// For debugging, recreate the line widths
+// 	var totals = [];
+// 	if (bestCase >= 0) {
+// 		failed = false;
+// 		var index = 0;
+// 		for (i = 0; i < tries[bestCase].length; i++) {
+// 			var total = 0;
+// 			for (var j = 0; j < tries[bestCase][i]; j++) {
+// 				total += widths.measureWidths[index++];
+// 			}
+// 			totals.push(Math.round(total));
+// 		}
+// 		// We now have an array that contains the number of measures per line, but we want to return the absolute measure number to break on.
+// 		if (tries[bestCase].length > 0) {
+// 			tries[bestCase][0]--; // The results should contain the last measure number on the line, zero-based.
+// 			for (i = 1; i < tries[bestCase].length; i++)
+// 				tries[bestCase][i] += tries[bestCase][i - 1]; // This sets the zero-based measure number
+// 			// The last line is implied and we don't need to return it
+// 			tries[bestCase].pop();
+// 		}
+// 	}
+// 	return { failed: failed, lineBreaks: tries[bestCase], bestCaseVariance: Math.round(bestCaseVariance), totals: totals };
+// }
+
+function fixedMeasureLineBreaks(widths, lineBreakPoint, preferredMeasuresPerLine) {
+	var lineBreaks = [];
+	var totals = [];
+	var thisWidth = 0;
+	var failed = false;
+	for (var i = 0; i < widths.length; i++) {
+		thisWidth += widths[i];
+		if (i % preferredMeasuresPerLine === (preferredMeasuresPerLine-1)) {
+			if (thisWidth > lineBreakPoint) {
+				failed = true;
+			}
+			if (i !== widths.length-1) // Don't bother putting a line break for the last line - it's already a break.
+				lineBreaks.push(i);
+			totals.push(Math.round(thisWidth));
+			thisWidth = 0;
+		}
+	}
+	return { failed: failed, totals: totals, lineBreaks: lineBreaks };
+}
+
+function getRevisedTune(lineBreaks, staffWidth, abcString, params, Parse) {
+	var abcParser = new Parse();
+	var revisedParams = {
+		lineBreaks: lineBreaks,
+		staffwidth: staffWidth
+	};
+	for (var key in params) {
+		if (params.hasOwnProperty(key) && key !== 'wrap' && key !== 'staffwidth') {
+			revisedParams[key] = params[key];
+		}
+	}
+
+	abcParser.parse(abcString, revisedParams);
+	return { tune: abcParser.getTune(), revisedParams: revisedParams };
+}
+
+function calcLineWraps(tune, widths, abcString, params, Parse, engraver_controller) {
+	// For calculating how much can go on the line, it depends on the width of the line. It is a convenience to just divide it here
+	// by the minimum spacing instead of multiplying the min spacing later.
+	// The scaling works differently: this is done by changing the scaling of the outer SVG, so the scaling needs to be compensated
+	// for here, because the actual width will be different from the calculated numbers.
+	var scale = params.scale ? Math.max(params.scale, 0.1) : 1;
+	var minSpacing = params.wrap.minSpacing ? Math.max(parseFloat(params.wrap.minSpacing), 1) : 1;
+	var minSpacingLimit = params.wrap.minSpacingLimit ? Math.max(parseFloat(params.wrap.minSpacingLimit), 1) : minSpacing - 0.1;
+	var maxSpacing = params.wrap.maxSpacing ? Math.max(parseFloat(params.wrap.maxSpacing), 1) : undefined;
+	if (params.wrap.lastLineLimit && !maxSpacing)
+		maxSpacing = Math.max(parseFloat(params.wrap.lastLineLimit), 1);
+	var targetHeight = params.wrap.targetHeight ? Math.max(parseInt(params.wrap.targetHeight, 10), 100) : undefined;
+	var preferredMeasuresPerLine = params.wrap.preferredMeasuresPerLine ? Math.max(parseInt(params.wrap.preferredMeasuresPerLine, 10), 1) : undefined;
+
+	var lineBreakPoint = (params.staffwidth - widths.left) / minSpacing / scale;
+	var minLineSize = (params.staffwidth - widths.left) / maxSpacing / scale;
+	var allowableVariance = (params.staffwidth - widths.left) / minSpacingLimit / scale;
+	var explanation = { widths: widths, lineBreakPoint: lineBreakPoint, minLineSize: minLineSize, attempts: [], staffWidth: params.staffwidth, minWidth: Math.round(allowableVariance) };
+
+	// If there is a preferred number of measures per line, test that first. If none of the lines is too long, then we're finished.
+	var lineBreaks = null;
+	if (preferredMeasuresPerLine) {
+		var f = fixedMeasureLineBreaks(widths.measureWidths, lineBreakPoint, preferredMeasuresPerLine);
+		explanation.attempts.push({ type: "Fixed Measures Per Line", preferredMeasuresPerLine: preferredMeasuresPerLine, lineBreaks: f.lineBreaks, failed: f.failed, totals: f.totals });
+		if (!f.failed)
+			lineBreaks = f.lineBreaks;
+	}
+
+	// If we don't have lineBreaks yet, use the free form method of line breaks.
+	// This will be called either if Preferred Measures is not used, or if the music is just weird - like a single measure is way too crowded.
+	if (!lineBreaks) {
+		var ff = freeFormLineBreaks(widths.measureWidths, lineBreakPoint);
+		explanation.attempts.push({ type: "Free Form", lineBreaks: ff.lineBreaks, totals: ff.totals });
+		lineBreaks = ff.lineBreaks;
+
+		// We now have an acceptable number of lines, but the measures may not be optimally distributed. See if there is a better distribution.
+		ff = optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation);
+		explanation.attempts.push({ type: "Optimize", failed: ff.failed, reason: ff.reason, lineBreaks: ff.lineBreaks, totals: ff.totals });
+		if (!ff.failed)
+			lineBreaks = ff.lineBreaks;
+	}
+
+	// If the vertical space exceeds targetHeight, remove a line and try again. If that is too crowded, then don't use it.
+	var staffWidth = params.staffwidth;
+	var ret = getRevisedTune(lineBreaks, staffWidth, abcString, params, Parse);
+	var newWidths = engraver_controller.getMeasureWidths(ret.tune);
+	var gotTune = true; // If we adjust the num lines, set this to false
+	explanation.attempts.push({type: "heightCheck", height: newWidths.height });
+
+	// 	if all of the lines are too sparse, make the width narrower.
+	// TODO-PER: implement this case.
+
+	// If one line and the spacing is > maxSpacing, make the width narrower.
+	if (lineBreaks.length === 0 && minLineSize > widths.total) {
+		staffWidth = (widths.total * maxSpacing * scale) + widths.left;
+		explanation.attempts.push({type: "too sparse", newWidth: Math.round(staffWidth)})
+		gotTune = false;
+	}
+
+	// if (ret.lineBreaks.length === 0) {
+	// 	// Everything fits on one line, so see if there is TOO much space and the staff width needs to be shortened.
+	// 	if (minLineSize > 0 && ret.totalThisLine > 0 && ret.totalThisLine < minLineSize)
+	// 		staffWidth = staffWidth / (minLineSize / ret.totalThisLine);
+	// } else if (ret.totalThisLine < minLineSize) {
+	// 	// the last line is too short, so attempt to redistribute by changing the min.
+	// 	// We will try more and less space alternatively. The space can't be less than 1.0, and we'll try in 0.1 increments.
+	// 	var minTrys = [];
+	// 	if (minSpacing > 1.1)
+	// 		minTrys.push(minSpacing - 0.1);
+	// 	minTrys.push(minSpacing + 0.1);
+	// 	if (minSpacing > 1.2)
+	// 		minTrys.push(minSpacing - 0.2);
+	// 	minTrys.push(minSpacing + 0.2);
+	// 	if (minSpacing > 1.3)
+	// 		minTrys.push(minSpacing - 0.3);
+	// 	minTrys.push(minSpacing + 0.3);
+	// 	for (var i = 0; i < minTrys.length && ret.totalThisLine < minLineSize; i++) {
+	// 		lineBreakPoint = (params.staffwidth - widths.left) / minTrys[i] / scale;
+	// 		ret = calcLineBreaks(widths.measureWidths, lineBreakPoint);
+	// 	}
+	// }
+
+	if (!gotTune)
+		ret = getRevisedTune(lineBreaks, staffWidth, abcString, params, Parse);
+	ret.explanation = explanation;
+	return ret;
+}
+
+module.exports = { wrapLines: wrapLines, calcLineWraps: calcLineWraps };

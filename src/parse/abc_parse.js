@@ -22,7 +22,7 @@ var ParseHeader = require('./abc_parse_header');
 var parseKeyVoice = require('./abc_parse_key_voice');
 var Tokenizer = require('./abc_tokenizer');
 var transpose = require('./abc_transpose');
-var wrapLines = require('./wrap_lines');
+var wrap = require('./wrap_lines');
 
 var Tune = require('../data/abc_tune');
 
@@ -1605,10 +1605,11 @@ var Parse = function() {
 			multilineVars.globalTranspose = undefined;
 		if (switches.lineBreaks) {
 			// change the format of the the line breaks for easy testing.
+			// The line break numbers are 0-based and they reflect the last measure of the current line.
 			multilineVars.lineBreaks = {};
 			//multilineVars.continueall = true;
 			for (var i = 0; i < switches.lineBreaks.length; i++)
-				multilineVars.lineBreaks[''+(switches.lineBreaks[i]+1)] = true;
+				multilineVars.lineBreaks[''+(switches.lineBreaks[i]+1)] = true; // Add 1 so that the line break is the first measure of the next line.
 		}
 		header.reset(tokenizer, warn, multilineVars, tune);
 
@@ -1685,7 +1686,7 @@ var Parse = function() {
 			addHintMeasures();
 		}
 
-		wrapLines(tune, multilineVars.lineBreaks);
+		wrap.wrapLines(tune, multilineVars.lineBreaks);
 	};
 };
 
