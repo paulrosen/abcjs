@@ -209,8 +209,8 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
 
 	var ret = wrap.calcLineWraps(tune, widths, abcString, params, Parse, engraver_controller);
 	renderOne(div, ret.tune, ret.revisedParams, tuneNumber);
-	tune.explanation = ret.explanation;
-	return tune;
+	ret.tune.explanation = ret.explanation;
+	return ret.tune;
 }
 
 module.exports = renderAbc;
