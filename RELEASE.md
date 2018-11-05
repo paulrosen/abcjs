@@ -1,3 +1,13 @@
+# Version 5.4.1
+
+## Bug fixes:
+
+* Improve the decision on how to break lines in line wrapping.
+
+* Don't duplicate meter when wrapping lines.
+
+* Return the correct version of the tune when doing line wrapping. 
+
 # Version 5.4.0
 
 ## Features:
