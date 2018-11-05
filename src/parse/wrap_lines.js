@@ -28,6 +28,7 @@ function wrapLines(tune, lineBreaks) {
 	var currentLine = [];
 	var measureNumber = [];
 	var measureMarker = [];
+	var lastMeter = '';
 
 	for (var i = 0; i < tune.lines.length; i++) {
 		var line = tune.lines[i];
@@ -58,8 +59,14 @@ function wrapLines(tune, lineBreaks) {
 								newLines[currentLine[j][k]].staff[j] = {voices: []};
 								for (var key in staff) {
 									if (staff.hasOwnProperty(key)) {
-										if (key !== 'voices')
+										if (key === 'meter') {
+											if (newLines.length === 1 || lastMeter !== JSON.stringify(staff[key])) {
+												lastMeter = JSON.stringify(staff[key]);
+												newLines[currentLine[j][k]].staff[j][key] = staff[key];
+											}
+										} else if (key !== 'voices') {
 											newLines[currentLine[j][k]].staff[j][key] = staff[key];
+										}
 									}
 								}
 							}
