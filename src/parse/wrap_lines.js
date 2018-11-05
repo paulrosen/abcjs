@@ -296,7 +296,7 @@ function optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation) {
 	// Let's get a list of all combinations that have a possibility of working. That is, all combinations where no line has a variance larger than "variance".
 	var lastLines = lastLinePossibilities(widths.measureWidths, lastLineStart, avg - variance, avg + variance);
 	var attempts = getAttempts(widths.measureWidths, 0, lineBreaks.length, avg - variance, avg + variance, lastLines);
-	console.log(attempts, avg - variance, avg + variance);
+	//console.log(attempts, avg - variance, avg + variance);
 
 	var failed = true;
 	for (var i = 0; i < attempts.length; i++) {
