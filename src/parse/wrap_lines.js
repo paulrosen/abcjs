@@ -278,7 +278,7 @@ function lastLinePossibilities(widths, start, min, max) {
 		if (acc > max)
 			break;
 		if (acc > min && i < start) {
-			possibilities.push(i);
+			possibilities.push(i-1);
 		}
 	}
 	return possibilities;
@@ -321,6 +321,22 @@ function optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation) {
 	}
 	if (failed) {
 		explanation.attempts.push({ type: "Optimize try", lineBreaks: lineBreaks, variance: variance, reason: "None of the " + attempts.length + " attempts were better." });
+		// TODO-PER: This shouldn't be necessary, but just try to move one measure down and see if it helps.
+		if (lineBreaks.length > 0) {
+			var attempt = [].concat(lineBreaks);
+			attempt[attempt.length - 1]--;
+			newVariance = getVariance(widths, attempt);
+			explanation.attempts.push({
+				type: "Optimize last try", lineBreaks: attempts[i],
+				variance: Math.round(variance), newVariance: Math.round(newVariance),
+				totalAttempts: attempts.length
+			});
+			if (newVariance < variance) {
+				variance = newVariance;
+				lineBreaks = attempt;
+				failed = false;
+			}
+		}
 	}
 	// Let's squeeze the line successively until it spills onto an extra line, then take the option with the lowest variance
 	// var targetNumLines = lineBreaks.length;
