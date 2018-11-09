@@ -64,7 +64,7 @@ var TimingCallbacks = function(target, params) {
 			}
 
 			while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
-				if (self.eventCallback)
+				if (self.eventCallback && self.noteTimings[self.currentEvent].type === 'event')
 					self.eventCallback(self.noteTimings[self.currentEvent]);
 				self.currentEvent++;
 			}
@@ -74,7 +74,7 @@ var TimingCallbacks = function(target, params) {
 				self.lineEndTimings.shift();
 			}
 
-			if (currentTime >= self.lastMoment &&self.eventCallback)
+			if (currentTime >= self.lastMoment && self.eventCallback)
 				self.eventCallback(null);
 			}
 	};
