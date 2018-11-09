@@ -1,3 +1,9 @@
+# Version 5.4.2
+
+## Bug fixes:
+
+* TimingCallbacks was reporting the end of the animation at the beginning of the last event - it now waits until the end of that event.
+
 # Version 5.4.1
 
 ## Bug fixes:
