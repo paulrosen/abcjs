@@ -74,10 +74,10 @@ var BeamElem;
 		this.elems.push(abselem);
 		//var pitch = abselem.abcelem.averagepitch;
 		this.total += pitch; // TODO CHORD (get pitches from abselem.heads)
-		if (!this.min || abselem.abcelem.minpitch < this.min) {
+		if (this.min === undefined || abselem.abcelem.minpitch < this.min) {
 			this.min = abselem.abcelem.minpitch;
 		}
-		if (!this.max || abselem.abcelem.maxpitch > this.max) {
+		if (this.max === undefined || abselem.abcelem.maxpitch > this.max) {
 			this.max = abselem.abcelem.maxpitch;
 		}
 	};
