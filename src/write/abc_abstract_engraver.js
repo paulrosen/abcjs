@@ -567,6 +567,14 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 		return { noteHead: noteHead, roomTaken: roomTaken, roomTakenRight: roomTakenRight };
 	}
 
+	function addIfNotExist(arr, item) {
+		for (var i = 0; i < arr.length; i++) {
+			if (JSON.stringify(arr[i]) === JSON.stringify(item))
+				return;
+		}
+		arr.push(item);
+	}
+
 	AbstractEngraver.prototype.addNoteToAbcElement = function(abselem, elem, dot, stemdir, style, zeroDuration, durlog, nostem, voice) {
 		var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
 		var noteHead;
@@ -645,7 +653,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				if (elem.startSlur) {
 					if (!elem.pitches[p].startSlur) elem.pitches[p].startSlur = []; //TODO possibly redundant, provided array is not optional
 					for (i=0; i<elem.startSlur.length; i++) {
-						elem.pitches[p].startSlur.push(elem.startSlur[i]);
+						addIfNotExist(elem.pitches[p].startSlur, elem.startSlur[i]);
 					}
 				}
 
@@ -655,7 +663,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 						elem.pitches[p].highestVert += 6;        // If the stem is up, then compensate for the length of the stem
 					if (!elem.pitches[p].endSlur) elem.pitches[p].endSlur = []; //TODO possibly redundant, provided array is not optional
 					for (i=0; i<elem.endSlur.length; i++) {
-						elem.pitches[p].endSlur.push(elem.endSlur[i]);
+						addIfNotExist(elem.pitches[p].endSlur, elem.endSlur[i]);
 					}
 				}
 			}
