@@ -881,6 +881,7 @@ var Parse = function() {
 					params.key.accidentals.push(multilineVars.key.explicitAccidentals[i]);
 			}
 		}
+		multilineVars.targetKey = params.key;
 		if (params.key.explicitAccidentals)
 			delete params.key.explicitAccidentals;
 		parseKeyVoice.addPosToKey(params.clef, params.key);

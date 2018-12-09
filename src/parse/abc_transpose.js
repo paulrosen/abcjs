@@ -184,7 +184,7 @@ var accidentals2 = {
 	"-1": "flat",
 	"0": "natural",
 	"1": "sharp",
-	"2": "dblsharp",
+	"2": "dblsharp"
 };
 transpose.note = function(multilineVars, el) {
 	// the "el" that is passed in has el.accidental, and el.pitch. "pitch" is the vertical position (0=middle C)
@@ -196,7 +196,7 @@ transpose.note = function(multilineVars, el) {
 	el.pitch = el.pitch + multilineVars.localTransposeVerticalMovement;
 
 	if (el.accidental) {
-		var ret = accidentalChange(origPitch, el.pitch, el.accidental, multilineVars.globalTransposeOrigKeySig, multilineVars.key);
+		var ret = accidentalChange(origPitch, el.pitch, el.accidental, multilineVars.globalTransposeOrigKeySig, multilineVars.targetKey);
 		el.pitch = ret[0];
 		el.accidental = accidentals2[ret[1]];
 	}
