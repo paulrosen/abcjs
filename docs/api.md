@@ -57,6 +57,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `program` | 0 | The midi program (aka "instrument") to use, if not specified in abcString. |
 | `midiTranspose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
 | `voicesOff` | false | Play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. |
+| `chordsOff` | false | Ignore the chords and just play the melody (and metronome if that is on). |
 | `generateDownload` | false | Whether to generate a download MIDI link. |
 | `generateInline` | true | Whether to generate the inline MIDI controls. |
 | `downloadClass` | "" | Add classes to the download controls. The classes `abcjs-download-midi` and `abcjs-midi-xxx` where `xxx` is the index of the tune are already added. This is appended to those classes. |

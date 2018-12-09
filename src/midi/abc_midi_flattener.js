@@ -82,7 +82,7 @@ var flatten;
 		currentChords = [];
 		lastChord = undefined;
 		barBeat = 0;
-		gChordTacet = false;
+		gChordTacet = options.chordsOff ? true : false;
 
 		stressBeat1 = 64;
 		stressBeatDown = 64;
@@ -151,7 +151,8 @@ var flatten;
 						drumDefinition = normalizeDrumDefinition(element.params);
 						break;
 					case "gchord":
-						gChordTacet = element.tacet;
+						if (!options.chordsOff)
+							gChordTacet = element.tacet;
 						break;
 					case "beat":
 						stressBeat1 = element.beats[0];
@@ -248,7 +249,7 @@ var flatten;
 		if (chordTrackFinished || !elem.chord || elem.chord.length === 0)
 			return null;
 
-		// Return the first annotation that is a regular chord: that is, it is in the default place or is a recognized "tacit" phrase.
+		// Return the first annotation that is a regular chord: that is, it is in the default place or is a recognized "tacet" phrase.
 		for (var i = 0; i < elem.chord.length; i++) {
 			var ch = elem.chord[i];
 			if (ch.position === 'default')
