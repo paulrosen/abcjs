@@ -1,3 +1,17 @@
+# Version 5.5.0
+
+## Features:
+
+* Add "chordsOff" parameter to just play midi of the melody.
+
+## Bug fixes:
+
+* Don't duplicate slurs on chords when using wrap.
+
+* Figure out correct accidental when transposing to a key with accidentals in the key signature.
+
+* Fix problem with calculating the height of beamed notes when the top or bottom one is middle C.
+
 # Version 5.4.2
 
 ## Bug fixes:
