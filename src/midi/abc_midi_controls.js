@@ -255,6 +255,11 @@ var midi = {};
 		MIDI.player.currentTime = endTime * ratio;
 		if (play)
 			startCurrentlySelectedTune();
+		else {
+			const { currentTime, duration } = MIDI.player;
+			const progress = currentTime/duration;
+			midiJsListener({ currentTime, duration, progress });
+		}
 	}
 
 	function setTimeWarp(percent) {
@@ -334,7 +339,7 @@ var midi = {};
 			midiControl = find(document, "abcjs-midi-current");
 			if (midiControl) {
 				var startButton = find(midiControl, 'abcjs-midi-start');
-				if (hasClass(startButton, 'abcjs-pushed')) {
+				if (hasClass(startButton, 'abcjs-loaded')) {
 					var progressBackground = find(midiControl, "abcjs-midi-progress-background");
 					var totalWidth = progressBackground.offsetWidth;
 					var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
@@ -406,6 +411,7 @@ var midi = {};
 			pauseCurrentlyPlayingTune();
 			// Change the element so that the start icon is shown.
 			removeClass(target, "abcjs-pushed");
+			return;
 		} else { // Else,
 			// If some other midi is running, turn it off.
 
@@ -415,20 +421,26 @@ var midi = {};
 				startCurrentlySelectedTune();
 			else {
 				deselectMidiControl();
-
-				// else, load this midi from scratch.
-				var onSuccess = function() {
+				onLoadMidi(target, parent, function() {
 					startCurrentlySelectedTune();
-					removeClass(target, "abcjs-loading");
-					addClass(parent, 'abcjs-midi-current');
-				};
-				addClass(target, "abcjs-loading");
-				loadMidi(parent, onSuccess);
+				});
 			}
-			// Change the element so that the pause icon is shown.
 			addClass(target, "abcjs-pushed");
 		}
-		// This replaces the old callback. It really only needs to be called once, but it doesn't hurt to set it every time.
+	}
+
+	function onLoadMidi(target, parent, cb) {
+		// else, load this midi from scratch.
+		var onSuccess = function() {
+			removeClass(target, "abcjs-loading");
+			addClass(parent, 'abcjs-midi-current');
+			addClass(target, 'abcjs-loaded');
+			if(cb) {
+				cb();
+			}
+		};
+		addClass(target, "abcjs-loading");
+		loadMidi(parent, onSuccess);
 		parent.abcjsLastBeat = -1;
 		parent.abcjsLastIndex = -1;
 		setMidiCallback(midiJsListener);
@@ -538,12 +550,16 @@ var midi = {};
 
 	function onProgress(target, event) {
 		var parent = closest(target, "abcjs-inline-midi");
+		var play = find(parent, "abcjs-midi-start");
+		var width = target.offsetWidth;
+		var offset = relMouseX(target, event);
 		if (hasClass(parent, "abcjs-midi-current")) {
-			var play = find(parent, "abcjs-midi-start");
 			play = hasClass(play, "abcjs-pushed");
-			var width = target.offsetWidth;
-			var offset = relMouseX(target, event);
 			jumpToMidiPosition(play, offset, width);
+		} else {
+			onLoadMidi(play, parent, function() {
+				jumpToMidiPosition(false, offset, width);
+			})
 		}
 	}
 
