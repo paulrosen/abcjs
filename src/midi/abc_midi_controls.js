@@ -244,7 +244,11 @@ var midi = {};
 	}
 
 	function setMidiCallback(midiJsListener) {
-		MIDI.player.setAnimation(midiJsListener);
+		if(midiJsListener) {
+			MIDI.player.setAnimation(midiJsListener);
+		} else {
+			MIDI.player.clearAnimation();
+		}
 	}
 
 	function jumpToMidiPosition(play, offset, width) {
@@ -340,11 +344,13 @@ var midi = {};
 			if (midiControl) {
 				var startButton = find(midiControl, 'abcjs-midi-start');
 				if (hasClass(startButton, 'abcjs-loaded')) {
-					var progressBackground = find(midiControl, "abcjs-midi-progress-background");
-					var totalWidth = progressBackground.offsetWidth;
-					var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
-					var scaled = totalWidth * lastNow; // The number of pixels
-					progressIndicator.style.left = scaled + "px";
+					if(!isIndicatorPressed) {
+						var progressBackground = find(midiControl, "abcjs-midi-progress-background");
+						var totalWidth = progressBackground.offsetWidth;
+						var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
+						var scaled = totalWidth * lastNow; // The number of pixels
+						progressIndicator.style.left = scaled + "px";
+					}
 					var clock = find(midiControl, "abcjs-midi-clock");
 					if (clock) {
 						var seconds = Math.floor(position.currentTime);
@@ -573,6 +579,8 @@ var midi = {};
 		el.innerHTML = Math.floor(percent * startTempo / 100);
 		setTimeWarp(percent);
 	}
+	var isIndicatorPressed = false;
+	var dragIndicator, dragParent;
 
 	function addDelegates() {
 		document.body.addEventListener("click", function(event) {
@@ -607,6 +615,37 @@ var midi = {};
 				target = target.parentNode;
 			}
 		});
+
+		document.body.addEventListener("mousedown", function(event) {
+			event = event || window.event;
+			var target = event.target || event.srcElement;
+			if (hasClass(target, 'abcjs-midi-progress-indicator')) {
+				dragIndicator = target;
+				isIndicatorPressed = true;
+				dragParent = closest(target, 'abcjs-midi-progress-background');
+			}
+		});
+
+
+		document.addEventListener('mousemove', function(event) {
+			event.preventDefault();
+			if (isIndicatorPressed) {
+				event = event || window.event;
+				const pos = relMouseX(dragParent, event);
+				dragIndicator.style.left = pos + 'px';
+			}
+		}, true);
+
+		document.body.addEventListener("mouseup", function(event) {
+			event = event || window.event;
+			if(isIndicatorPressed) {
+				event.preventDefault();
+				isIndicatorPressed = false;
+				dragIndicator = null;
+				dragParent = null;
+			}
+		});
+
 		if (window.MIDI === undefined) {
 			midi.midiInlineInitialized = 'not loaded';
 			var els = document.getElementsByClassName('abcjs-inline-midi');
