@@ -137,6 +137,11 @@ var midi = {};
 		soundfontUrl = url;
 	};
 
+	var interactiveProgressBar = true;
+	midi.setInteractiveProgressBar = function(interactive) {
+		interactiveProgressBar = interactive;
+	};
+
 	function hasClass(element, cls) {
 		if (!element)
 			return false;
@@ -600,7 +605,9 @@ var midi = {};
 					onReset(target, event);
 					return;
 				} else if (hasClass(target, 'abcjs-midi-progress-background')) {
-					onProgress(target, event);
+					if(interactiveProgressBar) {
+						onProgress(target, event);
+					}
 					return;
 				}
 				target = target.parentNode;
@@ -619,13 +626,14 @@ var midi = {};
 		document.body.addEventListener("mousedown", function(event) {
 			event = event || window.event;
 			var target = event.target || event.srcElement;
-			if (hasClass(target, 'abcjs-midi-progress-indicator')) {
-				dragIndicator = target;
-				isIndicatorPressed = true;
-				dragParent = closest(target, 'abcjs-midi-progress-background');
+			if(interactiveProgressBar) {
+				if (hasClass(target, 'abcjs-midi-progress-indicator')) {
+					dragIndicator = target;
+					isIndicatorPressed = true;
+					dragParent = closest(target, 'abcjs-midi-progress-background');
+				}
 			}
 		});
-
 
 		document.addEventListener('mousemove', function(event) {
 			event.preventDefault();
