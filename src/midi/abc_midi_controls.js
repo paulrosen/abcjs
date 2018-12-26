@@ -264,10 +264,10 @@ var midi = {};
 		MIDI.player.currentTime = endTime * ratio;
 		if (play)
 			startCurrentlySelectedTune();
-		else {
-			const { currentTime, duration } = MIDI.player;
-			const progress = currentTime/duration;
-			midiJsListener({ currentTime, duration, progress });
+		else if (midiJsListener) {
+			var ret = MIDI.player;
+			var progress = ret.currentTime/ret.duration;
+			midiJsListener({ currentTime: ret.currentTime, duration: ret.duration, progress: progress });
 		}
 	}
 
@@ -639,7 +639,7 @@ var midi = {};
 			event.preventDefault();
 			if (isIndicatorPressed) {
 				event = event || window.event;
-				const pos = relMouseX(dragParent, event);
+				var pos = relMouseX(dragParent, event);
 				dragIndicator.style.left = pos + 'px';
 			}
 		}, true);
