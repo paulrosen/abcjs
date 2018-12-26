@@ -208,7 +208,10 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
 	var widths = engraver_controller.getMeasureWidths(tune);
 
 	var ret = wrap.calcLineWraps(tune, widths, abcString, params, Parse, engraver_controller);
-	renderOne(div, ret.tune, ret.revisedParams, tuneNumber);
+    if (!params.oneSvgPerLine || tune.lines.length < 2)
+        renderOne(div, ret.tune, ret.revisedParams, tuneNumber);
+    else
+        renderEachLineSeparately(div, ret.tune, ret.revisedParams, tuneNumber);
 	ret.tune.explanation = ret.explanation;
 	return ret.tune;
 }
