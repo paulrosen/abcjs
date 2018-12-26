@@ -1,3 +1,23 @@
+# Version 5.6.0
+
+## Features:
+
+* Enable progress indicator dragging
+
+* Clicks on progress bar now move the indicator correctly 
+    
+## Bug fixes:
+
+* Fix the title (with unicode chars) in the downloadable MIDI file.
+
+* In midi, sort program changes before other events that happen at the same time.
+
+* Fix crash when calculating the title for a piece with a missing voice.
+
+* Fix bug where wrapping code was ignoring one SVG per line.
+
+* Fix off-by-one error when calculating line widths during wrapping.
+
 # Version 5.5.0
 
 ## Features:
