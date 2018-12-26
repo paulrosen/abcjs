@@ -29,6 +29,7 @@ abcjs.midi = {
 	setLoop: midi.setLoop,
 	deviceSupportsMidi: midi.deviceSupportsMidi,
 	setRandomProgress: midi.setRandomProgress,
+	setInteractiveProgressBar: midi.setInteractiveProgressBar
 };
 
 module.exports = abcjs;

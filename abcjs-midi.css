@@ -76,12 +76,12 @@
 	content: "\f04c"; /*   fa-play [&#xf04b;]    fa-pause [&#xf04c;] */
 }
 
-.abcjs-inline-midi .abcjs-midi-start.abcjs-pushed.abcjs-loading {
+.abcjs-inline-midi .abcjs-midi-start.abcjs-loading {
 	outline: none;
 	animation: a 1s infinite steps(8);
 }
 
-.abcjs-inline-midi .abcjs-midi-start.abcjs-pushed.abcjs-loading:before {
+.abcjs-inline-midi .abcjs-midi-start.abcjs-loading:before {
 	content: "\f110"; /*   fa-loading */
 }
 
