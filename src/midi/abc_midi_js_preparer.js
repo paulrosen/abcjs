@@ -194,6 +194,11 @@ var Preparer;
 	function sortTracks(output) {
 		return output.sort(function(a,b) {
 			if (a.absTime > b.absTime) return 1;
+			if (a.absTime === b.absTime) {
+				var bIsPreferred = (b[0] && b[0].event && b[0].event.subtype === "programChange");
+				if (bIsPreferred)
+					return 1;
+			}
 			return -1;
 		});
 	}
