@@ -208,7 +208,7 @@ function getVariance(widths, lineBreaks) {
 	var largestVariance = 0;
 	var measureNumber = 0;
 	for (var i = 0; i <= lineBreaks.length; i++) {
-		var breakMeasure = (i === lineBreaks.length) ? widths.measureWidths.length : lineBreaks[i];
+		var breakMeasure = (i === lineBreaks.length) ? widths.measureWidths.length-1 : lineBreaks[i];
 		var thisVariance = lineVariance(widths.measureWidths, measureNumber, breakMeasure, avg);
 		measureNumber = breakMeasure+1;
 		largestVariance = Math.max(largestVariance, thisVariance);
@@ -243,7 +243,7 @@ function lineVariance(widths, start, end, avg) {
 
 function lineWidth(widths, start, end) {
 	var thisTotal = 0;
-	for (var j = start; j < end; j++)
+	for (var j = start; j <= end; j++)
 		thisTotal += widths[j];
 	return thisTotal;
 }
