@@ -226,10 +226,13 @@ var Tune = function() {
 					if (staff.title) {
 						var hasATitle = false;
 						for (var k = 0; k < staff.title.length; k++) {
+							if (staff.title[k]) {
 							staff.title[k] = (firstMusicLine) ? staff.title[k].name : staff.title[k].subname;
 							if (staff.title[k])
 								hasATitle = true;
 							else
+									staff.title[k] = '';
+							} else
 								staff.title[k] = '';
 						}
 						if (!hasATitle)
