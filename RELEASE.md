@@ -1,3 +1,7 @@
+# Version 5.6.1
+
+* Fix bug where wrapping code was ignoring one SVG per line.
+
 # Version 5.6.0
 
 ## Features:
