@@ -727,7 +727,7 @@ Renderer.prototype.getTextSize = function(text, type, klass) {
 	var size = this.paper.getTextSize(text, hash.attr);
 	if (hash.font.box) {
 		size.height += 8;
-		// TODO-PER: Shouldn't the width also be increased here?
+		size.width += 8;
 	}
 	return size;
 };
@@ -748,13 +748,17 @@ Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, center
 	text = text.replace(/\n\n/g, "\n \n");
 	text = text.replace(/^\n/, "\xA0\n");
 
+	if (hash.font.box) {
+		hash.attr.x += 2;
+		hash.attr.y += 4;
+	}
 	var el = this.paper.text(text, hash.attr);
 
 	if (hash.font.box) {
 		var size = el.getBBox();
 		var padding = 2;
 		var margin = 2;
-		this.paper.rect({ x: size.x - padding, y: size.y + padding, width: size.width + padding*2, height: size.height + padding*2 - margin,  stroke: "#888888", fill: "transparent"});
+		this.paper.rect({ x: size.x - padding, y: size.y, width: size.width + padding*2, height: size.height + padding*2 - margin,  stroke: "#888888", fill: "transparent"});
 		//size.height += 8;
 	}
 	if (this.doRegression) this.addToRegression(el);
@@ -781,6 +785,11 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 		var bb = el.getBBox(); // This can return NaN if the element isn't visible.
 		var width = isNaN(bb.width) ? 0 : bb.width;
 		var height = isNaN(bb.height) ? 0 : bb.height;
+		var hash = this.getFontAndAttr(kind, klass);
+		if (hash.font.box) {
+			width += 8;
+			height += 8;
+		}
 		if (marginBottom !== null) {
 			var numLines = str.split("\n").length;
 			if (!isNaN(bb.height))
