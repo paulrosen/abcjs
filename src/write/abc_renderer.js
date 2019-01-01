@@ -340,23 +340,37 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 	this.noteNumber = null;
 	this.voiceNumber = null;
 
-	var extraText;
 	if (abctune.metaText.unalignedWords) {
-		extraText = "";
+		var hash = this.getFontAndAttr("wordsfont", 'meta-bottom');
+		var space = this.getTextSize("i", 'wordsfont', 'meta-bottom');
+
+		if (abctune.metaText.unalignedWords.length > 0)
+			this.moveY(this.spacing.words, 1);
 		for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
-			if (typeof abctune.metaText.unalignedWords[j] === 'string')
-				extraText += abctune.metaText.unalignedWords[j] + "\n";
-			else {
+			if (typeof abctune.metaText.unalignedWords[j] === 'string') {
+				this.outputTextIf(this.padding.left + spacing.INDENT, abctune.metaText.unalignedWords[j], 'wordsfont', 'meta-bottom', 0, 0, "start");
+			} else {
+				var largestY = 0;
+				var offsetX = 0;
 				for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
-					extraText += " FONT " + abctune.metaText.unalignedWords[j][k].text;
+					var type = (abctune.metaText.unalignedWords[j][k].font) ? abctune.metaText.unalignedWords[j][k].font : "wordsfont";
+					var el = this.renderText(this.padding.left + spacing.INDENT + offsetX, this.y, abctune.metaText.unalignedWords[j][k].text, type, 'meta-bottom', false);
+					var size = el.getBBox();
+					largestY = Math.max(largestY, size.height);
+					offsetX += size.width;
+					// If the phrase ends in a space, then that is not counted in the width, so we need to add that in ourselves.
+					if (abctune.metaText.unalignedWords[j][k].text[abctune.metaText.unalignedWords[j][k].text.length-1] === ' ') {
+						offsetX += space.width;
+					}
 				}
-				extraText += "\n";
+				this.moveY(largestY, 1);
 			}
 		}
-		this.outputTextIf(this.padding.left + spacing.INDENT, extraText, 'wordsfont', 'meta-bottom', this.spacing.words, 2, "start");
+		if (abctune.metaText.unalignedWords.length > 0)
+			this.moveY(hash.font.size, 2);
 	}
 
-	extraText = "";
+	var extraText = "";
 	if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
 	if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
 	if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
@@ -708,12 +722,16 @@ Renderer.prototype.addClasses = function (c, isNote) {
 };
 
 Renderer.prototype.getFontAndAttr = function(type, klass) {
-	var font = this.abctune.formatting[type];
-	// Raphael deliberately changes the font units to pixels for some reason, so we need to change points to pixels here.
-	if (font)
-		font = { face: font.face, size: font.size*4/3, decoration: font.decoration, style: font.style, weight: font.weight, box: font.box };
-	else
-		font = { face: "Arial", size: 12*4/3, decoration: "underline", style: "normal", weight: "normal" };
+	var font;
+	if (typeof type === 'string') {
+		font = this.abctune.formatting[type];
+		// Raphael deliberately changes the font units to pixels for some reason, so we need to change points to pixels here.
+		if (font)
+			font = {face: font.face, size: font.size * 4 / 3, decoration: font.decoration, style: font.style, weight: font.weight, box: font.box};
+		else
+			font = {face: "Arial", size: 12 * 4 / 3, decoration: "underline", style: "normal", weight: "normal"};
+	} else
+		font = {face: type.face, size: type.size * 4 / 3, decoration: type.decoration, style: type.style, weight: type.weight, box: type.box};
 
 	var attr = {"font-size": font.size, 'font-style': font.style,
 		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
