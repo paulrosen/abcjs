@@ -76,7 +76,7 @@ var Parse = function() {
 			this.textBlock = "";
 			this.score_is_present = false;	// Can't have original V: lines when there is the score directive
 			this.inEnding = false;
-			this.inTie = false;
+			this.inTie = [false];
 			this.inTieChord = {};
 			this.vocalPosition = "auto";
 			this.dynamicPosition = "auto";
@@ -1103,6 +1103,7 @@ var Parse = function() {
 		}
 		var el = { };
 
+		var overlayLevel = 0;
 		while (i < line.length)
 		{
 			var startI = i;
@@ -1159,6 +1160,7 @@ var Parse = function() {
 					if (ret[0] > 0) {
 						tune.appendElement('overlay', startOfLine, startOfLine+1, {});
 						i += 1;
+						overlayLevel++;
 					}
 
 					ret = letter_to_chord(line, i);
@@ -1221,6 +1223,7 @@ var Parse = function() {
 				ret = letter_to_bar(line, i);
 				if (ret[0] > 0) {
 					// This is definitely a bar
+					overlayLevel = 0;
 					if (el.gracenotes !== undefined) {
 						// Attach the grace note to an invisible note
 						el.rest = { type: 'spacer' };
@@ -1363,9 +1366,9 @@ var Parse = function() {
 										multilineVars.next_note_duration = 0;
 									}
 
-									if (multilineVars.inTie) {
+									if (multilineVars.inTie[overlayLevel]) {
 										parseCommon.each(el.pitches, function(pitch) { pitch.endTie = true; });
-										multilineVars.inTie = false;
+										multilineVars.inTie[overlayLevel] = false;
 									}
 
 									if (tripletNotesLeft > 0) {
@@ -1387,7 +1390,7 @@ var Parse = function() {
 												break;
 											case '-':
 												parseCommon.each(el.pitches, function(pitch) { pitch.startTie = {}; });
-												multilineVars.inTie = true;
+												multilineVars.inTie[overlayLevel] = true;
 												break;
 											case '>':
 											case '<':
@@ -1450,7 +1453,7 @@ var Parse = function() {
 						// Single pitch
 						var el2 = {};
 						var core = getCoreNote(line, i, el2, true);
-						if (el2.endTie !== undefined) multilineVars.inTie = true;
+						if (el2.endTie !== undefined) multilineVars.inTie[overlayLevel] = true;
 						if (core !== null) {
 							if (core.pitch !== undefined) {
 								el.pitches = [ { } ];
@@ -1479,17 +1482,17 @@ var Parse = function() {
 							if (core.decoration !== undefined) el.decoration = core.decoration;
 							if (core.graceNotes !== undefined) el.graceNotes = core.graceNotes;
 							delete el.startSlur;
-							if (multilineVars.inTie) {
+							if (multilineVars.inTie[overlayLevel]) {
 								if (el.pitches !== undefined) {
 									el.pitches[0].endTie = true;
-									multilineVars.inTie = false;
+									multilineVars.inTie[overlayLevel] = false;
 								} else if (el.rest.type !== 'spacer') {
 									el.rest.endTie = true;
-									multilineVars.inTie = false;
+									multilineVars.inTie[overlayLevel] = false;
 								}
 							}
 							if (core.startTie || el.startTie)
-								multilineVars.inTie = true;
+								multilineVars.inTie[overlayLevel] = true;
 							i  = core.endChar;
 
 							if (tripletNotesLeft > 0) {
