@@ -636,9 +636,9 @@ var midi = {};
 		});
 
 		document.addEventListener('mousemove', function(event) {
-			event.preventDefault();
 			if (isIndicatorPressed) {
 				event = event || window.event;
+				event.preventDefault();
 				var pos = relMouseX(dragParent, event);
 				dragIndicator.style.left = pos + 'px';
 			}
