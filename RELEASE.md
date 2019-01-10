@@ -1,4 +1,28 @@
+# Version 5.6.2
+
+## Features:
+
+* Add more chord definitions.
+
+* Support changing fonts in W: statements using $1 syntax.
+
+## Bug fixes:
+
+* Don't attach midi control listeners to the global object.
+
+* Fix some midi control visual issues.
+
+* Fix mousemove listener in the midi control, we want to consume only our events.
+
+* Sort the events for midi creation more deterministically.
+
+* Fix handling ties over a bar line when there is an overlay.
+
+* Adjust text a little when there is a box around it to be centered better.
+
 # Version 5.6.1
+
+## Bug fixes:
 
 * Fix bug where wrapping code was ignoring one SVG per line.
 
