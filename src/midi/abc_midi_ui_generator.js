@@ -58,6 +58,8 @@ var abcMidiUiGenerator;
 				engravingEl.innerHTML += inlineMidiHtml;
 				inlineDiv = engravingEl;
 			}
+			midi.attachListeners(inlineMidiEl);
+
 			if (abcjsParams.animate || abcjsParams.midiListener) {
 				for (i = 0; i < tunes.length; i++) {
 					var parent = find(inlineDiv, "abcjs-midi-" + i);

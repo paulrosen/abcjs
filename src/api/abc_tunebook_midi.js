@@ -67,6 +67,8 @@ var renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
             html += midi.generateMidiDownloadLink(tune, params, downloadMidi, index);
         }
         div.innerHTML = html;
+        if (params.generateInline)
+	        midi.attachListeners(div);
         var find = function(element, cls) {
             var els = element.getElementsByClassName(cls);
             if (els.length === 0)
