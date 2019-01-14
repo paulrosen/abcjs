@@ -272,6 +272,29 @@ var Decoration;
 		return hasOne;
 	};
 
+	function leftDecoration(decoration, abselem, roomtaken) {
+		for (var i=0;i<decoration.length; i++) {
+			switch (decoration[i]) {
+				case "arpeggio":
+					// The arpeggio symbol is the height of a note (that is, two Y units). This stacks as many as we need to go from the
+					// top note to the bottom note. The arpeggio should also be a little taller than the stacked notes, so there is an extra
+					// one drawn and it is offset by half of a note height (that is, one Y unit).
+					for (var j = abselem.abcelem.minpitch - 1; j <= abselem.abcelem.maxpitch; j += 2) {
+						abselem.addExtra(
+							new RelativeElement(
+								"scripts.arpeggio",
+								-glyphs.getSymbolWidth("scripts.arpeggio")*2 - roomtaken,
+								0,
+								j+2,
+								{klass: 'ornament', thickness: glyphs.symbolHeightInPitches("scripts.arpeggio")}
+							)
+						);
+					}
+					break;
+			}
+		}
+	}
+
 	Decoration.prototype.dynamicDecoration = function(voice, decoration, abselem, positioning) {
 		var diminuendo;
 		var crescendo;
@@ -320,6 +343,7 @@ var Decoration;
 		if (hasOne) {
 //			abselem.top = Math.max(yPos.above + 3, abselem.top); // TODO-PER: Not sure why we need this fudge factor.
 		}
+		leftDecoration(decoration, abselem, roomtaken);
 	};
 
 })();
