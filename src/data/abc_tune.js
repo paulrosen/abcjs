@@ -89,6 +89,7 @@ var Tune = function() {
 
 	this.getPickupLength = function() {
 		var pickupLength = 0;
+		var barLength = this.getBarLength();
 		for (var i = 0; i < this.lines.length; i++) {
 			if (this.lines[i].staff) {
 				for (var j = 0; j < this.lines[i].staff.length; j++) {
@@ -96,10 +97,11 @@ var Tune = function() {
 						var voice = this.lines[i].staff[j].voices[v];
 						var hasNote = false;
 						for (var el = 0; el < voice.length; el++) {
-							if (voice[el].duration)
+							var isSpacer = voice[el].rest && voice[el].rest.type === "spacer";
+							if (voice[el].duration && !isSpacer)
 								pickupLength += voice[el].duration;
-							if (pickupLength >= this.getBarLength())
-								pickupLength -= this.getBarLength();
+							if (pickupLength >= barLength)
+								pickupLength -= barLength;
 							if (voice[el].el_type === 'bar')
 								return pickupLength;
 						}
