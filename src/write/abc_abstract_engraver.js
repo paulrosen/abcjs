@@ -69,9 +69,11 @@ AbstractEngraver = function(bagpipes, renderer, tuneNumber) {
 AbstractEngraver.prototype.reset = function() {
 	this.slurs = {};
 	this.ties = [];
+	this.voiceScale = 1;
 	this.slursbyvoice = {};
 	this.tiesbyvoice = {};
 	this.endingsbyvoice = {};
+	this.scaleByVoice = {};
 	this.tripletmultiplier = 1;
 
 	this.abcline = undefined;
@@ -97,12 +99,15 @@ AbstractEngraver.prototype.pushCrossLineElems = function(s,v) {
   this.slursbyvoice[this.getCurrentVoiceId(s,v)] = this.slurs;
   this.tiesbyvoice[this.getCurrentVoiceId(s,v)] = this.ties;
   this.endingsbyvoice[this.getCurrentVoiceId(s,v)] = this.partstartelem;
+  this.scaleByVoice[this.getCurrentVoiceId(s,v)] = this.voiceScale;
 };
 
 AbstractEngraver.prototype.popCrossLineElems = function(s,v) {
   this.slurs = this.slursbyvoice[this.getCurrentVoiceId(s,v)] || {};
   this.ties = this.tiesbyvoice[this.getCurrentVoiceId(s,v)] || [];
   this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId(s,v)];
+  this.voiceScale = this.scaleByVoice[this.getCurrentVoiceId(s,v)];
+  if (this.voiceScale === undefined) this.voiceScale = 1;
 };
 
 	AbstractEngraver.prototype.containsLyrics = function(staves) {
@@ -338,6 +343,9 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 	  case "midi":
 		// This has no effect on the visible music, so just skip it.
 		break;
+	  case "scale":
+	  	this.voiceScale = elem.size;
+	  	break;
 
   default:
     var abselem2 = new AbsoluteElement(elem,0,0, 'unsupported', this.tuneNumber);
@@ -364,7 +372,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 	AbstractEngraver.prototype.calcBeamDir = function (isSingleLineStaff, voice, elems) {
 		if (this.stemdir) // If the user or voice is forcing the stem direction, we already know the answer.
 			return this.stemdir;
-		var beamelem = new BeamElem(this.stemHeight, this.stemdir);
+		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir);
 		for (var i = 0; i < elems.length; i++) {
 			beamelem.add({abcelem: elems[i]}); // This is a hack to call beam elem with just a minimum of processing: for our purposes, we don't need to construct the whole note.
 		}
@@ -377,7 +385,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		var abselemset = [];
 
 		var dir = this.calcBeamDir(isSingleLineStaff, voice, elems);
-		var beamelem = new BeamElem(this.stemHeight, dir);
+		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, dir);
 		if (hint) beamelem.setHint();
 		var oldDir = this.stemdir;
 		this.stemdir = dir;
@@ -459,7 +467,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 
 			flag = (gracebeam) ? null : chartable.uflags[(isBagpipes) ? 5 : 3];
 			var accidentalSlot = [];
-			var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale, accidentalSlot);
+			var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale*this.voiceScale, accidentalSlot);
 			var grace = ret.notehead;
 			this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up");
 
@@ -499,7 +507,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 		return roomtaken;
 	};
 
-	function addRestToAbsElement(abselem, elem, duration, dot, isMultiVoice, stemdir, isSingleLineStaff, durlog) {
+	function addRestToAbsElement(abselem, elem, duration, dot, isMultiVoice, stemdir, isSingleLineStaff, durlog, voiceScale) {
 		var c;
 		var restpitch = 7;
 		var noteHead;
@@ -556,7 +564,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				abselem.addExtra(numMeasures);
 		}
 		if (elem.rest.type !== "multimeasure") {
-			var ret = createNoteHead(abselem, c, {verticalPos: restpitch}, null, 0, 0, null, dot, 0, 1, []);
+			var ret = createNoteHead(abselem, c, {verticalPos: restpitch}, null, 0, 0, null, dot, 0, voiceScale, []);
 			noteHead = ret.notehead;
 			if (noteHead) {
 				abselem.addHead(noteHead);
@@ -669,7 +677,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			}
 
 			var hasStem = !nostem && durlog<=-1;
-			var ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomTaken, flag, dot, dotshiftx, 1, accidentalSlot);
+			var ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomTaken, flag, dot, dotshiftx, this.voiceScale, accidentalSlot);
 			symbolWidth = Math.max(glyphs.getSymbolWidth(c), symbolWidth);
 			abselem.extraw -= ret.extraLeft;
 			noteHead = ret.notehead;
@@ -686,10 +694,11 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 
 		// draw stem from the furthest note to a pitch above/below the stemmed note
 		if (hasStem) {
-			var p1 = (dir==="down") ? elem.minpitch-7 : elem.minpitch+1/3;
+			var stemHeight = 7 * this.voiceScale;
+			var p1 = (dir==="down") ? elem.minpitch-stemHeight : elem.minpitch+1/3;
 			// PER added stemdir test to make the line meet the note.
 			if (p1>6 && !stemdir) p1=6;
-			var p2 = (dir==="down") ? elem.maxpitch-1/3 : elem.maxpitch+7;
+			var p2 = (dir==="down") ? elem.maxpitch-1/3 : elem.maxpitch+stemHeight;
 			// PER added stemdir test to make the line meet the note.
 			if (p2<6 && !stemdir) p2=6;
 			var dx = (dir==="down" || abselem.heads.length === 0)?0:abselem.heads[0].w;
@@ -702,6 +711,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 					p1 += 1;
 			}
 			abselem.addExtra(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+			//var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 			min = Math.min(p1, p2);
 		}
 		return { noteHead: noteHead, roomTaken: roomTaken, roomTakenRight: roomTakenRight, min: min, additionalLedgers: additionalLedgers, dir: dir, symbolWidth: symbolWidth };
@@ -798,7 +808,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   if (hint) abselem.setHint();
 
   if (elem.rest) {
-	  var ret1 = addRestToAbsElement(abselem, elem, duration, dot, voice.voicetotal > 1, this.stemdir, isSingleLineStaff, durlog);
+	  var ret1 = addRestToAbsElement(abselem, elem, duration, dot, voice.voicetotal > 1, this.stemdir, isSingleLineStaff, durlog, this.voiceScale);
 	  notehead = ret1.noteHead;
 	  roomtaken = ret1.roomTaken;
 	  roomtakenright = ret1.roomTakenRight;
@@ -819,7 +829,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   }
 
   if (elem.gracenotes !== undefined) {
-	roomtaken += this.addGraceNotes(elem, voice, abselem, notehead, this.stemHeight, this.isBagpipes, roomtaken);
+	roomtaken += this.addGraceNotes(elem, voice, abselem, notehead, this.stemHeight * this.voiceScale, this.isBagpipes, roomtaken);
   }
 
   if (elem.decoration) {
@@ -855,7 +865,6 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 
 
 var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot) {
-
   // TODO scale the dot as well
   var pitch = pitchelem.verticalPos;
   var notehead;
@@ -877,7 +886,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
     notehead = new RelativeElement(c, shiftheadx, glyphs.getSymbolWidth(c)*scale, pitch, opts);
     if (flag) {
       var pos = pitch+((dir==="down")?-7:7)*scale;
-      if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;
+      //if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;
       var xdelta = (dir==="down")?headx:headx+notehead.w-0.6;
       abselem.addRight(new RelativeElement(flag, xdelta, glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));
     }

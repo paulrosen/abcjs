@@ -667,6 +667,19 @@ var parseKeyVoice = {};
 			}
 			start += attr.len;
 		};
+		var getNextToken = function(name, type) {
+			var attr = tokenizer.getVoiceToken(line, start, end);
+			if (attr.warn !== undefined)
+				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
+			else if (attr.token.length === 0 && line.charAt(start) !== '"')
+				warn("Expected value for " + name + " in voice", line, start);
+			else {
+				if (type === 'number')
+					attr.token = parseFloat(attr.token);
+				return attr.token;
+			}
+			start += attr.len;
+		};
 		var addNextNoteTokenToVoiceInfo = function(id, name) {
 			var noteToTransposition = {
 				"_B": 2,
@@ -833,6 +846,13 @@ var parseKeyVoice = {};
 					case 'volume':
 						// TODO-PER: This is accepted, but not implemented, yet.
 						addNextTokenToVoiceInfo(id, 'volume', 'number');
+						break;
+					case 'cue':
+						// TODO-PER: This is accepted, but not implemented, yet.
+						var cue = getNextToken('cue', 'string');
+						if (cue === 'on')
+							multilineVars.voices[id].scale = 0.6;
+						else multilineVars.voices[id].scale = 1;
 						break;
 					case "style":
 						attr = tokenizer.getVoiceToken(line, start, end);

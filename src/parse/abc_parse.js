@@ -1156,13 +1156,6 @@ var Parse = function() {
 						i += ret[0];
 					}
 
-					ret = letter_to_overlay(line, i);
-					if (ret[0] > 0) {
-						tune.appendElement('overlay', startOfLine, startOfLine+1, {});
-						i += 1;
-						overlayLevel++;
-					}
-
 					ret = letter_to_chord(line, i);
 					if (ret[0] > 0) {
 						// There could be more than one chord here if they have different positions.
@@ -1281,8 +1274,12 @@ var Parse = function() {
 					// 		startNewLine();
 					// }
 				} else if (line[i] === '&') {	// backtrack to beginning of measure
-					warn("Overlay not yet supported", line, i);
-					i++;
+					ret = letter_to_overlay(line, i);
+					if (ret[0] > 0) {
+						tune.appendElement('overlay', startOfLine, startOfLine+1, {});
+						i += 1;
+						overlayLevel++;
+					}
 
 				} else {
 					// This is definitely a note group

@@ -826,6 +826,10 @@ var Tune = function() {
 //		}
 //		return false;
 //	},
+	this.changeVoiceScale = function(scale) {
+		var This = this;
+		This.appendElement('scale', null, null, { size: scale} );
+	};
 
 	this.startNewLine = function(params) {
 		// If the pointed to line doesn't exist, just create that. If the line does exist, but doesn't have any music on it, just use it.

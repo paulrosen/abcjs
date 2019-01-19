@@ -703,6 +703,15 @@ var parseDirective = {};
 			case "vocalspace":
 			case "wordsspace":
 				return oneParameterMeasurement(cmd, tokens);
+			case "voicescale":
+				if (tokens.length !== 1 || tokens[0].type !== 'number')
+					return "voicescale requires one float as a parameter";
+				var voiceScale = tokens.shift();
+				if (multilineVars.currentVoice) {
+					multilineVars.currentVoice.scale = voiceScale.floatt;
+					tune.changeVoiceScale(multilineVars.currentVoice.scale);
+				}
+				return null;
 			case "vskip":
 				var vskip = getRequiredMeasurement(cmd, tokens);
 				if (vskip.error)
