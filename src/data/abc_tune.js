@@ -96,10 +96,15 @@ var Tune = function() {
 					for (var v = 0; v < this.lines[i].staff[j].voices.length; v++) {
 						var voice = this.lines[i].staff[j].voices[v];
 						var hasNote = false;
+						var tripletMultiplier = 1;
 						for (var el = 0; el < voice.length; el++) {
 							var isSpacer = voice[el].rest && voice[el].rest.type === "spacer";
+							if (voice[el].startTriplet)
+								tripletMultiplier = voice[el].tripletMultiplier;
 							if (voice[el].duration && !isSpacer)
-								pickupLength += voice[el].duration;
+								pickupLength += voice[el].duration * tripletMultiplier;
+							if (voice[el].endTriplet)
+								tripletMultiplier = 1;
 							if (pickupLength >= barLength)
 								pickupLength -= barLength;
 							if (voice[el].el_type === 'bar')
