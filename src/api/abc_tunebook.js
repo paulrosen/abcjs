@@ -152,6 +152,70 @@ var tunebook = {};
 		return ret;
 	};
 
+	tunebook.extractMeasures = function(abc) {
+		var tunes = [];
+		var book = new TuneBook(abc);
+		for (var i = 0; i < book.tunes.length; i++) {
+			var tune = book.tunes[i];
+			var arr = tune.abc.split("K:");
+			var arr2 = arr[1].split("\n");
+			var header = arr[0] + "K:" + arr2[0] + "\n";
+			var lastChord = null;
+			var measureStartChord = null;
+			var fragStart = null;
+			var measures = [];
+			var hasNotes = false;
+			var tuneObj = tunebook.parseOnly(tune.abc)[0];
+			var hasPickup = tuneObj.getPickupLength() > 0;
+			for (var j = 0; j < tuneObj.lines.length; j++) {
+				var line = tuneObj.lines[j];
+				if (line.staff) {
+					for (var k = 0; k < line.staff.length; k++) {
+						var staff = line.staff[k];
+						for (var kk = 0; kk < staff.voices.length; kk++) {
+							var voice = staff.voices[kk];
+							for (var kkk = 0; kkk < voice.length; kkk++) {
+								var elem = voice[kkk];
+								if (fragStart === null && elem.startChar >= 0) {
+									fragStart = elem.startChar;
+									if (elem.chord === undefined)
+										measureStartChord = lastChord;
+									else
+										measureStartChord = null;
+								}
+								if (elem.chord)
+									lastChord = elem;
+								if (elem.el_type === 'bar') {
+									if (hasNotes) {
+										var frag = tune.abc.substring(fragStart, elem.endChar);
+										var measure = {abc: frag};
+										lastChord = measureStartChord && measureStartChord.chord && measureStartChord.chord.length > 0 ? measureStartChord.chord[0].name : null;
+										if (lastChord)
+											measure.lastChord = lastChord;
+										if (elem.startEnding)
+											measure.startEnding = elem.startEnding;
+										if (elem.endEnding)
+											measure.endEnding = elem.endEnding;
+										measures.push(measure);
+										fragStart = null;
+										hasNotes = false;
+									}
+								} else if (elem.el_type === 'note') {
+									hasNotes = true;
+								}
+							}
+						}
+					}
+				}
+			}
+			tunes.push({
+				header: header,
+				measures: measures,
+				hasPickup: hasPickup
+			});
+		}
+		return tunes;
+	};
 })();
 
 module.exports = tunebook;
