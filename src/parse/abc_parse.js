@@ -63,7 +63,7 @@ var Parse = function() {
 			this.start_new_line = true;
 			this.is_in_header = true;
 			this.is_in_history = false;
-			this.partForNextLine = "";
+			this.partForNextLine = {};
 			this.havent_set_length = true;
 			this.voices = {};
 			this.staves = [];
@@ -859,7 +859,7 @@ var Parse = function() {
 
 	function startNewLine() {
 		var params = { startChar: -1, endChar: -1};
-		if (multilineVars.partForNextLine.length)
+		if (multilineVars.partForNextLine.title)
 			params.part = multilineVars.partForNextLine;
 		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? parseCommon.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : parseCommon.clone(multilineVars.clef);
 		var scoreTranspose = multilineVars.currentVoice ? multilineVars.currentVoice.scoreTranspose : 0;
@@ -935,7 +935,7 @@ var Parse = function() {
 		if (multilineVars.key.impliedNaturals)
 			delete multilineVars.key.impliedNaturals;
 
-		multilineVars.partForNextLine = "";
+		multilineVars.partForNextLine = {};
 	}
 
 	var letter_to_grace =  function(line, i) {

@@ -893,7 +893,7 @@ var Tune = function() {
 			createVoice(params);
 			// Some stuff just happens for the first voice
 			if (params.part)
-				This.appendElement('part', params.startChar, params.endChar, {title: params.part});
+				This.appendElement('part', params.part.startChar, params.part.endChar, {title: params.part.title});
 			if (params.meter !== undefined) This.lines[This.lineNum].staff[This.staffNum].meter = params.meter;
 		};
 		var createLine = function(params) {
