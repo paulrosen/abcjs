@@ -645,7 +645,6 @@ var parseDirective = {};
 			//					dynalign: { type: "boolean", optional: true },
 			//					exprabove: { type: "boolean", optional: true },
 			//					exprbelow: { type: "boolean", optional: true },
-			//					flatbeams: { type: "boolean", optional: true },
 			//					gchordbox: { type: "boolean", optional: true },
 			//					graceslurs: { type: "boolean", optional: true },
 			//					gracespacebefore: { type: "number", optional: true },
@@ -666,6 +665,7 @@ var parseDirective = {};
 			//					stretchstaff: { type: "boolean", optional: true },
 			//					titleformat: { type: "string", optional: true },
 			case "bagpipes":tune.formatting.bagpipes = true;break;
+			case "flatbeams":tune.formatting.flatbeams = true;break;
 			case "landscape":multilineVars.landscape = true;break;
 			case "papersize":multilineVars.papersize = restOfString;break;
 			case "slurgraces":tune.formatting.slurgraces = true;break;

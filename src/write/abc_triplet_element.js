@@ -21,11 +21,12 @@ var TripletElem;
 (function() {
 	"use strict";
 
-	TripletElem = function TripletElem(number, anchor1) {
+	TripletElem = function TripletElem(number, anchor1, options) {
 		this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
 		this.number = number;
 		this.duration = (''+anchor1.parent.durationClass).replace(/\./, '-');
 		this.middleElems = []; // This is to calculate the highest interior pitch. It is used to make sure that the drawn bracket never crosses a really high middle note.
+		this.flatBeams = options.flatBeams;
 	};
 
 	TripletElem.prototype.isClosed = function() {
@@ -81,11 +82,16 @@ var TripletElem;
 					this.startNote = max;
 					this.endNote = max;
 				}
+				if (this.flatBeams) {
+					this.startNote = Math.max(this.startNote, this.endNote);
+					this.endNote = Math.max(this.startNote, this.endNote);
+				}
 
 				this.yTextPos = this.startNote + (this.endNote - this.startNote) / 2;
 			}
 		}
 		delete this.middleElems;
+		delete this.flatBeams;
 	};
 
 	TripletElem.prototype.draw = function(renderer) {

@@ -58,11 +58,12 @@ var hint = false;
 		dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}
 	};
 
-AbstractEngraver = function(bagpipes, renderer, tuneNumber) {
+AbstractEngraver = function(renderer, tuneNumber, options) {
 	this.decoration = new Decoration();
 	this.renderer = renderer;
 	this.tuneNumber = tuneNumber;
-  this.isBagpipes = bagpipes;
+	this.isBagpipes = options.bagpipes;
+	this.flatBeams = options.flatbeams;
 	this.reset();
 };
 
@@ -372,7 +373,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 	AbstractEngraver.prototype.calcBeamDir = function (isSingleLineStaff, voice, elems) {
 		if (this.stemdir) // If the user or voice is forcing the stem direction, we already know the answer.
 			return this.stemdir;
-		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir);
+		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams);
 		for (var i = 0; i < elems.length; i++) {
 			beamelem.add({abcelem: elems[i]}); // This is a hack to call beam elem with just a minimum of processing: for our purposes, we don't need to construct the whole note.
 		}
@@ -385,7 +386,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		var abselemset = [];
 
 		var dir = this.calcBeamDir(isSingleLineStaff, voice, elems);
-		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, dir);
+		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, dir, this.flatBeams);
 		if (hint) beamelem.setHint();
 		var oldDir = this.stemdir;
 		this.stemdir = dir;
@@ -851,7 +852,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 
 
   if (elem.startTriplet) {
-    this.triplet = new TripletElem(elem.startTriplet, notehead); // above is opposite from case of slurs
+    this.triplet = new TripletElem(elem.startTriplet, notehead, { flatBeams: this.flatBeams }); // above is opposite from case of slurs
   }
 
   if (elem.endTriplet && this.triplet) {
