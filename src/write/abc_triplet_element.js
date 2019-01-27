@@ -25,10 +25,15 @@ var TripletElem;
 		this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
 		this.number = number;
 		this.duration = (''+anchor1.parent.durationClass).replace(/\./, '-');
+		this.middleElems = []; // This is to calculate the highest interior pitch. It is used to make sure that the drawn bracket never crosses a really high middle note.
 	};
 
 	TripletElem.prototype.isClosed = function() {
 		return this.anchor2;
+	};
+
+	TripletElem.prototype.middleNote = function(elem) {
+		this.middleElems.push(elem);
 	};
 
 	TripletElem.prototype.setCloseAnchor = function(anchor2) {
@@ -61,11 +66,26 @@ var TripletElem;
 				// a tall note in the middle, the bracket is horizontal and above the highest note.
 				this.startNote = Math.max(this.anchor1.parent.top, 9) + 4;
 				this.endNote = Math.max(this.anchor2.parent.top, 9) + 4;
-				// TODO-PER: Do the case where the middle note is really high.
+				// If it starts or ends on a rest, make the beam horizontal
+				if (this.anchor1.parent.type === "rest" && this.anchor2.parent.type !== "rest")
+					this.startNote = this.endNote;
+				else if (this.anchor2.parent.type === "rest" && this.anchor1.parent.type !== "rest")
+					this.endNote = this.startNote;
+				// See if the middle note is really high.
+				var max = 0;
+				for (var i = 0; i < this.middleElems.length; i++) {
+					max = Math.max(max, this.middleElems[i].top);
+				}
+				max += 4;
+				if (max > this.startNote || max > this.endNote) {
+					this.startNote = max;
+					this.endNote = max;
+				}
+
 				this.yTextPos = this.startNote + (this.endNote - this.startNote) / 2;
 			}
-
 		}
+		delete this.middleElems;
 	};
 
 	TripletElem.prototype.draw = function(renderer) {

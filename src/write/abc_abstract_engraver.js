@@ -858,6 +858,11 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
     this.triplet.setCloseAnchor(notehead);
   }
 
+  if (this.triplet && !elem.startTriplet && !elem.endTriplet) {
+  	this.triplet.middleNote(notehead);
+  }
+
+
   return abselem;
 };
 
