@@ -20,6 +20,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `ABCJS.midi.setRandomProgress(percent)` | Moves the progress to whatever percent is passed in for whatever is currently playing. |
 | `ABCJS.midi.setLoop(targetEl, state)` | Sets the "loop" mode for the element passed in. State should be true or false. |
 | `new abcjs.TimingCallbacks(outputElement, timingParams)` | returns an object with the properties `start()`, `stop()`, `pause()`, `reset()`. This will cause callback functions to be called for each beat and for each note. (see timingParams for more details) |
+| `abcjs.extractMeasures(tunebookString);` | This returns an array of all the individual measures found in the music. |
 
 | Parameters | Description |
 | ------------- | ----------- |

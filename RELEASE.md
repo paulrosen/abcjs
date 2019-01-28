@@ -1,3 +1,27 @@
+# Version 5.6.3
+
+## Features:
+
+* Add arpeggio decoration. 
+
+* Add "voicescale" and "cue=on".
+
+* Add "%%flatbeams".
+
+* Add entry point for "extractMeasures()" to analyze the tune. (Just single voice music for now.)
+
+## Bug fixes:
+
+* Add startChar and endChar for many non-note elements (parts, clefs, tempos, etc.)
+
+* Fix triplet bracket placement when there are rests or really high notes.
+
+* Handle triplets correctly when figuring out the length of the pickup measure.
+
+* Don't count spacers when seeing if there are pickup notes in a tune.
+ 
+* Fix bug not recognizing an inline header after a "&".
+    
 # Version 5.6.2
 
 ## Features:
