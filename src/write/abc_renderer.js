@@ -394,7 +394,9 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
  * Output text defined with %%text.
  * @param {array or string} text
  */
-Renderer.prototype.outputFreeText = function (text) {
+Renderer.prototype.outputFreeText = function (text, vskip) {
+	if (vskip)
+		this.moveY(vskip);
 	if (text === "") {	// we do want to print out blank lines if they have been specified.
 		var hash = this.getFontAndAttr('textfont', 'defined-text');
 		this.moveY(hash.attr['font-size'] * 2); // move the distance of the line, plus the distance of the margin, which is also one line.
@@ -414,6 +416,14 @@ Renderer.prototype.outputFreeText = function (text) {
 		var x = isCentered ? this.controller.width / 2 : this.padding.left;
 		this.outputTextIf(x, str, 'textfont', 'defined-text', 0, 1, alignment);
 	}
+};
+
+Renderer.prototype.outputSeparator = function (separator) {
+	if (!separator.lineLength)
+		return;
+	this.moveY(separator.spaceAbove);
+	this.printSeparator(separator.lineLength);
+	this.moveY(separator.spaceBelow);
 };
 
 /**
@@ -828,6 +838,21 @@ Renderer.prototype.addInvisibleMarker = function (className) {
 	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
 		x2, y+dy, x1, y+dy);
 	this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, "fill-opacity": 0, 'class': this.addClasses(className), 'data-vertical': y });
+};
+
+Renderer.prototype.printSeparator = function(width) {
+	var fill = "rgba(0,0,0,255)";
+	var stroke = "rgba(0,0,0,0)";
+	var y = Math.round(this.y);
+	var staffWidth = this.controller.width;
+	var x1 = (staffWidth - width)/2;
+	var x2 = x1 + width;
+	var pathString = 'M ' + x1 + ' ' + y +
+		' L ' + x2 + ' ' + y +
+		' L ' + x2 + ' ' + (y+1) +
+		' L ' + x1 + ' ' + (y+1) +
+		' L ' + x1 + ' ' + y + ' z';
+	this.paper.pathToBack({path:pathString, stroke:stroke, fill:fill, 'class': this.addClasses('defined-text')});
 };
 
 // For debugging, it is sometimes useful to know where you are vertically.

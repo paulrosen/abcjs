@@ -349,8 +349,11 @@ var verticalLint = function(tunes) {
 	var positioning = [];
 	for (var i = 0; i < tunes.length; i++) {
 		for (var j = 0; j < tunes[i].lines.length; j++) {
-			if (tunes[i].lines[j].staffGroup)
+			var line = tunes[i].lines[j];
+			if (line.staffGroup)
 				positioning.push(extractPositioningInfo(tunes[i].lines[j].staffGroup, j));
+			else
+				positioning.push(JSON.stringify(line));
 		}
 	}
 	return positioning;

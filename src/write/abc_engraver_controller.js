@@ -239,7 +239,9 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 		} else if (abcLine.subtitle && line !== 0) {
 			this.renderer.outputSubtitle(this.width, abcLine.subtitle);
 		} else if (abcLine.text !== undefined) {
-			this.renderer.outputFreeText(abcLine.text);
+			this.renderer.outputFreeText(abcLine.text, abcLine.vskip);
+		} else if (abcLine.separator !== undefined) {
+			this.renderer.outputSeparator(abcLine.separator);
 		}
 	}
 
