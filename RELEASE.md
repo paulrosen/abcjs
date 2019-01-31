@@ -1,3 +1,15 @@
+# Version 5.6.4
+
+## Features:
+
+* Add %%vskip
+
+* Add %%sep
+
+## Bugs
+
+* Don't include the minified versions of the libraries in the npm package.
+
 # Version 5.6.3
 
 ## Features:
