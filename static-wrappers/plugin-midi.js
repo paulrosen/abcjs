@@ -1,5 +1,5 @@
 require('./license');
-const abcjs = {
+var abcjs = {
 	plugin: require('../src/plugin/abc_plugin_midi')
 };
 

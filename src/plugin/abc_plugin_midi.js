@@ -166,11 +166,11 @@ plugin.render = function (contextnode, abcstring) {
 	    var  abcDiv = document.createElement('DIV');
 	    abcDiv.className = self.render_classname;
 	    abcWrapper.appendChild(abcDiv);
-	    renderAbc(abcDiv, abcstring, {});
+	    renderAbc(abcDiv, abcstring, self.render_options);
       if (self.show_midi) {
 	      var midiDiv = document.createElement('DIV');
 	      abcWrapper.appendChild(midiDiv);
-        renderMidi(midiDiv, abcstring, {});
+        renderMidi(midiDiv, abcstring, self.render_options);
       }
     };
 
