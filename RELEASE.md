@@ -1,3 +1,19 @@
+# Version 5.6.5
+
+## Features:
+
+* Add random access seeking to TimingCallbacks.
+
+* Pass back more progress info in the beat callback of TimingCallbacks.
+
+## Bugs
+
+* Add render_options to the midi version of the plugin.
+
+* Add missing release files; remove the "latest" versions, since they were not kept up to date.
+
+* Updated build packages.
+
 # Version 5.6.4
 
 ## Features:

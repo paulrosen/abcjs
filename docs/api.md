@@ -19,7 +19,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `ABCJS.midi.restartPlaying()` | Moves the progress back to the beginning for whatever is currently playing. |
 | `ABCJS.midi.setRandomProgress(percent)` | Moves the progress to whatever percent is passed in for whatever is currently playing. |
 | `ABCJS.midi.setLoop(targetEl, state)` | Sets the "loop" mode for the element passed in. State should be true or false. |
-| `new abcjs.TimingCallbacks(outputElement, timingParams)` | returns an object with the properties `start()`, `stop()`, `pause()`, `reset()`. This will cause callback functions to be called for each beat and for each note. (see timingParams for more details) |
+| `new abcjs.TimingCallbacks(outputElement, timingParams)` | returns an object with the properties `start()`, `stop()`, `pause()`, `reset()`, `setProgress(percent)`. This will cause callback functions to be called for each beat and for each note. (see timingParams for more details) |
 | `abcjs.extractMeasures(tunebookString);` | This returns an array of all the individual measures found in the music. |
 
 | Parameters | Description |
@@ -301,7 +301,7 @@ The abcjs plugin renders all the abc in a page (determined as a new line beginni
 To use, simply include the plugin version in the page:
 
 ```html
-<script src="abcjs_plugin_5.6.4-min.js" type="text/javascript"></script>
+<script src="abcjs_plugin_5.6.5-min.js" type="text/javascript"></script>
 ```
 
 Certain options for the plugin can be changed like this, if executed on page load, just after including the plugin file:
