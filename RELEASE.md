@@ -1,3 +1,9 @@
+# Version 5.6.6
+
+## Bugs
+
+* Calculate the correct number of beats in TimingCallbacks: fixes rounding error.
+
 # Version 5.6.5
 
 ## Features:

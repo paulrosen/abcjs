@@ -12,8 +12,8 @@
     "build:midi": "webpack --env.type=midi",
     "build:plugin": "webpack --env.type=plugin",
     "build:plugin-midi": "webpack --env.type=plugin-midi",
-    "build:grease": "cat src/plugin/greasemonkey.js bin/abcjs_plugin_5.6.5-min.js > bin/abcjs_plugin_5.6.5.user.js",
-    "fix-versions": "./fix-versions.sh 5.6.5",
+    "build:grease": "cat src/plugin/greasemonkey.js bin/abcjs_plugin_5.6.6-min.js > bin/abcjs_plugin_5.6.6.user.js",
+    "fix-versions": "./fix-versions.sh 5.6.6",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
