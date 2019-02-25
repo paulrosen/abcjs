@@ -31,7 +31,7 @@ var TimingCallbacks = function(target, params) {
 	self.noteTimings = target.noteTimings;
 	self.millisecondsPerBeat = 1000 / (self.qpm / 60);
 	self.lastMoment = self.noteTimings[self.noteTimings.length-1].milliseconds;
-	self.totalBeats = Math.floor(self.lastMoment / self.millisecondsPerBeat);
+	self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
 
 	self.startTime = null;
 	self.currentBeat = 0;
