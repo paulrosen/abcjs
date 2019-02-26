@@ -27,6 +27,7 @@ var createClef;
 		var clef;
 		var octave = 0;
 		var abselem = new AbsoluteElement(elem,0,10, 'staff-extra', tuneNumber);
+		abselem.isClef = true;
 		switch (elem.type) {
 			case "treble": clef = "clefs.G"; break;
 			case "tenor": clef="clefs.C"; break;

@@ -1,9 +1,9 @@
-const animation = require('./src/api/abc_animation');
-const tuneBook = require('./src/api/abc_tunebook');
+var animation = require('./src/api/abc_animation');
+var tuneBook = require('./src/api/abc_tunebook');
 
 var abcjs = {};
 
-abcjs.signature = "abcjs-basic v4.0.0";
+abcjs.signature = "abcjs-basic v5.6.6";
 
 Object.keys(animation).forEach(function (key) {
 	abcjs[key] = animation[key];
@@ -14,8 +14,9 @@ Object.keys(tuneBook).forEach(function (key) {
 });
 
 abcjs.renderAbc = require('./src/api/abc_tunebook_svg');
+abcjs.TimingCallbacks = require('./src/api/abc_timing_callbacks');
 
-const editor = require('./src/edit/abc_editor');
+var editor = require('./src/edit/abc_editor');
 abcjs['Editor'] = editor;
 
 module.exports = abcjs;

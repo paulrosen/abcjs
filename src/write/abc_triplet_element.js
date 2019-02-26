@@ -21,13 +21,20 @@ var TripletElem;
 (function() {
 	"use strict";
 
-	TripletElem = function TripletElem(number, anchor1) {
+	TripletElem = function TripletElem(number, anchor1, options) {
 		this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
 		this.number = number;
+		this.duration = (''+anchor1.parent.durationClass).replace(/\./, '-');
+		this.middleElems = []; // This is to calculate the highest interior pitch. It is used to make sure that the drawn bracket never crosses a really high middle note.
+		this.flatBeams = options.flatBeams;
 	};
 
 	TripletElem.prototype.isClosed = function() {
 		return this.anchor2;
+	};
+
+	TripletElem.prototype.middleNote = function(elem) {
+		this.middleElems.push(elem);
 	};
 
 	TripletElem.prototype.setCloseAnchor = function(anchor2) {
@@ -60,11 +67,31 @@ var TripletElem;
 				// a tall note in the middle, the bracket is horizontal and above the highest note.
 				this.startNote = Math.max(this.anchor1.parent.top, 9) + 4;
 				this.endNote = Math.max(this.anchor2.parent.top, 9) + 4;
-				// TODO-PER: Do the case where the middle note is really high.
+				// If it starts or ends on a rest, make the beam horizontal
+				if (this.anchor1.parent.type === "rest" && this.anchor2.parent.type !== "rest")
+					this.startNote = this.endNote;
+				else if (this.anchor2.parent.type === "rest" && this.anchor1.parent.type !== "rest")
+					this.endNote = this.startNote;
+				// See if the middle note is really high.
+				var max = 0;
+				for (var i = 0; i < this.middleElems.length; i++) {
+					max = Math.max(max, this.middleElems[i].top);
+				}
+				max += 4;
+				if (max > this.startNote || max > this.endNote) {
+					this.startNote = max;
+					this.endNote = max;
+				}
+				if (this.flatBeams) {
+					this.startNote = Math.max(this.startNote, this.endNote);
+					this.endNote = Math.max(this.startNote, this.endNote);
+				}
+
 				this.yTextPos = this.startNote + (this.endNote - this.startNote) / 2;
 			}
-
 		}
+		delete this.middleElems;
+		delete this.flatBeams;
 	};
 
 	TripletElem.prototype.draw = function(renderer) {
@@ -74,25 +101,25 @@ var TripletElem;
 			xTextPos = this.anchor1.parent.beam.xAtMidpoint(left, this.anchor2.x);
 		} else {
 			xTextPos = this.anchor1.x + (this.anchor2.x + this.anchor2.w - this.anchor1.x) / 2;
-			drawBracket(renderer, this.anchor1.x, this.startNote, this.anchor2.x + this.anchor2.w, this.endNote);
+			drawBracket(renderer, this.anchor1.x, this.startNote, this.anchor2.x + this.anchor2.w, this.endNote, this.duration);
 		}
-		renderer.renderText(xTextPos, renderer.calcY(this.yTextPos), "" + this.number, 'tripletfont', "triplet", "middle", true);
+		renderer.renderText(xTextPos, renderer.calcY(this.yTextPos), "" + this.number, 'tripletfont', renderer.addClasses('triplet d'+this.duration), "middle", true);
 	};
 
-	function drawLine(renderer, l, t, r, b) {
+	function drawLine(renderer, l, t, r, b, duration) {
 		var pathString = sprintf("M %f %f L %f %f",
 			l, t, r, b);
-		renderer.printPath({path: pathString, stroke: "#000000", 'class': renderer.addClasses('triplet')});
+		renderer.printPath({path: pathString, stroke: "#000000", 'class': renderer.addClasses('triplet d'+duration)});
 	}
 
-	function drawBracket(renderer, x1, y1, x2, y2) {
+	function drawBracket(renderer, x1, y1, x2, y2, duration) {
 		y1 = renderer.calcY(y1);
 		y2 = renderer.calcY(y2);
 		var bracketHeight = 5;
 
 		// Draw vertical lines at the beginning and end
-		drawLine(renderer, x1, y1, x1, y1 + bracketHeight);
-		drawLine(renderer, x2, y2, x2, y2 + bracketHeight);
+		drawLine(renderer, x1, y1, x1, y1 + bracketHeight, duration);
+		drawLine(renderer, x2, y2, x2, y2 + bracketHeight, duration);
 
 		// figure out midpoints to draw the broken line.
 		var midX = x1 + (x2-x1)/2;
@@ -101,10 +128,10 @@ var TripletElem;
 		var slope = (y2 - y1) / (x2 - x1);
 		var leftEndX = midX - gapWidth;
 		var leftEndY = y1 + (leftEndX - x1) * slope;
-		drawLine(renderer, x1, y1, leftEndX, leftEndY);
+		drawLine(renderer, x1, y1, leftEndX, leftEndY, duration);
 		var rightStartX = midX + gapWidth;
 		var rightStartY = y1 + (rightStartX - x1) * slope;
-		drawLine(renderer, rightStartX, rightStartY, x2, y2);
+		drawLine(renderer, rightStartX, rightStartY, x2, y2, duration);
 	}
 })();
 

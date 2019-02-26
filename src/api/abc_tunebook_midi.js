@@ -54,7 +54,7 @@ var renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
     if (params.inlineControls)
 	    params.inlineControls.selectionToggle = false; // Override the selection option because there is no selection in the Basic call.
 
-    function callback(div, tune, index) {
+    function callback(div, tune, index, abcString) {
         var html = "";
         var midiInst = midiCreate(tune, params);
         if (params.generateInline) {
@@ -67,6 +67,8 @@ var renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
             html += midi.generateMidiDownloadLink(tune, params, downloadMidi, index);
         }
         div.innerHTML = html;
+        if (params.generateInline)
+	        midi.attachListeners(div);
         var find = function(element, cls) {
             var els = element.getElementsByClassName(cls);
             if (els.length === 0)

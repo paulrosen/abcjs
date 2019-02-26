@@ -49,9 +49,12 @@ var rendererFactory;
 			//00 FF 5902 03 00 - key signature
 			//00 FF 5804 04 02 30 08 - time signature
 			if (name) {
-				this.track += "%00%FF%03" + toHex(name.length, 2);
+				// If there are multi-byte chars, we don't know how long the string will be until we create it.
+				var nameArray = "";
 				for (var i = 0; i < name.length; i++)
-					this.track += toHex(name.charCodeAt(i), 2);
+					nameArray += toHex(name.charCodeAt(i), 2);
+				this.track += "%00%FF%03" + toHex(nameArray.length/3, 2); // Each byte is represented by three chars "%XX", so divide by 3 to get the length.
+				this.track += nameArray;
 			}
 			this.endTrack();
 		}

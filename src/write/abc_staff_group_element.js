@@ -198,34 +198,42 @@ StaffGroupElement.prototype.finished = function() {
 	return true;
 };
 
-StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
-	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
-	this.spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
-	this.minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
+function getLeftEdgeOfStaff(renderer, voices, brace) {
 	var x = renderer.padding.left;
 
 	// find out how much space will be taken up by voice headers
 	var voiceheaderw = 0;
-	for (var i=0;i<this.voices.length;i++) {
-		if(this.voices[i].header) {
-			var size = renderer.getTextSize(this.voices[i].header, 'voicefont', '');
+	for (var i=0;i<voices.length;i++) {
+		if(voices[i].header) {
+			var size = renderer.getTextSize(voices[i].header, 'voicefont', '');
 			voiceheaderw = Math.max(voiceheaderw,size.width);
 		}
 	}
 	if (voiceheaderw) {
 		// Give enough spacing to the right - we use the width of an A for the amount of spacing.
 		var sizeW = renderer.getTextSize("A", 'voicefont', '');
-		x = x + voiceheaderw +sizeW.width;
+		voiceheaderw += sizeW.width;
 	}
+	x += voiceheaderw;
+
+	if (brace) {
+		brace.setLocation(x);
+		x += brace.getWidth();
+	}
+	return x;
+}
+
+StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
+	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
+	var spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
+	var minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
+
+	var x = getLeftEdgeOfStaff(renderer, this.voices, this.brace);
 	this.startx=x;
-	if (this.brace) {
-		this.brace.setLocation(this.startx);
-		x += this.brace.getWidth();
-		this.startx = x;
-	}
+	var i;
 
 	var currentduration = 0;
-	if (debug) console.log("init layout");
+	if (debug) console.log("init layout", spacing);
 	for (i=0;i<this.voices.length;i++) {
 		this.voices[i].beginLayout(x);
 	}
@@ -238,7 +246,6 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 			if (!this.voices[i].layoutEnded() && (!currentduration || this.voices[i].getDurationIndex()<currentduration))
 				currentduration=this.voices[i].getDurationIndex();
 		}
-		if (debug) console.log("currentduration: ",currentduration);
 
 
 		// isolate voices at current duration level
@@ -252,7 +259,7 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 				//console.log("out: voice ",i);
 			} else {
 				currentvoices.push(this.voices[i]);
-				if (debug) console.log("in: voice ",i);
+				//if (debug) console.log("in: voice ",i);
 			}
 		}
 
@@ -267,9 +274,9 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 				spacingduration = currentvoices[i].spacingduration;
 			}
 		}
-		//console.log("new spacingunit", spacingunit, this.spacingunits, "="+(spacingunit+ this.spacingunits));
-		this.spacingunits+=spacingunit;
-		this.minspace = Math.min(this.minspace,spacingunit);
+		spacingunits+=spacingunit;
+		minspace = Math.min(minspace,spacingunit);
+		if (debug) console.log("currentduration: ",currentduration, spacingunits, minspace);
 
 		for (i=0;i<currentvoices.length;i++) {
 			var voicechildx = currentvoices[i].layoutOneItem(x,spacing);
@@ -304,12 +311,13 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 		}
 	}
 	//console.log("greatest remaining",spacingunit,x);
-	this.spacingunits+=spacingunit;
+	spacingunits+=spacingunit;
 	this.w = x;
 
 	for (i=0;i<this.voices.length;i++) {
 		this.voices[i].w=this.w;
 	}
+	return { spacingUnits: spacingunits, minSpace: minspace };
 };
 
 StaffGroupElement.prototype.calcHeight = function () {
@@ -336,13 +344,13 @@ StaffGroupElement.prototype.draw = function (renderer) {
 	var debugPrint;
 	var colorIndex;
 	if (/*ABCJS.write.debugPlacement*/false) {
-		var colors = [ "rgba(207,27,36,0.4)", "rgba(168,214,80,0.4)", "rgba(110,161,224,0.4)", "rgba(191,119,218,0.4)", "rgba(195,30,151,0.4)",
-			"rgba(31,170,177,0.4)", "rgba(220,166,142,0.4)" ];
+		var colors = [ "rgb(207,27,36)", "rgb(168,214,80)", "rgb(110,161,224)", "rgb(191,119,218)", "rgb(195,30,151)",
+			"rgb(31,170,177)", "rgb(220,166,142)" ];
 		debugPrint = function(staff, key) {
 			if (staff.positionY[key]) {
 				//renderer.printHorizontalLine(50, renderer.calcY(staff.positionY[key]), key.substr(0, 4) + " " + Math.round(staff.positionY[key]));
 				var height = staff.specialY[key] * spacing.STEP;
-				renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff.positionY[key]), renderer.controller.width, height,colors[colorIndex], key.substr(0, 4));
+				renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff.positionY[key]), renderer.controller.width, height,colors[colorIndex], 0.4, key.substr(0, 4));
 				colorIndex += 1; if (colorIndex > 6) colorIndex = 0;
 			}
 		};
@@ -360,7 +368,7 @@ StaffGroupElement.prototype.draw = function (renderer) {
 		staff1.absoluteY = renderer.y;
 		if (/*ABCJS.write.debugPlacement*/false) {
 			colorIndex = 0;
-			renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff1.originalTop), renderer.controller.width, renderer.calcY(staff1.originalBottom)-renderer.calcY(staff1.originalTop),"rgba(0,0,0,0.1)");
+			renderer.printShadedBox(renderer.padding.left, renderer.calcY(staff1.originalTop), renderer.controller.width, renderer.calcY(staff1.originalBottom)-renderer.calcY(staff1.originalTop), "#000000", 0.1);
 			debugPrint(staff1, 'chordHeightAbove');
 			debugPrint(staff1, 'chordHeightBelow');
 			debugPrint(staff1, 'dynamicHeightAbove');
