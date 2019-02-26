@@ -262,7 +262,7 @@ AbsoluteElement.prototype.highlight = function (klass, color) {
 	if (klass === undefined)
 		klass = "abcjs-note_selected";
 	if (color === undefined)
-		color = "#ff0000";
+		color = "#000000"; //color = "#ff0000";
 	this.setClass(klass, "", color);
 };
 

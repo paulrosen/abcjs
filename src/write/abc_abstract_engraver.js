@@ -721,13 +721,13 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
         this.roomtaken+=chordWidth+7;
         x = -this.roomtaken;        // TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
-        abselem.addExtra(new RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
+        abselem.addExtra(new RelativeElement(elem.chord[i].name, x, chordWidth+4, undefined, {type:"text", height: chordHeight}));
         break;
       case "right":
         this.roomtakenright+=4;
         x = this.roomtakenright;// TODO-PER: This is just a guess from trial and error
         y = elem.averagepitch;
-        abselem.addRight(new RelativeElement(elem.chord[i].name, x, chordWidth+4, y, {type:"text", height: chordHeight}));
+        abselem.addRight(new RelativeElement(elem.chord[i].name, x, chordWidth+4, undefined, {type:"text", height: chordHeight}));
         break;
       case "below":
 		  // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
@@ -740,7 +740,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, dontDraw) { //ste
       default:
 		if (elem.chord[i].rel_position) {
 			var relPositionY = elem.chord[i].rel_position.y + 3*spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
-			abselem.addChild(new RelativeElement(elem.chord[i].name, x + elem.chord[i].rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {type: "text", height: chordHeight}));
+			abselem.addChild(new RelativeElement(elem.chord[i].name, x + elem.chord[i].rel_position.x, 0, undefined, {type: "text", height: chordHeight}));
 		} else {
 			// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
 			var pos2 = 'above';
