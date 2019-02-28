@@ -1,3 +1,9 @@
+# Version 5.6.7
+
+## Bugs
+
+* When note is far from the centerline, the stem is extended, so put the flag in the right place.
+
 # Version 5.6.6
 
 ## Bugs
