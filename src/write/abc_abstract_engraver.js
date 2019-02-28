@@ -468,7 +468,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 
 			flag = (gracebeam) ? null : chartable.uflags[(isBagpipes) ? 5 : 3];
 			var accidentalSlot = [];
-			var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale*this.voiceScale, accidentalSlot);
+			var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale*this.voiceScale, accidentalSlot, false);
 			var grace = ret.notehead;
 			this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up");
 
@@ -565,7 +565,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				abselem.addExtra(numMeasures);
 		}
 		if (elem.rest.type !== "multimeasure") {
-			var ret = createNoteHead(abselem, c, {verticalPos: restpitch}, null, 0, 0, null, dot, 0, voiceScale, []);
+			var ret = createNoteHead(abselem, c, {verticalPos: restpitch}, null, 0, 0, null, dot, 0, voiceScale, [], false);
 			noteHead = ret.notehead;
 			if (noteHead) {
 				abselem.addHead(noteHead);
@@ -678,7 +678,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			}
 
 			var hasStem = !nostem && durlog<=-1;
-			var ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomTaken, flag, dot, dotshiftx, this.voiceScale, accidentalSlot);
+			var ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomTaken, flag, dot, dotshiftx, this.voiceScale, accidentalSlot, true);
 			symbolWidth = Math.max(glyphs.getSymbolWidth(c), symbolWidth);
 			abselem.extraw -= ret.extraLeft;
 			noteHead = ret.notehead;
@@ -870,7 +870,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 
 
 
-var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot) {
+var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot, shouldExtendStem) {
   // TODO scale the dot as well
   var pitch = pitchelem.verticalPos;
   var notehead;
@@ -892,6 +892,13 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
     notehead = new RelativeElement(c, shiftheadx, glyphs.getSymbolWidth(c)*scale, pitch, opts);
     if (flag) {
       var pos = pitch+((dir==="down")?-7:7)*scale;
+      // if this is a regular note, (not grace or tempo indicator) then the stem will have been stretched to the middle line if it is far from the center.
+	    if (shouldExtendStem) {
+	    	if (dir==="down" && pos > 6)
+	    		pos = 6;
+	    	if (dir==="up" && pos < 6)
+	    		pos = 6;
+	    }
       //if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;
       var xdelta = (dir==="down")?headx:headx+notehead.w-0.6;
       abselem.addRight(new RelativeElement(flag, xdelta, glyphs.getSymbolWidth(flag)*scale, pos, {scalex:scale, scaley: scale}));

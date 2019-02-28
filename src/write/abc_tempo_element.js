@@ -87,7 +87,9 @@ var TempoElement;
 			flag,
 			dot,
 			0,
-			temposcale
+			temposcale,
+			[],
+			false
 		);
 		var tempoNote = ret.notehead;
 		absElem.addHead(tempoNote);
