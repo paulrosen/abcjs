@@ -678,7 +678,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			}
 
 			var hasStem = !nostem && durlog<=-1;
-			var ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomTaken, flag, dot, dotshiftx, this.voiceScale, accidentalSlot, true);
+			var ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomTaken, flag, dot, dotshiftx, this.voiceScale, accidentalSlot, !stemdir);
 			symbolWidth = Math.max(glyphs.getSymbolWidth(c), symbolWidth);
 			abselem.extraw -= ret.extraLeft;
 			noteHead = ret.notehead;
