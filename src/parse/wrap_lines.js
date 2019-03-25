@@ -285,87 +285,125 @@ function lastLinePossibilities(widths, start, min, max) {
 }
 
 function optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation) {
-	// Instead of having to try all the different combinations to find the best, we start with an important piece of knowledge about the lineBreaks we are given:
-	// If there is a line too short, it is the last one.
-	// So, let's just do a couple of tweaks to see how it works to add one or two measures to the last line.
-	var avg = widths.total / (lineBreaks.length + 1);
-	var variance = getVariance(widths, lineBreaks);
-	var variancePct = variance/lineBreakPoint*100;
+	//	figure out how many lines - That's one more than was tried before.
+	var numLines = Math.ceil(widths.total / lineBreakPoint) + 1;
 
-	if (lineBreaks.length === 0)
-		return { failed: true, reason: "Only one line." };
+	//	get the ideal width for a line (cumulative width / num lines) - approx the same as lineBreakPoint except for rounding
+	var idealWidth = Math.floor(widths.total / numLines);
 
-	var lastLineStart = lineBreaks[lineBreaks.length-1]+1;
-	var lastLineVariance = lineVariance(widths.measureWidths, lastLineStart, widths.measureWidths.length, avg);
-	if (variance > lastLineVariance)
-		return { failed: true, reason: "Last line is not too short." };
+	//	get each ideal line width (1*ideal, 2*ideal, 3*ideal, etc)
+	var idealWidths = [];
+	for (var i = 0; i < numLines; i++)
+		idealWidths.push(idealWidth*(i+1));
 
-	// Let's get a list of all combinations that have a possibility of working. That is, all combinations where no line has a variance larger than "variance".
-	var lastLines = lastLinePossibilities(widths.measureWidths, lastLineStart, avg - variance, avg + variance);
-	var attempts = getAttempts(widths.measureWidths, 0, lineBreaks.length, avg - variance, avg + variance, lastLines);
-	//console.log(attempts, avg - variance, avg + variance);
-
-	var failed = true;
-	for (var i = 0; i < attempts.length; i++) {
-		var newVariance = getVariance(widths, attempts[i]);
-		if (newVariance < variance) {
-			explanation.attempts.push({
-				type: "Optimize try", lineBreaks: attempts[i],
-				variance: Math.round(variance), newVariance: Math.round(newVariance),
-				totalAttempts: attempts.length
-			});
-			variance = newVariance;
-			lineBreaks = attempts[i];
-			failed = false;
+	//	from first measure, step through accum. Widths until the abs of the ideal is greater than the last one.
+	var accumulator = 0;
+	var lineAccumulator = 0;
+	var lineWidths = [];
+	var lastVariance = 999999;
+	var highestVariance = 0;
+	var currLine = 0;
+	lineBreaks = []; // These are the zero-based last measure on each line
+	for (i = 0; i < widths.measureWidths.length; i++) {
+		var measureWidth = widths.measureWidths[i];
+		accumulator += measureWidth;
+		lineAccumulator += measureWidth;
+		var thisVariance = Math.abs(accumulator-idealWidths[currLine]);
+		if (thisVariance > lastVariance) {
+			lineBreaks.push(i-1);
+			currLine++;
+			highestVariance = Math.max(highestVariance, lastVariance);
+			lastVariance = Math.abs(accumulator-idealWidths[currLine]);
+			lineWidths.push(lineAccumulator);
+			lineAccumulator = measureWidth;
+		} else {
+			lastVariance = thisVariance;
 		}
 	}
-	if (failed) {
-		explanation.attempts.push({ type: "Optimize try", lineBreaks: lineBreaks, variance: variance, reason: "None of the " + attempts.length + " attempts were better." });
-		// TODO-PER: This shouldn't be necessary, but just try to move one measure down and see if it helps.
-		if (lineBreaks.length > 0) {
-			var attempt = [].concat(lineBreaks);
-			attempt[attempt.length - 1]--;
-			newVariance = getVariance(widths, attempt);
-			explanation.attempts.push({
-				type: "Optimize last try", lineBreaks: attempts[i],
-				variance: Math.round(variance), newVariance: Math.round(newVariance),
-				totalAttempts: attempts.length
-			});
-			if (newVariance < variance) {
-				variance = newVariance;
-				lineBreaks = attempt;
-				failed = false;
-			}
-		}
-	}
-	// Let's squeeze the line successively until it spills onto an extra line, then take the option with the lowest variance
-	// var targetNumLines = lineBreaks.length;
-	// var newNumLines = targetNumLines;
-	// var TRY_INCREMENT = 1;
-	// var tryBreakPoint = lineBreakPoint - TRY_INCREMENT;
-	// var failed = true;
-	// while (targetNumLines === newNumLines && tryBreakPoint > 50) {
-	// 	var ff = freeFormLineBreaks(widths.measureWidths, tryBreakPoint);
-	// 	newNumLines = ff.lineBreaks.length;
-	// 	if (newNumLines === targetNumLines) {
-	// 		var newVariance = getVariance(widths, ff.lineBreaks);
-	// 		var newVariancePct = newVariance/tryBreakPoint*100;
-	// 		explanation.attempts.push({type: "Optimize try", tryBreakPoint: Math.round(tryBreakPoint), lineBreaks: ff.lineBreaks, totals: ff.totals,
-	// 			variance: Math.round(variance), newVariance: Math.round(newVariance), variancePct: Math.round(variancePct), newVariancePct: Math.round(newVariancePct)
-	// 		});
-	// 		if (newVariancePct < variancePct) {
-	// 			variancePct = newVariancePct;
-	// 			lineBreaks = ff.lineBreaks;
-	// 			failed = false;
-	// 		}
-	// 	} else {
-	// 		explanation.attempts.push({type: "Optimize try", explanation: "Exceeded number of lines." , tryBreakPoint: Math.round(tryBreakPoint), lineBreaks: ff.lineBreaks, totals: ff.totals, variance: variance, avg: avg, variancePct: variancePct});
-	// 	}
-	// 	tryBreakPoint -= TRY_INCREMENT;
-	// }
 
-	return { failed: failed, lineBreaks: lineBreaks, variance: variance };
+	return { failed: false, lineBreaks: lineBreaks, variance: highestVariance };
 }
+// 	// Instead of having to try all the different combinations to find the best, we start with an important piece of knowledge about the lineBreaks we are given:
+// 	// If there is a line too short, it is the last one.
+// 	// So, let's just do a couple of tweaks to see how it works to add one or two measures to the last line.
+// 	var avg = widths.total / (lineBreaks.length + 1);
+// 	var variance = getVariance(widths, lineBreaks);
+// 	var variancePct = variance/lineBreakPoint*100;
+//
+// 	if (lineBreaks.length === 0)
+// 		return { failed: true, reason: "Only one line." };
+//
+// 	var lastLineStart = lineBreaks[lineBreaks.length-1]+1;
+// 	var lastLineVariance = lineVariance(widths.measureWidths, lastLineStart, widths.measureWidths.length, avg);
+// 	if (variance > lastLineVariance)
+// 		return { failed: true, reason: "Last line is not too short." };
+//
+// 	// Let's get a list of all combinations that have a possibility of working. That is, all combinations where no line has a variance larger than "variance".
+// 	var lastLines = lastLinePossibilities(widths.measureWidths, lastLineStart, avg - variance, avg + variance);
+// 	var attempts = getAttempts(widths.measureWidths, 0, lineBreaks.length, avg - variance, avg + variance, lastLines);
+// 	//console.log(attempts, avg - variance, avg + variance);
+//
+// 	var failed = true;
+// 	for (var i = 0; i < attempts.length; i++) {
+// 		var newVariance = getVariance(widths, attempts[i]);
+// 		if (newVariance < variance) {
+// 			explanation.attempts.push({
+// 				type: "Optimize try", lineBreaks: attempts[i],
+// 				variance: Math.round(variance), newVariance: Math.round(newVariance),
+// 				totalAttempts: attempts.length
+// 			});
+// 			variance = newVariance;
+// 			lineBreaks = attempts[i];
+// 			failed = false;
+// 		}
+// 	}
+// 	if (failed) {
+// 		explanation.attempts.push({ type: "Optimize try", lineBreaks: lineBreaks, variance: variance, reason: "None of the " + attempts.length + " attempts were better." });
+// 		// TODO-PER: This shouldn't be necessary, but just try to move one measure down and see if it helps.
+// 		if (lineBreaks.length > 0) {
+// 			var attempt = [].concat(lineBreaks);
+// 			attempt[attempt.length - 1]--;
+// 			newVariance = getVariance(widths, attempt);
+// 			explanation.attempts.push({
+// 				type: "Optimize last try", lineBreaks: attempts[i],
+// 				variance: Math.round(variance), newVariance: Math.round(newVariance),
+// 				totalAttempts: attempts.length
+// 			});
+// 			if (newVariance < variance) {
+// 				variance = newVariance;
+// 				lineBreaks = attempt;
+// 				failed = false;
+// 			}
+// 		}
+// 	}
+// 	// Let's squeeze the line successively until it spills onto an extra line, then take the option with the lowest variance
+// 	// var targetNumLines = lineBreaks.length;
+// 	// var newNumLines = targetNumLines;
+// 	// var TRY_INCREMENT = 1;
+// 	// var tryBreakPoint = lineBreakPoint - TRY_INCREMENT;
+// 	// var failed = true;
+// 	// while (targetNumLines === newNumLines && tryBreakPoint > 50) {
+// 	// 	var ff = freeFormLineBreaks(widths.measureWidths, tryBreakPoint);
+// 	// 	newNumLines = ff.lineBreaks.length;
+// 	// 	if (newNumLines === targetNumLines) {
+// 	// 		var newVariance = getVariance(widths, ff.lineBreaks);
+// 	// 		var newVariancePct = newVariance/tryBreakPoint*100;
+// 	// 		explanation.attempts.push({type: "Optimize try", tryBreakPoint: Math.round(tryBreakPoint), lineBreaks: ff.lineBreaks, totals: ff.totals,
+// 	// 			variance: Math.round(variance), newVariance: Math.round(newVariance), variancePct: Math.round(variancePct), newVariancePct: Math.round(newVariancePct)
+// 	// 		});
+// 	// 		if (newVariancePct < variancePct) {
+// 	// 			variancePct = newVariancePct;
+// 	// 			lineBreaks = ff.lineBreaks;
+// 	// 			failed = false;
+// 	// 		}
+// 	// 	} else {
+// 	// 		explanation.attempts.push({type: "Optimize try", explanation: "Exceeded number of lines." , tryBreakPoint: Math.round(tryBreakPoint), lineBreaks: ff.lineBreaks, totals: ff.totals, variance: variance, avg: avg, variancePct: variancePct});
+// 	// 	}
+// 	// 	tryBreakPoint -= TRY_INCREMENT;
+// 	// }
+//
+// 	return { failed: failed, lineBreaks: lineBreaks, variance: variance };
+// }
 
 // function fixedNumLinesBreaks(widths, numLines, allowOver, allowableVariance) {
 // 	var idealLineBreak = widths.total / numLines;
