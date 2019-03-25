@@ -1,3 +1,11 @@
+# Version 5.6.8
+
+## Bugs
+
+* Improve the line wrapping algorithm.
+
+* When seeking in the TimingCallbacks, call the new position's callbacks right away. 
+
 # Version 5.6.7
 
 ## Bugs
