@@ -82,13 +82,13 @@ var TimingCallbacks = function(target, params) {
 		}
 		self.justUnpaused = false;
 
+		if (self.justSeeked) {
+			setCurrentLocation(timestamp);
+			self.justSeeked = false;
+		}
 		if (self.isPaused) {
 			self.pausedTime = timestamp;
 		} else {
-			if (self.justSeeked) {
-				setCurrentLocation(timestamp);
-				self.justSeeked = false;
-			}
 			var currentTime = timestamp - self.startTime;
 			currentTime += 50; // Add a little slop because this function isn't called exactly.
 			if (currentTime < self.lastMoment)
@@ -147,6 +147,7 @@ var TimingCallbacks = function(target, params) {
 
 		self.newSeekPercent = percent;
 		self.justSeeked = true;
+		requestAnimationFrame(self.doTiming);
 	};
 };
 
