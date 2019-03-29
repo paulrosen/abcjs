@@ -1,3 +1,15 @@
+# Version 5.6.9
+
+## Bugs
+
+* Make overlay work with first & second endings
+
+* Fix bug in measure counting in TimingCallbacks when line starts with a measure of rests.
+
+* Keep stem direction when doing line wrapping.
+
+* Improve the algorithm for wrapping lines. 
+
 # Version 5.6.8
 
 ## Bugs
