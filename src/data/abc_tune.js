@@ -214,6 +214,16 @@ var Tune = function() {
 								var snip = ov.snip[kkk];
 								staff.voices[k].splice(snip.start, snip.len);
 							}
+							// remove ending marks from the overlay voice so they are not repeated
+							for (kkk = 0; kkk < staff.voices[staff.voices.length-1].length; kkk++) {
+								staff.voices[staff.voices.length-1][kkk] = parseCommon.clone(staff.voices[staff.voices.length-1][kkk]);
+								var el = staff.voices[staff.voices.length-1][kkk];
+								if (el.el_type === 'bar' && el.startEnding) {
+									delete el.startEnding;
+								}
+								if (el.el_type === 'bar' && el.endEnding)
+									delete el.endEnding;
+							}
 						}
 					}
 				}
