@@ -1150,7 +1150,7 @@ var Tune = function() {
 					voicesArr[v].push({top: top, height: height, line: line, measureNumber: measureNumber, elem: elements[elem]});
 					if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
 						measureNumber++;
-					if (elements[elem].type === 'note')
+					if (elements[elem].type === 'note' || elements[elem].type === 'rest')
 						noteFound = true;
 				}
 			}
