@@ -1,3 +1,9 @@
+# Version 5.6.10
+
+## Bugs
+
+*Fix bug in TimingCallbacks where last beat can sometimes be skipped if the animation timer wakes up right at the end.
+
 # Version 5.6.9
 
 ## Bugs
