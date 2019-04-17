@@ -91,13 +91,16 @@ var TimingCallbacks = function(target, params) {
 		} else {
 			var currentTime = timestamp - self.startTime;
 			currentTime += 50; // Add a little slop because this function isn't called exactly.
-			if (currentTime < self.lastMoment)
+			if (currentTime < self.lastMoment) {
 				requestAnimationFrame(self.doTiming);
-
-			if (self.currentBeat * self.millisecondsPerBeat < currentTime) {
+				if (self.currentBeat * self.millisecondsPerBeat < currentTime) {
+					if (self.beatCallback)
+						self.beatCallback(self.currentBeat, self.totalBeats, self.lastMoment);
+					self.currentBeat++;
+				}
+			} else if (self.currentBeat <= self.totalBeats) {
 				if (self.beatCallback)
 					self.beatCallback(self.currentBeat, self.totalBeats, self.lastMoment);
-				self.currentBeat++;
 			}
 
 			while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
