@@ -53,16 +53,16 @@ var TimingCallbacks = function(target, params) {
 		var currentTime = timestamp - self.startTime;
 		currentTime += 50; // Add a little slop because this function isn't called exactly.
 
-		self.currentBeat = Math.floor(currentTime/self.millisecondsPerBeat);
-			if (self.beatCallback)
-				self.beatCallback(self.currentBeat, self.totalBeats, self.lastMoment);
+		self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
+		if (self.beatCallback)
+			self.beatCallback(self.currentBeat, self.totalBeats, self.lastMoment);
 
 		self.currentEvent = 0;
 		while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
 			self.currentEvent++;
 		}
-		if (self.eventCallback && self.currentEvent > 0 &&  self.noteTimings[self.currentEvent-1].type === 'event')
-			self.eventCallback(self.noteTimings[self.currentEvent-1]);
+		if (self.eventCallback && self.currentEvent > 0 && self.noteTimings[self.currentEvent - 1].type === 'event')
+			self.eventCallback(self.noteTimings[self.currentEvent - 1]);
 
 		// console.log("currentPercent="+currentPercent+
 		// 	" newSeekPercent="+self.newSeekPercent+
@@ -72,7 +72,7 @@ var TimingCallbacks = function(target, params) {
 		// 	" currentEvent="+self.currentEvent);
 	}
 
-	self.doTiming = function(timestamp) {
+	self.doTiming = function (timestamp) {
 		if (!self.startTime) {
 			self.startTime = timestamp;
 		} else if (self.justUnpaused) {
@@ -99,10 +99,12 @@ var TimingCallbacks = function(target, params) {
 					self.currentBeat++;
 				}
 			} else if (self.currentBeat <= self.totalBeats) {
-				if (self.beatCallback)
+				if (self.beatCallback) {
 					self.beatCallback(self.currentBeat, self.totalBeats, self.lastMoment);
+					self.currentBeat++;
+					requestAnimationFrame(self.doTiming);
+				}
 			}
-
 			while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
 				if (self.eventCallback && self.noteTimings[self.currentEvent].type === 'event')
 					self.eventCallback(self.noteTimings[self.currentEvent]);
@@ -116,7 +118,7 @@ var TimingCallbacks = function(target, params) {
 
 			if (currentTime >= self.lastMoment && self.eventCallback)
 				self.eventCallback(null);
-			}
+		}
 	};
 
 	self.start = function() {
