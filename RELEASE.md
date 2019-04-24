@@ -1,8 +1,14 @@
+# Version 5.6.11
+
+## Bugs
+
+* Fix bug in TimingCallbacks where some beats won't be reported if the javascript processing is interrupted (for instance, if the user changes tabs while it is running.)
+
 # Version 5.6.10
 
 ## Bugs
 
-*Fix bug in TimingCallbacks where last beat can sometimes be skipped if the animation timer wakes up right at the end.
+* Fix bug in TimingCallbacks where last beat can sometimes be skipped if the animation timer wakes up right at the end.
 
 # Version 5.6.9
 
