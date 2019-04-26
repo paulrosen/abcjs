@@ -22,6 +22,7 @@ var ParseHeader = require('./abc_parse_header');
 var parseKeyVoice = require('./abc_parse_key_voice');
 var Tokenizer = require('./abc_tokenizer');
 var transpose = require('./abc_transpose');
+var wrap = require('./wrap_lines');
 
 var Tune = require('../data/abc_tune');
 
@@ -62,19 +63,20 @@ var Parse = function() {
 			this.start_new_line = true;
 			this.is_in_header = true;
 			this.is_in_history = false;
-			this.partForNextLine = "";
+			this.partForNextLine = {};
 			this.havent_set_length = true;
 			this.voices = {};
 			this.staves = [];
 			this.macros = {};
 			this.currBarNumber = 1;
+			this.barCounter = {};
 			this.inTextBlock = false;
 			this.inPsBlock = false;
 			this.ignoredDecorations = [];
 			this.textBlock = "";
 			this.score_is_present = false;	// Can't have original V: lines when there is the score directive
 			this.inEnding = false;
-			this.inTie = false;
+			this.inTie = [false];
 			this.inTieChord = {};
 			this.vocalPosition = "auto";
 			this.dynamicPosition = "auto";
@@ -101,6 +103,7 @@ var Parse = function() {
 				if (this.differentFont("annotationfont", defaultFonts)) addFont(el, 'annotationfont', this.annotationfont);
 				if (this.differentFont("gchordfont", defaultFonts)) addFont(el, 'gchordfont', this.gchordfont);
 				if (this.differentFont("vocalfont", defaultFonts)) addFont(el, 'vocalfont', this.vocalfont);
+				if (this.differentFont("tripletfont", defaultFonts)) addFont(el, 'tripletfont', this.tripletfont);
 			} else if (elType === 'bar') {
 				if (this.dynamicPosition !== 'auto') addPositioning(el, 'dynamicPosition', this.dynamicPosition);
 				if (this.chordPosition !== 'auto') addPositioning(el, 'chordPosition', this.chordPosition);
@@ -192,8 +195,8 @@ var Parse = function() {
 				chord[2] = null;
 				chord[3] = { x: x.value, y: y.value };
 			} else {
-				chord[1] = chord[1].replace(/([ABCDEFG])b/g, "$1♭");
-				chord[1] = chord[1].replace(/([ABCDEFG])#/g, "$1♯");
+				chord[1] = chord[1].replace(/([ABCDEFG0-9])b/g, "$1b");
+				chord[1] = chord[1].replace(/([ABCDEFG0-9])#/g, "$1#");
 				chord[2] = 'default';
 				chord[1] = transpose.chordName(multilineVars, chord[1]);
 			}
@@ -369,6 +372,16 @@ var Parse = function() {
 		return [ret.len+retRep.len, ret.token, retRep.token];
 	};
 
+	var tripletQ = {
+		2: 3,
+		3: 2,
+		4: 3,
+		5: 2, // TODO-PER: not handling 6/8 rhythm yet
+		6: 2,
+		7: 2, // TODO-PER: not handling 6/8 rhythm yet
+		8: 3,
+		9: 2 // TODO-PER: not handling 6/8 rhythm yet
+	};
 	var letter_to_open_slurs_and_triplets =  function(line, i) {
 		// consume spaces, and look for all the open parens. If there is a number after the open paren,
 		// that is a triplet. Otherwise that is a slur. Collect all the slurs and the first triplet.
@@ -381,25 +394,37 @@ var Parse = function() {
 						warn("Can't nest triplets", line, i);
 					else {
 						ret.triplet = line.charAt(i+1) - '0';
+						ret.tripletQ = tripletQ[ret.triplet];
+						ret.num_notes = ret.triplet;
 						if (i+2 < line.length && line.charAt(i+2) === ':') {
-							// We are expecting "(p:q:r" or "(p:q" or "(p::r" we are only interested in the first number (p) and the number of notes (r)
+							// We are expecting "(p:q:r" or "(p:q" or "(p::r"
+							// That is: "put p notes into the time of q for the next r notes"
 							// if r is missing, then it is equal to p.
+							// if q is missing, it is determined from this table:
+							// (2 notes in the time of 3
+							// (3 notes in the time of 2
+							// (4 notes in the time of 3
+							// (5 notes in the time of n | if time sig is (6/8, 9/8, 12/8), n=3, else n=2
+							// (6 notes in the time of 2
+							// (7 notes in the time of n
+							// (8 notes in the time of 3
+							// (9 notes in the time of n
 							if (i+3 < line.length && line.charAt(i+3) === ':') {
+								// The second number, 'q', is not present.
 								if (i+4 < line.length && (line.charAt(i+4) >= '1' && line.charAt(i+4) <= '9')) {
 									ret.num_notes = line.charAt(i+4) - '0';
 									i += 3;
 								} else
 									warn("expected number after the two colons after the triplet to mark the duration", line, i);
 							} else if (i+3 < line.length && (line.charAt(i+3) >= '1' && line.charAt(i+3) <= '9')) {
-								// ignore this middle number
+								ret.tripletQ = line.charAt(i+3) - '0';
 								if (i+4 < line.length && line.charAt(i+4) === ':') {
 									if (i+5 < line.length && (line.charAt(i+5) >= '1' && line.charAt(i+5) <= '9')) {
 										ret.num_notes = line.charAt(i+5) - '0';
 										i += 4;
 									}
 								} else {
-									ret.num_notes = ret.triplet;
-									i += 3;
+									i += 2;
 								}
 							} else
 								warn("expected number after the triplet to mark the duration", line, i);
@@ -671,7 +696,8 @@ var Parse = function() {
 						} else
 							el.duration = multilineVars.default_length;
 						// If the clef is percussion, there is probably some translation of the pitch to a particular drum kit item.
-						if (multilineVars.clef && multilineVars.clef.type === "perc") {
+						if ((multilineVars.clef && multilineVars.clef.type === "perc") ||
+							(multilineVars.currentVoice && multilineVars.currentVoice.clef === "perc")) {
 							var key = line.charAt(index);
 							if (el.accidental) {
 								var accMap = { 'dblflat': '__', 'flat': '_', 'natural': '=', 'sharp': '^', 'dblsharp': '^^'};
@@ -833,10 +859,31 @@ var Parse = function() {
 
 	function startNewLine() {
 		var params = { startChar: -1, endChar: -1};
-		if (multilineVars.partForNextLine.length)
+		if (multilineVars.partForNextLine.title)
 			params.part = multilineVars.partForNextLine;
-		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? parseCommon.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : parseCommon.clone(multilineVars.clef) ;
-		params.key = parseKeyVoice.deepCopyKey(multilineVars.key);
+		params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? parseCommon.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : parseCommon.clone(multilineVars.clef);
+		var scoreTranspose = multilineVars.currentVoice ? multilineVars.currentVoice.scoreTranspose : 0;
+		params.key = parseKeyVoice.standardKey(multilineVars.key.root+multilineVars.key.acc+multilineVars.key.mode, multilineVars.key.root, multilineVars.key.acc, scoreTranspose);
+		params.key.mode = multilineVars.key.mode;
+		if (multilineVars.key.impliedNaturals)
+			params.key.impliedNaturals = multilineVars.key.impliedNaturals;
+		if (multilineVars.key.explicitAccidentals) {
+			for (var i = 0; i < multilineVars.key.explicitAccidentals.length; i++) {
+				var found = false;
+				for (var j = 0; j < params.key.accidentals.length; j++) {
+					if (params.key.accidentals[j].note === multilineVars.key.explicitAccidentals[i].note) {
+						// If the note is already in the list, override it with the new value
+						params.key.accidentals[j].acc = multilineVars.key.explicitAccidentals[i].acc;
+						found = true;
+					}
+				}
+				if (!found)
+					params.key.accidentals.push(multilineVars.key.explicitAccidentals[i]);
+			}
+		}
+		multilineVars.targetKey = params.key;
+		if (params.key.explicitAccidentals)
+			delete params.key.explicitAccidentals;
 		parseKeyVoice.addPosToKey(params.clef, params.key);
 		if (multilineVars.meter !== null) {
 			if (multilineVars.currentVoice) {
@@ -857,6 +904,8 @@ var Parse = function() {
 			params.name = multilineVars.currentVoice.name;
 		if (multilineVars.vocalfont)
 			params.vocalfont = multilineVars.vocalfont;
+		if (multilineVars.tripletfont)
+			params.tripletfont = multilineVars.tripletfont;
 		if (multilineVars.style)
 			params.style = multilineVars.style;
 		if (multilineVars.currentVoice) {
@@ -883,8 +932,10 @@ var Parse = function() {
 		if (multilineVars.barNumbers === 0 && isFirstVoice && multilineVars.currBarNumber !== 1)
 			params.barNumber = multilineVars.currBarNumber;
 		tune.startNewLine(params);
+		if (multilineVars.key.impliedNaturals)
+			delete multilineVars.key.impliedNaturals;
 
-		multilineVars.partForNextLine = "";
+		multilineVars.partForNextLine = {};
 	}
 
 	var letter_to_grace =  function(line, i) {
@@ -1052,6 +1103,7 @@ var Parse = function() {
 		}
 		var el = { };
 
+		var overlayLevel = 0;
 		while (i < line.length)
 		{
 			var startI = i;
@@ -1102,12 +1154,6 @@ var Parse = function() {
 					ret = letter_to_spacer(line, i);
 					if (ret[0] > 0) {
 						i += ret[0];
-					}
-
-					ret = letter_to_overlay(line, i);
-					if (ret[0] > 0) {
-						tune.appendElement('overlay', startOfLine, startOfLine+1, {});
-						i += 1;
 					}
 
 					ret = letter_to_chord(line, i);
@@ -1170,6 +1216,7 @@ var Parse = function() {
 				ret = letter_to_bar(line, i);
 				if (ret[0] > 0) {
 					// This is definitely a bar
+					overlayLevel = 0;
 					if (el.gracenotes !== undefined) {
 						// Attach the grace note to an invisible note
 						el.rest = { type: 'spacer' };
@@ -1217,9 +1264,22 @@ var Parse = function() {
 						el = {};
 					}
 					i += ret[0];
+					var cv = multilineVars.currentVoice ? multilineVars.currentVoice.staffNum + '-' + multilineVars.currentVoice.index : 'ONLY';
+					// if (multilineVars.lineBreaks) {
+					// 	if (!multilineVars.barCounter[cv])
+					// 		multilineVars.barCounter[cv] = 0;
+					// 	var breakNow = multilineVars.lineBreaks[''+multilineVars.barCounter[cv]];
+					// 	multilineVars.barCounter[cv]++;
+					// 	if (breakNow)
+					// 		startNewLine();
+					// }
 				} else if (line[i] === '&') {	// backtrack to beginning of measure
-					warn("Overlay not yet supported", line, i);
-					i++;
+					ret = letter_to_overlay(line, i);
+					if (ret[0] > 0) {
+						tune.appendElement('overlay', startOfLine, startOfLine+1, {});
+						i += 1;
+						overlayLevel++;
+					}
 
 				} else {
 					// This is definitely a note group
@@ -1234,6 +1294,7 @@ var Parse = function() {
 								warn("Can't nest triplets", line, i);
 							else {
 								el.startTriplet = ret.triplet;
+								el.tripletMultiplier = ret.tripletQ / ret.triplet;
 								tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
 							}
 						}
@@ -1302,9 +1363,9 @@ var Parse = function() {
 										multilineVars.next_note_duration = 0;
 									}
 
-									if (multilineVars.inTie) {
+									if (multilineVars.inTie[overlayLevel]) {
 										parseCommon.each(el.pitches, function(pitch) { pitch.endTie = true; });
-										multilineVars.inTie = false;
+										multilineVars.inTie[overlayLevel] = false;
 									}
 
 									if (tripletNotesLeft > 0) {
@@ -1326,7 +1387,7 @@ var Parse = function() {
 												break;
 											case '-':
 												parseCommon.each(el.pitches, function(pitch) { pitch.startTie = {}; });
-												multilineVars.inTie = true;
+												multilineVars.inTie[overlayLevel] = true;
 												break;
 											case '>':
 											case '<':
@@ -1389,7 +1450,7 @@ var Parse = function() {
 						// Single pitch
 						var el2 = {};
 						var core = getCoreNote(line, i, el2, true);
-						if (el2.endTie !== undefined) multilineVars.inTie = true;
+						if (el2.endTie !== undefined) multilineVars.inTie[overlayLevel] = true;
 						if (core !== null) {
 							if (core.pitch !== undefined) {
 								el.pitches = [ { } ];
@@ -1418,17 +1479,17 @@ var Parse = function() {
 							if (core.decoration !== undefined) el.decoration = core.decoration;
 							if (core.graceNotes !== undefined) el.graceNotes = core.graceNotes;
 							delete el.startSlur;
-							if (multilineVars.inTie) {
+							if (multilineVars.inTie[overlayLevel]) {
 								if (el.pitches !== undefined) {
 									el.pitches[0].endTie = true;
-									multilineVars.inTie = false;
+									multilineVars.inTie[overlayLevel] = false;
 								} else if (el.rest.type !== 'spacer') {
 									el.rest.endTie = true;
-									multilineVars.inTie = false;
+									multilineVars.inTie[overlayLevel] = false;
 								}
 							}
 							if (core.startTie || el.startTie)
-								multilineVars.inTie = true;
+								multilineVars.inTie[overlayLevel] = true;
 							i  = core.endChar;
 
 							if (tripletNotesLeft > 0) {
@@ -1442,7 +1503,8 @@ var Parse = function() {
 								addEndBeam(el);
 
 							// If there is a whole rest, then it should be the duration of the measure, not it's own duration. We need to special case it.
-							if (el.rest && el.rest.type === 'rest' && el.duration === 1) {
+							// If the time signature length is greater than 4/4, though, then a whole rest has no special treatment.
+							if (el.rest && el.rest.type === 'rest' && el.duration === 1 && durationOfMeasure(multilineVars) <= 1) {
 								el.rest.type = 'whole';
 
 								el.duration = durationOfMeasure(multilineVars);
@@ -1469,7 +1531,7 @@ var Parse = function() {
 		var ret = header.parseHeader(line);
 		if (ret.regular)
 			parseRegularMusicLine(ret.str);
-		if (ret.newline && multilineVars.continueall === undefined)
+		if (ret.newline)
 			startNewLine();
 		if (ret.words)
 			addWords(tune.getCurrentVoice(), line.substring(2));
@@ -1542,6 +1604,14 @@ var Parse = function() {
 				multilineVars.globalTranspose = undefined;
 		} else
 			multilineVars.globalTranspose = undefined;
+		if (switches.lineBreaks) {
+			// change the format of the the line breaks for easy testing.
+			// The line break numbers are 0-based and they reflect the last measure of the current line.
+			multilineVars.lineBreaks = {};
+			//multilineVars.continueall = true;
+			for (var i = 0; i < switches.lineBreaks.length; i++)
+				multilineVars.lineBreaks[''+(switches.lineBreaks[i]+1)] = true; // Add 1 so that the line break is the first measure of the next line.
+		}
 		header.reset(tokenizer, warn, multilineVars, tune);
 
 		// Take care of whatever line endings come our way
@@ -1616,6 +1686,8 @@ var Parse = function() {
 		if (switches.hint_measures) {
 			addHintMeasures();
 		}
+
+		wrap.wrapLines(tune, multilineVars.lineBreaks);
 	};
 };
 

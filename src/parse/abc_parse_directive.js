@@ -27,6 +27,7 @@ var parseDirective = {};
 		multilineVars.partsfont  = { face: "\"Times New Roman\"", size: 15, weight: "normal", style: "normal", decoration: "none" };
 		multilineVars.repeatfont  = { face: "\"Times New Roman\"", size: 13, weight: "normal", style: "normal", decoration: "none" };
 		multilineVars.textfont  = { face: "\"Times New Roman\"", size: 16, weight: "normal", style: "normal", decoration: "none" };
+		multilineVars.tripletfont = {face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none"};
 		multilineVars.vocalfont  = { face: "\"Times New Roman\"", size: 13, weight: "bold", style: "normal", decoration: "none" };
 		multilineVars.wordsfont  = { face: "\"Times New Roman\"", size: 16, weight: "normal", style: "normal", decoration: "none" };
 
@@ -48,6 +49,7 @@ var parseDirective = {};
 		tune.formatting.partsfont  = multilineVars.partsfont;
 		tune.formatting.repeatfont  = multilineVars.repeatfont;
 		tune.formatting.textfont  = multilineVars.textfont;
+		tune.formatting.tripletfont  = multilineVars.tripletfont;
 		tune.formatting.vocalfont  = multilineVars.vocalfont;
 		tune.formatting.wordsfont  = multilineVars.wordsfont;
 	}
@@ -643,7 +645,6 @@ var parseDirective = {};
 			//					dynalign: { type: "boolean", optional: true },
 			//					exprabove: { type: "boolean", optional: true },
 			//					exprbelow: { type: "boolean", optional: true },
-			//					flatbeams: { type: "boolean", optional: true },
 			//					gchordbox: { type: "boolean", optional: true },
 			//					graceslurs: { type: "boolean", optional: true },
 			//					gracespacebefore: { type: "number", optional: true },
@@ -664,6 +665,7 @@ var parseDirective = {};
 			//					stretchstaff: { type: "boolean", optional: true },
 			//					titleformat: { type: "string", optional: true },
 			case "bagpipes":tune.formatting.bagpipes = true;break;
+			case "flatbeams":tune.formatting.flatbeams = true;break;
 			case "landscape":multilineVars.landscape = true;break;
 			case "papersize":multilineVars.papersize = restOfString;break;
 			case "slurgraces":tune.formatting.slurgraces = true;break;
@@ -701,6 +703,15 @@ var parseDirective = {};
 			case "vocalspace":
 			case "wordsspace":
 				return oneParameterMeasurement(cmd, tokens);
+			case "voicescale":
+				if (tokens.length !== 1 || tokens[0].type !== 'number')
+					return "voicescale requires one float as a parameter";
+				var voiceScale = tokens.shift();
+				if (multilineVars.currentVoice) {
+					multilineVars.currentVoice.scale = voiceScale.floatt;
+					tune.changeVoiceScale(multilineVars.currentVoice.scale);
+				}
+				return null;
 			case "vskip":
 				var vskip = getRequiredMeasurement(cmd, tokens);
 				if (vskip.error)
@@ -736,8 +747,15 @@ var parseDirective = {};
 				if (scratch !== null) return scratch;
 				break;
 			case "staffnonote":
-				scratch = addMultilineVarBool('staffnonote', cmd, tokens);
-				if (scratch !== null) return scratch;
+				// The sense of the boolean is opposite here. "0" means true.
+				if (tokens.length !== 1)
+					return "Directive staffnonote requires one parameter: 0 or 1";
+				if (tokens[0].token === '0')
+					multilineVars.staffnonote = true;
+				else if (tokens[0].token === '1')
+					multilineVars.staffnonote = false;
+				else
+					return "Directive staffnonote requires one parameter: 0 or 1 (received " + tokens[0].token + ')';
 				break;
 			case "printtempo":
 				scratch = addMultilineVarBool('printTempo', cmd, tokens);
@@ -808,6 +826,7 @@ var parseDirective = {};
 				break;
 			case "gchordfont":
 			case "partsfont":
+			case "tripletfont":
 			case "vocalfont":
 			case "textfont":
 			case "annotationfont":
@@ -1006,6 +1025,7 @@ var parseDirective = {};
 					case "tempofont":
 					case "textfont":
 					case "voicefont":
+					case "tripletfont":
 					case "vocalfont":
 					case "wordsfont":
 					case "annotationfont":

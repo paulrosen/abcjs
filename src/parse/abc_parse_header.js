@@ -364,6 +364,8 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 		i +=ws;
 		if (line.length >= i+5 && line.charAt(i) === '[' && line.charAt(i+2) === ':') {
 			var e = line.indexOf(']', i);
+			var startChar = multilineVars.iChar + i;
+			var endChar = multilineVars.iChar + e + 1;
 			switch(line.substring(i, i+3))
 			{
 				case "[I:":
@@ -373,22 +375,22 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 				case "[M:":
 					var meter = this.setMeter(line.substring(i+3, e));
 					if (tune.hasBeginMusic() && meter)
-						tune.appendStartingElement('meter', -1, -1, meter);
+						tune.appendStartingElement('meter', startChar, endChar, meter);
 					else
 						multilineVars.meter = meter;
 					return [ e-i+1+ws ];
 				case "[K:":
 					var result = parseKeyVoice.parseKey(line.substring(i+3, e));
 					if (result.foundClef && tune.hasBeginMusic())
-						tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
+						tune.appendStartingElement('clef', startChar, endChar, multilineVars.clef);
 					if (result.foundKey && tune.hasBeginMusic())
-						tune.appendStartingElement('key', -1, -1, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
+						tune.appendStartingElement('key', startChar, endChar, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
 					return [ e-i+1+ws ];
 				case "[P:":
 					if (tune.lines.length <= tune.lineNum)
-						multilineVars.partForNextLine = line.substring(i+3, e);
+						multilineVars.partForNextLine = { title: line.substring(i+3, e), startChar: startChar, endChar: endChar };
 					else
-						tune.appendElement('part', -1, -1, {title: line.substring(i+3, e)});
+						tune.appendElement('part', startChar, endChar, {title: line.substring(i+3, e)});
 					return [ e-i+1+ws ];
 				case "[L:":
 					this.setDefaultLength(line, i+3, e);
@@ -396,8 +398,8 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 				case "[Q:":
 					if (e > 0) {
 						var tempo = this.setTempo(line, i+3, e);
-						if (tempo.type === 'delaySet') tune.appendElement('tempo', -1, -1, this.calcTempo(tempo.tempo));
-						else if (tempo.type === 'immediate') tune.appendElement('tempo', -1, -1, tempo.tempo);
+						if (tempo.type === 'delaySet') tune.appendElement('tempo', startChar, endChar, this.calcTempo(tempo.tempo));
+						else if (tempo.type === 'immediate') tune.appendElement('tempo', startChar, endChar, tempo.tempo);
 						return [ e-i+1+ws, line.charAt(i+1), line.substring(i+3, e)];
 					}
 					break;
@@ -428,18 +430,18 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 				case "M:":
 					var meter = this.setMeter(line.substring(i+2));
 					if (tune.hasBeginMusic() && meter)
-						tune.appendStartingElement('meter', -1, -1, meter);
+						tune.appendStartingElement('meter', multilineVars.iChar + i, multilineVars.iChar + line.length, meter);
 					return [ line.length ];
 				case "K:":
 					var result = parseKeyVoice.parseKey(line.substring(i+2));
 					if (result.foundClef && tune.hasBeginMusic())
-						tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
+						tune.appendStartingElement('clef', multilineVars.iChar + i, multilineVars.iChar + line.length, multilineVars.clef);
 					if (result.foundKey && tune.hasBeginMusic())
-						tune.appendStartingElement('key', -1, -1, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
+						tune.appendStartingElement('key', multilineVars.iChar + i, multilineVars.iChar + line.length, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
 					return [ line.length ];
 				case "P:":
 					if (tune.hasBeginMusic())
-						tune.appendElement('part', -1, -1, {title: line.substring(i+2)});
+						tune.appendElement('part', multilineVars.iChar + i, multilineVars.iChar + line.length, {title: line.substring(i+2)});
 					return [ line.length ];
 				case "L:":
 					this.setDefaultLength(line, i+2, line.length);
@@ -448,8 +450,8 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 					var e = line.indexOf('\x12', i+2);
 					if (e === -1) e = line.length;
 					var tempo = this.setTempo(line, i+2, e);
-					if (tempo.type === 'delaySet') tune.appendElement('tempo', -1, -1, this.calcTempo(tempo.tempo));
-					else if (tempo.type === 'immediate') tune.appendElement('tempo', -1, -1, tempo.tempo);
+					if (tempo.type === 'delaySet') tune.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, this.calcTempo(tempo.tempo));
+					else if (tempo.type === 'immediate') tune.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, tempo.tempo);
 				return [ e, line.charAt(i), parseCommon.strip(line.substring(i+2))];
 				case "V:":
 					parseKeyVoice.parseVoice(line, i+2, line.length);
@@ -507,6 +509,8 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 						tune.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
 					return {};
 				} else {
+					var startChar = multilineVars.iChar;
+					var endChar = startChar + line.length;
 					switch(line.charAt(0))
 					{
 						case  'H':
@@ -519,9 +523,9 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 							var result = parseKeyVoice.parseKey(line.substring(2));
 							if (!multilineVars.is_in_header && tune.hasBeginMusic()) {
 								if (result.foundClef)
-									tune.appendStartingElement('clef', -1, -1, multilineVars.clef);
+									tune.appendStartingElement('clef', startChar, endChar, multilineVars.clef);
 								if (result.foundKey)
-									tune.appendStartingElement('key', -1, -1, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
+									tune.appendStartingElement('key', startChar, endChar, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
 							}
 							multilineVars.is_in_header = false;	// The first key signifies the end of the header.
 							break;
@@ -536,7 +540,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 							if (multilineVars.is_in_header)
 								tune.addMetaText("partOrder", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
 							else
-								multilineVars.partForNextLine = tokenizer.translateString(tokenizer.stripComment(line.substring(2)));
+								multilineVars.partForNextLine = { title: tokenizer.translateString(tokenizer.stripComment(line.substring(2))), startChar: startChar, endChar: endChar};
 							break;
 						case  'Q':
 							var tempo = this.setTempo(line, 2, line.length);

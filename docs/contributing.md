@@ -43,9 +43,9 @@ Here's an example of how to call the linting functions:
 		const tuneBook = new abcjs.TuneBook(abcString);
 		const abcParser = new abcjs.parse.Parse();
 		const parserLint = new abcjs.test.ParserLint();
-		const engraverController = new abcjs.write.EngraverController(null,
-		     {add_classes: true, elementId: "comparison-engraving", staffwidth: 800,
-		      staffheight: 400});
+		const div = document.getElementById("comparison-engraving");
+		const engraverController = new abcjs.write.EngraverController(div,
+		     {add_classes: true, staffwidth: 800, staffheight: 400});
 
 		tuneBook.tunes.forEach((item) => {
 			abcParser.parse(item.abc);
@@ -83,6 +83,8 @@ To release a new version, this checklist should be followed:
 [_] Be sure [the read me file](../README.md) is up to date, along with all the files in [docs](../docs).
 
 [_] Find any hardcoded version numbers in [the package file](../package.json) and change them.
+
+[_] Change the hardcoded version numbers in index.js, midi.js, and test.js.
 
 [_] Minify the various library versions with `npm run build`.
 

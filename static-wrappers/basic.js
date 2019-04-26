@@ -1,4 +1,2 @@
 require('./license');
-const basic = require('../index.js');
-
-window.ABCJS = basic;
+window.ABCJS = require('../index.js');

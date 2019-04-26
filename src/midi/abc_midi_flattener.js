@@ -47,6 +47,11 @@ var flatten;
 	var currentChords;
 	var lastChord;
 	var barBeat;
+	var gChordTacet = false;
+	var stressBeat1 = 64;
+	var stressBeatDown = 64;
+	var stressBeatUp = 64;
+	var beatFraction = 0.25;
 
 	var drumTrack;
 	var drumTrackFinished;
@@ -77,6 +82,12 @@ var flatten;
 		currentChords = [];
 		lastChord = undefined;
 		barBeat = 0;
+		gChordTacet = options.chordsOff ? true : false;
+
+		stressBeat1 = 64;
+		stressBeatDown = 64;
+		stressBeatUp = 64;
+		beatFraction = 0.25;
 
 		// For the drum/metronome track.
 		drumTrack = [];
@@ -102,6 +113,7 @@ var flatten;
 						if (!startingMeter)
 							startingMeter = element;
 						meter = element;
+						beatFraction = getBeatFraction(meter);
 						break;
 					case "tempo":
 						if (!startingTempo)
@@ -137,6 +149,16 @@ var flatten;
 						break;
 					case "drum":
 						drumDefinition = normalizeDrumDefinition(element.params);
+						break;
+					case "gchord":
+						if (!options.chordsOff)
+							gChordTacet = element.tacet;
+						break;
+					case "beat":
+						stressBeat1 = element.beats[0];
+						stressBeatDown = element.beats[1];
+						stressBeatUp = element.beats[2];
+						// TODO-PER: also use the last parameter - which changes which beats are strong.
 						break;
 					default:
 						// This should never happen
@@ -183,6 +205,15 @@ var flatten;
 		return { tempo: startingTempo, instrument: instrument, tracks: tracks };
 	};
 
+	function getBeatFraction(meter) {
+		switch (meter.den) {
+			case 2: return 0.5;
+			case 4: return 0.25;
+			case 8: return 0.375;
+			case 16: return 0.125;
+		}
+		return 0.25;
+	}
 	//
 	// The algorithm for chords is:
 	// - The chords are done in a separate track.
@@ -211,11 +242,14 @@ var flatten;
 	var breakSynonyms = [ 'break', '(break)', 'no chord', 'n.c.', 'tacet'];
 
 	function findChord(elem) {
+		if (gChordTacet)
+			return 'break';
+
 		// TODO-PER: Just using the first chord if there are more than one.
 		if (chordTrackFinished || !elem.chord || elem.chord.length === 0)
 			return null;
 
-		// Return the first annotation that is a regular chord: that is, it is in the default place or is a recognized "tacit" phrase.
+		// Return the first annotation that is a regular chord: that is, it is in the default place or is a recognized "tacet" phrase.
 		for (var i = 0; i < elem.chord.length; i++) {
 			var ch = elem.chord[i];
 			if (ch.position === 'default')
@@ -244,7 +278,14 @@ var flatten;
 		// If there are guitar chords, then they are put in a separate track, but they have the same format.
 		//
 
-		var velocity = voiceOff ? 0 : 64;
+		var volume;
+		if (barBeat === 0)
+			volume = stressBeat1;
+		else if (barBeat % beatFraction < 0.001) // A little slop because of JavaScript floating point math.
+			volume = stressBeatDown;
+		else
+			volume = stressBeatUp;
+		var velocity = voiceOff ? 0 : volume;
 		var chord = findChord(elem);
 		if (chord) {
 			var c = interpretChord(chord);
@@ -266,10 +307,7 @@ var flatten;
 		}
 
 		if (elem.startTriplet) {
-			if (elem.startTriplet === 2)
-				multiplier = 3/2;
-			else
-				multiplier=(elem.startTriplet-1)/elem.startTriplet;
+			multiplier = elem.tripletMultiplier;
 		}
 
 		var duration = (elem.durationClass ? elem.durationClass : elem.duration) *multiplier;
@@ -303,7 +341,6 @@ var flatten;
 				var actualPitch = adjustPitch(note);
 				pitches.push({ pitch: actualPitch, startTie: note.startTie });
 
-				// TODO-PER: should the volume vary depending on whether it is on a beat or measure start?
 				if (!pitchesTied[''+actualPitch])	// If this is the second note of a tie, we don't start it again.
 					currentTrack.push({ cmd: 'start', pitch: actualPitch, volume: velocity });
 
@@ -482,37 +519,118 @@ var flatten;
 	}
 
 	var chordIntervals = {
-		'M': [ 0, 4, 7 ],
-		'6': [ 0, 4, 7, 9 ],
-		'7': [ 0, 4, 7, 10 ],
-		'+7': [ 0, 4, 8, 10 ],
-		'aug7': [ 0, 4, 8, 10 ],
-		'maj7': [ 0, 4, 7, 11 ],
-		'∆7': [ 0, 4, 7, 11 ],
-		'9': [ 0, 4, 7, 10, 14 ],
-		'11': [ 0, 4, 7, 10, 14, 16 ],
-		'13': [ 0, 4, 7, 10, 14, 18 ],
-		'+': [ 0, 4, 8 ],
-		'7#5': [ 0, 4, 8, 10 ],
-		'7+5': [ 0, 4, 8, 10 ],
-		'7b9': [ 0, 4, 7, 10, 13 ],
+		// diminished (all flat 5 chords)
+		'dim': [ 0, 3, 6 ],
+		'°': [ 0, 3, 6 ],
+		'˚': [ 0, 3, 6 ],
+
+		'dim7': [ 0, 3, 6, 9 ],
+		'°7': [ 0, 3, 6, 9 ],
+		'˚7': [ 0, 3, 6, 9 ],
+
+		'ø7': [ 0, 3, 6, 10 ],
+		'm7(b5)': [ 0, 3, 6, 10 ],
+		'm7b5': [ 0, 3, 6, 10 ],
+		'-7(b5)': [ 0, 3, 6, 10 ],
+		'-7b5': [ 0, 3, 6, 10 ],
+
 		'7b5': [ 0, 4, 6, 10 ],
-		'9#5': [ 0, 4, 8, 10, 14 ],
-		'9+5': [ 0, 4, 8, 10, 14 ],
+		'7(b5)': [ 0, 4, 6, 10 ],
+		'7♭5': [ 0, 4, 6, 10 ],
+
+		'7(b9,b5)': [ 0, 4, 6, 10, 13 ],
+		'7b9,b5': [ 0, 4, 6, 10, 13 ],
+		'7(#9,b5)': [ 0, 4, 6, 10, 15 ],
+		'7#9b5': [ 0, 4, 6, 10, 15 ],
+		'maj7(b5)': [ 0, 3, 6, 11 ],
+		'maj7b5': [ 0, 3, 6, 11 ],
+		'13(b5)': [ 0, 4, 6, 10, 14, 18 ],
+		'13b5': [ 0, 4, 6, 10, 14, 18 ],
+
+		// minor (all normal 5, minor 3 chords)
 		'm': [ 0, 3, 7 ],
 		'-': [ 0, 3, 7 ],
 		'm6': [ 0, 3, 7, 9 ],
 		'-6': [ 0, 3, 7, 9 ],
 		'm7': [ 0, 3, 7, 10 ],
 		'-7': [ 0, 3, 7, 10 ],
-		'dim': [ 0, 3, 6 ],
-		'dim7': [ 0, 3, 6, 9 ],
-		'°7': [ 0, 3, 6, 9 ],
-		'ø7': [ 0, 3, 6, 10 ],
+
+		'-(b6)': [ 0, 3, 7, 8 ],
+		'-b6': [ 0, 3, 7, 8 ],
+		'-6/9': [ 0, 3, 7, 9, 14 ],
+		'-7(b9)': [ 0, 3, 7, 10, 13 ],
+		'-7b9': [ 0, 3, 7, 10, 13 ],
+		'-maj7': [ 0, 3, 7, 11 ],
+		'-9+7': [ 0, 3, 7, 11, 13 ],
+		'-11': [  0, 3, 7, 11, 14, 16 ],
+
+		// major (all normal 5, major 3 chords)
+		'M': [ 0, 4, 7 ],
+		'6': [ 0, 4, 7, 9 ],
+		'6/9': [ 0, 4, 7, 9, 14 ],
+
+		'7': [ 0, 4, 7, 10 ],
+		'9': [ 0, 4, 7, 10, 14 ],
+		'11': [ 0, 4, 7, 10, 14, 16 ],
+		'13': [ 0, 4, 7, 10, 14, 18 ],
+		'7b9': [ 0, 4, 7, 10, 13 ],
+		'7♭9': [ 0, 4, 7, 10, 13 ],
+		'7(b9)': [ 0, 4, 7, 10, 13 ],
+		'7(#9)': [ 0, 4, 7, 10, 15 ],
+		'7#9': [ 0, 4, 7, 10, 15 ],
+		'(13)': [ 0, 4, 7, 10, 14, 18 ],
+		'7(9,13)': [ 0, 4, 7, 10, 14, 18 ],
+		'7(#9,b13)': [ 0, 4, 7, 10, 15, 17 ],
+		'7(#11)': [ 0, 4, 7, 10, 14, 17 ],
+		'7#11': [ 0, 4, 7, 10, 14, 17 ],
+		'7(b13)': [ 0, 4, 7, 10, 17 ],
+		'7b13': [ 0, 4, 7, 10, 17 ],
+		'9(#11)': [ 0, 4, 7, 10, 14, 17 ],
+		'9#11': [ 0, 4, 7, 10, 14, 17 ],
+		'13(#11)': [ 0, 4, 7, 10, 15, 18 ],
+		'13#11': [ 0, 4, 7, 10, 15, 18 ],
+
+		'maj7': [ 0, 4, 7, 11 ],
+		'∆7': [ 0, 4, 7, 11 ],
+		'Δ7': [ 0, 4, 7, 11 ],
+		'maj9': [ 0, 4, 7, 11, 14 ],
+		'maj7(9)': [ 0, 4, 7, 11, 14 ],
+		'maj7(11)': [ 0, 4, 7, 11, 16 ],
+		'maj7(#11)': [ 0, 4, 7, 11, 17 ],
+		'maj7(13)': [ 0, 4, 7, 11, 18 ],
+		'maj7(9,13)': [ 0, 4, 7, 11, 14, 18 ],
+
 		'7sus4': [ 0, 5, 7, 10 ],
 		'm7sus4': [ 0, 5, 7, 10 ],
-		'sus4': [ 0, 5, 7 ]
-	};
+		'sus4': [ 0, 5, 7 ],
+		'sus2': [ 0, 2, 7 ],
+		'7sus2': [ 0, 2, 7, 10 ],
+		'9sus4': [ 0, 5, 7, 14 ],
+		'13sus4': [ 0, 5, 7, 18 ],
+
+		// augmented (all sharp 5 chords)
+		'aug7': [ 0, 4, 8, 10 ],
+		'+7': [ 0, 4, 8, 10 ],
+		'+': [ 0, 4, 8 ],
+		'7#5': [ 0, 4, 8, 10 ],
+		'7♯5': [ 0, 4, 8, 10 ],
+		'7+5': [ 0, 4, 8, 10 ],
+		'9#5': [ 0, 4, 8, 10, 14 ],
+		'9♯5': [ 0, 4, 8, 10, 14 ],
+		'9+5': [ 0, 4, 8, 10, 14 ],
+		'-7(#5)': [ 0, 3, 8, 10 ],
+		'-7#5': [ 0, 3, 8, 10 ],
+		'7(#5)': [ 0, 4, 8, 10 ],
+		'7(b9,#5)': [ 0, 4, 8, 10, 13 ],
+		'7b9#5': [ 0, 4, 8, 10, 13 ],
+		'maj7(#5)': [ 0, 4, 8, 11 ],
+		'maj7#5': [ 0, 4, 8, 11 ],
+		'maj7(#5,#11)': [ 0, 4, 8, 11, 14 ],
+		'maj7#5#11': [ 0, 4, 8, 11, 14 ],
+		'9(#5)': [ 0, 4, 8, 10, 14 ],
+		'13(#5)': [ 0, 4, 8, 10, 14, 18 ],
+		'13#5': [ 0, 4, 8, 10, 14, 18 ]
+};
 	function chordNotes(bass, modifier) {
 		var intervals = chordIntervals[modifier];
 		if (!intervals)

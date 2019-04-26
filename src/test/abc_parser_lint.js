@@ -74,8 +74,8 @@ var ParserLint = function() {
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
 		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 		"upbow", "downbow", "staccato", "trem1", "trem2", "trem3", "trem4",
-		"/", "//", "//", "///", "turnx", "invertedturn", "invertedturnx", "arpeggio", "trill(", "trill)", "xstem",
-		"mark", "umarcato"
+		"/", "//", "//", "///", "////", "turnx", "invertedturn", "invertedturnx", "arpeggio", "trill(", "trill)", "xstem",
+		"mark", "marcato", "umarcato"
 	] } };
 
 	var tempoProperties =  {
@@ -169,6 +169,7 @@ var ParserLint = function() {
 			gchordfont: fontType,
 			measurefont: fontType,
 			repeatfont: fontType,
+			tripletfont: fontType,
 			vocalfont: fontType
 		}},
 		gracenotes: { type: 'array', optional: true, output: "noindex", items: {
@@ -221,6 +222,7 @@ var ParserLint = function() {
 		startBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'endBeam', 'beambr' ], optional: true },
 		startSlur: slurProperties,
 		startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true },
+		tripletMultiplier: { type: 'number', minimum: .1, maximum: 9, optional: true },
 		stemConnectsToAbove: { type: 'boolean', Enum: [ true ], optional: true },
 		style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x'], optional: true }
 };
@@ -502,6 +504,7 @@ var ParserLint = function() {
 			titlespace: { type: "number", optional: true },
 			topmargin: { type: "number", optional: true },
 			topspace: { type: "number", optional: true },
+			tripletfont: fontType,
 			vocalabove: { type: "boolean", optional: true },
 			vocalfont: fontType,
 			vocalspace: { type: "number", optional: true },
@@ -550,6 +553,7 @@ var ParserLint = function() {
 							bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 							clef: { type: 'object', optional: true, properties: clefProperties },
 							connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+							tripletfont: fontType,
 							vocalfont: fontType,
 							key: { type: 'object', optional: true, properties: keyProperties },
 							meter: { type: 'object', optional: true, properties: meterProperties },

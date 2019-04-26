@@ -1,3 +1,403 @@
+# Version 5.6.11
+
+## Bugs
+
+* Fix bug in TimingCallbacks where some beats won't be reported if the javascript processing is interrupted (for instance, if the user changes tabs while it is running.)
+
+# Version 5.6.10
+
+## Bugs
+
+* Fix bug in TimingCallbacks where last beat can sometimes be skipped if the animation timer wakes up right at the end.
+
+# Version 5.6.9
+
+## Bugs
+
+* Make overlay work with first & second endings
+
+* Fix bug in measure counting in TimingCallbacks when line starts with a measure of rests.
+
+* Keep stem direction when doing line wrapping.
+
+* Improve the algorithm for wrapping lines. 
+
+# Version 5.6.8
+
+## Bugs
+
+* Improve the line wrapping algorithm.
+
+* When seeking in the TimingCallbacks, call the new position's callbacks right away. 
+
+# Version 5.6.7
+
+## Bugs
+
+* When note is far from the centerline, the stem is extended, so put the flag in the right place.
+
+# Version 5.6.6
+
+## Bugs
+
+* Calculate the correct number of beats in TimingCallbacks: fixes rounding error.
+
+# Version 5.6.5
+
+## Features:
+
+* Add random access seeking to TimingCallbacks.
+
+* Pass back more progress info in the beat callback of TimingCallbacks.
+
+## Bugs
+
+* Add render_options to the midi version of the plugin.
+
+* Add missing release files; remove the "latest" versions, since they were not kept up to date.
+
+* Updated build packages.
+
+# Version 5.6.4
+
+## Features:
+
+* Add %%vskip
+
+* Add %%sep
+
+## Bugs
+
+* Don't include the minified versions of the libraries in the npm package.
+
+# Version 5.6.3
+
+## Features:
+
+* Add arpeggio decoration. 
+
+* Add "voicescale" and "cue=on".
+
+* Add "%%flatbeams".
+
+* Add entry point for "extractMeasures()" to analyze the tune. (Just single voice music for now.)
+
+## Bug fixes:
+
+* Add startChar and endChar for many non-note elements (parts, clefs, tempos, etc.)
+
+* Fix triplet bracket placement when there are rests or really high notes.
+
+* Handle triplets correctly when figuring out the length of the pickup measure.
+
+* Don't count spacers when seeing if there are pickup notes in a tune.
+ 
+* Fix bug not recognizing an inline header after a "&".
+    
+# Version 5.6.2
+
+## Features:
+
+* Add more chord definitions.
+
+* Support changing fonts in W: statements using $1 syntax.
+
+## Bug fixes:
+
+* Don't attach midi control listeners to the global object.
+
+* Fix some midi control visual issues.
+
+* Fix mousemove listener in the midi control, we want to consume only our events.
+
+* Sort the events for midi creation more deterministically.
+
+* Fix handling ties over a bar line when there is an overlay.
+
+* Adjust text a little when there is a box around it to be centered better.
+
+# Version 5.6.1
+
+## Bug fixes:
+
+* Fix bug where wrapping code was ignoring one SVG per line.
+
+# Version 5.6.0
+
+## Features:
+
+* Enable progress indicator dragging
+
+* Clicks on progress bar now move the indicator correctly 
+    
+## Bug fixes:
+
+* Fix the title (with unicode chars) in the downloadable MIDI file.
+
+* In midi, sort program changes before other events that happen at the same time.
+
+* Fix crash when calculating the title for a piece with a missing voice.
+
+* Fix bug where wrapping code was ignoring one SVG per line.
+
+* Fix off-by-one error when calculating line widths during wrapping.
+
+# Version 5.5.0
+
+## Features:
+
+* Add "chordsOff" parameter to just play midi of the melody.
+
+## Bug fixes:
+
+* Don't duplicate slurs on chords when using wrap.
+
+* Figure out correct accidental when transposing to a key with accidentals in the key signature.
+
+* Fix problem with calculating the height of beamed notes when the top or bottom one is middle C.
+
+# Version 5.4.2
+
+## Bug fixes:
+
+* TimingCallbacks was reporting the end of the animation at the beginning of the last event - it now waits until the end of that event.
+
+# Version 5.4.1
+
+## Bug fixes:
+
+* Improve the decision on how to break lines in line wrapping.
+
+* Don't duplicate meter when wrapping lines.
+
+* Return the correct version of the tune when doing line wrapping. 
+
+# Version 5.4.0
+
+## Features:
+
+* Add `preferredMeasuresPerLine` as a parameter to the line wrap.
+
+## Bug fixes:
+
+* Improvements to the speed and stability of the line wrapping code.
+
+* Fix lyric placement on wrapped lines.
+
+* Fix the timing of whole rests in the TimingCallback.
+
+# Version 5.3.5
+
+## Features:
+
+* Always send start of measure event on TimingCallbacks, even if the measure starts with a tie.
+
+* Support ^8 and _8 for clefs.
+
+# Version 5.3.4
+
+## Bug fixes:
+
+* Fix crash when doing multi-stave music in wrap mode.
+
+# Version 5.3.3
+
+## Bug fixes:
+
+* Fix test for shrinking the only line when wrapping.
+
+# Version 5.3.2
+
+## Bug fixes:
+
+* Test all options in the `wrap` parameter for legal values.
+
+* Ignore the explicit line breaks when using `wrap`.
+
+* Get the amount of spacing more even on each line when using `wrap`.
+
+# Version 5.3.1
+
+## Bug fixes:
+
+* Don't require passing `scale` as a parameter to get the `wrap` parameter to work.
+
+# Version 5.3.0
+
+## Features
+
+* Add parameter `wrap: { minSpacing, onlyLineLimit, lastLineLimit }` and automatically calc num measures for each line.
+
+* When animating, return an array of start and end chars if there is more than one voice.
+
+* Add line and measure info into the TimingCallbacks for the convenience of the clients.
+
+* Don't require qpm to be passed to TimingCallbacks: look for a qpm in the music.
+
+* In TimingCallbacks, add a callback when it is near the end of a line.
+
+* Add `replaceTarget()` to the timing callback so that re-engraving can happen when the cursor is running.
+
+* Include the original abcString in the callback when rendering.
+
+* Allow multiple overlays in the same measure.
+
+* Add `%%tripletfont` directive.
+
+* Add unicode versions of flats and sharps in midi chords.
+
+* Support `%%MIDI beat` command.
+
+* Support `%%MIDI gchordoff` and `%%MIDI gchordon`.
+
+## Bug fixes:
+
+* The tune positions were off by one because a newline is removed for each tune and was not counted.
+
+* Fix crash in `renderAbc` if the output container isn't an html element.
+
+* Fix default tempo in animation for compound meters to match the MIDI interpretation.
+
+* Refactored the animation to use the TimingCallbacks instead of duplicating code.
+
+* Fix a couple of bugs when sequencing elements for the TimingCallbacks and animation.
+
+* Center the time signature better (particularly 12/8).
+
+* Add extra space to the left of bar lines.
+
+* Add extra space to the width of a note when there is an accidental.
+
+* Lots of refactoring of the engraving code.
+
+* Fix crash when using `barsperstaff`.
+
+* Fix usage of `staffnonote`
+
+* In TimingCallbacks, make `extraMeasuresAtBeginning` default to 0.
+
+# Version 5.2.0
+
+## Features
+
+* Add a version of the plugin that supports midi.
+
+* Add getMeterFraction() convenience function.
+
+* Add a generic timer that provides callbacks in time with the music.
+
+* Small change to classes: add `abcjs-n...` to rests; add duration to triplet marks.
+
+## Bug fixes:
+
+* Correct the speed of animation in 3/8 meter.
+
+* Fix accidentally creating a global variable.
+
+# Version 5.1.2
+
+## Bug fixes:
+
+* Fix horizontal spacing calculation for multiline text.
+
+# Version 5.1.1
+
+## Bug fixes:
+
+* Fix regression for having the SVG responsive.
+
+# Version 5.1.0
+
+## Bug fixes:
+
+* Fix bug with spacing triplets when the stem direction is not explicitly set.
+
+* Fix problem with sizing the music div when zooming.
+
+* Fix crash when clicking on the time signature.
+
+* Fix bug in beat detection in midi listener.
+
+## Features
+
+* Add entry point for parseOnly().
+
+* Expose midi.setRandomProgress().
+
+* Expose midi.setLoop().
+
+* Expose midi.restartPlay().
+
+# Version 5.0.1
+
+## Bug fixes:
+
+* Comply with the Chrome change to not play audio unless the AudioContext is resumed inside a user interaction.
+
+# Version 5.0.0
+
+## Bug fixes:
+
+* Don't crash animation when there are invisible rests.
+
+* Don't crash when illegal value for scale is passed in.
+
+* Change guitar chord flat and sharp to the right symbols in a few more cases.
+
+* Begin to support mensural time signatures.
+
+## Features
+
+* Remove dependency on Raphael.
+
+# Version 4.1.1
+
+## Bug fixes:
+
+* Fix double transposition of the key signature when transposition is specified in the parameters.
+
+# Version 4.1.0
+
+## Bug fixes:
+
+* When the perc clef is defined in the voice, add the midimap translation to the pitches (this was already being done when perc is in the key sig.)
+
+* Get lines with lots of notes to align properly.
+
+* Do more edge cases with triplets; fix some triplet bugs.
+
+* Double bar lines were messing up the place for the repeat to return to.
+
+* MIDI animation now follows tempo changes.
+
+* Don't get off on the midi animation when encountering a spacer type rest.
+
+* Be sure the div to be written to is empty before engraving.
+
+* When midi is redrawn, stop playing the old midi.
+
+* After calling midi's stopPlaying, reset the inline midi control.
+
+* Fix midi animation when there are no explicit 1st & 2nd ending marks.
+
+* Add fix for getting the Font Awesome 5 icons to show up in audio control; some cosmetic tweaks to large version on audio control.
+
+* Fix click listener in Editor mode.
+
+## Features:
+
+* Allow "style=" parameter on V: line.
+
+* Add a spinner to the audio play button when the soundfonts are loading.
+
+* Allow rhythm slashes to be placed on rests.
+
+* Add feature to transpose a single voice, using "V: ... score=_B"
+
+* Add public function: midi.deviceSupportsMidi()
+
+* Add all the fonts to the directives that can be specified in the renderAbc call.
+
 # Version 4.0.1
 
 ## Bug fixes:

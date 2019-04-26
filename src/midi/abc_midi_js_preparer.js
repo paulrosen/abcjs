@@ -192,8 +192,24 @@ var Preparer;
 	}
 
 	function sortTracks(output) {
+		// First sort by time. If the time is the same, sort by channel, if the channel is the same, put the programChange first.
 		return output.sort(function(a,b) {
 			if (a.absTime > b.absTime) return 1;
+			if (a.absTime === b.absTime) {
+				if (a.length > 0 && b.length > 0 && a[0].event && b[0].event) {		// I think that there will always be at least one event, but testing just in case.
+					var aChannel = a[0].event.channel;
+					var bChannel = b[0].event.channel;
+					if (aChannel > bChannel)
+						return 1;
+					else if (aChannel < bChannel)
+						return -1;
+					else {
+						var bIsPreferred = b[0].event.subtype === "programChange";
+						if (bIsPreferred)
+							return 1;
+					}
+				}
+			}
 			return -1;
 		});
 	}

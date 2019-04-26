@@ -20,6 +20,7 @@
 var glyphs = require('./abc_glyphs');
 var spacing = require('./abc_spacing');
 var sprintf = require('./sprintf');
+var Svg = require('./svg');
 
 /**
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
@@ -27,7 +28,7 @@ var sprintf = require('./sprintf');
  * @param {bool} doRegression
  */
 var Renderer = function(paper, doRegression, shouldAddClasses) {
-  this.paper = paper;
+  this.paper = new Svg(paper);
   this.controller = null; //TODO-GD only used when drawing the ABCJS ARS to connect the controller with the elements for highlighting
 
 	this.space = 3*spacing.SPACE;
@@ -59,6 +60,23 @@ Renderer.prototype.reset = function() {
 	//             p[ps].sleep = 1;
 };
 
+Renderer.prototype.newTune = function(abcTune) {
+	this.abctune = abcTune; // TODO-PER: this is just to get the font info.
+	this.setVerticalSpace(abcTune.formatting);
+	this.measureNumber = null;
+	this.noteNumber = null;
+	this.setPrintMode(abcTune.media === 'print');
+	this.setPadding(abcTune);
+};
+
+Renderer.prototype.createElemSet = function() {
+	return this.paper.openGroup();
+};
+
+Renderer.prototype.closeElemSet = function() {
+	return this.paper.closeGroup();
+};
+
 /**
  * Set whether we are formatting this for the screen, or as a preview for creating a PDF version.
  * @param {bool} isPrint
@@ -82,63 +100,25 @@ Renderer.prototype.setPaperSize = function (maxwidth, scale, responsive) {
 		this.regressionLines.push("PAPER SIZE: ("+w+","+h+")");
 
 	// for accessibility
-	this.paper.canvas.setAttribute("role", "img");
-	var titleEl = document.createElement("title");
 	var text = "Sheet Music";
 	if (this.abctune && this.abctune.metaText && this.abctune.metaText.title)
 		text += " for \"" + this.abctune.metaText.title + '"';
-	var title = document.createTextNode(text);
-	titleEl.appendChild(title);
-	this.paper.canvas.insertBefore(titleEl, this.paper.canvas.firstChild);
+	this.paper.setTitle(text);
 
+	var parentStyles = { overflow: "hidden" };
 	if (responsive === 'resize') {
-		// this technique is from: http://thenewcode.com/744/Make-SVG-Responsive, thx to https://github.com/iantresman
-		this.paper.canvas.parentNode.classList.add("abcjs-container");
-		this.paper.canvas.setAttribute("viewBox", "0 0 " + w + " " + h);
-		this.paper.canvas.setAttribute("preserveAspectRatio", "xMinYMin meet");
-		this.paper.canvas.removeAttribute("height");
-		this.paper.canvas.removeAttribute("width");
-		this.paper.canvas.style['display'] = "inline-block";
-		this.paper.canvas.style['position'] = "absolute";
-		this.paper.canvas.style['top'] = "0";
-		this.paper.canvas.style['left'] = "0";
-		this.paper.canvas.parentNode.style['display'] = "inline-block";
-		this.paper.canvas.parentNode.style['position'] = "relative";
-		this.paper.canvas.parentNode.style['width'] = "100%";
-		// PER: I changed the padding from 100% to this through trial and error.
-		// The example was using a square image, but this music might be either wider or taller.
-		var padding = h / w * 100;
-		this.paper.canvas.parentNode.style['padding-bottom'] = padding + "%";
-		this.paper.canvas.parentNode.style['vertical-align'] = "middle";
-		this.paper.canvas.parentNode.style['overflow'] = "hidden";
-
+		this.paper.setResponsiveWidth(w, h);
 	} else {
-		this.paper.setSize(w / scale, h / scale);
-		// Correct for IE problem in calculating height
-		var isIE = /*@cc_on!@*/false;//IE detector
-		if (isIE) {
-			this.paper.canvas.parentNode.style.width = w + "px";
-			this.paper.canvas.parentNode.style.height = "" + h + "px";
+		parentStyles.width = "";
+		parentStyles.height = h + "px";
+		if (scale < 1) {
+			parentStyles.width = w + "px";
+			this.paper.setSize(w / scale, h / scale);
 		} else
-			this.paper.canvas.parentNode.setAttribute("style", "width:" + w + "px");
+			this.paper.setSize(w, h);
 	}
-	if (scale !== 1) {
-		this.paper.canvas.style.transform = "scale("+scale+","+scale+")";
-		this.paper.canvas.style['-ms-transform'] = "scale("+scale+","+scale+")";
-		this.paper.canvas.style['-webkit-transform'] = "scale("+scale+","+scale+")";
-		this.paper.canvas.style['transform-origin'] = "0 0";
-		this.paper.canvas.style['-ms-transform-origin-x'] = "0";
-		this.paper.canvas.style['-ms-transform-origin-y'] = "0";
-		this.paper.canvas.style['-webkit-transform-origin-x'] = "0";
-		this.paper.canvas.style['-webkit-transform-origin-y'] = "0";
-	} else {
-		this.paper.canvas.style.transform = "";
-		this.paper.canvas.style['-ms-transform'] = "";
-		this.paper.canvas.style['-webkit-transform'] = "";
-	}
-	this.paper.canvas.parentNode.style.overflow="hidden";
-	if (responsive !== 'resize')
-		this.paper.canvas.parentNode.style.height=""+h+"px";
+	this.paper.setScale(scale);
+	this.paper.setParentStyles(parentStyles);
 };
 
 /**
@@ -360,23 +340,37 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 	this.noteNumber = null;
 	this.voiceNumber = null;
 
-	var extraText;
 	if (abctune.metaText.unalignedWords) {
-		extraText = "";
+		var hash = this.getFontAndAttr("wordsfont", 'meta-bottom');
+		var space = this.getTextSize("i", 'wordsfont', 'meta-bottom');
+
+		if (abctune.metaText.unalignedWords.length > 0)
+			this.moveY(this.spacing.words, 1);
 		for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
-			if (typeof abctune.metaText.unalignedWords[j] === 'string')
-				extraText += abctune.metaText.unalignedWords[j] + "\n";
-			else {
+			if (typeof abctune.metaText.unalignedWords[j] === 'string') {
+				this.outputTextIf(this.padding.left + spacing.INDENT, abctune.metaText.unalignedWords[j], 'wordsfont', 'meta-bottom', 0, 0, "start");
+			} else {
+				var largestY = 0;
+				var offsetX = 0;
 				for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
-					extraText += " FONT " + abctune.metaText.unalignedWords[j][k].text;
+					var type = (abctune.metaText.unalignedWords[j][k].font) ? abctune.metaText.unalignedWords[j][k].font : "wordsfont";
+					var el = this.renderText(this.padding.left + spacing.INDENT + offsetX, this.y, abctune.metaText.unalignedWords[j][k].text, type, 'meta-bottom', false);
+					var size = el.getBBox();
+					largestY = Math.max(largestY, size.height);
+					offsetX += size.width;
+					// If the phrase ends in a space, then that is not counted in the width, so we need to add that in ourselves.
+					if (abctune.metaText.unalignedWords[j][k].text[abctune.metaText.unalignedWords[j][k].text.length-1] === ' ') {
+						offsetX += space.width;
+					}
 				}
-				extraText += "\n";
+				this.moveY(largestY, 1);
 			}
 		}
-		this.outputTextIf(this.padding.left + spacing.INDENT, extraText, 'wordsfont', 'meta-bottom', this.spacing.words, 2, "start");
+		if (abctune.metaText.unalignedWords.length > 0)
+			this.moveY(hash.font.size, 2);
 	}
 
-	extraText = "";
+	var extraText = "";
 	if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
 	if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
 	if (abctune.metaText.discography) extraText += "Discography: " + abctune.metaText.discography + "\n";
@@ -400,7 +394,9 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
  * Output text defined with %%text.
  * @param {array or string} text
  */
-Renderer.prototype.outputFreeText = function (text) {
+Renderer.prototype.outputFreeText = function (text, vskip) {
+	if (vskip)
+		this.moveY(vskip);
 	if (text === "") {	// we do want to print out blank lines if they have been specified.
 		var hash = this.getFontAndAttr('textfont', 'defined-text');
 		this.moveY(hash.attr['font-size'] * 2); // move the distance of the line, plus the distance of the margin, which is also one line.
@@ -420,6 +416,14 @@ Renderer.prototype.outputFreeText = function (text) {
 		var x = isCentered ? this.controller.width / 2 : this.padding.left;
 		this.outputTextIf(x, str, 'textfont', 'defined-text', 0, 1, alignment);
 	}
+};
+
+Renderer.prototype.outputSeparator = function (separator) {
+	if (!separator.lineLength)
+		return;
+	this.moveY(separator.spaceAbove);
+	this.printSeparator(separator.lineLength);
+	this.moveY(separator.spaceBelow);
 };
 
 /**
@@ -467,7 +471,10 @@ Renderer.prototype.addPath = function (path) {
 Renderer.prototype.endGroup = function (klass) {
   this.ingroup = false;
   if (this.path.length===0) return null;
-  var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
+  var path = "";
+	for (var i = 0; i < this.path.length; i++)
+		path += this.path[i].join(" ");
+	var ret = this.paper.path({path: path, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
 	this.path = [];
   if (this.doRegression) this.addToRegression(ret);
 
@@ -494,7 +501,7 @@ Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
   var y = this.calcY(pitch);
   var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
      x2, y+dy, x1, y+dy);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses(extraClass)}).toBack();
+  var ret = this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses(extraClass)});
   if (this.doRegression) this.addToRegression(ret);
 
   return ret;
@@ -524,7 +531,10 @@ Renderer.prototype.printStem = function (x, dx, y1, y2) {
   if (!isIE && this.ingroup) {
     this.addPath(pathArray);
   } else {
-    var ret = this.paper.path().attr({path:pathArray, stroke:"none", fill:fill, 'class': this.addClasses('stem')}).toBack();
+  	var path = "";
+  	for (var i = 0; i < pathArray.length; i++)
+  		path += pathArray[i].join(" ");
+    var ret = this.paper.pathToBack({path:path, stroke:"none", fill:fill, 'class': this.addClasses('stem')});
     if (this.doRegression) this.addToRegression(ret);
 
     return ret;
@@ -548,46 +558,49 @@ function kernSymbols(lastSymbol, thisSymbol, lastSymbolWidth) {
  * if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
  * not scaled if not in printgroup
  */
-Renderer.prototype.printSymbol = function(x, offset, symbol, scalex, scaley, klass) {
+Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, klass) {
 	var el;
-    var ycorr;
-  if (!symbol) return null;
-  if (symbol.length>0 && symbol.indexOf(".")<0) {
-    var elemset = this.paper.set();
-    var dx =0;
-    for (var i=0; i<symbol.length; i++) {
-        var s = symbol.charAt(i);
-        ycorr = glyphs.getYCorr(s);
-			el = glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), s, this.paper, klass);
+	var ycorr;
+	if (!symbol) return null;
+	if (symbol.length > 1 && symbol.indexOf(".") < 0) {
+		this.paper.openGroup();
+		var dx = 0;
+		for (var i = 0; i < symbol.length; i++) {
+			var s = symbol.charAt(i);
+			ycorr = glyphs.getYCorr(s);
+			el = glyphs.printSymbol(x + dx, this.calcY(offset + ycorr), s, this.paper, klass);
 			if (el) {
 				if (this.doRegression) this.addToRegression(el);
-				elemset.push(el);
-				if (i < symbol.length-1)
-					dx+= kernSymbols(s, symbol.charAt(i+1), glyphs.getSymbolWidth(s));
+				//elemset.push(el);
+				if (i < symbol.length - 1)
+					dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));
 			} else {
-				this.renderText(x, this.y, "no symbol:" +symbol, "debugfont", 'debug-msg', 'start');
-      }
-    }
-    return elemset;
-  } else {
-    ycorr = glyphs.getYCorr(symbol);
-    if (this.ingroup) {
-      this.addPath(glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
-    } else {
-      el = glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper, klass);
-      if (el) {
-	if (this.doRegression) this.addToRegression(el);
-	return el;
-      } else
-				this.renderText(x, this.y, "no symbol:" +symbol, "debugfont", 'debug-msg', 'start');
-    }
-    return null;    
-  }
+				this.renderText(x, this.y, "no symbol:" + symbol, "debugfont", 'debug-msg', 'start');
+			}
+		}
+		return this.paper.closeGroup();
+	} else {
+		ycorr = glyphs.getYCorr(symbol);
+		if (this.ingroup) {
+			this.addPath(glyphs.getPathForSymbol(x, this.calcY(offset + ycorr), symbol, scalex, scaley));
+		} else {
+			el = glyphs.printSymbol(x, this.calcY(offset + ycorr), symbol, this.paper, klass);
+			if (el) {
+				if (this.doRegression) this.addToRegression(el);
+				return el;
+			} else
+				this.renderText(x, this.y, "no symbol:" + symbol, "debugfont", 'debug-msg', 'start');
+		}
+		return null;
+	}
 };
 
+Renderer.prototype.scaleExistingElem = function (elem, scaleX, scaleY, x, y) {
+	this.paper.setAttributeOnElement(elem, { style: "transform:scale("+scaleX+","+scaleY + ");transform-origin:" + x + "px " + y + "px;"});
+};
 
 Renderer.prototype.printPath = function (attrs) {
-  var ret = this.paper.path().attr(attrs);
+  var ret = this.paper.path(attrs);
   if (this.doRegression) this.addToRegression(ret);
   return ret;
 };
@@ -606,7 +619,7 @@ Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Tony
 		xLeft+xCurve[4], yTop+yCurve[4],
 		xLeft+xCurve[5], yTop+yCurve[5],
 		xLeft+xCurve[6], yTop+yCurve[6]);
-	var ret1 = this.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000", 'class': this.addClasses('brace')});
+	var ret1 = this.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': this.addClasses('brace')});
 
 	xCurve = [0, 17.5, -7.5, 6.6, -5, 20, 0];
 	yCurve = [yHeight/2, yHeight/1.46, yHeight/1.22, yHeight, yHeight/1.19, yHeight/1.42, yHeight/2];
@@ -619,7 +632,7 @@ Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Tony
 		xLeft+xCurve[4], yTop+yCurve[4],
 		xLeft+xCurve[5], yTop+yCurve[5],
 		xLeft+xCurve[6], yTop+yCurve[6]);
-	var ret2 = this.paper.path().attr({path:pathString, stroke:"#000000", fill:"#000000", 'class': this.addClasses('brace')});
+	var ret2 = this.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': this.addClasses('brace')});
 
 	if (this.doRegression){
 		this.addToRegression(ret1);
@@ -662,7 +675,7 @@ Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass, isTi
 		klass += ' slur';
 	else
 		klass = 'slur';
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
+  var ret = this.paper.path({path:pathString, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
   if (this.doRegression) this.addToRegression(ret);
 
   return ret;
@@ -680,6 +693,7 @@ Renderer.prototype.calcY = function(ofs) {
  */
 Renderer.prototype.printStave = function (startx, endx, numLines) {
 	var klass = "top-line";
+	this.paper.openGroup({ prepend: true });
 	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
 	if (numLines === 1) {
 		this.printStaveLine(startx,endx,6, klass);
@@ -689,6 +703,7 @@ Renderer.prototype.printStave = function (startx, endx, numLines) {
 		this.printStaveLine(startx,endx,(i+1)*2, klass);
 		klass = undefined;
 	}
+	this.paper.closeGroup();
 };
 
 /**
@@ -703,7 +718,7 @@ Renderer.prototype.addClasses = function (c, isNote) {
 	if (this.lineNumber !== null && this.lineNumber !== undefined) ret.push("l"+this.lineNumber);
 	if (this.measureNumber !== null && this.measureNumber !== undefined) ret.push("m"+this.measureNumber);
 	if (this.voiceNumber !== null && this.voiceNumber !== undefined) ret.push("v"+this.voiceNumber);
-	if (c.indexOf('note') >= 0 && this.noteNumber !== null && this.noteNumber !== undefined) ret.push("n"+this.noteNumber);
+	if ((c.indexOf('note') >= 0 || c.indexOf('rest') >= 0) && this.noteNumber !== null && this.noteNumber !== undefined) ret.push("n"+this.noteNumber);
 	// add a prefix to all classes that abcjs adds.
 	if (ret.length > 0) {
 		ret = ret.join(' '); // Some strings are compound classes - that is, specify more than one class in a string.
@@ -717,12 +732,16 @@ Renderer.prototype.addClasses = function (c, isNote) {
 };
 
 Renderer.prototype.getFontAndAttr = function(type, klass) {
-	var font = this.abctune.formatting[type];
-	// Raphael deliberately changes the font units to pixels for some reason, so we need to change points to pixels here.
-	if (font)
-		font = { face: font.face, size: font.size*4/3, decoration: font.decoration, style: font.style, weight: font.weight, box: font.box };
-	else
-		font = { face: "Arial", size: 12*4/3, decoration: "underline", style: "normal", weight: "normal" };
+	var font;
+	if (typeof type === 'string') {
+		font = this.abctune.formatting[type];
+		// Raphael deliberately changes the font units to pixels for some reason, so we need to change points to pixels here.
+		if (font)
+			font = {face: font.face, size: font.size * 4 / 3, decoration: font.decoration, style: font.style, weight: font.weight, box: font.box};
+		else
+			font = {face: "Arial", size: 12 * 4 / 3, decoration: "underline", style: "normal", weight: "normal"};
+	} else
+		font = {face: type.face, size: type.size * 4 / 3, decoration: type.decoration, style: type.style, weight: type.weight, box: type.box};
 
 	var attr = {"font-size": font.size, 'font-style': font.style,
 		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
@@ -733,13 +752,11 @@ Renderer.prototype.getFontAndAttr = function(type, klass) {
 
 Renderer.prototype.getTextSize = function(text, type, klass) {
 	var hash = this.getFontAndAttr(type, klass);
-	var el = this.paper.text(0,0, text).attr(hash.attr);
-	var size = el.getBBox();
-	if (isNaN(size.height)) // This can happen if the element isn't visible.
-		size = { width: 0, height: 0};
-	el.remove();
-	if (hash.font.box)
+	var size = this.paper.getTextSize(text, hash.attr);
+	if (hash.font.box) {
 		size.height += 8;
+		size.width += 8;
+	}
 	return size;
 };
 
@@ -747,28 +764,30 @@ Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, center
 	var hash = this.getFontAndAttr(type, klass);
 	if (anchor)
 		hash.attr["text-anchor"] = anchor;
-	text = text.replace(/\n\n/g, "\n \n");
-	text = text.replace(/^\n/, "\xA0\n");
-	var el = this.paper.text(x, y, text).attr(hash.attr);
-	if (!centerVertically) {
-		// The text will be placed centered in vertical alignment, so we need to move the box down so that
-		// the top of the text is where we've requested.
-		var size = el.getBBox();
-		if (isNaN(size.height)) // This can happen if the element is hidden.
-			el.attr({ "y": y });
-		else {
-			if (hash.font.box) {
-				var padding = 2;
-				var margin = 2;
-				this.paper.rect(size.x - padding, size.y + size.height / 2 + margin, size.width + padding*2, size.height + padding*2 - margin).attr({"stroke": "#888888"});
-				size.height += 8;
-			}
-			el.attr({"y": y + size.height / 2});
-		}
-	}
+	hash.attr.x = x;
+	hash.attr.y = y + 7; // TODO-PER: Not sure why the text appears to be 7 pixels off.
+	if (!centerVertically)
+		hash.attr.dy = "0.5em";
 	if (type === 'debugfont') {
 		console.log("Debug msg: " + text);
-		el.attr({ stroke: "#ff0000"});
+		hash.attr.stroke = "#ff0000";
+	}
+
+	text = text.replace(/\n\n/g, "\n \n");
+	text = text.replace(/^\n/, "\xA0\n");
+
+	if (hash.font.box) {
+		hash.attr.x += 2;
+		hash.attr.y += 4;
+	}
+	var el = this.paper.text(text, hash.attr);
+
+	if (hash.font.box) {
+		var size = el.getBBox();
+		var padding = 2;
+		var margin = 2;
+		this.paper.rect({ x: size.x - padding, y: size.y, width: size.width + padding*2, height: size.height + padding*2 - margin,  stroke: "#888888", fill: "transparent"});
+		//size.height += 8;
 	}
 	if (this.doRegression) this.addToRegression(el);
 	return el;
@@ -794,6 +813,11 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 		var bb = el.getBBox(); // This can return NaN if the element isn't visible.
 		var width = isNaN(bb.width) ? 0 : bb.width;
 		var height = isNaN(bb.height) ? 0 : bb.height;
+		var hash = this.getFontAndAttr(kind, klass);
+		if (hash.font.box) {
+			width += 8;
+			height += 8;
+		}
 		if (marginBottom !== null) {
 			var numLines = str.split("\n").length;
 			if (!isNaN(bb.height))
@@ -813,7 +837,22 @@ Renderer.prototype.addInvisibleMarker = function (className) {
 	var x2 = 100;
 	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
 		x2, y+dy, x1, y+dy);
-	this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses(className), 'data-vertical': y }).toBack();
+	this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, "fill-opacity": 0, 'class': this.addClasses(className), 'data-vertical': y });
+};
+
+Renderer.prototype.printSeparator = function(width) {
+	var fill = "rgba(0,0,0,255)";
+	var stroke = "rgba(0,0,0,0)";
+	var y = Math.round(this.y);
+	var staffWidth = this.controller.width;
+	var x1 = (staffWidth - width)/2;
+	var x2 = x1 + width;
+	var pathString = 'M ' + x1 + ' ' + y +
+		' L ' + x2 + ' ' + y +
+		' L ' + x2 + ' ' + (y+1) +
+		' L ' + x1 + ' ' + (y+1) +
+		' L ' + x1 + ' ' + y + ' z';
+	this.paper.pathToBack({path:pathString, stroke:stroke, fill:fill, 'class': this.addClasses('defined-text')});
 };
 
 // For debugging, it is sometimes useful to know where you are vertically.
@@ -823,25 +862,25 @@ Renderer.prototype.printHorizontalLine = function (width, vertical, comment) {
 	var y = this.y;
 	if (vertical) y = vertical;
 	y = Math.round(y);
-	this.paper.text(10, y, ""+Math.round(y)).attr({"text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
+	this.paper.text(""+Math.round(y), {x: 10, y: y, "text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
 	var x1 = 50;
 	var x2 = width;
 	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
 		x2, y+dy, x1, y+dy);
-	this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
+	this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')});
 	for (var i = 1; i < width/100; i++) {
 		pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", i*100-dy, y-5, i*100-dy, y+5,
 			i*100+dy, y-5, i*100+dy, y+5);
-		this.paper.path().attr({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')}).toBack();
+		this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')});
 	}
 	if (comment)
-		this.paper.text(width+70, y, comment).attr({"text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
+		this.paper.text(comment, {x: width+70, y: y, "text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
 };
 
-Renderer.prototype.printShadedBox = function (x, y, width, height, color, comment) {
-	var box = this.paper.rect(x, y, width, height).attr({fill: color, stroke: color });
+Renderer.prototype.printShadedBox = function (x, y, width, height, color, opacity, comment) {
+	var box = this.paper.rect({ x: x, y: y, width: width, height: height, fill: color, stroke: color, "fill-opacity": opacity, "stroke-opacity": opacity });
 	if (comment)
-		this.paper.text(0, y+7, comment).attr({"text-anchor": "start", "font-size":"14px", fill: "rgba(0,0,255,.4)", stroke: "rgba(0,0,255,.4)" });
+		this.paper.text(comment, {x: 0, y: y+7, "text-anchor": "start", "font-size":"14px", fill: "rgba(0,0,255,.4)", stroke: "rgba(0,0,255,.4)" });
 	return box;
 };
 
@@ -850,13 +889,13 @@ Renderer.prototype.printVerticalLine = function (x, y1, y2) {
 	var fill = "#00aaaa";
 	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x - dy, y1, x - dy, y2,
 			x + dy, y1, x + dy, y2);
-	this.paper.path().attr({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')}).toBack();
+	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')});
 	pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x - 20, y1, x - 20, y1+3,
 		x, y1, x, y1+3);
-	this.paper.path().attr({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')}).toBack();
+	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')});
 	pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x + 20, y2, x + 20, y2+3,
 		x, y2, x, y2+3);
-	this.paper.path().attr({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')}).toBack();
+	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')});
 
 };
 

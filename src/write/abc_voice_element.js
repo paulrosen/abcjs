@@ -216,6 +216,13 @@ VoiceElement.prototype.shiftRight = function (dx) {
 	this.nextx+=dx;
 };
 
+function isNonSpacerRest(elem) {
+	if (elem.type !== 'rest')
+		return false;
+	if (elem.abcelem && elem.abcelem.rest && elem.abcelem.rest.type !== 'spacer')
+		return true;
+	return false;
+}
 VoiceElement.prototype.draw = function (renderer, bartop) {
 	var width = this.w-1;
 	renderer.staffbottom = this.staff.bottom;
@@ -237,7 +244,7 @@ VoiceElement.prototype.draw = function (renderer, bartop) {
 			justInitializedMeasureNumber = true;
 		}
 		child.draw(renderer, (this.barto || i===ii-1)?bartop:0);
-		if (child.type === 'note')
+		if (child.type === 'note' || isNonSpacerRest(child))
 			renderer.noteNumber++;
 		if (child.type === 'bar' && !justInitializedMeasureNumber) {
 			renderer.measureNumber++;

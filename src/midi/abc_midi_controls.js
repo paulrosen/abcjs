@@ -14,8 +14,16 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+function performanceOk() {
+	if (!('performance' in window))
+		return false;
+	if (!('now' in window.performance))
+		return false;
+	return true;
+}
+
 // Unfortunately, a few versions of Safari don't support the performance interface. For those browsers, MIDI just won't work.
-if ('performance' in window) {
+if (performanceOk()) {
 	if (!('galactic' in window))
 		window.galactic = {};
 	window.galactic.loc = {
@@ -71,8 +79,16 @@ var midi = {};
 		return label.replace(/%T/g, title);
 	}
 
+	midi.deviceSupportsMidi = function() {
+		if (!performanceOk())
+			return false;
+		if (midi.midiInlineInitialized === 'not loaded')
+			return false;
+		return true;
+	};
+
 	midi.generateMidiControls = function(tune, midiParams, midi, index, stopOld) {
-		if (!('performance' in window))
+		if (!performanceOk())
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">ERROR: this browser doesn\'t support window.performance</div>';
 		if (midi.midiInlineInitialized === 'not loaded')
 			return '<div class="abcjs-inline-midi abcjs-midi-' + index + '">MIDI NOT PRESENT</div>';
@@ -119,6 +135,11 @@ var midi = {};
 	var soundfontUrl = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/";
 	midi.setSoundFont = function(url) {
 		soundfontUrl = url;
+	};
+
+	var interactiveProgressBar = true;
+	midi.setInteractiveProgressBar = function(interactive) {
+		interactiveProgressBar = interactive;
 	};
 
 	function hasClass(element, cls) {
@@ -170,13 +191,13 @@ var midi = {};
 		return els[0];
 	}
 
-	function addLoadEvent(func) {
-		if (window.document.readyState === 'loading') {
-			window.addEventListener('load', func);
-		} else {
-			func();
-		}
-	}
+	// function addLoadEvent(func) {
+	// 	if (window.document.readyState === 'loading') {
+	// 		window.addEventListener('load', func);
+	// 	} else {
+	// 		func();
+	// 	}
+	// }
 
 	var midiJsInitialized = false;
 
@@ -207,6 +228,8 @@ var midi = {};
 			}).then(function() {
 				midiJsInitialized = true;
 				afterSetup(timeWarp, data, onSuccess);
+			}).catch(function(e) {
+				console.log("MIDI.setup failed:", e.message);
 			});
 		} else {
 			afterSetup(timeWarp, data, onSuccess);
@@ -226,7 +249,11 @@ var midi = {};
 	}
 
 	function setMidiCallback(midiJsListener) {
-		MIDI.player.setAnimation(midiJsListener);
+		if(midiJsListener) {
+			MIDI.player.setAnimation(midiJsListener);
+		} else {
+			MIDI.player.clearAnimation();
+		}
 	}
 
 	function jumpToMidiPosition(play, offset, width) {
@@ -237,6 +264,11 @@ var midi = {};
 		MIDI.player.currentTime = endTime * ratio;
 		if (play)
 			startCurrentlySelectedTune();
+		else if (midiJsListener) {
+			var ret = MIDI.player;
+			var progress = ret.currentTime/ret.duration;
+			midiJsListener({ currentTime: ret.currentTime/1000, duration: ret.duration/1000, progress: progress });
+		}
 	}
 
 	function setTimeWarp(percent) {
@@ -316,12 +348,14 @@ var midi = {};
 			midiControl = find(document, "abcjs-midi-current");
 			if (midiControl) {
 				var startButton = find(midiControl, 'abcjs-midi-start');
-				if (hasClass(startButton, 'abcjs-pushed')) {
-					var progressBackground = find(midiControl, "abcjs-midi-progress-background");
-					var totalWidth = progressBackground.offsetWidth;
-					var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
-					var scaled = totalWidth * lastNow; // The number of pixels
-					progressIndicator.style.left = scaled + "px";
+				if (hasClass(startButton, 'abcjs-loaded')) {
+					if(!isIndicatorPressed) {
+						var progressBackground = find(midiControl, "abcjs-midi-progress-background");
+						var totalWidth = progressBackground.offsetWidth;
+						var progressIndicator = find(midiControl, "abcjs-midi-progress-indicator");
+						var scaled = totalWidth * lastNow; // The number of pixels
+						progressIndicator.style.left = scaled + "px";
+					}
 					var clock = find(midiControl, "abcjs-midi-clock");
 					if (clock) {
 						var seconds = Math.floor(position.currentTime);
@@ -339,8 +373,9 @@ var midi = {};
 					var beatsPerSecond = parseInt(tempo, 10) / 60;
 					var currentTime = position.currentTime;
 					if (midiControl.abcjsListener) {
-						var thisBeat = Math.floor(currentTime / beatsPerSecond);
+						var thisBeat = Math.floor(currentTime * beatsPerSecond);
 						position.newBeat = thisBeat !== midiControl.abcjsLastBeat;
+						position.thisBeat = thisBeat;
 						midiControl.abcjsLastBeat = thisBeat;
 						midiControl.abcjsListener(midiControl, position, midiControl.abcjsContext);
 					}
@@ -387,6 +422,7 @@ var midi = {};
 			pauseCurrentlyPlayingTune();
 			// Change the element so that the start icon is shown.
 			removeClass(target, "abcjs-pushed");
+			return;
 		} else { // Else,
 			// If some other midi is running, turn it off.
 
@@ -396,18 +432,33 @@ var midi = {};
 				startCurrentlySelectedTune();
 			else {
 				deselectMidiControl();
-
-				// else, load this midi from scratch.
-				var onSuccess = function() {
+				onLoadMidi(target, parent, function() {
 					startCurrentlySelectedTune();
-					addClass(parent, 'abcjs-midi-current');
-				};
-				loadMidi(parent, onSuccess);
+				});
 			}
-			// Change the element so that the pause icon is shown.
 			addClass(target, "abcjs-pushed");
 		}
-		// This replaces the old callback. It really only needs to be called once, but it doesn't hurt to set it every time.
+	}
+
+	function setCurrentMidiControl(el) {
+		var els = document.querySelectorAll('.abcjs-midi-current');
+		for (var i = 0; i < els.length; i++)
+			removeClass(els[i], 'abcjs-midi-current');
+		addClass(el, 'abcjs-midi-current');
+	}
+
+	function onLoadMidi(target, parent, cb) {
+		// else, load this midi from scratch.
+		var onSuccess = function() {
+			removeClass(target, "abcjs-loading");
+			setCurrentMidiControl(parent);
+			addClass(target, 'abcjs-loaded');
+			if(cb) {
+				cb();
+			}
+		};
+		addClass(target, "abcjs-loading");
+		loadMidi(parent, onSuccess);
 		parent.abcjsLastBeat = -1;
 		parent.abcjsLastIndex = -1;
 		setMidiCallback(midiJsListener);
@@ -431,6 +482,32 @@ var midi = {};
 				removeClass(startBtn, "abcjs-pushed");
 		}
 	};
+	midi.restartPlaying = function() {
+		var target = document.querySelector(".abcjs-midi-current");
+		onReset(target);
+	};
+
+	midi.setLoop = function(target, state) {
+		var loop = target.querySelector('.abcjs-midi-loop');
+		if (!loop)
+			return;
+		if (state)
+			addClass(loop, 'abcjs-pushed');
+		else
+			removeClass(loop, 'abcjs-pushed');
+	};
+
+	midi.setRandomProgress = function(percent) {
+		var target = document.querySelector(".abcjs-midi-current");
+		var playEl = find(target, "abcjs-midi-start");
+		var play = hasClass(playEl, "abcjs-pushed");
+		var endTime = MIDI.player.duration;
+		if (play)
+			pauseCurrentlyPlayingTune();
+		MIDI.player.currentTime = endTime * percent;
+		if (play)
+			startCurrentlySelectedTune();
+	};
 
 	function resetProgress(parent) {
 		var progressIndicator = find(parent, "abcjs-midi-progress-indicator");
@@ -451,7 +528,7 @@ var midi = {};
 		var parent = closest(target, "abcjs-inline-midi");
 
 		function onSuccess() {
-			addClass(parent, 'abcjs-midi-current');
+			setCurrentMidiControl(parent);
 			resetProgress(parent);
 			if (callback)
 				callback();
@@ -480,23 +557,41 @@ var midi = {};
 	function relMouseX(target, event) {
 		var totalOffsetX = 0;
 
+		var width = target.offsetWidth;
 		do {
 			totalOffsetX += target.offsetLeft - target.scrollLeft;
 			target = target.offsetParent;
 		}
 		while (target);
 
-		return event.pageX - totalOffsetX;
+		var x = event.pageX - totalOffsetX;
+		if (x < 0)
+			x = 0;
+		if (x > width)
+			x = width - 1;
+		return x;
+	}
+
+	function isPlaying(target) {
+		var parent = closest(target, "abcjs-inline-midi");
+		var play = find(parent, "abcjs-midi-start");
+		if (hasClass(parent, "abcjs-midi-current")) {
+			return hasClass(play, "abcjs-pushed");
+		}
+		return false;
 	}
 
 	function onProgress(target, event) {
 		var parent = closest(target, "abcjs-inline-midi");
+		var play = find(parent, "abcjs-midi-start");
+		var width = target.offsetWidth;
+		var offset = relMouseX(target, event);
 		if (hasClass(parent, "abcjs-midi-current")) {
-			var play = find(parent, "abcjs-midi-start");
-			play = hasClass(play, "abcjs-pushed");
-			var width = target.offsetWidth;
-			var offset = relMouseX(target, event);
-			jumpToMidiPosition(play, offset, width);
+			jumpToMidiPosition(isPlaying(target), offset, width);
+		} else {
+			onLoadMidi(play, parent, function() {
+				jumpToMidiPosition(false, offset, width);
+			})
 		}
 	}
 
@@ -510,40 +605,87 @@ var midi = {};
 		el.innerHTML = Math.floor(percent * startTempo / 100);
 		setTimeWarp(percent);
 	}
+	var isIndicatorPressed = false;
+	var dragIndicator, dragParent;
+	var hasAddedMouseEvents = false;
 
-	function addDelegates() {
-		document.body.addEventListener("click", function(event) {
-			event = event || window.event;
-			var target = event.target || event.srcElement;
-			while (target && target !== document.body) {
-				if (hasClass(target, 'abcjs-midi-start')) {
-					onStart(target, event);
-					return;
-				} else if (hasClass(target, 'abcjs-midi-selection')) {
-					onSelection(target, event);
-					return;
-				} else if (hasClass(target, 'abcjs-midi-loop')) {
-					onLoop(target, event);
-					return;
-				} else if (hasClass(target, 'abcjs-midi-reset')) {
-					onReset(target, event);
-					return;
-				} else if (hasClass(target, 'abcjs-midi-progress-background')) {
-					onProgress(target, event);
-					return;
+	midi.attachListeners = function(parentElement) {
+		var audioControls = parentElement.querySelectorAll(".abcjs-inline-midi");
+		for (var a = 0; a < audioControls.length; a++) {
+			var audioCtl = audioControls[a];
+
+			audioCtl.addEventListener("click", function (event) {
+				event = event || window.event;
+				var target = event.target || event.srcElement;
+				while (target && target !== document.body) {
+					if (hasClass(target, 'abcjs-midi-start')) {
+						onStart(target, event);
+						return;
+					} else if (hasClass(target, 'abcjs-midi-selection')) {
+						onSelection(target, event);
+						return;
+					} else if (hasClass(target, 'abcjs-midi-loop')) {
+						onLoop(target, event);
+						return;
+					} else if (hasClass(target, 'abcjs-midi-reset')) {
+						onReset(target, event);
+						return;
+					} else if (hasClass(target, 'abcjs-midi-progress-background')) {
+						if (interactiveProgressBar) {
+							onProgress(target, event);
+						}
+						return;
+					}
+					target = target.parentNode;
 				}
-				target = target.parentNode;
-			}
-		});
-		document.body.addEventListener("change", function(event) {
-			event = event || window.event;
-			var target = event.target || event.srcElement;
-			while (target !== document.body) {
-				if (hasClass(target, 'abcjs-midi-tempo'))
-					onTempo(target, event);
-				target = target.parentNode;
-			}
-		});
+			});
+			audioCtl.addEventListener("change", function (event) {
+				event = event || window.event;
+				var target = event.target || event.srcElement;
+				while (target !== document.body) {
+					if (hasClass(target, 'abcjs-midi-tempo'))
+						onTempo(target, event);
+					target = target.parentNode;
+				}
+			});
+
+			audioCtl.addEventListener("mousedown", function (event) {
+				if (interactiveProgressBar) {
+					event = event || window.event;
+					var target = event.target || event.srcElement;
+					if (hasClass(target, 'abcjs-midi-progress-indicator')) {
+						dragIndicator = target;
+						isIndicatorPressed = true;
+						dragParent = closest(target, 'abcjs-midi-progress-background');
+					}
+				}
+			});
+		}
+		if (!hasAddedMouseEvents) {
+			hasAddedMouseEvents = true;
+			document.body.addEventListener('mousemove', function (event) {
+				if (isIndicatorPressed) {
+					event = event || window.event;
+					event.preventDefault();
+					var pos = relMouseX(dragParent, event);
+					dragIndicator.style.left = pos + 'px';
+				}
+			}, true);
+
+			document.body.addEventListener("mouseup", function (event) {
+				if (isIndicatorPressed) {
+					event = event || window.event;
+					event.preventDefault();
+					var pos = relMouseX(dragParent, event);
+					var width = dragParent.offsetWidth;
+					jumpToMidiPosition(isPlaying(dragParent), pos, width);
+					onProgress(dragParent, event);
+					isIndicatorPressed = false;
+					dragIndicator = null;
+					dragParent = null;
+				}
+			});
+		}
 		if (window.MIDI === undefined) {
 			midi.midiInlineInitialized = 'not loaded';
 			var els = document.getElementsByClassName('abcjs-inline-midi');
@@ -552,7 +694,7 @@ var midi = {};
 		}
 	}
 
-	addLoadEvent(addDelegates);
+	//addLoadEvent(addDelegates);
 
 })();
 

@@ -18,8 +18,6 @@
 /*global abcjs_is_user_script, abcjs_plugin_autostart */
 "use strict";
 
-var Raphael = require('raphael');
-
 var TuneBook = require('../api/abc_tunebook').TuneBook;
 var Parse = require('../parse/abc_parse');
 var EngraverController = require('../write/abc_engraver_controller');
@@ -173,16 +171,14 @@ plugin.render = function (contextnode, abcstring) {
 
     var doPrint = function() {
       try {
-        var paper = Raphael(abcdiv, 800, 400);
-        var engraver_controller = new EngraverController(paper, self.render_options);
+        var engraver_controller = new EngraverController(abcdiv, self.render_options);
         engraver_controller.engraveABC(tune);
       } catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
         // can't remember why we don't do this in the general case, but there was a good reason
         abcdiv.remove();
         abcdiv = document.createElement('DIV');
         abcdiv.className = self.render_classname;
-        paper = Raphael(abcdiv, 800, 400);
-        engraver_controller = new EngraverController(paper);
+        engraver_controller = new EngraverController(abcdiv);
         engraver_controller.engraveABC(tune);
         if (self.render_before) {
           contextnode.parentElement.insertBefore(abcdiv, contextnode);

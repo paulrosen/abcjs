@@ -15,12 +15,11 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-/*global window, Math, Raphael */
+/*global Math */
 
 var spacing = require('./abc_spacing');
 var AbstractEngraver = require('./abc_abstract_engraver');
 var Renderer = require('./abc_renderer');
-var Raphael = require('raphael');
 
 /**
  * @class
@@ -33,18 +32,17 @@ var Raphael = require('raphael');
  * elements in ABCJS AES know their "source data" in the ABCJS AST, and their "target shape" 
  * in the renderer for highlighting purposes
  *
- * @param {Object} paper SVG like object with methods path, text, etc.
+ * @param {Object} paper div element that will wrap the SVG
  * @param {Object} params all the params -- documented on github //TODO-GD move some of that documentation here
  */
 var EngraverController = function(paper, params) {
   params = params || {};
-  if (!paper) {
-  	// if a Raphael object was not passed in, create on here.
-	  paper = Raphael(params.elementId, params.staffwidth, params.staffheight);
-  }
   this.responsive = params.responsive;
   this.space = 3*spacing.SPACE;
-  this.scale = params.scale || undefined;
+  this.scale = params.scale ? parseFloat(params.scale) : 0;
+  if (!(this.scale > 0.1))
+  	this.scale = undefined;
+
 	if (params.staffwidth) {
 		// Note: Normally all measurements to the engraver are in POINTS. However, if a person is formatting for the
 		// screen and directly inputting the width, then it is more logical to have the measurement in pixels.
@@ -59,14 +57,6 @@ var EngraverController = function(paper, params) {
 	if (params.clickListener)
 		this.addSelectListener(params.clickListener);
 
-	// HACK-PER: Raphael doesn't support setting the class of an element, so this adds that support. This doesn't work on IE8 or less, though.
-	this.usingSvg = (window.SVGAngle || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1") ? true : false); // Same test Raphael uses
-	if (this.usingSvg && params.add_classes)
-		Raphael._availableAttrs['class'] = "";
-	Raphael._availableAttrs['text-decoration'] = "";
-	Raphael._availableAttrs['data-vertical'] = "";
-
-  //TODO-GD factor out all calls directly made to renderer.paper and fix all the coupling issues below
   this.renderer=new Renderer(paper, params.regression, params.add_classes);
 	this.renderer.setPaddingOverride(params);
   this.renderer.controller = this; // TODO-GD needed for highlighting
@@ -113,32 +103,83 @@ EngraverController.prototype.adjustNonScaledItems = function (scale) {
 	this.renderer.adjustNonScaledItems(scale);
 };
 
+EngraverController.prototype.getMeasureWidths = function(abcTune) {
+	this.reset();
+
+	this.renderer.lineNumber = null;
+
+	this.renderer.newTune(abcTune);
+	this.engraver = new AbstractEngraver(this.renderer, 0, { bagpipes: abcTune.formatting.bagpipes, flatbeams: abcTune.formatting.flatbeams });
+	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
+	if (abcTune.formatting.staffwidth) {
+		this.width = abcTune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
+	} else {
+		this.width = this.renderer.isPrint ? this.staffwidthPrint : this.staffwidthScreen;
+	}
+
+	var scale = abcTune.formatting.scale ? abcTune.formatting.scale : this.scale;
+	if (this.responsive === "resize") // The resizing will mess with the scaling, so just don't do it explicitly.
+		scale = undefined;
+	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
+	this.adjustNonScaledItems(scale);
+
+	var ret = { left: 0, measureWidths: [], height: 0, total: 0 };
+	// TODO-PER: need to add the height of the title block, too.
+	ret.height = this.renderer.padding.top + this.renderer.spacing.music + this.renderer.padding.bottom + 24; // the 24 is the empirical value added to the bottom of all tunes.
+	var debug = false;
+	var hasPrintedTempo = false;
+	for(var i=0; i<abcTune.lines.length; i++) {
+		var abcLine = abcTune.lines[i];
+		if (abcLine.staff) {
+			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null);
+
+			abcLine.staffGroup.layout(0, this.renderer, debug);
+			// At this point, the voices are laid out so that the bar lines are even with each other. So we just need to get the placement of the first voice.
+			if (abcLine.staffGroup.voices.length > 0) {
+				var voice = abcLine.staffGroup.voices[0];
+				var foundNotStaffExtra = false;
+				var lastXPosition = 0;
+				for (var k = 0; k < voice.children.length; k++) {
+					var child = voice.children[k];
+					if (!foundNotStaffExtra && !child.isClef && !child.isKeySig) {
+						foundNotStaffExtra = true;
+						ret.left = child.x;
+						lastXPosition = child.x;
+					}
+					if (child.type === 'bar') {
+						ret.measureWidths.push(child.x - lastXPosition);
+						ret.total += (child.x - lastXPosition);
+						lastXPosition = child.x;
+					}
+				}
+			}
+			hasPrintedTempo = true;
+			ret.height += abcLine.staffGroup.calcHeight() * spacing.STEP;
+		}
+	}
+	return ret;
+};
+
 /**
  * Run the engraving process on a single tune
  * @param {ABCJS.Tune} abctune
  */
 EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.lineNumber = null;
-	abctune.formatting.tripletfont = {face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none"}; // TODO-PER: This font isn't defined in the standard, so it's hardcoded here for now.
 
-	this.renderer.abctune = abctune; // TODO-PER: this is just to get the font info.
-	this.renderer.setVerticalSpace(abctune.formatting);
-	this.renderer.measureNumber = null;
-	this.renderer.noteNumber = null;
-	this.renderer.setPrintMode(abctune.media === 'print');
-	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
-	if (this.responsive === "resize") // The resizing will mess with the scaling, so just don't do it explicitly.
-		scale = undefined;
-	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
-	this.renderer.setPadding(abctune);
-	this.engraver = new AbstractEngraver(abctune.formatting.bagpipes,this.renderer, tuneNumber);
+	this.renderer.newTune(abctune);
+	this.engraver = new AbstractEngraver(this.renderer, tuneNumber, { bagpipes: abctune.formatting.bagpipes, flatbeams: abctune.formatting.flatbeams });
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
-	this.renderer.engraver = this.engraver; //TODO-PER: do we need this coupling? It's just used for the tempo
 	if (abctune.formatting.staffwidth) {
 		this.width = abctune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
 	} else {
 		this.width = this.renderer.isPrint ? this.staffwidthPrint : this.staffwidthScreen;
 	}
+
+	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
+	if (this.responsive === "resize") // The resizing will mess with the scaling, so just don't do it explicitly.
+		scale = undefined;
+	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
 	this.adjustNonScaledItems(scale);
 
 	// Generate the raw staff line data
@@ -158,7 +199,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	for(i=0; i<abctune.lines.length; i++) {
 		abcLine = abctune.lines[i];
 		if (abcLine.staff) {
-			this.setXSpacing(abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1);
+			this.setXSpacing(abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
 			if (abcLine.staffGroup.w > maxWidth) maxWidth = abcLine.staffGroup.w;
 		}
 	}
@@ -198,7 +239,9 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 		} else if (abcLine.subtitle && line !== 0) {
 			this.renderer.outputSubtitle(this.width, abcLine.subtitle);
 		} else if (abcLine.text !== undefined) {
-			this.renderer.outputFreeText(abcLine.text);
+			this.renderer.outputFreeText(abcLine.text, abcLine.vskip);
+		} else if (abcLine.separator !== undefined) {
+			this.renderer.outputSeparator(abcLine.separator);
 		}
 	}
 
@@ -231,12 +274,14 @@ function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, 
  * @param {boolean} isLastLine is this the last line to be printed?
  * @private
  */
-EngraverController.prototype.setXSpacing = function (staffGroup, formatting, isLastLine) {
+EngraverController.prototype.setXSpacing = function (staffGroup, formatting, isLastLine, debug) {
    var newspace = this.space;
-  for (var it = 0; it < 3; it++) { // TODO-PER: shouldn't need this triple pass any more, but it does slightly affect the coordinates.
-	  staffGroup.layout(newspace, this.renderer, false);
+  for (var it = 0; it < 8; it++) { // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
+	  var ret = staffGroup.layout(newspace, this.renderer, debug);
 	  var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
-		newspace = calcHorizontalSpacing(isLastLine, stretchLast, this.width+this.renderer.padding.left, staffGroup.w, newspace, staffGroup.spacingunits, staffGroup.minspace);
+		newspace = calcHorizontalSpacing(isLastLine, stretchLast, this.width+this.renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace);
+		if (debug)
+			console.log("setXSpace", it, staffGroup.w, newspace, staffGroup.minspace);
 		if (newspace === null) break;
   }
 	centerWholeRests(staffGroup.voices);

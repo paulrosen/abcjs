@@ -1,8 +1,8 @@
-var Raphael = require('raphael');
-
 var tunebook = require('./abc_tunebook');
 
 var EngraverController = require('../write/abc_engraver_controller');
+var Parse = require('../parse/abc_parse');
+var wrap = require('../parse/wrap_lines');
 
 var resizeDivs = {};
 function resizeOuter() {
@@ -21,7 +21,6 @@ window.addEventListener("resize", resizeOuter);
 window.addEventListener("orientationChange", resizeOuter);
 
 function renderOne(div, tune, params, tuneNumber) {
-    var width = params.width ? params.width : 800;
     if (params.viewportHorizontal) {
         // Create an inner div that holds the music, so that the passed in div will be the viewport.
         div.innerHTML = '<div class="abcjs-inner"></div>';
@@ -40,8 +39,9 @@ function renderOne(div, tune, params, tuneNumber) {
         div.style.overflowY = "auto";
         div = div.children[0]; // The music should be rendered in the inner div.
     }
-    /* jshint -W064 */ var paper = Raphael(div, width, 400); /* jshint +W064 */
-    var engraver_controller = new EngraverController(paper, params);
+    else
+	    div.innerHTML = "";
+    var engraver_controller = new EngraverController(div, params);
     engraver_controller.engraveABC(tune, tuneNumber);
     tune.engraver = engraver_controller;
     if (params.viewportVertical || params.viewportHorizontal) {
@@ -188,14 +188,32 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
         }
     }
 
-    function callback(div, tune, tuneNumber) {
-        if (!params.oneSvgPerLine || tune.lines.length < 2)
+    function callback(div, tune, tuneNumber, abcString) {
+        if (params.wrap && params.staffwidth) {
+	        tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
+	        return tune;
+        }
+        else if (!params.oneSvgPerLine || tune.lines.length < 2)
             renderOne(div, tune, params, tuneNumber);
         else
             renderEachLineSeparately(div, tune, params, tuneNumber);
+        return null;
     }
 
     return tunebook.renderEngine(callback, output, abc, params);
 };
+
+function doLineWrapping(div, tune, tuneNumber, abcString, params) {
+	var engraver_controller = new EngraverController(div, params);
+	var widths = engraver_controller.getMeasureWidths(tune);
+
+	var ret = wrap.calcLineWraps(tune, widths, abcString, params, Parse, engraver_controller);
+    if (!params.oneSvgPerLine || ret.tune.lines.length < 2)
+        renderOne(div, ret.tune, ret.revisedParams, tuneNumber);
+    else
+        renderEachLineSeparately(div, ret.tune, ret.revisedParams, tuneNumber);
+	ret.tune.explanation = ret.explanation;
+	return ret.tune;
+}
 
 module.exports = renderAbc;

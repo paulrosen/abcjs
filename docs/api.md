@@ -8,9 +8,19 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `tunebook = new ABCJS.TuneBook(tunebookString)` | Returns a `TuneBook` object, describing the tunebook passed in. |
 | `tuneObjectArray = ABCJS.renderAbc(output, tunebookString, params)` | Completely renders the tunebook. |
 | `tuneObjectArray = ABCJS.renderMidi(output, tunebookString, params)` | Completely creates midi for the tunebook. |
+| `tuneObjectArray = ABCJS.parseOnly(tunebookString, params)` | Parses all the tunes in the tunebookString and returns an array of them parsed structure. |
 | `ABCJS.startAnimation(outputElement, tuneObject, animationParams)` | Puts an animated cursor on the rendered music.  |
 | `ABCJS.stopAnimation()` | Stops the animation that was started with `startAnimation`. |
 | `ABCJS.pauseAnimation(pause)` | Pauses/resumes the animation that was started with `startAnimation`. Pass `true` or `false` to pause or resume. |
+| `ABCJS.midi.deviceSupportsMidi()` | Returns true if the device and browser is capable of playing MIDI. |
+| `ABCJS.midi.setSoundFont(url)` | Sets an alternate location for the soundfont. |
+| `ABCJS.midi.startPlaying(targetEl)` | Starts playing the MIDI for the element passed in. If the element is already playing, this pauses it. |
+| `ABCJS.midi.stopPlaying()` | Stops playing whatever is currently playing. |
+| `ABCJS.midi.restartPlaying()` | Moves the progress back to the beginning for whatever is currently playing. |
+| `ABCJS.midi.setRandomProgress(percent)` | Moves the progress to whatever percent is passed in for whatever is currently playing. |
+| `ABCJS.midi.setLoop(targetEl, state)` | Sets the "loop" mode for the element passed in. State should be true or false. |
+| `new abcjs.TimingCallbacks(outputElement, timingParams)` | returns an object with the properties `start()`, `stop()`, `pause()`, `reset()`, `setProgress(percent)`. This will cause callback functions to be called for each beat and for each note. (see timingParams for more details) |
+| `abcjs.extractMeasures(tunebookString);` | This returns an array of all the individual measures found in the music. |
 
 | Parameters | Description |
 | ------------- | ----------- |
@@ -28,6 +38,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `header_only` | false | only parse the header |
 | `stop_on_warning` | false | only parse until the first warning is encountered |
 | `hint_measures` | false | repeat the next measure at the end of the previous line, with a unique css class. |
+| `wrap` | null | NOTE: this requires the parameter `staffwidth` to be set! To have the parser ignore the line breaks, and figure out the line breaks based on the size of each measure. This is an object of: `preferredMeasuresPerLine`: How many measures per line if there is room. If there isn't room, then use the rest of the parameters. This is optional.  `minSpacing`: 1 means to pack the notes as close as possible, 2 means to double the spacing, etc., `maxSpacing`: if there is very little music and a wide line, then the line is shortened so the notes are not too spread out, `lastLineLimit`: if it works out that there is a single measure on the last line, then try different `minSpacing` values until the last line is no more spread out than this limit. `targetHeight`: [Not yet implemented]. A reasonable default for these values is `{ minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 }`. |
 
 | `params` (for engraver) | Default | Description |
 | ------------- | ----------- | ----------- |
@@ -46,6 +57,8 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `qpm` | 180 | The tempo, if not specified in abcString. |
 | `program` | 0 | The midi program (aka "instrument") to use, if not specified in abcString. |
 | `midiTranspose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
+| `voicesOff` | false | Play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. |
+| `chordsOff` | false | Ignore the chords and just play the melody (and metronome if that is on). |
 | `generateDownload` | false | Whether to generate a download MIDI link. |
 | `generateInline` | true | Whether to generate the inline MIDI controls. |
 | `downloadClass` | "" | Add classes to the download controls. The classes `abcjs-download-midi` and `abcjs-midi-xxx` where `xxx` is the index of the tune are already added. This is appended to those classes. |
@@ -141,12 +154,21 @@ Note that the default soundfont that is used by abcjs contains sounds for pitche
 | `scrollHorizontal` | false | Should there be a horizontal scrollbar if the music is wider than the viewport? (requires viewportHorizontal to be true.) |
 | `oneSvgPerLine` | false | Should each system of staves be rendered to a different SVG? This makes controlling with CSS easier, and makes it possible to paginate cleanly.
 
+| `timingParams` | Default | Description |
+| ------------- | ------- | ----------- |
+| `qpm` | whatever is in the Q: field | Number of beats per minute. |
+| `extraMeasuresAtBeginning` | 0 | Don't start the callbacks right away, but insert these number of measures first. |
+| `beatCallback` | null | Called for each beat passing the beat number (starting at 0). |
+| `eventCallback` | null | Called for each event (either a note, a rest, or a chord, and notes in separate voices are grouped together.) |
+| `lineEndCallback` | null | Called at the end of each line. (This is useful if you want to be sure the music is scrolled into view at the right time.) See `lineEndAnticipation` for more details. |
+| `lineEndAnticipation` | 0 | The number of milliseconds for the `lineEndCallback` to anticipate end of the line. That is, if you want to get the callback half a second before the end of the line, use 500. |
+
 | `animationParams` | Default | Description |
 | ------------- | ----------- | ----------- |
 | `hideFinishedMeasures` | false | true or false |
 | `hideCurrentMeasure` | false | true or false |
 | `showCursor` | false | true or false |
-| `bpm` | whatever is in the Q: field | number of beats per minute. |
+| `bpm` | whatever is in the Q: field | Number of beats per minute. |
 
 NOTE: To use animation, you MUST have `{ add_classes: true }` in the `engraverParams`. Also, the cursor is not visible unless you add some css. Often this will be something like either `.cursor { background-color: #ffffc0; opacity: 0.5 }` or `.cursor { border-left: 1px solid black; }`
 
@@ -202,6 +224,29 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 | abcjs-top-line | This marks the top line of each staff. This is useful if you are trying to find where on the page the music has been drawn. |
 | abcjs-top-of-system | This marks the top of each set of staves. This is useful if you are trying to find where on the page the music has been drawn. |
 
+To get a visual idea of how these classes are applied, see https://configurator.abcjs.net/classes and experiment.
+
+### changing colors
+
+If you want to just change everything to one other color, you can do something like:
+```
+<style>
+    svg {
+        fill: pink;
+        stroke: pink;
+    }
+<style>
+```
+If you want more control, you can use the classes. For instance, to turn only the horizontal staff lines pink, do this instead:
+```
+<style>
+    svg .abcjs-staff {
+        fill: pink;
+        stroke: pink;
+    }
+<style>
+```
+
 # abcjs editor
 
 Typical usage is:
@@ -256,7 +301,7 @@ The abcjs plugin renders all the abc in a page (determined as a new line beginni
 To use, simply include the plugin version in the page:
 
 ```html
-<script src="abcjs_plugin_latest-min.js" type="text/javascript"></script>
+<script src="abcjs_plugin_5.6.11-min.js" type="text/javascript"></script>
 ```
 
 Certain options for the plugin can be changed like this, if executed on page load, just after including the plugin file:
