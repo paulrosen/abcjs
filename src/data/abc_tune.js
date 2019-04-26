@@ -214,6 +214,16 @@ var Tune = function() {
 								var snip = ov.snip[kkk];
 								staff.voices[k].splice(snip.start, snip.len);
 							}
+							// remove ending marks from the overlay voice so they are not repeated
+							for (kkk = 0; kkk < staff.voices[staff.voices.length-1].length; kkk++) {
+								staff.voices[staff.voices.length-1][kkk] = parseCommon.clone(staff.voices[staff.voices.length-1][kkk]);
+								var el = staff.voices[staff.voices.length-1][kkk];
+								if (el.el_type === 'bar' && el.startEnding) {
+									delete el.startEnding;
+								}
+								if (el.el_type === 'bar' && el.endEnding)
+									delete el.endEnding;
+							}
 						}
 					}
 				}
@@ -1150,7 +1160,7 @@ var Tune = function() {
 					voicesArr[v].push({top: top, height: height, line: line, measureNumber: measureNumber, elem: elements[elem]});
 					if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
 						measureNumber++;
-					if (elements[elem].type === 'note')
+					if (elements[elem].type === 'note' || elements[elem].type === 'rest')
 						noteFound = true;
 				}
 			}

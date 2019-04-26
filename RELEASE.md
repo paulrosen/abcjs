@@ -1,3 +1,41 @@
+# Version 5.6.11
+
+## Bugs
+
+* Fix bug in TimingCallbacks where some beats won't be reported if the javascript processing is interrupted (for instance, if the user changes tabs while it is running.)
+
+# Version 5.6.10
+
+## Bugs
+
+* Fix bug in TimingCallbacks where last beat can sometimes be skipped if the animation timer wakes up right at the end.
+
+# Version 5.6.9
+
+## Bugs
+
+* Make overlay work with first & second endings
+
+* Fix bug in measure counting in TimingCallbacks when line starts with a measure of rests.
+
+* Keep stem direction when doing line wrapping.
+
+* Improve the algorithm for wrapping lines. 
+
+# Version 5.6.8
+
+## Bugs
+
+* Improve the line wrapping algorithm.
+
+* When seeking in the TimingCallbacks, call the new position's callbacks right away. 
+
+# Version 5.6.7
+
+## Bugs
+
+* When note is far from the centerline, the stem is extended, so put the flag in the right place.
+
 # Version 5.6.6
 
 ## Bugs
