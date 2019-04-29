@@ -213,13 +213,6 @@ var Decoration;
 			"coda": "scripts.coda",
 			"segno": "scripts.segno"
 		};
-		var alphabets = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-		alphabets.forEach(alphabet => {
-			symbolList[`[${alphabet}]`] = `scripts.[${alphabet}]`
-			symbolList[`[${alphabet}']`] = `scripts.[${alphabet}']`
-			symbolList[`[${alphabet}'']`] = `scripts.[${alphabet}'']`
-		})
-
 		var hasOne = false;
 		for (var i=0;i<decoration.length; i++) {
 			switch(decoration[i]) {
@@ -263,32 +256,6 @@ var Decoration;
 				case "umarcato":
 				case "coda":
 				case "segno":
-				case "[A]": case "[A']": case "[A'']":
-				case "[B]": case "[B']": case "[B'']":
-				case "[C]": case "[C']": case "[C'']":
-				case "[D]": case "[D']": case "[D'']":
-				case "[E]": case "[E']": case "[E'']":
-				case "[F]": case "[F']": case "[F'']":
-				case "[G]": case "[G']": case "[G'']":
-				case "[H]": case "[H']": case "[H'']":
-				case "[I]": case "[I']": case "[I'']":
-				case "[J]": case "[J']": case "[J'']":
-				case "[K]": case "[K']": case "[K'']":
-				case "[L]": case "[L']": case "[L'']":
-				case "[M]": case "[M']": case "[M'']":
-				case "[N]": case "[N']": case "[N'']":
-				case "[O]": case "[O']": case "[O'']":
-				case "[P]": case "[P']": case "[P'']":
-				case "[Q]": case "[Q']": case "[Q'']":
-				case "[R]": case "[R']": case "[R'']":
-				case "[S]": case "[S']": case "[S'']":
-				case "[T]": case "[T']": case "[T'']":
-				case "[U]": case "[U']": case "[U'']":
-				case "[V]": case "[V']": case "[V'']":
-				case "[W]": case "[W']": case "[W'']":
-				case "[X]": case "[X']": case "[X'']":
-				case "[Y]": case "[Y']": case "[Y'']":
-				case "[Z]": case "[Z']": case "[Z'']":
 					symbolDecoration(symbolList[decoration[i]], positioning);
 					hasOne = true;
 					break;

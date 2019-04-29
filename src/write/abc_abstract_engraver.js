@@ -320,12 +320,12 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
   case "stem":
     this.stemdir=elem.direction;
     break;
-  case "part":
+	case "part":
     var abselem = new AbsoluteElement(elem,0,0, 'part', this.tuneNumber);
 	  var dim = this.renderer.getTextSize(elem.title, 'partsfont', "part");
-    abselem.addChild(new RelativeElement(elem.title, 0, 0, undefined, {type:"part", height: dim.height/spacing.STEP}));
+    abselem.addChild(new RelativeElement(`scripts.${elem.title}`, 0, 0, 0, {type:"symbol"}));
     elemset[0] = abselem;
-    break;
+		break;
   case "tempo":
     var abselem3 = new AbsoluteElement(elem,0,0, 'tempo', this.tuneNumber);
     abselem3.addChild(new TempoElement(elem, this.tuneNumber, createNoteHead));

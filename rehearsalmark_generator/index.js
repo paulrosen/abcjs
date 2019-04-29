@@ -15,19 +15,19 @@ for(var i = 0; i < 26; i++){
   const d = textToSVG.getD(text, options);
   const char = String.fromCharCode('A'.charCodeAt(0)+i)
   const data = {}
-  data[`[${char}]`] = d
-  data[`[${char}\\']`] = d + dash
-  data[`[${char}\\'\\']`] = d + dash + dash2
+  data[`${char}`] = d
+  data[`${char}\\'`] = d + dash
+  data[`${char}\\'\\'`] = d + dash + dash2
   for(index in data) {
     var transformed = svgpath(data[index])
                       .scale(0.33)
-                      .translate(-48,-35)
+                      .translate(-33,-85)
                       .rel()
                       .round(3)
     const json = JSON.stringify(
       {
         d:transformed.segments,
-        w:30,
+        w:0,
 				h:0
       }
     )

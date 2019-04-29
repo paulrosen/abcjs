@@ -387,10 +387,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune) {
 						tune.appendStartingElement('key', startChar, endChar, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
 					return [ e-i+1+ws ];
 				case "[P:":
-					if (tune.lines.length <= tune.lineNum)
-						multilineVars.partForNextLine = { title: line.substring(i+3, e), startChar: startChar, endChar: endChar };
-					else
-						tune.appendElement('part', startChar, endChar, {title: line.substring(i+3, e)});
+					multilineVars.partForNextLine = { title: line.substring(i+3, e), startChar: startChar, endChar: endChar };
 					return [ e-i+1+ws ];
 				case "[L:":
 					this.setDefaultLength(line, i+3, e);
