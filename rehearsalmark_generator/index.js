@@ -21,7 +21,7 @@ for(var i = 0; i < 26; i++){
   for(index in data) {
     var transformed = svgpath(data[index])
                       .scale(0.33)
-                      .translate(-50,-35)
+                      .translate(-48,-35)
                       .rel()
                       .round(3)
     const json = JSON.stringify(
