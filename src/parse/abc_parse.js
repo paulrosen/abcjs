@@ -214,6 +214,13 @@ var Parse = function() {
 		"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato",
 		"style=normal", "style=harmonic", "style=rhythm", "style=x"
 	];
+	var alphabets = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+	alphabets.forEach(alphabet => {
+		legalAccents.push(`[${alphabet}]`);
+		legalAccents.push(`[${alphabet}']`);
+		legalAccents.push(`[${alphabet}'']`);
+	})
+
 	var volumeDecorations = [ "p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz" ];
 	var dynamicDecorations = ["crescendo(", "crescendo)", "diminuendo(", "diminuendo)"];
 
