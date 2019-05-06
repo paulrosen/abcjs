@@ -11,7 +11,7 @@ const dash = svgpath(textToSVG.getD("’", options)).rel().scale(0.75).translate
 const dash2 = svgpath(textToSVG.getD("’", options)).rel().scale(0.75).translate(60,10)
 const data = {}
 
-for(var i = 0; i < 26; i++){
+for(var i = 0; i < 12; i++){
   const text = String.fromCodePoint('🄰'.codePointAt(0)+i)
   const d = textToSVG.getD(text, options);
   const char = String.fromCharCode('A'.charCodeAt(0)+i)
@@ -37,12 +37,26 @@ data['Intro'].scaleY = 0.23
 data['Intro'].translateX = -33
 data['Intro'].translateY = -85
 
+data['Verse'] = {}
+data['Verse'].svg = textToSVG.getD('Verse', options)
+data['Verse'].scaleX = 0.15
+data['Verse'].scaleY = 0.23
+data['Verse'].translateX = -33
+data['Verse'].translateY = -85
+
 data['Ending'] = {}
 data['Ending'].svg = textToSVG.getD('Ending', options)
 data['Ending'].scaleX = 0.13
 data['Ending'].scaleY = 0.23
 data['Ending'].translateX = -33
 data['Ending'].translateY = -85
+
+data['Interlude'] = {}
+data['Interlude'].svg = textToSVG.getD('Interlude', options)
+data['Interlude'].scaleX = 0.10
+data['Interlude'].scaleY = 0.23
+data['Interlude'].translateX = -33
+data['Interlude'].translateY = -85
 
 for(index in data) {
   var transformed = svgpath(data[index].svg)
