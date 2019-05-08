@@ -44,6 +44,13 @@ data['Verse'].scaleY = 0.23
 data['Verse'].translateX = -33
 data['Verse'].translateY = -85
 
+data['Solo'] = {}
+data['Solo'].svg = textToSVG.getD('Solo', options)
+data['Solo'].scaleX = 0.17
+data['Solo'].scaleY = 0.23
+data['Solo'].translateX = -33
+data['Solo'].translateY = -85
+
 data['Ending'] = {}
 data['Ending'].svg = textToSVG.getD('Ending', options)
 data['Ending'].scaleX = 0.13
