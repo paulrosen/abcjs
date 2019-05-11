@@ -12,6 +12,7 @@ var TimingCallbacks = function(target, params) {
 	self.eventCallback = params.eventCallback;   // This is called for each note or rest encountered.
 	self.lineEndCallback = params.lineEndCallback;   // This is called when the end of a line is approaching.
 	self.lineEndAnticipation = params.lineEndAnticipation ? params.lineEndAnticipation : 0;   // How many milliseconds before the end should the call happen.
+	self.beatSubdivisions = params.beatSubdivisions ? parseInt(params.beatSubdivisions, 10) : 1; // how many callbacks per beat is desired.
 
 	self.replaceTarget = function(newTarget) {
 		newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
@@ -29,7 +30,7 @@ var TimingCallbacks = function(target, params) {
 
 	// noteTimings contains an array of events sorted by time. Events that happen at the same time are in the same element of the array.
 	self.noteTimings = target.noteTimings;
-	self.millisecondsPerBeat = 1000 / (self.qpm / 60);
+	self.millisecondsPerBeat = 1000 / (self.qpm / 60) / self.beatSubdivisions;
 	self.lastMoment = self.noteTimings[self.noteTimings.length-1].milliseconds;
 	self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
 
@@ -53,9 +54,10 @@ var TimingCallbacks = function(target, params) {
 		var currentTime = timestamp - self.startTime;
 		currentTime += 50; // Add a little slop because this function isn't called exactly.
 
+		var oldBeat = self.currentBeat;
 		self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
-		if (self.beatCallback)
-			self.beatCallback(self.currentBeat, self.totalBeats, self.lastMoment);
+		if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
+			self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment);
 
 		self.currentEvent = 0;
 		while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
@@ -95,12 +97,13 @@ var TimingCallbacks = function(target, params) {
 				requestAnimationFrame(self.doTiming);
 				if (self.currentBeat * self.millisecondsPerBeat < currentTime) {
 					if (self.beatCallback)
-						self.beatCallback(self.currentBeat, self.totalBeats, self.lastMoment);
+						self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment);
 					self.currentBeat++;
 				}
 			} else if (self.currentBeat <= self.totalBeats) {
+				// Because of timing issues (for instance, if the browser tab isn't active), the beat callbacks might not have happened when they are supposed to. To keep the client programs from having to deal with that, this will keep calling the loop until all of them have been sent.
 				if (self.beatCallback) {
-					self.beatCallback(self.currentBeat, self.totalBeats, self.lastMoment);
+					self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment);
 					self.currentBeat++;
 					requestAnimationFrame(self.doTiming);
 				}
