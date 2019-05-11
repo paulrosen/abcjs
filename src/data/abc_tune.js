@@ -133,6 +133,13 @@ var Tune = function() {
 		if (bpm <= 0)
 			bpm = 1; // I don't think this can happen, but we don't want a possibility of dividing by zero.
 
+		var beatsPerMeasure = this.getBeatsPerMeasure();
+
+		var minutesPerMeasure = beatsPerMeasure / bpm;
+		return minutesPerMeasure * 60000;
+	};
+
+	this.getBeatsPerMeasure = function() {
 		var beatsPerMeasure;
 		var meter = this.getMeterFraction();
 		if (meter.den === 8) {
@@ -142,9 +149,7 @@ var Tune = function() {
 		}
 		if (beatsPerMeasure <= 0) // This probably won't happen in any normal case - but it is possible that the meter could be set to something nonsensical.
 			beatsPerMeasure = 1;
-
-		var minutesPerMeasure = beatsPerMeasure / bpm;
-		return minutesPerMeasure * 60000;
+		return beatsPerMeasure;
 	};
 
 	this.reset = function () {
@@ -1109,7 +1114,8 @@ var Tune = function() {
 						startChar: element.abcelem.startChar,
 						endChar: element.abcelem.endChar,
 						startCharArray: [element.abcelem.startChar],
-						endCharArray: [element.abcelem.endChar]
+						endCharArray: [element.abcelem.endChar],
+						midiPitches: element.abcelem.midiPitches ? parseCommon.cloneArray(element.abcelem.midiPitches) : []
 					};
 				} else {
 					// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
@@ -1124,6 +1130,12 @@ var Tune = function() {
 						eventHash["event" + voiceTimeMilliseconds].startChar =element.abcelem.startChar;
 					if (eventHash["event" + voiceTimeMilliseconds].endChar === null)
 						eventHash["event" + voiceTimeMilliseconds].endChar =element.abcelem.endChar;
+					if (element.abcelem.midiPitches && element.abcelem.midiPitches.length) {
+						if (!eventHash["event" + voiceTimeMilliseconds].midiPitches)
+							eventHash["event" + voiceTimeMilliseconds].midiPitches = [];
+						for (var i = 0; i < element.abcelem.midiPitches.length; i++)
+							eventHash["event" + voiceTimeMilliseconds].midiPitches.push(element.abcelem.midiPitches[i]);
+					}
 				}
 				if (nextIsBar) {
 					eventHash["event" + voiceTimeMilliseconds].measureStart = true;

@@ -202,8 +202,23 @@ var flatten;
 		// 		startingTempo /= 4;
 		// }
 
-		return { tempo: startingTempo, instrument: instrument, tracks: tracks };
+		return { tempo: startingTempo, instrument: instrument, tracks: tracks, totalDuration: totalDuration(tracks) };
 	};
+
+	function totalDuration(tracks) {
+		var total = 0;
+		for (var i = 0; i < tracks.length; i++) {
+			var track = tracks[i];
+			var trackTotal = 0;
+			for (var j = 0; j < track.length; j++) {
+				var event = track[j];
+				if (event.duration)
+					trackTotal += event.duration;
+			}
+			total = Math.max(total, trackTotal);
+		}
+		return total;
+	}
 
 	function getBeatFraction(meter) {
 		switch (meter.den) {
@@ -336,10 +351,12 @@ var flatten;
 				duration = writeGraceNotes(graces, true, duration, null, velocity);
 			}
 			var pitches = [];
+			elem.midiPitches = [];
 			for (var i=0; i<elem.pitches.length; i++) {
 				var note = elem.pitches[i];
 				var actualPitch = adjustPitch(note);
 				pitches.push({ pitch: actualPitch, startTie: note.startTie });
+				elem.midiPitches.push({ pitch: actualPitch+60 }); // TODO-PER: why is the internal numbering system offset by 60 from midi? It should probably be the same as midi.
 
 				if (!pitchesTied[''+actualPitch])	// If this is the second note of a tie, we don't start it again.
 					currentTrack.push({ cmd: 'start', pitch: actualPitch, volume: velocity });
