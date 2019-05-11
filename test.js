@@ -15,6 +15,7 @@ Object.keys(tunebook).forEach(function (key) {
 
 abcjs.renderAbc = require('./src/api/abc_tunebook_svg');
 abcjs.renderMidi = require('./src/api/abc_tunebook_midi');
+abcjs.TimingCallbacks = require('./src/api/abc_timing_callbacks');
 
 var parser = require('./src/parse/abc_parse');
 abcjs['parse'] = { Parse: parser };
