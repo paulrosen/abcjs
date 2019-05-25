@@ -372,7 +372,6 @@ var flatten;
 							var pitchArray = currentTrack[last].elem.midiPitches;
 							for (var last2 = 0; last2 < pitchArray.length; last2++) {
 								if (pitchArray[last2].pitch-60 === actualPitch) { // TODO-PER: the 60 is to compensate for the midi pitch numbers again.
-									console.log("add tie value", pitchArray[last2].durationInMeasures, duration * tempoChangeFactor)
 									pitchArray[last2].durationInMeasures += duration * tempoChangeFactor;
 								}
 							}
