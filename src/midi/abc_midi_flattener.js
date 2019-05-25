@@ -33,6 +33,7 @@ var flatten;
 	var startingMeter;
 	var tempoChangeFactor = 1;
 	var instrument;
+	var currentInstrument;
 	// var channel;
 	var currentTrack;
 	var pitchesTied;
@@ -70,6 +71,7 @@ var flatten;
 		startingMeter = undefined;
 		tempoChangeFactor = 1;
 		instrument = undefined;
+		currentInstrument = undefined;
 		// channel = undefined;
 		currentTrack = undefined;
 		pitchesTied = {};
@@ -140,6 +142,7 @@ var flatten;
 					case "instrument":
 						if (instrument === undefined)
 							instrument = element.program;
+						currentInstrument = element.program;
 						currentTrack.push({ cmd: 'program', channel: i, instrument: element.program });
 						break;
 					case "channel":
@@ -358,14 +361,30 @@ var flatten;
 				var note = elem.pitches[i];
 				var actualPitch = adjustPitch(note);
 				pitches.push({ pitch: actualPitch, startTie: note.startTie });
-				elem.midiPitches.push({ pitch: actualPitch+60 }); // TODO-PER: why is the internal numbering system offset by 60 from midi? It should probably be the same as midi.
+				elem.midiPitches.push({ pitch: actualPitch+60, durationInMeasures: duration*tempoChangeFactor, volume: volume, instrument: currentInstrument }); // TODO-PER: why is the internal numbering system offset by 60 from midi? It should probably be the same as midi.
 
 				if (!pitchesTied[''+actualPitch])	// If this is the second note of a tie, we don't start it again.
 					currentTrack.push({ cmd: 'start', pitch: actualPitch, volume: velocity });
+				else {
+					// but we do add the duration to what we call back.
+					for (var last = currentTrack.length-1; last >= 0; last--) {
+						if (currentTrack[last].cmd === 'start' && currentTrack[last].pitch === actualPitch) {
+							var pitchArray = currentTrack[last].elem.midiPitches;
+							for (var last2 = 0; last2 < pitchArray.length; last2++) {
+								if (pitchArray[last2].pitch-60 === actualPitch) { // TODO-PER: the 60 is to compensate for the midi pitch numbers again.
+									console.log("add tie value", pitchArray[last2].durationInMeasures, duration * tempoChangeFactor)
+									pitchArray[last2].durationInMeasures += duration * tempoChangeFactor;
+								}
+							}
+							break;
+						}
+					}
+				}
 
-				if (note.startTie)
-					pitchesTied[''+actualPitch] = true;
-				else if (note.endTie)
+				if (note.startTie) {
+					pitchesTied['' + actualPitch] = true;
+					currentTrack[currentTrack.length-1].elem = elem;
+				} else if (note.endTie)
 					pitchesTied[''+actualPitch] = false;
 			}
 			var thisBreakBetweenNotes = normalBreakBetweenNotes;

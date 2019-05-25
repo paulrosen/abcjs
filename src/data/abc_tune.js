@@ -1238,8 +1238,17 @@ var Tune = function() {
 		// now we have all the events, but if there are multiple voices then there may be events out of order or duplicated, so normalize it.
 		timingEvents = makeSortedArray(eventHash);
 		addVerticalInfo(timingEvents);
-		timingEvents.push({ type: "end", milliseconds: voiceTimeMilliseconds })
+		timingEvents.push({ type: "end", milliseconds: voiceTimeMilliseconds });
+		this.addUsefulCallbackInfo(timingEvents);
 		return timingEvents;
+	};
+
+	this.addUsefulCallbackInfo = function(timingEvents) {
+		var millisecondsPerMeasure = this.millisecondsPerMeasure();
+		for (var i = 0; i < timingEvents.length; i++) {
+			var ev = timingEvents[i];
+			ev.millisecondsPerMeasure = millisecondsPerMeasure;
+		}
 	};
 
 	function getVertical(group) {
