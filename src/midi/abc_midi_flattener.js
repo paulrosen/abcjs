@@ -98,7 +98,7 @@ var flatten;
 			transpose = 0;
 			lastNoteDurationPosition = -1;
 			var voice = voices[i];
-			currentTrack = [{ cmd: 'program', channel: i, instrument: instrument ? instrument : 0 }];
+			currentTrack = [{ cmd: 'program', channel: i, instrument: instrument }];
 			pitchesTied = {};
 			for (var j = 0; j < voice.length; j++) {
 				var element = voice[j];
@@ -140,7 +140,7 @@ var flatten;
 					case "instrument":
 						if (instrument === undefined)
 							instrument = element.program;
-						currentTrack[0].instrument = element.program;
+						currentTrack.push({ cmd: 'program', channel: i, instrument: element.program });
 						break;
 					case "channel":
 					// 	if (channel === undefined)
@@ -166,6 +166,8 @@ var flatten;
 						break;
 				}
 			}
+			if (currentTrack[0].instrument === undefined)
+				currentTrack[0].instrument = instrument ? instrument : 0;
 			tracks.push(currentTrack);
 			if (chordTrack.length > 0) // Don't do chords on more than one track, so turn off chord detection after we create it.
 				chordTrackFinished = true;
