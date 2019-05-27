@@ -38,6 +38,7 @@ var TimingCallbacks = function(target, params) {
 	self.currentBeat = 0;
 	self.currentEvent = 0;
 	self.isPaused = false;
+	self.isRunning = false;
 	self.pausedTime = null;
 	self.justUnpaused = false;
 
@@ -90,7 +91,7 @@ var TimingCallbacks = function(target, params) {
 		}
 		if (self.isPaused) {
 			self.pausedTime = timestamp;
-		} else {
+		} else if (self.isRunning) {
 			var currentTime = timestamp - self.startTime;
 			currentTime += 50; // Add a little slop because this function isn't called exactly.
 			if (currentTime < self.lastMoment) {
@@ -125,6 +126,7 @@ var TimingCallbacks = function(target, params) {
 	};
 
 	self.start = function() {
+		self.isRunning = true;
 		if (self.isPaused) {
 			self.isPaused = false;
 			self.justUnpaused = true;
@@ -133,6 +135,7 @@ var TimingCallbacks = function(target, params) {
 	};
 	self.pause = function() {
 		self.isPaused = true;
+		self.isRunning = false;
 	};
 	self.reset = function() {
 		self.currentBeat = 0;
