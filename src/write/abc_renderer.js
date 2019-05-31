@@ -355,7 +355,12 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 				for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
 					var type = (abctune.metaText.unalignedWords[j][k].font) ? abctune.metaText.unalignedWords[j][k].font : "wordsfont";
 					var el = this.renderText(this.padding.left + spacing.INDENT + offsetX, this.y, abctune.metaText.unalignedWords[j][k].text, type, 'meta-bottom', false);
-					var size = el.getBBox();
+					var size;
+					try {
+						size = el.getBBox();
+					} catch(e) {
+						size = { width: 0, height: 0 };
+					}
 					largestY = Math.max(largestY, size.height);
 					offsetX += size.width;
 					// If the phrase ends in a space, then that is not counted in the width, so we need to add that in ourselves.
@@ -783,7 +788,12 @@ Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, center
 	var el = this.paper.text(text, hash.attr);
 
 	if (hash.font.box) {
-		var size = el.getBBox();
+		var size;
+                try {
+                        size = el.getBBox();
+                } catch(e) {
+                        size = { width: 0, height: 0 };
+                }
 		var padding = 2;
 		var margin = 2;
 		this.paper.rect({ x: size.x - padding, y: size.y, width: size.width + padding*2, height: size.height + padding*2 - margin,  stroke: "#888888", fill: "transparent"});
@@ -810,7 +820,12 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 		if (marginTop)
 			this.moveY(marginTop);
 		var el = this.renderText(x, this.y, str, kind, klass, alignment);
-		var bb = el.getBBox(); // This can return NaN if the element isn't visible.
+		var bb;
+		try {
+			bb = el.getBBox(); // This can return NaN if the element isn't visible.
+		} catch(e) {
+			bb = { width: 0, height: 0 };
+		}
 		var width = isNaN(bb.width) ? 0 : bb.width;
 		var height = isNaN(bb.height) ? 0 : bb.height;
 		var hash = this.getFontAndAttr(kind, klass);
@@ -903,7 +918,12 @@ Renderer.prototype.printVerticalLine = function (x, y1, y2) {
  * @private
  */
 Renderer.prototype.addToRegression = function (el) {
-	var box = el.getBBox();
+	var box;
+	try {
+		box = el.getBBox();
+	} catch(e) {
+		box = { width: 0, height: 0 };
+	}
 	//var str = "("+box.x+","+box.y+")["+box.width+","+box.height+"] "
 	var str = el.type + ' ' + box.toString() + ' ';
 	var attrs = [];
