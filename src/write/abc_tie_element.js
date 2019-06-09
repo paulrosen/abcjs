@@ -100,6 +100,18 @@ TieElem.prototype.layout = function (lineStartX, lineEndX) {
 	if (this.anchor1 && this.anchor2) {
 		this.startY = getPitch(this.anchor1, this.above, this.isTie);
 		this.endY = getPitch(this.anchor2, this.above, this.isTie);
+		if (lineStartX) {
+			// If one of the notes has a stem going up and the other has a stem going down, then move the end points a little.
+			var anchor1StemUp = this.anchor1.highestVert > this.anchor1.pitch;
+			var anchor2StemUp = this.anchor2.highestVert > this.anchor2.pitch;
+			if (anchor1StemUp && !anchor2StemUp) {
+				this.startY = (this.anchor1.highestVert + this.anchor1.pitch) / 2;
+				this.startX += 5; // So that the slur doesn't run into the stem.
+			}
+			if (anchor2StemUp && !anchor1StemUp) {
+				this.endY = (this.anchor2.highestVert + this.anchor2.pitch) / 2;
+			}
+		}
 	} else if (this.anchor1) {
 		this.startY = getPitch(this.anchor1, this.above, this.isTie);
 		this.endY = getPitch(this.anchor1, this.above, this.isTie);
