@@ -241,13 +241,13 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSin
 		var abselems = this.createABCElement(isFirstStaff, isSingleLineStaff, voice, ret.elem);
 		if (abselems) {
 			for (i = 0; i < abselems.length; i++) {
-				voice.addChild(abselems[i]);
 				if (!this.tempoSet && tempo && !tempo.suppress) {
 					this.tempoSet = true;
 					var tempoElement = new AbsoluteElement(ret.elem, 0, 0, "tempo", this.tuneNumber, {});
 					tempoElement.addChild(new TempoElement(tempo, this.tuneNumber, createNoteHead));
 					voice.addChild(tempoElement);
 				}
+				voice.addChild(abselems[i]);
 			}
 		}
 		pos += ret.count;
