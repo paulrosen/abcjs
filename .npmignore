@@ -1,3 +1,5 @@
 .idea/*
 tmp/*
 bin/*
+font_generator/*
+examples/*
