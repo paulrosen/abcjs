@@ -723,7 +723,7 @@ Renderer.prototype.addClasses = function (c, isNote) {
 	if (this.lineNumber !== null && this.lineNumber !== undefined) ret.push("l"+this.lineNumber);
 	if (this.measureNumber !== null && this.measureNumber !== undefined) ret.push("m"+this.measureNumber);
 	if (this.voiceNumber !== null && this.voiceNumber !== undefined) ret.push("v"+this.voiceNumber);
-	if ((c.indexOf('note') >= 0 || c.indexOf('rest') >= 0) && this.noteNumber !== null && this.noteNumber !== undefined) ret.push("n"+this.noteNumber);
+	if ((c.indexOf('note') >= 0 || c.indexOf('rest') >= 0 || c.indexOf('lyric') >= 0 ) && this.noteNumber !== null && this.noteNumber !== undefined) ret.push("n"+this.noteNumber);
 	// add a prefix to all classes that abcjs adds.
 	if (ret.length > 0) {
 		ret = ret.join(' '); // Some strings are compound classes - that is, specify more than one class in a string.
