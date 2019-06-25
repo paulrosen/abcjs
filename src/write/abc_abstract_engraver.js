@@ -471,6 +471,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			flag = (gracebeam) ? null : chartable.uflags[(isBagpipes) ? 5 : 3];
 			var accidentalSlot = [];
 			var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale*this.voiceScale, accidentalSlot, false);
+			ret.notehead.highestVert = ret.notehead.pitch + stemHeight * graceScaleStem;
 			var grace = ret.notehead;
 			this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up");
 
@@ -658,7 +659,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 
 				if (elem.startSlur || pp === 1) {
 					elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
-					if (getDuration(elem) < 0.5 && (stemdir==="up" || dir==="up"))
+					if (getDuration(elem) < 1 && (stemdir==="up" || dir==="up"))
 						elem.pitches[p].highestVert += 6;        // If the stem is up, then compensate for the length of the stem
 				}
 				if (elem.startSlur) {
@@ -670,7 +671,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 
 				if (elem.endSlur) {
 					elem.pitches[p].highestVert = elem.pitches[pp-1].verticalPos;
-					if (getDuration(elem) < 0.5 && (stemdir==="up" || dir==="up"))
+					if (getDuration(elem) < 1 && (stemdir==="up" || dir==="up"))
 						elem.pitches[p].highestVert += 6;        // If the stem is up, then compensate for the length of the stem
 					if (!elem.pitches[p].endSlur) elem.pitches[p].endSlur = []; //TODO possibly redundant, provided array is not optional
 					for (i=0; i<elem.endSlur.length; i++) {
