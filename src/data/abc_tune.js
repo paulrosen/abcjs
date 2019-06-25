@@ -192,7 +192,9 @@ var Tune = function() {
 									overlayVoice[k].snip.push({ start: snipStart, len: kk - snipStart});
 									overlayVoice[k].voice.push(event); // Also end the overlay with the barline.
 								} else {
-									overlayVoice[k].voice.push({ el_type: "note", duration: durationThisBar, rest: {type: "invisible"}, startChar: event.startChar, endChar: event.endChar });
+									// This keeps the voices lined up: if the overlay isn't in the first measure then we need a bunch of invisible rests.
+									if (durationThisBar > 0)
+										overlayVoice[k].voice.push({ el_type: "note", duration: durationThisBar, rest: {type: "invisible"}, startChar: event.startChar, endChar: event.endChar });
 									overlayVoice[k].voice.push(event);
 								}
 								durationThisBar = 0;
