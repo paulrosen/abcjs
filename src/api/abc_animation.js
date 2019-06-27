@@ -103,15 +103,19 @@ var animation = {};
 	};
 
 	animation.pauseAnimation = function(pause) {
-		if (pause)
-			timer.pause();
-		else
-			timer.start();
+		if (timer) {
+			if (pause)
+				timer.pause();
+			else
+				timer.start();
+		}
 	};
 
 	animation.stopAnimation = function() {
-		timer.stop();
-		timer = undefined;
+		if (timer) {
+			timer.stop();
+			timer = undefined;
+		}
 	};
 
 })();
