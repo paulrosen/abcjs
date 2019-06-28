@@ -114,10 +114,8 @@ var TempoElement;
 		var text;
 		if (this.tempo.preString) {
 			text = renderer.renderText(x, y, this.tempo.preString, 'tempofont', 'tempo', "start");
-			var preWidth = 0;
-			try {
-				preWidth = text.getBBox().width;
-			} catch(ex) {}
+			var size = renderer.getTextSize(this.tempo.preString, 'tempofont', 'tempo', text);
+			var preWidth = size.width;
 			var charWidth = preWidth / this.tempo.preString.length; // Just get some average number to increase the spacing.
 			x += preWidth + charWidth;
 		}
@@ -129,10 +127,8 @@ var TempoElement;
 			x += (this.note.w + 5);
 			var str = "= " + this.tempo.bpm;
 			text = renderer.renderText(x, y, str, 'tempofont', 'tempo', "start");
-			var postWidth = 0;
-			try {
-				postWidth = text.getBBox().width;
-			} catch(ex) {}
+			size = renderer.getTextSize(str, 'tempofont', 'tempo', text);
+			var postWidth = size.width;
 			var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
 			x += postWidth + charWidth2;
 		}

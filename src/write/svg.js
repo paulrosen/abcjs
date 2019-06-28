@@ -109,6 +109,13 @@ Svg.prototype.setParentStyles = function(attr) {
 				this.svg.parentNode.style[key] = attr[key];
 		}
 	}
+	// This is the last thing that gets called, so delete the temporary SVG if one was created
+	if (this.dummySvg) {
+		var body = document.querySelector('body');
+		body.removeChild(this.dummySvg);
+		this.dummySvg = null;
+	}
+
 };
 
 Svg.prototype.rect = function(attr) {
@@ -125,7 +132,7 @@ Svg.prototype.rect = function(attr) {
 	return el;
 };
 
-Svg.prototype.text = function(text, attr) {
+Svg.prototype.text = function(text, attr, target) {
 	var el = document.createElementNS(svgNS, 'text');
 	for (var key in attr) {
 		if (attr.hasOwnProperty(key)) {
@@ -141,27 +148,71 @@ Svg.prototype.text = function(text, attr) {
 			line.setAttribute("dy", "1.2em");
 		el.appendChild(line);
 	}
-	this.append(el);
+	if (target)
+		target.appendChild(el);
+	else
+		this.append(el);
 	return el;
 };
 
-Svg.prototype.getTextSize = function(text, attr) {
-	var el = this.text(text, attr);
+Svg.prototype.guessWidth = function(text, attr) {
+	var svg = this.createDummySvg();
+	var el = this.text(text, attr, svg);
 	var size;
 	try {
 		size  = el.getBBox();
-		if (isNaN(size.height)) // This can happen if the element isn't visible.
-			size = { width: 0, height: 0};
+		if (isNaN(size.height) || !size.height) // TODO-PER: I don't think this can happen unless there isn't a browser at all.
+			size = { width: attr['font-size']/2, height: attr['font-size'] + 2 }; // Just a wild guess.
 		else
-			size = { width: size.width, height: size.height };
+			size = {width: size.width, height: size.height};
 	} catch (ex) {
-		size = { width: 0, height: 0};
+		size = { width: attr['font-size']/2, height: attr['font-size'] + 2 }; // Just a wild guess.
 	}
-	// TODO-PER: can the size be gotten without inserting and deleting the element?
-	if (this.currentGroup)
-		this.currentGroup.removeChild(el);
-	else
-		this.svg.removeChild(el);
+	svg.removeChild(el);
+	return size;
+};
+
+Svg.prototype.createDummySvg = function() {
+	if (!this.dummySvg) {
+		this.dummySvg = createSvg();
+		var styles = [
+			"display: block !important;",
+			"height: 1px;",
+			"width: 1px;",
+			"position: absolute;"
+		];
+		this.dummySvg.setAttribute('style', styles.join(""));
+		var body = document.querySelector('body');
+		body.appendChild(this.dummySvg);
+	}
+
+	return this.dummySvg;
+};
+
+Svg.prototype.getTextSize = function(text, attr, el) {
+	if (typeof text === 'number')
+		text = ''+text;
+	if (!text || text.match(/^\s+$/))
+		return { width: 0, height: 0 };
+	var removeLater = !el;
+	if (!el)
+		el = this.text(text, attr);
+	var size;
+	try {
+		size  = el.getBBox();
+		if (isNaN(size.height) || !size.height)
+			size = this.guessWidth(text, attr);
+		else
+			size = {width: size.width, height: size.height};
+	} catch (ex) {
+		size = this.guessWidth(text, attr);
+	}
+	if (removeLater) {
+		if (this.currentGroup)
+			this.currentGroup.removeChild(el);
+		else
+			this.svg.removeChild(el);
+	}
 	return size;
 };
 

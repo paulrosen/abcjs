@@ -353,18 +353,14 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 				var largestY = 0;
 				var offsetX = 0;
 				for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
-					var type = (abctune.metaText.unalignedWords[j][k].font) ? abctune.metaText.unalignedWords[j][k].font : "wordsfont";
-					var el = this.renderText(this.padding.left + spacing.INDENT + offsetX, this.y, abctune.metaText.unalignedWords[j][k].text, type, 'meta-bottom', false);
-					var size;
-					try {
-						size = el.getBBox();
-					} catch(e) {
-						size = { width: 0, height: 0 };
-					}
+					var thisWord = abctune.metaText.unalignedWords[j][k];
+					var type = (thisWord.font) ? thisWord.font : "wordsfont";
+					var el = this.renderText(this.padding.left + spacing.INDENT + offsetX, this.y, thisWord.text, type, 'meta-bottom', false);
+					var size = this.getTextSize(thisWord.text, type, 'meta-bottom');
 					largestY = Math.max(largestY, size.height);
 					offsetX += size.width;
 					// If the phrase ends in a space, then that is not counted in the width, so we need to add that in ourselves.
-					if (abctune.metaText.unalignedWords[j][k].text[abctune.metaText.unalignedWords[j][k].text.length-1] === ' ') {
+					if (thisWord.text[thisWord.text.length-1] === ' ') {
 						offsetX += space.width;
 					}
 				}
@@ -755,9 +751,9 @@ Renderer.prototype.getFontAndAttr = function(type, klass) {
 	return { font: font, attr: attr };
 };
 
-Renderer.prototype.getTextSize = function(text, type, klass) {
+Renderer.prototype.getTextSize = function(text, type, klass, el) {
 	var hash = this.getFontAndAttr(type, klass);
-	var size = this.paper.getTextSize(text, hash.attr);
+	var size = this.paper.getTextSize(text, hash.attr, el);
 	if (hash.font.box) {
 		size.height += 8;
 		size.width += 8;
@@ -788,15 +784,10 @@ Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, center
 	var el = this.paper.text(text, hash.attr);
 
 	if (hash.font.box) {
-		var size;
-                try {
-                        size = el.getBBox();
-                } catch(e) {
-                        size = { width: 0, height: 0 };
-                }
+		var size = this.getTextSize(text, type, klass);
 		var padding = 2;
 		var margin = 2;
-		this.paper.rect({ x: size.x - padding, y: size.y, width: size.width + padding*2, height: size.height + padding*2 - margin,  stroke: "#888888", fill: "transparent"});
+		this.paper.rect({ x: x - padding, y: y, width: size.width + padding*2, height: size.height + padding*2 - margin,  stroke: "#888888", fill: "transparent"});
 		//size.height += 8;
 	}
 	if (this.doRegression) this.addToRegression(el);
@@ -820,12 +811,7 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 		if (marginTop)
 			this.moveY(marginTop);
 		var el = this.renderText(x, this.y, str, kind, klass, alignment);
-		var bb;
-		try {
-			bb = el.getBBox(); // This can return NaN if the element isn't visible.
-		} catch(e) {
-			bb = { width: 0, height: 0 };
-		}
+		var bb = this.getTextSize(str, kind, klass);
 		var width = isNaN(bb.width) ? 0 : bb.width;
 		var height = isNaN(bb.height) ? 0 : bb.height;
 		var hash = this.getFontAndAttr(kind, klass);
