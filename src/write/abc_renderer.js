@@ -347,7 +347,9 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 		if (abctune.metaText.unalignedWords.length > 0)
 			this.moveY(this.spacing.words, 1);
 		for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
-			if (typeof abctune.metaText.unalignedWords[j] === 'string') {
+			if (abctune.metaText.unalignedWords[j] === '')
+				this.moveY(hash.font.size, 1);
+			else if (typeof abctune.metaText.unalignedWords[j] === 'string') {
 				this.outputTextIf(this.padding.left + spacing.INDENT, abctune.metaText.unalignedWords[j], 'wordsfont', 'meta-bottom', 0, 0, "start");
 			} else {
 				var largestY = 0;
