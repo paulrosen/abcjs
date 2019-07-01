@@ -218,13 +218,14 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSin
   }
   for (var slur in this.slurs) {
     if (this.slurs.hasOwnProperty(slur)) {
-      this.slurs[slur]= new TieElem(null, null, this.slurs[slur].above, this.slurs[slur].force, false);
+      this.slurs[slur]= new TieElem({above: this.slurs[slur].above, force: this.slurs[slur].force, isTie: false});
 		if (hint) this.slurs[slur].setHint();
 	    voice.addOther(this.slurs[slur]);
     }
   }
   for (var i=0; i<this.ties.length; i++) {
-    this.ties[i]=new TieElem(null, null, this.ties[i].above, this.ties[i].force, true);
+  	// this is already a tie element, but it was created for the last line, so recreate it.
+    this.ties[i]=new TieElem({ above: this.ties[i].above, force: this.ties[i].force, isTie: true, stemDir: this.ties[i].stemDir });
 	  if (hint) this.ties[i].setHint();
 	  voice.addOther(this.ties[i]);
   }
@@ -473,7 +474,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale*this.voiceScale, accidentalSlot, false);
 			ret.notehead.highestVert = ret.notehead.pitch + stemHeight * graceScaleStem;
 			var grace = ret.notehead;
-			this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up");
+			this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up", true);
 
 			abselem.addExtra(grace);
 			// PER: added acciaccatura slash
@@ -501,7 +502,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 
 			if (i === 0 && !isBagpipes && !(elem.rest && (elem.rest.type === "spacer" || elem.rest.type === "invisible"))) {
 				var isTie = (elem.gracenotes.length === 1 && grace.pitch === notehead.pitch);
-				voice.addOther(new TieElem(grace, notehead, false, true, isTie));
+				voice.addOther(new TieElem({ anchor1: grace, anchor2: notehead, above: false, force: true, isTie: isTie, isGrace: true}));
 			}
 		}
 
@@ -681,12 +682,12 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			}
 
 			var hasStem = !nostem && durlog<=-1;
-			var ret = createNoteHead(abselem, c, elem.pitches[p], hasStem ? dir : null, 0, -roomTaken, flag, dot, dotshiftx, this.voiceScale, accidentalSlot, !stemdir);
+			var ret = createNoteHead(abselem, c, elem.pitches[p], dir, 0, -roomTaken, flag, dot, dotshiftx, this.voiceScale, accidentalSlot, !stemdir);
 			symbolWidth = Math.max(glyphs.getSymbolWidth(c), symbolWidth);
 			abselem.extraw -= ret.extraLeft;
 			noteHead = ret.notehead;
 			if (noteHead) {
-				this.addSlursAndTies(abselem, elem.pitches[p], noteHead, voice, hasStem ? dir : null);
+				this.addSlursAndTies(abselem, elem.pitches[p], noteHead, voice, hasStem ? dir : null, false);
 
 				if (elem.gracenotes && elem.gracenotes.length > 0)
 					noteHead.bottom = noteHead.bottom - 1;	 // If there is a tie to the grace notes, leave a little more room for the note to avoid collisions.
@@ -963,17 +964,29 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 
 };
 
-	AbstractEngraver.prototype.addSlursAndTies = function(abselem, pitchelem, notehead, voice, dir) {
+	AbstractEngraver.prototype.addSlursAndTies = function(abselem, pitchelem, notehead, voice, dir, isGrace) {
 		if (pitchelem.endTie) {
-			if (this.ties[0]) {
-				this.ties[0].setEndAnchor(notehead);
-				this.ties = this.ties.slice(1,this.ties.length);
+			if (this.ties.length > 0) {
+				// If there are multiple open ties, find the one that applies by matching the pitch, if possible.
+				var found = false;
+				for (var j = 0; j < this.ties.length; j++) {
+					if (this.ties[j].anchor1 && this.ties[j].anchor1.pitch === notehead.pitch) {
+						this.ties[j].setEndAnchor(notehead);
+						this.ties.splice(j, 1);
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					this.ties[0].setEndAnchor(notehead);
+					this.ties.splice(0, 1);
+				}
 			}
 		}
 
 		if (pitchelem.startTie) {
 			//PER: bug fix: var tie = new TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
-			var tie = new TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up",(this.stemdir==="down" || this.stemdir==="up"), true);
+			var tie = new TieElem({ anchor1: notehead, above: (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", force: (this.stemdir==="down" || this.stemdir==="up"), isTie: true, stemDir: this.stemdir, dir: dir, isGrace: isGrace});
 			if (hint) tie.setHint();
 
 			this.ties[this.ties.length]=tie;
@@ -993,7 +1006,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 					slur.setEndAnchor(notehead);
 					delete this.slurs[slurid];
 				} else {
-					slur = new TieElem(null, notehead, dir==="down",(this.stemdir==="up" || dir==="down") && this.stemdir!=="down", false);
+					slur = new TieElem({ anchor2: notehead, above: dir==="down", force: (this.stemdir==="up" || dir==="down") && this.stemdir!=="down", isTie: false, stemDir: this.stemdir, dir: dir});
 					if (hint) slur.setHint();
 					voice.addOther(slur);
 				}
@@ -1007,7 +1020,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 			for (i=0; i<pitchelem.startSlur.length; i++) {
 				var slurid = pitchelem.startSlur[i].label;
 				//PER: bug fix: var slur = new TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
-				var slur = new TieElem(notehead, null, (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", false, false);
+				var slur = new TieElem({ anchor1: notehead, above: (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", force: false, isTie: false, stemDir: this.stemdir, dir: dir});
 				if (hint) slur.setHint();
 				this.slurs[slurid]=slur;
 				voice.addOther(slur);
