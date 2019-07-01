@@ -35,13 +35,16 @@ var animation = {};
 			timer = undefined;
 		}
 
-		if (options.showCursor && !paper.querySelector('.abcjs-cursor')) {
-			cursor = document.createElement('DIV');
-			cursor.className = 'abcjs-cursor cursor';
-			cursor.style.position = 'absolute';
+		if (options.showCursor) {
+			cursor = paper.querySelector('.abcjs-cursor');
+			if (!cursor) {
+				cursor = document.createElement('DIV');
+				cursor.className = 'abcjs-cursor cursor';
+				cursor.style.position = 'absolute';
 
-			paper.appendChild(cursor);
-			paper.style.position = 'relative';
+				paper.appendChild(cursor);
+				paper.style.position = 'relative';
+			}
 		}
 
 		function hideMeasures(elements) {
@@ -85,10 +88,12 @@ var animation = {};
 					if (selector)
 						measureCallback(selector);
 				}
-				cursor.style.left = range.left + "px";
-				cursor.style.top = range.top + "px";
-				cursor.style.width = range.width + "px";
-				cursor.style.height = range.height + "px";
+				if (cursor) {
+					cursor.style.left = range.left + "px";
+					cursor.style.top = range.top + "px";
+					cursor.style.width = range.width + "px";
+					cursor.style.height = range.height + "px";
+				}
 			} else {
 				timer.stop();
 				timer = undefined;
