@@ -1183,7 +1183,7 @@ var Tune = function() {
 		return voicesArr;
 	};
 
-	this.setupEvents = function(startingDelay, timeDivider) {
+	this.setupEvents = function(startingDelay, timeDivider, bpm) {
 		var timingEvents = [];
 
 		var eventHash = {};
@@ -1242,12 +1242,12 @@ var Tune = function() {
 		timingEvents = makeSortedArray(eventHash);
 		addVerticalInfo(timingEvents);
 		timingEvents.push({ type: "end", milliseconds: voiceTimeMilliseconds });
-		this.addUsefulCallbackInfo(timingEvents);
+		this.addUsefulCallbackInfo(timingEvents, bpm);
 		return timingEvents;
 	};
 
-	this.addUsefulCallbackInfo = function(timingEvents) {
-		var millisecondsPerMeasure = this.millisecondsPerMeasure();
+	this.addUsefulCallbackInfo = function(timingEvents, bpm) {
+		var millisecondsPerMeasure = this.millisecondsPerMeasure(bpm);
 		for (var i = 0; i < timingEvents.length; i++) {
 			var ev = timingEvents[i];
 			ev.millisecondsPerMeasure = millisecondsPerMeasure;
@@ -1301,7 +1301,7 @@ var Tune = function() {
 			startingDelay -= this.getPickupLength() / beatLength / beatsPerSecond;
 		var timeDivider = beatLength * beatsPerSecond;
 
-		this.noteTimings = this.setupEvents(startingDelay, timeDivider);
+		this.noteTimings = this.setupEvents(startingDelay, timeDivider, bpm);
 	};
 };
 
