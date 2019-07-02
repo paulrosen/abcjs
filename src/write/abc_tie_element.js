@@ -85,61 +85,28 @@ TieElem.prototype.calcTieDirection = function () {
 	}
 };
 
-function hasStem(anchor) {
-	return anchor && anchor.parent.duration < 1;
-}
-
-function isStemUp(anchor) {
-	if (!anchor)
-		return false;
-	if (!hasStem(anchor)) // is there a stem at all?
-		return false;
-	// TODO-PER: this is a fragile way to detect that there is a stem going up on this note.
-	return anchor.pitch !== anchor.highestVert;
-}
-
-function getPitch(anchor, isAbove, isTie) {
-	if (isTie) {
-		// Always go to the note
-		return anchor.pitch;
-	}
-	if (isAbove && anchor.highestVert !== undefined)
-		return anchor.highestVert;
-	return anchor.pitch;
-}
-
-TieElem.prototype.layout = function (lineStartX, lineEndX) {
-	// We now have all of the input variables set, so we can figure out the start and ending x,y coordinates, and finalize the direction of the arc.
-
-	// Ties and slurs are handled a little differently, so do calculations for them separately.
-	if (this.isTie) {
-		this.calcTieDirection();
-		if (this.anchor1) // this can happen if the tie comes from the previous line.
-			this.anchor1.tieAbove = this.above;
-		if (this.anchor2) // this can happen if the tie goes to the next line.
-			this.anchor2.tieAbove = this.above;
-	} else {
-
-		// PER: We might have to override the natural slur direction if the first and last notes are not in the
-		// same direction. We always put the slur up in this case. The one case that works out wrong is that we always
-		// want the slur to be up when the last note is stem down. We can tell the stem direction if the top is
-		// equal to the pitch: if so, there is no stem above it.
-		if (!this.force) {
-			if (!hasStem(this.anchor1) && !hasStem(this.anchor2))
-				; // If neither note has a stem, just take the natural direction.
-			else if (hasStem(this.anchor1) && !hasStem(this.anchor2))
-				; // if the first note has a stem and the second doesn't, just take the natural direction.
-			else if (!isStemUp(this.anchor2))
-				this.above = true;
-		}
-
-		// There is an exception in the slur direction if there is also a tie on the starting or ending note.
-		if (!this.force && this.anchor2 && this.anchor2.isTie)
-			this.above = this.anchor2.tieAbove;
-		else if (!this.force && this.anchor1 && this.anchor1.isTie)
-			this.above = this.anchor1.tieAbove;
+TieElem.prototype.calcSlurDirection = function () {
+	// PER: We might have to override the natural slur direction if the first and last notes are not in the
+	// same direction. We always put the slur up in this case. The one case that works out wrong is that we always
+	// want the slur to be up when the last note is stem down. We can tell the stem direction if the top is
+	// equal to the pitch: if so, there is no stem above it.
+	if (!this.force) {
+		if (!hasStem(this.anchor1) && !hasStem(this.anchor2))
+			; // If neither note has a stem, just take the natural direction.
+		else if (hasStem(this.anchor1) && !hasStem(this.anchor2))
+			; // if the first note has a stem and the second doesn't, just take the natural direction.
+		else if (!isStemUp(this.anchor2))
+			this.above = true;
 	}
 
+	// There is an exception in the slur direction if there is also a tie on the starting or ending note.
+	if (!this.force && this.anchor2 && this.anchor2.isTie)
+		this.above = this.anchor2.tieAbove;
+	else if (!this.force && this.anchor1 && this.anchor1.isTie)
+		this.above = this.anchor1.tieAbove;
+};
+
+TieElem.prototype.calcX = function (lineStartX, lineEndX) {
 	if (this.anchor1) {
 		this.startX = this.anchor1.x; // The normal case where there is a starting element to attach to.
 		if (this.anchor1.scalex < 1) // this is a grace note - don't offset the tie as much.
@@ -155,12 +122,30 @@ TieElem.prototype.layout = function (lineStartX, lineEndX) {
 		this.endX = this.endLimitX.x; // if there is no start element, but there is a repeat mark before the start of the line.
 	else
 		this.endX = lineEndX; // There is no element and no repeat mark: extend to the beginning of the line.
+};
 
-	// For the pitches, if one of the anchors is present, both of the pitches are that anchor. If both are present, then we use both. If neither is present, we use the top of the staff.
+TieElem.prototype.calcTieY = function () {
+	// If the tie comes from another line, then one or both anchors will be missing.
+	if (this.anchor1)
+		this.startY = this.anchor1.pitch;
+	else if (this.anchor2)
+		this.startY = this.anchor2.pitch;
+	else
+		this.startY = this.above ? 14 : 0;
+
+	if (this.anchor2)
+		this.endY = this.anchor2.pitch;
+	else if (this.anchor1)
+		this.endY = this.anchor1.pitch;
+	else
+		this.endY = this.above ? 14 : 0;
+};
+
+TieElem.prototype.calcSlurY = function () {
 	if (this.anchor1 && this.anchor2) {
-		this.startY = getPitch(this.anchor1, this.above, this.isTie);
-		this.endY = getPitch(this.anchor2, this.above, this.isTie);
-		if (lineStartX) {
+		this.startY = getPitch(this.anchor1, this.above);
+		this.endY = getPitch(this.anchor2, this.above);
+		//if (lineStartX) {
 			// If one of the notes has a stem going up and the other has a stem going down, then move the end points a little.
 			var anchor1StemUp = this.anchor1.highestVert > this.anchor1.pitch;
 			var anchor2StemUp = this.anchor2.highestVert > this.anchor2.pitch;
@@ -171,18 +156,59 @@ TieElem.prototype.layout = function (lineStartX, lineEndX) {
 			if (anchor2StemUp && !anchor1StemUp && this.anchor1.pitch > this.anchor2.pitch) {
 				this.endY = (this.anchor2.highestVert + this.anchor2.pitch) / 2;
 			}
-		}
+		//}
 	} else if (this.anchor1) {
-		this.startY = getPitch(this.anchor1, this.above, this.isTie);
-		this.endY = getPitch(this.anchor1, this.above, this.isTie);
+		this.startY = getPitch(this.anchor1, this.above);
+		this.endY = getPitch(this.anchor1, this.above);
 	} else if (this.anchor2) {
-		this.startY = getPitch(this.anchor2, this.above, this.isTie);
-		this.endY = getPitch(this.anchor2, this.above, this.isTie);
+		this.startY = getPitch(this.anchor2, this.above);
+		this.endY = getPitch(this.anchor2, this.above);
 	} else {
 		// This is the case where the slur covers the entire line.
 		// TODO-PER: figure out where the real top and bottom of the line are.
 		this.startY = this.above ? 14 : 0;
 		this.endY = this.above ? 14 : 0;
+	}
+};
+
+function hasStem(anchor) {
+	return anchor && anchor.parent.duration < 1;
+}
+
+function isStemUp(anchor) {
+	if (!anchor)
+		return false;
+	if (!hasStem(anchor)) // is there a stem at all?
+		return false;
+	// TODO-PER: this is a fragile way to detect that there is a stem going up on this note.
+	return anchor.pitch !== anchor.highestVert;
+}
+
+function getPitch(anchor, isAbove) {
+	if (isAbove && anchor.highestVert !== undefined)
+		return anchor.highestVert;
+	return anchor.pitch;
+}
+
+TieElem.prototype.layout = function (lineStartX, lineEndX) {
+	// We now have all of the input variables set, so we can figure out the start and ending x,y coordinates, and finalize the direction of the arc.
+
+	// Ties and slurs are handled a little differently, so do calculations for them separately.
+	if (this.isTie) {
+		this.calcTieDirection();
+		if (this.anchor1) // this can happen if the tie comes from the previous line.
+			this.anchor1.tieAbove = this.above;
+		if (this.anchor2) // this can happen if the tie goes to the next line.
+			this.anchor2.tieAbove = this.above;
+		this.calcX(lineStartX, lineEndX);
+		this.calcTieY();
+
+	} else {
+
+		this.calcSlurDirection();
+		this.calcX(lineStartX, lineEndX);
+		this.calcSlurY();
+
 	}
 };
 
