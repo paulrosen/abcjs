@@ -1018,7 +1018,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 					slur.setStartX(this.startlimitelem);
 				}
 			}
-		} else {
+		} else if (!isGrace) {
 			for (var s in this.slurs) {
 				if (this.slurs.hasOwnProperty(s)) {
 					this.slurs[s].addInternalNote(notehead);

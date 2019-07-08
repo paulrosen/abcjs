@@ -18,9 +18,7 @@ var TieElem = function TieElem(options) {
 //	console.log("constructor", options.anchor1 ? options.anchor1.pitch : "N/A", options.anchor2 ? options.anchor2.pitch : "N/A", options.isTie, options.isGrace);
 	this.anchor1 = options.anchor1; // must have a .x and a .pitch, and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = options.anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
-	if (this.force)
-		this.force = true;
-	if (this.isGrace)
+	if (options.isGrace)
 		this.isGrace = true;
 	if (options.fixedY)
 		this.fixedY = true;
@@ -77,7 +75,13 @@ TieElem.prototype.calcTieDirection = function () {
 			referencePitch = this.anchor2.pitch;
 		else
 			referencePitch = 14; // TODO-PER: this can't really happen normally. This would imply that a tie crossed over three lines, something like "C-\nz\nC"
-		this.above = referencePitch >= 6;
+		// Put the arc in the opposite direction of the stem. That isn't always the pitch if one or both of the notes are beamed with something that affects its stem.
+		if ((this.anchor1 && this.anchor1.stemDir === 'down') && (this.anchor2 && this.anchor2.stemDir === "down"))
+			this.above = true;
+		else if ((this.anchor1 && this.anchor1.stemDir === 'up') && (this.anchor2 && this.anchor2.stemDir === "up"))
+			this.above = false;
+		else
+			this.above = referencePitch >= 6;
 	}
 };
 
@@ -156,11 +160,13 @@ TieElem.prototype.calcSlurY = function () {
 		} else
 			this.startY = this.anchor1.pitch;
 
-		if (this.above && this.anchor2.stemDir === "up" && !this.fixedY) {
+		// If the closing note has an up stem, and it is beamed, and it isn't the first note in the beam, then the beam will get in the way.
+		var beamInterferes = this.anchor2.parent.beam && this.anchor2.parent.beam.stemsUp && this.anchor2.parent.beam.elems[0] !== this.anchor2.parent;
+		if (this.above && this.anchor2.stemDir === "up" && !this.fixedY && !beamInterferes) {
 			this.endY = (this.anchor2.highestVert + this.anchor2.pitch) / 2;
 			this.endX += this.anchor2.w/2; // When going to the middle of the stem, bump the line to the right a little bit to make it look right.
 		} else
-			this.endY = this.anchor2.pitch;
+			this.endY = this.above && beamInterferes ? this.anchor2.highestVert : this.anchor2.pitch;
 
 	} else if (this.anchor1) {
 		this.startY = this.endY = this.anchor1.pitch;
@@ -171,6 +177,19 @@ TieElem.prototype.calcSlurY = function () {
 		// TODO-PER: figure out where the real top and bottom of the line are.
 		this.startY = this.above ? 14 : 0;
 		this.endY = this.above ? 14 : 0;
+	}
+};
+
+TieElem.prototype.avoidCollisionAbove = function () {
+	// Double check that an interior note in the slur isn't so high that it interferes.
+	if (this.above) {
+		var maxInnerHeight = -50;
+		for (var i = 0; i < this.internalNotes.length; i++) {
+			if (this.internalNotes[i].highestVert > maxInnerHeight)
+				maxInnerHeight = this.internalNotes[i].highestVert;
+		}
+		if (maxInnerHeight > this.startY && maxInnerHeight > this.endY)
+			this.startY = this.endY = maxInnerHeight - 1;
 	}
 };
 
@@ -208,6 +227,7 @@ TieElem.prototype.layout = function (lineStartX, lineEndX) {
 		this.calcX(lineStartX, lineEndX);
 		this.calcSlurY();
 	}
+	this.avoidCollisionAbove();
 };
 
 TieElem.prototype.draw = function (renderer, linestartx, lineendx) {
