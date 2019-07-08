@@ -216,16 +216,18 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSin
     this.partstartelem = new EndingElem("", null, null);
 	  voice.addOther(this.partstartelem);
   }
+	var voiceNumber = voice.voicetotal < 2 ? -1 : voice.voicenumber;
   for (var slur in this.slurs) {
     if (this.slurs.hasOwnProperty(slur)) {
-      this.slurs[slur]= new TieElem({above: this.slurs[slur].above, force: this.slurs[slur].force, isTie: false});
+	    // this is already a slur element, but it was created for the last line, so recreate it.
+      this.slurs[slur]= new TieElem({force: this.slurs[slur].force, voiceNumber: voiceNumber});
 		if (hint) this.slurs[slur].setHint();
 	    voice.addOther(this.slurs[slur]);
     }
   }
   for (var i=0; i<this.ties.length; i++) {
   	// this is already a tie element, but it was created for the last line, so recreate it.
-    this.ties[i]=new TieElem({ above: this.ties[i].above, force: this.ties[i].force, isTie: true, stemDir: this.ties[i].stemDir });
+    this.ties[i]=new TieElem({ force: this.ties[i].force, stemDir: this.ties[i].stemDir, voiceNumber: voiceNumber });
 	  if (hint) this.ties[i].setHint();
 	  voice.addOther(this.ties[i]);
   }
@@ -501,8 +503,9 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			ledgerLines(abselem, gracepitch, gracepitch, false, glyphs.getSymbolWidth("noteheads.quarter"), [], true, grace.dx - 1, 0.6);
 
 			if (i === 0 && !isBagpipes && !(elem.rest && (elem.rest.type === "spacer" || elem.rest.type === "invisible"))) {
+				// This is the overall slur that is under the grace notes.
 				var isTie = (elem.gracenotes.length === 1 && grace.pitch === notehead.pitch);
-				voice.addOther(new TieElem({ anchor1: grace, anchor2: notehead, above: false, force: true, isTie: isTie, isGrace: true}));
+				voice.addOther(new TieElem({ anchor1: grace, anchor2: notehead, isGrace: true}));
 			}
 		}
 
@@ -894,6 +897,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
     }
 	  var opts = {scalex:scale, scaley: scale, thickness: glyphs.symbolHeightInPitches(c)*scale };
     notehead = new RelativeElement(c, shiftheadx, glyphs.getSymbolWidth(c)*scale, pitch, opts);
+    notehead.stemDir = dir;
     if (flag) {
       var pos = pitch+((dir==="down")?-7:7)*scale;
       // if this is a regular note, (not grace or tempo indicator) then the stem will have been stretched to the middle line if it is far from the center.
@@ -984,9 +988,9 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 			}
 		}
 
+		var voiceNumber = voice.voicetotal < 2 ? -1 : voice.voicenumber;
 		if (pitchelem.startTie) {
-			//PER: bug fix: var tie = new TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down",(this.stemdir=="down" || this.stemdir=="up"));
-			var tie = new TieElem({ anchor1: notehead, above: (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", force: (this.stemdir==="down" || this.stemdir==="up"), isTie: true, stemDir: this.stemdir, dir: dir, isGrace: isGrace});
+			var tie = new TieElem({ anchor1: notehead, force: (this.stemdir==="down" || this.stemdir==="up"), stemDir: this.stemdir, isGrace: isGrace, voiceNumber: voiceNumber});
 			if (hint) tie.setHint();
 
 			this.ties[this.ties.length]=tie;
@@ -1006,7 +1010,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 					slur.setEndAnchor(notehead);
 					delete this.slurs[slurid];
 				} else {
-					slur = new TieElem({ anchor2: notehead, above: dir==="down", force: (this.stemdir==="up" || dir==="down") && this.stemdir!=="down", isTie: false, stemDir: this.stemdir, dir: dir});
+					slur = new TieElem({ anchor2: notehead, stemDir: this.stemdir, voiceNumber: voiceNumber});
 					if (hint) slur.setHint();
 					voice.addOther(slur);
 				}
@@ -1014,13 +1018,18 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 					slur.setStartX(this.startlimitelem);
 				}
 			}
+		} else {
+			for (var s in this.slurs) {
+				if (this.slurs.hasOwnProperty(s)) {
+					this.slurs[s].addInternalNote(notehead);
+				}
+			}
 		}
 
 		if (pitchelem.startSlur) {
 			for (i=0; i<pitchelem.startSlur.length; i++) {
 				var slurid = pitchelem.startSlur[i].label;
-				//PER: bug fix: var slur = new TieElem(notehead, null, (this.stemdir=="up" || dir=="down") && this.stemdir!="down", this.stemdir);
-				var slur = new TieElem({ anchor1: notehead, above: (this.stemdir==="down" || dir==="down") && this.stemdir!=="up", force: false, isTie: false, stemDir: this.stemdir, dir: dir});
+				var slur = new TieElem({ anchor1: notehead, stemDir: this.stemdir, voiceNumber: voiceNumber});
 				if (hint) slur.setHint();
 				this.slurs[slurid]=slur;
 				voice.addOther(slur);

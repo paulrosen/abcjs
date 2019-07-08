@@ -310,9 +310,27 @@ var verticalLint = function(tunes) {
 					for (var key in otherChild) {
 						if (otherChild.hasOwnProperty(key)) {
 							var value = otherChild[key];
-							if (typeof value === "object")
-								ch.params[key] = "object";
-							else if (typeof value === "number")
+							if (value === null)
+								ch.params[key] = "null";
+							else if (typeof value === "object") {
+								var obj3 = value.constructor.name + '[';
+								switch (value.constructor.name) {
+									case "AbsoluteElement":
+										obj3 += value.type;
+										break;
+									case "RelativeElement":
+										obj3 += value.pitch;
+										break;
+									case "Array":
+										obj3 += value.length;
+										break;
+									default:
+										console.log(value.constructor.name);
+										ch.params[key] = value.constructor.name;
+										break;
+								}
+								ch.params[key] = obj3 +']';
+							} else if (typeof value === "number")
 								ch.params[key] = fixed2(value);
 							else
 								ch.params[key] = value;

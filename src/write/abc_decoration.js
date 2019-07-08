@@ -75,7 +75,7 @@ var Decoration;
 				var blank2 = new RelativeElement("", -roomtaken-5, 0, yPos2+1);
 				abselem.addChild(blank1);
 				abselem.addChild(blank2);
-				voice.addOther(new TieElem({ anchor1: blank1, anchor2: blank2, above: false, force: false, isTie: false}));
+				voice.addOther(new TieElem({ anchor1: blank1, anchor2: blank2, fixedY: true}));
 			}
 		}
 		if (yPos === undefined)
