@@ -1,3 +1,51 @@
+# Version 5.7.0
+
+## Bugs:
+
+* Improve slur and tie direction and placement by following "Standard Practice Engraving".
+
+* Use override when calculating beats per measure in the timing functions.
+
+* Fix crash when using the old animation routine without a cursor.
+
+* Handle blank lines in the verses at the bottom.
+
+* Allow calling pauseAnimation and stopAnimation even if the animation hasn't started.
+
+* Fix alignment of overlay voices when the line starts with a bar line.
+
+* Don't start TimingCallbacks timer if there is a seek before the timer starts.
+
+* Expose TimingCallbacks in the midi and test versions.
+
+## Features:
+
+* Allow creation of SVG when it isn't visible in the DOM (by creating a dummy one if necessary).
+
+* Add classes to lyric lines.
+
+* Separate the tempo element into its own svg path so that it can be treated separately.
+
+* Support 6/4 time.
+
+* Invert beatCallback and timingCallback events.
+
+* Add more information in the callback for both the timingCallbacks and the note click callback about the sound of the note clicked.
+
+* In midi, support switching instruments in the same track.
+
+* In midi, return the pitch that is being played in the event; add the total duration as a parameter of the midi; expose getBeatsPerMeasure() in the tune structure.
+
+* In TimingCallbacks, allow subdividing beat callbacks.
+
+## Tasks:
+
+* Update webpack/babel to the latest versions.
+
+* Clean up the text size estimation to just be done in one place, and create a dummy svg if there isn't one available.
+
+* Remove the examples and the font_generator from the npm version.
+
 # Version 5.6.11
 
 ## Bugs
