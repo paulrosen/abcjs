@@ -772,9 +772,10 @@ var parseDirective = {};
 				if (scratch !== null) return scratch;
 				break;
 			case "setbarnb":
-				scratch = addMultilineVar('setbarnb', cmd, tokens);
-				if (scratch !== null) return scratch;
-				multilineVars.setBarNumber();
+				if (tokens.length !== 1 || tokens[0].type !== 'number') {
+					return 'Directive setbarnb requires a number as a parameter.';
+				}
+				multilineVars.currBarNumber = tokens[0].intt;
 				break;
 			case "begintext":
 				multilineVars.inTextBlock = true;

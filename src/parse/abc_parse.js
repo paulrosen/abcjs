@@ -112,13 +112,6 @@ var Parse = function() {
 				if (this.differentFont("measurefont", defaultFonts)) addFont(el, 'measurefont', this.measurefont);
 				if (this.differentFont("repeatfont", defaultFonts)) addFont(el, 'repeatfont', this.repeatfont);
 			}
-    },
-    setBarNumber: function(optBarNumber) {
-      if (optBarNumber !== undefined)
-        this.currBarNumber = optBarNumber;
-      else
-        this.currBarNumber = this.setbarnb;
-      delete this.setbarnb;
     }
 	};
 
