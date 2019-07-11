@@ -771,6 +771,11 @@ var parseDirective = {};
 				scratch = addMultilineVar('barNumbers', cmd, tokens);
 				if (scratch !== null) return scratch;
 				break;
+			case "setbarnb":
+				scratch = addMultilineVar('setbarnb', cmd, tokens);
+				if (scratch !== null) return scratch;
+				multilineVars.setBarNumber();
+				break;
 			case "begintext":
 				multilineVars.inTextBlock = true;
 				break;
