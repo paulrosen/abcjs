@@ -112,7 +112,7 @@ var Parse = function() {
 				if (this.differentFont("measurefont", defaultFonts)) addFont(el, 'measurefont', this.measurefont);
 				if (this.differentFont("repeatfont", defaultFonts)) addFont(el, 'repeatfont', this.repeatfont);
 			}
-    }
+		}
 	};
 
 	var addWarning = function(str) {
