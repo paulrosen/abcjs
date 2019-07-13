@@ -141,7 +141,7 @@ VoiceElement.prototype.addBeam = function (child) {
 VoiceElement.prototype.updateIndices = function () {
 	if (!this.layoutEnded()) {
 		this.durationindex += this.children[this.i].duration;
-		if (this.children[this.i].duration===0) this.durationindex = Math.round(this.durationindex*64)/64; // everytime we meet a barline, do rounding to nearest 64th
+		if (this.children[this.i].type === 'bar') this.durationindex = Math.round(this.durationindex*64)/64; // everytime we meet a barline, do rounding to nearest 64th
 		this.i++;
 	}
 };
@@ -184,8 +184,11 @@ VoiceElement.prototype.layoutOneItem = function (x, spacing) {
 	var child = this.children[this.i];
 	if (!child) return 0;
 	var er = x - this.minx; // available extrawidth to the left
-	if (er<child.getExtraWidth()) { // shift right by needed amount
-		x+=child.getExtraWidth()-er;
+	var extraWidth = child.getExtraWidth();
+	if (er<extraWidth) { // shift right by needed amount
+		// There's an exception if a bar element is after a Part element, there is no shift.
+		if (this.i === 0 || child.type !== 'bar' || this.children[this.i-1].type !== 'part' )
+			x+=extraWidth-er;
 	}
 	child.setX(x);
 
