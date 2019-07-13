@@ -658,15 +658,20 @@ var Tune = function() {
 	{
 		var This = this;
 		var pushNote = function(hp) {
+			var currStaff = This.lines[This.lineNum].staff[This.staffNum];
+			if (!currStaff) {
+				// TODO-PER: This prevents a crash, but it drops the element. Need to figure out how to start a new line, or delay adding this.
+				return;
+			}
 			if (hp.pitches !== undefined) {
-				var mid = This.lines[This.lineNum].staff[This.staffNum].workingClef.verticalPos;
+				var mid = currStaff.workingClef.verticalPos;
 				parseCommon.each(hp.pitches, function(p) { p.verticalPos = p.pitch - mid; });
 			}
 			if (hp.gracenotes !== undefined) {
-				var mid2 = This.lines[This.lineNum].staff[This.staffNum].workingClef.verticalPos;
+				var mid2 = currStaff.workingClef.verticalPos;
 				parseCommon.each(hp.gracenotes, function(p) { p.verticalPos = p.pitch - mid2; });
 			}
-			This.lines[This.lineNum].staff[This.staffNum].voices[This.voiceNum].push(hp);
+			currStaff.voices[This.voiceNum].push(hp);
 		};
 		hashParams.el_type = type;
 		if (startChar !== null)
