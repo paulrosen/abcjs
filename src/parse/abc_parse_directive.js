@@ -775,7 +775,7 @@ var parseDirective = {};
 				if (tokens.length !== 1 || tokens[0].type !== 'number') {
 					return 'Directive setbarnb requires a number as a parameter.';
 				}
-				multilineVars.currBarNumber = tokens[0].intt;
+				multilineVars.currBarNumber = tune.setBarNumberImmediate(tokens[0].intt);
 				break;
 			case "begintext":
 				multilineVars.inTextBlock = true;

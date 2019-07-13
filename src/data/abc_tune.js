@@ -931,6 +931,22 @@ var Tune = function() {
 		}
 	};
 
+	this.setBarNumberImmediate = function(barNumber) {
+		// If this is called right at the beginning of a line, then correct the measure number that is already written.
+		// If this is called at the beginning of a measure, then correct the measure number that was just created.
+		// If this is called in the middle of a measure, then subtract one from it, because it will be incremented before applied.
+		var currentVoice = this.getCurrentVoice();
+		if (currentVoice && currentVoice.length > 0) {
+			var lastElement = currentVoice[currentVoice.length-1];
+			if (lastElement.el_type === 'bar') {
+				if (lastElement.barNumber !== undefined) // the measure number might not be written for this bar, don't override that.
+					lastElement.barNumber = barNumber;
+			} else
+				return barNumber-1;
+		}
+		return barNumber;
+	};
+
 	this.hasBeginMusic = function() {
 		// return true if there exists at least one line that contains "staff"
 		for (var i = 0; i < this.lines.length; i++) {
