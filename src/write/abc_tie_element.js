@@ -80,6 +80,12 @@ TieElem.prototype.calcTieDirection = function () {
 			this.above = true;
 		else if ((this.anchor1 && this.anchor1.stemDir === 'up') && (this.anchor2 && this.anchor2.stemDir === "up"))
 			this.above = false;
+		else if (this.anchor1 && this.anchor2)
+			this.above = referencePitch >= 6;
+		else if (this.anchor1)
+			this.above = this.anchor1.stemDir === "down";
+		else if (this.anchor2)
+			this.above = this.anchor2.stemDir === "down";
 		else
 			this.above = referencePitch >= 6;
 	}
@@ -162,8 +168,9 @@ TieElem.prototype.calcSlurY = function () {
 
 		// If the closing note has an up stem, and it is beamed, and it isn't the first note in the beam, then the beam will get in the way.
 		var beamInterferes = this.anchor2.parent.beam && this.anchor2.parent.beam.stemsUp && this.anchor2.parent.beam.elems[0] !== this.anchor2.parent;
-		if (this.above && this.anchor2.stemDir === "up" && !this.fixedY && !beamInterferes) {
-			this.endY = (this.anchor2.highestVert + this.anchor2.pitch) / 2;
+		var midPoint = (this.anchor2.highestVert + this.anchor2.pitch) / 2;
+		if (this.above && this.anchor2.stemDir === "up" && !this.fixedY && !beamInterferes && (midPoint < this.startY)) {
+			this.endY = midPoint;
 			this.endX += this.anchor2.w/2; // When going to the middle of the stem, bump the line to the right a little bit to make it look right.
 		} else
 			this.endY = this.above && beamInterferes ? this.anchor2.highestVert : this.anchor2.pitch;

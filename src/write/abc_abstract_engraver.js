@@ -220,7 +220,7 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSin
   for (var slur in this.slurs) {
     if (this.slurs.hasOwnProperty(slur)) {
 	    // this is already a slur element, but it was created for the last line, so recreate it.
-      this.slurs[slur]= new TieElem({force: this.slurs[slur].force, voiceNumber: voiceNumber});
+      this.slurs[slur]= new TieElem({force: this.slurs[slur].force, voiceNumber: voiceNumber, stemDir: this.slurs[slur].stemDir});
 		if (hint) this.slurs[slur].setHint();
 	    voice.addOther(this.slurs[slur]);
     }
