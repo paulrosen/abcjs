@@ -52,6 +52,9 @@ var verticalLint = function(tunes) {
 	function formatY(obj) {
 		return "y= ( " + fixed2(obj.bottom) + ' , ' + fixed2(obj.top) + " )";
 	}
+	function formatX(obj) {
+		return " x=" + fixed2(obj.x) + ' w=' + fixed2(obj.width);
+	}
 	function formatArrayStart(tabs, i) {
 		return tabs + i + ": ";
 	}
@@ -146,7 +149,7 @@ var verticalLint = function(tunes) {
 			if (type === "unknown")
 				str += formatArrayStart(tabs, i) + formatObject(obj, indent);
 			else
-				str += formatArrayStart(tabs, i) + type + ' ' + formatY(obj) + "\n";
+				str += formatArrayStart(tabs, i) + type + ' ' + formatY(obj) + formatX(obj) + "\n";
 		}
 		return tabs + str;
 	}
