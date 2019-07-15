@@ -1,0 +1,281 @@
+var getNote = require('./load-note');
+var soundsCache = require('./sounds-cache');
+var createNoteMap = require('./create-note-map');
+var pitchToNoteName = require('./pitch-to-note-name');
+var instrumentIndexToName = require('./instrument-index-to-name');
+var downloadBuffer = require('./download-buffer');
+var sequence = require('../midi/abc_midi_sequencer');
+var flatten = require('../midi/abc_midi_flattener');
+
+// TODO-PER: remove the midi tests from here: I don't think the object can be constructed unless it passes.
+var notSupportedMessage = "MIDI is not supported in this browser.";
+
+var defaultSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/";
+
+
+function CreateSynth() {
+	var self = this;
+	self.audioBufferPossible = undefined;
+	self.audioContext = undefined;
+	self.directSource = []; // type: AudioBufferSourceNode
+	self.startTimeSec = undefined; // the time that the midi started: used for pause/resume.
+	self.pausedTimeSec = undefined; // the time that the midi was paused: used for resume.
+	self.audioBuffers = []; // cache of the buffers so starting play can be fast.
+	self.duration = undefined; // the duration of the tune in seconds.
+	self.isRunning = false; // whether there is currently a sound buffer running.
+
+	// Load and cache all needed sounds
+	self.init = function(options) {
+		self.audioContext = options.audioContext;
+		var startTime = self.audioContext.currentTime;
+		self.debugCallback = options.debugCallback;
+		if (self.debugCallback)
+			self.debugCallback("init called");
+		self.audioBufferPossible = self.deviceCapable();
+		if (!self.audioBufferPossible)
+			return Promise.reject(new Error(notSupportedMessage));
+		self.soundFontUrl = options.soundFontUrl ? options.soundFontUrl : defaultSoundFontUrl;
+		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : self.visualObj.millisecondsPerMeasure();
+		var params = options.options ? options.options : {};
+		if (options.visualObj) {
+			var seq = sequence(options.visualObj, params);
+			self.flattened = flatten(seq, params);
+		} else if (options.sequence)
+			self.flattened = options.sequence;
+		else
+			return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
+
+		var allNotes = {};
+		var currentInstrument = instrumentIndexToName[0];
+		self.flattened.tracks.forEach(function(track) {
+			track.forEach(function(event) {
+				if (event.cmd === "program" && instrumentIndexToName[event.instrument])
+					currentInstrument = instrumentIndexToName[event.instrument];
+				var pitchNumber = event.pitch + 60;
+				if (event.pitch !== undefined) {
+					var noteName = pitchToNoteName[pitchNumber];
+					if (noteName) {
+						if (!allNotes[currentInstrument])
+							allNotes[currentInstrument] = {};
+						allNotes[currentInstrument][pitchToNoteName[pitchNumber]] = true;
+					} else
+						console.log("Can't find note: ", pitchNumber);
+				}
+			});
+		});
+		if (self.debugCallback)
+			self.debugCallback("note gathering time = " + Math.floor((self.audioContext.currentTime - startTime)*1000)+"ms");
+		startTime = self.audioContext.currentTime;
+
+		var notes = [];
+		Object.keys(allNotes).forEach(function(instrument) {
+			Object.keys(allNotes[instrument]).forEach(function(note) {
+				notes.push({ instrument: instrument, note: note });
+			});
+		});
+		// If there are lots of notes, load them in batches
+		var batches = [];
+		var CHUNK = 256;
+		for (var i=0; i < notes.length; i += CHUNK) {
+			batches.push(notes.slice(i, i + CHUNK));
+		}
+
+		return new Promise(function(resolve, reject) {
+			var results = [];
+
+			var index = 0;
+			var next = function() {
+				if (index < batches.length) {
+					self.loadBatch(batches[index], self.soundFontUrl, startTime).then(function(data) {
+						startTime = self.audioContext.currentTime;
+						results.push(data);
+						index++;
+						next();
+					}, reject);
+				} else {
+					resolve(results);
+				}
+			};
+			next();
+		});
+	};
+
+	self.loadBatch = (function(batch, soundFontUrl, startTime) {
+		var promises = [];
+		batch.forEach(function(item) {
+			promises.push(getNote(soundFontUrl, item.instrument, item.note, self.audioContext));
+		});
+		return Promise.all(promises).then(function(response) {
+			if (self.debugCallback)
+				self.debugCallback("mp3 load time = " + Math.floor((self.audioContext.currentTime - startTime)*1000)+"ms");
+			return Promise.resolve(response);
+		});
+	});
+
+	self.prime = function() {
+		self.isRunning = false;
+		if (!self.audioBufferPossible)
+			return Promise.reject(new Error(notSupportedMessage));
+		if (self.debugCallback)
+			self.debugCallback("prime called");
+		return new Promise(function(resolve) {
+			var startTime = self.audioContext.currentTime;
+			var tempoMultiplier = self.millisecondsPerMeasure / 1000;
+			self.duration = self.flattened.totalDuration * tempoMultiplier;
+			var totalSamples = Math.floor(self.audioContext.sampleRate * self.duration);
+
+			// There might be a previous run that needs to be turned off.
+			self.stop();
+
+			var noteMapTracks = createNoteMap(self.flattened);
+			//console.log(noteMapTracks);
+
+			self.audioBuffers = [];
+			noteMapTracks.forEach(function(noteMap) {
+				var audioBuffer = self.audioContext.createBuffer(1, totalSamples, self.audioContext.sampleRate);
+				var chanData = audioBuffer.getChannelData(0);
+
+				noteMap.forEach(function(note) {
+					var start = Math.floor(note.start*self.audioContext.sampleRate * tempoMultiplier);
+					var numBeats = note.end - note.start;
+					var noteTimeSec = numBeats * tempoMultiplier;
+					var noteName = pitchToNoteName[note.pitch+60];
+					if (noteName) { // Just ignore pitches that don't exist.
+						var pitch = soundsCache[note.instrument][noteName].getChannelData(0);
+						var duration = Math.min(pitch.length, Math.floor(noteTimeSec * self.audioContext.sampleRate));
+						//console.log(pitchToNote[note.pitch+''], start, numBeats, noteTimeSec, duration);
+						for (var i = 0; i < duration; i++) {
+							var thisSample = pitch[i] * note.volume / 128;
+							if (chanData[start + i])
+								chanData[start + i] = (chanData[start + i] + thisSample) *0.75;
+							else
+								chanData[start + i] = thisSample;
+						}
+					}
+				});
+
+				self.audioBuffers.push(audioBuffer);
+			});
+
+			if (self.debugCallback) {
+				self.debugCallback("sampleRate = " + self.audioContext.sampleRate);
+				self.debugCallback("totalSamples = " + totalSamples);
+				self.debugCallback("creationTime = " + Math.floor((self.audioContext.currentTime - startTime)*1000) + "ms");
+			}
+			resolve({
+				status: "ok",
+				seconds: 0
+			});
+		});
+	};
+
+	// This is called after everything is set up, so it can quickly make sound
+	self.start = function() {
+		if (self.pausedTimeSec) {
+			self.resume();
+			return;
+		}
+
+		if (!self.audioBufferPossible)
+			throw new Error(notSupportedMessage);
+		if (self.debugCallback)
+			self.debugCallback("start called");
+
+		self.kickOffSound(0);
+		self.startTimeSec = self.audioContext.currentTime;
+		self.pausedTimeSec = undefined;
+
+		if (self.debugCallback)
+			self.debugCallback("MIDI STARTED", self.startTimeSec);
+	};
+
+	self.pause = function() {
+		if (!self.audioBufferPossible)
+			throw new Error(notSupportedMessage);
+		if (self.debugCallback)
+			self.debugCallback("pause called");
+
+		if (!self.pausedTimeSec) { // ignore if self is already paused.
+			self.stop();
+			self.pausedTimeSec = self.audioContext.currentTime;
+		}
+	};
+
+	self.resume = function() {
+		if (!self.audioBufferPossible)
+			throw new Error(notSupportedMessage);
+		if (self.debugCallback)
+			self.debugCallback("resume called");
+
+		var offset = self.pausedTimeSec - self.startTimeSec;
+		self.startTimeSec = self.audioContext.currentTime - offset; // We move the start time in case there is another pause/resume.
+		self.pausedTimeSec = undefined;
+		self.kickOffSound(offset);
+	};
+
+	self.seek = function(percent) {
+		var offset = self.duration * percent;
+
+		// TODO-PER: can seek when paused or when playing
+		if (!self.audioBufferPossible)
+			throw new Error(notSupportedMessage);
+		if (self.debugCallback)
+			self.debugCallback("seek called sec=" + offset);
+
+		if (self.isRunning) {
+			self.stop();
+			self.kickOffSound(offset);
+		}
+		var pauseDistance = self.pausedTimeSec ? self.pausedTimeSec - self.startTimeSec : undefined;
+		self.startTimeSec = self.audioContext.currentTime - offset;
+		if (self.pausedTimeSec)
+			self.pausedTimeSec = self.startTimeSec + pauseDistance;
+	};
+
+	self.stop = function() {
+		self.isRunning = false;
+		self.pausedTimeSec = undefined;
+		self.directSource.forEach(function(source) {
+			try {
+				source.stop();
+			} catch (error) {
+				// We don't care if self succeeds: it might fail if something else turned off the sound or it ended for some reason.
+				console.log("direct source didn't stop:", error)
+			}
+		});
+		self.directSource = [];
+	};
+
+	self.download = function() {
+		return downloadBuffer(self);
+	};
+
+	/////////////// Private functions //////////////
+
+	self.deviceCapable = function() {
+		try {
+			self.audioContext.sampleRate;
+		} catch (e) {
+			console.warn(notSupportedMessage);
+			if (self.debugCallback)
+				self.debugCallback(notSupportedMessage);
+			return false;
+		}
+		return true;
+	};
+
+	self.kickOffSound = function(seconds) {
+		self.isRunning = true;
+		self.directSource = [];
+		self.audioBuffers.forEach(function(audioBuffer, trackNum) {
+			self.directSource[trackNum] = self.audioContext.createBufferSource(); // creates a sound source
+			self.directSource[trackNum].buffer = audioBuffer; // tell the source which sound to play
+			self.directSource[trackNum].connect(self.audioContext.destination); // connect the source to the context's destination (the speakers)
+		});
+		self.directSource.forEach(function(source) {
+			source.start(0, seconds);
+		});
+	};
+}
+
+module.exports = CreateSynth;

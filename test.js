@@ -3,7 +3,7 @@ var tunebook = require('./src/api/abc_tunebook');
 
 var abcjs = {};
 
-abcjs.signature = "abcjs-test v5.7.0";
+abcjs.signature = "abcjs-test v5.8.0";
 
 Object.keys(animation).forEach(function (key) {
 	abcjs[key] = animation[key];
@@ -16,6 +16,18 @@ Object.keys(tunebook).forEach(function (key) {
 abcjs.renderAbc = require('./src/api/abc_tunebook_svg');
 abcjs.renderMidi = require('./src/api/abc_tunebook_midi');
 abcjs.TimingCallbacks = require('./src/api/abc_timing_callbacks');
+
+var CreateSynth = require('./src/synth/create-synth');
+var instrumentIndexToName = require('./src/synth/instrument-index-to-name');
+var pitchToNoteName = require('./src/synth/pitch-to-note-name');
+var SynthSequence = require('./src/synth/synth-sequence');
+
+abcjs.synth = {
+	CreateSynth: CreateSynth,
+	instrumentIndexToName: instrumentIndexToName,
+	pitchToNoteName: pitchToNoteName,
+	SynthSequence: SynthSequence
+};
 
 var parser = require('./src/parse/abc_parse');
 abcjs['parse'] = { Parse: parser };
