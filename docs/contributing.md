@@ -76,6 +76,8 @@ Here's an example of how to call the linting functions:
 
 ## Releasing
 
+Note: The following checklist is for committers. For most people who want to contribute a pull request, this isn't necessary.
+
 To release a new version, this checklist should be followed:
 
 [_] Add a section to the top of [the release notes](../RELEASE.md).
@@ -83,8 +85,6 @@ To release a new version, this checklist should be followed:
 [_] Be sure [the read me file](../README.md) is up to date, along with all the files in [docs](../docs).
 
 [_] Find any hardcoded version numbers in [the package file](../package.json) and change them.
-
-[_] Change the hardcoded version numbers in index.js, midi.js, and test.js.
 
 [_] Minify the various library versions with `npm run build`.
 

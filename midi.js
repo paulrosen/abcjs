@@ -1,9 +1,10 @@
+var version = require('./version');
 var animation = require('./src/api/abc_animation');
 var tunebook = require('./src/api/abc_tunebook');
 
 var abcjs = {};
 
-abcjs.signature = "abcjs-midi v5.8.0";
+abcjs.signature = "abcjs-midi v" + version;
 
 Object.keys(animation).forEach(function (key) {
 	abcjs[key] = animation[key];

@@ -9,6 +9,7 @@ echo $1 | grep -E -q '^[1-9]\.[0-9]+\.[0-9ab]+$' || die "Version number argument
 
 echo "Fix build files..."
 perl -pi -e "s/ v5([^\"]+)/ v$1/" *.js
+perl -pi -e "s/\'([^\']+)\'/\'$1\'/" version.js
 
 
 echo "Fix readme..."
