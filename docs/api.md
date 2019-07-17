@@ -7,9 +7,9 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `integer = ABCJS.numberOfTunes(tunebookString)` | Returns the number of tunes found in the tunebook. |
 | `tunebook = new ABCJS.TuneBook(tunebookString)` | Returns a `TuneBook` object, describing the tunebook passed in. |
 | `tuneObjectArray = ABCJS.renderAbc(output, tunebookString, params)` | Completely renders the tunebook. |
-| `tuneObjectArray = ABCJS.renderMidi(output, tunebookString, params)` | Completely creates midi for the tunebook. |
+| `tuneObjectArray = ABCJS.renderMidi(output, tunebookString, params)` | Completely creates midi for the tunebook. Note: this is deprecated in favor of [Synth Documentation](synth.md). |
 | `tuneObjectArray = ABCJS.parseOnly(tunebookString, params)` | Parses all the tunes in the tunebookString and returns an array of them parsed structure. |
-| `ABCJS.startAnimation(outputElement, tuneObject, animationParams)` | Puts an animated cursor on the rendered music.  |
+| `ABCJS.startAnimation(outputElement, tuneObject, animationParams)` | Puts an animated cursor on the rendered music. Note: this is deprecated in favor of `TimingCallbacks`. |
 | `ABCJS.stopAnimation()` | Stops the animation that was started with `startAnimation`. |
 | `ABCJS.pauseAnimation(pause)` | Pauses/resumes the animation that was started with `startAnimation`. Pass `true` or `false` to pause or resume. |
 | `ABCJS.midi.deviceSupportsMidi()` | Returns true if the device and browser is capable of playing MIDI. |
@@ -21,6 +21,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 | `ABCJS.midi.setLoop(targetEl, state)` | Sets the "loop" mode for the element passed in. State should be true or false. |
 | `new abcjs.TimingCallbacks(outputElement, timingParams)` | returns an object with the properties `start()`, `stop()`, `pause()`, `reset()`, `setProgress(percent)`. This will cause callback functions to be called for each beat and for each note. (see timingParams for more details) |
 | `abcjs.extractMeasures(tunebookString);` | This returns an array of all the individual measures found in the music. |
+| `abcjs.synth` | This is for creating audio. See [Synth Documentation](synth.md) for details. |
 
 | Parameters | Description |
 | ------------- | ----------- |

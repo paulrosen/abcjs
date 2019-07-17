@@ -1,3 +1,9 @@
+# Notes for Version 5.8.0
+
+This way of creating midi is being deprecated by a new method that is much smaller, less buggy and integrates with the TimingCallbacks object. This will continue to work for the forseeable future, but probably won't change much.
+
+See [Synth Documentation](synth.md) for details.
+
 # Notes for Version 3.0 Beta
 
 There are a number of features described below that are not yet activated. This release is primarily to get the main MIDI functionality working. Here is a list of features you can look forward to in upcoming versions:
