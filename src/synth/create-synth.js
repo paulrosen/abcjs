@@ -31,7 +31,7 @@ function CreateSynth() {
 		self.debugCallback = options.debugCallback;
 		if (self.debugCallback)
 			self.debugCallback("init called");
-		self.audioBufferPossible = self.deviceCapable();
+		self.audioBufferPossible = self._deviceCapable();
 		if (!self.audioBufferPossible)
 			return Promise.reject(new Error(notSupportedMessage));
 		self.soundFontUrl = options.soundFontUrl ? options.soundFontUrl : defaultSoundFontUrl;
@@ -86,7 +86,7 @@ function CreateSynth() {
 			var index = 0;
 			var next = function() {
 				if (index < batches.length) {
-					self.loadBatch(batches[index], self.soundFontUrl, startTime).then(function(data) {
+					self._loadBatch(batches[index], self.soundFontUrl, startTime).then(function(data) {
 						startTime = self.audioContext.currentTime;
 						results.push(data);
 						index++;
@@ -100,7 +100,7 @@ function CreateSynth() {
 		});
 	};
 
-	self.loadBatch = (function(batch, soundFontUrl, startTime) {
+	self._loadBatch = (function(batch, soundFontUrl, startTime) {
 		var promises = [];
 		batch.forEach(function(item) {
 			promises.push(getNote(soundFontUrl, item.instrument, item.note, self.audioContext));
@@ -181,7 +181,7 @@ function CreateSynth() {
 		if (self.debugCallback)
 			self.debugCallback("start called");
 
-		self.kickOffSound(0);
+		self._kickOffSound(0);
 		self.startTimeSec = self.audioContext.currentTime;
 		self.pausedTimeSec = undefined;
 
@@ -210,7 +210,7 @@ function CreateSynth() {
 		var offset = self.pausedTimeSec - self.startTimeSec;
 		self.startTimeSec = self.audioContext.currentTime - offset; // We move the start time in case there is another pause/resume.
 		self.pausedTimeSec = undefined;
-		self.kickOffSound(offset);
+		self._kickOffSound(offset);
 	};
 
 	self.seek = function(percent) {
@@ -224,7 +224,7 @@ function CreateSynth() {
 
 		if (self.isRunning) {
 			self.stop();
-			self.kickOffSound(offset);
+			self._kickOffSound(offset);
 		}
 		var pauseDistance = self.pausedTimeSec ? self.pausedTimeSec - self.startTimeSec : undefined;
 		self.startTimeSec = self.audioContext.currentTime - offset;
@@ -252,7 +252,7 @@ function CreateSynth() {
 
 	/////////////// Private functions //////////////
 
-	self.deviceCapable = function() {
+	self._deviceCapable = function() {
 		try {
 			self.audioContext.sampleRate;
 		} catch (e) {
@@ -264,7 +264,7 @@ function CreateSynth() {
 		return true;
 	};
 
-	self.kickOffSound = function(seconds) {
+	self._kickOffSound = function(seconds) {
 		self.isRunning = true;
 		self.directSource = [];
 		self.audioBuffers.forEach(function(audioBuffer, trackNum) {

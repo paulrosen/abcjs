@@ -8,8 +8,10 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 * The visual part of this library is supported from IE9 and newer, Safari 5.1 and newer, and all modern browsers.
 
-* The audio part of this library is much more limited: it doesn't work in IE, it only works in Safari 10 and newer, it does NOT work in Edge, but does work fine in all other modern browsers.
+* The MIDI-audio part of this library is much more limited: it doesn't work in IE, it only works in Safari 10 and newer, it does NOT work in Edge, but does work fine in all other modern browsers.
 Note that it takes computer resources to play the sound, so a sufficiently fast computer is needed. Research is being done to improve the performance in future versions.
+
+* This synth audio part of this library does not work on IE, but works on any system that supports `AudioContext` and `Promises`. That is, most browsers.
 
 ## **Special notes for Version 5.0.0:**
 

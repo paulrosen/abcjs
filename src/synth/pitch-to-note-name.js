@@ -1,4 +1,3 @@
-// TODO-PER: Note: the midi number of A0 is 21, so the numbers returned from the midi calculation really should be +60.
 var pitchToNoteName = {
 	21: 'A0',
 	22: 'Bb0',
