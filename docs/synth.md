@@ -22,6 +22,12 @@ Please try this out and report any issues that you have.
 
 * The instrument numbers and the pitch numbers come from the MIDI spec. MIDI is not produced, but it is MIDI-like.
 
+## Examples
+
+See [Basic Synth](../examples/basic-synth.html) for the simplest possible way of making sound.
+
+See [Full Synth](../examples/full-synth.html) for an example that incorporates a bouncing-ball type animation and an audio control.
+
 ## API
 
 | Synth Entry Points | Description |
@@ -33,7 +39,9 @@ Please try this out and report any issues that you have.
 
 ### ABCJS.synth.CreateSynth
 
-| method | Description |
+This is the object that handles creating the audio.
+
+| Method | Description |
 | ------------- | ----------- |
 | constructor | Call with `var createSynth = new ABCJS.synth.CreateSynth`. This is required for the synth to work. |
 | `init(synthOptions)` | The first call that must be made on the CreateSynth object. This will load all of the needed notes and will return a promise when they are loaded. There might be a considerable delay for this to finish. Because the notes are cached, though, the second time CreateSynth is created with a piece of music with similar notes, it will take much less time. See below for the synthOptions. |
@@ -57,7 +65,14 @@ Please try this out and report any issues that you have.
 | debugCallback | undefined | This will be called with various extra info at different times in the process. |
 
 ### ABCJS.synth.SynthSequence
-TODO-PER
+
+This is a helper object that will create an object that is consumed by `CreateSynth`. There is nothing special about this that you couldn't create the object by hand, but this provides some convenience functions.
+
+| Method | Parameters |Description |
+| ------------- | ----------- | ----------- |
+| `addTrack` | (none) | Returns the number of the track that was created. This must be called before anything can be added to the track. |
+| `setInstrument` | `trackNumber, instrumentNumber` | `trackNumber` is the value that is returned by `addTrack`. instrumentNumber is the stand MIDI number for the instrument. (See `ABCJS.synth.instrumentIndexToName` for the list of instruments.) This should be called right after `addTrack` and may be called at any time after that to change the instrument midstream. |
+| `appendNote` | `trackNumber, pitch, durationInMeasures, volume` | This adds a note. `trackNumber` is the value returned from `addTrack`. `pitch` is the standard midi pitch number. `durationInMeasures` is a floating point number where "1" is one measure. `volume` is a value from 0 to 255 that is the volume of the note. |
 
 ### ABCJS.synth.instrumentIndexToName
 
