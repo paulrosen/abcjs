@@ -39,8 +39,12 @@
 				"|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
 				"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|";
 
+			self.abcOptions = {
+				add_classes: true,
+				clickListener: clickListener
+			};
 			self.load = function () {
-				self.visualObj = ABCJS.renderAbc("paper", self.abc)[0];
+				self.visualObj = ABCJS.renderAbc("paper", self.abc, self.abcOptions)[0];
 			};
 
 			self.onWarp = function (ev) {
@@ -80,6 +84,7 @@
 				self.control.setAttribute("style", "");
 				document.querySelector(".activate-audio").setAttribute("style", "display:none;");
 				document.querySelector(".suspend-explanation").setAttribute("style", "display:none;");
+				document.querySelector(".click-explanation").setAttribute("style", "");
 				return self.go();
 			};
 
@@ -229,6 +234,34 @@
 				var startButton = self.control.querySelector(".abcjs-midi-start");
 				return startButton.classList.contains('abcjs-pushed');
 			};
+
+			self.clickListener = function(abcElem) {
+				var lastClicked = abcElem.midiPitches;
+				if (!lastClicked)
+					return;
+
+				var sequence = new ABCJS.synth.SynthSequence();
+
+				for (var i = 0; i < lastClicked.length; i++) {
+					var note = lastClicked[i];
+					var trackNum = sequence.addTrack();
+					sequence.setInstrument(trackNum, note.instrument);
+					sequence.appendNote(trackNum, note.pitch, note.durationInMeasures, note.volume);
+				}
+
+				var buffer = new ABCJS.synth.CreateSynth();
+				return buffer.init({
+					sequence: sequence,
+					audioContext: self.audioContext,
+					millisecondsPerMeasure: self.visualObj.millisecondsPerMeasure()
+				}).then(function () {
+					return buffer.prime();
+				}).then(function () {
+					return buffer.start();
+				}).catch(function (error) {
+					console.warn("synth error", error);
+				});
+			};
 		}
 
 		var synthControl = new SynthControl();
@@ -271,6 +304,10 @@
 				synthControl.init(ac);
 			});
 		}
+
+		function clickListener(abcElem) {
+			synthControl.clickListener(abcElem);
+		}
 	</script>
 </head>
 <body onload="load()">
@@ -291,6 +328,7 @@
 			%</label> (<span class="abcjs-midi-current-tempo"></span> BPM)
 		</span>
 	</div>
+	<p class="click-explanation" style="display:none;">Click on a note to play that note.</p>
 	<pre class="feedback"></pre>
 </main>
 </body>
