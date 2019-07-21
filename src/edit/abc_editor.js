@@ -307,6 +307,8 @@ Editor.prototype.redrawMidi = function() {
 		});
 		window.dispatchEvent(event);
 	}
+	if (this.abcjsParams.synthControl)
+		this.abcjsParams.synthControl.setTunes(this.tunes);
 };
 
 Editor.prototype.modelChanged = function() {
