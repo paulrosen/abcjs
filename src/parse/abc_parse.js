@@ -1585,7 +1585,7 @@ var Parse = function() {
 		}
 	}
 
-	this.parse = function(strTune, switches) {
+	this.parse = function(strTune, switches, startPos) {
 		// the switches are optional and cause a difference in the way the tune is parsed.
 		// switches.header_only : stop parsing when the header is finished
 		// switches.stop_on_warning : stop at the first warning encountered.
@@ -1594,10 +1594,12 @@ var Parse = function() {
 		// switches.hint_measures: put the next measure at the end of the current line.
 		// switches.transpose: change the key signature, chords, and notes by a number of half-steps.
 		if (!switches) switches = {};
+		if (!startPos) startPos = 0;
 		tune.reset();
 		if (switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
+		multilineVars.iChar = startPos;
 		if (switches.visualTranspose) {
 			multilineVars.globalTranspose = parseInt(switches.visualTranspose);
 			if (multilineVars.globalTranspose === 0)

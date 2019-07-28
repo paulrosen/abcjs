@@ -138,7 +138,7 @@ var tunebook = {};
 				div = document.getElementById(div);
 			if (div) {
 				if (currentTune >= 0 && currentTune < book.tunes.length) {
-					abcParser.parse(book.tunes[currentTune].abc, params);
+					abcParser.parse(book.tunes[currentTune].abc, params, book.tunes[currentTune].startPos - book.header.length);
 					var tune = abcParser.getTune();
 					var override = callback(div, tune, i, book.tunes[currentTune].abc);
 					ret.push(override ? override : tune);

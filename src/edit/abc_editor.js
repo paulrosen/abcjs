@@ -288,7 +288,7 @@ var Editor = function(editarea, params) {
 Editor.prototype.renderTune = function(abc, params, div) {
   var tunebook = new TuneBook(abc);
   var abcParser = Parse();
-  abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
+  abcParser.parse(tunebook.tunes[0].abc, params, tunebook.tunes[0].startPos - tunebook.header.length); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var engraver_controller = new EngraverController(div, this.abcjsParams);
   engraver_controller.engraveABC(tune);
@@ -377,7 +377,7 @@ Editor.prototype.parseABC = function() {
   this.warnings = [];
   for (var i=0; i<tunebook.tunes.length; i++) {
     var abcParser = new Parse();
-    abcParser.parse(tunebook.tunes[i].abc, this.abcjsParams);
+    abcParser.parse(tunebook.tunes[i].abc, this.abcjsParams, tunebook.tunes[i].startPos - tunebook.header.length);
     this.tunes[i] = abcParser.getTune();
 	  this.startPos[i] = tunebook.tunes[i].startPos;
     var warnings = abcParser.getWarnings() || [];
@@ -464,9 +464,9 @@ Editor.prototype.isDirty = function() {
 
 Editor.prototype.highlight = function(abcelem, tuneNumber, classes) {
 	// TODO-PER: The marker appears to get off by one for each tune parsed. I'm not sure why, but adding the tuneNumber in corrects it for the time being.
-	var offset = (tuneNumber !== undefined) ? this.startPos[tuneNumber] + tuneNumber : 0;
+//	var offset = (tuneNumber !== undefined) ? this.startPos[tuneNumber] + tuneNumber : 0;
 
-  this.editarea.setSelection(offset + abcelem.startChar, offset + abcelem.endChar);
+  this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
 };
 
 Editor.prototype.pause = function(shouldPause) {
