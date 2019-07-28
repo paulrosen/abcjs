@@ -1,3 +1,37 @@
+# Version 5.8.0
+
+## Bugs
+
+* Fix alignment issue when a tempo is over a barline.
+
+* Fix alignment issue when a part is over a barline.
+
+* Change startChar and endChar to be aware of the position in the entire tunebook.
+
+* Some tweaks to the slur and tie positioning.
+
+* Protect against crash when an element is added before the staff is ready.
+
+## Features
+
+* Add a new method of creating synthesized sound. (see [Synth Documentation](docs/synth.md) )
+
+* Implement "setbarnb" measure number
+
+## Tasks
+
+* Add demos for transposing.
+
+* Add demo of clicking on a note to play it.
+
+* Add examples of how to use the new synth.
+
+* Update build dependencies
+
+* Simplify the build process by not requiring a version number change for each entry point.
+
+* Add info about x and width to renderer regression tests.
+
 # Version 5.7.0
 
 ## Bugs:

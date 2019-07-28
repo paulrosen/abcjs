@@ -13,6 +13,10 @@ Note that it takes computer resources to play the sound, so a sufficiently fast 
 
 * This synth audio part of this library does not work on IE, but works on any system that supports `AudioContext` and `Promises`. That is, most browsers.
 
+## **Special note for Version 5.8.0:**
+
+A new method for creating synth sound is included as a **beta** release in this release. See [Synth Documentation](docs/synth.md) for details in how to use it. That means that the current method of creating sound using midi.js will be deprecated at some point in the future. It will be supported in its current form as long as possible. The new synth is much smaller and faster and appears less buggy. It does not work on IE 11 or older browsers, however, so it might not yet be appropriate for your site.
+
 ## **Special notes for Version 5.0.0:**
 
 ### Raphael
@@ -100,15 +104,15 @@ If you are looking at someone else's website and see ABC on the page and want to
 
 Here are the latest versions. You can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_5.7.0-min.js)
+- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_5.8.0-min.js)
 
-- [Basic+MIDI](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_midi_5.7.0-min.js)
+- [Basic+MIDI](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_midi_5.8.0-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.7.0-min.js)
+- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.8.0-min.js)
 
-- [Plugin+MIDI](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin-midi_5.7.0-min.js)
+- [Plugin+MIDI](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin-midi_5.8.0-min.js)
 
-- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.7.0.user.js)
+- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.8.0.user.js)
 
 - [Styles for the MIDI control](https://raw.github.com/paulrosen/abcjs/master/abcjs-midi.css)
 
