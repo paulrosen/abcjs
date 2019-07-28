@@ -187,7 +187,7 @@ VoiceElement.prototype.layoutOneItem = function (x, spacing) {
 	var extraWidth = child.getExtraWidth();
 	if (er<extraWidth) { // shift right by needed amount
 		// There's an exception if a bar element is after a Part element, there is no shift.
-		if (this.i === 0 || child.type !== 'bar' || this.children[this.i-1].type !== 'part' )
+		if (this.i === 0 || child.type !== 'bar' || (this.children[this.i-1].type !== 'part' && this.children[this.i-1].type !== 'tempo') )
 			x+=extraWidth-er;
 	}
 	child.setX(x);
