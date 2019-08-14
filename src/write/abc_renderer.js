@@ -400,12 +400,13 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 Renderer.prototype.outputFreeText = function (text, vskip) {
 	if (vskip)
 		this.moveY(vskip);
+	var hash = this.getFontAndAttr('textfont', 'defined-text');
 	if (text === "") {	// we do want to print out blank lines if they have been specified.
-		var hash = this.getFontAndAttr('textfont', 'defined-text');
 		this.moveY(hash.attr['font-size'] * 2); // move the distance of the line, plus the distance of the margin, which is also one line.
-	} else if (typeof text === 'string')
-		this.outputTextIf(this.padding.left, text, 'textfont', 'defined-text', 0, 1, "start");
-	else {
+	} else if (typeof text === 'string') {
+		this.moveY(hash.attr['font-size']/2); // TODO-PER: move down some - the y location should be the top of the text, but we output text specifying the center line.
+		this.outputTextIf(this.padding.left, text, 'textfont', 'defined-text', 0, 0, "start");
+	} else {
 		var str = "";
 		var isCentered = false; // The structure is wrong here: it requires an array to do centering, but it shouldn't have.
 		for (var i = 0; i < text.length; i++) {
