@@ -32,7 +32,27 @@ var Parse = function() {
 	var tokenizer = new Tokenizer();
 
 	this.getTune = function() {
-		return tune;
+		return {
+			formatting: tune.formatting,
+			lines: tune.lines,
+			media: tune.media,
+			metaText: tune.metaText,
+			version: tune.version,
+
+			addElementToEvents: tune.addElementToEvents,
+			addUsefulCallbackInfo: tune.addUsefulCallbackInfo,
+			getBarLength: tune.getBarLength,
+			getBeatLength: tune.getBeatLength,
+			getBeatsPerMeasure: tune.getBeatsPerMeasure,
+			getBpm: tune.getBpm,
+			getMeter: tune.getMeter,
+			getMeterFraction: tune.getMeterFraction,
+			getPickupLength: tune.getPickupLength,
+			makeVoicesArray: tune.makeVoicesArray,
+			millisecondsPerMeasure: tune.millisecondsPerMeasure,
+			setupEvents: tune.setupEvents,
+			setTiming: tune.setTiming
+		};
 	};
 
 	function addPositioning(el, type, value) {
