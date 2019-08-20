@@ -1,3 +1,11 @@
+# Version 5.8.1
+
+## Bugs
+
+* Fix vertical spacing of %%text
+
+* Fix output of getTune() when more than one tune is parsed with the same parser.
+
 # Version 5.8.0
 
 ## Bugs
