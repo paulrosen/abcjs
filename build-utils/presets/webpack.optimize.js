@@ -1,11 +1,6 @@
 const TerserPlugin = require('terser-webpack-plugin');
-const path = require("path");
 
-module.exports =  ({type}) => ({
-	output: {
-		filename: `abcjs_${type}_${getVersion()}-min.js`,
-		path: path.join(__dirname, "../bin")
-	},
+module.exports =  ({type} = {}) => ({
 	optimization: {
 		minimize: true,
 		minimizer: [
@@ -20,7 +15,7 @@ module.exports =  ({type}) => ({
 });
 
 function getVersion() {
-	const pJson = require('../package.json');
+	const pJson = require('../../package.json');
 	return pJson.version;
 }
 

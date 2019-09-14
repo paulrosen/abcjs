@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "webpack": "webpack",
-    "build": "npm run fix-versions && npm run build:basic && npm run build:midi && npm run build:plugin && npm run build:plugin-midi && npm run build:grease",
-    "build:basic": "npm run webpack -- --env.mode production --env.type basic",
+    "build": "npm run fix-versions && npm run build:basic-min && npm run build:basic && npm run build:midi && npm run build:plugin && npm run build:plugin-midi && npm run build:grease",
+    "build:basic": "npm run webpack -- --env.mode development --env.type basic",
+    "build:basic-min": "npm run webpack -- --env.mode production --env.type basic",
     "build:midi": "npm run webpack -- --env.mode production --env.type midi",
     "build:plugin": "npm run webpack -- --env.mode production --env.type plugin",
     "build:plugin-midi": "npm run webpack -- --env.mode production --env.type plugin-midi",
@@ -42,7 +43,6 @@
     "@babel/preset-env": "7.6.0",
     "babel-loader": "8.0.6",
     "compression-webpack-plugin": "3.0.0",
-    "uglifyjs-webpack-plugin": "2.2.0",
     "vuepress": "1.0.4",
     "webpack": "4.40.0",
     "webpack-bundle-analyzer": "3.5.0",
@@ -52,7 +52,6 @@
     "workbox-webpack-plugin": "^4.3.1"
   },
   "dependencies": {
-    "d3": "^5.9.7",
     "midi": "https://github.com/paulrosen/MIDI.js.git#abcjs"
   }
 }
