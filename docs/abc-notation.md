@@ -102,3 +102,10 @@ If you want to skip a chord, then use one of the following as the chord:
 "^tacet"
 
 These are case-insensitive.
+
+### mark:
+
+To arbitrarily add the class "mark" to the next note, you can use the decoration:
+```
+!mark!
+```
