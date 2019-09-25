@@ -13,7 +13,7 @@ function SynthControl() {
 	self.isStarted = false;
 
 	self.load = function (selector, visualObj, cursorControl) {
-		self.control = new ABCJS.synth.createSynthControl(selector, {
+		self.control = new ABCJS.synth.CreateSynthControl(selector, {
 			loopHandler: self.toggleLoop,
 			restartHandler: self.restart,
 			playHandler: self.play,
@@ -23,25 +23,6 @@ function SynthControl() {
 		});
 		self.cursorControl = cursorControl;
 		self.visualObj = visualObj;
-	};
-
-	self.onWarp = function (ev) {
-		var newWarp = ev.target.value;
-		if (parseInt(newWarp, 10) > 0) {
-			self.warp = parseInt(newWarp, 10);
-			var wasPlaying = self.isStarted;
-			var startPercent = self.percent;
-			self.destroy();
-			self.isStarted = false;
-			self.go().then(function () {
-				self.setProgress(startPercent, self.midiBuffer.duration * 1000);
-				if (wasPlaying) {
-					self.play();
-				}
-				self.timer.setProgress(startPercent);
-				self.midiBuffer.seek(startPercent);
-			});
-		}
 	};
 
 	self.init = function (audioContext) {
@@ -85,6 +66,8 @@ function SynthControl() {
 				beatSubdivisions: 16,
 				qpm: self.currentTempo
 			});
+			if (self.cursorControl && self.cursorControl.onReady && typeof self.cursorControl.onReady  === 'function')
+				self.cursorControl.onReady(self);
 			return Promise.resolve({ status: "created" });
 		}).catch(function (error) {
 			console.warn("synth error", error);
@@ -108,7 +91,7 @@ function SynthControl() {
 	self.play = function () {
 		self.isStarted = !self.isStarted;
 		if (self.isStarted) {
-			if (self.cursorControl)
+			if (self.cursorControl && self.cursorControl.onStart && typeof self.cursorControl.onStart  === 'function')
 				self.cursorControl.onStart();
 			self.midiBuffer.start();
 			self.timer.start();
@@ -141,6 +124,25 @@ function SynthControl() {
 		self.midiBuffer.seek(percent);
 	};
 
+	self.onWarp = function (ev) {
+		var newWarp = ev.target.value;
+		if (parseInt(newWarp, 10) > 0) {
+			self.warp = parseInt(newWarp, 10);
+			var wasPlaying = self.isStarted;
+			var startPercent = self.percent;
+			self.destroy();
+			self.isStarted = false;
+			self.go().then(function () {
+				self.setProgress(startPercent, self.midiBuffer.duration * 1000);
+				if (wasPlaying) {
+					self.play();
+				}
+				self.timer.setProgress(startPercent);
+				self.midiBuffer.seek(startPercent);
+			});
+		}
+	};
+
 	self.setProgress = function (percent, totalTime) {
 		self.percent = percent;
 		self.control.setProgress(percent, totalTime);
@@ -155,7 +157,7 @@ function SynthControl() {
 			self.timer.stop();
 			if (self.isStarted) {
 				self.control.pushPlay(false);
-				if (self.cursorControl)
+				if (self.cursorControl && self.cursorControl.onFinished && typeof self.cursorControl.onFinished  === 'function')
 					self.cursorControl.onFinished();
 				self.setProgress(0, 1);
 			}
@@ -169,7 +171,7 @@ function SynthControl() {
 
 	self.eventCallback = function (event) {
 		if (event) {
-			if (self.cursorControl)
+			if (self.cursorControl && self.cursorControl.onEvent && typeof self.cursorControl.onEvent  === 'function')
 				self.cursorControl.onEvent(event);
 		} else {
 			self.finished();
@@ -178,6 +180,18 @@ function SynthControl() {
 
 	self.getUrl = function () {
 		return self.midiBuffer.download();
+	};
+
+	self.download = function(fileName) {
+		var url = self.getUrl();
+		var link = document.createElement('a');
+		document.body.appendChild(link);
+		link.setAttribute("style","display: none;");
+		link.href = url;
+		link.download = fileName ? fileName : 'output.wav';
+		link.click();
+		window.URL.revokeObjectURL(url);
+		document.body.removeChild(link);
 	};
 }
 

@@ -36,13 +36,13 @@ See [Full Synth](../examples/full-synth.html) for an example that incorporates a
 | `ABCJS.synth.SynthSequence` | Creates an object that builds data for `CreateSynth`. This is normally done internally if `CreateSynth` is passed a visual object, but this is a way to custom build any sequence. |
 | `ABCJS.synth.instrumentIndexToName` |  This translates the MIDI instrument index in case you want a human-readable instrument. |
 | `ABCJS.synth.pitchToNoteName` |  This translates the MIDI pitch number into a letter/octave. For instance, `A3`. This is just to provide you with a human-readable form. |
-| `ABCJS.synth.createSynthControl` | Creates the object that handles the visual part of the control. This creates play and stop buttons, etc. See the section below for the options. |
+| `ABCJS.synth.CreateSynthControl` | Creates the object that handles the visual part of the control. This creates play and stop buttons, etc. See the section below for the options. |
 | `ABCJS.synth.registerAudioContext` | If an AudioContext is passed in, it keeps a reference to it so that it will be used for all synth. If nothing is passed in, then an AudioContext will be created and stored. **This should only be called inside a handler for a user gesture.** |
 | `ABCJS.synth.activeAudioContext` | If there is an AudioContext that is being used then this retrieves it. It allows freely sharing the same one in different parts of your app. |
 
-### ABCJS.synth.createSynthControl
+### ABCJS.synth.CreateSynthControl
 
-Called with `new ABCJS.synth.createSynthControl(element, options)`.
+Called with `new ABCJS.synth.CreateSynthControl(element, options)`.
 
 `element` is either a string representing a selector of an existing element on the page or a DOM element. The contents of that element are replaced with an audio control.
 

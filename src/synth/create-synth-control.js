@@ -4,7 +4,7 @@ var playImage = require('./play.svg');
 var pauseImage = require('./pause.svg');
 var resetImage = require('./reset.svg');
 
-function createSynthControl(parent, options) {
+function CreateSynthControl(parent, options) {
 	var self = this;
 	// parent is either an element or a selector.
 	if (typeof parent === "string") {
@@ -150,4 +150,4 @@ function attachListeners(parent, options) {
 			options.afterResume(window.abcjsAudioContext);
 	});
 }
-module.exports = createSynthControl;
+module.exports = CreateSynthControl;

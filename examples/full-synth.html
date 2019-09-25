@@ -31,6 +31,11 @@
 		function CursorControl() {
 			var self = this;
 
+			self.onReady = function() {
+				var downloadLink = document.querySelector(".download");
+				downloadLink.addEventListener("click", download);
+				downloadLink.setAttribute("style", "");
+			};
 			self.onStart = function() {
 
 			};
@@ -100,12 +105,20 @@
 
 			synthControl.load("#audio", visualObj, cursorControl);
 		}
+
+		function download() {
+			synthControl.download("cooleys.wav");
+		}
+
+
 	</script>
 </head>
 <body onload="load()">
 <main>
+	<button class="next">Next Tune</button>
 	<div id="paper"></div>
 	<div id="audio"></div>
+	<button class="download" style="display: none;">Download</button>
 	<p class="click-explanation" style="display:none;">Click on a note to play that note.</p>
 	<pre class="feedback"></pre>
 </main>
