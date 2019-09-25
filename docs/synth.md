@@ -36,6 +36,42 @@ See [Full Synth](../examples/full-synth.html) for an example that incorporates a
 | `ABCJS.synth.SynthSequence` | Creates an object that builds data for `CreateSynth`. This is normally done internally if `CreateSynth` is passed a visual object, but this is a way to custom build any sequence. |
 | `ABCJS.synth.instrumentIndexToName` |  This translates the MIDI instrument index in case you want a human-readable instrument. |
 | `ABCJS.synth.pitchToNoteName` |  This translates the MIDI pitch number into a letter/octave. For instance, `A3`. This is just to provide you with a human-readable form. |
+| `ABCJS.synth.createSynthControl` | Creates the object that handles the visual part of the control. This creates play and stop buttons, etc. See the section below for the options. |
+| `ABCJS.synth.registerAudioContext` | If an AudioContext is passed in, it keeps a reference to it so that it will be used for all synth. If nothing is passed in, then an AudioContext will be created and stored. **This should only be called inside a handler for a user gesture.** |
+| `ABCJS.synth.activeAudioContext` | If there is an AudioContext that is being used then this retrieves it. It allows freely sharing the same one in different parts of your app. |
+
+### ABCJS.synth.createSynthControl
+
+Called with `new ABCJS.synth.createSynthControl(element, options)`.
+
+`element` is either a string representing a selector of an existing element on the page or a DOM element. The contents of that element are replaced with an audio control.
+
+| Option | Description |
+| ------------- | ------------- |
+| loopHandler | Callback function when the loop button is clicked. If this is not present, then the loop button is not displayed. |
+| restartHandler | Callback function when the restart button is clicked. if this is not present, then the restart button is not displayed. |
+| playHandler | Callback function when the play button is clicked. if this is not present, then the play button is not displayed. |
+| progressHandler | Callback function when the progress bar is clicked. if this is not present, then the progress bar is not displayed.|
+| warpHandler | Callback function when the warp percent is changed. if this is not present, then the warp percent is not displayed. |
+| afterResume | Callback function after the AudioContext is set up correctly. |
+| ------------- | ------------- |
+| hasClock | Whether to display a clock on the control. |
+| ac | The AudioContext to use for this control. (Optional - if this is not present, then a button will appear asking the user to click to get an AudioContext.) |
+| ------------- | ------------- |
+| suspendText | To override the text explaining to the user why they need to click to get audio to work. |
+| activateAudioContext | To override the text of the button to click to get audio to work. |
+| repeatTitle | To override the text of the tooltip for toggling loop mode. |
+| repeatAria | To override the text of the aria for loop mode. (By default, the repeatTitle is used.) |
+| restartTitle | To override the text of the tooltip for the restart button. |
+| restartAria | To override the text of the aria for restart mode. (By default, the restartTitle is used.) |
+| playTitle | To override the text of the tooltip for the play/pause button. |
+| playAria | To override the text of the aria for the play/pause. (By default, the playTitle is used.)|
+| randomTitle | To override the text of the tooltip for the progress slider. |
+| randomAria | To override the text of the aria for progress slider. (By default, the randomTitle is used.)|
+| warpTitle | To override the text of the tooltip for the warp input. |
+| warpAria | To override the text of the aria for warp input. (By default, the warpTitle is used.)|
+| bpm | To override the text "BPM" for beats per minute. |
+|---|---|
 
 ### ABCJS.synth.CreateSynth
 

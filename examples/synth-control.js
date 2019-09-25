@@ -2,23 +2,37 @@ function SynthControl() {
 	var self = this;
 	self.warp = 100;
 	self.cursorControl = null;
+	self.visualObj = null;
+	self.audioContext = null;
+	self.timer = null;
+	self.midiBuffer = null;
+	self.options = null;
+	self.currentTempo = null;
+	self.control = null;
+	self.isLooping = false;
+	self.isStarted = false;
 
-	self.abcOptions = {
-		add_classes: true,
-		clickListener: self.clickListener
-	};
-	self.load = function (abc, cursorControl) {
+	self.load = function (selector, visualObj, cursorControl) {
+		self.control = new ABCJS.synth.createSynthControl(selector, {
+			loopHandler: self.toggleLoop,
+			restartHandler: self.restart,
+			playHandler: self.play,
+			progressHandler: self.randomAccess,
+			warpHandler: self.onWarp,
+			afterResume: self.init
+		});
 		self.cursorControl = cursorControl;
-		self.visualObj = ABCJS.renderAbc("paper", abc, self.abcOptions)[0];
+		self.visualObj = visualObj;
 	};
 
 	self.onWarp = function (ev) {
 		var newWarp = ev.target.value;
 		if (parseInt(newWarp, 10) > 0) {
 			self.warp = parseInt(newWarp, 10);
-			var wasPlaying = self.isStarted();
+			var wasPlaying = self.isStarted;
 			var startPercent = self.percent;
 			self.destroy();
+			self.isStarted = false;
 			self.go().then(function () {
 				self.setProgress(startPercent, self.midiBuffer.duration * 1000);
 				if (wasPlaying) {
@@ -28,20 +42,6 @@ function SynthControl() {
 				self.midiBuffer.seek(startPercent);
 			});
 		}
-	};
-
-	self.addListeners = function () {
-		self.control = document.querySelector(".abcjs-inline-midi");
-		var el = document.querySelector(".abcjs-midi-loop");
-		el.addEventListener("click", self.toggleLoop);
-		el = document.querySelector(".abcjs-midi-reset");
-		el.addEventListener("click", self.restart);
-		el = document.querySelector(".abcjs-midi-start");
-		el.addEventListener("click", self.play);
-		el = document.querySelector(".abcjs-midi-progress-background");
-		el.addEventListener("click", self.randomAccess);
-		el = document.querySelector(".abcjs-midi-tempo");
-		el.addEventListener("change", self.onWarp);
 	};
 
 	self.init = function (audioContext) {
@@ -65,7 +65,7 @@ function SynthControl() {
 		self.midiBuffer = new ABCJS.synth.CreateSynth();
 		var millisecondsPerMeasure = self.visualObj.millisecondsPerMeasure() * 100 / self.warp;
 		self.currentTempo = Math.round(self.visualObj.getBeatsPerMeasure() / millisecondsPerMeasure * 60000);
-		document.querySelector(".abcjs-midi-current-tempo").innerHTML = self.currentTempo;
+		self.control.setTempo(self.currentTempo);
 		self.percent = 0;
 
 		return self.midiBuffer.init({
@@ -102,36 +102,27 @@ function SynthControl() {
 			self.midiBuffer = null;
 		}
 		self.setProgress(0, 1);
-		var pushedButtons = self.control.querySelectorAll(".abcjs-pushed");
-		for (var i = 0; i < pushedButtons.length; i++) {
-			var button = pushedButtons[i];
-			button.classList.remove("abcjs-pushed");
-		}
+		self.control.resetAll();
 	};
 
 	self.play = function () {
-		var startButton = self.control.querySelector(".abcjs-midi-start");
-		if (self.isStarted()) {
-			self.timer.pause();
-			self.midiBuffer.pause();
-			startButton.classList.remove("abcjs-pushed");
-		} else {
+		self.isStarted = !self.isStarted;
+		if (self.isStarted) {
 			if (self.cursorControl)
 				self.cursorControl.onStart();
 			self.midiBuffer.start();
 			self.timer.start();
-			startButton.classList.add("abcjs-pushed");
+			self.control.pushPlay(true);
+		} else {
+			self.timer.pause();
+			self.midiBuffer.pause();
+			self.control.pushPlay(false);
 		}
 	};
 
 	self.toggleLoop = function () {
-		var loopButton = self.control.querySelector(".abcjs-midi-loop");
-		var isLooping = loopButton.classList.contains('abcjs-pushed');
-		if (isLooping) {
-			loopButton.classList.remove("abcjs-pushed");
-		} else {
-			loopButton.classList.add("abcjs-pushed");
-		}
+		self.isLooping = !self.isLooping;
+		self.control.pushLoop(self.isLooping);
 	};
 
 	self.restart = function () {
@@ -152,35 +143,18 @@ function SynthControl() {
 
 	self.setProgress = function (percent, totalTime) {
 		self.percent = percent;
-		var progressBackground = self.control.querySelector(".abcjs-midi-progress-background");
-		var progressThumb = self.control.querySelector(".abcjs-midi-progress-indicator");
-		var width = progressBackground.clientWidth;
-		var left = width * percent;
-		progressThumb.style.left = left + "px";
-		self.setClock(percent, totalTime);
-	};
-
-	self.setClock = function (percent, totalTime) {
-		var clock = self.control.querySelector(".abcjs-midi-clock");
-		var totalSeconds = (totalTime * percent) / 1000;
-		var minutes = Math.floor(totalSeconds / 60);
-		var seconds = Math.floor(totalSeconds % 60);
-		var secondsFormatted = seconds < 10 ? "0" + seconds : seconds;
-		clock.innerHTML = minutes + ":" + secondsFormatted;
+		self.control.setProgress(percent, totalTime);
 	};
 
 	self.finished = function () {
 		self.timer.reset();
-		var loopButton = self.control.querySelector(".abcjs-midi-loop");
-		var isLooping = loopButton.classList.contains('abcjs-pushed');
-		if (isLooping) {
+		if (self.isLooping) {
 			self.timer.start();
 			self.midiBuffer.start();
 		} else {
 			self.timer.stop();
-			if (self.isStarted()) {
-				var startButton = self.control.querySelector(".abcjs-midi-start");
-				startButton.classList.toggle("abcjs-pushed");
+			if (self.isStarted) {
+				self.control.pushPlay(false);
 				if (self.cursorControl)
 					self.cursorControl.onFinished();
 				self.setProgress(0, 1);
@@ -204,39 +178,6 @@ function SynthControl() {
 
 	self.getUrl = function () {
 		return self.midiBuffer.download();
-	};
-
-	self.isStarted = function () {
-		var startButton = self.control.querySelector(".abcjs-midi-start");
-		return startButton.classList.contains('abcjs-pushed');
-	};
-
-	self.clickListener = function(abcElem) {
-		var lastClicked = abcElem.midiPitches;
-		if (!lastClicked)
-			return;
-
-		var sequence = new ABCJS.synth.SynthSequence();
-
-		for (var i = 0; i < lastClicked.length; i++) {
-			var note = lastClicked[i];
-			var trackNum = sequence.addTrack();
-			sequence.setInstrument(trackNum, note.instrument);
-			sequence.appendNote(trackNum, note.pitch, note.durationInMeasures, note.volume);
-		}
-
-		var buffer = new ABCJS.synth.CreateSynth();
-		return buffer.init({
-			sequence: sequence,
-			audioContext: self.audioContext,
-			millisecondsPerMeasure: self.visualObj.millisecondsPerMeasure()
-		}).then(function () {
-			return buffer.prime();
-		}).then(function () {
-			return buffer.start();
-		}).catch(function (error) {
-			console.warn("synth error", error);
-		});
 	};
 }
 

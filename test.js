@@ -22,12 +22,18 @@ var CreateSynth = require('./src/synth/create-synth');
 var instrumentIndexToName = require('./src/synth/instrument-index-to-name');
 var pitchToNoteName = require('./src/synth/pitch-to-note-name');
 var SynthSequence = require('./src/synth/synth-sequence');
+var createSynthControl = require('./src/synth/create-synth-control');
+var registerAudioContext = require('./src/synth/register-audio-context');
+var activeAudioContext = require('./src/synth/active-audio-context');
 
 abcjs.synth = {
 	CreateSynth: CreateSynth,
 	instrumentIndexToName: instrumentIndexToName,
 	pitchToNoteName: pitchToNoteName,
-	SynthSequence: SynthSequence
+	SynthSequence: SynthSequence,
+	createSynthControl: createSynthControl,
+	registerAudioContext: registerAudioContext,
+	activeAudioContext: activeAudioContext
 };
 
 var parser = require('./src/parse/abc_parse');

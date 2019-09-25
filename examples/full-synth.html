@@ -7,8 +7,7 @@
 	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
 	<title>abcjs: Synth Demo</title>
 
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-	<link rel="stylesheet" type="text/css" href="../abcjs-midi.css">
+	<link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
 	<style>
 		main {
 			max-width: 770px;
@@ -23,7 +22,7 @@
 		}
 	</style>
 
-	<script src="../bin/abcjs_basic_5.8.1-min.js" type="text/javascript"></script>
+	<script src="../bin/abcjs_basic_5.8.1.js" type="text/javascript"></script>
 	<script src="synth-control.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
@@ -64,43 +63,49 @@
 			"|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
 			"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|";
 
-		function load() {
-			synthControl.addListeners();
-			synthControl.load(abc, cursorControl);
-			document.querySelector(".activate-audio").addEventListener("click", function() {
-				window.AudioContext = window.AudioContext ||
-					window.webkitAudioContext ||
-					navigator.mozAudioContext ||
-					navigator.msAudioContext;
+		function clickListener(abcElem) {
+			var lastClicked = abcElem.midiPitches;
+			if (!lastClicked)
+				return;
 
-				synthControl.control.setAttribute("style", "");
-				document.querySelector(".activate-audio").setAttribute("style", "display:none;");
-				document.querySelector(".suspend-explanation").setAttribute("style", "display:none;");
-				document.querySelector(".click-explanation").setAttribute("style", "");
-				var ac = new window.AudioContext();
-				synthControl.init(ac);
+			var sequence = new ABCJS.synth.SynthSequence();
+
+			for (var i = 0; i < lastClicked.length; i++) {
+				var note = lastClicked[i];
+				var trackNum = sequence.addTrack();
+				sequence.setInstrument(trackNum, note.instrument);
+				sequence.appendNote(trackNum, note.pitch, note.durationInMeasures, note.volume);
+			}
+
+			var buffer = new ABCJS.synth.CreateSynth();
+			return buffer.init({
+				sequence: sequence,
+				audioContext: synthControl.audioContext,
+				millisecondsPerMeasure: synthControl.visualObj.millisecondsPerMeasure()
+			}).then(function () {
+				return buffer.prime();
+			}).then(function () {
+				return buffer.start();
+			}).catch(function (error) {
+				console.warn("synth error", error);
 			});
+		}
+
+		function load() {
+			var abcOptions = {
+				add_classes: true,
+				clickListener: self.clickListener
+			};
+			var visualObj = ABCJS.renderAbc("paper", abc, abcOptions)[0];
+
+			synthControl.load("#audio", visualObj, cursorControl);
 		}
 	</script>
 </head>
 <body onload="load()">
 <main>
 	<div id="paper"></div>
-	<p class="suspend-explanation">Browsers won't allow audio to work unless the audio is started in response to a user action. This prevents auto-playing web sites. Therefore, the
-		following button is needed to do the initialization:</p>
-	<button class="activate-audio">Activate Audio Context</button>
-	<div class="abcjs-inline-midi" style="display: none;">
-		<button type="button" class="abcjs-midi-loop abcjs-btn" title="Click to toggle play once/repeat." aria-label="toggle repeat mode"></button>
-		<button type="button" class="abcjs-midi-reset abcjs-btn" title="Click to go to beginning." aria-label="restart from beginning"></button>
-		<button type="button" class="abcjs-midi-start abcjs-btn" title="Click to play/pause." aria-label="toggle play and pause"></button>
-		<button type="button" class="abcjs-midi-progress-background" title="Click to change the playback position." aria-label="change playback position"><span
-				class="abcjs-midi-progress-indicator"></span></button>
-		<span class="abcjs-midi-clock"> 0:00</span>
-		<span class="abcjs-tempo-wrapper">
-			<label><input class="abcjs-midi-tempo" type="number" min="1" max="300" value="100" title="Change the playback speed." aria-label="Playback speed percentage">
-			%</label> (<span class="abcjs-midi-current-tempo"></span> BPM)
-		</span>
-	</div>
+	<div id="audio"></div>
 	<p class="click-explanation" style="display:none;">Click on a note to play that note.</p>
 	<pre class="feedback"></pre>
 </main>

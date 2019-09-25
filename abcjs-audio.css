@@ -1,0 +1,152 @@
+/* Some basic CSS to make the Audio controls in abcjs presentable. */
+
+.abcjs-inline-midi {
+	height: 26px;
+	padding: 0 5px;
+	border-radius: 3px;
+	background-color: #424242;
+	display: flex;
+	align-items: center;
+	box-sizing: border-box;
+}
+
+.abcjs-inline-midi .abcjs-btn {
+	width: 28px;
+	height: 26px;
+	margin-right: 2px;
+	padding: 3px 4px;
+
+	background: none;
+	border: 1px solid transparent;
+	box-sizing: border-box;
+}
+
+.abcjs-btn g {
+	fill: #f4f4f4;
+	stroke: #f4f4f4;
+}
+
+.abcjs-inline-midi .abcjs-btn:hover g {
+	fill: #cccccc;
+	stroke: #cccccc;
+}
+
+.abcjs-inline-midi .abcjs-midi-selection.abcjs-pushed {
+	border: 1px solid #cccccc;
+	background-color: #666666;
+	box-sizing: border-box;
+}
+
+.abcjs-inline-midi .abcjs-midi-loop.abcjs-pushed {
+	border: 1px solid #cccccc;
+	background-color: #666666;
+	box-sizing: border-box;
+}
+
+.abcjs-inline-midi .abcjs-midi-reset.abcjs-pushed {
+	border: 1px solid #cccccc;
+	background-color: #666666;
+	box-sizing: border-box;
+}
+
+.abcjs-inline-midi .abcjs-midi-start .pause {
+	display: none;
+}
+
+.abcjs-inline-midi .abcjs-midi-start.abcjs-pushed .play {
+	display: none;
+}
+
+.abcjs-inline-midi .abcjs-midi-start.abcjs-pushed .pause {
+	display: inherit;
+}
+
+.abcjs-inline-midi .abcjs-midi-start.abcjs-loading {
+	outline: none;
+	animation: a 1s infinite steps(8);
+}
+
+.abcjs-inline-midi .abcjs-midi-progress-background {
+	background-color: #424242;
+	height: 10px;
+	border-radius: 5px;
+	border: 2px solid #cccccc;
+	margin: 0 8px 0 15px;
+	position: relative;
+	flex: 1;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+.abcjs-inline-midi .abcjs-midi-progress-indicator {
+	width: 20px;
+	margin-left: -10px; /* half of the width */
+	height: 14px;
+	background-color: #f4f4f4;
+	position: absolute;
+	display: inline-block;
+	border-radius: 6px;
+	top: -4px;
+	left: 0;
+	box-sizing: border-box;
+}
+
+.abcjs-inline-midi .abcjs-midi-clock {
+	margin-left: 4px;
+	margin-top: 1px;
+	margin-right: 2px;
+	display: inline-block;
+	font-family: sans-serif;
+	font-size: 16px;
+	box-sizing: border-box;
+	color: #f4f4f4;
+}
+
+.abcjs-inline-midi .abcjs-tempo-wrapper {
+	font-size: 10px;
+	display: inline-block;
+	color: #f4f4f4;
+	box-sizing: border-box;
+}
+
+.abcjs-inline-midi .abcjs-midi-tempo {
+	border-radius: 2px;
+	border: none;
+	margin: 1px 2px 0 4px;
+	width: 35px;
+	padding-left: 2px;
+	box-sizing: border-box;
+}
+
+/* Adding the class "abcjs-large" will make the control easier on a touch device. */
+.abcjs-large .abcjs-inline-midi {
+	height: 52px;
+}
+.abcjs-large .abcjs-btn {
+	width: 56px;
+	height: 52px;
+	font-size: 28px;
+	padding: 6px 8px;
+}
+.abcjs-large .abcjs-midi-progress-background {
+	height: 20px;
+	border: 4px solid #cccccc;
+}
+.abcjs-large .abcjs-midi-progress-indicator {
+	height: 28px;
+	top: -8px;
+	width: 40px;
+}
+.abcjs-large .abcjs-midi-clock {
+	font-size: 32px;
+	margin-right: 10px;
+	margin-left: 10px;
+	margin-top: -1px;
+}
+.abcjs-large .abcjs-midi-tempo {
+	font-size: 20px;
+	width: 50px;
+}
+.abcjs-large .abcjs-tempo-wrapper {
+	font-size: 20px;
+}

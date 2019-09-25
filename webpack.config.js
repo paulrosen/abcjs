@@ -13,6 +13,10 @@ module.exports = ({mode, presets, type} = {mode: "production", presets: []}) => 
 						test: /\.js$/,
 						exclude: /node_modules/,
 						use: "babel-loader"
+					},
+					{
+						test: /\.svg$/,
+						loader: 'svg-inline-loader'
 					}
 				]
 			},
