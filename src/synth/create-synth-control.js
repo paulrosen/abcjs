@@ -115,7 +115,7 @@ function buildDom(parent, options) {
 		var warpTitle = options.warpTitle ? options.warpTitle : "Change the playback speed.";
 		var warpAria = options.warpAria ? options.warpAria : warpTitle;
 		var bpm = options.bpm ? options.bpm : "BPM";
-		html += '<span class="abcjs-tempo-wrapper"><label><input class="abcjs-midi-tempo" type="number" min="1" max="300" value="100" title="' + warpTitle + '" aria-label="' + warpAria + '">%</label> (<span class="abcjs-midi-current-tempo"></span> ' + bpm + ')</span>\n';
+		html += '<span class="abcjs-tempo-wrapper"><label><input class="abcjs-midi-tempo" type="number" min="1" max="300" value="100" title="' + warpTitle + '" aria-label="' + warpAria + '">%</label><span>&nbsp;(<span class="abcjs-midi-current-tempo"></span> ' + bpm + ')</span></span>\n';
 	}
 	html += '</div>\n';
 	parent.innerHTML = html;

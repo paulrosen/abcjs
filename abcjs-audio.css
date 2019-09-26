@@ -104,15 +104,16 @@
 
 .abcjs-inline-midi .abcjs-tempo-wrapper {
 	font-size: 10px;
-	display: inline-block;
 	color: #f4f4f4;
 	box-sizing: border-box;
+	display: flex;
+	align-items: center;
 }
 
 .abcjs-inline-midi .abcjs-midi-tempo {
 	border-radius: 2px;
 	border: none;
-	margin: 1px 2px 0 4px;
+	margin: 0 2px 0 4px;
 	width: 35px;
 	padding-left: 2px;
 	box-sizing: border-box;
