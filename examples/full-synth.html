@@ -100,7 +100,6 @@
 			var buffer = new ABCJS.synth.CreateSynth();
 			return buffer.init({
 				sequence: sequence,
-				audioContext: synthControl.audioContext,
 				millisecondsPerMeasure: synthControl.visualObj.millisecondsPerMeasure()
 			}).then(function () {
 				return buffer.prime();
@@ -134,7 +133,8 @@
 			else
 				currentTune = 1;
 			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions);
-			synthControl.setTunes(visualObj);
+			synthControl.setTunes(visualObj).then(function (response) {
+			});
 		}
 
 

@@ -120,7 +120,7 @@ function buildDom(parent, options) {
 	html += '</div>\n';
 	parent.innerHTML = html;
 	if (acReady && options.afterResume)
-		options.afterResume(window.abcjsAudioContext);
+		options.afterResume(window.abcjsAudioContext.state !== "suspended");
 }
 
 function attachListeners(parent, options) {

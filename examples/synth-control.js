@@ -3,7 +3,6 @@ function SynthControl() {
 	self.warp = 100;
 	self.cursorControl = null;
 	self.visualObj = null;
-	self.audioContext = null;
 	self.timer = null;
 	self.midiBuffer = null;
 	self.options = null;
@@ -11,6 +10,7 @@ function SynthControl() {
 	self.control = null;
 	self.isLooping = false;
 	self.isStarted = false;
+	self.notSuspended = false;
 
 	self.load = function (selector, visualObj, cursorControl) {
 		self.control = new ABCJS.synth.CreateSynthControl(selector, {
@@ -25,8 +25,8 @@ function SynthControl() {
 		self.visualObj = visualObj;
 	};
 
-	self.init = function (audioContext) {
-		self.audioContext = audioContext;
+	self.init = function (notSuspended) {
+		self.notSuspended = notSuspended;
 		if (self.visualObj)
 			return self.go();
 		else
@@ -34,27 +34,31 @@ function SynthControl() {
 	};
 
 	self.setTunes = function(visualObjs) {
+		self.setProgress(0, 1);
+		self.control.resetAll();
+		self.isLooping = false;
+		if (self.isStarted)
+			self.play(); // this will pause the playback
+
 		// TODO-PER: how to handle multiple tunes?
 		self.visualObj = visualObjs[0];
-		if (self.audioContext)
+		if (self.notSuspended)
 			return self.go();
 		else
 			return Promise.resolve({ status: "no-audio-context"});
 	};
 
 	self.go = function () {
-		self.midiBuffer = new ABCJS.synth.CreateSynth();
 		var millisecondsPerMeasure = self.visualObj.millisecondsPerMeasure() * 100 / self.warp;
 		self.currentTempo = Math.round(self.visualObj.getBeatsPerMeasure() / millisecondsPerMeasure * 60000);
 		self.control.setTempo(self.currentTempo);
 		self.percent = 0;
 
+		if (!self.midiBuffer)
+			self.midiBuffer = new ABCJS.synth.CreateSynth();
 		return self.midiBuffer.init({
-			//debugCallback: debugCallback,
-			//soundFontUrl: soundFontUrl,
 			visualObj: self.visualObj,
 			options: self.options,
-			audioContext: self.audioContext,
 			millisecondsPerMeasure: millisecondsPerMeasure
 		}).then(function () {
 			return self.midiBuffer.prime();
