@@ -25,6 +25,7 @@ var SynthSequence = require('./src/synth/synth-sequence');
 var CreateSynthControl = require('./src/synth/create-synth-control');
 var registerAudioContext = require('./src/synth/register-audio-context');
 var activeAudioContext = require('./src/synth/active-audio-context');
+var playEvent = require('./src/synth/play-event');
 
 abcjs.synth = {
 	CreateSynth: CreateSynth,
@@ -33,7 +34,8 @@ abcjs.synth = {
 	SynthSequence: SynthSequence,
 	CreateSynthControl: CreateSynthControl,
 	registerAudioContext: registerAudioContext,
-	activeAudioContext: activeAudioContext
+	activeAudioContext: activeAudioContext,
+	playEvent: playEvent
 };
 
 var parser = require('./src/parse/abc_parse');
