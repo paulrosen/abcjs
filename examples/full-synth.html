@@ -126,7 +126,7 @@
 		function load() {
 			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions)[0];
 
-			synthControl.load("#audio", visualObj, cursorControl);
+			synthControl.load("#audio", visualObj, cursorControl, { displayLoop: true, displayRestart: true, displayPlay: true, displayProgress: true, displayWarp: true });
 
 			document.querySelector(".next").addEventListener("click", next);
 		}
@@ -150,10 +150,16 @@
 </head>
 <body onload="load()">
 <main>
+	<h1>Demo of abcjs audio capabilities</h1>
+	<p>This is a complete demo of what you can do with matching audio with the visual music.</p>
+	<p>Two different pieces of music are provided to demonstrate changing tunes. To toggle between the two pieces, click "Next Tune".</p>
+	<p>You are in control of the look of the cursor. Two different techniques are demonstrated: highlighting the note being played and putting a cursor on the page. The class CursorControl must be supplied by your program.</p>
+	<p>As the piece is playing, there are callbacks when the note changes. The info returned in the callback is printed to the page as it is received.</p>
+	<p>The visual control for playing music can look different. In this example, the abcjs-audio.css file has been loaded. You can supply your own css.</p>
 	<button class="next">Next Tune</button>
+	<button class="download" style="display: none;">Download</button>
 	<div id="paper"></div>
 	<div id="audio"></div>
-	<button class="download" style="display: none;">Download</button>
 	<p class="click-explanation" style="display:none;">Click on a note to play that note.</p>
 	<pre class="feedback"></pre>
 </main>

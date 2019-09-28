@@ -1,4 +1,4 @@
-# Notes for Version 5.8.0
+# Notes for Version 5.9.0
 
 This is a beta version of the new synth method. It is likely there will be some changes to the API in the short run but hopefully not too much.
 
@@ -39,6 +39,8 @@ See [Full Synth](../examples/full-synth.html) for an example that incorporates a
 | `ABCJS.synth.CreateSynthControl` | Creates the object that handles the visual part of the control. This creates play and stop buttons, etc. See the section below for the options. |
 | `ABCJS.synth.registerAudioContext` | If an AudioContext is passed in, it keeps a reference to it so that it will be used for all synth. If nothing is passed in, then an AudioContext will be created and stored. **This should only be called inside a handler for a user gesture.** |
 | `ABCJS.synth.activeAudioContext` | If there is an AudioContext that is being used then this retrieves it. It allows freely sharing the same one in different parts of your app. |
+| `ABCJS.synth.SynthControl` | This coordinates the cursor with the synth playback |
+| `ABCJS.synth.playEvent` | This will play a single event that is passed. The event must have the same format as the events that are passed back by the click listener. |
 
 ### ABCJS.synth.CreateSynthControl
 
@@ -58,8 +60,6 @@ Called with `new ABCJS.synth.CreateSynthControl(element, options)`.
 | hasClock | Whether to display a clock on the control. |
 | ac | The AudioContext to use for this control. (Optional - if this is not present, then a button will appear asking the user to click to get an AudioContext.) |
 | ------------- | ------------- |
-| suspendText | To override the text explaining to the user why they need to click to get audio to work. |
-| activateAudioContext | To override the text of the button to click to get audio to work. |
 | repeatTitle | To override the text of the tooltip for toggling loop mode. |
 | repeatAria | To override the text of the aria for loop mode. (By default, the repeatTitle is used.) |
 | restartTitle | To override the text of the tooltip for the restart button. |

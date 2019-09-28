@@ -1,4 +1,5 @@
 var registerAudioContext = require('./register-audio-context');
+var activeAudioContext = require('./active-audio-context');
 var loopImage = require('./loop.svg');
 var playImage = require('./play.svg');
 var pauseImage = require('./pause.svg');
@@ -20,8 +21,19 @@ function CreateSynthControl(parent, options) {
 	if (options)
 		self.options = Object.assign({}, options);
 
+	// This can be called in the following cases:
+	// AC already registered and not suspended
+	// AC already registered and suspended
+	// AC not registered and not passed in
+	// AC not registered but passed in (but suspended)
+	// AC not registered but passed in (not suspended)
+	// If the AC is already registered, then just use it - ignore what is passed in
+	// Create the AC if necessary if there isn't one already.
+	// We don't care right now if the AC is suspended - whenever a button is clicked then we check it.
+	if (self.options.ac)
+		registerAudioContext(self.options.ac);
 	buildDom(self.parent, self.options);
-	attachListeners(self.parent, self.options);
+	attachListeners(self);
 
 	self.setTempo = function(tempo) {
 		self.parent.querySelector(".abcjs-midi-current-tempo").innerHTML = tempo;
@@ -62,6 +74,17 @@ function CreateSynthControl(parent, options) {
 		var secondsFormatted = seconds < 10 ? "0" + seconds : seconds;
 		clock.innerHTML = minutes + ":" + secondsFormatted;
 	};
+
+	if (self.options.afterResume) {
+		var isResumed = false;
+		if (self.options.ac) {
+			isResumed = self.options.ac.state !== "suspended";
+		} else if (activeAudioContext()) {
+			isResumed = activeAudioContext().state !== "suspended";
+		}
+		if (isResumed)
+			self.options.afterResume();
+	}
 }
 
 function buildDom(parent, options) {
@@ -72,22 +95,7 @@ function buildDom(parent, options) {
 	var hasWarp = !!options.warpHandler;
 	var hasClock = options.hasClock !== false;
 
-	var acReady = false;
-	if (options.ac)
-		acReady = registerAudioContext(options.ac);
-	var tooEarlyStyle = acReady ? 'style="display:none;"' : '';
-	var controlStyle = acReady ? '' : 'style="display:none;"';
-	// TODO-PER: Why even have this message? Instead, the first click on the control does the loading. (Perhaps have an overlay on
-	// TODO the control that takes every mouse click and is the only thing focusable at first?)
-
-	var suspendText = options.suspendText ? options.suspendText : "Browsers won't allow audio to work unless the audio is started in response to a user action. This prevents auto-playing web sites. Therefore, the following button is needed to do the initialization:";
-	var activateAudioContext = options.activateAudioContext ? options.activateAudioContext : "Activate Audio Context";
-
-	var html = '<div class="abcjs-too-early" ' + tooEarlyStyle + '>\n';
-	html += '<p class="abcjs-suspend-explanation">' + suspendText + '</p>\n';
-	html += '<button class="abcjs-activate-audio">' + activateAudioContext + '</button>\n';
-	html += '</div>\n';
-	html += '<div class="abcjs-inline-midi" ' + controlStyle + '>\n';
+	var html = '<div class="abcjs-inline-midi">\n';
 	if (hasLoop) {
 		var repeatTitle = options.repeatTitle ? options.repeatTitle : "Click to toggle play once/repeat.";
 		var repeatAria = options.repeatAria ? options.repeatAria : repeatTitle;
@@ -119,35 +127,45 @@ function buildDom(parent, options) {
 	}
 	html += '</div>\n';
 	parent.innerHTML = html;
-	if (acReady && options.afterResume)
-		options.afterResume(window.abcjsAudioContext.state !== "suspended");
 }
 
-function attachListeners(parent, options) {
-	var hasLoop = !!options.loopHandler;
-	var hasRestart = !!options.restartHandler;
-	var hasPlay = !!options.playHandler;
-	var hasProgress = !!options.progressHandler;
-	var hasWarp = !!options.warpHandler;
+function acResumerMiddleWare(next, ev, afterResume) {
+	var needsInit = true;
+	if (!activeAudioContext()) {
+		registerAudioContext();
+	} else {
+		needsInit = activeAudioContext().state === "suspended";
+	}
+	if (needsInit) {
+		activeAudioContext().resume().then(function () {
+			if (afterResume) {
+				afterResume().then(function (response) {
+					next(ev);
+				});
+			} else
+				next(ev);
+		});
+	} else {
+		next(ev);
+	}
+}
+
+function attachListeners(self) {
+	var hasLoop = !!self.options.loopHandler;
+	var hasRestart = !!self.options.restartHandler;
+	var hasPlay = !!self.options.playHandler;
+	var hasProgress = !!self.options.progressHandler;
+	var hasWarp = !!self.options.warpHandler;
 
 	if (hasLoop)
-		parent.querySelector(".abcjs-midi-loop").addEventListener("click", options.loopHandler);
+		self.parent.querySelector(".abcjs-midi-loop").addEventListener("click", function(ev){acResumerMiddleWare(self.options.loopHandler, ev, self.options.afterResume)});
 	if (hasRestart)
-		parent.querySelector(".abcjs-midi-reset").addEventListener("click", options.restartHandler);
+		self.parent.querySelector(".abcjs-midi-reset").addEventListener("click", function(ev){acResumerMiddleWare(self.options.restartHandler, ev, self.options.afterResume)});
 	if (hasPlay)
-		parent.querySelector(".abcjs-midi-start").addEventListener("click", options.playHandler);
+		self.parent.querySelector(".abcjs-midi-start").addEventListener("click", function(ev){acResumerMiddleWare(self.options.playHandler, ev, self.options.afterResume)});
 	if (hasProgress)
-		parent.querySelector(".abcjs-midi-progress-background").addEventListener("click", options.progressHandler);
+		self.parent.querySelector(".abcjs-midi-progress-background").addEventListener("click", function(ev){acResumerMiddleWare(self.options.progressHandler, ev, self.options.afterResume)});
 	if (hasWarp)
-		parent.querySelector(".abcjs-midi-tempo").addEventListener("change", options.warpHandler);
-
-	parent.querySelector(".abcjs-activate-audio").addEventListener("click", function() {
-		registerAudioContext();
-		parent.querySelector(".abcjs-too-early").setAttribute("style", "display:none;");
-		parent.querySelector(".abcjs-inline-midi").setAttribute("style", "");
-
-		if (options.afterResume)
-			options.afterResume(window.abcjsAudioContext);
-	});
+		self.parent.querySelector(".abcjs-midi-tempo").addEventListener("change", function(ev){acResumerMiddleWare(self.options.warpHandler, ev, self.options.afterResume)});
 }
 module.exports = CreateSynthControl;

@@ -16,21 +16,23 @@ function SynthControl() {
 	self.isStarted = false;
 	self.notSuspended = false;
 
-	self.load = function (selector, visualObj, cursorControl) {
+	self.load = function (selector, visualObj, cursorControl, visualOptions) {
+		if (!visualOptions)
+			visualOptions = {};
 		self.control = new CreateSynthControl(selector, {
-			loopHandler: self.toggleLoop,
-			restartHandler: self.restart,
-			playHandler: self.play,
-			progressHandler: self.randomAccess,
-			warpHandler: self.onWarp,
+			loopHandler: visualOptions.displayLoop ? self.toggleLoop : undefined,
+			restartHandler: visualOptions.displayRestart ? self.restart : undefined,
+			playHandler: visualOptions.displayPlay ? self.play : undefined,
+			progressHandler: visualOptions.displayProgress ? self.randomAccess : undefined,
+			warpHandler: visualOptions.displayWarp ? self.onWarp : undefined,
 			afterResume: self.init
 		});
 		self.cursorControl = cursorControl;
 		self.visualObj = visualObj;
 	};
 
-	self.init = function (notSuspended) {
-		self.notSuspended = notSuspended;
+	self.init = function () {
+		self.notSuspended = true;
 		if (self.visualObj)
 			return self.go();
 		else

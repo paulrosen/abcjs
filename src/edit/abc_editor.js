@@ -221,7 +221,8 @@ var Editor = function(editarea, params) {
   if (params.synth) {
   	this.synth = {
   		el: params.synth.el,
-	    cursorControl: params.synth.cursorControl
+	    cursorControl: params.synth.cursorControl,
+	    options: params.synth.options
   	}
   }
 	// If the user wants midi, then store the elements that it will be written to. The element could either be passed in as an id,
@@ -319,7 +320,7 @@ Editor.prototype.redrawMidi = function() {
 			this.synth.synthControl.setTunes(this.tunes);
 		else {
 			this.synth.synthControl = new SynthControl();
-			this.synth.synthControl.load(this.synth.el, this.tunes[0], this.synth.cursorControl);
+			this.synth.synthControl.load(this.synth.el, this.tunes[0], this.synth.cursorControl, this.synth.options);
 		}
 	}
 };
