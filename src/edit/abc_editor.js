@@ -33,6 +33,7 @@ var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
 var TextPrinter = require('../transform/abc2abc_write');
 var EngraverController = require('../write/abc_engraver_controller');
+var SynthControl = require('../synth/synth-control');
 
 // Polyfill for CustomEvent for old IE versions
 if ( typeof window.CustomEvent !== "function" ) {
@@ -217,6 +218,12 @@ var Editor = function(editarea, params) {
     this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem());
   }
 
+  if (params.synth) {
+  	this.synth = {
+  		el: params.synth.el,
+	    cursorControl: params.synth.cursorControl
+  	}
+  }
 	// If the user wants midi, then store the elements that it will be written to. The element could either be passed in as an id,
 	// an element, or nothing. If nothing is passed in, then just put the midi on top of the generated music.
 	if (params.generate_midi) {
@@ -242,13 +249,13 @@ var Editor = function(editarea, params) {
       this.warningsdiv = this.div;
     }
   }
-  
+
   this.onchangeCallback = params.onchange;
 
   if (params.gui) {
     this.target = document.getElementById(editarea);
     this.abcjsParams.editable = true;
-  } 
+  }
   this.oldt = "";
   this.bReentry = false;
   this.parseABC();
@@ -307,8 +314,14 @@ Editor.prototype.redrawMidi = function() {
 		});
 		window.dispatchEvent(event);
 	}
-	if (this.abcjsParams.synthControl)
-		this.abcjsParams.synthControl.setTunes(this.tunes);
+	if (this.synth) {
+		if (this.synth.synthControl)
+			this.synth.synthControl.setTunes(this.tunes);
+		else {
+			this.synth.synthControl = new SynthControl();
+			this.synth.synthControl.load(this.synth.el, this.tunes[0], this.synth.cursorControl);
+		}
+	}
 };
 
 Editor.prototype.modelChanged = function() {
@@ -333,7 +346,7 @@ Editor.prototype.modelChanged = function() {
 
   if (this.warningsdiv) {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
-  } 
+  }
   if (this.target) {
     var textprinter = new TextPrinter(this.target, true);
     textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
@@ -363,7 +376,7 @@ Editor.prototype.parseABC = function() {
     this.updateSelection();
     return false;
   }
-  
+
   this.oldt = t;
   if (t === "") {
 	this.tunes = undefined;
@@ -371,7 +384,7 @@ Editor.prototype.parseABC = function() {
 	return true;
   }
   var tunebook = new TuneBook(t);
-  
+
   this.tunes = [];
   this.startPos = [];
   this.warnings = [];
@@ -419,7 +432,7 @@ Editor.prototype.setDirtyStyle = function(isDirty) {
       new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
     return element;
   };
-  
+
 	var readonlyClass = 'abc_textarea_dirty';
 	var el = this.editarea.getElem();
 	if (isDirty) {
