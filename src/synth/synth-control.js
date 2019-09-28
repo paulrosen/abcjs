@@ -1,3 +1,7 @@
+var CreateSynthControl = require('./create-synth-control');
+var CreateSynth = require('./create-synth');
+var TimingCallbacks = require('../api/abc_timing_callbacks');
+
 function SynthControl() {
 	var self = this;
 	self.warp = 100;
@@ -13,7 +17,7 @@ function SynthControl() {
 	self.notSuspended = false;
 
 	self.load = function (selector, visualObj, cursorControl) {
-		self.control = new ABCJS.synth.CreateSynthControl(selector, {
+		self.control = new CreateSynthControl(selector, {
 			loopHandler: self.toggleLoop,
 			restartHandler: self.restart,
 			playHandler: self.play,
@@ -34,8 +38,10 @@ function SynthControl() {
 	};
 
 	self.setTunes = function(visualObjs) {
-		self.setProgress(0, 1);
-		self.control.resetAll();
+		if (self.control) {
+			self.setProgress(0, 1);
+			self.control.resetAll();
+		}
 		self.isLooping = false;
 		if (self.isStarted)
 			self.play(); // this will pause the playback
@@ -55,7 +61,7 @@ function SynthControl() {
 		self.percent = 0;
 
 		if (!self.midiBuffer)
-			self.midiBuffer = new ABCJS.synth.CreateSynth();
+			self.midiBuffer = new CreateSynth();
 		return self.midiBuffer.init({
 			visualObj: self.visualObj,
 			options: self.options,
@@ -64,7 +70,7 @@ function SynthControl() {
 			return self.midiBuffer.prime();
 		}).then(function () {
 			// Need to create the TimingCallbacks after priming the midi so that the midi data is available for the callbacks.
-			self.timer = new ABCJS.TimingCallbacks(self.visualObj, {
+			self.timer = new TimingCallbacks(self.visualObj, {
 				beatCallback: self.beatCallback,
 				eventCallback: self.eventCallback,
 				beatSubdivisions: 16,
@@ -73,8 +79,6 @@ function SynthControl() {
 			if (self.cursorControl && self.cursorControl.onReady && typeof self.cursorControl.onReady  === 'function')
 				self.cursorControl.onReady(self);
 			return Promise.resolve({ status: "created" });
-		}).catch(function (error) {
-			console.warn("synth error", error);
 		});
 	};
 
@@ -161,6 +165,7 @@ function SynthControl() {
 			self.timer.stop();
 			if (self.isStarted) {
 				self.control.pushPlay(false);
+				self.isStarted = false;
 				if (self.cursorControl && self.cursorControl.onFinished && typeof self.cursorControl.onFinished  === 'function')
 					self.cursorControl.onFinished();
 				self.setProgress(0, 1);
@@ -199,3 +204,4 @@ function SynthControl() {
 	};
 }
 
+module.exports = SynthControl;
