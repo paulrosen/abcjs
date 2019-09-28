@@ -99,7 +99,21 @@
 			"\"C\"GA2c|e3/2^d/2eg|GA2c|e4|GA2c|e2g2|\"G7\"(gB3-|B4)|\n" +
 			"GB2d|fefg|GB2d|f4|GB2d|g2\"G+\"a2|\"C\"(ae3-|e4)|\n" +
 			"GA2c|e3/2^d/2eg|GA2c|e3G|GGce|g2_b2|\"F\"a2-a2-|a3c|\n" +
-			"cc2c|\"F#dim7\"d2c2|\"C\"gg2a|\"A7\"e3e|\"D7\"ed^cd|\"G7\"f2e2|\"C\"c4-|czz2|]"
+			"cc2c|\"F#dim7\"d2c2|\"C\"gg2a|\"A7\"e3e|\"D7\"ed^cd|\"G7\"f2e2|\"C\"c4-|czz2|]",
+
+			"X:1\n" +
+			"T:All Notes On Piano\n" +
+			"M:4/4\n" +
+			"Q:120\n" +
+			"L:1/4\n" +
+			"K:C clef=bass\n" +
+			"A,,,,^A,,,,B,,,,C,,,|^C,,,D,,,^D,,,E,,,|F,,,^F,,,G,,,^G,,,|A,,,^A,,,B,,,C,,|\n" +
+			"^C,,D,,^D,,E,,|F,,^F,,G,,^G,,|A,,^A,,B,,C,|^C,D,^D,E,|\n" +
+			"K:C clef=treble\n" +
+			"F,^F,G,^G,|A,^A,B,C|^CD^DE|F^FG^G|\n" +
+			"A^ABc|^cd^de|f^fg^g|a^abc'|\n" +
+			"^c'd'^d'e'|f'^f'g'^g'|a'^a'b'c''|^c''d''^d''e''|\n" +
+			"f''^f''g''^g''|a''^a''b''c'''|^c'''4|]"
 		];
 
 		var currentTune = 0;
@@ -136,10 +150,9 @@
 		}
 
 		function next() {
-			if (currentTune)
+			currentTune++;
+			if (currentTune >= abc.length)
 				currentTune = 0;
-			else
-				currentTune = 1;
 			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions);
 			synthControl.setTunes(visualObj).then(function (response) {
 			});
@@ -152,7 +165,7 @@
 <main>
 	<h1>Demo of abcjs audio capabilities</h1>
 	<p>This is a complete demo of what you can do with matching audio with the visual music.</p>
-	<p>Two different pieces of music are provided to demonstrate changing tunes. To toggle between the two pieces, click "Next Tune".</p>
+	<p>Different pieces of music are provided to demonstrate changing tunes. To toggle between the pieces, click "Next Tune".</p>
 	<p>You are in control of the look of the cursor. Two different techniques are demonstrated: highlighting the note being played and putting a cursor on the page. The class CursorControl must be supplied by your program.</p>
 	<p>As the piece is playing, there are callbacks when the note changes. The info returned in the callback is printed to the page as it is received.</p>
 	<p>The visual control for playing music can look different. In this example, the abcjs-audio.css file has been loaded. You can supply your own css.</p>

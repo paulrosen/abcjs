@@ -3,6 +3,7 @@ var activeAudioContext = require('./active-audio-context');
 var loopImage = require('./loop.svg');
 var playImage = require('./play.svg');
 var pauseImage = require('./pause.svg');
+var loadingImage = require('./loading.svg');
 var resetImage = require('./reset.svg');
 
 function CreateSynthControl(parent, options) {
@@ -95,7 +96,7 @@ function buildDom(parent, options) {
 	var hasWarp = !!options.warpHandler;
 	var hasClock = options.hasClock !== false;
 
-	var html = '<div class="abcjs-inline-midi">\n';
+	var html = '<div class="abcjs-inline-audio">\n';
 	if (hasLoop) {
 		var repeatTitle = options.repeatTitle ? options.repeatTitle : "Click to toggle play once/repeat.";
 		var repeatAria = options.repeatAria ? options.repeatAria : repeatTitle;
@@ -109,7 +110,7 @@ function buildDom(parent, options) {
 	if (hasPlay) {
 		var playTitle = options.playTitle ? options.playTitle : "Click to play/pause.";
 		var playAria = options.playAria ? options.playAria : playTitle;
-		html += '<button type="button" class="abcjs-midi-start abcjs-btn" title="' + playTitle + '" aria-label="' + playAria + '">' + playImage + pauseImage + '</button>\n';
+		html += '<button type="button" class="abcjs-midi-start abcjs-btn" title="' + playTitle + '" aria-label="' + playAria + '">' + playImage + pauseImage + loadingImage + '</button>\n';
 	}
 	if (hasProgress) {
 		var randomTitle = options.randomTitle ? options.randomTitle : "Click to change the playback position.";
@@ -129,7 +130,7 @@ function buildDom(parent, options) {
 	parent.innerHTML = html;
 }
 
-function acResumerMiddleWare(next, ev, afterResume) {
+function acResumerMiddleWare(next, ev, playBtn, afterResume) {
 	var needsInit = true;
 	if (!activeAudioContext()) {
 		registerAudioContext();
@@ -137,9 +138,12 @@ function acResumerMiddleWare(next, ev, afterResume) {
 		needsInit = activeAudioContext().state === "suspended";
 	}
 	if (needsInit) {
+		if (playBtn)
+			playBtn.classList.add("abcjs-loading");
 		activeAudioContext().resume().then(function () {
 			if (afterResume) {
 				afterResume().then(function (response) {
+					playBtn.classList.remove("abcjs-loading");
 					next(ev);
 				});
 			} else
@@ -156,16 +160,17 @@ function attachListeners(self) {
 	var hasPlay = !!self.options.playHandler;
 	var hasProgress = !!self.options.progressHandler;
 	var hasWarp = !!self.options.warpHandler;
+	var playBtn = self.parent.querySelector(".abcjs-midi-start");
 
 	if (hasLoop)
-		self.parent.querySelector(".abcjs-midi-loop").addEventListener("click", function(ev){acResumerMiddleWare(self.options.loopHandler, ev, self.options.afterResume)});
+		self.parent.querySelector(".abcjs-midi-loop").addEventListener("click", function(ev){acResumerMiddleWare(self.options.loopHandler, ev, playBtn, self.options.afterResume)});
 	if (hasRestart)
-		self.parent.querySelector(".abcjs-midi-reset").addEventListener("click", function(ev){acResumerMiddleWare(self.options.restartHandler, ev, self.options.afterResume)});
+		self.parent.querySelector(".abcjs-midi-reset").addEventListener("click", function(ev){acResumerMiddleWare(self.options.restartHandler, ev, playBtn, self.options.afterResume)});
 	if (hasPlay)
-		self.parent.querySelector(".abcjs-midi-start").addEventListener("click", function(ev){acResumerMiddleWare(self.options.playHandler, ev, self.options.afterResume)});
+		playBtn.addEventListener("click", function(ev){acResumerMiddleWare(self.options.playHandler, ev, playBtn, self.options.afterResume)});
 	if (hasProgress)
-		self.parent.querySelector(".abcjs-midi-progress-background").addEventListener("click", function(ev){acResumerMiddleWare(self.options.progressHandler, ev, self.options.afterResume)});
+		self.parent.querySelector(".abcjs-midi-progress-background").addEventListener("click", function(ev){acResumerMiddleWare(self.options.progressHandler, ev, playBtn, self.options.afterResume)});
 	if (hasWarp)
-		self.parent.querySelector(".abcjs-midi-tempo").addEventListener("change", function(ev){acResumerMiddleWare(self.options.warpHandler, ev, self.options.afterResume)});
+		self.parent.querySelector(".abcjs-midi-tempo").addEventListener("change", function(ev){acResumerMiddleWare(self.options.warpHandler, ev, playBtn, self.options.afterResume)});
 }
 module.exports = CreateSynthControl;
