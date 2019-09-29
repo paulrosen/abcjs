@@ -39,7 +39,7 @@ See [Full Synth](../examples/full-synth.html) for an example that incorporates a
 | `ABCJS.synth.CreateSynthControl` | Creates the object that handles the visual part of the control. This creates play and stop buttons, etc. See the section below for the options. |
 | `ABCJS.synth.registerAudioContext` | If an AudioContext is passed in, it keeps a reference to it so that it will be used for all synth. If nothing is passed in, then an AudioContext will be created and stored. **This should only be called inside a handler for a user gesture.** |
 | `ABCJS.synth.activeAudioContext` | If there is an AudioContext that is being used then this retrieves it. It allows freely sharing the same one in different parts of your app. |
-| `ABCJS.synth.SynthControl` | This coordinates the cursor with the synth playback |
+| `ABCJS.synth.SynthController` | This coordinates the cursor with the synth playback |
 | `ABCJS.synth.playEvent` | This will play a single event that is passed. The event must have the same format as the events that are passed back by the click listener. |
 
 ### ABCJS.synth.CreateSynthControl

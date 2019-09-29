@@ -1,10 +1,10 @@
 var registerAudioContext = require('./register-audio-context');
 var activeAudioContext = require('./active-audio-context');
-var loopImage = require('./loop.svg');
-var playImage = require('./play.svg');
-var pauseImage = require('./pause.svg');
-var loadingImage = require('./loading.svg');
-var resetImage = require('./reset.svg');
+var loopImage = require('./images/loop.svg');
+var playImage = require('./images/play.svg');
+var pauseImage = require('./images/pause.svg');
+var loadingImage = require('./images/loading.svg');
+var resetImage = require('./images/reset.svg');
 
 function CreateSynthControl(parent, options) {
 	var self = this;

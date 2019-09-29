@@ -2,7 +2,7 @@ var CreateSynthControl = require('./create-synth-control');
 var CreateSynth = require('./create-synth');
 var TimingCallbacks = require('../api/abc_timing_callbacks');
 
-function SynthControl() {
+function SynthController() {
 	var self = this;
 	self.warp = 100;
 	self.cursorControl = null;
@@ -206,4 +206,4 @@ function SynthControl() {
 	};
 }
 
-module.exports = SynthControl;
+module.exports = SynthController;

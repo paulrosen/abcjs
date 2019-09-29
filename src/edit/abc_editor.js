@@ -33,7 +33,7 @@ var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
 var TextPrinter = require('../transform/abc2abc_write');
 var EngraverController = require('../write/abc_engraver_controller');
-var SynthControl = require('../synth/synth-control');
+var SynthController = require('../synth/synth-controller');
 
 // Polyfill for CustomEvent for old IE versions
 if ( typeof window.CustomEvent !== "function" ) {
@@ -319,7 +319,7 @@ Editor.prototype.redrawMidi = function() {
 		if (this.synth.synthControl)
 			this.synth.synthControl.setTunes(this.tunes);
 		else {
-			this.synth.synthControl = new SynthControl();
+			this.synth.synthControl = new SynthController();
 			this.synth.synthControl.load(this.synth.el, this.tunes[0], this.synth.cursorControl, this.synth.options);
 		}
 	}

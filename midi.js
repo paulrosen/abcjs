@@ -26,13 +26,13 @@ var CeateSynthControl = require('./src/synth/create-synth-control');
 var registerAudioContext = require('./src/synth/register-audio-context');
 var activeAudioContext = require('./src/synth/active-audio-context');
 var playEvent = require('./src/synth/play-event');
-var SynthControl = require('./src/synth/synth-control');
+var SynthController = require('./src/synth/synth-controller');
 
 abcjs.synth = {
 	CreateSynth: CreateSynth,
 	instrumentIndexToName: instrumentIndexToName,
 	pitchToNoteName: pitchToNoteName,
-	SynthControl: SynthControl,
+	SynthController: SynthController,
 	SynthSequence: SynthSequence,
 	CreateSynthControl: CreateSynthControl,
 	activeAudioContext: activeAudioContext,
