@@ -1,4 +1,4 @@
-//    abc_midi_create.js: Turn a linear series of events into a series of MIDI commands.
+//    abc_midi_flattener.js: Turn a linear series of events into a series of MIDI commands.
 //    Copyright (C) 2010-2018 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
 //
 //    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
