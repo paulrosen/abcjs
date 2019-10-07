@@ -72,10 +72,12 @@ var sequence;
 		if (abctune.formatting.midi) {
 			//console.log("MIDI Formatting:", abctune.formatting.midi);
 			var globals = abctune.formatting.midi;
-			if (globals.program) {
+			if (globals.program && globals.program.length > 0) {
 				program = globals.program[0];
-				if (globals.program.length > 1)
-					channel = globals.program[1];
+				if (globals.program.length > 1) {
+					program = globals.program[1];
+					channel = globals.program[0];
+				}
 			}
 			if (globals.transpose)
 				transpose = globals.transpose[0];
