@@ -137,6 +137,14 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 	        ep.paddingbottom = -20;
         }
         renderOne(lineEl, tunes[k], ep, tuneNumber);
+        if (k === 0)
+            tune.engraver = tunes[k].engraver;
+        else {
+            if (!tune.engraver.staffgroups)
+                tune.engraver.staffgroups = tunes[k].engraver.staffgroups;
+            else if (tunes[k].engraver.staffgroups.length > 0)
+                tune.engraver.staffgroups.push(tunes[k].engraver.staffgroups[0]);
+        }
     }
 }
 
