@@ -386,6 +386,13 @@ var flatten;
 				} else if (note.endTie)
 					pitchesTied[''+actualPitch] = false;
 			}
+			if (elem.gracenotes) {
+				for (var j = 0; j < elem.gracenotes.length; j++) {
+					elem.midiGraceNotePitches = [];
+					var grace = elem.gracenotes[j];
+					elem.midiGraceNotePitches.push({ pitch: adjustPitch(grace)+60, durationInMeasures: 0, volume: volume, instrument: currentInstrument});
+				}
+			}
 			var thisBreakBetweenNotes = normalBreakBetweenNotes;
 			var soundDuration = duration-normalBreakBetweenNotes;
 			if (soundDuration < 0) {

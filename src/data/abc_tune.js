@@ -1141,6 +1141,8 @@ var Tune = function() {
 						endCharArray: [element.abcelem.endChar],
 						midiPitches: element.abcelem.midiPitches ? parseCommon.cloneArray(element.abcelem.midiPitches) : []
 					};
+					if (element.abcelem.midiGraceNotePitches)
+						eventHash["event" + voiceTimeMilliseconds].midiGraceNotePitches = parseCommon.cloneArray(element.abcelem.midiGraceNotePitches);
 				} else {
 					// If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
 					if (eventHash["event" + voiceTimeMilliseconds].left)
@@ -1159,6 +1161,12 @@ var Tune = function() {
 							eventHash["event" + voiceTimeMilliseconds].midiPitches = [];
 						for (var i = 0; i < element.abcelem.midiPitches.length; i++)
 							eventHash["event" + voiceTimeMilliseconds].midiPitches.push(element.abcelem.midiPitches[i]);
+					}
+					if (element.abcelem.midiGraceNotePitches && element.abcelem.midiGraceNotePitches.length) {
+						if (!eventHash["event" + voiceTimeMilliseconds].midiGraceNotePitches)
+							eventHash["event" + voiceTimeMilliseconds].midiGraceNotePitches = [];
+						for (var j = 0; j < element.abcelem.midiGraceNotePitches.length; j++)
+							eventHash["event" + voiceTimeMilliseconds].midiGraceNotePitches.push(element.abcelem.midiGraceNotePitches[j]);
 					}
 				}
 				if (nextIsBar) {
