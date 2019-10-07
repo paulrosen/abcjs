@@ -1,6 +1,6 @@
 var version = require('./version');
 var animation = require('./src/api/abc_animation');
-var tunebook = require('./src/api/abc_tunebook');
+var tuneBook = require('./src/api/abc_tunebook');
 
 var abcjs = {};
 
@@ -10,8 +10,8 @@ Object.keys(animation).forEach(function (key) {
 	abcjs[key] = animation[key];
 });
 
-Object.keys(tunebook).forEach(function (key) {
-	abcjs[key] = tunebook[key];
+Object.keys(tuneBook).forEach(function (key) {
+	abcjs[key] = tuneBook[key];
 });
 
 abcjs.renderAbc = require('./src/api/abc_tunebook_svg');
@@ -26,7 +26,7 @@ var CreateSynthControl = require('./src/synth/create-synth-control');
 var registerAudioContext = require('./src/synth/register-audio-context');
 var activeAudioContext = require('./src/synth/active-audio-context');
 var playEvent = require('./src/synth/play-event');
-var SynthController = require('./src/synth/synth-controler');
+var SynthController = require('./src/synth/synth-controller');
 
 abcjs.synth = {
 	CreateSynth: CreateSynth,
