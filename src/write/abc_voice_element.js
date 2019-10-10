@@ -292,8 +292,10 @@ VoiceElement.prototype.layoutBeams = function() {
 	// Now we can layout the triplets
 	for (i = 0; i < this.otherchildren.length; i++) {
 		var child = this.otherchildren[i];
-		if (child.layout)
+		if (child.layout) {
 			child.layout();
+			this.adjustRange(child);
+		}
 	}
 	this.staff.top = Math.max(this.staff.top, this.top);
 	this.staff.bottom = Math.min(this.staff.bottom, this.bottom);
