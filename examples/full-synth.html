@@ -121,6 +121,12 @@
 		var synthControl = new ABCJS.synth.SynthController();
 
 		function clickListener(abcElem) {
+			var output = "currentTrackMilliseconds: " + abcElem.currentTrackMilliseconds + "<br>" +
+				"midiPitches: " + JSON.stringify(abcElem.midiPitches, null, 4) + "<br>" +
+				"gracenotes: " + JSON.stringify(abcElem.gracenotes, null, 4) + "<br>" +
+				"midiGraceNotePitches: " + JSON.stringify(abcElem.midiGraceNotePitches, null, 4) + "<br>";
+			document.querySelector(".clicked-info").innerHTML = output;
+
 			var lastClicked = abcElem.midiPitches;
 			if (!lastClicked)
 				return;
@@ -174,6 +180,7 @@
 	<div id="paper"></div>
 	<div id="audio"></div>
 	<p class="click-explanation" style="display:none;">Click on a note to play that note.</p>
+	<pre class="clicked-info"></pre>
 	<pre class="feedback"></pre>
 </main>
 </body>
