@@ -10,8 +10,10 @@
 	<link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
 	<script src="../bin/abcjs_basic_5.8.1.js" type="text/javascript"></script>
 	<script type="text/javascript">
+		var abcjsEditor;
+
 		window.onload = function () {
-			new ABCJS.Editor("abc", {
+			abcjsEditor = new ABCJS.Editor("abc", {
 				canvas_id: "paper",
 				warnings_id: "warnings",
 				synth: {
@@ -30,7 +32,7 @@
 			if (!lastClicked)
 				return;
 
-			ABCJS.synth.playEvent(lastClicked, synthControl.visualObj.millisecondsPerMeasure()).then(function (response) {
+			ABCJS.synth.playEvent(lastClicked, abcjsEditor.millisecondsPerMeasure()).then(function (response) {
 				console.log("note played");
 			}).catch(function (error) {
 				console.log("error playing note", error);

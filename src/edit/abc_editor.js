@@ -489,6 +489,10 @@ Editor.prototype.pause = function(shouldPause) {
 		this.fireChanged();
 };
 
+Editor.prototype.millisecondsPerMeasure = function() {
+	return this.synth.synthControl.visualObj.millisecondsPerMeasure();
+};
+
 Editor.prototype.pauseMidi = function(shouldPause) {
 	this.midiPause = shouldPause;
 	if (!shouldPause)
