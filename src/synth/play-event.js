@@ -1,13 +1,19 @@
 var SynthSequence = require('./synth-sequence');
 var CreateSynth = require('./create-synth');
 
-function playEvent(midiPitches, millisecondsPerMeasure) {
+function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
 	var sequence = new SynthSequence();
 
 	for (var i = 0; i < midiPitches.length; i++) {
 		var note = midiPitches[i];
 		var trackNum = sequence.addTrack();
 		sequence.setInstrument(trackNum, note.instrument);
+		if (i === 0 && midiGracePitches) {
+			for (var j = 0; j < midiGracePitches.length; j++) {
+				var grace = midiGracePitches[j];
+				sequence.appendNote(trackNum, grace.pitch, 1 / 64, grace.volume);
+			}
+		}
 		sequence.appendNote(trackNum, note.pitch, note.durationInMeasures, note.volume);
 	}
 

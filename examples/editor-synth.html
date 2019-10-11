@@ -32,7 +32,7 @@
 			if (!lastClicked)
 				return;
 
-			ABCJS.synth.playEvent(lastClicked, abcjsEditor.millisecondsPerMeasure()).then(function (response) {
+			ABCJS.synth.playEvent(lastClicked, abcElem.midiGraceNotePitches, abcjsEditor.millisecondsPerMeasure()).then(function (response) {
 				console.log("note played");
 			}).catch(function (error) {
 				console.log("error playing note", error);
