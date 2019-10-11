@@ -23,6 +23,11 @@
 		.abcjs-cursor {
 			stroke: red;
 		}
+		.audio-error {
+			color: red;
+			border: 2px solid red;
+			padding: 10px;
+		}
 	</style>
 
 	<script src="../bin/abcjs_basic_5.8.1.js" type="text/javascript"></script>
@@ -118,7 +123,7 @@
 
 		var currentTune = 0;
 
-		var synthControl = new ABCJS.synth.SynthController();
+		var synthControl;
 
 		function clickListener(abcElem) {
 			var output = "currentTrackMilliseconds: " + abcElem.currentTrackMilliseconds + "<br>" +
@@ -145,14 +150,19 @@
 
 		function load() {
 			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions)[0];
-
-			synthControl.load("#audio", visualObj, cursorControl, { displayLoop: true, displayRestart: true, displayPlay: true, displayProgress: true, displayWarp: true });
-
 			document.querySelector(".next").addEventListener("click", next);
+
+			if (ABCJS.synth.supportsAudio()) {
+				synthControl = new ABCJS.synth.SynthController();
+				synthControl.load("#audio", visualObj, cursorControl, {displayLoop: true, displayRestart: true, displayPlay: true, displayProgress: true, displayWarp: true});
+			} else {
+				document.querySelector("#audio").innerHTML = "<div class='audio-error'>Audio is not supported in this browser.</div>";
+			}
 		}
 
 		function download() {
-			synthControl.download("cooleys.wav");
+			if (synthControl)
+				synthControl.download("cooleys.wav");
 		}
 
 		function next() {
@@ -160,7 +170,8 @@
 			if (currentTune >= abc.length)
 				currentTune = 0;
 			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions);
-			synthControl.setTunes(visualObj).then(function (response) {
+			if (synthControl)
+				synthControl.setTunes(visualObj).then(function (response) {
 			});
 		}
 
