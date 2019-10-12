@@ -41,6 +41,7 @@
   "devDependencies": {
     "@babel/core": "7.6.4",
     "@babel/preset-env": "7.6.3",
+    "@vuepress/shared-utils": "1.2.0",
     "babel-loader": "8.0.6",
     "compression-webpack-plugin": "3.0.0",
     "svg-inline-loader": "0.8.0",
