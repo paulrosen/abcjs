@@ -9,8 +9,9 @@ function registerAudioContext(ac) {
 				window.webkitAudioContext ||
 				navigator.mozAudioContext ||
 				navigator.msAudioContext;
+			ac = new ac();
 		}
-		window.abcjsAudioContext = new ac;
+		window.abcjsAudioContext = ac;
 	}
 	return window.abcjsAudioContext.state !== "suspended";
 }

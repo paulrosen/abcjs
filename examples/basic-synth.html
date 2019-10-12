@@ -12,9 +12,14 @@
 			max-width: 770px;
 			margin: 0 auto;
 		}
+		.audio-error {
+			color: red;
+			border: 2px solid red;
+			padding: 10px;
+		}
 	</style>
 
-	<script src="../bin/abcjs_basic_5.8.1-min.js" type="text/javascript"></script>
+	<script src="../bin/abcjs_basic_5.8.1.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		var abc = "T: Cooley's\n" +
 			"M: 4/4\n" +
@@ -38,41 +43,48 @@
 
 			startAudioButton.addEventListener("click", function() {
 				startAudioButton.setAttribute("style", "display:none;");
-				stopAudioButton.setAttribute("style", "");
+				if (ABCJS.synth.supportsAudio()) {
+					stopAudioButton.setAttribute("style", "");
 
-				// An audio context is needed - this is passed in for two reasons:
-				// 1) So that you can share this audio context with other elements on your page.
-				// 2) So that you can create it during a user interaction so that the browser doesn't block the sound.
-				window.AudioContext = window.AudioContext ||
-					window.webkitAudioContext ||
-					navigator.mozAudioContext ||
-					navigator.msAudioContext;
-				var audioContext = new window.AudioContext();
+					// An audio context is needed - this can be passed in for two reasons:
+					// 1) So that you can share this audio context with other elements on your page.
+					// 2) So that you can create it during a user interaction so that the browser doesn't block the sound.
+					// Setting this is optional - if you don't set an audioContext, then abcjs will create one.
+					window.AudioContext = window.AudioContext ||
+						window.webkitAudioContext ||
+						navigator.mozAudioContext ||
+						navigator.msAudioContext;
+					var audioContext = new window.AudioContext();
 
-				// This does a bare minimum so this object could be created in advance, or whenever convenient.
-				midiBuffer = new ABCJS.synth.CreateSynth();
+					// This does a bare minimum so this object could be created in advance, or whenever convenient.
+					midiBuffer = new ABCJS.synth.CreateSynth();
 
-				// midiBuffer.init preloads and caches all the notes needed. There may be significant network traffic here.
-				return midiBuffer.init({
-					visualObj: visualObj,
-					audioContext: audioContext,
-					millisecondsPerMeasure: visualObj.millisecondsPerMeasure()
-				}).then(function () {
-					// midiBuffer.prime actually builds the output buffer.
-					return midiBuffer.prime();
-				}).then(function () {
-					// At this point, everything slow has happened. midiBuffer.start will return very quickly and will start playing very quickly without lag.
-					midiBuffer.start();
-					return Promise.resolve();
-				}).catch(function (error) {
-					console.warn("synth error", error);
-				});
+					// midiBuffer.init preloads and caches all the notes needed. There may be significant network traffic here.
+					return midiBuffer.init({
+						visualObj: visualObj,
+						audioContext: audioContext,
+						millisecondsPerMeasure: visualObj.millisecondsPerMeasure()
+					}).then(function () {
+						// midiBuffer.prime actually builds the output buffer.
+						return midiBuffer.prime();
+					}).then(function () {
+						// At this point, everything slow has happened. midiBuffer.start will return very quickly and will start playing very quickly without lag.
+						midiBuffer.start();
+						return Promise.resolve();
+					}).catch(function (error) {
+						console.warn("synth error", error);
+					});
+				} else {
+					var audioError = document.querySelector(".audio-error");
+					audioError.setAttribute("style", "");
+				}
 			});
 
 			stopAudioButton.addEventListener("click", function() {
 				startAudioButton.setAttribute("style", "");
 				stopAudioButton.setAttribute("style", "display:none;");
-				midiBuffer.stop();
+				if (midiBuffer)
+					midiBuffer.stop();
 			});
 		}
 	</script>
@@ -84,6 +96,7 @@
 		following button is needed to do the initialization:</p>
 	<button class="activate-audio">Activate Audio Context And Play</button>
 	<button class="stop-audio" style="display:none;">Stop Audio</button>
+	<div class='audio-error' style="display:none;">Audio is not supported in this browser.</div>
 </main>
 </body>
 </html>
