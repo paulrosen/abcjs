@@ -34,6 +34,7 @@ var Parse = require('../parse/abc_parse');
 var TextPrinter = require('../transform/abc2abc_write');
 var EngraverController = require('../write/abc_engraver_controller');
 var SynthController = require('../synth/synth-controller');
+var supportsAudio = require('../synth/supports-audio');
 
 // Polyfill for CustomEvent for old IE versions
 if ( typeof window.CustomEvent !== "function" ) {
@@ -219,11 +220,13 @@ var Editor = function(editarea, params) {
   }
 
   if (params.synth) {
-  	this.synth = {
-  		el: params.synth.el,
-	    cursorControl: params.synth.cursorControl,
-	    options: params.synth.options
-  	}
+  	if (supportsAudio()) {
+	    this.synth = {
+		    el: params.synth.el,
+		    cursorControl: params.synth.cursorControl,
+		    options: params.synth.options
+	    }
+    }
   }
 	// If the user wants midi, then store the elements that it will be written to. The element could either be passed in as an id,
 	// an element, or nothing. If nothing is passed in, then just put the midi on top of the generated music.
