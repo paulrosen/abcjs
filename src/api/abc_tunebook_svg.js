@@ -197,6 +197,8 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
     }
 
     function callback(div, tune, tuneNumber, abcString) {
+    	if (params.afterParsing)
+    		params.afterParsing(tune, tuneNumber, abcString);
         if (params.wrap && params.staffwidth) {
 	        tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
 	        return tune;
