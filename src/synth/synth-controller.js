@@ -30,9 +30,10 @@ function SynthController() {
 		self.cursorControl = cursorControl;
 	};
 
-	self.setTune = function(visualObj, userAction) {
+	self.setTune = function(visualObj, userAction, audioParams) {
 		self.isLoaded = false;
 		self.visualObj = visualObj;
+		self.options = audioParams;
 
 		if (self.control) {
 			self.pause();
@@ -131,7 +132,7 @@ function SynthController() {
 
 	self.restart = function () {
 		if (self.timer) {
-			self.timer.reset();
+			self.timer.setProgress(0);
 			self.midiBuffer.seek(0);
 		}
 	};

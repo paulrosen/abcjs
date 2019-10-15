@@ -69,10 +69,12 @@
 				}
 
 				var cursor = document.querySelector("#paper svg .abcjs-cursor");
-				cursor.setAttribute("x1", ev.left-2);
-				cursor.setAttribute("x2", ev.left-2);
-				cursor.setAttribute("y1", ev.top);
-				cursor.setAttribute("y2", ev.top + ev.height);
+				if (cursor) {
+					cursor.setAttribute("x1", ev.left - 2);
+					cursor.setAttribute("x2", ev.left - 2);
+					cursor.setAttribute("y1", ev.top);
+					cursor.setAttribute("y2", ev.top + ev.height);
+				}
 			};
 			self.onFinished = function() {
 				var els = document.querySelectorAll("svg .highlight");
