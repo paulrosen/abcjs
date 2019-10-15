@@ -14,46 +14,40 @@ function SynthController() {
 	self.control = null;
 	self.isLooping = false;
 	self.isStarted = false;
-	self.notSuspended = false;
+	self.isLoaded = false;
 
-	self.load = function (selector, visualObj, cursorControl, visualOptions) {
+	self.load = function (selector, cursorControl, visualOptions) {
 		if (!visualOptions)
 			visualOptions = {};
 		self.control = new CreateSynthControl(selector, {
 			loopHandler: visualOptions.displayLoop ? self.toggleLoop : undefined,
 			restartHandler: visualOptions.displayRestart ? self.restart : undefined,
-			playHandler: visualOptions.displayPlay ? self.play : undefined,
+			playPromiseHandler: visualOptions.displayPlay ? self.play : undefined,
 			progressHandler: visualOptions.displayProgress ? self.randomAccess : undefined,
 			warpHandler: visualOptions.displayWarp ? self.onWarp : undefined,
 			afterResume: self.init
 		});
 		self.cursorControl = cursorControl;
+	};
+
+	self.setTune = function(visualObj, userAction) {
+		self.isLoaded = false;
 		self.visualObj = visualObj;
-	};
 
-	self.init = function () {
-		self.notSuspended = true;
-		if (self.visualObj)
-			return self.go();
-		else
-			return Promise.resolve({ status: "no-buffer"});
-	};
-
-	self.setTunes = function(visualObjs) {
 		if (self.control) {
+			self.pause();
 			self.setProgress(0, 1);
 			self.control.resetAll();
+			self.restart();
+			self.isStarted = false;
 		}
 		self.isLooping = false;
-		if (self.isStarted)
-			self.play(); // this will pause the playback
 
-		// TODO-PER: how to handle multiple tunes?
-		self.visualObj = visualObjs[0];
-		if (self.notSuspended)
+		if (userAction)
 			return self.go();
-		else
-			return Promise.resolve({ status: "no-audio-context"});
+		else {
+			return Promise.resolve({status: "no-audio-context"});
+		}
 	};
 
 	self.go = function () {
@@ -80,6 +74,7 @@ function SynthController() {
 			});
 			if (self.cursorControl && self.cursorControl.onReady && typeof self.cursorControl.onReady  === 'function')
 				self.cursorControl.onReady(self);
+			self.isLoaded = true;
 			return Promise.resolve({ status: "created" });
 		});
 	};
@@ -99,6 +94,15 @@ function SynthController() {
 	};
 
 	self.play = function () {
+		if (!self.isLoaded) {
+			return self.go().then(function() {
+				return self._play();
+			});
+		} else
+			return self._play();
+	};
+
+	self._play = function () {
 		self.isStarted = !self.isStarted;
 		if (self.isStarted) {
 			if (self.cursorControl && self.cursorControl.onStart && typeof self.cursorControl.onStart  === 'function')
@@ -107,6 +111,13 @@ function SynthController() {
 			self.timer.start();
 			self.control.pushPlay(true);
 		} else {
+			self.pause();
+		}
+		return Promise.resolve({ status: "ok" });
+	};
+
+	self.pause = function() {
+		if (self.timer) {
 			self.timer.pause();
 			self.midiBuffer.pause();
 			self.control.pushPlay(false);
@@ -119,8 +130,10 @@ function SynthController() {
 	};
 
 	self.restart = function () {
-		self.timer.reset();
-		self.midiBuffer.seek(0);
+		if (self.timer) {
+			self.timer.reset();
+			self.midiBuffer.seek(0);
+		}
 	};
 
 	self.randomAccess = function (ev) {

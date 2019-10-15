@@ -173,7 +173,7 @@ function CreateSynthControl(parent, options) {
 function buildDom(parent, options) {
 	var hasLoop = !!options.loopHandler;
 	var hasRestart = !!options.restartHandler;
-	var hasPlay = !!options.playHandler;
+	var hasPlay = !!options.playHandler || !!options.playPromiseHandler;
 	var hasProgress = !!options.progressHandler;
 	var hasWarp = !!options.warpHandler;
 	var hasClock = options.hasClock !== false;
@@ -212,34 +212,46 @@ function buildDom(parent, options) {
 	parent.innerHTML = html;
 }
 
-function acResumerMiddleWare(next, ev, playBtn, afterResume) {
+function acResumerMiddleWare(next, ev, playBtn, afterResume, isPromise) {
 	var needsInit = true;
 	if (!activeAudioContext()) {
 		registerAudioContext();
 	} else {
 		needsInit = activeAudioContext().state === "suspended";
 	}
+	if ((needsInit || isPromise) && playBtn)
+		playBtn.classList.add("abcjs-loading");
+
 	if (needsInit) {
-		if (playBtn)
-			playBtn.classList.add("abcjs-loading");
 		activeAudioContext().resume().then(function () {
 			if (afterResume) {
 				afterResume().then(function (response) {
-					playBtn.classList.remove("abcjs-loading");
-					next(ev);
+					doNext(next, ev, playBtn, isPromise);
 				});
-			} else
-				next(ev);
+			} else {
+				doNext(next, ev, playBtn, isPromise);
+			}
+		});
+	} else {
+		doNext(next, ev, playBtn, isPromise);
+	}
+}
+
+function doNext(next, ev, playBtn, isPromise) {
+	if (isPromise) {
+		next(ev).then(function() {
+			playBtn.classList.remove("abcjs-loading");
 		});
 	} else {
 		next(ev);
+		playBtn.classList.remove("abcjs-loading");
 	}
 }
 
 function attachListeners(self) {
 	var hasLoop = !!self.options.loopHandler;
 	var hasRestart = !!self.options.restartHandler;
-	var hasPlay = !!self.options.playHandler;
+	var hasPlay = !!self.options.playHandler || !!self.options.playPromiseHandler;
 	var hasProgress = !!self.options.progressHandler;
 	var hasWarp = !!self.options.warpHandler;
 	var playBtn = self.parent.querySelector(".abcjs-midi-start");
@@ -249,7 +261,14 @@ function attachListeners(self) {
 	if (hasRestart)
 		self.parent.querySelector(".abcjs-midi-reset").addEventListener("click", function(ev){acResumerMiddleWare(self.options.restartHandler, ev, playBtn, self.options.afterResume)});
 	if (hasPlay)
-		playBtn.addEventListener("click", function(ev){acResumerMiddleWare(self.options.playHandler, ev, playBtn, self.options.afterResume)});
+		playBtn.addEventListener("click", function(ev){
+			acResumerMiddleWare(
+				self.options.playPromiseHandler || self.options.playHandler,
+				ev,
+				playBtn,
+				self.options.afterResume,
+				!!self.options.playPromiseHandler)
+		});
 	if (hasProgress)
 		self.parent.querySelector(".abcjs-midi-progress-background").addEventListener("click", function(ev){acResumerMiddleWare(self.options.progressHandler, ev, playBtn, self.options.afterResume)});
 	if (hasWarp)

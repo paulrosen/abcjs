@@ -40,9 +40,11 @@
 
 			var startAudioButton = document.querySelector(".activate-audio");
 			var stopAudioButton = document.querySelector(".stop-audio");
+			var explanationDiv = document.querySelector(".suspend-explanation");
 
 			startAudioButton.addEventListener("click", function() {
 				startAudioButton.setAttribute("style", "display:none;");
+				explanationDiv.setAttribute("style", "opacity: 0;");
 				if (ABCJS.synth.supportsAudio()) {
 					stopAudioButton.setAttribute("style", "");
 
@@ -82,6 +84,7 @@
 
 			stopAudioButton.addEventListener("click", function() {
 				startAudioButton.setAttribute("style", "");
+				explanationDiv.setAttribute("style", "");
 				stopAudioButton.setAttribute("style", "display:none;");
 				if (midiBuffer)
 					midiBuffer.stop();

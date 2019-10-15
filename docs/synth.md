@@ -52,7 +52,7 @@ Called with `new ABCJS.synth.CreateSynthControl(element, options)`.
 | ------------- | ------------- |
 | loopHandler | Callback function when the loop button is clicked. If this is not present, then the loop button is not displayed. |
 | restartHandler | Callback function when the restart button is clicked. if this is not present, then the restart button is not displayed. |
-| playHandler | Callback function when the play button is clicked. if this is not present, then the play button is not displayed. |
+| playHandler or playPromiseHandler | Callback function when the play button is clicked. if this is not present, then the play button is not displayed. If the `handler` version is present, then it must return a promise. |
 | progressHandler | Callback function when the progress bar is clicked. if this is not present, then the progress bar is not displayed.|
 | warpHandler | Callback function when the warp percent is changed. if this is not present, then the warp percent is not displayed. |
 | afterResume | Callback function after the AudioContext is set up correctly. |

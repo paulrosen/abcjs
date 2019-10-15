@@ -319,12 +319,11 @@ Editor.prototype.redrawMidi = function() {
 		window.dispatchEvent(event);
 	}
 	if (this.synth) {
-		if (this.synth.synthControl)
-			this.synth.synthControl.setTunes(this.tunes);
-		else {
+		if (!this.synth.synthControl) {
 			this.synth.synthControl = new SynthController();
-			this.synth.synthControl.load(this.synth.el, this.tunes[0], this.synth.cursorControl, this.synth.options);
+			this.synth.synthControl.load(this.synth.el, this.synth.cursorControl, this.synth.options);
 		}
+		this.synth.synthControl.setTune(this.tunes[0], false);
 	}
 };
 

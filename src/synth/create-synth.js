@@ -27,8 +27,9 @@ function CreateSynth() {
 
 	// Load and cache all needed sounds
 	self.init = function(options) {
-		if (options.audioContext)
-			registerAudioContext(options.audioContext);
+		if (!options)
+			options = {};
+		registerAudioContext(options.audioContext); // This works no matter what - if there is already an ac it is a nop; if the context is not passed in, then it creates one.
 		var startTime = activeAudioContext().currentTime;
 		self.debugCallback = options.debugCallback;
 		if (self.debugCallback)

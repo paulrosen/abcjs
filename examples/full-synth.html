@@ -121,6 +121,8 @@
 			"f''^f''g''^g''|a''^a''b''c'''|^c'''4|]"
 		];
 
+		var tuneNames = [ "Cooleys", "Bill Bailey", "All Notes On Piano" ];
+
 		var currentTune = 0;
 
 		var synthControl;
@@ -149,30 +151,38 @@
 		};
 
 		function load() {
-			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions)[0];
 			document.querySelector(".next").addEventListener("click", next);
 
 			if (ABCJS.synth.supportsAudio()) {
 				synthControl = new ABCJS.synth.SynthController();
-				synthControl.load("#audio", visualObj, cursorControl, {displayLoop: true, displayRestart: true, displayPlay: true, displayProgress: true, displayWarp: true});
+				synthControl.load("#audio", cursorControl, {displayLoop: true, displayRestart: true, displayPlay: true, displayProgress: true, displayWarp: true});
 			} else {
 				document.querySelector("#audio").innerHTML = "<div class='audio-error'>Audio is not supported in this browser.</div>";
 			}
+			setTune(false);
 		}
 
 		function download() {
 			if (synthControl)
-				synthControl.download("cooleys.wav");
+				synthControl.download(tuneNames[currentTune] + ".wav");
+		}
+
+		function setTune(userAction) {
+			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions)[0];
+			if (synthControl) {
+				synthControl.setTune(visualObj, userAction).then(function (response) {
+					console.log("Audio successfully loaded.")
+				}).catch(function (error) {
+					console.warn("Audio problem:", error);
+				});
+			}
 		}
 
 		function next() {
 			currentTune++;
 			if (currentTune >= abc.length)
 				currentTune = 0;
-			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions);
-			if (synthControl)
-				synthControl.setTunes(visualObj).then(function (response) {
-			});
+			setTune(true);
 		}
 
 
