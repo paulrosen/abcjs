@@ -1,3 +1,43 @@
+# Version 5.9.0
+
+## Features
+
+* Add parameter afterParsing to provide a hook before displaying the music.
+
+* Added entry point for seeing if audio is possible.
+
+* Play gracenotes (when present) when playing a single event.
+
+* Keep a running total of the time that a note should be played for convenience in callbacks.
+
+* Add gracenote midi pitches to the return object on timing callbacks.
+
+* Support `%%MIDI program channel program` syntax.
+
+* Much improved interface for using the new audio.
+
+* Incorporate playing a single note.
+
+## Bugs
+
+* Fix crash in editor/synth demo.
+
+* Fix placement of triplets
+
+* Let the timingCallbacks be used with one SVG per line.
+
+## Tasks
+
+* Improve demos relating to audio.
+
+* Update all node dependencies.
+
+* Document the "mark" class.
+
+* Update webpack
+
+* Make uncompressed version of abcjs.
+
 # Version 5.8.1
 
 ## Bugs
