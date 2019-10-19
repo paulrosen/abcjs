@@ -119,7 +119,9 @@ function CreateSynthControl(parent, options) {
 	attachListeners(self);
 
 	self.setTempo = function(tempo) {
-		self.parent.querySelector(".abcjs-midi-current-tempo").innerHTML = tempo;
+		var el = self.parent.querySelector(".abcjs-midi-current-tempo");
+		if (el)
+			el.innerHTML = tempo;
 	};
 	self.resetAll = function() {
 		var pushedButtons = self.parent.querySelectorAll(".abcjs-pushed");
@@ -130,6 +132,8 @@ function CreateSynthControl(parent, options) {
 	};
 	self.pushPlay = function(push) {
 		var startButton = self.parent.querySelector(".abcjs-midi-start");
+		if (!startButton)
+			return;
 		if (push)
 			startButton.classList.add("abcjs-pushed");
 		else
@@ -137,6 +141,8 @@ function CreateSynthControl(parent, options) {
 	};
 	self.pushLoop = function(push) {
 		var loopButton = self.parent.querySelector(".abcjs-midi-loop");
+		if (!loopButton)
+			return;
 		if (push)
 			loopButton.classList.add("abcjs-pushed");
 		else
@@ -146,16 +152,20 @@ function CreateSynthControl(parent, options) {
 	self.setProgress = function (percent, totalTime) {
 		var progressBackground = self.parent.querySelector(".abcjs-midi-progress-background");
 		var progressThumb = self.parent.querySelector(".abcjs-midi-progress-indicator");
+		if (!progressBackground || !progressThumb)
+			return;
 		var width = progressBackground.clientWidth;
 		var left = width * percent;
 		progressThumb.style.left = left + "px";
 
 		var clock = self.parent.querySelector(".abcjs-midi-clock");
-		var totalSeconds = (totalTime * percent) / 1000;
-		var minutes = Math.floor(totalSeconds / 60);
-		var seconds = Math.floor(totalSeconds % 60);
-		var secondsFormatted = seconds < 10 ? "0" + seconds : seconds;
-		clock.innerHTML = minutes + ":" + secondsFormatted;
+		if (clock) {
+			var totalSeconds = (totalTime * percent) / 1000;
+			var minutes = Math.floor(totalSeconds / 60);
+			var seconds = Math.floor(totalSeconds % 60);
+			var secondsFormatted = seconds < 10 ? "0" + seconds : seconds;
+			clock.innerHTML = minutes + ":" + secondsFormatted;
+		}
 	};
 
 	if (self.options.afterResume) {
@@ -240,11 +250,13 @@ function acResumerMiddleWare(next, ev, playBtn, afterResume, isPromise) {
 function doNext(next, ev, playBtn, isPromise) {
 	if (isPromise) {
 		next(ev).then(function() {
-			playBtn.classList.remove("abcjs-loading");
+			if (playBtn)
+				playBtn.classList.remove("abcjs-loading");
 		});
 	} else {
 		next(ev);
-		playBtn.classList.remove("abcjs-loading");
+		if (playBtn)
+			playBtn.classList.remove("abcjs-loading");
 	}
 }
 

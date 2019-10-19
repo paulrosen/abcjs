@@ -138,6 +138,15 @@ function SynthController() {
 	};
 
 	self.randomAccess = function (ev) {
+		if (!self.isLoaded) {
+			return self.go().then(function() {
+				return self._randomAccess(ev);
+			});
+		} else
+			return self._randomAccess(ev);
+	};
+
+	self._randomAccess = function (ev) {
 		var background = (ev.target.classList.contains('abcjs-midi-progress-indicator')) ? ev.target.parentNode : ev.target;
 		var percent = (ev.x - background.offsetLeft) / background.offsetWidth;
 		if (percent < 0)
