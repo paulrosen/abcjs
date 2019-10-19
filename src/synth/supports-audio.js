@@ -1,4 +1,7 @@
 function supportsAudio() {
+	if (!window.Promise)
+		return false;
+
 	return window.AudioContext ||
 		window.webkitAudioContext ||
 		navigator.mozAudioContext ||
