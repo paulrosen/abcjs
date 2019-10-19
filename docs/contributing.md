@@ -88,7 +88,7 @@ To release a new version, this checklist should be followed:
 
 [_] Minify the various library versions with `npm run build`.
 
-[_] Add the new files: `git add bin/abcjs*_${version-number}-*`.
+[_] Add the new files: `git add bin/abcjs*_x.x.x*`.
 
 [_] IMPORTANT! Change the version number (probably line 3) in `package.json` BACK to the old version. (It will be changed automatically by the npm step.)
 

@@ -1,3 +1,11 @@
+# Version 5.9.1
+
+## Bugs
+
+* Fix crash when using different combinations of options for the audio control.
+
+* Fix some browser compatibility issues.
+
 # Version 5.9.0
 
 ## Features

@@ -303,7 +303,7 @@ The abcjs plugin renders all the abc in a page (determined as a new line beginni
 To use, simply include the plugin version in the page:
 
 ```html
-<script src="abcjs_plugin_5.9.0-min.js" type="text/javascript"></script>
+<script src="abcjs_plugin_5.9.1-min.js" type="text/javascript"></script>
 ```
 
 Certain options for the plugin can be changed like this, if executed on page load, just after including the plugin file:
