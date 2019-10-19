@@ -154,6 +154,7 @@
 
 		function load() {
 			document.querySelector(".next").addEventListener("click", next);
+			document.querySelector(".start").addEventListener("click", start);
 
 			if (ABCJS.synth.supportsAudio()) {
 				synthControl = new ABCJS.synth.SynthController();
@@ -167,6 +168,11 @@
 		function download() {
 			if (synthControl)
 				synthControl.download(tuneNames[currentTune] + ".wav");
+		}
+
+		function start() {
+			if (synthControl)
+				synthControl.play();
 		}
 
 		function setTune(userAction) {
@@ -199,6 +205,7 @@
 	<p>As the piece is playing, there are callbacks when the note changes. The info returned in the callback is printed to the page as it is received.</p>
 	<p>The visual control for playing music can look different. In this example, the abcjs-audio.css file has been loaded. You can supply your own css.</p>
 	<button class="next">Next Tune</button>
+	<button class="start">Start/Pause</button>
 	<button class="download" style="display: none;">Download</button>
 	<div id="paper"></div>
 	<div id="audio"></div>
