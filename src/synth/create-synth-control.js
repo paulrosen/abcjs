@@ -1,5 +1,6 @@
 var registerAudioContext = require('./register-audio-context');
 var activeAudioContext = require('./active-audio-context');
+var parseCommon = require('../parse/abc_common');
 // TODO-PER: The require statements for svg don't play well for node apps without extra plugins. The following lines would be clearer than inlining the SVG
 // var loopImage = require('./images/loop.svg');
 // var playImage = require('./images/play.svg');
@@ -102,7 +103,7 @@ function CreateSynthControl(parent, options) {
 	self.parent = parent;
 	self.options = {};
 	if (options)
-		self.options = Object.assign({}, options);
+		self.options = parseCommon.clone(options);
 
 	// This can be called in the following cases:
 	// AC already registered and not suspended
