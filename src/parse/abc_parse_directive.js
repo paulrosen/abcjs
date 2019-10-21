@@ -30,6 +30,7 @@ var parseDirective = {};
 		multilineVars.tripletfont = {face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none"};
 		multilineVars.vocalfont  = { face: "\"Times New Roman\"", size: 13, weight: "bold", style: "normal", decoration: "none" };
 		multilineVars.wordsfont  = { face: "\"Times New Roman\"", size: 16, weight: "normal", style: "normal", decoration: "none" };
+    multilineVars.freegchord = 1;
 
 		// These fonts are global for the entire tune.
 		tune.formatting.composerfont  = { face: "\"Times New Roman\"", size: 14, weight: "normal", style: "italic", decoration: "none" };
@@ -327,7 +328,6 @@ var parseDirective = {};
 		if (isNaN(num) || num === 0)
 			return "Directive \"" + cmd + "\" requires a number as a parameter.";
 		tune.formatting.scale = num;
-
 	};
 
 	var getRequiredMeasurement = function(cmd, tokens) {
@@ -1045,6 +1045,10 @@ var parseDirective = {};
 						if (scratch !== null) warn(scratch);
 						multilineVars.partsfont.box = multilineVars.partsBox;
 						break;
+          case "freegchord":
+            scratch = addMultilineVarBool('freegchord', cmd, tokens);
+            if (scratch !== null) warn(scratch);
+            break;
 					default:
 						warn("Formatting directive unrecognized: ", cmd, 0);
 				}
