@@ -1046,10 +1046,10 @@ var parseDirective = {};
 						if (scratch !== null) warn(scratch);
 						multilineVars.partsfont.box = multilineVars.partsBox;
 						break;
-          case "freegchord":
-            scratch = addMultilineVarBool('freegchord', cmd, tokens);
-            if (scratch !== null) warn(scratch);
-            break;
+					case "freegchord":
+						scratch = addMultilineVarBool('freegchord', cmd, tokens);
+						if (scratch !== null) warn(scratch);
+						break;
 					default:
 						warn("Formatting directive unrecognized: ", cmd, 0);
 				}
