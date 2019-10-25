@@ -70,8 +70,12 @@ function SynthController() {
 			self.timer = new TimingCallbacks(self.visualObj, {
 				beatCallback: self.beatCallback,
 				eventCallback: self.eventCallback,
-				beatSubdivisions: 16,
-				qpm: self.currentTempo
+				lineEndCallback: self.lineEndCallback,
+				qpm: self.currentTempo,
+
+				extraMeasuresAtBeginning: self.cursorControl ? self.cursorControl.extraMeasuresAtBeginning : undefined,
+				lineEndAnticipation: self.cursorControl ? self.cursorControl.lineEndAnticipation : undefined,
+				beatSubdivisions: self.cursorControl && self.cursorControl.beatSubdivisions !== undefined ? self.cursorControl.beatSubdivisions : 16,
 			});
 			if (self.cursorControl && self.cursorControl.onReady && typeof self.cursorControl.onReady  === 'function')
 				self.cursorControl.onReady(self);
@@ -201,6 +205,8 @@ function SynthController() {
 	self.beatCallback = function (beatNumber, totalBeats, totalTime) {
 		var percent = beatNumber / totalBeats;
 		self.setProgress(percent, totalTime);
+		if (self.cursorControl && self.cursorControl.onBeat && typeof self.cursorControl.onBeat  === 'function')
+			self.cursorControl.onBeat(beatNumber, totalBeats, totalTime);
 	};
 
 	self.eventCallback = function (event) {
@@ -210,6 +216,11 @@ function SynthController() {
 		} else {
 			self.finished();
 		}
+	};
+
+	self.lineEndCallback = function (data) {
+		if (self.cursorControl && self.cursorControl.onLineEnd && typeof self.cursorControl.onLineEnd  === 'function')
+			self.cursorControl.onLineEnd(data);
 	};
 
 	self.getUrl = function () {
