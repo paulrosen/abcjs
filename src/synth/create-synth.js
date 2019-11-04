@@ -47,7 +47,7 @@ function CreateSynth() {
 			self.flattened = options.sequence;
 		else
 			return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
-		self.sequenceCallback = options.options.sequenceCallback;
+		self.sequenceCallback = params.sequenceCallback;
 
 		var allNotes = {};
 		var currentInstrument = instrumentIndexToName[0];
