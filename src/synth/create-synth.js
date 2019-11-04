@@ -47,6 +47,7 @@ function CreateSynth() {
 			self.flattened = options.sequence;
 		else
 			return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
+		self.sequenceCallback = options.options.sequenceCallback;
 
 		var allNotes = {};
 		var currentInstrument = instrumentIndexToName[0];
@@ -131,6 +132,8 @@ function CreateSynth() {
 			self.stop();
 
 			var noteMapTracks = createNoteMap(self.flattened);
+			if (self.sequenceCallback)
+				self.sequenceCallback(noteMapTracks);
 			//console.log(noteMapTracks);
 
 			self.audioBuffers = [];
@@ -139,22 +142,7 @@ function CreateSynth() {
 				var chanData = audioBuffer.getChannelData(0);
 
 				noteMap.forEach(function(note) {
-					var start = Math.floor(note.start*activeAudioContext().sampleRate * tempoMultiplier);
-					var numBeats = note.end - note.start;
-					var noteTimeSec = numBeats * tempoMultiplier;
-					var noteName = pitchToNoteName[note.pitch+60];
-					if (noteName) { // Just ignore pitches that don't exist.
-						var pitch = soundsCache[note.instrument][noteName].getChannelData(0);
-						var duration = Math.min(pitch.length, Math.floor(noteTimeSec * activeAudioContext().sampleRate));
-						//console.log(pitchToNote[note.pitch+''], start, numBeats, noteTimeSec, duration);
-						for (var i = 0; i < duration; i++) {
-							var thisSample = pitch[i] * note.volume / 128;
-							if (chanData[start + i])
-								chanData[start + i] = (chanData[start + i] + thisSample) *0.75;
-							else
-								chanData[start + i] = thisSample;
-						}
-					}
+					self._placeNote(chanData, note, tempoMultiplier, soundsCache);
 				});
 
 				self.audioBuffers.push(audioBuffer);
@@ -278,6 +266,25 @@ function CreateSynth() {
 		self.directSource.forEach(function(source) {
 			source.start(0, seconds);
 		});
+	};
+
+	self._placeNote = function(chanData, note, tempoMultiplier, soundsCache) {
+		var start = Math.floor(note.start*activeAudioContext().sampleRate * tempoMultiplier);
+		var numBeats = note.end - note.start;
+		var noteTimeSec = numBeats * tempoMultiplier;
+		var noteName = pitchToNoteName[note.pitch+60];
+		if (noteName) { // Just ignore pitches that don't exist.
+			var pitch = soundsCache[note.instrument][noteName].getChannelData(0);
+			var duration = Math.min(pitch.length, Math.floor(noteTimeSec * activeAudioContext().sampleRate));
+			//console.log(pitchToNote[note.pitch+''], start, numBeats, noteTimeSec, duration);
+			for (var i = 0; i < duration; i++) {
+				var thisSample = pitch[i] * note.volume / 128;
+				if (chanData[start + i])
+					chanData[start + i] = (chanData[start + i] + thisSample) *0.75;
+				else
+					chanData[start + i] = thisSample;
+			}
+		}
 	};
 }
 
