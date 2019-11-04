@@ -29,7 +29,7 @@ var Renderer = require('./abc_renderer');
  * this data structure is first laid out (giving the graphelems x and y coordinates) and then drawn onto the renderer
  * each ABCJS AES represents a single staffgroup - all elements that are not in a staffgroup are rendered directly by the controller
  *
- * elements in ABCJS AES know their "source data" in the ABCJS AST, and their "target shape" 
+ * elements in ABCJS AES know their "source data" in the ABCJS AST, and their "target shape"
  * in the renderer for highlighting purposes
  *
  * @param {Object} paper div element that will wrap the SVG
@@ -77,7 +77,7 @@ EngraverController.prototype.reset = function() {
 
 /**
  * run the engraving process
- * @param {ABCJS.Tune|ABCJS.Tune[]} abctunes 
+ * @param {ABCJS.Tune|ABCJS.Tune[]} abctunes
  */
 EngraverController.prototype.engraveABC = function(abctunes, tuneNumber) {
   if (abctunes[0]===undefined) {
@@ -170,6 +170,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.newTune(abctune);
 	this.engraver = new AbstractEngraver(this.renderer, tuneNumber, { bagpipes: abctune.formatting.bagpipes, flatbeams: abctune.formatting.flatbeams });
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
+	this.engraver.measureLength = abctune.getMeterFraction().num/abctune.getMeterFraction().den;
 	if (abctune.formatting.staffwidth) {
 		this.width = abctune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
 	} else {

@@ -166,6 +166,10 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
 		  this.startlimitelem = keySig; // limit ties here
 	  }
     if (abcstaff.meter) {
+    	if (abcstaff.meter.type === 'specified') {
+    		this.measureLength = abcstaff.meter.value[0].num / abcstaff.meter.value[0].den;
+	    } else
+	    	this.measureLength = 1;
 		var ts = createTimeSignature(abcstaff.meter, this.tuneNumber);
 	    voice.addChild(ts);
 		this.startlimitelem = ts; // limit ties here
@@ -816,6 +820,8 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   if (hint) abselem.setHint();
 
   if (elem.rest) {
+  	if (this.measureLength === duration)
+	    elem.rest.type = 'whole'; // If the rest is exactly a measure, always use a whole rest
 	  var ret1 = addRestToAbsElement(abselem, elem, duration, dot, voice.voicetotal > 1, this.stemdir, isSingleLineStaff, durlog, this.voiceScale);
 	  notehead = ret1.noteHead;
 	  roomtaken = ret1.roomTaken;
