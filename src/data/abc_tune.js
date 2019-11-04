@@ -980,7 +980,7 @@ var Tune = function() {
 				}
 			}
 		}
-		return { type: "common_time", };
+		return { type: "common_time" };
 	};
 
 	this.getMeterFraction = function() {
@@ -1001,6 +1001,19 @@ var Tune = function() {
 		}
 		this.meter = { num: num, den: den };
 		return this.meter; // TODO-PER: is this saved value used anywhere? A get function shouldn't change state.
+	};
+
+	this.getKeySignature = function() {
+		for (var i = 0; i < this.lines.length; i++) {
+			var line = this.lines[i];
+			if (line.staff) {
+				for (var j = 0; j < line.staff.length; j++) {
+					if (line.staff[j].key)
+						return line.staff[j].key;
+				}
+			}
+		}
+		return {  };
 	};
 
 	this.getCurrentVoice = function() {
