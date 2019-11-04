@@ -1,3 +1,4 @@
+var supportsAudio = require('./supports-audio');
 var registerAudioContext = require('./register-audio-context');
 var activeAudioContext = require('./active-audio-context');
 var parseCommon = require('../parse/abc_common');
@@ -230,6 +231,10 @@ function acResumerMiddleWare(next, ev, playBtn, afterResume, isPromise) {
 	} else {
 		needsInit = activeAudioContext().state === "suspended";
 	}
+	if (!supportsAudio()) {
+		throw { status: "NotSupported", message: "This browser does not support audio."};
+	}
+
 	if ((needsInit || isPromise) && playBtn)
 		playBtn.classList.add("abcjs-loading");
 
