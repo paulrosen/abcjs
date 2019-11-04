@@ -3,6 +3,7 @@ var soundsCache = require('./sounds-cache');
 var createNoteMap = require('./create-note-map');
 var registerAudioContext = require('./register-audio-context');
 var activeAudioContext = require('./active-audio-context');
+var supportsAudio = require('./supports-audio');
 var pitchToNoteName = require('./pitch-to-note-name');
 var instrumentIndexToName = require('./instrument-index-to-name');
 var downloadBuffer = require('./download-buffer');
@@ -36,13 +37,15 @@ function CreateSynth() {
 			self.debugCallback("init called");
 		self.audioBufferPossible = self._deviceCapable();
 		if (!self.audioBufferPossible)
-			return Promise.reject(new Error(notSupportedMessage));
+			return Promise.reject({ status: "NotSupported", message: notSupportedMessage});
 		self.soundFontUrl = options.soundFontUrl ? options.soundFontUrl : defaultSoundFontUrl;
 		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : self.visualObj.millisecondsPerMeasure();
 		var params = options.options ? options.options : {};
+		self.meterSize = 1;
 		if (options.visualObj) {
 			var seq = sequence(options.visualObj, params);
 			self.flattened = flatten(seq, params);
+			self.meterSize = options.visualObj.getMeterFraction().num / options.visualObj.getMeterFraction().den;
 		} else if (options.sequence)
 			self.flattened = options.sequence;
 		else
@@ -124,7 +127,7 @@ function CreateSynth() {
 			self.debugCallback("prime called");
 		return new Promise(function(resolve) {
 			var startTime = activeAudioContext().currentTime;
-			var tempoMultiplier = self.millisecondsPerMeasure / 1000;
+			var tempoMultiplier = self.millisecondsPerMeasure / 1000 / self.meterSize;
 			self.duration = self.flattened.totalDuration * tempoMultiplier;
 			var totalSamples = Math.floor(activeAudioContext().sampleRate * self.duration);
 
@@ -244,9 +247,7 @@ function CreateSynth() {
 	/////////////// Private functions //////////////
 
 	self._deviceCapable = function() {
-		try {
-			activeAudioContext().sampleRate;
-		} catch (e) {
+		if (!supportsAudio()) {
 			console.warn(notSupportedMessage);
 			if (self.debugCallback)
 				self.debugCallback(notSupportedMessage);
