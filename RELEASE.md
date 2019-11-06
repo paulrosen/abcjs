@@ -1,3 +1,29 @@
+# Version 5.10.0
+
+## Bugs
+
+
+* Fix crash on init of synth if tempo is not passed in.
+
+* Fix the tempo for synth pieces that are not in 4/4.
+
+## Features
+
+* Rests that take up a measure should always be a whole rest, no matter what the time sig.
+
+* Allow beat subdivisions to be set for the synth control object.
+
+* Update the test for whether audio is possible to include access to ac.resume
+
+* Add sequenceCallback option for the synth.
+
+* Add api function to expose the tune's key signature.
+
+* Add sequenceCallback option for the synth.
+
+* Add the rest of the possible TimingCallback parameters when calling through the new synth.
+
+
 # Version 5.9.1
 
 ## Bugs
