@@ -66,6 +66,13 @@ function SynthController() {
 		}).then(function () {
 			return self.midiBuffer.prime();
 		}).then(function () {
+			var subdivisions = 16;
+			if (self.cursorControl &&
+				self.cursorControl.beatSubdivisions !== undefined &&
+				parseInt(self.cursorControl.beatSubdivisions, 10) >= 1 &&
+				parseInt(self.cursorControl.beatSubdivisions, 10) <= 64)
+				subdivisions = parseInt(self.cursorControl.beatSubdivisions, 10);
+
 			// Need to create the TimingCallbacks after priming the midi so that the midi data is available for the callbacks.
 			self.timer = new TimingCallbacks(self.visualObj, {
 				beatCallback: self.beatCallback,
@@ -75,7 +82,7 @@ function SynthController() {
 
 				extraMeasuresAtBeginning: self.cursorControl ? self.cursorControl.extraMeasuresAtBeginning : undefined,
 				lineEndAnticipation: self.cursorControl ? self.cursorControl.lineEndAnticipation : undefined,
-				beatSubdivisions: self.cursorControl && self.cursorControl.beatSubdivisions !== undefined ? self.cursorControl.beatSubdivisions : 16,
+				beatSubdivisions: subdivisions,
 			});
 			if (self.cursorControl && self.cursorControl.onReady && typeof self.cursorControl.onReady  === 'function')
 				self.cursorControl.onReady(self);
