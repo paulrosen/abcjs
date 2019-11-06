@@ -39,7 +39,7 @@ function CreateSynth() {
 		if (!self.audioBufferPossible)
 			return Promise.reject({ status: "NotSupported", message: notSupportedMessage});
 		self.soundFontUrl = options.soundFontUrl ? options.soundFontUrl : defaultSoundFontUrl;
-		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : self.visualObj.millisecondsPerMeasure();
+		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure() : 1000);
 		var params = options.options ? options.options : {};
 		self.meterSize = 1;
 		if (options.visualObj) {
