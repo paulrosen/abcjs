@@ -820,7 +820,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   if (hint) abselem.setHint();
 
   if (elem.rest) {
-  	if (this.measureLength === duration)
+  	if (this.measureLength === duration && elem.rest.type !== 'invisible' && elem.rest.type !== 'spacer')
 	    elem.rest.type = 'whole'; // If the rest is exactly a measure, always use a whole rest
 	  var ret1 = addRestToAbsElement(abselem, elem, duration, dot, voice.voicetotal > 1, this.stemdir, isSingleLineStaff, durlog, this.voiceScale);
 	  notehead = ret1.noteHead;
