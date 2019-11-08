@@ -1,7 +1,12 @@
-# Version 5.10.0
+# Version 5.10.1
 
 ## Bugs
 
+* Fix crash when attempting to manipulate  tunes that are created with oneSvgPerLine.
+
+# Version 5.10.0
+
+## Bugs
 
 * Fix crash on init of synth if tempo is not passed in.
 
