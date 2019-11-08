@@ -1,4 +1,5 @@
 var tunebook = require('./abc_tunebook');
+var Tune = require('../data/abc_tune');
 
 var EngraverController = require('../write/abc_engraver_controller');
 var Parse = require('../parse/abc_parse');
@@ -53,13 +54,13 @@ function renderOne(div, tune, params, tuneNumber) {
 
 function renderEachLineSeparately(div, tune, params, tuneNumber) {
     function initializeTuneLine(tune) {
-        return {
-            formatting: tune.formatting,
-            media: tune.media,
-            version: tune.version,
-            metaText: {},
-            lines: []
-        };
+        var obj = new Tune();
+        obj.formatting = tune.formatting;
+        obj.media = tune.media;
+        obj.version = tune.version;
+        obj.metaText = {};
+        obj.lines = [];
+        return obj;
     }
 
     // Before rendering, chop up the returned tune into an array where each element is a line.
