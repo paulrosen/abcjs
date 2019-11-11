@@ -1,8 +1,14 @@
+# Version 5.10.2
+
+## Bugs
+
+* Fix line wrapping problem when the total number of measures is less than the target number of measures.
+
 # Version 5.10.1
 
 ## Bugs
 
-* Fix crash when attempting to manipulate  tunes that are created with oneSvgPerLine.
+* Fix crash when attempting to manipulate tunes that are created with oneSvgPerLine.
 
 # Version 5.10.0
 
