@@ -558,10 +558,10 @@ function fixedMeasureLineBreaks(widths, lineBreakPoint, preferredMeasuresPerLine
 	var failed = false;
 	for (var i = 0; i < widths.length; i++) {
 		thisWidth += widths[i];
+		if (thisWidth > lineBreakPoint) {
+			failed = true;
+		}
 		if (i % preferredMeasuresPerLine === (preferredMeasuresPerLine-1)) {
-			if (thisWidth > lineBreakPoint) {
-				failed = true;
-			}
 			if (i !== widths.length-1) // Don't bother putting a line break for the last line - it's already a break.
 				lineBreaks.push(i);
 			totals.push(Math.round(thisWidth));
