@@ -8,7 +8,7 @@ Please try this out and report any issues that you have.
 
 ## Browser Compatibility and Requirements
 
-* This works in any browser that supports both `AudioContext` and `Promises`. That does NOT include IE, but this will work on any other "modern" browser, for instance, Firefox, Safari, Edge, and Chrome.
+* This works in any browser that supports `AudioContext`, `AudioContext.resume`, and `Promises`. That does NOT include IE, but this will work on any other "modern" browser that is at least the following version: Firefox 40, Safari 9.1, Edge 13, and Chrome 43.
 
 * This requires an internet connection for the "sound fonts". You can supply your own sound fonts, so if you want to deliver them locally you can get by without the network. The default sound fonts come from a github repo.
 

@@ -55,7 +55,7 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 
 | `params` (for midi) | Default | Description |
 | ------------- | ----------- | ----------- |
-| `qpm` | 180 | The tempo, if not specified in abcString. |
+| `qpm` | 180 | Override the starting tempo in the abcString. |
 | `program` | 0 | The midi program (aka "instrument") to use, if not specified in abcString. |
 | `midiTranspose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
 | `voicesOff` | false | Play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. |
