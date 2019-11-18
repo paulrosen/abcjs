@@ -104,6 +104,7 @@ var Parse = function() {
 			this.ornamentPosition = "auto";
 			this.volumePosition = "auto";
 			this.openSlurs = [];
+			this.freegchord = false;
 		},
 		differentFont: function(type, defaultFonts) {
 			if (this[type].decoration !== defaultFonts[type].decoration) return true;
@@ -214,9 +215,10 @@ var Parse = function() {
 				chord[1] = chord[1].substring(ws);
 				chord[2] = null;
 				chord[3] = { x: x.value, y: y.value };
-			} else {
+			} else if (multilineVars.freegchord !== true) {
 				chord[1] = chord[1].replace(/([ABCDEFG0-9])b/g, "$1♭");
 				chord[1] = chord[1].replace(/([ABCDEFG0-9])#/g, "$1♯");
+			} else {
 				chord[2] = 'default';
 				chord[1] = transpose.chordName(multilineVars, chord[1]);
 			}
