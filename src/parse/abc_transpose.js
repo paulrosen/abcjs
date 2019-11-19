@@ -101,26 +101,45 @@ transpose.keySignature = function(multilineVars, keys, keyName, root, acc, local
 
 var sharpChords = [ 'C', 'C♯', 'D', "D♯", 'E', 'F', "F♯", 'G', 'G♯', 'A', 'A♯', 'B'];
 var flatChords = [ 'C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
+var sharpChordsFree = [ 'C', 'C#', 'D', "D#", 'E', 'F', "F#", 'G', 'G#', 'A', 'A#', 'B'];
+var flatChordsFree = [ 'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
 transpose.chordName = function(multilineVars, chord) {
 	if (multilineVars.localTranspose && (multilineVars.localTranspose % 12 !== 0)) { // The chords are the same if it is an exact octave change.
 		var transposeFactor = multilineVars.localTranspose;
 		while (transposeFactor < 0) transposeFactor += 12;
 		if (transposeFactor > 11) transposeFactor = transposeFactor % 12;
-		chord = chord.replace(/C♭/g, "`~11`");
-		chord = chord.replace(/D♭/g, "`~1`");
-		chord = chord.replace(/E♭/g, "`~3`");
-		chord = chord.replace(/F♭/g, "`~4`");
-		chord = chord.replace(/G♭/g, "`~6`");
-		chord = chord.replace(/A♭/g, "`~8`");
-		chord = chord.replace(/B♭/g, "`~10`");
-		chord = chord.replace(/C♯/g, "`~1`");
-		chord = chord.replace(/D♯/g, "`~3`");
-		chord = chord.replace(/E♯/g, "`~5`");
-		chord = chord.replace(/F♯/g, "`~6`");
-		chord = chord.replace(/G♯/g, "`~8`");
-		chord = chord.replace(/A♯/g, "`~10`");
-		chord = chord.replace(/B♯/g, "`~0`");
+		if (multilineVars.freegchord) {
+			chord = chord.replace(/Cb/g, "`~11`");
+			chord = chord.replace(/Db/g, "`~1`");
+			chord = chord.replace(/Eb/g, "`~3`");
+			chord = chord.replace(/Fb/g, "`~4`");
+			chord = chord.replace(/Gb/g, "`~6`");
+			chord = chord.replace(/Ab/g, "`~8`");
+			chord = chord.replace(/Bb/g, "`~10`");
+			chord = chord.replace(/C#/g, "`~1`");
+			chord = chord.replace(/D#/g, "`~3`");
+			chord = chord.replace(/E#/g, "`~5`");
+			chord = chord.replace(/F#/g, "`~6`");
+			chord = chord.replace(/G#/g, "`~8`");
+			chord = chord.replace(/A#/g, "`~10`");
+			chord = chord.replace(/B#/g, "`~0`");
+		} else {
+			chord = chord.replace(/C♭/g, "`~11`");
+			chord = chord.replace(/D♭/g, "`~1`");
+			chord = chord.replace(/E♭/g, "`~3`");
+			chord = chord.replace(/F♭/g, "`~4`");
+			chord = chord.replace(/G♭/g, "`~6`");
+			chord = chord.replace(/A♭/g, "`~8`");
+			chord = chord.replace(/B♭/g, "`~10`");
+			chord = chord.replace(/C♯/g, "`~1`");
+			chord = chord.replace(/D♯/g, "`~3`");
+			chord = chord.replace(/E♯/g, "`~5`");
+			chord = chord.replace(/F♯/g, "`~6`");
+			chord = chord.replace(/G♯/g, "`~8`");
+			chord = chord.replace(/A♯/g, "`~10`");
+			chord = chord.replace(/B♯/g, "`~0`");
+		}
 		chord = chord.replace(/C/g, "`~0`");
 		chord = chord.replace(/D/g, "`~2`");
 		chord = chord.replace(/E/g, "`~4`");
@@ -134,7 +153,10 @@ transpose.chordName = function(multilineVars, chord) {
 				var chordNum = parseInt(arr[i].substr(1),10);
 				chordNum += transposeFactor;
 				if (chordNum > 11) chordNum -= 12;
-				arr[i] = multilineVars.localTransposePreferFlats ? flatChords[chordNum] : sharpChords[chordNum];
+				if (multilineVars.freegchord)
+					arr[i] = multilineVars.localTransposePreferFlats ? flatChordsFree[chordNum] : sharpChordsFree[chordNum];
+				else
+					arr[i] = multilineVars.localTransposePreferFlats ? flatChords[chordNum] : sharpChords[chordNum];
 			}
 		}
 		chord = arr.join("");

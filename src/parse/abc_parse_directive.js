@@ -357,6 +357,10 @@ var parseDirective = {};
 	};
 
 	var addMultilineVarBool = function(key, cmd, tokens) {
+		if (tokens.length === 1 && (tokens[0].token === 'true' || tokens[0].token === 'false')) {
+			multilineVars[key] = tokens[0].token === 'true';
+			return null;
+		}
 		var str = addMultilineVar(key, cmd, tokens, 0, 1);
 		if (str !== null) return str;
 		multilineVars[key] = (multilineVars[key] === 1);

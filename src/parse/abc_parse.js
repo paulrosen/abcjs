@@ -216,10 +216,11 @@ var Parse = function() {
 				chord[1] = chord[1].substring(ws);
 				chord[2] = null;
 				chord[3] = { x: x.value, y: y.value };
-			} else if (multilineVars.freegchord !== true) {
-				chord[1] = chord[1].replace(/([ABCDEFG0-9])b/g, "$1♭");
-				chord[1] = chord[1].replace(/([ABCDEFG0-9])#/g, "$1♯");
 			} else {
+				if (multilineVars.freegchord !== true) {
+					chord[1] = chord[1].replace(/([ABCDEFG0-9])b/g, "$1♭");
+					chord[1] = chord[1].replace(/([ABCDEFG0-9])#/g, "$1♯");
+				}
 				chord[2] = 'default';
 				chord[1] = transpose.chordName(multilineVars, chord[1]);
 			}

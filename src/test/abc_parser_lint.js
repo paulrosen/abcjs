@@ -390,6 +390,7 @@ var ParserLint = function() {
 			flatbeams: { type: "boolean", optional: true },
 			footer: { type: "string", optional: true },
 			footerfont: fontType,
+			freegchord: { type: "boolean", optional: true },
 			gchordbox: { type: "boolean", optional: true },
 			gchordfont: fontType,
 			graceslurs: { type: "boolean", optional: true },
