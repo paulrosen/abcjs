@@ -592,6 +592,15 @@ function calcLineWraps(tune, widths, abcString, params, Parse, engraver_controll
 	// by the minimum spacing instead of multiplying the min spacing later.
 	// The scaling works differently: this is done by changing the scaling of the outer SVG, so the scaling needs to be compensated
 	// for here, because the actual width will be different from the calculated numbers.
+
+	// If the desired width is less than the margin, just punt and return the original tune
+	if (params.staffwidth < widths.left) {
+		return {
+			explanation: "Staffwidth is narrower than the margin",
+			tune: tune,
+			revisedParams: params
+		};
+	}
 	var scale = params.scale ? Math.max(params.scale, 0.1) : 1;
 	var minSpacing = params.wrap.minSpacing ? Math.max(parseFloat(params.wrap.minSpacing), 1) : 1;
 	var minSpacingLimit = params.wrap.minSpacingLimit ? Math.max(parseFloat(params.wrap.minSpacingLimit), 1) : minSpacing - 0.1;
