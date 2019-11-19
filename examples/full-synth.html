@@ -195,6 +195,10 @@
 
 		function setTune(userAction) {
 			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions)[0];
+			// TODO-PER: This will allow the callback function to have access to timing info - this should be incorporated into the render at some point.
+			var midiBuffer = new ABCJS.synth.CreateSynth();
+			midiBuffer.init({ visualObj: visualObj });
+
 			if (synthControl) {
 				synthControl.setTune(visualObj, userAction).then(function (response) {
 					console.log("Audio successfully loaded.")
