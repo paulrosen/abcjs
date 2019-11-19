@@ -1,3 +1,17 @@
+# Version 5.10.3
+
+## Bugs
+
+* Don't crash when calculating the wrap lines if the staff width is too short.
+
+## Features
+
+* Allow boolean directives to use "true" and "false", in addition to 0 and 1.
+
+* Added freegchord option.
+
+* Show example of getting timing info on note callback function.
+
 # Version 5.10.2
 
 ## Bugs
