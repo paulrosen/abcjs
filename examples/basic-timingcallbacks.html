@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+	<title>abcjs: Basic TimingCallbacks Demo</title>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="../abcjs-midi.css">
+	<script src="../bin/abcjs_midi_5.10.3-min.js" type="text/javascript"></script>
+	<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+
+	<script type="text/javascript">
+
+		const abc = "T: Cooley's\n" +
+			"X:1\n" +
+			"T: Indiana Jones\n" +
+			"Q:1/4=90\n" +
+			"M:C\n" +
+			"L:1/4\n" +
+			"K:c\n" +
+			"c c c c | \n" +
+			"z3 e,3/4f,/4 | g,/2c3/2 d,3/4e,/4 | f,3 g,3/4a,/4 | b,/2f3/2 a,3/4b,/4 | c d e \n" +
+			"e,3/4f,/4 | g,/2c3/2 d3/4e/4   | f3  g,3/4g,/4 | e d3/4g,/4 e d3/4g,/4 | e d3/4g,/4 | e/2d/2 \n" +
+			"e,3/4g,/4 | f,3 d,3/4f,/4 | e,/4g,/4e3/2 e,3/4g,/4 | f,3 d,3/4f,/4 | e,/4g,/4e3/2 \n" +
+			"d3/4e/4   | f3 d3/4f/4 | _e/4d/4c3/2\n" +
+			"c3/4e/4   | d/2g,/4^f,/4 g,/2d/2 g,/4^f,/4g,/2 d/2c/4b,/4 | c8 |\n" +
+			"d/2g,/4^f,/4 g,/2d/2 g,/4^f,/4g,/2 d/2c/4b,/4 | c3 z1 |	\n";
+
+		function load() {
+			var sheet = ABCJS.renderAbc("paper", abc, { add_classes: true });
+			ABCJS.renderMidi("midi", abc);
+			ABCJS.renderMidi("midi-download", abc, { generateDownload: true, generateInline: false });
+		
+			var timer = new ABCJS.TimingCallbacks( sheet[0], { beatCallback: beat });
+			timer.start();
+		}
+
+		function beat() {
+			var timeToDisplay = 20;
+			var opacityChangeDelay = 10;
+			var opacityChangeAmount = 0.05;
+
+			var inner = $('#inner');
+
+			var fadeOut = function(opacity) {
+				opacity = opacity - opacityChangeAmount;
+				
+				inner.css('background-color', 'rgba(255, 255, 255, '+(1-opacity)+')');
+				
+				if (opacity <= 0) {
+					inner.trigger('fadeOut-complete');
+					return;
+				}
+				setTimeout(function() {
+					fadeOut(opacity);
+				}, opacityChangeDelay);
+			};
+
+			var blink = function() {
+				fadeOut(0);
+				inner.css('background-color', 'rgba(255, 255, 255, '+1+');');
+				fadeOut(1);
+			};
+
+			blink();
+		}
+
+		function myFunction() {
+			abcjs.midi.startPlaying(document.querySelector(".abcjs-inline-midi"));
+		}
+
+	</script>
+</head>
+
+<style>
+	#outer{ background-color: red; text-align: center;}
+	#inner{ background-color: rgba(255, 255, 255, 0.5); }
+</style>
+
+<body onload="load()">
+	<div id="outer">
+		<div id="inner">
+			<div id="midi" class="abcjs-large"></div>
+			<div id="paper"></div>
+			
+			<!-- <div id="midi"></div> -->
+			<!-- <div id="midi-download"></div> -->
+		</div>
+	</div>
+</body>
+</html>
