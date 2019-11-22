@@ -30,17 +30,18 @@
 
 		function load() {
 			var sheet = ABCJS.renderAbc("paper", abc, { add_classes: true });
-			ABCJS.renderMidi("midi", abc);
-			ABCJS.renderMidi("midi-download", abc, { generateDownload: true, generateInline: false });
+			var midi = ABCJS.renderMidi("midi", abc);
 		
 			var timer = new ABCJS.TimingCallbacks( sheet[0], { beatCallback: beat });
+			
+			ABCJS.midi.startPlaying(document.querySelector(".abcjs-inline-midi"));
 			timer.start();
 		}
 
 		function beat() {
-			var timeToDisplay = 20;
-			var opacityChangeDelay = 10;
-			var opacityChangeAmount = 0.05;
+			var timeToDisplay = 0;
+			var opacityChangeDelay = 20;
+			var opacityChangeAmount = 0.1;
 
 			var inner = $('#inner');
 
@@ -66,11 +67,6 @@
 
 			blink();
 		}
-
-		function myFunction() {
-			abcjs.midi.startPlaying(document.querySelector(".abcjs-inline-midi"));
-		}
-
 	</script>
 </head>
 
@@ -84,9 +80,6 @@
 		<div id="inner">
 			<div id="midi" class="abcjs-large"></div>
 			<div id="paper"></div>
-			
-			<!-- <div id="midi"></div> -->
-			<!-- <div id="midi-download"></div> -->
 		</div>
 	</div>
 </body>
