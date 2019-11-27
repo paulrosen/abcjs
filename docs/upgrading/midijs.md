@@ -1,10 +1,12 @@
-# Notes for Version 5.8.0
+# MIDI.JS Usage
+
+## Notes for Version 5.8.0
 
 This way of creating midi is being deprecated by a new method that is much smaller, less buggy and integrates with the TimingCallbacks object. This will continue to work for the forseeable future, but probably won't change much.
 
-See [Synth Documentation](synth.md) for details.
+See [Synth Documentation](../synth.md) for details.
 
-# Notes for Version 3.0 Beta
+## Notes for Version 3.0 Beta
 
 There are a number of features described below that are not yet activated. This release is primarily to get the main MIDI functionality working. Here is a list of features you can look forward to in upcoming versions:
 
@@ -18,13 +20,13 @@ There are a number of features described below that are not yet activated. This 
 
 * The "bouncing ball" functionality is not implemented.
 
-# MIDI generation in ABCJS
+## MIDI generation in ABCJS
 
 There are two ways to generate MIDI: as a download link, and as an inline control. The download link method is built into ABCJS. The inline control, though, depends on the external library [MIDI.js](https://github.com/mudcube/MIDI.js)
 
 That, in turn, is dependent on a set of sound fonts. A good place to get them is [MIDI.js Soundfonts](https://github.com/paulrosen/midi-js-soundfonts)
 
-# Site Setup
+## Site Setup
 
 * Use the version of the library that contains midi.js.
 
@@ -39,13 +41,13 @@ There is also some CSS required to make the MIDI control look right. You can use
 `<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">`
 `<link rel="stylesheet" href="abcjs-midi.css" media="all" type="text/css" />`
 
-# Creating the MIDI
+## Creating the MIDI
 
 After doing the above steps to load the CSS and the sound fonts, the simplest way to produce the MIDI is:
 
 `window.ABCJS.renderMidi("id-of-div-to-place-midi-controls", abcString, {}, { generateInline: true }, {});`
 
 
-# Example
+## Example
 
 See the examples in this repository. They contain the prerequisite files. [Editor](/examples/editor-midi.html), [Printable](/examples/printable.html).

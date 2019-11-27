@@ -1,0 +1,56 @@
+[
+  {
+	"title": "Overview",
+	"children": [
+	  "/overview/purpose.md",
+	  "/overview/examples.md",
+	  "/overview/getting-started.md",
+	  "/overview/abc-notation.md"
+	]
+  },
+  {
+	"title": "Visual",
+	"children": [
+	  "/visual/visual-params.md"
+	]
+  },
+  {
+	"title": "Audio",
+	"children": [
+	  "/audio/synthesized-sound.md"
+	]
+  },
+  {
+	"title": "Animation",
+	"children": [
+	  "/animation/timing-callbacks.md"
+	]
+  },
+  {
+	"title": "Interactive",
+	"children": [
+	  "/interactive/interactive-editor.md"
+	]
+  },
+  {
+	"title": "Analysis",
+	"children": [
+	  "/analysis/tune-book.md"
+	]
+  },
+  {
+	"title": "Developers",
+	"children": [
+	  "/developers/pull-requests.md",
+	  "/developers/basic-architecture.md",
+	  "/developers/releasing.md"
+	]
+  },
+  {
+	"title": "Upgrading",
+	"children": [
+	  "/upgrading/release-notes.md",
+	  "/upgrading/midijs.md"
+	]
+  }
+]

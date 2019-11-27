@@ -249,60 +249,13 @@ If you want more control, you can use the classes. For instance, to turn only th
 <style>
 ```
 
-# abcjs editor
-
-Typical usage is:
-
-	<script src="abcjs_editor_2.0-min.js" type="text/javascript"></script>
-	<script type="text/javascript">
-		window.onload = function() {
-			abc_editor = new ABCJS.Editor("abc", { canvas_id: "canvas0", midi_id:"midi", warnings_id:"warnings" });
-		}
-	</script>
-
-| Editor entry points | Description |
-| ------------- | ----------- |
-| `abc_editor = new ABCJS.Editor(editArea, editorParams)` | constructor of the editor object |
-| `setReadOnly(bool)` |adds or removes the class abc_textarea_readonly, and adds or removes the attribute readonly=yes |
-| `setDirtyStyle(bool)` | adds or removes the class abc_textarea_dirty |
-| `renderTune(abc, parserParams, domElement)` | Immediately renders the tune. (Useful for creating the SVG output behind the scenes, if div is hidden) |
-| `modelChanged()` | Called when the model has been changed to trigger re-rendering |
-| `parseABC()` | Called internally by fireChanged() -- returns true if there has been a change since last call. |
-| `updateSelection()` | Called when the user has changed the selection. This calls the engraver_controller to show the selection. |
-| `fireSelectionChanged()` | Called by the textarea object when the user has changed the selection. |
-| `paramChanged(engraverParams)` | Called to signal that the engraver params have changed, so re-rendering should occur. |
-| `fireChanged()` | Called by the textarea object when the user has changed something. |
-| `setNotDirty()` | Called by the client app to reset the dirty flag |
-| `isDirty()` | Returns true or false, whether the textarea contains the same text that it started with. |
-| `highlight(abcelem, tuneNumber, classes)` | Called by the engraver_controller to highlight an area. |
-| `pause(bool)` | Stops the automatic rendering when the user is typing. |
-| `pauseMidi(shouldPause)` | Stops the automatic re-rendering of the MIDI. |
-
-| Edit parameters | Description |
-| ------------- | ----------- |
-| `editArea` | If it is a string, then it is an HTML id of a textarea control. Otherwise, it should be an instantiation of an object that expresses the `EditArea` interface. |
-| `editorParams` | Hash of parameters for the editor. |
-
-| editorParams | Description |
-| ------------- | ----------- |
-| `canvas_id` or `paper_id` | HTML id to draw in. If not present, then the drawing happens just below the editor. |
-| `generate_midi` | if present, then midi is generated. |
-| `midi_id` | if present, the HTML id to place the midi control. Otherwise it is placed in the same div as the paper. An encompassing `div` surrounds each control with the class in the format `"inline-midi midi-%d"`. |
-| `midi_download_id` | if present, the HTML id to place the midi download link. Otherwise, if `midi_id` is present it is placed there, otherwise it is placed in the same div as the paper. An encompassing `div` surrounds each control with the class in the format `"download-midi midi-%d"`.|
-| `generate_warnings` | if present, then parser warnings are displayed on the page. |
-| `warnings_id` | if present, the HTML id to place the warnings. Otherwise they are placed in the same div as the paper. |
-| `onchange` | if present, the callback function to call whenever there has been a change. |
-| `gui` | if present, the paper can send changes back to the editor (presumably because the user changed something directly.) |
-| `abcjsParams` | options to send to abcjs when re-rendering both the visual and the midi. |
-| `indicate_changed` | the dirty flag is set if this is true. |
-
 # abcjs plugin
 
 The abcjs plugin renders all the abc in a page (determined as a new line beginning with X:).
 
 To use, simply include the plugin version in the page:
 
-```html
+```javascript
 <script src="abcjs_plugin_5.10.3-min.js" type="text/javascript"></script>
 ```
 

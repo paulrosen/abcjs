@@ -1,10 +1,4 @@
-# Notes for Version 5.9.0
-
-This is a beta version of the new synth method. It is likely there will be some changes to the API in the short run but hopefully not too much.
-
-Please try this out and report any issues that you have.
-
-# Synthesized Sound Generation
+# Synthesized Sound
 
 ## Browser Compatibility and Requirements
 
@@ -126,3 +120,4 @@ This is an array that converts the standard MIDI pitch indexes to a name. For in
 console.log(ABCJS.synth.pitchToNoteName[60]);
 // "C4"
 ```
+
