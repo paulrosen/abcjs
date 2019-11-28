@@ -1,13 +1,16 @@
 <template>
-	<ClientOnly>
-		<div ref='paper' class="render-abc"></div>
-	</ClientOnly>
+	<div class="show-and-render">
+		<div class="language- extra-class"><pre class="language-text"><code>{{abc}}</code></pre></div>
+		<render-abc :abc="abc"></render-abc>
+	</div>
 </template>
 
 <script>
 	import Vue from 'vue';
+	import RenderAbc from "./RenderAbc";
 	export default {
-		name: "render-abc",
+		name: "show-and-render-abc",
+		components: {RenderAbc},
 		props: {
 			abc: {
 				type: String,
