@@ -2,7 +2,11 @@
 
 todo
 
-The following assumes you've created a `TuneBook` object like this: `var tunebook = ABCJS.TuneBook(tunebookString)`:
+The following assumes you've created a `TuneBook` object like this: 
+
+```
+var tunebook = ABCJS.TuneBook(tunebookString);
+```
 
 | `TuneBook` Object | Description |
 | ------------- | ----------- |

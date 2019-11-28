@@ -4,7 +4,7 @@
 
 * This works in any browser that supports `AudioContext`, `AudioContext.resume`, and `Promises`. That does NOT include IE, but this will work on any other "modern" browser that is at least the following version: Firefox 40, Safari 9.1, Edge 13, and Chrome 43.
 
-* This requires an internet connection for the "sound fonts". You can supply your own sound fonts, so if you want to deliver them locally you can get by without the network. The default sound fonts come from a github repo.
+* This requires an internet connection for the "sound fonts". You can supply your own sound fonts, so if you want to deliver them locally you can get by without the network. The default sound fonts come from [this github repo](https://paulrosen.github.io/midi-js-soundfonts).
 
 * It is theoretically possible to create complex enough pieces to bog down your browser or eat up memory. The two things that take resources are each unique note in each instrument and the overall length of the music. Music of a few minutes long with a variety of notes in a few different instruments work with no problem on all devices that have been tested.
 
@@ -121,34 +121,9 @@ console.log(ABCJS.synth.pitchToNoteName[60]);
 // "C4"
 ```
 
-TODO: Potentially old below here:
+## Tempos
 
-| `params` (for midi) | Default | Description |
-| ------------- | ----------- | ----------- |
-| `qpm` | 180 | Override the starting tempo in the abcString. |
-| `program` | 0 | The midi program (aka "instrument") to use, if not specified in abcString. |
-| `midiTranspose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
-| `voicesOff` | false | Play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. |
-| `chordsOff` | false | Ignore the chords and just play the melody (and metronome if that is on). |
-| `generateDownload` | false | Whether to generate a download MIDI link. |
-| `generateInline` | true | Whether to generate the inline MIDI controls. |
-| `downloadClass` | "" | Add classes to the download controls. The classes `abcjs-download-midi` and `abcjs-midi-xxx` where `xxx` is the index of the tune are already added. This is appended to those classes. |
-| `downloadLabel` | "download midi" | The text for the MIDI download. If it contains `%T` then that is replaced with the first title. If this is a function, then the result of that function is called. The function takes two parameters: the parsed tune and the zero-based index of the tune in the tunebook. |
-| `preTextDownload` | "" | Text that appears right before the download link (can contain HTML markup). |
-| `postTextDownload` | "" | Text that appears right after the download link (can contain HTML markup). |
-| `preTextInline` | "" | Text that appears right before the MIDI controls (can contain HTML markup). If it contains `%T` then that is replaced with the first title. |
-| `postTextInline` | "" | Text that appears right after the MIDI controls (can contain HTML markup). If it contains `%T` then that is replaced with the first title. |
-| `midiListener` | null | Function that is called for each midi event. The parameters are the current abcjs element and the current MIDI event. |
-| `animate` | null | Whether to do a "bouncing ball" effect on the visual music. `{ listener: callback, target: output of ABCJS.renderAbc, qpm: tempo }` This calls the listener whenever the current note has changed. It is called with both the last selected note and the newly selected note. The callback parameters are arrays of svg elements. |
-| `context` | null | A string that is passed back to both the listener and animate callbacks. |
-| `inlineControls` | { selectionToggle: false, loopToggle: false, standard: true, tempo: false, startPlaying: false } | These are the options for which buttons and functionality appear in the inline controls. This is a hash, and is defined below. |
-| `drum` | "" | A string formatted like the `%%MIDI drum` specification. Using this parameter also implies `%%MIDI drumon` |
-| `drumBars` | 1 |  How many bars to spread the drum pattern over. |
-| `drumIntro` | 0 | How many bars of drum should precede the music. |
-
-**Note on tempos:**
-
-If the `qpm` parameter is not supplied, abcjs makes its best guess about what tempo should be used. If there is no tempo indicated at all in the ABC string, then 180 BPM is arbitrarily used.
+If the `qpm` parameter is not supplied, abcjs makes its best guess about what tempo should be used. If there is no tempo indicated at all in the ABC string, then 180 BPM is arbitrarily used. If `defaultQpm` is supplied, then that default will be used only if there is no explicit tempo.
 
 If an exact tempo line is supplied with the `Q:` line, then that tempo is used. If the `Q:` contains a standard tempo string, that string is used to make a guess at an appropriate tempo. Here is a list of the known tempo strings and their associated tempos. If you would like to make suggestions about other strings to support or changes to these tempos, please get in touch:
 
@@ -181,7 +156,8 @@ If an exact tempo line is supplied with the `Q:` line, then that tempo is used. 
 |presto|184|
 |prestissimo|210|
 
-**Note on the drum parameter:**
+## Drum parameter
+
 See the ABC documentation for the correct way to format the string that is passed as the drum parameter. Here is a table that provides a fairly reasonable default for drum, drumIntro, and drumBars when used as a metronome:
 ```
   const drumBeats = {
@@ -202,6 +178,32 @@ A more complicated example that has the drum pattern fall over two measures of 2
 ```
 
 Note that the default soundfont that is used by abcjs contains sounds for pitches **27** through **87**. You can experiment with any of them for different effects.
+
+
+TODO: Potentially old below here:
+
+| `params` (for midi) | Default | Description |
+| ------------- | ----------- | ----------- |
+| `qpm` | 180 | Override the starting tempo in the abcString. |
+| `program` | 0 | The midi program (aka "instrument") to use, if not specified in abcString. |
+| `midiTranspose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
+| `voicesOff` | false | Play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. |
+| `chordsOff` | false | Ignore the chords and just play the melody (and metronome if that is on). |
+| `generateDownload` | false | Whether to generate a download MIDI link. |
+| `generateInline` | true | Whether to generate the inline MIDI controls. |
+| `downloadClass` | "" | Add classes to the download controls. The classes `abcjs-download-midi` and `abcjs-midi-xxx` where `xxx` is the index of the tune are already added. This is appended to those classes. |
+| `downloadLabel` | "download midi" | The text for the MIDI download. If it contains `%T` then that is replaced with the first title. If this is a function, then the result of that function is called. The function takes two parameters: the parsed tune and the zero-based index of the tune in the tunebook. |
+| `preTextDownload` | "" | Text that appears right before the download link (can contain HTML markup). |
+| `postTextDownload` | "" | Text that appears right after the download link (can contain HTML markup). |
+| `preTextInline` | "" | Text that appears right before the MIDI controls (can contain HTML markup). If it contains `%T` then that is replaced with the first title. |
+| `postTextInline` | "" | Text that appears right after the MIDI controls (can contain HTML markup). If it contains `%T` then that is replaced with the first title. |
+| `midiListener` | null | Function that is called for each midi event. The parameters are the current abcjs element and the current MIDI event. |
+| `animate` | null | Whether to do a "bouncing ball" effect on the visual music. `{ listener: callback, target: output of ABCJS.renderAbc, qpm: tempo }` This calls the listener whenever the current note has changed. It is called with both the last selected note and the newly selected note. The callback parameters are arrays of svg elements. |
+| `context` | null | A string that is passed back to both the listener and animate callbacks. |
+| `inlineControls` | { selectionToggle: false, loopToggle: false, standard: true, tempo: false, startPlaying: false } | These are the options for which buttons and functionality appear in the inline controls. This is a hash, and is defined below. |
+| `drum` | "" | A string formatted like the `%%MIDI drum` specification. Using this parameter also implies `%%MIDI drumon` |
+| `drumBars` | 1 |  How many bars to spread the drum pattern over. |
+| `drumIntro` | 0 | How many bars of drum should precede the music. |
 
 | `inlineControls` | Default | Description |
 | ------------- | ----------- | ----------- |

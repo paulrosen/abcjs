@@ -6,7 +6,11 @@ There is a built in system for instantly updating the visual music as the end us
 
 ```javascript
     window.onload = function() {
-        abc_editor = new ABCJS.Editor("abc", { canvas_id: "canvas0", midi_id:"midi", warnings_id:"warnings" });
+        abc_editor = new ABCJS.Editor("abc", { 
+            canvas_id: "canvas0", 
+            midi_id:"midi", 
+            warnings_id:"warnings" 
+        });
     }
 ```
 
