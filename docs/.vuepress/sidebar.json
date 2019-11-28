@@ -11,7 +11,8 @@
   {
 	"title": "Visual",
 	"children": [
-	  "/visual/visual-params.md"
+	  "/visual/visual-params.md",
+	  "/visual/classes.md"
 	]
   },
   {

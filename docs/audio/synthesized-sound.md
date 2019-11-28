@@ -121,3 +121,99 @@ console.log(ABCJS.synth.pitchToNoteName[60]);
 // "C4"
 ```
 
+TODO: Potentially old below here:
+
+| `params` (for midi) | Default | Description |
+| ------------- | ----------- | ----------- |
+| `qpm` | 180 | Override the starting tempo in the abcString. |
+| `program` | 0 | The midi program (aka "instrument") to use, if not specified in abcString. |
+| `midiTranspose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
+| `voicesOff` | false | Play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. |
+| `chordsOff` | false | Ignore the chords and just play the melody (and metronome if that is on). |
+| `generateDownload` | false | Whether to generate a download MIDI link. |
+| `generateInline` | true | Whether to generate the inline MIDI controls. |
+| `downloadClass` | "" | Add classes to the download controls. The classes `abcjs-download-midi` and `abcjs-midi-xxx` where `xxx` is the index of the tune are already added. This is appended to those classes. |
+| `downloadLabel` | "download midi" | The text for the MIDI download. If it contains `%T` then that is replaced with the first title. If this is a function, then the result of that function is called. The function takes two parameters: the parsed tune and the zero-based index of the tune in the tunebook. |
+| `preTextDownload` | "" | Text that appears right before the download link (can contain HTML markup). |
+| `postTextDownload` | "" | Text that appears right after the download link (can contain HTML markup). |
+| `preTextInline` | "" | Text that appears right before the MIDI controls (can contain HTML markup). If it contains `%T` then that is replaced with the first title. |
+| `postTextInline` | "" | Text that appears right after the MIDI controls (can contain HTML markup). If it contains `%T` then that is replaced with the first title. |
+| `midiListener` | null | Function that is called for each midi event. The parameters are the current abcjs element and the current MIDI event. |
+| `animate` | null | Whether to do a "bouncing ball" effect on the visual music. `{ listener: callback, target: output of ABCJS.renderAbc, qpm: tempo }` This calls the listener whenever the current note has changed. It is called with both the last selected note and the newly selected note. The callback parameters are arrays of svg elements. |
+| `context` | null | A string that is passed back to both the listener and animate callbacks. |
+| `inlineControls` | { selectionToggle: false, loopToggle: false, standard: true, tempo: false, startPlaying: false } | These are the options for which buttons and functionality appear in the inline controls. This is a hash, and is defined below. |
+| `drum` | "" | A string formatted like the `%%MIDI drum` specification. Using this parameter also implies `%%MIDI drumon` |
+| `drumBars` | 1 |  How many bars to spread the drum pattern over. |
+| `drumIntro` | 0 | How many bars of drum should precede the music. |
+
+**Note on tempos:**
+
+If the `qpm` parameter is not supplied, abcjs makes its best guess about what tempo should be used. If there is no tempo indicated at all in the ABC string, then 180 BPM is arbitrarily used.
+
+If an exact tempo line is supplied with the `Q:` line, then that tempo is used. If the `Q:` contains a standard tempo string, that string is used to make a guess at an appropriate tempo. Here is a list of the known tempo strings and their associated tempos. If you would like to make suggestions about other strings to support or changes to these tempos, please get in touch:
+
+|Tempo|BPM|
+|---|---|
+|larghissimo|20|
+|adagissimo|24|
+|sostenuto|28|
+|grave|32|
+|largo|40|
+|lento|50|
+|larghetto|60|
+|adagio|68|
+|adagietto|74|
+|andante|80|
+|andantino|88|
+|marcia moderato|84|
+|andante moderato|100|
+|moderato|112|
+|allegretto|116|
+|allegro moderato|120|
+|allegro|126|
+|animato|132|
+|agitato|140|
+|veloce|148|
+|mosso vivo|156|
+|vivace|164|
+|vivacissimo|172|
+|allegrissimo|176|
+|presto|184|
+|prestissimo|210|
+
+**Note on the drum parameter:**
+See the ABC documentation for the correct way to format the string that is passed as the drum parameter. Here is a table that provides a fairly reasonable default for drum, drumIntro, and drumBars when used as a metronome:
+```
+  const drumBeats = {
+    // the array is [0]=drum [1]=drumIntro
+    "2/4": ["dd 76 77 60 30", 2],
+    "3/4": ["ddd 76 77 77 60 30 30", 1],
+    "4/4": ["dddd 76 77 77 77 60 30 30 30", 1],
+    "5/4": ["ddddd 76 77 77 76 77 60 30 30 60 30", 1],
+    "Cut Time": ["dd 76 77 60 30", 2],
+    "6/8": ["dd 76 77 60 30", 2],
+    "9/8": ["ddd 76 77 77 60 30 30", 1],
+    "12/8": ["dddd 76 77 77 77 60 30 30 30", 1]
+  };
+```
+A more complicated example that has the drum pattern fall over two measures of 2/4 time (This is a typical Bulgar pattern):
+```
+{ drum: "d2dd2ddz", drumBars: 2, drumIntro: 2 }
+```
+
+Note that the default soundfont that is used by abcjs contains sounds for pitches **27** through **87**. You can experiment with any of them for different effects.
+
+| `inlineControls` | Default | Description |
+| ------------- | ----------- | ----------- |
+| `selectionToggle` | false | Show a latched push button to play only the current selection. **Not yet implemented** |
+| `loopToggle` | false | Show a a latched push button to start playing again when the end is reached. |
+| `standard` | true | Show the start, pause, reset, and progress controls. |
+| `hide` | false | Whether to show the control at all. |
+| `startPlaying` | false | Whether to start the MIDI as soon as it is available. (Not available in the Editor. Only available when calling `ABCJS.renderMidi` ) |
+| `tempo` | false | Show the tempo change controls. This is a spinner that starts at 100%. There is an absolute tempo printed next to it.  **Not yet implemented** |
+| `tooltipSelection` | "Click to toggle play selection/play all." | The text of the tooltip.  **Not yet implemented** |
+| `tooltipLoop` | "Click to toggle play once/repeat." | The text of the tooltip. |
+| `tooltipReset` | "Click to go to beginning." | The text of the tooltip. |
+| `tooltipPlay` | "Click to play/pause." | The text of the tooltip. |
+| `tooltipProgress` | "Click to change the playback position." | The text of the tooltip. |
+| `tooltipTempo` | "Change the playback speed." | The text of the tooltip.  **Not yet implemented** |

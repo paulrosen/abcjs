@@ -1,20 +1,39 @@
 # Purpose
 
-This library makes it easy to incorporate **sheet music** into your **websites**. You can also turn visible **ABC** text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of one javascript file. You can also generate **MIDI files** or play them directly in your browser.
+This library makes it easy to incorporate **sheet music** into your **websites**. 
 
-License: [The MIT License (MIT)](http://opensource.org/licenses/MIT)
+## Uses
+
+* Draw arbitrary sheet music.
+
+* Instantly modify the music.
+
+* Do animation effects with the drawn music.
+
+* Style the music using CSS.
+
+* Create synthesized audio for the music.
+
+* Search for **ABC** formatted strings on a webpage (for instance in post or comments on a blog) and turn them into sheet music.
+
+* Allow the user to modify the music instantly by typing an **ABC** string.
+
+## NOT
+
+* It does not provide a visual editor (although it could be used as a basis if you want to write one.)
 
 ## Browser/device support
 
 * The visual part of this library is supported from IE9 and newer, Safari 5.1 and newer, and all modern browsers.
 
-* The MIDI-audio part of this library is much more limited: it doesn't work in IE, it only works in Safari 10 and newer, it does NOT work in Edge, but does work fine in all other modern browsers.
-Note that it takes computer resources to play the sound, so a sufficiently fast computer is needed. Research is being done to improve the performance in future versions.
-
-* This synth audio part of this library does not work on IE, but works on any system that supports `AudioContext` and `Promises`. That is, most browsers.
+* This synth audio part of this library does not work on IE, but works on any system that supports `AudioContext.resume` and `Promises`. That is, any browser newer than Firefox 40, Safari 9.1, Edge 13, and Chrome 43.
 
 ## Supported by BrowserStack
+
 If you aren't using the same browser and machine that I use, you can thank [BrowserStack](https://browserstack.com/) for their support of this open-source project.
 
 ![BrowserStack](https://cdn.rawgit.com/paulrosen/abcjs/master/docs/browserstack-logo-600x315.png)
 
+## License
+
+[The MIT License (MIT)](http://opensource.org/licenses/MIT)
