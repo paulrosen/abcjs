@@ -1,5 +1,9 @@
 # Visual Params
 
+::: tip TODO
+This page is currently being enhanced. Check back soon!
+:::
+
 The main entry point is `ABCJS.renderAbc`. Many users won't need to make any other call. That is enough to turn an arbitrary JavaScript string into an SVG image of sheet music.
  
 | ABCJS Entry Points | Description |

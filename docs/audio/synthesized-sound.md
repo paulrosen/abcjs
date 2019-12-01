@@ -1,5 +1,9 @@
 # Synthesized Sound
 
+::: tip TODO
+This page is currently being enhanced. Check back soon!
+:::
+
 ## Browser Compatibility and Requirements
 
 * This works in any browser that supports `AudioContext`, `AudioContext.resume`, and `Promises`. That does NOT include IE, but this will work on any other "modern" browser that is at least the following version: Firefox 40, Safari 9.1, Edge 13, and Chrome 43.

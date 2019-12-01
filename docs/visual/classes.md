@@ -1,5 +1,8 @@
 # Classes
 
+::: tip TODO
+This page is currently being enhanced. Check back soon!
+:::
 
 | css classes (assuming the SVG element is `.paper`) | Description |
 | `.paper path.abcjs-note_selected, .paper text.abcjs-note_selected` | The color that the selected note or other element is |

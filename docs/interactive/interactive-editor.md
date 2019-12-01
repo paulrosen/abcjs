@@ -2,6 +2,10 @@
 
 There is a built in system for instantly updating the visual music as the end user is typing an ABC string into a textarea.
 
+::: tip TODO
+This page is currently being enhanced. Check back soon!
+:::
+
 ## Example
 
 ```html

@@ -1,6 +1,9 @@
 # Timing Callbacks
 
-todo
+::: tip TODO
+This page is currently being enhanced. Check back soon!
+:::
+
 | `timingParams` | Default | Description |
 | ------------- | ------- | ----------- |
 | `qpm` | whatever is in the Q: field | Number of beats per minute. |

@@ -1,8 +1,10 @@
 ## Releasing
 
+::: danger Important!
 Note: The following checklist is for committers only! 
 
 For people who want to contribute a pull request, this isn't relevant!
+:::
 
 To release a new version, this checklist should be followed:
 
@@ -23,7 +25,6 @@ To release a new version, this checklist should be followed:
 [_] Change the version in [the package file](../package.json) with `npm version patch` <-- or `minor`, or `major`.
 
 [_] Update npm with `npm publish`.
-* Test: Go to [npm](https://npmjs.com/package/abcjs). The package number should be updated.
 
 [_] Push the change that npm publish created with `git push`.
 

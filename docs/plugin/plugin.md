@@ -2,6 +2,10 @@
 
 The abcjs plugin renders all the abc in a page (determined as a new line beginning with X:).
 
+::: tip TODO
+This page is currently being enhanced. Check back soon!
+:::
+
 To use, simply include the plugin version in the page:
 
 ```javascript
