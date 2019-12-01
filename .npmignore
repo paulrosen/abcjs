@@ -1,5 +1,6 @@
 .idea/*
 tmp/*
 bin/*
+docs/*
 font_generator/*
 examples/*
