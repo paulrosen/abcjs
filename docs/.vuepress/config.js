@@ -1,6 +1,6 @@
 module.exports = {
 	base: "/abcjs/",
-	title: "",
+	title: "abcjs",
 	themeConfig: {
 		logo: '/img/abcjs_comp_extended_08.svg',
 		displayAllHeaders: true,
