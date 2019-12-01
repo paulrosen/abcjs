@@ -8,7 +8,6 @@
 
 <script>
 	import Vue from 'vue';
-	import abcjs from "abcjs";
 
 	export default {
 		name: "abcjs-editor",
@@ -20,6 +19,7 @@
 		},
 		mounted() {
 			Vue.nextTick(() => {
+				const abcjs = require('abcjs');
 				const abc_editor = new abcjs.Editor("abc", {
 					canvas_id: "paper",
 					warnings_id: "warnings"
