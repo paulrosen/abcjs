@@ -560,9 +560,11 @@ var flatten;
 		var arr = remaining.split('/');
 		chick = chordNotes(bass, arr[0]);
 		if (arr.length === 2) {
-			var explicitBass = basses[arr[1]];
+			var explicitBass = basses[arr[1].substring(0,1)];
 			if (explicitBass) {
-				bass = basses[arr[1]] + transpose;
+				var bassAcc = arr[1].substring(1);
+				var bassShift = {'#': 1, '♯': 1, 'b': -1, '♭': -1}[bassAcc] || 0;
+				bass = basses[arr[1].substring(0,1)] + bassShift + transpose;
 				bass2 = bass;
 			}
 		}
