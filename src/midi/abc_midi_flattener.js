@@ -146,7 +146,15 @@ var flatten;
 						if (instrument === undefined)
 							instrument = element.program;
 						currentInstrument = element.program;
-						currentTrack.push({ cmd: 'program', channel: i, instrument: element.program });
+						if (currentTrack.length > 0 && currentTrack[currentTrack.length-1].cmd === 'program')
+							currentTrack[currentTrack.length-1].instrument = element.program;
+						else {
+							var ii;
+							for (ii = currentTrack.length-1; ii >= 0 && currentTrack[ii].cmd !== 'program'; ii--)
+								;
+							if (ii < 0 || currentTrack[ii].instrument !== element.program)
+								currentTrack.push({cmd: 'program', channel: i, instrument: element.program});
+						}
 						break;
 					case "channel":
 					// 	if (channel === undefined)
