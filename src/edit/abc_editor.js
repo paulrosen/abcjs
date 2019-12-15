@@ -219,6 +219,10 @@ var Editor = function(editarea, params) {
     this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem());
   }
 
+  if (params.selectionChangeCallback) {
+  	this.selectionChangeCallback = params.selectionChangeCallback;
+  }
+
   if (params.synth) {
   	if (supportsAudio()) {
 	    this.synth = {
@@ -409,6 +413,8 @@ Editor.prototype.updateSelection = function() {
   try {
     this.engraver_controller.rangeHighlight(selection.start, selection.end);
   } catch (e) {} // maybe printer isn't defined yet?
+	if (this.selectionChangeCallback)
+		this.selectionChangeCallback(selection.start, selection.end);
 };
 
 Editor.prototype.fireSelectionChanged = function() {
@@ -483,6 +489,8 @@ Editor.prototype.highlight = function(abcelem, tuneNumber, classes) {
 //	var offset = (tuneNumber !== undefined) ? this.startPos[tuneNumber] + tuneNumber : 0;
 
   this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
+	if (this.selectionChangeCallback)
+		this.selectionChangeCallback(abcelem.startChar, abcelem.endChar);
 };
 
 Editor.prototype.pause = function(shouldPause) {
