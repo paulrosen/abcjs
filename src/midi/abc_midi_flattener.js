@@ -38,7 +38,7 @@ var flatten;
 	var currentTrack;
 	var pitchesTied;
 	var lastNoteDurationPosition;
-	var currentTrackMilliseconds;
+	var currentTrackCounter;
 
 	var meter = { num: 4, den: 4 };
 	var chordTrack;
@@ -75,7 +75,7 @@ var flatten;
 		currentInstrument = undefined;
 		// channel = undefined;
 		currentTrack = undefined;
-		currentTrackMilliseconds = undefined;
+		currentTrackCounter = undefined;
 		pitchesTied = {};
 
 		// For resolving chords.
@@ -103,7 +103,7 @@ var flatten;
 			lastNoteDurationPosition = -1;
 			var voice = voices[i];
 			currentTrack = [{ cmd: 'program', channel: i, instrument: instrument }];
-			currentTrackMilliseconds = 0;
+			currentTrackCounter = 0;
 			pitchesTied = {};
 			for (var j = 0; j < voice.length; j++) {
 				var element = voice[j];
@@ -361,7 +361,12 @@ var flatten;
 			}
 		}
 
-		elem.currentTrackMilliseconds = currentTrackMilliseconds;
+		// The currentTrackCounter is the number of whole notes from the beginning of the piece.
+		// The beat fraction is the note that gets a beat (.25 is a quarter note)
+		// The tempo is in minutes and we want to get to milliseconds.
+		if (!elem.currentTrackMilliseconds)
+			elem.currentTrackMilliseconds = [];
+		elem.currentTrackMilliseconds.push(currentTrackCounter / beatFraction / startingTempo * 60*1000);
 		if (elem.pitches) {
 			if (graces && bagpipes) {
 				// If it is bagpipes, then the graces are played with the note. If the grace has the same pitch as the note, then we just skip it.
@@ -413,17 +418,17 @@ var flatten;
 			}
 			currentTrack.push({ cmd: 'move', duration: soundDuration*tempoChangeFactor });
 			lastNoteDurationPosition = currentTrack.length-1;
-			currentTrackMilliseconds += soundDuration*tempoChangeFactor;
+			currentTrackCounter += soundDuration*tempoChangeFactor;
 
 			for (var ii = 0; ii < pitches.length; ii++) {
 				if (!pitchesTied[''+pitches[ii].pitch])
 					currentTrack.push({ cmd: 'stop', pitch: pitches[ii].pitch });
 			}
 			currentTrack.push({ cmd: 'move', duration: thisBreakBetweenNotes*tempoChangeFactor });
-			currentTrackMilliseconds += thisBreakBetweenNotes*tempoChangeFactor;
+			currentTrackCounter += thisBreakBetweenNotes*tempoChangeFactor;
 		} else if (elem.rest) {
 			currentTrack.push({ cmd: 'move', duration: duration*tempoChangeFactor });
-			currentTrackMilliseconds += duration*tempoChangeFactor;
+			currentTrackCounter += duration*tempoChangeFactor;
 		}
 
 		if (elem.endTriplet) {
