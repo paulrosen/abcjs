@@ -51,6 +51,7 @@ function CreateSynth() {
 		else
 			return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
 		self.sequenceCallback = params.sequenceCallback;
+		self.callbackContext = params.callbackContext;
 
 		var allNotes = {};
 		var currentInstrument = instrumentIndexToName[0];
@@ -136,7 +137,7 @@ function CreateSynth() {
 
 			var noteMapTracks = createNoteMap(self.flattened);
 			if (self.sequenceCallback)
-				self.sequenceCallback(noteMapTracks);
+				self.sequenceCallback(noteMapTracks, self.callbackContext);
 			//console.log(noteMapTracks);
 
 			self.audioBuffers = [];
