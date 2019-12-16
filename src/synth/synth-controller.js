@@ -54,7 +54,8 @@ function SynthController() {
 	self.go = function () {
 		var millisecondsPerMeasure = self.visualObj.millisecondsPerMeasure() * 100 / self.warp;
 		self.currentTempo = Math.round(self.visualObj.getBeatsPerMeasure() / millisecondsPerMeasure * 60000);
-		self.control.setTempo(self.currentTempo);
+		if (self.control)
+			self.control.setTempo(self.currentTempo);
 		self.percent = 0;
 
 		if (!self.midiBuffer)
@@ -102,7 +103,8 @@ function SynthController() {
 			self.midiBuffer = null;
 		}
 		self.setProgress(0, 1);
-		self.control.resetAll();
+		if (self.control)
+			self.control.resetAll();
 	};
 
 	self.play = function () {
@@ -121,7 +123,8 @@ function SynthController() {
 				self.cursorControl.onStart();
 			self.midiBuffer.start();
 			self.timer.start();
-			self.control.pushPlay(true);
+			if (self.control)
+				self.control.pushPlay(true);
 		} else {
 			self.pause();
 		}
@@ -132,13 +135,15 @@ function SynthController() {
 		if (self.timer) {
 			self.timer.pause();
 			self.midiBuffer.pause();
-			self.control.pushPlay(false);
+			if (self.control)
+				self.control.pushPlay(false);
 		}
 	};
 
 	self.toggleLoop = function () {
 		self.isLooping = !self.isLooping;
-		self.control.pushLoop(self.isLooping);
+		if (self.control)
+			self.control.pushLoop(self.isLooping);
 	};
 
 	self.restart = function () {
@@ -189,7 +194,8 @@ function SynthController() {
 
 	self.setProgress = function (percent, totalTime) {
 		self.percent = percent;
-		self.control.setProgress(percent, totalTime);
+		if (self.control)
+			self.control.setProgress(percent, totalTime);
 	};
 
 	self.finished = function () {
@@ -200,7 +206,8 @@ function SynthController() {
 		} else {
 			self.timer.stop();
 			if (self.isStarted) {
-				self.control.pushPlay(false);
+				if (self.control)
+					self.control.pushPlay(false);
 				self.isStarted = false;
 				if (self.cursorControl && self.cursorControl.onFinished && typeof self.cursorControl.onFinished  === 'function')
 					self.cursorControl.onFinished();
