@@ -1,13 +1,6 @@
 # Classes
 
-::: tip TODO
-This page is currently being enhanced. Check back soon!
-:::
-
-| css classes (assuming the SVG element is `.paper`) | Description |
-| `.paper path.abcjs-note_selected, .paper text.abcjs-note_selected` | The color that the selected note or other element is |
-
-## classes
+## Class Names
 
 If you use, `{ add_classes: true }`, then the following classes are attached to various elements:
 
@@ -39,8 +32,36 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 | abcjs-beam-elem | The beams connecting eighth notes together. |
 | abcjs-top-line | This marks the top line of each staff. This is useful if you are trying to find where on the page the music has been drawn. |
 | abcjs-top-of-system | This marks the top of each set of staves. This is useful if you are trying to find where on the page the music has been drawn. |
+| abcjs-note_selected | This is the element that the user has clicked on. |
 
-To get a visual idea of how these classes are applied, see https://configurator.abcjs.net/classes and experiment.
+## Test Tune
+
+Paste in any ABC you want here and see how that affects the classes below:
+
+<example-tune-book :callbacks="callbacks" :tune-id="32"></example-tune-book>
+
+<script>
+	export default {
+		mounted() {
+			setTimeout(() => {
+				this.callbacks = [this.$refs.foundClasses];
+			}, 500);
+		},
+		data() {
+			return {
+				callbacks: [],
+			};
+		},
+	}
+</script>
+
+## Found Classes
+
+Select the following classes to see what they point to. (They are ANDed together.)
+
+<found-classes ref="foundClasses" target="#paper"></found-classes>
+
+## CSS Possibilities
 
 ### changing colors
 

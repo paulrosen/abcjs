@@ -6,6 +6,7 @@
 
 <script>
 	import AbcjsEditor from "./AbcjsEditor";
+	import abcjs from "abcjs";
 	export default {
 		name: "example-tune-book",
 		components: {AbcjsEditor},
@@ -14,10 +15,13 @@
 				type: Array,
 				required: false
 			},
+			tuneId: {
+				type: Number,
+				required: false
+			},
 		},
 		data() {
-			return {
-				abc: `%%gchordfont Itim\n
+			const abc = `%%gchordfont Itim\n
 X: 1
 T:Money Lost
 M:3/4
@@ -171,8 +175,16 @@ c/c/g/^f/ A/A/g/^f/| c/^f/c/^f/ A/^f/A/^f/|(3B/B/B/ (3f/f/f/ (3e/e/e/ (3d/d/d/ |
 V:2
 E D E/E/ D|E D E/E/ D|E D E/E/ D|E D E/E/ D|
 E D E/E/ D|E D E/E/ D|E D E/E/ D|E D E/E/ D|
-`,
-			};
-		}
-	}
+`;
+
+			let str = abc;
+			if (this.tuneId !== undefined) {
+				const book = new abcjs.TuneBook(abc);
+				str = book.getTuneById(''+this.tuneId).abc;
+			}
+			return {
+				abc: str
+			}
+		},
+	};
 </script>

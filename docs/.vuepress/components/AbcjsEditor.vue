@@ -33,6 +33,7 @@
 					canvas_id: "paper",
 					warnings_id: "warnings",
 					onchange: this.onchange,
+					abcjsParams: { add_classes: true },
 				});
 			});
 		},
