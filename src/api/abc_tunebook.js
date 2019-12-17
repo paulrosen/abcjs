@@ -83,7 +83,7 @@ var tunebook = {};
 
 	TuneBook.prototype.getTuneById = function(id) {
 		for (var i = 0; i < this.tunes.length; i++) {
-			if (this.tunes[i].id === id)
+			if (this.tunes[i].id === ''+id)
 				return this.tunes[i];
 		}
 		return null;
