@@ -6,7 +6,7 @@
 
 <script>
 	import AbcjsEditor from "./AbcjsEditor";
-	import abcjs from "abcjs";
+
 	export default {
 		name: "example-tune-book",
 		components: {AbcjsEditor},
@@ -19,6 +19,11 @@
 				type: Number,
 				required: false
 			},
+		},
+		mounted() {
+			Vue.nextTick(() => {
+				this.abcjs = require('abcjs');
+			});
 		},
 		data() {
 			const abc = `%%gchordfont Itim\n
@@ -178,12 +183,15 @@ E D E/E/ D|E D E/E/ D|E D E/E/ D|E D E/E/ D|
 `;
 
 			let str = abc;
-			if (this.tuneId !== undefined) {
+			if (this.abcjs && this.tuneId !== undefined) {
 				const book = new abcjs.TuneBook(abc);
 				str = book.getTuneById(''+this.tuneId).abc;
 			}
+
 			return {
-				abc: str
+				abc: str,
+				tuneId: undefined,
+				abcjs: null,
 			}
 		},
 	};
