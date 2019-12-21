@@ -198,16 +198,25 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
     }
 
     function callback(div, tune, tuneNumber, abcString) {
+        var removeDiv = false;
+        if (div === "*") {
+            removeDiv = true;
+            div = document.createElement("div");
+            div.setAttribute("style", "display:none;");
+            document.body.appendChild(div);
+        }
     	if (params.afterParsing)
     		params.afterParsing(tune, tuneNumber, abcString);
-        if (params.wrap && params.staffwidth) {
+        if (!removeDiv && params.wrap && params.staffwidth) {
 	        tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
 	        return tune;
         }
-        else if (!params.oneSvgPerLine || tune.lines.length < 2)
+        else if (removeDiv || !params.oneSvgPerLine || tune.lines.length < 2)
             renderOne(div, tune, params, tuneNumber);
         else
             renderEachLineSeparately(div, tune, params, tuneNumber);
+        if (removeDiv)
+            div.parentNode.removeChild(div);
         return null;
     }
 

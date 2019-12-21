@@ -134,7 +134,9 @@ var tunebook = {};
 		// output each tune, if it exists. Otherwise clear the div.
 		for (var i = 0; i < output.length; i++) {
 			var div = output[i];
-			if (typeof(div) === "string")
+			if (div === "*") {
+				// This is for "headless" rendering: doing the work but not showing the svg.
+			} else if (typeof(div) === "string")
 				div = document.getElementById(div);
 			if (div) {
 				if (currentTune >= 0 && currentTune < book.tunes.length) {

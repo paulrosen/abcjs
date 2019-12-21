@@ -67,3 +67,5 @@ The main entry point is `ABCJS.renderAbc`. Many users won't need to make any oth
 
 
 `tuneObject` contains a structure which is a machine-friendly version of the abc string that it was created from. It is the class `ABCJS.data.Tune` and is basically some meta-information and an array of each line in the tune. The format of that data is subject to change. 
+
+If you want to do the calculations for rendering, but not have the music appear, use "*" for the output div. That will return the visualObj but not display it. This is useful if you want to process an ABC file just for audio or for analysis.
