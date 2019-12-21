@@ -69,6 +69,7 @@ var sequence;
 
 		//%%MIDI beat ⟨int1⟩ ⟨int2⟩ ⟨int3⟩ ⟨int4⟩: controls the volumes of the notes in a measure. The first note in a bar has volume ⟨int1⟩; other ‘strong’ notes have volume ⟨int2⟩ and all the rest have volume ⟨int3⟩. These values must be in the range 0–127. The parameter ⟨int4⟩ determines which notes are ‘strong’. If the time signature is x/y, then each note is given a position number k = 0, 1, 2. . . x-1 within each bar. If k is a multiple of ⟨int4⟩, then the note is ‘strong’.
 
+		var startingMidi = [];
 		if (abctune.formatting.midi) {
 			//console.log("MIDI Formatting:", abctune.formatting.midi);
 			var globals = abctune.formatting.midi;
@@ -91,6 +92,11 @@ var sequence;
 				drumOn = true;
 			if (channel === 10)
 				program = PERCUSSION_PROGRAM;
+			if (globals.beat)
+				startingMidi.push({ el_type: 'beat', beats: globals.beat })
+			if (globals.nobeataccents)
+				startingMidi.push({ el_type: 'beataccents', value: false });
+
 		}
 
 		// Specified options in abc string.
@@ -110,6 +116,8 @@ var sequence;
 		if (transpose)
 			startVoice.push({ el_type: 'transpose', transpose: transpose });
 		startVoice.push({ el_type: 'tempo', qpm: qpm });
+		for (var ss = 0; ss < startingMidi.length;ss++)
+			startVoice.push(startingMidi[ss]);
 
 		// the relevant part of the input structure is:
 		// abctune
@@ -282,8 +290,10 @@ var sequence;
 											voices[voiceNumber].push({ el_type: 'beataccents', value: true });
 											break;
 										case "vol":
-										case "volinc":
 											voices[voiceNumber].push({ el_type: 'vol', volume: elem.params[0] });
+											break;
+										case "volinc":
+											voices[voiceNumber].push({ el_type: 'volinc', volume: elem.params[0] });
 											break;
 										default:
 											console.log("MIDI seq: midi cmd not handled: ", elem.cmd, elem);

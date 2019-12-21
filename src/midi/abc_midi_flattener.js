@@ -56,6 +56,7 @@ var flatten;
 	var stressBeatUp = 85;
 	var beatFraction = 0.25;
 	var nextVolume;
+	var nextVolumeDelta;
 
 	var drumTrack;
 	var drumTrackFinished;
@@ -96,6 +97,7 @@ var flatten;
 		stressBeatUp = 85;
 		beatFraction = 0.25;
 		nextVolume = undefined;
+		nextVolumeDelta = undefined;
 
 		// For the drum/metronome track.
 		drumTrack = [];
@@ -179,8 +181,10 @@ var flatten;
 						// TODO-PER: also use the last parameter - which changes which beats are strong.
 						break;
 					case "vol":
-					case "volinc":
 						nextVolume = element.volume;
+						break;
+					case "volinc":
+						nextVolumeDelta = element.volume;
 						break;
 					case "beataccents":
 						doBeatAccents = element.value;
@@ -334,6 +338,14 @@ var flatten;
 			else
 				volume = stressBeatUp;
 		}
+		if (nextVolumeDelta) {
+			volume += nextVolumeDelta;
+			nextVolumeDelta = undefined;
+		}
+		if (volume < 0)
+			volume = 0;
+		if (volume > 127)
+			volume = 127;
 		var velocity = voiceOff ? 0 : volume;
 		var chord = findChord(elem);
 		if (chord) {
