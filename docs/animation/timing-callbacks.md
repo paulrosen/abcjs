@@ -121,7 +121,23 @@ These are the entry points that can be called on the `timingCallbacks` object.
 
 ## Example
 
-::: tip TODO
-This page is currently being enhanced. Check back soon!
-:::
+Paste in any ABC you want here then click "start" to see what is returned by the timing callbacks:
 
+<example-tune-book :callbacks="callbacks" :tune-id="32"></example-tune-book>
+
+<timing-callbacks ref="timingCallbacks" target="#abc"></timing-callbacks>
+
+<script>
+	export default {
+		mounted() {
+			setTimeout(() => {
+				this.callbacks = [this.$refs.timingCallbacks];
+			}, 500);
+		},
+		data() {
+			return {
+				callbacks: [],
+			};
+		},
+	}
+</script>

@@ -5,6 +5,7 @@
 </template>
 
 <script>
+	import Vue from 'vue';
 	import AbcjsEditor from "./AbcjsEditor";
 
 	export default {
@@ -18,6 +19,19 @@
 			tuneId: {
 				type: Number,
 				required: false
+			},
+		},
+		computed: {
+			abc() {
+				let str;
+				if (!this.abcjs)
+					return "";
+
+				if (this.tuneId === undefined)
+					return this.allTunes;
+
+				const book = new this.abcjs.TuneBook(this.allTunes);
+				return book.getTuneById(''+this.tuneId).abc;
 			},
 		},
 		mounted() {
@@ -182,15 +196,8 @@ E D E/E/ D|E D E/E/ D|E D E/E/ D|E D E/E/ D|
 E D E/E/ D|E D E/E/ D|E D E/E/ D|E D E/E/ D|
 `;
 
-			let str = abc;
-			if (this.abcjs && this.tuneId !== undefined) {
-				const book = new abcjs.TuneBook(abc);
-				str = book.getTuneById(''+this.tuneId).abc;
-			}
-
 			return {
-				abc: str,
-				tuneId: undefined,
+				allTunes: abc,
 				abcjs: null,
 			}
 		},
