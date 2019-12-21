@@ -52,6 +52,7 @@ function CreateSynth() {
 			return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
 		self.sequenceCallback = params.sequenceCallback;
 		self.callbackContext = params.callbackContext;
+		self.onEnded = options.onEnded;
 
 		var allNotes = {};
 		var currentInstrument = instrumentIndexToName[0];
@@ -268,6 +269,11 @@ function CreateSynth() {
 		self.directSource.forEach(function(source) {
 			source.start(0, seconds);
 		});
+		if (self.onEnded) {
+			self.directSource[0].onended = function () {
+				self.onEnded(self.callbackContext);
+			};
+		}
 	};
 
 	self._placeNote = function(chanData, note, tempoMultiplier, soundsCache) {
