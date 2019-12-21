@@ -176,6 +176,24 @@ var sequence;
 								case "note":
 									// regular items are just pushed.
 									if (!elem.rest || elem.rest.type !== 'spacer') {
+										if (elem.decoration) {
+											if (elem.decoration.indexOf('ppp') >= 0)
+												voices[voiceNumber].push({ el_type: 'beat', beats: [30, 20, 10, 1] });
+											else if (elem.decoration.indexOf('pp') >= 0)
+												voices[voiceNumber].push({ el_type: 'beat', beats: [45, 35, 20, 1] });
+											else if (elem.decoration.indexOf('p') >= 0)
+												voices[voiceNumber].push({ el_type: 'beat', beats: [60, 50, 35, 1] });
+											else if (elem.decoration.indexOf('mp') >= 0)
+												voices[voiceNumber].push({ el_type: 'beat', beats: [75, 65, 50, 1] });
+											else if (elem.decoration.indexOf('mf') >= 0)
+												voices[voiceNumber].push({ el_type: 'beat', beats: [90, 80, 65, 1] });
+											else if (elem.decoration.indexOf('f') >= 0)
+												voices[voiceNumber].push({ el_type: 'beat', beats: [105, 95, 80, 1] });
+											else if (elem.decoration.indexOf('ff') >= 0)
+												voices[voiceNumber].push({ el_type: 'beat', beats: [120, 110, 95, 1] });
+											else if (elem.decoration.indexOf('fff') >= 0)
+												voices[voiceNumber].push({ el_type: 'beat', beats: [127, 125, 110, 1] });
+										}
 										voices[voiceNumber].push(elem);
 										noteEventsInBar++;
 									}
@@ -256,6 +274,16 @@ var sequence;
 											break;
 										case "beat":
 											voices[voiceNumber].push({ el_type: 'beat', beats: elem.params });
+											break;
+										case "nobeataccents":
+											voices[voiceNumber].push({ el_type: 'beataccents', value: false });
+											break;
+										case "beataccents":
+											voices[voiceNumber].push({ el_type: 'beataccents', value: true });
+											break;
+										case "vol":
+										case "volinc":
+											voices[voiceNumber].push({ el_type: 'vol', volume: elem.params[0] });
 											break;
 										default:
 											console.log("MIDI seq: midi cmd not handled: ", elem.cmd, elem);

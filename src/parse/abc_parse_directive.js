@@ -419,6 +419,7 @@ var parseDirective = {};
 		"stressmodel",
 		"transpose",
 		"rtranspose",
+		"vol",
 		"volinc"
 	];
 	var midiCmdParam1Integer1OptionalInteger = [

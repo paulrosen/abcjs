@@ -50,10 +50,12 @@ var flatten;
 	var lastChord;
 	var barBeat;
 	var gChordTacet = false;
-	var stressBeat1 = 64;
-	var stressBeatDown = 64;
-	var stressBeatUp = 64;
+	var doBeatAccents = true;
+	var stressBeat1 = 105;
+	var stressBeatDown = 95;
+	var stressBeatUp = 85;
 	var beatFraction = 0.25;
+	var nextVolume;
 
 	var drumTrack;
 	var drumTrackFinished;
@@ -88,10 +90,12 @@ var flatten;
 		barBeat = 0;
 		gChordTacet = options.chordsOff ? true : false;
 
-		stressBeat1 = 64;
-		stressBeatDown = 64;
-		stressBeatUp = 64;
+		doBeatAccents = true;
+		stressBeat1 = 105;
+		stressBeatDown = 95;
+		stressBeatUp = 85;
 		beatFraction = 0.25;
+		nextVolume = undefined;
 
 		// For the drum/metronome track.
 		drumTrack = [];
@@ -173,6 +177,13 @@ var flatten;
 						stressBeatDown = element.beats[1];
 						stressBeatUp = element.beats[2];
 						// TODO-PER: also use the last parameter - which changes which beats are strong.
+						break;
+					case "vol":
+					case "volinc":
+						nextVolume = element.volume;
+						break;
+					case "beataccents":
+						doBeatAccents = element.value;
 						break;
 					default:
 						// This should never happen
@@ -310,12 +321,19 @@ var flatten;
 		//
 
 		var volume;
-		if (barBeat === 0)
-			volume = stressBeat1;
-		else if (barBeat % beatFraction < 0.001) // A little slop because of JavaScript floating point math.
+		if (nextVolume) {
+			volume = nextVolume;
+			nextVolume = undefined;
+		} else if (!doBeatAccents) {
 			volume = stressBeatDown;
-		else
-			volume = stressBeatUp;
+		} else {
+			if (barBeat === 0)
+				volume = stressBeat1;
+			else if (barBeat % beatFraction < 0.001) // A little slop because of JavaScript floating point math.
+				volume = stressBeatDown;
+			else
+				volume = stressBeatUp;
+		}
 		var velocity = voiceOff ? 0 : volume;
 		var chord = findChord(elem);
 		if (chord) {

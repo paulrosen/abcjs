@@ -122,6 +122,16 @@ var midiSequencerLint = function(tune) {
 					ret += element.beats.join(",");
 					ret += '\n';
 					break;
+				case "vol":
+					ret += "\t\t";
+					ret += element.volume;
+					ret += '\n';
+					break;
+				case "beataccents":
+					ret += "\t\t";
+					ret += element.value;
+					ret += '\n';
+					break;
 				case "drum":
 					var params = element.params;
 					ret += "\t\t";
