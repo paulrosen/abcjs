@@ -2,16 +2,16 @@
 var TimingCallbacks = function(target, params) {
 	var self = this;
 	if (!params) params = {};
-	self.qpm = params.qpm;
+	self.qpm = params.qpm ? parseInt(params.qpm, 10) : null;
 	if (!self.qpm) {
 		var tempo = target.metaText ? target.metaText.tempo : null;
 		self.qpm = target.getBpm(tempo);
 	}
-	self.extraMeasuresAtBeginning = params.extraMeasuresAtBeginning ? params.extraMeasuresAtBeginning : 0;
+	self.extraMeasuresAtBeginning = params.extraMeasuresAtBeginning ? parseInt(params.extraMeasuresAtBeginning, 10) : 0;
 	self.beatCallback = params.beatCallback; // This is called for each beat.
 	self.eventCallback = params.eventCallback;   // This is called for each note or rest encountered.
 	self.lineEndCallback = params.lineEndCallback;   // This is called when the end of a line is approaching.
-	self.lineEndAnticipation = params.lineEndAnticipation ? params.lineEndAnticipation : 0;   // How many milliseconds before the end should the call happen.
+	self.lineEndAnticipation = params.lineEndAnticipation ? parseInt(params.lineEndAnticipation, 10) : 0;   // How many milliseconds before the end should the call happen.
 	self.beatSubdivisions = params.beatSubdivisions ? parseInt(params.beatSubdivisions, 10) : 1; // how many callbacks per beat is desired.
 
 	self.replaceTarget = function(newTarget) {
