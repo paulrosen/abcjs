@@ -415,7 +415,7 @@ var flatten;
 				else {
 					// but we do add the duration to what we call back.
 					for (var last = currentTrack.length-1; last >= 0; last--) {
-						if (currentTrack[last].cmd === 'start' && currentTrack[last].pitch === actualPitch) {
+						if (currentTrack[last].cmd === 'start' && currentTrack[last].pitch === actualPitch && currentTrack[last].elem) {
 							var pitchArray = currentTrack[last].elem.midiPitches;
 							for (var last2 = 0; last2 < pitchArray.length; last2++) {
 								if (pitchArray[last2].pitch-60 === actualPitch) { // TODO-PER: the 60 is to compensate for the midi pitch numbers again.
