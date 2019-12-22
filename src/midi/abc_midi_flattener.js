@@ -104,6 +104,8 @@ var flatten;
 		drumTrackFinished = false;
 		drumDefinition = {};
 
+		zeroOutMilliseconds(voices);
+
 		for (var i = 0; i < voices.length; i++) {
 			transpose = 0;
 			lastNoteDurationPosition = -1;
@@ -235,6 +237,16 @@ var flatten;
 
 		return { tempo: startingTempo, instrument: instrument, tracks: tracks, totalDuration: totalDuration(tracks) };
 	};
+
+	function zeroOutMilliseconds(voices) {
+		for (var i = 0; i < voices.length; i++) {
+			var voice = voices[i];
+			for (var j = 0; j < voice.length; j++) {
+				var element = voice[j];
+				delete element.currentTrackMilliseconds;
+			}
+		}
+	}
 
 	function totalDuration(tracks) {
 		var total = 0;
@@ -535,10 +547,10 @@ var flatten;
 		for (var g = 0; g < graces.length; g++) {
 			var gp = graces[g];
 			if (gp !== skipNote)
-				currentTrack.push({cmd: 'start', pitch: gp, volume: velocity});
+				currentTrack.push({cmd: 'start', pitch: gp.pitch, volume: velocity});
 			currentTrack.push({cmd: 'move', duration: graces[g].duration*tempoChangeFactor });
 			if (gp !== skipNote)
-				currentTrack.push({cmd: 'stop', pitch: gp});
+				currentTrack.push({cmd: 'stop', pitch: gp.pitch});
 			if (!stealFromCurrent)
 				currentTrack[lastNoteDurationPosition].duration -= graces[g].duration;
 			duration -= graces[g].duration;
