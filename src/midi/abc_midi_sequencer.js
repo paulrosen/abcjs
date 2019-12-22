@@ -29,7 +29,7 @@ var sequence;
 	sequence = function(abctune, options) {
 		// Global options
 		options = options || {};
-		var qpm = 180;	// The tempo if there isn't a tempo specified.
+		var qpm = undefined;
 		var program = options.program || 0;	// The program if there isn't a program specified.
 		var transpose = options.midiTranspose || 0;
 		var channel = options.channel || 0;
@@ -101,11 +101,18 @@ var sequence;
 
 		// Specified options in abc string.
 
-		// If the tempo was passed in, use that. If the tempo is specified, use that. Otherwise, use the default.
-		if (abctune.metaText.tempo)
-			qpm = interpretTempo(abctune.metaText.tempo);
+		// If the tempo was passed in, use that.
+		// If the tempo is specified, use that.
+		// If there is a default, use that.
+		// Otherwise, use the default.
 		if (options.qpm)
 			qpm = parseInt(options.qpm, 10);
+		else if (abctune.metaText.tempo)
+			qpm = interpretTempo(abctune.metaText.tempo);
+		else if (options.defaultQpm)
+			qpm = options.defaultQpm;
+		else
+			qpm = 180; 	// The tempo if there isn't a tempo specified.
 
 		var startVoice = [];
 		if (bagpipes)
