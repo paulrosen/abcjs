@@ -1,3 +1,51 @@
+# Version 5.11.0
+
+## Features
+
+* Changed documentation to vuepress.
+
+* Implement the defaultQpm parameter.
+
+* In TimingCallbacks, accept a tune that hasn't created noteTimings yet.
+
+* Audio: Implement beataccents, nobeataccents, vol, volinc, and set the correct default accent values.
+
+* Add onEnded callback for the CreateSynth object.
+
+* Add headless rendering with the "*" parameter.
+
+* Add callback context to audio calls.
+
+* Allow using audio without a visible control.
+
+* Add a callback when the selection changes in the editor.
+
+## Bugs
+
+* Fix bug in double reporting a note's millisecond; fix bug in playing gracenote.
+
+* Fix grace notes in percussion track.
+
+* Fix crash in creating audio when there is a mismatch of ties.
+
+* Fix bug with lining up ties with the correct voice on multipart music.
+
+* Change the TimingCallbacks input parameters into integers.
+
+* When querying a tunebook for an id, accept either string or number.
+
+* Fixed the value of currentTrackMilliseconds that is returned when the user clicks on a note.
+
+* Fix wrapLines with several titles
+
+* Don't add duplicate program commands in audio
+
+* Don't ignore chord basses with accidentals when generating midi
+
+## Tasks
+
+* Update dependencies
+
 # Version 5.10.3
 
 ## Bugs
