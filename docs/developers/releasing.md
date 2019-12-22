@@ -12,7 +12,7 @@ To release a new version, this checklist should be followed:
 
 [_] Be sure [the read me file](../README.md) is up to date, along with all the files in [docs](../docs).
 
-[_] Find any hardcoded version numbers in [the package file](../package.json) and change them.
+[_] Find any hardcoded version numbers in [the package file](../package.json) and change them. (Except the abcjs dependency at bottom.)
 
 [_] Minify the various library versions with `npm run build`.
 
@@ -25,6 +25,8 @@ To release a new version, this checklist should be followed:
 [_] Change the version in [the package file](../package.json) with `npm version patch` <-- or `minor`, or `major`.
 
 [_] Update npm with `npm publish`.
+
+[_] Update the abcjs dependency in package.json, run `npm install` and check it in.
 
 [_] Push the change that npm publish created with `git push`.
 
