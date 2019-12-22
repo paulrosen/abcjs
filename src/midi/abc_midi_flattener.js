@@ -533,7 +533,7 @@ var flatten;
 
 	function writeGraceNotes(graces, stealFromCurrent, duration, skipNote, velocity) {
 		for (var g = 0; g < graces.length; g++) {
-			var gp = adjustPitch(graces[g]);
+			var gp = graces[g];
 			if (gp !== skipNote)
 				currentTrack.push({cmd: 'start', pitch: gp, volume: velocity});
 			currentTrack.push({cmd: 'move', duration: graces[g].duration*tempoChangeFactor });

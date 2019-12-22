@@ -60,8 +60,8 @@ function CreateSynth() {
 			track.forEach(function(event) {
 				if (event.cmd === "program" && instrumentIndexToName[event.instrument])
 					currentInstrument = instrumentIndexToName[event.instrument];
-				var pitchNumber = event.pitch + 60;
 				if (event.pitch !== undefined) {
+					var pitchNumber = event.pitch + 60;
 					var noteName = pitchToNoteName[pitchNumber];
 					if (noteName) {
 						if (!allNotes[currentInstrument])
