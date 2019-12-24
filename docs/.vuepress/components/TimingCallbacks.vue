@@ -135,10 +135,14 @@
 	label, .label-indent {
 		display: block;
 		margin-left: 30px;
+		width: calc(100% - 30px);
 	}
 	label span {
 		display: inline-block;
 		width: 240px;
+	}
+	input {
+		width: 60px;
 	}
 	button {
 		background: #acffd9;

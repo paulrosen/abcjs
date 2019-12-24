@@ -23,6 +23,7 @@
 					warnings_id: "warnings",
 					onchange: this.onchange,
 					abcjsParams: { add_classes: true },
+					indicate_changed: true,
 				});
 			}
 		},
@@ -45,6 +46,7 @@
 					warnings_id: "warnings",
 					onchange: this.onchange,
 					abcjsParams: { add_classes: true },
+					indicate_changed: true,
 				});
 			});
 		},
