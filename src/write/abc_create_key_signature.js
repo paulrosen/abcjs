@@ -32,8 +32,15 @@ var createKeySignature;
 		abselem.isKeySig = true;
 		var dx = 0;
 		parseCommon.each(elem.accidentals, function(acc) {
-			var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
-			//var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
+			var symbol;
+			switch(acc.acc) {
+				case "sharp": symbol = "accidentals.sharp"; break;
+				case "natural": symbol = "accidentals.nat"; break;
+				case "flat": symbol = "accidentals.flat"; break;
+				case "quartersharp": symbol = "accidentals.halfsharp"; break;
+				case "quarterflat": symbol = "accidentals.halfflat"; break;
+				default: symbol = "accidentals.flat";
+			}
 			abselem.addRight(new RelativeElement(symbol, dx, glyphs.getSymbolWidth(symbol), acc.verticalPos, {thickness: glyphs.symbolHeightInPitches(symbol)}));
 			dx += glyphs.getSymbolWidth(symbol) + 2;
 		}, this);

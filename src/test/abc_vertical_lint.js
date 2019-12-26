@@ -95,8 +95,8 @@ var verticalLint = function(tunes) {
 				if (!isNaN(left) && !isNaN(right))
 					return "Time Sig " + left + "/" + right;
 			}
-			if (obj.elem[0] === "symbol accidentals.sharp" || obj.elem[0] === "symbol accidentals.flat" || obj.elem[0] === "symbol accidentals.nat")
-				return "Key Sig";
+			if (obj.elem[0] === "symbol accidentals.sharp" || obj.elem[0] === "symbol accidentals.flat" || obj.elem[0] === "symbol accidentals.nat" || obj.elem[0] === "symbol accidentals.halfsharp" || obj.elem[0] === "symbol accidentals.halfflat")
+				return "Key Sig " + obj.elem.join(" ").replace(/symbol/g,"");
 			if (obj.elem.length > 0) {
 				if (obj.elem[0] === 'symbol 1' || obj.elem[0] === 'symbol 2' || obj.elem[0] === 'symbol 3' || obj.elem[0] === 'symbol 4' || obj.elem[0] === 'symbol 5' || obj.elem[0] === 'symbol 6' || obj.elem[0] === 'symbol 7' || obj.elem[0] === 'symbol 8' || obj.elem[0] === 'symbol 9')
 				return "Time Sig (odd): " + obj.elem.join('').replace(/symbol /g,"");
