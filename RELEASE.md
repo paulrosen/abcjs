@@ -1,3 +1,19 @@
+# Version 5.12.0
+
+## Features
+
+* Add entry point for changing glyphs.
+
+* Improved documentation. 
+
+* Add example for changing glyphs.
+
+## Bugs
+
+* Fixed midi plugin example to demonstrate defaultQpm.
+
+* Fix rendering quarter tones in the key signature.
+
 # Version 5.11.0
 
 ## Features
