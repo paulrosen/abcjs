@@ -3,8 +3,6 @@ var spacing = require('./abc_spacing');
 /**
  * Glyphs and some methods to adjust for their x and y baseline
  */
-var Glyphs = function() {
-	"use strict";
 	var glyphs =
 	{'0':{d:[['M',4.83,-14.97],['c',0.33,-0.03,1.11,0.00,1.47,0.06],['c',1.68,0.36,2.97,1.59,3.78,3.60],['c',1.20,2.97,0.81,6.96,-0.90,9.27],['c',-0.78,1.08,-1.71,1.71,-2.91,1.95],['c',-0.45,0.09,-1.32,0.09,-1.77,0.00],['c',-0.81,-0.18,-1.47,-0.51,-2.07,-1.02],['c',-2.34,-2.07,-3.15,-6.72,-1.74,-10.20],['c',0.87,-2.16,2.28,-3.42,4.14,-3.66],['z'],['m',1.11,0.87],['c',-0.21,-0.06,-0.69,-0.09,-0.87,-0.06],['c',-0.54,0.12,-0.87,0.42,-1.17,0.99],['c',-0.36,0.66,-0.51,1.56,-0.60,3.00],['c',-0.03,0.75,-0.03,4.59,0.00,5.31],['c',0.09,1.50,0.27,2.40,0.60,3.06],['c',0.24,0.48,0.57,0.78,0.96,0.90],['c',0.27,0.09,0.78,0.09,1.05,0.00],['c',0.39,-0.12,0.72,-0.42,0.96,-0.90],['c',0.33,-0.66,0.51,-1.56,0.60,-3.06],['c',0.03,-0.72,0.03,-4.56,0.00,-5.31],['c',-0.09,-1.47,-0.27,-2.37,-0.60,-3.03],['c',-0.24,-0.48,-0.54,-0.78,-0.93,-0.90],['z']],w:10.78,h:14.959},
 		'1':{d:[['M',3.30,-15.06],['c',0.06,-0.06,0.21,-0.03,0.66,0.15],['c',0.81,0.39,1.08,0.39,1.83,0.03],['c',0.21,-0.09,0.39,-0.15,0.42,-0.15],['c',0.12,0.00,0.21,0.09,0.27,0.21],['c',0.06,0.12,0.06,0.33,0.06,5.94],['c',0.00,3.93,0.00,5.85,0.03,6.03],['c',0.06,0.36,0.15,0.69,0.27,0.96],['c',0.36,0.75,0.93,1.17,1.68,1.26],['c',0.30,0.03,0.39,0.09,0.39,0.30],['c',0.00,0.15,-0.03,0.18,-0.09,0.24],['c',-0.06,0.06,-0.09,0.06,-0.48,0.06],['c',-0.42,0.00,-0.69,-0.03,-2.10,-0.24],['c',-0.90,-0.15,-1.77,-0.15,-2.67,0.00],['c',-1.41,0.21,-1.68,0.24,-2.10,0.24],['c',-0.39,0.00,-0.42,0.00,-0.48,-0.06],['c',-0.06,-0.06,-0.06,-0.09,-0.06,-0.24],['c',0.00,-0.21,0.06,-0.27,0.36,-0.30],['c',0.75,-0.09,1.32,-0.51,1.68,-1.26],['c',0.12,-0.27,0.21,-0.60,0.27,-0.96],['c',0.03,-0.18,0.03,-1.59,0.03,-4.29],['c',0.00,-3.87,0.00,-4.05,-0.06,-4.14],['c',-0.09,-0.15,-0.18,-0.24,-0.39,-0.24],['c',-0.12,0.00,-0.15,0.03,-0.21,0.06],['c',-0.03,0.06,-0.45,0.99,-0.96,2.13],['c',-0.48,1.14,-0.90,2.10,-0.93,2.16],['c',-0.06,0.15,-0.21,0.24,-0.33,0.24],['c',-0.24,0.00,-0.42,-0.18,-0.42,-0.39],['c',0.00,-0.06,3.27,-7.62,3.33,-7.74],['z']],w:8.94,h:15.058},
@@ -103,74 +101,70 @@ var Glyphs = function() {
 
 	glyphs['noteheads.harmonic.quarter'] = {d:[['M',3.63,-4.02],['c',0.09,-0.06,0.18,-0.09,0.24,-0.03],['c',0.03,0.03,0.87,0.93,1.83,2.01],['c',1.50,1.65,1.80,1.98,1.80,2.04],['c',0.00,0.06,-0.30,0.39,-1.80,2.04],['c',-0.96,1.08,-1.80,1.98,-1.83,2.01],['c',-0.06,0.06,-0.15,0.03,-0.24,-0.03],['c',-0.12,-0.09,-3.54,-3.84,-3.60,-3.93],['c',-0.03,-0.03,-0.03,-0.09,-0.03,-0.15],['c',0.03,-0.06,3.45,-3.84,3.63,-3.96],['z']],w:7.5,h:8.165};
 
+var pathClone = function (pathArray) {
+	var res = [];
+	for (var i = 0, ii = pathArray.length; i < ii; i++) {
+		res[i] = [];
+		for (var j = 0, jj = pathArray[i].length; j < jj; j++) {
+			res[i][j] = pathArray[i][j];
+		}
+	}
+	return res;
+};
 
-  this.printSymbol = function (x,y,symb,paper, klass) {
+var pathScale = function (pathArray, kx, ky) {
+	for (var i = 0, ii = pathArray.length; i < ii; i++) {
+		var p = pathArray[i];
+		var j, jj;
+		for (j = 1, jj = p.length; j < jj; j++) {
+			p[j] *= (j % 2) ? kx : ky;
+		}
+	}
+};
+
+var Glyphs = {
+	printSymbol: function (x,y,symb,paper, klass) {
     if (!glyphs[symb]) return null;
-    var pathArray = this.pathClone(glyphs[symb].d);
+    var pathArray = pathClone(glyphs[symb].d);
     pathArray[0][1] +=x;
     pathArray[0][2] +=y;
     var path = "";
     for (var i = 0; i < pathArray.length; i++)
     	path += pathArray[i].join(" ");
     return paper.path({path:path, stroke:"none", fill:"#000000", 'class': klass });
-   };
-  
-  this.getPathForSymbol = function (x,y,symb,scalex, scaley) {
+   },
+
+  getPathForSymbol: function (x,y,symb,scalex, scaley) {
     scalex = scalex || 1;
     scaley = scaley || 1;
     if (!glyphs[symb]) return null;
-    var pathArray = this.pathClone(glyphs[symb].d);
-    if (scalex!==1 || scaley!==1) this.pathScale(pathArray,scalex,scaley);
+    var pathArray = pathClone(glyphs[symb].d);
+    if (scalex!==1 || scaley!==1) pathScale(pathArray,scalex,scaley);
     pathArray[0][1] +=x;
     pathArray[0][2] +=y;
 
     return pathArray;
-  };
-  
-  this.getSymbolWidth = function (symbol) {
+  },
+
+  getSymbolWidth: function (symbol) {
     if (glyphs[symbol]) return glyphs[symbol].w;
     return 0;
-  };
-  
-  this.getSymbolHeight = function (symbol) {
-    if (glyphs[symbol]) return glyphs[symbol].h;
-    return 0;
-  };
+  },
 
-	this.symbolHeightInPitches = function(symbol) {
-		return this.getSymbolHeight(symbol) / spacing.STEP;
-	};
+	symbolHeightInPitches: function(symbol) {
+		var height = glyphs[symbol] ? glyphs[symbol].h : 0;
+		return height / spacing.STEP;
+	},
 
-  this.getSymbolAlign = function (symbol) {
-    if (symbol.substring(0,7)==="scripts" && 
+  getSymbolAlign: function (symbol) {
+    if (symbol.substring(0,7)==="scripts" &&
 	symbol!=="scripts.roll") {
       return "center";
     }
     return "left";
-  };
+  },
 
-  this.pathClone = function (pathArray) {
-    var res = [];
-    for (var i = 0, ii = pathArray.length; i < ii; i++) {
-      res[i] = [];
-      for (var j = 0, jj = pathArray[i].length; j < jj; j++) {
-	res[i][j] = pathArray[i][j];
-      }
-    }
-    return res;
-  };
-
-  this.pathScale = function (pathArray, kx, ky) {
-    for (var i = 0, ii = pathArray.length; i < ii; i++) {
-      var p = pathArray[i];
-      var j, jj;
-      for (j = 1, jj = p.length; j < jj; j++) {
-	p[j] *= (j % 2) ? kx : ky;
-      }
-    }
-  };
-   
-  this.getYCorr = function (symbol) {
+  getYCorr: function (symbol) {
     switch(symbol) {
     case "0":
     case "1":
@@ -216,6 +210,10 @@ var Glyphs = function() {
 			return 1;
     default: return 0;
     }
-  };
+  },
+	setSymbol: function(name, path) {
+		glyphs[name] = path;
+	}
 };
-module.exports = new Glyphs(); // we need the glyphs for layout information
+
+module.exports = Glyphs; // we need the glyphs for layout information
