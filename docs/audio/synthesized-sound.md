@@ -1,9 +1,5 @@
 # Synthesized Sound
 
-::: tip TODO
-This page is currently being enhanced. Check back soon!
-:::
-
 ## Browser Compatibility and Requirements
 
 * This works in any browser that supports `AudioContext`, `AudioContext.resume`, and `Promises`. That does NOT include IE, but this will work on any other "modern" browser that is at least the following version: Firefox 40, Safari 9.1, Edge 13, and Chrome 43.
@@ -104,15 +100,148 @@ Stops playing the sound and resets the progress to the beginning of the sound fi
 
 This returns the audio buffer created. (It is in WAV format.)
 
-## synth.CreateSynthControl
+## synth.SynthController
 
 Creates the object that handles the visual part of the control. This creates play and stop buttons, etc. See the section below for the options.
+
+The constructor can be called at any time, including before much is initialized:
+
+```javascript
+var synthControl = new ABCJS.synth.SynthController();
+```
+
+### load(selector, cursorControl, visualOptions)
+
+After the DOM is loaded, this should be called to initialize the visual widget that contains the "play", etc. buttons.
+
+While this can be called multiple times, it is generally just called once during initialization.
+
+#### selector
+
+This is a CSS-style selector of the element that should be turned into the audio control.
+
+#### cursorControl
+
+This is an optional object that can be passed in that will receive callbacks when events happen that should move the cursor. See the section on "CursorControl" for more info.
+
+#### visualOptions
+
+This is a hash with the following possible properties:
+
+| Option | Default | Description |
+|---|---|---|
+| displayLoop | false | Whether to display a button that the user can press to make the tune loop instead of stopping when it gets to the end. |
+| displayRestart | false | Whether to display a button that the user can press to make the tune go back to the beginning. |
+| displayPlay | false | Whether to display a button that the user can press to make the tune start playing. (Note: this turns into the "pause" button when the tune is playing.) |
+| displayProgress | false | Whether to display the progress slider. The user can click anywhere on this to get the music to jump to that location. |
+| displayWarp | false | Whether to display the tempo and allow the user to change it on the fly. |
+
+### setTune(visualObj, userAction, audioParams)
+
+This is called whenever there is a new tune ready to be loaded into the player.
+
+#### visualObj
+
+This is one of the tunes that is returned from the `renderAbc()` call. That is, `renderAbc` will return an array of tunes. Often it is an array of length 1 if there is only one tune in the abc string, but it could be multiple tunes. 
+
+#### userAction
+
+True if this is being called inside an event handler from a user gesture. The audio buffer can't be created until then. If this is `true`, then the audio buffer is created immediately. If this is `false` then the audio buffer is not created until the user clicks the `play` button.
+
+### audioParams
+
+Here are the possible properties that can be passed in:
+
+| Property | Default | Description |
+|---|---|---|
+| audioContext | create it. | An AudioContext object so that they can be reused. |
+| debugCallback; | null | A function that is called at various times in the creation of the audio. |
+| soundFontUrl | use the default | The publicly available URL of the soundfont to use. |
+| millisecondsPerMeasure | calculated | An override of the tempo in the tune. |
+| visualObj | null | The object returned from `renderAbc`. |
+| options | {} | Options to pass to the low-level buffer creation routines. |
+| sequence | null | An alternate audio specification, if visualObj is not present. |
+| onEnded | null | A callback function when the AudioBuffer finishes playing. |
+
+The `options` element above can have the following properties:
+
+| Property | Default | Description |
+|---|---|---|
+| sequenceCallback | null | A hook to get the instructions that will be passed to the Audio Buffer. This can be used either to debug what audio was generated or to modify the sequence before the audio is created. This can be useful to add "swing" to the beats, or do any other processing that isn't possible in ABC notation. |
+| callbackContext | null | This is passed back with the sequenceCallback. It can be anything you want. |
+| program | 0 | The midi program (aka "instrument") to use, if not specified in ABC string. |
+| midiTranspose | 0 | The number of half-steps to transpose everything, if not specified in ABC string. |
+| channel | 0 | The "midi channel" to use. This isn't particularly useful except that specifying channel 10 means to use the percussion sounds. |
+| drum | null | Whether to add a drum, or metronome track. A string formatted like the `%%MIDI drum` specification. Using this parameter also implies `%%MIDI drumon` See the section for "Drum Parameter" for an explanation. |
+| drumBars | 1 | How many bars to spread the drum pattern over. See the section for "Drum Parameter" for an explanation. |
+| drumIntro | 0 | The number of measures of count in beats before the music starts. |
+| qpm | null | The tempo to use. This overrides a tempo that is in the tune. |
+| defaultQpm | null | The tempo to use, only if there is no tempo in the tune. |
+| chordsOff | false | If true, then don't turn the guitar chord symbols into sound. (But do play the metronome if there is one.) |
+| voicesOff | false | If true, play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. |
+
+### play(), pause(), toggleLoop(), restart(), setProgress(ev)
+
+These do the same thing as the user pressing these buttons, but can be called programmatically.
+
+### download(fileName)
+
+This will download the current audio buffer as a WAV file to the fileName passed in.
+
+### Example
+
+The following creates an audio control that the user can manipulate.
+
+```javascript
+// given that there are two elements in the DOM with the IDs "paper" and "audio"
+var cursorControl = { ... }; // see section on CursorControl
+var abc = "X:1\n etc...";
+var abcOptions = { add_classes: true };
+var audioParams = { chordsOff: true };
+
+if (ABCJS.synth.supportsAudio()) {
+	var synthControl = new ABCJS.synth.SynthController();
+	synthControl.load("#audio", 
+        cursorControl, 
+        {
+            displayLoop: true, 
+            displayRestart: true, 
+            displayPlay: true, 
+            displayProgress: true, 
+            displayWarp: true
+        }
+    );
+
+	var visualObj = ABCJS.renderAbc("paper", 
+        abc, abcOptions);
+	var createSynth = new ABCJS.synth.CreateSynth();
+	createSynth.init({ visualObj: visualObj[0] }).then(function () {
+		synthControl.setTune(visualObj[0], false, audioParams).then(function () {
+			console.log("Audio successfully loaded.")
+		}).catch(function (error) {
+			console.warn("Audio problem:", error);
+		});
+	}).catch(function (error) {
+		console.warn("Audio problem:", error);
+	});
+} else {
+	document.querySelector("#audio").innerHTML = 
+        "Audio is not supported in this browser.";
+	}
+}
+```
+
+## synth.CreateSynthControl
+
+Lower level object than `SynthController` if you want the functionality without the visible control.
 
 ```javascript
 var control = new ABCJS.synth.CreateSynthControl(element, options);
 ```
 
 `element` is either a string representing a selector of an existing element on the page or a DOM element. The contents of that element are replaced with an audio control.
+
+### options parameter
 
 | Option | Description |
 | ------------- | ------------- |
@@ -138,12 +267,6 @@ var control = new ABCJS.synth.CreateSynthControl(element, options);
 | warpAria | To override the text of the aria for warp input. (By default, the warpTitle is used.)|
 | bpm | To override the text "BPM" for beats per minute. |
 
-## synth.SynthController
-
-This coordinates the cursor with the synth playback.
-
-TODO-PER: Example? Params?
-
 ## synth.SynthSequence
 
 Creates an object that builds data for `CreateSynth`. This is normally done internally if `CreateSynth` is passed a visual object, but this is a way to custom build any sequence.
@@ -156,19 +279,114 @@ This is a helper object that will create an object that is consumed by `CreateSy
 | `setInstrument` | `trackNumber, instrumentNumber` | `trackNumber` is the value that is returned by `addTrack`. instrumentNumber is the stand MIDI number for the instrument. (See `ABCJS.synth.instrumentIndexToName` for the list of instruments.) This should be called right after `addTrack` and may be called at any time after that to change the instrument midstream. |
 | `appendNote` | `trackNumber, pitch, durationInMeasures, volume` | This adds a note. `trackNumber` is the value returned from `addTrack`. `pitch` is the standard midi pitch number. `durationInMeasures` is a floating point number where "1" is one measure. `volume` is a value from 0 to 255 that is the volume of the note. |
 
-TODO-PER: Example?
+## CursorControl object
 
-## synth.playEvent
+If you want notification when events happen, then you can pass in an object that you create yourself. The following properties are used:
+
+### beatSubdivisions
+
+How often to call the beat callback. If this is not set, then the beat callback is called once per beat. If you want a finer grained control, you can set this to a larger number. Notice that a large number will affect performance.
+
+### extraMeasuresAtBeginning
+
+How many extra measures to have at the beginning before the tune actually starts. This can be used for count in beats.
+
+### lineEndAnticipation
+
+When to call the onLineEnd event. If you want to scroll the music when the end of the line is reached, then you probably want to scroll it a little in advance so the user can read ahead. This is the number of milliseconds, so the value of 500 means to scroll the music one half second before the end of the line.
+
+### onReady(synthController)
+
+Called when the tune has actually been loaded. Because the audio buffer can only be initialized after a user gesture, the tune might not have been loaded when the visual control is created. This might be called when `setTune` is called, or when the user clicks PLAY.
+
+The parameter is the instance of the synthController that called it.
+
+### onStart()
+
+Called when the tune has actually started: that is, after all the set up has been completed.
+
+### onFinished()
+
+Called when the tune has finished.
+
+### onBeat(beatNumber, totalBeats, totalTime)
+
+Called each beat, or each subdivision of a beat.
+
+#### beatNumber
+
+This is the current beat - in a perfect case, this is called regularly. There are various things that can cause JavaScript to stop running, though, so it might get called a bunch of times in a row to catch up. This can be a fraction, if `beatSubdivisions` is present.
+
+### onEvent(event)
+
+This is called every time a note, rest, or bar is encountered.
+
+The `event` parameter has these properties:
+
+| Property | Description |
+|---|---|
+| measureStart | `true` if this is the beginning of a measure. (Note, beware of the case where the only event at the beginning of a measure is a note tied from a previous note. There might not be anything to do.) |
+| elements | The actual SVG elements that represent the note(s) being played. |
+| left | The leftmost point of the current elements. |
+| top | The topmost point of the current elements. |
+| height | The height of the current elements. | 
+| width | the width of the current elements. |
+
+### onLineEnd(data)
+
+This is called when the end of the line is approaching. The data is the following properties:
+
+| Property | Description |
+|---|---|
+| milliseconds | The current time. |
+| top | The top of the current line. |
+| bottom | The bottom of the current line. |
+
+Use this to determine if the SVG should be scrolled.
+
+## synth.playEvent(pitches, gracenotes, millisecondsPerMeasure)
 
 This will play a single event that is passed. The event must have the same format as the events that are passed back by the click listener.
 
-TODO-PER: Example? Params?
+### pitches
 
-## synth.activeAudioContext
+An array of pitches. If there is more than one item in the array, they are played at the same time. Pitches contain:
+
+| Attribute | Description |
+|---|---|
+| pitch | An integer value of the pitch, where middle C is 60 |
+| durationInMeasures | The length of the note. For instance, a quarter note in 4/4 would be .25 |
+| volume | A number from 0 to 127 for the volume of the note. |
+| instrument | The number of the instrument in the MIDI spec. |
+
+### gracenotes
+
+These are the same format as above, except that these notes are played before the main note for a short time. Also, if there is more than one note in the array, the notes are played sequentially.
+
+### millisecondsPerMeasure
+
+This is used to translate the `durationInMeasures` value into an actual time.
+ 
+### Example:
+
+```javascript
+ABCJS.synth.playEvent(
+    [ 60, 64, 67 ], // a C chord
+    [ 62], // start with a D as a grace note
+    1000 // a measure takes one second.    
+).then(function (response) {
+	console.log("note played");
+}).catch(function (error) {
+	console.log("error playing note", error);
+});
+
+```
+
+## synth.activeAudioContext()
 
 If there is an AudioContext that is being used then this retrieves it. It allows freely sharing the same one in different parts of your app.
 
-## synth.instrumentIndexToName
+## synth.instrumentIndexToName[index]
 
 This is an array that converts the standard MIDI instrument indexes to a name. For instance:
 ```javascript
@@ -176,7 +394,7 @@ console.log(ABCJS.synth.instrumentIndexToName[9]);
 // "glockenspiel"
 ```
 
-## synth.pitchToNoteName
+## synth.pitchToNoteName[pitchNumber]
 
 This is an array that converts the standard MIDI pitch indexes to a name. For instance:
 ```javascript
@@ -243,42 +461,3 @@ A more complicated example that has the drum pattern fall over two measures of 2
 Note that the default soundfont that is used by abcjs contains sounds for pitches **27** through **87**. You can experiment with any of them for different effects.
 
 
-TODO: Potentially old below here:
-
-| `params` (for midi) | Default | Description |
-| ------------- | ----------- | ----------- |
-| `qpm` | 180 | Override the starting tempo in the abcString. |
-| `program` | 0 | The midi program (aka "instrument") to use, if not specified in abcString. |
-| `midiTranspose` | 0 | The number of half-steps to transpose the everything, if not specified in abcString. |
-| `voicesOff` | false | Play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. |
-| `chordsOff` | false | Ignore the chords and just play the melody (and metronome if that is on). |
-| `generateDownload` | false | Whether to generate a download MIDI link. |
-| `generateInline` | true | Whether to generate the inline MIDI controls. |
-| `downloadClass` | "" | Add classes to the download controls. The classes `abcjs-download-midi` and `abcjs-midi-xxx` where `xxx` is the index of the tune are already added. This is appended to those classes. |
-| `downloadLabel` | "download midi" | The text for the MIDI download. If it contains `%T` then that is replaced with the first title. If this is a function, then the result of that function is called. The function takes two parameters: the parsed tune and the zero-based index of the tune in the tunebook. |
-| `preTextDownload` | "" | Text that appears right before the download link (can contain HTML markup). |
-| `postTextDownload` | "" | Text that appears right after the download link (can contain HTML markup). |
-| `preTextInline` | "" | Text that appears right before the MIDI controls (can contain HTML markup). If it contains `%T` then that is replaced with the first title. |
-| `postTextInline` | "" | Text that appears right after the MIDI controls (can contain HTML markup). If it contains `%T` then that is replaced with the first title. |
-| `midiListener` | null | Function that is called for each midi event. The parameters are the current abcjs element and the current MIDI event. |
-| `animate` | null | Whether to do a "bouncing ball" effect on the visual music. `{ listener: callback, target: output of ABCJS.renderAbc, qpm: tempo }` This calls the listener whenever the current note has changed. It is called with both the last selected note and the newly selected note. The callback parameters are arrays of svg elements. |
-| `context` | null | A string that is passed back to both the listener and animate callbacks. |
-| `inlineControls` | { selectionToggle: false, loopToggle: false, standard: true, tempo: false, startPlaying: false } | These are the options for which buttons and functionality appear in the inline controls. This is a hash, and is defined below. |
-| `drum` | "" | A string formatted like the `%%MIDI drum` specification. Using this parameter also implies `%%MIDI drumon` |
-| `drumBars` | 1 |  How many bars to spread the drum pattern over. |
-| `drumIntro` | 0 | How many bars of drum should precede the music. |
-
-| `inlineControls` | Default | Description |
-| ------------- | ----------- | ----------- |
-| `selectionToggle` | false | Show a latched push button to play only the current selection. **Not yet implemented** |
-| `loopToggle` | false | Show a a latched push button to start playing again when the end is reached. |
-| `standard` | true | Show the start, pause, reset, and progress controls. |
-| `hide` | false | Whether to show the control at all. |
-| `startPlaying` | false | Whether to start the MIDI as soon as it is available. (Not available in the Editor. Only available when calling `ABCJS.renderMidi` ) |
-| `tempo` | false | Show the tempo change controls. This is a spinner that starts at 100%. There is an absolute tempo printed next to it.  **Not yet implemented** |
-| `tooltipSelection` | "Click to toggle play selection/play all." | The text of the tooltip.  **Not yet implemented** |
-| `tooltipLoop` | "Click to toggle play once/repeat." | The text of the tooltip. |
-| `tooltipReset` | "Click to go to beginning." | The text of the tooltip. |
-| `tooltipPlay` | "Click to play/pause." | The text of the tooltip. |
-| `tooltipProgress` | "Click to change the playback position." | The text of the tooltip. |
-| `tooltipTempo` | "Change the playback speed." | The text of the tooltip.  **Not yet implemented** |
