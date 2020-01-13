@@ -4,6 +4,10 @@ The input to **abcjs** is mostly standard ABC Music Notation. That notation is d
 
 [ABC Notation](http://abcnotation.com/learn)
 
+The working document for the standard is [ABC Standard](https://abcnotation.com/wiki/abc:standard)
+
+In addition, there are many informal additions, particularly with new `%%` directives, that are supported to be compatible with other ABC software.
+
 ## Subtractions from the standard
 
 We've made an attempt to be compatible with other ABC software, but there are some exceptions.
