@@ -95,21 +95,24 @@ parseCommon.detect = function(arr, iterator) {
 
 // The following is a polyfill for Object.remove for IE9, IE10, and IE11.
 // from:https://github.com/jserz/js_piece/blob/master/DOM/ChildNode/remove()/remove().md
-(function (arr) {
-	arr.forEach(function (item) {
-		if (item.hasOwnProperty('remove')) {
-			return;
-		}
-		Object.defineProperty(item, 'remove', {
-			configurable: true,
-			enumerable: true,
-			writable: true,
-			value: function remove() {
-				if (this.parentNode !== null)
-					this.parentNode.removeChild(this);
+try {
+	(function (arr) {
+		arr.forEach(function (item) {
+			if (item.hasOwnProperty('remove')) {
+				return;
 			}
+			Object.defineProperty(item, 'remove', {
+				configurable: true,
+				enumerable: true,
+				writable: true,
+				value: function remove() {
+					if (this.parentNode !== null)
+						this.parentNode.removeChild(this);
+				}
+			});
 		});
-	});
-})([Element.prototype, CharacterData.prototype, DocumentType.prototype]);
-
+	})([Element.prototype, CharacterData.prototype, DocumentType.prototype]);
+} catch(e) {
+	// if we aren't in a browser, this code will crash, but it is not needed then either.
+}
 module.exports = parseCommon;

@@ -18,8 +18,12 @@ function resizeOuter() {
     }
 }
 
-window.addEventListener("resize", resizeOuter);
-window.addEventListener("orientationChange", resizeOuter);
+try {
+    window.addEventListener("resize", resizeOuter);
+    window.addEventListener("orientationChange", resizeOuter);
+} catch(e) {
+    // if we aren't in a browser, this code will crash, but it is not needed then either.
+}
 
 function renderOne(div, tune, params, tuneNumber) {
     if (params.viewportHorizontal) {

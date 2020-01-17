@@ -37,15 +37,19 @@ var SynthController = require('../synth/synth-controller');
 var supportsAudio = require('../synth/supports-audio');
 
 // Polyfill for CustomEvent for old IE versions
-if ( typeof window.CustomEvent !== "function" ) {
-	var CustomEvent = function(event, params) {
-		params = params || {bubbles: false, cancelable: false, detail: undefined};
-		var evt = document.createEvent('CustomEvent');
-		evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-		return evt;
-	};
-	CustomEvent.prototype = window.Event.prototype;
-	window.CustomEvent = CustomEvent;
+try {
+	if (typeof window.CustomEvent !== "function") {
+		var CustomEvent = function (event, params) {
+			params = params || {bubbles: false, cancelable: false, detail: undefined};
+			var evt = document.createEvent('CustomEvent');
+			evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+			return evt;
+		};
+		CustomEvent.prototype = window.Event.prototype;
+		window.CustomEvent = CustomEvent;
+	}
+} catch (e) {
+	// if we aren't in a browser, this code will crash, but it is not needed then either.
 }
 
 var EditArea = function(textareaid) {
