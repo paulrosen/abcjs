@@ -55,7 +55,7 @@
     "workbox-webpack-plugin": "4.3.1"
   },
   "dependencies": {
-    "abcjs": "5.11.0",
+    "abcjs": "5.12.0",
     "midi": "https://github.com/paulrosen/MIDI.js.git#abcjs"
   }
 }
