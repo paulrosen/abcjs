@@ -214,7 +214,8 @@ var BeamElem;
 			path: pathString,
 			stroke: "none",
 			fill: "#000000",
-			'class': renderer.addClasses(klass)
+			'class': renderer.addClasses(klass),
+			notSelectable: true
 		});
 	}
 

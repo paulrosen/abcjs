@@ -37,6 +37,9 @@ var Renderer = require('./abc_renderer');
  */
 var EngraverController = function(paper, params) {
   params = params || {};
+  this.selectionColor = params.selectionColor;
+  this.dragColor = params.dragColor ? params.dragColor : params.selectionColor;
+  this.dragging = params.dragging;
   this.responsive = params.responsive;
   this.space = 3*spacing.SPACE;
   this.scale = params.scale ? parseFloat(params.scale) : 0;
@@ -73,6 +76,11 @@ EngraverController.prototype.reset = function() {
 		this.engraver.reset();
 	this.engraver = null;
 	this.renderer.reset();
+	this.history = [];
+	this.currentAbsEl = null;
+	this.dragTarget = null;
+	this.dragMouseStart = { x: -1, y: -1 };
+	this.dragYStep = 0;
 };
 
 /**
@@ -249,6 +257,92 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
 	this.renderer.engraveExtraText(this.width, abctune);
 	this.renderer.setPaperSize(maxWidth, scale, this.responsive);
+	this.renderer.paper.svg.addEventListener('mousedown', mouseDown.bind(this));
+	this.renderer.paper.svg.addEventListener('mousemove', mouseMove.bind(this));
+	this.renderer.paper.svg.addEventListener('mouseup', mouseUp.bind(this));
+};
+
+function mouseDown(ev) {
+	// "this" is the EngraverController because of the bind(this) when setting the event listener.
+
+//	console.log(this.history)
+	var x = ev.offsetX;
+	var y = ev.offsetY;
+	var minDistance = 9999999;
+	var closestIndex = -1;
+	for (var i = 0; i < this.history.length && minDistance > 0; i++) {
+		var el = this.history[i];
+		if (!el.selectable)
+			continue;
+
+		// See if it is a direct hit on an element - if so, definitely take it (there are no overlapping elements)
+		if (el.dim.left < x && el.dim.right > x && el.dim.top < y && el.dim.bottom > y) {
+			closestIndex = i;
+			minDistance = 0;
+		} else {
+			// figure out the distance to this element.
+			var dx = Math.abs(x - el.dim.left) > Math.abs(x - el.dim.right) ? Math.abs(x - el.dim.right) : Math.abs(x - el.dim.left);
+			var dy = Math.abs(y - el.dim.top) > Math.abs(y - el.dim.bottom) ? Math.abs(y - el.dim.bottom) : Math.abs(y - el.dim.top);
+			var hypotenuse = Math.sqrt(dx*dx + dy*dy);
+			if (hypotenuse < minDistance) {
+				minDistance = hypotenuse;
+				closestIndex = i;
+			}
+		}
+	}
+	if (closestIndex >= 0) {
+		this.dragTarget = this.history[closestIndex];
+		this.dragMouseStart = { x: x, y: y };
+		if (this.dragging)
+			this.dragTarget.absEl.highlight(undefined, this.dragColor);
+	}
+}
+
+function mouseMove(ev) {
+	if (!this.dragTarget || !this.dragging)
+		return;
+
+	var yDist = Math.round((ev.offsetY - this.dragMouseStart.y)/spacing.STEP);
+	if (yDist !== this.dragYStep) {
+		this.dragStep = yDist;
+		this.dragTarget.svgEl.setAttribute("transform", "translate(0," + (yDist * spacing.STEP) + ")");
+	}
+}
+
+function mouseUp(ev) {
+	if (!this.dragTarget)
+		return;
+
+	this.clearSelection();
+	if (this.dragTarget.absEl && this.dragTarget.absEl.highlight) {
+		this.selected = [this.dragTarget.absEl];
+		this.dragTarget.absEl.highlight(undefined, this.selectionColor);
+	}
+
+	this.notifySelect(this.dragTarget, this.dragStep);
+	this.dragTarget = null;
+}
+
+EngraverController.prototype.recordHistory = function (svgEl, notSelectable) {
+	var box = svgEl.getBBox();
+	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, dim: { left: Math.round(box.x), top: Math.round(box.y), right: Math.round(box.x+box.width), bottom: Math.round(box.y+box.height) }, selectable: notSelectable !== true });
+};
+
+EngraverController.prototype.combineHistory = function (len, svgEl) {
+	if (len < 2)
+		return;
+	var items = [];
+	for (var i = 0; i < len; i++) {
+		items.push(this.history.pop());
+	}
+	for (i = 1; i < items.length; i++) {
+		items[0].dim.left = Math.min(items[0].dim.left, items[i].dim.left);
+		items[0].dim.top = Math.min(items[0].dim.top, items[i].dim.top);
+		items[0].dim.right = Math.max(items[0].dim.right, items[i].dim.right);
+		items[0].dim.bottom = Math.max(items[0].dim.bottom, items[i].dim.bottom);
+	}
+	items[0].svgEl = svgEl;
+	this.history.push(items[0]);
 };
 
 function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace) {
@@ -311,15 +405,24 @@ EngraverController.prototype.engraveStaffLine = function (staffGroup) {
  * Called by the Abstract Engraving Structure or any other (e.g. midi playback) to say it was selected (notehead clicked on)
  * @protected
  */
-EngraverController.prototype.notifySelect = function (abselem, tuneNumber, classes) {
-  this.clearSelection();
-  if (abselem.highlight) {
-    this.selected = [abselem];
-    abselem.highlight();
-  }
-  var abcelem = abselem.abcelem || {};
-  for (var i=0; i<this.listeners.length;i++) {
-	  this.listeners[i](abcelem, tuneNumber, classes);
+EngraverController.prototype.notifySelect = function (target, dragStep) {
+	var classes = [];
+	if (target.absEl.elemset) {
+		var classObj = {};
+		for (var j = 0; j < target.absEl.elemset.length; j++) {
+			var es = target.absEl.elemset[j];
+			if (es) {
+				var klass = es.getAttribute("class").split(' ');
+				for (var k = 0; k < klass.length; k++)
+					classObj[klass[k]] = true;
+			}
+		}
+		for (var kk = 0; kk < Object.keys(classObj).length; kk++)
+			classes.push(Object.keys(classObj)[kk]);
+	}
+
+	for (var i=0; i<this.listeners.length;i++) {
+	  this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes, dragStep);
   }
 };
 
@@ -374,7 +477,7 @@ EngraverController.prototype.rangeHighlight = function(start,end)
 		if ((end>elStart && start<elEnd) || ((end===start) && end===elEnd)) {
 		    //		if (elems[elem].abcelem.startChar>=start && elems[elem].abcelem.endChar<=end) {
 		    this.selected[this.selected.length]=elems[elem];
-		    elems[elem].highlight();
+		    elems[elem].highlight(undefined, this.selectionColor);
 		}
 	    }
 	}

@@ -202,21 +202,6 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 		this.setClass("mark", "", "#00ff00");
 	if (this.hint)
 		this.setClass("abcjs-hint", "", null);
-	var opacity = /*ABCJS.write.debugPlacement*/false ? 0.3 : 0; // Create transparent box that encompasses the element, and not so transparent to debug it.
-	var target = renderer.printShadedBox(this.x, renderer.calcY(this.top), this.w, renderer.calcY(this.bottom)-renderer.calcY(this.top), "#000000", opacity);
-	var self = this;
-	var controller = renderer.controller;
-	target.addEventListener('mouseup', function () {
-		var classes = [];
-		if (self.elemset) {
-			for (var j = 0; j < self.elemset.length; j++) {
-				var es = self.elemset[j];
-				if (es)
-					classes.push(es.getAttribute("class"));
-			}
-		}
-		controller.notifySelect(self, self.tuneNumber, classes);
-	});
 	this.abcelem.abselem = this;
 
 	var step = spacing.STEP;

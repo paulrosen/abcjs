@@ -126,9 +126,9 @@ RelativeElement.prototype.draw = function (renderer, bartop) {
 			if (this.klass) klass += " " + this.klass;
 			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.addClasses(klass)); break;
 		case "debug":
-			this.graphelem = renderer.renderText(this.x, renderer.calcY(15), ""+this.c, "debugfont", 'debug-msg', 'start'); break;
+			this.graphelem = renderer.renderText(this.x, renderer.calcY(15), ""+this.c, "debugfont", 'debug-msg', 'start', false, true); break;
 		case "barNumber":
-			this.graphelem = renderer.renderText(this.x, y, ""+this.c, "measurefont", 'bar-number', "middle");
+			this.graphelem = renderer.renderText(this.x, y, ""+this.c, "measurefont", 'bar-number', "middle", false, true);
 			break;
 		case "lyric":
 			this.graphelem = renderer.renderText(this.x, y, this.c, "vocalfont", 'lyric', "middle");

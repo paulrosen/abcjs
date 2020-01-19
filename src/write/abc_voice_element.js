@@ -246,6 +246,7 @@ VoiceElement.prototype.draw = function (renderer, bartop) {
 			renderer.noteNumber = 0;
 			justInitializedMeasureNumber = true;
 		}
+		renderer.controller.currentAbsEl = child;
 		child.draw(renderer, (this.barto || i===ii-1)?bartop:0);
 		if (child.type === 'note' || isNonSpacerRest(child))
 			renderer.noteNumber++;

@@ -110,6 +110,8 @@ var TempoElement;
 		if (this.pitch === undefined)
 			window.console.error("Tempo Element y-coordinate not set.");
 
+		var historyLen = renderer.controller.history.length;
+		renderer.createElemSet({ klass: "abcjs-tempo"});
 		var y = renderer.calcY(this.pitch);
 		var text;
 		if (this.tempo.preString) {
@@ -135,6 +137,8 @@ var TempoElement;
 		if (this.tempo.postString) {
 			renderer.renderText(x, y, this.tempo.postString, 'tempofont', 'tempo', "start");
 		}
+		var tempoGroup = renderer.closeElemSet();
+		renderer.controller.combineHistory(renderer.controller.history.length - historyLen, tempoGroup);
 	};
 })();
 

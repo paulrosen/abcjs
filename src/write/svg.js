@@ -219,6 +219,9 @@ Svg.prototype.getTextSize = function(text, attr, el) {
 Svg.prototype.openGroup = function(options) {
 	options = options ? options : {};
 	var el = document.createElementNS(svgNS, "g");
+	if (options.klass)
+		el.setAttribute("class", options.klass);
+
 	if (options.prepend)
 		this.svg.insertBefore(el, this.svg.firstChild);
 	else

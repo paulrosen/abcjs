@@ -39,6 +39,7 @@ CrescendoElem.prototype.draw = function (renderer) {
 		window.console.error("Crescendo Element y-coordinate not set.");
 	var y = renderer.calcY(this.pitch) + 4; // This is the top pixel to use (it is offset a little so that it looks good with the volume marks.)
 	var height = 8;
+	renderer.createElemSet({klass: "dynamics"});
 	if (this.dir === "<") {
 		this.drawLine(renderer, y+height/2, y);
 		this.drawLine(renderer, y+height/2, y+height);
@@ -46,6 +47,8 @@ CrescendoElem.prototype.draw = function (renderer) {
 		this.drawLine(renderer, y, y+height/2);
 		this.drawLine(renderer, y+height, y+height/2);
 	}
+	var g = renderer.closeElemSet();
+	renderer.controller.recordHistory(g);
 };
 
 CrescendoElem.prototype.drawLine = function (renderer, y1, y2) {

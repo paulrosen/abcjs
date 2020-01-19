@@ -69,8 +69,8 @@ Renderer.prototype.newTune = function(abcTune) {
 	this.setPadding(abcTune);
 };
 
-Renderer.prototype.createElemSet = function() {
-	return this.paper.openGroup();
+Renderer.prototype.createElemSet = function(options) {
+	return this.paper.openGroup(options);
 };
 
 Renderer.prototype.closeElemSet = function() {
@@ -285,6 +285,7 @@ Renderer.prototype.addStaffPadding = function(lastStaffGroup, thisStaffGroup) {
  * @param {object} abctune
  */
 Renderer.prototype.engraveTopText = function(width, abctune) {
+	var el;
 	if (abctune.metaText.header && this.isPrint) {
 		// Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
 		// This text goes above the margin, so we'll temporarily move up.
@@ -297,19 +298,53 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 	}
 	if (this.isPrint)
 		this.moveY(this.spacing.top);
-	this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', this.spacing.title, 0, 'middle');
-	if (abctune.lines[0])
-		this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'middle');
+	if (abctune.metaText.title) {
+		this.controller.currentAbsEl = {
+			tuneNumber: this.controller.engraver.tuneNumber,
+			elemset: [],
+			abcelem: {el_type: "title", startChar: -1, endChar: -1, text: abctune.metaText.title}
+		};
+		el = this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', this.spacing.title, 0, 'middle');
+		this.controller.currentAbsEl = {
+			tuneNumber: this.controller.engraver.tuneNumber,
+			elemset: [ el[2] ],
+			abcelem: {el_type: "title", startChar: -1, endChar: -1, text: abctune.metaText.title}
+		};
+		this.controller.currentAbsEl.elemset.push(el[2]);
+	}
+	if (abctune.lines[0] && abctune.lines[0].subtitle) {
+		this.controller.currentAbsEl = {
+			tuneNumber: this.controller.engraver.tuneNumber,
+			elemset: [],
+			abcelem: {el_type: "subtitle", startChar: -1, endChar: -1, text: abctune.lines[0].subtitle}
+		};
+		el = this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'middle');
+		this.controller.currentAbsEl.elemset.push(el[2]);
+	}
 
 	if (abctune.metaText.rhythm || abctune.metaText.origin || abctune.metaText.composer) {
 		this.moveY(this.spacing.composer);
-		var rSpace = this.outputTextIf(this.padding.left, abctune.metaText.rhythm, 'infofont', 'meta-top', 0, null, "start");
-
+		var rSpace;
+		if (abctune.metaText.rhythm.length > 0) {
+			this.controller.currentAbsEl = {
+				tuneNumber: this.controller.engraver.tuneNumber,
+				elemset: [],
+				abcelem: {el_type: "rhythm", startChar: -1, endChar: -1, text: abctune.metaText.rhythm}
+			};
+			rSpace = this.outputTextIf(this.padding.left, abctune.metaText.rhythm, 'infofont', 'meta-top', 0, null, "start");
+			this.controller.currentAbsEl.elemset.push(rSpace[2]);
+		}
 		var composerLine = "";
 		if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
 		if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
 		if (composerLine.length > 0) {
+			this.controller.currentAbsEl = {
+				tuneNumber: this.controller.engraver.tuneNumber,
+				elemset: [],
+				abcelem: {el_type: "composer", startChar: -1, endChar: -1, text: composerLine}
+			};
 			var space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top', 0, null, "end");
+			this.controller.currentAbsEl.elemset.push(space[2]);
 			this.moveY(space[1]);
 		} else {
 			this.moveY(rSpace[1]);
@@ -323,10 +358,25 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 	//	this.moveY(space2.height);
 	}
 
-	this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, 0, "end");
-	//this.skipSpaceY();
+	if (abctune.metaText.author.length > 0) {
+		this.controller.currentAbsEl = {
+			tuneNumber: this.controller.engraver.tuneNumber,
+			elemset: [],
+			abcelem: {el_type: "author", startChar: -1, endChar: -1, text: abctune.metaText.author}
+		};
+		this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, 0, "end");
+		this.controller.currentAbsEl.elemset.push(space[2]);
+	}
 
-	this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, 0, "start");
+	if (abctune.metaText.partOrder.length > 0) {
+		this.controller.currentAbsEl = {
+			tuneNumber: this.controller.engraver.tuneNumber,
+			elemset: [],
+			abcelem: {el_type: "partOrder", startChar: -1, endChar: -1, text: abctune.metaText.partOrder}
+		};
+		this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, 0, "start");
+		this.controller.currentAbsEl.elemset.push(space[2]);
+	}
 };
 
 /**
@@ -341,16 +391,23 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 	this.voiceNumber = null;
 
 	if (abctune.metaText.unalignedWords) {
+		this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "unalignedWords", startChar: -1, endChar: -1, text: abctune.metaText.unalignedWords }};
 		var hash = this.getFontAndAttr("wordsfont", 'meta-bottom');
 		var space = this.getTextSize("i", 'wordsfont', 'meta-bottom');
 
 		if (abctune.metaText.unalignedWords.length > 0)
 			this.moveY(this.spacing.words, 1);
+		var el;
+		var historyLen = this.controller.history.length;
+		if (abctune.metaText.unalignedWords.length > 0)
+			this.createElemSet({ klass: "abcjs-unaligned-words"});
 		for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
 			if (abctune.metaText.unalignedWords[j] === '')
 				this.moveY(hash.font.size, 1);
 			else if (typeof abctune.metaText.unalignedWords[j] === 'string') {
-				this.outputTextIf(this.padding.left + spacing.INDENT, abctune.metaText.unalignedWords[j], 'wordsfont', 'meta-bottom', 0, 0, "start");
+				el = this.outputTextIf(this.padding.left + spacing.INDENT, abctune.metaText.unalignedWords[j], 'wordsfont', 'meta-bottom', 0, 0, "start");
+				if (el[2])
+					this.controller.currentAbsEl.elemset.push(el[2]);
 			} else {
 				var largestY = 0;
 				var offsetX = 0;
@@ -358,6 +415,7 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 					var thisWord = abctune.metaText.unalignedWords[j][k];
 					var type = (thisWord.font) ? thisWord.font : "wordsfont";
 					var el = this.renderText(this.padding.left + spacing.INDENT + offsetX, this.y, thisWord.text, type, 'meta-bottom', false);
+					this.controller.currentAbsEl.elemset.push(el);
 					var size = this.getTextSize(thisWord.text, type, 'meta-bottom');
 					largestY = Math.max(largestY, size.height);
 					offsetX += size.width;
@@ -369,10 +427,14 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 				this.moveY(largestY, 1);
 			}
 		}
-		if (abctune.metaText.unalignedWords.length > 0)
+		if (abctune.metaText.unalignedWords.length > 0) {
 			this.moveY(hash.font.size, 2);
+			var unalignedGroup = this.closeElemSet();
+			this.controller.combineHistory(this.controller.history.length - historyLen, unalignedGroup);
+		}
 	}
 
+	this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "extraText", startChar: -1, endChar: -1, text: "" }}
 	var extraText = "";
 	if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
 	if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
@@ -383,13 +445,25 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 	if (abctune.metaText['abc-copyright']) extraText += "Copyright: " + abctune.metaText['abc-copyright'] + "\n";
 	if (abctune.metaText['abc-creator']) extraText += "Creator: " + abctune.metaText['abc-creator'] + "\n";
 	if (abctune.metaText['abc-edited-by']) extraText += "Edited By: " + abctune.metaText['abc-edited-by'] + "\n";
-	this.outputTextIf(this.padding.left, extraText, 'historyfont', 'meta-bottom', this.spacing.info, 0, "start");
+	if (extraText.length > 0) {
+		this.controller.currentAbsEl.abcelem.text = extraText;
+	}
+	el = this.outputTextIf(this.padding.left, extraText, 'historyfont', 'meta-bottom extra-text', this.spacing.info, 0, "start");
+	if (el[2])
+		this.controller.currentAbsEl.elemset.push(el[2]);
 
 	if (abctune.metaText.footer && this.isPrint) {
+		this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "footer", startChar: -1, endChar: -1, text: "" }}
 		// Note: whether there is a footer or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
-		this.outputTextIf(this.padding.left, abctune.metaText.footer.left, 'footerfont', 'header meta-bottom', 0, null, 'start');
-		this.outputTextIf(this.padding.left + width / 2, abctune.metaText.footer.center, 'footerfont', 'header meta-bottom', 0, null, 'middle');
-		this.outputTextIf(this.padding.left + width, abctune.metaText.footer.right, 'footerfont', 'header meta-bottom', 0, null, 'end');
+		el = this.outputTextIf(this.padding.left, abctune.metaText.footer.left, 'footerfont', 'header meta-bottom', 0, null, 'start');
+		if (el[2])
+			this.controller.currentAbsEl.elemset.push(el[2]);
+		el = this.outputTextIf(this.padding.left + width / 2, abctune.metaText.footer.center, 'footerfont', 'header meta-bottom', 0, null, 'middle');
+		if (el[2])
+			this.controller.currentAbsEl.elemset.push(el[2]);
+		el = this.outputTextIf(this.padding.left + width, abctune.metaText.footer.right, 'footerfont', 'header meta-bottom', 0, null, 'end');
+		if (el[2])
+			this.controller.currentAbsEl.elemset.push(el[2]);
 	}
 };
 
@@ -479,6 +553,7 @@ Renderer.prototype.endGroup = function (klass) {
 	for (var i = 0; i < this.path.length; i++)
 		path += this.path[i].join(" ");
 	var ret = this.paper.path({path: path, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
+	this.controller.recordHistory(ret);
 	this.path = [];
   if (this.doRegression) this.addToRegression(ret);
 
@@ -573,6 +648,7 @@ Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, kl
 			var s = symbol.charAt(i);
 			ycorr = glyphs.getYCorr(s);
 			el = glyphs.printSymbol(x + dx, this.calcY(offset + ycorr), s, this.paper, klass);
+			this.controller.recordHistory(el);
 			if (el) {
 				if (this.doRegression) this.addToRegression(el);
 				//elemset.push(el);
@@ -582,6 +658,7 @@ Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, kl
 				this.renderText(x, this.y, "no symbol:" + symbol, "debugfont", 'debug-msg', 'start');
 			}
 		}
+		this.controller.recordHistory(el.parentNode);
 		return this.paper.closeGroup();
 	} else {
 		ycorr = glyphs.getYCorr(symbol);
@@ -589,6 +666,7 @@ Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, kl
 			this.addPath(glyphs.getPathForSymbol(x, this.calcY(offset + ycorr), symbol, scalex, scaley));
 		} else {
 			el = glyphs.printSymbol(x, this.calcY(offset + ycorr), symbol, this.paper, klass);
+			this.controller.recordHistory(el);
 			if (el) {
 				if (this.doRegression) this.addToRegression(el);
 				return el;
@@ -605,6 +683,10 @@ Renderer.prototype.scaleExistingElem = function (elem, scaleX, scaleY, x, y) {
 
 Renderer.prototype.printPath = function (attrs) {
   var ret = this.paper.path(attrs);
+  if (!attrs.notSelectable)
+		this.controller.recordHistory(ret, true);
+  else
+	  this.controller.recordHistory(ret);
   if (this.doRegression) this.addToRegression(ret);
   return ret;
 };
@@ -615,6 +697,12 @@ Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Tony
 	var xCurve = [7.5, -8, 21, 0, 18.5, -10.5, 7.5];
 	var yCurve = [0, yHeight/5.5, yHeight/3.14, yHeight/2, yHeight/2.93, yHeight/4.88, 0];
 
+	this.controller.currentAbsEl = {
+		tuneNumber: this.controller.engraver.tuneNumber,
+		elemset: [],
+		abcelem: { el_type: "brace", startChar: -1, endChar: -1 }
+	};
+	this.createElemSet({ klass: 'brace' });
 	var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
 		xLeft+xCurve[0], yTop+yCurve[0],
 		xLeft+xCurve[1], yTop+yCurve[1],
@@ -637,6 +725,9 @@ Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Tony
 		xLeft+xCurve[5], yTop+yCurve[5],
 		xLeft+xCurve[6], yTop+yCurve[6]);
 	var ret2 = this.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': this.addClasses('brace')});
+	var g = this.closeElemSet();
+	this.controller.recordHistory(g);
+	this.controller.currentAbsEl.elemset.push(g);
 
 	if (this.doRegression){
 		this.addToRegression(ret1);
@@ -680,6 +771,7 @@ Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass, isTi
 	else
 		klass = 'slur';
   var ret = this.paper.path({path:pathString, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
+	this.controller.recordHistory(ret);
   if (this.doRegression) this.addToRegression(ret);
 
   return ret;
@@ -707,7 +799,8 @@ Renderer.prototype.printStave = function (startx, endx, numLines) {
 		this.printStaveLine(startx,endx,(i+1)*2, klass);
 		klass = undefined;
 	}
-	this.paper.closeGroup();
+	var ret = this.paper.closeGroup();
+	this.controller.recordHistory(ret, true);
 };
 
 /**
@@ -764,7 +857,7 @@ Renderer.prototype.getTextSize = function(text, type, klass, el) {
 	return size;
 };
 
-Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, centerVertically) {
+Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, centerVertically, notSelectable) {
 	var hash = this.getFontAndAttr(type, klass);
 	if (anchor)
 		hash.attr["text-anchor"] = anchor;
@@ -783,16 +876,19 @@ Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, center
 	if (hash.font.box) {
 		hash.attr.x += 2;
 		hash.attr.y += 4;
+		this.createElemSet();
 	}
 	var el = this.paper.text(text, hash.attr);
+	var elem = el;
 
 	if (hash.font.box) {
 		var size = this.getTextSize(text, type, klass);
 		var padding = 2;
 		var margin = 2;
 		this.paper.rect({ x: x - padding, y: y, width: size.width + padding*2, height: size.height + padding*2 - margin,  stroke: "#888888", fill: "transparent"});
-		//size.height += 8;
+		elem = this.closeElemSet();
 	}
+	this.controller.recordHistory(elem, notSelectable);
 	if (this.doRegression) this.addToRegression(el);
 	return el;
 };
@@ -827,7 +923,7 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 			if (!isNaN(bb.height))
 				this.moveY(height/numLines, (numLines + marginBottom));
 		}
-		return [width, height];
+		return [width, height, el];
 	}
 	return [0,0];
 };
