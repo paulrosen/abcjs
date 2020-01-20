@@ -62,7 +62,13 @@ var createClef;
 			if (octave !== 0) {
 				var scale = 2 / 3;
 				var adjustspacing = (glyphs.getSymbolWidth(clef) - glyphs.getSymbolWidth("8") * scale) / 2;
-				abselem.addRight(new RelativeElement("8", dx + adjustspacing, glyphs.getSymbolWidth("8") * scale, (octave > 0) ? abselem.top + 3 : abselem.bottom - 1, {
+				var pitch = (octave > 0) ? abselem.top + 3 : abselem.bottom - 1;
+				if (elem.type === "bass-8") {
+					// The placement for bass octave is a little different. It should hug the clef.
+					pitch = 3;
+					adjustspacing = 0;
+				}
+				abselem.addRight(new RelativeElement("8", dx + adjustspacing, glyphs.getSymbolWidth("8") * scale, pitch, {
 					scalex: scale,
 					scaley: scale
 				}));
