@@ -293,13 +293,13 @@ function mouseDown(ev) {
 	if (closestIndex >= 0) {
 		this.dragTarget = this.history[closestIndex];
 		this.dragMouseStart = { x: x, y: y };
-		if (this.dragging)
+		if (this.dragging && this.dragTarget.isDraggable)
 			this.dragTarget.absEl.highlight(undefined, this.dragColor);
 	}
 }
 
 function mouseMove(ev) {
-	if (!this.dragTarget || !this.dragging)
+	if (!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable)
 		return;
 
 	var yDist = Math.round((ev.offsetY - this.dragMouseStart.y)/spacing.STEP);
@@ -324,8 +324,9 @@ function mouseUp(ev) {
 }
 
 EngraverController.prototype.recordHistory = function (svgEl, notSelectable) {
+	var isNote = this.currentAbsEl && this.currentAbsEl.abcelem && this.currentAbsEl.abcelem.el_type === "note" && !this.currentAbsEl.abcelem.rest;
 	var box = svgEl.getBBox();
-	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, dim: { left: Math.round(box.x), top: Math.round(box.y), right: Math.round(box.x+box.width), bottom: Math.round(box.y+box.height) }, selectable: notSelectable !== true });
+	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, dim: { left: Math.round(box.x), top: Math.round(box.y), right: Math.round(box.x+box.width), bottom: Math.round(box.y+box.height) }, selectable: notSelectable !== true, isDraggable: isNote });
 };
 
 EngraverController.prototype.combineHistory = function (len, svgEl) {
