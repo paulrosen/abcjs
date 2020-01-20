@@ -358,7 +358,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 	//	this.moveY(space2.height);
 	}
 
-	if (abctune.metaText.author.length > 0) {
+	if (abctune.metaText.author && abctune.metaText.author.length > 0) {
 		this.controller.currentAbsEl = {
 			tuneNumber: this.controller.engraver.tuneNumber,
 			elemset: [],
@@ -368,7 +368,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 		this.controller.currentAbsEl.elemset.push(space[2]);
 	}
 
-	if (abctune.metaText.partOrder.length > 0) {
+	if (abctune.metaText.partOrder && abctune.metaText.partOrder.length > 0) {
 		this.controller.currentAbsEl = {
 			tuneNumber: this.controller.engraver.tuneNumber,
 			elemset: [],
