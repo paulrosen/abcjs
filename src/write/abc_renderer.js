@@ -325,7 +325,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 	if (abctune.metaText.rhythm || abctune.metaText.origin || abctune.metaText.composer) {
 		this.moveY(this.spacing.composer);
 		var rSpace;
-		if (abctune.metaText.rhythm.length > 0) {
+		if (abctune.metaText.rhythm && abctune.metaText.rhythm.length > 0) {
 			this.controller.currentAbsEl = {
 				tuneNumber: this.controller.engraver.tuneNumber,
 				elemset: [],
@@ -364,8 +364,8 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 			elemset: [],
 			abcelem: {el_type: "author", startChar: -1, endChar: -1, text: abctune.metaText.author}
 		};
-		this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, 0, "end");
-		this.controller.currentAbsEl.elemset.push(space[2]);
+		var space3 = this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, 0, "end");
+		this.controller.currentAbsEl.elemset.push(space3[2]);
 	}
 
 	if (abctune.metaText.partOrder && abctune.metaText.partOrder.length > 0) {
@@ -374,8 +374,8 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 			elemset: [],
 			abcelem: {el_type: "partOrder", startChar: -1, endChar: -1, text: abctune.metaText.partOrder}
 		};
-		this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, 0, "start");
-		this.controller.currentAbsEl.elemset.push(space[2]);
+		var space4 = this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, 0, "start");
+		this.controller.currentAbsEl.elemset.push(space4[2]);
 	}
 };
 
