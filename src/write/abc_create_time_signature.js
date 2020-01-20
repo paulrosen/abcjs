@@ -24,7 +24,7 @@ var createTimeSignature;
 	"use strict";
 
 	createTimeSignature = function(elem, tuneNumber) {
-		var abselem = new AbsoluteElement(elem,0,10, 'staff-extra', tuneNumber);
+		var abselem = new AbsoluteElement(elem,0,10, 'staff-extra time-signature', tuneNumber);
 		if (elem.type === "specified") {
 			var x = 0;
 			for (var i = 0; i < elem.value.length; i++) {

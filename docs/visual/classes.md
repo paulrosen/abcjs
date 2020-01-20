@@ -33,6 +33,16 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 | abcjs-top-line | This marks the top line of each staff. This is useful if you are trying to find where on the page the music has been drawn. |
 | abcjs-top-of-system | This marks the top of each set of staves. This is useful if you are trying to find where on the page the music has been drawn. |
 | abcjs-note_selected | This is the element that the user has clicked on. |
+| clef | All clefs |
+| time-signature | All time signatures |
+| key-signature | All key signatures |
+| subtitle | The subtitle, both on the top and inserted in the middle |
+| rhythm | The rhythm text |
+| composer | The composer text |
+| author | The author text |
+| part-order | The part order indicator at the top |
+| unaligned-words | Lyrics at the bottom that aren't lined up with notes. |
+
 
 ## Test Tune
 

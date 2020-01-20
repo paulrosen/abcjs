@@ -26,7 +26,7 @@ var createClef;
 	createClef = function(elem, tuneNumber) {
 		var clef;
 		var octave = 0;
-		var abselem = new AbsoluteElement(elem,0,10, 'staff-extra', tuneNumber);
+		var abselem = new AbsoluteElement(elem,0,10, 'staff-extra clef', tuneNumber);
 		abselem.isClef = true;
 		switch (elem.type) {
 			case "treble": clef = "clefs.G"; break;

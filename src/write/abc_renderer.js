@@ -305,11 +305,6 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 			abcelem: {el_type: "title", startChar: -1, endChar: -1, text: abctune.metaText.title}
 		};
 		el = this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', this.spacing.title, 0, 'middle');
-		this.controller.currentAbsEl = {
-			tuneNumber: this.controller.engraver.tuneNumber,
-			elemset: [ el[2] ],
-			abcelem: {el_type: "title", startChar: -1, endChar: -1, text: abctune.metaText.title}
-		};
 		this.controller.currentAbsEl.elemset.push(el[2]);
 	}
 	if (abctune.lines[0] && abctune.lines[0].subtitle) {
@@ -318,7 +313,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 			elemset: [],
 			abcelem: {el_type: "subtitle", startChar: -1, endChar: -1, text: abctune.lines[0].subtitle}
 		};
-		el = this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'middle');
+		el = this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top subtitle', this.spacing.subtitle, 0, 'middle');
 		this.controller.currentAbsEl.elemset.push(el[2]);
 	}
 
@@ -331,7 +326,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 				elemset: [],
 				abcelem: {el_type: "rhythm", startChar: -1, endChar: -1, text: abctune.metaText.rhythm}
 			};
-			rSpace = this.outputTextIf(this.padding.left, abctune.metaText.rhythm, 'infofont', 'meta-top', 0, null, "start");
+			rSpace = this.outputTextIf(this.padding.left, abctune.metaText.rhythm, 'infofont', 'meta-top rhythm', 0, null, "start");
 			this.controller.currentAbsEl.elemset.push(rSpace[2]);
 		}
 		var composerLine = "";
@@ -343,7 +338,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 				elemset: [],
 				abcelem: {el_type: "composer", startChar: -1, endChar: -1, text: composerLine}
 			};
-			var space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top', 0, null, "end");
+			var space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top composer', 0, null, "end");
 			this.controller.currentAbsEl.elemset.push(space[2]);
 			this.moveY(space[1]);
 		} else {
@@ -364,7 +359,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 			elemset: [],
 			abcelem: {el_type: "author", startChar: -1, endChar: -1, text: abctune.metaText.author}
 		};
-		var space3 = this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top', 0, 0, "end");
+		var space3 = this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top author', 0, 0, "end");
 		this.controller.currentAbsEl.elemset.push(space3[2]);
 	}
 
@@ -374,7 +369,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 			elemset: [],
 			abcelem: {el_type: "partOrder", startChar: -1, endChar: -1, text: abctune.metaText.partOrder}
 		};
-		var space4 = this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-bottom', 0, 0, "start");
+		var space4 = this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-top part-order', 0, 0, "start");
 		this.controller.currentAbsEl.elemset.push(space4[2]);
 	}
 };
@@ -392,8 +387,8 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 
 	if (abctune.metaText.unalignedWords) {
 		this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "unalignedWords", startChar: -1, endChar: -1, text: abctune.metaText.unalignedWords }};
-		var hash = this.getFontAndAttr("wordsfont", 'meta-bottom');
-		var space = this.getTextSize("i", 'wordsfont', 'meta-bottom');
+		var hash = this.getFontAndAttr("wordsfont", 'meta-bottom unaligned-words');
+		var space = this.getTextSize("i", 'wordsfont', 'meta-bottom unaligned-words');
 
 		if (abctune.metaText.unalignedWords.length > 0)
 			this.moveY(this.spacing.words, 1);
@@ -405,7 +400,7 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 			if (abctune.metaText.unalignedWords[j] === '')
 				this.moveY(hash.font.size, 1);
 			else if (typeof abctune.metaText.unalignedWords[j] === 'string') {
-				el = this.outputTextIf(this.padding.left + spacing.INDENT, abctune.metaText.unalignedWords[j], 'wordsfont', 'meta-bottom', 0, 0, "start");
+				el = this.outputTextIf(this.padding.left + spacing.INDENT, abctune.metaText.unalignedWords[j], 'wordsfont', 'meta-bottom unaligned-words', 0, 0, "start");
 				if (el[2])
 					this.controller.currentAbsEl.elemset.push(el[2]);
 			} else {
@@ -414,9 +409,9 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 				for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
 					var thisWord = abctune.metaText.unalignedWords[j][k];
 					var type = (thisWord.font) ? thisWord.font : "wordsfont";
-					var el = this.renderText(this.padding.left + spacing.INDENT + offsetX, this.y, thisWord.text, type, 'meta-bottom', false);
+					var el = this.renderText(this.padding.left + spacing.INDENT + offsetX, this.y, thisWord.text, type, 'meta-bottom unaligned-words', false);
 					this.controller.currentAbsEl.elemset.push(el);
-					var size = this.getTextSize(thisWord.text, type, 'meta-bottom');
+					var size = this.getTextSize(thisWord.text, type, 'meta-bottom unaligned-words');
 					largestY = Math.max(largestY, size.height);
 					offsetX += size.width;
 					// If the phrase ends in a space, then that is not counted in the width, so we need to add that in ourselves.
@@ -508,7 +503,7 @@ Renderer.prototype.outputSeparator = function (separator) {
  * Output an extra subtitle that is defined later in the tune.
  */
 Renderer.prototype.outputSubtitle = function (width, subtitle) {
-	this.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text meta-top', this.spacing.subtitle, 0, 'middle');
+	this.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text subtitle', this.spacing.subtitle, 0, 'middle');
 };
 
 /**

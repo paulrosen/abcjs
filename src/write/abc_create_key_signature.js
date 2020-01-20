@@ -28,7 +28,7 @@ var createKeySignature;
 	createKeySignature = function(elem, tuneNumber) {
 		if (!elem.accidentals || elem.accidentals.length === 0)
 			return null;
-		var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra', tuneNumber);
+		var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra key-signature', tuneNumber);
 		abselem.isKeySig = true;
 		var dx = 0;
 		parseCommon.each(elem.accidentals, function(acc) {
