@@ -421,9 +421,18 @@ EngraverController.prototype.notifySelect = function (target, dragStep) {
 		for (var kk = 0; kk < Object.keys(classObj).length; kk++)
 			classes.push(Object.keys(classObj)[kk]);
 	}
+	var analysis = {};
+	for (var ii = 0; ii < classes.length; ii++) {
+		if (classes[ii].indexOf('abcjs-v') === 0)
+			analysis.voice = classes[ii].replace('abcjs-v', '');
+		else if (classes[ii].indexOf('abcjs-l') === 0)
+			analysis.line = classes[ii].replace('abcjs-l', '');
+		else if (classes[ii].indexOf(/abcjs-m\d/) === 0)
+			analysis.measure = classes[ii].replace('abcjs-m', '');
+	}
 
 	for (var i=0; i<this.listeners.length;i++) {
-	  this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes, dragStep);
+	  this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, dragStep);
   }
 };
 
