@@ -423,18 +423,24 @@ EngraverController.prototype.notifySelect = function (target, dragStep) {
 	}
 	var analysis = {};
 	for (var ii = 0; ii < classes.length; ii++) {
-		if (classes[ii].indexOf('abcjs-v') === 0)
-			analysis.voice = classes[ii].replace('abcjs-v', '');
-		else if (classes[ii].indexOf('abcjs-l') === 0)
-			analysis.line = classes[ii].replace('abcjs-l', '');
-		else if (classes[ii].indexOf(/abcjs-m\d/) === 0)
-			analysis.measure = classes[ii].replace('abcjs-m', '');
+		findNumber(classes[ii], "abcjs-v", analysis, "voice");
+		findNumber(classes[ii], "abcjs-l", analysis, "line");
+		findNumber(classes[ii], "abcjs-m", analysis, "measure");
 	}
 
 	for (var i=0; i<this.listeners.length;i++) {
 	  this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, dragStep);
   }
 };
+
+function findNumber(klass, match, target, name) {
+	if (klass.indexOf(match) === 0) {
+		var value = klass.replace(match, '');
+		var num = parseInt(value, 10);
+		if (''+num === value)
+			target[name] = num;
+	}
+}
 
 /**
  * Called by the Abstract Engraving Structure to say it was modified (e.g. notehead dragged)
