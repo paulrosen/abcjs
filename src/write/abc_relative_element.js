@@ -153,7 +153,7 @@ RelativeElement.prototype.draw = function (renderer, bartop) {
 		case "stem":
 			this.graphelem = renderer.printStem(this.x, this.linewidth, y, renderer.calcY(this.pitch2)); break;
 		case "ledger":
-			this.graphelem = renderer.printStaveLine(this.x, this.x+this.w, this.pitch); break;
+			this.graphelem = renderer.printStaveLine(this.x, this.x+this.w, this.pitch, renderer.addClasses("ledger")); break;
 	}
 	if (this.scalex!==1 && this.graphelem) {
 		renderer.scaleExistingElem(this.graphelem, this.scalex, this.scaley, this.x, y);
