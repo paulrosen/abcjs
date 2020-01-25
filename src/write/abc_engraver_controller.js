@@ -262,12 +262,31 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.paper.svg.addEventListener('mouseup', mouseUp.bind(this));
 };
 
+function getCoord(ev) {
+	var x = ev.offsetX;
+	var y = ev.offsetY;
+	// TODO-PER: This only works for Firefox, not Chrome.
+	// The target might be the SVG that we want, or it could be an item in the SVG (usually a path). If it is not the SVG then
+	// add an offset to the coordinates.
+	//console.log(x, y, ev.target.tagName, ev, ev.target.getBoundingClientRect())
+	if (ev.target.tagName.toLowerCase() !== 'svg') {
+		var box = ev.target.getBBox();
+		var absRect = ev.target.getBoundingClientRect();
+		var offsetX = ev.clientX - absRect.left;
+		var offsetY = ev.clientY - absRect.top;
+		x = offsetX + box.x;
+		y = offsetY + box.y;
+	}
+	return [x,y];
+}
+
 function mouseDown(ev) {
 	// "this" is the EngraverController because of the bind(this) when setting the event listener.
 
-//	console.log(this.history)
-	var x = ev.offsetX;
-	var y = ev.offsetY;
+	var box = getCoord(ev);
+	var x = box[0];
+	var y = box[1];
+
 	var minDistance = 9999999;
 	var closestIndex = -1;
 	for (var i = 0; i < this.history.length && minDistance > 0; i++) {
@@ -302,7 +321,11 @@ function mouseMove(ev) {
 	if (!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable)
 		return;
 
-	var yDist = Math.round((ev.offsetY - this.dragMouseStart.y)/spacing.STEP);
+	var box = getCoord(ev);
+	var x = box[0];
+	var y = box[1];
+
+	var yDist = Math.round((y - this.dragMouseStart.y)/spacing.STEP);
 	if (yDist !== this.dragYStep) {
 		this.dragStep = yDist;
 		this.dragTarget.svgEl.setAttribute("transform", "translate(0," + (yDist * spacing.STEP) + ")");
