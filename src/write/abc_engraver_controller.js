@@ -390,8 +390,10 @@ function mouseDown(ev) {
 		this.dragTarget = this.history[closestIndex];
 		this.dragMechanism = "mouse";
 		this.dragMouseStart = { x: x, y: y };
-		if (this.dragging && this.dragTarget.isDraggable)
+		if (this.dragging && this.dragTarget.isDraggable) {
+			this.renderer.addGlobalClass("abcjs-dragging-in-progress");
 			this.dragTarget.absEl.highlight(undefined, this.dragColor);
+		}
 	}
 }
 
@@ -423,6 +425,7 @@ function mouseUp(ev) {
 	this.notifySelect(this.dragTarget, this.dragStep);
 	this.dragTarget.svgEl.focus();
 	this.dragTarget = null;
+	this.renderer.removeGlobalClass("abcjs-dragging-in-progress");
 }
 
 EngraverController.prototype.recordHistory = function (svgEl, notSelectable) {

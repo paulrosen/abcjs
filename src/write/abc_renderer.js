@@ -105,6 +105,17 @@ Renderer.prototype.setPaperSize = function (maxwidth, scale, responsive) {
 		text += " for \"" + this.abctune.metaText.title + '"';
 	this.paper.setTitle(text);
 
+	// for dragging - don't select during drag
+	var styles = [
+		"-webkit-touch-callout: none;",
+		"-webkit-user-select: none;",
+		"-khtml-user-select: none;",
+		"-moz-user-select: none;",
+		"-ms-user-select: none;",
+		"user-select: none;"
+	];
+	this.paper.insertStyles(".abcjs-dragging-in-progress text, .abcjs-dragging-in-progress tspan {" + styles.join(" ") + ")}");
+
 	var parentStyles = { overflow: "hidden" };
 	if (responsive === 'resize') {
 		this.paper.setResponsiveWidth(w, h);
@@ -119,6 +130,44 @@ Renderer.prototype.setPaperSize = function (maxwidth, scale, responsive) {
 	}
 	this.paper.setScale(scale);
 	this.paper.setParentStyles(parentStyles);
+};
+
+function getClassSet(el) {
+	var oldClass = el.getAttribute('class');
+	if (!oldClass)
+		oldClass = "";
+	var klasses = oldClass.split(" ");
+	var obj = {};
+	for (var i = 0; i < klasses.length; i++)
+		obj[klasses[i]] = true;
+	return obj;
+}
+
+function setClassSet(el, klassSet) {
+	var klasses = [];
+	for (var key in klassSet) {
+		if (klassSet.hasOwnProperty(key))
+			klasses.push(key);
+	}
+	el.setAttribute('class', klasses.join(' '));
+}
+
+Renderer.prototype.addGlobalClass = function (klass) {
+	// Can't use classList on IE
+	if (this.paper) {
+		var obj = getClassSet(this.paper.svg);
+		obj[klass] = true;
+		setClassSet(this.paper.svg, obj);
+	}
+};
+
+Renderer.prototype.removeGlobalClass = function (klass) {
+	// Can't use classList on IE
+	if (this.paper) {
+		var obj = getClassSet(this.paper.svg);
+		delete obj[klass];
+		setClassSet(this.paper.svg, obj);
+	}
 };
 
 /**

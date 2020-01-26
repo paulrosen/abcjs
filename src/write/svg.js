@@ -101,6 +101,12 @@ Svg.prototype.setScale = function(scale) {
 	}
 };
 
+Svg.prototype.insertStyles = function(styles) {
+	var el = document.createElementNS(svgNS, "style");
+	el.textContent = styles;
+	this.svg.prepend(el);
+};
+
 Svg.prototype.setParentStyles = function(attr) {
 	// This is needed to get the size right when there is scaling involved.
 	for (var key in attr) {
