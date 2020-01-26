@@ -12,7 +12,7 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 | abcjs-staff-extra | Clefs, key signatures, time signatures. |
 | abcjs-tempo | The tempo marking. |
 | abcjs-meta-bottom | Everything that is printed after all the music. |
-| abcjs-staff  | The horizontal lines that make up the staff; ledger lines. |
+| abcjs-staff  | The horizontal lines that make up the staff. |
 | abcjs-l0, abcjs-l1, etc. | (lower case L, followed by a number) The staff line number, starting at zero. | 
 | abcjs-m0, abcjs-m1, etc. | The measure count from the START OF THE LINE. |
 | abcjs-n0, abcjs-n1, etc. | The note count from the START OF THE MEASURE. |
@@ -33,16 +33,16 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 | abcjs-top-line | This marks the top line of each staff. This is useful if you are trying to find where on the page the music has been drawn. |
 | abcjs-top-of-system | This marks the top of each set of staves. This is useful if you are trying to find where on the page the music has been drawn. |
 | abcjs-note_selected | This is the element that the user has clicked on. |
-| clef | All clefs |
-| time-signature | All time signatures |
-| key-signature | All key signatures |
-| subtitle | The subtitle, both on the top and inserted in the middle |
-| rhythm | The rhythm text |
-| composer | The composer text |
-| author | The author text |
-| part-order | The part order indicator at the top |
-| unaligned-words | Lyrics at the bottom that aren't lined up with notes. |
-
+| abcjs-clef | All clefs |
+| abcjs-time-signature | All time signatures |
+| abcjs-key-signature | All key signatures |
+| abcjs-subtitle | The subtitle, both on the top and inserted in the middle |
+| abcjs-rhythm | The rhythm text |
+| abcjs-composer | The composer text |
+| abcjs-author | The author text |
+| abcjs-part-order | The part order indicator at the top |
+| abcjs-unaligned-words | Lyrics at the bottom that aren't lined up with notes. |
+| abcjs-ledger | ledger line. |
 
 ## Test Tune
 

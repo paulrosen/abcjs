@@ -254,6 +254,18 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 		}
 	}
 
+	if (this.dragging) {
+		for (var h = 0; h < this.history.length; h++) {
+			var hist = this.history[h];
+			if (!hist.svgEl.getAttribute("notSelectable")) {
+				hist.svgEl.setAttribute("tabindex", 0);
+				hist.svgEl.setAttribute("data-index", h);
+				hist.svgEl.addEventListener("keydown", keyboardDown.bind(this));
+				hist.svgEl.addEventListener("keyup", keyboardSelection.bind(this));
+				hist.svgEl.addEventListener("focus", elementFocused.bind(this));
+			}
+		}
+	}
 	this.renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
 	this.renderer.engraveExtraText(this.width, abctune);
 	this.renderer.setPaperSize(maxWidth, scale, this.responsive);
@@ -278,6 +290,71 @@ function getCoord(ev) {
 		y = offsetY + box.y;
 	}
 	return [x,y];
+}
+
+function elementFocused(ev) {
+	// If there had been another element focused and is being dragged, then report that before setting the new element up.
+	if (this.dragMechanism === "keyboard" && this.dragStep !== 0)
+		this.notifySelect(this.dragTarget, this.dragStep);
+
+	this.dragStep = 0;
+}
+
+function keyboardDown(ev) {
+	// Swallow the up and down arrow events - they will be used for dragging with the keyboard
+	switch(ev.keyCode) {
+		case 38:
+		case 40:
+			ev.preventDefault();
+	}
+}
+
+function keyboardSelection(ev) {
+	// "this" is the EngraverController because of the bind(this) when setting the event listener.
+	var handled = false;
+	var index = ev.target.dataset.index;
+	switch(ev.keyCode) {
+		case 13:
+		case 32:
+			handled = true;
+			this.dragTarget = this.history[index];
+			this.dragMechanism = "keyboard";
+			mouseUp.bind(this)();
+			break;
+		case 38: // arrow up
+			handled = true;
+			this.dragTarget = this.history[index];
+			this.dragMechanism = "keyboard";
+			if (this.dragTarget.isDraggable) {
+				if (this.dragging && this.dragTarget.isDraggable)
+					this.dragTarget.absEl.highlight(undefined, this.dragColor);
+				this.dragStep--;
+				this.dragTarget.svgEl.setAttribute("transform", "translate(0," + (this.dragStep * spacing.STEP) + ")");
+			}
+			break;
+		case 40: // arrow down
+			handled = true;
+			this.dragTarget = this.history[index];
+			this.dragMechanism = "keyboard";
+			if (this.dragTarget.isDraggable) {
+				if (this.dragging && this.dragTarget.isDraggable)
+					this.dragTarget.absEl.highlight(undefined, this.dragColor);
+				this.dragStep++;
+				this.dragTarget.svgEl.setAttribute("transform", "translate(0," + (this.dragStep * spacing.STEP) + ")");
+			}
+			break;
+		case 9: // tab
+			// This is losing focus - if there had been dragging, then do the callback
+			if (this.dragStep !== 0) {
+				mouseUp.bind(this)();
+			}
+			break;
+		default:
+			//console.log(ev);
+			break;
+	}
+	if (handled)
+		ev.preventDefault();
 }
 
 function mouseDown(ev) {
@@ -311,6 +388,7 @@ function mouseDown(ev) {
 	}
 	if (closestIndex >= 0) {
 		this.dragTarget = this.history[closestIndex];
+		this.dragMechanism = "mouse";
 		this.dragMouseStart = { x: x, y: y };
 		if (this.dragging && this.dragTarget.isDraggable)
 			this.dragTarget.absEl.highlight(undefined, this.dragColor);
@@ -318,7 +396,7 @@ function mouseDown(ev) {
 }
 
 function mouseMove(ev) {
-	if (!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable)
+	if (!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable || this.dragMechanism !== 'mouse')
 		return;
 
 	var box = getCoord(ev);
@@ -343,6 +421,7 @@ function mouseUp(ev) {
 	}
 
 	this.notifySelect(this.dragTarget, this.dragStep);
+	this.dragTarget.svgEl.focus();
 	this.dragTarget = null;
 }
 

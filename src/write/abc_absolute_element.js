@@ -210,6 +210,8 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 AbsoluteElement.prototype.isIE=/*@cc_on!@*/false;//IE detector
 
 AbsoluteElement.prototype.setClass = function (addClass, removeClass, color) {
+	if (!this.elemset)
+		return;
 	for (var i = 0; i < this.elemset.length; i++) {
 		var el = this.elemset[i];
 		el.setAttribute("fill", color);
