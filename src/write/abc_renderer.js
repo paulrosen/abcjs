@@ -21,6 +21,7 @@ var glyphs = require('./abc_glyphs');
 var spacing = require('./abc_spacing');
 var sprintf = require('./sprintf');
 var Svg = require('./svg');
+var AbsoluteElement = require('./abc_absolute_element');
 
 /**
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
@@ -348,47 +349,34 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 	if (this.isPrint)
 		this.moveY(this.spacing.top);
 	if (abctune.metaText.title) {
-		this.controller.currentAbsEl = {
-			tuneNumber: this.controller.engraver.tuneNumber,
-			elemset: [],
-			abcelem: {el_type: "title", startChar: -1, endChar: -1, text: abctune.metaText.title}
-		};
-		el = this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', this.spacing.title, 0, 'middle');
-		this.controller.currentAbsEl.elemset.push(el[2]);
+		this.wrapInAbsElem({el_type: "title", startChar: -1, endChar: -1, text: abctune.metaText.title}, 'title meta-top', function() {
+			return this.outputTextIf(this.padding.left + width / 2, abctune.metaText.title, 'titlefont', 'title meta-top', this.spacing.title, 0, 'middle')[2];
+		});
 	}
 	if (abctune.lines[0] && abctune.lines[0].subtitle) {
-		this.controller.currentAbsEl = {
-			tuneNumber: this.controller.engraver.tuneNumber,
-			elemset: [],
-			abcelem: {el_type: "subtitle", startChar: -1, endChar: -1, text: abctune.lines[0].subtitle}
-		};
-		el = this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top subtitle', this.spacing.subtitle, 0, 'middle');
-		this.controller.currentAbsEl.elemset.push(el[2]);
+		this.wrapInAbsElem({el_type: "subtitle", startChar: -1, endChar: -1, text: abctune.lines[0].subtitle}, 'text meta-top subtitle', function() {
+			return this.outputTextIf(this.padding.left + width / 2, abctune.lines[0].subtitle, 'subtitlefont', 'text meta-top subtitle', this.spacing.subtitle, 0, 'middle')[2];
+		});
 	}
 
 	if (abctune.metaText.rhythm || abctune.metaText.origin || abctune.metaText.composer) {
 		this.moveY(this.spacing.composer);
 		var rSpace;
 		if (abctune.metaText.rhythm && abctune.metaText.rhythm.length > 0) {
-			this.controller.currentAbsEl = {
-				tuneNumber: this.controller.engraver.tuneNumber,
-				elemset: [],
-				abcelem: {el_type: "rhythm", startChar: -1, endChar: -1, text: abctune.metaText.rhythm}
-			};
-			rSpace = this.outputTextIf(this.padding.left, abctune.metaText.rhythm, 'infofont', 'meta-top rhythm', 0, null, "start");
-			this.controller.currentAbsEl.elemset.push(rSpace[2]);
+			this.wrapInAbsElem({el_type: "rhythm", startChar: -1, endChar: -1, text: abctune.metaText.rhythm}, 'meta-top rhythm', function() {
+				rSpace = this.outputTextIf(this.padding.left, abctune.metaText.rhythm, 'infofont', 'meta-top rhythm', 0, null, "start");
+				return rSpace[2];
+			});
 		}
 		var composerLine = "";
 		if (abctune.metaText.composer) composerLine += abctune.metaText.composer;
 		if (abctune.metaText.origin) composerLine += ' (' + abctune.metaText.origin + ')';
 		if (composerLine.length > 0) {
-			this.controller.currentAbsEl = {
-				tuneNumber: this.controller.engraver.tuneNumber,
-				elemset: [],
-				abcelem: {el_type: "composer", startChar: -1, endChar: -1, text: composerLine}
-			};
-			var space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top composer', 0, null, "end");
-			this.controller.currentAbsEl.elemset.push(space[2]);
+			var space;
+			this.wrapInAbsElem({el_type: "composer", startChar: -1, endChar: -1, text: composerLine}, 'meta-top rhythm', function() {
+				space = this.outputTextIf(this.padding.left + width, composerLine, 'composerfont', 'meta-top composer', 0, null, "end");
+				return space[2];
+			});
 			this.moveY(space[1]);
 		} else {
 			this.moveY(rSpace[1]);
@@ -403,24 +391,26 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 	}
 
 	if (abctune.metaText.author && abctune.metaText.author.length > 0) {
-		this.controller.currentAbsEl = {
-			tuneNumber: this.controller.engraver.tuneNumber,
-			elemset: [],
-			abcelem: {el_type: "author", startChar: -1, endChar: -1, text: abctune.metaText.author}
-		};
-		var space3 = this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top author', 0, 0, "end");
-		this.controller.currentAbsEl.elemset.push(space3[2]);
+		var space3;
+		this.wrapInAbsElem({el_type: "author", startChar: -1, endChar: -1, text: abctune.metaText.author}, 'meta-top author', function() {
+			space3 = this.outputTextIf(this.padding.left + width, abctune.metaText.author, 'composerfont', 'meta-top author', 0, 0, "end");
+			return space3[2];
+		});
 	}
 
 	if (abctune.metaText.partOrder && abctune.metaText.partOrder.length > 0) {
-		this.controller.currentAbsEl = {
-			tuneNumber: this.controller.engraver.tuneNumber,
-			elemset: [],
-			abcelem: {el_type: "partOrder", startChar: -1, endChar: -1, text: abctune.metaText.partOrder}
-		};
-		var space4 = this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-top part-order', 0, 0, "start");
-		this.controller.currentAbsEl.elemset.push(space4[2]);
+		var space4;
+		this.wrapInAbsElem({el_type: "partOrder", startChar: -1, endChar: -1, text: abctune.metaText.partOrder}, 'meta-top part-order', function() {
+			space4 = this.outputTextIf(this.padding.left, abctune.metaText.partOrder, 'partsfont', 'meta-top part-order', 0, 0, "start");
+			return space4[2];
+		});
 	}
+};
+
+Renderer.prototype.wrapInAbsElem = function(abcelem, klass, creator) {
+	this.controller.currentAbsEl = new AbsoluteElement(abcelem, 0, 0, klass, this.controller.engraver.tuneNumber, {});
+	var el = creator.bind(this)();
+	this.controller.currentAbsEl.elemset = [el];
 };
 
 /**
