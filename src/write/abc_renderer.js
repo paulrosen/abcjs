@@ -973,15 +973,8 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 };
 
 Renderer.prototype.addInvisibleMarker = function (className) {
-	var dy = 0.35;
-	var fill = "rgba(0,0,0,0)";
-	var y = this.y;
-	y = Math.round(y);
-	var x1 = 0;
-	var x2 = 100;
-	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
-		x2, y+dy, x1, y+dy);
-	this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, "fill-opacity": 0, 'class': this.addClasses(className), 'data-vertical': y });
+	var y = Math.round(this.y);
+	this.paper.pathToBack({path:"M 0 " + y + " L 0 0", stroke:"none", fill:"none", "stroke-opacity": 0, "fill-opacity": 0, 'class': this.addClasses(className), 'data-vertical': y });
 };
 
 Renderer.prototype.printSeparator = function(width) {
