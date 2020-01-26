@@ -372,6 +372,7 @@ function mouseDown(ev) {
 			continue;
 
 		// See if it is a direct hit on an element - if so, definitely take it (there are no overlapping elements)
+		getDim(el);
 		if (el.dim.left < x && el.dim.right > x && el.dim.top < y && el.dim.bottom > y) {
 			closestIndex = i;
 			minDistance = 0;
@@ -430,9 +431,17 @@ function mouseUp(ev) {
 
 EngraverController.prototype.recordHistory = function (svgEl, notSelectable) {
 	var isNote = this.currentAbsEl && this.currentAbsEl.abcelem && this.currentAbsEl.abcelem.el_type === "note" && !this.currentAbsEl.abcelem.rest;
-	var box = svgEl.getBBox();
-	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, dim: { left: Math.round(box.x), top: Math.round(box.y), right: Math.round(box.x+box.width), bottom: Math.round(box.y+box.height) }, selectable: notSelectable !== true, isDraggable: isNote });
+	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, selectable: notSelectable !== true, isDraggable: isNote });
 };
+
+function getDim(historyEl) {
+	// Get the dimensions on demand because the getBBox call is expensive.
+	if (!historyEl.dim) {
+		var box = historyEl.svgEl.getBBox();
+		historyEl.dim = { left: Math.round(box.x), top: Math.round(box.y), right: Math.round(box.x+box.width), bottom: Math.round(box.y+box.height) };
+	}
+	return historyEl.dim;
+}
 
 EngraverController.prototype.combineHistory = function (len, svgEl) {
 	if (len < 2)
@@ -440,6 +449,9 @@ EngraverController.prototype.combineHistory = function (len, svgEl) {
 	var items = [];
 	for (var i = 0; i < len; i++) {
 		items.push(this.history.pop());
+	}
+	for (i = 0; i < items.length; i++) {
+		getDim(items[i]);
 	}
 	for (i = 1; i < items.length; i++) {
 		items[0].dim.left = Math.min(items[0].dim.left, items[i].dim.left);
