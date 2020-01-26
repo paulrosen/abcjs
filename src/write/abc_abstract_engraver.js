@@ -1044,8 +1044,9 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 	};
 
 AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
-	var measureNumHeight = this.renderer.getTextSize(number, "measurefont", 'bar-number');
-	abselem.addChild(new RelativeElement(number, 0, 0, 11+measureNumHeight.height / spacing.STEP, {type:"barNumber"}));
+	var measureNumDim = this.renderer.getTextSize(number, "measurefont", 'bar-number');
+	var dx = measureNumDim.width > 18 && abselem.abcelem.type === "treble" ? -7 : 0;
+	abselem.addChild(new RelativeElement(number, dx, measureNumDim.width, 11+measureNumDim.height / spacing.STEP, {type:"barNumber"}));
 };
 
 AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) {
