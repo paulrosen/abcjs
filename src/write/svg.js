@@ -208,11 +208,20 @@ Svg.prototype.createDummySvg = function() {
 	return this.dummySvg;
 };
 
+var sizeCache = {};
+
 Svg.prototype.getTextSize = function(text, attr, el) {
 	if (typeof text === 'number')
 		text = ''+text;
 	if (!text || text.match(/^\s+$/))
 		return { width: 0, height: 0 };
+	var key;
+	if (text.length < 20) {
+		// The short text tends to be repetitive and getBBox is really slow, so lets cache.
+		key = text + JSON.stringify(attr);
+		if (sizeCache[key])
+			return sizeCache[key];
+	}
 	var removeLater = !el;
 	if (!el)
 		el = this.text(text, attr);
@@ -232,6 +241,8 @@ Svg.prototype.getTextSize = function(text, attr, el) {
 		else
 			this.svg.removeChild(el);
 	}
+	if (key)
+		sizeCache[key] = size;
 	return size;
 };
 

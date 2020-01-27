@@ -878,8 +878,7 @@ Renderer.prototype.getTextSize = function(text, type, klass, el) {
 	var hash = this.getFontAndAttr(type, klass);
 	var size = this.paper.getTextSize(text, hash.attr, el);
 	if (hash.font.box) {
-		size.height += 8;
-		size.width += 8;
+		return { height: size.height + 8, width: size.width + 8 };
 	}
 	return size;
 };
@@ -911,10 +910,9 @@ Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, center
 	var elem = el;
 
 	if (hash.font.box) {
-		var size = this.getTextSize(text, type, klass);
+		var size = this.getTextSize(text, type, klass); // This size already has the box factored in, so the needs to be taken into consideration.
 		var padding = 2;
-		var margin = 2;
-		this.paper.rect({ x: x - padding, y: y, width: size.width, height: size.height});
+		this.paper.rect({ x: x - padding, y: y, width: size.width - padding, height: size.height - 8});
 		elem = this.closeElemSet();
 	}
 	this.controller.recordHistory(elem, notSelectable);
