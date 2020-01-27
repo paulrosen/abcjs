@@ -124,18 +124,31 @@ Svg.prototype.setParentStyles = function(attr) {
 
 };
 
+function constructHLine(x1, y1, x2) {
+	return "M " + x1 + " " + y1 + " L " + x2 + ' ' + y1 +
+		" L " + x2 + " " + (y1+1) + " " +
+		" L " + x1 + " " + (y1+1) + " " + " z ";
+}
+
+function constructVLine(x1, y1, y2) {
+	return "M " + x1 + " " + y1 + " L " + x1 + ' ' + y2 +
+		" L " + (x1+1) + " " + y2 + " " +
+		" L " + (x1+1) + " " + y1 + " " + " z ";
+}
+
 Svg.prototype.rect = function(attr) {
-	var el = document.createElementNS(svgNS, "rect");
-	for (var key in attr) {
-		if (attr.hasOwnProperty(key)) {
-			var tmp = "" + attr[key];
-			if (tmp.indexOf("NaN") >= 0)
-				debugger;
-			el.setAttributeNS(null, key, attr[key]);
-		}
-	}
-	this.append(el);
-	return el;
+	// This uses path instead of rect so that it can be hollow and the color changes with "fill" instead of "stroke".
+	var lines = [];
+	var x1 = attr.x;
+	var y1 = attr.y;
+	var x2 = attr.x + attr.width;
+	var y2 = attr.y + attr.height;
+	lines.push(constructHLine(x1, y1, x2));
+	lines.push(constructHLine(x1, y2, x2));
+	lines.push(constructVLine(x1, y1, y2));
+	lines.push(constructVLine(x2, y1, y2));
+
+	return this.path({ path: lines.join(" "), stroke: "none"});
 };
 
 Svg.prototype.text = function(text, attr, target) {
@@ -227,6 +240,8 @@ Svg.prototype.openGroup = function(options) {
 	var el = document.createElementNS(svgNS, "g");
 	if (options.klass)
 		el.setAttribute("class", options.klass);
+	if (options.fill)
+		el.setAttribute("fill", options.fill);
 
 	if (options.prepend)
 		this.svg.insertBefore(el, this.svg.firstChild);
