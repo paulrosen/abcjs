@@ -188,6 +188,31 @@ These do the same thing as the user pressing these buttons, but can be called pr
 
 This will download the current audio buffer as a WAV file to the fileName passed in.
 
+### synth.getMidiFile(abcString, options)
+
+This is called to get the audio in MIDI format, instead of as a buffer.
+
+#### abcString
+
+The ABC string to create the MIDI from.
+
+#### options
+
+The same options as are used elsewhere, with the addition of:
+
+```javascript
+{
+	generateLink: true
+}
+```
+If this is present, then the return value is a link that can be placed directly on the page for the user to download.
+
+If this is not present (or is false), then the return value is the actual data that makes up the MIDI file.
+
+```javascript
+var midi = new ABCJS.synth.getMidiFile("X:1\netc...", { chordsOff: true });
+```
+
 ### Example
 
 The following creates an audio control that the user can manipulate.

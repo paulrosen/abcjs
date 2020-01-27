@@ -30,6 +30,7 @@ var activeAudioContext = require('./src/synth/active-audio-context');
 var supportsAudio = require('./src/synth/supports-audio');
 var playEvent = require('./src/synth/play-event');
 var SynthController = require('./src/synth/synth-controller');
+var getMidiFile = require('./src/synth/get-midi-file');
 
 abcjs.synth = {
 	CreateSynth: CreateSynth,
@@ -41,7 +42,8 @@ abcjs.synth = {
 	registerAudioContext: registerAudioContext,
 	activeAudioContext: activeAudioContext,
 	supportsAudio: supportsAudio,
-	playEvent: playEvent
+	playEvent: playEvent,
+	getMidiFile: getMidiFile,
 };
 
 var editor = require('./src/edit/abc_editor');
