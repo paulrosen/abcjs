@@ -122,8 +122,7 @@ var TempoElement;
 			x += preWidth + charWidth;
 		}
 		if (this.note) {
-			if (this.note)
-				this.note.setX(x);
+			this.note.setX(x);
 			for (var i = 0; i < this.note.children.length; i++)
 				this.note.children[i].draw(renderer, x);
 			x += (this.note.w + 5);

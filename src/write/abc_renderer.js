@@ -424,51 +424,44 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 	this.noteNumber = null;
 	this.voiceNumber = null;
 
-	if (abctune.metaText.unalignedWords) {
-		this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "unalignedWords", startChar: -1, endChar: -1, text: abctune.metaText.unalignedWords }};
-		var hash = this.getFontAndAttr("wordsfont", 'meta-bottom unaligned-words');
-		var space = this.getTextSize("i", 'wordsfont', 'meta-bottom unaligned-words');
+	if (abctune.metaText.unalignedWords && abctune.metaText.unalignedWords.length > 0) {
+		this.wrapInAbsElem({el_type: "unalignedWords", startChar: -1, endChar: -1}, 'meta-bottom extra-text', function () {
+			var hash = this.getFontAndAttr("wordsfont", 'meta-bottom unaligned-words');
+			var space = this.getTextSize("i", 'wordsfont', 'meta-bottom unaligned-words');
 
-		if (abctune.metaText.unalignedWords.length > 0)
 			this.moveY(this.spacing.words, 1);
-		var el;
-		var historyLen = this.controller.history.length;
-		if (abctune.metaText.unalignedWords.length > 0)
-			this.createElemSet({ klass: "abcjs-unaligned-words"});
-		for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
-			if (abctune.metaText.unalignedWords[j] === '')
-				this.moveY(hash.font.size, 1);
-			else if (typeof abctune.metaText.unalignedWords[j] === 'string') {
-				el = this.outputTextIf(this.padding.left + spacing.INDENT, abctune.metaText.unalignedWords[j], 'wordsfont', 'meta-bottom unaligned-words', 0, 0, "start");
-				if (el[2])
-					this.controller.currentAbsEl.elemset.push(el[2]);
-			} else {
-				var largestY = 0;
-				var offsetX = 0;
-				for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
-					var thisWord = abctune.metaText.unalignedWords[j][k];
-					var type = (thisWord.font) ? thisWord.font : "wordsfont";
-					var el = this.renderText(this.padding.left + spacing.INDENT + offsetX, this.y, thisWord.text, type, 'meta-bottom unaligned-words', false);
-					this.controller.currentAbsEl.elemset.push(el);
-					var size = this.getTextSize(thisWord.text, type, 'meta-bottom unaligned-words');
-					largestY = Math.max(largestY, size.height);
-					offsetX += size.width;
-					// If the phrase ends in a space, then that is not counted in the width, so we need to add that in ourselves.
-					if (thisWord.text[thisWord.text.length-1] === ' ') {
-						offsetX += space.width;
+			var historyLen = this.controller.history.length;
+			this.createElemSet({klass: "abcjs-unaligned-words"});
+			for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
+				if (abctune.metaText.unalignedWords[j] === '')
+					this.moveY(hash.font.size, 1);
+				else if (typeof abctune.metaText.unalignedWords[j] === 'string') {
+					this.outputTextIf(this.padding.left + spacing.INDENT, abctune.metaText.unalignedWords[j], 'wordsfont', 'meta-bottom unaligned-words', 0, 0, "start");
+				} else {
+					var largestY = 0;
+					var offsetX = 0;
+					for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
+						var thisWord = abctune.metaText.unalignedWords[j][k];
+						var type = (thisWord.font) ? thisWord.font : "wordsfont";
+						this.renderText(this.padding.left + spacing.INDENT + offsetX, this.y, thisWord.text, type, 'meta-bottom unaligned-words', false);
+						var size = this.getTextSize(thisWord.text, type, 'meta-bottom unaligned-words');
+						largestY = Math.max(largestY, size.height);
+						offsetX += size.width;
+						// If the phrase ends in a space, then that is not counted in the width, so we need to add that in ourselves.
+						if (thisWord.text[thisWord.text.length - 1] === ' ') {
+							offsetX += space.width;
+						}
 					}
+					this.moveY(largestY, 1);
 				}
-				this.moveY(largestY, 1);
 			}
-		}
-		if (abctune.metaText.unalignedWords.length > 0) {
 			this.moveY(hash.font.size, 2);
-			var unalignedGroup = this.closeElemSet();
-			this.controller.combineHistory(this.controller.history.length - historyLen, unalignedGroup);
-		}
+			var g = this.closeElemSet();
+			this.controller.combineHistory(this.controller.history.length-historyLen, g);
+			return g;
+		});
 	}
 
-	this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "extraText", startChar: -1, endChar: -1, text: "" }}
 	var extraText = "";
 	if (abctune.metaText.book) extraText += "Book: " + abctune.metaText.book + "\n";
 	if (abctune.metaText.source) extraText += "Source: " + abctune.metaText.source + "\n";
@@ -480,11 +473,12 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 	if (abctune.metaText['abc-creator']) extraText += "Creator: " + abctune.metaText['abc-creator'] + "\n";
 	if (abctune.metaText['abc-edited-by']) extraText += "Edited By: " + abctune.metaText['abc-edited-by'] + "\n";
 	if (extraText.length > 0) {
-		this.controller.currentAbsEl.abcelem.text = extraText;
+		this.wrapInAbsElem({el_type: "extraText", startChar: -1, endChar: -1}, 'meta-bottom extra-text', function() {
+			var el = this.outputTextIf(this.padding.left, extraText, 'historyfont', 'meta-bottom extra-text', this.spacing.info, 0, "start");
+			this.controller.recordHistory(el[2]);
+			return el[2];
+		});
 	}
-	el = this.outputTextIf(this.padding.left, extraText, 'historyfont', 'meta-bottom extra-text', this.spacing.info, 0, "start");
-	if (el[2])
-		this.controller.currentAbsEl.elemset.push(el[2]);
 
 	if (abctune.metaText.footer && this.isPrint) {
 		this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "footer", startChar: -1, endChar: -1, text: "" }}
@@ -682,7 +676,6 @@ Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, kl
 			var s = symbol.charAt(i);
 			ycorr = glyphs.getYCorr(s);
 			el = glyphs.printSymbol(x + dx, this.calcY(offset + ycorr), s, this.paper, klass);
-			this.controller.recordHistory(el);
 			if (el) {
 				if (this.doRegression) this.addToRegression(el);
 				//elemset.push(el);
@@ -692,8 +685,9 @@ Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, kl
 				this.renderText(x, this.y, "no symbol:" + symbol, "debugfont", 'debug-msg', 'start');
 			}
 		}
-		this.controller.recordHistory(el.parentNode);
-		return this.paper.closeGroup();
+		var g = this.paper.closeGroup();
+		this.controller.recordHistory(g);
+		return g;
 	} else {
 		ycorr = glyphs.getYCorr(symbol);
 		if (this.ingroup) {

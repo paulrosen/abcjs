@@ -57,7 +57,7 @@ CrescendoElem.prototype.drawLine = function (renderer, y1, y2) {
 	var right = this.anchor2 ? this.anchor2.x : 800;
 	var pathString = sprintf("M %f %f L %f %f",
 		left, y1, right, y2);
-	renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('decoration')});
+	renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('decoration'), notSelectable: true});
 };
 
 module.exports = CrescendoElem;

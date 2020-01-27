@@ -254,6 +254,10 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 		}
 	}
 
+	this.renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
+	this.renderer.engraveExtraText(this.width, abctune);
+	this.renderer.setPaperSize(maxWidth, scale, this.responsive);
+
 	if (this.dragging) {
 		for (var h = 0; h < this.history.length; h++) {
 			var hist = this.history[h];
@@ -266,9 +270,6 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 			}
 		}
 	}
-	this.renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
-	this.renderer.engraveExtraText(this.width, abctune);
-	this.renderer.setPaperSize(maxWidth, scale, this.responsive);
 	this.renderer.paper.svg.addEventListener('mousedown', mouseDown.bind(this));
 	this.renderer.paper.svg.addEventListener('mousemove', mouseMove.bind(this));
 	this.renderer.paper.svg.addEventListener('mouseup', mouseUp.bind(this));
