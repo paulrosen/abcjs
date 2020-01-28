@@ -235,6 +235,7 @@ VoiceElement.prototype.draw = function (renderer, bartop) {
 	renderer.noteNumber = null;
 	if (this.header) { // print voice name
 		var textpitch = 14 - (this.voicenumber+1)*(12/(this.voicetotal+1));
+		renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "voice-name", startChar: -1, endChar: -1, text: this.header }};
 		renderer.renderText(renderer.padding.left, renderer.calcY(textpitch), this.header, 'voicefont', 'staff-extra voice-name', 'start');
 	}
 
