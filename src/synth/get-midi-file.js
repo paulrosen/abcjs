@@ -15,8 +15,24 @@ var getMidiFile = function(abcString, options) {
 
 	function callback(div, tune, index, abcString) {
 		var downloadMidi = midiCreate(tune, params);
-		if (params.generateLink)
-			return midi.generateMidiDownloadLink(tune, params, downloadMidi, index);
+		switch (params.midiOutputType) {
+			case "link":
+				return midi.generateMidiDownloadLink(tune, params, downloadMidi, index);
+			case "encoded":
+				return downloadMidi;
+			case "binary":
+				var decoded = downloadMidi.replace("data:audio/midi,", "");
+				decoded = decoded.replace(/MThd/g,"%4d%54%68%64");
+				decoded = decoded.replace(/MTrk/g,"%4d%54%72%6b");
+				var buffer = new ArrayBuffer(decoded.length/3);
+				var output = new Uint8Array(buffer);
+				for (var i = 0; i < decoded.length/3; i++) {
+					var p = i*3+1;
+					var d = parseInt(decoded.substring(p, p+2), 16);
+					output[i] = d;
+				}
+				return output;
+		}
 		return downloadMidi;
 	}
 
