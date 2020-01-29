@@ -416,6 +416,26 @@ var flatten;
 			}
 			var pitches = [];
 			elem.midiPitches = [];
+			var thisBreakBetweenNotes = normalBreakBetweenNotes;
+			if (elem.decoration) {
+				var isStaccato = false;
+				var isTenuto = false;
+				var isAccented = false;
+				for (var d = 0; d < elem.decoration.length; d++) {
+					if (elem.decoration[d] === 'staccato')
+						isStaccato = true;
+					else if (elem.decoration[d] === 'tenuto')
+						isTenuto = true;
+					else if (elem.decoration[d] === 'accent')
+						isAccented = true;
+				}
+				if (isStaccato)
+					thisBreakBetweenNotes = duration * 3/4;
+				if (isTenuto)
+					thisBreakBetweenNotes = 0;
+				if (isAccented)
+					velocity = Math.min(127, velocity*1.5);
+			}
 			for (var i=0; i<elem.pitches.length; i++) {
 				var note = elem.pitches[i];
 				var actualPitch = adjustPitch(note);
@@ -449,14 +469,13 @@ var flatten;
 				for (var j = 0; j < elem.gracenotes.length; j++) {
 					elem.midiGraceNotePitches = [];
 					var grace = elem.gracenotes[j];
-					elem.midiGraceNotePitches.push({ pitch: adjustPitch(grace)+60, durationInMeasures: 0, volume: volume, instrument: currentInstrument});
+					elem.midiGraceNotePitches.push({ pitch: adjustPitch(grace)+60, durationInMeasures: 0, volume: velocity, instrument: currentInstrument});
 				}
 			}
-			var thisBreakBetweenNotes = normalBreakBetweenNotes;
-			var soundDuration = duration-normalBreakBetweenNotes;
+			var soundDuration = duration-thisBreakBetweenNotes;
 			if (soundDuration < 0) {
 				soundDuration = 0;
-				thisBreakBetweenNotes = 0;
+				thisBreakBetweenNotes = duration;
 			}
 			currentTrack.push({ cmd: 'move', duration: soundDuration*tempoChangeFactor });
 			lastNoteDurationPosition = currentTrack.length-1;
@@ -537,7 +556,7 @@ var flatten;
 
 		for (g = 0; g < graces.length; g++) {
 			grace = graces[g];
-			var pitch = grace.midipitch ? grace.midipitch - 60 : grace.pitch;
+			var pitch = adjustPitch(grace);
 			ret.push({ pitch: pitch, duration: grace.duration/graceDivider*multiplier });
 		}
 		return ret;
