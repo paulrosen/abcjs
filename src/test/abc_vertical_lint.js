@@ -21,45 +21,38 @@
 var verticalLint = function(tunes) {
 	"use strict";
 
-	function fixed2(num) {
+	function fixed(digits, zero, num) {
 		if (num === undefined)
 			return "undefined";
 		if (typeof num !== "number")
 			return num;
-		var str = num.toFixed(2);
-		if (str.indexOf(".00") > 0)
+		var str = num.toFixed(digits);
+		if (str.indexOf(zero) > 0)
 			return str.split('.')[0];
-		if (str[str.length-1] === '0')
+		while (str.length && str[str.length-1] === '0')
 			str = str.substr(0,str.length-1);
 		return str;
+	}
+	function fixed1(num) {
+		return fixed(1, ".0", num);
+	}
+	function fixed2(num) {
+		return fixed(2, ".00", num);
 	}
 	function fixed4(num) {
-		if (num === undefined)
-			return "undefined";
-		if (typeof num !== "number")
-			return num;
-		var str = num.toFixed(4);
-		if (str.indexOf(".0000") > 0)
-			return str.split('.')[0];
-		if (str[str.length-1] === '0')
-			str = str.substr(0,str.length-1);
-		if (str[str.length-1] === '0')
-			str = str.substr(0,str.length-1);
-		if (str[str.length-1] === '0')
-			str = str.substr(0,str.length-1);
-		return str;
+		return fixed(4, ".0000", num);
 	}
 	function formatY(obj) {
-		return "y= ( " + fixed2(obj.bottom) + ' , ' + fixed2(obj.top) + " )";
+		return "y= ( " + fixed1(obj.bottom) + ' , ' + fixed1(obj.top) + " )";
 	}
 	function formatX(obj) {
-		return " x=" + fixed2(obj.x) + ' w=' + fixed2(obj.width);
+		return " x=" + fixed1(obj.x) + ' w=' + fixed1(obj.width);
 	}
 	function formatArrayStart(tabs, i) {
 		return tabs + i + ": ";
 	}
 	function getType(obj) {
-		if (obj.$type === 'staff-extra') {
+		if (obj.$type.indexOf('staff-extra') >= 0) {
 			if (obj.elem.length === 1) {
 				switch(obj.elem[0]) {
 					case "symbol clefs.G":
@@ -72,12 +65,24 @@ var verticalLint = function(tunes) {
 						return "Time Common";
 					case "symbol timesig.cut":
 						return "Time Cut";
+					case "symbol timesig.imperfectum":
+						return "Time Imperfectum";
+					case "symbol timesig.imperfectum2":
+						return "Time Imperfectum 2";
+					case "symbol timesig.perfectum":
+						return "Time Perfectum";
+					case "symbol timesig.perfectum2":
+						return "Time Perfectum 2";
+					case "symbol clefs.perc":
+						return "Percussion Clef";
 				}
 			} else if (obj.elem.length === 2) {
 				switch(obj.elem[0]) {
 					case "symbol clefs.G":
 						if (obj.elem[1] === 'symbol 8')
 							return "Treble Clef 8";
+						else if (obj.elem[1].indexOf("barNumber") === 0)
+							return "Treble Clef [bar=" + obj.elem[1].substring(10) + "]";
 						break;
 					case "symbol clefs.F":
 						if (obj.elem[1] === 'symbol 8')
@@ -147,7 +152,7 @@ var verticalLint = function(tunes) {
 			var obj = arr[i];
 			var type = getType(obj);
 			if (type === "unknown")
-				str += formatArrayStart(tabs, i) + formatObject(obj, indent);
+				str += formatArrayStart(tabs, i) + "\n" + formatObject(obj, indent) + "\n";
 			else
 				str += formatArrayStart(tabs, i) + type + ' ' + formatY(obj) + formatX(obj) + "\n";
 		}
@@ -218,8 +223,10 @@ var verticalLint = function(tunes) {
 					str.push(prefix + formatElements(value, indent+1));
 				else if (toString.call(value) === "[object Array]")
 					str.push(prefix + formatArray(value, indent+1));
-				else if (typeof obj[key] === "object")
+				else if (typeof value === "object")
 					str.push(prefix + formatObject(value, indent+1));
+				else if (typeof value === "number")
+					str.push(prefix + fixed1(value));
 				else
 					str.push(prefix + value);
 			}
@@ -230,7 +237,7 @@ var verticalLint = function(tunes) {
 
 	function formatLine(line, lineNum) {
 		var str = "";
-		str += "Line: " + lineNum + ": (" + fixed2(line.height) + ")\n";
+		str += "Line: " + lineNum + ": (" + fixed1(line.height) + ")\n";
 		if (line.brace)
 			str += "brace: " + line.brace.x + " " + formatY(line.brace) + "\n";
 		str += "staffs: " + formatStaffs(line.staffs, 1);
@@ -252,15 +259,15 @@ var verticalLint = function(tunes) {
 	function extractPositioningInfo(staffGroup, lineNum) {
 		var ret = { height: staffGroup.height, minSpace: staffGroup.minspace, spacingUnits: staffGroup.spacingunits, width: staffGroup.w, startX: staffGroup.startX, staffs: [], voices: [] };
 		if (staffGroup.brace) {
-			ret.brace = { x: staffGroup.brace.x, top: fixed2(staffGroup.brace.startY), bottom: fixed2(staffGroup.brace.endY) };
+			ret.brace = { x: staffGroup.brace.x, top: fixed1(staffGroup.brace.startY), bottom: fixed1(staffGroup.brace.endY) };
 		}
 		for (var i = 0; i < staffGroup.staffs.length; i++) {
 			var staff = staffGroup.staffs[i];
-			ret.staffs.push({bottom: fixed2(staff.bottom), top: fixed2(staff.top), specialY: setSpecialY(staff) });
+			ret.staffs.push({bottom: fixed1(staff.bottom), top: fixed1(staff.top), specialY: setSpecialY(staff) });
 		}
 		for (i = 0; i < staffGroup.voices.length; i++) {
 			var voice = staffGroup.voices[i];
-			var obj = { bottom: fixed2(voice.bottom), top: fixed2(voice.top), specialY: setSpecialY(voice), width: fixed2(voice.w), startX: voice.startX, voiceChildren: [], otherChildren: [], beams: [] };
+			var obj = { bottom: fixed1(voice.bottom), top: fixed1(voice.top), specialY: setSpecialY(voice), width: fixed1(voice.w), startX: voice.startX, voiceChildren: [], otherChildren: [], beams: [] };
 			for (var j = 0; j < voice.children.length; j++) {
 				var child = voice.children[j];
 				var type = child.type;
@@ -273,7 +280,7 @@ var verticalLint = function(tunes) {
 						type = "note(rest)";
 					if (child.abcelem.lyric && child.abcelem.lyric.length > 0) type += " " + child.abcelem.lyric[0].syllable;
 				}
-				var obj2 = { $type: type, bottom: fixed2(child.bottom), top: fixed2(child.top), specialY: setSpecialY(child), minSpacing: child.minspacing, duration: child.duration, width: child.w, x: child.x };
+				var obj2 = { $type: type, bottom: fixed1(child.bottom), top: fixed1(child.top), specialY: setSpecialY(child), minSpacing: child.minspacing, duration: child.duration, width: child.w, x: child.x };
 				obj2.elem = [];
 				if (type === 'tempo') {
 					var tempo = child.children[0].tempo;
@@ -289,7 +296,7 @@ var verticalLint = function(tunes) {
 					else
 						arr.push('*');
 					if (tempoNote) {
-						arr.push(' note(' + fixed2(tempoNote.top) + ',' + fixed2(tempoNote.bottom) + ',' + fixed2(tempoNote.x) + ',' + fixed2(tempoNote.w) + ')');
+						arr.push(' note(' + fixed1(tempoNote.top) + ',' + fixed1(tempoNote.bottom) + ',' + fixed1(tempoNote.x) + ',' + fixed1(tempoNote.w) + ')');
 					}
 					obj2.elem.push(arr.join(' '));
 				}
@@ -334,7 +341,7 @@ var verticalLint = function(tunes) {
 								}
 								ch.params[key] = obj3 +']';
 							} else if (typeof value === "number")
-								ch.params[key] = fixed2(value);
+								ch.params[key] = fixed1(value);
 							else
 								ch.params[key] = value;
 						}
