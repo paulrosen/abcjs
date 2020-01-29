@@ -46,7 +46,7 @@ VoiceElement.prototype.addChild = function (child) {
 	if (child.type === 'bar') {
 		var firstItem = true;
 		for (var i = 0; firstItem && i < this.children.length; i++) {
-			if (this.children[i].type !== "staff-extra" && this.children[i].type !== "tempo")
+			if (this.children[i].type.indexOf("staff-extra") < 0 && this.children[i].type !== "tempo")
 				firstItem = false;
 		}
 		if (!firstItem) {
