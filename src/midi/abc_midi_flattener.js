@@ -57,6 +57,7 @@ var flatten;
 	var beatFraction = 0.25;
 	var nextVolume;
 	var nextVolumeDelta;
+	var slurCount = 0;
 
 	var drumTrack;
 	var drumTrackFinished;
@@ -98,6 +99,7 @@ var flatten;
 		beatFraction = 0.25;
 		nextVolume = undefined;
 		nextVolumeDelta = undefined;
+		slurCount = 0;
 
 		// For the drum/metronome track.
 		drumTrack = [];
@@ -417,6 +419,7 @@ var flatten;
 			var pitches = [];
 			elem.midiPitches = [];
 			var thisBreakBetweenNotes = normalBreakBetweenNotes;
+			var noteModification = "none";
 			if (elem.decoration) {
 				var isStaccato = false;
 				var isTenuto = false;
@@ -428,6 +431,18 @@ var flatten;
 						isTenuto = true;
 					else if (elem.decoration[d] === 'accent')
 						isAccented = true;
+					else if (elem.decoration[d] === 'trill')
+						noteModification = "trill";
+					else if (elem.decoration[d] === 'lowermordent')
+						noteModification = "lowermordent";
+					else if (elem.decoration[d] === 'uppermordent')
+						noteModification = "mordent";
+					else if (elem.decoration[d] === 'mordent')
+						noteModification = "mordent";
+					else if (elem.decoration[d] === 'turn')
+						noteModification = "turn";
+					else if (elem.decoration[d] === 'roll')
+						noteModification = "roll";
 				}
 				if (isStaccato)
 					thisBreakBetweenNotes = duration * 3/4;
@@ -438,6 +453,10 @@ var flatten;
 			}
 			for (var i=0; i<elem.pitches.length; i++) {
 				var note = elem.pitches[i];
+				if (note.startSlur)
+					slurCount += note.startSlur.length;
+				if (note.endSlur)
+					slurCount -= note.endSlur.length;
 				var actualPitch = adjustPitch(note);
 				pitches.push({ pitch: actualPitch, startTie: note.startTie });
 				elem.midiPitches.push({ pitch: actualPitch+60, durationInMeasures: duration*tempoChangeFactor, volume: volume, instrument: currentInstrument }); // TODO-PER: why is the internal numbering system offset by 60 from midi? It should probably be the same as midi.
@@ -472,12 +491,83 @@ var flatten;
 					elem.midiGraceNotePitches.push({ pitch: adjustPitch(grace)+60, durationInMeasures: 0, volume: velocity, instrument: currentInstrument});
 				}
 			}
+			if (slurCount > 0)
+				thisBreakBetweenNotes = 0;
 			var soundDuration = duration-thisBreakBetweenNotes;
 			if (soundDuration < 0) {
 				soundDuration = 0;
 				thisBreakBetweenNotes = duration;
 			}
-			currentTrack.push({ cmd: 'move', duration: soundDuration*tempoChangeFactor });
+			if (noteModification !== "none") {
+				var noteTime;
+				var numNotes;
+				var relativeNoteList = [];
+				switch (noteModification) {
+					case "trill":
+						// We want an even number of 32nd notes - (the first note has already started) so it starts and stops on the main note
+						noteTime = 1.0/32;
+						numNotes = Math.floor(soundDuration/noteTime);
+						if (numNotes < 1) {
+							numNotes = 1;
+						} else if (numNotes % 2 === 1)
+							numNotes--;
+						while(numNotes > 0) {
+							numNotes--;
+							relativeNoteList.push(numNotes % 2);
+						}
+						break;
+					case "mordent":
+						noteTime = 1.0/32;
+						relativeNoteList.push(1);
+						relativeNoteList.push(0);
+						break;
+					case "lowermordent":
+						noteTime = 1.0/32;
+						relativeNoteList.push(-1);
+						relativeNoteList.push(0);
+						break;
+					case "turn":
+						noteTime = soundDuration / 5;
+						relativeNoteList.push(1);
+						relativeNoteList.push(0);
+						relativeNoteList.push(-1);
+						relativeNoteList.push(0);
+						break;
+					case "roll":
+						noteTime = 1.0/32;
+						numNotes = Math.floor(soundDuration/noteTime);
+						if (numNotes < 1) {
+							numNotes = 1;
+						}
+						while (numNotes) {
+							relativeNoteList.push(0);
+							numNotes--;
+						}
+
+						break;
+				}
+				var currentlyPlayingNote = [];
+				var iii;
+				for (iii = 0; iii < elem.pitches.length; iii++) {
+					currentlyPlayingNote.push(adjustPitch({ pitch: elem.pitches[iii].pitch}));
+				}
+				var remainingTime = soundDuration;
+				for (var dd = 0; dd < relativeNoteList.length; dd++) {
+					currentTrack.push({ cmd: 'move', duration: (noteTime-0.001)*tempoChangeFactor });
+					for (iii = 0; iii < elem.pitches.length; iii++) {
+						currentTrack.push({ cmd: 'stop', pitch: currentlyPlayingNote[iii]});
+					}
+					currentTrack.push({ cmd: 'move', duration: 0.001*tempoChangeFactor });
+					for (iii = 0; iii < elem.pitches.length; iii++) {
+						currentTrack.push({ cmd: 'start', pitch: adjustPitch({ pitch: elem.pitches[iii].pitch+relativeNoteList[dd]}), volume: velocity});
+						currentlyPlayingNote[iii] = adjustPitch({ pitch: elem.pitches[iii].pitch+relativeNoteList[dd]});
+					}
+					remainingTime -= noteTime;
+				}
+				currentTrack.push({ cmd: 'move', duration: remainingTime*tempoChangeFactor });
+			} else
+				currentTrack.push({ cmd: 'move', duration: soundDuration*tempoChangeFactor });
+
 			lastNoteDurationPosition = currentTrack.length-1;
 			currentTrackCounter += soundDuration*tempoChangeFactor;
 
