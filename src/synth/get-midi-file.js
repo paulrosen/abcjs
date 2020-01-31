@@ -1,5 +1,4 @@
 var tunebook = require('../api/abc_tunebook');
-var midi = require('../midi/abc_midi_controls');
 var midiCreate = require('../midi/abc_midi_create');
 
 var getMidiFile = function(abcString, options) {
@@ -17,7 +16,7 @@ var getMidiFile = function(abcString, options) {
 		var downloadMidi = midiCreate(tune, params);
 		switch (params.midiOutputType) {
 			case "link":
-				return midi.generateMidiDownloadLink(tune, params, downloadMidi, index);
+				return generateMidiDownloadLink(tune, params, downloadMidi, index);
 			case "encoded":
 				return downloadMidi;
 			case "binary":
@@ -37,6 +36,28 @@ var getMidiFile = function(abcString, options) {
 	}
 
 	return tunebook.renderEngine(callback, "*", abcString, params);
+};
+
+var generateMidiDownloadLink = function(tune, midiParams, midi, index) {
+	var divClasses = ['abcjs-download-midi', 'abcjs-midi-' + index]
+	if (midiParams.downloadClass)
+		divClasses.push(midiParams.downloadClass)
+	var html = '<div class="' + divClasses.join(' ') + '">';
+	if (midiParams.preTextDownload)
+		html += midiParams.preTextDownload;
+	var title = tune.metaText && tune.metaText.title ? tune.metaText.title : 'Untitled';
+	var label;
+	if (midiParams.downloadLabel && isFunction(midiParams.downloadLabel))
+		label = midiParams.downloadLabel(tune, index);
+	else if (midiParams.downloadLabel)
+		label = midiParams.downloadLabel.replace(/%T/, title);
+	else
+		label = "Download MIDI for \"" + title + "\"";
+	title = title.toLowerCase().replace(/'/g, '').replace(/\W/g, '_').replace(/__/g, '_');
+	html += '<a download="' + title + '.midi" href="' + midi + '">' + label + '</a>';
+	if (midiParams.postTextDownload)
+		html += midiParams.postTextDownload;
+	return html + "</div>";
 };
 
 
