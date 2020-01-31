@@ -99,6 +99,8 @@ var TripletElem;
 
 	TripletElem.prototype.draw = function(renderer) {
 		var xTextPos;
+		var durationClass = ("abcjs-d"+this.duration).replace(/\./g,"-");
+		renderer.createElemSet({ klass: renderer.addClasses('triplet '+durationClass)});
 		if (this.hasBeam) {
 			var left = this.anchor1.parent.beam.isAbove() ? this.anchor1.x + this.anchor1.w : this.anchor1.x;
 			xTextPos = this.anchor1.parent.beam.xAtMidpoint(left, this.anchor2.x);
@@ -106,13 +108,12 @@ var TripletElem;
 			xTextPos = this.anchor1.x + (this.anchor2.x + this.anchor2.w - this.anchor1.x) / 2;
 			drawBracket(renderer, this.anchor1.x, this.startNote, this.anchor2.x + this.anchor2.w, this.endNote, this.duration);
 		}
-		renderer.renderText(xTextPos, renderer.calcY(this.yTextPos), "" + this.number, 'tripletfont', renderer.addClasses('triplet d'+this.duration), "middle", true);
+		renderer.renderText(xTextPos, renderer.calcY(this.yTextPos), "" + this.number, 'tripletfont', "", "middle", true);
+		renderer.closeElemSet();
 	};
 
-	function drawLine(renderer, l, t, r, b, duration) {
-		var pathString = sprintf("M %f %f L %f %f",
-			l, t, r, b);
-		renderer.printPath({path: pathString, stroke: "#000000", 'class': renderer.addClasses('triplet d'+duration)});
+	function drawLine(renderer, l, t, r, b) {
+		return sprintf("M %f %f L %f %f", l, t, r, b);
 	}
 
 	function drawBracket(renderer, x1, y1, x2, y2, duration) {
@@ -121,8 +122,9 @@ var TripletElem;
 		var bracketHeight = 5;
 
 		// Draw vertical lines at the beginning and end
-		drawLine(renderer, x1, y1, x1, y1 + bracketHeight, duration);
-		drawLine(renderer, x2, y2, x2, y2 + bracketHeight, duration);
+		var pathString = "";
+		pathString += drawLine(renderer, x1, y1, x1, y1 + bracketHeight);
+		pathString += drawLine(renderer, x2, y2, x2, y2 + bracketHeight);
 
 		// figure out midpoints to draw the broken line.
 		var midX = x1 + (x2-x1)/2;
@@ -131,10 +133,11 @@ var TripletElem;
 		var slope = (y2 - y1) / (x2 - x1);
 		var leftEndX = midX - gapWidth;
 		var leftEndY = y1 + (leftEndX - x1) * slope;
-		drawLine(renderer, x1, y1, leftEndX, leftEndY, duration);
+		pathString += drawLine(renderer, x1, y1, leftEndX, leftEndY);
 		var rightStartX = midX + gapWidth;
 		var rightStartY = y1 + (rightStartX - x1) * slope;
-		drawLine(renderer, rightStartX, rightStartY, x2, y2, duration);
+		pathString += drawLine(renderer, rightStartX, rightStartY, x2, y2);
+		renderer.printPath({path: pathString, stroke: "#000000"});
 	}
 })();
 

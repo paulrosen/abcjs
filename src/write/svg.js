@@ -253,6 +253,8 @@ Svg.prototype.openGroup = function(options) {
 		el.setAttribute("class", options.klass);
 	if (options.fill)
 		el.setAttribute("fill", options.fill);
+	if (options.stroke)
+		el.setAttribute("stroke", options.stroke);
 
 	if (options.prepend)
 		this.svg.insertBefore(el, this.svg.firstChild);

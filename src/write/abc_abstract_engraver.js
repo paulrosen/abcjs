@@ -395,7 +395,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		var abselemset = [];
 
 		var dir = this.calcBeamDir(isSingleLineStaff, voice, elems);
-		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, dir, this.flatBeams);
+		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, dir, this.flatBeams, elems[0]);
 		if (hint) beamelem.setHint();
 		var oldDir = this.stemdir;
 		this.stemdir = dir;

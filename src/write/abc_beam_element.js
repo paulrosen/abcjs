@@ -49,7 +49,7 @@ var BeamElem;
 	//
 	// Setup phase
 	//
-	BeamElem = function BeamElem(stemHeight, type, flat) {
+	BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
 		// type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
 		this.isflat = flat;
 		this.isgrace = (type && type === "grace");
@@ -60,6 +60,12 @@ var BeamElem;
 		this.allrests = true;
 		this.stemHeight = stemHeight;
 		this.beams = []; // During the layout phase, this will become a list of the beams that need to be drawn.
+		if (firstElement && firstElement.duration) {
+			this.duration = firstElement.duration;
+			if (firstElement.startTriplet)
+				this.duration *= firstElement.tripletMultiplier;
+		} else
+			this.duration = 0;
 	};
 
 	BeamElem.prototype.setHint = function () {
@@ -149,12 +155,24 @@ var BeamElem;
 	BeamElem.prototype.draw = function(renderer) {
 		if (this.beams.length === 0) return;
 
-		renderer.beginGroup();
+		var klass = 'beam-elem';
+		if (this.hint)
+			klass += " abcjs-hint";
+
+		var pathString = "";
 		for (var i = 0; i < this.beams.length; i++) {
 			var beam = this.beams[i];
-			drawBeam(renderer, beam.startX, beam.startY, beam.endX, beam.endY, beam.dy, this.hint);
+			pathString += drawBeam(renderer, beam.startX, beam.startY, beam.endX, beam.endY, beam.dy);
 		}
-		renderer.endGroup('beam-elem');
+		var durationClass = ("abcjs-d"+this.duration).replace(/\./g,"-");
+		var klasses = renderer.addClasses('beam-elem '+durationClass);
+		renderer.printPath({
+			path: pathString,
+			stroke: "none",
+			fill: "#000000",
+			'class': klasses,
+			notSelectable: true
+		});
 	};
 
 	//
@@ -200,23 +218,12 @@ var BeamElem;
 		return dy;
 	}
 
-	function drawBeam(renderer, startX, startY, endX, endY, dy, isHint) {
-		var klass = 'beam-elem';
-		if (isHint)
-			klass += " abcjs-hint";
-
+	function drawBeam(renderer, startX, startY, endX, endY, dy) {
 		// the X coordinates are actual coordinates, but the Y coordinates are in pitches.
 		startY = renderer.calcY(startY);
 		endY = renderer.calcY(endY);
-		var pathString = "M" + startX + " " + startY + " L" + endX + " " + endY +
+		return "M" + startX + " " + startY + " L" + endX + " " + endY +
 			"L" + endX + " " + (endY + dy) + " L" + startX + " " + (startY + dy) + "z";
-		renderer.printPath({
-			path: pathString,
-			stroke: "none",
-			fill: "#000000",
-			'class': renderer.addClasses(klass),
-			notSelectable: true
-		});
 	}
 
 	function calcXPos(asc, firstElement, lastElement) {
