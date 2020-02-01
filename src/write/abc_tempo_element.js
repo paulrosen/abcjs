@@ -24,6 +24,7 @@ var TempoElement;
 
 	TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
 		this.tempo = tempo;
+		this.tempo.type = "tempo"; /// TODO-PER: this should be set earlier, in the parser, probably.
 		this.tuneNumber = tuneNumber;
 		this.tempoHeightAbove = totalHeightInPitches;
 		this.pitch = undefined; // This will be set later
@@ -110,34 +111,62 @@ var TempoElement;
 		if (this.pitch === undefined)
 			window.console.error("Tempo Element y-coordinate not set.");
 
-		var historyLen = renderer.controller.history.length;
-		renderer.createElemSet({ klass: "abcjs-tempo"});
-		var y = renderer.calcY(this.pitch);
-		var text;
-		if (this.tempo.preString) {
-			text = renderer.renderText(x, y, this.tempo.preString, 'tempofont', 'tempo', "start");
-			var size = renderer.getTextSize(this.tempo.preString, 'tempofont', 'tempo', text);
-			var preWidth = size.width;
-			var charWidth = preWidth / this.tempo.preString.length; // Just get some average number to increase the spacing.
-			x += preWidth + charWidth;
+		var self = this;
+		renderer.wrapInAbsElem(this.tempo, "abcjs-tempo", function () {
+			renderer.createElemSet({klass: "abcjs-tempo"});
+			var y = renderer.calcY(self.pitch);
+			var text;
+			if (self.tempo.preString) {
+				text = renderer.renderText(x, y, self.tempo.preString, 'tempofont', 'tempo', "start");
+				var size = renderer.getTextSize(self.tempo.preString, 'tempofont', 'tempo', text);
+				var preWidth = size.width;
+				var charWidth = preWidth / self.tempo.preString.length; // Just get some average number to increase the spacing.
+				x += preWidth + charWidth;
+			}
+			if (self.note) {
+				self.note.setX(x);
+				for (var i = 0; i < self.note.children.length; i++)
+					self.note.children[i].draw(renderer, x);
+				x += (self.note.w + 5);
+				var str = "= " + self.tempo.bpm;
+				text = renderer.renderText(x, y, str, 'tempofont', 'tempo', "start");
+				size = renderer.getTextSize(str, 'tempofont', 'tempo', text);
+				var postWidth = size.width;
+				var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
+				x += postWidth + charWidth2;
+			}
+			if (self.tempo.postString) {
+				renderer.renderText(x, y, self.tempo.postString, 'tempofont', 'tempo', "start");
+			}
+			var tempoGroup = renderer.closeElemSet();
+		})
+	};
+
+	TempoElement.prototype.adjustElements = function(renderer) {
+		// TODO-PER: This straightens out the tempo elements because they are written in the wrong order.
+		for (var i = renderer.controller.history.length - 1; i >= 0; i--) {
+			if (renderer.controller.history[i].absEl.abcelem.type !== "tempo")
+				break;
 		}
-		if (this.note) {
-			this.note.setX(x);
-			for (var i = 0; i < this.note.children.length; i++)
-				this.note.children[i].draw(renderer, x);
-			x += (this.note.w + 5);
-			var str = "= " + this.tempo.bpm;
-			text = renderer.renderText(x, y, str, 'tempofont', 'tempo', "start");
-			size = renderer.getTextSize(str, 'tempofont', 'tempo', text);
-			var postWidth = size.width;
-			var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
-			x += postWidth + charWidth2;
+		var group;
+		for (var ii = i+1; ii < renderer.controller.history.length; ii++) {
+			var hist = renderer.controller.history[ii];
+			var inGroup = hist.svgEl.parentNode.tagName.toLowerCase() === 'g';
+			if (inGroup)
+				group = hist.svgEl.parentNode;
+			else if (group) {
+				group.appendChild(hist.svgEl);
+			}
+			var classes = hist.svgEl.getAttribute("class");
+			classes = classes.replace("abcjs-tempo",'');
+			hist.svgEl.setAttribute("class", classes);
+
+			console.log(classes)
 		}
-		if (this.tempo.postString) {
-			renderer.renderText(x, y, this.tempo.postString, 'tempofont', 'tempo', "start");
+		var len = renderer.controller.history.length-i-1;
+		if (group && len > 1) {
+			renderer.controller.combineHistory(len, group);
 		}
-		var tempoGroup = renderer.closeElemSet();
-		renderer.controller.combineHistory(renderer.controller.history.length - historyLen, tempoGroup);
 	};
 })();
 

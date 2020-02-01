@@ -198,6 +198,10 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	var g = renderer.endGroup(klass);
 	if (g)
 		this.elemset.push(g);
+	if (klass === "tempo" && this.children.length > 0) {
+		// Combine any tempo elements that are in a row. TODO-PER: this is a hack because the tempo note is an AbsoluteElement so there are nested AbsoluteElements here.
+		this.children[0].adjustElements(renderer);
+	}
 	if (this.klass)
 		this.setClass("mark", "", "#00ff00");
 	if (this.hint)

@@ -238,7 +238,6 @@ VoiceElement.prototype.draw = function (renderer, bartop) {
 		var self = this;
 		renderer.wrapInAbsElem({ el_type: "voice-name", startChar: -1, endChar: -1, text: this.header }, 'meta-bottom extra-text', function() {
 			var textEl = renderer.renderText(renderer.padding.left, renderer.calcY(textpitch), self.header, 'voicefont', 'staff-extra voice-name', 'start');
-			this.controller.recordHistory(textEl);
 			return textEl;
 		});
 	}

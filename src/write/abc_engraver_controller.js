@@ -429,8 +429,10 @@ function mouseUp(ev) {
 }
 
 EngraverController.prototype.recordHistory = function (svgEl, notSelectable) {
-	var isNote = this.currentAbsEl && this.currentAbsEl.abcelem && this.currentAbsEl.abcelem.el_type === "note" && !this.currentAbsEl.abcelem.rest;
+	var isNote = this.currentAbsEl && this.currentAbsEl.abcelem && this.currentAbsEl.abcelem.el_type === "note" && !this.currentAbsEl.abcelem.rest && svgEl.tagName !== 'text';
 	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, selectable: notSelectable !== true, isDraggable: isNote });
+	//var last = this.history[this.history.length-1];
+	//console.log(last.svgEl, { selectable: last.selectable, isDraggable: last.isDraggable});
 };
 
 function getDim(historyEl) {

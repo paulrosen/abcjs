@@ -39,25 +39,21 @@ CrescendoElem.prototype.draw = function (renderer) {
 		window.console.error("Crescendo Element y-coordinate not set.");
 	var y = renderer.calcY(this.pitch) + 4; // This is the top pixel to use (it is offset a little so that it looks good with the volume marks.)
 	var height = 8;
-	renderer.createElemSet({klass: "dynamics"});
 	if (this.dir === "<") {
-		this.drawLine(renderer, y+height/2, y);
-		this.drawLine(renderer, y+height/2, y+height);
+		this.drawLine(renderer, y+height/2, y, y+height/2, y+height);
 	} else {
-		this.drawLine(renderer, y, y+height/2);
-		this.drawLine(renderer, y+height, y+height/2);
+		this.drawLine(renderer, y, y+height/2, y+height, y+height/2);
 	}
-	var g = renderer.closeElemSet();
-	renderer.controller.recordHistory(g);
 };
 
-CrescendoElem.prototype.drawLine = function (renderer, y1, y2) {
+CrescendoElem.prototype.drawLine = function (renderer, y1, y2, y3, y4) {
 	// TODO-PER: This is just a quick hack to make the dynamic marks not crash if they are mismatched. See the slur treatment for the way to get the beginning and end.
 	var left = this.anchor1 ? this.anchor1.x : 0;
 	var right = this.anchor2 ? this.anchor2.x : 800;
-	var pathString = sprintf("M %f %f L %f %f",
-		left, y1, right, y2);
-	renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('decoration'), notSelectable: true});
+
+	var pathString = sprintf("M %f %f L %f %f M %f %f L %f %f",
+		left, y1, right, y2, left, y3, right, y4);
+	renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('dynamics decoration')});
 };
 
 module.exports = CrescendoElem;

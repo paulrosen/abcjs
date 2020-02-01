@@ -711,10 +711,7 @@ Renderer.prototype.scaleExistingElem = function (elem, scaleX, scaleY, x, y) {
 
 Renderer.prototype.printPath = function (attrs) {
   var ret = this.paper.path(attrs);
-  if (!attrs.notSelectable)
-		this.controller.recordHistory(ret, true);
-  else
-	  this.controller.recordHistory(ret);
+	this.controller.recordHistory(ret, attrs.notSelectable);
   if (this.doRegression) this.addToRegression(ret);
   return ret;
 };
@@ -722,13 +719,13 @@ Renderer.prototype.printPath = function (attrs) {
 Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Tony
 	var ret1;
 	var ret2;
-	this.wrapInAbsElem({ el_type: "brace", startChar: -1, endChar: -1 }, 'brace', function() {
+	this.wrapInAbsElem({ el_type: "brace", startChar: -1, endChar: -1 }, 'abcjs-brace', function() {
 		var yHeight = yBottom - yTop;
 
 		var xCurve = [7.5, -8, 21, 0, 18.5, -10.5, 7.5];
 		var yCurve = [0, yHeight/5.5, yHeight/3.14, yHeight/2, yHeight/2.93, yHeight/4.88, 0];
 
-		this.createElemSet({ klass: 'brace' });
+		this.createElemSet({ klass: 'abcjs-brace' });
 		var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
 			xLeft+xCurve[0], yTop+yCurve[0],
 			xLeft+xCurve[1], yTop+yCurve[1],
@@ -752,7 +749,7 @@ Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Tony
 			xLeft+xCurve[6], yTop+yCurve[6]);
 		ret2 = this.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': this.addClasses('brace')});
 		var g = this.closeElemSet();
-		this.controller.recordHistory(g);
+		this.controller.recordHistory(g, true);
 		return g;
 	});
 
