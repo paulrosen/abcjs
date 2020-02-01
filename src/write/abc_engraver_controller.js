@@ -278,18 +278,16 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 function getCoord(ev) {
 	var x = ev.offsetX;
 	var y = ev.offsetY;
-	// TODO-PER: This only works for Firefox, not Chrome.
 	// The target might be the SVG that we want, or it could be an item in the SVG (usually a path). If it is not the SVG then
 	// add an offset to the coordinates.
-	//console.log(x, y, ev.target.tagName, ev, ev.target.getBoundingClientRect())
-	if (ev.target.tagName.toLowerCase() !== 'svg') {
-		var box = ev.target.getBBox();
-		var absRect = ev.target.getBoundingClientRect();
-		var offsetX = ev.clientX - absRect.left;
-		var offsetY = ev.clientY - absRect.top;
-		x = offsetX + box.x;
-		y = offsetY + box.y;
-	}
+	// if (ev.target.tagName.toLowerCase() !== 'svg') {
+	// 	var box = ev.target.getBBox();
+	// 	var absRect = ev.target.getBoundingClientRect();
+	// 	var offsetX = ev.clientX - absRect.left;
+	// 	var offsetY = ev.clientY - absRect.top;
+	// 	x = offsetX + box.x;
+	// 	y = offsetY + box.y;
+	// }
 	return [x,y];
 }
 

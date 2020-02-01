@@ -15,7 +15,6 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var parseCommon = require('../parse/abc_common');
-var AbsoluteElement = require('./abc_absolute_element');
 
 var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
 	this.children = [];
