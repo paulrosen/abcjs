@@ -112,6 +112,7 @@ var TempoElement;
 			window.console.error("Tempo Element y-coordinate not set.");
 
 		var self = this;
+		var tempoGroup;
 		renderer.wrapInAbsElem(this.tempo, "abcjs-tempo", function () {
 			renderer.createElemSet({klass: "abcjs-tempo"});
 			var y = renderer.calcY(self.pitch);
@@ -138,8 +139,9 @@ var TempoElement;
 			if (self.tempo.postString) {
 				renderer.renderText(x, y, self.tempo.postString, 'tempofont', 'tempo', "start");
 			}
-			var tempoGroup = renderer.closeElemSet();
+			tempoGroup = renderer.closeElemSet();
 		})
+		return tempoGroup;
 	};
 
 	TempoElement.prototype.adjustElements = function(renderer) {
@@ -160,8 +162,6 @@ var TempoElement;
 			var classes = hist.svgEl.getAttribute("class");
 			classes = classes.replace("abcjs-tempo",'');
 			hist.svgEl.setAttribute("class", classes);
-
-			console.log(classes)
 		}
 		var len = renderer.controller.history.length-i-1;
 		if (group && len > 1) {

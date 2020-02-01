@@ -261,7 +261,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	if (this.dragging) {
 		for (var h = 0; h < this.history.length; h++) {
 			var hist = this.history[h];
-			if (!hist.svgEl.getAttribute("notSelectable")) {
+			if (hist.selectable) {
 				hist.svgEl.setAttribute("tabindex", 0);
 				hist.svgEl.setAttribute("data-index", h);
 				hist.svgEl.addEventListener("keydown", keyboardDown.bind(this));
