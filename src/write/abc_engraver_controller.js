@@ -39,7 +39,8 @@ var EngraverController = function(paper, params) {
   params = params || {};
   this.selectionColor = params.selectionColor;
   this.dragColor = params.dragColor ? params.dragColor : params.selectionColor;
-  this.dragging = params.dragging;
+  this.dragging = !!params.dragging;
+  this.selectAll = !!params.selectAll;
   this.responsive = params.responsive;
   this.space = 3*spacing.SPACE;
   this.scale = params.scale ? parseFloat(params.scale) : 0;
@@ -430,7 +431,12 @@ function mouseUp(ev) {
 
 EngraverController.prototype.recordHistory = function (svgEl, notSelectable) {
 	var isNote = this.currentAbsEl && this.currentAbsEl.abcelem && this.currentAbsEl.abcelem.el_type === "note" && !this.currentAbsEl.abcelem.rest && svgEl.tagName !== 'text';
-	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, selectable: notSelectable !== true, isDraggable: isNote });
+	var selectable = notSelectable !== true;
+	if (!this.selectAll) {
+		if (this.currentAbsEl.abcelem.el_type !== "note" && this.currentAbsEl.abcelem.el_type !== "bar")
+			selectable = false;
+	}
+	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, selectable: selectable, isDraggable: isNote });
 	//var last = this.history[this.history.length-1];
 	//console.log(last.svgEl, { selectable: last.selectable, isDraggable: last.isDraggable});
 };
