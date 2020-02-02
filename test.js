@@ -69,6 +69,7 @@ var parserLint = require('./src/test/abc_parser_lint');
 var verticalLint = require('./src/test/abc_vertical_lint');
 var midiLint = require('./src/test/abc_midi_lint');
 var midiSequencerLint = require('./src/test/abc_midi_sequencer_lint');
-abcjs['test'] = { ParserLint: parserLint, verticalLint: verticalLint, midiLint: midiLint, midiSequencerLint: midiSequencerLint };
+var renderingLint = require('./src/test/rendering-lint');
+abcjs['test'] = { ParserLint: parserLint, verticalLint: verticalLint, midiLint: midiLint, midiSequencerLint: midiSequencerLint, renderingLint: renderingLint };
 
 module.exports = abcjs;
