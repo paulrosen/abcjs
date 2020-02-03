@@ -433,7 +433,7 @@ EngraverController.prototype.recordHistory = function (svgEl, notSelectable) {
 	var isNote = this.currentAbsEl && this.currentAbsEl.abcelem && this.currentAbsEl.abcelem.el_type === "note" && !this.currentAbsEl.abcelem.rest && svgEl.tagName !== 'text';
 	var selectable = notSelectable !== true;
 	if (!this.selectAll) {
-		if (this.currentAbsEl.abcelem.el_type !== "note" && this.currentAbsEl.abcelem.el_type !== "bar")
+		if (!this.currentAbsEl || (this.currentAbsEl.abcelem.el_type !== "note" && this.currentAbsEl.abcelem.el_type !== "bar"))
 			selectable = false;
 	}
 	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, selectable: selectable, isDraggable: isNote });
