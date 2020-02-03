@@ -143,7 +143,7 @@ var Tune = function() {
 	this.getBeatsPerMeasure = function() {
 		var beatsPerMeasure;
 		var meter = this.getMeterFraction();
-		if (meter.den === 8) {
+		if (meter.num % 3 === 0) {
 			beatsPerMeasure = meter.num / 3;
 		} else {
 			beatsPerMeasure = meter.num;
@@ -1320,7 +1320,7 @@ var Tune = function() {
 			bpm = 180;
 			// Compensate for compound meter, where the beat isn't a beat.
 			var meter = this.getMeterFraction();
-			if (meter && meter.den === 8) {
+			if (meter && (meter.num % 3 === 0)) {
 				bpm = 120;
 			}
 		}
