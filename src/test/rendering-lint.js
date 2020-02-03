@@ -10,20 +10,29 @@ function lintOne(history) {
 	var items = [];
 	var svgEl = history.svgEl;
 	var absEl = history.absEl;
-	items.push(listSvgElement(svgEl));
 	items.push("selectable: " + history.selectable);
 	items.push("isDraggable: " + history.isDraggable);
-	items.push("element classes: " + listClasses(svgEl));
 	var size = svgEl.getBBox();
 	items.push("size: " + Math.round(size.x) + "," + Math.round(size.y) + " - " + Math.round(size.width) + "," + Math.round(size.height));
-	items.push("attributes: " + listAttributes(svgEl));
-	items.push("abc: " + listAbcElement(absEl.abcelem));
-	items.push("abs: " + listAbsElement(absEl));
+
+	items.push(listSvgElement(svgEl, 1));
+	items.push("element classes: " + listClasses(svgEl, 1));
+	items.push("attributes:" + listAttributes(svgEl, 1));
+	items.push("abc:" + listAbcElement(absEl.abcelem, 1));
+	items.push(listAbsElement(absEl, 1));
 
 	return items.join("\n");
 }
 
-function listSvgElement(svgEl) {
+function createIndent(indent) {
+	var str = "";
+	for (var i = 0; i < indent; i++)
+		str += "\t";
+	return str;
+}
+
+function listSvgElement(svgEl, indent) {
+	var tab = createIndent(indent);
 	var output = [];
 	output.push("element type: " + svgEl.tagName );
 	switch (svgEl.tagName) {
@@ -38,7 +47,7 @@ function listSvgElement(svgEl) {
 		default:
 			console.log(svgEl.outerHTML)
 	}
-	return output.join("\n\t");
+	return output.join("\n"+tab);
 }
 
 function listGroupChildren(g) {
@@ -50,7 +59,8 @@ function listGroupChildren(g) {
 	return output.join(" ");
 }
 
-function listAttributes(el) {
+function listAttributes(el, indent) {
+	var tab = createIndent(indent);
 	if (el.hasAttributes()) {
 		var attrs = el.attributes;
 		var output = [];
@@ -59,13 +69,14 @@ function listAttributes(el) {
 				output.push(attrs[i].name + ": " + attrs[i].value);
 		}
 		output = output.sort();
-		return "\n\t" + output.join("\n\t");
+		return "\n"+tab + output.join("\n"+tab);
 	} else {
 		return "";
 	}
 }
 
-function listClasses(el) {
+function listClasses(el, indent) {
+	var tab = createIndent(indent);
 	var classes = el.classList;
 	var klasses = [];
 	for (var i = 0; i < classes.length; i++)
@@ -73,12 +84,13 @@ function listClasses(el) {
 	klasses = klasses.sort();
 	if (klasses.length === 0)
 		return "[none]";
-	return klasses.join(", ");
+	return tab + klasses.join(", ");
 }
 
-function listAbsElement(absEl) {
-	var output = [];
-	var keys = Object.keys(absEl);
+function listAbsElement(absEl, indent) {
+	var tab = createIndent(indent);
+	var output = ["abs:"];
+	var keys = Object.keys(absEl).sort();
 	for (var i = 0; i < keys.length; i++) {
 		var item = absEl[keys[i]];
 		switch(keys[i]) {
@@ -87,7 +99,7 @@ function listAbsElement(absEl) {
 			case "elemset":
 				output.push(keys[i] + ": (" + item.length + ")");
 				for (var j = 0; j < item.length; j++) {
-					output.push(listSvgElement(item[j]));
+					output.push(listSvgElement(item[j], indent+1));
 				}
 				break;
 			case "specialY":
@@ -104,7 +116,7 @@ function listAbsElement(absEl) {
 				if (item.length > 0) {
 					output.push(keys[i] + ":");
 					for (var k = 0; k < item.length; k++)
-						output.push(listRelativeElement(item[k]));
+						output.push(listRelativeElement(item[k], indent+1));
 				}
 				break;
 			default:
@@ -112,14 +124,14 @@ function listAbsElement(absEl) {
 					output.push(keys[i] + ": " + item);
 		}
 	}
-	output = output.sort();
-	return "\n\t" + output.join("\n\t");
+	return output.join("\n"+tab);
 }
 
-function listRelativeElement(relativeElement) {
+function listRelativeElement(relativeElement, indent) {
+	var tab = createIndent(indent);
 	var output = [];
 	output.push("relative element: " + relativeElement.type);
-	var keys = Object.keys(relativeElement);
+	var keys = Object.keys(relativeElement).sort();
 	for (var i = 0; i < keys.length; i++) {
 		var item = relativeElement[keys[i]];
 		switch (keys[i]) {
@@ -129,7 +141,7 @@ function listRelativeElement(relativeElement) {
 			case "graphelem":
 				if (item) {
 					output.push(keys[i] +": ");
-					output.push(listSvgElement(item))
+					output.push(listSvgElement(item, indent+1))
 				}
 				break;
 			default:
@@ -138,14 +150,14 @@ function listRelativeElement(relativeElement) {
 				break;
 		}
 	}
-	output = output.sort();
-	return "\n\t" + output.join("\n\t");
+	return output.join("\n"+tab);
 }
 
-function listAbcElement(abcelem) {
+function listAbcElement(abcelem, indent) {
+	var tab = createIndent(indent);
 	var output = [];
 	var ignored = [];
-	var keys = Object.keys(abcelem);
+	var keys = Object.keys(abcelem).sort();
 	for (var i = 0; i < keys.length; i++) {
 		var item = abcelem[keys[i]];
 		switch(keys[i]) {
@@ -185,7 +197,7 @@ function listAbcElement(abcelem) {
 			case "lyric":
 			case "pitches":
 			case "accidentals":
-				output.push(listArrayOfObjects(keys[i], item));
+				output.push(listArrayOfObjects(keys[i], item, indent+1));
 				break;
 			case "abselem":
 				break;
@@ -194,31 +206,30 @@ function listAbcElement(abcelem) {
 				console.log(keys[i] + ' ' + item)
 		}
 	}
-	output = output.sort();
 	if (ignored.length > 0)
 		output.push("ignored: " + ignored.join(" "));
-	return "\n\t" + output.join("\n\t");
+	return "\n"+tab + output.join("\n"+tab);
 }
 
-function listArrayOfObjects(key, arr) {
+function listArrayOfObjects(key, arr, indent) {
+	var tab = createIndent(indent);
 	var output = [];
 	output.push(key + ":");
 	for (var i = 0; i < arr.length; i++) {
 		var item = arr[i];
-		var keys = Object.keys(item);
+		var keys = Object.keys(item).sort();
 		for (var j = 0; j < keys.length; j++) {
 			switch(keys[j]) {
 				case "startSlur":
 				case "startTie":
-					output.push(listArrayOfObjects(keys[j], item[keys[j]]));
+					output.push(listArrayOfObjects(keys[j], item[keys[j]], indent+1));
 					break;
 				default:
 					output.push(keys[j] + ': ' + item[keys[j]]);
 			}
 		}
 	}
-	output = output.sort();
-	return "\n\t" + output.join("\n\t");
+	return output.join("\n"+tab);
 }
 
 module.exports = renderingLint;
