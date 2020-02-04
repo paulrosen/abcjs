@@ -171,6 +171,7 @@ var rendererFactory;
 		var a = [];
 
 		// cut up into 7 bit chunks;
+		n = Math.round(n);
 		while (n !== 0) {
 			a.push(n & 0x7F);
 			n = n >> 7;
