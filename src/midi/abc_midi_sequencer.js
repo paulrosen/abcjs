@@ -33,6 +33,7 @@ var sequence;
 		var program = options.program || 0;	// The program if there isn't a program specified.
 		var transpose = options.midiTranspose || 0;
 		var channel = options.channel || 0;
+		var channelExplicitlySet = false;
 		var drumPattern = options.drum || "";
 		var drumBars = options.drumBars || 1;
 		var drumIntro = options.drumIntro || 0;
@@ -79,11 +80,14 @@ var sequence;
 					program = globals.program[1];
 					channel = globals.program[0];
 				}
+				channelExplicitlySet = true;
 			}
 			if (globals.transpose)
 				transpose = globals.transpose[0];
-			if (globals.channel)
+			if (globals.channel) {
 				channel = globals.channel[0];
+				channelExplicitlySet = true;
+			}
 			if (globals.drum)
 				drumPattern = globals.drum;
 			if (globals.drumbars)
@@ -155,7 +159,7 @@ var sequence;
 						if (!voices[voiceNumber]) {
 							voices[voiceNumber] = [].concat(JSON.parse(JSON.stringify(startVoice)));
 						}
-						if (staff.clef && staff.clef.type === 'perc') {
+						if (staff.clef && staff.clef.type === 'perc' && !channelExplicitlySet) {
 							for (var cl = 0; cl < voices[voiceNumber].length; cl++) {
 								if (voices[voiceNumber][cl].el_type === 'instrument')
 									voices[voiceNumber][cl].program = PERCUSSION_PROGRAM;
@@ -277,6 +281,7 @@ var sequence;
 											break;
 										case "program":
 											voices[voiceNumber].push({ el_type: 'instrument', program: elem.params[0] });
+											channelExplicitlySet = true;
 											break;
 										case "transpose":
 											voices[voiceNumber].push({ el_type: 'transpose', transpose: elem.params[0] });
