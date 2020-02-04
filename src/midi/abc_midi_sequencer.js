@@ -158,6 +158,9 @@ var sequence;
 						var voice = staff.voices[k];
 						if (!voices[voiceNumber]) {
 							voices[voiceNumber] = [].concat(JSON.parse(JSON.stringify(startVoice)));
+							var voiceName = getTrackTitle(line.staffGroup, voiceNumber);
+							if (voiceName)
+								voices[voiceNumber].unshift({el_type: "name", trackName: voiceName});
 						}
 						if (staff.clef && staff.clef.type === 'perc' && !channelExplicitlySet) {
 							for (var cl = 0; cl < voices[voiceNumber].length; cl++) {
@@ -346,6 +349,18 @@ var sequence;
 		}
 		return voices;
 	};
+
+	function getTrackTitle(staffGroup, voiceNumber) {
+		if (!staffGroup || !staffGroup.staffs)
+			return undefined;
+		for (var i = 0; i < staffGroup.staffs.length; i++) {
+			var staff = staffGroup.staffs[i];
+			for (var j = 0; j < staff.voices.length; j++) {
+				if (staff.voices[j] === voiceNumber)
+					return staffGroup.voices[staff.voices[j]].header;
+			}
+		}
+	}
 
 	function interpretTempo(element) {
 		var duration = 1/4;

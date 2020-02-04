@@ -45,6 +45,9 @@ var create;
 			for (var j = 0; j < commands.tracks[i].length; j++) {
 				var event = commands.tracks[i][j];
 				switch (event.cmd) {
+					case 'text':
+						midi.setName(event.type, event.text);
+						break;
 					case 'program':
 						midi.setChannel(event.channel);
 						midi.setInstrument(event.instrument);

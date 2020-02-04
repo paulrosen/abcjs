@@ -80,6 +80,28 @@ var rendererFactory;
 		this.trackstrings += this.track;
 	};
 
+	Midi.prototype.setName = function(type, text) {
+		// MIDI defines the following types of events:
+		//FF 01 len text Text Event
+		//FF 02 len text Copyright Notice
+		//FF 03 len text Sequence/Track Name
+		//FF 04 len text Instrument Name
+		//FF 05 len text Lyric
+		//FF 06 len text Marker
+		//FF 07 len text Cue Point
+		switch(type) {
+			case 'name':
+				var name = "%00%FF%03" + toHex(text.length, 2);
+				for (var i = 0; i < text.length; i++)
+					name += toHex(text.charCodeAt(i), 2);
+				if (this.track)
+					this.track = name + this.track;
+				else
+					this.track = name;
+				break;
+		}
+	};
+
 	Midi.prototype.setInstrument = function(number) {
 		//console.log("setInstrument", number);
 		if (this.track)

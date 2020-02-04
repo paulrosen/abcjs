@@ -39,6 +39,7 @@ var flatten;
 	var pitchesTied;
 	var lastNoteDurationPosition;
 	var currentTrackCounter;
+	var currentTrackName;
 
 	var meter = { num: 4, den: 4 };
 	var chordTrack;
@@ -80,6 +81,7 @@ var flatten;
 		// channel = undefined;
 		currentTrack = undefined;
 		currentTrackCounter = undefined;
+		currentTrackName = undefined;
 		pitchesTied = {};
 
 		// For resolving chords.
@@ -114,10 +116,14 @@ var flatten;
 			var voice = voices[i];
 			currentTrack = [{ cmd: 'program', channel: i, instrument: instrument }];
 			currentTrackCounter = 0;
+			currentTrackName = undefined;
 			pitchesTied = {};
 			for (var j = 0; j < voice.length; j++) {
 				var element = voice[j];
 				switch (element.el_type) {
+					case "name":
+						currentTrackName = {cmd: 'text', type: "name", text: element.trackName };
+						break;
 					case "note":
 						writeNote(element, options.voicesOff);
 						break;
@@ -201,6 +207,8 @@ var flatten;
 			}
 			if (currentTrack[0].instrument === undefined)
 				currentTrack[0].instrument = instrument ? instrument : 0;
+			if (currentTrackName)
+				currentTrack.unshift(currentTrackName);
 			tracks.push(currentTrack);
 			if (chordTrack.length > 0) // Don't do chords on more than one track, so turn off chord detection after we create it.
 				chordTrackFinished = true;
