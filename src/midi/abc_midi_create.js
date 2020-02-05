@@ -36,7 +36,9 @@ var create;
 		var title = abcTune.metaText ? abcTune.metaText.title : undefined;
 		if (title && title.length > 128)
 			title = title.substring(0,124) + '...';
-		midi.setGlobalInfo(commands.tempo, title);
+		var key = abcTune.getKeySignature();
+		var time = abcTune.getMeterFraction();
+		midi.setGlobalInfo(commands.tempo, title, key, time);
 		midiJs.setGlobalInfo(commands.tempo, title);
 
 		for (var i = 0; i < commands.tracks.length; i++) {
@@ -46,7 +48,7 @@ var create;
 				var event = commands.tracks[i][j];
 				switch (event.cmd) {
 					case 'text':
-						midi.setName(event.type, event.text);
+						midi.setText(event.type, event.text);
 						break;
 					case 'program':
 						midi.setChannel(event.channel);
