@@ -1,0 +1,3 @@
+[submodule "docs/.vuepress/dist"]
+  path = docs/.vuepress/dist
+  url = git@github.com:paulrosen/abcjs.git
