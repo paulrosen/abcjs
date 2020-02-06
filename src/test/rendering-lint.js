@@ -47,7 +47,7 @@ function listSvgElement(svgEl, indent) {
 		default:
 			console.log(svgEl.outerHTML)
 	}
-	return output.join("\n"+tab);
+	return "\n"+tab + output.join("\n"+tab);
 }
 
 function listGroupChildren(g) {
