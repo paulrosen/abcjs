@@ -1,5 +1,4 @@
 var getNote = require('./load-note');
-var soundsCache = require('./sounds-cache');
 var createNoteMap = require('./create-note-map');
 var registerAudioContext = require('./register-audio-context');
 var activeAudioContext = require('./active-audio-context');
@@ -9,6 +8,7 @@ var instrumentIndexToName = require('./instrument-index-to-name');
 var downloadBuffer = require('./download-buffer');
 var sequence = require('../midi/abc_midi_sequencer');
 var flatten = require('../midi/abc_midi_flattener');
+var placeNote = require('./place-note');
 
 // TODO-PER: remove the midi tests from here: I don't think the object can be constructed unless it passes.
 var notSupportedMessage = "MIDI is not supported in this browser.";
@@ -142,12 +142,14 @@ function CreateSynth() {
 			//console.log(noteMapTracks);
 
 			self.audioBuffers = [];
-			noteMapTracks.forEach(function(noteMap) {
-				var audioBuffer = activeAudioContext().createBuffer(1, totalSamples, activeAudioContext().sampleRate);
+			var allPromises = [];
+			noteMapTracks.forEach(function(noteMap, trackNumber) {
+				var audioBuffer = activeAudioContext().createBuffer(2, totalSamples, activeAudioContext().sampleRate);
 				var chanData = audioBuffer.getChannelData(0);
 
+				var panDistance = 0; // TODO-PER: tracks can be separated by setting this number from -1 to 1.
 				noteMap.forEach(function(note) {
-					self._placeNote(chanData, note, tempoMultiplier, soundsCache);
+					allPromises.push(placeNote(audioBuffer, note, tempoMultiplier, activeAudioContext().sampleRate, panDistance));
 				});
 
 				self.audioBuffers.push(audioBuffer);
@@ -158,9 +160,11 @@ function CreateSynth() {
 				self.debugCallback("totalSamples = " + totalSamples);
 				self.debugCallback("creationTime = " + Math.floor((activeAudioContext().currentTime - startTime)*1000) + "ms");
 			}
-			resolve({
-				status: "ok",
-				seconds: 0
+			Promise.all(allPromises).then(function() {
+				resolve({
+					status: "ok",
+					seconds: 0
+				});
 			});
 		});
 	};
@@ -273,25 +277,6 @@ function CreateSynth() {
 			self.directSource[0].onended = function () {
 				self.onEnded(self.callbackContext);
 			};
-		}
-	};
-
-	self._placeNote = function(chanData, note, tempoMultiplier, soundsCache) {
-		var start = Math.floor(note.start*activeAudioContext().sampleRate * tempoMultiplier);
-		var numBeats = note.end - note.start;
-		var noteTimeSec = numBeats * tempoMultiplier;
-		var noteName = pitchToNoteName[note.pitch+60];
-		if (noteName) { // Just ignore pitches that don't exist.
-			var pitch = soundsCache[note.instrument][noteName].getChannelData(0);
-			var duration = Math.min(pitch.length, Math.floor(noteTimeSec * activeAudioContext().sampleRate));
-			//console.log(pitchToNote[note.pitch+''], start, numBeats, noteTimeSec, duration);
-			for (var i = 0; i < duration; i++) {
-				var thisSample = pitch[i] * note.volume / 128;
-				if (chanData[start + i])
-					chanData[start + i] = (chanData[start + i] + thisSample) *0.75;
-				else
-					chanData[start + i] = thisSample;
-			}
 		}
 	};
 }
