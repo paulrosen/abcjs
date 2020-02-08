@@ -858,8 +858,12 @@ var flatten;
 };
 	function chordNotes(bass, modifier) {
 		var intervals = chordIntervals[modifier];
-		if (!intervals)
-			intervals = chordIntervals.M;
+		if (!intervals) {
+			if (modifier.charAt(0) === 'm')
+				intervals = chordIntervals.m;
+			else
+				intervals = chordIntervals.M;
+		}
 		bass += 12;	// the chord is an octave above the bass note.
 		var notes = [ ];
 		for (var i = 0; i < intervals.length; i++) {
