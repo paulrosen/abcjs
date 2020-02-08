@@ -52,8 +52,8 @@ TextPrinter.prototype.printHeader = function() {
     this.printHeaderLine("composer","C");
     this.printHeaderLine("history","H");
     this.printHeaderLine("author","A");
-    this.printHeaderLine("book","B");  
-    this.printHeaderLine("discography","D");  
+    this.printHeaderLine("book","B");
+    this.printHeaderLine("discography","D");
     this.printHeaderLine("url","F");
     this.printHeaderLine("group","G");
     this.printHeaderLine("instruction","I");
@@ -96,7 +96,7 @@ TextPrinter.prototype.printHeaderLine = function(fieldname, abcfield, defaut) {
 	for (var i=0; i<valarray.length; i++) {
 	    this.printString(abcfield+": "+valarray[i]);
 	    this.printNewLine();
-	} 
+	}
     }
 };
 
@@ -132,20 +132,16 @@ TextPrinter.prototype.printABCLine = function(staffs) {
 };
 
 TextPrinter.prototype.printABCStaff = function(abcstaff) {
-    
-    // TODO if (abcstaff.bracket) header += "bracket "+abcstaff.bracket+" ";
-    // TODO if (abcstaff.brace) header += "brace "+abcstaff.brace+" ";
-    
-    
+
     for (this.v = 0; this.v < abcstaff.voices.length; this.v++) {
 	// TODO stuff about voices
-	
+
 	// TODO this is where key sig is this.voice.addChild(this.printClef(abcstaff.clef));
 	// this.voice.addChild(this.printKeySignature(abcstaff.key));
 	// if (abcstaff.meter) this.voice.addChild(this.printTimeSignature(abcstaff.meter));
 	this.printABCVoice(abcstaff.voices[this.v]);
     }
-    
+
 };
 
 TextPrinter.prototype.printABCVoice = function(abcline) {
@@ -208,7 +204,7 @@ TextPrinter.prototype.printNote = function(elem) {
 	    str+= '"'+elem.chord[i].name+'"';
 	}
     }
-    
+
     //TODO unify map between names and symbols (to be used with abcparse?)
     var decorations = {
 	"staccato" : ".",
@@ -270,7 +266,7 @@ TextPrinter.prototype.printNote = function(elem) {
 	    str+=this.getNoteString(elem.pitches[i], ignoreslur);
 	}
 	if (elem.pitches.length > 1) str+="]";
-    } 
+    }
 
     if (elem.pitches.length === 1 && elem.pitches[0].endSlur) {
 	str+=this.multiplyString(")",elem.pitches[0].endSlur.length);
@@ -332,9 +328,9 @@ TextPrinter.prototype.getNoteString = function(pitchelem, ignoreslur) {
 	    octave++;
 	}
     }
-    
+
     str+=pitchstr;
-    
+
     if (pitchelem.duration) {
 	str+=this.getDurationString(pitchelem.duration);
     }
@@ -354,13 +350,13 @@ TextPrinter.prototype.getDurationString = function(duration) {
     //TODO detect crooked rhythm
     if (duration/this.l > 1) {
 	return duration/this.l;
-    } 
+    }
     var ret = "";
     if (this.l/duration>1) {
 	ret+="/";
 	if (this.l/duration>2) {
 	    ret+=this.l/duration;
-	}   
+	}
     }
     return ret;
 };
