@@ -61,7 +61,7 @@ var create;
 						midiJs.startNote(convertPitch(event.pitch), event.volume);
 						break;
 					case 'stop':
-						midi.endNote(convertPitch(event.pitch), 0); // TODO-PER: Refactor: the old midi used a duration here.
+						midi.endNote(convertPitch(event.pitch));
 						midiJs.endNote(convertPitch(event.pitch));
 						break;
 					case 'move':

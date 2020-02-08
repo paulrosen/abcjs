@@ -381,7 +381,7 @@ var flatten;
 					// need to figure out how far in time the chord started: if there are pickup notes before the chords start, we need pauses.
 					var distance = timeFromStart();
 					if (distance > 0)
-						chordTrack.push({cmd: 'move', duration: distance*tempoChangeFactor });
+						addMove(chordTrack, distance*tempoChangeFactor);
 				}
 
 				lastChord = c;
@@ -561,20 +561,20 @@ var flatten;
 				}
 				var remainingTime = soundDuration;
 				for (var dd = 0; dd < relativeNoteList.length; dd++) {
-					currentTrack.push({ cmd: 'move', duration: (noteTime-0.001)*tempoChangeFactor });
+					addMove(currentTrack, (noteTime-0.001)*tempoChangeFactor);
 					for (iii = 0; iii < elem.pitches.length; iii++) {
 						currentTrack.push({ cmd: 'stop', pitch: currentlyPlayingNote[iii]});
 					}
-					currentTrack.push({ cmd: 'move', duration: 0.001*tempoChangeFactor });
+					addMove(currentTrack, 0.001*tempoChangeFactor);
 					for (iii = 0; iii < elem.pitches.length; iii++) {
 						currentTrack.push({ cmd: 'start', pitch: adjustPitch({ pitch: elem.pitches[iii].pitch+relativeNoteList[dd]}), volume: velocity});
 						currentlyPlayingNote[iii] = adjustPitch({ pitch: elem.pitches[iii].pitch+relativeNoteList[dd]});
 					}
 					remainingTime -= noteTime;
 				}
-				currentTrack.push({ cmd: 'move', duration: remainingTime*tempoChangeFactor });
+				addMove(currentTrack, remainingTime*tempoChangeFactor);
 			} else
-				currentTrack.push({ cmd: 'move', duration: soundDuration*tempoChangeFactor });
+				addMove(currentTrack, soundDuration*tempoChangeFactor);
 
 			lastNoteDurationPosition = currentTrack.length-1;
 			currentTrackCounter += soundDuration*tempoChangeFactor;
@@ -583,10 +583,10 @@ var flatten;
 				if (!pitchesTied[''+pitches[ii].pitch])
 					currentTrack.push({ cmd: 'stop', pitch: pitches[ii].pitch });
 			}
-			currentTrack.push({ cmd: 'move', duration: thisBreakBetweenNotes*tempoChangeFactor });
+			addMove(currentTrack, thisBreakBetweenNotes*tempoChangeFactor);
 			currentTrackCounter += thisBreakBetweenNotes*tempoChangeFactor;
 		} else if (elem.rest) {
-			currentTrack.push({ cmd: 'move', duration: duration*tempoChangeFactor });
+			addMove(currentTrack, duration*tempoChangeFactor);
 			currentTrackCounter += duration*tempoChangeFactor;
 		}
 
@@ -665,7 +665,7 @@ var flatten;
 			var gp = graces[g];
 			if (gp !== skipNote)
 				currentTrack.push({cmd: 'start', pitch: gp.pitch, volume: velocity});
-			currentTrack.push({cmd: 'move', duration: graces[g].duration*tempoChangeFactor });
+			addMove(currentTrack, graces[g].duration*tempoChangeFactor);
 			if (gp !== skipNote)
 				currentTrack.push({cmd: 'stop', pitch: gp.pitch});
 			if (!stealFromCurrent)
@@ -876,19 +876,19 @@ var flatten;
 		// undefined means there is a stop time.
 		if (boom !== undefined)
 			chordTrack.push({cmd: 'start', pitch: boom, volume: 64});
-		chordTrack.push({ cmd: 'move', duration: (beatLength/2)*tempoChangeFactor });
+		addMove(chordTrack, (beatLength/2)*tempoChangeFactor);
 		if (boom !== undefined)
 			chordTrack.push({ cmd: 'stop', pitch: boom });
-		chordTrack.push({ cmd: 'move', duration: (beatLength/2)*tempoChangeFactor });
+		addMove(chordTrack, (beatLength/2)*tempoChangeFactor);
 	}
 
 	function writeChick(chick, beatLength) {
 		for (var c = 0; c < chick.length; c++)
 			chordTrack.push({cmd: 'start', pitch: chick[c], volume: 48});
-		chordTrack.push({ cmd: 'move', duration: (beatLength/2)*tempoChangeFactor });
+		addMove(chordTrack, (beatLength/2)*tempoChangeFactor);
 		for (c = 0; c < chick.length; c++)
 			chordTrack.push({ cmd: 'stop', pitch: chick[c] });
-		chordTrack.push({ cmd: 'move', duration: (beatLength/2)*tempoChangeFactor });
+		addMove(chordTrack, (beatLength/2)*tempoChangeFactor);
 	}
 
 	var rhythmPatterns = { "2/2": [ 'boom', 'chick' ],
@@ -935,7 +935,7 @@ var flatten;
 						writeChick(currentChords[0].chord.chick, beatLength);
 						break;
 					case '':
-						chordTrack.push({ cmd: 'move', duration: beatLength*tempoChangeFactor });
+						addMove(chordTrack, beatLength*tempoChangeFactor);
 						break;
 				}
 			}
@@ -978,7 +978,7 @@ var flatten;
 					if (beats[''+m2])	// If there is an explicit chord on this beat, play it.
 						writeChick(thisChord.chord.chick, beatLength);
 					else
-						chordTrack.push({cmd: 'move', duration: beatLength*tempoChangeFactor });
+						addMove(chordTrack, beatLength*tempoChangeFactor);
 					break;
 			}
 		}
@@ -1077,7 +1077,7 @@ var flatten;
 
 	function drumBeat(pitch, soundLength, volume) {
 		drumTrack.push({ cmd: 'start', pitch: pitch - 60, volume: volume});
-		drumTrack.push({ cmd: 'move', duration: soundLength });
+		addMove(drumTrack, soundLength);
 		drumTrack.push({ cmd: 'stop', pitch: pitch - 60 });
 	}
 
@@ -1091,14 +1091,14 @@ var flatten;
 			// need to figure out how far in time the bar started: if there are pickup notes before the chords start, we need pauses.
 			var distance = timeFromStart();
 			if (distance > 0 && distance < measureLen - 0.01) { // because of floating point, adding the notes might not exactly equal the measure size.
-				drumTrack.push({cmd: 'move', duration: distance * tempoChangeFactor});
+				addMove(drumTrack, distance * tempoChangeFactor);
 				return;
 			}
 		}
 
 		if (!drumDefinition.on) {
 			// this is the case where there has been a drum track, but it was specifically turned off.
-			drumTrack.push({ cmd: 'move', duration: measureLen * tempoChangeFactor });
+			addMove(drumTrack, measureLen * tempoChangeFactor);
 			return;
 		}
 		for (var i = 0; i < drumDefinition.pattern.length; i++) {
@@ -1106,8 +1106,12 @@ var flatten;
 			if (drumDefinition.pattern[i].pitch)
 				drumBeat(drumDefinition.pattern[i].pitch, len, drumDefinition.pattern[i].velocity);
 			else
-				drumTrack.push({ cmd: 'move', duration: len });
+				addMove(drumTrack, len);
 		}
+	}
+	function addMove(array, duration) {
+		if (duration > 0)
+			array.push({ cmd: 'move', duration: duration });
 	}
 })();
 

@@ -111,8 +111,8 @@ var rendererFactory;
 		this.track += "%" + pitch.toString(16) + toHex(loudness, 2); //note
 	};
 
-	Midi.prototype.endNote = function(pitch, length) {
-		this.track += toDurationHex(this.silencelength+length); // only need to shift by amount of silence (if there is any)
+	Midi.prototype.endNote = function(pitch) {
+		this.track += toDurationHex(this.silencelength); // only need to shift by amount of silence (if there is any)
 		this.silencelength = 0;
 //		this.track += toDurationHex(length); //duration
 		this.track += this.noteOffAndChannel;
@@ -121,6 +121,8 @@ var rendererFactory;
 
 	Midi.prototype.addRest = function(length) {
 		this.silencelength += length;
+		if (this.silencelength < 0)
+			this.silencelength = 0;
 	};
 
 	Midi.prototype.getData = function() {
