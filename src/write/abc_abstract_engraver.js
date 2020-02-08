@@ -181,17 +181,17 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
 	  var isSingleLineStaff = staffLines === 1;
 	  this.createABCVoice(abcstaff.voices[v],tempo, s, v, isSingleLineStaff, voice);
 	  staffgroup.setStaffLimits(voice);
-            //Tony: Here I am following what staves need to be surrounded by the brace, by incrementing the length of the brace class.
-            //So basically this keeps incrementing the number of staff surrounded by the brace until it sees "end".
-            //This then gets processed in abc_staff_group_element.js, so that it will have the correct top and bottom coordinates for the brace.
 			if(abcstaff.brace === "start"){
-				staffgroup.brace = new BraceElem(1, true);
+				staffgroup.brace = new BraceElem(voice.staff, "brace");
 			}
 			else if(abcstaff.brace === "end" && staffgroup.brace) {
-				staffgroup.brace.increaseStavesIncluded();
+				staffgroup.brace.setBottomStaff(voice.staff);
 			}
-			else if(abcstaff.brace === "continue" && staffgroup.brace){
-				staffgroup.brace.increaseStavesIncluded();
+			if(abcstaff.bracket === "start"){
+				staffgroup.bracket = new BraceElem(voice.staff, "bracket");
+			}
+			else if(abcstaff.bracket === "end" && staffgroup.bracket) {
+				staffgroup.bracket.setBottomStaff(voice.staff);
 			}
   }
 };

@@ -49,6 +49,7 @@ var StaffGroupElement = function() {
 	this.voices = [];
 	this.staffs = [];
 	this.brace = undefined; //tony
+	this.bracket = undefined;
 };
 
 StaffGroupElement.prototype.setLimit = function(member, voice) {
@@ -198,7 +199,7 @@ StaffGroupElement.prototype.finished = function() {
 	return true;
 };
 
-function getLeftEdgeOfStaff(renderer, voices, brace) {
+function getLeftEdgeOfStaff(renderer, voices, brace, bracket) {
 	var x = renderer.padding.left;
 
 	// find out how much space will be taken up by voice headers
@@ -216,11 +217,16 @@ function getLeftEdgeOfStaff(renderer, voices, brace) {
 	}
 	x += voiceheaderw;
 
+	var ofs = 0;
 	if (brace) {
 		brace.setLocation(x);
-		x += brace.getWidth();
+		ofs = brace.getWidth();
 	}
-	return x;
+	if (bracket) {
+		bracket.setLocation(x);
+		ofs = Math.max(ofs, bracket.getWidth());
+	}
+	return x + ofs;
 }
 
 StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
@@ -228,7 +234,7 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 	var spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
 	var minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
 
-	var x = getLeftEdgeOfStaff(renderer, this.voices, this.brace);
+	var x = getLeftEdgeOfStaff(renderer, this.voices, this.brace, this.bracket);
 	this.startx=x;
 	var i;
 
@@ -405,6 +411,12 @@ StaffGroupElement.prototype.draw = function (renderer) {
 				renderer.noteNumber = null;
 				renderer.printStave(this.startx, this.w, staff.lines);
 			}
+			if (this.brace && this.brace.isStartVoice(i)) {//Tony
+				this.brace.draw(renderer, topLine, bottomLine); //tony
+			}
+			if (this.bracket && this.bracket.isStartVoice(i)) {
+				this.bracket.draw(renderer, topLine, bottomLine);
+			}
 		}
 		this.voices[i].draw(renderer, bartop);
 		renderer.measureNumber = null;
@@ -413,13 +425,6 @@ StaffGroupElement.prototype.draw = function (renderer) {
 			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
 //			if (staff.bottom < 0)
 //				renderer.moveY(spacing.STEP, -staff.bottom);
-		}
-		if(this.brace) {//Tony
-			if (i === this.brace.length - 1) {
-				if (this.brace) {
-					this.brace.draw(renderer, topLine, bottomLine); //tony
-				}
-			}
 		}
 	}
 	renderer.measureNumber = null;

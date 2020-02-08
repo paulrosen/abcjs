@@ -716,50 +716,6 @@ Renderer.prototype.printPath = function (attrs) {
   return ret;
 };
 
-Renderer.prototype.drawBrace = function(xLeft, yTop, yBottom) {//Tony
-	var ret1;
-	var ret2;
-	this.wrapInAbsElem({ el_type: "brace", startChar: -1, endChar: -1 }, 'abcjs-brace', function() {
-		var yHeight = yBottom - yTop;
-
-		var xCurve = [7.5, -8, 21, 0, 18.5, -10.5, 7.5];
-		var yCurve = [0, yHeight/5.5, yHeight/3.14, yHeight/2, yHeight/2.93, yHeight/4.88, 0];
-
-		this.createElemSet({ klass: 'abcjs-brace' });
-		var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
-			xLeft+xCurve[0], yTop+yCurve[0],
-			xLeft+xCurve[1], yTop+yCurve[1],
-			xLeft+xCurve[2], yTop+yCurve[2],
-			xLeft+xCurve[3], yTop+yCurve[3],
-			xLeft+xCurve[4], yTop+yCurve[4],
-			xLeft+xCurve[5], yTop+yCurve[5],
-			xLeft+xCurve[6], yTop+yCurve[6]);
-		ret1 = this.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': this.addClasses('brace')});
-
-		xCurve = [0, 17.5, -7.5, 6.6, -5, 20, 0];
-		yCurve = [yHeight/2, yHeight/1.46, yHeight/1.22, yHeight, yHeight/1.19, yHeight/1.42, yHeight/2];
-
-		pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
-			xLeft+xCurve[ 0], yTop+yCurve[0],
-			xLeft+xCurve[1], yTop+yCurve[1],
-			xLeft+xCurve[2], yTop+yCurve[2],
-			xLeft+xCurve[3], yTop+yCurve[3],
-			xLeft+xCurve[4], yTop+yCurve[4],
-			xLeft+xCurve[5], yTop+yCurve[5],
-			xLeft+xCurve[6], yTop+yCurve[6]);
-		ret2 = this.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': this.addClasses('brace')});
-		var g = this.closeElemSet();
-		this.controller.recordHistory(g, true);
-		return g;
-	});
-
-	if (this.doRegression){
-		this.addToRegression(ret1);
-		this.addToRegression(ret2);
-	}
-	return ret1 + ret2;
-};
-
 Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass, isTie) {
 	// If it is a tie vs. a slur, draw it shallower.
 	var spacing = isTie ? 1.2 : 1.5;
