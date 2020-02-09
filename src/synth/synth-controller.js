@@ -57,6 +57,7 @@ function SynthController() {
 		if (self.control)
 			self.control.setTempo(self.currentTempo);
 		self.percent = 0;
+		var loadingResponse;
 
 		if (!self.midiBuffer)
 			self.midiBuffer = new CreateSynth();
@@ -64,7 +65,8 @@ function SynthController() {
 			visualObj: self.visualObj,
 			options: self.options,
 			millisecondsPerMeasure: millisecondsPerMeasure
-		}).then(function () {
+		}).then(function (response) {
+			loadingResponse = response;
 			return self.midiBuffer.prime();
 		}).then(function () {
 			var subdivisions = 16;
@@ -88,7 +90,7 @@ function SynthController() {
 			if (self.cursorControl && self.cursorControl.onReady && typeof self.cursorControl.onReady  === 'function')
 				self.cursorControl.onReady(self);
 			self.isLoaded = true;
-			return Promise.resolve({ status: "created" });
+			return Promise.resolve({ status: "created", notesStatus: loadingResponse });
 		});
 	};
 

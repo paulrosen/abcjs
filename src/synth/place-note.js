@@ -10,6 +10,10 @@ function placeNote(outputAudioBuffer, note, tempoMultiplier, sampleRate, panDist
 	var offlineCtx = new OfflineAC(2,Math.floor((len+0.5)*sampleRate*2),sampleRate);
 	var noteName = pitchToNoteName[note.pitch+60];
 	var noteBuffer = soundsCache[note.instrument][noteName];
+	if (noteBuffer === "error") { // If the note isn't available, just leave a blank spot
+		console.log("Didn't load note: " + note.instrument + " " + noteName);
+		return;
+	}
 
 	// create audio buffer
 	var source = offlineCtx.createBufferSource();

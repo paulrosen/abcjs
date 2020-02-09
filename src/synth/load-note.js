@@ -11,10 +11,10 @@ var getNote = function(url, instrument, name, audioContext) {
 		var instrumentCache = soundsCache[instrument];
 
 		if (instrumentCache[name] === 'error') {
-			return reject(new Error("Unable to load sound font" + ' ' + url + ' ' + instrument + ' ' + name));
+			return resolve({instrument: instrument, name: name, status: "error", message: "Unable to load sound font" + ' ' + url + ' ' + instrument + ' ' + name });
 		}
 		if (instrumentCache[name]) {
-			return resolve({instrument: instrument, name: name});
+			return resolve({instrument: instrument, name: name, status: "cached"});
 		}
 
 		// if (this.debugCallback)
@@ -29,29 +29,26 @@ var getNote = function(url, instrument, name, audioContext) {
 			instrumentCache[name] = audioBuffer;
 			// if (self.debugCallback)
 			// 	self.debugCallback(`Sound loaded: ${instrument} ${name} ${url}`);
-			resolve({instrument: instrument, name: name});
+			resolve({instrument: instrument, name: name, status: "loaded"});
 		}
 
 		function onFailure(error) {
+			error = "Can't decode sound. " + url + ' ' + instrument + ' ' + name + error;
 			if (self.debugCallback)
 				self.debugCallback(error);
 			console.log(error);
-			reject(error);
+			return resolve({instrument: instrument, name: name, status: "error", message: error });
 		}
 
 		xhr.onload = function (e) {
 			if (this.status === 200) {
-				audioContext.decodeAudioData(this.response, onSuccess, onFailure);//.then(function() {
-				// 	return resolve({instrument: instrument, name: name});
-				// }).catch(function(error) {
-				// 	return reject(new Error(cantLoadMp3 + error));
-				// });
+				audioContext.decodeAudioData(this.response, onSuccess, onFailure);
 			} else {
 				instrumentCache[name] = "error"; // To keep this from trying to load repeatedly.
 				var cantLoadMp3 = "Onload error loading sound: " +  name + " " + url + " " + e.currentTarget.status + " " + e.currentTarget.statusText;
 				if (self.debugCallback)
 					self.debugCallback(cantLoadMp3);
-				return reject(new Error(cantLoadMp3));
+				return resolve({instrument: instrument, name: name, status: "error", message: cantLoadMp3 });
 			}
 		};
 		xhr.addEventListener("error", function () {
@@ -59,7 +56,7 @@ var getNote = function(url, instrument, name, audioContext) {
 			var cantLoadMp3 = "Error in loading sound: " + " " + url;
 			if (self.debugCallback)
 				self.debugCallback(cantLoadMp3);
-			return reject(new Error(cantLoadMp3));
+			return resolve({instrument: instrument, name: name, status: "error", message: cantLoadMp3 });
 		}, false);
 		xhr.send();
 	});

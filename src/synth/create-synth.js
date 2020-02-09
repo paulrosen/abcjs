@@ -117,7 +117,20 @@ function CreateSynth() {
 		return Promise.all(promises).then(function(response) {
 			if (self.debugCallback)
 				self.debugCallback("mp3 load time = " + Math.floor((activeAudioContext().currentTime - startTime)*1000)+"ms");
-			return Promise.resolve(response);
+			var loaded = [];
+			var cached = [];
+			var error = [];
+			for (var i = 0; i < response.length; i++) {
+				var oneResponse = response[i];
+				var which = oneResponse.instrument + ":" + oneResponse.name;
+				if (oneResponse.status === "loaded")
+					loaded.push(which);
+				else if (oneResponse.status === "cached")
+					cached.push(which);
+				else
+					error.push(which + ' ' + oneResponse.message);
+			}
+			return Promise.resolve({ loaded: loaded, cached: cached, error: error });
 		});
 	});
 
