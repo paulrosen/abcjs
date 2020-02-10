@@ -41,6 +41,7 @@ function CreateSynth() {
 		self.soundFontUrl = options.soundFontUrl ? options.soundFontUrl : defaultSoundFontUrl;
 		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure() : 1000);
 		var params = options.options ? options.options : {};
+		self.pan = params.pan;
 		self.meterSize = 1;
 		if (options.visualObj) {
 			var seq = sequence(options.visualObj, params);
@@ -154,13 +155,15 @@ function CreateSynth() {
 				self.sequenceCallback(noteMapTracks, self.callbackContext);
 			//console.log(noteMapTracks);
 
+			var panDistances = setPan(noteMapTracks.length, self.pan);
+
 			self.audioBuffers = [];
 			var allPromises = [];
 			noteMapTracks.forEach(function(noteMap, trackNumber) {
 				var audioBuffer = activeAudioContext().createBuffer(2, totalSamples, activeAudioContext().sampleRate);
 				var chanData = audioBuffer.getChannelData(0);
 
-				var panDistance = 0; // TODO-PER: tracks can be separated by setting this number from -1 to 1.
+				var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
 				noteMap.forEach(function(note) {
 					allPromises.push(placeNote(audioBuffer, note, tempoMultiplier, activeAudioContext().sampleRate, panDistance));
 				});
@@ -181,6 +184,51 @@ function CreateSynth() {
 			});
 		});
 	};
+
+	function setPan(numTracks, panParam) {
+		if (panParam === null || panParam === undefined)
+			return null;
+
+		var panDistances = [];
+		if (panParam.length) {
+			if (numTracks === panParam.length) {
+				var ok = true;
+				for (var pp = 0; pp < panParam.length; pp++){
+					var x = parseFloat(panParam[pp]);
+					if (x >= -1 && x <= 1)
+						panDistances.push(x);
+					else
+						ok = false;
+				}
+				if (ok)
+					return panDistances;
+			}
+		} else {
+			var panNumber = parseFloat(panParam);
+			// the separation needs to be no further than 2 (i.e. -1 to 1) so test to see if there are too many tracks for the passed in distance
+			if (panNumber*(numTracks-1) > 2)
+				return null;
+
+			// If there are an even number of tracks, then offset so that the first two are centered around the middle
+			var even = numTracks % 2 === 0;
+			var currLow = even ? 0 - panNumber/2 : 0;
+			var currHigh = currLow+panNumber;
+			// Now add the tracks to either side
+			for (var p = 0; p < numTracks; p++) {
+				even = p % 2 === 0;
+				if (even) {
+					panDistances.push(currLow);
+					currLow -= panNumber;
+				} else {
+					panDistances.push(currHigh);
+					currHigh += panNumber;
+				}
+			}
+			return panDistances;
+		}
+		// There was either no panning, or the parameters were illegal
+		return null;
+	}
 
 	// This is called after everything is set up, so it can quickly make sound
 	self.start = function() {
