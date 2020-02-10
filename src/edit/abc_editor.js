@@ -331,7 +331,7 @@ Editor.prototype.redrawMidi = function() {
 			this.synth.synthControl = new SynthController();
 			this.synth.synthControl.load(this.synth.el, this.synth.cursorControl, this.synth.options);
 		}
-		this.synth.synthControl.setTune(this.tunes[0], false);
+		this.synth.synthControl.setTune(this.tunes[0], false, this.abcjsParams);
 	}
 };
 
