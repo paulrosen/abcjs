@@ -294,7 +294,7 @@ function getCoord(ev) {
 
 function elementFocused(ev) {
 	// If there had been another element focused and is being dragged, then report that before setting the new element up.
-	if (this.dragMechanism === "keyboard" && this.dragYStep !== 0)
+	if (this.dragMechanism === "keyboard" && this.dragYStep !== 0 && this.dragTarget)
 		this.notifySelect(this.dragTarget, this.dragYStep);
 
 	this.dragYStep = 0;
