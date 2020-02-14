@@ -1,3 +1,8 @@
+# Version 6.0.0-beta.2
+
+## Bugs
+* Fix crash when creating music when the SVG is not shown.
+
 # Version 6.0.0-beta.1
 
 ## Selection
