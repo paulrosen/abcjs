@@ -8,11 +8,13 @@ For people who want to contribute a pull request, this isn't relevant!
 
 To release a new version, this checklist should be followed:
 
+[_] Get all commits since the last release with `git log > temp.txt`.
+
 [_] Add a section to the top of [the release notes](../RELEASE.md).
 
 [_] Be sure [the read me file](../README.md) is up to date, along with all the files in [docs](../docs).
 
-[_] Find any hardcoded version numbers in [the package file](../package.json) and change them. (Except the abcjs dependency at bottom.)
+[_] Find any hardcoded version numbers in [the package file](../package.json) and change them. 
 
 [_] Minify the various library versions with `npm run build`.
 
@@ -24,9 +26,9 @@ To release a new version, this checklist should be followed:
 
 [_] Change the version in [the package file](../package.json) with `npm version patch` <-- or `minor`, or `major`.
 
-[_] Update npm with `npm publish`.
+[_] Update npm with `npm publish` or `npm publish --tag beta`.
 
-[_] Update the abcjs dependency in package.json, run `npm install` and check it in.
+[_] Run `npm install` and check it in.
 
 [_] Push the change that npm publish created with `git push`.
 
@@ -41,9 +43,7 @@ To release a new version, this checklist should be followed:
 
 [_] Read through all the issues to see if any should be closed.
 
-[_] Update the [configurator](https://github.com/paulrosen/abcjs-configurator) and deploy it.
-
 [_] Update https://abcjs.net and the examples on github.
 
-[_] Also release a new version of the [WordPress plugin](https://wordpress.org/plugins/abc-notation/).
+[_] Release a new version of the [WordPress plugin](https://wordpress.org/plugins/abc-notation/).
 

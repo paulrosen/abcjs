@@ -1,3 +1,62 @@
+# Version 6.0.0-beta.1
+
+## Selection
+* Completely revamp the selection of elements code.
+* Implement dragging notes vertically.
+* Give more information when clicking on the staff label.
+* Get the box around text to be selected with the text.
+* Fix selection of the text at the top.
+* Click listener parameters now have analysis.
+* Add more element types that can be selected by the user.
+* Add option "selectAll" for only being able to select notes/rests/bars.
+* Add option "selectionColor".
+* Add option "dragColor".
+* Add option "dragging".
+
+## Audio
+* Add "pan" parameter for the audio.
+* Pass changes to audio parameters into the editor.
+* Improve error handling of midi.
+* Guard against crash when a negative duration is given to the midi.
+* If an unknown chord pattern starts with an "m", default to minor chord (was always defaulting to major.)
+* Redo audio buffer creation to use built in audio nodes.
+* Add key and time sig to midi output; use the "note off" command instead of volume 0 in midi file.
+* Add track name to midi file.
+* Don't override channel for the percussion clef if the program or channel was explicitly set.
+* Fix small, accumulating rounding error in midi file timing.
+* Fix crash when there isn't a title or other things about the first music line.
+* Fix detection of whether a meter is compound.
+* Add audio support for trills, mordent, turn, and roll.
+* Fix grace note pitch; implement staccato, tenuto, and accent in audio.
+* Add option for retrieving the binary midi data.
+* Expose the code for creating a MIDI file to the basic library.
+
+## Rendering
+* Draw bracket; fix positioning of the brace and bracket.
+* Fix grouping and classes of triplets and beams.
+* Some tweaks to the grouping of svg elements.
+* Optimize calls to getBBox
+* Give measure numbers that appear on the left edge more room when they would interfere with the treble clef.
+* Make the invisible marker zero pixels so it can't accidentally get shown with css.
+* Add classes to ledger lines
+* Add more identifying classes.
+* Adjust the bass octave indicator a little.
+* Group some svg elements together that belong together.
+* Remove the selector box for each element - entire SVG is selectable.
+
+## Tasks
+* Add testing for the output of the selection.
+* Set gitmodules for the vuepress docs (so that commits can be in npm.)
+* Remove some dependencies on the window object.
+* Put all drawing actions in an array
+
+## Documentation
+* Create demo of dragging and selection.
+* Documentation should import on the latest abcjs.
+* Fix link to audio examples in docs.
+* Fix logo path in readme
+* Add reference to the standard.
+
 # Version 5.12.0
 
 ## Features
