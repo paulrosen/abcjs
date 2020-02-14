@@ -20,11 +20,7 @@ To release a new version, this checklist should be followed:
 
 [_] Add the new files: `git add bin/abcjs*_x.x.x*`.
 
-[_] IMPORTANT! Change the version number (probably line 3) in `package.json` BACK to the old version. (It will be changed automatically by the npm step.)
-
 [_] Check the minified versions and other changed files in.
-
-[_] Change the version in [the package file](../package.json) with `npm version patch` <-- or `minor`, or `major`.
 
 [_] Update npm with `npm publish` or `npm publish --tag beta`.
 
