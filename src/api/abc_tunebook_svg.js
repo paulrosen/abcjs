@@ -206,7 +206,7 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
         if (div === "*") {
             removeDiv = true;
             div = document.createElement("div");
-            div.setAttribute("style", "display:none;");
+            div.setAttribute("style", "visibility: hidden;");
             document.body.appendChild(div);
         }
     	if (params.afterParsing)
