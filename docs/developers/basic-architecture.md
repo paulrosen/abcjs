@@ -15,6 +15,13 @@ npm link abcjs
 
 In a test application. Then any changes made to the abcjs code will automatically be picked up by that test application's webpack.
 
+## Greasemonkey
+
+There used to be a version of the library for Greasemonkey but that has been discontinued. If you want a Greasemonkey version, do this:
+```bash
+cat src/plugin/greasemonkey.js bin/abcjs_plugin_5.12.0-min.js > bin/abcjs_plugin_5.12.0.user.js
+```
+
 ## Testing
 
 There are hundreds of test files that are stored outside of this repository. If you wish to run the unit tests, please contact [Paul Rosen](https://paulrosen.net/contact-me/) for more information.
