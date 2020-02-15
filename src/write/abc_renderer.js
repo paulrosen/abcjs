@@ -890,7 +890,7 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 		if (marginTop)
 			this.moveY(marginTop);
 		var el = this.renderText(x, this.y, str, kind, klass, alignment);
-		var bb = this.getTextSize(str, kind, klass);
+		var bb = this.getTextSize(str, kind, klass, el);
 		var width = isNaN(bb.width) ? 0 : bb.width;
 		var height = isNaN(bb.height) ? 0 : bb.height;
 		var hash = this.getFontAndAttr(kind, klass);
