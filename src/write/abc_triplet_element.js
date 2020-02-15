@@ -108,8 +108,9 @@ var TripletElem;
 			xTextPos = this.anchor1.x + (this.anchor2.x + this.anchor2.w - this.anchor1.x) / 2;
 			drawBracket(renderer, this.anchor1.x, this.startNote, this.anchor2.x + this.anchor2.w, this.endNote, this.duration);
 		}
-		renderer.renderText(xTextPos, renderer.calcY(this.yTextPos), "" + this.number, 'tripletfont', "", "middle", true, true);
-		renderer.closeElemSet();
+		renderer.renderText({x: xTextPos, y: renderer.calcY(this.yTextPos), text: "" + this.number, type: 'tripletfont', anchor: "middle", centerVertically: true, history: 'ignore', noClass: true});
+		var g = renderer.closeElemSet();
+		renderer.controller.recordHistory(g, true);
 	};
 
 	function drawLine(renderer, l, t, r, b) {

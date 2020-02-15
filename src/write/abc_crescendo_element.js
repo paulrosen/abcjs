@@ -53,7 +53,9 @@ CrescendoElem.prototype.drawLine = function (renderer, y1, y2, y3, y4) {
 
 	var pathString = sprintf("M %f %f L %f %f M %f %f L %f %f",
 		left, y1, right, y2, left, y3, right, y4);
-	renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('dynamics decoration')});
+	renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "dynamics", startChar: -1, endChar: -1 }};
+	var el = renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('dynamics decoration')});
+	renderer.controller.currentAbsEl.elemset.push(el);
 };
 
 module.exports = CrescendoElem;

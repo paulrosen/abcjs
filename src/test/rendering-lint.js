@@ -1,17 +1,27 @@
-var renderingLint = function(history) {
+var renderingLint = function(history, abcString) {
 	var output = [];
 	for (var i = 0; i < history.length; i++) {
-		output.push(lintOne(history[i]));
+		output.push(lintOne(history[i], abcString));
 	}
 	return output.join("\n\n");
 };
 
-function lintOne(history) {
+function lintOne(history, abcString) {
 	var items = [];
 	var svgEl = history.svgEl;
 	var absEl = history.absEl;
-	items.push("selectable: " + history.selectable);
-	items.push("isDraggable: " + history.isDraggable);
+	var originalText = "``";
+	if (history.absEl && history.absEl.abcelem && history.absEl.abcelem.startChar >= 0)
+		originalText = '`' + abcString.substring(history.absEl.abcelem.startChar, history.absEl.abcelem.endChar) + '`';
+	if (history.selectable)
+		originalText += " selectable";
+	else
+		originalText += " not-selectable";
+	if (history.isDraggable)
+		originalText += " draggable";
+	else
+		originalText += " not-draggable";
+	items.push(originalText);
 	var size = svgEl.getBBox();
 	items.push("size: " + Math.round(size.x) + "," + Math.round(size.y) + " - " + Math.round(size.width) + "," + Math.round(size.height));
 
@@ -34,8 +44,7 @@ function listSvgElement(svgEl, indent) {
 	var tab = createIndent(indent);
 	var tab2 = createIndent(indent+1);
 	var output = [];
-	output.push("Element type: " + svgEl.tagName );
-	output.push("classes: " + listClasses(svgEl));
+	output.push("el: " + svgEl.tagName + listClasses(svgEl));
 	switch (svgEl.tagName) {
 		case "text":
 			output.push("Text: " + svgEl.textContent);
@@ -55,7 +64,7 @@ function listGroupChildren(g) {
 	var output = [];
 	for (var i = 0; i < g.children.length; i++) {
 		var el = g.children[i];
-		output.push(el.tagName + '(' + listClasses(el) + ')');
+		output.push(el.tagName + listClasses(el));
 	}
 	return output.join(" ");
 }
@@ -84,7 +93,7 @@ function listClasses(el) {
 	klasses = klasses.sort();
 	if (klasses.length === 0)
 		return "[none]";
-	return klasses.join(", ");
+	return '.' + klasses.join(".");
 }
 
 function listAbsElement(absEl, indent) {

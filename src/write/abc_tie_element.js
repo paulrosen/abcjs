@@ -244,7 +244,9 @@ TieElem.prototype.draw = function (renderer, linestartx, lineendx) {
 	if (this.hint)
 			klass = "abcjs-hint";
 	var fudgeY =  this.fixedY ? 1.5 : 0; // TODO-PER: This just compensates for drawArc, which contains too much knowledge of ties and slurs.
-	renderer.drawArc(this.startX, this.endX, this.startY+fudgeY, this.endY+fudgeY,  this.above, klass, this.isTie);
+	renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "slur", startChar: -1, endChar: -1 }};
+	var el = renderer.drawArc(this.startX, this.endX, this.startY+fudgeY, this.endY+fudgeY,  this.above, klass, this.isTie);
+	renderer.controller.currentAbsEl.elemset.push(el);
 
 };
 

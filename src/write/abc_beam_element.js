@@ -166,13 +166,15 @@ var BeamElem;
 		}
 		var durationClass = ("abcjs-d"+this.duration).replace(/\./g,"-");
 		var klasses = renderer.addClasses('beam-elem '+durationClass);
-		renderer.printPath({
+		renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "beam", startChar: -1, endChar: -1 }};
+		var el = renderer.printPath({
 			path: pathString,
 			stroke: "none",
 			fill: "#000000",
 			'class': klasses,
 			notSelectable: true
 		});
+		renderer.controller.currentAbsEl.elemset.push(el);
 	};
 
 	//

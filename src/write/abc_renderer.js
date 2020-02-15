@@ -443,7 +443,7 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 					for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
 						var thisWord = abctune.metaText.unalignedWords[j][k];
 						var type = (thisWord.font) ? thisWord.font : "wordsfont";
-						this.renderText(this.padding.left + spacing.INDENT + offsetX, this.y, thisWord.text, type, 'meta-bottom unaligned-words', false);
+						this.renderText({x: this.padding.left + spacing.INDENT + offsetX, y: this.y, text: thisWord.text, type: type, klass: 'meta-bottom unaligned-words', anchor: 'start'});
 						var size = this.getTextSize(thisWord.text, type, 'meta-bottom unaligned-words');
 						largestY = Math.max(largestY, size.height);
 						offsetX += size.width;
@@ -475,13 +475,12 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 	if (extraText.length > 0) {
 		this.wrapInAbsElem({el_type: "extraText", startChar: -1, endChar: -1}, 'meta-bottom extra-text', function() {
 			var el = this.outputTextIf(this.padding.left, extraText, 'historyfont', 'meta-bottom extra-text', this.spacing.info, 0, "start");
-			this.controller.recordHistory(el[2]);
 			return el[2];
 		});
 	}
 
 	if (abctune.metaText.footer && this.isPrint) {
-		this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "footer", startChar: -1, endChar: -1, text: "" }}
+		this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "footer", startChar: -1, endChar: -1, text: "" }};
 		// Note: whether there is a footer or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
 		el = this.outputTextIf(this.padding.left, abctune.metaText.footer.left, 'footerfont', 'header meta-bottom', 0, null, 'start');
 		if (el[2])
@@ -495,10 +494,6 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 	}
 };
 
-/**
- * Output text defined with %%text.
- * @param {array or string} text
- */
 Renderer.prototype.outputFreeText = function (text, vskip) {
 	if (vskip)
 		this.moveY(vskip);
@@ -595,9 +590,6 @@ Renderer.prototype.endGroup = function (klass) {
  * @param {number} pitch pitch the stave line is drawn at
  */
 Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
-	var extraClass = "staff";
-	if (klass !== undefined)
-		extraClass += " " + klass;
   var isIE=/*@cc_on!@*/false;//IE detector
   var dy = 0.35;
   var fill = "#000000";
@@ -608,7 +600,10 @@ Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
   var y = this.calcY(pitch);
   var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
      x2, y+dy, x1, y+dy);
-  var ret = this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses(extraClass)});
+  var options = {path:pathString, stroke:"none", fill:fill};
+  if (klass)
+  	options['class'] = klass;
+  var ret = this.paper.pathToBack(options);
   if (this.doRegression) this.addToRegression(ret);
 
   return ret;
@@ -682,7 +677,7 @@ Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, kl
 				if (i < symbol.length - 1)
 					dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));
 			} else {
-				this.renderText(x, this.y, "no symbol:" + symbol, "debugfont", 'debug-msg', 'start');
+				this.renderText({ x: x, y: this.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'});
 			}
 		}
 		var g = this.paper.closeGroup();
@@ -699,7 +694,7 @@ Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, kl
 				if (this.doRegression) this.addToRegression(el);
 				return el;
 			} else
-				this.renderText(x, this.y, "no symbol:" + symbol, "debugfont", 'debug-msg', 'start');
+				this.renderText({ x: x, y: this.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'});
 		}
 		return null;
 	}
@@ -769,17 +764,18 @@ Renderer.prototype.calcY = function(ofs) {
  */
 Renderer.prototype.printStave = function (startx, endx, numLines) {
 	var klass = "top-line";
-	this.paper.openGroup({ prepend: true });
+	this.paper.openGroup({ prepend: true, klass: "abcjs-l1 abcjs-staff" });
 	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
 	if (numLines === 1) {
 		this.printStaveLine(startx,endx,6, klass);
-		return;
-	}
-	for (var i = numLines-1; i >= 0; i--) {
-		this.printStaveLine(startx,endx,(i+1)*2, klass);
-		klass = undefined;
+	} else {
+		for (var i = numLines - 1; i >= 0; i--) {
+			this.printStaveLine(startx, endx, (i + 1) * 2, klass);
+			klass = undefined;
+		}
 	}
 	var ret = this.paper.closeGroup();
+	this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [ret], abcelem: { el_type: "staff", startChar: -1, endChar: -1 }};
 	this.controller.recordHistory(ret, true);
 };
 
@@ -787,15 +783,15 @@ Renderer.prototype.printStave = function (startx, endx, numLines) {
  *
  * @private
  */
-Renderer.prototype.addClasses = function (c, isNote) {
+Renderer.prototype.addClasses = function (c) {
 	if (!this.shouldAddClasses)
 		return "";
 	var ret = [];
-	if (c.length > 0) ret.push(c);
+	if (c && c.length > 0) ret.push(c);
 	if (this.lineNumber !== null && this.lineNumber !== undefined) ret.push("l"+this.lineNumber);
 	if (this.measureNumber !== null && this.measureNumber !== undefined) ret.push("m"+this.measureNumber);
 	if (this.voiceNumber !== null && this.voiceNumber !== undefined) ret.push("v"+this.voiceNumber);
-	if ((c.indexOf('note') >= 0 || c.indexOf('rest') >= 0 || c.indexOf('lyric') >= 0 ) && this.noteNumber !== null && this.noteNumber !== undefined) ret.push("n"+this.noteNumber);
+	if (c && (c.indexOf('note') >= 0 || c.indexOf('rest') >= 0 || c.indexOf('lyric') >= 0 ) && this.noteNumber !== null && this.noteNumber !== undefined) ret.push("n"+this.noteNumber);
 	// add a prefix to all classes that abcjs adds.
 	if (ret.length > 0) {
 		ret = ret.join(' '); // Some strings are compound classes - that is, specify more than one class in a string.
@@ -836,20 +832,20 @@ Renderer.prototype.getTextSize = function(text, type, klass, el) {
 	return size;
 };
 
-Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, centerVertically, notSelectable) {
-	var hash = this.getFontAndAttr(type, klass);
-	if (anchor)
-		hash.attr["text-anchor"] = anchor;
-	hash.attr.x = x;
-	hash.attr.y = y + 7; // TODO-PER: Not sure why the text appears to be 7 pixels off.
-	if (!centerVertically)
+Renderer.prototype.renderText = function(params) {
+	var hash = this.getFontAndAttr(params.type, params.klass);
+	if (params.anchor)
+		hash.attr["text-anchor"] = params.anchor;
+	hash.attr.x = params.x;
+	hash.attr.y = params.y + 7; // TODO-PER: Not sure why the text appears to be 7 pixels off.
+	if (!params.centerVertically)
 		hash.attr.dy = "0.5em";
-	if (type === 'debugfont') {
-		console.log("Debug msg: " + text);
+	if (params.type === 'debugfont') {
+		console.log("Debug msg: " + params.text);
 		hash.attr.stroke = "#ff0000";
 	}
 
-	text = text.replace(/\n\n/g, "\n \n");
+	 var text = params.text.replace(/\n\n/g, "\n \n");
 	text = text.replace(/^\n/, "\xA0\n");
 
 	var klass2 = hash.attr['class'];
@@ -859,16 +855,21 @@ Renderer.prototype.renderText = function(x, y, text, type, klass, anchor, center
 		delete hash.attr['class'];
 		this.createElemSet({klass: klass2, fill: "#000000"});
 	}
+	if (params.noClass)
+		delete hash.attr['class'];
 	var el = this.paper.text(text, hash.attr);
 	var elem = el;
 
 	if (hash.font.box) {
-		var size = this.getTextSize(text, type, klass); // This size already has the box factored in, so the needs to be taken into consideration.
+		var size = this.getTextSize(text, params.type, params.klass); // This size already has the box factored in, so the needs to be taken into consideration.
 		var padding = 2;
-		this.paper.rect({ x: x - padding, y: y, width: size.width - padding, height: size.height - 8});
+		this.paper.rect({ x: params.x - padding, y: params.y, width: size.width - padding, height: size.height - 8});
 		elem = this.closeElemSet();
 	}
-	this.controller.recordHistory(elem, notSelectable);
+	if (!params.history)
+		this.controller.recordHistory(elem);
+	else if (params.history === 'not-selectable')
+		this.controller.recordHistory(elem, true);
 	if (this.doRegression) this.addToRegression(el);
 	return elem;
 };
@@ -889,7 +890,7 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 	if (str) {
 		if (marginTop)
 			this.moveY(marginTop);
-		var el = this.renderText(x, this.y, str, kind, klass, alignment);
+		var el = this.renderText({x: x, y: this.y, text: str, type: kind, klass: klass, anchor: alignment});
 		var bb = this.getTextSize(str, kind, klass, el);
 		var width = isNaN(bb.width) ? 0 : bb.width;
 		var height = isNaN(bb.height) ? 0 : bb.height;

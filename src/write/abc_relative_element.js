@@ -126,27 +126,27 @@ RelativeElement.prototype.draw = function (renderer, bartop) {
 			if (this.klass) klass += " " + this.klass;
 			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.addClasses(klass)); break;
 		case "debug":
-			this.graphelem = renderer.renderText(this.x, renderer.calcY(15), ""+this.c, "debugfont", 'debug-msg', 'start', false, true); break;
+			this.graphelem = renderer.renderText({ x: this.x, y: renderer.calcY(15), text: ""+this.c, type: "debugfont", klass: 'debug-msg', anchor: 'start', centerVertically: false, history: 'not-selectable'}); break;
 		case "barNumber":
-			this.graphelem = renderer.renderText(this.x, y, ""+this.c, "measurefont", 'bar-number', "middle", false, true);
+			this.graphelem = renderer.renderText({ x: this.x, y: y, text: ""+this.c, type: "measurefont", klass: 'bar-number', anchor: "middle", history: 'ignore'});
 			break;
 		case "lyric":
-			this.graphelem = renderer.renderText(this.x, y, this.c, "vocalfont", 'lyric', "middle");
+			this.graphelem = renderer.renderText({ x: this.x, y: y, text: this.c, type: "vocalfont", klass: 'lyric', anchor: "middle"});
 			break;
 		case "chord":
-			this.graphelem = renderer.renderText(this.x, y, this.c, 'gchordfont', "chord", "middle");
+			this.graphelem = renderer.renderText({ x: this.x, y: y, text: this.c, type: 'gchordfont', klass: "chord", anchor: "middle"});
 			break;
 		case "decoration":
-			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "middle", true);
+			this.graphelem = renderer.renderText({ x: this.x, y: y, text: this.c, type: 'annotationfont', klass: "annotation", anchor: "middle", centerVertically: true});
 			break;
 		case "text":
-			this.graphelem = renderer.renderText(this.x, y, this.c, 'annotationfont', "annotation", "start", this.centerVertically);
+			this.graphelem = renderer.renderText({ x: this.x, y: y, text: this.c, type: 'annotationfont', klass: "annotation", anchor: "start", centerVertically: this.centerVertically});
 			break;
 		case "multimeasure-text":
-			this.graphelem = renderer.renderText(this.x+this.w/2, y, this.c, 'tempofont', "rest", "middle", false);
+			this.graphelem = renderer.renderText({ x: this.x+this.w/2, y: y, text: this.c, type: 'tempofont', klass: "rest", anchor: "middle", centerVertically: false});
 			break;
 		case "part":
-			this.graphelem = renderer.renderText(this.x, y, this.c, 'partsfont', "part", "start");
+			this.graphelem = renderer.renderText({ x: this.x, y: y, text: this.c, type: 'partsfont', klass: "part", anchor: "start"});
 			break;
 		case "bar":
 			this.graphelem = renderer.printStem(this.x, this.linewidth, y, (bartop)?bartop:renderer.calcY(this.pitch2)); break; // bartop can't be 0

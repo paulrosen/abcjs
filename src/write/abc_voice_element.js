@@ -237,7 +237,7 @@ VoiceElement.prototype.draw = function (renderer, bartop) {
 		var textpitch = 14 - (this.voicenumber+1)*(12/(this.voicetotal+1));
 		var self = this;
 		renderer.wrapInAbsElem({ el_type: "voice-name", startChar: -1, endChar: -1, text: this.header }, 'meta-bottom extra-text', function() {
-			var textEl = renderer.renderText(renderer.padding.left, renderer.calcY(textpitch), self.header, 'voicefont', 'staff-extra voice-name', 'start');
+			var textEl = renderer.renderText({x: renderer.padding.left, y: renderer.calcY(textpitch), text: self.header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start'});
 			return textEl;
 		});
 	}

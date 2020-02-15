@@ -114,11 +114,11 @@ var TempoElement;
 		var self = this;
 		var tempoGroup;
 		renderer.wrapInAbsElem(this.tempo, "abcjs-tempo", function () {
-			renderer.createElemSet({klass: "abcjs-tempo"});
+			renderer.createElemSet({klass: renderer.addClasses("tempo")});
 			var y = renderer.calcY(self.pitch);
 			var text;
 			if (self.tempo.preString) {
-				text = renderer.renderText(x, y, self.tempo.preString, 'tempofont', 'tempo', "start");
+				text = renderer.renderText({x:x, y: y, text: self.tempo.preString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true});
 				var size = renderer.getTextSize(self.tempo.preString, 'tempofont', 'tempo', text);
 				var preWidth = size.width;
 				var charWidth = preWidth / self.tempo.preString.length; // Just get some average number to increase the spacing.
@@ -130,17 +130,17 @@ var TempoElement;
 					self.note.children[i].draw(renderer, x);
 				x += (self.note.w + 5);
 				var str = "= " + self.tempo.bpm;
-				text = renderer.renderText(x, y, str, 'tempofont', 'tempo', "start");
+				text = renderer.renderText({x:x, y: y, text: str, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true});
 				size = renderer.getTextSize(str, 'tempofont', 'tempo', text);
 				var postWidth = size.width;
 				var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
 				x += postWidth + charWidth2;
 			}
 			if (self.tempo.postString) {
-				renderer.renderText(x, y, self.tempo.postString, 'tempofont', 'tempo', "start");
+				renderer.renderText({x:x, y: y, text: self.tempo.postString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true});
 			}
 			tempoGroup = renderer.closeElemSet();
-		})
+		});
 		return tempoGroup;
 	};
 
@@ -159,9 +159,7 @@ var TempoElement;
 			else if (group) {
 				group.appendChild(hist.svgEl);
 			}
-			var classes = hist.svgEl.getAttribute("class");
-			classes = classes.replace("abcjs-tempo",'');
-			hist.svgEl.setAttribute("class", classes);
+			hist.svgEl.setAttribute("class", '');
 		}
 		var len = renderer.controller.history.length-i-1;
 		if (group && len > 1) {

@@ -39,7 +39,7 @@ EndingElem.prototype.draw = function (renderer, linestartx, lineendx) {
 		pathString = sprintf("M %f %f L %f %f",
 			linestartx, y, linestartx, y+height);
 		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});
-		renderer.renderText(linestartx+5, renderer.calcY(this.pitch-0.5), this.text, 'repeatfont', 'ending',"start");
+		renderer.renderText({x: linestartx+5, y: renderer.calcY(this.pitch-0.5), text: this.text, type: 'repeatfont', klass: 'ending', anchor: "start"});
 	}
 
 	if (this.anchor2) {
