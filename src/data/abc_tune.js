@@ -89,33 +89,42 @@ var Tune = function() {
 	};
 
 	this.getPickupLength = function() {
-		var pickupLength = 0;
 		var barLength = this.getBarLength();
-		for (var i = 0; i < this.lines.length; i++) {
-			if (this.lines[i].staff) {
-				for (var j = 0; j < this.lines[i].staff.length; j++) {
-					for (var v = 0; v < this.lines[i].staff[j].voices.length; v++) {
-						var voice = this.lines[i].staff[j].voices[v];
-						var hasNote = false;
-						var tripletMultiplier = 1;
-						for (var el = 0; el < voice.length; el++) {
-							var isSpacer = voice[el].rest && voice[el].rest.type === "spacer";
-							if (voice[el].startTriplet)
-								tripletMultiplier = voice[el].tripletMultiplier;
-							if (voice[el].duration && !isSpacer)
-								pickupLength += voice[el].duration * tripletMultiplier;
-							if (voice[el].endTriplet)
-								tripletMultiplier = 1;
-							if (pickupLength >= barLength)
-								pickupLength -= barLength;
-							if (voice[el].el_type === 'bar')
-								return pickupLength;
+		var computePickupLength = (function() {
+			var pickupLength = 0;
+			for (var i = 0; i < this.lines.length; i++) {
+				if (this.lines[i].staff) {
+					for (var j = 0; j < this.lines[i].staff.length; j++) {
+						for (var v = 0; v < this.lines[i].staff[j].voices.length; v++) {
+							var voice = this.lines[i].staff[j].voices[v];
+							var hasNote = false;
+							var tripletMultiplier = 1;
+							for (var el = 0; el < voice.length; el++) {
+								var isSpacer = voice[el].rest && voice[el].rest.type === "spacer";
+								if (voice[el].startTriplet)
+									tripletMultiplier = voice[el].tripletMultiplier;
+								if (voice[el].duration && !isSpacer)
+									pickupLength += voice[el].duration * tripletMultiplier;
+								if (voice[el].endTriplet)
+									tripletMultiplier = 1;
+								if (pickupLength >= barLength)
+									pickupLength -= barLength;
+								if (voice[el].el_type === 'bar')
+									return pickupLength;
+							}
 						}
 					}
 				}
 			}
-		}
-		return pickupLength;
+
+			return pickupLength;
+		});
+
+		var pickupLength = computePickupLength.apply(this);
+
+		// If computed pickup length is very close to 0 or the bar length, we assume
+		// that we actually have a full bar and hence no pickup.
+		return (pickupLength < 1e-8 || barLength-pickupLength < 1e-8) ? 0 : pickupLength;
 	};
 
 	this.getBarLength = function() {
