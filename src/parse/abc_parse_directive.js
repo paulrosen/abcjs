@@ -281,6 +281,13 @@ var parseDirective = {};
 			size = parseFloat(size);
 
 		face = face.join(' ');
+		if (face === '') {
+			if (!currentSetting) {
+				warn("Must specify the name of the font since there is no default value.", str, position);
+				face = "sans-serif";
+			} else
+				face = currentSetting.face;
+		}
 		var psFont = fontTranslation(face);
 		var font = {};
 		if (psFont) {
