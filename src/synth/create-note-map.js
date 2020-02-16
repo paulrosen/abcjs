@@ -21,8 +21,16 @@ var createNoteMap = function(sequence) {
 					currentTime += ev.duration;
 					break;
 				case "stop":
-					map[i].push({pitch: ev.pitch, instrument: nextNote[ev.pitch].instrument, start: nextNote[ev.pitch].time, end: currentTime, volume: nextNote[ev.pitch].volume});
-					delete nextNote[ev.pitch];
+					if (nextNote[ev.pitch]) { // If unisons are requested, then there might be two starts and two stops for the same note. Only use one of them.
+						map[i].push({
+							pitch: ev.pitch,
+							instrument: nextNote[ev.pitch].instrument,
+							start: nextNote[ev.pitch].time,
+							end: currentTime,
+							volume: nextNote[ev.pitch].volume
+						});
+						delete nextNote[ev.pitch];
+					}
 					break;
 				case "program":
 					currentInstrument = instrumentIndexToName[ev.instrument];
