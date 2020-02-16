@@ -704,9 +704,13 @@ Renderer.prototype.scaleExistingElem = function (elem, scaleX, scaleY, x, y) {
 	this.paper.setAttributeOnElement(elem, { style: "transform:scale("+scaleX+","+scaleY + ");transform-origin:" + x + "px " + y + "px;"});
 };
 
-Renderer.prototype.printPath = function (attrs) {
+Renderer.prototype.printPath = function (attrs, params) {
   var ret = this.paper.path(attrs);
-	this.controller.recordHistory(ret, attrs.notSelectable);
+  if (!params || !params.history)
+		this.controller.recordHistory(ret);
+  else if (params.history === 'not-selectable')
+		this.controller.recordHistory(ret, true);
+
   if (this.doRegression) this.addToRegression(ret);
   return ret;
 };

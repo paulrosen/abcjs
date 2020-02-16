@@ -100,6 +100,7 @@ var TripletElem;
 	TripletElem.prototype.draw = function(renderer) {
 		var xTextPos;
 		var durationClass = ("abcjs-d"+this.duration).replace(/\./g,"-");
+		renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "triplet", startChar: -1, endChar: -1 }};
 		renderer.createElemSet({ klass: renderer.addClasses('triplet '+durationClass)});
 		if (this.hasBeam) {
 			var left = this.anchor1.parent.beam.isAbove() ? this.anchor1.x + this.anchor1.w : this.anchor1.x;
@@ -110,6 +111,7 @@ var TripletElem;
 		}
 		renderer.renderText({x: xTextPos, y: renderer.calcY(this.yTextPos), text: "" + this.number, type: 'tripletfont', anchor: "middle", centerVertically: true, history: 'ignore', noClass: true});
 		var g = renderer.closeElemSet();
+		renderer.controller.currentAbsEl.elemset.push(g);
 		renderer.controller.recordHistory(g, true);
 	};
 

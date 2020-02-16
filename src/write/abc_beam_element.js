@@ -171,9 +171,8 @@ var BeamElem;
 			path: pathString,
 			stroke: "none",
 			fill: "#000000",
-			'class': klasses,
-			notSelectable: true
-		});
+			'class': klasses
+		}, {history: 'not-selectable'});
 		renderer.controller.currentAbsEl.elemset.push(el);
 	};
 

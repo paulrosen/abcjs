@@ -33,26 +33,36 @@ EndingElem.prototype.draw = function (renderer, linestartx, lineendx) {
 		window.console.error("Ending Element y-coordinate not set.");
 	var y = renderer.calcY(this.pitch);
 	var height = 20;
-	var pathString;
+	var pathString = '';
+
 	if (this.anchor1) {
 		linestartx = this.anchor1.x+this.anchor1.w;
-		pathString = sprintf("M %f %f L %f %f",
+		pathString += sprintf("M %f %f L %f %f ",
 			linestartx, y, linestartx, y+height);
-		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});
-		renderer.renderText({x: linestartx+5, y: renderer.calcY(this.pitch-0.5), text: this.text, type: 'repeatfont', klass: 'ending', anchor: "start"});
 	}
 
 	if (this.anchor2) {
 		lineendx = this.anchor2.x;
-		pathString = sprintf("M %f %f L %f %f",
+		pathString += sprintf("M %f %f L %f %f ",
 			lineendx, y, lineendx, y+height);
-		renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});
 	}
 
-
-	pathString = sprintf("M %f %f L %f %f",
+	pathString += sprintf("M %f %f L %f %f ",
 		linestartx, y, lineendx, y);
-	renderer.printPath({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses('ending')});
+
+	var self = this;
+	var g;
+	var ret = renderer.wrapInAbsElem({el_type: "ending", startChar: -1, endChar: -1}, 'abcjs-ending', function () {
+
+		renderer.createElemSet({klass: renderer.addClasses("ending")});
+		renderer.printPath({path: pathString, stroke: "#000000", fill: "#000000"}, { history: 'ignore'});
+		if (self.anchor1)
+			renderer.renderText({x: linestartx + 5, y: renderer.calcY(self.pitch - 0.5), text: self.text, type: 'repeatfont', klass: 'ending', anchor: "start", noClass: true, history: 'ignore'});
+		g = renderer.closeElemSet();
+		renderer.controller.recordHistory(g, false);
+		return g;
+	});
+	return g;
 };
 
 module.exports = EndingElem;
