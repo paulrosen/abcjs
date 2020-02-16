@@ -181,7 +181,7 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
 	  var isSingleLineStaff = staffLines === 1;
 	  this.createABCVoice(abcstaff.voices[v],tempo, s, v, isSingleLineStaff, voice);
 	  staffgroup.setStaffLimits(voice);
-			if(abcstaff.brace === "start"){
+			if(abcstaff.brace === "start" || (!staffgroup.brace && abcstaff.brace)){
 				staffgroup.brace = new BraceElem(voice.staff, "brace");
 			}
 			else if(abcstaff.brace === "end" && staffgroup.brace) {
@@ -189,7 +189,7 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
 			} else if(abcstaff.brace === "continue" && staffgroup.brace) {
 				staffgroup.brace.continuing(voice.staff);
 			}
-			if(abcstaff.bracket === "start"){
+			if(abcstaff.bracket === "start" || (!staffgroup.bracket && abcstaff.bracket)){
 				staffgroup.bracket = new BraceElem(voice.staff, "bracket");
 			}
 			else if(abcstaff.bracket === "end" && staffgroup.bracket) {
