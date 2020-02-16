@@ -240,6 +240,8 @@ var verticalLint = function(tunes) {
 		str += "Line: " + lineNum + ": (" + fixed1(line.height) + ")\n";
 		if (line.brace)
 			str += "brace: " + line.brace.x + " " + formatY(line.brace) + "\n";
+		if (line.bracket)
+			str += "bracket: " + line.bracket.x + " " + formatY(line.bracket) + "\n";
 		str += "staffs: " + formatStaffs(line.staffs, 1);
 		str += "voices: " + formatVoices(line.voices, 1);
 		return str;
@@ -260,6 +262,9 @@ var verticalLint = function(tunes) {
 		var ret = { height: staffGroup.height, minSpace: staffGroup.minspace, spacingUnits: staffGroup.spacingunits, width: staffGroup.w, startX: staffGroup.startX, staffs: [], voices: [] };
 		if (staffGroup.brace) {
 			ret.brace = { x: staffGroup.brace.x, top: fixed1(staffGroup.brace.startY), bottom: fixed1(staffGroup.brace.endY) };
+		}
+		if (staffGroup.bracket) {
+			ret.bracket = { x: staffGroup.bracket.x, top: fixed1(staffGroup.bracket.startY), bottom: fixed1(staffGroup.bracket.endY) };
 		}
 		for (var i = 0; i < staffGroup.staffs.length; i++) {
 			var staff = staffGroup.staffs[i];
