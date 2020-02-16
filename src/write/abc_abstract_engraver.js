@@ -186,12 +186,16 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
 			}
 			else if(abcstaff.brace === "end" && staffgroup.brace) {
 				staffgroup.brace.setBottomStaff(voice.staff);
+			} else if(abcstaff.brace === "continue" && staffgroup.brace) {
+				staffgroup.brace.continuing(voice.staff);
 			}
 			if(abcstaff.bracket === "start"){
 				staffgroup.bracket = new BraceElem(voice.staff, "bracket");
 			}
 			else if(abcstaff.bracket === "end" && staffgroup.bracket) {
 				staffgroup.bracket.setBottomStaff(voice.staff);
+			} else if(abcstaff.bracket === "continue" && staffgroup.bracket) {
+				staffgroup.bracket.continuing(voice.staff);
 			}
   }
 };

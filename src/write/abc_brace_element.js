@@ -26,6 +26,11 @@ BraceElem.prototype.setBottomStaff = function(staff) {
 	this.endStaff = staff;
 };
 
+BraceElem.prototype.continuing = function(staff) {
+	// If the final staff isn't present, then use the last one we saw.
+	this.lastContinuedStaff = staff;
+};
+
 BraceElem.prototype.setLocation = function(x) {
 	this.x = x;
 };
@@ -44,7 +49,12 @@ BraceElem.prototype.draw = function (renderer, top, bottom) {
 	// The absoluteY number is the spot where the note on the first ledger line is drawn (i.e. middle C if treble clef)
 	// The STEP offset here moves it to the top and bottom lines
 	this.startY = this.startStaff.absoluteY - spacing.STEP*10;
-	this.endY = this.endStaff.absoluteY - spacing.STEP*2;
+	if (this.endStaff)
+		this.endY = this.endStaff.absoluteY - spacing.STEP*2;
+	else if (this.lastContinuedStaff)
+		this.endY = this.lastContinuedStaff.absoluteY - spacing.STEP*2;
+	else
+		this.endY = this.startStaff.absoluteY - spacing.STEP*2;
     this.drawBrace(renderer, this.x,this.startY, this.endY);
 };
 
