@@ -431,19 +431,19 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 
 			this.moveY(this.spacing.words, 1);
 			var historyLen = this.controller.history.length;
-			this.createElemSet({klass: "abcjs-unaligned-words"});
+			this.createElemSet({klass: "abcjs-meta-bottom abcjs-unaligned-words"});
 			for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
 				if (abctune.metaText.unalignedWords[j] === '')
 					this.moveY(hash.font.size, 1);
 				else if (typeof abctune.metaText.unalignedWords[j] === 'string') {
-					this.outputTextIf(this.padding.left + spacing.INDENT, abctune.metaText.unalignedWords[j], 'wordsfont', 'meta-bottom unaligned-words', 0, 0, "start");
+					this.outputTextIf(this.padding.left + spacing.INDENT, abctune.metaText.unalignedWords[j], 'wordsfont', 'meta-bottom unaligned-words', 0, 0, "start", true);
 				} else {
 					var largestY = 0;
 					var offsetX = 0;
 					for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
 						var thisWord = abctune.metaText.unalignedWords[j][k];
 						var type = (thisWord.font) ? thisWord.font : "wordsfont";
-						this.renderText({x: this.padding.left + spacing.INDENT + offsetX, y: this.y, text: thisWord.text, type: type, klass: 'meta-bottom unaligned-words', anchor: 'start'});
+						this.renderText({x: this.padding.left + spacing.INDENT + offsetX, y: this.y, text: thisWord.text, type: type, klass: 'meta-bottom unaligned-words', anchor: 'start', noClass: true});
 						var size = this.getTextSize(thisWord.text, type, 'meta-bottom unaligned-words');
 						largestY = Math.max(largestY, size.height);
 						offsetX += size.width;
@@ -665,15 +665,14 @@ Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, kl
 	var ycorr;
 	if (!symbol) return null;
 	if (symbol.length > 1 && symbol.indexOf(".") < 0) {
-		this.paper.openGroup();
+		this.paper.openGroup({klass: klass});
 		var dx = 0;
 		for (var i = 0; i < symbol.length; i++) {
 			var s = symbol.charAt(i);
 			ycorr = glyphs.getYCorr(s);
-			el = glyphs.printSymbol(x + dx, this.calcY(offset + ycorr), s, this.paper, klass);
+			el = glyphs.printSymbol(x + dx, this.calcY(offset + ycorr), s, this.paper, '');
 			if (el) {
 				if (this.doRegression) this.addToRegression(el);
-				//elemset.push(el);
 				if (i < symbol.length - 1)
 					dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));
 			} else {
@@ -890,11 +889,11 @@ Renderer.prototype.skipSpaceY = function () {
 // Call with 'kind' being the font type to use,
 // if marginBottom === null then don't increment the Y after printing, otherwise that is the extra number of em's to leave below the line.
 // and alignment being "start", "middle", or "end".
-Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, marginBottom, alignment) {
+Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, marginBottom, alignment, noClass) {
 	if (str) {
 		if (marginTop)
 			this.moveY(marginTop);
-		var el = this.renderText({x: x, y: this.y, text: str, type: kind, klass: klass, anchor: alignment});
+		var el = this.renderText({x: x, y: this.y, text: str, type: kind, klass: klass, anchor: alignment, noClass: noClass});
 		var bb = this.getTextSize(str, kind, klass, el);
 		var width = isNaN(bb.width) ? 0 : bb.width;
 		var height = isNaN(bb.height) ? 0 : bb.height;
