@@ -735,7 +735,7 @@ var parseDirective = {};
 				break;
 			case "sep":
 				if (tokens.length === 0)
-					tune.addSeparator();
+					tune.addSeparator(14,14,85); // If no parameters are given, then there is a default size.
 				else {
 					var points = tokenizer.getMeasurement(tokens);
 					if (points.used === 0)
