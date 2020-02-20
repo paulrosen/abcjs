@@ -813,16 +813,16 @@ Renderer.prototype.getFontAndAttr = function(type, klass) {
 		font = this.abctune.formatting[type];
 		// Raphael deliberately changes the font units to pixels for some reason, so we need to change points to pixels here.
 		if (font)
-			font = {face: font.face, size: font.size * 4 / 3, decoration: font.decoration, style: font.style, weight: font.weight, box: font.box};
+			font = {face: font.face, size: Math.round(font.size * 4 / 3), decoration: font.decoration, style: font.style, weight: font.weight, box: font.box};
 		else
-			font = {face: "Arial", size: 12 * 4 / 3, decoration: "underline", style: "normal", weight: "normal"};
+			font = {face: "Arial", size: Math.round(12 * 4 / 3), decoration: "underline", style: "normal", weight: "normal"};
 	} else
-		font = {face: type.face, size: type.size * 4 / 3, decoration: type.decoration, style: type.style, weight: type.weight, box: type.box};
+		font = {face: type.face, size: Math.round(type.size * 4 / 3), decoration: type.decoration, style: type.style, weight: type.weight, box: type.box};
 
 	var attr = {"font-size": font.size, 'font-style': font.style,
 		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
 		'class': this.addClasses(klass) };
-	attr.font = "";	// There is a spurious font definition that is put on all text elements. This overwrites it.
+	//attr.font = "";	// There is a spurious font definition that is put on all text elements. This overwrites it.
 	return { font: font, attr: attr };
 };
 

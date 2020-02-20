@@ -822,7 +822,7 @@ var Tune = function() {
 	};
 
 	this.addSeparator = function(spaceAbove, spaceBelow, lineLength) {
-		this.pushLine({separator: {spaceAbove: spaceAbove, spaceBelow: spaceBelow, lineLength: lineLength}});
+		this.pushLine({separator: {spaceAbove: Math.round(spaceAbove), spaceBelow: Math.round(spaceBelow), lineLength: Math.round(lineLength)}});
 	};
 
 	this.addText = function(str) {

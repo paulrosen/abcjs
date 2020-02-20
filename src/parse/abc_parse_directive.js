@@ -725,7 +725,7 @@ var parseDirective = {};
 				}
 				return null;
 			case "vskip":
-				var vskip = getRequiredMeasurement(cmd, tokens);
+				var vskip = Math.round(getRequiredMeasurement(cmd, tokens));
 				if (vskip.error)
 					return vskip.error;
 				tune.addSpacing(vskip);

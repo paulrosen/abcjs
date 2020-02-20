@@ -51,7 +51,7 @@ var BeamElem;
 	//
 	BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
 		// type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
-		this.isflat = flat;
+		this.isflat = !!flat;
 		this.isgrace = (type && type === "grace");
 		this.forceup = this.isgrace || (type && type === "up");
 		this.forcedown = (type && type === "down");
@@ -62,8 +62,10 @@ var BeamElem;
 		this.beams = []; // During the layout phase, this will become a list of the beams that need to be drawn.
 		if (firstElement && firstElement.duration) {
 			this.duration = firstElement.duration;
-			if (firstElement.startTriplet)
+			if (firstElement.startTriplet) {
 				this.duration *= firstElement.tripletMultiplier;
+			}
+			this.duration = Math.round(this.duration*1000)/1000;
 		} else
 			this.duration = 0;
 	};
@@ -75,11 +77,11 @@ var BeamElem;
 	BeamElem.prototype.add = function(abselem) {
 		var pitch = abselem.abcelem.averagepitch;
 		if (pitch === undefined) return; // don't include elements like spacers in beams
-		this.allrests = this.allrests && abselem.abcelem.rest;
+		if (!abselem.abcelem.rest)
+			this.allrests = false;
 		abselem.beam = this;
 		this.elems.push(abselem);
-		//var pitch = abselem.abcelem.averagepitch;
-		this.total += pitch; // TODO CHORD (get pitches from abselem.heads)
+		this.total = Math.round(this.total+pitch);
 		if (this.min === undefined || abselem.abcelem.minpitch < this.min) {
 			this.min = abselem.abcelem.minpitch;
 		}

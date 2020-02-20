@@ -89,7 +89,7 @@ AbstractEngraver.prototype.reset = function() {
 };
 
 AbstractEngraver.prototype.setStemHeight = function(heightInPixels) {
-	this.stemHeight = heightInPixels / spacing.STEP;
+	this.stemHeight = Math.round(heightInPixels * 10 / spacing.STEP) / 10;
 };
 
 AbstractEngraver.prototype.getCurrentVoiceId = function(s,v) {
@@ -457,11 +457,12 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 	AbstractEngraver.prototype.addGraceNotes = function (elem, voice, abselem, notehead, stemHeight, isBagpipes, roomtaken) {
 		var gracescale = 3 / 5;
 		var graceScaleStem = 3.5 / 5; // TODO-PER: empirically found constant.
+		stemHeight = Math.round(stemHeight * graceScaleStem);
 		var gracebeam = null;
 		var flag;
 
 		if (elem.gracenotes.length > 1) {
-			gracebeam = new BeamElem(stemHeight * graceScaleStem, "grace", isBagpipes);
+			gracebeam = new BeamElem(stemHeight, "grace", isBagpipes);
 			if (hint) gracebeam.setHint();
 			gracebeam.mainNote = abselem;	// this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
 		}
@@ -482,7 +483,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			flag = (gracebeam) ? null : chartable.uflags[(isBagpipes) ? 5 : 3];
 			var accidentalSlot = [];
 			var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale*this.voiceScale, accidentalSlot, false);
-			ret.notehead.highestVert = ret.notehead.pitch + stemHeight * graceScaleStem;
+			ret.notehead.highestVert = ret.notehead.pitch + stemHeight;
 			var grace = ret.notehead;
 			this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up", true);
 
@@ -710,7 +711,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 
 		// draw stem from the furthest note to a pitch above/below the stemmed note
 		if (hasStem) {
-			var stemHeight = 7 * this.voiceScale;
+			var stemHeight = Math.round(70 * this.voiceScale) / 10;
 			var p1 = (dir==="down") ? elem.minpitch-stemHeight : elem.minpitch+1/3;
 			// PER added stemdir test to make the line meet the note.
 			if (p1>6 && !stemdir) p1=6;

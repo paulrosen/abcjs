@@ -239,9 +239,9 @@ var verticalLint = function(tunes) {
 		var str = "";
 		str += "Line: " + lineNum + ": (" + fixed1(line.height) + ")\n";
 		if (line.brace)
-			str += "brace: " + line.brace.x + " " + formatY(line.brace) + "\n";
+			str += "brace: " + fixed1(line.brace.x) + " " + formatY(line.brace) + "\n";
 		if (line.bracket)
-			str += "bracket: " + line.bracket.x + " " + formatY(line.bracket) + "\n";
+			str += "bracket: " + fixed1(line.bracket.x) + " " + formatY(line.bracket) + "\n";
 		str += "staffs: " + formatStaffs(line.staffs, 1);
 		str += "voices: " + formatVoices(line.voices, 1);
 		return str;

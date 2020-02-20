@@ -24,7 +24,7 @@ var TripletElem;
 	TripletElem = function TripletElem(number, anchor1, options) {
 		this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
 		this.number = number;
-		this.duration = (''+anchor1.parent.durationClass).replace(/\./, '-');
+		this.durationClass = ('d'+(Math.round(anchor1.parent.durationClass*1000)/1000)).replace(/\./, '-');
 		this.middleElems = []; // This is to calculate the highest interior pitch. It is used to make sure that the drawn bracket never crosses a really high middle note.
 		this.flatBeams = options.flatBeams;
 	};
@@ -51,7 +51,7 @@ var TripletElem;
 	TripletElem.prototype.layout = function() {
 		// TODO end and beginning of line (PER: P.S. I'm not sure this can happen: I think the parser will always specify both the start and end points.)
 		if (this.anchor1 && this.anchor2) {
-			this.hasBeam = this.anchor1.parent.beam && this.anchor1.parent.beam === this.anchor2.parent.beam;
+			this.hasBeam = !!this.anchor1.parent.beam && this.anchor1.parent.beam === this.anchor2.parent.beam;
 
 			if (this.hasBeam) {
 				// If there is a beam then we don't need to draw anything except the text. The beam could either be above or below.
@@ -99,15 +99,14 @@ var TripletElem;
 
 	TripletElem.prototype.draw = function(renderer) {
 		var xTextPos;
-		var durationClass = ("abcjs-d"+this.duration).replace(/\./g,"-");
 		renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "triplet", startChar: -1, endChar: -1 }};
-		renderer.createElemSet({ klass: renderer.addClasses('triplet '+durationClass)});
+		renderer.createElemSet({ klass: renderer.addClasses('triplet '+this.durationClass)});
 		if (this.hasBeam) {
 			var left = this.anchor1.parent.beam.isAbove() ? this.anchor1.x + this.anchor1.w : this.anchor1.x;
 			xTextPos = this.anchor1.parent.beam.xAtMidpoint(left, this.anchor2.x);
 		} else {
 			xTextPos = this.anchor1.x + (this.anchor2.x + this.anchor2.w - this.anchor1.x) / 2;
-			drawBracket(renderer, this.anchor1.x, this.startNote, this.anchor2.x + this.anchor2.w, this.endNote, this.duration);
+			drawBracket(renderer, this.anchor1.x, this.startNote, this.anchor2.x + this.anchor2.w, this.endNote);
 		}
 		renderer.renderText({x: xTextPos, y: renderer.calcY(this.yTextPos), text: "" + this.number, type: 'tripletfont', anchor: "middle", centerVertically: true, history: 'ignore', noClass: true});
 		var g = renderer.closeElemSet();
@@ -119,7 +118,7 @@ var TripletElem;
 		return sprintf("M %f %f L %f %f", l, t, r, b);
 	}
 
-	function drawBracket(renderer, x1, y1, x2, y2, duration) {
+	function drawBracket(renderer, x1, y1, x2, y2) {
 		y1 = renderer.calcY(y1);
 		y2 = renderer.calcY(y2);
 		var bracketHeight = 5;

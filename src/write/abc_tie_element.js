@@ -171,7 +171,7 @@ TieElem.prototype.calcSlurY = function () {
 		var midPoint = (this.anchor2.highestVert + this.anchor2.pitch) / 2;
 		if (this.above && this.anchor2.stemDir === "up" && !this.fixedY && !beamInterferes && (midPoint < this.startY)) {
 			this.endY = midPoint;
-			this.endX += this.anchor2.w/2; // When going to the middle of the stem, bump the line to the right a little bit to make it look right.
+			this.endX += Math.round(this.anchor2.w/2); // When going to the middle of the stem, bump the line to the right a little bit to make it look right.
 		} else
 			this.endY = this.above && beamInterferes ? this.anchor2.highestVert : this.anchor2.pitch;
 
