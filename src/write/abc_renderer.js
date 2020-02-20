@@ -495,6 +495,7 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 };
 
 Renderer.prototype.outputFreeText = function (text, vskip) {
+	this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "free-text", startChar: -1, endChar: -1, text: text }};
 	if (vskip)
 		this.moveY(vskip);
 	var hash = this.getFontAndAttr('textfont', 'defined-text');
