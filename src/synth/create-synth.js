@@ -110,7 +110,8 @@ function CreateSynth() {
 		});
 	};
 
-	self._loadBatch = (function(batch, soundFontUrl, startTime) {
+	self._loadBatch = (function(batch, soundFontUrl, startTime, delay) {
+		// This is called recursively to see if the sounds have loaded. The "delay" parameter is how long it has been since the original call.
 		var promises = [];
 		batch.forEach(function(item) {
 			promises.push(getNote(soundFontUrl, item.instrument, item.note, activeAudioContext()));
@@ -120,18 +121,44 @@ function CreateSynth() {
 				self.debugCallback("mp3 load time = " + Math.floor((activeAudioContext().currentTime - startTime)*1000)+"ms");
 			var loaded = [];
 			var cached = [];
+			var pending = [];
 			var error = [];
 			for (var i = 0; i < response.length; i++) {
 				var oneResponse = response[i];
 				var which = oneResponse.instrument + ":" + oneResponse.name;
 				if (oneResponse.status === "loaded")
 					loaded.push(which);
+				else if (oneResponse.status === "pending")
+					pending.push(which);
 				else if (oneResponse.status === "cached")
 					cached.push(which);
 				else
 					error.push(which + ' ' + oneResponse.message);
 			}
-			return Promise.resolve({ loaded: loaded, cached: cached, error: error });
+			if (pending.length > 0) {
+				// There was probably a second call for notes before the first one finished, so just retry a few times to see if they stop being pending.
+				// Retry quickly at first so that there isn't an unnecessary delay, but increase the delay each time.
+				if (!delay)
+					delay = 50;
+				else
+					delay = delay * 2;
+				if (delay < 90000) {
+					return new Promise(function (resolve, reject) {
+						setTimeout(function () {
+							var newBatch = [];
+							for (i = 0; i < pending.length; i++) {
+								which = pending[i].split(":");
+								newBatch.push({instrument: which[0], note: which[1]});
+							}
+							self._loadBatch(newBatch, soundFontUrl, startTime, delay).then(function (response) {
+								resolve(response);
+							});
+						}, delay);
+					});
+				} else
+					return Promise.reject(new Error("time out attempting to load: " + batch.join("/")));
+			} else
+				return Promise.resolve({loaded: loaded, cached: cached, error: error});
 		});
 	});
 

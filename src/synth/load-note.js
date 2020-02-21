@@ -13,6 +13,9 @@ var getNote = function(url, instrument, name, audioContext) {
 		if (instrumentCache[name] === 'error') {
 			return resolve({instrument: instrument, name: name, status: "error", message: "Unable to load sound font" + ' ' + url + ' ' + instrument + ' ' + name });
 		}
+		if (instrumentCache[name] === 'pending') {
+			return resolve({instrument: instrument, name: name, status: "pending"});
+		}
 		if (instrumentCache[name]) {
 			return resolve({instrument: instrument, name: name, status: "cached"});
 		}
