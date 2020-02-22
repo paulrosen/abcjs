@@ -175,6 +175,10 @@ function CreateSynth() {
 			var startTime = activeAudioContext().currentTime;
 			var tempoMultiplier = self.millisecondsPerMeasure / 1000 / self.meterSize;
 			self.duration = self.flattened.totalDuration * tempoMultiplier;
+			if(self.duration <= 0) {
+				self.audioBuffers = [];
+				return resolve({ status: "empty", seconds: 0});
+			}
 			var totalSamples = Math.floor(activeAudioContext().sampleRate * self.duration);
 
 			// There might be a previous run that needs to be turned off.
