@@ -1,3 +1,37 @@
+# Version 6.0.0-beta.3
+
+## Bugs
+
+* Remove warning in audio creation when the track name is specified.
+
+* Don't crash in creating audio when the length of the music is zero.
+
+* Fix some timing problems with loading note mp3 that are already pending.
+
+* Fix selection of free text.
+
+* Set the correct defaults for a bare "%%sep" command.
+
+* Set the right font face when a font is specified with only "box"
+
+* Fix crash in audio when trying to play unisons.
+
+* Fix setting the position of braces and brackets when the start staff isn't present.
+
+* Fix computation of pickup length because of JavaScript math problems
+
+* Fix setting the position of braces and brackets when the end staff isn't present.
+
+* Fix some inaccuracies in getting height of text.
+
+## Improvements
+
+* Improve efficiency of creating the audio buffer; improve sound quality and volume of the buffer.
+
+* Round many of the calculations to make the SVG draw the same on different systems.
+
+* Improve the selection data.
+
 # Version 6.0.0-beta.2
 
 ## Bugs

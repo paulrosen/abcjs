@@ -187,7 +187,7 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	}
 	var klass = this.type;
 	if (this.type === 'note' || this.type === 'rest') {
-		klass += ' d' + this.durationClass.toFixed(3);
+		klass += ' d' + Math.round(this.durationClass*1000)/1000;
 		klass = klass.replace(/\./g, '-');
 		if (this.abcelem.pitches) {
 			for (var j = 0; j < this.abcelem.pitches.length; j++) {
