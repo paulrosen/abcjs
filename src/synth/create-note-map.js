@@ -35,6 +35,9 @@ var createNoteMap = function(sequence) {
 				case "program":
 					currentInstrument = instrumentIndexToName[ev.instrument];
 					break;
+				case "text":
+					// Ignore the track names - that is just for midi files.
+					break;
 				default:
 					// TODO-PER: handle other event types
 					console.log("Unhanded midi event", ev);
