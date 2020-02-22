@@ -163,6 +163,9 @@ function CreateSynth() {
 	});
 
 	self.prime = function() {
+		// At this point all of the notes are loaded. This function writes them into the output buffer.
+		// Most music has a lot of repeating notes. If a note is the same pitch, volume, length, etc. as another one,
+		// It saves a lot of time to just create it once and place it repeatedly where ever it needs to be.
 		self.isRunning = false;
 		if (!self.audioBufferPossible)
 			return Promise.reject(new Error(notSupportedMessage));
@@ -180,23 +183,32 @@ function CreateSynth() {
 			var noteMapTracks = createNoteMap(self.flattened);
 			if (self.sequenceCallback)
 				self.sequenceCallback(noteMapTracks, self.callbackContext);
-			//console.log(noteMapTracks);
 
 			var panDistances = setPan(noteMapTracks.length, self.pan);
 
-			self.audioBuffers = [];
-			var allPromises = [];
+			// Create a simple list of all the unique sounds in this music and where they should be placed.
+			// There appears to be a limit on how many audio buffers can be created at once so this technique limits the number needed.
+			var uniqueSounds = {};
 			noteMapTracks.forEach(function(noteMap, trackNumber) {
-				var audioBuffer = activeAudioContext().createBuffer(2, totalSamples, activeAudioContext().sampleRate);
-				var chanData = audioBuffer.getChannelData(0);
-
 				var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
 				noteMap.forEach(function(note) {
-					allPromises.push(placeNote(audioBuffer, note, tempoMultiplier, activeAudioContext().sampleRate, panDistance));
+					var key = note.instrument + ':' + note.pitch + ':' +note.volume + ':' + (note.end-note.start) + ':' + panDistance + ':' + tempoMultiplier;
+					if (!uniqueSounds[key])
+						uniqueSounds[key] = [];
+					uniqueSounds[key].push(note.start);
 				});
-
-				self.audioBuffers.push(audioBuffer);
 			});
+
+			// Now that we know what we are trying to create, construct the audio buffer by creating each sound and placing it.
+			var allPromises = [];
+			var audioBuffer = activeAudioContext().createBuffer(2, totalSamples, activeAudioContext().sampleRate);
+			for (var key2 = 0; key2 < Object.keys(uniqueSounds).length; key2++) {
+				var k = Object.keys(uniqueSounds)[key2];
+				var parts = k.split(":");
+				parts = { instrument: parts[0], pitch: parseInt(parts[1],10), volume: parseInt(parts[2], 10), len: parseFloat(parts[3]), pan: parseFloat(parts[4]), tempoMultiplier: parseFloat(parts[5])};
+				allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k]));
+			}
+			self.audioBuffers = [audioBuffer];
 
 			if (self.debugCallback) {
 				self.debugCallback("sampleRate = " + activeAudioContext().sampleRate);

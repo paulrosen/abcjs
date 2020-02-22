@@ -4,14 +4,13 @@ var pitchToNoteName = require('./pitch-to-note-name');
 var OfflineAC = window.OfflineAudioContext ||
 	window.webkitOfflineAudioContext;
 
-function placeNote(outputAudioBuffer, note, tempoMultiplier, sampleRate, panDistance) {
-	var start = note.start * tempoMultiplier;
-	var len = (note.end - note.start) * tempoMultiplier;
+function placeNote(outputAudioBuffer, sampleRate, sound, startArray) {
+	var len = sound.len * sound.tempoMultiplier;
 	var offlineCtx = new OfflineAC(2,Math.floor((len+0.5)*sampleRate*2),sampleRate);
-	var noteName = pitchToNoteName[note.pitch+60];
-	var noteBuffer = soundsCache[note.instrument][noteName];
+	var noteName = pitchToNoteName[sound.pitch+60];
+	var noteBuffer = soundsCache[sound.instrument][noteName];
 	if (noteBuffer === "error") { // If the note isn't available, just leave a blank spot
-		console.log("Didn't load note: " + note.instrument + " " + noteName);
+		console.log("Didn't load note: " + sound.instrument + " " + noteName);
 		return;
 	}
 
@@ -20,13 +19,13 @@ function placeNote(outputAudioBuffer, note, tempoMultiplier, sampleRate, panDist
 	source.buffer = noteBuffer;
 
 	// add gain
-	var volume = (note.volume / 127) * 2.0;
+	var volume = (sound.volume / 127) * 2.0;
 	source.gainNode = offlineCtx.createGain();
 
 	// add pan if supported and present
-	if (panDistance && offlineCtx.createStereoPanner) {
+	if (sound.pan && offlineCtx.createStereoPanner) {
 		source.panNode = offlineCtx.createStereoPanner();
-		source.panNode.pan.setValueAtTime(panDistance, 0);
+		source.panNode.pan.setValueAtTime(sound.pan, 0);
 	}
 	source.gainNode.gain.value = Math.min(1.0, Math.max(-1.0, volume));
 	source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
@@ -51,7 +50,11 @@ function placeNote(outputAudioBuffer, note, tempoMultiplier, sampleRate, panDist
 	}
 	var fnResolve;
 	offlineCtx.oncomplete = function(e) {
-		copyToChannel(outputAudioBuffer, e.renderedBuffer, Math.floor(start*sampleRate));
+		if (e.renderedBuffer) { // If the system gets overloaded then this can start failing. Just drop the note if so.
+			for (var i = 0; i < startArray.length; i++) {
+				copyToChannel(outputAudioBuffer, e.renderedBuffer, Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate));
+			}
+		}
 		fnResolve();
 	};
 	offlineCtx.startRendering();
@@ -67,7 +70,7 @@ var copyToChannel = function(toBuffer, fromBuffer, start) {
 
 		// Mix the current note into the existing track
 		for (var n = 0; n < fromData.length; n++) {
-			toData[n + start] = toData[n + start] * 0.5 + fromData[n] * 0.5;
+			toData[n + start] += fromData[n];
 		}
 	}
 };
