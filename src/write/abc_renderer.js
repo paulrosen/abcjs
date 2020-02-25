@@ -767,7 +767,7 @@ Renderer.prototype.calcY = function(ofs) {
  * Print @param {number} numLines. If there is 1 line it is the B line. Otherwise the bottom line is the E line.
  */
 Renderer.prototype.printStave = function (startx, endx, numLines) {
-	var klass = "top-line";
+	var klass = "abcjs-top-line";
 	this.paper.openGroup({ prepend: true, klass: "abcjs-l1 abcjs-staff" });
 	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
 	if (numLines === 1) {
