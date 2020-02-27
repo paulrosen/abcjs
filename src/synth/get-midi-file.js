@@ -15,8 +15,6 @@ var getMidiFile = function(abcString, options) {
 	function callback(div, tune, index, abcString) {
 		var downloadMidi = midiCreate(tune, params);
 		switch (params.midiOutputType) {
-			case "link":
-				return generateMidiDownloadLink(tune, params, downloadMidi, index);
 			case "encoded":
 				return downloadMidi;
 			case "binary":
@@ -31,6 +29,9 @@ var getMidiFile = function(abcString, options) {
 					output[i] = d;
 				}
 				return output;
+			case "link":
+			default:
+				return generateMidiDownloadLink(tune, params, downloadMidi, index);
 		}
 		return downloadMidi;
 	}
