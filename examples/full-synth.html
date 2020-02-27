@@ -195,6 +195,11 @@
 
 		function setTune(userAction) {
 			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions)[0];
+			var midi = ABCJS.synth.getMidiFile(abc[currentTune]);
+			var midiButton = document.querySelector(".midi");
+			midiButton.setAttribute("href", midi);
+			midiButton.setAttribute("download", visualObj.metaText.title + ".midi");
+
 			// TODO-PER: This will allow the callback function to have access to timing info - this should be incorporated into the render at some point.
 			var midiBuffer = new ABCJS.synth.CreateSynth();
 			midiBuffer.init({ visualObj: visualObj }).then(function (response) {
@@ -232,6 +237,7 @@
 	<button class="next">Next Tune</button>
 	<button class="start">Start/Pause</button>
 	<button class="download" style="display: none;">Download</button>
+	<a class="midi">MIDI</a>
 	<div id="paper"></div>
 	<div id="audio"></div>
 	<p class="beat"></p>
