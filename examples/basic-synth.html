@@ -33,7 +33,8 @@
 
 		function load() {
 			// First draw the music - this supplies an object that has a lot of information about how to create the synth.
-			var visualObj = ABCJS.renderAbc("paper", abc)[0];
+			var visualObj = ABCJS.renderAbc("paper", abc, {
+				responsive: "resize" })[0];
 
 			// This object is the class that will contain the buffer
 			var midiBuffer;
@@ -57,30 +58,33 @@
 						navigator.mozAudioContext ||
 						navigator.msAudioContext;
 					var audioContext = new window.AudioContext();
+					audioContext.resume().then(function () {
+						// In theory the AC shouldn't start suspended because it is being initialized in a click handler, but iOS seems to anyway.
 
-					// This does a bare minimum so this object could be created in advance, or whenever convenient.
-					midiBuffer = new ABCJS.synth.CreateSynth();
+						// This does a bare minimum so this object could be created in advance, or whenever convenient.
+						midiBuffer = new ABCJS.synth.CreateSynth();
 
-					// midiBuffer.init preloads and caches all the notes needed. There may be significant network traffic here.
-					return midiBuffer.init({
-						visualObj: visualObj,
-						audioContext: audioContext,
-						millisecondsPerMeasure: visualObj.millisecondsPerMeasure()
-					}).then(function (response) {
-						console.log(response);
-						// midiBuffer.prime actually builds the output buffer.
-						return midiBuffer.prime();
-					}).then(function () {
-						// At this point, everything slow has happened. midiBuffer.start will return very quickly and will start playing very quickly without lag.
-						midiBuffer.start();
-						return Promise.resolve();
-					}).catch(function (error) {
-						if (error.status === "NotSupported") {
-							stopAudioButton.setAttribute("style", "display:none;");
-							var audioError = document.querySelector(".audio-error");
-							audioError.setAttribute("style", "");
-						} else
-							console.warn("synth error", error);
+						// midiBuffer.init preloads and caches all the notes needed. There may be significant network traffic here.
+						return midiBuffer.init({
+							visualObj: visualObj,
+							audioContext: audioContext,
+							millisecondsPerMeasure: visualObj.millisecondsPerMeasure()
+						}).then(function (response) {
+							// console.log(response); // this contains the list of notes that were loaded.
+							// midiBuffer.prime actually builds the output buffer.
+							return midiBuffer.prime();
+						}).then(function () {
+							// At this point, everything slow has happened. midiBuffer.start will return very quickly and will start playing very quickly without lag.
+							midiBuffer.start();
+							return Promise.resolve();
+						}).catch(function (error) {
+							if (error.status === "NotSupported") {
+								stopAudioButton.setAttribute("style", "display:none;");
+								var audioError = document.querySelector(".audio-error");
+								audioError.setAttribute("style", "");
+							} else
+								console.warn("synth error", error);
+						});
 					});
 				} else {
 					var audioError = document.querySelector(".audio-error");

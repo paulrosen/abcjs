@@ -38,6 +38,7 @@ abcjs.synth = {
 	SynthController: SynthController,
 	SynthSequence: SynthSequence,
 	CreateSynthControl: CreateSynthControl,
+	registerAudioContext: registerAudioContext,
 	activeAudioContext: activeAudioContext,
 	playEvent: playEvent
 };
