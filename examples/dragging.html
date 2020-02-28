@@ -85,13 +85,32 @@
 			return output;
 		}
 
-		function clickListener(abcelem, tuneNumber, classes, analysis, dragStep) {
-			if (abcelem.pitches && dragStep && abcelem.startChar >= 0 && abcelem.endChar >= 0) {
+		var selectionCallback;
+		var currentIndex = -1;
+		var maxIndex = -1;
+
+		function selectPrevious() {
+			if (selectionCallback && currentIndex > 0)
+				selectionCallback(currentIndex-1);
+		}
+
+		function selectNext() {
+			if (selectionCallback && currentIndex < maxIndex)
+				selectionCallback(currentIndex+1);
+		}
+
+		function clickListener(abcelem, tuneNumber, classes, analysis, drag) {
+			if (drag) {
+				selectionCallback = drag.setSelection;
+				currentIndex = drag.index;
+				maxIndex = drag.max;
+			}
+			if (abcelem.pitches && drag && drag.step && abcelem.startChar >= 0 && abcelem.endChar >= 0) {
 				var originalText = abcString.substring(abcelem.startChar, abcelem.endChar);
 				var arr = tokenize(originalText);
 				// arr now contains elements that are either a chord, a decoration, a note name, or anything else. It can be put back to its original string with .join("").
 				for (var i = 0; i < arr.length; i++) {
-					arr[i] = moveNote(arr[i], dragStep);
+					arr[i] = moveNote(arr[i], drag.step);
 				}
 				var newText = arr.join("");
 
@@ -155,6 +174,7 @@
 			flex-wrap: wrap;
 		}
 		#source {
+			font-size: 13px;
 			max-width: 700px;
 			overflow: auto;
 			font-family: "Lucida Console", Monaco, monospace;
@@ -193,6 +213,7 @@
 			the notes, rests, and measures are selectable.
 		</div>
 	</li>
+	<li><button onclick="selectPrevious()">Previous</button><button onclick="selectNext()">Next</button></li>
 </ul>
 <div class="row">
 	<div>

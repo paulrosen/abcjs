@@ -81,6 +81,7 @@ EngraverController.prototype.reset = function() {
 	this.history = [];
 	this.currentAbsEl = null;
 	this.dragTarget = null;
+	this.dragIndex = -1;
 	this.dragMouseStart = { x: -1, y: -1 };
 	this.dragYStep = 0;
 };

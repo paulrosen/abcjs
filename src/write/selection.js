@@ -38,7 +38,7 @@ function getCoord(ev) {
 function elementFocused(ev) {
 	// If there had been another element focused and is being dragged, then report that before setting the new element up.
 	if (this.dragMechanism === "keyboard" && this.dragYStep !== 0 && this.dragTarget)
-		this.notifySelect(this.dragTarget, this.dragYStep);
+		notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.history.length, this.dragIndex);
 
 	this.dragYStep = 0;
 }
@@ -61,13 +61,14 @@ function keyboardSelection(ev) {
 		case 32:
 			handled = true;
 			this.dragTarget = this.history[index];
+			this.dragIndex = index;
 			this.dragMechanism = "keyboard";
 			mouseUp.bind(this)();
 			break;
 		case 38: // arrow up
 			handled = true;
 			this.dragTarget = this.history[index];
-			this.dragMechanism = "keyboard";
+			this.dragIndex = index;
 			if (this.dragTarget.isDraggable) {
 				if (this.dragging && this.dragTarget.isDraggable)
 					this.dragTarget.absEl.highlight(undefined, this.dragColor);
@@ -78,6 +79,7 @@ function keyboardSelection(ev) {
 		case 40: // arrow down
 			handled = true;
 			this.dragTarget = this.history[index];
+			this.dragIndex = index;
 			this.dragMechanism = "keyboard";
 			if (this.dragTarget.isDraggable) {
 				if (this.dragging && this.dragTarget.isDraggable)
@@ -132,6 +134,7 @@ function mouseDown(ev) {
 	}
 	if (closestIndex >= 0) {
 		this.dragTarget = this.history[closestIndex];
+		this.dragIndex = closestIndex;
 		this.dragMechanism = "mouse";
 		this.dragMouseStart = { x: x, y: y };
 		if (this.dragging && this.dragTarget.isDraggable) {
@@ -170,13 +173,23 @@ function mouseUp(ev) {
 		this.dragTarget.absEl.highlight(undefined, this.selectionColor);
 	}
 
-	notifySelect.bind(this)(this.dragTarget, this.dragYStep);
+	notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.history.length, this.dragIndex);
 	this.dragTarget.svgEl.focus();
 	this.dragTarget = null;
+	this.dragIndex = -1;
 	this.renderer.removeGlobalClass("abcjs-dragging-in-progress");
 }
 
-function notifySelect(target, dragStep) {
+function setSelection(dragIndex) {
+	if (dragIndex >= 0 && dragIndex < this.history.length) {
+		this.dragTarget = this.history[dragIndex];
+		this.dragIndex = dragIndex;
+		this.dragMechanism = "keyboard";
+		mouseUp.bind(this)();
+	}
+}
+
+function notifySelect(target, dragStep, dragMax, dragIndex) {
 	var classes = [];
 	if (target.absEl.elemset) {
 		var classObj = {};
@@ -199,7 +212,7 @@ function notifySelect(target, dragStep) {
 	}
 
 	for (var i=0; i<this.listeners.length;i++) {
-		this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, dragStep);
+		this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, { step: dragStep, max: dragMax, index: dragIndex, setSelection: setSelection.bind(this)});
 	}
 }
 
