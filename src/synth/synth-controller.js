@@ -1,6 +1,7 @@
 var CreateSynthControl = require('./create-synth-control');
 var CreateSynth = require('./create-synth');
 var TimingCallbacks = require('../api/abc_timing_callbacks');
+var activeAudioContext = require('./active-audio-context');
 
 function SynthController() {
 	var self = this;
@@ -119,18 +120,20 @@ function SynthController() {
 	};
 
 	self._play = function () {
-		self.isStarted = !self.isStarted;
-		if (self.isStarted) {
-			if (self.cursorControl && self.cursorControl.onStart && typeof self.cursorControl.onStart  === 'function')
-				self.cursorControl.onStart();
-			self.midiBuffer.start();
-			self.timer.start();
-			if (self.control)
-				self.control.pushPlay(true);
-		} else {
-			self.pause();
-		}
-		return Promise.resolve({ status: "ok" });
+		activeAudioContext().resume().then(function () {
+			self.isStarted = !self.isStarted;
+			if (self.isStarted) {
+				if (self.cursorControl && self.cursorControl.onStart && typeof self.cursorControl.onStart === 'function')
+					self.cursorControl.onStart();
+				self.midiBuffer.start();
+				self.timer.start();
+				if (self.control)
+					self.control.pushPlay(true);
+			} else {
+				self.pause();
+			}
+			return Promise.resolve({status: "ok"});
+		})
 	};
 
 	self.pause = function() {
