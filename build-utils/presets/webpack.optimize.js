@@ -21,7 +21,7 @@ function getVersion() {
 
 function makeBanner(type) {
 	const outputFilename = `abcjs_${type}_${getVersion()}-min.js`;
-	const banner1 = `abcjs_${type} v${getVersion()} Copyright © 2009-2019 Paul Rosen and Gregory Dyke (https://abcjs.net) */`;
+	const banner1 = `abcjs_${type} v${getVersion()} Copyright © 2009-2020 Paul Rosen and Gregory Dyke (https://abcjs.net) */`;
 	const banner2 = `/*! midi.js Copyright © Michael Deal (http://mudcu.be) */`;
 	const banner3 = `/*! For license information please see ${outputFilename}.LICENSE`;
 	const hasMidi = type === 'midi';
