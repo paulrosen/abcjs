@@ -1,3 +1,27 @@
+# Version 6.0.0-beta.4
+
+## Features
+
+* Add a callback for the client to select items programmatically.
+
+* Add midi download to the synth example.
+
+* Add "link" as the default style of midi file return value.
+
+## Bugs
+
+* Call resume on the AudioContext just before playing, just in case. (Fixed Safari bug)
+
+* Fixed regression with the line number on the staves.
+
+* Fixed regression: the class "abcjs-top-line" lost the "abcjs-" part.
+
+## Tasks
+
+* Update copyright years.
+
+* Update dragging example.
+
 # Version 6.0.0-beta.3
 
 ## Bugs
