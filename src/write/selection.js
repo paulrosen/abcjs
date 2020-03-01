@@ -126,16 +126,31 @@ function mouseDown(ev) {
 
 	var minDistance = 9999999;
 	var closestIndex = -1;
+	var chosenEl;
 	for (var i = 0; i < this.history.length && minDistance > 0; i++) {
 		var el = this.history[i];
 		if (!el.selectable)
 			continue;
 
-		// See if it is a direct hit on an element - if so, definitely take it (there are no overlapping elements)
 		this.getDim(el);
 		if (el.dim.left < x && el.dim.right > x && el.dim.top < y && el.dim.bottom > y) {
+			// See if it is a direct hit on an element - if so, definitely take it (there are no overlapping elements)
 			closestIndex = i;
 			minDistance = 0;
+		} else if (el.dim.top < y && el.dim.bottom > y) {
+			// See if it is the same vertical as the element. Then the distance is the x difference
+			var horiz = Math.min(Math.abs(el.dim.left - x), Math.abs(el.dim.right - x));
+			if (horiz < minDistance) {
+				minDistance = horiz;
+				closestIndex = i;
+			}
+		} else if (el.dim.left < x && el.dim.right > x) {
+			// See if it is the same horizontal as the element. Then the distance is the y difference
+			var vert = Math.min(Math.abs(el.dim.top - y), Math.abs(el.dim.bottom - y));
+			if (vert < minDistance) {
+				minDistance = vert;
+				closestIndex = i;
+			}
 		} else {
 			// figure out the distance to this element.
 			var dx = Math.abs(x - el.dim.left) > Math.abs(x - el.dim.right) ? Math.abs(x - el.dim.right) : Math.abs(x - el.dim.left);
@@ -147,7 +162,7 @@ function mouseDown(ev) {
 			}
 		}
 	}
-	if (closestIndex >= 0) {
+	if (closestIndex >= 0 && minDistance <= 12) {
 		this.dragTarget = this.history[closestIndex];
 		this.dragIndex = closestIndex;
 		this.dragMechanism = "mouse";
