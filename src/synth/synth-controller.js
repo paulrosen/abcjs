@@ -135,7 +135,7 @@ function SynthController() {
 	};
 
 	self._play = function () {
-		activeAudioContext().resume().then(function () {
+		return activeAudioContext().resume().then(function () {
 			self.isStarted = !self.isStarted;
 			if (self.isStarted) {
 				if (self.cursorControl && self.cursorControl.onStart && typeof self.cursorControl.onStart === 'function')
