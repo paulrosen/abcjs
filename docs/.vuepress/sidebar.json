@@ -11,6 +11,7 @@
   {
 	"title": "Visual",
 	"children": [
+	  "/visual/overview.md",
 	  "/visual/visual-params.md",
 	  "/visual/classes.md"
 	]
