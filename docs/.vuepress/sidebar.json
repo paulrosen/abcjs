@@ -12,8 +12,9 @@
 	"title": "Visual",
 	"children": [
 	  "/visual/overview.md",
-	  "/visual/visual-params.md",
-	  "/visual/classes.md"
+	  "/visual/render-abc-options.md",
+	  "/visual/classes.md",
+	  "/visual/click-listener.md"
 	]
   },
   {
@@ -38,6 +39,12 @@
 	"title": "Analysis",
 	"children": [
 	  "/analysis/tune-book.md"
+	]
+  },
+  {
+	"title": "Deprecated",
+	"children": [
+	  "/deprecated/deprecated-api.md"
 	]
   },
   {

@@ -36,6 +36,14 @@ You can directly access the array of tunes in a tune book with:
 var arrayOfTunes = tunebook.tunes;
 ```
 
+### Get all measures separately
+
+To parse the string and return each measure:
+
+```javascript
+var measureArray = abcjs.extractMeasures(tunebookString);
+```
+
 ## Test Data
 
 Paste in any ABC you want here and see how that affects the analysis above:

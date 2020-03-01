@@ -1,6 +1,14 @@
 # Release Notes
 
-Full release notes can be found in the RELEASE.md file.
+Full release notes can be found in the [RELEASE.md](https://github.com/paulrosen/abcjs/blob/master/RELEASE.md) file.
+
+## Notes for Version 6.0.0
+
+There has been a large change in the underlying SVG output. It should look exactly the same, but it will take up much less space. Also a number of inconsistencies in the way classes are applied has been fixed. If you are just using the library to output standard notation, you probably won't notice any difference. However, if you are querying the SVG directly, or setting CSS that targets elements, then you will need to retest.
+
+There has been a change to the data that comes back from the click listener. This includes information if the user has dragged a note.
+
+There have been many improvements to the audio quality. More improvements are coming, too!
 
 ## Notes for Version 5.9.0
 

@@ -78,12 +78,12 @@ This is an object containing a wide variety of options. See the section on optio
 
 ## Return value
 
-The return value is an array of objects that each represent a tune. If you aren't doing more processing on the music you probably don't need this. However, this is what is passed to the TimingCallbacks object and the CreateSynth object.
+The return value is an array of objects that each represent a tune. If you aren't doing more processing on the music you probably don't need this. This is what needs to be passed to the TimingCallbacks object and the CreateSynth object.
 
-Also, there is a lot of valuable info in this object that you can extract. 
+There is a lot of valuable info in this object that you can extract that might be useful to you.
 
-::: warning Object Format
-HOWEVER, the format of this object is not guaranteed to be backwards compatible, so if you do delve into this and write code that depends on it, you need to retest whenever you upgrade abcjs.
+::: warning Return Object Format
+HOWEVER, the format of this object is NOT guaranteed to be backwards compatible, so if you do delve into this and write code that depends on it, you need to retest whenever you upgrade abcjs.
 :::
 
 ::: tip Tip
