@@ -154,7 +154,6 @@ var TimingCallbacks = function(target, params) {
 		if (offsetPercent) {
 			self.setProgress(offsetPercent);
 		} else {
-			console.log("start call requestAnimationFrame", performance.now())
 			requestAnimationFrame(self.doTiming);
 		}
 	};
