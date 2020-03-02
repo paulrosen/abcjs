@@ -184,6 +184,9 @@ var TimingCallbacks = function(target, params) {
 		self.justSeeked = true;
 		self.doTiming(performance.now());
 		//requestAnimationFrame(self.doTiming);
+		if (self.lineEndCallback) {
+			self.lineEndTimings = getLineEndTimings(self.noteTimings, self.lineEndAnticipation);
+		}
 	};
 };
 
