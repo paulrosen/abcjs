@@ -1,3 +1,19 @@
+# Version 6.0.0-beta.5
+
+## Features
+
+* Add offset parameter for TimingCallbacks start()
+
+* Somewhat improved documentation.
+
+## Bugs
+
+* Make the timing of beats more accurate in TimingCallbacks.
+
+* Only select element if the click is within 12 pixels.
+
+* Fix crash when using the built in audio control.
+    
 # Version 6.0.0-beta.4
 
 ## Features
