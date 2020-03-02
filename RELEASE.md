@@ -1,3 +1,11 @@
+# Version 6.0.0-beta.6
+
+## Bugs
+
+* When doing line wrap, don't drop the meter when there are multiple staves.
+
+* Keep the line callbacks in TimingCallbacks accurate after seeking.
+
 # Version 6.0.0-beta.5
 
 ## Features
