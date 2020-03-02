@@ -67,7 +67,7 @@ var TimingCallbacks = function(target, params) {
 		self.startTime = self.startTime + timeDifference;
 
 		var currentTime = timestamp - self.startTime;
-		currentTime += 50; // Add a little slop because this function isn't called exactly.
+		currentTime += 16; // Add a little slop because this function isn't called exactly.
 
 		var oldBeat = self.currentBeat;
 		self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
@@ -89,7 +89,13 @@ var TimingCallbacks = function(target, params) {
 		// 	" currentEvent="+self.currentEvent);
 	}
 
+	self.lastTimestamp = 0;
 	self.doTiming = function (timestamp) {
+		// This is called 60 times a second, that is, every 16 msecs.
+		//console.log("doTiming", timestamp, timestamp-self.lastTimestamp);
+		if (self.lastTimestamp === timestamp)
+			return; // If there are multiple seeks or other calls, then we can easily get multiple callbacks for the same instance.
+		self.lastTimestamp = timestamp;
 		if (!self.startTime) {
 			self.startTime = timestamp;
 		} else if (self.justUnpaused) {
@@ -107,7 +113,7 @@ var TimingCallbacks = function(target, params) {
 			self.pausedTime = timestamp;
 		} else if (self.isRunning) {
 			var currentTime = timestamp - self.startTime;
-			currentTime += 50; // Add a little slop because this function isn't called exactly.
+			currentTime += 16; // Add a little slop because this function isn't called exactly.
 			while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
 				if (self.eventCallback && self.noteTimings[self.currentEvent].type === 'event')
 					self.eventCallback(self.noteTimings[self.currentEvent]);
@@ -139,13 +145,18 @@ var TimingCallbacks = function(target, params) {
 		}
 	};
 
-	self.start = function() {
+	self.start = function(offsetPercent) {
 		self.isRunning = true;
 		if (self.isPaused) {
 			self.isPaused = false;
 			self.justUnpaused = true;
 		}
-		requestAnimationFrame(self.doTiming);
+		if (offsetPercent) {
+			self.setProgress(offsetPercent);
+		} else {
+			console.log("start call requestAnimationFrame", performance.now())
+			requestAnimationFrame(self.doTiming);
+		}
 	};
 	self.pause = function() {
 		self.isPaused = true;
@@ -172,7 +183,8 @@ var TimingCallbacks = function(target, params) {
 
 		self.newSeekPercent = percent;
 		self.justSeeked = true;
-		requestAnimationFrame(self.doTiming);
+		self.doTiming(performance.now());
+		//requestAnimationFrame(self.doTiming);
 	};
 };
 
