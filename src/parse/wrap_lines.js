@@ -63,7 +63,7 @@ function wrapLines(tune, lineBreaks) {
 								for (var key in staff) {
 									if (staff.hasOwnProperty(key)) {
 										if (key === 'meter') {
-											if (newLines.length === 1 || lastMeter !== JSON.stringify(staff[key])) {
+											if (currentLine[j][k] === 0 || lastMeter !== JSON.stringify(staff[key])) {
 												lastMeter = JSON.stringify(staff[key]);
 												newLines[currentLine[j][k]].staff[j][key] = staff[key];
 											}
