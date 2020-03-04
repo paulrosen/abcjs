@@ -1,3 +1,11 @@
+# Version 6.0.0-beta.7
+
+## Bugs
+
+* Some tweaks to improve audio output.
+
+* Element.prepend is not available on older browsers.
+
 # Version 6.0.0-beta.6
 
 ## Bugs
