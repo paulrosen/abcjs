@@ -34,7 +34,10 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray) {
 	source.buffer = noteBuffer;
 
 	// add gain
-	var volume = (sound.volume / 127) * 2.0;
+	// volume can be between 1 to 127. This translation to gain is just trial and error.
+	// The smaller the first number, the more dynamic range between the quietest to loudest.
+	// The larger the second number, the louder it will be in general.
+	var volume = (sound.volume / 96) * 3.0;
 	source.gainNode = offlineCtx.createGain();
 
 	// add pan if supported and present
@@ -42,7 +45,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray) {
 		source.panNode = offlineCtx.createStereoPanner();
 		source.panNode.pan.setValueAtTime(sound.pan, 0);
 	}
-	source.gainNode.gain.value = Math.min(1.0, Math.max(-1.0, volume));
+	source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
 	source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
 	source.gainNode.gain.linearRampToValueAtTime(0.0, len + 0.3);
 
