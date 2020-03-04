@@ -104,7 +104,8 @@ Svg.prototype.setScale = function(scale) {
 Svg.prototype.insertStyles = function(styles) {
 	var el = document.createElementNS(svgNS, "style");
 	el.textContent = styles;
-	this.svg.prepend(el);
+	this.svg.insertBefore(el, this.svg.firstChild); // prepend is not available on older browsers.
+//	this.svg.prepend(el);
 };
 
 Svg.prototype.setParentStyles = function(attr) {
