@@ -74,12 +74,17 @@ var TimingCallbacks = function(target, params) {
 		if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
 			self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment);
 
+		var lineStart = 0;
 		self.currentEvent = 0;
 		while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
 			self.currentEvent++;
+			if (self.lineEndCallback && self.lineEndTimings['e'+self.currentEvent])
+				lineStart = self.currentEvent;
 		}
 		if (self.eventCallback && self.currentEvent > 0 && self.noteTimings[self.currentEvent - 1].type === 'event')
 			self.eventCallback(self.noteTimings[self.currentEvent - 1]);
+		if (self.lineEndCallback)
+			self.lineEndCallback(self.lineEndTimings['e'+lineStart])
 
 		// console.log("currentPercent="+currentPercent+
 		// 	" newSeekPercent="+self.newSeekPercent+
@@ -118,6 +123,8 @@ var TimingCallbacks = function(target, params) {
 				if (self.eventCallback && self.noteTimings[self.currentEvent].type === 'event')
 					self.eventCallback(self.noteTimings[self.currentEvent]);
 				self.currentEvent++;
+				if (self.lineEndCallback && self.lineEndTimings['e'+self.currentEvent])
+					self.lineEndCallback(self.lineEndTimings['e'+self.currentEvent]);
 			}
 			if (currentTime < self.lastMoment) {
 				requestAnimationFrame(self.doTiming);
@@ -133,11 +140,6 @@ var TimingCallbacks = function(target, params) {
 					self.currentBeat++;
 					requestAnimationFrame(self.doTiming);
 				}
-			}
-
-			if (self.lineEndCallback && self.lineEndTimings.length && self.lineEndTimings[0].milliseconds <= currentTime) {
-				self.lineEndCallback(self.lineEndTimings[0]);
-				self.lineEndTimings.shift();
 			}
 
 			if (currentTime >= self.lastMoment && self.eventCallback)
@@ -166,9 +168,6 @@ var TimingCallbacks = function(target, params) {
 		self.currentEvent = 0;
 		self.startTime = null;
 		self.pausedTime = null;
-		if (self.lineEndCallback) {
-			self.lineEndTimings = getLineEndTimings(self.noteTimings, self.lineEndAnticipation);
-		}
 	};
 	self.stop = function() {
 		self.pause();
@@ -183,22 +182,18 @@ var TimingCallbacks = function(target, params) {
 		self.newSeekPercent = percent;
 		self.justSeeked = true;
 		self.doTiming(performance.now());
-		//requestAnimationFrame(self.doTiming);
-		if (self.lineEndCallback) {
-			self.lineEndTimings = getLineEndTimings(self.noteTimings, self.lineEndAnticipation);
-		}
 	};
 };
 
 function getLineEndTimings(timings, anticipation) {
 	// Returns an array of milliseconds to call the lineEndCallback.
 	// This figures out the timing of the beginning of each line and subtracts the anticipation from it.
-	var callbackTimes = [];
+	var callbackTimes = {};
 	var lastTop = null;
 	for (var i = 0; i < timings.length; i++) {
 		var timing = timings[i];
 		if (timing.top !== lastTop) {
-			callbackTimes.push({ milliseconds: timing.milliseconds - anticipation, top: timing.top, bottom: timing.top+timing.height });
+			callbackTimes['e'+i] = { measureNumber: Math.floor(timing.milliseconds/timing.millisecondsPerMeasure), milliseconds: timing.milliseconds - anticipation, top: timing.top, bottom: timing.top+timing.height };
 			lastTop = timing.top;
 		}
 	}
