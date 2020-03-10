@@ -1,3 +1,11 @@
+# Version 6.0.0-beta.8
+
+## Bugs
+
+* Give the percussion clef a little more room to the right.
+
+* Fix line ending callbacks after random access seeking.
+
 # Version 6.0.0-beta.7
 
 ## Bugs
