@@ -27,6 +27,7 @@ var TimingCallbacks = function(target, params) {
 	self.lineEndCallback = params.lineEndCallback;   // This is called when the end of a line is approaching.
 	self.lineEndAnticipation = params.lineEndAnticipation ? parseInt(params.lineEndAnticipation, 10) : 0;   // How many milliseconds before the end should the call happen.
 	self.beatSubdivisions = params.beatSubdivisions ? parseInt(params.beatSubdivisions, 10) : 1; // how many callbacks per beat is desired.
+	self.joggerTimer = null;
 
 	self.replaceTarget = function(newTarget) {
 		newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
@@ -147,6 +148,23 @@ var TimingCallbacks = function(target, params) {
 		}
 	};
 
+	// In general music doesn't need a timer at 60 fps because notes don't happen that fast.
+	// For instance, at 120 beats per minute, a sixteenth note takes 125ms. So just as a
+	// compromise value between performance and jank this is set about half that.
+	var JOGGING_INTERVAL = 60;
+
+	self.animationJogger = function() {
+		// There are some cases where the animation timer doesn't work: for instance when
+		// this isn't running in a visible tab and sometimes on mobile devices. We compensate
+		// by having a backup timer using setTimeout. This won't be accurate so the performance
+		// will be jerky, but without it the requestAnimationFrame might be skipped and so
+		// not called again.
+		if (self.isRunning) {
+			self.doTiming(performance.now());
+			self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
+		}
+	};
+
 	self.start = function(offsetPercent) {
 		self.isRunning = true;
 		if (self.isPaused) {
@@ -157,11 +175,16 @@ var TimingCallbacks = function(target, params) {
 			self.setProgress(offsetPercent);
 		} else {
 			requestAnimationFrame(self.doTiming);
+			self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
 		}
 	};
 	self.pause = function() {
 		self.isPaused = true;
 		self.isRunning = false;
+		if (self.joggerTimer) {
+			clearTimeout(self.joggerTimer);
+			self.joggerTimer = null;
+		}
 	};
 	self.reset = function() {
 		self.currentBeat = 0;
@@ -182,6 +205,7 @@ var TimingCallbacks = function(target, params) {
 		self.newSeekPercent = percent;
 		self.justSeeked = true;
 		self.doTiming(performance.now());
+		self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
 	};
 };
 
