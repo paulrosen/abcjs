@@ -15,6 +15,18 @@ npm link abcjs
 
 In a test application. Then any changes made to the abcjs code will automatically be picked up by that test application's webpack.
 
+## Docker
+
+There are docker files included so that npm can be run without installing it. This only applies to someone who wants to keep all their development tools separate on their computer. If you have nodejs installed then you can ignore this.
+
+If you do want to build without development tools installed, but you do have Docker installed, put this in your profile:
+```shell script
+npm() {
+    CMD="${1: } ${2: } ${3: }" docker-compose up
+}
+```
+Then from the root folder you can use `npm` like normal. Note that this won't work if you are from any other folder.
+
 ## Greasemonkey
 
 There used to be a version of the library for Greasemonkey but that has been discontinued. If you want a Greasemonkey version, do this:
