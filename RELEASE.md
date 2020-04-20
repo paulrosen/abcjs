@@ -1,3 +1,13 @@
+# Version 6.0.0-beta.9
+
+## Bugs
+
+* Add a fail-safe timer for the timingCallbacks (for some mobile devices that don't properly do requestAnimationFrame)
+
+## Tasks
+
+* Add Docker files for running npm.
+
 # Version 6.0.0-beta.8
 
 ## Bugs
