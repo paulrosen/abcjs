@@ -23,6 +23,8 @@ To release a new version, this checklist should be followed:
 [_] Check the minified versions and other changed files in.
 
 [_] Update npm with `npm publish` or `npm publish --tag beta`.
+    To do this in docker:
+    `docker run -v $(pwd):/srv/app -it <image-id> /bin/bash`
 
 [_] Run `npm install` and check it in.
 
