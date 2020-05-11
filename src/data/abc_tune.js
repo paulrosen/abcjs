@@ -152,7 +152,9 @@ var Tune = function() {
 	this.getBeatsPerMeasure = function() {
 		var beatsPerMeasure;
 		var meter = this.getMeterFraction();
-		if (meter.num % 3 === 0) {
+		if (meter.num === 3 && meter.den === 4)
+			beatsPerMeasure = meter.num;
+		else if (meter.num % 3 === 0) {
 			beatsPerMeasure = meter.num / 3;
 		} else {
 			beatsPerMeasure = meter.num;
