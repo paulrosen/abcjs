@@ -733,6 +733,12 @@ var flatten;
 		}
 		var arr = remaining.split('/');
 		chick = chordNotes(bass, arr[0]);
+		// If the 5th is altered then the bass is altered. Normally the bass is 7 from the root, so adjust if it isn't.
+		if (chick.length >= 3) {
+			var fifth = chick[2] - chick[0];
+			bass2 = bass2 + 7 - fifth;
+		}
+
 		if (arr.length === 2) {
 			var explicitBass = basses[arr[1].substring(0,1)];
 			if (explicitBass) {
