@@ -736,7 +736,7 @@ var flatten;
 		// If the 5th is altered then the bass is altered. Normally the bass is 7 from the root, so adjust if it isn't.
 		if (chick.length >= 3) {
 			var fifth = chick[2] - chick[0];
-			bass2 = bass2 + 7 - fifth;
+			bass2 = bass2 + fifth - 7;
 		}
 
 		if (arr.length === 2) {
