@@ -592,6 +592,8 @@ var flatten;
 
 		if (elem.endTriplet) {
 			multiplier=1;
+			// Because of JS arithmetic, triplets will cause the beats to drift.
+			barBeat = Math.round(barBeat*128)/128;
 		}
 	}
 
