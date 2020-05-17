@@ -199,6 +199,8 @@ var sequence;
 									// regular items are just pushed.
 									if (!elem.rest || elem.rest.type !== 'spacer') {
 										if (elem.decoration) {
+											if (elem.decoration.indexOf('pppp') >= 0)
+												voices[voiceNumber].push({ el_type: 'beat', beats: [15, 10, 5, 1] });
 											if (elem.decoration.indexOf('ppp') >= 0)
 												voices[voiceNumber].push({ el_type: 'beat', beats: [30, 20, 10, 1] });
 											else if (elem.decoration.indexOf('pp') >= 0)
@@ -214,6 +216,8 @@ var sequence;
 											else if (elem.decoration.indexOf('ff') >= 0)
 												voices[voiceNumber].push({ el_type: 'beat', beats: [120, 110, 95, 1] });
 											else if (elem.decoration.indexOf('fff') >= 0)
+												voices[voiceNumber].push({ el_type: 'beat', beats: [127, 125, 110, 1] });
+											else if (elem.decoration.indexOf('ffff') >= 0)
 												voices[voiceNumber].push({ el_type: 'beat', beats: [127, 125, 110, 1] });
 										}
 										voices[voiceNumber].push(elem);
