@@ -52,7 +52,8 @@ var Parse = function() {
 			makeVoicesArray: tune.makeVoicesArray,
 			millisecondsPerMeasure: tune.millisecondsPerMeasure,
 			setupEvents: tune.setupEvents,
-			setTiming: tune.setTiming
+			setTiming: tune.setTiming,
+			setUpAudio: tune.setUpAudio
 		};
 	};
 

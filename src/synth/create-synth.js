@@ -21,8 +21,6 @@ var supportsAudio = require('./supports-audio');
 var pitchToNoteName = require('./pitch-to-note-name');
 var instrumentIndexToName = require('./instrument-index-to-name');
 var downloadBuffer = require('./download-buffer');
-var sequence = require('../midi/abc_midi_sequencer');
-var flatten = require('../midi/abc_midi_flattener');
 var placeNote = require('./place-note');
 
 // TODO-PER: remove the midi tests from here: I don't think the object can be constructed unless it passes.
@@ -59,8 +57,7 @@ function CreateSynth() {
 		self.pan = params.pan;
 		self.meterSize = 1;
 		if (options.visualObj) {
-			var seq = sequence(options.visualObj, params);
-			self.flattened = flatten(seq, params);
+			self.flattened = options.visualObj.setUpAudio(params);
 			self.meterSize = options.visualObj.getMeterFraction().num / options.visualObj.getMeterFraction().den;
 		} else if (options.sequence)
 			self.flattened = options.sequence;

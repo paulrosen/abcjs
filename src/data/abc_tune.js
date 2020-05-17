@@ -17,6 +17,8 @@
 var parseCommon = require('../parse/abc_common');
 var parseKeyVoice = require('../parse/abc_parse_key_voice');
 var spacing = require('../write/abc_spacing');
+var sequence = require('../midi/abc_midi_sequencer');
+var flatten = require('../midi/abc_midi_flattener');
 
 /**
  * This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
@@ -1343,6 +1345,8 @@ var Tune = function() {
 			var tempo = this.metaText ? this.metaText.tempo : null;
 			bpm = this.getBpm(tempo);
 		}
+		// Calculate the basic midi data. We only care about the qpm variable here.
+		this.setUpAudio({qpm: bpm});
 
 		var beatLength = this.getBeatLength();
 		var beatsPerSecond = bpm / 60;
@@ -1355,6 +1359,12 @@ var Tune = function() {
 		var timeDivider = beatLength * beatsPerSecond;
 
 		this.noteTimings = this.setupEvents(startingDelay, timeDivider, bpm);
+	};
+
+	this.setUpAudio = function(options) {
+		if (!options) options = {};
+		var seq = sequence(this, options);
+		return flatten(seq, options);
 	};
 };
 
