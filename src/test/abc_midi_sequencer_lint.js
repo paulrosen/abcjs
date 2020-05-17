@@ -143,6 +143,11 @@ var midiSequencerLint = function(tune) {
 					ret += "[" + params.pattern.join(" ") + "] bars=" + params.bars + " intro=" + params.intro + " on=" + params.on;
 					ret += '\n';
 					break;
+				case "name":
+					ret += "\t\t";
+					ret += element.trackName;
+					ret += '\n';
+					break;
 				default:
 					ret += "Unknown el_type: " + element.el_type + "\n";
 					break;
