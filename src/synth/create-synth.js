@@ -51,9 +51,9 @@ function CreateSynth() {
 		self.audioBufferPossible = self._deviceCapable();
 		if (!self.audioBufferPossible)
 			return Promise.reject({ status: "NotSupported", message: notSupportedMessage});
-		self.soundFontUrl = options.soundFontUrl ? options.soundFontUrl : defaultSoundFontUrl;
-		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure() : 1000);
 		var params = options.options ? options.options : {};
+		self.soundFontUrl = params.soundFontUrl ? params.soundFontUrl : defaultSoundFontUrl;
+		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure() : 1000);
 		self.pan = params.pan;
 		self.meterSize = 1;
 		if (options.visualObj) {
