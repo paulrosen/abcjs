@@ -469,28 +469,35 @@ var flatten;
 				pitches.push({ pitch: actualPitch, startTie: note.startTie });
 				elem.midiPitches.push({ pitch: actualPitch+60, durationInMeasures: duration*tempoChangeFactor, volume: volume, instrument: currentInstrument }); // TODO-PER: why is the internal numbering system offset by 60 from midi? It should probably be the same as midi.
 
-				if (!pitchesTied[''+actualPitch])	// If this is the second note of a tie, we don't start it again.
+				if (!pitchesTied[''+note.pitch])	// If this is the second note of a tie, we don't start it again.
 					currentTrack.push({ cmd: 'start', pitch: actualPitch, volume: velocity });
 				else {
 					// but we do add the duration to what we call back.
-					for (var last = currentTrack.length-1; last >= 0; last--) {
-						if (currentTrack[last].cmd === 'start' && currentTrack[last].pitch === actualPitch && currentTrack[last].elem) {
-							var pitchArray = currentTrack[last].elem.midiPitches;
-							for (var last2 = 0; last2 < pitchArray.length; last2++) {
-								if (pitchArray[last2].pitch-60 === actualPitch) { // TODO-PER: the 60 is to compensate for the midi pitch numbers again.
-									pitchArray[last2].durationInMeasures += duration * tempoChangeFactor;
+					var found = false;
+					var lastMove;
+					for (var last = currentTrack.length-1; last >= 0 && !found; last--) {
+						 if (currentTrack[last].cmd === 'move') lastMove = last;
+						if (currentTrack[last].cmd === 'start' && currentTrack[last].elem) {
+							var pitchArray = currentTrack[last].elem.pitches;
+							for (var last2 = 0; last2 < pitchArray.length && !found; last2++) {
+								if (pitchArray[last2].pitch === note.pitch) {
+									// Target the move command, which immediately follows
+									if (lastMove !== undefined) {// This should always be found, but this is some safety.
+										currentTrack[lastMove].duration += duration * tempoChangeFactor;
+										duration = 0; // Since this was tacked on to the last note, don't add the duration again.
+									}
+									found = true;
 								}
 							}
-							break;
 						}
 					}
 				}
 
 				if (note.startTie) {
-					pitchesTied['' + actualPitch] = true;
+					pitchesTied['' + note.pitch] = true;
 					currentTrack[currentTrack.length-1].elem = elem;
 				} else if (note.endTie)
-					pitchesTied[''+actualPitch] = false;
+					pitchesTied[''+note.pitch] = false;
 			}
 			if (elem.gracenotes) {
 				for (var j = 0; j < elem.gracenotes.length; j++) {
@@ -620,7 +627,20 @@ var flatten;
 		var actualPitch = extractOctave(pitch) *12 + scale[extractNote(pitch)];
 
 		if ( barAccidentals[pitch]!==undefined) {
-			actualPitch +=  barAccidentals[pitch];
+			// If there is no accidental in the key signature then the accidental is taken at face value.
+			// If there is a sharp in the key sig and a sharp is given, then it is ignored. Ditto with flat.
+			// If there is a sharp or flat in the key sig and natural is given, then there is a half pitch alteration.
+			var keySigAlteration = accidentals[extractNote(pitch)];
+			var barAccidental = barAccidentals[pitch];
+			var alteration = 0;
+			if (keySigAlteration === -1) {
+				alteration = barAccidental + 1;
+			} else if (keySigAlteration === 0) {
+				alteration = barAccidental;
+			} else if (keySigAlteration === 1) {
+				alteration = barAccidental - 1;
+			}
+			actualPitch += keySigAlteration + alteration;
 		} else { // use normal accidentals
 			actualPitch +=  accidentals[extractNote(pitch)];
 		}
