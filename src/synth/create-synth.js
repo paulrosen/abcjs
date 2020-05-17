@@ -344,6 +344,8 @@ function CreateSynth() {
 		if (self.isRunning) {
 			self.stop();
 			self._kickOffSound(offset);
+		} else {
+			self.pausedTimeSec = offset;
 		}
 		var pauseDistance = self.pausedTimeSec ? self.pausedTimeSec - self.startTimeSec : undefined;
 		self.startTimeSec = activeAudioContext().currentTime - offset;
