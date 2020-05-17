@@ -408,8 +408,9 @@ var flatten;
 			var stealFromCurrent = (bagpipes || lastNoteDurationPosition < 0 || currentTrack.length === 0);
 			var stealFromDuration = stealFromCurrent ? duration : currentTrack[lastNoteDurationPosition].duration;
 			graces = processGraceNotes(elem.gracenotes, stealFromDuration);
-			if (!bagpipes) {
-				duration = writeGraceNotes(graces, stealFromCurrent, duration, null, velocity);
+			if (!stealFromCurrent) {
+				var newDuration = writeGraceNotes(graces, stealFromCurrent, duration, null, velocity);
+				currentTrackCounter += (duration-newDuration)*tempoChangeFactor;
 			}
 		}
 
@@ -420,9 +421,11 @@ var flatten;
 			elem.currentTrackMilliseconds = [];
 		elem.currentTrackMilliseconds.push(currentTrackCounter / beatFraction / startingTempo * 60*1000);
 		if (elem.pitches) {
-			if (graces && bagpipes) {
+			if (graces && stealFromCurrent) {
 				// If it is bagpipes, then the graces are played with the note. If the grace has the same pitch as the note, then we just skip it.
-				duration = writeGraceNotes(graces, true, duration, null, velocity);
+				var newDuration2 = writeGraceNotes(graces, true, duration, null, velocity);
+				currentTrackCounter += (duration-newDuration2)*tempoChangeFactor;
+				duration = newDuration2;
 			}
 			var pitches = [];
 			elem.midiPitches = [];
