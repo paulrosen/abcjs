@@ -39,6 +39,9 @@ var midiLint = function(tune) {
 				case 'move':
 					ret += "\tMove: " + event.duration + "\n";
 					break;
+				case 'text':
+					ret += "\tText: " + event.type + '=' + event.text + "\n";
+					break;
 				default:
 					ret += "\tUnknown: " + event.cmd + "\n";
 			}
