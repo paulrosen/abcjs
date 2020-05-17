@@ -106,6 +106,7 @@ var Parse = function() {
 			this.volumePosition = "auto";
 			this.openSlurs = [];
 			this.freegchord = false;
+			this.endingHoldOver = {};
 		},
 		differentFont: function(type, defaultFonts) {
 			if (this[type].decoration !== defaultFonts[type].decoration) return true;
@@ -134,7 +135,39 @@ var Parse = function() {
 				if (this.differentFont("measurefont", defaultFonts)) addFont(el, 'measurefont', this.measurefont);
 				if (this.differentFont("repeatfont", defaultFonts)) addFont(el, 'repeatfont', this.repeatfont);
 			}
-		}
+		},
+		duplicateStartEndingHoldOvers: function() {
+			this.endingHoldOver = {
+				inTie: [],
+				inTieChord: {}
+			};
+			for (var i = 0; i < this.inTie.length; i++) {
+				this.endingHoldOver.inTie.push([]);
+				for (var j = 0; j < this.inTie[i].length; j++) {
+					this.endingHoldOver.inTie[i].push(this.inTie[i][j]);
+				}
+			}
+			for (var key in this.inTieChord) {
+				if (this.inTieChord.hasOwnProperty(key))
+					this.endingHoldOver.inTieChord[key] = this.inTieChord[key];
+			}
+		},
+		restoreStartEndingHoldOvers: function() {
+			if (!this.endingHoldOver.inTie)
+				return;
+			this.inTie = [];
+			this.inTieChord = {};
+			for (var i = 0; i < this.endingHoldOver.inTie.length; i++) {
+				this.inTie.push([]);
+				for (var j = 0; j < this.endingHoldOver.inTie[i].length; j++) {
+					this.inTie[i].push(this.endingHoldOver.inTie[i][j]);
+				}
+			}
+			for (var key in this.endingHoldOver.inTieChord) {
+				if (this.endingHoldOver.inTieChord.hasOwnProperty(key))
+					this.inTieChord[key] = this.endingHoldOver.inTieChord[key];
+			}
+		},
 	};
 
 	var addWarning = function(str) {
@@ -1263,6 +1296,13 @@ var Parse = function() {
 							if (multilineVars.inEnding)
 								bar.endEnding = true;
 							multilineVars.inEnding = true;
+							if (ret[1] === "bar_right_repeat") {
+								// restore the tie and slur state from the start repeat
+								multilineVars.restoreStartEndingHoldOvers();
+							} else {
+								// save inTie, inTieChord
+								multilineVars.duplicateStartEndingHoldOvers();
+							}
 						}
 						if (el.decoration !== undefined)
 							bar.decoration = el.decoration;
