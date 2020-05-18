@@ -77,10 +77,12 @@ function SynthController() {
 
 		if (!self.midiBuffer)
 			self.midiBuffer = new CreateSynth();
-		return self.midiBuffer.init({
-			visualObj: self.visualObj,
-			options: self.options,
-			millisecondsPerMeasure: millisecondsPerMeasure
+		return activeAudioContext().resume().then(function (response) {
+			return self.midiBuffer.init({
+				visualObj: self.visualObj,
+				options: self.options,
+				millisecondsPerMeasure: millisecondsPerMeasure
+			});
 		}).then(function (response) {
 			loadingResponse = response;
 			return self.midiBuffer.prime();
