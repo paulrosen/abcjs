@@ -738,7 +738,13 @@ var flatten;
 		var bass = basses[root];
 		if (!bass)	// If the bass note isn't listed, then this was an unknown root. Only A-G are accepted.
 			return undefined;
-		bass  += transpose;
+		// Don't transpose the chords more than an octave.
+		var chordTranspose = transpose;
+		while (chordTranspose < -8)
+			chordTranspose += 12;
+		while (chordTranspose > 8)
+			chordTranspose -= 12;
+		bass  += chordTranspose;
 		var bass2 = bass - 5;	// The alternating bass is a 4th below
 		var chick;
 		if (name.length === 1)
@@ -767,7 +773,7 @@ var flatten;
 			if (explicitBass) {
 				var bassAcc = arr[1].substring(1);
 				var bassShift = {'#': 1, '♯': 1, 'b': -1, '♭': -1}[bassAcc] || 0;
-				bass = basses[arr[1].substring(0,1)] + bassShift + transpose;
+				bass = basses[arr[1].substring(0,1)] + bassShift + chordTranspose;
 				bass2 = bass;
 			}
 		}
