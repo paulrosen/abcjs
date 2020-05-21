@@ -611,7 +611,7 @@ var flatten;
 	function adjustPitch(note) {
 		if (note.midipitch)
 			return note.midipitch - 60;
-		var pitch = note.pitch;
+		var pitch = note.soundPitch ? note.soundPitch : note.pitch;
 		if (note.accidental) {
 			switch(note.accidental) { // change that pitch (not other octaves) for the rest of the bar
 				case "sharp":

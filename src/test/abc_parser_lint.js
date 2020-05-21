@@ -185,8 +185,9 @@ var ParserLint = function() {
 				verticalPos: { type: 'number' },
 				startBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'endBeam', 'beambr' ], optional: true },
 				startSlur: slurProperties,
-				startTie: tieProperties
-			}
+				startTie: tieProperties,
+				soundPitch: { type: 'number', optional: true }
+				}
 		}},
 		lyric: { type: 'array', optional: true, output: "noindex", items: {
 			type: 'object', properties: {
@@ -204,7 +205,8 @@ var ParserLint = function() {
 					verticalPos: { type: 'number' },
 					startSlur: slurProperties,
 					startTie: tieProperties,
-					style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x'], optional: true }
+					style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x'], optional: true },
+					soundPitch: { type: 'number', optional: true }
 				}
 		}},
 		positioning: { type: 'object', optional: true, properties: {
