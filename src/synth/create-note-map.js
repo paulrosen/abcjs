@@ -33,7 +33,7 @@ var createNoteMap = function(sequence) {
 					nextNote[ev.pitch] = { time: currentTime, instrument: currentInstrument, volume: ev.volume };
 					break;
 				case "move":
-					currentTime += ev.duration;
+					currentTime = Math.round((currentTime+ev.duration)*1000000)/1000000;
 					break;
 				case "stop":
 					if (nextNote[ev.pitch]) { // If unisons are requested, then there might be two starts and two stops for the same note. Only use one of them.

@@ -64,7 +64,10 @@ var flatten;
 	var drumTrackFinished;
 	var drumDefinition = {};
 
-	var normalBreakBetweenNotes = 1.0/128;	// a 128th note of silence between notes for articulation.
+	// The gaps per beat. The numbers are per measure so it can't be resolved until we know how many beats per measure.
+	var normalBreakBetweenNotes = 0.000520833333325*1.5; // for articulation (matches muse score value)
+	var slurredBreakBetweenNotes = 0.000520833333325;
+	var staccatoBreakBetweenNotes = 0.03138020833333125;
 
 	flatten = function(voices, options) {
 		if (!options) options = {};
@@ -337,15 +340,7 @@ var flatten;
 		return distance;
 	}
 
-	function writeNote(elem, voiceOff) {
-		//
-		// Create a series of note events to append to the current track.
-		// The output event is one of: { pitchStart: pitch_in_abc_units, volume: from_1_to_64 }
-		// { pitchStop: pitch_in_abc_units }
-		// { moveTime: duration_in_abc_units }
-		// If there are guitar chords, then they are put in a separate track, but they have the same format.
-		//
-
+	function processVolume(voiceOff) {
 		var volume;
 		if (nextVolume) {
 			volume = nextVolume;
@@ -368,7 +363,10 @@ var flatten;
 			volume = 0;
 		if (volume > 127)
 			volume = 127;
-		var velocity = voiceOff ? 0 : volume;
+		return voiceOff ? 0 : volume;
+	}
+
+	function processChord(elem) {
 		var chord = findChord(elem);
 		if (chord) {
 			var c = interpretChord(chord);
@@ -381,19 +379,156 @@ var flatten;
 					// need to figure out how far in time the chord started: if there are pickup notes before the chords start, we need pauses.
 					var distance = timeFromStart();
 					if (distance > 0)
-						addMove(chordTrack, distance*tempoChangeFactor);
+						addMove(chordTrack, distance * tempoChangeFactor);
 				}
 
 				lastChord = c;
 				currentChords.push({chord: lastChord, beat: barBeat});
 			}
 		}
+	}
+
+	function addTieLength(note, duration) {
+		var found = false;
+		var lastMove;
+		for (var last = currentTrack.length - 1; last >= 0 && !found; last--) {
+			if (currentTrack[last].cmd === 'move') lastMove = last;
+			if (currentTrack[last].cmd === 'start' && currentTrack[last].elem) {
+				var pitchArray = currentTrack[last].elem.pitches;
+				for (var last2 = 0; last2 < pitchArray.length && !found; last2++) {
+					if (pitchArray[last2].pitch === note.pitch) {
+						// Target the move command, which immediately follows
+						if (lastMove !== undefined) {// This should always be found, but this is some safety.
+							currentTrack[lastMove].duration += Math.round(duration * tempoChangeFactor * 1000000)/1000000;
+							duration = 0; // Since this was tacked on to the last note, don't add the duration again.
+						}
+						found = true;
+					}
+				}
+			}
+		}
+		return duration;
+	}
+
+	function findNoteModifications(elem, velocity) {
+		var ret = { };
+		if (elem.decoration) {
+			for (var d = 0; d < elem.decoration.length; d++) {
+				if (elem.decoration[d] === 'staccato')
+					ret.thisBreakBetweenNotes = staccatoBreakBetweenNotes / beatFraction;
+				else if (elem.decoration[d] === 'tenuto')
+					ret.thisBreakBetweenNotes = slurredBreakBetweenNotes / beatFraction;
+				else if (elem.decoration[d] === 'accent')
+					ret.velocity = Math.min(127, velocity * 1.5);
+				else if (elem.decoration[d] === 'trill')
+					ret.noteModification = "trill";
+				else if (elem.decoration[d] === 'lowermordent')
+					ret.noteModification = "lowermordent";
+				else if (elem.decoration[d] === 'uppermordent')
+					ret.noteModification = "mordent";
+				else if (elem.decoration[d] === 'mordent')
+					ret.noteModification = "mordent";
+				else if (elem.decoration[d] === 'turn')
+					ret.noteModification = "turn";
+				else if (elem.decoration[d] === 'roll')
+					ret.noteModification = "roll";
+			}
+		}
+		return ret;
+	}
+
+	function doModifiedNotes(noteModification, soundDuration, elem, velocity) {
+		var noteTime;
+		var numNotes;
+		var relativeNoteList = [];
+		var gapSize = 1.0 / 32 * 0.09; // The gap is 9% of a 32th note
+		switch (noteModification) {
+			case "trill":
+				noteTime = 1.0 / 32;
+				var runningDuration = soundDuration - noteTime;
+
+				var note = 1;
+				while (runningDuration > 0) {
+					relativeNoteList.push(note);
+					note = (note === 1) ? 0 : 1;
+					runningDuration -= noteTime;
+				}
+				break;
+			case "mordent":
+				noteTime = 1.0 / 32;
+				relativeNoteList.push(1);
+				relativeNoteList.push(0);
+				break;
+			case "lowermordent":
+				noteTime = 1.0 / 32;
+				relativeNoteList.push(-1);
+				relativeNoteList.push(0);
+				break;
+			case "turn":
+				noteTime = soundDuration / 5;
+				relativeNoteList.push(1);
+				relativeNoteList.push(0);
+				relativeNoteList.push(-1);
+				relativeNoteList.push(0);
+				break;
+			case "roll":
+				noteTime = 1.0 / 32;
+				numNotes = Math.floor(soundDuration / noteTime);
+				if (numNotes < 1) {
+					numNotes = 1;
+				}
+				while (numNotes) {
+					relativeNoteList.push(0);
+					numNotes--;
+				}
+				break;
+		}
+		var currentlyPlayingNote = [];
+		var iii;
+		for (iii = 0; iii < elem.pitches.length; iii++) {
+			currentlyPlayingNote.push({ pitch: adjustPitch({pitch: elem.pitches[iii].pitch})});
+		}
+		var remainingTime = soundDuration;
+		for (var dd = 0; dd < relativeNoteList.length; dd++) {
+			addMove(currentTrack, (noteTime - gapSize) * tempoChangeFactor);
+			for (iii = 0; iii < elem.pitches.length; iii++) {
+				currentTrack.push({cmd: 'stop', pitch: currentlyPlayingNote[iii].pitch});
+			}
+			addMove(currentTrack, gapSize * tempoChangeFactor);
+			for (iii = 0; iii < elem.pitches.length; iii++) {
+				currentTrack.push({
+					cmd: 'start',
+					pitch: adjustPitch({pitch: elem.pitches[iii].pitch + relativeNoteList[dd]}),
+					volume: velocity
+				});
+				currentlyPlayingNote[iii].pitch = adjustPitch({pitch: elem.pitches[iii].pitch + relativeNoteList[dd]});
+			}
+			remainingTime -= noteTime;
+		}
+		addMove(currentTrack, remainingTime * tempoChangeFactor);
+		return currentlyPlayingNote;
+	}
+
+	function writeNote(elem, voiceOff) {
+		//
+		// Create a series of note events to append to the current track.
+		// The output event is one of: { pitchStart: pitch_in_abc_units, volume: from_1_to_64 }
+		// { pitchStop: pitch_in_abc_units }
+		// { moveTime: duration_in_abc_units }
+		// If there are guitar chords, then they are put in a separate track, but they have the same format.
+		//
+
+		var trackStartingIndex = currentTrack.length;
+
+		var velocity = processVolume(voiceOff);
+		processChord(elem);
 
 		if (elem.startTriplet) {
 			multiplier = elem.tripletMultiplier;
 		}
 
 		var duration = (elem.durationClass ? elem.durationClass : elem.duration) *multiplier;
+		var totalDuration = duration;
 		barBeat += duration;
 
 		// if there are grace notes, then also play them.
@@ -405,12 +540,23 @@ var flatten;
 			// There are two cases: if this is bagpipe, the grace notes are played on the beat with the current note.
 			// Normally, the grace notes would be played before the beat. (If this is the first note in the track, however, then it is played on the current beat.)
 			// The reason for the exception on the first note is that it would otherwise move the whole track in time and would affect all the other tracks.
-			var stealFromCurrent = (bagpipes || lastNoteDurationPosition < 0 || currentTrack.length === 0);
+			// Later note: this is an experiment with always starting the graces on the beat.
+			var stealFromCurrent = true; // (bagpipes || lastNoteDurationPosition < 0 || currentTrack.length === 0);
 			var stealFromDuration = stealFromCurrent ? duration : currentTrack[lastNoteDurationPosition].duration;
 			graces = processGraceNotes(elem.gracenotes, stealFromDuration);
-			if (!stealFromCurrent) {
-				var newDuration = writeGraceNotes(graces, stealFromCurrent, duration, null, velocity);
-				currentTrackCounter += (duration-newDuration)*tempoChangeFactor;
+			duration = writeGraceNotes(graces, stealFromCurrent, duration, null, velocity);
+			if (!stealFromCurrent)
+				trackStartingIndex = currentTrack.length;
+
+			for (var j = 0; j < elem.gracenotes.length; j++) {
+				elem.midiGraceNotePitches = [];
+				var grace = elem.gracenotes[j];
+				elem.midiGraceNotePitches.push({
+					pitch: adjustPitch(grace) + 60,
+					durationInMeasures: 0,
+					volume: velocity,
+					instrument: currentInstrument
+				});
 			}
 		}
 
@@ -420,48 +566,18 @@ var flatten;
 		if (!elem.currentTrackMilliseconds)
 			elem.currentTrackMilliseconds = [];
 		elem.currentTrackMilliseconds.push(currentTrackCounter / beatFraction / startingTempo * 60*1000);
+		var tieAdjustment = 0;
 		if (elem.pitches) {
-			if (graces && stealFromCurrent) {
-				// If it is bagpipes, then the graces are played with the note. If the grace has the same pitch as the note, then we just skip it.
-				var newDuration2 = writeGraceNotes(graces, true, duration, null, velocity);
-				currentTrackCounter += (duration-newDuration2)*tempoChangeFactor;
-				duration = newDuration2;
-			}
 			var pitches = [];
+			var thisBreakBetweenNotes = normalBreakBetweenNotes/beatFraction;
+			const ret = findNoteModifications(elem, velocity);
+			if (ret.thisBreakBetweenNotes)
+				thisBreakBetweenNotes = ret.thisBreakBetweenNotes;
+			if (ret.velocity)
+				velocity = ret.velocity;
+
 			elem.midiPitches = [];
-			var thisBreakBetweenNotes = normalBreakBetweenNotes;
-			var noteModification = "none";
-			if (elem.decoration) {
-				var isStaccato = false;
-				var isTenuto = false;
-				var isAccented = false;
-				for (var d = 0; d < elem.decoration.length; d++) {
-					if (elem.decoration[d] === 'staccato')
-						isStaccato = true;
-					else if (elem.decoration[d] === 'tenuto')
-						isTenuto = true;
-					else if (elem.decoration[d] === 'accent')
-						isAccented = true;
-					else if (elem.decoration[d] === 'trill')
-						noteModification = "trill";
-					else if (elem.decoration[d] === 'lowermordent')
-						noteModification = "lowermordent";
-					else if (elem.decoration[d] === 'uppermordent')
-						noteModification = "mordent";
-					else if (elem.decoration[d] === 'mordent')
-						noteModification = "mordent";
-					else if (elem.decoration[d] === 'turn')
-						noteModification = "turn";
-					else if (elem.decoration[d] === 'roll')
-						noteModification = "roll";
-				}
-				if (isStaccato)
-					thisBreakBetweenNotes = duration * 3/4;
-				if (isTenuto)
-					thisBreakBetweenNotes = 0;
-				if (isAccented)
-					velocity = Math.min(127, velocity*1.5);
-			}
+			var hasMovedTie = false;
 			for (var i=0; i<elem.pitches.length; i++) {
 				var note = elem.pitches[i];
 				if (note.startSlur)
@@ -470,29 +586,17 @@ var flatten;
 					slurCount -= note.endSlur.length;
 				var actualPitch = adjustPitch(note);
 				pitches.push({ pitch: actualPitch, startTie: note.startTie });
-				elem.midiPitches.push({ pitch: actualPitch+60, durationInMeasures: duration*tempoChangeFactor, volume: volume, instrument: currentInstrument }); // TODO-PER: why is the internal numbering system offset by 60 from midi? It should probably be the same as midi.
+				elem.midiPitches.push({ pitch: actualPitch+60, durationInMeasures: duration*tempoChangeFactor, volume: velocity, instrument: currentInstrument }); // TODO-PER: why is the internal numbering system offset by 60 from midi? It should probably be the same as midi.
 
 				if (!pitchesTied[''+note.pitch])	// If this is the second note of a tie, we don't start it again.
 					currentTrack.push({ cmd: 'start', pitch: actualPitch, volume: velocity });
 				else {
 					// but we do add the duration to what we call back.
-					var found = false;
-					var lastMove;
-					for (var last = currentTrack.length-1; last >= 0 && !found; last--) {
-						 if (currentTrack[last].cmd === 'move') lastMove = last;
-						if (currentTrack[last].cmd === 'start' && currentTrack[last].elem) {
-							var pitchArray = currentTrack[last].elem.pitches;
-							for (var last2 = 0; last2 < pitchArray.length && !found; last2++) {
-								if (pitchArray[last2].pitch === note.pitch) {
-									// Target the move command, which immediately follows
-									if (lastMove !== undefined) {// This should always be found, but this is some safety.
-										currentTrack[lastMove].duration += duration * tempoChangeFactor;
-										duration = 0; // Since this was tacked on to the last note, don't add the duration again.
-									}
-									found = true;
-								}
-							}
-						}
+					if (!hasMovedTie) {
+						hasMovedTie = true;
+						tieAdjustment = duration*tempoChangeFactor;
+						currentTrackCounter += duration*tempoChangeFactor;
+						duration = addTieLength(note, duration);
 					}
 				}
 
@@ -502,87 +606,15 @@ var flatten;
 				} else if (note.endTie)
 					pitchesTied[''+note.pitch] = false;
 			}
-			if (elem.gracenotes) {
-				for (var j = 0; j < elem.gracenotes.length; j++) {
-					elem.midiGraceNotePitches = [];
-					var grace = elem.gracenotes[j];
-					elem.midiGraceNotePitches.push({ pitch: adjustPitch(grace)+60, durationInMeasures: 0, volume: velocity, instrument: currentInstrument});
-				}
-			}
 			if (slurCount > 0)
-				thisBreakBetweenNotes = 0;
+				thisBreakBetweenNotes = slurredBreakBetweenNotes/beatFraction;
 			var soundDuration = duration-thisBreakBetweenNotes;
 			if (soundDuration < 0) {
 				soundDuration = 0;
 				thisBreakBetweenNotes = duration;
 			}
-			if (noteModification !== "none") {
-				var noteTime;
-				var numNotes;
-				var relativeNoteList = [];
-				switch (noteModification) {
-					case "trill":
-						// We want an even number of 32nd notes - (the first note has already started) so it starts and stops on the main note
-						noteTime = 1.0/32;
-						numNotes = Math.floor(soundDuration/noteTime);
-						if (numNotes < 1) {
-							numNotes = 1;
-						} else if (numNotes % 2 === 1)
-							numNotes--;
-						while(numNotes > 0) {
-							numNotes--;
-							relativeNoteList.push(numNotes % 2);
-						}
-						break;
-					case "mordent":
-						noteTime = 1.0/32;
-						relativeNoteList.push(1);
-						relativeNoteList.push(0);
-						break;
-					case "lowermordent":
-						noteTime = 1.0/32;
-						relativeNoteList.push(-1);
-						relativeNoteList.push(0);
-						break;
-					case "turn":
-						noteTime = soundDuration / 5;
-						relativeNoteList.push(1);
-						relativeNoteList.push(0);
-						relativeNoteList.push(-1);
-						relativeNoteList.push(0);
-						break;
-					case "roll":
-						noteTime = 1.0/32;
-						numNotes = Math.floor(soundDuration/noteTime);
-						if (numNotes < 1) {
-							numNotes = 1;
-						}
-						while (numNotes) {
-							relativeNoteList.push(0);
-							numNotes--;
-						}
-
-						break;
-				}
-				var currentlyPlayingNote = [];
-				var iii;
-				for (iii = 0; iii < elem.pitches.length; iii++) {
-					currentlyPlayingNote.push(adjustPitch({ pitch: elem.pitches[iii].pitch}));
-				}
-				var remainingTime = soundDuration;
-				for (var dd = 0; dd < relativeNoteList.length; dd++) {
-					addMove(currentTrack, (noteTime-0.001)*tempoChangeFactor);
-					for (iii = 0; iii < elem.pitches.length; iii++) {
-						currentTrack.push({ cmd: 'stop', pitch: currentlyPlayingNote[iii]});
-					}
-					addMove(currentTrack, 0.001*tempoChangeFactor);
-					for (iii = 0; iii < elem.pitches.length; iii++) {
-						currentTrack.push({ cmd: 'start', pitch: adjustPitch({ pitch: elem.pitches[iii].pitch+relativeNoteList[dd]}), volume: velocity});
-						currentlyPlayingNote[iii] = adjustPitch({ pitch: elem.pitches[iii].pitch+relativeNoteList[dd]});
-					}
-					remainingTime -= noteTime;
-				}
-				addMove(currentTrack, remainingTime*tempoChangeFactor);
+			if (ret.noteModification) {
+				pitches = doModifiedNotes(ret.noteModification, soundDuration, elem, velocity);
 			} else
 				addMove(currentTrack, soundDuration*tempoChangeFactor);
 
@@ -605,6 +637,30 @@ var flatten;
 			// Because of JS arithmetic, triplets will cause the beats to drift.
 			barBeat = Math.round(barBeat*128)/128;
 		}
+
+		// Debugging code - comment this out for release.
+		// var writtenDuration = 0;
+		// for (var jj = trackStartingIndex; jj < currentTrack.length; jj++) {
+		// 	if (currentTrack[jj].cmd === "move") {
+		// 		writtenDuration += currentTrack[jj].duration;
+		// 	}
+		// }
+		// if (Math.abs(writtenDuration+tieAdjustment - totalDuration*tempoChangeFactor) > 0.0001) {
+		// 	console.log("Duration error: ", trackStartingIndex, writtenDuration, totalDuration);
+		// 	for (jj = trackStartingIndex; jj < currentTrack.length; jj++) {
+		// 		console.log(currentTrack[jj]);
+		// 	}
+		// }
+		// var recheckCounter = 0;
+		// for (jj = 0; jj < currentTrack.length; jj++) {
+		// 	if (currentTrack[jj].cmd === "move") {
+		// 		recheckCounter += currentTrack[jj].duration;
+		// 	}
+		// }
+		// if (Math.abs(recheckCounter - currentTrackCounter) > 0.0001) {
+		// 	console.log("COUNTER: ", recheckCounter, currentTrackCounter)
+		// }
+
 	}
 
 	var scale = [0,2,4,5,7,9,11];
@@ -665,8 +721,8 @@ var flatten;
 		return accidentals;
 	}
 
-	var graceDivider = 8; // This is the fraction of a note that the grace represents. That is, if this is 2, then a grace note of 1/16 would be a 1/32.
 	function processGraceNotes(graces, companionDuration) {
+		// Grace notes take up half of the note value. So if there are many of them they are all real short.
 		var graceDuration = 0;
 		var ret = [];
 		var grace;
@@ -674,13 +730,12 @@ var flatten;
 			grace = graces[g];
 			graceDuration += grace.duration;
 		}
-		graceDuration = graceDuration / graceDivider;
-		var multiplier = (graceDuration * 2 > companionDuration) ? companionDuration/(graceDuration * 2) : 1;
+		var multiplier = companionDuration/2 / graceDuration;
 
 		for (g = 0; g < graces.length; g++) {
 			grace = graces[g];
 			var pitch = adjustPitch(grace);
-			ret.push({ pitch: pitch, duration: grace.duration/graceDivider*multiplier });
+			ret.push({ pitch: pitch, duration: grace.duration*multiplier });
 		}
 		return ret;
 	}
@@ -690,12 +745,15 @@ var flatten;
 			var gp = graces[g];
 			if (gp !== skipNote)
 				currentTrack.push({cmd: 'start', pitch: gp.pitch, volume: velocity});
-			addMove(currentTrack, graces[g].duration*tempoChangeFactor);
+			var thisDuration = graces[g].duration*tempoChangeFactor;
+			addMove(currentTrack, thisDuration);
 			if (gp !== skipNote)
 				currentTrack.push({cmd: 'stop', pitch: gp.pitch});
-			if (!stealFromCurrent)
-				currentTrack[lastNoteDurationPosition].duration -= graces[g].duration;
-			duration -= graces[g].duration;
+			if (stealFromCurrent) {
+				duration -= thisDuration;
+				currentTrackCounter += thisDuration * tempoChangeFactor;
+			} else
+				currentTrack[lastNoteDurationPosition].duration -= thisDuration;
 		}
 		return duration;
 	}
@@ -1150,8 +1208,10 @@ var flatten;
 		}
 	}
 	function addMove(array, duration) {
-		if (duration > 0)
-			array.push({ cmd: 'move', duration: duration });
+		if (duration > 0) {
+			duration = Math.round(duration*1000000)/1000000;
+			array.push({cmd: 'move', duration: duration});
+		}
 	}
 })();
 
