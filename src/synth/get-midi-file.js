@@ -54,6 +54,11 @@ var getMidiFile = function(abcString, options) {
 	return tunebook.renderEngine(callback, "*", abcString, params);
 };
 
+function isFunction(functionToCheck) {
+	var getType = {};
+	return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
+
 var generateMidiDownloadLink = function(tune, midiParams, midi, index) {
 	var divClasses = ['abcjs-download-midi', 'abcjs-midi-' + index]
 	if (midiParams.downloadClass)
