@@ -5,7 +5,7 @@ die () {
 }
 
 [ "$#" -eq 1 ] || die "Call with a version number argument in the form x.y.z[-beta.n]"
-echo $1 | grep -E -q '^[1-9]+\.[0-9]+\.[0-9]+(-beta.\d)?$' || die "Version number argument required (x.y.z[-beta.n]), $1 provided"
+echo $1 | grep -E -q '^[1-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?$' || die "Version number argument required (x.y.z[-beta.n]), $1 provided"
 
 echo "Fix build files..."
 perl -pi -e "s/ v6([^\"]+)/ v$1/" *.js

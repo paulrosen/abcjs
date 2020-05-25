@@ -1,3 +1,34 @@
+# Version 6.0.0-beta.10
+
+## Features
+
+* Add option to turn off individual voices when producing the audio.
+* Add track names to midi file output.
+
+## Documentation
+
+* Example of how to play only chords or only melody.
+
+## Bugs
+
+* Fix placement of multiline overlay voices.
+* Fix crash when setting the name of the midi file to download.
+* Many timing tweaks and other improvements to the audio creation.
+* Playback treble+8, etc. clefs in the correct octave.
+* Don't transpose chord accompaniment more than an octave.
+* Extra resume of audio context for Safari 13
+* Fix setting the sound font url.
+* Support pppp and ffff in audio.
+* Fill midiPitches when doing any timing operation.
+* Fix seeking when paused moved the cursor but not the audio.
+* Fix audio timing when there are grace notes present.
+* Fix end tie that happens over an ending.
+* Fix audio for ties when there are accidentals.
+* Fix the alternating bass note for chords with #5 and b5.
+* Fix arithmetic inaccuracies in triplets.
+* Fix interpreting a "maj" chord as minor.
+* Fix tempo of 3/4 tunes.
+
 # Version 6.0.0-beta.9
 
 ## Bugs
