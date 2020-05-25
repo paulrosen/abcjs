@@ -179,6 +179,7 @@ var Tune = function() {
 
 	this.resolveOverlays = function() {
 		var madeChanges = false;
+		var durationsPerLines = [];
 		for (var i = 0; i < this.lines.length; i++) {
 			var line = this.lines[i];
 			if (line.staff) {
@@ -188,8 +189,10 @@ var Tune = function() {
 					for (var k = 0; k < staff.voices.length; k++) {
 						var voice = staff.voices[k];
 						overlayVoice.push({ hasOverlay: false, voice: [], snip: []});
+						durationsPerLines[i] = 0;
 						var durationThisBar = 0;
 						var inOverlay = false;
+						var overlayDuration = 0;
 						var snipStart = -1;
 						for (var kk = 0; kk < voice.length; kk++) {
 							var event = voice[kk];
@@ -198,6 +201,21 @@ var Tune = function() {
 								inOverlay = true;
 								snipStart = kk;
 								overlayVoice[k].hasOverlay = true;
+								if (overlayDuration === 0)
+									overlayDuration = durationsPerLines[i];
+								// If this isn't the first line, we also need invisible rests on the previous lines.
+								// So, if the next voice doesn't appear in a previous line, create it
+								for (var ii = 0; ii < i; ii++) {
+									if (durationsPerLines[ii] && this.lines[ii].staff && staff.voices.length >= this.lines[ii].staff[0].voices.length) {
+										this.lines[ii].staff[0].voices.push([{
+											el_type: "note",
+											duration: durationsPerLines[ii],
+											rest: {type: "invisible"},
+											startChar: event.startChar,
+											endChar: event.endChar
+										}]);
+									}
+								}
 							} else if (event.el_type === "bar") {
 								if (inOverlay) {
 									// delete the overlay events from this array without messing up this loop.
@@ -216,6 +234,7 @@ var Tune = function() {
 									overlayVoice[k].voice.push(event);
 								} else {
 									durationThisBar += event.duration;
+									durationsPerLines[i] += event.duration;
 								}
 							} else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "overlay" || event.el_type === "style" || event.el_type === "transpose") {
 								// These types of events are duplicated on the overlay layer.
