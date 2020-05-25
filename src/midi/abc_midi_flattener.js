@@ -121,6 +121,11 @@ var flatten;
 			currentTrackCounter = 0;
 			currentTrackName = undefined;
 			pitchesTied = {};
+			var voiceOff = false;
+			if (options.voicesOff === true)
+				voiceOff = true;
+			else if (options.voicesOff && options.voicesOff.length && options.voicesOff.indexOf(i) >= 0)
+				voiceOff = true;
 			for (var j = 0; j < voice.length; j++) {
 				var element = voice[j];
 				switch (element.el_type) {
@@ -128,7 +133,7 @@ var flatten;
 						currentTrackName = {cmd: 'text', type: "name", text: element.trackName };
 						break;
 					case "note":
-						writeNote(element, options.voicesOff);
+						writeNote(element, voiceOff);
 						break;
 					case "key":
 						accidentals = setKeySignature(element);

@@ -178,7 +178,7 @@ The `options` element above can have the following properties:
 | qpm | null | The tempo to use. This overrides a tempo that is in the tune. |
 | defaultQpm | null | The tempo to use, only if there is no tempo in the tune. |
 | chordsOff | false | If true, then don't turn the guitar chord symbols into sound. (But do play the metronome if there is one.) |
-| voicesOff | false | If true, play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. |
+| voicesOff | false | If true, play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. This can also be an array of voices to turn off. The voices are numbered starting at zero. |
 
 ### play(), pause(), toggleLoop(), restart(), setProgress(ev)
 

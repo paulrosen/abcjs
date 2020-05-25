@@ -25,8 +25,15 @@
 			'T:Cindy\n' +
 			'M:4/4\n' +
 			'K:G\n' +
+			'%%score (harmony melody)\n' +
 			'L:1/4\n' +
-			'd||"G"eddB|AG2d|"D7"eddB|"G"d3d|\n' +
+				'[V: harmony]' +
+			'g||"G"gggg|dB2g|gggd|g3g|\n' +
+			'"G"gggd|dcB2|dccA|Bzz2|\n' +
+			'"C"G2cc|ccd/c/B|"G"G4-|Gzz2|\n' +
+			'"C"G2cc|cc2c|"D7"dddc|"G"B2z2|]\n' +
+				'[V: melody]' +
+			'd||"G"eddB|AG2d|eddB|d3d|\n' +
 			'"G"eddB|BAG2|"D7"BGGE|"G"GzB/A/G|\n' +
 			'"C"E2GG|AGB/A/G|"G"D4-|DzB/A/G|\n' +
 			'"C"E2GG|AG2A|"D7"BBBA|"G"G2z2|]\n';
@@ -40,8 +47,10 @@
 			var midiBuffer;
 
 			var startChordsButton = document.querySelector(".play-chords");
+			var startMelodiesButton = document.querySelector(".play-melodies");
+			var startHarmonyButton = document.querySelector(".play-harmony");
 			var startMelodyButton = document.querySelector(".play-melody");
-			var startBothButton = document.querySelector(".play-both");
+			var startAllButton = document.querySelector(".play-all");
 			var stopAudioButton = document.querySelector(".stop-audio");
 
 			startChordsButton.addEventListener("click", function() {
@@ -49,20 +58,32 @@
 				play(options);
 			});
 
-			startMelodyButton.addEventListener("click", function() {
+			startMelodiesButton.addEventListener("click", function() {
 				var options = {chordsOff: true};
 				play(options);
 			});
 
-			startBothButton.addEventListener("click", function() {
+			startHarmonyButton.addEventListener("click", function() {
+				var options = {chordsOff: true, voicesOff: [1]};
+				play(options);
+			});
+
+			startMelodyButton.addEventListener("click", function() {
+				var options = {chordsOff: true, voicesOff: [0]};
+				play(options);
+			});
+
+			startAllButton.addEventListener("click", function() {
 				var options = {};
 				play(options);
 			});
 
 			function play(options) {
 				startChordsButton.setAttribute("style", "display:none;");
+				startMelodiesButton.setAttribute("style", "display:none;");
+				startHarmonyButton.setAttribute("style", "display:none;");
 				startMelodyButton.setAttribute("style", "display:none;");
-				startBothButton.setAttribute("style", "display:none;");
+				startAllButton.setAttribute("style", "display:none;");
 				if (ABCJS.synth.supportsAudio()) {
 					stopAudioButton.setAttribute("style", "");
 
@@ -113,8 +134,10 @@
 
 			stopAudioButton.addEventListener("click", function() {
 				startChordsButton.setAttribute("style", "");
+				startMelodiesButton.setAttribute("style", "");
+				startHarmonyButton.setAttribute("style", "");
 				startMelodyButton.setAttribute("style", "");
-				startBothButton.setAttribute("style", "");
+				startAllButton.setAttribute("style", "");
 				stopAudioButton.setAttribute("style", "display:none;");
 				if (midiBuffer)
 					midiBuffer.stop();
@@ -126,8 +149,10 @@
 <main>
 	<div id="paper"></div>
 	<button class="play-chords">Play Chords</button>
+	<button class="play-melodies">Play Melodies</button>
+	<button class="play-harmony">Play Harmony</button>
 	<button class="play-melody">Play Melody</button>
-	<button class="play-both">Play Both</button>
+	<button class="play-all">Play All</button>
 	<button class="stop-audio" style="display:none;">Stop Audio</button>
 	<div class='audio-error' style="display:none;">Audio is not supported in this browser.</div>
 </main>
