@@ -44,7 +44,7 @@ var addChord;
 					break;
 				case "below":
 					// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-					abselem.addRight(new RelativeElement(chord.name, 0, chordWidth + chordMargin, undefined, {
+					abselem.addRight(new RelativeElement(chord.name, 0, 0, undefined, {
 						type: "text",
 						position: "below",
 						height: chordHeight
@@ -52,7 +52,7 @@ var addChord;
 					break;
 				case "above":
 					// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-					abselem.addRight(new RelativeElement(chord.name, 0, chordWidth + chordMargin, undefined, {
+					abselem.addRight(new RelativeElement(chord.name, 0, 0, undefined, {
 						type: "text",
 						height: chordHeight
 					}));
