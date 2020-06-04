@@ -121,7 +121,11 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 	this.renderer.lineNumber = null;
 
 	this.renderer.newTune(abcTune);
-	this.engraver = new AbstractEngraver(this.renderer, 0, { bagpipes: abcTune.formatting.bagpipes, flatbeams: abcTune.formatting.flatbeams });
+	this.engraver = new AbstractEngraver(this.renderer, 0, {
+		bagpipes: abcTune.formatting.bagpipes,
+		flatbeams: abcTune.formatting.flatbeams,
+		slurgraces: abcTune.formatting.slurgraces
+	});
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	if (abcTune.formatting.staffwidth) {
 		this.width = abcTune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
@@ -180,7 +184,11 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.renderer.lineNumber = null;
 
 	this.renderer.newTune(abctune);
-	this.engraver = new AbstractEngraver(this.renderer, tuneNumber, { bagpipes: abctune.formatting.bagpipes, flatbeams: abctune.formatting.flatbeams });
+	this.engraver = new AbstractEngraver(this.renderer, tuneNumber, {
+		bagpipes: abctune.formatting.bagpipes,
+		flatbeams: abctune.formatting.flatbeams,
+		slurgraces: abctune.formatting.slurgraces
+	});
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.engraver.measureLength = abctune.getMeterFraction().num/abctune.getMeterFraction().den;
 	if (abctune.formatting.staffwidth) {
