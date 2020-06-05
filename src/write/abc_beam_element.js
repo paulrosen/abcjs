@@ -235,7 +235,7 @@ var BeamElem;
 		var startX = starthead.x;
 		if (asc) startX += starthead.w - 0.6;
 		var endX = endhead.x;
-		if (asc) endX += endhead.w;
+		endX += (asc) ? endhead.w : 0.6;
 		return [ startX, endX ];
 	}
 

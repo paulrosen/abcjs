@@ -618,7 +618,7 @@ Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
  * @param {number} y2 y coordinate of the stem top
  */
 Renderer.prototype.printStem = function (x, dx, y1, y2) {
-  if (dx<0) { // correct path "handedness" for intersection with other elements
+  if (dx<0 || y1<y2) { // correct path "handedness" for intersection with other elements
     var tmp = y2;
     y2 = y1;
     y1 = tmp;
