@@ -124,7 +124,7 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 	this.engraver = new AbstractEngraver(this.renderer, 0, {
 		bagpipes: abcTune.formatting.bagpipes,
 		flatbeams: abcTune.formatting.flatbeams,
-		slurgraces: abcTune.formatting.slurgraces
+		graceSlurs: abcTune.formatting.graceSlurs !== false // undefined is the default, which is true
 	});
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	if (abcTune.formatting.staffwidth) {
@@ -187,7 +187,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.engraver = new AbstractEngraver(this.renderer, tuneNumber, {
 		bagpipes: abctune.formatting.bagpipes,
 		flatbeams: abctune.formatting.flatbeams,
-		slurgraces: abctune.formatting.slurgraces
+		graceSlurs: abctune.formatting.graceSlurs !== false // undefined is the default, which is true
 	});
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.engraver.measureLength = abctune.getMeterFraction().num/abctune.getMeterFraction().den;

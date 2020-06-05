@@ -65,7 +65,7 @@ AbstractEngraver = function(renderer, tuneNumber, options) {
 	this.tuneNumber = tuneNumber;
 	this.isBagpipes = options.bagpipes;
 	this.flatBeams = options.flatbeams;
-	this.slurGraces = options.slurgraces;
+	this.graceSlurs = options.graceSlurs;
 	this.reset();
 };
 
@@ -513,9 +513,13 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			}
 			ledgerLines(abselem, gracepitch, gracepitch, false, glyphs.getSymbolWidth("noteheads.quarter"), [], true, grace.dx - 1, 0.6);
 
-			if (!this.slurGraces && (i === 0 && !isBagpipes && !(elem.rest && (elem.rest.type === "spacer" || elem.rest.type === "invisible")))) {
+			// if this is the first grace note, we might want to start a slur.
+			// there is a slur if graceSlurs is specifically set.
+			// there is no slur if it is bagpipes.
+			// there is not a slur if the element is a spacer or invisible rest.
+			var isInvisibleRest = elem.rest && (elem.rest.type === "spacer" || elem.rest.type === "invisible");
+			if (i === 0 && !isBagpipes && this.graceSlurs && !isInvisibleRest) {
 				// This is the overall slur that is under the grace notes.
-				var isTie = (elem.gracenotes.length === 1 && grace.pitch === notehead.pitch);
 				voice.addOther(new TieElem({ anchor1: grace, anchor2: notehead, isGrace: true}));
 			}
 		}

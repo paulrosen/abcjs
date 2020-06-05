@@ -671,7 +671,6 @@ var parseDirective = {};
 			//					exprabove: { type: "boolean", optional: true },
 			//					exprbelow: { type: "boolean", optional: true },
 			//					gchordbox: { type: "boolean", optional: true },
-			//					graceslurs: { type: "boolean", optional: true },
 			//					gracespacebefore: { type: "number", optional: true },
 			//					gracespaceinside: { type: "number", optional: true },
 			//					gracespaceafter: { type: "number", optional: true },
@@ -693,7 +692,16 @@ var parseDirective = {};
 			case "flatbeams":tune.formatting.flatbeams = true;break;
 			case "landscape":multilineVars.landscape = true;break;
 			case "papersize":multilineVars.papersize = restOfString;break;
-			case "slurgraces":tune.formatting.slurgraces = true;break;
+			case "graceslurs":
+				if (tokens.length !== 1)
+					return "Directive graceslurs requires one parameter: 0 or 1";
+				if (tokens[0].token === '0' || tokens[0].token === 'false')
+					tune.formatting.graceSlurs = false;
+				else if (tokens[0].token === '1' || tokens[0].token === 'true')
+					tune.formatting.graceSlurs = true;
+				else
+					return "Directive graceslurs requires one parameter: 0 or 1 (received " + tokens[0].token + ')';
+				break;
 			case "stretchlast":tune.formatting.stretchlast = true;break;
 			case "titlecaps":multilineVars.titlecaps = true;break;
 			case "titleleft":tune.formatting.titleleft = true;break;
