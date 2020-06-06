@@ -495,7 +495,7 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 };
 
 Renderer.prototype.outputFreeText = function (text, vskip) {
-	this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "free-text", startChar: -1, endChar: -1, text: text }};
+	this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "freeText", startChar: -1, endChar: -1, text: text }};
 	if (vskip)
 		this.moveY(vskip);
 	var hash = this.getFontAndAttr('textfont', 'defined-text');
@@ -671,7 +671,7 @@ Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, kl
 		for (var i = 0; i < symbol.length; i++) {
 			var s = symbol.charAt(i);
 			ycorr = glyphs.getYCorr(s);
-			el = glyphs.printSymbol(x + dx, this.calcY(offset + ycorr), s, this.paper, '');
+			el = glyphs.printSymbol(x + dx, this.calcY(offset + ycorr), s, this.paper, '', "", "");
 			if (el) {
 				if (this.doRegression) this.addToRegression(el);
 				if (i < symbol.length - 1)
@@ -688,7 +688,7 @@ Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, kl
 		if (this.ingroup) {
 			this.addPath(glyphs.getPathForSymbol(x, this.calcY(offset + ycorr), symbol, scalex, scaley));
 		} else {
-			el = glyphs.printSymbol(x, this.calcY(offset + ycorr), symbol, this.paper, klass);
+			el = glyphs.printSymbol(x, this.calcY(offset + ycorr), symbol, this.paper, klass, "none", "#000000");
 			this.controller.recordHistory(el);
 			if (el) {
 				if (this.doRegression) this.addToRegression(el);

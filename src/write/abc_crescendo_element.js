@@ -14,6 +14,8 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+var highlight = require('./highlight');
+var unhighlight = require('./unhighlight');
 var sprintf = require('./sprintf');
 
 var CrescendoElem = function CrescendoElem(anchor1, anchor2, dir, positioning) {
@@ -51,12 +53,12 @@ CrescendoElem.prototype.drawLine = function (renderer, y1, y2, y3, y4) {
 	var left = this.anchor1 ? this.anchor1.x : 0;
 	var right = this.anchor2 ? this.anchor2.x : 800;
 
-	var type = this.dir === "<" ? "crescendo" : "diminuendo";
 	var pathString = sprintf("M %f %f L %f %f M %f %f L %f %f",
 		left, y1, right, y2, left, y3, right, y4);
-	renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: type, startChar: -1, endChar: -1 }};
-	var el = renderer.printPath({path:pathString, stroke:"#000000", 'class': renderer.addClasses('dynamics decoration')});
+	renderer.controller.currentAbsEl = { highlight: highlight.bind(this), unhighlight: unhighlight.bind(this), tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "dynamicDecoration", startChar: -1, endChar: -1 }};
+	var el = renderer.printPath({path:pathString, highlight: "stroke", stroke:"#000000", 'class': renderer.addClasses('dynamics decoration')});
 	renderer.controller.currentAbsEl.elemset.push(el);
+	this.elemset = [el];
 };
 
 module.exports = CrescendoElem;

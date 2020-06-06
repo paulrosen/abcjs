@@ -14,6 +14,9 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+var highlight = require('./highlight');
+var unhighlight = require('./unhighlight');
+
 var TieElem = function TieElem(options) {
 //	console.log("constructor", options.anchor1 ? options.anchor1.pitch : "N/A", options.anchor2 ? options.anchor2.pitch : "N/A", options.isTie, options.isGrace);
 	this.anchor1 = options.anchor1; // must have a .x and a .pitch, and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
@@ -244,10 +247,10 @@ TieElem.prototype.draw = function (renderer, linestartx, lineendx) {
 	if (this.hint)
 			klass = "abcjs-hint";
 	var fudgeY =  this.fixedY ? 1.5 : 0; // TODO-PER: This just compensates for drawArc, which contains too much knowledge of ties and slurs.
-	renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "slur", startChar: -1, endChar: -1 }};
+	renderer.controller.currentAbsEl = { highlight: highlight.bind(this), unhighlight: unhighlight.bind(this), tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "slur", startChar: -1, endChar: -1 }};
 	var el = renderer.drawArc(this.startX, this.endX, this.startY+fudgeY, this.endY+fudgeY,  this.above, klass, this.isTie);
 	renderer.controller.currentAbsEl.elemset.push(el);
-
+	this.elemset = [el];
 };
 
 module.exports = TieElem;

@@ -124,7 +124,7 @@ RelativeElement.prototype.draw = function (renderer, bartop) {
 			if (this.c===null) return null;
 			var klass = "symbol";
 			if (this.klass) klass += " " + this.klass;
-			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.addClasses(klass)); break;
+			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.addClasses(klass), "none", "#000000"); break;
 		case "debug":
 			this.graphelem = renderer.renderText({ x: this.x, y: renderer.calcY(15), text: ""+this.c, type: "debugfont", klass: 'debug-msg', anchor: 'start', centerVertically: false, history: 'not-selectable'}); break;
 		case "barNumber":

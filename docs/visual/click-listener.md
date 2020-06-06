@@ -29,4 +29,4 @@ TODO
 
 ## drag
 
-TODO
+See the [Dragging](./dragging.md) page for more details.

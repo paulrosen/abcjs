@@ -15,6 +15,7 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var spacing = require('./abc_spacing');
+var setClass = require('./set-class');
 
 // duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
 // minspacing - spacing which must be taken on top of the width defined by the duration
@@ -204,9 +205,9 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 		this.children[0].adjustElements(renderer);
 	}
 	if (this.klass)
-		this.setClass("mark", "", "#00ff00");
+		setClass(this.elemset, "mark", "", "#00ff00");
 	if (this.hint)
-		this.setClass("abcjs-hint", "", null);
+		setClass(this.elemset, "abcjs-hint", "", null);
 	this.abcelem.abselem = this;
 
 	var step = spacing.STEP;
@@ -214,30 +215,12 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 
 AbsoluteElement.prototype.isIE=/*@cc_on!@*/false;//IE detector
 
-AbsoluteElement.prototype.setClass = function (addClass, removeClass, color) {
-	if (!this.elemset)
-		return;
-	for (var i = 0; i < this.elemset.length; i++) {
-		var el = this.elemset[i];
-		el.setAttribute("fill", color);
-		var kls = el.getAttribute("class");
-		if (!kls) kls = "";
-		kls = kls.replace(removeClass, "");
-		kls = kls.replace(addClass, "");
-		if (addClass.length > 0) {
-			if (kls.length > 0 && kls.charAt(kls.length - 1) !== ' ') kls += " ";
-			kls += addClass;
-		}
-		el.setAttribute("class", kls);
-	}
-};
-
 AbsoluteElement.prototype.highlight = function (klass, color) {
 	if (klass === undefined)
 		klass = "abcjs-note_selected";
 	if (color === undefined)
 		color = "#ff0000";
-	this.setClass(klass, "", color);
+	setClass(this.elemset, klass, "", color);
 };
 
 AbsoluteElement.prototype.unhighlight = function (klass, color) {
@@ -245,7 +228,7 @@ AbsoluteElement.prototype.unhighlight = function (klass, color) {
 		klass = "abcjs-note_selected";
 	if (color === undefined)
 		color = "#000000";
-	this.setClass("", klass, color);
+	setClass(this.elemset, "", klass, color);
 };
 
 module.exports = AbsoluteElement;

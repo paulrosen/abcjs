@@ -42,7 +42,7 @@ var EngraverController = function(paper, params) {
   this.selectionColor = params.selectionColor;
   this.dragColor = params.dragColor ? params.dragColor : params.selectionColor;
   this.dragging = !!params.dragging;
-  this.selectAll = !!params.selectAll;
+  this.selectTypes = params.selectTypes;
   this.responsive = params.responsive;
   this.space = 3*spacing.SPACE;
   this.scale = params.scale ? parseFloat(params.scale) : 0;
@@ -250,13 +250,20 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 EngraverController.prototype.recordHistory = function (svgEl, notSelectable) {
 	var isNote = this.currentAbsEl && this.currentAbsEl.abcelem && this.currentAbsEl.abcelem.el_type === "note" && !this.currentAbsEl.abcelem.rest && svgEl.tagName !== 'text';
 	var selectable = notSelectable !== true;
-	if (!this.selectAll) {
-		if (!this.currentAbsEl || (this.currentAbsEl.abcelem.el_type !== "note" && this.currentAbsEl.abcelem.el_type !== "bar"))
-			selectable = false;
-	}
+	if (!this.currentAbsEl || !this.currentAbsEl.abcelem) selectable = false;
+	if (this.selectTypes === false)
+		selectable = false;
+	else if (this.selectTypes === undefined)
+		this.selectTypes = [ 'note' ];
+	else if (this.selectTypes === true) {
+		// Nothing to do here. If selectable was set to false earlier then it can't be overwritten.
+	} else if (this.selectTypes.indexOf(this.currentAbsEl.abcelem.el_type) < 0)
+		selectable = false;
+
+	if (!selectable)
+		return;
+
 	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, selectable: selectable, isDraggable: isNote });
-	//var last = this.history[this.history.length-1];
-	//console.log(last.svgEl, { selectable: last.selectable, isDraggable: last.isDraggable});
 };
 
 EngraverController.prototype.getDim = function(historyEl) {
