@@ -128,7 +128,7 @@ BraceElem.prototype.drawBrace = function(renderer, xLeft, yTop, yBottom) {//Tony
 			ret = curvyPath(renderer, xLeft, yTop, yBottom, type);
 		else if (type === "bracket")
 			ret = straightPath(renderer, xLeft, yTop, yBottom, type);
-		renderer.controller.recordHistory(ret, true);
+		renderer.controller.recordHistory(ret);
 		return ret;
 	});
 
