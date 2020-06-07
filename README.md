@@ -9,13 +9,11 @@ The documentation has not been updated for the beta version. It is set for the l
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
-## Coronavirus Notice
+## Issues
 
-Like everyone else, my life is turned upside down since the beginning of the COVID-19 pandemic and I have fallen behind on answering questions and otherwise working on this project.
+Thanks so much for the bug reports and feature requests that are pouring into the issues. I appreciate you taking the time to help improve abcjs. This is not a full time project, though, so I can't promise a quick turn around on the issues. I am going to attempt to be caught up on responding once a week at least.
 
-But don't worry, this is still a high priority and I anticipate catching up before the end of April.
-
-Thanks for your patience, and please stay safe, stay home, and wash your hands.
+And I would love some help on this project, particularly with documentation at the moment, but many other things, too, as soon as I finish some refactoring. If you are so inclined, please get in touch.
 
 ## Supported by BrowserStack
 If you aren't using the same browser and machine that I use, you can thank [BrowserStack](https://browserstack.com/) for their support of this open-source project.
