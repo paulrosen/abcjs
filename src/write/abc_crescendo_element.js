@@ -56,7 +56,7 @@ CrescendoElem.prototype.drawLine = function (renderer, y1, y2, y3, y4) {
 	var pathString = sprintf("M %f %f L %f %f M %f %f L %f %f",
 		left, y1, right, y2, left, y3, right, y4);
 	renderer.controller.currentAbsEl = { highlight: highlight.bind(this), unhighlight: unhighlight.bind(this), tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "dynamicDecoration", startChar: -1, endChar: -1 }};
-	var el = renderer.printPath({path:pathString, highlight: "stroke", stroke:"#000000", 'class': renderer.addClasses('dynamics decoration')});
+	var el = renderer.printPath({path:pathString, highlight: "stroke", stroke:"#000000", 'class': renderer.controller.classes.generate('dynamics decoration')});
 	renderer.controller.currentAbsEl.elemset.push(el);
 	this.elemset = [el];
 };

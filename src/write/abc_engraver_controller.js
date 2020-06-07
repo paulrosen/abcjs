@@ -22,6 +22,7 @@ var AbstractEngraver = require('./abc_abstract_engraver');
 var Renderer = require('./abc_renderer');
 var setupSelection = require('./selection');
 var layout = require('./layout');
+var Classes = require('./classes');
 
 /**
  * @class
@@ -46,6 +47,7 @@ var EngraverController = function(paper, params) {
   this.responsive = params.responsive;
   this.space = 3*spacing.SPACE;
   this.scale = params.scale ? parseFloat(params.scale) : 0;
+  this.classes = new Classes({ shouldAddClasses: params.add_classes });
   if (!(this.scale > 0.1))
   	this.scale = undefined;
 
@@ -63,7 +65,7 @@ var EngraverController = function(paper, params) {
 	if (params.clickListener)
 		this.addSelectListener(params.clickListener);
 
-  this.renderer=new Renderer(paper, params.regression, params.add_classes);
+  this.renderer=new Renderer(paper, params.regression);
 	this.renderer.setPaddingOverride(params);
   this.renderer.controller = this; // TODO-GD needed for highlighting
 
@@ -118,7 +120,7 @@ EngraverController.prototype.adjustNonScaledItems = function (scale) {
 EngraverController.prototype.getMeasureWidths = function(abcTune) {
 	this.reset();
 
-	this.renderer.lineNumber = null;
+	this.classes.reset();
 
 	this.renderer.newTune(abcTune);
 	this.engraver = new AbstractEngraver(this.renderer, 0, {
@@ -181,7 +183,7 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
  * @param {ABCJS.Tune} abctune
  */
 EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
-	this.renderer.lineNumber = null;
+	this.classes.reset();
 
 	this.renderer.newTune(abctune);
 	this.engraver = new AbstractEngraver(this.renderer, tuneNumber, {
@@ -227,7 +229,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.staffgroups = [];
 	this.lastStaffGroupIndex = -1;
 	for (var line = 0; line < abctune.lines.length; line++) {
-		this.renderer.lineNumber = line;
+		this.classes.incrLine();
 		abcLine = abctune.lines[line];
 		if (abcLine.staff) {
 			this.engraveStaffLine(abcLine.staffGroup);
@@ -305,7 +307,7 @@ EngraverController.prototype.combineHistory = function (len, svgEl) {
 EngraverController.prototype.engraveStaffLine = function (staffGroup) {
 	if (this.lastStaffGroupIndex > -1)
 		this.renderer.addStaffPadding(this.staffgroups[this.lastStaffGroupIndex], staffGroup);
-	this.renderer.voiceNumber = null;
+//	this.renderer.voiceNumber = null;
 	staffGroup.draw(this.renderer);
 	var height = staffGroup.height * spacing.STEP;
 	//this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+height);

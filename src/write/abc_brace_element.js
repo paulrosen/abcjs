@@ -88,7 +88,7 @@ function straightPath(renderer, xLeft, yTop, yBottom, type) {
 		-wCurve*0.1, -hCurve*0.3,
 		-wCurve, -hCurve-spacing.STEP // left bottom
 	);
-	return renderer.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses(type)});
+	return renderer.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.controller.classes.generate(type)});
 }
 
 function curvyPath(renderer, xLeft, yTop, yBottom, type) {
@@ -117,7 +117,7 @@ function curvyPath(renderer, xLeft, yTop, yBottom, type) {
 		xLeft+xCurve[4], yTop+yCurve[4],
 		xLeft+xCurve[5], yTop+yCurve[5],
 		xLeft+xCurve[6], yTop+yCurve[6]);
-	return renderer.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.addClasses(type)});
+	return renderer.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.controller.classes.generate(type)});
 }
 
 BraceElem.prototype.drawBrace = function(renderer, xLeft, yTop, yBottom) {//Tony

@@ -40,7 +40,7 @@ DynamicDecoration.prototype.draw = function(renderer) {
 	var scaley = 1;
 	var self = this;
 	var ret = renderer.wrapInAbsElem({el_type: "dynamicDecoration", startChar: -1, endChar: -1, decoration: this.dec}, 'abcjs-decoration', function () {
-		var el = renderer.printSymbol(self.anchor.x, self.pitch, self.dec, scalex, scaley, renderer.addClasses('decoration'));
+		var el = renderer.printSymbol(self.anchor.x, self.pitch, self.dec, scalex, scaley, renderer.controller.classes.generate('decoration'));
 		return el;
 	});
 	this.elemset = [ret];

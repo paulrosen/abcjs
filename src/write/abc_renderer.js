@@ -28,14 +28,13 @@ var AbsoluteElement = require('./abc_absolute_element');
  * @param {Object} paper
  * @param {bool} doRegression
  */
-var Renderer = function(paper, doRegression, shouldAddClasses) {
+var Renderer = function(paper, doRegression) {
   this.paper = new Svg(paper);
   this.controller = null; //TODO-GD only used when drawing the ABCJS ARS to connect the controller with the elements for highlighting
 
 	this.space = 3*spacing.SPACE;
   this.padding = {}; // renderer's padding is managed by the controller
   this.doRegression = doRegression;
-  this.shouldAddClasses = shouldAddClasses;
   if (this.doRegression)
     this.regressionLines = [];
 	this.reset();
@@ -64,8 +63,8 @@ Renderer.prototype.reset = function() {
 Renderer.prototype.newTune = function(abcTune) {
 	this.abctune = abcTune; // TODO-PER: this is just to get the font info.
 	this.setVerticalSpace(abcTune.formatting);
-	this.measureNumber = null;
-	this.noteNumber = null;
+	//this.measureNumber = null;
+	//this.noteNumber = null;
 	this.setPrintMode(abcTune.media === 'print');
 	this.setPadding(abcTune);
 };
@@ -411,6 +410,7 @@ Renderer.prototype.wrapInAbsElem = function(abcelem, klass, creator) {
 	this.controller.currentAbsEl = new AbsoluteElement(abcelem, 0, 0, klass, this.controller.engraver.tuneNumber, {});
 	var el = creator.bind(this)();
 	this.controller.currentAbsEl.elemset = [el];
+	return el;
 };
 
 /**
@@ -419,10 +419,7 @@ Renderer.prototype.wrapInAbsElem = function(abcelem, klass, creator) {
  * @param {object} abctune
  */
 Renderer.prototype.engraveExtraText = function(width, abctune) {
-	this.lineNumber = null;
-	this.measureNumber = null;
-	this.noteNumber = null;
-	this.voiceNumber = null;
+	this.controller.classes.reset();
 
 	if (abctune.metaText.unalignedWords && abctune.metaText.unalignedWords.length > 0) {
 		this.wrapInAbsElem({el_type: "unalignedWords", startChar: -1, endChar: -1}, 'meta-bottom extra-text', function () {
@@ -576,7 +573,7 @@ Renderer.prototype.endGroup = function (klass) {
   var path = "";
 	for (var i = 0; i < this.path.length; i++)
 		path += this.path[i].join(" ");
-	var ret = this.paper.path({path: path, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
+	var ret = this.paper.path({path: path, stroke:"none", fill:"#000000", 'class': this.controller.classes.generate(klass)});
 	this.controller.recordHistory(ret);
 	this.path = [];
   if (this.doRegression) this.addToRegression(ret);
@@ -637,7 +634,7 @@ Renderer.prototype.printStem = function (x, dx, y1, y2) {
   	var path = "";
   	for (var i = 0; i < pathArray.length; i++)
   		path += pathArray[i].join(" ");
-    var ret = this.paper.pathToBack({path:path, stroke:"none", fill:fill, 'class': this.addClasses('stem')});
+    var ret = this.paper.pathToBack({path:path, stroke:"none", fill:fill, 'class': this.controller.classes.generate('stem')});
     if (this.doRegression) this.addToRegression(ret);
 
     return ret;
@@ -749,7 +746,7 @@ Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass, isTi
 		klass += ' slur';
 	else
 		klass = 'slur';
-  var ret = this.paper.path({path:pathString, stroke:"none", fill:"#000000", 'class': this.addClasses(klass)});
+  var ret = this.paper.path({path:pathString, stroke:"none", fill:"#000000", 'class': this.controller.classes.generate(klass)});
 	this.controller.recordHistory(ret);
   if (this.doRegression) this.addToRegression(ret);
 
@@ -768,7 +765,7 @@ Renderer.prototype.calcY = function(ofs) {
  */
 Renderer.prototype.printStave = function (startx, endx, numLines) {
 	var klass = "abcjs-top-line";
-	this.paper.openGroup({ prepend: true, klass: "abcjs-staff abcjs-l" + this.lineNumber });
+	this.paper.openGroup({ prepend: true, klass: this.controller.classes.generate("abcjs-staff") });
 	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
 	if (numLines === 1) {
 		this.printStaveLine(startx,endx,6, klass);
@@ -787,27 +784,6 @@ Renderer.prototype.printStave = function (startx, endx, numLines) {
  *
  * @private
  */
-Renderer.prototype.addClasses = function (c) {
-	if (!this.shouldAddClasses)
-		return "";
-	var ret = [];
-	if (c && c.length > 0) ret.push(c);
-	if (this.lineNumber !== null && this.lineNumber !== undefined) ret.push("l"+this.lineNumber);
-	if (this.measureNumber !== null && this.measureNumber !== undefined) ret.push("m"+this.measureNumber);
-	if (this.voiceNumber !== null && this.voiceNumber !== undefined) ret.push("v"+this.voiceNumber);
-	if (c && (c.indexOf('note') >= 0 || c.indexOf('rest') >= 0 || c.indexOf('lyric') >= 0 ) && this.noteNumber !== null && this.noteNumber !== undefined) ret.push("n"+this.noteNumber);
-	// add a prefix to all classes that abcjs adds.
-	if (ret.length > 0) {
-		ret = ret.join(' '); // Some strings are compound classes - that is, specify more than one class in a string.
-		ret = ret.split(' ');
-		for (var i = 0; i < ret.length; i++) {
-			if (ret[i].indexOf('abcjs-') !== 0 && ret[i].length > 0) // if the prefix doesn't already exist and the class is not blank.
-				ret[i] = 'abcjs-' + ret[i];
-		}
-	}
-	return ret.join(' ');
-};
-
 Renderer.prototype.getFontAndAttr = function(type, klass) {
 	var font;
 	if (typeof type === 'string') {
@@ -822,7 +798,7 @@ Renderer.prototype.getFontAndAttr = function(type, klass) {
 
 	var attr = {"font-size": font.size, 'font-style': font.style,
 		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
-		'class': this.addClasses(klass) };
+		'class': this.controller.classes.generate(klass) };
 	//attr.font = "";	// There is a spurious font definition that is put on all text elements. This overwrites it.
 	return { font: font, attr: attr };
 };
@@ -915,7 +891,7 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 
 Renderer.prototype.addInvisibleMarker = function (className) {
 	var y = Math.round(this.y);
-	this.paper.pathToBack({path:"M 0 " + y + " L 0 0", stroke:"none", fill:"none", "stroke-opacity": 0, "fill-opacity": 0, 'class': this.addClasses(className), 'data-vertical': y });
+	this.paper.pathToBack({path:"M 0 " + y + " L 0 0", stroke:"none", fill:"none", "stroke-opacity": 0, "fill-opacity": 0, 'class': this.controller.classes.generate(className), 'data-vertical': y });
 };
 
 Renderer.prototype.printSeparator = function(width) {
@@ -930,7 +906,7 @@ Renderer.prototype.printSeparator = function(width) {
 		' L ' + x2 + ' ' + (y+1) +
 		' L ' + x1 + ' ' + (y+1) +
 		' L ' + x1 + ' ' + y + ' z';
-	this.paper.pathToBack({path:pathString, stroke:stroke, fill:fill, 'class': this.addClasses('defined-text')});
+	this.paper.pathToBack({path:pathString, stroke:stroke, fill:fill, 'class': this.controller.classes.generate('defined-text')});
 };
 
 // For debugging, it is sometimes useful to know where you are vertically.
@@ -945,11 +921,11 @@ Renderer.prototype.printHorizontalLine = function (width, vertical, comment) {
 	var x2 = width;
 	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
 		x2, y+dy, x1, y+dy);
-	this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')});
+	this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, 'class': this.controller.classes.generate('staff')});
 	for (var i = 1; i < width/100; i++) {
 		pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", i*100-dy, y-5, i*100-dy, y+5,
 			i*100+dy, y-5, i*100+dy, y+5);
-		this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, 'class': this.addClasses('staff')});
+		this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, 'class': this.controller.classes.generate('staff')});
 	}
 	if (comment)
 		this.paper.text(comment, {x: width+70, y: y, "text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
@@ -967,13 +943,13 @@ Renderer.prototype.printVerticalLine = function (x, y1, y2) {
 	var fill = "#00aaaa";
 	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x - dy, y1, x - dy, y2,
 			x + dy, y1, x + dy, y2);
-	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')});
+	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.controller.classes.generate('staff')});
 	pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x - 20, y1, x - 20, y1+3,
 		x, y1, x, y1+3);
-	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')});
+	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.controller.classes.generate('staff')});
 	pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x + 20, y2, x + 20, y2+3,
 		x, y2, x, y2+3);
-	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.addClasses('staff')});
+	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.controller.classes.generate('staff')});
 
 };
 

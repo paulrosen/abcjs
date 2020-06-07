@@ -54,7 +54,7 @@ EndingElem.prototype.draw = function (renderer, linestartx, lineendx) {
 	var g;
 	var ret = renderer.wrapInAbsElem({el_type: "ending", startChar: -1, endChar: -1}, 'abcjs-ending', function () {
 
-		renderer.createElemSet({klass: renderer.addClasses("ending")});
+		renderer.createElemSet({klass: renderer.controller.classes.generate("ending")});
 		renderer.printPath({path: pathString, stroke: "#000000", fill: "#000000"}, { history: 'ignore'});
 		if (self.anchor1)
 			renderer.renderText({x: linestartx + 5, y: renderer.calcY(self.pitch - 0.5), text: self.text, type: 'repeatfont', klass: 'ending', anchor: "start", noClass: true, history: 'ignore'});

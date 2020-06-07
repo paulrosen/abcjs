@@ -124,7 +124,7 @@ RelativeElement.prototype.draw = function (renderer, bartop) {
 			if (this.c===null) return null;
 			var klass = "symbol";
 			if (this.klass) klass += " " + this.klass;
-			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.addClasses(klass), "none", "#000000"); break;
+			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.controller.classes.generate(klass), "none", "#000000"); break;
 		case "debug":
 			this.graphelem = renderer.renderText({ x: this.x, y: renderer.calcY(15), text: ""+this.c, type: "debugfont", klass: 'debug-msg', anchor: 'start', centerVertically: false, history: 'not-selectable'}); break;
 		case "barNumber":
@@ -153,7 +153,7 @@ RelativeElement.prototype.draw = function (renderer, bartop) {
 		case "stem":
 			this.graphelem = renderer.printStem(this.x, this.linewidth, y, renderer.calcY(this.pitch2)); break;
 		case "ledger":
-			this.graphelem = renderer.printStaveLine(this.x, this.x+this.w, this.pitch, renderer.addClasses("ledger")); break;
+			this.graphelem = renderer.printStaveLine(this.x, this.x+this.w, this.pitch, renderer.controller.classes.generate("ledger")); break;
 	}
 	if (this.scalex!==1 && this.graphelem) {
 		renderer.scaleExistingElem(this.graphelem, this.scalex, this.scaley, this.x, y);

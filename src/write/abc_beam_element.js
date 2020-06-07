@@ -167,7 +167,7 @@ var BeamElem;
 			pathString += drawBeam(renderer, beam.startX, beam.startY, beam.endX, beam.endY, beam.dy);
 		}
 		var durationClass = ("abcjs-d"+this.duration).replace(/\./g,"-");
-		var klasses = renderer.addClasses('beam-elem '+durationClass);
+		var klasses = renderer.controller.classes.generate('beam-elem '+durationClass);
 		renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "beam", startChar: -1, endChar: -1 }};
 		var el = renderer.printPath({
 			path: pathString,

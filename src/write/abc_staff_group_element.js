@@ -394,12 +394,10 @@ StaffGroupElement.prototype.draw = function (renderer) {
 	var bottomLine;
 
 	var bartop = 0;
-	renderer.measureNumber = null;
-	renderer.noteNumber = null;
 	for (var i=0;i<this.voices.length;i++) {
 		var staff = this.voices[i].staff;
 		renderer.y = staff.absoluteY;
-		renderer.voiceNumber = i;
+		renderer.controller.classes.incrVoice();
 		//renderer.y = staff.y;
 		// offset for starting the counting at middle C
 		if (!this.voices[i].duplicate) {
@@ -407,8 +405,7 @@ StaffGroupElement.prototype.draw = function (renderer) {
 			if (!topLine) topLine  = renderer.calcY(10);
 			bottomLine  = renderer.calcY(2);
 			if (staff.lines !== 0) {
-				renderer.measureNumber = null;
-				renderer.noteNumber = null;
+				renderer.controller.classes.newMeasure();
 				renderer.printStave(this.startx, this.w, staff.lines);
 			}
 			if (this.brace && this.brace.isStartVoice(i)) {//Tony
@@ -419,16 +416,14 @@ StaffGroupElement.prototype.draw = function (renderer) {
 			}
 		}
 		this.voices[i].draw(renderer, bartop);
-		renderer.measureNumber = null;
-		renderer.noteNumber = null;
+		renderer.controller.classes.newMeasure();
 		if (!this.voices[i].duplicate) {
 			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
 //			if (staff.bottom < 0)
 //				renderer.moveY(spacing.STEP, -staff.bottom);
 		}
 	}
-	renderer.measureNumber = null;
-	renderer.noteNumber = null;
+	renderer.controller.classes.newMeasure();
 
 	// connect all the staves together with a vertical line
 	if (this.staffs.length>1) {

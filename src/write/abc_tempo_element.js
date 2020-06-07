@@ -115,7 +115,7 @@ var TempoElement;
 		var tempoGroup;
 		this.tempo.el_type = "tempo";
 		renderer.wrapInAbsElem(this.tempo, "abcjs-tempo", function () {
-			renderer.createElemSet({klass: renderer.addClasses("tempo")});
+			renderer.createElemSet({klass: renderer.controller.classes.generate("tempo")});
 			var y = renderer.calcY(self.pitch);
 			var text;
 			if (self.tempo.preString) {
