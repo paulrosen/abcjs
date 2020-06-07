@@ -1384,7 +1384,7 @@ var Parse = function() {
 							}
 
 							var chordNote = getCoreNote(line, i, {}, false);
-							if (chordNote !== null) {
+							if (chordNote !== null && chordNote.pitch !== undefined) {
 								if (accent[0] > 0) { // If we found a decoration above, it modifies the entire chord. "style" is handled below.
 									if (accent[1].indexOf("style=") !== 0) {
 										if (el.decoration === undefined)
