@@ -62,6 +62,7 @@ EndingElem.prototype.draw = function (renderer, linestartx, lineendx) {
 		renderer.controller.recordHistory(g, false);
 		return g;
 	});
+	this.elemset = [g];
 	return g;
 };
 

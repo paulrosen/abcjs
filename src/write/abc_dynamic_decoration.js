@@ -43,6 +43,7 @@ DynamicDecoration.prototype.draw = function(renderer) {
 		var el = renderer.printSymbol(self.anchor.x, self.pitch, self.dec, scalex, scaley, renderer.addClasses('decoration'));
 		return el;
 	});
+	this.elemset = [ret];
 };
 
 module.exports = DynamicDecoration;

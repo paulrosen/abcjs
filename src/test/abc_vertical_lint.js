@@ -144,6 +144,12 @@ var verticalLint = function(tunes) {
 		return tabs + str;
 	}
 
+	function formatClasses(obj) {
+		if (obj.classes)
+			return " " + obj.classes;
+		return '';
+	}
+
 	function formatElements(arr, indent) {
 		var tabs = "";
 		for (var i = 0; i < indent; i++) tabs += "\t";
@@ -152,9 +158,9 @@ var verticalLint = function(tunes) {
 			var obj = arr[i];
 			var type = getType(obj);
 			if (type === "unknown")
-				str += formatArrayStart(tabs, i) + "\n" + formatObject(obj, indent) + "\n";
+				str += formatArrayStart(tabs, i) + "\n" + formatObject(obj, indent) + formatClasses(obj) + "\n";
 			else
-				str += formatArrayStart(tabs, i) + type + ' ' + formatY(obj) + formatX(obj) + "\n";
+				str += formatArrayStart(tabs, i) + type + ' ' + formatY(obj) + formatX(obj) + formatClasses(obj) + "\n";
 		}
 		return tabs + str;
 	}
@@ -170,7 +176,7 @@ var verticalLint = function(tunes) {
 			var params = "";
 			for (var j = 0; j < keys.length; j++)
 				params += keys[j] + ": " + arr[i].params[keys[j]] + " ";
-			str += arr[i].type + " (" + params + ")\n";
+			str += arr[i].type + " (" + params + ")" + formatClasses(arr[i].params) + "\n";
 		}
 		return str + "\n";
 	}
@@ -276,16 +282,34 @@ var verticalLint = function(tunes) {
 			for (var j = 0; j < voice.children.length; j++) {
 				var child = voice.children[j];
 				var type = child.type;
+				var classes = [];
+				if (child.elemset) {
+					for (var jj = 0; jj < child.elemset.length; jj++) {
+						var cl = child.elemset[jj].classList;
+						if (cl && cl.length > 0) {
+							for (var jjj = 0; jjj < cl.length; jjj++)
+								classes.push(cl[jjj]);
+						}
+					}
+				}
 				if (type === 'note' || type === 'rest') {
 					if (child.abcelem.pitches) {
 						var pitches = [];
 						for (var ii = 0; ii < child.abcelem.pitches.length; ii++) pitches.push(child.abcelem.pitches[ii].verticalPos);
 						type += "(" + pitches.join(',') + ")";
-					} else
-						type = "note(rest)";
+					} else {
+						var r = "rest";
+						switch (child.abcelem.rest.type) {
+							case "invisible": r += "/inv"; break;
+							case "spacer": r += "/sp"; break;
+						}
+						type = "note(" + r + ")";
+					}
 					if (child.abcelem.lyric && child.abcelem.lyric.length > 0) type += " " + child.abcelem.lyric[0].syllable;
 				}
 				var obj2 = { $type: type, bottom: fixed1(child.bottom), top: fixed1(child.top), specialY: setSpecialY(child), minSpacing: child.minspacing, duration: child.duration, width: child.w, x: child.x };
+				if (classes.length > 0)
+					obj2.classes = classes.join(" ");
 				obj2.elem = [];
 				if (type === 'tempo') {
 					var tempo = child.children[0].tempo;
@@ -327,6 +351,17 @@ var verticalLint = function(tunes) {
 							var value = otherChild[key];
 							if (value === null)
 								ch.params[key] = "null";
+							else if (key === "elemset") {
+								var cls = [];
+								for (var j2 = 0; j2 < otherChild.elemset.length; j2++) {
+									var c2 = otherChild.elemset[j2].classList;
+									if (c2 && c2.length > 0) {
+										for (var j3 = 0; j3 < c2.length; j3++)
+											cls.push(c2[j3]);
+									}
+								}
+								ch.params.classes = cls.join(" ");
+							}
 							else if (typeof value === "object") {
 								var obj3 = value.constructor.name + '[';
 								switch (value.constructor.name) {

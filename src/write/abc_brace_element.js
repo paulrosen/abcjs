@@ -131,6 +131,7 @@ BraceElem.prototype.drawBrace = function(renderer, xLeft, yTop, yBottom) {//Tony
 		renderer.controller.recordHistory(ret);
 		return ret;
 	});
+	this.elemset = [ret];
 
 	if (renderer.doRegression){
 		renderer.addToRegression(ret);

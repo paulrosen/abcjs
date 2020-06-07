@@ -142,6 +142,7 @@ var TempoElement;
 			}
 			tempoGroup = renderer.closeElemSet();
 		});
+		this.elemset = [tempoGroup];
 		return tempoGroup;
 	};
 
