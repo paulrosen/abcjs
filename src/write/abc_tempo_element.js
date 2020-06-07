@@ -120,7 +120,7 @@ var TempoElement;
 			var text;
 			if (self.tempo.preString) {
 				text = renderer.renderText({x:x, y: y, text: self.tempo.preString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true, history: "ignore"});
-				var size = renderer.getTextSize(self.tempo.preString, 'tempofont', 'tempo', text);
+				var size = renderer.controller.getTextSize.calc(self.tempo.preString, 'tempofont', 'tempo', text);
 				var preWidth = size.width;
 				var charWidth = preWidth / self.tempo.preString.length; // Just get some average number to increase the spacing.
 				x += preWidth + charWidth;
@@ -132,7 +132,7 @@ var TempoElement;
 				x += (self.note.w + 5);
 				var str = "= " + self.tempo.bpm;
 				text = renderer.renderText({x:x, y: y, text: str, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true, history: "ignore"});
-				size = renderer.getTextSize(str, 'tempofont', 'tempo', text);
+				size = renderer.controller.getTextSize.calc(str, 'tempofont', 'tempo', text);
 				var postWidth = size.width;
 				var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
 				x += postWidth + charWidth2;

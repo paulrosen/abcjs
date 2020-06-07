@@ -338,7 +338,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 	if (abctune.metaText.header && this.isPrint) {
 		// Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
 		// This text goes above the margin, so we'll temporarily move up.
-		var headerTextHeight = this.getTextSize("XXXX", "headerfont", 'abcjs-header abcjs-meta-top').height;
+		var headerTextHeight = this.controller.getTextSize.calc("XXXX", "headerfont", 'abcjs-header abcjs-meta-top').height;
 		this.y -=headerTextHeight;
 		this.outputTextIf(this.padding.left, abctune.metaText.header.left, 'headerfont', 'header meta-top', 0, null, 'start');
 		this.outputTextIf(this.padding.left + width / 2, abctune.metaText.header.center, 'headerfont', 'header meta-top', 0, null, 'middle');
@@ -385,7 +385,7 @@ Renderer.prototype.engraveTopText = function(width, abctune) {
 	//} else if (this.isPrint) {
 	//	// abcm2ps adds this space whether there is anything to write or not.
 	//	this.moveY(this.spacing.composer);
-	//	var space2 = this.getTextSize("M", 'composerfont', 'meta-top');
+	//	var space2 = this.controller.getTextSize.calc("M", 'composerfont', 'meta-top');
 	//	this.moveY(space2.height);
 	}
 
@@ -423,8 +423,8 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 
 	if (abctune.metaText.unalignedWords && abctune.metaText.unalignedWords.length > 0) {
 		this.wrapInAbsElem({el_type: "unalignedWords", startChar: -1, endChar: -1}, 'meta-bottom extra-text', function () {
-			var hash = this.getFontAndAttr("wordsfont", 'meta-bottom unaligned-words');
-			var space = this.getTextSize("i", 'wordsfont', 'meta-bottom unaligned-words');
+			var hash = this.controller.getFontAndAttr.calc("wordsfont", 'meta-bottom unaligned-words');
+			var space = this.controller.getTextSize.calc("i", 'wordsfont', 'meta-bottom unaligned-words');
 
 			this.moveY(this.spacing.words, 1);
 			var historyLen = this.controller.history.length;
@@ -441,7 +441,7 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 						var thisWord = abctune.metaText.unalignedWords[j][k];
 						var type = (thisWord.font) ? thisWord.font : "wordsfont";
 						this.renderText({x: this.padding.left + spacing.INDENT + offsetX, y: this.y, text: thisWord.text, type: type, klass: 'meta-bottom unaligned-words', anchor: 'start', noClass: true});
-						var size = this.getTextSize(thisWord.text, type, 'meta-bottom unaligned-words');
+						var size = this.controller.getTextSize.calc(thisWord.text, type, 'meta-bottom unaligned-words');
 						largestY = Math.max(largestY, size.height);
 						offsetX += size.width;
 						// If the phrase ends in a space, then that is not counted in the width, so we need to add that in ourselves.
@@ -495,7 +495,7 @@ Renderer.prototype.outputFreeText = function (text, vskip) {
 	this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "freeText", startChar: -1, endChar: -1, text: text }};
 	if (vskip)
 		this.moveY(vskip);
-	var hash = this.getFontAndAttr('textfont', 'defined-text');
+	var hash = this.controller.getFontAndAttr.calc('textfont', 'defined-text');
 	if (text === "") {	// we do want to print out blank lines if they have been specified.
 		this.moveY(hash.attr['font-size'] * 2); // move the distance of the line, plus the distance of the margin, which is also one line.
 	} else if (typeof text === 'string') {
@@ -784,36 +784,10 @@ Renderer.prototype.printStave = function (startx, endx, numLines) {
  *
  * @private
  */
-Renderer.prototype.getFontAndAttr = function(type, klass) {
-	var font;
-	if (typeof type === 'string') {
-		font = this.abctune.formatting[type];
-		// Raphael deliberately changes the font units to pixels for some reason, so we need to change points to pixels here.
-		if (font)
-			font = {face: font.face, size: Math.round(font.size * 4 / 3), decoration: font.decoration, style: font.style, weight: font.weight, box: font.box};
-		else
-			font = {face: "Arial", size: Math.round(12 * 4 / 3), decoration: "underline", style: "normal", weight: "normal"};
-	} else
-		font = {face: type.face, size: Math.round(type.size * 4 / 3), decoration: type.decoration, style: type.style, weight: type.weight, box: type.box};
 
-	var attr = {"font-size": font.size, 'font-style': font.style,
-		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
-		'class': this.controller.classes.generate(klass) };
-	//attr.font = "";	// There is a spurious font definition that is put on all text elements. This overwrites it.
-	return { font: font, attr: attr };
-};
-
-Renderer.prototype.getTextSize = function(text, type, klass, el) {
-	var hash = this.getFontAndAttr(type, klass);
-	var size = this.paper.getTextSize(text, hash.attr, el);
-	if (hash.font.box) {
-		return { height: size.height + 8, width: size.width + 8 };
-	}
-	return size;
-};
 
 Renderer.prototype.renderText = function(params) {
-	var hash = this.getFontAndAttr(params.type, params.klass);
+	var hash = this.controller.getFontAndAttr.calc(params.type, params.klass);
 	if (params.anchor)
 		hash.attr["text-anchor"] = params.anchor;
 	hash.attr.x = params.x;
@@ -841,7 +815,7 @@ Renderer.prototype.renderText = function(params) {
 	var elem = el;
 
 	if (hash.font.box) {
-		var size = this.getTextSize(text, params.type, params.klass); // This size already has the box factored in, so the needs to be taken into consideration.
+		var size = this.controller.getTextSize.calc(text, params.type, params.klass); // This size already has the box factored in, so the needs to be taken into consideration.
 		var padding = 2;
 		this.paper.rect({ x: params.x - padding, y: params.y, width: size.width - padding, height: size.height - 8});
 		elem = this.closeElemSet();
@@ -871,10 +845,10 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 		if (marginTop)
 			this.moveY(marginTop);
 		var el = this.renderText({x: x, y: this.y, text: str, type: kind, klass: klass, anchor: alignment, noClass: noClass});
-		var bb = this.getTextSize(str, kind, klass, el);
+		var bb = this.controller.getTextSize.calc(str, kind, klass, el);
 		var width = isNaN(bb.width) ? 0 : bb.width;
 		var height = isNaN(bb.height) ? 0 : bb.height;
-		var hash = this.getFontAndAttr(kind, klass);
+		var hash = this.controller.getFontAndAttr.calc(kind, klass);
 		if (hash.font.box) {
 			width += 8;
 			height += 8;

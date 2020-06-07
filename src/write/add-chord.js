@@ -20,7 +20,7 @@ var addChord;
 				font = 'gchordfont';
 				klass = "chord";
 			}
-			var dim = renderer.getTextSize(chord.name, 'annotationfont', "annotation");
+			var dim = renderer.controller.getTextSize.calc(chord.name, 'annotationfont', "annotation");
 			var chordWidth = dim.width;
 			var chordHeight = dim.height / spacing.STEP;
 			switch (chord.position) {

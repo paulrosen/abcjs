@@ -23,6 +23,8 @@ var Renderer = require('./abc_renderer');
 var setupSelection = require('./selection');
 var layout = require('./layout');
 var Classes = require('./classes');
+var GetFontAndAttr = require('./get-font-and-attr');
+var GetTextSize = require('./get-text-size');
 
 /**
  * @class
@@ -102,6 +104,8 @@ EngraverController.prototype.engraveABC = function(abctunes, tuneNumber) {
   for (var i = 0; i < abctunes.length; i++) {
   	if (tuneNumber === undefined)
   		tuneNumber = i;
+	  this.getFontAndAttr = new GetFontAndAttr(abctunes[i].formatting, this.classes);
+	  this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
     this.engraveTune(abctunes[i], tuneNumber);
   }
 	if (this.renderer.doRegression)
@@ -122,6 +126,8 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 
 	this.classes.reset();
 
+	this.getFontAndAttr = new GetFontAndAttr(abctune.formatting, this.classes);
+	this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
 	this.renderer.newTune(abcTune);
 	this.engraver = new AbstractEngraver(this.renderer, 0, {
 		bagpipes: abcTune.formatting.bagpipes,

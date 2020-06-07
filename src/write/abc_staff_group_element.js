@@ -206,13 +206,13 @@ function getLeftEdgeOfStaff(renderer, voices, brace, bracket) {
 	var voiceheaderw = 0;
 	for (var i=0;i<voices.length;i++) {
 		if(voices[i].header) {
-			var size = renderer.getTextSize(voices[i].header, 'voicefont', '');
+			var size = renderer.controller.getTextSize.calc(voices[i].header, 'voicefont', '');
 			voiceheaderw = Math.max(voiceheaderw,size.width);
 		}
 	}
 	if (voiceheaderw) {
 		// Give enough spacing to the right - we use the width of an A for the amount of spacing.
-		var sizeW = renderer.getTextSize("A", 'voicefont', '');
+		var sizeW = renderer.controller.getTextSize.calc("A", 'voicefont', '');
 		voiceheaderw += sizeW.width;
 	}
 	x += voiceheaderw;
