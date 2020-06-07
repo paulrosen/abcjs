@@ -34,9 +34,13 @@ function setupSelection(engraver) {
 	engraver.renderer.paper.svg.addEventListener('mouseup', mouseUp.bind(engraver));
 }
 
-function getCoord(ev) {
-	var x = ev.offsetX;
-	var y = ev.offsetY;
+function getCoord(ev, svg) {
+	var scaleY = svg.height.baseVal.value / svg.clientHeight
+	var scaleX = svg.width.baseVal.value / svg.clientWidth
+
+	var x = ev.offsetX * scaleX;
+	var y = ev.offsetY * scaleY;
+
 	// The target might be the SVG that we want, or it could be an item in the SVG (usually a path). If it is not the SVG then
 	// add an offset to the coordinates.
 	// if (ev.target.tagName.toLowerCase() !== 'svg') {
@@ -120,7 +124,7 @@ function keyboardSelection(ev) {
 function mouseDown(ev) {
 	// "this" is the EngraverController because of the bind(this) when setting the event listener.
 
-	var box = getCoord(ev);
+	var box = getCoord(ev, this.renderer.paper.svg);
 	var x = box[0];
 	var y = box[1];
 
@@ -180,7 +184,7 @@ function mouseMove(ev) {
 	if (!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable || this.dragMechanism !== 'mouse')
 		return;
 
-	var box = getCoord(ev);
+	var box = getCoord(ev, this.renderer.paper.svg);
 	var x = box[0];
 	var y = box[1];
 
