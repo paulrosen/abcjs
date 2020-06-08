@@ -35,8 +35,9 @@ function setupSelection(engraver) {
 }
 
 function getCoord(ev, svg) {
-	var scaleY = svg.height.baseVal.value / svg.clientHeight
-	var scaleX = svg.width.baseVal.value / svg.clientWidth
+  // svg.height and svg.width give element height and width in chrome
+	var scaleY = svg.viewBox.baseVal.height / svg.clientHeight
+	var scaleX = svg.viewBox.baseVal.width / svg.clientWidth
 
 	var x = ev.offsetX * scaleX;
 	var y = ev.offsetY * scaleY;
