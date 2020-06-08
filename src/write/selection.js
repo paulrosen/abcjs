@@ -34,9 +34,24 @@ function setupSelection(engraver) {
 	engraver.renderer.paper.svg.addEventListener('mouseup', mouseUp.bind(engraver));
 }
 
-function getCoord(ev) {
-	var x = ev.offsetX;
-	var y = ev.offsetY;
+function getCoord(ev, svg) {
+  var scaleX = 1;
+  var scaleY = 1;
+
+  // when renderer.options.responsive === 'resize' the click coords are in relation to the HTML
+  // element, we need to convert to the SVG viewBox coords
+  if (svg.viewBox.baseVal) { // Firefox passes null to this when no viewBox is given
+    // Chrome makes these values null when no viewBox is given.
+    if (svg.viewBox.baseVal.width !== 0)
+      scaleX = svg.viewBox.baseVal.width / svg.clientWidth
+    if (svg.viewBox.baseVal.height !== 0)
+      scaleY = svg.viewBox.baseVal.height / svg.clientHeight
+  }
+
+	var x = ev.offsetX * scaleX;
+	var y = ev.offsetY * scaleY;
+  //console.log(x, y)
+
 	// The target might be the SVG that we want, or it could be an item in the SVG (usually a path). If it is not the SVG then
 	// add an offset to the coordinates.
 	// if (ev.target.tagName.toLowerCase() !== 'svg') {
@@ -120,7 +135,7 @@ function keyboardSelection(ev) {
 function mouseDown(ev) {
 	// "this" is the EngraverController because of the bind(this) when setting the event listener.
 
-	var box = getCoord(ev);
+	var box = getCoord(ev, this.renderer.paper.svg);
 	var x = box[0];
 	var y = box[1];
 
@@ -180,7 +195,7 @@ function mouseMove(ev) {
 	if (!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable || this.dragMechanism !== 'mouse')
 		return;
 
-	var box = getCoord(ev);
+	var box = getCoord(ev, this.renderer.paper.svg);
 	var x = box[0];
 	var y = box[1];
 
