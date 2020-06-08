@@ -114,7 +114,7 @@ var TripletElem;
 		renderer.controller.recordHistory(g, true);
 	};
 
-	function drawLine(renderer, l, t, r, b) {
+	function drawLine(l, t, r, b) {
 		return sprintf("M %f %f L %f %f", l, t, r, b);
 	}
 
@@ -125,8 +125,8 @@ var TripletElem;
 
 		// Draw vertical lines at the beginning and end
 		var pathString = "";
-		pathString += drawLine(renderer, x1, y1, x1, y1 + bracketHeight);
-		pathString += drawLine(renderer, x2, y2, x2, y2 + bracketHeight);
+		pathString += drawLine(x1, y1, x1, y1 + bracketHeight);
+		pathString += drawLine(x2, y2, x2, y2 + bracketHeight);
 
 		// figure out midpoints to draw the broken line.
 		var midX = x1 + (x2-x1)/2;
@@ -135,10 +135,10 @@ var TripletElem;
 		var slope = (y2 - y1) / (x2 - x1);
 		var leftEndX = midX - gapWidth;
 		var leftEndY = y1 + (leftEndX - x1) * slope;
-		pathString += drawLine(renderer, x1, y1, leftEndX, leftEndY);
+		pathString += drawLine( x1, y1, leftEndX, leftEndY);
 		var rightStartX = midX + gapWidth;
 		var rightStartY = y1 + (rightStartX - x1) * slope;
-		pathString += drawLine(renderer, rightStartX, rightStartY, x2, y2);
+		pathString += drawLine( rightStartX, rightStartY, x2, y2);
 		renderer.printPath({path: pathString, stroke: "#000000"});
 	}
 })();

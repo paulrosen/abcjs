@@ -59,9 +59,9 @@ var hint = false;
 		dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}
 	};
 
-AbstractEngraver = function(renderer, tuneNumber, options) {
+AbstractEngraver = function(getTextSize, tuneNumber, options) {
 	this.decoration = new Decoration();
-	this.renderer = renderer;
+	this.getTextSize = getTextSize;
 	this.tuneNumber = tuneNumber;
 	this.isBagpipes = options.bagpipes;
 	this.flatBeams = options.flatbeams;
@@ -129,11 +129,11 @@ AbstractEngraver.prototype.popCrossLineElems = function(s,v) {
 		}
 	};
 
-AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
+AbstractEngraver.prototype.createABCLine = function(staffs, tempo, getTextSize) {
     this.minY = 2; // PER: This will be the lowest that any note reaches. It will be used to set the dynamics row.
 	// See if there are any lyrics on this line.
 	this.containsLyrics(staffs);
-  var staffgroup = new StaffGroupElement();
+  var staffgroup = new StaffGroupElement(this.getTextSize);
 	this.tempoSet = false;
   for (var s = 0; s < staffs.length; s++) {
 	  if (hint)
@@ -337,7 +337,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
     break;
   case "part":
     var abselem = new AbsoluteElement(elem,0,0, 'part', this.tuneNumber);
-	  var dim = this.renderer.controller.getTextSize.calc(elem.title, 'partsfont', "part");
+	  var dim = this.getTextSize.calc(elem.title, 'partsfont', "part");
     abselem.addChild(new RelativeElement(elem.title, 0, 0, undefined, {type:"part", height: dim.height/spacing.STEP}));
     elemset[0] = abselem;
     break;
@@ -746,7 +746,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			var div = ly.divider === ' ' ? "" : ly.divider;
 			lyricStr += ly.syllable + div + "\n";
 		});
-		var lyricDim = this.renderer.controller.getTextSize.calc(lyricStr, 'vocalfont', "lyric");
+		var lyricDim = this.getTextSize.calc(lyricStr, 'vocalfont', "lyric");
 		var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
 		abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, {type:"lyric", position: position, height: lyricDim.height / spacing.STEP }));
 	};
@@ -820,7 +820,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 	ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
 
   if (elem.chord !== undefined) {
-  	var ret3 = addChord(this.renderer, abselem, elem, roomtaken, roomtakenright);
+  	var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright);
 	  roomtaken = ret3.roomTaken;
 	  roomtakenright = ret3.roomTakenRight;
   }
@@ -1006,7 +1006,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 	};
 
 AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
-	var measureNumDim = this.renderer.controller.getTextSize.calc(number, "measurefont", 'bar-number');
+	var measureNumDim = this.getTextSize.calc(number, "measurefont", 'bar-number');
 	var dx = measureNumDim.width > 18 && abselem.abcelem.type === "treble" ? -7 : 0;
 	abselem.addChild(new RelativeElement(number, dx, measureNumDim.width, 11+measureNumDim.height / spacing.STEP, {type:"barNumber"}));
 };
@@ -1090,7 +1090,7 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
   } // 2 is hardcoded
 
   if (elem.startEnding && isFirstStaff) { // only put the first & second ending marks on the first staff
-	  var textWidth = this.renderer.controller.getTextSize.calc(elem.startEnding, "repeatfont", '').width;
+	  var textWidth = this.getTextSize.calc(elem.startEnding, "repeatfont", '').width;
 	  abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
     this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
 	  voice.addOther(this.partstartelem);

@@ -45,7 +45,8 @@ var spacing = require('./abc_spacing');
 // height: Set in the draw() method to the height actually used. Used by the calling function to know where to start the next staff group.
 // TODO-PER: This should actually be set in the layout method and passed back as a return value.
 
-var StaffGroupElement = function() {
+var StaffGroupElement = function(getTextSize) {
+	this.getTextSize = getTextSize;
 	this.voices = [];
 	this.staffs = [];
 	this.brace = undefined; //tony
@@ -199,20 +200,20 @@ StaffGroupElement.prototype.finished = function() {
 	return true;
 };
 
-function getLeftEdgeOfStaff(renderer, voices, brace, bracket) {
+function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
 	var x = renderer.padding.left;
 
 	// find out how much space will be taken up by voice headers
 	var voiceheaderw = 0;
 	for (var i=0;i<voices.length;i++) {
 		if(voices[i].header) {
-			var size = renderer.controller.getTextSize.calc(voices[i].header, 'voicefont', '');
+			var size = getTextSize.calc(voices[i].header, 'voicefont', '');
 			voiceheaderw = Math.max(voiceheaderw,size.width);
 		}
 	}
 	if (voiceheaderw) {
 		// Give enough spacing to the right - we use the width of an A for the amount of spacing.
-		var sizeW = renderer.controller.getTextSize.calc("A", 'voicefont', '');
+		var sizeW = getTextSize.calc("A", 'voicefont', '');
 		voiceheaderw += sizeW.width;
 	}
 	x += voiceheaderw;
@@ -234,7 +235,7 @@ StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {
 	var spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
 	var minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
 
-	var x = getLeftEdgeOfStaff(renderer, this.voices, this.brace, this.bracket);
+	var x = getLeftEdgeOfStaff(renderer, this.getTextSize, this.voices, this.brace, this.bracket);
 	this.startx=x;
 	var i;
 

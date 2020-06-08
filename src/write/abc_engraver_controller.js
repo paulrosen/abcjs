@@ -129,7 +129,7 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 	this.getFontAndAttr = new GetFontAndAttr(abcTune.formatting, this.classes);
 	this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
 	this.renderer.newTune(abcTune);
-	this.engraver = new AbstractEngraver(this.renderer, 0, {
+	this.engraver = new AbstractEngraver(this.getTextSize, 0, {
 		bagpipes: abcTune.formatting.bagpipes,
 		flatbeams: abcTune.formatting.flatbeams,
 		graceSlurs: abcTune.formatting.graceSlurs !== false // undefined is the default, which is true
@@ -155,7 +155,7 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 	for(var i=0; i<abcTune.lines.length; i++) {
 		var abcLine = abcTune.lines[i];
 		if (abcLine.staff) {
-			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null);
+			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null, this.getTextSize);
 
 			abcLine.staffGroup.layout(0, this.renderer, debug);
 			// At this point, the voices are laid out so that the bar lines are even with each other. So we just need to get the placement of the first voice.
@@ -192,7 +192,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	this.classes.reset();
 
 	this.renderer.newTune(abctune);
-	this.engraver = new AbstractEngraver(this.renderer, tuneNumber, {
+	this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
 		bagpipes: abctune.formatting.bagpipes,
 		flatbeams: abctune.formatting.flatbeams,
 		graceSlurs: abctune.formatting.graceSlurs !== false // undefined is the default, which is true
@@ -218,7 +218,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	for(i=0; i<abctune.lines.length; i++) {
 		abcLine = abctune.lines[i];
 		if (abcLine.staff) {
-			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abctune.metaText.tempo: null);
+			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abctune.metaText.tempo: null, this.getTextSize);
 			hasPrintedTempo = true;
 		}
 	}

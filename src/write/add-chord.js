@@ -5,7 +5,7 @@ var addChord;
 
 (function () {
 	"use strict";
-	addChord = function (renderer, abselem, elem, roomTaken, roomTakenRight) {
+	addChord = function (getTextSize, abselem, elem, roomTaken, roomTakenRight) {
 		var chordMargin = 8; // If there are chords next to each other, this is how close they can get.
 		for (var i = 0; i < elem.chord.length; i++) {
 			var chord = elem.chord[i];
@@ -20,7 +20,7 @@ var addChord;
 				font = 'gchordfont';
 				klass = "chord";
 			}
-			var dim = renderer.controller.getTextSize.calc(chord.name, 'annotationfont', "annotation");
+			var dim = getTextSize.calc(chord.name, 'annotationfont', "annotation");
 			var chordWidth = dim.width;
 			var chordHeight = dim.height / spacing.STEP;
 			switch (chord.position) {
