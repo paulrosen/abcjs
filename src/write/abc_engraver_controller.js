@@ -126,7 +126,7 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 
 	this.classes.reset();
 
-	this.getFontAndAttr = new GetFontAndAttr(abctune.formatting, this.classes);
+	this.getFontAndAttr = new GetFontAndAttr(abcTune.formatting, this.classes);
 	this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
 	this.renderer.newTune(abcTune);
 	this.engraver = new AbstractEngraver(this.renderer, 0, {
