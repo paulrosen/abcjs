@@ -44,9 +44,13 @@ function drawRelativeElement(renderer, params, bartop) {
 			params.graphelem = printStaffLine(renderer, params.x, params.x+params.w, params.pitch, renderer.controller.classes.generate("ledger")); break;
 	}
 	if (params.scalex!==1 && params.graphelem) {
-		renderer.scaleExistingElem(params.graphelem, params.scalex, params.scaley, params.x, y);
+		scaleExistingElem(renderer.paper, params.graphelem, params.scalex, params.scaley, params.x, y);
 	}
 	return params.graphelem;
+}
+
+function scaleExistingElem(paper, elem, scaleX, scaleY, x, y) {
+	paper.setAttributeOnElement(elem, { style: "transform:scale("+scaleX+","+scaleY + ");transform-origin:" + x + "px " + y + "px;"});
 }
 
 module.exports = drawRelativeElement;

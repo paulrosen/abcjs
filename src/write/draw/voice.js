@@ -6,6 +6,7 @@ var drawTie = require('./tie');
 var drawTempo = require('./tempo');
 var drawBeam = require('./beam');
 var renderText = require('./text');
+var drawAbsolute = require('./absolute');
 var parseCommon = require('../../parse/abc_common');
 
 function drawVoice(renderer, params, bartop) {
@@ -33,7 +34,7 @@ function drawVoice(renderer, params, bartop) {
 				child.elemset = drawTempo(renderer, child);
 				break;
 			default:
-				child.draw(renderer, (params.barto || i === ii - 1) ? bartop : 0);
+				drawAbsolute(renderer, child,(params.barto || i === ii - 1) ? bartop : 0);
 		}
 		if (child.type === 'note' || isNonSpacerRest(child))
 			renderer.controller.classes.incrNote();
@@ -73,7 +74,7 @@ function drawVoice(renderer, params, bartop) {
 					break;
 				default:
 					console.log(child.constructor.name)
-					child.draw(renderer, params.startx + 10, width);
+					drawAbsolute(renderer, child, params.startx + 10, width);
 			}
 		}
 	});

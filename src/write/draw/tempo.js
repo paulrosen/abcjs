@@ -9,7 +9,7 @@ function drawTempo(renderer, params) {
 	var tempoGroup;
 	params.tempo.el_type = "tempo";
 	renderer.wrapInAbsElem(params.tempo, "abcjs-tempo", function () {
-		renderer.createElemSet({klass: renderer.controller.classes.generate("tempo")});
+		renderer.paper.openGroup({klass: renderer.controller.classes.generate("tempo")});
 		var y = renderer.calcY(params.pitch);
 		var text;
 		if (params.tempo.preString) {
@@ -34,7 +34,7 @@ function drawTempo(renderer, params) {
 		if (params.tempo.postString) {
 			renderText(renderer, {x:x, y: y, text: params.tempo.postString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true, history: "ignore"});
 		}
-		tempoGroup = renderer.closeElemSet();
+		tempoGroup = renderer.paper.closeGroup();
 	});
 	return [tempoGroup];
 }

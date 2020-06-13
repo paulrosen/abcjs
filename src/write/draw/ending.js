@@ -26,11 +26,11 @@ function drawEnding(renderer, params, linestartx, lineendx) {
 
 	var g = renderer.wrapInAbsElem({el_type: "ending", startChar: -1, endChar: -1}, 'abcjs-ending', function () {
 
-		renderer.createElemSet({klass: renderer.controller.classes.generate("ending")});
+		renderer.paper.openGroup({klass: renderer.controller.classes.generate("ending")});
 		printPath(renderer, {path: pathString, stroke: "#000000", fill: "#000000"}, { history: 'ignore'});
 		if (params.anchor1)
 			renderText(renderer, {x: linestartx + 5, y: renderer.calcY(params.pitch - 0.5), text: params.text, type: 'repeatfont', klass: 'ending', anchor: "start", noClass: true, history: 'ignore'});
-		var g = renderer.closeElemSet();
+		var g = renderer.paper.closeGroup();
 		renderer.controller.recordHistory(g, false);
 		return g;
 	});

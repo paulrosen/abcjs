@@ -19,7 +19,7 @@ function renderText(renderer, params) {
 		hash.attr.x += 2;
 		hash.attr.y += 4;
 		delete hash.attr['class'];
-		renderer.createElemSet({klass: klass2, fill: "#000000"});
+		renderer.paper.openGroup({klass: klass2, fill: "#000000"});
 	}
 	if (params.noClass)
 		delete hash.attr['class'];
@@ -30,7 +30,7 @@ function renderText(renderer, params) {
 		var size = renderer.controller.getTextSize.calc(text, params.type, params.klass); // This size already has the box factored in, so the needs to be taken into consideration.
 		var padding = 2;
 		renderer.paper.rect({ x: params.x - padding, y: params.y, width: size.width - padding, height: size.height - 8});
-		elem = renderer.closeElemSet();
+		elem = renderer.paper.closeGroup();
 	}
 	if (!params.history)
 		renderer.controller.recordHistory(elem);

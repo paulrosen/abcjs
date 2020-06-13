@@ -1,5 +1,6 @@
 var renderText = require('./text');
 var glyphs = require('../abc_glyphs');
+var elementGroup = require('./group-elements');
 
 /**
  * assumes this.y is set appropriately
@@ -29,8 +30,8 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
 		return g;
 	} else {
 		ycorr = glyphs.getYCorr(symbol);
-		if (renderer.ingroup) {
-			renderer.addPath(glyphs.getPathForSymbol(x, renderer.calcY(offset + ycorr), symbol, scalex, scaley));
+		if (elementGroup.isInGroup()) {
+			elementGroup.addPath(glyphs.getPathForSymbol(x, renderer.calcY(offset + ycorr), symbol, scalex, scaley));
 		} else {
 			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, klass, "none", "#000000");
 			renderer.controller.recordHistory(el);

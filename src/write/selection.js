@@ -183,7 +183,7 @@ function mouseDown(ev) {
 		this.dragMechanism = "mouse";
 		this.dragMouseStart = { x: x, y: y };
 		if (this.dragging && this.dragTarget.isDraggable) {
-			this.renderer.addGlobalClass("abcjs-dragging-in-progress");
+			addGlobalClass(this.renderer.paper, "abcjs-dragging-in-progress");
 			this.dragTarget.absEl.highlight(undefined, this.dragColor);
 		}
 	}
@@ -222,7 +222,7 @@ function mouseUp(ev) {
 	this.dragTarget.svgEl.focus();
 	this.dragTarget = null;
 	this.dragIndex = -1;
-	this.renderer.removeGlobalClass("abcjs-dragging-in-progress");
+	removeGlobalClass(this.renderer.svg, "abcjs-dragging-in-progress");
 }
 
 function setSelection(dragIndex) {
@@ -295,6 +295,42 @@ function rangeHighlight(start,end) {
 				}
 			}
 		}
+	}
+}
+
+function getClassSet(el) {
+	var oldClass = el.getAttribute('class');
+	if (!oldClass)
+		oldClass = "";
+	var klasses = oldClass.split(" ");
+	var obj = {};
+	for (var i = 0; i < klasses.length; i++)
+		obj[klasses[i]] = true;
+	return obj;
+}
+
+function setClassSet(el, klassSet) {
+	var klasses = [];
+	for (var key in klassSet) {
+		if (klassSet.hasOwnProperty(key))
+			klasses.push(key);
+	}
+	el.setAttribute('class', klasses.join(' '));
+}
+
+function addGlobalClass(svg, klass) {
+	if (svg) {
+		var obj = getClassSet(svg.svg);
+		obj[klass] = true;
+		setClassSet(svg.svg, obj);
+	}
+}
+
+function removeGlobalClass(svg, klass) {
+	if (svg) {
+		var obj = getClassSet(svg.svg);
+		delete obj[klass];
+		setClassSet(svg.svg, obj);
 	}
 }
 

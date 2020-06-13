@@ -68,58 +68,12 @@ Renderer.prototype.newTune = function(abcTune) {
 	this.setPadding(abcTune);
 };
 
-Renderer.prototype.createElemSet = function(options) {
-	return this.paper.openGroup(options);
-};
-
-Renderer.prototype.closeElemSet = function() {
-	return this.paper.closeGroup();
-};
-
 /**
  * Set whether we are formatting this for the screen, or as a preview for creating a PDF version.
  * @param {bool} isPrint
  */
 Renderer.prototype.setPrintMode = function (isPrint) {
 	this.isPrint = isPrint;
-};
-
-function getClassSet(el) {
-	var oldClass = el.getAttribute('class');
-	if (!oldClass)
-		oldClass = "";
-	var klasses = oldClass.split(" ");
-	var obj = {};
-	for (var i = 0; i < klasses.length; i++)
-		obj[klasses[i]] = true;
-	return obj;
-}
-
-function setClassSet(el, klassSet) {
-	var klasses = [];
-	for (var key in klassSet) {
-		if (klassSet.hasOwnProperty(key))
-			klasses.push(key);
-	}
-	el.setAttribute('class', klasses.join(' '));
-}
-
-Renderer.prototype.addGlobalClass = function (klass) {
-	// Can't use classList on IE
-	if (this.paper) {
-		var obj = getClassSet(this.paper.svg);
-		obj[klass] = true;
-		setClassSet(this.paper.svg, obj);
-	}
-};
-
-Renderer.prototype.removeGlobalClass = function (klass) {
-	// Can't use classList on IE
-	if (this.paper) {
-		var obj = getClassSet(this.paper.svg);
-		delete obj[klass];
-		setClassSet(this.paper.svg, obj);
-	}
 };
 
 /**
@@ -380,7 +334,7 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 
 			this.moveY(this.spacing.words, 1);
 			var historyLen = this.controller.history.length;
-			this.createElemSet({klass: "abcjs-meta-bottom abcjs-unaligned-words"});
+			this.paper.openGroup({klass: "abcjs-meta-bottom abcjs-unaligned-words"});
 			for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
 				if (abctune.metaText.unalignedWords[j] === '')
 					this.moveY(hash.font.size, 1);
@@ -405,7 +359,7 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 				}
 			}
 			this.moveY(hash.font.size, 2);
-			var g = this.closeElemSet();
+			var g = this.paper.closeGroup();
 			this.controller.combineHistory(this.controller.history.length-historyLen, g);
 			return g;
 		});
@@ -474,58 +428,6 @@ Renderer.prototype.outputFreeText = function (text, vskip) {
  */
 Renderer.prototype.outputSubtitle = function (width, subtitle) {
 	this.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text subtitle', this.spacing.subtitle, 0, 'middle');
-};
-
-/**
- * Begin a group of glyphs that will always be moved, scaled and highlighted together
- */
-Renderer.prototype.beginGroup = function () {
-  this.path = [];
-  this.lastM = [0,0];
-  this.ingroup = true;
-};
-
-/**
- * Add a path to the current group
- * @param {Array} path
- * @private
- */
-Renderer.prototype.addPath = function (path) {
-  path = path || [];
-  if (path.length===0) return;
-  path[0][0]="m";
-  path[0][1]-=this.lastM[0];
-  path[0][2]-=this.lastM[1];
-  this.lastM[0]+=path[0][1];
-  this.lastM[1]+=path[0][2];
-  this.path.push(path[0]);
-  for (var i=1,ii=path.length;i<ii;i++) {
-    if (path[i][0]==="m") {
-      this.lastM[0]+=path[i][1];
-      this.lastM[1]+=path[i][2];
-    }
-    this.path.push(path[i]);
-  }
-};
-
-/**
- * End a group of glyphs that will always be moved, scaled and highlighted together
- */
-Renderer.prototype.endGroup = function (klass) {
-  this.ingroup = false;
-  if (this.path.length===0) return null;
-  var path = "";
-	for (var i = 0; i < this.path.length; i++)
-		path += this.path[i].join(" ");
-	var ret = this.paper.path({path: path, stroke:"none", fill:"#000000", 'class': this.controller.classes.generate(klass)});
-	this.controller.recordHistory(ret);
-	this.path = [];
-
-  return ret;
-};
-
-Renderer.prototype.scaleExistingElem = function (elem, scaleX, scaleY, x, y) {
-	this.paper.setAttributeOnElement(elem, { style: "transform:scale("+scaleX+","+scaleY + ");transform-origin:" + x + "px " + y + "px;"});
 };
 
 /**

@@ -5,7 +5,7 @@ var printPath = require('./print-path');
 function drawTriplet(renderer, params) {
 	var xTextPos;
 	renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "triplet", startChar: -1, endChar: -1 }};
-	renderer.createElemSet({ klass: renderer.controller.classes.generate('triplet '+params.durationClass)});
+	renderer.paper.openGroup({ klass: renderer.controller.classes.generate('triplet '+params.durationClass)});
 	if (params.hasBeam) {
 		var left = params.anchor1.parent.beam.isAbove() ? params.anchor1.x + params.anchor1.w : params.anchor1.x;
 		xTextPos = params.anchor1.parent.beam.xAtMidpoint(left, params.anchor2.x);
@@ -14,7 +14,7 @@ function drawTriplet(renderer, params) {
 		drawBracket(renderer, params.anchor1.x, params.startNote, params.anchor2.x + params.anchor2.w, params.endNote);
 	}
 	renderText(renderer, {x: xTextPos, y: renderer.calcY(params.yTextPos), text: "" + params.number, type: 'tripletfont', anchor: "middle", centerVertically: true, history: 'ignore', noClass: true});
-	var g = renderer.closeElemSet();
+	var g = renderer.paper.closeGroup();
 	renderer.controller.currentAbsEl.elemset.push(g);
 	renderer.controller.recordHistory(g, true);
 	return g;

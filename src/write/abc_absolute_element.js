@@ -14,10 +14,7 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var spacing = require('./abc_spacing');
 var setClass = require('./set-class');
-var drawTempo = require('./draw/tempo');
-var drawRelativeElement = require('./draw/relative');
 
 // duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
 // minspacing - spacing which must be taken on top of the width defined by the duration
@@ -173,52 +170,6 @@ AbsoluteElement.prototype.setX = function (x) {
 
 AbsoluteElement.prototype.setHint = function () {
 	this.hint = true;
-};
-
-AbsoluteElement.prototype.draw = function (renderer, bartop) {
-	if (this.invisible) return;
-	this.elemset = [];
-	renderer.beginGroup();
-	for (var i=0; i<this.children.length; i++) {
-		var child = this.children[i];
-		var el;
-		switch (child.constructor.name) {
-			case 'TempoElement':
-				el = drawTempo(renderer, child);
-				if (el)
-					this.elemset = this.elemset.concat(el);
-				break;
-			default:
-				el = drawRelativeElement(renderer, child, bartop);
-				if (el)
-					this.elemset.push(el);
-		}
-	}
-	var klass = this.type;
-	if (this.type === 'note' || this.type === 'rest') {
-		klass += ' d' + Math.round(this.durationClass*1000)/1000;
-		klass = klass.replace(/\./g, '-');
-		if (this.abcelem.pitches) {
-			for (var j = 0; j < this.abcelem.pitches.length; j++) {
-				klass += ' p' + this.abcelem.pitches[j].pitch;
-			}
-		}
-	}
-	var g = renderer.endGroup(klass);
-	if (g)
-		this.elemset.push(g);
-	if (klass === "tempo" && this.children.length > 0) {
-		renderer.controller.currentAbsEl.elemset[0] = this.elemset[0];
-		// Combine any tempo elements that are in a row. TODO-PER: this is a hack because the tempo note is an AbsoluteElement so there are nested AbsoluteElements here.
-		this.children[0].adjustElements(renderer);
-	}
-	if (this.klass)
-		setClass(this.elemset, "mark", "", "#00ff00");
-	if (this.hint)
-		setClass(this.elemset, "abcjs-hint", "", null);
-	this.abcelem.abselem = this;
-
-	var step = spacing.STEP;
 };
 
 AbsoluteElement.prototype.isIE=/*@cc_on!@*/false;//IE detector
