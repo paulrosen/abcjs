@@ -16,6 +16,8 @@
 
 var spacing = require('./abc_spacing');
 var setClass = require('./set-class');
+var drawTempo = require('./draw/tempo');
+var drawRelativeElement = require('./draw/relative');
 
 // duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
 // minspacing - spacing which must be taken on top of the width defined by the duration
@@ -178,13 +180,19 @@ AbsoluteElement.prototype.draw = function (renderer, bartop) {
 	this.elemset = [];
 	renderer.beginGroup();
 	for (var i=0; i<this.children.length; i++) {
-		if (/*ABCJS.write.debugPlacement*/false) {
-			if (this.children[i].klass === 'ornament')
-				renderer.printShadedBox(this.x, renderer.calcY(this.children[i].top), this.w, renderer.calcY(this.children[i].bottom)-renderer.calcY(this.children[i].top), "rgb(0,0,200)", 0.3);
+		var child = this.children[i];
+		var el;
+		switch (child.constructor.name) {
+			case 'TempoElement':
+				el = drawTempo(renderer, child);
+				if (el)
+					this.elemset = this.elemset.concat(el);
+				break;
+			default:
+				el = drawRelativeElement(renderer, child, bartop);
+				if (el)
+					this.elemset.push(el);
 		}
-		var el = this.children[i].draw(renderer,bartop);
-		if (el)
-			this.elemset.push(el);
 	}
 	var klass = this.type;
 	if (this.type === 'note' || this.type === 'rest') {

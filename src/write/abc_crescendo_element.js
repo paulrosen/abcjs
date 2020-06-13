@@ -14,10 +14,6 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var highlight = require('./highlight');
-var unhighlight = require('./unhighlight');
-var sprintf = require('./sprintf');
-
 var CrescendoElem = function CrescendoElem(anchor1, anchor2, dir, positioning) {
 	this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
@@ -34,31 +30,6 @@ CrescendoElem.prototype.setUpperAndLowerElements = function(positionY) {
 		this.pitch = positionY.dynamicHeightAbove;
 	else
 		this.pitch = positionY.dynamicHeightBelow;
-};
-
-CrescendoElem.prototype.draw = function (renderer) {
-	if (this.pitch === undefined)
-		window.console.error("Crescendo Element y-coordinate not set.");
-	var y = renderer.calcY(this.pitch) + 4; // This is the top pixel to use (it is offset a little so that it looks good with the volume marks.)
-	var height = 8;
-	if (this.dir === "<") {
-		this.drawLine(renderer, y+height/2, y, y+height/2, y+height);
-	} else {
-		this.drawLine(renderer, y, y+height/2, y+height, y+height/2);
-	}
-};
-
-CrescendoElem.prototype.drawLine = function (renderer, y1, y2, y3, y4) {
-	// TODO-PER: This is just a quick hack to make the dynamic marks not crash if they are mismatched. See the slur treatment for the way to get the beginning and end.
-	var left = this.anchor1 ? this.anchor1.x : 0;
-	var right = this.anchor2 ? this.anchor2.x : 800;
-
-	var pathString = sprintf("M %f %f L %f %f M %f %f L %f %f",
-		left, y1, right, y2, left, y3, right, y4);
-	renderer.controller.currentAbsEl = { highlight: highlight.bind(this), unhighlight: unhighlight.bind(this), tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "dynamicDecoration", startChar: -1, endChar: -1 }};
-	var el = renderer.printPath({path:pathString, highlight: "stroke", stroke:"#000000", 'class': renderer.controller.classes.generate('dynamics decoration')});
-	renderer.controller.currentAbsEl.elemset.push(el);
-	this.elemset = [el];
 };
 
 module.exports = CrescendoElem;

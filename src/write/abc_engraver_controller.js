@@ -21,10 +21,13 @@ var spacing = require('./abc_spacing');
 var AbstractEngraver = require('./abc_abstract_engraver');
 var Renderer = require('./abc_renderer');
 var setupSelection = require('./selection');
-var layout = require('./layout');
+var layout = require('./layout/layout');
 var Classes = require('./classes');
 var GetFontAndAttr = require('./get-font-and-attr');
 var GetTextSize = require('./get-text-size');
+var drawStaffGroup = require('./draw/staff-group');
+var drawSeparator = require('./draw/separator');
+var setPaperSize = require('./draw/set-paper-size');
 
 /**
  * @class
@@ -243,14 +246,16 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 			this.renderer.outputSubtitle(this.width, abcLine.subtitle);
 		} else if (abcLine.text !== undefined) {
 			this.renderer.outputFreeText(abcLine.text, abcLine.vskip);
-		} else if (abcLine.separator !== undefined) {
-			this.renderer.outputSeparator(abcLine.separator);
+		} else if (abcLine.separator !== undefined && abcLine.separator.lineLength) {
+			this.renderer.moveY(abcLine.separator.spaceAbove);
+			drawSeparator(this.renderer, abcLine.separator.lineLength);
+			this.renderer.moveY(abcLine.separator.spaceBelow);
 		}
 	}
 
 	this.renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
 	this.renderer.engraveExtraText(this.width, abctune);
-	this.renderer.setPaperSize(maxWidth, scale, this.responsive);
+	setPaperSize(this.renderer, maxWidth, scale, this.responsive);
 
 	setupSelection(this);
 };
@@ -314,7 +319,7 @@ EngraverController.prototype.engraveStaffLine = function (staffGroup) {
 	if (this.lastStaffGroupIndex > -1)
 		this.renderer.addStaffPadding(this.staffgroups[this.lastStaffGroupIndex], staffGroup);
 //	this.renderer.voiceNumber = null;
-	staffGroup.draw(this.renderer);
+	drawStaffGroup(this.renderer, staffGroup);
 	var height = staffGroup.height * spacing.STEP;
 	//this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+height);
   this.staffgroups[this.staffgroups.length] = staffGroup;

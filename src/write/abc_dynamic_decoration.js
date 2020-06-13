@@ -33,17 +33,4 @@ DynamicDecoration.prototype.setUpperAndLowerElements = function(positionY) {
 		this.pitch = positionY.volumeHeightBelow;
 };
 
-DynamicDecoration.prototype.draw = function(renderer) {
-	if (this.pitch === undefined)
-		window.console.error("Dynamic Element y-coordinate not set.");
-	var scalex = 1;
-	var scaley = 1;
-	var self = this;
-	var ret = renderer.wrapInAbsElem({el_type: "dynamicDecoration", startChar: -1, endChar: -1, decoration: this.dec}, 'abcjs-decoration', function () {
-		var el = renderer.printSymbol(self.anchor.x, self.pitch, self.dec, scalex, scaley, renderer.controller.classes.generate('decoration'));
-		return el;
-	});
-	this.elemset = [ret];
-};
-
 module.exports = DynamicDecoration;

@@ -106,45 +106,7 @@ var TempoElement;
 		return absElem;
 	};
 
-	TempoElement.prototype.draw = function(renderer) {
-		var x = this.x;
-		if (this.pitch === undefined)
-			window.console.error("Tempo Element y-coordinate not set.");
 
-		var self = this;
-		var tempoGroup;
-		this.tempo.el_type = "tempo";
-		renderer.wrapInAbsElem(this.tempo, "abcjs-tempo", function () {
-			renderer.createElemSet({klass: renderer.controller.classes.generate("tempo")});
-			var y = renderer.calcY(self.pitch);
-			var text;
-			if (self.tempo.preString) {
-				text = renderer.renderText({x:x, y: y, text: self.tempo.preString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true, history: "ignore"});
-				var size = renderer.controller.getTextSize.calc(self.tempo.preString, 'tempofont', 'tempo', text);
-				var preWidth = size.width;
-				var charWidth = preWidth / self.tempo.preString.length; // Just get some average number to increase the spacing.
-				x += preWidth + charWidth;
-			}
-			if (self.note) {
-				self.note.setX(x);
-				for (var i = 0; i < self.note.children.length; i++)
-					self.note.children[i].draw(renderer, x);
-				x += (self.note.w + 5);
-				var str = "= " + self.tempo.bpm;
-				text = renderer.renderText({x:x, y: y, text: str, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true, history: "ignore"});
-				size = renderer.controller.getTextSize.calc(str, 'tempofont', 'tempo', text);
-				var postWidth = size.width;
-				var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
-				x += postWidth + charWidth2;
-			}
-			if (self.tempo.postString) {
-				renderer.renderText({x:x, y: y, text: self.tempo.postString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true, history: "ignore"});
-			}
-			tempoGroup = renderer.closeElemSet();
-		});
-		this.elemset = [tempoGroup];
-		return tempoGroup;
-	};
 
 	TempoElement.prototype.adjustElements = function(renderer) {
 		// TODO-PER: This straightens out the tempo elements because they are written in the wrong order.

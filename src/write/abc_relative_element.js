@@ -41,11 +41,6 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 		else
 			this.bottom += opt.stemHeight;
 	}
-	//if (this.type === "symbol") {
-	//	var offset = glyphs.getYCorr(this.c);
-	//	this.top += offset;
-	//	this.bottom += offset;
-	//}
 	this.height = opt.height ? opt.height : 4; // The +1 is to give a little bit of padding.
 	this.centerVertically = false;
 	switch (this.type) {
@@ -113,52 +108,6 @@ RelativeElement.prototype.setUpperAndLowerElements = function(positionY) {
 	}
 	if (this.pitch === undefined || this.top === undefined)
 		window.console.error("RelativeElement position not set.", this.type, this.pitch, this.top, positionY);
-};
-
-RelativeElement.prototype.draw = function (renderer, bartop) {
-	if (this.pitch === undefined)
-		window.console.error(this.type + " Relative Element y-coordinate not set.");
-	var y = renderer.calcY(this.pitch);
-	switch(this.type) {
-		case "symbol":
-			if (this.c===null) return null;
-			var klass = "symbol";
-			if (this.klass) klass += " " + this.klass;
-			this.graphelem = renderer.printSymbol(this.x, this.pitch, this.c, this.scalex, this.scaley, renderer.controller.classes.generate(klass), "none", "#000000"); break;
-		case "debug":
-			this.graphelem = renderer.renderText({ x: this.x, y: renderer.calcY(15), text: ""+this.c, type: "debugfont", klass: 'debug-msg', anchor: 'start', centerVertically: false, history: 'not-selectable'}); break;
-		case "barNumber":
-			this.graphelem = renderer.renderText({ x: this.x, y: y, text: ""+this.c, type: "measurefont", klass: 'bar-number', anchor: "middle", history: 'ignore'});
-			break;
-		case "lyric":
-			this.graphelem = renderer.renderText({ x: this.x, y: y, text: this.c, type: "vocalfont", klass: 'lyric', anchor: "middle"});
-			break;
-		case "chord":
-			this.graphelem = renderer.renderText({ x: this.x, y: y, text: this.c, type: 'gchordfont', klass: "chord", anchor: "middle"});
-			break;
-		case "decoration":
-			this.graphelem = renderer.renderText({ x: this.x, y: y, text: this.c, type: 'annotationfont', klass: "annotation", anchor: "middle", centerVertically: true});
-			break;
-		case "text":
-			this.graphelem = renderer.renderText({ x: this.x, y: y, text: this.c, type: 'annotationfont', klass: "annotation", anchor: "start", centerVertically: this.centerVertically});
-			break;
-		case "multimeasure-text":
-			this.graphelem = renderer.renderText({ x: this.x+this.w/2, y: y, text: this.c, type: 'tempofont', klass: "rest", anchor: "middle", centerVertically: false});
-			break;
-		case "part":
-			this.graphelem = renderer.renderText({ x: this.x, y: y, text: this.c, type: 'partsfont', klass: "part", anchor: "start"});
-			break;
-		case "bar":
-			this.graphelem = renderer.printStem(this.x, this.linewidth, y, (bartop)?bartop:renderer.calcY(this.pitch2)); break; // bartop can't be 0
-		case "stem":
-			this.graphelem = renderer.printStem(this.x, this.linewidth, y, renderer.calcY(this.pitch2)); break;
-		case "ledger":
-			this.graphelem = renderer.printStaveLine(this.x, this.x+this.w, this.pitch, renderer.controller.classes.generate("ledger")); break;
-	}
-	if (this.scalex!==1 && this.graphelem) {
-		renderer.scaleExistingElem(this.graphelem, this.scalex, this.scaley, this.x, y);
-	}
-	return this.graphelem;
 };
 
 module.exports = RelativeElement;

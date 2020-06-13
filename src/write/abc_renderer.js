@@ -17,11 +17,10 @@
 
 /*global Math, console */
 
-var glyphs = require('./abc_glyphs');
 var spacing = require('./abc_spacing');
-var sprintf = require('./sprintf');
 var Svg = require('./svg');
 var AbsoluteElement = require('./abc_absolute_element');
+var renderText = require('./draw/text');
 
 /**
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
@@ -83,53 +82,6 @@ Renderer.prototype.closeElemSet = function() {
  */
 Renderer.prototype.setPrintMode = function (isPrint) {
 	this.isPrint = isPrint;
-};
-
-/**
- * Set the size of the canvas.
- * @param {object} maxwidth
- * @param {object} scale
- */
-Renderer.prototype.setPaperSize = function (maxwidth, scale, responsive) {
-	var w = (maxwidth+this.padding.right)*scale;
-	var h = (this.y+this.padding.bottom)*scale;
-	if (this.isPrint)
-		h = Math.max(h, 1056); // 11in x 72pt/in x 1.33px/pt
-	// TODO-PER: We are letting the page get as long as it needs now, but eventually that should go to a second page.
-	if (this.doRegression)
-		this.regressionLines.push("PAPER SIZE: ("+w+","+h+")");
-
-	// for accessibility
-	var text = "Sheet Music";
-	if (this.abctune && this.abctune.metaText && this.abctune.metaText.title)
-		text += " for \"" + this.abctune.metaText.title + '"';
-	this.paper.setTitle(text);
-
-	// for dragging - don't select during drag
-	var styles = [
-		"-webkit-touch-callout: none;",
-		"-webkit-user-select: none;",
-		"-khtml-user-select: none;",
-		"-moz-user-select: none;",
-		"-ms-user-select: none;",
-		"user-select: none;"
-	];
-	this.paper.insertStyles(".abcjs-dragging-in-progress text, .abcjs-dragging-in-progress tspan {" + styles.join(" ") + ")}");
-
-	var parentStyles = { overflow: "hidden" };
-	if (responsive === 'resize') {
-		this.paper.setResponsiveWidth(w, h);
-	} else {
-		parentStyles.width = "";
-		parentStyles.height = h + "px";
-		if (scale < 1) {
-			parentStyles.width = w + "px";
-			this.paper.setSize(w / scale, h / scale);
-		} else
-			this.paper.setSize(w, h);
-	}
-	this.paper.setScale(scale);
-	this.paper.setParentStyles(parentStyles);
 };
 
 function getClassSet(el) {
@@ -440,7 +392,7 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 					for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
 						var thisWord = abctune.metaText.unalignedWords[j][k];
 						var type = (thisWord.font) ? thisWord.font : "wordsfont";
-						this.renderText({x: this.padding.left + spacing.INDENT + offsetX, y: this.y, text: thisWord.text, type: type, klass: 'meta-bottom unaligned-words', anchor: 'start', noClass: true});
+						renderText(this, {x: this.padding.left + spacing.INDENT + offsetX, y: this.y, text: thisWord.text, type: type, klass: 'meta-bottom unaligned-words', anchor: 'start', noClass: true});
 						var size = this.controller.getTextSize.calc(thisWord.text, type, 'meta-bottom unaligned-words');
 						largestY = Math.max(largestY, size.height);
 						offsetX += size.width;
@@ -517,14 +469,6 @@ Renderer.prototype.outputFreeText = function (text, vskip) {
 	}
 };
 
-Renderer.prototype.outputSeparator = function (separator) {
-	if (!separator.lineLength)
-		return;
-	this.moveY(separator.spaceAbove);
-	this.printSeparator(separator.lineLength);
-	this.moveY(separator.spaceBelow);
-};
-
 /**
  * Output an extra subtitle that is defined later in the tune.
  */
@@ -581,177 +525,10 @@ Renderer.prototype.endGroup = function (klass) {
   return ret;
 };
 
-/**
- * gets scaled
- * @param {number} x1 start x
- * @param {number} x2 end x
- * @param {number} pitch pitch the stave line is drawn at
- */
-Renderer.prototype.printStaveLine = function (x1,x2, pitch, klass) {
-  var isIE=/*@cc_on!@*/false;//IE detector
-  var dy = 0.35;
-  var fill = "#000000";
-  if (isIE) {
-    dy = 1;
-    fill = "#666666";
-  }
-  var y = this.calcY(pitch);
-  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
-     x2, y+dy, x1, y+dy);
-  var options = {path:pathString, stroke:"none", fill:fill};
-  if (klass)
-  	options['class'] = klass;
-  var ret = this.paper.pathToBack(options);
-  if (this.doRegression) this.addToRegression(ret);
-
-  return ret;
-};
-
-/**
- * gets scaled if not in a group
- * @param {number} x x coordinate of the stem
- * @param {number} dx stem width
- * @param {number} y1 y coordinate of the stem bottom
- * @param {number} y2 y coordinate of the stem top
- */
-Renderer.prototype.printStem = function (x, dx, y1, y2) {
-  if (dx<0 || y1<y2) { // correct path "handedness" for intersection with other elements
-    var tmp = y2;
-    y2 = y1;
-    y1 = tmp;
-  }
-  var isIE=/*@cc_on!@*/false;//IE detector
-  var fill = "#000000";
-  if (isIE && dx<1) {
-    dx = 1;
-    fill = "#666666";
-  }
-  if (~~x === x) x+=0.05; // raphael does weird rounding (for VML)
-  var pathArray = [["M",x,y1],["L", x, y2],["L", x+dx, y2],["L",x+dx,y1],["z"]];
-  if (!isIE && this.ingroup) {
-    this.addPath(pathArray);
-  } else {
-  	var path = "";
-  	for (var i = 0; i < pathArray.length; i++)
-  		path += pathArray[i].join(" ");
-    var ret = this.paper.pathToBack({path:path, stroke:"none", fill:fill, 'class': this.controller.classes.generate('stem')});
-    if (this.doRegression) this.addToRegression(ret);
-
-    return ret;
-  }
-};
-
-function kernSymbols(lastSymbol, thisSymbol, lastSymbolWidth) {
-	// This is just some adjustments to make it look better.
-	var width = lastSymbolWidth;
-	if (lastSymbol === 'f' && thisSymbol === 'f')
-		width = width*2/3;
-	if (lastSymbol === 'p' && thisSymbol === 'p')
-		width = width*5/6;
-	if (lastSymbol === 'f' && thisSymbol === 'z')
-		width = width*5/8;
-	return width;
-}
-
-/**
- * assumes this.y is set appropriately
- * if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
- * not scaled if not in printgroup
- */
-Renderer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley, klass) {
-	var el;
-	var ycorr;
-	if (!symbol) return null;
-	if (symbol.length > 1 && symbol.indexOf(".") < 0) {
-		this.paper.openGroup({klass: klass});
-		var dx = 0;
-		for (var i = 0; i < symbol.length; i++) {
-			var s = symbol.charAt(i);
-			ycorr = glyphs.getYCorr(s);
-			el = glyphs.printSymbol(x + dx, this.calcY(offset + ycorr), s, this.paper, '', "", "");
-			if (el) {
-				if (this.doRegression) this.addToRegression(el);
-				if (i < symbol.length - 1)
-					dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));
-			} else {
-				this.renderText({ x: x, y: this.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'});
-			}
-		}
-		var g = this.paper.closeGroup();
-		this.controller.recordHistory(g);
-		return g;
-	} else {
-		ycorr = glyphs.getYCorr(symbol);
-		if (this.ingroup) {
-			this.addPath(glyphs.getPathForSymbol(x, this.calcY(offset + ycorr), symbol, scalex, scaley));
-		} else {
-			el = glyphs.printSymbol(x, this.calcY(offset + ycorr), symbol, this.paper, klass, "none", "#000000");
-			this.controller.recordHistory(el);
-			if (el) {
-				if (this.doRegression) this.addToRegression(el);
-				return el;
-			} else
-				this.renderText({ x: x, y: this.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'});
-		}
-		return null;
-	}
-};
-
 Renderer.prototype.scaleExistingElem = function (elem, scaleX, scaleY, x, y) {
 	this.paper.setAttributeOnElement(elem, { style: "transform:scale("+scaleX+","+scaleY + ");transform-origin:" + x + "px " + y + "px;"});
 };
 
-Renderer.prototype.printPath = function (attrs, params) {
-  var ret = this.paper.path(attrs);
-  if (!params || !params.history)
-		this.controller.recordHistory(ret);
-  else if (params.history === 'not-selectable')
-		this.controller.recordHistory(ret, true);
-
-  if (this.doRegression) this.addToRegression(ret);
-  return ret;
-};
-
-Renderer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above, klass, isTie) {
-	// If it is a tie vs. a slur, draw it shallower.
-	var spacing = isTie ? 1.2 : 1.5;
-
-  x1 = x1 + 6;
-  x2 = x2 + 4;
-  pitch1 = pitch1 + ((above)?spacing:-spacing);
-  pitch2 = pitch2 + ((above)?spacing:-spacing);
-  var y1 = this.calcY(pitch1);
-  var y2 = this.calcY(pitch2);
-
-  //unit direction vector
-  var dx = x2-x1;
-  var dy = y2-y1;
-  var norm= Math.sqrt(dx*dx+dy*dy);
-  var ux = dx/norm;
-  var uy = dy/norm;
-
-  var flatten = norm/3.5;
-  var maxFlatten = isTie ? 10 : 25;  // If it is a tie vs. a slur, draw it shallower.
-  var curve = ((above)?-1:1)*Math.min(maxFlatten, Math.max(4, flatten));
-
-  var controlx1 = x1+flatten*ux-curve*uy;
-  var controly1 = y1+flatten*uy+curve*ux;
-  var controlx2 = x2-flatten*ux-curve*uy;
-  var controly2 = y2-flatten*uy+curve*ux;
-  var thickness = 2;
-  var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
-     controlx1, controly1, controlx2, controly2, x2, y2,
-     controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-	if (klass)
-		klass += ' slur';
-	else
-		klass = 'slur';
-  var ret = this.paper.path({path:pathString, stroke:"none", fill:"#000000", 'class': this.controller.classes.generate(klass)});
-	this.controller.recordHistory(ret);
-  if (this.doRegression) this.addToRegression(ret);
-
-  return ret;
-};
 /**
  * Calculates the y for a given pitch value (relative to the stave the renderer is currently printing)
  * @param {number} ofs pitch value (bottom C on a G clef = 0, D=1, etc.)
@@ -761,72 +538,10 @@ Renderer.prototype.calcY = function(ofs) {
 };
 
 /**
- * Print @param {number} numLines. If there is 1 line it is the B line. Otherwise the bottom line is the E line.
- */
-Renderer.prototype.printStave = function (startx, endx, numLines) {
-	var klass = "abcjs-top-line";
-	this.paper.openGroup({ prepend: true, klass: this.controller.classes.generate("abcjs-staff") });
-	// If there is one line, it is the B line. Otherwise, the bottom line is the E line.
-	if (numLines === 1) {
-		this.printStaveLine(startx,endx,6, klass);
-	} else {
-		for (var i = numLines - 1; i >= 0; i--) {
-			this.printStaveLine(startx, endx, (i + 1) * 2, klass);
-			klass = undefined;
-		}
-	}
-	var ret = this.paper.closeGroup();
-	this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [ret], abcelem: { el_type: "staff", startChar: -1, endChar: -1 }};
-	this.controller.recordHistory(ret, true);
-};
-
-/**
  *
  * @private
  */
 
-
-Renderer.prototype.renderText = function(params) {
-	var hash = this.controller.getFontAndAttr.calc(params.type, params.klass);
-	if (params.anchor)
-		hash.attr["text-anchor"] = params.anchor;
-	hash.attr.x = params.x;
-	hash.attr.y = params.y + 7; // TODO-PER: Not sure why the text appears to be 7 pixels off.
-	if (!params.centerVertically)
-		hash.attr.dy = "0.5em";
-	if (params.type === 'debugfont') {
-		console.log("Debug msg: " + params.text);
-		hash.attr.stroke = "#ff0000";
-	}
-
-	 var text = params.text.replace(/\n\n/g, "\n \n");
-	text = text.replace(/^\n/, "\xA0\n");
-
-	var klass2 = hash.attr['class'];
-	if (hash.font.box) {
-		hash.attr.x += 2;
-		hash.attr.y += 4;
-		delete hash.attr['class'];
-		this.createElemSet({klass: klass2, fill: "#000000"});
-	}
-	if (params.noClass)
-		delete hash.attr['class'];
-	var el = this.paper.text(text, hash.attr);
-	var elem = el;
-
-	if (hash.font.box) {
-		var size = this.controller.getTextSize.calc(text, params.type, params.klass); // This size already has the box factored in, so the needs to be taken into consideration.
-		var padding = 2;
-		this.paper.rect({ x: params.x - padding, y: params.y, width: size.width - padding, height: size.height - 8});
-		elem = this.closeElemSet();
-	}
-	if (!params.history)
-		this.controller.recordHistory(elem);
-	else if (params.history === 'not-selectable')
-		this.controller.recordHistory(elem, true);
-	if (this.doRegression) this.addToRegression(el);
-	return elem;
-};
 
 Renderer.prototype.moveY = function (em, numLines) {
 	if (numLines === undefined) numLines = 1;
@@ -844,7 +559,7 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 	if (str) {
 		if (marginTop)
 			this.moveY(marginTop);
-		var el = this.renderText({x: x, y: this.y, text: str, type: kind, klass: klass, anchor: alignment, noClass: noClass});
+		var el = renderText(this, {x: x, y: this.y, text: str, type: kind, klass: klass, anchor: alignment, noClass: noClass});
 		var bb = this.controller.getTextSize.calc(str, kind, klass, el);
 		var width = isNaN(bb.width) ? 0 : bb.width;
 		var height = isNaN(bb.height) ? 0 : bb.height;
@@ -861,70 +576,6 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 		return [width, height, el];
 	}
 	return [0,0];
-};
-
-Renderer.prototype.addInvisibleMarker = function (className) {
-	var y = Math.round(this.y);
-	this.paper.pathToBack({path:"M 0 " + y + " L 0 0", stroke:"none", fill:"none", "stroke-opacity": 0, "fill-opacity": 0, 'class': this.controller.classes.generate(className), 'data-vertical': y });
-};
-
-Renderer.prototype.printSeparator = function(width) {
-	var fill = "rgba(0,0,0,255)";
-	var stroke = "rgba(0,0,0,0)";
-	var y = Math.round(this.y);
-	var staffWidth = this.controller.width;
-	var x1 = (staffWidth - width)/2;
-	var x2 = x1 + width;
-	var pathString = 'M ' + x1 + ' ' + y +
-		' L ' + x2 + ' ' + y +
-		' L ' + x2 + ' ' + (y+1) +
-		' L ' + x1 + ' ' + (y+1) +
-		' L ' + x1 + ' ' + y + ' z';
-	this.paper.pathToBack({path:pathString, stroke:stroke, fill:fill, 'class': this.controller.classes.generate('defined-text')});
-};
-
-// For debugging, it is sometimes useful to know where you are vertically.
-Renderer.prototype.printHorizontalLine = function (width, vertical, comment) {
-	var dy = 0.35;
-	var fill = "rgba(0,0,255,.4)";
-	var y = this.y;
-	if (vertical) y = vertical;
-	y = Math.round(y);
-	this.paper.text(""+Math.round(y), {x: 10, y: y, "text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
-	var x1 = 50;
-	var x2 = width;
-	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x1+x2, y-dy,
-		x2, y+dy, x1, y+dy);
-	this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, 'class': this.controller.classes.generate('staff')});
-	for (var i = 1; i < width/100; i++) {
-		pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", i*100-dy, y-5, i*100-dy, y+5,
-			i*100+dy, y-5, i*100+dy, y+5);
-		this.paper.pathToBack({path:pathString, stroke:"none", fill:fill, 'class': this.controller.classes.generate('staff')});
-	}
-	if (comment)
-		this.paper.text(comment, {x: width+70, y: y, "text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
-};
-
-Renderer.prototype.printShadedBox = function (x, y, width, height, color, opacity, comment) {
-	var box = this.paper.rect({ x: x, y: y, width: width, height: height, fill: color, stroke: color, "fill-opacity": opacity, "stroke-opacity": opacity });
-	if (comment)
-		this.paper.text(comment, {x: 0, y: y+7, "text-anchor": "start", "font-size":"14px", fill: "rgba(0,0,255,.4)", stroke: "rgba(0,0,255,.4)" });
-	return box;
-};
-
-Renderer.prototype.printVerticalLine = function (x, y1, y2) {
-	var dy = 0.35;
-	var fill = "#00aaaa";
-	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x - dy, y1, x - dy, y2,
-			x + dy, y1, x + dy, y2);
-	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.controller.classes.generate('staff')});
-	pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x - 20, y1, x - 20, y1+3,
-		x, y1, x, y1+3);
-	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.controller.classes.generate('staff')});
-	pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x + 20, y2, x + 20, y2+3,
-		x, y2, x, y2+3);
-	this.paper.pathToBack({path: pathString, stroke: "none", fill: fill, 'class': this.controller.classes.generate('staff')});
-
 };
 
 /**

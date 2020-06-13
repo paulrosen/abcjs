@@ -14,8 +14,6 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var parseCommon = require('../parse/abc_common');
-
 var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
 	this.children = [];
 	this.beams = [];
@@ -217,64 +215,6 @@ VoiceElement.prototype.shiftRight = function (dx) {
 	child.setX(child.x+dx);
 	this.minx+=dx;
 	this.nextx+=dx;
-};
-
-function isNonSpacerRest(elem) {
-	if (elem.type !== 'rest')
-		return false;
-	if (elem.abcelem && elem.abcelem.rest && elem.abcelem.rest.type !== 'spacer')
-		return true;
-	return false;
-}
-VoiceElement.prototype.draw = function (renderer, bartop) {
-	var width = this.w-1;
-	renderer.staffbottom = this.staff.bottom;
-	//this.barbottom = renderer.calcY(2);
-
-	//renderer.measureNumber = null;
-	//renderer.noteNumber = null;
-	if (this.header) { // print voice name
-		var textpitch = 14 - (this.voicenumber+1)*(12/(this.voicetotal+1));
-		var self = this;
-		renderer.wrapInAbsElem({ el_type: "voiceName", startChar: -1, endChar: -1, text: this.header }, 'meta-bottom extra-text', function() {
-			var textEl = renderer.renderText({x: renderer.padding.left, y: renderer.calcY(textpitch), text: self.header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start'});
-			return textEl;
-		});
-	}
-
-	for (var i=0, ii=this.children.length; i<ii; i++) {
-		var child = this.children[i];
-		var justInitializedMeasureNumber = false;
-		if (child.type !== 'staff-extra' && !renderer.controller.classes.isInMeasure()) {
-			renderer.controller.classes.startMeasure();
-			justInitializedMeasureNumber = true;
-		}
-		renderer.controller.currentAbsEl = child;
-		child.draw(renderer, (this.barto || i===ii-1)?bartop:0);
-		if (child.type === 'note' || isNonSpacerRest(child))
-			renderer.controller.classes.incrNote();
-		if (child.type === 'bar' && !justInitializedMeasureNumber) {
-			renderer.controller.classes.incrMeasure();
-		}
-	}
-
-	renderer.controller.classes.startMeasure();
-	parseCommon.each(this.beams, function(beam) {
-		if (beam === 'bar') {
-			renderer.controller.classes.incrMeasure();
-		} else
-			beam.draw(renderer); // beams must be drawn first for proper printing of triplets, slurs and ties.
-	});
-
-	renderer.controller.classes.startMeasure();
-	var self = this;
-	parseCommon.each(this.otherchildren, function(child) {
-		if (child === 'bar') {
-			renderer.controller.classes.incrMeasure();
-		} else
-			child.draw(renderer,self.startx+10,width);
-	});
-
 };
 
 VoiceElement.prototype.layoutBeams = function() {
