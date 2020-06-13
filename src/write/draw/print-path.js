@@ -5,7 +5,6 @@ function printPath(renderer, attrs, params) {
 	else if (params.history === 'not-selectable')
 		renderer.controller.recordHistory(ret, true);
 
-	if (renderer.doRegression) renderer.addToRegression(ret);
 	return ret;
 }
 

@@ -36,7 +36,6 @@ function renderText(renderer, params) {
 		renderer.controller.recordHistory(elem);
 	else if (params.history === 'not-selectable')
 		renderer.controller.recordHistory(elem, true);
-	if (renderer.doRegression) renderer.addToRegression(el);
 	return elem;
 }
 

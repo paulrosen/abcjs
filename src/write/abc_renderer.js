@@ -520,7 +520,6 @@ Renderer.prototype.endGroup = function (klass) {
 	var ret = this.paper.path({path: path, stroke:"none", fill:"#000000", 'class': this.controller.classes.generate(klass)});
 	this.controller.recordHistory(ret);
 	this.path = [];
-  if (this.doRegression) this.addToRegression(ret);
 
   return ret;
 };
@@ -576,32 +575,6 @@ Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, margi
 		return [width, height, el];
 	}
 	return [0,0];
-};
-
-/**
- * @private
- */
-Renderer.prototype.addToRegression = function (el) {
-	var box;
-	try {
-		box = el.getBBox();
-	} catch(e) {
-		box = { width: 0, height: 0 };
-	}
-	//var str = "("+box.x+","+box.y+")["+box.width+","+box.height+"] "
-	var str = el.type + ' ' + box.toString() + ' ';
-	var attrs = [];
-	for (var key in el.attrs) {
-		if (el.attrs.hasOwnProperty(key)) {
-			if (key === 'class')
-				str = el.attrs[key] + " " + str;
-			else
-				attrs.push(key+": "+el.attrs[key]);
-		}
-	}
-	attrs.sort();
-	str += "{ " +attrs.join(" ") + " }";
-	this.regressionLines.push(str);
 };
 
 module.exports = Renderer;

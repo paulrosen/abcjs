@@ -19,7 +19,6 @@ function printStem(renderer, x, dx, y1, y2) {
 		for (var i = 0; i < pathArray.length; i++)
 			path += pathArray[i].join(" ");
 		var ret = renderer.paper.pathToBack({path:path, stroke:"none", fill:fill, 'class': renderer.controller.classes.generate('stem')});
-		if (renderer.doRegression) renderer.addToRegression(ret);
 
 		return ret;
 	}

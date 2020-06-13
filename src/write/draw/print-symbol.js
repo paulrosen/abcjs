@@ -18,7 +18,6 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
 			ycorr = glyphs.getYCorr(s);
 			el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, '', "", "");
 			if (el) {
-				if (renderer.doRegression) renderer.addToRegression(el);
 				if (i < symbol.length - 1)
 					dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));
 			} else {
@@ -36,7 +35,6 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
 			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, klass, "none", "#000000");
 			renderer.controller.recordHistory(el);
 			if (el) {
-				if (renderer.doRegression) renderer.addToRegression(el);
 				return el;
 			} else
 				renderText(renderer, { x: x, y: renderer.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'});

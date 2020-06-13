@@ -15,7 +15,6 @@ function printStaffLine(renderer, x1,x2, pitch, klass) {
 	if (klass)
 		options['class'] = klass;
 	var ret = renderer.paper.pathToBack(options);
-	if (renderer.doRegression) renderer.addToRegression(ret);
 
 	return ret;
 }

@@ -87,9 +87,6 @@ var draw = function(renderer, xLeft, yTop, yBottom, type) {//Tony
 		return ret;
 	});
 
-	if (renderer.doRegression){
-		renderer.addToRegression(ret);
-	}
 	return ret;
 };
 module.exports = drawBrace;

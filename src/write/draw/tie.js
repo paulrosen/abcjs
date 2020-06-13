@@ -76,7 +76,6 @@ var drawArc = function(renderer, x1, x2, pitch1, pitch2, above, klass, isTie) {
 		klass = 'slur';
 	var ret = renderer.paper.path({path:pathString, stroke:"none", fill:"#000000", 'class': renderer.controller.classes.generate(klass)});
 	renderer.controller.recordHistory(ret);
-	if (renderer.doRegression) renderer.addToRegression(ret);
 
 	return ret;
 };
