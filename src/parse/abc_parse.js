@@ -254,6 +254,9 @@ var Parse = function() {
 				if (multilineVars.freegchord !== true) {
 					chord[1] = chord[1].replace(/([ABCDEFG0-9])b/g, "$1♭");
 					chord[1] = chord[1].replace(/([ABCDEFG0-9])#/g, "$1♯");
+					chord[1] = chord[1].replace(/([ABCDEFG0-9])([♯♭]?)o/g, "$1$2°");
+					chord[1] = chord[1].replace(/([ABCDEFG0-9])([♯♭]?)0/g, "$1$2ø");
+					chord[1] = chord[1].replace(/([ABCDEFG0-9])([♯♭]?)\^/g, "$1$2∆");
 				}
 				chord[2] = 'default';
 				chord[1] = transpose.chordName(multilineVars, chord[1]);
