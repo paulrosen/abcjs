@@ -68,9 +68,9 @@ var flatten;
 	var drumDefinition = {};
 
 	// The gaps per beat. The numbers are per measure so it can't be resolved until we know how many beats per measure.
-	var normalBreakBetweenNotes = 0.000520833333325*1.5; // for articulation (matches muse score value)
-	var slurredBreakBetweenNotes = 0.000520833333325;
-	var staccatoBreakBetweenNotes = 0.03138020833333125;
+	var normalBreakBetweenNotes = 0; //0.000520833333325*1.5; // for articulation (matches muse score value)
+	var slurredBreakBetweenNotes = 0; // 0.000520833333325;
+	var staccatoBreakBetweenNotes = 0; // 0.03138020833333125;
 
 	flatten = function(voices, options) {
 		if (!options) options = {};
@@ -486,7 +486,7 @@ var flatten;
 				relativeNoteList.push(0);
 				break;
 			case "roll":
-				noteTime = 1.0 / 32;
+				noteTime = 1.0 / 16;
 				numNotes = Math.floor(soundDuration / noteTime);
 				if (numNotes < 1) {
 					numNotes = 1;
