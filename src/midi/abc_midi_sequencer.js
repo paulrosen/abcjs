@@ -38,6 +38,8 @@ var sequence;
 		var drumBars = options.drumBars || 1;
 		var drumIntro = options.drumIntro || 0;
 		var drumOn = drumPattern !== "";
+		var style = []; // The note head style for each voice.
+		var rhythmHeadThisBar = false; // Rhythm notation was detected.
 
 		// All of the above overrides need to be integers
 		program = parseInt(program, 10);
@@ -220,7 +222,18 @@ var sequence;
 											else if (elem.decoration.indexOf('ffff') >= 0)
 												voices[voiceNumber].push({ el_type: 'beat', beats: [127, 125, 110, 1] });
 										}
+										if (!elem.style && style[voiceNumber]) {
+											elem.style = style[voiceNumber];
+										}
+										if (elem.duration === 0) {
+											elem = Object.assign({}, elem);
+											elem.duration = 0.25; // TODO-PER: this should be the length of one beat
+										}
 										voices[voiceNumber].push(elem);
+										if (elem.style === "rhythm") {
+											rhythmHeadThisBar = true;
+											chordVoiceOffThisBar(voices)
+										}
 										noteEventsInBar++;
 									}
 									break;
@@ -264,9 +277,10 @@ var sequence;
 										skipEndingPlaceholder[voiceNumber] = voices[voiceNumber].length;
 									if (startRepeat)
 										startRepeatPlaceholder[voiceNumber] = voices[voiceNumber].length;
+									rhythmHeadThisBar = false;
 									break;
 								case 'style':
-									// TODO-PER: If this is set to rhythm heads, then it should use the percussion channel.
+									style[voiceNumber] = elem.head;
 									break;
 								case 'part':
 									// TODO-PER: If there is a part section in the header, then this should probably affect the repeats.
@@ -353,6 +367,17 @@ var sequence;
 		}
 		return voices;
 	};
+
+	function chordVoiceOffThisBar(voices) {
+		for (var i = 0; i < voices.length; i++) {
+			var voice = voices[i];
+			var j = voice.length-1;
+			while (j >= 0 && voice[j].el_type !== 'bar') {
+				voice[j].noChordVoice = true;
+				j--;
+			}
+		}
+	}
 
 	function getTrackTitle(staff, voiceNumber) {
 		if (!staff || staff.length <= voiceNumber || !staff[voiceNumber].title)

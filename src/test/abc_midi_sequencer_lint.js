@@ -73,6 +73,10 @@ var midiSequencerLint = function(tune) {
 							if (element.pitches[n].endTie)
 								ret += ' endTie';
 						}
+						if (element.style && element.style !== "normal")
+							ret += "\n\t\tstyle: " + element.style;
+						if (element.noChordVoice)
+							ret += "\n\t\tnoChordVoice";
 					}
 					ret += '\n';
 					break;

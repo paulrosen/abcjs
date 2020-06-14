@@ -47,10 +47,13 @@ var flatten;
 	var chordChannel;
 	var chordInstrument = 0;
 	var drumInstrument = 128;
+	var boomVolume = 64;
+	var chickVolume = 48;
 	var currentChords;
 	var lastChord;
 	var barBeat;
 	var gChordTacet = false;
+	var hasRhythmHead = false;
 	var doBeatAccents = true;
 	var stressBeat1 = 105;
 	var stressBeatDown = 95;
@@ -93,9 +96,12 @@ var flatten;
 		chordChannel = voices.length; // first free channel for chords
 		chordTrackFinished = false;
 		currentChords = [];
+		boomVolume = 64;
+		chickVolume = 48;
 		lastChord = undefined;
 		barBeat = 0;
 		gChordTacet = options.chordsOff ? true : false;
+		hasRhythmHead = false;
 
 		doBeatAccents = true;
 		stressBeat1 = 105;
@@ -162,6 +168,7 @@ var flatten;
 						barAccidentals = [];
 						if (i === 0) // Only write the drum part on the first voice so that it is not duplicated.
 							writeDrum(voices.length+1);
+						hasRhythmHead = false; // decide whether there are rhythm heads each measure.
 						break;
 					case "bagpipes":
 						bagpipes = true;
@@ -315,6 +322,8 @@ var flatten;
 	// - If there is a chord on the second beat, play a chord for the first beat instead of a bass note.
 	// - Likewise, if there is a chord on the fourth beat of 4/4, play a chord on the third beat instead of a bass note.
 	//
+	// If there is any note in the melody that has a rhythm head, then assume the melody controls the rhythm, so that is
+	// the same as a break.
 	var breakSynonyms = [ 'break', '(break)', 'no chord', 'n.c.', 'tacet'];
 
 	function findChord(elem) {
@@ -581,15 +590,29 @@ var flatten;
 			if (ret.velocity)
 				velocity = ret.velocity;
 
+			// TODO-PER: Can also make a different sound on style=x and style=harmonic
+			var ePitches = elem.pitches;
+			if (elem.style === "rhythm") {
+				hasRhythmHead = true;
+				if (lastChord && lastChord.chick) {
+					ePitches = [];
+					for (var i2 = 0; i2 < lastChord.chick.length; i2++) {
+						var note2 = Object.assign({}, elem.pitches[0]);
+						note2.actualPitch = lastChord.chick[i2]
+						ePitches.push(note2);
+					}
+				}
+			}
+
 			elem.midiPitches = [];
 			var hasMovedTie = false;
-			for (var i=0; i<elem.pitches.length; i++) {
-				var note = elem.pitches[i];
+			for (var i=0; i<ePitches.length; i++) {
+				var note = ePitches[i];
 				if (note.startSlur)
 					slurCount += note.startSlur.length;
 				if (note.endSlur)
 					slurCount -= note.endSlur.length;
-				var actualPitch = adjustPitch(note);
+				var actualPitch = note.actualPitch ? note.actualPitch : adjustPitch(note);
 				pitches.push({ pitch: actualPitch, startTie: note.startTie });
 				elem.midiPitches.push({ pitch: actualPitch+60, durationInMeasures: duration*tempoChangeFactor, volume: velocity, instrument: currentInstrument }); // TODO-PER: why is the internal numbering system offset by 60 from midi? It should probably be the same as midi.
 
@@ -975,19 +998,19 @@ var flatten;
 		return notes;
 	}
 
-	function writeBoom(boom, beatLength) {
+	function writeBoom(boom, beatLength, volume) {
 		// undefined means there is a stop time.
 		if (boom !== undefined)
-			chordTrack.push({cmd: 'start', pitch: boom, volume: 64});
+			chordTrack.push({cmd: 'start', pitch: boom, volume: volume});
 		addMove(chordTrack, (beatLength/2)*tempoChangeFactor);
 		if (boom !== undefined)
 			chordTrack.push({ cmd: 'stop', pitch: boom });
 		addMove(chordTrack, (beatLength/2)*tempoChangeFactor);
 	}
 
-	function writeChick(chick, beatLength) {
+	function writeChick(chick, beatLength, volume) {
 		for (var c = 0; c < chick.length; c++)
-			chordTrack.push({cmd: 'start', pitch: chick[c], volume: 48});
+			chordTrack.push({cmd: 'start', pitch: chick[c], volume: volume});
 		addMove(chordTrack, (beatLength/2)*tempoChangeFactor);
 		for (c = 0; c < chick.length; c++)
 			chordTrack.push({ cmd: 'stop', pitch: chick[c] });
@@ -1027,19 +1050,23 @@ var flatten;
 		}
 		if (currentChords.length === 1) {
 			for (var m = 0; m < pattern.length; m++) {
-				switch (pattern[m]) {
-					case 'boom':
-						writeBoom(currentChords[0].chord.boom, beatLength);
-						break;
-					case 'boom2':
-						writeBoom(currentChords[0].chord.boom2, beatLength);
-						break;
-					case 'chick':
-						writeChick(currentChords[0].chord.chick, beatLength);
-						break;
-					case '':
-						addMove(chordTrack, beatLength*tempoChangeFactor);
-						break;
+				if (hasRhythmHead) {
+					addMove(chordTrack, beatLength * tempoChangeFactor);
+				} else {
+					switch (pattern[m]) {
+						case 'boom':
+							writeBoom(currentChords[0].chord.boom, beatLength, boomVolume);
+							break;
+						case 'boom2':
+							writeBoom(currentChords[0].chord.boom2, beatLength, boomVolume);
+							break;
+						case 'chick':
+							writeChick(currentChords[0].chord.chick, beatLength, chickVolume);
+							break;
+						case '':
+							addMove(chordTrack, beatLength * tempoChangeFactor);
+							break;
+					}
 				}
 			}
 			return;
@@ -1061,28 +1088,32 @@ var flatten;
 			var thisChord;
 			if (beats[''+m2])
 				thisChord = beats[''+m2];
-			switch (pattern[m2]) {
-				case 'boom':
-					if (beats[''+(m2+1)]) // If there is not a chord change on the next beat, play a bass note.
-						writeChick(thisChord.chord.chick, beatLength);
-					else
-						writeBoom(thisChord.chord.boom, beatLength);
-					break;
-				case 'boom2':
-					if (beats[''+(m2+1)])
-						writeChick(thisChord.chord.chick, beatLength);
-					else
-						writeBoom(thisChord.chord.boom2, beatLength);
-					break;
-				case 'chick':
-					writeChick(thisChord.chord.chick, beatLength);
-					break;
-				case '':
-					if (beats[''+m2])	// If there is an explicit chord on this beat, play it.
-						writeChick(thisChord.chord.chick, beatLength);
-					else
-						addMove(chordTrack, beatLength*tempoChangeFactor);
-					break;
+			if (hasRhythmHead) {
+				addMove(chordTrack, beatLength * tempoChangeFactor);
+			} else {
+				switch (pattern[m2]) {
+					case 'boom':
+						if (beats['' + (m2 + 1)]) // If there is not a chord change on the next beat, play a bass note.
+							writeChick(thisChord.chord.chick, beatLength, chickVolume);
+						else
+							writeBoom(thisChord.chord.boom, beatLength, boomVolume);
+						break;
+					case 'boom2':
+						if (beats['' + (m2 + 1)])
+							writeChick(thisChord.chord.chick, beatLength, chickVolume);
+						else
+							writeBoom(thisChord.chord.boom2, beatLength, boomVolume);
+						break;
+					case 'chick':
+						writeChick(thisChord.chord.chick, beatLength, chickVolume);
+						break;
+					case '':
+						if (beats['' + m2])	// If there is an explicit chord on this beat, play it.
+							writeChick(thisChord.chord.chick, beatLength, chickVolume);
+						else
+							addMove(chordTrack, beatLength * tempoChangeFactor);
+						break;
+				}
 			}
 		}
 	}
