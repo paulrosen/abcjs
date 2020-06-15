@@ -25,9 +25,7 @@ var layout = require('./layout/layout');
 var Classes = require('./classes');
 var GetFontAndAttr = require('./get-font-and-attr');
 var GetTextSize = require('./get-text-size');
-var drawStaffGroup = require('./draw/staff-group');
-var drawSeparator = require('./draw/separator');
-var setPaperSize = require('./draw/set-paper-size');
+var draw = require('./draw/draw');
 
 /**
  * @class
@@ -81,7 +79,6 @@ EngraverController.prototype.reset = function() {
 	this.selected = [];
 	this.ingroup = false;
 	this.staffgroups = [];
-	this.lastStaffGroupIndex = -1;
 	if (this.engraver)
 		this.engraver.reset();
 	this.engraver = null;
@@ -230,32 +227,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	var maxWidth = layout(this.renderer, abctune, this.width, this.space);
 
 	// Do all the writing to output
-	this.renderer.topMargin(abctune);
-	//this.renderer.printHorizontalLine(this.width + this.renderer.padding.left + this.renderer.padding.right);
-	this.renderer.engraveTopText(this.width, abctune);
-	this.renderer.addMusicPadding();
-
-	this.staffgroups = [];
-	this.lastStaffGroupIndex = -1;
-	for (var line = 0; line < abctune.lines.length; line++) {
-		this.classes.incrLine();
-		abcLine = abctune.lines[line];
-		if (abcLine.staff) {
-			this.engraveStaffLine(abcLine.staffGroup);
-		} else if (abcLine.subtitle && line !== 0) {
-			this.renderer.outputSubtitle(this.width, abcLine.subtitle);
-		} else if (abcLine.text !== undefined) {
-			this.renderer.outputFreeText(abcLine.text, abcLine.vskip);
-		} else if (abcLine.separator !== undefined && abcLine.separator.lineLength) {
-			this.renderer.moveY(abcLine.separator.spaceAbove);
-			drawSeparator(this.renderer, abcLine.separator.lineLength);
-			this.renderer.moveY(abcLine.separator.spaceBelow);
-		}
-	}
-
-	this.renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
-	this.renderer.engraveExtraText(this.width, abctune);
-	setPaperSize(this.renderer, maxWidth, scale, this.responsive);
+	this.staffgroups = draw(this.renderer, this.classes, abctune, this.width, maxWidth, this.responsive, scale);
 
 	setupSelection(this);
 };
@@ -308,24 +280,6 @@ EngraverController.prototype.combineHistory = function (len, svgEl) {
 	this.history.push(items[0]);
 };
 
-
-/**
- * Engrave a single line (a group of related staffs)
- * @param {ABCJS.Tune} abctune an ABCJS AST
- * @param {Object} staffGroup an staffGroup
- * @private
- */
-EngraverController.prototype.engraveStaffLine = function (staffGroup) {
-	if (this.lastStaffGroupIndex > -1)
-		this.renderer.addStaffPadding(this.staffgroups[this.lastStaffGroupIndex], staffGroup);
-//	this.renderer.voiceNumber = null;
-	drawStaffGroup(this.renderer, staffGroup);
-	var height = staffGroup.height * spacing.STEP;
-	//this.renderer.printVerticalLine(this.width+this.renderer.padding.left, this.renderer.y, this.renderer.y+height);
-  this.staffgroups[this.staffgroups.length] = staffGroup;
-	this.lastStaffGroupIndex = this.staffgroups.length-1;
-	this.renderer.y += height;
-};
 
 EngraverController.prototype.addSelectListener = function (clickListener) {
 	this.listeners[this.listeners.length] = clickListener;
