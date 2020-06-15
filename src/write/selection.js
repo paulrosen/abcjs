@@ -219,9 +219,11 @@ function mouseUp(ev) {
 	}
 
 	notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.history.length, this.dragIndex);
-	this.dragTarget.svgEl.focus();
-	this.dragTarget = null;
-	this.dragIndex = -1;
+	if (this.dragTarget.svgEl && this.dragTarget.svgEl.focus) {
+		this.dragTarget.svgEl.focus();
+		this.dragTarget = null;
+		this.dragIndex = -1;
+	}
 	removeGlobalClass(this.renderer.svg, "abcjs-dragging-in-progress");
 }
 
