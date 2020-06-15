@@ -203,7 +203,20 @@
 
 			// TODO-PER: This will allow the callback function to have access to timing info - this should be incorporated into the render at some point.
 			var midiBuffer = new ABCJS.synth.CreateSynth();
-			midiBuffer.init({ visualObj: visualObj }).then(function (response) {
+			midiBuffer.init({
+				//audioContext: new AudioContext(),
+				visualObj: visualObj,
+				// sequence: [],
+				// millisecondsPerMeasure: 1000,
+				// debugCallback: function(message) { console.log(message) },
+				options: {
+					// soundFontUrl: "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/" ,
+					// sequenceCallback: function(noteMapTracks, callbackContext) { return noteMapTracks; },
+					// callbackContext: this,
+					// onEnded: function(callbackContext),
+					// pan: [ -0.5, 0.5 ]
+				}
+			}).then(function (response) {
 				console.log(response);
 				if (synthControl) {
 					synthControl.setTune(visualObj, userAction).then(function (response) {

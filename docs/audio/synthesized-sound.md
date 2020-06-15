@@ -48,9 +48,18 @@ This must not be called until the user has made a gesture on the page because th
 | visualObj | undefined | This is the result of `renderAbc()`. Important: `renderAbc()` returns an array, since an ABC string can contain more than one tune. This variable is just one element in that array. Either this must be supplied, or `sequence` must be supplied. |
 | sequence | undefined | This is a manually-created set of instructions for creating the audio. It is built using the `SynthSequence` object. |
 | millisecondsPerMeasure | calculated | This allows control over the tempo. If this is present, then the tempo specified in the ABC string is ignored. |
-| soundFontUrl | "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/" | This is the public URL for the sound font. If it isn't present, then the sound fonts come from the github repo. This can be replaced if the new sound font follows the same format. |
 | debugCallback | undefined | This will be called with various extra info at different times in the process. |
+| options | undefined | Some options for the sound creation (see list below). |
+
+#### synthOptions.options
+
+| Attribute | Default | Description |
+| ------------- | ----------- |----------- |
+| soundFontUrl | "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/" | This is the public URL for the sound font. If it isn't present, then the sound fonts come from the github repo. This can be replaced if the new sound font follows the same format. |
 | sequenceCallback | undefined | This is called after the array of notes is created, and just before it is used to create the audio buffer. The array of tracks is passed in, and this gives a chance to tweak the audio before it is created: you can give it some swing, you can change volumes, or anything else. |
+| callbackContext | undefined | This is passed back when the sequenceCallback function is called. | 
+| onEnded | undefined | This function is called after the playback stops. |
+| pan | [0...] | An array of numbers between -1 and 1 for how far to pan each track. -1 is all the way to the left and 1 is all the way to the right. If there are not enough items in the array for all the tracks, then the remaining tracks will be in the middle. |   
 
 #### Example
 ```javascript
@@ -58,10 +67,20 @@ var myContext = new AudioContext();
 var visualObj = ABCJS.renderAbc(...);
 synth.init({
     audioContext: myContext,
-    visualObj: visualObj,
-    millisecondsPerMeasure: 400
+    visualObj: visualObj[0],
+    millisecondsPerMeasure: 500,
+    options: {
+        soundFontUrl: "https:/path/to/soundfont/folder",
+        pan: [ -0.3, 0.3 ] 
+    }
 });
 ```
+
+The above will:
+1. create audio for the first tune found in the tunebook that is passed to `renderAbc`.
+2. It will play at 1/2 second per measure (180 bpm for 2/4 time).
+3. It will use the URL provided for the soundfont.
+4. It will put the first track a little bit to the left side and the second track a little bit to the right. (Note that if the music is a single line of music with chord diagrams, the melody will be track 0 and the chords will be track 1.)
 
 ### prime()
 
