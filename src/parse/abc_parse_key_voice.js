@@ -586,6 +586,7 @@ var parseKeyVoice = {};
 				case "alto":
 				case "tenor":
 				case "perc":
+				case "none":
 					// clef is [clef=] [⟨clef type⟩] [⟨line number⟩] [+8|-8]
 					var clef = tokens.shift();
 					switch (clef.token) {
