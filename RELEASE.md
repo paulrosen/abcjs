@@ -1,3 +1,36 @@
+# Version 6.0.0-beta.11
+
+## Features
+
+* Allow "K:C none" to be the same as "K:C clef=none"
+* Allow a finer grained selection mechanism.
+* Allow braces to be selected.
+* Allow o 0 and ^ as input for º ø and ∆ in chords.
+* Don't play notes that are drawn with the rhythm notehead: replace with chord.
+* Implement graceslurs
+* Make the annotation not take horizontal space.
+
+## Bugs
+
+* Crash in Firefox <= 50 when selecting.
+* Don't crash if a rest is put inside a chord i.e. `[z]`
+* Improve downward stem and beam rendering
+* Remove the gaps between notes in audio.
+* When removing latex commands, don't mess up the character positioning.
+* fix to scale the click coords when paper is set to responsive
+* support viewBox differences between chrome and firefox
+
+## Refactoring
+
+* Extract the chord/annotation function to a separate file.
+* Much refactoring to start putting all of the drawing commands together.
+
+## Documentation
+
+* Add example for using wrap.
+* Improve documentation for the call to initialize the synth.
+* use https link over ssh for building documentation
+
 # Version 6.0.0-beta.10
 
 ## Features
