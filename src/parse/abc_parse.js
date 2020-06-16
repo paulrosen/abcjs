@@ -1713,7 +1713,17 @@ var Parse = function() {
 		strTune = parseCommon.gsub(strTune, '\r\n', '\n');
 		strTune = parseCommon.gsub(strTune, '\r', '\n');
 		strTune += '\n';	// Tacked on temporarily to make the last line continuation work
-		strTune = strTune.replace(/\n\\.*\n/g, "\n");	// get rid of latex commands.
+		// get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
+		var arr = strTune.split("\n\\");
+		if (arr.length > 1) {
+			for (var i2 = 1; i2 < arr.length; i2++) {
+				while (arr[i2].length > 0 && arr[i2][0] !== "\n") {
+					arr[i2] = arr[i2].substr(1);
+					arr[i2-1] += ' ';
+				}
+			}
+			strTune = arr.join("  "); //. the split removed two characters, so this puts them back
+		}
 		var continuationReplacement = function(all, backslash, comment){
 			var spaces = "                                                                                                                                                                                                     ";
 			var padding = comment ? spaces.substring(0, comment.length) : "";
