@@ -13,9 +13,9 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale) {
 		classes.incrLine();
 		var abcLine = abcTune.lines[line];
 		if (abcLine.staff) {
+			if (staffgroups.length >= 1)
+				renderer.addStaffPadding(staffgroups[staffgroups.length-1], abcLine.staffGroup);
 			staffgroups.push(engraveStaffLine(renderer, abcLine.staffGroup));
-			if (staffgroups.length > 1)
-				renderer.addStaffPadding(staffgroups[staffgroups.length-2], staffgroups[staffgroups.length-1]);
 		} else if (abcLine.subtitle && line !== 0) {
 			renderer.outputSubtitle(width, abcLine.subtitle);
 		} else if (abcLine.text !== undefined) {
