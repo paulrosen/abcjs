@@ -4,6 +4,8 @@ var spacing = require('../abc_spacing');
 var setClass = require('../set-class');
 var elementGroup = require('./group-elements');
 
+var tempoElem = require('../abc_tempo_element');
+
 function drawAbsolute(renderer, params, bartop) {
 	if (params.invisible) return;
 	params.elemset = [];
@@ -11,8 +13,8 @@ function drawAbsolute(renderer, params, bartop) {
 	for (var i=0; i<params.children.length; i++) {
 		var child = params.children[i];
 		var el;
-		switch (child.constructor.name) {
-			case 'TempoElement':
+		switch (child.constructor) {
+			case tempoElem:
 				el = drawTempo(renderer, child);
 				if (el)
 					params.elemset = params.elemset.concat(el);
