@@ -35,34 +35,35 @@ function setupSelection(engraver) {
 }
 
 function getCoord(ev, svg) {
-  var scaleX = 1;
-  var scaleY = 1;
+	var scaleX = 1;
+	var scaleY = 1;
 
-  // when renderer.options.responsive === 'resize' the click coords are in relation to the HTML
-  // element, we need to convert to the SVG viewBox coords
-  if (svg.viewBox.baseVal) { // Firefox passes null to this when no viewBox is given
-    // Chrome makes these values null when no viewBox is given.
-    if (svg.viewBox.baseVal.width !== 0)
-      scaleX = svg.viewBox.baseVal.width / svg.clientWidth
-    if (svg.viewBox.baseVal.height !== 0)
-      scaleY = svg.viewBox.baseVal.height / svg.clientHeight
-  }
+	// when renderer.options.responsive === 'resize' the click coords are in relation to the HTML
+	// element, we need to convert to the SVG viewBox coords
+	if (svg.viewBox.baseVal) { // Firefox passes null to this when no viewBox is given
+		// Chrome makes these values null when no viewBox is given.
+		if (svg.viewBox.baseVal.width !== 0)
+			scaleX = svg.viewBox.baseVal.width / svg.clientWidth
+		if (svg.viewBox.baseVal.height !== 0)
+			scaleY = svg.viewBox.baseVal.height / svg.clientHeight
+	}
 
-	var x = ev.offsetX * scaleX;
-	var y = ev.offsetY * scaleY;
-  //console.log(x, y)
+	var svgClicked = ev.target.tagName === "svg";
+	var x;
+	var y;
+	if (svgClicked) {
+		x = ev.offsetX;
+		y = ev.offsetY;
+	} else {
+		x = ev.layerX;
+		y = ev.layerY;
+	}
 
-	// The target might be the SVG that we want, or it could be an item in the SVG (usually a path). If it is not the SVG then
-	// add an offset to the coordinates.
-	// if (ev.target.tagName.toLowerCase() !== 'svg') {
-	// 	var box = ev.target.getBBox();
-	// 	var absRect = ev.target.getBoundingClientRect();
-	// 	var offsetX = ev.clientX - absRect.left;
-	// 	var offsetY = ev.clientY - absRect.top;
-	// 	x = offsetX + box.x;
-	// 	y = offsetY + box.y;
-	// }
-	return [x,y];
+	x = x * scaleX;
+	y = y * scaleY;
+	//console.log(x, y)
+
+	return [x, y];
 }
 
 function elementFocused(ev) {
@@ -132,22 +133,24 @@ function keyboardSelection(ev) {
 		ev.preventDefault();
 }
 
-function mouseDown(ev) {
-	// "this" is the EngraverController because of the bind(this) when setting the event listener.
+function findElementInHistory(history, el) {
+	for (var i = 0; i < history.length; i++) {
+		if (el === history[i].svgEl)
+			return i;
+	}
+	return -1;
+}
 
-	var box = getCoord(ev, this.renderer.paper.svg);
-	var x = box[0];
-	var y = box[1];
-
+function findElementByCoord(self, x, y) {
 	var minDistance = 9999999;
 	var closestIndex = -1;
 	var chosenEl;
-	for (var i = 0; i < this.history.length && minDistance > 0; i++) {
-		var el = this.history[i];
+	for (var i = 0; i < self.history.length && minDistance > 0; i++) {
+		var el = self.history[i];
 		if (!el.selectable)
 			continue;
 
-		this.getDim(el);
+		self.getDim(el);
 		if (el.dim.left < x && el.dim.right > x && el.dim.top < y && el.dim.bottom > y) {
 			// See if it is a direct hit on an element - if so, definitely take it (there are no overlapping elements)
 			closestIndex = i;
@@ -177,11 +180,53 @@ function mouseDown(ev) {
 			}
 		}
 	}
-	if (closestIndex >= 0 && minDistance <= 12) {
-		this.dragTarget = this.history[closestIndex];
-		this.dragIndex = closestIndex;
+	return (closestIndex >= 0 && minDistance <= 12) ? closestIndex : -1;
+}
+
+function getBestMatchCoordinates(dim, ev) {
+	// Different browsers have conflicting meanings for the coordinates that are returned.
+	// If the item we want is clicked on directly, then we will just see what is the best match.
+	// This seems like less of a hack than browser sniffing.
+	if (dim.x <= ev.offsetX && dim.x+dim.width >= ev.offsetX &&
+		dim.y <= ev.offsetY && dim.y+dim.height >= ev.offsetY)
+		return [ ev.offsetX, ev.offsetY];
+	return  [ ev.layerX, ev.layerY];
+}
+
+function getMousePosition(self, ev) {
+	// if the user clicked exactly on an element that we're interested in, then we already have the answer.
+	// This is more reliable than the calculations because firefox returns different coords for offsetX, offsetY
+	var x;
+	var y;
+	var box;
+	var clickedOn = findElementInHistory(self.history, ev.target);
+	if (clickedOn >= 0) {
+		// There was a direct hit on an element.
+		box = getBestMatchCoordinates(self.history[clickedOn].svgEl.getBBox(), ev);
+		x = box[0];
+		y = box[1];
+		//console.log("clicked on", clickedOn, x, y, self.history[clickedOn].svgEl.getBBox(), ev.target.getBBox());
+	} else {
+		// See if they clicked close to an element.
+		box = getCoord(ev, self.renderer.paper.svg);
+		x = box[0];
+		y = box[1];
+		clickedOn = findElementByCoord(self, x, y);
+		//console.log("clicked near", clickedOn, x, y, printEl(ev.target));
+	}
+	return { x: x, y: y, clickedOn: clickedOn };
+}
+
+function mouseDown(ev) {
+	// "this" is the EngraverController because of the bind(this) when setting the event listener.
+
+	var positioning = getMousePosition(this, ev);
+
+	if (positioning.clickedOn >= 0) {
+		this.dragTarget = this.history[positioning.clickedOn];
+		this.dragIndex = positioning.clickedOn;
 		this.dragMechanism = "mouse";
-		this.dragMouseStart = { x: x, y: y };
+		this.dragMouseStart = { x: positioning.x, y: positioning.y };
 		if (this.dragging && this.dragTarget.isDraggable) {
 			addGlobalClass(this.renderer.paper, "abcjs-dragging-in-progress");
 			this.dragTarget.absEl.highlight(undefined, this.dragColor);
@@ -195,11 +240,9 @@ function mouseMove(ev) {
 	if (!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable || this.dragMechanism !== 'mouse')
 		return;
 
-	var box = getCoord(ev, this.renderer.paper.svg);
-	var x = box[0];
-	var y = box[1];
+	var positioning = getMousePosition(this, ev);
 
-	var yDist = Math.round((y - this.dragMouseStart.y)/spacing.STEP);
+	var yDist = Math.round((positioning.y - this.dragMouseStart.y)/spacing.STEP);
 	if (yDist !== this.dragYStep) {
 		this.dragYStep = yDist;
 		this.dragTarget.svgEl.setAttribute("transform", "translate(0," + (yDist * spacing.STEP) + ")");
