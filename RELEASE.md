@@ -1,3 +1,13 @@
+# Version 6.0.0-beta.12
+
+## Bugs
+
+* Fix selection of items in a cross-browser way, in different markups and css that the SVG can appear.
+
+* Fixes #440 second staff rendering too early.
+
+* Fix regression bug when rendering.
+
 # Version 6.0.0-beta.11
 
 ## Features
