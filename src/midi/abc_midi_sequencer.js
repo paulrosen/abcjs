@@ -186,6 +186,13 @@ var sequence;
 							staff.clef.el_type = 'clef';
 							voices[voiceNumber].push({ el_type: 'transpose', transpose: staff.clef.transpose });
 						}
+						if (staff.clef && staff.clef.type) {
+							if (staff.clef.type.indexOf("-8") >= 0)
+								voices[voiceNumber].push({ el_type: 'transpose', transpose: -12 });
+							else if (staff.clef.type.indexOf("+8") >= 0)
+								voices[voiceNumber].push({ el_type: 'transpose', transpose: 12 });
+						}
+
 						if (abctune.formatting.midi && abctune.formatting.midi.drumoff) {
 							// If there is a drum off command right at the beginning it is put in the metaText instead of the stream,
 							// so we will just insert it here.
@@ -249,6 +256,12 @@ var sequence;
 								case "clef": // need to keep this to catch the "transpose" element.
 									if (elem.transpose)
 										voices[voiceNumber].push({ el_type: 'transpose', transpose: elem.transpose });
+									if (elem.type) {
+										if (elem.type.indexOf("-8") >= 0)
+											voices[voiceNumber].push({ el_type: 'transpose', transpose: -12 });
+										else if (elem.type.indexOf("+8") >= 0)
+											voices[voiceNumber].push({ el_type: 'transpose', transpose: 12 });
+									}
 									break;
 								case "tempo":
 									qpm = interpretTempo(elem);
