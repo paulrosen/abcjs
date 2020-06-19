@@ -43,6 +43,7 @@ var flatten;
 
 	var meter = { num: 4, den: 4 };
 	var chordTrack;
+	var chordSourceTrack;
 	var chordTrackFinished;
 	var chordChannel;
 	var chordInstrument = 0;
@@ -93,6 +94,7 @@ var flatten;
 		// For resolving chords.
 		meter = { num: 4, den: 4 };
 		chordTrack = [];
+		chordSourceTrack = false;
 		chordChannel = voices.length; // first free channel for chords
 		chordTrackFinished = false;
 		currentChords = [];
@@ -139,7 +141,9 @@ var flatten;
 						currentTrackName = {cmd: 'text', type: "name", text: element.trackName };
 						break;
 					case "note":
-						writeNote(element, voiceOff);
+						var setChordTrack = writeNote(element, voiceOff);
+						if (setChordTrack)
+							chordSourceTrack = i;
 						break;
 					case "key":
 						accidentals = setKeySignature(element);
@@ -160,7 +164,7 @@ var flatten;
 						transpose = element.transpose;
 						break;
 					case "bar":
-						if (chordTrack.length > 0 && i === 0) {
+						if (chordTrack.length > 0 && (chordSourceTrack === false || i === chordSourceTrack)) {
 							resolveChords();
 							currentChords = [];
 						}
@@ -381,6 +385,7 @@ var flatten;
 	}
 
 	function processChord(elem) {
+		var firstChord = false;
 		var chord = findChord(elem);
 		if (chord) {
 			var c = interpretChord(chord);
@@ -389,6 +394,7 @@ var flatten;
 				// If we ever have a chord in this voice, then we add the chord track.
 				// However, if there are chords on more than one voice, then just use the first voice.
 				if (chordTrack.length === 0) {
+					firstChord = true;
 					chordTrack.push({cmd: 'program', channel: chordChannel, instrument: chordInstrument});
 					// need to figure out how far in time the chord started: if there are pickup notes before the chords start, we need pauses.
 					var distance = timeFromStart();
@@ -400,6 +406,7 @@ var flatten;
 				currentChords.push({chord: lastChord, beat: barBeat});
 			}
 		}
+		return firstChord;
 	}
 
 	function addTieLength(note, duration) {
@@ -535,7 +542,7 @@ var flatten;
 		var trackStartingIndex = currentTrack.length;
 
 		var velocity = processVolume(voiceOff);
-		processChord(elem);
+		var setChordTrack = processChord(elem);
 
 		if (elem.startTriplet) {
 			multiplier = elem.tripletMultiplier;
@@ -688,7 +695,7 @@ var flatten;
 		// if (Math.abs(recheckCounter - currentTrackCounter) > 0.0001) {
 		// 	console.log("COUNTER: ", recheckCounter, currentTrackCounter)
 		// }
-
+		return setChordTrack;
 	}
 
 	var scale = [0,2,4,5,7,9,11];
