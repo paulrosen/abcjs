@@ -224,6 +224,7 @@ function SynthController() {
 		self.timer.reset();
 		if (self.isLooping) {
 			self.timer.start();
+			self.midiBuffer.finished();
 			self.midiBuffer.start();
 		} else {
 			self.timer.stop();
@@ -231,6 +232,7 @@ function SynthController() {
 				if (self.control)
 					self.control.pushPlay(false);
 				self.isStarted = false;
+				self.midiBuffer.finished();
 				if (self.cursorControl && self.cursorControl.onFinished && typeof self.cursorControl.onFinished  === 'function')
 					self.cursorControl.onFinished();
 				self.setProgress(0, 1);

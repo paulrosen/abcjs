@@ -33,8 +33,8 @@ function CreateSynth() {
 	var self = this;
 	self.audioBufferPossible = undefined;
 	self.directSource = []; // type: AudioBufferSourceNode
-	self.startTimeSec = undefined; // the time that the midi started: used for pause/resume.
-	self.pausedTimeSec = undefined; // the time that the midi was paused: used for resume.
+	self.startTimeSec = undefined; // the time (in seconds) that the audio started: used for pause to get the pausedTimeSec.
+	self.pausedTimeSec = undefined; // the position (in seconds) that the audio was paused: used for resume.
 	self.audioBuffers = []; // cache of the buffers so starting play can be fast.
 	self.duration = undefined; // the duration of the tune in seconds.
 	self.isRunning = false; // whether there is currently a sound buffer running.
@@ -287,18 +287,14 @@ function CreateSynth() {
 
 	// This is called after everything is set up, so it can quickly make sound
 	self.start = function() {
-		if (self.pausedTimeSec) {
-			self.resume();
-			return;
-		}
-
 		if (!self.audioBufferPossible)
 			throw new Error(notSupportedMessage);
 		if (self.debugCallback)
 			self.debugCallback("start called");
 
-		self._kickOffSound(0);
-		self.startTimeSec = activeAudioContext().currentTime;
+		var resumePosition = self.pausedTimeSec ? self.pausedTimeSec : 0;
+		self._kickOffSound(resumePosition);
+		self.startTimeSec = activeAudioContext().currentTime - resumePosition;
 		self.pausedTimeSec = undefined;
 
 		if (self.debugCallback)
@@ -311,22 +307,12 @@ function CreateSynth() {
 		if (self.debugCallback)
 			self.debugCallback("pause called");
 
-		if (!self.pausedTimeSec) { // ignore if self is already paused.
-			self.stop();
-			self.pausedTimeSec = activeAudioContext().currentTime;
-		}
+	 	self.stop();
+		self.pausedTimeSec = activeAudioContext().currentTime - self.startTimeSec;
 	};
 
 	self.resume = function() {
-		if (!self.audioBufferPossible)
-			throw new Error(notSupportedMessage);
-		if (self.debugCallback)
-			self.debugCallback("resume called");
-
-		var offset = self.pausedTimeSec - self.startTimeSec;
-		self.startTimeSec = activeAudioContext().currentTime - offset; // We move the start time in case there is another pause/resume.
-		self.pausedTimeSec = undefined;
-		self._kickOffSound(offset);
+		self.start();
 	};
 
 	self.seek = function(percent) {
@@ -344,10 +330,7 @@ function CreateSynth() {
 		} else {
 			self.pausedTimeSec = offset;
 		}
-		var pauseDistance = self.pausedTimeSec ? self.pausedTimeSec - self.startTimeSec : undefined;
-		self.startTimeSec = activeAudioContext().currentTime - offset;
-		if (self.pausedTimeSec)
-			self.pausedTimeSec = self.startTimeSec + pauseDistance;
+		self.pausedTimeSec = offset;
 	};
 
 	self.stop = function() {
@@ -362,6 +345,11 @@ function CreateSynth() {
 			}
 		});
 		self.directSource = [];
+	};
+	self.finished = function() {
+		self.startTimeSec = undefined;
+		self.pausedTimeSec = undefined;
+		self.isRunning = false;
 	};
 
 	self.download = function() {

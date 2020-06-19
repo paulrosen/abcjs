@@ -99,6 +99,13 @@
 				for (var i = 0; i < els.length; i++ ) {
 					els[i].classList.remove("highlight");
 				}
+				var cursor = document.querySelector("#paper svg .abcjs-cursor");
+				if (cursor) {
+					cursor.setAttribute("x1", 0);
+					cursor.setAttribute("x2", 0);
+					cursor.setAttribute("y1", 0);
+					cursor.setAttribute("y2", 0);
+				}
 			};
 		}
 
