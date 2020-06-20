@@ -58,7 +58,9 @@ function CreateSynth() {
 		self.meterSize = 1;
 		if (options.visualObj) {
 			self.flattened = options.visualObj.setUpAudio(params);
-			self.meterSize = options.visualObj.getMeterFraction().num / options.visualObj.getMeterFraction().den;
+			var meter = options.visualObj.getMeterFraction();
+			if (meter.den)
+				self.meterSize = options.visualObj.getMeterFraction().num / options.visualObj.getMeterFraction().den;
 		} else if (options.sequence)
 			self.flattened = options.sequence;
 		else
