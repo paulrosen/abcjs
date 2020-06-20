@@ -1531,9 +1531,9 @@ var Parse = function() {
 								// TODO-PER: straighten this out so there is not so much copying: getCoreNote shouldn't change e'
 								if (core.accidental !== undefined) el.pitches[0].accidental = core.accidental;
 								el.pitches[0].pitch = core.pitch;
-								if (core.soundPitch)
+								if (core.soundPitch || core.soundPitch === 0)
 									el.pitches[0].soundPitch = core.soundPitch;
-								if (core.midipitch)
+								if (core.midipitch || core.midipitch === 0)
 									el.pitches[0].midipitch = core.midipitch;
 								if (core.endSlur !== undefined) el.pitches[0].endSlur = core.endSlur;
 								if (core.endTie !== undefined) el.pitches[0].endTie = core.endTie;

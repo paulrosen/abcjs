@@ -71,7 +71,7 @@ var flatten;
 	// The gaps per beat. The numbers are per measure so it can't be resolved until we know how many beats per measure.
 	var normalBreakBetweenNotes = 0; //0.000520833333325*1.5; // for articulation (matches muse score value)
 	var slurredBreakBetweenNotes = 0; // 0.000520833333325;
-	var staccatoBreakBetweenNotes = 0; // 0.03138020833333125;
+	var staccatoBreakBetweenNotes = 0.03138020833333125;
 
 	flatten = function(voices, options) {
 		if (!options) options = {};
@@ -702,7 +702,7 @@ var flatten;
 	function adjustPitch(note) {
 		if (note.midipitch)
 			return note.midipitch - 60;
-		var pitch = note.soundPitch ? note.soundPitch : note.pitch;
+		var pitch = note.soundPitch || note.soundPitch === 0 ? note.soundPitch : note.pitch;
 		if (note.accidental) {
 			switch(note.accidental) { // change that pitch (not other octaves) for the rest of the bar
 				case "sharp":
