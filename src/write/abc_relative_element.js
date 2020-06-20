@@ -41,6 +41,8 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 		else
 			this.bottom += opt.stemHeight;
 	}
+	if (opt.dim)
+		this.dim = opt.dim;
 	this.height = opt.height ? opt.height : 4; // The +1 is to give a little bit of padding.
 	this.centerVertically = false;
 	switch (this.type) {

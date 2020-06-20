@@ -555,6 +555,7 @@ var ParserLint = function() {
 							bracket: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
 							clef: { type: 'object', optional: true, properties: clefProperties },
 							connectBarLines: { type: 'string', optional: true, Enum: [ "start", "continue", "end" ] },
+							gchordfont: fontType,
 							tripletfont: fontType,
 							vocalfont: fontType,
 							key: { type: 'object', optional: true, properties: keyProperties },

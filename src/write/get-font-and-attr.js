@@ -3,6 +3,17 @@ var GetFontAndAttr = function GetFontAndAttr(formatting, classes) {
 	this.classes = classes;
 };
 
+GetFontAndAttr.prototype.updateFonts = function(fontOverrides) {
+	if (fontOverrides.gchordfont)
+		this.formatting.gchordfont = fontOverrides.gchordfont;
+	if (fontOverrides.tripletfont)
+		this.formatting.tripletfont = fontOverrides.tripletfont;
+	if (fontOverrides.annotationfont)
+		this.formatting.annotationfont = fontOverrides.annotationfont;
+	if (fontOverrides.vocalfont)
+		this.formatting.vocalfont = fontOverrides.vocalfont;
+};
+
 GetFontAndAttr.prototype.calc = function(type, klass) {
 	var font;
 	if (typeof type === 'string') {
@@ -14,11 +25,11 @@ GetFontAndAttr.prototype.calc = function(type, klass) {
 			font = {face: "Arial", size: Math.round(12 * 4 / 3), decoration: "underline", style: "normal", weight: "normal"};
 	} else
 		font = {face: type.face, size: Math.round(type.size * 4 / 3), decoration: type.decoration, style: type.style, weight: type.weight, box: type.box};
+	font.padding = font.size / 10;
 
 	var attr = {"font-size": font.size, 'font-style': font.style,
 		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
 		'class': this.classes.generate(klass) };
-	//attr.font = "";	// There is a spurious font definition that is put on all text elements. This overwrites it.
 	return { font: font, attr: attr };
 };
 

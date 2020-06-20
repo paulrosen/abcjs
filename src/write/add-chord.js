@@ -20,7 +20,8 @@ var addChord;
 				font = 'gchordfont';
 				klass = "chord";
 			}
-			var dim = getTextSize.calc(chord.name, 'annotationfont', "annotation");
+			var attr = getTextSize.attr(font, klass);
+			var dim = getTextSize.calc(chord.name, font, klass);
 			var chordWidth = dim.width;
 			var chordHeight = dim.height / spacing.STEP;
 			switch (chord.position) {
@@ -30,7 +31,8 @@ var addChord;
 					y = elem.averagepitch;
 					abselem.addExtra(new RelativeElement(chord.name, x, chordWidth + 4, y, {
 						type: "text",
-						height: chordHeight
+						height: chordHeight,
+						dim: attr
 					}));
 					break;
 				case "right":
@@ -39,7 +41,8 @@ var addChord;
 					y = elem.averagepitch;
 					abselem.addRight(new RelativeElement(chord.name, x, chordWidth + 4, y, {
 						type: "text",
-						height: chordHeight
+						height: chordHeight,
+						dim: attr
 					}));
 					break;
 				case "below":
@@ -47,14 +50,16 @@ var addChord;
 					abselem.addRight(new RelativeElement(chord.name, 0, 0, undefined, {
 						type: "text",
 						position: "below",
-						height: chordHeight
+						height: chordHeight,
+						dim: attr
 					}));
 					break;
 				case "above":
 					// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
 					abselem.addRight(new RelativeElement(chord.name, 0, 0, undefined, {
 						type: "text",
-						height: chordHeight
+						height: chordHeight,
+						dim: attr
 					}));
 					break;
 				default:
@@ -62,7 +67,8 @@ var addChord;
 						var relPositionY = chord.rel_position.y + 3 * spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
 						abselem.addChild(new RelativeElement(chord.name, x + chord.rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {
 							type: "text",
-							height: chordHeight
+							height: chordHeight,
+							dim: attr
 						}));
 					} else {
 						// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
@@ -73,7 +79,8 @@ var addChord;
 						abselem.addCentered(new RelativeElement(chord.name, x, chordWidth, undefined, {
 							type: "chord",
 							position: pos2,
-							height: chordHeight
+							height: chordHeight,
+							dim: attr
 						}));
 					}
 			}

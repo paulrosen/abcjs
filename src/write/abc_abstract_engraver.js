@@ -146,6 +146,7 @@ AbstractEngraver.prototype.createABCLine = function(staffs, tempo, getTextSize) 
 
 AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo, s) {
 // If the tempo is passed in, then the first element should get the tempo attached to it.
+	staffgroup.getTextSize.updateFonts(abcstaff);
   for (var v = 0; v < abcstaff.voices.length; v++) {
     var voice = new VoiceElement(v,abcstaff.voices.length);
     if (v===0) {
@@ -748,7 +749,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 		});
 		var lyricDim = this.getTextSize.calc(lyricStr, 'vocalfont', "lyric");
 		var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
-		abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, {type:"lyric", position: position, height: lyricDim.height / spacing.STEP }));
+		abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, {type:"lyric", position: position, height: lyricDim.height / spacing.STEP, dim: this.getTextSize.attr('vocalfont', "lyric") }));
 	};
 
 AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff, voice) { //stem presence: true for drawing stemless notehead
@@ -1008,7 +1009,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
 	var measureNumDim = this.getTextSize.calc(number, "measurefont", 'bar-number');
 	var dx = measureNumDim.width > 18 && abselem.abcelem.type === "treble" ? -7 : 0;
-	abselem.addChild(new RelativeElement(number, dx, measureNumDim.width, 11+measureNumDim.height / spacing.STEP, {type:"barNumber"}));
+	abselem.addChild(new RelativeElement(number, dx, measureNumDim.width, 11+measureNumDim.height / spacing.STEP, {type:"barNumber", dim: this.getTextSize.attr("measurefont", 'bar-number')}));
 };
 
 AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) {

@@ -971,6 +971,8 @@ var Parse = function() {
 			params.vocalfont = multilineVars.vocalfont;
 		if (multilineVars.tripletfont)
 			params.tripletfont = multilineVars.tripletfont;
+		if (multilineVars.gchordfont)
+			params.gchordfont = multilineVars.gchordfont;
 		if (multilineVars.style)
 			params.style = multilineVars.style;
 		if (multilineVars.currentVoice) {

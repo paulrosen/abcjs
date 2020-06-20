@@ -14,27 +14,27 @@ function drawRelativeElement(renderer, params, bartop) {
 			if (params.klass) klass += " " + params.klass;
 			params.graphelem = printSymbol(renderer, params.x, params.pitch, params.c, params.scalex, params.scaley, renderer.controller.classes.generate(klass), "none", "#000000"); break;
 		case "debug":
-			params.graphelem = renderText(renderer, { x: params.x, y: renderer.calcY(15), text: ""+params.c, type: "debugfont", klass: 'debug-msg', anchor: 'start', centerVertically: false, history: 'not-selectable'}); break;
+			params.graphelem = renderText(renderer, { x: params.x, y: renderer.calcY(15), text: ""+params.c, type: "debugfont", klass: renderer.controller.classes.generate('debug-msg'), anchor: 'start', centerVertically: false, history: 'not-selectable', dim: params.dim}); break;
 		case "barNumber":
-			params.graphelem = renderText(renderer, { x: params.x, y: y, text: ""+params.c, type: "measurefont", klass: 'bar-number', anchor: "middle", history: 'ignore'});
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: ""+params.c, type: "measurefont", klass: renderer.controller.classes.generate('bar-number'), anchor: "middle", history: 'ignore', dim: params.dim});
 			break;
 		case "lyric":
-			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: "vocalfont", klass: 'lyric', anchor: "middle"});
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: "vocalfont", klass: renderer.controller.classes.generate('lyric'), anchor: "middle", dim: params.dim});
 			break;
 		case "chord":
-			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'gchordfont', klass: "chord", anchor: "middle"});
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'gchordfont', klass: renderer.controller.classes.generate("chord"), anchor: "middle", dim: params.dim});
 			break;
 		case "decoration":
-			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'annotationfont', klass: "annotation", anchor: "middle", centerVertically: true});
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'annotationfont', klass: renderer.controller.classes.generate("annotation"), anchor: "middle", centerVertically: true, dim: params.dim});
 			break;
 		case "text":
-			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'annotationfont', klass: "annotation", anchor: "start", centerVertically: params.centerVertically});
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'annotationfont', klass: renderer.controller.classes.generate("annotation"), anchor: "start", centerVertically: params.centerVertically, dim: params.dim});
 			break;
 		case "multimeasure-text":
-			params.graphelem = renderText(renderer, { x: params.x+params.w/2, y: y, text: params.c, type: 'tempofont', klass: "rest", anchor: "middle", centerVertically: false});
+			params.graphelem = renderText(renderer, { x: params.x+params.w/2, y: y, text: params.c, type: 'tempofont', klass: renderer.controller.classes.generate("rest"), anchor: "middle", centerVertically: false, dim: params.dim});
 			break;
 		case "part":
-			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'partsfont', klass: "part", anchor: "start"});
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'partsfont', klass: renderer.controller.classes.generate("part"), anchor: "start", dim: params.dim});
 			break;
 		case "bar":
 			params.graphelem = printStem(renderer, params.x, params.linewidth, y, (bartop)?bartop:renderer.calcY(params.pitch2)); break; // bartop can't be 0
