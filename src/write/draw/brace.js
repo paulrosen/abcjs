@@ -1,17 +1,18 @@
 var sprintf = require('./sprintf');
 var spacing = require('../abc_spacing');
+var renderText = require('./text');
 
 function drawBrace(renderer, params) {
 	// The absoluteY number is the spot where the note on the first ledger line is drawn (i.e. middle C if treble clef)
 	// The STEP offset here moves it to the top and bottom lines
-	var startY = params.startStaff.absoluteY - spacing.STEP*10;
-	if (params.endStaff)
-		params.endY = params.endStaff.absoluteY - spacing.STEP*2;
-	else if (params.lastContinuedStaff)
-		params.endY = params.lastContinuedStaff.absoluteY - spacing.STEP*2;
+	var startY = params.startVoice.staff.absoluteY - spacing.STEP*10;
+	if (params.endVoice && params.endVoice.staff)
+		params.endY = params.endVoice.staff.absoluteY - spacing.STEP*2;
+	else if (params.lastContinuedVoice && params.lastContinuedVoice.staff)
+		params.endY = params.lastContinuedVoice.staff.absoluteY - spacing.STEP*2;
 	else
-		params.endY = params.startStaff.absoluteY - spacing.STEP*2;
-	return draw(renderer, params.x,startY, params.endY, params.type);
+		params.endY = params.startVoice.staff.absoluteY - spacing.STEP*2;
+	return draw(renderer, params.x,startY, params.endY, params.type, params.header);
 }
 
 function straightPath(renderer, xLeft, yTop, yBottom, type) {
@@ -76,13 +77,23 @@ function curvyPath(renderer, xLeft, yTop, yBottom, type) {
 	return renderer.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.controller.classes.generate(type)});
 }
 
-var draw = function(renderer, xLeft, yTop, yBottom, type) {//Tony
+var draw = function(renderer, xLeft, yTop, yBottom, type, header) {//Tony
 	var ret = renderer.wrapInAbsElem({ el_type: type, startChar: -1, endChar: -1 }, 'abcjs-'+type, function() {
 		var ret;
+		if (header) {
+			renderer.paper.openGroup({klass: renderer.controller.classes.generate("staff-extra voice-name")});
+			var position = yTop + (yBottom - yTop)/2;
+			position = position - renderer.controller.getTextSize.baselineToCenter(header, "voicefont", 'staff-extra voice-name', 0, 1);
+
+			renderText(renderer, {x: renderer.padding.left, y: position, text: header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start', centerVertically: true});
+		}
 		if (type === "brace")
 			ret = curvyPath(renderer, xLeft, yTop, yBottom, type);
 		else if (type === "bracket")
 			ret = straightPath(renderer, xLeft, yTop, yBottom, type);
+		if (header) {
+			ret = renderer.paper.closeGroup();
+		}
 		renderer.controller.recordHistory(ret);
 		return ret;
 	});

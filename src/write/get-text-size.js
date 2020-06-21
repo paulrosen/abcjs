@@ -21,4 +21,14 @@ GetTextSize.prototype.calc = function(text, type, klass, el) {
 	return size;
 };
 
+GetTextSize.prototype.baselineToCenter = function(text, type, klass, index, total) {
+	// This is for the case where SVG wants to use the baseline of the first line as the Y coordinate.
+	// If there are multiple lines of text or there is an array of text then that will not be centered so this adjusts it.
+	var height = this.calc(text, type, klass).height;
+	var fontHeight = this.attr(type, klass).font.size;
+
+	return height * 0.5 + (total - index - 2) * fontHeight;
+};
+
+
 module.exports = GetTextSize;

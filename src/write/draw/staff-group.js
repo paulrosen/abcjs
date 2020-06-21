@@ -72,14 +72,8 @@ function drawStaffGroup(renderer, params) {
 				renderer.controller.classes.newMeasure();
 				printStaff(renderer, params.startx, params.w, staff.lines);
 			}
-			if (params.brace && params.brace.isStartVoice(i)) {//Tony
-				params.brace.startY = staff.absoluteY - spacing.STEP*10;
-				params.brace.elemset = drawBrace(renderer, params.brace); //tony
-			}
-			if (params.bracket && params.bracket.isStartVoice(i)) {
-				params.bracket.startY = staff.absoluteY - spacing.STEP*10;
-				params.bracket.elemset = [drawBrace(renderer, params.bracket)];
-			}
+			printBrace(renderer, staff.absoluteY, params.brace, i);
+			printBrace(renderer, staff.absoluteY, params.bracket, i);
 		}
 		drawVoice(renderer, params.voices[i], bartop);
 		renderer.controller.classes.newMeasure();
@@ -96,6 +90,17 @@ function drawStaffGroup(renderer, params) {
 		printStem(renderer, params.startx, 0.6, topLine, bottomLine);
 	}
 	renderer.y = startY;
+}
+
+function printBrace(renderer, absoluteY, brace, index) {
+	if (brace) {
+		for (var i = 0; i < brace.length; i++) {
+			if (brace[i].isStartVoice(index)) {
+				brace[i].startY = absoluteY - spacing.STEP * 10;
+				brace[i].elemset = drawBrace(renderer, brace[i]);
+			}
+		}
+	}
 }
 
 function addInvisibleMarker(renderer, className) {

@@ -21,9 +21,8 @@ function drawVoice(renderer, params, bartop) {
 	renderer.staffbottom = params.staff.bottom;
 
 	if (params.header) { // print voice name
-		var textpitch = 14 - (params.voicenumber+1)*(12/(params.voicetotal+1));
 		renderer.wrapInAbsElem({ el_type: "voiceName", startChar: -1, endChar: -1, text: params.header }, 'meta-bottom extra-text', function() {
-			var textEl = renderText(renderer, {x: renderer.padding.left, y: renderer.calcY(textpitch), text: params.header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start'});
+			var textEl = renderText(renderer, {x: renderer.padding.left, y: renderer.calcY(params.headerPosition), text: params.header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start', centerVertically: true});
 			return textEl;
 		});
 	}

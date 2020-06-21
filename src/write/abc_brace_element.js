@@ -14,18 +14,23 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var BraceElem = function BraceElem(staff, type) {
-    this.startStaff = staff;
+var BraceElem = function BraceElem(voice, type) {
+    this.startVoice = voice;
     this.type = type;
 };
 
-BraceElem.prototype.setBottomStaff = function(staff) {
-	this.endStaff = staff;
+BraceElem.prototype.setBottomStaff = function(voice) {
+	this.endVoice = voice;
+	// If only the start brace has a name then the name belongs to the brace instead of the staff.
+	if (this.startVoice.header && !this.endVoice.header) {
+		this.header = this.startVoice.header;
+		delete this.startVoice.header;
+	}
 };
 
-BraceElem.prototype.continuing = function(staff) {
+BraceElem.prototype.continuing = function(voice) {
 	// If the final staff isn't present, then use the last one we saw.
-	this.lastContinuedStaff = staff;
+	this.lastContinuedVoice = voice;
 };
 
 BraceElem.prototype.setLocation = function(x) {
@@ -37,7 +42,7 @@ BraceElem.prototype.getWidth = function() {
 };
 
 BraceElem.prototype.isStartVoice = function (voice) {
-	if (this.startStaff && this.startStaff.voices.length > 0 && this.startStaff.voices[0] === voice)
+	if (this.startVoice && this.startVoice.staff && this.startVoice.staff.voices.length > 0 && this.startVoice.staff.voices[0] === voice)
 		return true;
 	return false;
 };

@@ -114,7 +114,7 @@ var ParserLint = function() {
 
 	var clefProperties = {
 		stafflines: { type: 'number', minimum: 0, maximum: 10, optional: true },
-		transpose: { type: 'number', minimum: -11, maximum: 11, optional: true },
+		transpose: { type: 'number', minimum: -24, maximum: 24, optional: true },
 		type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none', 'perc' ] },
 		verticalPos: { type: 'number', minimum: -20, maximum: 10 },	// the pitch that goes in the middle of the staff C=0
 		clefPos: { type: 'number', minimum: 2, maximum: 10, optional: true }	// this is needed if there is a clef, but should not be present if the clef is 'none'

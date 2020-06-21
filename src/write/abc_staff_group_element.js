@@ -203,10 +203,28 @@ function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
 
 	// find out how much space will be taken up by voice headers
 	var voiceheaderw = 0;
-	for (var i=0;i<voices.length;i++) {
+	var i;
+	var size;
+	for (i=0;i<voices.length;i++) {
 		if(voices[i].header) {
-			var size = getTextSize.calc(voices[i].header, 'voicefont', '');
+			size = getTextSize.calc(voices[i].header, 'voicefont', '');
 			voiceheaderw = Math.max(voiceheaderw,size.width);
+		}
+	}
+	if (brace) {
+		for (i = 0; i < brace.length; i++) {
+			if (brace[i].header) {
+				size = getTextSize.calc(brace[i].header, 'voicefont', '');
+				voiceheaderw = Math.max(voiceheaderw,size.width);
+			}
+		}
+	}
+	if (bracket) {
+		for (i = 0; i < bracket.length; i++) {
+			if (bracket[i].header) {
+				size = getTextSize.calc(bracket[i].header, 'voicefont', '');
+				voiceheaderw = Math.max(voiceheaderw,size.width);
+			}
 		}
 	}
 	if (voiceheaderw) {
@@ -217,15 +235,19 @@ function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
 	x += voiceheaderw;
 
 	var ofs = 0;
-	if (brace) {
-		brace.setLocation(x);
-		ofs = brace.getWidth();
-	}
-	if (bracket) {
-		bracket.setLocation(x);
-		ofs = Math.max(ofs, bracket.getWidth());
-	}
+	ofs = setBraceLocation(brace, x, ofs);
+	ofs = setBraceLocation(bracket, x, ofs);
 	return x + ofs;
+}
+
+function setBraceLocation(brace, x, ofs) {
+	if (brace) {
+		for (var i = 0; i < brace.length; i++) {
+			brace[i].setLocation(x);
+			ofs = Math.max(ofs, brace[i].getWidth());
+		}
+	}
+	return ofs;
 }
 
 StaffGroupElement.prototype.layout = function(spacing, renderer, debug) {

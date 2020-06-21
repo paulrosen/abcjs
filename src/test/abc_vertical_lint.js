@@ -51,6 +51,23 @@ var verticalLint = function(tunes) {
 	function formatArrayStart(tabs, i) {
 		return tabs + i + ": ";
 	}
+	function collectBrace(brace) {
+		var ret;
+		if (brace) {
+			ret = [];
+			for (var b1 = 0; b1 < brace.length; b1++) {
+				var bracket = {
+					x: brace[b1].x,
+					top: fixed1(brace[b1].startY),
+					bottom: fixed1(brace[b1].endY)
+				};
+				if (brace[b1].header)
+					bracket.header = brace[b1].header;
+				ret.push(bracket);
+			}
+		}
+		return ret;
+	}
 	function getType(obj) {
 		if (obj.$type.indexOf('staff-extra') >= 0) {
 			if (obj.elem.length === 1) {
@@ -241,13 +258,23 @@ var verticalLint = function(tunes) {
 		return str.join("\n");
 	}
 
+	function addHeader(obj) {
+		if (obj.header)
+			return " " + obj.header;
+		return "";
+	}
+
 	function formatLine(line, lineNum) {
 		var str = "";
 		str += "Line: " + lineNum + ": (" + fixed1(line.height) + ")\n";
-		if (line.brace)
-			str += "brace: " + fixed1(line.brace.x) + " " + formatY(line.brace) + "\n";
-		if (line.bracket)
-			str += "bracket: " + fixed1(line.bracket.x) + " " + formatY(line.bracket) + "\n";
+		if (line.brace) {
+			for (var i = 0; i < line.brace.length; i++)
+				str += "brace: " + fixed1(line.brace[i].x) + " " + formatY(line.brace[i]) + addHeader(line.brace[i]) + "\n";
+		}
+		if (line.bracket) {
+			for (var i2 = 0; i2 < line.bracket.length; i2++)
+			str += "bracket: " + fixed1(line.bracket[i2].x) + " " + formatY(line.bracket[i2]) + addHeader(line.bracket[i2]) + "\n";
+		}
 		str += "staffs: " + formatStaffs(line.staffs, 1);
 		str += "voices: " + formatVoices(line.voices, 1);
 		return str;
@@ -266,12 +293,8 @@ var verticalLint = function(tunes) {
 
 	function extractPositioningInfo(staffGroup, lineNum) {
 		var ret = { height: staffGroup.height, minSpace: staffGroup.minspace, spacingUnits: staffGroup.spacingunits, width: staffGroup.w, startX: staffGroup.startX, staffs: [], voices: [] };
-		if (staffGroup.brace) {
-			ret.brace = { x: staffGroup.brace.x, top: fixed1(staffGroup.brace.startY), bottom: fixed1(staffGroup.brace.endY) };
-		}
-		if (staffGroup.bracket) {
-			ret.bracket = { x: staffGroup.bracket.x, top: fixed1(staffGroup.bracket.startY), bottom: fixed1(staffGroup.bracket.endY) };
-		}
+		ret.brace = collectBrace(staffGroup.brace);
+		ret.bracket = collectBrace(staffGroup.bracket);
 		for (var i = 0; i < staffGroup.staffs.length; i++) {
 			var staff = staffGroup.staffs[i];
 			ret.staffs.push({bottom: fixed1(staff.bottom), top: fixed1(staff.top), specialY: setSpecialY(staff) });
