@@ -954,6 +954,10 @@ var Tune = function() {
 			if (params.part)
 				This.appendElement('part', params.part.startChar, params.part.endChar, {title: params.part.title});
 			if (params.meter !== undefined) This.lines[This.lineNum].staff[This.staffNum].meter = params.meter;
+			if (This.vskipPending) {
+				This.lines[This.lineNum].vskip = This.vskipPending;
+				delete This.vskipPending;
+			}
 		};
 		var createLine = function(params) {
 			This.lines[This.lineNum] = {staff: []};

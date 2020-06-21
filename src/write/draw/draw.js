@@ -13,6 +13,9 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale) {
 		classes.incrLine();
 		var abcLine = abcTune.lines[line];
 		if (abcLine.staff) {
+			if (abcLine.vskip) {
+				renderer.moveY(abcLine.vskip);
+			}
 			if (staffgroups.length >= 1)
 				renderer.addStaffPadding(staffgroups[staffgroups.length-1], abcLine.staffGroup);
 			staffgroups.push(engraveStaffLine(renderer, abcLine.staffGroup));
