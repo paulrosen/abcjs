@@ -222,7 +222,8 @@ function mouseDown(ev) {
 
 	var positioning = getMousePosition(this, ev);
 
-	if (positioning.clickedOn >= 0) {
+	// Only start dragging if the user clicked close enough to an element and clicked with the main mouse button.
+	if (positioning.clickedOn >= 0 && ev.button === 0) {
 		this.dragTarget = this.history[positioning.clickedOn];
 		this.dragIndex = positioning.clickedOn;
 		this.dragMechanism = "mouse";
