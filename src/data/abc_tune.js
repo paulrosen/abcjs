@@ -177,6 +177,7 @@ var Tune = function() {
 		this.staffNum = 0;
 		this.voiceNum = 0;
 		this.lineNum = 0;
+		this.runningFonts = {};
 	};
 
 	this.resolveOverlays = function() {
@@ -305,6 +306,7 @@ var Tune = function() {
 
 	this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote, currSlur) {
 		this.closeLine();	// Close the last line.
+		delete this.runningFonts;
 
 		// If the tempo was created with a string like "Allegro", then the duration of a beat needs to be set at the last moment, when it is most likely known.
 		if (this.metaText.tempo && this.metaText.tempo.bpm && !this.metaText.tempo.duration)
@@ -941,10 +943,10 @@ var Tune = function() {
 			if (params.staffscale) {
 				This.lines[This.lineNum].staff[This.staffNum].staffscale = params.staffscale;
 			}
-			if (params.annotationfont) This.lines[This.lineNum].staff[This.staffNum].annotationfont = params.annotationfont;
-			if (params.gchordfont) This.lines[This.lineNum].staff[This.staffNum].gchordfont = params.gchordfont;
-			if (params.tripletfont) This.lines[This.lineNum].staff[This.staffNum].tripletfont = params.tripletfont;
-			if (params.vocalfont) This.lines[This.lineNum].staff[This.staffNum].vocalfont = params.vocalfont;
+			if (params.annotationfont) This.setLineFont("annotationfont", params.annotationfont);
+			if (params.gchordfont) This.setLineFont("gchordfont", params.gchordfont);
+			if (params.tripletfont) This.setLineFont("tripletfont", params.tripletfont);
+			if (params.vocalfont) This.setLineFont("vocalfont", params.vocalfont);
 			if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
 			if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;
 			if (params.connectBarLines) This.lines[This.lineNum].staff[This.staffNum].connectBarLines = params.connectBarLines;
@@ -975,6 +977,28 @@ var Tune = function() {
 			this.startNewLine(params);
 		}
 	};
+
+	this.setRunningFont = function(type, font) {
+		// This is called at tune start to set the current default fonts so we know whether to record a change.
+		this.runningFonts[type] = font;
+	};
+
+	this.setLineFont = function(type, font) {
+		// If we haven't encountered the font type yet then we are using the default font so it doesn't
+		// need to be noted. If we have encountered it, then only record it if it is different from the last time.
+		if (this.runningFonts[type]) {
+			var isDifferent = false;
+			var keys = Object.keys(font);
+			for (var i = 0; i < keys.length; i++) {
+				if (this.runningFonts[type][keys[i]] !== font[keys[i]])
+					isDifferent = true;
+			}
+			if (isDifferent) {
+				this.lines[this.lineNum].staff[this.staffNum][type] = font;
+			}
+		}
+		this.runningFonts[type] = font;
+	}
 
 	this.setBarNumberImmediate = function(barNumber) {
 		// If this is called right at the beginning of a line, then correct the measure number that is already written.

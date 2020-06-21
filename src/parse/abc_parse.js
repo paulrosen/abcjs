@@ -1769,8 +1769,16 @@ var Parse = function() {
 					}
 					else
 						multilineVars.textBlock += ' ' + line;
-				} else
+				} else {
+					var wasInHeader = multilineVars.is_in_header;
 					parseLine(line);
+					if (wasInHeader && !multilineVars.is_in_header) {
+						tune.setRunningFont("annotationfont", multilineVars.annotationfont);
+						tune.setRunningFont("gchordfont", multilineVars.gchordfont);
+						tune.setRunningFont("tripletfont", multilineVars.tripletfont);
+						tune.setRunningFont("vocalfont", multilineVars.vocalfont);
+					}
+				}
 				multilineVars.iChar += line.length + 1;
 			});
 			var ph = 11*72;
