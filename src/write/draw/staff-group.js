@@ -51,8 +51,7 @@ function drawStaffGroup(renderer, params) {
 			debugPrint(staff1, 'volumeHeightAbove');
 			debugPrint(staff1, 'volumeHeightBelow');
 		}
-		if (staff1.bottom < 0)
-			renderer.moveY(spacing.STEP, -staff1.bottom);
+		renderer.moveY(spacing.STEP, -staff1.bottom);
 	}
 	var topLine; // these are to connect multiple staves. We need to remember where they are.
 	var bottomLine;
