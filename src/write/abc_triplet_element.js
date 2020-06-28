@@ -53,7 +53,7 @@ var TripletElem;
 			var beam = this.anchor1.parent.beam;
 			// if hasBeam is true, then the first and last element in the triplet have the same beam.
 			// We also need to check if the beam doesn't contain other notes so that `(3 dcdcc` will do a bracket.
-			if (beam.firstElement !== this.anchor1.parent || beam.lastElement !== this.anchor2.parent)
+			if (this.hasBeam && (beam.elems[0] !== this.anchor1.parent || beam.elems[beam.elems.length-1] !== this.anchor2.parent))
 				this.hasBeam = false;
 
 			if (this.hasBeam) {

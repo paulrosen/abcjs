@@ -66,7 +66,6 @@ var BeamElem;
 				this.duration *= firstElement.tripletMultiplier;
 			}
 			this.duration = Math.round(this.duration*1000)/1000;
-			this.firstElement = firstElement.abselem;
 		} else
 			this.duration = 0;
 	};
@@ -89,7 +88,6 @@ var BeamElem;
 		if (this.max === undefined || abselem.abcelem.maxpitch > this.max) {
 			this.max = abselem.abcelem.maxpitch;
 		}
-		this.lastElement = abselem;
 	};
 
 	var middleLine = 6;	// hardcoded 6 is B
