@@ -41,15 +41,10 @@
 //		Contains the starting text. This can be compared against the current text to see if anything changed.
 //
 
-/*global document, window, clearTimeout, setTimeout */
-
-var TuneBook = require('../api/abc_tunebook').TuneBook;
 var parseCommon = require('../parse/abc_common');
-var Parse = require('../parse/abc_parse');
-var TextPrinter = require('../transform/abc2abc_write');
-var EngraverController = require('../write/abc_engraver_controller');
 var SynthController = require('../synth/synth-controller');
 var supportsAudio = require('../synth/supports-audio');
+var renderAbc = require('../api/abc_tunebook_svg');
 
 // Polyfill for CustomEvent for old IE versions
 try {
@@ -158,18 +153,13 @@ EditArea.prototype.getElem = function() {
 //		adds or removes the class abc_textarea_readonly, and adds or removes the attribute readonly=yes
 // - setDirtyStyle(bool)
 //		adds or removes the class abc_textarea_dirty
-// - renderTune(abc, parserparams, div)
-//		Immediately renders the tune. (Useful for creating the SVG output behind the scenes, if div is hidden)
-//		string abc: the ABC text
-//		parserparams: params to send to the parser
-//		div: the HTML id to render to.
 // - modelChanged()
 //		Called when the model has been changed to trigger re-rendering
 // - parseABC()
 //		Called internally by fireChanged()
 //		returns true if there has been a change since last call.
 // - updateSelection()
-//		Called when the user has changed the selection. This calls the engraver_controller to show the selection.
+//		Called when the user has changed the selection. This calls the engraver to show the selection.
 // - fireSelectionChanged()
 //		Called by the textarea object when the user has changed the selection.
 // - paramChanged(engraverparams)
@@ -181,43 +171,49 @@ EditArea.prototype.getElem = function() {
 // - isDirty()
 //		Returns true or false, whether the textarea contains the same text that it started with.
 // - highlight(abcelem)
-//		Called by the engraver_controller to highlight an area.
+//		Called by the engraver to highlight an area.
 // - pause(bool)
 //		Stops the automatic rendering when the user is typing.
 //
 
-var Editor = function(editarea, params) {
-	// Copy all the options that will be passed through
-	this.abcjsParams = {};
+function gatherAbcParams(params) {
+	// There used to be a bunch of ways parameters can be passed in. This just simplifies it.
+	var abcjsParams = {};
 	var key;
 	if (params.abcjsParams) {
 		for (key in params.abcjsParams) {
 			if (params.abcjsParams.hasOwnProperty(key)) {
-				this.abcjsParams[key] = params.abcjsParams[key];
+				abcjsParams[key] = params.abcjsParams[key];
 			}
 		}
 	}
 	if (params.midi_options) {
 		for (key in params.midi_options) {
 			if (params.midi_options.hasOwnProperty(key)) {
-				this.abcjsParams[key] = params.midi_options[key];
+				abcjsParams[key] = params.midi_options[key];
 			}
 		}
 	}
 	if (params.parser_options) {
 		for (key in params.parser_options) {
 			if (params.parser_options.hasOwnProperty(key)) {
-				this.abcjsParams[key] = params.parser_options[key];
+				abcjsParams[key] = params.parser_options[key];
 			}
 		}
 	}
 	if (params.render_options) {
 		for (key in params.render_options) {
 			if (params.render_options.hasOwnProperty(key)) {
-				this.abcjsParams[key] = params.render_options[key];
+				abcjsParams[key] = params.render_options[key];
 			}
 		}
 	}
+	return abcjsParams;
+}
+
+var Editor = function(editarea, params) {
+	// Copy all the options that will be passed through
+	this.abcjsParams = gatherAbcParams(params);
 
 	if (params.indicate_changed)
 		this.indicate_changed = true;
@@ -230,9 +226,9 @@ var Editor = function(editarea, params) {
   this.editarea.addChangeListener(this);
 
   if (params.canvas_id) {
-    this.div = document.getElementById(params.canvas_id);
+    this.div = params.canvas_id;
   } else if (params.paper_id) {
-    this.div = document.getElementById(params.paper_id);
+    this.div = params.paper_id;
   } else {
     this.div = document.createElement("DIV");
     this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem());
@@ -269,21 +265,14 @@ var Editor = function(editarea, params) {
 		}
 	}
 
-  if (params.generate_warnings || params.warnings_id) {
-    if (params.warnings_id) {
+  if (params.generate_warnings && params.warnings_id) {
       this.warningsdiv = document.getElementById(params.warnings_id);
-    } else {
-      this.warningsdiv = this.div;
-    }
   }
 
   this.onchangeCallback = params.onchange;
 
-  if (params.gui) {
-    this.target = document.getElementById(editarea);
-    this.abcjsParams.editable = true;
-  }
-  this.oldt = "";
+  this.currentAbc = "";
+  this.tunes = [];
   this.bReentry = false;
   this.parseABC();
   this.modelChanged();
@@ -319,15 +308,6 @@ var Editor = function(editarea, params) {
   };
 };
 
-Editor.prototype.renderTune = function(abc, params, div) {
-  var tunebook = new TuneBook(abc);
-  var abcParser = Parse();
-  abcParser.parse(tunebook.tunes[0].abc, params, tunebook.tunes[0].startPos - tunebook.header.length); //TODO handle multiple tunes
-  var tune = abcParser.getTune();
-  var engraver_controller = new EngraverController(div, this.abcjsParams);
-  engraver_controller.engraveABC(tune);
-};
-
 Editor.prototype.redrawMidi = function() {
 	if (this.generate_midi && !this.midiPause) {
 		var event = new window.CustomEvent("generateMidi", {
@@ -351,38 +331,25 @@ Editor.prototype.redrawMidi = function() {
 };
 
 Editor.prototype.modelChanged = function() {
-  if (this.tunes === undefined) {
-    if (this.downloadMidi !== undefined)
-		this.downloadMidi.innerHTML = "";
-    if (this.inlineMidi !== undefined)
-		this.inlineMidi.innerHTML = "";
-    this.div.innerHTML = "";
-	return;
-  }
-
   if (this.bReentry)
     return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
   this.bReentry = true;
   this.timerId = null;
-  this.div.innerHTML = "";
-  this.engraver_controller = new EngraverController(this.div, this.abcjsParams);
-  this.engraver_controller.engraveABC(this.tunes);
-	this.tunes[0].engraver = this.engraver_controller;	// TODO-PER: We actually want an output object for each tune, not the entire controller. When refactoring, don't save data in the controller.
+  this.tunes = renderAbc(this.div, this.currentAbc, this.abcjsParams);
+  if (this.tunes.length > 0) {
+	  this.warnings = this.tunes[0].warnings;
+	  this.tunes[0].engraver.addSelectListener(this.highlight.bind(this));
+  }
 	this.redrawMidi();
 
   if (this.warningsdiv) {
     this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
   }
-  if (this.target) {
-    var textprinter = new TextPrinter(this.target, true);
-    textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
-  }
-  this.engraver_controller.addSelectListener(this.highlight.bind(this));
   this.updateSelection();
   this.bReentry = false;
 };
 
-// Call this to reparse in response to the printing parameters changing
+// Call this to reparse in response to the client changing the parameters on the fly
 Editor.prototype.paramChanged = function(engraverParams) {
 	if (engraverParams) {
 		for (var key in engraverParams) {
@@ -391,51 +358,33 @@ Editor.prototype.paramChanged = function(engraverParams) {
 			}
 		}
 	}
-	this.oldt = "";
+	this.currentAbc = "";
 	this.fireChanged();
 };
 
 // return true if the model has changed
 Editor.prototype.parseABC = function() {
   var t = this.editarea.getString();
-  if (t===this.oldt) {
+  if (t===this.currentAbc) {
     this.updateSelection();
     return false;
   }
 
-  this.oldt = t;
-  if (t === "") {
-	this.tunes = undefined;
-	this.warnings = "";
-	return true;
-  }
-  var tunebook = new TuneBook(t);
-
-  this.tunes = [];
-  this.startPos = [];
-  this.warnings = [];
-  for (var i=0; i<tunebook.tunes.length; i++) {
-    var abcParser = new Parse();
-    abcParser.parse(tunebook.tunes[i].abc, this.abcjsParams, tunebook.tunes[i].startPos - tunebook.header.length);
-    this.tunes[i] = abcParser.getTune();
-	  this.startPos[i] = tunebook.tunes[i].startPos;
-    var warnings = abcParser.getWarnings() || [];
-    for (var j=0; j<warnings.length; j++) {
-      this.warnings.push(warnings[j]);
-    }
-  }
+  this.currentAbc = t;
   return true;
 };
 
 Editor.prototype.updateSelection = function() {
   var selection = this.editarea.getSelection();
   try {
-    this.engraver_controller.rangeHighlight(selection.start, selection.end);
+  	if (this.tunes.length > 0 && this.tunes[0].engraver)
+	  this.tunes[0].engraver.rangeHighlight(selection.start, selection.end);
   } catch (e) {} // maybe printer isn't defined yet?
 	if (this.selectionChangeCallback)
 		this.selectionChangeCallback(selection.start, selection.end);
 };
 
+// Called when the textarea's selection is in the process of changing (after mouse down, dragging, or keyboard arrows)
 Editor.prototype.fireSelectionChanged = function() {
   this.updateSelection();
 };
@@ -470,7 +419,7 @@ Editor.prototype.setDirtyStyle = function(isDirty) {
     }
 };
 
-// call when abc text is changed and needs re-parsing
+// call when the textarea alerts us that the abc text is changed and needs re-parsing
 Editor.prototype.fireChanged = function() {
   if (this.bIsPaused)
     return;

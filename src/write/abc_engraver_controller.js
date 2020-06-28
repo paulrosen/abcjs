@@ -63,7 +63,6 @@ var EngraverController = function(paper, params) {
 		this.staffwidthScreen = 740; // TODO-PER: Not sure where this number comes from, but this is how it's always been.
 		this.staffwidthPrint = 680; // The number of pixels in 8.5", after 1cm of margin has been removed.
 	}
-  this.editable = params.editable || false;
 	this.listeners = [];
 	if (params.clickListener)
 		this.addSelectListener(params.clickListener);
