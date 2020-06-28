@@ -50,10 +50,14 @@ var TripletElem;
 		// TODO end and beginning of line (PER: P.S. I'm not sure this can happen: I think the parser will always specify both the start and end points.)
 		if (this.anchor1 && this.anchor2) {
 			this.hasBeam = !!this.anchor1.parent.beam && this.anchor1.parent.beam === this.anchor2.parent.beam;
+			var beam = this.anchor1.parent.beam;
+			// if hasBeam is true, then the first and last element in the triplet have the same beam.
+			// We also need to check if the beam doesn't contain other notes so that `(3 dcdcc` will do a bracket.
+			if (beam.firstElement !== this.anchor1.parent || beam.lastElement !== this.anchor2.parent)
+				this.hasBeam = false;
 
 			if (this.hasBeam) {
 				// If there is a beam then we don't need to draw anything except the text. The beam could either be above or below.
-				var beam = this.anchor1.parent.beam;
 				var left = beam.isAbove() ? this.anchor1.x + this.anchor1.w : this.anchor1.x;
 				this.yTextPos = beam.heightAtMidpoint(left,  this.anchor2.x);
 				this.yTextPos += beam.isAbove() ? 3 : -2; // This creates some space between the beam and the number.
