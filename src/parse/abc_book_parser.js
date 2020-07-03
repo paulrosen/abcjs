@@ -14,39 +14,37 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var parseCommon = require('./abc_common');
-
 var BookParser = function(book) {
 	"use strict";
 
   var This = this;
   var directives = "";
-  book = parseCommon.strip(book);
+  book = book.trim();
   var tunes = book.split("\nX:");
   for (var i = 1; i < tunes.length; i++)	// Put back the X: that we lost when splitting the tunes.
     tunes[i] = "X:" + tunes[i];
   // Keep track of the character position each tune starts with.
   var pos = 0;
   This.tunes = [];
-  parseCommon.each(tunes, function(tune) {
+  tunes.forEach(function(tune) {
     This.tunes.push({ abc: tune, startPos: pos});
     pos += tune.length + 1; // We also lost a newline when splitting, so count that.
   });
-  if (This.tunes.length > 1 && !parseCommon.startsWith(This.tunes[0].abc, 'X:')) {	// If there is only one tune, the X: might be missing, otherwise assume the top of the file is "intertune"
+  if (This.tunes.length > 1 && !This.tunes[0].abc.startsWith('X:')) {	// If there is only one tune, the X: might be missing, otherwise assume the top of the file is "intertune"
     // There could be file-wide directives in this, if so, we need to insert it into each tune. We can probably get away with
     // just looking for file-wide directives here (before the first tune) and inserting them at the bottom of each tune, since
     // the tune is parsed all at once. The directives will be seen before the engraver begins processing.
     var dir = This.tunes.shift();
     var arrDir = dir.abc.split('\n');
-    parseCommon.each(arrDir, function(line) {
-      if (parseCommon.startsWith(line, '%%'))
+    arrDir.forEach(function(line) {
+      if (line.startsWith('%%'))
         directives += line + '\n';
     });
   }
   This.header = directives;
 
   // Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
-  parseCommon.each(This.tunes, function(tune) {
+  This.tunes.forEach(function(tune) {
     var end = tune.abc.indexOf('\n\n');
     if (end > 0)
       tune.abc = tune.abc.substring(0, end);
