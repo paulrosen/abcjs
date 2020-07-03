@@ -14,6 +14,12 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+/**
+ * BookParser takes a string of abc tunes and returns an array of tunes ready to be passed to the
+ * TuneParser.
+ * A book is split by the 'X:' header and we extract the title and tune id to make tunes easir to
+ * find later.
+ */
 const BookParser = function(book) {
 
   var directives = "";
