@@ -14,7 +14,7 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var BookParser = function(book) {
+const BookParser = function(book) {
 
   var directives = "";
   book = book.trim();
@@ -63,4 +63,4 @@ var BookParser = function(book) {
   return tunes;
 };
 
-module.exports = BookParser
+export default BookParser
