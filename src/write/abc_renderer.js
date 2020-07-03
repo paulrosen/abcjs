@@ -15,7 +15,7 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-/*global Math, console */
+/*global Math */
 
 var spacing = require('./abc_spacing');
 var Svg = require('./svg');
@@ -240,7 +240,6 @@ Renderer.prototype.addStaffPadding = function(lastStaffGroup, thisStaffGroup) {
  * @param {object} abctune
  */
 Renderer.prototype.engraveTopText = function(width, abctune) {
-	var el;
 	if (abctune.metaText.header && this.isPrint) {
 		// Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
 		// This text goes above the margin, so we'll temporarily move up.
@@ -325,6 +324,7 @@ Renderer.prototype.wrapInAbsElem = function(abcelem, klass, creator) {
  * @param {object} abctune
  */
 Renderer.prototype.engraveExtraText = function(width, abctune) {
+	var el;
 	this.controller.classes.reset();
 
 	if (abctune.metaText.unalignedWords && abctune.metaText.unalignedWords.length > 0) {

@@ -15,7 +15,6 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /*global document */
-/*global window, ABCJS, console */
 
 var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
@@ -98,7 +97,6 @@ var tunebook = {};
 	};
 
 	tunebook.parseOnly = function(abc, params) {
-		var tunes = [];
 		var numTunes = tunebook.numberOfTunes(abc);
 
 		// this just needs to be passed in because this tells the engine how many tunes to process.

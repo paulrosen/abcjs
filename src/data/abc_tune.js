@@ -101,7 +101,6 @@ var Tune = function() {
 					for (var j = 0; j < this.lines[i].staff.length; j++) {
 						for (var v = 0; v < this.lines[i].staff[j].voices.length; v++) {
 							var voice = this.lines[i].staff[j].voices[v];
-							var hasNote = false;
 							var tripletMultiplier = 1;
 							for (var el = 0; el < voice.length; el++) {
 								var isSpacer = voice[el].rest && voice[el].rest.type === "spacer";
@@ -1308,7 +1307,7 @@ var Tune = function() {
 			for (var elem = 0; elem < elements.length; elem++) {
 				var element = elements[elem].elem;
 				if (element.abcelem.el_type === "tempo") {
-					var bpm = this.getBpm(element.abcelem);
+					bpm = this.getBpm(element.abcelem);
 					var beatLength = this.getBeatLength();
 					var beatsPerSecond = bpm / 60;
 					timeDivider = beatLength * beatsPerSecond;

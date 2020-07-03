@@ -29,7 +29,7 @@ var sequence;
 	sequence = function(abctune, options) {
 		// Global options
 		options = options || {};
-		var qpm = undefined;
+		var qpm;
 		var program = options.program || 0;	// The program if there isn't a program specified.
 		var transpose = options.midiTranspose || 0;
 		var channel = options.channel || 0;

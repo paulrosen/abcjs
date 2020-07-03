@@ -475,6 +475,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			gracebeam.mainNote = abselem;	// this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
 		}
 
+    var i;
 		var graceoffsets = [];
 		for (i = elem.gracenotes.length - 1; i >= 0; i--) { // figure out where to place each gracenote
 			roomtaken += 10;
@@ -484,7 +485,6 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			}
 		}
 
-		var i;
 		for (i = 0; i < elem.gracenotes.length; i++) {
 			var gracepitch = elem.gracenotes[i].verticalPos;
 
@@ -764,7 +764,6 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   var symbolWidth = 0;
   var additionalLedgers = []; // PER: handle the case of [bc'], where the b doesn't have a ledger line
 
-  var i;
   var dir;
 
 	var duration = getDuration(elem);
@@ -855,7 +854,6 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
   // TODO scale the dot as well
   var pitch = pitchelem.verticalPos;
   var notehead;
-  var i;
   var accidentalshiftx = 0;
   var newDotShiftX = 0;
   var extraLeft = 0;
@@ -975,10 +973,11 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 			abselem.startTie = true;
 		}
 
+		var slur;
+		var slurid;
 		if (pitchelem.endSlur) {
 			for (var i=0; i<pitchelem.endSlur.length; i++) {
-				var slurid = pitchelem.endSlur[i];
-				var slur;
+				slurid = pitchelem.endSlur[i];
 				if (this.slurs[slurid]) {
 					slur = this.slurs[slurid];
 					slur.setEndAnchor(notehead);
@@ -1002,8 +1001,8 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 
 		if (pitchelem.startSlur) {
 			for (i=0; i<pitchelem.startSlur.length; i++) {
-				var slurid = pitchelem.startSlur[i].label;
-				var slur = new TieElem({ anchor1: notehead, stemDir: this.stemdir, voiceNumber: voiceNumber});
+				slurid = pitchelem.startSlur[i].label;
+				slur = new TieElem({ anchor1: notehead, stemDir: this.stemdir, voiceNumber: voiceNumber});
 				if (hint) slur.setHint();
 				this.slurs[slurid]=slur;
 				voice.addOther(slur);

@@ -6,7 +6,6 @@ var addChord;
 (function () {
 	"use strict";
 	addChord = function (getTextSize, abselem, elem, roomTaken, roomTakenRight) {
-		var chordMargin = 8; // If there are chords next to each other, this is how close they can get.
 		for (var i = 0; i < elem.chord.length; i++) {
 			var chord = elem.chord[i];
 			var x = 0;

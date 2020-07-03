@@ -459,10 +459,6 @@ var parseDirective = {};
 	var midiCmdParam5Integer = [
 		"drone"
 	];
-	var midiCmdParam1IntegerOptionalOctave = [
-		"bassprog",
-		"chordprog"
-	];
 	var midiCmdParam1String1Integer = [
 		"portamento"
 	];

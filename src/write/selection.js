@@ -144,7 +144,6 @@ function findElementInHistory(history, el) {
 function findElementByCoord(self, x, y) {
 	var minDistance = 9999999;
 	var closestIndex = -1;
-	var chosenEl;
 	for (var i = 0; i < self.history.length && minDistance > 0; i++) {
 		var el = self.history[i];
 		if (!el.selectable)
