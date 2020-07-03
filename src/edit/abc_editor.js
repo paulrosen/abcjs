@@ -113,6 +113,8 @@ var Editor = function(editarea, params) {
   	this.selectionChangeCallback = params.selectionChangeCallback;
   }
 
+  this.abcjsParams.clickListener = this.highlight.bind(this);
+
   if (params.synth) {
   	if (supportsAudio()) {
 	    this.synth = {
@@ -213,7 +215,6 @@ Editor.prototype.modelChanged = function() {
   this.tunes = renderAbc(this.div, this.currentAbc, this.abcjsParams);
   if (this.tunes.length > 0) {
 	  this.warnings = this.tunes[0].warnings;
-	  this.tunes[0].engraver.addSelectListener(this.highlight.bind(this));
   }
 	this.redrawMidi();
 
