@@ -29,7 +29,8 @@ var BookParser = function(book) {
     tunes.push({ abc: tune, startPos: pos});
     pos += tune.length + 1; // We also lost a newline when splitting, so count that.
   });
-  if (tunes.length > 1 && !tunes[0].abc.startsWith('X:')) {	// If there is only one tune, the X: might be missing, otherwise assume the top of the file is "intertune"
+  if (tunes.length > 1 && !tunes[0].abc.startsWith('X:')) {
+    // If there is only one tune, the X: might be missing, otherwise assume the top of the file is "intertune"
     // There could be file-wide directives in this, if so, we need to insert it into each tune. We can probably get away with
     // just looking for file-wide directives here (before the first tune) and inserting them at the bottom of each tune, since
     // the tune is parsed all at once. The directives will be seen before the engraver begins processing.
@@ -44,9 +45,7 @@ var BookParser = function(book) {
 
   // Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
   tunes.forEach(function(tune) {
-    var end = tune.abc.indexOf('\n\n');
-    if (end > 0)
-      tune.abc = tune.abc.substring(0, end);
+    tune.abc = tune.abc.trimEnd();
     tune.pure = tune.abc;
     tune.abc = directives + tune.abc;
 
