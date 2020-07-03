@@ -65,6 +65,7 @@ var BookParser = function(book) {
     var id = tune.pure.substring(2, tune.pure.indexOf("\n"));
     tune.id = id.replace(/^\s+|\s+$/g, '');
   });
+  return This.tunes;
 };
 
 module.exports = BookParser

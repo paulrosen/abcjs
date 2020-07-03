@@ -34,7 +34,7 @@ var tunebook = {};
 	};
 
 	var TuneBook = tunebook.TuneBook = function(book) {
-    BookParser.bind(this)(book)
+    this.tunes = BookParser(book)
 	};
 
 	TuneBook.prototype.getTuneById = function(id) {
