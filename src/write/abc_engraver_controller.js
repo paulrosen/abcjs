@@ -23,6 +23,7 @@ var Renderer = require('./abc_renderer');
 var FreeText = require('./free-text');
 var Separator = require('./separator');
 var Subtitle = require('./subtitle');
+var TopText = require('./top-text');
 var setupSelection = require('./selection');
 var layout = require('./layout/layout');
 var Classes = require('./classes');
@@ -226,6 +227,8 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 		scale = undefined;
 	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
 	this.adjustNonScaledItems(scale);
+
+	abctune.topText = new TopText(abctune.metaText, abctune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
 
 	// Generate the raw staff line data
 	var i;

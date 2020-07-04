@@ -416,10 +416,6 @@ Renderer.prototype.moveY = function (em, numLines) {
 	this.y += em*numLines;
 };
 
-Renderer.prototype.skipSpaceY = function () {
-	this.y += this.space;
-};
-
 // Call with 'kind' being the font type to use,
 // if marginBottom === null then don't increment the Y after printing, otherwise that is the extra number of em's to leave below the line.
 // and alignment being "start", "middle", or "end".

@@ -5,7 +5,7 @@ var spacing = require('../abc_spacing');
 
 function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale) {
 	renderer.topMargin(abcTune);
-	renderer.engraveTopText(width, abcTune);
+	nonMusic(renderer, abcTune.topText);
 	renderer.addMusicPadding();
 
 	var staffgroups = [];
