@@ -1758,9 +1758,9 @@ var Parse = function() {
 					}
 					else {
 						if (parseCommon.startsWith(line, "%%"))
-							multilineVars.textBlock += ' ' + line.substring(2);
+							multilineVars.textBlock += line.substring(2) + "\n";
 						else
-							multilineVars.textBlock += ' ' + line;
+							multilineVars.textBlock += line + "\n";
 					}
 				} else if (multilineVars.inPsBlock) {
 					if (parseCommon.startsWith(line, "%%endps")) {

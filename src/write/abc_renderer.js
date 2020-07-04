@@ -397,39 +397,6 @@ Renderer.prototype.engraveExtraText = function(width, abctune) {
 	}
 };
 
-Renderer.prototype.outputFreeText = function (text, vskip) {
-	this.controller.currentAbsEl = { tuneNumber: this.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "freeText", startChar: -1, endChar: -1, text: text }};
-	if (vskip)
-		this.moveY(vskip);
-	var hash = this.controller.getFontAndAttr.calc('textfont', 'defined-text');
-	if (text === "") {	// we do want to print out blank lines if they have been specified.
-		this.moveY(hash.attr['font-size'] * 2); // move the distance of the line, plus the distance of the margin, which is also one line.
-	} else if (typeof text === 'string') {
-		this.moveY(hash.attr['font-size']/2); // TODO-PER: move down some - the y location should be the top of the text, but we output text specifying the center line.
-		this.outputTextIf(this.padding.left, text, 'textfont', 'defined-text', 0, 0, "start");
-	} else {
-		var str = "";
-		var isCentered = false; // The structure is wrong here: it requires an array to do centering, but it shouldn't have.
-		for (var i = 0; i < text.length; i++) {
-			if (text[i].font)
-				str += "FONT(" + text[i].font + ")";
-			str += text[i].text;
-			if (text[i].center)
-				isCentered = true;
-		}
-		var alignment = isCentered ? 'middle' : 'start';
-		var x = isCentered ? this.controller.width / 2 : this.padding.left;
-		this.outputTextIf(x, str, 'textfont', 'defined-text', 0, 1, alignment);
-	}
-};
-
-/**
- * Output an extra subtitle that is defined later in the tune.
- */
-Renderer.prototype.outputSubtitle = function (width, subtitle) {
-	this.outputTextIf(this.padding.left + width / 2, subtitle, 'subtitlefont', 'text subtitle', this.spacing.subtitle, 0, 'middle');
-};
-
 /**
  * Calculates the y for a given pitch value (relative to the stave the renderer is currently printing)
  * @param {number} ofs pitch value (bottom C on a G clef = 0, D=1, etc.)

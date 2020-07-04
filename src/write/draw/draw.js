@@ -1,6 +1,6 @@
 var drawStaffGroup = require('./staff-group');
-var drawSeparator = require('./separator');
 var setPaperSize = require('./set-paper-size');
+var nonMusic = require('./non-music');
 var spacing = require('../abc_spacing');
 
 function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale) {
@@ -17,16 +17,10 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale) {
 				renderer.moveY(abcLine.vskip);
 			}
 			if (staffgroups.length >= 1)
-				renderer.addStaffPadding(staffgroups[staffgroups.length-1], abcLine.staffGroup);
+				renderer.addStaffPadding(staffgroups[staffgroups.length - 1], abcLine.staffGroup);
 			staffgroups.push(engraveStaffLine(renderer, abcLine.staffGroup));
-		} else if (abcLine.subtitle && line !== 0) {
-			renderer.outputSubtitle(width, abcLine.subtitle);
-		} else if (abcLine.text !== undefined) {
-			renderer.outputFreeText(abcLine.text, abcLine.vskip);
-		} else if (abcLine.separator !== undefined && abcLine.separator.lineLength) {
-			renderer.moveY(abcLine.separator.spaceAbove);
-			drawSeparator(renderer, abcLine.separator.lineLength);
-			renderer.moveY(abcLine.separator.spaceBelow);
+		} else if (abcLine.nonMusic) {
+			nonMusic(renderer, abcLine.nonMusic);
 		}
 	}
 
