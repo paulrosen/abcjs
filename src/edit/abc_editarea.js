@@ -58,7 +58,6 @@ try {
 }
 
 var EditArea = function(textareaid) {
-  console.log(textareaid);
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
   this.isDragging = false;
