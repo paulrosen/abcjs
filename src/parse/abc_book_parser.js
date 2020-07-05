@@ -15,9 +15,9 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
- * BookParser takes a string of abc tunes and returns an array of tunes ready to be passed to the
- * TuneParser.
- * A book is split by the 'X:' header and we extract the title and tune id to make tunes easir to
+ * BookParser takes a string of abc tunes and returns an object consisting of a header string and
+ * an array of tune objects to later be passed to the tune parser.
+ * A book is split by the 'X:' header and we extract the title and tune id to make tunes easier to
  * find later.
  */
 const BookParser = function(book) {
