@@ -1,6 +1,6 @@
 var version = require('./version');
-var animation = require('./src/api/abc_animation');
-var tuneBook = require('./src/api/abc_tunebook');
+var animation = require('./lib/api/abc_animation');
+var tuneBook = require('./lib/api/abc_tunebook');
 
 var abcjs = {};
 
@@ -14,23 +14,23 @@ Object.keys(tuneBook).forEach(function (key) {
 	abcjs[key] = tuneBook[key];
 });
 
-abcjs.renderAbc = require('./src/api/abc_tunebook_svg');
-abcjs.TimingCallbacks = require('./src/api/abc_timing_callbacks');
+abcjs.renderAbc = require('./lib/api/abc_tunebook_svg');
+abcjs.TimingCallbacks = require('./lib/api/abc_timing_callbacks');
 
-var glyphs = require('./src/write/abc_glyphs');
+var glyphs = require('./lib/write/abc_glyphs');
 abcjs.setGlyph = glyphs.setSymbol;
 
-var CreateSynth = require('./src/synth/create-synth');
-var instrumentIndexToName = require('./src/synth/instrument-index-to-name');
-var pitchToNoteName = require('./src/synth/pitch-to-note-name');
-var SynthSequence = require('./src/synth/synth-sequence');
-var CreateSynthControl = require('./src/synth/create-synth-control');
-var registerAudioContext = require('./src/synth/register-audio-context');
-var activeAudioContext = require('./src/synth/active-audio-context');
-var supportsAudio = require('./src/synth/supports-audio');
-var playEvent = require('./src/synth/play-event');
-var SynthController = require('./src/synth/synth-controller');
-var getMidiFile = require('./src/synth/get-midi-file');
+var CreateSynth = require('./lib/synth/create-synth');
+var instrumentIndexToName = require('./lib/synth/instrument-index-to-name');
+var pitchToNoteName = require('./lib/synth/pitch-to-note-name');
+var SynthSequence = require('./lib/synth/synth-sequence');
+var CreateSynthControl = require('./lib/synth/create-synth-control');
+var registerAudioContext = require('./lib/synth/register-audio-context');
+var activeAudioContext = require('./lib/synth/active-audio-context');
+var supportsAudio = require('./lib/synth/supports-audio');
+var playEvent = require('./lib/synth/play-event');
+var SynthController = require('./lib/synth/synth-controller');
+var getMidiFile = require('./lib/synth/get-midi-file');
 
 abcjs.synth = {
 	CreateSynth: CreateSynth,
@@ -46,7 +46,7 @@ abcjs.synth = {
 	getMidiFile: getMidiFile,
 };
 
-abcjs['Editor'] = require('./src/edit/abc_editor');
-abcjs['EditArea'] = require('./src/edit/abc_editarea');
+abcjs['Editor'] = require('./lib/edit/abc_editor');
+abcjs['EditArea'] = require('./lib/edit/abc_editarea');
 
 module.exports = abcjs;

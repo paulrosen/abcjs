@@ -1,2 +1,2 @@
 require('./license');
-window.ABCJS = require('../index.js');
+window.ABCJS = require('../basic.js');
