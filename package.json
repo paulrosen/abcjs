@@ -12,7 +12,7 @@
     "build:plugin": "npm run webpack -- --env.mode production --env.type plugin",
     "build:plugin-midi": "npm run webpack -- --env.mode production --env.type plugin-midi",
     "fix-versions": "./fix-versions.sh 6.0.0-beta.12",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "build:analyze": "npm run build:basic -- --env.presets analyze"
@@ -43,6 +43,7 @@
     "@vuepress/shared-utils": "1.5.0",
     "babel-loader": "8.1.0",
     "compression-webpack-plugin": "4.0.0",
+    "jest": "^26.1.0",
     "serialize-javascript": "3.1.0",
     "svg-inline-loader": "0.8.2",
     "vuepress": "1.5.0",
