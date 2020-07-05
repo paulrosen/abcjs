@@ -1,6 +1,6 @@
 function TopText(metaText, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
 	this.rows = [];
-//Renderer.prototype.outputTextIf = function(x, str, kind, klass, marginTop, marginBottom, alignment, noClass) {
+
 	if (metaText.header && isPrint) {
 		// Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
 		// This text goes above the margin, so we'll temporarily move up.

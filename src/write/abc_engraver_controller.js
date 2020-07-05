@@ -24,6 +24,7 @@ var FreeText = require('./free-text');
 var Separator = require('./separator');
 var Subtitle = require('./subtitle');
 var TopText = require('./top-text');
+var BottomText = require('./bottom-text');
 var setupSelection = require('./selection');
 var layout = require('./layout/layout');
 var Classes = require('./classes');
@@ -80,7 +81,6 @@ var EngraverController = function(paper, params) {
 
 EngraverController.prototype.reset = function() {
 	this.selected = [];
-	this.ingroup = false;
 	this.staffgroups = [];
 	if (this.engraver)
 		this.engraver.reset();
@@ -111,8 +111,6 @@ EngraverController.prototype.engraveABC = function(abctunes, tuneNumber) {
 	  this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
     this.engraveTune(abctunes[i], tuneNumber);
   }
-	if (this.renderer.doRegression)
-		return this.renderer.regressionLines.join("\n");
 };
 
 /**
@@ -255,6 +253,7 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 			abcLine.nonMusic = new Separator(abcLine.separator.spaceAbove, abcLine.separator.lineLength, abcLine.separator.spaceBelow);
 		}
 	}
+	abctune.bottomText = new BottomText(abctune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
 
 	// Adjust the x-coordinates to their absolute positions
 	var maxWidth = layout(this.renderer, abctune, this.width, this.space);

@@ -9,13 +9,6 @@ var renderText = require('./text');
 var drawAbsolute = require('./absolute');
 var parseCommon = require('../../parse/abc_common');
 
-var crescendoElem = require('../abc_crescendo_element');
-var dynamicDecorationElem = require('../abc_dynamic_decoration');
-var tripletElem = require('../abc_triplet_element');
-var endingElem = require('../abc_ending_element');
-var tieElem = require('../abc_tie_element');
-var tempoElem = require('../abc_tempo_element');
-
 function drawVoice(renderer, params, bartop) {
 	var width = params.w-1;
 	renderer.staffbottom = params.staff.bottom;
@@ -35,8 +28,8 @@ function drawVoice(renderer, params, bartop) {
 			justInitializedMeasureNumber = true;
 		}
 		renderer.controller.currentAbsEl = child;
-		switch (child.constructor) {
-			case tempoElem:
+		switch (child.type) {
+			case "TempoElem":
 				child.elemset = drawTempo(renderer, child);
 				break;
 			default:
@@ -62,20 +55,20 @@ function drawVoice(renderer, params, bartop) {
 		if (child === 'bar') {
 			renderer.controller.classes.incrMeasure();
 		} else {
-			switch (child.constructor) {
-				case crescendoElem:
+			switch (child.type) {
+				case "CrescendoElem":
 					child.elemset = drawCrescendo(renderer, child);
 					break;
-				case dynamicDecorationElem:
+				case "DynamicDecoration":
 					child.elemset = drawDynamics(renderer, child);
 					break;
-				case tripletElem:
+				case "TripletElem":
 					drawTriplet(renderer, child);
 					break;
-				case endingElem:
+				case "EndingElem":
 					child.elemset = drawEnding(renderer, child, params.startx + 10, width);
 					break;
-				case tieElem:
+				case "TieElem":
 					child.elemset = drawTie(renderer, child, params.startx + 10, width);
 					break;
 				default:

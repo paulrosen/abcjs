@@ -8,7 +8,7 @@ var elementGroup;
 	"use strict";
 
 	function Group() {
-
+		this.ingroup = false;
 	}
 
 	Group.prototype.beginGroup = function (paper, controller) {

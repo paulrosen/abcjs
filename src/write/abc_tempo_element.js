@@ -23,6 +23,7 @@ var TempoElement;
 	var totalHeightInPitches = 5;
 
 	TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
+		this.type = "TempoElement";
 		this.tempo = tempo;
 		this.tempo.type = "tempo"; /// TODO-PER: this should be set earlier, in the parser, probably.
 		this.tuneNumber = tuneNumber;

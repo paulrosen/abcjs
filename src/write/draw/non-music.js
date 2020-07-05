@@ -37,6 +37,11 @@ function nonMusic(renderer, obj) {
 			}
 		} else if (row.separator) {
 			drawSeparator(renderer, row.separator)
+		} else if (row.startGroup) {
+			renderer.paper.openGroup({klass: row.klass});
+		} else if (row.endGroup) {
+			// TODO-PER: also create a history element with the title "row.endGroup"
+			var g = renderer.paper.closeGroup();
 		}
 	}
 }
