@@ -59,12 +59,12 @@ const BookParser = function(book) {
     var title = tune.pure.split("T:");
     if (title.length > 1) {
       title = title[1].split("\n");
-      tune.title = title[0].replace(/^\s+|\s+$/g, '');
+      tune.title = title[0].trim();
     }
 
     // for the user's convenience, parse and store the id separately. The id is between the first X: and the next \n
     var id = tune.pure.substring(2, tune.pure.indexOf("\n"));
-    tune.id = id.replace(/^\s+|\s+$/g, '');
+    tune.id = id.trim();
   });
   return { header, tunes };
 };
