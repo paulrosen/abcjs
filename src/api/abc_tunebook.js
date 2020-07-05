@@ -19,7 +19,7 @@
 
 var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
-var BookParser = require('../parse/abc_book_parser');
+import BookParser from '../parse/abc_book_parser';
 
 var tunebook = {};
 
