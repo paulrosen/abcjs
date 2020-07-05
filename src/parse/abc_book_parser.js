@@ -46,7 +46,7 @@ const BookParser = function(book) {
         directives += line + '\n';
     });
   }
-  header = directives;
+  var header = directives;
 
   // Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
   tunes.forEach(function(tune) {
@@ -66,7 +66,7 @@ const BookParser = function(book) {
     var id = tune.pure.substring(2, tune.pure.indexOf("\n"));
     tune.id = id.replace(/^\s+|\s+$/g, '');
   });
-  return tunes;
+  return { header, tunes };
 };
 
 export default BookParser
