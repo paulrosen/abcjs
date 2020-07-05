@@ -50,7 +50,7 @@ const BookParser = function(book) {
 
   // Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
   tunes.forEach(function(tune) {
-    tune.abc = tune.abc.trimEnd() + "\n";
+    tune.abc = tune.abc.trimEnd();
     tune.pure = tune.abc;
     tune.abc = directives + tune.abc;
 
