@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "webpack": "webpack",
-    "build": "npm run fix-versions && npm run build:basic-min && npm run build:basic && npm run build:midi && npm run build:plugin && npm run build:plugin-midi",
+    "build": "npm run fix-versions && npm run build:es5 && npm run build:basic-min && npm run build:basic && npm run build:midi && npm run build:plugin && npm run build:plugin-midi",
+    "build:es5": "babel src -d lib",
     "build:basic": "npm run webpack -- --env.mode development --env.type basic",
     "build:basic-min": "npm run webpack -- --env.mode production --env.type basic",
     "build:midi": "npm run webpack -- --env.mode production --env.type midi",
@@ -38,6 +39,7 @@
   },
   "homepage": "https://abcjs.net",
   "devDependencies": {
+    "@babel/cli": "^7.10.4",
     "@babel/core": "7.10.2",
     "@babel/preset-env": "7.10.2",
     "@vuepress/shared-utils": "1.5.0",
