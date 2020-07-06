@@ -3,6 +3,7 @@
   "version": "6.0.0-beta.12",
   "description": "Renderer for abc music notation",
   "main": "index.js",
+  "module": "basic.js",
   "scripts": {
     "webpack": "webpack",
     "build": "npm run fix-versions && npm run build:es5 && npm run build:basic-min && npm run build:basic && npm run build:midi && npm run build:plugin && npm run build:plugin-midi",
@@ -45,6 +46,7 @@
     "@vuepress/shared-utils": "1.5.0",
     "babel-loader": "8.1.0",
     "compression-webpack-plugin": "4.0.0",
+    "core-js": "^3.6.5",
     "serialize-javascript": "3.1.0",
     "svg-inline-loader": "0.8.2",
     "vuepress": "1.5.0",
@@ -58,5 +60,6 @@
   "dependencies": {
     "abcjs": "6.0.0-beta.12",
     "midi": "https://github.com/paulrosen/MIDI.js.git#abcjs"
-  }
+  },
+  "browserslist": "defaults"
 }
