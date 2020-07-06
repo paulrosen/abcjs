@@ -18,6 +18,7 @@ var highlight = require('./highlight');
 var unhighlight = require('./unhighlight');
 
 var TieElem = function TieElem(options) {
+	this.type = "TieElem";
 //	console.log("constructor", options.anchor1 ? options.anchor1.pitch : "N/A", options.anchor2 ? options.anchor2.pitch : "N/A", options.isTie, options.isGrace);
 	this.anchor1 = options.anchor1; // must have a .x and a .pitch, and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
 	this.anchor2 = options.anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)

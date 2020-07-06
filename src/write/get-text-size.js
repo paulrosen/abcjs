@@ -12,7 +12,29 @@ GetTextSize.prototype.attr = function(type, klass) {
 };
 
 GetTextSize.prototype.calc = function(text, type, klass, el) {
-	var hash = this.attr(type, klass);
+	var hash;
+	// This can be passed in either a string or a font. If it is a string it names one of the standard fonts.
+	if (typeof type === 'string')
+		hash = this.attr(type, klass);
+	else {
+		hash = {
+			font: {
+				face: type.face,
+				size: type.size,
+				decoration: type.decoration,
+				style: type.style,
+				weight: type.weight
+			},
+			attr: {
+				"font-size": type.size,
+				"font-style": type.style,
+				"font-family": type.face,
+				"font-weight": type.weight,
+				"text-decoration": type.decoration,
+				"class": this.getFontAndAttr.classes.generate(klass)
+			}
+		}
+	}
 	var size = this.svg.getTextSize(text, hash.attr, el);
 	if (hash.font.box) {
 		// Add padding and an equal margin to each side.

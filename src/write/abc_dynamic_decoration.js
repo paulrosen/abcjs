@@ -17,6 +17,7 @@
 var spacing = require('./abc_spacing');
 
 var DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
+	this.type = "DynamicDecoration";
 	this.anchor = anchor;
 	this.dec = dec;
 	if (position === 'below')
