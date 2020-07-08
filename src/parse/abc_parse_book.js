@@ -22,7 +22,8 @@ var BookParser = function(book) {
 	var directives = "";
 	book = parseCommon.strip(book);
 	var tuneStrings = book.split("\nX:");
-	for (var i = 1; i < tuneStrings.length; i++)	// Put back the X: that we lost when splitting the tunes.
+	// Put back the X: that we lost when splitting the tunes.
+	for (var i = 1; i < tuneStrings.length; i++)
 		tuneStrings[i] = "X:" + tuneStrings[i];
 	// Keep track of the character position each tune starts with.
 	var pos = 0;
