@@ -34,7 +34,9 @@ var tunebook = {};
 	};
 
 	var TuneBook = tunebook.TuneBook = function(book) {
-		ParseBook.bind(this)(book);
+		var parsed = ParseBook(book);
+		this.header = parsed.header;
+		this.tunes = parsed.tunes;
 	};
 
 	TuneBook.prototype.getTuneById = function(id) {
