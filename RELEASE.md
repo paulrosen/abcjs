@@ -1,3 +1,66 @@
+# Version 6.0.0-beta.13
+
+## Bugs
+* Fix staff spacing bug when nothing is below the staff (like with bass clef only containing high notes)
+
+* If a triplet is beamed with anything else, add a bracket.
+
+* Fix supportsAudio() so it always return a bool
+
+* allow more than one brace on a system
+
+* Don't start dragging a note unless only the main mouse button is clicked.
+
+* Don't crash audio if the time signature is malformed.
+
+* Fix tempo on 9/4 and 12/4 meters
+
+* Restore staccato note length
+
+* fix bug in audio transposing middle C
+
+* fix placement and sizing of text and the text box
+
+* fix bug with sizing gchordfont
+
+* Fix some crashes and bugs in the visible audio control.
+
+## Features
+* Calculate tempo using passed in bpm if the millisecondsPerMeasure is not supplied.
+
+* Refactor the editor to use renderAbc so that all the renderAbc functionality is available.
+
+* allow multiple lines on a voice name
+
+* center the voice name when there is one name in a brace.
+
+* Implement vskip for regular music lines.
+
+* allow changing gchordfont in the middle of the tune
+
+* Create chords from whichever voice chords are encountered first.
+
+* Get the octave clefs to sound in the correct octave.
+
+## Documentation
+* update example to show onSvgPerLine and use new audio.
+
+* Fix example links in docs.
+
+* Add example for playing synth with no visual music.
+
+* Fix midi download link on full synth example.
+
+## Refactoring
+
+* split tunebook from tunebook parsing.
+
+* More refactoring of the drawing code.
+
+* separate bottom text into creation/drawing stages; cut down on dependencies in the draw functions.
+
+* separate editarea from editor to allow function redefinitions
+
 # Version 6.0.0-beta.12
 
 ## Bugs
