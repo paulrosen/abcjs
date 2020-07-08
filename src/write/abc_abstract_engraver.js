@@ -475,7 +475,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			gracebeam.mainNote = abselem;	// this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
 		}
 
-    var i;
+		var i;
 		var graceoffsets = [];
 		for (i = elem.gracenotes.length - 1; i >= 0; i--) { // figure out where to place each gracenote
 			roomtaken += 10;
