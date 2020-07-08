@@ -33,6 +33,7 @@
 
 		function load() {
 			// First draw the music - this supplies an object that has a lot of information about how to create the synth.
+			// NOTE: If you want just the sound without showing the music, use "*" instead of "paper" in the renderAbc call.
 			var visualObj = ABCJS.renderAbc("paper", abc, {
 				responsive: "resize" })[0];
 
