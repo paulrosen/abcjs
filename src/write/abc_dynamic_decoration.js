@@ -15,6 +15,7 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
+	this.type = "DynamicDecoration";
 	this.anchor = anchor;
 	this.dec = dec;
 	if (position === 'below')

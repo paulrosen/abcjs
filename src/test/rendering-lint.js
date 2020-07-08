@@ -13,10 +13,7 @@ function lintOne(history, abcString) {
 	var originalText = "``";
 	if (history.absEl && history.absEl.abcelem && history.absEl.abcelem.startChar >= 0)
 		originalText = '`' + abcString.substring(history.absEl.abcelem.startChar, history.absEl.abcelem.endChar) + '`';
-	if (history.selectable)
-		originalText += " selectable";
-	else
-		originalText += " not-selectable";
+	originalText += " selectable";
 	if (history.isDraggable)
 		originalText += " draggable";
 	else
@@ -105,6 +102,8 @@ function listAbsElement(absEl, indent) {
 		var item = absEl[keys[i]];
 		switch(keys[i]) {
 			case "abcelem":
+			case "highlight":
+			case "unhighlight":
 				break;
 			case "elemset":
 				// List this at the bottom
@@ -134,6 +133,24 @@ function listAbsElement(absEl, indent) {
 					}
 				}
 				break;
+			case "tuneNumber":
+			case "bottom":
+			case "duration":
+			case "durationClass":
+			case "extraw":
+			case "minspacing":
+			case "top":
+			case "type":
+			case "w":
+			case "x":
+				output.push(keys[i] + ": " + item);
+				break;
+			case "invisible":
+			case "isClef":
+				// Don't clutter with false items
+				if (item)
+					output.push(keys[i] + ": " + item);
+				break;
 			default:
 				if (item !== undefined)
 					output.push(keys[i] + ": " + item);
@@ -159,6 +176,9 @@ function listRelativeElement(relativeElement, indent) {
 		switch (keys[i]) {
 			case "parent":
 			case "part":
+				break;
+			case "dim":
+				output.push(keys[i] +": "+JSON.stringify(item.attr));
 				break;
 			case "graphelem":
 				if (item) {

@@ -38,10 +38,6 @@ function renderText(renderer, params) {
 		renderer.paper.rect({ x: params.x + hash.font.padding - delta, y: params.y + hash.font.padding, width: size.width + hash.font.padding*2, height: size.height + hash.font.padding*2});
 		elem = renderer.paper.closeGroup();
 	}
-	if (!params.history)
-		renderer.controller.recordHistory(elem);
-	else if (params.history === 'not-selectable')
-		renderer.controller.recordHistory(elem, true);
 	return elem;
 }
 

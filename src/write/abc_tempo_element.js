@@ -23,6 +23,7 @@ var TempoElement;
 	var totalHeightInPitches = 5;
 
 	TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
+		this.type = "TempoElement";
 		this.tempo = tempo;
 		this.tempo.type = "tempo"; /// TODO-PER: this should be set earlier, in the parser, probably.
 		this.tuneNumber = tuneNumber;
@@ -104,31 +105,6 @@ var TempoElement;
 			absElem.addExtra(stem);
 		}
 		return absElem;
-	};
-
-
-
-	TempoElement.prototype.adjustElements = function(renderer) {
-		// TODO-PER: This straightens out the tempo elements because they are written in the wrong order.
-		for (var i = renderer.controller.history.length - 1; i >= 0; i--) {
-			if (renderer.controller.history[i].absEl.abcelem.type !== "tempo")
-				break;
-		}
-		var group;
-		for (var ii = i+1; ii < renderer.controller.history.length; ii++) {
-			var hist = renderer.controller.history[ii];
-			var inGroup = hist.svgEl.parentNode.tagName.toLowerCase() === 'g';
-			if (inGroup)
-				group = hist.svgEl.parentNode;
-			else if (group) {
-				group.appendChild(hist.svgEl);
-			}
-			hist.svgEl.setAttribute("class", '');
-		}
-		var len = renderer.controller.history.length-i-1;
-		if (group && len > 1) {
-			renderer.controller.combineHistory(len, group);
-		}
 	};
 })();
 

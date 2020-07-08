@@ -46,7 +46,7 @@ abcjs.synth = {
 	getMidiFile: getMidiFile,
 };
 
-var editor = require('./src/edit/abc_editor');
-abcjs['Editor'] = editor;
+abcjs['Editor'] = require('./src/edit/abc_editor');
+abcjs['EditArea'] = require('./src/edit/abc_editarea');
 
 module.exports = abcjs;

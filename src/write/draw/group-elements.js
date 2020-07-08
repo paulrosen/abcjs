@@ -8,7 +8,7 @@ var elementGroup;
 	"use strict";
 
 	function Group() {
-
+		this.ingroup = false;
 	}
 
 	Group.prototype.beginGroup = function (paper, controller) {
@@ -56,7 +56,6 @@ var elementGroup;
 			fill: "#000000",
 			'class': this.controller.classes.generate(klass)
 		});
-		this.controller.recordHistory(ret);
 		this.path = [];
 
 		return ret;

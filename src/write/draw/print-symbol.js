@@ -26,7 +26,6 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
 			}
 		}
 		var g = renderer.paper.closeGroup();
-		renderer.controller.recordHistory(g);
 		return g;
 	} else {
 		ycorr = glyphs.getYCorr(symbol);
@@ -34,7 +33,6 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
 			elementGroup.addPath(glyphs.getPathForSymbol(x, renderer.calcY(offset + ycorr), symbol, scalex, scaley));
 		} else {
 			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, klass, "none", "#000000");
-			renderer.controller.recordHistory(el);
 			if (el) {
 				return el;
 			} else

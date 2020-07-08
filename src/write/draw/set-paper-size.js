@@ -4,8 +4,6 @@ function setPaperSize(renderer, maxwidth, scale, responsive) {
 	if (renderer.isPrint)
 		h = Math.max(h, 1056); // 11in x 72pt/in x 1.33px/pt
 	// TODO-PER: We are letting the page get as long as it needs now, but eventually that should go to a second page.
-	if (renderer.doRegression)
-		renderer.regressionLines.push("PAPER SIZE: ("+w+","+h+")");
 
 	// for accessibility
 	var text = "Sheet Music";

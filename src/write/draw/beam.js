@@ -14,14 +14,12 @@ function drawBeam(renderer, params) {
 	}
 	var durationClass = ("abcjs-d"+params.duration).replace(/\./g,"-");
 	var klasses = renderer.controller.classes.generate('beam-elem '+durationClass);
-	renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "beam", startChar: -1, endChar: -1 }};
 	var el = printPath(renderer, {
 		path: pathString,
 		stroke: "none",
 		fill: "#000000",
 		'class': klasses
-	}, {history: 'not-selectable'});
-	renderer.controller.currentAbsEl.elemset.push(el);
+	});
 	return [el];
 }
 

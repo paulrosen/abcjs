@@ -20,6 +20,11 @@
 var spacing = require('./abc_spacing');
 var AbstractEngraver = require('./abc_abstract_engraver');
 var Renderer = require('./abc_renderer');
+var FreeText = require('./free-text');
+var Separator = require('./separator');
+var Subtitle = require('./subtitle');
+var TopText = require('./top-text');
+var BottomText = require('./bottom-text');
 var setupSelection = require('./selection');
 var layout = require('./layout/layout');
 var Classes = require('./classes');
@@ -76,14 +81,11 @@ var EngraverController = function(paper, params) {
 
 EngraverController.prototype.reset = function() {
 	this.selected = [];
-	this.ingroup = false;
 	this.staffgroups = [];
 	if (this.engraver)
 		this.engraver.reset();
 	this.engraver = null;
 	this.renderer.reset();
-	this.history = [];
-	this.currentAbsEl = null;
 	this.dragTarget = null;
 	this.dragIndex = -1;
 	this.dragMouseStart = { x: -1, y: -1 };
@@ -107,8 +109,6 @@ EngraverController.prototype.engraveABC = function(abctunes, tuneNumber) {
 	  this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
     this.engraveTune(abctunes[i], tuneNumber);
   }
-	if (this.renderer.doRegression)
-		return this.renderer.regressionLines.join("\n");
 };
 
 /**
@@ -151,9 +151,11 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 	ret.height = this.renderer.padding.top + this.renderer.spacing.music + this.renderer.padding.bottom + 24; // the 24 is the empirical value added to the bottom of all tunes.
 	var debug = false;
 	var hasPrintedTempo = false;
+	var hasSeenNonSubtitle = false;
 	for(var i=0; i<abcTune.lines.length; i++) {
 		var abcLine = abcTune.lines[i];
 		if (abcLine.staff) {
+			hasSeenNonSubtitle = true;
 			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null, this.getTextSize);
 
 			abcLine.staffGroup.layout(0, this.renderer, debug);
@@ -178,6 +180,18 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 			}
 			hasPrintedTempo = true;
 			ret.height += abcLine.staffGroup.calcHeight() * spacing.STEP;
+		} else if (abcLine.subtitle) {
+			// If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
+			if (hasSeenNonSubtitle) {
+				var center = this.width / 2 + this.renderer.padding.left;
+				abcLine.nonMusic = new Subtitle(this.renderer.spacing.subtitle, abcLine.subtitle, center, this.getTextSize);
+			}
+		} else if (abcLine.text !== undefined) {
+			hasSeenNonSubtitle = true;
+			abcLine.nonMusic = new FreeText(abcLine.text, abcLine.vskip, this.getFontAndAttr, this.renderer.padding.left, this.width, this.getTextSize);
+		} else if (abcLine.separator !== undefined && abcLine.separator.lineLength) {
+			hasSeenNonSubtitle = true;
+			abcLine.nonMusic = new Separator(abcLine.separator.spaceAbove, abcLine.separator.lineLength, abcLine.separator.spaceBelow);
 		}
 	}
 	return ret;
@@ -210,44 +224,44 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
 	this.adjustNonScaledItems(scale);
 
+	abctune.topText = new TopText(abctune.metaText, abctune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+
 	// Generate the raw staff line data
 	var i;
 	var abcLine;
 	var hasPrintedTempo = false;
+	var hasSeenNonSubtitle = false;
 	for(i=0; i<abctune.lines.length; i++) {
 		abcLine = abctune.lines[i];
 		if (abcLine.staff) {
+			hasSeenNonSubtitle = true;
 			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abctune.metaText.tempo: null, this.getTextSize);
 			hasPrintedTempo = true;
+		} else if (abcLine.subtitle) {
+			// If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
+			if (hasSeenNonSubtitle) {
+				var center = this.width / 2 + this.renderer.padding.left;
+				abcLine.nonMusic = new Subtitle(this.renderer.spacing.subtitle, abcLine.subtitle, center, this.getTextSize);
+			}
+		} else if (abcLine.text !== undefined) {
+			hasSeenNonSubtitle = true;
+			abcLine.nonMusic = new FreeText(abcLine.text, abcLine.vskip, this.getFontAndAttr, this.renderer.padding.left, this.width, this.getTextSize);
+		} else if (abcLine.separator !== undefined && abcLine.separator.lineLength) {
+			hasSeenNonSubtitle = true;
+			abcLine.nonMusic = new Separator(abcLine.separator.spaceAbove, abcLine.separator.lineLength, abcLine.separator.spaceBelow);
 		}
 	}
+	abctune.bottomText = new BottomText(abctune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
 
 	// Adjust the x-coordinates to their absolute positions
 	var maxWidth = layout(this.renderer, abctune, this.width, this.space);
 
 	// Do all the writing to output
-	this.staffgroups = draw(this.renderer, this.classes, abctune, this.width, maxWidth, this.responsive, scale);
+	var ret = draw(this.renderer, this.classes, abctune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber);
+	this.staffgroups = ret.staffgroups;
+	this.selectables = ret.selectables;
 
 	setupSelection(this);
-};
-
-EngraverController.prototype.recordHistory = function (svgEl, notSelectable) {
-	var isNote = this.currentAbsEl && this.currentAbsEl.abcelem && this.currentAbsEl.abcelem.el_type === "note" && !this.currentAbsEl.abcelem.rest && svgEl.tagName !== 'text';
-	var selectable = notSelectable !== true;
-	if (!this.currentAbsEl || !this.currentAbsEl.abcelem) selectable = false;
-	if (this.selectTypes === false)
-		selectable = false;
-	else if (this.selectTypes === undefined)
-		this.selectTypes = [ 'note' ];
-	else if (this.selectTypes === true) {
-		// Nothing to do here. If selectable was set to false earlier then it can't be overwritten.
-	} else if (this.selectTypes.indexOf(this.currentAbsEl.abcelem.el_type) < 0)
-		selectable = false;
-
-	if (!selectable)
-		return;
-
-	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, selectable: selectable, isDraggable: isNote });
 };
 
 EngraverController.prototype.getDim = function(historyEl) {
@@ -258,27 +272,6 @@ EngraverController.prototype.getDim = function(historyEl) {
 	}
 	return historyEl.dim;
 };
-
-EngraverController.prototype.combineHistory = function (len, svgEl) {
-	if (len < 2)
-		return;
-	var items = [];
-	for (var i = 0; i < len; i++) {
-		items.push(this.history.pop());
-	}
-	for (i = 0; i < items.length; i++) {
-		this.getDim(items[i]);
-	}
-	for (i = 1; i < items.length; i++) {
-		items[0].dim.left = Math.min(items[0].dim.left, items[i].dim.left);
-		items[0].dim.top = Math.min(items[0].dim.top, items[i].dim.top);
-		items[0].dim.right = Math.max(items[0].dim.right, items[i].dim.right);
-		items[0].dim.bottom = Math.max(items[0].dim.bottom, items[i].dim.bottom);
-	}
-	items[0].svgEl = svgEl;
-	this.history.push(items[0]);
-};
-
 
 EngraverController.prototype.addSelectListener = function (clickListener) {
 	this.listeners[this.listeners.length] = clickListener;

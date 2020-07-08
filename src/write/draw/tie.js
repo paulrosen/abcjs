@@ -1,17 +1,14 @@
-var highlight = require('../highlight');
-var unhighlight = require('../unhighlight');
 var sprintf = require('./sprintf');
 
-function drawTie(renderer, params, linestartx, lineendx) {
+function drawTie(renderer, params, linestartx, lineendx, selectables) {
 	layout(params, linestartx, lineendx);
 
 	var klass;
 	if (params.hint)
 		klass = "abcjs-hint";
 	var fudgeY =  params.fixedY ? 1.5 : 0; // TODO-PER: This just compensates for drawArc, which contains too much knowledge of ties and slurs.
-	renderer.controller.currentAbsEl = { highlight: highlight.bind(params), unhighlight: unhighlight.bind(params), tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [], abcelem: { el_type: "slur", startChar: -1, endChar: -1 }};
 	var el = drawArc(renderer, params.startX, params.endX, params.startY+fudgeY, params.endY+fudgeY,  params.above, klass, params.isTie);
-	renderer.controller.currentAbsEl.elemset.push(el);
+	selectables.wrapSvgEl({ el_type: "slur", startChar: -1, endChar: -1 }, el);
 	return [el];
 }
 
@@ -75,7 +72,6 @@ var drawArc = function(renderer, x1, x2, pitch1, pitch2, above, klass, isTie) {
 	else
 		klass = 'slur';
 	var ret = renderer.paper.path({path:pathString, stroke:"none", fill:"#000000", 'class': renderer.controller.classes.generate(klass)});
-	renderer.controller.recordHistory(ret);
 
 	return ret;
 };

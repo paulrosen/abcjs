@@ -374,6 +374,8 @@ var verticalLint = function(tunes) {
 							var value = otherChild[key];
 							if (value === null)
 								ch.params[key] = "null";
+							else if (value === className && key === 'type')
+								;
 							else if (key === "elemset") {
 								var cls = [];
 								for (var j2 = 0; j2 < otherChild.elemset.length; j2++) {
@@ -437,16 +439,32 @@ var verticalLint = function(tunes) {
 		return formatLine(ret, lineNum);
 	}
 
+	function extractText(label, arr) {
+		var items = [];
+		items.push(label);
+		for (var i = 0; i < arr.length; i++) {
+			var item = arr[i];
+			items.push("\t" + JSON.stringify(item));
+		}
+		items.push("");
+		return items.join("\n");
+	}
+
 	var positioning = [];
 	for (var i = 0; i < tunes.length; i++) {
-		for (var j = 0; j < tunes[i].lines.length; j++) {
-			var line = tunes[i].lines[j];
+		var tune = tunes[i];
+		if (tune.topText && tune.topText.rows.length > 0)
+			positioning.push(extractText("Top Text", tune.topText.rows));
+		for (var j = 0; j < tune.lines.length; j++) {
+			var line = tune.lines[j];
 			if (line.staffGroup)
-				positioning.push(extractPositioningInfo(tunes[i].lines[j].staffGroup, j));
+				positioning.push(extractPositioningInfo(tune.lines[j].staffGroup, j));
 			else
 				positioning.push(JSON.stringify(line));
 		}
 	}
+	if (tune.bottomText && tune.bottomText.rows.length > 0)
+		positioning.push(extractText("Bottom Text", tune.bottomText.rows));
 	return positioning;
 };
 
