@@ -22,13 +22,13 @@ var BookParser = function(book) {
 	var This = this;
 	var directives = "";
 	book = parseCommon.strip(book);
-	var tunes = book.split("\nX:");
-	for (var i = 1; i < tunes.length; i++)	// Put back the X: that we lost when splitting the tunes.
-		tunes[i] = "X:" + tunes[i];
+	var tuneStrings = book.split("\nX:");
+	for (var i = 1; i < tuneStrings.length; i++)	// Put back the X: that we lost when splitting the tunes.
+		tuneStrings[i] = "X:" + tuneStrings[i];
 	// Keep track of the character position each tune starts with.
 	var pos = 0;
 	This.tunes = [];
-	parseCommon.each(tunes, function(tune) {
+	parseCommon.each(tuneStrings, function(tune) {
 		This.tunes.push({ abc: tune, startPos: pos});
 		pos += tune.length + 1; // We also lost a newline when splitting, so count that.
 	});
