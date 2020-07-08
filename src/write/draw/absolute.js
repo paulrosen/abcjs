@@ -37,8 +37,9 @@ function drawAbsolute(renderer, params, bartop, selectables) {
 	if (g) {
 		params.elemset.push(g);
 		selectables.add(params, g, params.type === 'note');
-	} else
+	} else if (params.elemset.length > 0)
 		selectables.add(params, params.elemset[0], params.type === 'note');
+	// If there was no output, then don't add to the selectables. This happens when using the "y" spacer, for instance.
 
 	if (params.klass)
 		setClass(params.elemset, "mark", "", "#00ff00");
