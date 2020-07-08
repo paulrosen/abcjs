@@ -16,8 +16,55 @@
 
 var parseCommon = require('./abc_common');
 
-var BookParser = function() {
+var BookParser = function(book) {
 	"use strict";
+
+	var This = this;
+	var directives = "";
+	book = parseCommon.strip(book);
+	var tunes = book.split("\nX:");
+	for (var i = 1; i < tunes.length; i++)	// Put back the X: that we lost when splitting the tunes.
+		tunes[i] = "X:" + tunes[i];
+	// Keep track of the character position each tune starts with.
+	var pos = 0;
+	This.tunes = [];
+	parseCommon.each(tunes, function(tune) {
+		This.tunes.push({ abc: tune, startPos: pos});
+		pos += tune.length + 1; // We also lost a newline when splitting, so count that.
+	});
+	if (This.tunes.length > 1 && !parseCommon.startsWith(This.tunes[0].abc, 'X:')) {	// If there is only one tune, the X: might be missing, otherwise assume the top of the file is "intertune"
+		// There could be file-wide directives in this, if so, we need to insert it into each tune. We can probably get away with
+		// just looking for file-wide directives here (before the first tune) and inserting them at the bottom of each tune, since
+		// the tune is parsed all at once. The directives will be seen before the engraver begins processing.
+		var dir = This.tunes.shift();
+		var arrDir = dir.abc.split('\n');
+		parseCommon.each(arrDir, function(line) {
+			if (parseCommon.startsWith(line, '%%'))
+				directives += line + '\n';
+		});
+	}
+	This.header = directives;
+
+	// Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
+	parseCommon.each(This.tunes, function(tune) {
+		var end = tune.abc.indexOf('\n\n');
+		if (end > 0)
+			tune.abc = tune.abc.substring(0, end);
+		tune.pure = tune.abc;
+		tune.abc = directives + tune.abc;
+
+		// for the user's convenience, parse and store the title separately. The title is between the first T: and the next \n
+		var title = tune.pure.split("T:");
+		if (title.length > 1) {
+			title = title[1].split("\n");
+			tune.title = title[0].replace(/^\s+|\s+$/g, '');
+		} else
+			tune.title = "";
+
+		// for the user's convenience, parse and store the id separately. The id is between the first X: and the next \n
+		var id = tune.pure.substring(2, tune.pure.indexOf("\n"));
+		tune.id = id.replace(/^\s+|\s+$/g, '');
+	});
 };
 
 module.exports = BookParser;
