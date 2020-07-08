@@ -12,9 +12,7 @@ function printStaff(renderer, startx, endx, numLines) {
 			klass = undefined;
 		}
 	}
-	var ret = renderer.paper.closeGroup();
-	renderer.controller.currentAbsEl = { tuneNumber: renderer.controller.engraver.tuneNumber, elemset: [ret], abcelem: { el_type: "staff", startChar: -1, endChar: -1 }};
-	renderer.controller.recordHistory(ret, true);
+	renderer.paper.closeGroup();
 }
 
 module.exports = printStaff;

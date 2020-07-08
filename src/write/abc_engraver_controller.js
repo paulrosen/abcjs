@@ -86,8 +86,6 @@ EngraverController.prototype.reset = function() {
 		this.engraver.reset();
 	this.engraver = null;
 	this.renderer.reset();
-	this.history = [];
-	this.currentAbsEl = null;
 	this.dragTarget = null;
 	this.dragIndex = -1;
 	this.dragMouseStart = { x: -1, y: -1 };
@@ -259,28 +257,11 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 	var maxWidth = layout(this.renderer, abctune, this.width, this.space);
 
 	// Do all the writing to output
-	this.staffgroups = draw(this.renderer, this.classes, abctune, this.width, maxWidth, this.responsive, scale);
+	var ret = draw(this.renderer, this.classes, abctune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber);
+	this.staffgroups = ret.staffgroups;
+	this.selectables = ret.selectables;
 
 	setupSelection(this);
-};
-
-EngraverController.prototype.recordHistory = function (svgEl, notSelectable) {
-	var isNote = this.currentAbsEl && this.currentAbsEl.abcelem && this.currentAbsEl.abcelem.el_type === "note" && !this.currentAbsEl.abcelem.rest && svgEl.tagName !== 'text';
-	var selectable = notSelectable !== true;
-	if (!this.currentAbsEl || !this.currentAbsEl.abcelem) selectable = false;
-	if (this.selectTypes === false)
-		selectable = false;
-	else if (this.selectTypes === undefined)
-		this.selectTypes = [ 'note' ];
-	else if (this.selectTypes === true) {
-		// Nothing to do here. If selectable was set to false earlier then it can't be overwritten.
-	} else if (this.selectTypes.indexOf(this.currentAbsEl.abcelem.el_type) < 0)
-		selectable = false;
-
-	if (!selectable)
-		return;
-
-	this.history.push({ absEl: this.currentAbsEl, svgEl: svgEl, selectable: selectable, isDraggable: isNote });
 };
 
 EngraverController.prototype.getDim = function(historyEl) {
@@ -291,27 +272,6 @@ EngraverController.prototype.getDim = function(historyEl) {
 	}
 	return historyEl.dim;
 };
-
-EngraverController.prototype.combineHistory = function (len, svgEl) {
-	if (len < 2)
-		return;
-	var items = [];
-	for (var i = 0; i < len; i++) {
-		items.push(this.history.pop());
-	}
-	for (i = 0; i < items.length; i++) {
-		this.getDim(items[i]);
-	}
-	for (i = 1; i < items.length; i++) {
-		items[0].dim.left = Math.min(items[0].dim.left, items[i].dim.left);
-		items[0].dim.top = Math.min(items[0].dim.top, items[i].dim.top);
-		items[0].dim.right = Math.max(items[0].dim.right, items[i].dim.right);
-		items[0].dim.bottom = Math.max(items[0].dim.bottom, items[i].dim.bottom);
-	}
-	items[0].svgEl = svgEl;
-	this.history.push(items[0]);
-};
-
 
 EngraverController.prototype.addSelectListener = function (clickListener) {
 	this.listeners[this.listeners.length] = clickListener;

@@ -18,8 +18,8 @@ var spacing = require('./abc_spacing');
 function setupSelection(engraver) {
 	engraver.rangeHighlight = rangeHighlight;
 	if (engraver.dragging) {
-		for (var h = 0; h < engraver.history.length; h++) {
-			var hist = engraver.history[h];
+		for (var h = 0; h < engraver.selectables.length; h++) {
+			var hist = engraver.selectables[h];
 			if (hist.selectable) {
 				hist.svgEl.setAttribute("tabindex", 0);
 				hist.svgEl.setAttribute("data-index", h);
@@ -69,7 +69,7 @@ function getCoord(ev, svg) {
 function elementFocused(ev) {
 	// If there had been another element focused and is being dragged, then report that before setting the new element up.
 	if (this.dragMechanism === "keyboard" && this.dragYStep !== 0 && this.dragTarget)
-		notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.history.length, this.dragIndex);
+		notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex);
 
 	this.dragYStep = 0;
 }
@@ -91,14 +91,14 @@ function keyboardSelection(ev) {
 		case 13:
 		case 32:
 			handled = true;
-			this.dragTarget = this.history[index];
+			this.dragTarget = this.selectables[index];
 			this.dragIndex = index;
 			this.dragMechanism = "keyboard";
 			mouseUp.bind(this)();
 			break;
 		case 38: // arrow up
 			handled = true;
-			this.dragTarget = this.history[index];
+			this.dragTarget = this.selectables[index];
 			this.dragIndex = index;
 			if (this.dragTarget.isDraggable) {
 				if (this.dragging && this.dragTarget.isDraggable)
@@ -109,7 +109,7 @@ function keyboardSelection(ev) {
 			break;
 		case 40: // arrow down
 			handled = true;
-			this.dragTarget = this.history[index];
+			this.dragTarget = this.selectables[index];
 			this.dragIndex = index;
 			this.dragMechanism = "keyboard";
 			if (this.dragTarget.isDraggable) {
@@ -133,9 +133,9 @@ function keyboardSelection(ev) {
 		ev.preventDefault();
 }
 
-function findElementInHistory(history, el) {
-	for (var i = 0; i < history.length; i++) {
-		if (el === history[i].svgEl)
+function findElementInHistory(selectables, el) {
+	for (var i = 0; i < selectables.length; i++) {
+		if (el === selectables[i].svgEl)
 			return i;
 	}
 	return -1;
@@ -145,10 +145,8 @@ function findElementByCoord(self, x, y) {
 	var minDistance = 9999999;
 	var closestIndex = -1;
 	var chosenEl;
-	for (var i = 0; i < self.history.length && minDistance > 0; i++) {
-		var el = self.history[i];
-		if (!el.selectable)
-			continue;
+	for (var i = 0; i < self.selectables.length && minDistance > 0; i++) {
+		var el = self.selectables[i];
 
 		self.getDim(el);
 		if (el.dim.left < x && el.dim.right > x && el.dim.top < y && el.dim.bottom > y) {
@@ -193,19 +191,35 @@ function getBestMatchCoordinates(dim, ev) {
 	return  [ ev.layerX, ev.layerY];
 }
 
+function getTarget(target) {
+	// This searches up the dom for the first item containig the attribute "selectable", or stopping at the SVG.
+	if (target.tagName === "svg")
+		return target;
+
+	var found = target.getAttribute("selectable");
+	while (!found) {
+		target = target.parentElement;
+		if (target.tagName === "svg")
+			found = true;
+		else
+			found = target.getAttribute("selectable");
+	}
+	return target;
+}
+
 function getMousePosition(self, ev) {
 	// if the user clicked exactly on an element that we're interested in, then we already have the answer.
 	// This is more reliable than the calculations because firefox returns different coords for offsetX, offsetY
 	var x;
 	var y;
 	var box;
-	var clickedOn = findElementInHistory(self.history, ev.target);
+	var clickedOn = findElementInHistory(self.selectables, getTarget(ev.target));
 	if (clickedOn >= 0) {
 		// There was a direct hit on an element.
-		box = getBestMatchCoordinates(self.history[clickedOn].svgEl.getBBox(), ev);
+		box = getBestMatchCoordinates(self.selectables[clickedOn].svgEl.getBBox(), ev);
 		x = box[0];
 		y = box[1];
-		//console.log("clicked on", clickedOn, x, y, self.history[clickedOn].svgEl.getBBox(), ev.target.getBBox());
+		//console.log("clicked on", clickedOn, x, y, self.selectables[clickedOn].svgEl.getBBox(), ev.target.getBBox());
 	} else {
 		// See if they clicked close to an element.
 		box = getCoord(ev, self.renderer.paper.svg);
@@ -224,7 +238,7 @@ function mouseDown(ev) {
 
 	// Only start dragging if the user clicked close enough to an element and clicked with the main mouse button.
 	if (positioning.clickedOn >= 0 && ev.button === 0) {
-		this.dragTarget = this.history[positioning.clickedOn];
+		this.dragTarget = this.selectables[positioning.clickedOn];
 		this.dragIndex = positioning.clickedOn;
 		this.dragMechanism = "mouse";
 		this.dragMouseStart = { x: positioning.x, y: positioning.y };
@@ -262,7 +276,7 @@ function mouseUp(ev) {
 		this.dragTarget.absEl.highlight(undefined, this.selectionColor);
 	}
 
-	notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.history.length, this.dragIndex);
+	notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex);
 	if (this.dragTarget.svgEl && this.dragTarget.svgEl.focus) {
 		this.dragTarget.svgEl.focus();
 		this.dragTarget = null;
@@ -272,8 +286,8 @@ function mouseUp(ev) {
 }
 
 function setSelection(dragIndex) {
-	if (dragIndex >= 0 && dragIndex < this.history.length) {
-		this.dragTarget = this.history[dragIndex];
+	if (dragIndex >= 0 && dragIndex < this.selectables.length) {
+		this.dragTarget = this.selectables[dragIndex];
 		this.dragIndex = dragIndex;
 		this.dragMechanism = "keyboard";
 		mouseUp.bind(this)();

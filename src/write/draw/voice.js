@@ -7,33 +7,31 @@ var drawTempo = require('./tempo');
 var drawBeam = require('./beam');
 var renderText = require('./text');
 var drawAbsolute = require('./absolute');
-var parseCommon = require('../../parse/abc_common');
 
-function drawVoice(renderer, params, bartop) {
+function drawVoice(renderer, params, bartop, selectables) {
 	var width = params.w-1;
 	renderer.staffbottom = params.staff.bottom;
 
 	if (params.header) { // print voice name
-		renderer.wrapInAbsElem({ el_type: "voiceName", startChar: -1, endChar: -1, text: params.header }, 'meta-bottom extra-text', function() {
-			var textEl = renderText(renderer, {x: renderer.padding.left, y: renderer.calcY(params.headerPosition), text: params.header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start', centerVertically: true});
-			return textEl;
-		});
+		var textEl = renderText(renderer, {x: renderer.padding.left, y: renderer.calcY(params.headerPosition), text: params.header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start', centerVertically: true});
+		selectables.wrapSvgEl({ el_type: "voiceName", startChar: -1, endChar: -1, text: params.header }, textEl);
 	}
 
-	for (var i=0, ii=params.children.length; i<ii; i++) {
-		var child = params.children[i];
+	var i;
+	var child;
+	for (i=0; i < params.children.length; i++) {
+		child = params.children[i];
 		var justInitializedMeasureNumber = false;
 		if (child.type !== 'staff-extra' && !renderer.controller.classes.isInMeasure()) {
 			renderer.controller.classes.startMeasure();
 			justInitializedMeasureNumber = true;
 		}
-		renderer.controller.currentAbsEl = child;
 		switch (child.type) {
-			case "TempoElem":
-				child.elemset = drawTempo(renderer, child);
-				break;
+			// case "tempo":
+			// 	child.elemset = drawTempo(renderer, child, selectables);
+			// 	break;
 			default:
-				drawAbsolute(renderer, child,(params.barto || i === ii - 1) ? bartop : 0);
+				drawAbsolute(renderer, child,(params.barto || i === params.children.length - 1) ? bartop : 0, selectables);
 		}
 		if (child.type === 'note' || isNonSpacerRest(child))
 			renderer.controller.classes.incrNote();
@@ -43,40 +41,43 @@ function drawVoice(renderer, params, bartop) {
 	}
 
 	renderer.controller.classes.startMeasure();
-	parseCommon.each(params.beams, function(beam) {
+
+	for (i = 0; i < params.beams.length; i++) {
+		var beam = params.beams[i];
 		if (beam === 'bar') {
 			renderer.controller.classes.incrMeasure();
 		} else
-			drawBeam(renderer, beam); // beams must be drawn first for proper printing of triplets, slurs and ties.
-	});
+			drawBeam(renderer, beam, selectables); // beams must be drawn first for proper printing of triplets, slurs and ties.
+	}
 
 	renderer.controller.classes.startMeasure();
-	parseCommon.each(params.otherchildren, function(child) {
+	for (i = 0; i < params.otherchildren.length; i++) {
+		child = params.otherchildren[i];
 		if (child === 'bar') {
 			renderer.controller.classes.incrMeasure();
 		} else {
 			switch (child.type) {
 				case "CrescendoElem":
-					child.elemset = drawCrescendo(renderer, child);
+					child.elemset = drawCrescendo(renderer, child, selectables);
 					break;
 				case "DynamicDecoration":
-					child.elemset = drawDynamics(renderer, child);
+					child.elemset = drawDynamics(renderer, child, selectables);
 					break;
 				case "TripletElem":
-					drawTriplet(renderer, child);
+					drawTriplet(renderer, child, selectables);
 					break;
 				case "EndingElem":
-					child.elemset = drawEnding(renderer, child, params.startx + 10, width);
+					child.elemset = drawEnding(renderer, child, params.startx + 10, width, selectables);
 					break;
 				case "TieElem":
-					child.elemset = drawTie(renderer, child, params.startx + 10, width);
+					child.elemset = drawTie(renderer, child, params.startx + 10, width, selectables);
 					break;
 				default:
 					console.log(child)
-					drawAbsolute(renderer, child, params.startx + 10, width);
+					drawAbsolute(renderer, child, params.startx + 10, width, selectables);
 			}
 		}
-	});
+	}
 
 }
 

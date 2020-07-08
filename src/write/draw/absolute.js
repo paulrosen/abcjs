@@ -4,23 +4,21 @@ var spacing = require('../abc_spacing');
 var setClass = require('../set-class');
 var elementGroup = require('./group-elements');
 
-var tempoElem = require('../abc_tempo_element');
-
-function drawAbsolute(renderer, params, bartop) {
+function drawAbsolute(renderer, params, bartop, selectables) {
 	if (params.invisible) return;
 	params.elemset = [];
 	elementGroup.beginGroup(renderer.paper, renderer.controller);
 	for (var i=0; i<params.children.length; i++) {
 		var child = params.children[i];
 		var el;
-		switch (child.constructor) {
-			case tempoElem:
-				el = drawTempo(renderer, child);
+		switch (child.type) {
+			case "TempoElement":
+				el = drawTempo(renderer, child, selectables);
 				if (el)
 					params.elemset = params.elemset.concat(el);
 				break;
 			default:
-				el = drawRelativeElement(renderer, child, bartop);
+				el = drawRelativeElement(renderer, child, bartop, selectables);
 				if (el)
 					params.elemset.push(el);
 		}
@@ -36,13 +34,12 @@ function drawAbsolute(renderer, params, bartop) {
 		}
 	}
 	var g = elementGroup.endGroup(klass);
-	if (g)
+	if (g) {
 		params.elemset.push(g);
-	if (klass === "tempo" && params.children.length > 0) {
-		renderer.controller.currentAbsEl.elemset[0] = params.elemset[0];
-		// Combine any tempo elements that are in a row. TODO-PER: this is a hack because the tempo note is an AbsoluteElement so there are nested AbsoluteElements here.
-		params.children[0].adjustElements(renderer);
-	}
+		selectables.add(params, g, params.type === 'note');
+	} else
+		selectables.add(params, params.elemset[0], params.type === 'note');
+
 	if (params.klass)
 		setClass(params.elemset, "mark", "", "#00ff00");
 	if (params.hint)

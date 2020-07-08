@@ -21,7 +21,8 @@ function TopText(metaText, lines, width, isPrint, paddingLeft, spacing, getTextS
 	if (metaText.rhythm || metaText.origin || metaText.composer) {
 		this.rows.push({move: spacing.composer});
 		if (metaText.rhythm && metaText.rhythm.length > 0) {
-			this.addTextIf(paddingLeft, metaText.rhythm, 'infofont', 'meta-top rhythm', 0, null, "start", getTextSize, "rhythm");
+			var noMove = !!(metaText.composer || metaText.origin);
+			this.addTextIf(paddingLeft, metaText.rhythm, 'infofont', 'meta-top rhythm', 0, null, "start", getTextSize, "rhythm", noMove);
 		}
 		var composerLine = "";
 		if (metaText.composer) composerLine += metaText.composer;
@@ -42,16 +43,18 @@ function TopText(metaText, lines, width, isPrint, paddingLeft, spacing, getTextS
 	}
 }
 
-TopText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType) {
+TopText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType, noMove) {
 	if (!text)
 		return;
 	if (marginTop)
 		this.rows.push({move: marginTop});
 	this.rows.push({left: marginLeft, text: text, font: font, klass: klass, anchor: anchor, absElemType: absElemType});
-	size = getTextSize.calc(text, font, klass);
-	this.rows.push({move: size.height});
-	if (marginBottom)
-		this.rows.push({move: marginBottom});
+	if (!noMove) {
+		size = getTextSize.calc(text, font, klass);
+		this.rows.push({move: size.height});
+		if (marginBottom)
+			this.rows.push({move: marginBottom});
+	}
 }
 
 module.exports = TopText;

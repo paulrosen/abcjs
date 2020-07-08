@@ -3,7 +3,7 @@ var printStem = require('./print-stem');
 var printStaffLine = require('./staff-line');
 var printSymbol = require('./print-symbol');
 
-function drawRelativeElement(renderer, params, bartop) {
+function drawRelativeElement(renderer, params, bartop, selectables) {
 	if (params.pitch === undefined)
 		window.console.error(params.type + " Relative Element y-coordinate not set.");
 	var y = renderer.calcY(params.pitch);
@@ -14,9 +14,9 @@ function drawRelativeElement(renderer, params, bartop) {
 			if (params.klass) klass += " " + params.klass;
 			params.graphelem = printSymbol(renderer, params.x, params.pitch, params.c, params.scalex, params.scaley, renderer.controller.classes.generate(klass), "none", "#000000"); break;
 		case "debug":
-			params.graphelem = renderText(renderer, { x: params.x, y: renderer.calcY(15), text: ""+params.c, type: "debugfont", klass: renderer.controller.classes.generate('debug-msg'), anchor: 'start', centerVertically: false, history: 'not-selectable', dim: params.dim}); break;
+			params.graphelem = renderText(renderer, { x: params.x, y: renderer.calcY(15), text: ""+params.c, type: "debugfont", klass: renderer.controller.classes.generate('debug-msg'), anchor: 'start', centerVertically: false, dim: params.dim}); break;
 		case "barNumber":
-			params.graphelem = renderText(renderer, { x: params.x, y: y, text: ""+params.c, type: "measurefont", klass: renderer.controller.classes.generate('bar-number'), anchor: "middle", history: 'ignore', dim: params.dim});
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: ""+params.c, type: "measurefont", klass: renderer.controller.classes.generate('bar-number'), anchor: "middle", dim: params.dim});
 			break;
 		case "lyric":
 			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: "vocalfont", klass: renderer.controller.classes.generate('lyric'), anchor: "middle", dim: params.dim});

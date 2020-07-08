@@ -20,7 +20,7 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
 		if (unalignedWords[j] === '')
 			this.rows.push({move: space.height});
 		else if (typeof unalignedWords[j] === 'string') {
-			this.addTextIf(paddingLeft + indent, unalignedWords[j], defFont, klass, 0, 0, "start", getTextSize);
+			this.addTextIf(paddingLeft + indent, unalignedWords[j], defFont, klass, 0, 0, "start", getTextSize, null, true);
 		} else {
 			var largestY = 0;
 			var offsetX = 0;
@@ -31,7 +31,6 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
 					left: paddingLeft + indent + offsetX,
 					text: thisWord.text,
 					font: font,
-					klass: klass,
 					anchor: 'start'
 				});
 				var size = getTextSize.calc(thisWord.text, defFont, klass);
@@ -46,7 +45,7 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
 		}
 	}
 	this.rows.push({move: space.height * 2});
-	this.rows.push({endGroup: "unalignedWords"});
+	this.rows.push({endGroup: "unalignedWords", absElemType: "unalignedWords"});
 }
 
 BottomText.prototype.extraText = function (metaText, marginLeft, spacing, getTextSize) {
@@ -75,12 +74,18 @@ BottomText.prototype.footer = function (footer, marginLeft, getTextSize) {
 	this.addTextIf(paddingLeft + width, footer.right, font, klass, 0, 0, 'end', getTextSize);
 }
 
-BottomText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType) {
+BottomText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType, inGroup) {
 	if (!text)
 		return;
 	if (marginTop)
 		this.rows.push({move: marginTop});
-	this.rows.push({left: marginLeft, text: text, font: font, klass: klass, anchor: anchor, absElemType: absElemType});
+	var attr = {left: marginLeft, text: text, font: font, anchor: anchor};
+	if (absElemType)
+		attr.absElemType = absElemType;
+	if (!inGroup) {
+		attr.klass = klass;
+	}
+	this.rows.push(attr);
 	size = getTextSize.calc(text, font, klass);
 	this.rows.push({move: size.height});
 	if (marginBottom)

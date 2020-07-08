@@ -186,13 +186,6 @@ Renderer.prototype.setVerticalSpace = function(formatting) {
  * Leave space before printing a staff system
  */
 
-Renderer.prototype.wrapInAbsElem = function(abcelem, klass, creator) {
-	this.controller.currentAbsEl = new AbsoluteElement(abcelem, 0, 0, klass, this.controller.engraver.tuneNumber, {});
-	var el = creator.bind(this)();
-	this.controller.currentAbsEl.elemset = [el];
-	return el;
-};
-
 /**
  * Calculates the y for a given pitch value (relative to the stave the renderer is currently printing)
  * @param {number} ofs pitch value (bottom C on a G clef = 0, D=1, etc.)

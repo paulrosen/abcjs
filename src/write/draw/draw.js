@@ -2,10 +2,12 @@ var drawStaffGroup = require('./staff-group');
 var setPaperSize = require('./set-paper-size');
 var nonMusic = require('./non-music');
 var spacing = require('../abc_spacing');
+var Selectables = require('./selectables');
 
-function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale) {
+function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber) {
+	var selectables = new Selectables(renderer.paper, selectTypes, tuneNumber);
 	renderer.moveY(renderer.padding.top);
-	nonMusic(renderer, abcTune.topText);
+	nonMusic(renderer, abcTune.topText, selectables);
 	renderer.moveY(renderer.spacing.music);
 
 	var staffgroups = [];
@@ -18,20 +20,21 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale) {
 			}
 			if (staffgroups.length >= 1)
 				addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
-			staffgroups.push(engraveStaffLine(renderer, abcLine.staffGroup));
+			staffgroups.push(engraveStaffLine(renderer, abcLine.staffGroup, selectables));
 		} else if (abcLine.nonMusic) {
-			nonMusic(renderer, abcLine.nonMusic);
+			nonMusic(renderer, abcLine.nonMusic, selectables);
 		}
 	}
 
+	classes.reset();
 	renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
-	nonMusic(renderer, abcTune.bottomText);
+	nonMusic(renderer, abcTune.bottomText, selectables);
 	setPaperSize(renderer, maxWidth, scale, responsive);
-	return staffgroups;
+	return { staffgroups: staffgroups, selectables: selectables.getElements() };
 }
 
-function engraveStaffLine(renderer, staffGroup) {
-	drawStaffGroup(renderer, staffGroup);
+function engraveStaffLine(renderer, staffGroup, selectables) {
+	drawStaffGroup(renderer, staffGroup, selectables);
 	var height = staffGroup.height * spacing.STEP;
 	renderer.y += height;
 	return staffGroup;

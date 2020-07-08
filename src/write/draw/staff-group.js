@@ -5,7 +5,7 @@ var printStaff = require('./staff');
 var printDebugBox = require('./debug-box');
 var printStem = require('./print-stem');
 
-function drawStaffGroup(renderer, params) {
+function drawStaffGroup(renderer, params, selectables) {
 	// We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
 	// All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
 	// renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
@@ -71,10 +71,10 @@ function drawStaffGroup(renderer, params) {
 				renderer.controller.classes.newMeasure();
 				printStaff(renderer, params.startx, params.w, staff.lines);
 			}
-			printBrace(renderer, staff.absoluteY, params.brace, i);
-			printBrace(renderer, staff.absoluteY, params.bracket, i);
+			printBrace(renderer, staff.absoluteY, params.brace, i, selectables);
+			printBrace(renderer, staff.absoluteY, params.bracket, i, selectables);
 		}
-		drawVoice(renderer, params.voices[i], bartop);
+		drawVoice(renderer, params.voices[i], bartop, selectables);
 		renderer.controller.classes.newMeasure();
 		if (!params.voices[i].duplicate) {
 			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
@@ -91,12 +91,12 @@ function drawStaffGroup(renderer, params) {
 	renderer.y = startY;
 }
 
-function printBrace(renderer, absoluteY, brace, index) {
+function printBrace(renderer, absoluteY, brace, index, selectables) {
 	if (brace) {
 		for (var i = 0; i < brace.length; i++) {
 			if (brace[i].isStartVoice(index)) {
 				brace[i].startY = absoluteY - spacing.STEP * 10;
-				brace[i].elemset = drawBrace(renderer, brace[i]);
+				brace[i].elemset = drawBrace(renderer, brace[i], selectables);
 			}
 		}
 	}
