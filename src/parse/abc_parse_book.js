@@ -54,12 +54,12 @@ var BookParser = function(book) {
 		tune.abc = directives + tune.abc;
 
 		// for the user's convenience, parse and store the title separately. The title is between the first T: and the next \n
+		tune.title = "";
 		var title = tune.pure.split("T:");
 		if (title.length > 1) {
 			title = title[1].split("\n");
 			tune.title = title[0].replace(/^\s+|\s+$/g, '');
-		} else
-			tune.title = "";
+		}
 
 		// for the user's convenience, parse and store the id separately. The id is between the first X: and the next \n
 		var id = tune.pure.substring(2, tune.pure.indexOf("\n"));
