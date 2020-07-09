@@ -36,6 +36,10 @@
   "bugs": {
     "url": "https://github.com/paulrosen/abcjs/issues"
   },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/paulrosen"
+  },
   "homepage": "https://abcjs.net",
   "devDependencies": {
     "@babel/core": "7.10.2",
