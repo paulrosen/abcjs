@@ -59,36 +59,14 @@ var Tune = function() {
 	//		if specified, { num: 99, den: 99 }
 
 	this.getBeatLength = function() {
-		for (var i = 0; i < this.lines.length; i++) {
-			if (this.lines[i].staff) {
-				for (var j = 0; j < this.lines[i].staff.length; j++) {
-					if (this.lines[i].staff[j].meter) {
-						var meter = this.lines[i].staff[j].meter;
-						if (meter.type === "specified") {
-							if (meter.value.length > 0) {
-								var num = parseInt(meter.value[0].num, 10);
-								var den = parseInt(meter.value[0].den, 10);
-								if (num === 3 && den === 8) return 3/8;
-								if (num === 6 && den === 8) return 3/8;
-								if (num === 6 && den === 4) return 3/4;
-								if (num === 9 && den === 4) return 3/4;
-								if (num === 12 && den === 4) return 3/4;
-								if (num === 9 && den === 8) return 3/8;
-								if (num === 12 && den === 8) return 3/8;
-								return 1/den;
-							}
-							else
-								return 1/4; // No meter was specified, so use this default
-						} else if (meter.type === 'cut_time') {
-							return 1/2;
-						} else {
-							return 1/4; // TODO-PER: this works for common time, but not for the ancient meters.
-						}
-					}
-				}
-			}
-		}
-		return 1/4; // No meter was specified, so use this default
+		// This returns a fraction: for instance 1/4 for a quarter
+		// There are two types of meters: compound and regular. Compound meter has 3 beats counted as one.
+		var meter = this.getMeterFraction();
+		var multiplier = 1;
+		if (meter.num === 6 || meter.num === 9 || meter.num === 12)
+			multiplier = 3;
+
+		return multiplier / meter.den;
 	};
 
 	this.getPickupLength = function() {
@@ -123,8 +101,6 @@ var Tune = function() {
 			return pickupLength;
 		});
 
-		var pickupLength = computePickupLength.apply(this);
-
 		// If computed pickup length is very close to 0 or the bar length, we assume
 		// that we actually have a full bar and hence no pickup.
 		return (pickupLength < 1e-8 || barLength-pickupLength < 1e-8) ? 0 : pickupLength;
@@ -153,18 +129,9 @@ var Tune = function() {
 	};
 
 	this.getBeatsPerMeasure = function() {
-		var beatsPerMeasure;
-		var meter = this.getMeterFraction();
-		if (meter.num === 3 && meter.den === 4)
-			beatsPerMeasure = meter.num;
-		else if (meter.num % 3 === 0) {
-			beatsPerMeasure = meter.num / 3;
-		} else {
-			beatsPerMeasure = meter.num;
-		}
-		if (beatsPerMeasure <= 0) // This probably won't happen in any normal case - but it is possible that the meter could be set to something nonsensical.
-			beatsPerMeasure = 1;
-		return beatsPerMeasure;
+		var beatLen = this.getBeatLength();
+		var barLen = this.getBarLength();
+		return barLen / beatLen;
 	};
 
 	this.getMeter = function() {
@@ -404,8 +371,8 @@ var Tune = function() {
 			var elements = voices[v];
 			for (var elem = 0; elem < elements.length; elem++) {
 				var element = elements[elem].elem;
-				if (element.abcelem.el_type === "tempo") {
-					var bpm = this.getBpm(element.abcelem);
+				if (!bpm && element.abcelem.el_type === "tempo") {
+					bpm = this.getBpm(element.abcelem);
 					var beatLength = this.getBeatLength();
 					var beatsPerSecond = bpm / 60;
 					timeDivider = beatLength * beatsPerSecond;
@@ -481,7 +448,7 @@ var Tune = function() {
 			bpm = 180;
 			// Compensate for compound meter, where the beat isn't a beat.
 			var meter = this.getMeterFraction();
-			if (meter && (meter.num % 3 === 0)) {
+			if (meter && meter.num !== 3 && (meter.num % 3 === 0)) {
 				bpm = 120;
 			}
 		}
