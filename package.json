@@ -1,17 +1,22 @@
 {
   "name": "abcjs",
-  "version": "6.0.0-beta.13",
+  "version": "6.0.0-beta.14",
   "description": "Renderer for abc music notation",
-  "main": "index.js",
+  "main": "dist/abcjs-basic.js",
+  "module": "index.js",
   "scripts": {
     "webpack": "webpack",
-    "build": "npm run fix-versions && npm run build:basic-min && npm run build:basic && npm run build:midi && npm run build:plugin && npm run build:plugin-midi",
+    "build": "npm run fix-versions && npm run build:basic && npm run build:basic-min && npm run build:dist && npm run build:dist-min && npm run build:dist-midi && npm run build:dist-midi-min && npm run build:midi && npm run build:plugin && npm run build:plugin-midi",
     "build:basic": "npm run webpack -- --env.mode development --env.type basic",
     "build:basic-min": "npm run webpack -- --env.mode production --env.type basic",
+    "build:dist": "npm run webpack -- --env.mode development --env.type basic -o dist/abcjs-basic.js",
+    "build:dist-min": "npm run webpack -- --env.mode production --env.type basic -o dist/abcjs-basic.min.js",
+    "build:dist-midi": "npm run webpack -- --env.mode development --env.type basic -o dist/abcjs-midi.js",
+    "build:dist-midi-min": "npm run webpack -- --env.mode production --env.type basic -o dist/abcjs-midi.min.js",
     "build:midi": "npm run webpack -- --env.mode production --env.type midi",
     "build:plugin": "npm run webpack -- --env.mode production --env.type plugin",
     "build:plugin-midi": "npm run webpack -- --env.mode production --env.type plugin-midi",
-    "fix-versions": "./fix-versions.sh 6.0.0-beta.13",
+    "fix-versions": "./fix-versions.sh 6.0.0-beta.14",
     "test": "jest",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
@@ -36,6 +41,10 @@
   "bugs": {
     "url": "https://github.com/paulrosen/abcjs/issues"
   },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/paulrosen"
+  },
   "homepage": "https://abcjs.net",
   "devDependencies": {
     "@babel/core": "7.10.2",
@@ -55,7 +64,7 @@
     "workbox-webpack-plugin": "5.1.3"
   },
   "dependencies": {
-    "abcjs": "6.0.0-beta.13",
+    "abcjs": "6.0.0-beta.14",
     "midi": "https://github.com/paulrosen/MIDI.js.git#abcjs"
   }
 }

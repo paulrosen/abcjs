@@ -583,7 +583,7 @@ var ParserLint = function() {
 		description:"ABC Internal Music Representation",
 		type:"object",
 		properties: {
-			version: { type: "string", Enum: [ "1.0.1" ] },
+			version: { type: "string", Enum: [ "1.1.0" ] },
 			media: { type: "string", Enum: [ "screen", "print" ] },
 
 			formatting: formattingProperties,

@@ -24,11 +24,13 @@ var parseKeyVoice = {};
 	var warn;
 	var multilineVars;
 	var tune;
-	parseKeyVoice.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
+	var tuneBuilder;
+	parseKeyVoice.initialize = function(tokenizer_, warn_, multilineVars_, tune_, tuneBuilder_) {
 		tokenizer = tokenizer_;
 		warn = warn_;
 		multilineVars = multilineVars_;
 		tune = tune_;
+		tuneBuilder = tuneBuilder_;
 	};
 
 	parseKeyVoice.standardKey = function(keyName, root, acc, localTranspose) {
@@ -631,7 +633,7 @@ var parseKeyVoice = {};
 
 	var setCurrentVoice = function(id) {
 		multilineVars.currentVoice = multilineVars.voices[id];
-		tune.setCurrentVoice(multilineVars.currentVoice.staffNum, multilineVars.currentVoice.index);
+		tuneBuilder.setCurrentVoice(multilineVars.currentVoice.staffNum, multilineVars.currentVoice.index);
 	};
 
 	parseKeyVoice.parseVoice = function(line, i, e) {

@@ -6,6 +6,15 @@ module.exports = ({mode, presets, type} = {mode: "production", presets: []}) => 
 	return webpackMerge(
 		{
 			entry: `./static-wrappers/${type}.js`,
+			output: {
+				library: {
+					amd: 'abcjs',
+					root: 'ABCJS',
+					commonjs: 'abcjs'
+				},
+				libraryTarget: 'umd',
+				globalObject: 'this'
+			},
 			mode,
 			module: {
 				rules: [

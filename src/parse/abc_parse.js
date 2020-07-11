@@ -23,10 +23,12 @@ var transpose = require('./abc_transpose');
 var wrap = require('./wrap_lines');
 
 var Tune = require('../data/abc_tune');
+var TuneBuilder = require('../parse/tune-builder');
 
 var Parse = function() {
 	"use strict";
 	var tune = new Tune();
+	var tuneBuilder = new TuneBuilder(tune);
 	var tokenizer = new Tokenizer();
 
 	this.getTune = function() {
@@ -51,7 +53,8 @@ var Parse = function() {
 			millisecondsPerMeasure: tune.millisecondsPerMeasure,
 			setupEvents: tune.setupEvents,
 			setTiming: tune.setTiming,
-			setUpAudio: tune.setUpAudio
+			setUpAudio: tune.setUpAudio,
+			visualTranspose: tune.visualTranspose
 		};
 	};
 
@@ -196,10 +199,10 @@ var Parse = function() {
 		var clean_line = encode(line.substring(0, col_num)) +
 			'<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' +
 			encode(line.substring(col_num+1));
-		addWarning("Music Line:" + tune.getNumLines() + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
+		addWarning("Music Line:" + tuneBuilder.getNumLines() + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
 		addWarningObject({message:str, line:line, startChar: multilineVars.iChar + col_num, column: col_num});
 	};
-	var header = new ParseHeader(tokenizer, warn, multilineVars, tune);
+	var header = new ParseHeader(tokenizer, warn, multilineVars, tune, tuneBuilder);
 
 	this.getWarnings = function() {
 		return multilineVars.warnings;
@@ -853,7 +856,7 @@ var Parse = function() {
 				case '-':
 					if (state === 'startSlur') {
 						// This is the first character, so it must have been meant for the previous note. Correct that here.
-						tune.addTieToLastNote();
+						tuneBuilder.addTieToLastNote();
 						el.endTie = true;
 					} else if (state === 'octave' || state === 'duration' || state === 'end_slur') {
 						el.startTie = {};
@@ -996,7 +999,7 @@ var Parse = function() {
 		var isFirstVoice = multilineVars.currentVoice === undefined || (multilineVars.currentVoice.staffNum ===  0 && multilineVars.currentVoice.index ===  0);
 		if (multilineVars.barNumbers === 0 && isFirstVoice && multilineVars.currBarNumber !== 1)
 			params.barNumber = multilineVars.currBarNumber;
-		tune.startNewLine(params);
+		tuneBuilder.startNewLine(params);
 		if (multilineVars.key.impliedNaturals)
 			delete multilineVars.key.impliedNaturals;
 
@@ -1287,7 +1290,7 @@ var Parse = function() {
 						el.rest = { type: 'spacer' };
 						el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
 						multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-						tune.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el);
+						tuneBuilder.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el);
 						multilineVars.measureNotEmpty = true;
 						el = {};
 					}
@@ -1331,7 +1334,7 @@ var Parse = function() {
 							}
 						}
 						multilineVars.addFormattingOptions(el, tune.formatting, 'bar');
-						tune.appendElement('bar', startOfLine+i, startOfLine+i+ret[0], bar);
+						tuneBuilder.appendElement('bar', startOfLine+i, startOfLine+i+ret[0], bar);
 						multilineVars.measureNotEmpty = false;
 						el = {};
 					}
@@ -1348,7 +1351,7 @@ var Parse = function() {
 				} else if (line[i] === '&') {	// backtrack to beginning of measure
 					ret = letter_to_overlay(line, i);
 					if (ret[0] > 0) {
-						tune.appendElement('overlay', startOfLine, startOfLine+1, {});
+						tuneBuilder.appendElement('overlay', startOfLine, startOfLine+1, {});
 						i += 1;
 						overlayLevel++;
 					}
@@ -1510,7 +1513,7 @@ var Parse = function() {
 									}
 
 									multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-									tune.appendElement('note', startOfLine+chordStartChar, startOfLine+i, el);
+									tuneBuilder.appendElement('note', startOfLine+chordStartChar, startOfLine+i, el);
 									multilineVars.measureNotEmpty = true;
 									el = {};
 								}
@@ -1584,7 +1587,7 @@ var Parse = function() {
 							}
 
 							multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-							tune.appendElement('note', startOfLine+startI, startOfLine+i, el);
+							tuneBuilder.appendElement('note', startOfLine+startI, startOfLine+i, el);
 							multilineVars.measureNotEmpty = true;
 							el = {};
 						}
@@ -1627,9 +1630,9 @@ var Parse = function() {
 		if (ret.newline)
 			startNewLine();
 		if (ret.words)
-			addWords(tune.getCurrentVoice(), line.substring(2));
+			addWords(tuneBuilder.getCurrentVoice(), line.substring(2));
 		if (ret.symbols)
-			addSymbols(tune.getCurrentVoice(), line.substring(2));
+			addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
 		if (ret.recurse)
 			parseLine(ret.str);
 	};
@@ -1688,7 +1691,7 @@ var Parse = function() {
 		// switches.transpose: change the key signature, chords, and notes by a number of half-steps.
 		if (!switches) switches = {};
 		if (!startPos) startPos = 0;
-		tune.reset();
+		tuneBuilder.reset();
 		if (switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
@@ -1697,6 +1700,8 @@ var Parse = function() {
 			multilineVars.globalTranspose = parseInt(switches.visualTranspose);
 			if (multilineVars.globalTranspose === 0)
 				multilineVars.globalTranspose = undefined;
+			else
+				tuneBuilder.setVisualTranspose(switches.visualTranspose);
 		} else
 			multilineVars.globalTranspose = undefined;
 		if (switches.lineBreaks) {
@@ -1747,11 +1752,10 @@ var Parse = function() {
 						multilineVars.is_in_history = false;
 						parseLine(line);
 					} else
-						tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
+						tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
 				} else if (multilineVars.inTextBlock) {
 					if (parseCommon.startsWith(line, "%%endtext")) {
-						//tune.addMetaText("textBlock", multilineVars.textBlock);
-						tune.addText(multilineVars.textBlock);
+						tuneBuilder.addText(multilineVars.textBlock);
 						multilineVars.inTextBlock = false;
 					}
 					else {
@@ -1771,10 +1775,10 @@ var Parse = function() {
 					var wasInHeader = multilineVars.is_in_header;
 					parseLine(line);
 					if (wasInHeader && !multilineVars.is_in_header) {
-						tune.setRunningFont("annotationfont", multilineVars.annotationfont);
-						tune.setRunningFont("gchordfont", multilineVars.gchordfont);
-						tune.setRunningFont("tripletfont", multilineVars.tripletfont);
-						tune.setRunningFont("vocalfont", multilineVars.vocalfont);
+						tuneBuilder.setRunningFont("annotationfont", multilineVars.annotationfont);
+						tuneBuilder.setRunningFont("gchordfont", multilineVars.gchordfont);
+						tuneBuilder.setRunningFont("tripletfont", multilineVars.tripletfont);
+						tuneBuilder.setRunningFont("vocalfont", multilineVars.vocalfont);
 					}
 				}
 				multilineVars.iChar += line.length + 1;
@@ -1791,7 +1795,7 @@ var Parse = function() {
 				ph = pl;
 				pl = x;
 			}
-			multilineVars.openSlurs = tune.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
+			multilineVars.openSlurs = tuneBuilder.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
 		} catch (err) {
 			if (err !== "normal_abort")
 				throw err;
