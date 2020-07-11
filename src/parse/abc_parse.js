@@ -55,7 +55,8 @@ var Parse = function() {
 			millisecondsPerMeasure: tune.millisecondsPerMeasure,
 			setupEvents: tune.setupEvents,
 			setTiming: tune.setTiming,
-			setUpAudio: tune.setUpAudio
+			setUpAudio: tune.setUpAudio,
+			visualTranspose: tune.visualTranspose
 		};
 	};
 
@@ -1701,6 +1702,8 @@ var Parse = function() {
 			multilineVars.globalTranspose = parseInt(switches.visualTranspose);
 			if (multilineVars.globalTranspose === 0)
 				multilineVars.globalTranspose = undefined;
+			else
+				tuneBuilder.setVisualTranspose(switches.visualTranspose);
 		} else
 			multilineVars.globalTranspose = undefined;
 		if (switches.lineBreaks) {

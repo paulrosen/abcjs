@@ -14,6 +14,11 @@ var TuneBuilder = function(tune) {
 		tune.voiceNum = 0;
 		tune.lineNum = 0;
 		tune.runningFonts = {};
+		delete tune.visualTranspose;
+	};
+
+	this.setVisualTranspose = function(visualTranspose) {
+		tune.visualTranspose = visualTranspose;
 	};
 
 	this.resolveOverlays = function() {
