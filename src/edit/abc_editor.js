@@ -246,6 +246,19 @@ Editor.prototype.paramChanged = function(engraverParams) {
 	this.fireChanged();
 };
 
+Editor.prototype.synthParamChanged = function(options) {
+	this.synth.options = {};
+	if (options) {
+		for (var key in options) {
+			if (options.hasOwnProperty(key)) {
+				this.synth.options[key] = options[key];
+			}
+		}
+	}
+	this.currentAbc = "";
+	this.fireChanged();
+};
+
 // return true if the model has changed
 Editor.prototype.parseABC = function() {
   var t = this.editarea.getString();
