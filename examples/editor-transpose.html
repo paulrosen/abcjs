@@ -10,7 +10,7 @@
 	<script src="../bin/abcjs_basic_6.0.0-beta.14-min.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		var editor;
-		var renderParams = {};
+		var renderParams = { selectTypes: false};
 		var synthOptions = {};
 		var visualTransposeEl;
 		var audioTransposeEl;
@@ -54,9 +54,9 @@
 				'});'
 
 			if (visualTransposeEl.value !== "0")
-				renderParams = { visualTranspose: parseInt(visualTransposeEl.value, 10) };
+				renderParams = { selectTypes: false, visualTranspose: parseInt(visualTransposeEl.value, 10) };
 			else
-				renderParams = {};
+				renderParams = { selectTypes: false };
 			editor.paramChanged(renderParams);
 
 			if (audioTransposeEl.value !== "0")
@@ -112,8 +112,9 @@
 			font-family: Arial, "sans-serif";
 		}
 		textarea {
-			width: calc(100% - 10px);
+			width: calc(100% - 43px);
 			height: 200px;
+			padding: 10px 20px;
 		}
 		button {
 			background: #ffffff;
@@ -134,7 +135,7 @@
 			margin-bottom: 5px;
 		}
 		#warnings {
-			color: #ff0e0e;
+			color: #dd0000;
 			padding: 5px 0;
 		}
 
@@ -148,7 +149,7 @@
 		fieldset p {
 			padding: 0;
 			margin: 0;
-			color: #808080;
+			color: #6d6d6d;
 			font-style: italic;
 		}
 	</style>
