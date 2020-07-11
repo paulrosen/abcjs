@@ -14,12 +14,8 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-/*global document */
-/*global window, ABCJS, console */
-
-var parseCommon = require('../parse/abc_common');
 var Parse = require('../parse/abc_parse');
-var ParseBook = require('../parse/abc_parse_book');
+var bookParser = require('../parse/abc_parse_book');
 
 var tunebook = {};
 
@@ -34,7 +30,7 @@ var tunebook = {};
 	};
 
 	var TuneBook = tunebook.TuneBook = function(book) {
-		var parsed = ParseBook(book);
+		var parsed = bookParser(book);
 		this.header = parsed.header;
 		this.tunes = parsed.tunes;
 	};

@@ -72,5 +72,5 @@ var bookParser = function(book) {
 	};
 };
 
-module.exports = BookParser;
+module.exports = bookParser;
 
