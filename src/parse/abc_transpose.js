@@ -39,6 +39,8 @@ var newKey = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 var newKeyMinor = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
 transpose.keySignature = function(multilineVars, keys, keyName, root, acc, localTranspose) {
+	if (multilineVars.clef.type === "perc")
+		return { accidentals: keys[keyName], root: root, acc: acc };
 	if (!localTranspose) localTranspose = 0;
 	multilineVars.localTransposeVerticalMovement = 0;
 	multilineVars.localTransposePreferFlats = false;
@@ -212,7 +214,7 @@ transpose.note = function(multilineVars, el) {
 	// the "el" that is passed in has el.accidental, and el.pitch. "pitch" is the vertical position (0=middle C)
 	// localTranspose is the number of half steps
 	// localTransposeVerticalMovement is the vertical distance to move.
-	if (!multilineVars.localTranspose)
+	if (!multilineVars.localTranspose || multilineVars.clef.type === "perc")
 		return;
 	var origPitch = el.pitch;
 	el.pitch = el.pitch + multilineVars.localTransposeVerticalMovement;

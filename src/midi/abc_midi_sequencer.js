@@ -167,6 +167,10 @@ var sequence;
 							if (voiceName)
 								voices[voiceNumber].unshift({el_type: "name", trackName: voiceName});
 						}
+						// Negate any transposition for the percussion staff.
+						if (transpose && staff.clef.type === "perc")
+							voices[voiceNumber].push({ el_type: 'transpose', transpose: 0 });
+
 						if (staff.clef && staff.clef.type === 'perc' && !channelExplicitlySet) {
 							for (var cl = 0; cl < voices[voiceNumber].length; cl++) {
 								if (voices[voiceNumber][cl].el_type === 'instrument')
@@ -185,7 +189,7 @@ var sequence;
 							voices[voiceNumber].push({el_type: 'drum', params: {pattern: drumPattern, bars: drumBars, on: drumOn, intro: drumIntro}});
 							startingDrumSet = true;
 						}
-						if (staff.clef && staff.clef.transpose) {
+						if (staff.clef && staff.clef.type !== "perc" && staff.clef.transpose) {
 							staff.clef.el_type = 'clef';
 							voices[voiceNumber].push({ el_type: 'transpose', transpose: staff.clef.transpose });
 						}
