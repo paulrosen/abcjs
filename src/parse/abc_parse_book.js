@@ -16,7 +16,7 @@
 
 var parseCommon = require('./abc_common');
 
-var BookParser = function(book) {
+var bookParser = function(book) {
 	"use strict";
 
 	var directives = "";
