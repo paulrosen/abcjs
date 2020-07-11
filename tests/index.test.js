@@ -1,5 +1,5 @@
-import { default as basic } from "../index"
-import { default as midi  } from "../midi"
+import basic from "../index"
+import midi from "../midi"
 
 test("exports an object", () => {
 	expect(typeof basic).toBe('object')

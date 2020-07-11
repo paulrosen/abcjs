@@ -1,4 +1,4 @@
-import { default as midi  } from "../midi"
+import midi from "../midi"
 
 test("exports an object", () => {
 	expect(typeof midi).toBe('object')
