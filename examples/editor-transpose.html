@@ -5,44 +5,216 @@
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
-	<title>abcjs: Basic Editor Demo</title>
+	<link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
+	<title>abcjs: Editor Transpose Demo</title>
 	<script src="../bin/abcjs_basic_6.0.0-beta.14-min.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		var editor;
+		var renderParams = {};
+		var synthOptions = {};
+		var visualTransposeEl;
+		var audioTransposeEl;
+		var codeEl;
+		var abcEl;
 		window.onload = function() {
+			abcEl = document.querySelector("#abc");
+			visualTransposeEl = document.querySelector(".visual-transpose");
+			audioTransposeEl = document.querySelector(".audio-transpose");
+			codeEl = document.querySelector(".editor-code");
+			document.querySelector(".midi-command").addEventListener("click", onMidiCommand);
+			document.querySelector(".key-command").addEventListener("click", onKeyCommand);
+			document.querySelector(".voice-command").addEventListener("click", onVoiceCommand);
+
 			editor = new ABCJS.Editor("abc", { canvas_id: "paper",
 				warnings_id: "warnings",
-				abcjsParams: {}
+				abcjsParams: renderParams,
+				synth: {
+					el: "#audio",
+					options: {displayRestart: true, displayPlay: true, displayProgress: true, options: {}}
+				}
 			});
 
-			var transposeHalfSteps = document.querySelector(".transpose-half-steps");
+			visualTransposeEl.addEventListener("change", paramChanged);
+			audioTransposeEl.addEventListener("change", paramChanged);
+			paramChanged();
+		};
 
-			transposeHalfSteps.addEventListener("change", function() {
-				editor.paramChanged({
-					visualTranspose: transposeHalfSteps.value
-				});
-			});
+		function paramChanged() {
+			var output = 'new ABCJS.Editor("abc", {\n' +
+				'  canvas_id: "paper",\n' +
+				'  warnings_id: "warnings",\n' +
+				'  abcjsParams: renderParams,\n' +
+				'  synth: {\n' +
+				'    el: "#audio",\n' +
+				'    options: {\n' +
+				'      displayRestart: true, displayPlay: true, displayProgress: true,\n' +
+				'      options: synthOptions\n' +
+				'    }\n' +
+				'  },\n' +
+				'});'
+
+			if (visualTransposeEl.value !== "0")
+				renderParams = { visualTranspose: parseInt(visualTransposeEl.value, 10) };
+			else
+				renderParams = {};
+			editor.paramChanged(renderParams);
+
+			if (audioTransposeEl.value !== "0")
+				synthOptions = { midiTranspose: parseInt(audioTransposeEl.value, 10)};
+			else
+				synthOptions = {};
+			editor.synthParamChanged(synthOptions);
+
+			output = output.replace("renderParams", JSON.stringify(renderParams));
+			output = output.replace("synthOptions", JSON.stringify(synthOptions));
+			codeEl.innerHTML = output;
 		}
 
+		function onMidiCommand() {
+			var abc = abcEl.value;
+			abc = abc.split("\n");
+			abc[0] += "\n%%MIDI transpose 2";
+			abc = abc.join("\n");
+			abcEl.value = abc;
+		}
+
+		function onKeyCommand() {
+			var abc = abcEl.value;
+			abc = abc.split("K:");
+			if (abc.length > 1) {
+				var arr = abc[1].split("\n");
+				arr[0] = " Em transpose=-2";
+				abc[1] = arr.join("\n");
+			}
+			abc = abc.join("K:");
+			abcEl.value = abc;
+		}
+
+		function onVoiceCommand() {
+			var abc = abcEl.value;
+			abc = abc.split("V:");
+			if (abc.length > 1) {
+				var arr = abc[1].split("\n");
+				arr[0] = " Melody transpose=-2";
+				abc[1] = arr.join("\n");
+			}
+			abc = abc.join("V:");
+			abcEl.value = abc;
+		}
 	</script>
+	<style>
+		main {
+			font-size: 18px;
+			max-width: 776px;
+			background: #e6f3f3;
+			padding: 20px;
+			margin: 0 auto;
+			font-family: Arial, "sans-serif";
+		}
+		textarea {
+			width: calc(100% - 10px);
+			height: 200px;
+		}
+		button {
+			background: #ffffff;
+			border-radius: 8px;
+			padding: 10px;
+			border: 1px solid #5c5c5c;
+		}
+		button:hover {
+			background: #8cf3f3;
+		}
+		#paper {
+			background: #ffffff;
+		}
+		h1 {
+			margin: 0;
+		}
+		h2 {
+			margin-bottom: 5px;
+		}
+		#warnings {
+			color: #ff0e0e;
+			padding: 5px 0;
+		}
+
+		pre {
+			background: #5c5c5c;
+			color: #ffffff;
+			font-size: 14px;
+			padding: 5px;
+			font-family: Monaco, monospace;
+		}
+		fieldset p {
+			padding: 0;
+			margin: 0;
+			color: #808080;
+			font-style: italic;
+		}
+	</style>
 </head>
 <body>
-<textarea id="abc" cols="80" rows="15">X: 1
+<main>
+	<h1>Transposing Example</h1>
+	<p>This demonstrates the different methods of transposition. It is possible to transpose by inserting commands
+		into the ABC string or by using parameters when calling the rendering function. When using the parameters the transposition always adds to whatever the ABC string says. When inserting strings into ABC that always uses the last transposition encountered.</p>
+	<section class="input">
+		<h2>ABC String</h2>
+			<textarea aria-label="ABC string" id="abc">X: 1
 T: Cooley's
 M: 4/4
 L: 1/8
 R: reel
-K: Emin
+K: Em
+V: Melody
 |:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
-EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|@
+EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
 |:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
 eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
 </textarea>
-<br>
-<label>Transpose half-steps: <input class="transpose-half-steps" type="number" min="-24" max="24" step="1" value="0"></label>
+		<fieldset>
+			<legend>Options</legend>
+			<h2>Transpose Parameters</h2>
+			<p>These are added to whatever is in the tune (in half steps)</p>
+			<label>Visual:
+				<input
+						class="visual-transpose"
+						type="number"
+						min="-24"
+						max="24"
+						step="1"
+						value="0">
+			</label>
+			<label>Audio:
+				<input
+						class="audio-transpose"
+						type="number"
+						min="-24"
+						max="24"
+						step="1"
+						value="0">
+			</label>
+			<h2>ABC Insertions</h2>
+			<p>These all do the same thing.</p>
+			<button class="midi-command">Add %%MIDI command</button>
+			<button class="key-command">Add transpose to K:</button>
+			<button class="voice-command">Add transpose to V:</button>
+		</fieldset>
+	</section>
 
-<div id="warnings"></div>
-<hr>
-<div id="paper"></div>
+	<section class="output">
+		<h2>Output</h2>
+		<div id="audio"></div>
+		<div id="warnings"></div>
+		<div id="paper"></div>
+	</section>
+
+	<section class="explanation">
+		<h2>Code Sample</h2>
+		<pre class="editor-code">
+
+		</pre>
+	</section>
+</main>
 </body>
 </html>
