@@ -108,6 +108,8 @@ var Editor = function(editarea, params) {
     this.div = document.createElement("DIV");
     this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem());
   }
+  if (typeof this.div === 'string')
+	  this.div = document.getElementById(this.div);
 
   if (params.selectionChangeCallback) {
   	this.selectionChangeCallback = params.selectionChangeCallback;
@@ -142,8 +144,14 @@ var Editor = function(editarea, params) {
 		}
 	}
 
-  if (params.generate_warnings && params.warnings_id) {
+  if (params.warnings_id) {
+  	if (typeof(params.warnings_id) === "string")
       this.warningsdiv = document.getElementById(params.warnings_id);
+  	else
+		this.warningsdiv = params.warnings_id;
+  } else if (params.generate_warnings) {
+	  this.warningsdiv = document.createElement("div");
+	  this.div.parentNode.insertBefore(this.warningsdiv, this.div);
   }
 
   this.onchangeCallback = params.onchange;
