@@ -1,2 +1,2 @@
 require('./license');
-window.ABCJS = require('../midi.js');
+module.exports = require('../midi');
