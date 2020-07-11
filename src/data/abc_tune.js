@@ -423,17 +423,17 @@ var Tune = function() {
 		}
 	};
 
-	function getVertical(group) {
-		var voices = group.voices;
-		var firstStaff = group.staffs[0];
-		var middleC = firstStaff.absoluteY;
-		var top = middleC - firstStaff.top*spacing.STEP;
-		var lastStaff = group.staffs[group.staffs.length-1];
-		middleC = lastStaff.absoluteY;
-		var bottom = middleC - lastStaff.bottom*spacing.STEP;
-		var height = bottom - top;
-		return { top: top, height: height };
-	}
+	// function getVertical(group) {
+	// 	var voices = group.voices;
+	// 	var firstStaff = group.staffs[0];
+	// 	var middleC = firstStaff.absoluteY;
+	// 	var top = middleC - firstStaff.top*spacing.STEP;
+	// 	var lastStaff = group.staffs[group.staffs.length-1];
+	// 	middleC = lastStaff.absoluteY;
+	// 	var bottom = middleC - lastStaff.bottom*spacing.STEP;
+	// 	var height = bottom - top;
+	// 	return { top: top, height: height };
+	// }
 
 	this.getBpm = function(tempo) {
 		var bpm;
