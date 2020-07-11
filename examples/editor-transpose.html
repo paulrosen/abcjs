@@ -53,16 +53,10 @@
 				'  },\n' +
 				'});'
 
-			if (visualTransposeEl.value !== "0")
-				renderParams = { selectTypes: false, visualTranspose: parseInt(visualTransposeEl.value, 10) };
-			else
-				renderParams = { selectTypes: false };
+			renderParams = { selectTypes: false, visualTranspose: parseInt(visualTransposeEl.value, 10) };
 			editor.paramChanged(renderParams);
 
-			if (audioTransposeEl.value !== "0")
-				synthOptions = { midiTranspose: parseInt(audioTransposeEl.value, 10)};
-			else
-				synthOptions = {};
+			synthOptions = { midiTranspose: parseInt(audioTransposeEl.value, 10)};
 			editor.synthParamChanged(synthOptions);
 
 			output = output.replace("renderParams", JSON.stringify(renderParams));
