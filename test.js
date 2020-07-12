@@ -1,3 +1,4 @@
+var abcjs = require('./index');
 var version = require('./version');
 
 abcjs.signature = "abcjs-test v" + version;
