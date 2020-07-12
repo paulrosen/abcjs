@@ -1,72 +1,56 @@
 import basic from "../index"
-import midi from "../midi"
 
 test("exports an object", () => {
-	expect(typeof basic).toBe('object')
+	expect(basic).toEqual(expect.any(Object))
 })
 
 test("has correct signature", () => {
-  expect(basic.signature).toMatch(/^abcjs-basic v/)
+  expect(basic.signature).toEqual(expect.stringContaining('abcjs-basic v'))
 })
 
 test("can control animations", () => {
-	[basic, midi].forEach((API) => {
-		expect(typeof API.startAnimation).toBe('function')
-		expect(typeof API.stopAnimation).toBe('function')
-		expect(typeof API.pauseAnimation).toBe('function')
-	})
+	expect(basic.startAnimation).toEqual(expect.any(Function))
+	expect(basic.stopAnimation).toEqual(expect.any(Function))
+	expect(basic.pauseAnimation).toEqual(expect.any(Function))
 })
 
 test("can read a tunebook", () => {
-	[basic, midi].forEach((API) => {
-		expect(typeof API.numberOfTunes).toBe('function')
-		expect(typeof API.TuneBook).toBe('function')
-		expect(typeof API.parseOnly).toBe('function')
-		expect(typeof API.renderEngine).toBe('function')
-		expect(typeof API.extractMeasures).toBe('function')
-	})
+	expect(basic.numberOfTunes).toEqual(expect.any(Function))
+	expect(basic.TuneBook).toEqual(expect.any(Function))
+	expect(basic.parseOnly).toEqual(expect.any(Function))
+	expect(basic.renderEngine).toEqual(expect.any(Function))
+	expect(basic.extractMeasures).toEqual(expect.any(Function))
 })
 
 test("can render a tune", () => {
-	[basic, midi].forEach((API) => {
-		expect(typeof API.renderAbc).toBe('function')
-		expect(typeof API.renderAbc).toBe('function')
-	})
+	expect(basic.renderAbc).toEqual(expect.any(Function))
 })
 
 test("can access timing callbacks", () => {
-	[basic, midi].forEach((API) => {
-		expect(typeof API.TimingCallbacks).toBe('function')
-		expect(typeof API.TimingCallbacks).toBe('function')
-	})
+	expect(basic.TimingCallbacks).toEqual(expect.any(Function))
 })
 
 test("can set glyphs", () => {
-	[basic, midi].forEach((API) => {
-		expect(typeof API.setGlyph).toBe('function')
-		expect(typeof API.setGlyph).toBe('function')
-	})
+	expect(basic.setGlyph).toEqual(expect.any(Function))
 })
 
 test("can access synth", () => {
-	[basic, midi].forEach((API) => {
-		expect(typeof API.synth.CreateSynth).toBe('function')
-		expect(typeof API.synth.instrumentIndexToName).toBe('object')
-		expect(typeof API.synth.pitchToNoteName).toBe('object')
-		expect(typeof API.synth.SynthController).toBe('function')
-		expect(typeof API.synth.SynthSequence).toBe('function')
-		expect(typeof API.synth.CreateSynthControl).toBe('function')
-		expect(typeof API.synth.registerAudioContext).toBe('function')
-		expect(typeof API.synth.activeAudioContext).toBe('function')
-		expect(typeof API.synth.playEvent).toBe('function')
-	})
-	expect(typeof basic.synth.getMidiFile).toBe('function')
-	expect(typeof basic.synth.supportsAudio).toBe('function')
+	expect(basic.synth).toEqual(expect.objectContaining({
+		CreateSynth: expect.any(Function),
+		instrumentIndexToName: expect.any(Object),
+		pitchToNoteName: expect.any(Object),
+		SynthController: expect.any(Function),
+		SynthSequence: expect.any(Function),
+		CreateSynthControl: expect.any(Function),
+		registerAudioContext: expect.any(Function),
+		activeAudioContext: expect.any(Function),
+		playEvent: expect.any(Function),
+		getMidiFile: expect.any(Function),
+		supportsAudio: expect.any(Function),
+	}))
 })
 
 test("can access editor", () => {
-	[basic, midi].forEach((API) => {
-		expect(typeof API.Editor).toBe('function')
-		expect(typeof API.EditArea).toBe('function')
-	})
+	expect(basic.Editor).toEqual(expect.any(Function))
+	expect(basic.EditArea).toEqual(expect.any(Function))
 })
