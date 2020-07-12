@@ -52,7 +52,6 @@ var tunebook = {};
 	};
 
 	tunebook.parseOnly = function(abc, params) {
-		var tunes = [];
 		var numTunes = tunebook.numberOfTunes(abc);
 
 		// this just needs to be passed in because this tells the engine how many tunes to process.

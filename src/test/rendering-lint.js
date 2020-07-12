@@ -167,7 +167,6 @@ function listAbsElement(absEl, indent) {
 }
 
 function listRelativeElement(relativeElement, indent) {
-	var tab = createIndent(indent);
 	var tab2 = createIndent(indent+1);
 	var output = [];
 	output.push("relative element: " + relativeElement.type);
