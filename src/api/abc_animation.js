@@ -14,8 +14,6 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var spacing = require('../write/abc_spacing');
-var parseCommon = require('../parse/abc_common');
 var TimingCallbacks = require('./abc_timing_callbacks');
 
 var animation = {};

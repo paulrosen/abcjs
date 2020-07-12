@@ -116,12 +116,13 @@ VoiceElement.prototype.setRange = function(child) {
 
 VoiceElement.prototype.setUpperAndLowerElements = function(positionY) {
 	var i;
+	var abselem;
 	for (i = 0; i < this.children.length; i++) {
-		var abselem = this.children[i];
+		abselem = this.children[i];
 		abselem.setUpperAndLowerElements(positionY);
 	}
 	for (i = 0; i < this.otherchildren.length; i++) {
-		var abselem = this.otherchildren[i];
+		abselem = this.otherchildren[i];
 		if (typeof abselem !== 'string')
 			abselem.setUpperAndLowerElements(positionY);
 	}

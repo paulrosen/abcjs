@@ -610,7 +610,7 @@ function calcLineWraps(tune, widths, abcString, params, Parse, engraver_controll
 	var maxSpacing = params.wrap.maxSpacing ? Math.max(parseFloat(params.wrap.maxSpacing), 1) : undefined;
 	if (params.wrap.lastLineLimit && !maxSpacing)
 		maxSpacing = Math.max(parseFloat(params.wrap.lastLineLimit), 1);
-	var targetHeight = params.wrap.targetHeight ? Math.max(parseInt(params.wrap.targetHeight, 10), 100) : undefined;
+	// var targetHeight = params.wrap.targetHeight ? Math.max(parseInt(params.wrap.targetHeight, 10), 100) : undefined;
 	var preferredMeasuresPerLine = params.wrap.preferredMeasuresPerLine ? Math.max(parseInt(params.wrap.preferredMeasuresPerLine, 10), 1) : undefined;
 
 	var lineBreakPoint = (params.staffwidth - widths.left) / minSpacing / scale;

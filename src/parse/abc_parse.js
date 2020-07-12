@@ -14,8 +14,6 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-/*global window */
-
 var parseCommon = require('./abc_common');
 var parseDirective = require('./abc_parse_directive');
 var ParseHeader = require('./abc_parse_header');
@@ -1341,7 +1339,7 @@ var Parse = function() {
 						el = {};
 					}
 					i += ret[0];
-					var cv = multilineVars.currentVoice ? multilineVars.currentVoice.staffNum + '-' + multilineVars.currentVoice.index : 'ONLY';
+					// var cv = multilineVars.currentVoice ? multilineVars.currentVoice.staffNum + '-' + multilineVars.currentVoice.index : 'ONLY';
 					// if (multilineVars.lineBreaks) {
 					// 	if (!multilineVars.barCounter[cv])
 					// 		multilineVars.barCounter[cv] = 0;
