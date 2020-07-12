@@ -11,8 +11,8 @@ var engraverController = require('./src/write/abc_engraver_controller');
 abcjs['write'] = { EngraverController: engraverController };
 
 var midi = require('./src/midi/abc_midi_controls');
-var sequence = require('./src/midi/abc_midi_sequencer');
-var flatten = require('./src/midi/abc_midi_flattener');
+var sequence = require('./src/synth/abc_midi_sequencer');
+var flatten = require('./src/synth/abc_midi_flattener');
 var midiCreate = require('./src/midi/abc_midi_create');
 var midiUiGenerator = require('./src/midi/abc_midi_ui_generator');
 abcjs['midi'] = midi;

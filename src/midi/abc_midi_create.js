@@ -15,7 +15,7 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var Preparer = require('./abc_midi_js_preparer');
-var rendererFactory = require('./abc_midi_renderer');
+var rendererFactory = require('../synth/abc_midi_renderer');
 
 var create;
 

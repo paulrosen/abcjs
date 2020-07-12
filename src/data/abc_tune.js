@@ -16,8 +16,8 @@
 
 var parseCommon = require('../parse/abc_common');
 var spacing = require('../write/abc_spacing');
-var sequence = require('../midi/abc_midi_sequencer');
-var flatten = require('../midi/abc_midi_flattener');
+var sequence = require('../synth/abc_midi_sequencer');
+var flatten = require('../synth/abc_midi_flattener');
 
 /**
  * This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
