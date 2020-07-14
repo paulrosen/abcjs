@@ -50,7 +50,7 @@ TopText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop
 		this.rows.push({move: marginTop});
 	this.rows.push({left: marginLeft, text: text, font: font, klass: klass, anchor: anchor, absElemType: absElemType});
 	if (!noMove) {
-		const size = getTextSize.calc(text, font, klass);
+		var size = getTextSize.calc(text, font, klass);
 		this.rows.push({move: size.height});
 		if (marginBottom)
 			this.rows.push({move: marginBottom});
