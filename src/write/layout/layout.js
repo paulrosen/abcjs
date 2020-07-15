@@ -1,3 +1,4 @@
+var layoutBeams = require('./beams');
 var layout;
 
 (function () {
@@ -20,7 +21,7 @@ var layout;
 			abcLine = abctune.lines[i];
 			if (abcLine.staffGroup && abcLine.staffGroup.voices) {
 				for (var j = 0; j < abcLine.staffGroup.voices.length; j++)
-					abcLine.staffGroup.voices[j].layoutBeams();
+					layoutBeams(abcLine.staffGroup.voices[j]);
 				abcLine.staffGroup.setUpperAndLowerElements(renderer);
 			}
 		}
