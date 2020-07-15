@@ -1,3 +1,4 @@
+var calcHeight = require('./calcHeight');
 var layoutBeams = require('./beams');
 var setUpperAndLowerElements = require('./setUpperAndLowerElements');
 var layout;
@@ -32,7 +33,7 @@ var layout;
 		for(i=0; i<abctune.lines.length; i++) {
 			abcLine = abctune.lines[i];
 			if (abcLine.staffGroup) {
-				abcLine.staffGroup.height = abcLine.staffGroup.calcHeight();
+				abcLine.staffGroup.height = calcHeight(abcLine.staffGroup);
 			}
 		}
 		return maxWidth;
