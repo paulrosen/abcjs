@@ -1,5 +1,5 @@
 var calcHeight = require('./calcHeight');
-var layoutBeams = require('./beams');
+var layoutVoice = require('./voice');
 var setUpperAndLowerElements = require('./setUpperAndLowerElements');
 var layoutStaffGroup = require('./staffGroup');
 var layout;
@@ -24,7 +24,7 @@ var layout;
 			abcLine = abctune.lines[i];
 			if (abcLine.staffGroup && abcLine.staffGroup.voices) {
 				for (var j = 0; j < abcLine.staffGroup.voices.length; j++)
-					layoutBeams(abcLine.staffGroup.voices[j]);
+					layoutVoice(abcLine.staffGroup.voices[j]);
 				setUpperAndLowerElements(renderer, abcLine.staffGroup);
 			}
 		}

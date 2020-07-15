@@ -1,4 +1,4 @@
-var layoutBeams = function(voice) {
+var layoutVoice = function(voice) {
 	for (var i = 0; i < voice.beams.length; i++) {
 		if (voice.beams[i].layout) {
 			voice.beams[i].layout();
@@ -44,4 +44,4 @@ function moveDecorations(beam) {
 	}
 };
 
-module.exports = layoutBeams;
+module.exports = layoutVoice;
