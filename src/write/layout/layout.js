@@ -1,6 +1,7 @@
 var calcHeight = require('./calcHeight');
 var layoutBeams = require('./beams');
 var setUpperAndLowerElements = require('./setUpperAndLowerElements');
+var layoutStaffGroup = require('./staffGroup');
 var layout;
 
 (function () {
@@ -42,7 +43,7 @@ var layout;
 	var setXSpacing = function (renderer, width, space, staffGroup, formatting, isLastLine, debug) {
 		var newspace = space;
 		for (var it = 0; it < 8; it++) { // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
-			var ret = staffGroup.layout(newspace, renderer, debug);
+			var ret = layoutStaffGroup(newspace, renderer, debug, staffGroup);
 			var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
 			newspace = calcHorizontalSpacing(isLastLine, stretchLast, width+renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace);
 			if (debug)
