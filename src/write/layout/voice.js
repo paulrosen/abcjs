@@ -1,7 +1,10 @@
+var layoutBeam = require('./beam');
+var beam = require('../abc_beam_element');
+
 var layoutVoice = function(voice) {
 	for (var i = 0; i < voice.beams.length; i++) {
-		if (voice.beams[i].layout) {
-			voice.beams[i].layout();
+		if (voice.beams[i] instanceof beam) {
+			layoutBeam(voice.beams[i]);
 			moveDecorations(voice.beams[i]);
 			// The above will change the top and bottom of the abselem children, so see if we need to expand our range.
 			for (var j = 0; j < voice.beams[i].elems.length; j++) {
