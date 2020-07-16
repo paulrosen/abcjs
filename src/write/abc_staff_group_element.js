@@ -106,11 +106,4 @@ StaffGroupElement.prototype.setStaffLimits = function (voice) {
 	this.setLimit('dynamicHeightBelow', voice);
 };
 
-StaffGroupElement.prototype.finished = function() {
-	for (var i=0;i<this.voices.length;i++) {
-		if (!this.voices[i].layoutEnded()) return false;
-	}
-	return true;
-};
-
 module.exports = StaffGroupElement;

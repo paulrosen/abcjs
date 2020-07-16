@@ -114,85 +114,8 @@ VoiceElement.prototype.addBeam = function (child) {
 	this.beams.push(child);
 };
 
-VoiceElement.prototype.updateIndices = function () {
-	if (!this.layoutEnded()) {
-		this.durationindex += this.children[this.i].duration;
-		if (this.children[this.i].type === 'bar') this.durationindex = Math.round(this.durationindex*64)/64; // everytime we meet a barline, do rounding to nearest 64th
-		this.i++;
-	}
-};
-
-VoiceElement.prototype.layoutEnded = function () {
-	return (this.i>=this.children.length);
-};
-
 VoiceElement.prototype.getDurationIndex = function () {
 	return this.durationindex - (this.children[this.i] && (this.children[this.i].duration>0)?0:0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
-};
-
-// number of spacing units expected for next positioning
-VoiceElement.prototype.getSpacingUnits = function () {
-	return Math.sqrt(this.spacingduration*8);
-	// TODO-PER: On short lines, this would never trigger, so the spacing was wrong. I just changed this line empirically, though, so I don't know if there are other ramifications.
-	//return (this.minx<this.nextx) ? Math.sqrt(this.spacingduration*8) : 0; // we haven't used any spacing units if we end up using minx
-};
-
-//
-VoiceElement.prototype.getNextX = function () {
-	return Math.max(this.minx, this.nextx);
-};
-
-VoiceElement.prototype.beginLayout = function (startx) {
-	this.i=0;
-	this.durationindex=0;
-	//this.ii=this.children.length;
-	this.startx=startx;
-	this.minx=startx; // furthest left to where negatively positioned elements are allowed to go
-	this.nextx=startx; // x position where the next element of this voice should be placed assuming no other voices and no fixed width constraints
-	this.spacingduration=0; // duration left to be laid out in current iteration (omitting additional spacing due to other aspects, such as bars, dots, sharps and flats)
-};
-
-// Try to layout the element at index this.i
-// x - position to try to layout the element at
-// spacing - base spacing
-// can't call this function more than once per iteration
-VoiceElement.prototype.layoutOneItem = function (x, spacing) {
-	var child = this.children[this.i];
-	if (!child) return 0;
-	var er = x - this.minx; // available extrawidth to the left
-	var extraWidth = child.getExtraWidth();
-	if (er<extraWidth) { // shift right by needed amount
-		// There's an exception if a bar element is after a Part element, there is no shift.
-		if (this.i === 0 || child.type !== 'bar' || (this.children[this.i-1].type !== 'part' && this.children[this.i-1].type !== 'tempo') )
-			x+=extraWidth-er;
-	}
-	child.setX(x);
-
-	this.spacingduration = child.duration;
-	//update minx
-	this.minx = x+child.getMinWidth(); // add necessary layout space
-	if (this.i!==this.children.length-1) this.minx+=child.minspacing; // add minimumspacing except on last elem
-
-	this.updateNextX(x, spacing);
-
-	// contribute to staff y position
-	//this.staff.top = Math.max(child.top,this.staff.top);
-	//this.staff.bottom = Math.min(child.bottom,this.staff.bottom);
-
-	return x; // where we end up having placed the child
-};
-
-// call when spacingduration has been updated
-VoiceElement.prototype.updateNextX = function (x, spacing) {
-	this.nextx= x + (spacing*Math.sqrt(this.spacingduration*8));
-};
-
-VoiceElement.prototype.shiftRight = function (dx) {
-	var child = this.children[this.i];
-	if (!child) return;
-	child.setX(child.x+dx);
-	this.minx+=dx;
-	this.nextx+=dx;
 };
 
 module.exports = VoiceElement;

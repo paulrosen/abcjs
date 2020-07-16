@@ -1,3 +1,5 @@
+layoutVoiceElements = require('./VoiceElements');
+
 var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
 	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
 	var spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
@@ -10,15 +12,15 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
 	var currentduration = 0;
 	if (debug) console.log("init layout", spacing);
 	for (i=0;i<staffGroup.voices.length;i++) {
-		staffGroup.voices[i].beginLayout(x);
+		layoutVoiceElements.beginLayout(x, staffGroup.voices[i]);
 	}
 
 	var spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
-	while (!staffGroup.finished()) {
+	while (!finished(staffGroup.voices)) {
 		// find first duration level to be laid out among candidates across voices
 		currentduration= null; // candidate smallest duration level
 		for (i=0;i<staffGroup.voices.length;i++) {
-			if (!staffGroup.voices[i].layoutEnded() && (!currentduration || staffGroup.voices[i].getDurationIndex()<currentduration))
+			if (!layoutVoiceElements.layoutEnded(staffGroup.voices[i]) && (!currentduration || staffGroup.voices[i].getDurationIndex()<currentduration))
 				currentduration=staffGroup.voices[i].getDurationIndex();
 		}
 
@@ -43,9 +45,9 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
 		var spacingduration = 0;
 		for (i=0;i<currentvoices.length;i++) {
 			//console.log("greatest spacing unit", x, currentvoices[i].getNextX(), currentvoices[i].getSpacingUnits(), currentvoices[i].spacingduration);
-			if (currentvoices[i].getNextX()>x) {
-				x=currentvoices[i].getNextX();
-				spacingunit=currentvoices[i].getSpacingUnits();
+			if (layoutVoiceElements.getNextX(currentvoices[i])>x) {
+				x=layoutVoiceElements.getNextX(currentvoices[i]);
+				spacingunit=layoutVoiceElements.getSpacingUnits(currentvoices[i]);
 				spacingduration = currentvoices[i].spacingduration;
 			}
 		}
@@ -54,12 +56,12 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
 		if (debug) console.log("currentduration: ",currentduration, spacingunits, minspace);
 
 		for (i=0;i<currentvoices.length;i++) {
-			var voicechildx = currentvoices[i].layoutOneItem(x,spacing);
+			var voicechildx = layoutVoiceElements.layoutOneItem(x,spacing, currentvoices[i]);
 			var dx = voicechildx-x;
 			if (dx>0) {
 				x = voicechildx; //update x
 				for (var j=0;j<i;j++) { // shift over all previously laid out elements
-					currentvoices[j].shiftRight(dx);
+					layoutVoiceElements.shiftRight(dx, currentvoices[j]);
 				}
 			}
 		}
@@ -67,22 +69,22 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
 		// remove the value of already counted spacing units in other voices (e.g. if a voice had planned to use up 5 spacing units but is not in line to be laid out at this duration level - where we've used 2 spacing units - then we must use up 3 spacing units, not 5)
 		for (i=0;i<othervoices.length;i++) {
 			othervoices[i].spacingduration-=spacingduration;
-			othervoices[i].updateNextX(x,spacing); // adjust other voices expectations
+			layoutVoiceElements.updateNextX(x,spacing, othervoices[i]); // adjust other voices expectations
 		}
 
 		// update indexes of currently laid out elems
 		for (i=0;i<currentvoices.length;i++) {
 			var voice = currentvoices[i];
-			voice.updateIndices();
+			layoutVoiceElements.updateIndices(voice);
 		}
 	} // finished laying out
 
 
 	// find the greatest remaining x as a base for the width
 	for (i=0;i<staffGroup.voices.length;i++) {
-		if (staffGroup.voices[i].getNextX()>x) {
-			x=staffGroup.voices[i].getNextX();
-			spacingunit=staffGroup.voices[i].getSpacingUnits();
+		if (layoutVoiceElements.getNextX(staffGroup.voices[i])>x) {
+			x=layoutVoiceElements.getNextX(staffGroup.voices[i]);
+			spacingunit=layoutVoiceElements.getSpacingUnits(staffGroup.voices[i]);
 		}
 	}
 	//console.log("greatest remaining",spacingunit,x);
@@ -146,5 +148,12 @@ function setBraceLocation(brace, x, ofs) {
 	}
 	return ofs;
 }
+
+function finished(voices) {
+	for (var i=0;i<voices.length;i++) {
+		if (!layoutVoiceElements.layoutEnded(voices[i])) return false;
+	}
+	return true;
+};
 
 module.exports = layoutStaffGroup;
