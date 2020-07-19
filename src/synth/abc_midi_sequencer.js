@@ -15,6 +15,7 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var sequence;
+var parseCommon = require("../parse/abc_common");
 
 (function() {
 	"use strict";
@@ -207,6 +208,8 @@ var sequence;
 							voices[voiceNumber].push({el_type: 'drum', params: {pattern: "", on: false }});
 						}
 						var noteEventsInBar = 0;
+						var tripletMultiplier = 0;
+						var tripletDurationLeft = 0; // try to mitigate the js rounding problems.
 						for (var v = 0; v < voice.length; v++) {
 							// For each element in a voice
 							var elem = voice[v];
@@ -236,14 +239,33 @@ var sequence;
 											else if (elem.decoration.indexOf('ffff') >= 0)
 												voices[voiceNumber].push({ el_type: 'beat', beats: [127, 125, 110, 1] });
 										}
-										if (!elem.style && style[voiceNumber]) {
-											elem.style = style[voiceNumber];
+										var noteElem = { elem: elem, el_type: "note" }; // Make a copy so that modifications aren't kept except for adding the midiPitches
+										if (elem.style)
+											noteElem.style = elem.style;
+										else if (style[voiceNumber])
+											noteElem.style = style[voiceNumber];
+										noteElem.duration = (elem.duration === 0) ? 0.25 : elem.duration;
+										if (elem.startTriplet) {
+											tripletMultiplier = elem.tripletMultiplier;
+											tripletDurationLeft = elem.startTriplet * tripletMultiplier * elem.duration;
+											noteElem.duration = noteElem.duration * tripletMultiplier;
+											tripletDurationLeft -= noteElem.duration;
+										} else if (tripletMultiplier) {
+											if (elem.endTriplet) {
+												tripletMultiplier = 0;
+												noteElem.duration = tripletDurationLeft;
+											} else {
+												noteElem.duration = noteElem.duration * tripletMultiplier;
+												tripletDurationLeft -= noteElem.duration;
+											}
 										}
-										if (elem.duration === 0) {
-											elem = Object.assign({}, elem);
-											elem.duration = 0.25; // TODO-PER: this should be the length of one beat
-										}
-										voices[voiceNumber].push(elem);
+										if (elem.rest) noteElem.rest = elem.rest;
+										if (elem.decoration) noteElem.decoration = elem.decoration.slice(0);
+										if (elem.pitches) noteElem.pitches = parseCommon.cloneArray(elem.pitches);
+										if (elem.gracenotes) noteElem.gracenotes = parseCommon.cloneArray(elem.gracenotes);
+										if (elem.chord) noteElem.chord = parseCommon.cloneArray(elem.chord);
+
+										voices[voiceNumber].push(noteElem);
 										if (elem.style === "rhythm") {
 											rhythmHeadThisBar = true;
 											chordVoiceOffThisBar(voices)
@@ -384,6 +406,9 @@ var sequence;
 					}
 				}
 			}
+		}
+		if (voices.length > 0 && voices[0].length > 0) {
+			voices[0][0].pickupLength = abctune.getPickupLength();
 		}
 		return voices;
 	};

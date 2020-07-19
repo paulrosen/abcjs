@@ -16,13 +16,15 @@
 var soundsCache = require('./sounds-cache');
 var pitchToNoteName = require('./pitch-to-note-name');
 
-var OfflineAC = window.OfflineAudioContext ||
-	window.webkitOfflineAudioContext;
-
 function placeNote(outputAudioBuffer, sampleRate, sound, startArray) {
+	// sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
+	// len is in whole notes. Multiply by tempoMultiplier to get seconds.
+	var OfflineAC = window.OfflineAudioContext ||
+		window.webkitOfflineAudioContext;
+
 	var len = sound.len * sound.tempoMultiplier;
 	var offlineCtx = new OfflineAC(2,Math.floor((len+0.5)*sampleRate*2),sampleRate);
-	var noteName = pitchToNoteName[sound.pitch+60];
+	var noteName = pitchToNoteName[sound.pitch];
 	var noteBuffer = soundsCache[sound.instrument][noteName];
 	if (noteBuffer === "error") { // If the note isn't available, just leave a blank spot
 		console.log("Didn't load note: " + sound.instrument + " " + noteName);

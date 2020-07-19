@@ -76,7 +76,7 @@ function CreateSynth() {
 				if (event.cmd === "program" && instrumentIndexToName[event.instrument])
 					currentInstrument = instrumentIndexToName[event.instrument];
 				if (event.pitch !== undefined) {
-					var pitchNumber = event.pitch + 60;
+					var pitchNumber = event.pitch;
 					var noteName = pitchToNoteName[pitchNumber];
 					if (noteName) {
 						if (!allNotes[currentInstrument])
