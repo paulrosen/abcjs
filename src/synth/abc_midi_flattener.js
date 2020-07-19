@@ -337,7 +337,7 @@ var flatten;
 	}
 
 	function getBeatFraction(meter) {
-		switch (meter.den) {
+		switch (parseInt(meter.den,10)) {
 			case 2: return 0.5;
 			case 4: return 0.25;
 			case 8: return 0.375;
@@ -970,15 +970,15 @@ var flatten;
 		return notes;
 	}
 
-	function writeBoom(boom, beatLength, volume, beat) {
+	function writeBoom(boom, beatLength, volume, beat, noteLength) {
 		// undefined means there is a stop time.
 		if (boom !== undefined)
-			chordTrack.push({cmd: 'note', pitch: boom, volume: volume, start: lastBarTime+beat*beatLength, duration: beatLength/2*tempoChangeFactor, instrument: chordInstrument});
+			chordTrack.push({cmd: 'note', pitch: boom, volume: volume, start: lastBarTime+beat*beatLength, duration: noteLength*tempoChangeFactor, instrument: chordInstrument});
 	}
 
-	function writeChick(chick, beatLength, volume, beat) {
+	function writeChick(chick, beatLength, volume, beat, noteLength) {
 		for (var c = 0; c < chick.length; c++)
-			chordTrack.push({cmd: 'note', pitch: chick[c], volume: volume, start: lastBarTime+beat*beatLength, duration: beatLength/2*tempoChangeFactor, instrument: chordInstrument});
+			chordTrack.push({cmd: 'note', pitch: chick[c], volume: volume, start: lastBarTime+beat*beatLength, duration: noteLength*tempoChangeFactor, instrument: chordInstrument});
 	}
 
 	var rhythmPatterns = { "2/2": [ 'boom', 'chick' ],
@@ -995,6 +995,7 @@ var flatten;
 		var num = meter.num;
 		var den = meter.den;
 		var beatLength = 1/den;
+		var noteLength = 1/8;
 		var pattern = rhythmPatterns[num+'/'+den];
 		var thisMeasureLength = parseInt(num,10)/parseInt(den,10);
 		var portionOfAMeasure = thisMeasureLength !== endTime-startTime;
@@ -1019,13 +1020,13 @@ var flatten;
 				if (!hasRhythmHead) {
 					switch (pattern[m]) {
 						case 'boom':
-							writeBoom(currentChords[0].chord.boom, beatLength, boomVolume, m);
+							writeBoom(currentChords[0].chord.boom, beatLength, boomVolume, m, noteLength);
 							break;
 						case 'boom2':
-							writeBoom(currentChords[0].chord.boom2, beatLength, boomVolume, m);
+							writeBoom(currentChords[0].chord.boom2, beatLength, boomVolume, m, noteLength);
 							break;
 						case 'chick':
-							writeChick(currentChords[0].chord.chick, beatLength, chickVolume, m);
+							writeChick(currentChords[0].chord.chick, beatLength, chickVolume, m, noteLength);
 							break;
 					}
 				}
@@ -1053,32 +1054,32 @@ var flatten;
 				switch (pattern[m2]) {
 					case 'boom':
 						if (beats['' + (m2 + 1)]) // If there is not a chord change on the next beat, play a bass note.
-							writeChick(thisChord.chord.chick, beatLength, chickVolume);
+							writeChick(thisChord.chord.chick, beatLength, chickVolume, noteLength);
 						else {
-							writeBoom(thisChord.chord.boom, beatLength, boomVolume, m2);
+							writeBoom(thisChord.chord.boom, beatLength, boomVolume, m2, noteLength);
 							lastBoom = thisChord.chord.boom;
 						}
 						break;
 					case 'boom2':
 						if (beats['' + (m2 + 1)])
-							writeChick(thisChord.chord.chick, beatLength, chickVolume, m2);
+							writeChick(thisChord.chord.chick, beatLength, chickVolume, m2, noteLength);
 						else {
 							// If there is the same root as the last chord, use the alternating bass, otherwise play the root.
 							if (lastBoom === thisChord.chord.boom) {
-								writeBoom(thisChord.chord.boom2, beatLength, boomVolume, m2);
+								writeBoom(thisChord.chord.boom2, beatLength, boomVolume, m2, noteLength);
 								lastBoom = undefined;
 							} else {
-								writeBoom(thisChord.chord.boom, beatLength, boomVolume, m2);
+								writeBoom(thisChord.chord.boom, beatLength, boomVolume, m2, noteLength);
 								lastBoom = thisChord.chord.boom;
 							}
 						}
 						break;
 					case 'chick':
-						writeChick(thisChord.chord.chick, beatLength, chickVolume, m2);
+						writeChick(thisChord.chord.chick, beatLength, chickVolume, m2, noteLength);
 						break;
 					case '':
 						if (beats['' + m2])	// If there is an explicit chord on this beat, play it.
-							writeChick(thisChord.chord.chick, beatLength, chickVolume, m2);
+							writeChick(thisChord.chord.chick, beatLength, chickVolume, m2, noteLength);
 						break;
 				}
 			}

@@ -44,6 +44,7 @@ var parseCommon = require("../parse/abc_common");
 		var drumOn = drumPattern !== "";
 		var style = []; // The note head style for each voice.
 		var rhythmHeadThisBar = false; // Rhythm notation was detected.
+		var crescendoSize = 50; // how much to increase or decrease volume when crescendo/diminuendo is encountered.
 
 		// All of the above overrides need to be integers
 		program = parseInt(program, 10);
@@ -118,7 +119,7 @@ var parseCommon = require("../parse/abc_common");
 		if (options.qpm)
 			qpm = parseInt(options.qpm, 10);
 		else if (abctune.metaText.tempo)
-			qpm = interpretTempo(abctune.metaText.tempo);
+			qpm = interpretTempo(abctune.metaText.tempo, abctune.getBeatLength());
 		else if (options.defaultQpm)
 			qpm = options.defaultQpm;
 		else
@@ -147,6 +148,8 @@ var parseCommon = require("../parse/abc_common");
 
 		// visit each voice completely in turn
 		var voices = [];
+		var inCrescendo = [];
+		var inDiminuendo = [];
 		var startRepeatPlaceholder = []; // There is a place holder for each voice.
 		var skipEndingPlaceholder = []; // This is the place where the first ending starts.
 		var startingDrumSet = false;
@@ -210,34 +213,95 @@ var parseCommon = require("../parse/abc_common");
 						var noteEventsInBar = 0;
 						var tripletMultiplier = 0;
 						var tripletDurationLeft = 0; // try to mitigate the js rounding problems.
+						var currentVolume = [105, 95, 85, 1];
+
 						for (var v = 0; v < voice.length; v++) {
 							// For each element in a voice
 							var elem = voice[v];
 							switch (elem.el_type) {
 								case "note":
+									if (inCrescendo[k]) {
+										currentVolume[0] += inCrescendo[k];
+										currentVolume[1] += inCrescendo[k];
+										currentVolume[2] += inCrescendo[k];
+										voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume.slice(0) });
+									}
+
+									if (inDiminuendo[k]) {
+										currentVolume[0] -= inDiminuendo[k];
+										currentVolume[1] -= inDiminuendo[k];
+										currentVolume[2] -= inDiminuendo[k];
+										voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume.slice(0) });
+									}
+
 									// regular items are just pushed.
 									if (!elem.rest || elem.rest.type !== 'spacer') {
 										if (elem.decoration) {
-											if (elem.decoration.indexOf('pppp') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [15, 10, 5, 1] });
-											if (elem.decoration.indexOf('ppp') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [30, 20, 10, 1] });
-											else if (elem.decoration.indexOf('pp') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [45, 35, 20, 1] });
-											else if (elem.decoration.indexOf('p') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [60, 50, 35, 1] });
-											else if (elem.decoration.indexOf('mp') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [75, 65, 50, 1] });
-											else if (elem.decoration.indexOf('mf') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [90, 80, 65, 1] });
-											else if (elem.decoration.indexOf('f') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [105, 95, 80, 1] });
-											else if (elem.decoration.indexOf('ff') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [120, 110, 95, 1] });
-											else if (elem.decoration.indexOf('fff') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [127, 125, 110, 1] });
-											else if (elem.decoration.indexOf('ffff') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [127, 125, 110, 1] });
+											if (elem.decoration.indexOf('pppp') >= 0) {
+												currentVolume =  [15, 10, 5, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats:currentVolume });
+											}
+
+											if (elem.decoration.indexOf('ppp') >= 0) {
+												currentVolume = [30, 20, 10, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('pp') >= 0) {
+												currentVolume = [45, 35, 20, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('p') >= 0) {
+												currentVolume = [60, 50, 35, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('mp') >= 0) {
+												currentVolume = [75, 65, 50, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('mf') >= 0) {
+												currentVolume = [90, 80, 65, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('f') >= 0) {
+												currentVolume = [105, 95, 80, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('ff') >= 0) {
+												currentVolume = [120, 110, 95, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('fff') >= 0) {
+												currentVolume = [127, 125, 110, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('ffff') >= 0) {
+												currentVolume = [127, 125, 110, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											if (elem.decoration.indexOf("crescendo(") >= 0) {
+												var n = numNotesToDecoration(voice, v, "crescendo)");
+												var top = Math.min(127, currentVolume[0] + crescendoSize);
+												inCrescendo[k] = Math.floor((top - currentVolume[0]) / n);
+												inDiminuendo[k] = false;
+											} else if (elem.decoration.indexOf("crescendo)") >= 0) {
+												inCrescendo[k] = false;
+											} else if (elem.decoration.indexOf("diminuendo(") >= 0) {
+												var n2 = numNotesToDecoration(voice, v, "diminuendo)");
+												var bottom = Math.max(15, currentVolume[0] - crescendoSize);
+												inCrescendo[k] = false;
+												inDiminuendo[k] = Math.floor((top - currentVolume[0]) / n2);
+											} else if (elem.decoration.indexOf("diminuendo)") >= 0) {
+												inDiminuendo[k] = false;
+											}
 										}
 										var noteElem = { elem: elem, el_type: "note" }; // Make a copy so that modifications aren't kept except for adding the midiPitches
 										if (elem.style)
@@ -293,7 +357,7 @@ var parseCommon = require("../parse/abc_common");
 									}
 									break;
 								case "tempo":
-									qpm = interpretTempo(elem);
+									qpm = interpretTempo(elem, abctune.getBeatLength());
 									voices[voiceNumber].push({ el_type: 'tempo', qpm: qpm });
 									break;
 								case "bar":
@@ -413,6 +477,17 @@ var parseCommon = require("../parse/abc_common");
 		return voices;
 	};
 
+	function numNotesToDecoration(voice, start, decoration) {
+		var counter = 0;
+		for (var i = start+1; i < voice.length; i++) {
+			if (voice[i].el_type === "note")
+				counter++;
+			if (voice[i].decoration && voice[i].decoration.indexOf(decoration) >= 0)
+				return counter;
+		}
+		return counter;
+	}
+
 	function chordVoiceOffThisBar(voices) {
 		for (var i = 0; i < voices.length; i++) {
 			var voice = voices[i];
@@ -430,7 +505,7 @@ var parseCommon = require("../parse/abc_common");
 		return staff[voiceNumber].title.join(" ");
 	}
 
-	function interpretTempo(element) {
+	function interpretTempo(element, beatLength) {
 		var duration = 1/4;
 		if (element.duration) {
 			duration = element.duration[0];
@@ -439,9 +514,8 @@ var parseCommon = require("../parse/abc_common");
 		if (element.bpm) {
 			bpm = element.bpm;
 		}
-		// The tempo is defined with a beat of a 1/4 note, so we need to adjust it if the tempo is expressed with other than a quarter note.
-		// expressedDuration * expressedBeatsPerMinute / lengthOfQuarterNote = quarterNotesPerMinute
-		return duration * bpm / 0.25;
+		// The tempo is defined with a beat length of "duration". If that isn't the natural beat length then there is a translation.
+		return duration * bpm / beatLength;
 	}
 
 	function interpretMeter(element) {
