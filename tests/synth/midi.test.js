@@ -1,6 +1,6 @@
 describe("MIDI file creation", () => {
 	var abcMidi = `X:1 
-%%MIDI program 40
+%%MIDI program 4
 %%MIDI channel 4
 %%MIDI transpose -2
 T: midi options
