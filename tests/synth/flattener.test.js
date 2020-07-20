@@ -980,6 +980,195 @@ K:F
 
 	//////////////////////////////////////////////////////////
 
+	var abcBreak = `X:1
+L:1/4
+Q:1/4=40
+K:A
+"E7"Bcde|"A"f"^break"efe|"E7"Bc"^ignore"de|
+`;
+
+	var expectedBreak = {
+		"tempo": 60,
+		"instrument": 0,
+		"totalDuration": 1.5,
+		"tracks": [
+			// TODO-PER
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
+	var abcMidMeasureChordChange = `X:1
+K: Gmin
+|: "Gm" GFDF GFDF | GF D2 "F" C4 |
+`;
+
+	var expectedMidMeasureChordChange = {
+		"tempo": 60,
+		"instrument": 0,
+		"totalDuration": 1.5,
+		"tracks": [
+			// TODO-PER
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
+	var abcGrace = `X:1
+T: midi-grace-notes
+L:1/4
+Q:1/4=40
+K:A
+{e}a|:{e}gz{e}ag|{efg}ag{ABcdefg}ag:|
+{B}e{B2c/d/}fef|[K:Bb]{Bcde}f2{Bcde}f2|]
+`;
+
+	var expectedGrace = {
+		"tempo": 60,
+		"instrument": 0,
+		"totalDuration": 1.5,
+		"tracks": [
+			// TODO-PER
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
+	var abcMidiOptions = `X:1
+%%MIDI program 40
+%%MIDI channel 4
+%%MIDI transpose -2
+L:1/4
+Q:1/4=40
+K:A
+ABcd|
+`;
+
+	var expectedMidiOptions = {
+		"tempo": 60,
+		"instrument": 0,
+		"totalDuration": 1.5,
+		"tracks": [
+			// TODO-PER
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
+	var abcMultiMeasureRest = `X:1
+M:4/4
+L:1/8
+Q:1/4=130
+K:Bb
+cdef|Z4|fedc|
+`;
+
+	var expectedMultiMeasureRest = {
+		"tempo": 60,
+		"instrument": 0,
+		"totalDuration": 1.5,
+		"tracks": [
+			// TODO-PER
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
+	var abcOctaveClefs = `X:1
+M:4/4
+K:C
+[K: treble+8]{B}A4 [CE^F]4 | [K: treble-8]G8| G,2B,2 c'2e'2 | [K: bass-8]C8| [K: bass+8]B,8|
+`;
+
+	var expectedOctaveClefs = {
+		"tempo": 60,
+		"instrument": 0,
+		"totalDuration": 1.5,
+		"tracks": [
+			// TODO-PER
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
+	var abcOverlay = `X:1
+M: 4/4
+L: 1/4
+K:C
+C4 | D4 |
+G4 & E4 | A4 & F4 |
+B4 & d4 & f4 | c4 & e4 & g4 |
+a4 | b4 & d'4 |
+C4 | D4 | E4 & G4 | A4 | B4 & d4 |
+`;
+
+	var expectedOverlay = {
+		"tempo": 60,
+		"instrument": 0,
+		"totalDuration": 1.5,
+		"tracks": [
+			// TODO-PER
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
+	var abcPercMap = `X:1
+%%percmap D  pedal-hi-hat x
+%%percmap E  bass-drum-1
+%%percmap F  acoustic-bass-drum
+%%percmap G  low-floor-tom
+%%percmap A  high-floor-tom
+%%percmap B  low-tom
+%%percmap ^B tambourine   triangle
+%%percmap c  acoustic-snare
+%%percmap _c electric-snare
+%%percmap ^c low-wood-block   triangle
+%%percmap =c side-stick
+%%percmap d  low-mid-tom
+%%percmap ^d high-wood-block    triangle
+%%percmap e  high-mid-tom
+%%percmap ^e cowbell      triangle
+%%percmap f  high-tom
+%%percmap ^f ride-cymbal-1
+%%percmap g  closed-hi-hat
+%%percmap ^g open-hi-hat
+%%percmap a  crash-cym-1  x
+%%percmap ^a open-triangle     triangle
+Q:1/4=50
+K:C perc
+DEFG AB^Bc _c^c=cd ^de^ef ^fg^ga ^a
+`;
+
+	var expectedPercMap = {
+		"tempo": 60,
+		"instrument": 0,
+		"totalDuration": 1.5,
+		"tracks": [
+			// TODO-PER
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
+	var abcLongTie = `X:1
+L:1/4
+Q:80
+K:A
+cd-d2-|d2-dz|
+`;
+
+	var expectedLongTie = {
+		"tempo": 60,
+		"instrument": 0,
+		"totalDuration": 1.5,
+		"tracks": [
+			// TODO-PER
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
 	it("flatten-pickup-triplet-chords-rhythmhead", () => {
 		doFlattenTest(abcMultiple, expectedMultiple);
 	})
@@ -1010,6 +1199,42 @@ K:F
 
 	it("flatten-meter-change", () => {
 		doFlattenTest(abcMeterChange, expectedMeterChange);
+	})
+
+	it("flatten-break", () => {
+		doFlattenTest(abcBreak, expectedBreak);
+	})
+
+	it("flatten-mid-measure", () => {
+		doFlattenTest(abcMidMeasureChordChange, expectedMidMeasureChordChange);
+	})
+
+	it("flatten-grace", () => {
+		doFlattenTest(abcGrace, expectedGrace);
+	})
+
+	it("flatten-midi-options", () => {
+		doFlattenTest(abcMidiOptions, expectedMidiOptions);
+	})
+
+	it("flatten-multi-measure-rest", () => {
+		doFlattenTest(abcMultiMeasureRest, expectedMultiMeasureRest);
+	})
+
+	it("flatten-octave-clefs", () => {
+		doFlattenTest(abcOctaveClefs, expectedOctaveClefs);
+	})
+
+	it("flatten-overlay", () => {
+		doFlattenTest(abcOverlay, expectedOverlay);
+	})
+
+	it("flatten-perc-map", () => {
+		doFlattenTest(abcPercMap, expectedPercMap);
+	})
+
+	it("flatten-long-tie", () => {
+		doFlattenTest(abcLongTie, expectedLongTie);
 	})
 })
 
