@@ -388,6 +388,9 @@ var parseCommon = require("../parse/abc_common");
 								case 'style':
 									style[voiceNumber] = elem.head;
 									break;
+								case 'timeSignature':
+									voices[voiceNumber].push(interpretMeter(elem));
+									break;
 								case 'part':
 									// TODO-PER: If there is a part section in the header, then this should probably affect the repeats.
 									break;

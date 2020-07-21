@@ -971,9 +971,9 @@ K:F
 				{"cmd":"note","pitch":62,"volume":48,"start":1,"duration":0.125,"instrument":0},
 				{"cmd":"note","pitch":65,"volume":48,"start":1,"duration":0.125,"instrument":0},
 				{"cmd":"note","pitch":41,"volume":64,"start":1.25,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":53,"volume":48,"start":1.5,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":57,"volume":48,"start":1.5,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":60,"volume":48,"start":1.5,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":58,"volume":48,"start":1.5,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":1.5,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":65,"volume":48,"start":1.5,"duration":0.125,"instrument":0},
 			]
 		]
 	};
