@@ -24,6 +24,6 @@ jobs:
         run: npm install --color="always"
 
       - name: Install Dependencies
-        run: npm test -- --coverage --colors
+        run: npm test -- --colors
 
 
