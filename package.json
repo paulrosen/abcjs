@@ -17,7 +17,7 @@
     "build:plugin": "npm run webpack -- --env.mode production --env.type plugin",
     "build:plugin-midi": "npm run webpack -- --env.mode production --env.type plugin-midi",
     "fix-versions": "./fix-versions.sh 6.0.0-beta.14",
-    "test": "jest",
+    "test": "mocha 'tests/**/*.js'",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "build:analyze": "npm run build:basic -- --env.presets analyze"

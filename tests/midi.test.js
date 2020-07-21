@@ -1,23 +1,25 @@
-import basic from "../index"
-import midi from "../midi"
+const assert = require('chai').assert
+const basic = require('../index')
+const midi = require('../midi')
 
-test("is extension of basic", () => {
-	expect(midi).toBe(basic)
-})
+describe("ABCJS Midi", function () {
+	it("should extend ABCJS basic", function () {
+		expect(midi).toBe(basic)
+	})
 
-test("has correct signature", () => {
-  expect(midi.signature).toEqual(expect.stringContaining('abcjs-midi v'))
-})
+	it('should have the correct ABCJS signature', function () {
+		expect(midi.signature).toEqual(expect.stringContaining('abcjs-midi v'))
+	})
 
-test("can access midi", () => {
-	expect(midi.midi).toEqual(expect.objectContaining({
-		setSoundFont: expect.any(Function),
-		startPlaying: expect.any(Function),
-		restartPlaying: expect.any(Function),
-		stopPlaying: expect.any(Function),
-		setLoop: expect.any(Function),
-		deviceSupportsMidi: expect.any(Function),
-		setRandomProgress: expect.any(Function),
-		setInteractiveProgressBar: expect.any(Function),
-	}))
+	it("should expose the midi object", function () {
+		assert.isObject(midi.midi)
+		assert.isFunction(midi.midi.setSoundFont)
+		assert.isFunction(midi.midi.startPlaying)
+		assert.isFunction(midi.midi.restartPlaying)
+		assert.isFunction(midi.midi.stopPlaying)
+		assert.isFunction(midi.midi.setLoop)
+		assert.isFunction(midi.midi.deviceSupportsMidi)
+		assert.isFunction(midi.midi.setRandomProgress)
+		assert.isFunction(midi.midi.setInteractiveProgressBar)
+	})
 })
