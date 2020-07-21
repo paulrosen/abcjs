@@ -290,7 +290,12 @@ var flatten;
 						pitch.duration = element.duration;
 						if (pitch.startTie) {
 							//console.log(element)
-							ties[pitch.pitch] = {el: j, pitch: k};
+							if (ties[pitch.pitch] === undefined) // We might have three notes tied together - if so just add this duration.
+								ties[pitch.pitch] = {el: j, pitch: k};
+							else {
+								voice[ties[pitch.pitch].el].pitches[ties[pitch.pitch].pitch].duration += pitch.duration;
+								element.pitches[k] = null;
+							}
 							//console.log(">>> START", JSON.stringify(ties));
 						} else if (pitch.endTie) {
 							//console.log(element)
@@ -630,6 +635,8 @@ var flatten;
 			elem.elem.midiPitches = [];
 			for (var i=0; i<ePitches.length; i++) {
 				var note = ePitches[i];
+				if (!note)
+					continue;
 				if (note.startSlur)
 					slurCount += note.startSlur.length;
 				if (note.endSlur)
@@ -655,12 +662,13 @@ var flatten;
 				}
 				pitches.push(p);
 				currentTrack.push(p);
+
+				var soundDuration = p.duration;
+				if (ret.noteModification) {
+					pitches = doModifiedNotes(ret.noteModification, soundDuration, elem, velocity);
+				}
+				elem.elem.midiPitches = pitches;
 			}
-			var soundDuration = p.duration;
-			if (ret.noteModification) {
-				pitches = doModifiedNotes(ret.noteModification, soundDuration, elem, velocity);
-			}
-			elem.elem.midiPitches = pitches;
 			lastNoteDurationPosition = currentTrack.length-1;
 
 		}

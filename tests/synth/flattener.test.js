@@ -943,8 +943,7 @@ K:F
 "F"F2A|[M:4/4]"Bb"Bd2f|
 `;
 
-	var expectedMeterChange =
-	{
+	var expectedMeterChange = {
 		"tempo":40,
 		"instrument":0,
 		"totalDuration":1.75,
@@ -990,9 +989,49 @@ K:A
 	var expectedBreak = {
 		"tempo": 60,
 		"instrument": 0,
-		"totalDuration": 1.5,
+		"totalDuration": 3,
 		"tracks": [
-			// TODO-PER
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":71,"volume":105,"start":0,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":73,"volume":95,"start":0.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":0.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":95,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":78,"volume":105,"start":1,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":95,"start":1.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":78,"volume":95,"start":1.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":95,"start":1.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":105,"start":2,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":73,"volume":95,"start":2.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":2.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":95,"start":2.75,"duration":0.25,"instrument":0,"gap":0}
+			],
+			[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":40,"volume":64,"start":0,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":56,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":35,"volume":64,"start":0.5,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":56,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":57,"volume":48,"start":1,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":61,"volume":48,"start":1,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":64,"volume":48,"start":1,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":40,"volume":64,"start":2,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":2.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":56,"volume":48,"start":2.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":2.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":2.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":35,"volume":64,"start":2.5,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":2.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":56,"volume":48,"start":2.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":2.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":2.75,"duration":0.125,"instrument":0}
+			]
 		]
 	};
 
@@ -1081,11 +1120,25 @@ K:C
 `;
 
 	var expectedOctaveClefs = {
-		"tempo": 60,
+		"tempo": 180,
 		"instrument": 0,
-		"totalDuration": 1.5,
+		"totalDuration": 5,
 		"tracks": [
-			// TODO-PER
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":95,"volume":70,"start":0,"duration":0.125,"gap":0},
+				{"cmd":"note","pitch":93,"volume":105,"start":0,"duration":0.5,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":84,"volume":95,"start":0.5,"duration":0.5,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":88,"volume":95,"start":0.5,"duration":0.5,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":90,"volume":95,"start":0.5,"duration":0.5,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":43,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":31,"volume":105,"start":2,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":35,"volume":95,"start":2.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":95,"start":2.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":95,"start":2.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":36,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":83,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0}
+			]
 		]
 	};
 
@@ -1103,11 +1156,41 @@ C4 | D4 | E4 & G4 | A4 | B4 & d4 |
 `;
 
 	var expectedOverlay = {
-		"tempo": 60,
+		"tempo": 180,
 		"instrument": 0,
-		"totalDuration": 1.5,
+		"totalDuration": 13,
 		"tracks": [
-			// TODO-PER
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":105,"start":5,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":81,"volume":105,"start":6,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":83,"volume":105,"start":7,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":8,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":9,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":10,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":105,"start":11,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":105,"start":12,"duration":1,"instrument":0,"gap":0}
+			],
+			[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":64,"volume":95,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":105,"start":5,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":86,"volume":105,"start":7,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":10,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":105,"start":12,"duration":1,"instrument":0,"gap":0}
+			],
+			[
+				{"cmd":"program","channel":2,"instrument":0},
+				{"cmd":"note","pitch":77,"volume":95,"start":4,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":79,"volume":105,"start":5,"duration":1,"instrument":0,"gap":0}
+			]
 		]
 	};
 
@@ -1159,11 +1242,15 @@ cd-d2-|d2-dz|
 `;
 
 	var expectedLongTie = {
-		"tempo": 60,
+		"tempo": 80,
 		"instrument": 0,
-		"totalDuration": 1.5,
+		"totalDuration": 2,
 		"tracks": [
-			// TODO-PER
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":73,"volume":105,"start":0,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":0.25,"duration":1.5,"instrument":0,"gap":0}
+			]
 		]
 	};
 
