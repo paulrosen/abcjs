@@ -1043,11 +1043,45 @@ K: Gmin
 `;
 
 	var expectedMidMeasureChordChange = {
-		"tempo": 60,
-		"instrument": 0,
-		"totalDuration": 1.5,
-		"tracks": [
-			// TODO-PER
+		"tempo":180,
+		"instrument":0,
+		"totalDuration":2,
+		"tracks":
+		[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":0,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":85,"start":0.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":95,"start":0.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":85,"start":0.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":95,"start":0.5,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":85,"start":0.625,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":95,"start":0.75,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":85,"start":0.875,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":1,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":85,"start":1.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":95,"start":1.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":95,"start":1.5,"duration":0.5,"instrument":0,"gap":0}
+			],
+			[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":43,"volume":64,"start":0,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":58,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":38,"volume":64,"start":0.5,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":58,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":43,"volume":64,"start":1,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":58,"volume":48,"start":1.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":1.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":41,"volume":64,"start":1.5,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":53,"volume":48,"start":1.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":57,"volume":48,"start":1.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":48,"start":1.75,"duration":0.125,"instrument":0}
+			]
 		]
 	};
 
@@ -1084,30 +1118,47 @@ ABcd|
 `;
 
 	var expectedMidiOptions = {
-		"tempo": 60,
-		"instrument": 0,
-		"totalDuration": 1.5,
-		"tracks": [
-			// TODO-PER
-		]
+		"tempo":40,
+		"instrument":40,
+		"totalDuration":1,
+		"tracks":
+			[
+				[
+					{"cmd":"program","channel":4,"instrument":40},
+					{"cmd":"note","pitch":67,"volume":105,"start":0,"duration":0.25,"instrument":40,"gap":0},
+					{"cmd":"note","pitch":69,"volume":95,"start":0.25,"duration":0.25,"instrument":40,"gap":0},
+					{"cmd":"note","pitch":71,"volume":95,"start":0.5,"duration":0.25,"instrument":40,"gap":0},
+					{"cmd":"note","pitch":72,"volume":95,"start":0.75,"duration":0.25,"instrument":40,"gap":0}
+					]
+			]
 	};
 
 	//////////////////////////////////////////////////////////
 
 	var abcMultiMeasureRest = `X:1
 M:4/4
-L:1/8
+L:1/4
 Q:1/4=130
 K:Bb
 cdef|Z4|fedc|
 `;
 
 	var expectedMultiMeasureRest = {
-		"tempo": 60,
-		"instrument": 0,
-		"totalDuration": 1.5,
-		"tracks": [
-			// TODO-PER
+		"tempo":130,
+		"instrument":0,
+		"totalDuration":5,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":0,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":85,"start":0.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":75,"volume":85,"start":0.50,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":77,"volume":85,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":77,"volume":105,"start":5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":75,"volume":85,"start":5.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":5.50,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":5.75,"duration":0.25,"instrument":0,"gap":0}
+			]
 		]
 	};
 
