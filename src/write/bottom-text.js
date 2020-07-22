@@ -86,7 +86,7 @@ BottomText.prototype.addTextIf = function (marginLeft, text, font, klass, margin
 		attr.klass = klass;
 	}
 	this.rows.push(attr);
-	size = getTextSize.calc(text, font, klass);
+	var size = getTextSize.calc(text, font, klass);
 	this.rows.push({move: size.height});
 	if (marginBottom)
 		this.rows.push({move: marginBottom});
