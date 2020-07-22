@@ -82,14 +82,6 @@ AbsoluteElement.prototype.setUpperAndLowerElements = function(specialYResolved) 
 	}
 };
 
-AbsoluteElement.prototype.getMinWidth = function () { // absolute space taken to the right of the note
-	return this.w;
-};
-
-AbsoluteElement.prototype.getExtraWidth = function () { // space needed to the left of the note
-	return -this.extraw;
-};
-
 AbsoluteElement.prototype.addExtra = function (extra) {
 	if (extra.dx<this.extraw) this.extraw = extra.dx;
 	this.extra[this.extra.length] = extra;
