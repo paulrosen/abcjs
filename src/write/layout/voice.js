@@ -1,4 +1,5 @@
 var layoutBeam = require('./beam');
+var getBarYAt = require('./getBarYAt');
 var beam = require('../abc_beam_element');
 
 var layoutVoice = function(voice) {
@@ -30,7 +31,7 @@ function moveDecorations(beam) {
 		var child = beam.elems[ch];
 		if (child.top) {
 			// We now know where the ornaments should have been placed, so move them if they would overlap.
-			var top = beam.yAtNote(child);
+			var top = yAtNote(child, beam);
 			for (var i = 0; i < child.children.length; i++) {
 				var el = child.children[i];
 				if (el.klass === 'ornament') {
@@ -45,6 +46,11 @@ function moveDecorations(beam) {
 			}
 		}
 	}
+};
+
+function yAtNote(element, beam) {
+	var beam = beam.beams[0];
+	return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, element.x);
 };
 
 module.exports = layoutVoice;
