@@ -63,7 +63,6 @@ var flatten;
 	var slurCount = 0;
 
 	var drumTrack;
-	var drumTrackPPW;
 	var drumTrackFinished;
 	var drumDefinition = {};
 
@@ -114,7 +113,6 @@ var flatten;
 
 		// For the drum/metronome track.
 		drumTrack = [];
-		drumTrackPPW = 0;
 		drumTrackFinished = false;
 		drumDefinition = {};
 
@@ -170,12 +168,12 @@ var flatten;
 							resolveChords(lastBarTime, element.time);
 							currentChords = [];
 						}
-						lastBarTime = element.time;
 						barAccidentals = [];
 						if (i === 0) // Only write the drum part on the first voice so that it is not duplicated.
 							writeDrum(voices.length+1);
 						hasRhythmHead = false; // decide whether there are rhythm heads each measure.
 						chordLastBar = lastChord;
+						lastBarTime = element.time;
 						break;
 					case "bagpipes":
 						bagpipes = true;
@@ -1185,13 +1183,6 @@ var flatten;
 		return ret;
 	}
 
-	function drumBeat(pitch, soundLength, volume) {
-		//drumTrack.push({ cmd: 'start', pitch: pitch - 60, volume: volume, ppw: drumTrackPPW});
-		//addMove(drumTrack, soundLength);
-		drumTrackPPW += Math.round(PPW*soundLength);
-		//addStop(drumTrack, pitch - 60, "drum");
-	}
-
 	function writeDrum(channel) {
 		if (drumTrack.length === 0 && !drumDefinition.on)
 			return;
@@ -1199,29 +1190,26 @@ var flatten;
 		var measureLen = meter.num/meter.den;
 		if (drumTrack.length === 0) {
 			drumTrack.push({cmd: 'program', channel: channel, instrument: drumInstrument});
-			// need to figure out how far in time the bar started: if there are pickup notes before the chords start, we need pauses.
-			var distance = timeFromStart();
-			if (distance > 0 && distance < measureLen - 0.01) { // because of floating point, adding the notes might not exactly equal the measure size.
-				//addMove(drumTrack, distance * tempoChangeFactor);
-				drumTrackPPW += Math.round(PPW*distance*tempoChangeFactor);
-				return;
-			}
 		}
 
 		if (!drumDefinition.on) {
 			// this is the case where there has been a drum track, but it was specifically turned off.
-			//addMove(drumTrack, measureLen * tempoChangeFactor);
-			drumTrackPPW += Math.round(PPW*measureLen*tempoChangeFactor);
 			return;
 		}
+		var start = lastBarTime;
+		console.log(drumDefinition.pattern)
 		for (var i = 0; i < drumDefinition.pattern.length; i++) {
 			var len = drumDefinition.pattern[i].len * tempoChangeFactor;
-			if (drumDefinition.pattern[i].pitch)
-				drumBeat(drumDefinition.pattern[i].pitch, len, drumDefinition.pattern[i].velocity);
-			else {
-				//addMove(drumTrack, len);
-				drumTrackPPW += Math.round(PPW*len);
+			if (drumDefinition.pattern[i].pitch) {
+				drumTrack.push({
+					cmd: 'note',
+					pitch: drumDefinition.pattern[i].pitch,
+					volume: drumDefinition.pattern[i].velocity,
+					start: start,
+					duration: len,
+					instrument: drumInstrument});
 			}
+			start += len;
 		}
 	}
 })();
