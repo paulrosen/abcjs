@@ -1,16 +1,23 @@
 # Automated Tests
 
-## Jest
+## Mocha
+
+Currently there are two sets of mocha tests.
+
+Either:
 
 Run with:
 ```shell script
 npm run test
 ```
 
-## Mocha
+this will pass all `.js` files to mocha.
 
-These are browser-based tests. To run, load the `.html` file into the browser. That will run
+or
+
+To run browser based tests, load the `.html` file into the browser. That will run
 all of the tests associated with that file. To run just some of the tests, use the query parameter:
+This will most like need a server to serve the `.html` files to solve CORS issues.
 ```
 ?grep=test-name
 ```
