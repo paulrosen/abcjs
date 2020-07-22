@@ -62,6 +62,7 @@ var TripletElem;
 				var left = beam.isAbove() ? this.anchor1.x + this.anchor1.w : this.anchor1.x;
 				this.yTextPos = beam.heightAtMidpoint(left,  this.anchor2.x);
 				this.yTextPos += beam.isAbove() ? 3 : -2; // This creates some space between the beam and the number.
+				this.xTextPos = beam.xAtMidpoint(left, this.anchor2.x);
 				this.top = this.yTextPos + 1;
 				this.bottom = this.yTextPos - 2;
 				if (beam.isAbove())
@@ -93,6 +94,7 @@ var TripletElem;
 				}
 
 				this.yTextPos = this.startNote + (this.endNote - this.startNote) / 2;
+				this.xTextPos = this.anchor1.x + (this.anchor2.x + this.anchor2.w - this.anchor1.x) / 2;
 				this.top = this.yTextPos + 1;
 			}
 		}

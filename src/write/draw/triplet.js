@@ -6,13 +6,13 @@ function drawTriplet(renderer, params, selectables) {
 	var xTextPos;
 	renderer.paper.openGroup({ klass: renderer.controller.classes.generate('triplet '+params.durationClass)});
 	if (params.hasBeam) {
-		var left = params.anchor1.parent.beam.isAbove() ? params.anchor1.x + params.anchor1.w : params.anchor1.x;
-		xTextPos = params.anchor1.parent.beam.xAtMidpoint(left, params.anchor2.x);
+		// var left = params.anchor1.parent.beam.isAbove() ? params.anchor1.x + params.anchor1.w : params.anchor1.x;
+		// xTextPos = params.anchor1.parent.beam.xAtMidpoint(left, params.anchor2.x);
 	} else {
-		xTextPos = params.anchor1.x + (params.anchor2.x + params.anchor2.w - params.anchor1.x) / 2;
+		// xTextPos = params.anchor1.x + (params.anchor2.x + params.anchor2.w - params.anchor1.x) / 2;
 		drawBracket(renderer, params.anchor1.x, params.startNote, params.anchor2.x + params.anchor2.w, params.endNote);
 	}
-	renderText(renderer, {x: xTextPos, y: renderer.calcY(params.yTextPos), text: "" + params.number, type: 'tripletfont', anchor: "middle", centerVertically: true, noClass: true});
+	renderText(renderer, {x: params.xTextPos, y: renderer.calcY(params.yTextPos), text: "" + params.number, type: 'tripletfont', anchor: "middle", centerVertically: true, noClass: true});
 	var g = renderer.paper.closeGroup();
 	selectables.wrapSvgEl({ el_type: "triplet", startChar: -1, endChar: -1 }, g);
 	return g;
