@@ -1,3 +1,5 @@
+var spacing = require('../abc_spacing');
+
 var setUpperAndLowerElements = function(renderer, staffGroup) {
 	// Each staff already has the top and bottom set, now we see if there are elements that are always on top and bottom, and resolve their pitch.
 	// Also, get the overall height of all the staves in this group.

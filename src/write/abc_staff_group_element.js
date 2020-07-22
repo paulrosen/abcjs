@@ -14,8 +14,6 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var spacing = require('./abc_spacing');
-
 // StaffGroupElement contains all the elements that go together to make one line of music.
 // That might be multiple staves that are tied together, and it might be multiple voices on one staff.
 //
