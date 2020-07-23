@@ -34,7 +34,7 @@ var TempoElement;
 		}
 	};
 
-	TempoElement.prototype.setUpperAndLowerElements = function(positionY) { // TODO-PER: This might not be called.
+	TempoElement.prototype.setUpperAndLowerElements = function(positionY) {
 		this.pitch = positionY.tempoHeightAbove;
 		this.top = positionY.tempoHeightAbove;
 		this.bottom = positionY.tempoHeightAbove;
