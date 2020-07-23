@@ -44,8 +44,6 @@ var TripletElem;
 			this.endingHeightAbove = 4;
 	};
 
-	TripletElem.prototype.setUpperAndLowerElements = function(/*positionY*/) {
-	};
 })();
 
 module.exports = TripletElem;
