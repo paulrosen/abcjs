@@ -25,7 +25,6 @@
 
 // There are three phases: the setup phase, when new elements are being discovered, the layout phase, when everything is calculated, and the drawing phase,
 // when the object is not changed, but is used to put the elements on the page.
-var getBarYAt = require('./layout/getBarYAt');
 var calcAverage = require('./layout/calcAverage');
 
 var BeamElem;
@@ -86,24 +85,6 @@ var BeamElem;
 		var average = calcAverage(this.total, this.elems.length);
 		return average < middleLine;
 	};
-
-	BeamElem.prototype.isAbove = function() {
-		return this.stemsUp;
-	};
-
-	// We can't just use the entire beam for the calculation. The range has to be passed in, because the beam might extend into some unrelated notes. for instance, (3_a'f'e'f'2 when L:16
-	BeamElem.prototype.heightAtMidpoint = function(startX, endX) {
-		if (this.beams.length === 0)
-			return 0;
-		var beam = this.beams[0];
-		var midPoint = startX + (endX - startX) / 2;
-		return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, midPoint);
-	};
-
-	BeamElem.prototype.xAtMidpoint = function(startX, endX) {
-		return startX + (endX - startX)/2;
-	};
-
 })();
 
 module.exports = BeamElem;

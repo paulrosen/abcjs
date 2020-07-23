@@ -64,13 +64,13 @@ function layout(element) {
 
 		if (element.hasBeam) {
 			// If there is a beam then we don't need to draw anything except the text. The beam could either be above or below.
-			var left = beam.isAbove() ? element.anchor1.x + element.anchor1.w : element.anchor1.x;
-			element.yTextPos = beam.heightAtMidpoint(left,  element.anchor2.x);
-			element.yTextPos += beam.isAbove() ? 3 : -2; // This creates some space between the beam and the number.
-			element.xTextPos = beam.xAtMidpoint(left, element.anchor2.x);
+			var left = isAbove(beam) ? element.anchor1.x + element.anchor1.w : element.anchor1.x;
+			element.yTextPos = heightAtMidpoint(left,  element.anchor2.x, beam);
+			element.yTextPos += isAbove(beam) ? 3 : -2; // This creates some space between the beam and the number.
+			element.xTextPos = xAtMidpoint(left, element.anchor2.x);
 			element.top = element.yTextPos + 1;
 			element.bottom = element.yTextPos - 2;
-			if (beam.isAbove())
+			if (isAbove(beam))
 				element.endingHeightAbove = 4;
 		} else {
 			// If there isn't a beam, then we need to draw the bracket and the text. The bracket is always above.
@@ -105,6 +105,23 @@ function layout(element) {
 	}
 	delete element.middleElems;
 	delete element.flatBeams;
+};
+
+function isAbove(beam) {
+	return beam.stemsUp;
+};
+
+// We can't just use the entire beam for the calculation. The range has to be passed in, because the beam might extend into some unrelated notes. for instance, (3_a'f'e'f'2 when L:16
+function heightAtMidpoint(startX, endX, beam) {
+	if (beam.beams.length === 0)
+		return 0;
+	var beam = beam.beams[0];
+	var midPoint = startX + (endX - startX) / 2;
+	return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, midPoint);
+};
+
+function xAtMidpoint(startX, endX) {
+	return startX + (endX - startX)/2;
 };
 
 module.exports = layoutVoice;
