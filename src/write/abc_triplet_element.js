@@ -46,61 +46,6 @@ var TripletElem;
 
 	TripletElem.prototype.setUpperAndLowerElements = function(/*positionY*/) {
 	};
-
-	TripletElem.prototype.layout = function() {
-		// TODO end and beginning of line (PER: P.S. I'm not sure this can happen: I think the parser will always specify both the start and end points.)
-		if (this.anchor1 && this.anchor2) {
-			this.hasBeam = !!this.anchor1.parent.beam && this.anchor1.parent.beam === this.anchor2.parent.beam;
-			var beam = this.anchor1.parent.beam;
-			// if hasBeam is true, then the first and last element in the triplet have the same beam.
-			// We also need to check if the beam doesn't contain other notes so that `(3 dcdcc` will do a bracket.
-			if (this.hasBeam && (beam.elems[0] !== this.anchor1.parent || beam.elems[beam.elems.length-1] !== this.anchor2.parent))
-				this.hasBeam = false;
-
-			if (this.hasBeam) {
-				// If there is a beam then we don't need to draw anything except the text. The beam could either be above or below.
-				var left = beam.isAbove() ? this.anchor1.x + this.anchor1.w : this.anchor1.x;
-				this.yTextPos = beam.heightAtMidpoint(left,  this.anchor2.x);
-				this.yTextPos += beam.isAbove() ? 3 : -2; // This creates some space between the beam and the number.
-				this.xTextPos = beam.xAtMidpoint(left, this.anchor2.x);
-				this.top = this.yTextPos + 1;
-				this.bottom = this.yTextPos - 2;
-				if (beam.isAbove())
-					this.endingHeightAbove = 4;
-			} else {
-				// If there isn't a beam, then we need to draw the bracket and the text. The bracket is always above.
-				// The bracket is never lower than the 'a' line, but is 4 pitches above the first and last notes. If there is
-				// a tall note in the middle, the bracket is horizontal and above the highest note.
-				this.startNote = Math.max(this.anchor1.parent.top, 9) + 4;
-				this.endNote = Math.max(this.anchor2.parent.top, 9) + 4;
-				// If it starts or ends on a rest, make the beam horizontal
-				if (this.anchor1.parent.type === "rest" && this.anchor2.parent.type !== "rest")
-					this.startNote = this.endNote;
-				else if (this.anchor2.parent.type === "rest" && this.anchor1.parent.type !== "rest")
-					this.endNote = this.startNote;
-				// See if the middle note is really high.
-				var max = 0;
-				for (var i = 0; i < this.middleElems.length; i++) {
-					max = Math.max(max, this.middleElems[i].top);
-				}
-				max += 4;
-				if (max > this.startNote || max > this.endNote) {
-					this.startNote = max;
-					this.endNote = max;
-				}
-				if (this.flatBeams) {
-					this.startNote = Math.max(this.startNote, this.endNote);
-					this.endNote = Math.max(this.startNote, this.endNote);
-				}
-
-				this.yTextPos = this.startNote + (this.endNote - this.startNote) / 2;
-				this.xTextPos = this.anchor1.x + (this.anchor2.x + this.anchor2.w - this.anchor1.x) / 2;
-				this.top = this.yTextPos + 1;
-			}
-		}
-		delete this.middleElems;
-		delete this.flatBeams;
-	};
 })();
 
 module.exports = TripletElem;
