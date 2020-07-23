@@ -493,70 +493,59 @@ var flatten;
 		return ret;
 	}
 
-	function doModifiedNotes(noteModification, soundDuration, elem, velocity) {
+	function doModifiedNotes(noteModification, p, tempoChangeFactor) {
+		// var p = { cmd: 'note', pitch: actualPitch, volume: velocity, start: elem.time, duration: note.duration*tempoChangeFactor, instrument: currentInstrument };
 		var noteTime;
 		var numNotes;
-		var relativeNoteList = [];
-		var gapSize = 1.0 / 32 * 0.09; // The gap is 9% of a 32th note
+		var start = p.start;
+		var pp;
+		var runningDuration = p.duration;
+		var shortestNote = (1.0 / 32) * tempoChangeFactor;
+
 		switch (noteModification) {
 			case "trill":
-				noteTime = 1.0 / 32;
-				var runningDuration = soundDuration - noteTime;
-
 				var note = 1;
 				while (runningDuration > 0) {
-					relativeNoteList.push(note);
+					currentTrack.push({ cmd: 'note', pitch: p.pitch+note, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
 					note = (note === 1) ? 0 : 1;
-					runningDuration -= noteTime;
+					runningDuration -= shortestNote;
+					start += shortestNote;
 				}
 				break;
 			case "mordent":
-				noteTime = 1.0 / 32;
-				relativeNoteList.push(1);
-				relativeNoteList.push(0);
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				runningDuration -= shortestNote;
+				start += shortestNote;
+				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				runningDuration -= shortestNote;
+				start += shortestNote;
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, instrument: currentInstrument });
 				break;
 			case "lowermordent":
-				noteTime = 1.0 / 32;
-				relativeNoteList.push(-1);
-				relativeNoteList.push(0);
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				runningDuration -= shortestNote;
+				start += shortestNote;
+				currentTrack.push({ cmd: 'note', pitch: p.pitch-1, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				runningDuration -= shortestNote;
+				start += shortestNote;
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, instrument: currentInstrument });
 				break;
 			case "turn":
-				noteTime = soundDuration / 5;
-				relativeNoteList.push(1);
-				relativeNoteList.push(0);
-				relativeNoteList.push(-1);
-				relativeNoteList.push(0);
+				shortestNote = p.duration / 5;
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*2, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote*3, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*4, duration: shortestNote, instrument: currentInstrument });
 				break;
 			case "roll":
-				noteTime = 1.0 / 16;
-				numNotes = Math.floor(soundDuration / noteTime);
-				if (numNotes < 1) {
-					numNotes = 1;
-				}
-				while (numNotes) {
-					relativeNoteList.push(0);
-					numNotes--;
+				while (runningDuration > 0) {
+					currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+					runningDuration -= shortestNote*2;
+					start += shortestNote*2;
 				}
 				break;
 		}
-		var currentlyPlayingNote = [];
-		var iii;
-		for (iii = 0; iii < elem.pitches.length; iii++) {
-			currentlyPlayingNote.push({ pitch: adjustPitch({pitch: elem.pitches[iii].pitch})});
-		}
-		var remainingTime = soundDuration;
-		for (var dd = 0; dd < relativeNoteList.length; dd++) {
-			for (iii = 0; iii < elem.pitches.length; iii++) {
-				// currentTrack.push({
-				// 	cmd: 'start',
-				// 	pitch: adjustPitch({pitch: elem.pitches[iii].pitch + relativeNoteList[dd]}),
-				// 	volume: velocity
-				// });
-				currentlyPlayingNote[iii].pitch = adjustPitch({pitch: elem.pitches[iii].pitch + relativeNoteList[dd]});
-			}
-			remainingTime -= noteTime;
-		}
-		return currentlyPlayingNote;
 	}
 
 	function writeNote(elem, voiceOff) {
@@ -608,7 +597,6 @@ var flatten;
 		elem.elem.currentTrackMilliseconds = elem.time / beatFraction / startingTempo * 60*1000;
 		//var tieAdjustment = 0;
 		if (elem.pitches) {
-			var pitches = [];
 			var thisBreakBetweenNotes = '';
 			const ret = findNoteModifications(elem, velocity);
 			if (ret.thisBreakBetweenNotes)
@@ -641,31 +629,29 @@ var flatten;
 					slurCount -= note.endSlur.length;
 				var actualPitch = note.actualPitch ? note.actualPitch : adjustPitch(note);
 				var p = { cmd: 'note', pitch: actualPitch, volume: velocity, start: elem.time, duration: note.duration*tempoChangeFactor, instrument: currentInstrument };
-				if (slurCount > 0)
-					p.endType = 'tenuto';
-				else if (thisBreakBetweenNotes)
-					p.endType = thisBreakBetweenNotes;
-
-				switch (p.endType) {
-					case "tenuto":
-						p.gap = slurredBreakBetweenNotes;
-						break;
-					case "staccato":
-						var d = p.duration * staccatoBreakBetweenNotes;
-						p.gap = startingTempo / 60 * d;
-						break;
-					default:
-						p.gap = normalBreakBetweenNotes;
-						break;
-				}
-				pitches.push(p);
-				currentTrack.push(p);
-
-				var soundDuration = p.duration;
+				elem.elem.midiPitches.push(p);
 				if (ret.noteModification) {
-					pitches = doModifiedNotes(ret.noteModification, soundDuration, elem, velocity);
+					doModifiedNotes(ret.noteModification, p, tempoChangeFactor);
+				} else {
+					if (slurCount > 0)
+						p.endType = 'tenuto';
+					else if (thisBreakBetweenNotes)
+						p.endType = thisBreakBetweenNotes;
+
+					switch (p.endType) {
+						case "tenuto":
+							p.gap = slurredBreakBetweenNotes;
+							break;
+						case "staccato":
+							var d = p.duration * staccatoBreakBetweenNotes;
+							p.gap = startingTempo / 60 * d;
+							break;
+						default:
+							p.gap = normalBreakBetweenNotes;
+							break;
+					}
+					currentTrack.push(p);
 				}
-				elem.elem.midiPitches = pitches;
 			}
 			lastNoteDurationPosition = currentTrack.length-1;
 
@@ -1197,7 +1183,6 @@ var flatten;
 			return;
 		}
 		var start = lastBarTime;
-		console.log(drumDefinition.pattern)
 		for (var i = 0; i < drumDefinition.pattern.length; i++) {
 			var len = drumDefinition.pattern[i].len * tempoChangeFactor;
 			if (drumDefinition.pattern[i].pitch) {
