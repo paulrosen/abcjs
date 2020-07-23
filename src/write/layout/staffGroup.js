@@ -1,4 +1,4 @@
-layoutVoiceElements = require('./VoiceElements');
+var layoutVoiceElements = require('./VoiceElements');
 
 var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
 	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
