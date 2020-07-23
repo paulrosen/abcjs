@@ -843,12 +843,8 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   	this.triplet.middleNote(notehead);
   }
 
-
   return abselem;
 };
-
-
-
 
 var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot, shouldExtendStem) {
   // TODO scale the dot as well
