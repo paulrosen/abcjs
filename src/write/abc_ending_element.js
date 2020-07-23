@@ -23,8 +23,4 @@ var EndingElem = function EndingElem(text, anchor1, anchor2) {
 	this.pitch = undefined; // This will be set later
 };
 
-EndingElem.prototype.setUpperAndLowerElements = function(positionY) {
-	this.pitch = positionY.endingHeightAbove - 2;
-};
-
 module.exports = EndingElem;

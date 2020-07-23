@@ -94,8 +94,17 @@ function setUpperAndLowerVoiceElements(positionY, voice) {
 	}
 	for (i = 0; i < voice.otherchildren.length; i++) {
 		abselem = voice.otherchildren[i];
-		if (typeof abselem !== 'string')
-			abselem.setUpperAndLowerElements(positionY);
+		switch (abselem.type) {
+			case 'CrescendoElem':
+				setUpperAndLowerCrescendoElements(positionY, abselem);
+				break;
+			case 'DynamicDecoration':
+				setUpperAndLowerDynamicElements(positionY, abselem);
+				break;
+			case 'EndingElem':
+				setUpperAndLowerEndingElements(positionY, abselem);
+				break;
+		}
 	}
 };
 
@@ -120,6 +129,24 @@ function setUpperAndLowerAbsoluteElements(specialYResolved, element) {
 			}
 		}
 	}
+};
+
+function setUpperAndLowerCrescendoElements(positionY, element) {
+	if (element.dynamicHeightAbove)
+		element.pitch = positionY.dynamicHeightAbove;
+	else
+		element.pitch = positionY.dynamicHeightBelow;
+};
+
+function setUpperAndLowerDynamicElements(positionY, element) {
+	if (element.volumeHeightAbove)
+		element.pitch = positionY.volumeHeightAbove;
+	else
+		element.pitch = positionY.volumeHeightBelow;
+};
+
+function setUpperAndLowerEndingElements(positionY, element) {
+	element.pitch = positionY.endingHeightAbove - 2;
 };
 
 module.exports = setUpperAndLowerElements;

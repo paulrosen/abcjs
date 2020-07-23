@@ -25,11 +25,4 @@ var DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
 	this.pitch = undefined; // This will be set later
 };
 
-DynamicDecoration.prototype.setUpperAndLowerElements = function(positionY) {
-	if (this.volumeHeightAbove)
-		this.pitch = positionY.volumeHeightAbove;
-	else
-		this.pitch = positionY.volumeHeightBelow;
-};
-
 module.exports = DynamicDecoration;
