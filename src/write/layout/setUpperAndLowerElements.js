@@ -64,7 +64,7 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 
 		for (var j = 0; j < staff.voices.length; j++) {
 			var voice = staffGroup.voices[staff.voices[j]];
-			voice.setUpperAndLowerElements(positionY);
+			setUpperAndLowerVoiceElements(positionY, voice);
 		}
 		// We might need a little space in between staves if the staves haven't been pushed far enough apart by notes or extra vertical stuff.
 		// Only try to put in extra space if this isn't the top staff.
@@ -83,6 +83,20 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 		//console.log("Staff Y: ",i,heightInPitches,staff.top,staff.bottom);
 	}
 	//console.log("Staff Height: ",heightInPitches,this.height);
+};
+
+function setUpperAndLowerVoiceElements(positionY, voice) {
+	var i;
+	var abselem;
+	for (i = 0; i < voice.children.length; i++) {
+		abselem = voice.children[i];
+		abselem.setUpperAndLowerElements(positionY);
+	}
+	for (i = 0; i < voice.otherchildren.length; i++) {
+		abselem = voice.otherchildren[i];
+		if (typeof abselem !== 'string')
+			abselem.setUpperAndLowerElements(positionY);
+	}
 };
 
 module.exports = setUpperAndLowerElements;

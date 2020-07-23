@@ -91,20 +91,6 @@ VoiceElement.prototype.setRange = function(child) {
 	this.setLimit('dynamicHeightBelow', child);
 };
 
-VoiceElement.prototype.setUpperAndLowerElements = function(positionY) {
-	var i;
-	var abselem;
-	for (i = 0; i < this.children.length; i++) {
-		abselem = this.children[i];
-		abselem.setUpperAndLowerElements(positionY);
-	}
-	for (i = 0; i < this.otherchildren.length; i++) {
-		abselem = this.otherchildren[i];
-		if (typeof abselem !== 'string')
-			abselem.setUpperAndLowerElements(positionY);
-	}
-};
-
 VoiceElement.prototype.addOther = function (child) {
 	this.otherchildren.push(child);
 	this.setRange(child);
