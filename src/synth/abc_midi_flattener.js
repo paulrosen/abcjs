@@ -37,6 +37,7 @@ var flatten;
 	var currentTrack;
 	var lastNoteDurationPosition;
 	var currentTrackName;
+	var lastEventTime;
 
 	var meter = { num: 4, den: 4 };
 	var chordTrack;
@@ -87,6 +88,7 @@ var flatten;
 		// channel = undefined;
 		currentTrack = undefined;
 		currentTrackName = undefined;
+		lastEventTime = 0;
 
 		// For resolving chords.
 		meter = { num: 4, den: 4 };
@@ -189,13 +191,11 @@ var flatten;
 							for (ii = currentTrack.length-1; ii >= 0 && currentTrack[ii].cmd !== 'program'; ii--)
 								;
 							if (ii < 0 || currentTrack[ii].instrument !== element.program)
-								currentTrack.push({cmd: 'program', channel: i, instrument: element.program});
+								currentTrack.push({cmd: 'program', channel: 0, instrument: element.program});
 						}
 						break;
 					case "channel":
-					// 	if (channel === undefined)
-					// 		channel = element.channel;
-					// 	currentTrack[0].channel = element.channel;
+						setChannel(element.channel);
 						break;
 					case "drum":
 						drumDefinition = normalizeDrumDefinition(element.params);
@@ -265,8 +265,17 @@ var flatten;
 		// 		startingTempo /= 4;
 		// }
 
-		return { tempo: startingTempo, instrument: instrument, tracks: tracks, totalDuration: totalDuration(tracks) };
+		return { tempo: startingTempo, instrument: instrument, tracks: tracks, totalDuration: lastEventTime };
 	};
+
+	function setChannel(channel) {
+		for (var i = currentTrack.length-1; i>=0; i--) {
+			if (currentTrack[i].cmd === "program") {
+				currentTrack[i].channel = channel;
+				return;
+			}
+		}
+	}
 
 	function resolveTies(voices) {
 		for (var i = 0; i < voices.length; i++) {
@@ -325,20 +334,6 @@ var flatten;
 		}
 	}
 
-	function totalDuration(tracks) {
-		var total = 0;
-		for (var i = 0; i < tracks.length; i++) {
-			var track = tracks[i];
-			for (var j = 0; j < track.length; j++) {
-				var event = track[j];
-				if ((event.start || event.start === 0) && event.duration) {
-					total = Math.max(total, event.start + event.duration);
-				}
-			}
-		}
-		return total;
-	}
-
 	function getBeatFraction(meter) {
 		switch (parseInt(meter.den,10)) {
 			case 2: return 0.5;
@@ -394,15 +389,6 @@ var flatten;
 				return 'break';
 		}
 		return null;
-	}
-
-	function timeFromStart() {
-		var distance = 0;
-		for (var ct = 0; ct < currentTrack.length; ct++) {
-			if (currentTrack[ct].cmd === 'move')
-				distance += currentTrack[ct].duration;
-		}
-		return distance;
 	}
 
 	function calcBeat(measureStart, beatLength, currTime) {
@@ -656,6 +642,7 @@ var flatten;
 			lastNoteDurationPosition = currentTrack.length-1;
 
 		}
+		lastEventTime = Math.max(lastEventTime, elem.time+elem.elem.duration*tempoChangeFactor);
 
 		return setChordTrack;
 	}
@@ -761,7 +748,7 @@ var flatten;
 	}
 
 	var basses = {
-		'A': 44, 'B': 47, 'C': 48, 'D': 50, 'E': 40, 'F': 41, 'G': 43
+		'A': 45, 'B': 47, 'C': 48, 'D': 50, 'E': 40, 'F': 41, 'G': 43
 	};
 	function interpretChord(name) {
 		// chords have the format:
@@ -1046,7 +1033,7 @@ var flatten;
 				switch (pattern[m2]) {
 					case 'boom':
 						if (beats['' + (m2 + 1)]) // If there is not a chord change on the next beat, play a bass note.
-							writeChick(thisChord.chord.chick, beatLength, chickVolume, noteLength);
+							writeChick(thisChord.chord.chick, beatLength, chickVolume, m2, noteLength);
 						else {
 							writeBoom(thisChord.chord.boom, beatLength, boomVolume, m2, noteLength);
 							lastBoom = thisChord.chord.boom;

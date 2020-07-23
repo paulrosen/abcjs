@@ -949,7 +949,7 @@ V: 3 transpose=4
 
 	//////////////////////////////////////////////////////////
 
-	var abcTempo = `X:1
+	var abcTempoChange = `X:1
 L:1/4
 M:C|
 Q:1/2=60
@@ -957,7 +957,7 @@ K:D
 "D"DEFG| [Q:1/2=90] DEFG |	
 `;
 
-	var expectedTempo = {
+	var expectedTempoChange = {
 		"tempo":60,
 		"instrument":0,
 		"totalDuration":1.9166666666666667,
@@ -1163,7 +1163,7 @@ K:A
 `;
 
 	var expectedBreak = {
-		"tempo": 60,
+		"tempo": 40,
 		"instrument": 0,
 		"totalDuration": 3,
 		"tracks": [
@@ -1407,14 +1407,14 @@ cdef|Z4|fedc|
 		"tracks":[
 			[
 				{"cmd":"program","channel":0,"instrument":0},
-				{"cmd":"note","pitch":72,"volume":85,"start":0,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":74,"volume":85,"start":0.25,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":75,"volume":85,"start":0.50,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":77,"volume":85,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":105,"start":0,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":0.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":75,"volume":95,"start":0.50,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":77,"volume":95,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":77,"volume":105,"start":5,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":75,"volume":85,"start":5.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":75,"volume":95,"start":5.25,"duration":0.25,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":74,"volume":95,"start":5.50,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":72,"volume":85,"start":5.75,"duration":0.25,"instrument":0,"gap":0}
+				{"cmd":"note","pitch":72,"volume":95,"start":5.75,"duration":0.25,"instrument":0,"gap":0}
 			]
 		]
 	};
@@ -1592,7 +1592,7 @@ cd-d2-|d2-dz|
 		doFlattenTest(abcDynamics, expectedDynamics);
 	})
 
-	it("flatten-jig", () => {
+	it("flatten-six-huit", () => {
 		doFlattenTest(abcSixHuit, expectedSixHuit);
 	})
 
@@ -1605,7 +1605,8 @@ cd-d2-|d2-dz|
 	})
 
 	it("flatten-tempo-change", () => {
-		doFlattenTest(abcTempo, expectedTempo);
+		console.log("flatten-tempo-change")
+		doFlattenTest(abcTempoChange, expectedTempoChange);
 	})
 
 	it("flatten-decorations", () => {
