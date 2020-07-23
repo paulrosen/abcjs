@@ -33,10 +33,6 @@ BraceElem.prototype.continuing = function(voice) {
 	this.lastContinuedVoice = voice;
 };
 
-BraceElem.prototype.setLocation = function(x) {
-	this.x = x;
-};
-
 BraceElem.prototype.getWidth = function() {
 	return 10; // TODO-PER: right now the drawing function doesn't vary the width at all. If it does in the future then this will change.
 };

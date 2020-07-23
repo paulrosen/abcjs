@@ -142,12 +142,16 @@ function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
 function setBraceLocation(brace, x, ofs) {
 	if (brace) {
 		for (var i = 0; i < brace.length; i++) {
-			brace[i].setLocation(x);
+			setLocation(x, brace[i]);
 			ofs = Math.max(ofs, brace[i].getWidth());
 		}
 	}
 	return ofs;
 }
+
+function setLocation(x, element) {
+	element.x = x;
+};
 
 function finished(voices) {
 	for (var i=0;i<voices.length;i++) {
