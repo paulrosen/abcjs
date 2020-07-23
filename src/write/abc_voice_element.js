@@ -100,8 +100,4 @@ VoiceElement.prototype.addBeam = function (child) {
 	this.beams.push(child);
 };
 
-VoiceElement.prototype.getDurationIndex = function () {
-	return this.durationindex - (this.children[this.i] && (this.children[this.i].duration>0)?0:0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
-};
-
 module.exports = VoiceElement;

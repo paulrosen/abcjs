@@ -20,8 +20,8 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
 		// find first duration level to be laid out among candidates across voices
 		currentduration= null; // candidate smallest duration level
 		for (i=0;i<staffGroup.voices.length;i++) {
-			if (!layoutVoiceElements.layoutEnded(staffGroup.voices[i]) && (!currentduration || staffGroup.voices[i].getDurationIndex()<currentduration))
-				currentduration=staffGroup.voices[i].getDurationIndex();
+			if (!layoutVoiceElements.layoutEnded(staffGroup.voices[i]) && (!currentduration || getDurationIndex(staffGroup.voices[i])<currentduration))
+				currentduration=getDurationIndex(staffGroup.voices[i]);
 		}
 
 
@@ -29,7 +29,7 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
 		var currentvoices = [];
 		var othervoices = [];
 		for (i=0;i<staffGroup.voices.length;i++) {
-			var durationIndex = staffGroup.voices[i].getDurationIndex();
+			var durationIndex = getDurationIndex(staffGroup.voices[i]);
 			// PER: Because of the inexactness of JS floating point math, we just get close.
 			if (durationIndex - currentduration > epsilon) {
 				othervoices.push(staffGroup.voices[i]);
@@ -158,6 +158,10 @@ function finished(voices) {
 		if (!layoutVoiceElements.layoutEnded(voices[i])) return false;
 	}
 	return true;
+};
+
+function getDurationIndex(element) {
+	return element.durationindex - (element.children[element.i] && (element.children[element.i].duration>0)?0:0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
 };
 
 module.exports = layoutStaffGroup;
