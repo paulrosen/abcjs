@@ -121,7 +121,11 @@ function setUpperAndLowerAbsoluteElements(specialYResolved, element) {
 				if (child[key]) { // If this relative element has defined a height for this class of element
 					child.pitch = specialYResolved[key];
 					if (child.top === undefined) { // TODO-PER: HACK! Not sure this is the right place to do this.
-						child.setUpperAndLowerElements(specialYResolved);
+						if (child.type === 'TempoElement') {
+							setUpperAndLowerTempoElement(specialYResolved, child);
+						} else {
+							setUpperAndLowerRelativeElements(specialYResolved, child);
+						}
 						element.pushTop(child.top);
 						element.pushBottom(child.bottom);
 					}
@@ -147,6 +151,59 @@ function setUpperAndLowerDynamicElements(positionY, element) {
 
 function setUpperAndLowerEndingElements(positionY, element) {
 	element.pitch = positionY.endingHeightAbove - 2;
+};
+
+function setUpperAndLowerTempoElement(positionY, element) {
+	element.pitch = positionY.tempoHeightAbove;
+	element.top = positionY.tempoHeightAbove;
+	element.bottom = positionY.tempoHeightAbove;
+	if (element.note) {
+		var tempoPitch = element.pitch - element.totalHeightInPitches + 1; // The pitch we receive is the top of the allotted area: change that to practically the bottom.
+		element.note.top = tempoPitch;
+		element.note.bottom = tempoPitch;
+		for (var i = 0; i < element.note.children.length; i++) {
+			var child = element.note.children[i];
+			child.top += tempoPitch;
+			child.bottom += tempoPitch;
+			child.pitch += tempoPitch;
+			if (child.pitch2 !== undefined)
+				child.pitch2 += tempoPitch;
+		}
+	}
+};
+
+function setUpperAndLowerRelativeElements(positionY, element) {
+	switch(element.type) {
+		case "part":
+			element.top = positionY.partHeightAbove + element.height;
+			element.bottom = positionY.partHeightAbove;
+			break;
+		case "text":
+		case "chord":
+			if (element.chordHeightAbove) {
+				element.top = positionY.chordHeightAbove;
+				element.bottom = positionY.chordHeightAbove;
+			} else {
+				element.top = positionY.chordHeightBelow;
+				element.bottom = positionY.chordHeightBelow;
+			}
+			break;
+		case "lyric":
+			if (element.lyricHeightAbove) {
+				element.top = positionY.lyricHeightAbove;
+				element.bottom = positionY.lyricHeightAbove;
+			} else {
+				element.top = positionY.lyricHeightBelow;
+				element.bottom = positionY.lyricHeightBelow;
+			}
+			break;
+		case "debug":
+			element.top = positionY.chordHeightAbove;
+			element.bottom = positionY.chordHeightAbove;
+			break;
+	}
+	if (element.pitch === undefined || element.top === undefined)
+		console.error("RelativeElement position not set.", element.type, element.pitch, element.top, positionY);
 };
 
 module.exports = setUpperAndLowerElements;
