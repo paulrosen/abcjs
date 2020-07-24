@@ -6,7 +6,6 @@ var calcAverage = require('./calcAverage');
 var layoutBeam = function(beam) {
 	if (beam.elems.length === 0 || beam.allrests) return;
 
-	beam.stemsUp = beam.calcDir(); // True means the stems are facing up.
 	var dy = calcDy(beam.stemsUp, beam.isgrace); // This is the width of the beam line.
 
 	// create the main beam

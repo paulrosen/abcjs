@@ -77,12 +77,19 @@ var BeamElem;
 		}
 	};
 
-	var middleLine = 6;	// hardcoded 6 is B
 
 	BeamElem.prototype.calcDir = function() {
-		if (this.forceup) return true;
-		if (this.forcedown) return false;
+		if (this.forceup) { this.stemsUp = true; return true; }
+		if (this.forcedown) { this.stemsUp = false; return false; }
+		var middleLine = 6;	// hardcoded 6 is B
 		var average = calcAverage(this.total, this.elems.length);
+		this.stemsUp = average < middleLine; // true is up, false is down;
+		var dir = this.stemsUp ? 'up' : 'down';
+		for (var i = 0; i < this.elems.length; i++) {
+			for (var j = 0; j < this.elems[i].heads.length; j++) {
+				this.elems[i].heads[j].stemDir = dir;
+			}
+		}
 		return average < middleLine;
 	};
 })();
