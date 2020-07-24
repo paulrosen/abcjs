@@ -1,7 +1,6 @@
 var RelativeElement = require('../abc_relative_element');
 var spacing = require('../abc_spacing');
 var getBarYAt = require('./getBarYAt');
-var calcAverage = require('./calcAverage');
 
 var layoutBeam = function(beam) {
 	if (beam.elems.length === 0 || beam.allrests) return;
@@ -16,7 +15,7 @@ var layoutBeam = function(beam) {
 	minStemHeight = minStem(firstElement, beam.stemsUp, referencePitch, minStemHeight);
 	minStemHeight = minStem(lastElement, beam.stemsUp, referencePitch, minStemHeight);
 	minStemHeight = Math.max(beam.stemHeight, minStemHeight + 3); // TODO-PER: The 3 is the width of a 16th beam. The actual height of the beam should be used instead.
-	var yPos = calcYPos(beam.total, beam.elems.length, minStemHeight, beam.stemsUp, firstElement.abcelem.averagepitch, lastElement.abcelem.averagepitch, beam.isflat, beam.min, beam.max, beam.isgrace);
+	var yPos = calcYPos(beam.average, beam.elems.length, minStemHeight, beam.stemsUp, firstElement.abcelem.averagepitch, lastElement.abcelem.averagepitch, beam.isflat, beam.min, beam.max, beam.isgrace);
 	var xPos = calcXPos(beam.stemsUp, firstElement, lastElement);
 	beam.beams.push({ startX: xPos[0], endX: xPos[1], startY: yPos[0], endY: yPos[1], dy: dy });
 
@@ -82,8 +81,7 @@ function calcXPos(asc, firstElement, lastElement) {
 	return [ startX, endX ];
 }
 
-function calcYPos(total, numElements, stemHeight, asc, firstAveragePitch, lastAveragePitch, isFlat, minPitch, maxPitch, isGrace) {
-	var average = calcAverage(total, numElements); // This is the average pitch for the all the notes that will be beamed.
+function calcYPos(average, numElements, stemHeight, asc, firstAveragePitch, lastAveragePitch, isFlat, minPitch, maxPitch, isGrace) {
 	var barpos = stemHeight - 2; // (isGrace)? 5:7;
 	var barminpos = stemHeight - 2;
 	var pos = Math.round(asc ? Math.max(average + barpos, maxPitch + barminpos) : Math.min(average - barpos, minPitch - barminpos));

@@ -25,7 +25,6 @@
 
 // There are three phases: the setup phase, when new elements are being discovered, the layout phase, when everything is calculated, and the drawing phase,
 // when the object is not changed, but is used to put the elements on the page.
-var calcAverage = require('./layout/calcAverage');
 
 var BeamElem;
 
@@ -44,6 +43,7 @@ var BeamElem;
 		this.forcedown = (type && type === "down");
 		this.elems = []; // all the AbsoluteElements that this beam touches. It may include embedded rests.
 		this.total = 0;
+		this.average = 6; // use middle line as start for average.
 		this.allrests = true;
 		this.stemHeight = stemHeight;
 		this.beams = []; // During the layout phase, this will become a list of the beams that need to be drawn.
@@ -82,16 +82,22 @@ var BeamElem;
 		if (this.forceup) { this.stemsUp = true; return true; }
 		if (this.forcedown) { this.stemsUp = false; return false; }
 		var middleLine = 6;	// hardcoded 6 is B
-		var average = calcAverage(this.total, this.elems.length);
-		this.stemsUp = average < middleLine; // true is up, false is down;
+		this.average = calcAverage(this.total, this.elems.length);
+		this.stemsUp = this.average < middleLine; // true is up, false is down;
 		var dir = this.stemsUp ? 'up' : 'down';
 		for (var i = 0; i < this.elems.length; i++) {
 			for (var j = 0; j < this.elems[i].heads.length; j++) {
 				this.elems[i].heads[j].stemDir = dir;
 			}
 		}
-		return average < middleLine;
+		return this.stemsUp;
 	};
 })();
+
+function calcAverage(total, numElements) {
+	if (!numElements)
+		return 0;
+	return total / numElements;
+}
 
 module.exports = BeamElem;
