@@ -18,7 +18,8 @@ var TuneBuilder = function(tune) {
 	};
 
 	this.setVisualTranspose = function(visualTranspose) {
-		tune.visualTranspose = visualTranspose;
+		if (visualTranspose)
+			tune.visualTranspose = visualTranspose;
 	};
 
 	this.resolveOverlays = function() {

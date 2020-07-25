@@ -32,7 +32,7 @@ var Parse = function() {
 	var tokenizer = new Tokenizer();
 
 	this.getTune = function() {
-		return {
+		var t = {
 			formatting: tune.formatting,
 			lines: tune.lines,
 			media: tune.media,
@@ -53,9 +53,11 @@ var Parse = function() {
 			millisecondsPerMeasure: tune.millisecondsPerMeasure,
 			setupEvents: tune.setupEvents,
 			setTiming: tune.setTiming,
-			setUpAudio: tune.setUpAudio,
-			visualTranspose: tune.visualTranspose
+			setUpAudio: tune.setUpAudio
 		};
+		if (tune.visualTranspose)
+			t.visualTranspose = tune.visualTranspose;
+		return t;
 	};
 
 	function addPositioning(el, type, value) {
