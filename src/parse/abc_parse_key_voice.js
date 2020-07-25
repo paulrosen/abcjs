@@ -177,7 +177,8 @@ var parseKeyVoice = {};
 			'D#': [ key1flat, key2flat, key3flat ],
 			'E#': [ key1flat ],
 			'G#': [ key1flat, key2flat, key3flat, key4flat ],
-			'Gbm': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ]
+			'Gbm': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ],
+			'none': []
 		};
 
 		return transpose.keySignature(multilineVars, keys, keyName, root, acc, localTranspose);
