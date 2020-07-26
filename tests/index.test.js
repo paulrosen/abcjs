@@ -1,56 +1,58 @@
-import basic from "../index"
+const assert = require('chai').assert
+const basic = require('../index')
 
-test("exports an object", () => {
-	expect(basic).toEqual(expect.any(Object))
-})
+describe("ABCJS Basic", function () {
+	it('should expose ABCJS as an object', function () {
+		assert.isObject(basic)
+	})
 
-test("has correct signature", () => {
-  expect(basic.signature).toEqual(expect.stringContaining('abcjs-basic v'))
-})
+	it('should have the correct ABCJS signature', function () {
+		assert.include(basic.signature, 'abcjs-basic v')
+	})
 
-test("can control animations", () => {
-	expect(basic.startAnimation).toEqual(expect.any(Function))
-	expect(basic.stopAnimation).toEqual(expect.any(Function))
-	expect(basic.pauseAnimation).toEqual(expect.any(Function))
-})
+	it('should expose animation functions', function () {
+		assert.isFunction(basic.startAnimation)
+		assert.isFunction(basic.stopAnimation)
+		assert.isFunction(basic.pauseAnimation)
+	})
 
-test("can read a tunebook", () => {
-	expect(basic.numberOfTunes).toEqual(expect.any(Function))
-	expect(basic.TuneBook).toEqual(expect.any(Function))
-	expect(basic.parseOnly).toEqual(expect.any(Function))
-	expect(basic.renderEngine).toEqual(expect.any(Function))
-	expect(basic.extractMeasures).toEqual(expect.any(Function))
-})
+	it('should eexpose tunebook functions', function () {
+		assert.isFunction(basic.numberOfTunes)
+		assert.isFunction(basic.TuneBook)
+		assert.isFunction(basic.parseOnly)
+		assert.isFunction(basic.renderEngine)
+		assert.isFunction(basic.extractMeasures)
+	})
 
-test("can render a tune", () => {
-	expect(basic.renderAbc).toEqual(expect.any(Function))
-})
+	it('should expose renderAbc function', function () {
+		assert.isFunction(basic.renderAbc)
+	})
 
-test("can access timing callbacks", () => {
-	expect(basic.TimingCallbacks).toEqual(expect.any(Function))
-})
+	it('should expose timing callback function', function () {
+		assert.isFunction(basic.TimingCallbacks)
+	})
 
-test("can set glyphs", () => {
-	expect(basic.setGlyph).toEqual(expect.any(Function))
-})
+	it('should expose setGlyph function', function () {
+		assert.isFunction(basic.setGlyph)
+	})
 
-test("can access synth", () => {
-	expect(basic.synth).toEqual(expect.objectContaining({
-		CreateSynth: expect.any(Function),
-		instrumentIndexToName: expect.any(Object),
-		pitchToNoteName: expect.any(Object),
-		SynthController: expect.any(Function),
-		SynthSequence: expect.any(Function),
-		CreateSynthControl: expect.any(Function),
-		registerAudioContext: expect.any(Function),
-		activeAudioContext: expect.any(Function),
-		playEvent: expect.any(Function),
-		getMidiFile: expect.any(Function),
-		supportsAudio: expect.any(Function),
-	}))
-})
+	it('should expose the synth object', function () {
+		assert.isObject(basic.synth)
+		assert.isFunction(basic.synth.CreateSynth)
+		assert.isArray(basic.synth.instrumentIndexToName)
+		assert.isObject(basic.synth.pitchToNoteName)
+		assert.isFunction(basic.synth.SynthController)
+		assert.isFunction(basic.synth.SynthSequence)
+		assert.isFunction(basic.synth.CreateSynthControl)
+		assert.isFunction(basic.synth.registerAudioContext)
+		assert.isFunction(basic.synth.activeAudioContext)
+		assert.isFunction(basic.synth.playEvent)
+		assert.isFunction(basic.synth.getMidiFile)
+		assert.isFunction(basic.synth.supportsAudio)
+	})
 
-test("can access editor", () => {
-	expect(basic.Editor).toEqual(expect.any(Function))
-	expect(basic.EditArea).toEqual(expect.any(Function))
+	it('should expose the editor functions', function () {
+		assert.isFunction(basic.Editor)
+		assert.isFunction(basic.EditArea)
+	})
 })

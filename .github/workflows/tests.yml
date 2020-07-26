@@ -20,17 +20,10 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Cache jest
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-jest
-        with:
-          path: /tmp/jest_rs
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-
       - name: Install Dependencies
         run: npm install --color="always"
 
       - name: Install Dependencies
-        run: npm test -- --coverage --colors
+        run: npm test -- --colors
+
 

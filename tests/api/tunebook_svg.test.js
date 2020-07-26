@@ -1,25 +1,31 @@
-import render from 'api/abc_tunebook_svg'
-import tunebook from 'api/abc_tunebook'
+const assert = require('chai').assert
+const render = require('../../src/api/abc_tunebook_svg')
+const tunebook = require('../../src/api/abc_tunebook')
 
-jest.mock('api/abc_tunebook')
+// mock renderEngine Call
+tunebook.renderEngine = function (...args) {
+	return args[3]
+}
 
-test("passes the correct params to renderEngine", () => {
-	let parserParams = { p: 'parserParams' }
-	let engraverParams = { e: 'engraverParams' }
-	let renderParams = { r: 'renderParams' }
-	console.log(render('', '', parserParams, engraverParams, renderParams))
-	expect(tunebook.renderEngine.mock.calls[0][3]).toEqual({
-		...parserParams,
-		...engraverParams,
-		...renderParams,
+describe("renderAbc", function () {
+	it("passes the correct params to renderEngine", () => {
+		let parserParams = { p: 'parserParams' }
+		let engraverParams = { e: 'engraverParams' }
+		let renderParams = { r: 'renderParams' }
+		let result = render('', '', parserParams, engraverParams, renderParams)
+		assert.deepEqual(result, {
+			...parserParams,
+			...engraverParams,
+			...renderParams,
+		})
 	})
-})
 
-test("passes click listener to renderEngine", () => {
-	let engraverParams = { listener: { highlight: 'clickListener' }}
-	render('', '', {}, engraverParams, {})
-	expect(tunebook.renderEngine.mock.calls[1][3]).toEqual({
-		clickListener: 'clickListener'
+	it("passes click listener to renderEngine", () => {
+		let engraverParams = { listener: { highlight: 'clickListener' }}
+		let result = render('', '', {}, engraverParams, {})
+		assert.deepEqual(result, {
+			clickListener: 'clickListener'
+		})
 	})
 })
 
