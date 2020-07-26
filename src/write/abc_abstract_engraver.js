@@ -516,6 +516,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 		}
 
 		if (gracebeam) {
+			gracebeam.calcDir();
 			voice.addBeam(gracebeam);
 		}
 		return roomtaken;

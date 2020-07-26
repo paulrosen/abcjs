@@ -38,9 +38,9 @@ var BeamElem;
 		// type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
 		this.type = "BeamElem";
 		this.isflat = !!flat;
-		this.isgrace = (type && type === "grace");
-		this.forceup = this.isgrace || (type && type === "up");
-		this.forcedown = (type && type === "down");
+		this.isgrace = !!(type && type === "grace");
+		this.forceup = !!(this.isgrace || (type && type === "up"));
+		this.forcedown = !!(type && type === "down");
 		this.elems = []; // all the AbsoluteElements that this beam touches. It may include embedded rests.
 		this.total = 0;
 		this.average = 6; // use middle line as start for average.
@@ -79,18 +79,21 @@ var BeamElem;
 
 
 	BeamElem.prototype.calcDir = function() {
-		if (this.forceup) { this.stemsUp = true; return true; }
-		if (this.forcedown) { this.stemsUp = false; return false; }
-		var middleLine = 6;	// hardcoded 6 is B
 		this.average = calcAverage(this.total, this.elems.length);
-		this.stemsUp = this.average < middleLine; // true is up, false is down;
+		if (this.forceup) {
+			this.stemsUp = true;
+		} else if (this.forcedown) {
+			this.stemsUp = false;
+		} else {
+			var middleLine = 6;	// hardcoded 6 is B
+			this.stemsUp = this.average < middleLine; // true is up, false is down;
+		}
 		var dir = this.stemsUp ? 'up' : 'down';
 		for (var i = 0; i < this.elems.length; i++) {
 			for (var j = 0; j < this.elems[i].heads.length; j++) {
 				this.elems[i].heads[j].stemDir = dir;
 			}
 		}
-		return this.stemsUp;
 	};
 })();
 
