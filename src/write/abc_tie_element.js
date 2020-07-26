@@ -52,10 +52,6 @@ TieElem.prototype.setHint = function () {
 	this.hint = true;
 };
 
-TieElem.prototype.setUpperAndLowerElements = function(positionY) {
-	// Doesn't depend on the highest and lowest, so there's nothing to do here.
-};
-
 TieElem.prototype.calcTieDirection = function () {
 	// The rules:
 	// 1) If it is in a grace note group, then the direction is always BELOW.

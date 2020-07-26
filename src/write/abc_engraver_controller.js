@@ -31,6 +31,7 @@ var Classes = require('./classes');
 var GetFontAndAttr = require('./get-font-and-attr');
 var GetTextSize = require('./get-text-size');
 var draw = require('./draw/draw');
+var calcHeight = require('./layout/calcHeight');
 
 /**
  * @class
@@ -179,7 +180,7 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 				}
 			}
 			hasPrintedTempo = true;
-			ret.height += abcLine.staffGroup.calcHeight() * spacing.STEP;
+			ret.height += calcHeight(abcLine.staffGroup) * spacing.STEP;
 		} else if (abcLine.subtitle) {
 			// If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
 			if (hasSeenNonSubtitle) {

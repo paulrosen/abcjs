@@ -391,26 +391,11 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		}
 	}
 
-	AbstractEngraver.prototype.calcBeamDir = function (isSingleLineStaff, voice, elems) {
-		if (this.stemdir) // If the user or voice is forcing the stem direction, we already know the answer.
-			return this.stemdir;
-		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams);
-		for (var i = 0; i < elems.length; i++) {
-			beamelem.add({abcelem: elems[i]}); // This is a hack to call beam elem with just a minimum of processing: for our purposes, we don't need to construct the whole note.
-		}
-
-		var dir = beamelem.calcDir();
-		return dir ? "up" : "down";
-	};
-
 	AbstractEngraver.prototype.createBeam = function (isSingleLineStaff, voice, elems) {
 		var abselemset = [];
 
-		var dir = this.calcBeamDir(isSingleLineStaff, voice, elems);
-		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, dir, this.flatBeams, elems[0]);
+		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams, elems[0]);
 		if (hint) beamelem.setHint();
-		var oldDir = this.stemdir;
-		this.stemdir = dir;
 		for (var i = 0; i < elems.length; i++) {
 			var elem = elems[i];
 			var abselem = this.createNote(elem, true, isSingleLineStaff, voice);
@@ -422,7 +407,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 				this.tripletmultiplier = 1;
 			}
 		}
-		this.stemdir = oldDir;
+		beamelem.calcDir();
 		voice.addBeam(beamelem);
 		return abselemset;
 	};
@@ -830,7 +815,6 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 	  roomtakenright = ret3.roomTakenRight;
   }
 
-
   if (elem.startTriplet) {
     this.triplet = new TripletElem(elem.startTriplet, notehead, { flatBeams: this.flatBeams }); // above is opposite from case of slurs
   }
@@ -843,12 +827,8 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   	this.triplet.middleNote(notehead);
   }
 
-
   return abselem;
 };
-
-
-
 
 var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot, shouldExtendStem) {
   // TODO scale the dot as well

@@ -20,36 +20,18 @@ var RelativeElement = require('./abc_relative_element');
 var TempoElement;
 (function() {
 	"use strict";
-	var totalHeightInPitches = 5;
 
 	TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
 		this.type = "TempoElement";
 		this.tempo = tempo;
 		this.tempo.type = "tempo"; /// TODO-PER: this should be set earlier, in the parser, probably.
 		this.tuneNumber = tuneNumber;
-		this.tempoHeightAbove = totalHeightInPitches;
+		// TODO: can these two properties be merged?
+		this.totalHeightInPitches = 5;
+		this.tempoHeightAbove = this.totalHeightInPitches;
 		this.pitch = undefined; // This will be set later
 		if (this.tempo.duration && !this.tempo.suppressBpm) {
 			this.note = this.createNote(createNoteHead, tempo, tuneNumber);
-		}
-	};
-
-	TempoElement.prototype.setUpperAndLowerElements = function(positionY) { // TODO-PER: This might not be called.
-		this.pitch = positionY.tempoHeightAbove;
-		this.top = positionY.tempoHeightAbove;
-		this.bottom = positionY.tempoHeightAbove;
-		if (this.note) {
-			var tempoPitch = this.pitch - totalHeightInPitches + 1; // The pitch we receive is the top of the allotted area: change that to practically the bottom.
-			this.note.top = tempoPitch;
-			this.note.bottom = tempoPitch;
-			for (var i = 0; i < this.note.children.length; i++) {
-				var child = this.note.children[i];
-				child.top += tempoPitch;
-				child.bottom += tempoPitch;
-				child.pitch += tempoPitch;
-				if (child.pitch2 !== undefined)
-					child.pitch2 += tempoPitch;
-			}
 		}
 	};
 
