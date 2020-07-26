@@ -294,28 +294,30 @@ var flatten;
 				if (element.pitches) {
 					for (var k = 0; k < element.pitches.length; k++) {
 						var pitch = element.pitches[k];
-						pitch.duration = element.duration;
-						if (pitch.startTie) {
-							//console.log(element)
-							if (ties[pitch.pitch] === undefined) // We might have three notes tied together - if so just add this duration.
-								ties[pitch.pitch] = {el: j, pitch: k};
-							else {
-								voice[ties[pitch.pitch].el].pitches[ties[pitch.pitch].pitch].duration += pitch.duration;
-								element.pitches[k] = null;
-							}
-							//console.log(">>> START", JSON.stringify(ties));
-						} else if (pitch.endTie) {
-							//console.log(element)
-							var tie = ties[pitch.pitch];
-							//console.log(">>> END", pitch.pitch, tie, JSON.stringify(ties));
-							if (tie) {
-								var dur = pitch.duration;
-								delete voice[tie.el].pitches[tie.pitch].startTie;
-								voice[tie.el].pitches[tie.pitch].duration += dur;
-								element.pitches[k] = null;
-								delete ties[pitch.pitch];
-							} else {
-								delete pitch.endTie;
+						if (pitch) {
+							pitch.duration = element.duration;
+							if (pitch.startTie) {
+								//console.log(element)
+								if (ties[pitch.pitch] === undefined) // We might have three notes tied together - if so just add this duration.
+									ties[pitch.pitch] = {el: j, pitch: k};
+								else {
+									voice[ties[pitch.pitch].el].pitches[ties[pitch.pitch].pitch].duration += pitch.duration;
+									element.pitches[k] = null;
+								}
+								//console.log(">>> START", JSON.stringify(ties));
+							} else if (pitch.endTie) {
+								//console.log(element)
+								var tie = ties[pitch.pitch];
+								//console.log(">>> END", pitch.pitch, tie, JSON.stringify(ties));
+								if (tie) {
+									var dur = pitch.duration;
+									delete voice[tie.el].pitches[tie.pitch].startTie;
+									voice[tie.el].pitches[tie.pitch].duration += dur;
+									element.pitches[k] = null;
+									delete ties[pitch.pitch];
+								} else {
+									delete pitch.endTie;
+								}
 							}
 						}
 					}
@@ -570,7 +572,7 @@ var flatten;
 				elem.elem.midiGraceNotePitches = [];
 				var grace = elem.gracenotes[j];
 				elem.elem.midiGraceNotePitches.push({
-					pitch: adjustPitch(grace) + 60,
+					pitch: adjustPitch(grace),
 					durationInMeasures: 0,
 					volume: velocity,
 					instrument: currentInstrument

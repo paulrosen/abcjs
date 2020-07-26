@@ -54,12 +54,12 @@ var create;
 						midiJs.setInstrument(event.instrument);
 						break;
 					case 'start':
-						midi.startNote(convertPitch(event.pitch), event.volume);
-						midiJs.startNote(convertPitch(event.pitch), event.volume);
+						midi.startNote(event.pitch, event.volume);
+						midiJs.startNote(event.pitch, event.volume);
 						break;
 					case 'stop':
-						midi.endNote(convertPitch(event.pitch));
-						midiJs.endNote(convertPitch(event.pitch));
+						midi.endNote(event.pitch);
+						midiJs.endNote(event.pitch);
 						break;
 					case 'move':
 						midi.addRest(event.duration * baseDuration);
@@ -84,10 +84,6 @@ var create;
 		else
 			return midiFile;
 	};
-
-	function convertPitch(pitch) {
-		return 60 + pitch;
-	}
 })();
 
 module.exports = create;

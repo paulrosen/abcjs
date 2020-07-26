@@ -228,9 +228,9 @@ var parseCommon = require("../parse/abc_common");
 									}
 
 									if (inDiminuendo[k]) {
-										currentVolume[0] -= inDiminuendo[k];
-										currentVolume[1] -= inDiminuendo[k];
-										currentVolume[2] -= inDiminuendo[k];
+										currentVolume[0] += inDiminuendo[k];
+										currentVolume[1] += inDiminuendo[k];
+										currentVolume[2] += inDiminuendo[k];
 										voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume.slice(0) });
 									}
 
@@ -298,7 +298,7 @@ var parseCommon = require("../parse/abc_common");
 												var n2 = numNotesToDecoration(voice, v, "diminuendo)");
 												var bottom = Math.max(15, currentVolume[0] - crescendoSize);
 												inCrescendo[k] = false;
-												inDiminuendo[k] = Math.floor((top - currentVolume[0]) / n2);
+												inDiminuendo[k] = Math.floor((bottom - currentVolume[0]) / n2);
 											} else if (elem.decoration.indexOf("diminuendo)") >= 0) {
 												inDiminuendo[k] = false;
 											}
@@ -374,7 +374,10 @@ var parseCommon = require("../parse/abc_common");
 										if (!s) s = 0; // If there wasn't a left repeat, then we repeat from the beginning.
 										var e = skipEndingPlaceholder[voiceNumber];
 										if (!e) e = voices[voiceNumber].length; // If there wasn't a first ending marker, then we copy everything.
-										voices[voiceNumber] = voices[voiceNumber].concat(voices[voiceNumber].slice(s, e));
+										// duplicate each of the elements - this has to be a deep copy.
+										for (var z = s; z < e; z++) {
+											voices[voiceNumber].push(parseCommon.clone(voices[voiceNumber][z]));
+										}
 										// reset these in case there is a second repeat later on.
 										skipEndingPlaceholder[voiceNumber] = undefined;
 										startRepeatPlaceholder[voiceNumber] = undefined;
