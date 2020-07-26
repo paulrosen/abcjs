@@ -555,29 +555,9 @@ var flatten;
 		// a better one is: the grace notes cannot take more than 1/2 of the main note's value.
 		// A grace note (of 1/8 note duration) takes 1/8 of the main note's value.
 		var graces;
-		if (elem.gracenotes) {
-			// There are two cases: if this is bagpipe, the grace notes are played on the beat with the current note.
-			// Normally, the grace notes would be played before the beat. (If this is the first note in the track, however, then it is played on the current beat.)
-			// The reason for the exception on the first note is that it would otherwise move the whole track in time and would affect all the other tracks.
-			// Later note: this is an experiment with always starting the graces on the beat.
-			var stealFromCurrent = true; // (bagpipes || lastNoteDurationPosition < 0 || currentTrack.length === 0);
-			var duration = elem.pitches[0].duration;
-			var stealFromDuration = stealFromCurrent ? duration : currentTrack[lastNoteDurationPosition].duration;
-			graces = processGraceNotes(elem.gracenotes, stealFromDuration);
-			duration = writeGraceNotes(graces, stealFromCurrent, duration, null, velocity*2/3); // make the graces a little quieter.
-			if (!stealFromCurrent)
-				trackStartingIndex = currentTrack.length;
-
-			for (var j = 0; j < elem.gracenotes.length; j++) {
-				elem.elem.midiGraceNotePitches = [];
-				var grace = elem.gracenotes[j];
-				elem.elem.midiGraceNotePitches.push({
-					pitch: adjustPitch(grace),
-					durationInMeasures: 0,
-					volume: velocity,
-					instrument: currentInstrument
-				});
-			}
+		if (elem.gracenotes && elem.pitches && elem.pitches.length > 0 && elem.pitches[0]) {
+			graces = processGraceNotes(elem.gracenotes, elem.pitches[0].duration);
+			elem.elem.midiGraceNotePitches = writeGraceNotes(graces, elem.time, velocity*2/3, currentInstrument); // make the graces a little quieter.
 		}
 
 		// The beat fraction is the note that gets a beat (.25 is a quarter note)
@@ -617,6 +597,10 @@ var flatten;
 					slurCount -= note.endSlur.length;
 				var actualPitch = note.actualPitch ? note.actualPitch : adjustPitch(note);
 				var p = { cmd: 'note', pitch: actualPitch, volume: velocity, start: elem.time, duration: note.duration*tempoChangeFactor, instrument: currentInstrument };
+				if (elem.gracenotes) {
+					p.duration = p.duration / 2;
+					p.start = p.start + p.duration;
+				}
 				elem.elem.midiPitches.push(p);
 				if (ret.noteModification) {
 					doModifiedNotes(ret.noteModification, p, tempoChangeFactor);
@@ -724,19 +708,21 @@ var flatten;
 		return ret;
 	}
 
-	function writeGraceNotes(graces, stealFromCurrent, duration, skipNote, velocity) {
+	function writeGraceNotes(graces, start, velocity, currentInstrument) {
+		var midiGrace = [];
+		velocity = Math.round(velocity)
 		for (var g = 0; g < graces.length; g++) {
 			var gp = graces[g];
-			// TODO-PER: skipNote is always null. When should that be used?
-			if (gp !== skipNote)
-				currentTrack.push({cmd: 'note', pitch: gp.pitch, volume: velocity, start: 0, duration: 0.125, gap: 0});
-			var thisDuration = graces[g].duration*tempoChangeFactor;
-			if (stealFromCurrent) {
-				duration -= thisDuration;
-			} else
-				currentTrack[lastNoteDurationPosition].duration -= thisDuration;
+			currentTrack.push({cmd: 'note', pitch: gp.pitch, volume: velocity, start: start, duration: gp.duration, gap: 0, instrument:currentInstrument});
+			midiGrace.push({
+				pitch: gp.pitch,
+				durationInMeasures: gp.duration,
+				volume: velocity,
+				instrument: currentInstrument
+			});
+			start += gp.duration;
 		}
-		return duration;
+		return midiGrace;
 	}
 
 	function extractOctave(pitch) {
