@@ -281,14 +281,24 @@ var flatten;
 		for (var i = 0; i < voices.length; i++) {
 			var voice = voices[i];
 			var ties = {};
+			var startingTempo = 0;
 			var timeCounter = 0;
+			var tempoMultiplier = 1;
 			for (var j = 0; j < voice.length; j++) {
 				var element = voice[j];
+
+				if (element.el_type === 'tempo') {
+					if (!startingTempo)
+						startingTempo = element.qpm;
+					else
+						tempoMultiplier = element.qpm ? startingTempo / element.qpm : 1;
+					continue;
+				}
 
 				// For convenience, put the current time in each event so that it doesn't have to be calculated in the complicated stuff that follows.
 				element.time = timeCounter;
 				var thisDuration = element.duration ? element.duration : 0;
-				timeCounter += thisDuration;
+				timeCounter += thisDuration*tempoMultiplier;
 
 				// If there are pitches then put the duration in the pitch object and if there are ties then change the duration of the first note in the tie.
 				if (element.pitches) {
