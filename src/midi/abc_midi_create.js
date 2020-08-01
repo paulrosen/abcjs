@@ -41,6 +41,7 @@ var create;
 		for (var i = 0; i < commands.tracks.length; i++) {
 			midi.startTrack();
 			midiJs.startTrack();
+			var notePlacement = {};
 			for (var j = 0; j < commands.tracks[i].length; j++) {
 				var event = commands.tracks[i][j];
 				switch (event.cmd) {
@@ -53,22 +54,22 @@ var create;
 						midiJs.setChannel(event.channel);
 						midiJs.setInstrument(event.instrument);
 						break;
-					case 'start':
-						midi.startNote(event.pitch, event.volume);
-						midiJs.startNote(event.pitch, event.volume);
-						break;
-					case 'stop':
-						midi.endNote(event.pitch);
-						midiJs.endNote(event.pitch);
-						break;
-					case 'move':
-						midi.addRest(event.duration * baseDuration);
-						midiJs.addRest(event.duration * baseDuration);
+					case 'note':
+						var start = event.start;
+						var end = start + event.duration;
+						// TODO: end is affected by event.gap, too.
+						if (!notePlacement[start])
+							notePlacement[start] = [];
+						notePlacement[start].push({ pitch: event.pitch, volume: event.volume });
+						if (!notePlacement[end])
+							notePlacement[end] = [];
+						notePlacement[end].push({ pitch: event.pitch, volume: 0 });
 						break;
 					default:
 						console.log("MIDI create Unknown: " + event.cmd);
 				}
 			}
+			addNotes(midi, midiJs, notePlacement, baseDuration);
 			midi.endTrack();
 			midiJs.endTrack();
 		}
@@ -84,6 +85,31 @@ var create;
 		else
 			return midiFile;
 	};
+
+	function addNotes(midi, midiJs, notePlacement, baseDuration) {
+		var times = Object.keys(notePlacement).sort();
+		var lastTime = 0;
+		for (var i = 0; i < times.length; i++) {
+			var events = notePlacement[times[i]];
+			if (times[i] > lastTime) {
+				var distance = (times[i] - lastTime) * baseDuration;
+				midi.addRest(distance);
+				midiJs.addRest(distance);
+				lastTime = times[i];
+			}
+			for (var j = 0; j < events.length; j++) {
+				var event = events[j];
+				if (event.volume) {
+					midi.startNote(event.pitch, event.volume);
+					midiJs.startNote(event.pitch, event.volume);
+				} else {
+					midi.endNote(event.pitch);
+					midiJs.endNote(event.pitch);
+				}
+			}
+		}
+	}
+
 })();
 
 module.exports = create;
