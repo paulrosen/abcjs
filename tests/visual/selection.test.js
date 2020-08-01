@@ -4045,7 +4045,7 @@ F,G,A,F, (G,A,B,G,) C4 C4|[C,8A,8] [F8F,8B,8]|A,3C B,3D G,F,E,D, F,2A,2|D,2C,2 B
 //////////////////////////////////////////////////////////
 	var abcTempo = `X:1
 M:4/4
-L:1/16
+L:1/4
 Q: "Easy Swing" 1/4=140
 K:C
 G4| [Q:"left" 1/4=170"right"] A4 |
@@ -4062,7 +4062,8 @@ G4| [Q:"left" 1/4=170"right"] A4 |
 			"tabindex": "0",
 			"data-index": "0"
 		},
-		"abcEl": {"type": "treble", "verticalPos": 0, "clefPos": 4, "el_type": "clef"}
+		"abcEl": {"type": "treble", "verticalPos": 0, "clefPos": 4, "el_type": "clef"},
+		"size":{"x":20,"y":39,"width":19,"height":57}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -4073,18 +4074,17 @@ G4| [Q:"left" 1/4=170"right"] A4 |
 			"tabindex": "0",
 			"data-index": "1"
 		},
-		"abcEl": {"type": "specified", "value": [{"num": "4", "den": "4"}], "el_type": "timeSignature"}
+		"abcEl": {"type": "specified", "value": [{"num": "4", "den": "4"}], "el_type": "timeSignature"},
+		"size":{"x":49,"y":54,"width":12,"height":30}
 	}, {
 		"draggable": false,
 		"svgEl": {
-			"stroke": "none",
-			"fill": "#000000",
-			"class": "",
 			"selectable": "true",
 			"tabindex": "0",
 			"data-index": "2"
 		},
-		"abcEl": {"preString": "Easy Swing", "duration": [0.25], "bpm": 140, "type": "tempo", "el_type": "tempo"}
+		"abcEl": {"preString": "Easy Swing", "duration": [0.25], "bpm": 140, "type": "tempo", "el_type": "tempo"},
+		"size":{"x":71,"y":18,"width":167,"height":29}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -4096,15 +4096,16 @@ G4| [Q:"left" 1/4=170"right"] A4 |
 			"data-index": "3"
 		},
 		"abcEl": {
-			"pitches": [{"pitch": 4, "verticalPos": 4, "highestVert": 10}],
-			"duration": 0.25,
+			"pitches": [{"pitch": 4, "verticalPos": 4, "highestVert": 4}],
+			"duration": 1,
 			"el_type": "note",
-			"startChar": 45,
-			"endChar": 47,
+			"startChar": 44,
+			"endChar": 46,
 			"averagepitch": 4,
 			"minpitch": 4,
 			"maxpitch": 4
-		}
+		},
+		"size":{"x":71,"y":73,"width":15,"height":8}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -4115,13 +4116,11 @@ G4| [Q:"left" 1/4=170"right"] A4 |
 			"tabindex": "0",
 			"data-index": "4"
 		},
-		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 47, "endChar": 48}
+		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 46, "endChar": 47},
+		"size":{"x":156,"y":54,"width":1,"height":31}
 	}, {
 		"draggable": false,
 		"svgEl": {
-			"stroke": "none",
-			"fill": "#000000",
-			"class": "",
 			"selectable": "true",
 			"tabindex": "0",
 			"data-index": "5"
@@ -4132,10 +4131,11 @@ G4| [Q:"left" 1/4=170"right"] A4 |
 			"bpm": 170,
 			"postString": "right",
 			"el_type": "tempo",
-			"startChar": 49,
-			"endChar": 74,
+			"startChar": 48,
+			"endChar": 73,
 			"type": "tempo"
-		}
+		},
+		"size":{"x":167,"y":18,"width":145,"height":29}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -4147,15 +4147,16 @@ G4| [Q:"left" 1/4=170"right"] A4 |
 			"data-index": "6"
 		},
 		"abcEl": {
-			"pitches": [{"pitch": 5, "verticalPos": 5, "highestVert": 11}],
-			"duration": 0.25,
+			"pitches": [{"pitch": 5, "verticalPos": 5, "highestVert": 5}],
+			"duration": 1,
 			"el_type": "note",
-			"startChar": 74,
-			"endChar": 78,
+			"startChar": 73,
+			"endChar": 77,
 			"averagepitch": 5,
 			"minpitch": 5,
 			"maxpitch": 5
-		}
+		},
+		"size":{"x":167,"y":69,"width":15,"height":8}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -4166,7 +4167,8 @@ G4| [Q:"left" 1/4=170"right"] A4 |
 			"tabindex": "0",
 			"data-index": "7"
 		},
-		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 78, "endChar": 79}
+		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 77, "endChar": 78},
+		"size":{"x":252,"y":54,"width":1,"height":31}
 	}]
 
 //////////////////////////////////////////////////////////
@@ -4190,7 +4192,9 @@ function doSelectionTest(abc, expected) {
 		var sel = selection[i];
 		var abcEl = copyAbcEl(sel.absEl.abcelem);
 		var svgEl = copySvgEl(sel.svgEl);
-		results.push({draggable: sel.isDraggable, svgEl: svgEl, abcEl: abcEl});
+		var size = sel.svgEl.getBBox();
+		results.push({draggable: sel.isDraggable, svgEl: svgEl, abcEl: abcEl,
+			size: { x: Math.round(size.x), y: Math.round(size.y), width: Math.round(size.width), height: Math.round(size.height) }});
 	}
 	console.log(JSON.stringify(results))
 	for (i = 0; i < results.length; i++) {
