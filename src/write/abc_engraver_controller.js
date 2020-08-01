@@ -123,43 +123,20 @@ EngraverController.prototype.adjustNonScaledItems = function (scale) {
 
 EngraverController.prototype.getMeasureWidths = function(abcTune) {
 	this.reset();
-
-	this.classes.reset();
-
 	this.getFontAndAttr = new GetFontAndAttr(abcTune.formatting, this.classes);
 	this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
-	this.renderer.newTune(abcTune);
-	this.engraver = new AbstractEngraver(this.getTextSize, 0, {
-		bagpipes: abcTune.formatting.bagpipes,
-		flatbeams: abcTune.formatting.flatbeams,
-		graceSlurs: abcTune.formatting.graceSlurs !== false // undefined is the default, which is true
-	});
-	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
-	if (abcTune.formatting.staffwidth) {
-		this.width = abcTune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
-	} else {
-		this.width = this.renderer.isPrint ? this.staffwidthPrint : this.staffwidthScreen;
-	}
 
-	var scale = abcTune.formatting.scale ? abcTune.formatting.scale : this.scale;
-	if (this.responsive === "resize") // The resizing will mess with the scaling, so just don't do it explicitly.
-		scale = undefined;
-	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
-	this.adjustNonScaledItems(scale);
+	this.setupTune(abcTune, 0);
+	this.constructTuneElements(abcTune);
+	var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
 
 	var ret = { left: 0, measureWidths: [], height: 0, total: 0 };
 	// TODO-PER: need to add the height of the title block, too.
 	ret.height = this.renderer.padding.top + this.renderer.spacing.music + this.renderer.padding.bottom + 24; // the 24 is the empirical value added to the bottom of all tunes.
-	var debug = false;
-	var hasPrintedTempo = false;
-	var hasSeenNonSubtitle = false;
+
 	for(var i=0; i<abcTune.lines.length; i++) {
 		var abcLine = abcTune.lines[i];
 		if (abcLine.staff) {
-			hasSeenNonSubtitle = true;
-			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null, this.getTextSize);
-
-			abcLine.staffGroup.layout(0, this.renderer, debug);
 			// At this point, the voices are laid out so that the bar lines are even with each other. So we just need to get the placement of the first voice.
 			if (abcLine.staffGroup.voices.length > 0) {
 				var voice = abcLine.staffGroup.voices[0];
@@ -179,64 +156,50 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 					}
 				}
 			}
-			hasPrintedTempo = true;
 			ret.height += calcHeight(abcLine.staffGroup) * spacing.STEP;
-		} else if (abcLine.subtitle) {
-			// If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
-			if (hasSeenNonSubtitle) {
-				var center = this.width / 2 + this.renderer.padding.left;
-				abcLine.nonMusic = new Subtitle(this.renderer.spacing.subtitle, abcLine.subtitle, center, this.getTextSize);
-			}
-		} else if (abcLine.text !== undefined) {
-			hasSeenNonSubtitle = true;
-			abcLine.nonMusic = new FreeText(abcLine.text, abcLine.vskip, this.getFontAndAttr, this.renderer.padding.left, this.width, this.getTextSize);
-		} else if (abcLine.separator !== undefined && abcLine.separator.lineLength) {
-			hasSeenNonSubtitle = true;
-			abcLine.nonMusic = new Separator(abcLine.separator.spaceAbove, abcLine.separator.lineLength, abcLine.separator.spaceBelow);
 		}
 	}
 	return ret;
 };
 
-/**
- * Run the engraving process on a single tune
- * @param {ABCJS.Tune} abctune
- */
-EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
+EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 	this.classes.reset();
 
-	this.renderer.newTune(abctune);
+	this.renderer.newTune(abcTune);
 	this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
-		bagpipes: abctune.formatting.bagpipes,
-		flatbeams: abctune.formatting.flatbeams,
-		graceSlurs: abctune.formatting.graceSlurs !== false // undefined is the default, which is true
+		bagpipes: abcTune.formatting.bagpipes,
+		flatbeams: abcTune.formatting.flatbeams,
+		graceSlurs: abcTune.formatting.graceSlurs !== false // undefined is the default, which is true
 	});
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
-	this.engraver.measureLength = abctune.getMeterFraction().num/abctune.getMeterFraction().den;
-	if (abctune.formatting.staffwidth) {
-		this.width = abctune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
+	this.engraver.measureLength = abcTune.getMeterFraction().num/abcTune.getMeterFraction().den;
+	if (abcTune.formatting.staffwidth) {
+		this.width = abcTune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
 	} else {
 		this.width = this.renderer.isPrint ? this.staffwidthPrint : this.staffwidthScreen;
 	}
 
-	var scale = abctune.formatting.scale ? abctune.formatting.scale : this.scale;
+	var scale = abcTune.formatting.scale ? abcTune.formatting.scale : this.scale;
 	if (this.responsive === "resize") // The resizing will mess with the scaling, so just don't do it explicitly.
 		scale = undefined;
 	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
+	this.scale = scale;
 	this.adjustNonScaledItems(scale);
+};
 
-	abctune.topText = new TopText(abctune.metaText, abctune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+EngraverController.prototype.constructTuneElements = function (abcTune) {
+	abcTune.topText = new TopText(abcTune.metaText, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
 
 	// Generate the raw staff line data
 	var i;
 	var abcLine;
 	var hasPrintedTempo = false;
 	var hasSeenNonSubtitle = false;
-	for(i=0; i<abctune.lines.length; i++) {
-		abcLine = abctune.lines[i];
+	for(i=0; i<abcTune.lines.length; i++) {
+		abcLine = abcTune.lines[i];
 		if (abcLine.staff) {
 			hasSeenNonSubtitle = true;
-			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abctune.metaText.tempo: null, this.getTextSize);
+			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null, this.getTextSize);
 			hasPrintedTempo = true;
 		} else if (abcLine.subtitle) {
 			// If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
@@ -252,13 +215,20 @@ EngraverController.prototype.engraveTune = function (abctune, tuneNumber) {
 			abcLine.nonMusic = new Separator(abcLine.separator.spaceAbove, abcLine.separator.lineLength, abcLine.separator.spaceBelow);
 		}
 	}
-	abctune.bottomText = new BottomText(abctune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+	abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+};
 
-	// Adjust the x-coordinates to their absolute positions
-	var maxWidth = layout(this.renderer, abctune, this.width, this.space);
+EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
+	this.setupTune(abcTune, tuneNumber);
 
-	// Do all the writing to output
-	var ret = draw(this.renderer, this.classes, abctune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber);
+	// Create all of the element objects that will appear on the page.
+	this.constructTuneElements(abcTune);
+
+	// Do all the positioning, both horizontally and vertically
+	var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
+
+	// Do all the writing to the SVG
+	var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, this.scale, this.selectTypes, tuneNumber);
 	this.staffgroups = ret.staffgroups;
 	this.selectables = ret.selectables;
 
