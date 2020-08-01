@@ -1,4 +1,4 @@
-describe("audio flattener", () => {
+describe("Selection", () => {
 	var abcMultiple = `X:1
 M:4/4
 L:1/16
