@@ -804,7 +804,8 @@ var Parse = function() {
 						delete el.grace_notes;
 						// At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
 						if (el.rest.type === 'multimeasure') {
-							el.duration = 1;
+							el.duration = tune.getBarLength();
+							el.rest.text = 1;
 							state = 'Zduration';
 						} else {
 							if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
@@ -850,7 +851,8 @@ var Parse = function() {
 						el.accidental = 'quarterflat';state = 'pitch';
 					} else if (state === 'Zduration') {
 						var num = tokenizer.getNumber(line, index);
-						el.duration = num.num;
+						el.duration = num.num * tune.getBarLength();
+						el.rest.text = num.num;
 						el.endChar = num.index;
 						return el;
 					} else return null;
