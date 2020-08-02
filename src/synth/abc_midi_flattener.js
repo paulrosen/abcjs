@@ -653,6 +653,8 @@ var flatten;
 
 	var scale = [0,2,4,5,7,9,11];
 	function adjustPitch(note) {
+		if (note.midipitch !== undefined)
+			return note.midipitch; // The pitch might already be known, for instance if there is a drummap.
 		var pitch = note.soundPitch || note.soundPitch === 0 ? note.soundPitch : note.pitch;
 		if (note.accidental) {
 			switch(note.accidental) { // change that pitch (not other octaves) for the rest of the bar

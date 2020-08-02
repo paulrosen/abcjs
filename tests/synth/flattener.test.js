@@ -1904,6 +1904,55 @@ Q: 80
 
 	//////////////////////////////////////////////////////////
 
+	var abcSnare = `X:1
+V:SnareDrum stem=up stafflines=1
+K:C clef=perc
+%%MIDI channel 10
+%%MIDI drummap B 38
+!f!B2 z2  B/4B/4B/4B/4 B/4B/4B/4B/4 B/4B/4B/4B/4 B/4B/4B/4B/4 B/4B/4B/4B/4 | B/4B/4B/4B/4 !>!B2 {/B}B4|
+`;
+
+	var expectedSnare = {
+		"tempo":180,
+		"instrument":128,
+		"totalDuration":2,
+		"tracks":[
+			[
+				{"cmd":"program","channel":10,"instrument":128},
+				{"cmd":"note","pitch":38,"volume":80,"start":0,"duration":0.25,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":95,"start":0.5,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.53125,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.5625,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.59375,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.625,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.65625,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.6875,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.71875,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":95,"start":0.75,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.78125,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.8125,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.84375,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.875,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.90625,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.9375,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":0.96875,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":95,"start":1,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":1.03125,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":1.0625,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":1.09375,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":105,"start":1.125,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":1.15625,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":1.1875,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":80,"start":1.21875,"duration":0.03125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":120,"start":1.25,"duration":0.25,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":38,"volume":53,"start":1.5,"duration":0.25,"gap":0,"instrument":128},
+				{"cmd":"note","pitch":38,"volume":80,"start":1.75,"duration":0.25,"instrument":128,"gap":0}
+			]
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
 
 	it("flatten-pickup-triplet-chords-rhythmhead", () => {
 		doFlattenTest(abcMultiple, expectedMultiple);
@@ -1992,6 +2041,10 @@ Q: 80
 
 	it("flatten-regular-tie", () => {
 		doFlattenTest(abcRegularTie, expectedRegularTie);
+	})
+
+	it("flatten-snare", () => {
+		doFlattenTest(abcSnare, expectedSnare);
 	})
 })
 
