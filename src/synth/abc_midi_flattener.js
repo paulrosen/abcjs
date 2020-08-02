@@ -121,8 +121,8 @@ var flatten;
 		if (voices.length > 0 && voices[0].length > 0)
 			pickupLength = voices[0][0].pickupLength;
 
-		// First resolve the ties. That will make the rest of the logic easier
-		resolveTies(voices);
+		// First adjust the input to resolve ties, set the starting time for each note, etc. That will make the rest of the logic easier
+		preProcess(voices);
 
 		for (var i = 0; i < voices.length; i++) {
 			transpose = 0;
@@ -167,7 +167,7 @@ var flatten;
 						break;
 					case "bar":
 						if (chordTrack.length > 0 && (chordSourceTrack === false || i === chordSourceTrack)) {
-							resolveChords(lastBarTime, element.time);
+							resolveChords(lastBarTime, timeToRealTime(element.time));
 							currentChords = [];
 						}
 						barAccidentals = [];
@@ -175,7 +175,7 @@ var flatten;
 							writeDrum(voices.length+1);
 						hasRhythmHead = false; // decide whether there are rhythm heads each measure.
 						chordLastBar = lastChord;
-						lastBarTime = element.time;
+						lastBarTime = timeToRealTime(element.time);
 						break;
 					case "bagpipes":
 						bagpipes = true;
@@ -277,7 +277,15 @@ var flatten;
 		}
 	}
 
-	function resolveTies(voices) {
+	function timeToRealTime(time) {
+		return time/1000000;
+	}
+
+	function durationRounded(duration) {
+		return Math.round(duration*tempoChangeFactor*1000000)/1000000;
+	}
+
+	function preProcess(voices) {
 		for (var i = 0; i < voices.length; i++) {
 			var voice = voices[i];
 			var ties = {};
@@ -298,7 +306,7 @@ var flatten;
 				// For convenience, put the current time in each event so that it doesn't have to be calculated in the complicated stuff that follows.
 				element.time = timeCounter;
 				var thisDuration = element.duration ? element.duration : 0;
-				timeCounter += thisDuration*tempoMultiplier;
+				timeCounter += Math.round(thisDuration*tempoMultiplier*1000000); // To compensate for JS rounding problems, do all intermediate calcs on integers.
 
 				// If there are pitches then put the duration in the pitch object and if there are ties then change the duration of the first note in the tie.
 				if (element.pitches) {
@@ -457,8 +465,8 @@ var flatten;
 				}
 
 				lastChord = c;
-				var barBeat = calcBeat(lastBarTime, getBeatFraction(meter), elem.time);
-				currentChords.push({chord: lastChord, beat: barBeat, start: elem.time});
+				var barBeat = calcBeat(lastBarTime, getBeatFraction(meter), timeToRealTime(elem.time));
+				currentChords.push({chord: lastChord, beat: barBeat, start: timeToRealTime(elem.time)});
 			}
 		}
 		return firstChord;
@@ -491,14 +499,13 @@ var flatten;
 		return ret;
 	}
 
-	function doModifiedNotes(noteModification, p, tempoChangeFactor) {
-		// var p = { cmd: 'note', pitch: actualPitch, volume: velocity, start: elem.time, duration: note.duration*tempoChangeFactor, instrument: currentInstrument };
+	function doModifiedNotes(noteModification, p) {
 		var noteTime;
 		var numNotes;
 		var start = p.start;
 		var pp;
 		var runningDuration = p.duration;
-		var shortestNote = (1.0 / 32) * tempoChangeFactor;
+		var shortestNote = durationRounded(1.0 / 32);
 
 		switch (noteModification) {
 			case "trill":
@@ -557,7 +564,7 @@ var flatten;
 
 		var trackStartingIndex = currentTrack.length;
 
-		var velocity = processVolume(elem.time, voiceOff);
+		var velocity = processVolume(timeToRealTime(elem.time), voiceOff);
 		var setChordTrack = processChord(elem);
 
 		// if there are grace notes, then also play them.
@@ -567,12 +574,12 @@ var flatten;
 		var graces;
 		if (elem.gracenotes && elem.pitches && elem.pitches.length > 0 && elem.pitches[0]) {
 			graces = processGraceNotes(elem.gracenotes, elem.pitches[0].duration);
-			elem.elem.midiGraceNotePitches = writeGraceNotes(graces, elem.time, velocity*2/3, currentInstrument); // make the graces a little quieter.
+			elem.elem.midiGraceNotePitches = writeGraceNotes(graces, timeToRealTime(elem.time), velocity*2/3, currentInstrument); // make the graces a little quieter.
 		}
 
 		// The beat fraction is the note that gets a beat (.25 is a quarter note)
 		// The tempo is in minutes and we want to get to milliseconds.
-		elem.elem.currentTrackMilliseconds = elem.time / beatFraction / startingTempo * 60*1000;
+		elem.elem.currentTrackMilliseconds = timeToRealTime(elem.time) / beatFraction / startingTempo * 60*1000;
 		//var tieAdjustment = 0;
 		if (elem.pitches) {
 			var thisBreakBetweenNotes = '';
@@ -606,14 +613,14 @@ var flatten;
 				if (note.endSlur)
 					slurCount -= note.endSlur.length;
 				var actualPitch = note.actualPitch ? note.actualPitch : adjustPitch(note);
-				var p = { cmd: 'note', pitch: actualPitch, volume: velocity, start: elem.time, duration: note.duration*tempoChangeFactor, instrument: currentInstrument };
+				var p = { cmd: 'note', pitch: actualPitch, volume: velocity, start: timeToRealTime(elem.time), duration: durationRounded(note.duration), instrument: currentInstrument };
 				if (elem.gracenotes) {
 					p.duration = p.duration / 2;
 					p.start = p.start + p.duration;
 				}
 				elem.elem.midiPitches.push(p);
 				if (ret.noteModification) {
-					doModifiedNotes(ret.noteModification, p, tempoChangeFactor);
+					doModifiedNotes(ret.noteModification, p);
 				} else {
 					if (slurCount > 0)
 						p.endType = 'tenuto';
@@ -638,7 +645,8 @@ var flatten;
 			lastNoteDurationPosition = currentTrack.length-1;
 
 		}
-		lastEventTime = Math.max(lastEventTime, elem.time+elem.elem.duration*tempoChangeFactor);
+		var realDur = elem.pitches && elem.pitches.length > 0 && elem.pitches[0] ? elem.pitches[0].duration : elem.elem.duration;
+		lastEventTime = Math.max(lastEventTime, timeToRealTime(elem.time)+durationRounded(realDur));
 
 		return setChordTrack;
 	}
@@ -746,7 +754,7 @@ var flatten;
 	}
 
 	var basses = {
-		'A': 45, 'B': 47, 'C': 48, 'D': 50, 'E': 40, 'F': 41, 'G': 43
+		'A': 33, 'B': 35, 'C': 36, 'D': 38, 'E': 40, 'F': 41, 'G': 43
 	};
 	function interpretChord(name) {
 		// chords have the format:
@@ -950,12 +958,12 @@ var flatten;
 	function writeBoom(boom, beatLength, volume, beat, noteLength) {
 		// undefined means there is a stop time.
 		if (boom !== undefined)
-			chordTrack.push({cmd: 'note', pitch: boom, volume: volume, start: lastBarTime+beat*beatLength, duration: noteLength*tempoChangeFactor, instrument: chordInstrument});
+			chordTrack.push({cmd: 'note', pitch: boom, volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), instrument: chordInstrument});
 	}
 
 	function writeChick(chick, beatLength, volume, beat, noteLength) {
 		for (var c = 0; c < chick.length; c++)
-			chordTrack.push({cmd: 'note', pitch: chick[c], volume: volume, start: lastBarTime+beat*beatLength, duration: noteLength*tempoChangeFactor, instrument: chordInstrument});
+			chordTrack.push({cmd: 'note', pitch: chick[c], volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), instrument: chordInstrument});
 	}
 
 	var rhythmPatterns = { "2/2": [ 'boom', 'chick' ],
@@ -975,7 +983,9 @@ var flatten;
 		var noteLength = 1/8;
 		var pattern = rhythmPatterns[num+'/'+den];
 		var thisMeasureLength = parseInt(num,10)/parseInt(den,10);
-		var portionOfAMeasure = thisMeasureLength !== endTime-startTime;
+		var portionOfAMeasure = thisMeasureLength - (endTime-startTime)/tempoChangeFactor;
+		if (Math.abs(portionOfAMeasure) < 0.00001)
+			portionOfAMeasure = false;
 		if (!pattern || portionOfAMeasure) { // If it is an unsupported meter, or this isn't a full bar, just chick on each beat.
 			pattern = [];
 			var barBeat = calcBeat(lastBarTime, getBeatFraction(meter), startTime);
@@ -1169,7 +1179,7 @@ var flatten;
 		}
 		var start = lastBarTime;
 		for (var i = 0; i < drumDefinition.pattern.length; i++) {
-			var len = drumDefinition.pattern[i].len * tempoChangeFactor;
+			var len = durationRounded(drumDefinition.pattern[i].len);
 			if (drumDefinition.pattern[i].pitch) {
 				drumTrack.push({
 					cmd: 'note',

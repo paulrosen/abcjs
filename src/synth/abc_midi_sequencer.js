@@ -212,7 +212,8 @@ var parseCommon = require("../parse/abc_common");
 						}
 						var noteEventsInBar = 0;
 						var tripletMultiplier = 0;
-						var tripletDurationLeft = 0; // try to mitigate the js rounding problems.
+						var tripletDurationTotal = 0; // try to mitigate the js rounding problems.
+						var tripletDurationCount = 0;
 						var currentVolume = [105, 95, 85, 1];
 
 						for (var v = 0; v < voice.length; v++) {
@@ -311,16 +312,18 @@ var parseCommon = require("../parse/abc_common");
 										noteElem.duration = (elem.duration === 0) ? 0.25 : elem.duration;
 										if (elem.startTriplet) {
 											tripletMultiplier = elem.tripletMultiplier;
-											tripletDurationLeft = elem.startTriplet * tripletMultiplier * elem.duration;
+											tripletDurationTotal = elem.startTriplet * tripletMultiplier * elem.duration;
 											noteElem.duration = noteElem.duration * tripletMultiplier;
-											tripletDurationLeft -= noteElem.duration;
+											noteElem.duration = Math.round(noteElem.duration*1000000)/1000000;
+											tripletDurationCount = noteElem.duration;
 										} else if (tripletMultiplier) {
 											if (elem.endTriplet) {
 												tripletMultiplier = 0;
-												noteElem.duration = tripletDurationLeft;
+												noteElem.duration = Math.round((tripletDurationTotal - tripletDurationCount)*1000000)/1000000;
 											} else {
 												noteElem.duration = noteElem.duration * tripletMultiplier;
-												tripletDurationLeft -= noteElem.duration;
+												noteElem.duration = Math.round(noteElem.duration*1000000)/1000000;
+												tripletDurationCount += noteElem.duration;
 											}
 										}
 										if (elem.rest) noteElem.rest = elem.rest;
