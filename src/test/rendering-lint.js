@@ -188,6 +188,20 @@ function listRelativeElement(relativeElement, indent) {
 					output.push(svg);
 				}
 				break;
+			case "note":
+				break;
+			case "tempo":
+				var tempoDetails = [];
+				if (item.preString)
+					tempoDetails.push("preString: " + item.preString);
+				if (item.duration && item.duration.length)
+					tempoDetails.push("duration: " + item.duration.join(","));
+				if (item.bpm)
+					tempoDetails.push("bpm: " + item.bpm);
+				if (item.postString)
+					tempoDetails.push("postString: " + item.postString);
+				output.push(keys[i] + ": " + tempoDetails.join(", "));
+				break;
 			default:
 				if (item !== undefined)
 					output.push(keys[i] + ": " + (''+item).replace(/\n/g, "\\n"));
