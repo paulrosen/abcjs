@@ -1301,7 +1301,6 @@ K:A
 L:1/8
 Q:135
 K:Ab
-K:A
 "Eb7"zG2GA2A2|=A2AB-B4|"Ab"z"^break"c2cd2d2|=d2de2c2=c|
 `;
 
@@ -1354,6 +1353,41 @@ K:A
 				{"cmd":"note","pitch":44,"volume":48,"start":2,"duration":0.125,"instrument":0},
 				{"cmd":"note","pitch":48,"volume":48,"start":2,"duration":0.125,"instrument":0},
 				{"cmd":"note","pitch":51,"volume":48,"start":2,"duration":0.125,"instrument":0}
+			]
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
+	var abcEndChord = `X:1
+L:1/4
+Q:135
+K:C
+"C"c4-|c|]
+`;
+
+	var expectedEndChord = {
+		"tempo":135,
+		"instrument":0,
+		"totalDuration":1.25,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":72,"volume":105,"start":0,"duration":1.25,"instrument":0,"gap":0}
+			],
+			[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":36,"volume":64,"start":0,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":31,"volume":64,"start":0.5,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":1,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":1,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1,"duration":0.125,"instrument":0},
 			]
 		]
 	};
@@ -1914,6 +1948,10 @@ Q: 80
 
 	it("flatten-break2", () => {
 		doFlattenTest(abcBreak2, expectedBreak2);
+	})
+
+	it("flatten-end-chord", () => {
+		doFlattenTest(abcEndChord, expectedEndChord);
 	})
 
 	it("flatten-mid-measure", () => {

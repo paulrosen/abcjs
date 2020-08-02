@@ -988,8 +988,7 @@ var flatten;
 			portionOfAMeasure = false;
 		if (!pattern || portionOfAMeasure) { // If it is an unsupported meter, or this isn't a full bar, just chick on each beat.
 			pattern = [];
-			var barBeat = calcBeat(lastBarTime, getBeatFraction(meter), startTime);
-			var beatsPresent = barBeat / beatLength;
+			var beatsPresent = ((endTime-startTime)/tempoChangeFactor) / beatLength;
 			for (var p = 0; p < beatsPresent; p++)
 				pattern.push("chick");
 		}
