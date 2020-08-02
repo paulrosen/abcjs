@@ -665,6 +665,8 @@ var parseKeyVoice = {};
 			var attr = tokenizer.getVoiceToken(line, start, end);
 			if (attr.warn !== undefined)
 				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
+			else if (attr.err !== undefined)
+				warn("Expected value for " + name + " in voice: " + attr.err, line, start);
 			else if (attr.token.length === 0 && line.charAt(start) !== '"')
 				warn("Expected value for " + name + " in voice", line, start);
 			else
@@ -675,6 +677,8 @@ var parseKeyVoice = {};
 			var attr = tokenizer.getVoiceToken(line, start, end);
 			if (attr.warn !== undefined)
 				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
+			else if (attr.err !== undefined)
+				warn("Expected value for " + name + " in voice: " + attr.err, line, start);
 			else if (attr.token.length === 0 && line.charAt(start) !== '"')
 				warn("Expected value for " + name + " in voice", line, start);
 			else {
@@ -688,6 +692,8 @@ var parseKeyVoice = {};
 			var attr = tokenizer.getVoiceToken(line, start, end);
 			if (attr.warn !== undefined)
 				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
+			else if (attr.err !== undefined)
+				warn("Expected value for " + name + " in voice: " + attr.err, line, start);
 			else if (attr.token.length === 0 && line.charAt(start) !== '"')
 				warn("Expected value for " + name + " in voice", line, start);
 			else {
@@ -813,6 +819,8 @@ var parseKeyVoice = {};
 						attr = tokenizer.getVoiceToken(line, start, end);
 						if (attr.warn !== undefined)
 							warn("Expected value for stems in voice: " + attr.warn, line, start);
+						else if (attr.err !== undefined)
+							warn("Expected value for stems in voice: " + attr.err, line, start);
 						else if (attr.token === 'up' || attr.token === 'down')
 							multilineVars.voices[id].stem = attr.token;
 						else
@@ -875,6 +883,8 @@ var parseKeyVoice = {};
 						attr = tokenizer.getVoiceToken(line, start, end);
 						if (attr.warn !== undefined)
 							warn("Expected value for style in voice: " + attr.warn, line, start);
+						else if (attr.err !== undefined)
+							warn("Expected value for style in voice: " + attr.err, line, start);
 						else if (attr.token === 'normal' || attr.token === 'harmonic' || attr.token === 'rhythm' || attr.token === 'x')
 							multilineVars.voices[id].style = attr.token;
 						else
