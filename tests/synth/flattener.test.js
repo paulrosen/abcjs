@@ -1667,6 +1667,45 @@ cd-d2-|d2-dz|
 
 	//////////////////////////////////////////////////////////
 
+	var abcRegularTie = `X:1
+M:4/4
+L:1/8
+Q:1/4=150
+K:Bb
+GBcd-d4|zcdc dc3:|
+`;
+
+	var expectedRegularTie = {
+		"tempo":150,
+		"instrument":0,
+		"totalDuration":4,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":0,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":70,"volume":85,"start":0.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":95,"start":0.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":85,"start":0.375,"duration":0.625,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":1.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":1.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":1.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":1.5,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":1.625,"duration":0.375,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":2,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":70,"volume":85,"start":2.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":95,"start":2.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":85,"start":2.375,"duration":0.625,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":3.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":3.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":3.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":3.5,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":3.625,"duration":0.375,"instrument":0,"gap":0},
+			]
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
 	var abcTripletChords = `X:1
 T:triplets-and-chord-rhythm
 M: 4/4
@@ -1844,6 +1883,10 @@ Q: 80
 
 	it("flatten-triplet-chords", () => {
 		doFlattenTest(abcTripletChords, expectedTripletChords);
+	})
+
+	it("flatten-regular-tie", () => {
+		doFlattenTest(abcRegularTie, expectedRegularTie);
 	})
 })
 
