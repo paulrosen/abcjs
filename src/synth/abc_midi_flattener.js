@@ -1027,7 +1027,8 @@ var flatten;
 		var beats = {};
 		for (var i = 0; i < currentChords.length; i++) {
 			var cc = currentChords[i];
-			beats[''+cc.beat] = cc;
+			var b = Math.round(cc.beat);
+			beats[''+b] = cc;
 		}
 
 		// - If there is a chord on the second beat, play a chord for the first beat instead of a bass note.

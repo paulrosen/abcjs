@@ -1297,6 +1297,69 @@ K:A
 
 	//////////////////////////////////////////////////////////
 
+	var abcBreak2 = `X:1
+L:1/8
+Q:135
+K:Ab
+K:A
+"Eb7"zG2GA2A2|=A2AB-B4|"Ab"z"^break"c2cd2d2|=d2de2c2=c|
+`;
+
+	var expectedBreak2 = {
+		"tempo":135,
+		"instrument":0,
+		"totalDuration":4,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":68,"volume":85,"start":0.125,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":68,"volume":85,"start":0.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":95,"start":0.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":95,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":105,"start":1,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":95,"start":1.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":85,"start":1.375,"duration":0.625,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":73,"volume":85,"start":2.125,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":73,"volume":85,"start":2.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":2.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":2.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":105,"start":3,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":3.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":85,"start":3.375,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":73,"volume":85,"start":3.625,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":3.875,"duration":0.125,"instrument":0,"gap":0}
+			],
+			[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":39,"volume":64,"start":0,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":51,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":58,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":61,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":34,"volume":64,"start":0.5,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":51,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":58,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":61,"volume":48,"start":0.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":39,"volume":64,"start":1,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":51,"volume":48,"start":1.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":58,"volume":48,"start":1.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":61,"volume":48,"start":1.25,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":34,"volume":64,"start":1.5,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":51,"volume":48,"start":1.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":58,"volume":48,"start":1.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":61,"volume":48,"start":1.75,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":44,"volume":48,"start":2,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":2,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":51,"volume":48,"start":2,"duration":0.125,"instrument":0}
+			]
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
 	var abcMidMeasureChordChange = `X:1
 K: Gmin
 |: "Gm" GFDF GFDF | GF D2 "F" C4 |
@@ -1847,6 +1910,10 @@ Q: 80
 
 	it("flatten-break", () => {
 		doFlattenTest(abcBreak, expectedBreak);
+	})
+
+	it("flatten-break2", () => {
+		doFlattenTest(abcBreak2, expectedBreak2);
 	})
 
 	it("flatten-mid-measure", () => {
