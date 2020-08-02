@@ -183,8 +183,8 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 	if (this.responsive === "resize") // The resizing will mess with the scaling, so just don't do it explicitly.
 		scale = undefined;
 	if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
-	this.scale = scale;
 	this.adjustNonScaledItems(scale);
+	return scale;
 };
 
 EngraverController.prototype.constructTuneElements = function (abcTune) {
@@ -219,7 +219,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 };
 
 EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
-	this.setupTune(abcTune, tuneNumber);
+	var scale = this.setupTune(abcTune, tuneNumber);
 
 	// Create all of the element objects that will appear on the page.
 	this.constructTuneElements(abcTune);
@@ -228,7 +228,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
 	var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
 
 	// Do all the writing to the SVG
-	var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, this.scale, this.selectTypes, tuneNumber);
+	var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber);
 	this.staffgroups = ret.staffgroups;
 	this.selectables = ret.selectables;
 
