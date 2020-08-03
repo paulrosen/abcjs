@@ -1,10 +1,9 @@
-describe("Automatic line wrapping", () => {
-	var abcSingleLine = `X:1
-L:1/4
-M:4/4
-K:Bb
-B,4|C2D2|E3F|GABc|d/e/f/g/ !marcato!D/ E/ F/ G/|B,4|C2D2|E3F|GABc|d/e/f/g/ D/ E/ F/ G/|
-`;
+describe("Automatic line wrapping", function() {
+	var abcSingleLine = "X:1\n" +
+"L:1/4\n" +
+"M:4/4\n" +
+"K:Bb\n" +
+"B,4|C2D2|E3F|GABc|d/e/f/g/ !marcato!D/ E/ F/ G/|B,4|C2D2|E3F|GABc|d/e/f/g/ D/ E/ F/ G/|\n";
 
 	var expectedSingleLine400 = {
 		"lineBreakPoint": 180.805,
@@ -30,7 +29,7 @@ B,4|C2D2|E3F|GABc|d/e/f/g/ !marcato!D/ E/ F/ G/|B,4|C2D2|E3F|GABc|d/e/f/g/ D/ E/
 		"voiceSizes": [[[13]], [[17]], [[14]]]
 	};
 
-	it("wrap-single-line", () => {
+	it("wrap-single-line", function() {
 		doWrapTest(abcSingleLine, expectedSingleLine400, 400);
 		doWrapTest(abcSingleLine, expectedSingleLine500, 500);
 		doWrapTest(abcSingleLine, expectedSingleLine600, 600);

@@ -1,12 +1,11 @@
-describe("Audio flattener", () => {
-	var abcMultiple = `K:C
-Q:1/4=60
-L:1/4
-V:1
-G/| (3c/d/c/ "C"z d .e| {f}g !tenuto!a [gb] !style=rhythm!B|"D"A2"E"^G2|
-V:2
-x/|C4|D4|^F2B2|
-`;
+describe("Audio flattener", function() {
+	var abcMultiple = 'K:C\n' +
+'Q:1/4=60\n' +
+'L:1/4\n' +
+'V:1\n' +
+'G/| (3c/d/c/ "C"z d .e| {f}g !tenuto!a [gb] !style=rhythm!B|"D"A2"E"^G2|\n' +
+'V:2\n' +
+'x/|C4|D4|^F2B2|\n';
 
 	var expectedMultiple = {
 		"tempo": 60,
@@ -341,15 +340,14 @@ x/|C4|D4|^F2B2|
 
 	//////////////////////////////////////////////////////////
 
-	var abcDynamics = `X:1
-M:4/4
-L:1/4
-Q:1/4=120
-K:C
-!crescendo(! EFGA| GAB !crescendo)!c | !diminuendo(! EFGA| GAB !diminuendo)!c |
-!pppp! A B !ppp!A B |!pp! A B !p!A B | !mp! AB !sfz! AB|
-!mf! AB !f! AB | !ff! AB !fff! AB | !ffff! ABAB|]
-`;
+	var abcDynamics = 'X:1\n' +
+'M:4/4\n' +
+'L:1/4\n' +
+'Q:1/4=120\n' +
+'K:C\n' +
+'!crescendo(! EFGA| GAB !crescendo)!c | !diminuendo(! EFGA| GAB !diminuendo)!c |\n' +
+'!pppp! A B !ppp!A B |!pp! A B !p!A B | !mp! AB !sfz! AB|\n' +
+'!mf! AB !f! AB | !ff! AB !fff! AB | !ffff! ABAB|]\n';
 
 	var expectedDynamics = {
 		"tempo": 120,
@@ -728,13 +726,12 @@ K:C
 
 	//////////////////////////////////////////////////////////
 
-	var abcSixHuit = `X:1
-M:6/8
-L:1/8
-Q:3/8=60
-K:G
-"G"GAB cde|"D7"fga DEF|
-`;
+	var abcSixHuit = 'X:1\n' +
+'M:6/8\n' +
+'L:1/8\n' +
+'Q:3/8=60\n' +
+'K:G\n' +
+'"G"GAB cde|"D7"fga DEF|\n';
 
 	var expectedSixHuit = {
 		"tempo": 60,
@@ -790,13 +787,12 @@ K:G
 
 	//////////////////////////////////////////////////////////
 
-	var abcRepeat = `X:1
-M:C
-L:1/8
-Q:1/2=50
-K:G
-cde|:"D7"f2 d2 e2 f2|1"G"g4 fedc:|"C"e4z4|]
-`;
+	var abcRepeat = 'X:1\n' +
+'M:C\n' +
+'L:1/8\n' +
+'Q:1/2=50\n' +
+'K:G\n' +
+'cde|:"D7"f2 d2 e2 f2|1"G"g4 fedc:|"C"e4z4|]\n';
 
 	var expectedRepeat = {
 		"tempo":100,
@@ -874,23 +870,22 @@ cde|:"D7"f2 d2 e2 f2|1"G"g4 fedc:|"C"e4z4|]
 
 	//////////////////////////////////////////////////////////
 
-	var abcDrum = `X:1
-T: metronome
-L:1/4
-Q:1/4=60
-%%MIDI drum dddd 76 77 77 77 50 50 50 50
-N:The drum beat should start on the first full measure.
-N:The drum beat should drop out in the second line.
-N:The drum beat pattern should change for the third line.
-K:A
-V:1
-%%MIDI drumon
-e|a/g/ f/e/ c3/2 B/|Azzz|z4|z/c/ z/d/ z/e/ z/f/|
-%%MIDI drumoff
-|a/g/ f/e/ c3/2 B/|Azzz|[I:MIDI drumon]z4|z/c/ z/d/ z/e/ z/f/|
-%%MIDI drum d2z/d/d 35 38 38 100 50 50 
-|a/g/ f/e/ c3/2 B/|Azzz|z4|z/c/ z/d/ z/e/ z/f/|
-`;
+	var abcDrum = 'X:1\n' +
+'T: metronome\n' +
+'L:1/4\n' +
+'Q:1/4=60\n' +
+'%%MIDI drum dddd 76 77 77 77 50 50 50 50\n' +
+'N:The drum beat should start on the first full measure.\n' +
+'N:The drum beat should drop out in the second line.\n' +
+'N:The drum beat pattern should change for the third line.\n' +
+'K:A\n' +
+'V:1\n' +
+'%%MIDI drumon\n' +
+'e|a/g/ f/e/ c3/2 B/|Azzz|z4|z/c/ z/d/ z/e/ z/f/|\n' +
+'%%MIDI drumoff\n' +
+'|a/g/ f/e/ c3/2 B/|Azzz|[I:MIDI drumon]z4|z/c/ z/d/ z/e/ z/f/|\n' +
+'%%MIDI drum d2z/d/d 35 38 38 100 50 50\n' +
+'|a/g/ f/e/ c3/2 B/|Azzz|z4|z/c/ z/d/ z/e/ z/f/|\n';
 
 	var expectedDrum = {
 		"tempo":60,
@@ -982,17 +977,16 @@ e|a/g/ f/e/ c3/2 B/|Azzz|z4|z/c/ z/d/ z/e/ z/f/|
 
 	//////////////////////////////////////////////////////////
 
-	var abcTranspose = `X: 1
-M: 4/4
-L: 1/4
-K: Em
-V: 1 transpose=-2
-"Em"EGAB|
-V: 2
-"Em"EGAB|
-V: 3 transpose=4
-"Em"EGAB|
-`;
+	var abcTranspose = 'X: 1\n' +
+'M: 4/4\n' +
+'L: 1/4\n' +
+'K: Em\n' +
+'V: 1 transpose=-2\n' +
+'"Em"EGAB|\n' +
+'V: 2\n' +
+'"Em"EGAB|\n' +
+'V: 3 transpose=4\n' +
+'"Em"EGAB|\n';
 
 	var expectedTranspose = {
 		"tempo":180,"instrument":0,"totalDuration":1,"tracks":[
@@ -1033,13 +1027,12 @@ V: 3 transpose=4
 
 	//////////////////////////////////////////////////////////
 
-	var abcTempoChange = `X:1
-L:1/4
-M:C|
-Q:1/2=60
-K:D
-"D"DEFG| [Q:1/2=90] DEFG |	
-`;
+	var abcTempoChange = 'X:1\n' +
+'L:1/4\n' +
+'M:C|\n' +
+'Q:1/2=60\n' +
+'K:D\n' +
+'"D"DEFG| [Q:1/2=90] DEFG |\n';
 
 	var expectedTempoChange = {
 		"tempo":60,
@@ -1073,16 +1066,15 @@ K:D
 
 	//////////////////////////////////////////////////////////
 
-	var abcDecoration = `X:1
-M:4/4
-L:1/4
-Q:1/4=90
-K:C
-%%MIDI program 3
-!trill! e !lowermordent! d !uppermordent! c !mordent! B | !accent!A .G !turn! g !roll! a | !slide! d  !/! G  !//! G   !///! G |
-[Q:1/4=180] !trill! e !lowermordent! d !uppermordent! c !mordent! B | !accent!A .G !turn! g !roll! a | !slide! d  !/! G  !//! G   !///! G |
-[Q:1/4=60] !trill! e !lowermordent! d !uppermordent! c !mordent! B | !accent!A .G !turn! g !roll! a | !slide! d  !/! G  !//! G   !///! G |
-`;
+	var abcDecoration = 'X:1\n' +
+'M:4/4\n' +
+'L:1/4\n' +
+'Q:1/4=90\n' +
+'K:C\n' +
+'%%MIDI program 3\n' +
+'!trill! e !lowermordent! d !uppermordent! c !mordent! B | !accent!A .G !turn! g !roll! a | !slide! d  !/! G  !//! G   !///! G |\n' +
+'[Q:1/4=180] !trill! e !lowermordent! d !uppermordent! c !mordent! B | !accent!A .G !turn! g !roll! a | !slide! d  !/! G  !//! G   !///! G |\n' +
+'[Q:1/4=60] !trill! e !lowermordent! d !uppermordent! c !mordent! B | !accent!A .G !turn! g !roll! a | !slide! d  !/! G  !//! G   !///! G |\n';
 
 	var expectedDecoration = {
 		"tempo":90,
@@ -1194,14 +1186,13 @@ K:C
 
 	//////////////////////////////////////////////////////////
 
-	var abcMeterChange = `X:1
-T: chords meter change
-L:1/4
-Q:1/4=40
-M:3/4
-K:F
-"F"F2A|[M:4/4]"Bb"Bd2f|
-`;
+	var abcMeterChange = 'X:1\n' +
+'T: chords meter change\n' +
+'L:1/4\n' +
+'Q:1/4=40\n' +
+'M:3/4\n' +
+'K:F\n' +
+'"F"F2A|[M:4/4]"Bb"Bd2f|\n';
 
 	var expectedMeterChange = {
 		"tempo":40,
@@ -1239,12 +1230,11 @@ K:F
 
 	//////////////////////////////////////////////////////////
 
-	var abcBreak = `X:1
-L:1/4
-Q:1/4=40
-K:A
-"E7"Bcde|"A"f"^break"efe|"E7"Bc"^ignore"de|
-`;
+	var abcBreak = 'X:1\n' +
+'L:1/4\n' +
+'Q:1/4=40\n' +
+'K:A\n' +
+'"E7"Bcde|"A"f"^break"efe|"E7"Bc"^ignore"de|\n';
 
 	var expectedBreak = {
 		"tempo": 40,
@@ -1297,12 +1287,11 @@ K:A
 
 	//////////////////////////////////////////////////////////
 
-	var abcBreak2 = `X:1
-L:1/8
-Q:135
-K:Ab
-"Eb7"zG2GA2A2|=A2AB-B4|"Ab"z"^break"c2cd2d2|=d2de2c2=c|
-`;
+	var abcBreak2 = 'X:1\n' +
+'L:1/8\n' +
+'Q:135\n' +
+'K:Ab\n' +
+'"Eb7"zG2GA2A2|=A2AB-B4|"Ab"z"^break"c2cd2d2|=d2de2c2=c|\n';
 
 	var expectedBreak2 = {
 		"tempo":135,
@@ -1311,21 +1300,21 @@ K:Ab
 		"tracks":[
 			[
 				{"cmd":"program","channel":0,"instrument":0},
-				{"cmd":"note","pitch":68,"volume":85,"start":0.125,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":68,"volume":85,"start":0.375,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":69,"volume":95,"start":0.5,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":69,"volume":95,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":85,"start":0.125,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":85,"start":0.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":68,"volume":95,"start":0.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":68,"volume":95,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":69,"volume":105,"start":1,"duration":0.25,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":69,"volume":95,"start":1.25,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":71,"volume":85,"start":1.375,"duration":0.625,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":73,"volume":85,"start":2.125,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":73,"volume":85,"start":2.375,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":74,"volume":95,"start":2.5,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":74,"volume":95,"start":2.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":70,"volume":85,"start":1.375,"duration":0.625,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":2.125,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":2.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":73,"volume":95,"start":2.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":73,"volume":95,"start":2.75,"duration":0.25,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":74,"volume":105,"start":3,"duration":0.25,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":74,"volume":95,"start":3.25,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":76,"volume":85,"start":3.375,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":73,"volume":85,"start":3.625,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":75,"volume":85,"start":3.375,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":3.625,"duration":0.25,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":72,"volume":85,"start":3.875,"duration":0.125,"instrument":0,"gap":0}
 			],
 			[
@@ -1359,12 +1348,11 @@ K:Ab
 
 	//////////////////////////////////////////////////////////
 
-	var abcEndChord = `X:1
-L:1/4
-Q:135
-K:C
-"C"c4-|c|]
-`;
+	var abcEndChord = 'X:1\n' +
+'L:1/4\n' +
+'Q:135\n' +
+'K:C\n' +
+'"C"c4-|c|]\n';
 
 	var expectedEndChord = {
 		"tempo":135,
@@ -1394,10 +1382,9 @@ K:C
 
 	//////////////////////////////////////////////////////////
 
-	var abcMidMeasureChordChange = `X:1
-K: Gmin
-|: "Gm" GFDF GFDF | GF D2 "F" C4 |
-`;
+	var abcMidMeasureChordChange = 'X:1\n' +
+'K: Gmin\n' +
+'|: "Gm" GFDF GFDF | GF D2 "F" C4 |\n';
 
 	var expectedMidMeasureChordChange = {
 		"tempo":180,
@@ -1444,14 +1431,13 @@ K: Gmin
 
 	//////////////////////////////////////////////////////////
 
-	var abcGrace = `X:1
-T: midi-grace-notes
-L:1/4
-Q:1/4=40
-K:A
-{e}a|:{e}gz{e}ag|{efg}ag{ABcdefg}ag:|
-{B}e{B2c/d/}fef|[K:Bb]{Bcde}f2{Bcde}f2|]
-`;
+	var abcGrace = 'X:1\n' +
+'T: midi-grace-notes\n' +
+'L:1/4\n' +
+'Q:1/4=40\n' +
+'K:A\n' +
+'{e}a|:{e}gz{e}ag|{efg}ag{ABcdefg}ag:|\n' +
+'{B}e{B2c/d/}fef|[K:Bb]{Bcde}f2{Bcde}f2|]\n';
 
 	var expectedGrace = {
 		"tempo":40,
@@ -1544,15 +1530,14 @@ K:A
 
 	//////////////////////////////////////////////////////////
 
-	var abcMidiOptions = `X:1
-%%MIDI program 40
-%%MIDI channel 4
-%%MIDI transpose -2
-L:1/4
-Q:1/4=40
-K:A
-ABcd|
-`;
+	var abcMidiOptions = 'X:1\n' +
+'%%MIDI program 40\n' +
+'%%MIDI channel 4\n' +
+'%%MIDI transpose -2\n' +
+'L:1/4\n' +
+'Q:1/4=40\n' +
+'K:A\n' +
+'ABcd|\n';
 
 	var expectedMidiOptions = {
 		"tempo":40,
@@ -1572,13 +1557,12 @@ ABcd|
 
 	//////////////////////////////////////////////////////////
 
-	var abcMultiMeasureRest = `X:1
-M:4/4
-L:1/4
-Q:1/4=130
-K:Bb
-cdef|Z4|fedc|
-`;
+	var abcMultiMeasureRest = 'X:1\n' +
+'M:4/4\n' +
+'L:1/4\n' +
+'Q:1/4=130\n' +
+'K:Bb\n' +
+'cdef|Z4|fedc|\n';
 
 	var expectedMultiMeasureRest = {
 		"tempo":130,
@@ -1601,11 +1585,10 @@ cdef|Z4|fedc|
 
 	//////////////////////////////////////////////////////////
 
-	var abcOctaveClefs = `X:1
-M:4/4
-K:C
-[K: treble+8]{B}A4 [CE^F]4 | [K: treble-8]G8| G,2B,2 c'2e'2 | [K: bass-8]C8| [K: bass+8]B,8|
-`;
+	var abcOctaveClefs = 'X:1\n' +
+'M:4/4\n' +
+'K:C\n' +
+"[K: treble+8]{B}A4 [CE^F]4 | [K: treble-8]G8| G,2B,2 c'2e'2 | [K: bass-8]C8| [K: bass+8]B,8|\n";
 
 	var expectedOctaveClefs = {
 		"tempo": 180,
@@ -1632,16 +1615,15 @@ K:C
 
 	//////////////////////////////////////////////////////////
 
-	var abcOverlay = `X:1
-M: 4/4
-L: 1/4
-K:C
-C4 | D4 |
-G4 & E4 | A4 & F4 |
-B4 & d4 & f4 | c4 & e4 & g4 |
-a4 | b4 & d'4 |
-C4 | D4 | E4 & G4 | A4 | B4 & d4 |
-`;
+	var abcOverlay = 'X:1\n' +
+'M: 4/4\n' +
+'L: 1/4\n' +
+'K:C\n' +
+'C4 | D4 |\n' +
+'G4 & E4 | A4 & F4 |\n' +
+'B4 & d4 & f4 | c4 & e4 & g4 |\n' +
+"a4 | b4 & d'4 |\n" +
+'C4 | D4 | E4 & G4 | A4 | B4 & d4 |\n';
 
 	var expectedOverlay = {
 		"tempo": 180,
@@ -1684,32 +1666,31 @@ C4 | D4 | E4 & G4 | A4 | B4 & d4 |
 
 	//////////////////////////////////////////////////////////
 
-	var abcPercMap = `X:1
-%%percmap D  pedal-hi-hat x
-%%percmap E  bass-drum-1
-%%percmap F  acoustic-bass-drum
-%%percmap G  low-floor-tom
-%%percmap A  high-floor-tom
-%%percmap B  low-tom
-%%percmap ^B tambourine   triangle
-%%percmap c  acoustic-snare
-%%percmap _c electric-snare
-%%percmap ^c low-wood-block   triangle
-%%percmap =c side-stick
-%%percmap d  low-mid-tom
-%%percmap ^d high-wood-block    triangle
-%%percmap e  high-mid-tom
-%%percmap ^e cowbell      triangle
-%%percmap f  high-tom
-%%percmap ^f ride-cymbal-1
-%%percmap g  closed-hi-hat
-%%percmap ^g open-hi-hat
-%%percmap a  crash-cym-1  x
-%%percmap ^a open-triangle     triangle
-Q:1/4=50
-K:C perc
-DEFG AB^Bc _c^c=cd ^de^ef ^fg^ga ^a
-`;
+	var abcPercMap = 'X:1\n' +
+'%%percmap D  pedal-hi-hat x\n' +
+'%%percmap E  bass-drum-1\n' +
+'%%percmap F  acoustic-bass-drum\n' +
+'%%percmap G  low-floor-tom\n' +
+'%%percmap A  high-floor-tom\n' +
+'%%percmap B  low-tom\n' +
+'%%percmap ^B tambourine   triangle\n' +
+'%%percmap c  acoustic-snare\n' +
+'%%percmap _c electric-snare\n' +
+'%%percmap ^c low-wood-block   triangle\n' +
+'%%percmap =c side-stick\n' +
+'%%percmap d  low-mid-tom\n' +
+'%%percmap ^d high-wood-block    triangle\n' +
+'%%percmap e  high-mid-tom\n' +
+'%%percmap ^e cowbell      triangle\n' +
+'%%percmap f  high-tom\n' +
+'%%percmap ^f ride-cymbal-1\n' +
+'%%percmap g  closed-hi-hat\n' +
+'%%percmap ^g open-hi-hat\n' +
+'%%percmap a  crash-cym-1  x\n' +
+'%%percmap ^a open-triangle     triangle\n' +
+'Q:1/4=50\n' +
+'K:C perc\n' +
+'DEFG AB^Bc _c^c=cd ^de^ef ^fg^ga ^a\n';
 
 	var expectedPercMap = {
 		"tempo":50,"instrument":128,"totalDuration":2.625,"tracks":[
@@ -1742,12 +1723,11 @@ DEFG AB^Bc _c^c=cd ^de^ef ^fg^ga ^a
 
 	//////////////////////////////////////////////////////////
 
-	var abcLongTie = `X:1
-L:1/4
-Q:80
-K:A
-cd-d2-|d2-dz|
-`;
+	var abcLongTie = 'X:1\n' +
+'L:1/4\n' +
+'Q:80\n' +
+'K:A\n' +
+'cd-d2-|d2-dz|\n';
 
 	var expectedLongTie = {
 		"tempo": 80,
@@ -1764,13 +1744,12 @@ cd-d2-|d2-dz|
 
 	//////////////////////////////////////////////////////////
 
-	var abcRegularTie = `X:1
-M:4/4
-L:1/8
-Q:1/4=150
-K:Bb
-GBcd-d4|zcdc dc3:|
-`;
+	var abcRegularTie = 'X:1\n' +
+'M:4/4\n' +
+'L:1/8\n' +
+'Q:1/4=150\n' +
+'K:Bb\n' +
+'GBcd-d4|zcdc dc3:|\n';
 
 	var expectedRegularTie = {
 		"tempo":150,
@@ -1803,16 +1782,15 @@ GBcd-d4|zcdc dc3:|
 
 	//////////////////////////////////////////////////////////
 
-	var abcTripletChords = `X:1
-T:triplets-and-chord-rhythm
-M: 4/4
-L: 1/8
-Q: 80
-"C" (3 C2 D2 E2 "G/G" (3 F2 E2 D2 |
-"C" (3 CA,G, (3 CDE "C" (3 EEE (3 GGG |
-"C" (3 CDE (3 FED (3 CDE (3 FED |
-"C" (3 CDC (3 EFE "D" (3 GAG (3 cdc |
-`;
+	var abcTripletChords = 'X:1\n' +
+'T:triplets-and-chord-rhythm\n' +
+'M: 4/4\n' +
+'L: 1/8\n' +
+'Q: 80\n' +
+'"C" (3 C2 D2 E2 "G/G" (3 F2 E2 D2 |\n' +
+'"C" (3 CA,G, (3 CDE "C" (3 EEE (3 GGG |\n' +
+'"C" (3 CDE (3 FED (3 CDE (3 FED |\n' +
+'"C" (3 CDC (3 EFE "D" (3 GAG (3 cdc |\n';
 
 	var expectedTripletChords = {
 		"tempo":80,
@@ -1904,13 +1882,12 @@ Q: 80
 
 	//////////////////////////////////////////////////////////
 
-	var abcSnare = `X:1
-V:SnareDrum stem=up stafflines=1
-K:C clef=perc
-%%MIDI channel 10
-%%MIDI drummap B 38
-!f!B2 z2  B/4B/4B/4B/4 B/4B/4B/4B/4 B/4B/4B/4B/4 B/4B/4B/4B/4 B/4B/4B/4B/4 | B/4B/4B/4B/4 !>!B2 {/B}B4|
-`;
+	var abcSnare = 'X:1\n' +
+'V:SnareDrum stem=up stafflines=1\n' +
+'K:C clef=perc\n' +
+'%%MIDI channel 10\n' +
+'%%MIDI drummap B 38\n' +
+'!f!B2 z2  B/4B/4B/4B/4 B/4B/4B/4B/4 B/4B/4B/4B/4 B/4B/4B/4B/4 B/4B/4B/4B/4 | B/4B/4B/4B/4 !>!B2 {/B}B4|\n';
 
 	var expectedSnare = {
 		"tempo":180,
@@ -1954,96 +1931,96 @@ K:C clef=perc
 	//////////////////////////////////////////////////////////
 
 
-	it("flatten-pickup-triplet-chords-rhythmhead", () => {
+	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
 	})
 
-	it("flatten-dynamics", () => {
+	it("flatten-dynamics", function() {
 		doFlattenTest(abcDynamics, expectedDynamics);
 	})
 
-	it("flatten-six-huit", () => {
+	it("flatten-six-huit", function() {
 		doFlattenTest(abcSixHuit, expectedSixHuit);
 	})
 
-	it("flatten-repeat", () => {
+	it("flatten-repeat", function() {
 		doFlattenTest(abcRepeat, expectedRepeat);
 	})
 
-	it("flatten-drum", () => {
+	it("flatten-drum", function() {
 		doFlattenTest(abcDrum, expectedDrum);
 	})
 
-	it("flatten-transpose", () => {
+	it("flatten-transpose", function() {
 		doFlattenTest(abcTranspose, expectedTranspose);
 	})
 
-	it("flatten-tempo-change", () => {
+	it("flatten-tempo-change", function() {
 		console.log("flatten-tempo-change")
 		doFlattenTest(abcTempoChange, expectedTempoChange);
 	})
 
-	it("flatten-decorations", () => {
+	it("flatten-decorations", function() {
 		doFlattenTest(abcDecoration, expectedDecoration);
 	})
 
-	it("flatten-meter-change", () => {
+	it("flatten-meter-change", function() {
 		doFlattenTest(abcMeterChange, expectedMeterChange);
 	})
 
-	it("flatten-break", () => {
+	it("flatten-break", function() {
 		doFlattenTest(abcBreak, expectedBreak);
 	})
 
-	it("flatten-break2", () => {
+	it("flatten-break2", function() {
 		doFlattenTest(abcBreak2, expectedBreak2);
 	})
 
-	it("flatten-end-chord", () => {
+	it("flatten-end-chord", function() {
 		doFlattenTest(abcEndChord, expectedEndChord);
 	})
 
-	it("flatten-mid-measure", () => {
+	it("flatten-mid-measure", function() {
 		doFlattenTest(abcMidMeasureChordChange, expectedMidMeasureChordChange);
 	})
 
-	it("flatten-grace", () => {
+	it("flatten-grace", function() {
 		doFlattenTest(abcGrace, expectedGrace);
 	})
 
-	it("flatten-midi-options", () => {
+	it("flatten-midi-options", function() {
 		doFlattenTest(abcMidiOptions, expectedMidiOptions);
 	})
 
-	it("flatten-multi-measure-rest", () => {
+	it("flatten-multi-measure-rest", function() {
 		doFlattenTest(abcMultiMeasureRest, expectedMultiMeasureRest);
 	})
 
-	it("flatten-octave-clefs", () => {
+	it("flatten-octave-clefs", function() {
 		doFlattenTest(abcOctaveClefs, expectedOctaveClefs);
 	})
 
-	it("flatten-overlay", () => {
+	it("flatten-overlay", function() {
 		doFlattenTest(abcOverlay, expectedOverlay);
 	})
 
-	it("flatten-perc-map", () => {
+	it("flatten-perc-map", function() {
 		doFlattenTest(abcPercMap, expectedPercMap);
 	})
 
-	it("flatten-long-tie", () => {
+	it("flatten-long-tie", function() {
 		doFlattenTest(abcLongTie, expectedLongTie);
 	})
 
-	it("flatten-triplet-chords", () => {
+	it("flatten-triplet-chords", function() {
 		doFlattenTest(abcTripletChords, expectedTripletChords);
 	})
 
-	it("flatten-regular-tie", () => {
+	it("flatten-regular-tie", function() {
 		doFlattenTest(abcRegularTie, expectedRegularTie);
 	})
 
-	it("flatten-snare", () => {
+	it("flatten-snare", function() {
 		doFlattenTest(abcSnare, expectedSnare);
 	})
 })
