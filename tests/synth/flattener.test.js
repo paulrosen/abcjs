@@ -762,28 +762,94 @@ describe("Audio flattener", function() {
 					"channel": 1,
 					"instrument": 0
 				},
-				{"cmd":"note","pitch":43,"volume":64,"start":0,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":55,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":59,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":62,"volume":48,"start":0.25,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":38,"volume":64,"start":0.375,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":55,"volume":48,"start":0.625,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":59,"volume":48,"start":0.625,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":62,"volume":48,"start":0.625,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":38,"volume":64,"start":0.75,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":50,"volume":48,"start":1,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":54,"volume":48,"start":1,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":57,"volume":48,"start":1,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":60,"volume":48,"start":1,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":33,"volume":64,"start":1.125,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":50,"volume":48,"start":1.375,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":54,"volume":48,"start":1.375,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":57,"volume":48,"start":1.375,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":60,"volume":48,"start":1.375,"duration":0.125,"instrument":0},
+				{"cmd":"note","pitch":43,"volume":64,"start":0,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.25,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":0.25,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":0.25,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":38,"volume":64,"start":0.375,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.625,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":0.625,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":0.625,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":38,"volume":64,"start":0.75,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":50,"volume":48,"start":1,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":54,"volume":48,"start":1,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":57,"volume":48,"start":1,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":48,"start":1,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":33,"volume":64,"start":1.125,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":50,"volume":48,"start":1.375,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":54,"volume":48,"start":1.375,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":57,"volume":48,"start":1.375,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":48,"start":1.375,"duration":0.0625,"instrument":0},
 			],
 		],
 		"totalDuration": 1.5
 	}
+
+	//////////////////////////////////////////////////////////
+
+	var abcJigChords = 'X:1\n' +
+	'L:1/8\n' +
+	'Q:3/8=61\n' +
+	'M:6/8\n' +
+	'K:F\n' +
+	'"C"cde def|c2e d2f|"C"c2"D"d "G"d2"E"e|';
+
+	var expectedJigChords = {
+		"tempo":61,
+		"instrument":0,
+		"totalDuration":2.25,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":72,"volume":105,"start":0,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":85,"start":0.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":85,"start":0.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":0.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":85,"start":0.5,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":77,"volume":85,"start":0.625,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":105,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":85,"start":1,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":1.125,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":77,"volume":85,"start":1.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":105,"start":1.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":85,"start":1.75,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":1.875,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":85,"start":2.125,"duration":0.125,"instrument":0,"gap":0}
+			],
+			[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":36,"volume":64,"start":0,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":0.25,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":0.25,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.25,"duration":0.0625,"instrument":0},
+
+				{"cmd":"note","pitch":31,"volume":64,"start":0.375,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":0.625,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":0.625,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.625,"duration":0.0625,"instrument":0},
+
+				{"cmd":"note","pitch":36,"volume":64,"start":0.75,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":1,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":1,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1,"duration":0.0625,"instrument":0},
+
+				{"cmd":"note","pitch":31,"volume":64,"start":1.125,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":1.375,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":1.375,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1.375,"duration":0.0625,"instrument":0},
+
+				{"cmd":"note","pitch":36,"volume":64,"start":1.5,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":50,"volume":48,"start":1.75,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":54,"volume":48,"start":1.75,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":57,"volume":48,"start":1.75,"duration":0.0625,"instrument":0},
+
+				{"cmd":"note","pitch":31,"volume":64,"start":1.875,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":2.325,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":56,"volume":48,"start":2.325,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":2.325,"duration":0.0625,"instrument":0}
+			]
+		]
+	};
 
 	//////////////////////////////////////////////////////////
 
@@ -1447,22 +1513,22 @@ describe("Audio flattener", function() {
 			[
 				{"cmd":"program","channel":0,"instrument":0},
 				{"cmd":"note","pitch":76,"volume":57,"start":0,"duration":0.125,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":81,"volume":85,"start":0.125,"duration":0.125,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":81,"volume":85,"start":0.125,"duration":0.125,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":76,"volume":70,"start":0.25,"duration":0.125,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":80,"volume":105,"start":0.375,"duration":0.125,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":80,"volume":105,"start":0.375,"duration":0.125,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":76,"volume":63,"start":0.75,"duration":0.125,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":81,"volume":95,"start":0.875,"duration":0.125,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":81,"volume":95,"start":0.875,"duration":0.125,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":80,"volume":95,"start":1,"duration":0.25,"instrument":0,"gap":0,"instrument":0},
 
 				{"cmd":"note","pitch":76,"volume":70,"start":1.25,"duration":0.041666666666666664,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":78,"volume":70,"start":1.2916666666666667,"duration":0.041666666666666664,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":80,"volume":70,"start":1.3333333333333335,"duration":0.041666666666666664,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":81,"volume":105,"start":1.375,"duration":0.125,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":81,"volume":105,"start":1.375,"duration":0.125,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":80,"volume":95,"start":1.5,"duration":0.25,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":80,"volume":95,"start":1.5,"duration":0.25,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":69,"volume":63,"start":1.75,"duration":0.017857142857142856,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":71,"volume":63,"start":1.7678571428571428,"duration":0.017857142857142856,"gap":0,"instrument":0},
@@ -1471,24 +1537,24 @@ describe("Audio flattener", function() {
 				{"cmd":"note","pitch":76,"volume":63,"start":1.8214285714285712,"duration":0.017857142857142856,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":78,"volume":63,"start":1.839285714285714,"duration":0.017857142857142856,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":80,"volume":63,"start":1.8571428571428568,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":81,"volume":95,"start":1.875,"duration":0.125,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":81,"volume":95,"start":1.875,"duration":0.125,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":80,"volume":95,"start":2,"duration":0.25,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":80,"volume":95,"start":2,"duration":0.25,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":76,"volume":70,"start":2.25,"duration":0.125,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":80,"volume":105,"start":2.375,"duration":0.125,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":80,"volume":105,"start":2.375,"duration":0.125,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":76,"volume":63,"start":2.75,"duration":0.125,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":81,"volume":95,"start":2.875,"duration":0.125,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":81,"volume":95,"start":2.875,"duration":0.125,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":80,"volume":95,"start":3,"duration":0.25,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":80,"volume":95,"start":3,"duration":0.25,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":76,"volume":70,"start":3.25,"duration":0.041666666666666664,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":78,"volume":70,"start":3.2916666666666667,"duration":0.041666666666666664,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":80,"volume":70,"start":3.333333333333333,"duration":0.041666666666666664,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":81,"volume":105,"start":3.375,"duration":0.125,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":81,"volume":105,"start":3.375,"duration":0.125,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":80,"volume":95,"start":3.5,"duration":0.25,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":80,"volume":95,"start":3.5,"duration":0.25,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":69,"volume":63,"start":3.75,"duration":0.017857142857142856,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":71,"volume":63,"start":3.7678571428571428,"duration":0.017857142857142856,"gap":0,"instrument":0},
@@ -1497,33 +1563,33 @@ describe("Audio flattener", function() {
 				{"cmd":"note","pitch":76,"volume":63,"start":3.8214285714285712,"duration":0.017857142857142856,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":78,"volume":63,"start":3.839285714285714,"duration":0.017857142857142856,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":80,"volume":63,"start":3.8571428571428568,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":81,"volume":95,"start":3.875,"duration":0.125,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":81,"volume":95,"start":3.875,"duration":0.125,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":80,"volume":95,"start":4,"duration":0.25,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":80,"volume":95,"start":4,"duration":0.25,"instrument":0,"gap":0},
 //
 				{"cmd":"note","pitch":71,"volume":70,"start":4.25,"duration":0.125,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":76,"volume":105,"start":4.375,"duration":0.125,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":76,"volume":105,"start":4.375,"duration":0.125,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":71,"volume":63,"start":4.5,"duration":0.08333333333333333,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":73,"volume":63,"start":4.583333333333333,"duration":0.020833333333333332,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":74,"volume":63,"start":4.604166666666666,"duration":0.020833333333333332,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":78,"volume":95,"start":4.625,"duration":0.125,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":78,"volume":95,"start":4.625,"duration":0.125,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":76,"volume":95,"start":4.75,"duration":0.25,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":76,"volume":95,"start":4.75,"duration":0.25,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":78,"volume":95,"start":5,"duration":0.25,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":78,"volume":95,"start":5,"duration":0.25,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":71,"volume":70,"start":5.25,"duration":0.0625,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":73,"volume":70,"start":5.3125,"duration":0.0625,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":74,"volume":70,"start":5.375,"duration":0.0625,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":76,"volume":70,"start":5.4375,"duration":0.0625,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":78,"volume":105,"start":5.5,"duration":0.25,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":78,"volume":105,"start":5.5,"duration":0.25,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":71,"volume":63,"start":5.75,"duration":0.0625,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":73,"volume":63,"start":5.8125,"duration":0.0625,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":74,"volume":63,"start":5.875,"duration":0.0625,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":76,"volume":63,"start":5.9375,"duration":0.0625,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":78,"volume":95,"start":6,"duration":0.25,"instrument":0,"gap":0,"instrument":0}
+				{"cmd":"note","pitch":78,"volume":95,"start":6,"duration":0.25,"instrument":0,"gap":0}
 			]
 		]
 	};
@@ -1930,6 +1996,47 @@ describe("Audio flattener", function() {
 
 	//////////////////////////////////////////////////////////
 
+	var abcMetronome = 'X:1\n' +
+'L:1/4\n' +
+'Q:1/4=60\n' +
+'%%MIDI drum dddd 76 77 77 77 50 50 50 50\n' +
+'K:A\n' +
+'V:1\n' +
+'%%MIDI drumon\n' +
+'e|a/g/ f/e/ c3/2 B/|Azzz|\n';
+
+	var expectedMetronome = {
+		"tempo":60,
+		"instrument":0,
+		"totalDuration":2.25,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":76,"volume":85,"start":0,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":81,"volume":105,"start":0.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":80,"volume":85,"start":0.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":78,"volume":95,"start":0.5,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":85,"start":0.625,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":73,"volume":95,"start":0.75,"duration":0.375,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":85,"start":1.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":105,"start":1.25,"duration":0.25,"instrument":0,"gap":0}
+			],
+			[
+				{"cmd":"program","channel":2,"instrument":128},
+				{"cmd":"note","pitch":76,"volume":50,"start":0.25,"duration":0.25,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":0.5,"duration":0.25,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":0.75,"duration":0.25,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":1,"duration":0.25,"instrument":128},
+				{"cmd":"note","pitch":76,"volume":50,"start":1.25,"duration":0.25,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":1.5,"duration":0.25,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":1.75,"duration":0.25,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":2,"duration":0.25,"instrument":128}
+			]
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
 
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
@@ -1941,6 +2048,10 @@ describe("Audio flattener", function() {
 
 	it("flatten-six-huit", function() {
 		doFlattenTest(abcSixHuit, expectedSixHuit);
+	})
+
+	it("flatten-jig-chords", function() {
+		doFlattenTest(abcJigChords, expectedJigChords);
 	})
 
 	it("flatten-repeat", function() {
@@ -2022,6 +2133,10 @@ describe("Audio flattener", function() {
 
 	it("flatten-snare", function() {
 		doFlattenTest(abcSnare, expectedSnare);
+	})
+
+	it("flatten-metronome", function() {
+		doFlattenTest(abcMetronome, expectedMetronome);
 	})
 })
 
