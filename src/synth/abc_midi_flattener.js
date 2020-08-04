@@ -19,6 +19,7 @@
 // It also extracts guitar chords to a separate voice and resolves their rhythm.
 
 var flatten;
+var parseCommon = require("../parse/abc_common");
 
 (function() {
 	"use strict";
@@ -433,7 +434,7 @@ var flatten;
 			var barBeat = calcBeat(lastBarTime, getBeatFraction(meter), beat);
 			if (barBeat === 0)
 				volume = stressBeat1;
-			else if (Number.isInteger(barBeat))
+			else if (parseInt(barBeat,10) === barBeat)
 				volume = stressBeatDown;
 			else
 				volume = stressBeatUp;
@@ -583,7 +584,7 @@ var flatten;
 		//var tieAdjustment = 0;
 		if (elem.pitches) {
 			var thisBreakBetweenNotes = '';
-			const ret = findNoteModifications(elem, velocity);
+			var ret = findNoteModifications(elem, velocity);
 			if (ret.thisBreakBetweenNotes)
 				thisBreakBetweenNotes = ret.thisBreakBetweenNotes;
 			if (ret.velocity)
@@ -596,8 +597,8 @@ var flatten;
 				if (lastChord && lastChord.chick) {
 					ePitches = [];
 					for (var i2 = 0; i2 < lastChord.chick.length; i2++) {
-						var note2 = Object.assign({}, elem.pitches[0]);
-						note2.actualPitch = lastChord.chick[i2]
+						var note2 = parseCommon.clone(elem.pitches[0]);
+						note2.actualPitch = lastChord.chick[i2];
 						ePitches.push(note2);
 					}
 				}
