@@ -1118,14 +1118,14 @@ describe("Audio flattener", function() {
 			],
 			[
 				{"cmd":"program","channel":1,"instrument":0},
-				{"cmd":"note","pitch":38,"volume":64,"start":0,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":50,"volume":48,"start":0.5,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":54,"volume":48,"start":0.5,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":57,"volume":48,"start":0.5,"duration":0.125,"instrument":0},
-				{"cmd":"note","pitch":38,"volume":64,"start":1,"duration":0.083333,"instrument":0},
-				{"cmd":"note","pitch":50,"volume":48,"start":1.333333,"duration":0.083333,"instrument":0},
-				{"cmd":"note","pitch":54,"volume":48,"start":1.333333,"duration":0.083333,"instrument":0},
-				{"cmd":"note","pitch":57,"volume":48,"start":1.333333,"duration":0.083333,"instrument":0}
+				{"cmd":"note","pitch":38,"volume":64,"start":0,"duration":0.25,"instrument":0},
+				{"cmd":"note","pitch":50,"volume":48,"start":0.5,"duration":0.25,"instrument":0},
+				{"cmd":"note","pitch":54,"volume":48,"start":0.5,"duration":0.25,"instrument":0},
+				{"cmd":"note","pitch":57,"volume":48,"start":0.5,"duration":0.25,"instrument":0},
+				{"cmd":"note","pitch":38,"volume":64,"start":1,"duration":0.166667,"instrument":0},
+				{"cmd":"note","pitch":50,"volume":48,"start":1.333333,"duration":0.166667,"instrument":0},
+				{"cmd":"note","pitch":54,"volume":48,"start":1.333333,"duration":0.166667,"instrument":0},
+				{"cmd":"note","pitch":57,"volume":48,"start":1.333333,"duration":0.166667,"instrument":0}
 			]
 		]
 	};
