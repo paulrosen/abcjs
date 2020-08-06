@@ -1,3 +1,67 @@
+# Version 6.0.0-beta.14
+
+## Bugs
+
+* Don't crash if setTiming is called too early.
+
+* Fix length of accompaniment notes in compound meters.
+
+* Fix inaccuracies with JS floating point on the length of notes.
+
+* Fix crash when unmatched quote is in V: line.
+
+* Get the multimeasure rest to have the correct duration for both display and audio.
+
+* Fix crash "undefined size".
+
+* Fix computing the pickup length when there are triplets.
+
+* Don't transpose the perc clef.
+
+* The audio should ignore the visualTranspose.
+
+* Fix tempo calculation.
+
+## Features
+
+* Improve the drawing of the double flat symbol.
+
+* Detect chords that aren't on the beat and move them.
+
+* Play chords on incomplete measures.
+
+* Fix selection of tempo element.
+
+* Handle no key sig in transpose.
+
+* Allow synth parameters to be changed on the fly when using the editor.
+
+* Don't require generate_warnings in editor params if warnings_id is present.
+
+* Accept an element as well as an ID in warnings_id.
+
+## Refactoring
+
+* Refactor the way notes are placed to create audio.
+
+* Move layout functionality to a separate directory.
+
+## Documentation
+
+* Make a better example of how to transpose.
+
+## Testing
+
+* Add Mocha
+
+* Add mocha tests covering most of the audio note placement.
+
+* Add mocha tests for the selectable items.
+
+* Add mocha tests for the line wrapping code.
+
+* Add mocha tests that will run cross browser.
+
 # Version 6.0.0-beta.13
 
 ## Bugs
@@ -494,7 +558,7 @@
 
 ## Features
 
-* Add a new method of creating synthesized sound. (see [Synth Documentation](docs/synth.md) )
+* Add a new method of creating synthesized sound. (see [Synth Documentation](docs/audio/synthesized-sound.md) )
 
 * Implement "setbarnb" measure number
 
