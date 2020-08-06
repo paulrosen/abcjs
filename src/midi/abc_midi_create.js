@@ -87,7 +87,12 @@ var create;
 	};
 
 	function addNotes(midi, midiJs, notePlacement, baseDuration) {
-		var times = Object.keys(notePlacement).sort();
+		var times = Object.keys(notePlacement);
+		for (var h = 0; h < times.length; h++)
+			times[h] = parseFloat(times[h]);
+		times.sort(function(a,b) {
+			return a - b;
+		});
 		var lastTime = 0;
 		for (var i = 0; i < times.length; i++) {
 			var events = notePlacement[times[i]];
