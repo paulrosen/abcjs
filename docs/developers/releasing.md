@@ -32,6 +32,8 @@ To release a new version, this checklist should be followed:
 
 [_] Check the minified versions and other changed files in.
 
+[_] Merge the `dev` branch into `master`. 
+
 [_] Update npm with `npm publish` or `npm publish --tag beta`.
     To do this in docker:
     `docker run -v $(pwd):/srv/app -it IMAGE-ID /bin/bash`
