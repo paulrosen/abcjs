@@ -14,8 +14,6 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var spacing = require('./abc_spacing');
-
 var DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
 	this.type = "DynamicDecoration";
 	this.anchor = anchor;
@@ -25,13 +23,6 @@ var DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
 	else
 		this.volumeHeightAbove = 5;
 	this.pitch = undefined; // This will be set later
-};
-
-DynamicDecoration.prototype.setUpperAndLowerElements = function(positionY) {
-	if (this.volumeHeightAbove)
-		this.pitch = positionY.volumeHeightAbove;
-	else
-		this.pitch = positionY.volumeHeightBelow;
 };
 
 module.exports = DynamicDecoration;

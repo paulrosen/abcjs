@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!--
+	Run this to check the browser compatibility of abcjs on a wide variety of browsers.
+	This uses the compiled but uncompressed library.
+
+	This has the same effect as the all.html file that works with modern browsers but it
+	works in a wider range of browsers.
+
+	It can't use the node.js version because the Tarp library (used to polyfill
+	the require statement) is not very browser-compatible.
+
+	Here are the oldest browser versions that have been tested:
+	Firefox 32
+	Safari 5.1
+	IE 10
+	Samsung 4.1
+	Chrome 37
+	Opera 23
+	Edge 80
+	-->
+	<meta charset="utf-8" />
+	<title>Browser Compatibility Test</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+	<script src="../bin/abcjs_basic_6.0.0-beta.14.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="mocha"></div>
+<div id="paper"></div>
+<div id="midi"></div>
+<script>
+	// The tests were written for the node version, so just make either entry point valid.
+	window.abcjs = window.ABCJS;
+
+	// This is the one polyfill needed for the test runner.
+	if (!Error.captureStackTrace) {
+		console.log("Polyfill captureStackTrace")
+		var container = new Error();
+
+		Object.defineProperty({}, 'stack', {
+			configurable: true,
+			get: function getStack() {
+				var stack = container.stack;
+
+				Object.defineProperty(this, 'stack', {
+					value: stack
+				});
+
+				return stack;
+			}
+		});
+	}
+</script>
+<script src="../node_modules/chai/chai.js"></script>
+<script src="../node_modules/mocha/mocha.js"></script>
+<script class="mocha-init">
+	mocha.setup({ui: 'bdd', globals: ['__VUE_DEVTOOLS_TOAST__']});
+	mocha.checkLeaks();
+</script>
+
+<script src="synth/flattener.test.js"></script>
+<script src="synth/midi.test.js"></script>
+<script src="visual/wrap.test.js"></script>
+<script src="visual/selection.test.js"></script>
+
+<script>
+	mocha.run();
+</script>
+
+</body>
+</html>

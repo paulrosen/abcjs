@@ -14,8 +14,6 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-/*global window */
-
 var parseCommon = require('./abc_common');
 var parseDirective = require('./abc_parse_directive');
 var ParseHeader = require('./abc_parse_header');
@@ -25,14 +23,16 @@ var transpose = require('./abc_transpose');
 var wrap = require('./wrap_lines');
 
 var Tune = require('../data/abc_tune');
+var TuneBuilder = require('../parse/tune-builder');
 
 var Parse = function() {
 	"use strict";
 	var tune = new Tune();
+	var tuneBuilder = new TuneBuilder(tune);
 	var tokenizer = new Tokenizer();
 
 	this.getTune = function() {
-		return {
+		var t = {
 			formatting: tune.formatting,
 			lines: tune.lines,
 			media: tune.media,
@@ -55,6 +55,9 @@ var Parse = function() {
 			setTiming: tune.setTiming,
 			setUpAudio: tune.setUpAudio
 		};
+		if (tune.visualTranspose)
+			t.visualTranspose = tune.visualTranspose;
+		return t;
 	};
 
 	function addPositioning(el, type, value) {
@@ -198,10 +201,10 @@ var Parse = function() {
 		var clean_line = encode(line.substring(0, col_num)) +
 			'<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' +
 			encode(line.substring(col_num+1));
-		addWarning("Music Line:" + tune.getNumLines() + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
+		addWarning("Music Line:" + tuneBuilder.getNumLines() + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
 		addWarningObject({message:str, line:line, startChar: multilineVars.iChar + col_num, column: col_num});
 	};
-	var header = new ParseHeader(tokenizer, warn, multilineVars, tune);
+	var header = new ParseHeader(tokenizer, warn, multilineVars, tune, tuneBuilder);
 
 	this.getWarnings = function() {
 		return multilineVars.warnings;
@@ -801,7 +804,8 @@ var Parse = function() {
 						delete el.grace_notes;
 						// At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
 						if (el.rest.type === 'multimeasure') {
-							el.duration = 1;
+							el.duration = tune.getBarLength();
+							el.rest.text = 1;
 							state = 'Zduration';
 						} else {
 							if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
@@ -847,7 +851,8 @@ var Parse = function() {
 						el.accidental = 'quarterflat';state = 'pitch';
 					} else if (state === 'Zduration') {
 						var num = tokenizer.getNumber(line, index);
-						el.duration = num.num;
+						el.duration = num.num * tune.getBarLength();
+						el.rest.text = num.num;
 						el.endChar = num.index;
 						return el;
 					} else return null;
@@ -855,7 +860,7 @@ var Parse = function() {
 				case '-':
 					if (state === 'startSlur') {
 						// This is the first character, so it must have been meant for the previous note. Correct that here.
-						tune.addTieToLastNote();
+						tuneBuilder.addTieToLastNote();
 						el.endTie = true;
 					} else if (state === 'octave' || state === 'duration' || state === 'end_slur') {
 						el.startTie = {};
@@ -998,7 +1003,7 @@ var Parse = function() {
 		var isFirstVoice = multilineVars.currentVoice === undefined || (multilineVars.currentVoice.staffNum ===  0 && multilineVars.currentVoice.index ===  0);
 		if (multilineVars.barNumbers === 0 && isFirstVoice && multilineVars.currBarNumber !== 1)
 			params.barNumber = multilineVars.currBarNumber;
-		tune.startNewLine(params);
+		tuneBuilder.startNewLine(params);
 		if (multilineVars.key.impliedNaturals)
 			delete multilineVars.key.impliedNaturals;
 
@@ -1289,7 +1294,7 @@ var Parse = function() {
 						el.rest = { type: 'spacer' };
 						el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
 						multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-						tune.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el);
+						tuneBuilder.appendElement('note', startOfLine+i, startOfLine+i+ret[0], el);
 						multilineVars.measureNotEmpty = true;
 						el = {};
 					}
@@ -1333,12 +1338,12 @@ var Parse = function() {
 							}
 						}
 						multilineVars.addFormattingOptions(el, tune.formatting, 'bar');
-						tune.appendElement('bar', startOfLine+i, startOfLine+i+ret[0], bar);
+						tuneBuilder.appendElement('bar', startOfLine+i, startOfLine+i+ret[0], bar);
 						multilineVars.measureNotEmpty = false;
 						el = {};
 					}
 					i += ret[0];
-					var cv = multilineVars.currentVoice ? multilineVars.currentVoice.staffNum + '-' + multilineVars.currentVoice.index : 'ONLY';
+					// var cv = multilineVars.currentVoice ? multilineVars.currentVoice.staffNum + '-' + multilineVars.currentVoice.index : 'ONLY';
 					// if (multilineVars.lineBreaks) {
 					// 	if (!multilineVars.barCounter[cv])
 					// 		multilineVars.barCounter[cv] = 0;
@@ -1350,7 +1355,7 @@ var Parse = function() {
 				} else if (line[i] === '&') {	// backtrack to beginning of measure
 					ret = letter_to_overlay(line, i);
 					if (ret[0] > 0) {
-						tune.appendElement('overlay', startOfLine, startOfLine+1, {});
+						tuneBuilder.appendElement('overlay', startOfLine, startOfLine+1, {});
 						i += 1;
 						overlayLevel++;
 					}
@@ -1512,7 +1517,7 @@ var Parse = function() {
 									}
 
 									multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-									tune.appendElement('note', startOfLine+chordStartChar, startOfLine+i, el);
+									tuneBuilder.appendElement('note', startOfLine+chordStartChar, startOfLine+i, el);
 									multilineVars.measureNotEmpty = true;
 									el = {};
 								}
@@ -1586,7 +1591,7 @@ var Parse = function() {
 							}
 
 							multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-							tune.appendElement('note', startOfLine+startI, startOfLine+i, el);
+							tuneBuilder.appendElement('note', startOfLine+startI, startOfLine+i, el);
 							multilineVars.measureNotEmpty = true;
 							el = {};
 						}
@@ -1629,9 +1634,9 @@ var Parse = function() {
 		if (ret.newline)
 			startNewLine();
 		if (ret.words)
-			addWords(tune.getCurrentVoice(), line.substring(2));
+			addWords(tuneBuilder.getCurrentVoice(), line.substring(2));
 		if (ret.symbols)
-			addSymbols(tune.getCurrentVoice(), line.substring(2));
+			addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
 		if (ret.recurse)
 			parseLine(ret.str);
 	};
@@ -1690,7 +1695,7 @@ var Parse = function() {
 		// switches.transpose: change the key signature, chords, and notes by a number of half-steps.
 		if (!switches) switches = {};
 		if (!startPos) startPos = 0;
-		tune.reset();
+		tuneBuilder.reset();
 		if (switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
@@ -1699,6 +1704,8 @@ var Parse = function() {
 			multilineVars.globalTranspose = parseInt(switches.visualTranspose);
 			if (multilineVars.globalTranspose === 0)
 				multilineVars.globalTranspose = undefined;
+			else
+				tuneBuilder.setVisualTranspose(switches.visualTranspose);
 		} else
 			multilineVars.globalTranspose = undefined;
 		if (switches.lineBreaks) {
@@ -1749,11 +1756,10 @@ var Parse = function() {
 						multilineVars.is_in_history = false;
 						parseLine(line);
 					} else
-						tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
+						tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
 				} else if (multilineVars.inTextBlock) {
 					if (parseCommon.startsWith(line, "%%endtext")) {
-						//tune.addMetaText("textBlock", multilineVars.textBlock);
-						tune.addText(multilineVars.textBlock);
+						tuneBuilder.addText(multilineVars.textBlock);
 						multilineVars.inTextBlock = false;
 					}
 					else {
@@ -1773,10 +1779,10 @@ var Parse = function() {
 					var wasInHeader = multilineVars.is_in_header;
 					parseLine(line);
 					if (wasInHeader && !multilineVars.is_in_header) {
-						tune.setRunningFont("annotationfont", multilineVars.annotationfont);
-						tune.setRunningFont("gchordfont", multilineVars.gchordfont);
-						tune.setRunningFont("tripletfont", multilineVars.tripletfont);
-						tune.setRunningFont("vocalfont", multilineVars.vocalfont);
+						tuneBuilder.setRunningFont("annotationfont", multilineVars.annotationfont);
+						tuneBuilder.setRunningFont("gchordfont", multilineVars.gchordfont);
+						tuneBuilder.setRunningFont("tripletfont", multilineVars.tripletfont);
+						tuneBuilder.setRunningFont("vocalfont", multilineVars.vocalfont);
 					}
 				}
 				multilineVars.iChar += line.length + 1;
@@ -1793,7 +1799,7 @@ var Parse = function() {
 				ph = pl;
 				pl = x;
 			}
-			multilineVars.openSlurs = tune.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
+			multilineVars.openSlurs = tuneBuilder.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
 		} catch (err) {
 			if (err !== "normal_abort")
 				throw err;

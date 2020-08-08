@@ -12,9 +12,10 @@ function drawTempo(renderer, params, selectables) {
 		renderer.paper.openGroup({klass: renderer.controller.classes.generate("tempo")});
 		var y = renderer.calcY(params.pitch);
 		var text;
+		var size;
 		if (params.tempo.preString) {
 			text = renderText(renderer, {x:x, y: y, text: params.tempo.preString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true});
-			var size = renderer.controller.getTextSize.calc(params.tempo.preString, 'tempofont', 'tempo', text);
+			size = renderer.controller.getTextSize.calc(params.tempo.preString, 'tempofont', 'tempo', text);
 			var preWidth = size.width;
 			var charWidth = preWidth / params.tempo.preString.length; // Just get some average number to increase the spacing.
 			x += preWidth + charWidth;

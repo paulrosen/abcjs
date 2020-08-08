@@ -24,11 +24,13 @@ var parseKeyVoice = {};
 	var warn;
 	var multilineVars;
 	var tune;
-	parseKeyVoice.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
+	var tuneBuilder;
+	parseKeyVoice.initialize = function(tokenizer_, warn_, multilineVars_, tune_, tuneBuilder_) {
 		tokenizer = tokenizer_;
 		warn = warn_;
 		multilineVars = multilineVars_;
 		tune = tune_;
+		tuneBuilder = tuneBuilder_;
 	};
 
 	parseKeyVoice.standardKey = function(keyName, root, acc, localTranspose) {
@@ -175,7 +177,8 @@ var parseKeyVoice = {};
 			'D#': [ key1flat, key2flat, key3flat ],
 			'E#': [ key1flat ],
 			'G#': [ key1flat, key2flat, key3flat, key4flat ],
-			'Gbm': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ]
+			'Gbm': [ key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp ],
+			'none': []
 		};
 
 		return transpose.keySignature(multilineVars, keys, keyName, root, acc, localTranspose);
@@ -631,7 +634,7 @@ var parseKeyVoice = {};
 
 	var setCurrentVoice = function(id) {
 		multilineVars.currentVoice = multilineVars.voices[id];
-		tune.setCurrentVoice(multilineVars.currentVoice.staffNum, multilineVars.currentVoice.index);
+		tuneBuilder.setCurrentVoice(multilineVars.currentVoice.staffNum, multilineVars.currentVoice.index);
 	};
 
 	parseKeyVoice.parseVoice = function(line, i, e) {
@@ -662,6 +665,8 @@ var parseKeyVoice = {};
 			var attr = tokenizer.getVoiceToken(line, start, end);
 			if (attr.warn !== undefined)
 				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
+			else if (attr.err !== undefined)
+				warn("Expected value for " + name + " in voice: " + attr.err, line, start);
 			else if (attr.token.length === 0 && line.charAt(start) !== '"')
 				warn("Expected value for " + name + " in voice", line, start);
 			else
@@ -672,6 +677,8 @@ var parseKeyVoice = {};
 			var attr = tokenizer.getVoiceToken(line, start, end);
 			if (attr.warn !== undefined)
 				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
+			else if (attr.err !== undefined)
+				warn("Expected value for " + name + " in voice: " + attr.err, line, start);
 			else if (attr.token.length === 0 && line.charAt(start) !== '"')
 				warn("Expected value for " + name + " in voice", line, start);
 			else {
@@ -685,6 +692,8 @@ var parseKeyVoice = {};
 			var attr = tokenizer.getVoiceToken(line, start, end);
 			if (attr.warn !== undefined)
 				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
+			else if (attr.err !== undefined)
+				warn("Expected value for " + name + " in voice: " + attr.err, line, start);
 			else if (attr.token.length === 0 && line.charAt(start) !== '"')
 				warn("Expected value for " + name + " in voice", line, start);
 			else {
@@ -810,6 +819,8 @@ var parseKeyVoice = {};
 						attr = tokenizer.getVoiceToken(line, start, end);
 						if (attr.warn !== undefined)
 							warn("Expected value for stems in voice: " + attr.warn, line, start);
+						else if (attr.err !== undefined)
+							warn("Expected value for stems in voice: " + attr.err, line, start);
 						else if (attr.token === 'up' || attr.token === 'down')
 							multilineVars.voices[id].stem = attr.token;
 						else
@@ -872,6 +883,8 @@ var parseKeyVoice = {};
 						attr = tokenizer.getVoiceToken(line, start, end);
 						if (attr.warn !== undefined)
 							warn("Expected value for style in voice: " + attr.warn, line, start);
+						else if (attr.err !== undefined)
+							warn("Expected value for style in voice: " + attr.err, line, start);
 						else if (attr.token === 'normal' || attr.token === 'harmonic' || attr.token === 'rhythm' || attr.token === 'x')
 							multilineVars.voices[id].style = attr.token;
 						else

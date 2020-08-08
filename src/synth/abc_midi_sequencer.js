@@ -15,6 +15,7 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var sequence;
+var parseCommon = require("../parse/abc_common");
 
 (function() {
 	"use strict";
@@ -29,9 +30,12 @@ var sequence;
 	sequence = function(abctune, options) {
 		// Global options
 		options = options || {};
-		var qpm = undefined;
+		var qpm;
 		var program = options.program || 0;	// The program if there isn't a program specified.
 		var transpose = options.midiTranspose || 0;
+		// If the tune has a visual transpose then that needs to be subtracted out because we are getting the visual object.
+		if (abctune.visualTranspose)
+			transpose -= abctune.visualTranspose;
 		var channel = options.channel || 0;
 		var channelExplicitlySet = false;
 		var drumPattern = options.drum || "";
@@ -40,6 +44,7 @@ var sequence;
 		var drumOn = drumPattern !== "";
 		var style = []; // The note head style for each voice.
 		var rhythmHeadThisBar = false; // Rhythm notation was detected.
+		var crescendoSize = 50; // how much to increase or decrease volume when crescendo/diminuendo is encountered.
 
 		// All of the above overrides need to be integers
 		program = parseInt(program, 10);
@@ -114,7 +119,7 @@ var sequence;
 		if (options.qpm)
 			qpm = parseInt(options.qpm, 10);
 		else if (abctune.metaText.tempo)
-			qpm = interpretTempo(abctune.metaText.tempo);
+			qpm = interpretTempo(abctune.metaText.tempo, abctune.getBeatLength());
 		else if (options.defaultQpm)
 			qpm = options.defaultQpm;
 		else
@@ -143,6 +148,8 @@ var sequence;
 
 		// visit each voice completely in turn
 		var voices = [];
+		var inCrescendo = [];
+		var inDiminuendo = [];
 		var startRepeatPlaceholder = []; // There is a place holder for each voice.
 		var skipEndingPlaceholder = []; // This is the place where the first ending starts.
 		var startingDrumSet = false;
@@ -164,6 +171,10 @@ var sequence;
 							if (voiceName)
 								voices[voiceNumber].unshift({el_type: "name", trackName: voiceName});
 						}
+						// Negate any transposition for the percussion staff.
+						if (transpose && staff.clef.type === "perc")
+							voices[voiceNumber].push({ el_type: 'transpose', transpose: 0 });
+
 						if (staff.clef && staff.clef.type === 'perc' && !channelExplicitlySet) {
 							for (var cl = 0; cl < voices[voiceNumber].length; cl++) {
 								if (voices[voiceNumber][cl].el_type === 'instrument')
@@ -182,7 +193,7 @@ var sequence;
 							voices[voiceNumber].push({el_type: 'drum', params: {pattern: drumPattern, bars: drumBars, on: drumOn, intro: drumIntro}});
 							startingDrumSet = true;
 						}
-						if (staff.clef && staff.clef.transpose) {
+						if (staff.clef && staff.clef.type !== "perc" && staff.clef.transpose) {
 							staff.clef.el_type = 'clef';
 							voices[voiceNumber].push({ el_type: 'transpose', transpose: staff.clef.transpose });
 						}
@@ -200,43 +211,128 @@ var sequence;
 							voices[voiceNumber].push({el_type: 'drum', params: {pattern: "", on: false }});
 						}
 						var noteEventsInBar = 0;
+						var tripletMultiplier = 0;
+						var tripletDurationTotal = 0; // try to mitigate the js rounding problems.
+						var tripletDurationCount = 0;
+						var currentVolume = [105, 95, 85, 1];
+
 						for (var v = 0; v < voice.length; v++) {
 							// For each element in a voice
 							var elem = voice[v];
 							switch (elem.el_type) {
 								case "note":
+									if (inCrescendo[k]) {
+										currentVolume[0] += inCrescendo[k];
+										currentVolume[1] += inCrescendo[k];
+										currentVolume[2] += inCrescendo[k];
+										voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume.slice(0) });
+									}
+
+									if (inDiminuendo[k]) {
+										currentVolume[0] += inDiminuendo[k];
+										currentVolume[1] += inDiminuendo[k];
+										currentVolume[2] += inDiminuendo[k];
+										voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume.slice(0) });
+									}
+
 									// regular items are just pushed.
 									if (!elem.rest || elem.rest.type !== 'spacer') {
 										if (elem.decoration) {
-											if (elem.decoration.indexOf('pppp') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [15, 10, 5, 1] });
-											if (elem.decoration.indexOf('ppp') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [30, 20, 10, 1] });
-											else if (elem.decoration.indexOf('pp') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [45, 35, 20, 1] });
-											else if (elem.decoration.indexOf('p') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [60, 50, 35, 1] });
-											else if (elem.decoration.indexOf('mp') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [75, 65, 50, 1] });
-											else if (elem.decoration.indexOf('mf') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [90, 80, 65, 1] });
-											else if (elem.decoration.indexOf('f') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [105, 95, 80, 1] });
-											else if (elem.decoration.indexOf('ff') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [120, 110, 95, 1] });
-											else if (elem.decoration.indexOf('fff') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [127, 125, 110, 1] });
-											else if (elem.decoration.indexOf('ffff') >= 0)
-												voices[voiceNumber].push({ el_type: 'beat', beats: [127, 125, 110, 1] });
+											if (elem.decoration.indexOf('pppp') >= 0) {
+												currentVolume =  [15, 10, 5, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats:currentVolume });
+											}
+
+											if (elem.decoration.indexOf('ppp') >= 0) {
+												currentVolume = [30, 20, 10, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('pp') >= 0) {
+												currentVolume = [45, 35, 20, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('p') >= 0) {
+												currentVolume = [60, 50, 35, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('mp') >= 0) {
+												currentVolume = [75, 65, 50, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('mf') >= 0) {
+												currentVolume = [90, 80, 65, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('f') >= 0) {
+												currentVolume = [105, 95, 80, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('ff') >= 0) {
+												currentVolume = [120, 110, 95, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('fff') >= 0) {
+												currentVolume = [127, 125, 110, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											else if (elem.decoration.indexOf('ffff') >= 0) {
+												currentVolume = [127, 125, 110, 1];
+												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+											}
+
+											if (elem.decoration.indexOf("crescendo(") >= 0) {
+												var n = numNotesToDecoration(voice, v, "crescendo)");
+												var top = Math.min(127, currentVolume[0] + crescendoSize);
+												inCrescendo[k] = Math.floor((top - currentVolume[0]) / n);
+												inDiminuendo[k] = false;
+											} else if (elem.decoration.indexOf("crescendo)") >= 0) {
+												inCrescendo[k] = false;
+											} else if (elem.decoration.indexOf("diminuendo(") >= 0) {
+												var n2 = numNotesToDecoration(voice, v, "diminuendo)");
+												var bottom = Math.max(15, currentVolume[0] - crescendoSize);
+												inCrescendo[k] = false;
+												inDiminuendo[k] = Math.floor((bottom - currentVolume[0]) / n2);
+											} else if (elem.decoration.indexOf("diminuendo)") >= 0) {
+												inDiminuendo[k] = false;
+											}
 										}
-										if (!elem.style && style[voiceNumber]) {
-											elem.style = style[voiceNumber];
+										var noteElem = { elem: elem, el_type: "note" }; // Make a copy so that modifications aren't kept except for adding the midiPitches
+										if (elem.style)
+											noteElem.style = elem.style;
+										else if (style[voiceNumber])
+											noteElem.style = style[voiceNumber];
+										noteElem.duration = (elem.duration === 0) ? 0.25 : elem.duration;
+										if (elem.startTriplet) {
+											tripletMultiplier = elem.tripletMultiplier;
+											tripletDurationTotal = elem.startTriplet * tripletMultiplier * elem.duration;
+											noteElem.duration = noteElem.duration * tripletMultiplier;
+											noteElem.duration = Math.round(noteElem.duration*1000000)/1000000;
+											tripletDurationCount = noteElem.duration;
+										} else if (tripletMultiplier) {
+											if (elem.endTriplet) {
+												tripletMultiplier = 0;
+												noteElem.duration = Math.round((tripletDurationTotal - tripletDurationCount)*1000000)/1000000;
+											} else {
+												noteElem.duration = noteElem.duration * tripletMultiplier;
+												noteElem.duration = Math.round(noteElem.duration*1000000)/1000000;
+												tripletDurationCount += noteElem.duration;
+											}
 										}
-										if (elem.duration === 0) {
-											elem = Object.assign({}, elem);
-											elem.duration = 0.25; // TODO-PER: this should be the length of one beat
-										}
-										voices[voiceNumber].push(elem);
+										if (elem.rest) noteElem.rest = elem.rest;
+										if (elem.decoration) noteElem.decoration = elem.decoration.slice(0);
+										if (elem.pitches) noteElem.pitches = parseCommon.cloneArray(elem.pitches);
+										if (elem.gracenotes) noteElem.gracenotes = parseCommon.cloneArray(elem.gracenotes);
+										if (elem.chord) noteElem.chord = parseCommon.cloneArray(elem.chord);
+
+										voices[voiceNumber].push(noteElem);
 										if (elem.style === "rhythm") {
 											rhythmHeadThisBar = true;
 											chordVoiceOffThisBar(voices)
@@ -264,7 +360,7 @@ var sequence;
 									}
 									break;
 								case "tempo":
-									qpm = interpretTempo(elem);
+									qpm = interpretTempo(elem, abctune.getBeatLength());
 									voices[voiceNumber].push({ el_type: 'tempo', qpm: qpm });
 									break;
 								case "bar":
@@ -281,7 +377,13 @@ var sequence;
 										if (!s) s = 0; // If there wasn't a left repeat, then we repeat from the beginning.
 										var e = skipEndingPlaceholder[voiceNumber];
 										if (!e) e = voices[voiceNumber].length; // If there wasn't a first ending marker, then we copy everything.
-										voices[voiceNumber] = voices[voiceNumber].concat(voices[voiceNumber].slice(s, e));
+										// duplicate each of the elements - this has to be a deep copy.
+										for (var z = s; z < e; z++) {
+											var item = parseCommon.clone(voices[voiceNumber][z]);
+											if (item.pitches)
+												item.pitches = parseCommon.cloneArray(item.pitches);
+											voices[voiceNumber].push(item);
+										}
 										// reset these in case there is a second repeat later on.
 										skipEndingPlaceholder[voiceNumber] = undefined;
 										startRepeatPlaceholder[voiceNumber] = undefined;
@@ -294,6 +396,9 @@ var sequence;
 									break;
 								case 'style':
 									style[voiceNumber] = elem.head;
+									break;
+								case 'timeSignature':
+									voices[voiceNumber].push(interpretMeter(elem));
 									break;
 								case 'part':
 									// TODO-PER: If there is a part section in the header, then this should probably affect the repeats.
@@ -378,8 +483,22 @@ var sequence;
 				}
 			}
 		}
+		if (voices.length > 0 && voices[0].length > 0) {
+			voices[0][0].pickupLength = abctune.getPickupLength();
+		}
 		return voices;
 	};
+
+	function numNotesToDecoration(voice, start, decoration) {
+		var counter = 0;
+		for (var i = start+1; i < voice.length; i++) {
+			if (voice[i].el_type === "note")
+				counter++;
+			if (voice[i].decoration && voice[i].decoration.indexOf(decoration) >= 0)
+				return counter;
+		}
+		return counter;
+	}
 
 	function chordVoiceOffThisBar(voices) {
 		for (var i = 0; i < voices.length; i++) {
@@ -398,7 +517,7 @@ var sequence;
 		return staff[voiceNumber].title.join(" ");
 	}
 
-	function interpretTempo(element) {
+	function interpretTempo(element, beatLength) {
 		var duration = 1/4;
 		if (element.duration) {
 			duration = element.duration[0];
@@ -407,9 +526,8 @@ var sequence;
 		if (element.bpm) {
 			bpm = element.bpm;
 		}
-		// The tempo is defined with a beat of a 1/4 note, so we need to adjust it if the tempo is expressed with other than a quarter note.
-		// expressedDuration * expressedBeatsPerMinute / lengthOfQuarterNote = quarterNotesPerMinute
-		return duration * bpm / 0.25;
+		// The tempo is defined with a beat length of "duration". If that isn't the natural beat length then there is a translation.
+		return duration * bpm / beatLength;
 	}
 
 	function interpretMeter(element) {

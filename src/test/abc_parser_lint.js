@@ -218,6 +218,7 @@ var ParserLint = function() {
 		}},
 		rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'lyric' ], properties: {
 			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest', 'multimeasure', 'whole' ] },	// multimeasure requires duration to be the number of measures.
+			text: { type: 'number', minimum: 1, maximum: 100, optional: true },
 			endTie: { type: 'boolean', Enum: [ true ], optional: true },
 			startTie: tieProperties
 		}},
@@ -583,7 +584,7 @@ var ParserLint = function() {
 		description:"ABC Internal Music Representation",
 		type:"object",
 		properties: {
-			version: { type: "string", Enum: [ "1.0.1" ] },
+			version: { type: "string", Enum: [ "1.1.0" ] },
 			media: { type: "string", Enum: [ "screen", "print" ] },
 
 			formatting: formattingProperties,

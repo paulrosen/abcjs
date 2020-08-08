@@ -59,37 +59,6 @@ var AbsoluteElement = function AbsoluteElement(abcelem, duration, minspacing, ty
 	};
 };
 
-// For each of the relative elements that can't be placed in advance (because their vertical placement depends on everything
-// else on the line), this iterates through them and sets their pitch. By the time this is called, specialYResolved contains a
-// hash with the vertical placement (in pitch units) for each type.
-// TODO-PER: I think this needs to be separated by "above" and "below". How do we know that for dynamics at the point where they are being defined, though? We need a pass through all the relative elements to set "above" and "below".
-AbsoluteElement.prototype.setUpperAndLowerElements = function(specialYResolved) {
-	// specialYResolved contains the actual pitch for each of the classes of elements.
-	for (var i = 0; i < this.children.length; i++) {
-		var child = this.children[i];
-		for (var key in this.specialY) { // for each class of element that needs to be placed vertically
-			if (this.specialY.hasOwnProperty(key)) {
-				if (child[key]) { // If this relative element has defined a height for this class of element
-					child.pitch = specialYResolved[key];
-					if (child.top === undefined) { // TODO-PER: HACK! Not sure this is the right place to do this.
-						child.setUpperAndLowerElements(specialYResolved);
-						this.pushTop(child.top);
-						this.pushBottom(child.bottom);
-					}
-				}
-			}
-		}
-	}
-};
-
-AbsoluteElement.prototype.getMinWidth = function () { // absolute space taken to the right of the note
-	return this.w;
-};
-
-AbsoluteElement.prototype.getExtraWidth = function () { // space needed to the left of the note
-	return -this.extraw;
-};
-
 AbsoluteElement.prototype.addExtra = function (extra) {
 	if (extra.dx<this.extraw) this.extraw = extra.dx;
 	this.extra[this.extra.length] = extra;

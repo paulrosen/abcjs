@@ -167,7 +167,6 @@ function listAbsElement(absEl, indent) {
 }
 
 function listRelativeElement(relativeElement, indent) {
-	var tab = createIndent(indent);
 	var tab2 = createIndent(indent+1);
 	var output = [];
 	output.push("relative element: " + relativeElement.type);
@@ -188,6 +187,20 @@ function listRelativeElement(relativeElement, indent) {
 					svg = svg.substring(indent); // Remove the indent on the first line because that will be added as the last line of this method.
 					output.push(svg);
 				}
+				break;
+			case "note":
+				break;
+			case "tempo":
+				var tempoDetails = [];
+				if (item.preString)
+					tempoDetails.push("preString: " + item.preString);
+				if (item.duration && item.duration.length)
+					tempoDetails.push("duration: " + item.duration.join(","));
+				if (item.bpm)
+					tempoDetails.push("bpm: " + item.bpm);
+				if (item.postString)
+					tempoDetails.push("postString: " + item.postString);
+				output.push(keys[i] + ": " + tempoDetails.join(", "));
 				break;
 			default:
 				if (item !== undefined)

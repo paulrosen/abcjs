@@ -23,11 +23,13 @@ var parseDirective = {};
 	var warn;
 	var multilineVars;
 	var tune;
-	parseDirective.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
+	var tuneBuilder;
+	parseDirective.initialize = function(tokenizer_, warn_, multilineVars_, tune_, tuneBuilder_) {
 		tokenizer = tokenizer_;
 		warn = warn_;
 		multilineVars = multilineVars_;
 		tune = tune_;
+		tuneBuilder = tuneBuilder_;
 		initializeFonts();
 	};
 
@@ -459,10 +461,6 @@ var parseDirective = {};
 	var midiCmdParam5Integer = [
 		"drone"
 	];
-	var midiCmdParam1IntegerOptionalOctave = [
-		"bassprog",
-		"chordprog"
-	];
 	var midiCmdParam1String1Integer = [
 		"portamento"
 	];
@@ -618,8 +616,8 @@ var parseDirective = {};
 			}
 		}
 
-		if (tune.hasBeginMusic())
-			tune.appendElement('midi', -1, -1, { cmd: midi_cmd, params: midi_params });
+		if (tuneBuilder.hasBeginMusic())
+			tuneBuilder.appendElement('midi', -1, -1, { cmd: midi_cmd, params: midi_params });
 		else {
 			if (tune.formatting['midi'] === undefined)
 				tune.formatting['midi'] = {};
@@ -742,21 +740,21 @@ var parseDirective = {};
 				var voiceScale = tokens.shift();
 				if (multilineVars.currentVoice) {
 					multilineVars.currentVoice.scale = voiceScale.floatt;
-					tune.changeVoiceScale(multilineVars.currentVoice.scale);
+					tuneBuilder.changeVoiceScale(multilineVars.currentVoice.scale);
 				}
 				return null;
 			case "vskip":
 				var vskip = Math.round(getRequiredMeasurement(cmd, tokens));
 				if (vskip.error)
 					return vskip.error;
-				tune.addSpacing(vskip);
+				tuneBuilder.addSpacing(vskip);
 				return null;
 			case "scale":
 				setScale(cmd, tokens);
 				break;
 			case "sep":
 				if (tokens.length === 0)
-					tune.addSeparator(14,14,85); // If no parameters are given, then there is a default size.
+					tuneBuilder.addSeparator(14,14,85); // If no parameters are given, then there is a default size.
 				else {
 					var points = tokenizer.getMeasurement(tokens);
 					if (points.used === 0)
@@ -772,7 +770,7 @@ var parseDirective = {};
 					if (points.used === 0 || tokens.length !== 0)
 						return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
 					var lenLine = points.value;
-					tune.addSeparator(spaceAbove, spaceBelow, lenLine);
+					tuneBuilder.addSeparator(spaceAbove, spaceBelow, lenLine);
 				}
 				break;
 			case "barsperstaff":
@@ -812,7 +810,7 @@ var parseDirective = {};
 				if (tokens.length !== 1 || tokens[0].type !== 'number') {
 					return 'Directive setbarnb requires a number as a parameter.';
 				}
-				multilineVars.currBarNumber = tune.setBarNumberImmediate(tokens[0].intt);
+				multilineVars.currBarNumber = tuneBuilder.setBarNumberImmediate(tokens[0].intt);
 				break;
 			case "begintext":
 				multilineVars.inTextBlock = true;
@@ -831,11 +829,11 @@ var parseDirective = {};
 				break;
 			case "text":
 				var textstr = tokenizer.translateString(restOfString);
-				tune.addText(parseDirective.parseFontChangeLine(textstr));
+				tuneBuilder.addText(parseDirective.parseFontChangeLine(textstr));
 				break;
 			case "center":
 				var centerstr = tokenizer.translateString(restOfString);
-				tune.addCentered(parseDirective.parseFontChangeLine(centerstr));
+				tuneBuilder.addCentered(parseDirective.parseFontChangeLine(centerstr));
 				break;
 			case "font":
 				// don't need to do anything for this; it is a useless directive
@@ -985,7 +983,7 @@ var parseDirective = {};
 
 			case "newpage":
 				var pgNum = tokenizer.getInt(restOfString);
-				tune.addNewPage(pgNum.digits === 0 ? -1 : pgNum.value);
+				tuneBuilder.addNewPage(pgNum.digits === 0 ? -1 : pgNum.value);
 				break;
 
 			case "abc":
@@ -997,7 +995,7 @@ var parseDirective = {};
 					case "-version":
 					case "-charset":
 						var subCmd = arr.shift();
-						tune.addMetaText(cmd+subCmd, arr.join(' '));
+						tuneBuilder.addMetaText(cmd+subCmd, arr.join(' '));
 						break;
 					default:
 						return "Unknown directive: " + cmd+arr[0];
@@ -1020,7 +1018,7 @@ var parseDirective = {};
 				if (footerArr.length > 3)
 					warn("Too many tabs in " + cmd + ": " + footerArr.length + " found.", restOfString, 0);
 
-				tune.addMetaTextObj(cmd, footer);
+				tuneBuilder.addMetaTextObj(cmd, footer);
 				break;
 
 			case "midi":

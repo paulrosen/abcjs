@@ -25,26 +25,25 @@ var createNoteMap = function(sequence) {
 	// TODO-PER: handle more than one note in a track
 	var nextNote = {};
 	var currentInstrument = instrumentIndexToName[0];
+	// ev.start and ev.duration are in whole notes. Need to turn them into
 	sequence.tracks.forEach(function(track, i) {
-		var currentTime = 0;
 		track.forEach(function(ev) {
 			switch (ev.cmd) {
-				case "start":
-					nextNote[ev.pitch] = { time: currentTime, instrument: currentInstrument, volume: ev.volume };
-					break;
-				case "move":
-					currentTime = Math.round((currentTime+ev.duration)*1000000)/1000000;
-					break;
-				case "stop":
-					if (nextNote[ev.pitch]) { // If unisons are requested, then there might be two starts and two stops for the same note. Only use one of them.
+				case "note":
+					// ev contains:
+					// {"cmd":"note","pitch":72,"volume":95,"start":0.125,"duration":0.25,"instrument":0,"gap":0}
+					// where start and duration are in whole notes, gap is in 1/1920 of a second (i.e. MIDI ticks)
+					if (ev.duration > 0) {
+						var gap = ev.gap ? ev.gap : 0;
+						var len = ev.duration;
+						gap = Math.min(gap, len * 2 / 3);
 						map[i].push({
 							pitch: ev.pitch,
-							instrument: nextNote[ev.pitch].instrument,
-							start: nextNote[ev.pitch].time,
-							end: currentTime,
-							volume: nextNote[ev.pitch].volume
+							instrument: currentInstrument,
+							start: Math.round((ev.start) * 1000000)/1000000,
+							end: Math.round((ev.start + len - gap) * 1000000)/1000000,
+							volume: ev.volume
 						});
-						delete nextNote[ev.pitch];
 					}
 					break;
 				case "program":
@@ -55,7 +54,7 @@ var createNoteMap = function(sequence) {
 					break;
 				default:
 					// TODO-PER: handle other event types
-					console.log("Unhanded midi event", ev);
+					console.log("Unhandled midi event", ev);
 			}
 		});
 	});

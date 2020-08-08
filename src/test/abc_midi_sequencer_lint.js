@@ -33,6 +33,8 @@ var midiSequencerLint = function(tune) {
 				case "note":
 					ret += "\t\t";
 					ret += 'duration: ' + element.duration + '\n';
+					if (element.decoration && element.decoration.length > 0)
+						ret += '\t\tdecoration: ' + element.decoration.join(", ") + '\n';
 					ret += "\t\t";
 					if (element.chord) {
 						ret += 'chord: ';

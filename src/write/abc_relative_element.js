@@ -78,38 +78,4 @@ RelativeElement.prototype.setX = function (x) {
 	this.x = x+this.dx;
 };
 
-RelativeElement.prototype.setUpperAndLowerElements = function(positionY) {
-	switch(this.type) {
-		case "part":
-			this.top = positionY.partHeightAbove + this.height;
-			this.bottom = positionY.partHeightAbove;
-			break;
-		case "text":
-		case "chord":
-			if (this.chordHeightAbove) {
-				this.top = positionY.chordHeightAbove;
-				this.bottom = positionY.chordHeightAbove;
-			} else {
-				this.top = positionY.chordHeightBelow;
-				this.bottom = positionY.chordHeightBelow;
-			}
-			break;
-		case "lyric":
-			if (this.lyricHeightAbove) {
-				this.top = positionY.lyricHeightAbove;
-				this.bottom = positionY.lyricHeightAbove;
-			} else {
-				this.top = positionY.lyricHeightBelow;
-				this.bottom = positionY.lyricHeightBelow;
-			}
-			break;
-		case "debug":
-			this.top = positionY.chordHeightAbove;
-			this.bottom = positionY.chordHeightAbove;
-			break;
-	}
-	if (this.pitch === undefined || this.top === undefined)
-		window.console.error("RelativeElement position not set.", this.type, this.pitch, this.top, positionY);
-};
-
 module.exports = RelativeElement;

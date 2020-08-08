@@ -34,7 +34,7 @@ var SynthSequence = function() {
 	self.appendNote = function(trackNumber, pitch, durationInMeasures, volume) {
 		self.tracks[trackNumber].push({
 			cmd: "start",
-			pitch: pitch - 60,
+			pitch: pitch,
 			volume: volume
 		});
 		self.tracks[trackNumber].push({
@@ -43,7 +43,7 @@ var SynthSequence = function() {
 		});
 		self.tracks[trackNumber].push({
 			cmd: "stop",
-			pitch: pitch - 60
+			pitch: pitch
 		});
 		var duration = 0;
 		self.tracks[trackNumber].forEach(function(event) {

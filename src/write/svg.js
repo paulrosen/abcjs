@@ -322,6 +322,10 @@ Svg.prototype.setAttributeOnElement = function(el, attr) {
 	}
 };
 
+Svg.prototype.moveElementToChild = function(parent, child) {
+	parent.appendChild(child);
+};
+
 function createSvg() {
 	var svg = document.createElementNS(svgNS, "svg");
 	svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");

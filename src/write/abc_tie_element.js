@@ -14,9 +14,6 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var highlight = require('./highlight');
-var unhighlight = require('./unhighlight');
-
 var TieElem = function TieElem(options) {
 	this.type = "TieElem";
 //	console.log("constructor", options.anchor1 ? options.anchor1.pitch : "N/A", options.anchor2 ? options.anchor2.pitch : "N/A", options.isTie, options.isGrace);
@@ -53,10 +50,6 @@ TieElem.prototype.setEndX = function(endLimitElem) {
 
 TieElem.prototype.setHint = function () {
 	this.hint = true;
-};
-
-TieElem.prototype.setUpperAndLowerElements = function(positionY) {
-	// Doesn't depend on the highest and lowest, so there's nothing to do here.
 };
 
 TieElem.prototype.calcTieDirection = function () {

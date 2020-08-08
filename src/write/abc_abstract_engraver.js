@@ -391,26 +391,11 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		}
 	}
 
-	AbstractEngraver.prototype.calcBeamDir = function (isSingleLineStaff, voice, elems) {
-		if (this.stemdir) // If the user or voice is forcing the stem direction, we already know the answer.
-			return this.stemdir;
-		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams);
-		for (var i = 0; i < elems.length; i++) {
-			beamelem.add({abcelem: elems[i]}); // This is a hack to call beam elem with just a minimum of processing: for our purposes, we don't need to construct the whole note.
-		}
-
-		var dir = beamelem.calcDir();
-		return dir ? "up" : "down";
-	};
-
 	AbstractEngraver.prototype.createBeam = function (isSingleLineStaff, voice, elems) {
 		var abselemset = [];
 
-		var dir = this.calcBeamDir(isSingleLineStaff, voice, elems);
-		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, dir, this.flatBeams, elems[0]);
+		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams, elems[0]);
 		if (hint) beamelem.setHint();
-		var oldDir = this.stemdir;
-		this.stemdir = dir;
 		for (var i = 0; i < elems.length; i++) {
 			var elem = elems[i];
 			var abselem = this.createNote(elem, true, isSingleLineStaff, voice);
@@ -422,7 +407,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 				this.tripletmultiplier = 1;
 			}
 		}
-		this.stemdir = oldDir;
+		beamelem.calcDir();
 		voice.addBeam(beamelem);
 		return abselemset;
 	};
@@ -475,6 +460,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			gracebeam.mainNote = abselem;	// this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
 		}
 
+		var i;
 		var graceoffsets = [];
 		for (i = elem.gracenotes.length - 1; i >= 0; i--) { // figure out where to place each gracenote
 			roomtaken += 10;
@@ -484,7 +470,6 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			}
 		}
 
-		var i;
 		for (i = 0; i < elem.gracenotes.length; i++) {
 			var gracepitch = elem.gracenotes[i].verticalPos;
 
@@ -531,6 +516,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 		}
 
 		if (gracebeam) {
+			gracebeam.calcDir();
 			voice.addBeam(gracebeam);
 		}
 		return roomtaken;
@@ -589,7 +575,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				dot = 0;
 				var mmWidth = glyphs.getSymbolWidth(c);
 				abselem.addHead(new RelativeElement(c, -mmWidth, mmWidth * 2, 7));
-				var numMeasures = new RelativeElement("" + elem.duration, 0, mmWidth, 16, {type: "multimeasure-text"});
+				var numMeasures = new RelativeElement("" + elem.rest.text, 0, mmWidth, 16, {type: "multimeasure-text"});
 				abselem.addExtra(numMeasures);
 		}
 		if (elem.rest.type !== "multimeasure") {
@@ -764,7 +750,6 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   var symbolWidth = 0;
   var additionalLedgers = []; // PER: handle the case of [bc'], where the b doesn't have a ledger line
 
-  var i;
   var dir;
 
 	var duration = getDuration(elem);
@@ -782,13 +767,13 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 
   var durationForSpacing = duration * this.tripletmultiplier;
   if (elem.rest && elem.rest.type === 'multimeasure')
-  	durationForSpacing = 1;
+  	durationForSpacing = duration;
   var absType = elem.rest ? "rest" : "note";
   var abselem = new AbsoluteElement(elem, durationForSpacing, 1, absType, this.tuneNumber, { durationClassOveride: elem.duration * this.tripletmultiplier});
   if (hint) abselem.setHint();
 
   if (elem.rest) {
-  	if (this.measureLength === duration && elem.rest.type !== 'invisible' && elem.rest.type !== 'spacer')
+  	if (this.measureLength === duration && elem.rest.type !== 'invisible' && elem.rest.type !== 'spacer' && elem.rest.type !== 'multimeasure')
 	    elem.rest.type = 'whole'; // If the rest is exactly a measure, always use a whole rest
 	  var ret1 = addRestToAbsElement(abselem, elem, duration, dot, voice.voicetotal > 1, this.stemdir, isSingleLineStaff, durlog, this.voiceScale);
 	  notehead = ret1.noteHead;
@@ -831,7 +816,6 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 	  roomtakenright = ret3.roomTakenRight;
   }
 
-
   if (elem.startTriplet) {
     this.triplet = new TripletElem(elem.startTriplet, notehead, { flatBeams: this.flatBeams }); // above is opposite from case of slurs
   }
@@ -844,18 +828,13 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   	this.triplet.middleNote(notehead);
   }
 
-
   return abselem;
 };
-
-
-
 
 var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot, shouldExtendStem) {
   // TODO scale the dot as well
   var pitch = pitchelem.verticalPos;
   var notehead;
-  var i;
   var accidentalshiftx = 0;
   var newDotShiftX = 0;
   var extraLeft = 0;
@@ -975,10 +954,11 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 			abselem.startTie = true;
 		}
 
+		var slur;
+		var slurid;
 		if (pitchelem.endSlur) {
 			for (var i=0; i<pitchelem.endSlur.length; i++) {
-				var slurid = pitchelem.endSlur[i];
-				var slur;
+				slurid = pitchelem.endSlur[i];
 				if (this.slurs[slurid]) {
 					slur = this.slurs[slurid];
 					slur.setEndAnchor(notehead);
@@ -1002,8 +982,8 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 
 		if (pitchelem.startSlur) {
 			for (i=0; i<pitchelem.startSlur.length; i++) {
-				var slurid = pitchelem.startSlur[i].label;
-				var slur = new TieElem({ anchor1: notehead, stemDir: this.stemdir, voiceNumber: voiceNumber});
+				slurid = pitchelem.startSlur[i].label;
+				slur = new TieElem({ anchor1: notehead, stemDir: this.stemdir, voiceNumber: voiceNumber});
 				if (hint) slur.setHint();
 				this.slurs[slurid]=slur;
 				voice.addOther(slur);

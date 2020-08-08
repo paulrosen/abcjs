@@ -108,6 +108,8 @@ var Editor = function(editarea, params) {
     this.div = document.createElement("DIV");
     this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem());
   }
+  if (typeof this.div === 'string')
+	  this.div = document.getElementById(this.div);
 
   if (params.selectionChangeCallback) {
   	this.selectionChangeCallback = params.selectionChangeCallback;
@@ -142,8 +144,14 @@ var Editor = function(editarea, params) {
 		}
 	}
 
-  if (params.generate_warnings && params.warnings_id) {
+  if (params.warnings_id) {
+  	if (typeof(params.warnings_id) === "string")
       this.warningsdiv = document.getElementById(params.warnings_id);
+  	else
+		this.warningsdiv = params.warnings_id;
+  } else if (params.generate_warnings) {
+	  this.warningsdiv = document.createElement("div");
+	  this.div.parentNode.insertBefore(this.warningsdiv, this.div);
   }
 
   this.onchangeCallback = params.onchange;
@@ -203,7 +211,7 @@ Editor.prototype.redrawMidi = function() {
 			this.synth.synthControl = new SynthController();
 			this.synth.synthControl.load(this.synth.el, this.synth.cursorControl, this.synth.options);
 		}
-		this.synth.synthControl.setTune(this.tunes[0], false, this.abcjsParams);
+		this.synth.synthControl.setTune(this.tunes[0], false, this.synth.options);
 	}
 };
 
@@ -231,6 +239,19 @@ Editor.prototype.paramChanged = function(engraverParams) {
 		for (var key in engraverParams) {
 			if (engraverParams.hasOwnProperty(key)) {
 				this.abcjsParams[key] = engraverParams[key];
+			}
+		}
+	}
+	this.currentAbc = "";
+	this.fireChanged();
+};
+
+Editor.prototype.synthParamChanged = function(options) {
+	this.synth.options = {};
+	if (options) {
+		for (var key in options) {
+			if (options.hasOwnProperty(key)) {
+				this.synth.options[key] = options[key];
 			}
 		}
 	}

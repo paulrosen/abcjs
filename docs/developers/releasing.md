@@ -6,6 +6,20 @@ Note: The following checklist is for committers only!
 For people who want to contribute a pull request, this isn't relevant!
 :::
 
+::: tip Branch
+All new work should be done in the `dev` branch.
+:::
+
+To begin a new version:
+
+[_] Switch to the `dev` branch and do all new work there.
+
+[_] Find any hardcoded version numbers in [the package file](../package.json) and change them. 
+
+[_] Minify the various library versions with `npm run build` just to get the next version's examples set up.
+
+[_] Add the new files: `git add bin/abcjs*_x.x.x*`.
+
 To release a new version, this checklist should be followed:
 
 [_] Get all commits since the last release with `git log > temp.txt`.
@@ -14,17 +28,15 @@ To release a new version, this checklist should be followed:
 
 [_] Be sure [the read me file](../README.md) is up to date, along with all the files in [docs](../docs).
 
-[_] Find any hardcoded version numbers in [the package file](../package.json) and change them. 
-
 [_] Minify the various library versions with `npm run build`.
-
-[_] Add the new files: `git add bin/abcjs*_x.x.x*`.
 
 [_] Check the minified versions and other changed files in.
 
+[_] Merge the `dev` branch into `master`. 
+
 [_] Update npm with `npm publish` or `npm publish --tag beta`.
     To do this in docker:
-    `docker run -v $(pwd):/srv/app -it <image-id> /bin/bash`
+    `docker run -v $(pwd):/srv/app -it abcjs /bin/bash`
      `npm login`
 
 [_] Run `npm install` and check it in.
