@@ -22,7 +22,7 @@
 					canvas_id: "paper",
 					warnings_id: "warnings",
 					onchange: this.onchange,
-					abcjsParams: { add_classes: true },
+					abcjsParams: { add_classes: true, responsive: "resize" },
 					indicate_changed: true,
 				});
 			}
@@ -45,7 +45,7 @@
 					canvas_id: "paper",
 					warnings_id: "warnings",
 					onchange: this.onchange,
-					abcjsParams: { add_classes: true },
+					abcjsParams: { add_classes: true, responsive: "resize" },
 					indicate_changed: true,
 				});
 			});
