@@ -25,7 +25,8 @@ GetFontAndAttr.prototype.calc = function(type, klass) {
 			font = {face: "Arial", size: Math.round(12 * 4 / 3), decoration: "underline", style: "normal", weight: "normal"};
 	} else
 		font = {face: type.face, size: Math.round(type.size * 4 / 3), decoration: type.decoration, style: type.style, weight: type.weight, box: type.box};
-	font.padding = font.size / 10;
+	var paddingPercent = this.formatting.fontboxpadding ? this.formatting.fontboxpadding : 0.1
+	font.padding = font.size * paddingPercent;
 
 	var attr = {"font-size": font.size, 'font-style': font.style,
 		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,

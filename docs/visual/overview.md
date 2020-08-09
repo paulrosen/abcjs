@@ -74,7 +74,7 @@ A standard string that is in ABC format. This can be one tune, many tunes, or a 
 
 ### Options
 
-This is an object containing a wide variety of options. See the section on options for more details.
+This is an object containing a wide variety of options. [See the section on options for more details](render-abc-options.html).
 
 ## Return value
 

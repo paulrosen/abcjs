@@ -1083,6 +1083,12 @@ var parseDirective = {};
 					case "freegchord":
 						scratch = addMultilineVarBool('freegchord', cmd, tokens);
 						if (scratch !== null) warn(scratch);
+						break;
+					case "fontboxpadding":
+						if (tokens.length !== 1 || tokens[0].type !== 'number')
+							warn("Directive \"" + cmd + "\" requires a number as a parameter.");
+						tune.formatting.fontboxpadding = tokens[0].floatt;
+						break;
 					default:
 						warn("Formatting directive unrecognized: ", cmd, 0);
 				}

@@ -26,6 +26,7 @@ function renderText(renderer, params) {
 		} else if (hash.attr["text-anchor"] === "start") {
 			hash.attr.x += hash.font.padding;
 		}
+		hash.attr.y += hash.font.padding;
 		delete hash.attr['class'];
 	}
 	if (params.noClass)
@@ -38,13 +39,13 @@ function renderText(renderer, params) {
 		if (hash.attr["text-anchor"] === "middle") {
 		 	delta = size.width / 2 + hash.font.padding;
 		} else if (hash.attr["text-anchor"] === "end") {
-			delta = size.width + hash.font.padding * 3;
+			delta = size.width + hash.font.padding * 2;
 		}
 		var deltaY = 0;
 		if (params.centerVertically) {
 			deltaY = size.height - hash.font.padding;
 		}
-		renderer.paper.rect({ x: params.x - delta, y: params.y - deltaY, width: size.width + hash.font.padding*2, height: size.height + hash.font.padding*2});
+		renderer.paper.rect({ x: Math.round(params.x - delta), y: Math.round(params.y - deltaY), width: Math.round(size.width + hash.font.padding*2), height: Math.round(size.height + hash.font.padding*2)});
 		elem = renderer.paper.closeGroup();
 	}
 	return elem;

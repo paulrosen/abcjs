@@ -95,6 +95,11 @@ Default: 0
  
  The index of the tune in the tunebook to render (starting at zero for the first tune). This is only relevant if the abc string that is passed in contains multiple tunes.
 
+## textboxpadding
+Default: 0.10
+ 
+What percentage of the font size should the box that is drawn around the font be padded by? 
+
 ## viewportHorizontal
 Default: false
  

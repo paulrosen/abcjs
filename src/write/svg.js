@@ -126,15 +126,19 @@ Svg.prototype.setParentStyles = function(attr) {
 };
 
 function constructHLine(x1, y1, x2) {
-	return "M " + x1 + " " + y1 + " L " + x2 + ' ' + y1 +
-		" L " + x2 + " " + (y1+1) + " " +
-		" L " + x1 + " " + (y1+1) + " " + " z ";
+	var len = x2 - x1;
+	return "M " + x1 + " " + y1 +
+		" l " + len + ' ' + 0 +
+		" l " + 0 + " " + 1 + " " +
+		" l " + (-len) + " " + 0 + " " + " z ";
 }
 
 function constructVLine(x1, y1, y2) {
-	return "M " + x1 + " " + y1 + " L " + x1 + ' ' + y2 +
-		" L " + (x1+1) + " " + y2 + " " +
-		" L " + (x1+1) + " " + y1 + " " + " z ";
+	var len = y2 - y1;
+	return "M " + x1 + " " + y1 +
+		" l " + 0 + ' ' + len +
+		" l " + 1 + " " + 0 + " " +
+		" l " + 0 + " " + (-len) + " " + " z ";
 }
 
 Svg.prototype.rect = function(attr) {
@@ -146,8 +150,8 @@ Svg.prototype.rect = function(attr) {
 	var y2 = attr.y + attr.height;
 	lines.push(constructHLine(x1, y1, x2));
 	lines.push(constructHLine(x1, y2, x2));
-	lines.push(constructVLine(x1, y1, y2));
 	lines.push(constructVLine(x2, y1, y2));
+	lines.push(constructVLine(x1, y2, y1));
 
 	return this.path({ path: lines.join(" "), stroke: "none"});
 };
