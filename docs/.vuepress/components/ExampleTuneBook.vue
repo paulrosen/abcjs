@@ -40,7 +40,7 @@
 			});
 		},
 		data() {
-			const abc = `%%gchordfont Itim\n
+			const abc = `%%gchordfont "itim-music,Itim" 20
 X: 1
 T:Money Lost
 M:3/4
