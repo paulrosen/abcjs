@@ -69,7 +69,7 @@ var parseDirective = {};
 		tune.formatting.wordsfont  = multilineVars.wordsfont;
 	}
 
-	var fontTypeCanHaveBox = { gchordfont: true, measurefont: true, partsfont: true };
+	var fontTypeCanHaveBox = { gchordfont: true, measurefont: true, partsfont: true, annotationfont: true, composerfont: true, historyfont: true, infofont: true, subtitlefont: true, textfont: true, titlefont: true, voicefont: true  };
 
 	var fontTranslation = function(fontFace) {
 		// This translates Postscript fonts for a web alternative.

@@ -30,8 +30,6 @@ function TopText(metaText, lines, width, isPrint, paddingLeft, spacing, getTextS
 		if (composerLine.length > 0) {
 			this.addTextIf(paddingLeft + width, composerLine, 'composerfont', 'meta-top composer', 0, null, "end", getTextSize, "composer");
 		}
-		// TODO-PER: The following is a hack to make the elements line up with abcm2ps. Don't know where the extra space is coming from.
-		this.rows.push({move: -6});
 	}
 
 	if (metaText.author && metaText.author.length > 0) {
