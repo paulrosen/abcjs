@@ -273,7 +273,7 @@ var Parse = function() {
 	var legalAccents = [ "trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
 		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
-		"segno", "coda", "D.S.", "D.C.", "fine",
+		"segno", "coda", "D.S.", "D.C.", "fine", "beambr1", "beambr2",
 		"slide", "^", "marcato",
 		"upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4",
 		"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato",
@@ -1269,7 +1269,11 @@ var Parse = function() {
 								} else {
 									if (el.decoration === undefined)
 										el.decoration = [];
-									el.decoration.push(ret[1]);
+									if (ret[1] === 'beambr1')
+										el.beambr = 1;
+									else if (ret[1] === "beambr2")
+										el.beambr = 2;
+									else el.decoration.push(ret[1]);
 								}
 							}
 							i += ret[0];

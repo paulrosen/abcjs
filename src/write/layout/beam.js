@@ -157,13 +157,25 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
 		var duration = elem.abcelem.duration; // get the duration via abcelem because of triplets
 		if (duration === 0) duration = 0.25; // if this is stemless, then we use quarter note as the duration.
 		for (var durlog = getDurlog(duration); durlog < -3; durlog++) {
-			if (auxBeams[-4 - durlog]) {
-				auxBeams[-4 - durlog].single = false;
+			var index = -4 - durlog;
+			if (auxBeams[index]) {
+				auxBeams[index].single = false;
 			} else {
-				auxBeams[-4 - durlog] = {
-					x: x + ((asc) ? -0.6 : 0), y: bary + sy * (-4 - durlog + 1),
+				auxBeams[index] = {
+					x: x + ((asc) ? -0.6 : 0), y: bary + sy * (index + 1),
 					durlog: durlog, single: true
 				};
+			}
+			if (i > 0 && elem.abcelem.beambr && elem.abcelem.beambr <= (index+1)) {
+				if (!auxBeams[index].split)
+					auxBeams[index].split = [auxBeams[index].x];
+				var xPos = calcXPos(asc, elems[i-1], elem);
+				if (auxBeams[index].split[auxBeams[index].split.length-1] >= xPos[0]) {
+					// the reduction in beams leaves a note unattached so create a small flag for it.
+					xPos[0] += elem.w;
+				}
+				auxBeams[index].split.push(xPos[0]);
+				auxBeams[index].split.push(xPos[1]);
 			}
 		}
 
@@ -178,7 +190,17 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
 					auxBeamEndX = (i === 0) ? x + 5 : x - 5;
 					auxBeamEndY = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, auxBeamEndX) + sy * (j + 1);
 				}
-				beams.push({ startX: auxBeams[j].x, endX: auxBeamEndX, startY: auxBeams[j].y, endY: auxBeamEndY, dy: dy });
+				var b = { startX: auxBeams[j].x, endX: auxBeamEndX, startY: auxBeams[j].y, endY: auxBeamEndY, dy: dy }
+				if (auxBeams[j].split !== undefined) {
+					var split = auxBeams[j].split;
+					if (b.endX <= split[split.length-1]) {
+						// the reduction in beams leaves the last note by itself, so create a little flag for it
+						split[split.length-1] -= elem.w;
+					}
+					split.push(b.endX);
+					b.split = auxBeams[j].split;
+				}
+				beams.push(b);
 				auxBeams = auxBeams.slice(0, j);
 			}
 		}
