@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Audio Tests</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+	<link rel="stylesheet" href="../abcjs-audio.css" />
+</head>
+<body>
+<p class="intro">These tests use the AudioContext which must be started after a user interaction, so you
+need to click the button below to do the testing.</p>
+<button class="intro start-test">Start Test</button>
+<div id="mocha"></div>
+<div id="paper"></div>
+<div id="midi"></div>
+<script src="../node_modules/chai/chai.js"></script>
+<script src="../node_modules/mocha/mocha.js"></script>
+<script class="mocha-init">
+	mocha.setup({ui: 'bdd', globals: ['__VUE_DEVTOOLS_TOAST__', 'abcjsAudioContext']});
+	mocha.checkLeaks();
+</script>
+
+<script src="synth/synth.test.js"></script>
+
+<script src="../node_modules/@tarp/require/require.min.js"></script>
+<script>
+	Tarp.require({main: "../index.js"}).then(function (response) {
+		window.abcjs = response;
+
+		var el = document.querySelector(".start-test");
+		el.addEventListener("click", function() {
+			var els = document.querySelectorAll(".intro")
+			for (var i = 0; i < els.length; i++) {
+				els[i].style = "display:none;";
+			}
+			mocha.run();
+		});
+	});
+</script>
+
+</body>
+</html>
