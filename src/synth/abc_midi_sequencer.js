@@ -150,6 +150,7 @@ var parseCommon = require("../parse/abc_common");
 		var voices = [];
 		var inCrescendo = [];
 		var inDiminuendo = [];
+		var currentVolume;
 		var startRepeatPlaceholder = []; // There is a place holder for each voice.
 		var skipEndingPlaceholder = []; // This is the place where the first ending starts.
 		var startingDrumSet = false;
@@ -214,7 +215,7 @@ var parseCommon = require("../parse/abc_common");
 						var tripletMultiplier = 0;
 						var tripletDurationTotal = 0; // try to mitigate the js rounding problems.
 						var tripletDurationCount = 0;
-						var currentVolume = [105, 95, 85, 1];
+						currentVolume = [105, 95, 85, 1];
 
 						for (var v = 0; v < voice.length; v++) {
 							// For each element in a voice
@@ -234,76 +235,10 @@ var parseCommon = require("../parse/abc_common");
 										currentVolume[2] += inDiminuendo[k];
 										voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume.slice(0) });
 									}
+									setDynamics(elem);
 
 									// regular items are just pushed.
 									if (!elem.rest || elem.rest.type !== 'spacer') {
-										if (elem.decoration) {
-											if (elem.decoration.indexOf('pppp') >= 0) {
-												currentVolume =  [15, 10, 5, 1];
-												voices[voiceNumber].push({ el_type: 'beat', beats:currentVolume });
-											}
-
-											if (elem.decoration.indexOf('ppp') >= 0) {
-												currentVolume = [30, 20, 10, 1];
-												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
-											}
-
-											else if (elem.decoration.indexOf('pp') >= 0) {
-												currentVolume = [45, 35, 20, 1];
-												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
-											}
-
-											else if (elem.decoration.indexOf('p') >= 0) {
-												currentVolume = [60, 50, 35, 1];
-												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
-											}
-
-											else if (elem.decoration.indexOf('mp') >= 0) {
-												currentVolume = [75, 65, 50, 1];
-												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
-											}
-
-											else if (elem.decoration.indexOf('mf') >= 0) {
-												currentVolume = [90, 80, 65, 1];
-												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
-											}
-
-											else if (elem.decoration.indexOf('f') >= 0) {
-												currentVolume = [105, 95, 80, 1];
-												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
-											}
-
-											else if (elem.decoration.indexOf('ff') >= 0) {
-												currentVolume = [120, 110, 95, 1];
-												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
-											}
-
-											else if (elem.decoration.indexOf('fff') >= 0) {
-												currentVolume = [127, 125, 110, 1];
-												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
-											}
-
-											else if (elem.decoration.indexOf('ffff') >= 0) {
-												currentVolume = [127, 125, 110, 1];
-												voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
-											}
-
-											if (elem.decoration.indexOf("crescendo(") >= 0) {
-												var n = numNotesToDecoration(voice, v, "crescendo)");
-												var top = Math.min(127, currentVolume[0] + crescendoSize);
-												inCrescendo[k] = Math.floor((top - currentVolume[0]) / n);
-												inDiminuendo[k] = false;
-											} else if (elem.decoration.indexOf("crescendo)") >= 0) {
-												inCrescendo[k] = false;
-											} else if (elem.decoration.indexOf("diminuendo(") >= 0) {
-												var n2 = numNotesToDecoration(voice, v, "diminuendo)");
-												var bottom = Math.max(15, currentVolume[0] - crescendoSize);
-												inCrescendo[k] = false;
-												inDiminuendo[k] = Math.floor((bottom - currentVolume[0]) / n2);
-											} else if (elem.decoration.indexOf("diminuendo)") >= 0) {
-												inDiminuendo[k] = false;
-											}
-										}
 										var noteElem = { elem: elem, el_type: "note" }; // Make a copy so that modifications aren't kept except for adding the midiPitches
 										if (elem.style)
 											noteElem.style = elem.style;
@@ -366,6 +301,7 @@ var parseCommon = require("../parse/abc_common");
 								case "bar":
 									if (noteEventsInBar > 0) // don't add two bars in a row.
 										voices[voiceNumber].push({ el_type: 'bar' }); // We need the bar marking to reset the accidentals.
+									setDynamics(elem);
 									noteEventsInBar = 0;
 									// figure out repeats and endings --
 									// The important part is where there is a start repeat, and end repeat, or a first ending.
@@ -459,6 +395,68 @@ var parseCommon = require("../parse/abc_common");
 							}
 						}
 						voiceNumber++;
+					}
+				}
+
+				function setDynamics(elem) {
+					var volumes = {
+						'pppp': [15, 10, 5, 1],
+						'ppp': [30, 20, 10, 1],
+						'pp': [45, 35, 20, 1],
+						'p': [60, 50, 35, 1],
+						'mp': [75, 65, 50, 1],
+						'mf': [90, 80, 65, 1],
+						'f': [105, 95, 80, 1],
+						'ff': [120, 110, 95, 1],
+						'fff': [127, 125, 110, 1],
+						'ffff': [127, 125, 110, 1]
+					};
+
+					var dynamicType;
+					if (elem.decoration) {
+						if (elem.decoration.indexOf('pppp') >= 0)
+							dynamicType = 'pppp';
+						else if (elem.decoration.indexOf('ppp') >= 0)
+							dynamicType = 'ppp';
+						else if (elem.decoration.indexOf('pp') >= 0)
+							dynamicType = 'pp';
+						else if (elem.decoration.indexOf('p') >= 0)
+							dynamicType = 'p';
+						else if (elem.decoration.indexOf('mp') >= 0)
+							dynamicType = 'mp';
+						else if (elem.decoration.indexOf('mf') >= 0)
+							dynamicType = 'mf';
+						else if (elem.decoration.indexOf('f') >= 0)
+							dynamicType = 'f';
+						else if (elem.decoration.indexOf('ff') >= 0)
+							dynamicType = 'ff';
+						else if (elem.decoration.indexOf('fff') >= 0)
+							dynamicType = 'fff';
+						else if (elem.decoration.indexOf('ffff') >= 0)
+							dynamicType = 'ffff';
+
+						if (dynamicType) {
+							currentVolume = volumes[dynamicType];
+							voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+							inCrescendo[k] = false;
+							inDiminuendo[k] = false;
+						}
+
+						if (elem.decoration.indexOf("crescendo(") >= 0) {
+							var n = numNotesToDecoration(voice, v, "crescendo)");
+							var top = Math.min(127, currentVolume[0] + crescendoSize);
+							inCrescendo[k] = Math.floor((top - currentVolume[0]) / n);
+							inDiminuendo[k] = false;
+						} else if (elem.decoration.indexOf("crescendo)") >= 0) {
+							inCrescendo[k] = false;
+						} else if (elem.decoration.indexOf("diminuendo(") >= 0) {
+							var n2 = numNotesToDecoration(voice, v, "diminuendo)");
+							var bottom = Math.max(15, currentVolume[0] - crescendoSize);
+							inCrescendo[k] = false;
+							inDiminuendo[k] = Math.floor((bottom - currentVolume[0]) / n2);
+						} else if (elem.decoration.indexOf("diminuendo)") >= 0) {
+							inDiminuendo[k] = false;
+						}
 					}
 				}
 			}
