@@ -75,6 +75,8 @@ var EngraverController = function(paper, params) {
 
   this.renderer=new Renderer(paper, params.regression);
 	this.renderer.setPaddingOverride(params);
+	if (params.showDebug)
+		this.renderer.showDebug = params.showDebug;
   this.renderer.controller = this; // TODO-GD needed for highlighting
 
 	this.reset();

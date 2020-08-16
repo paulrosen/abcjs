@@ -156,6 +156,34 @@ Svg.prototype.rect = function(attr) {
 	return this.path({ path: lines.join(" "), stroke: "none"});
 };
 
+Svg.prototype.dottedLine = function(attr) {
+	var el = document.createElementNS(svgNS, 'line');
+	el.setAttribute("x1", attr.x1);
+	el.setAttribute("x2", attr.x2);
+	el.setAttribute("y1", attr.y1);
+	el.setAttribute("y2", attr.y2);
+	el.setAttribute("stroke", attr.stroke);
+	el.setAttribute("stroke-dasharray", "5,5");
+	this.svg.insertBefore(el, this.svg.firstChild);
+};
+
+Svg.prototype.rectBeneath = function(attr) {
+	var el = document.createElementNS(svgNS, 'rect');
+	el.setAttribute("x", attr.x);
+	el.setAttribute("width", attr.width);
+	el.setAttribute("y", attr.y);
+	el.setAttribute("height", attr.height);
+	if (attr.stroke)
+		el.setAttribute("stroke", attr.stroke);
+	if (attr['stroke-opacity'])
+		el.setAttribute("stroke-opacity", attr['stroke-opacity']);
+	if (attr.fill)
+		el.setAttribute("fill", attr.fill);
+	if (attr['fill-opacity'])
+		el.setAttribute("fill-opacity", attr['fill-opacity']);
+	this.svg.insertBefore(el, this.svg.firstChild);
+};
+
 Svg.prototype.text = function(text, attr, target) {
 	var el = document.createElementNS(svgNS, 'text');
 	for (var key in attr) {

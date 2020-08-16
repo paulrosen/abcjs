@@ -23,7 +23,7 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 			dynamicHeightBelow: 0
 		};
 
-		if (/*ABCJS.write.debugPlacement*/false) {
+		if (renderer.showDebug && renderer.showDebug.indexOf("box") >= 0) {
 			staff.originalTop = staff.top; // This is just being stored for debugging purposes.
 			staff.originalBottom = staff.bottom; // This is just being stored for debugging purposes.
 		}
@@ -59,7 +59,7 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 			positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow;
 		}
 
-		if (/*ABCJS.write.debugPlacement*/false)
+		if (renderer.showDebug && renderer.showDebug.indexOf("box") >= 0)
 			staff.positionY = positionY; // This is just being stored for debugging purposes.
 
 		for (var j = 0; j < staff.voices.length; j++) {
@@ -106,7 +106,7 @@ function setUpperAndLowerVoiceElements(positionY, voice) {
 				break;
 		}
 	}
-};
+}
 
 // For each of the relative elements that can't be placed in advance (because their vertical placement depends on everything
 // else on the line), this iterates through them and sets their pitch. By the time this is called, specialYResolved contains a
@@ -133,25 +133,25 @@ function setUpperAndLowerAbsoluteElements(specialYResolved, element) {
 			}
 		}
 	}
-};
+}
 
 function setUpperAndLowerCrescendoElements(positionY, element) {
 	if (element.dynamicHeightAbove)
 		element.pitch = positionY.dynamicHeightAbove;
 	else
 		element.pitch = positionY.dynamicHeightBelow;
-};
+}
 
 function setUpperAndLowerDynamicElements(positionY, element) {
 	if (element.volumeHeightAbove)
 		element.pitch = positionY.volumeHeightAbove;
 	else
 		element.pitch = positionY.volumeHeightBelow;
-};
+}
 
 function setUpperAndLowerEndingElements(positionY, element) {
 	element.pitch = positionY.endingHeightAbove - 2;
-};
+}
 
 function setUpperAndLowerTempoElement(positionY, element) {
 	element.pitch = positionY.tempoHeightAbove;
@@ -170,7 +170,7 @@ function setUpperAndLowerTempoElement(positionY, element) {
 				child.pitch2 += tempoPitch;
 		}
 	}
-};
+}
 
 function setUpperAndLowerRelativeElements(positionY, element) {
 	switch(element.type) {
@@ -204,6 +204,6 @@ function setUpperAndLowerRelativeElements(positionY, element) {
 	}
 	if (element.pitch === undefined || element.top === undefined)
 		console.error("RelativeElement position not set.", element.type, element.pitch, element.top, positionY);
-};
+}
 
 module.exports = setUpperAndLowerElements;
