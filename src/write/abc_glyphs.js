@@ -138,7 +138,12 @@ var pathScale = function (pathArray, kx, ky) {
 var Glyphs = {
 	printSymbol: function (x,y,symb,paper, klass, stroke, fill) {
 		if (!glyphs[symb]) return null;
-		return paper.text(glyphs[symb].d, {x:x, y:y, stroke:stroke, fill:fill, 'class': klass });
+		// this is a fudge to correct the new smufl symbols
+		// there might be a better place to do this
+		g = glyphs[symb]
+		if (symb.indexOf('noteheads') === -1)
+			x = x - (g.w/2)
+		return paper.text(g.d, {x:x, y:y, stroke:stroke, fill:fill, 'class': klass });
 	},
 
 	getPathForSymbol: function (x,y,symb,scalex, scaley) {
