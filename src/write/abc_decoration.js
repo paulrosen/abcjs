@@ -180,6 +180,9 @@ var Decoration = function Decoration() {
 			"dmarcato": "scripts.dmarcato",
 			"umarcato": "scripts.umarcato",
 			"turn": "scripts.turn",
+			"invertedturn": "scripts.invertedturn",
+			"turnx": "scripts.turnx",
+			"invertedturnx": "scripts.invertedturnx",
 			"uppermordent": "scripts.prall",
 			"pralltriller": "scripts.prall",
 			"mordent": "scripts.mordent",
@@ -225,6 +228,9 @@ var Decoration = function Decoration() {
 				case "marcato":
 				case "dmarcato":
 				case "turn":
+				case "invertedturn":
+				case "turnx":
+				case "invertedturnx":
 				case "uppermordent":
 				case "pralltriller":
 				case "mordent":

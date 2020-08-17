@@ -45,27 +45,30 @@ var glyphs = {
 	'noteheads.harmonic.quarter': { d: '\uE0DB', w:7.5,    h:8.165  },
 
 
-	'scripts.ufermata': { d: '\uE4C0', w: 19.748, h: 11.289 },
-	'scripts.dfermata': { d: '\uE4C1', w: 19.744, h: 11.274 },
-	'scripts.sforzato': { d: '\uE539', w: 13.5,   h: 7.5    },
-	'scripts.staccato': { d: '\uE4A2', w: 2.989,  h: 3.004  },
+	'scripts.ufermata':      { d: '\uE4C0', w: 19.748, h: 11.289 },
+	'scripts.dfermata':      { d: '\uE4C1', w: 19.744, h: 11.274 },
+	'scripts.sforzato':      { d: '\uE539', w: 13.5,   h: 7.5    },
+	'scripts.staccato':      { d: '\uE4A2', w: 2.989,  h: 3.004  },
 	// 'scripts.dstaccato': { d: '\uE4A3', w: 2.989,  h: 3.004  },
-	'scripts.tenuto':   { d: '\uE4A4', w: 8.985,  h: 1.08   },
-	// 'scripts.dtenuto':  { d: '\uE4A5', w: 8.985,  h: 1.08   },
-	'scripts.umarcato': { d: '\uE4AC', w: 7.5,    h: 8.245  },
-	'scripts.dmarcato': { d: '\uE4AD', w: 7.5,    h: 8.25   },
-	'scripts.stopped':  { d: '\uE08D', w: 8.295,  h: 8.295  },
-	'scripts.downbow':  { d: '\uE610', w: 11.22,  h: 9.992  },
-	'scripts.upbow':    { d: '\uE612', w: 9.73,   h: 15.608 },
-	'scripts.turn':     { d: '\uE567', w: 16.366, h: 7.893  },
-	'scripts.trill':    { d: '\uE566', w: 17.963, h: 16.49  },
-	'scripts.segno':    { d: '\uE047', w: 15,     h: 22.504 },
-	'scripts.coda':     { d: '\uE048', w: 16.035, h: 21.062 },
-	'scripts.comma':    { d: '\uE581', w: 3.042,  h: 9.237  },
-	'scripts.roll':     { d: '\uE59E', w: 10.817, h: 6.125  },
-	'scripts.prall':    { d: '\uE56C', w: 15.011, h: 7.5    },
-	'scripts.arpeggio': { d: '', w: 5,      h: 10     },
-	'scripts.mordent':  { d: '\uE56D', w: 15.011, h: 10.012 },
+	'scripts.tenuto':        { d: '\uE4A4', w: 8.985,  h: 1.08   },
+	// 'scripts.dtenuto':       { d: '\uE4A5', w: 8.985,  h: 1.08   },
+	'scripts.umarcato':      { d: '\uE4AC', w: 7.5,    h: 8.245  },
+	'scripts.dmarcato':      { d: '\uE4AD', w: 7.5,    h: 8.25   },
+	'scripts.stopped':       { d: '\uE08D', w: 8.295,  h: 8.295  },
+	'scripts.downbow':       { d: '\uE610', w: 11.22,  h: 9.992  },
+	'scripts.upbow':         { d: '\uE612', w: 9.73,   h: 15.608 },
+	'scripts.turn':          { d: '\uE567', w: 16.366, h: 7.893  },
+	'scripts.invertedturn':  { d: '\uE568', w: 16.366, h: 7.893  },
+	'scripts.turnx':         { d: '\uE569', w: 16.366, h: 7.893  },
+	'scripts.invertedturnx': { d: '\uE569', w: 16.366, h: 7.893  },
+	'scripts.trill':         { d: '\uE566', w: 17.963, h: 16.49  },
+	'scripts.segno':         { d: '\uE047', w: 15,     h: 22.504 },
+	'scripts.coda':          { d: '\uE048', w: 16.035, h: 21.062 },
+	'scripts.comma':         { d: '\uE581', w: 3.042,  h: 9.237  },
+	'scripts.roll':          { d: '\uE59E', w: 10.817, h: 6.125  },
+	'scripts.prall':         { d: '\uE56C', w: 15.011, h: 7.5    },
+	'scripts.arpeggio':      { d: '', w: 5,      h: 10     },
+	'scripts.mordent':       { d: '\uE56D', w: 15.011, h: 10.012 },
 
 	'flags.u8th':   { d: '\uE240', w: 6.692,  h:22.59  },
 	'flags.d8th':   { d: '\uE241', w: 8.492,  h:21.691 },
@@ -134,7 +137,6 @@ var pathScale = function (pathArray, kx, ky) {
 var Glyphs = {
 	printSymbol: function (x,y,symb,paper, klass, stroke, fill) {
 		if (!glyphs[symb]) return null;
-		console.log(symb)
 		return paper.text(glyphs[symb].d, {x:x, y:y, stroke:stroke, fill:fill, 'class': klass });
 	},
 
