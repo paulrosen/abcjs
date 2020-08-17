@@ -146,18 +146,6 @@ var Glyphs = {
 		return paper.text(g.d, {x:x, y:y, stroke:stroke, fill:fill, 'class': klass });
 	},
 
-	getPathForSymbol: function (x,y,symb,scalex, scaley) {
-		scalex = scalex || 1;
-		scaley = scaley || 1;
-		if (!glyphs[symb]) return null;
-		var pathArray = pathClone(glyphs[symb].d);
-		if (scalex!==1 || scaley!==1) pathScale(pathArray,scalex,scaley);
-		pathArray[0][1] +=x;
-		pathArray[0][2] +=y;
-
-		return pathArray;
-	},
-
 	getSymbolWidth: function (symbol) {
 		if (glyphs[symbol]) return glyphs[symbol].w;
 		return 0;
