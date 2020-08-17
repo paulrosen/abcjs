@@ -101,17 +101,17 @@ var glyphs = {
 	's': { d: '\uE524', w: 6.632,  h: 8.758  },
 	'z': { d: '\uE525', w: 8.573,  h: 8.743  },
 	'+': { d: '\uE08C', w: 7.507,  h: 7.515  },
-	',': { d: '\uE089', w: 3.452,  h: 8.143  },
+	',': { d: '\uE4CE', w: 3.452,  h: 8.143  },
 	'-': { d: '\uE090', w: 5.001,  h: 0.81   },
 	'.': { d: '.', w:3.413,   h: 3.402  },
 
 	'scripts.wedge':        { d: '\uE4A6', w: 7.49,  h:7.752 },
 	'scripts.thumb':        { d: '\uE624', w: 5.955, h:9.75  },
-	'scripts.open':         { d: '\uE570', w: 5.955, h:7.5   },
+	'scripts.open':         { d: '\uE7F8', w: 5.955, h:7.5   },
 	'scripts.longphrase':   { d: '', w: 2.16,  h:23.04 },
 	'scripts.mediumphrase': { d: '', w: 2.16,  h:15.54 },
 	'scripts.shortphrase':  { d: '', w: 2.16,  h:8.04  },
-	'scripts.snap':         { d: '\uEDB9', w: 10.38, h:6.84 }
+	'scripts.snap':         { d: '\uE631', w: 10.38, h:6.84 }
 };
 
 var pathClone = function (pathArray) {
