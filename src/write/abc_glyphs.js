@@ -44,12 +44,13 @@ var glyphs = {
 	'noteheads.slash.quarter':    { d: '\uE100', w:9,      h:9      },
 	'noteheads.harmonic.quarter': { d: '\uE0DB', w:7.5,    h:8.165  },
 
-
 	'scripts.ufermata':      { d: '\uE4C0', w: 19.748, h: 11.289 },
 	'scripts.dfermata':      { d: '\uE4C1', w: 19.744, h: 11.274 },
 	'scripts.sforzato':      { d: '\uE539', w: 13.5,   h: 7.5    },
+	'scripts.accent':        { d: '\uE4A0', w: 2.989,  h: 3.004  },
+	// 'scripts.daccent':       { d: '\uE4A1', w: 2.989,  h: 3.004  },
 	'scripts.staccato':      { d: '\uE4A2', w: 2.989,  h: 3.004  },
-	// 'scripts.dstaccato': { d: '\uE4A3', w: 2.989,  h: 3.004  },
+	// 'scripts.dstaccato':     { d: '\uE4A3', w: 2.989,  h: 3.004  },
 	'scripts.tenuto':        { d: '\uE4A4', w: 8.985,  h: 1.08   },
 	// 'scripts.dtenuto':       { d: '\uE4A5', w: 8.985,  h: 1.08   },
 	'scripts.umarcato':      { d: '\uE4AC', w: 7.5,    h: 8.245  },

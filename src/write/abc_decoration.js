@@ -18,7 +18,6 @@ var Decoration = function Decoration() {
 		for (var i=0;i<decoration.length; i++) {
 			if (decoration[i]==="staccato" || decoration[i]==="tenuto" || decoration[i] === "accent") {
 				var symbol = "scripts." + decoration[i];
-				if (decoration[i] === "accent") symbol = "scripts.sforzato";
 				if (yPos === undefined)
 					yPos = (dir==="down") ? pitch+2:minPitch-2;
 				else
