@@ -13,4 +13,4 @@ function drawSeparator(renderer, width) {
 	renderer.paper.pathToBack({path:pathString, stroke:stroke, fill:fill, 'class': renderer.controller.classes.generate('defined-text')});
 }
 
-module.exports = drawSeparator;
+export default drawSeparator;

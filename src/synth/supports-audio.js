@@ -13,7 +13,7 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var activeAudioContext = require('./active-audio-context');
+import activeAudioContext from './active-audio-context';
 
 //
 // Support for audio depends on three things: support for Promise, support for AudioContext, and support for AudioContext.resume.
@@ -39,4 +39,4 @@ function supportsAudio() {
 		!!navigator.msAudioContext;
 }
 
-module.exports = supportsAudio;
+export default supportsAudio;

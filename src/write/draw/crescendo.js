@@ -1,7 +1,7 @@
-var highlight = require('../highlight');
-var unhighlight = require('../unhighlight');
-var sprintf = require('./sprintf');
-var printPath = require('./print-path');
+import highlight from '../highlight';
+import unhighlight from '../unhighlight';
+import sprintf from './sprintf';
+import printPath from './print-path';
 
 function drawCrescendo(renderer, params, selectables) {
 	if (params.pitch === undefined)
@@ -30,4 +30,4 @@ var drawLine = function (renderer, y1, y2, y3, y4, left, right) {
 	return el;
 };
 
-module.exports = drawCrescendo;
+export default drawCrescendo;

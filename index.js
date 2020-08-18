@@ -1,10 +1,44 @@
-var version = require('./version');
-var animation = require('./src/api/abc_animation');
-var tuneBook = require('./src/api/abc_tunebook');
+import version from './version'
+import animation from './src/api/abc_animation'
+import tuneBook from './src/api/abc_tunebook'
+import renderAbc from './src/api/abc_tunebook_svg'
+import TimingCallbacks from './src/api/abc_timing_callbacks'
+import Editor from './src/edit/abc_editor'
+import EditArea from './src/edit/abc_editarea'
+import glyphs from './src/write/abc_glyphs'
+import CreateSynth from './src/synth/create-synth'
+import instrumentIndexToName from './src/synth/instrument-index-to-name'
+import pitchToNoteName from './src/synth/pitch-to-note-name'
+import SynthSequence from './src/synth/synth-sequence'
+import CreateSynthControl from './src/synth/create-synth-control'
+import registerAudioContext from './src/synth/register-audio-context'
+import activeAudioContext from './src/synth/active-audio-context'
+import supportsAudio from './src/synth/supports-audio'
+import playEvent from './src/synth/play-event'
+import SynthController from './src/synth/synth-controller'
+import getMidiFile from './src/synth/get-midi-file'
 
-var abcjs = {};
-
-abcjs.signature = "abcjs-basic v" + version;
+const abcjs = {
+	signature: "abcjs-basic v" + version,
+	Editor: Editor,
+	EditArea: EditArea,
+	setGlyph: glyphs.setSymbol,
+	renderAbc: renderAbc,
+	TimingCallbacks: TimingCallbacks,
+	synth: {
+		CreateSynth: CreateSynth,
+		instrumentIndexToName: instrumentIndexToName,
+		pitchToNoteName: pitchToNoteName,
+		SynthController: SynthController,
+		SynthSequence: SynthSequence,
+		CreateSynthControl: CreateSynthControl,
+		registerAudioContext: registerAudioContext,
+		activeAudioContext: activeAudioContext,
+		supportsAudio: supportsAudio,
+		playEvent: playEvent,
+		getMidiFile: getMidiFile,
+	}
+};
 
 Object.keys(animation).forEach(function (key) {
 	abcjs[key] = animation[key];
@@ -14,39 +48,4 @@ Object.keys(tuneBook).forEach(function (key) {
 	abcjs[key] = tuneBook[key];
 });
 
-abcjs.renderAbc = require('./src/api/abc_tunebook_svg');
-abcjs.TimingCallbacks = require('./src/api/abc_timing_callbacks');
-
-var glyphs = require('./src/write/abc_glyphs');
-abcjs.setGlyph = glyphs.setSymbol;
-
-var CreateSynth = require('./src/synth/create-synth');
-var instrumentIndexToName = require('./src/synth/instrument-index-to-name');
-var pitchToNoteName = require('./src/synth/pitch-to-note-name');
-var SynthSequence = require('./src/synth/synth-sequence');
-var CreateSynthControl = require('./src/synth/create-synth-control');
-var registerAudioContext = require('./src/synth/register-audio-context');
-var activeAudioContext = require('./src/synth/active-audio-context');
-var supportsAudio = require('./src/synth/supports-audio');
-var playEvent = require('./src/synth/play-event');
-var SynthController = require('./src/synth/synth-controller');
-var getMidiFile = require('./src/synth/get-midi-file');
-
-abcjs.synth = {
-	CreateSynth: CreateSynth,
-	instrumentIndexToName: instrumentIndexToName,
-	pitchToNoteName: pitchToNoteName,
-	SynthController: SynthController,
-	SynthSequence: SynthSequence,
-	CreateSynthControl: CreateSynthControl,
-	registerAudioContext: registerAudioContext,
-	activeAudioContext: activeAudioContext,
-	supportsAudio: supportsAudio,
-	playEvent: playEvent,
-	getMidiFile: getMidiFile,
-};
-
-abcjs['Editor'] = require('./src/edit/abc_editor');
-abcjs['EditArea'] = require('./src/edit/abc_editarea');
-
-module.exports = abcjs;
+export default abcjs

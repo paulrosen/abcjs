@@ -104,4 +104,4 @@ StaffGroupElement.prototype.setStaffLimits = function (voice) {
 	this.setLimit('dynamicHeightBelow', voice);
 };
 
-module.exports = StaffGroupElement;
+export default StaffGroupElement;

@@ -1,4 +1,4 @@
-var printPath = require('./print-path');
+import printPath from './print-path';
 
 function drawBeam(renderer, params) {
 	if (params.beams.length === 0) return;
@@ -54,4 +54,4 @@ function getY(startX, startY, slope, currentX) {
 	return startY + x*slope;
 }
 
-module.exports = drawBeam;
+export default drawBeam;

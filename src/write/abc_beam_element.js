@@ -103,4 +103,4 @@ function calcAverage(total, numElements) {
 	return total / numElements;
 }
 
-module.exports = BeamElem;
+export default BeamElem;

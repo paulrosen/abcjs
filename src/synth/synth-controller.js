@@ -13,10 +13,10 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var CreateSynthControl = require('./create-synth-control');
-var CreateSynth = require('./create-synth');
-var TimingCallbacks = require('../api/abc_timing_callbacks');
-var activeAudioContext = require('./active-audio-context');
+import CreateSynthControl from './create-synth-control';
+import CreateSynth from './create-synth';
+import TimingCallbacks from '../api/abc_timing_callbacks';
+import activeAudioContext from './active-audio-context';
 
 function SynthController() {
 	var self = this;
@@ -278,4 +278,4 @@ function SynthController() {
 	};
 }
 
-module.exports = SynthController;
+export default SynthController;

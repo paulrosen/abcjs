@@ -365,5 +365,4 @@ function createSvg() {
 	return svg;
 }
 
-
-module.exports = Svg;
+export default Svg;

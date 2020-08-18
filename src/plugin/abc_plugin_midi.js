@@ -17,8 +17,8 @@
 
 /*global abcjs_is_user_script, abcjs_plugin_autostart */
 
-var renderAbc = require('../api/abc_tunebook_svg');
-var renderMidi = require('../api/abc_tunebook_midi');
+import renderAbc from '../api/abc_tunebook_svg';
+import renderMidi from '../api/abc_tunebook_midi';
 
 var Plugin = function() {
 	"use strict";
@@ -217,4 +217,4 @@ if (autostart &&
   }
 }
 
-module.exports = plugin;
+export default plugin;

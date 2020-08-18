@@ -14,7 +14,7 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var setClass = require('./set-class');
+import setClass from './set-class';
 
 // duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
 // minspacing - spacing which must be taken on top of the width defined by the duration
@@ -159,4 +159,4 @@ AbsoluteElement.prototype.unhighlight = function (klass, color) {
 	setClass(this.elemset, "", klass, color);
 };
 
-module.exports = AbsoluteElement;
+export default AbsoluteElement;

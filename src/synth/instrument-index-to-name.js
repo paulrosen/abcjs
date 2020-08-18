@@ -161,4 +161,4 @@ var instrumentIndexToName = [
 	"percussion"
 ];
 
-module.exports = instrumentIndexToName;
+export default instrumentIndexToName;

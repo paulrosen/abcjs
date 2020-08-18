@@ -25,4 +25,4 @@ var DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
 	this.pitch = undefined; // This will be set later
 };
 
-module.exports = DynamicDecoration;
+export default DynamicDecoration;

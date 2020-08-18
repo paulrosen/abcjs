@@ -14,9 +14,9 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var parseCommon = require('./abc_common');
-var parseDirective = require('./abc_parse_directive');
-var parseKeyVoice = require('./abc_parse_key_voice');
+import parseCommon from './abc_common';
+import parseDirective from './abc_parse_directive';
+import parseKeyVoice from './abc_parse_key_voice';
 
 var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	this.reset = function(tokenizer, warn, multilineVars, tune) {
@@ -586,4 +586,4 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	};
 };
 
-module.exports = ParseHeader;
+export default ParseHeader;

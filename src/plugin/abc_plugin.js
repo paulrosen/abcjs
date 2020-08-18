@@ -18,9 +18,9 @@
 /*global abcjs_is_user_script, abcjs_plugin_autostart */
 "use strict";
 
-var TuneBook = require('../api/abc_tunebook').TuneBook;
-var Parse = require('../parse/abc_parse');
-var EngraverController = require('../write/abc_engraver_controller');
+import {TuneBook} from '../api/abc_tunebook';
+import Parse from '../parse/abc_parse';
+import EngraverController from '../write/abc_engraver_controller';
 
 var Plugin = function() {
 	"use strict";
@@ -239,4 +239,4 @@ if (autostart &&
   }
 }
 
-module.exports = plugin;
+export default plugin;

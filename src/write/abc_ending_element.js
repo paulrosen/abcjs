@@ -23,4 +23,4 @@ var EndingElem = function EndingElem(text, anchor1, anchor2) {
 	this.pitch = undefined; // This will be set later
 };
 
-module.exports = EndingElem;
+export default EndingElem;

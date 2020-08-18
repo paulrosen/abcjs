@@ -13,14 +13,15 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var tunebook = require('./abc_tunebook');
-var Tune = require('../data/abc_tune');
+import tunebook from './abc_tunebook';
+import Tune from '../data/abc_tune';
 
-var EngraverController = require('../write/abc_engraver_controller');
-var Parse = require('../parse/abc_parse');
-var wrap = require('../parse/wrap_lines');
+import EngraverController from '../write/abc_engraver_controller';
+import Parse from '../parse/abc_parse';
+import wrap from '../parse/wrap_lines';
 
 var resizeDivs = {};
+
 function resizeOuter() {
     var width = window.innerWidth;
     for (var id in resizeDivs) {
@@ -255,4 +256,4 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
 	return ret.tune;
 }
 
-module.exports = renderAbc;
+export default renderAbc;

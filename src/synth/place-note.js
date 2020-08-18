@@ -13,8 +13,8 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var soundsCache = require('./sounds-cache');
-var pitchToNoteName = require('./pitch-to-note-name');
+import soundsCache from './sounds-cache';
+import pitchToNoteName from './pitch-to-note-name';
 
 function placeNote(outputAudioBuffer, sampleRate, sound, startArray) {
 	// sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
@@ -95,4 +95,4 @@ var copyToChannel = function(toBuffer, fromBuffer, start) {
 	}
 };
 
-module.exports = placeNote;
+export default placeNote;

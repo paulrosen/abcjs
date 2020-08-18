@@ -18,4 +18,4 @@ var setClass = function (elemset, addClass, removeClass, color) {
 	}
 };
 
-module.exports = setClass;
+export default setClass;

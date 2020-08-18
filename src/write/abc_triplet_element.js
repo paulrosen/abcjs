@@ -46,4 +46,4 @@ var TripletElem;
 
 })();
 
-module.exports = TripletElem;
+export default TripletElem;

@@ -50,4 +50,4 @@ var midiLint = function(tune) {
 	return ret;
 };
 
-module.exports = midiLint;
+export default midiLint;

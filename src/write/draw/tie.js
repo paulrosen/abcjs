@@ -1,4 +1,4 @@
-var sprintf = require('./sprintf');
+import sprintf from './sprintf';
 
 function drawTie(renderer, params, linestartx, lineendx, selectables) {
 	layout(params, linestartx, lineendx);
@@ -76,4 +76,4 @@ var drawArc = function(renderer, x1, x2, pitch1, pitch2, above, klass, isTie) {
 	return ret;
 };
 
-module.exports = drawTie;
+export default drawTie;

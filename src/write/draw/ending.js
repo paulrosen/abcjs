@@ -1,6 +1,6 @@
-var sprintf = require('./sprintf');
-var renderText = require('./text');
-var printPath = require('./print-path');
+import sprintf from './sprintf';
+import renderText from './text';
+import printPath from './print-path';
 
 function drawEnding(renderer, params, linestartx, lineendx, selectables) {
 	if (params.pitch === undefined)
@@ -41,4 +41,4 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
 	return [g];
 }
 
-module.exports = drawEnding;
+export default drawEnding;

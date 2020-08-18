@@ -1,5 +1,5 @@
-var drawRelativeElement = require('./relative');
-var renderText = require('./text');
+import drawRelativeElement from './relative';
+import renderText from './text';
 
 function drawTempo(renderer, params, selectables) {
 	var x = params.x;
@@ -40,4 +40,4 @@ function drawTempo(renderer, params, selectables) {
 	return [tempoGroup];
 }
 
-module.exports = drawTempo;
+export default drawTempo;

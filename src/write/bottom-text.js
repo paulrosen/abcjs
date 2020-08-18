@@ -92,4 +92,4 @@ BottomText.prototype.addTextIf = function (marginLeft, text, font, klass, margin
 		this.rows.push({move: marginBottom});
 }
 
-module.exports = BottomText;
+export default BottomText;

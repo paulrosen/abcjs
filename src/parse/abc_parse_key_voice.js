@@ -13,9 +13,9 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var parseCommon = require('./abc_common');
-var parseDirective = require('./abc_parse_directive');
-var transpose = require('./abc_transpose');
+import parseCommon from './abc_common';
+import parseDirective from './abc_parse_directive';
+import transpose from './abc_transpose';
 
 var parseKeyVoice = {};
 
@@ -933,4 +933,4 @@ var parseKeyVoice = {};
 
 })();
 
-module.exports = parseKeyVoice;
+export default parseKeyVoice;

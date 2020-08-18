@@ -1,7 +1,7 @@
-var calcHeight = require('./calcHeight');
-var layoutVoice = require('./voice');
-var setUpperAndLowerElements = require('./setUpperAndLowerElements');
-var layoutStaffGroup = require('./staffGroup');
+import calcHeight from './calcHeight';
+import layoutVoice from './voice';
+import setUpperAndLowerElements from './setUpperAndLowerElements';
+import layoutStaffGroup from './staffGroup';
 var layout;
 
 (function () {
@@ -91,4 +91,4 @@ var layout;
 	}
 })();
 
-module.exports = layout;
+export default layout;

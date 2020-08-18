@@ -51,4 +51,4 @@ function renderText(renderer, params) {
 	return elem;
 }
 
-module.exports = renderText;
+export default renderText;

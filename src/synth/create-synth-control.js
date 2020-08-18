@@ -13,10 +13,10 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var supportsAudio = require('./supports-audio');
-var registerAudioContext = require('./register-audio-context');
-var activeAudioContext = require('./active-audio-context');
-var parseCommon = require('../parse/abc_common');
+import supportsAudio from './supports-audio';
+import registerAudioContext from './register-audio-context';
+import activeAudioContext from './active-audio-context';
+import parseCommon from '../parse/abc_common';
 // TODO-PER: The require statements for svg don't play well for node apps without extra plugins. The following lines would be clearer than inlining the SVG
 // var loopImage = require('./images/loop.svg');
 // var playImage = require('./images/play.svg');
@@ -307,4 +307,4 @@ function attachListeners(self) {
 	if (hasWarp)
 		self.parent.querySelector(".abcjs-midi-tempo").addEventListener("change", function(ev){acResumerMiddleWare(self.options.warpHandler, ev, playBtn, self.options.afterResume)});
 }
-module.exports = CreateSynthControl;
+export default CreateSynthControl;

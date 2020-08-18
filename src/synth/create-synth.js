@@ -13,15 +13,15 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var getNote = require('./load-note');
-var createNoteMap = require('./create-note-map');
-var registerAudioContext = require('./register-audio-context');
-var activeAudioContext = require('./active-audio-context');
-var supportsAudio = require('./supports-audio');
-var pitchToNoteName = require('./pitch-to-note-name');
-var instrumentIndexToName = require('./instrument-index-to-name');
-var downloadBuffer = require('./download-buffer');
-var placeNote = require('./place-note');
+import getNote from './load-note';
+import createNoteMap from './create-note-map';
+import registerAudioContext from './register-audio-context';
+import activeAudioContext from './active-audio-context';
+import supportsAudio from './supports-audio';
+import pitchToNoteName from './pitch-to-note-name';
+import instrumentIndexToName from './instrument-index-to-name';
+import downloadBuffer from './download-buffer';
+import placeNote from './place-note';
 
 // TODO-PER: remove the midi tests from here: I don't think the object can be constructed unless it passes.
 var notSupportedMessage = "MIDI is not supported in this browser.";
@@ -389,4 +389,4 @@ function CreateSynth() {
 	};
 }
 
-module.exports = CreateSynth;
+export default CreateSynth;

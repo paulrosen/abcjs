@@ -13,8 +13,8 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var SynthSequence = require('./synth-sequence');
-var CreateSynth = require('./create-synth');
+import SynthSequence from './synth-sequence';
+import CreateSynth from './create-synth';
 
 function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
 	var sequence = new SynthSequence();
@@ -42,4 +42,5 @@ function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
 		return buffer.start();
 	});
 }
-module.exports = playEvent;
+
+export default playEvent;

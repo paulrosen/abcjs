@@ -2,7 +2,8 @@
   "name": "abcjs",
   "version": "6.0.0-beta.15",
   "description": "Renderer for abc music notation",
-  "main": "index.js",
+  "main": "dist/abcjs-basic.js",
+  "module": "index.js",
   "scripts": {
     "webpack": "webpack",
     "build": "npm run fix-versions && npm run build:basic && npm run build:basic-min && npm run build:midi && npm run build:plugin && npm run build:plugin-midi && npm run build:dist",

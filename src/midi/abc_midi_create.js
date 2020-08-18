@@ -14,8 +14,8 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var Preparer = require('./abc_midi_js_preparer');
-var rendererFactory = require('../synth/abc_midi_renderer');
+import Preparer from './abc_midi_js_preparer';
+import rendererFactory from '../synth/abc_midi_renderer';
 
 var create;
 
@@ -117,4 +117,4 @@ var create;
 
 })();
 
-module.exports = create;
+export default create;

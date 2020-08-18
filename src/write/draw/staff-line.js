@@ -1,4 +1,4 @@
-var sprintf = require('./sprintf');
+import sprintf from './sprintf';
 
 function printStaffLine(renderer, x1,x2, pitch, klass) {
 	var isIE=/*@cc_on!@*/false;//IE detector
@@ -19,5 +19,4 @@ function printStaffLine(renderer, x1,x2, pitch, klass) {
 	return ret;
 }
 
-module.exports = printStaffLine;
-
+export default printStaffLine;

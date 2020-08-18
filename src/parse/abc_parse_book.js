@@ -14,7 +14,7 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var parseCommon = require('./abc_common');
+import parseCommon from './abc_common';
 
 var bookParser = function(book) {
 	"use strict";
@@ -72,5 +72,4 @@ var bookParser = function(book) {
 	};
 };
 
-module.exports = bookParser;
-
+export default bookParser;

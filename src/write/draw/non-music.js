@@ -1,5 +1,5 @@
-var drawSeparator = require('./separator');
-var renderText = require('./text');
+import drawSeparator from './separator';
+import renderText from './text';
 
 function nonMusic(renderer, obj, selectables) {
 	for (var i = 0; i < obj.rows.length; i++) {
@@ -42,4 +42,4 @@ function nonMusic(renderer, obj, selectables) {
 	}
 }
 
-module.exports = nonMusic;
+export default nonMusic;

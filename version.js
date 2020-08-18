@@ -1,3 +1,3 @@
-var version = '6.0.0-beta.15';
+const version = '6.0.0-beta.15';
 
-module.exports = version;
+export default version;

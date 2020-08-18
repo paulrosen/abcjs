@@ -227,4 +227,4 @@ transpose.note = function(multilineVars, el) {
 
 };
 
-module.exports = transpose;
+export default transpose;

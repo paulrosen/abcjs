@@ -5,4 +5,4 @@ function printDebugBox(renderer, attr, comment) {
 	return box;
 }
 
-module.exports = printDebugBox;
+export default printDebugBox;

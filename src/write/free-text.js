@@ -30,4 +30,4 @@ function FreeText(text, vskip, getFontAndAttr, paddingLeft, width, getTextSize) 
 	}
 }
 
-module.exports = FreeText;
+export default FreeText;

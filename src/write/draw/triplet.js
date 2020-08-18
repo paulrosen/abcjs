@@ -1,6 +1,6 @@
-var sprintf = require('./sprintf');
-var renderText = require('./text');
-var printPath = require('./print-path');
+import sprintf from './sprintf';
+import renderText from './text';
+import printPath from './print-path';
 
 function drawTriplet(renderer, params, selectables) {
 	var xTextPos;
@@ -42,4 +42,4 @@ function drawBracket(renderer, x1, y1, x2, y2) {
 	printPath(renderer, {path: pathString, stroke: "#000000"});
 }
 
-module.exports = drawTriplet;
+export default drawTriplet;

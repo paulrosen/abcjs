@@ -13,7 +13,7 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var spacing = require('./abc_spacing');
+import spacing from './abc_spacing';
 
 /**
  * Glyphs and some methods to adjust for their x and y baseline
@@ -231,4 +231,4 @@ var Glyphs = {
 	}
 };
 
-module.exports = Glyphs; // we need the glyphs for layout information
+export default Glyphs; // we need the glyphs for layout information

@@ -14,10 +14,10 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var parseCommon = require('../parse/abc_common');
-var spacing = require('../write/abc_spacing');
-var sequence = require('../synth/abc_midi_sequencer');
-var flatten = require('../synth/abc_midi_flattener');
+import parseCommon from '../parse/abc_common';
+import spacing from '../write/abc_spacing';
+import sequence from '../synth/abc_midi_sequencer';
+import flatten from '../synth/abc_midi_flattener';
 
 /**
  * This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
@@ -489,4 +489,4 @@ var Tune = function() {
 	};
 };
 
-module.exports = Tune;
+export default Tune;

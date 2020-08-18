@@ -267,4 +267,4 @@ var rendererFactory;
 	};
 })();
 
-module.exports = rendererFactory;
+export default rendererFactory;

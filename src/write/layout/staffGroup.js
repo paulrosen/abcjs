@@ -1,4 +1,4 @@
-var layoutVoiceElements = require('./VoiceElements');
+import layoutVoiceElements from './VoiceElements';
 
 var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
 	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
@@ -164,4 +164,4 @@ function getDurationIndex(element) {
 	return element.durationindex - (element.children[element.i] && (element.children[element.i].duration>0)?0:0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
 };
 
-module.exports = layoutStaffGroup;
+export default layoutStaffGroup;

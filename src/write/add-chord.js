@@ -1,5 +1,5 @@
-var RelativeElement = require('./abc_relative_element');
-var spacing = require('./abc_spacing');
+import RelativeElement from './abc_relative_element';
+import spacing from './abc_spacing';
 
 var addChord;
 
@@ -89,4 +89,4 @@ var addChord;
 
 })();
 
-module.exports = addChord;
+export default addChord;

@@ -14,16 +14,16 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var parseCommon = require('./abc_common');
-var parseDirective = require('./abc_parse_directive');
-var ParseHeader = require('./abc_parse_header');
-var parseKeyVoice = require('./abc_parse_key_voice');
-var Tokenizer = require('./abc_tokenizer');
-var transpose = require('./abc_transpose');
-var wrap = require('./wrap_lines');
+import parseCommon from './abc_common';
+import parseDirective from './abc_parse_directive';
+import ParseHeader from './abc_parse_header';
+import parseKeyVoice from './abc_parse_key_voice';
+import Tokenizer from './abc_tokenizer';
+import transpose from './abc_transpose';
+import wrap from './wrap_lines';
 
-var Tune = require('../data/abc_tune');
-var TuneBuilder = require('../parse/tune-builder');
+import Tune from '../data/abc_tune';
+import TuneBuilder from '../parse/tune-builder';
 
 var Parse = function() {
 	"use strict";
@@ -1816,4 +1816,4 @@ var Parse = function() {
 	};
 };
 
-module.exports = Parse;
+export default Parse;

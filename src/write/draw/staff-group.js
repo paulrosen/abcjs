@@ -1,9 +1,9 @@
-var spacing = require('../abc_spacing');
-var drawBrace = require('./brace');
-var drawVoice = require('./voice');
-var printStaff = require('./staff');
-var printDebugBox = require('./debug-box');
-var printStem = require('./print-stem');
+import spacing from '../abc_spacing';
+import drawBrace from './brace';
+import drawVoice from './voice';
+import printStaff from './staff';
+import printDebugBox from './debug-box';
+import printStem from './print-stem';
 
 function drawStaffGroup(renderer, params, selectables) {
 	// We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
@@ -158,4 +158,4 @@ function boxAllElements(renderer, voices) {
 	}
 }
 
-module.exports = drawStaffGroup;
+export default drawStaffGroup;

@@ -115,4 +115,4 @@ try {
 } catch(e) {
 	// if we aren't in a browser, this code will crash, but it is not needed then either.
 }
-module.exports = parseCommon;
+export default parseCommon;

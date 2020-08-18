@@ -1,4 +1,4 @@
-var printStaffLine = require('./staff-line');
+import printStaffLine from './staff-line';
 
 function printStaff(renderer, startx, endx, numLines) {
 	var klass = "abcjs-top-line";
@@ -15,4 +15,4 @@ function printStaff(renderer, startx, endx, numLines) {
 	renderer.paper.closeGroup();
 }
 
-module.exports = printStaff;
+export default printStaff;

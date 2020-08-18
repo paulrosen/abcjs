@@ -13,7 +13,7 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var spacing = require('./abc_spacing');
+import spacing from './abc_spacing';
 
 function setupSelection(engraver) {
 	engraver.rangeHighlight = rangeHighlight;
@@ -393,4 +393,4 @@ function removeGlobalClass(svg, klass) {
 	}
 }
 
-module.exports = setupSelection;
+export default setupSelection;

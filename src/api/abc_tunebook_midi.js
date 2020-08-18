@@ -13,10 +13,10 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var tunebook = require('./abc_tunebook');
+import tunebook from './abc_tunebook';
 
-var midi = require('../midi/abc_midi_controls');
-var midiCreate = require('../midi/abc_midi_create');
+import midi from '../midi/abc_midi_controls';
+import midiCreate from '../midi/abc_midi_create';
 
 // A quick way to render a tune from javascript when interactivity is not required.
 // This is used when a javascript routine has some abc text that it wants to render
@@ -113,4 +113,4 @@ var renderMidi = function(output, abc, parserParams, midiParams, renderParams) {
     return tunebook.renderEngine(callback, output, abc, params);
 };
 
-module.exports = renderMidi;
+export default renderMidi;

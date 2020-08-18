@@ -31,4 +31,4 @@ function registerAudioContext(ac) {
 	return window.abcjsAudioContext.state !== "suspended";
 }
 
-module.exports = registerAudioContext;
+export default registerAudioContext;

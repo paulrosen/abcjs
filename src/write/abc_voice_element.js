@@ -100,4 +100,4 @@ VoiceElement.prototype.addBeam = function (child) {
 	this.beams.push(child);
 };
 
-module.exports = VoiceElement;
+export default VoiceElement;

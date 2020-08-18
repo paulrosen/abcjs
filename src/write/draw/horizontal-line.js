@@ -20,4 +20,4 @@ function printHorizontalLine(renderer, width, vertical, comment) {
 		renderer.paper.text(comment, {x: width+70, y: y, "text-anchor": "start", "font-size":"18px", fill: fill, stroke: fill });
 }
 
-module.exports = printHorizontalLine;
+export default printHorizontalLine;

@@ -65,4 +65,4 @@ var elementGroup;
 	elementGroup = new Group();
 })();
 
-module.exports = elementGroup;
+export default elementGroup;

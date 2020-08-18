@@ -1,7 +1,7 @@
-var renderText = require('./text');
-var printStem = require('./print-stem');
-var printStaffLine = require('./staff-line');
-var printSymbol = require('./print-symbol');
+import renderText from './text';
+import printStem from './print-stem';
+import printStaffLine from './staff-line';
+import printSymbol from './print-symbol';
 
 function drawRelativeElement(renderer, params, bartop, selectables) {
 	if (params.pitch === undefined)
@@ -53,4 +53,4 @@ function scaleExistingElem(paper, elem, scaleX, scaleY, x, y) {
 	paper.setAttributeOnElement(elem, { style: "transform:scale("+scaleX+","+scaleY + ");transform-origin:" + x + "px " + y + "px;"});
 }
 
-module.exports = drawRelativeElement;
+export default drawRelativeElement;

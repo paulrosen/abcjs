@@ -78,4 +78,4 @@ RelativeElement.prototype.setX = function (x) {
 	this.x = x+this.dx;
 };
 
-module.exports = RelativeElement;
+export default RelativeElement;

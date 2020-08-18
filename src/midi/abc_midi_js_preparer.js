@@ -240,4 +240,4 @@ var Preparer;
 	};
 })();
 
-module.exports = Preparer;
+export default Preparer;

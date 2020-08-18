@@ -13,6 +13,7 @@ module.exports = ({mode, presets, type} = {mode: "production", presets: []}) => 
 					commonjs: 'abcjs'
 				},
 				libraryTarget: 'umd',
+				libraryExport: 'default',
 				globalObject: 'this'
 			},
 			mode,

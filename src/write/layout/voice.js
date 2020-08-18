@@ -1,5 +1,5 @@
-var layoutBeam = require('./beam');
-var getBarYAt = require('./getBarYAt');
+import layoutBeam from './beam';
+import getBarYAt from './getBarYAt';
 
 var layoutVoice = function(voice) {
 	for (var i = 0; i < voice.beams.length; i++) {
@@ -124,4 +124,4 @@ function xAtMidpoint(startX, endX) {
 	return startX + (endX - startX)/2;
 };
 
-module.exports = layoutVoice;
+export default layoutVoice;

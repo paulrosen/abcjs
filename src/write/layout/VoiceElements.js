@@ -84,4 +84,4 @@ function getMinWidth(child) { // absolute space taken to the right of the note
 	return child.w;
 };
 
-module.exports = VoiceElement;
+export default VoiceElement;

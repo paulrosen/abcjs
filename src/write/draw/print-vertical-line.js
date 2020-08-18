@@ -13,4 +13,4 @@ function printVerticalLine (renderer, x, y1, y2) {
 
 }
 
-module.exports = printVerticalLine;
+export default printVerticalLine;

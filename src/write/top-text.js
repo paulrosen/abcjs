@@ -55,4 +55,4 @@ TopText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop
 	}
 }
 
-module.exports = TopText;
+export default TopText;

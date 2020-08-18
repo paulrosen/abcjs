@@ -1,4 +1,4 @@
-var elementGroup = require('./group-elements');
+import elementGroup from './group-elements';
 
 function printStem(renderer, x, dx, y1, y2) {
 	if (dx<0 || y1<y2) { // correct path "handedness" for intersection with other elements
@@ -26,4 +26,4 @@ function printStem(renderer, x, dx, y1, y2) {
 	}
 }
 
-module.exports = printStem;
+export default printStem;

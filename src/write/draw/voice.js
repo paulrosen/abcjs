@@ -1,11 +1,11 @@
-var drawCrescendo = require('./crescendo');
-var drawDynamics = require('./dynamics');
-var drawTriplet = require('./triplet');
-var drawEnding = require('./ending');
-var drawTie = require('./tie');
-var drawBeam = require('./beam');
-var renderText = require('./text');
-var drawAbsolute = require('./absolute');
+import drawCrescendo from './crescendo';
+import drawDynamics from './dynamics';
+import drawTriplet from './triplet';
+import drawEnding from './ending';
+import drawTie from './tie';
+import drawBeam from './beam';
+import renderText from './text';
+import drawAbsolute from './absolute';
 
 function drawVoice(renderer, params, bartop, selectables) {
 	var width = params.w-1;
@@ -88,4 +88,4 @@ function isNonSpacerRest(elem) {
 	return false;
 }
 
-module.exports = drawVoice;
+export default drawVoice;

@@ -18,8 +18,9 @@
 // of the grace notes, decorations, ties, triplets, rests, transpositions, keys, and accidentals into actual note durations.
 // It also extracts guitar chords to a separate voice and resolves their rhythm.
 
+import parseCommon from "../parse/abc_common";
+
 var flatten;
-var parseCommon = require("../parse/abc_common");
 
 (function() {
 	"use strict";
@@ -1208,4 +1209,4 @@ var parseCommon = require("../parse/abc_common");
 	}
 })();
 
-module.exports = flatten;
+export default flatten;

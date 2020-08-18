@@ -4,4 +4,4 @@ function printPath(renderer, attrs, params) {
 	return ret;
 }
 
-module.exports = printPath;
+export default printPath;
