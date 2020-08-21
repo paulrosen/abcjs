@@ -39,8 +39,8 @@ var createKeySignature;
 				case "sharp": symbol = "accidentals.sharp"; fudge = -3; break;
 				case "natural": symbol = "accidentals.nat"; break;
 				case "flat": symbol = "accidentals.flat"; fudge = -1.2; break;
-				case "quartersharp": symbol = "accidentals.halfsharp"; break;
-				case "quarterflat": symbol = "accidentals.halfflat"; break;
+				case "quartersharp": symbol = "accidentals.halfsharp"; fudge = -2.5; break;
+				case "quarterflat": symbol = "accidentals.halfflat"; fudge = -1.2; break;
 				default: symbol = "accidentals.flat";
 			}
 			abselem.addRight(new RelativeElement(symbol, dx, glyphs.getSymbolWidth(symbol), acc.verticalPos, {thickness: glyphs.symbolHeightInPitches(symbol), top: acc.verticalPos+glyphs.symbolHeightInPitches(symbol)+fudge, bottom: acc.verticalPos+fudge }));

@@ -83,7 +83,7 @@ var createClef;
 			case "clefs.G": return -5;
 			case "clefs.C": return -4;
 			case "clefs.F": return -4;
-			case "clefs.perc": return -4;
+			case "clefs.perc": return -2;
 			default: return 0;
 		}
 	}
