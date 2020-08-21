@@ -7,6 +7,7 @@
     "webpack": "webpack",
     "build": "npm run fix-versions && npm run build:basic && npm run build:basic-min && npm run build:midi && npm run build:plugin && npm run build:plugin-midi && npm run build:dist",
     "build:basic": "npm run webpack -- --env.mode development --env.type basic",
+    "example-debug": "npm run webpack -- --env.mode development --env.type basic -o dist/abcjs-basic.js",
     "build:basic-min": "npm run webpack -- --env.mode production --env.type basic",
     "build:dist": "cp bin/abcjs_basic_6.0.0-beta.15-min.js dist/abcjs-basic-min.js && cp bin/abcjs_basic_6.0.0-beta.15.js dist/abcjs-basic.js && cp bin/abcjs_basic_6.0.0-beta.15-min.js.LICENSE dist/abcjs-basic.js.LICENSE",
     "build:midi": "npm run webpack -- --env.mode production --env.type midi",
