@@ -51,19 +51,16 @@ var createClef;
 		// }
 		var dx =5;
 		if (clef) {
-			abselem.addRight(new RelativeElement(clef, dx, glyphs.getSymbolWidth(clef), elem.clefPos));
+			var height = glyphs.symbolHeightInPitches(clef);
+			var ofs = clefOffsets(clef);
+			abselem.addRight(new RelativeElement(clef, dx, glyphs.getSymbolWidth(clef), elem.clefPos, { top: height+elem.clefPos+ofs, bottom: elem.clefPos+ofs}));
 
-			if (clef === 'clefs.G') {
-				abselem.top = 13;
-				abselem.bottom = -1;
-			} else {
-				abselem.top = 10;
-				abselem.bottom = 2;
-			}
 			if (octave !== 0) {
 				var scale = 2 / 3;
 				var adjustspacing = (glyphs.getSymbolWidth(clef) - glyphs.getSymbolWidth("8") * scale) / 2;
 				var pitch = (octave > 0) ? abselem.top + 3 : abselem.bottom - 1;
+				var top = (octave > 0) ? abselem.top + 3 : abselem.bottom - 3;
+				var bottom = top-2;
 				if (elem.type === "bass-8") {
 					// The placement for bass octave is a little different. It should hug the clef.
 					pitch = 3;
@@ -71,14 +68,25 @@ var createClef;
 				}
 				abselem.addRight(new RelativeElement("8", dx + adjustspacing, glyphs.getSymbolWidth("8") * scale, pitch, {
 					scalex: scale,
-					scaley: scale
+					scaley: scale,
+					top: top,
+					bottom: bottom
 				}));
-				abselem.top += 2;
+				//abselem.top += 2;
 			}
 		}
 		return abselem;
 	};
 
+	function clefOffsets(clef) {
+		switch (clef) {
+			case "clefs.G": return -5;
+			case "clefs.C": return -4;
+			case "clefs.F": return -4;
+			case "clefs.perc": return -4;
+			default: return 0;
+		}
+	}
 })();
 
 module.exports = createClef;

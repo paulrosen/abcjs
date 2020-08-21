@@ -725,7 +725,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				else
 					p1 += 1;
 			}
-			abselem.addExtra(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+			abselem.addRight(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
 			//var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 			min = Math.min(p1, p2);
 		}
@@ -913,7 +913,8 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
                  accidentalSlot.push([pitch,accPlace]);
                  accidentalshiftx = (glyphs.getSymbolWidth(symb)*scale+2);
          }
-    abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
+         var h = glyphs.symbolHeightInPitches(symb);
+    abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale, top: pitch+h/2, bottom: pitch-h/2}));
 	  extraLeft = glyphs.getSymbolWidth(symb) / 2; // TODO-PER: We need a little extra width if there is an accidental, but I'm not sure why it isn't the full width of the accidental.
   }
 

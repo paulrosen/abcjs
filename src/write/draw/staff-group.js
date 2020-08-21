@@ -26,7 +26,7 @@ function drawStaffGroup(renderer, params, selectables) {
 		staff1.absoluteY = renderer.y;
 		if (renderer.showDebug) {
 			if (renderer.showDebug.indexOf("box") >= 0) {
-				boxAllElements(renderer, params.voices);
+				boxAllElements(renderer, params.voices, staff1.voices);
 			}
 			if (renderer.showDebug.indexOf("grid") >= 0) {
 				renderer.paper.dottedLine({x1: renderer.padding.left, x2: renderer.padding.left+renderer.controller.width, y1: startY, y2: startY, stroke: "#0000ff"})
@@ -139,15 +139,19 @@ function addInvisibleMarker(renderer, className) {
 	renderer.paper.pathToBack({path:"M 0 " + y + " L 0 0", stroke:"none", fill:"none", "stroke-opacity": 0, "fill-opacity": 0, 'class': renderer.controller.classes.generate(className), 'data-vertical': y });
 }
 
-function boxAllElements(renderer, voices) {
-	for (var i = 0; i < voices.length; i++) {
-		for (var j = 0; j < voices[i].children.length; j++) {
-			var elem = voices[i].children[j];
-			var height = (elem.top - elem.bottom)*spacing.STEP;
+function boxAllElements(renderer, voices, which) {
+	for (var i = 0; i < which.length; i++) {
+		var children = voices[which[i]].children;
+		for (var j = 0; j < children.length; j++) {
+			var elem = children[j];
+			var coords = elem.getFixedCoords();
+			if (elem.invisible || coords.t === undefined || coords.b === undefined)
+				continue;
+			var height = (coords.t - coords.b)*spacing.STEP;
 			printDebugBox(renderer,
-				{ x: elem.x,
-					y: renderer.calcY(elem.top),
-					width: elem.w,
+				{ x: coords.x,
+					y: renderer.calcY(coords.t),
+					width: coords.w,
 					height: height,
 					fill: "#88e888",
 					"fill-opacity": 0.4,

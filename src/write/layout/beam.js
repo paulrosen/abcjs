@@ -136,7 +136,7 @@ function createStems(elems, asc, beam, dy, mainNote) {
 			linewidth: lineWidth
 		});
 		stem.setX(parent.x); // This is after the x coordinates were set, so we have to set it directly.
-		parent.addExtra(stem);
+		parent.addRight(stem);
 	}
 
 }
