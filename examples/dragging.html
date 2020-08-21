@@ -99,7 +99,7 @@
 				selectionCallback(currentIndex+1);
 		}
 
-		function clickListener(abcelem, tuneNumber, classes, analysis, drag) {
+		function clickListener(abcelem, tuneNumber, classes, analysis, drag, mouseEvent) {
 			if (drag) {
 				selectionCallback = drag.setSelection;
 				currentIndex = drag.index;

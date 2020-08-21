@@ -154,7 +154,7 @@
 
 		var synthControl;
 
-		function clickListener(abcElem) {
+		function clickListener(abcElem, tuneNumber, classes, analysis, drag, mouseEvent) {
 			var output = "currentTrackMilliseconds: " + abcElem.currentTrackMilliseconds + "<br>" +
 				"midiPitches: " + JSON.stringify(abcElem.midiPitches, null, 4) + "<br>" +
 				"gracenotes: " + JSON.stringify(abcElem.gracenotes, null, 4) + "<br>" +

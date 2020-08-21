@@ -69,7 +69,7 @@ function getCoord(ev, svg) {
 function elementFocused(ev) {
 	// If there had been another element focused and is being dragged, then report that before setting the new element up.
 	if (this.dragMechanism === "keyboard" && this.dragYStep !== 0 && this.dragTarget)
-		notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex);
+		notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex, ev);
 
 	this.dragYStep = 0;
 }
@@ -275,7 +275,7 @@ function mouseUp(ev) {
 		this.dragTarget.absEl.highlight(undefined, this.selectionColor);
 	}
 
-	notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex);
+	notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex, ev);
 	if (this.dragTarget.svgEl && this.dragTarget.svgEl.focus) {
 		this.dragTarget.svgEl.focus();
 		this.dragTarget = null;
@@ -293,7 +293,7 @@ function setSelection(dragIndex) {
 	}
 }
 
-function notifySelect(target, dragStep, dragMax, dragIndex) {
+function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
 	var classes = [];
 	if (target.absEl.elemset) {
 		var classObj = {};
@@ -316,7 +316,7 @@ function notifySelect(target, dragStep, dragMax, dragIndex) {
 	}
 
 	for (var i=0; i<this.listeners.length;i++) {
-		this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, { step: dragStep, max: dragMax, index: dragIndex, setSelection: setSelection.bind(this)});
+		this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, { step: dragStep, max: dragMax, index: dragIndex, setSelection: setSelection.bind(this)}, ev);
 	}
 }
 
