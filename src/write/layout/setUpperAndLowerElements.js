@@ -47,7 +47,11 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 		if (staff.specialY.partHeightAbove) { staff.top += staff.specialY.partHeightAbove; positionY.partHeightAbove = staff.top; }
 		if (staff.specialY.tempoHeightAbove) { staff.top += staff.specialY.tempoHeightAbove; positionY.tempoHeightAbove = staff.top; }
 
-		if (staff.specialY.lyricHeightBelow) { positionY.lyricHeightBelow = staff.bottom; staff.bottom -= staff.specialY.lyricHeightBelow; }
+		if (staff.specialY.lyricHeightBelow) {
+			staff.specialY.lyricHeightBelow += renderer.spacing.vocal/spacing.STEP;
+			positionY.lyricHeightBelow = staff.bottom;
+			staff.bottom -= staff.specialY.lyricHeightBelow;
+		}
 		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= staff.specialY.chordHeightBelow; }
 		if (staff.specialY.volumeHeightBelow && staff.specialY.dynamicHeightBelow) {
 			positionY.volumeHeightBelow = staff.bottom;
@@ -64,7 +68,7 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 
 		for (var j = 0; j < staff.voices.length; j++) {
 			var voice = staffGroup.voices[staff.voices[j]];
-			setUpperAndLowerVoiceElements(positionY, voice);
+			setUpperAndLowerVoiceElements(positionY, voice, renderer.spacing);
 		}
 		// We might need a little space in between staves if the staves haven't been pushed far enough apart by notes or extra vertical stuff.
 		// Only try to put in extra space if this isn't the top staff.
@@ -85,12 +89,12 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 	//console.log("Staff Height: ",heightInPitches,this.height);
 };
 
-function setUpperAndLowerVoiceElements(positionY, voice) {
+function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
 	var i;
 	var abselem;
 	for (i = 0; i < voice.children.length; i++) {
 		abselem = voice.children[i];
-		setUpperAndLowerAbsoluteElements(positionY, abselem);
+		setUpperAndLowerAbsoluteElements(positionY, abselem, spacing);
 	}
 	for (i = 0; i < voice.otherchildren.length; i++) {
 		abselem = voice.otherchildren[i];
@@ -112,7 +116,7 @@ function setUpperAndLowerVoiceElements(positionY, voice) {
 // else on the line), this iterates through them and sets their pitch. By the time this is called, specialYResolved contains a
 // hash with the vertical placement (in pitch units) for each type.
 // TODO-PER: I think this needs to be separated by "above" and "below". How do we know that for dynamics at the point where they are being defined, though? We need a pass through all the relative elements to set "above" and "below".
-function setUpperAndLowerAbsoluteElements(specialYResolved, element) {
+function setUpperAndLowerAbsoluteElements(specialYResolved, element, spacing) {
 	// specialYResolved contains the actual pitch for each of the classes of elements.
 	for (var i = 0; i < element.children.length; i++) {
 		var child = element.children[i];
@@ -124,7 +128,7 @@ function setUpperAndLowerAbsoluteElements(specialYResolved, element) {
 						if (child.type === 'TempoElement') {
 							setUpperAndLowerTempoElement(specialYResolved, child);
 						} else {
-							setUpperAndLowerRelativeElements(specialYResolved, child);
+							setUpperAndLowerRelativeElements(specialYResolved, child, spacing);
 						}
 						element.pushTop(child.top);
 						element.pushBottom(child.bottom);
@@ -172,7 +176,7 @@ function setUpperAndLowerTempoElement(positionY, element) {
 	}
 }
 
-function setUpperAndLowerRelativeElements(positionY, element) {
+function setUpperAndLowerRelativeElements(positionY, element, renderSpacing) {
 	switch(element.type) {
 		case "part":
 			element.top = positionY.partHeightAbove + element.height;
@@ -193,8 +197,9 @@ function setUpperAndLowerRelativeElements(positionY, element) {
 				element.top = positionY.lyricHeightAbove;
 				element.bottom = positionY.lyricHeightAbove;
 			} else {
-				element.top = positionY.lyricHeightBelow;
-				element.bottom = positionY.lyricHeightBelow;
+				element.top = positionY.lyricHeightBelow + renderSpacing.vocal/spacing.STEP;
+				element.bottom = positionY.lyricHeightBelow + renderSpacing.vocal/spacing.STEP;
+				element.pitch -= renderSpacing.vocal/spacing.STEP;
 			}
 			break;
 		case "debug":
