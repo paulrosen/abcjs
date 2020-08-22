@@ -944,7 +944,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 
 		var voiceNumber = voice.voicetotal < 2 ? -1 : voice.voicenumber;
 		if (pitchelem.startTie) {
-			var tie = new TieElem({ anchor1: notehead, force: (this.stemdir==="down" || this.stemdir==="up"), stemDir: this.stemdir, isGrace: isGrace, voiceNumber: voiceNumber});
+			var tie = new TieElem({ anchor1: notehead, force: (this.stemdir==="down" || this.stemdir==="up"), stemDir: this.stemdir, isGrace: isGrace, voiceNumber: voiceNumber, style: pitchelem.startTie.style });
 			if (hint) tie.setHint();
 
 			this.ties[this.ties.length]=tie;
@@ -984,7 +984,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 		if (pitchelem.startSlur) {
 			for (i=0; i<pitchelem.startSlur.length; i++) {
 				slurid = pitchelem.startSlur[i].label;
-				slur = new TieElem({ anchor1: notehead, stemDir: this.stemdir, voiceNumber: voiceNumber});
+				slur = new TieElem({ anchor1: notehead, stemDir: this.stemdir, voiceNumber: voiceNumber, style: pitchelem.startSlur[i].style});
 				if (hint) slur.setHint();
 				this.slurs[slurid]=slur;
 				voice.addOther(slur);
