@@ -15,7 +15,12 @@ Selectables.prototype.getElements = function () {
 Selectables.prototype.add = function (absEl, svgEl, isNote) {
 	if (!this.canSelect(absEl))
 		return;
-	this.paper.setAttributeOnElement(svgEl, { selectable: true, tabindex: 0, "data-index": this.elements.length})
+	var params;
+	if (this.selectTypes === undefined)
+		params = { selectable: false, "data-index": this.elements.length}; // This is the old behavior.
+	else
+		params = { selectable: true, tabindex: 0, "data-index": this.elements.length};
+	this.paper.setAttributeOnElement(svgEl, params);
 	this.elements.push({ absEl: absEl, svgEl: svgEl, isDraggable: isNote });
 
 };
@@ -28,7 +33,7 @@ Selectables.prototype.canSelect = function (absEl) {
 	if (this.selectTypes === true)
 		return true;
 	if (this.selectTypes === undefined) {
-		// by default, only notes can be selected
+		// by default, only notes can be clicked.
 		return absEl.abcelem.el_type === 'note';
 	}
 	return this.selectTypes.indexOf(absEl.abcelem.el_type) >= 0;
