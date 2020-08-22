@@ -28,39 +28,40 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 			staff.originalBottom = staff.bottom; // This is just being stored for debugging purposes.
 		}
 
-		if (staff.specialY.lyricHeightAbove) { staff.top += staff.specialY.lyricHeightAbove; positionY.lyricHeightAbove = staff.top; }
-		if (staff.specialY.chordHeightAbove) { staff.top += staff.specialY.chordHeightAbove; positionY.chordHeightAbove = staff.top; }
+		incTop(staff, positionY, 'lyricHeightAbove');
+		incTop(staff, positionY, 'chordHeightAbove');
 		if (staff.specialY.endingHeightAbove) {
 			if (staff.specialY.chordHeightAbove)
 				staff.top += 2;
 			else
-				staff.top += staff.specialY.endingHeightAbove;
+				staff.top += staff.specialY.endingHeightAbove + margin;
 			positionY.endingHeightAbove = staff.top;
 		}
 		if (staff.specialY.dynamicHeightAbove && staff.specialY.volumeHeightAbove) {
-			staff.top += Math.max(staff.specialY.dynamicHeightAbove, staff.specialY.volumeHeightAbove);
+			staff.top += Math.max(staff.specialY.dynamicHeightAbove, staff.specialY.volumeHeightAbove) + margin;
 			positionY.dynamicHeightAbove = staff.top;
 			positionY.volumeHeightAbove = staff.top;
-		} else if (staff.specialY.dynamicHeightAbove) {
-			staff.top += staff.specialY.dynamicHeightAbove; positionY.dynamicHeightAbove = staff.top;
-		} else if (staff.specialY.volumeHeightAbove) { staff.top += staff.specialY.volumeHeightAbove; positionY.volumeHeightAbove = staff.top; }
-		if (staff.specialY.partHeightAbove) { staff.top += staff.specialY.partHeightAbove; positionY.partHeightAbove = staff.top; }
-		if (staff.specialY.tempoHeightAbove) { staff.top += staff.specialY.tempoHeightAbove; positionY.tempoHeightAbove = staff.top; }
+		} else {
+			incTop(staff, positionY, 'dynamicHeightAbove');
+			incTop(staff, positionY, 'volumeHeightAbove');
+		}
+		incTop(staff, positionY, 'partHeightAbove');
+		incTop(staff, positionY, 'tempoHeightAbove');
 
 		if (staff.specialY.lyricHeightBelow) {
 			staff.specialY.lyricHeightBelow += renderer.spacing.vocal/spacing.STEP;
 			positionY.lyricHeightBelow = staff.bottom;
-			staff.bottom -= staff.specialY.lyricHeightBelow;
+			staff.bottom -= staff.specialY.lyricHeightBelow - margin;
 		}
-		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= staff.specialY.chordHeightBelow; }
+		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= staff.specialY.chordHeightBelow - margin; }
 		if (staff.specialY.volumeHeightBelow && staff.specialY.dynamicHeightBelow) {
 			positionY.volumeHeightBelow = staff.bottom;
 			positionY.dynamicHeightBelow = staff.bottom;
-			staff.bottom -= Math.max(staff.specialY.volumeHeightBelow, staff.specialY.dynamicHeightBelow);
+			staff.bottom -= Math.max(staff.specialY.volumeHeightBelow, staff.specialY.dynamicHeightBelow) - margin;
 		} else if (staff.specialY.volumeHeightBelow) {
-			positionY.volumeHeightBelow = staff.bottom; staff.bottom -= staff.specialY.volumeHeightBelow;
+			positionY.volumeHeightBelow = staff.bottom; staff.bottom -= staff.specialY.volumeHeightBelow - margin;
 		} else if (staff.specialY.dynamicHeightBelow) {
-			positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow;
+			positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow - margin;
 		}
 
 		if (renderer.showDebug && renderer.showDebug.indexOf("box") >= 0)
@@ -88,6 +89,14 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 	}
 	//console.log("Staff Height: ",heightInPitches,this.height);
 };
+
+var margin = 1;
+function incTop(staff, positionY, item) {
+	if (staff.specialY[item]) {
+		staff.top += staff.specialY[item] + margin;
+		positionY[item] = staff.top;
+	}
+}
 
 function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
 	var i;
