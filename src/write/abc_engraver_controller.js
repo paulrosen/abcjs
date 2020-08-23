@@ -75,6 +75,8 @@ var EngraverController = function(paper, params) {
 
   this.renderer=new Renderer(paper, params.regression);
 	this.renderer.setPaddingOverride(params);
+	if (params.showDebug)
+		this.renderer.showDebug = params.showDebug;
   this.renderer.controller = this; // TODO-GD needed for highlighting
 
 	this.reset();
@@ -128,7 +130,7 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 
 	this.setupTune(abcTune, 0);
 	this.constructTuneElements(abcTune);
-	var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
+	var maxWidth = layout(this.renderer, abcTune, 0, this.space);
 
 	var ret = { left: 0, measureWidths: [], height: 0, total: 0 };
 	// TODO-PER: need to add the height of the title block, too.

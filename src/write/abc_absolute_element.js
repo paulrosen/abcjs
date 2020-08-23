@@ -33,13 +33,17 @@ var AbsoluteElement = function AbsoluteElement(abcelem, duration, minspacing, ty
 	this.heads = [];
 	this.extra = [];
 	this.extraw = 0;
-	//this.decs = [];
 	this.w = 0;
 	this.right = [];
 	this.invisible = false;
 	this.bottom = undefined;
 	this.top = undefined;
 	this.type = type;
+
+	// The following are the dimensions of the fixed part of the element.
+	// That is, the chord text will be a different height depending on lot of factors, but the 8th flag will always be in the same place.
+	this.fixed = { w: 0, t: undefined, b: undefined }; // there is no x-coord here, because that is set later.
+
 	// these are the heights of all of the vertical elements that can't be placed until the end of the line.
 	// the vertical order of elements that are above is: tempo, part, volume/dynamic, ending/chord, lyric
 	// the vertical order of elements that are below is: lyric, chord, volume/dynamic
@@ -59,7 +63,14 @@ var AbsoluteElement = function AbsoluteElement(abcelem, duration, minspacing, ty
 	};
 };
 
+AbsoluteElement.prototype.getFixedCoords = function () {
+	return { x: this.x, w: this.fixed.w, t: this.fixed.t, b: this.fixed.b };
+};
+
 AbsoluteElement.prototype.addExtra = function (extra) {
+	this.fixed.w = Math.max(this.fixed.w, extra.dx+extra.w);
+	if (this.fixed.t === undefined) this.fixed.t = extra.top; else this.fixed.t = Math.max(this.fixed.t, extra.top);
+	if (this.fixed.b === undefined) this.fixed.b = extra.bottom; else this.fixed.b = Math.min(this.fixed.b, extra.bottom);
 	if (extra.dx<this.extraw) this.extraw = extra.dx;
 	this.extra[this.extra.length] = extra;
 	this.addChild(extra);
@@ -72,6 +83,16 @@ AbsoluteElement.prototype.addHead = function (head) {
 };
 
 AbsoluteElement.prototype.addRight = function (right) {
+	// These are the elements that are the fixed part.
+	this.fixed.w = Math.max(this.fixed.w, right.dx+right.w);
+	if (right.top !== undefined) {
+		if (this.fixed.t === undefined) this.fixed.t = right.top; else this.fixed.t = Math.max(this.fixed.t, right.top);
+	}
+	if (right.bottom !== undefined) {
+		if (this.fixed.b === undefined) this.fixed.b = right.bottom; else this.fixed.b = Math.min(this.fixed.b, right.bottom);
+	}
+	if (isNaN(this.fixed.t) || isNaN(this.fixed.b))
+		debugger;
 	if (right.dx+right.w>this.w) this.w = right.dx+right.w;
 	this.right[this.right.length] = right;
 	this.addChild(right);

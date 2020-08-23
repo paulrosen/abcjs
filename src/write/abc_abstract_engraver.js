@@ -726,7 +726,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				else
 					p1 += 1;
 			}
-			abselem.addExtra(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+			abselem.addRight(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
 			//var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 			min = Math.min(p1, p2);
 		}
@@ -854,7 +854,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 
 		var voiceNumber = voice.voicetotal < 2 ? -1 : voice.voicenumber;
 		if (pitchelem.startTie) {
-			var tie = new TieElem({ anchor1: notehead, force: (this.stemdir==="down" || this.stemdir==="up"), stemDir: this.stemdir, isGrace: isGrace, voiceNumber: voiceNumber});
+			var tie = new TieElem({ anchor1: notehead, force: (this.stemdir==="down" || this.stemdir==="up"), stemDir: this.stemdir, isGrace: isGrace, voiceNumber: voiceNumber, style: pitchelem.startTie.style });
 			if (hint) tie.setHint();
 
 			this.ties[this.ties.length]=tie;
@@ -894,7 +894,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 		if (pitchelem.startSlur) {
 			for (i=0; i<pitchelem.startSlur.length; i++) {
 				slurid = pitchelem.startSlur[i].label;
-				slur = new TieElem({ anchor1: notehead, stemDir: this.stemdir, voiceNumber: voiceNumber});
+				slur = new TieElem({ anchor1: notehead, stemDir: this.stemdir, voiceNumber: voiceNumber, style: pitchelem.startSlur[i].style});
 				if (hint) slur.setHint();
 				this.slurs[slurid]=slur;
 				voice.addOther(slur);

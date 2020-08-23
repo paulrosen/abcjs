@@ -3,7 +3,6 @@ var drawDynamics = require('./dynamics');
 var drawTriplet = require('./triplet');
 var drawEnding = require('./ending');
 var drawTie = require('./tie');
-var drawTempo = require('./tempo');
 var drawBeam = require('./beam');
 var renderText = require('./text');
 var drawAbsolute = require('./absolute');

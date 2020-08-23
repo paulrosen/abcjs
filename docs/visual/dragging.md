@@ -72,4 +72,4 @@ If, instead of an array, you use the value `{ selectTypes: true }` then all of t
 
 If, instead of an array, you use the value `{ selectTypes: false }` then none of the items are selectable.
 
-If `selectTypes` is not passed in, then only notes and rests are selectable.
+If `selectTypes` is not passed in, then nothing is selectable (the same behavior as passing `false`), but notes and rests are clickable. (That is, the [clickListener](./click-listener.md) function will be called on a click. ) This mimics the previous behavior so it is backwards compatible.

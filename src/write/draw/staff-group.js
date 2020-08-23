@@ -13,18 +13,6 @@ function drawStaffGroup(renderer, params, selectables) {
 
 	var debugPrint;
 	var colorIndex;
-	if (/*ABCJS.write.debugPlacement*/false) {
-		var colors = [ "rgb(207,27,36)", "rgb(168,214,80)", "rgb(110,161,224)", "rgb(191,119,218)", "rgb(195,30,151)",
-			"rgb(31,170,177)", "rgb(220,166,142)" ];
-		debugPrint = function(staff, key) {
-			if (staff.positionY[key]) {
-				//renderer.printHorizontalLine(50, renderer.calcY(staff.positionY[key]), key.substr(0, 4) + " " + Math.round(staff.positionY[key]));
-				var height = staff.specialY[key] * spacing.STEP;
-				printDebugBox(renderer.padding.left, renderer.calcY(staff.positionY[key]), renderer.controller.width, height,colors[colorIndex], 0.4, key.substr(0, 4));
-				colorIndex += 1; if (colorIndex > 6) colorIndex = 0;
-			}
-		};
-	}
 
 	// An invisible marker is useful to be able to find where each system starts.
 	addInvisibleMarker(renderer,"abcjs-top-of-system");
@@ -36,22 +24,47 @@ function drawStaffGroup(renderer, params, selectables) {
 		//renderer.printHorizontalLine(50, renderer.y, "start");
 		renderer.moveY(spacing.STEP, staff1.top);
 		staff1.absoluteY = renderer.y;
-		if (/*ABCJS.write.debugPlacement*/false) {
-			colorIndex = 0;
-			printDebugBox(renderer.padding.left, renderer.calcY(staff1.originalTop), renderer.controller.width, renderer.calcY(staff1.originalBottom)-renderer.calcY(staff1.originalTop), "#000000", 0.1);
-			debugPrint(staff1, 'chordHeightAbove');
-			debugPrint(staff1, 'chordHeightBelow');
-			debugPrint(staff1, 'dynamicHeightAbove');
-			debugPrint(staff1, 'dynamicHeightBelow');
-			debugPrint(staff1, 'endingHeightAbove');
-			debugPrint(staff1, 'lyricHeightAbove');
-			debugPrint(staff1, 'lyricHeightBelow');
-			debugPrint(staff1, 'partHeightAbove');
-			debugPrint(staff1, 'tempoHeightAbove');
-			debugPrint(staff1, 'volumeHeightAbove');
-			debugPrint(staff1, 'volumeHeightBelow');
+		if (renderer.showDebug) {
+			if (renderer.showDebug.indexOf("box") >= 0) {
+				boxAllElements(renderer, params.voices, staff1.voices);
+			}
+			if (renderer.showDebug.indexOf("grid") >= 0) {
+				renderer.paper.dottedLine({x1: renderer.padding.left, x2: renderer.padding.left+renderer.controller.width, y1: startY, y2: startY, stroke: "#0000ff"})
+				printDebugBox(renderer,
+					{ x: renderer.padding.left,
+						y: renderer.calcY(staff1.originalTop),
+						width: renderer.controller.width,
+						height: renderer.calcY(staff1.originalBottom) - renderer.calcY(staff1.originalTop),
+						fill: "#000000",
+						stroke: "#000000",
+						"fill-opacity": 0.1,
+						"stroke-opacity": 0.1 });
+				colorIndex = 0;
+				debugPrintGridItem(staff1, 'chordHeightAbove');
+				debugPrintGridItem(staff1, 'chordHeightBelow');
+				debugPrintGridItem(staff1, 'dynamicHeightAbove');
+				debugPrintGridItem(staff1, 'dynamicHeightBelow');
+				debugPrintGridItem(staff1, 'endingHeightAbove');
+				debugPrintGridItem(staff1, 'lyricHeightAbove');
+				debugPrintGridItem(staff1, 'lyricHeightBelow');
+				debugPrintGridItem(staff1, 'partHeightAbove');
+				debugPrintGridItem(staff1, 'tempoHeightAbove');
+				debugPrintGridItem(staff1, 'volumeHeightAbove');
+				debugPrintGridItem(staff1, 'volumeHeightBelow');
+			}
 		}
 		renderer.moveY(spacing.STEP, -staff1.bottom);
+		if (renderer.showDebug) {
+			if (renderer.showDebug.indexOf("grid") >= 0) {
+				renderer.paper.dottedLine({
+					x1: renderer.padding.left,
+					x2: renderer.padding.left + renderer.controller.width,
+					y1: renderer.y,
+					y2: renderer.y,
+					stroke: "#0000aa"
+				});
+			}
+		}
 	}
 	var topLine; // these are to connect multiple staves. We need to remember where they are.
 	var bottomLine;
@@ -89,6 +102,25 @@ function drawStaffGroup(renderer, params, selectables) {
 		printStem(renderer, params.startx, 0.6, topLine, bottomLine);
 	}
 	renderer.y = startY;
+
+	function debugPrintGridItem(staff, key) {
+		var colors = [ "rgb(207,27,36)", "rgb(168,214,80)", "rgb(110,161,224)", "rgb(191,119,218)", "rgb(195,30,151)",
+			"rgb(31,170,177)", "rgb(220,166,142)" ];
+		if (staff.positionY[key]) {
+			var height = staff.specialY[key] * spacing.STEP;
+			printDebugBox(renderer,
+				{ x: renderer.padding.left,
+					y: renderer.calcY(staff.positionY[key]),
+					width: renderer.controller.width,
+					height: height,
+					fill: colors[colorIndex],
+					stroke: colors[colorIndex],
+					"fill-opacity": 0.4,
+					"stroke-opacity": 0.4 },
+				key.substr(0, 4));
+			colorIndex += 1; if (colorIndex > 6) colorIndex = 0;
+		}
+	}
 }
 
 function printBrace(renderer, absoluteY, brace, index, selectables) {
@@ -105,6 +137,29 @@ function printBrace(renderer, absoluteY, brace, index, selectables) {
 function addInvisibleMarker(renderer, className) {
 	var y = Math.round(renderer.y);
 	renderer.paper.pathToBack({path:"M 0 " + y + " L 0 0", stroke:"none", fill:"none", "stroke-opacity": 0, "fill-opacity": 0, 'class': renderer.controller.classes.generate(className), 'data-vertical': y });
+}
+
+function boxAllElements(renderer, voices, which) {
+	for (var i = 0; i < which.length; i++) {
+		var children = voices[which[i]].children;
+		for (var j = 0; j < children.length; j++) {
+			var elem = children[j];
+			var coords = elem.getFixedCoords();
+			if (elem.invisible || coords.t === undefined || coords.b === undefined)
+				continue;
+			var height = (coords.t - coords.b)*spacing.STEP;
+			printDebugBox(renderer,
+				{ x: coords.x,
+					y: renderer.calcY(coords.t),
+					width: coords.w,
+					height: height,
+					fill: "#88e888",
+					"fill-opacity": 0.4,
+					stroke: "#4aa93d",
+					"stroke-opacity": 0.8
+			});
+		}
+	}
 }
 
 module.exports = drawStaffGroup;

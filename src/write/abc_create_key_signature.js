@@ -34,15 +34,16 @@ var createKeySignature;
 		var dx = 0;
 		parseCommon.each(elem.accidentals, function(acc) {
 			var symbol;
+			var fudge = 0;
 			switch(acc.acc) {
-				case "sharp": symbol = "accidentals.sharp"; break;
+				case "sharp": symbol = "accidentals.sharp"; fudge = -3; break;
 				case "natural": symbol = "accidentals.nat"; break;
-				case "flat": symbol = "accidentals.flat"; break;
-				case "quartersharp": symbol = "accidentals.halfsharp"; break;
-				case "quarterflat": symbol = "accidentals.halfflat"; break;
+				case "flat": symbol = "accidentals.flat"; fudge = -1.2; break;
+				case "quartersharp": symbol = "accidentals.halfsharp"; fudge = -2.5; break;
+				case "quarterflat": symbol = "accidentals.halfflat"; fudge = -1.2; break;
 				default: symbol = "accidentals.flat";
 			}
-			abselem.addRight(new RelativeElement(symbol, dx, glyphs.getSymbolWidth(symbol), acc.verticalPos, {thickness: glyphs.symbolHeightInPitches(symbol)}));
+			abselem.addRight(new RelativeElement(symbol, dx, glyphs.getSymbolWidth(symbol), acc.verticalPos, {thickness: glyphs.symbolHeightInPitches(symbol), top: acc.verticalPos+glyphs.symbolHeightInPitches(symbol)+fudge, bottom: acc.verticalPos+fudge }));
 			dx += glyphs.getSymbolWidth(symbol) + 2;
 		}, this);
 		return abselem;

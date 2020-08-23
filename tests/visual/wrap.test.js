@@ -29,9 +29,29 @@ describe("Automatic line wrapping", function() {
 		"voiceSizes": [[[13]], [[17]], [[14]]]
 	};
 
-	it("wrap-single-line", function() {
+	var abcShortMeasures = "%%stretchlast 1\nX:1\nQ:1/4=70\nM:2/4\nL:1/4\nK:C clef=bass\nC,D,|D,2|E,F,|G,2|\nG,2|F,E,|D,D,|C,2|]\n";
+
+	var expectedShortMeasures740 = {
+		"lineBreakPoint":383.24833333333333,
+		"minLineSize":246.3739285714286,
+		"minWidth":406,
+		"measureWidths":
+			[48.41500000000001,27.370000000000005,37.620000000000005,27.370000000000005,16.369999999999997,37.620000000000005,37.620000000000005,27.370000000000005],
+		"voiceSizes":[[[10]],[[10]]]};
+
+	it("wrap-short-measures", function() {
+		doWrapTest(abcShortMeasures, expectedShortMeasures740, 740);
+	});
+
+	it("wrap-single-line400", function() {
 		doWrapTest(abcSingleLine, expectedSingleLine400, 400);
+	})
+
+	it("wrap-single-line500", function() {
 		doWrapTest(abcSingleLine, expectedSingleLine500, 500);
+	})
+
+	it("wrap-single-line600", function() {
 		doWrapTest(abcSingleLine, expectedSingleLine600, 600);
 	})
 })

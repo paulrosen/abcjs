@@ -7,7 +7,7 @@ function drawTie(renderer, params, linestartx, lineendx, selectables) {
 	if (params.hint)
 		klass = "abcjs-hint";
 	var fudgeY =  params.fixedY ? 1.5 : 0; // TODO-PER: This just compensates for drawArc, which contains too much knowledge of ties and slurs.
-	var el = drawArc(renderer, params.startX, params.endX, params.startY+fudgeY, params.endY+fudgeY,  params.above, klass, params.isTie);
+	var el = drawArc(renderer, params.startX, params.endX, params.startY+fudgeY, params.endY+fudgeY,  params.above, klass, params.isTie, params.dotted);
 	selectables.wrapSvgEl({ el_type: "slur", startChar: -1, endChar: -1 }, el);
 	return [el];
 }
@@ -37,7 +37,7 @@ var layout = function (params, lineStartX, lineEndX) {
 	params.avoidCollisionAbove();
 };
 
-var drawArc = function(renderer, x1, x2, pitch1, pitch2, above, klass, isTie) {
+var drawArc = function(renderer, x1, x2, pitch1, pitch2, above, klass, isTie, dotted) {
 	// If it is a tie vs. a slur, draw it shallower.
 	var spacing = isTie ? 1.2 : 1.5;
 
@@ -64,14 +64,21 @@ var drawArc = function(renderer, x1, x2, pitch1, pitch2, above, klass, isTie) {
 	var controlx2 = x2-flatten*ux-curve*uy;
 	var controly2 = y2-flatten*uy+curve*ux;
 	var thickness = 2;
-	var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
-		controlx1, controly1, controlx2, controly2, x2, y2,
-		controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
 	if (klass)
 		klass += ' slur';
 	else
 		klass = 'slur';
-	var ret = renderer.paper.path({path:pathString, stroke:"none", fill:"#000000", 'class': renderer.controller.classes.generate(klass)});
+	var ret;
+	if (dotted) {
+		var pathString2 = sprintf("M %f %f C %f %f %f %f %f %f", x1, y1,
+			controlx1, controly1, controlx2, controly2, x2, y2);
+		ret = renderer.paper.path({path:pathString2, stroke:"#000000", fill:"none", 'stroke-dasharray': "5 5", 'class': renderer.controller.classes.generate(klass)});
+	} else {
+		var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
+			controlx1, controly1, controlx2, controly2, x2, y2,
+			controlx2 - thickness * uy, controly2 + thickness * ux, controlx1 - thickness * uy, controly1 + thickness * ux, x1, y1);
+		ret = renderer.paper.path({path:pathString, stroke:"none", fill:"#000000", 'class': renderer.controller.classes.generate(klass)});
+	}
 
 	return ret;
 };

@@ -40,7 +40,7 @@
 		}
 	</style>
 
-	<script src="../bin/abcjs_basic_6.0.0-beta.14-min.js" type="text/javascript"></script>
+	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
 		function CursorControl() {
@@ -154,7 +154,7 @@
 
 		var synthControl;
 
-		function clickListener(abcElem) {
+		function clickListener(abcElem, tuneNumber, classes, analysis, drag, mouseEvent) {
 			var output = "currentTrackMilliseconds: " + abcElem.currentTrackMilliseconds + "<br>" +
 				"midiPitches: " + JSON.stringify(abcElem.midiPitches, null, 4) + "<br>" +
 				"gracenotes: " + JSON.stringify(abcElem.gracenotes, null, 4) + "<br>" +

@@ -27,7 +27,7 @@ var TempoElement;
 		this.tempo.type = "tempo"; /// TODO-PER: this should be set earlier, in the parser, probably.
 		this.tuneNumber = tuneNumber;
 		// TODO: can these two properties be merged?
-		this.totalHeightInPitches = 5;
+		this.totalHeightInPitches = 6;
 		this.tempoHeightAbove = this.totalHeightInPitches;
 		this.pitch = undefined; // This will be set later
 		if (this.tempo.duration && !this.tempo.suppressBpm) {
@@ -84,7 +84,7 @@ var TempoElement;
 			var dx = tempoNote.dx + tempoNote.w;
 			var width = -0.6;
 			stem = new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2": p2, linewidth: width});
-			absElem.addExtra(stem);
+			absElem.addRight(stem);
 		}
 		return absElem;
 	};

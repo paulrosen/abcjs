@@ -23,48 +23,53 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 			dynamicHeightBelow: 0
 		};
 
-		if (/*ABCJS.write.debugPlacement*/false) {
+		if (renderer.showDebug && renderer.showDebug.indexOf("box") >= 0) {
 			staff.originalTop = staff.top; // This is just being stored for debugging purposes.
 			staff.originalBottom = staff.bottom; // This is just being stored for debugging purposes.
 		}
 
-		if (staff.specialY.lyricHeightAbove) { staff.top += staff.specialY.lyricHeightAbove; positionY.lyricHeightAbove = staff.top; }
-		if (staff.specialY.chordHeightAbove) { staff.top += staff.specialY.chordHeightAbove; positionY.chordHeightAbove = staff.top; }
+		incTop(staff, positionY, 'lyricHeightAbove');
+		incTop(staff, positionY, 'chordHeightAbove');
 		if (staff.specialY.endingHeightAbove) {
 			if (staff.specialY.chordHeightAbove)
 				staff.top += 2;
 			else
-				staff.top += staff.specialY.endingHeightAbove;
+				staff.top += staff.specialY.endingHeightAbove + margin;
 			positionY.endingHeightAbove = staff.top;
 		}
 		if (staff.specialY.dynamicHeightAbove && staff.specialY.volumeHeightAbove) {
-			staff.top += Math.max(staff.specialY.dynamicHeightAbove, staff.specialY.volumeHeightAbove);
+			staff.top += Math.max(staff.specialY.dynamicHeightAbove, staff.specialY.volumeHeightAbove) + margin;
 			positionY.dynamicHeightAbove = staff.top;
 			positionY.volumeHeightAbove = staff.top;
-		} else if (staff.specialY.dynamicHeightAbove) {
-			staff.top += staff.specialY.dynamicHeightAbove; positionY.dynamicHeightAbove = staff.top;
-		} else if (staff.specialY.volumeHeightAbove) { staff.top += staff.specialY.volumeHeightAbove; positionY.volumeHeightAbove = staff.top; }
-		if (staff.specialY.partHeightAbove) { staff.top += staff.specialY.partHeightAbove; positionY.partHeightAbove = staff.top; }
-		if (staff.specialY.tempoHeightAbove) { staff.top += staff.specialY.tempoHeightAbove; positionY.tempoHeightAbove = staff.top; }
+		} else {
+			incTop(staff, positionY, 'dynamicHeightAbove');
+			incTop(staff, positionY, 'volumeHeightAbove');
+		}
+		incTop(staff, positionY, 'partHeightAbove');
+		incTop(staff, positionY, 'tempoHeightAbove');
 
-		if (staff.specialY.lyricHeightBelow) { positionY.lyricHeightBelow = staff.bottom; staff.bottom -= staff.specialY.lyricHeightBelow; }
-		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= staff.specialY.chordHeightBelow; }
+		if (staff.specialY.lyricHeightBelow) {
+			staff.specialY.lyricHeightBelow += renderer.spacing.vocal/spacing.STEP;
+			positionY.lyricHeightBelow = staff.bottom;
+			staff.bottom -= staff.specialY.lyricHeightBelow - margin;
+		}
+		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= staff.specialY.chordHeightBelow - margin; }
 		if (staff.specialY.volumeHeightBelow && staff.specialY.dynamicHeightBelow) {
 			positionY.volumeHeightBelow = staff.bottom;
 			positionY.dynamicHeightBelow = staff.bottom;
-			staff.bottom -= Math.max(staff.specialY.volumeHeightBelow, staff.specialY.dynamicHeightBelow);
+			staff.bottom -= Math.max(staff.specialY.volumeHeightBelow, staff.specialY.dynamicHeightBelow) - margin;
 		} else if (staff.specialY.volumeHeightBelow) {
-			positionY.volumeHeightBelow = staff.bottom; staff.bottom -= staff.specialY.volumeHeightBelow;
+			positionY.volumeHeightBelow = staff.bottom; staff.bottom -= staff.specialY.volumeHeightBelow - margin;
 		} else if (staff.specialY.dynamicHeightBelow) {
-			positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow;
+			positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow - margin;
 		}
 
-		if (/*ABCJS.write.debugPlacement*/false)
+		if (renderer.showDebug && renderer.showDebug.indexOf("box") >= 0)
 			staff.positionY = positionY; // This is just being stored for debugging purposes.
 
 		for (var j = 0; j < staff.voices.length; j++) {
 			var voice = staffGroup.voices[staff.voices[j]];
-			setUpperAndLowerVoiceElements(positionY, voice);
+			setUpperAndLowerVoiceElements(positionY, voice, renderer.spacing);
 		}
 		// We might need a little space in between staves if the staves haven't been pushed far enough apart by notes or extra vertical stuff.
 		// Only try to put in extra space if this isn't the top staff.
@@ -85,12 +90,20 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 	//console.log("Staff Height: ",heightInPitches,this.height);
 };
 
-function setUpperAndLowerVoiceElements(positionY, voice) {
+var margin = 1;
+function incTop(staff, positionY, item) {
+	if (staff.specialY[item]) {
+		staff.top += staff.specialY[item] + margin;
+		positionY[item] = staff.top;
+	}
+}
+
+function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
 	var i;
 	var abselem;
 	for (i = 0; i < voice.children.length; i++) {
 		abselem = voice.children[i];
-		setUpperAndLowerAbsoluteElements(positionY, abselem);
+		setUpperAndLowerAbsoluteElements(positionY, abselem, spacing);
 	}
 	for (i = 0; i < voice.otherchildren.length; i++) {
 		abselem = voice.otherchildren[i];
@@ -106,13 +119,13 @@ function setUpperAndLowerVoiceElements(positionY, voice) {
 				break;
 		}
 	}
-};
+}
 
 // For each of the relative elements that can't be placed in advance (because their vertical placement depends on everything
 // else on the line), this iterates through them and sets their pitch. By the time this is called, specialYResolved contains a
 // hash with the vertical placement (in pitch units) for each type.
 // TODO-PER: I think this needs to be separated by "above" and "below". How do we know that for dynamics at the point where they are being defined, though? We need a pass through all the relative elements to set "above" and "below".
-function setUpperAndLowerAbsoluteElements(specialYResolved, element) {
+function setUpperAndLowerAbsoluteElements(specialYResolved, element, spacing) {
 	// specialYResolved contains the actual pitch for each of the classes of elements.
 	for (var i = 0; i < element.children.length; i++) {
 		var child = element.children[i];
@@ -124,7 +137,7 @@ function setUpperAndLowerAbsoluteElements(specialYResolved, element) {
 						if (child.type === 'TempoElement') {
 							setUpperAndLowerTempoElement(specialYResolved, child);
 						} else {
-							setUpperAndLowerRelativeElements(specialYResolved, child);
+							setUpperAndLowerRelativeElements(specialYResolved, child, spacing);
 						}
 						element.pushTop(child.top);
 						element.pushBottom(child.bottom);
@@ -133,25 +146,25 @@ function setUpperAndLowerAbsoluteElements(specialYResolved, element) {
 			}
 		}
 	}
-};
+}
 
 function setUpperAndLowerCrescendoElements(positionY, element) {
 	if (element.dynamicHeightAbove)
 		element.pitch = positionY.dynamicHeightAbove;
 	else
 		element.pitch = positionY.dynamicHeightBelow;
-};
+}
 
 function setUpperAndLowerDynamicElements(positionY, element) {
 	if (element.volumeHeightAbove)
 		element.pitch = positionY.volumeHeightAbove;
 	else
 		element.pitch = positionY.volumeHeightBelow;
-};
+}
 
 function setUpperAndLowerEndingElements(positionY, element) {
 	element.pitch = positionY.endingHeightAbove - 2;
-};
+}
 
 function setUpperAndLowerTempoElement(positionY, element) {
 	element.pitch = positionY.tempoHeightAbove;
@@ -170,9 +183,9 @@ function setUpperAndLowerTempoElement(positionY, element) {
 				child.pitch2 += tempoPitch;
 		}
 	}
-};
+}
 
-function setUpperAndLowerRelativeElements(positionY, element) {
+function setUpperAndLowerRelativeElements(positionY, element, renderSpacing) {
 	switch(element.type) {
 		case "part":
 			element.top = positionY.partHeightAbove + element.height;
@@ -193,8 +206,9 @@ function setUpperAndLowerRelativeElements(positionY, element) {
 				element.top = positionY.lyricHeightAbove;
 				element.bottom = positionY.lyricHeightAbove;
 			} else {
-				element.top = positionY.lyricHeightBelow;
-				element.bottom = positionY.lyricHeightBelow;
+				element.top = positionY.lyricHeightBelow + renderSpacing.vocal/spacing.STEP;
+				element.bottom = positionY.lyricHeightBelow + renderSpacing.vocal/spacing.STEP;
+				element.pitch -= renderSpacing.vocal/spacing.STEP;
 			}
 			break;
 		case "debug":
@@ -204,6 +218,6 @@ function setUpperAndLowerRelativeElements(positionY, element) {
 	}
 	if (element.pitch === undefined || element.top === undefined)
 		console.error("RelativeElement position not set.", element.type, element.pitch, element.top, positionY);
-};
+}
 
 module.exports = setUpperAndLowerElements;

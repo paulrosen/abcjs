@@ -89,6 +89,7 @@ var Parse = function() {
 			this.is_in_header = true;
 			this.is_in_history = false;
 			this.partForNextLine = {};
+			this.tempoForNextLine = [];
 			this.havent_set_length = true;
 			this.voices = {};
 			this.staves = [];
@@ -274,7 +275,7 @@ var Parse = function() {
 		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
 		"segno", "coda", "D.S.", "D.C.", "fine", "beambr1", "beambr2",
-		"slide", "^", "marcato",
+		"slide", "marcato",
 		"upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4",
 		"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato",
 		"style=normal", "style=harmonic", "style=rhythm", "style=x"
@@ -322,7 +323,10 @@ var Parse = function() {
 		}
 		switch (line.charAt(i))
 		{
-			case '.':return [1, 'staccato'];
+			case '.':
+				if (line[i+1] === '(' || line[i+1] === '-') // a dot then open paren is a dotted slur; likewise dot dash is dotted tie.
+					break;
+				return [1, 'staccato'];
 			case 'u':return [1, 'upbow'];
 			case 'v':return [1, 'downbow'];
 			case '~':return [1, 'irishroll'];
@@ -330,7 +334,7 @@ var Parse = function() {
 			case '+':
 				var ret = tokenizer.getBrackettedSubstring(line, i, 5);
 				// Be sure that the accent is recognizable.
-			if (ret[1].length > 0 && (ret[1].charAt(0) === '^' || ret[1].charAt(0) ==='_'))
+			if (ret[1].length > 1 && (ret[1].charAt(0) === '^' || ret[1].charAt(0) ==='_'))
 					ret[1] = ret[1].substring(1);	// TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
 				if (parseCommon.detect(legalAccents, function(acc) {
 					return (ret[1] === acc);
@@ -452,6 +456,10 @@ var Parse = function() {
 		// that is a triplet. Otherwise that is a slur. Collect all the slurs and the first triplet.
 		var ret = {};
 		var start = i;
+		if (line[i] === '.' && line[i+1] === '(') {
+			ret.dottedSlur = true;
+			i++;
+		}
 		while (line.charAt(i) === '(' || tokenizer.isWhiteSpace(line.charAt(i))) {
 			if (line.charAt(i) === '(') {
 				if (i+1 < line.length && (line.charAt(i+1) >= '2' && line.charAt(i+1) <= '9')) {
@@ -703,6 +711,11 @@ var Parse = function() {
 		var isComplete = function(state) {
 			return (state === 'octave' || state === 'duration' || state === 'Zduration' || state === 'broken_rhythm' || state === 'end_slur');
 		};
+		var dottedTie;
+		if (line[index] === '.' && line[index+1] === '-') {
+			dottedTie = true;
+			index++;
+		}
 		var state = 'startSlur';
 		var durationSetByPreviousNote = false;
 		while (1) {
@@ -860,7 +873,7 @@ var Parse = function() {
 				case '-':
 					if (state === 'startSlur') {
 						// This is the first character, so it must have been meant for the previous note. Correct that here.
-						tuneBuilder.addTieToLastNote();
+						tuneBuilder.addTieToLastNote(dottedTie);
 						el.endTie = true;
 					} else if (state === 'octave' || state === 'duration' || state === 'end_slur') {
 						el.startTie = {};
@@ -881,11 +894,21 @@ var Parse = function() {
 					if (isComplete(state)) {
 						el.end_beam = true;
 						// look ahead to see if there is a tie
+						dottedTie = false;
 						do {
-							if (line.charAt(index) === '-')
+							if (line.charAt(index) === '.' && line.charAt(index+1) === '-') {
+								dottedTie = true;
+								index++;
+							}
+							if (line.charAt(index) === '-') {
 								el.startTie = {};
+								if (dottedTie)
+									el.startTie.style = "dotted";
+							}
 							index++;
-						} while (index < line.length && (tokenizer.isWhiteSpace(line.charAt(index)) || line.charAt(index) === '-'));
+						} while (index < line.length &&
+						(tokenizer.isWhiteSpace(line.charAt(index)) || line.charAt(index) === '-') ||
+						(line.charAt(index) === '.' && line.charAt(index+1) === '-'));
 						el.endChar = index;
 						if (!durationSetByPreviousNote && canHaveBrokenRhythm && (line.charAt(index) === '<' || line.charAt(index) === '>')) {	// TODO-PER: Don't need the test for < and >, but that makes the endChar work out for the regression test.
 							index--;
@@ -1008,6 +1031,9 @@ var Parse = function() {
 			delete multilineVars.key.impliedNaturals;
 
 		multilineVars.partForNextLine = {};
+		if (multilineVars.tempoForNextLine.length === 4)
+			tuneBuilder.appendElement(multilineVars.tempoForNextLine[0],multilineVars.tempoForNextLine[1],multilineVars.tempoForNextLine[2],multilineVars.tempoForNextLine[3]);
+		multilineVars.tempoForNextLine = [];
 	}
 
 	var letter_to_grace =  function(line, i) {
@@ -1372,6 +1398,8 @@ var Parse = function() {
 					if (ret.consumed > 0) {
 						if (ret.startSlur !== undefined)
 							el.startSlur = ret.startSlur;
+						if (ret.dottedSlur)
+							el.dottedSlur = true;
 						if (ret.triplet !== undefined) {
 							if (tripletNotesLeft > 0)
 								warn("Can't nest triplets", line, i);
@@ -1548,6 +1576,7 @@ var Parse = function() {
 								if (core.endTie !== undefined) el.pitches[0].endTie = core.endTie;
 								if (core.startSlur !== undefined) el.pitches[0].startSlur = core.startSlur;
 								if (el.startSlur !== undefined) el.pitches[0].startSlur = el.startSlur;
+								if (el.dottedSlur !== undefined) el.pitches[0].dottedSlur = true;
 								if (core.startTie !== undefined) el.pitches[0].startTie = core.startTie;
 								if (el.startTie !== undefined) el.pitches[0].startTie = el.startTie;
 							} else {
@@ -1564,6 +1593,7 @@ var Parse = function() {
 							if (core.decoration !== undefined) el.decoration = core.decoration;
 							if (core.graceNotes !== undefined) el.graceNotes = core.graceNotes;
 							delete el.startSlur;
+							delete el.dottedSlur;
 							if (isInTie(multilineVars,  overlayLevel, el)) {
 								if (el.pitches !== undefined) {
 									el.pitches[0].endTie = true;

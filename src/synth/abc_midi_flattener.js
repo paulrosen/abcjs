@@ -575,12 +575,14 @@ var parseCommon = require("../parse/abc_common");
 		var graces;
 		if (elem.gracenotes && elem.pitches && elem.pitches.length > 0 && elem.pitches[0]) {
 			graces = processGraceNotes(elem.gracenotes, elem.pitches[0].duration);
-			elem.elem.midiGraceNotePitches = writeGraceNotes(graces, timeToRealTime(elem.time), velocity*2/3, currentInstrument); // make the graces a little quieter.
+			if (elem.elem)
+				elem.elem.midiGraceNotePitches = writeGraceNotes(graces, timeToRealTime(elem.time), velocity*2/3, currentInstrument); // make the graces a little quieter.
 		}
 
 		// The beat fraction is the note that gets a beat (.25 is a quarter note)
 		// The tempo is in minutes and we want to get to milliseconds.
-		elem.elem.currentTrackMilliseconds = timeToRealTime(elem.time) / beatFraction / startingTempo * 60*1000;
+		if (elem.elem)
+			elem.elem.currentTrackMilliseconds = timeToRealTime(elem.time) / beatFraction / startingTempo * 60*1000;
 		//var tieAdjustment = 0;
 		if (elem.pitches) {
 			var thisBreakBetweenNotes = '';
@@ -604,7 +606,8 @@ var parseCommon = require("../parse/abc_common");
 				}
 			}
 
-			elem.elem.midiPitches = [];
+			if (elem.elem)
+				elem.elem.midiPitches = [];
 			for (var i=0; i<ePitches.length; i++) {
 				var note = ePitches[i];
 				if (!note)
@@ -619,7 +622,8 @@ var parseCommon = require("../parse/abc_common");
 					p.duration = p.duration / 2;
 					p.start = p.start + p.duration;
 				}
-				elem.elem.midiPitches.push(p);
+				if (elem.elem)
+					elem.elem.midiPitches.push(p);
 				if (ret.noteModification) {
 					doModifiedNotes(ret.noteModification, p);
 				} else {
@@ -646,10 +650,17 @@ var parseCommon = require("../parse/abc_common");
 			lastNoteDurationPosition = currentTrack.length-1;
 
 		}
-		var realDur = elem.pitches && elem.pitches.length > 0 && elem.pitches[0] ? elem.pitches[0].duration : elem.elem.duration;
+		var realDur = getRealDuration(elem);
 		lastEventTime = Math.max(lastEventTime, timeToRealTime(elem.time)+durationRounded(realDur));
 
 		return setChordTrack;
+	}
+	function getRealDuration(elem) {
+		if (elem.pitches && elem.pitches.length > 0 && elem.pitches[0])
+			return elem.pitches[0].duration;
+		if (elem.elem)
+			return elem.elem.duration;
+		return elem.duration;
 	}
 
 	var scale = [0,2,4,5,7,9,11];

@@ -124,7 +124,7 @@ Renderer.prototype.initVerticalSpace = function() {
 		text: 18.9, // Set the vertical space above the history.
 		title: 7.56, // Set the vertical space above the title.
 		top: 30.24, //Set the vertical space above the tunes and on the top of the continuation pages.
-		vocal: 30.67, // Set the vertical space above the lyrics under the staves.
+		vocal: 0, // Set the vertical space above the lyrics under the staves.
 		words: 0 // Set the vertical space above the lyrics at the end of the tune.
 	};
 	/*

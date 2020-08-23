@@ -284,6 +284,10 @@ var TuneBuilder = function(tune) {
 
 					currSlur[chordPos].push(nextNum);
 					obj.startSlur.push({ label: nextNum });
+					if (obj.dottedSlur) {
+						obj.startSlur[obj.startSlur.length-1].style = 'dotted';
+						delete obj.dottedSlur;
+					}
 //					lyr.syllable += ' ' + nextNum + '>';	// TODO-PER:debugging
 					nextNum++;
 				}
@@ -474,11 +478,13 @@ var TuneBuilder = function(tune) {
 		return null;
 	};
 
-	this.addTieToLastNote = function() {
+	this.addTieToLastNote = function(dottedTie) {
 		// TODO-PER: if this is a chord, which note?
 		var el = this.getLastNote();
 		if (el && el.pitches && el.pitches.length > 0) {
 			el.pitches[0].startTie = {};
+			if (dottedTie)
+				el.pitches[0].startTie.style = 'dotted';
 			return true;
 		}
 		return false;

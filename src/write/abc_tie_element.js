@@ -27,6 +27,8 @@ var TieElem = function TieElem(options) {
 		this.stemDir = options.stemDir;
 	if (options.voiceNumber !== undefined)
 		this.voiceNumber = options.voiceNumber;
+	if (options.style !== undefined)
+		this.dotted = true;
 	this.internalNotes = [];
 };
 
