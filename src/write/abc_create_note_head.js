@@ -87,7 +87,8 @@ var createNoteHead;
 				accidentalSlot.push([pitch,accPlace]);
 				accidentalshiftx = (glyphs.getSymbolWidth(symb)*scale+2);
 			}
-			abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale}));
+			var h = glyphs.symbolHeightInPitches(symb);
+			abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, {scalex:scale, scaley: scale, top: pitch+h/2, bottom: pitch-h/2}));
 			extraLeft = glyphs.getSymbolWidth(symb) / 2; // TODO-PER: We need a little extra width if there is an accidental, but I'm not sure why it isn't the full width of the accidental.
 		}
 
