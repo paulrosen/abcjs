@@ -396,8 +396,17 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 				case "[Q:":
 					if (e > 0) {
 						var tempo = this.setTempo(line, i+3, e);
-						if (tempo.type === 'delaySet') tuneBuilder.appendElement('tempo', startChar, endChar, this.calcTempo(tempo.tempo));
-						else if (tempo.type === 'immediate') tuneBuilder.appendElement('tempo', startChar, endChar, tempo.tempo);
+						if (tempo.type === 'delaySet') {
+							if (tuneBuilder.hasBeginMusic())
+								tuneBuilder.appendElement('tempo', startChar, endChar, this.calcTempo(tempo.tempo));
+							else
+								multilineVars.tempoForNextLine = ['tempo', startChar, endChar, this.calcTempo(tempo.tempo)]
+						} else if (tempo.type === 'immediate') {
+							if (tuneBuilder.hasBeginMusic())
+								tuneBuilder.appendElement('tempo', startChar, endChar, tempo.tempo);
+							else
+								multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo]
+						}
 						return [ e-i+1+ws, line.charAt(i+1), line.substring(i+3, e)];
 					}
 					break;

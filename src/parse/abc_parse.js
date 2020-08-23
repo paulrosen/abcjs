@@ -89,6 +89,7 @@ var Parse = function() {
 			this.is_in_header = true;
 			this.is_in_history = false;
 			this.partForNextLine = {};
+			this.tempoForNextLine = [];
 			this.havent_set_length = true;
 			this.voices = {};
 			this.staves = [];
@@ -274,7 +275,7 @@ var Parse = function() {
 		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 		"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
 		"segno", "coda", "D.S.", "D.C.", "fine", "beambr1", "beambr2",
-		"slide", "^", "marcato",
+		"slide", "marcato",
 		"upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4",
 		"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato",
 		"style=normal", "style=harmonic", "style=rhythm", "style=x"
@@ -333,7 +334,7 @@ var Parse = function() {
 			case '+':
 				var ret = tokenizer.getBrackettedSubstring(line, i, 5);
 				// Be sure that the accent is recognizable.
-			if (ret[1].length > 0 && (ret[1].charAt(0) === '^' || ret[1].charAt(0) ==='_'))
+			if (ret[1].length > 1 && (ret[1].charAt(0) === '^' || ret[1].charAt(0) ==='_'))
 					ret[1] = ret[1].substring(1);	// TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
 				if (parseCommon.detect(legalAccents, function(acc) {
 					return (ret[1] === acc);
@@ -1030,6 +1031,9 @@ var Parse = function() {
 			delete multilineVars.key.impliedNaturals;
 
 		multilineVars.partForNextLine = {};
+		if (multilineVars.tempoForNextLine.length === 4)
+			tuneBuilder.appendElement(multilineVars.tempoForNextLine[0],multilineVars.tempoForNextLine[1],multilineVars.tempoForNextLine[2],multilineVars.tempoForNextLine[3]);
+		multilineVars.tempoForNextLine = [];
 	}
 
 	var letter_to_grace =  function(line, i) {
