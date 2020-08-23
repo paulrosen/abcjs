@@ -77,6 +77,9 @@ var BeamElem;
 		}
 	};
 
+	BeamElem.prototype.addBeam = function(beam) {
+		this.beams.push(beam);
+	};
 
 	BeamElem.prototype.calcDir = function() {
 		this.average = calcAverage(this.total, this.elems.length);

@@ -15,6 +15,7 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var setClass = require('./set-class');
+var calcHeight = require('./calcHeight');
 
 // duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
 // minspacing - spacing which must be taken on top of the width defined by the duration
@@ -156,6 +157,14 @@ AbsoluteElement.prototype.setX = function (x) {
 	this.x = x;
 	for (var i=0; i<this.children.length; i++)
 		this.children[i].setX(x);
+};
+
+AbsoluteElement.prototype.center = function (before, after) {
+	// Used to center whole rests
+	var midpoint = (after.x - before.x) / 2 + before.x;
+	this.x = midpoint - this.w / 2;
+	for (var k = 0; k < this.children.length; k++)
+		this.children[k].setX(this.x);
 };
 
 AbsoluteElement.prototype.setHint = function () {

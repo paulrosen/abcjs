@@ -1,4 +1,3 @@
-var calcHeight = require('./calcHeight');
 var layoutVoice = require('./voice');
 var setUpperAndLowerElements = require('./setUpperAndLowerElements');
 var layoutStaffGroup = require('./staffGroup');
@@ -34,7 +33,7 @@ var layout;
 		for(i=0; i<abctune.lines.length; i++) {
 			abcLine = abctune.lines[i];
 			if (abcLine.staffGroup) {
-				abcLine.staffGroup.height = calcHeight(abcLine.staffGroup);
+				abcLine.staffGroup.setHeight();
 			}
 		}
 		return maxWidth;
@@ -51,7 +50,6 @@ var layout;
 			if (newspace === null) break;
 		}
 		centerWholeRests(staffGroup.voices);
-		//renderer.printHorizontalLine(width);
 	};
 
 	function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace) {
@@ -81,10 +79,7 @@ var layout;
 				if (absElem.abcelem.rest && (absElem.abcelem.rest.type === 'whole' || absElem.abcelem.rest.type === 'multimeasure')) {
 					var before = voice.children[j-1];
 					var after = voice.children[j+1];
-					var midpoint = (after.x - before.x) / 2 + before.x;
-					absElem.x = midpoint - absElem.w / 2;
-					for (var k = 0; k < absElem.children.length; k++)
-						absElem.children[k].x = absElem.x;
+					absElem.center(before, after);
 				}
 			}
 		}

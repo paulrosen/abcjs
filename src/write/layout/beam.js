@@ -17,12 +17,12 @@ var layoutBeam = function(beam) {
 	minStemHeight = Math.max(beam.stemHeight, minStemHeight + 3); // TODO-PER: The 3 is the width of a 16th beam. The actual height of the beam should be used instead.
 	var yPos = calcYPos(beam.average, beam.elems.length, minStemHeight, beam.stemsUp, firstElement.abcelem.averagepitch, lastElement.abcelem.averagepitch, beam.isflat, beam.min, beam.max, beam.isgrace);
 	var xPos = calcXPos(beam.stemsUp, firstElement, lastElement);
-	beam.beams.push({ startX: xPos[0], endX: xPos[1], startY: yPos[0], endY: yPos[1], dy: dy });
+	beam.addBeam({ startX: xPos[0], endX: xPos[1], startY: yPos[0], endY: yPos[1], dy: dy });
 
 	// create the rest of the beams (in the case of 1/16th notes, etc.
 	var beams = createAdditionalBeams(beam.elems, beam.stemsUp, beam.beams[0], beam.isgrace, dy);
 	for (var i = 0; i < beams.length; i++)
-		beam.beams.push(beams[i]);
+		beam.addBeam(beams[i]);
 
 	// Now that the main beam is defined, we know how tall the stems should be, so create them and attach them to the original notes.
 	createStems(beam.elems, beam.stemsUp, beam.beams[0], dy, beam.mainNote);

@@ -78,10 +78,10 @@ VoiceElement.updateIndices = function (voice) {
 
 function getExtraWidth(child) { // space needed to the left of the note
 	return -child.extraw;
-};
+}
 
 function getMinWidth(child) { // absolute space taken to the right of the note
 	return child.w;
-};
+}
 
 module.exports = VoiceElement;

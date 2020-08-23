@@ -31,7 +31,7 @@ var Classes = require('./classes');
 var GetFontAndAttr = require('./get-font-and-attr');
 var GetTextSize = require('./get-text-size');
 var draw = require('./draw/draw');
-var calcHeight = require('./layout/calcHeight');
+var calcHeight = require('./calcHeight');
 
 /**
  * @class
