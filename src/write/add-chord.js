@@ -58,7 +58,8 @@ var addChord;
 					abselem.addRight(new RelativeElement(chord.name, 0, 0, undefined, {
 						type: "text",
 						height: chordHeight,
-						dim: attr
+						dim: attr,
+						realWidth: chordWidth
 					}));
 					break;
 				default:
@@ -79,7 +80,8 @@ var addChord;
 							type: "chord",
 							position: pos2,
 							height: chordHeight,
-							dim: attr
+							dim: attr,
+							realWidth: chordWidth
 						}));
 					}
 			}

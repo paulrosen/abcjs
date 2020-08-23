@@ -30,6 +30,8 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 
 		incTop(staff, positionY, 'lyricHeightAbove');
 		incTop(staff, positionY, 'chordHeightAbove');
+		if (staff.specialY.chordLines)
+			incTop(staff, positionY, 'chordHeightAbove');
 		if (staff.specialY.endingHeightAbove) {
 			if (staff.specialY.chordHeightAbove)
 				staff.top += 2;

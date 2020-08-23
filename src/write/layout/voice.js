@@ -12,6 +12,10 @@ var layoutVoice = function(voice) {
 			}
 		}
 	}
+	var addLane = setLaneForChord(voice.children);
+	if (addLane)
+		voice.staff.specialY.chordLines = 2;
+
 	// Now we can layout the triplets
 	for (i = 0; i < voice.otherchildren.length; i++) {
 		var child = voice.otherchildren[i];
@@ -45,12 +49,50 @@ function moveDecorations(beam) {
 			}
 		}
 	}
-};
+}
+
+function setLaneForChord(absElems) {
+	var rightMostLane1 = 0;
+	var rightMostLane2 = 0;
+	for (var i = 0; i < absElems.length; i++) {
+		for (var j = 0; j < absElems[i].children.length; j++) {
+			var relElem = absElems[i].children[j];
+			if (relElem.chordHeightAbove) {
+				// These items are centered so figure the coordinates accordingly and add a little margin.
+				var xCoords = relElem.getChordDim();
+				if (xCoords) {
+					var isLane1 = rightMostLane1 < xCoords.left;
+					if (isLane1)
+						rightMostLane1 = xCoords.right;
+					else
+						rightMostLane2 = xCoords.right;
+					if (!isLane1)
+						relElem.putChordInLane2();
+				}
+			}
+		}
+	}
+	// If we used a second line, then we need to go back and set the first lines.
+	if (rightMostLane2 > 0)
+		setLane(absElems);
+	return rightMostLane2 > 0; // This is a way to see if we ever used the second lane.
+}
+
+function setLane(absElems) {
+	for (var i = 0; i < absElems.length; i++) {
+		for (var j = 0; j < absElems[i].children.length; j++) {
+			var relElem = absElems[i].children[j];
+			if (relElem.chordHeightAbove) {
+				relElem.setLaneIfBlank();
+			}
+		}
+	}
+}
 
 function yAtNote(element, beam) {
-	var beam = beam.beams[0];
+	beam = beam.beams[0];
 	return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, element.x);
-};
+}
 
 function layout(element) {
 	// TODO end and beginning of line (PER: P.S. I'm not sure this can happen: I think the parser will always specify both the start and end points.)
@@ -105,23 +147,23 @@ function layout(element) {
 	}
 	delete element.middleElems;
 	delete element.flatBeams;
-};
+}
 
 function isAbove(beam) {
 	return beam.stemsUp;
-};
+}
 
 // We can't just use the entire beam for the calculation. The range has to be passed in, because the beam might extend into some unrelated notes. for instance, (3_a'f'e'f'2 when L:16
 function heightAtMidpoint(startX, endX, beam) {
 	if (beam.beams.length === 0)
 		return 0;
-	var beam = beam.beams[0];
+	beam = beam.beams[0];
 	var midPoint = startX + (endX - startX) / 2;
 	return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, midPoint);
-};
+}
 
 function xAtMidpoint(startX, endX) {
 	return startX + (endX - startX)/2;
-};
+}
 
 module.exports = layoutVoice;

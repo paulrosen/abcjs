@@ -158,6 +158,22 @@ function boxAllElements(renderer, voices, which) {
 					stroke: "#4aa93d",
 					"stroke-opacity": 0.8
 			});
+
+			for (var k = 0; k < elem.children.length; k++) {
+				var relElem = elem.children[k];
+				var chord = relElem.getChordDim();
+				if (chord) {
+					printDebugBox(renderer,
+						{ x: chord.left,
+							y: renderer.calcY(relElem.pitch),
+							width: chord.right-chord.left,
+							height: 20,
+							fill: "none",
+							stroke: "#4aa93d",
+							"stroke-opacity": 0.8
+						});
+				}
+			}
 		}
 	}
 }

@@ -22,14 +22,14 @@ function drawRelativeElement(renderer, params, bartop, selectables) {
 			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: "vocalfont", klass: renderer.controller.classes.generate('lyric'), anchor: "middle", dim: params.dim});
 			break;
 		case "chord":
-			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'gchordfont', klass: renderer.controller.classes.generate("chord"), anchor: "middle", dim: params.dim});
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'gchordfont', klass: renderer.controller.classes.generate("chord"), anchor: "middle", dim: params.dim, lane: params.lane});
 			break;
 		case "decoration":
 			// The +6 is to compensate for the placement of text in svg: to be on the same row as symbols, the y-coord needs to compensate for the center line.
 			params.graphelem = renderText(renderer, { x: params.x, y: y+6, text: params.c, type: 'annotationfont', klass: renderer.controller.classes.generate("annotation"), anchor: "middle", centerVertically: true, dim: params.dim});
 			break;
 		case "text":
-			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'annotationfont', klass: renderer.controller.classes.generate("annotation"), anchor: "start", centerVertically: params.centerVertically, dim: params.dim});
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'annotationfont', klass: renderer.controller.classes.generate("annotation"), anchor: "start", centerVertically: params.centerVertically, dim: params.dim, lane: params.lane});
 			break;
 		case "multimeasure-text":
 			params.graphelem = renderText(renderer, { x: params.x+params.w/2, y: y, text: params.c, type: 'tempofont', klass: renderer.controller.classes.generate("rest"), anchor: "middle", centerVertically: false, dim: params.dim});

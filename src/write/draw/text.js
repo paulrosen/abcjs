@@ -1,4 +1,8 @@
 function renderText(renderer, params) {
+	var y = params.y;
+	if (params.lane === 1) { // The first lane is the main one and goes closest to the music, so that is the one that needs to be offset.
+		y += params.dim.font.size;
+	}
 	var hash;
 	if (params.dim) {
 		hash = params.dim;
@@ -8,7 +12,7 @@ function renderText(renderer, params) {
 	if (params.anchor)
 		hash.attr["text-anchor"] = params.anchor;
 	hash.attr.x = params.x;
-	hash.attr.y = params.y;
+	hash.attr.y = y;
 	if (!params.centerVertically)
 		hash.attr.y += hash.font.size;
 	if (params.type === 'debugfont') {
@@ -45,7 +49,7 @@ function renderText(renderer, params) {
 		if (params.centerVertically) {
 			deltaY = size.height - hash.font.padding;
 		}
-		renderer.paper.rect({ x: Math.round(params.x - delta), y: Math.round(params.y - deltaY), width: Math.round(size.width + hash.font.padding*2), height: Math.round(size.height + hash.font.padding*2)});
+		renderer.paper.rect({ x: Math.round(params.x - delta), y: Math.round(y - deltaY), width: Math.round(size.width + hash.font.padding*2), height: Math.round(size.height + hash.font.padding*2)});
 		elem = renderer.paper.closeGroup();
 	}
 	return elem;
