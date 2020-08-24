@@ -1,8 +1,42 @@
+# Version 6.0.0-beta.15
+
+## Bugs
+* Slightly increase the spacing for the dynamics lane.
+* Fix crash when inline tempo is the first thing in the file.
+* If `selectTypes` is not passed in, then the click behavior matches the last version of abcjs.
+* Various positioning tweaks for clefs and key signatures.
+* Get the fingerings to not interfere with chords.
+* Fix dynamic volume calculation when dynamic is defined on bar line.
+* Fix regression when wrapping short lines.
+* Don't crash when creating a drum track (the inserted rests don't have elements attached.)
+* Create AudioContext if one isn't passed in.
+* fix some minor positioning problems with text boxes.
+
+## Features
+* Use two lines for annotations and chords if they would run into each other.
+* Recognize `!^!` as a synonym for `!marcato!`.
+* Add a little more vertical space so nearby elements don't touch.
+* Add support for dotted slurs and dotted ties.
+* Pass back original mouse event when an element is clicked.
+* Implement `vocalspace`.
+* Add `showDebug` parameter to display element placement.
+* Support `beambr1` and `beambr2`.
+* Add the option `fontboxpadding`.
+* Allow `annotationfont`, `composerfont`, `historyfont`, `infofont`, `subtitlefont`, `textfont`, `titlefont`, and `voicefont` to have a text box.
+
+## Refactoring
+* Some refactoring of layout functionality.
+
+## Documentation
+* Change all the examples to use the `/dist` folder so the path doesn't change every release.
+* Create test for web audio.
+* Set a custom font for the chords in the docs.
+
 # Version 6.0.0-beta.14
 
 ## Bugs
 
-* Don't crash if setTiming is called too early.
+* Don't crash if `setTiming` is called too early.
 
 * Fix length of accompaniment notes in compound meters.
 
@@ -10,7 +44,7 @@
 
 * Fix crash when unmatched quote is in V: line.
 
-* Get the multimeasure rest to have the correct duration for both display and audio.
+* Get the multi-measure rest to have the correct duration for both display and audio.
 
 * Fix crash "undefined size".
 
