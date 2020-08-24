@@ -8,6 +8,8 @@ There has been a large change in the underlying SVG output. It should look exact
 
 There has been a change to the data that comes back from the click listener. This includes information if the user has dragged a note.
 
+There are some minor improvements to the spacing of elements. That may slightly change how the music is laid out.
+
 There have been many improvements to the audio quality. More improvements are coming, too!
 
 ## Notes for Version 5.9.0
