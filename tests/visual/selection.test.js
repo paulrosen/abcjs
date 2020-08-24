@@ -122,18 +122,18 @@ describe("Selection", function() {
 			"class": "",
 			"text-anchor": "end",
 			"x": "755",
-			"y": "123.978125",
+			"y": "129.978125",
 			"selectable": "true",
 			"tabindex": "0",
 			"data-index": "4"
 		},
 		"abcEl": {"el_type": "author", "startChar": -1, "endChar": -1, "text": "Yours Truly"},
-		"size": {"x": 668, "y": 107, "width": 88, "height": 21}
+		"size": {"x": 668, "y": 113, "width": 88, "height": 21}
 	}, {
 		"draggable": false,
 		"svgEl": {"fill": "#000000", "selectable": "true", "tabindex": "0", "data-index": "5"},
 		"abcEl": {"el_type": "partOrder", "startChar": -1, "endChar": -1, "text": "AABB"},
-		"size": {"x": 17, "y": 128, "width": 61, "height": 27}
+		"size": {"x": 15, "y": 132, "width": 61, "height": 27}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -4377,19 +4377,22 @@ describe("Selection", function() {
 
 //////////////////////////////////////////////////////////
 	it("selection-multiple", function() {
-		doSelectionTest(abcMultiple, expectedMultiple);
+		doSelectionTest(abcMultiple, expectedMultiple, {selectTypes: true});
 	})
 
 	it("selection-tempo", function() {
-		doSelectionTest(abcTempo, expectedTempo);
+		doSelectionTest(abcTempo, expectedTempo, {selectTypes: true});
+	})
+	it("selection-none", function() {
+		doSelectionTest(abcMultiple, expectedMultiple, {});
 	})
 
 })
 
 //////////////////////////////////////////////////////////
 
-function doSelectionTest(abc, expected) {
-	var visualObj = abcjs.renderAbc("paper", abc, {selectTypes: true});
+function doSelectionTest(abc, expected, options) {
+	var visualObj = abcjs.renderAbc("paper", abc, options);
 	var selection = visualObj[0].engraver.selectables;
 	var results = []
 	for (var i = 0; i < selection.length; i++) {
