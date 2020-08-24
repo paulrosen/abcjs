@@ -20,9 +20,9 @@ var CrescendoElem = function CrescendoElem(anchor1, anchor2, dir, positioning) {
 	this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
 	this.dir = dir; // either "<" or ">"
 	if (positioning === 'above')
-		this.dynamicHeightAbove = 4;
+		this.dynamicHeightAbove = 6;
 	else
-		this.dynamicHeightBelow = 4;
+		this.dynamicHeightBelow = 6;
 	this.pitch = undefined; // This will be set later
 };
 

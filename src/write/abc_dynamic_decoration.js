@@ -19,9 +19,9 @@ var DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
 	this.anchor = anchor;
 	this.dec = dec;
 	if (position === 'below')
-		this.volumeHeightBelow = 5;
+		this.volumeHeightBelow = 6;
 	else
-		this.volumeHeightAbove = 5;
+		this.volumeHeightAbove = 6;
 	this.pitch = undefined; // This will be set later
 };
 

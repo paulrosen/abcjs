@@ -53,17 +53,17 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 		if (staff.specialY.lyricHeightBelow) {
 			staff.specialY.lyricHeightBelow += renderer.spacing.vocal/spacing.STEP;
 			positionY.lyricHeightBelow = staff.bottom;
-			staff.bottom -= staff.specialY.lyricHeightBelow - margin;
+			staff.bottom -= (staff.specialY.lyricHeightBelow + margin);
 		}
-		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= staff.specialY.chordHeightBelow - margin; }
+		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= (staff.specialY.chordHeightBelow + margin); }
 		if (staff.specialY.volumeHeightBelow && staff.specialY.dynamicHeightBelow) {
 			positionY.volumeHeightBelow = staff.bottom;
 			positionY.dynamicHeightBelow = staff.bottom;
-			staff.bottom -= Math.max(staff.specialY.volumeHeightBelow, staff.specialY.dynamicHeightBelow) - margin;
+			staff.bottom -= (Math.max(staff.specialY.volumeHeightBelow, staff.specialY.dynamicHeightBelow) + margin);
 		} else if (staff.specialY.volumeHeightBelow) {
-			positionY.volumeHeightBelow = staff.bottom; staff.bottom -= staff.specialY.volumeHeightBelow - margin;
+			positionY.volumeHeightBelow = staff.bottom; staff.bottom -= (staff.specialY.volumeHeightBelow + margin);
 		} else if (staff.specialY.dynamicHeightBelow) {
-			positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= staff.specialY.dynamicHeightBelow - margin;
+			positionY.dynamicHeightBelow = staff.bottom; staff.bottom -= (staff.specialY.dynamicHeightBelow + margin);
 		}
 
 		if (renderer.showDebug && renderer.showDebug.indexOf("box") >= 0)
