@@ -27,7 +27,8 @@
     "abc",
     "music",
     "notation",
-    "midi"
+    "midi",
+    "webaudio"
   ],
   "author": "Paul Rosen <paul@paulrosen.net> (https://abcjs.net)",
   "contributors": [
