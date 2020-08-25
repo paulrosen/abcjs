@@ -48,7 +48,6 @@ var getMidiFile = function(abcString, options) {
 			default:
 				return generateMidiDownloadLink(tune, params, downloadMidi, index);
 		}
-		return downloadMidi;
 	}
 
 	return tunebook.renderEngine(callback, "*", abcString, params);

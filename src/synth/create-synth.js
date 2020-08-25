@@ -67,7 +67,7 @@ function CreateSynth() {
 			return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
 		self.sequenceCallback = params.sequenceCallback;
 		self.callbackContext = params.callbackContext;
-		self.onEnded = options.onEnded;
+		self.onEnded = params.onEnded;
 
 		var allNotes = {};
 		var currentInstrument = instrumentIndexToName[0];
