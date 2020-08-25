@@ -44,7 +44,7 @@ This must not be called until the user has made a gesture on the page because th
 
 | Attribute | Default | Description |
 | ------------- | ----------- |----------- |
-| audioContext | REQUIRED | This the value of `new AudioContext()`. It is passed in instead of created because the calling program might be managing and reusing this. It also MUST be creating in the handler of a user action. It can't be created at any other time. |
+| audioContext | undefined | This the value of `new AudioContext()`. It should be passed in instead of created because the calling program might be managing and reusing this. It also MUST be creating in the handler of a user action. It can't be created at any other time. But if you don't pass one in then abcjs will create it. This value is cached for the length of the browser session. |
 | visualObj | undefined | This is the result of `renderAbc()`. Important: `renderAbc()` returns an array, since an ABC string can contain more than one tune. This variable is just one element in that array. Either this must be supplied, or `sequence` must be supplied. |
 | sequence | undefined | This is a manually-created set of instructions for creating the audio. It is built using the `SynthSequence` object. |
 | millisecondsPerMeasure | calculated | This allows control over the tempo. If this is present, then the tempo specified in the ABC string is ignored. |
@@ -52,6 +52,8 @@ This must not be called until the user has made a gesture on the page because th
 | options | undefined | Some options for the sound creation (see list below). |
 
 #### synthOptions.options
+
+In addition to the following option, you can also set the options described in audioParams below.
 
 | Attribute | Default | Description |
 | ------------- | ----------- |----------- |
@@ -207,31 +209,6 @@ These do the same thing as the user pressing these buttons, but can be called pr
 
 This will download the current audio buffer as a WAV file to the fileName passed in.
 
-### synth.getMidiFile(abcString, options)
-
-This is called to get the audio in MIDI format, instead of as a buffer.
-
-#### abcString
-
-The ABC string to create the MIDI from.
-
-#### options
-
-The same options as are used elsewhere, with the addition of:
-
-```javascript
-{
-	generateLink: true
-}
-```
-If this is present, then the return value is a link that can be placed directly on the page for the user to download.
-
-If this is not present (or is false), then the return value is the actual data that makes up the MIDI file.
-
-```javascript
-var midi = new ABCJS.synth.getMidiFile("X:1\netc...", { chordsOff: true });
-```
-
 ### Example
 
 The following creates an audio control that the user can manipulate.
@@ -273,6 +250,81 @@ if (ABCJS.synth.supportsAudio()) {
         "Audio is not supported in this browser.";
 	}
 }
+```
+
+## synth.getMidiFile(abcString, options)
+
+This is called to get the audio in MIDI format, instead of as a playable audio buffer.
+
+### abcString
+
+The ABC string to create the MIDI from.
+
+### options
+
+The same options as are used elsewhere, with the addition of:
+
+```javascript
+options = {
+	midiOutputType: "encoded" | "binary" | "link",
+    // The following OPTIONAL parameters are only used when the type is "link":
+    downloadClass: "class-name-to-add",
+    preTextDownload: "text that appears before the link",
+    downloadLabel: "the text that appears as the body of the anchor tag that is clickable",
+    postTextDownload: "text that appears after the link"
+}
+```
+
+#### midiOutputType
+
+If this is not present or set to `link`, then the return value is a link that can be placed directly on the page for the user to download.
+
+If this is set to `binary`, then the actual contents of the midi file are returned, as a blob.
+
+If this is set to "encoded", then the contents of the midi file are returned, as an encoded ASCII string. That is, bytes are represented by `%xx` where xx is a hexidecimal value.
+
+#### downloadLabel
+
+If this isn't present, then the title is retrieved from the tune and the label is "Download MIDI for $TITLE".
+
+If you'd like to use the title in the label but modify it, use `%T`. That is: `downloadLabel: "the tune %T is ready for download"`
+
+### Examples
+
+#### Complete download link
+
+```html
+<div id="midi-link"></div>
+```
+
+```javascript
+var midi = new ABCJS.synth.getMidiFile("X:1\nT:Cooley's\netc...", { chordsOff: true, midiOutputType: "link" });
+document.getElementById("midi-link").innerHTML = midi;
+```
+That results in the following html:
+
+```html
+<div id="midi-link">
+<div class="abcjs-download-midi abcjs-midi-0"><a download="cooleys.midi" href="data:audio/midi,MThd%00%00%00%06%00%01%00 etc...">Download MIDI for "Cooley's"</a></div>
+</div>
+```
+
+#### The midi data for your own download
+
+```html
+<a id="midi-link" download="myfile.midi" href="">MIDI</a>
+```
+
+```javascript
+var midi = new ABCJS.synth.getMidiFile("X:1\nT:Cooley's\netc...", { chordsOff: true, midiOutputType: "encoded" });
+document.getElementById("midi-link").setAttribute("html", midi);
+```
+
+#### Actual midi file to pass to another library
+
+```javascript
+var midi = new ABCJS.synth.getMidiFile("X:1\nT:Cooley's\netc...", { chordsOff: true, midiOutputType: "binary" });
+otherLibraryMidiPlayer.loadTune(midi);
 ```
 
 ## synth.CreateSynthControl
