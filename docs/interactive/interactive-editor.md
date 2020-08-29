@@ -18,13 +18,13 @@ let editor = new abcjs.Editor(editArea, editorParams);
 
 | editorParams | Description |
 | ------------- | ----------- |
-| `canvas_id` or `paper_id` | HTML id to draw in. If not present, then the drawing happens just below the editor. |
-| `generate_warnings` | if present, then parser warnings are displayed on the page. |
-| `warnings_id` | if present, the HTML id to place the warnings. Otherwise they are placed in the same div as the paper. |
-| `onchange` | if present, the callback function to call whenever there has been a change in the ABC string. |
+| `canvas_id` or `paper_id` | HTML id to draw in. If not present, then the drawing happens just below the editor. This can either be an ID or the actual HTML element. |
+| `generate_warnings` | If present, then parser warnings are displayed on the page. The warnings are displayed just above the music. |
+| `warnings_id` | If present, the HTML id to place the warnings. This supersedes `generate_warnings`. This can either be an id or the actual HTML element. |
+| `onchange` | If present, the callback function to call whenever there has been a change in the ABC string. |
 | `selectionChangeCallback` | If present, the callback function to call whenever there has been a change of selection. |
-| `abcjsParams` | options to send to abcjs when re-rendering both the visual and the audio. |
-| `indicate_changed` | the dirty flag is set if this is true. |
+| `abcjsParams` | Options to send to abcjs when re-rendering both the visual and the audio. |
+| `indicate_changed` | The dirty flag is set if this is true. When the user types in the textarea then the class `abc_textarea_dirty` is added to the textarea. Also see the `isDirty` and `setNotDirty` methods below. |
 | `synth` | If present, add an audio control. This is an object. See below for the possible properties. Note: if the browser doesn't support synth, then this parameter has no effect. |
 
 ### Deprecated parameters:
