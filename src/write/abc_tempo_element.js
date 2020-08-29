@@ -80,7 +80,7 @@ var TempoElement;
 		var stem;
 		if (note !== "noteheads.whole" && note !== "noteheads.dbl") {
 			var p1 = 1 / 3 * temposcale;
-			var p2 = 7 * temposcale;
+			var p2 = 5 * temposcale;
 			var dx = tempoNote.dx + tempoNote.w;
 			var width = -0.6;
 			stem = new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2": p2, linewidth: width});

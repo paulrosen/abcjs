@@ -10,7 +10,9 @@ function drawTempo(renderer, params, selectables) {
 	params.tempo.el_type = "tempo";
 //	renderer.wrapInAbsElem(params.tempo, "abcjs-tempo", function () {
 		renderer.paper.openGroup({klass: renderer.controller.classes.generate("tempo")});
-		var y = renderer.calcY(params.pitch);
+		// The text is aligned with extra room for descenders but numbers look like they are a little too high, so bump it a little.
+	var descenderHeight = 2;
+		var y = renderer.calcY(params.pitch) + 2;
 		var text;
 		var size;
 		if (params.tempo.preString) {
