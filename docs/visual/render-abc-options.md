@@ -13,6 +13,11 @@ Default: false
  
  If true, then each element that is drawn on the SVG will have an identifying class with it that you can use to style, move, or hide the element. See the section on classes for more details.
  
+## afterParsing
+Default: undefined
+
+TODO
+ 
 ## clickListener
 Default: null
  
@@ -20,10 +25,30 @@ Callback function. The signature of the function is: `function(abcelem, tuneNumb
  
  This is called whenever the user clicks on a note or selects a series of notes. For more details, see the page on the click listener.
 
+## format
+Default: undefined
+
+An object of any of the visual formatting options that can be specified with the `%%option` syntax in an ABC string.
+
+For instance:
+```javascript
+renderAbc("paper", "X:1\netc...", {
+  format: {
+    gchordfont: "Verdana 20",
+    partsbox: true
+  }
+})
+```
+
 ## hint_measures
 Default: false
  
 Repeat the next measure at the end of the previous line, with a unique css class. 
+
+## lineBreaks
+Default: undefined
+
+TODO
 
 ## oneSvgPerLine
 Default: false
@@ -83,7 +108,7 @@ Default: 1
 ## scrollHorizontal
 Default: false
  
- Should there be a horizontal scrollbar if the music is wider than the viewport? (requires viewportHorizontal to be true.) 
+ Should there be a horizontal scrollbar if the music is wider than the viewport? (requires `viewportHorizontal` to be true.) 
 
 ## staffwidth
 Default: 740
@@ -104,6 +129,9 @@ What percentage of the font size should the box that is drawn around the font be
 Default: false
  
  Should the horizontal width be limited by the device's width? 
+
+## viewportVertical
+Default: false
 
 ## visualTranspose
 Default: 0
@@ -131,5 +159,5 @@ Default: null
  
  `minSpacing` values until the last line is no more spread out than this limit. 
  
- A reasonable default for these values is `{ minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 }`. 
+ A reasonable thing to set these values to is `{ minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 }`. 
  
