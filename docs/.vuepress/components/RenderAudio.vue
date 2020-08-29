@@ -6,7 +6,7 @@
 
 <script>
 	import Vue from 'vue';
-	import css from 'abcjs/abcjs-audio.css';
+	import css from '../../../abcjs-audio.css';
 	export default {
 		name: "render-audio",
 		props: {
@@ -22,7 +22,7 @@
 		},
 		mounted() {
 			Vue.nextTick(() => {
-				const abcjs = require('abcjs');
+				const abcjs = require('../../../index');
 				this.synthControl = new abcjs.synth.SynthController();
 				this.synthControl.load(this.$refs.audio, null, {displayLoop: true, displayRestart: true, displayPlay: true, displayProgress: true, displayWarp: true});
 				this.setTune();

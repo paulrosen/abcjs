@@ -25,7 +25,7 @@
 		},
 		mounted() {
 			Vue.nextTick(() => {
-				const abcjs = require('abcjs');
+				const abcjs = require('../../../index');
 				const el = this.$refs.paper;
 				this.visualObj = abcjs.renderAbc(el, this.abc, this.defaultOptions);
 			});

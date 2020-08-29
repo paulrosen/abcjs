@@ -17,7 +17,7 @@
 			},
 			abc() {
 				this.$refs.textarea.value = this.abc;
-				const abcjs = require('abcjs');
+				const abcjs = require('../../../index');
 				const abc_editor = new abcjs.Editor("abc", {
 					canvas_id: "paper",
 					warnings_id: "warnings",
@@ -40,7 +40,7 @@
 		mounted() {
 			Vue.nextTick(() => {
 				this.$refs.textarea.value = this.abc;
-				const abcjs = require('abcjs');
+				const abcjs = require('../../../index');
 				const abc_editor = new abcjs.Editor("abc", {
 					canvas_id: "paper",
 					warnings_id: "warnings",

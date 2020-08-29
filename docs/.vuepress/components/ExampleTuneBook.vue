@@ -36,7 +36,7 @@
 		},
 		mounted() {
 			Vue.nextTick(() => {
-				this.abcjs = require('abcjs');
+				this.abcjs = require('../../../index');
 			});
 		},
 		data() {

@@ -1,3 +1,8 @@
+# Version 6.0.0-beta.16
+
+## Features
+* If there is a repeat, then include both of the currentTrackMilliseconds in the callback. (Note: if you consume this, be sure you can handle either a number or an array.)
+
 # Version 6.0.0-beta.15
 
 ## Bugs
