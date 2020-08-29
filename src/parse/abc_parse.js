@@ -1743,7 +1743,7 @@ var Parse = function() {
 		} else
 			multilineVars.globalTranspose = undefined;
 		if (switches.lineBreaks) {
-			// change the format of the the line breaks for easy testing.
+			// change the format of the line breaks for easy testing.
 			// The line break numbers are 0-based and they reflect the last measure of the current line.
 			multilineVars.lineBreaks = {};
 			//multilineVars.continueall = true;
