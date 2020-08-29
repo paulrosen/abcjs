@@ -581,8 +581,20 @@ var parseCommon = require("../parse/abc_common");
 
 		// The beat fraction is the note that gets a beat (.25 is a quarter note)
 		// The tempo is in minutes and we want to get to milliseconds.
-		if (elem.elem)
-			elem.elem.currentTrackMilliseconds = timeToRealTime(elem.time) / beatFraction / startingTempo * 60*1000;
+		// If the element is inside a repeat, there may be more than one value. If there is one value,
+		// then just store that as a number. If there are more than one value, then change that to
+		// an array and return all of them.
+		if (elem.elem) {
+			var ms = timeToRealTime(elem.time) / beatFraction / startingTempo * 60 * 1000;
+			if (elem.elem.currentTrackMilliseconds === undefined)
+				elem.elem.currentTrackMilliseconds = ms;
+			else {
+				if (elem.elem.currentTrackMilliseconds.length === undefined)
+					elem.elem.currentTrackMilliseconds = [ elem.elem.currentTrackMilliseconds, ms ];
+				else
+					elem.elem.currentTrackMilliseconds.push(ms);
+			}
+		}
 		//var tieAdjustment = 0;
 		if (elem.pitches) {
 			var thisBreakBetweenNotes = '';
