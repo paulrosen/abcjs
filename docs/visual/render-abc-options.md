@@ -48,7 +48,9 @@ Repeat the next measure at the end of the previous line, with a unique css class
 ## lineBreaks
 Default: undefined
 
-TODO
+If you want to control exactly which measures are on each line, then you can pass this in. It is an array of numbers that represent the right-most measure number on a line (1-based). That is, if the first numbers passed are `[ 3, 5, ...` then the first line will have measures 1, 2, and 3 and the second line will have measures 4 and 5.
+
+This parameter is primarily for the wrap mechanism to call internally, but it can be passed in if you have your own wrapping mechanism.
 
 ## oneSvgPerLine
 Default: false
