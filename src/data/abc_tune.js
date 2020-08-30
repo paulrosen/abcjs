@@ -456,6 +456,7 @@ var Tune = function() {
 	};
 
 	this.setTiming = function (bpm, measuresOfDelay) {
+		measuresOfDelay = measuresOfDelay || 0;
 		if (!this.engraver || !this.engraver.staffgroups) {
 			console.log("setTiming cannot be called before the tune is drawn.");
 			this.noteTimings = [];
