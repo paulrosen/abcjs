@@ -13,6 +13,7 @@
 	"children": [
 	  "/visual/overview.md",
 	  "/visual/render-abc-options.md",
+	  "/visual/render-abc-result.md",
 	  "/visual/classes.md",
 	  "/visual/click-listener.md",
 	  "/visual/dragging.md"
