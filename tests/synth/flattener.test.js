@@ -1206,6 +1206,45 @@ describe("Audio flattener", function() {
 
 	//////////////////////////////////////////////////////////
 
+	var abcTempoChange2 = 'X:1\n' +
+'L:1/4\n' +
+'M:4/4\n' +
+'K:F\n' +
+'[Q:1/4=129.0476605]CDEF |[Q:1/4=127]GABc | [Q:1/4=131] CDEF |[Q:1/4=130] GABc |[Q:1/4=127]CDEF |\n' ;
+
+	var expectedTempoChange2 = {
+		"tempo":180,
+		"instrument":0,
+		"totalDuration":6.988656,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":0.348837,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":85,"start":0.348837,"duration":0.348837,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":85,"start":0.697674,"duration":0.348837,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":85,"start":1.046511,"duration":0.348837,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":1.395348,"duration":0.354331,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":85,"start":1.749679,"duration":0.354331,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":70,"volume":85,"start":2.10401,"duration":0.354331,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":2.458341,"duration":0.354331,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":2.812672,"duration":0.343511,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":85,"start":3.156183,"duration":0.343511,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":85,"start":3.499694,"duration":0.343511,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":85,"start":3.843205,"duration":0.343511,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":4.186716,"duration":0.346154,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":85,"start":4.53287,"duration":0.346154,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":70,"volume":85,"start":4.879024,"duration":0.346154,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":85,"start":5.225178,"duration":0.346154,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":5.571332,"duration":0.354331,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":85,"start":5.925663,"duration":0.354331,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":85,"start":6.279994,"duration":0.354331,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":85,"start":6.634325,"duration":0.354331,"instrument":0,"gap":0}
+			]
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
 	var abcDecoration = 'X:1\n' +
 'M:4/4\n' +
 'L:1/4\n' +
@@ -2145,8 +2184,13 @@ describe("Audio flattener", function() {
 	})
 
 	it("flatten-tempo-change", function() {
-		console.log("flatten-tempo-change")
+		//console.log("flatten-tempo-change")
 		doFlattenTest(abcTempoChange, expectedTempoChange);
+	})
+
+	it("flatten-tempo-change2", function() {
+		//console.log("flatten-tempo-change2")
+		doFlattenTest(abcTempoChange2, expectedTempoChange2);
 	})
 
 	it("flatten-decorations", function() {

@@ -81,7 +81,7 @@ var Tune = function() {
 							var isSpacer = voice[el].rest && voice[el].rest.type === "spacer";
 							if (voice[el].startTriplet)
 								tripletMultiplier = voice[el].tripletMultiplier;
-							if (voice[el].duration && !isSpacer)
+							if (voice[el].duration && !isSpacer && voice[el].el_type !== "tempo")
 								pickupLength += voice[el].duration * tripletMultiplier;
 							if (voice[el].endTriplet)
 								tripletMultiplier = 1;
@@ -371,7 +371,7 @@ var Tune = function() {
 			var elements = voices[v];
 			for (var elem = 0; elem < elements.length; elem++) {
 				var element = elements[elem].elem;
-				if (!bpm && element.abcelem.el_type === "tempo") {
+				if (element.abcelem.el_type === "tempo") {
 					bpm = this.getBpm(element.abcelem);
 					var beatLength = this.getBeatLength();
 					var beatsPerSecond = bpm / 60;

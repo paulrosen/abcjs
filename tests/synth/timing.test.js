@@ -25,6 +25,12 @@ describe("Timing", function() {
 		{ bar: true },
 	];
 
+	var abcTempoChange = 'X:1\n' +
+		'L:1/4\n' +
+		'M:4/4\n' +
+		'K:F\n' +
+		'[Q:1/4=129.0476605]CDEF |[Q:1/4=127]GABc | [Q:1/4=131] CDEF |[Q:1/4=130] GABc |[Q:1/4=127]CDEF |\n' ;
+
 //////////////////////////////////////////////////////////
 
 	it("of repeated sections", function() {
@@ -34,7 +40,30 @@ describe("Timing", function() {
 	it("repeated sections callback", function() {
 		doClickTest(abcRepeatedSections, expectedRepeatedSections);
 	});
+
+	it("tempo change2 animation", function() {
+		doAnimationTest(abcTempoChange);
+	});
 });
+
+//////////////////////////////////////////////////////////
+
+function doAnimationTest(abc) {
+	var visualObj = abcjs.renderAbc("paper", abc);
+	visualObj[0].setUpAudio();
+	visualObj[0].setTiming();
+	var ms = visualObj[0].millisecondsPerMeasure();
+	//console.log(JSON.stringify(visualObj[0].noteTimings))
+	for (var i = 0; i < visualObj[0].noteTimings.length; i++) {
+		var ev = visualObj[0].noteTimings[i];
+
+		if (ev.midiPitches) {
+			var start = Math.round(ev.midiPitches[0].start  * ms);
+			chai.assert.equal(ev.milliseconds, start, 'timing for element ' + i);
+		}
+	}
+}
+var trans = function(nt, i, ms) { console.log(nt[i].milliseconds, nt[i].midiPitches[0].start, ms, nt[i].midiPitches[0].start* ms) }
 
 //////////////////////////////////////////////////////////
 
