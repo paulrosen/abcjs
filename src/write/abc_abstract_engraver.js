@@ -166,6 +166,7 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
 			  this.addMeasureNumber(abcstaff.barNumber, clef);
 		  }
 		  voice.addChild(clef);
+		  this.startlimitelem = clef; // limit ties here
 	  }
 	  var keySig = createKeySignature(abcstaff.key, this.tuneNumber);
 	  if (keySig) {
