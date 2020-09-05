@@ -49,6 +49,7 @@ var Parse = function() {
 			getMeterFraction: tune.getMeterFraction,
 			getPickupLength: tune.getPickupLength,
 			getKeySignature: tune.getKeySignature,
+			getElementFromChar: tune.getElementFromChar,
 			makeVoicesArray: tune.makeVoicesArray,
 			millisecondsPerMeasure: tune.millisecondsPerMeasure,
 			setupEvents: tune.setupEvents,

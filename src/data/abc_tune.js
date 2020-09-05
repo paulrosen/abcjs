@@ -182,6 +182,27 @@ var Tune = function() {
 		return {  };
 	};
 
+	this.getElementFromChar = function(char) {
+		for (var i = 0; i < this.lines.length; i++) {
+			var line = this.lines[i];
+			if (line.staff) {
+				for (var j = 0; j < line.staff.length; j++) {
+					var staff = line.staff[j];
+					for (var k = 0; k < staff.voices.length; k++) {
+						var voice = staff.voices[k];
+						for (var ii = 0; ii < voice.length; ii++) {
+							var elem = voice[ii];
+							if (elem.startChar && elem.endChar &&
+								elem.startChar <= char && elem.endChar > char)
+								return elem;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	};
+
 	function addVerticalInfo(timingEvents) {
 		// Add vertical info to the bar events: put the next event's top, and the event after the next measure's top.
 		var lastBarTop;
