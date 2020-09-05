@@ -826,7 +826,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
     this.triplet.setCloseAnchor(notehead);
   }
 
-  if (this.triplet && !elem.startTriplet && !elem.endTriplet) {
+  if (this.triplet && !elem.startTriplet && !elem.endTriplet && !(elem.rest && elem.rest.type === "spacer")) {
   	this.triplet.middleNote(notehead);
   }
 

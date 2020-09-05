@@ -29,7 +29,7 @@ var TripletElem;
 	};
 
 	TripletElem.prototype.isClosed = function() {
-		return this.anchor2;
+		return !!this.anchor2;
 	};
 
 	TripletElem.prototype.middleNote = function(elem) {
