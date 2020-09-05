@@ -23,7 +23,8 @@
 				abcjsParams: {
 					add_classes: true,
 					clickListener: clickListener
-				}
+				},
+				selectionChangeCallback: selectionChangeCallback
 			});
 		};
 
@@ -37,6 +38,13 @@
 			}).catch(function (error) {
 				console.log("error playing note", error);
 			});
+		}
+
+		function selectionChangeCallback(start, end) {
+			if (abcjsEditor) {
+				var el = abcjsEditor.tunes[0].getElementFromChar(start);
+				console.log(el);
+			}
 		}
 	</script>
 </head>

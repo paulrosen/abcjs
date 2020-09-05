@@ -104,6 +104,10 @@ Durations have units where a whole note is 1. If the first measure is not full, 
 
 This returns the internal representation of the key signature with all of its pieces broken apart.
 
+### getElementFromChar(charIndex)
+
+`charIndex` is a character position in the original ABC. This searches through the tune for the element that matches that character. If you pass in the index of a non-note element it returns null.
+
 ### millisecondsPerMeasure()
 
 This does the calculation using beats per minute and beats per measure.
