@@ -1480,7 +1480,7 @@ var Parse = function() {
 										setIsInTie(multilineVars,  overlayLevel, false);
 									}
 
-									if (tripletNotesLeft > 0 && !(core.rest && core.rest.type === "spacer")) {
+									if (tripletNotesLeft > 0 && !(el.rest && el.rest.type === "spacer")) {
 										tripletNotesLeft--;
 										if (tripletNotesLeft === 0) {
 											el.endTriplet = true;
