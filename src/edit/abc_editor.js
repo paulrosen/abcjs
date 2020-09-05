@@ -115,6 +115,7 @@ var Editor = function(editarea, params) {
   	this.selectionChangeCallback = params.selectionChangeCallback;
   }
 
+  this.clientClickListener = this.abcjsParams.clickListener;
   this.abcjsParams.clickListener = this.highlight.bind(this);
 
   if (params.synth) {
@@ -349,13 +350,15 @@ Editor.prototype.isDirty = function() {
 	return this.editarea.initialText !== this.editarea.getString();
 };
 
-Editor.prototype.highlight = function(abcelem, tuneNumber, classes) {
+Editor.prototype.highlight = function(abcelem, tuneNumber, classes, analysis, drag, mouseEvent) {
 	// TODO-PER: The marker appears to get off by one for each tune parsed. I'm not sure why, but adding the tuneNumber in corrects it for the time being.
 //	var offset = (tuneNumber !== undefined) ? this.startPos[tuneNumber] + tuneNumber : 0;
 
   this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
 	if (this.selectionChangeCallback)
 		this.selectionChangeCallback(abcelem.startChar, abcelem.endChar);
+	if (this.clientClickListener)
+		this.clientClickListener(abcelem, tuneNumber, classes, analysis, drag, mouseEvent);
 };
 
 Editor.prototype.pause = function(shouldPause) {
