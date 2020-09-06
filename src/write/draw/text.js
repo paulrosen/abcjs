@@ -1,8 +1,8 @@
 function renderText(renderer, params) {
 	var y = params.y;
-	if (params.lane === 1) { // The first lane is the main one and goes closest to the music, so that is the one that needs to be offset.
-		y += params.dim.font.size;
-	}
+	if (params.lane)
+		y += params.dim.font.size*params.lane;
+
 	var hash;
 	if (params.dim) {
 		hash = params.dim;

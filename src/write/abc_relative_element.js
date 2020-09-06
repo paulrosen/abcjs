@@ -89,21 +89,26 @@ RelativeElement.prototype.getChordDim = function () {
 		return null;
 	// Chords are centered, annotations are left justified.
 	// We add a little margin so that items can't touch - we use half the font size as the margin, so that is 1/4 on each side.
-	var offset = this.type === "chord" ? this.realWidth/2 : 0;
+	// if there is only one character that we're printing, use half of that margin.
 	var margin = this.dim.font.size/4;
+	if (this.c.length === 1)
+		margin = margin / 2;
+
+	var offset = this.type === "chord" ? this.realWidth/2 : 0;
 	var left = this.x - offset - margin;
 	var right = left + this.realWidth + margin;
 	return { left: left, right: right};
 };
 
-RelativeElement.prototype.setLaneIfBlank = function () {
+RelativeElement.prototype.invertLane = function (total) {
 	if (this.lane === undefined)
-		this.lane = 1;
+		this.lane = 0;
+	this.lane = total - this.lane - 1;
 };
 
-RelativeElement.prototype.putChordInLane2 = function () {
-	this.lane = 2;
-	this.chordHeightAbove += this.chordHeightAbove;
+RelativeElement.prototype.putChordInLane = function (i) {
+	this.lane = i;
+	this.chordHeightAbove = this.height*this.lane;
 };
 
 RelativeElement.prototype.setX = function (x) {

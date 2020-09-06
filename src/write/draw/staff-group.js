@@ -108,6 +108,8 @@ function drawStaffGroup(renderer, params, selectables) {
 			"rgb(31,170,177)", "rgb(220,166,142)" ];
 		if (staff.positionY[key]) {
 			var height = staff.specialY[key] * spacing.STEP;
+			if (key === "chordHeightAbove" && staff.specialY.chordLines)
+				height *= staff.specialY.chordLines;
 			printDebugBox(renderer,
 				{ x: renderer.padding.left,
 					y: renderer.calcY(staff.positionY[key]),
@@ -163,11 +165,14 @@ function boxAllElements(renderer, voices, which) {
 				var relElem = elem.children[k];
 				var chord = relElem.getChordDim();
 				if (chord) {
+					var y = renderer.calcY(relElem.pitch);
+					if (relElem.lane)
+						y += relElem.dim.font.size*relElem.lane;
 					printDebugBox(renderer,
 						{ x: chord.left,
-							y: renderer.calcY(relElem.pitch),
+							y: y,
 							width: chord.right-chord.left,
-							height: 20,
+							height: relElem.dim.font.size,
 							fill: "none",
 							stroke: "#4aa93d",
 							"stroke-opacity": 0.8

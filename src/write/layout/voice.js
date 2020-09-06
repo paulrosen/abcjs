@@ -12,9 +12,7 @@ var layoutVoice = function(voice) {
 			}
 		}
 	}
-	var addLane = setLaneForChord(voice.children);
-	if (addLane)
-		voice.staff.specialY.chordLines = 2;
+	voice.staff.specialY.chordLines = setLaneForChord(voice.children);
 
 	// Now we can layout the triplets
 	for (i = 0; i < voice.otherchildren.length; i++) {
@@ -51,39 +49,55 @@ function moveDecorations(beam) {
 	}
 }
 
+function placeInLane(rightMost, relElem) {
+	// These items are centered so figure the coordinates accordingly and add a little margin.
+	var xCoords = relElem.getChordDim();
+	if (xCoords) {
+		for (var i = 0; i < rightMost.length; i++) {
+			var fits = rightMost[i] < xCoords.left;
+			if (fits) {
+				if (i > 0)
+					relElem.putChordInLane(i);
+				rightMost[i] = xCoords.right;
+				return;
+			}
+		}
+		// If we didn't return early, then we need a new row
+		rightMost.push(xCoords.right);
+		relElem.putChordInLane(rightMost.length-1);
+	}
+}
+
 function setLaneForChord(absElems) {
-	var rightMostLane1 = 0;
-	var rightMostLane2 = 0;
+	// Criteria:
+	// 1) lane numbers start from the bottom so that as many items as possible are in lane 0, closest to the music.
+	// 2) a chord can have more than one line (for instance "C\nD") each line is a lane.
+	// 3) if two adjoining items would touch then push the second one to the next lane.
+	// 4) use as many lanes as is necessary to get everything to not touch.
+	// 5) leave a margin between items, so use another lane if the chords would have less than a character's width.
+	// 6) if the chord only has one character, allow it to be closer than if the chord has more than one character.
+	var rightMostAbove = [0];
 	for (var i = 0; i < absElems.length; i++) {
 		for (var j = 0; j < absElems[i].children.length; j++) {
 			var relElem = absElems[i].children[j];
 			if (relElem.chordHeightAbove) {
-				// These items are centered so figure the coordinates accordingly and add a little margin.
-				var xCoords = relElem.getChordDim();
-				if (xCoords) {
-					var isLane1 = rightMostLane1 < xCoords.left;
-					if (isLane1)
-						rightMostLane1 = xCoords.right;
-					else
-						rightMostLane2 = xCoords.right;
-					if (!isLane1)
-						relElem.putChordInLane2();
-				}
+				placeInLane(rightMostAbove, relElem);
 			}
 		}
 	}
 	// If we used a second line, then we need to go back and set the first lines.
-	if (rightMostLane2 > 0)
-		setLane(absElems);
-	return rightMostLane2 > 0; // This is a way to see if we ever used the second lane.
+	// Also we need to flip the indexes of the names so that we can count from the top line.
+	if (rightMostAbove.length > 1)
+		setLane(absElems, rightMostAbove.length);
+	return rightMostAbove.length;
 }
 
-function setLane(absElems) {
+function setLane(absElems, numLanes) {
 	for (var i = 0; i < absElems.length; i++) {
 		for (var j = 0; j < absElems[i].children.length; j++) {
 			var relElem = absElems[i].children[j];
 			if (relElem.chordHeightAbove) {
-				relElem.setLaneIfBlank();
+				relElem.invertLane(numLanes);
 			}
 		}
 	}
