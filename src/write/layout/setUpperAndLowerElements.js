@@ -29,7 +29,7 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 		}
 
 		incTop(staff, positionY, 'lyricHeightAbove');
-		incTop(staff, positionY, 'chordHeightAbove', staff.specialY.chordLines);
+		incTop(staff, positionY, 'chordHeightAbove', staff.specialY.chordLines.above);
 		if (staff.specialY.endingHeightAbove) {
 			if (staff.specialY.chordHeightAbove)
 				staff.top += 2;
@@ -53,7 +53,13 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 			positionY.lyricHeightBelow = staff.bottom;
 			staff.bottom -= (staff.specialY.lyricHeightBelow + margin);
 		}
-		if (staff.specialY.chordHeightBelow) { positionY.chordHeightBelow = staff.bottom; staff.bottom -= (staff.specialY.chordHeightBelow + margin); }
+		if (staff.specialY.chordHeightBelow) {
+			positionY.chordHeightBelow = staff.bottom;
+			var hgt = staff.specialY.chordHeightBelow;
+			if (staff.specialY.chordLines.below)
+				hgt *= staff.specialY.chordLines.below;
+			staff.bottom -= (hgt + margin);
+		}
 		if (staff.specialY.volumeHeightBelow && staff.specialY.dynamicHeightBelow) {
 			positionY.volumeHeightBelow = staff.bottom;
 			positionY.dynamicHeightBelow = staff.bottom;

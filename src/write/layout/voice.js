@@ -77,27 +77,44 @@ function setLaneForChord(absElems) {
 	// 5) leave a margin between items, so use another lane if the chords would have less than a character's width.
 	// 6) if the chord only has one character, allow it to be closer than if the chord has more than one character.
 	var rightMostAbove = [0];
+	var rightMostBelow = [0];
 	for (var i = 0; i < absElems.length; i++) {
 		for (var j = 0; j < absElems[i].children.length; j++) {
 			var relElem = absElems[i].children[j];
 			if (relElem.chordHeightAbove) {
 				placeInLane(rightMostAbove, relElem);
 			}
+			if (relElem.chordHeightBelow) {
+				placeInLane(rightMostBelow, relElem);
+			}
 		}
 	}
 	// If we used a second line, then we need to go back and set the first lines.
 	// Also we need to flip the indexes of the names so that we can count from the top line.
-	if (rightMostAbove.length > 1)
-		setLane(absElems, rightMostAbove.length);
-	return rightMostAbove.length;
+	if (rightMostAbove.length > 1 || rightMostBelow.length > 1)
+		setLane(absElems, rightMostAbove.length, rightMostBelow.length);
+	return { above: rightMostAbove.length, below: rightMostBelow.length };
 }
 
-function setLane(absElems, numLanes) {
+function numAnnotationsBelow(absElem) {
+	var count = 0;
+	for (var j = 0; j < absElem.children.length; j++) {
+		var relElem = absElem.children[j];
+		if (relElem.chordHeightBelow)
+			count++;
+	}
+	return count;
+}
+
+function setLane(absElems, numLanesAbove, numLanesBelow) {
 	for (var i = 0; i < absElems.length; i++) {
+		var below = numAnnotationsBelow(absElems[i]);
 		for (var j = 0; j < absElems[i].children.length; j++) {
 			var relElem = absElems[i].children[j];
 			if (relElem.chordHeightAbove) {
-				relElem.invertLane(numLanes);
+				relElem.invertLane(numLanesAbove);
+			} else if (relElem.chordHeightBelow) {
+				relElem.invertLane(below);
 			}
 		}
 	}

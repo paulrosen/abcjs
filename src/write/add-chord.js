@@ -54,7 +54,8 @@ var addChord;
 							type: "text",
 							position: "below",
 							height: chordHeight,
-							dim: attr
+							dim: attr,
+							realWidth: chordWidth
 						}));
 						break;
 					case "above":

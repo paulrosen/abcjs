@@ -83,9 +83,9 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 };
 
 RelativeElement.prototype.getChordDim = function () {
-	if (!this.chordHeightAbove)
-		return null;
 	if (this.type === "debug")
+		return null;
+	if (!this.chordHeightAbove && !this.chordHeightBelow)
 		return null;
 	// Chords are centered, annotations are left justified.
 	// We add a little margin so that items can't touch - we use half the font size as the margin, so that is 1/4 on each side.
@@ -108,7 +108,16 @@ RelativeElement.prototype.invertLane = function (total) {
 
 RelativeElement.prototype.putChordInLane = function (i) {
 	this.lane = i;
-	this.chordHeightAbove = this.height*this.lane;
+	if (this.chordHeightAbove)
+		this.chordHeightAbove = this.height*this.lane;
+	else
+		this.chordHeightBelow = this.height*this.lane;
+};
+
+RelativeElement.prototype.getLane = function () {
+	if (this.lane === undefined)
+		return 0;
+	return this.lane;
 };
 
 RelativeElement.prototype.setX = function (x) {
