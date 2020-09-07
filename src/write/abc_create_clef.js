@@ -44,7 +44,7 @@ var createClef;
 			case 'alto-8': clef="clefs.C"; octave = -1; break;
 			case 'none': return null;
 			case 'perc': clef="clefs.perc"; break;
-			default: abselem.addChild(new RelativeElement("clef="+elem.type, 0, 0, undefined, {type:"debug"}));
+			default: abselem.addFixed(new RelativeElement("clef="+elem.type, 0, 0, undefined, {type:"debug"}));
 		}
 		// if (elem.verticalPos) {
 		// pitch = elem.verticalPos;

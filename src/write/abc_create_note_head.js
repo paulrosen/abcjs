@@ -13,7 +13,7 @@ var createNoteHead;
 		var newDotShiftX = 0;
 		var extraLeft = 0;
 		if (c === undefined)
-			abselem.addChild(new RelativeElement("pitch is undefined", 0, 0, 0, {type:"debug"}));
+			abselem.addFixed(new RelativeElement("pitch is undefined", 0, 0, 0, {type:"debug"}));
 		else if (c==="") {
 			notehead = new RelativeElement(null, 0, 0, pitch);
 		} else {

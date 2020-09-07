@@ -40,8 +40,9 @@ var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
 	};
 };
 
-VoiceElement.prototype.addChild = function (child) {
-	if (child.type === 'bar') {
+VoiceElement.prototype.addChild = function (absElem) {
+	// This is always passed an AbsoluteElement
+	if (absElem.type === 'bar') {
 		var firstItem = true;
 		for (var i = 0; firstItem && i < this.children.length; i++) {
 			if (this.children[i].type.indexOf("staff-extra") < 0 && this.children[i].type !== "tempo")
@@ -52,8 +53,8 @@ VoiceElement.prototype.addChild = function (child) {
 			this.otherchildren.push("bar");
 		}
 	}
-	this.children[this.children.length] = child;
-	this.setRange(child);
+	this.children[this.children.length] = absElem;
+	this.setRange(absElem);
 };
 
 VoiceElement.prototype.setLimit = function(member, child) {
@@ -98,6 +99,10 @@ VoiceElement.prototype.addOther = function (child) {
 
 VoiceElement.prototype.addBeam = function (child) {
 	this.beams.push(child);
+};
+
+VoiceElement.prototype.setWidth = function (width) {
+	this.w = width;
 };
 
 module.exports = VoiceElement;

@@ -64,15 +64,15 @@ var Decoration;
 				if (glyphs.getSymbolAlign(symbol)!=="center") {
 					deltaX -= (glyphs.getSymbolWidth(symbol)/2);
 				}
-				abselem.addChild(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), yPos));
+				abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), yPos));
 			}
 			if (decoration[i]==="slide" && abselem.heads[0]) {
 				var yPos2 = abselem.heads[0].pitch;
 				yPos2 -= 2; // TODO-PER: not sure what this fudge factor is.
 				var blank1 = new RelativeElement("", -roomtaken-15, 0, yPos2-1);
 				var blank2 = new RelativeElement("", -roomtaken-5, 0, yPos2+1);
-				abselem.addChild(blank1);
-				abselem.addChild(blank2);
+				abselem.addFixedX(blank1);
+				abselem.addFixedX(blank2);
 				voice.addOther(new TieElem({ anchor1: blank1, anchor2: blank2, fixedY: true}));
 			}
 		}
@@ -127,7 +127,7 @@ var Decoration;
 			deltaX += (dir === 'down') ? -5 : 3;
 			for (var i = 0; i < count; i++) {
 				placement -= 1;
-				abselem.addChild(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), placement));
+				abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), placement));
 			}
 		}
 
@@ -166,7 +166,7 @@ var Decoration;
 			var textFudge = 2;
 			var textHeight = 5;
 			// TODO-PER: Get the height of the current font and use that for the thickness.
-			abselem.addChild(new RelativeElement(text, width/2, 0, y+textFudge, {type:"decoration", klass: 'ornament', thickness: 3}));
+			abselem.addFixedX(new RelativeElement(text, width/2, 0, y+textFudge, {type:"decoration", klass: 'ornament', thickness: 3}));
 
 			incrementPlacement(placement, textHeight);
 		}
@@ -178,7 +178,7 @@ var Decoration;
 			var height = glyphs.symbolHeightInPitches(symbol) + 1; // adding a little padding so nothing touches.
 			var y = getPlacement(placement);
 			y = (placement === 'above') ? y + height/2 : y - height/2;// Center the element vertically.
-			abselem.addChild(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), y, { klass: 'ornament', thickness: glyphs.symbolHeightInPitches(symbol) }));
+			abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), y, { klass: 'ornament', thickness: glyphs.symbolHeightInPitches(symbol) }));
 
 			incrementPlacement(placement, height);
 		}

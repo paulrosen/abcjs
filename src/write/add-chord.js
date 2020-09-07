@@ -35,7 +35,8 @@ var addChord;
 						abselem.addExtra(new RelativeElement(chord, x, chordWidth + 4, y, {
 							type: "text",
 							height: chordHeight,
-							dim: attr
+							dim: attr,
+							position: "left"
 						}));
 						break;
 					case "right":
@@ -45,7 +46,8 @@ var addChord;
 						abselem.addRight(new RelativeElement(chord, x, chordWidth + 4, y, {
 							type: "text",
 							height: chordHeight,
-							dim: attr
+							dim: attr,
+							position: "right"
 						}));
 						break;
 					case "below":
@@ -62,6 +64,7 @@ var addChord;
 						// setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
 						abselem.addRight(new RelativeElement(chord, 0, 0, undefined, {
 							type: "text",
+							position: "above",
 							height: chordHeight,
 							dim: attr,
 							realWidth: chordWidth
@@ -70,7 +73,8 @@ var addChord;
 					default:
 						if (rel_position) {
 							var relPositionY = rel_position.y + 3 * spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
-							abselem.addChild(new RelativeElement(chord, x + rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {
+							abselem.addRight(new RelativeElement(chord, x + rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {
+								position: "relative",
 								type: "text",
 								height: chordHeight,
 								dim: attr
@@ -81,13 +85,15 @@ var addChord;
 							if (elem.positioning && elem.positioning.chordPosition)
 								pos2 = elem.positioning.chordPosition;
 
-							abselem.addCentered(new RelativeElement(chord, x, chordWidth, undefined, {
-								type: "chord",
-								position: pos2,
-								height: chordHeight,
-								dim: attr,
-								realWidth: chordWidth
-							}));
+							if (pos2 !== 'hidden') {
+								abselem.addCentered(new RelativeElement(chord, x, chordWidth, undefined, {
+									type: "chord",
+									position: pos2,
+									height: chordHeight,
+									dim: attr,
+									realWidth: chordWidth
+								}));
+							}
 						}
 				}
 			}

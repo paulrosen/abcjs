@@ -265,7 +265,7 @@ AbstractEngraver.prototype.createABCVoice = function(abcline, tempo, s, v, isSin
 				if (!this.tempoSet && tempo && !tempo.suppress) {
 					this.tempoSet = true;
 					var tempoElement = new AbsoluteElement(tempo, 0, 0, "tempo", this.tuneNumber, {});
-					tempoElement.addChild(new TempoElement(tempo, this.tuneNumber, createNoteHead));
+					tempoElement.addFixedX(new TempoElement(tempo, this.tuneNumber, createNoteHead));
 					voice.addChild(tempoElement);
 				}
 				voice.addChild(abselems[i]);
@@ -346,12 +346,12 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
   case "part":
     var abselem = new AbsoluteElement(elem,0,0, 'part', this.tuneNumber);
 	  var dim = this.getTextSize.calc(elem.title, 'partsfont', "part");
-    abselem.addChild(new RelativeElement(elem.title, 0, 0, undefined, {type:"part", height: dim.height/spacing.STEP}));
+    abselem.addFixedX(new RelativeElement(elem.title, 0, 0, undefined, {type:"part", height: dim.height/spacing.STEP}));
     elemset[0] = abselem;
     break;
   case "tempo":
     var abselem3 = new AbsoluteElement(elem,0,0, 'tempo', this.tuneNumber);
-    abselem3.addChild(new TempoElement(elem, this.tuneNumber, createNoteHead));
+    abselem3.addFixedX(new TempoElement(elem, this.tuneNumber, createNoteHead));
     elemset[0] = abselem3;
     break;
 	  case "style":
@@ -373,7 +373,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 
   default:
     var abselem2 = new AbsoluteElement(elem,0,0, 'unsupported', this.tuneNumber);
-    abselem2.addChild(new RelativeElement("element type "+elem.el_type, 0, 0, undefined, {type:"debug"}));
+    abselem2.addFixed(new RelativeElement("element type "+elem.el_type, 0, 0, undefined, {type:"debug"}));
     elemset[0] = abselem2;
   }
 
@@ -432,20 +432,20 @@ var sortPitch = function(elem) {
 var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, additionalLedgers, dir, dx, scale) {
 	for (var i=maxPitch; i>11; i--) {
 		if (i%2===0 && !isRest) {
-			abselem.addChild(new RelativeElement(null, dx, (symbolWidth+4)*scale, i, {type:"ledger"}));
+			abselem.addFixed(new RelativeElement(null, dx, (symbolWidth+4)*scale, i, {type:"ledger"}));
 		}
 	}
 
 	for (i=minPitch; i<1; i++) {
 		if (i%2===0 && !isRest) {
-			abselem.addChild(new RelativeElement(null, dx, (symbolWidth+4)*scale, i, {type:"ledger"}));
+			abselem.addFixed(new RelativeElement(null, dx, (symbolWidth+4)*scale, i, {type:"ledger"}));
 		}
 	}
 
 	for (i = 0; i < additionalLedgers.length; i++) { // PER: draw additional ledgers
 		var ofs = symbolWidth;
 		if (dir === 'down') ofs = -ofs;
-		abselem.addChild(new RelativeElement(null, ofs+dx, (symbolWidth+4)*scale, additionalLedgers[i], {type:"ledger"}));
+		abselem.addFixed(new RelativeElement(null, ofs+dx, (symbolWidth+4)*scale, additionalLedgers[i], {type:"ledger"}));
 	}
 };
 
@@ -806,7 +806,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   }
 
   if (elem.barNumber) {
-    abselem.addChild(new RelativeElement(elem.barNumber, -10, 0, 0, {type:"barNumber"}));
+    abselem.addFixed(new RelativeElement(elem.barNumber, -10, 0, 0, {type:"barNumber"}));
   }
 
   // ledger lines
@@ -906,7 +906,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
 	var measureNumDim = this.getTextSize.calc(number, "measurefont", 'bar-number');
 	var dx = measureNumDim.width > 18 && abselem.abcelem.type === "treble" ? -7 : 0;
-	abselem.addChild(new RelativeElement(number, dx, measureNumDim.width, 11+measureNumDim.height / spacing.STEP, {type:"barNumber", dim: this.getTextSize.attr("measurefont", 'bar-number')}));
+	abselem.addFixed(new RelativeElement(number, dx, measureNumDim.width, 11+measureNumDim.height / spacing.STEP, {type:"barNumber", dim: this.getTextSize.attr("measurefont", 'bar-number')}));
 };
 
 AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) {

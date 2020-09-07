@@ -43,6 +43,8 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 	}
 	if (opt.dim)
 		this.dim = opt.dim;
+	if (opt.position)
+		this.position = opt.position;
 	this.height = opt.height ? opt.height : 4; // The +1 is to give a little bit of padding.
 	if (opt.top)
 		this.top = opt.top;

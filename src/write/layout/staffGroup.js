@@ -89,11 +89,8 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
 	}
 	//console.log("greatest remaining",spacingunit,x);
 	spacingunits+=spacingunit;
-	staffGroup.w = x;
+	staffGroup.setWidth(x);
 
-	for (i=0;i<staffGroup.voices.length;i++) {
-		staffGroup.voices[i].w=staffGroup.w;
-	}
 	return { spacingUnits: spacingunits, minSpace: minspace };
 };
 
@@ -151,17 +148,17 @@ function setBraceLocation(brace, x, ofs) {
 
 function setLocation(x, element) {
 	element.x = x;
-};
+}
 
 function finished(voices) {
 	for (var i=0;i<voices.length;i++) {
 		if (!layoutVoiceElements.layoutEnded(voices[i])) return false;
 	}
 	return true;
-};
+}
 
 function getDurationIndex(element) {
 	return element.durationindex - (element.children[element.i] && (element.children[element.i].duration>0)?0:0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
-};
+}
 
 module.exports = layoutStaffGroup;

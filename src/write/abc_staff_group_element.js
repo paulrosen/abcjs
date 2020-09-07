@@ -93,6 +93,13 @@ StaffGroupElement.prototype.setHeight = function () {
 	this.height = calcHeight(this);
 };
 
+StaffGroupElement.prototype.setWidth = function (width) {
+	this.w = width;
+	for (var i=0;i<this.voices.length;i++) {
+		this.voices[i].setWidth(width);
+	}
+};
+
 StaffGroupElement.prototype.setStaffLimits = function (voice) {
 	voice.staff.top = Math.max(voice.staff.top, voice.top);
 	voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);

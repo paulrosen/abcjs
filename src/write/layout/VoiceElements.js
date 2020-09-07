@@ -21,8 +21,6 @@ VoiceElement.getNextX = function (voice) {
 // number of spacing units expected for next positioning
 VoiceElement.getSpacingUnits = function (voice) {
 	return Math.sqrt(voice.spacingduration*8);
-	// TODO-PER: On short lines, this would never trigger, so the spacing was wrong. I just changed this line empirically, though, so I don't know if there are other ramifications.
-	//return (this.minx<this.nextx) ? Math.sqrt(this.spacingduration*8) : 0; // we haven't used any spacing units if we end up using minx
 };
 
 // Try to layout the element at index this.i
