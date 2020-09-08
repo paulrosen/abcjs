@@ -436,8 +436,8 @@ var parseCommon = require("../parse/abc_common");
 							dynamicType = 'ffff';
 
 						if (dynamicType) {
-							currentVolume = volumes[dynamicType];
-							voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume });
+							currentVolume = volumes[dynamicType].slice(0);
+							voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume.slice(0) });
 							inCrescendo[k] = false;
 							inDiminuendo[k] = false;
 						}
@@ -445,6 +445,9 @@ var parseCommon = require("../parse/abc_common");
 						if (elem.decoration.indexOf("crescendo(") >= 0) {
 							var n = numNotesToDecoration(voice, v, "crescendo)");
 							var top = Math.min(127, currentVolume[0] + crescendoSize);
+							var endDec = endingVolume(voice, v+n+1, Object.keys(volumes));
+							if (endDec)
+								top = volumes[endDec][0];
 							inCrescendo[k] = Math.floor((top - currentVolume[0]) / n);
 							inDiminuendo[k] = false;
 						} else if (elem.decoration.indexOf("crescendo)") >= 0) {
@@ -452,6 +455,9 @@ var parseCommon = require("../parse/abc_common");
 						} else if (elem.decoration.indexOf("diminuendo(") >= 0) {
 							var n2 = numNotesToDecoration(voice, v, "diminuendo)");
 							var bottom = Math.max(15, currentVolume[0] - crescendoSize);
+							var endDec2 = endingVolume(voice, v+n2+1, Object.keys(volumes));
+							if (endDec2)
+								bottom = volumes[endDec2][0];
 							inCrescendo[k] = false;
 							inDiminuendo[k] = Math.floor((bottom - currentVolume[0]) / n2);
 						} else if (elem.decoration.indexOf("diminuendo)") >= 0) {
@@ -496,6 +502,20 @@ var parseCommon = require("../parse/abc_common");
 				return counter;
 		}
 		return counter;
+	}
+	function endingVolume(voice, start, volumeDecorations) {
+		var end = Math.min(voice.length, start + 3); // If we have a volume within a couple notes of the end then assume that is the destination.
+		for (var i = start; i < end; i++) {
+			if (voice[i].el_type === "note") {
+				if (voice[i].decoration) {
+					for (var j = 0; j < voice[i].decoration.length; j++) {
+						if (volumeDecorations.indexOf(voice[i].decoration[j]) >= 0)
+							return voice[i].decoration[j];
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	function chordVoiceOffThisBar(voices) {

@@ -741,59 +741,99 @@ describe("Audio flattener", function() {
 		"tracks":[
 			[
 				{"cmd":"program","channel":0,"instrument":0},
-				{"cmd":"note","pitch":60,"volume":115,"start":0,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":62,"volume":90,"start":0.125,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":64,"volume":55,"start":0.25,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":65,"volume":45,"start":0.375,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":67,"volume":65,"start":0.5,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":69,"volume":55,"start":0.625,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":71,"volume":75,"start":0.75,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":72,"volume":65,"start":0.875,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":74,"volume":95,"start":1,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":71,"volume":90,"start":1.25,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":67,"volume":95,"start":1.5,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":65,"volume":100,"start":1.75,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":64,"volume":47,"start":2,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":65,"volume":85,"start":2.125,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":67,"volume":91,"start":2.25,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":69,"volume":67,"start":2.375,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":71,"volume":73,"start":2.5,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":72,"volume":49,"start":2.625,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":60,"start":0,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":35,"start":0.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":54,"start":0.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":43,"start":0.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":62,"start":0.5,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":51,"start":0.625,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":70,"start":0.75,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":59,"start":0.875,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":88,"start":1,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":82,"start":1.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":86,"start":1.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":90,"start":1.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":2,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":80,"start":2.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":87,"start":2.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":64,"start":2.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":71,"start":2.5,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":48,"start":2.625,"duration":0.125,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":74,"volume":55,"start":2.75,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":76,"volume":31,"start":2.875,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":77,"volume":33,"start":3,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":74,"volume":41,"start":3.25,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":71,"volume":32,"start":3.5,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":69,"volume":23,"start":3.75,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":67,"volume":96,"start":4,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":72,"volume":77,"start":4.25,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":76,"volume":68,"start":4.5,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":79,"volume":59,"start":4.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":32,"start":2.875,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":77,"volume":60,"start":3,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":50,"start":3.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":50,"start":3.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":50,"start":3.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":60,"start":4,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":50,"start":4.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":50,"start":4.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":79,"volume":50,"start":4.75,"duration":0.25,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":81,"volume":60,"start":5,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":77,"volume":41,"start":5.25,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":74,"volume":32,"start":5.5,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":71,"volume":23,"start":5.75,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":72,"volume":24,"start":6,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":74,"volume":0,"start":6.125,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":71,"volume":0,"start":6.25,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":72,"volume":0,"start":6.375,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":69,"volume":0,"start":6.5,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":71,"volume":0,"start":6.625,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":67,"volume":0,"start":6.75,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":69,"volume":0,"start":6.875,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":65,"volume":0,"start":7,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":67,"volume":0,"start":7.125,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":64,"volume":0,"start":7.25,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":65,"volume":0,"start":7.375,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":62,"volume":0,"start":7.5,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":64,"volume":0,"start":7.625,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":65,"volume":0,"start":7.75,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":67,"volume":0,"start":7.875,"duration":0.125,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":64,"volume":96,"start":8,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":60,"volume":77,"start":8.25,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":62,"volume":68,"start":8.5,"duration":0.25,"instrument":0,"gap":0},
-				{"cmd":"note","pitch":59,"volume":59,"start":8.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":77,"volume":50,"start":5.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":50,"start":5.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":50,"start":5.75,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":60,"start":6,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":35,"start":6.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":50,"start":6.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":35,"start":6.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":50,"start":6.5,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":35,"start":6.625,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":50,"start":6.75,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":35,"start":6.875,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":60,"start":7,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":35,"start":7.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":50,"start":7.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":35,"start":7.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":50,"start":7.5,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":35,"start":7.625,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":50,"start":7.75,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":35,"start":7.875,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":60,"start":8,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":50,"start":8.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":50,"start":8.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":59,"volume":50,"start":8.75,"duration":0.25,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":60,"volume":60,"start":9,"duration":1,"instrument":0,"gap":0}
+			]
+		]
+	};
+
+	//////////////////////////////////////////////////////////
+
+	var abcDynamics3 = 'X: 1\n' +
+		'M: 4/4\n' +
+		'L: 1/4\n' +
+		'K: C\n' +
+		'!pppp!CDEF | !<(!GABc| !<)!y!ffff!BcBA | !>(!GFED | !>)!y!pppp!C4 |]\n';
+
+	var expectedDynamics3 = {
+		"tempo":180,
+		"instrument":0,
+		"totalDuration":5,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":15,"start":0,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":10,"start":0.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":10,"start":0.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":10,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
+
+				{"cmd":"note","pitch":67,"volume":15,"start":1,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":38,"start":1.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":66,"start":1.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":94,"start":1.75,"duration":0.25,"instrument":0,"gap":0},
+
+				{"cmd":"note","pitch":71,"volume":127,"start":2,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":125,"start":2.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":125,"start":2.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":125,"start":2.75,"duration":0.25,"instrument":0,"gap":0},
+
+				{"cmd":"note","pitch":67,"volume":127,"start":3,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":97,"start":3.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":69,"start":3.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":41,"start":3.75,"duration":0.25,"instrument":0,"gap":0},
+
+				{"cmd":"note","pitch":60,"volume":15,"start":4,"duration":1,"instrument":0,"gap":0}
 			]
 		]
 	};
@@ -2161,6 +2201,10 @@ describe("Audio flattener", function() {
 
 	it("flatten-dynamics2", function() {
 		doFlattenTest(abcDynamics2, expectedDynamics2);
+	})
+
+	it("flatten-dynamics3", function() {
+		doFlattenTest(abcDynamics3, expectedDynamics3);
 	})
 
 	it("flatten-six-huit", function() {
