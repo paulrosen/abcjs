@@ -20,7 +20,7 @@ function setPaperSize(renderer, maxwidth, scale, responsive) {
 		"-ms-user-select: none;",
 		"user-select: none;"
 	];
-	renderer.paper.insertStyles(".abcjs-dragging-in-progress text, .abcjs-dragging-in-progress tspan {" + styles.join(" ") + ")}");
+	renderer.paper.insertStyles(".abcjs-dragging-in-progress text, .abcjs-dragging-in-progress tspan {" + styles.join(" ") + "}");
 
 	var parentStyles = { overflow: "hidden" };
 	if (responsive === 'resize') {
