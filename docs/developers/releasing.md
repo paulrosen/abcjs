@@ -10,7 +10,7 @@ For people who want to contribute a pull request, this isn't relevant!
 All new work should be done in the `dev` branch.
 :::
 
-To begin a new version:
+### To begin a new version:
 
 [_] Switch to the `dev` branch and do all new work there.
 
@@ -20,7 +20,7 @@ To begin a new version:
 
 [_] Add the new files: `git add bin/abcjs*_x.x.x*`.
 
-To release a new version, this checklist should be followed:
+### To release a new version, this checklist should be followed:
 
 [_] Get all commits since the last release with `git log > temp.txt`.
 
