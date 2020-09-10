@@ -3,6 +3,48 @@
 ## Features
 * If there is a repeat, then include both of the currentTrackMilliseconds in the callback. (Note: if you consume this, be sure you can handle either a number or an array.)
 
+* Allow as many lanes as needed for annotations below the staff. 
+    
+* Add Tune.getElementFromChar method for convenience.
+
+* Allow setTiming to be called without parameters.
+
+## Bugs
+
+* Fix the audio interpretation of dynamics.
+
+* Fix vertical positioning of annotations when they appear on the same line as other annotations.
+
+* Fix bug when there is a spacer in a triplet.
+
+* Fix drawing of slur at beginning of line.
+
+* Fix bug where editor swallows the clickListener callback.
+
+* Fix timing when there are tempo changes.
+
+* Move tempo note up slightly so it aligns with the number, not the font's baseline.
+
+## Documentation
+
+* Document the return value of renderAbc
+
+* A little improvement to the Editor documentation.
+
+* Document classes a little more comprehensively.
+
+* Document lineBreaks parameter.
+
+* Remove the circular requirement for abcjs in the docs.
+
+* Start to document the rest of the options for renderAbc
+
+* Create example of how to annotate music.
+
+* Improve documentation of audio.
+
+* Changed the object that onEnded is passed in with to match documentation.
+
 # Version 6.0.0-beta.15
 
 ## Bugs
