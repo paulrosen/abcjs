@@ -22301,7 +22301,7 @@ function setPaperSize(renderer, maxwidth, scale, responsive) {
   renderer.paper.setTitle(text); // for dragging - don't select during drag
 
   var styles = ["-webkit-touch-callout: none;", "-webkit-user-select: none;", "-khtml-user-select: none;", "-moz-user-select: none;", "-ms-user-select: none;", "user-select: none;"];
-  renderer.paper.insertStyles(".abcjs-dragging-in-progress text, .abcjs-dragging-in-progress tspan {" + styles.join(" ") + ")}");
+  renderer.paper.insertStyles(".abcjs-dragging-in-progress text, .abcjs-dragging-in-progress tspan {" + styles.join(" ") + "}");
   var parentStyles = {
     overflow: "hidden"
   };
