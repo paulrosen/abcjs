@@ -29,7 +29,7 @@ function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
 				sequence.appendNote(trackNum, grace.pitch, 1 / 64, grace.volume);
 			}
 		}
-		sequence.appendNote(trackNum, note.pitch, note.durationInMeasures, note.volume);
+		sequence.appendNote(trackNum, note.pitch, note.duration, note.volume);
 	}
 
 	var buffer = new CreateSynth();
