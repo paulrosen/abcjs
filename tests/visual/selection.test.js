@@ -145,13 +145,13 @@ describe("Selection", function() {
 			"class": "",
 			"text-anchor": "start",
 			"x": "15",
-			"y": "187.5875",
+			"y": "193.5875",
 			"selectable": "true",
 			"tabindex": "0",
 			"data-index": "6"
 		},
 		"abcEl": {"el_type": "freeText", "startChar": -1, "endChar": -1, "text": "there is some random text"},
-		"size": {"x": 15, "y": 169, "width": 217, "height": 24}
+		"size": {"x": 15, "y": 175, "width": 217, "height": 24}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -163,7 +163,7 @@ describe("Selection", function() {
 			"data-index": "7"
 		},
 		"abcEl": {"el_type": "brace", "startChar": -1, "endChar": -1},
-		"size": {"x": 43, "y": 331, "width": 8, "height": 144}
+		"size": {"x": 43, "y": 352, "width": 8, "height": 151}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -175,13 +175,13 @@ describe("Selection", function() {
 			"class": "",
 			"text-anchor": "start",
 			"x": "15",
-			"y": "338.748",
+			"y": "360.248",
 			"selectable": "true",
 			"tabindex": "0",
 			"data-index": "8"
 		},
 		"abcEl": {"el_type": "voiceName", "startChar": -1, "endChar": -1, "text": "RH"},
-		"size": {"x": 15, "y": 327, "width": 19, "height": 15}
+		"size": {"x": 15, "y": 348, "width": 19, "height": 15}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -193,7 +193,7 @@ describe("Selection", function() {
 			"data-index": "9"
 		},
 		"abcEl": {"type": "treble", "verticalPos": 0, "clefPos": 4, "el_type": "clef"},
-		"size": {"x": 58, "y": 317, "width": 19, "height": 57}
+		"size": {"x": 58, "y": 338, "width": 19, "height": 57}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -211,7 +211,7 @@ describe("Selection", function() {
 				"verticalPos": 9
 			}], "root": "B", "acc": "b", "mode": "", "el_type": "keySignature"
 		},
-		"size": {"x": 88, "y": 321, "width": 16, "height": 30}
+		"size": {"x": 88, "y": 342, "width": 16, "height": 30}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -223,17 +223,17 @@ describe("Selection", function() {
 			"data-index": "11"
 		},
 		"abcEl": {"type": "specified", "value": [{"num": "4", "den": "4"}], "el_type": "timeSignature"},
-		"size": {"x": 114, "y": 331, "width": 12, "height": 30}
+		"size": {"x": 114, "y": 353, "width": 12, "height": 30}
 	}, {
 		"draggable": false,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "12"},
 		"abcEl": {"preString": "Easy Swing", "duration": [0.25], "bpm": 140, "type": "tempo", "el_type": "tempo"},
-		"size": {"x": 136, "y": 186, "width": 167, "height": 29}
+		"size": {"x": 136, "y": 201, "width": 167, "height": 22}
 	}, {
 		"draggable": false,
 		"svgEl": {"fill": "#000000", "selectable": "true", "tabindex": "0", "data-index": "13"},
 		"abcEl": {"title": "A", "el_type": "part", "startChar": 644, "endChar": 647},
-		"size": {"x": 138, "y": 212, "width": 19, "height": 27}
+		"size": {"x": 136, "y": 224, "width": 19, "height": 27}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -259,7 +259,7 @@ describe("Selection", function() {
 			"minpitch": 6,
 			"maxpitch": 13
 		},
-		"size": {"x": 136, "y": 292, "width": 10, "height": 58}
+		"size": {"x": 136, "y": 313, "width": 10, "height": 58}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -281,7 +281,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 176, "y": 300, "width": 16, "height": 35}
+		"size": {"x": 176, "y": 321, "width": 16, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -303,7 +303,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 194, "y": 296, "width": 10, "height": 35}
+		"size": {"x": 194, "y": 317, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -324,7 +324,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 204, "y": 304, "width": 10, "height": 31}
+		"size": {"x": 204, "y": 325, "width": 10, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -336,7 +336,7 @@ describe("Selection", function() {
 			"data-index": "18"
 		},
 		"abcEl": {"type": "bar_thin", "barNumber": 2, "el_type": "bar", "startChar": 720, "endChar": 721},
-		"size": {"x": 221, "y": 331, "width": 1, "height": 31}
+		"size": {"x": 221, "y": 352, "width": 1, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -362,7 +362,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 13
 		},
-		"size": {"x": 246, "y": 292, "width": 17, "height": 51}
+		"size": {"x": 246, "y": 313, "width": 17, "height": 51}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -388,7 +388,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 13
 		},
-		"size": {"x": 314, "y": 292, "width": 10, "height": 39}
+		"size": {"x": 314, "y": 313, "width": 10, "height": 39}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -400,7 +400,7 @@ describe("Selection", function() {
 			"data-index": "21"
 		},
 		"abcEl": {"type": "bar_thin", "barNumber": 3, "el_type": "bar", "startChar": 744, "endChar": 745},
-		"size": {"x": 351, "y": 331, "width": 1, "height": 31}
+		"size": {"x": 351, "y": 352, "width": 1, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -421,7 +421,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 361, "y": 319, "width": 8, "height": 21}
+		"size": {"x": 361, "y": 340, "width": 8, "height": 21}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -444,7 +444,7 @@ describe("Selection", function() {
 			"minpitch": 13,
 			"maxpitch": 13
 		},
-		"size": {"x": 386, "y": 284, "width": 10, "height": 39}
+		"size": {"x": 386, "y": 306, "width": 10, "height": 39}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -465,7 +465,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 397, "y": 287, "width": 10, "height": 48}
+		"size": {"x": 397, "y": 308, "width": 10, "height": 48}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -486,7 +486,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 407, "y": 289, "width": 10, "height": 53}
+		"size": {"x": 407, "y": 311, "width": 10, "height": 53}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -508,7 +508,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 418, "y": 292, "width": 10, "height": 43}
+		"size": {"x": 418, "y": 313, "width": 10, "height": 43}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -532,7 +532,7 @@ describe("Selection", function() {
 			"minpitch": 6,
 			"maxpitch": 6
 		},
-		"size": {"x": 429, "y": 311, "width": 10, "height": 39}
+		"size": {"x": 429, "y": 333, "width": 10, "height": 39}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -553,7 +553,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 440, "y": 309, "width": 10, "height": 33}
+		"size": {"x": 440, "y": 331, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -576,7 +576,7 @@ describe("Selection", function() {
 			"minpitch": 7,
 			"maxpitch": 7
 		},
-		"size": {"x": 451, "y": 307, "width": 10, "height": 39}
+		"size": {"x": 451, "y": 329, "width": 10, "height": 39}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -598,7 +598,7 @@ describe("Selection", function() {
 			"minpitch": 6,
 			"maxpitch": 6
 		},
-		"size": {"x": 462, "y": 319, "width": 10, "height": 31}
+		"size": {"x": 462, "y": 341, "width": 10, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -610,7 +610,7 @@ describe("Selection", function() {
 			"data-index": "31"
 		},
 		"abcEl": {"type": "bar_thin", "barNumber": 4, "el_type": "bar", "startChar": 775, "endChar": 776},
-		"size": {"x": 489, "y": 331, "width": 1, "height": 31}
+		"size": {"x": 489, "y": 352, "width": 1, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "32"},
@@ -624,7 +624,7 @@ describe("Selection", function() {
 			"endChar": 801,
 			"type": "tempo"
 		},
-		"size": {"x": 500, "y": 186, "width": 145, "height": 29}
+		"size": {"x": 500, "y": 201, "width": 145, "height": 22}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -650,7 +650,7 @@ describe("Selection", function() {
 			"minpitch": 7,
 			"maxpitch": 10
 		},
-		"size": {"x": 500, "y": 304, "width": 10, "height": 43}
+		"size": {"x": 500, "y": 325, "width": 10, "height": 43}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -671,7 +671,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 516, "y": 319, "width": 8, "height": 21}
+		"size": {"x": 516, "y": 340, "width": 8, "height": 21}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -696,7 +696,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 13
 		},
-		"size": {"x": 534, "y": 292, "width": 10, "height": 51}
+		"size": {"x": 534, "y": 313, "width": 10, "height": 51}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -708,7 +708,7 @@ describe("Selection", function() {
 			"data-index": "36"
 		},
 		"abcEl": {"type": "bar_thin", "barNumber": 5, "el_type": "bar", "startChar": 820, "endChar": 821},
-		"size": {"x": 568, "y": 331, "width": 1, "height": 31}
+		"size": {"x": 568, "y": 352, "width": 1, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -734,7 +734,7 @@ describe("Selection", function() {
 			"minpitch": 4,
 			"maxpitch": 9
 		},
-		"size": {"x": 579, "y": 307, "width": 10, "height": 51}
+		"size": {"x": 579, "y": 329, "width": 10, "height": 51}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -760,7 +760,7 @@ describe("Selection", function() {
 			"minpitch": 7,
 			"maxpitch": 10
 		},
-		"size": {"x": 608, "y": 266, "width": 18, "height": 81}
+		"size": {"x": 608, "y": 287, "width": 18, "height": 81}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -772,7 +772,7 @@ describe("Selection", function() {
 			"data-index": "39"
 		},
 		"abcEl": {"type": "bar_thin", "barNumber": 6, "el_type": "bar", "startChar": 840, "endChar": 841},
-		"size": {"x": 646, "y": 331, "width": 1, "height": 31}
+		"size": {"x": 646, "y": 352, "width": 1, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -798,7 +798,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 10
 		},
-		"size": {"x": 657, "y": 304, "width": 17, "height": 39}
+		"size": {"x": 657, "y": 325, "width": 17, "height": 39}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -820,7 +820,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 708, "y": 300, "width": 10, "height": 31}
+		"size": {"x": 708, "y": 321, "width": 10, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -832,12 +832,12 @@ describe("Selection", function() {
 			"data-index": "42"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 860, "endChar": 861},
-		"size": {"x": 756, "y": 331, "width": 1, "height": 31}
+		"size": {"x": 756, "y": 352, "width": 1, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "43"},
 		"abcEl": {"el_type": "dynamicDecoration", "startChar": -1, "endChar": -1, "decoration": "mp"},
-		"size": {"x": 134, "y": 407, "width": 27, "height": 13}
+		"size": {"x": 134, "y": 429, "width": 27, "height": 13}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -849,7 +849,7 @@ describe("Selection", function() {
 			"data-index": "44"
 		},
 		"abcEl": {"el_type": "dynamicDecoration", "startChar": -1, "endChar": -1},
-		"size": {"x": 246, "y": 404, "width": 68, "height": 8}
+		"size": {"x": 246, "y": 426, "width": 68, "height": 8}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -861,12 +861,12 @@ describe("Selection", function() {
 			"data-index": "45"
 		},
 		"abcEl": {"el_type": "slur", "startChar": -1, "endChar": -1},
-		"size": {"x": 397, "y": 296, "width": 26, "height": 5}
+		"size": {"x": 397, "y": 318, "width": 26, "height": 5}
 	}, {
 		"draggable": false,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "46"},
 		"abcEl": {"el_type": "triplet", "startChar": -1, "endChar": -1},
-		"size": {"x": 441, "y": 286, "width": 8, "height": 17}
+		"size": {"x": 441, "y": 307, "width": 8, "height": 17}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -878,7 +878,7 @@ describe("Selection", function() {
 			"data-index": "47"
 		},
 		"abcEl": {"el_type": "dynamicDecoration", "startChar": -1, "endChar": -1},
-		"size": {"x": 386, "y": 404, "width": 76, "height": 8}
+		"size": {"x": 386, "y": 426, "width": 76, "height": 8}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -890,7 +890,7 @@ describe("Selection", function() {
 			"data-index": "48"
 		},
 		"abcEl": {"el_type": "dynamicDecoration", "startChar": -1, "endChar": -1, "decoration": "f"},
-		"size": {"x": 497, "y": 402, "width": 16, "height": 19}
+		"size": {"x": 497, "y": 423, "width": 16, "height": 19}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -902,7 +902,7 @@ describe("Selection", function() {
 			"data-index": "49"
 		},
 		"abcEl": {"el_type": "dynamicDecoration", "startChar": -1, "endChar": -1, "decoration": "p"},
-		"size": {"x": 575, "y": 407, "width": 15, "height": 13}
+		"size": {"x": 575, "y": 429, "width": 15, "height": 13}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -914,7 +914,7 @@ describe("Selection", function() {
 			"data-index": "50"
 		},
 		"abcEl": {"el_type": "dynamicDecoration", "startChar": -1, "endChar": -1},
-		"size": {"x": 657, "y": 404, "width": 51, "height": 8}
+		"size": {"x": 657, "y": 426, "width": 51, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -935,7 +935,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 136, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 136, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -956,7 +956,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 152, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 152, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -977,7 +977,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 176, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 176, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -998,7 +998,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 204, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 204, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1021,7 +1021,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 236, "y": 353, "width": 20, "height": 47}
+		"size": {"x": 236, "y": 375, "width": 20, "height": 47}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1047,7 +1047,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 260, "y": 346, "width": 30, "height": 54}
+		"size": {"x": 260, "y": 368, "width": 30, "height": 54}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1068,7 +1068,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 297, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 297, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1089,7 +1089,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 314, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 314, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1110,7 +1110,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 362, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 362, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1131,7 +1131,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 386, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 386, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1152,7 +1152,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 429, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 429, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1173,7 +1173,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 462, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 462, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1194,7 +1194,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 500, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 500, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1215,7 +1215,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 517, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 517, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1236,7 +1236,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 534, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 534, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1257,7 +1257,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 551, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 551, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1278,7 +1278,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 579, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 579, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1299,7 +1299,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 595, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 595, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1320,7 +1320,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 612, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 612, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1341,7 +1341,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 629, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 629, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1362,7 +1362,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 657, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 657, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1383,7 +1383,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 674, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 674, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1404,7 +1404,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 691, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 691, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1425,7 +1425,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 708, "y": 369, "width": 10, "height": 31}
+		"size": {"x": 708, "y": 391, "width": 10, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1437,7 +1437,7 @@ describe("Selection", function() {
 			"data-index": "75"
 		},
 		"abcEl": {"el_type": "slur", "startChar": -1, "endChar": -1},
-		"size": {"x": 142, "y": 378, "width": 15, "height": 5}
+		"size": {"x": 142, "y": 400, "width": 15, "height": 5}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1449,7 +1449,7 @@ describe("Selection", function() {
 			"data-index": "76"
 		},
 		"abcEl": {"el_type": "slur", "startChar": -1, "endChar": -1},
-		"size": {"x": 158, "y": 378, "width": 22, "height": 6}
+		"size": {"x": 158, "y": 400, "width": 22, "height": 6}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1461,7 +1461,7 @@ describe("Selection", function() {
 			"data-index": "77"
 		},
 		"abcEl": {"el_type": "slur", "startChar": -1, "endChar": -1},
-		"size": {"x": 239, "y": 375, "width": 11, "height": 6}
+		"size": {"x": 239, "y": 397, "width": 11, "height": 6}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1473,7 +1473,7 @@ describe("Selection", function() {
 			"data-index": "78"
 		},
 		"abcEl": {"el_type": "slur", "startChar": -1, "endChar": -1},
-		"size": {"x": 263, "y": 375, "width": 21, "height": 8}
+		"size": {"x": 263, "y": 397, "width": 21, "height": 8}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1485,13 +1485,13 @@ describe("Selection", function() {
 			"class": "",
 			"text-anchor": "start",
 			"x": "15",
-			"y": "464.31399999999996",
+			"y": "493.56399999999996",
 			"selectable": "true",
 			"tabindex": "0",
 			"data-index": "79"
 		},
 		"abcEl": {"el_type": "voiceName", "startChar": -1, "endChar": -1, "text": "LH"},
-		"size": {"x": 15, "y": 452, "width": 17, "height": 15}
+		"size": {"x": 15, "y": 482, "width": 17, "height": 15}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1503,7 +1503,7 @@ describe("Selection", function() {
 			"data-index": "80"
 		},
 		"abcEl": {"type": "bass", "verticalPos": -12, "clefPos": 8, "el_type": "clef"},
-		"size": {"x": 58, "y": 443, "width": 20, "height": 23}
+		"size": {"x": 58, "y": 473, "width": 20, "height": 23}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1521,7 +1521,7 @@ describe("Selection", function() {
 				"verticalPos": 7
 			}], "root": "B", "acc": "b", "mode": "", "el_type": "keySignature"
 		},
-		"size": {"x": 88, "y": 441, "width": 16, "height": 30}
+		"size": {"x": 88, "y": 470, "width": 16, "height": 30}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1533,7 +1533,7 @@ describe("Selection", function() {
 			"data-index": "82"
 		},
 		"abcEl": {"type": "specified", "value": [{"num": "4", "den": "4"}], "el_type": "timeSignature"},
-		"size": {"x": 114, "y": 444, "width": 12, "height": 30}
+		"size": {"x": 114, "y": 473, "width": 12, "height": 30}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1554,7 +1554,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 136, "y": 435, "width": 16, "height": 31}
+		"size": {"x": 136, "y": 465, "width": 16, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1575,7 +1575,7 @@ describe("Selection", function() {
 			"minpitch": 13,
 			"maxpitch": 13
 		},
-		"size": {"x": 164, "y": 428, "width": 10, "height": 31}
+		"size": {"x": 164, "y": 457, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1600,7 +1600,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 15
 		},
-		"size": {"x": 176, "y": 420, "width": 10, "height": 58}
+		"size": {"x": 176, "y": 449, "width": 10, "height": 58}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1612,7 +1612,7 @@ describe("Selection", function() {
 			"data-index": "86"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 1272, "endChar": 1273},
-		"size": {"x": 221, "y": 362, "width": 1, "height": 113}
+		"size": {"x": 221, "y": 383, "width": 1, "height": 120}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1634,7 +1634,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 246, "y": 435, "width": 10, "height": 56}
+		"size": {"x": 246, "y": 465, "width": 10, "height": 56}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1656,7 +1656,7 @@ describe("Selection", function() {
 			"minpitch": 4,
 			"maxpitch": 4
 		},
-		"size": {"x": 257, "y": 463, "width": 10, "height": 33}
+		"size": {"x": 257, "y": 492, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1677,7 +1677,7 @@ describe("Selection", function() {
 			"minpitch": 5,
 			"maxpitch": 5
 		},
-		"size": {"x": 280, "y": 436, "width": 10, "height": 31}
+		"size": {"x": 280, "y": 465, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1698,7 +1698,7 @@ describe("Selection", function() {
 			"minpitch": 6,
 			"maxpitch": 6
 		},
-		"size": {"x": 297, "y": 455, "width": 10, "height": 31}
+		"size": {"x": 297, "y": 484, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1720,7 +1720,7 @@ describe("Selection", function() {
 			"minpitch": 7,
 			"maxpitch": 7
 		},
-		"size": {"x": 314, "y": 451, "width": 10, "height": 33}
+		"size": {"x": 314, "y": 480, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1741,7 +1741,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 324, "y": 447, "width": 10, "height": 35}
+		"size": {"x": 324, "y": 476, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1763,7 +1763,7 @@ describe("Selection", function() {
 			"minpitch": 9,
 			"maxpitch": 9
 		},
-		"size": {"x": 335, "y": 443, "width": 10, "height": 37}
+		"size": {"x": 335, "y": 472, "width": 10, "height": 37}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1775,7 +1775,7 @@ describe("Selection", function() {
 			"data-index": "94"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 1296, "endChar": 1297},
-		"size": {"x": 351, "y": 362, "width": 1, "height": 113}
+		"size": {"x": 351, "y": 383, "width": 1, "height": 120}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1797,7 +1797,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 362, "y": 447, "width": 10, "height": 33}
+		"size": {"x": 362, "y": 476, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1819,7 +1819,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 374, "y": 439, "width": 10, "height": 37}
+		"size": {"x": 374, "y": 469, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1840,7 +1840,7 @@ describe("Selection", function() {
 			"minpitch": 13,
 			"maxpitch": 13
 		},
-		"size": {"x": 386, "y": 428, "width": 10, "height": 31}
+		"size": {"x": 386, "y": 457, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1861,7 +1861,7 @@ describe("Selection", function() {
 			"minpitch": 13,
 			"maxpitch": 13
 		},
-		"size": {"x": 429, "y": 428, "width": 10, "height": 31}
+		"size": {"x": 429, "y": 457, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1883,7 +1883,7 @@ describe("Selection", function() {
 			"minpitch": 9,
 			"maxpitch": 9
 		},
-		"size": {"x": 462, "y": 443, "width": 10, "height": 37}
+		"size": {"x": 462, "y": 472, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1905,7 +1905,7 @@ describe("Selection", function() {
 			"minpitch": 7,
 			"maxpitch": 7
 		},
-		"size": {"x": 473, "y": 451, "width": 10, "height": 33}
+		"size": {"x": 473, "y": 480, "width": 10, "height": 33}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1917,7 +1917,7 @@ describe("Selection", function() {
 			"data-index": "101"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 1316, "endChar": 1317},
-		"size": {"x": 489, "y": 362, "width": 1, "height": 113}
+		"size": {"x": 489, "y": 383, "width": 1, "height": 120}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1942,7 +1942,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 12
 		},
-		"size": {"x": 500, "y": 432, "width": 10, "height": 47}
+		"size": {"x": 500, "y": 461, "width": 10, "height": 47}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -1963,7 +1963,7 @@ describe("Selection", function() {
 			"minpitch": 7,
 			"maxpitch": 7
 		},
-		"size": {"x": 516, "y": 447, "width": 8, "height": 21}
+		"size": {"x": 516, "y": 476, "width": 8, "height": 21}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -1988,7 +1988,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 15
 		},
-		"size": {"x": 534, "y": 420, "width": 10, "height": 47}
+		"size": {"x": 534, "y": 449, "width": 10, "height": 47}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2000,7 +2000,7 @@ describe("Selection", function() {
 			"data-index": "105"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 1338, "endChar": 1339},
-		"size": {"x": 568, "y": 362, "width": 1, "height": 113}
+		"size": {"x": 568, "y": 383, "width": 1, "height": 120}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2021,7 +2021,7 @@ describe("Selection", function() {
 			"minpitch": 9,
 			"maxpitch": 9
 		},
-		"size": {"x": 579, "y": 443, "width": 10, "height": 31}
+		"size": {"x": 579, "y": 472, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2042,7 +2042,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 612, "y": 439, "width": 10, "height": 31}
+		"size": {"x": 612, "y": 468, "width": 10, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2054,7 +2054,7 @@ describe("Selection", function() {
 			"data-index": "108"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 1346, "endChar": 1347},
-		"size": {"x": 646, "y": 362, "width": 1, "height": 113}
+		"size": {"x": 646, "y": 383, "width": 1, "height": 120}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2075,7 +2075,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 657, "y": 438, "width": 17, "height": 33}
+		"size": {"x": 657, "y": 467, "width": 17, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2097,7 +2097,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 708, "y": 435, "width": 10, "height": 45}
+		"size": {"x": 708, "y": 465, "width": 10, "height": 45}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2118,7 +2118,7 @@ describe("Selection", function() {
 			"minpitch": 9,
 			"maxpitch": 9
 		},
-		"size": {"x": 718, "y": 443, "width": 10, "height": 40}
+		"size": {"x": 718, "y": 472, "width": 10, "height": 40}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2139,7 +2139,7 @@ describe("Selection", function() {
 			"minpitch": 6,
 			"maxpitch": 6
 		},
-		"size": {"x": 729, "y": 455, "width": 10, "height": 30}
+		"size": {"x": 729, "y": 484, "width": 10, "height": 30}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2161,7 +2161,7 @@ describe("Selection", function() {
 			"minpitch": 7,
 			"maxpitch": 7
 		},
-		"size": {"x": 740, "y": 451, "width": 10, "height": 37}
+		"size": {"x": 740, "y": 480, "width": 10, "height": 37}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2173,7 +2173,7 @@ describe("Selection", function() {
 			"data-index": "114"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 1360, "endChar": 1361},
-		"size": {"x": 756, "y": 362, "width": 1, "height": 113}
+		"size": {"x": 756, "y": 383, "width": 1, "height": 120}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2185,7 +2185,7 @@ describe("Selection", function() {
 			"data-index": "115"
 		},
 		"abcEl": {"el_type": "brace", "startChar": -1, "endChar": -1},
-		"size": {"x": 15, "y": 579, "width": 8, "height": 143}
+		"size": {"x": 15, "y": 620, "width": 8, "height": 147}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2197,7 +2197,7 @@ describe("Selection", function() {
 			"data-index": "116"
 		},
 		"abcEl": {"type": "treble", "verticalPos": 0, "clefPos": 4, "el_type": "clef"},
-		"size": {"x": 30, "y": 565, "width": 19, "height": 57}
+		"size": {"x": 30, "y": 606, "width": 19, "height": 57}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2215,7 +2215,7 @@ describe("Selection", function() {
 				"verticalPos": 9
 			}], "root": "B", "acc": "b", "mode": "", "el_type": "keySignature"
 		},
-		"size": {"x": 59, "y": 569, "width": 16, "height": 30}
+		"size": {"x": 59, "y": 610, "width": 16, "height": 30}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2238,7 +2238,7 @@ describe("Selection", function() {
 			"minpitch": 12,
 			"maxpitch": 12
 		},
-		"size": {"x": 107, "y": 544, "width": 10, "height": 31}
+		"size": {"x": 107, "y": 585, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2264,7 +2264,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 13
 		},
-		"size": {"x": 150, "y": 541, "width": 10, "height": 39}
+		"size": {"x": 150, "y": 581, "width": 10, "height": 39}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2285,7 +2285,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 193, "y": 567, "width": 8, "height": 21}
+		"size": {"x": 193, "y": 608, "width": 8, "height": 21}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2307,7 +2307,7 @@ describe("Selection", function() {
 			"minpitch": 9,
 			"maxpitch": 9
 		},
-		"size": {"x": 205, "y": 556, "width": 17, "height": 39}
+		"size": {"x": 205, "y": 597, "width": 17, "height": 39}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2319,7 +2319,7 @@ describe("Selection", function() {
 			"data-index": "122"
 		},
 		"abcEl": {"type": "bar_thin", "barNumber": 8, "el_type": "bar", "startChar": 881, "endChar": 882},
-		"size": {"x": 228, "y": 579, "width": 1, "height": 31}
+		"size": {"x": 228, "y": 620, "width": 1, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2345,7 +2345,7 @@ describe("Selection", function() {
 			"minpitch": 5,
 			"maxpitch": 10
 		},
-		"size": {"x": 248, "y": 552, "width": 10, "height": 51}
+		"size": {"x": 248, "y": 593, "width": 10, "height": 51}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2367,7 +2367,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 274, "y": 560, "width": 10, "height": 31}
+		"size": {"x": 274, "y": 601, "width": 10, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2386,7 +2386,7 @@ describe("Selection", function() {
 			"startChar": 893,
 			"endChar": 895
 		},
-		"size": {"x": 300, "y": 579, "width": 1, "height": 31}
+		"size": {"x": 300, "y": 620, "width": 1, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2411,7 +2411,7 @@ describe("Selection", function() {
 			"minpitch": 3,
 			"maxpitch": 7
 		},
-		"size": {"x": 330, "y": 564, "width": 10, "height": 47}
+		"size": {"x": 330, "y": 605, "width": 10, "height": 47}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2436,7 +2436,7 @@ describe("Selection", function() {
 			"minpitch": 4,
 			"maxpitch": 6
 		},
-		"size": {"x": 386, "y": 568, "width": 10, "height": 39}
+		"size": {"x": 386, "y": 609, "width": 10, "height": 39}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2457,7 +2457,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 429, "y": 567, "width": 8, "height": 21}
+		"size": {"x": 429, "y": 608, "width": 8, "height": 21}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2469,7 +2469,7 @@ describe("Selection", function() {
 			"data-index": "129"
 		},
 		"abcEl": {"type": "bar_thin", "barNumber": 10, "el_type": "bar", "startChar": 912, "endChar": 913},
-		"size": {"x": 456, "y": 579, "width": 1, "height": 31}
+		"size": {"x": 456, "y": 620, "width": 1, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2494,7 +2494,7 @@ describe("Selection", function() {
 			"minpitch": 6,
 			"maxpitch": 8
 		},
-		"size": {"x": 467, "y": 560, "width": 17, "height": 39}
+		"size": {"x": 467, "y": 601, "width": 17, "height": 39}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2515,7 +2515,7 @@ describe("Selection", function() {
 			"minpitch": 5,
 			"maxpitch": 5
 		},
-		"size": {"x": 521, "y": 572, "width": 10, "height": 31}
+		"size": {"x": 521, "y": 612, "width": 10, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2527,7 +2527,7 @@ describe("Selection", function() {
 			"data-index": "132"
 		},
 		"abcEl": {"type": "bar_thin", "barNumber": 11, "el_type": "bar", "startChar": 924, "endChar": 925},
-		"size": {"x": 569, "y": 579, "width": 1, "height": 31}
+		"size": {"x": 569, "y": 620, "width": 1, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2553,7 +2553,7 @@ describe("Selection", function() {
 			"minpitch": 1,
 			"maxpitch": 5
 		},
-		"size": {"x": 580, "y": 572, "width": 10, "height": 47}
+		"size": {"x": 580, "y": 612, "width": 10, "height": 47}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2575,7 +2575,7 @@ describe("Selection", function() {
 			"minpitch": 6,
 			"maxpitch": 6
 		},
-		"size": {"x": 615, "y": 556, "width": 10, "height": 43}
+		"size": {"x": 615, "y": 597, "width": 10, "height": 43}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2596,7 +2596,7 @@ describe("Selection", function() {
 			"minpitch": 7,
 			"maxpitch": 7
 		},
-		"size": {"x": 626, "y": 553, "width": 10, "height": 42}
+		"size": {"x": 626, "y": 594, "width": 10, "height": 42}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2617,7 +2617,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 637, "y": 551, "width": 10, "height": 40}
+		"size": {"x": 637, "y": 592, "width": 10, "height": 40}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2639,7 +2639,7 @@ describe("Selection", function() {
 			"minpitch": 9,
 			"maxpitch": 9
 		},
-		"size": {"x": 647, "y": 548, "width": 10, "height": 39}
+		"size": {"x": 647, "y": 589, "width": 10, "height": 39}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2661,7 +2661,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 658, "y": 545, "width": 10, "height": 39}
+		"size": {"x": 658, "y": 585, "width": 10, "height": 39}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2682,7 +2682,7 @@ describe("Selection", function() {
 			"minpitch": 5,
 			"maxpitch": 5
 		},
-		"size": {"x": 669, "y": 547, "width": 10, "height": 56}
+		"size": {"x": 669, "y": 588, "width": 10, "height": 56}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2703,7 +2703,7 @@ describe("Selection", function() {
 			"minpitch": 6,
 			"maxpitch": 6
 		},
-		"size": {"x": 680, "y": 550, "width": 10, "height": 49}
+		"size": {"x": 680, "y": 591, "width": 10, "height": 49}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2726,7 +2726,7 @@ describe("Selection", function() {
 			"minpitch": 7,
 			"maxpitch": 7
 		},
-		"size": {"x": 691, "y": 552, "width": 10, "height": 43}
+		"size": {"x": 691, "y": 593, "width": 10, "height": 43}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2738,7 +2738,7 @@ describe("Selection", function() {
 			"data-index": "142"
 		},
 		"abcEl": {"type": "bar_thin", "barNumber": 12, "el_type": "bar", "startChar": 949, "endChar": 950},
-		"size": {"x": 706, "y": 579, "width": 1, "height": 31}
+		"size": {"x": 706, "y": 620, "width": 1, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2760,7 +2760,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 717, "y": 583, "width": 15, "height": 8}
+		"size": {"x": 717, "y": 624, "width": 15, "height": 8}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2772,7 +2772,7 @@ describe("Selection", function() {
 			"data-index": "144"
 		},
 		"abcEl": {"type": "bar_thin_thick", "endEnding": true, "el_type": "bar", "startChar": 957, "endChar": 959},
-		"size": {"x": 766, "y": 579, "width": 8, "height": 31}
+		"size": {"x": 766, "y": 620, "width": 8, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2784,12 +2784,12 @@ describe("Selection", function() {
 			"data-index": "145"
 		},
 		"abcEl": {"el_type": "dynamicDecoration", "startChar": -1, "endChar": -1, "decoration": "f"},
-		"size": {"x": 104, "y": 497, "width": 16, "height": 19}
+		"size": {"x": 104, "y": 526, "width": 16, "height": 19}
 	}, {
 		"draggable": false,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "146"},
 		"abcEl": {"el_type": "ending", "startChar": -1, "endChar": -1},
-		"size": {"x": 301, "y": 523, "width": 468, "height": 23}
+		"size": {"x": 301, "y": 560, "width": 468, "height": 23}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -2801,12 +2801,12 @@ describe("Selection", function() {
 			"data-index": "147"
 		},
 		"abcEl": {"el_type": "dynamicDecoration", "startChar": -1, "endChar": -1},
-		"size": {"x": 580, "y": 499, "width": 110, "height": 8}
+		"size": {"x": 580, "y": 529, "width": 110, "height": 8}
 	}, {
 		"draggable": false,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "148"},
 		"abcEl": {"el_type": "dynamicDecoration", "startChar": -1, "endChar": -1, "decoration": "mp"},
-		"size": {"x": 716, "y": 502, "width": 27, "height": 13}
+		"size": {"x": 716, "y": 531, "width": 27, "height": 13}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2827,7 +2827,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 107, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 107, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2848,7 +2848,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 150, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 150, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2869,7 +2869,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 193, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 193, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2890,7 +2890,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 212, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 212, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2911,7 +2911,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 248, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 248, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2932,7 +2932,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 259, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 259, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2953,7 +2953,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 274, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 274, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2974,7 +2974,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 285, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 285, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -2995,7 +2995,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 330, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 330, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3016,7 +3016,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 358, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 358, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3037,7 +3037,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 386, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 386, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3058,7 +3058,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 429, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 429, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3079,7 +3079,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 467, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 467, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3100,7 +3100,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 489, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 489, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3121,7 +3121,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 510, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 510, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3142,7 +3142,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 521, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 521, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3164,7 +3164,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 580, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 580, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3185,7 +3185,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 591, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 591, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3206,7 +3206,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 615, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 615, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3227,7 +3227,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 658, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 658, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3248,7 +3248,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 717, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 717, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3269,7 +3269,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 728, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 728, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3290,7 +3290,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 739, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 739, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3311,7 +3311,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 750, "y": 618, "width": 10, "height": 31}
+		"size": {"x": 750, "y": 659, "width": 10, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -3323,7 +3323,7 @@ describe("Selection", function() {
 			"data-index": "173"
 		},
 		"abcEl": {"type": "bass", "verticalPos": -12, "clefPos": 8, "el_type": "clef"},
-		"size": {"x": 30, "y": 691, "width": 20, "height": 23}
+		"size": {"x": 30, "y": 736, "width": 20, "height": 23}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -3341,7 +3341,7 @@ describe("Selection", function() {
 				"verticalPos": 7
 			}], "root": "B", "acc": "b", "mode": "", "el_type": "keySignature"
 		},
-		"size": {"x": 59, "y": 689, "width": 16, "height": 30}
+		"size": {"x": 59, "y": 733, "width": 16, "height": 30}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3363,7 +3363,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 107, "y": 695, "width": 10, "height": 29}
+		"size": {"x": 107, "y": 740, "width": 10, "height": 29}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3384,7 +3384,7 @@ describe("Selection", function() {
 			"minpitch": 9,
 			"maxpitch": 9
 		},
-		"size": {"x": 118, "y": 691, "width": 10, "height": 33}
+		"size": {"x": 118, "y": 736, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3405,7 +3405,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 129, "y": 687, "width": 10, "height": 37}
+		"size": {"x": 129, "y": 732, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3427,7 +3427,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 139, "y": 695, "width": 10, "height": 29}
+		"size": {"x": 139, "y": 740, "width": 10, "height": 29}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3449,7 +3449,7 @@ describe("Selection", function() {
 			"minpitch": 9,
 			"maxpitch": 9
 		},
-		"size": {"x": 150, "y": 691, "width": 10, "height": 29}
+		"size": {"x": 150, "y": 736, "width": 10, "height": 29}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3470,7 +3470,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 161, "y": 687, "width": 10, "height": 33}
+		"size": {"x": 161, "y": 732, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3491,7 +3491,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 172, "y": 683, "width": 10, "height": 37}
+		"size": {"x": 172, "y": 728, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3513,7 +3513,7 @@ describe("Selection", function() {
 			"minpitch": 9,
 			"maxpitch": 9
 		},
-		"size": {"x": 183, "y": 691, "width": 10, "height": 29}
+		"size": {"x": 183, "y": 736, "width": 10, "height": 29}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3534,7 +3534,7 @@ describe("Selection", function() {
 			"minpitch": 12,
 			"maxpitch": 12
 		},
-		"size": {"x": 193, "y": 679, "width": 10, "height": 31}
+		"size": {"x": 193, "y": 724, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3555,7 +3555,7 @@ describe("Selection", function() {
 			"minpitch": 12,
 			"maxpitch": 12
 		},
-		"size": {"x": 212, "y": 679, "width": 10, "height": 31}
+		"size": {"x": 212, "y": 724, "width": 10, "height": 31}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -3567,7 +3567,7 @@ describe("Selection", function() {
 			"data-index": "185"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 1387, "endChar": 1388},
-		"size": {"x": 228, "y": 610, "width": 1, "height": 112}
+		"size": {"x": 228, "y": 651, "width": 1, "height": 116}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3592,7 +3592,7 @@ describe("Selection", function() {
 			"minpitch": 5,
 			"maxpitch": 10
 		},
-		"size": {"x": 248, "y": 687, "width": 10, "height": 51}
+		"size": {"x": 248, "y": 732, "width": 10, "height": 51}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3617,7 +3617,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 15
 		},
-		"size": {"x": 274, "y": 668, "width": 10, "height": 58}
+		"size": {"x": 274, "y": 712, "width": 10, "height": 58}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -3629,7 +3629,7 @@ describe("Selection", function() {
 			"data-index": "188"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 1407, "endChar": 1408},
-		"size": {"x": 300, "y": 610, "width": 1, "height": 112}
+		"size": {"x": 300, "y": 651, "width": 1, "height": 116}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3651,7 +3651,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 330, "y": 686, "width": 16, "height": 35}
+		"size": {"x": 330, "y": 730, "width": 16, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3673,7 +3673,7 @@ describe("Selection", function() {
 			"minpitch": 12,
 			"maxpitch": 12
 		},
-		"size": {"x": 347, "y": 679, "width": 10, "height": 37}
+		"size": {"x": 347, "y": 724, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3695,7 +3695,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 358, "y": 683, "width": 16, "height": 33}
+		"size": {"x": 358, "y": 728, "width": 16, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3717,7 +3717,7 @@ describe("Selection", function() {
 			"minpitch": 13,
 			"maxpitch": 13
 		},
-		"size": {"x": 375, "y": 676, "width": 10, "height": 37}
+		"size": {"x": 375, "y": 720, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3739,7 +3739,7 @@ describe("Selection", function() {
 			"minpitch": 9,
 			"maxpitch": 9
 		},
-		"size": {"x": 386, "y": 691, "width": 10, "height": 37}
+		"size": {"x": 386, "y": 736, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3760,7 +3760,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 397, "y": 695, "width": 10, "height": 36}
+		"size": {"x": 397, "y": 740, "width": 10, "height": 36}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3781,7 +3781,7 @@ describe("Selection", function() {
 			"minpitch": 7,
 			"maxpitch": 7
 		},
-		"size": {"x": 408, "y": 699, "width": 10, "height": 34}
+		"size": {"x": 408, "y": 744, "width": 10, "height": 34}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3803,7 +3803,7 @@ describe("Selection", function() {
 			"minpitch": 6,
 			"maxpitch": 6
 		},
-		"size": {"x": 418, "y": 703, "width": 10, "height": 33}
+		"size": {"x": 418, "y": 747, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3825,7 +3825,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 429, "y": 695, "width": 10, "height": 33}
+		"size": {"x": 429, "y": 740, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3847,7 +3847,7 @@ describe("Selection", function() {
 			"minpitch": 10,
 			"maxpitch": 10
 		},
-		"size": {"x": 440, "y": 687, "width": 10, "height": 37}
+		"size": {"x": 440, "y": 732, "width": 10, "height": 37}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -3859,7 +3859,7 @@ describe("Selection", function() {
 			"data-index": "199"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 1433, "endChar": 1434},
-		"size": {"x": 456, "y": 610, "width": 1, "height": 112}
+		"size": {"x": 456, "y": 651, "width": 1, "height": 116}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3881,7 +3881,7 @@ describe("Selection", function() {
 			"minpitch": 6,
 			"maxpitch": 6
 		},
-		"size": {"x": 467, "y": 676, "width": 10, "height": 35}
+		"size": {"x": 467, "y": 721, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3903,7 +3903,7 @@ describe("Selection", function() {
 			"minpitch": 5,
 			"maxpitch": 5
 		},
-		"size": {"x": 478, "y": 680, "width": 10, "height": 35}
+		"size": {"x": 478, "y": 724, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3925,7 +3925,7 @@ describe("Selection", function() {
 			"minpitch": 4,
 			"maxpitch": 4
 		},
-		"size": {"x": 489, "y": 684, "width": 10, "height": 35}
+		"size": {"x": 489, "y": 728, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3947,7 +3947,7 @@ describe("Selection", function() {
 			"minpitch": 3,
 			"maxpitch": 3
 		},
-		"size": {"x": 499, "y": 687, "width": 10, "height": 35}
+		"size": {"x": 499, "y": 732, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3968,7 +3968,7 @@ describe("Selection", function() {
 			"minpitch": 2,
 			"maxpitch": 2
 		},
-		"size": {"x": 510, "y": 695, "width": 10, "height": 31}
+		"size": {"x": 510, "y": 740, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -3990,7 +3990,7 @@ describe("Selection", function() {
 			"minpitch": 1,
 			"maxpitch": 1
 		},
-		"size": {"x": 521, "y": 672, "width": 10, "height": 58}
+		"size": {"x": 521, "y": 716, "width": 10, "height": 58}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -4011,7 +4011,7 @@ describe("Selection", function() {
 			"minpitch": 3,
 			"maxpitch": 3
 		},
-		"size": {"x": 532, "y": 669, "width": 10, "height": 53}
+		"size": {"x": 532, "y": 714, "width": 10, "height": 53}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -4032,7 +4032,7 @@ describe("Selection", function() {
 			"minpitch": 5,
 			"maxpitch": 5
 		},
-		"size": {"x": 543, "y": 667, "width": 10, "height": 48}
+		"size": {"x": 543, "y": 711, "width": 10, "height": 48}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -4054,7 +4054,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 8
 		},
-		"size": {"x": 553, "y": 664, "width": 10, "height": 39}
+		"size": {"x": 553, "y": 709, "width": 10, "height": 39}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -4066,7 +4066,7 @@ describe("Selection", function() {
 			"data-index": "209"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 1465, "endChar": 1466},
-		"size": {"x": 569, "y": 610, "width": 1, "height": 112}
+		"size": {"x": 569, "y": 651, "width": 1, "height": 116}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -4087,7 +4087,7 @@ describe("Selection", function() {
 			"minpitch": 1,
 			"maxpitch": 1
 		},
-		"size": {"x": 580, "y": 699, "width": 16, "height": 31}
+		"size": {"x": 580, "y": 744, "width": 16, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -4108,7 +4108,7 @@ describe("Selection", function() {
 			"minpitch": -1,
 			"maxpitch": -1
 		},
-		"size": {"x": 598, "y": 707, "width": 15, "height": 31}
+		"size": {"x": 598, "y": 751, "width": 15, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -4133,7 +4133,7 @@ describe("Selection", function() {
 			"minpitch": 2,
 			"maxpitch": 6
 		},
-		"size": {"x": 615, "y": 680, "width": 10, "height": 47}
+		"size": {"x": 615, "y": 724, "width": 10, "height": 47}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -4154,7 +4154,7 @@ describe("Selection", function() {
 			"minpitch": 7,
 			"maxpitch": 7
 		},
-		"size": {"x": 657, "y": 695, "width": 8, "height": 21}
+		"size": {"x": 657, "y": 740, "width": 8, "height": 21}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -4166,7 +4166,7 @@ describe("Selection", function() {
 			"data-index": "214"
 		},
 		"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 1488, "endChar": 1489},
-		"size": {"x": 706, "y": 610, "width": 1, "height": 112}
+		"size": {"x": 706, "y": 651, "width": 1, "height": 116}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -4187,7 +4187,7 @@ describe("Selection", function() {
 			"minpitch": 4,
 			"maxpitch": 4
 		},
-		"size": {"x": 717, "y": 710, "width": 15, "height": 8}
+		"size": {"x": 717, "y": 755, "width": 15, "height": 8}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -4199,7 +4199,7 @@ describe("Selection", function() {
 			"data-index": "216"
 		},
 		"abcEl": {"type": "bar_thin_thick", "el_type": "bar", "startChar": 1494, "endChar": 1496},
-		"size": {"x": 766, "y": 610, "width": 8, "height": 112}
+		"size": {"x": 766, "y": 651, "width": 8, "height": 116}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -4211,7 +4211,7 @@ describe("Selection", function() {
 			"data-index": "217"
 		},
 		"abcEl": {"el_type": "slur", "startChar": -1, "endChar": -1},
-		"size": {"x": 156, "y": 679, "width": 30, "height": 7}
+		"size": {"x": 156, "y": 724, "width": 30, "height": 7}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -4221,7 +4221,7 @@ describe("Selection", function() {
 			"data-index": "218"
 		},
 		"abcEl": {"el_type": "unalignedWords", "startChar": -1, "endChar": -1, "text": ""},
-		"size": {"x": 65, "y": 764, "width": 278, "height": 72}
+		"size": {"x": 65, "y": 809, "width": 278, "height": 72}
 	}, {
 		"draggable": false,
 		"svgEl": {
@@ -4233,7 +4233,7 @@ describe("Selection", function() {
 			"class": "",
 			"text-anchor": "start",
 			"x": "15",
-			"y": "902.8627070627693",
+			"y": "947.6127070627692",
 			"selectable": "true",
 			"tabindex": "0",
 			"data-index": "219"
@@ -4244,7 +4244,7 @@ describe("Selection", function() {
 			"endChar": -1,
 			"text": "Source: My own testing\nHistory: This shows every type of thing that can possibly be drawn.\n\nAnd two lines of history!\n"
 		},
-		"size": {"x": 15, "y": 884, "width": 568, "height": 100}
+		"size": {"x": 15, "y": 929, "width": 568, "height": 100}
 	}]
 
 //////////////////////////////////////////////////////////
@@ -4267,7 +4267,7 @@ describe("Selection", function() {
 				"data-index": "0"
 			},
 			"abcEl": {"type": "treble", "verticalPos": 0, "clefPos": 4, "el_type": "clef"},
-			"size": {"x": 20, "y": 39, "width": 19, "height": 57}
+			"size": {"x": 20, "y": 50, "width": 19, "height": 57}
 		}, {
 			"draggable": false,
 			"svgEl": {
@@ -4279,7 +4279,7 @@ describe("Selection", function() {
 				"data-index": "1"
 			},
 			"abcEl": {"type": "specified", "value": [{"num": "4", "den": "4"}], "el_type": "timeSignature"},
-			"size": {"x": 49, "y": 54, "width": 12, "height": 30}
+			"size": {"x": 49, "y": 65, "width": 12, "height": 30}
 		}, {
 			"draggable": false,
 			"svgEl": {
@@ -4288,7 +4288,7 @@ describe("Selection", function() {
 				"data-index": "2"
 			},
 			"abcEl": {"preString": "Easy Swing", "duration": [0.25], "bpm": 140, "type": "tempo", "el_type": "tempo"},
-			"size": {"x": 71, "y": 18, "width": 167, "height": 29}
+			"size": {"x": 71, "y": 27, "width": 167, "height": 22}
 		}, {
 			"draggable": true,
 			"svgEl": {
@@ -4309,7 +4309,7 @@ describe("Selection", function() {
 				"minpitch": 4,
 				"maxpitch": 4
 			},
-			"size": {"x": 71, "y": 73, "width": 15, "height": 8}
+			"size": {"x": 71, "y": 83, "width": 15, "height": 8}
 		}, {
 			"draggable": false,
 			"svgEl": {
@@ -4321,7 +4321,7 @@ describe("Selection", function() {
 				"data-index": "4"
 			},
 			"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 46, "endChar": 47},
-			"size": {"x": 156, "y": 54, "width": 1, "height": 31}
+			"size": {"x": 156, "y": 64, "width": 1, "height": 31}
 		}, {
 			"draggable": false,
 			"svgEl": {
@@ -4339,7 +4339,7 @@ describe("Selection", function() {
 				"endChar": 73,
 				"type": "tempo"
 			},
-			"size": {"x": 167, "y": 18, "width": 145, "height": 29}
+			"size": {"x": 167, "y": 27, "width": 145, "height": 22}
 		}, {
 			"draggable": true,
 			"svgEl": {
@@ -4360,7 +4360,7 @@ describe("Selection", function() {
 				"minpitch": 5,
 				"maxpitch": 5
 			},
-			"size": {"x": 167, "y": 69, "width": 15, "height": 8}
+			"size": {"x": 167, "y": 79, "width": 15, "height": 8}
 		}, {
 			"draggable": false,
 			"svgEl": {
@@ -4372,7 +4372,7 @@ describe("Selection", function() {
 				"data-index": "7"
 			},
 			"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 77, "endChar": 78},
-			"size": {"x": 252, "y": 54, "width": 1, "height": 31}
+			"size": {"x": 252, "y": 64, "width": 1, "height": 31}
 		}]
 
 //////////////////////////////////////////////////////////

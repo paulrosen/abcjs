@@ -17,9 +17,13 @@ var SynthSequence = function() {
 	var self = this;
 	self.tracks = [];
 	self.totalDuration = 0;
+	self.currentInstrument = [];
+	self.starts = [];
 
 	self.addTrack = function() {
 		self.tracks.push([]);
+		self.currentInstrument.push(0);
+		self.starts.push(0);
 		return self.tracks.length - 1;
 	};
 
@@ -29,28 +33,22 @@ var SynthSequence = function() {
 			cmd: "program",
 			instrument: instrumentNumber
 		});
+		self.currentInstrument[trackNumber] = instrumentNumber;
 	};
 
 	self.appendNote = function(trackNumber, pitch, durationInMeasures, volume) {
 		self.tracks[trackNumber].push({
-			cmd: "start",
+			cmd: "note",
+			duration: durationInMeasures,
+			gap: 0,
+			instrument: self.currentInstrument[trackNumber],
 			pitch: pitch,
+			start: self.starts[trackNumber],
 			volume: volume
 		});
-		self.tracks[trackNumber].push({
-			cmd: "move",
-			duration: durationInMeasures
-		});
-		self.tracks[trackNumber].push({
-			cmd: "stop",
-			pitch: pitch
-		});
-		var duration = 0;
-		self.tracks[trackNumber].forEach(function(event) {
-			if (event.duration)
-				duration += event.duration;
-		});
-		self.totalDuration = Math.max(self.totalDuration, duration);
+		self.starts[trackNumber] += durationInMeasures;
+
+		self.totalDuration = Math.max(self.totalDuration, self.starts[trackNumber]);
 	};
 };
 

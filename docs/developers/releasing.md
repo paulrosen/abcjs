@@ -10,17 +10,19 @@ For people who want to contribute a pull request, this isn't relevant!
 All new work should be done in the `dev` branch.
 :::
 
-To begin a new version:
+### To begin a new version:
 
 [_] Switch to the `dev` branch and do all new work there.
 
 [_] Find any hardcoded version numbers in [the package file](../package.json) and change them. 
 
+[_] Find any hardcoded version numbers in any examples and change them. 
+
 [_] Minify the various library versions with `npm run build` just to get the next version's examples set up.
 
 [_] Add the new files: `git add bin/abcjs*_x.x.x*`.
 
-To release a new version, this checklist should be followed:
+### To release a new version, this checklist should be followed:
 
 [_] Get all commits since the last release with `git log > temp.txt`.
 
@@ -38,8 +40,6 @@ To release a new version, this checklist should be followed:
     To do this in docker:
     `docker run -v $(pwd):/srv/app -it abcjs /bin/bash`
      `npm login`
-
-[_] Run `npm install` and check it in.
 
 [_] Push the change that npm publish created with `git push`.
 
