@@ -78,12 +78,18 @@ function setLaneForChord(absElems) {
 	// 6) if the chord only has one character, allow it to be closer than if the chord has more than one character.
 	var rightMostAbove = [0];
 	var rightMostBelow = [0];
-	for (var i = 0; i < absElems.length; i++) {
-		for (var j = 0; j < absElems[i].children.length; j++) {
-			var relElem = absElems[i].children[j];
+	var i;
+	var j;
+	var relElem;
+	for (i = 0; i < absElems.length; i++) {
+		for (j = 0; j < absElems[i].children.length; j++) {
+			relElem = absElems[i].children[j];
 			if (relElem.chordHeightAbove) {
 				placeInLane(rightMostAbove, relElem);
 			}
+		}
+		for (j = absElems[i].children.length-1; j >=0; j--) {
+			relElem = absElems[i].children[j];
 			if (relElem.chordHeightBelow) {
 				placeInLane(rightMostBelow, relElem);
 			}
@@ -113,8 +119,8 @@ function setLane(absElems, numLanesAbove, numLanesBelow) {
 			var relElem = absElems[i].children[j];
 			if (relElem.chordHeightAbove) {
 				relElem.invertLane(numLanesAbove);
-			} else if (relElem.chordHeightBelow) {
-				relElem.invertLane(below);
+			// } else if (relElem.chordHeightBelow) {
+			// 	relElem.invertLane(below);
 			}
 		}
 	}
