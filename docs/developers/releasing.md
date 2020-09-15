@@ -16,6 +16,8 @@ All new work should be done in the `dev` branch.
 
 [_] Find any hardcoded version numbers in [the package file](../package.json) and change them. 
 
+[_] Find any hardcoded version numbers in any examples and change them. 
+
 [_] Minify the various library versions with `npm run build` just to get the next version's examples set up.
 
 [_] Add the new files: `git add bin/abcjs*_x.x.x*`.
@@ -38,8 +40,6 @@ All new work should be done in the `dev` branch.
     To do this in docker:
     `docker run -v $(pwd):/srv/app -it abcjs /bin/bash`
      `npm login`
-
-[_] Run `npm install` and check it in.
 
 [_] Push the change that npm publish created with `git push`.
 

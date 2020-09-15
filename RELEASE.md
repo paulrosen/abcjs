@@ -1,3 +1,15 @@
+# Version 6.0.0-beta.17
+
+## Bugs
+
+* Fix positioning of "3" on triplets.
+
+* Add a tiny bit on margin for the annotation lanes.
+
+* Fix positioning of lower annotations (that is: "_annotation").
+
+* Fix generating audio using the SynthSequence object.
+
 # Version 6.0.0-beta.16
 
 ## Features
