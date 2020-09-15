@@ -8,7 +8,8 @@ function drawTriplet(renderer, params, selectables) {
 	if (!params.hasBeam) {
 		drawBracket(renderer, params.anchor1.x, params.startNote, params.anchor2.x + params.anchor2.w, params.endNote);
 	}
-	renderText(renderer, {x: params.xTextPos, y: renderer.calcY(params.yTextPos), text: "" + params.number, type: 'tripletfont', anchor: "middle", centerVertically: true, noClass: true});
+	// HACK: adjust the position of "3". It is too high in all cases so we fudge it by subtracting 1 here.
+	renderText(renderer, {x: params.xTextPos, y: renderer.calcY(params.yTextPos - 1), text: "" + params.number, type: 'tripletfont', anchor: "middle", centerVertically: true, noClass: true});
 	var g = renderer.paper.closeGroup();
 	selectables.wrapSvgEl({ el_type: "triplet", startChar: -1, endChar: -1 }, g);
 	return g;
