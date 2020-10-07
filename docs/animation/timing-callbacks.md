@@ -33,7 +33,7 @@ var timingCallbacks = new abcjs.TimingCallbacks(visualObj, params);
 This is called once for every beat in the tune. It is called one additional time when the tune is finished.
 
 ```javascript
-function beatCallback(beatNumber, totalBeats, totalTime) {}
+function beatCallback(beatNumber, totalBeats, totalTime, position) {}
 ```
 
 |Name|Description|
@@ -41,6 +41,7 @@ function beatCallback(beatNumber, totalBeats, totalTime) {}
 | beatNumber | Zero-based beat number. Usually this will increment sequentially and regularly, but if javascript is paused long enough (for instance, if the browser tab is changed), then there may be a number of these calls at once when it catches up. |
 | totalBeats | The total number of beats (including all repeats) that will be played. |
 | totalTime | The total number of milliseconds of the tune. |
+| position | The interpolated position of the cursor if the beat occurs between notes. This is an object with the attributes { left: , top: , height: } This can be used to smooth out the cursor by moving it on the beat callbacks. The higher the number of `beatSubdivisions` the smoother the cursor will be. |
 
 ### eventCallback
 
