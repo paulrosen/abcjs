@@ -263,6 +263,7 @@ var Tune = function() {
 			var isTiedToNext = element.startTie;
 			if (isTiedState !== undefined) {
 				eventHash["event" + isTiedState].elements.push(es); // Add the tied note to the first note that it is tied to
+				eventHash["event" + isTiedState].endX = endX; // The right edge of the note is now the right edge of the tied note.
 				if (nextIsBar) {
 					if (!eventHash["event" + voiceTimeMilliseconds]) {
 						eventHash["event" + voiceTimeMilliseconds] = {
@@ -315,6 +316,10 @@ var Tune = function() {
 						eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);
 					else
 						eventHash["event" + voiceTimeMilliseconds].left = element.x;
+					if (eventHash["event" + voiceTimeMilliseconds].endX)
+						eventHash["event" + voiceTimeMilliseconds].endX = Math.min(eventHash["event" + voiceTimeMilliseconds].endX, endX);
+					else
+						eventHash["event" + voiceTimeMilliseconds].endX = endX;
 					eventHash["event" + voiceTimeMilliseconds].elements.push(es);
 					eventHash["event" + voiceTimeMilliseconds].startCharArray.push(element.abcelem.startChar);
 					eventHash["event" + voiceTimeMilliseconds].endCharArray.push(element.abcelem.endChar);
