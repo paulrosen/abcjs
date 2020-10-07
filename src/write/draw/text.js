@@ -1,5 +1,5 @@
 function renderText(renderer, params) {
-	var laneMargin = 1;
+	var laneMargin = params.dim.font.size*0.25;
 	var y = params.y;
 	if (params.lane)
 		y += (params.dim.font.size+laneMargin)*params.lane;
