@@ -240,11 +240,11 @@ function SynthController() {
 		}
 	};
 
-	self.beatCallback = function (beatNumber, totalBeats, totalTime) {
+	self.beatCallback = function (beatNumber, totalBeats, totalTime, position) {
 		var percent = beatNumber / totalBeats;
 		self.setProgress(percent, totalTime);
 		if (self.cursorControl && self.cursorControl.onBeat && typeof self.cursorControl.onBeat  === 'function')
-			self.cursorControl.onBeat(beatNumber, totalBeats, totalTime);
+			self.cursorControl.onBeat(beatNumber, totalBeats, totalTime, position);
 	};
 
 	self.eventCallback = function (event) {
