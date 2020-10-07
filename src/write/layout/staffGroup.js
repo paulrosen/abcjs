@@ -1,11 +1,11 @@
 var layoutVoiceElements = require('./VoiceElements');
 
-var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
+var layoutStaffGroup = function(spacing, renderer, debug, staffGroup, leftEdge) {
 	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
 	var spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
 	var minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
 
-	var x = getLeftEdgeOfStaff(renderer, staffGroup.getTextSize, staffGroup.voices, staffGroup.brace, staffGroup.bracket);
+	var x = leftEdge;
 	staffGroup.startx=x;
 	var i;
 
@@ -94,61 +94,6 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup) {
 	return { spacingUnits: spacingunits, minSpace: minspace };
 };
 
-function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
-	var x = renderer.padding.left;
-
-	// find out how much space will be taken up by voice headers
-	var voiceheaderw = 0;
-	var i;
-	var size;
-	for (i=0;i<voices.length;i++) {
-		if(voices[i].header) {
-			size = getTextSize.calc(voices[i].header, 'voicefont', '');
-			voiceheaderw = Math.max(voiceheaderw,size.width);
-		}
-	}
-	if (brace) {
-		for (i = 0; i < brace.length; i++) {
-			if (brace[i].header) {
-				size = getTextSize.calc(brace[i].header, 'voicefont', '');
-				voiceheaderw = Math.max(voiceheaderw,size.width);
-			}
-		}
-	}
-	if (bracket) {
-		for (i = 0; i < bracket.length; i++) {
-			if (bracket[i].header) {
-				size = getTextSize.calc(bracket[i].header, 'voicefont', '');
-				voiceheaderw = Math.max(voiceheaderw,size.width);
-			}
-		}
-	}
-	if (voiceheaderw) {
-		// Give enough spacing to the right - we use the width of an A for the amount of spacing.
-		var sizeW = getTextSize.calc("A", 'voicefont', '');
-		voiceheaderw += sizeW.width;
-	}
-	x += voiceheaderw;
-
-	var ofs = 0;
-	ofs = setBraceLocation(brace, x, ofs);
-	ofs = setBraceLocation(bracket, x, ofs);
-	return x + ofs;
-}
-
-function setBraceLocation(brace, x, ofs) {
-	if (brace) {
-		for (var i = 0; i < brace.length; i++) {
-			setLocation(x, brace[i]);
-			ofs = Math.max(ofs, brace[i].getWidth());
-		}
-	}
-	return ofs;
-}
-
-function setLocation(x, element) {
-	element.x = x;
-}
 
 function finished(voices) {
 	for (var i=0;i<voices.length;i++) {

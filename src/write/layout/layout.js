@@ -1,6 +1,7 @@
 var layoutVoice = require('./voice');
 var setUpperAndLowerElements = require('./setUpperAndLowerElements');
 var layoutStaffGroup = require('./staffGroup');
+var getLeftEdgeOfStaff = require('./get-left-edge-of-staff');
 var layout;
 
 (function () {
@@ -40,9 +41,10 @@ var layout;
 	}
 	// Do the x-axis positioning for a single line (a group of related staffs)
 	var setXSpacing = function (renderer, width, space, staffGroup, formatting, isLastLine, debug) {
+		var leftEdge = getLeftEdgeOfStaff(renderer, staffGroup.getTextSize, staffGroup.voices, staffGroup.brace, staffGroup.bracket);
 		var newspace = space;
 		for (var it = 0; it < 8; it++) { // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
-			var ret = layoutStaffGroup(newspace, renderer, debug, staffGroup);
+			var ret = layoutStaffGroup(newspace, renderer, debug, staffGroup, leftEdge);
 			var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
 			newspace = calcHorizontalSpacing(isLastLine, stretchLast, width+renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace);
 			if (debug)
