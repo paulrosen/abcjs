@@ -112,6 +112,19 @@ Default: false
  
  Should there be a horizontal scrollbar if the music is wider than the viewport? (requires `viewportHorizontal` to be true.) 
 
+## showDebug
+Default: []
+
+This is an array of the types of debug information. It can be:
+
+### 'grid'
+
+This prints out lines showing where various parts of the music are calculated.
+
+### 'box'
+
+This prints a shaded box for each element. If you see elements either too far apart or too close together this will give you an idea of what is causing it.
+
 ## staffwidth
 Default: 740
 

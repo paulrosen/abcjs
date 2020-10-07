@@ -1,3 +1,25 @@
+# Version 6.0.0-beta.18
+
+## Bugs
+
+* Slight speedup when laying out scores with names in the voices.
+
+* Increase the size of the annotation's lane to account for descenders.
+
+* Fix calculation of beat length for 3/8 time.
+
+## Features
+
+* Return the cursor position for each beat in the timing callbacks.
+
+* Add the x position of the end of each note to the note timings.
+
+## Documentation
+
+* Document the renderer debug option.
+
+* Document the new parameter on the TimingCallback's beatCallback.
+
 # Version 6.0.0-beta.17
 
 ## Bugs

@@ -1,8 +1,9 @@
 function renderText(renderer, params) {
-	var laneMargin = 1;
 	var y = params.y;
-	if (params.lane)
-		y += (params.dim.font.size+laneMargin)*params.lane;
+	if (params.lane) {
+		var laneMargin = params.dim.font.size*0.25;
+		y += (params.dim.font.size + laneMargin) * params.lane;
+	}
 
 	var hash;
 	if (params.dim) {

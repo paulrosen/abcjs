@@ -110,10 +110,11 @@ RelativeElement.prototype.invertLane = function (total) {
 
 RelativeElement.prototype.putChordInLane = function (i) {
 	this.lane = i;
+	// Add some extra space to account for the character's descenders.
 	if (this.chordHeightAbove)
-		this.chordHeightAbove = this.height*this.lane;
+		this.chordHeightAbove = (this.height*1.25)*this.lane;
 	else
-		this.chordHeightBelow = this.height*this.lane;
+		this.chordHeightBelow = (this.height*1.25)*this.lane;
 };
 
 RelativeElement.prototype.getLane = function () {

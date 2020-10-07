@@ -73,7 +73,7 @@ var TimingCallbacks = function(target, params) {
 		var oldBeat = self.currentBeat;
 		self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
 		if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
-			self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment);
+			self.doBeatCallback();
 
 		var lineStart = 0;
 		self.currentEvent = 0;
@@ -130,21 +130,55 @@ var TimingCallbacks = function(target, params) {
 			if (currentTime < self.lastMoment) {
 				requestAnimationFrame(self.doTiming);
 				if (self.currentBeat * self.millisecondsPerBeat < currentTime) {
-					if (self.beatCallback)
-						self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment);
+					self.doBeatCallback();
 					self.currentBeat++;
 				}
 			} else if (self.currentBeat <= self.totalBeats) {
 				// Because of timing issues (for instance, if the browser tab isn't active), the beat callbacks might not have happened when they are supposed to. To keep the client programs from having to deal with that, this will keep calling the loop until all of them have been sent.
 				if (self.beatCallback) {
-					self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment);
+					self.doBeatCallback();
 					self.currentBeat++;
 					requestAnimationFrame(self.doTiming);
 				}
 			}
 
-			if (currentTime >= self.lastMoment && self.eventCallback)
+			if (currentTime >= self.lastMoment && self.eventCallback) {
 				self.eventCallback(null);
+				self.stop();
+			}
+		}
+	};
+
+	self.doBeatCallback = function() {
+		if (self.beatCallback) {
+			var next = self.currentEvent;
+			while (next < self.noteTimings.length && self.noteTimings[next].left === null)
+				next++;
+			var endMs;
+			var ev;
+			if (next < self.noteTimings.length) {
+				endMs = self.noteTimings[next].milliseconds;
+				next = self.currentEvent - 1;
+				while (next >= 0 && self.noteTimings[next].left === null)
+					next--;
+
+				ev = self.noteTimings[next];
+			}
+
+			var position = {};
+			if (ev) {
+				position.top = ev.top;
+				position.height = ev.height;
+
+				var gap = endMs - ev.milliseconds;
+				var off = self.currentBeat * self.millisecondsPerBeat - ev.milliseconds;
+				var ratio = off / gap;
+				var gap2 = self.noteTimings[self.currentEvent - 1].endX - ev.left;
+				position.left = ev.left + ratio * gap2;
+			}
+
+			self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment, position);
+			// self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment, self.currentEvent, self.millisecondsPerBeat * self.beatSubdivisions, ev, self.noteTimings[self.currentEvent-1].endX, endMs);
 		}
 	};
 

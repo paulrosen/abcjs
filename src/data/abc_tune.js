@@ -65,6 +65,8 @@ var Tune = function() {
 		var multiplier = 1;
 		if (meter.num === 6 || meter.num === 9 || meter.num === 12)
 			multiplier = 3;
+		else if (meter.num === 3 && meter.den === 8)
+			multiplier = 3;
 
 		return multiplier / meter.den;
 	};
@@ -245,7 +247,7 @@ var Tune = function() {
 		return arr;
 	}
 
-	this.addElementToEvents = function(eventHash, element, voiceTimeMilliseconds, top, height, line, measureNumber, timeDivider, isTiedState, nextIsBar) {
+	this.addElementToEvents = function(eventHash, element, voiceTimeMilliseconds, top, height, line, measureNumber, timeDivider, isTiedState, nextIsBar, endX) {
 		if (element.hint)
 			return { isTiedState: undefined, duration: 0 };
 		var realDuration = element.durationClass ? element.durationClass : element.duration;
@@ -261,6 +263,7 @@ var Tune = function() {
 			var isTiedToNext = element.startTie;
 			if (isTiedState !== undefined) {
 				eventHash["event" + isTiedState].elements.push(es); // Add the tied note to the first note that it is tied to
+				eventHash["event" + isTiedState].endX = endX; // The right edge of the note is now the right edge of the tied note.
 				if (nextIsBar) {
 					if (!eventHash["event" + voiceTimeMilliseconds]) {
 						eventHash["event" + voiceTimeMilliseconds] = {
@@ -271,6 +274,7 @@ var Tune = function() {
 							top: top,
 							height: height,
 							left: null,
+							endX: endX,
 							width: 0,
 							elements: [],
 							startChar: null,
@@ -295,6 +299,7 @@ var Tune = function() {
 						top: top,
 						height: height,
 						left: element.x,
+						endX: endX,
 						width: element.w,
 						elements: [es],
 						startChar: element.abcelem.startChar,
@@ -311,6 +316,10 @@ var Tune = function() {
 						eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);
 					else
 						eventHash["event" + voiceTimeMilliseconds].left = element.x;
+					if (eventHash["event" + voiceTimeMilliseconds].endX)
+						eventHash["event" + voiceTimeMilliseconds].endX = Math.min(eventHash["event" + voiceTimeMilliseconds].endX, endX);
+					else
+						eventHash["event" + voiceTimeMilliseconds].endX = endX;
 					eventHash["event" + voiceTimeMilliseconds].elements.push(es);
 					eventHash["event" + voiceTimeMilliseconds].startCharArray.push(element.abcelem.startChar);
 					eventHash["event" + voiceTimeMilliseconds].endCharArray.push(element.abcelem.endChar);
@@ -398,7 +407,7 @@ var Tune = function() {
 					var beatsPerSecond = bpm / 60;
 					timeDivider = beatLength * beatsPerSecond;
 				}
-				var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, elements[elem].line, elements[elem].measureNumber, timeDivider, isTiedState, nextIsBar);
+				var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, elements[elem].line, elements[elem].measureNumber, timeDivider, isTiedState, nextIsBar, endXForElement(this.lines, elements, elem));
 				isTiedState = ret.isTiedState;
 				nextIsBar = ret.nextIsBar;
 				voiceTime += ret.duration;
@@ -413,7 +422,7 @@ var Tune = function() {
 							endingRepeatElem = elem;
 						for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
 							var element2 = elements[el2].elem;
-							ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar);
+							ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar, endXForElement(this.lines, elements, el2));
 							isTiedState = ret.isTiedState;
 							nextIsBar = ret.nextIsBar;
 							voiceTime += ret.duration;
@@ -444,6 +453,37 @@ var Tune = function() {
 			ev.millisecondsPerMeasure = millisecondsPerMeasure;
 		}
 	};
+
+	function endXForElement(lines, elements, elem) {
+		if (elem >= elements.length)
+			elem = elements.length - 1;
+
+		var startX = elements[elem].elem.x;
+		function getEndpoint(elements, elem, proposed) {
+			if (elem >= elements.length)
+				elem = elements.length - 1;
+
+			if (proposed > startX)
+				return proposed;
+			var line = elements[elem].line;
+			return lines[line].staffGroup.w;
+		}
+		elem++;
+		while (elem < elements.length) {
+			if (elements[elem].elem.type === 'bar') {
+				var barType = elements[elem].elem.abcelem.type;
+				var endRepeat = (barType === "bar_right_repeat" || barType === "bar_dbl_repeat");
+				var startEnding = (elements[elem].elem.abcelem.startEnding === '1');
+				if (endRepeat || startEnding)
+					return getEndpoint(elements, elem, elements[elem].elem.x);
+				elem++;
+			} else {
+				return getEndpoint(elements, elem, elements[elem].elem.x);
+			}
+		}
+		// If this is the end of the voice data, then use the line width for the end.
+		return getEndpoint(elements, elem, -1);
+	}
 
 	// function getVertical(group) {
 	// 	var voices = group.voices;
