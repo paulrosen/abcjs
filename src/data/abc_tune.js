@@ -65,6 +65,8 @@ var Tune = function() {
 		var multiplier = 1;
 		if (meter.num === 6 || meter.num === 9 || meter.num === 12)
 			multiplier = 3;
+		else if (meter.num === 3 && meter.den === 8)
+			multiplier = 3;
 
 		return multiplier / meter.den;
 	};
