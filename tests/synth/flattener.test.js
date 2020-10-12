@@ -957,10 +957,10 @@ describe("Audio flattener", function() {
 				{"cmd":"note","pitch":54,"volume":48,"start":1.75,"duration":0.0625,"instrument":0},
 				{"cmd":"note","pitch":57,"volume":48,"start":1.75,"duration":0.0625,"instrument":0},
 
-				{"cmd":"note","pitch":31,"volume":64,"start":1.875,"duration":0.0625,"instrument":0},
-				{"cmd":"note","pitch":52,"volume":48,"start":2.325,"duration":0.0625,"instrument":0},
-				{"cmd":"note","pitch":56,"volume":48,"start":2.325,"duration":0.0625,"instrument":0},
-				{"cmd":"note","pitch":59,"volume":48,"start":2.325,"duration":0.0625,"instrument":0}
+				{"cmd":"note","pitch":43,"volume":64,"start":1.875,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":2.125,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":56,"volume":48,"start":2.125,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":2.125,"duration":0.0625,"instrument":0}
 			]
 		]
 	};
@@ -2187,6 +2187,82 @@ describe("Audio flattener", function() {
 			]
 		]
 	};
+	//////////////////////////////////////////////////////////
+
+	var abcTwelveEight = 'X: 1\n' +
+		'M: 12/8\n' +
+		'K: Ador\n' +
+		'|:"Am" A2e e2d "G" BAB d2B | "Am" A2e e2d "G" B2A GAB |\n';
+
+	var expectedTwelveEight = {
+		"tempo":180,
+		"instrument":0,
+		"totalDuration":3,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":69,"volume":105,"start":0,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":85,"start":0.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":95,"start":0.375,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":85,"start":0.625,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":95,"start":0.75,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":85,"start":0.875,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":85,"start":1,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":95,"start":1.125,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":85,"start":1.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":105,"start":1.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":85,"start":1.75,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":95,"start":1.875,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":74,"volume":85,"start":2.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":95,"start":2.25,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":85,"start":2.5,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":95,"start":2.625,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":85,"start":2.75,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":85,"start":2.875,"duration":0.125,"instrument":0,"gap":0}
+			],
+			[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":33,"volume":64,"start":0,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":45,"volume":48,"start":0.25,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":0.25,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":0.25,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":28,"volume":64,"start":0.375,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":45,"volume":48,"start":0.625,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":0.625,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":0.625,"duration":0.0625,"instrument":0},
+
+				{"cmd":"note","pitch":43,"volume":64,"start":0.75,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":1,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":1,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":38,"volume":64,"start":1.125,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1.375,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":1.375,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":1.375,"duration":0.0625,"instrument":0},
+
+				{"cmd":"note","pitch":33,"volume":64,"start":1.5,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":45,"volume":48,"start":1.75,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":1.75,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":1.75,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":28,"volume":64,"start":1.875,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":45,"volume":48,"start":2.125,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":2.125,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":2.125,"duration":0.0625,"instrument":0},
+
+				{"cmd":"note","pitch":43,"volume":64,"start":2.25,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":2.5,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":2.5,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":2.5,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":38,"volume":64,"start":2.625,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":2.875,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":48,"start":2.875,"duration":0.0625,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":2.875,"duration":0.0625,"instrument":0}
+			]
+		]
+
+};
+
+
 
 	//////////////////////////////////////////////////////////
 
@@ -2303,6 +2379,10 @@ describe("Audio flattener", function() {
 
 	it("flatten-metronome", function() {
 		doFlattenTest(abcMetronome, expectedMetronome);
+	})
+
+	it("flatten-twelve-eight", function() {
+		doFlattenTest(abcTwelveEight, expectedTwelveEight);
 	})
 })
 

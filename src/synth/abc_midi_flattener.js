@@ -999,7 +999,7 @@ var parseCommon = require("../parse/abc_common");
 		"5/4": [ 'boom', 'chick', 'chick', 'boom2', 'chick' ],
 		"6/8": [ 'boom', '', 'chick', 'boom2', '', 'chick' ],
 		"9/8": [ 'boom', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick' ],
-		"12/8": [ 'boom', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick' ],
+		"12/8": [ 'boom', '', 'chick', 'boom2', '', 'chick', 'boom', '', 'chick', 'boom2', '', 'chick' ],
 	};
 
 	function resolveChords(startTime, endTime) {
@@ -1049,10 +1049,11 @@ var parseCommon = require("../parse/abc_common");
 		// If we are here it is because more than one chord was declared in the measure, so we have to sort out what chord goes where.
 
 		// First, normalize the chords on beats.
+		var mult = beatLength === 0.125 ? 3 : 1; // If this is a compound meter then the beats in the currentChords is 1/3 of the true beat
 		var beats = {};
 		for (var i = 0; i < currentChords.length; i++) {
 			var cc = currentChords[i];
-			var b = Math.round(cc.beat);
+			var b = Math.round(cc.beat*mult);
 			beats[''+b] = cc;
 		}
 
