@@ -195,8 +195,7 @@ function SynthController() {
 		self.midiBuffer.seek(percent);
 	};
 
-	self.onWarp = function (ev) {
-		var newWarp = ev.target.value;
+	self.setWarp = function (newWarp) {
 		if (parseInt(newWarp, 10) > 0) {
 			self.warp = parseInt(newWarp, 10);
 			var wasPlaying = self.isStarted;
@@ -212,6 +211,11 @@ function SynthController() {
 				self.midiBuffer.seek(startPercent);
 			});
 		}
+	};
+
+	self.onWarp = function (ev) {
+		var newWarp = ev.target.value;
+		self.setWarp(newWarp);
 	};
 
 	self.setProgress = function (percent, totalTime) {
