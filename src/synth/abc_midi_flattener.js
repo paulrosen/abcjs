@@ -419,7 +419,7 @@ var parseCommon = require("../parse/abc_common");
 
 	function processVolume(beat, voiceOff) {
 		if (voiceOff)
-			return true;
+			return 0;
 
 		var volume;
 		if (nextVolume) {
