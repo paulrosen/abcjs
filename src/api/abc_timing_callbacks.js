@@ -175,7 +175,7 @@ var TimingCallbacks = function(target, params) {
 				var gap = endMs - ev.milliseconds;
 				var off = self.currentBeat * self.millisecondsPerBeat - ev.milliseconds;
 				var ratio = off / gap;
-				var gap2 = self.noteTimings[self.currentEvent - 1].endX - ev.left;
+				var gap2 = ev.endX - ev.left;
 				position.left = ev.left + ratio * gap2;
 			}
 
