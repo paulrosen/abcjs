@@ -448,7 +448,10 @@ var parseCommon = require("../parse/abc_common");
 							var endDec = endingVolume(voice, v+n+1, Object.keys(volumes));
 							if (endDec)
 								top = volumes[endDec][0];
-							inCrescendo[k] = Math.floor((top - currentVolume[0]) / n);
+							if (n > 0)
+								inCrescendo[k] = Math.floor((top - currentVolume[0]) / n);
+							else
+								inCrescendo[k] = false;
 							inDiminuendo[k] = false;
 						} else if (elem.decoration.indexOf("crescendo)") >= 0) {
 							inCrescendo[k] = false;
@@ -459,7 +462,10 @@ var parseCommon = require("../parse/abc_common");
 							if (endDec2)
 								bottom = volumes[endDec2][0];
 							inCrescendo[k] = false;
-							inDiminuendo[k] = Math.floor((bottom - currentVolume[0]) / n2);
+							if (n2 > 0)
+								inDiminuendo[k] = Math.floor((bottom - currentVolume[0]) / n2);
+							else
+								inDiminuendo[k] = false;
 						} else if (elem.decoration.indexOf("diminuendo)") >= 0) {
 							inDiminuendo[k] = false;
 						}
