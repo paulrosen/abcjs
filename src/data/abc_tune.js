@@ -465,6 +465,8 @@ var Tune = function() {
 		return elements[index];
 	}
 	function addEndPoints(lines, elements) {
+		if (elements.length < 1)
+			return;
 		for (var i = 0; i < elements.length-1; i++) {
 			var el = elements[i];
 			var next = skipTies(elements, i+1);
@@ -479,7 +481,8 @@ var Tune = function() {
 					el.endX = endX;
 			}
 		}
-		elements[i].endX = lines[el.line].staffGroup.w;
+		var lastEl = elements[elements.length-1];
+		lastEl.endX = lines[lastEl.line].staffGroup.w;
 	}
 
 	this.getBpm = function(tempo) {
