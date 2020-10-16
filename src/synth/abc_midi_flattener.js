@@ -512,41 +512,41 @@ var parseCommon = require("../parse/abc_common");
 			case "trill":
 				var note = 1;
 				while (runningDuration > 0) {
-					currentTrack.push({ cmd: 'note', pitch: p.pitch+note, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+					currentTrack.push({ cmd: 'note', pitch: p.pitch+note, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 					note = (note === 1) ? 0 : 1;
 					runningDuration -= shortestNote;
 					start += shortestNote;
 				}
 				break;
 			case "mordent":
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 				runningDuration -= shortestNote;
 				start += shortestNote;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 				runningDuration -= shortestNote;
 				start += shortestNote;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, gap: 0, instrument: currentInstrument });
 				break;
 			case "lowermordent":
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 				runningDuration -= shortestNote;
 				start += shortestNote;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch-1, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch-1, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 				runningDuration -= shortestNote;
 				start += shortestNote;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, gap: 0, instrument: currentInstrument });
 				break;
 			case "turn":
 				shortestNote = p.duration / 5;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote, duration: shortestNote, instrument: currentInstrument });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*2, duration: shortestNote, instrument: currentInstrument });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote*3, duration: shortestNote, instrument: currentInstrument });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*4, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote, duration: shortestNote, gap: 0, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*2, duration: shortestNote, gap: 0, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote*3, duration: shortestNote, gap: 0, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*4, duration: shortestNote, gap: 0, instrument: currentInstrument });
 				break;
 			case "roll":
 				while (runningDuration > 0) {
-					currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+					currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 					runningDuration -= shortestNote*2;
 					start += shortestNote*2;
 				}
@@ -984,12 +984,12 @@ var parseCommon = require("../parse/abc_common");
 	function writeBoom(boom, beatLength, volume, beat, noteLength) {
 		// undefined means there is a stop time.
 		if (boom !== undefined)
-			chordTrack.push({cmd: 'note', pitch: boom, volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), instrument: chordInstrument});
+			chordTrack.push({cmd: 'note', pitch: boom, volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), gap: 0, instrument: chordInstrument});
 	}
 
 	function writeChick(chick, beatLength, volume, beat, noteLength) {
 		for (var c = 0; c < chick.length; c++)
-			chordTrack.push({cmd: 'note', pitch: chick[c], volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), instrument: chordInstrument});
+			chordTrack.push({cmd: 'note', pitch: chick[c], volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), gap: 0, instrument: chordInstrument});
 	}
 
 	var rhythmPatterns = { "2/2": [ 'boom', 'chick' ],
@@ -1214,6 +1214,7 @@ var parseCommon = require("../parse/abc_common");
 					volume: drumDefinition.pattern[i].velocity,
 					start: start,
 					duration: len,
+					gap: 0,
 					instrument: drumInstrument});
 			}
 			start += len;
