@@ -16,7 +16,7 @@
 
 //This file takes as input the output structure of the writing routine and lists the vertical position of all the elements.
 
-/*globals toString */
+var pitchToNoteName = require('../synth/pitch-to-note-name');
 
 var midiLint = function(tune) {
 	"use strict";
@@ -30,14 +30,8 @@ var midiLint = function(tune) {
 				case 'program':
 					ret += "\tProgram: ch=" + event.channel + " inst=" + event.instrument + "\n";
 					break;
-				case 'start':
-					ret += "\tStart: " + event.pitch + " Volume: " + event.volume + "\n";
-					break;
-				case 'stop':
-					ret += "\tStop: " + event.pitch + "\n";
-					break;
-				case 'move':
-					ret += "\tMove: " + event.duration + "\n";
+				case 'note':
+					ret += "\tNote: pitch=" + pitchToNoteName[event.pitch] + " (" + event.pitch + ") start=" + event.start + " dur=" + event.duration + " gap=" + event.gap + " vol=" + event.volume + " inst=" + event.instrument + "\n";
 					break;
 				case 'text':
 					ret += "\tText: " + event.type + '=' + event.text + "\n";

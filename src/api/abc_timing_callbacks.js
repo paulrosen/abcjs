@@ -73,7 +73,7 @@ var TimingCallbacks = function(target, params) {
 		var oldBeat = self.currentBeat;
 		self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
 		if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
-			self.doBeatCallback();
+			self.doBeatCallback(timestamp);
 
 		var lineStart = 0;
 		self.currentEvent = 0;
@@ -130,14 +130,16 @@ var TimingCallbacks = function(target, params) {
 			if (currentTime < self.lastMoment) {
 				requestAnimationFrame(self.doTiming);
 				if (self.currentBeat * self.millisecondsPerBeat < currentTime) {
-					self.doBeatCallback();
-					self.currentBeat++;
+					var ret = self.doBeatCallback(timestamp);
+					if (ret !== null)
+						currentTime = ret;
 				}
 			} else if (self.currentBeat <= self.totalBeats) {
 				// Because of timing issues (for instance, if the browser tab isn't active), the beat callbacks might not have happened when they are supposed to. To keep the client programs from having to deal with that, this will keep calling the loop until all of them have been sent.
 				if (self.beatCallback) {
-					self.doBeatCallback();
-					self.currentBeat++;
+					var ret2 = self.doBeatCallback(timestamp);
+					if (ret2 !== null)
+						currentTime = ret2;
 					requestAnimationFrame(self.doTiming);
 				}
 			}
@@ -149,7 +151,7 @@ var TimingCallbacks = function(target, params) {
 		}
 	};
 
-	self.doBeatCallback = function() {
+	self.doBeatCallback = function(timestamp) {
 		if (self.beatCallback) {
 			var next = self.currentEvent;
 			while (next < self.noteTimings.length && self.noteTimings[next].left === null)
@@ -173,13 +175,18 @@ var TimingCallbacks = function(target, params) {
 				var gap = endMs - ev.milliseconds;
 				var off = self.currentBeat * self.millisecondsPerBeat - ev.milliseconds;
 				var ratio = off / gap;
-				var gap2 = self.noteTimings[self.currentEvent - 1].endX - ev.left;
+				var gap2 = ev.endX - ev.left;
 				position.left = ev.left + ratio * gap2;
 			}
 
+			var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
 			self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment, position);
-			// self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment, self.currentEvent, self.millisecondsPerBeat * self.beatSubdivisions, ev, self.noteTimings[self.currentEvent-1].endX, endMs);
+			if (thisStartTime !== self.startTime) {
+				return timestamp - self.startTime + 16; // Add a little slop because this function isn't called exactly.
+			} else
+				self.currentBeat++;
 		}
+		return null;
 	};
 
 	// In general music doesn't need a timer at 60 fps because notes don't happen that fast.

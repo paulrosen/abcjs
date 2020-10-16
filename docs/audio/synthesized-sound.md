@@ -205,6 +205,10 @@ The `options` element above can have the following properties:
 
 These do the same thing as the user pressing these buttons, but can be called programmatically.
 
+### setWarp(percent)
+
+This changes the tempo to the percent passed in. That should be a positive integer. It will change the tempo immediately if the music is already playing.
+
 ### download(fileName)
 
 This will download the current audio buffer as a WAV file to the fileName passed in.

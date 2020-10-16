@@ -116,3 +116,5 @@ This does the calculation using beats per minute and beats per measure.
 
 If you aren't using the built in synth, but you still want the information that the synth provides, call this. If you aren't overriding the BPM or anything else that can be set in the synth call, you can call this with no parameters. Otherwise specify the items you want to override.
 
+This returns an array of all the sequence data. Normally you won't need this information, but there may be cases where it is useful for post-processing.
+

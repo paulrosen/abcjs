@@ -1,3 +1,25 @@
+# Version 6.0.0-beta.19
+
+## Bugs
+
+* Fix crash when processing a string that contains no note events.
+
+* Don't let odd crescendo or diminuendo cause a nonsensical volume.
+
+* Initialize the gap in audio files.
+
+* Fix bug in timing callbacks when the position changes inside an event handler.
+
+* Fix bug in turning off individual voices.
+
+* Fixed chord placement when there are more than one chord in a measure in compound meter.
+
+## Features
+
+* Implement a smooth cursor in the timing callbacks.
+
+* Expose setWarp so that the tempo can be changed programmatically.
+
 # Version 6.0.0-beta.18
 
 ## Bugs

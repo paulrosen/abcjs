@@ -247,7 +247,7 @@ var Tune = function() {
 		return arr;
 	}
 
-	this.addElementToEvents = function(eventHash, element, voiceTimeMilliseconds, top, height, line, measureNumber, timeDivider, isTiedState, nextIsBar, endX) {
+	this.addElementToEvents = function(eventHash, element, voiceTimeMilliseconds, top, height, line, measureNumber, timeDivider, isTiedState, nextIsBar) {
 		if (element.hint)
 			return { isTiedState: undefined, duration: 0 };
 		var realDuration = element.durationClass ? element.durationClass : element.duration;
@@ -263,7 +263,6 @@ var Tune = function() {
 			var isTiedToNext = element.startTie;
 			if (isTiedState !== undefined) {
 				eventHash["event" + isTiedState].elements.push(es); // Add the tied note to the first note that it is tied to
-				eventHash["event" + isTiedState].endX = endX; // The right edge of the note is now the right edge of the tied note.
 				if (nextIsBar) {
 					if (!eventHash["event" + voiceTimeMilliseconds]) {
 						eventHash["event" + voiceTimeMilliseconds] = {
@@ -274,7 +273,6 @@ var Tune = function() {
 							top: top,
 							height: height,
 							left: null,
-							endX: endX,
 							width: 0,
 							elements: [],
 							startChar: null,
@@ -299,7 +297,6 @@ var Tune = function() {
 						top: top,
 						height: height,
 						left: element.x,
-						endX: endX,
 						width: element.w,
 						elements: [es],
 						startChar: element.abcelem.startChar,
@@ -316,10 +313,6 @@ var Tune = function() {
 						eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);
 					else
 						eventHash["event" + voiceTimeMilliseconds].left = element.x;
-					if (eventHash["event" + voiceTimeMilliseconds].endX)
-						eventHash["event" + voiceTimeMilliseconds].endX = Math.min(eventHash["event" + voiceTimeMilliseconds].endX, endX);
-					else
-						eventHash["event" + voiceTimeMilliseconds].endX = endX;
 					eventHash["event" + voiceTimeMilliseconds].elements.push(es);
 					eventHash["event" + voiceTimeMilliseconds].startCharArray.push(element.abcelem.startChar);
 					eventHash["event" + voiceTimeMilliseconds].endCharArray.push(element.abcelem.endChar);
@@ -407,10 +400,13 @@ var Tune = function() {
 					var beatsPerSecond = bpm / 60;
 					timeDivider = beatLength * beatsPerSecond;
 				}
-				var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, elements[elem].line, elements[elem].measureNumber, timeDivider, isTiedState, nextIsBar, endXForElement(this.lines, elements, elem));
+				var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, elements[elem].line, elements[elem].measureNumber, timeDivider, isTiedState, nextIsBar);
 				isTiedState = ret.isTiedState;
 				nextIsBar = ret.nextIsBar;
 				voiceTime += ret.duration;
+				var lastHash;
+				if (element.duration > 0)
+					lastHash = "event" + voiceTimeMilliseconds;
 				voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 				if (element.type === 'bar') {
 					var barType = element.abcelem.type;
@@ -418,16 +414,24 @@ var Tune = function() {
 					var startEnding = (element.abcelem.startEnding === '1');
 					var startRepeat = (barType === "bar_left_repeat" || barType === "bar_dbl_repeat" || barType === "bar_right_repeat");
 					if (endRepeat) {
+						// Force the end of the previous note to the position of the measure - the cursor won't go past the end repeat
+						if (elem > 0) {
+							eventHash[lastHash].endX = element.x;
+						}
+
 						if (endingRepeatElem === -1)
 							endingRepeatElem = elem;
+						var lastVoiceTimeMilliseconds = 0;
 						for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
 							var element2 = elements[el2].elem;
-							ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar, endXForElement(this.lines, elements, el2));
+							ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar);
 							isTiedState = ret.isTiedState;
 							nextIsBar = ret.nextIsBar;
 							voiceTime += ret.duration;
+							lastVoiceTimeMilliseconds = voiceTimeMilliseconds;
 							voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 						}
+						eventHash["event" + lastVoiceTimeMilliseconds].endX = elements[endingRepeatElem].elem.x;
 						nextIsBar = true;
 						endingRepeatElem = -1;
 					}
@@ -441,6 +445,7 @@ var Tune = function() {
 		// now we have all the events, but if there are multiple voices then there may be events out of order or duplicated, so normalize it.
 		timingEvents = makeSortedArray(eventHash);
 		addVerticalInfo(timingEvents);
+		addEndPoints(this.lines, timingEvents)
 		timingEvents.push({ type: "end", milliseconds: voiceTimeMilliseconds });
 		this.addUsefulCallbackInfo(timingEvents, bpm);
 		return timingEvents;
@@ -454,48 +459,31 @@ var Tune = function() {
 		}
 	};
 
-	function endXForElement(lines, elements, elem) {
-		if (elem >= elements.length)
-			elem = elements.length - 1;
-
-		var startX = elements[elem].elem.x;
-		function getEndpoint(elements, elem, proposed) {
-			if (elem >= elements.length)
-				elem = elements.length - 1;
-
-			if (proposed > startX)
-				return proposed;
-			var line = elements[elem].line;
-			return lines[line].staffGroup.w;
-		}
-		elem++;
-		while (elem < elements.length) {
-			if (elements[elem].elem.type === 'bar') {
-				var barType = elements[elem].elem.abcelem.type;
-				var endRepeat = (barType === "bar_right_repeat" || barType === "bar_dbl_repeat");
-				var startEnding = (elements[elem].elem.abcelem.startEnding === '1');
-				if (endRepeat || startEnding)
-					return getEndpoint(elements, elem, elements[elem].elem.x);
-				elem++;
-			} else {
-				return getEndpoint(elements, elem, elements[elem].elem.x);
+	function skipTies(elements, index) {
+		while (elements[index].left === null && index < elements.length)
+			index++;
+		return elements[index];
+	}
+	function addEndPoints(lines, elements) {
+		if (elements.length < 1)
+			return;
+		for (var i = 0; i < elements.length-1; i++) {
+			var el = elements[i];
+			var next = skipTies(elements, i+1);
+			if (el.left !== null) {
+				// If there is no left element that is because this is a tie so it should be skipped.
+				var endX = (next && el.top === next.top) ? next.left : lines[el.line].staffGroup.w;
+				// If this is already set, it is because the notes aren't sequential here, like the next thing is a repeat bar line.
+				// In that case, the right-most position is passed in. There could still be an intervening note in another voice, so always look for the closest position.
+				if  (el.endX !== undefined)
+					el.endX = Math.min(el.endX, endX);
+				else
+					el.endX = endX;
 			}
 		}
-		// If this is the end of the voice data, then use the line width for the end.
-		return getEndpoint(elements, elem, -1);
+		var lastEl = elements[elements.length-1];
+		lastEl.endX = lines[lastEl.line].staffGroup.w;
 	}
-
-	// function getVertical(group) {
-	// 	var voices = group.voices;
-	// 	var firstStaff = group.staffs[0];
-	// 	var middleC = firstStaff.absoluteY;
-	// 	var top = middleC - firstStaff.top*spacing.STEP;
-	// 	var lastStaff = group.staffs[group.staffs.length-1];
-	// 	middleC = lastStaff.absoluteY;
-	// 	var bottom = middleC - lastStaff.bottom*spacing.STEP;
-	// 	var height = bottom - top;
-	// 	return { top: top, height: height };
-	// }
 
 	this.getBpm = function(tempo) {
 		var bpm;
@@ -542,6 +530,7 @@ var Tune = function() {
 		var timeDivider = beatLength * beatsPerSecond;
 
 		this.noteTimings = this.setupEvents(startingDelay, timeDivider, bpm);
+		return this.noteTimings;
 	};
 
 	this.setUpAudio = function(options) {

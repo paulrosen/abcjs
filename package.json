@@ -1,6 +1,6 @@
 {
   "name": "abcjs",
-  "version": "6.0.0-beta.18",
+  "version": "6.0.0-beta.19",
   "description": "Renderer for abc music notation",
   "main": "index.js",
   "scripts": {
@@ -9,11 +9,11 @@
     "build:basic": "npm run webpack -- --env.mode development --env.type basic",
     "example-debug": "npm run webpack -- --env.mode development --env.type basic -o dist/abcjs-basic.js",
     "build:basic-min": "npm run webpack -- --env.mode production --env.type basic",
-    "build:dist": "cp bin/abcjs_basic_6.0.0-beta.18-min.js dist/abcjs-basic-min.js && cp bin/abcjs_basic_6.0.0-beta.18.js dist/abcjs-basic.js && cp bin/abcjs_basic_6.0.0-beta.18-min.js.LICENSE dist/abcjs-basic.js.LICENSE",
+    "build:dist": "cp bin/abcjs_basic_6.0.0-beta.19-min.js dist/abcjs-basic-min.js && cp bin/abcjs_basic_6.0.0-beta.19.js dist/abcjs-basic.js && cp bin/abcjs_basic_6.0.0-beta.19-min.js.LICENSE dist/abcjs-basic.js.LICENSE",
     "build:midi": "npm run webpack -- --env.mode production --env.type midi",
     "build:plugin": "npm run webpack -- --env.mode production --env.type plugin",
     "build:plugin-midi": "npm run webpack -- --env.mode production --env.type plugin-midi",
-    "fix-versions": "./fix-versions.sh 6.0.0-beta.18",
+    "fix-versions": "./fix-versions.sh 6.0.0-beta.19",
     "test": "mocha 'tests/**/*.js'",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",

@@ -419,7 +419,7 @@ var parseCommon = require("../parse/abc_common");
 
 	function processVolume(beat, voiceOff) {
 		if (voiceOff)
-			return true;
+			return 0;
 
 		var volume;
 		if (nextVolume) {
@@ -512,41 +512,41 @@ var parseCommon = require("../parse/abc_common");
 			case "trill":
 				var note = 1;
 				while (runningDuration > 0) {
-					currentTrack.push({ cmd: 'note', pitch: p.pitch+note, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+					currentTrack.push({ cmd: 'note', pitch: p.pitch+note, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 					note = (note === 1) ? 0 : 1;
 					runningDuration -= shortestNote;
 					start += shortestNote;
 				}
 				break;
 			case "mordent":
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 				runningDuration -= shortestNote;
 				start += shortestNote;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 				runningDuration -= shortestNote;
 				start += shortestNote;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, gap: 0, instrument: currentInstrument });
 				break;
 			case "lowermordent":
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 				runningDuration -= shortestNote;
 				start += shortestNote;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch-1, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch-1, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 				runningDuration -= shortestNote;
 				start += shortestNote;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, gap: 0, instrument: currentInstrument });
 				break;
 			case "turn":
 				shortestNote = p.duration / 5;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote, duration: shortestNote, instrument: currentInstrument });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*2, duration: shortestNote, instrument: currentInstrument });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote*3, duration: shortestNote, instrument: currentInstrument });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*4, duration: shortestNote, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote, duration: shortestNote, gap: 0, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*2, duration: shortestNote, gap: 0, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote*3, duration: shortestNote, gap: 0, instrument: currentInstrument });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*4, duration: shortestNote, gap: 0, instrument: currentInstrument });
 				break;
 			case "roll":
 				while (runningDuration > 0) {
-					currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, instrument: currentInstrument });
+					currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument });
 					runningDuration -= shortestNote*2;
 					start += shortestNote*2;
 				}
@@ -984,12 +984,12 @@ var parseCommon = require("../parse/abc_common");
 	function writeBoom(boom, beatLength, volume, beat, noteLength) {
 		// undefined means there is a stop time.
 		if (boom !== undefined)
-			chordTrack.push({cmd: 'note', pitch: boom, volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), instrument: chordInstrument});
+			chordTrack.push({cmd: 'note', pitch: boom, volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), gap: 0, instrument: chordInstrument});
 	}
 
 	function writeChick(chick, beatLength, volume, beat, noteLength) {
 		for (var c = 0; c < chick.length; c++)
-			chordTrack.push({cmd: 'note', pitch: chick[c], volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), instrument: chordInstrument});
+			chordTrack.push({cmd: 'note', pitch: chick[c], volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), gap: 0, instrument: chordInstrument});
 	}
 
 	var rhythmPatterns = { "2/2": [ 'boom', 'chick' ],
@@ -999,7 +999,7 @@ var parseCommon = require("../parse/abc_common");
 		"5/4": [ 'boom', 'chick', 'chick', 'boom2', 'chick' ],
 		"6/8": [ 'boom', '', 'chick', 'boom2', '', 'chick' ],
 		"9/8": [ 'boom', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick' ],
-		"12/8": [ 'boom', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick' ],
+		"12/8": [ 'boom', '', 'chick', 'boom2', '', 'chick', 'boom', '', 'chick', 'boom2', '', 'chick' ],
 	};
 
 	function resolveChords(startTime, endTime) {
@@ -1049,10 +1049,11 @@ var parseCommon = require("../parse/abc_common");
 		// If we are here it is because more than one chord was declared in the measure, so we have to sort out what chord goes where.
 
 		// First, normalize the chords on beats.
+		var mult = beatLength === 0.125 ? 3 : 1; // If this is a compound meter then the beats in the currentChords is 1/3 of the true beat
 		var beats = {};
 		for (var i = 0; i < currentChords.length; i++) {
 			var cc = currentChords[i];
-			var b = Math.round(cc.beat);
+			var b = Math.round(cc.beat*mult);
 			beats[''+b] = cc;
 		}
 
@@ -1213,6 +1214,7 @@ var parseCommon = require("../parse/abc_common");
 					volume: drumDefinition.pattern[i].velocity,
 					start: start,
 					duration: len,
+					gap: 0,
 					instrument: drumInstrument});
 			}
 			start += len;
