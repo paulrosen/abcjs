@@ -382,7 +382,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     var oldBeat = self.currentBeat;
     self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
     if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
-      self.doBeatCallback();
+      self.doBeatCallback(timestamp);
     var lineStart = 0;
     self.currentEvent = 0;
 
@@ -440,14 +440,14 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
         requestAnimationFrame(self.doTiming);
 
         if (self.currentBeat * self.millisecondsPerBeat < currentTime) {
-          self.doBeatCallback();
-          self.currentBeat++;
+          var ret = self.doBeatCallback(timestamp);
+          if (ret !== null) currentTime = ret;
         }
       } else if (self.currentBeat <= self.totalBeats) {
         // Because of timing issues (for instance, if the browser tab isn't active), the beat callbacks might not have happened when they are supposed to. To keep the client programs from having to deal with that, this will keep calling the loop until all of them have been sent.
         if (self.beatCallback) {
-          self.doBeatCallback();
-          self.currentBeat++;
+          var ret2 = self.doBeatCallback(timestamp);
+          if (ret2 !== null) currentTime = ret2;
           requestAnimationFrame(self.doTiming);
         }
       }
@@ -459,7 +459,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     }
   };
 
-  self.doBeatCallback = function () {
+  self.doBeatCallback = function (timestamp) {
     if (self.beatCallback) {
       var next = self.currentEvent;
 
@@ -489,12 +489,20 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
         var gap = endMs - ev.milliseconds;
         var off = self.currentBeat * self.millisecondsPerBeat - ev.milliseconds;
         var ratio = off / gap;
-        var gap2 = self.noteTimings[self.currentEvent - 1].endX - ev.left;
+        var gap2 = ev.endX - ev.left;
         position.left = ev.left + ratio * gap2;
       }
 
-      self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment, position); // self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment, self.currentEvent, self.millisecondsPerBeat * self.beatSubdivisions, ev, self.noteTimings[self.currentEvent-1].endX, endMs);
+      var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
+
+      self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment, position);
+
+      if (thisStartTime !== self.startTime) {
+        return timestamp - self.startTime + 16; // Add a little slop because this function isn't called exactly.
+      } else self.currentBeat++;
     }
+
+    return null;
   }; // In general music doesn't need a timer at 60 fps because notes don't happen that fast.
   // For instance, at 120 beats per minute, a sixteenth note takes 125ms. So just as a
   // compromise value between performance and jank this is set about half that.
@@ -1409,7 +1417,7 @@ var Tune = function Tune() {
     return arr;
   }
 
-  this.addElementToEvents = function (eventHash, element, voiceTimeMilliseconds, top, height, line, measureNumber, timeDivider, isTiedState, nextIsBar, endX) {
+  this.addElementToEvents = function (eventHash, element, voiceTimeMilliseconds, top, height, line, measureNumber, timeDivider, isTiedState, nextIsBar) {
     if (element.hint) return {
       isTiedState: undefined,
       duration: 0
@@ -1429,8 +1437,6 @@ var Tune = function Tune() {
       if (isTiedState !== undefined) {
         eventHash["event" + isTiedState].elements.push(es); // Add the tied note to the first note that it is tied to
 
-        eventHash["event" + isTiedState].endX = endX; // The right edge of the note is now the right edge of the tied note.
-
         if (nextIsBar) {
           if (!eventHash["event" + voiceTimeMilliseconds]) {
             eventHash["event" + voiceTimeMilliseconds] = {
@@ -1441,7 +1447,6 @@ var Tune = function Tune() {
               top: top,
               height: height,
               left: null,
-              endX: endX,
               width: 0,
               elements: [],
               startChar: null,
@@ -1467,7 +1472,6 @@ var Tune = function Tune() {
             top: top,
             height: height,
             left: element.x,
-            endX: endX,
             width: element.w,
             elements: [es],
             startChar: element.abcelem.startChar,
@@ -1480,7 +1484,6 @@ var Tune = function Tune() {
         } else {
           // If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
           if (eventHash["event" + voiceTimeMilliseconds].left) eventHash["event" + voiceTimeMilliseconds].left = Math.min(eventHash["event" + voiceTimeMilliseconds].left, element.x);else eventHash["event" + voiceTimeMilliseconds].left = element.x;
-          if (eventHash["event" + voiceTimeMilliseconds].endX) eventHash["event" + voiceTimeMilliseconds].endX = Math.min(eventHash["event" + voiceTimeMilliseconds].endX, endX);else eventHash["event" + voiceTimeMilliseconds].endX = endX;
           eventHash["event" + voiceTimeMilliseconds].elements.push(es);
           eventHash["event" + voiceTimeMilliseconds].startCharArray.push(element.abcelem.startChar);
           eventHash["event" + voiceTimeMilliseconds].endCharArray.push(element.abcelem.endChar);
@@ -1586,10 +1589,12 @@ var Tune = function Tune() {
           timeDivider = beatLength * beatsPerSecond;
         }
 
-        var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, elements[elem].line, elements[elem].measureNumber, timeDivider, isTiedState, nextIsBar, endXForElement(this.lines, elements, elem));
+        var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, elements[elem].line, elements[elem].measureNumber, timeDivider, isTiedState, nextIsBar);
         isTiedState = ret.isTiedState;
         nextIsBar = ret.nextIsBar;
         voiceTime += ret.duration;
+        var lastHash;
+        if (element.duration > 0) lastHash = "event" + voiceTimeMilliseconds;
         voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 
         if (element.type === 'bar') {
@@ -1599,17 +1604,25 @@ var Tune = function Tune() {
           var startRepeat = barType === "bar_left_repeat" || barType === "bar_dbl_repeat" || barType === "bar_right_repeat";
 
           if (endRepeat) {
+            // Force the end of the previous note to the position of the measure - the cursor won't go past the end repeat
+            if (elem > 0) {
+              eventHash[lastHash].endX = element.x;
+            }
+
             if (endingRepeatElem === -1) endingRepeatElem = elem;
+            var lastVoiceTimeMilliseconds = 0;
 
             for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
               var element2 = elements[el2].elem;
-              ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar, endXForElement(this.lines, elements, el2));
+              ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar);
               isTiedState = ret.isTiedState;
               nextIsBar = ret.nextIsBar;
               voiceTime += ret.duration;
+              lastVoiceTimeMilliseconds = voiceTimeMilliseconds;
               voiceTimeMilliseconds = Math.round(voiceTime * 1000);
             }
 
+            eventHash["event" + lastVoiceTimeMilliseconds].endX = elements[endingRepeatElem].elem.x;
             nextIsBar = true;
             endingRepeatElem = -1;
           }
@@ -1623,6 +1636,7 @@ var Tune = function Tune() {
 
     timingEvents = makeSortedArray(eventHash);
     addVerticalInfo(timingEvents);
+    addEndPoints(this.lines, timingEvents);
     timingEvents.push({
       type: "end",
       milliseconds: voiceTimeMilliseconds
@@ -1640,45 +1654,33 @@ var Tune = function Tune() {
     }
   };
 
-  function endXForElement(lines, elements, elem) {
-    if (elem >= elements.length) elem = elements.length - 1;
-    var startX = elements[elem].elem.x;
-
-    function getEndpoint(elements, elem, proposed) {
-      if (elem >= elements.length) elem = elements.length - 1;
-      if (proposed > startX) return proposed;
-      var line = elements[elem].line;
-      return lines[line].staffGroup.w;
+  function skipTies(elements, index) {
+    while (elements[index].left === null && index < elements.length) {
+      index++;
     }
 
-    elem++;
+    return elements[index];
+  }
 
-    while (elem < elements.length) {
-      if (elements[elem].elem.type === 'bar') {
-        var barType = elements[elem].elem.abcelem.type;
-        var endRepeat = barType === "bar_right_repeat" || barType === "bar_dbl_repeat";
-        var startEnding = elements[elem].elem.abcelem.startEnding === '1';
-        if (endRepeat || startEnding) return getEndpoint(elements, elem, elements[elem].elem.x);
-        elem++;
-      } else {
-        return getEndpoint(elements, elem, elements[elem].elem.x);
+  function addEndPoints(lines, elements) {
+    if (elements.length < 1) return;
+
+    for (var i = 0; i < elements.length - 1; i++) {
+      var el = elements[i];
+      var next = skipTies(elements, i + 1);
+
+      if (el.left !== null) {
+        // If there is no left element that is because this is a tie so it should be skipped.
+        var endX = next && el.top === next.top ? next.left : lines[el.line].staffGroup.w; // If this is already set, it is because the notes aren't sequential here, like the next thing is a repeat bar line.
+        // In that case, the right-most position is passed in. There could still be an intervening note in another voice, so always look for the closest position.
+
+        if (el.endX !== undefined) el.endX = Math.min(el.endX, endX);else el.endX = endX;
       }
-    } // If this is the end of the voice data, then use the line width for the end.
+    }
 
-
-    return getEndpoint(elements, elem, -1);
-  } // function getVertical(group) {
-  // 	var voices = group.voices;
-  // 	var firstStaff = group.staffs[0];
-  // 	var middleC = firstStaff.absoluteY;
-  // 	var top = middleC - firstStaff.top*spacing.STEP;
-  // 	var lastStaff = group.staffs[group.staffs.length-1];
-  // 	middleC = lastStaff.absoluteY;
-  // 	var bottom = middleC - lastStaff.bottom*spacing.STEP;
-  // 	var height = bottom - top;
-  // 	return { top: top, height: height };
-  // }
-
+    var lastEl = elements[elements.length - 1];
+    lastEl.endX = lines[lastEl.line].staffGroup.w;
+  }
 
   this.getBpm = function (tempo) {
     var bpm;
@@ -1726,6 +1728,7 @@ var Tune = function Tune() {
     if (startingDelay) startingDelay -= this.getPickupLength() / beatLength / beatsPerSecond;
     var timeDivider = beatLength * beatsPerSecond;
     this.noteTimings = this.setupEvents(startingDelay, timeDivider, bpm);
+    return this.noteTimings;
   };
 
   this.setUpAudio = function (options) {
@@ -12305,7 +12308,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
   }
 
   function processVolume(beat, voiceOff) {
-    if (voiceOff) return true;
+    if (voiceOff) return 0;
     var volume;
 
     if (nextVolume) {
@@ -12394,6 +12397,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
             volume: p.volume,
             start: start,
             duration: shortestNote,
+            gap: 0,
             instrument: currentInstrument
           });
           note = note === 1 ? 0 : 1;
@@ -12410,6 +12414,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: p.volume,
           start: start,
           duration: shortestNote,
+          gap: 0,
           instrument: currentInstrument
         });
         runningDuration -= shortestNote;
@@ -12420,6 +12425,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: p.volume,
           start: start,
           duration: shortestNote,
+          gap: 0,
           instrument: currentInstrument
         });
         runningDuration -= shortestNote;
@@ -12430,6 +12436,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: p.volume,
           start: start,
           duration: runningDuration,
+          gap: 0,
           instrument: currentInstrument
         });
         break;
@@ -12441,6 +12448,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: p.volume,
           start: start,
           duration: shortestNote,
+          gap: 0,
           instrument: currentInstrument
         });
         runningDuration -= shortestNote;
@@ -12451,6 +12459,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: p.volume,
           start: start,
           duration: shortestNote,
+          gap: 0,
           instrument: currentInstrument
         });
         runningDuration -= shortestNote;
@@ -12461,6 +12470,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: p.volume,
           start: start,
           duration: runningDuration,
+          gap: 0,
           instrument: currentInstrument
         });
         break;
@@ -12473,6 +12483,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: p.volume,
           start: start,
           duration: shortestNote,
+          gap: 0,
           instrument: currentInstrument
         });
         currentTrack.push({
@@ -12481,6 +12492,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: p.volume,
           start: start + shortestNote,
           duration: shortestNote,
+          gap: 0,
           instrument: currentInstrument
         });
         currentTrack.push({
@@ -12489,6 +12501,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: p.volume,
           start: start + shortestNote * 2,
           duration: shortestNote,
+          gap: 0,
           instrument: currentInstrument
         });
         currentTrack.push({
@@ -12497,6 +12510,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: p.volume,
           start: start + shortestNote * 3,
           duration: shortestNote,
+          gap: 0,
           instrument: currentInstrument
         });
         currentTrack.push({
@@ -12505,6 +12519,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: p.volume,
           start: start + shortestNote * 4,
           duration: shortestNote,
+          gap: 0,
           instrument: currentInstrument
         });
         break;
@@ -12517,6 +12532,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
             volume: p.volume,
             start: start,
             duration: shortestNote,
+            gap: 0,
             instrument: currentInstrument
           });
           runningDuration -= shortestNote * 2;
@@ -13009,6 +13025,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
       volume: volume,
       start: lastBarTime + beat * durationRounded(beatLength),
       duration: durationRounded(noteLength),
+      gap: 0,
       instrument: chordInstrument
     });
   }
@@ -13021,6 +13038,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
         volume: volume,
         start: lastBarTime + beat * durationRounded(beatLength),
         duration: durationRounded(noteLength),
+        gap: 0,
         instrument: chordInstrument
       });
     }
@@ -13034,7 +13052,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
     "5/4": ['boom', 'chick', 'chick', 'boom2', 'chick'],
     "6/8": ['boom', '', 'chick', 'boom2', '', 'chick'],
     "9/8": ['boom', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick'],
-    "12/8": ['boom', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick']
+    "12/8": ['boom', '', 'chick', 'boom2', '', 'chick', 'boom', '', 'chick', 'boom2', '', 'chick']
   };
 
   function resolveChords(startTime, endTime) {
@@ -13098,11 +13116,13 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
     // First, normalize the chords on beats.
 
 
+    var mult = beatLength === 0.125 ? 3 : 1; // If this is a compound meter then the beats in the currentChords is 1/3 of the true beat
+
     var beats = {};
 
     for (var i = 0; i < currentChords.length; i++) {
       var cc = currentChords[i];
-      var b = Math.round(cc.beat);
+      var b = Math.round(cc.beat * mult);
       beats['' + b] = cc;
     } // - If there is a chord on the second beat, play a chord for the first beat instead of a bass note.
     // - Likewise, if there is a chord on the fourth beat of 4/4, play a chord on the third beat instead of a bass note.
@@ -13294,6 +13314,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           volume: drumDefinition.pattern[i].velocity,
           start: start,
           duration: len,
+          gap: 0,
           instrument: drumInstrument
         });
       }
@@ -13811,7 +13832,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
               var top = Math.min(127, currentVolume[0] + crescendoSize);
               var endDec = endingVolume(voice, v + n + 1, Object.keys(volumes));
               if (endDec) top = volumes[endDec][0];
-              inCrescendo[k] = Math.floor((top - currentVolume[0]) / n);
+              if (n > 0) inCrescendo[k] = Math.floor((top - currentVolume[0]) / n);else inCrescendo[k] = false;
               inDiminuendo[k] = false;
             } else if (elem.decoration.indexOf("crescendo)") >= 0) {
               inCrescendo[k] = false;
@@ -13821,7 +13842,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
               var endDec2 = endingVolume(voice, v + n2 + 1, Object.keys(volumes));
               if (endDec2) bottom = volumes[endDec2][0];
               inCrescendo[k] = false;
-              inDiminuendo[k] = Math.floor((bottom - currentVolume[0]) / n2);
+              if (n2 > 0) inDiminuendo[k] = Math.floor((bottom - currentVolume[0]) / n2);else inDiminuendo[k] = false;
             } else if (elem.decoration.indexOf("diminuendo)") >= 0) {
               inDiminuendo[k] = false;
             }
@@ -16091,9 +16112,7 @@ function SynthController() {
     self.midiBuffer.seek(percent);
   };
 
-  self.onWarp = function (ev) {
-    var newWarp = ev.target.value;
-
+  self.setWarp = function (newWarp) {
     if (parseInt(newWarp, 10) > 0) {
       self.warp = parseInt(newWarp, 10);
       var wasPlaying = self.isStarted;
@@ -16111,6 +16130,11 @@ function SynthController() {
         self.midiBuffer.seek(startPercent);
       });
     }
+  };
+
+  self.onWarp = function (ev) {
+    var newWarp = ev.target.value;
+    self.setWarp(newWarp);
   };
 
   self.setProgress = function (percent, totalTime) {
