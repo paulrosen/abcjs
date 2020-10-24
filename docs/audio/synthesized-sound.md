@@ -40,6 +40,8 @@ The first call that must be made on the CreateSynth object. This will load all o
 
 This must not be called until the user has made a gesture on the page because this references an `AudioContext`.
 
+This returns a promise after all the notes have been loaded.
+
 #### synthOptions
 
 | Attribute | Default | Description |
@@ -75,6 +77,10 @@ synth.init({
         soundFontUrl: "https:/path/to/soundfont/folder",
         pan: [ -0.3, 0.3 ] 
     }
+}).then(function (results) {
+    // Ready to play. The results are details about what was loaded.
+}).catch(function (reason) {
+    console.log(reason)
 });
 ```
 
