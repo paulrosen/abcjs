@@ -2,6 +2,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const path = require("path");
 
 module.exports =  ({type}) => ({
+	mode: 'production',
 	output: {
 		filename: `abcjs_${type}_${getVersion()}-min.js`,
 		path: path.join(__dirname, "../bin")

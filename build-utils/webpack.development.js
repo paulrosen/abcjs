@@ -1,6 +1,7 @@
 const path = require("path");
 
 module.exports = ({type}) => ({
+	mode: 'development',
 	devtool: "source-map",
 	output: {
 		filename: `abcjs_${type}_${getVersion()}.js`,
