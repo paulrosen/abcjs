@@ -173,11 +173,11 @@ var TimingCallbacks = function(target, params) {
 				position.top = ev.top;
 				position.height = ev.height;
 
-				var gap = endMs - ev.milliseconds;
-				var off = self.currentBeat * self.millisecondsPerBeat - ev.milliseconds;
-				var ratio = off / gap;
-				var gap2 = ev.endX - ev.left;
-				position.left = ev.left + ratio * gap2;
+				var offMs = Math.max(0, timestamp-self.startTime-ev.milliseconds); // Offset in time from the last beat
+				var gapMs = endMs - ev.milliseconds; // Length of this event in time
+				var gapPx = ev.endX - ev.left; // The length in pixels
+				var offPx = offMs * gapPx / gapMs;
+				position.left = ev.left + offPx;
 			}
 
 			var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
