@@ -70,11 +70,6 @@ var TimingCallbacks = function(target, params) {
 		var currentTime = timestamp - self.startTime;
 		currentTime += 16; // Add a little slop because this function isn't called exactly.
 
-		var oldBeat = self.currentBeat;
-		self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
-		if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
-			self.doBeatCallback(timestamp);
-
 		var lineStart = 0;
 		self.currentEvent = 0;
 		while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
@@ -82,6 +77,12 @@ var TimingCallbacks = function(target, params) {
 			if (self.lineEndCallback && self.lineEndTimings['e'+self.currentEvent])
 				lineStart = self.currentEvent;
 		}
+
+		var oldBeat = self.currentBeat;
+		self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
+		if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
+			self.doBeatCallback(timestamp);
+
 		if (self.eventCallback && self.currentEvent > 0 && self.noteTimings[self.currentEvent - 1].type === 'event')
 			self.eventCallback(self.noteTimings[self.currentEvent - 1]);
 		if (self.lineEndCallback)
@@ -172,11 +173,11 @@ var TimingCallbacks = function(target, params) {
 				position.top = ev.top;
 				position.height = ev.height;
 
-				var gap = endMs - ev.milliseconds;
-				var off = self.currentBeat * self.millisecondsPerBeat - ev.milliseconds;
-				var ratio = off / gap;
-				var gap2 = ev.endX - ev.left;
-				position.left = ev.left + ratio * gap2;
+				var offMs = Math.max(0, timestamp-self.startTime-ev.milliseconds); // Offset in time from the last beat
+				var gapMs = endMs - ev.milliseconds; // Length of this event in time
+				var gapPx = ev.endX - ev.left; // The length in pixels
+				var offPx = offMs * gapPx / gapMs;
+				position.left = ev.left + offPx;
 			}
 
 			var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
@@ -245,7 +246,10 @@ var TimingCallbacks = function(target, params) {
 
 		self.newSeekPercent = percent;
 		self.justSeeked = true;
-		self.doTiming(performance.now());
+		var now = performance.now();
+		self.lastTimestamp = now - 1; // Make sure that the timing loop is done. This can be called often enough that the performance timer hasn't changed since the last call. If so, the seek won't happen now.
+		// (This is an issue when the client is repeating - if they go back to the beginning right at the end of the piece this needs to move right away so that stop() isn't called.)
+		self.doTiming(now);
 		self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
 	};
 };

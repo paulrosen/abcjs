@@ -1,3 +1,17 @@
+# Version 6.0.0-beta.20
+
+## Bugs
+
+* Fixed bug in smooth cursor when repeat is on one line.
+
+* Fix timing callbacks calling stop() when playing in a loop.
+
+## Documentation
+
+* Add example for adding swing.
+
+* Add example for playing on repeat.
+
 # Version 6.0.0-beta.19
 
 ## Bugs

@@ -866,7 +866,7 @@ describe("Selection", function() {
 		"draggable": false,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "46"},
 		"abcEl": {"el_type": "triplet", "startChar": -1, "endChar": -1},
-		"size": {"x": 441, "y": 307, "width": 8, "height": 17}
+		"size": {"x": 441, "y": 311, "width": 8, "height": 17}
 	}, {
 		"draggable": false,
 		"svgEl": {

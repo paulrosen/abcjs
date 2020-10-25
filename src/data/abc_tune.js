@@ -475,9 +475,11 @@ var Tune = function() {
 				var endX = (next && el.top === next.top) ? next.left : lines[el.line].staffGroup.w;
 				// If this is already set, it is because the notes aren't sequential here, like the next thing is a repeat bar line.
 				// In that case, the right-most position is passed in. There could still be an intervening note in another voice, so always look for the closest position.
-				if  (el.endX !== undefined)
-					el.endX = Math.min(el.endX, endX);
-				else
+				// If there is a repeat that stays on the same line, the endX set above won't be right because the next note will be before. In that case, use the endX that was calculated.
+				if  (el.endX !== undefined) {
+					if (endX > el.left)
+						el.endX = Math.min(el.endX, endX);
+				} else
 					el.endX = endX;
 			}
 		}
