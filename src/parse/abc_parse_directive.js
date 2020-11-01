@@ -897,8 +897,8 @@ var parseDirective = {};
 						multilineVars.staves.push({index: multilineVars.staves.length, numVoices: 0});
 					}
 					var staff = parseCommon.last(multilineVars.staves);
-					if (bracket !== undefined) staff.bracket = bracket;
-					if (brace !== undefined) staff.brace = brace;
+					if (bracket !== undefined && staff.bracket === undefined) staff.bracket = bracket;
+					if (brace !== undefined && staff.brace === undefined) staff.brace = brace;
 					if (continueBar) staff.connectBarLines = 'end';
 					if (multilineVars.voices[id] === undefined) {
 						multilineVars.voices[id] = {staffNum: staff.index, index: staff.numVoices};

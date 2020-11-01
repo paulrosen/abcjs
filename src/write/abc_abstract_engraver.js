@@ -189,24 +189,27 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
 	  var isSingleLineStaff = staffLines === 1;
 	  this.createABCVoice(abcstaff.voices[v],tempo, s, v, isSingleLineStaff, voice);
 	  staffgroup.setStaffLimits(voice);
-			if(abcstaff.brace === "start" || (!staffgroup.brace && abcstaff.brace)){
-				if (!staffgroup.brace)
-					staffgroup.brace = [];
-				staffgroup.brace.push(new BraceElem(voice, "brace"));
-			} else if(abcstaff.brace === "end" && staffgroup.brace) {
-				staffgroup.brace[staffgroup.brace.length-1].setBottomStaff(voice);
-			} else if(abcstaff.brace === "continue" && staffgroup.brace) {
-				staffgroup.brace[staffgroup.brace.length-1].continuing(voice);
-			}
-			if(abcstaff.bracket === "start" || (!staffgroup.bracket && abcstaff.bracket)){
-				if (!staffgroup.bracket)
-					staffgroup.bracket = [];
-				staffgroup.bracket.push(new BraceElem(voice, "bracket"));
-			} else if(abcstaff.bracket === "end" && staffgroup.bracket) {
-				staffgroup.bracket[staffgroup.bracket.length-1].setBottomStaff(voice);
-			} else if(abcstaff.bracket === "continue" && staffgroup.bracket) {
-				staffgroup.bracket[staffgroup.bracket.length-1].continuing(voice);
-			}
+	  if (v === 0) {
+		  // only do brace and bracket processing on the first voice, otherwise it would be done twice.
+		  if (abcstaff.brace === "start" || (!staffgroup.brace && abcstaff.brace)) {
+			  if (!staffgroup.brace)
+				  staffgroup.brace = [];
+			  staffgroup.brace.push(new BraceElem(voice, "brace"));
+		  } else if (abcstaff.brace === "end" && staffgroup.brace) {
+			  staffgroup.brace[staffgroup.brace.length - 1].setBottomStaff(voice);
+		  } else if (abcstaff.brace === "continue" && staffgroup.brace) {
+			  staffgroup.brace[staffgroup.brace.length - 1].continuing(voice);
+		  }
+		  if (abcstaff.bracket === "start" || (!staffgroup.bracket && abcstaff.bracket)) {
+			  if (!staffgroup.bracket)
+				  staffgroup.bracket = [];
+			  staffgroup.bracket.push(new BraceElem(voice, "bracket"));
+		  } else if (abcstaff.bracket === "end" && staffgroup.bracket) {
+			  staffgroup.bracket[staffgroup.bracket.length - 1].setBottomStaff(voice);
+		  } else if (abcstaff.bracket === "continue" && staffgroup.bracket) {
+			  staffgroup.bracket[staffgroup.bracket.length - 1].continuing(voice);
+		  }
+	  }
   }
 };
 
