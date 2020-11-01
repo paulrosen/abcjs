@@ -1089,6 +1089,9 @@ var parseDirective = {};
 							warn("Directive \"" + cmd + "\" requires a number as a parameter.");
 						tune.formatting.fontboxpadding = tokens[0].floatt;
 						break;
+					case "stretchlast":
+						tune.formatting.stretchlast = (value === "true" || value === true);
+						break;
 					default:
 						warn("Formatting directive unrecognized: ", cmd, 0);
 				}
