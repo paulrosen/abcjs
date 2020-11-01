@@ -14,7 +14,8 @@ var layout;
 		for(i=0; i<abctune.lines.length; i++) {
 			abcLine = abctune.lines[i];
 			if (abcLine.staff) {
-				setXSpacing(renderer, width, space, abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
+				var isLastLine = (i === abctune.lines.length - 1) && (abctune.isLastLine == null || abctune.isLastLine);
+				setXSpacing(renderer, width, space, abcLine.staffGroup, abctune.formatting, isLastLine, false);
 				if (abcLine.staffGroup.w > maxWidth) maxWidth = abcLine.staffGroup.w;
 			}
 		}

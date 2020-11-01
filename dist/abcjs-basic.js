@@ -1064,8 +1064,10 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
     } else {
       ep.paddingtop = 10;
       ep.paddingbottom = -20;
-    }
+    } // This flag is used in layout.js for overall width layout, except for the last line.
 
+
+    tunes[k].isLastLine = k === tunes.length - 1;
     renderOne(lineEl, tunes[k], ep, tuneNumber);
     if (k === 0) tune.engraver = tunes[k].engraver;else {
       if (!tune.engraver.staffgroups) tune.engraver.staffgroups = tunes[k].engraver.staffgroups;else if (tunes[k].engraver.staffgroups.length > 0) tune.engraver.staffgroups.push(tunes[k].engraver.staffgroups[0]);
@@ -24000,7 +24002,8 @@ var layout;
       abcLine = abctune.lines[i];
 
       if (abcLine.staff) {
-        setXSpacing(renderer, width, space, abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
+        var isLastLine = i === abctune.lines.length - 1 && (abctune.isLastLine == null || abctune.isLastLine);
+        setXSpacing(renderer, width, space, abcLine.staffGroup, abctune.formatting, isLastLine, false);
         if (abcLine.staffGroup.w > maxWidth) maxWidth = abcLine.staffGroup.w;
       }
     } // Layout the beams and add the stems to the beamed notes.

@@ -156,6 +156,10 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 	        ep.paddingtop = 10;
 	        ep.paddingbottom = -20;
         }
+
+        // This flag is used in layout.js for overall width layout, except for the last line.
+        tunes[k].isLastLine = k === tunes.length - 1;
+
         renderOne(lineEl, tunes[k], ep, tuneNumber);
         if (k === 0)
             tune.engraver = tunes[k].engraver;
