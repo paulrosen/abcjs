@@ -16,7 +16,7 @@
 var soundsCache = require('./sounds-cache');
 var pitchToNoteName = require('./pitch-to-note-name');
 
-function placeNote(outputAudioBuffer, sampleRate, sound, startArray) {
+function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier) {
 	// sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
 	// len is in whole notes. Multiply by tempoMultiplier to get seconds.
 	var OfflineAC = window.OfflineAudioContext ||
@@ -39,7 +39,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray) {
 	// volume can be between 1 to 127. This translation to gain is just trial and error.
 	// The smaller the first number, the more dynamic range between the quietest to loudest.
 	// The larger the second number, the louder it will be in general.
-	var volume = (sound.volume / 96) * 3.0;
+	var volume = (sound.volume / 96) * volumeMultiplier;
 	source.gainNode = offlineCtx.createGain();
 
 	// add pan if supported and present

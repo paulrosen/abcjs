@@ -19,6 +19,7 @@ var Tune = require('../data/abc_tune');
 var EngraverController = require('../write/abc_engraver_controller');
 var Parse = require('../parse/abc_parse');
 var wrap = require('../parse/wrap_lines');
+var parseCommon = require("../parse/abc_common");
 
 var resizeDivs = {};
 function resizeOuter() {
@@ -155,6 +156,11 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
         } else {
 	        ep.paddingtop = 10;
 	        ep.paddingbottom = -20;
+        }
+        if (k < tunes.length-1) {
+            // If it is not the last line, force stretchlast. If it is, stretchlast might have been set by the input parameters.
+            tunes[k].formatting = parseCommon.clone(tunes[k].formatting);
+            tunes[k].formatting.stretchlast = true
         }
         renderOne(lineEl, tunes[k], ep, tuneNumber);
         if (k === 0)

@@ -111,7 +111,7 @@ var instrumentIndexToName = [
 	"lead_5_charang",
 	"lead_6_voice",
 	"lead_7_fifths",
-	"lead_8_bass__lead",
+	"lead_8_bass_lead",
 
 	"pad_1_new_age",
 	"pad_2_warm",

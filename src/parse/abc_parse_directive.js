@@ -897,8 +897,8 @@ var parseDirective = {};
 						multilineVars.staves.push({index: multilineVars.staves.length, numVoices: 0});
 					}
 					var staff = parseCommon.last(multilineVars.staves);
-					if (bracket !== undefined) staff.bracket = bracket;
-					if (brace !== undefined) staff.brace = brace;
+					if (bracket !== undefined && staff.bracket === undefined) staff.bracket = bracket;
+					if (brace !== undefined && staff.brace === undefined) staff.brace = brace;
 					if (continueBar) staff.connectBarLines = 'end';
 					if (multilineVars.voices[id] === undefined) {
 						multilineVars.voices[id] = {staffNum: staff.index, index: staff.numVoices};
@@ -1088,6 +1088,9 @@ var parseDirective = {};
 						if (tokens.length !== 1 || tokens[0].type !== 'number')
 							warn("Directive \"" + cmd + "\" requires a number as a parameter.");
 						tune.formatting.fontboxpadding = tokens[0].floatt;
+						break;
+					case "stretchlast":
+						tune.formatting.stretchlast = (value === "true" || value === true);
 						break;
 					default:
 						warn("Formatting directive unrecognized: ", cmd, 0);
