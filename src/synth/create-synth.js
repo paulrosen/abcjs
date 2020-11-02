@@ -26,8 +26,10 @@ var placeNote = require('./place-note');
 // TODO-PER: remove the midi tests from here: I don't think the object can be constructed unless it passes.
 var notSupportedMessage = "MIDI is not supported in this browser.";
 
-var defaultSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/";
-
+var defaultSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/abcjs/";
+// These are the original soundfonts supplied. They will need a volume boost:
+var alternateSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/";
+var alternateSoundFontUrl2 = "https://paulrosen.github.io/midi-js-soundfonts/MusyngKite/";
 
 function CreateSynth() {
 	var self = this;
@@ -53,6 +55,12 @@ function CreateSynth() {
 			return Promise.reject({ status: "NotSupported", message: notSupportedMessage});
 		var params = options.options ? options.options : {};
 		self.soundFontUrl = params.soundFontUrl ? params.soundFontUrl : defaultSoundFontUrl;
+		if (params.soundFontVolumeMultiplier)
+			self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;
+		else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2)
+			self.soundFontVolumeMultiplier = 10.0;
+		else
+			self.soundFontVolumeMultiplier = 1.0;
 		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure(options.bpm) : 1000);
 		self.pan = params.pan;
 		self.meterSize = 1;
@@ -224,7 +232,7 @@ function CreateSynth() {
 				var k = Object.keys(uniqueSounds)[key2];
 				var parts = k.split(":");
 				parts = { instrument: parts[0], pitch: parseInt(parts[1],10), volume: parseInt(parts[2], 10), len: parseFloat(parts[3]), pan: parseFloat(parts[4]), tempoMultiplier: parseFloat(parts[5])};
-				allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k]));
+				allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier));
 			}
 			self.audioBuffers = [audioBuffer];
 
