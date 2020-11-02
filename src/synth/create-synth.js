@@ -55,6 +55,8 @@ function CreateSynth() {
 			return Promise.reject({ status: "NotSupported", message: notSupportedMessage});
 		var params = options.options ? options.options : {};
 		self.soundFontUrl = params.soundFontUrl ? params.soundFontUrl : defaultSoundFontUrl;
+		if (self.soundFontUrl[self.soundFontUrl.length-1] !== '/')
+			self.soundFontUrl += '/';
 		if (params.soundFontVolumeMultiplier)
 			self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;
 		else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2)
