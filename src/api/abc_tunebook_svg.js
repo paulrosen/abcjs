@@ -157,7 +157,7 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 	        ep.paddingtop = 10;
 	        ep.paddingbottom = -20;
         }
-        if (k < tunes.length-2) {
+        if (k < tunes.length-1) {
             // If it is not the last line, force stretchlast. If it is, stretchlast might have been set by the input parameters.
             tunes[k].formatting = parseCommon.clone(tunes[k].formatting);
             tunes[k].formatting.stretchlast = true
