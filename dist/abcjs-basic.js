@@ -921,6 +921,8 @@ var Parse = __webpack_require__(/*! ../parse/abc_parse */ "./src/parse/abc_parse
 
 var wrap = __webpack_require__(/*! ../parse/wrap_lines */ "./src/parse/wrap_lines.js");
 
+var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
+
 var resizeDivs = {};
 
 function resizeOuter() {
@@ -1064,6 +1066,12 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
     } else {
       ep.paddingtop = 10;
       ep.paddingbottom = -20;
+    }
+
+    if (k < tunes.length - 1) {
+      // If it is not the last line, force stretchlast. If it is, stretchlast might have been set by the input parameters.
+      tunes[k].formatting = parseCommon.clone(tunes[k].formatting);
+      tunes[k].formatting.stretchlast = true;
     }
 
     renderOne(lineEl, tunes[k], ep, tuneNumber);
@@ -6126,8 +6134,8 @@ var parseDirective = {};
           }
 
           var staff = parseCommon.last(multilineVars.staves);
-          if (bracket !== undefined) staff.bracket = bracket;
-          if (brace !== undefined) staff.brace = brace;
+          if (bracket !== undefined && staff.bracket === undefined) staff.bracket = bracket;
+          if (brace !== undefined && staff.brace === undefined) staff.brace = brace;
           if (continueBar) staff.connectBarLines = 'end';
 
           if (multilineVars.voices[id] === undefined) {
@@ -6351,6 +6359,10 @@ var parseDirective = {};
           case "fontboxpadding":
             if (tokens.length !== 1 || tokens[0].type !== 'number') warn("Directive \"" + cmd + "\" requires a number as a parameter.");
             tune.formatting.fontboxpadding = tokens[0].floatt;
+            break;
+
+          case "stretchlast":
+            tune.formatting.stretchlast = value === "true" || value === true;
             break;
 
           default:
@@ -14806,7 +14818,10 @@ var placeNote = __webpack_require__(/*! ./place-note */ "./src/synth/place-note.
 
 
 var notSupportedMessage = "MIDI is not supported in this browser.";
-var defaultSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/";
+var defaultSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/abcjs/"; // These are the original soundfonts supplied. They will need a volume boost:
+
+var alternateSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/";
+var alternateSoundFontUrl2 = "https://paulrosen.github.io/midi-js-soundfonts/MusyngKite/";
 
 function CreateSynth() {
   var self = this;
@@ -14838,6 +14853,8 @@ function CreateSynth() {
     });
     var params = options.options ? options.options : {};
     self.soundFontUrl = params.soundFontUrl ? params.soundFontUrl : defaultSoundFontUrl;
+    if (self.soundFontUrl[self.soundFontUrl.length - 1] !== '/') self.soundFontUrl += '/';
+    if (params.soundFontVolumeMultiplier) self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2) self.soundFontVolumeMultiplier = 10.0;else self.soundFontVolumeMultiplier = 1.0;
     self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : options.visualObj ? options.visualObj.millisecondsPerMeasure(options.bpm) : 1000;
     self.pan = params.pan;
     self.meterSize = 1;
@@ -15011,7 +15028,7 @@ function CreateSynth() {
           pan: parseFloat(parts[4]),
           tempoMultiplier: parseFloat(parts[5])
         };
-        allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k]));
+        allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier));
       }
 
       self.audioBuffers = [audioBuffer];
@@ -15390,7 +15407,7 @@ module.exports = getMidiFile;
 //    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-var instrumentIndexToName = ["acoustic_grand_piano", "bright_acoustic_piano", "electric_grand_piano", "honkytonk_piano", "electric_piano_1", "electric_piano_2", "harpsichord", "clavinet", "celesta", "glockenspiel", "music_box", "vibraphone", "marimba", "xylophone", "tubular_bells", "dulcimer", "drawbar_organ", "percussive_organ", "rock_organ", "church_organ", "reed_organ", "accordion", "harmonica", "tango_accordion", "acoustic_guitar_nylon", "acoustic_guitar_steel", "electric_guitar_jazz", "electric_guitar_clean", "electric_guitar_muted", "overdriven_guitar", "distortion_guitar", "guitar_harmonics", "acoustic_bass", "electric_bass_finger", "electric_bass_pick", "fretless_bass", "slap_bass_1", "slap_bass_2", "synth_bass_1", "synth_bass_2", "violin", "viola", "cello", "contrabass", "tremolo_strings", "pizzicato_strings", "orchestral_harp", "timpani", "string_ensemble_1", "string_ensemble_2", "synth_strings_1", "synth_strings_2", "choir_aahs", "voice_oohs", "synth_choir", "orchestra_hit", "trumpet", "trombone", "tuba", "muted_trumpet", "french_horn", "brass_section", "synth_brass_1", "synth_brass_2", "soprano_sax", "alto_sax", "tenor_sax", "baritone_sax", "oboe", "english_horn", "bassoon", "clarinet", "piccolo", "flute", "recorder", "pan_flute", "blown_bottle", "shakuhachi", "whistle", "ocarina", "lead_1_square", "lead_2_sawtooth", "lead_3_calliope", "lead_4_chiff", "lead_5_charang", "lead_6_voice", "lead_7_fifths", "lead_8_bass__lead", "pad_1_new_age", "pad_2_warm", "pad_3_polysynth", "pad_4_choir", "pad_5_bowed", "pad_6_metallic", "pad_7_halo", "pad_8_sweep", "fx_1_rain", "fx_2_soundtrack", "fx_3_crystal", "fx_4_atmosphere", "fx_5_brightness", "fx_6_goblins", "fx_7_echoes", "fx_8_scifi", "sitar", "banjo", "shamisen", "koto", "kalimba", "bagpipe", "fiddle", "shanai", "tinkle_bell", "agogo", "steel_drums", "woodblock", "taiko_drum", "melodic_tom", "synth_drum", "reverse_cymbal", "guitar_fret_noise", "breath_noise", "seashore", "bird_tweet", "telephone_ring", "helicopter", "applause", "gunshot", "percussion"];
+var instrumentIndexToName = ["acoustic_grand_piano", "bright_acoustic_piano", "electric_grand_piano", "honkytonk_piano", "electric_piano_1", "electric_piano_2", "harpsichord", "clavinet", "celesta", "glockenspiel", "music_box", "vibraphone", "marimba", "xylophone", "tubular_bells", "dulcimer", "drawbar_organ", "percussive_organ", "rock_organ", "church_organ", "reed_organ", "accordion", "harmonica", "tango_accordion", "acoustic_guitar_nylon", "acoustic_guitar_steel", "electric_guitar_jazz", "electric_guitar_clean", "electric_guitar_muted", "overdriven_guitar", "distortion_guitar", "guitar_harmonics", "acoustic_bass", "electric_bass_finger", "electric_bass_pick", "fretless_bass", "slap_bass_1", "slap_bass_2", "synth_bass_1", "synth_bass_2", "violin", "viola", "cello", "contrabass", "tremolo_strings", "pizzicato_strings", "orchestral_harp", "timpani", "string_ensemble_1", "string_ensemble_2", "synth_strings_1", "synth_strings_2", "choir_aahs", "voice_oohs", "synth_choir", "orchestra_hit", "trumpet", "trombone", "tuba", "muted_trumpet", "french_horn", "brass_section", "synth_brass_1", "synth_brass_2", "soprano_sax", "alto_sax", "tenor_sax", "baritone_sax", "oboe", "english_horn", "bassoon", "clarinet", "piccolo", "flute", "recorder", "pan_flute", "blown_bottle", "shakuhachi", "whistle", "ocarina", "lead_1_square", "lead_2_sawtooth", "lead_3_calliope", "lead_4_chiff", "lead_5_charang", "lead_6_voice", "lead_7_fifths", "lead_8_bass_lead", "pad_1_new_age", "pad_2_warm", "pad_3_polysynth", "pad_4_choir", "pad_5_bowed", "pad_6_metallic", "pad_7_halo", "pad_8_sweep", "fx_1_rain", "fx_2_soundtrack", "fx_3_crystal", "fx_4_atmosphere", "fx_5_brightness", "fx_6_goblins", "fx_7_echoes", "fx_8_scifi", "sitar", "banjo", "shamisen", "koto", "kalimba", "bagpipe", "fiddle", "shanai", "tinkle_bell", "agogo", "steel_drums", "woodblock", "taiko_drum", "melodic_tom", "synth_drum", "reverse_cymbal", "guitar_fret_noise", "breath_noise", "seashore", "bird_tweet", "telephone_ring", "helicopter", "applause", "gunshot", "percussion"];
 module.exports = instrumentIndexToName;
 
 /***/ }),
@@ -15674,7 +15691,7 @@ var soundsCache = __webpack_require__(/*! ./sounds-cache */ "./src/synth/sounds-
 
 var pitchToNoteName = __webpack_require__(/*! ./pitch-to-note-name */ "./src/synth/pitch-to-note-name.js");
 
-function placeNote(outputAudioBuffer, sampleRate, sound, startArray) {
+function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier) {
   // sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
   // len is in whole notes. Multiply by tempoMultiplier to get seconds.
   var OfflineAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
@@ -15696,7 +15713,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray) {
   // The smaller the first number, the more dynamic range between the quietest to loudest.
   // The larger the second number, the louder it will be in general.
 
-  var volume = sound.volume / 96 * 3.0;
+  var volume = sound.volume / 96 * volumeMultiplier;
   source.gainNode = offlineCtx.createGain(); // add pan if supported and present
 
   if (sound.pan && offlineCtx.createStereoPanner) {
@@ -16841,22 +16858,25 @@ var AbstractEngraver;
       this.createABCVoice(abcstaff.voices[v], tempo, s, v, isSingleLineStaff, voice);
       staffgroup.setStaffLimits(voice);
 
-      if (abcstaff.brace === "start" || !staffgroup.brace && abcstaff.brace) {
-        if (!staffgroup.brace) staffgroup.brace = [];
-        staffgroup.brace.push(new BraceElem(voice, "brace"));
-      } else if (abcstaff.brace === "end" && staffgroup.brace) {
-        staffgroup.brace[staffgroup.brace.length - 1].setBottomStaff(voice);
-      } else if (abcstaff.brace === "continue" && staffgroup.brace) {
-        staffgroup.brace[staffgroup.brace.length - 1].continuing(voice);
-      }
+      if (v === 0) {
+        // only do brace and bracket processing on the first voice, otherwise it would be done twice.
+        if (abcstaff.brace === "start" || !staffgroup.brace && abcstaff.brace) {
+          if (!staffgroup.brace) staffgroup.brace = [];
+          staffgroup.brace.push(new BraceElem(voice, "brace"));
+        } else if (abcstaff.brace === "end" && staffgroup.brace) {
+          staffgroup.brace[staffgroup.brace.length - 1].setBottomStaff(voice);
+        } else if (abcstaff.brace === "continue" && staffgroup.brace) {
+          staffgroup.brace[staffgroup.brace.length - 1].continuing(voice);
+        }
 
-      if (abcstaff.bracket === "start" || !staffgroup.bracket && abcstaff.bracket) {
-        if (!staffgroup.bracket) staffgroup.bracket = [];
-        staffgroup.bracket.push(new BraceElem(voice, "bracket"));
-      } else if (abcstaff.bracket === "end" && staffgroup.bracket) {
-        staffgroup.bracket[staffgroup.bracket.length - 1].setBottomStaff(voice);
-      } else if (abcstaff.bracket === "continue" && staffgroup.bracket) {
-        staffgroup.bracket[staffgroup.bracket.length - 1].continuing(voice);
+        if (abcstaff.bracket === "start" || !staffgroup.bracket && abcstaff.bracket) {
+          if (!staffgroup.bracket) staffgroup.bracket = [];
+          staffgroup.bracket.push(new BraceElem(voice, "bracket"));
+        } else if (abcstaff.bracket === "end" && staffgroup.bracket) {
+          staffgroup.bracket[staffgroup.bracket.length - 1].setBottomStaff(voice);
+        } else if (abcstaff.bracket === "continue" && staffgroup.bracket) {
+          staffgroup.bracket[staffgroup.bracket.length - 1].continuing(voice);
+        }
       }
     }
   };

@@ -1,3 +1,21 @@
+# Version 6.0.0-beta.21
+
+## Bugs
+
+* Don't require soundFontUrl to end in a slash.
+
+* Force stretchlast on all lines except the last when printing one svg per line.
+
+* Fix placement of brackets and braces when there are two voices on a staff.
+
+* Fix typo in lead_8_bass_lead instrument name.
+
+## Features
+
+* Added soundFontVolumeMultiplier parameter; 
+    
+* made the abcjs soundfont the default.
+
 # Version 6.0.0-beta.20
 
 ## Bugs
