@@ -365,7 +365,7 @@ var Tune = function() {
 					voicesArr[v] = [];
 				var elements = voices[v].children;
 				for (var elem = 0; elem < elements.length; elem++) {
-					voicesArr[v].push({top: top, height: height, line: line, measureNumber: measureNumber, elem: elements[elem]});
+					voicesArr[v].push({top: top, height: height, line: group.line, measureNumber: measureNumber, elem: elements[elem]});
 					if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
 						measureNumber++;
 					if (elements[elem].type === 'note' || elements[elem].type === 'rest')
