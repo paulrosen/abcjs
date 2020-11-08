@@ -2,6 +2,7 @@
  * Begin a group of glyphs that will always be moved, scaled and highlighted together
  */
 
+const roundNumber = require("./round-number");
 var elementGroup;
 
 (function () {
@@ -27,8 +28,8 @@ var elementGroup;
 		path = path || [];
 		if (path.length === 0) return;
 		path[0][0] = "m";
-		path[0][1] -= this.lastM[0];
-		path[0][2] -= this.lastM[1];
+		path[0][1] = roundNumber(path[0][1] - this.lastM[0]);
+		path[0][2] = roundNumber(path[0][2] - this.lastM[1]);
 		this.lastM[0] += path[0][1];
 		this.lastM[1] += path[0][2];
 		this.path.push(path[0]);

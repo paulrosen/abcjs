@@ -1,6 +1,7 @@
 var sprintf = require('./sprintf');
 var renderText = require('./text');
 var printPath = require('./print-path');
+const roundNumber = require("./round-number");
 
 function drawTriplet(renderer, params, selectables) {
 	var xTextPos;
@@ -16,7 +17,7 @@ function drawTriplet(renderer, params, selectables) {
 }
 
 function drawLine(l, t, r, b) {
-	return sprintf("M %f %f L %f %f", l, t, r, b);
+	return sprintf("M %f %f L %f %f", roundNumber(l), roundNumber(t), roundNumber(r), roundNumber(b));
 }
 
 function drawBracket(renderer, x1, y1, x2, y2) {

@@ -1,4 +1,5 @@
 var printPath = require('./print-path');
+const roundNumber = require("./round-number");
 
 function drawBeam(renderer, params) {
 	if (params.beams.length === 0) return;
@@ -37,15 +38,17 @@ function drawBeam(renderer, params) {
 
 function draw(renderer, startX, startY, endX, endY, dy) {
 	// the X coordinates are actual coordinates, but the Y coordinates are in pitches.
-	startY = renderer.calcY(startY);
-	endY = renderer.calcY(endY);
+	startY = roundNumber(renderer.calcY(startY));
+	endY = roundNumber(renderer.calcY(endY));
+	startX = roundNumber(startX);
+	endX = roundNumber(endX);
+	var startY2 = roundNumber(startY+dy);
+	var endY2 = roundNumber(endY+dy);
 	return "M" + startX + " " + startY + " L" + endX + " " + endY +
-		"L" + endX + " " + (endY + dy) + " L" + startX + " " + (startY + dy) + "z";
+		"L" + endX + " " + endY2 + " L" + startX + " " + startY2 + "z";
 }
 
 function getSlope(renderer, startX, startY, endX, endY) {
-	startY = startY;
-	endY = endY;
 	return (endY - startY) / (endX - startX);
 }
 

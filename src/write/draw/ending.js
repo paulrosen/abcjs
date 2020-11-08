@@ -1,24 +1,25 @@
 var sprintf = require('./sprintf');
 var renderText = require('./text');
 var printPath = require('./print-path');
+const roundNumber = require("./round-number");
 
 function drawEnding(renderer, params, linestartx, lineendx, selectables) {
 	if (params.pitch === undefined)
 		window.console.error("Ending Element y-coordinate not set.");
-	var y = renderer.calcY(params.pitch);
+	var y = roundNumber(renderer.calcY(params.pitch));
 	var height = 20;
 	var pathString = '';
 
 	if (params.anchor1) {
-		linestartx = params.anchor1.x+params.anchor1.w;
+		linestartx = roundNumber(params.anchor1.x+params.anchor1.w);
 		pathString += sprintf("M %f %f L %f %f ",
-			linestartx, y, linestartx, y+height);
+			linestartx, y, linestartx, roundNumber(y+height));
 	}
 
 	if (params.anchor2) {
-		lineendx = params.anchor2.x;
+		lineendx = roundNumber(params.anchor2.x);
 		pathString += sprintf("M %f %f L %f %f ",
-			lineendx, y, lineendx, y+height);
+			lineendx, y, lineendx, roundNumber(y+height));
 	}
 
 	pathString += sprintf("M %f %f L %f %f ",
@@ -28,8 +29,8 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
 	printPath(renderer, {path: pathString, stroke: "#000000", fill: "#000000"});
 	if (params.anchor1)
 		renderText(renderer, {
-			x: linestartx + 5,
-			y: renderer.calcY(params.pitch - 0.5),
+			x: roundNumber(linestartx + 5),
+			y: roundNumber(renderer.calcY(params.pitch - 0.5)),
 			text: params.text,
 			type: 'repeatfont',
 			klass: 'ending',
