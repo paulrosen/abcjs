@@ -60,7 +60,9 @@ function CreateSynth() {
 		if (params.soundFontVolumeMultiplier)
 			self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;
 		else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2)
-			self.soundFontVolumeMultiplier = 10.0;
+			self.soundFontVolumeMultiplier = 5.0;
+		else if (self.soundFontUrl === defaultSoundFontUrl)
+			self.soundFontVolumeMultiplier = 0.5;
 		else
 			self.soundFontVolumeMultiplier = 1.0;
 		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure(options.bpm) : 1000);
