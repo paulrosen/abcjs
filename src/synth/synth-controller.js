@@ -260,9 +260,9 @@ function SynthController() {
 		}
 	};
 
-	self.lineEndCallback = function (data) {
+	self.lineEndCallback = function (lineEvent, leftEvent) {
 		if (self.cursorControl && self.cursorControl.onLineEnd && typeof self.cursorControl.onLineEnd  === 'function')
-			self.cursorControl.onLineEnd(data);
+			self.cursorControl.onLineEnd(lineEvent, leftEvent);
 	};
 
 	self.getUrl = function () {

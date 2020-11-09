@@ -89,7 +89,7 @@ var TimingCallbacks = function(target, params) {
 		if (self.eventCallback && self.currentEvent > 0 && self.noteTimings[self.currentEvent - 1].type === 'event')
 			self.eventCallback(self.noteTimings[self.currentEvent - 1]);
 		if (self.lineEndCallback)
-			self.lineEndCallback(self.lineEndTimings[self.currentLine])
+			self.lineEndCallback(self.lineEndTimings[self.currentLine], self.noteTimings[self.currentEvent])
 
 		// console.log("currentPercent="+currentPercent+
 		// 	" newSeekPercent="+self.newSeekPercent+
