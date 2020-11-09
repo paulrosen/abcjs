@@ -52,6 +52,7 @@ var TimingCallbacks = function(target, params) {
 	self.startTime = null;
 	self.currentBeat = 0;
 	self.currentEvent = 0;
+	self.currentLine = 0;
 	self.isPaused = false;
 	self.isRunning = false;
 	self.pausedTime = null;
@@ -70,12 +71,14 @@ var TimingCallbacks = function(target, params) {
 		var currentTime = timestamp - self.startTime;
 		currentTime += 16; // Add a little slop because this function isn't called exactly.
 
-		var lineStart = 0;
 		self.currentEvent = 0;
 		while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
 			self.currentEvent++;
-			if (self.lineEndCallback && self.lineEndTimings['e'+self.currentEvent])
-				lineStart = self.currentEvent;
+		}
+
+		self.currentLine = 0;
+		while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < currentTime) {
+			self.currentLine++;
 		}
 
 		var oldBeat = self.currentBeat;
@@ -86,7 +89,7 @@ var TimingCallbacks = function(target, params) {
 		if (self.eventCallback && self.currentEvent > 0 && self.noteTimings[self.currentEvent - 1].type === 'event')
 			self.eventCallback(self.noteTimings[self.currentEvent - 1]);
 		if (self.lineEndCallback)
-			self.lineEndCallback(self.lineEndTimings['e'+lineStart])
+			self.lineEndCallback(self.lineEndTimings[self.currentLine])
 
 		// console.log("currentPercent="+currentPercent+
 		// 	" newSeekPercent="+self.newSeekPercent+
@@ -125,8 +128,11 @@ var TimingCallbacks = function(target, params) {
 				if (self.eventCallback && self.noteTimings[self.currentEvent].type === 'event')
 					self.eventCallback(self.noteTimings[self.currentEvent]);
 				self.currentEvent++;
-				if (self.lineEndCallback && self.lineEndTimings['e'+self.currentEvent])
-					self.lineEndCallback(self.lineEndTimings['e'+self.currentEvent]);
+			}
+			if (self.lineEndCallback && self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < currentTime) {
+				var leftEvent = self.noteTimings[self.currentEvent].milliseconds === currentTime ? self.noteTimings[self.currentEvent] : self.noteTimings[self.currentEvent-1]
+				self.lineEndCallback(self.lineEndTimings[self.currentLine], leftEvent);
+				self.currentLine++;
 			}
 			if (currentTime < self.lastMoment) {
 				requestAnimationFrame(self.doTiming);
@@ -257,12 +263,12 @@ var TimingCallbacks = function(target, params) {
 function getLineEndTimings(timings, anticipation) {
 	// Returns an array of milliseconds to call the lineEndCallback.
 	// This figures out the timing of the beginning of each line and subtracts the anticipation from it.
-	var callbackTimes = {};
+	var callbackTimes = [];
 	var lastTop = null;
 	for (var i = 0; i < timings.length; i++) {
 		var timing = timings[i];
 		if (timing.top !== lastTop) {
-			callbackTimes['e'+i] = { measureNumber: Math.floor(timing.milliseconds/timing.millisecondsPerMeasure), milliseconds: timing.milliseconds - anticipation, top: timing.top, bottom: timing.top+timing.height };
+			callbackTimes.push({ measureNumber: timing.measureNumber, milliseconds: timing.milliseconds-anticipation, top: timing.top, bottom: timing.top+timing.height });
 			lastTop = timing.top;
 		}
 	}

@@ -102,7 +102,7 @@ function SynthController() {
 				qpm: self.currentTempo,
 
 				extraMeasuresAtBeginning: self.cursorControl ? self.cursorControl.extraMeasuresAtBeginning : undefined,
-				lineEndAnticipation: self.cursorControl ? self.cursorControl.lineEndAnticipation : undefined,
+				lineEndAnticipation: self.cursorControl ? self.cursorControl.lineEndAnticipation : 0,
 				beatSubdivisions: subdivisions,
 			});
 			if (self.cursorControl && self.cursorControl.onReady && typeof self.cursorControl.onReady  === 'function')
