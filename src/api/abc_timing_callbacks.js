@@ -129,7 +129,7 @@ var TimingCallbacks = function(target, params) {
 					self.eventCallback(self.noteTimings[self.currentEvent]);
 				self.currentEvent++;
 			}
-			if (self.lineEndCallback && self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < currentTime) {
+			if (self.lineEndCallback && self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < currentTime && self.currentEvent < self.noteTimings.length) {
 				var leftEvent = self.noteTimings[self.currentEvent].milliseconds === currentTime ? self.noteTimings[self.currentEvent] : self.noteTimings[self.currentEvent-1]
 				self.lineEndCallback(self.lineEndTimings[self.currentLine], leftEvent);
 				self.currentLine++;
@@ -179,6 +179,15 @@ var TimingCallbacks = function(target, params) {
 				position.top = ev.top;
 				position.height = ev.height;
 
+				// timestamp = the time passed in from the animation timer
+				// self.startTime = the time that the tune was started (if there was seeking or pausing, it is adjusted to keep the math the same)
+				// ev = the event that is either happening now or has most recently passed.
+				// ev.milliseconds = the time that the current event starts (relative to self.startTime)
+				// endMs = the time that the next event starts
+				// ev.endX = the x coordinate that the next event happens (or the end of the line or repeat measure)
+				// ev.left = the x coordinate of the current event
+				//
+				// The output is the X coordinate of the current cursor location. It is calculated with the ratio of the length of the event and the width of it.
 				var offMs = Math.max(0, timestamp-self.startTime-ev.milliseconds); // Offset in time from the last beat
 				var gapMs = endMs - ev.milliseconds; // Length of this event in time
 				var gapPx = ev.endX - ev.left; // The length in pixels
