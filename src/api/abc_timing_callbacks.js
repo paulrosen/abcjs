@@ -125,8 +125,13 @@ var TimingCallbacks = function(target, params) {
 			var currentTime = timestamp - self.startTime;
 			currentTime += 16; // Add a little slop because this function isn't called exactly.
 			while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
-				if (self.eventCallback && self.noteTimings[self.currentEvent].type === 'event')
+				if (self.eventCallback && self.noteTimings[self.currentEvent].type === 'event') {
+					var thisStartTime = self.startTime; // the event callback can call seek and change the position from beneath us.
 					self.eventCallback(self.noteTimings[self.currentEvent]);
+					if (thisStartTime !== self.startTime) {
+						currentTime = timestamp - self.startTime;
+					}
+				}
 				self.currentEvent++;
 			}
 			if (self.lineEndCallback && self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < currentTime && self.currentEvent < self.noteTimings.length) {
@@ -196,9 +201,24 @@ var TimingCallbacks = function(target, params) {
 			}
 
 			var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
-			self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment, position);
+			self.beatCallback(
+				self.currentBeat / self.beatSubdivisions,
+				self.totalBeats / self.beatSubdivisions,
+				self.lastMoment,
+				position,
+				{
+					// Output debug info
+					timestamp: timestamp,
+					startTime: self.startTime,
+					ev: ev,
+					endMs: endMs,
+					offMs: offMs,
+					offPs: offPx,
+					gapMs: gapMs,
+					gapPx: gapPx
+				});
 			if (thisStartTime !== self.startTime) {
-				return timestamp - self.startTime + 16; // Add a little slop because this function isn't called exactly.
+				return timestamp - self.startTime;
 			} else
 				self.currentBeat++;
 		}
