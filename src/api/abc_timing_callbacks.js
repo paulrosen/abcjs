@@ -180,6 +180,7 @@ var TimingCallbacks = function(target, params) {
 			}
 
 			var position = {};
+			var debugInfo = {};
 			if (ev) {
 				position.top = ev.top;
 				position.height = ev.height;
@@ -198,16 +199,7 @@ var TimingCallbacks = function(target, params) {
 				var gapPx = ev.endX - ev.left; // The length in pixels
 				var offPx = offMs * gapPx / gapMs;
 				position.left = ev.left + offPx;
-			}
-
-			var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
-			self.beatCallback(
-				self.currentBeat / self.beatSubdivisions,
-				self.totalBeats / self.beatSubdivisions,
-				self.lastMoment,
-				position,
-				{
-					// Output debug info
+				debugInfo = {
 					timestamp: timestamp,
 					startTime: self.startTime,
 					ev: ev,
@@ -216,7 +208,21 @@ var TimingCallbacks = function(target, params) {
 					offPs: offPx,
 					gapMs: gapMs,
 					gapPx: gapPx
-				});
+				};
+			} else {
+				debugInfo = {
+					timestamp: timestamp,
+					startTime: self.startTime,
+				};
+			}
+
+			var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
+			self.beatCallback(
+				self.currentBeat / self.beatSubdivisions,
+				self.totalBeats / self.beatSubdivisions,
+				self.lastMoment,
+				position,
+				debugInfo);
 			if (thisStartTime !== self.startTime) {
 				return timestamp - self.startTime;
 			} else
