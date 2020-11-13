@@ -122,9 +122,11 @@
 <div class="data">${JSON.stringify(ev, null, "\t")}</div>
 				</div>`;
 			},
-			lineEndCallback(info) {
+			lineEndCallback( info, event, details) {
 				this.outputStream += `<div class="line-end-callback"><div class="header">LINE END CALLBACK</div>
 <div class="data">${JSON.stringify(info, null, "\t")}</div>
+<div class="data">${JSON.stringify(event, null, "\t")}</div>
+<div class="data">${JSON.stringify(details, null, "\t")}</div>
 				</div>`;
 			},
 		},

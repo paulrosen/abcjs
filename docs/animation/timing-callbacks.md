@@ -94,7 +94,7 @@ ev = {
 This will be called as the cursor is approaching the end of a line of music. This is useful if there is more than a screen's worth of music; it can be used to scroll the page at the right time.
 
 ```javascript
-function lineEndCallback(info) {}
+function lineEndCallback(info, event, details) {}
 ```
 
 The parameter `info` looks like this:
@@ -106,6 +106,16 @@ info = {
     "bottom": number // The number of pixels from the top of the svg to the bottom of the cursor
 }
 ```
+The parameter `event` is the standard note event.
+
+The parameter `details` looks like this:
+```javascript
+details = {
+    "line": number, // the current line number (zero-based)
+    "endTimings": array // the array of the timings for each line
+}
+```
+The `endTimings` array elements are of the same type as the `info` parameter.
 
 ## Functions
 
