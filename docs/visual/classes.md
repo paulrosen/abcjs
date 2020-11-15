@@ -36,7 +36,9 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 | abcjs-part-order | The part order indicator at the top. |
 | abcjs-rest | Everything to do with a rest. |
 | abcjs-rhythm | The rhythm text. |
-| abcjs-slur | Slurs and ties. |
+| abcjs-slur | Slurs and ties. (backwards compatible) |
+| abcjs-tie | Tie. |
+| abcjs-legato | Slur. Because "abcjs-slur" was historically used to indicate either a slur or a tie this indicates only a slur. |
 | abcjs-staff  | The horizontal lines that make up the staff. |
 | abcjs-staff-extra | Clefs, key signatures, time signatures. |
 | abcjs-stem | |
