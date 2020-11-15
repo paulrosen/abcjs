@@ -69,6 +69,7 @@ var drawArc = function(renderer, x1, x2, pitch1, pitch2, above, klass, isTie, do
 		klass += ' slur';
 	else
 		klass = 'slur';
+	klass += isTie ? ' tie' : ' legato';
 	var ret;
 	if (dotted) {
 		klass += ' dotted';
