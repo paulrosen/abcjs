@@ -23,7 +23,7 @@ function FreeText(text, vskip, getFontAndAttr, paddingLeft, width, getTextSize) 
 				isCentered = true;
 			var alignment = isCentered ? 'middle' : 'start';
 			var x = isCentered ? width / 2 : paddingLeft;
-			this.rows.push({left: x, text: text[i].text, font: currentFont, klass: 'defined-text', anchor: "start", absElemType: "freeText"});
+			this.rows.push({left: x, text: text[i].text, font: currentFont, klass: 'defined-text', anchor: alignment, absElemType: "freeText"});
 			size = getTextSize.calc(text[i].text, currentFont, 'defined-text');
 			this.rows.push({move: size.height});
 		}
