@@ -150,6 +150,8 @@ var parseCommon = require("../parse/abc_common");
 		var voices = [];
 		var inCrescendo = [];
 		var inDiminuendo = [];
+		var durationCounter = [0];
+		var tempoChanges = {};
 		var currentVolume;
 		var startRepeatPlaceholder = []; // There is a place holder for each voice.
 		var skipEndingPlaceholder = []; // This is the place where the first ending starts.
@@ -239,7 +241,7 @@ var parseCommon = require("../parse/abc_common");
 
 									// regular items are just pushed.
 									if (!elem.rest || elem.rest.type !== 'spacer') {
-										var noteElem = { elem: elem, el_type: "note" }; // Make a copy so that modifications aren't kept except for adding the midiPitches
+										var noteElem = { elem: elem, el_type: "note", timing: durationCounter[voiceNumber] }; // Make a copy so that modifications aren't kept except for adding the midiPitches
 										if (elem.style)
 											noteElem.style = elem.style;
 										else if (style[voiceNumber])
@@ -273,6 +275,7 @@ var parseCommon = require("../parse/abc_common");
 											chordVoiceOffThisBar(voices)
 										}
 										noteEventsInBar++;
+										durationCounter[voiceNumber] += noteElem.duration;
 									}
 									break;
 								case "key":
@@ -296,7 +299,8 @@ var parseCommon = require("../parse/abc_common");
 									break;
 								case "tempo":
 									qpm = interpretTempo(elem, abctune.getBeatLength());
-									voices[voiceNumber].push({ el_type: 'tempo', qpm: qpm });
+									voices[voiceNumber].push({ el_type: 'tempo', qpm: qpm, timing: durationCounter[voiceNumber] });
+									tempoChanges[''+durationCounter[voiceNumber]] = { el_type: 'tempo', qpm: qpm, timing: durationCounter[voiceNumber] };
 									break;
 								case "bar":
 									if (noteEventsInBar > 0) // don't add two bars in a row.
@@ -395,6 +399,8 @@ var parseCommon = require("../parse/abc_common");
 							}
 						}
 						voiceNumber++;
+						if (!durationCounter[voiceNumber])
+							durationCounter[voiceNumber] = 0;
 					}
 				}
 
@@ -473,6 +479,9 @@ var parseCommon = require("../parse/abc_common");
 				}
 			}
 		}
+		// If there are tempo changes, make sure they are in all the voices. This must be done post process because all the elements in all the voices need to be created first.
+		insertTempoChanges(voices, tempoChanges);
+
 		if (drumIntro) {
 			var pickups = abctune.getPickupLength();
 			// add some measures of rests to the start of each track.
@@ -522,6 +531,26 @@ var parseCommon = require("../parse/abc_common");
 			}
 		}
 		return null;
+	}
+
+	function insertTempoChanges(voices, tempoChanges) {
+		var changePositions = Object.keys(tempoChanges);
+		for (var i = 0; i < voices.length; i++) {
+			var voice = voices[i];
+			for (var j = 0; j < voice.length; j++) {
+				var el = voice[j];
+				if (changePositions.indexOf(''+el.timing) >= 0) {
+					if (el.el_type === "tempo") {
+						el.qpm = tempoChanges[''+el.timing].qpm;
+						j++; // when there is a tempo element the next element has the same timing and we don't want it to match the second time.
+					} else {
+						console.log("tempo position", i, j, el);
+						voices[i].splice(j, 0, {el_type: "tempo", qpm: tempoChanges[''+el.timing].qpm, timing: el.timing});
+						j +=2; // skip the element we just inserted.
+					}
+				}
+			}
+		}
 	}
 
 	function chordVoiceOffThisBar(voices) {
