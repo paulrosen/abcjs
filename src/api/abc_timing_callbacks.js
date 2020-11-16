@@ -136,7 +136,7 @@ var TimingCallbacks = function(target, params) {
 			}
 			if (self.lineEndCallback && self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < currentTime && self.currentEvent < self.noteTimings.length) {
 				var leftEvent = self.noteTimings[self.currentEvent].milliseconds === currentTime ? self.noteTimings[self.currentEvent] : self.noteTimings[self.currentEvent-1]
-				self.lineEndCallback(self.lineEndTimings[self.currentLine], leftEvent, { line: self.currentLine, endTimings: self.lineEndTimings });
+				self.lineEndCallback(self.lineEndTimings[self.currentLine], leftEvent, { line: self.currentLine, endTimings: self.lineEndTimings, currentTime: currentTime });
 				self.currentLine++;
 			}
 			if (currentTime < self.lastMoment) {
