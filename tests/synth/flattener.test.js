@@ -2277,7 +2277,121 @@ describe("Audio flattener", function() {
 
 };
 
+	//////////////////////////////////////////////////////////
 
+	var abcTempoThreeVoices = 'X: 1\n' +
+		'T: tempo-change-three-voices\n' +
+		'%%score { ( 1 3 ) | 2 }\n' +
+		'Q:1/4=70\n' +
+		'M: 4/4\n' +
+		'L: 1/8\n' +
+		'K: C\n' +
+		'V:1 clef=treble\n' +
+		'V:3 clef=treble\n' +
+		'V:2 clef=bass\n' +
+		'V:1\n' +
+		'a2b2c\'2b2 | [Q:1/4=80] a2b2c\'2b2 | a2b2c\'2b2 |\n' +
+		'a2b2c\'2b2 | a2b2c\'2b2 | a2b2c\'2b2 :|\n' +
+		'V:3\n' +
+		'E8 | F8 | A8 |\n' +
+		'E8 | [Q:1/4=100] F8 | A8 :|\n' +
+		'V:2\n' +
+		'A,4 G,4 | A,4 G,4 |[Q:1/4=90] F,4 E,4 |\n' +
+		'A,4 G,4 |  A,4 G,4 | [Q:1/4=120] F,4 E,4 :|\n';
+
+	var expectedTempoThreeVoices = {"tempo":70,"instrument":0,"tracks":[
+		[
+			{"cmd":"program","channel":0,"instrument":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":0,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":95,"start":0.25,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":95,"start":0.5,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":95,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":1,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":1.21875,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":1.4375,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":1.65625,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":1.875,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":2.09375,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":2.3125,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":2.53125,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":2.75,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":2.96875,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":3.1875,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":3.40625,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":3.625,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":3.84375,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":4.0625,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":4.28125,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":4.5,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":4.71875,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":4.9375,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":5.15625,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":5.375,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":95,"start":5.625,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":95,"start":5.875,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":95,"start":6.125,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":6.375,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":6.59375,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":6.8125,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":7.03125,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":7.25,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":7.46875,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":7.6875,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":7.90625,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":8.125,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":8.34375,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":8.5625,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":8.78125,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":9,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":9.21875,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":9.4375,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":9.65625,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":9.875,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":10.09375,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":10.3125,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":10.53125,"duration":0.21875,"instrument":0,"gap":0}
+		],[
+			{"cmd":"program","channel":1,"instrument":0},
+			{"cmd":"note","pitch":64,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":65,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":69,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":64,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":65,"volume":105,"start":4,"duration":0.7,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":69,"volume":105,"start":4.7,"duration":0.7,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":64,"volume":105,"start":5.4,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":65,"volume":105,"start":6.4,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":69,"volume":105,"start":7.4,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":64,"volume":105,"start":8.4,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":65,"volume":105,"start":9.4,"duration":0.7,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":69,"volume":105,"start":10.1,"duration":0.7,"instrument":0,"gap":0}
+		],[
+			{"cmd":"program","channel":2,"instrument":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":0,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":95,"start":0.5,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":1,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":95,"start":1.5,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":53,"volume":105,"start":2,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":52,"volume":85,"start":2.388889,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":2.777778,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":85,"start":3.166667,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":3.555556,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":85,"start":3.944445,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":53,"volume":105,"start":4.333334,"duration":0.291667,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":52,"volume":85,"start":4.625001,"duration":0.291667,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":4.916668,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":95,"start":5.416668,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":5.916668,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":95,"start":6.416668,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":53,"volume":105,"start":6.916668,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":52,"volume":85,"start":7.305557,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":7.694446,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":85,"start":8.083335,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":8.472224,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":85,"start":8.861113,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":53,"volume":105,"start":9.250002,"duration":0.291667,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":52,"volume":85,"start":9.541669,"duration":0.291667,"instrument":0,"gap":0}
+		]
+	],"totalDuration":10.799999999999999};
 
 	//////////////////////////////////////////////////////////
 
@@ -2398,6 +2512,10 @@ describe("Audio flattener", function() {
 
 	it("flatten-twelve-eight", function() {
 		doFlattenTest(abcTwelveEight, expectedTwelveEight);
+	})
+
+	it("flatten-tempo-3-voices", function() {
+		doFlattenTest(abcTempoThreeVoices, expectedTempoThreeVoices);
 	})
 })
 
