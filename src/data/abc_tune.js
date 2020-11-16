@@ -347,6 +347,7 @@ var Tune = function() {
 	this.makeVoicesArray = function() {
 		// First make a new array that is arranged by voice so that the repeats that span different lines are handled correctly.
 		var voicesArr = [];
+		var measureNumber = [];
 		for (var line = 0; line < this.engraver.staffgroups.length; line++) {
 			var group = this.engraver.staffgroups[line];
 			var firstStaff = group.staffs[0];
@@ -359,15 +360,16 @@ var Tune = function() {
 
 			var voices = group.voices;
 			for (var v = 0; v < voices.length; v++) {
-				var measureNumber = 0;
 				var noteFound = false;
 				if (!voicesArr[v])
 					voicesArr[v] = [];
+				if (measureNumber[v] === undefined)
+					measureNumber[v] = 0;
 				var elements = voices[v].children;
 				for (var elem = 0; elem < elements.length; elem++) {
-					voicesArr[v].push({top: top, height: height, line: group.line, measureNumber: measureNumber, elem: elements[elem]});
+					voicesArr[v].push({top: top, height: height, line: group.line, measureNumber: measureNumber[v], elem: elements[elem]});
 					if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
-						measureNumber++;
+						measureNumber[v]++;
 					if (elements[elem].type === 'note' || elements[elem].type === 'rest')
 						noteFound = true;
 				}
