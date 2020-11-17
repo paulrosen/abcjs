@@ -301,7 +301,7 @@ function getLineEndTimings(timings, anticipation) {
 	var lastTop = null;
 	for (var i = 0; i < timings.length; i++) {
 		var timing = timings[i];
-		if (timing.top !== lastTop) {
+		if (timing.type !== 'end' && timing.top !== lastTop) {
 			callbackTimes.push({ measureNumber: timing.measureNumber, milliseconds: timing.milliseconds-anticipation, top: timing.top, bottom: timing.top+timing.height });
 			lastTop = timing.top;
 		}
