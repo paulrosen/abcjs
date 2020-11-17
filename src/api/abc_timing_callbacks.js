@@ -59,45 +59,6 @@ var TimingCallbacks = function(target, params) {
 	self.justUnpaused = false;
 
 	self.newSeekPercent = 0;
-	self.justSeeked = false;
-
-	function setCurrentLocation(timestamp) {
-		// First find the relative amount to move: that is, the difference between the current percentage and the passed in percent.
-		var currentPercent = (timestamp - self.startTime) / self.lastMoment;
-		var percentDifference = currentPercent - self.newSeekPercent;
-		var timeDifference = self.lastMoment * percentDifference;
-		self.startTime = self.startTime + timeDifference;
-
-		var currentTime = timestamp - self.startTime;
-		currentTime += 16; // Add a little slop because this function isn't called exactly.
-
-		self.currentEvent = 0;
-		while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
-			self.currentEvent++;
-		}
-
-		self.currentLine = 0;
-		while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < currentTime) {
-			self.currentLine++;
-		}
-
-		var oldBeat = self.currentBeat;
-		self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
-		if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
-			self.doBeatCallback(timestamp);
-
-		if (self.eventCallback && self.currentEvent > 0 && self.noteTimings[self.currentEvent - 1].type === 'event')
-			self.eventCallback(self.noteTimings[self.currentEvent - 1]);
-		if (self.lineEndCallback)
-			self.lineEndCallback(self.lineEndTimings[self.currentLine], self.noteTimings[self.currentEvent], { line: self.currentLine, endTimings: self.lineEndTimings })
-
-		// console.log("currentPercent="+currentPercent+
-		// 	" newSeekPercent="+self.newSeekPercent+
-		// 	" percentDifference="+percentDifference+
-		// 	" timeDifference=",timeDifference+
-		// 	" currentBeat="+self.currentBeat+
-		// 	" currentEvent="+self.currentEvent);
-	}
 
 	self.lastTimestamp = 0;
 	self.doTiming = function (timestamp) {
@@ -115,10 +76,6 @@ var TimingCallbacks = function(target, params) {
 		}
 		self.justUnpaused = false;
 
-		if (self.justSeeked) {
-			setCurrentLocation(timestamp);
-			self.justSeeked = false;
-		}
 		if (self.isPaused) {
 			self.pausedTime = timestamp;
 		} else if (self.isRunning) {
@@ -156,11 +113,35 @@ var TimingCallbacks = function(target, params) {
 				}
 			}
 
-			if (currentTime >= self.lastMoment && self.eventCallback) {
-				self.eventCallback(null);
-				self.stop();
+			if (currentTime >= self.lastMoment) {
+				if (self.eventCallback) {
+					// At the end, the event callback can return "continue" to keep from stopping.
+					// The event callback can either be a promise or not.
+					var promise = self.eventCallback(null);
+					self.shouldStop(promise).then(function(shouldStop) {
+						if (shouldStop)
+							self.stop();
+					})
+				} else
+					self.stop();
 			}
 		}
+	};
+
+	self.shouldStop = function(promise) {
+		// The return of the last event callback can be "continue" or a promise that returns "continue".
+		// If it is then don't call stop. Any other value calls stop.
+		return new Promise(function (resolve) {
+			if (!promise)
+				return resolve(true);
+			if (promise === "continue")
+				return resolve(false);
+			if (promise.then) {
+				promise.then(function (result) {
+					resolve(result !== "continue");
+				});
+			}
+		});
 	};
 
 	self.doBeatCallback = function(timestamp) {
@@ -285,12 +266,30 @@ var TimingCallbacks = function(target, params) {
 		if (percent < 0) percent = 0;
 		if (percent > 1) percent = 1;
 
-		self.newSeekPercent = percent;
-		self.justSeeked = true;
 		var now = performance.now();
-		self.lastTimestamp = now - 1; // Make sure that the timing loop is done. This can be called often enough that the performance timer hasn't changed since the last call. If so, the seek won't happen now.
-		// (This is an issue when the client is repeating - if they go back to the beginning right at the end of the piece this needs to move right away so that stop() isn't called.)
-		self.doTiming(now);
+		var currentTime = self.lastMoment * percent;
+		self.startTime = now - currentTime;
+
+		self.currentEvent = 0;
+		while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
+			self.currentEvent++;
+		}
+
+		self.currentLine = 0;
+		while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds+self.lineEndAnticipation < currentTime) {
+			self.currentLine++;
+		}
+
+		var oldBeat = self.currentBeat;
+		self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
+		if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
+			self.doBeatCallback(self.startTime+currentTime);
+
+		if (self.eventCallback && self.currentEvent > 0 && self.noteTimings[self.currentEvent - 1].type === 'event')
+			self.eventCallback(self.noteTimings[self.currentEvent - 1]);
+		if (self.lineEndCallback)
+			self.lineEndCallback(self.lineEndTimings[self.currentLine], self.noteTimings[self.currentEvent], { line: self.currentLine, endTimings: self.lineEndTimings });
+
 		self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
 	};
 };

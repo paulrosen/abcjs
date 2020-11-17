@@ -33,7 +33,7 @@ var timingCallbacks = new abcjs.TimingCallbacks(visualObj, params);
 This is called once for every beat in the tune. It is called one additional time when the tune is finished.
 
 ```javascript
-function beatCallback(beatNumber, totalBeats, totalTime, position) {}
+function beatCallback(beatNumber, totalBeats, totalTime, position, debugInfo) {}
 ```
 
 |Name|Description|
@@ -42,6 +42,7 @@ function beatCallback(beatNumber, totalBeats, totalTime, position) {}
 | totalBeats | The total number of beats (including all repeats) that will be played. |
 | totalTime | The total number of milliseconds of the tune. |
 | position | The interpolated position of the cursor if the beat occurs between notes. This is an object with the attributes { left: , top: , height: } This can be used to smooth out the cursor by moving it on the beat callbacks. The higher the number of `beatSubdivisions` the smoother the cursor will be. |
+| debugInfo | A hash of some extra info that might be useful in figuring out why the callback was triggered. |
 
 ### eventCallback
 
@@ -88,6 +89,10 @@ ev = {
 * The `startCharArray` and `endCharArray` are arrays because there is more than one location in the abc string if there is more than one voice.
 
 * The format of the `elements` array is subject to change in future versions.
+
+* This is called one last time with passing in `null` at the end of the tune. On that call `eventCallback` can return the string "continue" to keep the timer from stopping. This is useful if you want to play on repeat - in theory you would probably have another call to `seek()`.
+
+* This function can be a Promise or not.
 
 ### lineEndCallback
 
