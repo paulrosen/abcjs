@@ -26,6 +26,7 @@ function drawAbsolute(renderer, params, bartop, selectables) {
 	}
 	var klass = params.type;
 	if (params.type === 'note' || params.type === 'rest') {
+		params.counters = renderer.controller.classes.getCurrent();
 		klass += ' d' + Math.round(params.durationClass*1000)/1000;
 		klass = klass.replace(/\./g, '-');
 		if (params.abcelem.pitches) {

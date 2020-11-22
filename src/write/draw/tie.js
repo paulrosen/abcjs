@@ -4,7 +4,15 @@ const roundNumber = require("./round-number");
 function drawTie(renderer, params, linestartx, lineendx, selectables) {
 	layout(params, linestartx, lineendx);
 
-	var klass;
+	var klass = '';
+	if (params.anchor1) {
+		klass += 'abcjs-start-m' + params.anchor1.parent.counters.measure + '-n' + params.anchor1.parent.counters.note;
+	} else
+		klass += 'abcjs-start-edge';
+	if (params.anchor2) {
+		klass += ' abcjs-end-m' + params.anchor2.parent.counters.measure + '-n' + params.anchor2.parent.counters.note;
+	} else
+		klass += ' abcjs-end-edge';
 	if (params.hint)
 		klass = "abcjs-hint";
 	var fudgeY =  params.fixedY ? 1.5 : 0; // TODO-PER: This just compensates for drawArc, which contains too much knowledge of ties and slurs.

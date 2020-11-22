@@ -20,6 +20,7 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 | abcjs-decoration | Everything to do with the extra symbols, like crescendo. |
 | abcjs-defined-text | Text that appears between the lines of music, created with `%%text`. |
 | abcjs-dynamics | The dynamics markings: `p` for instance. Also the crescendo mark. |
+| abcjs-end-m0-n0 | Added to slurs to indicate the ending note. |
 | abcjs-ending | The line and decoration for the 1st and 2nd ending. |
 | abcjs-key-signature | All key signatures |
 | abcjs-l0, abcjs-l1, etc. | (lower case L, followed by a number) The staff line number, starting at zero. | 
@@ -37,6 +38,7 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 | abcjs-rest | Everything to do with a rest. |
 | abcjs-rhythm | The rhythm text. |
 | abcjs-slur | Slurs and ties. (backwards compatible) |
+| abcjs-start-m0-n0 | Added to slurs to indicate the beginning note. |
 | abcjs-tie | Tie. |
 | abcjs-legato | Slur. Because "abcjs-slur" was historically used to indicate either a slur or a tie this indicates only a slur. |
 | abcjs-staff  | The horizontal lines that make up the staff. |

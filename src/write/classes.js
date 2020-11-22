@@ -52,6 +52,15 @@ Classes.prototype.incrNote = function () {
 	this.noteNumber++;
 };
 
+Classes.prototype.getCurrent = function (c) {
+	return {
+		line: this.lineNumber,
+		measure: this.measureNumber,
+		voice: this.voiceNumber,
+		note: this.noteNumber
+	};
+};
+
 Classes.prototype.generate = function (c) {
 	if (!this.shouldAddClasses)
 		return "";
