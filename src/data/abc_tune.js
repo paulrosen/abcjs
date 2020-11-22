@@ -348,6 +348,7 @@ var Tune = function() {
 		// First make a new array that is arranged by voice so that the repeats that span different lines are handled correctly.
 		var voicesArr = [];
 		var measureNumber = [];
+		var tempos = {};
 		for (var line = 0; line < this.engraver.staffgroups.length; line++) {
 			var group = this.engraver.staffgroups[line];
 			var firstStaff = group.staffs[0];
@@ -367,6 +368,8 @@ var Tune = function() {
 					measureNumber[v] = 0;
 				var elements = voices[v].children;
 				for (var elem = 0; elem < elements.length; elem++) {
+					if (elements[elem].type === "tempo")
+						tempos[measureNumber[v]] = this.getBpm(elements[elem].abcelem);
 					voicesArr[v].push({top: top, height: height, line: group.line, measureNumber: measureNumber[v], elem: elements[elem]});
 					if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
 						measureNumber[v]++;
@@ -375,10 +378,11 @@ var Tune = function() {
 				}
 			}
 		}
+		this.tempoLocations = tempos; // This should be passed back, but the function is accessible publicly so that would break the interface.
 		return voicesArr;
 	};
 
-	this.setupEvents = function(startingDelay, timeDivider, bpm) {
+	this.setupEvents = function(startingDelay, timeDivider, startingBpm) {
 		var timingEvents = [];
 
 		var eventHash = {};
@@ -394,14 +398,17 @@ var Tune = function() {
 			var startingRepeatElem = 0;
 			var endingRepeatElem = -1;
 			var elements = voices[v];
+			var bpm = startingBpm;
+			timeDivider = this.getBeatLength() * bpm / 60;
+			var tempoDone = -1;
 			for (var elem = 0; elem < elements.length; elem++) {
-				var element = elements[elem].elem;
-				if (element.abcelem.el_type === "tempo") {
-					bpm = this.getBpm(element.abcelem);
-					var beatLength = this.getBeatLength();
-					var beatsPerSecond = bpm / 60;
-					timeDivider = beatLength * beatsPerSecond;
+				var thisMeasure = elements[elem].measureNumber;
+				if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
+					bpm = this.tempoLocations[thisMeasure];
+					timeDivider = this.getBeatLength() * bpm / 60;
+					tempoDone = thisMeasure;
 				}
+				var element = elements[elem].elem;
 				var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, elements[elem].line, elements[elem].measureNumber, timeDivider, isTiedState, nextIsBar);
 				isTiedState = ret.isTiedState;
 				nextIsBar = ret.nextIsBar;
@@ -424,7 +431,14 @@ var Tune = function() {
 						if (endingRepeatElem === -1)
 							endingRepeatElem = elem;
 						var lastVoiceTimeMilliseconds = 0;
+						tempoDone = -1;
 						for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
+							thisMeasure = elements[el2].measureNumber;
+							if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
+								bpm = this.tempoLocations[thisMeasure];
+								timeDivider = this.getBeatLength() * bpm / 60;
+								tempoDone = thisMeasure;
+							}
 							var element2 = elements[el2].elem;
 							ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar);
 							isTiedState = ret.isTiedState;

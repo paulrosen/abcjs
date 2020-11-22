@@ -544,7 +544,7 @@ var parseCommon = require("../parse/abc_common");
 						el.qpm = tempoChanges[''+el.timing].qpm;
 						j++; // when there is a tempo element the next element has the same timing and we don't want it to match the second time.
 					} else {
-						console.log("tempo position", i, j, el);
+						//console.log("tempo position", i, j, el);
 						voices[i].splice(j, 0, {el_type: "tempo", qpm: tempoChanges[''+el.timing].qpm, timing: el.timing});
 						j +=2; // skip the element we just inserted.
 					}
