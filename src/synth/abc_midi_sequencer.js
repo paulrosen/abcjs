@@ -358,6 +358,11 @@ var parseCommon = require("../parse/abc_common");
 										case "drummap":
 											// This is handled before getting here so it can be ignored.
 											break;
+										case "channel":
+											// There's not much needed for the channel except to look out for the percussion channel
+											if (elem.params[0] === 10)
+												voices[voiceNumber].push({ el_type: 'instrument', program: PERCUSSION_PROGRAM });
+											break;
 										case "program":
 											voices[voiceNumber].push({ el_type: 'instrument', program: elem.params[0] });
 											channelExplicitlySet = true;
