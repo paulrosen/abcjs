@@ -1069,7 +1069,7 @@ var parseCommon = require("../parse/abc_common");
 			if (beats[''+m2])
 				thisChord = beats[''+m2];
 			var lastBoom;
-			if (!hasRhythmHead) {
+			if (!hasRhythmHead && thisChord) {
 				switch (pattern[m2]) {
 					case 'boom':
 						if (beats['' + (m2 + 1)]) // If there is not a chord change on the next beat, play a bass note.
