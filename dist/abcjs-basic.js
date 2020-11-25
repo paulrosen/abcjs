@@ -363,43 +363,12 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
   self.startTime = null;
   self.currentBeat = 0;
   self.currentEvent = 0;
+  self.currentLine = 0;
   self.isPaused = false;
   self.isRunning = false;
   self.pausedTime = null;
   self.justUnpaused = false;
   self.newSeekPercent = 0;
-  self.justSeeked = false;
-
-  function setCurrentLocation(timestamp) {
-    // First find the relative amount to move: that is, the difference between the current percentage and the passed in percent.
-    var currentPercent = (timestamp - self.startTime) / self.lastMoment;
-    var percentDifference = currentPercent - self.newSeekPercent;
-    var timeDifference = self.lastMoment * percentDifference;
-    self.startTime = self.startTime + timeDifference;
-    var currentTime = timestamp - self.startTime;
-    currentTime += 16; // Add a little slop because this function isn't called exactly.
-
-    var lineStart = 0;
-    self.currentEvent = 0;
-
-    while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
-      self.currentEvent++;
-      if (self.lineEndCallback && self.lineEndTimings['e' + self.currentEvent]) lineStart = self.currentEvent;
-    }
-
-    var oldBeat = self.currentBeat;
-    self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
-    if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
-      self.doBeatCallback(timestamp);
-    if (self.eventCallback && self.currentEvent > 0 && self.noteTimings[self.currentEvent - 1].type === 'event') self.eventCallback(self.noteTimings[self.currentEvent - 1]);
-    if (self.lineEndCallback) self.lineEndCallback(self.lineEndTimings['e' + lineStart]); // console.log("currentPercent="+currentPercent+
-    // 	" newSeekPercent="+self.newSeekPercent+
-    // 	" percentDifference="+percentDifference+
-    // 	" timeDifference=",timeDifference+
-    // 	" currentBeat="+self.currentBeat+
-    // 	" currentEvent="+self.currentEvent);
-  }
-
   self.lastTimestamp = 0;
 
   self.doTiming = function (timestamp) {
@@ -419,11 +388,6 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
 
     self.justUnpaused = false;
 
-    if (self.justSeeked) {
-      setCurrentLocation(timestamp);
-      self.justSeeked = false;
-    }
-
     if (self.isPaused) {
       self.pausedTime = timestamp;
     } else if (self.isRunning) {
@@ -431,9 +395,27 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
       currentTime += 16; // Add a little slop because this function isn't called exactly.
 
       while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
-        if (self.eventCallback && self.noteTimings[self.currentEvent].type === 'event') self.eventCallback(self.noteTimings[self.currentEvent]);
+        if (self.eventCallback && self.noteTimings[self.currentEvent].type === 'event') {
+          var thisStartTime = self.startTime; // the event callback can call seek and change the position from beneath us.
+
+          self.eventCallback(self.noteTimings[self.currentEvent]);
+
+          if (thisStartTime !== self.startTime) {
+            currentTime = timestamp - self.startTime;
+          }
+        }
+
         self.currentEvent++;
-        if (self.lineEndCallback && self.lineEndTimings['e' + self.currentEvent]) self.lineEndCallback(self.lineEndTimings['e' + self.currentEvent]);
+      }
+
+      if (self.lineEndCallback && self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < currentTime && self.currentEvent < self.noteTimings.length) {
+        var leftEvent = self.noteTimings[self.currentEvent].milliseconds === currentTime ? self.noteTimings[self.currentEvent] : self.noteTimings[self.currentEvent - 1];
+        self.lineEndCallback(self.lineEndTimings[self.currentLine], leftEvent, {
+          line: self.currentLine,
+          endTimings: self.lineEndTimings,
+          currentTime: currentTime
+        });
+        self.currentLine++;
       }
 
       if (currentTime < self.lastMoment) {
@@ -452,11 +434,32 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
         }
       }
 
-      if (currentTime >= self.lastMoment && self.eventCallback) {
-        self.eventCallback(null);
-        self.stop();
+      if (currentTime >= self.lastMoment) {
+        if (self.eventCallback) {
+          // At the end, the event callback can return "continue" to keep from stopping.
+          // The event callback can either be a promise or not.
+          var promise = self.eventCallback(null);
+          self.shouldStop(promise).then(function (shouldStop) {
+            if (shouldStop) self.stop();
+          });
+        } else self.stop();
       }
     }
+  };
+
+  self.shouldStop = function (promise) {
+    // The return of the last event callback can be "continue" or a promise that returns "continue".
+    // If it is then don't call stop. Any other value calls stop.
+    return new Promise(function (resolve) {
+      if (!promise) return resolve(true);
+      if (promise === "continue") return resolve(false);
+
+      if (promise.then) {
+        promise.then(function (result) {
+          resolve(result !== "continue");
+        });
+      }
+    });
   };
 
   self.doBeatCallback = function (timestamp) {
@@ -482,10 +485,20 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
       }
 
       var position = {};
+      var debugInfo = {};
 
       if (ev) {
         position.top = ev.top;
-        position.height = ev.height;
+        position.height = ev.height; // timestamp = the time passed in from the animation timer
+        // self.startTime = the time that the tune was started (if there was seeking or pausing, it is adjusted to keep the math the same)
+        // ev = the event that is either happening now or has most recently passed.
+        // ev.milliseconds = the time that the current event starts (relative to self.startTime)
+        // endMs = the time that the next event starts
+        // ev.endX = the x coordinate that the next event happens (or the end of the line or repeat measure)
+        // ev.left = the x coordinate of the current event
+        //
+        // The output is the X coordinate of the current cursor location. It is calculated with the ratio of the length of the event and the width of it.
+
         var offMs = Math.max(0, timestamp - self.startTime - ev.milliseconds); // Offset in time from the last beat
 
         var gapMs = endMs - ev.milliseconds; // Length of this event in time
@@ -494,14 +507,29 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
 
         var offPx = offMs * gapPx / gapMs;
         position.left = ev.left + offPx;
+        debugInfo = {
+          timestamp: timestamp,
+          startTime: self.startTime,
+          ev: ev,
+          endMs: endMs,
+          offMs: offMs,
+          offPs: offPx,
+          gapMs: gapMs,
+          gapPx: gapPx
+        };
+      } else {
+        debugInfo = {
+          timestamp: timestamp,
+          startTime: self.startTime
+        };
       }
 
       var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
 
-      self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment, position);
+      self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment, position, debugInfo);
 
       if (thisStartTime !== self.startTime) {
-        return timestamp - self.startTime + 16; // Add a little slop because this function isn't called exactly.
+        return timestamp - self.startTime;
       } else self.currentBeat++;
     }
 
@@ -568,13 +596,30 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     // the effect of this function is to move startTime so that the callbacks happen correctly for the new seek.
     if (percent < 0) percent = 0;
     if (percent > 1) percent = 1;
-    self.newSeekPercent = percent;
-    self.justSeeked = true;
     var now = performance.now();
-    self.lastTimestamp = now - 1; // Make sure that the timing loop is done. This can be called often enough that the performance timer hasn't changed since the last call. If so, the seek won't happen now.
-    // (This is an issue when the client is repeating - if they go back to the beginning right at the end of the piece this needs to move right away so that stop() isn't called.)
+    var currentTime = self.lastMoment * percent;
+    self.startTime = now - currentTime;
+    self.currentEvent = 0;
 
-    self.doTiming(now);
+    while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
+      self.currentEvent++;
+    }
+
+    self.currentLine = 0;
+
+    while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds + self.lineEndAnticipation < currentTime) {
+      self.currentLine++;
+    }
+
+    var oldBeat = self.currentBeat;
+    self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
+    if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
+      self.doBeatCallback(self.startTime + currentTime);
+    if (self.eventCallback && self.currentEvent > 0 && self.noteTimings[self.currentEvent - 1].type === 'event') self.eventCallback(self.noteTimings[self.currentEvent - 1]);
+    if (self.lineEndCallback) self.lineEndCallback(self.lineEndTimings[self.currentLine], self.noteTimings[self.currentEvent], {
+      line: self.currentLine,
+      endTimings: self.lineEndTimings
+    });
     self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
   };
 };
@@ -582,19 +627,19 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
 function getLineEndTimings(timings, anticipation) {
   // Returns an array of milliseconds to call the lineEndCallback.
   // This figures out the timing of the beginning of each line and subtracts the anticipation from it.
-  var callbackTimes = {};
+  var callbackTimes = [];
   var lastTop = null;
 
   for (var i = 0; i < timings.length; i++) {
     var timing = timings[i];
 
-    if (timing.top !== lastTop) {
-      callbackTimes['e' + i] = {
-        measureNumber: Math.floor(timing.milliseconds / timing.millisecondsPerMeasure),
+    if (timing.type !== 'end' && timing.top !== lastTop) {
+      callbackTimes.push({
+        measureNumber: timing.measureNumber,
         milliseconds: timing.milliseconds - anticipation,
         top: timing.top,
         bottom: timing.top + timing.height
-      };
+      });
       lastTop = timing.top;
     }
   }
@@ -1541,6 +1586,8 @@ var Tune = function Tune() {
   this.makeVoicesArray = function () {
     // First make a new array that is arranged by voice so that the repeats that span different lines are handled correctly.
     var voicesArr = [];
+    var measureNumber = [];
+    var tempos = {};
 
     for (var line = 0; line < this.engraver.staffgroups.length; line++) {
       var group = this.engraver.staffgroups[line];
@@ -1554,30 +1601,33 @@ var Tune = function Tune() {
       var voices = group.voices;
 
       for (var v = 0; v < voices.length; v++) {
-        var measureNumber = 0;
         var noteFound = false;
         if (!voicesArr[v]) voicesArr[v] = [];
+        if (measureNumber[v] === undefined) measureNumber[v] = 0;
         var elements = voices[v].children;
 
         for (var elem = 0; elem < elements.length; elem++) {
+          if (elements[elem].type === "tempo") tempos[measureNumber[v]] = this.getBpm(elements[elem].abcelem);
           voicesArr[v].push({
             top: top,
             height: height,
-            line: line,
-            measureNumber: measureNumber,
+            line: group.line,
+            measureNumber: measureNumber[v],
             elem: elements[elem]
           });
           if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
-            measureNumber++;
+            measureNumber[v]++;
           if (elements[elem].type === 'note' || elements[elem].type === 'rest') noteFound = true;
         }
       }
     }
 
+    this.tempoLocations = tempos; // This should be passed back, but the function is accessible publicly so that would break the interface.
+
     return voicesArr;
   };
 
-  this.setupEvents = function (startingDelay, timeDivider, bpm) {
+  this.setupEvents = function (startingDelay, timeDivider, startingBpm) {
     var timingEvents = [];
     var eventHash = {}; // The time is the number of seconds from the beginning of the piece.
     // The units we are scanning are in notation units (i.e. 0.25 is a quarter note)
@@ -1593,17 +1643,20 @@ var Tune = function Tune() {
       var startingRepeatElem = 0;
       var endingRepeatElem = -1;
       var elements = voices[v];
+      var bpm = startingBpm;
+      timeDivider = this.getBeatLength() * bpm / 60;
+      var tempoDone = -1;
 
       for (var elem = 0; elem < elements.length; elem++) {
-        var element = elements[elem].elem;
+        var thisMeasure = elements[elem].measureNumber;
 
-        if (element.abcelem.el_type === "tempo") {
-          bpm = this.getBpm(element.abcelem);
-          var beatLength = this.getBeatLength();
-          var beatsPerSecond = bpm / 60;
-          timeDivider = beatLength * beatsPerSecond;
+        if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
+          bpm = this.tempoLocations[thisMeasure];
+          timeDivider = this.getBeatLength() * bpm / 60;
+          tempoDone = thisMeasure;
         }
 
+        var element = elements[elem].elem;
         var ret = this.addElementToEvents(eventHash, element, voiceTimeMilliseconds, elements[elem].top, elements[elem].height, elements[elem].line, elements[elem].measureNumber, timeDivider, isTiedState, nextIsBar);
         isTiedState = ret.isTiedState;
         nextIsBar = ret.nextIsBar;
@@ -1626,8 +1679,17 @@ var Tune = function Tune() {
 
             if (endingRepeatElem === -1) endingRepeatElem = elem;
             var lastVoiceTimeMilliseconds = 0;
+            tempoDone = -1;
 
             for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
+              thisMeasure = elements[el2].measureNumber;
+
+              if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
+                bpm = this.tempoLocations[thisMeasure];
+                timeDivider = this.getBeatLength() * bpm / 60;
+                tempoDone = thisMeasure;
+              }
+
               var element2 = elements[el2].elem;
               ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar);
               isTiedState = ret.isTiedState;
@@ -12420,7 +12482,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
             start: start,
             duration: shortestNote,
             gap: 0,
-            instrument: currentInstrument
+            instrument: currentInstrument,
+            style: 'decoration'
           });
           note = note === 1 ? 0 : 1;
           runningDuration -= shortestNote;
@@ -12437,7 +12500,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           start: start,
           duration: shortestNote,
           gap: 0,
-          instrument: currentInstrument
+          instrument: currentInstrument,
+          style: 'decoration'
         });
         runningDuration -= shortestNote;
         start += shortestNote;
@@ -12448,7 +12512,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           start: start,
           duration: shortestNote,
           gap: 0,
-          instrument: currentInstrument
+          instrument: currentInstrument,
+          style: 'decoration'
         });
         runningDuration -= shortestNote;
         start += shortestNote;
@@ -12471,7 +12536,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           start: start,
           duration: shortestNote,
           gap: 0,
-          instrument: currentInstrument
+          instrument: currentInstrument,
+          style: 'decoration'
         });
         runningDuration -= shortestNote;
         start += shortestNote;
@@ -12482,7 +12548,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           start: start,
           duration: shortestNote,
           gap: 0,
-          instrument: currentInstrument
+          instrument: currentInstrument,
+          style: 'decoration'
         });
         runningDuration -= shortestNote;
         start += shortestNote;
@@ -12506,7 +12573,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           start: start,
           duration: shortestNote,
           gap: 0,
-          instrument: currentInstrument
+          instrument: currentInstrument,
+          style: 'decoration'
         });
         currentTrack.push({
           cmd: 'note',
@@ -12515,7 +12583,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           start: start + shortestNote,
           duration: shortestNote,
           gap: 0,
-          instrument: currentInstrument
+          instrument: currentInstrument,
+          style: 'decoration'
         });
         currentTrack.push({
           cmd: 'note',
@@ -12524,7 +12593,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           start: start + shortestNote * 2,
           duration: shortestNote,
           gap: 0,
-          instrument: currentInstrument
+          instrument: currentInstrument,
+          style: 'decoration'
         });
         currentTrack.push({
           cmd: 'note',
@@ -12533,7 +12603,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           start: start + shortestNote * 3,
           duration: shortestNote,
           gap: 0,
-          instrument: currentInstrument
+          instrument: currentInstrument,
+          style: 'decoration'
         });
         currentTrack.push({
           cmd: 'note',
@@ -12555,7 +12626,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
             start: start,
             duration: shortestNote,
             gap: 0,
-            instrument: currentInstrument
+            instrument: currentInstrument,
+            style: 'decoration'
           });
           runningDuration -= shortestNote * 2;
           start += shortestNote * 2;
@@ -12797,7 +12869,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
         start: start,
         duration: gp.duration,
         gap: 0,
-        instrument: currentInstrument
+        instrument: currentInstrument,
+        style: 'grace'
       });
       midiGrace.push({
         pitch: gp.pitch,
@@ -12938,10 +13011,10 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
     '7b9,b5': [0, 4, 6, 10, 13],
     '7(#9,b5)': [0, 4, 6, 10, 15],
     '7#9b5': [0, 4, 6, 10, 15],
-    'maj7(b5)': [0, 3, 6, 11],
-    'maj7b5': [0, 3, 6, 11],
-    '13(b5)': [0, 4, 6, 10, 14, 18],
-    '13b5': [0, 4, 6, 10, 14, 18],
+    'maj7(b5)': [0, 4, 6, 11],
+    'maj7b5': [0, 4, 6, 11],
+    '13(b5)': [0, 4, 6, 10, 14, 21],
+    '13b5': [0, 4, 6, 10, 14, 21],
     // minor (all normal 5, minor 3 chords)
     'm': [0, 3, 7],
     '-': [0, 3, 7],
@@ -12956,47 +13029,53 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
     '-7b9': [0, 3, 7, 10, 13],
     '-maj7': [0, 3, 7, 11],
     '-9+7': [0, 3, 7, 11, 13],
-    '-11': [0, 3, 7, 11, 14, 16],
+    '-11': [0, 3, 7, 11, 14, 17],
+    'm11': [0, 3, 7, 11, 14, 17],
+    '-maj9': [0, 3, 7, 11, 14],
+    '-∆9': [0, 3, 7, 11, 14],
+    'mM9': [0, 3, 7, 11, 14],
     // major (all normal 5, major 3 chords)
     'M': [0, 4, 7],
     '6': [0, 4, 7, 9],
     '6/9': [0, 4, 7, 9, 14],
+    '6add9': [0, 4, 7, 9, 14],
+    '69': [0, 4, 7, 9, 14],
     '7': [0, 4, 7, 10],
     '9': [0, 4, 7, 10, 14],
-    '11': [0, 4, 7, 10, 14, 16],
-    '13': [0, 4, 7, 10, 14, 18],
+    '11': [0, 7, 10, 14, 17],
+    '13': [0, 4, 7, 10, 14, 21],
     '7b9': [0, 4, 7, 10, 13],
     '7♭9': [0, 4, 7, 10, 13],
     '7(b9)': [0, 4, 7, 10, 13],
     '7(#9)': [0, 4, 7, 10, 15],
     '7#9': [0, 4, 7, 10, 15],
-    '(13)': [0, 4, 7, 10, 14, 18],
-    '7(9,13)': [0, 4, 7, 10, 14, 18],
-    '7(#9,b13)': [0, 4, 7, 10, 15, 17],
-    '7(#11)': [0, 4, 7, 10, 14, 17],
-    '7#11': [0, 4, 7, 10, 14, 17],
-    '7(b13)': [0, 4, 7, 10, 17],
-    '7b13': [0, 4, 7, 10, 17],
-    '9(#11)': [0, 4, 7, 10, 14, 17],
-    '9#11': [0, 4, 7, 10, 14, 17],
-    '13(#11)': [0, 4, 7, 10, 15, 18],
-    '13#11': [0, 4, 7, 10, 15, 18],
+    '(13)': [0, 4, 7, 10, 14, 21],
+    '7(9,13)': [0, 4, 7, 10, 14, 21],
+    '7(#9,b13)': [0, 4, 7, 10, 15, 20],
+    '7(#11)': [0, 4, 7, 10, 14, 18],
+    '7#11': [0, 4, 7, 10, 14, 18],
+    '7(b13)': [0, 4, 7, 10, 20],
+    '7b13': [0, 4, 7, 10, 20],
+    '9(#11)': [0, 4, 7, 10, 14, 18],
+    '9#11': [0, 4, 7, 10, 14, 18],
+    '13(#11)': [0, 4, 7, 10, 18, 21],
+    '13#11': [0, 4, 7, 10, 18, 21],
     'maj7': [0, 4, 7, 11],
     '∆7': [0, 4, 7, 11],
     'Δ7': [0, 4, 7, 11],
     'maj9': [0, 4, 7, 11, 14],
     'maj7(9)': [0, 4, 7, 11, 14],
-    'maj7(11)': [0, 4, 7, 11, 16],
-    'maj7(#11)': [0, 4, 7, 11, 17],
-    'maj7(13)': [0, 4, 7, 11, 18],
-    'maj7(9,13)': [0, 4, 7, 11, 14, 18],
+    'maj7(11)': [0, 4, 7, 11, 17],
+    'maj7(#11)': [0, 4, 7, 11, 18],
+    'maj7(13)': [0, 4, 7, 14, 21],
+    'maj7(9,13)': [0, 4, 7, 11, 14, 21],
     '7sus4': [0, 5, 7, 10],
-    'm7sus4': [0, 5, 7, 10],
+    'm7sus4': [0, 3, 7, 10, 17],
     'sus4': [0, 5, 7],
     'sus2': [0, 2, 7],
     '7sus2': [0, 2, 7, 10],
-    '9sus4': [0, 5, 7, 14],
-    '13sus4': [0, 5, 7, 18],
+    '9sus4': [0, 5, 7, 10, 14],
+    '13sus4': [0, 5, 7, 10, 14, 21],
     // augmented (all sharp 5 chords)
     'aug7': [0, 4, 8, 10],
     '+7': [0, 4, 8, 10],
@@ -13014,11 +13093,11 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
     '7b9#5': [0, 4, 8, 10, 13],
     'maj7(#5)': [0, 4, 8, 11],
     'maj7#5': [0, 4, 8, 11],
-    'maj7(#5,#11)': [0, 4, 8, 11, 14],
-    'maj7#5#11': [0, 4, 8, 11, 14],
+    'maj7(#5,#11)': [0, 4, 8, 11, 18],
+    'maj7#5#11': [0, 4, 8, 11, 18],
     '9(#5)': [0, 4, 8, 10, 14],
-    '13(#5)': [0, 4, 8, 10, 14, 18],
-    '13#5': [0, 4, 8, 10, 14, 18]
+    '13(#5)': [0, 4, 8, 10, 14, 21],
+    '13#5': [0, 4, 8, 10, 14, 21]
   };
 
   function chordNotes(bass, modifier) {
@@ -13155,7 +13234,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
       if (beats['' + m2]) thisChord = beats['' + m2];
       var lastBoom;
 
-      if (!hasRhythmHead) {
+      if (!hasRhythmHead && thisChord) {
         switch (pattern[m2]) {
           case 'boom':
             if (beats['' + (m2 + 1)]) // If there is not a chord change on the next beat, play a bass note.
@@ -13809,6 +13888,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
     var voices = [];
     var inCrescendo = [];
     var inDiminuendo = [];
+    var durationCounter = [0];
+    var tempoChanges = {};
     var currentVolume;
     var startRepeatPlaceholder = []; // There is a place holder for each voice.
 
@@ -14008,7 +14089,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                   if (!elem.rest || elem.rest.type !== 'spacer') {
                     var noteElem = {
                       elem: elem,
-                      el_type: "note"
+                      el_type: "note",
+                      timing: durationCounter[voiceNumber]
                     }; // Make a copy so that modifications aren't kept except for adding the midiPitches
 
                     if (elem.style) noteElem.style = elem.style;else if (style[voiceNumber]) noteElem.style = style[voiceNumber];
@@ -14044,6 +14126,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                     }
 
                     noteEventsInBar++;
+                    durationCounter[voiceNumber] += noteElem.duration;
                   }
 
                   break;
@@ -14094,8 +14177,14 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                   qpm = interpretTempo(elem, abctune.getBeatLength());
                   voices[voiceNumber].push({
                     el_type: 'tempo',
-                    qpm: qpm
+                    qpm: qpm,
+                    timing: durationCounter[voiceNumber]
                   });
+                  tempoChanges['' + durationCounter[voiceNumber]] = {
+                    el_type: 'tempo',
+                    qpm: qpm,
+                    timing: durationCounter[voiceNumber]
+                  };
                   break;
 
                 case "bar":
@@ -14180,6 +14269,14 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
 
                     case "drummap":
                       // This is handled before getting here so it can be ignored.
+                      break;
+
+                    case "channel":
+                      // There's not much needed for the channel except to look out for the percussion channel
+                      if (elem.params[0] === 10) voices[voiceNumber].push({
+                        el_type: 'instrument',
+                        program: PERCUSSION_PROGRAM
+                      });
                       break;
 
                     case "program":
@@ -14271,10 +14368,14 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
             }
 
             voiceNumber++;
+            if (!durationCounter[voiceNumber]) durationCounter[voiceNumber] = 0;
           }
         }
       }
-    }
+    } // If there are tempo changes, make sure they are in all the voices. This must be done post process because all the elements in all the voices need to be created first.
+
+
+    insertTempoChanges(voices, tempoChanges);
 
     if (drumIntro) {
       var pickups = abctune.getPickupLength(); // add some measures of rests to the start of each track.
@@ -14343,6 +14444,33 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
     }
 
     return null;
+  }
+
+  function insertTempoChanges(voices, tempoChanges) {
+    var changePositions = Object.keys(tempoChanges);
+
+    for (var i = 0; i < voices.length; i++) {
+      var voice = voices[i];
+
+      for (var j = 0; j < voice.length; j++) {
+        var el = voice[j];
+
+        if (changePositions.indexOf('' + el.timing) >= 0) {
+          if (el.el_type === "tempo") {
+            el.qpm = tempoChanges['' + el.timing].qpm;
+            j++; // when there is a tempo element the next element has the same timing and we don't want it to match the second time.
+          } else {
+            //console.log("tempo position", i, j, el);
+            voices[i].splice(j, 0, {
+              el_type: "tempo",
+              qpm: tempoChanges['' + el.timing].qpm,
+              timing: el.timing
+            });
+            j += 2; // skip the element we just inserted.
+          }
+        }
+      }
+    }
   }
 
   function chordVoiceOffThisBar(voices) {
@@ -14502,13 +14630,15 @@ var createNoteMap = function createNoteMap(sequence) {
             var gap = ev.gap ? ev.gap : 0;
             var len = ev.duration;
             gap = Math.min(gap, len * 2 / 3);
-            map[i].push({
+            var obj = {
               pitch: ev.pitch,
               instrument: currentInstrument,
               start: Math.round(ev.start * 1000000) / 1000000,
               end: Math.round((ev.start + len - gap) * 1000000) / 1000000,
               volume: ev.volume
-            });
+            };
+            if (ev.style) obj.style = ev.style;
+            map[i].push(obj);
           }
 
           break;
@@ -14854,7 +14984,11 @@ function CreateSynth() {
     var params = options.options ? options.options : {};
     self.soundFontUrl = params.soundFontUrl ? params.soundFontUrl : defaultSoundFontUrl;
     if (self.soundFontUrl[self.soundFontUrl.length - 1] !== '/') self.soundFontUrl += '/';
-    if (params.soundFontVolumeMultiplier) self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2) self.soundFontVolumeMultiplier = 10.0;else self.soundFontVolumeMultiplier = 1.0;
+    if (params.soundFontVolumeMultiplier) self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2) self.soundFontVolumeMultiplier = 5.0;else if (self.soundFontUrl === defaultSoundFontUrl) self.soundFontVolumeMultiplier = 0.5;else self.soundFontVolumeMultiplier = 1.0;
+    if (params.programOffsets) self.programOffsets = params.programOffsets;else if (self.soundFontUrl === defaultSoundFontUrl) self.programOffsets = {
+      "violin": 113,
+      "trombone": 200
+    };else self.programOffsets = {};
     self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : options.visualObj ? options.visualObj.millisecondsPerMeasure(options.bpm) : 1000;
     self.pan = params.pan;
     self.meterSize = 1;
@@ -15028,7 +15162,7 @@ function CreateSynth() {
           pan: parseFloat(parts[4]),
           tempoMultiplier: parseFloat(parts[5])
         };
-        allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier));
+        allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument]));
       }
 
       self.audioBuffers = [audioBuffer];
@@ -15220,8 +15354,9 @@ var downloadBuffer = function downloadBuffer(buffer) {
 
 
 function bufferToWave(audioBuffers) {
-  var numOfChan = audioBuffers.length;
-  var length = audioBuffers[0].length * numOfChan * 2 + 44;
+  var audioBuffer = audioBuffers[0];
+  var numOfChan = audioBuffer.numberOfChannels;
+  var length = audioBuffer.length * numOfChan * 2 + 44;
   var buffer = new ArrayBuffer(length);
   var view = new DataView(buffer);
   var channels = [];
@@ -15243,8 +15378,8 @@ function bufferToWave(audioBuffers) {
   setUint16(1); // PCM (uncompressed)
 
   setUint16(numOfChan);
-  setUint32(audioBuffers[0].sampleRate);
-  setUint32(audioBuffers[0].sampleRate * 2 * numOfChan); // avg. bytes/sec
+  setUint32(audioBuffer.sampleRate);
+  setUint32(audioBuffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
 
   setUint16(numOfChan * 2); // block-align
 
@@ -15255,8 +15390,8 @@ function bufferToWave(audioBuffers) {
   setUint32(length - pos - 4); // chunk length
   // write interleaved data
 
-  for (i = 0; i < audioBuffers.length; i++) {
-    channels.push(audioBuffers[i].getChannelData(0));
+  for (i = 0; i < numOfChan; i++) {
+    channels.push(audioBuffer.getChannelData(i));
   }
 
   while (pos < length) {
@@ -15691,11 +15826,13 @@ var soundsCache = __webpack_require__(/*! ./sounds-cache */ "./src/synth/sounds-
 
 var pitchToNoteName = __webpack_require__(/*! ./pitch-to-note-name */ "./src/synth/pitch-to-note-name.js");
 
-function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier) {
+function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs) {
   // sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
   // len is in whole notes. Multiply by tempoMultiplier to get seconds.
+  // ofsMs is an offset to subtract from the note to line up programs that have different length onsets.
   var OfflineAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
   var len = sound.len * sound.tempoMultiplier;
+  if (ofsMs) len += ofsMs / 1000;
   var offlineCtx = new OfflineAC(2, Math.floor((len + 0.5) * sampleRate * 2), sampleRate);
   var noteName = pitchToNoteName[sound.pitch];
   var noteBuffer = soundsCache[sound.instrument][noteName];
@@ -15749,7 +15886,13 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
     if (e.renderedBuffer) {
       // If the system gets overloaded then this can start failing. Just drop the note if so.
       for (var i = 0; i < startArray.length; i++) {
-        copyToChannel(outputAudioBuffer, e.renderedBuffer, Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate));
+        //Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
+        var start = startArray[i] * sound.tempoMultiplier;
+        if (ofsMs) start -= ofsMs / 1000;
+        if (start < 0) start = 0; // If the item that is moved back is at the very beginning of the buffer then don't move it back. To do that would be to push everything else forward. TODO-PER: this should probably be done at some point but then it would change timing in existing apps.
+
+        start = Math.floor(start * sampleRate);
+        copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
       }
     }
 
@@ -16047,7 +16190,7 @@ function SynthController() {
         lineEndCallback: self.lineEndCallback,
         qpm: self.currentTempo,
         extraMeasuresAtBeginning: self.cursorControl ? self.cursorControl.extraMeasuresAtBeginning : undefined,
-        lineEndAnticipation: self.cursorControl ? self.cursorControl.lineEndAnticipation : undefined,
+        lineEndAnticipation: self.cursorControl ? self.cursorControl.lineEndAnticipation : 0,
         beatSubdivisions: subdivisions
       });
       if (self.cursorControl && self.cursorControl.onReady && typeof self.cursorControl.onReady === 'function') self.cursorControl.onReady(self);
@@ -16203,8 +16346,8 @@ function SynthController() {
     }
   };
 
-  self.lineEndCallback = function (data) {
-    if (self.cursorControl && self.cursorControl.onLineEnd && typeof self.cursorControl.onLineEnd === 'function') self.cursorControl.onLineEnd(data);
+  self.lineEndCallback = function (lineEvent, leftEvent) {
+    if (self.cursorControl && self.cursorControl.onLineEnd && typeof self.cursorControl.onLineEnd === 'function') self.cursorControl.onLineEnd(lineEvent, leftEvent);
   };
 
   self.getUrl = function () {
@@ -21335,6 +21478,15 @@ Classes.prototype.incrNote = function () {
   this.noteNumber++;
 };
 
+Classes.prototype.getCurrent = function (c) {
+  return {
+    line: this.lineNumber,
+    measure: this.measureNumber,
+    voice: this.voiceNumber,
+    note: this.noteNumber
+  };
+};
+
 Classes.prototype.generate = function (c) {
   if (!this.shouldAddClasses) return "";
   var ret = [];
@@ -21404,6 +21556,7 @@ function drawAbsolute(renderer, params, bartop, selectables) {
   var klass = params.type;
 
   if (params.type === 'note' || params.type === 'rest') {
+    params.counters = renderer.controller.classes.getCurrent();
     klass += ' d' + Math.round(params.durationClass * 1000) / 1000;
     klass = klass.replace(/\./g, '-');
 
@@ -21448,6 +21601,8 @@ module.exports = drawAbsolute;
 
 var printPath = __webpack_require__(/*! ./print-path */ "./src/write/draw/print-path.js");
 
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+
 function drawBeam(renderer, params) {
   if (params.beams.length === 0) return;
   var klass = 'beam-elem';
@@ -21486,14 +21641,16 @@ function drawBeam(renderer, params) {
 
 function draw(renderer, startX, startY, endX, endY, dy) {
   // the X coordinates are actual coordinates, but the Y coordinates are in pitches.
-  startY = renderer.calcY(startY);
-  endY = renderer.calcY(endY);
-  return "M" + startX + " " + startY + " L" + endX + " " + endY + "L" + endX + " " + (endY + dy) + " L" + startX + " " + (startY + dy) + "z";
+  startY = roundNumber(renderer.calcY(startY));
+  endY = roundNumber(renderer.calcY(endY));
+  startX = roundNumber(startX);
+  endX = roundNumber(endX);
+  var startY2 = roundNumber(startY + dy);
+  var endY2 = roundNumber(endY + dy);
+  return "M" + startX + " " + startY + " L" + endX + " " + endY + "L" + endX + " " + endY2 + " L" + startX + " " + startY2 + "z";
 }
 
 function getSlope(renderer, startX, startY, endX, endY) {
-  startY = startY;
-  endY = endY;
   return (endY - startY) / (endX - startX);
 }
 
@@ -21628,6 +21785,8 @@ var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js"
 
 var printPath = __webpack_require__(/*! ./print-path */ "./src/write/draw/print-path.js");
 
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+
 function drawCrescendo(renderer, params, selectables) {
   if (params.pitch === undefined) window.console.error("Crescendo Element y-coordinate not set.");
   var y = renderer.calcY(params.pitch) + 4; // This is the top pixel to use (it is offset a little so that it looks good with the volume marks.)
@@ -21653,6 +21812,12 @@ function drawCrescendo(renderer, params, selectables) {
 }
 
 var drawLine = function drawLine(renderer, y1, y2, y3, y4, left, right) {
+  y1 = roundNumber(y1);
+  y2 = roundNumber(y2);
+  y3 = roundNumber(y3);
+  y4 = roundNumber(y4);
+  left = roundNumber(left);
+  right = roundNumber(right);
   var pathString = sprintf("M %f %f L %f %f M %f %f L %f %f", left, y1, right, y2, left, y3, right, y4);
   var el = printPath(renderer, {
     path: pathString,
@@ -21725,7 +21890,10 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
       }
 
       if (staffgroups.length >= 1) addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
-      staffgroups.push(engraveStaffLine(renderer, abcLine.staffGroup, selectables));
+      var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables);
+      staffgroup.line = line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
+
+      staffgroups.push(staffgroup);
     } else if (abcLine.nonMusic) {
       nonMusic(renderer, abcLine.nonMusic, selectables);
     }
@@ -21778,7 +21946,7 @@ function drawDynamics(renderer, params, selectables) {
   if (params.pitch === undefined) window.console.error("Dynamic Element y-coordinate not set.");
   var scalex = 1;
   var scaley = 1;
-  var el = printSymbol(renderer, params.anchor.x, params.pitch, params.dec, scalex, scaley, renderer.controller.classes.generate('decoration'));
+  var el = printSymbol(renderer, params.anchor.x, params.pitch, params.dec, scalex, scaley, renderer.controller.classes.generate('decoration dynamics'));
   selectables.wrapSvgEl({
     el_type: "dynamicDecoration",
     startChar: -1,
@@ -21805,20 +21973,22 @@ var renderText = __webpack_require__(/*! ./text */ "./src/write/draw/text.js");
 
 var printPath = __webpack_require__(/*! ./print-path */ "./src/write/draw/print-path.js");
 
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+
 function drawEnding(renderer, params, linestartx, lineendx, selectables) {
   if (params.pitch === undefined) window.console.error("Ending Element y-coordinate not set.");
-  var y = renderer.calcY(params.pitch);
+  var y = roundNumber(renderer.calcY(params.pitch));
   var height = 20;
   var pathString = '';
 
   if (params.anchor1) {
-    linestartx = params.anchor1.x + params.anchor1.w;
-    pathString += sprintf("M %f %f L %f %f ", linestartx, y, linestartx, y + height);
+    linestartx = roundNumber(params.anchor1.x + params.anchor1.w);
+    pathString += sprintf("M %f %f L %f %f ", linestartx, y, linestartx, roundNumber(y + height));
   }
 
   if (params.anchor2) {
-    lineendx = params.anchor2.x;
-    pathString += sprintf("M %f %f L %f %f ", lineendx, y, lineendx, y + height);
+    lineendx = roundNumber(params.anchor2.x);
+    pathString += sprintf("M %f %f L %f %f ", lineendx, y, lineendx, roundNumber(y + height));
   }
 
   pathString += sprintf("M %f %f L %f %f ", linestartx, y, lineendx, y);
@@ -21831,8 +22001,8 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
     fill: "#000000"
   });
   if (params.anchor1) renderText(renderer, {
-    x: linestartx + 5,
-    y: renderer.calcY(params.pitch - 0.5),
+    x: roundNumber(linestartx + 5),
+    y: roundNumber(renderer.calcY(params.pitch - 0.5)),
     text: params.text,
     type: 'repeatfont',
     klass: 'ending',
@@ -21857,11 +22027,13 @@ module.exports = drawEnding;
   !*** ./src/write/draw/group-elements.js ***!
   \******************************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Begin a group of glyphs that will always be moved, scaled and highlighted together
  */
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+
 var elementGroup;
 
 (function () {
@@ -21887,8 +22059,8 @@ var elementGroup;
     path = path || [];
     if (path.length === 0) return;
     path[0][0] = "m";
-    path[0][1] -= this.lastM[0];
-    path[0][2] -= this.lastM[1];
+    path[0][1] = roundNumber(path[0][1] - this.lastM[0]);
+    path[0][2] = roundNumber(path[0][2] - this.lastM[1]);
     this.lastM[0] += path[0][1];
     this.lastM[1] += path[0][2];
     this.path.push(path[0]);
@@ -22018,30 +22190,25 @@ module.exports = printPath;
 
 var elementGroup = __webpack_require__(/*! ./group-elements */ "./src/write/draw/group-elements.js");
 
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+
 function printStem(renderer, x, dx, y1, y2) {
   if (dx < 0 || y1 < y2) {
     // correct path "handedness" for intersection with other elements
-    var tmp = y2;
-    y2 = y1;
+    var tmp = roundNumber(y2);
+    y2 = roundNumber(y1);
     y1 = tmp;
+  } else {
+    y1 = roundNumber(y1);
+    y2 = roundNumber(y2);
   }
 
-  var isIE =
-  /*@cc_on!@*/
-  false; //IE detector
-
+  x = roundNumber(x);
+  var x2 = roundNumber(x + dx);
   var fill = "#000000";
+  var pathArray = [["M", x, y1], ["L", x, y2], ["L", x2, y2], ["L", x2, y1], ["z"]];
 
-  if (isIE && dx < 1) {
-    dx = 1;
-    fill = "#666666";
-  }
-
-  if (~~x === x) x += 0.05; // raphael does weird rounding (for VML)
-
-  var pathArray = [["M", x, y1], ["L", x, y2], ["L", x + dx, y2], ["L", x + dx, y1], ["z"]];
-
-  if (!isIE && elementGroup.isInGroup()) {
+  if (elementGroup.isInGroup()) {
     elementGroup.addPath(pathArray);
   } else {
     var path = "";
@@ -22310,6 +22477,21 @@ function scaleExistingElem(paper, elem, scaleX, scaleY, x, y) {
 }
 
 module.exports = drawRelativeElement;
+
+/***/ }),
+
+/***/ "./src/write/draw/round-number.js":
+/*!****************************************!*\
+  !*** ./src/write/draw/round-number.js ***!
+  \****************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function roundNumber(x) {
+  return parseFloat(x.toFixed(2));
+}
+
+module.exports = roundNumber;
 
 /***/ }),
 
@@ -22800,6 +22982,8 @@ module.exports = drawStaffGroup;
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+
 function printStaffLine(renderer, x1, x2, pitch, klass) {
   var isIE =
   /*@cc_on!@*/
@@ -22814,7 +22998,11 @@ function printStaffLine(renderer, x1, x2, pitch, klass) {
   }
 
   var y = renderer.calcY(pitch);
-  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y - dy, x2, y - dy, x2, y + dy, x1, y + dy);
+  x1 = roundNumber(x1);
+  x2 = roundNumber(x2);
+  var y1 = roundNumber(y - dy);
+  var y2 = roundNumber(y + dy);
+  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y1, x2, y1, x2, y2, x1, y2);
   var options = {
     path: pathString,
     stroke: "none",
@@ -22956,7 +23144,9 @@ module.exports = drawTempo;
   !*** ./src/write/draw/text.js ***!
   \********************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
 
 function renderText(renderer, params) {
   var y = params.y;
@@ -23003,6 +23193,8 @@ function renderText(renderer, params) {
   }
 
   if (params.noClass) delete hash.attr['class'];
+  hash.attr.x = roundNumber(hash.attr.x);
+  hash.attr.y = roundNumber(hash.attr.y);
   var elem = renderer.paper.text(text, hash.attr);
 
   if (hash.font.box) {
@@ -23046,9 +23238,20 @@ module.exports = renderText;
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+
 function drawTie(renderer, params, linestartx, lineendx, selectables) {
   layout(params, linestartx, lineendx);
-  var klass;
+  var klass = '';
+
+  if (params.anchor1) {
+    klass += 'abcjs-start-m' + params.anchor1.parent.counters.measure + '-n' + params.anchor1.parent.counters.note;
+  } else klass += 'abcjs-start-edge';
+
+  if (params.anchor2) {
+    klass += ' abcjs-end-m' + params.anchor2.parent.counters.measure + '-n' + params.anchor2.parent.counters.note;
+  } else klass += ' abcjs-end-edge';
+
   if (params.hint) klass = "abcjs-hint";
   var fudgeY = params.fixedY ? 1.5 : 0; // TODO-PER: This just compensates for drawArc, which contains too much knowledge of ties and slurs.
 
@@ -23084,12 +23287,12 @@ var layout = function layout(params, lineStartX, lineEndX) {
 var drawArc = function drawArc(renderer, x1, x2, pitch1, pitch2, above, klass, isTie, dotted) {
   // If it is a tie vs. a slur, draw it shallower.
   var spacing = isTie ? 1.2 : 1.5;
-  x1 = x1 + 6;
-  x2 = x2 + 4;
+  x1 = roundNumber(x1 + 6);
+  x2 = roundNumber(x2 + 4);
   pitch1 = pitch1 + (above ? spacing : -spacing);
   pitch2 = pitch2 + (above ? spacing : -spacing);
-  var y1 = renderer.calcY(pitch1);
-  var y2 = renderer.calcY(pitch2); //unit direction vector
+  var y1 = roundNumber(renderer.calcY(pitch1));
+  var y2 = roundNumber(renderer.calcY(pitch2)); //unit direction vector
 
   var dx = x2 - x1;
   var dy = y2 - y1;
@@ -23100,15 +23303,17 @@ var drawArc = function drawArc(renderer, x1, x2, pitch1, pitch2, above, klass, i
   var maxFlatten = isTie ? 10 : 25; // If it is a tie vs. a slur, draw it shallower.
 
   var curve = (above ? -1 : 1) * Math.min(maxFlatten, Math.max(4, flatten));
-  var controlx1 = x1 + flatten * ux - curve * uy;
-  var controly1 = y1 + flatten * uy + curve * ux;
-  var controlx2 = x2 - flatten * ux - curve * uy;
-  var controly2 = y2 - flatten * uy + curve * ux;
+  var controlx1 = roundNumber(x1 + flatten * ux - curve * uy);
+  var controly1 = roundNumber(y1 + flatten * uy + curve * ux);
+  var controlx2 = roundNumber(x2 - flatten * ux - curve * uy);
+  var controly2 = roundNumber(y2 - flatten * uy + curve * ux);
   var thickness = 2;
   if (klass) klass += ' slur';else klass = 'slur';
+  klass += isTie ? ' tie' : ' legato';
   var ret;
 
   if (dotted) {
+    klass += ' dotted';
     var pathString2 = sprintf("M %f %f C %f %f %f %f %f %f", x1, y1, controlx1, controly1, controlx2, controly2, x2, y2);
     ret = renderer.paper.path({
       path: pathString2,
@@ -23118,7 +23323,7 @@ var drawArc = function drawArc(renderer, x1, x2, pitch1, pitch2, above, klass, i
       'class': renderer.controller.classes.generate(klass)
     });
   } else {
-    var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1, controlx1, controly1, controlx2, controly2, x2, y2, controlx2 - thickness * uy, controly2 + thickness * ux, controlx1 - thickness * uy, controly1 + thickness * ux, x1, y1);
+    var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1, controlx1, controly1, controlx2, controly2, x2, y2, roundNumber(controlx2 - thickness * uy), roundNumber(controly2 + thickness * ux), roundNumber(controlx1 - thickness * uy), roundNumber(controly1 + thickness * ux), x1, y1);
     ret = renderer.paper.path({
       path: pathString,
       stroke: "none",
@@ -23146,6 +23351,8 @@ var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js"
 var renderText = __webpack_require__(/*! ./text */ "./src/write/draw/text.js");
 
 var printPath = __webpack_require__(/*! ./print-path */ "./src/write/draw/print-path.js");
+
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
 
 function drawTriplet(renderer, params, selectables) {
   var xTextPos;
@@ -23177,7 +23384,7 @@ function drawTriplet(renderer, params, selectables) {
 }
 
 function drawLine(l, t, r, b) {
-  return sprintf("M %f %f L %f %f", l, t, r, b);
+  return sprintf("M %f %f L %f %f", roundNumber(l), roundNumber(t), roundNumber(r), roundNumber(b));
 }
 
 function drawBracket(renderer, x1, y1, x2, y2) {
@@ -23391,7 +23598,7 @@ function FreeText(text, vskip, getFontAndAttr, paddingLeft, width, getTextSize) 
         text: text[i].text,
         font: currentFont,
         klass: 'defined-text',
-        anchor: "start",
+        anchor: alignment,
         absElemType: "freeText"
       });
       size = getTextSize.calc(text[i].text, currentFont, 'defined-text');
@@ -25790,11 +25997,11 @@ THE SOFTWARE.
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-var version = '6.0.0-beta.21';
+var version = '6.0.0-beta.22';
 module.exports = version;
 
 /***/ })
 
 /******/ });
 });
-//# sourceMappingURL=abcjs_basic_6.0.0-beta.21.js.map
+//# sourceMappingURL=abcjs_basic_6.0.0-beta.22.js.map

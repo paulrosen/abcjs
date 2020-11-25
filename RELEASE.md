@@ -1,3 +1,55 @@
+# Version 6.0.0-beta.22
+
+## Bugs
+
+* Fix crash in audio when there is an odd measure that contains chords.
+
+* Fix definition of some jazz chords, particularly the 13th
+
+* Fix timing on multiple voices when the tempo changes.
+
+* Fix downloading WAV files in stereo.
+
+* Fix the last line in the line end callbacks.
+
+* Simplified and fixed some edge cases when seeking; added return value for eventCallback.
+
+* Fix tempo change in multiple voices
+
+* Fix the reporting of measure numbers in the timing callbacks when there are multiple voices.
+
+* Add more info to the lineEndingCallback so the client can see all of the lines.
+
+* Fix the alignment of %%center text.
+
+* Don't crash if the current beat is later than the last event (can happen when the animation timer is delayed)
+
+* Fix line end callback anticipation handling.
+
+* Fix lower volume of default soundfont to prevent clipping.
+
+* Fix crash when doing audio for tune with subtitle
+
+## Features
+
+* Add programOffsets parameter for audio.
+
+* Handle `%%MIDI channel 10` when it is in the middle of a tune.
+
+* Add the note style (grace or decoration) to the sequenceCallback.
+
+* Add classes for pinpointing where slurs start and end (abcjs-start-m0-n0, abcjs-end-m0-n0)
+
+* Round many paths to 2 dec. places; add "abcjs-dotted" to dotted slurs.
+
+* Add abcjs-dynamics class to the !f!, etc. symbols.
+
+* Differentiate between slurs and ties in the classes.
+
+* Add more info to the lineEndingCallback so the client can see all of the lines.
+
+* Add some details about the beat callback to straighten out doing a smooth cursor.
+
 # Version 6.0.0-beta.21
 
 ## Bugs
