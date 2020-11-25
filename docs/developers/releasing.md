@@ -41,6 +41,8 @@ All new work should be done in the `dev` branch.
     `docker run -v $(pwd):/srv/app -it abcjs /bin/bash`
      `npm login`
 
+[_] Build docs with `npm run docs:build`.
+
 [_] Push the change that npm publish created with `git push`.
 
 [_] Push new documentation with `./deploy-docs.sh`.
