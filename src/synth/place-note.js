@@ -16,13 +16,16 @@
 var soundsCache = require('./sounds-cache');
 var pitchToNoteName = require('./pitch-to-note-name');
 
-function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier) {
+function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs) {
 	// sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
 	// len is in whole notes. Multiply by tempoMultiplier to get seconds.
+	// ofsMs is an offset to subtract from the note to line up programs that have different length onsets.
 	var OfflineAC = window.OfflineAudioContext ||
 		window.webkitOfflineAudioContext;
 
 	var len = sound.len * sound.tempoMultiplier;
+	if (ofsMs)
+		len +=ofsMs/1000;
 	var offlineCtx = new OfflineAC(2,Math.floor((len+0.5)*sampleRate*2),sampleRate);
 	var noteName = pitchToNoteName[sound.pitch];
 	var noteBuffer = soundsCache[sound.instrument][noteName];
@@ -72,7 +75,14 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 	offlineCtx.oncomplete = function(e) {
 		if (e.renderedBuffer) { // If the system gets overloaded then this can start failing. Just drop the note if so.
 			for (var i = 0; i < startArray.length; i++) {
-				copyToChannel(outputAudioBuffer, e.renderedBuffer, Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate));
+				//Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
+				var start = startArray[i] * sound.tempoMultiplier;
+				if (ofsMs)
+					start -=ofsMs/1000;
+				if (start < 0)
+					start = 0; // If the item that is moved back is at the very beginning of the buffer then don't move it back. To do that would be to push everything else forward. TODO-PER: this should probably be done at some point but then it would change timing in existing apps.
+				start = Math.floor(start*sampleRate);
+				copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
 			}
 		}
 		fnResolve();
