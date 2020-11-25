@@ -1,20 +1,20 @@
 var elementGroup = require('./group-elements');
+const roundNumber = require("./round-number");
 
 function printStem(renderer, x, dx, y1, y2) {
 	if (dx<0 || y1<y2) { // correct path "handedness" for intersection with other elements
-		var tmp = y2;
-		y2 = y1;
+		var tmp = roundNumber(y2);
+		y2 = roundNumber(y1);
 		y1 = tmp;
+	} else {
+		y1 = roundNumber(y1);
+		y2 = roundNumber(y2);
 	}
-	var isIE=/*@cc_on!@*/false;//IE detector
+	x = roundNumber(x);
+	var x2 = roundNumber(x+dx);
 	var fill = "#000000";
-	if (isIE && dx<1) {
-		dx = 1;
-		fill = "#666666";
-	}
-	if (~~x === x) x+=0.05; // raphael does weird rounding (for VML)
-	var pathArray = [["M",x,y1],["L", x, y2],["L", x+dx, y2],["L",x+dx,y1],["z"]];
-	if (!isIE && elementGroup.isInGroup()) {
+	var pathArray = [["M",x,y1],["L", x, y2],["L", x2, y2],["L",x2,y1],["z"]];
+	if (elementGroup.isInGroup()) {
 		elementGroup.addPath(pathArray);
 	} else {
 		var path = "";

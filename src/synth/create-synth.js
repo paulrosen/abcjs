@@ -60,9 +60,21 @@ function CreateSynth() {
 		if (params.soundFontVolumeMultiplier)
 			self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;
 		else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2)
-			self.soundFontVolumeMultiplier = 10.0;
+			self.soundFontVolumeMultiplier = 5.0;
+		else if (self.soundFontUrl === defaultSoundFontUrl)
+			self.soundFontVolumeMultiplier = 0.5;
 		else
 			self.soundFontVolumeMultiplier = 1.0;
+		if (params.programOffsets)
+			self.programOffsets = params.programOffsets;
+		else if (self.soundFontUrl === defaultSoundFontUrl)
+			self.programOffsets = {
+				"violin": 113,
+				"trombone": 200,
+			};
+		else
+			self.programOffsets = {};
+
 		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure(options.bpm) : 1000);
 		self.pan = params.pan;
 		self.meterSize = 1;
@@ -234,7 +246,7 @@ function CreateSynth() {
 				var k = Object.keys(uniqueSounds)[key2];
 				var parts = k.split(":");
 				parts = { instrument: parts[0], pitch: parseInt(parts[1],10), volume: parseInt(parts[2], 10), len: parseFloat(parts[3]), pan: parseFloat(parts[4]), tempoMultiplier: parseFloat(parts[5])};
-				allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier));
+				allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument]));
 			}
 			self.audioBuffers = [audioBuffer];
 

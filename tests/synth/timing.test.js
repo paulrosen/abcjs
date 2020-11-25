@@ -31,6 +31,14 @@ describe("Timing", function() {
 		'K:F\n' +
 		'[Q:1/4=129.0476605]CDEF |[Q:1/4=127]GABc | [Q:1/4=131] CDEF |[Q:1/4=130] GABc |[Q:1/4=127]CDEF |\n' ;
 
+	var abcSubTitleCrash = 'X:1\n' +
+		'T:subtitle-crash\n' +
+		'L:1/4\n' +
+		'K:C\n' +
+		'cdef|\n' +
+		'T:subtitle\n' +
+		'fabg|\n';
+
 //////////////////////////////////////////////////////////
 
 	it("of repeated sections", function() {
@@ -43,6 +51,10 @@ describe("Timing", function() {
 
 	it("tempo change2 animation", function() {
 		doAnimationTest(abcTempoChange);
+	});
+
+	it("subtitle crash", function() {
+		doCreationTest(abcSubTitleCrash);
 	});
 });
 
@@ -79,6 +91,14 @@ function doClickTest(abc, expected) {
 			index++;
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////
+
+function doCreationTest(abc) {
+	var visualObj = abcjs.renderAbc("paper", abc);
+	visualObj[0].setUpAudio();
+	visualObj[0].setTiming();
 }
 
 //////////////////////////////////////////////////////////

@@ -2,6 +2,7 @@ var highlight = require('../highlight');
 var unhighlight = require('../unhighlight');
 var sprintf = require('./sprintf');
 var printPath = require('./print-path');
+const roundNumber = require("./round-number");
 
 function drawCrescendo(renderer, params, selectables) {
 	if (params.pitch === undefined)
@@ -24,6 +25,13 @@ function drawCrescendo(renderer, params, selectables) {
 }
 
 var drawLine = function (renderer, y1, y2, y3, y4, left, right) {
+	y1 = roundNumber(y1);
+	y2 = roundNumber(y2);
+	y3 = roundNumber(y3);
+	y4 = roundNumber(y4);
+	left = roundNumber(left);
+	right = roundNumber(right);
+
 	var pathString = sprintf("M %f %f L %f %f M %f %f L %f %f",
 		left, y1, right, y2, left, y3, right, y4);
 	var el = printPath(renderer, {path:pathString, highlight: "stroke", stroke:"#000000", 'class': renderer.controller.classes.generate('dynamics decoration')});

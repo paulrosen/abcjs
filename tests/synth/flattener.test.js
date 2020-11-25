@@ -79,7 +79,8 @@ describe("Audio flattener", function() {
 					"start":1.125,
 					"duration":0.125,
 					"instrument": 0,
-					"gap":0
+					"gap":0,
+					"style": "grace"
 				},
 				{
 					"cmd": "note",
@@ -1318,98 +1319,98 @@ describe("Audio flattener", function() {
 			[
 				// TODO-PER: also handle the slide and the drum rolls.
 				{"cmd":"program","channel":0,"instrument":3},
-				{"cmd":"note","pitch":77,"volume":105,"start":0,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":0.03125,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":77,"volume":105,"start":0.0625,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":0.09375,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":77,"volume":105,"start":0.125,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":0.15625,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":77,"volume":105,"start":0.1875,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":0.21875,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":74,"volume":95,"start":0.25,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":73,"volume":95,"start":0.28125,"duration":0.03125,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":77,"volume":105,"start":0,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":0.03125,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":77,"volume":105,"start":0.0625,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":0.09375,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":77,"volume":105,"start":0.125,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":0.15625,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":77,"volume":105,"start":0.1875,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":0.21875,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":74,"volume":95,"start":0.25,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":73,"volume":95,"start":0.28125,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":74,"volume":95,"start":0.3125,"duration":0.1875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":72,"volume":95,"start":0.5,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":73,"volume":95,"start":0.53125,"duration":0.03125,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":72,"volume":95,"start":0.5,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":73,"volume":95,"start":0.53125,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":72,"volume":95,"start":0.5625,"duration":0.1875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":71,"volume":95,"start":0.75,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":72,"volume":95,"start":0.78125,"duration":0.03125,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":71,"volume":95,"start":0.75,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":72,"volume":95,"start":0.78125,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":71,"volume":95,"start":0.8125,"duration":0.1875,"gap":0,"instrument":3},
 				{"cmd":"note","pitch":69,"volume":127,"start":1,"duration":0.25,"instrument":3,"gap":0},
 				{"cmd":"note","pitch":67,"volume":95,"start":1.25,"duration":0.25,"instrument":3,"endType":"staccato","gap":0.15000000000000002},
-				{"cmd":"note","pitch":79,"volume":95,"start":1.5,"duration":0.05,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":80,"volume":95,"start":1.55,"duration":0.05,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":79,"volume":95,"start":1.6,"duration":0.05,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":80,"volume":95,"start":1.65,"duration":0.05,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":79,"volume":95,"start":1.5,"duration":0.05,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":80,"volume":95,"start":1.55,"duration":0.05,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":79,"volume":95,"start":1.6,"duration":0.05,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":80,"volume":95,"start":1.65,"duration":0.05,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":79,"volume":95,"start":1.7,"duration":0.05,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":95,"start":1.75,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":95,"start":1.8125,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":95,"start":1.875,"duration":0.03125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":95,"start":1.9375,"duration":0.03125,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":81,"volume":95,"start":1.75,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":81,"volume":95,"start":1.8125,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":81,"volume":95,"start":1.875,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":81,"volume":95,"start":1.9375,"duration":0.03125,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":74,"volume":105,"start":2,"duration":0.25,"instrument":3,"gap":0},
 				{"cmd":"note","pitch":67,"volume":95,"start":2.25,"duration":0.25,"instrument":3,"gap":0},
 				{"cmd":"note","pitch":67,"volume":95,"start":2.5,"duration":0.25,"instrument":3,"gap":0},
 				{"cmd":"note","pitch":67,"volume":95,"start":2.75,"duration":0.25,"instrument":3,"gap":0},
-				{"cmd":"note","pitch":77,"volume":105,"start":3,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":3.015625,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":77,"volume":105,"start":3.03125,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":3.046875,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":77,"volume":105,"start":3.0625,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":3.078125,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":77,"volume":105,"start":3.09375,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":3.109375,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":74,"volume":85,"start":3.125,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":73,"volume":85,"start":3.140625,"duration":0.015625,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":77,"volume":105,"start":3,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":3.015625,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":77,"volume":105,"start":3.03125,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":3.046875,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":77,"volume":105,"start":3.0625,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":3.078125,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":77,"volume":105,"start":3.09375,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":3.109375,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":74,"volume":85,"start":3.125,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":73,"volume":85,"start":3.140625,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":74,"volume":85,"start":3.15625,"duration":0.09375,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":72,"volume":95,"start":3.25,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":73,"volume":95,"start":3.265625,"duration":0.015625,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":72,"volume":95,"start":3.25,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":73,"volume":95,"start":3.265625,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":72,"volume":95,"start":3.28125,"duration":0.09375,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":71,"volume":85,"start":3.375,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":72,"volume":85,"start":3.390625,"duration":0.015625,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":71,"volume":85,"start":3.375,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":72,"volume":85,"start":3.390625,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":71,"volume":85,"start":3.40625,"duration":0.09375,"gap":0,"instrument":3},
 				{"cmd":"note","pitch":69,"volume":127,"start":3.5,"duration":0.125,"instrument":3,"gap":0},
 				{"cmd":"note","pitch":67,"volume":85,"start":3.625,"duration":0.125,"instrument":3,"endType":"staccato","gap":0.07500000000000001},
-				{"cmd":"note","pitch":79,"volume":95,"start":3.75,"duration":0.025,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":80,"volume":95,"start":3.775,"duration":0.025,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":79,"volume":95,"start":3.8,"duration":0.025,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":80,"volume":95,"start":3.825,"duration":0.025,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":79,"volume":95,"start":3.75,"duration":0.025,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":80,"volume":95,"start":3.775,"duration":0.025,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":79,"volume":95,"start":3.8,"duration":0.025,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":80,"volume":95,"start":3.825,"duration":0.025,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":79,"volume":95,"start":3.85,"duration":0.025,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":85,"start":3.875,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":85,"start":3.90625,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":85,"start":3.9375,"duration":0.015625,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":85,"start":3.96875,"duration":0.015625,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":81,"volume":85,"start":3.875,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":81,"volume":85,"start":3.90625,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":81,"volume":85,"start":3.9375,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":81,"volume":85,"start":3.96875,"duration":0.015625,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":74,"volume":105,"start":4,"duration":0.125,"instrument":3,"gap":0},
 				{"cmd":"note","pitch":67,"volume":85,"start":4.125,"duration":0.125,"instrument":3,"gap":0},
 				{"cmd":"note","pitch":67,"volume":95,"start":4.25,"duration":0.125,"instrument":3,"gap":0},
 				{"cmd":"note","pitch":67,"volume":85,"start":4.375,"duration":0.125,"instrument":3,"gap":0},
-				{"cmd":"note","pitch":77,"volume":105,"start":4.5,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":4.546875,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":77,"volume":105,"start":4.59375,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":4.640625,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":77,"volume":105,"start":4.6875,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":4.734375,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":77,"volume":105,"start":4.78125,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":76,"volume":105,"start":4.828125,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":74,"volume":85,"start":4.875,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":73,"volume":85,"start":4.921875,"duration":0.046875,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":77,"volume":105,"start":4.5,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":4.546875,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":77,"volume":105,"start":4.59375,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":4.640625,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":77,"volume":105,"start":4.6875,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":4.734375,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":77,"volume":105,"start":4.78125,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":76,"volume":105,"start":4.828125,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":74,"volume":85,"start":4.875,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":73,"volume":85,"start":4.921875,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":74,"volume":85,"start":4.96875,"duration":0.28125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":72,"volume":95,"start":5.25,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":73,"volume":95,"start":5.296875,"duration":0.046875,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":72,"volume":95,"start":5.25,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":73,"volume":95,"start":5.296875,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":72,"volume":95,"start":5.34375,"duration":0.28125,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":71,"volume":85,"start":5.625,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":72,"volume":85,"start":5.671875,"duration":0.046875,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":71,"volume":85,"start":5.625,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":72,"volume":85,"start":5.671875,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":71,"volume":85,"start":5.71875,"duration":0.28125,"gap":0,"instrument":3},
 				{"cmd":"note","pitch":69,"volume":127,"start":6,"duration":0.375,"instrument":3,"gap":0},
 				{"cmd":"note","pitch":67,"volume":85,"start":6.375,"duration":0.375,"instrument":3,"endType":"staccato","gap":0.22500000000000003},
-				{"cmd":"note","pitch":79,"volume":95,"start":6.75,"duration":0.075,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":80,"volume":95,"start":6.825,"duration":0.075,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":79,"volume":95,"start":6.9,"duration":0.075,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":80,"volume":95,"start":6.975,"duration":0.075,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":79,"volume":95,"start":6.75,"duration":0.075,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":80,"volume":95,"start":6.825,"duration":0.075,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":79,"volume":95,"start":6.9,"duration":0.075,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":80,"volume":95,"start":6.975,"duration":0.075,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":79,"volume":95,"start":7.05,"duration":0.075,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":85,"start":7.125,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":85,"start":7.21875,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":85,"start":7.3125,"duration":0.046875,"gap":0,"instrument":3},
-				{"cmd":"note","pitch":81,"volume":85,"start":7.40625,"duration":0.046875,"gap":0,"instrument":3},
+				{"cmd":"note","pitch":81,"volume":85,"start":7.125,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":81,"volume":85,"start":7.21875,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":81,"volume":85,"start":7.3125,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
+				{"cmd":"note","pitch":81,"volume":85,"start":7.40625,"duration":0.046875,"gap":0,"instrument":3, "style": "decoration"},
 				{"cmd":"note","pitch":74,"volume":105,"start":7.5,"duration":0.375,"instrument":3,"gap":0},
 				{"cmd":"note","pitch":67,"volume":85,"start":7.875,"duration":0.375,"instrument":3,"gap":0},
 				{"cmd":"note","pitch":67,"volume":95,"start":8.25,"duration":0.375,"instrument":3,"gap":0},
@@ -1680,83 +1681,83 @@ describe("Audio flattener", function() {
 		"tracks":[
 			[
 				{"cmd":"program","channel":0,"instrument":0},
-				{"cmd":"note","pitch":76,"volume":57,"start":0,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":76,"volume":57,"start":0,"duration":0.125,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":81,"volume":85,"start":0.125,"duration":0.125,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":76,"volume":70,"start":0.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":76,"volume":70,"start":0.25,"duration":0.125,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":80,"volume":105,"start":0.375,"duration":0.125,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":76,"volume":63,"start":0.75,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":76,"volume":63,"start":0.75,"duration":0.125,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":81,"volume":95,"start":0.875,"duration":0.125,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":80,"volume":95,"start":1,"duration":0.25,"instrument":0,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":80,"volume":95,"start":1,"duration":0.25,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":76,"volume":70,"start":1.25,"duration":0.041666666666666664,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":78,"volume":70,"start":1.2916666666666667,"duration":0.041666666666666664,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":80,"volume":70,"start":1.3333333333333335,"duration":0.041666666666666664,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":76,"volume":70,"start":1.25,"duration":0.041666666666666664,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":78,"volume":70,"start":1.2916666666666667,"duration":0.041666666666666664,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":80,"volume":70,"start":1.3333333333333335,"duration":0.041666666666666664,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":81,"volume":105,"start":1.375,"duration":0.125,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":80,"volume":95,"start":1.5,"duration":0.25,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":69,"volume":63,"start":1.75,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":71,"volume":63,"start":1.7678571428571428,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":73,"volume":63,"start":1.7857142857142856,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":74,"volume":63,"start":1.8035714285714284,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":76,"volume":63,"start":1.8214285714285712,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":78,"volume":63,"start":1.839285714285714,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":80,"volume":63,"start":1.8571428571428568,"duration":0.017857142857142856,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":69,"volume":63,"start":1.75,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":71,"volume":63,"start":1.7678571428571428,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":73,"volume":63,"start":1.7857142857142856,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":74,"volume":63,"start":1.8035714285714284,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":76,"volume":63,"start":1.8214285714285712,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":78,"volume":63,"start":1.839285714285714,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":80,"volume":63,"start":1.8571428571428568,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":81,"volume":95,"start":1.875,"duration":0.125,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":80,"volume":95,"start":2,"duration":0.25,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":76,"volume":70,"start":2.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":76,"volume":70,"start":2.25,"duration":0.125,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":80,"volume":105,"start":2.375,"duration":0.125,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":76,"volume":63,"start":2.75,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":76,"volume":63,"start":2.75,"duration":0.125,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":81,"volume":95,"start":2.875,"duration":0.125,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":80,"volume":95,"start":3,"duration":0.25,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":76,"volume":70,"start":3.25,"duration":0.041666666666666664,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":78,"volume":70,"start":3.2916666666666667,"duration":0.041666666666666664,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":80,"volume":70,"start":3.333333333333333,"duration":0.041666666666666664,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":76,"volume":70,"start":3.25,"duration":0.041666666666666664,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":78,"volume":70,"start":3.2916666666666667,"duration":0.041666666666666664,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":80,"volume":70,"start":3.333333333333333,"duration":0.041666666666666664,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":81,"volume":105,"start":3.375,"duration":0.125,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":80,"volume":95,"start":3.5,"duration":0.25,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":69,"volume":63,"start":3.75,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":71,"volume":63,"start":3.7678571428571428,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":73,"volume":63,"start":3.7857142857142856,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":74,"volume":63,"start":3.8035714285714284,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":76,"volume":63,"start":3.8214285714285712,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":78,"volume":63,"start":3.839285714285714,"duration":0.017857142857142856,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":80,"volume":63,"start":3.8571428571428568,"duration":0.017857142857142856,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":69,"volume":63,"start":3.75,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":71,"volume":63,"start":3.7678571428571428,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":73,"volume":63,"start":3.7857142857142856,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":74,"volume":63,"start":3.8035714285714284,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":76,"volume":63,"start":3.8214285714285712,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":78,"volume":63,"start":3.839285714285714,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":80,"volume":63,"start":3.8571428571428568,"duration":0.017857142857142856,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":81,"volume":95,"start":3.875,"duration":0.125,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":80,"volume":95,"start":4,"duration":0.25,"instrument":0,"gap":0},
 //
-				{"cmd":"note","pitch":71,"volume":70,"start":4.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":71,"volume":70,"start":4.25,"duration":0.125,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":76,"volume":105,"start":4.375,"duration":0.125,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":71,"volume":63,"start":4.5,"duration":0.08333333333333333,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":73,"volume":63,"start":4.583333333333333,"duration":0.020833333333333332,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":74,"volume":63,"start":4.604166666666666,"duration":0.020833333333333332,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":71,"volume":63,"start":4.5,"duration":0.08333333333333333,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":73,"volume":63,"start":4.583333333333333,"duration":0.020833333333333332,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":74,"volume":63,"start":4.604166666666666,"duration":0.020833333333333332,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":78,"volume":95,"start":4.625,"duration":0.125,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":76,"volume":95,"start":4.75,"duration":0.25,"instrument":0,"gap":0},
 
 				{"cmd":"note","pitch":78,"volume":95,"start":5,"duration":0.25,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":71,"volume":70,"start":5.25,"duration":0.0625,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":73,"volume":70,"start":5.3125,"duration":0.0625,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":74,"volume":70,"start":5.375,"duration":0.0625,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":76,"volume":70,"start":5.4375,"duration":0.0625,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":71,"volume":70,"start":5.25,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":73,"volume":70,"start":5.3125,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":74,"volume":70,"start":5.375,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":76,"volume":70,"start":5.4375,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":78,"volume":105,"start":5.5,"duration":0.25,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":71,"volume":63,"start":5.75,"duration":0.0625,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":73,"volume":63,"start":5.8125,"duration":0.0625,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":74,"volume":63,"start":5.875,"duration":0.0625,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":76,"volume":63,"start":5.9375,"duration":0.0625,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":71,"volume":63,"start":5.75,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":73,"volume":63,"start":5.8125,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":74,"volume":63,"start":5.875,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":76,"volume":63,"start":5.9375,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":78,"volume":95,"start":6,"duration":0.25,"instrument":0,"gap":0}
 			]
 		]
@@ -1831,7 +1832,7 @@ describe("Audio flattener", function() {
 		"tracks": [
 			[
 				{"cmd":"program","channel":0,"instrument":0},
-				{"cmd":"note","pitch":95,"volume":70,"start":0,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":95,"volume":70,"start":0,"duration":0.25,"instrument":0,"gap":0, "style": "grace"},
 				{"cmd":"note","pitch":93,"volume":105,"start":0.25,"duration":0.25,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":84,"volume":95,"start":0.5,"duration":0.5,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":88,"volume":95,"start":0.5,"duration":0.5,"instrument":0,"gap":0},
@@ -2156,7 +2157,7 @@ describe("Audio flattener", function() {
 				{"cmd":"note","pitch":38,"volume":80,"start":1.1875,"duration":0.03125,"instrument":128,"gap":0},
 				{"cmd":"note","pitch":38,"volume":80,"start":1.21875,"duration":0.03125,"instrument":128,"gap":0},
 				{"cmd":"note","pitch":38,"volume":120,"start":1.25,"duration":0.25,"instrument":128,"gap":0},
-				{"cmd":"note","pitch":38,"volume":53,"start":1.5,"duration":0.25,"gap":0,"instrument":128},
+				{"cmd":"note","pitch":38,"volume":53,"start":1.5,"duration":0.25,"gap":0,"instrument":128, "style": "grace"},
 				{"cmd":"note","pitch":38,"volume":80,"start":1.75,"duration":0.25,"instrument":128,"gap":0}
 			]
 		]
@@ -2277,7 +2278,173 @@ describe("Audio flattener", function() {
 
 };
 
+	//////////////////////////////////////////////////////////
 
+	var abcTempoThreeVoices = 'X: 1\n' +
+		'T: tempo-change-three-voices\n' +
+		'%%score { ( 1 3 ) | 2 }\n' +
+		'Q:1/4=70\n' +
+		'M: 4/4\n' +
+		'L: 1/8\n' +
+		'K: C\n' +
+		'V:1 clef=treble\n' +
+		'V:3 clef=treble\n' +
+		'V:2 clef=bass\n' +
+		'V:1\n' +
+		'a2b2c\'2b2 | [Q:1/4=80] a2b2c\'2b2 | a2b2c\'2b2 |\n' +
+		'a2b2c\'2b2 | a2b2c\'2b2 | a2b2c\'2b2 :|\n' +
+		'V:3\n' +
+		'E8 | F8 | A8 |\n' +
+		'E8 | [Q:1/4=100] F8 | A8 :|\n' +
+		'V:2\n' +
+		'A,4 G,4 | A,4 G,4 |[Q:1/4=90] F,4 E,4 |\n' +
+		'A,4 G,4 |  A,4 G,4 | [Q:1/4=120] F,4 E,4 :|\n';
+
+	var expectedTempoThreeVoices = {"tempo":70,"instrument":0,"tracks":[
+		[
+			{"cmd":"program","channel":0,"instrument":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":0,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":95,"start":0.25,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":95,"start":0.5,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":95,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":1,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":1.21875,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":1.4375,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":1.65625,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":1.875,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":2.069444,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":2.263888,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":2.458332,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":2.652776,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":2.84722,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":3.041664,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":3.236108,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":3.430552,"duration":0.175,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":3.605552,"duration":0.175,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":3.780552,"duration":0.175,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":3.955552,"duration":0.175,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":4.130552,"duration":0.145833,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":4.276385,"duration":0.145833,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":4.422218,"duration":0.145833,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":4.568051,"duration":0.145833,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":4.713884,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":95,"start":4.963884,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":95,"start":5.213884,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":95,"start":5.463884,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":5.713884,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":5.932634,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":6.151384,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":6.370134,"duration":0.21875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":6.588884,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":6.783328,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":6.977772,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":7.172216,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":7.36666,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":7.561104,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":7.755548,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":7.949992,"duration":0.194444,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":8.144436,"duration":0.175,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":8.319436,"duration":0.175,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":8.494436,"duration":0.175,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":8.669436,"duration":0.175,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":81,"volume":105,"start":8.844436,"duration":0.145833,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":8.990269,"duration":0.145833,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":84,"volume":85,"start":9.136102,"duration":0.145833,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":85,"start":9.281935,"duration":0.145833,"instrument":0,"gap":0}
+		],[
+			{"cmd":"program","channel":1,"instrument":0},
+			{"cmd":"note","pitch":64,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":65,"volume":105,"start":1,"duration":0.875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":69,"volume":105,"start":1.875,"duration":0.777778,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":64,"volume":105,"start":2.652778,"duration":0.777778,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":65,"volume":105,"start":3.430556,"duration":0.7,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":69,"volume":105,"start":4.130556,"duration":0.583333,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":64,"volume":105,"start":4.713889,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":65,"volume":105,"start":5.713889,"duration":0.875,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":69,"volume":105,"start":6.588889,"duration":0.777778,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":64,"volume":105,"start":7.366667,"duration":0.777778,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":65,"volume":105,"start":8.144445,"duration":0.7,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":69,"volume":105,"start":8.844445,"duration":0.583333,"instrument":0,"gap":0}
+		],[
+			{"cmd":"program","channel":2,"instrument":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":0,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":95,"start":0.5,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":1,"duration":0.4375,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":85,"start":1.4375,"duration":0.4375,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":53,"volume":105,"start":1.875,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":52,"volume":85,"start":2.263889,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":2.652778,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":85,"start":3.041667,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":3.430556,"duration":0.35,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":85,"start":3.780556,"duration":0.35,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":53,"volume":105,"start":4.130556,"duration":0.291667,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":52,"volume":85,"start":4.422223,"duration":0.291667,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":4.71389,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":95,"start":5.21389,"duration":0.5,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":5.71389,"duration":0.4375,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":85,"start":6.15139,"duration":0.4375,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":53,"volume":105,"start":6.58889,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":52,"volume":85,"start":6.977779,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":7.366668,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":85,"start":7.755557,"duration":0.388889,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":57,"volume":105,"start":8.144446,"duration":0.35,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":55,"volume":85,"start":8.494446,"duration":0.35,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":53,"volume":105,"start":8.844446,"duration":0.291667,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":52,"volume":85,"start":9.136113,"duration":0.291667,"instrument":0,"gap":0}
+]],"totalDuration":9.42778};
+
+	var expectedTempoThreeVoicesTiming = [
+		{"ms":0,"ln":0,"x1":81.948,"ch":[136,224,271],"x2":136.119,"midiPitches":["81 0.25","64 1","57 0.5"]},
+		{"ms":857,"ln":0,"x1":136.119,"ch":[138],"x2":190.29,"midiPitches":["83 0.25"]},
+		{"ms":1714,"ln":0,"x1":190.29,"ch":[140,275],"x2":244.46099999999998,"midiPitches":["84 0.25","55 0.5"]},
+		{"ms":2571,"ln":0,"x1":244.46099999999998,"ch":[143],"x2":309.632,"midiPitches":["83 0.25"]},
+		{"ms":3429,"ln":0,"x1":309.632,"ch":[158,228,280],"x2":363.803,"midiPitches":["81 0.21875","65 0.875","57 0.4375"]},
+		{"ms":4179,"ln":0,"x1":363.803,"ch":[161],"x2":417.974,"midiPitches":["83 0.21875"]},
+		{"ms":4929,"ln":0,"x1":417.974,"ch":[163,285],"x2":472.145,"midiPitches":["84 0.21875","55 0.4375"]},
+		{"ms":5679,"ln":0,"x1":472.145,"ch":[166],"x2":537.316,"midiPitches":["83 0.21875"]},
+		{"ms":6429,"ln":0,"x1":537.316,"ch":[170,233,300],"x2":591.4870000000001,"midiPitches":["81 0.194444","69 0.777778","53 0.388889"]},
+		{"ms":7095,"ln":0,"x1":591.4870000000001,"ch":[173],"x2":645.6580000000001,"midiPitches":["83 0.194444"]},
+		{"ms":7762,"ln":0,"x1":645.6580000000001,"ch":[175,305],"x2":699.8290000000002,"midiPitches":["84 0.194444","52 0.388889"]},
+		{"ms":8429,"ln":0,"x1":699.8290000000002,"ch":[178],"x2":755.0000000000002,"midiPitches":["83 0.194444"]},
+		{"ms":9095,"ln":1,"x1":60.153,"ch":[183,239,311],"x2":115.05691666666667,"midiPitches":["81 0.194444","64 0.777778","57 0.388889"]},
+		{"ms":9762,"ln":1,"x1":115.05691666666667,"ch":[185],"x2":169.96083333333334,"midiPitches":["83 0.194444"]},
+		{"ms":10429,"ln":1,"x1":169.96083333333334,"ch":[187,315],"x2":224.86475000000002,"midiPitches":["84 0.194444","55 0.388889"]},
+		{"ms":11095,"ln":1,"x1":224.86475000000002,"ch":[190],"x2":290.76866666666666,"midiPitches":["83 0.194444"]},
+		{"ms":11762,"ln":1,"x1":290.76866666666666,"ch":[194,255,320],"x2":345.6725833333333,"midiPitches":["81 0.175","65 0.7","57 0.35"]},
+		{"ms":12362,"ln":1,"x1":345.6725833333333,"ch":[197],"x2":400.57649999999995,"midiPitches":["83 0.175"]},
+		{"ms":12962,"ln":1,"x1":400.57649999999995,"ch":[199,326],"x2":455.4804166666666,"midiPitches":["84 0.175","55 0.35"]},
+		{"ms":13562,"ln":1,"x1":455.4804166666666,"ch":[202],"x2":521.3843333333332,"midiPitches":["83 0.175"]},
+		{"ms":14162,"ln":1,"x1":521.3843333333332,"ch":[206,260,343],"x2":576.2882499999998,"midiPitches":["81 0.145833","69 0.583333","53 0.291667"]},
+		{"ms":14662,"ln":1,"x1":576.2882499999998,"ch":[209],"x2":631.1921666666665,"midiPitches":["83 0.145833"]},
+		{"ms":15162,"ln":1,"x1":631.1921666666665,"ch":[211,348],"x2":686.0960833333331,"midiPitches":["84 0.145833","52 0.291667"]},
+		{"ms":15662,"ln":1,"x1":686.0960833333331,"ch":[214],"x2":740.9999999999998,"midiPitches":["83 0.145833"]},
+
+
+		{"ms":16162,"ln":0,"x1":81.948,"ch":[136,224,271],"x2":136.119,"midiPitches":["81 0.25","64 1","57 0.5"]},
+		{"ms":17019,"ln":0,"x1":136.119,"ch":[138],"x2":190.29,"midiPitches":["83 0.25"]},
+		{"ms":17876,"ln":0,"x1":190.29,"ch":[140,275],"x2":244.46099999999998,"midiPitches":["84 0.25","55 0.5"]},
+		{"ms":18733,"ln":0,"x1":244.46099999999998,"ch":[143],"x2":309.632,"midiPitches":["83 0.25"]},
+		{"ms":19590,"ln":0,"x1":309.632,"ch":[158,228,280],"x2":363.803,"midiPitches":["81 0.21875","65 0.875","57 0.4375"]},
+		{"ms":20340,"ln":0,"x1":363.803,"ch":[161],"x2":417.974,"midiPitches":["83 0.21875"]},
+		{"ms":21090,"ln":0,"x1":417.974,"ch":[163,285],"x2":472.145,"midiPitches":["84 0.21875","55 0.4375"]},
+		{"ms":21840,"ln":0,"x1":472.145,"ch":[166],"x2":537.316,"midiPitches":["83 0.21875"]},
+		{"ms":22590,"ln":0,"x1":537.316,"ch":[170,233,300],"x2":591.4870000000001,"midiPitches":["81 0.194444","69 0.777778","53 0.388889"]},
+		{"ms":23257,"ln":0,"x1":591.4870000000001,"ch":[173],"x2":645.6580000000001,"midiPitches":["83 0.194444"]},
+		{"ms":23924,"ln":0,"x1":645.6580000000001,"ch":[175,305],"x2":699.8290000000002,"midiPitches":["84 0.194444","52 0.388889"]},
+		{"ms":24590,"ln":0,"x1":699.8290000000002,"ch":[178],"x2":755.0000000000002,"midiPitches":["83 0.194444"]},
+		{"ms":25257,"ln":1,"x1":60.153,"ch":[183,239,311],"x2":115.05691666666667,"midiPitches":["81 0.194444","64 0.777778","57 0.388889"]},
+		{"ms":25924,"ln":1,"x1":115.05691666666667,"ch":[185],"x2":169.96083333333334,"midiPitches":["83 0.194444"]},
+		{"ms":26590,"ln":1,"x1":169.96083333333334,"ch":[187,315],"x2":224.86475000000002,"midiPitches":["84 0.194444","55 0.388889"]},
+		{"ms":27257,"ln":1,"x1":224.86475000000002,"ch":[190],"x2":290.76866666666666,"midiPitches":["83 0.194444"]},
+		{"ms":27924,"ln":1,"x1":290.76866666666666,"ch":[194,255,320],"x2":345.6725833333333,"midiPitches":["81 0.175","65 0.7","57 0.35"]},
+		{"ms":28524,"ln":1,"x1":345.6725833333333,"ch":[197],"x2":400.57649999999995,"midiPitches":["83 0.175"]},
+		{"ms":29124,"ln":1,"x1":400.57649999999995,"ch":[199,326],"x2":455.4804166666666,"midiPitches":["84 0.175","55 0.35"]},
+		{"ms":29724,"ln":1,"x1":455.4804166666666,"ch":[202],"x2":521.3843333333332,"midiPitches":["83 0.175"]},
+		{"ms":30324,"ln":1,"x1":521.3843333333332,"ch":[206,260,343],"x2":576.2882499999998,"midiPitches":["81 0.145833","69 0.583333","53 0.291667"]},
+		{"ms":30824,"ln":1,"x1":576.2882499999998,"ch":[209],"x2":631.1921666666665,"midiPitches":["83 0.145833"]},
+		{"ms":31324,"ln":1,"x1":631.1921666666665,"ch":[211,348],"x2":686.0960833333331,"midiPitches":["84 0.145833","52 0.291667"]},
+		{"ms":31824,"ln":1,"x1":686.0960833333331,"ch":[214],"x2":754.9999999999998,"midiPitches":["83 0.145833"]}
+	];
 
 	//////////////////////////////////////////////////////////
 
@@ -2399,6 +2566,11 @@ describe("Audio flattener", function() {
 	it("flatten-twelve-eight", function() {
 		doFlattenTest(abcTwelveEight, expectedTwelveEight);
 	})
+
+	it("flatten-tempo-3-voices", function() {
+		doFlattenTest(abcTempoThreeVoices, expectedTempoThreeVoices);
+		doTimingObjTest(abcTempoThreeVoices, expectedTempoThreeVoicesTiming);
+	})
 })
 
 //////////////////////////////////////////////////////////
@@ -2418,4 +2590,31 @@ function doFlattenTest(abc, expected) {
 			chai.assert.deepStrictEqual(flatten.tracks[i][j],expected.tracks[i][j], msg)
 		}
 	}
+}
+
+function doTimingObjTest(abc, expected) {
+	var visualObj = abcjs.renderAbc("paper", abc, {});
+	visualObj[0].setUpAudio();
+	var timing = visualObj[0].setTiming();
+	var output = [];
+	for (var i = 0; i < timing.length; i++) {
+		var t = timing[i];
+		if (t.type === "event") {
+			var midiPitches = [];
+			if (!t.midiPitches)
+				debugger;
+			for (var j = 0; j < t.midiPitches.length; j++)
+				midiPitches.push(t.midiPitches[j].pitch + ' ' + t.midiPitches[j].duration);
+			output.push({
+				ms: t.milliseconds,
+				ln: t.line,
+				x1: t.left,
+				ch: t.startCharArray,
+				x2: t.endX,
+				midiPitches: midiPitches
+			});
+		}
+	}
+	console.log(JSON.stringify(output));
+	chai.assert.deepStrictEqual(output,expected, "timing error")
 }

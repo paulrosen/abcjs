@@ -20,7 +20,9 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 			}
 			if (staffgroups.length >= 1)
 				addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
-			staffgroups.push(engraveStaffLine(renderer, abcLine.staffGroup, selectables));
+			var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables);
+			staffgroup.line = line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
+			staffgroups.push(staffgroup);
 		} else if (abcLine.nonMusic) {
 			nonMusic(renderer, abcLine.nonMusic, selectables);
 		}

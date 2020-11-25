@@ -1,3 +1,5 @@
+const roundNumber = require("./round-number");
+
 function renderText(renderer, params) {
 	var y = params.y;
 	if (params.lane) {
@@ -37,6 +39,8 @@ function renderText(renderer, params) {
 	}
 	if (params.noClass)
 		delete hash.attr['class'];
+	hash.attr.x = roundNumber(hash.attr.x);
+	hash.attr.y = roundNumber(hash.attr.y);
 	var elem = renderer.paper.text(text, hash.attr);
 	if (hash.font.box) {
 		var size = elem.getBBox();

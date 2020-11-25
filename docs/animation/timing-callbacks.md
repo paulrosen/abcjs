@@ -33,7 +33,7 @@ var timingCallbacks = new abcjs.TimingCallbacks(visualObj, params);
 This is called once for every beat in the tune. It is called one additional time when the tune is finished.
 
 ```javascript
-function beatCallback(beatNumber, totalBeats, totalTime, position) {}
+function beatCallback(beatNumber, totalBeats, totalTime, position, debugInfo) {}
 ```
 
 |Name|Description|
@@ -42,6 +42,7 @@ function beatCallback(beatNumber, totalBeats, totalTime, position) {}
 | totalBeats | The total number of beats (including all repeats) that will be played. |
 | totalTime | The total number of milliseconds of the tune. |
 | position | The interpolated position of the cursor if the beat occurs between notes. This is an object with the attributes { left: , top: , height: } This can be used to smooth out the cursor by moving it on the beat callbacks. The higher the number of `beatSubdivisions` the smoother the cursor will be. |
+| debugInfo | A hash of some extra info that might be useful in figuring out why the callback was triggered. |
 
 ### eventCallback
 
@@ -89,12 +90,16 @@ ev = {
 
 * The format of the `elements` array is subject to change in future versions.
 
+* This is called one last time with passing in `null` at the end of the tune. On that call `eventCallback` can return the string "continue" to keep the timer from stopping. This is useful if you want to play on repeat - in theory you would probably have another call to `seek()`.
+
+* This function can be a Promise or not.
+
 ### lineEndCallback
 
 This will be called as the cursor is approaching the end of a line of music. This is useful if there is more than a screen's worth of music; it can be used to scroll the page at the right time.
 
 ```javascript
-function lineEndCallback(info) {}
+function lineEndCallback(info, event, details) {}
 ```
 
 The parameter `info` looks like this:
@@ -106,6 +111,16 @@ info = {
     "bottom": number // The number of pixels from the top of the svg to the bottom of the cursor
 }
 ```
+The parameter `event` is the standard note event.
+
+The parameter `details` looks like this:
+```javascript
+details = {
+    "line": number, // the current line number (zero-based)
+    "endTimings": array // the array of the timings for each line
+}
+```
+The `endTimings` array elements are of the same type as the `info` parameter.
 
 ## Functions
 

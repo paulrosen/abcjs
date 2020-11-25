@@ -1,4 +1,5 @@
 var sprintf = require('./sprintf');
+const roundNumber = require("./round-number");
 
 function printStaffLine(renderer, x1,x2, pitch, klass) {
 	var isIE=/*@cc_on!@*/false;//IE detector
@@ -9,8 +10,12 @@ function printStaffLine(renderer, x1,x2, pitch, klass) {
 		fill = "#666666";
 	}
 	var y = renderer.calcY(pitch);
-	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy,
-		x2, y+dy, x1, y+dy);
+	x1 = roundNumber(x1);
+	x2 = roundNumber(x2);
+	var y1 = roundNumber(y-dy);
+	var y2 = roundNumber(y+dy);
+	var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y1, x2, y1,
+		x2, y2, x1, y2);
 	var options = {path:pathString, stroke:"none", fill:fill};
 	if (klass)
 		options['class'] = klass;

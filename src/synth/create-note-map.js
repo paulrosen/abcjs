@@ -37,13 +37,16 @@ var createNoteMap = function(sequence) {
 						var gap = ev.gap ? ev.gap : 0;
 						var len = ev.duration;
 						gap = Math.min(gap, len * 2 / 3);
-						map[i].push({
+						var obj = {
 							pitch: ev.pitch,
 							instrument: currentInstrument,
 							start: Math.round((ev.start) * 1000000)/1000000,
 							end: Math.round((ev.start + len - gap) * 1000000)/1000000,
 							volume: ev.volume
-						});
+						};
+						if (ev.style)
+							obj.style = ev.style;
+						map[i].push(obj);
 					}
 					break;
 				case "program":

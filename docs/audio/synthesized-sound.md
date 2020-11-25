@@ -59,8 +59,9 @@ In addition to the following option, you can also set the options described in a
 
 | Attribute | Default | Description |
 | ------------- | ----------- |----------- |
-| soundFontUrl | "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/" | This is the public URL for the sound font. If it isn't present, then the sound fonts come from the github repo. This can be replaced if the new sound font follows the same format. |
+| soundFontUrl | "https://paulrosen.github.io/midi-js-soundfonts/abcjs/" | This is the public URL for the sound font. If it isn't present, then the sound fonts come from the github repo. This can be replaced if the new sound font follows the same format. |
 | soundFontVolumeMultiplier | 1.0 | This is the amount to multiply all the volumes to compensate for different volume soundfonts. If you find that either the volume is too low or the output is clipped, you can experiment with this number. |
+| programOffsets | {} | The offset of each voice to the beat. Some voices have a ramp up time so that the beginning of the sound isn't the beat. This is the number of milliseconds that the program should be offset. This is expressed as `{ 'program_name': 100 }` where the program name is one of the standard midi names, like "acoustic_grand_piano". If you use the default soundfont then these values are set automatically. You can still provide this parameter to override the settings if you like. |
 | sequenceCallback | undefined | This is called after the array of notes is created, and just before it is used to create the audio buffer. The array of tracks is passed in, and this gives a chance to tweak the audio before it is created: you can give it some swing, you can change volumes, or anything else. |
 | callbackContext | undefined | This is passed back when the sequenceCallback function is called. | 
 | onEnded | undefined | This function is called after the playback stops. |

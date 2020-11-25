@@ -19,8 +19,9 @@ var downloadBuffer = function(buffer) {
 
 // Convert an AudioBuffer to a Blob using WAVE representation
 function bufferToWave(audioBuffers) {
-	var numOfChan = audioBuffers.length;
-	var length = audioBuffers[0].length * numOfChan * 2 + 44;
+	var audioBuffer = audioBuffers[0];
+	var numOfChan = audioBuffer.numberOfChannels;
+	var length = audioBuffer.length * numOfChan * 2 + 44;
 	var buffer = new ArrayBuffer(length);
 	var view = new DataView(buffer);
 	var channels = [];
@@ -38,8 +39,8 @@ function bufferToWave(audioBuffers) {
 	setUint32(16);                                 // length = 16
 	setUint16(1);                                  // PCM (uncompressed)
 	setUint16(numOfChan);
-	setUint32(audioBuffers[0].sampleRate);
-	setUint32(audioBuffers[0].sampleRate * 2 * numOfChan); // avg. bytes/sec
+	setUint32(audioBuffer.sampleRate);
+	setUint32(audioBuffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
 	setUint16(numOfChan * 2);                      // block-align
 	setUint16(16);                                 // 16-bit (hardcoded in this demo)
 
@@ -47,8 +48,8 @@ function bufferToWave(audioBuffers) {
 	setUint32(length - pos - 4);                   // chunk length
 
 	// write interleaved data
-	for(i = 0; i < audioBuffers.length; i++)
-		channels.push(audioBuffers[i].getChannelData(0));
+	for(i = 0; i < numOfChan; i++)
+		channels.push(audioBuffer.getChannelData(i));
 
 	while(pos < length) {
 		for(i = 0; i < channels.length; i++) {             // interleave channels
