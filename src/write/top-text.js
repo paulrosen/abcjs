@@ -1,4 +1,4 @@
-function TopText(metaText, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
+function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
 	this.rows = [];
 
 	if (metaText.header && isPrint) {
@@ -12,7 +12,9 @@ function TopText(metaText, lines, width, isPrint, paddingLeft, spacing, getTextS
 	if (isPrint)
 		this.rows.push({move: spacing.top});
 	if (metaText.title) {
-		this.addTextIf(paddingLeft + width / 2, metaText.title, 'titlefont', 'title meta-top', spacing.title, 0, 'middle', getTextSize, "title");
+		var tAnchor = formatting.titleleft ? 'start' : 'middle';
+		var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
+		this.addTextIf(tLeft, metaText.title, 'titlefont', 'title meta-top', spacing.title, 0, tAnchor, getTextSize, "title");
 	}
 	if (lines[0] && lines[0].subtitle) {
 		this.addTextIf(paddingLeft + width / 2, lines[0].subtitle, 'subtitlefont', 'text meta-top subtitle', spacing.subtitle, 0, 'middle', getTextSize, "subtitle");

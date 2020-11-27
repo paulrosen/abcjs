@@ -190,7 +190,7 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 };
 
 EngraverController.prototype.constructTuneElements = function (abcTune) {
-	abcTune.topText = new TopText(abcTune.metaText, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+	abcTune.topText = new TopText(abcTune.metaText, abcTune.formatting, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
 
 	// Generate the raw staff line data
 	var i;
