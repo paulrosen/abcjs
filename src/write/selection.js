@@ -314,6 +314,8 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
 		findNumber(classes[ii], "abcjs-l", analysis, "line");
 		findNumber(classes[ii], "abcjs-m", analysis, "measure");
 	}
+	if (target.staffPos)
+		analysis.staffPos = target.staffPos;
 
 	for (var i=0; i<this.listeners.length;i++) {
 		this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, { step: dragStep, max: dragMax, index: dragIndex, setSelection: setSelection.bind(this)}, ev);

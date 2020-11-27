@@ -87,7 +87,7 @@ function drawStaffGroup(renderer, params, selectables) {
 			printBrace(renderer, staff.absoluteY, params.brace, i, selectables);
 			printBrace(renderer, staff.absoluteY, params.bracket, i, selectables);
 		}
-		drawVoice(renderer, params.voices[i], bartop, selectables);
+		drawVoice(renderer, params.voices[i], bartop, selectables, { top: startY, height: params.height*spacing.STEP});
 		renderer.controller.classes.newMeasure();
 		if (!params.voices[i].duplicate) {
 			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.

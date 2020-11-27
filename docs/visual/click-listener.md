@@ -30,7 +30,15 @@ The css classes of the element that was clicked. (This requires the parameter `{
 
 ## analysis
 
-An object containing the line, measure, and voice that was clicked.
+An object containing the following info about the item clicked:
+ ```
+{
+    line: 0, // zero-based line
+    measure: 0, // zero-based measure from the beginning of the line
+    voice: 0, // zero-based voice 
+    staffPos: { top: 0, height: 0 } // the coordinates in the SVG for the staff system that contains the item.
+}
+```
 
 ## drag
 

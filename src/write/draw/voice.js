@@ -7,7 +7,7 @@ var drawBeam = require('./beam');
 var renderText = require('./text');
 var drawAbsolute = require('./absolute');
 
-function drawVoice(renderer, params, bartop, selectables) {
+function drawVoice(renderer, params, bartop, selectables, staffPos) {
 	var width = params.w-1;
 	renderer.staffbottom = params.staff.bottom;
 
@@ -30,7 +30,7 @@ function drawVoice(renderer, params, bartop, selectables) {
 			// 	child.elemset = drawTempo(renderer, child, selectables);
 			// 	break;
 			default:
-				drawAbsolute(renderer, child,(params.barto || i === params.children.length - 1) ? bartop : 0, selectables);
+				drawAbsolute(renderer, child,(params.barto || i === params.children.length - 1) ? bartop : 0, selectables, staffPos);
 		}
 		if (child.type === 'note' || isNonSpacerRest(child))
 			renderer.controller.classes.incrNote();
@@ -73,7 +73,7 @@ function drawVoice(renderer, params, bartop, selectables) {
 					break;
 				default:
 					console.log(child)
-					drawAbsolute(renderer, child, params.startx + 10, width, selectables);
+					drawAbsolute(renderer, child, params.startx + 10, width, selectables, staffPos);
 			}
 		}
 	}

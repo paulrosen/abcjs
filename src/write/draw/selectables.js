@@ -12,7 +12,7 @@ Selectables.prototype.getElements = function () {
 	return this.elements;
 }
 
-Selectables.prototype.add = function (absEl, svgEl, isNote) {
+Selectables.prototype.add = function (absEl, svgEl, isNote, staffPos) {
 	if (!this.canSelect(absEl))
 		return;
 	var params;
@@ -21,7 +21,10 @@ Selectables.prototype.add = function (absEl, svgEl, isNote) {
 	else
 		params = { selectable: true, tabindex: 0, "data-index": this.elements.length};
 	this.paper.setAttributeOnElement(svgEl, params);
-	this.elements.push({ absEl: absEl, svgEl: svgEl, isDraggable: isNote });
+	var sel = { absEl: absEl, svgEl: svgEl, isDraggable: isNote };
+	if (staffPos !== undefined)
+		sel.staffPos = staffPos;
+	this.elements.push(sel);
 
 };
 
