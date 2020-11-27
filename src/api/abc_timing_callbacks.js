@@ -275,9 +275,11 @@ var TimingCallbacks = function(target, params) {
 			self.currentEvent++;
 		}
 
-		self.currentLine = 0;
-		while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds+self.lineEndAnticipation < currentTime) {
-			self.currentLine++;
+		if (self.lineEndCallback) {
+			self.currentLine = 0;
+			while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds + self.lineEndAnticipation < currentTime) {
+				self.currentLine++;
+			}
 		}
 
 		var oldBeat = self.currentBeat;
