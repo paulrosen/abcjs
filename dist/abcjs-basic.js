@@ -605,10 +605,12 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
       self.currentEvent++;
     }
 
-    self.currentLine = 0;
+    if (self.lineEndCallback) {
+      self.currentLine = 0;
 
-    while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds + self.lineEndAnticipation < currentTime) {
-      self.currentLine++;
+      while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds + self.lineEndAnticipation < currentTime) {
+        self.currentLine++;
+      }
     }
 
     var oldBeat = self.currentBeat;
@@ -25997,11 +25999,11 @@ THE SOFTWARE.
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-var version = '6.0.0-beta.22';
+var version = '6.0.0-beta.23';
 module.exports = version;
 
 /***/ })
 
 /******/ });
 });
-//# sourceMappingURL=abcjs_basic_6.0.0-beta.22.js.map
+//# sourceMappingURL=abcjs_basic_6.0.0-beta.23.js.map
