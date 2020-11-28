@@ -1,3 +1,19 @@
+# Version 6.0.0-beta.23
+
+## Bugs
+
+* Fix calculation of bottom text height when there are blank lines.
+
+* Center chord symbols better.
+
+* Fix crash in the timer when lineEndCallback is not specified.
+
+## Features
+
+* Add the staff Y coordinates to the clickListener.
+
+* Implemented %%titleleft
+
 # Version 6.0.0-beta.22
 
 ## Bugs

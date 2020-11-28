@@ -17756,7 +17756,7 @@ var AbstractEngraver;
     ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
 
     if (elem.chord !== undefined) {
-      var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright);
+      var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth);
       roomtaken = ret3.roomTaken;
       roomtakenright = ret3.roomTakenRight;
     }
@@ -19440,7 +19440,7 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 };
 
 EngraverController.prototype.constructTuneElements = function (abcTune) {
-  abcTune.topText = new TopText(abcTune.metaText, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize); // Generate the raw staff line data
+  abcTune.topText = new TopText(abcTune.metaText, abcTune.formatting, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize); // Generate the raw staff line data
 
   var i;
   var abcLine;
@@ -21150,7 +21150,7 @@ var addChord;
 (function () {
   "use strict";
 
-  addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight) {
+  addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth) {
     for (var i = 0; i < elem.chord.length; i++) {
       var pos = elem.chord[i].position;
       var rel_position = elem.chord[i].rel_position;
@@ -21242,7 +21242,7 @@ var addChord;
               if (elem.positioning && elem.positioning.chordPosition) pos2 = elem.positioning.chordPosition;
 
               if (pos2 !== 'hidden') {
-                abselem.addCentered(new RelativeElement(chord, x, chordWidth, undefined, {
+                abselem.addCentered(new RelativeElement(chord, noteheadWidth / 2, chordWidth, undefined, {
                   type: "chord",
                   position: pos2,
                   height: chordHeight,
@@ -21383,10 +21383,12 @@ BottomText.prototype.addTextIf = function (marginLeft, text, font, klass, margin
     attr.klass = klass;
   }
 
-  this.rows.push(attr);
-  var size = getTextSize.calc(text, font, klass);
+  this.rows.push(attr); // If there are blank lines they won't be counted by getTextSize, so just get the height of one line and multiply
+
+  var size = getTextSize.calc("A", font, klass);
+  var h = size.height * 1.1 * text.split("\n").length;
   this.rows.push({
-    move: size.height
+    move: h
   });
   if (marginBottom) this.rows.push({
     move: marginBottom
@@ -21533,7 +21535,7 @@ var setClass = __webpack_require__(/*! ../set-class */ "./src/write/set-class.js
 
 var elementGroup = __webpack_require__(/*! ./group-elements */ "./src/write/draw/group-elements.js");
 
-function drawAbsolute(renderer, params, bartop, selectables) {
+function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
   if (params.invisible) return;
   var isTempo = params.children.length > 0 && params.children[0].type === "TempoElement";
   params.elemset = [];
@@ -21576,12 +21578,12 @@ function drawAbsolute(renderer, params, bartop, selectables) {
       // If this is a tempo element there are text portions that are in params.elemset[0] already.
       // The graphic portion (the drawn note) is in g and that should just be added to the text so that it is a single element for selecting.
       renderer.paper.moveElementToChild(params.elemset[0], g);
-      selectables.add(params, params.elemset[0], false);
+      selectables.add(params, params.elemset[0], false, staffPos);
     } else {
       params.elemset.push(g);
-      selectables.add(params, g, params.type === 'note');
+      selectables.add(params, g, params.type === 'note', staffPos);
     }
-  } else if (params.elemset.length > 0) selectables.add(params, params.elemset[0], params.type === 'note'); // If there was no output, then don't add to the selectables. This happens when using the "y" spacer, for instance.
+  } else if (params.elemset.length > 0) selectables.add(params, params.elemset[0], params.type === 'note', staffPos); // If there was no output, then don't add to the selectables. This happens when using the "y" spacer, for instance.
 
 
   if (params.klass) setClass(params.elemset, "mark", "", "#00ff00");
@@ -22519,7 +22521,7 @@ Selectables.prototype.getElements = function () {
   return this.elements;
 };
 
-Selectables.prototype.add = function (absEl, svgEl, isNote) {
+Selectables.prototype.add = function (absEl, svgEl, isNote, staffPos) {
   if (!this.canSelect(absEl)) return;
   var params;
   if (this.selectTypes === undefined) params = {
@@ -22532,11 +22534,13 @@ Selectables.prototype.add = function (absEl, svgEl, isNote) {
       "data-index": this.elements.length
     };
   this.paper.setAttributeOnElement(svgEl, params);
-  this.elements.push({
+  var sel = {
     absEl: absEl,
     svgEl: svgEl,
     isDraggable: isNote
-  });
+  };
+  if (staffPos !== undefined) sel.staffPos = staffPos;
+  this.elements.push(sel);
 };
 
 Selectables.prototype.canSelect = function (absEl) {
@@ -22864,7 +22868,10 @@ function drawStaffGroup(renderer, params, selectables) {
       printBrace(renderer, staff.absoluteY, params.bracket, i, selectables);
     }
 
-    drawVoice(renderer, params.voices[i], bartop, selectables);
+    drawVoice(renderer, params.voices[i], bartop, selectables, {
+      top: startY,
+      height: params.height * spacing.STEP
+    });
     renderer.controller.classes.newMeasure();
 
     if (!params.voices[i].duplicate) {
@@ -23441,7 +23448,7 @@ var renderText = __webpack_require__(/*! ./text */ "./src/write/draw/text.js");
 
 var drawAbsolute = __webpack_require__(/*! ./absolute */ "./src/write/draw/absolute.js");
 
-function drawVoice(renderer, params, bartop, selectables) {
+function drawVoice(renderer, params, bartop, selectables, staffPos) {
   var width = params.w - 1;
   renderer.staffbottom = params.staff.bottom;
 
@@ -23481,7 +23488,7 @@ function drawVoice(renderer, params, bartop, selectables) {
       // 	child.elemset = drawTempo(renderer, child, selectables);
       // 	break;
       default:
-        drawAbsolute(renderer, child, params.barto || i === params.children.length - 1 ? bartop : 0, selectables);
+        drawAbsolute(renderer, child, params.barto || i === params.children.length - 1 ? bartop : 0, selectables, staffPos);
     }
 
     if (child.type === 'note' || isNonSpacerRest(child)) renderer.controller.classes.incrNote();
@@ -23533,7 +23540,7 @@ function drawVoice(renderer, params, bartop, selectables) {
 
         default:
           console.log(child);
-          drawAbsolute(renderer, child, params.startx + 10, width, selectables);
+          drawAbsolute(renderer, child, params.startx + 10, width, selectables, staffPos);
       }
     }
   }
@@ -25303,6 +25310,8 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
     findNumber(classes[ii], "abcjs-m", analysis, "measure");
   }
 
+  if (target.staffPos) analysis.staffPos = target.staffPos;
+
   for (var i = 0; i < this.listeners.length; i++) {
     this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, {
       step: dragStep,
@@ -25846,7 +25855,7 @@ module.exports = Svg;
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-function TopText(metaText, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
+function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
   this.rows = [];
 
   if (metaText.header && isPrint) {
@@ -25863,7 +25872,9 @@ function TopText(metaText, lines, width, isPrint, paddingLeft, spacing, getTextS
   });
 
   if (metaText.title) {
-    this.addTextIf(paddingLeft + width / 2, metaText.title, 'titlefont', 'title meta-top', spacing.title, 0, 'middle', getTextSize, "title");
+    var tAnchor = formatting.titleleft ? 'start' : 'middle';
+    var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
+    this.addTextIf(tLeft, metaText.title, 'titlefont', 'title meta-top', spacing.title, 0, tAnchor, getTextSize, "title");
   }
 
   if (lines[0] && lines[0].subtitle) {
