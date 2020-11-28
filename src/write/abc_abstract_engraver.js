@@ -816,7 +816,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 	ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
 
   if (elem.chord !== undefined) {
-  	var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright);
+  	var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth);
 	  roomtaken = ret3.roomTaken;
 	  roomtakenright = ret3.roomTakenRight;
   }

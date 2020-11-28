@@ -5,7 +5,7 @@ var addChord;
 
 (function () {
 	"use strict";
-	addChord = function (getTextSize, abselem, elem, roomTaken, roomTakenRight) {
+	addChord = function (getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth) {
 		for (var i = 0; i < elem.chord.length; i++) {
 			var pos = elem.chord[i].position;
 			var rel_position = elem.chord[i].rel_position;
@@ -86,7 +86,7 @@ var addChord;
 								pos2 = elem.positioning.chordPosition;
 
 							if (pos2 !== 'hidden') {
-								abselem.addCentered(new RelativeElement(chord, x, chordWidth, undefined, {
+								abselem.addCentered(new RelativeElement(chord, noteheadWidth/2, chordWidth, undefined, {
 									type: "chord",
 									position: pos2,
 									height: chordHeight,
