@@ -86,8 +86,10 @@ BottomText.prototype.addTextIf = function (marginLeft, text, font, klass, margin
 		attr.klass = klass;
 	}
 	this.rows.push(attr);
-	var size = getTextSize.calc(text, font, klass);
-	this.rows.push({move: size.height});
+	// If there are blank lines they won't be counted by getTextSize, so just get the height of one line and multiply
+	var size = getTextSize.calc("A", font, klass);
+	var h = (size.height*1.1) * text.split("\n").length;
+	this.rows.push({move: h});
 	if (marginBottom)
 		this.rows.push({move: marginBottom});
 }
