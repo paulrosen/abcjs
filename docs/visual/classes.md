@@ -27,6 +27,7 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 | abcjs-ledger | ledger line. |
 | abcjs-lyric | The lyric line. |
 | abcjs-m0, abcjs-m1, etc. | The measure count from the START OF THE LINE. |
+| abcjs-mm0, abcjs-mm1, etc. | The measure count from the START OF THE TUNE. |
 | abcjs-meta-bottom | Everything that is printed after all the music. |
 | abcjs-meta-top | Everything that is printed before the first staff line. |
 | abcjs-n0, abcjs-n1, etc. | The note count from the START OF THE MEASURE. |

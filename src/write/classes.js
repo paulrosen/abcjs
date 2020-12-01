@@ -7,6 +7,7 @@ Classes.prototype.reset = function () {
 	this.lineNumber = null;
 	this.voiceNumber = null;
 	this.measureNumber = null;
+	this.measureTotalPerLine = [];
 	this.noteNumber = null;
 }
 
@@ -34,6 +35,8 @@ Classes.prototype.isInMeasure = function () {
 };
 
 Classes.prototype.newMeasure = function () {
+	if (this.measureNumber)
+		this.measureTotalPerLine[this.lineNumber] = this.measureNumber;
 	this.measureNumber = null;
 	this.noteNumber = null;
 };
@@ -52,10 +55,20 @@ Classes.prototype.incrNote = function () {
 	this.noteNumber++;
 };
 
+Classes.prototype.measureTotal = function () {
+	var total = 0;
+	for (var i = 0; i < this.lineNumber; i++)
+		total += this.measureTotalPerLine[i];
+	if (this.measureNumber)
+		total += this.measureNumber;
+	return total;
+};
+
 Classes.prototype.getCurrent = function (c) {
 	return {
 		line: this.lineNumber,
 		measure: this.measureNumber,
+		measureTotal: this.measureTotal(),
 		voice: this.voiceNumber,
 		note: this.noteNumber
 	};
@@ -68,6 +81,7 @@ Classes.prototype.generate = function (c) {
 	if (c && c.length > 0) ret.push(c);
 	if (this.lineNumber !== null) ret.push("l"+this.lineNumber);
 	if (this.measureNumber !== null) ret.push("m"+this.measureNumber);
+	if (this.measureNumber !== null) ret.push("mm"+this.measureTotal()); // measureNumber is null between measures so this is still the test for measureTotal
 	if (this.voiceNumber !== null)  ret.push("v"+this.voiceNumber);
 	if (c && (c.indexOf('note') >= 0 || c.indexOf('rest') >= 0 || c.indexOf('lyric') >= 0 ) && this.noteNumber !== null) ret.push("n"+this.noteNumber);
 	// add a prefix to all classes that abcjs adds.
