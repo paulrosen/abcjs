@@ -39,6 +39,18 @@ describe("Timing", function() {
 		'T:subtitle\n' +
 		'fabg|\n';
 
+	var abcRepeatAtStartCrash = 'X:1\n' +
+		'T:repeat-at-start-of-line-crash\n' +
+		'K:C\n' +
+		'E8|\n' +
+		'|1 D8 :|2 C8\n';
+
+	var abcSkipTiesCrash = 'X:1 \n' +
+		'T:skip-ties-crash\n' +
+		'M:4/4\n' +
+		'K:C\n' +
+		'E8- | E8 |]\n';
+
 //////////////////////////////////////////////////////////
 
 	it("of repeated sections", function() {
@@ -55,6 +67,14 @@ describe("Timing", function() {
 
 	it("subtitle crash", function() {
 		doCreationTest(abcSubTitleCrash);
+	});
+
+	it("repeat at start crash", function() {
+		doCreationTest(abcRepeatAtStartCrash);
+	});
+
+	it("skip ties crash", function() {
+		doCreationTest(abcSkipTiesCrash);
 	});
 });
 

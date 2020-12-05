@@ -447,7 +447,8 @@ var Tune = function() {
 							lastVoiceTimeMilliseconds = voiceTimeMilliseconds;
 							voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 						}
-						eventHash["event" + lastVoiceTimeMilliseconds].endX = elements[endingRepeatElem].elem.x;
+						if (eventHash["event" + lastVoiceTimeMilliseconds]) // This won't exist if it is the beginning of the next line. That's ok because we will just count the end of the last line as the end.
+							eventHash["event" + lastVoiceTimeMilliseconds].endX = elements[endingRepeatElem].elem.x;
 						nextIsBar = true;
 						endingRepeatElem = -1;
 					}
@@ -476,7 +477,7 @@ var Tune = function() {
 	};
 
 	function skipTies(elements, index) {
-		while (elements[index].left === null && index < elements.length)
+		while (index < elements.length && elements[index].left === null)
 			index++;
 		return elements[index];
 	}
