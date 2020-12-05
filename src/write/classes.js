@@ -58,7 +58,7 @@ Classes.prototype.incrNote = function () {
 Classes.prototype.measureTotal = function () {
 	var total = 0;
 	for (var i = 0; i < this.lineNumber; i++)
-		total += this.measureTotalPerLine[i];
+		total += this.measureTotalPerLine[i] ? this.measureTotalPerLine[i] : 0; // This can be null when non-music things are present.
 	if (this.measureNumber)
 		total += this.measureNumber;
 	return total;
