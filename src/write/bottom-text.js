@@ -88,8 +88,11 @@ BottomText.prototype.addTextIf = function (marginLeft, text, font, klass, margin
 	this.rows.push(attr);
 	// If there are blank lines they won't be counted by getTextSize, so just get the height of one line and multiply
 	var size = getTextSize.calc("A", font, klass);
-	var h = (size.height*1.1) * text.split("\n").length;
-	this.rows.push({move: h});
+	var numLines = text.split("\n").length;
+	if (text[text.length-1] === '\n')
+		numLines--; // If there is a new line at the end of the string, then an extra line will be counted.
+	var h = (size.height*1.1) * numLines;
+	this.rows.push({move: Math.round(h)});
 	if (marginBottom)
 		this.rows.push({move: marginBottom});
 }
