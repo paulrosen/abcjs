@@ -207,7 +207,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 			// If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
 			if (hasSeenNonSubtitle) {
 				var center = this.width / 2 + this.renderer.padding.left;
-				abcLine.nonMusic = new Subtitle(this.renderer.spacing.subtitle, abcLine.subtitle, center, this.getTextSize);
+				abcLine.nonMusic = new Subtitle(this.renderer.spacing.subtitle, abcTune.formatting, abcLine.subtitle, center, this.renderer.padding.left, this.getTextSize);
 			}
 		} else if (abcLine.text !== undefined) {
 			hasSeenNonSubtitle = true;

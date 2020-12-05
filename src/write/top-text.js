@@ -11,13 +11,13 @@ function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spaci
 	}
 	if (isPrint)
 		this.rows.push({move: spacing.top});
+	var tAnchor = formatting.titleleft ? 'start' : 'middle';
+	var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
 	if (metaText.title) {
-		var tAnchor = formatting.titleleft ? 'start' : 'middle';
-		var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
 		this.addTextIf(tLeft, metaText.title, 'titlefont', 'title meta-top', spacing.title, 0, tAnchor, getTextSize, "title");
 	}
 	if (lines[0] && lines[0].subtitle) {
-		this.addTextIf(paddingLeft + width / 2, lines[0].subtitle, 'subtitlefont', 'text meta-top subtitle', spacing.subtitle, 0, 'middle', getTextSize, "subtitle");
+		this.addTextIf(tLeft, lines[0].subtitle, 'subtitlefont', 'text meta-top subtitle', spacing.subtitle, 0, tAnchor, getTextSize, "subtitle");
 	}
 
 	if (metaText.rhythm || metaText.origin || metaText.composer) {
