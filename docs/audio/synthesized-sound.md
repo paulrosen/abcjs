@@ -480,8 +480,14 @@ This is used to translate the `durationInMeasures` value into an actual time.
 
 ```javascript
 ABCJS.synth.playEvent(
-    [ 60, 64, 67 ], // a C chord
-    [ 62], // start with a D as a grace note
+	[   // a C chord
+		{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":0.125,"instrument":0,"gap":0},
+		{"cmd":"note","pitch":64,"volume":105,"start":0,"duration":0.125,"instrument":0,"gap":0},
+		{"cmd":"note","pitch":67,"volume":105,"start":0,"duration":0.125,"instrument":0,"gap":0},
+	],
+	[   // start with a D as a grace note
+		{"pitch":62,"durationInMeasures":0.125,"volume":70,"instrument":0}
+	],
     1000 // a measure takes one second.    
 ).then(function (response) {
 	console.log("note played");
