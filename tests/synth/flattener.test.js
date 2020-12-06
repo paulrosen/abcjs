@@ -1127,10 +1127,6 @@ describe("Audio flattener", function() {
 			],
 			[
 				{"cmd":"program","channel":2,"instrument":128},
-				{"cmd":"note","pitch":76,"volume":50,"start":0,"duration":0.25,"gap":0,"instrument":128},
-				{"cmd":"note","pitch":77,"volume":50,"start":0.25,"duration":0.25,"gap":0,"instrument":128},
-				{"cmd":"note","pitch":77,"volume":50,"start":0.5,"duration":0.25,"gap":0,"instrument":128},
-				{"cmd":"note","pitch":77,"volume":50,"start":0.75,"duration":0.25,"gap":0,"instrument":128},
 				{"cmd":"note","pitch":76,"volume":50,"start":0.25,"duration":0.25,"gap":0,"instrument":128},
 				{"cmd":"note","pitch":77,"volume":50,"start":0.5,"duration":0.25,"gap":0,"instrument":128},
 				{"cmd":"note","pitch":77,"volume":50,"start":0.75,"duration":0.25,"gap":0,"instrument":128},
@@ -2169,6 +2165,7 @@ describe("Audio flattener", function() {
 'L:1/4\n' +
 'Q:1/4=60\n' +
 '%%MIDI drum dddd 76 77 77 77 50 50 50 50\n' +
+'M:4/4\n' +
 'K:A\n' +
 'V:1\n' +
 '%%MIDI drumon\n' +
@@ -2192,14 +2189,14 @@ describe("Audio flattener", function() {
 			],
 			[
 				{"cmd":"program","channel":2,"instrument":128},
-				{"cmd":"note","pitch":76,"volume":50,"start":0.25,"duration":0.25,"instrument":128},
-				{"cmd":"note","pitch":77,"volume":50,"start":0.5,"duration":0.25,"instrument":128},
-				{"cmd":"note","pitch":77,"volume":50,"start":0.75,"duration":0.25,"instrument":128},
-				{"cmd":"note","pitch":77,"volume":50,"start":1,"duration":0.25,"instrument":128},
-				{"cmd":"note","pitch":76,"volume":50,"start":1.25,"duration":0.25,"instrument":128},
-				{"cmd":"note","pitch":77,"volume":50,"start":1.5,"duration":0.25,"instrument":128},
-				{"cmd":"note","pitch":77,"volume":50,"start":1.75,"duration":0.25,"instrument":128},
-				{"cmd":"note","pitch":77,"volume":50,"start":2,"duration":0.25,"instrument":128}
+				{"cmd":"note","pitch":76,"volume":50,"start":0.25,"duration":0.25,"gap":0,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":0.5,"duration":0.25,"gap":0,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":0.75,"duration":0.25,"gap":0,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":1,"duration":0.25,"gap":0,"instrument":128},
+				{"cmd":"note","pitch":76,"volume":50,"start":1.25,"duration":0.25,"gap":0,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":1.5,"duration":0.25,"gap":0,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":1.75,"duration":0.25,"gap":0,"instrument":128},
+				{"cmd":"note","pitch":77,"volume":50,"start":2,"duration":0.25,"gap":0,"instrument":128}
 			]
 		]
 	};

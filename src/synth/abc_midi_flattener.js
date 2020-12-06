@@ -1203,6 +1203,8 @@ var parseCommon = require("../parse/abc_common");
 
 		var measureLen = meter.num/meter.den;
 		if (drumTrack.length === 0) {
+			if (lastEventTime < measureLen)
+				return; // This is true if there are pickup notes. The drum doesn't start until the first full measure.
 			drumTrack.push({cmd: 'program', channel: channel, instrument: drumInstrument});
 		}
 
