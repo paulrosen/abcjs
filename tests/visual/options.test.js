@@ -56,7 +56,7 @@ describe("Visual Options", function() {
 		[{"tag":"text","text":"This is","x":143,"y":236,"w":67,"h":29},{"tag":"text","text":"= 190","x":232,"y":236,"w":58,"h":29},{"tag":"text","text":"Fast","x":302,"y":236,"w":42,"h":29},{"tag":"path","text":"","x":220,"y":237,"w":7,"h":18}],
 		[],
 		[{"tag":"text","text":"Part","x":147,"y":266,"w":72,"h":45},{"tag":"path","text":"","x":143,"y":259,"w":80,"h":54}],
-		[{"tag":"text","text":"C","x":181,"y":337,"w":24,"h":37},{"tag":"path","text":"","x":178,"y":331,"w":31,"h":45}],
+		[{"tag":"text","text":"C","x":186,"y":337,"w":24,"h":37},{"tag":"path","text":"","x":183,"y":331,"w":31,"h":45}],
 		[{"tag":"text","text":"No Chord","x":334,"y":335,"w":80,"h":22},{"tag":"path","text":"","x":332,"y":331,"w":85,"h":27}],
 		[{"tag":"text","text":"2","x":468,"y":401,"w":5,"h":10},{"tag":"path","text":"","x":467,"y":399,"w":8,"h":13}],
 		[{"tag":"path","text":"","x":515,"y":389,"w":123,"h":5},{"tag":"text","text":"3","x":565,"y":335,"w":23,"h":82}],
@@ -65,8 +65,8 @@ describe("Visual Options", function() {
 		[{"tag":"text","text":"3","x":12,"y":591,"w":5,"h":10},{"tag":"path","text":"","x":12,"y":589,"w":8,"h":13}],
 		[{"tag":"text","text":"4","x":398,"y":591,"w":5,"h":10},{"tag":"path","text":"","x":397,"y":589,"w":8,"h":13}],
 		[{"tag":"text","text":"more extra text","x":18,"y":666,"w":221,"h":34},{"tag":"path","text":"","x":15,"y":664,"w":228,"h":41}],
-		[{"tag":"text","text":"The extra verses","x":65,"y":734,"w":122,"h":20},{"tag":"text","text":"The extra verses - line 2","x":65,"y":754,"w":178,"h":20}],
-		[{"tag":"text","text":"Source: sourceNotes: The notesHistory: History","x":16,"y":816,"w":89,"h":42},{"tag":"path","text":"","x":15,"y":813,"w":92,"h":46}]
+		[{"tag":"text","text":"The extra verses","x":65,"y":734,"w":122,"h":20},{"tag":"text","text":"The extra verses - line 2","x":65,"y":756,"w":178,"h":20}],
+		[{"tag":"text","text":"Source: sourceNotes: The notesHistory: History","x":16,"y":820,"w":89,"h":42},{"tag":"path","text":"","x":15,"y":817,"w":92,"h":46}]
 	];
 
 	var expected50 = [
@@ -80,8 +80,8 @@ describe("Visual Options", function() {
 		[{"tag":"text","text":"This is","x":216,"y":420,"w":67,"h":29},{"tag":"text","text":"= 190","x":306,"y":420,"w":58,"h":29},{"tag":"text","text":"Fast","x":375,"y":420,"w":42,"h":29},{"tag":"path","text":"","x":293,"y":421,"w":7,"h":18}],
 		[],
 		[{"tag":"text","text":"Part","x":236,"y":465,"w":72,"h":45},{"tag":"path","text":"","x":216,"y":443,"w":112,"h":85}],
-		[{"tag":"text","text":"C","x":280,"y":597,"w":24,"h":37},{"tag":"path","text":"","x":263,"y":578,"w":58,"h":71}],
-		[{"tag":"text","text":"No Chord","x":414,"y":590,"w":80,"h":22},{"tag":"path","text":"","x":404,"y":578,"w":101,"h":43}],
+		[{"tag":"text","text":"C","x":285,"y":597,"w":24,"h":37},{"tag":"path","text":"","x":268,"y":578,"w":58,"h":71}],
+		[{"tag":"text","text":"No Chord","x":414,"y":590,"w":80,"h":22},{"tag":"path","text":"","x":405,"y":578,"w":101,"h":43}],
 		[{"tag":"text","text":"2","x":514,"y":690,"w":5,"h":10},{"tag":"path","text":"","x":509,"y":684,"w":15,"h":20}],
 		[{"tag":"path","text":"","x":560,"y":689,"w":101,"h":5},{"tag":"text","text":"3","x":599,"y":635,"w":23,"h":82}],
 		[{"tag":"text","text":"extra text","x":29,"y":808,"w":138,"h":34},{"tag":"path","text":"","x":15,"y":794,"w":167,"h":63}],
@@ -89,8 +89,8 @@ describe("Visual Options", function() {
 		[{"tag":"text","text":"3","x":5,"y":965,"w":5,"h":10},{"tag":"path","text":"","x":1,"y":960,"w":15,"h":20}],
 		[{"tag":"text","text":"4","x":398,"y":965,"w":5,"h":10},{"tag":"path","text":"","x":394,"y":960,"w":15,"h":20}],
 		[{"tag":"text","text":"more extra text","x":29,"y":1062,"w":221,"h":34},{"tag":"path","text":"","x":15,"y":1048,"w":250,"h":63}],
-		[{"tag":"text","text":"The extra verses","x":65,"y":1163,"w":122,"h":20},{"tag":"text","text":"The extra verses - line 2","x":65,"y":1183,"w":178,"h":20}],
-		[{"tag":"text","text":"Source: sourceNotes: The notesHistory: History","x":21,"y":1250,"w":89,"h":42},{"tag":"path","text":"","x":15,"y":1242,"w":102,"h":55}]
+		[{"tag":"text","text":"The extra verses","x":65,"y":1163,"w":122,"h":20},{"tag":"text","text":"The extra verses - line 2","x":65,"y":1185,"w":178,"h":20}],
+		[{"tag":"text","text":"Source: sourceNotes: The notesHistory: History","x":21,"y":1254,"w":89,"h":42},{"tag":"path","text":"","x":15,"y":1246,"w":102,"h":55}]
 	];
 
 	var expected100 = [
@@ -104,17 +104,17 @@ describe("Visual Options", function() {
 		[{"tag":"text","text":"This is","x":308,"y":650,"w":67,"h":29},{"tag":"text","text":"= 190","x":398,"y":650,"w":58,"h":29},{"tag":"text","text":"Fast","x":467,"y":650,"w":42,"h":29},{"tag":"path","text":"","x":385,"y":651,"w":7,"h":18}],
 		[],
 		[{"tag":"text","text":"Part","x":347,"y":715,"w":72,"h":45},{"tag":"path","text":"","x":308,"y":673,"w":151,"h":124}],
-		[{"tag":"text","text":"C","x":405,"y":922,"w":24,"h":37},{"tag":"path","text":"","x":372,"y":886,"w":91,"h":104}],
-		[{"tag":"text","text":"No Chord","x":553,"y":908,"w":80,"h":22},{"tag":"path","text":"","x":534,"y":886,"w":121,"h":63}],
-		[{"tag":"text","text":"2","x":595,"y":1068,"w":5,"h":10},{"tag":"path","text":"","x":586,"y":1058,"w":24,"h":29}],
-		[{"tag":"path","text":"","x":641,"y":1081,"w":63,"h":5},{"tag":"text","text":"3","x":661,"y":1027,"w":23,"h":82}],
+		[{"tag":"text","text":"C","x":410,"y":922,"w":24,"h":37},{"tag":"path","text":"","x":377,"y":886,"w":91,"h":104}],
+		[{"tag":"text","text":"No Chord","x":557,"y":908,"w":80,"h":22},{"tag":"path","text":"","x":538,"y":886,"w":121,"h":63}],
+		[{"tag":"text","text":"2","x":597,"y":1068,"w":5,"h":10},{"tag":"path","text":"","x":588,"y":1058,"w":24,"h":29}],
+		[{"tag":"path","text":"","x":643,"y":1081,"w":62,"h":5},{"tag":"text","text":"3","x":662,"y":1027,"w":23,"h":82}],
 		[{"tag":"text","text":"extra text","x":43,"y":1214,"w":138,"h":34},{"tag":"path","text":"","x":15,"y":1186,"w":195,"h":91}],
 		[{"tag":"text","text":"Another Subtitle","x":303,"y":1361,"w":164,"h":26},{"tag":"path","text":"","x":280,"y":1336,"w":211,"h":73}],
 		[{"tag":"text","text":"3","x":5,"y":1464,"w":5,"h":10},{"tag":"path","text":"","x":-4,"y":1454,"w":24,"h":29}],
 		[{"tag":"text","text":"4","x":398,"y":1464,"w":5,"h":10},{"tag":"path","text":"","x":389,"y":1454,"w":24,"h":29}],
 		[{"tag":"text","text":"more extra text","x":43,"y":1588,"w":221,"h":34},{"tag":"path","text":"","x":15,"y":1560,"w":278,"h":91}],
-		[{"tag":"text","text":"The extra verses","x":65,"y":1731,"w":122,"h":20},{"tag":"text","text":"The extra verses - line 2","x":65,"y":1751,"w":178,"h":20}],
-		[{"tag":"text","text":"Source: sourceNotes: The notesHistory: History","x":27,"y":1824,"w":89,"h":42},{"tag":"path","text":"","x":15,"y":1810,"w":114,"h":67}]
+		[{"tag":"text","text":"The extra verses","x":65,"y":1731,"w":122,"h":20},{"tag":"text","text":"The extra verses - line 2","x":65,"y":1753,"w":178,"h":20}],
+		[{"tag":"text","text":"Source: sourceNotes: The notesHistory: History","x":27,"y":1828,"w":89,"h":42},{"tag":"path","text":"","x":15,"y":1814,"w":114,"h":67}]
 	];
 
 

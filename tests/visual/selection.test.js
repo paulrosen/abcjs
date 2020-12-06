@@ -122,7 +122,7 @@ describe("Selection", function() {
 			"class": "",
 			"text-anchor": "end",
 			"x": "755",
-			"y": "129.978125",
+			"y": "129.98",
 			"selectable": "true",
 			"tabindex": "0",
 			"data-index": "4"
@@ -145,7 +145,7 @@ describe("Selection", function() {
 			"class": "",
 			"text-anchor": "start",
 			"x": "15",
-			"y": "193.5875",
+			"y": "193.59",
 			"selectable": "true",
 			"tabindex": "0",
 			"data-index": "6"
@@ -175,7 +175,7 @@ describe("Selection", function() {
 			"class": "",
 			"text-anchor": "start",
 			"x": "15",
-			"y": "360.248",
+			"y": "360.25",
 			"selectable": "true",
 			"tabindex": "0",
 			"data-index": "8"
@@ -259,7 +259,7 @@ describe("Selection", function() {
 			"minpitch": 6,
 			"maxpitch": 13
 		},
-		"size": {"x": 136, "y": 313, "width": 10, "height": 58}
+		"size": {"x": 136, "y": 314, "width": 10, "height": 58}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -303,7 +303,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 11
 		},
-		"size": {"x": 194, "y": 317, "width": 10, "height": 35}
+		"size": {"x": 193, "y": 317, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -336,7 +336,7 @@ describe("Selection", function() {
 			"data-index": "18"
 		},
 		"abcEl": {"type": "bar_thin", "barNumber": 2, "el_type": "bar", "startChar": 720, "endChar": 721},
-		"size": {"x": 221, "y": 352, "width": 1, "height": 31}
+		"size": {"x": 220, "y": 352, "width": 1, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -362,7 +362,7 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 13
 		},
-		"size": {"x": 246, "y": 313, "width": 17, "height": 51}
+		"size": {"x": 244, "y": 314, "width": 17, "height": 51}
 	}, {
 		"draggable": true,
 		"svgEl": {
@@ -388,7 +388,7 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 13
 		},
-		"size": {"x": 314, "y": 313, "width": 10, "height": 39}
+		"size": {"x": 317, "y": 314, "width": 10, "height": 39}
 	}, {
 		"draggable": false,
 		"svgEl": {
