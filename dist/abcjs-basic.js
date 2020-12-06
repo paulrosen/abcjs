@@ -1701,7 +1701,8 @@ var Tune = function Tune() {
               voiceTimeMilliseconds = Math.round(voiceTime * 1000);
             }
 
-            eventHash["event" + lastVoiceTimeMilliseconds].endX = elements[endingRepeatElem].elem.x;
+            if (eventHash["event" + lastVoiceTimeMilliseconds]) // This won't exist if it is the beginning of the next line. That's ok because we will just count the end of the last line as the end.
+              eventHash["event" + lastVoiceTimeMilliseconds].endX = elements[endingRepeatElem].elem.x;
             nextIsBar = true;
             endingRepeatElem = -1;
           }
@@ -1734,7 +1735,7 @@ var Tune = function Tune() {
   };
 
   function skipTies(elements, index) {
-    while (elements[index].left === null && index < elements.length) {
+    while (index < elements.length && elements[index].left === null) {
       index++;
     }
 
@@ -2423,7 +2424,9 @@ var create;
             break;
 
           case 'program':
-            midi.setChannel(event.channel);
+            var pan = 0;
+            if (options.pan && options.pan.length > i) pan = options.pan[i];
+            midi.setChannel(event.channel, pan);
             midi.setInstrument(event.instrument);
             midiJs.setChannel(event.channel);
             midiJs.setInstrument(event.instrument);
@@ -13393,6 +13396,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
     var measureLen = meter.num / meter.den;
 
     if (drumTrack.length === 0) {
+      if (lastEventTime < measureLen) return; // This is true if there are pickup notes. The drum doesn't start until the first full measure.
+
       drumTrack.push({
         cmd: 'program',
         channel: channel,
@@ -13484,7 +13489,8 @@ var rendererFactory;
   Midi.prototype.setGlobalInfo = function (qpm, name, key, time) {
     if (this.trackcount === 0) {
       this.startTrack();
-      var divisions = Math.round(60000000 / qpm);
+      var divisions = Math.round(60000000 / qpm); // Add the tempo
+
       this.track += "%00%FF%51%03" + toHex(divisions, 6);
       if (key) this.track += keySignature(key);
       if (time) this.track += timeSignature(time);
@@ -13539,8 +13545,23 @@ var rendererFactory;
     this.instrument = number;
   };
 
-  Midi.prototype.setChannel = function (number) {
+  Midi.prototype.setChannel = function (number, pan) {
     this.channel = number;
+    var ccPrefix = "%00%B" + this.channel.toString(16); // Reset midi, in case it was set previously.
+
+    this.track += ccPrefix + "%79%00"; // Reset All Controllers
+
+    this.track += ccPrefix + "%40%00"; // Damper pedal
+
+    this.track += ccPrefix + "%5B%30"; // Effect 1 Depth (reverb)
+    // Translate pan as -1 to 1 to 0 to 127
+
+    if (!pan) pan = 0;
+    pan = Math.round((pan + 1) * 64);
+    this.track += ccPrefix + "%0A" + toHex(pan, 2); // Pan
+
+    this.track += ccPrefix + "%07%64"; // Channel Volume
+
     this.noteOnAndChannel = "%9" + this.channel.toString(16);
     this.noteOffAndChannel = "%8" + this.channel.toString(16);
   };
@@ -15116,6 +15137,7 @@ function CreateSynth() {
     // At this point all of the notes are loaded. This function writes them into the output buffer.
     // Most music has a lot of repeating notes. If a note is the same pitch, volume, length, etc. as another one,
     // It saves a lot of time to just create it once and place it repeatedly where ever it needs to be.
+    var fadeTimeSec = 0.3;
     self.isRunning = false;
     if (!self.audioBufferPossible) return Promise.reject(new Error(notSupportedMessage));
     if (self.debugCallback) self.debugCallback("prime called");
@@ -15132,6 +15154,7 @@ function CreateSynth() {
         });
       }
 
+      self.duration += fadeTimeSec;
       var totalSamples = Math.floor(activeAudioContext().sampleRate * self.duration); // There might be a previous run that needs to be turned off.
 
       self.stop();
@@ -15164,7 +15187,7 @@ function CreateSynth() {
           pan: parseFloat(parts[4]),
           tempoMultiplier: parseFloat(parts[5])
         };
-        allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument]));
+        allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec));
       }
 
       self.audioBuffers = [audioBuffer];
@@ -15828,14 +15851,14 @@ var soundsCache = __webpack_require__(/*! ./sounds-cache */ "./src/synth/sounds-
 
 var pitchToNoteName = __webpack_require__(/*! ./pitch-to-note-name */ "./src/synth/pitch-to-note-name.js");
 
-function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs) {
+function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec) {
   // sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
   // len is in whole notes. Multiply by tempoMultiplier to get seconds.
   // ofsMs is an offset to subtract from the note to line up programs that have different length onsets.
   var OfflineAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
   var len = sound.len * sound.tempoMultiplier;
   if (ofsMs) len += ofsMs / 1000;
-  var offlineCtx = new OfflineAC(2, Math.floor((len + 0.5) * sampleRate * 2), sampleRate);
+  var offlineCtx = new OfflineAC(2, Math.floor((len + fadeTimeSec) * sampleRate * 2), sampleRate);
   var noteName = pitchToNoteName[sound.pitch];
   var noteBuffer = soundsCache[sound.instrument][noteName];
 
@@ -15863,7 +15886,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
   source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
 
   source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
-  source.gainNode.gain.linearRampToValueAtTime(0.0, len + 0.3); // connect all the nodes
+  source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec); // connect all the nodes
 
   if (source.panNode) {
     source.panNode.connect(offlineCtx.destination);
@@ -15877,9 +15900,9 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
   source.start(0);
 
   if (source.noteOff) {
-    source.noteOff(len + 0.5);
+    source.noteOff(len + fadeTimeSec);
   } else {
-    source.stop(len + 0.5);
+    source.stop(len + fadeTimeSec);
   }
 
   var fnResolve;
@@ -17065,7 +17088,8 @@ var AbstractEngraver;
         this.slurs[slur] = new TieElem({
           force: this.slurs[slur].force,
           voiceNumber: voiceNumber,
-          stemDir: this.slurs[slur].stemDir
+          stemDir: this.slurs[slur].stemDir,
+          style: this.slurs[slur].dotted
         });
         if (hint) this.slurs[slur].setHint();
         voice.addOther(this.slurs[slur]);
@@ -17077,7 +17101,8 @@ var AbstractEngraver;
       this.ties[i] = new TieElem({
         force: this.ties[i].force,
         stemDir: this.ties[i].stemDir,
-        voiceNumber: voiceNumber
+        voiceNumber: voiceNumber,
+        style: this.ties[i].dotted
       });
       if (hint) this.ties[i].setHint();
       voice.addOther(this.ties[i]);
@@ -19458,7 +19483,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
       // If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
       if (hasSeenNonSubtitle) {
         var center = this.width / 2 + this.renderer.padding.left;
-        abcLine.nonMusic = new Subtitle(this.renderer.spacing.subtitle, abcLine.subtitle, center, this.getTextSize);
+        abcLine.nonMusic = new Subtitle(this.renderer.spacing.subtitle, abcTune.formatting, abcLine.subtitle, center, this.renderer.padding.left, this.getTextSize);
       }
     } else if (abcLine.text !== undefined) {
       hasSeenNonSubtitle = true;
@@ -20903,6 +20928,8 @@ TieElem.prototype.calcX = function (lineStartX, lineEndX) {
   else this.startX = lineStartX; // There is no element and no repeat mark: extend to the beginning of the line.
 
 
+  if (!this.anchor1 && this.dotted) this.startX -= 3; // The arc needs to be long enough to tell that it is dotted.
+
   if (this.anchor2) this.endX = this.anchor2.x; // The normal case where there is a starting element to attach to.
   else if (this.endLimitX) this.endX = this.endLimitX.x; // if there is no start element, but there is a repeat mark before the start of the line.
     else this.endX = lineEndX; // There is no element and no repeat mark: extend to the beginning of the line.
@@ -21386,9 +21413,12 @@ BottomText.prototype.addTextIf = function (marginLeft, text, font, klass, margin
   this.rows.push(attr); // If there are blank lines they won't be counted by getTextSize, so just get the height of one line and multiply
 
   var size = getTextSize.calc("A", font, klass);
-  var h = size.height * 1.1 * text.split("\n").length;
+  var numLines = text.split("\n").length;
+  if (text[text.length - 1] === '\n') numLines--; // If there is a new line at the end of the string, then an extra line will be counted.
+
+  var h = size.height * 1.1 * numLines;
   this.rows.push({
-    move: h
+    move: Math.round(h)
   });
   if (marginBottom) this.rows.push({
     move: marginBottom
@@ -21488,8 +21518,9 @@ Classes.prototype.measureTotal = function () {
   var total = 0;
 
   for (var i = 0; i < this.lineNumber; i++) {
-    total += this.measureTotalPerLine[i];
-  }
+    total += this.measureTotalPerLine[i] ? this.measureTotalPerLine[i] : 0;
+  } // This can be null when non-music things are present.
+
 
   if (this.measureNumber) total += this.measureNumber;
   return total;
@@ -25486,17 +25517,19 @@ module.exports = setClass;
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-function Subtitle(spaceAbove, text, center, getTextSize) {
+function Subtitle(spaceAbove, formatting, text, center, paddingLeft, getTextSize) {
   this.rows = [];
   if (spaceAbove) this.rows.push({
     move: spaceAbove
   });
+  var tAnchor = formatting.titleleft ? 'start' : 'middle';
+  var tLeft = formatting.titleleft ? paddingLeft : center;
   this.rows.push({
     left: center,
     text: text,
     font: 'subtitlefont',
     klass: 'text subtitle',
-    anchor: "middle"
+    anchor: tAnchor
   });
   var size = getTextSize.calc(text, 'subtitlefont', 'text subtitle');
   this.rows.push({
@@ -25886,15 +25919,15 @@ function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spaci
   if (isPrint) this.rows.push({
     move: spacing.top
   });
+  var tAnchor = formatting.titleleft ? 'start' : 'middle';
+  var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
 
   if (metaText.title) {
-    var tAnchor = formatting.titleleft ? 'start' : 'middle';
-    var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
     this.addTextIf(tLeft, metaText.title, 'titlefont', 'title meta-top', spacing.title, 0, tAnchor, getTextSize, "title");
   }
 
   if (lines[0] && lines[0].subtitle) {
-    this.addTextIf(paddingLeft + width / 2, lines[0].subtitle, 'subtitlefont', 'text meta-top subtitle', spacing.subtitle, 0, 'middle', getTextSize, "subtitle");
+    this.addTextIf(tLeft, lines[0].subtitle, 'subtitlefont', 'text meta-top subtitle', spacing.subtitle, 0, tAnchor, getTextSize, "subtitle");
   }
 
   if (metaText.rhythm || metaText.origin || metaText.composer) {

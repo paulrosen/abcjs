@@ -1,3 +1,29 @@
+# Version 6.0.0-beta.24
+
+## Bugs
+
+* If there are pickup notes and a drum track, don't start drum until the first full measure.
+
+* If a dotted slur crosses a line, the slur on the next line should also be dotted.
+
+* Make the audio buffer a little longer so the last note can fade out more naturally.
+
+* Fix abcjs-mmXX class when there are non-music lines present.
+
+* Fix height of bottom text: it was calculating a line too many.
+
+* Fix a couple of crashes when calculating the timing of a tune.
+
+* Fix documentation about how to directly play sound.
+
+## Features
+
+* Add resets to MIDI file; carry forward "pan" option to MIDI file.
+
+* %%titleleft should also affect subtitle.
+
+* Add class for the measure count from the start of the tune.
+
 # Version 6.0.0-beta.23
 
 ## Bugs
