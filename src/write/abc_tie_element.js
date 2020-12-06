@@ -127,6 +127,8 @@ TieElem.prototype.calcX = function (lineStartX, lineEndX) {
 		this.startX = this.startLimitX.x+this.startLimitX.w; // if there is no start element, but there is a repeat mark before the start of the line.
 	else
 		this.startX = lineStartX; // There is no element and no repeat mark: extend to the beginning of the line.
+	if (!this.anchor1 && this.dotted)
+		this.startX -= 3; // The arc needs to be long enough to tell that it is dotted.
 
 	if (this.anchor2)
 		this.endX = this.anchor2.x; // The normal case where there is a starting element to attach to.
