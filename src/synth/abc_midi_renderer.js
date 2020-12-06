@@ -44,6 +44,7 @@ var rendererFactory;
 		if (this.trackcount === 0) {
 			this.startTrack();
 			var divisions = Math.round(60000000 / qpm);
+			// Add the tempo
 			this.track += "%00%FF%51%03" + toHex(divisions, 6);
 
 			if (key)
@@ -100,6 +101,8 @@ var rendererFactory;
 
 	Midi.prototype.setChannel = function(number) {
 		this.channel = number;
+		// Turn off the piano pedal, in case it was on from a previous file.
+		this.track += "%00%B" + this.channel.toString(16) + "%40%00";
 		this.noteOnAndChannel = "%9" + this.channel.toString(16);
 		this.noteOffAndChannel = "%8" + this.channel.toString(16);
 	};
