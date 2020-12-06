@@ -49,7 +49,10 @@ var create;
 						midi.setText(event.type, event.text);
 						break;
 					case 'program':
-						midi.setChannel(event.channel);
+						var pan = 0;
+						if (options.pan && options.pan.length > i)
+							pan = options.pan[i];
+						midi.setChannel(event.channel, pan);
 						midi.setInstrument(event.instrument);
 						midiJs.setChannel(event.channel);
 						midiJs.setInstrument(event.instrument);

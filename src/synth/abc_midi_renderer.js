@@ -99,10 +99,20 @@ var rendererFactory;
 		this.instrument = number;
 	};
 
-	Midi.prototype.setChannel = function(number) {
+	Midi.prototype.setChannel = function(number, pan) {
 		this.channel = number;
-		// Turn off the piano pedal, in case it was on from a previous file.
-		this.track += "%00%B" + this.channel.toString(16) + "%40%00";
+		var ccPrefix = "%00%B" + this.channel.toString(16);
+		// Reset midi, in case it was set previously.
+		this.track += ccPrefix + "%79%00"; // Reset All Controllers
+		this.track += ccPrefix + "%40%00"; // Damper pedal
+		this.track += ccPrefix + "%5B%30"; // Effect 1 Depth (reverb)
+		// Translate pan as -1 to 1 to 0 to 127
+		if (!pan)
+			pan = 0;
+		pan = Math.round((pan + 1) * 64);
+		this.track += ccPrefix + "%0A" + toHex(pan, 2); // Pan
+		this.track += ccPrefix + "%07%64"; // Channel Volume
+
 		this.noteOnAndChannel = "%9" + this.channel.toString(16);
 		this.noteOffAndChannel = "%8" + this.channel.toString(16);
 	};
