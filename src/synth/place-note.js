@@ -16,7 +16,7 @@
 var soundsCache = require('./sounds-cache');
 var pitchToNoteName = require('./pitch-to-note-name');
 
-function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs) {
+function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec) {
 	// sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
 	// len is in whole notes. Multiply by tempoMultiplier to get seconds.
 	// ofsMs is an offset to subtract from the note to line up programs that have different length onsets.
@@ -26,7 +26,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 	var len = sound.len * sound.tempoMultiplier;
 	if (ofsMs)
 		len +=ofsMs/1000;
-	var offlineCtx = new OfflineAC(2,Math.floor((len+0.5)*sampleRate*2),sampleRate);
+	var offlineCtx = new OfflineAC(2,Math.floor((len+fadeTimeSec)*sampleRate*2),sampleRate);
 	var noteName = pitchToNoteName[sound.pitch];
 	var noteBuffer = soundsCache[sound.instrument][noteName];
 	if (noteBuffer === "error") { // If the note isn't available, just leave a blank spot
@@ -52,7 +52,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 	}
 	source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
 	source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
-	source.gainNode.gain.linearRampToValueAtTime(0.0, len + 0.3);
+	source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
 
 	// connect all the nodes
 	if (source.panNode) {
@@ -67,9 +67,9 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 	source.start(0);
 
 	if (source.noteOff) {
-		source.noteOff(len + 0.5);
+		source.noteOff(len + fadeTimeSec);
 	} else {
-		source.stop(len + 0.5);
+		source.stop(len + fadeTimeSec);
 	}
 	var fnResolve;
 	offlineCtx.oncomplete = function(e) {
