@@ -22,6 +22,7 @@ var pitchToNoteName = require('./pitch-to-note-name');
 var instrumentIndexToName = require('./instrument-index-to-name');
 var downloadBuffer = require('./download-buffer');
 var placeNote = require('./place-note');
+var soundsCache = require('./sounds-cache');
 
 // TODO-PER: remove the midi tests from here: I don't think the object can be constructed unless it passes.
 var notSupportedMessage = "MIDI is not supported in this browser.";
@@ -92,6 +93,7 @@ function CreateSynth() {
 		self.onEnded = params.onEnded;
 
 		var allNotes = {};
+		var cached = [];
 		var currentInstrument = instrumentIndexToName[0];
 		self.flattened.tracks.forEach(function(track) {
 			track.forEach(function(event) {
@@ -103,7 +105,10 @@ function CreateSynth() {
 					if (noteName) {
 						if (!allNotes[currentInstrument])
 							allNotes[currentInstrument] = {};
-						allNotes[currentInstrument][pitchToNoteName[pitchNumber]] = true;
+						if (!soundsCache[currentInstrument] || !soundsCache[currentInstrument][noteName])
+							allNotes[currentInstrument][noteName] = true;
+						else
+							cached.push(currentInstrument+":"+noteName);
 					} else
 						console.log("Can't find note: ", pitchNumber);
 				}
@@ -127,14 +132,23 @@ function CreateSynth() {
 		}
 
 		return new Promise(function(resolve, reject) {
-			var results = [];
+			var results = {
+				cached: cached,
+				error: [],
+				loaded: []
+			};
 
 			var index = 0;
 			var next = function() {
 				if (index < batches.length) {
 					self._loadBatch(batches[index], self.soundFontUrl, startTime).then(function(data) {
 						startTime = activeAudioContext().currentTime;
-						results.push(data);
+						if (data) {
+							if (data.error)
+								results.error = results.error.concat(data.error);
+							if (data.loaded)
+								results.loaded = results.loaded.concat(data.loaded);
+						}
 						index++;
 						next();
 					}, reject);
@@ -188,13 +202,20 @@ function CreateSynth() {
 							}
 							self._loadBatch(newBatch, soundFontUrl, startTime, delay).then(function (response) {
 								resolve(response);
+							}).catch(function (error) {
+								reject(error);
 							});
 						}, delay);
 					});
-				} else
-					return Promise.reject(new Error("time out attempting to load: " + batch.join("/")));
+				} else {
+					var list = [];
+					for (var j = 0; j < batch.length; j++)
+						list.push(batch[j].instrument+'/'+batch[j].note)
+					return Promise.reject(new Error("timeout attempting to load: " + list.join(", ")));
+				}
 			} else
 				return Promise.resolve({loaded: loaded, cached: cached, error: error});
+		}).catch(function (error) {
 		});
 	});
 

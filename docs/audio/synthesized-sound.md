@@ -40,7 +40,14 @@ The first call that must be made on the CreateSynth object. This will load all o
 
 This must not be called until the user has made a gesture on the page because this references an `AudioContext`.
 
-This returns a promise after all the notes have been loaded.
+This returns a promise after all the notes have been loaded. The promise contains:
+```
+{
+    cached: [], // an array of the notes that were previously loaded.
+	error: [], // an array of the notes that haven't been loaded and the error message that was received
+    loaded: [] // an array of the notes that have been loaded.
+}
+```
 
 #### synthOptions
 

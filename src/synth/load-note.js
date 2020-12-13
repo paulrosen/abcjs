@@ -51,16 +51,23 @@ var getNote = function(url, instrument, name, audioContext) {
 		}
 
 		function onFailure(error) {
-			error = "Can't decode sound. " + url + ' ' + instrument + ' ' + name + error;
+			error = "Can't decode sound. " + url + ' ' + instrument + ' ' + name + ' ' + error;
 			if (self.debugCallback)
 				self.debugCallback(error);
-			console.log(error);
 			return resolve({instrument: instrument, name: name, status: "error", message: error });
 		}
 
 		xhr.onload = function (e) {
 			if (this.status === 200) {
-				audioContext.decodeAudioData(this.response, onSuccess, onFailure);
+				try {
+					var promise = audioContext.decodeAudioData(this.response, onSuccess, onFailure);
+					// older browsers only have the callback. Newer ones will report an unhandled
+					// rejection if catch isn't handled so we need both. We don't need to report it twice, though.
+					if (promise.catch)
+						promise.catch(function () {});
+				} catch(error) {
+					reject(error);
+				}
 			} else {
 				instrumentCache[name] = "error"; // To keep this from trying to load repeatedly.
 				var cantLoadMp3 = "Onload error loading sound: " +  name + " " + url + " " + e.currentTarget.status + " " + e.currentTarget.statusText;
