@@ -15,6 +15,7 @@ module.exports = ({mode, presets, type} = {mode: "production", presets: []}) => 
 				libraryTarget: 'umd',
 				globalObject: 'this'
 			},
+			target: ['web', 'es5'],
 			mode,
 			module: {
 				rules: [
