@@ -255,7 +255,7 @@ function CreateSynth() {
 			noteMapTracks.forEach(function(noteMap, trackNumber) {
 				var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
 				noteMap.forEach(function(note) {
-					var key = note.instrument + ':' + note.pitch + ':' +note.volume + ':' + (note.end-note.start) + ':' + panDistance + ':' + tempoMultiplier;
+					var key = note.instrument + ':' + note.pitch + ':' +note.volume + ':' + Math.round((note.end-note.start)*1000)/1000 + ':' + panDistance + ':' + tempoMultiplier;
 					if (!uniqueSounds[key])
 						uniqueSounds[key] = [];
 					uniqueSounds[key].push(note.start);
