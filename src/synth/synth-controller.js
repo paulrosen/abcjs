@@ -44,11 +44,17 @@ function SynthController() {
 			afterResume: self.init
 		});
 		self.cursorControl = cursorControl;
+		self.disable(true);
+	};
+
+	self.disable = function(isDisabled) {
+		self.control.disable(isDisabled);
 	};
 
 	self.setTune = function(visualObj, userAction, audioParams) {
 		self.isLoaded = false;
 		self.visualObj = visualObj;
+		self.disable(false);
 		self.options = audioParams;
 
 		if (self.control) {
@@ -128,6 +134,8 @@ function SynthController() {
 	};
 
 	self.play = function () {
+		if (!self.visualObj)
+			return Promise.resolve({status: "loading"});
 		if (!self.isLoaded) {
 			return self.go().then(function() {
 				return self._play();
@@ -176,6 +184,8 @@ function SynthController() {
 	};
 
 	self.randomAccess = function (ev) {
+		if (!self.visualObj)
+			return Promise.resolve({status: "loading"});
 		if (!self.isLoaded) {
 			return self.go().then(function() {
 				return self._randomAccess(ev);

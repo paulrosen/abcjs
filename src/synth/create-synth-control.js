@@ -135,6 +135,13 @@ function CreateSynthControl(parent, options) {
 	buildDom(self.parent, self.options);
 	attachListeners(self);
 
+	self.disable = function(isDisabled) {
+		var el = self.parent.querySelector(".abcjs-inline-audio");
+		if (isDisabled)
+			el.classList.add("abcjs-disabled");
+		else
+			el.classList.remove("abcjs-disabled");
+	};
 	self.setTempo = function(tempo) {
 		var el = self.parent.querySelector(".abcjs-midi-current-tempo");
 		if (el)

@@ -10,6 +10,10 @@
 	box-sizing: border-box;
 }
 
+.abcjs-inline-audio.abcjs-disabled {
+	opacity: 0.5;
+}
+
 .abcjs-inline-audio .abcjs-btn {
 	width: 28px;
 	height: 26px;

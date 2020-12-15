@@ -172,6 +172,12 @@ This is a hash with the following possible properties:
 | displayProgress | false | Whether to display the progress slider. The user can click anywhere on this to get the music to jump to that location. |
 | displayWarp | false | Whether to display the tempo and allow the user to change it on the fly. |
 
+### disable(isDisabled)
+
+This is called internally when waiting for the audio to finish loading. It can also be called directly by the client. The most common use for that is to disable the visual control when you are about to load in a new tune.
+
+If you load in a new tune without disabling the control first and the user clicks play while the notes are still being loaded over the network, the old tune will play until the new one is ready. 
+
 ### setTune(visualObj, userAction, audioParams)
 
 This is called whenever there is a new tune ready to be loaded into the player.
