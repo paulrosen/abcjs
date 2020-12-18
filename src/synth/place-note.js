@@ -16,7 +16,7 @@
 var soundsCache = require('./sounds-cache');
 var pitchToNoteName = require('./pitch-to-note-name');
 
-function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec) {
+function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec, noteEndSec) {
 	// sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
 	// len is in whole notes. Multiply by tempoMultiplier to get seconds.
 	// ofsMs is an offset to subtract from the note to line up programs that have different length onsets.
@@ -26,6 +26,9 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 	var len = sound.len * sound.tempoMultiplier;
 	if (ofsMs)
 		len +=ofsMs/1000;
+	len -= noteEndSec;
+	if (len < 0)
+		len = 0.005; // Have some small audible length no matter how short the note is.
 	var offlineCtx = new OfflineAC(2,Math.floor((len+fadeTimeSec)*sampleRate*2),sampleRate);
 	var noteName = pitchToNoteName[sound.pitch];
 	var noteBuffer = soundsCache[sound.instrument][noteName];

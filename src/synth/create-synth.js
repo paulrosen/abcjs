@@ -75,6 +75,10 @@ function CreateSynth() {
 			};
 		else
 			self.programOffsets = {};
+		var p = params.fadeLength !== undefined ? parseInt(params.fadeLength,10) : NaN;
+		self.fadeLength = isNaN(p) ? 300 : p;
+		p = params.noteEnd !== undefined ? parseInt(params.noteEnd,10) : NaN;
+		self.noteEnd = isNaN(p) ? 0 : p;
 
 		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure(options.bpm) : 1000);
 		self.pan = params.pan;
@@ -223,7 +227,7 @@ function CreateSynth() {
 		// At this point all of the notes are loaded. This function writes them into the output buffer.
 		// Most music has a lot of repeating notes. If a note is the same pitch, volume, length, etc. as another one,
 		// It saves a lot of time to just create it once and place it repeatedly where ever it needs to be.
-		var fadeTimeSec = 0.3;
+		var fadeTimeSec = self.fadeLength/1000;
 		self.isRunning = false;
 		if (!self.audioBufferPossible)
 			return Promise.reject(new Error(notSupportedMessage));
@@ -269,7 +273,7 @@ function CreateSynth() {
 				var k = Object.keys(uniqueSounds)[key2];
 				var parts = k.split(":");
 				parts = { instrument: parts[0], pitch: parseInt(parts[1],10), volume: parseInt(parts[2], 10), len: parseFloat(parts[3]), pan: parseFloat(parts[4]), tempoMultiplier: parseFloat(parts[5])};
-				allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec));
+				allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd/1000));
 			}
 			self.audioBuffers = [audioBuffer];
 
