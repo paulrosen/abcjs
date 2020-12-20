@@ -414,7 +414,7 @@ var Tune = function() {
 				nextIsBar = ret.nextIsBar;
 				voiceTime += ret.duration;
 				var lastHash;
-				if (element.duration > 0)
+				if (element.duration > 0 && eventHash["event" + voiceTimeMilliseconds]) // This won't exist if this is the end of a tie.
 					lastHash = "event" + voiceTimeMilliseconds;
 				voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 				if (element.type === 'bar') {

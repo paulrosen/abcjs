@@ -51,6 +51,14 @@ describe("Timing", function() {
 		'K:C\n' +
 		'E8- | E8 |]\n';
 
+	var abcTieRepeatCrash = 'X:1\n' +
+		'T:tie-repeat-crash\n' +
+		'L:1/8\n' +
+		'Q:1/4=100\n' +
+		'M:4/4\n' +
+		'K:G\n' +
+		'G3 F- F4 :|\n';
+
 //////////////////////////////////////////////////////////
 
 	it("of repeated sections", function() {
@@ -75,6 +83,10 @@ describe("Timing", function() {
 
 	it("skip ties crash", function() {
 		doCreationTest(abcSkipTiesCrash);
+	});
+
+	it("tie repeat crash", function() {
+		doCreationTest(abcTieRepeatCrash);
 	});
 });
 
