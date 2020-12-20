@@ -367,7 +367,7 @@ function CreateSynth() {
 	};
 
 	self.seek = function(percent) {
-		var offset = self.duration * percent;
+		var offset = (self.duration-self.fadeLength/1000) * percent;
 
 		// TODO-PER: can seek when paused or when playing
 		if (!self.audioBufferPossible)
