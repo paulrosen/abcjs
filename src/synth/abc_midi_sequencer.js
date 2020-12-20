@@ -152,6 +152,7 @@ var parseCommon = require("../parse/abc_common");
 		var inDiminuendo = [];
 		var durationCounter = [0];
 		var tempoChanges = {};
+		tempoChanges["0"] = { el_type: 'tempo', qpm: qpm, timing: 0 };
 		var currentVolume;
 		var startRepeatPlaceholder = []; // There is a place holder for each voice.
 		var skipEndingPlaceholder = []; // This is the place where the first ending starts.
@@ -539,12 +540,18 @@ var parseCommon = require("../parse/abc_common");
 	}
 
 	function insertTempoChanges(voices, tempoChanges) {
+		if (!tempoChanges || tempoChanges.length === 0)
+			return;
 		var changePositions = Object.keys(tempoChanges);
 		for (var i = 0; i < voices.length; i++) {
 			var voice = voices[i];
+			var lastTempo = tempoChanges['0'] ? tempoChanges['0'].qpm : 0; // Don't insert redundant changes. This happens normally when repeating from the beginning, but could happen anywhere that there is a tempo marking that is the same as the last one.
 			for (var j = 0; j < voice.length; j++) {
 				var el = voice[j];
-				if (changePositions.indexOf(''+el.timing) >= 0) {
+				if (el.el_type === "tempo")
+					lastTempo = el.qpm;
+				if (changePositions.indexOf(''+el.timing) >= 0 && lastTempo !== tempoChanges[''+el.timing].qpm) {
+					lastTempo = tempoChanges[''+el.timing].qpm;
 					if (el.el_type === "tempo") {
 						el.qpm = tempoChanges[''+el.timing].qpm;
 						j++; // when there is a tempo element the next element has the same timing and we don't want it to match the second time.

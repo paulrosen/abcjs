@@ -48,7 +48,8 @@ function SynthController() {
 	};
 
 	self.disable = function(isDisabled) {
-		self.control.disable(isDisabled);
+		if (self.control)
+			self.control.disable(isDisabled);
 	};
 
 	self.setTune = function(visualObj, userAction, audioParams) {
