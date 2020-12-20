@@ -221,6 +221,9 @@ Editor.prototype.modelChanged = function() {
     return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
   this.bReentry = true;
   this.timerId = null;
+  if (this.synth && this.synth.synthControl)
+	  this.synth.synthControl.disable(true);
+
   this.tunes = renderAbc(this.div, this.currentAbc, this.abcjsParams);
   if (this.tunes.length > 0) {
 	  this.warnings = this.tunes[0].warnings;
