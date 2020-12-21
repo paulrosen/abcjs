@@ -1209,7 +1209,7 @@ var Parse = function() {
 			if (line.charAt(i) === '%')
 				break;
 
-			var retInlineHeader = header.letter_to_inline_header(line, i);
+			var retInlineHeader = header.letter_to_inline_header(line, i, delayStartNewLine);
 			if (retInlineHeader[0] > 0) {
 					i += retInlineHeader[0];
 					if (retInlineHeader[1] === 'V')

@@ -785,8 +785,11 @@ var TuneBuilder = function(tune) {
 			this.startNewLine(params);
 		} else if (tune.lines[tune.lineNum].staff[tune.staffNum] === undefined) createStaff(params);
 		else if (tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum] === undefined) createVoice(params);
-		else if (!this.containsNotes(tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum])) return;
-		else {
+		else if (!this.containsNotes(tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum])) {
+			// We don't need a new line but we might need to update parts of it.
+			if (params.part)
+				self.appendElement('part', params.part.startChar, params.part.endChar, {title: params.part.title});
+		} else {
 			tune.lineNum++;
 			this.startNewLine(params);
 		}

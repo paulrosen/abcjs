@@ -356,7 +356,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 		}
 	};
 
-	this.letter_to_inline_header = function(line, i)
+	this.letter_to_inline_header = function(line, i, startLine)
 	{
 		var ws = tokenizer.eatWhiteSpace(line, i);
 		i +=ws;
@@ -385,7 +385,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 						tuneBuilder.appendStartingElement('key', startChar, endChar, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
 					return [ e-i+1+ws ];
 				case "[P:":
-					if (tune.lines.length <= tune.lineNum)
+					if (startLine || tune.lines.length <= tune.lineNum)
 						multilineVars.partForNextLine = { title: line.substring(i+3, e), startChar: startChar, endChar: endChar };
 					else
 						tuneBuilder.appendElement('part', startChar, endChar, {title: line.substring(i+3, e)});
@@ -402,7 +402,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 							else
 								multilineVars.tempoForNextLine = ['tempo', startChar, endChar, this.calcTempo(tempo.tempo)]
 						} else if (tempo.type === 'immediate') {
-							if (tuneBuilder.hasBeginMusic())
+							if (!startLine && tuneBuilder.hasBeginMusic())
 								tuneBuilder.appendElement('tempo', startChar, endChar, tempo.tempo);
 							else
 								multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo]
@@ -552,7 +552,12 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 						case  'Q':
 							var tempo = this.setTempo(line, 2, line.length);
 							if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;
-							else if (tempo.type === 'immediate') tune.metaText.tempo = tempo.tempo;
+							else if (tempo.type === 'immediate') {
+								if (!tune.metaText.tempo)
+									tune.metaText.tempo = tempo.tempo;
+								else
+									multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo]
+							}
 							break;
 						case  'T':
 							this.setTitle(line.substring(2));
