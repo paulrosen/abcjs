@@ -32,41 +32,40 @@
         var visualObj = ABCJS.renderAbc("paper", abc);
         var createSynth = new ABCJS.synth.CreateSynth();
         var synthControl = new ABCJS.synth.SynthController(); 
-        // console.log('ABCJS: ', ABCJS);
-        // console.log('ABCJS.synth: ', ABCJS.synth);
-        // console.log('ABCJS.synth.synthController: ', ABCJS.synth.SynthController);
-        /*
-        window.AudioContext = window.AudioContext ||
-          window.webkitAudioContext ||
-          navigator.mozAudioContext ||
-          navigator.msAudioContext;
-        var audioContext = new window.AudioContext();
-        */
-        // resume() call needed?
-        /*
-        audioContext.resume().then(function() {
-          synthControl.load('#audio', {
-            displayRestart: true,
-            displayPlay: true,
-            displayProgress: true
-          });
-          */
-          // preloads and caches the notes to be played
-          createSynth.init({ visualObj: visualObj[0]
-          }).then(function() {
-              //setTune(visualObj, userAction, audioParams)
-              synthControl.setTune(visualObj[0], false, {
-                // audioContext: audioContext,
-                options: {
-                  midiTranspose: 0
-                }
-              }).then(function(){
-                console.log('Audio successfully loaded.')
-              }).catch(function(error) {
-                console.warn('Audio problem: ', error);
-              })
-          });
-        // }) --> from audioContext.resume()
+        var playOutput = document.querySelector('#play-output');
+        
+        playOutput.addEventListener('click', () => {
+          window.AudioContext = window.AudioContext ||
+            window.webkitAudioContext ||
+            navigator.mozAudioContext ||
+            navigator.msAudioContext;
+          var audioContext = new window.AudioContext();
+          
+          // resume() call needed?
+          audioContext.resume().then(function() {
+            synthControl.load('#audio', {
+              displayRestart: true,
+              displayPlay: true,
+              displayProgress: true
+            });
+          
+            // preloads and caches the notes to be played
+            createSynth.init({ visualObj: visualObj[0]
+            }).then(function() {
+                //setTune(visualObj, userAction, audioParams)
+                synthControl.setTune(visualObj[0], false, {
+                  audioContext: audioContext,
+                  options: {
+                    midiTranspose: 0
+                  }
+                }).then(function(){
+                  console.log('Audio successfully loaded.')
+                }).catch(function(error) {
+                  console.warn('Audio problem: ', error);
+                })
+            });
+          }) // --> from audioContext.resume()
+      })
       } else {
         document.querySelector('#audio').innerHTML = 'Audio is not supported in this browser.'
       } 
@@ -80,7 +79,7 @@
         
         // use updated audioParams for a new set tune (do I need to call createSynth.init again?)
         synthControl.setTune(visualObj[0], false, {
-                // audioContext: audioContext,
+                audioContext: audioContext,
                 options: {
                   midiTranspose: transposeHalfSteps.value
                 }
@@ -97,7 +96,7 @@
 </head>
 <body onload="load()">
   <label>Transpose half-steps: <input class="transpose-half-steps" type="number" min="-24" max="24" step="1" value="0"></label>
-
+  <button id="play-output">Play Output</button>
   <div id="audio"></div>
   <div id="warnings"></div>
   <div id="paper"></div>
