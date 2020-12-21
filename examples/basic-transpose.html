@@ -5,7 +5,15 @@
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
-	<title>abcjs: Basic Demo</title>
+  <title>abcjs: Basic Demo</title>
+
+  <!-- scripts and styles for MIDI audio player (deprecated?) -->
+  <!-- <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="../abcjs-midi.css">
+  <script src="../bin/abcjs_midi_6.0.0-beta.25-min.js" type="text/javascript"></script> -->
+
+  <!-- stylesheet linked in editor-transpose -->
+  <link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
 	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		var abc = "T: Cooley's\n" +
@@ -19,21 +27,80 @@
 			"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|";
 
 		function load() {
-			ABCJS.renderAbc("paper", abc);
+
+      if (ABCJS.synth.supportsAudio()){
+        var visualObj = ABCJS.renderAbc("paper", abc);
+        var createSynth = new ABCJS.synth.CreateSynth();
+        var synthControl = new ABCJS.synth.SynthController(); 
+        // console.log('ABCJS: ', ABCJS);
+        // console.log('ABCJS.synth: ', ABCJS.synth);
+        // console.log('ABCJS.synth.synthController: ', ABCJS.synth.SynthController);
+        /*
+        window.AudioContext = window.AudioContext ||
+          window.webkitAudioContext ||
+          navigator.mozAudioContext ||
+          navigator.msAudioContext;
+        var audioContext = new window.AudioContext();
+        */
+        // resume() call needed?
+        /*
+        audioContext.resume().then(function() {
+          synthControl.load('#audio', {
+            displayRestart: true,
+            displayPlay: true,
+            displayProgress: true
+          });
+          */
+          // preloads and caches the notes to be played
+          createSynth.init({ visualObj: visualObj[0]
+          }).then(function() {
+              //setTune(visualObj, userAction, audioParams)
+              synthControl.setTune(visualObj[0], false, {
+                // audioContext: audioContext,
+                options: {
+                  midiTranspose: 0
+                }
+              }).then(function(){
+                console.log('Audio successfully loaded.')
+              }).catch(function(error) {
+                console.warn('Audio problem: ', error);
+              })
+          });
+        // }) --> from audioContext.resume()
+      } else {
+        document.querySelector('#audio').innerHTML = 'Audio is not supported in this browser.'
+      } 
 
 			var transposeHalfSteps = document.querySelector(".transpose-half-steps");
 
 			transposeHalfSteps.addEventListener("change", function() {
 				ABCJS.renderAbc("paper", abc, {
 					visualTranspose: transposeHalfSteps.value
-				});
-			});
-		}
+        });
+        
+        // use updated audioParams for a new set tune (do I need to call createSynth.init again?)
+        synthControl.setTune(visualObj[0], false, {
+                // audioContext: audioContext,
+                options: {
+                  midiTranspose: transposeHalfSteps.value
+                }
+              }).then(function(){
+                console.log('Audio successfully loaded.')
+              }).catch(function(error) {
+                console.warn('Audio problem: ', error);
+              })
+      });
+      
+  }  
 
 	</script>
 </head>
 <body onload="load()">
-<label>Transpose half-steps: <input class="transpose-half-steps" type="number" min="-24" max="24" step="1" value="0"></label>
-<div id="paper"></div>
+  <label>Transpose half-steps: <input class="transpose-half-steps" type="number" min="-24" max="24" step="1" value="0"></label>
+
+  <div id="audio"></div>
+  <div id="warnings"></div>
+  <div id="paper"></div>
+
 </body>
 </html>
