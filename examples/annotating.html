@@ -163,17 +163,35 @@
 		.abcjs-lyric {
 			fill: none;
 		}
+    label {
+      display:block;
+    }
 	</style>
 </head>
 <body onload="load()">
 <p>
 	This is a simple example of how elements can be found on the page and how
-	other things can be drawn on the page.
+	annotations can be drawn on the page.
 </p>
-<p>1) Note that the upper elements are drawn with the annotation syntax "^text".</p>
-<p>2) Note that room is created for the lower elements by creating a w: line and then setting its fill to none.</p>
+<p>1) Note that annotations above the staves are drawn with the annotation syntax "^text".</p>
+<p>2) Note that room is created for annotations below the staves by creating a w: line and then setting its fill to none on the stylesheet.</p>
 <p>3) Note that the notes are retrieved by their unique class and their position is retrieved. When the music is changed,
 this will automatically move the drawn lines to the right place.</p>
 <div id="paper"></div>
+
+<label for="abc">ABC Notation:</label>
+<textarea id="abc" cols="50" rows="12">
+T: New Exercise
+M: C
+L: 1/4
+K: C
+V: 1 name="Alto\n[species 2]\n[Sop.]"
+"^1"c2"^2→"G2|B2d2|B2"^5→\n6→".(A2|C4)|
+V: 2 clef=treble-8 name="Tenor\n[c.f.]\n[Alt.]"
+"^4. Consecutive leaps - - -"c4|e4|d4|c4|
+W: Set this line's fill to none to make space for annotations below the staff.
+  </textarea>
+<p>Note that \ is a character which must be escaped in JavaScript.</p>
+
 </body>
 </html>
