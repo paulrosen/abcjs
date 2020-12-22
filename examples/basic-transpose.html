@@ -14,7 +14,7 @@
 
   <!-- stylesheet linked in editor-transpose -->
   <link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
-  <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+  <script src="../bin/abcjs_basic_6.0.0-beta.25.js" type="text/javascript"></script>
   <style>
     #audio {
       margin-top: 20px;
@@ -31,24 +31,33 @@
 			"|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
 			"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|";
 
+    // todo: if you click Play Output again, it resets the visual rendering and transposeHalfSteps input.
+    // todo: transposeHalfSteps input doesn't affect audio playback
 		function load() {
 
-      if (ABCJS.synth.supportsAudio()){
-        var visualObj = ABCJS.renderAbc("paper", abc);
-        var createSynth = new ABCJS.synth.CreateSynth();
-        var synthControl = new ABCJS.synth.SynthController(); 
-        var playOutput = document.querySelector('#play-output');
-        
-        playOutput.addEventListener('click', () => {
+      var playOutput = document.querySelector('#play-output');
+      // todo: invoke renderAbc outside of listener
+
+      playOutput.addEventListener('click', () => {
+        if (ABCJS.synth.supportsAudio()){
+          var visualObj = ABCJS.renderAbc("paper", abc);
+          
+          var createSynth = new ABCJS.synth.CreateSynth();  // initialize sound buffer
+          var synthControl = new ABCJS.synth.SynthController();  // iitialize visual widget to control playback
+          console.log(synthControl);
+          
+
           window.AudioContext = window.AudioContext ||
             window.webkitAudioContext ||
             navigator.mozAudioContext ||
             navigator.msAudioContext;
           var audioContext = new window.AudioContext();
           
-          // resume() call needed?
+          // todo: break lines 54-76 into its own function
+          // don't need to create an audioContext and then resume it; take out 44-60
           audioContext.resume().then(function() {
-            synthControl.load('#audio', {
+            // null = cursorControl (required)
+            synthControl.load('#audio', null, {
               displayRestart: true,
               displayPlay: true,
               displayProgress: true
@@ -57,7 +66,7 @@
             // preloads and caches the notes to be played
             createSynth.init({ visualObj: visualObj[0]
             }).then(function() {
-                //setTune(visualObj, userAction, audioParams)
+                // parameters: setTune(visualObj, userAction, audioParams)
                 synthControl.setTune(visualObj[0], false, {
                   audioContext: audioContext,
                   options: {
@@ -70,19 +79,21 @@
                 })
             });
           }) 
-      })
-      } else {
+      }
+       else {
         document.querySelector('#audio').innerHTML = 'Audio is not supported in this browser.'
       } 
 
 			var transposeHalfSteps = document.querySelector(".transpose-half-steps");
 
 			transposeHalfSteps.addEventListener("change", function() {
-				ABCJS.renderAbc("paper", abc, {
+			  visualObj = ABCJS.renderAbc("paper", abc, {
 					visualTranspose: transposeHalfSteps.value
         });
         
+        // todo
         // use updated audioParams for a new set tune (do I need to call createSynth.init again?)
+        // feels that this should be a function of createSynth
         synthControl.setTune(visualObj[0], false, {
                 audioContext: audioContext,
                 options: {
@@ -94,8 +105,8 @@
                 console.warn('Audio problem: ', error);
               })
       });
-      
-  }  
+    });  
+  }
 
 	</script>
 </head>
