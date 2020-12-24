@@ -1,63 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="x-ua-compatible" content="ie=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
-	<title>abcjs animation</title>
-	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <title>abcjs animation</title>
+  <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
 
-	<style media="screen" type="text/css">
-		.cursor-editor {
-			width: 500px;
-			margin-top: 12px;
-		}
+  <style media="screen" type="text/css">
+    .cursor-editor {
+      width: 500px;
+      margin-top: 12px;
+    }
 
-		.cursor-nav {
-			margin-bottom: 12px;
-		}
+    .cursor-nav {
+      margin-bottom: 12px;
+    }
 
-		.paper .abcjs-cursor {
-			background-color: rgba(196,196,196,.5);
-		}
-	</style>
+    .paper .abcjs-cursor {
+      background-color: rgba(196,196,196,.5);
+    }
+  </style>
 </head>
 
 <body>
 <div class="main">
-	<div class="header">
-		<h1>abcjs animation</h1>
-	</div>
-	<div class="cursor-nav">
-		<div>
-			<button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true, "showCursor": true }'>
-				Animate</button> { hideFinishedMeasures: true, showCursor: true }
-		</div>
-		<div>
-			<button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true, "showCursor": true, "bpm": 180 }'>
-				Animate</button> { hideFinishedMeasures: true, showCursor: true, bpm: 180 }
-		</div>
-		<div>
-			<button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true, "showCursor": true, "bpm": 60 }'>
-				Animate</button> { hideFinishedMeasures: true, showCursor: true, bpm: 60 }
-		</div>
-		<div>
-			<button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true }'>
-				Animate</button> { hideFinishedMeasures: true }
-		</div>
-		<div>
-			<button class="do-animation" data-paper="#paper0" data-params='{ "showCursor": true }'>
-				Animate</button> { showCursor: true }
-		</div>
-		<div>
-			<button class='pause' disabled>
-				Pause</button>
-		</div>
-	</div>
-	<div id="paper0" class="paper"></div>
-	<div class="cursor-editor">
-	<textarea name='abc' id='abc' cols="80" rows="8" >
+  <div class="header">
+    <h1>abcjs animation</h1>
+  </div>
+  <div class="cursor-nav">
+    <div>
+      <button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true, "showCursor": true }'>
+        Animate</button> { hideFinishedMeasures: true, showCursor: true }
+    </div>
+    <div>
+      <button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true, "showCursor": true, "bpm": 180 }'>
+        Animate</button> { hideFinishedMeasures: true, showCursor: true, bpm: 180 }
+    </div>
+    <div>
+      <button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true, "showCursor": true, "bpm": 60 }'>
+        Animate</button> { hideFinishedMeasures: true, showCursor: true, bpm: 60 }
+    </div>
+    <div>
+      <button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true }'>
+        Animate</button> { hideFinishedMeasures: true }
+    </div>
+    <div>
+      <button class="do-animation" data-paper="#paper0" data-params='{ "showCursor": true }'>
+        Animate</button> { showCursor: true }
+    </div>
+    <div>
+      <button class='pause' disabled>
+        Pause</button>
+    </div>
+  </div>
+  <div id="paper0" class="paper"></div>
+  <div class="cursor-editor">
+  <textarea name='abc' id='abc' cols="80" rows="8" spellcheck="false">
 X:1
 T:Animation Demo
 M:4/4
@@ -67,52 +67,52 @@ V:V0 clef=treble
 K:C clef=treble stafflines=5
 [V: V0] G4 c4 G4 F4-|F4 G4 G4 c4-|c4 z4 [Bd]4 c4|c4 B4 G8|
 G4 F4 E8|D4 E4 C8-|C8 F8|E4 E4 C8|]
-	</textarea>
-	</div>
-	<div id="warnings"></div>
+  </textarea>
+  </div>
+  <div id="warnings"></div>
 </div>
 
-	<script>
-		var abc_editor = new window.ABCJS.Editor(
-			"abc", {
-				paper_id: "paper0",
-				warnings_id:"warnings",
-				abcjsParams: {
-					add_classes: true
-				}
-			}
-		);
+  <script>
+    var abc_editor = new window.ABCJS.Editor(
+      "abc", {
+        paper_id: "paper0",
+        warnings_id:"warnings",
+        abcjsParams: {
+          add_classes: true
+        }
+      }
+    );
 
-		var buttons = document.querySelectorAll("BUTTON.do-animation");
+    var buttons = document.querySelectorAll("BUTTON.do-animation");
 
-		var button_onclick = function () {
-			var params = this.attributes["data-params"].value;
-			params = JSON.parse(params);
+    var button_onclick = function () {
+      var params = this.attributes["data-params"].value;
+      params = JSON.parse(params);
 
-			var paperSelector = this.attributes["data-paper"].value;
-			var paper = document.querySelectorAll(paperSelector)[0];
+      var paperSelector = this.attributes["data-paper"].value;
+      var paper = document.querySelectorAll(paperSelector)[0];
 
-			ABCJS.startAnimation(paper, abc_editor.tunes[0], params);
-			pauseButton.disabled = false;
-		};
+      ABCJS.startAnimation(paper, abc_editor.tunes[0], params);
+      pauseButton.disabled = false;
+    };
 
-		for (var i = 0; i < buttons.length; i++) {
-			buttons[i].addEventListener('click', button_onclick, false);
-		}
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].addEventListener('click', button_onclick, false);
+    }
 
-		var pauseButton = document.querySelectorAll("BUTTON.pause");
-		pauseButton = pauseButton[0];
+    var pauseButton = document.querySelectorAll("BUTTON.pause");
+    pauseButton = pauseButton[0];
 
-		var isPaused = false;
-		var pauseText = ["Pause", "Resume"];
+    var isPaused = false;
+    var pauseText = ["Pause", "Resume"];
 
-		var pause = function () {
-			isPaused = !isPaused;
-			pauseButton.innerText = pauseText[isPaused ? 1 : 0];
-			ABCJS.pauseAnimation(isPaused);
-		};
+    var pause = function () {
+      isPaused = !isPaused;
+      pauseButton.innerText = pauseText[isPaused ? 1 : 0];
+      ABCJS.pauseAnimation(isPaused);
+    };
 
-		pauseButton.addEventListener('click', pause, false);
-	</script>
+    pauseButton.addEventListener('click', pause, false);
+  </script>
 </body>
 </html>
