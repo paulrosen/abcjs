@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="x-ua-compatible" content="ie=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
-	<title>abcjs: Basic Editor Demo</title>
-	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
-	<script type="text/javascript">
-		window.onload = function() {
-			new ABCJS.Editor("abc", { canvas_id: "paper",
-				warnings_id: "warnings",
-				abcjsParams: {}
-			});
-		}
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <title>abcjs: Basic Editor Demo</title>
+  <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    window.onload = function() {
+      new ABCJS.Editor("abc", { canvas_id: "paper",
+        warnings_id: "warnings",
+        abcjsParams: {}
+      });
+    }
 
-	</script>
+  </script>
 </head>
 <body>
-<textarea id="abc" cols="80" rows="15">X: 1
+<textarea id="abc" cols="80" rows="15" spellcheck="false">X: 1
 T: Cooley's
 M: 4/4
 L: 1/8
