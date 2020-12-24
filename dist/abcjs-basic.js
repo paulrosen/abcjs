@@ -8,14 +8,100 @@
 	else
 		root["ABCJS"] = factory();
 })(this, function() {
-return /******/ (function() { // webpackBootstrap
-/******/ 	var __webpack_modules__ = ({
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = "./static-wrappers/basic.js");
+/******/ })
+/************************************************************************/
+/******/ ({
 
 /***/ "./index.js":
 /*!******************!*\
   !*** ./index.js ***!
   \******************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var version = __webpack_require__(/*! ./version */ "./version.js");
 
@@ -83,7 +169,8 @@ module.exports = abcjs;
 /*!**********************************!*\
   !*** ./src/api/abc_animation.js ***!
   \**********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_animation.js: handles animating the music in real time.
 //    Copyright (C) 2014-2020 Paul Rosen (paul at paulrosen dot net)
@@ -215,7 +302,8 @@ module.exports = animation;
 /*!*****************************************!*\
   !*** ./src/api/abc_timing_callbacks.js ***!
   \*****************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    Copyright (C) 2015-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -569,7 +657,8 @@ module.exports = TimingCallbacks;
 /*!*********************************!*\
   !*** ./src/api/abc_tunebook.js ***!
   \*********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -852,7 +941,8 @@ module.exports = tunebook;
 /*!*************************************!*\
   !*** ./src/api/abc_tunebook_svg.js ***!
   \*************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2015-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -1128,7 +1218,8 @@ module.exports = renderAbc;
 /*!******************************!*\
   !*** ./src/data/abc_tune.js ***!
   \******************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_tune.js: a computer usable internal structure representing one tune.
 //    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
@@ -1738,7 +1829,8 @@ module.exports = Tune;
 /*!**********************************!*\
   !*** ./src/edit/abc_editarea.js ***!
   \**********************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 // abc_editor.js
 //    Copyright (C) 2015-2020 Paul Rosen (paul at paulrosen dot net)
@@ -1880,7 +1972,8 @@ module.exports = EditArea;
 /*!********************************!*\
   !*** ./src/edit/abc_editor.js ***!
   \********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //
 // window.ABCJS.Editor:
@@ -2276,7 +2369,8 @@ module.exports = Editor;
 /*!*************************************!*\
   !*** ./src/midi/abc_midi_create.js ***!
   \*************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_midi_create.js: Turn a linear series of events into a midi file.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -2419,7 +2513,8 @@ module.exports = create;
 /*!******************************************!*\
   !*** ./src/midi/abc_midi_js_preparer.js ***!
   \******************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_midi_js_preparer.js: Create the structure that MIDI.js expects.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -2646,7 +2741,8 @@ module.exports = Preparer;
 /*!*********************************!*\
   !*** ./src/parse/abc_common.js ***!
   \*********************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
 //    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
@@ -2781,7 +2877,8 @@ module.exports = parseCommon;
 /*!********************************!*\
   !*** ./src/parse/abc_parse.js ***!
   \********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
 //    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
@@ -4839,7 +4936,8 @@ module.exports = Parse;
 /*!*************************************!*\
   !*** ./src/parse/abc_parse_book.js ***!
   \*************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_parse_book.js: parses a string representing ABC Music Notation into a usable internal structure.
 //    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
@@ -4926,7 +5024,8 @@ module.exports = bookParser;
 /*!******************************************!*\
   !*** ./src/parse/abc_parse_directive.js ***!
   \******************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -6349,7 +6448,8 @@ module.exports = parseDirective;
 /*!***************************************!*\
   !*** ./src/parse/abc_parse_header.js ***!
   \***************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_parse_header.js: parses a the header fields from a string representing ABC Music Notation into a usable internal structure.
 //    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
@@ -7045,7 +7145,8 @@ module.exports = ParseHeader;
 /*!******************************************!*\
   !*** ./src/parse/abc_parse_key_voice.js ***!
   \******************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -8350,7 +8451,8 @@ module.exports = parseKeyVoice;
 /*!************************************!*\
   !*** ./src/parse/abc_tokenizer.js ***!
   \************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_tokenizer.js: tokenizes an ABC Music Notation string to support abc_parse.
 //    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
@@ -9781,7 +9883,8 @@ module.exports = Tokenizer;
 /*!************************************!*\
   !*** ./src/parse/abc_transpose.js ***!
   \************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_transpose.js: Handles the automatic transposition of key signatures, chord symbols, and notes.
 //    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
@@ -10041,7 +10144,8 @@ module.exports = transpose;
 /*!***********************************!*\
   !*** ./src/parse/tune-builder.js ***!
   \***********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var parseKeyVoice = __webpack_require__(/*! ../parse/abc_parse_key_voice */ "./src/parse/abc_parse_key_voice.js");
 
@@ -11062,7 +11166,8 @@ module.exports = TuneBuilder;
 /*!*********************************!*\
   !*** ./src/parse/wrap_lines.js ***!
   \*********************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    wrap_lines.js: does line wrap on an already parsed tune.
 //    Copyright (C) 2018-2020 Paul Rosen (paul at paulrosen dot net)
@@ -11839,7 +11944,8 @@ module.exports = {
 /*!*****************************************!*\
   !*** ./src/synth/abc_midi_flattener.js ***!
   \*****************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_midi_flattener.js: Turn a linear series of events into a series of MIDI commands.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -13334,7 +13440,8 @@ module.exports = flatten;
 /*!****************************************!*\
   !*** ./src/synth/abc_midi_renderer.js ***!
   \****************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_midi_renderer.js: Create the actual format for the midi.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -13645,7 +13752,8 @@ module.exports = rendererFactory;
 /*!*****************************************!*\
   !*** ./src/synth/abc_midi_sequencer.js ***!
   \*****************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_midi_sequencer.js: Turn parsed abc into a linear series of events.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -14471,7 +14579,8 @@ module.exports = sequence;
 /*!*******************************************!*\
   !*** ./src/synth/active-audio-context.js ***!
   \*******************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -14502,7 +14611,8 @@ module.exports = activeAudioContext;
 /*!**************************************!*\
   !*** ./src/synth/create-note-map.js ***!
   \**************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -14581,7 +14691,8 @@ module.exports = createNoteMap;
 /*!*******************************************!*\
   !*** ./src/synth/create-synth-control.js ***!
   \*******************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -14823,7 +14934,8 @@ module.exports = CreateSynthControl;
 /*!***********************************!*\
   !*** ./src/synth/create-synth.js ***!
   \***********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -15266,7 +15378,8 @@ module.exports = CreateSynth;
 /*!**************************************!*\
   !*** ./src/synth/download-buffer.js ***!
   \**************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -15367,7 +15480,8 @@ module.exports = downloadBuffer;
 /*!************************************!*\
   !*** ./src/synth/get-midi-file.js ***!
   \************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -15458,7 +15572,8 @@ module.exports = getMidiFile;
 /*!***********************************************!*\
   !*** ./src/synth/instrument-index-to-name.js ***!
   \***********************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -15483,7 +15598,8 @@ module.exports = instrumentIndexToName;
 /*!********************************!*\
   !*** ./src/synth/load-note.js ***!
   \********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -15614,7 +15730,8 @@ module.exports = getNote;
 /*!*****************************************!*\
   !*** ./src/synth/pitch-to-note-name.js ***!
   \*****************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -15741,7 +15858,8 @@ module.exports = pitchToNoteName;
 /*!*********************************!*\
   !*** ./src/synth/place-note.js ***!
   \*********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -15860,7 +15978,8 @@ module.exports = placeNote;
 /*!*********************************!*\
   !*** ./src/synth/play-event.js ***!
   \*********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -15917,7 +16036,8 @@ module.exports = playEvent;
 /*!*********************************************!*\
   !*** ./src/synth/register-audio-context.js ***!
   \*********************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -15957,7 +16077,8 @@ module.exports = registerAudioContext;
 /*!***********************************!*\
   !*** ./src/synth/sounds-cache.js ***!
   \***********************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -15982,7 +16103,8 @@ module.exports = soundsCache;
 /*!*************************************!*\
   !*** ./src/synth/supports-audio.js ***!
   \*************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -16023,7 +16145,8 @@ module.exports = supportsAudio;
 /*!***************************************!*\
   !*** ./src/synth/synth-controller.js ***!
   \***************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -16306,7 +16429,8 @@ module.exports = SynthController;
 /*!*************************************!*\
   !*** ./src/synth/synth-sequence.js ***!
   \*************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -16368,7 +16492,8 @@ module.exports = SynthSequence;
 /*!*******************************************!*\
   !*** ./src/write/abc_absolute_element.js ***!
   \*******************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_absolute_element.js: Definition of the AbsoluteElement class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -16643,7 +16768,8 @@ module.exports = AbsoluteElement;
 /*!********************************************!*\
   !*** ./src/write/abc_abstract_engraver.js ***!
   \********************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 // abc_abstract_engraver.js: Creates a data structure suitable for printing a line of abc
 // Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com)
@@ -17924,7 +18050,8 @@ module.exports = AbstractEngraver;
 /*!***************************************!*\
   !*** ./src/write/abc_beam_element.js ***!
   \***************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_beam_element.js: Definition of the BeamElem class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -18047,7 +18174,8 @@ module.exports = BeamElem;
 /*!****************************************!*\
   !*** ./src/write/abc_brace_element.js ***!
   \****************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_brace_element.js: Definition of the BraceElement class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -18100,7 +18228,8 @@ module.exports = BraceElem;
 /*!**************************************!*\
   !*** ./src/write/abc_create_clef.js ***!
   \**************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_create_clef.js
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -18271,7 +18400,8 @@ module.exports = createClef;
 /*!***********************************************!*\
   !*** ./src/write/abc_create_key_signature.js ***!
   \***********************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_create_key_signature.js
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -18359,7 +18489,8 @@ module.exports = createKeySignature;
 /*!*******************************************!*\
   !*** ./src/write/abc_create_note_head.js ***!
   \*******************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
 
@@ -18499,7 +18630,8 @@ module.exports = createNoteHead;
 /*!************************************************!*\
   !*** ./src/write/abc_create_time_signature.js ***!
   \************************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_create_time_signature.js
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -18616,7 +18748,8 @@ module.exports = createTimeSignature;
 /*!********************************************!*\
   !*** ./src/write/abc_crescendo_element.js ***!
   \********************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_crescendo_element.js: Definition of the CrescendoElem class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -18653,7 +18786,8 @@ module.exports = CrescendoElem;
 /*!*************************************!*\
   !*** ./src/write/abc_decoration.js ***!
   \*************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 // abc_decoration.js: Creates a data structure suitable for printing a line of abc
 // Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) & Paul Rosen
@@ -19066,7 +19200,8 @@ module.exports = Decoration;
 /*!*********************************************!*\
   !*** ./src/write/abc_dynamic_decoration.js ***!
   \*********************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_dynamic_decoration.js: Definition of the DynamicDecoration class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -19099,7 +19234,8 @@ module.exports = DynamicDecoration;
 /*!*****************************************!*\
   !*** ./src/write/abc_ending_element.js ***!
   \*****************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_ending_element.js: Definition of the EndingElement class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -19136,7 +19272,8 @@ module.exports = EndingElem;
 /*!**********************************************!*\
   !*** ./src/write/abc_engraver_controller.js ***!
   \**********************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_engraver_controller.js: Controls the engraving process of an ABCJS abstract syntax tree as produced by ABCJS/parse
 //    Copyright (C) 2014-2020 Gregory Dyke (gregdyke at gmail dot com)
@@ -19429,7 +19566,8 @@ module.exports = EngraverController;
 /*!*********************************!*\
   !*** ./src/write/abc_glyphs.js ***!
   \*********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2009-2020 Gregory Dyke (gregdyke at gmail dot com) Paul Rosen (paul at paulrosen dot net)
 //
@@ -20074,7 +20212,8 @@ module.exports = Glyphs; // we need the glyphs for layout information
 /*!*******************************************!*\
   !*** ./src/write/abc_relative_element.js ***!
   \*******************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_relative_element.js: Definition of the RelativeElement class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -20205,7 +20344,8 @@ module.exports = RelativeElement;
 /*!***********************************!*\
   !*** ./src/write/abc_renderer.js ***!
   \***********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_renderer.js: API to render to SVG/Raphael/whatever rendering engine
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com)
@@ -20424,7 +20564,8 @@ module.exports = Renderer;
 /*!**********************************!*\
   !*** ./src/write/abc_spacing.js ***!
   \**********************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    Copyright (C) 2014-2020 Gregory Dyke (gregdyke at gmail dot com)
 //
@@ -20456,7 +20597,8 @@ module.exports = spacing;
 /*!**********************************************!*\
   !*** ./src/write/abc_staff_group_element.js ***!
   \**********************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_staff_group_element.js: Definition of the StaffGroupElement class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -20579,7 +20721,8 @@ module.exports = StaffGroupElement;
 /*!****************************************!*\
   !*** ./src/write/abc_tempo_element.js ***!
   \****************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    abc_tempo_element.js: Definition of the TempoElement class.
 //    Copyright (C) 2014-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -20715,7 +20858,8 @@ module.exports = TempoElement;
 /*!**************************************!*\
   !*** ./src/write/abc_tie_element.js ***!
   \**************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_tie_element.js: Definition of the TieElement class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -20877,7 +21021,8 @@ module.exports = TieElem;
 /*!******************************************!*\
   !*** ./src/write/abc_triplet_element.js ***!
   \******************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_triplet_element.js: Definition of the TripletElem class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -20934,7 +21079,8 @@ module.exports = TripletElem;
 /*!****************************************!*\
   !*** ./src/write/abc_voice_element.js ***!
   \****************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_voice_element.js: Definition of the VoiceElement class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -21048,7 +21194,8 @@ module.exports = VoiceElement;
 /*!********************************!*\
   !*** ./src/write/add-chord.js ***!
   \********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
 
@@ -21180,7 +21327,8 @@ module.exports = addChord;
 /*!**********************************!*\
   !*** ./src/write/bottom-text.js ***!
   \**********************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function BottomText(metaText, width, isPrint, paddingLeft, spacing, getTextSize) {
   this.rows = [];
@@ -21314,7 +21462,8 @@ module.exports = BottomText;
 /*!*********************************!*\
   !*** ./src/write/calcHeight.js ***!
   \*********************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 var calcHeight = function calcHeight(staffGroup) {
   // the height is calculated here in a parallel way to the drawing below in hopes that both of these functions will be modified together.
@@ -21341,7 +21490,8 @@ module.exports = calcHeight;
 /*!******************************!*\
   !*** ./src/write/classes.js ***!
   \******************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 var Classes = function Classes(options) {
   this.shouldAddClasses = options.shouldAddClasses;
@@ -21448,7 +21598,8 @@ module.exports = Classes;
 /*!************************************!*\
   !*** ./src/write/draw/absolute.js ***!
   \************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var drawTempo = __webpack_require__(/*! ./tempo */ "./src/write/draw/tempo.js");
 
@@ -21525,7 +21676,8 @@ module.exports = drawAbsolute;
 /*!********************************!*\
   !*** ./src/write/draw/beam.js ***!
   \********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var printPath = __webpack_require__(/*! ./print-path */ "./src/write/draw/print-path.js");
 
@@ -21595,7 +21747,8 @@ module.exports = drawBeam;
 /*!*********************************!*\
   !*** ./src/write/draw/brace.js ***!
   \*********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
@@ -21701,7 +21854,8 @@ module.exports = drawBrace;
 /*!*************************************!*\
   !*** ./src/write/draw/crescendo.js ***!
   \*************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var highlight = __webpack_require__(/*! ../highlight */ "./src/write/highlight.js");
 
@@ -21762,7 +21916,8 @@ module.exports = drawCrescendo;
 /*!*************************************!*\
   !*** ./src/write/draw/debug-box.js ***!
   \*************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function printDebugBox(renderer, attr, comment) {
   var box = renderer.paper.rectBeneath(attr);
@@ -21785,7 +21940,8 @@ module.exports = printDebugBox;
 /*!********************************!*\
   !*** ./src/write/draw/draw.js ***!
   \********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var drawStaffGroup = __webpack_require__(/*! ./staff-group */ "./src/write/draw/staff-group.js");
 
@@ -21861,7 +22017,8 @@ module.exports = draw;
 /*!************************************!*\
   !*** ./src/write/draw/dynamics.js ***!
   \************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var printSymbol = __webpack_require__(/*! ./print-symbol */ "./src/write/draw/print-symbol.js");
 
@@ -21887,7 +22044,8 @@ module.exports = drawDynamics;
 /*!**********************************!*\
   !*** ./src/write/draw/ending.js ***!
   \**********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
@@ -21948,7 +22106,8 @@ module.exports = drawEnding;
 /*!******************************************!*\
   !*** ./src/write/draw/group-elements.js ***!
   \******************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Begin a group of glyphs that will always be moved, scaled and highlighted together
@@ -22031,7 +22190,8 @@ module.exports = elementGroup;
 /*!*************************************!*\
   !*** ./src/write/draw/non-music.js ***!
   \*************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var drawSeparator = __webpack_require__(/*! ./separator */ "./src/write/draw/separator.js");
 
@@ -22089,7 +22249,8 @@ module.exports = nonMusic;
 /*!**************************************!*\
   !*** ./src/write/draw/print-path.js ***!
   \**************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function printPath(renderer, attrs, params) {
   var ret = renderer.paper.path(attrs);
@@ -22104,7 +22265,8 @@ module.exports = printPath;
 /*!**************************************!*\
   !*** ./src/write/draw/print-stem.js ***!
   \**************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var elementGroup = __webpack_require__(/*! ./group-elements */ "./src/write/draw/group-elements.js");
 
@@ -22153,7 +22315,8 @@ module.exports = printStem;
 /*!****************************************!*\
   !*** ./src/write/draw/print-symbol.js ***!
   \****************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var renderText = __webpack_require__(/*! ./text */ "./src/write/draw/text.js");
 
@@ -22240,7 +22403,8 @@ module.exports = printSymbol;
 /*!************************************!*\
   !*** ./src/write/draw/relative.js ***!
   \************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var renderText = __webpack_require__(/*! ./text */ "./src/write/draw/text.js");
 
@@ -22400,7 +22564,8 @@ module.exports = drawRelativeElement;
 /*!****************************************!*\
   !*** ./src/write/draw/round-number.js ***!
   \****************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function roundNumber(x) {
   return parseFloat(x.toFixed(2));
@@ -22414,7 +22579,8 @@ module.exports = roundNumber;
 /*!***************************************!*\
   !*** ./src/write/draw/selectables.js ***!
   \***************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var highlight = __webpack_require__(/*! ../highlight */ "./src/write/highlight.js");
 
@@ -22485,7 +22651,8 @@ module.exports = Selectables;
 /*!*************************************!*\
   !*** ./src/write/draw/separator.js ***!
   \*************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function drawSeparator(renderer, width) {
   var fill = "rgba(0,0,0,255)";
@@ -22511,7 +22678,8 @@ module.exports = drawSeparator;
 /*!******************************************!*\
   !*** ./src/write/draw/set-paper-size.js ***!
   \******************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function setPaperSize(renderer, maxwidth, scale, responsive) {
   var w = (maxwidth + renderer.padding.right) * scale;
@@ -22554,7 +22722,8 @@ module.exports = setPaperSize;
 /*!***********************************!*\
   !*** ./src/write/draw/sprintf.js ***!
   \***********************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -22664,7 +22833,8 @@ module.exports = sprintf;
 /*!***************************************!*\
   !*** ./src/write/draw/staff-group.js ***!
   \***************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var spacing = __webpack_require__(/*! ../abc_spacing */ "./src/write/abc_spacing.js");
 
@@ -22892,7 +23062,8 @@ module.exports = drawStaffGroup;
 /*!**************************************!*\
   !*** ./src/write/draw/staff-line.js ***!
   \**************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
@@ -22935,7 +23106,8 @@ module.exports = printStaffLine;
 /*!*********************************!*\
   !*** ./src/write/draw/staff.js ***!
   \*********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var printStaffLine = __webpack_require__(/*! ./staff-line */ "./src/write/draw/staff-line.js");
 
@@ -22966,7 +23138,8 @@ module.exports = printStaff;
 /*!*********************************!*\
   !*** ./src/write/draw/tempo.js ***!
   \*********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var drawRelativeElement = __webpack_require__(/*! ./relative */ "./src/write/draw/relative.js");
 
@@ -23055,7 +23228,8 @@ module.exports = drawTempo;
 /*!********************************!*\
   !*** ./src/write/draw/text.js ***!
   \********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
 
@@ -23144,7 +23318,8 @@ module.exports = renderText;
 /*!*******************************!*\
   !*** ./src/write/draw/tie.js ***!
   \*******************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
@@ -23253,7 +23428,8 @@ module.exports = drawTie;
 /*!***********************************!*\
   !*** ./src/write/draw/triplet.js ***!
   \***********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
@@ -23329,7 +23505,8 @@ module.exports = drawTriplet;
 /*!*********************************!*\
   !*** ./src/write/draw/voice.js ***!
   \*********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var drawCrescendo = __webpack_require__(/*! ./crescendo */ "./src/write/draw/crescendo.js");
 
@@ -23459,7 +23636,8 @@ module.exports = drawVoice;
 /*!********************************!*\
   !*** ./src/write/free-text.js ***!
   \********************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function FreeText(text, vskip, getFontAndAttr, paddingLeft, width, getTextSize) {
   this.rows = [];
@@ -23524,7 +23702,8 @@ module.exports = FreeText;
 /*!****************************************!*\
   !*** ./src/write/get-font-and-attr.js ***!
   \****************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 var GetFontAndAttr = function GetFontAndAttr(formatting, classes) {
   this.formatting = formatting;
@@ -23591,7 +23770,8 @@ module.exports = GetFontAndAttr;
 /*!************************************!*\
   !*** ./src/write/get-text-size.js ***!
   \************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 var GetTextSize = function GetTextSize(getFontAndAttr, svg) {
   this.getFontAndAttr = getFontAndAttr;
@@ -23657,7 +23837,8 @@ module.exports = GetTextSize;
 /*!********************************!*\
   !*** ./src/write/highlight.js ***!
   \********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var setClass = __webpack_require__(/*! ./set-class */ "./src/write/set-class.js");
 
@@ -23675,7 +23856,8 @@ module.exports = highlight;
 /*!*******************************************!*\
   !*** ./src/write/layout/VoiceElements.js ***!
   \*******************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 var VoiceElement = function VoiceElements() {};
 
@@ -23775,7 +23957,8 @@ module.exports = VoiceElement;
 /*!**********************************!*\
   !*** ./src/write/layout/beam.js ***!
   \**********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var RelativeElement = __webpack_require__(/*! ../abc_relative_element */ "./src/write/abc_relative_element.js");
 
@@ -24017,7 +24200,8 @@ module.exports = layoutBeam;
 /*!****************************************************!*\
   !*** ./src/write/layout/get-left-edge-of-staff.js ***!
   \****************************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
   var x = renderer.padding.left; // find out how much space will be taken up by voice headers
@@ -24087,7 +24271,8 @@ module.exports = getLeftEdgeOfStaff;
 /*!***************************************!*\
   !*** ./src/write/layout/getBarYAt.js ***!
   \***************************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function getBarYAt(startx, starty, endx, endy, x) {
   return starty + (endy - starty) / (endx - startx) * (x - startx);
@@ -24101,7 +24286,8 @@ module.exports = getBarYAt;
 /*!************************************!*\
   !*** ./src/write/layout/layout.js ***!
   \************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var layoutVoice = __webpack_require__(/*! ./voice */ "./src/write/layout/voice.js");
 
@@ -24223,7 +24409,8 @@ module.exports = layout;
 /*!******************************************************!*\
   !*** ./src/write/layout/setUpperAndLowerElements.js ***!
   \******************************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var spacing = __webpack_require__(/*! ../abc_spacing */ "./src/write/abc_spacing.js");
 
@@ -24479,7 +24666,8 @@ module.exports = setUpperAndLowerElements;
 /*!****************************************!*\
   !*** ./src/write/layout/staffGroup.js ***!
   \****************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var layoutVoiceElements = __webpack_require__(/*! ./VoiceElements */ "./src/write/layout/VoiceElements.js");
 
@@ -24607,7 +24795,8 @@ module.exports = layoutStaffGroup;
 /*!*************************************!*\
   !*** ./src/write/layout/triplet.js ***!
   \*************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var getBarYAt = __webpack_require__(/*! ./getBarYAt */ "./src/write/layout/getBarYAt.js");
 
@@ -24691,7 +24880,8 @@ module.exports = layoutTriplet;
 /*!***********************************!*\
   !*** ./src/write/layout/voice.js ***!
   \***********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var layoutBeam = __webpack_require__(/*! ./beam */ "./src/write/layout/beam.js");
 
@@ -24855,7 +25045,8 @@ module.exports = layoutVoice;
 /*!********************************!*\
   !*** ./src/write/selection.js ***!
   \********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 //    Copyright (C) 2020 Paul Rosen (paul at paulrosen dot net)
 //
@@ -25295,7 +25486,8 @@ module.exports = setupSelection;
 /*!********************************!*\
   !*** ./src/write/separator.js ***!
   \********************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function Separator(spaceAbove, lineLength, spaceBelow) {
   this.rows = [];
@@ -25318,7 +25510,8 @@ module.exports = Separator;
 /*!********************************!*\
   !*** ./src/write/set-class.js ***!
   \********************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 var setClass = function setClass(elemset, addClass, removeClass, color) {
   if (!elemset) return;
@@ -25350,7 +25543,8 @@ module.exports = setClass;
 /*!*******************************!*\
   !*** ./src/write/subtitle.js ***!
   \*******************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function Subtitle(spaceAbove, formatting, text, center, paddingLeft, getTextSize) {
   this.rows = [];
@@ -25380,7 +25574,8 @@ module.exports = Subtitle;
 /*!**************************!*\
   !*** ./src/write/svg.js ***!
   \**************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 //    abc_voice_element.js: Definition of the VoiceElement class.
 //    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
@@ -25735,7 +25930,8 @@ module.exports = Svg;
 /*!*******************************!*\
   !*** ./src/write/top-text.js ***!
   \*******************************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
   this.rows = [];
@@ -25824,7 +26020,8 @@ module.exports = TopText;
 /*!**********************************!*\
   !*** ./src/write/unhighlight.js ***!
   \**********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 var setClass = __webpack_require__(/*! ./set-class */ "./src/write/set-class.js");
 
@@ -25842,7 +26039,8 @@ module.exports = unhighlight;
 /*!**********************************!*\
   !*** ./static-wrappers/basic.js ***!
   \**********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(/*! ./license */ "./static-wrappers/license.js");
 
@@ -25854,7 +26052,8 @@ module.exports = __webpack_require__(/*! ../index */ "./index.js");
 /*!************************************!*\
   !*** ./static-wrappers/license.js ***!
   \************************************/
-/***/ (function() {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 /**!
 Copyright (c) 2009-2020 Paul Rosen and Gregory Dyke
@@ -25886,44 +26085,14 @@ THE SOFTWARE.
 /*!********************!*\
   !*** ./version.js ***!
   \********************/
-/***/ (function(module) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
 var version = '6.0.0-beta.25';
 module.exports = version;
 
 /***/ })
 
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		if(__webpack_module_cache__[moduleId]) {
-/******/ 			return __webpack_module_cache__[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	// module exports must be returned from runtime so entry inlining is disabled
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__("./static-wrappers/basic.js");
-/******/ })()
-;
+/******/ });
 });
 //# sourceMappingURL=abcjs_basic_6.0.0-beta.25.js.map
