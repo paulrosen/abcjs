@@ -1,29 +1,6 @@
 <template>
 	<div class="synth-sandbox-output">
-		<pre>usingNode {{ usingNode }}
-soundfont {{ soundfont }}
-sheetMusic {{ sheetMusic }}
-cursor {{ cursor }}
-changes {{ changes }}
-playbackWidget {{ playbackWidget }}
-large {{ large }}
-loop {{ loop }}
-restart {{ restart }}
-play {{ play }}
-progress {{ progress }}
-warp {{ warp }}
-clock {{ clock }}
-usingCallbacks {{ usingCallbacks }}
-metronome {{ metronome }}
-tempo {{ tempo }}
-stereo {{ stereo }}
-instrument {{ instrument }}
-transpose {{ transpose }}
-noChords {{ noChords }}
-noVoice {{ noVoice }}
-tweak {{ tweak }}
-midi {{ midi }}
-playImmediate {{ playImmediate }}</pre>
+		TODO
 	</div>
 </template>
 

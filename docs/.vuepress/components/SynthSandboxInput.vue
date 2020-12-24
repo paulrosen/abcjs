@@ -1,5 +1,6 @@
 <template>
 	<div class="synth-sandbox-input">
+		<div>
 		<field-set label="Setup">
 			<template v-slot:controls>
 				<check-box
@@ -52,16 +53,8 @@
 				</check-box>
 			</template>
 		</field-set>
-
-		<field-set label="Timing">
-			<template v-slot:controls>
-				<check-box
-					label="Listen for callbacks"
-					value="usingCallbacks">
-				</check-box>
-			</template>
-		</field-set>
-
+		</div>
+		<div>
 		<field-set label="Sound">
 			<template v-slot:controls>
 				<check-box
@@ -101,6 +94,15 @@
 			</template>
 		</field-set>
 
+		<field-set label="Timing">
+			<template v-slot:controls>
+				<check-box
+					label="Listen for callbacks"
+					value="usingCallbacks">
+				</check-box>
+			</template>
+		</field-set>
+
 		<field-set label="Other">
 			<template v-slot:controls>
 				<check-box
@@ -120,7 +122,7 @@
 
 			</template>
 		</field-set>
-
+		</div>
 	</div>
 </template>
 
@@ -135,5 +137,16 @@ export default {
 </script>
 
 <style scoped>
-
+.synth-sandbox-input {
+	display: flex;
+}
+.synth-sandbox-input > div {
+	width: 50%;
+}
+.synth-sandbox-input > div:first-child {
+	margin-right: 5px;
+}
+.synth-sandbox-input > div:last-child {
+	margin-left: 5px;
+}
 </style>

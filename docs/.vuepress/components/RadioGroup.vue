@@ -37,9 +37,6 @@ export default {
 </script>
 
 <style scoped>
-fieldset {
-	margin-top: 1em;
-}
 .radio {
 	display: grid;
 	grid-template-columns: min-content auto;

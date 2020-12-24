@@ -47,11 +47,14 @@ export default {
 			if (this.disabled)
 				classes.push("checkbox--disabled");
 			return classes.join(" ");
-		}
-	},
-	data() {
-		return {
-			item: false,
+		},
+		item:{
+			get(){
+				this.$store.getters[this.value];
+			},
+			set(newValue){
+				this.$store.commit(this.value, newValue)
+			}
 		}
 	},
 

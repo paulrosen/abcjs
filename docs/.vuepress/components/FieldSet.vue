@@ -19,5 +19,10 @@ export default {
 </script>
 
 <style scoped>
+fieldset {
+	margin-bottom: 1em;
+	display: inline-block;
+	width: calc(100% - 30px);
+}
 
 </style>
