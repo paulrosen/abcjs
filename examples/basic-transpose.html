@@ -8,10 +8,11 @@
   <title>abcjs: Basic Demo</title>
 
   <link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
-  <script src="../bin/abcjs_basic_6.0.0-beta.25.js" type="text/javascript"></script>
+  <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
   <style>
     #audio {
       margin-top: 20px;
+      max-width: 760px;
     }
   </style>
 	<script type="text/javascript">
@@ -42,7 +43,6 @@
         
           // preloads and caches the notes to be played
           createSynth.init({ visualObj: visualObj[0] }).then(function() {
-              // parameters: setTune(visualObj, userAction, audioParams)
               synthControl.setTune(visualObj[0], true, { midiTranspose: transposeBy })
               .then(function(){
                 console.log('Audio successfully loaded.')
@@ -51,7 +51,7 @@
               })
           });
 
-          // appends playback widget at given element with null CursorControl and given playback buttons
+          // appends playback widget at given element with null CursorControl
           synthControl.load('#audio', null, {
             displayRestart: true,
             displayPlay: true,
