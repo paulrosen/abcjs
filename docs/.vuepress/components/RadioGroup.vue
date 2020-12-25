@@ -2,12 +2,12 @@
 	<div class="radio-group">
 		<field-set :label="label">
 			<template v-slot:controls>
-				<label class="radio radio-gradient" v-for="item in options">
+				<label class="radio radio-gradient" v-for="choice in options">
 					<span class="radio__input">
-						<input type="radio" :name="name" :value="item.value">
+						<input type="radio" v-model="item"  :name="name" :value="choice.value">
 						<span class="radio__control"></span>
 					</span>
-					<span class="radio__label">{{item.text}}</span>
+					<span class="radio__label">{{choice.text}}</span>
 				</label>
 			</template>
 		</field-set>
@@ -32,7 +32,17 @@ export default {
 			type: Array,
 			required: true
 		}
-	}
+	},
+	computed: {
+		item:{
+			get(){
+				return this.$store.getters[this.name];
+			},
+			set(newValue){
+				this.$store.commit(this.name, newValue)
+			}
+		}
+	},
 }
 </script>
 
@@ -48,6 +58,7 @@ export default {
 .radio:focus-within .radio__label {
 	transform: scale(1.05);
 	opacity: 1;
+	margin-left: 8px;
 }
 
 .radio__label {

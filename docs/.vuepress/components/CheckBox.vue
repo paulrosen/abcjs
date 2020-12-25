@@ -50,7 +50,7 @@ export default {
 		},
 		item:{
 			get(){
-				this.$store.getters[this.value];
+				return this.$store.getters[this.value];
 			},
 			set(newValue){
 				this.$store.commit(this.value, newValue)
