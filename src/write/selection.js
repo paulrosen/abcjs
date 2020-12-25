@@ -317,16 +317,6 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
 	if (target.staffPos)
 		analysis.staffPos = target.staffPos;
 
-	if (target.absEl.heads && target.absEl.heads.length > 0) {
-		analysis.notePositions = [];
-		for (var jj = 0; jj < target.absEl.heads.length; jj++) {
-			analysis.notePositions.push({
-				x: target.absEl.heads[jj].x + target.absEl.heads[jj].w/2,
-				y: analysis.staffPos.zero - target.absEl.heads[jj].pitch * spacing.STEP
-			});
-		}
-	}
-
 	for (var i=0; i<this.listeners.length;i++) {
 		this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, { step: dragStep, max: dragMax, index: dragIndex, setSelection: setSelection.bind(this)}, ev);
 	}

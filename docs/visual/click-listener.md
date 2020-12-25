@@ -36,7 +36,6 @@ An object containing the following info about the item clicked:
     line: 0, // zero-based line
     measure: 0, // zero-based measure from the beginning of the line
     voice: 0, // zero-based voice 
-    notePositions: [ { x: 0, y: 0 } ] // the coordinates in the SVG of the noteheads
     staffPos: { top: 0, height: 0, zero: 0 } // the Y-coordinates in the SVG for the staff system that contains the item. "zero" is the Y-coordinate of the middle-C.
 }
 ```
