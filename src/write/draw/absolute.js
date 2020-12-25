@@ -56,7 +56,15 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 		setClass(params.elemset, "abcjs-hint", "", null);
 	params.abcelem.abselem = params;
 
-	var step = spacing.STEP;
+	if (params.heads && params.heads.length > 0) {
+		params.notePositions = [];
+		for (var jj = 0; jj < params.heads.length; jj++) {
+			params.notePositions.push({
+				x: params.heads[jj].x + params.heads[jj].w/2,
+				y: staffPos.zero - params.heads[jj].pitch * spacing.STEP
+			});
+		}
+	}
 }
 
 module.exports = drawAbsolute;

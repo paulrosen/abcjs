@@ -22,7 +22,8 @@
   {
 	"title": "Audio",
 	"children": [
-	  "/audio/synthesized-sound.md"
+	  "/audio/synthesized-sound.md",
+	  "/audio/synthesizer-sandbox.md"
 	]
   },
   {
