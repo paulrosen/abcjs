@@ -26,7 +26,7 @@ export default {
       'soundfont',
       'sheetMusic',
       'cursor',
-      'hideMeasures'
+      'hideMeasures',
       'changes',
       'playbackWidget',
       'large',
@@ -72,13 +72,18 @@ ${audio}`;
       // console.log(this.changes);
       // SETUP
       const abcjs = this.usingNode ? 'abcjs' : 'ABCJS';
+
+
+      // TODO: hide measures, cursor that highlights current note
       // VISUAL
+      let visualOptions = {};
       const target = this.sheetMusic ? 'paper' : '*';
-      // TODO: method of inputting changes
-      // TODO: cursor that highlights current note
-      // TODO: hide measures as they finish playing
       const hideMeasures = this.hideMeasures ? '' : '';
+
+
+      // TODO
       // CHANGES
+      let synthOptions = {};  // will be passed to mySynth.init
       let changes = '';
       switch (this.changes) {
         case 'editor':
@@ -91,20 +96,36 @@ ${audio}`;
 });`;
           break;
         case 'drag':
-
+          // use visualOptions
           break;
         case 'params':
-
+          // add to synthOptions
           break;
         case 'programmatic':
-
+          // see flow chart
           break;
       }
+
+
       // CURSOR
-      // TODO: cursor
-      const cursor = this.cursor ? 'var cursorControl = new synth.CursorControl();' : 'var cursorControl = null;';
-      // AUDIO CONTROL
-      const widget = this.playbackWidget ? `var synthControl = new synth.SynthController();
+      const cursor = this.usingCallbacks ? `// see docs for parameters
+var cursorControl = new synth.CursorControl();` : 'var cursorControl = null;';
+
+
+      // AUDIO CONTROL. Edit out the midiTranspose stuff
+      const widget = this.playbackWidget ? `var mySynth = new ABCJS.synth.CreateSynth();
+var synthControl = new synth.SynthController();
+var mySynth = new ABCJS.synth.CreateSynth();
+
+mySynth.init(synthOptions).then(function() {
+    synthControl.setTune(visualObj[0], true, { midiTranspose: transposeBy })
+    .then(function(){
+      console.log('Audio successfully loaded.')
+    }).catch(function(error) {
+      console.warn('Audio problem: ', error);
+    })
+});
+
 synthControl.load('#audio', cursorControl, {
   displayLoop: ${this.loop},
   displayRestart: ${this.restart},
@@ -112,16 +133,25 @@ synthControl.load('#audio', cursorControl, {
   displayProgress: ${this.progress},
   displayWarp: ${this.warp},
   displayClock: ${this.clock} 
-});` : ''; 
+});` : `var mySynth = new ABCJS.synth.CreateSynth();
+mySynth.init(synthOptions).then(() => { 
+  synth.prime(() => { 
+    ... });
+  .start();`; 
+
+// TODO: check syntax ^^
       // SOUND
       // TIMING
       // OTHER
+
+
       return `
-var visualObj = ${abcjs}.renderAbc("${target}", abcString, {});
+var visualObj = ${abcjs}.renderAbc("${target}", abcString, ${JSON.stringify(visualOptions)});
+var synthOptions = { visualObj: visualObj[0], ...${JSON.stringify(synthOptions)} };
 
 ${changes}
 
-// trigger the below constructors on a user gesture:
+// trigger these on a user gesture: 
 ${widget}`;
     },
   },
