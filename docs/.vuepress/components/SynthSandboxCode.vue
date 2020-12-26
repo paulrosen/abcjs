@@ -55,25 +55,49 @@ export default {
     },
     sheetMusicHtml() {
       const paper = this.sheetMusic ? '<div id="paper"></div>' : ''; 
-      const audio = this.playbackWidget ? '<div id="audio"></div>' : '';
-      return `${paper}
+      let audio = '';
+      if (this.playbackWidget) {
+        if (this.large) {
+          audio = `<div id="audio" class="abcjs-large"></div>`;
+        }
+        else audio = '<div id="audio"></div>';
+      }
+      // const audio = this.playbackWidget ? '<div id="audio"></div>' : '';
+      return `
+${paper}
 ${audio}`;
     },
     sheetMusicJs() {
       const target = this.sheetMusic ? 'paper' : '*';
       const abcjs = this.usingNode ? 'abcjs' : 'ABCJS';
-      // TODO
+      // TODO: method of inputting changes
+      let changes = '';
+      if (this.changes === 'editor') {
+        changes = `var abc_editor = new window.ABCJS.Editor("abc", {
+  paper_id: "paper0",
+  warnings_id:"warnings",
+  abcjsParams: {
+    add_classes: true
+  }
+});`;
+      }
+      // TODO: cursor
       const cursor = this.cursor ? 'var cursorControl = new synth.CursorControl();' : 'var cursorControl = null;';
-      const widget = this.playbackWidget ? `var synthControl = new synth.SynthController(); \n synthControl.load('#audio', cursorControl, {
-        displayLoop: ${this.loop},
-        displayRestart: ${this.restart},
-        displayPlay: ${this.play},
-        displayProgress: ${this.progress},
-        displayWarp: ${this.warp},
-        displayClock: ${this.clock} 
-      });`  : ''; 
+      const widget = this.playbackWidget ? `var synthControl = new synth.SynthController();
+synthControl.load('#audio', cursorControl, {
+  displayLoop: ${this.loop},
+  displayRestart: ${this.restart},
+  displayPlay: ${this.play},
+  displayProgress: ${this.progress},
+  displayWarp: ${this.warp},
+  displayClock: ${this.clock} 
+});` : ''; 
       // other widget options; large playback widget uses CSS 
-      return `var visualObj = ${abcjs}.renderAbc("${target}", abcString, {});
+      return `
+var visualObj = ${abcjs}.renderAbc("${target}", abcString, {});
+
+${changes}
+
 ${widget}`;
     },
   },
@@ -86,6 +110,7 @@ code {
   color: white;
   width: 100%;
   display: inline-block;
+  white-space: pre-wrap;
   font-size: 1.1em;
 }
 </style>
