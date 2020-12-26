@@ -39,6 +39,23 @@ describe("Automatic line wrapping", function() {
 			[48.41500000000001,27.370000000000005,37.620000000000005,27.370000000000005,16.369999999999997,37.620000000000005,37.620000000000005,27.370000000000005],
 		"voiceSizes":[[[10]],[[10]]]};
 
+	var abcSplitByText =
+		"M: 4/4\n" +
+		"L: 1/8\n" +
+		"R: reel\n" +
+		"K: Emin\n" +
+		"EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
+		"%%text Here is some text\n" +
+		"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2|]";
+
+	var expectedSplitByText = {
+		"lineBreakPoint":383.24833333333333,
+		"minLineSize":246.3739285714286,
+		"minWidth":406,
+		"measureWidths":
+			[48.41500000000001,27.370000000000005,37.620000000000005,27.370000000000005,16.369999999999997,37.620000000000005,37.620000000000005,27.370000000000005],
+		"voiceSizes":[[[10]],[[10]]]};
+
 	it("wrap-short-measures", function() {
 		doWrapTest(abcShortMeasures, expectedShortMeasures740, 740);
 	});
@@ -53,6 +70,10 @@ describe("Automatic line wrapping", function() {
 
 	it("wrap-single-line600", function() {
 		doWrapTest(abcSingleLine, expectedSingleLine600, 600);
+	})
+
+	it("split-by-text", function() {
+		doWrapTest(abcSplitByText, expectedSplitByText, 500);
 	})
 })
 
