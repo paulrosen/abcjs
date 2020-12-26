@@ -585,14 +585,19 @@ var parseCommon = require("../parse/abc_common");
 		// then just store that as a number. If there are more than one value, then change that to
 		// an array and return all of them.
 		if (elem.elem) {
-			var ms = timeToRealTime(elem.time) / beatFraction / startingTempo * 60 * 1000;
-			if (elem.elem.currentTrackMilliseconds === undefined)
+			var rt = timeToRealTime(elem.time);
+			var ms = rt / beatFraction / startingTempo * 60 * 1000;
+			if (elem.elem.currentTrackMilliseconds === undefined) {
 				elem.elem.currentTrackMilliseconds = ms;
-			else {
-				if (elem.elem.currentTrackMilliseconds.length === undefined)
-					elem.elem.currentTrackMilliseconds = [ elem.elem.currentTrackMilliseconds, ms ];
-				else
+				elem.elem.currentTrackWholeNotes = rt;
+			} else {
+				if (elem.elem.currentTrackMilliseconds.length === undefined) {
+					elem.elem.currentTrackMilliseconds = [elem.elem.currentTrackMilliseconds, ms];
+					elem.elem.currentTrackWholeNotes = [elem.elem.currentTrackWholeNotes, rt];
+				} else {
 					elem.elem.currentTrackMilliseconds.push(ms);
+					elem.elem.currentTrackWholeNotes.push(rt);
+				}
 			}
 		}
 		//var tieAdjustment = 0;
