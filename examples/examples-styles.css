@@ -1,5 +1,6 @@
-/* TODO: button, button hover */
-/* set width of textarea to 100% of div; remove # cols in html */
+/* TODO: button, button hover. Color #3FB07C on hover */
+/* left-align ths in table */
+/* double-check that tab titles are correct for all html files */
 
 * {
   box-sizing: border-box;
@@ -37,6 +38,11 @@ fieldset {
   margin: 15px 0;
 }
 
+textarea {
+  width: 100%;
+  border: 2px solid black;
+}
+
 a {
   color: black;
 }
@@ -55,6 +61,7 @@ p {
 
 button {
   margin: 0 4px;
+  padding: 5px;
 }
 
 table {
