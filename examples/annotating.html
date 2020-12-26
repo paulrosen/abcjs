@@ -5,6 +5,8 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
   <title>abcjs: Annotating</title>
   <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
   <script type="text/javascript">
@@ -169,18 +171,23 @@
   </style>
 </head>
 <body onload="load()">
-<p>
-  This is a simple example of how elements can be found on the page and how
-  annotations can be drawn.
-</p>
-<p>1) Note that annotations above the staves are written into the ABC notation using the syntax "^text".</p>
-<p>2) Note that room is created for annotations below the staves by creating a w: line and then setting its fill to none on the stylesheet.</p>
-<p>3) Note that the notes are retrieved by their unique class and their position is retrieved. When the music is changed,
-this will automatically move the drawn lines to the right place.</p>
-<div id="paper"></div>
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>Annotation</h1>
+  </header>
+  <div class="container">
+    <p>
+      This is a simple example of how elements can be found on the page and how
+      annotations can be drawn.
+    </p>
+    <p>1) Note that annotations above the staves are written into the ABC notation using the syntax "^text".</p>
+    <p>2) Note that room is created for annotations below the staves by creating a w: line and then setting its fill to none on the stylesheet.</p>
+    <p>3) Note that the notes are retrieved by their unique class and their position is retrieved. When the music is changed,
+    this will automatically move the drawn lines to the right place.</p>
+    <div id="paper"></div>
 
-<label for="abc">ABC Notation:</label>
-<textarea id="abc" cols="50" rows="12" spellcheck="false">
+    <label for="abc">ABC Notation:</label>
+    <textarea id="abc" cols="50" rows="12" spellcheck="false">
 T: New Exercise
 M: C
 L: 1/4
@@ -190,8 +197,8 @@ V: 1 name="Alto\n[species 2]\n[Sop.]"
 V: 2 clef=treble-8 name="Tenor\n[c.f.]\n[Alt.]"
 "^4. Consecutive leaps - - -"c4|e4|d4|c4|
 W: Set this line's fill to none to make space for annotations below the staff.
-  </textarea>
-<p>Note that \ is a character which must be escaped in JavaScript.</p>
-
+      </textarea>
+    <p>Note that \ is a character which must be escaped in JavaScript.</p>
+  </div>
 </body>
 </html>

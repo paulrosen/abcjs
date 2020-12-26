@@ -5,6 +5,8 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
   <title>abcjs: Midi Editor demo</title>
 
   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -37,37 +39,44 @@
   </script>
 </head>
 <body>
-
-<textarea id="abc" cols="80" rows="15" spellcheck="false">X: 1
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>MIDI with Editor</h1>
+  </header>
+  <div class="container">
+    <textarea id="abc" cols="80" rows="15" spellcheck="false">
+X: 1
 T: Cooley's
 M: 4/4
 L: 1/8
 R: reel
 K: Emin
-|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|@
+|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
 EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
 |:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
 eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
-</textarea>
+    </textarea>
 
-<div id="warnings"></div>
-<hr>
-<div id="midi"></div>
-<div id="canvas"></div>
+    <div id="warnings"></div>
+    <hr>
+    <div id="midi"></div>
+    <div id="canvas"></div>
 
-<hr>
+    <hr>
 
-<textarea id="abc2" cols="80" rows="15" spellcheck="false">X: 1
+    <textarea id="abc2" cols="80" rows="15" spellcheck="false">
+X: 1
 T: Cooley's
 M: 4/4
 L: 1/8
 R: reel
 K: Emin
-|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|@
+|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
 EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
 |:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
 eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
-</textarea>
-<div id="download"></div>
+    </textarea>
+    <div id="download"></div>
+  </div>
 </body>
 </html>

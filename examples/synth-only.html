@@ -5,6 +5,8 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
   <title>abcjs: Synth Only Demo</title>
 
   <link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
@@ -72,19 +74,24 @@
   </script>
 </head>
 <body onload="load()">
-<main>
-  <h1>Demo of abcjs audio capabilities</h1>
-  <p>This shows how to play notes without a visual representation.</p>
-  <p>Type valid ABC code in the textarea and click "Play" to hear it.</p>
-  <label>ABC code<textarea id="source" spellcheck="false">
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>Synth (audio only)</h1>
+  </header>
+  <div class="container">
+    <main>
+      <p>This shows how to play notes without a visual representation.</p>
+      <p>Type valid ABC code in the textarea and click "Play" to hear it.</p>
+      <label>ABC code<textarea id="source" spellcheck="false">
 X:1
 L:1/4
 M:4/4
 K:G
 BAGA|BBB2|
-  </textarea></label>
-  <button class="play">Play</button>
-  <div class="error"></div>
-</main>
+      </textarea></label>
+      <button class="play">Play</button>
+      <div class="error"></div>
+    </main>
+  </div>
 </body>
 </html>

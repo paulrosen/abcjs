@@ -3,7 +3,9 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="examples-styles.css"/>
+
 	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
 	<title>abcjs: Basic Synth Demo</title>
 
@@ -105,12 +107,18 @@
 </head>
 <body onload="load()">
 <main>
-	<div id="paper"></div>
-	<p class="suspend-explanation">Browsers won't allow audio to work unless the audio is started in response to a user action. This prevents auto-playing web sites. Therefore, the
-		following button is needed to do the initialization:</p>
-	<button class="activate-audio">Activate Audio Context And Play</button>
-	<button class="stop-audio" style="display:none;">Stop Audio</button>
-	<div class='audio-error' style="display:none;">Audio is not supported in this browser.</div>
+  <header">
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>Basic Synth</h1>
+  </header>
+  <div class="container">
+    <div id="paper"></div>
+    <p class="suspend-explanation">Browsers won't allow audio to work unless the audio is started in response to a user action. This prevents auto-playing web sites. Therefore, the
+      following button is needed to do the initialization:</p>
+    <button class="activate-audio">Activate Audio Context And Play</button>
+    <button class="stop-audio" style="display:none;">Stop Audio</button>
+    <div class='audio-error' style="display:none;">Audio is not supported in this browser.</div>
+  </div>
 </main>
 </body>
 </html>

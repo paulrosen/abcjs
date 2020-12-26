@@ -4,7 +4,9 @@
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
 	<title>abcjs: Glyph Demo</title>
 	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
 	<script type="text/javascript">
@@ -92,17 +94,23 @@
 	</script>
 </head>
 <body onload="load()">
-<p>
-	This is an example of modifying the font used to create the music. In this case, the <b>quarter sharp</b>
-	and <b>quarter flat</b> symbols are changed to the Koron and Sori symbols.
-</p>
-<p>
-	The path supplied must use <b>relative</b> positioning.
-</p>
-<p>
-	NOTE: Use this feature at your own risk because the format of the font may change in the future!
-</p>
-<div id="paper1"></div>
-<div id="paper2"></div>
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>Changing Glyphs</h1>
+  </header>
+  <div class="container">
+    <p>
+      This is an example of modifying the font used to create the music. In this case, the <b>quarter sharp</b>
+      and <b>quarter flat</b> symbols are changed to the Koron and Sori symbols.
+    </p>
+    <p>
+      The path supplied must use <b>relative</b> positioning.
+    </p>
+    <p>
+      NOTE: Use this feature at your own risk because the format of the font may change in the future!
+    </p>
+    <div id="paper1"></div>
+    <div id="paper2"></div>
+  </div> 
 </body>
 </html>

@@ -4,7 +4,9 @@
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
 	<title>abcjs: Synth Demo</title>
 
 	<link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
@@ -37,7 +39,7 @@
 		}
 		.label {
 			color: #888888;
-		}
+    }
 	</style>
 
 	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
@@ -247,23 +249,28 @@
 	</script>
 </head>
 <body onload="load()">
-<main>
-	<h1>Demo of abcjs audio capabilities</h1>
-	<p>This is a complete demo of what you can do with matching audio with the visual music.</p>
-	<p>Different pieces of music are provided to demonstrate changing tunes. To toggle between the pieces, click "Next Tune".</p>
-	<p>You are in control of the look of the cursor. Two different techniques are demonstrated: highlighting the note being played and putting a cursor on the page. The class CursorControl must be supplied by your program.</p>
-	<p>As the piece is playing, there are callbacks when the note changes. The info returned in the callback is printed to the page as it is received.</p>
-	<p>The visual control for playing music can look different. In this example, the abcjs-audio.css file has been loaded. You can supply your own css.</p>
-	<button class="next">Next Tune</button>
-	<button class="start">Start/Pause</button>
-	<button class="download" style="display: none;">Download</button>
-	<div class="midi">MIDI</div>
-	<div id="paper"></div>
-	<div id="audio"></div>
-	<p class="beat"></p>
-	<p class="click-explanation" style="display:none;">Click on a note to play that note.</p>
-	<pre class="clicked-info"></pre>
-	<pre class="feedback"></pre>
-</main>
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>Full Synth</h1>
+  </header>
+  <div class="container">
+    <main>
+      <p>This is a complete demo of what you can do with matching audio with the visual music.</p>
+      <p>Different pieces of music are provided to demonstrate changing tunes. To toggle between the pieces, click "Next Tune".</p>
+      <p>You are in control of the look of the cursor. Two different techniques are demonstrated: highlighting the note being played and putting a cursor on the page. The class CursorControl must be supplied by your program.</p>
+      <p>As the piece is playing, there are callbacks when the note changes. The info returned in the callback is printed to the page as it is received.</p>
+      <p>The visual control for playing music can look different. In this example, the abcjs-audio.css file has been loaded. You can supply your own css.</p>
+      <button class="next">Next Tune</button>
+      <button class="start">Start/Pause</button>
+      <button class="download" style="display: none;">Download</button>
+      <div class="midi">MIDI</div>
+      <div id="paper"></div>
+      <div id="audio"></div>
+      <p class="beat"></p>
+      <p class="click-explanation" style="display:none;">Click on a note to play that note.</p>
+      <pre class="clicked-info"></pre>
+      <pre class="feedback"></pre>
+    </main>
+  </div>
 </body>
 </html>

@@ -4,7 +4,9 @@
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/> 
+  <link rel="stylesheet" href="examples-styles.css"/>
+
   <title>abcjs: Basic Demo</title>
 
   <link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
@@ -90,11 +92,16 @@
 	</script>
 </head>
 <body onload="load()">
-  <label>Transpose half-steps: <input class="transpose-half-steps" type="number" min="-24" max="24" step="1" value="0"></label>
-  <button id="show-player">Show Audio Player</button>
-  <div id="audio"></div>
-  <div id="warnings"></div>
-  <div id="paper"></div>
-
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>Basic Transposition</h1>
+  </header>
+  <div class="container">
+    <label>Transpose half-steps: <input class="transpose-half-steps" type="number" min="-24" max="24" step="1" value="0"></label>
+    <button id="show-player">Show Audio Player</button>
+    <div id="audio"></div>
+    <div id="warnings"></div>
+    <div id="paper"></div>
+  </div>
 </body>
 </html>

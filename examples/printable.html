@@ -5,6 +5,8 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
   <title>abcjs: PDF Maker Demo</title>
 
   <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
@@ -37,38 +39,39 @@
       box-sizing: inherit;
     }
 
-    body {
+    /* body {
       background-color: #f1f4f4;
       margin: 0;
       font-size: 20px;
       font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
-    }
+    } */
 
-    header, footer {
-      background: #a9e4f7; /* Old browsers */
-      background: -moz-linear-gradient(left, #a9e4f7 0%, #0098c4 100%); /* FF3.6-15 */
-      background: -webkit-linear-gradient(left, #a9e4f7 0%, #0098c4 100%); /* Chrome10-25,Safari5.1-6 */
-      background: linear-gradient(to right, #a9e4f7 0%, #0098c4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#a9e4f7', endColorstr='#0098c4', GradientType=1); /* IE6-9 */
-    }
-    header {
+     /* header, footer { */
+      /* background: #a9e4f7; Old browsers */
+      /* background: -moz-linear-gradient(left, #a9e4f7 0%, #0098c4 100%); FF3.6-15 */
+      /* background: -webkit-linear-gradient(left, #a9e4f7 0%, #0098c4 100%); Chrome10-25,Safari5.1-6 */
+      /* background: linear-gradient(to right, #a9e4f7 0%, #0098c4 100%); W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+      /* filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#a9e4f7', endColorstr='#0098c4', GradientType=1); IE6-9 */
+    /* }  */
+
+    /* header {
       display: flex;
-    }
+    } */
 
-    header h1 {
+    /* header h1 {
       margin: 0;
       padding: 20px 20px 20px 0;
       color: #333;
       font-size: 30px;
-    }
+    } */
 
-    .logo-wrapper {
+    /* .logo-wrapper {
       width: 90px;
       height: 67px;
       display: flex;
       align-items: center;
       padding-top: 14px;
-    }
+    } */
 
     main {
       margin: 10px 5px 0 5px;
@@ -136,7 +139,7 @@
       z-index: 200;
     }
 
-    nav button {
+    /* nav button {
       font-size: 20px;
       padding: 5px 20px;
       border-radius: 8px;
@@ -148,19 +151,20 @@
     nav button:hover {
       text-decoration: underline;
       background-color: #0a9ecc;
-    }
+    } */
 
     footer {
       padding: 1px 0;
       margin-top: 20px;
       line-height: 30px;
+      text-align: end;
     }
     footer ul {
       list-style: none;
       padding: 5px;
     }
 
-    footer a {
+    /* footer a {
       color: black;
       text-decoration: none;
       background-color: #F3ECE2;
@@ -170,15 +174,15 @@
     }
     footer a:hover {
       text-decoration: underline;
-    }
+    } */
 
     @media screen and (min-width: 361px) {
       header h1 {
         font-size: 35px;
       }
-      .logo-wrapper {
+      /* .logo-wrapper {
         height: 74px;
-      }
+      } */
     }
 
     @media screen and (min-width: 550px) {
@@ -191,9 +195,9 @@
       header h1 {
         font-size: 50px;
       }
-      .logo-wrapper {
+      /* .logo-wrapper {
         height: 98px;
-      }
+      } */
       .instructions {
         padding-left: 20px;
       }
@@ -220,32 +224,34 @@
   </style>
 </head>
 <body>
-<header>
-  <div class="logo-wrapper"><div id="logo"></div></div>
-  <h1>abcjs PDF Maker</h1>
-</header>
-<main>
-  <section>
-    <p>
-      This page demonstrates how to take the output of abcjs and make a nicely formatted PDF out of it. It does that by using the browser's built in print capability. The
-      browser's "Print Preview" dialog contains an option to "print to PDF".
-      (It is useful to use the "oneSvgPerLine" option when printing. This will keep the browser from breaking the music in the middle of a staff when there is a page break.)
-    </p>
-    <ul class="instructions">
-      <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
-        Use the input dialog below to create the music you wish to print.</li>
-      <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
-        Use the music player to test your input for typos.</li>
-      <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
-        Click the "print" button to save as PDF.</li>
-      <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
-        Copy and paste the abc text you've created into your favorite text editor to save for later.</li>
-      <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
-        Tell your friends, family, and casual acquaintances  about <a href="https://abcjs.net" target="_blank" class="muted">abcjs</a>!</li>
-    </ul>
-  </section>
-  <section class="input">
-    <textarea id="abc" spellcheck="false">X: 1
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>PDF Maker</h1>
+  </header>
+  <div class="container">
+    <main>
+      <section>
+        <p>
+          This page demonstrates how to take the output of abcjs and make a nicely formatted PDF out of it. It does that by using the browser's built in print capability. The
+          browser's "Print Preview" dialog contains an option to "print to PDF".
+          (It is useful to use the "oneSvgPerLine" option when printing. This will keep the browser from breaking the music in the middle of a staff when there is a page break.)
+        </p>
+        <ul class="instructions">
+          <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
+            Use the input dialog below to create the music you wish to print.</li>
+          <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
+            Use the music player to test your input for typos.</li>
+          <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
+            Click the "print" button to save as PDF.</li>
+          <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
+            Copy and paste the abc text you've created into your favorite text editor to save for later.</li>
+          <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
+            Tell your friends, family, and casual acquaintances  about <a href="https://abcjs.net" target="_blank" class="muted">abcjs</a>!</li>
+        </ul>
+      </section>
+      <section class="input">
+        <textarea id="abc" spellcheck="false">
+X: 1
 T: Cooley's
 M: 4/4
 L: 1/8
@@ -255,24 +261,26 @@ K: Emin
 EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
 |:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
 eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
-    </textarea>
+        </textarea>
 
-    <div id="warnings"></div>
-    <div id="audio"></div>
-  </section>
-  <section class="output">
-    <nav>
-      <button onclick="window.print()"><i class="fa fa-print" aria-hidden="true"></i> Print</button>
-    </nav>
-    <div id="canvas"></div>
-  </section>
-</main>
-<footer>
-  <ul>
-    <li>Demo program courtesy of <a href="https://abcjs.net" target="_blank">abcjs</a></li>
-    <li>Written by <a href="https://paulrosen.net" target="_blank">Paul Rosen</a></li>
-    <li>Copyright &copy; 2018 by Paul Rosen</li>
-  </ul>
-</footer>
+        <div id="warnings"></div>
+        <div id="audio"></div>
+      </section>
+      <section class="output">
+        <nav>
+          <button onclick="window.print()"><i class="fa fa-print" aria-hidden="true"></i> Print</button>
+        </nav>
+        <div id="canvas"></div>
+      </section>
+    </main>
+
+    <footer>
+      <ul>
+        <li>Demo program courtesy of <a href="https://abcjs.net" target="_blank">abcjs</a></li>
+        <li>Written by <a href="https://paulrosen.net" target="_blank">Paul Rosen</a></li>
+        <li>Copyright &copy; 2018 by Paul Rosen</li>
+      </ul>
+    </footer>
+  </div>
 </body>
 </html>
