@@ -20,6 +20,7 @@
 					label="Show sheet music"
 					:sub-options="[
         { text: 'Cursor should follow the playback', value: 'cursor' },
+        { text: 'Measures should hide as they finish playing', value: 'hideMeasures'}
     ]"
 					value="sheetMusic">
 				</check-box>

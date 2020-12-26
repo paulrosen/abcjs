@@ -26,6 +26,7 @@ export default {
       'soundfont',
       'sheetMusic',
       'cursor',
+      'hideMeasures'
       'changes',
       'playbackWidget',
       'large',
@@ -55,6 +56,7 @@ export default {
     },
     sheetMusicHtml() {
       const paper = this.sheetMusic ? '<div id="paper"></div>' : ''; 
+      const warnings = '<div id="warnings"></div>';
       let audio = '';
       if (this.playbackWidget) {
         if (this.large) {
@@ -62,27 +64,46 @@ export default {
         }
         else audio = '<div id="audio"></div>';
       }
-      // const audio = this.playbackWidget ? '<div id="audio"></div>' : '';
-      return `
-${paper}
+      return `${paper}
+${warnings}
 ${audio}`;
     },
     sheetMusicJs() {
-      const target = this.sheetMusic ? 'paper' : '*';
+      // console.log(this.changes);
+      // SETUP
       const abcjs = this.usingNode ? 'abcjs' : 'ABCJS';
+      // VISUAL
+      const target = this.sheetMusic ? 'paper' : '*';
       // TODO: method of inputting changes
+      // TODO: cursor that highlights current note
+      // TODO: hide measures as they finish playing
+      const hideMeasures = this.hideMeasures ? '' : '';
+      // CHANGES
       let changes = '';
-      if (this.changes === 'editor') {
-        changes = `var abc_editor = new window.ABCJS.Editor("abc", {
-  paper_id: "paper0",
+      switch (this.changes) {
+        case 'editor':
+          changes = `var abc_editor = new window.ABCJS.Editor("abc", {
+  paper_id: "paper",
   warnings_id:"warnings",
   abcjsParams: {
     add_classes: true
   }
 });`;
+          break;
+        case 'drag':
+
+          break;
+        case 'params':
+
+          break;
+        case 'programmatic':
+
+          break;
       }
+      // CURSOR
       // TODO: cursor
       const cursor = this.cursor ? 'var cursorControl = new synth.CursorControl();' : 'var cursorControl = null;';
+      // AUDIO CONTROL
       const widget = this.playbackWidget ? `var synthControl = new synth.SynthController();
 synthControl.load('#audio', cursorControl, {
   displayLoop: ${this.loop},
@@ -92,12 +113,15 @@ synthControl.load('#audio', cursorControl, {
   displayWarp: ${this.warp},
   displayClock: ${this.clock} 
 });` : ''; 
-      // other widget options; large playback widget uses CSS 
+      // SOUND
+      // TIMING
+      // OTHER
       return `
 var visualObj = ${abcjs}.renderAbc("${target}", abcString, {});
 
 ${changes}
 
+// trigger the below constructors on a user gesture:
 ${widget}`;
     },
   },
