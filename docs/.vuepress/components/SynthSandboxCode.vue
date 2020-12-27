@@ -64,7 +64,8 @@ export default {
         }
         else audio = '<div id="audio"></div>';
       }
-      return `${paper}
+      return `
+${paper}
 ${warnings}
 ${audio}`;
     },
@@ -78,7 +79,31 @@ ${audio}`;
       // VISUAL
       let visualOptions = {};
       const target = this.sheetMusic ? 'paper' : '*';
-      const hideMeasures = this.hideMeasures ? '' : '';
+      let animation = '';
+      if (this.cursor || this.hideMeasures) {
+        console.log(this.hideMeasures);
+        const params = {};
+        if (this.cursor) {
+          console.log('hi from cursor highlight');
+          // add to params
+          params.hi = "cursor highlight";
+        }
+        // TODO: this.hideMeasures = undefined
+        if (this.hideMeasures) {
+          console.log('hi from hide measures');
+          // add to params
+          params.hello = 'hide measures';
+        }
+        animation = 
+`// use a button and ABCJS.pauseAnimation() to allow user to pause the animation 
+ABCJS.startAnimation(paper, abc_editor.tunes[0], ${JSON.stringify(params)});`
+      }
+//       const cursorHighlight = this.cursor ? 
+// ``
+//       const hideMeasures = this.hideMeasures ? 
+// `// use a button and ABCJS.pauseAnimation() to allow user to pause the animation 
+// ABCJS.startAnimation(paper, abc_editor.tunes[0], params);` :
+//       '';
 
 
       // TODO
@@ -108,8 +133,10 @@ ${audio}`;
 
 
       // CURSOR
-      const cursor = this.usingCallbacks ? `// see docs for parameters
-var cursorControl = new synth.CursorControl();` : 'var cursorControl = null;';
+      const cursorControl = this.usingCallbacks ? 
+`// see docs for parameters
+var cursorControl = new synth.CursorControl();` : 
+'var cursorControl = null;';
 
 
       // AUDIO CONTROL. Edit out the midiTranspose stuff
@@ -151,8 +178,12 @@ var synthOptions = { visualObj: visualObj[0], ...${JSON.stringify(synthOptions)}
 
 ${changes}
 
+${cursorControl}
+
 // trigger these on a user gesture: 
-${widget}`;
+${widget}
+
+${animation}`;
     },
   },
 }
