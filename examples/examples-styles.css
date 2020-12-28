@@ -1,7 +1,3 @@
-/* TODO: button, button hover. Color #3FB07C on hover */
-/* left-align ths in table */
-/* double-check that tab titles are correct for all html files */
-
 * {
   box-sizing: border-box;
 }
@@ -26,9 +22,9 @@ header {
   margin-bottom: 30px;
 }
 
-/* .container {
+.container {
   max-width: 700px;
-} */
+}
 
 main {
   padding: 0;
@@ -61,11 +57,22 @@ p {
 
 button {
   margin: 0 4px;
-  padding: 5px;
+  padding: 5px 10px;
+  font-size: inherit;
+}
+
+button:hover {
+  background-color: #3FB07C;
+  color: white;
+  border-color: #3FB07C;
 }
 
 table {
   border-spacing: 0;
+}
+
+th {
+  text-align: start;
 }
 
 th, td {
