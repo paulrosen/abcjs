@@ -4,7 +4,9 @@
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
 	<title>abcjs: Basic Demo</title>
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="../abcjs-midi.css">
@@ -29,9 +31,14 @@
 	</script>
 </head>
 <body onload="load()">
-
-<div id="paper"></div>
-<div id="midi"></div>
-<div id="midi-download"></div>
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>Basic MIDI</h1>
+  </header>
+  <div class="container">
+    <div id="paper"></div>
+    <div id="midi"></div>
+    <div id="midi-download"></div>
+  </div>
 </body>
 </html>

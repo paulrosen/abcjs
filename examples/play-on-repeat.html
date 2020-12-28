@@ -4,7 +4,9 @@
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
 	<title>abcjs: Play On Repeat Demo</title>
 
 	<style>
@@ -171,19 +173,24 @@
 	</script>
 </head>
 <body onload="load()">
-<main>
-	<h1>Play On Repeat</h1>
-	<p>Demonstration of playing a selection of a tune in a loop. Set the start and end measures on the fly using the inputs.</p>
-	<div>
-	<label>Start Measure: <input type="number" min="1" max="16" id="start-measure" value="5"></label>
-	<label>End Measure: <input type="number" min="1" max="16" id="end-measure" value="8"></label>
-	</div>
-	<div id="paper"></div>
-	<p class="suspend-explanation">Browsers won't allow audio to work unless the audio is started in response to a user action. This prevents auto-playing web sites. Therefore, the
-		following button is needed to do the initialization:</p>
-	<button class="activate-audio">Activate Audio Context And Play</button>
-	<button class="stop-audio" style="display:none;">Stop Audio</button>
-	<div class='audio-error' style="display:none;">Audio is not supported in this browser.</div>
-</main>
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>Play on Repeat</h1>
+  </header>
+  <div class="container">
+    <main>
+      <p>Demonstration of playing a selection of a tune in a loop. Set the start and end measures on the fly using the inputs.</p>
+      <div>
+      <label>Start Measure: <input type="number" min="1" max="16" id="start-measure" value="5"></label>
+      <label>End Measure: <input type="number" min="1" max="16" id="end-measure" value="8"></label>
+      </div>
+      <div id="paper"></div>
+      <p class="suspend-explanation">Browsers won't allow audio to work unless the audio is started in response to a user action. This prevents auto-playing web sites. Therefore, the
+        following button is needed to do the initialization:</p>
+      <button class="activate-audio">Activate Audio Context And Play</button>
+      <button class="stop-audio" style="display:none;">Stop Audio</button>
+      <div class='audio-error' style="display:none;">Audio is not supported in this browser.</div>
+    </main>
+  </div>
 </body>
 </html>
