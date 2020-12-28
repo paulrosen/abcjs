@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="x-ua-compatible" content="ie=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/> 
+  <link rel="stylesheet" href="examples-styles.css"/>
+
   <title>abcjs: Basic Demo</title>
 
   <link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
@@ -15,18 +17,18 @@
       max-width: 760px;
     }
   </style>
-	<script type="text/javascript">
-		var abc = "T: Cooley's\n" +
-			"M: 4/4\n" +
-			"L: 1/8\n" +
-			"R: reel\n" +
-			"K: Emin\n" +
-			"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
-			"EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|\n" +
-			"|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
-			"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|";
+  <script type="text/javascript">
+    var abc = "T: Cooley's\n" +
+      "M: 4/4\n" +
+      "L: 1/8\n" +
+      "R: reel\n" +
+      "K: Emin\n" +
+      "|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
+      "EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|\n" +
+      "|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
+      "eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|";
     
-		function load() {
+    function load() {
 
       var showPlayer = document.querySelector('#show-player');
       var visualObj = ABCJS.renderAbc("paper", abc);
@@ -52,10 +54,11 @@
           });
 
           // appends playback widget at given element with null CursorControl
-          synthControl.load('#audio', null, {
+          var cursorControl = null;
+          synthControl.load('#audio', cursorControl, {
             displayRestart: true,
             displayPlay: true,
-            displayProgress: true
+            displayProgress: true,
           });
         }
         else {
@@ -65,13 +68,13 @@
         showPlayer.style.display = 'none';
       }); 
 
-			var transposeHalfSteps = document.querySelector(".transpose-half-steps");
-			transposeHalfSteps.addEventListener("change", function() {
+      var transposeHalfSteps = document.querySelector(".transpose-half-steps");
+      transposeHalfSteps.addEventListener("change", function() {
 
         transposeBy = transposeHalfSteps.value;
         // re-render visualObj
         visualObj = ABCJS.renderAbc("paper", abc, {
-					  visualTranspose: transposeBy
+            visualTranspose: transposeBy
         });
 
         if(createSynth && synthControl) {
@@ -87,14 +90,19 @@
       }); 
   }
 
-	</script>
+  </script>
 </head>
 <body onload="load()">
-  <label>Transpose half-steps: <input class="transpose-half-steps" type="number" min="-24" max="24" step="1" value="0"></label>
-  <button id="show-player">Show Audio Player</button>
-  <div id="audio"></div>
-  <div id="warnings"></div>
-  <div id="paper"></div>
-
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>Basic Transposition</h1>
+  </header>
+  <div class="container">
+    <label>Transpose half-steps: <input class="transpose-half-steps" type="number" min="-24" max="24" step="1" value="0"></label>
+    <button id="show-player">Show Audio Player</button>
+    <div id="audio"></div>
+    <div id="warnings"></div>
+    <div id="paper"></div>
+  </div>
 </body>
 </html>

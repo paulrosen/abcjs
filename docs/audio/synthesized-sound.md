@@ -28,7 +28,7 @@ Since there are a number of ways to use the synthesized sound: with or without a
 
 ## synth.CreateSynth
 
-Creates the object that does all the work of creating and playing the audio. It is the only object you need to create an audio widget for the user to control the sound.
+Creates the object that caches and buffers the audio to be played. All implementations of audio playback will need a CreateSynth.
 
 ```javascript
 var synth = new ABCJS.synth.CreateSynth();
@@ -138,7 +138,7 @@ This returns the audio buffer created. (It is in WAV format.)
 
 ## synth.SynthController
 
-Creates the object that handles the visual part of the control. This creates play and stop buttons, etc. See the section below for the options.
+Creates a visual widget that allows the user to control playback, including play and stop buttons, a progress bar, etc. This is the quickest way to set up a playback widget. See the section below for options.
 
 The constructor can be called at any time, including before much is initialized:
 

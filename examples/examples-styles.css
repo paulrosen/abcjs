@@ -1,0 +1,106 @@
+* {
+  box-sizing: border-box;
+}
+
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 300;
+  src: url(https://fonts.gstatic.com/s/roboto/v20/KFOlCnqEu92Fr1MmSU5fCRc4AMP6lbBP.woff2); 
+}
+
+body {
+  padding: 20px;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 22px;
+  color: black;
+  background-color: #FFFFFF;
+}
+
+header {
+  margin-bottom: 30px;
+}
+
+.container {
+  max-width: 700px;
+}
+
+main {
+  padding: 0;
+}
+
+fieldset {
+  margin: 15px 0;
+}
+
+textarea {
+  width: 100%;
+  border: 2px solid black;
+}
+
+a {
+  color: black;
+}
+
+a:visited {
+  color: black;
+}
+
+h1 {
+  margin: 20px 0;
+}
+
+p {
+  text-align: start;
+}
+
+button {
+  margin: 0 4px;
+  padding: 5px 10px;
+  font-size: inherit;
+}
+
+button:hover {
+  background-color: #3FB07C;
+  color: white;
+  border-color: #3FB07C;
+}
+
+table {
+  border-spacing: 0;
+}
+
+th {
+  text-align: start;
+}
+
+th, td {
+  border: 1px solid #dfe2e5;
+  padding: 16px 20px;
+}
+
+tr:nth-child(even) {
+  background-color: #F6F8FA;
+}
+
+@media only screen and (min-width:700px) {
+
+  header {
+    padding: 0 30px;
+  }
+
+  /* center content on wider screens */
+  .container {
+    margin: 0 auto;
+    max-width: 770px;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  table {
+    margin: 0 auto;
+  }
+}

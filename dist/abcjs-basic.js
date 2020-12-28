@@ -1664,7 +1664,8 @@ var Tune = function Tune() {
         nextIsBar = ret.nextIsBar;
         voiceTime += ret.duration;
         var lastHash;
-        if (element.duration > 0) lastHash = "event" + voiceTimeMilliseconds;
+        if (element.duration > 0 && eventHash["event" + voiceTimeMilliseconds]) // This won't exist if this is the end of a tie.
+          lastHash = "event" + voiceTimeMilliseconds;
         voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 
         if (element.type === 'bar') {
@@ -2203,6 +2204,7 @@ Editor.prototype.modelChanged = function () {
 
   this.bReentry = true;
   this.timerId = null;
+  if (this.synth && this.synth.synthControl) this.synth.synthControl.disable(true);
   this.tunes = renderAbc(this.div, this.currentAbc, this.abcjsParams);
 
   if (this.tunes.length > 0) {
@@ -4263,7 +4265,7 @@ var Parse = function Parse() {
     while (i < line.length) {
       var startI = i;
       if (line.charAt(i) === '%') break;
-      var retInlineHeader = header.letter_to_inline_header(line, i);
+      var retInlineHeader = header.letter_to_inline_header(line, i, delayStartNewLine);
 
       if (retInlineHeader[0] > 0) {
         i += retInlineHeader[0];
@@ -6866,7 +6868,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
     }
   };
 
-  this.letter_to_inline_header = function (line, i) {
+  this.letter_to_inline_header = function (line, i, startLine) {
     var ws = tokenizer.eatWhiteSpace(line, i);
     i += ws;
 
@@ -6893,7 +6895,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
           return [e - i + 1 + ws];
 
         case "[P:":
-          if (tune.lines.length <= tune.lineNum) multilineVars.partForNextLine = {
+          if (startLine || tune.lines.length <= tune.lineNum) multilineVars.partForNextLine = {
             title: line.substring(i + 3, e),
             startChar: startChar,
             endChar: endChar
@@ -6913,7 +6915,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
             if (tempo.type === 'delaySet') {
               if (tuneBuilder.hasBeginMusic()) tuneBuilder.appendElement('tempo', startChar, endChar, this.calcTempo(tempo.tempo));else multilineVars.tempoForNextLine = ['tempo', startChar, endChar, this.calcTempo(tempo.tempo)];
             } else if (tempo.type === 'immediate') {
-              if (tuneBuilder.hasBeginMusic()) tuneBuilder.appendElement('tempo', startChar, endChar, tempo.tempo);else multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo];
+              if (!startLine && tuneBuilder.hasBeginMusic()) tuneBuilder.appendElement('tempo', startChar, endChar, tempo.tempo);else multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo];
             }
 
             return [e - i + 1 + ws, line.charAt(i + 1), line.substring(i + 3, e)];
@@ -7073,7 +7075,9 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
 
             case 'Q':
               var tempo = this.setTempo(line, 2, line.length);
-              if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;else if (tempo.type === 'immediate') tune.metaText.tempo = tempo.tempo;
+              if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;else if (tempo.type === 'immediate') {
+                if (!tune.metaText.tempo) tune.metaText.tempo = tempo.tempo;else multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo];
+              }
               break;
 
             case 'T':
@@ -11056,7 +11060,12 @@ var TuneBuilder = function TuneBuilder(tune) {
     if (tune.lines[tune.lineNum] === undefined) createLine(params);else if (tune.lines[tune.lineNum].staff === undefined) {
       tune.lineNum++;
       this.startNewLine(params);
-    } else if (tune.lines[tune.lineNum].staff[tune.staffNum] === undefined) createStaff(params);else if (tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum] === undefined) createVoice(params);else if (!this.containsNotes(tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum])) return;else {
+    } else if (tune.lines[tune.lineNum].staff[tune.staffNum] === undefined) createStaff(params);else if (tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum] === undefined) createVoice(params);else if (!this.containsNotes(tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum])) {
+      // We don't need a new line but we might need to update parts of it.
+      if (params.part) self.appendElement('part', params.part.startChar, params.part.endChar, {
+        title: params.part.title
+      });
+    } else {
       tune.lineNum++;
       this.startNewLine(params);
     }
@@ -13913,6 +13922,11 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
     var inDiminuendo = [];
     var durationCounter = [0];
     var tempoChanges = {};
+    tempoChanges["0"] = {
+      el_type: 'tempo',
+      qpm: qpm,
+      timing: 0
+    };
     var currentVolume;
     var startRepeatPlaceholder = []; // There is a place holder for each voice.
 
@@ -14470,15 +14484,20 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
   }
 
   function insertTempoChanges(voices, tempoChanges) {
+    if (!tempoChanges || tempoChanges.length === 0) return;
     var changePositions = Object.keys(tempoChanges);
 
     for (var i = 0; i < voices.length; i++) {
       var voice = voices[i];
+      var lastTempo = tempoChanges['0'] ? tempoChanges['0'].qpm : 0; // Don't insert redundant changes. This happens normally when repeating from the beginning, but could happen anywhere that there is a tempo marking that is the same as the last one.
 
       for (var j = 0; j < voice.length; j++) {
         var el = voice[j];
+        if (el.el_type === "tempo") lastTempo = el.qpm;
 
-        if (changePositions.indexOf('' + el.timing) >= 0) {
+        if (changePositions.indexOf('' + el.timing) >= 0 && lastTempo !== tempoChanges['' + el.timing].qpm) {
+          lastTempo = tempoChanges['' + el.timing].qpm;
+
           if (el.el_type === "tempo") {
             el.qpm = tempoChanges['' + el.timing].qpm;
             j++; // when there is a tempo element the next element has the same timing and we don't want it to match the second time.
@@ -14753,6 +14772,11 @@ function CreateSynthControl(parent, options) {
   buildDom(self.parent, self.options);
   attachListeners(self);
 
+  self.disable = function (isDisabled) {
+    var el = self.parent.querySelector(".abcjs-inline-audio");
+    if (isDisabled) el.classList.add("abcjs-disabled");else el.classList.remove("abcjs-disabled");
+  };
+
   self.setTempo = function (tempo) {
     var el = self.parent.querySelector(".abcjs-midi-current-tempo");
     if (el) el.innerHTML = tempo;
@@ -15014,6 +15038,10 @@ function CreateSynth() {
       "violin": 113,
       "trombone": 200
     };else self.programOffsets = {};
+    var p = params.fadeLength !== undefined ? parseInt(params.fadeLength, 10) : NaN;
+    self.fadeLength = isNaN(p) ? 300 : p;
+    p = params.noteEnd !== undefined ? parseInt(params.noteEnd, 10) : NaN;
+    self.noteEnd = isNaN(p) ? 0 : p;
     self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : options.visualObj ? options.visualObj.millisecondsPerMeasure(options.bpm) : 1000;
     self.pan = params.pan;
     self.meterSize = 1;
@@ -15159,7 +15187,7 @@ function CreateSynth() {
     // At this point all of the notes are loaded. This function writes them into the output buffer.
     // Most music has a lot of repeating notes. If a note is the same pitch, volume, length, etc. as another one,
     // It saves a lot of time to just create it once and place it repeatedly where ever it needs to be.
-    var fadeTimeSec = 0.3;
+    var fadeTimeSec = self.fadeLength / 1000;
     self.isRunning = false;
     if (!self.audioBufferPossible) return Promise.reject(new Error(notSupportedMessage));
     if (self.debugCallback) self.debugCallback("prime called");
@@ -15189,7 +15217,7 @@ function CreateSynth() {
       noteMapTracks.forEach(function (noteMap, trackNumber) {
         var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
         noteMap.forEach(function (note) {
-          var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + (note.end - note.start) + ':' + panDistance + ':' + tempoMultiplier;
+          var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + Math.round((note.end - note.start) * 1000) / 1000 + ':' + panDistance + ':' + tempoMultiplier;
           if (!uniqueSounds[key]) uniqueSounds[key] = [];
           uniqueSounds[key].push(note.start);
         });
@@ -15209,7 +15237,7 @@ function CreateSynth() {
           pan: parseFloat(parts[4]),
           tempoMultiplier: parseFloat(parts[5])
         };
-        allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec));
+        allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd / 1000));
       }
 
       self.audioBuffers = [audioBuffer];
@@ -15297,7 +15325,7 @@ function CreateSynth() {
   };
 
   self.seek = function (percent) {
-    var offset = self.duration * percent; // TODO-PER: can seek when paused or when playing
+    var offset = (self.duration - self.fadeLength / 1000) * percent; // TODO-PER: can seek when paused or when playing
 
     if (!self.audioBufferPossible) throw new Error(notSupportedMessage);
     if (self.debugCallback) self.debugCallback("seek called sec=" + offset);
@@ -15879,13 +15907,16 @@ var soundsCache = __webpack_require__(/*! ./sounds-cache */ "./src/synth/sounds-
 
 var pitchToNoteName = __webpack_require__(/*! ./pitch-to-note-name */ "./src/synth/pitch-to-note-name.js");
 
-function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec) {
+function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec, noteEndSec) {
   // sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
   // len is in whole notes. Multiply by tempoMultiplier to get seconds.
   // ofsMs is an offset to subtract from the note to line up programs that have different length onsets.
   var OfflineAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
   var len = sound.len * sound.tempoMultiplier;
   if (ofsMs) len += ofsMs / 1000;
+  len -= noteEndSec;
+  if (len < 0) len = 0.005; // Have some small audible length no matter how short the note is.
+
   var offlineCtx = new OfflineAC(2, Math.floor((len + fadeTimeSec) * sampleRate * 2), sampleRate);
   var noteName = pitchToNoteName[sound.pitch];
   var noteBuffer = soundsCache[sound.instrument][noteName];
@@ -16195,11 +16226,17 @@ function SynthController() {
       afterResume: self.init
     });
     self.cursorControl = cursorControl;
+    self.disable(true);
+  };
+
+  self.disable = function (isDisabled) {
+    if (self.control) self.control.disable(isDisabled);
   };
 
   self.setTune = function (visualObj, userAction, audioParams) {
     self.isLoaded = false;
     self.visualObj = visualObj;
+    self.disable(false);
     self.options = audioParams;
 
     if (self.control) {
@@ -16273,6 +16310,10 @@ function SynthController() {
   };
 
   self.play = function () {
+    if (!self.visualObj) return Promise.resolve({
+      status: "loading"
+    });
+
     if (!self.isLoaded) {
       return self.go().then(function () {
         return self._play();
@@ -16320,6 +16361,10 @@ function SynthController() {
   };
 
   self.randomAccess = function (ev) {
+    if (!self.visualObj) return Promise.resolve({
+      status: "loading"
+    });
+
     if (!self.isLoaded) {
       return self.go().then(function () {
         return self._randomAccess(ev);

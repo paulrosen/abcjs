@@ -4,7 +4,9 @@
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
 	<title>abcjs: Drag And Drop Demo</title>
 	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
 	<script type="text/javascript">
@@ -199,31 +201,37 @@
 	</style>
 </head>
 <body onload="load()">
-<h1>Drag and drop demo</h1>
-<div>Render Time: <span id="time"></span>ms</div>
-<div>SVG size: <span id="size"></span>K</div>
-<ul>
-	<li><label><input type="checkbox" id="allowDragging" onclick="optionChanged()" checked>Allow Dragging</label>
-		<div>When checked, then text is not selectable on the music and notes are draggable. You can
-			also navigate through the music with the tab key, and change notes with the up and down arrows. When not checked, then items are selectable, but not draggable.
-		</div>
-	</li>
-	<li><label><input type="checkbox" id="selectAll" onclick="optionChanged()">Select All</label>
-		<div>When this is checked, nearly every visible thing is selectable. When it is not checked, then only
-			the notes, rests, and measures are selectable.
-		</div>
-	</li>
-	<li><button onclick="selectPrevious()">Previous</button><button onclick="selectNext()">Next</button></li>
-</ul>
-<div class="row">
-	<div>
-		<h2>Output</h2>
-		<div id="paper"></div>
-	</div>
-	<div>
-		<h2>Source</h2>
-		<div id="source"></div>
-	</div>
-</div>
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>Dragging</h1>
+  </header>
+  <div class="container">
+    <h1>Drag and drop demo</h1>
+    <div>Render Time: <span id="time"></span>ms</div>
+    <div>SVG size: <span id="size"></span>K</div>
+    <ul>
+      <li><label><input type="checkbox" id="allowDragging" onclick="optionChanged()" checked>Allow Dragging</label>
+        <div>When checked, then text is not selectable on the music and notes are draggable. You can
+          also navigate through the music with the tab key, and change notes with the up and down arrows. When not checked, then items are selectable, but not draggable.
+        </div>
+      </li>
+      <li><label><input type="checkbox" id="selectAll" onclick="optionChanged()">Select All</label>
+        <div>When this is checked, nearly every visible thing is selectable. When it is not checked, then only
+          the notes, rests, and measures are selectable.
+        </div>
+      </li>
+      <li><button onclick="selectPrevious()">Previous</button><button onclick="selectNext()">Next</button></li>
+    </ul>
+    <div class="row">
+      <div>
+        <h2>Output</h2>
+        <div id="paper"></div>
+      </div>
+      <div>
+        <h2>Source</h2>
+        <div id="source"></div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

@@ -6,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="favicon.ico" type="image/x-icon"/>
   <link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
-  <title>abcjs: Editor Transpose Demo</title>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
+  <title>Transposition with Editor</title>
   <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
   <script type="text/javascript">
     var editor;
@@ -100,7 +102,7 @@
     main {
       font-size: 18px;
       max-width: 776px;
-      background: #e6f3f3;
+      /* background: #e6f3f3; */
       padding: 20px;
       margin: 0 auto;
       font-family: Arial, "sans-serif";
@@ -122,9 +124,9 @@
     #paper {
       background: #ffffff;
     }
-    h1 {
+    /* h1 {
       margin: 0;
-    }
+    } */
     h2 {
       margin-bottom: 5px;
     }
@@ -134,8 +136,8 @@
     }
 
     pre {
-      background: #5c5c5c;
-      color: #ffffff;
+      /* background: #5c5c5c; */
+      /* color: #ffffff; */
       font-size: 14px;
       padding: 5px;
       font-family: Monaco, monospace;
@@ -149,13 +151,18 @@
   </style>
 </head>
 <body>
-<main>
-  <h1>Transposing Example</h1>
-  <p>This demonstrates the different methods of transposition. It is possible to transpose by inserting commands
-    into the ABC string or by using parameters when calling the rendering function. When using the parameters the transposition always adds to whatever the ABC string says. When inserting strings into ABC that always uses the last transposition encountered.</p>
-  <section class="input">
-    <h2>ABC String</h2>
-      <textarea aria-label="ABC string" id="abc" spellcheck="false">X: 1
+  <header>
+    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs">
+    <h1>abcjs transposition with editor</h1>
+  </header>
+  <div class="container">
+    <main>
+      <p>This demonstrates the different methods of transposition. It is possible to transpose by inserting commands
+        into the ABC string or by using parameters when calling the rendering function. When using the parameters the transposition always adds to whatever the ABC string says. When inserting strings into ABC that always uses the last transposition encountered.</p>
+      <section class="input">
+        <h2>ABC String</h2>
+          <textarea aria-label="ABC string" id="abc" spellcheck="false">
+X: 1
 T: Cooley's
 M: 4/4
 L: 1/8
@@ -166,50 +173,51 @@ V: Melody
 EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
 |:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
 eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
-</textarea>
-    <fieldset>
-      <legend>Options</legend>
-      <h2>Transpose Parameters</h2>
-      <p>These are added to whatever is in the tune (in half steps)</p>
-      <label>Visual:
-        <input
-            class="visual-transpose"
-            type="number"
-            min="-24"
-            max="24"
-            step="1"
-            value="0">
-      </label>
-      <label>Audio:
-        <input
-            class="audio-transpose"
-            type="number"
-            min="-24"
-            max="24"
-            step="1"
-            value="0">
-      </label>
-      <h2>ABC Insertions</h2>
-      <p>These all do the same thing.</p>
-      <button class="midi-command">Add %%MIDI command</button>
-      <button class="key-command">Add transpose to K:</button>
-      <button class="voice-command">Add transpose to V:</button>
-    </fieldset>
-  </section>
+    </textarea>
+        <fieldset>
+          <legend>Options</legend>
+          <h2>Transpose Parameters</h2>
+          <p>These are added to whatever is in the tune (in half steps)</p>
+          <label>Visual:
+            <input
+                class="visual-transpose"
+                type="number"
+                min="-24"
+                max="24"
+                step="1"
+                value="0">
+          </label>
+          <label>Audio:
+            <input
+                class="audio-transpose"
+                type="number"
+                min="-24"
+                max="24"
+                step="1"
+                value="0">
+          </label>
+          <h2>ABC Insertions</h2>
+          <p>These all do the same thing.</p>
+          <button class="midi-command">Add %%MIDI command</button>
+          <button class="key-command">Add transpose to K:</button>
+          <button class="voice-command">Add transpose to V:</button>
+        </fieldset>
+      </section>
 
-  <section class="output">
-    <h2>Output</h2>
-    <div id="audio"></div>
-    <div id="warnings"></div>
-    <div id="paper"></div>
-  </section>
+      <section class="output">
+        <h2>Output</h2>
+        <div id="audio"></div>
+        <div id="warnings"></div>
+        <div id="paper"></div>
+      </section>
 
-  <section class="explanation">
-    <h2>Code Sample</h2>
-    <pre class="editor-code">
+      <section class="explanation">
+        <h2>Code Sample</h2>
+        <pre class="editor-code">
 
-    </pre>
-  </section>
-</main>
+        </pre>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
