@@ -16,7 +16,25 @@ Default: false
 ## afterParsing
 Default: undefined
 
-TODO
+:::
+::: tip The contents of this is subject to change so if you use this function you will need to retest it whenever upgrading abcjs.
+:::
+
+Callback function. If this is present then it is called right after the ABC string is parsed and before the music has started to display or be set up for audio.
+
+This is useful if there is an extension to the parsing that you want to add.
+
+```javascript
+function afterParsing(tune, tuneNumber, abcString)
+```
+- tune: 
+The object that is passed to both the renderer and the audio creator. 
+
+- tuneNumber: 
+Zero-based number of the tune. Useful if the abcstring contains more than one tune.
+
+- abcString: 
+The original string that was passed in.
  
 ## clickListener
 Default: null
