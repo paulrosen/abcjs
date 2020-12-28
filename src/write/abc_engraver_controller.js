@@ -44,8 +44,6 @@ var calcHeight = require('./calcHeight');
  * elements in ABCJS AES know their "source data" in the ABCJS AST, and their "target shape"
  * in the renderer for highlighting purposes
  *
- * @param {Object} paper div element that will wrap the SVG
- * @param {Object} params all the params -- documented on github //TODO-GD move some of that documentation here
  */
 var EngraverController = function(paper, params) {
   params = params || {};
@@ -73,7 +71,7 @@ var EngraverController = function(paper, params) {
 	if (params.clickListener)
 		this.addSelectListener(params.clickListener);
 
-  this.renderer=new Renderer(paper, params.regression);
+  this.renderer=new Renderer(paper);
 	this.renderer.setPaddingOverride(params);
 	if (params.showDebug)
 		this.renderer.showDebug = params.showDebug;
@@ -97,7 +95,6 @@ EngraverController.prototype.reset = function() {
 
 /**
  * run the engraving process
- * @param {ABCJS.Tune|ABCJS.Tune[]} abctunes
  */
 EngraverController.prototype.engraveABC = function(abctunes, tuneNumber) {
   if (abctunes[0]===undefined) {
@@ -116,7 +113,6 @@ EngraverController.prototype.engraveABC = function(abctunes, tuneNumber) {
 
 /**
  * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
- * @param {float} scale
  */
 EngraverController.prototype.adjustNonScaledItems = function (scale) {
 	this.width /= scale;
@@ -130,15 +126,27 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 
 	this.setupTune(abcTune, 0);
 	this.constructTuneElements(abcTune);
-	var maxWidth = layout(this.renderer, abcTune, 0, this.space);
+	// layout() sets the x-coordinate of the abcTune element here:
+	// abcTune.lines[0].staffGroup.voices[0].children[0].x
+	layout(this.renderer, abcTune, 0, this.space);
 
-	var ret = { left: 0, measureWidths: [], height: 0, total: 0 };
-	// TODO-PER: need to add the height of the title block, too.
-	ret.height = this.renderer.padding.top + this.renderer.spacing.music + this.renderer.padding.bottom + 24; // the 24 is the empirical value added to the bottom of all tunes.
+	var ret = [];
+	var section;
 
+	var needNewSection = true;
 	for(var i=0; i<abcTune.lines.length; i++) {
 		var abcLine = abcTune.lines[i];
 		if (abcLine.staff) {
+			if (needNewSection) {
+				section = {
+					left: 0,
+					measureWidths: [],
+					//height: this.renderer.padding.top + this.renderer.spacing.music + this.renderer.padding.bottom + 24, // the 24 is the empirical value added to the bottom of all tunes.
+					total: 0
+				};
+				ret.push(section);
+				needNewSection = false;
+			}
 			// At this point, the voices are laid out so that the bar lines are even with each other. So we just need to get the placement of the first voice.
 			if (abcLine.staffGroup.voices.length > 0) {
 				var voice = abcLine.staffGroup.voices[0];
@@ -148,18 +156,19 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 					var child = voice.children[k];
 					if (!foundNotStaffExtra && !child.isClef && !child.isKeySig) {
 						foundNotStaffExtra = true;
-						ret.left = child.x;
+						section.left = child.x;
 						lastXPosition = child.x;
 					}
 					if (child.type === 'bar') {
-						ret.measureWidths.push(child.x - lastXPosition);
-						ret.total += (child.x - lastXPosition);
+						section.measureWidths.push(child.x - lastXPosition);
+						section.total += (child.x - lastXPosition);
 						lastXPosition = child.x;
 					}
 				}
 			}
-			ret.height += calcHeight(abcLine.staffGroup) * spacing.STEP;
-		}
+			//section.height += calcHeight(abcLine.staffGroup) * spacing.STEP;
+		} else
+			needNewSection = true;
 	}
 	return ret;
 };
@@ -201,7 +210,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 		abcLine = abcTune.lines[i];
 		if (abcLine.staff) {
 			hasSeenNonSubtitle = true;
-			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null, this.getTextSize);
+			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null);
 			hasPrintedTempo = true;
 		} else if (abcLine.subtitle) {
 			// If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.

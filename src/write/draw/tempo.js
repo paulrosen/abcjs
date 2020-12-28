@@ -1,7 +1,7 @@
 var drawRelativeElement = require('./relative');
 var renderText = require('./text');
 
-function drawTempo(renderer, params, selectables) {
+function drawTempo(renderer, params) {
 	var x = params.x;
 	if (params.pitch === undefined)
 		window.console.error("Tempo Element y-coordinate not set.");
@@ -25,7 +25,7 @@ function drawTempo(renderer, params, selectables) {
 		if (params.note) {
 			params.note.setX(x);
 			for (var i = 0; i < params.note.children.length; i++)
-				drawRelativeElement(renderer, params.note.children[i], x, selectables);
+				drawRelativeElement(renderer, params.note.children[i], x);
 			x += (params.note.w + 5);
 			var str = "= " + params.tempo.bpm;
 			text = renderText(renderer, {x:x, y: y, text: str, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true});

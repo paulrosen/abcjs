@@ -1,4 +1,6 @@
 // For debugging, it is sometimes useful to know where you are vertically.
+const sprintf = require("./sprintf");
+
 function printHorizontalLine(renderer, width, vertical, comment) {
 	var dy = 0.35;
 	var fill = "rgba(0,0,255,.4)";

@@ -11,7 +11,6 @@ function drawStaffGroup(renderer, params, selectables) {
 	// renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
 	// If there are multiple staves, then renderer.y will be incremented for each new staff.
 
-	var debugPrint;
 	var colorIndex;
 
 	// An invisible marker is useful to be able to find where each system starts.

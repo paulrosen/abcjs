@@ -3,10 +3,6 @@
  */
 
 const roundNumber = require("./round-number");
-var elementGroup;
-
-(function () {
-	"use strict";
 
 	function Group() {
 		this.ingroup = false;
@@ -63,7 +59,6 @@ var elementGroup;
 	};
 
 	// There is just a singleton of this object.
-	elementGroup = new Group();
-})();
+	var elementGroup = new Group();
 
 module.exports = elementGroup;

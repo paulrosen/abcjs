@@ -20,12 +20,7 @@ var RelativeElement = require('./abc_relative_element');
 
 var parseCommon = require('../parse/abc_common');
 
-var createKeySignature;
-
-(function() {
-	"use strict";
-
-	createKeySignature = function(elem, tuneNumber) {
+var createKeySignature = function(elem, tuneNumber) {
 		if (!elem.accidentals || elem.accidentals.length === 0)
 			return null;
 		elem.el_type = "keySignature";
@@ -48,6 +43,5 @@ var createKeySignature;
 		}, this);
 		return abselem;
 	};
-})();
 
 module.exports = createKeySignature;

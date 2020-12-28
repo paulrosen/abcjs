@@ -2,11 +2,8 @@ var layoutVoice = require('./voice');
 var setUpperAndLowerElements = require('./setUpperAndLowerElements');
 var layoutStaffGroup = require('./staffGroup');
 var getLeftEdgeOfStaff = require('./get-left-edge-of-staff');
-var layout;
 
-(function () {
-	"use strict";
-	layout = function (renderer, abctune, width, space) {
+var layout = function (renderer, abctune, width, space) {
 		var i;
 		var abcLine;
 		// Adjust the x-coordinates to their absolute positions
@@ -86,6 +83,5 @@ var layout;
 			}
 		}
 	}
-})();
 
 module.exports = layout;

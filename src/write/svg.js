@@ -74,14 +74,6 @@ Svg.prototype.setResponsiveWidth = function(w, h) {
 Svg.prototype.setSize = function(w, h) {
 	this.svg.setAttribute('width', w);
 	this.svg.setAttribute('height', h);
-	// TODO-PER: Is this hack still needed?
-	// Correct for IE problem in calculating height
-	// var isIE = /*@cc_on!@*/false;//IE detector
-	// if (isIE) {
-	// 	this.paper.canvas.parentNode.style.width = w + "px";
-	// 	this.paper.canvas.parentNode.style.height = "" + h + "px";
-	// } else
-	// 	this.paper.canvas.parentNode.setAttribute("style", "width:" + w + "px");
 };
 
 Svg.prototype.setScale = function(scale) {

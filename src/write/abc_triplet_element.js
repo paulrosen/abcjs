@@ -14,12 +14,7 @@
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var TripletElem;
-
-(function() {
-	"use strict";
-
-	TripletElem = function TripletElem(number, anchor1, options) {
+var TripletElem = function TripletElem(number, anchor1, options) {
 		this.type = "TripletElem";
 		this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
 		this.number = number;
@@ -43,7 +38,5 @@ var TripletElem;
 		if (this.anchor1.parent.beam)
 			this.endingHeightAbove = 4;
 	};
-
-})();
 
 module.exports = TripletElem;

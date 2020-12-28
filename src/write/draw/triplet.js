@@ -4,7 +4,6 @@ var printPath = require('./print-path');
 const roundNumber = require("./round-number");
 
 function drawTriplet(renderer, params, selectables) {
-	var xTextPos;
 	renderer.paper.openGroup({ klass: renderer.controller.classes.generate('triplet '+params.durationClass)});
 	if (!params.hasBeam) {
 		drawBracket(renderer, params.anchor1.x, params.startNote, params.anchor2.x + params.anchor2.w, params.endNote);

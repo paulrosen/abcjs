@@ -20,12 +20,7 @@ var glyphs = require('./abc_glyphs');
 var RelativeElement = require('./abc_relative_element');
 var TieElem = require('./abc_tie_element');
 
-var Decoration;
-
-(function() {
-	"use strict";
-
-	Decoration = function Decoration() {
+var Decoration = function Decoration() {
 		this.startDiminuendoX = undefined;
 		this.startCrescendoX = undefined;
 		this.minTop = 12;	// TODO-PER: this is assuming a 5-line staff. Pass that info in.
@@ -343,7 +338,5 @@ var Decoration;
 		}
 		leftDecoration(decoration, abselem, roomtaken);
 	};
-
-})();
 
 module.exports = Decoration;

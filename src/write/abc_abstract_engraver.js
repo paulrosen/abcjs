@@ -35,11 +35,6 @@ var addChord = require('./add-chord');
 
 var parseCommon = require('../parse/abc_common');
 
-var AbstractEngraver;
-
-(function() {
-	"use strict";
-
 var getDuration = function(elem) {
   var d = 0;
   if (elem.duration) {
@@ -60,7 +55,7 @@ var hint = false;
 		dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}
 	};
 
-AbstractEngraver = function(getTextSize, tuneNumber, options) {
+var AbstractEngraver = function(getTextSize, tuneNumber, options) {
 	this.decoration = new Decoration();
 	this.getTextSize = getTextSize;
 	this.tuneNumber = tuneNumber;
@@ -130,7 +125,7 @@ AbstractEngraver.prototype.popCrossLineElems = function(s,v) {
 		}
 	};
 
-AbstractEngraver.prototype.createABCLine = function(staffs, tempo, getTextSize) {
+AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
     this.minY = 2; // PER: This will be the lowest that any note reaches. It will be used to set the dynamics row.
 	// See if there are any lyrics on this line.
 	this.containsLyrics(staffs);
@@ -1003,8 +998,5 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
 	return abselem;
 
 };
-
-
-})();
 
 module.exports = AbstractEngraver;

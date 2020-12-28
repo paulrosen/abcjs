@@ -18,7 +18,6 @@
 
 var spacing = require('./abc_spacing');
 var Svg = require('./svg');
-var AbsoluteElement = require('./abc_absolute_element');
 
 /**
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
@@ -52,19 +51,11 @@ Renderer.prototype.newTune = function(abcTune) {
 	this.setPadding(abcTune);
 };
 
-/**
- * Set the padding
- * @param {object} params
- */
 Renderer.prototype.setPaddingOverride = function(params) {
 	this.paddingOverride = { top: params.paddingtop, bottom: params.paddingbottom,
 		right: params.paddingright, left: params.paddingleft };
 };
 
-/**
- * Set the padding
- * @param {object} params
- */
 Renderer.prototype.setPadding = function(abctune) {
 	// If the padding is set in the tune, then use that.
 	// Otherwise, if the padding is set in the override, use that.

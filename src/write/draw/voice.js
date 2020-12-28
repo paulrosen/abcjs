@@ -27,7 +27,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 		}
 		switch (child.type) {
 			// case "tempo":
-			// 	child.elemset = drawTempo(renderer, child, selectables);
+			// 	child.elemset = drawTempo(renderer, child);
 			// 	break;
 			default:
 				drawAbsolute(renderer, child,(params.barto || i === params.children.length - 1) ? bartop : 0, selectables, staffPos);

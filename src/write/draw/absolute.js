@@ -14,12 +14,12 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 		var el;
 		switch (child.type) {
 			case "TempoElement":
-				el = drawTempo(renderer, child, selectables);
+				el = drawTempo(renderer, child);
 				if (el)
 					params.elemset = params.elemset.concat(el);
 				break;
 			default:
-				el = drawRelativeElement(renderer, child, bartop, selectables);
+				el = drawRelativeElement(renderer, child, bartop);
 				if (el)
 					params.elemset.push(el);
 		}

@@ -1,5 +1,3 @@
-var highlight = require('../highlight');
-var unhighlight = require('../unhighlight');
 var sprintf = require('./sprintf');
 var printPath = require('./print-path');
 const roundNumber = require("./round-number");
@@ -34,8 +32,7 @@ var drawLine = function (renderer, y1, y2, y3, y4, left, right) {
 
 	var pathString = sprintf("M %f %f L %f %f M %f %f L %f %f",
 		left, y1, right, y2, left, y3, right, y4);
-	var el = printPath(renderer, {path:pathString, highlight: "stroke", stroke:"#000000", 'class': renderer.controller.classes.generate('dynamics decoration')});
-	return el;
+	return printPath(renderer, {path:pathString, highlight: "stroke", stroke:"#000000", 'class': renderer.controller.classes.generate('dynamics decoration')});
 };
 
 module.exports = drawCrescendo;

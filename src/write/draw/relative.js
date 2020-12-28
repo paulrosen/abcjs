@@ -3,7 +3,7 @@ var printStem = require('./print-stem');
 var printStaffLine = require('./staff-line');
 var printSymbol = require('./print-symbol');
 
-function drawRelativeElement(renderer, params, bartop, selectables) {
+function drawRelativeElement(renderer, params, bartop) {
 	if (params.pitch === undefined)
 		window.console.error(params.type + " Relative Element y-coordinate not set.");
 	var y = renderer.calcY(params.pitch);

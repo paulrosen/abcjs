@@ -18,12 +18,7 @@ var AbsoluteElement = require('./abc_absolute_element');
 var glyphs = require('./abc_glyphs');
 var RelativeElement = require('./abc_relative_element');
 
-var createClef;
-
-(function() {
-	"use strict";
-
-	createClef = function(elem, tuneNumber) {
+var createClef = function(elem, tuneNumber) {
 		var clef;
 		var octave = 0;
 		elem.el_type = "clef";
@@ -87,6 +82,5 @@ var createClef;
 			default: return 0;
 		}
 	}
-})();
 
 module.exports = createClef;

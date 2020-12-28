@@ -4,7 +4,7 @@ function BottomText(metaText, width, isPrint, paddingLeft, spacing, getTextSize)
 		this.unalignedWords(metaText.unalignedWords, paddingLeft, spacing, getTextSize);
 	this.extraText(metaText, paddingLeft, spacing, getTextSize);
 	if (metaText.footer && isPrint)
-		this.footer(metaText.footer, paddingLeft, getTextSize);
+		this.footer(metaText.footer, width, paddingLeft, getTextSize);
 }
 
 BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spacing, getTextSize) {
@@ -64,7 +64,7 @@ BottomText.prototype.extraText = function (metaText, marginLeft, spacing, getTex
 	}
 }
 
-BottomText.prototype.footer = function (footer, marginLeft, getTextSize) {
+BottomText.prototype.footer = function (footer, width, paddingLeft, getTextSize) {
 	var klass = 'header meta-bottom';
 	var font = "footerfont";
 	this.rows.push({startGroup: "footer", klass: klass});

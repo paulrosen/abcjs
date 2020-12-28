@@ -4,10 +4,6 @@ const roundNumber = require("./round-number");
 function drawBeam(renderer, params) {
 	if (params.beams.length === 0) return;
 
-	var klass = 'beam-elem';
-	if (params.hint)
-		klass += " abcjs-hint";
-
 	var pathString = "";
 	for (var i = 0; i < params.beams.length; i++) {
 		var beam = params.beams[i];

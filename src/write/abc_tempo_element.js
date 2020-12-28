@@ -17,11 +17,7 @@
 var AbsoluteElement = require('./abc_absolute_element');
 var RelativeElement = require('./abc_relative_element');
 
-var TempoElement;
-(function() {
-	"use strict";
-
-	TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
+var TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
 		this.type = "TempoElement";
 		this.tempo = tempo;
 		this.tempo.type = "tempo"; /// TODO-PER: this should be set earlier, in the parser, probably.
@@ -88,6 +84,5 @@ var TempoElement;
 		}
 		return absElem;
 	};
-})();
 
 module.exports = TempoElement;

@@ -244,8 +244,6 @@ AbsoluteElement.prototype.setHint = function () {
 	this.hint = true;
 };
 
-AbsoluteElement.prototype.isIE=/*@cc_on!@*/false;//IE detector
-
 AbsoluteElement.prototype.highlight = function (klass, color) {
 	if (klass === undefined)
 		klass = "abcjs-note_selected";

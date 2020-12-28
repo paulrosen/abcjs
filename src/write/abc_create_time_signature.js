@@ -18,12 +18,7 @@ var AbsoluteElement = require('./abc_absolute_element');
 var glyphs = require('./abc_glyphs');
 var RelativeElement = require('./abc_relative_element');
 
-var createTimeSignature;
-
-(function() {
-	"use strict";
-
-	createTimeSignature = function(elem, tuneNumber) {
+var createTimeSignature = function(elem, tuneNumber) {
 		elem.el_type = "timeSignature";
 		var abselem = new AbsoluteElement(elem,0,10, 'staff-extra time-signature', tuneNumber);
 		if (elem.type === "specified") {
@@ -70,6 +65,5 @@ var createTimeSignature;
 		}
 		return abselem;
 	};
-})();
 
 module.exports = createTimeSignature;

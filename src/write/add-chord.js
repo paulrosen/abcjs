@@ -1,11 +1,7 @@
 var RelativeElement = require('./abc_relative_element');
 var spacing = require('./abc_spacing');
 
-var addChord;
-
-(function () {
-	"use strict";
-	addChord = function (getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth) {
+var addChord = function (getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth) {
 		for (var i = 0; i < elem.chord.length; i++) {
 			var pos = elem.chord[i].position;
 			var rel_position = elem.chord[i].rel_position;
@@ -100,7 +96,5 @@ var addChord;
 		}
 		return {roomTaken: roomTaken, roomTakenRight: roomTakenRight};
 	};
-
-})();
 
 module.exports = addChord;

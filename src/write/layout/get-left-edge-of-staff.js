@@ -11,22 +11,9 @@ function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
 			voiceheaderw = Math.max(voiceheaderw,size.width);
 		}
 	}
-	if (brace) {
-		for (i = 0; i < brace.length; i++) {
-			if (brace[i].header) {
-				size = getTextSize.calc(brace[i].header, 'voicefont', '');
-				voiceheaderw = Math.max(voiceheaderw,size.width);
-			}
-		}
-	}
-	if (bracket) {
-		for (i = 0; i < bracket.length; i++) {
-			if (bracket[i].header) {
-				size = getTextSize.calc(bracket[i].header, 'voicefont', '');
-				voiceheaderw = Math.max(voiceheaderw,size.width);
-			}
-		}
-	}
+	voiceheaderw = addBraceSize(voiceheaderw, brace, getTextSize);
+	voiceheaderw = addBraceSize(voiceheaderw, bracket, getTextSize);
+
 	if (voiceheaderw) {
 		// Give enough spacing to the right - we use the width of an A for the amount of spacing.
 		var sizeW = getTextSize.calc("A", 'voicefont', '');
@@ -38,6 +25,18 @@ function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
 	ofs = setBraceLocation(brace, x, ofs);
 	ofs = setBraceLocation(bracket, x, ofs);
 	return x + ofs;
+}
+
+function addBraceSize(voiceheaderw, brace, getTextSize) {
+	if (brace) {
+		for (var i = 0; i < brace.length; i++) {
+			if (brace[i].header) {
+				var size = getTextSize.calc(brace[i].header, 'voicefont', '');
+				voiceheaderw = Math.max(voiceheaderw,size.width);
+			}
+		}
+	}
+	return voiceheaderw;
 }
 
 function setBraceLocation(brace, x, ofs) {

@@ -26,15 +26,10 @@
 // There are three phases: the setup phase, when new elements are being discovered, the layout phase, when everything is calculated, and the drawing phase,
 // when the object is not changed, but is used to put the elements on the page.
 
-var BeamElem;
-
-(function() {
-	"use strict";
-
-	//
-	// Setup phase
-	//
-	BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
+//
+// Setup phase
+//
+var BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
 		// type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
 		this.type = "BeamElem";
 		this.isflat = !!flat;
@@ -98,7 +93,6 @@ var BeamElem;
 			}
 		}
 	};
-})();
 
 function calcAverage(total, numElements) {
 	if (!numElements)

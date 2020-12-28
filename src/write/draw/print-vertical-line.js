@@ -1,3 +1,5 @@
+const sprintf = require("./sprintf");
+
 function printVerticalLine (renderer, x, y1, y2) {
 	var dy = 0.35;
 	var fill = "#00aaaa";

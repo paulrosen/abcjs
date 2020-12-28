@@ -51,30 +51,28 @@ function straightPath(renderer, xLeft, yTop, yBottom, type) {
 function curvyPath(renderer, xLeft, yTop, yBottom, type) {
 	var yHeight = yBottom - yTop;
 
-	var xCurve = [7.5, -8, 21, 0, 18.5, -10.5, 7.5];
-	var yCurve = [0, yHeight/5.5, yHeight/3.14, yHeight/2, yHeight/2.93, yHeight/4.88, 0];
+	var pathString = curve(xLeft,
+		yTop,
+		[7.5, -8, 21, 0, 18.5, -10.5, 7.5],
+		[0, yHeight/5.5, yHeight/3.14, yHeight/2, yHeight/2.93, yHeight/4.88, 0]);
 
-	var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
-		xLeft+xCurve[0], yTop+yCurve[0],
-		xLeft+xCurve[1], yTop+yCurve[1],
-		xLeft+xCurve[2], yTop+yCurve[2],
-		xLeft+xCurve[3], yTop+yCurve[3],
-		xLeft+xCurve[4], yTop+yCurve[4],
-		xLeft+xCurve[5], yTop+yCurve[5],
-		xLeft+xCurve[6], yTop+yCurve[6]);
+	pathString += curve(xLeft,
+		yTop,
+		[0, 17.5, -7.5, 6.6, -5, 20, 0],
+		[yHeight/2, yHeight/1.46, yHeight/1.22, yHeight, yHeight/1.19, yHeight/1.42, yHeight/2]);
 
-	xCurve = [0, 17.5, -7.5, 6.6, -5, 20, 0];
-	yCurve = [yHeight/2, yHeight/1.46, yHeight/1.22, yHeight, yHeight/1.19, yHeight/1.42, yHeight/2];
-
-	pathString += sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
-		xLeft+xCurve[0], yTop+yCurve[0],
-		xLeft+xCurve[1], yTop+yCurve[1],
-		xLeft+xCurve[2], yTop+yCurve[2],
-		xLeft+xCurve[3], yTop+yCurve[3],
-		xLeft+xCurve[4], yTop+yCurve[4],
-		xLeft+xCurve[5], yTop+yCurve[5],
-		xLeft+xCurve[6], yTop+yCurve[6]);
 	return renderer.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.controller.classes.generate(type)});
+}
+
+function curve(xLeft, yTop, xCurve, yCurve) {
+	return sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
+		xLeft+xCurve[0], yTop+yCurve[0],
+		xLeft+xCurve[1], yTop+yCurve[1],
+		xLeft+xCurve[2], yTop+yCurve[2],
+		xLeft+xCurve[3], yTop+yCurve[3],
+		xLeft+xCurve[4], yTop+yCurve[4],
+		xLeft+xCurve[5], yTop+yCurve[5],
+		xLeft+xCurve[6], yTop+yCurve[6]);
 }
 
 var draw = function (renderer, xLeft, yTop, yBottom, type, header, selectables) {//Tony

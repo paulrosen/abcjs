@@ -1,11 +1,7 @@
 var glyphs = require('./abc_glyphs');
 var RelativeElement = require('./abc_relative_element');
 
-var createNoteHead;
-
-(function() {
-
-	createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot, shouldExtendStem) {
+var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot, shouldExtendStem) {
 		// TODO scale the dot as well
 		var pitch = pitchelem.verticalPos;
 		var notehead;
@@ -95,7 +91,5 @@ var createNoteHead;
 		return { notehead: notehead, accidentalshiftx: accidentalshiftx, dotshiftx: newDotShiftX, extraLeft: extraLeft };
 
 	};
-
-})();
 
 module.exports = createNoteHead;
