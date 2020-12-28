@@ -6,6 +6,10 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
+## Change in output folders for 6.0.0.25
+
+The files in `/bin` are being phased out. You can get the executables from `/dist` and the file names will not have the version number attached.
+
 ## Default soundfont change for 6.0.0.beta.21
 
 In this beta the default soundfont was changed to https://paulrosen.github.io/midi-js-soundfonts/abcjs/ Hopefully you will find that sounds better. If you set the soundfont directly then you won't notice any change. If you prefer the old soundfont, use the `soundFontUrl: "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/"` option when calling the synth functions.

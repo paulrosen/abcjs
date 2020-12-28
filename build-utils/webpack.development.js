@@ -4,8 +4,8 @@ module.exports = ({type}) => ({
 	mode: 'development',
 	devtool: "source-map",
 	output: {
-		filename: `abcjs_${type}_${getVersion()}.js`,
-		path: path.join(__dirname, "../bin")
+		filename: `abcjs-${type}.js`,
+		path: path.join(__dirname, "../dist")
 	},
 });
 
