@@ -20,6 +20,7 @@
 					label="Show sheet music"
 					:sub-options="[
         { text: 'Cursor should follow the playback', value: 'cursor' },
+        { text: 'Measures should hide as they finish playing', value: 'hideMeasures'}
     ]"
 					value="sheetMusic">
 				</check-box>
@@ -31,7 +32,7 @@
 			name="changes"
 			:options="[
         { text: 'User changes the tune in an editor', value: 'editor' },
-        { text: 'User changes the tune visually', value: 'drag' },
+        { text: 'User changes the tune by interacting with the visual rendering', value: 'drag' },
         { text: 'User changes the way the tune is played', value: 'params' },
         { text: 'Tune and/or parameters change programmatically', value: 'programmatic' },  ]">
 		</radio-group>
