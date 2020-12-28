@@ -54,7 +54,9 @@ var Parse = function() {
 			millisecondsPerMeasure: tune.millisecondsPerMeasure,
 			setupEvents: tune.setupEvents,
 			setTiming: tune.setTiming,
-			setUpAudio: tune.setUpAudio
+			setUpAudio: tune.setUpAudio,
+
+			lineBreaks: tune.lineBreaks
 		};
 		if (tune.visualTranspose)
 			t.visualTranspose = tune.visualTranspose;
@@ -1374,15 +1376,6 @@ var Parse = function() {
 						el = {};
 					}
 					i += ret[0];
-					// var cv = multilineVars.currentVoice ? multilineVars.currentVoice.staffNum + '-' + multilineVars.currentVoice.index : 'ONLY';
-					// if (multilineVars.lineBreaks) {
-					// 	if (!multilineVars.barCounter[cv])
-					// 		multilineVars.barCounter[cv] = 0;
-					// 	var breakNow = multilineVars.lineBreaks[''+multilineVars.barCounter[cv]];
-					// 	multilineVars.barCounter[cv]++;
-					// 	if (breakNow)
-					// 		startNewLine();
-					// }
 				} else if (line[i] === '&') {	// backtrack to beginning of measure
 					ret = letter_to_overlay(line, i);
 					if (ret[0] > 0) {
@@ -1744,12 +1737,9 @@ var Parse = function() {
 		} else
 			multilineVars.globalTranspose = undefined;
 		if (switches.lineBreaks) {
-			// change the format of the line breaks for easy testing.
 			// The line break numbers are 0-based and they reflect the last measure of the current line.
-			multilineVars.lineBreaks = {};
+			multilineVars.lineBreaks = switches.lineBreaks;
 			//multilineVars.continueall = true;
-			for (var i = 0; i < switches.lineBreaks.length; i++)
-				multilineVars.lineBreaks[''+(switches.lineBreaks[i]+1)] = true; // Add 1 so that the line break is the first measure of the next line.
 		}
 		header.reset(tokenizer, warn, multilineVars, tune);
 

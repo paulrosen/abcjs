@@ -252,13 +252,18 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
 	var engraver_controller = new EngraverController(div, params);
 	var widths = engraver_controller.getMeasureWidths(tune);
 
-	var ret = wrap.calcLineWraps(tune, widths, abcString, params, Parse, engraver_controller);
+	var ret = wrap.calcLineWraps(tune, widths, params);
+	if (ret.reParse) {
+        var abcParser = new Parse();
+        abcParser.parse(abcString, ret.revisedParams);
+        tune = abcParser.getTune();
+    }
     if (!params.oneSvgPerLine || ret.tune.lines.length < 2)
-        renderOne(div, ret.tune, ret.revisedParams, tuneNumber);
+        renderOne(div, tune, ret.revisedParams, tuneNumber);
     else
-        renderEachLineSeparately(div, ret.tune, ret.revisedParams, tuneNumber);
-	ret.tune.explanation = ret.explanation;
-	return ret.tune;
+        renderEachLineSeparately(div, tune, ret.revisedParams, tuneNumber);
+	tune.explanation = ret.explanation;
+	return tune;
 }
 
 module.exports = renderAbc;

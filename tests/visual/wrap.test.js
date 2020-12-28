@@ -5,81 +5,180 @@ describe("Automatic line wrapping", function() {
 "K:Bb\n" +
 "B,4|C2D2|E3F|GABc|d/e/f/g/ !marcato!D/ E/ F/ G/|B,4|C2D2|E3F|GABc|d/e/f/g/ D/ E/ F/ G/|\n";
 
-	var expectedSingleLine400 = {
-		"lineBreakPoint": 180.805,
-		"minLineSize": 116.23178571428572,
-		"minWidth": 191,
-		"measureWidths": [42.78, 38.74000000000002, 44.629999999999995, 59.24000000000001, 126.84799999999996, 31.985000000000014, 38.74000000000001, 44.629999999999995, 59.23999999999978, 126.84799999999996],
-		"voiceSizes": [[[8]], [[5]], [[11]], [[11]], [[9]]]
-	};
+	var expectedSingleLine400 = [{"widths":{"left":74.551,"measureWidths":[42.78,38.74000000000002,44.629999999999995,59.24000000000001,126.84799999999996,31.985000000000014,38.74000000000001,44.629999999999995,59.23999999999978,126.84799999999996],"total":613.6809999999998},"lineBreakPoint":180.805,"minLineSize":116.23178571428572,"staffWidth":400,"minWidth":191}];
 
-	var expectedSingleLine500 = {
-		"lineBreakPoint": 236.36055555555555,
-		"minLineSize": 151.94607142857143,
-		"minWidth": 250,
-		"measureWidths": [42.78, 38.74000000000002, 44.629999999999995, 59.24000000000001, 126.84799999999996, 31.985000000000014, 38.74000000000001, 44.629999999999995, 59.23999999999978, 126.84799999999996],
-		"voiceSizes": [[[13]], [[9]], [[13]], [[9]]]
-	};
+	var expectedSingleLine400LineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":7},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":8,"end":12},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":13,"end":23},{"ogLine":0,"line":3,"staff":0,"voice":0,"start":24,"end":34},{"ogLine":0,"line":4,"staff":0,"voice":0,"start":35,"end":44}];
 
-	var expectedSingleLine600 = {
-		"lineBreakPoint": 291.9161111111111,
-		"minLineSize": 187.66035714285715,
-		"minWidth": 309,
-		"measureWidths": [42.78, 38.74000000000002, 44.629999999999995, 59.24000000000001, 126.84799999999996, 31.985000000000014, 38.74000000000001, 44.629999999999995, 59.23999999999978, 126.84799999999996],
-		"voiceSizes": [[[13]], [[17]], [[14]]]
-	};
+	var expectedSingleLine500 = [{"widths":{"left":74.551,"measureWidths":[42.78,38.74000000000002,44.629999999999995,59.24000000000001,126.84799999999996,31.985000000000014,38.74000000000001,44.629999999999995,59.23999999999978,126.84799999999996],"total":613.6809999999998},"lineBreakPoint":236.36055555555555,"minLineSize":151.94607142857143,"staffWidth":500,"minWidth":250}];
+
+	var expectedSingleLine500LineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":12},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":13,"end":21},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":22,"end":34},{"ogLine":0,"line":3,"staff":0,"voice":0,"start":35,"end":44}];
+
+	var expectedSingleLine600 = [{"widths":{"left":74.551,"measureWidths":[42.78,38.74000000000002,44.629999999999995,59.24000000000001,126.84799999999996,31.985000000000014,38.74000000000001,44.629999999999995,59.23999999999978,126.84799999999996],"total":613.6809999999998},"lineBreakPoint":291.9161111111111,"minLineSize":187.66035714285715,"staffWidth":600,"minWidth":309}];
+
+	var expectedSingleLine600LineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":12},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":13,"end":29},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":30,"end":44}];
 
 	var abcShortMeasures = "%%stretchlast 1\nX:1\nQ:1/4=70\nM:2/4\nL:1/4\nK:C clef=bass\nC,D,|D,2|E,F,|G,2|\nG,2|F,E,|D,D,|C,2|]\n";
 
-	var expectedShortMeasures740 = {
-		"lineBreakPoint":383.24833333333333,
-		"minLineSize":246.3739285714286,
-		"minWidth":406,
-		"measureWidths":
-			[48.41500000000001,27.370000000000005,37.620000000000005,27.370000000000005,16.369999999999997,37.620000000000005,37.620000000000005,27.370000000000005],
-		"voiceSizes":[[[10]],[[10]]]};
+	var expectedShortMeasures740 = [{"widths":{"left":50.153,"measureWidths":[48.41500000000001,27.370000000000005,37.620000000000005,27.370000000000005,16.369999999999997,37.620000000000005,37.620000000000005,27.370000000000005],"total":259.75500000000005},"lineBreakPoint":383.24833333333333,"minLineSize":246.3739285714286,"staffWidth":740,"minWidth":406}];
+
+	var expectedShortMeasures740LineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":9},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":10,"end":20}];
 
 	var abcSplitByText =
 		"M: 4/4\n" +
 		"L: 1/8\n" +
 		"R: reel\n" +
 		"K: Emin\n" +
-		"EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
+		"EB{c}BA B2 EB|\n" +
+		"~B2 AB dBAG|\n" +
+		"FDAD BDAD|\n" +
+		"FDAD dAFD|\n" +
 		"%%text Here is some text\n" +
-		"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2|]";
+		"eB B2 eBgB|\n" +
+		"eB B2 defg|\n" +
+		"afe^c dBAF|\n" +
+		"DEFD E2|]\n";
 
-	var expectedSplitByText = {
-		"lineBreakPoint":383.24833333333333,
-		"minLineSize":246.3739285714286,
-		"minWidth":406,
-		"measureWidths":
-			[48.41500000000001,27.370000000000005,37.620000000000005,27.370000000000005,16.369999999999997,37.620000000000005,37.620000000000005,27.370000000000005],
-		"voiceSizes":[[[10]],[[10]]]};
+	var expectedSplitByText = [{"widths":{"left":67.301,"measureWidths":[112.46500000000002,80.67,91.48,91.48],"total":376.095},"lineBreakPoint":240.38833333333332,"minLineSize":154.53535714285715,"staffWidth":500,"minWidth":255},{"widths":{"left":67.301,"measureWidths":[80.67,80.67,105.855,59.05000000000001],"total":326.245},"lineBreakPoint":240.38833333333332,"minLineSize":154.53535714285715,"staffWidth":500,"minWidth":255}];
+
+	var expectedSplitByTextLineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":7},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":8,"end":24},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":25,"end":34},{"ogLine":1,"line":3},{"ogLine":2,"line":4,"staff":0,"voice":0,"start":0,"end":7},{"ogLine":2,"line":5,"staff":0,"voice":0,"start":8,"end":15},{"ogLine":2,"line":6,"staff":0,"voice":0,"start":16,"end":31}];
+
+	var abcPiano = "X:1\n" +
+		"T:piano_wrap\n" +
+		"M:4/4\n" +
+		"L:1/16\n" +
+		"%%staves {(RH) (LH)}\n" +
+		"V:RH clef=treble\n" +
+		"V:LH clef=bass\n" +
+		"K:C\n" +
+		"[V: RH]c4 f4 e8| fede g8 e4|g16|\n" +
+		"[V: LH] E,12 F,4| z4 G,F,A,G, z4 G,F,A,G, | G,16| \n" +
+		"[V: RH]c4 f4 e8| fede g8 e4|\n" +
+		"[V: LH] E,12 F,4| z4 G,F,A,G, z4 G,F,A,G, |\n" +
+		"[V: RH]c4 f4 e8| fede g8 e4|\n" +
+		"[V: LH] E,12 F,4| z4 G,F,A,G, z4 G,F,A,G, |\n" +
+		"[V: RH]c4 f4 e8| fede g8 e4|\n" +
+		"[V: LH] E,12 F,4| z4 G,F,A,G, z4 G,F,A,G, |\n" +
+		"[V: RH]c4 f4 e8| fede g8 e4|\n" +
+		"[V: LH] E,12 F,4| z4 G,F,A,G, z4 G,F,A,G, |\n" +
+		"[V: RH]c4 f4 e8| fede g8 e4|]\n" +
+		"[V: LH] E,12 F,4| z4 G,F,A,G, z4 G,F,A,G, |]";
+
+	var expectedPiano = [{"widths":{"left":60.153,"measureWidths":[59.785000000000004,154.608,31.985000000000014,37.99,154.60800000000003,37.99,154.60800000000003,37.99,154.60800000000003,37.99,154.60800000000003,37.99,154.60800000000003],"total":1209.3680000000002},"lineBreakPoint":244.35944444444442,"minLineSize":157.0882142857143,"staffWidth":500,"minWidth":259}];
+
+	var expectedPianoLineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":10},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":11,"end":23},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":24,"end":34},{"ogLine":0,"line":3,"staff":0,"voice":0,"start":35,"end":45},{"ogLine":0,"line":4,"staff":0,"voice":0,"start":46,"end":56},{"ogLine":0,"line":5,"staff":0,"voice":0,"start":57,"end":68},{"ogLine":0,"line":0,"staff":1,"voice":0,"start":0,"end":13},{"ogLine":0,"line":1,"staff":1,"voice":0,"start":14,"end":29},{"ogLine":0,"line":2,"staff":1,"voice":0,"start":30,"end":43},{"ogLine":0,"line":3,"staff":1,"voice":0,"start":44,"end":57},{"ogLine":0,"line":4,"staff":1,"voice":0,"start":58,"end":71},{"ogLine":0,"line":5,"staff":1,"voice":0,"start":72,"end":86}];
+
+	var abcQuartet = "X:1\n" +
+		"T: wrap quartet\n" +
+		"%%score (1 2) 3 4\n" +
+		"K: C\n" +
+		"V:1 name=\"Violin I\"    snm=\"Vl.1\" clef=treble\n" +
+		"V:2 name=\"Violin II\"   snm=\"Vl.2\" clef=treble\n" +
+		"V:3 name=\"Viola\"       snm=\"Va\"   clef=alto\n" +
+		"V:4 name=\"Violoncello\" snm=\"Vc\"   clef=bass\n" +
+		"%\n" +
+		"[V:1] CDEF GABc | cdef gabc' |\n" +
+		"[V:2] E2G2 B2d2 | cBAG FEDC |\n" +
+		"[V:3] C2E2 G2B2 | C2E2 G2B2 |\n" +
+		"[V:4] C,8 | E,4 G,4 |\n" +
+		"[V:1] CDEF GABc | cdef gabc' |\n" +
+		"[V:2] EFGA Bcde | cBAG FEDC |\n" +
+		"[V:3] C2E2 G2B2 | C2E2 G2B2 |\n" +
+		"[V:4] C,8 | E,4 G,4 |\n" +
+		"[V:1] C8 | E8 |\n" +
+		"[V:2] E8 | G8 |\n" +
+		"[V:3] G,8 | G,8 |\n" +
+		"[V:4] C,8 | E,8 |\n" +
+		"[V:1] C8 | E8 |\n" +
+		"[V:2] E8 | G8 |\n" +
+		"[V:3] G,8 | G,8 |\n" +
+		"[V:4] C,8 | E,8 |\n" +
+		"[V:1] C8 | E8 |\n" +
+		"[V:2] E8 | G8 |\n" +
+		"[V:3] G,8 | G,8 |\n" +
+		"[V:4] C,8 | E,8 |\n" +
+		"[V:1] CDEF GABc | cdef gabc' |\n" +
+		"[V:2] EFGA Bcde | cBAG FEDC |\n" +
+		"[V:3] C2E2 G2B2 | C2E2 G2B2 |\n" +
+		"[V:4] C,8 | E,4 G,4 |\n" +
+		"[V:1] CDEF GABc | cdef gabc' |\n" +
+		"[V:2] EFGA Bcde | cBAG FEDC |\n" +
+		"[V:3] C2E2 G2B2 | C2E2 G2B2 |\n" +
+		"[V:4] C,8 | E,4 G,4 |\n";
+
+	var expectedQuartet = [
+		{
+			"widths": {
+				"left": 92.34125,
+				"measureWidths": [91.48000000000002, 102.48000000000002, 91.48000000000002, 102.48000000000002, 20.985, 31.985, 20.985, 31.985, 20.985, 31.985, 91.48000000000002, 102.48000000000002, 91.48000000000002, 102.48000000000002],
+				"total": 934.7500000000002
+			},
+			"lineBreakPoint": 226.47708333333333,
+			"minLineSize": 145.59241071428573,
+			"staffWidth": 500,
+			"minWidth": 240
+		}];
+
+	var expectedQuartetLineBreaks = [
+		{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":18},
+		{"ogLine":0,"line":1,"staff":0,"voice":0,"start":19,"end":28},
+		{"ogLine":0,"line":2,"staff":0,"voice":0,"start":29,"end":45},
+		{"ogLine":0,"line":3,"staff":0,"voice":0,"start":46,"end":62},
+		{"ogLine":0,"line":4,"staff":0,"voice":0,"start":63,"end":71},
+		{"ogLine":0,"line":5,"staff":0,"voice":0,"start":72, "end":91},
+		{"ogLine":0,"line":0,"staff":0,"voice":1,"start":0,"end":14},
+		{"ogLine":0,"line":1,"staff":0,"voice":1,"start":15,"end":24},
+		{"ogLine":0,"line":2,"staff":0,"voice":1,"start":25,"end":41},
+		{"ogLine":0,"line":3,"staff":0,"voice":1,"start":42,"end":58},
+		{"ogLine":0,"line":4,"staff":0,"voice":1,"start":59,"end":67},
+		{"ogLine":0,"line":5,"staff":0,"voice":1,"start":68,"end":87},
+		{"ogLine":0,"line":0,"staff":1,"voice":0,"start":0,"end":9},
+		{"ogLine":0,"line":1,"staff":1,"voice":0,"start":10,"end":14},
+		{"ogLine":0,"line":2,"staff":1,"voice":0,"start":15,"end":25},
+		{"ogLine":0,"line":3,"staff":1,"voice":0,"start":26,"end":36},
+		{"ogLine":0,"line":4,"staff":1,"voice":0,"start":37,"end":41},
+		{"ogLine":0,"line":5,"staff":1,"voice":0,"start":42,"end":52},
+		{"ogLine":0,"line":0,"staff":2,"voice":0,"start":0,"end":4},
+		{"ogLine":0,"line":1,"staff":2,"voice":0,"start":5,"end":6},
+		{"ogLine":0,"line":2,"staff":2,"voice":0,"start":7,"end":15},
+		{"ogLine":0,"line":3,"staff":2,"voice":0,"start":16,"end":23},
+		{"ogLine":0,"line":4,"staff":2,"voice":0,"start":24,"end":26},
+		{"ogLine":0,"line":5,"staff":2,"voice":0,"start":27,"end":32}]
+
+
+	//////////////////////////////////////////////////////////////
 
 	it("wrap-short-measures", function() {
-		doWrapTest(abcShortMeasures, expectedShortMeasures740, 740);
+		doWrapTest(abcShortMeasures, expectedShortMeasures740, expectedShortMeasures740LineBreaks, 740);
 	});
 
 	it("wrap-single-line400", function() {
-		doWrapTest(abcSingleLine, expectedSingleLine400, 400);
+		doWrapTest(abcSingleLine, expectedSingleLine400, expectedSingleLine400LineBreaks, 400);
 	})
 
 	it("wrap-single-line500", function() {
-		doWrapTest(abcSingleLine, expectedSingleLine500, 500);
+		doWrapTest(abcSingleLine, expectedSingleLine500, expectedSingleLine500LineBreaks, 500);
 	})
 
 	it("wrap-single-line600", function() {
-		doWrapTest(abcSingleLine, expectedSingleLine600, 600);
+		doWrapTest(abcSingleLine, expectedSingleLine600,  expectedSingleLine600LineBreaks, 600);
 	})
 
 	it("split-by-text", function() {
-		doWrapTest(abcSplitByText, expectedSplitByText, 500);
+		doWrapTest(abcSplitByText, expectedSplitByText, expectedSplitByTextLineBreaks, 500);
+	})
+
+	it("piano-wrap", function() {
+		doWrapTest(abcPiano, expectedPiano, expectedPianoLineBreaks, 500);
+	})
+
+	it("quartet-wrap", function() {
+		doWrapTest(abcQuartet, expectedQuartet, expectedQuartetLineBreaks, 500);
 	})
 })
 
 //////////////////////////////////////////////////////////
 
-function doWrapTest(abc, expected, width) {
+function doWrapTest(abc, expected, expectedLineBreaks, width) {
 	var visualObj = abcjs.renderAbc("paper", abc, {
 		staffwidth: width,
 		wrap: {
@@ -104,15 +203,15 @@ function doWrapTest(abc, expected, width) {
 		lines.push(line);
 	}
 
-	var explanation = {};
-	explanation.lineBreakPoint = visualObj[0].explanation.lineBreakPoint;
-	explanation.minLineSize = visualObj[0].explanation.minLineSize;
-	explanation.minWidth = visualObj[0].explanation.minWidth;
-	explanation.measureWidths = visualObj[0].explanation.widths.measureWidths;
-	explanation.voiceSizes = lines;
+	for (var e = 0; e < visualObj[0].explanation.length; e++)
+		delete visualObj[0].explanation[e].attempts;
 
-	console.log(JSON.stringify(explanation))
-	var msg = "\nrcv: " + JSON.stringify(explanation) + "\n" +
+	// console.log(JSON.stringify(visualObj[0].explanation))
+	// console.log(JSON.stringify(visualObj[0].lineBreaks))
+	var msg = "\nrcv: " + JSON.stringify(visualObj[0].explanation) + "\n" +
 		"exp: " + JSON.stringify(expected) + "\n";
-	chai.assert.deepStrictEqual(explanation, expected, msg);
+	chai.assert.deepStrictEqual(visualObj[0].explanation, expected, msg);
+	msg = "\nrcv: " + JSON.stringify(visualObj[0].lineBreaks) + "\n" +
+		"exp: " + JSON.stringify(expectedLineBreaks) + "\n";
+	chai.assert.deepStrictEqual(visualObj[0].lineBreaks, expectedLineBreaks, msg);
 }
