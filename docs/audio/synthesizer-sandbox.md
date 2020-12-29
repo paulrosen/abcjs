@@ -6,7 +6,7 @@ The most common options for using the synthesizer are listed below. Mix and matc
 
 <synth-sandbox-input></synth-sandbox-input>
 
-## Here's what that looks like
+## Constructed Demo
 
 <synth-sandbox-output></synth-sandbox-output>
 
