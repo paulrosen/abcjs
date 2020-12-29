@@ -1,5 +1,6 @@
 <template>
   <div class="synth-sandbox-code">
+    <button @click="download">Download Complete Demo</button>
     <h3>Header</h3>
     <code>
     {{declaration}}
@@ -239,7 +240,90 @@ ${widget}
 
 ${animation} ${timing} ${other}`;
     },
+		title() {
+    	let options = [];
+			if (this.sheetMusic) options.push("visual");
+			if (this.sheetMusic && this.cursor) options.push("cursor");
+			if (this.sheetMusic && this.hideMeasures) options.push("hide");
+			options.push(this.changes);
+			if (this.playbackWidget) options.push("playback");
+			if (this.playbackWidget && this.large) options.push("large");
+			if (this.playbackWidget && this.loop) options.push("loop");
+			if (this.playbackWidget && this.restart) options.push("restart");
+			if (this.playbackWidget && this.play) options.push("play");
+			if (this.playbackWidget && this.progress) options.push("progress");
+			if (this.playbackWidget && this.warp) options.push("warp");
+			if (this.playbackWidget && this.clock) options.push("clock");
+			if (this.usingCallbacks) options.push("callback");
+			if (this.metronome) options.push("metronome");
+			if (this.tempo) options.push("tempo");
+			if (this.stereo) options.push("stereo");
+			if (this.instrument) options.push("instrument");
+			if (this.transpose) options.push("transpose");
+			if (this.noChords) options.push("nochords");
+			if (this.noVoice) options.push("novoice");
+			if (this.tweak) options.push("tweak");
+			if (this.midi) options.push("midi");
+			if (this.playImmediate) options.push("immediate");
+			if (this.soundfont) options.push("soundfont");
+
+			return options.join(' ');
+		},
+	  filename() {
+    	return this.title.replace(/ /g,'-') + ".html";
+	  },
+		fullDemo() {
+			const preamble = `<!DOCTYPE html>
+<html lang="en">
+<head>
+\t<meta charset="utf-8">
+\t<meta http-equiv="x-ua-compatible" content="ie=edge">
+\t<meta name="viewport" content="width=device-width, initial-scale=1">
+
+\t<title>${this.title}</title>
+\t<script src="abcjs-basic.js" type="text/javascript">&lt;/script>
+\t<script type="text/javascript">
+\tvar abcString = "T: Cooley's\\n" +
+\t\t"M: 4/4\\n" +
+\t\t"L: 1/8\\n" +
+\t\t"R: reel\\n" +
+\t\t"K: Emin\\n" +
+\t\t"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\\n" +
+\t\t"EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|\\n" +
+\t\t"|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\\n" +
+\t\t"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|";
+
+\tfunction load() {
+`.replace(/&lt;/g,"<");
+			const middle = `}\n\t&lt;/script>
+</head>
+<body onload="load()">
+<header>
+\t<h1>${this.title}</h1>
+</header>
+\t<div class="container">
+`.replace(/&lt;/g,"<");
+			const postAmble = `\t</div>
+</body>
+</html>
+`;
+			return `${preamble}${this.sheetMusicJs}${middle}${this.sheetMusicHtml}${postAmble}`;
+
+		}
   },
+	methods: {
+		download() {
+			const url = "data:application/txt," + encodeURIComponent(this.fullDemo);
+			const link = document.createElement('a');
+			document.body.appendChild(link);
+			link.setAttribute("style", "display: none;");
+			link.href = url;
+			link.download = this.filename;
+			link.click();
+			window.URL.revokeObjectURL(url);
+			document.body.removeChild(link);
+		}
+	}
 }
 </script>
 

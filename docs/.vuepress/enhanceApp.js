@@ -15,7 +15,7 @@ export default ({
 			sheetMusic: true,
       cursor: false,
       hideMeasures: false,
-			changes: 'editor',
+			changes: 'programmatic',
 
 			playbackWidget: true,
 			large: false,

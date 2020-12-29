@@ -7,10 +7,6 @@
 					label="I am using the Node ecosystem"
 					value="usingNode">
 				</check-box>
-				<check-box
-					label="I have my own soundfont"
-					value="soundfont">
-				</check-box>
 			</template>
 		</field-set>
 
@@ -31,10 +27,9 @@
 			label="Changes"
 			name="changes"
 			:options="[
-        { text: 'User changes the tune in an editor', value: 'editor' },
+        { text: 'The tune is determined programmatically', value: 'programmatic' },
         { text: 'User changes the tune by interacting with the visual rendering', value: 'drag' },
-        { text: 'User changes the way the tune is played', value: 'params' },
-        { text: 'Tune and/or parameters change programmatically', value: 'programmatic' },  ]">
+        { text: 'User changes the tune in an editor', value: 'editor' },  ]">
 		</radio-group>
 
 		<field-set label="Audio Control">
@@ -92,20 +87,6 @@
 					value="noVoice">
 				</check-box>
 
-			</template>
-		</field-set>
-
-		<field-set label="Timing">
-			<template v-slot:controls>
-				<check-box
-					label="Listen for callbacks"
-					value="usingCallbacks">
-				</check-box>
-			</template>
-		</field-set>
-
-		<field-set label="Other">
-			<template v-slot:controls>
 				<check-box
 					label="I want to be able to tweak the audio before it is created."
 					value="tweak">
@@ -121,8 +102,22 @@
 					value="playImmediate">
 				</check-box>
 
+				<check-box
+					label="I have my own soundfont"
+					value="soundfont">
+				</check-box>
 			</template>
 		</field-set>
+
+		<field-set label="Timing">
+			<template v-slot:controls>
+				<check-box
+					label="Listen for callbacks"
+					value="usingCallbacks">
+				</check-box>
+			</template>
+		</field-set>
+
 		</div>
 	</div>
 </template>
