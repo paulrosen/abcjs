@@ -12,7 +12,7 @@
 body {
   padding: 20px;
   font-family: Roboto, Arial, sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 22px;
   color: black;
   background-color: #FFFFFF;
@@ -55,10 +55,17 @@ p {
   text-align: start;
 }
 
+input {
+  font-size: 1em;
+}
+
 button {
   margin: 0 4px;
   padding: 5px 10px;
   font-size: inherit;
+  background: #e2fdf1;
+  border: 1px solid #5c5c5c;
+  border-radius: 4px;
 }
 
 button:hover {
@@ -84,9 +91,16 @@ tr:nth-child(even) {
   background-color: #F6F8FA;
 }
 
+.table-header td {
+  background: #adf3f3;
+  font-size: 22px;
+}
+
 @media only screen and (min-width:700px) {
 
   header {
+    max-width: 1000px;
+    margin: 0 auto 30px auto;
     padding: 0 30px;
   }
 
