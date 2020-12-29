@@ -10,6 +10,10 @@ Full documentation is here: [abcjs documentation](https://paulrosen.github.io/ab
 
 The files in `/bin` are being phased out. You can get the executables from `/dist` and the file names will not have the version number attached.
 
+Many of the old versions that were in `/bin` are no longer kept in the active branches. If you need a particular old version then you can go to the branch with that tag to get it. 
+
+The last version in each major version number is still available in the active branch as well as many recent versions.
+
 ## Default soundfont change for 6.0.0.beta.21
 
 In this beta the default soundfont was changed to https://paulrosen.github.io/midi-js-soundfonts/abcjs/ Hopefully you will find that sounds better. If you set the soundfont directly then you won't notice any change. If you prefer the old soundfont, use the `soundFontUrl: "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/"` option when calling the synth functions.
