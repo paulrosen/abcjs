@@ -17,6 +17,7 @@ export default ({
       hideMeasures: false,
 			changes: 'programmatic',
 
+			hasSound: false,
 			playbackWidget: true,
 			large: false,
 			loop: false,
@@ -48,6 +49,7 @@ export default ({
     cursor(state) { return state.synth.cursor },
     hideMeasures(state) { return state.synth.hideMeasures },
 		changes(state) { return state.synth.changes },
+		hasSound(state) { return state.synth.hasSound },
 		playbackWidget(state) { return state.synth.playbackWidget },
 		large(state) { return state.synth.large },
 		loop(state) { return state.synth.loop },
@@ -76,6 +78,7 @@ export default ({
     cursor(state, payload) { state.synth.cursor = payload },
     hideMeasures(state, payload) { state.synth.hideMeasures = payload },
 		changes(state, payload) { state.synth.changes = payload },
+		hasSound(state, payload) { state.synth.hasSound = payload },
 		playbackWidget(state, payload) { state.synth.playbackWidget = payload },
 		large(state, payload) { state.synth.large = payload },
 		loop(state, payload) { state.synth.loop = payload },

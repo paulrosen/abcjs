@@ -13,7 +13,7 @@
 		</label>
 
 		<div v-if="subOptions" class="sub-options">
-			<check-box v-for="option in subOptions" :label="option.text" :value="option.value" :disabled="!item"></check-box>
+			<check-box v-for="option in subOptions" :label="option.text" :value="option.value" :disabled="disabled || !item"></check-box>
 		</div>
 	</div>
 </template>

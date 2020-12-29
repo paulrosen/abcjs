@@ -45,7 +45,9 @@
     { text: 'Include Warp', value: 'warp' },
     { text: 'Include Clock', value: 'clock' },
     ]"
-					value="playbackWidget">
+					value="playbackWidget"
+					:disabled="!hasSound"
+				>
 				</check-box>
 			</template>
 		</field-set>
@@ -54,58 +56,22 @@
 		<field-set label="Sound">
 			<template v-slot:controls>
 				<check-box
-					label="I want a metronome accompaniment"
-					value="metronome">
-				</check-box>
-				<check-box
-					label="I want to control the tempo programmatically"
-					value="tempo">
-				</check-box>
-
-				<check-box
-					label="I want to create a stereo effect"
-					value="stereo">
-				</check-box>
-
-				<check-box
-					label="I want to set the instrument(s) that are played back"
-					value="instrument">
-				</check-box>
-
-				<check-box
-					label="I want to transpose"
-					value="transpose">
-				</check-box>
-
-				<check-box
-					label="I want to turn off the chord accompaniment"
-					value="noChords">
-				</check-box>
-
-				<check-box
-					label="I want to turn off a voice"
-					value="noVoice">
-				</check-box>
-
-				<check-box
-					label="I want to be able to tweak the audio before it is created."
-					value="tweak">
-				</check-box>
-
-				<check-box
-					label="I want to download a MIDI file"
-					value="midi">
-				</check-box>
-
-				<check-box
-					label="I want to play an arbitrary note without ABC"
-					value="playImmediate">
-				</check-box>
-
-				<check-box
-					label="I have my own soundfont"
-					value="soundfont">
-				</check-box>
+					label="I want sound"
+					value="hasSound"
+					:sub-options="[
+    { text: 'I want a metronome accompaniment', value: 'metronome' },
+    { text: 'I want to control the tempo programmatically', value: 'tempo' },
+    { text: 'I want to create a stereo effect', value: 'stereo' },
+    { text: 'I want to set the instrument(s) that are played back', value: 'instrument' },
+    { text: 'I want to transpose', value: 'transpose' },
+    { text: 'I want to turn off the chord accompaniment', value: 'noChords' },
+    { text: 'I want to turn off a voice', value: 'noVoice' },
+    { text: 'I want to be able to tweak the audio before it is created.', value: 'tweak' },
+    { text: 'I want to download a MIDI file', value: 'midi' },
+    { text: 'I want to play an arbitrary note without ABC', value: 'playImmediate' },
+    { text: 'I have my own soundfont', value: 'soundfont' },
+    ]"
+				></check-box>
 			</template>
 		</field-set>
 
@@ -123,12 +89,18 @@
 </template>
 
 <script>
+import {mapGetters} from "vuex";
 import FieldSet from "./FieldSet";
 import CheckBox from "./CheckBox";
 import RadioGroup from "./RadioGroup";
 export default {
 	name: "synth-sandbox-input",
 	components: {RadioGroup, CheckBox, FieldSet},
+	computed: {
+		...mapGetters([
+			'hasSound',
+		]),
+	},
 }
 </script>
 
