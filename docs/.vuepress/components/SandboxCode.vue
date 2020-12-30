@@ -1,5 +1,5 @@
 <template>
-  <div class="synth-sandbox-code">
+  <div class="sandbox-code">
     <button @click="download">Download Complete Demo</button>
     <h3>Header</h3>
     <code>{{declaration}}</code>
@@ -7,6 +7,8 @@
     <code>{{sheetMusicHtml}}</code>
     <h3>JavaScript</h3>
     <code>{{sheetMusicJs}}</code>
+    <h3>CSS</h3>
+    <code>{{sheetMusicCss}}</code>
   </div>
 </template>
 
@@ -18,13 +20,16 @@ import {
 	middleString,
 	midiString,
 	paperString, postAmbleString,
-	preampleString,
-	setupString
+	preambleString,
+	preamble2String,
+	setupString, startTimerHtmlString
 } from "./example-strings";
 import {clickListenerJsString, editorJsString, renderAbcString, visualOptionsString} from "./example-strings-js";
+import {cssString} from "./example-strings-css";
+import {cursorJsString} from "./example-strings-js-cursor";
 
 export default {
-  name: 'synth-sandbox-code',
+  name: 'sandbox-code',
   computed: {
     ...mapGetters([
       'usingNode',
@@ -64,7 +69,12 @@ ${paperString(this.sheetMusic)}
 ${audioString(this.playbackWidget && this.hasSound, this.large)}
 ${midiString(this.midi)}
 ${clickListenerHtmlString(this.usingCallbacks)}
+${startTimerHtmlString(this.sheetMusic && this.cursor)}
 `;
+    },
+
+    sheetMusicCss() {
+		return cssString(this.playbackWidget && this.hasSound, this.sheetMusic && this.cursor);
     },
 
     sheetMusicJs() {
@@ -119,6 +129,7 @@ ${clickListenerHtmlString(this.usingCallbacks)}
 		return `${renderAbcString(usingNode, !this.hasEditor, this.sheetMusic, visualOptions)}
 ${editorJsString(usingNode, this.hasEditor, this.sheetMusic)}
 ${clickListenerJsString(this.usingCallbacks)}
+${cursorJsString(usingNode, this.sheetMusic && this.cursor)}
 `;
     },
 	  hasEditor() {
@@ -159,7 +170,7 @@ ${clickListenerJsString(this.usingCallbacks)}
     	return this.title.replace(/ /g,'-') + ".html";
 	  },
 		fullDemo() {
-			return `${preampleString(this.hasEditor, this.title)}${this.sheetMusicJs}${middleString(this.title)}${this.sheetMusicHtml}${postAmbleString()}`;
+			return `${preambleString(this.title)}${this.sheetMusicCss}${preamble2String(this.hasEditor)}${this.sheetMusicJs}${middleString(this.title)}${this.sheetMusicHtml}${postAmbleString()}`;
 		}
   },
 	data() {

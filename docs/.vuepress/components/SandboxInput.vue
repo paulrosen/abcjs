@@ -1,5 +1,5 @@
 <template>
-	<div class="synth-sandbox-input">
+	<div class="sandbox-input">
 		<div>
 		<field-set label="Setup">
 			<template v-slot:controls>
@@ -95,7 +95,7 @@ import FieldSet from "./FieldSet";
 import CheckBox from "./CheckBox";
 import RadioGroup from "./RadioGroup";
 export default {
-	name: "synth-sandbox-input",
+	name: "sandbox-input",
 	components: {RadioGroup, CheckBox, FieldSet},
 	computed: {
 		...mapGetters([
@@ -106,16 +106,16 @@ export default {
 </script>
 
 <style scoped>
-.synth-sandbox-input {
+.sandbox-input {
 	display: flex;
 }
-.synth-sandbox-input > div {
+.sandbox-input > div {
 	width: 50%;
 }
-.synth-sandbox-input > div:first-child {
+.sandbox-input > div:first-child {
 	margin-right: 5px;
 }
-.synth-sandbox-input > div:last-child {
+.sandbox-input > div:last-child {
 	margin-left: 5px;
 }
 </style>

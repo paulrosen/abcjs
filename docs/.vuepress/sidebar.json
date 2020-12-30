@@ -5,8 +5,9 @@
 	  "/overview/purpose.md",
 	  "/overview/examples.md",
 	  "/overview/getting-started.md",
-	  "/overview/faq.md",
-	  "/overview/abc-notation.md"
+		"/overview/example-generator.md",
+	  "/overview/abc-notation.md",
+		"/overview/faq.md"
 	]
   },
   {
@@ -23,8 +24,7 @@
   {
 	"title": "Audio",
 	"children": [
-	  "/audio/synthesized-sound.md",
-	  "/audio/synthesizer-sandbox.md"
+	  "/audio/synthesized-sound.md"
 	]
   },
   {

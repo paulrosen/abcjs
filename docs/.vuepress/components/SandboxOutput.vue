@@ -1,5 +1,5 @@
 <template>
-	<div class="synth-sandbox-output">
+	<div class="sandbox-output">
 		TODO
 	</div>
 </template>
@@ -7,7 +7,7 @@
 <script>
 import {mapGetters} from 'vuex'
 export default {
-	name: "synth-sandbox-output",
+	name: "sandbox-output",
 	computed: {
 		...mapGetters([
 			'usingNode',

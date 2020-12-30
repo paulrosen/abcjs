@@ -1,4 +1,4 @@
-function abcjs(usingNode) {
+export function entryPoint(usingNode) {
 	return usingNode ? 'abcjs' : 'ABCJS';
 }
 
@@ -11,7 +11,7 @@ export const renderAbcString = (usingNode, hasRender, showMusic, visualOptions) 
 		return '';
 
 	return `var visualOptions = ${visualOptions};
-var visualObj = ${abcjs(usingNode)}.renderAbc("${target(showMusic)}", abcString, visualOptions);`
+var visualObj = ${entryPoint(usingNode)}.renderAbc("${target(showMusic)}", abcString, visualOptions);`
 };
 
 export const editorJsString = (usingNode, hasEditor, showMusic) => {
@@ -19,7 +19,7 @@ export const editorJsString = (usingNode, hasEditor, showMusic) => {
 		return '';
 
 	return `var options = {};
-var editor = new ${abcjs(usingNode)}.Editor("abc", {
+var editor = new ${entryPoint(usingNode)}.Editor("abc", {
   canvas_id: "${target(showMusic)}",
   warnings_id: "warnings",
   abcjsParams: options
@@ -49,10 +49,11 @@ document.querySelector(".clicked-info").innerHTML = "<div class='label'>Clicked 
 `;
 };
 
+
 ///////////////////////////
 
 export const timingCallbacksString = (usingNode) => {
-`var timingCallbacks = new ${abcjs(usingNode)}.TimingCallbacks(visualObj[0], {
+`var timingCallbacks = new ${entryPoint(usingNode)}.TimingCallbacks(visualObj[0], {
 beatCallback: cursorControl.onBeat,
 eventCallback: cursorControl.onEvent
 });
