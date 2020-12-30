@@ -33,7 +33,7 @@
         { text: 'User changes the tune in an editor', value: 'editor' },  ]">
 		</radio-group>
 
-		<field-set label="Audio Control">
+<!--		<field-set label="Audio Control">
 			<template v-slot:controls>
 				<check-box
 					label="Show playback widget"
@@ -74,7 +74,7 @@
     ]"
 				></check-box>
 			</template>
-		</field-set>
+		</field-set> -->
 
 		<field-set label="Timing">
 			<template v-slot:controls>
