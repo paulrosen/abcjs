@@ -48,7 +48,10 @@ function addLineBreaks(lines, linesBreakElements) {
 				outputLines[action.line].staff[action.staff] = {voices: []};
 				var keys = Object.keys(inputStaff)
 				for (var k = 0; k < keys.length; k++) {
-					if (keys[k] !== "voices")
+					var skip = keys[k] === "voices";
+					if (keys[k] === "meter" && action.line !== 0)
+						skip = true;
+					if (!skip)
 						outputLines[action.line].staff[action.staff][keys[k]] = inputStaff[keys[k]];
 				}
 			}
