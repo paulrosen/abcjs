@@ -1,6 +1,8 @@
 # Examples
 
-Open the file [Examples Table Of Contents](https://github.com/paulrosen/abcjs/tree/master/examples.toc.html). That lists all the demos with links to see each one. 
+Open the file [Examples Table Of Contents](https://cdn.rawgit.com/paulrosen/abcjs/master/examples/toc.html). That lists all the pre-made demos with links to see each one. 
+
+Also look at the [Example Generator](example-generator.md). You can choose which features you want to use and a working demo will be generated for you.
 
 For examples already online:
 
