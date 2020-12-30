@@ -351,7 +351,7 @@ function calcLineWraps(tune, widths, params) {
 	// for here, because the actual width will be different from the calculated numbers.
 
 	// If the desired width is less than the margin, just punt and return the original tune
-	console.log(widths)
+	//console.log(widths)
 	if (widths.length === 0 || params.staffwidth < widths[0].left) {
 		return {
 			reParse: false,
@@ -408,16 +408,19 @@ function calcLineWraps(tune, widths, params) {
 			lineBreaks = ff.lineBreaks;
 
 			// We now have an acceptable number of lines, but the measures may not be optimally distributed. See if there is a better distribution.
-			ff = optimizeLineWidths(section, lineBreakPoint, lineBreaks, explanation);
-			explanation.attempts.push({
-				type: "Optimize",
-				failed: ff.failed,
-				reason: ff.reason,
-				lineBreaks: ff.lineBreaks,
-				totals: ff.totals
-			});
-			if (!ff.failed)
-				lineBreaks = ff.lineBreaks;
+			if (section.measureWidths.length < 25) {
+				// This is an intensive operation and it is optional so just do it for shorter music.
+				ff = optimizeLineWidths(section, lineBreakPoint, lineBreaks, explanation);
+				explanation.attempts.push({
+					type: "Optimize",
+					failed: ff.failed,
+					reason: ff.reason,
+					lineBreaks: ff.lineBreaks,
+					totals: ff.totals
+				});
+				if (!ff.failed)
+					lineBreaks = ff.lineBreaks;
+			}
 		}
 		accumulatedLineBreaks.push(lineBreaks);
 		explanations.push(explanation);
