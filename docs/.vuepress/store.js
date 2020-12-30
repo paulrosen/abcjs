@@ -1,7 +1,8 @@
-import {audioString, clickListenerHtmlString, editorString, middleString, midiString, paperString, postAmbleString, preamble2String, preambleString, setupString, startTimerHtmlString} from "./components/example-strings";
+import {audioString, clickListenerHtmlString, dragExplanationHtmlString, dragHtmlString, editorString, middleString, midiString, paperString, postAmbleString, preamble2String, preambleString, setupString, startTimerHtmlString} from "./components/example-strings";
 import {cssString} from "./components/example-strings-css";
 import {clickListenerJsString, editorJsString, renderAbcString, visualOptionsString} from "./components/example-strings-js";
 import {cursorJsString} from "./components/example-strings-js-cursor";
+import {dragJsString} from "./components/example-strings-js-drag";
 
 const state = {
 	examples: {
@@ -75,17 +76,19 @@ const getters = {
 		return setupString(getters.usingNode)
 	},
 	sheetMusicHtml(state, getters) {
-		return `${editorString(getters.hasEditor)}
+		return `${dragExplanationHtmlString(getters.changes === 'drag')}
+${editorString(getters.hasEditor)}
 ${paperString(getters.sheetMusic)}
 ${audioString(getters.playbackWidget && getters.hasSound, getters.large)}
 ${midiString(getters.midi)}
 ${clickListenerHtmlString(getters.usingCallbacks)}
+${dragHtmlString(getters.changes === 'drag')}
 ${startTimerHtmlString(getters.sheetMusic && (getters.cursor || getters.hideMeasures))}
 `;
 	},
 
 	sheetMusicCss(state, getters) {
-		return cssString(getters.playbackWidget && getters.hasSound, getters.sheetMusic && getters.cursor, getters.sheetMusic && getters.hideMeasures);
+		return cssString(getters.playbackWidget && getters.hasSound, getters.sheetMusic && getters.cursor, getters.sheetMusic && getters.hideMeasures, getters.sheetMusic && getters.changes === 'drag');
 	},
 
 	sheetMusicJs(state, getters) {
@@ -109,17 +112,11 @@ ${startTimerHtmlString(getters.sheetMusic && (getters.cursor || getters.hideMeas
 //       // VISUAL
 //       const animation = animationCode(getters, animationOptions);
 //
-//       // CHANGES
-//       const changes = changesCode(getters, visualOptions);
-//
 //       // AUDIO CONTROL
 //       const widget = audioControlCode(getters);
 //
 //       // SOUND
 //       soundCode(getters, animationOptions, visualOptions, audioParams);
-//
-//       // TIMING
-//       const timing = timingCode(getters);
 //
 //       // OTHER
 //       const other = otherCode(getters, synthOptions, audioParams);
@@ -142,6 +139,7 @@ ${startTimerHtmlString(getters.sheetMusic && (getters.cursor || getters.hideMeas
 ${editorJsString(usingNode, getters.hasEditor, getters.sheetMusic)}
 ${clickListenerJsString(getters.usingCallbacks)}
 ${cursorJsString(usingNode, getters.sheetMusic && getters.cursor, getters.sheetMusic && getters.hideMeasures)}
+${dragJsString(usingNode, getters.changes === 'drag')}
 `;
 	},
 	hasEditor(state, getters) {

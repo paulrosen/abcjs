@@ -1,5 +1,5 @@
 
-export const cssString = (hasAudio, hasCursor, hideMeasures) => {
+export const cssString = (hasAudio, hasCursor, hideMeasures, allowDragging) => {
 	let css = [];
 	if (hasAudio)
 		css.push(`<link rel="stylesheet" type="text/css" href="abcjs-audio.css">`);
@@ -18,6 +18,22 @@ stroke: red;
 .hide-note {
 opacity: 0;
 transition: opacity .5s ease;
+}
+</style>
+`)
+	}
+	if (allowDragging) {
+		css.push(`<style>
+#source {
+font-size: 18px;
+max-width: 700px;
+overflow: auto;
+font-family: "Lucida Console", Monaco, monospace;
+white-space: nowrap;
+}
+.select {
+background-color: #FCF9BB;
+box-shadow: 0 0 1px black;
 }
 </style>
 `)

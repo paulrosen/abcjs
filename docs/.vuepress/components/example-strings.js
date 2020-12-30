@@ -44,6 +44,15 @@ export const clickListenerHtmlString = (clickListener) => {
 	return clickListener ? '<div class="clicked-info"></div>' : '';
 };
 
+export const dragExplanationHtmlString = (allowDragging) => {
+	return allowDragging ? '<p>Drag a note up and down and watch the source code change to match it.</p>' : '';
+};
+
+export const dragHtmlString = (allowDragging) => {
+	return allowDragging ? '<h2>Source</h2>\n' +
+		'<div id="source"></div>' : '';
+};
+
 export const startTimerHtmlString = (hasTimer) => {
 	if (!hasTimer)
 		return '';

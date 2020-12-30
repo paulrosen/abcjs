@@ -54,18 +54,6 @@ document.querySelector(".clicked-info").innerHTML = "<div class='label'>Clicked 
 
 ///////////////////////////
 
-export const timingCallbacksString = (usingNode) => {
-`var timingCallbacks = new ${entryPoint(usingNode)}.TimingCallbacks(visualObj[0], {
-beatCallback: cursorControl.onBeat,
-eventCallback: cursorControl.onEvent
-});
-`
-};
-
-const CLICK_LISTENER_FUNCTION = ` function(abcelem, tuneNumber, classes, analysis, drag, mouseEvent) {  
-  // modify the ABC string and rerender 
-}`
-
 const replaceFunctionPlaceholders = (stringifiedObject) => {
 	return stringifiedObject
 		.replace("\"__FUNCTION_PLACEHOLDER_CLICK_LISTENER__\"", CLICK_LISTENER_FUNCTION);
@@ -85,25 +73,4 @@ ABCJS.startAnimation(paper, abc_editor.tunes[0], ${JSON.stringify(animationOptio
 	}
 
 	return '';
-}
-
-const changesCode = (sandbox, visualOptions) => {
-	// TODO: Change these radio-button options to checkboxes, as they are not mutually exclusive.
-	switch (sandbox.changes) {
-		case 'editor':
-			return `
-var abc_editor = new window.ABCJS.Editor("abc", {
-  paper_id: "paper",
-  warnings_id:"warnings",
-  abcjsParams: {
-    add_classes: true
-  }
-});`;
-		case 'drag':
-			visualOptions.dragging = true;
-			visualOptions.clickListener = "__FUNCTION_PLACEHOLDER_CLICK_LISTENER__"
-			return '';
-		default:
-			'';
-	}
 }
