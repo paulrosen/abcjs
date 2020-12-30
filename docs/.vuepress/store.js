@@ -80,12 +80,12 @@ ${paperString(getters.sheetMusic)}
 ${audioString(getters.playbackWidget && getters.hasSound, getters.large)}
 ${midiString(getters.midi)}
 ${clickListenerHtmlString(getters.usingCallbacks)}
-${startTimerHtmlString(getters.sheetMusic && getters.cursor)}
+${startTimerHtmlString(getters.sheetMusic && (getters.cursor || getters.hideMeasures))}
 `;
 	},
 
 	sheetMusicCss(state, getters) {
-		return cssString(getters.playbackWidget && getters.hasSound, getters.sheetMusic && getters.cursor);
+		return cssString(getters.playbackWidget && getters.hasSound, getters.sheetMusic && getters.cursor, getters.sheetMusic && getters.hideMeasures);
 	},
 
 	sheetMusicJs(state, getters) {
@@ -94,7 +94,8 @@ ${startTimerHtmlString(getters.sheetMusic && getters.cursor)}
 		const visualOptions = visualOptionsString(
 			getters.responsive,
 			getters.usingCallbacks,
-			getters.hasSound && getters.metronome
+			getters.hasSound && getters.metronome,
+			getters.hideMeasures
 		);  // will be passed to renderAbc()
 //       const synthOptions = {};  // will be passed to mySynth.init
 //       const audioParams = {};   // will be passed to synthControl.setTune()
@@ -140,7 +141,7 @@ ${startTimerHtmlString(getters.sheetMusic && getters.cursor)}
 		return `${renderAbcString(usingNode, !getters.hasEditor, getters.sheetMusic, visualOptions)}
 ${editorJsString(usingNode, getters.hasEditor, getters.sheetMusic)}
 ${clickListenerJsString(getters.usingCallbacks)}
-${cursorJsString(usingNode, getters.sheetMusic && getters.cursor)}
+${cursorJsString(usingNode, getters.sheetMusic && getters.cursor, getters.sheetMusic && getters.hideMeasures)}
 `;
 	},
 	hasEditor(state, getters) {

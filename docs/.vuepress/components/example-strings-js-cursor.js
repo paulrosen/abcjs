@@ -1,10 +1,9 @@
 import {entryPoint} from "./example-strings-js";
 
-const cursorString = `function CursorControl(rootSelector) {
-	// This demonstrates two methods of indicating where the music is.
+const cursor1 = `
+// This demonstrates two methods of indicating where the music is.
 	// 1) An element is created that is moved along for each note.
 	// 2) The currently being played note is given a class so that it can be transformed.
-	var self = this;
 	self.cursor = null; // This is the svg element that will move with the music.
 	self.rootSelector = rootSelector; // This is the same selector as the renderAbc call uses.
 
@@ -28,7 +27,9 @@ const cursorString = `function CursorControl(rootSelector) {
 			lastSelection[k].classList.remove("abcjs-highlight");
 	};
 
-	self.onEvent = function(ev) {
+`;
+
+const cursor2 = `
 		// This is called every time a note or a rest is reached and contains the coordinates of it.
 		if (ev.measureStart && ev.left === null)
 			return; // this was the second part of a tie across a measure line. Just ignore it.
@@ -50,9 +51,9 @@ const cursorString = `function CursorControl(rootSelector) {
 			self.cursor.setAttribute("y1", ev.top);
 			self.cursor.setAttribute("y2", ev.top + ev.height);
 		}
-	};
-	self.onFinished = function() {
-		self.removeSelection();
+`;
+
+const cursor3 = `		self.removeSelection();
 
 		if (self.cursor) {
 			self.cursor.setAttribute("x1", 0);
@@ -60,6 +61,38 @@ const cursorString = `function CursorControl(rootSelector) {
 			self.cursor.setAttribute("y1", 0);
 			self.cursor.setAttribute("y2", 0);
 		}
+`;
+
+const hide1 = `		if (ev.measureStart) {
+			var elements = document.querySelectorAll('.abcjs-mm' + ev.measureNumber);
+			for (var j = 0; j < elements.length; j++) {
+				const element = elements[j];
+				if (!element.classList.contains('abcjs-bar'))
+					element.classList.add('hide-note');
+			}
+		}
+`;
+
+const hide2 = `
+			var elements = document.querySelectorAll('.hide-note');
+			for (var j = 0; j < elements.length; j++) {
+				const element = elements[j];
+					element.classList.remove('hide-note');
+			}
+`;
+
+const cursorString = (usingNode, hasCursor, hideMeasures) => {
+	return `function CursorControl(rootSelector) {
+	var self = this;
+${hasCursor ? cursor1 : '' }
+	self.onEvent = function(ev) {
+${hasCursor ? cursor2 : '' }
+	${hideMeasures ? hide1 : '' }
+	
+	};
+	self.onFinished = function() {
+	${hasCursor ? cursor3 : '' }
+	${hideMeasures ? hide2 : '' }
 	};
 }
 
@@ -75,16 +108,19 @@ cursorControl.onFinished();
 }
 
 function startTimer() {
-cursorControl.onStart();
-var timingCallbacks = new ABCJS.TimingCallbacks(visualObj[0], {
+	${hasCursor ? 'cursorControl.onStart();' : '' }
+
+var timingCallbacks = new ${usingNode ? 'abcjs' : 'ABCJS'}.TimingCallbacks(visualObj[0], {
 	eventCallback: onEvent
 });
 timingCallbacks.start();
 }
 `
-export const cursorJsString = (usingNode, hasCursor) => {
-	if (!hasCursor)
+}
+
+export const cursorJsString = (usingNode, hasCursor, hideMeasures) => {
+	if (!hasCursor && !hideMeasures)
 		return '';
-	return cursorString.replace(/ABCJS/g, entryPoint(usingNode));
+	return cursorString(usingNode, hasCursor, hideMeasures);
 };
 

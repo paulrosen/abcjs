@@ -26,12 +26,14 @@ var editor = new ${entryPoint(usingNode)}.Editor("abc", {
 });`
 };
 
-export const visualOptionsString = (responsive, callbacks, metronome) => {
+export const visualOptionsString = (responsive, callbacks, metronome, hideMeasures) => {
 	let options = [];
 	if (responsive)
 		options.push("responsive: 'resize'");
 	if (callbacks) {
 		options.push("clickListener: clickListener");
+	}
+	if (callbacks || hideMeasures) {
 		options.push("add_classes: true");
 	}
 	if (metronome)
