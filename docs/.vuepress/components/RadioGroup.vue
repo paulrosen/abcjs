@@ -80,7 +80,7 @@ export default {
 }
 
 .radio-gradient input:checked + .radio__control {
-	background: radial-gradient(#000000 50%, rgba(255, 0, 0, 0) 51%);
+	background: radial-gradient(#000000 41%, #ffffff 41%) 0.1px;
 }
 
 .radio-before .radio__control {

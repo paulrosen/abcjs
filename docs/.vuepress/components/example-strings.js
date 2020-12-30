@@ -40,6 +40,10 @@ export const midiString = (showMidi) => {
 	return showMidi ? '<div id="midi-download"></div>' : '';
 };
 
+export const clickListenerHtmlString = (clickListener) => {
+	return clickListener ? '<div class="clicked-info"></div>' : '';
+};
+
 export const preampleString = (hasEditor, title) => {
 	const abcString = hasEditor ? '' : `var abcString = "T: Cooley's\\n" +
 "M: 4/4\\n" +

@@ -13,7 +13,7 @@
 <script>
 import {mapGetters} from "vuex";
 import {
-	audioString,
+	audioString, clickListenerHtmlString,
 	editorString,
 	middleString,
 	midiString,
@@ -21,126 +21,7 @@ import {
 	preampleString,
 	setupString
 } from "./example-strings";
-import {editorJsString, renderAbcString} from "./example-strings-js";
-
-const CLICK_LISTENER_FUNCTION = ` function(abcelem, tuneNumber, classes, analysis, drag, mouseEvent) {  
-  // modify the ABC string and rerender 
-}`
-
-const replaceFunctionPlaceholders = (stringifiedObject) => {
-  return stringifiedObject
-    .replace("\"__FUNCTION_PLACEHOLDER_CLICK_LISTENER__\"", CLICK_LISTENER_FUNCTION);
-}
-
-const animationCode = (sandbox, animationOptions) => {
-  if (sandbox.cursor || sandbox.hideMeasures) {
-    if (sandbox.cursor) {
-      animationOptions.showCursor = true;
-    }
-    if (sandbox.hideMeasures) {
-      animationOptions.hideFinishedMeasures = true;
-    }
-    // TODO: startAnimation() is deprecated.
-    return `
-ABCJS.startAnimation(paper, abc_editor.tunes[0], ${JSON.stringify(animationOptions)});`
-  }
-
-  return '';
-}
-
-const changesCode = (sandbox, visualOptions) => {
-   // TODO: Change these radio-button options to checkboxes, as they are not mutually exclusive.
-  switch (sandbox.changes) {
-    case 'editor':
-      return `
-var abc_editor = new window.ABCJS.Editor("abc", {
-  paper_id: "paper",
-  warnings_id:"warnings",
-  abcjsParams: {
-    add_classes: true
-  }
-});`;
-  case 'drag':
-    visualOptions.dragging = true;
-    visualOptions.clickListener = "__FUNCTION_PLACEHOLDER_CLICK_LISTENER__"
-    return '';
-  default:
-    '';
-}
-}
-
-const audioControlCode = (sandbox) => {
-  if (!sandbox.playbackWidget) {
-    return `var mySynth = new ABCJS.synth.CreateSynth();
-mySynth.init(synthOptions).then(() => { 
-  synth.prime().then(() => {
-    start();
-  });
-});`;
-  }
-
-  return `var mySynth = new ABCJS.synth.CreateSynth();
-var synthControl = new synth.SynthController();
-var mySynth = new ABCJS.synth.CreateSynth();
-
-mySynth.init(synthOptions).then(function() {
-  synthControl.setTune(visualObj[0], true, audioParams)
-  .then(function(){
-    console.log('Audio successfully loaded.')
-  }).catch(function(error) {
-    console.warn('Audio problem: ', error);
-  })
-});
-
-synthControl.load('#audio', cursorControl, {
-  displayLoop: ${sandbox.loop},
-  displayRestart: ${sandbox.restart},
-  displayPlay: ${sandbox.play},
-  displayProgress: ${sandbox.progress},
-  displayWarp: ${sandbox.warp},
-  displayClock: ${sandbox.clock} 
-});`
-}
-
-const soundCode = (sandbox, animationOptions, visualOptions, audioParams) => {
-  // TODO: How should a dev use these parameters if they do not have a playback widget to pass audioParams to? 
-  if(sandbox.metronome) console.log('metronome')   // TODO
-  if(sandbox.tempo) {
-    animationOptions.bpm = 120;
-    audioParams.qpm = 120;
-  }
-  if(sandbox.stereo) console.log('stereo')   // TODO
-  if(sandbox.instrument) audioParams.program = 0;
-  if(sandbox.transpose) { 
-    visualOptions.visualTranspose = 0;
-    audioParams.midiTranspose = 0;
-  }
-  if(sandbox.noChords) audioParams.chordsOff = true;
-  if(sandbox.noVoice) audioParams.voicesOff = true;
-}
-
-const timingCode = (sandbox) => {
-  if (!sandbox.usingCallbacks) return '';
-
-  // TODO: Currently, both objects will be instantiated if user selects "Listen for callbacks". Suggestion to present TimingCallbacks and CursorControl as separate options in the sandbox.
-  return `
-var timingCallbacks = new abcjs.TimingCallbacks(visualObj, {});
-cursorControl = new synth.CursorControl();`
-}
-
-const otherCode = (sandbox, synthOptions, audioParams) => {
-  if(sandbox.tweak) {
-    synthOptions.sequenceCallback = 'callback to change audio before it is buffered';
-    audioParams.sequenceCallback = 'callback to change audio before it is buffered';
-  }
-  // TODO
-  if(sandbox.playImmediate) { 
-    console.log('playImmediate') 
-  }   
-
-  // TODO: Midi is deprecated.
-  return sandbox.midi ? `ABCJS.renderMidi("midi-download", abc, { generateDownload: true, generateInline: false });` : '';
-}
+import {clickListenerJsString, editorJsString, renderAbcString, visualOptionsString} from "./example-strings-js";
 
 export default {
   name: 'synth-sandbox-code',
@@ -149,9 +30,11 @@ export default {
       'usingNode',
       'soundfont',
       'sheetMusic',
+      'responsive',
       'cursor',
       'hideMeasures',
       'changes',
+      'hasSound',
       'playbackWidget',
       'large',
       'loop',
@@ -179,13 +62,19 @@ export default {
       return `${editorString(this.hasEditor)}
 ${paperString(this.sheetMusic)}
 ${audioString(this.playbackWidget && this.hasSound, this.large)}
-${midiString(this.midi)}`;
+${midiString(this.midi)}
+${clickListenerHtmlString(this.usingCallbacks)}
+`;
     },
 
     sheetMusicJs() {
 
       // SETUP
-//       const visualOptions = {};  // will be passed to renderAbc()
+       const visualOptions = visualOptionsString(
+			this.responsive,
+			this.usingCallbacks,
+		   this.hasSound && this.metronome
+	   );  // will be passed to renderAbc()
 //       const synthOptions = {};  // will be passed to mySynth.init
 //       const audioParams = {};   // will be passed to synthControl.setTune()
 //       const animationOptions = {};    // will be passed to startAnimation()
@@ -226,8 +115,10 @@ ${midiString(this.midi)}`;
 // ${widget}
 //
 // ${animation} ${timing} ${other}`;
-		return `${renderAbcString(this.usingNode, !this.hasEditor, this.sheetMusic)}
-${editorJsString(this.usingNode, this.hasEditor, this.sheetMusic)}
+		var usingNode = this.isDownloading ? false : this.usingNode;
+		return `${renderAbcString(usingNode, !this.hasEditor, this.sheetMusic, visualOptions)}
+${editorJsString(usingNode, this.hasEditor, this.sheetMusic)}
+${clickListenerJsString(this.usingCallbacks)}
 `;
     },
 	  hasEditor() {
@@ -236,6 +127,7 @@ ${editorJsString(this.usingNode, this.hasEditor, this.sheetMusic)}
 		title() {
     	let options = [];
 			if (this.sheetMusic) options.push("visual");
+			if (this.sheetMusic && this.responsive) options.push("responsive");
 			if (this.sheetMusic && this.cursor) options.push("cursor");
 			if (this.sheetMusic && this.hideMeasures) options.push("hide");
 			options.push(this.changes);
@@ -270,8 +162,14 @@ ${editorJsString(this.usingNode, this.hasEditor, this.sheetMusic)}
 			return `${preampleString(this.hasEditor, this.title)}${this.sheetMusicJs}${middleString(this.title)}${this.sheetMusicHtml}${postAmbleString()}`;
 		}
   },
+	data() {
+  		return {
+  			isDownloading: false,
+		}
+	},
 	methods: {
 		download() {
+			this.isDownloading = true;
 			const url = "data:application/txt," + encodeURIComponent(this.fullDemo);
 			const link = document.createElement('a');
 			document.body.appendChild(link);
@@ -281,6 +179,7 @@ ${editorJsString(this.usingNode, this.hasEditor, this.sheetMusic)}
 			link.click();
 			window.URL.revokeObjectURL(url);
 			document.body.removeChild(link);
+			this.isDownloading = false;
 		}
 	}
 }

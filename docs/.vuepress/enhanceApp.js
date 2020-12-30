@@ -15,6 +15,7 @@ export default ({
 			sheetMusic: true,
       cursor: false,
       hideMeasures: false,
+			responsive: false,
 			changes: 'programmatic',
 
 			hasSound: false,
@@ -48,6 +49,7 @@ export default ({
 		sheetMusic(state) { return state.synth.sheetMusic },
     cursor(state) { return state.synth.cursor },
     hideMeasures(state) { return state.synth.hideMeasures },
+		responsive(state) { return state.synth.responsive },
 		changes(state) { return state.synth.changes },
 		hasSound(state) { return state.synth.hasSound },
 		playbackWidget(state) { return state.synth.playbackWidget },
@@ -77,6 +79,7 @@ export default ({
 		sheetMusic(state, payload) { state.synth.sheetMusic = payload },
     cursor(state, payload) { state.synth.cursor = payload },
     hideMeasures(state, payload) { state.synth.hideMeasures = payload },
+		responsive(state, payload) { state.synth.responsive = payload },
 		changes(state, payload) { state.synth.changes = payload },
 		hasSound(state, payload) { state.synth.hasSound = payload },
 		playbackWidget(state, payload) { state.synth.playbackWidget = payload },
