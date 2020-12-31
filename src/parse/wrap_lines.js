@@ -64,6 +64,14 @@ function addLineBreaks(lines, linesBreakElements) {
 			outputLines[action.line] = lines[action.ogLine];
 		}
 	}
+	// There could be some missing info - if the tune passed in was incomplete or had different lengths for different voices or was missing a voice altogether - just fill in the gaps.
+	for (var ii = 0; ii < outputLines.length; ii++) {
+		if (outputLines[ii].staff) {
+			outputLines[ii].staff = outputLines[ii].staff.filter(function (el) {
+				return el != null;
+			});
+		}
+	}
 	return outputLines;
 }
 
