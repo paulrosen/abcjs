@@ -58,7 +58,8 @@ This is the object that is passed into the editor in the `synth` property. If th
 | `setNotDirty()` | Called by the client app to reset the dirty flag. (For instance, when the user saves their work.) |
 | `isDirty()` | Returns true or false, whether the textarea contains the same text that it started with. |
 | `pause(bool)` | Stops the automatic rendering when the user is typing. |
-| `millisecondsPerMeasure` | Called to return the number of milliseconds in a measure for the first tune in the editor. |
+| `millisecondsPerMeasure()` | Called to return the number of milliseconds in a measure for the first tune in the editor. |
+| `synthParamChanged(options)` | Called to replace the options passed in when the editor is created. It replaces the options here: `{ synth: { options: originalOptions } }` |
 
 ## Example
 
