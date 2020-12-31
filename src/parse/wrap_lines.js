@@ -37,6 +37,7 @@ function addLineBreaks(lines, linesBreakElements) {
 	// then copy all the elements from start to end for the staff and voice specified.
 	// If the item doesn't contain "staff" then it is a non music line and should just be copied.
 	var outputLines = [];
+	var lastKeySig = []; // This is per staff - if the key changed then this will be populated.
 	for (var i = 0; i < linesBreakElements.length; i++) {
 		var action = linesBreakElements[i];
 		if (lines[action.ogLine].staff) {
@@ -54,12 +55,26 @@ function addLineBreaks(lines, linesBreakElements) {
 					if (!skip)
 						outputLines[action.line].staff[action.staff][keys[k]] = inputStaff[keys[k]];
 				}
+				if (lastKeySig[action.staff])
+					outputLines[action.line].staff[action.staff].key = lastKeySig[action.staff];
 			}
 			if (!outputLines[action.line].staff[action.staff].voices[action.voice]) {
 				outputLines[action.line].staff[action.staff].voices[action.voice] = [];
 			}
 			outputLines[action.line].staff[action.staff].voices[action.voice] =
 				lines[action.ogLine].staff[action.staff].voices[action.voice].slice(action.start, action.end+1);
+			var currVoice = outputLines[action.line].staff[action.staff].voices[action.voice];
+			for (var kk = currVoice.length-1; kk >= 0; kk--) {
+				if (currVoice[kk].el_type === "key") {
+					lastKeySig[action.staff] = {
+						root: currVoice[kk].root,
+						acc: currVoice[kk].acc,
+						mode: currVoice[kk].mode,
+						accidentals: currVoice[kk].accidentals.filter(function (acc) { return acc.acc !== 'natural' })
+					};
+					break;
+				}
+			}
 		} else {
 			outputLines[action.line] = lines[action.ogLine];
 		}
