@@ -256,8 +256,8 @@ function oneTry(measureWidths, idealWidths, accumulator, lineAccumulator, lineWi
 }
 
 function optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation) {
-	//	figure out how many lines - That's one more than was tried before.
-	var numLines = Math.ceil(widths.total / lineBreakPoint) + 1;
+	//	figure out how many lines
+	var numLines = Math.ceil(widths.total / lineBreakPoint); // + 1 TODO-PER: this used to be plus one - not sure why
 
 	//	get the ideal width for a line (cumulative width / num lines) - approx the same as lineBreakPoint except for rounding
 	var idealWidth = Math.floor(widths.total / numLines);
@@ -377,7 +377,7 @@ function calcLineWraps(tune, widths, params) {
 	if (params.wrap.lastLineLimit && !maxSpacing)
 		maxSpacing = Math.max(parseFloat(params.wrap.lastLineLimit), 1);
 	// var targetHeight = params.wrap.targetHeight ? Math.max(parseInt(params.wrap.targetHeight, 10), 100) : undefined;
-	var preferredMeasuresPerLine = params.wrap.preferredMeasuresPerLine ? Math.max(parseInt(params.wrap.preferredMeasuresPerLine, 10), 1) : undefined;
+	var preferredMeasuresPerLine = params.wrap.preferredMeasuresPerLine ? Math.max(parseInt(params.wrap.preferredMeasuresPerLine, 10), 0) : undefined;
 
 	var accumulatedLineBreaks = [];
 	var explanations = [];
@@ -419,7 +419,8 @@ function calcLineWraps(tune, widths, params) {
 			lineBreaks = ff.lineBreaks;
 
 			// We now have an acceptable number of lines, but the measures may not be optimally distributed. See if there is a better distribution.
-			if (section.measureWidths.length < 25) {
+			if (lineBreaks.length > 0 && section.measureWidths.length < 25) {
+				// Only do this if everything doesn't fit on one line.
 				// This is an intensive operation and it is optional so just do it for shorter music.
 				ff = optimizeLineWidths(section, lineBreakPoint, lineBreaks, explanation);
 				explanation.attempts.push({
