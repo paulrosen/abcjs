@@ -6,6 +6,10 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
+## Change in wrapping behavior for 6.0.0.25
+
+There have been some tweaks to the way wrapping is calculated. Hopefully this will make your music layout a little better. If you start seeing odd results, let me know.
+
 ## Change in output folders for 6.0.0.25
 
 The files in `/bin` are being phased out. You can get the executables from `/dist` and the file names will not have the version number attached.
