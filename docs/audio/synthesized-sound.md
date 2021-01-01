@@ -4,7 +4,7 @@
 
 * This works in any browser that supports `AudioContext`, `AudioContext.resume`, and `Promises`. That does NOT include IE, but this will work on any other "modern" browser that is at least the following version: Firefox 40, Safari 9.1, Edge 13, and Chrome 43.
 
-* This requires an internet connection for the "sound fonts". You can supply your own sound fonts, so if you want to deliver them locally you can get by without the network. The default sound fonts come from [this github repo](https://paulrosen.github.io/midi-js-soundfonts).
+* This requires an internet connection for the "sound fonts". You can supply your own sound fonts, so if you want to deliver them locally you can get by without the network. The default sound fonts come from [this github repo](https://paulrosen.github.io/midi-js-soundfonts/abcjs).
 
 * It is theoretically possible to create complex enough pieces to bog down your browser or eat up memory. The two things that take resources are each unique note in each instrument and the overall length of the music. Music of a few minutes long with a variety of notes in a few different instruments work with no problem on all devices that have been tested.
 
@@ -14,7 +14,7 @@
 
 * The sounds themselves come from a "sound font": that is, each individual note on each instrument is a separate sound file that is combined into the audio buffer.
 
-* The instrument numbers and the pitch numbers come from the MIDI spec. MIDI is not produced, but it is MIDI-like.
+* The instrument numbers and the pitch numbers come from the MIDI spec. MIDI is not normally produced, but it is MIDI-like. (There is a function to create a MIDI file for download.)
 
 ## Examples
 
@@ -26,7 +26,7 @@ See [Full Synth](https://raw.githubusercontent.com/paulrosen/abcjs/master/exampl
 
 Since there are a number of ways to use the synthesized sound: with or without a visual depiction of the tune, with or without a user-facing audio control, and with or without various timing callbacks, there are a number of different entry points.
 
-## synth.CreateSynth
+## CreateSynth
 
 Creates the object that caches and buffers the audio to be played. All implementations of audio playback will need a CreateSynth.
 
@@ -136,7 +136,7 @@ Stops playing the sound and resets the progress to the beginning of the sound fi
 
 This returns the audio buffer created. (It is in WAV format.)
 
-## synth.SynthController
+## SynthController
 
 Creates a visual widget that allows the user to control playback, including play and stop buttons, a progress bar, etc. This is the quickest way to set up a playback widget. See the section below for options.
 
@@ -278,9 +278,13 @@ if (ABCJS.synth.supportsAudio()) {
 }
 ```
 
-## synth.getMidiFile(abcString, options)
+## getMidiFile(abcString, options)
 
 This is called to get the audio in MIDI format, instead of as a playable audio buffer.
+
+```javascript
+ABCJS.synth.getMidiFile(abcString, { midiOutputType: 'binary', bpm: 100 })
+```
 
 ### abcString
 
@@ -353,7 +357,7 @@ var midi = new ABCJS.synth.getMidiFile("X:1\nT:Cooley's\netc...", { chordsOff: t
 otherLibraryMidiPlayer.loadTune(midi);
 ```
 
-## synth.CreateSynthControl
+## CreateSynthControl
 
 Lower level object than `SynthController` if you want the functionality without the visible control.
 
@@ -389,10 +393,25 @@ var control = new ABCJS.synth.CreateSynthControl(element, options);
 | warpAria | To override the text of the aria for warp input. (By default, the warpTitle is used.)|
 | bpm | To override the text "BPM" for beats per minute. |
 
-## synth.SynthSequence
+## SynthSequence
 
 Creates an object that builds data for `CreateSynth`. This is normally done internally if `CreateSynth` is passed a visual object, but this is a way to custom build any sequence.
 
+```javascript
+var sequencer = ABCJS.synth.SynthSequence()
+sequencer.addTrack();
+sequencer.setInstrument(0, 25);
+sequencer.appendNote({ trackNumber: 0, pitch: 60, durationInMeasures: 1, volume: 80 })
+
+var buffer = new ABCJS.synth.CreateSynth();
+return buffer.init({
+	sequence: sequence,
+}).then(function () {
+	return buffer.prime();
+}).then(function () {
+	return buffer.start();
+});
+```
 This is a helper object that will create an object that is consumed by `CreateSynth`. There is nothing special about this that you couldn't create the object by hand, but this provides some convenience functions.
 
 | Method | Parameters |Description |
@@ -403,43 +422,45 @@ This is a helper object that will create an object that is consumed by `CreateSy
 
 ## CursorControl object
 
-If you want notification when events happen, then you can pass in an object that you create yourself. The following properties are used:
+If you want notification when events happen, then you can pass in an object that you create yourself. Note that even though this object is called `CursorControl` it can be used for anything that requires knowledge of various events that happen during playback: when a note is played, when a beat is reached, when the end of a music line is near, when a measure starts, and when the music stops.
 
-### beatSubdivisions
+The following properties are used:
+
+- beatSubdivisions
 
 How often to call the beat callback. If this is not set, then the beat callback is called once per beat. If you want a finer grained control, you can set this to a larger number. Notice that a large number will affect performance.
 
-### extraMeasuresAtBeginning
+- extraMeasuresAtBeginning
 
 How many extra measures to have at the beginning before the tune actually starts. This can be used for count in beats.
 
-### lineEndAnticipation
+- lineEndAnticipation
 
 When to call the onLineEnd event. If you want to scroll the music when the end of the line is reached, then you probably want to scroll it a little in advance so the user can read ahead. This is the number of milliseconds, so the value of 500 means to scroll the music one half second before the end of the line.
 
-### onReady(synthController)
+- onReady(synthController)
 
 Called when the tune has actually been loaded. Because the audio buffer can only be initialized after a user gesture, the tune might not have been loaded when the visual control is created. This might be called when `setTune` is called, or when the user clicks PLAY.
 
 The parameter is the instance of the synthController that called it.
 
-### onStart()
+- onStart()
 
 Called when the tune has actually started: that is, after all the set up has been completed.
 
-### onFinished()
+- onFinished()
 
 Called when the tune has finished.
 
-### onBeat(beatNumber, totalBeats, totalTime)
+- onBeat(beatNumber, totalBeats, totalTime)
 
 Called each beat, or each subdivision of a beat.
 
-#### beatNumber
+  - beatNumber
 
 This is the current beat - in a perfect case, this is called regularly. There are various things that can cause JavaScript to stop running, though, so it might get called a bunch of times in a row to catch up. This can be a fraction, if `beatSubdivisions` is present.
 
-### onEvent(event)
+- onEvent(event)
 
 This is called every time a note, rest, or bar is encountered.
 
@@ -454,7 +475,7 @@ The `event` parameter has these properties:
 | height | The height of the current elements. | 
 | width | the width of the current elements. |
 
-### onLineEnd(data)
+- onLineEnd(data)
 
 This is called when the end of the line is approaching. The data is the following properties:
 
@@ -466,7 +487,29 @@ This is called when the end of the line is approaching. The data is the followin
 
 Use this to determine if the SVG should be scrolled.
 
-## synth.playEvent(pitches, gracenotes, millisecondsPerMeasure)
+Example:
+```javascript
+var CursorControl = function() {
+	this.beatSubdivisions = 2;
+	this.onStart = function() {
+		console.log("The tune has started playing.");
+    }
+	this.onFinished = function() {
+		console.log("The tune has stopped playing.");
+    }
+	this.onBeat = function(beatNumber) {
+		console.log("Beat " + beatNumber + " is happening.");
+    }
+	this.onEvent = function(event) {
+		console.log("An event is happening", event);
+    }
+}
+var cursorControl = new CursorControl();
+synthControl = new ABCJS.synth.SynthController();
+synthControl.load("#audio", cursorControl, {displayPlay: true, displayProgress: true});
+```
+
+## playEvent(pitches, gracenotes, millisecondsPerMeasure)
 
 This will play a single event that is passed. The event must have the same format as the events that are passed back by the click listener.
 
@@ -510,11 +553,15 @@ ABCJS.synth.playEvent(
 
 ```
 
-## synth.activeAudioContext()
+## activeAudioContext()
 
 If there is an AudioContext that is being used then this retrieves it. It allows freely sharing the same one in different parts of your app.
 
-## synth.instrumentIndexToName[index]
+```javascript
+var ac = ABCJS.synth.activeAudioContext();
+```
+
+## instrumentIndexToName[index]
 
 This is an array that converts the standard MIDI instrument indexes to a name. For instance:
 ```javascript
@@ -522,7 +569,7 @@ console.log(ABCJS.synth.instrumentIndexToName[9]);
 // "glockenspiel"
 ```
 
-## synth.pitchToNoteName[pitchNumber]
+## pitchToNoteName[pitchNumber]
 
 This is an array that converts the standard MIDI pitch indexes to a name. For instance:
 ```javascript
