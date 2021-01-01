@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "webpack": "webpack",
-    "build": "npm run fix-versions && npm run build:basic && npm run build:basic-min && npm run build:plugin",
+    "build": "npm run fix-versions && npm run build:basic && npm run build:basic-min && npm run build:plugin && npm run copy-output",
     "build:basic": "npm run webpack -- --env.mode development --env.type basic -o dist/abcjs-basic.js",
     "build:basic-min": "npm run webpack -- --env.mode production --env.type basic",
     "build:plugin": "npm run webpack -- --env.mode production --env.type plugin",
     "fix-versions": "./fix-versions.sh 6.0.0-beta.25",
+    "copy-output": "./build-copy.sh 6.0.0-beta.25",
     "test": "mocha 'tests/**/*.js'",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
