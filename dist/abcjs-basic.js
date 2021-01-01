@@ -1204,10 +1204,17 @@ var renderAbc = function renderAbc(output, abc, parserParams, engraverParams, re
 function doLineWrapping(div, tune, tuneNumber, abcString, params) {
   var engraver_controller = new EngraverController(div, params);
   var widths = engraver_controller.getMeasureWidths(tune);
-  var ret = wrap.calcLineWraps(tune, widths, abcString, params, Parse, engraver_controller);
-  if (!params.oneSvgPerLine || ret.tune.lines.length < 2) renderOne(div, ret.tune, ret.revisedParams, tuneNumber);else renderEachLineSeparately(div, ret.tune, ret.revisedParams, tuneNumber);
-  ret.tune.explanation = ret.explanation;
-  return ret.tune;
+  var ret = wrap.calcLineWraps(tune, widths, params);
+
+  if (ret.reParse) {
+    var abcParser = new Parse();
+    abcParser.parse(abcString, ret.revisedParams);
+    tune = abcParser.getTune();
+  }
+
+  if (!params.oneSvgPerLine || ret.tune.lines.length < 2) renderOne(div, tune, ret.revisedParams, tuneNumber);else renderEachLineSeparately(div, tune, ret.revisedParams, tuneNumber);
+  tune.explanation = ret.explanation;
+  return tune;
 }
 
 module.exports = renderAbc;
@@ -2944,7 +2951,8 @@ var Parse = function Parse() {
       millisecondsPerMeasure: tune.millisecondsPerMeasure,
       setupEvents: tune.setupEvents,
       setTiming: tune.setTiming,
-      setUpAudio: tune.setUpAudio
+      setUpAudio: tune.setUpAudio,
+      lineBreaks: tune.lineBreaks
     };
     if (tune.visualTranspose) t.visualTranspose = tune.visualTranspose;
     return t;
@@ -4434,15 +4442,7 @@ var Parse = function Parse() {
             multilineVars.measureNotEmpty = false;
             el = {};
           }
-          i += ret[0]; // var cv = multilineVars.currentVoice ? multilineVars.currentVoice.staffNum + '-' + multilineVars.currentVoice.index : 'ONLY';
-          // if (multilineVars.lineBreaks) {
-          // 	if (!multilineVars.barCounter[cv])
-          // 		multilineVars.barCounter[cv] = 0;
-          // 	var breakNow = multilineVars.lineBreaks[''+multilineVars.barCounter[cv]];
-          // 	multilineVars.barCounter[cv]++;
-          // 	if (breakNow)
-          // 		startNewLine();
-          // }
+          i += ret[0];
         } else if (line[i] === '&') {
           // backtrack to beginning of measure
           ret = letter_to_overlay(line, i);
@@ -4813,14 +4813,8 @@ var Parse = function Parse() {
     } else multilineVars.globalTranspose = undefined;
 
     if (switches.lineBreaks) {
-      // change the format of the line breaks for easy testing.
       // The line break numbers are 0-based and they reflect the last measure of the current line.
-      multilineVars.lineBreaks = {}; //multilineVars.continueall = true;
-
-      for (var i = 0; i < switches.lineBreaks.length; i++) {
-        multilineVars.lineBreaks['' + (switches.lineBreaks[i] + 1)] = true;
-      } // Add 1 so that the line break is the first measure of the next line.
-
+      multilineVars.lineBreaks = switches.lineBreaks; //multilineVars.continueall = true;
     }
 
     header.reset(tokenizer, warn, multilineVars, tune); // Take care of whatever line endings come our way
@@ -11197,116 +11191,202 @@ function wrapLines(tune, lineBreaks) {
   if (!lineBreaks || tune.lines.length === 0) return; // tune.lines contains nested arrays: there is an array of lines (that's the part this function rewrites),
   // there is an array of staffs per line (for instance, piano will have 2, orchestra will have many)
   // there is an array of voices per staff (for instance, 4-part harmony might have bass and tenor on a single staff)
-  // The measure numbers start at zero for each staff, but on the succeeding lines, the measure numbers are reset to the beginning of the line.
 
-  var newLines = []; // keep track of our counters for each staff and voice
+  var lines = removeLineBreaks(tune.lines);
+  var linesBreakElements = findLineBreaks(lines, lineBreaks); //console.log(JSON.stringify(linesBreakElements))
 
-  var startNewLine = [];
-  var currentLine = [];
-  var measureNumber = [];
-  var measureMarker = [];
-  var lastMeter = '';
-  var voiceStart = {};
-  var linesWithoutStaff = 0;
+  tune.lines = addLineBreaks(lines, linesBreakElements);
+  tune.lineBreaks = linesBreakElements;
+}
 
-  for (var i = 0; i < tune.lines.length; i++) {
-    var line = tune.lines[i];
+function addLineBreaks(lines, linesBreakElements) {
+  // linesBreakElements is an array of all of the elements that break for a new line
+  // The objects in the array look like:
+  // {"ogLine":0,"line":0,"staff":0,"voice":0,"start":0, "end":21}
+  // ogLine is the original line that it came from,
+  // line is the target line.
+  // then copy all the elements from start to end for the staff and voice specified.
+  // If the item doesn't contain "staff" then it is a non music line and should just be copied.
+  var outputLines = [];
+  var lastKeySig = []; // This is per staff - if the key changed then this will be populated.
 
-    if (line.staff) {
-      var staffs = line.staff;
+  for (var i = 0; i < linesBreakElements.length; i++) {
+    var action = linesBreakElements[i];
 
-      for (var j = 0; j < staffs.length; j++) {
-        if (startNewLine[j] === undefined) {
-          startNewLine[j] = [];
-          currentLine[j] = [];
-          measureNumber[j] = [];
-          measureMarker[j] = [];
-        }
+    if (lines[action.ogLine].staff) {
+      var inputStaff = lines[action.ogLine].staff[action.staff];
 
-        var staff = staffs[j];
-        var voices = staff.voices;
-
-        for (var k = 0; k < voices.length; k++) {
-          if (startNewLine[j][k] === undefined) {
-            startNewLine[j][k] = true;
-            currentLine[j][k] = 0;
-            measureNumber[j][k] = 0;
-            measureMarker[j][k] = 0;
-          }
-
-          if (linesWithoutStaff > 0) currentLine[j][k] += linesWithoutStaff;
-          var voice = voices[k];
-
-          for (var e = 0; e < voice.length; e++) {
-            if (startNewLine[j][k]) {
-              if (!newLines[currentLine[j][k]]) newLines[currentLine[j][k]] = {
-                staff: []
-              };
-
-              if (!newLines[currentLine[j][k]].staff[j]) {
-                newLines[currentLine[j][k]].staff[j] = {
-                  voices: []
-                };
-
-                for (var key in staff) {
-                  if (staff.hasOwnProperty(key)) {
-                    if (key === 'meter') {
-                      if (currentLine[j][k] === 0 || lastMeter !== JSON.stringify(staff[key])) {
-                        lastMeter = JSON.stringify(staff[key]);
-                        newLines[currentLine[j][k]].staff[j][key] = staff[key];
-                      }
-                    } else if (key !== 'voices') {
-                      newLines[currentLine[j][k]].staff[j][key] = staff[key];
-                    }
-                  }
-                }
-              }
-
-              if (measureMarker[j][k]) newLines[currentLine[j][k]].staff[j].barNumber = measureMarker[j][k];
-              startNewLine[j][k] = false;
-            }
-
-            var element = voice[e];
-
-            if (!newLines[currentLine[j][k]].staff[j].voices[k]) {
-              newLines[currentLine[j][k]].staff[j].voices[k] = [];
-
-              for (var startItem in voiceStart) {
-                if (voiceStart.hasOwnProperty(startItem)) {
-                  newLines[currentLine[j][k]].staff[j].voices[k].push(voiceStart[startItem]);
-                }
-              }
-            }
-
-            newLines[currentLine[j][k]].staff[j].voices[k].push(element);
-
-            if (element.el_type === 'stem') {
-              // This is a nice trick to just pay attention to the last setting of each type.
-              voiceStart[element.el_type] = element;
-            }
-
-            if (element.el_type === 'bar') {
-              measureNumber[j][k]++;
-
-              if (lineBreaks[measureNumber[j][k]]) {
-                startNewLine[j][k] = true;
-                currentLine[j][k]++;
-                measureMarker[j][k] = element.barNumber;
-                delete element.barNumber;
-              }
-            }
-          }
-        }
+      if (!outputLines[action.line]) {
+        outputLines[action.line] = {
+          staff: []
+        };
       }
 
-      linesWithoutStaff = 0;
+      if (!outputLines[action.line].staff[action.staff]) {
+        outputLines[action.line].staff[action.staff] = {
+          voices: []
+        };
+        var keys = Object.keys(inputStaff);
+
+        for (var k = 0; k < keys.length; k++) {
+          var skip = keys[k] === "voices";
+          if (keys[k] === "meter" && action.line !== 0) skip = true;
+          if (!skip) outputLines[action.line].staff[action.staff][keys[k]] = inputStaff[keys[k]];
+        }
+
+        if (lastKeySig[action.staff]) outputLines[action.line].staff[action.staff].key = lastKeySig[action.staff];
+      }
+
+      if (!outputLines[action.line].staff[action.staff].voices[action.voice]) {
+        outputLines[action.line].staff[action.staff].voices[action.voice] = [];
+      }
+
+      outputLines[action.line].staff[action.staff].voices[action.voice] = lines[action.ogLine].staff[action.staff].voices[action.voice].slice(action.start, action.end + 1);
+      var currVoice = outputLines[action.line].staff[action.staff].voices[action.voice];
+
+      for (var kk = currVoice.length - 1; kk >= 0; kk--) {
+        if (currVoice[kk].el_type === "key") {
+          lastKeySig[action.staff] = {
+            root: currVoice[kk].root,
+            acc: currVoice[kk].acc,
+            mode: currVoice[kk].mode,
+            accidentals: currVoice[kk].accidentals.filter(function (acc) {
+              return acc.acc !== 'natural';
+            })
+          };
+          break;
+        }
+      }
     } else {
-      newLines.push(line);
-      linesWithoutStaff++;
+      outputLines[action.line] = lines[action.ogLine];
+    }
+  } // There could be some missing info - if the tune passed in was incomplete or had different lengths for different voices or was missing a voice altogether - just fill in the gaps.
+
+
+  for (var ii = 0; ii < outputLines.length; ii++) {
+    if (outputLines[ii].staff) {
+      outputLines[ii].staff = outputLines[ii].staff.filter(function (el) {
+        return el != null;
+      });
     }
   }
 
-  tune.lines = newLines;
+  return outputLines;
+}
+
+function findLineBreaks(lines, lineBreakArray) {
+  // lineBreakArray is an array of all of the sections of the tune - often there will just be one
+  // section unless there is a subtitle or other non-music lines. Each of the elements of
+  // Each element of lineBreakArray is an array of the zero-based last measure of the line.
+  var lineBreakIndexes = [];
+  var lbai = 0;
+  var lineCounter = 0;
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+
+    if (line.staff) {
+      var lineStart = lineCounter;
+      var lineBreaks = lineBreakArray[lbai];
+      lbai++;
+
+      for (var j = 0; j < line.staff.length; j++) {
+        var staff = line.staff[j];
+
+        for (var k = 0; k < staff.voices.length; k++) {
+          var outputLine = lineStart;
+          var measureNumber = 0;
+          var lbi = 0;
+          var voice = staff.voices[k];
+          var start = 0;
+
+          for (var e = 0; e < voice.length; e++) {
+            var el = voice[e];
+
+            if (el.el_type === 'bar') {
+              if (lineBreaks[lbi] === measureNumber) {
+                lineBreakIndexes.push({
+                  ogLine: i,
+                  line: outputLine,
+                  staff: j,
+                  voice: k,
+                  start: start,
+                  end: e
+                });
+                start = e + 1;
+                outputLine++;
+                lineCounter = Math.max(lineCounter, outputLine);
+                lbi++;
+              }
+
+              measureNumber++;
+            }
+          }
+
+          lineBreakIndexes.push({
+            ogLine: i,
+            line: outputLine,
+            staff: j,
+            voice: k,
+            start: start,
+            end: voice.length
+          });
+          outputLine++;
+          lineCounter = Math.max(lineCounter, outputLine);
+        }
+      }
+    } else {
+      lineBreakIndexes.push({
+        ogLine: i,
+        line: outputLine
+      });
+      outputLine++;
+      lineCounter = Math.max(lineCounter, outputLine);
+    }
+  }
+
+  return lineBreakIndexes;
+}
+
+function removeLineBreaks(lines) {
+  // This concatenates all the music lines. If there is a non-music line then it leaves it,
+  // so it returns an array of lines where there is no more than one staff line in a row.
+  var outputLines = [];
+  var startLine = true;
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+
+    if (line.staff) {
+      if (startLine) {
+        outputLines.push(line);
+        startLine = false;
+      } else {
+        //	copy all voices to the previous line
+        var output = outputLines[outputLines.length - 1];
+        var staffs = line.staff;
+
+        for (var j = 0; j < staffs.length; j++) {
+          if (output.staff.length <= j) output.staff.push({
+            voices: []
+          });
+          var staff = staffs[j];
+          var voices = staff.voices;
+
+          for (var k = 0; k < voices.length; k++) {
+            if (output.staff[j].voices.length < k) output.staff[j].voices.push([]);
+            var voice = voices[k];
+            output.staff[j].voices[k] = output.staff[j].voices[k].concat(voice);
+          }
+        }
+      }
+    } else {
+      startLine = true;
+      outputLines.push(line);
+    }
+  }
+
+  return outputLines;
 }
 
 function freeFormLineBreaks(widths, lineBreakPoint) {
@@ -11342,166 +11422,6 @@ function freeFormLineBreaks(widths, lineBreakPoint) {
     lineBreaks: lineBreaks,
     totals: totals
   };
-} // function createLineTestArray(numLines, numMeasures, maxMeasuresPerLine, minMeasuresPerLine) {
-// 	var tries = [];
-// 	// To get all the iterations, it is every digit in a particular base-numbering system.
-// 	// That is, we want to generate every number that is (numLines-1) digits, in base (max-min+1)
-// 	// For instance, for 5 lines where the min is 6 and max is 8, we want ever combination of 4 digits in base 3.
-// 	var base = maxMeasuresPerLine - minMeasuresPerLine + 1;
-// 	var digits = numLines - 1; // The last digit is fixed: it is what ever is needed to sum up to the total number of measures.
-// 	var done = false;
-// 	var iter = 0;
-// 	while (!done) {
-// 		var attempt = [];
-// 		var num = iter;
-// 		var total = 0;
-// 		for (var d = digits - 1; d >= 0; d--) {
-// 			attempt[d] = (num % base) + minMeasuresPerLine;
-// 			num = Math.floor(num / base);
-// 			total += attempt[d];
-// 		}
-// 		if (num > 0)
-// 			done = true; // continue until we exceed the greatest number. We know because there is a remainer.
-// 		else {
-// 			var lastLine = numMeasures - total;
-// 			if (lastLine >= minMeasuresPerLine && lastLine <= maxMeasuresPerLine) {
-// 				attempt[digits] = lastLine;
-// 				tries.push(attempt);
-// 			}
-// 			iter++;
-// 		}
-// 	}
-// 	return tries;
-// }
-// function getVariance(attempt, idealLineBreak, widths, allowableOverage) {
-// 	var measureNumber = 0;
-// 	var thisWorstVariance = 0;
-// 	for (var j = 0; j < attempt.length; j++) {
-// 		var lineWidth = 0;
-// 		var measuresThisLine = attempt[j];
-// 		for (var k = 0; k < measuresThisLine; k++) {
-// 			lineWidth += widths[measureNumber++];
-// 		}
-// 		if (lineWidth > allowableOverage)
-// 			return null;
-// 		var variance = Math.abs(lineWidth - idealLineBreak);
-// 		if (variance > thisWorstVariance)
-// 			thisWorstVariance = variance;
-// 	}
-// 	return thisWorstVariance;
-// }
-// function getMaxVariance(widths, lineBreakPoint, lineBreaks) {
-// 	var maxVariance = 0;
-// 	var numLines = lineBreaks.length + 1; // the last line doesn't have an explicit break
-// 	var measureNumber = 0;
-// 	var totals = [];
-// 	for (var i = 0; i <= lineBreaks.length; i++) {
-// 		var breakMeasure = (i === lineBreaks.length) ? widths.length : lineBreaks[i];
-// 		var thisTotal = 0;
-// 		for (var j = measureNumber; j < breakMeasure; j++) {
-// 			thisTotal += widths[j];
-// 		}
-// 		measureNumber = breakMeasure;
-// 		var thisVariance = thisTotal <= lineBreakPoint ? lineBreakPoint - thisTotal : 1000000;
-// 		totals.push({total: thisTotal, variance: thisVariance})
-// 		maxVariance = Math.max(maxVariance, thisVariance);
-// 	}
-//
-// 	console.log(lineBreakPoint, totals)
-// 	return maxVariance;
-// }
-
-
-function getVariance(widths, lineBreaks) {
-  var numLines = lineBreaks.length + 1; // the last line doesn't have an explicit break
-
-  var avg = widths.total / numLines;
-  var largestVariance = 0;
-  var measureNumber = 0;
-
-  for (var i = 0; i <= lineBreaks.length; i++) {
-    var breakMeasure = i === lineBreaks.length ? widths.measureWidths.length - 1 : lineBreaks[i];
-    var thisVariance = lineVariance(widths.measureWidths, measureNumber, breakMeasure, avg);
-    measureNumber = breakMeasure + 1;
-    largestVariance = Math.max(largestVariance, thisVariance);
-  }
-
-  return largestVariance;
-} // function getAvgVariance(widths, lineBreakPoint, lineBreaks) {
-// 	var totalVariance = 0;
-// 	var numLines = lineBreaks.length + 1; // the last line doesn't have an explicit break
-// 	var measureNumber = 0;
-// 	for (var i = 0; i <= lineBreaks.length; i++) {
-// 		var breakMeasure = (i === lineBreaks.length) ? widths.length : lineBreaks[i];
-// 		var thisTotal = 0;
-// 		for (var j = measureNumber; j < breakMeasure; j++) {
-// 			thisTotal += widths[j];
-// 		}
-// 		measureNumber = breakMeasure;
-// 		var thisVariance = Math.abs(lineBreakPoint - thisTotal);
-// 		totalVariance += thisVariance;
-// 	}
-//
-// 	return totalVariance / numLines;
-// }
-
-
-function lineVariance(widths, start, end, avg) {
-  var thisTotal = lineWidth(widths, start, end);
-  var thisVariance = Math.abs(avg - thisTotal);
-  return thisVariance;
-}
-
-function lineWidth(widths, start, end) {
-  var thisTotal = 0;
-
-  for (var j = start; j <= end; j++) {
-    thisTotal += widths[j];
-  }
-
-  return thisTotal;
-} // TODO-PER: For long pieces of music, this can get long, so stop finding the combinations at an arbitrary place.
-
-
-function getAttempts(widths, start, linesLeft, min, max, lastLines) {
-  var MAX_COMBINATIONS = 1200;
-  var acc = 0;
-  var attempts = [];
-
-  for (var i = start; i < widths.length && acc < max; i++) {
-    acc += widths[i];
-    if (acc > max) break;
-
-    if (acc > min) {
-      if (linesLeft > 0 && attempts.length < MAX_COMBINATIONS) {
-        var nextLines = getAttempts(widths, i + 1, linesLeft - 1, min, max, lastLines);
-
-        for (var j = 0; j < nextLines.length; j++) {
-          attempts.push([i].concat(nextLines[j]));
-        }
-      }
-
-      if (linesLeft === 1 && lastLines.indexOf(i) >= 0) attempts.push([i]);
-    }
-  }
-
-  return attempts;
-}
-
-function lastLinePossibilities(widths, start, min, max) {
-  var acc = 0;
-  var possibilities = [];
-
-  for (var i = widths.length - 1; i >= 0; i--) {
-    acc += widths[i];
-    if (acc > max) break;
-
-    if (acc > min && i < start) {
-      possibilities.push(i - 1);
-    }
-  }
-
-  return possibilities;
 }
 
 function clone(arr) {
@@ -11574,8 +11494,9 @@ function oneTry(measureWidths, idealWidths, accumulator, lineAccumulator, lineWi
 }
 
 function optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation) {
-  //	figure out how many lines - That's one more than was tried before.
-  var numLines = Math.ceil(widths.total / lineBreakPoint) + 1; //	get the ideal width for a line (cumulative width / num lines) - approx the same as lineBreakPoint except for rounding
+  //	figure out how many lines
+  var numLines = Math.ceil(widths.total / lineBreakPoint); // + 1 TODO-PER: this used to be plus one - not sure why
+  //	get the ideal width for a line (cumulative width / num lines) - approx the same as lineBreakPoint except for rounding
 
   var idealWidth = Math.floor(widths.total / numLines); //	get each ideal line width (1*ideal, 2*ideal, 3*ideal, etc)
 
@@ -11646,135 +11567,7 @@ function optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation) {
     lineBreaks: otherTries[smallestIndex].lineBreaks,
     variance: otherTries[smallestIndex].highestVariance
   };
-} // 	// Instead of having to try all the different combinations to find the best, we start with an important piece of knowledge about the lineBreaks we are given:
-// 	// If there is a line too short, it is the last one.
-// 	// So, let's just do a couple of tweaks to see how it works to add one or two measures to the last line.
-// 	var avg = widths.total / (lineBreaks.length + 1);
-// 	var variance = getVariance(widths, lineBreaks);
-// 	var variancePct = variance/lineBreakPoint*100;
-//
-// 	if (lineBreaks.length === 0)
-// 		return { failed: true, reason: "Only one line." };
-//
-// 	var lastLineStart = lineBreaks[lineBreaks.length-1]+1;
-// 	var lastLineVariance = lineVariance(widths.measureWidths, lastLineStart, widths.measureWidths.length, avg);
-// 	if (variance > lastLineVariance)
-// 		return { failed: true, reason: "Last line is not too short." };
-//
-// 	// Let's get a list of all combinations that have a possibility of working. That is, all combinations where no line has a variance larger than "variance".
-// 	var lastLines = lastLinePossibilities(widths.measureWidths, lastLineStart, avg - variance, avg + variance);
-// 	var attempts = getAttempts(widths.measureWidths, 0, lineBreaks.length, avg - variance, avg + variance, lastLines);
-// 	//console.log(attempts, avg - variance, avg + variance);
-//
-// 	var failed = true;
-// 	for (var i = 0; i < attempts.length; i++) {
-// 		var newVariance = getVariance(widths, attempts[i]);
-// 		if (newVariance < variance) {
-// 			explanation.attempts.push({
-// 				type: "Optimize try", lineBreaks: attempts[i],
-// 				variance: Math.round(variance), newVariance: Math.round(newVariance),
-// 				totalAttempts: attempts.length
-// 			});
-// 			variance = newVariance;
-// 			lineBreaks = attempts[i];
-// 			failed = false;
-// 		}
-// 	}
-// 	if (failed) {
-// 		explanation.attempts.push({ type: "Optimize try", lineBreaks: lineBreaks, variance: variance, reason: "None of the " + attempts.length + " attempts were better." });
-// 		// TODO-PER: This shouldn't be necessary, but just try to move one measure down and see if it helps.
-// 		if (lineBreaks.length > 0) {
-// 			var attempt = [].concat(lineBreaks);
-// 			attempt[attempt.length - 1]--;
-// 			newVariance = getVariance(widths, attempt);
-// 			explanation.attempts.push({
-// 				type: "Optimize last try", lineBreaks: attempts[i],
-// 				variance: Math.round(variance), newVariance: Math.round(newVariance),
-// 				totalAttempts: attempts.length
-// 			});
-// 			if (newVariance < variance) {
-// 				variance = newVariance;
-// 				lineBreaks = attempt;
-// 				failed = false;
-// 			}
-// 		}
-// 	}
-// 	// Let's squeeze the line successively until it spills onto an extra line, then take the option with the lowest variance
-// 	// var targetNumLines = lineBreaks.length;
-// 	// var newNumLines = targetNumLines;
-// 	// var TRY_INCREMENT = 1;
-// 	// var tryBreakPoint = lineBreakPoint - TRY_INCREMENT;
-// 	// var failed = true;
-// 	// while (targetNumLines === newNumLines && tryBreakPoint > 50) {
-// 	// 	var ff = freeFormLineBreaks(widths.measureWidths, tryBreakPoint);
-// 	// 	newNumLines = ff.lineBreaks.length;
-// 	// 	if (newNumLines === targetNumLines) {
-// 	// 		var newVariance = getVariance(widths, ff.lineBreaks);
-// 	// 		var newVariancePct = newVariance/tryBreakPoint*100;
-// 	// 		explanation.attempts.push({type: "Optimize try", tryBreakPoint: Math.round(tryBreakPoint), lineBreaks: ff.lineBreaks, totals: ff.totals,
-// 	// 			variance: Math.round(variance), newVariance: Math.round(newVariance), variancePct: Math.round(variancePct), newVariancePct: Math.round(newVariancePct)
-// 	// 		});
-// 	// 		if (newVariancePct < variancePct) {
-// 	// 			variancePct = newVariancePct;
-// 	// 			lineBreaks = ff.lineBreaks;
-// 	// 			failed = false;
-// 	// 		}
-// 	// 	} else {
-// 	// 		explanation.attempts.push({type: "Optimize try", explanation: "Exceeded number of lines." , tryBreakPoint: Math.round(tryBreakPoint), lineBreaks: ff.lineBreaks, totals: ff.totals, variance: variance, avg: avg, variancePct: variancePct});
-// 	// 	}
-// 	// 	tryBreakPoint -= TRY_INCREMENT;
-// 	// }
-//
-// 	return { failed: failed, lineBreaks: lineBreaks, variance: variance };
-// }
-// function fixedNumLinesBreaks(widths, numLines, allowOver, allowableVariance) {
-// 	var idealLineBreak = widths.total / numLines;
-// 	// If all the measures had the same amount of stuff, then the ave would be correct.
-// 	// We will test all the combinations from one less to one more than the average.
-// 	var averageMeasuresPerLine = Math.round(widths.measureWidths.length / numLines);
-// 	var minMeasuresPerLine = Math.max(averageMeasuresPerLine - 1, 1);
-// 	var maxMeasuresPerLine = averageMeasuresPerLine + 1;
-// 	var tries = createLineTestArray(numLines, widths.measureWidths.length, maxMeasuresPerLine, minMeasuresPerLine);
-// 	console.log("fixedNumLinesBreaks tests ("+minMeasuresPerLine+'-'+maxMeasuresPerLine+")", numLines, tries.length)
-//
-// 	// For each possible number of measures per line, see which has the closest spacing to the ideal.
-// 	var bestCase = -1;
-// 	var bestCaseVariance = 1000000;
-// 	for (var i = 0 ; i < tries.length; i++) {
-// 		var attempt = tries[i];
-// 		var variance = getVariance(attempt, idealLineBreak, widths.measureWidths, allowOver ? allowableVariance : 0);
-// 		if (variance !== null) {
-// 			if (variance < bestCaseVariance) {
-// 				bestCaseVariance = variance;
-// 				bestCase = i;
-// 			}
-// 		}
-// 	}
-// 	var failed = true;
-// 	// For debugging, recreate the line widths
-// 	var totals = [];
-// 	if (bestCase >= 0) {
-// 		failed = false;
-// 		var index = 0;
-// 		for (i = 0; i < tries[bestCase].length; i++) {
-// 			var total = 0;
-// 			for (var j = 0; j < tries[bestCase][i]; j++) {
-// 				total += widths.measureWidths[index++];
-// 			}
-// 			totals.push(Math.round(total));
-// 		}
-// 		// We now have an array that contains the number of measures per line, but we want to return the absolute measure number to break on.
-// 		if (tries[bestCase].length > 0) {
-// 			tries[bestCase][0]--; // The results should contain the last measure number on the line, zero-based.
-// 			for (i = 1; i < tries[bestCase].length; i++)
-// 				tries[bestCase][i] += tries[bestCase][i - 1]; // This sets the zero-based measure number
-// 			// The last line is implied and we don't need to return it
-// 			tries[bestCase].pop();
-// 		}
-// 	}
-// 	return { failed: failed, lineBreaks: tries[bestCase], bestCaseVariance: Math.round(bestCaseVariance), totals: totals };
-// }
-
+}
 
 function fixedMeasureLineBreaks(widths, lineBreakPoint, preferredMeasuresPerLine) {
   var lineBreaks = [];
@@ -11804,8 +11597,7 @@ function fixedMeasureLineBreaks(widths, lineBreakPoint, preferredMeasuresPerLine
   };
 }
 
-function getRevisedTune(lineBreaks, staffWidth, abcString, params, Parse) {
-  var abcParser = new Parse();
+function getRevisedTuneParams(lineBreaks, staffWidth, params) {
   var revisedParams = {
     lineBreaks: lineBreaks,
     staffwidth: staffWidth
@@ -11817,23 +11609,22 @@ function getRevisedTune(lineBreaks, staffWidth, abcString, params, Parse) {
     }
   }
 
-  abcParser.parse(abcString, revisedParams);
   return {
-    tune: abcParser.getTune(),
     revisedParams: revisedParams
   };
 }
 
-function calcLineWraps(tune, widths, abcString, params, Parse, engraver_controller) {
+function calcLineWraps(tune, widths, params) {
   // For calculating how much can go on the line, it depends on the width of the line. It is a convenience to just divide it here
   // by the minimum spacing instead of multiplying the min spacing later.
   // The scaling works differently: this is done by changing the scaling of the outer SVG, so the scaling needs to be compensated
   // for here, because the actual width will be different from the calculated numbers.
   // If the desired width is less than the margin, just punt and return the original tune
-  if (params.staffwidth < widths.left) {
+  //console.log(widths)
+  if (widths.length === 0 || params.staffwidth < widths[0].left) {
     return {
-      explanation: "Staffwidth is narrower than the margin",
-      tune: tune,
+      reParse: false,
+      explanation: "Staff width is narrower than the margin",
       revisedParams: params
     };
   }
@@ -11844,101 +11635,74 @@ function calcLineWraps(tune, widths, abcString, params, Parse, engraver_controll
   var maxSpacing = params.wrap.maxSpacing ? Math.max(parseFloat(params.wrap.maxSpacing), 1) : undefined;
   if (params.wrap.lastLineLimit && !maxSpacing) maxSpacing = Math.max(parseFloat(params.wrap.lastLineLimit), 1); // var targetHeight = params.wrap.targetHeight ? Math.max(parseInt(params.wrap.targetHeight, 10), 100) : undefined;
 
-  var preferredMeasuresPerLine = params.wrap.preferredMeasuresPerLine ? Math.max(parseInt(params.wrap.preferredMeasuresPerLine, 10), 1) : undefined;
-  var lineBreakPoint = (params.staffwidth - widths.left) / minSpacing / scale;
-  var minLineSize = (params.staffwidth - widths.left) / maxSpacing / scale;
-  var allowableVariance = (params.staffwidth - widths.left) / minSpacingLimit / scale;
-  var explanation = {
-    widths: widths,
-    lineBreakPoint: lineBreakPoint,
-    minLineSize: minLineSize,
-    attempts: [],
-    staffWidth: params.staffwidth,
-    minWidth: Math.round(allowableVariance)
-  }; // If there is a preferred number of measures per line, test that first. If none of the lines is too long, then we're finished.
+  var preferredMeasuresPerLine = params.wrap.preferredMeasuresPerLine ? Math.max(parseInt(params.wrap.preferredMeasuresPerLine, 10), 0) : undefined;
+  var accumulatedLineBreaks = [];
+  var explanations = [];
 
-  var lineBreaks = null;
+  for (var s = 0; s < widths.length; s++) {
+    var section = widths[s];
+    var usableWidth = params.staffwidth - section.left;
+    var lineBreakPoint = usableWidth / minSpacing / scale;
+    var minLineSize = usableWidth / maxSpacing / scale;
+    var allowableVariance = usableWidth / minSpacingLimit / scale;
+    var explanation = {
+      widths: section,
+      lineBreakPoint: lineBreakPoint,
+      minLineSize: minLineSize,
+      attempts: [],
+      staffWidth: params.staffwidth,
+      minWidth: Math.round(allowableVariance)
+    }; // If there is a preferred number of measures per line, test that first. If none of the lines is too long, then we're finished.
 
-  if (preferredMeasuresPerLine) {
-    var f = fixedMeasureLineBreaks(widths.measureWidths, lineBreakPoint, preferredMeasuresPerLine);
-    explanation.attempts.push({
-      type: "Fixed Measures Per Line",
-      preferredMeasuresPerLine: preferredMeasuresPerLine,
-      lineBreaks: f.lineBreaks,
-      failed: f.failed,
-      totals: f.totals
-    });
-    if (!f.failed) lineBreaks = f.lineBreaks;
-  } // If we don't have lineBreaks yet, use the free form method of line breaks.
-  // This will be called either if Preferred Measures is not used, or if the music is just weird - like a single measure is way too crowded.
+    var lineBreaks = null;
+
+    if (preferredMeasuresPerLine) {
+      var f = fixedMeasureLineBreaks(section.measureWidths, lineBreakPoint, preferredMeasuresPerLine);
+      explanation.attempts.push({
+        type: "Fixed Measures Per Line",
+        preferredMeasuresPerLine: preferredMeasuresPerLine,
+        lineBreaks: f.lineBreaks,
+        failed: f.failed,
+        totals: f.totals
+      });
+      if (!f.failed) lineBreaks = f.lineBreaks;
+    } // If we don't have lineBreaks yet, use the free form method of line breaks.
+    // This will be called either if Preferred Measures is not used, or if the music is just weird - like a single measure is way too crowded.
 
 
-  if (!lineBreaks) {
-    var ff = freeFormLineBreaks(widths.measureWidths, lineBreakPoint);
-    explanation.attempts.push({
-      type: "Free Form",
-      lineBreaks: ff.lineBreaks,
-      totals: ff.totals
-    });
-    lineBreaks = ff.lineBreaks; // We now have an acceptable number of lines, but the measures may not be optimally distributed. See if there is a better distribution.
+    if (!lineBreaks) {
+      var ff = freeFormLineBreaks(section.measureWidths, lineBreakPoint);
+      explanation.attempts.push({
+        type: "Free Form",
+        lineBreaks: ff.lineBreaks,
+        totals: ff.totals
+      });
+      lineBreaks = ff.lineBreaks; // We now have an acceptable number of lines, but the measures may not be optimally distributed. See if there is a better distribution.
 
-    ff = optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation);
-    explanation.attempts.push({
-      type: "Optimize",
-      failed: ff.failed,
-      reason: ff.reason,
-      lineBreaks: ff.lineBreaks,
-      totals: ff.totals
-    });
-    if (!ff.failed) lineBreaks = ff.lineBreaks;
+      if (lineBreaks.length > 0 && section.measureWidths.length < 25) {
+        // Only do this if everything doesn't fit on one line.
+        // This is an intensive operation and it is optional so just do it for shorter music.
+        ff = optimizeLineWidths(section, lineBreakPoint, lineBreaks, explanation);
+        explanation.attempts.push({
+          type: "Optimize",
+          failed: ff.failed,
+          reason: ff.reason,
+          lineBreaks: ff.lineBreaks,
+          totals: ff.totals
+        });
+        if (!ff.failed) lineBreaks = ff.lineBreaks;
+      }
+    }
+
+    accumulatedLineBreaks.push(lineBreaks);
+    explanations.push(explanation);
   } // If the vertical space exceeds targetHeight, remove a line and try again. If that is too crowded, then don't use it.
 
 
   var staffWidth = params.staffwidth;
-  var ret = getRevisedTune(lineBreaks, staffWidth, abcString, params, Parse);
-  var newWidths = engraver_controller.getMeasureWidths(ret.tune);
-  var gotTune = true; // If we adjust the num lines, set this to false
-
-  explanation.attempts.push({
-    type: "heightCheck",
-    height: newWidths.height
-  }); // 	if all of the lines are too sparse, make the width narrower.
-  // TODO-PER: implement this case.
-  // If one line and the spacing is > maxSpacing, make the width narrower.
-
-  if (lineBreaks.length === 0 && minLineSize > widths.total) {
-    staffWidth = widths.total * maxSpacing * scale + widths.left;
-    explanation.attempts.push({
-      type: "too sparse",
-      newWidth: Math.round(staffWidth)
-    });
-    gotTune = false;
-  } // if (ret.lineBreaks.length === 0) {
-  // 	// Everything fits on one line, so see if there is TOO much space and the staff width needs to be shortened.
-  // 	if (minLineSize > 0 && ret.totalThisLine > 0 && ret.totalThisLine < minLineSize)
-  // 		staffWidth = staffWidth / (minLineSize / ret.totalThisLine);
-  // } else if (ret.totalThisLine < minLineSize) {
-  // 	// the last line is too short, so attempt to redistribute by changing the min.
-  // 	// We will try more and less space alternatively. The space can't be less than 1.0, and we'll try in 0.1 increments.
-  // 	var minTrys = [];
-  // 	if (minSpacing > 1.1)
-  // 		minTrys.push(minSpacing - 0.1);
-  // 	minTrys.push(minSpacing + 0.1);
-  // 	if (minSpacing > 1.2)
-  // 		minTrys.push(minSpacing - 0.2);
-  // 	minTrys.push(minSpacing + 0.2);
-  // 	if (minSpacing > 1.3)
-  // 		minTrys.push(minSpacing - 0.3);
-  // 	minTrys.push(minSpacing + 0.3);
-  // 	for (var i = 0; i < minTrys.length && ret.totalThisLine < minLineSize; i++) {
-  // 		lineBreakPoint = (params.staffwidth - widths.left) / minTrys[i] / scale;
-  // 		ret = calcLineBreaks(widths.measureWidths, lineBreakPoint);
-  // 	}
-  // }
-
-
-  if (!gotTune) ret = getRevisedTune(lineBreaks, staffWidth, abcString, params, Parse);
-  ret.explanation = explanation;
+  var ret = getRevisedTuneParams(accumulatedLineBreaks, staffWidth, params);
+  ret.explanation = explanations;
+  ret.reParse = true;
   return ret;
 }
 
@@ -12679,9 +12443,20 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
 
 
     if (elem.elem) {
-      var ms = timeToRealTime(elem.time) / beatFraction / startingTempo * 60 * 1000;
-      if (elem.elem.currentTrackMilliseconds === undefined) elem.elem.currentTrackMilliseconds = ms;else {
-        if (elem.elem.currentTrackMilliseconds.length === undefined) elem.elem.currentTrackMilliseconds = [elem.elem.currentTrackMilliseconds, ms];else elem.elem.currentTrackMilliseconds.push(ms);
+      var rt = timeToRealTime(elem.time);
+      var ms = rt / beatFraction / startingTempo * 60 * 1000;
+
+      if (elem.elem.currentTrackMilliseconds === undefined) {
+        elem.elem.currentTrackMilliseconds = ms;
+        elem.elem.currentTrackWholeNotes = rt;
+      } else {
+        if (elem.elem.currentTrackMilliseconds.length === undefined) {
+          elem.elem.currentTrackMilliseconds = [elem.elem.currentTrackMilliseconds, ms];
+          elem.elem.currentTrackWholeNotes = [elem.elem.currentTrackWholeNotes, rt];
+        } else {
+          elem.elem.currentTrackMilliseconds.push(ms);
+          elem.elem.currentTrackWholeNotes.push(rt);
+        }
       }
     } //var tieAdjustment = 0;
 
@@ -16789,10 +16564,6 @@ AbsoluteElement.prototype.setHint = function () {
   this.hint = true;
 };
 
-AbsoluteElement.prototype.isIE =
-/*@cc_on!@*/
-false; //IE detector
-
 AbsoluteElement.prototype.highlight = function (klass, color) {
   if (klass === undefined) klass = "abcjs-note_selected";
   if (color === undefined) color = "#ff0000";
@@ -16869,1223 +16640,1217 @@ var addChord = __webpack_require__(/*! ./add-chord */ "./src/write/add-chord.js"
 
 var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
 
-var AbstractEngraver;
+var getDuration = function getDuration(elem) {
+  var d = 0;
 
-(function () {
-  "use strict";
-
-  var getDuration = function getDuration(elem) {
-    var d = 0;
-
-    if (elem.duration) {
-      d = elem.duration;
-    }
-
-    return d;
-  };
-
-  var hint = false;
-  var chartable = {
-    rest: {
-      0: "rests.whole",
-      1: "rests.half",
-      2: "rests.quarter",
-      3: "rests.8th",
-      4: "rests.16th",
-      5: "rests.32nd",
-      6: "rests.64th",
-      7: "rests.128th",
-      "multi": "rests.multimeasure"
-    },
-    note: {
-      "-1": "noteheads.dbl",
-      0: "noteheads.whole",
-      1: "noteheads.half",
-      2: "noteheads.quarter",
-      3: "noteheads.quarter",
-      4: "noteheads.quarter",
-      5: "noteheads.quarter",
-      6: "noteheads.quarter",
-      7: "noteheads.quarter",
-      'nostem': "noteheads.quarter"
-    },
-    rhythm: {
-      "-1": "noteheads.slash.whole",
-      0: "noteheads.slash.whole",
-      1: "noteheads.slash.whole",
-      2: "noteheads.slash.quarter",
-      3: "noteheads.slash.quarter",
-      4: "noteheads.slash.quarter",
-      5: "noteheads.slash.quarter",
-      6: "noteheads.slash.quarter",
-      7: "noteheads.slash.quarter",
-      nostem: "noteheads.slash.nostem"
-    },
-    x: {
-      "-1": "noteheads.indeterminate",
-      0: "noteheads.indeterminate",
-      1: "noteheads.indeterminate",
-      2: "noteheads.indeterminate",
-      3: "noteheads.indeterminate",
-      4: "noteheads.indeterminate",
-      5: "noteheads.indeterminate",
-      6: "noteheads.indeterminate",
-      7: "noteheads.indeterminate",
-      nostem: "noteheads.indeterminate"
-    },
-    harmonic: {
-      "-1": "noteheads.harmonic.quarter",
-      0: "noteheads.harmonic.quarter",
-      1: "noteheads.harmonic.quarter",
-      2: "noteheads.harmonic.quarter",
-      3: "noteheads.harmonic.quarter",
-      4: "noteheads.harmonic.quarter",
-      5: "noteheads.harmonic.quarter",
-      6: "noteheads.harmonic.quarter",
-      7: "noteheads.harmonic.quarter",
-      nostem: "noteheads.harmonic.quarter"
-    },
-    uflags: {
-      3: "flags.u8th",
-      4: "flags.u16th",
-      5: "flags.u32nd",
-      6: "flags.u64th"
-    },
-    dflags: {
-      3: "flags.d8th",
-      4: "flags.d16th",
-      5: "flags.d32nd",
-      6: "flags.d64th"
-    }
-  };
-
-  AbstractEngraver = function AbstractEngraver(getTextSize, tuneNumber, options) {
-    this.decoration = new Decoration();
-    this.getTextSize = getTextSize;
-    this.tuneNumber = tuneNumber;
-    this.isBagpipes = options.bagpipes;
-    this.flatBeams = options.flatbeams;
-    this.graceSlurs = options.graceSlurs;
-    this.reset();
-  };
-
-  AbstractEngraver.prototype.reset = function () {
-    this.slurs = {};
-    this.ties = [];
-    this.voiceScale = 1;
-    this.slursbyvoice = {};
-    this.tiesbyvoice = {};
-    this.endingsbyvoice = {};
-    this.scaleByVoice = {};
-    this.tripletmultiplier = 1;
-    this.abcline = undefined;
-    this.accidentalSlot = undefined;
-    this.accidentalshiftx = undefined;
-    this.dotshiftx = undefined;
-    this.hasVocals = false;
-    this.minY = undefined;
-    this.partstartelem = undefined;
-    this.startlimitelem = undefined;
-    this.stemdir = undefined;
-  };
-
-  AbstractEngraver.prototype.setStemHeight = function (heightInPixels) {
-    this.stemHeight = Math.round(heightInPixels * 10 / spacing.STEP) / 10;
-  };
-
-  AbstractEngraver.prototype.getCurrentVoiceId = function (s, v) {
-    return "s" + s + "v" + v;
-  };
-
-  AbstractEngraver.prototype.pushCrossLineElems = function (s, v) {
-    this.slursbyvoice[this.getCurrentVoiceId(s, v)] = this.slurs;
-    this.tiesbyvoice[this.getCurrentVoiceId(s, v)] = this.ties;
-    this.endingsbyvoice[this.getCurrentVoiceId(s, v)] = this.partstartelem;
-    this.scaleByVoice[this.getCurrentVoiceId(s, v)] = this.voiceScale;
-  };
-
-  AbstractEngraver.prototype.popCrossLineElems = function (s, v) {
-    this.slurs = this.slursbyvoice[this.getCurrentVoiceId(s, v)] || {};
-    this.ties = this.tiesbyvoice[this.getCurrentVoiceId(s, v)] || [];
-    this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId(s, v)];
-    this.voiceScale = this.scaleByVoice[this.getCurrentVoiceId(s, v)];
-    if (this.voiceScale === undefined) this.voiceScale = 1;
-  };
-
-  AbstractEngraver.prototype.containsLyrics = function (staves) {
-    for (var i = 0; i < staves.length; i++) {
-      for (var j = 0; j < staves[i].voices.length; j++) {
-        for (var k = 0; k < staves[i].voices[j].length; k++) {
-          var el = staves[i].voices[j][k];
-
-          if (el.lyric) {
-            // We just want to see if there are vocals below the music to know where to put the dynamics.
-            if (!el.positioning || el.positioning.vocalPosition === 'below') this.hasVocals = true;
-            return;
-          }
-        }
-      }
-    }
-  };
-
-  AbstractEngraver.prototype.createABCLine = function (staffs, tempo, getTextSize) {
-    this.minY = 2; // PER: This will be the lowest that any note reaches. It will be used to set the dynamics row.
-    // See if there are any lyrics on this line.
-
-    this.containsLyrics(staffs);
-    var staffgroup = new StaffGroupElement(this.getTextSize);
-    this.tempoSet = false;
-
-    for (var s = 0; s < staffs.length; s++) {
-      if (hint) this.restoreState();
-      hint = false;
-      this.createABCStaff(staffgroup, staffs[s], tempo, s);
-    }
-
-    return staffgroup;
-  };
-
-  AbstractEngraver.prototype.createABCStaff = function (staffgroup, abcstaff, tempo, s) {
-    // If the tempo is passed in, then the first element should get the tempo attached to it.
-    staffgroup.getTextSize.updateFonts(abcstaff);
-
-    for (var v = 0; v < abcstaff.voices.length; v++) {
-      var voice = new VoiceElement(v, abcstaff.voices.length);
-
-      if (v === 0) {
-        voice.barfrom = abcstaff.connectBarLines === "start" || abcstaff.connectBarLines === "continue";
-        voice.barto = abcstaff.connectBarLines === "continue" || abcstaff.connectBarLines === "end";
-      } else {
-        voice.duplicate = true; // bar lines and other duplicate info need not be created
-      }
-
-      if (abcstaff.title && abcstaff.title[v]) {
-        voice.header = abcstaff.title[v].replace(/\\n/g, "\n");
-        voice.headerPosition = 6 + staffgroup.getTextSize.baselineToCenter(voice.header, "voicefont", 'staff-extra voice-name', v, abcstaff.voices.length) / spacing.STEP;
-      }
-
-      var clef = createClef(abcstaff.clef, this.tuneNumber);
-
-      if (clef) {
-        if (v === 0 && abcstaff.barNumber) {
-          this.addMeasureNumber(abcstaff.barNumber, clef);
-        }
-
-        voice.addChild(clef);
-        this.startlimitelem = clef; // limit ties here
-      }
-
-      var keySig = createKeySignature(abcstaff.key, this.tuneNumber);
-
-      if (keySig) {
-        voice.addChild(keySig);
-        this.startlimitelem = keySig; // limit ties here
-      }
-
-      if (abcstaff.meter) {
-        if (abcstaff.meter.type === 'specified') {
-          this.measureLength = abcstaff.meter.value[0].num / abcstaff.meter.value[0].den;
-        } else this.measureLength = 1;
-
-        var ts = createTimeSignature(abcstaff.meter, this.tuneNumber);
-        voice.addChild(ts);
-        this.startlimitelem = ts; // limit ties here
-      }
-
-      if (voice.duplicate) voice.children = []; // we shouldn't reprint the above if we're reusing the same staff. We just created them to get the right spacing.
-
-      var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
-      staffgroup.addVoice(voice, s, staffLines);
-      var isSingleLineStaff = staffLines === 1;
-      this.createABCVoice(abcstaff.voices[v], tempo, s, v, isSingleLineStaff, voice);
-      staffgroup.setStaffLimits(voice);
-
-      if (v === 0) {
-        // only do brace and bracket processing on the first voice, otherwise it would be done twice.
-        if (abcstaff.brace === "start" || !staffgroup.brace && abcstaff.brace) {
-          if (!staffgroup.brace) staffgroup.brace = [];
-          staffgroup.brace.push(new BraceElem(voice, "brace"));
-        } else if (abcstaff.brace === "end" && staffgroup.brace) {
-          staffgroup.brace[staffgroup.brace.length - 1].setBottomStaff(voice);
-        } else if (abcstaff.brace === "continue" && staffgroup.brace) {
-          staffgroup.brace[staffgroup.brace.length - 1].continuing(voice);
-        }
-
-        if (abcstaff.bracket === "start" || !staffgroup.bracket && abcstaff.bracket) {
-          if (!staffgroup.bracket) staffgroup.bracket = [];
-          staffgroup.bracket.push(new BraceElem(voice, "bracket"));
-        } else if (abcstaff.bracket === "end" && staffgroup.bracket) {
-          staffgroup.bracket[staffgroup.bracket.length - 1].setBottomStaff(voice);
-        } else if (abcstaff.bracket === "continue" && staffgroup.bracket) {
-          staffgroup.bracket[staffgroup.bracket.length - 1].continuing(voice);
-        }
-      }
-    }
-  };
-
-  function getBeamGroup(abcline, pos) {
-    // If there are notes beamed together, they are handled as a group, so find all of them here.
-    var elem = abcline[pos];
-    if (elem.el_type !== 'note' || !elem.startBeam || elem.endBeam) return {
-      count: 1,
-      elem: elem
-    };
-    var group = [];
-
-    while (pos < abcline.length && abcline[pos].el_type === 'note') {
-      group.push(abcline[pos]);
-      if (abcline[pos].endBeam) break;
-      pos++;
-    }
-
-    return {
-      count: group.length,
-      elem: group
-    };
+  if (elem.duration) {
+    d = elem.duration;
   }
 
-  AbstractEngraver.prototype.createABCVoice = function (abcline, tempo, s, v, isSingleLineStaff, voice) {
-    this.popCrossLineElems(s, v);
-    this.stemdir = this.isBagpipes ? "down" : null;
-    this.abcline = abcline;
+  return d;
+};
 
-    if (this.partstartelem) {
-      this.partstartelem = new EndingElem("", null, null);
-      voice.addOther(this.partstartelem);
-    }
+var hint = false;
+var chartable = {
+  rest: {
+    0: "rests.whole",
+    1: "rests.half",
+    2: "rests.quarter",
+    3: "rests.8th",
+    4: "rests.16th",
+    5: "rests.32nd",
+    6: "rests.64th",
+    7: "rests.128th",
+    "multi": "rests.multimeasure"
+  },
+  note: {
+    "-1": "noteheads.dbl",
+    0: "noteheads.whole",
+    1: "noteheads.half",
+    2: "noteheads.quarter",
+    3: "noteheads.quarter",
+    4: "noteheads.quarter",
+    5: "noteheads.quarter",
+    6: "noteheads.quarter",
+    7: "noteheads.quarter",
+    'nostem': "noteheads.quarter"
+  },
+  rhythm: {
+    "-1": "noteheads.slash.whole",
+    0: "noteheads.slash.whole",
+    1: "noteheads.slash.whole",
+    2: "noteheads.slash.quarter",
+    3: "noteheads.slash.quarter",
+    4: "noteheads.slash.quarter",
+    5: "noteheads.slash.quarter",
+    6: "noteheads.slash.quarter",
+    7: "noteheads.slash.quarter",
+    nostem: "noteheads.slash.nostem"
+  },
+  x: {
+    "-1": "noteheads.indeterminate",
+    0: "noteheads.indeterminate",
+    1: "noteheads.indeterminate",
+    2: "noteheads.indeterminate",
+    3: "noteheads.indeterminate",
+    4: "noteheads.indeterminate",
+    5: "noteheads.indeterminate",
+    6: "noteheads.indeterminate",
+    7: "noteheads.indeterminate",
+    nostem: "noteheads.indeterminate"
+  },
+  harmonic: {
+    "-1": "noteheads.harmonic.quarter",
+    0: "noteheads.harmonic.quarter",
+    1: "noteheads.harmonic.quarter",
+    2: "noteheads.harmonic.quarter",
+    3: "noteheads.harmonic.quarter",
+    4: "noteheads.harmonic.quarter",
+    5: "noteheads.harmonic.quarter",
+    6: "noteheads.harmonic.quarter",
+    7: "noteheads.harmonic.quarter",
+    nostem: "noteheads.harmonic.quarter"
+  },
+  uflags: {
+    3: "flags.u8th",
+    4: "flags.u16th",
+    5: "flags.u32nd",
+    6: "flags.u64th"
+  },
+  dflags: {
+    3: "flags.d8th",
+    4: "flags.d16th",
+    5: "flags.d32nd",
+    6: "flags.d64th"
+  }
+};
 
-    var voiceNumber = voice.voicetotal < 2 ? -1 : voice.voicenumber;
+var AbstractEngraver = function AbstractEngraver(getTextSize, tuneNumber, options) {
+  this.decoration = new Decoration();
+  this.getTextSize = getTextSize;
+  this.tuneNumber = tuneNumber;
+  this.isBagpipes = options.bagpipes;
+  this.flatBeams = options.flatbeams;
+  this.graceSlurs = options.graceSlurs;
+  this.reset();
+};
 
-    for (var slur in this.slurs) {
-      if (this.slurs.hasOwnProperty(slur)) {
-        // this is already a slur element, but it was created for the last line, so recreate it.
-        this.slurs[slur] = new TieElem({
-          force: this.slurs[slur].force,
-          voiceNumber: voiceNumber,
-          stemDir: this.slurs[slur].stemDir,
-          style: this.slurs[slur].dotted
-        });
-        if (hint) this.slurs[slur].setHint();
-        voice.addOther(this.slurs[slur]);
+AbstractEngraver.prototype.reset = function () {
+  this.slurs = {};
+  this.ties = [];
+  this.voiceScale = 1;
+  this.slursbyvoice = {};
+  this.tiesbyvoice = {};
+  this.endingsbyvoice = {};
+  this.scaleByVoice = {};
+  this.tripletmultiplier = 1;
+  this.abcline = undefined;
+  this.accidentalSlot = undefined;
+  this.accidentalshiftx = undefined;
+  this.dotshiftx = undefined;
+  this.hasVocals = false;
+  this.minY = undefined;
+  this.partstartelem = undefined;
+  this.startlimitelem = undefined;
+  this.stemdir = undefined;
+};
+
+AbstractEngraver.prototype.setStemHeight = function (heightInPixels) {
+  this.stemHeight = Math.round(heightInPixels * 10 / spacing.STEP) / 10;
+};
+
+AbstractEngraver.prototype.getCurrentVoiceId = function (s, v) {
+  return "s" + s + "v" + v;
+};
+
+AbstractEngraver.prototype.pushCrossLineElems = function (s, v) {
+  this.slursbyvoice[this.getCurrentVoiceId(s, v)] = this.slurs;
+  this.tiesbyvoice[this.getCurrentVoiceId(s, v)] = this.ties;
+  this.endingsbyvoice[this.getCurrentVoiceId(s, v)] = this.partstartelem;
+  this.scaleByVoice[this.getCurrentVoiceId(s, v)] = this.voiceScale;
+};
+
+AbstractEngraver.prototype.popCrossLineElems = function (s, v) {
+  this.slurs = this.slursbyvoice[this.getCurrentVoiceId(s, v)] || {};
+  this.ties = this.tiesbyvoice[this.getCurrentVoiceId(s, v)] || [];
+  this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId(s, v)];
+  this.voiceScale = this.scaleByVoice[this.getCurrentVoiceId(s, v)];
+  if (this.voiceScale === undefined) this.voiceScale = 1;
+};
+
+AbstractEngraver.prototype.containsLyrics = function (staves) {
+  for (var i = 0; i < staves.length; i++) {
+    for (var j = 0; j < staves[i].voices.length; j++) {
+      for (var k = 0; k < staves[i].voices[j].length; k++) {
+        var el = staves[i].voices[j][k];
+
+        if (el.lyric) {
+          // We just want to see if there are vocals below the music to know where to put the dynamics.
+          if (!el.positioning || el.positioning.vocalPosition === 'below') this.hasVocals = true;
+          return;
+        }
       }
     }
+  }
+};
 
-    for (var i = 0; i < this.ties.length; i++) {
-      // this is already a tie element, but it was created for the last line, so recreate it.
-      this.ties[i] = new TieElem({
-        force: this.ties[i].force,
-        stemDir: this.ties[i].stemDir,
+AbstractEngraver.prototype.createABCLine = function (staffs, tempo) {
+  this.minY = 2; // PER: This will be the lowest that any note reaches. It will be used to set the dynamics row.
+  // See if there are any lyrics on this line.
+
+  this.containsLyrics(staffs);
+  var staffgroup = new StaffGroupElement(this.getTextSize);
+  this.tempoSet = false;
+
+  for (var s = 0; s < staffs.length; s++) {
+    if (hint) this.restoreState();
+    hint = false;
+    this.createABCStaff(staffgroup, staffs[s], tempo, s);
+  }
+
+  return staffgroup;
+};
+
+AbstractEngraver.prototype.createABCStaff = function (staffgroup, abcstaff, tempo, s) {
+  // If the tempo is passed in, then the first element should get the tempo attached to it.
+  staffgroup.getTextSize.updateFonts(abcstaff);
+
+  for (var v = 0; v < abcstaff.voices.length; v++) {
+    var voice = new VoiceElement(v, abcstaff.voices.length);
+
+    if (v === 0) {
+      voice.barfrom = abcstaff.connectBarLines === "start" || abcstaff.connectBarLines === "continue";
+      voice.barto = abcstaff.connectBarLines === "continue" || abcstaff.connectBarLines === "end";
+    } else {
+      voice.duplicate = true; // bar lines and other duplicate info need not be created
+    }
+
+    if (abcstaff.title && abcstaff.title[v]) {
+      voice.header = abcstaff.title[v].replace(/\\n/g, "\n");
+      voice.headerPosition = 6 + staffgroup.getTextSize.baselineToCenter(voice.header, "voicefont", 'staff-extra voice-name', v, abcstaff.voices.length) / spacing.STEP;
+    }
+
+    var clef = createClef(abcstaff.clef, this.tuneNumber);
+
+    if (clef) {
+      if (v === 0 && abcstaff.barNumber) {
+        this.addMeasureNumber(abcstaff.barNumber, clef);
+      }
+
+      voice.addChild(clef);
+      this.startlimitelem = clef; // limit ties here
+    }
+
+    var keySig = createKeySignature(abcstaff.key, this.tuneNumber);
+
+    if (keySig) {
+      voice.addChild(keySig);
+      this.startlimitelem = keySig; // limit ties here
+    }
+
+    if (abcstaff.meter) {
+      if (abcstaff.meter.type === 'specified') {
+        this.measureLength = abcstaff.meter.value[0].num / abcstaff.meter.value[0].den;
+      } else this.measureLength = 1;
+
+      var ts = createTimeSignature(abcstaff.meter, this.tuneNumber);
+      voice.addChild(ts);
+      this.startlimitelem = ts; // limit ties here
+    }
+
+    if (voice.duplicate) voice.children = []; // we shouldn't reprint the above if we're reusing the same staff. We just created them to get the right spacing.
+
+    var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
+    staffgroup.addVoice(voice, s, staffLines);
+    var isSingleLineStaff = staffLines === 1;
+    this.createABCVoice(abcstaff.voices[v], tempo, s, v, isSingleLineStaff, voice);
+    staffgroup.setStaffLimits(voice);
+
+    if (v === 0) {
+      // only do brace and bracket processing on the first voice, otherwise it would be done twice.
+      if (abcstaff.brace === "start" || !staffgroup.brace && abcstaff.brace) {
+        if (!staffgroup.brace) staffgroup.brace = [];
+        staffgroup.brace.push(new BraceElem(voice, "brace"));
+      } else if (abcstaff.brace === "end" && staffgroup.brace) {
+        staffgroup.brace[staffgroup.brace.length - 1].setBottomStaff(voice);
+      } else if (abcstaff.brace === "continue" && staffgroup.brace) {
+        staffgroup.brace[staffgroup.brace.length - 1].continuing(voice);
+      }
+
+      if (abcstaff.bracket === "start" || !staffgroup.bracket && abcstaff.bracket) {
+        if (!staffgroup.bracket) staffgroup.bracket = [];
+        staffgroup.bracket.push(new BraceElem(voice, "bracket"));
+      } else if (abcstaff.bracket === "end" && staffgroup.bracket) {
+        staffgroup.bracket[staffgroup.bracket.length - 1].setBottomStaff(voice);
+      } else if (abcstaff.bracket === "continue" && staffgroup.bracket) {
+        staffgroup.bracket[staffgroup.bracket.length - 1].continuing(voice);
+      }
+    }
+  }
+};
+
+function getBeamGroup(abcline, pos) {
+  // If there are notes beamed together, they are handled as a group, so find all of them here.
+  var elem = abcline[pos];
+  if (elem.el_type !== 'note' || !elem.startBeam || elem.endBeam) return {
+    count: 1,
+    elem: elem
+  };
+  var group = [];
+
+  while (pos < abcline.length && abcline[pos].el_type === 'note') {
+    group.push(abcline[pos]);
+    if (abcline[pos].endBeam) break;
+    pos++;
+  }
+
+  return {
+    count: group.length,
+    elem: group
+  };
+}
+
+AbstractEngraver.prototype.createABCVoice = function (abcline, tempo, s, v, isSingleLineStaff, voice) {
+  this.popCrossLineElems(s, v);
+  this.stemdir = this.isBagpipes ? "down" : null;
+  this.abcline = abcline;
+
+  if (this.partstartelem) {
+    this.partstartelem = new EndingElem("", null, null);
+    voice.addOther(this.partstartelem);
+  }
+
+  var voiceNumber = voice.voicetotal < 2 ? -1 : voice.voicenumber;
+
+  for (var slur in this.slurs) {
+    if (this.slurs.hasOwnProperty(slur)) {
+      // this is already a slur element, but it was created for the last line, so recreate it.
+      this.slurs[slur] = new TieElem({
+        force: this.slurs[slur].force,
         voiceNumber: voiceNumber,
-        style: this.ties[i].dotted
+        stemDir: this.slurs[slur].stemDir,
+        style: this.slurs[slur].dotted
       });
-      if (hint) this.ties[i].setHint();
-      voice.addOther(this.ties[i]);
-    }
-
-    for (var j = 0; j < this.abcline.length; j++) {
-      setAveragePitch(this.abcline[j]);
-      this.minY = Math.min(this.abcline[j].minpitch, this.minY);
-    }
-
-    var isFirstStaff = s === 0;
-    var pos = 0;
-
-    while (pos < this.abcline.length) {
-      var ret = getBeamGroup(this.abcline, pos);
-      var abselems = this.createABCElement(isFirstStaff, isSingleLineStaff, voice, ret.elem);
-
-      if (abselems) {
-        for (i = 0; i < abselems.length; i++) {
-          if (!this.tempoSet && tempo && !tempo.suppress) {
-            this.tempoSet = true;
-            var tempoElement = new AbsoluteElement(tempo, 0, 0, "tempo", this.tuneNumber, {});
-            tempoElement.addFixedX(new TempoElement(tempo, this.tuneNumber, createNoteHead));
-            voice.addChild(tempoElement);
-          }
-
-          voice.addChild(abselems[i]);
-        }
-      }
-
-      pos += ret.count;
-    }
-
-    this.pushCrossLineElems(s, v);
-  };
-
-  AbstractEngraver.prototype.saveState = function () {
-    this.tiesSave = parseCommon.cloneArray(this.ties);
-    this.slursSave = parseCommon.cloneHashOfHash(this.slurs);
-    this.slursbyvoiceSave = parseCommon.cloneHashOfHash(this.slursbyvoice);
-    this.tiesbyvoiceSave = parseCommon.cloneHashOfArrayOfHash(this.tiesbyvoice);
-  };
-
-  AbstractEngraver.prototype.restoreState = function () {
-    this.ties = parseCommon.cloneArray(this.tiesSave);
-    this.slurs = parseCommon.cloneHashOfHash(this.slursSave);
-    this.slursbyvoice = parseCommon.cloneHashOfHash(this.slursbyvoiceSave);
-    this.tiesbyvoice = parseCommon.cloneHashOfArrayOfHash(this.tiesbyvoiceSave);
-  }; // function writeMeasureWidth(voice) {
-  // 	var width = 0;
-  // 	for (var i = voice.children.length-1; i >= 0; i--) {
-  // 		var elem = voice.children[i];
-  // 		if (elem.abcelem.el_type === 'bar')
-  // 			break;
-  // 		width += elem.w;
-  // 	}
-  // 	return new RelativeElement(width.toFixed(2), -70, 0, undefined, {type:"debug"});
-  // }
-  // return an array of AbsoluteElement
-
-
-  AbstractEngraver.prototype.createABCElement = function (isFirstStaff, isSingleLineStaff, voice, elem) {
-    var elemset = [];
-
-    switch (elem.el_type) {
-      case undefined:
-        // it is undefined if we were passed an array in - an array means a set of notes that should be beamed together.
-        elemset = this.createBeam(isSingleLineStaff, voice, elem);
-        break;
-
-      case "note":
-        elemset[0] = this.createNote(elem, false, isSingleLineStaff, voice);
-
-        if (this.triplet && this.triplet.isClosed()) {
-          voice.addOther(this.triplet);
-          this.triplet = null;
-          this.tripletmultiplier = 1;
-        }
-
-        break;
-
-      case "bar":
-        elemset[0] = this.createBarLine(voice, elem, isFirstStaff);
-        if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true; //	  elemset[0].addChild(writeMeasureWidth(voice));
-
-        break;
-
-      case "meter":
-        elemset[0] = createTimeSignature(elem, this.tuneNumber);
-        this.startlimitelem = elemset[0]; // limit ties here
-
-        if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
-        break;
-
-      case "clef":
-        elemset[0] = createClef(elem, this.tuneNumber);
-        if (!elemset[0]) return null;
-        if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
-        break;
-
-      case "key":
-        var absKey = createKeySignature(elem, this.tuneNumber);
-
-        if (absKey) {
-          elemset[0] = absKey;
-          this.startlimitelem = elemset[0]; // limit ties here
-        }
-
-        if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
-        break;
-
-      case "stem":
-        this.stemdir = elem.direction;
-        break;
-
-      case "part":
-        var abselem = new AbsoluteElement(elem, 0, 0, 'part', this.tuneNumber);
-        var dim = this.getTextSize.calc(elem.title, 'partsfont', "part");
-        abselem.addFixedX(new RelativeElement(elem.title, 0, 0, undefined, {
-          type: "part",
-          height: dim.height / spacing.STEP
-        }));
-        elemset[0] = abselem;
-        break;
-
-      case "tempo":
-        var abselem3 = new AbsoluteElement(elem, 0, 0, 'tempo', this.tuneNumber);
-        abselem3.addFixedX(new TempoElement(elem, this.tuneNumber, createNoteHead));
-        elemset[0] = abselem3;
-        break;
-
-      case "style":
-        if (elem.head === "normal") delete this.style;else this.style = elem.head;
-        break;
-
-      case "hint":
-        hint = true;
-        this.saveState();
-        break;
-
-      case "midi":
-        // This has no effect on the visible music, so just skip it.
-        break;
-
-      case "scale":
-        this.voiceScale = elem.size;
-        break;
-
-      default:
-        var abselem2 = new AbsoluteElement(elem, 0, 0, 'unsupported', this.tuneNumber);
-        abselem2.addFixed(new RelativeElement("element type " + elem.el_type, 0, 0, undefined, {
-          type: "debug"
-        }));
-        elemset[0] = abselem2;
-    }
-
-    return elemset;
-  };
-
-  function setAveragePitch(elem) {
-    if (elem.pitches) {
-      sortPitch(elem);
-      var sum = 0;
-
-      for (var p = 0; p < elem.pitches.length; p++) {
-        sum += elem.pitches[p].verticalPos;
-      }
-
-      elem.averagepitch = sum / elem.pitches.length;
-      elem.minpitch = elem.pitches[0].verticalPos;
-      elem.maxpitch = elem.pitches[elem.pitches.length - 1].verticalPos;
+      if (hint) this.slurs[slur].setHint();
+      voice.addOther(this.slurs[slur]);
     }
   }
 
-  AbstractEngraver.prototype.createBeam = function (isSingleLineStaff, voice, elems) {
-    var abselemset = [];
-    var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams, elems[0]);
-    if (hint) beamelem.setHint();
+  for (var i = 0; i < this.ties.length; i++) {
+    // this is already a tie element, but it was created for the last line, so recreate it.
+    this.ties[i] = new TieElem({
+      force: this.ties[i].force,
+      stemDir: this.ties[i].stemDir,
+      voiceNumber: voiceNumber,
+      style: this.ties[i].dotted
+    });
+    if (hint) this.ties[i].setHint();
+    voice.addOther(this.ties[i]);
+  }
 
-    for (var i = 0; i < elems.length; i++) {
-      var elem = elems[i];
-      var abselem = this.createNote(elem, true, isSingleLineStaff, voice);
-      abselemset.push(abselem);
-      beamelem.add(abselem);
+  for (var j = 0; j < this.abcline.length; j++) {
+    setAveragePitch(this.abcline[j]);
+    this.minY = Math.min(this.abcline[j].minpitch, this.minY);
+  }
+
+  var isFirstStaff = s === 0;
+  var pos = 0;
+
+  while (pos < this.abcline.length) {
+    var ret = getBeamGroup(this.abcline, pos);
+    var abselems = this.createABCElement(isFirstStaff, isSingleLineStaff, voice, ret.elem);
+
+    if (abselems) {
+      for (i = 0; i < abselems.length; i++) {
+        if (!this.tempoSet && tempo && !tempo.suppress) {
+          this.tempoSet = true;
+          var tempoElement = new AbsoluteElement(tempo, 0, 0, "tempo", this.tuneNumber, {});
+          tempoElement.addFixedX(new TempoElement(tempo, this.tuneNumber, createNoteHead));
+          voice.addChild(tempoElement);
+        }
+
+        voice.addChild(abselems[i]);
+      }
+    }
+
+    pos += ret.count;
+  }
+
+  this.pushCrossLineElems(s, v);
+};
+
+AbstractEngraver.prototype.saveState = function () {
+  this.tiesSave = parseCommon.cloneArray(this.ties);
+  this.slursSave = parseCommon.cloneHashOfHash(this.slurs);
+  this.slursbyvoiceSave = parseCommon.cloneHashOfHash(this.slursbyvoice);
+  this.tiesbyvoiceSave = parseCommon.cloneHashOfArrayOfHash(this.tiesbyvoice);
+};
+
+AbstractEngraver.prototype.restoreState = function () {
+  this.ties = parseCommon.cloneArray(this.tiesSave);
+  this.slurs = parseCommon.cloneHashOfHash(this.slursSave);
+  this.slursbyvoice = parseCommon.cloneHashOfHash(this.slursbyvoiceSave);
+  this.tiesbyvoice = parseCommon.cloneHashOfArrayOfHash(this.tiesbyvoiceSave);
+}; // function writeMeasureWidth(voice) {
+// 	var width = 0;
+// 	for (var i = voice.children.length-1; i >= 0; i--) {
+// 		var elem = voice.children[i];
+// 		if (elem.abcelem.el_type === 'bar')
+// 			break;
+// 		width += elem.w;
+// 	}
+// 	return new RelativeElement(width.toFixed(2), -70, 0, undefined, {type:"debug"});
+// }
+// return an array of AbsoluteElement
+
+
+AbstractEngraver.prototype.createABCElement = function (isFirstStaff, isSingleLineStaff, voice, elem) {
+  var elemset = [];
+
+  switch (elem.el_type) {
+    case undefined:
+      // it is undefined if we were passed an array in - an array means a set of notes that should be beamed together.
+      elemset = this.createBeam(isSingleLineStaff, voice, elem);
+      break;
+
+    case "note":
+      elemset[0] = this.createNote(elem, false, isSingleLineStaff, voice);
 
       if (this.triplet && this.triplet.isClosed()) {
         voice.addOther(this.triplet);
         this.triplet = null;
         this.tripletmultiplier = 1;
       }
+
+      break;
+
+    case "bar":
+      elemset[0] = this.createBarLine(voice, elem, isFirstStaff);
+      if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true; //	  elemset[0].addChild(writeMeasureWidth(voice));
+
+      break;
+
+    case "meter":
+      elemset[0] = createTimeSignature(elem, this.tuneNumber);
+      this.startlimitelem = elemset[0]; // limit ties here
+
+      if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
+      break;
+
+    case "clef":
+      elemset[0] = createClef(elem, this.tuneNumber);
+      if (!elemset[0]) return null;
+      if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
+      break;
+
+    case "key":
+      var absKey = createKeySignature(elem, this.tuneNumber);
+
+      if (absKey) {
+        elemset[0] = absKey;
+        this.startlimitelem = elemset[0]; // limit ties here
+      }
+
+      if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
+      break;
+
+    case "stem":
+      this.stemdir = elem.direction;
+      break;
+
+    case "part":
+      var abselem = new AbsoluteElement(elem, 0, 0, 'part', this.tuneNumber);
+      var dim = this.getTextSize.calc(elem.title, 'partsfont', "part");
+      abselem.addFixedX(new RelativeElement(elem.title, 0, 0, undefined, {
+        type: "part",
+        height: dim.height / spacing.STEP
+      }));
+      elemset[0] = abselem;
+      break;
+
+    case "tempo":
+      var abselem3 = new AbsoluteElement(elem, 0, 0, 'tempo', this.tuneNumber);
+      abselem3.addFixedX(new TempoElement(elem, this.tuneNumber, createNoteHead));
+      elemset[0] = abselem3;
+      break;
+
+    case "style":
+      if (elem.head === "normal") delete this.style;else this.style = elem.head;
+      break;
+
+    case "hint":
+      hint = true;
+      this.saveState();
+      break;
+
+    case "midi":
+      // This has no effect on the visible music, so just skip it.
+      break;
+
+    case "scale":
+      this.voiceScale = elem.size;
+      break;
+
+    default:
+      var abselem2 = new AbsoluteElement(elem, 0, 0, 'unsupported', this.tuneNumber);
+      abselem2.addFixed(new RelativeElement("element type " + elem.el_type, 0, 0, undefined, {
+        type: "debug"
+      }));
+      elemset[0] = abselem2;
+  }
+
+  return elemset;
+};
+
+function setAveragePitch(elem) {
+  if (elem.pitches) {
+    sortPitch(elem);
+    var sum = 0;
+
+    for (var p = 0; p < elem.pitches.length; p++) {
+      sum += elem.pitches[p].verticalPos;
     }
 
-    beamelem.calcDir();
-    voice.addBeam(beamelem);
-    return abselemset;
-  };
+    elem.averagepitch = sum / elem.pitches.length;
+    elem.minpitch = elem.pitches[0].verticalPos;
+    elem.maxpitch = elem.pitches[elem.pitches.length - 1].verticalPos;
+  }
+}
 
-  var sortPitch = function sortPitch(elem) {
-    var sorted;
+AbstractEngraver.prototype.createBeam = function (isSingleLineStaff, voice, elems) {
+  var abselemset = [];
+  var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams, elems[0]);
+  if (hint) beamelem.setHint();
 
-    do {
-      sorted = true;
+  for (var i = 0; i < elems.length; i++) {
+    var elem = elems[i];
+    var abselem = this.createNote(elem, true, isSingleLineStaff, voice);
+    abselemset.push(abselem);
+    beamelem.add(abselem);
 
-      for (var p = 0; p < elem.pitches.length - 1; p++) {
-        if (elem.pitches[p].pitch > elem.pitches[p + 1].pitch) {
-          sorted = false;
-          var tmp = elem.pitches[p];
-          elem.pitches[p] = elem.pitches[p + 1];
-          elem.pitches[p + 1] = tmp;
-        }
-      }
-    } while (!sorted);
-  };
+    if (this.triplet && this.triplet.isClosed()) {
+      voice.addOther(this.triplet);
+      this.triplet = null;
+      this.tripletmultiplier = 1;
+    }
+  }
 
-  var ledgerLines = function ledgerLines(abselem, minPitch, maxPitch, isRest, symbolWidth, additionalLedgers, dir, dx, scale) {
-    for (var i = maxPitch; i > 11; i--) {
-      if (i % 2 === 0 && !isRest) {
-        abselem.addFixed(new RelativeElement(null, dx, (symbolWidth + 4) * scale, i, {
-          type: "ledger"
-        }));
+  beamelem.calcDir();
+  voice.addBeam(beamelem);
+  return abselemset;
+};
+
+var sortPitch = function sortPitch(elem) {
+  var sorted;
+
+  do {
+    sorted = true;
+
+    for (var p = 0; p < elem.pitches.length - 1; p++) {
+      if (elem.pitches[p].pitch > elem.pitches[p + 1].pitch) {
+        sorted = false;
+        var tmp = elem.pitches[p];
+        elem.pitches[p] = elem.pitches[p + 1];
+        elem.pitches[p + 1] = tmp;
       }
     }
+  } while (!sorted);
+};
 
-    for (i = minPitch; i < 1; i++) {
-      if (i % 2 === 0 && !isRest) {
-        abselem.addFixed(new RelativeElement(null, dx, (symbolWidth + 4) * scale, i, {
-          type: "ledger"
-        }));
-      }
-    }
-
-    for (i = 0; i < additionalLedgers.length; i++) {
-      // PER: draw additional ledgers
-      var ofs = symbolWidth;
-      if (dir === 'down') ofs = -ofs;
-      abselem.addFixed(new RelativeElement(null, ofs + dx, (symbolWidth + 4) * scale, additionalLedgers[i], {
+var ledgerLines = function ledgerLines(abselem, minPitch, maxPitch, isRest, symbolWidth, additionalLedgers, dir, dx, scale) {
+  for (var i = maxPitch; i > 11; i--) {
+    if (i % 2 === 0 && !isRest) {
+      abselem.addFixed(new RelativeElement(null, dx, (symbolWidth + 4) * scale, i, {
         type: "ledger"
       }));
     }
-  };
+  }
 
-  AbstractEngraver.prototype.addGraceNotes = function (elem, voice, abselem, notehead, stemHeight, isBagpipes, roomtaken) {
-    var gracescale = 3 / 5;
-    var graceScaleStem = 3.5 / 5; // TODO-PER: empirically found constant.
-
-    stemHeight = Math.round(stemHeight * graceScaleStem);
-    var gracebeam = null;
-    var flag;
-
-    if (elem.gracenotes.length > 1) {
-      gracebeam = new BeamElem(stemHeight, "grace", isBagpipes);
-      if (hint) gracebeam.setHint();
-      gracebeam.mainNote = abselem; // this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
+  for (i = minPitch; i < 1; i++) {
+    if (i % 2 === 0 && !isRest) {
+      abselem.addFixed(new RelativeElement(null, dx, (symbolWidth + 4) * scale, i, {
+        type: "ledger"
+      }));
     }
+  }
 
-    var i;
-    var graceoffsets = [];
+  for (i = 0; i < additionalLedgers.length; i++) {
+    // PER: draw additional ledgers
+    var ofs = symbolWidth;
+    if (dir === 'down') ofs = -ofs;
+    abselem.addFixed(new RelativeElement(null, ofs + dx, (symbolWidth + 4) * scale, additionalLedgers[i], {
+      type: "ledger"
+    }));
+  }
+};
 
-    for (i = elem.gracenotes.length - 1; i >= 0; i--) {
-      // figure out where to place each gracenote
-      roomtaken += 10;
-      graceoffsets[i] = roomtaken;
+AbstractEngraver.prototype.addGraceNotes = function (elem, voice, abselem, notehead, stemHeight, isBagpipes, roomtaken) {
+  var gracescale = 3 / 5;
+  var graceScaleStem = 3.5 / 5; // TODO-PER: empirically found constant.
 
-      if (elem.gracenotes[i].accidental) {
-        roomtaken += 7;
-      }
+  stemHeight = Math.round(stemHeight * graceScaleStem);
+  var gracebeam = null;
+  var flag;
+
+  if (elem.gracenotes.length > 1) {
+    gracebeam = new BeamElem(stemHeight, "grace", isBagpipes);
+    if (hint) gracebeam.setHint();
+    gracebeam.mainNote = abselem; // this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
+  }
+
+  var i;
+  var graceoffsets = [];
+
+  for (i = elem.gracenotes.length - 1; i >= 0; i--) {
+    // figure out where to place each gracenote
+    roomtaken += 10;
+    graceoffsets[i] = roomtaken;
+
+    if (elem.gracenotes[i].accidental) {
+      roomtaken += 7;
     }
+  }
 
-    for (i = 0; i < elem.gracenotes.length; i++) {
-      var gracepitch = elem.gracenotes[i].verticalPos;
-      flag = gracebeam ? null : chartable.uflags[isBagpipes ? 5 : 3];
-      var accidentalSlot = [];
-      var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale * this.voiceScale, accidentalSlot, false);
-      ret.notehead.highestVert = ret.notehead.pitch + stemHeight;
-      var grace = ret.notehead;
-      this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up", true);
-      abselem.addExtra(grace); // PER: added acciaccatura slash
+  for (i = 0; i < elem.gracenotes.length; i++) {
+    var gracepitch = elem.gracenotes[i].verticalPos;
+    flag = gracebeam ? null : chartable.uflags[isBagpipes ? 5 : 3];
+    var accidentalSlot = [];
+    var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale * this.voiceScale, accidentalSlot, false);
+    ret.notehead.highestVert = ret.notehead.pitch + stemHeight;
+    var grace = ret.notehead;
+    this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up", true);
+    abselem.addExtra(grace); // PER: added acciaccatura slash
 
-      if (elem.gracenotes[i].acciaccatura) {
-        var pos = elem.gracenotes[i].verticalPos + 7 * gracescale; // the same formula that determines the flag position.
+    if (elem.gracenotes[i].acciaccatura) {
+      var pos = elem.gracenotes[i].verticalPos + 7 * gracescale; // the same formula that determines the flag position.
 
-        var dAcciaccatura = gracebeam ? 5 : 6; // just an offset to make it line up correctly.
+      var dAcciaccatura = gracebeam ? 5 : 6; // just an offset to make it line up correctly.
 
-        abselem.addRight(new RelativeElement("flags.ugrace", -graceoffsets[i] + dAcciaccatura, 0, pos, {
-          scalex: gracescale,
-          scaley: gracescale
-        }));
-      }
-
-      if (gracebeam) {
-        // give the beam the necessary info
-        var graceDuration = elem.gracenotes[i].duration / 2;
-        if (isBagpipes) graceDuration /= 2;
-        var pseudoabselem = {
-          heads: [grace],
-          abcelem: {
-            averagepitch: gracepitch,
-            minpitch: gracepitch,
-            maxpitch: gracepitch,
-            duration: graceDuration
-          }
-        };
-        gracebeam.add(pseudoabselem);
-      } else {
-        // draw the stem
-        var p1 = gracepitch + 1 / 3 * gracescale;
-        var p2 = gracepitch + 7 * gracescale;
-        var dx = grace.dx + grace.w;
-        var width = -0.6;
-        abselem.addExtra(new RelativeElement(null, dx, 0, p1, {
-          "type": "stem",
-          "pitch2": p2,
-          linewidth: width
-        }));
-      }
-
-      ledgerLines(abselem, gracepitch, gracepitch, false, glyphs.getSymbolWidth("noteheads.quarter"), [], true, grace.dx - 1, 0.6); // if this is the first grace note, we might want to start a slur.
-      // there is a slur if graceSlurs is specifically set.
-      // there is no slur if it is bagpipes.
-      // there is not a slur if the element is a spacer or invisible rest.
-
-      var isInvisibleRest = elem.rest && (elem.rest.type === "spacer" || elem.rest.type === "invisible");
-
-      if (i === 0 && !isBagpipes && this.graceSlurs && !isInvisibleRest) {
-        // This is the overall slur that is under the grace notes.
-        voice.addOther(new TieElem({
-          anchor1: grace,
-          anchor2: notehead,
-          isGrace: true
-        }));
-      }
+      abselem.addRight(new RelativeElement("flags.ugrace", -graceoffsets[i] + dAcciaccatura, 0, pos, {
+        scalex: gracescale,
+        scaley: gracescale
+      }));
     }
 
     if (gracebeam) {
-      gracebeam.calcDir();
-      voice.addBeam(gracebeam);
-    }
-
-    return roomtaken;
-  };
-
-  function addRestToAbsElement(abselem, elem, duration, dot, isMultiVoice, stemdir, isSingleLineStaff, durlog, voiceScale) {
-    var c;
-    var restpitch = 7;
-    var noteHead;
-    var roomTaken;
-    var roomTakenRight;
-
-    if (isMultiVoice) {
-      if (stemdir === "down") restpitch = 3;
-      if (stemdir === "up") restpitch = 11;
-    } // There is special placement for the percussion staff. If there is one staff line, then move the rest position.
-
-
-    if (isSingleLineStaff) {
-      // The half and whole rests are attached to different lines normally, so we need to tweak their position to get them to both be attached to the same one.
-      if (duration < 0.5) restpitch = 7;else if (duration < 1) restpitch = 7; // half rest
-      else restpitch = 5; // whole rest
-    }
-
-    switch (elem.rest.type) {
-      case "whole":
-        c = chartable.rest[0];
-        elem.averagepitch = restpitch;
-        elem.minpitch = restpitch;
-        elem.maxpitch = restpitch;
-        dot = 0;
-        break;
-
-      case "rest":
-        if (elem.style === "rhythm") // special case for rhythm: rests are a handy way to express the rhythm.
-          c = chartable.rhythm[-durlog];else c = chartable.rest[-durlog];
-        elem.averagepitch = restpitch;
-        elem.minpitch = restpitch;
-        elem.maxpitch = restpitch;
-        break;
-
-      case "invisible":
-      case "spacer":
-        c = "";
-        elem.averagepitch = restpitch;
-        elem.minpitch = restpitch;
-        elem.maxpitch = restpitch;
-        break;
-
-      case "multimeasure":
-        c = chartable.rest['multi'];
-        elem.averagepitch = restpitch;
-        elem.minpitch = restpitch;
-        elem.maxpitch = restpitch;
-        dot = 0;
-        var mmWidth = glyphs.getSymbolWidth(c);
-        abselem.addHead(new RelativeElement(c, -mmWidth, mmWidth * 2, 7));
-        var numMeasures = new RelativeElement("" + elem.rest.text, 0, mmWidth, 16, {
-          type: "multimeasure-text"
-        });
-        abselem.addExtra(numMeasures);
-    }
-
-    if (elem.rest.type !== "multimeasure") {
-      var ret = createNoteHead(abselem, c, {
-        verticalPos: restpitch
-      }, null, 0, 0, null, dot, 0, voiceScale, [], false);
-      noteHead = ret.notehead;
-
-      if (noteHead) {
-        abselem.addHead(noteHead);
-        roomTaken = ret.accidentalshiftx;
-        roomTakenRight = ret.dotshiftx;
-      }
-    }
-
-    return {
-      noteHead: noteHead,
-      roomTaken: roomTaken,
-      roomTakenRight: roomTakenRight
-    };
-  }
-
-  function addIfNotExist(arr, item) {
-    for (var i = 0; i < arr.length; i++) {
-      if (JSON.stringify(arr[i]) === JSON.stringify(item)) return;
-    }
-
-    arr.push(item);
-  }
-
-  AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, stemdir, style, zeroDuration, durlog, nostem, voice) {
-    var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
-
-    var noteHead;
-    var roomTaken = 0;
-    var roomTakenRight = 0;
-    var min;
-    var i;
-    var additionalLedgers = []; // The accidentalSlot will hold a list of all the accidentals on this chord. Each element is a vertical place,
-    // and contains a pitch, which is the last pitch that contains an accidental in that slot. The slots are numbered
-    // from closest to the note to farther left. We only need to know the last accidental we placed because
-    // we know that the pitches are sorted by now.
-
-    var accidentalSlot = [];
-    var symbolWidth = 0;
-    var dir = elem.averagepitch >= 6 ? "down" : "up";
-    if (stemdir) dir = stemdir;
-    style = elem.style ? elem.style : style; // get the style of note head.
-
-    if (!style || style === "normal") style = "note";
-    var noteSymbol;
-    if (zeroDuration) noteSymbol = chartable[style].nostem;else noteSymbol = chartable[style][-durlog];
-    if (!noteSymbol) console.log("noteSymbol:", style, durlog, zeroDuration); // determine elements of chords which should be shifted
-
-    var p;
-
-    for (p = dir === "down" ? elem.pitches.length - 2 : 1; dir === "down" ? p >= 0 : p < elem.pitches.length; p = dir === "down" ? p - 1 : p + 1) {
-      var prev = elem.pitches[dir === "down" ? p + 1 : p - 1];
-      var curr = elem.pitches[p];
-      var delta = dir === "down" ? prev.pitch - curr.pitch : curr.pitch - prev.pitch;
-
-      if (delta <= 1 && !prev.printer_shift) {
-        curr.printer_shift = delta ? "different" : "same";
-
-        if (curr.verticalPos > 11 || curr.verticalPos < 1) {
-          // PER: add extra ledger line
-          additionalLedgers.push(curr.verticalPos - curr.verticalPos % 2);
+      // give the beam the necessary info
+      var graceDuration = elem.gracenotes[i].duration / 2;
+      if (isBagpipes) graceDuration /= 2;
+      var pseudoabselem = {
+        heads: [grace],
+        abcelem: {
+          averagepitch: gracepitch,
+          minpitch: gracepitch,
+          maxpitch: gracepitch,
+          duration: graceDuration
         }
-
-        if (dir === "down") {
-          roomTaken = glyphs.getSymbolWidth(noteSymbol) + 2;
-        } else {
-          dotshiftx = glyphs.getSymbolWidth(noteSymbol) + 2;
-        }
-      }
-    }
-
-    var pp = elem.pitches.length;
-
-    for (p = 0; p < elem.pitches.length; p++) {
-      if (!nostem) {
-        var flag;
-
-        if (dir === "down" && p !== 0 || dir === "up" && p !== pp - 1) {
-          // not the stemmed elem of the chord
-          flag = null;
-        } else {
-          flag = chartable[dir === "down" ? "dflags" : "uflags"][-durlog];
-        }
-      }
-
-      var c;
-
-      if (elem.pitches[p].style) {
-        // There is a style for the whole group of pitches, but there could also be an override for a particular pitch.
-        c = chartable[elem.pitches[p].style][-durlog];
-      } else c = noteSymbol; // The highest position for the sake of placing slurs is itself if the slur is internal. It is the highest position possible if the slur is for the whole chord.
-      // If the note is the only one in the chord, then any slur it has counts as if it were on the whole chord.
-
-
-      elem.pitches[p].highestVert = elem.pitches[p].verticalPos;
-      var isTopWhenStemIsDown = (stemdir === "up" || dir === "up") && p === 0;
-      var isBottomWhenStemIsUp = (stemdir === "down" || dir === "down") && p === pp - 1;
-
-      if (isTopWhenStemIsDown || isBottomWhenStemIsUp) {
-        // place to put slurs if not already on pitches
-        if (elem.startSlur || pp === 1) {
-          elem.pitches[p].highestVert = elem.pitches[pp - 1].verticalPos;
-          if (getDuration(elem) < 1 && (stemdir === "up" || dir === "up")) elem.pitches[p].highestVert += 6; // If the stem is up, then compensate for the length of the stem
-        }
-
-        if (elem.startSlur) {
-          if (!elem.pitches[p].startSlur) elem.pitches[p].startSlur = []; //TODO possibly redundant, provided array is not optional
-
-          for (i = 0; i < elem.startSlur.length; i++) {
-            addIfNotExist(elem.pitches[p].startSlur, elem.startSlur[i]);
-          }
-        }
-
-        if (elem.endSlur) {
-          elem.pitches[p].highestVert = elem.pitches[pp - 1].verticalPos;
-          if (getDuration(elem) < 1 && (stemdir === "up" || dir === "up")) elem.pitches[p].highestVert += 6; // If the stem is up, then compensate for the length of the stem
-
-          if (!elem.pitches[p].endSlur) elem.pitches[p].endSlur = []; //TODO possibly redundant, provided array is not optional
-
-          for (i = 0; i < elem.endSlur.length; i++) {
-            addIfNotExist(elem.pitches[p].endSlur, elem.endSlur[i]);
-          }
-        }
-      }
-
-      var hasStem = !nostem && durlog <= -1;
-      var ret = createNoteHead(abselem, c, elem.pitches[p], dir, 0, -roomTaken, flag, dot, dotshiftx, this.voiceScale, accidentalSlot, !stemdir);
-      symbolWidth = Math.max(glyphs.getSymbolWidth(c), symbolWidth);
-      abselem.extraw -= ret.extraLeft;
-      noteHead = ret.notehead;
-
-      if (noteHead) {
-        this.addSlursAndTies(abselem, elem.pitches[p], noteHead, voice, hasStem ? dir : null, false);
-        if (elem.gracenotes && elem.gracenotes.length > 0) noteHead.bottom = noteHead.bottom - 1; // If there is a tie to the grace notes, leave a little more room for the note to avoid collisions.
-
-        abselem.addHead(noteHead);
-      }
-
-      roomTaken += ret.accidentalshiftx;
-      roomTakenRight = Math.max(roomTakenRight, ret.dotshiftx);
-    } // draw stem from the furthest note to a pitch above/below the stemmed note
-
-
-    if (hasStem) {
-      var stemHeight = Math.round(70 * this.voiceScale) / 10;
-      var p1 = dir === "down" ? elem.minpitch - stemHeight : elem.minpitch + 1 / 3; // PER added stemdir test to make the line meet the note.
-
-      if (p1 > 6 && !stemdir) p1 = 6;
-      var p2 = dir === "down" ? elem.maxpitch - 1 / 3 : elem.maxpitch + stemHeight; // PER added stemdir test to make the line meet the note.
-
-      if (p2 < 6 && !stemdir) p2 = 6;
-      var dx = dir === "down" || abselem.heads.length === 0 ? 0 : abselem.heads[0].w;
-      var width = dir === "down" ? 1 : -1; // TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
-
-      if (noteHead.c === 'noteheads.slash.quarter') {
-        if (dir === 'down') p2 -= 1;else p1 += 1;
-      }
-
-      abselem.addRight(new RelativeElement(null, dx, 0, p1, {
+      };
+      gracebeam.add(pseudoabselem);
+    } else {
+      // draw the stem
+      var p1 = gracepitch + 1 / 3 * gracescale;
+      var p2 = gracepitch + 7 * gracescale;
+      var dx = grace.dx + grace.w;
+      var width = -0.6;
+      abselem.addExtra(new RelativeElement(null, dx, 0, p1, {
         "type": "stem",
         "pitch2": p2,
         linewidth: width
-      })); //var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
-
-      min = Math.min(p1, p2);
-    }
-
-    return {
-      noteHead: noteHead,
-      roomTaken: roomTaken,
-      roomTakenRight: roomTakenRight,
-      min: min,
-      additionalLedgers: additionalLedgers,
-      dir: dir,
-      symbolWidth: symbolWidth
-    };
-  };
-
-  AbstractEngraver.prototype.addLyric = function (abselem, elem) {
-    var lyricStr = "";
-    parseCommon.each(elem.lyric, function (ly) {
-      var div = ly.divider === ' ' ? "" : ly.divider;
-      lyricStr += ly.syllable + div + "\n";
-    });
-    var lyricDim = this.getTextSize.calc(lyricStr, 'vocalfont', "lyric");
-    var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
-    abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, {
-      type: "lyric",
-      position: position,
-      height: lyricDim.height / spacing.STEP,
-      dim: this.getTextSize.attr('vocalfont', "lyric")
-    }));
-  };
-
-  AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaff, voice) {
-    //stem presence: true for drawing stemless notehead
-    var notehead = null;
-    var roomtaken = 0; // room needed to the left of the note
-
-    var roomtakenright = 0; // room needed to the right of the note
-
-    var symbolWidth = 0;
-    var additionalLedgers = []; // PER: handle the case of [bc'], where the b doesn't have a ledger line
-
-    var dir;
-    var duration = getDuration(elem);
-    var zeroDuration = false;
-
-    if (duration === 0) {
-      zeroDuration = true;
-      duration = 0.25;
-      nostem = true;
-    } //PER: zero duration will draw a quarter note head.
-
-
-    var durlog = Math.floor(Math.log(duration) / Math.log(2)); //TODO use getDurlog
-
-    var dot = 0;
-
-    for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2) {
-      ;
-    }
-
-    if (elem.startTriplet) {
-      this.tripletmultiplier = elem.tripletMultiplier;
-    }
-
-    var durationForSpacing = duration * this.tripletmultiplier;
-    if (elem.rest && elem.rest.type === 'multimeasure') durationForSpacing = duration;
-    var absType = elem.rest ? "rest" : "note";
-    var abselem = new AbsoluteElement(elem, durationForSpacing, 1, absType, this.tuneNumber, {
-      durationClassOveride: elem.duration * this.tripletmultiplier
-    });
-    if (hint) abselem.setHint();
-
-    if (elem.rest) {
-      if (this.measureLength === duration && elem.rest.type !== 'invisible' && elem.rest.type !== 'spacer' && elem.rest.type !== 'multimeasure') elem.rest.type = 'whole'; // If the rest is exactly a measure, always use a whole rest
-
-      var ret1 = addRestToAbsElement(abselem, elem, duration, dot, voice.voicetotal > 1, this.stemdir, isSingleLineStaff, durlog, this.voiceScale);
-      notehead = ret1.noteHead;
-      roomtaken = ret1.roomTaken;
-      roomtakenright = ret1.roomTakenRight;
-    } else {
-      var ret2 = this.addNoteToAbcElement(abselem, elem, dot, this.stemdir, this.style, zeroDuration, durlog, nostem, voice);
-      if (ret2.min !== undefined) this.minY = Math.min(ret2.min, this.minY);
-      notehead = ret2.noteHead;
-      roomtaken = ret2.roomTaken;
-      roomtakenright = ret2.roomTakenRight;
-      additionalLedgers = ret2.additionalLedgers;
-      dir = ret2.dir;
-      symbolWidth = ret2.symbolWidth;
-    }
-
-    if (elem.lyric !== undefined) {
-      this.addLyric(abselem, elem);
-    }
-
-    if (elem.gracenotes !== undefined) {
-      roomtaken += this.addGraceNotes(elem, voice, abselem, notehead, this.stemHeight * this.voiceScale, this.isBagpipes, roomtaken);
-    }
-
-    if (elem.decoration) {
-      this.decoration.createDecoration(voice, elem.decoration, abselem.top, notehead ? notehead.w : 0, abselem, roomtaken, dir, abselem.bottom, elem.positioning, this.hasVocals);
-    }
-
-    if (elem.barNumber) {
-      abselem.addFixed(new RelativeElement(elem.barNumber, -10, 0, 0, {
-        type: "barNumber"
       }));
-    } // ledger lines
-
-
-    ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
-
-    if (elem.chord !== undefined) {
-      var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth);
-      roomtaken = ret3.roomTaken;
-      roomtakenright = ret3.roomTakenRight;
     }
 
-    if (elem.startTriplet) {
-      this.triplet = new TripletElem(elem.startTriplet, notehead, {
-        flatBeams: this.flatBeams
-      }); // above is opposite from case of slurs
+    ledgerLines(abselem, gracepitch, gracepitch, false, glyphs.getSymbolWidth("noteheads.quarter"), [], true, grace.dx - 1, 0.6); // if this is the first grace note, we might want to start a slur.
+    // there is a slur if graceSlurs is specifically set.
+    // there is no slur if it is bagpipes.
+    // there is not a slur if the element is a spacer or invisible rest.
+
+    var isInvisibleRest = elem.rest && (elem.rest.type === "spacer" || elem.rest.type === "invisible");
+
+    if (i === 0 && !isBagpipes && this.graceSlurs && !isInvisibleRest) {
+      // This is the overall slur that is under the grace notes.
+      voice.addOther(new TieElem({
+        anchor1: grace,
+        anchor2: notehead,
+        isGrace: true
+      }));
     }
+  }
 
-    if (elem.endTriplet && this.triplet) {
-      this.triplet.setCloseAnchor(notehead);
-    }
+  if (gracebeam) {
+    gracebeam.calcDir();
+    voice.addBeam(gracebeam);
+  }
 
-    if (this.triplet && !elem.startTriplet && !elem.endTriplet && !(elem.rest && elem.rest.type === "spacer")) {
-      this.triplet.middleNote(notehead);
-    }
+  return roomtaken;
+};
 
-    return abselem;
-  };
+function addRestToAbsElement(abselem, elem, duration, dot, isMultiVoice, stemdir, isSingleLineStaff, durlog, voiceScale) {
+  var c;
+  var restpitch = 7;
+  var noteHead;
+  var roomTaken;
+  var roomTakenRight;
 
-  AbstractEngraver.prototype.addSlursAndTies = function (abselem, pitchelem, notehead, voice, dir, isGrace) {
-    if (pitchelem.endTie) {
-      if (this.ties.length > 0) {
-        // If there are multiple open ties, find the one that applies by matching the pitch, if possible.
-        var found = false;
+  if (isMultiVoice) {
+    if (stemdir === "down") restpitch = 3;
+    if (stemdir === "up") restpitch = 11;
+  } // There is special placement for the percussion staff. If there is one staff line, then move the rest position.
 
-        for (var j = 0; j < this.ties.length; j++) {
-          if (this.ties[j].anchor1 && this.ties[j].anchor1.pitch === notehead.pitch) {
-            this.ties[j].setEndAnchor(notehead);
-            this.ties.splice(j, 1);
-            found = true;
-            break;
-          }
-        }
 
-        if (!found) {
-          this.ties[0].setEndAnchor(notehead);
-          this.ties.splice(0, 1);
-        }
-      }
-    }
+  if (isSingleLineStaff) {
+    // The half and whole rests are attached to different lines normally, so we need to tweak their position to get them to both be attached to the same one.
+    if (duration < 0.5) restpitch = 7;else if (duration < 1) restpitch = 7; // half rest
+    else restpitch = 5; // whole rest
+  }
 
-    var voiceNumber = voice.voicetotal < 2 ? -1 : voice.voicenumber;
+  switch (elem.rest.type) {
+    case "whole":
+      c = chartable.rest[0];
+      elem.averagepitch = restpitch;
+      elem.minpitch = restpitch;
+      elem.maxpitch = restpitch;
+      dot = 0;
+      break;
 
-    if (pitchelem.startTie) {
-      var tie = new TieElem({
-        anchor1: notehead,
-        force: this.stemdir === "down" || this.stemdir === "up",
-        stemDir: this.stemdir,
-        isGrace: isGrace,
-        voiceNumber: voiceNumber,
-        style: pitchelem.startTie.style
+    case "rest":
+      if (elem.style === "rhythm") // special case for rhythm: rests are a handy way to express the rhythm.
+        c = chartable.rhythm[-durlog];else c = chartable.rest[-durlog];
+      elem.averagepitch = restpitch;
+      elem.minpitch = restpitch;
+      elem.maxpitch = restpitch;
+      break;
+
+    case "invisible":
+    case "spacer":
+      c = "";
+      elem.averagepitch = restpitch;
+      elem.minpitch = restpitch;
+      elem.maxpitch = restpitch;
+      break;
+
+    case "multimeasure":
+      c = chartable.rest['multi'];
+      elem.averagepitch = restpitch;
+      elem.minpitch = restpitch;
+      elem.maxpitch = restpitch;
+      dot = 0;
+      var mmWidth = glyphs.getSymbolWidth(c);
+      abselem.addHead(new RelativeElement(c, -mmWidth, mmWidth * 2, 7));
+      var numMeasures = new RelativeElement("" + elem.rest.text, 0, mmWidth, 16, {
+        type: "multimeasure-text"
       });
-      if (hint) tie.setHint();
-      this.ties[this.ties.length] = tie;
-      voice.addOther(tie); // HACK-PER: For the animation, we need to know if a note is tied to the next one, so here's a flag.
-      // Unfortunately, only some of the notes in the current event might be tied, but this will consider it
-      // tied if any one of them is. That will work for most cases.
+      abselem.addExtra(numMeasures);
+  }
 
-      abselem.startTie = true;
+  if (elem.rest.type !== "multimeasure") {
+    var ret = createNoteHead(abselem, c, {
+      verticalPos: restpitch
+    }, null, 0, 0, null, dot, 0, voiceScale, [], false);
+    noteHead = ret.notehead;
+
+    if (noteHead) {
+      abselem.addHead(noteHead);
+      roomTaken = ret.accidentalshiftx;
+      roomTakenRight = ret.dotshiftx;
+    }
+  }
+
+  return {
+    noteHead: noteHead,
+    roomTaken: roomTaken,
+    roomTakenRight: roomTakenRight
+  };
+}
+
+function addIfNotExist(arr, item) {
+  for (var i = 0; i < arr.length; i++) {
+    if (JSON.stringify(arr[i]) === JSON.stringify(item)) return;
+  }
+
+  arr.push(item);
+}
+
+AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, stemdir, style, zeroDuration, durlog, nostem, voice) {
+  var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
+
+  var noteHead;
+  var roomTaken = 0;
+  var roomTakenRight = 0;
+  var min;
+  var i;
+  var additionalLedgers = []; // The accidentalSlot will hold a list of all the accidentals on this chord. Each element is a vertical place,
+  // and contains a pitch, which is the last pitch that contains an accidental in that slot. The slots are numbered
+  // from closest to the note to farther left. We only need to know the last accidental we placed because
+  // we know that the pitches are sorted by now.
+
+  var accidentalSlot = [];
+  var symbolWidth = 0;
+  var dir = elem.averagepitch >= 6 ? "down" : "up";
+  if (stemdir) dir = stemdir;
+  style = elem.style ? elem.style : style; // get the style of note head.
+
+  if (!style || style === "normal") style = "note";
+  var noteSymbol;
+  if (zeroDuration) noteSymbol = chartable[style].nostem;else noteSymbol = chartable[style][-durlog];
+  if (!noteSymbol) console.log("noteSymbol:", style, durlog, zeroDuration); // determine elements of chords which should be shifted
+
+  var p;
+
+  for (p = dir === "down" ? elem.pitches.length - 2 : 1; dir === "down" ? p >= 0 : p < elem.pitches.length; p = dir === "down" ? p - 1 : p + 1) {
+    var prev = elem.pitches[dir === "down" ? p + 1 : p - 1];
+    var curr = elem.pitches[p];
+    var delta = dir === "down" ? prev.pitch - curr.pitch : curr.pitch - prev.pitch;
+
+    if (delta <= 1 && !prev.printer_shift) {
+      curr.printer_shift = delta ? "different" : "same";
+
+      if (curr.verticalPos > 11 || curr.verticalPos < 1) {
+        // PER: add extra ledger line
+        additionalLedgers.push(curr.verticalPos - curr.verticalPos % 2);
+      }
+
+      if (dir === "down") {
+        roomTaken = glyphs.getSymbolWidth(noteSymbol) + 2;
+      } else {
+        dotshiftx = glyphs.getSymbolWidth(noteSymbol) + 2;
+      }
+    }
+  }
+
+  var pp = elem.pitches.length;
+
+  for (p = 0; p < elem.pitches.length; p++) {
+    if (!nostem) {
+      var flag;
+
+      if (dir === "down" && p !== 0 || dir === "up" && p !== pp - 1) {
+        // not the stemmed elem of the chord
+        flag = null;
+      } else {
+        flag = chartable[dir === "down" ? "dflags" : "uflags"][-durlog];
+      }
     }
 
-    var slur;
-    var slurid;
+    var c;
 
-    if (pitchelem.endSlur) {
-      for (var i = 0; i < pitchelem.endSlur.length; i++) {
-        slurid = pitchelem.endSlur[i];
+    if (elem.pitches[p].style) {
+      // There is a style for the whole group of pitches, but there could also be an override for a particular pitch.
+      c = chartable[elem.pitches[p].style][-durlog];
+    } else c = noteSymbol; // The highest position for the sake of placing slurs is itself if the slur is internal. It is the highest position possible if the slur is for the whole chord.
+    // If the note is the only one in the chord, then any slur it has counts as if it were on the whole chord.
 
-        if (this.slurs[slurid]) {
-          slur = this.slurs[slurid];
-          slur.setEndAnchor(notehead);
-          delete this.slurs[slurid];
-        } else {
-          slur = new TieElem({
-            anchor2: notehead,
-            stemDir: this.stemdir,
-            voiceNumber: voiceNumber
-          });
-          if (hint) slur.setHint();
-          voice.addOther(slur);
-        }
 
-        if (this.startlimitelem) {
-          slur.setStartX(this.startlimitelem);
+    elem.pitches[p].highestVert = elem.pitches[p].verticalPos;
+    var isTopWhenStemIsDown = (stemdir === "up" || dir === "up") && p === 0;
+    var isBottomWhenStemIsUp = (stemdir === "down" || dir === "down") && p === pp - 1;
+
+    if (isTopWhenStemIsDown || isBottomWhenStemIsUp) {
+      // place to put slurs if not already on pitches
+      if (elem.startSlur || pp === 1) {
+        elem.pitches[p].highestVert = elem.pitches[pp - 1].verticalPos;
+        if (getDuration(elem) < 1 && (stemdir === "up" || dir === "up")) elem.pitches[p].highestVert += 6; // If the stem is up, then compensate for the length of the stem
+      }
+
+      if (elem.startSlur) {
+        if (!elem.pitches[p].startSlur) elem.pitches[p].startSlur = []; //TODO possibly redundant, provided array is not optional
+
+        for (i = 0; i < elem.startSlur.length; i++) {
+          addIfNotExist(elem.pitches[p].startSlur, elem.startSlur[i]);
         }
       }
-    } else if (!isGrace) {
-      for (var s in this.slurs) {
-        if (this.slurs.hasOwnProperty(s)) {
-          this.slurs[s].addInternalNote(notehead);
+
+      if (elem.endSlur) {
+        elem.pitches[p].highestVert = elem.pitches[pp - 1].verticalPos;
+        if (getDuration(elem) < 1 && (stemdir === "up" || dir === "up")) elem.pitches[p].highestVert += 6; // If the stem is up, then compensate for the length of the stem
+
+        if (!elem.pitches[p].endSlur) elem.pitches[p].endSlur = []; //TODO possibly redundant, provided array is not optional
+
+        for (i = 0; i < elem.endSlur.length; i++) {
+          addIfNotExist(elem.pitches[p].endSlur, elem.endSlur[i]);
         }
       }
     }
 
-    if (pitchelem.startSlur) {
-      for (i = 0; i < pitchelem.startSlur.length; i++) {
-        slurid = pitchelem.startSlur[i].label;
+    var hasStem = !nostem && durlog <= -1;
+    var ret = createNoteHead(abselem, c, elem.pitches[p], dir, 0, -roomTaken, flag, dot, dotshiftx, this.voiceScale, accidentalSlot, !stemdir);
+    symbolWidth = Math.max(glyphs.getSymbolWidth(c), symbolWidth);
+    abselem.extraw -= ret.extraLeft;
+    noteHead = ret.notehead;
+
+    if (noteHead) {
+      this.addSlursAndTies(abselem, elem.pitches[p], noteHead, voice, hasStem ? dir : null, false);
+      if (elem.gracenotes && elem.gracenotes.length > 0) noteHead.bottom = noteHead.bottom - 1; // If there is a tie to the grace notes, leave a little more room for the note to avoid collisions.
+
+      abselem.addHead(noteHead);
+    }
+
+    roomTaken += ret.accidentalshiftx;
+    roomTakenRight = Math.max(roomTakenRight, ret.dotshiftx);
+  } // draw stem from the furthest note to a pitch above/below the stemmed note
+
+
+  if (hasStem) {
+    var stemHeight = Math.round(70 * this.voiceScale) / 10;
+    var p1 = dir === "down" ? elem.minpitch - stemHeight : elem.minpitch + 1 / 3; // PER added stemdir test to make the line meet the note.
+
+    if (p1 > 6 && !stemdir) p1 = 6;
+    var p2 = dir === "down" ? elem.maxpitch - 1 / 3 : elem.maxpitch + stemHeight; // PER added stemdir test to make the line meet the note.
+
+    if (p2 < 6 && !stemdir) p2 = 6;
+    var dx = dir === "down" || abselem.heads.length === 0 ? 0 : abselem.heads[0].w;
+    var width = dir === "down" ? 1 : -1; // TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
+
+    if (noteHead.c === 'noteheads.slash.quarter') {
+      if (dir === 'down') p2 -= 1;else p1 += 1;
+    }
+
+    abselem.addRight(new RelativeElement(null, dx, 0, p1, {
+      "type": "stem",
+      "pitch2": p2,
+      linewidth: width
+    })); //var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
+
+    min = Math.min(p1, p2);
+  }
+
+  return {
+    noteHead: noteHead,
+    roomTaken: roomTaken,
+    roomTakenRight: roomTakenRight,
+    min: min,
+    additionalLedgers: additionalLedgers,
+    dir: dir,
+    symbolWidth: symbolWidth
+  };
+};
+
+AbstractEngraver.prototype.addLyric = function (abselem, elem) {
+  var lyricStr = "";
+  parseCommon.each(elem.lyric, function (ly) {
+    var div = ly.divider === ' ' ? "" : ly.divider;
+    lyricStr += ly.syllable + div + "\n";
+  });
+  var lyricDim = this.getTextSize.calc(lyricStr, 'vocalfont', "lyric");
+  var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
+  abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, {
+    type: "lyric",
+    position: position,
+    height: lyricDim.height / spacing.STEP,
+    dim: this.getTextSize.attr('vocalfont', "lyric")
+  }));
+};
+
+AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaff, voice) {
+  //stem presence: true for drawing stemless notehead
+  var notehead = null;
+  var roomtaken = 0; // room needed to the left of the note
+
+  var roomtakenright = 0; // room needed to the right of the note
+
+  var symbolWidth = 0;
+  var additionalLedgers = []; // PER: handle the case of [bc'], where the b doesn't have a ledger line
+
+  var dir;
+  var duration = getDuration(elem);
+  var zeroDuration = false;
+
+  if (duration === 0) {
+    zeroDuration = true;
+    duration = 0.25;
+    nostem = true;
+  } //PER: zero duration will draw a quarter note head.
+
+
+  var durlog = Math.floor(Math.log(duration) / Math.log(2)); //TODO use getDurlog
+
+  var dot = 0;
+
+  for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2) {
+    ;
+  }
+
+  if (elem.startTriplet) {
+    this.tripletmultiplier = elem.tripletMultiplier;
+  }
+
+  var durationForSpacing = duration * this.tripletmultiplier;
+  if (elem.rest && elem.rest.type === 'multimeasure') durationForSpacing = duration;
+  var absType = elem.rest ? "rest" : "note";
+  var abselem = new AbsoluteElement(elem, durationForSpacing, 1, absType, this.tuneNumber, {
+    durationClassOveride: elem.duration * this.tripletmultiplier
+  });
+  if (hint) abselem.setHint();
+
+  if (elem.rest) {
+    if (this.measureLength === duration && elem.rest.type !== 'invisible' && elem.rest.type !== 'spacer' && elem.rest.type !== 'multimeasure') elem.rest.type = 'whole'; // If the rest is exactly a measure, always use a whole rest
+
+    var ret1 = addRestToAbsElement(abselem, elem, duration, dot, voice.voicetotal > 1, this.stemdir, isSingleLineStaff, durlog, this.voiceScale);
+    notehead = ret1.noteHead;
+    roomtaken = ret1.roomTaken;
+    roomtakenright = ret1.roomTakenRight;
+  } else {
+    var ret2 = this.addNoteToAbcElement(abselem, elem, dot, this.stemdir, this.style, zeroDuration, durlog, nostem, voice);
+    if (ret2.min !== undefined) this.minY = Math.min(ret2.min, this.minY);
+    notehead = ret2.noteHead;
+    roomtaken = ret2.roomTaken;
+    roomtakenright = ret2.roomTakenRight;
+    additionalLedgers = ret2.additionalLedgers;
+    dir = ret2.dir;
+    symbolWidth = ret2.symbolWidth;
+  }
+
+  if (elem.lyric !== undefined) {
+    this.addLyric(abselem, elem);
+  }
+
+  if (elem.gracenotes !== undefined) {
+    roomtaken += this.addGraceNotes(elem, voice, abselem, notehead, this.stemHeight * this.voiceScale, this.isBagpipes, roomtaken);
+  }
+
+  if (elem.decoration) {
+    this.decoration.createDecoration(voice, elem.decoration, abselem.top, notehead ? notehead.w : 0, abselem, roomtaken, dir, abselem.bottom, elem.positioning, this.hasVocals);
+  }
+
+  if (elem.barNumber) {
+    abselem.addFixed(new RelativeElement(elem.barNumber, -10, 0, 0, {
+      type: "barNumber"
+    }));
+  } // ledger lines
+
+
+  ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
+
+  if (elem.chord !== undefined) {
+    var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth);
+    roomtaken = ret3.roomTaken;
+    roomtakenright = ret3.roomTakenRight;
+  }
+
+  if (elem.startTriplet) {
+    this.triplet = new TripletElem(elem.startTriplet, notehead, {
+      flatBeams: this.flatBeams
+    }); // above is opposite from case of slurs
+  }
+
+  if (elem.endTriplet && this.triplet) {
+    this.triplet.setCloseAnchor(notehead);
+  }
+
+  if (this.triplet && !elem.startTriplet && !elem.endTriplet && !(elem.rest && elem.rest.type === "spacer")) {
+    this.triplet.middleNote(notehead);
+  }
+
+  return abselem;
+};
+
+AbstractEngraver.prototype.addSlursAndTies = function (abselem, pitchelem, notehead, voice, dir, isGrace) {
+  if (pitchelem.endTie) {
+    if (this.ties.length > 0) {
+      // If there are multiple open ties, find the one that applies by matching the pitch, if possible.
+      var found = false;
+
+      for (var j = 0; j < this.ties.length; j++) {
+        if (this.ties[j].anchor1 && this.ties[j].anchor1.pitch === notehead.pitch) {
+          this.ties[j].setEndAnchor(notehead);
+          this.ties.splice(j, 1);
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        this.ties[0].setEndAnchor(notehead);
+        this.ties.splice(0, 1);
+      }
+    }
+  }
+
+  var voiceNumber = voice.voicetotal < 2 ? -1 : voice.voicenumber;
+
+  if (pitchelem.startTie) {
+    var tie = new TieElem({
+      anchor1: notehead,
+      force: this.stemdir === "down" || this.stemdir === "up",
+      stemDir: this.stemdir,
+      isGrace: isGrace,
+      voiceNumber: voiceNumber,
+      style: pitchelem.startTie.style
+    });
+    if (hint) tie.setHint();
+    this.ties[this.ties.length] = tie;
+    voice.addOther(tie); // HACK-PER: For the animation, we need to know if a note is tied to the next one, so here's a flag.
+    // Unfortunately, only some of the notes in the current event might be tied, but this will consider it
+    // tied if any one of them is. That will work for most cases.
+
+    abselem.startTie = true;
+  }
+
+  var slur;
+  var slurid;
+
+  if (pitchelem.endSlur) {
+    for (var i = 0; i < pitchelem.endSlur.length; i++) {
+      slurid = pitchelem.endSlur[i];
+
+      if (this.slurs[slurid]) {
+        slur = this.slurs[slurid];
+        slur.setEndAnchor(notehead);
+        delete this.slurs[slurid];
+      } else {
         slur = new TieElem({
-          anchor1: notehead,
+          anchor2: notehead,
           stemDir: this.stemdir,
-          voiceNumber: voiceNumber,
-          style: pitchelem.startSlur[i].style
+          voiceNumber: voiceNumber
         });
         if (hint) slur.setHint();
-        this.slurs[slurid] = slur;
         voice.addOther(slur);
       }
-    }
-  };
 
-  AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
-    var measureNumDim = this.getTextSize.calc(number, "measurefont", 'bar-number');
-    var dx = measureNumDim.width > 18 && abselem.abcelem.type === "treble" ? -7 : 0;
-    abselem.addFixed(new RelativeElement(number, dx, measureNumDim.width, 11 + measureNumDim.height / spacing.STEP, {
-      type: "barNumber",
-      dim: this.getTextSize.attr("measurefont", 'bar-number')
-    }));
-  };
-
-  AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) {
-    // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
-    var abselem = new AbsoluteElement(elem, 0, 10, 'bar', this.tuneNumber);
-    var anchor = null; // place to attach part lines
-
-    var dx = 0;
-
-    if (elem.barNumber) {
-      this.addMeasureNumber(elem.barNumber, abselem);
-    }
-
-    var firstdots = elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat";
-    var firstthin = elem.type !== "bar_left_repeat" && elem.type !== "bar_thick_thin" && elem.type !== "bar_invisible";
-    var thick = elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat" || elem.type === "bar_left_repeat" || elem.type === "bar_thin_thick" || elem.type === "bar_thick_thin";
-    var secondthin = elem.type === "bar_left_repeat" || elem.type === "bar_thick_thin" || elem.type === "bar_thin_thin" || elem.type === "bar_dbl_repeat";
-    var seconddots = elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat"; // limit positioning of slurs
-
-    if (firstdots || seconddots) {
-      for (var slur in this.slurs) {
-        if (this.slurs.hasOwnProperty(slur)) {
-          this.slurs[slur].setEndX(abselem);
-        }
+      if (this.startlimitelem) {
+        slur.setStartX(this.startlimitelem);
       }
-
-      this.startlimitelem = abselem;
     }
-
-    if (firstdots) {
-      abselem.addRight(new RelativeElement("dots.dot", dx, 1, 7));
-      abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
-      dx += 6; //2 hardcoded, twice;
+  } else if (!isGrace) {
+    for (var s in this.slurs) {
+      if (this.slurs.hasOwnProperty(s)) {
+        this.slurs[s].addInternalNote(notehead);
+      }
     }
+  }
 
-    if (firstthin) {
-      anchor = new RelativeElement(null, dx, 1, 2, {
-        "type": "bar",
-        "pitch2": 10,
-        linewidth: 0.6
+  if (pitchelem.startSlur) {
+    for (i = 0; i < pitchelem.startSlur.length; i++) {
+      slurid = pitchelem.startSlur[i].label;
+      slur = new TieElem({
+        anchor1: notehead,
+        stemDir: this.stemdir,
+        voiceNumber: voiceNumber,
+        style: pitchelem.startSlur[i].style
       });
-      abselem.addRight(anchor);
+      if (hint) slur.setHint();
+      this.slurs[slurid] = slur;
+      voice.addOther(slur);
+    }
+  }
+};
+
+AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
+  var measureNumDim = this.getTextSize.calc(number, "measurefont", 'bar-number');
+  var dx = measureNumDim.width > 18 && abselem.abcelem.type === "treble" ? -7 : 0;
+  abselem.addFixed(new RelativeElement(number, dx, measureNumDim.width, 11 + measureNumDim.height / spacing.STEP, {
+    type: "barNumber",
+    dim: this.getTextSize.attr("measurefont", 'bar-number')
+  }));
+};
+
+AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) {
+  // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
+  var abselem = new AbsoluteElement(elem, 0, 10, 'bar', this.tuneNumber);
+  var anchor = null; // place to attach part lines
+
+  var dx = 0;
+
+  if (elem.barNumber) {
+    this.addMeasureNumber(elem.barNumber, abselem);
+  }
+
+  var firstdots = elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat";
+  var firstthin = elem.type !== "bar_left_repeat" && elem.type !== "bar_thick_thin" && elem.type !== "bar_invisible";
+  var thick = elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat" || elem.type === "bar_left_repeat" || elem.type === "bar_thin_thick" || elem.type === "bar_thick_thin";
+  var secondthin = elem.type === "bar_left_repeat" || elem.type === "bar_thick_thin" || elem.type === "bar_thin_thin" || elem.type === "bar_dbl_repeat";
+  var seconddots = elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat"; // limit positioning of slurs
+
+  if (firstdots || seconddots) {
+    for (var slur in this.slurs) {
+      if (this.slurs.hasOwnProperty(slur)) {
+        this.slurs[slur].setEndX(abselem);
+      }
     }
 
-    if (elem.type === "bar_invisible") {
-      anchor = new RelativeElement(null, dx, 1, 2, {
-        "type": "none",
-        "pitch2": 10,
-        linewidth: 0.6
-      });
-      abselem.addRight(anchor);
-    }
+    this.startlimitelem = abselem;
+  }
 
-    if (elem.decoration) {
-      this.decoration.createDecoration(voice, elem.decoration, 12, thick ? 3 : 1, abselem, 0, "down", 2, elem.positioning, this.hasVocals);
-    }
+  if (firstdots) {
+    abselem.addRight(new RelativeElement("dots.dot", dx, 1, 7));
+    abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
+    dx += 6; //2 hardcoded, twice;
+  }
 
-    if (thick) {
-      dx += 4; //3 hardcoded;
+  if (firstthin) {
+    anchor = new RelativeElement(null, dx, 1, 2, {
+      "type": "bar",
+      "pitch2": 10,
+      linewidth: 0.6
+    });
+    abselem.addRight(anchor);
+  }
 
-      anchor = new RelativeElement(null, dx, 4, 2, {
-        "type": "bar",
-        "pitch2": 10,
-        linewidth: 4
-      });
-      abselem.addRight(anchor);
-      dx += 5;
-    } // if (this.partstartelem && (thick || (firstthin && secondthin))) { // means end of nth part
-    // this.partstartelem.anchor2=anchor;
-    // this.partstartelem = null;
-    // }
+  if (elem.type === "bar_invisible") {
+    anchor = new RelativeElement(null, dx, 1, 2, {
+      "type": "none",
+      "pitch2": 10,
+      linewidth: 0.6
+    });
+    abselem.addRight(anchor);
+  }
 
+  if (elem.decoration) {
+    this.decoration.createDecoration(voice, elem.decoration, 12, thick ? 3 : 1, abselem, 0, "down", 2, elem.positioning, this.hasVocals);
+  }
 
-    if (this.partstartelem && elem.endEnding) {
-      this.partstartelem.anchor2 = anchor;
-      this.partstartelem = null;
-    }
+  if (thick) {
+    dx += 4; //3 hardcoded;
 
-    if (secondthin) {
-      dx += 3; //3 hardcoded;
-
-      anchor = new RelativeElement(null, dx, 1, 2, {
-        "type": "bar",
-        "pitch2": 10,
-        linewidth: 0.6
-      });
-      abselem.addRight(anchor); // 3 is hardcoded
-    }
-
-    if (seconddots) {
-      dx += 3; //3 hardcoded;
-
-      abselem.addRight(new RelativeElement("dots.dot", dx, 1, 7));
-      abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
-    } // 2 is hardcoded
+    anchor = new RelativeElement(null, dx, 4, 2, {
+      "type": "bar",
+      "pitch2": 10,
+      linewidth: 4
+    });
+    abselem.addRight(anchor);
+    dx += 5;
+  } // if (this.partstartelem && (thick || (firstthin && secondthin))) { // means end of nth part
+  // this.partstartelem.anchor2=anchor;
+  // this.partstartelem = null;
+  // }
 
 
-    if (elem.startEnding && isFirstStaff) {
-      // only put the first & second ending marks on the first staff
-      var textWidth = this.getTextSize.calc(elem.startEnding, "repeatfont", '').width;
-      abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
+  if (this.partstartelem && elem.endEnding) {
+    this.partstartelem.anchor2 = anchor;
+    this.partstartelem = null;
+  }
 
-      this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
-      voice.addOther(this.partstartelem);
-    } // Add a little space to the left of the bar line so that nothing can crowd it.
+  if (secondthin) {
+    dx += 3; //3 hardcoded;
+
+    anchor = new RelativeElement(null, dx, 1, 2, {
+      "type": "bar",
+      "pitch2": 10,
+      linewidth: 0.6
+    });
+    abselem.addRight(anchor); // 3 is hardcoded
+  }
+
+  if (seconddots) {
+    dx += 3; //3 hardcoded;
+
+    abselem.addRight(new RelativeElement("dots.dot", dx, 1, 7));
+    abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
+  } // 2 is hardcoded
 
 
-    abselem.extraw -= 5;
-    return abselem;
-  };
-})();
+  if (elem.startEnding && isFirstStaff) {
+    // only put the first & second ending marks on the first staff
+    var textWidth = this.getTextSize.calc(elem.startEnding, "repeatfont", '').width;
+    abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
+
+    this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
+    voice.addOther(this.partstartelem);
+  } // Add a little space to the left of the bar line so that nothing can crowd it.
+
+
+  abselem.extraw -= 5;
+  return abselem;
+};
 
 module.exports = AbstractEngraver;
 
@@ -18123,88 +17888,83 @@ module.exports = AbstractEngraver;
 // stems. After that, we are ready for the drawing step.
 // There are three phases: the setup phase, when new elements are being discovered, the layout phase, when everything is calculated, and the drawing phase,
 // when the object is not changed, but is used to put the elements on the page.
-var BeamElem;
+//
+// Setup phase
+//
+var BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
+  // type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
+  this.type = "BeamElem";
+  this.isflat = !!flat;
+  this.isgrace = !!(type && type === "grace");
+  this.forceup = !!(this.isgrace || type && type === "up");
+  this.forcedown = !!(type && type === "down");
+  this.elems = []; // all the AbsoluteElements that this beam touches. It may include embedded rests.
 
-(function () {
-  "use strict"; //
-  // Setup phase
-  //
+  this.total = 0;
+  this.average = 6; // use middle line as start for average.
 
-  BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
-    // type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
-    this.type = "BeamElem";
-    this.isflat = !!flat;
-    this.isgrace = !!(type && type === "grace");
-    this.forceup = !!(this.isgrace || type && type === "up");
-    this.forcedown = !!(type && type === "down");
-    this.elems = []; // all the AbsoluteElements that this beam touches. It may include embedded rests.
+  this.allrests = true;
+  this.stemHeight = stemHeight;
+  this.beams = []; // During the layout phase, this will become a list of the beams that need to be drawn.
 
-    this.total = 0;
-    this.average = 6; // use middle line as start for average.
+  if (firstElement && firstElement.duration) {
+    this.duration = firstElement.duration;
 
-    this.allrests = true;
-    this.stemHeight = stemHeight;
-    this.beams = []; // During the layout phase, this will become a list of the beams that need to be drawn.
-
-    if (firstElement && firstElement.duration) {
-      this.duration = firstElement.duration;
-
-      if (firstElement.startTriplet) {
-        this.duration *= firstElement.tripletMultiplier;
-      }
-
-      this.duration = Math.round(this.duration * 1000) / 1000;
-    } else this.duration = 0;
-  };
-
-  BeamElem.prototype.setHint = function () {
-    this.hint = true;
-  };
-
-  BeamElem.prototype.add = function (abselem) {
-    var pitch = abselem.abcelem.averagepitch;
-    if (pitch === undefined) return; // don't include elements like spacers in beams
-
-    if (!abselem.abcelem.rest) this.allrests = false;
-    abselem.beam = this;
-    this.elems.push(abselem);
-    this.total = Math.round(this.total + pitch);
-
-    if (this.min === undefined || abselem.abcelem.minpitch < this.min) {
-      this.min = abselem.abcelem.minpitch;
+    if (firstElement.startTriplet) {
+      this.duration *= firstElement.tripletMultiplier;
     }
 
-    if (this.max === undefined || abselem.abcelem.maxpitch > this.max) {
-      this.max = abselem.abcelem.maxpitch;
+    this.duration = Math.round(this.duration * 1000) / 1000;
+  } else this.duration = 0;
+};
+
+BeamElem.prototype.setHint = function () {
+  this.hint = true;
+};
+
+BeamElem.prototype.add = function (abselem) {
+  var pitch = abselem.abcelem.averagepitch;
+  if (pitch === undefined) return; // don't include elements like spacers in beams
+
+  if (!abselem.abcelem.rest) this.allrests = false;
+  abselem.beam = this;
+  this.elems.push(abselem);
+  this.total = Math.round(this.total + pitch);
+
+  if (this.min === undefined || abselem.abcelem.minpitch < this.min) {
+    this.min = abselem.abcelem.minpitch;
+  }
+
+  if (this.max === undefined || abselem.abcelem.maxpitch > this.max) {
+    this.max = abselem.abcelem.maxpitch;
+  }
+};
+
+BeamElem.prototype.addBeam = function (beam) {
+  this.beams.push(beam);
+};
+
+BeamElem.prototype.calcDir = function () {
+  this.average = calcAverage(this.total, this.elems.length);
+
+  if (this.forceup) {
+    this.stemsUp = true;
+  } else if (this.forcedown) {
+    this.stemsUp = false;
+  } else {
+    var middleLine = 6; // hardcoded 6 is B
+
+    this.stemsUp = this.average < middleLine; // true is up, false is down;
+  }
+
+  var dir = this.stemsUp ? 'up' : 'down';
+
+  for (var i = 0; i < this.elems.length; i++) {
+    for (var j = 0; j < this.elems[i].heads.length; j++) {
+      this.elems[i].heads[j].stemDir = dir;
     }
-  };
-
-  BeamElem.prototype.addBeam = function (beam) {
-    this.beams.push(beam);
-  };
-
-  BeamElem.prototype.calcDir = function () {
-    this.average = calcAverage(this.total, this.elems.length);
-
-    if (this.forceup) {
-      this.stemsUp = true;
-    } else if (this.forcedown) {
-      this.stemsUp = false;
-    } else {
-      var middleLine = 6; // hardcoded 6 is B
-
-      this.stemsUp = this.average < middleLine; // true is up, false is down;
-    }
-
-    var dir = this.stemsUp ? 'up' : 'down';
-
-    for (var i = 0; i < this.elems.length; i++) {
-      for (var j = 0; j < this.elems[i].heads.length; j++) {
-        this.elems[i].heads[j].stemDir = dir;
-      }
-    }
-  };
-})();
+  }
+};
 
 function calcAverage(total, numElements) {
   if (!numElements) return 0;
@@ -18297,145 +18057,139 @@ var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js"
 
 var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
 
-var createClef;
+var createClef = function createClef(elem, tuneNumber) {
+  var clef;
+  var octave = 0;
+  elem.el_type = "clef";
+  var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra clef', tuneNumber);
+  abselem.isClef = true;
 
-(function () {
-  "use strict";
+  switch (elem.type) {
+    case "treble":
+      clef = "clefs.G";
+      break;
 
-  createClef = function createClef(elem, tuneNumber) {
-    var clef;
-    var octave = 0;
-    elem.el_type = "clef";
-    var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra clef', tuneNumber);
-    abselem.isClef = true;
+    case "tenor":
+      clef = "clefs.C";
+      break;
 
-    switch (elem.type) {
-      case "treble":
-        clef = "clefs.G";
-        break;
+    case "alto":
+      clef = "clefs.C";
+      break;
 
-      case "tenor":
-        clef = "clefs.C";
-        break;
+    case "bass":
+      clef = "clefs.F";
+      break;
 
-      case "alto":
-        clef = "clefs.C";
-        break;
+    case 'treble+8':
+      clef = "clefs.G";
+      octave = 1;
+      break;
 
-      case "bass":
-        clef = "clefs.F";
-        break;
+    case 'tenor+8':
+      clef = "clefs.C";
+      octave = 1;
+      break;
 
-      case 'treble+8':
-        clef = "clefs.G";
-        octave = 1;
-        break;
+    case 'bass+8':
+      clef = "clefs.F";
+      octave = 1;
+      break;
 
-      case 'tenor+8':
-        clef = "clefs.C";
-        octave = 1;
-        break;
+    case 'alto+8':
+      clef = "clefs.C";
+      octave = 1;
+      break;
 
-      case 'bass+8':
-        clef = "clefs.F";
-        octave = 1;
-        break;
+    case 'treble-8':
+      clef = "clefs.G";
+      octave = -1;
+      break;
 
-      case 'alto+8':
-        clef = "clefs.C";
-        octave = 1;
-        break;
+    case 'tenor-8':
+      clef = "clefs.C";
+      octave = -1;
+      break;
 
-      case 'treble-8':
-        clef = "clefs.G";
-        octave = -1;
-        break;
+    case 'bass-8':
+      clef = "clefs.F";
+      octave = -1;
+      break;
 
-      case 'tenor-8':
-        clef = "clefs.C";
-        octave = -1;
-        break;
+    case 'alto-8':
+      clef = "clefs.C";
+      octave = -1;
+      break;
 
-      case 'bass-8':
-        clef = "clefs.F";
-        octave = -1;
-        break;
+    case 'none':
+      return null;
 
-      case 'alto-8':
-        clef = "clefs.C";
-        octave = -1;
-        break;
+    case 'perc':
+      clef = "clefs.perc";
+      break;
 
-      case 'none':
-        return null;
-
-      case 'perc':
-        clef = "clefs.perc";
-        break;
-
-      default:
-        abselem.addFixed(new RelativeElement("clef=" + elem.type, 0, 0, undefined, {
-          type: "debug"
-        }));
-    } // if (elem.verticalPos) {
-    // pitch = elem.verticalPos;
-    // }
-
-
-    var dx = 5;
-
-    if (clef) {
-      var height = glyphs.symbolHeightInPitches(clef);
-      var ofs = clefOffsets(clef);
-      abselem.addRight(new RelativeElement(clef, dx, glyphs.getSymbolWidth(clef), elem.clefPos, {
-        top: height + elem.clefPos + ofs,
-        bottom: elem.clefPos + ofs
+    default:
+      abselem.addFixed(new RelativeElement("clef=" + elem.type, 0, 0, undefined, {
+        type: "debug"
       }));
+  } // if (elem.verticalPos) {
+  // pitch = elem.verticalPos;
+  // }
 
-      if (octave !== 0) {
-        var scale = 2 / 3;
-        var adjustspacing = (glyphs.getSymbolWidth(clef) - glyphs.getSymbolWidth("8") * scale) / 2;
-        var pitch = octave > 0 ? abselem.top + 3 : abselem.bottom - 1;
-        var top = octave > 0 ? abselem.top + 3 : abselem.bottom - 3;
-        var bottom = top - 2;
 
-        if (elem.type === "bass-8") {
-          // The placement for bass octave is a little different. It should hug the clef.
-          pitch = 3;
-          adjustspacing = 0;
-        }
+  var dx = 5;
 
-        abselem.addRight(new RelativeElement("8", dx + adjustspacing, glyphs.getSymbolWidth("8") * scale, pitch, {
-          scalex: scale,
-          scaley: scale,
-          top: top,
-          bottom: bottom
-        })); //abselem.top += 2;
+  if (clef) {
+    var height = glyphs.symbolHeightInPitches(clef);
+    var ofs = clefOffsets(clef);
+    abselem.addRight(new RelativeElement(clef, dx, glyphs.getSymbolWidth(clef), elem.clefPos, {
+      top: height + elem.clefPos + ofs,
+      bottom: elem.clefPos + ofs
+    }));
+
+    if (octave !== 0) {
+      var scale = 2 / 3;
+      var adjustspacing = (glyphs.getSymbolWidth(clef) - glyphs.getSymbolWidth("8") * scale) / 2;
+      var pitch = octave > 0 ? abselem.top + 3 : abselem.bottom - 1;
+      var top = octave > 0 ? abselem.top + 3 : abselem.bottom - 3;
+      var bottom = top - 2;
+
+      if (elem.type === "bass-8") {
+        // The placement for bass octave is a little different. It should hug the clef.
+        pitch = 3;
+        adjustspacing = 0;
       }
-    }
 
-    return abselem;
-  };
-
-  function clefOffsets(clef) {
-    switch (clef) {
-      case "clefs.G":
-        return -5;
-
-      case "clefs.C":
-        return -4;
-
-      case "clefs.F":
-        return -4;
-
-      case "clefs.perc":
-        return -2;
-
-      default:
-        return 0;
+      abselem.addRight(new RelativeElement("8", dx + adjustspacing, glyphs.getSymbolWidth("8") * scale, pitch, {
+        scalex: scale,
+        scaley: scale,
+        top: top,
+        bottom: bottom
+      })); //abselem.top += 2;
     }
   }
-})();
+
+  return abselem;
+};
+
+function clefOffsets(clef) {
+  switch (clef) {
+    case "clefs.G":
+      return -5;
+
+    case "clefs.C":
+      return -4;
+
+    case "clefs.F":
+      return -4;
+
+    case "clefs.perc":
+      return -2;
+
+    default:
+      return 0;
+  }
+}
 
 module.exports = createClef;
 
@@ -18471,60 +18225,54 @@ var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/w
 
 var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
 
-var createKeySignature;
+var createKeySignature = function createKeySignature(elem, tuneNumber) {
+  if (!elem.accidentals || elem.accidentals.length === 0) return null;
+  elem.el_type = "keySignature";
+  var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra key-signature', tuneNumber);
+  abselem.isKeySig = true;
+  var dx = 0;
+  parseCommon.each(elem.accidentals, function (acc) {
+    var symbol;
+    var fudge = 0;
 
-(function () {
-  "use strict";
+    switch (acc.acc) {
+      case "sharp":
+        symbol = "accidentals.sharp";
+        fudge = -3;
+        break;
 
-  createKeySignature = function createKeySignature(elem, tuneNumber) {
-    if (!elem.accidentals || elem.accidentals.length === 0) return null;
-    elem.el_type = "keySignature";
-    var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra key-signature', tuneNumber);
-    abselem.isKeySig = true;
-    var dx = 0;
-    parseCommon.each(elem.accidentals, function (acc) {
-      var symbol;
-      var fudge = 0;
+      case "natural":
+        symbol = "accidentals.nat";
+        break;
 
-      switch (acc.acc) {
-        case "sharp":
-          symbol = "accidentals.sharp";
-          fudge = -3;
-          break;
+      case "flat":
+        symbol = "accidentals.flat";
+        fudge = -1.2;
+        break;
 
-        case "natural":
-          symbol = "accidentals.nat";
-          break;
+      case "quartersharp":
+        symbol = "accidentals.halfsharp";
+        fudge = -2.5;
+        break;
 
-        case "flat":
-          symbol = "accidentals.flat";
-          fudge = -1.2;
-          break;
+      case "quarterflat":
+        symbol = "accidentals.halfflat";
+        fudge = -1.2;
+        break;
 
-        case "quartersharp":
-          symbol = "accidentals.halfsharp";
-          fudge = -2.5;
-          break;
+      default:
+        symbol = "accidentals.flat";
+    }
 
-        case "quarterflat":
-          symbol = "accidentals.halfflat";
-          fudge = -1.2;
-          break;
-
-        default:
-          symbol = "accidentals.flat";
-      }
-
-      abselem.addRight(new RelativeElement(symbol, dx, glyphs.getSymbolWidth(symbol), acc.verticalPos, {
-        thickness: glyphs.symbolHeightInPitches(symbol),
-        top: acc.verticalPos + glyphs.symbolHeightInPitches(symbol) + fudge,
-        bottom: acc.verticalPos + fudge
-      }));
-      dx += glyphs.getSymbolWidth(symbol) + 2;
-    }, this);
-    return abselem;
-  };
-})();
+    abselem.addRight(new RelativeElement(symbol, dx, glyphs.getSymbolWidth(symbol), acc.verticalPos, {
+      thickness: glyphs.symbolHeightInPitches(symbol),
+      top: acc.verticalPos + glyphs.symbolHeightInPitches(symbol) + fudge,
+      bottom: acc.verticalPos + fudge
+    }));
+    dx += glyphs.getSymbolWidth(symbol) + 2;
+  }, this);
+  return abselem;
+};
 
 module.exports = createKeySignature;
 
@@ -18541,131 +18289,127 @@ var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js"
 
 var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
 
-var createNoteHead;
+var createNoteHead = function createNoteHead(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot, shouldExtendStem) {
+  // TODO scale the dot as well
+  var pitch = pitchelem.verticalPos;
+  var notehead;
+  var accidentalshiftx = 0;
+  var newDotShiftX = 0;
+  var extraLeft = 0;
+  if (c === undefined) abselem.addFixed(new RelativeElement("pitch is undefined", 0, 0, 0, {
+    type: "debug"
+  }));else if (c === "") {
+    notehead = new RelativeElement(null, 0, 0, pitch);
+  } else {
+    var shiftheadx = headx;
 
-(function () {
-  createNoteHead = function createNoteHead(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot, shouldExtendStem) {
-    // TODO scale the dot as well
-    var pitch = pitchelem.verticalPos;
-    var notehead;
-    var accidentalshiftx = 0;
-    var newDotShiftX = 0;
-    var extraLeft = 0;
-    if (c === undefined) abselem.addFixed(new RelativeElement("pitch is undefined", 0, 0, 0, {
-      type: "debug"
-    }));else if (c === "") {
-      notehead = new RelativeElement(null, 0, 0, pitch);
-    } else {
-      var shiftheadx = headx;
-
-      if (pitchelem.printer_shift) {
-        var adjust = pitchelem.printer_shift === "same" ? 1 : 0;
-        shiftheadx = dir === "down" ? -glyphs.getSymbolWidth(c) * scale + adjust : glyphs.getSymbolWidth(c) * scale - adjust;
-      }
-
-      var opts = {
-        scalex: scale,
-        scaley: scale,
-        thickness: glyphs.symbolHeightInPitches(c) * scale
-      };
-      notehead = new RelativeElement(c, shiftheadx, glyphs.getSymbolWidth(c) * scale, pitch, opts);
-      notehead.stemDir = dir;
-
-      if (flag) {
-        var pos = pitch + (dir === "down" ? -7 : 7) * scale; // if this is a regular note, (not grace or tempo indicator) then the stem will have been stretched to the middle line if it is far from the center.
-
-        if (shouldExtendStem) {
-          if (dir === "down" && pos > 6) pos = 6;
-          if (dir === "up" && pos < 6) pos = 6;
-        } //if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;
-
-
-        var xdelta = dir === "down" ? headx : headx + notehead.w - 0.6;
-        abselem.addRight(new RelativeElement(flag, xdelta, glyphs.getSymbolWidth(flag) * scale, pos, {
-          scalex: scale,
-          scaley: scale
-        }));
-      }
-
-      newDotShiftX = notehead.w + dotshiftx - 2 + 5 * dot;
-
-      for (; dot > 0; dot--) {
-        var dotadjusty = 1 - Math.abs(pitch) % 2; //PER: take abs value of the pitch. And the shift still happens on ledger lines.
-
-        abselem.addRight(new RelativeElement("dots.dot", notehead.w + dotshiftx - 2 + 5 * dot, glyphs.getSymbolWidth("dots.dot"), pitch + dotadjusty));
-      }
-    }
-    if (notehead) notehead.highestVert = pitchelem.highestVert;
-
-    if (pitchelem.accidental) {
-      var symb;
-
-      switch (pitchelem.accidental) {
-        case "quartersharp":
-          symb = "accidentals.halfsharp";
-          break;
-
-        case "dblsharp":
-          symb = "accidentals.dblsharp";
-          break;
-
-        case "sharp":
-          symb = "accidentals.sharp";
-          break;
-
-        case "quarterflat":
-          symb = "accidentals.halfflat";
-          break;
-
-        case "flat":
-          symb = "accidentals.flat";
-          break;
-
-        case "dblflat":
-          symb = "accidentals.dblflat";
-          break;
-
-        case "natural":
-          symb = "accidentals.nat";
-      } // if a note is at least a sixth away, it can share a slot with another accidental
-
-
-      var accSlotFound = false;
-      var accPlace = extrax;
-
-      for (var j = 0; j < accidentalSlot.length; j++) {
-        if (pitch - accidentalSlot[j][0] >= 6) {
-          accidentalSlot[j][0] = pitch;
-          accPlace = accidentalSlot[j][1];
-          accSlotFound = true;
-          break;
-        }
-      }
-
-      if (accSlotFound === false) {
-        accPlace -= glyphs.getSymbolWidth(symb) * scale + 2;
-        accidentalSlot.push([pitch, accPlace]);
-        accidentalshiftx = glyphs.getSymbolWidth(symb) * scale + 2;
-      }
-
-      var h = glyphs.symbolHeightInPitches(symb);
-      abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, {
-        scalex: scale,
-        scaley: scale,
-        top: pitch + h / 2,
-        bottom: pitch - h / 2
-      }));
-      extraLeft = glyphs.getSymbolWidth(symb) / 2; // TODO-PER: We need a little extra width if there is an accidental, but I'm not sure why it isn't the full width of the accidental.
+    if (pitchelem.printer_shift) {
+      var adjust = pitchelem.printer_shift === "same" ? 1 : 0;
+      shiftheadx = dir === "down" ? -glyphs.getSymbolWidth(c) * scale + adjust : glyphs.getSymbolWidth(c) * scale - adjust;
     }
 
-    return {
-      notehead: notehead,
-      accidentalshiftx: accidentalshiftx,
-      dotshiftx: newDotShiftX,
-      extraLeft: extraLeft
+    var opts = {
+      scalex: scale,
+      scaley: scale,
+      thickness: glyphs.symbolHeightInPitches(c) * scale
     };
+    notehead = new RelativeElement(c, shiftheadx, glyphs.getSymbolWidth(c) * scale, pitch, opts);
+    notehead.stemDir = dir;
+
+    if (flag) {
+      var pos = pitch + (dir === "down" ? -7 : 7) * scale; // if this is a regular note, (not grace or tempo indicator) then the stem will have been stretched to the middle line if it is far from the center.
+
+      if (shouldExtendStem) {
+        if (dir === "down" && pos > 6) pos = 6;
+        if (dir === "up" && pos < 6) pos = 6;
+      } //if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;
+
+
+      var xdelta = dir === "down" ? headx : headx + notehead.w - 0.6;
+      abselem.addRight(new RelativeElement(flag, xdelta, glyphs.getSymbolWidth(flag) * scale, pos, {
+        scalex: scale,
+        scaley: scale
+      }));
+    }
+
+    newDotShiftX = notehead.w + dotshiftx - 2 + 5 * dot;
+
+    for (; dot > 0; dot--) {
+      var dotadjusty = 1 - Math.abs(pitch) % 2; //PER: take abs value of the pitch. And the shift still happens on ledger lines.
+
+      abselem.addRight(new RelativeElement("dots.dot", notehead.w + dotshiftx - 2 + 5 * dot, glyphs.getSymbolWidth("dots.dot"), pitch + dotadjusty));
+    }
+  }
+  if (notehead) notehead.highestVert = pitchelem.highestVert;
+
+  if (pitchelem.accidental) {
+    var symb;
+
+    switch (pitchelem.accidental) {
+      case "quartersharp":
+        symb = "accidentals.halfsharp";
+        break;
+
+      case "dblsharp":
+        symb = "accidentals.dblsharp";
+        break;
+
+      case "sharp":
+        symb = "accidentals.sharp";
+        break;
+
+      case "quarterflat":
+        symb = "accidentals.halfflat";
+        break;
+
+      case "flat":
+        symb = "accidentals.flat";
+        break;
+
+      case "dblflat":
+        symb = "accidentals.dblflat";
+        break;
+
+      case "natural":
+        symb = "accidentals.nat";
+    } // if a note is at least a sixth away, it can share a slot with another accidental
+
+
+    var accSlotFound = false;
+    var accPlace = extrax;
+
+    for (var j = 0; j < accidentalSlot.length; j++) {
+      if (pitch - accidentalSlot[j][0] >= 6) {
+        accidentalSlot[j][0] = pitch;
+        accPlace = accidentalSlot[j][1];
+        accSlotFound = true;
+        break;
+      }
+    }
+
+    if (accSlotFound === false) {
+      accPlace -= glyphs.getSymbolWidth(symb) * scale + 2;
+      accidentalSlot.push([pitch, accPlace]);
+      accidentalshiftx = glyphs.getSymbolWidth(symb) * scale + 2;
+    }
+
+    var h = glyphs.symbolHeightInPitches(symb);
+    abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, {
+      scalex: scale,
+      scaley: scale,
+      top: pitch + h / 2,
+      bottom: pitch - h / 2
+    }));
+    extraLeft = glyphs.getSymbolWidth(symb) / 2; // TODO-PER: We need a little extra width if there is an accidental, but I'm not sure why it isn't the full width of the accidental.
+  }
+
+  return {
+    notehead: notehead,
+    accidentalshiftx: accidentalshiftx,
+    dotshiftx: newDotShiftX,
+    extraLeft: extraLeft
   };
-})();
+};
 
 module.exports = createNoteHead;
 
@@ -18699,91 +18443,85 @@ var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js"
 
 var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
 
-var createTimeSignature;
+var createTimeSignature = function createTimeSignature(elem, tuneNumber) {
+  elem.el_type = "timeSignature";
+  var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra time-signature', tuneNumber);
 
-(function () {
-  "use strict";
+  if (elem.type === "specified") {
+    var x = 0;
 
-  createTimeSignature = function createTimeSignature(elem, tuneNumber) {
-    elem.el_type = "timeSignature";
-    var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra time-signature', tuneNumber);
-
-    if (elem.type === "specified") {
-      var x = 0;
-
-      for (var i = 0; i < elem.value.length; i++) {
-        if (i !== 0) {
-          abselem.addRight(new RelativeElement('+', x + 1, glyphs.getSymbolWidth("+"), 6, {
-            thickness: glyphs.symbolHeightInPitches("+")
-          }));
-          x += glyphs.getSymbolWidth("+") + 2;
-        }
-
-        if (elem.value[i].den) {
-          var numWidth = 0;
-
-          for (var i2 = 0; i2 < elem.value[i].num.length; i2++) {
-            numWidth += glyphs.getSymbolWidth(elem.value[i].num.charAt(i2));
-          }
-
-          var denWidth = 0;
-
-          for (i2 = 0; i2 < elem.value[i].num.length; i2++) {
-            denWidth += glyphs.getSymbolWidth(elem.value[i].den.charAt(i2));
-          }
-
-          var maxWidth = Math.max(numWidth, denWidth);
-          abselem.addRight(new RelativeElement(elem.value[i].num, x + (maxWidth - numWidth) / 2, numWidth, 8, {
-            thickness: glyphs.symbolHeightInPitches(elem.value[i].num.charAt(0))
-          }));
-          abselem.addRight(new RelativeElement(elem.value[i].den, x + (maxWidth - denWidth) / 2, denWidth, 4, {
-            thickness: glyphs.symbolHeightInPitches(elem.value[i].den.charAt(0))
-          }));
-          x += maxWidth;
-        } else {
-          var thisWidth = 0;
-
-          for (var i3 = 0; i3 < elem.value[i].num.length; i3++) {
-            thisWidth += glyphs.getSymbolWidth(elem.value[i].num.charAt(i3));
-          }
-
-          abselem.addRight(new RelativeElement(elem.value[i].num, x, thisWidth, 6, {
-            thickness: glyphs.symbolHeightInPitches(elem.value[i].num.charAt(0))
-          }));
-          x += thisWidth;
-        }
+    for (var i = 0; i < elem.value.length; i++) {
+      if (i !== 0) {
+        abselem.addRight(new RelativeElement('+', x + 1, glyphs.getSymbolWidth("+"), 6, {
+          thickness: glyphs.symbolHeightInPitches("+")
+        }));
+        x += glyphs.getSymbolWidth("+") + 2;
       }
-    } else if (elem.type === "common_time") {
-      abselem.addRight(new RelativeElement("timesig.common", 0, glyphs.getSymbolWidth("timesig.common"), 6, {
-        thickness: glyphs.symbolHeightInPitches("timesig.common")
-      }));
-    } else if (elem.type === "cut_time") {
-      abselem.addRight(new RelativeElement("timesig.cut", 0, glyphs.getSymbolWidth("timesig.cut"), 6, {
-        thickness: glyphs.symbolHeightInPitches("timesig.cut")
-      }));
-    } else if (elem.type === "tempus_imperfectum") {
-      abselem.addRight(new RelativeElement("timesig.imperfectum", 0, glyphs.getSymbolWidth("timesig.imperfectum"), 6, {
-        thickness: glyphs.symbolHeightInPitches("timesig.imperfectum")
-      }));
-    } else if (elem.type === "tempus_imperfectum_prolatio") {
-      abselem.addRight(new RelativeElement("timesig.imperfectum2", 0, glyphs.getSymbolWidth("timesig.imperfectum2"), 6, {
-        thickness: glyphs.symbolHeightInPitches("timesig.imperfectum2")
-      }));
-    } else if (elem.type === "tempus_perfectum") {
-      abselem.addRight(new RelativeElement("timesig.perfectum", 0, glyphs.getSymbolWidth("timesig.perfectum"), 6, {
-        thickness: glyphs.symbolHeightInPitches("timesig.perfectum")
-      }));
-    } else if (elem.type === "tempus_perfectum_prolatio") {
-      abselem.addRight(new RelativeElement("timesig.perfectum2", 0, glyphs.getSymbolWidth("timesig.perfectum2"), 6, {
-        thickness: glyphs.symbolHeightInPitches("timesig.perfectum2")
-      }));
-    } else {
-      console.log("time signature:", elem);
-    }
 
-    return abselem;
-  };
-})();
+      if (elem.value[i].den) {
+        var numWidth = 0;
+
+        for (var i2 = 0; i2 < elem.value[i].num.length; i2++) {
+          numWidth += glyphs.getSymbolWidth(elem.value[i].num.charAt(i2));
+        }
+
+        var denWidth = 0;
+
+        for (i2 = 0; i2 < elem.value[i].num.length; i2++) {
+          denWidth += glyphs.getSymbolWidth(elem.value[i].den.charAt(i2));
+        }
+
+        var maxWidth = Math.max(numWidth, denWidth);
+        abselem.addRight(new RelativeElement(elem.value[i].num, x + (maxWidth - numWidth) / 2, numWidth, 8, {
+          thickness: glyphs.symbolHeightInPitches(elem.value[i].num.charAt(0))
+        }));
+        abselem.addRight(new RelativeElement(elem.value[i].den, x + (maxWidth - denWidth) / 2, denWidth, 4, {
+          thickness: glyphs.symbolHeightInPitches(elem.value[i].den.charAt(0))
+        }));
+        x += maxWidth;
+      } else {
+        var thisWidth = 0;
+
+        for (var i3 = 0; i3 < elem.value[i].num.length; i3++) {
+          thisWidth += glyphs.getSymbolWidth(elem.value[i].num.charAt(i3));
+        }
+
+        abselem.addRight(new RelativeElement(elem.value[i].num, x, thisWidth, 6, {
+          thickness: glyphs.symbolHeightInPitches(elem.value[i].num.charAt(0))
+        }));
+        x += thisWidth;
+      }
+    }
+  } else if (elem.type === "common_time") {
+    abselem.addRight(new RelativeElement("timesig.common", 0, glyphs.getSymbolWidth("timesig.common"), 6, {
+      thickness: glyphs.symbolHeightInPitches("timesig.common")
+    }));
+  } else if (elem.type === "cut_time") {
+    abselem.addRight(new RelativeElement("timesig.cut", 0, glyphs.getSymbolWidth("timesig.cut"), 6, {
+      thickness: glyphs.symbolHeightInPitches("timesig.cut")
+    }));
+  } else if (elem.type === "tempus_imperfectum") {
+    abselem.addRight(new RelativeElement("timesig.imperfectum", 0, glyphs.getSymbolWidth("timesig.imperfectum"), 6, {
+      thickness: glyphs.symbolHeightInPitches("timesig.imperfectum")
+    }));
+  } else if (elem.type === "tempus_imperfectum_prolatio") {
+    abselem.addRight(new RelativeElement("timesig.imperfectum2", 0, glyphs.getSymbolWidth("timesig.imperfectum2"), 6, {
+      thickness: glyphs.symbolHeightInPitches("timesig.imperfectum2")
+    }));
+  } else if (elem.type === "tempus_perfectum") {
+    abselem.addRight(new RelativeElement("timesig.perfectum", 0, glyphs.getSymbolWidth("timesig.perfectum"), 6, {
+      thickness: glyphs.symbolHeightInPitches("timesig.perfectum")
+    }));
+  } else if (elem.type === "tempus_perfectum_prolatio") {
+    abselem.addRight(new RelativeElement("timesig.perfectum2", 0, glyphs.getSymbolWidth("timesig.perfectum2"), 6, {
+      thickness: glyphs.symbolHeightInPitches("timesig.perfectum2")
+    }));
+  } else {
+    console.log("time signature:", elem);
+  }
+
+  return abselem;
+};
 
 module.exports = createTimeSignature;
 
@@ -18859,383 +18597,377 @@ var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/w
 
 var TieElem = __webpack_require__(/*! ./abc_tie_element */ "./src/write/abc_tie_element.js");
 
-var Decoration;
+var Decoration = function Decoration() {
+  this.startDiminuendoX = undefined;
+  this.startCrescendoX = undefined;
+  this.minTop = 12; // TODO-PER: this is assuming a 5-line staff. Pass that info in.
 
-(function () {
-  "use strict";
+  this.minBottom = 0;
+};
 
-  Decoration = function Decoration() {
-    this.startDiminuendoX = undefined;
-    this.startCrescendoX = undefined;
-    this.minTop = 12; // TODO-PER: this is assuming a 5-line staff. Pass that info in.
+var closeDecoration = function closeDecoration(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch) {
+  var yPos;
 
-    this.minBottom = 0;
-  };
+  for (var i = 0; i < decoration.length; i++) {
+    if (decoration[i] === "staccato" || decoration[i] === "tenuto" || decoration[i] === "accent") {
+      var symbol = "scripts." + decoration[i];
+      if (decoration[i] === "accent") symbol = "scripts.sforzato";
+      if (yPos === undefined) yPos = dir === "down" ? pitch + 2 : minPitch - 2;else yPos = dir === "down" ? yPos + 2 : yPos - 2;
 
-  var closeDecoration = function closeDecoration(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch) {
-    var yPos;
-
-    for (var i = 0; i < decoration.length; i++) {
-      if (decoration[i] === "staccato" || decoration[i] === "tenuto" || decoration[i] === "accent") {
-        var symbol = "scripts." + decoration[i];
-        if (decoration[i] === "accent") symbol = "scripts.sforzato";
-        if (yPos === undefined) yPos = dir === "down" ? pitch + 2 : minPitch - 2;else yPos = dir === "down" ? yPos + 2 : yPos - 2;
-
-        if (decoration[i] === "accent") {
-          // Always place the accent three pitches away, no matter whether that is a line or space.
-          if (dir === "up") yPos--;else yPos++;
-        } else {
-          // don't place on a stave line. The stave lines are 2,4,6,8,10
-          switch (yPos) {
-            case 2:
-            case 4:
-            case 6:
-            case 8:
-            case 10:
-              if (dir === "up") yPos--;else yPos++;
-              break;
-          }
-        }
-
-        if (pitch > 9) yPos++; // take up some room of those that are above
-
-        var deltaX = width / 2;
-
-        if (glyphs.getSymbolAlign(symbol) !== "center") {
-          deltaX -= glyphs.getSymbolWidth(symbol) / 2;
-        }
-
-        abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), yPos));
-      }
-
-      if (decoration[i] === "slide" && abselem.heads[0]) {
-        var yPos2 = abselem.heads[0].pitch;
-        yPos2 -= 2; // TODO-PER: not sure what this fudge factor is.
-
-        var blank1 = new RelativeElement("", -roomtaken - 15, 0, yPos2 - 1);
-        var blank2 = new RelativeElement("", -roomtaken - 5, 0, yPos2 + 1);
-        abselem.addFixedX(blank1);
-        abselem.addFixedX(blank2);
-        voice.addOther(new TieElem({
-          anchor1: blank1,
-          anchor2: blank2,
-          fixedY: true
-        }));
-      }
-    }
-
-    if (yPos === undefined) yPos = pitch;
-    return {
-      above: yPos,
-      below: abselem.bottom
-    };
-  };
-
-  var volumeDecoration = function volumeDecoration(voice, decoration, abselem, positioning) {
-    for (var i = 0; i < decoration.length; i++) {
-      switch (decoration[i]) {
-        case "p":
-        case "mp":
-        case "pp":
-        case "ppp":
-        case "pppp":
-        case "f":
-        case "ff":
-        case "fff":
-        case "ffff":
-        case "sfz":
-        case "mf":
-          var elem = new DynamicDecoration(abselem, decoration[i], positioning);
-          voice.addOther(elem);
-      }
-    }
-  };
-
-  var compoundDecoration = function compoundDecoration(decoration, pitch, width, abselem, dir) {
-    function highestPitch() {
-      if (abselem.heads.length === 0) return 10; // TODO-PER: I don't know if this can happen, but we'll return the top of the staff if so.
-
-      var pitch = abselem.heads[0].pitch;
-
-      for (var i = 1; i < abselem.heads.length; i++) {
-        pitch = Math.max(pitch, abselem.heads[i].pitch);
-      }
-
-      return pitch;
-    }
-
-    function lowestPitch() {
-      if (abselem.heads.length === 0) return 2; // TODO-PER: I don't know if this can happen, but we'll return the bottom of the staff if so.
-
-      var pitch = abselem.heads[0].pitch;
-
-      for (var i = 1; i < abselem.heads.length; i++) {
-        pitch = Math.min(pitch, abselem.heads[i].pitch);
-      }
-
-      return pitch;
-    }
-
-    function compoundDecoration(symbol, count) {
-      var placement = dir === 'down' ? lowestPitch() + 1 : highestPitch() + 9;
-      if (dir !== 'down' && count === 1) placement--;
-      var deltaX = width / 2;
-      deltaX += dir === 'down' ? -5 : 3;
-
-      for (var i = 0; i < count; i++) {
-        placement -= 1;
-        abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), placement));
-      }
-    }
-
-    for (var i = 0; i < decoration.length; i++) {
-      switch (decoration[i]) {
-        case "/":
-          compoundDecoration("flags.ugrace", 1);
-          break;
-
-        case "//":
-          compoundDecoration("flags.ugrace", 2);
-          break;
-
-        case "///":
-          compoundDecoration("flags.ugrace", 3);
-          break;
-
-        case "////":
-          compoundDecoration("flags.ugrace", 4);
-          break;
-      }
-    }
-  };
-
-  var stackedDecoration = function stackedDecoration(decoration, width, abselem, yPos, positioning, minTop, minBottom) {
-    function incrementPlacement(placement, height) {
-      if (placement === 'above') yPos.above += height;else yPos.below -= height;
-    }
-
-    function getPlacement(placement) {
-      var y;
-
-      if (placement === 'above') {
-        y = yPos.above;
-        if (y < minTop) y = minTop;
+      if (decoration[i] === "accent") {
+        // Always place the accent three pitches away, no matter whether that is a line or space.
+        if (dir === "up") yPos--;else yPos++;
       } else {
-        y = yPos.below;
-        if (y > minBottom) y = minBottom;
+        // don't place on a stave line. The stave lines are 2,4,6,8,10
+        switch (yPos) {
+          case 2:
+          case 4:
+          case 6:
+          case 8:
+          case 10:
+            if (dir === "up") yPos--;else yPos++;
+            break;
+        }
       }
 
-      return y;
-    }
+      if (pitch > 9) yPos++; // take up some room of those that are above
 
-    function textDecoration(text, placement) {
-      var y = getPlacement(placement);
-      var textFudge = 2;
-      var textHeight = 5; // TODO-PER: Get the height of the current font and use that for the thickness.
-
-      abselem.addFixedX(new RelativeElement(text, width / 2, 0, y + textFudge, {
-        type: "decoration",
-        klass: 'ornament',
-        thickness: 3
-      }));
-      incrementPlacement(placement, textHeight);
-    }
-
-    function symbolDecoration(symbol, placement) {
       var deltaX = width / 2;
 
       if (glyphs.getSymbolAlign(symbol) !== "center") {
         deltaX -= glyphs.getSymbolWidth(symbol) / 2;
       }
 
-      var height = glyphs.symbolHeightInPitches(symbol) + 1; // adding a little padding so nothing touches.
+      abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), yPos));
+    }
 
-      var y = getPlacement(placement);
-      y = placement === 'above' ? y + height / 2 : y - height / 2; // Center the element vertically.
+    if (decoration[i] === "slide" && abselem.heads[0]) {
+      var yPos2 = abselem.heads[0].pitch;
+      yPos2 -= 2; // TODO-PER: not sure what this fudge factor is.
 
-      abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), y, {
-        klass: 'ornament',
-        thickness: glyphs.symbolHeightInPitches(symbol)
+      var blank1 = new RelativeElement("", -roomtaken - 15, 0, yPos2 - 1);
+      var blank2 = new RelativeElement("", -roomtaken - 5, 0, yPos2 + 1);
+      abselem.addFixedX(blank1);
+      abselem.addFixedX(blank2);
+      voice.addOther(new TieElem({
+        anchor1: blank1,
+        anchor2: blank2,
+        fixedY: true
       }));
-      incrementPlacement(placement, height);
-    }
-
-    var symbolList = {
-      "+": "scripts.stopped",
-      "open": "scripts.open",
-      "snap": "scripts.snap",
-      "wedge": "scripts.wedge",
-      "thumb": "scripts.thumb",
-      "shortphrase": "scripts.shortphrase",
-      "mediumphrase": "scripts.mediumphrase",
-      "longphrase": "scripts.longphrase",
-      "trill": "scripts.trill",
-      "roll": "scripts.roll",
-      "irishroll": "scripts.roll",
-      "marcato": "scripts.umarcato",
-      "dmarcato": "scripts.dmarcato",
-      "umarcato": "scripts.umarcato",
-      "turn": "scripts.turn",
-      "uppermordent": "scripts.prall",
-      "pralltriller": "scripts.prall",
-      "mordent": "scripts.mordent",
-      "lowermordent": "scripts.mordent",
-      "downbow": "scripts.downbow",
-      "upbow": "scripts.upbow",
-      "fermata": "scripts.ufermata",
-      "invertedfermata": "scripts.dfermata",
-      "breath": ",",
-      "coda": "scripts.coda",
-      "segno": "scripts.segno"
-    };
-    var hasOne = false;
-
-    for (var i = 0; i < decoration.length; i++) {
-      switch (decoration[i]) {
-        case "0":
-        case "1":
-        case "2":
-        case "3":
-        case "4":
-        case "5":
-        case "D.C.":
-        case "D.S.":
-          textDecoration(decoration[i], positioning);
-          hasOne = true;
-          break;
-
-        case "fine":
-          textDecoration("FINE", positioning);
-          hasOne = true;
-          break;
-
-        case "+":
-        case "open":
-        case "snap":
-        case "wedge":
-        case "thumb":
-        case "shortphrase":
-        case "mediumphrase":
-        case "longphrase":
-        case "trill":
-        case "roll":
-        case "irishroll":
-        case "marcato":
-        case "dmarcato":
-        case "turn":
-        case "uppermordent":
-        case "pralltriller":
-        case "mordent":
-        case "lowermordent":
-        case "downbow":
-        case "upbow":
-        case "fermata":
-        case "breath":
-        case "umarcato":
-        case "coda":
-        case "segno":
-          symbolDecoration(symbolList[decoration[i]], positioning);
-          hasOne = true;
-          break;
-
-        case "invertedfermata":
-          symbolDecoration(symbolList[decoration[i]], 'below');
-          hasOne = true;
-          break;
-
-        case "mark":
-          abselem.klass = "mark";
-          break;
-      }
-    }
-
-    return hasOne;
-  };
-
-  function leftDecoration(decoration, abselem, roomtaken) {
-    for (var i = 0; i < decoration.length; i++) {
-      switch (decoration[i]) {
-        case "arpeggio":
-          // The arpeggio symbol is the height of a note (that is, two Y units). This stacks as many as we need to go from the
-          // top note to the bottom note. The arpeggio should also be a little taller than the stacked notes, so there is an extra
-          // one drawn and it is offset by half of a note height (that is, one Y unit).
-          for (var j = abselem.abcelem.minpitch - 1; j <= abselem.abcelem.maxpitch; j += 2) {
-            abselem.addExtra(new RelativeElement("scripts.arpeggio", -glyphs.getSymbolWidth("scripts.arpeggio") * 2 - roomtaken, 0, j + 2, {
-              klass: 'ornament',
-              thickness: glyphs.symbolHeightInPitches("scripts.arpeggio")
-            }));
-          }
-
-          break;
-      }
     }
   }
 
-  Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, positioning) {
-    var diminuendo;
-    var crescendo;
-
-    for (var i = 0; i < decoration.length; i++) {
-      switch (decoration[i]) {
-        case "diminuendo(":
-          this.startDiminuendoX = abselem;
-          diminuendo = undefined;
-          break;
-
-        case "diminuendo)":
-          diminuendo = {
-            start: this.startDiminuendoX,
-            stop: abselem
-          };
-          this.startDiminuendoX = undefined;
-          break;
-
-        case "crescendo(":
-          this.startCrescendoX = abselem;
-          crescendo = undefined;
-          break;
-
-        case "crescendo)":
-          crescendo = {
-            start: this.startCrescendoX,
-            stop: abselem
-          };
-          this.startCrescendoX = undefined;
-          break;
-      }
-    }
-
-    if (diminuendo) {
-      voice.addOther(new CrescendoElem(diminuendo.start, diminuendo.stop, ">", positioning));
-    }
-
-    if (crescendo) {
-      voice.addOther(new CrescendoElem(crescendo.start, crescendo.stop, "<", positioning));
-    }
+  if (yPos === undefined) yPos = pitch;
+  return {
+    above: yPos,
+    below: abselem.bottom
   };
+};
 
-  Decoration.prototype.createDecoration = function (voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, positioning, hasVocals) {
-    if (!positioning) positioning = {
-      ornamentPosition: 'above',
-      volumePosition: hasVocals ? 'above' : 'below',
-      dynamicPosition: hasVocals ? 'above' : 'below'
-    }; // These decorations don't affect the placement of other decorations
+var volumeDecoration = function volumeDecoration(voice, decoration, abselem, positioning) {
+  for (var i = 0; i < decoration.length; i++) {
+    switch (decoration[i]) {
+      case "p":
+      case "mp":
+      case "pp":
+      case "ppp":
+      case "pppp":
+      case "f":
+      case "ff":
+      case "fff":
+      case "ffff":
+      case "sfz":
+      case "mf":
+        var elem = new DynamicDecoration(abselem, decoration[i], positioning);
+        voice.addOther(elem);
+    }
+  }
+};
 
-    volumeDecoration(voice, decoration, abselem, positioning.volumePosition);
-    this.dynamicDecoration(voice, decoration, abselem, positioning.dynamicPosition);
-    compoundDecoration(decoration, pitch, width, abselem, dir); // treat staccato, accent, and tenuto first (may need to shift other markers)
+var compoundDecoration = function compoundDecoration(decoration, pitch, width, abselem, dir) {
+  function highestPitch() {
+    if (abselem.heads.length === 0) return 10; // TODO-PER: I don't know if this can happen, but we'll return the top of the staff if so.
 
-    var yPos = closeDecoration(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch); // yPos is an object containing 'above' and 'below'. That is the placement of the next symbol on either side.
+    var pitch = abselem.heads[0].pitch;
 
-    yPos.above = Math.max(yPos.above, this.minTop);
-    var hasOne = stackedDecoration(decoration, width, abselem, yPos, positioning.ornamentPosition, this.minTop, this.minBottom);
-
-    if (hasOne) {//			abselem.top = Math.max(yPos.above + 3, abselem.top); // TODO-PER: Not sure why we need this fudge factor.
+    for (var i = 1; i < abselem.heads.length; i++) {
+      pitch = Math.max(pitch, abselem.heads[i].pitch);
     }
 
-    leftDecoration(decoration, abselem, roomtaken);
+    return pitch;
+  }
+
+  function lowestPitch() {
+    if (abselem.heads.length === 0) return 2; // TODO-PER: I don't know if this can happen, but we'll return the bottom of the staff if so.
+
+    var pitch = abselem.heads[0].pitch;
+
+    for (var i = 1; i < abselem.heads.length; i++) {
+      pitch = Math.min(pitch, abselem.heads[i].pitch);
+    }
+
+    return pitch;
+  }
+
+  function compoundDecoration(symbol, count) {
+    var placement = dir === 'down' ? lowestPitch() + 1 : highestPitch() + 9;
+    if (dir !== 'down' && count === 1) placement--;
+    var deltaX = width / 2;
+    deltaX += dir === 'down' ? -5 : 3;
+
+    for (var i = 0; i < count; i++) {
+      placement -= 1;
+      abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), placement));
+    }
+  }
+
+  for (var i = 0; i < decoration.length; i++) {
+    switch (decoration[i]) {
+      case "/":
+        compoundDecoration("flags.ugrace", 1);
+        break;
+
+      case "//":
+        compoundDecoration("flags.ugrace", 2);
+        break;
+
+      case "///":
+        compoundDecoration("flags.ugrace", 3);
+        break;
+
+      case "////":
+        compoundDecoration("flags.ugrace", 4);
+        break;
+    }
+  }
+};
+
+var stackedDecoration = function stackedDecoration(decoration, width, abselem, yPos, positioning, minTop, minBottom) {
+  function incrementPlacement(placement, height) {
+    if (placement === 'above') yPos.above += height;else yPos.below -= height;
+  }
+
+  function getPlacement(placement) {
+    var y;
+
+    if (placement === 'above') {
+      y = yPos.above;
+      if (y < minTop) y = minTop;
+    } else {
+      y = yPos.below;
+      if (y > minBottom) y = minBottom;
+    }
+
+    return y;
+  }
+
+  function textDecoration(text, placement) {
+    var y = getPlacement(placement);
+    var textFudge = 2;
+    var textHeight = 5; // TODO-PER: Get the height of the current font and use that for the thickness.
+
+    abselem.addFixedX(new RelativeElement(text, width / 2, 0, y + textFudge, {
+      type: "decoration",
+      klass: 'ornament',
+      thickness: 3
+    }));
+    incrementPlacement(placement, textHeight);
+  }
+
+  function symbolDecoration(symbol, placement) {
+    var deltaX = width / 2;
+
+    if (glyphs.getSymbolAlign(symbol) !== "center") {
+      deltaX -= glyphs.getSymbolWidth(symbol) / 2;
+    }
+
+    var height = glyphs.symbolHeightInPitches(symbol) + 1; // adding a little padding so nothing touches.
+
+    var y = getPlacement(placement);
+    y = placement === 'above' ? y + height / 2 : y - height / 2; // Center the element vertically.
+
+    abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), y, {
+      klass: 'ornament',
+      thickness: glyphs.symbolHeightInPitches(symbol)
+    }));
+    incrementPlacement(placement, height);
+  }
+
+  var symbolList = {
+    "+": "scripts.stopped",
+    "open": "scripts.open",
+    "snap": "scripts.snap",
+    "wedge": "scripts.wedge",
+    "thumb": "scripts.thumb",
+    "shortphrase": "scripts.shortphrase",
+    "mediumphrase": "scripts.mediumphrase",
+    "longphrase": "scripts.longphrase",
+    "trill": "scripts.trill",
+    "roll": "scripts.roll",
+    "irishroll": "scripts.roll",
+    "marcato": "scripts.umarcato",
+    "dmarcato": "scripts.dmarcato",
+    "umarcato": "scripts.umarcato",
+    "turn": "scripts.turn",
+    "uppermordent": "scripts.prall",
+    "pralltriller": "scripts.prall",
+    "mordent": "scripts.mordent",
+    "lowermordent": "scripts.mordent",
+    "downbow": "scripts.downbow",
+    "upbow": "scripts.upbow",
+    "fermata": "scripts.ufermata",
+    "invertedfermata": "scripts.dfermata",
+    "breath": ",",
+    "coda": "scripts.coda",
+    "segno": "scripts.segno"
   };
-})();
+  var hasOne = false;
+
+  for (var i = 0; i < decoration.length; i++) {
+    switch (decoration[i]) {
+      case "0":
+      case "1":
+      case "2":
+      case "3":
+      case "4":
+      case "5":
+      case "D.C.":
+      case "D.S.":
+        textDecoration(decoration[i], positioning);
+        hasOne = true;
+        break;
+
+      case "fine":
+        textDecoration("FINE", positioning);
+        hasOne = true;
+        break;
+
+      case "+":
+      case "open":
+      case "snap":
+      case "wedge":
+      case "thumb":
+      case "shortphrase":
+      case "mediumphrase":
+      case "longphrase":
+      case "trill":
+      case "roll":
+      case "irishroll":
+      case "marcato":
+      case "dmarcato":
+      case "turn":
+      case "uppermordent":
+      case "pralltriller":
+      case "mordent":
+      case "lowermordent":
+      case "downbow":
+      case "upbow":
+      case "fermata":
+      case "breath":
+      case "umarcato":
+      case "coda":
+      case "segno":
+        symbolDecoration(symbolList[decoration[i]], positioning);
+        hasOne = true;
+        break;
+
+      case "invertedfermata":
+        symbolDecoration(symbolList[decoration[i]], 'below');
+        hasOne = true;
+        break;
+
+      case "mark":
+        abselem.klass = "mark";
+        break;
+    }
+  }
+
+  return hasOne;
+};
+
+function leftDecoration(decoration, abselem, roomtaken) {
+  for (var i = 0; i < decoration.length; i++) {
+    switch (decoration[i]) {
+      case "arpeggio":
+        // The arpeggio symbol is the height of a note (that is, two Y units). This stacks as many as we need to go from the
+        // top note to the bottom note. The arpeggio should also be a little taller than the stacked notes, so there is an extra
+        // one drawn and it is offset by half of a note height (that is, one Y unit).
+        for (var j = abselem.abcelem.minpitch - 1; j <= abselem.abcelem.maxpitch; j += 2) {
+          abselem.addExtra(new RelativeElement("scripts.arpeggio", -glyphs.getSymbolWidth("scripts.arpeggio") * 2 - roomtaken, 0, j + 2, {
+            klass: 'ornament',
+            thickness: glyphs.symbolHeightInPitches("scripts.arpeggio")
+          }));
+        }
+
+        break;
+    }
+  }
+}
+
+Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, positioning) {
+  var diminuendo;
+  var crescendo;
+
+  for (var i = 0; i < decoration.length; i++) {
+    switch (decoration[i]) {
+      case "diminuendo(":
+        this.startDiminuendoX = abselem;
+        diminuendo = undefined;
+        break;
+
+      case "diminuendo)":
+        diminuendo = {
+          start: this.startDiminuendoX,
+          stop: abselem
+        };
+        this.startDiminuendoX = undefined;
+        break;
+
+      case "crescendo(":
+        this.startCrescendoX = abselem;
+        crescendo = undefined;
+        break;
+
+      case "crescendo)":
+        crescendo = {
+          start: this.startCrescendoX,
+          stop: abselem
+        };
+        this.startCrescendoX = undefined;
+        break;
+    }
+  }
+
+  if (diminuendo) {
+    voice.addOther(new CrescendoElem(diminuendo.start, diminuendo.stop, ">", positioning));
+  }
+
+  if (crescendo) {
+    voice.addOther(new CrescendoElem(crescendo.start, crescendo.stop, "<", positioning));
+  }
+};
+
+Decoration.prototype.createDecoration = function (voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, positioning, hasVocals) {
+  if (!positioning) positioning = {
+    ornamentPosition: 'above',
+    volumePosition: hasVocals ? 'above' : 'below',
+    dynamicPosition: hasVocals ? 'above' : 'below'
+  }; // These decorations don't affect the placement of other decorations
+
+  volumeDecoration(voice, decoration, abselem, positioning.volumePosition);
+  this.dynamicDecoration(voice, decoration, abselem, positioning.dynamicPosition);
+  compoundDecoration(decoration, pitch, width, abselem, dir); // treat staccato, accent, and tenuto first (may need to shift other markers)
+
+  var yPos = closeDecoration(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch); // yPos is an object containing 'above' and 'below'. That is the placement of the next symbol on either side.
+
+  yPos.above = Math.max(yPos.above, this.minTop);
+  var hasOne = stackedDecoration(decoration, width, abselem, yPos, positioning.ornamentPosition, this.minTop, this.minBottom);
+
+  if (hasOne) {//			abselem.top = Math.max(yPos.above + 3, abselem.top); // TODO-PER: Not sure why we need this fudge factor.
+  }
+
+  leftDecoration(decoration, abselem, roomtaken);
+};
 
 module.exports = Decoration;
 
@@ -19377,8 +19109,6 @@ var calcHeight = __webpack_require__(/*! ./calcHeight */ "./src/write/calcHeight
  * elements in ABCJS AES know their "source data" in the ABCJS AST, and their "target shape"
  * in the renderer for highlighting purposes
  *
- * @param {Object} paper div element that will wrap the SVG
- * @param {Object} params all the params -- documented on github //TODO-GD move some of that documentation here
  */
 
 
@@ -19409,7 +19139,7 @@ var EngraverController = function EngraverController(paper, params) {
 
   this.listeners = [];
   if (params.clickListener) this.addSelectListener(params.clickListener);
-  this.renderer = new Renderer(paper, params.regression);
+  this.renderer = new Renderer(paper);
   this.renderer.setPaddingOverride(params);
   if (params.showDebug) this.renderer.showDebug = params.showDebug;
   this.renderer.controller = this; // TODO-GD needed for highlighting
@@ -19433,7 +19163,6 @@ EngraverController.prototype.reset = function () {
 };
 /**
  * run the engraving process
- * @param {ABCJS.Tune|ABCJS.Tune[]} abctunes
  */
 
 
@@ -19453,7 +19182,6 @@ EngraverController.prototype.engraveABC = function (abctunes, tuneNumber) {
 };
 /**
  * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
- * @param {float} scale
  */
 
 
@@ -19467,22 +19195,30 @@ EngraverController.prototype.getMeasureWidths = function (abcTune) {
   this.getFontAndAttr = new GetFontAndAttr(abcTune.formatting, this.classes);
   this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
   this.setupTune(abcTune, 0);
-  this.constructTuneElements(abcTune);
-  var maxWidth = layout(this.renderer, abcTune, 0, this.space);
-  var ret = {
-    left: 0,
-    measureWidths: [],
-    height: 0,
-    total: 0
-  }; // TODO-PER: need to add the height of the title block, too.
+  this.constructTuneElements(abcTune); // layout() sets the x-coordinate of the abcTune element here:
+  // abcTune.lines[0].staffGroup.voices[0].children[0].x
 
-  ret.height = this.renderer.padding.top + this.renderer.spacing.music + this.renderer.padding.bottom + 24; // the 24 is the empirical value added to the bottom of all tunes.
+  layout(this.renderer, abcTune, 0, this.space);
+  var ret = [];
+  var section;
+  var needNewSection = true;
 
   for (var i = 0; i < abcTune.lines.length; i++) {
     var abcLine = abcTune.lines[i];
 
     if (abcLine.staff) {
-      // At this point, the voices are laid out so that the bar lines are even with each other. So we just need to get the placement of the first voice.
+      if (needNewSection) {
+        section = {
+          left: 0,
+          measureWidths: [],
+          //height: this.renderer.padding.top + this.renderer.spacing.music + this.renderer.padding.bottom + 24, // the 24 is the empirical value added to the bottom of all tunes.
+          total: 0
+        };
+        ret.push(section);
+        needNewSection = false;
+      } // At this point, the voices are laid out so that the bar lines are even with each other. So we just need to get the placement of the first voice.
+
+
       if (abcLine.staffGroup.voices.length > 0) {
         var voice = abcLine.staffGroup.voices[0];
         var foundNotStaffExtra = false;
@@ -19493,20 +19229,19 @@ EngraverController.prototype.getMeasureWidths = function (abcTune) {
 
           if (!foundNotStaffExtra && !child.isClef && !child.isKeySig) {
             foundNotStaffExtra = true;
-            ret.left = child.x;
+            section.left = child.x;
             lastXPosition = child.x;
           }
 
           if (child.type === 'bar') {
-            ret.measureWidths.push(child.x - lastXPosition);
-            ret.total += child.x - lastXPosition;
+            section.measureWidths.push(child.x - lastXPosition);
+            section.total += child.x - lastXPosition;
             lastXPosition = child.x;
           }
         }
-      }
+      } //section.height += calcHeight(abcLine.staffGroup) * spacing.STEP;
 
-      ret.height += calcHeight(abcLine.staffGroup) * spacing.STEP;
-    }
+    } else needNewSection = true;
   }
 
   return ret;
@@ -19551,7 +19286,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 
     if (abcLine.staff) {
       hasSeenNonSubtitle = true;
-      abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo : null, this.getTextSize);
+      abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo : null);
       hasPrintedTempo = true;
     } else if (abcLine.subtitle) {
       // If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
@@ -20412,8 +20147,6 @@ module.exports = RelativeElement;
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
 
 var Svg = __webpack_require__(/*! ./svg */ "./src/write/svg.js");
-
-var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
 /**
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
  * @param {Object} paper
@@ -20447,11 +20180,6 @@ Renderer.prototype.newTune = function (abcTune) {
   this.isPrint = abcTune.media === 'print';
   this.setPadding(abcTune);
 };
-/**
- * Set the padding
- * @param {object} params
- */
-
 
 Renderer.prototype.setPaddingOverride = function (params) {
   this.paddingOverride = {
@@ -20461,11 +20189,6 @@ Renderer.prototype.setPaddingOverride = function (params) {
     left: params.paddingleft
   };
 };
-/**
- * Set the padding
- * @param {object} params
- */
-
 
 Renderer.prototype.setPadding = function (abctune) {
   // If the padding is set in the tune, then use that.
@@ -20788,112 +20511,106 @@ var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/w
 
 var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
 
-var TempoElement;
+var TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
+  this.type = "TempoElement";
+  this.tempo = tempo;
+  this.tempo.type = "tempo"; /// TODO-PER: this should be set earlier, in the parser, probably.
 
-(function () {
-  "use strict";
+  this.tuneNumber = tuneNumber; // TODO: can these two properties be merged?
 
-  TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
-    this.type = "TempoElement";
-    this.tempo = tempo;
-    this.tempo.type = "tempo"; /// TODO-PER: this should be set earlier, in the parser, probably.
+  this.totalHeightInPitches = 6;
+  this.tempoHeightAbove = this.totalHeightInPitches;
+  this.pitch = undefined; // This will be set later
 
-    this.tuneNumber = tuneNumber; // TODO: can these two properties be merged?
+  if (this.tempo.duration && !this.tempo.suppressBpm) {
+    this.note = this.createNote(createNoteHead, tempo, tuneNumber);
+  }
+};
 
-    this.totalHeightInPitches = 6;
-    this.tempoHeightAbove = this.totalHeightInPitches;
-    this.pitch = undefined; // This will be set later
+TempoElement.prototype.setX = function (x) {
+  this.x = x;
+};
 
-    if (this.tempo.duration && !this.tempo.suppressBpm) {
-      this.note = this.createNote(createNoteHead, tempo, tuneNumber);
-    }
-  };
+TempoElement.prototype.createNote = function (createNoteHead, tempo, tuneNumber) {
+  var temposcale = 0.75;
+  var duration = tempo.duration[0]; // TODO when multiple durations
 
-  TempoElement.prototype.setX = function (x) {
-    this.x = x;
-  };
+  var absElem = new AbsoluteElement(tempo, duration, 1, 'tempo', tuneNumber); // There aren't an infinite number of note values, but we are passed a float, so just in case something is off upstream,
+  // merge all of the in between points.
 
-  TempoElement.prototype.createNote = function (createNoteHead, tempo, tuneNumber) {
-    var temposcale = 0.75;
-    var duration = tempo.duration[0]; // TODO when multiple durations
+  var dot;
+  var flag;
+  var note;
 
-    var absElem = new AbsoluteElement(tempo, duration, 1, 'tempo', tuneNumber); // There aren't an infinite number of note values, but we are passed a float, so just in case something is off upstream,
-    // merge all of the in between points.
+  if (duration <= 1 / 32) {
+    note = "noteheads.quarter";
+    flag = "flags.u32nd";
+    dot = 0;
+  } else if (duration <= 1 / 16) {
+    note = "noteheads.quarter";
+    flag = "flags.u16th";
+    dot = 0;
+  } else if (duration <= 3 / 32) {
+    note = "noteheads.quarter";
+    flag = "flags.u16nd";
+    dot = 1;
+  } else if (duration <= 1 / 8) {
+    note = "noteheads.quarter";
+    flag = "flags.u8th";
+    dot = 0;
+  } else if (duration <= 3 / 16) {
+    note = "noteheads.quarter";
+    flag = "flags.u8th";
+    dot = 1;
+  } else if (duration <= 1 / 4) {
+    note = "noteheads.quarter";
+    dot = 0;
+  } else if (duration <= 3 / 8) {
+    note = "noteheads.quarter";
+    dot = 1;
+  } else if (duration <= 1 / 2) {
+    note = "noteheads.half";
+    dot = 0;
+  } else if (duration <= 3 / 4) {
+    note = "noteheads.half";
+    dot = 1;
+  } else if (duration <= 1) {
+    note = "noteheads.whole";
+    dot = 0;
+  } else if (duration <= 1.5) {
+    note = "noteheads.whole";
+    dot = 1;
+  } else if (duration <= 2) {
+    note = "noteheads.dbl";
+    dot = 0;
+  } else {
+    note = "noteheads.dbl";
+    dot = 1;
+  }
 
-    var dot;
-    var flag;
-    var note;
+  var ret = createNoteHead(absElem, note, {
+    verticalPos: 0
+  }, // This is just temporary: we'll offset the vertical positioning when we get the actual vertical spot.
+  "up", 0, 0, flag, dot, 0, temposcale, [], false);
+  var tempoNote = ret.notehead;
+  absElem.addHead(tempoNote);
+  var stem;
 
-    if (duration <= 1 / 32) {
-      note = "noteheads.quarter";
-      flag = "flags.u32nd";
-      dot = 0;
-    } else if (duration <= 1 / 16) {
-      note = "noteheads.quarter";
-      flag = "flags.u16th";
-      dot = 0;
-    } else if (duration <= 3 / 32) {
-      note = "noteheads.quarter";
-      flag = "flags.u16nd";
-      dot = 1;
-    } else if (duration <= 1 / 8) {
-      note = "noteheads.quarter";
-      flag = "flags.u8th";
-      dot = 0;
-    } else if (duration <= 3 / 16) {
-      note = "noteheads.quarter";
-      flag = "flags.u8th";
-      dot = 1;
-    } else if (duration <= 1 / 4) {
-      note = "noteheads.quarter";
-      dot = 0;
-    } else if (duration <= 3 / 8) {
-      note = "noteheads.quarter";
-      dot = 1;
-    } else if (duration <= 1 / 2) {
-      note = "noteheads.half";
-      dot = 0;
-    } else if (duration <= 3 / 4) {
-      note = "noteheads.half";
-      dot = 1;
-    } else if (duration <= 1) {
-      note = "noteheads.whole";
-      dot = 0;
-    } else if (duration <= 1.5) {
-      note = "noteheads.whole";
-      dot = 1;
-    } else if (duration <= 2) {
-      note = "noteheads.dbl";
-      dot = 0;
-    } else {
-      note = "noteheads.dbl";
-      dot = 1;
-    }
+  if (note !== "noteheads.whole" && note !== "noteheads.dbl") {
+    var p1 = 1 / 3 * temposcale;
+    var p2 = 5 * temposcale;
+    var dx = tempoNote.dx + tempoNote.w;
+    var width = -0.6;
+    stem = new RelativeElement(null, dx, 0, p1, {
+      "type": "stem",
+      "pitch2": p2,
+      linewidth: width
+    });
+    absElem.addRight(stem);
+  }
 
-    var ret = createNoteHead(absElem, note, {
-      verticalPos: 0
-    }, // This is just temporary: we'll offset the vertical positioning when we get the actual vertical spot.
-    "up", 0, 0, flag, dot, 0, temposcale, [], false);
-    var tempoNote = ret.notehead;
-    absElem.addHead(tempoNote);
-    var stem;
-
-    if (note !== "noteheads.whole" && note !== "noteheads.dbl") {
-      var p1 = 1 / 3 * temposcale;
-      var p2 = 5 * temposcale;
-      var dx = tempoNote.dx + tempoNote.w;
-      var width = -0.6;
-      stem = new RelativeElement(null, dx, 0, p1, {
-        "type": "stem",
-        "pitch2": p2,
-        linewidth: width
-      });
-      absElem.addRight(stem);
-    }
-
-    return absElem;
-  };
-})();
+  return absElem;
+};
 
 module.exports = TempoElement;
 
@@ -21084,37 +20801,31 @@ module.exports = TieElem;
 //    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 //    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-var TripletElem;
+var TripletElem = function TripletElem(number, anchor1, options) {
+  this.type = "TripletElem";
+  this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
 
-(function () {
-  "use strict";
+  this.number = number;
+  this.durationClass = ('d' + Math.round(anchor1.parent.durationClass * 1000) / 1000).replace(/\./, '-');
+  this.middleElems = []; // This is to calculate the highest interior pitch. It is used to make sure that the drawn bracket never crosses a really high middle note.
 
-  TripletElem = function TripletElem(number, anchor1, options) {
-    this.type = "TripletElem";
-    this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
+  this.flatBeams = options.flatBeams;
+};
 
-    this.number = number;
-    this.durationClass = ('d' + Math.round(anchor1.parent.durationClass * 1000) / 1000).replace(/\./, '-');
-    this.middleElems = []; // This is to calculate the highest interior pitch. It is used to make sure that the drawn bracket never crosses a really high middle note.
+TripletElem.prototype.isClosed = function () {
+  return !!this.anchor2;
+};
 
-    this.flatBeams = options.flatBeams;
-  };
+TripletElem.prototype.middleNote = function (elem) {
+  this.middleElems.push(elem);
+};
 
-  TripletElem.prototype.isClosed = function () {
-    return !!this.anchor2;
-  };
+TripletElem.prototype.setCloseAnchor = function (anchor2) {
+  this.anchor2 = anchor2; // TODO-PER: Unfortunately, I don't know if there is a beam above until after the vertical positioning is done,
+  // so I don't know whether to leave room for the number above. Therefore, If there is a beam on the first note, I'll leave room just in case.
 
-  TripletElem.prototype.middleNote = function (elem) {
-    this.middleElems.push(elem);
-  };
-
-  TripletElem.prototype.setCloseAnchor = function (anchor2) {
-    this.anchor2 = anchor2; // TODO-PER: Unfortunately, I don't know if there is a beam above until after the vertical positioning is done,
-    // so I don't know whether to leave room for the number above. Therefore, If there is a beam on the first note, I'll leave room just in case.
-
-    if (this.anchor1.parent.beam) this.endingHeightAbove = 4;
-  };
-})();
+  if (this.anchor1.parent.beam) this.endingHeightAbove = 4;
+};
 
 module.exports = TripletElem;
 
@@ -21246,123 +20957,117 @@ var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/w
 
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
 
-var addChord;
+var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth) {
+  for (var i = 0; i < elem.chord.length; i++) {
+    var pos = elem.chord[i].position;
+    var rel_position = elem.chord[i].rel_position;
+    var chords = elem.chord[i].name.split("\n");
 
-(function () {
-  "use strict";
+    for (var j = chords.length - 1; j >= 0; j--) {
+      // parse these in opposite order because we place them from bottom to top.
+      var chord = chords[j];
+      var x = 0;
+      var y;
+      var font;
+      var klass;
 
-  addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth) {
-    for (var i = 0; i < elem.chord.length; i++) {
-      var pos = elem.chord[i].position;
-      var rel_position = elem.chord[i].rel_position;
-      var chords = elem.chord[i].name.split("\n");
+      if (pos === "left" || pos === "right" || pos === "below" || pos === "above") {
+        font = 'annotationfont';
+        klass = "annotation";
+      } else {
+        font = 'gchordfont';
+        klass = "chord";
+      }
 
-      for (var j = chords.length - 1; j >= 0; j--) {
-        // parse these in opposite order because we place them from bottom to top.
-        var chord = chords[j];
-        var x = 0;
-        var y;
-        var font;
-        var klass;
+      var attr = getTextSize.attr(font, klass);
+      var dim = getTextSize.calc(chord, font, klass);
+      var chordWidth = dim.width;
+      var chordHeight = dim.height / spacing.STEP;
 
-        if (pos === "left" || pos === "right" || pos === "below" || pos === "above") {
-          font = 'annotationfont';
-          klass = "annotation";
-        } else {
-          font = 'gchordfont';
-          klass = "chord";
-        }
+      switch (pos) {
+        case "left":
+          roomTaken += chordWidth + 7;
+          x = -roomTaken; // TODO-PER: This is just a guess from trial and error
 
-        var attr = getTextSize.attr(font, klass);
-        var dim = getTextSize.calc(chord, font, klass);
-        var chordWidth = dim.width;
-        var chordHeight = dim.height / spacing.STEP;
+          y = elem.averagepitch;
+          abselem.addExtra(new RelativeElement(chord, x, chordWidth + 4, y, {
+            type: "text",
+            height: chordHeight,
+            dim: attr,
+            position: "left"
+          }));
+          break;
 
-        switch (pos) {
-          case "left":
-            roomTaken += chordWidth + 7;
-            x = -roomTaken; // TODO-PER: This is just a guess from trial and error
+        case "right":
+          roomTakenRight += 4;
+          x = roomTakenRight; // TODO-PER: This is just a guess from trial and error
 
-            y = elem.averagepitch;
-            abselem.addExtra(new RelativeElement(chord, x, chordWidth + 4, y, {
+          y = elem.averagepitch;
+          abselem.addRight(new RelativeElement(chord, x, chordWidth + 4, y, {
+            type: "text",
+            height: chordHeight,
+            dim: attr,
+            position: "right"
+          }));
+          break;
+
+        case "below":
+          // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
+          abselem.addRight(new RelativeElement(chord, 0, 0, undefined, {
+            type: "text",
+            position: "below",
+            height: chordHeight,
+            dim: attr,
+            realWidth: chordWidth
+          }));
+          break;
+
+        case "above":
+          // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
+          abselem.addRight(new RelativeElement(chord, 0, 0, undefined, {
+            type: "text",
+            position: "above",
+            height: chordHeight,
+            dim: attr,
+            realWidth: chordWidth
+          }));
+          break;
+
+        default:
+          if (rel_position) {
+            var relPositionY = rel_position.y + 3 * spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
+
+            abselem.addRight(new RelativeElement(chord, x + rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {
+              position: "relative",
               type: "text",
               height: chordHeight,
-              dim: attr,
-              position: "left"
+              dim: attr
             }));
-            break;
-
-          case "right":
-            roomTakenRight += 4;
-            x = roomTakenRight; // TODO-PER: This is just a guess from trial and error
-
-            y = elem.averagepitch;
-            abselem.addRight(new RelativeElement(chord, x, chordWidth + 4, y, {
-              type: "text",
-              height: chordHeight,
-              dim: attr,
-              position: "right"
-            }));
-            break;
-
-          case "below":
+          } else {
             // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-            abselem.addRight(new RelativeElement(chord, 0, 0, undefined, {
-              type: "text",
-              position: "below",
-              height: chordHeight,
-              dim: attr,
-              realWidth: chordWidth
-            }));
-            break;
+            var pos2 = 'above';
+            if (elem.positioning && elem.positioning.chordPosition) pos2 = elem.positioning.chordPosition;
 
-          case "above":
-            // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-            abselem.addRight(new RelativeElement(chord, 0, 0, undefined, {
-              type: "text",
-              position: "above",
-              height: chordHeight,
-              dim: attr,
-              realWidth: chordWidth
-            }));
-            break;
-
-          default:
-            if (rel_position) {
-              var relPositionY = rel_position.y + 3 * spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
-
-              abselem.addRight(new RelativeElement(chord, x + rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {
-                position: "relative",
-                type: "text",
+            if (pos2 !== 'hidden') {
+              abselem.addCentered(new RelativeElement(chord, noteheadWidth / 2, chordWidth, undefined, {
+                type: "chord",
+                position: pos2,
                 height: chordHeight,
-                dim: attr
+                dim: attr,
+                realWidth: chordWidth
               }));
-            } else {
-              // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-              var pos2 = 'above';
-              if (elem.positioning && elem.positioning.chordPosition) pos2 = elem.positioning.chordPosition;
-
-              if (pos2 !== 'hidden') {
-                abselem.addCentered(new RelativeElement(chord, noteheadWidth / 2, chordWidth, undefined, {
-                  type: "chord",
-                  position: pos2,
-                  height: chordHeight,
-                  dim: attr,
-                  realWidth: chordWidth
-                }));
-              }
             }
+          }
 
-        }
       }
     }
+  }
 
-    return {
-      roomTaken: roomTaken,
-      roomTakenRight: roomTakenRight
-    };
+  return {
+    roomTaken: roomTaken,
+    roomTakenRight: roomTakenRight
   };
-})();
+};
 
 module.exports = addChord;
 
@@ -21379,7 +21084,7 @@ function BottomText(metaText, width, isPrint, paddingLeft, spacing, getTextSize)
   this.rows = [];
   if (metaText.unalignedWords && metaText.unalignedWords.length > 0) this.unalignedWords(metaText.unalignedWords, paddingLeft, spacing, getTextSize);
   this.extraText(metaText, paddingLeft, spacing, getTextSize);
-  if (metaText.footer && isPrint) this.footer(metaText.footer, paddingLeft, getTextSize);
+  if (metaText.footer && isPrint) this.footer(metaText.footer, width, paddingLeft, getTextSize);
 }
 
 BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spacing, getTextSize) {
@@ -21454,7 +21159,7 @@ BottomText.prototype.extraText = function (metaText, marginLeft, spacing, getTex
   }
 };
 
-BottomText.prototype.footer = function (footer, marginLeft, getTextSize) {
+BottomText.prototype.footer = function (footer, width, paddingLeft, getTextSize) {
   var klass = 'header meta-bottom';
   var font = "footerfont";
   this.rows.push({
@@ -21668,12 +21373,12 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 
     switch (child.type) {
       case "TempoElement":
-        el = drawTempo(renderer, child, selectables);
+        el = drawTempo(renderer, child);
         if (el) params.elemset = params.elemset.concat(el);
         break;
 
       default:
-        el = drawRelativeElement(renderer, child, bartop, selectables);
+        el = drawRelativeElement(renderer, child, bartop);
         if (el) params.elemset.push(el);
     }
   }
@@ -21710,7 +21415,17 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
   if (params.klass) setClass(params.elemset, "mark", "", "#00ff00");
   if (params.hint) setClass(params.elemset, "abcjs-hint", "", null);
   params.abcelem.abselem = params;
-  var step = spacing.STEP;
+
+  if (params.heads && params.heads.length > 0) {
+    params.notePositions = [];
+
+    for (var jj = 0; jj < params.heads.length; jj++) {
+      params.notePositions.push({
+        x: params.heads[jj].x + params.heads[jj].w / 2,
+        y: staffPos.zero - params.heads[jj].pitch * spacing.STEP
+      });
+    }
+  }
 }
 
 module.exports = drawAbsolute;
@@ -21730,8 +21445,6 @@ var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/ro
 
 function drawBeam(renderer, params) {
   if (params.beams.length === 0) return;
-  var klass = 'beam-elem';
-  if (params.hint) klass += " abcjs-hint";
   var pathString = "";
 
   for (var i = 0; i < params.beams.length; i++) {
@@ -21842,18 +21555,18 @@ function straightPath(renderer, xLeft, yTop, yBottom, type) {
 
 function curvyPath(renderer, xLeft, yTop, yBottom, type) {
   var yHeight = yBottom - yTop;
-  var xCurve = [7.5, -8, 21, 0, 18.5, -10.5, 7.5];
-  var yCurve = [0, yHeight / 5.5, yHeight / 3.14, yHeight / 2, yHeight / 2.93, yHeight / 4.88, 0];
-  var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", xLeft + xCurve[0], yTop + yCurve[0], xLeft + xCurve[1], yTop + yCurve[1], xLeft + xCurve[2], yTop + yCurve[2], xLeft + xCurve[3], yTop + yCurve[3], xLeft + xCurve[4], yTop + yCurve[4], xLeft + xCurve[5], yTop + yCurve[5], xLeft + xCurve[6], yTop + yCurve[6]);
-  xCurve = [0, 17.5, -7.5, 6.6, -5, 20, 0];
-  yCurve = [yHeight / 2, yHeight / 1.46, yHeight / 1.22, yHeight, yHeight / 1.19, yHeight / 1.42, yHeight / 2];
-  pathString += sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", xLeft + xCurve[0], yTop + yCurve[0], xLeft + xCurve[1], yTop + yCurve[1], xLeft + xCurve[2], yTop + yCurve[2], xLeft + xCurve[3], yTop + yCurve[3], xLeft + xCurve[4], yTop + yCurve[4], xLeft + xCurve[5], yTop + yCurve[5], xLeft + xCurve[6], yTop + yCurve[6]);
+  var pathString = curve(xLeft, yTop, [7.5, -8, 21, 0, 18.5, -10.5, 7.5], [0, yHeight / 5.5, yHeight / 3.14, yHeight / 2, yHeight / 2.93, yHeight / 4.88, 0]);
+  pathString += curve(xLeft, yTop, [0, 17.5, -7.5, 6.6, -5, 20, 0], [yHeight / 2, yHeight / 1.46, yHeight / 1.22, yHeight, yHeight / 1.19, yHeight / 1.42, yHeight / 2]);
   return renderer.paper.path({
     path: pathString,
     stroke: "#000000",
     fill: "#000000",
     'class': renderer.controller.classes.generate(type)
   });
+}
+
+function curve(xLeft, yTop, xCurve, yCurve) {
+  return sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", xLeft + xCurve[0], yTop + yCurve[0], xLeft + xCurve[1], yTop + yCurve[1], xLeft + xCurve[2], yTop + yCurve[2], xLeft + xCurve[3], yTop + yCurve[3], xLeft + xCurve[4], yTop + yCurve[4], xLeft + xCurve[5], yTop + yCurve[5], xLeft + xCurve[6], yTop + yCurve[6]);
 }
 
 var draw = function draw(renderer, xLeft, yTop, yBottom, type, header, selectables) {
@@ -21902,10 +21615,6 @@ module.exports = drawBrace;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var highlight = __webpack_require__(/*! ../highlight */ "./src/write/highlight.js");
-
-var unhighlight = __webpack_require__(/*! ../unhighlight */ "./src/write/unhighlight.js");
-
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
 var printPath = __webpack_require__(/*! ./print-path */ "./src/write/draw/print-path.js");
@@ -21944,13 +21653,12 @@ var drawLine = function drawLine(renderer, y1, y2, y3, y4, left, right) {
   left = roundNumber(left);
   right = roundNumber(right);
   var pathString = sprintf("M %f %f L %f %f M %f %f L %f %f", left, y1, right, y2, left, y3, right, y4);
-  var el = printPath(renderer, {
+  return printPath(renderer, {
     path: pathString,
     highlight: "stroke",
     stroke: "#000000",
     'class': renderer.controller.classes.generate('dynamics decoration')
   });
-  return el;
 };
 
 module.exports = drawCrescendo;
@@ -22159,74 +21867,67 @@ module.exports = drawEnding;
  */
 var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
 
-var elementGroup;
+function Group() {
+  this.ingroup = false;
+}
 
-(function () {
-  "use strict";
+Group.prototype.beginGroup = function (paper, controller) {
+  this.paper = paper;
+  this.controller = controller;
+  this.path = [];
+  this.lastM = [0, 0];
+  this.ingroup = true;
+};
 
-  function Group() {
-    this.ingroup = false;
+Group.prototype.isInGroup = function () {
+  return this.ingroup;
+};
+
+Group.prototype.addPath = function (path) {
+  path = path || [];
+  if (path.length === 0) return;
+  path[0][0] = "m";
+  path[0][1] = roundNumber(path[0][1] - this.lastM[0]);
+  path[0][2] = roundNumber(path[0][2] - this.lastM[1]);
+  this.lastM[0] += path[0][1];
+  this.lastM[1] += path[0][2];
+  this.path.push(path[0]);
+
+  for (var i = 1, ii = path.length; i < ii; i++) {
+    if (path[i][0] === "m") {
+      this.lastM[0] += path[i][1];
+      this.lastM[1] += path[i][2];
+    }
+
+    this.path.push(path[i]);
+  }
+};
+/**
+ * End a group of glyphs that will always be moved, scaled and highlighted together
+ */
+
+
+Group.prototype.endGroup = function (klass) {
+  this.ingroup = false;
+  if (this.path.length === 0) return null;
+  var path = "";
+
+  for (var i = 0; i < this.path.length; i++) {
+    path += this.path[i].join(" ");
   }
 
-  Group.prototype.beginGroup = function (paper, controller) {
-    this.paper = paper;
-    this.controller = controller;
-    this.path = [];
-    this.lastM = [0, 0];
-    this.ingroup = true;
-  };
-
-  Group.prototype.isInGroup = function () {
-    return this.ingroup;
-  };
-
-  Group.prototype.addPath = function (path) {
-    path = path || [];
-    if (path.length === 0) return;
-    path[0][0] = "m";
-    path[0][1] = roundNumber(path[0][1] - this.lastM[0]);
-    path[0][2] = roundNumber(path[0][2] - this.lastM[1]);
-    this.lastM[0] += path[0][1];
-    this.lastM[1] += path[0][2];
-    this.path.push(path[0]);
-
-    for (var i = 1, ii = path.length; i < ii; i++) {
-      if (path[i][0] === "m") {
-        this.lastM[0] += path[i][1];
-        this.lastM[1] += path[i][2];
-      }
-
-      this.path.push(path[i]);
-    }
-  };
-  /**
-   * End a group of glyphs that will always be moved, scaled and highlighted together
-   */
+  var ret = this.paper.path({
+    path: path,
+    stroke: "none",
+    fill: "#000000",
+    'class': this.controller.classes.generate(klass)
+  });
+  this.path = [];
+  return ret;
+}; // There is just a singleton of this object.
 
 
-  Group.prototype.endGroup = function (klass) {
-    this.ingroup = false;
-    if (this.path.length === 0) return null;
-    var path = "";
-
-    for (var i = 0; i < this.path.length; i++) {
-      path += this.path[i].join(" ");
-    }
-
-    var ret = this.paper.path({
-      path: path,
-      stroke: "none",
-      fill: "#000000",
-      'class': this.controller.classes.generate(klass)
-    });
-    this.path = [];
-    return ret;
-  }; // There is just a singleton of this object.
-
-
-  elementGroup = new Group();
-})();
-
+var elementGroup = new Group();
 module.exports = elementGroup;
 
 /***/ }),
@@ -22459,7 +22160,7 @@ var printStaffLine = __webpack_require__(/*! ./staff-line */ "./src/write/draw/s
 
 var printSymbol = __webpack_require__(/*! ./print-symbol */ "./src/write/draw/print-symbol.js");
 
-function drawRelativeElement(renderer, params, bartop, selectables) {
+function drawRelativeElement(renderer, params, bartop) {
   if (params.pitch === undefined) window.console.error(params.type + " Relative Element y-coordinate not set.");
   var y = renderer.calcY(params.pitch);
 
@@ -22898,7 +22599,6 @@ function drawStaffGroup(renderer, params, selectables) {
   // All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
   // renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
   // If there are multiple staves, then renderer.y will be incremented for each new staff.
-  var debugPrint;
   var colorIndex; // An invisible marker is useful to be able to find where each system starts.
 
   addInvisibleMarker(renderer, "abcjs-top-of-system");
@@ -22991,6 +22691,7 @@ function drawStaffGroup(renderer, params, selectables) {
 
     drawVoice(renderer, params.voices[i], bartop, selectables, {
       top: startY,
+      zero: renderer.y,
       height: params.height * spacing.STEP
     });
     renderer.controller.classes.newMeasure();
@@ -23190,7 +22891,7 @@ var drawRelativeElement = __webpack_require__(/*! ./relative */ "./src/write/dra
 
 var renderText = __webpack_require__(/*! ./text */ "./src/write/draw/text.js");
 
-function drawTempo(renderer, params, selectables) {
+function drawTempo(renderer, params) {
   var x = params.x;
   if (params.pitch === undefined) window.console.error("Tempo Element y-coordinate not set.");
   var tempoGroup;
@@ -23227,7 +22928,7 @@ function drawTempo(renderer, params, selectables) {
     params.note.setX(x);
 
     for (var i = 0; i < params.note.children.length; i++) {
-      drawRelativeElement(renderer, params.note.children[i], x, selectables);
+      drawRelativeElement(renderer, params.note.children[i], x);
     }
 
     x += params.note.w + 5;
@@ -23485,7 +23186,6 @@ var printPath = __webpack_require__(/*! ./print-path */ "./src/write/draw/print-
 var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
 
 function drawTriplet(renderer, params, selectables) {
-  var xTextPos;
   renderer.paper.openGroup({
     klass: renderer.controller.classes.generate('triplet ' + params.durationClass)
   });
@@ -23606,7 +23306,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 
     switch (child.type) {
       // case "tempo":
-      // 	child.elemset = drawTempo(renderer, child, selectables);
+      // 	child.elemset = drawTempo(renderer, child);
       // 	break;
       default:
         drawAbsolute(renderer, child, params.barto || i === params.children.length - 1 ? bartop : 0, selectables, staffPos);
@@ -24262,23 +23962,8 @@ function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
     }
   }
 
-  if (brace) {
-    for (i = 0; i < brace.length; i++) {
-      if (brace[i].header) {
-        size = getTextSize.calc(brace[i].header, 'voicefont', '');
-        voiceheaderw = Math.max(voiceheaderw, size.width);
-      }
-    }
-  }
-
-  if (bracket) {
-    for (i = 0; i < bracket.length; i++) {
-      if (bracket[i].header) {
-        size = getTextSize.calc(bracket[i].header, 'voicefont', '');
-        voiceheaderw = Math.max(voiceheaderw, size.width);
-      }
-    }
-  }
+  voiceheaderw = addBraceSize(voiceheaderw, brace, getTextSize);
+  voiceheaderw = addBraceSize(voiceheaderw, bracket, getTextSize);
 
   if (voiceheaderw) {
     // Give enough spacing to the right - we use the width of an A for the amount of spacing.
@@ -24291,6 +23976,19 @@ function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
   ofs = setBraceLocation(brace, x, ofs);
   ofs = setBraceLocation(bracket, x, ofs);
   return x + ofs;
+}
+
+function addBraceSize(voiceheaderw, brace, getTextSize) {
+  if (brace) {
+    for (var i = 0; i < brace.length; i++) {
+      if (brace[i].header) {
+        var size = getTextSize.calc(brace[i].header, 'voicefont', '');
+        voiceheaderw = Math.max(voiceheaderw, size.width);
+      }
+    }
+  }
+
+  return voiceheaderw;
 }
 
 function setBraceLocation(brace, x, ofs) {
@@ -24342,109 +24040,103 @@ var layoutStaffGroup = __webpack_require__(/*! ./staffGroup */ "./src/write/layo
 
 var getLeftEdgeOfStaff = __webpack_require__(/*! ./get-left-edge-of-staff */ "./src/write/layout/get-left-edge-of-staff.js");
 
-var layout;
+var layout = function layout(renderer, abctune, width, space) {
+  var i;
+  var abcLine; // Adjust the x-coordinates to their absolute positions
 
-(function () {
-  "use strict";
+  var maxWidth = width;
 
-  layout = function layout(renderer, abctune, width, space) {
-    var i;
-    var abcLine; // Adjust the x-coordinates to their absolute positions
+  for (i = 0; i < abctune.lines.length; i++) {
+    abcLine = abctune.lines[i];
 
-    var maxWidth = width;
-
-    for (i = 0; i < abctune.lines.length; i++) {
-      abcLine = abctune.lines[i];
-
-      if (abcLine.staff) {
-        setXSpacing(renderer, width, space, abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
-        if (abcLine.staffGroup.w > maxWidth) maxWidth = abcLine.staffGroup.w;
-      }
-    } // Layout the beams and add the stems to the beamed notes.
-
-
-    for (i = 0; i < abctune.lines.length; i++) {
-      abcLine = abctune.lines[i];
-
-      if (abcLine.staffGroup && abcLine.staffGroup.voices) {
-        for (var j = 0; j < abcLine.staffGroup.voices.length; j++) {
-          layoutVoice(abcLine.staffGroup.voices[j]);
-        }
-
-        setUpperAndLowerElements(renderer, abcLine.staffGroup);
-      }
-    } // Set the staff spacing
-    // TODO-PER: we should have been able to do this by the time we called setUpperAndLowerElements, but for some reason the "bottom" element seems to be set as a side effect of setting the X spacing.
-
-
-    for (i = 0; i < abctune.lines.length; i++) {
-      abcLine = abctune.lines[i];
-
-      if (abcLine.staffGroup) {
-        abcLine.staffGroup.setHeight();
-      }
+    if (abcLine.staff) {
+      setXSpacing(renderer, width, space, abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
+      if (abcLine.staffGroup.w > maxWidth) maxWidth = abcLine.staffGroup.w;
     }
-
-    return maxWidth;
-  }; // Do the x-axis positioning for a single line (a group of related staffs)
+  } // Layout the beams and add the stems to the beamed notes.
 
 
-  var setXSpacing = function setXSpacing(renderer, width, space, staffGroup, formatting, isLastLine, debug) {
-    var leftEdge = getLeftEdgeOfStaff(renderer, staffGroup.getTextSize, staffGroup.voices, staffGroup.brace, staffGroup.bracket);
-    var newspace = space;
+  for (i = 0; i < abctune.lines.length; i++) {
+    abcLine = abctune.lines[i];
 
-    for (var it = 0; it < 8; it++) {
-      // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
-      var ret = layoutStaffGroup(newspace, renderer, debug, staffGroup, leftEdge);
-      var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
-      newspace = calcHorizontalSpacing(isLastLine, stretchLast, width + renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace);
-      if (debug) console.log("setXSpace", it, staffGroup.w, newspace, staffGroup.minspace);
-      if (newspace === null) break;
-    }
-
-    centerWholeRests(staffGroup.voices);
-  };
-
-  function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace) {
-    // TODO-PER: This used to stretch the first line when it is the only line, but I'm not sure why. abcm2ps doesn't do that
-    if (isLastLine && lineWidth / targetWidth < 0.66 && !stretchLast) return null; // don't stretch last line too much
-
-    if (Math.abs(targetWidth - lineWidth) < 2) return null; // if we are already near the target width, we're done.
-
-    var relSpace = spacingUnits * spacing;
-    var constSpace = lineWidth - relSpace;
-
-    if (spacingUnits > 0) {
-      spacing = (targetWidth - constSpace) / spacingUnits;
-
-      if (spacing * minSpace > 50) {
-        spacing = 50 / minSpace;
+    if (abcLine.staffGroup && abcLine.staffGroup.voices) {
+      for (var j = 0; j < abcLine.staffGroup.voices.length; j++) {
+        layoutVoice(abcLine.staffGroup.voices[j]);
       }
 
-      return spacing;
+      setUpperAndLowerElements(renderer, abcLine.staffGroup);
     }
+  } // Set the staff spacing
+  // TODO-PER: we should have been able to do this by the time we called setUpperAndLowerElements, but for some reason the "bottom" element seems to be set as a side effect of setting the X spacing.
 
-    return null;
+
+  for (i = 0; i < abctune.lines.length; i++) {
+    abcLine = abctune.lines[i];
+
+    if (abcLine.staffGroup) {
+      abcLine.staffGroup.setHeight();
+    }
   }
 
-  function centerWholeRests(voices) {
-    // whole rests are a special case: if they are by themselves in a measure, then they should be centered.
-    // (If they are not by themselves, that is probably a user error, but we'll just center it between the two items to either side of it.)
-    for (var i = 0; i < voices.length; i++) {
-      var voice = voices[i]; // Look through all of the elements except for the first and last. If the whole note appears there then there isn't anything to center it between anyway.
+  return maxWidth;
+}; // Do the x-axis positioning for a single line (a group of related staffs)
 
-      for (var j = 1; j < voice.children.length - 1; j++) {
-        var absElem = voice.children[j];
 
-        if (absElem.abcelem.rest && (absElem.abcelem.rest.type === 'whole' || absElem.abcelem.rest.type === 'multimeasure')) {
-          var before = voice.children[j - 1];
-          var after = voice.children[j + 1];
-          absElem.center(before, after);
-        }
+var setXSpacing = function setXSpacing(renderer, width, space, staffGroup, formatting, isLastLine, debug) {
+  var leftEdge = getLeftEdgeOfStaff(renderer, staffGroup.getTextSize, staffGroup.voices, staffGroup.brace, staffGroup.bracket);
+  var newspace = space;
+
+  for (var it = 0; it < 8; it++) {
+    // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
+    var ret = layoutStaffGroup(newspace, renderer, debug, staffGroup, leftEdge);
+    var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
+    newspace = calcHorizontalSpacing(isLastLine, stretchLast, width + renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace);
+    if (debug) console.log("setXSpace", it, staffGroup.w, newspace, staffGroup.minspace);
+    if (newspace === null) break;
+  }
+
+  centerWholeRests(staffGroup.voices);
+};
+
+function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace) {
+  // TODO-PER: This used to stretch the first line when it is the only line, but I'm not sure why. abcm2ps doesn't do that
+  if (isLastLine && lineWidth / targetWidth < 0.66 && !stretchLast) return null; // don't stretch last line too much
+
+  if (Math.abs(targetWidth - lineWidth) < 2) return null; // if we are already near the target width, we're done.
+
+  var relSpace = spacingUnits * spacing;
+  var constSpace = lineWidth - relSpace;
+
+  if (spacingUnits > 0) {
+    spacing = (targetWidth - constSpace) / spacingUnits;
+
+    if (spacing * minSpace > 50) {
+      spacing = 50 / minSpace;
+    }
+
+    return spacing;
+  }
+
+  return null;
+}
+
+function centerWholeRests(voices) {
+  // whole rests are a special case: if they are by themselves in a measure, then they should be centered.
+  // (If they are not by themselves, that is probably a user error, but we'll just center it between the two items to either side of it.)
+  for (var i = 0; i < voices.length; i++) {
+    var voice = voices[i]; // Look through all of the elements except for the first and last. If the whole note appears there then there isn't anything to center it between anyway.
+
+    for (var j = 1; j < voice.children.length - 1; j++) {
+      var absElem = voice.children[j];
+
+      if (absElem.abcelem.rest && (absElem.abcelem.rest.type === 'whole' || absElem.abcelem.rest.type === 'multimeasure')) {
+        var before = voice.children[j - 1];
+        var after = voice.children[j + 1];
+        absElem.center(before, after);
       }
     }
   }
-})();
+}
 
 module.exports = layout;
 
@@ -25599,7 +25291,7 @@ function Subtitle(spaceAbove, formatting, text, center, paddingLeft, getTextSize
   var tAnchor = formatting.titleleft ? 'start' : 'middle';
   var tLeft = formatting.titleleft ? paddingLeft : center;
   this.rows.push({
-    left: center,
+    left: tLeft,
     text: text,
     font: 'subtitlefont',
     klass: 'text subtitle',
@@ -25694,14 +25386,7 @@ Svg.prototype.setResponsiveWidth = function (w, h) {
 
 Svg.prototype.setSize = function (w, h) {
   this.svg.setAttribute('width', w);
-  this.svg.setAttribute('height', h); // TODO-PER: Is this hack still needed?
-  // Correct for IE problem in calculating height
-  // var isIE = /*@cc_on!@*/false;//IE detector
-  // if (isIE) {
-  // 	this.paper.canvas.parentNode.style.width = w + "px";
-  // 	this.paper.canvas.parentNode.style.height = "" + h + "px";
-  // } else
-  // 	this.paper.canvas.parentNode.setAttribute("style", "width:" + w + "px");
+  this.svg.setAttribute('height', h);
 };
 
 Svg.prototype.setScale = function (scale) {
@@ -25984,7 +25669,7 @@ function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spaci
   if (metaText.header && isPrint) {
     // Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
     // This text goes above the margin, so we'll temporarily move up.
-    var headerTextHeight = getTextSize.calc("XXXX", "headerfont", 'abcjs-header abcjs-meta-top').height;
+    var headerTextHeight = getTextSize.calc("X", "headerfont", 'abcjs-header abcjs-meta-top').height;
     this.addTextIf(paddingLeft, metaText.header.left, 'headerfont', 'header meta-top', -headerTextHeight, 0, 'start', getTextSize);
     this.addTextIf(paddingLeft + width / 2, metaText.header.center, 'headerfont', 'header meta-top', -headerTextHeight, null, 'middle', getTextSize);
     this.addTextIf(paddingLeft + width, metaText.header.right, 'headerfont', 'header meta-top', -headerTextHeight, null, 'end', getTextSize);
@@ -26140,4 +25825,4 @@ module.exports = version;
 
 /******/ });
 });
-//# sourceMappingURL=abcjs_basic_6.0.0-beta.25.js.map
+//# sourceMappingURL=abcjs-basic.js.map
