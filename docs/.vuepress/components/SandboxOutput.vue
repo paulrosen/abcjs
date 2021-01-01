@@ -55,7 +55,7 @@ eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|`;
 .sandbox-output .demo {
 	border: 1px solid #888888;
 	padding: 10px;
-	background: #f9fdef;
+	background: #fefffa;
 	box-shadow: -1px -1px 1px #aaaaaa, 1px 2px 4px #aaaaaa;;
 	border-top: none;
 	border-left: none;

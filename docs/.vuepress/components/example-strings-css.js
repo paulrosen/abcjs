@@ -1,5 +1,5 @@
 
-export const cssString = (hasAudio, hasCursor, hideMeasures, allowDragging) => {
+export const cssString = (hasAudio, hasCursor, hideMeasures, allowDragging, usingCallbacks) => {
 	let css = [];
 	if (hasAudio)
 		css.push(`<link rel="stylesheet" type="text/css" href="abcjs-audio.css">`);
@@ -38,5 +38,18 @@ box-shadow: 0 0 1px black;
 </style>
 `)
 	}
+	if (usingCallbacks) {
+		css.push(`<style>
+.clicked-info {
+height: 200px;
+}
+.instructions {
+color: red;
+font-size: 2em;
+font-style: italic;
+}
+</style>
+`)
+}
 	return css.join("\n");
 };

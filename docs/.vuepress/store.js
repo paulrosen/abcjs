@@ -81,14 +81,20 @@ ${editorString(getters.hasEditor)}
 ${paperString(getters.sheetMusic)}
 ${audioString(getters.playbackWidget && getters.hasSound, getters.large)}
 ${midiString(getters.midi)}
-${clickListenerHtmlString(getters.usingCallbacks)}
+${clickListenerHtmlString(getters.sheetMusic && getters.usingCallbacks)}
 ${dragHtmlString(getters.changes === 'drag')}
 ${startTimerHtmlString(getters.sheetMusic && (getters.cursor || getters.hideMeasures))}
 `;
 	},
 
 	sheetMusicCss(state, getters) {
-		return cssString(getters.playbackWidget && getters.hasSound, getters.sheetMusic && getters.cursor, getters.sheetMusic && getters.hideMeasures, getters.sheetMusic && getters.changes === 'drag');
+		return cssString(
+			getters.playbackWidget && getters.hasSound,
+			getters.sheetMusic && getters.cursor,
+			getters.sheetMusic && getters.hideMeasures,
+			getters.sheetMusic && getters.changes === 'drag',
+			getters.sheetMusic && getters.usingCallbacks
+		);
 	},
 
 	sheetMusicJs(state, getters) {
@@ -108,7 +114,7 @@ ${startTimerHtmlString(getters.sheetMusic && (getters.cursor || getters.hideMeas
 		if (getters.sheetMusic && getters.cursor) options.push("cursor");
 		if (getters.sheetMusic && getters.hideMeasures) options.push("hide");
 		options.push(getters.changes);
-		if (getters.usingCallbacks) options.push("callback");
+		if (getters.sheetMusic && getters.usingCallbacks) options.push("callback");
 		if (getters.hasSound) options.push("sound");
 		if (getters.hasSound && getters.playbackWidget) options.push("playback");
 		if (getters.hasSound && getters.playbackWidget && getters.large) options.push("large");
@@ -187,13 +193,13 @@ function sheetMusicJsBuilder(getters, usingNode) {
 	// SETUP
 	const visualOptions = visualOptionsString(
 		getters.responsive,
-		getters.usingCallbacks,
+		getters.sheetMusic && getters.usingCallbacks,
 		getters.hasSound && getters.metronome,
 		getters.hideMeasures
 	);  // will be passed to renderAbc()
 	return `${renderAbcString(usingNode, !getters.hasEditor, getters.sheetMusic, visualOptions)}
 ${editorJsString(usingNode, getters.hasEditor, getters.sheetMusic)}
-${clickListenerJsString(getters.usingCallbacks)}
+${clickListenerJsString(getters.sheetMusic && getters.usingCallbacks)}
 ${cursorJsString(usingNode, getters.sheetMusic && getters.cursor, getters.sheetMusic && getters.hideMeasures)}
 ${dragJsString(usingNode, getters.changes === 'drag')}
 `;

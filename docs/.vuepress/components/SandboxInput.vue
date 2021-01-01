@@ -29,8 +29,8 @@
 			name="changes"
 			:options="[
         { text: 'The tune is determined programmatically', value: 'programmatic' },
-        { text: 'User changes the tune by interacting with the visual rendering', value: 'drag' },
-        { text: 'User changes the tune in an editor', value: 'editor' },  ]">
+        { text: 'User changes the tune with a visual editor', value: 'drag' },
+        { text: 'User changes the tune with a text editor', value: 'editor' },  ]">
 		</radio-group>
 
 <!--		<field-set label="Audio Control">
@@ -80,7 +80,9 @@
 			<template v-slot:controls>
 				<check-box
 					label="Listen for callbacks"
-					value="usingCallbacks">
+					value="usingCallbacks"
+					:disabled="!sheetMusic"
+				>
 				</check-box>
 			</template>
 		</field-set>
@@ -100,6 +102,7 @@ export default {
 	computed: {
 		...mapGetters([
 			'hasSound',
+			'sheetMusic',
 		]),
 	},
 }

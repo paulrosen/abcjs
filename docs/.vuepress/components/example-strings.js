@@ -41,7 +41,7 @@ export const midiString = (showMidi) => {
 };
 
 export const clickListenerHtmlString = (clickListener) => {
-	return clickListener ? '<div class="clicked-info"></div>' : '';
+	return clickListener ? '<div class="clicked-info"><div class="instructions">Click on a note to see information about that note.</div></div>' : '';
 };
 
 export const dragExplanationHtmlString = (allowDragging) => {
