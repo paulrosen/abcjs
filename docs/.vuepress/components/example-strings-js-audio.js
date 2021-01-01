@@ -1,5 +1,44 @@
 ////////////////////////////////////////////
 
+// TODO-PER: from sheetMusicJs. To be integrated:
+
+//       const synthOptions = {};  // will be passed to mySynth.init
+//       const audioParams = {};   // will be passed to synthControl.setTune()
+//       const animationOptions = {};    // will be passed to startAnimation()
+//
+//       if (getters.soundfont) {
+//         synthOptions.soundFontURL = 'URL';
+//         audioParams.soundFontURL = 'URL';
+//       }
+//
+//       // VISUAL
+//       const animation = animationCode(getters, animationOptions);
+//
+//       // AUDIO CONTROL
+//       const widget = audioControlCode(getters);
+//
+//       // SOUND
+//       soundCode(getters, animationOptions, visualOptions, audioParams);
+//
+//       // OTHER
+//       const other = otherCode(getters, synthOptions, audioParams);
+//
+//       // RETURNED CODE
+//       return `
+// var visualOptions = ${replaceFunctionPlaceholders(JSON.stringify(visualOptions))};
+// var audioParams = ${JSON.stringify(audioParams)};
+// var cursorControl = null;
+// var synthOptions = { visualObj: visualObj[0], ...${JSON.stringify(synthOptions)} };
+//
+// ${changes}
+//
+// // trigger these on a user gesture:
+// ${widget}
+//
+// ${animation} ${timing} ${other}`;
+
+////////////////////////////////////////////
+// TODO-PER: to be integrated
 
 const audioControlCode = (sandbox) => {
 	if (!sandbox.playbackWidget) {

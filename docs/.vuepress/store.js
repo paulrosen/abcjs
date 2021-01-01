@@ -92,55 +92,11 @@ ${startTimerHtmlString(getters.sheetMusic && (getters.cursor || getters.hideMeas
 	},
 
 	sheetMusicJs(state, getters) {
-
-		// SETUP
-		const visualOptions = visualOptionsString(
-			getters.responsive,
-			getters.usingCallbacks,
-			getters.hasSound && getters.metronome,
-			getters.hideMeasures
-		);  // will be passed to renderAbc()
-//       const synthOptions = {};  // will be passed to mySynth.init
-//       const audioParams = {};   // will be passed to synthControl.setTune()
-//       const animationOptions = {};    // will be passed to startAnimation()
-//
-//       if (getters.soundfont) {
-//         synthOptions.soundFontURL = 'URL';
-//         audioParams.soundFontURL = 'URL';
-//       }
-//
-//       // VISUAL
-//       const animation = animationCode(getters, animationOptions);
-//
-//       // AUDIO CONTROL
-//       const widget = audioControlCode(getters);
-//
-//       // SOUND
-//       soundCode(getters, animationOptions, visualOptions, audioParams);
-//
-//       // OTHER
-//       const other = otherCode(getters, synthOptions, audioParams);
-//
-//       // RETURNED CODE
-//       return `
-// var visualOptions = ${replaceFunctionPlaceholders(JSON.stringify(visualOptions))};
-// var audioParams = ${JSON.stringify(audioParams)};
-// var cursorControl = null;
-// var synthOptions = { visualObj: visualObj[0], ...${JSON.stringify(synthOptions)} };
-//
-// ${changes}
-//
-// // trigger these on a user gesture:
-// ${widget}
-//
-// ${animation} ${timing} ${other}`;
 		var usingNode = getters.isDownloading ? false : getters.usingNode;
-		return `${renderAbcString(usingNode, !getters.hasEditor, getters.sheetMusic, visualOptions)}
-${editorJsString(usingNode, getters.hasEditor, getters.sheetMusic)}
-${clickListenerJsString(getters.usingCallbacks)}
-${cursorJsString(usingNode, getters.sheetMusic && getters.cursor, getters.sheetMusic && getters.hideMeasures)}
-${dragJsString(usingNode, getters.changes === 'drag')}
-`;
+		return sheetMusicJsBuilder(getters, usingNode);
+	},
+	sheetMusicJsNode(state, getters) {
+		return sheetMusicJsBuilder(getters, true);
 	},
 	hasEditor(state, getters) {
 		return getters.changes === 'editor';
@@ -224,4 +180,21 @@ export const store = {
 	getters,
 	mutations,
 	actions,
+}
+
+function sheetMusicJsBuilder(getters, usingNode) {
+
+	// SETUP
+	const visualOptions = visualOptionsString(
+		getters.responsive,
+		getters.usingCallbacks,
+		getters.hasSound && getters.metronome,
+		getters.hideMeasures
+	);  // will be passed to renderAbc()
+	return `${renderAbcString(usingNode, !getters.hasEditor, getters.sheetMusic, visualOptions)}
+${editorJsString(usingNode, getters.hasEditor, getters.sheetMusic)}
+${clickListenerJsString(getters.usingCallbacks)}
+${cursorJsString(usingNode, getters.sheetMusic && getters.cursor, getters.sheetMusic && getters.hideMeasures)}
+${dragJsString(usingNode, getters.changes === 'drag')}
+`;
 }
