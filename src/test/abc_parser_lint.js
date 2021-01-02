@@ -492,7 +492,7 @@ var ParserLint = function() {
 			staffwidth: { type: "number", optional: true },
 			stemheight: { type: "number", optional: true },
 			straightflags: { type: "boolean", optional: true },
-			stretchlast: { type: "boolean", optional: true },
+			stretchlast: {type: "number", optional: true, minimum: 0, maximum: 1 },
 			stretchstaff: { type: "boolean", optional: true },
 			subtitlefont: fontType,
 			subtitlespace: { type: "number", optional: true },

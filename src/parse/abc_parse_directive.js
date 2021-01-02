@@ -700,7 +700,13 @@ var parseDirective = {};
 				else
 					return "Directive graceslurs requires one parameter: 0 or 1 (received " + tokens[0].token + ')';
 				break;
-			case "stretchlast":tune.formatting.stretchlast = true;break;
+			case "stretchlast":
+				var sl = parseStretchLast(tokens);
+				if (sl.value !== undefined)
+					tune.formatting.stretchlast = sl.value;
+				if (sl.error)
+					return sl.error;
+				break;
 			case "titlecaps":multilineVars.titlecaps = true;break;
 			case "titleleft":tune.formatting.titleleft = true;break;
 			case "measurebox":tune.formatting.measurebox = true;break;
@@ -1090,7 +1096,11 @@ var parseDirective = {};
 						tune.formatting.fontboxpadding = tokens[0].floatt;
 						break;
 					case "stretchlast":
-						tune.formatting.stretchlast = (value === "true" || value === true);
+						var sl = parseStretchLast(tokens);
+						if (sl.value !== undefined)
+							tune.formatting.stretchlast = sl.value;
+						if (sl.error)
+							return sl.error;
 						break;
 					default:
 						warn("Formatting directive unrecognized: ", cmd, 0);
@@ -1098,6 +1108,22 @@ var parseDirective = {};
 			}
 		}
 	};
+
+	function parseStretchLast(tokens) {
+		if (tokens.length === 0)
+			return { value: 1 }; // if there is no value then the presence of this is the same as "true"
+		else if (tokens.length === 1) {
+			if (tokens[0].type === "number") {
+				if (tokens[0].floatt >= 0 || tokens[0].floatt <= 1)
+					return {value: tokens[0].floatt};
+			} else if (tokens[0].token === 'false') {
+				return { value: 0 };
+			} else if (tokens[0].token === 'true') {
+				return {value: 1};
+			}
+		}
+		return { error: "Directive stretchlast requires zero or one parameter: false, true, or number between 0 and 1 (received " + tokens[0].token + ')' };
+	}
 })();
 
 module.exports = parseDirective;

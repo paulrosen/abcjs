@@ -42,8 +42,7 @@ var layout = function (renderer, abctune, width, space) {
 		var newspace = space;
 		for (var it = 0; it < 8; it++) { // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
 			var ret = layoutStaffGroup(newspace, renderer, debug, staffGroup, leftEdge);
-			var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
-			newspace = calcHorizontalSpacing(isLastLine, stretchLast, width+renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace);
+			newspace = calcHorizontalSpacing(isLastLine, formatting.stretchlast, width+renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace, renderer.padding.left+renderer.padding.right);
 			if (debug)
 				console.log("setXSpace", it, staffGroup.w, newspace, staffGroup.minspace);
 			if (newspace === null) break;
@@ -51,9 +50,17 @@ var layout = function (renderer, abctune, width, space) {
 		centerWholeRests(staffGroup.voices);
 	};
 
-	function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace) {
-		// TODO-PER: This used to stretch the first line when it is the only line, but I'm not sure why. abcm2ps doesn't do that
-		if (isLastLine && lineWidth / targetWidth < 0.66 && !stretchLast) return null; // don't stretch last line too much
+	function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace, padding) {
+		if (isLastLine) {
+			if (stretchLast === undefined) {
+				if (lineWidth / targetWidth < 0.66) return null; // keep this for backward compatibility. The break isn't quite the same for some reason.
+			} else {
+				// "Stretch the last music line of a tune when it lacks less than the float fraction of the page width."
+				var lack = 1 - (lineWidth+padding) / targetWidth;
+				var stretch = lack < stretchLast;
+				if (!stretch) return null; // don't stretch last line too much
+			}
+		}
 		if (Math.abs(targetWidth-lineWidth) < 2) return null; // if we are already near the target width, we're done.
 		var relSpace = spacingUnits * spacing;
 		var constSpace = lineWidth - relSpace;

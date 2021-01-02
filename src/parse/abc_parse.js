@@ -55,9 +55,9 @@ var Parse = function() {
 			setupEvents: tune.setupEvents,
 			setTiming: tune.setTiming,
 			setUpAudio: tune.setUpAudio,
-
-			lineBreaks: tune.lineBreaks
 		};
+		if (tune.lineBreaks)
+			t.lineBreaks = tune.lineBreaks;
 		if (tune.visualTranspose)
 			t.visualTranspose = tune.visualTranspose;
 		return t;
