@@ -184,6 +184,7 @@
 		function load() {
 			document.querySelector(".next").addEventListener("click", next);
 			document.querySelector(".start").addEventListener("click", start);
+			document.querySelector(".warp").addEventListener("click", warp);
 
 			if (ABCJS.synth.supportsAudio()) {
 				synthControl = new ABCJS.synth.SynthController();
@@ -202,6 +203,16 @@
 		function start() {
 			if (synthControl)
 				synthControl.play();
+		}
+
+		function warp() {
+			var el = document.querySelector(".warp");
+			el.setAttribute("disabled", true)
+			var amount = Math.random()
+			console.log("warp", amount)
+			synthControl.setWarp(amount*100).then(function () {
+				el.removeAttribute("disabled")
+			})
 		}
 
 		function setTune(userAction) {
@@ -264,6 +275,7 @@
       <button class="next">Next Tune</button>
       <button class="start">Start/Pause</button>
       <button class="download" style="display: none;">Download</button>
+      <button class="warp">Warp</button>
       <div class="midi">MIDI</div>
       <div id="paper"></div>
       <div id="audio"></div>

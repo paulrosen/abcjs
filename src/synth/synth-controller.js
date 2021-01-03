@@ -213,20 +213,24 @@ function SynthController() {
 			var startPercent = self.percent;
 			self.destroy();
 			self.isStarted = false;
-			self.go().then(function () {
+			return self.go().then(function () {
 				self.setProgress(startPercent, self.midiBuffer.duration * 1000);
+				if (self.control)
+					self.control.setWarp(self.currentTempo, self.warp);
 				if (wasPlaying) {
-					self.play();
+					return self.play();
 				}
 				self.timer.setProgress(startPercent);
 				self.midiBuffer.seek(startPercent);
+				return Promise.resolve();
 			});
 		}
+		return Promise.resolve();
 	};
 
 	self.onWarp = function (ev) {
 		var newWarp = ev.target.value;
-		self.setWarp(newWarp);
+		return self.setWarp(newWarp);
 	};
 
 	self.setProgress = function (percent, totalTime) {

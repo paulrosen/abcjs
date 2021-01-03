@@ -142,10 +142,15 @@ function CreateSynthControl(parent, options) {
 		else
 			el.classList.remove("abcjs-disabled");
 	};
+	self.setWarp = function(tempo, warp) {
+		var el = self.parent.querySelector(".abcjs-midi-tempo");
+		el.value = Math.round(warp);
+		self.setTempo(tempo*warp/100)
+	};
 	self.setTempo = function(tempo) {
 		var el = self.parent.querySelector(".abcjs-midi-current-tempo");
 		if (el)
-			el.innerHTML = tempo;
+			el.innerHTML = Math.round(tempo);
 	};
 	self.resetAll = function() {
 		var pushedButtons = self.parent.querySelectorAll(".abcjs-pushed");
