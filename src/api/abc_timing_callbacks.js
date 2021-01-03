@@ -55,7 +55,7 @@ var TimingCallbacks = function(target, params) {
 	self.currentLine = 0;
 	self.isPaused = false;
 	self.isRunning = false;
-	self.pausedTime = null;
+	self.pausedPercent = null;
 	self.justUnpaused = false;
 
 	self.newSeekPercent = 0;
@@ -69,16 +69,9 @@ var TimingCallbacks = function(target, params) {
 		self.lastTimestamp = timestamp;
 		if (!self.startTime) {
 			self.startTime = timestamp;
-		} else if (self.justUnpaused) {
-			// Add the amount we paused to the start time to get the right place.
-			var timePaused = (timestamp - self.pausedTime);
-			self.startTime += timePaused;
 		}
-		self.justUnpaused = false;
 
-		if (self.isPaused) {
-			self.pausedTime = timestamp;
-		} else if (self.isRunning) {
+		if (!self.isPaused && self.isRunning) {
 			var currentTime = timestamp - self.startTime;
 			currentTime += 16; // Add a little slop because this function isn't called exactly.
 			while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
@@ -237,6 +230,13 @@ var TimingCallbacks = function(target, params) {
 		}
 		if (offsetPercent) {
 			self.setProgress(offsetPercent);
+		} else if (self.pausedPercent) {
+			var now = performance.now();
+			var currentTime = self.lastMoment * self.pausedPercent;
+			self.startTime = now - currentTime;
+			self.pausedPercent = null;
+			self.reportNext = true;
+			requestAnimationFrame(self.doTiming);
 		} else {
 			requestAnimationFrame(self.doTiming);
 			self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
@@ -244,6 +244,8 @@ var TimingCallbacks = function(target, params) {
 	};
 	self.pause = function() {
 		self.isPaused = true;
+		var now = performance.now();
+		self.pausedPercent = (now - self.startTime) / self.lastMoment;
 		self.isRunning = false;
 		if (self.joggerTimer) {
 			clearTimeout(self.joggerTimer);
@@ -254,7 +256,7 @@ var TimingCallbacks = function(target, params) {
 		self.currentBeat = 0;
 		self.currentEvent = 0;
 		self.startTime = null;
-		self.pausedTime = null;
+		self.pausedPercent = null;
 	};
 	self.stop = function() {
 		self.pause();
@@ -265,6 +267,9 @@ var TimingCallbacks = function(target, params) {
 		// the effect of this function is to move startTime so that the callbacks happen correctly for the new seek.
 		if (percent < 0) percent = 0;
 		if (percent > 1) percent = 1;
+
+		if (self.pausedPercent)
+			self.pausedPercent = percent;
 
 		var now = performance.now();
 		var currentTime = self.lastMoment * percent;
