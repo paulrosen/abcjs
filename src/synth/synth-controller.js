@@ -206,6 +206,11 @@ function SynthController() {
 		self.midiBuffer.seek(percent);
 	};
 
+	self.seek = function (percent) {
+		self.timer.setProgress(percent);
+		self.midiBuffer.seek(percent);
+	};
+
 	self.setWarp = function (newWarp) {
 		if (parseInt(newWarp, 10) > 0) {
 			self.warp = parseInt(newWarp, 10);
