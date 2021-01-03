@@ -27,6 +27,40 @@ npm() {
 ```
 Then from the root folder you can use `npm` like normal. Note that this won't work if you are from any other folder.
 
+## Building locally
+
+To build the library so that it can be included with a `<script>` tag, there are some options:
+
+To build everything:
+```bash
+npm run build
+```
+
+This takes a little while and is probably building more things than you want.
+
+If you want to build a version that is convenient to debug:
+
+```bash
+npm run build:basic
+```
+
+Then include the file `dist/abcjs-basic.js`.
+
+To build the same code as minimized for distribution:
+
+```bash
+npm run build:basic-min
+```
+
+And include the file `disst/abcjs-basic-min.js`.
+
+If you want to keep the version numbering on the files (so that different versions are easy to keep straight), after building either `build:basic` or `build:basic-min` run the script:
+
+```bash
+npm run build:copy-output
+```
+
+
 ## Greasemonkey
 
 There used to be a version of the library for Greasemonkey but that has been discontinued. If you want a Greasemonkey version, do this:
