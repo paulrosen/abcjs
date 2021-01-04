@@ -366,7 +366,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
   self.currentLine = 0;
   self.isPaused = false;
   self.isRunning = false;
-  self.pausedTime = null;
+  self.pausedPercent = null;
   self.justUnpaused = false;
   self.newSeekPercent = 0;
   self.lastTimestamp = 0;
@@ -380,17 +380,9 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
 
     if (!self.startTime) {
       self.startTime = timestamp;
-    } else if (self.justUnpaused) {
-      // Add the amount we paused to the start time to get the right place.
-      var timePaused = timestamp - self.pausedTime;
-      self.startTime += timePaused;
     }
 
-    self.justUnpaused = false;
-
-    if (self.isPaused) {
-      self.pausedTime = timestamp;
-    } else if (self.isRunning) {
+    if (!self.isPaused && self.isRunning) {
       var currentTime = timestamp - self.startTime;
       currentTime += 16; // Add a little slop because this function isn't called exactly.
 
@@ -563,6 +555,13 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
 
     if (offsetPercent) {
       self.setProgress(offsetPercent);
+    } else if (self.pausedPercent) {
+      var now = performance.now();
+      var currentTime = self.lastMoment * self.pausedPercent;
+      self.startTime = now - currentTime;
+      self.pausedPercent = null;
+      self.reportNext = true;
+      requestAnimationFrame(self.doTiming);
     } else {
       requestAnimationFrame(self.doTiming);
       self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
@@ -571,6 +570,8 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
 
   self.pause = function () {
     self.isPaused = true;
+    var now = performance.now();
+    self.pausedPercent = (now - self.startTime) / self.lastMoment;
     self.isRunning = false;
 
     if (self.joggerTimer) {
@@ -583,7 +584,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     self.currentBeat = 0;
     self.currentEvent = 0;
     self.startTime = null;
-    self.pausedTime = null;
+    self.pausedPercent = null;
   };
 
   self.stop = function () {
@@ -596,6 +597,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     // the effect of this function is to move startTime so that the callbacks happen correctly for the new seek.
     if (percent < 0) percent = 0;
     if (percent > 1) percent = 1;
+    if (self.pausedPercent) self.pausedPercent = percent;
     var now = performance.now();
     var currentTime = self.lastMoment * percent;
     self.startTime = now - currentTime;
@@ -2951,9 +2953,9 @@ var Parse = function Parse() {
       millisecondsPerMeasure: tune.millisecondsPerMeasure,
       setupEvents: tune.setupEvents,
       setTiming: tune.setTiming,
-      setUpAudio: tune.setUpAudio,
-      lineBreaks: tune.lineBreaks
+      setUpAudio: tune.setUpAudio
     };
+    if (tune.lineBreaks) t.lineBreaks = tune.lineBreaks;
     if (tune.visualTranspose) t.visualTranspose = tune.visualTranspose;
     return t;
   };
@@ -5965,7 +5967,9 @@ var parseDirective = {};
         break;
 
       case "stretchlast":
-        tune.formatting.stretchlast = true;
+        var sl = parseStretchLast(tokens);
+        if (sl.value !== undefined) tune.formatting.stretchlast = sl.value;
+        if (sl.error) return sl.error;
         break;
 
       case "titlecaps":
@@ -6425,7 +6429,9 @@ var parseDirective = {};
             break;
 
           case "stretchlast":
-            tune.formatting.stretchlast = value === "true" || value === true;
+            var sl = parseStretchLast(tokens);
+            if (sl.value !== undefined) tune.formatting.stretchlast = sl.value;
+            if (sl.error) return sl.error;
             break;
 
           default:
@@ -6434,6 +6440,30 @@ var parseDirective = {};
       }
     }
   };
+
+  function parseStretchLast(tokens) {
+    if (tokens.length === 0) return {
+      value: 1
+    }; // if there is no value then the presence of this is the same as "true"
+    else if (tokens.length === 1) {
+        if (tokens[0].type === "number") {
+          if (tokens[0].floatt >= 0 || tokens[0].floatt <= 1) return {
+            value: tokens[0].floatt
+          };
+        } else if (tokens[0].token === 'false') {
+          return {
+            value: 0
+          };
+        } else if (tokens[0].token === 'true') {
+          return {
+            value: 1
+          };
+        }
+      }
+    return {
+      error: "Directive stretchlast requires zero or one parameter: false, true, or number between 0 and 1 (received " + tokens[0].token + ')'
+    };
+  }
 })();
 
 module.exports = parseDirective;
@@ -14552,9 +14582,15 @@ function CreateSynthControl(parent, options) {
     if (isDisabled) el.classList.add("abcjs-disabled");else el.classList.remove("abcjs-disabled");
   };
 
+  self.setWarp = function (tempo, warp) {
+    var el = self.parent.querySelector(".abcjs-midi-tempo");
+    el.value = Math.round(warp);
+    self.setTempo(tempo * warp / 100);
+  };
+
   self.setTempo = function (tempo) {
     var el = self.parent.querySelector(".abcjs-midi-current-tempo");
-    if (el) el.innerHTML = tempo;
+    if (el) el.innerHTML = Math.round(tempo);
   };
 
   self.resetAll = function () {
@@ -16156,6 +16192,11 @@ function SynthController() {
     self.midiBuffer.seek(percent);
   };
 
+  self.seek = function (percent) {
+    self.timer.setProgress(percent);
+    self.midiBuffer.seek(percent);
+  };
+
   self.setWarp = function (newWarp) {
     if (parseInt(newWarp, 10) > 0) {
       self.warp = parseInt(newWarp, 10);
@@ -16163,22 +16204,26 @@ function SynthController() {
       var startPercent = self.percent;
       self.destroy();
       self.isStarted = false;
-      self.go().then(function () {
+      return self.go().then(function () {
         self.setProgress(startPercent, self.midiBuffer.duration * 1000);
+        if (self.control) self.control.setWarp(self.currentTempo, self.warp);
 
         if (wasPlaying) {
-          self.play();
+          return self.play();
         }
 
         self.timer.setProgress(startPercent);
         self.midiBuffer.seek(startPercent);
+        return Promise.resolve();
       });
     }
+
+    return Promise.resolve();
   };
 
   self.onWarp = function (ev) {
     var newWarp = ev.target.value;
-    self.setWarp(newWarp);
+    return self.setWarp(newWarp);
   };
 
   self.setProgress = function (percent, totalTime) {
@@ -24089,8 +24134,7 @@ var setXSpacing = function setXSpacing(renderer, width, space, staffGroup, forma
   for (var it = 0; it < 8; it++) {
     // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
     var ret = layoutStaffGroup(newspace, renderer, debug, staffGroup, leftEdge);
-    var stretchLast = formatting.stretchlast ? formatting.stretchlast : false;
-    newspace = calcHorizontalSpacing(isLastLine, stretchLast, width + renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace);
+    newspace = calcHorizontalSpacing(isLastLine, formatting.stretchlast, width + renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace, renderer.padding.left + renderer.padding.right);
     if (debug) console.log("setXSpace", it, staffGroup.w, newspace, staffGroup.minspace);
     if (newspace === null) break;
   }
@@ -24098,9 +24142,17 @@ var setXSpacing = function setXSpacing(renderer, width, space, staffGroup, forma
   centerWholeRests(staffGroup.voices);
 };
 
-function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace) {
-  // TODO-PER: This used to stretch the first line when it is the only line, but I'm not sure why. abcm2ps doesn't do that
-  if (isLastLine && lineWidth / targetWidth < 0.66 && !stretchLast) return null; // don't stretch last line too much
+function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace, padding) {
+  if (isLastLine) {
+    if (stretchLast === undefined) {
+      if (lineWidth / targetWidth < 0.66) return null; // keep this for backward compatibility. The break isn't quite the same for some reason.
+    } else {
+      // "Stretch the last music line of a tune when it lacks less than the float fraction of the page width."
+      var lack = 1 - (lineWidth + padding) / targetWidth;
+      var stretch = lack < stretchLast;
+      if (!stretch) return null; // don't stretch last line too much
+    }
+  }
 
   if (Math.abs(targetWidth - lineWidth) < 2) return null; // if we are already near the target width, we're done.
 

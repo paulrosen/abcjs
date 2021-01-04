@@ -1,3 +1,71 @@
+# Version 6.0.0-beta.25
+
+## Bugs
+
+* Fix the way pause/resume is handled in the timing callbacks.
+
+* Fix problems with changing the tempo with "warp"
+
+* Keep key sig changes when wrapping.
+
+* Make wrapping use one less line in some cases.
+
+* Fix crash when wrapping music that has unusual voice mismatches.
+
+* Fix meter display when wrapping.
+
+* Prevent out of memory when wrapping long tune.
+
+* Fix some cases where P: and Q: were not handled correctly.
+
+* Fix changing tempo when there is a repeat.
+
+* Fix audio seek: Seek percent should take the fade length into account.
+
+* Fix crash when a tie is right before a repeat sign.
+
+* Improve error handling when creating audio.
+
+## Features
+
+* Add entry point in synth controller to programmatically seek
+
+* %%stretchlast takes a number parameter
+
+* Deliver the elapsed time in whole notes as well as milliseconds in the timing callbacks.
+
+* Return the position of the notehead in the click listener.
+
+* Add SynthControl.disable() so that the user can't click on the control before the tune is ready.
+
+## Tasks
+
+* Remove many old versions of the minified releases.
+
+* Change the destination folder for the build.
+
+* Refactor wrapping
+
+## Documentation
+
+* Some clarification of the build process in the docs.
+
+* Create the example generator.
+
+* Add FAQ
+
+* Some tweaking to the demos; create demo table of contents.
+
+* Add a little css for the examples
+
+* Improvements to examples/basic-transpose.html
+
+* Disabled spellcheck for ABC input textareas
+
+* Document afterParsing function
+
+* Document synthParamChanged
+
 # Version 6.0.0-beta.24
 
 ## Bugs
