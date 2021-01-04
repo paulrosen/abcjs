@@ -7,11 +7,13 @@ describe("Automatic line wrapping", function() {
 
 	var expectedSingleLine400 = [{"widths":{"left":74.551,"measureWidths":[42.78,38.74000000000002,44.629999999999995,59.24000000000001,126.84799999999996,31.985000000000014,38.74000000000001,44.629999999999995,59.23999999999978,126.84799999999996],"total":613.6809999999998},"lineBreakPoint":180.805,"minLineSize":116.23178571428572,"staffWidth":400,"minWidth":191}];
 
-	var expectedSingleLine400LineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":7},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":8,"end":12},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":13,"end":23},{"ogLine":0,"line":3,"staff":0,"voice":0,"start":24,"end":34},{"ogLine":0,"line":4,"staff":0,"voice":0,"start":35,"end":44}];
+	var expectedSingleLine400LineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":12},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":13,"end":21},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":22,"end":34},{"ogLine":0,"line":3,"staff":0,"voice":0,"start":35,"end":44}]
+	;
 
 	var expectedSingleLine500 = [{"widths":{"left":74.551,"measureWidths":[42.78,38.74000000000002,44.629999999999995,59.24000000000001,126.84799999999996,31.985000000000014,38.74000000000001,44.629999999999995,59.23999999999978,126.84799999999996],"total":613.6809999999998},"lineBreakPoint":236.36055555555555,"minLineSize":151.94607142857143,"staffWidth":500,"minWidth":250}];
 
-	var expectedSingleLine500LineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":12},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":13,"end":21},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":22,"end":34},{"ogLine":0,"line":3,"staff":0,"voice":0,"start":35,"end":44}];
+	var expectedSingleLine500LineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":12},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":13,"end":26},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":27,"end":44}]
+	;
 
 	var expectedSingleLine600 = [{"widths":{"left":74.551,"measureWidths":[42.78,38.74000000000002,44.629999999999995,59.24000000000001,126.84799999999996,31.985000000000014,38.74000000000001,44.629999999999995,59.23999999999978,126.84799999999996],"total":613.6809999999998},"lineBreakPoint":291.9161111111111,"minLineSize":187.66035714285715,"staffWidth":600,"minWidth":309}];
 
@@ -40,7 +42,8 @@ describe("Automatic line wrapping", function() {
 
 	var expectedSplitByText = [{"widths":{"left":67.301,"measureWidths":[112.46500000000002,80.67,91.48,91.48],"total":376.095},"lineBreakPoint":240.38833333333332,"minLineSize":154.53535714285715,"staffWidth":500,"minWidth":255},{"widths":{"left":67.301,"measureWidths":[80.67,80.67,105.855,59.05000000000001],"total":326.245},"lineBreakPoint":240.38833333333332,"minLineSize":154.53535714285715,"staffWidth":500,"minWidth":255}];
 
-	var expectedSplitByTextLineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":7},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":8,"end":24},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":25,"end":34},{"ogLine":1,"line":3},{"ogLine":2,"line":4,"staff":0,"voice":0,"start":0,"end":7},{"ogLine":2,"line":5,"staff":0,"voice":0,"start":8,"end":15},{"ogLine":2,"line":6,"staff":0,"voice":0,"start":16,"end":31}];
+	var expectedSplitByTextLineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":15},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":16,"end":34},{"ogLine":1,"line":2},{"ogLine":2,"line":3,"staff":0,"voice":0,"start":0,"end":15},{"ogLine":2,"line":4,"staff":0,"voice":0,"start":16,"end":31}]
+	;
 
 	var abcPiano = "X:1\n" +
 		"T:piano_wrap\n" +
@@ -65,7 +68,8 @@ describe("Automatic line wrapping", function() {
 
 	var expectedPiano = [{"widths":{"left":60.153,"measureWidths":[59.785000000000004,154.608,31.985000000000014,37.99,154.60800000000003,37.99,154.60800000000003,37.99,154.60800000000003,37.99,154.60800000000003,37.99,154.60800000000003],"total":1209.3680000000002},"lineBreakPoint":244.35944444444442,"minLineSize":157.0882142857143,"staffWidth":500,"minWidth":259}];
 
-	var expectedPianoLineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":10},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":11,"end":23},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":24,"end":34},{"ogLine":0,"line":3,"staff":0,"voice":0,"start":35,"end":45},{"ogLine":0,"line":4,"staff":0,"voice":0,"start":46,"end":56},{"ogLine":0,"line":5,"staff":0,"voice":0,"start":57,"end":68},{"ogLine":0,"line":0,"staff":1,"voice":0,"start":0,"end":13},{"ogLine":0,"line":1,"staff":1,"voice":0,"start":14,"end":29},{"ogLine":0,"line":2,"staff":1,"voice":0,"start":30,"end":43},{"ogLine":0,"line":3,"staff":1,"voice":0,"start":44,"end":57},{"ogLine":0,"line":4,"staff":1,"voice":0,"start":58,"end":71},{"ogLine":0,"line":5,"staff":1,"voice":0,"start":72,"end":86}];
+	var expectedPianoLineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":12},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":13,"end":27},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":28,"end":38},{"ogLine":0,"line":3,"staff":0,"voice":0,"start":39,"end":56},{"ogLine":0,"line":4,"staff":0,"voice":0,"start":57,"end":68},{"ogLine":0,"line":0,"staff":1,"voice":0,"start":0,"end":15},{"ogLine":0,"line":1,"staff":1,"voice":0,"start":16,"end":32},{"ogLine":0,"line":2,"staff":1,"voice":0,"start":33,"end":46},{"ogLine":0,"line":3,"staff":1,"voice":0,"start":47,"end":71},{"ogLine":0,"line":4,"staff":1,"voice":0,"start":72,"end":86}]
+	;
 
 	var abcQuartet = "X:1\n" +
 		"T: wrap quartet\n" +
@@ -118,31 +122,8 @@ describe("Automatic line wrapping", function() {
 			"minWidth": 240
 		}];
 
-	var expectedQuartetLineBreaks = [
-		{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":18},
-		{"ogLine":0,"line":1,"staff":0,"voice":0,"start":19,"end":28},
-		{"ogLine":0,"line":2,"staff":0,"voice":0,"start":29,"end":45},
-		{"ogLine":0,"line":3,"staff":0,"voice":0,"start":46,"end":62},
-		{"ogLine":0,"line":4,"staff":0,"voice":0,"start":63,"end":71},
-		{"ogLine":0,"line":5,"staff":0,"voice":0,"start":72, "end":91},
-		{"ogLine":0,"line":0,"staff":0,"voice":1,"start":0,"end":14},
-		{"ogLine":0,"line":1,"staff":0,"voice":1,"start":15,"end":24},
-		{"ogLine":0,"line":2,"staff":0,"voice":1,"start":25,"end":41},
-		{"ogLine":0,"line":3,"staff":0,"voice":1,"start":42,"end":58},
-		{"ogLine":0,"line":4,"staff":0,"voice":1,"start":59,"end":67},
-		{"ogLine":0,"line":5,"staff":0,"voice":1,"start":68,"end":87},
-		{"ogLine":0,"line":0,"staff":1,"voice":0,"start":0,"end":9},
-		{"ogLine":0,"line":1,"staff":1,"voice":0,"start":10,"end":14},
-		{"ogLine":0,"line":2,"staff":1,"voice":0,"start":15,"end":25},
-		{"ogLine":0,"line":3,"staff":1,"voice":0,"start":26,"end":36},
-		{"ogLine":0,"line":4,"staff":1,"voice":0,"start":37,"end":41},
-		{"ogLine":0,"line":5,"staff":1,"voice":0,"start":42,"end":52},
-		{"ogLine":0,"line":0,"staff":2,"voice":0,"start":0,"end":4},
-		{"ogLine":0,"line":1,"staff":2,"voice":0,"start":5,"end":6},
-		{"ogLine":0,"line":2,"staff":2,"voice":0,"start":7,"end":15},
-		{"ogLine":0,"line":3,"staff":2,"voice":0,"start":16,"end":23},
-		{"ogLine":0,"line":4,"staff":2,"voice":0,"start":24,"end":26},
-		{"ogLine":0,"line":5,"staff":2,"voice":0,"start":27,"end":32}]
+	var expectedQuartetLineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":18},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":19,"end":37},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":38,"end":52},{"ogLine":0,"line":3,"staff":0,"voice":0,"start":53,"end":71},{"ogLine":0,"line":4,"staff":0,"voice":0,"start":72,"end":91},{"ogLine":0,"line":0,"staff":0,"voice":1,"start":0,"end":14},{"ogLine":0,"line":1,"staff":0,"voice":1,"start":15,"end":33},{"ogLine":0,"line":2,"staff":0,"voice":1,"start":34,"end":48},{"ogLine":0,"line":3,"staff":0,"voice":1,"start":49,"end":67},{"ogLine":0,"line":4,"staff":0,"voice":1,"start":68,"end":87},{"ogLine":0,"line":0,"staff":1,"voice":0,"start":0,"end":9},{"ogLine":0,"line":1,"staff":1,"voice":0,"start":10,"end":19},{"ogLine":0,"line":2,"staff":1,"voice":0,"start":20,"end":31},{"ogLine":0,"line":3,"staff":1,"voice":0,"start":32,"end":41},{"ogLine":0,"line":4,"staff":1,"voice":0,"start":42,"end":52},{"ogLine":0,"line":0,"staff":2,"voice":0,"start":0,"end":4},{"ogLine":0,"line":1,"staff":2,"voice":0,"start":5,"end":9},{"ogLine":0,"line":2,"staff":2,"voice":0,"start":10,"end":21},{"ogLine":0,"line":3,"staff":2,"voice":0,"start":22,"end":26},{"ogLine":0,"line":4,"staff":2,"voice":0,"start":27,"end":32}]
+
 
 
 	//////////////////////////////////////////////////////////////
