@@ -76,7 +76,7 @@ function CreateSynth() {
 		else
 			self.programOffsets = {};
 		var p = params.fadeLength !== undefined ? parseInt(params.fadeLength,10) : NaN;
-		self.fadeLength = isNaN(p) ? 300 : p;
+		self.fadeLength = isNaN(p) ? 200 : p;
 		p = params.noteEnd !== undefined ? parseInt(params.noteEnd,10) : NaN;
 		self.noteEnd = isNaN(p) ? 0 : p;
 
