@@ -333,7 +333,7 @@ function findNumber(klass, match, target, name) {
 
 function clearSelection() {
 	for (var i=0;i<this.selected.length;i++) {
-		this.selected[i].unhighlight();
+		this.selected[i].unhighlight(undefined, this.renderer.foregroundColor);
 	}
 	this.selected = [];
 }

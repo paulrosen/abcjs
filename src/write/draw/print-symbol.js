@@ -32,7 +32,7 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
 		if (elementGroup.isInGroup()) {
 			elementGroup.addPath(glyphs.getPathForSymbol(x, renderer.calcY(offset + ycorr), symbol, scalex, scaley));
 		} else {
-			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, klass, "none", "#000000");
+			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, klass, "none", renderer.foregroundColor);
 			if (el) {
 				return el;
 			} else

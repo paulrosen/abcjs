@@ -45,7 +45,7 @@ function straightPath(renderer, xLeft, yTop, yBottom, type) {
 		-wCurve*0.1, -hCurve*0.3,
 		-wCurve, -hCurve-spacing.STEP // left bottom
 	);
-	return renderer.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.controller.classes.generate(type)});
+	return renderer.paper.path({path:pathString, stroke:renderer.foregroundColor, fill:renderer.foregroundColor, 'class': renderer.controller.classes.generate(type)});
 }
 
 function curvyPath(renderer, xLeft, yTop, yBottom, type) {
@@ -61,7 +61,7 @@ function curvyPath(renderer, xLeft, yTop, yBottom, type) {
 		[0, 17.5, -7.5, 6.6, -5, 20, 0],
 		[yHeight/2, yHeight/1.46, yHeight/1.22, yHeight, yHeight/1.19, yHeight/1.42, yHeight/2]);
 
-	return renderer.paper.path({path:pathString, stroke:"#000000", fill:"#000000", 'class': renderer.controller.classes.generate(type)});
+	return renderer.paper.path({path:pathString, stroke:renderer.foregroundColor, fill:renderer.foregroundColor, 'class': renderer.controller.classes.generate(type)});
 }
 
 function curve(xLeft, yTop, xCurve, yCurve) {

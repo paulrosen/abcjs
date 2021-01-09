@@ -26,7 +26,7 @@ function drawBeam(renderer, params) {
 	var el = printPath(renderer, {
 		path: pathString,
 		stroke: "none",
-		fill: "#000000",
+		fill: renderer.foregroundColor,
 		'class': klasses
 	});
 	return [el];

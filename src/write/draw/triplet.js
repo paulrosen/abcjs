@@ -40,7 +40,7 @@ function drawBracket(renderer, x1, y1, x2, y2) {
 	var rightStartX = midX + gapWidth;
 	var rightStartY = y1 + (rightStartX - x1) * slope;
 	pathString += drawLine( rightStartX, rightStartY, x2, y2);
-	printPath(renderer, {path: pathString, stroke: "#000000"});
+	printPath(renderer, {path: pathString, stroke: renderer.foregroundColor});
 }
 
 module.exports = drawTriplet;

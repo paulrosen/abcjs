@@ -12,7 +12,7 @@ function drawRelativeElement(renderer, params, bartop) {
 			if (params.c===null) return null;
 			var klass = "symbol";
 			if (params.klass) klass += " " + params.klass;
-			params.graphelem = printSymbol(renderer, params.x, params.pitch, params.c, params.scalex, params.scaley, renderer.controller.classes.generate(klass), "none", "#000000"); break;
+			params.graphelem = printSymbol(renderer, params.x, params.pitch, params.c, params.scalex, params.scaley, renderer.controller.classes.generate(klass), "none", renderer.foregroundColor); break;
 		case "debug":
 			params.graphelem = renderText(renderer, { x: params.x, y: renderer.calcY(15), text: ""+params.c, type: "debugfont", klass: renderer.controller.classes.generate('debug-msg'), anchor: 'start', centerVertically: false, dim: params.dim}); break;
 		case "barNumber":

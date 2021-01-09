@@ -15,6 +15,8 @@
 //    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var setClass = require('./set-class');
+var highlight = require("./highlight");
+var unhighlight = require("./unhighlight");
 
 // Everything that is placed in the SVG is first created as an absolute element. This is one unit of graphic information.
 // That is, it embodies a concept: a clef, a time signature, a bar line,etc. or most complexly:
@@ -245,19 +247,11 @@ AbsoluteElement.prototype.setHint = function () {
 };
 
 AbsoluteElement.prototype.highlight = function (klass, color) {
-	if (klass === undefined)
-		klass = "abcjs-note_selected";
-	if (color === undefined)
-		color = "#ff0000";
-	setClass(this.elemset, klass, "", color);
+	highlight.bind(this)(klass, color);
 };
 
 AbsoluteElement.prototype.unhighlight = function (klass, color) {
-	if (klass === undefined)
-		klass = "abcjs-note_selected";
-	if (color === undefined)
-		color = "#000000";
-	setClass(this.elemset, "", klass, color);
+	unhighlight.bind(this)(klass, color);
 };
 
 module.exports = AbsoluteElement;

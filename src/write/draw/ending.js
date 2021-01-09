@@ -26,7 +26,7 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
 		linestartx, y, lineendx, y);
 
 	renderer.paper.openGroup({klass: renderer.controller.classes.generate("ending")});
-	printPath(renderer, {path: pathString, stroke: "#000000", fill: "#000000"});
+	printPath(renderer, {path: pathString, stroke: renderer.foregroundColor, fill: renderer.foregroundColor});
 	if (params.anchor1)
 		renderText(renderer, {
 			x: roundNumber(linestartx + 5),

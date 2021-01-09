@@ -28,7 +28,7 @@ function renderText(renderer, params) {
 	text = text.replace(/^\n/, "\xA0\n");
 
 	if (hash.font.box) {
-		renderer.paper.openGroup({klass: hash.attr['class'], fill: "#000000"});
+		renderer.paper.openGroup({klass: hash.attr['class'], fill: renderer.foregroundColor});
 		if (hash.attr["text-anchor"] === "end") {
 			hash.attr.x -= hash.font.padding;
 		} else if (hash.attr["text-anchor"] === "start") {

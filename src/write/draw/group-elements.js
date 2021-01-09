@@ -50,7 +50,7 @@ const roundNumber = require("./round-number");
 		var ret = this.paper.path({
 			path: path,
 			stroke: "none",
-			fill: "#000000",
+			fill: this.controller.renderer.foregroundColor,
 			'class': this.controller.classes.generate(klass)
 		});
 		this.path = [];

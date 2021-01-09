@@ -34,8 +34,8 @@ function drawStaffGroup(renderer, params, selectables) {
 						y: renderer.calcY(staff1.originalTop),
 						width: renderer.controller.width,
 						height: renderer.calcY(staff1.originalBottom) - renderer.calcY(staff1.originalTop),
-						fill: "#000000",
-						stroke: "#000000",
+						fill: renderer.foregroundColor,
+						stroke: renderer.foregroundColor,
 						"fill-opacity": 0.1,
 						"stroke-opacity": 0.1 });
 				colorIndex = 0;

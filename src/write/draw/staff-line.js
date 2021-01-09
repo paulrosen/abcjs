@@ -2,13 +2,8 @@ var sprintf = require('./sprintf');
 const roundNumber = require("./round-number");
 
 function printStaffLine(renderer, x1,x2, pitch, klass) {
-	var isIE=/*@cc_on!@*/false;//IE detector
 	var dy = 0.35;
-	var fill = "#000000";
-	if (isIE) {
-		dy = 1;
-		fill = "#666666";
-	}
+	var fill = renderer.foregroundColor;
 	var y = renderer.calcY(pitch);
 	x1 = roundNumber(x1);
 	x2 = roundNumber(x2);

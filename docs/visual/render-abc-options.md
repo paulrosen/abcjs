@@ -7,7 +7,6 @@ function callbackFn() {}
 renderAbc("paper", abcString, { add_classes: true, clickListener: callbackFn });
 ```
 
-
 ## add_classes
 Default: false
  
@@ -17,7 +16,8 @@ Default: false
 Default: undefined
 
 :::
-::: tip The contents of this is subject to change so if you use this function you will need to retest it whenever upgrading abcjs.
+::: warning Volatile
+The contents of this is subject to change so if you use this function you will need to retest it whenever upgrading abcjs.
 :::
 
 Callback function. If this is present then it is called right after the ABC string is parsed and before the music has started to display or be set up for audio.
@@ -42,6 +42,20 @@ Default: null
 Callback function. The signature of the function is: `function(abcelem, tuneNumber, classes, analysis, drag) {}`.
  
  This is called whenever the user clicks on a note or selects a series of notes. For more details, see the page on the click listener.
+
+## dragColor
+Default: same as selectionColor
+
+This is the color of the elements currently being dragged.
+
+## dragging
+
+See the [dragging page](./dragging.md) for more information.
+
+## foregroundColor
+Default: currentColor
+
+This sets the color of everything displayed. This can be overridden in CSS for particular elements. This color is applied to `fill` and `stroke` attributes.
 
 ## format
 Default: undefined
@@ -129,6 +143,15 @@ Default: 1
 Default: false
  
  Should there be a horizontal scrollbar if the music is wider than the viewport? (requires `viewportHorizontal` to be true.) 
+
+## selectionColor
+Default: "#ff0000"
+
+This is the color of the note that the user has most recently clicked.
+
+## selectTypes
+
+See the [dragging page](./dragging.md) for more information.
 
 ## showDebug
 Default: []

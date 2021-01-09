@@ -12,7 +12,7 @@ function printStem(renderer, x, dx, y1, y2) {
 	}
 	x = roundNumber(x);
 	var x2 = roundNumber(x+dx);
-	var fill = "#000000";
+	var fill = renderer.foregroundColor;
 	var pathArray = [["M",x,y1],["L", x, y2],["L", x2, y2],["L",x2,y1],["z"]];
 	if (elementGroup.isInGroup()) {
 		elementGroup.addPath(pathArray);
