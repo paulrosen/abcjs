@@ -76,6 +76,10 @@ Svg.prototype.setSize = function(w, h) {
 	this.svg.setAttribute('height', h);
 };
 
+Svg.prototype.setAttribute = function(attr, value) {
+	this.svg.setAttribute(attr, value);
+};
+
 Svg.prototype.setScale = function(scale) {
 	if (scale !== 1) {
 		this.svg.style.transform = "scale("+scale+","+scale+")";

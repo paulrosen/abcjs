@@ -77,6 +77,8 @@ var EngraverController = function(paper, params) {
 		this.renderer.showDebug = params.showDebug;
   this.renderer.controller = this; // TODO-GD needed for highlighting
 	this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
+	if (params.ariaLabel)
+		this.renderer.ariaLabel = params.ariaLabel;
 
 	this.reset();
 };

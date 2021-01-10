@@ -10,6 +10,8 @@ function setPaperSize(renderer, maxwidth, scale, responsive) {
 	if (renderer.abctune && renderer.abctune.metaText && renderer.abctune.metaText.title)
 		text += " for \"" + renderer.abctune.metaText.title + '"';
 	renderer.paper.setTitle(text);
+	var label = renderer.ariaLabel ? renderer.ariaLabel : text;
+	renderer.paper.setAttribute("aria-label", label);
 
 	// for dragging - don't select during drag
 	var styles = [
