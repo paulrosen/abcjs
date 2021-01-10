@@ -359,7 +359,11 @@ var parseCommon = require("../parse/abc_common");
 		switch (parseInt(meter.den,10)) {
 			case 2: return 0.5;
 			case 4: return 0.25;
-			case 8: return 0.375;
+			case 8:
+				if (meter.num % 3 === 0)
+					return 0.375;
+				else
+					return 0.125;
 			case 16: return 0.125;
 		}
 		return 0.25;
@@ -592,11 +596,21 @@ var parseCommon = require("../parse/abc_common");
 				elem.elem.currentTrackWholeNotes = rt;
 			} else {
 				if (elem.elem.currentTrackMilliseconds.length === undefined) {
-					elem.elem.currentTrackMilliseconds = [elem.elem.currentTrackMilliseconds, ms];
-					elem.elem.currentTrackWholeNotes = [elem.elem.currentTrackWholeNotes, rt];
+					if (elem.elem.currentTrackMilliseconds !== ms) {
+						elem.elem.currentTrackMilliseconds = [elem.elem.currentTrackMilliseconds, ms];
+						elem.elem.currentTrackWholeNotes = [elem.elem.currentTrackWholeNotes, rt];
+					}
 				} else {
-					elem.elem.currentTrackMilliseconds.push(ms);
-					elem.elem.currentTrackWholeNotes.push(rt);
+					// There can be duplicates if there are multiple voices
+					var found = false;
+					for (var j = 0; j < elem.elem.currentTrackMilliseconds.length; j++) {
+						if (elem.elem.currentTrackMilliseconds[j] === ms)
+							found = true;
+					}
+					if (!found) {
+						elem.elem.currentTrackMilliseconds.push(ms);
+						elem.elem.currentTrackWholeNotes.push(rt);
+					}
 				}
 			}
 		}

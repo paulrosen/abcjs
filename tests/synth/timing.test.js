@@ -25,6 +25,32 @@ describe("Timing", function() {
 		{ bar: true },
 	];
 
+	var abcElevenEight = 'X:1\n' +
+		'%%score { 1 | 2 }\n' +
+		'L:1/8\n' +
+		'Q:1/4=140\n' +
+		'M:11/8\n' +
+		'K:C\n' +
+		'V:1 treble nm=\"Piano\"\n' +
+		'V:2 bass\n' +
+		'V:1\n' +
+		'A,B,CD EFD E2 E2 |\n' +
+		'V:2\n' +
+		'A,,2 .[E,C,]2 E,,2 .[E,C,] A,,2 .[E,C,]2 |\n';
+
+	var expectedElevenEight = [
+		{ ms: 0, pitches: [57] },
+		{ ms: 214.28571428571428, pitches: [59] },
+		{ ms: 428.57142857142856, pitches: [60] },
+		{ ms: 642.8571428571429, pitches: [62] },
+		{ ms: 857.1428571428571, pitches: [64] },
+		{ ms: 1071.4285714285713, pitches: [65] },
+		{ ms: 1285.7142857142858, pitches: [62] },
+		{ ms: 1500, pitches: [64] },
+		{ ms: 1928.5714285714284, pitches: [64] },
+		{ bar: true },
+	];
+
 	var abcTempoChange = 'X:1\n' +
 		'L:1/4\n' +
 		'M:4/4\n' +
@@ -67,6 +93,10 @@ describe("Timing", function() {
 
 	it("repeated sections callback", function() {
 		doClickTest(abcRepeatedSections, expectedRepeatedSections);
+	});
+
+	it("of 11/8", function() {
+		doTimingTest(abcElevenEight, expectedElevenEight);
 	});
 
 	it("tempo change2 animation", function() {
