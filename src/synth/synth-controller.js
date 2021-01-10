@@ -31,6 +31,7 @@ function SynthController() {
 	self.isLooping = false;
 	self.isStarted = false;
 	self.isLoaded = false;
+	self.isLoading = false;
 
 	self.load = function (selector, cursorControl, visualOptions) {
 		if (!visualOptions)
@@ -53,7 +54,6 @@ function SynthController() {
 	};
 
 	self.setTune = function(visualObj, userAction, audioParams) {
-		self.isLoaded = false;
 		self.visualObj = visualObj;
 		self.disable(false);
 		self.options = audioParams;
@@ -75,6 +75,7 @@ function SynthController() {
 	};
 
 	self.go = function () {
+		self.isLoading = true;
 		var millisecondsPerMeasure = self.visualObj.millisecondsPerMeasure() * 100 / self.warp;
 		self.currentTempo = Math.round(self.visualObj.getBeatsPerMeasure() / millisecondsPerMeasure * 60000);
 		if (self.control)
@@ -115,6 +116,7 @@ function SynthController() {
 			if (self.cursorControl && self.cursorControl.onReady && typeof self.cursorControl.onReady  === 'function')
 				self.cursorControl.onReady(self);
 			self.isLoaded = true;
+			self.isLoading = false;
 			return Promise.resolve({ status: "created", notesStatus: loadingResponse });
 		});
 	};
@@ -135,14 +137,32 @@ function SynthController() {
 	};
 
 	self.play = function () {
+		return self.runWhenReady(self._play, undefined);
+	};
+
+	function sleep(ms) {
+		return new Promise(function (resolve) {
+			setTimeout(resolve, ms)
+		});
+	}
+
+	self.runWhenReady = function(fn, arg1) {
 		if (!self.visualObj)
 			return Promise.resolve({status: "loading"});
-		if (!self.isLoaded) {
-			return self.go().then(function() {
-				return self._play();
+		if (self.isLoading) {
+			// Some other promise is waiting for the tune to be loaded, so just wait.
+			return sleep(500).then(function() {
+				if (self.isLoading)
+					return self.runWhenReady(fn, arg1);
+				return fn(arg1);
+			})
+		} else if (!self.isLoaded) {
+			return self.go().then(function () {
+				return fn(arg1);
 			});
-		} else
-			return self._play();
+		} else {
+			return fn(arg1);
+		}
 	};
 
 	self._play = function () {
@@ -185,14 +205,7 @@ function SynthController() {
 	};
 
 	self.randomAccess = function (ev) {
-		if (!self.visualObj)
-			return Promise.resolve({status: "loading"});
-		if (!self.isLoaded) {
-			return self.go().then(function() {
-				return self._randomAccess(ev);
-			});
-		} else
-			return self._randomAccess(ev);
+		return self.runWhenReady(self._randomAccess, ev);
 	};
 
 	self._randomAccess = function (ev) {
@@ -200,10 +213,10 @@ function SynthController() {
 		var percent = (ev.x - background.offsetLeft) / background.offsetWidth;
 		if (percent < 0)
 			percent = 0;
-		if (percent > 100)
-			percent = 100;
-		self.timer.setProgress(percent);
-		self.midiBuffer.seek(percent);
+		if (percent > 1)
+			percent = 1;
+		self.seek(percent);
+		return Promise.resolve({status: "ok"});
 	};
 
 	self.seek = function (percent) {
@@ -223,10 +236,12 @@ function SynthController() {
 				if (self.control)
 					self.control.setWarp(self.currentTempo, self.warp);
 				if (wasPlaying) {
-					return self.play();
+					return self.play().then(function () {
+						self.seek(startPercent);
+						return Promise.resolve();
+					});
 				}
-				self.timer.setProgress(startPercent);
-				self.midiBuffer.seek(startPercent);
+				self.seek(startPercent);
 				return Promise.resolve();
 			});
 		}
