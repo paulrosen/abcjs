@@ -79,6 +79,7 @@ var EngraverController = function(paper, params) {
 	this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
 	if (params.ariaLabel)
 		this.renderer.ariaLabel = params.ariaLabel;
+	this.renderer.minPadding = params.minPadding ? params.minPadding : 0;
 
 	this.reset();
 };

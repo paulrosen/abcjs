@@ -27,11 +27,12 @@ VoiceElement.getSpacingUnits = function (voice) {
 // x - position to try to layout the element at
 // spacing - base spacing
 // can't call this function more than once per iteration
-VoiceElement.layoutOneItem = function (x, spacing, voice) {
+VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding) {
 	var child = voice.children[voice.i];
 	if (!child) return 0;
 	var er = x - voice.minx; // available extrawidth to the left
-	var extraWidth = getExtraWidth(child);
+	var pad = voice.durationindex + child.duration > 0 ? minPadding : 0; // only add padding to the items that aren't fixed to the left edge.
+	var extraWidth = getExtraWidth(child, pad);
 	if (er<extraWidth) { // shift right by needed amount
 		// There's an exception if a bar element is after a Part element, there is no shift.
 		if (voice.i === 0 || child.type !== 'bar' || (voice.children[voice.i-1].type !== 'part' && voice.children[voice.i-1].type !== 'tempo') )
@@ -74,8 +75,11 @@ VoiceElement.updateIndices = function (voice) {
 	}
 };
 
-function getExtraWidth(child) { // space needed to the left of the note
-	return -child.extraw;
+function getExtraWidth(child, minPadding) { // space needed to the left of the note
+	var padding = 0;
+	if (child.type === 'note' || child.type === 'bar')
+		padding = minPadding;
+	return -child.extraw + padding;
 }
 
 function getMinWidth(child) { // absolute space taken to the right of the note

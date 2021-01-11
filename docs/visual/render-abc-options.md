@@ -84,6 +84,12 @@ If you want to control exactly which measures are on each line, then you can pas
 
 This parameter is primarily for the wrap mechanism to call internally, but it can be passed in if you have your own wrapping mechanism.
 
+## minPadding
+Default: 0
+ 
+The number of pixels that are added to the left of each staff item. This is not added to the fixed items at the beginning of the line (that is, clef, time signature and key signature) but is added to all other elements on the line. If the line is overly crowded the notes can't get any closer than this.
+
+
 ## oneSvgPerLine
 Default: false
  

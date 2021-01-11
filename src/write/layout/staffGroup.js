@@ -56,7 +56,7 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup, leftEdge) 
 		if (debug) console.log("currentduration: ",currentduration, spacingunits, minspace);
 
 		for (i=0;i<currentvoices.length;i++) {
-			var voicechildx = layoutVoiceElements.layoutOneItem(x,spacing, currentvoices[i]);
+			var voicechildx = layoutVoiceElements.layoutOneItem(x,spacing, currentvoices[i], renderer.minPadding);
 			var dx = voicechildx-x;
 			if (dx>0) {
 				x = voicechildx; //update x
