@@ -6,6 +6,15 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
+## Breaking change when using midi.js for 6.0.0.26
+
+The midi.js package is no longer a direct dependency, it is now a peerDependency so it is not included by default. That way, users who aren't using the old style of sound generation won't need to load the package. If you are using the old style that uses midi.js, include this line in your `package.json` file:
+
+```
+    "midi": "https://github.com/paulrosen/MIDI.js.git#abcjs"
+```
+Note that if you are using the minified version of the library with a `<script>` tag this does not apply to you.
+
 ## Change in wrapping behavior for 6.0.0.25
 
 There have been some tweaks to the way wrapping is calculated. Hopefully this will make your music layout a little better. If you start seeing odd results, let me know.

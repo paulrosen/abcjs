@@ -62,7 +62,7 @@
     "webpack-node-externals": "2.5.2",
     "workbox-webpack-plugin": "5.1.3"
   },
-  "dependencies": {
+  "peerDependencies": {
     "midi": "https://github.com/paulrosen/MIDI.js.git#abcjs"
   }
 }
