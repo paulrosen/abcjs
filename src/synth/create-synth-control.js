@@ -145,7 +145,7 @@ function CreateSynthControl(parent, options) {
 	self.setWarp = function(tempo, warp) {
 		var el = self.parent.querySelector(".abcjs-midi-tempo");
 		el.value = Math.round(warp);
-		self.setTempo(tempo*warp/100)
+		self.setTempo(tempo)
 	};
 	self.setTempo = function(tempo) {
 		var el = self.parent.querySelector(".abcjs-midi-current-tempo");

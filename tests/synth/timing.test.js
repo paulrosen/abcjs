@@ -57,6 +57,31 @@ describe("Timing", function() {
 		'K:F\n' +
 		'[Q:1/4=129.0476605]CDEF |[Q:1/4=127]GABc | [Q:1/4=131] CDEF |[Q:1/4=130] GABc |[Q:1/4=127]CDEF |\n' ;
 
+	var abcWarp = 'X:1\n' +
+		'L:1/4\n' +
+		'Q:1/4=60\n' +
+		'M:4/4\n' +
+		'K:F\n' +
+		'CD E>F | (3GAB Ac |\n' ;
+
+	var warpTests = [
+		{ bpm: 30, measuresOfDelay: 0 },
+		{ bpm: 30, measuresOfDelay: 1 },
+		{ bpm: 60, measuresOfDelay: 0 },
+		{ bpm: 60, measuresOfDelay: 1 },
+		{ bpm: 90, measuresOfDelay: 0 },
+		{ bpm: 90, measuresOfDelay: 2 },
+	];
+
+	var warpMs = [
+		{ millisecondsPerMeasure: 8000, ms: [0,2000,4000,7000,8000,9333,10667,12000,14000,16000]},
+		{ millisecondsPerMeasure: 8000, ms: [8000,10000,12000,15000,16000,17333,18667,20000,22000,24000]},
+		{ millisecondsPerMeasure: 4000, ms: [0,1000,2000,3500,4000,4667,5333,6000,7000,8000]},
+		{ millisecondsPerMeasure: 4000, ms: [4000,5000,6000,7500,8000,8667,9333,10000,11000,12000]},
+		{ millisecondsPerMeasure: 2666.666666666667, ms: [0,667,1333,2333,2667,3111,3556,4000,4667,5333]},
+		{ millisecondsPerMeasure: 2666.666666666667, ms: [5333,6000,6667,7667,8000,8444,8889,9333,10000,10667]},
+	];
+
 	var abcSubTitleCrash = 'X:1\n' +
 		'T:subtitle-crash\n' +
 		'L:1/4\n' +
@@ -118,7 +143,30 @@ describe("Timing", function() {
 	it("tie repeat crash", function() {
 		doCreationTest(abcTieRepeatCrash);
 	});
+
+	it("warp", function() {
+		for (var i = 0; i < warpTests.length; i++) {
+			doWarpTest(abcWarp, warpTests[i], warpMs[i]);
+		}
+	});
 });
+
+//////////////////////////////////////////////////////////
+
+function doWarpTest(abc, warps, warpMs) {
+	var visualObj = abcjs.renderAbc("paper", abc);
+	//visualObj[0].setUpAudio();
+	visualObj[0].setTiming(warps.bpm, warps.measuresOfDelay);
+	var ms = [];
+	for (var i = 0; i < visualObj[0].noteTimings.length; i++)
+		ms.push(visualObj[0].noteTimings[i].milliseconds);
+	// console.log(visualObj[0].noteTimings[0].millisecondsPerMeasure)
+	// console.log(JSON.stringify(ms))
+	chai.assert.equal(visualObj[0].noteTimings[0].millisecondsPerMeasure, warpMs.millisecondsPerMeasure, 'millisecondsPerMeasure for test { bpm:' + warps.bpm +', measuresOfDelay:' + warps.measuresOfDelay + ' }');
+	var msg = 'millisecs for  test { bpm:' + warps.bpm +', measuresOfDelay:' + warps.measuresOfDelay + ' }\n';
+	msg += "rcv: " + JSON.stringify(ms) + "\nexp: " + JSON.stringify(warpMs.ms);
+	chai.assert.deepStrictEqual(ms, warpMs.ms, msg);
+}
 
 //////////////////////////////////////////////////////////
 

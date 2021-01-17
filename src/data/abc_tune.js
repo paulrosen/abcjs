@@ -382,7 +382,8 @@ var Tune = function() {
 		return voicesArr;
 	};
 
-	this.setupEvents = function(startingDelay, timeDivider, startingBpm) {
+	this.setupEvents = function(startingDelay, timeDivider, startingBpm, warp) {
+		if (!warp) warp = 1;
 		var timingEvents = [];
 
 		var eventHash = {};
@@ -405,7 +406,7 @@ var Tune = function() {
 				var thisMeasure = elements[elem].measureNumber;
 				if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
 					bpm = this.tempoLocations[thisMeasure];
-					timeDivider = this.getBeatLength() * bpm / 60;
+					timeDivider = warp * this.getBeatLength() * bpm / 60;
 					tempoDone = thisMeasure;
 				}
 				var element = elements[elem].elem;
@@ -464,7 +465,7 @@ var Tune = function() {
 		addVerticalInfo(timingEvents);
 		addEndPoints(this.lines, timingEvents)
 		timingEvents.push({ type: "end", milliseconds: voiceTimeMilliseconds });
-		this.addUsefulCallbackInfo(timingEvents, bpm);
+		this.addUsefulCallbackInfo(timingEvents, bpm*warp);
 		return timingEvents;
 	};
 
@@ -531,10 +532,14 @@ var Tune = function() {
 			return;
 		}
 
-		if (!bpm) {
-			var tempo = this.metaText ? this.metaText.tempo : null;
-			bpm = this.getBpm(tempo);
-		}
+		var tempo = this.metaText ? this.metaText.tempo : null;
+		var naturalBpm = this.getBpm(tempo);
+		var warp = 1;
+		if (bpm)
+			warp = bpm / naturalBpm;
+		else
+			bpm = naturalBpm;
+
 		// Calculate the basic midi data. We only care about the qpm variable here.
 		//this.setUpAudio({qpm: bpm});
 
@@ -548,7 +553,7 @@ var Tune = function() {
 			startingDelay -= this.getPickupLength() / beatLength / beatsPerSecond;
 		var timeDivider = beatLength * beatsPerSecond;
 
-		this.noteTimings = this.setupEvents(startingDelay, timeDivider, bpm);
+		this.noteTimings = this.setupEvents(startingDelay, timeDivider, bpm, warp);
 		return this.noteTimings;
 	};
 
