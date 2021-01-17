@@ -120,6 +120,7 @@
 		var abc = [
 			"T: Cooley's\n" +
 			"M: 4/4\n" +
+			"Q: 1/4=120\n" +
 			"L: 1/8\n" +
 			"R: reel\n" +
 			"K: Emin\n" +
@@ -189,6 +190,7 @@
 			document.querySelector(".next").addEventListener("click", next);
 			document.querySelector(".start").addEventListener("click", start);
 			document.querySelector(".warp").addEventListener("click", warp);
+			document.querySelector(".seek").addEventListener("click", seek);
 
 			if (ABCJS.synth.supportsAudio()) {
 				synthControl = new ABCJS.synth.SynthController();
@@ -207,6 +209,10 @@
 		function start() {
 			if (synthControl)
 				synthControl.play();
+		}
+
+		function seek() {
+			synthControl.seek(0.50)
 		}
 
 		function warp() {
@@ -278,8 +284,9 @@
       <p>The visual control for playing music can look different. In this example, the abcjs-audio.css file has been loaded. You can supply your own css.</p>
       <button class="next">Next Tune</button>
       <button class="start">Start/Pause</button>
-      <button class="download" style="display: none;">Download</button>
-      <button class="warp">Warp</button>
+      <button class="warp">Rand. Warp</button>
+      <button class="seek">Seek to Middle</button>
+		<button class="download" style="display: none;">Download</button>
       <div class="midi">MIDI</div>
       <div id="paper"></div>
       <div id="audio"></div>
