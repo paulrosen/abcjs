@@ -685,17 +685,19 @@ var Parse = function() {
 	var getBrokenRhythm = function(line, index) {
 		switch (line.charAt(index)) {
 			case '>':
-			if (index < line.length - 1 && line.charAt(index+1) === '>')	// double >>
+				if (index < line.length - 2 && line.charAt(index + 1) === '>' && line.charAt(index + 2) === '>')	// triple >>>
+					return [3, 1.875, 0.125];
+				else if (index < line.length - 1 && line.charAt(index + 1) === '>')	// double >>
 					return [2, 1.75, 0.25];
 				else
 					return [1, 1.5, 0.5];
-				break;
 			case '<':
-			if (index < line.length - 1 && line.charAt(index+1) === '<')	// double <<
+				if (index < line.length - 2 && line.charAt(index + 1) === '<' && line.charAt(index + 2) === '<')	// triple <<<
+					return [3, 0.125, 1.875];
+				else if (index < line.length - 1 && line.charAt(index + 1) === '<')	// double <<
 					return [2, 0.25, 1.75];
 				else
 					return [1, 0.5, 1.5];
-				break;
 		}
 		return null;
 	};
