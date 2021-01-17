@@ -4,6 +4,8 @@
 
 This library makes it easy to incorporate **sheet music** into your **websites**. You can also turn visible **ABC** text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of one javascript file. You can also generate **MIDI files** or play them directly in your browser.
 
+[List of Examples](https://cdn.rawgit.com/paulrosen/abcjs/master/examples/toc.html)
+
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
 ## Breaking change when using midi.js for 6.0.0.26
@@ -11,7 +13,7 @@ Full documentation is here: [abcjs documentation](https://paulrosen.github.io/ab
 The midi.js package is no longer a direct dependency, it is now a peerDependency so it is not included by default. That way, users who aren't using the old style of sound generation won't need to load the package. If you are using the old style that uses midi.js, include this line in your `package.json` file:
 
 ```
-    "midi": "https://github.com/paulrosen/MIDI.js.git#abcjs"
+"midi": "https://github.com/paulrosen/MIDI.js.git#abcjs"
 ```
 Note that if you are using the minified version of the library with a `<script>` tag this does not apply to you.
 
