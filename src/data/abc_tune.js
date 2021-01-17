@@ -437,7 +437,7 @@ var Tune = function() {
 							thisMeasure = elements[el2].measureNumber;
 							if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
 								bpm = this.tempoLocations[thisMeasure];
-								timeDivider = this.getBeatLength() * bpm / 60;
+								timeDivider = warp * this.getBeatLength() * bpm / 60;
 								tempoDone = thisMeasure;
 							}
 							var element2 = elements[el2].elem;

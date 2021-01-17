@@ -30,37 +30,33 @@ var TimingCallbacks = function(target, params) {
 	self.joggerTimer = null;
 
 	self.replaceTarget = function(newTarget) {
-		newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
+		self.noteTimings = newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
 		if (newTarget.noteTimings.length === 0)
 			newTarget.setTiming(0,0);
 		if (self.lineEndCallback) {
 			self.lineEndTimings = getLineEndTimings(newTarget.noteTimings, self.lineEndAnticipation);
 		}
-		self.noteTimings = newTarget.noteTimings;
+		self.startTime = null;
+		self.currentBeat = 0;
+		self.currentEvent = 0;
+		self.currentLine = 0;
+		self.isPaused = false;
+		self.isRunning = false;
+		self.pausedPercent = null;
+		self.justUnpaused = false;
+		self.newSeekPercent = 0;
+		self.lastTimestamp = 0;
+
+		if (self.noteTimings.length === 0)
+			return;
+		// noteTimings contains an array of events sorted by time. Events that happen at the same time are in the same element of the array.
+		self.millisecondsPerBeat = 1000 / (self.qpm / 60) / self.beatSubdivisions;
+		self.lastMoment = self.noteTimings[self.noteTimings.length-1].milliseconds;
+		self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
 	};
 
 	self.replaceTarget(target);
-	if (self.noteTimings.length === 0)
-		return;
 
-	// noteTimings contains an array of events sorted by time. Events that happen at the same time are in the same element of the array.
-	self.noteTimings = target.noteTimings;
-	self.millisecondsPerBeat = 1000 / (self.qpm / 60) / self.beatSubdivisions;
-	self.lastMoment = self.noteTimings[self.noteTimings.length-1].milliseconds;
-	self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
-
-	self.startTime = null;
-	self.currentBeat = 0;
-	self.currentEvent = 0;
-	self.currentLine = 0;
-	self.isPaused = false;
-	self.isRunning = false;
-	self.pausedPercent = null;
-	self.justUnpaused = false;
-
-	self.newSeekPercent = 0;
-
-	self.lastTimestamp = 0;
 	self.doTiming = function (timestamp) {
 		// This is called 60 times a second, that is, every 16 msecs.
 		//console.log("doTiming", timestamp, timestamp-self.lastTimestamp);
