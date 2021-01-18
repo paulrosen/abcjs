@@ -27,14 +27,16 @@
       "EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|\n" +
       "|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
       "eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|";
-    
+
     function load() {
 
       var showPlayer = document.querySelector('#show-player');
+      var transposeHalfSteps = document.querySelector(".transpose-half-steps");
+      var transposeVisual = document.querySelector(".transpose-visual");
+      var transposeAudio = document.querySelector(".transpose-audio");
       var visualObj = ABCJS.renderAbc("paper", abc);
       var createSynth;
       var synthControl;
-      var transposeBy;
 
       // Initialize sound buffer and playback widget on a user gesture because of browser constraints on AudioContexts.
       showPlayer.addEventListener('click', () => {
@@ -42,18 +44,13 @@
         if (ABCJS.synth.supportsAudio()){
           createSynth = new ABCJS.synth.CreateSynth();  // sound buffer
           synthControl = new ABCJS.synth.SynthController();  // widget
-        
+
           // preloads and caches the notes to be played
           createSynth.init({ visualObj: visualObj[0] }).then(function() {
-              synthControl.setTune(visualObj[0], true, { midiTranspose: transposeBy })
-              .then(function(){
-                console.log('Audio successfully loaded.')
-              }).catch(function(error) {
-                console.warn('Audio problem: ', error);
-              })
+            redraw();
           });
 
-          // appends playback widget at given element with null CursorControl
+          // creates playback widget with no visual cursor
           var cursorControl = null;
           synthControl.load('#audio', cursorControl, {
             displayRestart: true,
@@ -63,34 +60,42 @@
         }
         else {
           document.querySelector('#audio').innerHTML = 'Audio is not supported in this browser.'
-        } 
+        }
 
         showPlayer.style.display = 'none';
-      }); 
+      });
+		function redraw() {
 
-      var transposeHalfSteps = document.querySelector(".transpose-half-steps");
-      transposeHalfSteps.addEventListener("change", function() {
-
-        transposeBy = transposeHalfSteps.value;
-        // re-render visualObj
-        visualObj = ABCJS.renderAbc("paper", abc, {
-            visualTranspose: transposeBy
-        });
-
-        if(createSynth && synthControl) {
-          // re-set tune stored in SynthController
-          synthControl.setTune(visualObj[0], true, { midiTranspose: transposeBy })
-          .then(function(){
-            console.log('Audio successfully loaded.')
-          }).catch(function(error) {
-            console.warn('Audio problem: ', error);
+          var transposeBy = transposeHalfSteps.value;
+          var doVisual = transposeVisual.checked ? transposeBy : 0;
+          var doAudio = transposeAudio.checked ? transposeBy : 0;
+          // re-render visualObj
+          visualObj = ABCJS.renderAbc("paper", abc, {
+          	visualTranspose: doVisual
           });
-        }
-        else return;  
-      }); 
+          if(createSynth && synthControl) {
+          	// re-set tune stored in SynthController
+          	synthControl.setTune(visualObj[0], true, { midiTranspose: doAudio })
+          		.then(function(){
+          			console.log('Audio successfully loaded.')
+          		}).catch(function(error) {
+          		console.warn('Audio problem: ', error);
+          	});
+          }
+		}
+
+    transposeHalfSteps.addEventListener("change", function() {
+        redraw();
+    });
+    transposeVisual.addEventListener("change", function() {
+	  redraw();
+	});
+    transposeAudio.addEventListener("change", function() {
+      redraw();
+    });
   }
 
-  </script>
+</script>
 </head>
 <body onload="load()">
   <header>
@@ -98,8 +103,10 @@
     <h1>Basic Transposition</h1>
   </header>
   <div class="container">
-	  <p>This transposes both the visual music and the synth.</p>
+    <p>This transposes either/both the visual music and the synth.</p>
     <label>Transpose half-steps: <input class="transpose-half-steps" type="number" min="-24" max="24" step="1" value="0"></label>
+    <label><input type="checkbox" class="transpose-visual" checked>Visual?</label>
+    <label><input type="checkbox" class="transpose-audio" checked>Audio?</label>
     <button id="show-player">Show Audio Player</button>
     <div id="audio"></div>
     <div id="warnings"></div>
