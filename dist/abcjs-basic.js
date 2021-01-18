@@ -343,33 +343,31 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
   self.joggerTimer = null;
 
   self.replaceTarget = function (newTarget) {
-    newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
+    self.noteTimings = newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
     if (newTarget.noteTimings.length === 0) newTarget.setTiming(0, 0);
 
     if (self.lineEndCallback) {
       self.lineEndTimings = getLineEndTimings(newTarget.noteTimings, self.lineEndAnticipation);
     }
 
-    self.noteTimings = newTarget.noteTimings;
+    self.startTime = null;
+    self.currentBeat = 0;
+    self.currentEvent = 0;
+    self.currentLine = 0;
+    self.isPaused = false;
+    self.isRunning = false;
+    self.pausedPercent = null;
+    self.justUnpaused = false;
+    self.newSeekPercent = 0;
+    self.lastTimestamp = 0;
+    if (self.noteTimings.length === 0) return; // noteTimings contains an array of events sorted by time. Events that happen at the same time are in the same element of the array.
+
+    self.millisecondsPerBeat = 1000 / (self.qpm / 60) / self.beatSubdivisions;
+    self.lastMoment = self.noteTimings[self.noteTimings.length - 1].milliseconds;
+    self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
   };
 
   self.replaceTarget(target);
-  if (self.noteTimings.length === 0) return; // noteTimings contains an array of events sorted by time. Events that happen at the same time are in the same element of the array.
-
-  self.noteTimings = target.noteTimings;
-  self.millisecondsPerBeat = 1000 / (self.qpm / 60) / self.beatSubdivisions;
-  self.lastMoment = self.noteTimings[self.noteTimings.length - 1].milliseconds;
-  self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
-  self.startTime = null;
-  self.currentBeat = 0;
-  self.currentEvent = 0;
-  self.currentLine = 0;
-  self.isPaused = false;
-  self.isRunning = false;
-  self.pausedPercent = null;
-  self.justUnpaused = false;
-  self.newSeekPercent = 0;
-  self.lastTimestamp = 0;
 
   self.doTiming = function (timestamp) {
     // This is called 60 times a second, that is, every 16 msecs.
@@ -1638,7 +1636,8 @@ var Tune = function Tune() {
     return voicesArr;
   };
 
-  this.setupEvents = function (startingDelay, timeDivider, startingBpm) {
+  this.setupEvents = function (startingDelay, timeDivider, startingBpm, warp) {
+    if (!warp) warp = 1;
     var timingEvents = [];
     var eventHash = {}; // The time is the number of seconds from the beginning of the piece.
     // The units we are scanning are in notation units (i.e. 0.25 is a quarter note)
@@ -1663,7 +1662,7 @@ var Tune = function Tune() {
 
         if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
           bpm = this.tempoLocations[thisMeasure];
-          timeDivider = this.getBeatLength() * bpm / 60;
+          timeDivider = warp * this.getBeatLength() * bpm / 60;
           tempoDone = thisMeasure;
         }
 
@@ -1698,7 +1697,7 @@ var Tune = function Tune() {
 
               if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
                 bpm = this.tempoLocations[thisMeasure];
-                timeDivider = this.getBeatLength() * bpm / 60;
+                timeDivider = warp * this.getBeatLength() * bpm / 60;
                 tempoDone = thisMeasure;
               }
 
@@ -1731,7 +1730,7 @@ var Tune = function Tune() {
       type: "end",
       milliseconds: voiceTimeMilliseconds
     });
-    this.addUsefulCallbackInfo(timingEvents, bpm);
+    this.addUsefulCallbackInfo(timingEvents, bpm * warp);
     return timingEvents;
   };
 
@@ -1807,12 +1806,11 @@ var Tune = function Tune() {
       return;
     }
 
-    if (!bpm) {
-      var tempo = this.metaText ? this.metaText.tempo : null;
-      bpm = this.getBpm(tempo);
-    } // Calculate the basic midi data. We only care about the qpm variable here.
+    var tempo = this.metaText ? this.metaText.tempo : null;
+    var naturalBpm = this.getBpm(tempo);
+    var warp = 1;
+    if (bpm) warp = bpm / naturalBpm;else bpm = naturalBpm; // Calculate the basic midi data. We only care about the qpm variable here.
     //this.setUpAudio({qpm: bpm});
-
 
     var beatLength = this.getBeatLength();
     var beatsPerSecond = bpm / 60;
@@ -1820,7 +1818,7 @@ var Tune = function Tune() {
     var startingDelay = measureLength / beatLength * measuresOfDelay / beatsPerSecond;
     if (startingDelay) startingDelay -= this.getPickupLength() / beatLength / beatsPerSecond;
     var timeDivider = beatLength * beatsPerSecond;
-    this.noteTimings = this.setupEvents(startingDelay, timeDivider, bpm);
+    this.noteTimings = this.setupEvents(startingDelay, timeDivider, bpm, warp);
     return this.noteTimings;
   };
 
@@ -3672,14 +3670,14 @@ var Parse = function Parse() {
   var getBrokenRhythm = function getBrokenRhythm(line, index) {
     switch (line.charAt(index)) {
       case '>':
-        if (index < line.length - 1 && line.charAt(index + 1) === '>') // double >>
+        if (index < line.length - 2 && line.charAt(index + 1) === '>' && line.charAt(index + 2) === '>') // triple >>>
+          return [3, 1.875, 0.125];else if (index < line.length - 1 && line.charAt(index + 1) === '>') // double >>
           return [2, 1.75, 0.25];else return [1, 1.5, 0.5];
-        break;
 
       case '<':
-        if (index < line.length - 1 && line.charAt(index + 1) === '<') // double <<
+        if (index < line.length - 2 && line.charAt(index + 1) === '<' && line.charAt(index + 2) === '<') // triple <<<
+          return [3, 0.125, 1.875];else if (index < line.length - 1 && line.charAt(index + 1) === '<') // double <<
           return [2, 0.25, 1.75];else return [1, 0.5, 1.5];
-        break;
     }
 
     return null;
@@ -12142,7 +12140,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
         return 0.25;
 
       case 8:
-        return 0.375;
+        if (meter.num % 3 === 0) return 0.375;else return 0.125;
 
       case 16:
         return 0.125;
@@ -12481,11 +12479,22 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
         elem.elem.currentTrackWholeNotes = rt;
       } else {
         if (elem.elem.currentTrackMilliseconds.length === undefined) {
-          elem.elem.currentTrackMilliseconds = [elem.elem.currentTrackMilliseconds, ms];
-          elem.elem.currentTrackWholeNotes = [elem.elem.currentTrackWholeNotes, rt];
+          if (elem.elem.currentTrackMilliseconds !== ms) {
+            elem.elem.currentTrackMilliseconds = [elem.elem.currentTrackMilliseconds, ms];
+            elem.elem.currentTrackWholeNotes = [elem.elem.currentTrackWholeNotes, rt];
+          }
         } else {
-          elem.elem.currentTrackMilliseconds.push(ms);
-          elem.elem.currentTrackWholeNotes.push(rt);
+          // There can be duplicates if there are multiple voices
+          var found = false;
+
+          for (var j = 0; j < elem.elem.currentTrackMilliseconds.length; j++) {
+            if (elem.elem.currentTrackMilliseconds[j] === ms) found = true;
+          }
+
+          if (!found) {
+            elem.elem.currentTrackMilliseconds.push(ms);
+            elem.elem.currentTrackWholeNotes.push(rt);
+          }
         }
       }
     } //var tieAdjustment = 0;
@@ -14585,7 +14594,7 @@ function CreateSynthControl(parent, options) {
   self.setWarp = function (tempo, warp) {
     var el = self.parent.querySelector(".abcjs-midi-tempo");
     el.value = Math.round(warp);
-    self.setTempo(tempo * warp / 100);
+    self.setTempo(tempo);
   };
 
   self.setTempo = function (tempo) {
@@ -14850,7 +14859,7 @@ function CreateSynth() {
       "trombone": 200
     };else self.programOffsets = {};
     var p = params.fadeLength !== undefined ? parseInt(params.fadeLength, 10) : NaN;
-    self.fadeLength = isNaN(p) ? 300 : p;
+    self.fadeLength = isNaN(p) ? 200 : p;
     p = params.noteEnd !== undefined ? parseInt(params.noteEnd, 10) : NaN;
     self.noteEnd = isNaN(p) ? 0 : p;
     self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : options.visualObj ? options.visualObj.millisecondsPerMeasure(options.bpm) : 1000;
@@ -16025,6 +16034,7 @@ function SynthController() {
   self.isLooping = false;
   self.isStarted = false;
   self.isLoaded = false;
+  self.isLoading = false;
 
   self.load = function (selector, cursorControl, visualOptions) {
     if (!visualOptions) visualOptions = {};
@@ -16045,7 +16055,6 @@ function SynthController() {
   };
 
   self.setTune = function (visualObj, userAction, audioParams) {
-    self.isLoaded = false;
     self.visualObj = visualObj;
     self.disable(false);
     self.options = audioParams;
@@ -16067,6 +16076,7 @@ function SynthController() {
   };
 
   self.go = function () {
+    self.isLoading = true;
     var millisecondsPerMeasure = self.visualObj.millisecondsPerMeasure() * 100 / self.warp;
     self.currentTempo = Math.round(self.visualObj.getBeatsPerMeasure() / millisecondsPerMeasure * 60000);
     if (self.control) self.control.setTempo(self.currentTempo);
@@ -16097,6 +16107,7 @@ function SynthController() {
       });
       if (self.cursorControl && self.cursorControl.onReady && typeof self.cursorControl.onReady === 'function') self.cursorControl.onReady(self);
       self.isLoaded = true;
+      self.isLoading = false;
       return Promise.resolve({
         status: "created",
         notesStatus: loadingResponse
@@ -16121,15 +16132,33 @@ function SynthController() {
   };
 
   self.play = function () {
+    return self.runWhenReady(self._play, undefined);
+  };
+
+  function sleep(ms) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, ms);
+    });
+  }
+
+  self.runWhenReady = function (fn, arg1) {
     if (!self.visualObj) return Promise.resolve({
       status: "loading"
     });
 
-    if (!self.isLoaded) {
-      return self.go().then(function () {
-        return self._play();
+    if (self.isLoading) {
+      // Some other promise is waiting for the tune to be loaded, so just wait.
+      return sleep(500).then(function () {
+        if (self.isLoading) return self.runWhenReady(fn, arg1);
+        return fn(arg1);
       });
-    } else return self._play();
+    } else if (!self.isLoaded) {
+      return self.go().then(function () {
+        return fn(arg1);
+      });
+    } else {
+      return fn(arg1);
+    }
   };
 
   self._play = function () {
@@ -16172,24 +16201,18 @@ function SynthController() {
   };
 
   self.randomAccess = function (ev) {
-    if (!self.visualObj) return Promise.resolve({
-      status: "loading"
-    });
-
-    if (!self.isLoaded) {
-      return self.go().then(function () {
-        return self._randomAccess(ev);
-      });
-    } else return self._randomAccess(ev);
+    return self.runWhenReady(self._randomAccess, ev);
   };
 
   self._randomAccess = function (ev) {
     var background = ev.target.classList.contains('abcjs-midi-progress-indicator') ? ev.target.parentNode : ev.target;
     var percent = (ev.x - background.offsetLeft) / background.offsetWidth;
     if (percent < 0) percent = 0;
-    if (percent > 100) percent = 100;
-    self.timer.setProgress(percent);
-    self.midiBuffer.seek(percent);
+    if (percent > 1) percent = 1;
+    self.seek(percent);
+    return Promise.resolve({
+      status: "ok"
+    });
   };
 
   self.seek = function (percent) {
@@ -16209,11 +16232,13 @@ function SynthController() {
         if (self.control) self.control.setWarp(self.currentTempo, self.warp);
 
         if (wasPlaying) {
-          return self.play();
+          return self.play().then(function () {
+            self.seek(startPercent);
+            return Promise.resolve();
+          });
         }
 
-        self.timer.setProgress(startPercent);
-        self.midiBuffer.seek(startPercent);
+        self.seek(startPercent);
         return Promise.resolve();
       });
     }
@@ -19190,6 +19215,8 @@ var EngraverController = function EngraverController(paper, params) {
   this.renderer.controller = this; // TODO-GD needed for highlighting
 
   this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
+  if (params.ariaLabel) this.renderer.ariaLabel = params.ariaLabel;
+  this.renderer.minPadding = params.minPadding ? params.minPadding : 0;
   this.reset();
 };
 
@@ -22482,7 +22509,9 @@ function setPaperSize(renderer, maxwidth, scale, responsive) {
 
   var text = "Sheet Music";
   if (renderer.abctune && renderer.abctune.metaText && renderer.abctune.metaText.title) text += " for \"" + renderer.abctune.metaText.title + '"';
-  renderer.paper.setTitle(text); // for dragging - don't select during drag
+  renderer.paper.setTitle(text);
+  var label = renderer.ariaLabel ? renderer.ariaLabel : text;
+  renderer.paper.setAttribute("aria-label", label); // for dragging - don't select during drag
 
   var styles = ["-webkit-touch-callout: none;", "-webkit-user-select: none;", "-khtml-user-select: none;", "-moz-user-select: none;", "-ms-user-select: none;", "user-select: none;"];
   renderer.paper.insertStyles(".abcjs-dragging-in-progress text, .abcjs-dragging-in-progress tspan {" + styles.join(" ") + "}");
@@ -23671,12 +23700,14 @@ VoiceElement.getSpacingUnits = function (voice) {
 // can't call this function more than once per iteration
 
 
-VoiceElement.layoutOneItem = function (x, spacing, voice) {
+VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding) {
   var child = voice.children[voice.i];
   if (!child) return 0;
   var er = x - voice.minx; // available extrawidth to the left
 
-  var extraWidth = getExtraWidth(child);
+  var pad = voice.durationindex + child.duration > 0 ? minPadding : 0; // only add padding to the items that aren't fixed to the left edge.
+
+  var extraWidth = getExtraWidth(child, pad);
 
   if (er < extraWidth) {
     // shift right by needed amount
@@ -23720,9 +23751,11 @@ VoiceElement.updateIndices = function (voice) {
   }
 };
 
-function getExtraWidth(child) {
+function getExtraWidth(child, minPadding) {
   // space needed to the left of the note
-  return -child.extraw;
+  var padding = 0;
+  if (child.type === 'note' || child.type === 'bar') padding = minPadding;
+  return -child.extraw + padding;
 }
 
 function getMinWidth(child) {
@@ -24511,7 +24544,7 @@ var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staff
     if (debug) console.log("currentduration: ", currentduration, spacingunits, minspace);
 
     for (i = 0; i < currentvoices.length; i++) {
-      var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, currentvoices[i]);
+      var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, currentvoices[i], renderer.minPadding);
       var dx = voicechildx - x;
 
       if (dx > 0) {
@@ -25430,6 +25463,10 @@ Svg.prototype.setResponsiveWidth = function (w, h) {
 Svg.prototype.setSize = function (w, h) {
   this.svg.setAttribute('width', w);
   this.svg.setAttribute('height', h);
+};
+
+Svg.prototype.setAttribute = function (attr, value) {
+  this.svg.setAttribute(attr, value);
 };
 
 Svg.prototype.setScale = function (scale) {

@@ -1,3 +1,33 @@
+# Version 6.0.0-beta.26
+
+## Build
+
+* Added types for TypeScript for `renderAbc` function
+
+* Change midi.js to a peerDependency.
+
+## Accessibility
+
+* Add foregroundColor parameter and set the default to currentColor (for high contrast)
+
+* Add option to set the aria-label; by default aria-label is set to the title.
+
+## Bugs
+
+* Fixed some regressions in changing the audio tempo.
+
+* Fix some timing and crashing issues on synth.
+
+* Fix the currentTrackMilliseconds for meters with eighth note denominators that are not compound.
+
+## Features
+
+* Add support for triple broken rhythm symbols `>>>` and `<<<`
+
+* Add `minPadding` parameter to keep the notes from getting too close together on crowded lines.
+
+* Change the fadeLength default to 200ms
+
 # Version 6.0.0-beta.25
 
 ## Bugs
