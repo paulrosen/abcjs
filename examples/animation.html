@@ -1,121 +1,154 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
-  <link rel="stylesheet" href="examples-styles.css"/>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+	<link rel="stylesheet" href="examples-styles.css"/>
 
-  <title>abcjs animation</title>
-  <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+	<title>abcjs animation</title>
+	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
 
-  <style media="screen" type="text/css">
-    .cursor-editor {
-      width: 500px;
-      margin-top: 12px;
-    }
-
-    .cursor-nav {
-      margin-bottom: 12px;
-    }
-
-    .paper .abcjs-cursor {
-      background-color: rgba(196,196,196,.5);
-    }
-  </style>
+	<style media="screen" type="text/css">
+       .abcjs-cursor {
+            stroke: blue;
+        }
+	   path {
+		   transition: opacity 1s;
+	   }
+	   .hidden {
+		   opacity: 0;
+	   }
+	   .color {
+		   stroke: red;
+		   fill: red;
+	   }
+	</style>
 </head>
 
-<body>
-  <header>
-    <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
-    <h1>Animation</h1>
-  </header>
+<body onload="load()">
+<header>
+	<img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+	<h1>Animation</h1>
+</header>
 <div class="container">
-  <div class="cursor-nav">
-    <div>
-      <button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true, "showCursor": true }'>
-        Animate</button> { hideFinishedMeasures: true, showCursor: true }
-    </div>
-    <div>
-      <button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true, "showCursor": true, "bpm": 180 }'>
-        Animate</button> { hideFinishedMeasures: true, showCursor: true, bpm: 180 }
-    </div>
-    <div>
-      <button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true, "showCursor": true, "bpm": 60 }'>
-        Animate</button> { hideFinishedMeasures: true, showCursor: true, bpm: 60 }
-    </div>
-    <div>
-      <button class="do-animation" data-paper="#paper0" data-params='{ "hideFinishedMeasures": true }'>
-        Animate</button> { hideFinishedMeasures: true }
-    </div>
-    <div>
-      <button class="do-animation" data-paper="#paper0" data-params='{ "showCursor": true }'>
-        Animate</button> { showCursor: true }
-    </div>
-    <div>
-      <button class='pause' disabled>
-        Pause</button>
-    </div>
-  </div>
-  <div id="paper0" class="paper"></div>
-  <div class="cursor-editor">
-  <textarea name='abc' id='abc' cols="80" rows="8" spellcheck="false">
-X:1
-T:Animation Demo
-M:4/4
-L:1/16
-Q:1/4=112
-V:V0 clef=treble
-K:C clef=treble stafflines=5
-[V: V0] G4 c4 G4 F4-|F4 G4 G4 c4-|c4 z4 [Bd]4 c4|c4 B4 G8|
-G4 F4 E8|D4 E4 C8-|C8 F8|E4 E4 C8|]
-  </textarea>
-  </div>
-  <div id="warnings"></div>
+	<div class="cursor-nav">
+		<div>
+			<label><input type="checkbox" id="hide-finished-measures" checked>Hide Finished Measures</label>
+			<label><input type="checkbox" id="show-cursor" checked>Show Cursor</label>
+			<label><input type="checkbox" id="color-note" checked>Color Note</label>
+			<button id="do-animation">Start</button>
+		</div>
+	</div>
+	<div id="paper" class="paper"></div>
+	<div id="warnings"></div>
 </div>
 
-  <script>
-    var abc_editor = new window.ABCJS.Editor(
-      "abc", {
-        paper_id: "paper0",
-        warnings_id:"warnings",
-        abcjsParams: {
-          add_classes: true
-        }
-      }
-    );
+<script>
+	var abcString = "T: Cooley's\n" +
+		"M: 4/4\n" +
+		"L: 1/8\n" +
+		"R: reel\n" +
+		"K: Emin\n" +
+		"|:EBBA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
+		"EBBA B2 EB|B2 AB defg|afe^c dBAF|1 DEFD E2 D2:|2 DEFD E2 gf||\n" +
+		"|:eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
+		"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2 gf:|";
 
-    var buttons = document.querySelectorAll("BUTTON.do-animation");
+	function load() {
+		var visualObj = ABCJS.renderAbc("paper", abcString, {add_classes: true});
+		var timingCallbacks = new ABCJS.TimingCallbacks(visualObj[0], {
+			beatCallback: beatCallback,
+			eventCallback: eventCallback,
+		});
 
-    var button_onclick = function () {
-      var params = this.attributes["data-params"].value;
-      params = JSON.parse(params);
+		function createCursor() {
+			var svg = document.querySelector("#paper svg");
+			var cursor = document.createElementNS("http://www.w3.org/2000/svg", "line");
+			cursor.setAttribute("class", "abcjs-cursor");
+			cursor.setAttributeNS(null, 'x1', 0);
+			cursor.setAttributeNS(null, 'y1', 0);
+			cursor.setAttributeNS(null, 'x2', 0);
+			cursor.setAttributeNS(null, 'y2', 0);
+			svg.appendChild(cursor);
+			return cursor;
+		}
+		var cursor = createCursor();
 
-      var paperSelector = this.attributes["data-paper"].value;
-      var paper = document.querySelectorAll(paperSelector)[0];
+		var button = document.getElementById("do-animation");
+		button.addEventListener("click", function() { startStop(); });
+		var hideFinishedMeasures = document.getElementById("hide-finished-measures");
+		var showCursor = document.getElementById("show-cursor");
+		var colorNote = document.getElementById("color-note");
 
-      ABCJS.startAnimation(paper, abc_editor.tunes[0], params);
-      pauseButton.disabled = false;
-    };
+		var isRunning = false;
+		var buttonText = ["Start", "Stop"];
 
-    for (var i = 0; i < buttons.length; i++) {
-      buttons[i].addEventListener('click', button_onclick, false);
-    }
+		var pauseButtonControl = function () {
+			isRunning = !isRunning;
+			button.innerText = buttonText[isRunning ? 1 : 0];
+		};
 
-    var pauseButton = document.querySelectorAll("BUTTON.pause");
-    pauseButton = pauseButton[0];
+		var startStop = function() {
+			isRunning = !isRunning;
+			button.innerText = buttonText[isRunning ? 1 : 0];
+			if (isRunning)
+				timingCallbacks.start();
+			else
+				timingCallbacks.stop();
+		}
 
-    var isPaused = false;
-    var pauseText = ["Pause", "Resume"];
+		var restart = function() {
+			timingCallbacks.start();
+		}
 
-    var pause = function () {
-      isPaused = !isPaused;
-      pauseButton.innerText = pauseText[isPaused ? 1 : 0];
-      ABCJS.pauseAnimation(isPaused);
-    };
+		function beatCallback(currentBeat,totalBeats,lastMoment,position, debugInfo) {
+			if (showCursor.checked) {
+				cursor.setAttribute("x1", position.left - 2);
+				cursor.setAttribute("x2", position.left - 2);
+				cursor.setAttribute("y1", position.top);
+				cursor.setAttribute("y2", position.top + position.height);
+			}
+		}
 
-    pauseButton.addEventListener('click', pause, false);
-  </script>
+		function hideMeasure(num) {
+			var els = document.querySelectorAll(".abcjs-mm"+num);
+			for (var i = 0; i < els.length; i++)
+				els[i].classList.add("hidden")
+		}
+
+		var lastEls = [];
+		function colorElements(els) {
+			var i;
+			var j;
+			for (i = 0; i < lastEls.length; i++) {
+				for (j = 0; j < lastEls[i].length; j++) {
+					lastEls[i][j].classList.remove("color");
+				}
+			}
+			for (i = 0; i < els.length; i++) {
+				for (j = 0; j < els[i].length; j++) {
+					els[i][j].classList.add("color");
+				}
+			}
+			lastEls = els;
+		}
+
+		function eventCallback(ev) {
+			if (!ev) {
+				pauseButtonControl();
+				return;
+			}
+			if (ev.measureStart && hideFinishedMeasures.checked) {
+				hideMeasure(ev.measureNumber);
+			}
+			if (colorNote.checked) {
+				colorElements(ev.elements);
+			}
+		}
+	}
+
+</script>
 </body>
 </html>
