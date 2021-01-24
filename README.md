@@ -8,6 +8,19 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
+## Rename the default branch to `main`
+
+The default branch is now named `main`. If you have cloned this repo previously, you can change it with:
+```shell
+git branch -m master main
+git fetch origin
+git branch -u origin/main main
+```
+
+## Historical abcjs Packages 6.0.0.27
+
+Old versions of abcjs have been removed from this repo. If you are looking for them, you can find them here: https://github.com/paulrosen/historical-abcjs-versions
+
 ## Breaking change when using midi.js for 6.0.0.26
 
 The midi.js package is no longer a direct dependency, it is now a peerDependency so it is not included by default. That way, users who aren't using the old style of sound generation won't need to load the package. If you are using the old style that uses midi.js, include this line in your `package.json` file:
