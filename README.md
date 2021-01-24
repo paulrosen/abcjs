@@ -8,6 +8,15 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
+## Rename the default branch to `main`
+
+The default branch is now named `main`. If you have cloned this repo previously, you can change it with:
+```shell
+git branch -m master main
+git fetch origin
+git branch -u origin/main main
+```
+
 ## Historical abcjs Packages 6.0.0.27
 
 Old versions of abcjs have been removed from this repo. If you are looking for them, you can find them here: https://github.com/paulrosen/historical-abcjs-versions
