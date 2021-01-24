@@ -19,6 +19,16 @@
 			border: 2px solid red;
 			padding: 10px;
 		}
+		.row {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+		}
+		.status {
+			padding: 2px 10px 10px 10px;
+			background-color: #f0f0f0;
+			width:250px;
+		}
 	</style>
 
 	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
@@ -45,10 +55,12 @@
 			var startAudioButton = document.querySelector(".activate-audio");
 			var stopAudioButton = document.querySelector(".stop-audio");
 			var explanationDiv = document.querySelector(".suspend-explanation");
+			var statusDiv = document.querySelector(".status");
 
 			startAudioButton.addEventListener("click", function() {
 				startAudioButton.setAttribute("style", "display:none;");
 				explanationDiv.setAttribute("style", "opacity: 0;");
+				statusDiv.innerHTML = "<div>Testing browser</div>";
 				if (ABCJS.synth.supportsAudio()) {
 					stopAudioButton.setAttribute("style", "");
 
@@ -62,6 +74,7 @@
 						navigator.msAudioContext;
 					var audioContext = new window.AudioContext();
 					audioContext.resume().then(function () {
+						statusDiv.innerHTML += "<div>AudioContext resumed</div>";
 						// In theory the AC shouldn't start suspended because it is being initialized in a click handler, but iOS seems to anyway.
 
 						// This does a bare minimum so this object could be created in advance, or whenever convenient.
@@ -73,12 +86,15 @@
 							audioContext: audioContext,
 							millisecondsPerMeasure: visualObj.millisecondsPerMeasure()
 						}).then(function (response) {
+							statusDiv.innerHTML += "<div>Audio object has been initialized</div>";
 							// console.log(response); // this contains the list of notes that were loaded.
 							// midiBuffer.prime actually builds the output buffer.
 							return midiBuffer.prime();
 						}).then(function () {
+							statusDiv.innerHTML += "<div>Audio object has been primed</div>";
 							// At this point, everything slow has happened. midiBuffer.start will return very quickly and will start playing very quickly without lag.
 							midiBuffer.start();
+							statusDiv.innerHTML += "<div>Audio started</div>";
 							return Promise.resolve();
 						}).catch(function (error) {
 							if (error.status === "NotSupported") {
@@ -107,18 +123,24 @@
 </head>
 <body onload="load()">
 <main>
-  <header">
+  <header>
     <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
     <h1>Basic Synth</h1>
   </header>
-  <div class="container">
-    <div id="paper"></div>
-    <p class="suspend-explanation">Browsers won't allow audio to work unless the audio is started in response to a user action. This prevents auto-playing web sites. Therefore, the
-      following button is needed to do the initialization:</p>
-    <button class="activate-audio">Activate Audio Context And Play</button>
-    <button class="stop-audio" style="display:none;">Stop Audio</button>
-    <div class='audio-error' style="display:none;">Audio is not supported in this browser.</div>
-  </div>
+	<div class="container">
+		<div id="paper"></div>
+		<p class="suspend-explanation">Browsers won't allow audio to work unless the audio is started in response to a
+			user action. This prevents auto-playing web sites. Therefore, the
+			following button is needed to do the initialization:</p>
+		<div class="row">
+			<div>
+				<button class="activate-audio">Activate Audio Context And Play</button>
+				<button class="stop-audio" style="display:none;">Stop Audio</button>
+				<div class='audio-error' style="display:none;">Audio is not supported in this browser.</div>
+			</div>
+			<div class="status"></div>
+		</div>
+	</div>
 </main>
 </body>
 </html>
