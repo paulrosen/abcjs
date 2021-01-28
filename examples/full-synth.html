@@ -226,6 +226,7 @@
 		}
 
 		function setTune(userAction) {
+			synthControl.disable(true);
 			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions)[0];
 			var midi = ABCJS.synth.getMidiFile(abc[currentTune]);
 			var midiButton = document.querySelector(".midi");
