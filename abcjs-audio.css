@@ -179,3 +179,7 @@
 .abcjs-large .abcjs-tempo-wrapper {
 	font-size: 20px;
 }
+
+.abcjs-css-warning {
+	display: none;
+}
