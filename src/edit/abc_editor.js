@@ -208,11 +208,12 @@ Editor.prototype.redrawMidi = function() {
 		window.dispatchEvent(event);
 	}
 	if (this.synth) {
+		var userAction = this.synth.synthControl; // Can't really tell if there was a user action before drawing, but we assume that if the synthControl was created already there was a user action.
 		if (!this.synth.synthControl) {
 			this.synth.synthControl = new SynthController();
 			this.synth.synthControl.load(this.synth.el, this.synth.cursorControl, this.synth.options);
 		}
-		this.synth.synthControl.setTune(this.tunes[0], false, this.synth.options);
+		this.synth.synthControl.setTune(this.tunes[0], userAction, this.synth.options);
 	}
 };
 
