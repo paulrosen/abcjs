@@ -1,3 +1,45 @@
+# Version 6.0.0-beta.27
+
+## Bugs
+
+* Fix regression bug with setting the tempo when there is no Q: in the ABC string.
+
+* Fix measure class numbering when the line starts with a bar line.
+
+* Fix slur placement over a line break when there is more than one voice.
+
+* Recreate audio when changing the tune in the editor.
+
+* Fix wrapping crash when the first line in the tune is a subtitle.
+
+* Fix synchronization of timing callbacks after changing the tempo.
+
+* Fix regression bug when creating audio buffer in Safari.
+
+* If an audio context is passed in, always use it.
+
+## Documentation
+
+* Add warning if audio CSS is missing.
+
+* Improve the animation demo.
+
+* Add warning if a nonsensical rhythm is encountered.
+
+* Add warning if audio CSS is missing.
+
+* Change default branch to main
+
+* Add links and info for old versions.
+
+* Redo the animation demo.
+
+* Add responsive demo.
+
+* Change alt text for example's logo
+
+* Some tweaks to transposition demo.
+
 # Version 6.0.0-beta.26
 
 ## Build

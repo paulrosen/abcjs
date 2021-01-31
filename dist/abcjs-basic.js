@@ -372,7 +372,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
   self.doTiming = function (timestamp) {
     // This is called 60 times a second, that is, every 16 msecs.
     //console.log("doTiming", timestamp, timestamp-self.lastTimestamp);
-    if (self.lastTimestamp === timestamp) return; // If there are multiple seeks or other calls, then we can easily get multiple callbacks for the same instance.
+    if (self.lastTimestamp === timestamp) return; // If there are multiple seeks or other calls, then we can easily get multiple callbacks for the same instant.
 
     self.lastTimestamp = timestamp;
 
@@ -553,7 +553,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
 
     if (offsetPercent) {
       self.setProgress(offsetPercent);
-    } else if (self.pausedPercent) {
+    } else if (self.pausedPercent !== null) {
       var now = performance.now();
       var currentTime = self.lastMoment * self.pausedPercent;
       self.startTime = now - currentTime;
@@ -595,10 +595,11 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     // the effect of this function is to move startTime so that the callbacks happen correctly for the new seek.
     if (percent < 0) percent = 0;
     if (percent > 1) percent = 1;
-    if (self.pausedPercent) self.pausedPercent = percent;
+    if (!self.isRunning) self.pausedPercent = percent;
     var now = performance.now();
     var currentTime = self.lastMoment * percent;
     self.startTime = now - currentTime;
+    var oldEvent = self.currentEvent;
     self.currentEvent = 0;
 
     while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
@@ -617,7 +618,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
     if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
       self.doBeatCallback(self.startTime + currentTime);
-    if (self.eventCallback && self.currentEvent > 0 && self.noteTimings[self.currentEvent - 1].type === 'event') self.eventCallback(self.noteTimings[self.currentEvent - 1]);
+    if (self.eventCallback && self.currentEvent >= 0 && self.noteTimings[self.currentEvent].type === 'event') self.eventCallback(self.noteTimings[self.currentEvent]);
     if (self.lineEndCallback) self.lineEndCallback(self.lineEndTimings[self.currentLine], self.noteTimings[self.currentEvent], {
       line: self.currentLine,
       endTimings: self.lineEndTimings
@@ -1809,8 +1810,12 @@ var Tune = function Tune() {
     var tempo = this.metaText ? this.metaText.tempo : null;
     var naturalBpm = this.getBpm(tempo);
     var warp = 1;
-    if (bpm) warp = bpm / naturalBpm;else bpm = naturalBpm; // Calculate the basic midi data. We only care about the qpm variable here.
+
+    if (bpm) {
+      if (tempo) warp = bpm / naturalBpm;
+    } else bpm = naturalBpm; // Calculate the basic midi data. We only care about the qpm variable here.
     //this.setUpAudio({qpm: bpm});
+
 
     var beatLength = this.getBeatLength();
     var beatsPerSecond = bpm / 60;
@@ -2197,12 +2202,14 @@ Editor.prototype.redrawMidi = function () {
   }
 
   if (this.synth) {
+    var userAction = this.synth.synthControl; // Can't really tell if there was a user action before drawing, but we assume that if the synthControl was created already there was a user action.
+
     if (!this.synth.synthControl) {
       this.synth.synthControl = new SynthController();
       this.synth.synthControl.load(this.synth.el, this.synth.cursorControl, this.synth.options);
     }
 
-    this.synth.synthControl.setTune(this.tunes[0], false, this.synth.options);
+    this.synth.synthControl.setTune(this.tunes[0], userAction, this.synth.options);
   }
 };
 
@@ -4693,6 +4700,15 @@ var Parse = function Parse() {
               if (el.rest && el.rest.type === 'rest' && el.duration === 1 && durationOfMeasure(multilineVars) <= 1) {
                 el.rest.type = 'whole';
                 el.duration = durationOfMeasure(multilineVars);
+              } // Create a warning if this is not a displayable duration.
+              // The first item on a line is a regular note value, each item after that represents a dot placed after the previous note.
+              // Only durations less than a whole note are tested because whole note durations have some tricky rules.
+
+
+              var durations = [0.5, 0.75, 0.875, 0.9375, 0.96875, 0.984375, 0.25, 0.375, 0.4375, 0.46875, 0.484375, 0.4921875, 0.125, 0.1875, 0.21875, 0.234375, 0.2421875, 0.24609375, 0.0625, 0.09375, 0.109375, 0.1171875, 0.12109375, 0.123046875, 0.03125, 0.046875, 0.0546875, 0.05859375, 0.060546875, 0.0615234375, 0.015625, 0.0234375, 0.02734375, 0.029296875, 0.0302734375, 0.03076171875];
+
+              if (el.duration < 1 && durations.indexOf(el.duration) === -1 && el.duration !== 0) {
+                if (!el.rest || el.rest.type !== 'spacer') addWarning("Duration not representable: " + line.substring(startI, i));
               }
 
               multilineVars.addFormattingOptions(el, tune.formatting, 'note');
@@ -10443,44 +10459,45 @@ var TuneBuilder = function TuneBuilder(tune) {
     while (this.resolveOverlays()) {// keep resolving overlays as long as any are found.
     }
 
-    function cleanUpSlursInLine(line) {
+    function cleanUpSlursInLine(line, voiceNum) {
+      if (!currSlur[voiceNum]) currSlur[voiceNum] = [];
       var x; //			var lyr = null;	// TODO-PER: debugging.
 
       var addEndSlur = function addEndSlur(obj, num, chordPos) {
-        if (currSlur[chordPos] === undefined) {
+        if (currSlur[voiceNum][chordPos] === undefined) {
           // There isn't an exact match for note position, but we'll take any other open slur.
-          for (x = 0; x < currSlur.length; x++) {
-            if (currSlur[x] !== undefined) {
+          for (x = 0; x < currSlur[voiceNum].length; x++) {
+            if (currSlur[voiceNum][x] !== undefined) {
               chordPos = x;
               break;
             }
           }
 
-          if (currSlur[chordPos] === undefined) {
+          if (currSlur[voiceNum][chordPos] === undefined) {
             var offNum = chordPos * 100 + 1;
             parseCommon.each(obj.endSlur, function (x) {
               if (offNum === x) --offNum;
             });
-            currSlur[chordPos] = [offNum];
+            currSlur[voiceNum][chordPos] = [offNum];
           }
         }
 
         var slurNum;
 
         for (var i = 0; i < num; i++) {
-          slurNum = currSlur[chordPos].pop();
+          slurNum = currSlur[voiceNum][chordPos].pop();
           obj.endSlur.push(slurNum); //					lyr.syllable += '<' + slurNum;	// TODO-PER: debugging
         }
 
-        if (currSlur[chordPos].length === 0) delete currSlur[chordPos];
+        if (currSlur[voiceNum][chordPos].length === 0) delete currSlur[voiceNum][chordPos];
         return slurNum;
       };
 
       var addStartSlur = function addStartSlur(obj, num, chordPos, usedNums) {
         obj.startSlur = [];
 
-        if (currSlur[chordPos] === undefined) {
-          currSlur[chordPos] = [];
+        if (currSlur[voiceNum][chordPos] === undefined) {
+          currSlur[voiceNum][chordPos] = [];
         }
 
         var nextNum = chordPos * 100 + 1;
@@ -10498,13 +10515,13 @@ var TuneBuilder = function TuneBuilder(tune) {
             });
           }
 
-          parseCommon.each(currSlur[chordPos], function (x) {
+          parseCommon.each(currSlur[voiceNum][chordPos], function (x) {
             if (nextNum === x) ++nextNum;
           });
-          parseCommon.each(currSlur[chordPos], function (x) {
+          parseCommon.each(currSlur[voiceNum][chordPos], function (x) {
             if (nextNum === x) ++nextNum;
           });
-          currSlur[chordPos].push(nextNum);
+          currSlur[voiceNum][chordPos].push(nextNum);
           obj.startSlur.push({
             label: nextNum
           });
@@ -10582,7 +10599,7 @@ var TuneBuilder = function TuneBuilder(tune) {
             if (el.gracenotes && el.pitches[0].endSlur && el.pitches[0].endSlur[0] === 100 && el.pitches[0].startSlur) {
               if (el.gracenotes[0].endSlur) el.gracenotes[0].endSlur.push(el.pitches[0].startSlur[0].label);else el.gracenotes[0].endSlur = [el.pitches[0].startSlur[0].label];
               if (el.pitches[0].endSlur.length === 1) delete el.pitches[0].endSlur;else if (el.pitches[0].endSlur[0] === 100) el.pitches[0].endSlur.shift();else if (el.pitches[0].endSlur[el.pitches[0].endSlur.length - 1] === 100) el.pitches[0].endSlur.pop();
-              if (currSlur[1].length === 1) delete currSlur[1];else currSlur[1].pop();
+              if (currSlur[voiceNum][1].length === 1) delete currSlur[voiceNum][1];else currSlur[voiceNum][1].pop();
             }
           }
         }
@@ -10665,7 +10682,7 @@ var TuneBuilder = function TuneBuilder(tune) {
 
           for (tune.voiceNum = 0; tune.voiceNum < staff[tune.staffNum].voices.length; tune.voiceNum++) {
             var voice = staff[tune.staffNum].voices[tune.voiceNum];
-            cleanUpSlursInLine(voice);
+            cleanUpSlursInLine(voice, tune.voiceNum);
 
             for (var j = 0; j < voice.length; j++) {
               if (voice[j].el_type === 'clef') fixClefPlacement(voice[j]);
@@ -11309,6 +11326,7 @@ function findLineBreaks(lines, lineBreakArray) {
   var lineBreakIndexes = [];
   var lbai = 0;
   var lineCounter = 0;
+  var outputLine = 0;
 
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i];
@@ -11322,7 +11340,7 @@ function findLineBreaks(lines, lineBreakArray) {
         var staff = line.staff[j];
 
         for (var k = 0; k < staff.voices.length; k++) {
-          var outputLine = lineStart;
+          outputLine = lineStart;
           var measureNumber = 0;
           var lbi = 0;
           var voice = staff.voices[k];
@@ -14698,6 +14716,7 @@ function buildDom(parent, options) {
     html += '<span class="abcjs-tempo-wrapper"><label><input class="abcjs-midi-tempo" type="number" min="1" max="300" value="100" title="' + warpTitle + '" aria-label="' + warpAria + '">%</label><span>&nbsp;(<span class="abcjs-midi-current-tempo"></span> ' + bpm + ')</span></span>\n';
   }
 
+  html += '<div class="abcjs-css-warning" style="font-size: 12px;color:red;border: 1px solid red;text-align: center;width: 300px;margin-top: 4px;font-weight: bold;border-radius: 4px;">CSS required: load abcjs-audio.css</div>';
   html += '</div>\n';
   parent.innerHTML = html;
 }
@@ -15536,7 +15555,7 @@ var getNote = function getNote(url, instrument, name, audioContext) {
           var promise = audioContext.decodeAudioData(this.response, onSuccess, onFailure); // older browsers only have the callback. Newer ones will report an unhandled
           // rejection if catch isn't handled so we need both. We don't need to report it twice, though.
 
-          if (promise["catch"]) promise["catch"](function () {});
+          if (promise && promise["catch"]) promise["catch"](function () {});
         } catch (error) {
           reject(error);
         }
@@ -15744,7 +15763,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
   if (noteBuffer === "error" || noteBuffer === "pending") {
     // If the note isn't available, just leave a blank spot
     // If the note is still pending by now that means an error happened when loading. There was probably a timeout.
-    console.log("Didn't load note: " + sound.instrument + " " + noteName);
+    console.log("Didn't load note", sound.instrument, noteName, noteBuffer);
     return;
   } // create audio buffer
 
@@ -15908,15 +15927,14 @@ module.exports = playEvent;
 // If you call it with no parameters, then an AudioContext is created and stored.
 // If you call it with a parameter, that is used as an already created AudioContext.
 function registerAudioContext(ac) {
-  if (!window.abcjsAudioContext) {
-    if (!ac) {
-      ac = window.AudioContext || window.webkitAudioContext || navigator.mozAudioContext || navigator.msAudioContext;
-      ac = new ac();
+  // If one is passed in, that is the one to use even if there was already one created.
+  if (ac) window.abcjsAudioContext = ac;else {
+    // no audio context passed in, so create it unless there is already one from before.
+    if (!window.abcjsAudioContext) {
+      var AudioContext = window.AudioContext || window.webkitAudioContext;
+      window.abcjsAudioContext = new AudioContext();
     }
-
-    window.abcjsAudioContext = ac;
   }
-
   return window.abcjsAudioContext.state !== "suspended";
 }
 
@@ -23359,9 +23377,11 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 
   var i;
   var child;
+  var foundNote = false;
 
   for (i = 0; i < params.children.length; i++) {
     child = params.children[i];
+    if (child.type === 'note') foundNote = true;
     var justInitializedMeasureNumber = false;
 
     if (child.type !== 'staff-extra' && !renderer.controller.classes.isInMeasure()) {
@@ -23379,7 +23399,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 
     if (child.type === 'note' || isNonSpacerRest(child)) renderer.controller.classes.incrNote();
 
-    if (child.type === 'bar' && !justInitializedMeasureNumber) {
+    if (child.type === 'bar' && !justInitializedMeasureNumber && foundNote) {
       renderer.controller.classes.incrMeasure();
     }
   }
