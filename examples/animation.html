@@ -17,7 +17,7 @@
 	   path {
 		   transition: opacity 1s;
 	   }
-	   .hidden {
+	   .abcjs-note.hidden, .abcjs-beam-elem.hidden {
 		   opacity: 0;
 	   }
 	   .color {
@@ -104,18 +104,38 @@
 		}
 
 		function beatCallback(currentBeat,totalBeats,lastMoment,position, debugInfo) {
-			if (showCursor.checked) {
-				cursor.setAttribute("x1", position.left - 2);
-				cursor.setAttribute("x2", position.left - 2);
-				cursor.setAttribute("y1", position.top);
-				cursor.setAttribute("y2", position.top + position.height);
+			var x1, x2, y1, y2;
+			if (currentBeat === totalBeats) {
+				showAllMeasures();
+				x1 = 0;
+				x2 = 0;
+				y1 = 0;
+				y2 = 0;
+			} else {
+				x1 = position.left - 2;
+				x2 = position.left - 2;
+				y1 = position.top;
+				y2 = position.top + position.height;
 			}
+			if (showCursor.checked) {
+				cursor.setAttribute("x1", x1);
+				cursor.setAttribute("x2", x2);
+				cursor.setAttribute("y1", y1);
+				cursor.setAttribute("y2", y2);
+			}
+			if (colorNote.checked)
+				colorElements([]);
 		}
 
 		function hideMeasure(num) {
 			var els = document.querySelectorAll(".abcjs-mm"+num);
 			for (var i = 0; i < els.length; i++)
 				els[i].classList.add("hidden")
+		}
+		function showAllMeasures() {
+			var els = document.querySelectorAll(".hidden");
+			for (var i = 0; i < els.length; i++)
+				els[i].classList.remove("hidden")
 		}
 
 		var lastEls = [];
@@ -135,13 +155,18 @@
 			lastEls = els;
 		}
 
+		var lastMeasure = -1;
 		function eventCallback(ev) {
 			if (!ev) {
 				pauseButtonControl();
 				return;
 			}
 			if (ev.measureStart && hideFinishedMeasures.checked) {
-				hideMeasure(ev.measureNumber);
+				if (lastMeasure > ev.measureNumber)
+					showAllMeasures();
+				else if (lastMeasure >= 0)
+					hideMeasure(lastMeasure);
+				lastMeasure = ev.measureNumber;
 			}
 			if (colorNote.checked) {
 				colorElements(ev.elements);
