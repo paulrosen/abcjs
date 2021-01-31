@@ -54,6 +54,8 @@ All new work should be done in the `dev` branch.
 * The title should be "Version 3.0.0 release"
 * The description should be a couple sentences about what the release is.
 
+[_] Add the binary to https://github.com/paulrosen/historical-abcjs-versions.
+
 [_] Read through all the issues to see if any should be closed.
 
 [_] Update https://abcjs.net and the examples on github.

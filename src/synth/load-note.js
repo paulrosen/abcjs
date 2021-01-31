@@ -63,7 +63,7 @@ var getNote = function(url, instrument, name, audioContext) {
 					var promise = audioContext.decodeAudioData(this.response, onSuccess, onFailure);
 					// older browsers only have the callback. Newer ones will report an unhandled
 					// rejection if catch isn't handled so we need both. We don't need to report it twice, though.
-					if (promise.catch)
+					if (promise && promise.catch)
 						promise.catch(function () {});
 				} catch(error) {
 					reject(error);

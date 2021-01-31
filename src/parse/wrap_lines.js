@@ -98,6 +98,7 @@ function findLineBreaks(lines, lineBreakArray) {
 	var lineBreakIndexes = [];
 	var lbai = 0;
 	var lineCounter = 0;
+	var outputLine = 0;
 	for (var i = 0; i < lines.length; i++) {
 		var line = lines[i];
 		if (line.staff) {
@@ -107,7 +108,7 @@ function findLineBreaks(lines, lineBreakArray) {
 			for (var j = 0; j < line.staff.length; j++) {
 				var staff = line.staff[j];
 				for (var k = 0; k < staff.voices.length; k++) {
-					var outputLine = lineStart;
+					outputLine = lineStart;
 					var measureNumber = 0;
 					var lbi = 0;
 					var voice = staff.voices[k];

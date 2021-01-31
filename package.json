@@ -1,6 +1,6 @@
 {
   "name": "abcjs",
-  "version": "6.0.0-beta.26",
+  "version": "6.0.0-beta.27",
   "description": "Renderer for abc music notation",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -11,8 +11,8 @@
     "build:basic-min": "npm run webpack -- --env.mode production --env.type basic",
     "build:plugin": "npm run webpack -- --env.mode production --env.type plugin",
     "build:midi": "npm run webpack -- --env.mode production --env.type midi",
-    "fix-versions": "./fix-versions.sh 6.0.0-beta.26",
-    "copy-output": "./build-copy.sh 6.0.0-beta.26",
+    "fix-versions": "./fix-versions.sh 6.0.0-beta.27",
+    "copy-output": "./build-copy.sh 6.0.0-beta.27",
     "test": "mocha 'tests/**/*.js'",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",

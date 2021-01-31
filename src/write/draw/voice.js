@@ -18,8 +18,11 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 
 	var i;
 	var child;
+	var foundNote = false;
 	for (i=0; i < params.children.length; i++) {
 		child = params.children[i];
+		if (child.type === 'note')
+			foundNote = true;
 		var justInitializedMeasureNumber = false;
 		if (child.type !== 'staff-extra' && !renderer.controller.classes.isInMeasure()) {
 			renderer.controller.classes.startMeasure();
@@ -34,7 +37,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 		}
 		if (child.type === 'note' || isNonSpacerRest(child))
 			renderer.controller.classes.incrNote();
-		if (child.type === 'bar' && !justInitializedMeasureNumber) {
+		if (child.type === 'bar' && !justInitializedMeasureNumber && foundNote) {
 			renderer.controller.classes.incrMeasure();
 		}
 	}

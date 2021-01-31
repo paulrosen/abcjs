@@ -1620,6 +1620,22 @@ var Parse = function() {
 								el.duration = durationOfMeasure(multilineVars);
 							}
 
+							// Create a warning if this is not a displayable duration.
+							// The first item on a line is a regular note value, each item after that represents a dot placed after the previous note.
+							// Only durations less than a whole note are tested because whole note durations have some tricky rules.
+							var durations = [
+								0.5, 0.75, 0.875, 0.9375, 0.96875, 0.984375,
+								0.25, 0.375, 0.4375, 0.46875, 0.484375, 0.4921875,
+								0.125, 0.1875, 0.21875, 0.234375, 0.2421875, 0.24609375,
+								0.0625, 0.09375, 0.109375, 0.1171875, 0.12109375, 0.123046875,
+								0.03125, 0.046875, 0.0546875, 0.05859375, 0.060546875, 0.0615234375,
+								0.015625, 0.0234375, 0.02734375, 0.029296875, 0.0302734375, 0.03076171875,
+							];
+							if (el.duration < 1 && durations.indexOf(el.duration) === -1 && el.duration !== 0) {
+								if (!el.rest || el.rest.type !== 'spacer')
+									addWarning("Duration not representable: " + line.substring(startI, i));
+							}
+
 							multilineVars.addFormattingOptions(el, tune.formatting, 'note');
 							tuneBuilder.appendElement('note', startOfLine+startI, startOfLine+i, el);
 							multilineVars.measureNotEmpty = true;

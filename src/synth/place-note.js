@@ -34,7 +34,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 	var noteBuffer = soundsCache[sound.instrument][noteName];
 	if (noteBuffer === "error" || noteBuffer === "pending") { // If the note isn't available, just leave a blank spot
 		// If the note is still pending by now that means an error happened when loading. There was probably a timeout.
-		console.log("Didn't load note: " + sound.instrument + " " + noteName);
+		console.log("Didn't load note", sound.instrument, noteName, noteBuffer);
 		return;
 	}
 

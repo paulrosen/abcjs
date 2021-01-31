@@ -18,15 +18,15 @@
 // If you call it with a parameter, that is used as an already created AudioContext.
 
 function registerAudioContext(ac) {
-	if (!window.abcjsAudioContext) {
-		if (!ac) {
-			ac = window.AudioContext ||
-				window.webkitAudioContext ||
-				navigator.mozAudioContext ||
-				navigator.msAudioContext;
-			ac = new ac();
-		}
+	// If one is passed in, that is the one to use even if there was already one created.
+	if (ac)
 		window.abcjsAudioContext = ac;
+	else {
+		// no audio context passed in, so create it unless there is already one from before.
+		if (!window.abcjsAudioContext) {
+			var AudioContext = window.AudioContext || window.webkitAudioContext;
+			window.abcjsAudioContext = new AudioContext();
+		}
 	}
 	return window.abcjsAudioContext.state !== "suspended";
 }

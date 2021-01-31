@@ -61,7 +61,7 @@ var TimingCallbacks = function(target, params) {
 		// This is called 60 times a second, that is, every 16 msecs.
 		//console.log("doTiming", timestamp, timestamp-self.lastTimestamp);
 		if (self.lastTimestamp === timestamp)
-			return; // If there are multiple seeks or other calls, then we can easily get multiple callbacks for the same instance.
+			return; // If there are multiple seeks or other calls, then we can easily get multiple callbacks for the same instant.
 		self.lastTimestamp = timestamp;
 		if (!self.startTime) {
 			self.startTime = timestamp;
@@ -226,7 +226,7 @@ var TimingCallbacks = function(target, params) {
 		}
 		if (offsetPercent) {
 			self.setProgress(offsetPercent);
-		} else if (self.pausedPercent) {
+		} else if (self.pausedPercent !== null) {
 			var now = performance.now();
 			var currentTime = self.lastMoment * self.pausedPercent;
 			self.startTime = now - currentTime;
@@ -264,13 +264,14 @@ var TimingCallbacks = function(target, params) {
 		if (percent < 0) percent = 0;
 		if (percent > 1) percent = 1;
 
-		if (self.pausedPercent)
+		if (!self.isRunning)
 			self.pausedPercent = percent;
 
 		var now = performance.now();
 		var currentTime = self.lastMoment * percent;
 		self.startTime = now - currentTime;
 
+		var oldEvent = self.currentEvent;
 		self.currentEvent = 0;
 		while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
 			self.currentEvent++;
@@ -288,8 +289,8 @@ var TimingCallbacks = function(target, params) {
 		if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
 			self.doBeatCallback(self.startTime+currentTime);
 
-		if (self.eventCallback && self.currentEvent > 0 && self.noteTimings[self.currentEvent - 1].type === 'event')
-			self.eventCallback(self.noteTimings[self.currentEvent - 1]);
+		if (self.eventCallback && self.currentEvent >= 0 && self.noteTimings[self.currentEvent].type === 'event')
+			self.eventCallback(self.noteTimings[self.currentEvent]);
 		if (self.lineEndCallback)
 			self.lineEndCallback(self.lineEndTimings[self.currentLine], self.noteTimings[self.currentEvent], { line: self.currentLine, endTimings: self.lineEndTimings });
 

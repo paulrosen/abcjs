@@ -8,6 +8,8 @@
 
 [Special Notes](special-notes.md) (Notes from previous versions)
 
+[Old Versions of abcjs](https://github.com/paulrosen/historical-abcjs-versions) (All previous versions of abcjs)
+
 [Info for abcjs contributors](contributing.md) (Info about how abcjs is built and managed)
 
 [Support of the ABC standard](abc-notation.md) (How abcjs varies from the ABC standard)

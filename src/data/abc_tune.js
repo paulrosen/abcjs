@@ -535,9 +535,10 @@ var Tune = function() {
 		var tempo = this.metaText ? this.metaText.tempo : null;
 		var naturalBpm = this.getBpm(tempo);
 		var warp = 1;
-		if (bpm)
-			warp = bpm / naturalBpm;
-		else
+		if (bpm) {
+			if (tempo)
+				warp = bpm / naturalBpm;
+		} else
 			bpm = naturalBpm;
 
 		// Calculate the basic midi data. We only care about the qpm variable here.
