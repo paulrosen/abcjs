@@ -17,6 +17,15 @@ git fetch origin
 git branch -u origin/main main
 ```
 
+## New css for audio control 6.0.0.27
+
+Be sure to download the latest abcjs-audio.css file if you are using it. If you are styling the audio control with your own css, add the rule:
+```css
+.abcjs-css-warning {
+	display: none;
+}
+```
+
 ## Historical abcjs Packages 6.0.0.27
 
 Old versions of abcjs have been removed from this repo. If you are looking for them, you can find them here: https://github.com/paulrosen/historical-abcjs-versions
