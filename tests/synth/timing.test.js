@@ -82,6 +82,30 @@ describe("Timing", function() {
 		{ millisecondsPerMeasure: 2666.666666666667, ms: [5333,6000,6667,7667,8000,8444,8889,9333,10000,10667,11333,12000,13000,13333,13778,14222,14667,15333,16000]},
 	];
 
+	var abcWarpNoQ = 'X:1\n' +
+		'L:1/4\n' +
+		'M:4/4\n' +
+		'K:F\n' +
+		'CD E>F | (3GAB Ac :|\n' ;
+
+	var warpTestsNoQ = [
+		{ bpm: 30, measuresOfDelay: 0 },
+		{ bpm: 30, measuresOfDelay: 1 },
+		{ bpm: 60, measuresOfDelay: 0 },
+		{ bpm: 60, measuresOfDelay: 1 },
+		{ bpm: 90, measuresOfDelay: 0 },
+		{ bpm: 90, measuresOfDelay: 2 },
+	];
+
+	var warpMsNoQ = [
+		{ millisecondsPerMeasure: 8000, ms: [0,2000,4000,7000,8000,9333,10667,12000,14000,16000,18000,20000,23000,24000,25333,26667,28000,30000,32000]},
+		{ millisecondsPerMeasure: 8000, ms: [8000,10000,12000,15000,16000,17333,18667,20000,22000,24000,26000,28000,31000,32000,33333,34667,36000,38000,40000]},
+		{ millisecondsPerMeasure: 4000, ms: [0,1000,2000,3500,4000,4667,5333,6000,7000,8000,9000,10000,11500,12000,12667,13333,14000,15000,16000]},
+		{ millisecondsPerMeasure: 4000, ms: [4000,5000,6000,7500,8000,8667,9333,10000,11000,12000,13000,14000,15500,16000,16667,17333,18000,19000,20000]},
+		{ millisecondsPerMeasure: 2666.666666666667, ms: [0,667,1333,2333,2667,3111,3556,4000,4667,5333,6000,6667,7667,8000,8444,8889,9333,10000,10667]},
+		{ millisecondsPerMeasure: 2666.666666666667, ms: [5333,6000,6667,7667,8000,8444,8889,9333,10000,10667,11333,12000,13000,13333,13778,14222,14667,15333,16000]},
+	];
+
 	var abcSubTitleCrash = 'X:1\n' +
 		'T:subtitle-crash\n' +
 		'L:1/4\n' +
@@ -147,6 +171,12 @@ describe("Timing", function() {
 	it("warp", function() {
 		for (var i = 0; i < warpTests.length; i++) {
 			doWarpTest(abcWarp, warpTests[i], warpMs[i]);
+		}
+	});
+
+	it("warp no q", function() {
+		for (var i = 0; i < warpTestsNoQ.length; i++) {
+			doWarpTest(abcWarpNoQ, warpTestsNoQ[i], warpMsNoQ[i]);
 		}
 	});
 });
