@@ -21,7 +21,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 	var foundNote = false;
 	for (i=0; i < params.children.length; i++) {
 		child = params.children[i];
-		if (child.type === 'note')
+		if (child.type === 'note' || child.type === 'rest')
 			foundNote = true;
 		var justInitializedMeasureNumber = false;
 		if (child.type !== 'staff-extra' && !renderer.controller.classes.isInMeasure()) {
