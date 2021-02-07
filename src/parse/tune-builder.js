@@ -237,42 +237,44 @@ var TuneBuilder = function(tune) {
 			// keep resolving overlays as long as any are found.
 		}
 
-		function cleanUpSlursInLine(line, voiceNum) {
-			if (!currSlur[voiceNum])
-				currSlur[voiceNum] = [];
+		function cleanUpSlursInLine(line, staffNum, voiceNum) {
+			if (!currSlur[staffNum])
+				currSlur[staffNum] = [];
+			if (!currSlur[staffNum][voiceNum])
+				currSlur[staffNum][voiceNum] = [];
 			var x;
 //			var lyr = null;	// TODO-PER: debugging.
 
 			var addEndSlur = function(obj, num, chordPos) {
-				if (currSlur[voiceNum][chordPos] === undefined) {
+				if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
 					// There isn't an exact match for note position, but we'll take any other open slur.
-					for (x = 0; x < currSlur[voiceNum].length; x++) {
-						if (currSlur[voiceNum][x] !== undefined) {
+					for (x = 0; x < currSlur[staffNum][voiceNum].length; x++) {
+						if (currSlur[staffNum][voiceNum][x] !== undefined) {
 							chordPos = x;
 							break;
 						}
 					}
-					if (currSlur[voiceNum][chordPos] === undefined) {
+					if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
 						var offNum = chordPos*100+1;
 						parseCommon.each(obj.endSlur, function(x) { if (offNum === x) --offNum; });
-						currSlur[voiceNum][chordPos] = [offNum];
+						currSlur[staffNum][voiceNum][chordPos] = [offNum];
 					}
 				}
 				var slurNum;
 				for (var i = 0; i < num; i++) {
-					slurNum = currSlur[voiceNum][chordPos].pop();
+					slurNum = currSlur[staffNum][voiceNum][chordPos].pop();
 					obj.endSlur.push(slurNum);
 //					lyr.syllable += '<' + slurNum;	// TODO-PER: debugging
 				}
-				if (currSlur[voiceNum][chordPos].length === 0)
-					delete currSlur[voiceNum][chordPos];
+				if (currSlur[staffNum][voiceNum][chordPos].length === 0)
+					delete currSlur[staffNum][voiceNum][chordPos];
 				return slurNum;
 			};
 
 			var addStartSlur = function(obj, num, chordPos, usedNums) {
 				obj.startSlur = [];
-				if (currSlur[voiceNum][chordPos] === undefined) {
-					currSlur[voiceNum][chordPos] = [];
+				if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
+					currSlur[staffNum][voiceNum][chordPos] = [];
 				}
 				var nextNum = chordPos*100+1;
 				for (var i = 0; i < num; i++) {
@@ -281,10 +283,10 @@ var TuneBuilder = function(tune) {
 						parseCommon.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
 						parseCommon.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
 					}
-					parseCommon.each(currSlur[voiceNum][chordPos], function(x) { if (nextNum === x) ++nextNum; });
-					parseCommon.each(currSlur[voiceNum][chordPos], function(x) { if (nextNum === x) ++nextNum; });
+					parseCommon.each(currSlur[staffNum][voiceNum][chordPos], function(x) { if (nextNum === x) ++nextNum; });
+					parseCommon.each(currSlur[staffNum][voiceNum][chordPos], function(x) { if (nextNum === x) ++nextNum; });
 
-					currSlur[voiceNum][chordPos].push(nextNum);
+					currSlur[staffNum][voiceNum][chordPos].push(nextNum);
 					obj.startSlur.push({ label: nextNum });
 					if (obj.dottedSlur) {
 						obj.startSlur[obj.startSlur.length-1].style = 'dotted';
@@ -356,10 +358,10 @@ var TuneBuilder = function(tune) {
 								el.pitches[0].endSlur.shift();
 							else if (el.pitches[0].endSlur[el.pitches[0].endSlur.length-1] === 100)
 								el.pitches[0].endSlur.pop();
-							if (currSlur[voiceNum][1].length === 1)
-								delete currSlur[voiceNum][1];
+							if (currSlur[staffNum][voiceNum][1].length === 1)
+								delete currSlur[staffNum][voiceNum][1];
 							else
-								currSlur[voiceNum][1].pop();
+								currSlur[staffNum][voiceNum][1].pop();
 						}
 					}
 				}
@@ -432,7 +434,7 @@ var TuneBuilder = function(tune) {
 						fixClefPlacement(staff[tune.staffNum].clef);
 					for (tune.voiceNum = 0; tune.voiceNum < staff[tune.staffNum].voices.length; tune.voiceNum++) {
 						var voice = staff[tune.staffNum].voices[tune.voiceNum];
-						cleanUpSlursInLine(voice, tune.voiceNum);
+						cleanUpSlursInLine(voice, tune.staffNum, tune.voiceNum);
 						for (var j = 0; j < voice.length; j++) {
 							if (voice[j].el_type === 'clef')
 								fixClefPlacement(voice[j]);
