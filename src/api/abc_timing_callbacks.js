@@ -1,4 +1,4 @@
-//    Copyright (C) 2015-2020 Paul Rosen (paul at paulrosen dot net)
+//    Copyright (C) 2015-2021 Paul Rosen (paul at paulrosen dot net)
 //
 //    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 //    documentation files (the "Software"), to deal in the Software without restriction, including without limitation

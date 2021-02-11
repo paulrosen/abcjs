@@ -1,4 +1,4 @@
-//    Copyright (C) 2014-2020 Gregory Dyke (gregdyke at gmail dot com)
+//    Copyright (C) 2014-2021 Gregory Dyke (gregdyke at gmail dot com)
 //
 //    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 //    documentation files (the "Software"), to deal in the Software without restriction, including without limitation

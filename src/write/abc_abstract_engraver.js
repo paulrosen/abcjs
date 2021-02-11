@@ -1,5 +1,5 @@
 // abc_abstract_engraver.js: Creates a data structure suitable for printing a line of abc
-// Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com)
+// Copyright (C) 2010-2021 Gregory Dyke (gregdyke at gmail dot com)
 //
 //    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 //    documentation files (the "Software"), to deal in the Software without restriction, including without limitation

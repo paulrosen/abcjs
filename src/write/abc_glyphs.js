@@ -1,4 +1,4 @@
-//    Copyright (C) 2009-2020 Gregory Dyke (gregdyke at gmail dot com) Paul Rosen (paul at paulrosen dot net)
+//    Copyright (C) 2009-2021 Gregory Dyke (gregdyke at gmail dot com) Paul Rosen (paul at paulrosen dot net)
 //
 //    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 //    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
