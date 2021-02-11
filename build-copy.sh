@@ -9,4 +9,9 @@ echo $1 | grep -E -q '^[1-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?$' || die "Version 
 
 cp ./dist/abcjs-basic.js ./bin/abcjs_basic_$1.js
 cp ./dist/abcjs-basic-min.js ./bin/abcjs_basic_$1-min.js
+cp ./dist/abcjs-midi-min.js ./bin/abcjs_midi_$1-min.js
 cp ./dist/abcjs-plugin-min.js ./bin/abcjs_plugin_$1-min.js
+cp ./dist/abcjs-basic.js.LICENSE ./bin/abcjs_basic_$1.js.LICENSE
+cp ./dist/abcjs-basic-min.js.LICENSE ./bin/abcjs_basic_$1-min.js.LICENSE
+cp ./dist/abcjs-midi-min.js.LICENSE ./bin/abcjs_midi_$1-min.js.LICENSE
+cp ./dist/abcjs-plugin-min.js.LICENSE ./bin/abcjs_plugin_$1-min.js.LICENSE
