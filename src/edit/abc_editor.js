@@ -1,4 +1,3 @@
-//
 // window.ABCJS.Editor:
 //
 // constructor(editarea, params)
