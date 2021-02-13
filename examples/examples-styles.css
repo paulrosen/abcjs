@@ -14,8 +14,7 @@ body {
   font-family: Roboto, Arial, sans-serif;
   font-size: 16px;
   line-height: 22px;
-  color: black;
-  background-color: #FFFFFF;
+  color: currentColor;
 }
 
 header {
@@ -34,21 +33,50 @@ fieldset {
   margin: 15px 0;
 }
 
+fieldset p {
+  padding: 0;
+  margin: 0;
+  color: #6d6d6d;
+  font-style: italic;
+}
+
 textarea {
   width: 100%;
-  border: 2px solid black;
+  border: 2px solid currentColor;
+  height: 200px;
+  padding: 10px;
+}
+
+#warnings {
+  color: #dd0000;
+  padding: 5px 0;
+}
+
+#warnings:empty {
+  display: none;
+}
+
+pre {
+  font-size: 14px;
+  padding: 5px;
+  font-family: Monaco, monospace;
+  border: 1px solid #ffffff;
 }
 
 a {
-  color: black;
+  color: currentColor;
 }
 
 a:visited {
-  color: black;
+  color: currentColor;
 }
 
 h1 {
   margin: 20px 0;
+}
+
+h2 {
+  margin-bottom: 5px;
 }
 
 p {
@@ -72,6 +100,10 @@ button:hover {
   background-color: #3FB07C;
   color: white;
   border-color: #3FB07C;
+}
+
+.visible-background svg {
+  background: #f5f5f5;
 }
 
 table {
@@ -123,5 +155,14 @@ tr:nth-child(even) {
   body {
     color: #ffffff;
     background: #121212;
+  }
+  .table-header td {
+    color: #000000;
+  }
+  tr:nth-child(even) {
+    background-color: #666666;
+  }
+  .visible-background svg {
+    background: #404040;
   }
 }

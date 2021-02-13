@@ -14,7 +14,12 @@
        .abcjs-cursor {
             stroke: blue;
         }
-	   path {
+       @media (prefers-color-scheme: dark) {
+           .abcjs-cursor {
+               stroke: #ffffff;
+           }
+       }
+       path {
 		   transition: opacity 1s;
 	   }
 	   .abcjs-note.hidden, .abcjs-beam-elem.hidden {

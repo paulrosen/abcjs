@@ -30,187 +30,6 @@
     };
   </script>
   <style>
-    html {
-      box-sizing: border-box;
-    }
-    *, *:before, *:after {
-      box-sizing: inherit;
-    }
-
-    /* body {
-      background-color: #f1f4f4;
-      margin: 0;
-      font-size: 20px;
-      font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
-    } */
-
-     /* header, footer { */
-      /* background: #a9e4f7; Old browsers */
-      /* background: -moz-linear-gradient(left, #a9e4f7 0%, #0098c4 100%); FF3.6-15 */
-      /* background: -webkit-linear-gradient(left, #a9e4f7 0%, #0098c4 100%); Chrome10-25,Safari5.1-6 */
-      /* background: linear-gradient(to right, #a9e4f7 0%, #0098c4 100%); W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-      /* filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#a9e4f7', endColorstr='#0098c4', GradientType=1); IE6-9 */
-    /* }  */
-
-    /* header {
-      display: flex;
-    } */
-
-    /* header h1 {
-      margin: 0;
-      padding: 20px 20px 20px 0;
-      color: #333;
-      font-size: 30px;
-    } */
-
-    /* .logo-wrapper {
-      width: 90px;
-      height: 67px;
-      display: flex;
-      align-items: center;
-      padding-top: 14px;
-    } */
-
-    main {
-      margin: 10px 5px 0 5px;
-    }
-
-    .instructions {
-      list-style: none;
-      padding: 0;
-    }
-
-    .svg-inline--fa {
-      opacity: .8;
-    }
-
-    .instructions .svg-inline--fa {
-      opacity: .6;
-    }
-
-    .input {
-      margin-bottom: 30px;
-    }
-
-    .muted {
-      color: #0098c4;
-      text-decoration: none;
-    }
-    .muted:hover {
-      text-decoration: underline;
-    }
-
-    textarea {
-      width: 100%;
-      font-size: 18px;
-      height: 300px;
-      overflow: hidden;
-      border-radius: 4px;
-      padding: 8px;
-      font-family: "Lucida Console", Monaco, monospace;
-    }
-
-    #warnings {
-      font-family: "Lucida Console", Monaco, monospace;
-      border: 2px solid #f10707;
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 4px;
-    }
-
-    #warnings span {
-      color: #f10707;
-    }
-
-    #warnings:empty {
-      display: none;
-    }
-
-    .output {
-      position: relative;
-    }
-
-    nav {
-      position: absolute;
-      right: 10px;
-      top: 5px;
-      z-index: 200;
-    }
-
-    /* nav button {
-      font-size: 20px;
-      padding: 5px 20px;
-      border-radius: 8px;
-      margin-top: 5px;
-      color: white;
-      background: #0098c4;
-    }
-
-    nav button:hover {
-      text-decoration: underline;
-      background-color: #0a9ecc;
-    } */
-
-    footer {
-      padding: 1px 0;
-      margin-top: 20px;
-      line-height: 30px;
-      text-align: end;
-    }
-    footer ul {
-      list-style: none;
-      padding: 5px;
-    }
-
-    /* footer a {
-      color: black;
-      text-decoration: none;
-      background-color: #F3ECE2;
-      padding: 1px 10px;
-      border-radius: 3px;
-      box-shadow: 2px 2px 0px #aaa;
-    }
-    footer a:hover {
-      text-decoration: underline;
-    } */
-
-    @media screen and (min-width: 361px) {
-      header h1 {
-        font-size: 35px;
-      }
-      /* .logo-wrapper {
-        height: 74px;
-      } */
-    }
-
-    @media screen and (min-width: 550px) {
-      main {
-        margin: 10px 30px 0 30px;
-      }
-      header, footer {
-        padding-left: 30px;
-      }
-      header h1 {
-        font-size: 50px;
-      }
-      /* .logo-wrapper {
-        height: 98px;
-      } */
-      .instructions {
-        padding-left: 20px;
-      }
-    }
-
-    @media screen {
-      #canvas {
-        border: 2px solid #d6b88c;
-        border-radius: 4px;
-      }
-      #canvas svg {
-        background-color: #F3ECe2;
-      }
-    }
-
     @media print {
       header, footer, nav button, main section {
         display: none;
@@ -235,16 +54,12 @@
           (It is useful to use the "oneSvgPerLine" option when printing. This will keep the browser from breaking the music in the middle of a staff when there is a page break.)
         </p>
         <ul class="instructions">
-          <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
+          <li>
             Use the input dialog below to create the music you wish to print.</li>
-          <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
+          <li>
             Use the music player to test your input for typos.</li>
-          <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
+          <li>
             Click the "print" button to save as PDF.</li>
-          <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
-            Copy and paste the abc text you've created into your favorite text editor to save for later.</li>
-          <li><i class="fa fa-hand-point-right" aria-hidden="true"></i>
-            Tell your friends, family, and casual acquaintances  about <a href="https://abcjs.net" target="_blank" class="muted">abcjs</a>!</li>
         </ul>
       </section>
       <section class="input">
@@ -268,17 +83,9 @@ eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
         <nav>
           <button onclick="window.print()"><i class="fa fa-print" aria-hidden="true"></i> Print</button>
         </nav>
-        <div id="canvas"></div>
+        <div id="canvas" class="visible-background"></div>
       </section>
     </main>
-
-    <footer>
-      <ul>
-        <li>Demo program courtesy of <a href="https://abcjs.net" target="_blank">abcjs</a></li>
-        <li>Written by <a href="https://paulrosen.net" target="_blank">Paul Rosen</a></li>
-        <li>Copyright &copy; 2018 by Paul Rosen</li>
-      </ul>
-    </footer>
   </div>
 </body>
 </html>

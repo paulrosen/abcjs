@@ -64,9 +64,6 @@
       justify-content: center;
       width: auto;
     }
-	#paper svg {
-		background: #f5f5f5;
-	}
     form {
       margin: 0 auto 30px auto;
       max-width: 800px;
@@ -89,6 +86,6 @@
       <label>Maximum spacing: <input id="max" name="max" type="number" min="0" max="5" step=".1" value="2.8"></label>
       <button type="submit">Redraw</button>
     </form>
-  <div id="paper"></div>
+  <div id="paper" class="visible-background"></div>
 </body>
 </html>
