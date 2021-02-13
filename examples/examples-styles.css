@@ -118,3 +118,10 @@ tr:nth-child(even) {
     margin: 0 auto;
   }
 }
+
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #ffffff;
+    background: #121212;
+  }
+}

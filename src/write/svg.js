@@ -358,6 +358,8 @@ function createSvg() {
 	var svg = document.createElementNS(svgNS, "svg");
 	svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
 	svg.setAttribute('role', 'img');    // for accessibility
+	svg.setAttribute('fill', 'currentColor');    // for automatically picking up dark mode and high contrast
+	svg.setAttribute('stroke', 'currentColor');    // for automatically picking up dark mode and high contrast
 	return svg;
 }
 
