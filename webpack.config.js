@@ -4,21 +4,6 @@ const WebpackBundleAnalyzer = require("webpack-bundle-analyzer")
 	.BundleAnalyzerPlugin;
 
 module.exports = (env, argv) => {
-	const config = {
-		basic: {
-			name: 'basic',
-			entry: `./index.js`,
-		},
-		plugin: {
-			name: 'plugin',
-			entry: `./static-wrappers/plugin.js`,
-		},
-		midi: {
-			name: 'midi',
-			entry: `./midi.js`,
-		}
-	}
-
 	const defaults = (argv, type) => {
 		return {
 			output: {
@@ -61,10 +46,20 @@ module.exports = (env, argv) => {
 	}
 
 	return [
-		{...defaults(argv, 'basic'), ...config.basic},
-		{...defaults(argv, 'plugin'), ...config.plugin},
-		{...defaults(argv, 'midi'), ...config.midi},
-	];
+		{
+			name: 'basic',
+			entry: `./index.js`,
+			...defaults(argv, 'basic')
+		}, {
+			name: 'plugin',
+			entry: `./static-wrappers/plugin.js`,
+			...defaults(argv, 'plugin')
+		}, {
+			name: 'midi',
+			entry: `./midi.js`,
+			...defaults(argv, 'midi')
+		}
+	]
 };
 
 function makeBanner(type) {
