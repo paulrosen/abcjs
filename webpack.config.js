@@ -8,23 +8,14 @@ module.exports = (env, argv) => {
 		basic: {
 			name: 'basic',
 			entry: `./index.js`,
-			output: {
-				filename: argv.mode === 'production' ? 'abcjs-basic-min.js' : `abcjs-basic.js`,
-			},
 		},
 		plugin: {
 			name: 'plugin',
 			entry: `./static-wrappers/plugin.js`,
-			output: {
-				filename: argv.mode === 'production' ? 'abcjs-plugin-min.js' : `abcjs-plugin.js`,
-			},
 		},
 		midi: {
 			name: 'midi',
 			entry: `./midi.js`,
-			output: {
-				filename: argv.mode === 'production' ? 'abcjs-midi-min.js' : `abcjs-midi.js`,
-			},
 		}
 	}
 
@@ -37,7 +28,8 @@ module.exports = (env, argv) => {
 					commonjs: 'abcjs'
 				},
 				libraryTarget: 'umd',
-				globalObject: 'this'
+				globalObject: 'this',
+				filename: argv.mode === 'production' ? `abcjs-${type}-min.js` : `abcjs-${type}.js`,
 			},
 			devtool: argv.mode === 'production' ? false : 'source-map',
 			module: {
