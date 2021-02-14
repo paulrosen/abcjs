@@ -11,6 +11,7 @@ tmp/
 .babelrc
 .eslintrc
 .gitmodules
+.editorconfig
 deploy-docs.sh
 docker-compose.yml
 Dockerfile
