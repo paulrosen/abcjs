@@ -1,11 +1,35 @@
-const {merge} = require("webpack-merge");
-const modeConfig = env => require(`./build-utils/webpack.${env.mode}`)(env);
-const presetConfig = require("./build-utils/loadPresets");
+const pkg = require("./package.json");
+const TerserPlugin = require('terser-webpack-plugin');
+const WebpackBundleAnalyzer = require("webpack-bundle-analyzer")
+	.BundleAnalyzerPlugin;
 
-module.exports = ({mode, presets, type} = {mode: "production", presets: []}) => {
-	return merge(
-		{
-			entry: `./static-wrappers/${type}.js`,
+module.exports = (env, argv) => {
+	const config = {
+		basic: {
+			name: 'basic',
+			entry: `./static-wrappers/basic.js`,
+			output: {
+				filename: argv.mode === 'production' ? 'abcjs-basic-min.js' : `abcjs-basic.js`,
+			},
+		},
+		plugin: {
+			name: 'plugin',
+			entry: `./static-wrappers/plugin.js`,
+			output: {
+				filename: argv.mode === 'production' ? 'abcjs-plugin-min.js' : `abcjs-plugin.js`,
+			},
+		},
+		midi: {
+			name: 'midi',
+			entry: `./static-wrappers/midi.js`,
+			output: {
+				filename: argv.mode === 'production' ? 'abcjs-midi-min.js' : `abcjs-midi.js`,
+			},
+		}
+	}
+
+	const defaults = (argv, type) => {
+		return {
 			output: {
 				library: {
 					amd: 'abcjs',
@@ -15,7 +39,7 @@ module.exports = ({mode, presets, type} = {mode: "production", presets: []}) => 
 				libraryTarget: 'umd',
 				globalObject: 'this'
 			},
-			mode,
+			devtool: argv.mode === 'production' ? false : 'source-map',
 			module: {
 				rules: [
 					{
@@ -29,10 +53,37 @@ module.exports = ({mode, presets, type} = {mode: "production", presets: []}) => 
 					}
 				]
 			},
-			plugins: [
-			]
-		},
-		modeConfig({mode, type}),
-		presetConfig({mode, presets, type})
-	);
+			optimization:{
+				minimizer: [
+					new TerserPlugin({
+						extractComments: {
+							condition: /^\**!/,
+							banner: makeBanner(type),
+						},
+					}),
+				],
+			}
+		}
+	}
+
+	if (env.analyze) {
+		defaults.plugins = [
+			new WebpackBundleAnalyzer()
+		]
+	}
+
+	return [
+		{...defaults(argv, 'basic'), ...config.basic},
+		{...defaults(argv, 'plugin'), ...config.plugin},
+		{...defaults(argv, 'midi'), ...config.midi},
+	];
 };
+
+function makeBanner(type) {
+	const outputFilename = `abcjs_${type}-min.js`;
+	const banner1 = `abcjs_${type} v${pkg.version} Copyright © 2009-2021 Paul Rosen and Gregory Dyke (https://abcjs.net) */`;
+	const banner2 = `/*! midi.js Copyright © Michael Deal (http://mudcu.be) */`;
+	const banner3 = `/*! For license information please see ${outputFilename}.LICENSE`;
+	const hasMidi = type === 'midi';
+	return hasMidi ? `${banner1}\n${banner2}\n${banner3}` : `${banner1}\n${banner3}`;
+}
