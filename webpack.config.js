@@ -38,10 +38,6 @@ module.exports = (env, argv) => {
 						test: /\.js$/,
 						exclude: /node_modules/,
 						use: "babel-loader"
-					},
-					{
-						test: /\.svg$/,
-						loader: 'svg-inline-loader'
 					}
 				]
 			},
