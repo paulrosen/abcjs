@@ -7,7 +7,7 @@ module.exports = (env, argv) => {
 	const config = {
 		basic: {
 			name: 'basic',
-			entry: `./static-wrappers/basic.js`,
+			entry: `./index.js`,
 			output: {
 				filename: argv.mode === 'production' ? 'abcjs-basic-min.js' : `abcjs-basic.js`,
 			},
@@ -21,7 +21,7 @@ module.exports = (env, argv) => {
 		},
 		midi: {
 			name: 'midi',
-			entry: `./static-wrappers/midi.js`,
+			entry: `./midi.js`,
 			output: {
 				filename: argv.mode === 'production' ? 'abcjs-midi-min.js' : `abcjs-midi.js`,
 			},
@@ -57,8 +57,8 @@ module.exports = (env, argv) => {
 				minimizer: [
 					new TerserPlugin({
 						extractComments: {
-							condition: /^\**!/,
-							banner: makeBanner(type),
+							condition: /^\*\**!/i,
+							banner: makeBanner(type)
 						},
 					}),
 				],
