@@ -5,7 +5,7 @@ const WebpackBundleAnalyzer = require("webpack-bundle-analyzer")
 
 module.exports = (env, argv) => {
   const defaults = (argv, type) => {
-    return {
+    const config = {
       output: {
         library: {
           amd: 'abcjs',
@@ -37,12 +37,13 @@ module.exports = (env, argv) => {
         ],
       }
     }
-  }
 
-  if (env.analyze) {
-    defaults.plugins = [
-      new WebpackBundleAnalyzer()
-    ]
+    if (env.analyze) {
+      config.plugins = [
+        new WebpackBundleAnalyzer()
+      ]
+    }
+    return config
   }
 
   return [
