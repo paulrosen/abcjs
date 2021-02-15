@@ -16,17 +16,20 @@ module.exports = (env = {} , argv) => {
         globalObject: 'this',
         filename: argv.mode === 'development' ? `abcjs-${type}.js` : `abcjs-${type}-min.js`,
       },
-			devtool: argv.mode === 'development' ? 'source-map' : false,
+      devtool: argv.mode === 'development' ? 'source-map' : false,
       module: {
         rules: [
           {
             test: /\.js$/,
             exclude: /node_modules/,
             use: "babel-loader"
+          }, {
+            test: /\.svg$/,
+            loader: 'svg-inline-loader'
           }
-        ]
+        ],
       },
-			mode: 'production',
+      mode: 'production',
       optimization:{
         minimizer: [
           new TerserPlugin({
