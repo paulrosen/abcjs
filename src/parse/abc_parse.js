@@ -472,8 +472,7 @@ var Parse = function() {
 			strTune = arr.join("  "); //. the split removed two characters, so this puts them back
 		}
 		var continuationReplacement = function(all, backslash, comment){
-			var spaces = "                                                                                                                                                                                                     ";
-			var padding = comment ? spaces.substring(0, comment.length) : "";
+			var padding = comment ? Array(comment.length +1).join(' ') : "";
 			return backslash + " \x12" + padding;
 		};
 		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
