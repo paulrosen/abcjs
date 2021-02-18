@@ -457,9 +457,9 @@ var Parse = function() {
 		header.reset(tokenizer, warn, multilineVars, tune);
 
 		// Take care of whatever line endings come our way
-		strTune = parseCommon.gsub(strTune, '\r\n', '\n');
-		strTune = parseCommon.gsub(strTune, '\r', '\n');
-		strTune += '\n';	// Tacked on temporarily to make the last line continuation work
+		// Tack on newline temporarily to make the last line continuation work
+		strTune = strTune.replace(/\r\n?/, '\n') + '\n';
+
 		// get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
 		var arr = strTune.split("\n\\");
 		if (arr.length > 1) {
