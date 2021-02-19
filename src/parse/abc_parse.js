@@ -527,27 +527,28 @@ var Parse = function() {
 
 			multilineVars.openSlurs = tuneBuilder.cleanUp(multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
 
-			var ph = 11*72;
-			var pl = 8.5*72;
-			switch (multilineVars.papersize) {
-				//case "letter": ph = 11*72; pl = 8.5*72; break;
-				case "legal": ph = 14*72; pl = 8.5*72; break;
-				case "A4": ph = 11.7*72; pl = 8.3*72; break;
-			}
-			if (multilineVars.landscape) {
-				var x = ph;
-				ph = pl;
-				pl = x;
-			}
-			if (!tune.formatting.pagewidth)
-				tune.formatting.pagewidth = pl;
-			if (!tune.formatting.pageheight)
-				tune.formatting.pageheight = ph;
-
 		} catch (err) {
 			if (err !== "normal_abort")
 				throw err;
 		}
+
+		var ph = 11*72;
+		var pl = 8.5*72;
+		switch (multilineVars.papersize) {
+			//case "letter": ph = 11*72; pl = 8.5*72; break;
+			case "legal": ph = 14*72; pl = 8.5*72; break;
+			case "A4": ph = 11.7*72; pl = 8.3*72; break;
+		}
+		if (multilineVars.landscape) {
+			var x = ph;
+			ph = pl;
+			pl = x;
+		}
+		if (!tune.formatting.pagewidth)
+			tune.formatting.pagewidth = pl;
+		if (!tune.formatting.pageheight)
+			tune.formatting.pageheight = ph;
+
 		if (switches.hint_measures) {
 			addHintMeasures();
 		}
