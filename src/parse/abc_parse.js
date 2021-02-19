@@ -524,6 +524,9 @@ var Parse = function() {
 				}
 				multilineVars.iChar += line.length + 1;
 			});
+
+			multilineVars.openSlurs = tuneBuilder.cleanUp(multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
+
 			var ph = 11*72;
 			var pl = 8.5*72;
 			switch (multilineVars.papersize) {
@@ -536,7 +539,11 @@ var Parse = function() {
 				ph = pl;
 				pl = x;
 			}
-			multilineVars.openSlurs = tuneBuilder.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
+			if (!tune.formatting.pagewidth)
+				tune.formatting.pagewidth = pl;
+			if (!tune.formatting.pageheight)
+				tune.formatting.pageheight = ph;
+
 		} catch (err) {
 			if (err !== "normal_abort")
 				throw err;
