@@ -380,6 +380,11 @@ var Parse = function() {
 		if (line.length === 0)
 			return;
 
+		if (line.length < 2 || line.charAt(1) !== ':') {
+			music.parseMusic(line);
+			return
+		}
+
 		var ret = header.parseHeader(line);
 		if (ret.regular)
 			music.parseMusic(ret.str);

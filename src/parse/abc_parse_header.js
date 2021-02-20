@@ -474,11 +474,6 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	};
 
 	this.parseHeader = function(line) {
-		if (line.length < 2 || line.charAt(1) !== ':') {
-			// If we got this far, we have a regular line of mulsic
-			return {regular: true, str: line};
-		}
-
 				var nextLine = "";
 				if (line.indexOf('\x12') >= 0 && line.charAt(0) !== 'w') {	// w: is the only header field that can have a continuation.
 					nextLine = line.substring(line.indexOf('\x12')+1);
