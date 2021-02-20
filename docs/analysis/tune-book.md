@@ -13,7 +13,7 @@ It might be useful to know in advance how many tunes are in a tunebook before re
 The following assumes you've created a `TuneBook` object like this: 
 
 ```
-var tunebook = ABCJS.TuneBook(tunebookString);
+var tuneBook = new ABCJS.TuneBook(tunebookString)
 ```
 
 ### Extract Tune by ID
