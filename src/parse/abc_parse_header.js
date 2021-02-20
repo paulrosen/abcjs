@@ -474,11 +474,6 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	};
 
 	this.parseHeader = function(line) {
-		if (parseCommon.startsWith(line, '%%')) {
-			var err = parseDirective.addDirective(line.substring(2));
-			if (err) warn(err, line, 2);
-			return {};
-		}
 		var i = line.indexOf('%');
 		if (i >= 0)
 			line = line.substring(0, i);

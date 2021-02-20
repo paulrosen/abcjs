@@ -366,6 +366,11 @@ var Parse = function() {
 	};
 
 	var parseLine = function(line) {
+		if (parseCommon.startsWith(line, '%%')) {
+			var err = parseDirective.addDirective(line.substring(2));
+			if (err) warn(err, line, 2);
+			return;
+		}
 		var ret = header.parseHeader(line);
 		if (ret.regular)
 			music.parseMusic(ret.str);
