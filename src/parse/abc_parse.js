@@ -387,7 +387,7 @@ var Parse = function() {
 
 		var ret = header.parseHeader(line);
 		if (ret.regular)
-			music.parseMusic(ret.str);
+			music.parseMusic(line);
 		if (ret.newline)
 			music.startNewLine();
 		if (ret.words)

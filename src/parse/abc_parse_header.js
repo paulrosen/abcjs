@@ -552,12 +552,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 					warn("Ignored header", line, 0);
 					break;
 				default:
-					// It wasn't a recognized header value, so parse it as music.
-					if (nextLine.length)
-						nextLine = "\x12" + nextLine;
-					//parseRegularMusicLine(line+nextLine);
-					//nextLine = "";
-					return {regular: true, str: line+nextLine};
+					return {regular: true};
 			}
 		}
 		if (nextLine.length > 0)
