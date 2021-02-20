@@ -560,8 +560,8 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				elem.maxpitch = restpitch;
 				dot = 0;
 				var mmWidth = glyphs.getSymbolWidth(c);
-				abselem.addHead(new RelativeElement(c, -mmWidth, mmWidth * 2, 7));
-				var numMeasures = new RelativeElement("" + elem.rest.text, 0, mmWidth, 16, {type: "multimeasure-text"});
+				abselem.addHead(new RelativeElement(c, mmWidth, mmWidth * 2, 7));
+				var numMeasures = new RelativeElement("" + elem.rest.text, mmWidth, mmWidth, 16, {type: "multimeasure-text"});
 				abselem.addExtra(numMeasures);
 		}
 		if (elem.rest.type !== "multimeasure") {
@@ -753,7 +753,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 
   var durationForSpacing = duration * this.tripletmultiplier;
   if (elem.rest && elem.rest.type === 'multimeasure')
-  	durationForSpacing = duration;
+  	durationForSpacing = 1;
   var absType = elem.rest ? "rest" : "note";
   var abselem = new AbsoluteElement(elem, durationForSpacing, 1, absType, this.tuneNumber, { durationClassOveride: elem.duration * this.tripletmultiplier});
   if (hint) abselem.setHint();
