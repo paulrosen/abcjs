@@ -475,7 +475,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 
 	this.parseHeader = function(line) {
 		var nextLine = "";
-		if (line.indexOf('\x12') >= 0 && line.charAt(0) !== 'w') {	// w: is the only header field that can have a continuation.
+		if (line.indexOf('\x12') >= 0) {
 			nextLine = line.substring(line.indexOf('\x12')+1);
 			line = line.substring(0, line.indexOf('\x12'));	//This handles a continuation mark on a header field
 		}
