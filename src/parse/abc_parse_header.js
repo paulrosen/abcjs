@@ -474,14 +474,6 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	};
 
 	this.parseHeader = function(line) {
-		var i = line.indexOf('%');
-		if (i >= 0)
-			line = line.substring(0, i);
-		line = line.replace(/\s+$/, '');
-
-		if (line.length === 0)
-			return {};
-
 		if (line.length >= 2) {
 			if (line.charAt(1) === ':') {
 				var nextLine = "";

@@ -371,6 +371,15 @@ var Parse = function() {
 			if (err) warn(err, line, 2);
 			return;
 		}
+
+		var i = line.indexOf('%');
+		if (i >= 0)
+			line = line.substring(0, i);
+		line = line.replace(/\s+$/, '');
+
+		if (line.length === 0)
+			return;
+
 		var ret = header.parseHeader(line);
 		if (ret.regular)
 			music.parseMusic(ret.str);
