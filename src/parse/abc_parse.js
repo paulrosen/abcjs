@@ -194,8 +194,8 @@ var Parse = function() {
 		addWarningObject({message:str, line:line, startChar: multilineVars.iChar + col_num, column: col_num});
 	};
 
-	var header = new ParseHeader(tokenizer, warn, multilineVars, tune, tuneBuilder);
-	var music = new ParseMusic(tokenizer, warn, multilineVars, tune, tuneBuilder, header);
+	var header;
+	var music;
 
 	this.getWarnings = function() {
 		return multilineVars.warnings;
@@ -434,6 +434,9 @@ var Parse = function() {
 		if (!switches) switches = {};
 		if (!startPos) startPos = 0;
 		tuneBuilder.reset();
+		header = new ParseHeader(tokenizer, warn, multilineVars, tune, tuneBuilder);
+		music = new ParseMusic(tokenizer, warn, multilineVars, tune, tuneBuilder, header);
+
 		if (switches.print)
 			tune.media = 'print';
 		multilineVars.reset();
