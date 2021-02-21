@@ -141,6 +141,8 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
     	voice.header=abcstaff.title[v].replace(/\\n/g, "\n");
     	voice.headerPosition = 6 + staffgroup.getTextSize.baselineToCenter(voice.header, "voicefont", 'staff-extra voice-name', v, abcstaff.voices.length)/spacing.STEP;
 	}
+    if (abcstaff.clef && abcstaff.clef.type === "perc")
+    	voice.isPercussion = true;
 	  var clef = createClef(abcstaff.clef, this.tuneNumber);
 	  if (clef) {
 		  if (v ===0 && abcstaff.barNumber) {
@@ -461,7 +463,8 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 
 			flag = (gracebeam) ? null : chartable.uflags[(isBagpipes) ? 5 : 3];
 			var accidentalSlot = [];
-			var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale*this.voiceScale, accidentalSlot, false);
+			var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i],
+				{dir: "up", headx: -graceoffsets[i], extrax: -graceoffsets[i], flag: flag, scale: gracescale*this.voiceScale, accidentalSlot: accidentalSlot});
 			ret.notehead.highestVert = ret.notehead.pitch + stemHeight;
 			var grace = ret.notehead;
 			this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up", true);
@@ -565,7 +568,8 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				abselem.addExtra(numMeasures);
 		}
 		if (elem.rest.type !== "multimeasure") {
-			var ret = createNoteHead(abselem, c, {verticalPos: restpitch}, null, 0, 0, null, dot, 0, voiceScale, [], false);
+			var ret = createNoteHead(abselem, c, {verticalPos: restpitch},
+				{ dot: dot, scale: voiceScale});
 			noteHead = ret.notehead;
 			if (noteHead) {
 				abselem.addHead(noteHead);
@@ -678,7 +682,8 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			}
 
 			var hasStem = !nostem && durlog<=-1;
-			var ret = createNoteHead(abselem, c, elem.pitches[p], dir, 0, -roomTaken, flag, dot, dotshiftx, this.voiceScale, accidentalSlot, !stemdir);
+			var ret = createNoteHead(abselem, c, elem.pitches[p],
+				{dir: dir, extrax: -roomTaken, flag: flag, dot: dot, dotshiftx: dotshiftx, scale: this.voiceScale, accidentalSlot: accidentalSlot, shouldExtendStem: !stemdir, printAccidentals: !voice.isPercussion});
 			symbolWidth = Math.max(glyphs.getSymbolWidth(c), symbolWidth);
 			abselem.extraw -= ret.extraLeft;
 			noteHead = ret.notehead;

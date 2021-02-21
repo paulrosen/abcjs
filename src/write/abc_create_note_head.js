@@ -1,7 +1,19 @@
 var glyphs = require('./abc_glyphs');
 var RelativeElement = require('./abc_relative_element');
 
-var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot, shouldExtendStem) {
+var createNoteHead = function(abselem, c, pitchelem, options) {
+	if (!options) options = {};
+	var dir = (options.dir !== undefined) ? options.dir : null;
+	var headx = (options.headx !== undefined) ? options.headx : 0;
+	var extrax = (options.extrax !== undefined) ? options.extrax : 0;
+	var flag = (options.flag !== undefined) ? options.flag : null;
+	var dot = (options.dot !== undefined) ? options.dot : 0;
+	var dotshiftx = (options.dotshiftx !== undefined) ? options.dotshiftx : 0;
+	var scale = (options.scale !== undefined) ? options.scale : 1;
+	var accidentalSlot = (options.accidentalSlot !== undefined) ? options.accidentalSlot : [];
+	var shouldExtendStem = (options.shouldExtendStem !== undefined) ? options.shouldExtendStem : false;
+	var printAccidentals = (options.printAccidentals !== undefined) ? options.printAccidentals : true;
+
 		// TODO scale the dot as well
 		var pitch = pitchelem.verticalPos;
 		var notehead;
@@ -43,7 +55,7 @@ var createNoteHead = function(abselem, c, pitchelem, dir, headx, extrax, flag, d
 		if (notehead)
 			notehead.highestVert = pitchelem.highestVert;
 
-		if (pitchelem.accidental) {
+		if (printAccidentals && pitchelem.accidental) {
 			var symb;
 			switch (pitchelem.accidental) {
 				case "quartersharp":
