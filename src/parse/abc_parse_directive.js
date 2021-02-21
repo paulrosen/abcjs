@@ -337,6 +337,17 @@ var parseDirective = {};
 
 	};
 
+	var interpretPercMap = function(restOfString) {
+		var tokens = restOfString.split(/\s+/); // Allow multiple spaces.
+		if (tokens.length !== 2 && tokens.length !== 3)
+			return { error: 'Expected parameters "abc-note", "drum-sound", and optionally "note-head"'}
+		var key = tokens[0];
+		var value = { sound: tokens[1] };
+		if (tokens.length === 3)
+			value.noteHead = tokens[2];
+		return { key: key, value: value };
+	}
+
 	var getRequiredMeasurement = function(cmd, tokens) {
 		var points = tokenizer.getMeasurement(tokens);
 		if (points.used === 0 || tokens.length !== 0)
@@ -1021,9 +1032,18 @@ var parseDirective = {};
 				else
 					parseMidiCommand(midi, tune, restOfString);
 				break;
+			case "percmap":
+				var percmap = interpretPercMap(restOfString);
+				if (percmap.error)
+					warn(percmap.error, str, 8);
+				else {
+					if (!tune.formatting.percmap)
+						tune.formatting.percmap = {};
+					tune.formatting.percmap[percmap.key] = percmap.value;
+				}
+				break;
 
 			case "map":
-			case "percmap":
 			case "playtempo":
 			case "auquality":
 			case "continuous":

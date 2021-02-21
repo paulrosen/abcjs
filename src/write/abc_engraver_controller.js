@@ -169,7 +169,8 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 	this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
 		bagpipes: abcTune.formatting.bagpipes,
 		flatbeams: abcTune.formatting.flatbeams,
-		graceSlurs: abcTune.formatting.graceSlurs !== false // undefined is the default, which is true
+		graceSlurs: abcTune.formatting.graceSlurs !== false, // undefined is the default, which is true
+		percmap: abcTune.formatting.percmap
 	});
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.engraver.measureLength = abcTune.getMeterFraction().num/abcTune.getMeterFraction().den;
