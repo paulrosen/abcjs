@@ -165,14 +165,24 @@ function findElementByCoord(self, x, y) {
 	return (closestIndex >= 0 && minDistance <= 12) ? closestIndex : -1;
 }
 
-function getBestMatchCoordinates(dim, ev) {
+function getBestMatchCoordinates(dim, ev, scale) {
 	// Different browsers have conflicting meanings for the coordinates that are returned.
 	// If the item we want is clicked on directly, then we will just see what is the best match.
 	// This seems like less of a hack than browser sniffing.
 	if (dim.x <= ev.offsetX && dim.x+dim.width >= ev.offsetX &&
 		dim.y <= ev.offsetY && dim.y+dim.height >= ev.offsetY)
 		return [ ev.offsetX, ev.offsetY];
-	return  [ ev.layerX, ev.layerY];
+	// Firefox returns a weird value for offset, but layer is correct.
+	// Safari and Chrome return the correct value for offset, but layer is multiplied by the scale (that is, if it were rendered with { scale: 2 })
+	// For instance (if scale is 2):
+	// Firefox: { offsetY: 5, layerY: 335 }
+	// Others: {offsetY: 335, layerY: 670} (there could be a little rounding, so the number might not be exactly 2x)
+	// So, if layerY/scale is approx. offsetY, then use offsetY, otherwise use layerY
+	var epsilon = Math.abs(ev.layerY/scale - ev.offsetY);
+	if (epsilon < 3)
+		return [ ev.offsetX, ev.offsetY];
+	else
+		return  [ ev.layerX, ev.layerY];
 }
 
 function getTarget(target) {
@@ -200,7 +210,7 @@ function getMousePosition(self, ev) {
 	var clickedOn = findElementInHistory(self.selectables, getTarget(ev.target));
 	if (clickedOn >= 0) {
 		// There was a direct hit on an element.
-		box = getBestMatchCoordinates(self.selectables[clickedOn].svgEl.getBBox(), ev);
+		box = getBestMatchCoordinates(self.selectables[clickedOn].svgEl.getBBox(), ev, self.scale);
 		x = box[0];
 		y = box[1];
 		//console.log("clicked on", clickedOn, x, y, self.selectables[clickedOn].svgEl.getBBox(), ev.target.getBBox());
