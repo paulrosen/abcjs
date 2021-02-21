@@ -56,6 +56,7 @@ style=rhythm
 style=harmonic
 style=x
 style=normal
+style=triangle
 ```
 
 You can also use the above as a decoration to a single note to affect just that note:

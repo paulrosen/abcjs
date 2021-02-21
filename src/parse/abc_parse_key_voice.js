@@ -554,6 +554,7 @@ var parseKeyVoice = {};
 						case "harmonic":
 						case "rhythm":
 						case "x":
+						case "triangle":
 							multilineVars.style = tokens[0].token;
 							tokens.shift();
 							break;
@@ -870,10 +871,10 @@ var parseKeyVoice = {};
 							warn("Expected value for style in voice: " + attr.warn, line, start);
 						else if (attr.err !== undefined)
 							warn("Expected value for style in voice: " + attr.err, line, start);
-						else if (attr.token === 'normal' || attr.token === 'harmonic' || attr.token === 'rhythm' || attr.token === 'x')
+						else if (attr.token === 'normal' || attr.token === 'harmonic' || attr.token === 'rhythm' || attr.token === 'x' || attr.token === 'triangle')
 							multilineVars.voices[id].style = attr.token;
 						else
-							warn("Expected one of [normal, harmonic, rhythm, x] for voice style", line, start);
+							warn("Expected one of [normal, harmonic, rhythm, x, triangle] for voice style", line, start);
 						start += attr.len;
 						break;
 					// default:

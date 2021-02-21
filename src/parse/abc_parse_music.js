@@ -714,7 +714,7 @@ var legalAccents = [
 	"slide", "marcato",
 	"upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4",
 	"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato",
-	"style=normal", "style=harmonic", "style=rhythm", "style=x"
+	"style=normal", "style=harmonic", "style=rhythm", "style=x", "style=triangle"
 ];
 
 var volumeDecorations = [

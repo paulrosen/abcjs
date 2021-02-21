@@ -191,7 +191,7 @@ var ParserLint = function() {
 					verticalPos: { type: 'number' },
 					startSlur: slurProperties,
 					startTie: tieProperties,
-					style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x'], optional: true },
+					style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x', 'triangle'], optional: true },
 					soundPitch: { type: 'number', optional: true }
 				}
 		}},
@@ -213,7 +213,7 @@ var ParserLint = function() {
 		startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true },
 		tripletMultiplier: { type: 'number', minimum: .1, maximum: 9, optional: true },
 		stemConnectsToAbove: { type: 'boolean', Enum: [ true ], optional: true },
-		style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x'], optional: true }
+		style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x', 'triangle'], optional: true }
 };
 
 	var keyProperties = { // change deepCopyKey (in parse_header) if there are changes around here
@@ -283,7 +283,7 @@ var ParserLint = function() {
 				direction: { type: 'string', Enum: [ 'up', 'down', 'auto', 'none' ] }
 			}},
 			{ value: 'style', properties: {
-				head: { type: 'string', Enum: [ 'normal', 'harmonic', 'rhythm', 'x' ] }
+				head: { type: 'string', Enum: [ 'normal', 'harmonic', 'rhythm', 'x', 'triangle' ] }
 			}},
 			{ value: 'tempo', properties: appendPositioning(tempoProperties) },
 			{ value: 'transpose', properties: { steps: { type: "number" } } },
