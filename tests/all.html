@@ -27,12 +27,10 @@
 <script src="visual/directives.test.js"></script>
 <script src="parse/start-char.test.js"></script>
 
-<script src="../node_modules/@tarp/require/require.min.js"></script>
+<script src="../dist/abcjs-basic-min.js"></script>
 <script>
-	Tarp.require({main: "../index.js"}).then(function (response) {
-		window.abcjs = response;
-		mocha.run();
-	});
+	window.abcjs = ABCJS
+	mocha.run();
 </script>
 
 </body>

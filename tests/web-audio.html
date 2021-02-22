@@ -23,19 +23,17 @@ need to click the button below to do the testing.</p>
 
 <script src="synth/synth.test.js"></script>
 
-<script src="../node_modules/@tarp/require/require.min.js"></script>
+<script src="../dist/abcjs-basic-min.js"></script>
 <script>
-	Tarp.require({main: "../index.js"}).then(function (response) {
-		window.abcjs = response;
+	window.abcjs = ABCJS
 
-		var el = document.querySelector(".start-test");
-		el.addEventListener("click", function() {
-			var els = document.querySelectorAll(".intro")
-			for (var i = 0; i < els.length; i++) {
-				els[i].style = "display:none;";
-			}
-			mocha.run();
-		});
+	var el = document.querySelector(".start-test");
+	el.addEventListener("click", function() {
+		var els = document.querySelectorAll(".intro")
+		for (var i = 0; i < els.length; i++) {
+			els[i].style = "display:none;";
+		}
+		mocha.run();
 	});
 </script>
 
