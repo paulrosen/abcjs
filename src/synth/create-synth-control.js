@@ -2,7 +2,7 @@ var supportsAudio = require('./supports-audio');
 var registerAudioContext = require('./register-audio-context');
 var activeAudioContext = require('./active-audio-context');
 var parseCommon = require('../parse/abc_common');
-// TODO-PER: The require statements for svg don't play well for node apps without extra plugins. The following lines would be clearer than inlining the SVG
+
 var loopImage = require('./images/loop.svg');
 var playImage = require('./images/play.svg');
 var pauseImage = require('./images/pause.svg');
