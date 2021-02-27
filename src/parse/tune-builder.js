@@ -94,10 +94,14 @@ var TuneBuilder = function(tune) {
 					for (k = 0; k < overlayVoice.length; k++) {
 						var ov = overlayVoice[k];
 						if (ov.hasOverlay) {
+							ov.voice.splice(0, 0, {el_type: "stem", direction: "down"})
 							staff.voices.push(ov.voice);
 							for (var kkk = ov.snip.length-1; kkk >= 0; kkk--) {
 								var snip = ov.snip[kkk];
 								staff.voices[k].splice(snip.start, snip.len);
+								staff.voices[k].splice(snip.start+1, 0, { el_type: "stem", direction: "auto" });
+								var indexOfLastBar = findLastBar(staff.voices[k], snip.start);
+								staff.voices[k].splice(indexOfLastBar, 0, { el_type: "stem", direction: "up" });
 							}
 							// remove ending marks from the overlay voice so they are not repeated
 							for (kkk = 0; kkk < staff.voices[staff.voices.length-1].length; kkk++) {
@@ -117,6 +121,12 @@ var TuneBuilder = function(tune) {
 		return madeChanges;
 	};
 
+	function findLastBar(voice, start) {
+		for (var i = start-1; i > 0 && voice[i].el_type !== "bar"; i--) {
+
+		}
+		return i;
+	}
 	function fixTitles(lines) {
 		// We might have name and subname defined. We now know what line everything is on, so we can determine which to use.
 		var firstMusicLine = true;
