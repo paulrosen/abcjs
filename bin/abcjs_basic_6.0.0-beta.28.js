@@ -173,20 +173,6 @@ module.exports = abcjs;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_animation.js: handles animating the music in real time.
-//    Copyright (C) 2014-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var TimingCallbacks = __webpack_require__(/*! ./abc_timing_callbacks */ "./src/api/abc_timing_callbacks.js");
 
 var animation = {};
@@ -305,20 +291,6 @@ module.exports = animation;
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-//    Copyright (C) 2015-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var TimingCallbacks = function TimingCallbacks(target, params) {
   var self = this;
   if (!params) params = {};
@@ -548,22 +520,23 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
 
     if (self.isPaused) {
       self.isPaused = false;
-      self.justUnpaused = true;
+      if (offsetPercent === undefined) self.justUnpaused = true;
     }
 
     if (offsetPercent) {
       self.setProgress(offsetPercent);
+    } else if (offsetPercent === 0) {
+      self.reset();
     } else if (self.pausedPercent !== null) {
       var now = performance.now();
       var currentTime = self.lastMoment * self.pausedPercent;
       self.startTime = now - currentTime;
       self.pausedPercent = null;
       self.reportNext = true;
-      requestAnimationFrame(self.doTiming);
-    } else {
-      requestAnimationFrame(self.doTiming);
-      self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
     }
+
+    requestAnimationFrame(self.doTiming);
+    self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
   };
 
   self.pause = function () {
@@ -581,6 +554,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
   self.reset = function () {
     self.currentBeat = 0;
     self.currentEvent = 0;
+    self.currentLine = 0;
     self.startTime = null;
     self.pausedPercent = null;
   };
@@ -664,20 +638,6 @@ module.exports = TimingCallbacks;
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 //    abc_tunebook.js: splits a string representing ABC Music Notation into individual tunes.
-//    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var Parse = __webpack_require__(/*! ../parse/abc_parse */ "./src/parse/abc_parse.js");
 
 var bookParser = __webpack_require__(/*! ../parse/abc_parse_book */ "./src/parse/abc_parse_book.js");
@@ -945,20 +905,6 @@ module.exports = tunebook;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2015-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var tunebook = __webpack_require__(/*! ./abc_tunebook */ "./src/api/abc_tunebook.js");
 
 var Tune = __webpack_require__(/*! ../data/abc_tune */ "./src/data/abc_tune.js");
@@ -1230,20 +1176,6 @@ module.exports = renderAbc;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_tune.js: a computer usable internal structure representing one tune.
-//    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
 
 var spacing = __webpack_require__(/*! ../write/abc_spacing */ "./src/write/abc_spacing.js");
@@ -1830,7 +1762,7 @@ var Tune = function Tune() {
   this.setUpAudio = function (options) {
     if (!options) options = {};
     var seq = sequence(this, options);
-    return flatten(seq, options);
+    return flatten(seq, options, this.formatting.percmap);
   };
 };
 
@@ -1846,20 +1778,6 @@ module.exports = Tune;
 /***/ (function(module, exports) {
 
 // abc_editor.js
-//    Copyright (C) 2015-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // window.ABCJS.Editor is the interface class for the area that contains the ABC text. It is responsible for
 // holding the text of the tune and calling the parser and the rendering engines.
 //
@@ -1988,7 +1906,6 @@ module.exports = EditArea;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//
 // window.ABCJS.Editor:
 //
 // constructor(editarea, params)
@@ -2389,20 +2306,6 @@ module.exports = Editor;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_midi_create.js: Turn a linear series of events into a midi file.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var Preparer = __webpack_require__(/*! ./abc_midi_js_preparer */ "./src/midi/abc_midi_js_preparer.js");
 
 var rendererFactory = __webpack_require__(/*! ../synth/abc_midi_renderer */ "./src/synth/abc_midi_renderer.js");
@@ -2533,20 +2436,6 @@ module.exports = create;
 /***/ (function(module, exports) {
 
 //    abc_midi_js_preparer.js: Create the structure that MIDI.js expects.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var Preparer;
 
 (function () {
@@ -2761,20 +2650,6 @@ module.exports = Preparer;
 /***/ (function(module, exports) {
 
 //    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
-//    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var parseCommon = {};
 
 parseCommon.clone = function (source) {
@@ -2897,31 +2772,15 @@ module.exports = parseCommon;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
-//    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
 
 var parseDirective = __webpack_require__(/*! ./abc_parse_directive */ "./src/parse/abc_parse_directive.js");
 
 var ParseHeader = __webpack_require__(/*! ./abc_parse_header */ "./src/parse/abc_parse_header.js");
 
-var parseKeyVoice = __webpack_require__(/*! ./abc_parse_key_voice */ "./src/parse/abc_parse_key_voice.js");
+var ParseMusic = __webpack_require__(/*! ./abc_parse_music */ "./src/parse/abc_parse_music.js");
 
 var Tokenizer = __webpack_require__(/*! ./abc_tokenizer */ "./src/parse/abc_tokenizer.js");
-
-var transpose = __webpack_require__(/*! ./abc_transpose */ "./src/parse/abc_transpose.js");
 
 var wrap = __webpack_require__(/*! ./wrap_lines */ "./src/parse/wrap_lines.js");
 
@@ -3126,7 +2985,8 @@ var Parse = function Parse() {
     });
   };
 
-  var header = new ParseHeader(tokenizer, warn, multilineVars, tune, tuneBuilder);
+  var header;
+  var music;
 
   this.getWarnings = function () {
     return multilineVars.warnings;
@@ -3134,316 +2994,6 @@ var Parse = function Parse() {
 
   this.getWarningObjects = function () {
     return multilineVars.warningObjects;
-  };
-
-  var letter_to_chord = function letter_to_chord(line, i) {
-    if (line.charAt(i) === '"') {
-      var chord = tokenizer.getBrackettedSubstring(line, i, 5);
-      if (!chord[2]) warn("Missing the closing quote while parsing the chord symbol", line, i); // If it starts with ^, then the chord appears above.
-      // If it starts with _ then the chord appears below.
-      // (note that the 2.0 draft standard defines them as not chords, but annotations and also defines @.)
-
-      if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '^') {
-        chord[1] = chord[1].substring(1);
-        chord[2] = 'above';
-      } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '_') {
-        chord[1] = chord[1].substring(1);
-        chord[2] = 'below';
-      } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '<') {
-        chord[1] = chord[1].substring(1);
-        chord[2] = 'left';
-      } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '>') {
-        chord[1] = chord[1].substring(1);
-        chord[2] = 'right';
-      } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '@') {
-        // @-15,5.7
-        chord[1] = chord[1].substring(1);
-        var x = tokenizer.getFloat(chord[1]);
-        if (x.digits === 0) warn("Missing first position in absolutely positioned annotation.", line, i);
-        chord[1] = chord[1].substring(x.digits);
-        if (chord[1][0] !== ',') warn("Missing comma absolutely positioned annotation.", line, i);
-        chord[1] = chord[1].substring(1);
-        var y = tokenizer.getFloat(chord[1]);
-        if (y.digits === 0) warn("Missing second position in absolutely positioned annotation.", line, i);
-        chord[1] = chord[1].substring(y.digits);
-        var ws = tokenizer.skipWhiteSpace(chord[1]);
-        chord[1] = chord[1].substring(ws);
-        chord[2] = null;
-        chord[3] = {
-          x: x.value,
-          y: y.value
-        };
-      } else {
-        if (multilineVars.freegchord !== true) {
-          chord[1] = chord[1].replace(/([ABCDEFG0-9])b/g, "$1♭");
-          chord[1] = chord[1].replace(/([ABCDEFG0-9])#/g, "$1♯");
-          chord[1] = chord[1].replace(/^([ABCDEFG])([♯♭]?)o([^A-Za-z])/g, "$1$2°$3");
-          chord[1] = chord[1].replace(/^([ABCDEFG])([♯♭]?)o$/g, "$1$2°");
-          chord[1] = chord[1].replace(/^([ABCDEFG])([♯♭]?)0([^A-Za-z])/g, "$1$2ø$3");
-          chord[1] = chord[1].replace(/^([ABCDEFG])([♯♭]?)\^([^A-Za-z])/g, "$1$2∆$3");
-        }
-
-        chord[2] = 'default';
-        chord[1] = transpose.chordName(multilineVars, chord[1]);
-      }
-
-      return chord;
-    }
-
-    return [0, ""];
-  };
-
-  var legalAccents = ["trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge", "open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase", "segno", "coda", "D.S.", "D.C.", "fine", "beambr1", "beambr2", "slide", "marcato", "upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4", "turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato", "style=normal", "style=harmonic", "style=rhythm", "style=x"];
-  var volumeDecorations = ["p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp", "fff", "ffff", "sfz"];
-  var dynamicDecorations = ["crescendo(", "crescendo)", "diminuendo(", "diminuendo)"];
-  var accentPseudonyms = [["<", "accent"], [">", "accent"], ["tr", "trill"], ["plus", "+"], ["emphasis", "accent"], ["^", "umarcato"], ["marcato", "umarcato"]];
-  var accentDynamicPseudonyms = [["<(", "crescendo("], ["<)", "crescendo)"], [">(", "diminuendo("], [">)", "diminuendo)"]];
-
-  var letter_to_accent = function letter_to_accent(line, i) {
-    var macro = multilineVars.macros[line.charAt(i)];
-
-    if (macro !== undefined) {
-      if (macro.charAt(0) === '!' || macro.charAt(0) === '+') macro = macro.substring(1);
-      if (macro.charAt(macro.length - 1) === '!' || macro.charAt(macro.length - 1) === '+') macro = macro.substring(0, macro.length - 1);
-      if (parseCommon.detect(legalAccents, function (acc) {
-        return macro === acc;
-      })) return [1, macro];else if (parseCommon.detect(volumeDecorations, function (acc) {
-        return macro === acc;
-      })) {
-        if (multilineVars.volumePosition === 'hidden') macro = "";
-        return [1, macro];
-      } else if (parseCommon.detect(dynamicDecorations, function (acc) {
-        if (multilineVars.dynamicPosition === 'hidden') macro = "";
-        return macro === acc;
-      })) {
-        return [1, macro];
-      } else {
-        if (!parseCommon.detect(multilineVars.ignoredDecorations, function (dec) {
-          return macro === dec;
-        })) warn("Unknown macro: " + macro, line, i);
-        return [1, ''];
-      }
-    }
-
-    switch (line.charAt(i)) {
-      case '.':
-        if (line[i + 1] === '(' || line[i + 1] === '-') // a dot then open paren is a dotted slur; likewise dot dash is dotted tie.
-          break;
-        return [1, 'staccato'];
-
-      case 'u':
-        return [1, 'upbow'];
-
-      case 'v':
-        return [1, 'downbow'];
-
-      case '~':
-        return [1, 'irishroll'];
-
-      case '!':
-      case '+':
-        var ret = tokenizer.getBrackettedSubstring(line, i, 5); // Be sure that the accent is recognizable.
-
-        if (ret[1].length > 1 && (ret[1].charAt(0) === '^' || ret[1].charAt(0) === '_')) ret[1] = ret[1].substring(1); // TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
-
-        if (parseCommon.detect(legalAccents, function (acc) {
-          return ret[1] === acc;
-        })) return ret;
-
-        if (parseCommon.detect(volumeDecorations, function (acc) {
-          return ret[1] === acc;
-        })) {
-          if (multilineVars.volumePosition === 'hidden') ret[1] = '';
-          return ret;
-        }
-
-        if (parseCommon.detect(dynamicDecorations, function (acc) {
-          return ret[1] === acc;
-        })) {
-          if (multilineVars.dynamicPosition === 'hidden') ret[1] = '';
-          return ret;
-        }
-
-        if (parseCommon.detect(accentPseudonyms, function (acc) {
-          if (ret[1] === acc[0]) {
-            ret[1] = acc[1];
-            return true;
-          } else return false;
-        })) return ret;
-
-        if (parseCommon.detect(accentDynamicPseudonyms, function (acc) {
-          if (ret[1] === acc[0]) {
-            ret[1] = acc[1];
-            return true;
-          } else return false;
-        })) {
-          if (multilineVars.dynamicPosition === 'hidden') ret[1] = '';
-          return ret;
-        } // We didn't find the accent in the list, so consume the space, but don't return an accent.
-        // Although it is possible that ! was used as a line break, so accept that.
-
-
-        if (line.charAt(i) === '!' && (ret[0] === 1 || line.charAt(i + ret[0] - 1) !== '!')) return [1, null];
-        warn("Unknown decoration: " + ret[1], line, i);
-        ret[1] = "";
-        return ret;
-
-      case 'H':
-        return [1, 'fermata'];
-
-      case 'J':
-        return [1, 'slide'];
-
-      case 'L':
-        return [1, 'accent'];
-
-      case 'M':
-        return [1, 'mordent'];
-
-      case 'O':
-        return [1, 'coda'];
-
-      case 'P':
-        return [1, 'pralltriller'];
-
-      case 'R':
-        return [1, 'roll'];
-
-      case 'S':
-        return [1, 'segno'];
-
-      case 'T':
-        return [1, 'trill'];
-    }
-
-    return [0, 0];
-  };
-
-  var letter_to_spacer = function letter_to_spacer(line, i) {
-    var start = i;
-
-    while (tokenizer.isWhiteSpace(line.charAt(i))) {
-      i++;
-    }
-
-    return [i - start];
-  }; // returns the class of the bar line
-  // the number of the repeat
-  // and the number of characters used up
-  // if 0 is returned, then the next element was not a bar line
-
-
-  var letter_to_bar = function letter_to_bar(line, curr_pos) {
-    var ret = tokenizer.getBarLine(line, curr_pos);
-    if (ret.len === 0) return [0, ""];
-
-    if (ret.warn) {
-      warn(ret.warn, line, curr_pos);
-      return [ret.len, ""];
-    } // Now see if this is a repeated ending
-    // A repeated ending is all of the characters 1,2,3,4,5,6,7,8,9,0,-, and comma
-    // It can also optionally start with '[', which is ignored.
-    // Also, it can have white space before the '['.
-
-
-    for (var ws = 0; ws < line.length; ws++) {
-      if (line.charAt(curr_pos + ret.len + ws) !== ' ') break;
-    }
-
-    var orig_bar_len = ret.len;
-
-    if (line.charAt(curr_pos + ret.len + ws) === '[') {
-      ret.len += ws + 1;
-    } // It can also be a quoted string. It is unclear whether that construct requires '[', but it seems like it would. otherwise it would be confused with a regular chord.
-
-
-    if (line.charAt(curr_pos + ret.len) === '"' && line.charAt(curr_pos + ret.len - 1) === '[') {
-      var ending = tokenizer.getBrackettedSubstring(line, curr_pos + ret.len, 5);
-      return [ret.len + ending[0], ret.token, ending[1]];
-    }
-
-    var retRep = tokenizer.getTokenOf(line.substring(curr_pos + ret.len), "1234567890-,");
-    if (retRep.len === 0 || retRep.token[0] === '-') return [orig_bar_len, ret.token];
-    return [ret.len + retRep.len, ret.token, retRep.token];
-  };
-
-  var tripletQ = {
-    2: 3,
-    3: 2,
-    4: 3,
-    5: 2,
-    // TODO-PER: not handling 6/8 rhythm yet
-    6: 2,
-    7: 2,
-    // TODO-PER: not handling 6/8 rhythm yet
-    8: 3,
-    9: 2 // TODO-PER: not handling 6/8 rhythm yet
-
-  };
-
-  var letter_to_open_slurs_and_triplets = function letter_to_open_slurs_and_triplets(line, i) {
-    // consume spaces, and look for all the open parens. If there is a number after the open paren,
-    // that is a triplet. Otherwise that is a slur. Collect all the slurs and the first triplet.
-    var ret = {};
-    var start = i;
-
-    if (line[i] === '.' && line[i + 1] === '(') {
-      ret.dottedSlur = true;
-      i++;
-    }
-
-    while (line.charAt(i) === '(' || tokenizer.isWhiteSpace(line.charAt(i))) {
-      if (line.charAt(i) === '(') {
-        if (i + 1 < line.length && line.charAt(i + 1) >= '2' && line.charAt(i + 1) <= '9') {
-          if (ret.triplet !== undefined) warn("Can't nest triplets", line, i);else {
-            ret.triplet = line.charAt(i + 1) - '0';
-            ret.tripletQ = tripletQ[ret.triplet];
-            ret.num_notes = ret.triplet;
-
-            if (i + 2 < line.length && line.charAt(i + 2) === ':') {
-              // We are expecting "(p:q:r" or "(p:q" or "(p::r"
-              // That is: "put p notes into the time of q for the next r notes"
-              // if r is missing, then it is equal to p.
-              // if q is missing, it is determined from this table:
-              // (2 notes in the time of 3
-              // (3 notes in the time of 2
-              // (4 notes in the time of 3
-              // (5 notes in the time of n | if time sig is (6/8, 9/8, 12/8), n=3, else n=2
-              // (6 notes in the time of 2
-              // (7 notes in the time of n
-              // (8 notes in the time of 3
-              // (9 notes in the time of n
-              if (i + 3 < line.length && line.charAt(i + 3) === ':') {
-                // The second number, 'q', is not present.
-                if (i + 4 < line.length && line.charAt(i + 4) >= '1' && line.charAt(i + 4) <= '9') {
-                  ret.num_notes = line.charAt(i + 4) - '0';
-                  i += 3;
-                } else warn("expected number after the two colons after the triplet to mark the duration", line, i);
-              } else if (i + 3 < line.length && line.charAt(i + 3) >= '1' && line.charAt(i + 3) <= '9') {
-                ret.tripletQ = line.charAt(i + 3) - '0';
-
-                if (i + 4 < line.length && line.charAt(i + 4) === ':') {
-                  if (i + 5 < line.length && line.charAt(i + 5) >= '1' && line.charAt(i + 5) <= '9') {
-                    ret.num_notes = line.charAt(i + 5) - '0';
-                    i += 4;
-                  }
-                } else {
-                  i += 2;
-                }
-              } else warn("expected number after the triplet to mark the duration", line, i);
-            }
-          }
-          i++;
-        } else {
-          if (ret.startSlur === undefined) ret.startSlur = 1;else ret.startSlur++;
-        }
-      }
-
-      i++;
-    }
-
-    ret.consumed = i - start;
-    return ret;
   };
 
   var addWords = function addWords(line, words) {
@@ -3674,1083 +3224,10 @@ var Parse = function Parse() {
     });
   };
 
-  var getBrokenRhythm = function getBrokenRhythm(line, index) {
-    switch (line.charAt(index)) {
-      case '>':
-        if (index < line.length - 2 && line.charAt(index + 1) === '>' && line.charAt(index + 2) === '>') // triple >>>
-          return [3, 1.875, 0.125];else if (index < line.length - 1 && line.charAt(index + 1) === '>') // double >>
-          return [2, 1.75, 0.25];else return [1, 1.5, 0.5];
-
-      case '<':
-        if (index < line.length - 2 && line.charAt(index + 1) === '<' && line.charAt(index + 2) === '<') // triple <<<
-          return [3, 0.125, 1.875];else if (index < line.length - 1 && line.charAt(index + 1) === '<') // double <<
-          return [2, 0.25, 1.75];else return [1, 0.5, 1.5];
-    }
-
-    return null;
-  }; // TODO-PER: make this a method in el.
-
-
-  var addEndBeam = function addEndBeam(el) {
-    if (el.duration !== undefined && el.duration < 0.25) el.end_beam = true;
-    return el;
-  };
-
-  var pitches = {
-    A: 5,
-    B: 6,
-    C: 0,
-    D: 1,
-    E: 2,
-    F: 3,
-    G: 4,
-    a: 12,
-    b: 13,
-    c: 7,
-    d: 8,
-    e: 9,
-    f: 10,
-    g: 11
-  };
-  var rests = {
-    x: 'invisible',
-    y: 'spacer',
-    z: 'rest',
-    Z: 'multimeasure'
-  };
-
-  var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
-    //var el = { startChar: index };
-    var isComplete = function isComplete(state) {
-      return state === 'octave' || state === 'duration' || state === 'Zduration' || state === 'broken_rhythm' || state === 'end_slur';
-    };
-
-    var dottedTie;
-
-    if (line[index] === '.' && line[index + 1] === '-') {
-      dottedTie = true;
-      index++;
-    }
-
-    var state = 'startSlur';
-    var durationSetByPreviousNote = false;
-
-    while (1) {
-      switch (line.charAt(index)) {
-        case '(':
-          if (state === 'startSlur') {
-            if (el.startSlur === undefined) el.startSlur = 1;else el.startSlur++;
-          } else if (isComplete(state)) {
-            el.endChar = index;
-            return el;
-          } else return null;
-
-          break;
-
-        case ')':
-          if (isComplete(state)) {
-            if (el.endSlur === undefined) el.endSlur = 1;else el.endSlur++;
-          } else return null;
-
-          break;
-
-        case '^':
-          if (state === 'startSlur') {
-            el.accidental = 'sharp';
-            state = 'sharp2';
-          } else if (state === 'sharp2') {
-            el.accidental = 'dblsharp';
-            state = 'pitch';
-          } else if (isComplete(state)) {
-            el.endChar = index;
-            return el;
-          } else return null;
-
-          break;
-
-        case '_':
-          if (state === 'startSlur') {
-            el.accidental = 'flat';
-            state = 'flat2';
-          } else if (state === 'flat2') {
-            el.accidental = 'dblflat';
-            state = 'pitch';
-          } else if (isComplete(state)) {
-            el.endChar = index;
-            return el;
-          } else return null;
-
-          break;
-
-        case '=':
-          if (state === 'startSlur') {
-            el.accidental = 'natural';
-            state = 'pitch';
-          } else if (isComplete(state)) {
-            el.endChar = index;
-            return el;
-          } else return null;
-
-          break;
-
-        case 'A':
-        case 'B':
-        case 'C':
-        case 'D':
-        case 'E':
-        case 'F':
-        case 'G':
-        case 'a':
-        case 'b':
-        case 'c':
-        case 'd':
-        case 'e':
-        case 'f':
-        case 'g':
-          if (state === 'startSlur' || state === 'sharp2' || state === 'flat2' || state === 'pitch') {
-            el.pitch = pitches[line.charAt(index)];
-            transpose.note(multilineVars, el);
-            state = 'octave'; // At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
-
-            if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
-              el.duration = multilineVars.default_length * multilineVars.next_note_duration;
-              multilineVars.next_note_duration = 0;
-              durationSetByPreviousNote = true;
-            } else el.duration = multilineVars.default_length; // If the clef is percussion, there is probably some translation of the pitch to a particular drum kit item.
-
-
-            if (multilineVars.clef && multilineVars.clef.type === "perc" || multilineVars.currentVoice && multilineVars.currentVoice.clef === "perc") {
-              var key = line.charAt(index);
-
-              if (el.accidental) {
-                var accMap = {
-                  'dblflat': '__',
-                  'flat': '_',
-                  'natural': '=',
-                  'sharp': '^',
-                  'dblsharp': '^^'
-                };
-                key = accMap[el.accidental] + key;
-              }
-
-              if (tune.formatting && tune.formatting.midi && tune.formatting.midi.drummap) el.midipitch = tune.formatting.midi.drummap[key];
-            } else if (multilineVars.clef && multilineVars.clef.type.indexOf('-') >= 0) {
-              el.soundPitch = el.pitch - 7;
-            } else if (multilineVars.clef && multilineVars.clef.type.indexOf('+') >= 0) el.soundPitch = el.pitch + 7;
-          } else if (isComplete(state)) {
-            el.endChar = index;
-            return el;
-          } else return null;
-
-          break;
-
-        case ',':
-          if (state === 'octave') {
-            el.pitch -= 7;
-            if (el.soundPitch !== undefined) el.soundPitch -= 7;
-          } else if (isComplete(state)) {
-            el.endChar = index;
-            return el;
-          } else return null;
-
-          break;
-
-        case '\'':
-          if (state === 'octave') {
-            el.pitch += 7;
-            if (el.soundPitch !== undefined) el.soundPitch += 7;
-          } else if (isComplete(state)) {
-            el.endChar = index;
-            return el;
-          } else return null;
-
-          break;
-
-        case 'x':
-        case 'y':
-        case 'z':
-        case 'Z':
-          if (state === 'startSlur') {
-            el.rest = {
-              type: rests[line.charAt(index)]
-            }; // There shouldn't be some of the properties that notes have. If some sneak in due to bad syntax in the abc file,
-            // just nix them here.
-
-            delete el.accidental;
-            delete el.startSlur;
-            delete el.startTie;
-            delete el.endSlur;
-            delete el.endTie;
-            delete el.end_beam;
-            delete el.grace_notes; // At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
-
-            if (el.rest.type === 'multimeasure') {
-              el.duration = tune.getBarLength();
-              el.rest.text = 1;
-              state = 'Zduration';
-            } else {
-              if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
-                el.duration = multilineVars.default_length * multilineVars.next_note_duration;
-                multilineVars.next_note_duration = 0;
-                durationSetByPreviousNote = true;
-              } else el.duration = multilineVars.default_length;
-
-              state = 'duration';
-            }
-          } else if (isComplete(state)) {
-            el.endChar = index;
-            return el;
-          } else return null;
-
-          break;
-
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-        case '0':
-        case '/':
-          if (state === 'octave' || state === 'duration') {
-            var fraction = tokenizer.getFraction(line, index); //if (!durationSetByPreviousNote)
-
-            el.duration = el.duration * fraction.value; // TODO-PER: We can test the returned duration here and give a warning if it isn't the one expected.
-
-            el.endChar = fraction.index;
-
-            while (fraction.index < line.length && (tokenizer.isWhiteSpace(line.charAt(fraction.index)) || line.charAt(fraction.index) === '-')) {
-              if (line.charAt(fraction.index) === '-') el.startTie = {};else el = addEndBeam(el);
-              fraction.index++;
-            }
-
-            index = fraction.index - 1;
-            state = 'broken_rhythm';
-          } else if (state === 'sharp2') {
-            el.accidental = 'quartersharp';
-            state = 'pitch';
-          } else if (state === 'flat2') {
-            el.accidental = 'quarterflat';
-            state = 'pitch';
-          } else if (state === 'Zduration') {
-            var num = tokenizer.getNumber(line, index);
-            el.duration = num.num * tune.getBarLength();
-            el.rest.text = num.num;
-            el.endChar = num.index;
-            return el;
-          } else return null;
-
-          break;
-
-        case '-':
-          if (state === 'startSlur') {
-            // This is the first character, so it must have been meant for the previous note. Correct that here.
-            tuneBuilder.addTieToLastNote(dottedTie);
-            el.endTie = true;
-          } else if (state === 'octave' || state === 'duration' || state === 'end_slur') {
-            el.startTie = {};
-            if (!durationSetByPreviousNote && canHaveBrokenRhythm) state = 'broken_rhythm';else {
-              // Peek ahead to the next character. If it is a space, then we have an end beam.
-              if (tokenizer.isWhiteSpace(line.charAt(index + 1))) addEndBeam(el);
-              el.endChar = index + 1;
-              return el;
-            }
-          } else if (state === 'broken_rhythm') {
-            el.endChar = index;
-            return el;
-          } else return null;
-
-          break;
-
-        case ' ':
-        case '\t':
-          if (isComplete(state)) {
-            el.end_beam = true; // look ahead to see if there is a tie
-
-            dottedTie = false;
-
-            do {
-              if (line.charAt(index) === '.' && line.charAt(index + 1) === '-') {
-                dottedTie = true;
-                index++;
-              }
-
-              if (line.charAt(index) === '-') {
-                el.startTie = {};
-                if (dottedTie) el.startTie.style = "dotted";
-              }
-
-              index++;
-            } while (index < line.length && (tokenizer.isWhiteSpace(line.charAt(index)) || line.charAt(index) === '-') || line.charAt(index) === '.' && line.charAt(index + 1) === '-');
-
-            el.endChar = index;
-
-            if (!durationSetByPreviousNote && canHaveBrokenRhythm && (line.charAt(index) === '<' || line.charAt(index) === '>')) {
-              // TODO-PER: Don't need the test for < and >, but that makes the endChar work out for the regression test.
-              index--;
-              state = 'broken_rhythm';
-            } else return el;
-          } else return null;
-
-          break;
-
-        case '>':
-        case '<':
-          if (isComplete(state)) {
-            if (canHaveBrokenRhythm) {
-              var br2 = getBrokenRhythm(line, index);
-              index += br2[0] - 1; // index gets incremented below, so we'll let that happen
-
-              multilineVars.next_note_duration = br2[2];
-              el.duration = br2[1] * el.duration;
-              state = 'end_slur';
-            } else {
-              el.endChar = index;
-              return el;
-            }
-          } else return null;
-
-          break;
-
-        default:
-          if (isComplete(state)) {
-            el.endChar = index;
-            return el;
-          }
-
-          return null;
-      }
-
-      index++;
-
-      if (index === line.length) {
-        if (isComplete(state)) {
-          el.endChar = index;
-          return el;
-        } else return null;
-      }
-    }
-
-    return null;
-  };
-
-  function startNewLine() {
-    var params = {
-      startChar: -1,
-      endChar: -1
-    };
-    if (multilineVars.partForNextLine.title) params.part = multilineVars.partForNextLine;
-    params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? parseCommon.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : parseCommon.clone(multilineVars.clef);
-    var scoreTranspose = multilineVars.currentVoice ? multilineVars.currentVoice.scoreTranspose : 0;
-    params.key = parseKeyVoice.standardKey(multilineVars.key.root + multilineVars.key.acc + multilineVars.key.mode, multilineVars.key.root, multilineVars.key.acc, scoreTranspose);
-    params.key.mode = multilineVars.key.mode;
-    if (multilineVars.key.impliedNaturals) params.key.impliedNaturals = multilineVars.key.impliedNaturals;
-
-    if (multilineVars.key.explicitAccidentals) {
-      for (var i = 0; i < multilineVars.key.explicitAccidentals.length; i++) {
-        var found = false;
-
-        for (var j = 0; j < params.key.accidentals.length; j++) {
-          if (params.key.accidentals[j].note === multilineVars.key.explicitAccidentals[i].note) {
-            // If the note is already in the list, override it with the new value
-            params.key.accidentals[j].acc = multilineVars.key.explicitAccidentals[i].acc;
-            found = true;
-          }
-        }
-
-        if (!found) params.key.accidentals.push(multilineVars.key.explicitAccidentals[i]);
-      }
-    }
-
-    multilineVars.targetKey = params.key;
-    if (params.key.explicitAccidentals) delete params.key.explicitAccidentals;
-    parseKeyVoice.addPosToKey(params.clef, params.key);
-
-    if (multilineVars.meter !== null) {
-      if (multilineVars.currentVoice) {
-        parseCommon.each(multilineVars.staves, function (st) {
-          st.meter = multilineVars.meter;
-        });
-        params.meter = multilineVars.staves[multilineVars.currentVoice.staffNum].meter;
-        multilineVars.staves[multilineVars.currentVoice.staffNum].meter = null;
-      } else params.meter = multilineVars.meter;
-
-      multilineVars.meter = null;
-    } else if (multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].meter) {
-      // Make sure that each voice gets the meter marking.
-      params.meter = multilineVars.staves[multilineVars.currentVoice.staffNum].meter;
-      multilineVars.staves[multilineVars.currentVoice.staffNum].meter = null;
-    }
-
-    if (multilineVars.currentVoice && multilineVars.currentVoice.name) params.name = multilineVars.currentVoice.name;
-    if (multilineVars.vocalfont) params.vocalfont = multilineVars.vocalfont;
-    if (multilineVars.tripletfont) params.tripletfont = multilineVars.tripletfont;
-    if (multilineVars.gchordfont) params.gchordfont = multilineVars.gchordfont;
-    if (multilineVars.style) params.style = multilineVars.style;
-
-    if (multilineVars.currentVoice) {
-      var staff = multilineVars.staves[multilineVars.currentVoice.staffNum];
-      if (staff.brace) params.brace = staff.brace;
-      if (staff.bracket) params.bracket = staff.bracket;
-      if (staff.connectBarLines) params.connectBarLines = staff.connectBarLines;
-      if (staff.name) params.name = staff.name[multilineVars.currentVoice.index];
-      if (staff.subname) params.subname = staff.subname[multilineVars.currentVoice.index];
-      if (multilineVars.currentVoice.stem) params.stem = multilineVars.currentVoice.stem;
-      if (multilineVars.currentVoice.stafflines) params.stafflines = multilineVars.currentVoice.stafflines;
-      if (multilineVars.currentVoice.staffscale) params.staffscale = multilineVars.currentVoice.staffscale;
-      if (multilineVars.currentVoice.scale) params.scale = multilineVars.currentVoice.scale;
-      if (multilineVars.currentVoice.style) params.style = multilineVars.currentVoice.style;
-      if (multilineVars.currentVoice.transpose) params.clef.transpose = multilineVars.currentVoice.transpose;
-    }
-
-    var isFirstVoice = multilineVars.currentVoice === undefined || multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0;
-    if (multilineVars.barNumbers === 0 && isFirstVoice && multilineVars.currBarNumber !== 1) params.barNumber = multilineVars.currBarNumber;
-    tuneBuilder.startNewLine(params);
-    if (multilineVars.key.impliedNaturals) delete multilineVars.key.impliedNaturals;
-    multilineVars.partForNextLine = {};
-    if (multilineVars.tempoForNextLine.length === 4) tuneBuilder.appendElement(multilineVars.tempoForNextLine[0], multilineVars.tempoForNextLine[1], multilineVars.tempoForNextLine[2], multilineVars.tempoForNextLine[3]);
-    multilineVars.tempoForNextLine = [];
-  }
-
-  var letter_to_grace = function letter_to_grace(line, i) {
-    // Grace notes are an array of: startslur, note, endslur, space; where note is accidental, pitch, duration
-    if (line.charAt(i) === '{') {
-      // fetch the gracenotes string and consume that into the array
-      var gra = tokenizer.getBrackettedSubstring(line, i, 1, '}');
-      if (!gra[2]) warn("Missing the closing '}' while parsing grace note", line, i); // If there is a slur after the grace construction, then move it to the last note inside the grace construction
-
-      if (line[i + gra[0]] === ')') {
-        gra[0]++;
-        gra[1] += ')';
-      }
-
-      var gracenotes = [];
-      var ii = 0;
-      var inTie = false;
-
-      while (ii < gra[1].length) {
-        var acciaccatura = false;
-
-        if (gra[1].charAt(ii) === '/') {
-          acciaccatura = true;
-          ii++;
-        }
-
-        var note = getCoreNote(gra[1], ii, {}, false);
-
-        if (note !== null) {
-          // The grace note durations should not be affected by the default length: they should be based on 1/16, so if that isn't the default, then multiply here.
-          note.duration = note.duration / (multilineVars.default_length * 8);
-          if (acciaccatura) note.acciaccatura = true;
-          gracenotes.push(note);
-
-          if (inTie) {
-            note.endTie = true;
-            inTie = false;
-          }
-
-          if (note.startTie) inTie = true;
-          ii = note.endChar;
-          delete note.endChar;
-        } else {
-          // We shouldn't get anything but notes or a space here, so report an error
-          if (gra[1].charAt(ii) === ' ') {
-            if (gracenotes.length > 0) gracenotes[gracenotes.length - 1].end_beam = true;
-          } else warn("Unknown character '" + gra[1].charAt(ii) + "' while parsing grace note", line, i);
-
-          ii++;
-        }
-      }
-
-      if (gracenotes.length) return [gra[0], gracenotes];
-    }
-
-    return [0];
-  };
-
-  function letter_to_overlay(line, i) {
-    if (line.charAt(i) === '&') {
-      var start = i;
-
-      while (line.charAt(i) && line.charAt(i) !== ':' && line.charAt(i) !== '|') {
-        i++;
-      }
-
-      return [i - start, line.substring(start + 1, i)];
-    }
-
-    return [0];
-  }
-
-  function durationOfMeasure(multilineVars) {
-    // TODO-PER: This could be more complicated if one of the unusual measures is used.
-    var meter = multilineVars.origMeter;
-    if (!meter || meter.type !== 'specified') return 1;
-    if (!meter.value || meter.value.length === 0) return 1;
-    return parseInt(meter.value[0].num, 10) / parseInt(meter.value[0].den, 10);
-  } //
-  // Parse line of music
-  //
-  // This is a stream of <(bar-marking|header|note-group)...> in any order, with optional spaces between each element
-  // core-note is <open-slur, accidental, pitch:required, octave, duration, close-slur&|tie> with no spaces within that
-  // chord is <open-bracket:required, core-note:required... close-bracket:required duration> with no spaces within that
-  // grace-notes is <open-brace:required, (open-slur|core-note:required|close-slur)..., close-brace:required> spaces are allowed
-  // note-group is <grace-notes, chord symbols&|decorations..., grace-notes, slur&|triplet, chord|core-note, end-slur|tie> spaces are allowed between items
-  // bar-marking is <ampersand> or <chord symbols&|decorations..., bar:required> spaces allowed
-  // header is <open-bracket:required, K|M|L|V:required, colon:required, field:required, close-bracket:required> spaces can occur between the colon, in the field, and before the close bracket
-  // header can also be the only thing on a line. This is true even if it is a continuation line. In this case the brackets are not required.
-  // a space is a back-tick, a space, or a tab. If it is a back-tick, then there is no end-beam.
-  // Line preprocessing: anything after a % is ignored (the double %% should have been taken care of before this)
-  // Then, all leading and trailing spaces are ignored.
-  // If there was a line continuation, the \n was replaced by a \r and the \ was replaced by a space. This allows the construct
-  // of having a header mid-line conceptually, but actually be at the start of the line. This is equivolent to putting the header in [ ].
-  // TODO-PER: How to handle ! for line break?
-  // TODO-PER: dots before bar, dots before slur
-  // TODO-PER: U: redefinable symbols.
-  // Ambiguous symbols:
-  // "[" can be the start of a chord, the start of a header element or part of a bar line.
-  // --- if it is immediately followed by "|", it is a bar line
-  // --- if it is immediately followed by K: L: M: V: it is a header (note: there are other headers mentioned in the standard, but I'm not sure how they would be used.)
-  // --- otherwise it is the beginning of a chord
-  // "(" can be the start of a slur or a triplet
-  // --- if it is followed by a number from 2-9, then it is a triplet
-  // --- otherwise it is a slur
-  // "]"
-  // --- if there is a chord open, then this is the close
-  // --- if it is after a [|, then it is an invisible bar line
-  // --- otherwise, it is par of a bar
-  // "." can be a bar modifier or a slur modifier, or a decoration
-  // --- if it comes immediately before a bar, it is a bar modifier
-  // --- if it comes immediately before a slur, it is a slur modifier
-  // --- otherwise it is a decoration for the next note.
-  // number:
-  // --- if it is after a bar, with no space, it is an ending marker
-  // --- if it is after a ( with no space, it is a triplet count
-  // --- if it is after a pitch or octave or slash, then it is a duration
-  // Unambiguous symbols (except inside quoted strings):
-  // vertical-bar, colon: part of a bar
-  // ABCDEFGabcdefg: pitch
-  // xyzZ: rest
-  // comma, prime: octave
-  // close-paren: end-slur
-  // hyphen: tie
-  // tilde, v, u, bang, plus, THLMPSO: decoration
-  // carat, underscore, equal: accidental
-  // ampersand: time reset
-  // open-curly, close-curly: grace notes
-  // double-quote: chord symbol
-  // less-than, greater-than, slash: duration
-  // back-tick, space, tab: space
-
-
-  var nonDecorations = "ABCDEFGabcdefgxyzZ[]|^_{"; // use this to prescreen so we don't have to look for a decoration at every note.
-
-  var parseRegularMusicLine = function parseRegularMusicLine(line) {
-    header.resolveTempo(); //multilineVars.havent_set_length = false;	// To late to set this now.
-
-    multilineVars.is_in_header = false; // We should have gotten a key header by now, but just in case, this is definitely out of the header.
-
-    var i = 0;
-    var startOfLine = multilineVars.iChar; // see if there is nothing but a comment on this line. If so, just ignore it. A full line comment is optional white space followed by %
-
-    while (tokenizer.isWhiteSpace(line.charAt(i)) && i < line.length) {
-      i++;
-    }
-
-    if (i === line.length || line.charAt(i) === '%') return; // Start with the standard staff, clef and key symbols on each line
-
-    var delayStartNewLine = multilineVars.start_new_line;
-    if (multilineVars.continueall === undefined) multilineVars.start_new_line = true;else multilineVars.start_new_line = false;
-    var tripletNotesLeft = 0; // See if the line starts with a header field
-
-    var retHeader = header.letter_to_body_header(line, i);
-
-    if (retHeader[0] > 0) {
-      i += retHeader[0];
-      if (retHeader[1] === 'V') delayStartNewLine = true; // fixes bug on this: c[V:2]d
-      // TODO-PER: Handle inline headers
-    }
-
-    var el = {};
-    var overlayLevel = 0;
-
-    while (i < line.length) {
-      var startI = i;
-      if (line.charAt(i) === '%') break;
-      var retInlineHeader = header.letter_to_inline_header(line, i, delayStartNewLine);
-
-      if (retInlineHeader[0] > 0) {
-        i += retInlineHeader[0];
-        if (retInlineHeader[1] === 'V') delayStartNewLine = true; // fixes bug on this: c[V:2]d
-        // TODO-PER: Handle inline headers
-        //multilineVars.start_new_line = false;
-      } else {
-        // Wait until here to actually start the line because we know we're past the inline statements.
-        if (delayStartNewLine) {
-          startNewLine();
-          delayStartNewLine = false;
-        } // We need to decide if the following characters are a bar-marking or a note-group.
-        // Unfortunately, that is ambiguous. Both can contain chord symbols and decorations.
-        // If there is a grace note either before or after the chord symbols and decorations, then it is definitely a note-group.
-        // If there is a bar marker, it is definitely a bar-marking.
-        // If there is either a core-note or chord, it is definitely a note-group.
-        // So, loop while we find grace-notes, chords-symbols, or decorations. [It is an error to have more than one grace-note group in a row; the others can be multiple]
-        // Then, if there is a grace-note, we know where to go.
-        // Else see if we have a chord, core-note, slur, triplet, or bar.
-
-
-        var ret;
-
-        while (1) {
-          ret = tokenizer.eatWhiteSpace(line, i);
-
-          if (ret > 0) {
-            i += ret;
-          }
-
-          if (i > 0 && line.charAt(i - 1) === '\x12') {
-            // there is one case where a line continuation isn't the same as being on the same line, and that is if the next character after it is a header.
-            ret = header.letter_to_body_header(line, i);
-
-            if (ret[0] > 0) {
-              if (ret[1] === 'V') startNewLine(); // fixes bug on this: c\\nV:2]\\nd
-              // TODO: insert header here
-
-              i = ret[0];
-              multilineVars.start_new_line = false;
-            }
-          } // gather all the grace notes, chord symbols and decorations
-
-
-          ret = letter_to_spacer(line, i);
-
-          if (ret[0] > 0) {
-            i += ret[0];
-          }
-
-          ret = letter_to_chord(line, i);
-
-          if (ret[0] > 0) {
-            // There could be more than one chord here if they have different positions.
-            // If two chords have the same position, then connect them with newline.
-            if (!el.chord) el.chord = [];
-            var chordName = tokenizer.translateString(ret[1]);
-            chordName = chordName.replace(/;/g, "\n");
-            var addedChord = false;
-
-            for (var ci = 0; ci < el.chord.length; ci++) {
-              if (el.chord[ci].position === ret[2]) {
-                addedChord = true;
-                el.chord[ci].name += "\n" + chordName;
-              }
-            }
-
-            if (addedChord === false) {
-              if (ret[2] === null && ret[3]) el.chord.push({
-                name: chordName,
-                rel_position: ret[3]
-              });else el.chord.push({
-                name: chordName,
-                position: ret[2]
-              });
-            }
-
-            i += ret[0];
-            var ii = tokenizer.skipWhiteSpace(line.substring(i));
-            if (ii > 0) el.force_end_beam_last = true;
-            i += ii;
-          } else {
-            if (nonDecorations.indexOf(line.charAt(i)) === -1) ret = letter_to_accent(line, i);else ret = [0];
-
-            if (ret[0] > 0) {
-              if (ret[1] === null) {
-                if (i + 1 < line.length) startNewLine(); // There was a ! in the middle of the line. Start a new line if there is anything after it.
-              } else if (ret[1].length > 0) {
-                if (ret[1].indexOf("style=") === 0) {
-                  el.style = ret[1].substr(6);
-                } else {
-                  if (el.decoration === undefined) el.decoration = [];
-                  if (ret[1] === 'beambr1') el.beambr = 1;else if (ret[1] === "beambr2") el.beambr = 2;else el.decoration.push(ret[1]);
-                }
-              }
-
-              i += ret[0];
-            } else {
-              ret = letter_to_grace(line, i); // TODO-PER: Be sure there aren't already grace notes defined. That is an error.
-
-              if (ret[0] > 0) {
-                el.gracenotes = ret[1];
-                i += ret[0];
-              } else break;
-            }
-          }
-        }
-
-        ret = letter_to_bar(line, i);
-
-        if (ret[0] > 0) {
-          // This is definitely a bar
-          overlayLevel = 0;
-
-          if (el.gracenotes !== undefined) {
-            // Attach the grace note to an invisible note
-            el.rest = {
-              type: 'spacer'
-            };
-            el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
-
-            multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-            tuneBuilder.appendElement('note', startOfLine + i, startOfLine + i + ret[0], el);
-            multilineVars.measureNotEmpty = true;
-            el = {};
-          }
-
-          var bar = {
-            type: ret[1]
-          };
-          if (bar.type.length === 0) warn("Unknown bar type", line, i);else {
-            if (multilineVars.inEnding && bar.type !== 'bar_thin') {
-              bar.endEnding = true;
-              multilineVars.inEnding = false;
-            }
-
-            if (ret[2]) {
-              bar.startEnding = ret[2];
-              if (multilineVars.inEnding) bar.endEnding = true;
-              multilineVars.inEnding = true;
-
-              if (ret[1] === "bar_right_repeat") {
-                // restore the tie and slur state from the start repeat
-                multilineVars.restoreStartEndingHoldOvers();
-              } else {
-                // save inTie, inTieChord
-                multilineVars.duplicateStartEndingHoldOvers();
-              }
-            }
-
-            if (el.decoration !== undefined) bar.decoration = el.decoration;
-            if (el.chord !== undefined) bar.chord = el.chord;
-            if (bar.startEnding && multilineVars.barFirstEndingNum === undefined) multilineVars.barFirstEndingNum = multilineVars.currBarNumber;else if (bar.startEnding && bar.endEnding && multilineVars.barFirstEndingNum) multilineVars.currBarNumber = multilineVars.barFirstEndingNum;else if (bar.endEnding) multilineVars.barFirstEndingNum = undefined;
-
-            if (bar.type !== 'bar_invisible' && multilineVars.measureNotEmpty) {
-              var isFirstVoice = multilineVars.currentVoice === undefined || multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0;
-
-              if (isFirstVoice) {
-                multilineVars.currBarNumber++;
-                if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0) bar.barNumber = multilineVars.currBarNumber;
-              }
-            }
-
-            multilineVars.addFormattingOptions(el, tune.formatting, 'bar');
-            tuneBuilder.appendElement('bar', startOfLine + i, startOfLine + i + ret[0], bar);
-            multilineVars.measureNotEmpty = false;
-            el = {};
-          }
-          i += ret[0];
-        } else if (line[i] === '&') {
-          // backtrack to beginning of measure
-          ret = letter_to_overlay(line, i);
-
-          if (ret[0] > 0) {
-            tuneBuilder.appendElement('overlay', startOfLine, startOfLine + 1, {});
-            i += 1;
-            overlayLevel++;
-          }
-        } else {
-          // This is definitely a note group
-          //
-          // Look for as many open slurs and triplets as there are. (Note: only the first triplet is valid.)
-          ret = letter_to_open_slurs_and_triplets(line, i);
-
-          if (ret.consumed > 0) {
-            if (ret.startSlur !== undefined) el.startSlur = ret.startSlur;
-            if (ret.dottedSlur) el.dottedSlur = true;
-
-            if (ret.triplet !== undefined) {
-              if (tripletNotesLeft > 0) warn("Can't nest triplets", line, i);else {
-                el.startTriplet = ret.triplet;
-                el.tripletMultiplier = ret.tripletQ / ret.triplet;
-                tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
-              }
-            }
-
-            i += ret.consumed;
-          } // handle chords.
-
-
-          if (line.charAt(i) === '[') {
-            var chordStartChar = i;
-            i++;
-            var chordDuration = null;
-            var rememberEndBeam = false;
-            var done = false;
-
-            while (!done) {
-              var accent = letter_to_accent(line, i);
-
-              if (accent[0] > 0) {
-                i += accent[0];
-              }
-
-              var chordNote = getCoreNote(line, i, {}, false);
-
-              if (chordNote !== null && chordNote.pitch !== undefined) {
-                if (accent[0] > 0) {
-                  // If we found a decoration above, it modifies the entire chord. "style" is handled below.
-                  if (accent[1].indexOf("style=") !== 0) {
-                    if (el.decoration === undefined) el.decoration = [];
-                    el.decoration.push(accent[1]);
-                  }
-                }
-
-                if (chordNote.end_beam) {
-                  el.end_beam = true;
-                  delete chordNote.end_beam;
-                }
-
-                if (el.pitches === undefined) {
-                  el.duration = chordNote.duration;
-                  el.pitches = [chordNote];
-                } else // Just ignore the note lengths of all but the first note. The standard isn't clear here, but this seems less confusing.
-                  el.pitches.push(chordNote);
-
-                delete chordNote.duration;
-
-                if (accent[0] > 0) {
-                  // If we found a style above, it modifies the individual pitch, not the entire chord.
-                  if (accent[1].indexOf("style=") === 0) {
-                    el.pitches[el.pitches.length - 1].style = accent[1].substr(6);
-                  }
-                }
-
-                if (multilineVars.inTieChord[el.pitches.length]) {
-                  chordNote.endTie = true;
-                  multilineVars.inTieChord[el.pitches.length] = undefined;
-                }
-
-                if (chordNote.startTie) multilineVars.inTieChord[el.pitches.length] = true;
-                i = chordNote.endChar;
-                delete chordNote.endChar;
-              } else if (line.charAt(i) === ' ') {
-                // Spaces are not allowed in chords, but we can recover from it by ignoring it.
-                warn("Spaces are not allowed in chords", line, i);
-                i++;
-              } else {
-                if (i < line.length && line.charAt(i) === ']') {
-                  // consume the close bracket
-                  i++;
-
-                  if (multilineVars.next_note_duration !== 0) {
-                    el.duration = el.duration * multilineVars.next_note_duration;
-                    multilineVars.next_note_duration = 0;
-                  }
-
-                  if (isInTie(multilineVars, overlayLevel, el)) {
-                    parseCommon.each(el.pitches, function (pitch) {
-                      pitch.endTie = true;
-                    });
-                    setIsInTie(multilineVars, overlayLevel, false);
-                  }
-
-                  if (tripletNotesLeft > 0 && !(el.rest && el.rest.type === "spacer")) {
-                    tripletNotesLeft--;
-
-                    if (tripletNotesLeft === 0) {
-                      el.endTriplet = true;
-                    }
-                  }
-
-                  var postChordDone = false;
-
-                  while (i < line.length && !postChordDone) {
-                    switch (line.charAt(i)) {
-                      case ' ':
-                      case '\t':
-                        addEndBeam(el);
-                        break;
-
-                      case ')':
-                        if (el.endSlur === undefined) el.endSlur = 1;else el.endSlur++;
-                        break;
-
-                      case '-':
-                        parseCommon.each(el.pitches, function (pitch) {
-                          pitch.startTie = {};
-                        });
-                        setIsInTie(multilineVars, overlayLevel, true);
-                        break;
-
-                      case '>':
-                      case '<':
-                        var br2 = getBrokenRhythm(line, i);
-                        i += br2[0] - 1; // index gets incremented below, so we'll let that happen
-
-                        multilineVars.next_note_duration = br2[2];
-                        if (chordDuration) chordDuration = chordDuration * br2[1];else chordDuration = br2[1];
-                        break;
-
-                      case '1':
-                      case '2':
-                      case '3':
-                      case '4':
-                      case '5':
-                      case '6':
-                      case '7':
-                      case '8':
-                      case '9':
-                      case '/':
-                        var fraction = tokenizer.getFraction(line, i);
-                        chordDuration = fraction.value;
-                        i = fraction.index;
-                        if (line.charAt(i) === ' ') rememberEndBeam = true;
-                        if (line.charAt(i) === '-' || line.charAt(i) === ')' || line.charAt(i) === ' ' || line.charAt(i) === '<' || line.charAt(i) === '>') i--; // Subtracting one because one is automatically added below
-                        else postChordDone = true;
-                        break;
-
-                      default:
-                        postChordDone = true;
-                        break;
-                    }
-
-                    if (!postChordDone) {
-                      i++;
-                    }
-                  }
-                } else warn("Expected ']' to end the chords", line, i);
-
-                if (el.pitches !== undefined) {
-                  if (chordDuration !== null) {
-                    el.duration = el.duration * chordDuration;
-                    if (rememberEndBeam) addEndBeam(el);
-                  }
-
-                  multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-                  tuneBuilder.appendElement('note', startOfLine + chordStartChar, startOfLine + i, el);
-                  multilineVars.measureNotEmpty = true;
-                  el = {};
-                }
-
-                done = true;
-              }
-            }
-          } else {
-            // Single pitch
-            var el2 = {};
-            var core = getCoreNote(line, i, el2, true);
-            if (el2.endTie !== undefined) setIsInTie(multilineVars, overlayLevel, true);
-
-            if (core !== null) {
-              if (core.pitch !== undefined) {
-                el.pitches = [{}]; // TODO-PER: straighten this out so there is not so much copying: getCoreNote shouldn't change e'
-
-                if (core.accidental !== undefined) el.pitches[0].accidental = core.accidental;
-                el.pitches[0].pitch = core.pitch;
-                if (core.soundPitch || core.soundPitch === 0) el.pitches[0].soundPitch = core.soundPitch;
-                if (core.midipitch || core.midipitch === 0) el.pitches[0].midipitch = core.midipitch;
-                if (core.endSlur !== undefined) el.pitches[0].endSlur = core.endSlur;
-                if (core.endTie !== undefined) el.pitches[0].endTie = core.endTie;
-                if (core.startSlur !== undefined) el.pitches[0].startSlur = core.startSlur;
-                if (el.startSlur !== undefined) el.pitches[0].startSlur = el.startSlur;
-                if (el.dottedSlur !== undefined) el.pitches[0].dottedSlur = true;
-                if (core.startTie !== undefined) el.pitches[0].startTie = core.startTie;
-                if (el.startTie !== undefined) el.pitches[0].startTie = el.startTie;
-              } else {
-                el.rest = core.rest;
-                if (core.endSlur !== undefined) el.endSlur = core.endSlur;
-                if (core.endTie !== undefined) el.rest.endTie = core.endTie;
-                if (core.startSlur !== undefined) el.startSlur = core.startSlur;
-                if (core.startTie !== undefined) el.rest.startTie = core.startTie;
-                if (el.startTie !== undefined) el.rest.startTie = el.startTie;
-              }
-
-              if (core.chord !== undefined) el.chord = core.chord;
-              if (core.duration !== undefined) el.duration = core.duration;
-              if (core.decoration !== undefined) el.decoration = core.decoration;
-              if (core.graceNotes !== undefined) el.graceNotes = core.graceNotes;
-              delete el.startSlur;
-              delete el.dottedSlur;
-
-              if (isInTie(multilineVars, overlayLevel, el)) {
-                if (el.pitches !== undefined) {
-                  el.pitches[0].endTie = true;
-                } else if (el.rest.type !== 'spacer') {
-                  el.rest.endTie = true;
-                }
-
-                setIsInTie(multilineVars, overlayLevel, false);
-              }
-
-              if (core.startTie || el.startTie) setIsInTie(multilineVars, overlayLevel, true);
-              i = core.endChar;
-
-              if (tripletNotesLeft > 0 && !(core.rest && core.rest.type === "spacer")) {
-                tripletNotesLeft--;
-
-                if (tripletNotesLeft === 0) {
-                  el.endTriplet = true;
-                }
-              }
-
-              if (core.end_beam) addEndBeam(el); // If there is a whole rest, then it should be the duration of the measure, not it's own duration. We need to special case it.
-              // If the time signature length is greater than 4/4, though, then a whole rest has no special treatment.
-
-              if (el.rest && el.rest.type === 'rest' && el.duration === 1 && durationOfMeasure(multilineVars) <= 1) {
-                el.rest.type = 'whole';
-                el.duration = durationOfMeasure(multilineVars);
-              } // Create a warning if this is not a displayable duration.
-              // The first item on a line is a regular note value, each item after that represents a dot placed after the previous note.
-              // Only durations less than a whole note are tested because whole note durations have some tricky rules.
-
-
-              var durations = [0.5, 0.75, 0.875, 0.9375, 0.96875, 0.984375, 0.25, 0.375, 0.4375, 0.46875, 0.484375, 0.4921875, 0.125, 0.1875, 0.21875, 0.234375, 0.2421875, 0.24609375, 0.0625, 0.09375, 0.109375, 0.1171875, 0.12109375, 0.123046875, 0.03125, 0.046875, 0.0546875, 0.05859375, 0.060546875, 0.0615234375, 0.015625, 0.0234375, 0.02734375, 0.029296875, 0.0302734375, 0.03076171875];
-
-              if (el.duration < 1 && durations.indexOf(el.duration) === -1 && el.duration !== 0) {
-                if (!el.rest || el.rest.type !== 'spacer') addWarning("Duration not representable: " + line.substring(startI, i));
-              }
-
-              multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-              tuneBuilder.appendElement('note', startOfLine + startI, startOfLine + i, el);
-              multilineVars.measureNotEmpty = true;
-              el = {};
-            }
-          }
-
-          if (i === startI) {
-            // don't know what this is, so ignore it.
-            if (line.charAt(i) !== ' ' && line.charAt(i) !== '`') warn("Unknown character ignored", line, i);
-            i++;
-          }
-        }
-      }
-    }
-  };
-
-  var isInTie = function isInTie(multilineVars, overlayLevel, el) {
-    if (multilineVars.inTie[overlayLevel] === undefined) return false; // If this is single voice music then the voice index isn't set, so we use the first voice.
-
-    var voiceIndex = multilineVars.currentVoice ? multilineVars.currentVoice.index : 0;
-
-    if (multilineVars.inTie[overlayLevel][voiceIndex]) {
-      if (el.pitches !== undefined || el.rest.type !== 'spacer') return true;
-    }
-
-    return false;
-  };
-
-  var setIsInTie = function setIsInTie(multilineVars, overlayLevel, value) {
-    // If this is single voice music then the voice index isn't set, so we use the first voice.
-    var voiceIndex = multilineVars.currentVoice ? multilineVars.currentVoice.index : 0;
-    if (multilineVars.inTie[overlayLevel] === undefined) multilineVars.inTie[overlayLevel] = [];
-    multilineVars.inTie[overlayLevel][voiceIndex] = value;
-  };
-
   var parseLine = function parseLine(line) {
     var ret = header.parseHeader(line);
-    if (ret.regular) parseRegularMusicLine(ret.str);
-    if (ret.newline) startNewLine();
+    if (ret.regular) music.parseMusic(ret.str);
+    if (ret.newline) music.startNewLine();
     if (ret.words) addWords(tuneBuilder.getCurrentVoice(), line.substring(2));
     if (ret.symbols) addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
     if (ret.recurse) parseLine(ret.str);
@@ -4819,6 +3296,8 @@ var Parse = function Parse() {
     if (!switches) switches = {};
     if (!startPos) startPos = 0;
     tuneBuilder.reset();
+    header = new ParseHeader(tokenizer, warn, multilineVars, tune, tuneBuilder);
+    music = new ParseMusic(tokenizer, warn, multilineVars, tune, tuneBuilder, header);
     if (switches.print) tune.media = 'print';
     multilineVars.reset();
     multilineVars.iChar = startPos;
@@ -4952,20 +3431,6 @@ module.exports = Parse;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_parse_book.js: parses a string representing ABC Music Notation into a usable internal structure.
-//    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
 
 var bookParser = function bookParser(book) {
@@ -5039,20 +3504,6 @@ module.exports = bookParser;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
 
 var parseDirective = {};
@@ -5721,6 +4172,36 @@ var parseDirective = {};
     var num = parseFloat(scratch);
     if (isNaN(num) || num === 0) return "Directive \"" + cmd + "\" requires a number as a parameter.";
     tune.formatting.scale = num;
+  }; // starts at 35
+
+
+  var drumNames = ["acoustic-bass-drum", "bass-drum-1", "side-stick", "acoustic-snare", "hand-clap", "electric-snare", "low-floor-tom", "closed-hi-hat", "high-floor-tom", "pedal-hi-hat", "low-tom", "open-hi-hat", "low-mid-tom", "hi-mid-tom", "crash-cymbal-1", "high-tom", "ride-cymbal-1", "chinese-cymbal", "ride-bell", "tambourine", "splash-cymbal", "cowbell", "crash-cymbal-2", "vibraslap", "ride-cymbal-2", "hi-bongo", "low-bongo", "mute-hi-conga", "open-hi-conga", "low-conga", "high-timbale", "low-timbale", "high-agogo", "low-agogo", "cabasa", "maracas", "short-whistle", "long-whistle", "short-guiro", "long-guiro", "claves", "hi-wood-block", "low-wood-block", "mute-cuica", "open-cuica", "mute-triangle", "open-triangle"];
+
+  var interpretPercMap = function interpretPercMap(restOfString) {
+    var tokens = restOfString.split(/\s+/); // Allow multiple spaces.
+
+    if (tokens.length !== 2 && tokens.length !== 3) return {
+      error: 'Expected parameters "abc-note", "drum-sound", and optionally "note-head"'
+    };
+    var key = tokens[0]; // The percussion sound can either be a MIDI number or a drum name. If it is not a number then check for a name.
+
+    var pitch = parseInt(tokens[1], 10);
+
+    if ((isNaN(pitch) || pitch < 35 || pitch > 81) && tokens[1]) {
+      pitch = drumNames.indexOf(tokens[1].toLowerCase()) + 35;
+    }
+
+    if (isNaN(pitch) || pitch < 35 || pitch > 81) return {
+      error: 'Expected drum name, received "' + tokens[1] + '"'
+    };
+    var value = {
+      sound: pitch
+    };
+    if (tokens.length === 3) value.noteHead = tokens[2];
+    return {
+      key: key,
+      value: value
+    };
   };
 
   var getRequiredMeasurement = function getRequiredMeasurement(cmd, tokens) {
@@ -6376,8 +4857,15 @@ var parseDirective = {};
         if (midi.length === 0) warn("Expected midi command", restOfString, 0);else parseMidiCommand(midi, tune, restOfString);
         break;
 
-      case "map":
       case "percmap":
+        var percmap = interpretPercMap(restOfString);
+        if (percmap.error) warn(percmap.error, str, 8);else {
+          if (!tune.formatting.percmap) tune.formatting.percmap = {};
+          tune.formatting.percmap[percmap.key] = percmap.value;
+        }
+        break;
+
+      case "map":
       case "playtempo":
       case "auquality":
       case "continuous":
@@ -6492,20 +4980,6 @@ module.exports = parseDirective;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_parse_header.js: parses a the header fields from a string representing ABC Music Notation into a usable internal structure.
-//    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
 
 var parseDirective = __webpack_require__(/*! ./abc_parse_directive */ "./src/parse/abc_parse_directive.js");
@@ -7190,20 +5664,6 @@ module.exports = ParseHeader;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
 
 var parseDirective = __webpack_require__(/*! ./abc_parse_directive */ "./src/parse/abc_parse_directive.js");
@@ -8075,6 +6535,7 @@ var parseKeyVoice = {};
             case "harmonic":
             case "rhythm":
             case "x":
+            case "triangle":
               multilineVars.style = tokens[0].token;
               tokens.shift();
               break;
@@ -8428,7 +6889,7 @@ var parseKeyVoice = {};
 
           case "style":
             attr = tokenizer.getVoiceToken(line, start, end);
-            if (attr.warn !== undefined) warn("Expected value for style in voice: " + attr.warn, line, start);else if (attr.err !== undefined) warn("Expected value for style in voice: " + attr.err, line, start);else if (attr.token === 'normal' || attr.token === 'harmonic' || attr.token === 'rhythm' || attr.token === 'x') multilineVars.voices[id].style = attr.token;else warn("Expected one of [normal, harmonic, rhythm, x] for voice style", line, start);
+            if (attr.warn !== undefined) warn("Expected value for style in voice: " + attr.warn, line, start);else if (attr.err !== undefined) warn("Expected value for style in voice: " + attr.err, line, start);else if (attr.token === 'normal' || attr.token === 'harmonic' || attr.token === 'rhythm' || attr.token === 'x' || attr.token === 'triangle') multilineVars.voices[id].style = attr.token;else warn("Expected one of [normal, harmonic, rhythm, x, triangle] for voice style", line, start);
             start += attr.len;
             break;
           // default:
@@ -8489,6 +6950,1422 @@ module.exports = parseKeyVoice;
 
 /***/ }),
 
+/***/ "./src/parse/abc_parse_music.js":
+/*!**************************************!*\
+  !*** ./src/parse/abc_parse_music.js ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
+
+var parseKeyVoice = __webpack_require__(/*! ./abc_parse_key_voice */ "./src/parse/abc_parse_key_voice.js");
+
+var transpose = __webpack_require__(/*! ./abc_transpose */ "./src/parse/abc_transpose.js");
+
+var tokenizer;
+var warn;
+var multilineVars;
+var tune;
+var tuneBuilder;
+var header;
+
+var MusicParser = function MusicParser(_tokenizer, _warn, _multilineVars, _tune, _tuneBuilder, _header) {
+  tokenizer = _tokenizer;
+  warn = _warn;
+  multilineVars = _multilineVars;
+  tune = _tune;
+  tuneBuilder = _tuneBuilder;
+  header = _header;
+}; //
+// Parse line of music
+//
+// This is a stream of <(bar-marking|header|note-group)...> in any order, with optional spaces between each element
+// core-note is <open-slur, accidental, pitch:required, octave, duration, close-slur&|tie> with no spaces within that
+// chord is <open-bracket:required, core-note:required... close-bracket:required duration> with no spaces within that
+// grace-notes is <open-brace:required, (open-slur|core-note:required|close-slur)..., close-brace:required> spaces are allowed
+// note-group is <grace-notes, chord symbols&|decorations..., grace-notes, slur&|triplet, chord|core-note, end-slur|tie> spaces are allowed between items
+// bar-marking is <ampersand> or <chord symbols&|decorations..., bar:required> spaces allowed
+// header is <open-bracket:required, K|M|L|V:required, colon:required, field:required, close-bracket:required> spaces can occur between the colon, in the field, and before the close bracket
+// header can also be the only thing on a line. This is true even if it is a continuation line. In this case the brackets are not required.
+// a space is a back-tick, a space, or a tab. If it is a back-tick, then there is no end-beam.
+// Line preprocessing: anything after a % is ignored (the double %% should have been taken care of before this)
+// Then, all leading and trailing spaces are ignored.
+// If there was a line continuation, the \n was replaced by a \r and the \ was replaced by a space. This allows the construct
+// of having a header mid-line conceptually, but actually be at the start of the line. This is equivolent to putting the header in [ ].
+// TODO-PER: How to handle ! for line break?
+// TODO-PER: dots before bar, dots before slur
+// TODO-PER: U: redefinable symbols.
+// Ambiguous symbols:
+// "[" can be the start of a chord, the start of a header element or part of a bar line.
+// --- if it is immediately followed by "|", it is a bar line
+// --- if it is immediately followed by K: L: M: V: it is a header (note: there are other headers mentioned in the standard, but I'm not sure how they would be used.)
+// --- otherwise it is the beginning of a chord
+// "(" can be the start of a slur or a triplet
+// --- if it is followed by a number from 2-9, then it is a triplet
+// --- otherwise it is a slur
+// "]"
+// --- if there is a chord open, then this is the close
+// --- if it is after a [|, then it is an invisible bar line
+// --- otherwise, it is par of a bar
+// "." can be a bar modifier or a slur modifier, or a decoration
+// --- if it comes immediately before a bar, it is a bar modifier
+// --- if it comes immediately before a slur, it is a slur modifier
+// --- otherwise it is a decoration for the next note.
+// number:
+// --- if it is after a bar, with no space, it is an ending marker
+// --- if it is after a ( with no space, it is a triplet count
+// --- if it is after a pitch or octave or slash, then it is a duration
+// Unambiguous symbols (except inside quoted strings):
+// vertical-bar, colon: part of a bar
+// ABCDEFGabcdefg: pitch
+// xyzZ: rest
+// comma, prime: octave
+// close-paren: end-slur
+// hyphen: tie
+// tilde, v, u, bang, plus, THLMPSO: decoration
+// carat, underscore, equal: accidental
+// ampersand: time reset
+// open-curly, close-curly: grace notes
+// double-quote: chord symbol
+// less-than, greater-than, slash: duration
+// back-tick, space, tab: space
+
+
+var nonDecorations = "ABCDEFGabcdefgxyzZ[]|^_{"; // use this to prescreen so we don't have to look for a decoration at every note.
+
+var isInTie = function isInTie(multilineVars, overlayLevel, el) {
+  if (multilineVars.inTie[overlayLevel] === undefined) return false; // If this is single voice music then the voice index isn't set, so we use the first voice.
+
+  var voiceIndex = multilineVars.currentVoice ? multilineVars.currentVoice.index : 0;
+
+  if (multilineVars.inTie[overlayLevel][voiceIndex]) {
+    if (el.pitches !== undefined || el.rest.type !== 'spacer') return true;
+  }
+
+  return false;
+};
+
+MusicParser.prototype.parseMusic = function (line) {
+  header.resolveTempo(); //multilineVars.havent_set_length = false;	// To late to set this now.
+
+  multilineVars.is_in_header = false; // We should have gotten a key header by now, but just in case, this is definitely out of the header.
+
+  var i = 0;
+  var startOfLine = multilineVars.iChar; // see if there is nothing but a comment on this line. If so, just ignore it. A full line comment is optional white space followed by %
+
+  while (tokenizer.isWhiteSpace(line.charAt(i)) && i < line.length) {
+    i++;
+  }
+
+  if (i === line.length || line.charAt(i) === '%') return; // Start with the standard staff, clef and key symbols on each line
+
+  var delayStartNewLine = multilineVars.start_new_line;
+  if (multilineVars.continueall === undefined) multilineVars.start_new_line = true;else multilineVars.start_new_line = false;
+  var tripletNotesLeft = 0; // See if the line starts with a header field
+
+  var retHeader = header.letter_to_body_header(line, i);
+
+  if (retHeader[0] > 0) {
+    i += retHeader[0];
+    if (retHeader[1] === 'V') delayStartNewLine = true; // fixes bug on this: c[V:2]d
+    // TODO-PER: Handle inline headers
+  }
+
+  var el = {};
+  var overlayLevel = 0;
+
+  while (i < line.length) {
+    var startI = i;
+    if (line.charAt(i) === '%') break;
+    var retInlineHeader = header.letter_to_inline_header(line, i, delayStartNewLine);
+
+    if (retInlineHeader[0] > 0) {
+      i += retInlineHeader[0];
+      if (retInlineHeader[1] === 'V') delayStartNewLine = true; // fixes bug on this: c[V:2]d
+      // TODO-PER: Handle inline headers
+      //multilineVars.start_new_line = false;
+    } else {
+      // Wait until here to actually start the line because we know we're past the inline statements.
+      if (delayStartNewLine) {
+        this.startNewLine();
+        delayStartNewLine = false;
+      } // We need to decide if the following characters are a bar-marking or a note-group.
+      // Unfortunately, that is ambiguous. Both can contain chord symbols and decorations.
+      // If there is a grace note either before or after the chord symbols and decorations, then it is definitely a note-group.
+      // If there is a bar marker, it is definitely a bar-marking.
+      // If there is either a core-note or chord, it is definitely a note-group.
+      // So, loop while we find grace-notes, chords-symbols, or decorations. [It is an error to have more than one grace-note group in a row; the others can be multiple]
+      // Then, if there is a grace-note, we know where to go.
+      // Else see if we have a chord, core-note, slur, triplet, or bar.
+
+
+      var ret;
+
+      while (1) {
+        ret = tokenizer.eatWhiteSpace(line, i);
+
+        if (ret > 0) {
+          i += ret;
+        }
+
+        if (i > 0 && line.charAt(i - 1) === '\x12') {
+          // there is one case where a line continuation isn't the same as being on the same line, and that is if the next character after it is a header.
+          ret = header.letter_to_body_header(line, i);
+
+          if (ret[0] > 0) {
+            if (ret[1] === 'V') this.startNewLine(); // fixes bug on this: c\\nV:2]\\nd
+            // TODO: insert header here
+
+            i = ret[0];
+            multilineVars.start_new_line = false;
+          }
+        } // gather all the grace notes, chord symbols and decorations
+
+
+        ret = letter_to_spacer(line, i);
+
+        if (ret[0] > 0) {
+          i += ret[0];
+        }
+
+        ret = letter_to_chord(line, i);
+
+        if (ret[0] > 0) {
+          // There could be more than one chord here if they have different positions.
+          // If two chords have the same position, then connect them with newline.
+          if (!el.chord) el.chord = [];
+          var chordName = tokenizer.translateString(ret[1]);
+          chordName = chordName.replace(/;/g, "\n");
+          var addedChord = false;
+
+          for (var ci = 0; ci < el.chord.length; ci++) {
+            if (el.chord[ci].position === ret[2]) {
+              addedChord = true;
+              el.chord[ci].name += "\n" + chordName;
+            }
+          }
+
+          if (addedChord === false) {
+            if (ret[2] === null && ret[3]) el.chord.push({
+              name: chordName,
+              rel_position: ret[3]
+            });else el.chord.push({
+              name: chordName,
+              position: ret[2]
+            });
+          }
+
+          i += ret[0];
+          var ii = tokenizer.skipWhiteSpace(line.substring(i));
+          if (ii > 0) el.force_end_beam_last = true;
+          i += ii;
+        } else {
+          if (nonDecorations.indexOf(line.charAt(i)) === -1) ret = letter_to_accent(line, i);else ret = [0];
+
+          if (ret[0] > 0) {
+            if (ret[1] === null) {
+              if (i + 1 < line.length) this.startNewLine(); // There was a ! in the middle of the line. Start a new line if there is anything after it.
+            } else if (ret[1].length > 0) {
+              if (ret[1].indexOf("style=") === 0) {
+                el.style = ret[1].substr(6);
+              } else {
+                if (el.decoration === undefined) el.decoration = [];
+                if (ret[1] === 'beambr1') el.beambr = 1;else if (ret[1] === "beambr2") el.beambr = 2;else el.decoration.push(ret[1]);
+              }
+            }
+
+            i += ret[0];
+          } else {
+            ret = letter_to_grace(line, i); // TODO-PER: Be sure there aren't already grace notes defined. That is an error.
+
+            if (ret[0] > 0) {
+              el.gracenotes = ret[1];
+              i += ret[0];
+            } else break;
+          }
+        }
+      }
+
+      ret = letter_to_bar(line, i);
+
+      if (ret[0] > 0) {
+        // This is definitely a bar
+        overlayLevel = 0;
+
+        if (el.gracenotes !== undefined) {
+          // Attach the grace note to an invisible note
+          el.rest = {
+            type: 'spacer'
+          };
+          el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
+
+          multilineVars.addFormattingOptions(el, tune.formatting, 'note');
+          tuneBuilder.appendElement('note', startOfLine + i, startOfLine + i + ret[0], el);
+          multilineVars.measureNotEmpty = true;
+          el = {};
+        }
+
+        var bar = {
+          type: ret[1]
+        };
+        if (bar.type.length === 0) warn("Unknown bar type", line, i);else {
+          if (multilineVars.inEnding && bar.type !== 'bar_thin') {
+            bar.endEnding = true;
+            multilineVars.inEnding = false;
+          }
+
+          if (ret[2]) {
+            bar.startEnding = ret[2];
+            if (multilineVars.inEnding) bar.endEnding = true;
+            multilineVars.inEnding = true;
+
+            if (ret[1] === "bar_right_repeat") {
+              // restore the tie and slur state from the start repeat
+              multilineVars.restoreStartEndingHoldOvers();
+            } else {
+              // save inTie, inTieChord
+              multilineVars.duplicateStartEndingHoldOvers();
+            }
+          }
+
+          if (el.decoration !== undefined) bar.decoration = el.decoration;
+          if (el.chord !== undefined) bar.chord = el.chord;
+          if (bar.startEnding && multilineVars.barFirstEndingNum === undefined) multilineVars.barFirstEndingNum = multilineVars.currBarNumber;else if (bar.startEnding && bar.endEnding && multilineVars.barFirstEndingNum) multilineVars.currBarNumber = multilineVars.barFirstEndingNum;else if (bar.endEnding) multilineVars.barFirstEndingNum = undefined;
+
+          if (bar.type !== 'bar_invisible' && multilineVars.measureNotEmpty) {
+            var isFirstVoice = multilineVars.currentVoice === undefined || multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0;
+
+            if (isFirstVoice) {
+              multilineVars.currBarNumber++;
+              if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0) bar.barNumber = multilineVars.currBarNumber;
+            }
+          }
+
+          multilineVars.addFormattingOptions(el, tune.formatting, 'bar');
+          tuneBuilder.appendElement('bar', startOfLine + i, startOfLine + i + ret[0], bar);
+          multilineVars.measureNotEmpty = false;
+          el = {};
+        }
+        i += ret[0];
+      } else if (line[i] === '&') {
+        // backtrack to beginning of measure
+        ret = letter_to_overlay(line, i);
+
+        if (ret[0] > 0) {
+          tuneBuilder.appendElement('overlay', startOfLine, startOfLine + 1, {});
+          i += 1;
+          overlayLevel++;
+        }
+      } else {
+        // This is definitely a note group
+        //
+        // Look for as many open slurs and triplets as there are. (Note: only the first triplet is valid.)
+        ret = letter_to_open_slurs_and_triplets(line, i);
+
+        if (ret.consumed > 0) {
+          if (ret.startSlur !== undefined) el.startSlur = ret.startSlur;
+          if (ret.dottedSlur) el.dottedSlur = true;
+
+          if (ret.triplet !== undefined) {
+            if (tripletNotesLeft > 0) warn("Can't nest triplets", line, i);else {
+              el.startTriplet = ret.triplet;
+              el.tripletMultiplier = ret.tripletQ / ret.triplet;
+              tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
+            }
+          }
+
+          i += ret.consumed;
+        } // handle chords.
+
+
+        if (line.charAt(i) === '[') {
+          var chordStartChar = i;
+          i++;
+          var chordDuration = null;
+          var rememberEndBeam = false;
+          var done = false;
+
+          while (!done) {
+            var accent = letter_to_accent(line, i);
+
+            if (accent[0] > 0) {
+              i += accent[0];
+            }
+
+            var chordNote = getCoreNote(line, i, {}, false);
+
+            if (chordNote !== null && chordNote.pitch !== undefined) {
+              if (accent[0] > 0) {
+                // If we found a decoration above, it modifies the entire chord. "style" is handled below.
+                if (accent[1].indexOf("style=") !== 0) {
+                  if (el.decoration === undefined) el.decoration = [];
+                  el.decoration.push(accent[1]);
+                }
+              }
+
+              if (chordNote.end_beam) {
+                el.end_beam = true;
+                delete chordNote.end_beam;
+              }
+
+              if (el.pitches === undefined) {
+                el.duration = chordNote.duration;
+                el.pitches = [chordNote];
+              } else // Just ignore the note lengths of all but the first note. The standard isn't clear here, but this seems less confusing.
+                el.pitches.push(chordNote);
+
+              delete chordNote.duration;
+
+              if (accent[0] > 0) {
+                // If we found a style above, it modifies the individual pitch, not the entire chord.
+                if (accent[1].indexOf("style=") === 0) {
+                  el.pitches[el.pitches.length - 1].style = accent[1].substr(6);
+                }
+              }
+
+              if (multilineVars.inTieChord[el.pitches.length]) {
+                chordNote.endTie = true;
+                multilineVars.inTieChord[el.pitches.length] = undefined;
+              }
+
+              if (chordNote.startTie) multilineVars.inTieChord[el.pitches.length] = true;
+              i = chordNote.endChar;
+              delete chordNote.endChar;
+            } else if (line.charAt(i) === ' ') {
+              // Spaces are not allowed in chords, but we can recover from it by ignoring it.
+              warn("Spaces are not allowed in chords", line, i);
+              i++;
+            } else {
+              if (i < line.length && line.charAt(i) === ']') {
+                // consume the close bracket
+                i++;
+
+                if (multilineVars.next_note_duration !== 0) {
+                  el.duration = el.duration * multilineVars.next_note_duration;
+                  multilineVars.next_note_duration = 0;
+                }
+
+                if (isInTie(multilineVars, overlayLevel, el)) {
+                  parseCommon.each(el.pitches, function (pitch) {
+                    pitch.endTie = true;
+                  });
+                  setIsInTie(multilineVars, overlayLevel, false);
+                }
+
+                if (tripletNotesLeft > 0 && !(el.rest && el.rest.type === "spacer")) {
+                  tripletNotesLeft--;
+
+                  if (tripletNotesLeft === 0) {
+                    el.endTriplet = true;
+                  }
+                }
+
+                var postChordDone = false;
+
+                while (i < line.length && !postChordDone) {
+                  switch (line.charAt(i)) {
+                    case ' ':
+                    case '\t':
+                      addEndBeam(el);
+                      break;
+
+                    case ')':
+                      if (el.endSlur === undefined) el.endSlur = 1;else el.endSlur++;
+                      break;
+
+                    case '-':
+                      parseCommon.each(el.pitches, function (pitch) {
+                        pitch.startTie = {};
+                      });
+                      setIsInTie(multilineVars, overlayLevel, true);
+                      break;
+
+                    case '>':
+                    case '<':
+                      var br2 = getBrokenRhythm(line, i);
+                      i += br2[0] - 1; // index gets incremented below, so we'll let that happen
+
+                      multilineVars.next_note_duration = br2[2];
+                      if (chordDuration) chordDuration = chordDuration * br2[1];else chordDuration = br2[1];
+                      break;
+
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                    case '/':
+                      var fraction = tokenizer.getFraction(line, i);
+                      chordDuration = fraction.value;
+                      i = fraction.index;
+                      if (line.charAt(i) === ' ') rememberEndBeam = true;
+                      if (line.charAt(i) === '-' || line.charAt(i) === ')' || line.charAt(i) === ' ' || line.charAt(i) === '<' || line.charAt(i) === '>') i--; // Subtracting one because one is automatically added below
+                      else postChordDone = true;
+                      break;
+
+                    default:
+                      postChordDone = true;
+                      break;
+                  }
+
+                  if (!postChordDone) {
+                    i++;
+                  }
+                }
+              } else warn("Expected ']' to end the chords", line, i);
+
+              if (el.pitches !== undefined) {
+                if (chordDuration !== null) {
+                  el.duration = el.duration * chordDuration;
+                  if (rememberEndBeam) addEndBeam(el);
+                }
+
+                multilineVars.addFormattingOptions(el, tune.formatting, 'note');
+                tuneBuilder.appendElement('note', startOfLine + chordStartChar, startOfLine + i, el);
+                multilineVars.measureNotEmpty = true;
+                el = {};
+              }
+
+              done = true;
+            }
+          }
+        } else {
+          // Single pitch
+          var el2 = {};
+          var core = getCoreNote(line, i, el2, true);
+          if (el2.endTie !== undefined) setIsInTie(multilineVars, overlayLevel, true);
+
+          if (core !== null) {
+            if (core.pitch !== undefined) {
+              el.pitches = [{}]; // TODO-PER: straighten this out so there is not so much copying: getCoreNote shouldn't change e'
+
+              if (core.accidental !== undefined) el.pitches[0].accidental = core.accidental;
+              el.pitches[0].pitch = core.pitch;
+              if (core.soundPitch || core.soundPitch === 0) el.pitches[0].soundPitch = core.soundPitch;
+              if (core.midipitch || core.midipitch === 0) el.pitches[0].midipitch = core.midipitch;
+              if (core.endSlur !== undefined) el.pitches[0].endSlur = core.endSlur;
+              if (core.endTie !== undefined) el.pitches[0].endTie = core.endTie;
+              if (core.startSlur !== undefined) el.pitches[0].startSlur = core.startSlur;
+              if (el.startSlur !== undefined) el.pitches[0].startSlur = el.startSlur;
+              if (el.dottedSlur !== undefined) el.pitches[0].dottedSlur = true;
+              if (core.startTie !== undefined) el.pitches[0].startTie = core.startTie;
+              if (el.startTie !== undefined) el.pitches[0].startTie = el.startTie;
+            } else {
+              el.rest = core.rest;
+              if (core.endSlur !== undefined) el.endSlur = core.endSlur;
+              if (core.endTie !== undefined) el.rest.endTie = core.endTie;
+              if (core.startSlur !== undefined) el.startSlur = core.startSlur;
+              if (core.startTie !== undefined) el.rest.startTie = core.startTie;
+              if (el.startTie !== undefined) el.rest.startTie = el.startTie;
+            }
+
+            if (core.chord !== undefined) el.chord = core.chord;
+            if (core.duration !== undefined) el.duration = core.duration;
+            if (core.decoration !== undefined) el.decoration = core.decoration;
+            if (core.graceNotes !== undefined) el.graceNotes = core.graceNotes;
+            delete el.startSlur;
+            delete el.dottedSlur;
+
+            if (isInTie(multilineVars, overlayLevel, el)) {
+              if (el.pitches !== undefined) {
+                el.pitches[0].endTie = true;
+              } else if (el.rest.type !== 'spacer') {
+                el.rest.endTie = true;
+              }
+
+              setIsInTie(multilineVars, overlayLevel, false);
+            }
+
+            if (core.startTie || el.startTie) setIsInTie(multilineVars, overlayLevel, true);
+            i = core.endChar;
+
+            if (tripletNotesLeft > 0 && !(core.rest && core.rest.type === "spacer")) {
+              tripletNotesLeft--;
+
+              if (tripletNotesLeft === 0) {
+                el.endTriplet = true;
+              }
+            }
+
+            if (core.end_beam) addEndBeam(el); // If there is a whole rest, then it should be the duration of the measure, not it's own duration. We need to special case it.
+            // If the time signature length is greater than 4/4, though, then a whole rest has no special treatment.
+
+            if (el.rest && el.rest.type === 'rest' && el.duration === 1 && durationOfMeasure(multilineVars) <= 1) {
+              el.rest.type = 'whole';
+              el.duration = durationOfMeasure(multilineVars);
+            } // Create a warning if this is not a displayable duration.
+            // The first item on a line is a regular note value, each item after that represents a dot placed after the previous note.
+            // Only durations less than a whole note are tested because whole note durations have some tricky rules.
+
+
+            var durations = [0.5, 0.75, 0.875, 0.9375, 0.96875, 0.984375, 0.25, 0.375, 0.4375, 0.46875, 0.484375, 0.4921875, 0.125, 0.1875, 0.21875, 0.234375, 0.2421875, 0.24609375, 0.0625, 0.09375, 0.109375, 0.1171875, 0.12109375, 0.123046875, 0.03125, 0.046875, 0.0546875, 0.05859375, 0.060546875, 0.0615234375, 0.015625, 0.0234375, 0.02734375, 0.029296875, 0.0302734375, 0.03076171875];
+
+            if (el.duration < 1 && durations.indexOf(el.duration) === -1 && el.duration !== 0) {
+              if (!el.rest || el.rest.type !== 'spacer') warn("Duration not representable: " + line.substring(startI, i), line, i);
+            }
+
+            multilineVars.addFormattingOptions(el, tune.formatting, 'note');
+            tuneBuilder.appendElement('note', startOfLine + startI, startOfLine + i, el);
+            multilineVars.measureNotEmpty = true;
+            el = {};
+          }
+        }
+
+        if (i === startI) {
+          // don't know what this is, so ignore it.
+          if (line.charAt(i) !== ' ' && line.charAt(i) !== '`') warn("Unknown character ignored", line, i);
+          i++;
+        }
+      }
+    }
+  }
+};
+
+var setIsInTie = function setIsInTie(multilineVars, overlayLevel, value) {
+  // If this is single voice music then the voice index isn't set, so we use the first voice.
+  var voiceIndex = multilineVars.currentVoice ? multilineVars.currentVoice.index : 0;
+  if (multilineVars.inTie[overlayLevel] === undefined) multilineVars.inTie[overlayLevel] = [];
+  multilineVars.inTie[overlayLevel][voiceIndex] = value;
+};
+
+var letter_to_chord = function letter_to_chord(line, i) {
+  if (line.charAt(i) === '"') {
+    var chord = tokenizer.getBrackettedSubstring(line, i, 5);
+    if (!chord[2]) warn("Missing the closing quote while parsing the chord symbol", line, i); // If it starts with ^, then the chord appears above.
+    // If it starts with _ then the chord appears below.
+    // (note that the 2.0 draft standard defines them as not chords, but annotations and also defines @.)
+
+    if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '^') {
+      chord[1] = chord[1].substring(1);
+      chord[2] = 'above';
+    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '_') {
+      chord[1] = chord[1].substring(1);
+      chord[2] = 'below';
+    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '<') {
+      chord[1] = chord[1].substring(1);
+      chord[2] = 'left';
+    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '>') {
+      chord[1] = chord[1].substring(1);
+      chord[2] = 'right';
+    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '@') {
+      // @-15,5.7
+      chord[1] = chord[1].substring(1);
+      var x = tokenizer.getFloat(chord[1]);
+      if (x.digits === 0) warn("Missing first position in absolutely positioned annotation.", line, i);
+      chord[1] = chord[1].substring(x.digits);
+      if (chord[1][0] !== ',') warn("Missing comma absolutely positioned annotation.", line, i);
+      chord[1] = chord[1].substring(1);
+      var y = tokenizer.getFloat(chord[1]);
+      if (y.digits === 0) warn("Missing second position in absolutely positioned annotation.", line, i);
+      chord[1] = chord[1].substring(y.digits);
+      var ws = tokenizer.skipWhiteSpace(chord[1]);
+      chord[1] = chord[1].substring(ws);
+      chord[2] = null;
+      chord[3] = {
+        x: x.value,
+        y: y.value
+      };
+    } else {
+      if (multilineVars.freegchord !== true) {
+        chord[1] = chord[1].replace(/([ABCDEFG0-9])b/g, "$1♭");
+        chord[1] = chord[1].replace(/([ABCDEFG0-9])#/g, "$1♯");
+        chord[1] = chord[1].replace(/^([ABCDEFG])([♯♭]?)o([^A-Za-z])/g, "$1$2°$3");
+        chord[1] = chord[1].replace(/^([ABCDEFG])([♯♭]?)o$/g, "$1$2°");
+        chord[1] = chord[1].replace(/^([ABCDEFG])([♯♭]?)0([^A-Za-z])/g, "$1$2ø$3");
+        chord[1] = chord[1].replace(/^([ABCDEFG])([♯♭]?)\^([^A-Za-z])/g, "$1$2∆$3");
+      }
+
+      chord[2] = 'default';
+      chord[1] = transpose.chordName(multilineVars, chord[1]);
+    }
+
+    return chord;
+  }
+
+  return [0, ""];
+};
+
+var letter_to_grace = function letter_to_grace(line, i) {
+  // Grace notes are an array of: startslur, note, endslur, space; where note is accidental, pitch, duration
+  if (line.charAt(i) === '{') {
+    // fetch the gracenotes string and consume that into the array
+    var gra = tokenizer.getBrackettedSubstring(line, i, 1, '}');
+    if (!gra[2]) warn("Missing the closing '}' while parsing grace note", line, i); // If there is a slur after the grace construction, then move it to the last note inside the grace construction
+
+    if (line[i + gra[0]] === ')') {
+      gra[0]++;
+      gra[1] += ')';
+    }
+
+    var gracenotes = [];
+    var ii = 0;
+    var inTie = false;
+
+    while (ii < gra[1].length) {
+      var acciaccatura = false;
+
+      if (gra[1].charAt(ii) === '/') {
+        acciaccatura = true;
+        ii++;
+      }
+
+      var note = getCoreNote(gra[1], ii, {}, false);
+
+      if (note !== null) {
+        // The grace note durations should not be affected by the default length: they should be based on 1/16, so if that isn't the default, then multiply here.
+        note.duration = note.duration / (multilineVars.default_length * 8);
+        if (acciaccatura) note.acciaccatura = true;
+        gracenotes.push(note);
+
+        if (inTie) {
+          note.endTie = true;
+          inTie = false;
+        }
+
+        if (note.startTie) inTie = true;
+        ii = note.endChar;
+        delete note.endChar;
+      } else {
+        // We shouldn't get anything but notes or a space here, so report an error
+        if (gra[1].charAt(ii) === ' ') {
+          if (gracenotes.length > 0) gracenotes[gracenotes.length - 1].end_beam = true;
+        } else warn("Unknown character '" + gra[1].charAt(ii) + "' while parsing grace note", line, i);
+
+        ii++;
+      }
+    }
+
+    if (gracenotes.length) return [gra[0], gracenotes];
+  }
+
+  return [0];
+};
+
+function letter_to_overlay(line, i) {
+  if (line.charAt(i) === '&') {
+    var start = i;
+
+    while (line.charAt(i) && line.charAt(i) !== ':' && line.charAt(i) !== '|') {
+      i++;
+    }
+
+    return [i - start, line.substring(start + 1, i)];
+  }
+
+  return [0];
+}
+
+function durationOfMeasure(multilineVars) {
+  // TODO-PER: This could be more complicated if one of the unusual measures is used.
+  var meter = multilineVars.origMeter;
+  if (!meter || meter.type !== 'specified') return 1;
+  if (!meter.value || meter.value.length === 0) return 1;
+  return parseInt(meter.value[0].num, 10) / parseInt(meter.value[0].den, 10);
+}
+
+var legalAccents = ["trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge", "open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase", "segno", "coda", "D.S.", "D.C.", "fine", "beambr1", "beambr2", "slide", "marcato", "upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4", "turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato", "style=normal", "style=harmonic", "style=rhythm", "style=x", "style=triangle"];
+var volumeDecorations = ["p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp", "fff", "ffff", "sfz"];
+var dynamicDecorations = ["crescendo(", "crescendo)", "diminuendo(", "diminuendo)"];
+var accentPseudonyms = [["<", "accent"], [">", "accent"], ["tr", "trill"], ["plus", "+"], ["emphasis", "accent"], ["^", "umarcato"], ["marcato", "umarcato"]];
+var accentDynamicPseudonyms = [["<(", "crescendo("], ["<)", "crescendo)"], [">(", "diminuendo("], [">)", "diminuendo)"]];
+
+var letter_to_accent = function letter_to_accent(line, i) {
+  var macro = multilineVars.macros[line.charAt(i)];
+
+  if (macro !== undefined) {
+    if (macro.charAt(0) === '!' || macro.charAt(0) === '+') macro = macro.substring(1);
+    if (macro.charAt(macro.length - 1) === '!' || macro.charAt(macro.length - 1) === '+') macro = macro.substring(0, macro.length - 1);
+    if (parseCommon.detect(legalAccents, function (acc) {
+      return macro === acc;
+    })) return [1, macro];else if (parseCommon.detect(volumeDecorations, function (acc) {
+      return macro === acc;
+    })) {
+      if (multilineVars.volumePosition === 'hidden') macro = "";
+      return [1, macro];
+    } else if (parseCommon.detect(dynamicDecorations, function (acc) {
+      if (multilineVars.dynamicPosition === 'hidden') macro = "";
+      return macro === acc;
+    })) {
+      return [1, macro];
+    } else {
+      if (!parseCommon.detect(multilineVars.ignoredDecorations, function (dec) {
+        return macro === dec;
+      })) warn("Unknown macro: " + macro, line, i);
+      return [1, ''];
+    }
+  }
+
+  switch (line.charAt(i)) {
+    case '.':
+      if (line[i + 1] === '(' || line[i + 1] === '-') // a dot then open paren is a dotted slur; likewise dot dash is dotted tie.
+        break;
+      return [1, 'staccato'];
+
+    case 'u':
+      return [1, 'upbow'];
+
+    case 'v':
+      return [1, 'downbow'];
+
+    case '~':
+      return [1, 'irishroll'];
+
+    case '!':
+    case '+':
+      var ret = tokenizer.getBrackettedSubstring(line, i, 5); // Be sure that the accent is recognizable.
+
+      if (ret[1].length > 1 && (ret[1].charAt(0) === '^' || ret[1].charAt(0) === '_')) ret[1] = ret[1].substring(1); // TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
+
+      if (parseCommon.detect(legalAccents, function (acc) {
+        return ret[1] === acc;
+      })) return ret;
+
+      if (parseCommon.detect(volumeDecorations, function (acc) {
+        return ret[1] === acc;
+      })) {
+        if (multilineVars.volumePosition === 'hidden') ret[1] = '';
+        return ret;
+      }
+
+      if (parseCommon.detect(dynamicDecorations, function (acc) {
+        return ret[1] === acc;
+      })) {
+        if (multilineVars.dynamicPosition === 'hidden') ret[1] = '';
+        return ret;
+      }
+
+      if (parseCommon.detect(accentPseudonyms, function (acc) {
+        if (ret[1] === acc[0]) {
+          ret[1] = acc[1];
+          return true;
+        } else return false;
+      })) return ret;
+
+      if (parseCommon.detect(accentDynamicPseudonyms, function (acc) {
+        if (ret[1] === acc[0]) {
+          ret[1] = acc[1];
+          return true;
+        } else return false;
+      })) {
+        if (multilineVars.dynamicPosition === 'hidden') ret[1] = '';
+        return ret;
+      } // We didn't find the accent in the list, so consume the space, but don't return an accent.
+      // Although it is possible that ! was used as a line break, so accept that.
+
+
+      if (line.charAt(i) === '!' && (ret[0] === 1 || line.charAt(i + ret[0] - 1) !== '!')) return [1, null];
+      warn("Unknown decoration: " + ret[1], line, i);
+      ret[1] = "";
+      return ret;
+
+    case 'H':
+      return [1, 'fermata'];
+
+    case 'J':
+      return [1, 'slide'];
+
+    case 'L':
+      return [1, 'accent'];
+
+    case 'M':
+      return [1, 'mordent'];
+
+    case 'O':
+      return [1, 'coda'];
+
+    case 'P':
+      return [1, 'pralltriller'];
+
+    case 'R':
+      return [1, 'roll'];
+
+    case 'S':
+      return [1, 'segno'];
+
+    case 'T':
+      return [1, 'trill'];
+  }
+
+  return [0, 0];
+};
+
+var letter_to_spacer = function letter_to_spacer(line, i) {
+  var start = i;
+
+  while (tokenizer.isWhiteSpace(line.charAt(i))) {
+    i++;
+  }
+
+  return [i - start];
+}; // returns the class of the bar line
+// the number of the repeat
+// and the number of characters used up
+// if 0 is returned, then the next element was not a bar line
+
+
+var letter_to_bar = function letter_to_bar(line, curr_pos) {
+  var ret = tokenizer.getBarLine(line, curr_pos);
+  if (ret.len === 0) return [0, ""];
+
+  if (ret.warn) {
+    warn(ret.warn, line, curr_pos);
+    return [ret.len, ""];
+  } // Now see if this is a repeated ending
+  // A repeated ending is all of the characters 1,2,3,4,5,6,7,8,9,0,-, and comma
+  // It can also optionally start with '[', which is ignored.
+  // Also, it can have white space before the '['.
+
+
+  for (var ws = 0; ws < line.length; ws++) {
+    if (line.charAt(curr_pos + ret.len + ws) !== ' ') break;
+  }
+
+  var orig_bar_len = ret.len;
+
+  if (line.charAt(curr_pos + ret.len + ws) === '[') {
+    ret.len += ws + 1;
+  } // It can also be a quoted string. It is unclear whether that construct requires '[', but it seems like it would. otherwise it would be confused with a regular chord.
+
+
+  if (line.charAt(curr_pos + ret.len) === '"' && line.charAt(curr_pos + ret.len - 1) === '[') {
+    var ending = tokenizer.getBrackettedSubstring(line, curr_pos + ret.len, 5);
+    return [ret.len + ending[0], ret.token, ending[1]];
+  }
+
+  var retRep = tokenizer.getTokenOf(line.substring(curr_pos + ret.len), "1234567890-,");
+  if (retRep.len === 0 || retRep.token[0] === '-') return [orig_bar_len, ret.token];
+  return [ret.len + retRep.len, ret.token, retRep.token];
+};
+
+var tripletQ = {
+  2: 3,
+  3: 2,
+  4: 3,
+  5: 2,
+  // TODO-PER: not handling 6/8 rhythm yet
+  6: 2,
+  7: 2,
+  // TODO-PER: not handling 6/8 rhythm yet
+  8: 3,
+  9: 2 // TODO-PER: not handling 6/8 rhythm yet
+
+};
+
+var letter_to_open_slurs_and_triplets = function letter_to_open_slurs_and_triplets(line, i) {
+  // consume spaces, and look for all the open parens. If there is a number after the open paren,
+  // that is a triplet. Otherwise that is a slur. Collect all the slurs and the first triplet.
+  var ret = {};
+  var start = i;
+
+  if (line[i] === '.' && line[i + 1] === '(') {
+    ret.dottedSlur = true;
+    i++;
+  }
+
+  while (line.charAt(i) === '(' || tokenizer.isWhiteSpace(line.charAt(i))) {
+    if (line.charAt(i) === '(') {
+      if (i + 1 < line.length && line.charAt(i + 1) >= '2' && line.charAt(i + 1) <= '9') {
+        if (ret.triplet !== undefined) warn("Can't nest triplets", line, i);else {
+          ret.triplet = line.charAt(i + 1) - '0';
+          ret.tripletQ = tripletQ[ret.triplet];
+          ret.num_notes = ret.triplet;
+
+          if (i + 2 < line.length && line.charAt(i + 2) === ':') {
+            // We are expecting "(p:q:r" or "(p:q" or "(p::r"
+            // That is: "put p notes into the time of q for the next r notes"
+            // if r is missing, then it is equal to p.
+            // if q is missing, it is determined from this table:
+            // (2 notes in the time of 3
+            // (3 notes in the time of 2
+            // (4 notes in the time of 3
+            // (5 notes in the time of n | if time sig is (6/8, 9/8, 12/8), n=3, else n=2
+            // (6 notes in the time of 2
+            // (7 notes in the time of n
+            // (8 notes in the time of 3
+            // (9 notes in the time of n
+            if (i + 3 < line.length && line.charAt(i + 3) === ':') {
+              // The second number, 'q', is not present.
+              if (i + 4 < line.length && line.charAt(i + 4) >= '1' && line.charAt(i + 4) <= '9') {
+                ret.num_notes = line.charAt(i + 4) - '0';
+                i += 3;
+              } else warn("expected number after the two colons after the triplet to mark the duration", line, i);
+            } else if (i + 3 < line.length && line.charAt(i + 3) >= '1' && line.charAt(i + 3) <= '9') {
+              ret.tripletQ = line.charAt(i + 3) - '0';
+
+              if (i + 4 < line.length && line.charAt(i + 4) === ':') {
+                if (i + 5 < line.length && line.charAt(i + 5) >= '1' && line.charAt(i + 5) <= '9') {
+                  ret.num_notes = line.charAt(i + 5) - '0';
+                  i += 4;
+                }
+              } else {
+                i += 2;
+              }
+            } else warn("expected number after the triplet to mark the duration", line, i);
+          }
+        }
+        i++;
+      } else {
+        if (ret.startSlur === undefined) ret.startSlur = 1;else ret.startSlur++;
+      }
+    }
+
+    i++;
+  }
+
+  ret.consumed = i - start;
+  return ret;
+};
+
+MusicParser.prototype.startNewLine = function () {
+  var params = {
+    startChar: -1,
+    endChar: -1
+  };
+  if (multilineVars.partForNextLine.title) params.part = multilineVars.partForNextLine;
+  params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? parseCommon.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : parseCommon.clone(multilineVars.clef);
+  var scoreTranspose = multilineVars.currentVoice ? multilineVars.currentVoice.scoreTranspose : 0;
+  params.key = parseKeyVoice.standardKey(multilineVars.key.root + multilineVars.key.acc + multilineVars.key.mode, multilineVars.key.root, multilineVars.key.acc, scoreTranspose);
+  params.key.mode = multilineVars.key.mode;
+  if (multilineVars.key.impliedNaturals) params.key.impliedNaturals = multilineVars.key.impliedNaturals;
+
+  if (multilineVars.key.explicitAccidentals) {
+    for (var i = 0; i < multilineVars.key.explicitAccidentals.length; i++) {
+      var found = false;
+
+      for (var j = 0; j < params.key.accidentals.length; j++) {
+        if (params.key.accidentals[j].note === multilineVars.key.explicitAccidentals[i].note) {
+          // If the note is already in the list, override it with the new value
+          params.key.accidentals[j].acc = multilineVars.key.explicitAccidentals[i].acc;
+          found = true;
+        }
+      }
+
+      if (!found) params.key.accidentals.push(multilineVars.key.explicitAccidentals[i]);
+    }
+  }
+
+  multilineVars.targetKey = params.key;
+  if (params.key.explicitAccidentals) delete params.key.explicitAccidentals;
+  parseKeyVoice.addPosToKey(params.clef, params.key);
+
+  if (multilineVars.meter !== null) {
+    if (multilineVars.currentVoice) {
+      parseCommon.each(multilineVars.staves, function (st) {
+        st.meter = multilineVars.meter;
+      });
+      params.meter = multilineVars.staves[multilineVars.currentVoice.staffNum].meter;
+      multilineVars.staves[multilineVars.currentVoice.staffNum].meter = null;
+    } else params.meter = multilineVars.meter;
+
+    multilineVars.meter = null;
+  } else if (multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].meter) {
+    // Make sure that each voice gets the meter marking.
+    params.meter = multilineVars.staves[multilineVars.currentVoice.staffNum].meter;
+    multilineVars.staves[multilineVars.currentVoice.staffNum].meter = null;
+  }
+
+  if (multilineVars.currentVoice && multilineVars.currentVoice.name) params.name = multilineVars.currentVoice.name;
+  if (multilineVars.vocalfont) params.vocalfont = multilineVars.vocalfont;
+  if (multilineVars.tripletfont) params.tripletfont = multilineVars.tripletfont;
+  if (multilineVars.gchordfont) params.gchordfont = multilineVars.gchordfont;
+  if (multilineVars.style) params.style = multilineVars.style;
+
+  if (multilineVars.currentVoice) {
+    var staff = multilineVars.staves[multilineVars.currentVoice.staffNum];
+    if (staff.brace) params.brace = staff.brace;
+    if (staff.bracket) params.bracket = staff.bracket;
+    if (staff.connectBarLines) params.connectBarLines = staff.connectBarLines;
+    if (staff.name) params.name = staff.name[multilineVars.currentVoice.index];
+    if (staff.subname) params.subname = staff.subname[multilineVars.currentVoice.index];
+    if (multilineVars.currentVoice.stem) params.stem = multilineVars.currentVoice.stem;
+    if (multilineVars.currentVoice.stafflines) params.stafflines = multilineVars.currentVoice.stafflines;
+    if (multilineVars.currentVoice.staffscale) params.staffscale = multilineVars.currentVoice.staffscale;
+    if (multilineVars.currentVoice.scale) params.scale = multilineVars.currentVoice.scale;
+    if (multilineVars.currentVoice.style) params.style = multilineVars.currentVoice.style;
+    if (multilineVars.currentVoice.transpose) params.clef.transpose = multilineVars.currentVoice.transpose;
+  }
+
+  var isFirstVoice = multilineVars.currentVoice === undefined || multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0;
+  if (multilineVars.barNumbers === 0 && isFirstVoice && multilineVars.currBarNumber !== 1) params.barNumber = multilineVars.currBarNumber;
+  tuneBuilder.startNewLine(params);
+  if (multilineVars.key.impliedNaturals) delete multilineVars.key.impliedNaturals;
+  multilineVars.partForNextLine = {};
+  if (multilineVars.tempoForNextLine.length === 4) tuneBuilder.appendElement(multilineVars.tempoForNextLine[0], multilineVars.tempoForNextLine[1], multilineVars.tempoForNextLine[2], multilineVars.tempoForNextLine[3]);
+  multilineVars.tempoForNextLine = [];
+}; // TODO-PER: make this a method in el.
+
+
+var addEndBeam = function addEndBeam(el) {
+  if (el.duration !== undefined && el.duration < 0.25) el.end_beam = true;
+  return el;
+};
+
+var pitches = {
+  A: 5,
+  B: 6,
+  C: 0,
+  D: 1,
+  E: 2,
+  F: 3,
+  G: 4,
+  a: 12,
+  b: 13,
+  c: 7,
+  d: 8,
+  e: 9,
+  f: 10,
+  g: 11
+};
+var rests = {
+  x: 'invisible',
+  y: 'spacer',
+  z: 'rest',
+  Z: 'multimeasure'
+};
+
+var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
+  //var el = { startChar: index };
+  var isComplete = function isComplete(state) {
+    return state === 'octave' || state === 'duration' || state === 'Zduration' || state === 'broken_rhythm' || state === 'end_slur';
+  };
+
+  var dottedTie;
+
+  if (line[index] === '.' && line[index + 1] === '-') {
+    dottedTie = true;
+    index++;
+  }
+
+  var state = 'startSlur';
+  var durationSetByPreviousNote = false;
+
+  while (1) {
+    switch (line.charAt(index)) {
+      case '(':
+        if (state === 'startSlur') {
+          if (el.startSlur === undefined) el.startSlur = 1;else el.startSlur++;
+        } else if (isComplete(state)) {
+          el.endChar = index;
+          return el;
+        } else return null;
+
+        break;
+
+      case ')':
+        if (isComplete(state)) {
+          if (el.endSlur === undefined) el.endSlur = 1;else el.endSlur++;
+        } else return null;
+
+        break;
+
+      case '^':
+        if (state === 'startSlur') {
+          el.accidental = 'sharp';
+          state = 'sharp2';
+        } else if (state === 'sharp2') {
+          el.accidental = 'dblsharp';
+          state = 'pitch';
+        } else if (isComplete(state)) {
+          el.endChar = index;
+          return el;
+        } else return null;
+
+        break;
+
+      case '_':
+        if (state === 'startSlur') {
+          el.accidental = 'flat';
+          state = 'flat2';
+        } else if (state === 'flat2') {
+          el.accidental = 'dblflat';
+          state = 'pitch';
+        } else if (isComplete(state)) {
+          el.endChar = index;
+          return el;
+        } else return null;
+
+        break;
+
+      case '=':
+        if (state === 'startSlur') {
+          el.accidental = 'natural';
+          state = 'pitch';
+        } else if (isComplete(state)) {
+          el.endChar = index;
+          return el;
+        } else return null;
+
+        break;
+
+      case 'A':
+      case 'B':
+      case 'C':
+      case 'D':
+      case 'E':
+      case 'F':
+      case 'G':
+      case 'a':
+      case 'b':
+      case 'c':
+      case 'd':
+      case 'e':
+      case 'f':
+      case 'g':
+        if (state === 'startSlur' || state === 'sharp2' || state === 'flat2' || state === 'pitch') {
+          el.pitch = pitches[line.charAt(index)];
+          transpose.note(multilineVars, el);
+          state = 'octave'; // At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
+
+          if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
+            el.duration = multilineVars.default_length * multilineVars.next_note_duration;
+            multilineVars.next_note_duration = 0;
+            durationSetByPreviousNote = true;
+          } else el.duration = multilineVars.default_length; // If the clef is percussion, there is probably some translation of the pitch to a particular drum kit item.
+
+
+          if (multilineVars.clef && multilineVars.clef.type === "perc" || multilineVars.currentVoice && multilineVars.currentVoice.clef === "perc") {
+            var key = line.charAt(index);
+
+            if (el.accidental) {
+              var accMap = {
+                'dblflat': '__',
+                'flat': '_',
+                'natural': '=',
+                'sharp': '^',
+                'dblsharp': '^^'
+              };
+              key = accMap[el.accidental] + key;
+            }
+
+            if (tune.formatting && tune.formatting.midi && tune.formatting.midi.drummap) el.midipitch = tune.formatting.midi.drummap[key];
+          } else if (multilineVars.clef && multilineVars.clef.type.indexOf('-') >= 0) {
+            el.soundPitch = el.pitch - 7;
+          } else if (multilineVars.clef && multilineVars.clef.type.indexOf('+') >= 0) el.soundPitch = el.pitch + 7;
+        } else if (isComplete(state)) {
+          el.endChar = index;
+          return el;
+        } else return null;
+
+        break;
+
+      case ',':
+        if (state === 'octave') {
+          el.pitch -= 7;
+          if (el.soundPitch !== undefined) el.soundPitch -= 7;
+        } else if (isComplete(state)) {
+          el.endChar = index;
+          return el;
+        } else return null;
+
+        break;
+
+      case '\'':
+        if (state === 'octave') {
+          el.pitch += 7;
+          if (el.soundPitch !== undefined) el.soundPitch += 7;
+        } else if (isComplete(state)) {
+          el.endChar = index;
+          return el;
+        } else return null;
+
+        break;
+
+      case 'x':
+      case 'y':
+      case 'z':
+      case 'Z':
+        if (state === 'startSlur') {
+          el.rest = {
+            type: rests[line.charAt(index)]
+          }; // There shouldn't be some of the properties that notes have. If some sneak in due to bad syntax in the abc file,
+          // just nix them here.
+
+          delete el.accidental;
+          delete el.startSlur;
+          delete el.startTie;
+          delete el.endSlur;
+          delete el.endTie;
+          delete el.end_beam;
+          delete el.grace_notes; // At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
+
+          if (el.rest.type === 'multimeasure') {
+            el.duration = tune.getBarLength();
+            el.rest.text = 1;
+            state = 'Zduration';
+          } else {
+            if (canHaveBrokenRhythm && multilineVars.next_note_duration !== 0) {
+              el.duration = multilineVars.default_length * multilineVars.next_note_duration;
+              multilineVars.next_note_duration = 0;
+              durationSetByPreviousNote = true;
+            } else el.duration = multilineVars.default_length;
+
+            state = 'duration';
+          }
+        } else if (isComplete(state)) {
+          el.endChar = index;
+          return el;
+        } else return null;
+
+        break;
+
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+      case '0':
+      case '/':
+        if (state === 'octave' || state === 'duration') {
+          var fraction = tokenizer.getFraction(line, index); //if (!durationSetByPreviousNote)
+
+          el.duration = el.duration * fraction.value; // TODO-PER: We can test the returned duration here and give a warning if it isn't the one expected.
+
+          el.endChar = fraction.index;
+
+          while (fraction.index < line.length && (tokenizer.isWhiteSpace(line.charAt(fraction.index)) || line.charAt(fraction.index) === '-')) {
+            if (line.charAt(fraction.index) === '-') el.startTie = {};else el = addEndBeam(el);
+            fraction.index++;
+          }
+
+          index = fraction.index - 1;
+          state = 'broken_rhythm';
+        } else if (state === 'sharp2') {
+          el.accidental = 'quartersharp';
+          state = 'pitch';
+        } else if (state === 'flat2') {
+          el.accidental = 'quarterflat';
+          state = 'pitch';
+        } else if (state === 'Zduration') {
+          var num = tokenizer.getNumber(line, index);
+          el.duration = num.num * tune.getBarLength();
+          el.rest.text = num.num;
+          el.endChar = num.index;
+          return el;
+        } else return null;
+
+        break;
+
+      case '-':
+        if (state === 'startSlur') {
+          // This is the first character, so it must have been meant for the previous note. Correct that here.
+          tuneBuilder.addTieToLastNote(dottedTie);
+          el.endTie = true;
+        } else if (state === 'octave' || state === 'duration' || state === 'end_slur') {
+          el.startTie = {};
+          if (!durationSetByPreviousNote && canHaveBrokenRhythm) state = 'broken_rhythm';else {
+            // Peek ahead to the next character. If it is a space, then we have an end beam.
+            if (tokenizer.isWhiteSpace(line.charAt(index + 1))) addEndBeam(el);
+            el.endChar = index + 1;
+            return el;
+          }
+        } else if (state === 'broken_rhythm') {
+          el.endChar = index;
+          return el;
+        } else return null;
+
+        break;
+
+      case ' ':
+      case '\t':
+        if (isComplete(state)) {
+          el.end_beam = true; // look ahead to see if there is a tie
+
+          dottedTie = false;
+
+          do {
+            if (line.charAt(index) === '.' && line.charAt(index + 1) === '-') {
+              dottedTie = true;
+              index++;
+            }
+
+            if (line.charAt(index) === '-') {
+              el.startTie = {};
+              if (dottedTie) el.startTie.style = "dotted";
+            }
+
+            index++;
+          } while (index < line.length && (tokenizer.isWhiteSpace(line.charAt(index)) || line.charAt(index) === '-') || line.charAt(index) === '.' && line.charAt(index + 1) === '-');
+
+          el.endChar = index;
+
+          if (!durationSetByPreviousNote && canHaveBrokenRhythm && (line.charAt(index) === '<' || line.charAt(index) === '>')) {
+            // TODO-PER: Don't need the test for < and >, but that makes the endChar work out for the regression test.
+            index--;
+            state = 'broken_rhythm';
+          } else return el;
+        } else return null;
+
+        break;
+
+      case '>':
+      case '<':
+        if (isComplete(state)) {
+          if (canHaveBrokenRhythm) {
+            var br2 = getBrokenRhythm(line, index);
+            index += br2[0] - 1; // index gets incremented below, so we'll let that happen
+
+            multilineVars.next_note_duration = br2[2];
+            el.duration = br2[1] * el.duration;
+            state = 'end_slur';
+          } else {
+            el.endChar = index;
+            return el;
+          }
+        } else return null;
+
+        break;
+
+      default:
+        if (isComplete(state)) {
+          el.endChar = index;
+          return el;
+        }
+
+        return null;
+    }
+
+    index++;
+
+    if (index === line.length) {
+      if (isComplete(state)) {
+        el.endChar = index;
+        return el;
+      } else return null;
+    }
+  }
+
+  return null;
+};
+
+var getBrokenRhythm = function getBrokenRhythm(line, index) {
+  switch (line.charAt(index)) {
+    case '>':
+      if (index < line.length - 2 && line.charAt(index + 1) === '>' && line.charAt(index + 2) === '>') // triple >>>
+        return [3, 1.875, 0.125];else if (index < line.length - 1 && line.charAt(index + 1) === '>') // double >>
+        return [2, 1.75, 0.25];else return [1, 1.5, 0.5];
+
+    case '<':
+      if (index < line.length - 2 && line.charAt(index + 1) === '<' && line.charAt(index + 2) === '<') // triple <<<
+        return [3, 0.125, 1.875];else if (index < line.length - 1 && line.charAt(index + 1) === '<') // double <<
+        return [2, 0.25, 1.75];else return [1, 0.5, 1.5];
+  }
+
+  return null;
+};
+
+module.exports = MusicParser;
+
+/***/ }),
+
 /***/ "./src/parse/abc_tokenizer.js":
 /*!************************************!*\
   !*** ./src/parse/abc_tokenizer.js ***!
@@ -8497,20 +8374,6 @@ module.exports = parseKeyVoice;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_tokenizer.js: tokenizes an ABC Music Notation string to support abc_parse.
-//    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js"); // this is a series of functions that get a particular element out of the passed stream.
 // the return is the number of characters consumed, so 0 means that the element wasn't found.
 // also returned is the element found. This may be a different length because spaces may be consumed that aren't part of the string.
@@ -9929,20 +9792,6 @@ module.exports = Tokenizer;
 /***/ (function(module, exports) {
 
 //    abc_transpose.js: Handles the automatic transposition of key signatures, chord symbols, and notes.
-//    Copyright (C) 2010-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var transpose = {};
 var keyIndex = {
   'C': 0,
@@ -10312,11 +10161,24 @@ var TuneBuilder = function TuneBuilder(tune) {
             var ov = overlayVoice[k];
 
             if (ov.hasOverlay) {
+              ov.voice.splice(0, 0, {
+                el_type: "stem",
+                direction: "down"
+              });
               staff.voices.push(ov.voice);
 
               for (var kkk = ov.snip.length - 1; kkk >= 0; kkk--) {
                 var snip = ov.snip[kkk];
                 staff.voices[k].splice(snip.start, snip.len);
+                staff.voices[k].splice(snip.start + 1, 0, {
+                  el_type: "stem",
+                  direction: "auto"
+                });
+                var indexOfLastBar = findLastBar(staff.voices[k], snip.start);
+                staff.voices[k].splice(indexOfLastBar, 0, {
+                  el_type: "stem",
+                  direction: "up"
+                });
               } // remove ending marks from the overlay voice so they are not repeated
 
 
@@ -10338,6 +10200,12 @@ var TuneBuilder = function TuneBuilder(tune) {
 
     return madeChanges;
   };
+
+  function findLastBar(voice, start) {
+    for (var i = start - 1; i > 0 && voice[i].el_type !== "bar"; i--) {}
+
+    return i;
+  }
 
   function fixTitles(lines) {
     // We might have name and subname defined. We now know what line everything is on, so we can determine which to use.
@@ -10459,45 +10327,46 @@ var TuneBuilder = function TuneBuilder(tune) {
     while (this.resolveOverlays()) {// keep resolving overlays as long as any are found.
     }
 
-    function cleanUpSlursInLine(line, voiceNum) {
-      if (!currSlur[voiceNum]) currSlur[voiceNum] = [];
+    function cleanUpSlursInLine(line, staffNum, voiceNum) {
+      if (!currSlur[staffNum]) currSlur[staffNum] = [];
+      if (!currSlur[staffNum][voiceNum]) currSlur[staffNum][voiceNum] = [];
       var x; //			var lyr = null;	// TODO-PER: debugging.
 
       var addEndSlur = function addEndSlur(obj, num, chordPos) {
-        if (currSlur[voiceNum][chordPos] === undefined) {
+        if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
           // There isn't an exact match for note position, but we'll take any other open slur.
-          for (x = 0; x < currSlur[voiceNum].length; x++) {
-            if (currSlur[voiceNum][x] !== undefined) {
+          for (x = 0; x < currSlur[staffNum][voiceNum].length; x++) {
+            if (currSlur[staffNum][voiceNum][x] !== undefined) {
               chordPos = x;
               break;
             }
           }
 
-          if (currSlur[voiceNum][chordPos] === undefined) {
+          if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
             var offNum = chordPos * 100 + 1;
             parseCommon.each(obj.endSlur, function (x) {
               if (offNum === x) --offNum;
             });
-            currSlur[voiceNum][chordPos] = [offNum];
+            currSlur[staffNum][voiceNum][chordPos] = [offNum];
           }
         }
 
         var slurNum;
 
         for (var i = 0; i < num; i++) {
-          slurNum = currSlur[voiceNum][chordPos].pop();
+          slurNum = currSlur[staffNum][voiceNum][chordPos].pop();
           obj.endSlur.push(slurNum); //					lyr.syllable += '<' + slurNum;	// TODO-PER: debugging
         }
 
-        if (currSlur[voiceNum][chordPos].length === 0) delete currSlur[voiceNum][chordPos];
+        if (currSlur[staffNum][voiceNum][chordPos].length === 0) delete currSlur[staffNum][voiceNum][chordPos];
         return slurNum;
       };
 
       var addStartSlur = function addStartSlur(obj, num, chordPos, usedNums) {
         obj.startSlur = [];
 
-        if (currSlur[voiceNum][chordPos] === undefined) {
-          currSlur[voiceNum][chordPos] = [];
+        if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
+          currSlur[staffNum][voiceNum][chordPos] = [];
         }
 
         var nextNum = chordPos * 100 + 1;
@@ -10515,13 +10384,13 @@ var TuneBuilder = function TuneBuilder(tune) {
             });
           }
 
-          parseCommon.each(currSlur[voiceNum][chordPos], function (x) {
+          parseCommon.each(currSlur[staffNum][voiceNum][chordPos], function (x) {
             if (nextNum === x) ++nextNum;
           });
-          parseCommon.each(currSlur[voiceNum][chordPos], function (x) {
+          parseCommon.each(currSlur[staffNum][voiceNum][chordPos], function (x) {
             if (nextNum === x) ++nextNum;
           });
-          currSlur[voiceNum][chordPos].push(nextNum);
+          currSlur[staffNum][voiceNum][chordPos].push(nextNum);
           obj.startSlur.push({
             label: nextNum
           });
@@ -10599,7 +10468,7 @@ var TuneBuilder = function TuneBuilder(tune) {
             if (el.gracenotes && el.pitches[0].endSlur && el.pitches[0].endSlur[0] === 100 && el.pitches[0].startSlur) {
               if (el.gracenotes[0].endSlur) el.gracenotes[0].endSlur.push(el.pitches[0].startSlur[0].label);else el.gracenotes[0].endSlur = [el.pitches[0].startSlur[0].label];
               if (el.pitches[0].endSlur.length === 1) delete el.pitches[0].endSlur;else if (el.pitches[0].endSlur[0] === 100) el.pitches[0].endSlur.shift();else if (el.pitches[0].endSlur[el.pitches[0].endSlur.length - 1] === 100) el.pitches[0].endSlur.pop();
-              if (currSlur[voiceNum][1].length === 1) delete currSlur[voiceNum][1];else currSlur[voiceNum][1].pop();
+              if (currSlur[staffNum][voiceNum][1].length === 1) delete currSlur[staffNum][voiceNum][1];else currSlur[staffNum][voiceNum][1].pop();
             }
           }
         }
@@ -10682,7 +10551,7 @@ var TuneBuilder = function TuneBuilder(tune) {
 
           for (tune.voiceNum = 0; tune.voiceNum < staff[tune.staffNum].voices.length; tune.voiceNum++) {
             var voice = staff[tune.staffNum].voices[tune.voiceNum];
-            cleanUpSlursInLine(voice, tune.voiceNum);
+            cleanUpSlursInLine(voice, tune.staffNum, tune.voiceNum);
 
             for (var j = 0; j < voice.length; j++) {
               if (voice[j].el_type === 'clef') fixClefPlacement(voice[j]);
@@ -11218,20 +11087,6 @@ module.exports = TuneBuilder;
 /***/ (function(module, exports) {
 
 //    wrap_lines.js: does line wrap on an already parsed tune.
-//    Copyright (C) 2018-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 function wrapLines(tune, lineBreaks) {
   if (!lineBreaks || tune.lines.length === 0) return; // tune.lines contains nested arrays: there is an array of lines (that's the part this function rewrites),
   // there is an array of staffs per line (for instance, piano will have 2, orchestra will have many)
@@ -11767,26 +11622,14 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_midi_flattener.js: Turn a linear series of events into a series of MIDI commands.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // We input a set of voices, but the notes are still complex. This pass changes the logical definitions
 // of the grace notes, decorations, ties, triplets, rests, transpositions, keys, and accidentals into actual note durations.
 // It also extracts guitar chords to a separate voice and resolves their rhythm.
 var flatten;
 
 var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
+
+var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pitches-to-perc.js");
 
 (function () {
   "use strict";
@@ -11835,7 +11678,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
   var drumTrack;
   var drumTrackFinished;
   var drumDefinition = {};
-  var pickupLength = 0; // The gaps per beat. The first two are in seconds, the third is in fraction of a duration.
+  var pickupLength = 0;
+  var percmap; // The gaps per beat. The first two are in seconds, the third is in fraction of a duration.
 
   var normalBreakBetweenNotes = 0; //0.000520833333325*1.5; // for articulation (matches muse score value)
 
@@ -11843,7 +11687,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
 
   var staccatoBreakBetweenNotes = 0.4; // some people say staccato is half duration, some say 3/4 so this splits it
 
-  flatten = function flatten(voices, options) {
+  flatten = function flatten(voices, options, percmap_) {
     if (!options) options = {};
     barAccidentals = [];
     accidentals = [0, 0, 0, 0, 0, 0, 0];
@@ -11857,7 +11701,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
 
     currentTrack = undefined;
     currentTrackName = undefined;
-    lastEventTime = 0; // For resolving chords.
+    lastEventTime = 0;
+    percmap = percmap_; // For resolving chords.
 
     meter = {
       num: 4,
@@ -12548,6 +12393,12 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
         if (note.startSlur) slurCount += note.startSlur.length;
         if (note.endSlur) slurCount -= note.endSlur.length;
         var actualPitch = note.actualPitch ? note.actualPitch : adjustPitch(note);
+
+        if (currentInstrument === drumInstrument && percmap) {
+          var name = pitchesToPerc(note);
+          if (name && percmap[name]) actualPitch = percmap[name].sound;
+        }
+
         var p = {
           cmd: 'note',
           pitch: actualPitch,
@@ -13285,20 +13136,6 @@ module.exports = flatten;
 /***/ (function(module, exports) {
 
 //    abc_midi_renderer.js: Create the actual format for the midi.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var rendererFactory;
 
 (function () {
@@ -13597,20 +13434,6 @@ module.exports = rendererFactory;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_midi_sequencer.js: Turn parsed abc into a linear series of events.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var sequence;
 
 var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
@@ -14433,20 +14256,6 @@ module.exports = sequence;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var registerAudioContext = __webpack_require__(/*! ./register-audio-context.js */ "./src/synth/register-audio-context.js");
 
 function activeAudioContext() {
@@ -14465,20 +14274,6 @@ module.exports = activeAudioContext;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Convert the input structure to a more useful structure where each item has a length of its own.
 var instrumentIndexToName = __webpack_require__(/*! ./instrument-index-to-name */ "./src/synth/instrument-index-to-name.js");
 
@@ -14545,39 +14340,23 @@ module.exports = createNoteMap;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var supportsAudio = __webpack_require__(/*! ./supports-audio */ "./src/synth/supports-audio.js");
 
 var registerAudioContext = __webpack_require__(/*! ./register-audio-context */ "./src/synth/register-audio-context.js");
 
 var activeAudioContext = __webpack_require__(/*! ./active-audio-context */ "./src/synth/active-audio-context.js");
 
-var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js"); // TODO-PER: The require statements for svg don't play well for node apps without extra plugins. The following lines would be clearer than inlining the SVG
-// var loopImage = require('./images/loop.svg');
-// var playImage = require('./images/play.svg');
-// var pauseImage = require('./images/pause.svg');
-// var loadingImage = require('./images/loading.svg');
-// var resetImage = require('./images/reset.svg');
+var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
 
+var loopImage = __webpack_require__(/*! ./images/loop.svg.js */ "./src/synth/images/loop.svg.js");
 
-var loopImage = '<svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 700" preserveAspectRatio="xMidYMid meet">\n' + '<g transform="translate(0,700) scale(0.1,-0.1)" >\n' + '<path d="M3111 6981 c-20 -37 -90 -55 -364 -96 -120 -18 -190 -33 -244 -55 ' + '-42 -17 -124 -42 -182 -56 -78 -18 -119 -34 -157 -60 -28 -19 -86 -46 -128 ' + '-60 -43 -13 -107 -42 -144 -64 -37 -23 -84 -46 -106 -52 -21 -7 -56 -29 -79 ' + '-50 -22 -22 -61 -50 -86 -63 -26 -13 -67 -40 -91 -60 -24 -20 -65 -47 -90 -60 ' + '-25 -13 -53 -31 -61 -41 -8 -9 -32 -30 -54 -46 -75 -54 -486 -460 -512 -507 ' + '-15 -25 -48 -69 -75 -98 -26 -28 -48 -57 -48 -63 0 -6 -18 -29 -39 -53 -21 ' + '-23 -56 -71 -77 -107 -20 -36 -50 -80 -65 -97 -16 -18 -33 -52 -40 -75 -12 ' + '-47 -47 -115 -84 -166 -13 -18 -30 -56 -38 -83 -8 -27 -34 -80 -56 -118 -33 ' + '-53 -46 -91 -62 -167 -12 -63 -34 -127 -59 -179 -42 -84 -60 -166 -60 -270 0 ' + '-90 26 -122 125 -154 54 -17 96 -19 430 -20 305 -1 381 2 430 14 82 22 140 51 ' + '153 78 6 12 22 47 37 77 14 30 38 77 54 103 15 27 34 73 40 103 7 30 28 78 48 ' + '107 19 28 44 74 55 101 10 28 34 67 53 87 18 20 49 61 68 90 19 30 44 63 57 ' + '74 13 11 36 40 52 65 59 94 232 270 306 313 20 11 57 37 82 58 25 20 70 52 ' + '100 72 30 19 66 47 79 61 13 14 49 35 80 46 30 12 80 37 111 56 31 19 95 45 ' + '143 58 48 12 110 37 139 55 63 40 127 55 323 76 83 9 208 28 279 41 156 29 ' + '165 29 330 4 453 -71 514 -84 606 -130 31 -16 83 -36 116 -45 32 -9 84 -34 ' + '115 -56 31 -21 82 -48 113 -60 32 -11 72 -33 89 -48 18 -16 59 -45 92 -65 33 ' + '-21 74 -51 90 -66 17 -15 49 -40 73 -54 52 -32 65 -61 50 -113 -8 -31 -61 -90 ' + '-277 -308 -300 -303 -361 -382 -369 -481 -2 -29 0 -66 6 -81 13 -40 88 -138 ' + '115 -151 12 -6 54 -26 92 -44 l70 -33 945 -2 c520 -1 975 2 1012 7 64 8 191 ' + '50 231 76 11 7 33 34 50 60 22 34 42 51 65 58 l32 9 0 1101 0 1102 -32 9 c-21 ' + '7 -44 26 -64 55 -60 84 -77 97 -140 110 -44 9 -76 10 -127 2 -59 -9 -77 -17 ' + '-134 -62 -37 -28 -172 -155 -301 -281 -129 -127 -249 -237 -267 -245 -25 -10 ' + '-41 -11 -71 -2 -58 15 -112 45 -124 69 -6 11 -35 35 -64 54 -28 18 -58 41 -66 ' + '50 -8 9 -41 35 -75 58 -33 22 -77 56 -99 75 -21 18 -64 46 -95 61 -31 14 -73 ' + '39 -93 55 -20 15 -70 40 -110 55 -40 15 -97 44 -127 64 -29 21 -78 44 -107 53 ' + '-30 8 -77 31 -105 51 -42 28 -73 39 -173 60 -68 14 -154 39 -196 58 -95 43 ' + '-131 51 -343 76 -209 24 -242 32 -279 70 l-30 29 -328 0 c-312 0 -330 -1 -339 ' + '-19z"></path>\n' + '<path d="M254 2875 c-89 -16 -107 -26 -145 -78 -32 -44 -62 -66 -91 -67 -17 0 ' + '-18 -61 -18 -1140 l0 -1140 24 0 c16 0 41 -17 72 -50 40 -42 61 -55 117 -72 ' + 'l69 -21 82 23 c44 12 96 30 114 39 18 9 148 132 290 272 141 141 267 261 279 ' + '268 51 26 86 14 176 -61 32 -26 62 -48 66 -48 5 0 36 -25 70 -55 34 -30 74 ' + '-61 89 -69 15 -8 37 -28 50 -45 12 -17 50 -45 84 -62 34 -17 78 -44 98 -60 19 ' + '-16 61 -37 93 -48 32 -11 81 -37 107 -56 27 -20 76 -45 109 -56 33 -12 75 -31 ' + '93 -44 62 -45 93 -58 191 -82 54 -12 130 -37 168 -54 68 -29 180 -58 226 -59 ' + '62 0 183 -64 183 -96 0 -12 88 -14 639 -14 l639 0 12 30 c18 44 76 66 233 89 ' + '89 14 160 30 200 47 34 15 106 42 159 60 54 18 112 44 130 57 47 35 85 52 146 ' + '67 29 7 76 28 105 48 29 20 77 48 107 63 30 15 66 39 80 54 14 15 50 40 81 56 ' + '31 15 78 46 104 69 26 22 61 46 79 54 17 7 43 26 56 42 14 16 41 41 60 56 64 ' + '48 380 362 408 405 15 23 40 51 55 63 15 12 36 38 46 58 11 21 37 57 58 82 22 ' + '25 49 62 62 83 13 20 38 56 57 78 19 23 50 74 69 113 19 39 46 86 59 104 14 ' + '18 34 62 46 98 12 36 32 77 45 92 31 38 60 97 80 167 9 33 26 76 37 95 29 50 ' + '47 103 68 206 10 52 32 117 51 155 29 56 33 74 34 140 0 94 -10 108 -101 138 ' + '-61 20 -83 21 -463 21 -226 0 -421 -4 -451 -10 -63 -12 -86 -30 -110 -85 -10 ' + '-22 -33 -63 -52 -92 -21 -31 -42 -80 -53 -123 -11 -44 -32 -93 -56 -128 -20 ' + '-32 -47 -83 -59 -115 -12 -32 -37 -77 -56 -100 -19 -23 -50 -65 -69 -94 -19 ' + '-29 -44 -57 -54 -63 -11 -5 -29 -27 -42 -47 -52 -85 -234 -277 -300 -315 -25 ' + '-15 -53 -38 -62 -51 -9 -14 -42 -39 -74 -57 -32 -18 -75 -48 -95 -66 -21 -18 ' + '-59 -44 -85 -58 -26 -13 -72 -40 -100 -59 -35 -24 -78 -41 -128 -52 -47 -11 ' + '-99 -31 -139 -56 -69 -42 -94 -49 -391 -110 -245 -51 -425 -66 -595 -50 -168 ' + '16 -230 27 -330 61 -47 16 -123 35 -170 44 -98 17 -123 25 -172 58 -20 14 -71 ' + '37 -114 53 -44 15 -95 40 -115 56 -20 16 -70 42 -110 59 -40 16 -88 45 -108 ' + '63 -20 19 -55 46 -78 61 -24 14 -49 35 -55 47 -7 11 -34 33 -60 49 -50 31 -65 ' + '61 -53 102 4 13 130 147 281 298 236 238 277 283 299 335 15 32 35 71 46 86 ' + '12 18 19 44 19 76 0 42 -8 63 -53 138 -92 151 11 139 -1207 141 -798 2 -1030 ' + '0 -1086 -11z"></path>\n' + '</g>\n' + '</svg>\n';
-var playImage = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" class="abcjs-play-svg">\n' + '    <g>\n' + '    <polygon points="4 0 23 12.5 4 25"/>\n' + '    </g>\n' + '</svg>';
-var pauseImage = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" class="abcjs-pause-svg">\n' + '  <g>\n' + '    <rect width="8.23" height="25"/>\n' + '    <rect width="8.23" height="25" x="17"/>\n' + '  </g>\n' + '</svg>';
-var loadingImage = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="abcjs-loading-svg">\n' + '    <circle cx="50" cy="50" fill="none" stroke-width="20" r="35" stroke-dasharray="160 55"></circle>\n' + '</svg>';
-var resetImage = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25">\n' + '  <g>\n' + '    <polygon points="5 12.5 24 0 24 25"/>\n' + '    <rect width="3" height="25" x="0" y="0"/>\n' + '  </g>\n' + '</svg>';
+var playImage = __webpack_require__(/*! ./images/play.svg.js */ "./src/synth/images/play.svg.js");
+
+var pauseImage = __webpack_require__(/*! ./images/pause.svg.js */ "./src/synth/images/pause.svg.js");
+
+var loadingImage = __webpack_require__(/*! ./images/loading.svg.js */ "./src/synth/images/loading.svg.js");
+
+var resetImage = __webpack_require__(/*! ./images/reset.svg.js */ "./src/synth/images/reset.svg.js");
 
 function CreateSynthControl(parent, options) {
   var self = this; // parent is either an element or a selector.
@@ -14800,20 +14579,6 @@ module.exports = CreateSynthControl;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var getNote = __webpack_require__(/*! ./load-note */ "./src/synth/load-note.js");
 
 var createNoteMap = __webpack_require__(/*! ./create-note-map */ "./src/synth/create-note-map.js");
@@ -15248,20 +15013,6 @@ module.exports = CreateSynth;
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var downloadBuffer = function downloadBuffer(buffer) {
   return window.URL.createObjectURL(bufferToWave(buffer.audioBuffers));
 }; // Convert an AudioBuffer to a Blob using WAVE representation
@@ -15350,20 +15101,6 @@ module.exports = downloadBuffer;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var tunebook = __webpack_require__(/*! ../api/abc_tunebook */ "./src/api/abc_tunebook.js");
 
 var midiCreate = __webpack_require__(/*! ../midi/abc_midi_create */ "./src/midi/abc_midi_create.js");
@@ -15435,6 +15172,66 @@ module.exports = getMidiFile;
 
 /***/ }),
 
+/***/ "./src/synth/images/loading.svg.js":
+/*!*****************************************!*\
+  !*** ./src/synth/images/loading.svg.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var svg = "\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" class=\"abcjs-loading-svg\">\n    <circle cx=\"50\" cy=\"50\" fill=\"none\" stroke-width=\"20\" r=\"35\" stroke-dasharray=\"160 55\"></circle>\n</svg>\n";
+module.exports = svg;
+
+/***/ }),
+
+/***/ "./src/synth/images/loop.svg.js":
+/*!**************************************!*\
+  !*** ./src/synth/images/loop.svg.js ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var svg = "\n<svg version=\"1.0\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 700 700\" preserveAspectRatio=\"xMidYMid meet\">\n\t<g transform=\"translate(0,700) scale(0.1,-0.1)\" >\n\t<path d=\"M3111 6981 c-20 -37 -90 -55 -364 -96 -120 -18 -190 -33 -244 -55\n\t-42 -17 -124 -42 -182 -56 -78 -18 -119 -34 -157 -60 -28 -19 -86 -46 -128\n\t-60 -43 -13 -107 -42 -144 -64 -37 -23 -84 -46 -106 -52 -21 -7 -56 -29 -79\n\t-50 -22 -22 -61 -50 -86 -63 -26 -13 -67 -40 -91 -60 -24 -20 -65 -47 -90 -60\n\t-25 -13 -53 -31 -61 -41 -8 -9 -32 -30 -54 -46 -75 -54 -486 -460 -512 -507\n\t-15 -25 -48 -69 -75 -98 -26 -28 -48 -57 -48 -63 0 -6 -18 -29 -39 -53 -21\n\t-23 -56 -71 -77 -107 -20 -36 -50 -80 -65 -97 -16 -18 -33 -52 -40 -75 -12\n\t-47 -47 -115 -84 -166 -13 -18 -30 -56 -38 -83 -8 -27 -34 -80 -56 -118 -33\n\t-53 -46 -91 -62 -167 -12 -63 -34 -127 -59 -179 -42 -84 -60 -166 -60 -270 0\n\t-90 26 -122 125 -154 54 -17 96 -19 430 -20 305 -1 381 2 430 14 82 22 140 51\n\t153 78 6 12 22 47 37 77 14 30 38 77 54 103 15 27 34 73 40 103 7 30 28 78 48\n\t107 19 28 44 74 55 101 10 28 34 67 53 87 18 20 49 61 68 90 19 30 44 63 57\n\t74 13 11 36 40 52 65 59 94 232 270 306 313 20 11 57 37 82 58 25 20 70 52\n\t100 72 30 19 66 47 79 61 13 14 49 35 80 46 30 12 80 37 111 56 31 19 95 45\n\t143 58 48 12 110 37 139 55 63 40 127 55 323 76 83 9 208 28 279 41 156 29\n\t165 29 330 4 453 -71 514 -84 606 -130 31 -16 83 -36 116 -45 32 -9 84 -34\n\t115 -56 31 -21 82 -48 113 -60 32 -11 72 -33 89 -48 18 -16 59 -45 92 -65 33\n\t-21 74 -51 90 -66 17 -15 49 -40 73 -54 52 -32 65 -61 50 -113 -8 -31 -61 -90\n\t-277 -308 -300 -303 -361 -382 -369 -481 -2 -29 0 -66 6 -81 13 -40 88 -138\n\t115 -151 12 -6 54 -26 92 -44 l70 -33 945 -2 c520 -1 975 2 1012 7 64 8 191\n\t50 231 76 11 7 33 34 50 60 22 34 42 51 65 58 l32 9 0 1101 0 1102 -32 9 c-21\n\t7 -44 26 -64 55 -60 84 -77 97 -140 110 -44 9 -76 10 -127 2 -59 -9 -77 -17\n\t-134 -62 -37 -28 -172 -155 -301 -281 -129 -127 -249 -237 -267 -245 -25 -10\n\t-41 -11 -71 -2 -58 15 -112 45 -124 69 -6 11 -35 35 -64 54 -28 18 -58 41 -66\n\t50 -8 9 -41 35 -75 58 -33 22 -77 56 -99 75 -21 18 -64 46 -95 61 -31 14 -73\n\t39 -93 55 -20 15 -70 40 -110 55 -40 15 -97 44 -127 64 -29 21 -78 44 -107 53\n\t-30 8 -77 31 -105 51 -42 28 -73 39 -173 60 -68 14 -154 39 -196 58 -95 43\n\t-131 51 -343 76 -209 24 -242 32 -279 70 l-30 29 -328 0 c-312 0 -330 -1 -339\n\t-19z\"></path>\n\t<path d=\"M254 2875 c-89 -16 -107 -26 -145 -78 -32 -44 -62 -66 -91 -67 -17 0\n\t-18 -61 -18 -1140 l0 -1140 24 0 c16 0 41 -17 72 -50 40 -42 61 -55 117 -72\n\tl69 -21 82 23 c44 12 96 30 114 39 18 9 148 132 290 272 141 141 267 261 279\n\t268 51 26 86 14 176 -61 32 -26 62 -48 66 -48 5 0 36 -25 70 -55 34 -30 74\n\t-61 89 -69 15 -8 37 -28 50 -45 12 -17 50 -45 84 -62 34 -17 78 -44 98 -60 19\n\t-16 61 -37 93 -48 32 -11 81 -37 107 -56 27 -20 76 -45 109 -56 33 -12 75 -31\n\t93 -44 62 -45 93 -58 191 -82 54 -12 130 -37 168 -54 68 -29 180 -58 226 -59\n\t62 0 183 -64 183 -96 0 -12 88 -14 639 -14 l639 0 12 30 c18 44 76 66 233 89\n\t89 14 160 30 200 47 34 15 106 42 159 60 54 18 112 44 130 57 47 35 85 52 146\n\t67 29 7 76 28 105 48 29 20 77 48 107 63 30 15 66 39 80 54 14 15 50 40 81 56\n\t31 15 78 46 104 69 26 22 61 46 79 54 17 7 43 26 56 42 14 16 41 41 60 56 64\n\t48 380 362 408 405 15 23 40 51 55 63 15 12 36 38 46 58 11 21 37 57 58 82 22\n\t25 49 62 62 83 13 20 38 56 57 78 19 23 50 74 69 113 19 39 46 86 59 104 14\n\t18 34 62 46 98 12 36 32 77 45 92 31 38 60 97 80 167 9 33 26 76 37 95 29 50\n\t47 103 68 206 10 52 32 117 51 155 29 56 33 74 34 140 0 94 -10 108 -101 138\n\t-61 20 -83 21 -463 21 -226 0 -421 -4 -451 -10 -63 -12 -86 -30 -110 -85 -10\n\t-22 -33 -63 -52 -92 -21 -31 -42 -80 -53 -123 -11 -44 -32 -93 -56 -128 -20\n\t-32 -47 -83 -59 -115 -12 -32 -37 -77 -56 -100 -19 -23 -50 -65 -69 -94 -19\n\t-29 -44 -57 -54 -63 -11 -5 -29 -27 -42 -47 -52 -85 -234 -277 -300 -315 -25\n\t-15 -53 -38 -62 -51 -9 -14 -42 -39 -74 -57 -32 -18 -75 -48 -95 -66 -21 -18\n\t-59 -44 -85 -58 -26 -13 -72 -40 -100 -59 -35 -24 -78 -41 -128 -52 -47 -11\n\t-99 -31 -139 -56 -69 -42 -94 -49 -391 -110 -245 -51 -425 -66 -595 -50 -168\n\t16 -230 27 -330 61 -47 16 -123 35 -170 44 -98 17 -123 25 -172 58 -20 14 -71\n\t37 -114 53 -44 15 -95 40 -115 56 -20 16 -70 42 -110 59 -40 16 -88 45 -108\n\t63 -20 19 -55 46 -78 61 -24 14 -49 35 -55 47 -7 11 -34 33 -60 49 -50 31 -65\n\t61 -53 102 4 13 130 147 281 298 236 238 277 283 299 335 15 32 35 71 46 86\n\t12 18 19 44 19 76 0 42 -8 63 -53 138 -92 151 11 139 -1207 141 -798 2 -1030\n\t0 -1086 -11z\"></path>\n\t</g>\n</svg>\n";
+module.exports = svg;
+
+/***/ }),
+
+/***/ "./src/synth/images/pause.svg.js":
+/*!***************************************!*\
+  !*** ./src/synth/images/pause.svg.js ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var svg = "\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 25 25\" class=\"abcjs-pause-svg\">\n  <g>\n    <rect width=\"8.23\" height=\"25\"/>\n    <rect width=\"8.23\" height=\"25\" x=\"17\"/>\n  </g>\n</svg>\n";
+module.exports = svg;
+
+/***/ }),
+
+/***/ "./src/synth/images/play.svg.js":
+/*!**************************************!*\
+  !*** ./src/synth/images/play.svg.js ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var svg = "\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 25 25\" class=\"abcjs-play-svg\">\n    <g>\n    <polygon points=\"4 0 23 12.5 4 25\"/>\n    </g>\n</svg>\n";
+module.exports = svg;
+
+/***/ }),
+
+/***/ "./src/synth/images/reset.svg.js":
+/*!***************************************!*\
+  !*** ./src/synth/images/reset.svg.js ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var svg = "\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 25 25\">\n  <g>\n    <polygon points=\"5 12.5 24 0 24 25\"/>\n    <rect width=\"3\" height=\"25\" x=\"0\" y=\"0\"/>\n  </g>\n</svg>\n";
+module.exports = svg;
+
+/***/ }),
+
 /***/ "./src/synth/instrument-index-to-name.js":
 /*!***********************************************!*\
   !*** ./src/synth/instrument-index-to-name.js ***!
@@ -15442,20 +15239,6 @@ module.exports = getMidiFile;
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var instrumentIndexToName = ["acoustic_grand_piano", "bright_acoustic_piano", "electric_grand_piano", "honkytonk_piano", "electric_piano_1", "electric_piano_2", "harpsichord", "clavinet", "celesta", "glockenspiel", "music_box", "vibraphone", "marimba", "xylophone", "tubular_bells", "dulcimer", "drawbar_organ", "percussive_organ", "rock_organ", "church_organ", "reed_organ", "accordion", "harmonica", "tango_accordion", "acoustic_guitar_nylon", "acoustic_guitar_steel", "electric_guitar_jazz", "electric_guitar_clean", "electric_guitar_muted", "overdriven_guitar", "distortion_guitar", "guitar_harmonics", "acoustic_bass", "electric_bass_finger", "electric_bass_pick", "fretless_bass", "slap_bass_1", "slap_bass_2", "synth_bass_1", "synth_bass_2", "violin", "viola", "cello", "contrabass", "tremolo_strings", "pizzicato_strings", "orchestral_harp", "timpani", "string_ensemble_1", "string_ensemble_2", "synth_strings_1", "synth_strings_2", "choir_aahs", "voice_oohs", "synth_choir", "orchestra_hit", "trumpet", "trombone", "tuba", "muted_trumpet", "french_horn", "brass_section", "synth_brass_1", "synth_brass_2", "soprano_sax", "alto_sax", "tenor_sax", "baritone_sax", "oboe", "english_horn", "bassoon", "clarinet", "piccolo", "flute", "recorder", "pan_flute", "blown_bottle", "shakuhachi", "whistle", "ocarina", "lead_1_square", "lead_2_sawtooth", "lead_3_calliope", "lead_4_chiff", "lead_5_charang", "lead_6_voice", "lead_7_fifths", "lead_8_bass_lead", "pad_1_new_age", "pad_2_warm", "pad_3_polysynth", "pad_4_choir", "pad_5_bowed", "pad_6_metallic", "pad_7_halo", "pad_8_sweep", "fx_1_rain", "fx_2_soundtrack", "fx_3_crystal", "fx_4_atmosphere", "fx_5_brightness", "fx_6_goblins", "fx_7_echoes", "fx_8_scifi", "sitar", "banjo", "shamisen", "koto", "kalimba", "bagpipe", "fiddle", "shanai", "tinkle_bell", "agogo", "steel_drums", "woodblock", "taiko_drum", "melodic_tom", "synth_drum", "reverse_cymbal", "guitar_fret_noise", "breath_noise", "seashore", "bird_tweet", "telephone_ring", "helicopter", "applause", "gunshot", "percussion"];
 module.exports = instrumentIndexToName;
 
@@ -15468,20 +15251,6 @@ module.exports = instrumentIndexToName;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Load one mp3 file for one note.
 // url = the base url for the soundfont
 // instrument = the instrument name (e.g. "acoustic_grand_piano")
@@ -15600,20 +15369,6 @@ module.exports = getNote;
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var pitchToNoteName = {
   21: 'A0',
   22: 'Bb0',
@@ -15721,6 +15476,81 @@ module.exports = pitchToNoteName;
 
 /***/ }),
 
+/***/ "./src/synth/pitches-to-perc.js":
+/*!**************************************!*\
+  !*** ./src/synth/pitches-to-perc.js ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var pitchMap = {
+  f0: "_C",
+  n0: "=C",
+  s0: "^C",
+  x0: "C",
+  f1: "_D",
+  n1: "=D",
+  s1: "^D",
+  x1: "D",
+  f2: "_E",
+  n2: "=E",
+  s2: "^E",
+  x2: "E",
+  f3: "_F",
+  n3: "=F",
+  s3: "^F",
+  x3: "F",
+  f4: "_G",
+  n4: "=G",
+  s4: "^G",
+  x4: "G",
+  f5: "_A",
+  n5: "=A",
+  s5: "^A",
+  x5: "A",
+  f6: "_B",
+  n6: "=B",
+  s6: "^B",
+  x6: "B",
+  f7: "_c",
+  n7: "=c",
+  s7: "^c",
+  x7: "c",
+  f8: "_d",
+  n8: "=d",
+  s8: "^d",
+  x8: "d",
+  f9: "_e",
+  n9: "=e",
+  s9: "^e",
+  x9: "e",
+  f10: "_f",
+  n10: "=f",
+  s10: "^f",
+  x10: "f",
+  f11: "_g",
+  n11: "=g",
+  s11: "^g",
+  x11: "g",
+  f12: "_a",
+  n12: "=a",
+  s12: "^a",
+  x12: "a",
+  f13: "_b",
+  n13: "=b",
+  s13: "^b",
+  x13: "b"
+};
+
+function pitchesToPerc(pitchObj) {
+  var pitch = (pitchObj.accidental ? pitchObj.accidental[0] : 'x') + pitchObj.verticalPos;
+  return pitchMap[pitch];
+}
+
+module.exports = pitchesToPerc;
+
+/***/ }),
+
 /***/ "./src/synth/place-note.js":
 /*!*********************************!*\
   !*** ./src/synth/place-note.js ***!
@@ -15728,20 +15558,6 @@ module.exports = pitchToNoteName;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var soundsCache = __webpack_require__(/*! ./sounds-cache */ "./src/synth/sounds-cache.js");
 
 var pitchToNoteName = __webpack_require__(/*! ./pitch-to-note-name */ "./src/synth/pitch-to-note-name.js");
@@ -15851,20 +15667,6 @@ module.exports = placeNote;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var SynthSequence = __webpack_require__(/*! ./synth-sequence */ "./src/synth/synth-sequence.js");
 
 var CreateSynth = __webpack_require__(/*! ./create-synth */ "./src/synth/create-synth.js");
@@ -15909,20 +15711,6 @@ module.exports = playEvent;
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Call this when it is safe for the abcjs to produce sound. This is after the first user gesture on the page.
 // If you call it with no parameters, then an AudioContext is created and stored.
 // If you call it with a parameter, that is used as an already created AudioContext.
@@ -15949,20 +15737,6 @@ module.exports = registerAudioContext;
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var soundsCache = {};
 module.exports = soundsCache;
 
@@ -15975,20 +15749,6 @@ module.exports = soundsCache;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var activeAudioContext = __webpack_require__(/*! ./active-audio-context */ "./src/synth/active-audio-context.js"); //
 // Support for audio depends on three things: support for Promise, support for AudioContext, and support for AudioContext.resume.
 // Unfortunately, AudioContext.resume cannot be detected unless an AudioContext is created, and creating an AudioContext can't
@@ -16017,20 +15777,6 @@ module.exports = supportsAudio;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var CreateSynthControl = __webpack_require__(/*! ./create-synth-control */ "./src/synth/create-synth-control.js");
 
 var CreateSynth = __webpack_require__(/*! ./create-synth */ "./src/synth/create-synth.js");
@@ -16186,7 +15932,7 @@ function SynthController() {
       if (self.isStarted) {
         if (self.cursorControl && self.cursorControl.onStart && typeof self.cursorControl.onStart === 'function') self.cursorControl.onStart();
         self.midiBuffer.start();
-        self.timer.start();
+        self.timer.start(self.percent);
         if (self.control) self.control.pushPlay(true);
       } else {
         self.pause();
@@ -16278,9 +16024,10 @@ function SynthController() {
     self.timer.reset();
 
     if (self.isLooping) {
-      self.timer.start();
+      self.timer.start(0);
       self.midiBuffer.finished();
       self.midiBuffer.start();
+      return "continue";
     } else {
       self.timer.stop();
 
@@ -16304,7 +16051,7 @@ function SynthController() {
     if (event) {
       if (self.cursorControl && self.cursorControl.onEvent && typeof self.cursorControl.onEvent === 'function') self.cursorControl.onEvent(event);
     } else {
-      self.finished();
+      return self.finished();
     }
   };
 
@@ -16340,20 +16087,6 @@ module.exports = SynthController;
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-//    Copyright (C) 2019-2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var SynthSequence = function SynthSequence() {
   var self = this;
   self.tracks = [];
@@ -16404,20 +16137,6 @@ module.exports = SynthSequence;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_absolute_element.js: Definition of the AbsoluteElement class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var setClass = __webpack_require__(/*! ./set-class */ "./src/write/set-class.js");
 
 var highlight = __webpack_require__(/*! ./highlight */ "./src/write/highlight.js");
@@ -16676,20 +16395,6 @@ module.exports = AbsoluteElement;
 /***/ (function(module, exports, __webpack_require__) {
 
 // abc_abstract_engraver.js: Creates a data structure suitable for printing a line of abc
-// Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
 
 var BeamElem = __webpack_require__(/*! ./abc_beam_element */ "./src/write/abc_beam_element.js");
@@ -16725,6 +16430,8 @@ var TripletElem = __webpack_require__(/*! ./abc_triplet_element */ "./src/write/
 var VoiceElement = __webpack_require__(/*! ./abc_voice_element */ "./src/write/abc_voice_element.js");
 
 var addChord = __webpack_require__(/*! ./add-chord */ "./src/write/add-chord.js");
+
+var pitchesToPerc = __webpack_require__(/*! ../synth/pitches-to-perc */ "./src/synth/pitches-to-perc.js");
 
 var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
 
@@ -16799,6 +16506,18 @@ var chartable = {
     7: "noteheads.harmonic.quarter",
     nostem: "noteheads.harmonic.quarter"
   },
+  triangle: {
+    "-1": "noteheads.triangle.quarter",
+    0: "noteheads.triangle.quarter",
+    1: "noteheads.triangle.quarter",
+    2: "noteheads.triangle.quarter",
+    3: "noteheads.triangle.quarter",
+    4: "noteheads.triangle.quarter",
+    5: "noteheads.triangle.quarter",
+    6: "noteheads.triangle.quarter",
+    7: "noteheads.triangle.quarter",
+    nostem: "noteheads.triangle.quarter"
+  },
   uflags: {
     3: "flags.u8th",
     4: "flags.u16th",
@@ -16820,6 +16539,7 @@ var AbstractEngraver = function AbstractEngraver(getTextSize, tuneNumber, option
   this.isBagpipes = options.bagpipes;
   this.flatBeams = options.flatbeams;
   this.graceSlurs = options.graceSlurs;
+  this.percmap = options.percmap;
   this.reset();
 };
 
@@ -16918,6 +16638,7 @@ AbstractEngraver.prototype.createABCStaff = function (staffgroup, abcstaff, temp
       voice.headerPosition = 6 + staffgroup.getTextSize.baselineToCenter(voice.header, "voicefont", 'staff-extra voice-name', v, abcstaff.voices.length) / spacing.STEP;
     }
 
+    if (abcstaff.clef && abcstaff.clef.type === "perc") voice.isPercussion = true;
     var clef = createClef(abcstaff.clef, this.tuneNumber);
 
     if (clef) {
@@ -17303,7 +17024,14 @@ AbstractEngraver.prototype.addGraceNotes = function (elem, voice, abselem, noteh
     var gracepitch = elem.gracenotes[i].verticalPos;
     flag = gracebeam ? null : chartable.uflags[isBagpipes ? 5 : 3];
     var accidentalSlot = [];
-    var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], "up", -graceoffsets[i], -graceoffsets[i], flag, 0, 0, gracescale * this.voiceScale, accidentalSlot, false);
+    var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], {
+      dir: "up",
+      headx: -graceoffsets[i],
+      extrax: -graceoffsets[i],
+      flag: flag,
+      scale: gracescale * this.voiceScale,
+      accidentalSlot: accidentalSlot
+    });
     ret.notehead.highestVert = ret.notehead.pitch + stemHeight;
     var grace = ret.notehead;
     this.addSlursAndTies(abselem, elem.gracenotes[i], grace, voice, "up", true);
@@ -17423,8 +17151,8 @@ function addRestToAbsElement(abselem, elem, duration, dot, isMultiVoice, stemdir
       elem.maxpitch = restpitch;
       dot = 0;
       var mmWidth = glyphs.getSymbolWidth(c);
-      abselem.addHead(new RelativeElement(c, -mmWidth, mmWidth * 2, 7));
-      var numMeasures = new RelativeElement("" + elem.rest.text, 0, mmWidth, 16, {
+      abselem.addHead(new RelativeElement(c, mmWidth, mmWidth * 2, 7));
+      var numMeasures = new RelativeElement("" + elem.rest.text, mmWidth, mmWidth, 16, {
         type: "multimeasure-text"
       });
       abselem.addExtra(numMeasures);
@@ -17433,7 +17161,10 @@ function addRestToAbsElement(abselem, elem, duration, dot, isMultiVoice, stemdir
   if (elem.rest.type !== "multimeasure") {
     var ret = createNoteHead(abselem, c, {
       verticalPos: restpitch
-    }, null, 0, 0, null, dot, 0, voiceScale, [], false);
+    }, {
+      dot: dot,
+      scale: voiceScale
+    });
     noteHead = ret.notehead;
 
     if (noteHead) {
@@ -17524,6 +17255,13 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, s
     if (elem.pitches[p].style) {
       // There is a style for the whole group of pitches, but there could also be an override for a particular pitch.
       c = chartable[elem.pitches[p].style][-durlog];
+    } else if (voice.isPercussion && this.percmap) {
+      c = noteSymbol;
+      var percHead = this.percmap[pitchesToPerc(elem.pitches[p])];
+
+      if (percHead && percHead.noteHead) {
+        if (chartable[percHead.noteHead]) c = chartable[percHead.noteHead][-durlog];
+      }
     } else c = noteSymbol; // The highest position for the sake of placing slurs is itself if the slur is internal. It is the highest position possible if the slur is for the whole chord.
     // If the note is the only one in the chord, then any slur it has counts as if it were on the whole chord.
 
@@ -17560,7 +17298,17 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, s
     }
 
     var hasStem = !nostem && durlog <= -1;
-    var ret = createNoteHead(abselem, c, elem.pitches[p], dir, 0, -roomTaken, flag, dot, dotshiftx, this.voiceScale, accidentalSlot, !stemdir);
+    var ret = createNoteHead(abselem, c, elem.pitches[p], {
+      dir: dir,
+      extrax: -roomTaken,
+      flag: flag,
+      dot: dot,
+      dotshiftx: dotshiftx,
+      scale: this.voiceScale,
+      accidentalSlot: accidentalSlot,
+      shouldExtendStem: !stemdir,
+      printAccidentals: !voice.isPercussion
+    });
     symbolWidth = Math.max(glyphs.getSymbolWidth(c), symbolWidth);
     abselem.extraw -= ret.extraLeft;
     noteHead = ret.notehead;
@@ -17662,7 +17410,7 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
   }
 
   var durationForSpacing = duration * this.tripletmultiplier;
-  if (elem.rest && elem.rest.type === 'multimeasure') durationForSpacing = duration;
+  if (elem.rest && elem.rest.type === 'multimeasure') durationForSpacing = 1;
   var absType = elem.rest ? "rest" : "note";
   var abselem = new AbsoluteElement(elem, durationForSpacing, 1, absType, this.tuneNumber, {
     durationClassOveride: elem.duration * this.tripletmultiplier
@@ -17952,20 +17700,6 @@ module.exports = AbstractEngraver;
 /***/ (function(module, exports) {
 
 //    abc_beam_element.js: Definition of the BeamElem class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Most elements on the page are related to a particular absolute element -- notes, rests, bars, etc. Beams, however, span multiple elements.
 // This means that beams can't be laid out until the absolute elements are placed. There is the further complication that the stems for beamed
 // notes can't be laid out until the beams are because we don't know how long they will be until we know the slope of the beam and the horizontal
@@ -18071,20 +17805,6 @@ module.exports = BeamElem;
 /***/ (function(module, exports) {
 
 //    abc_brace_element.js: Definition of the BraceElement class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var BraceElem = function BraceElem(voice, type) {
   this.startVoice = voice;
   this.type = type;
@@ -18125,20 +17845,6 @@ module.exports = BraceElem;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_create_clef.js
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
 
 var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
@@ -18291,20 +17997,6 @@ module.exports = createClef;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_create_key_signature.js
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
 
 var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
@@ -18377,8 +18069,19 @@ var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js"
 
 var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
 
-var createNoteHead = function createNoteHead(abselem, c, pitchelem, dir, headx, extrax, flag, dot, dotshiftx, scale, accidentalSlot, shouldExtendStem) {
-  // TODO scale the dot as well
+var createNoteHead = function createNoteHead(abselem, c, pitchelem, options) {
+  if (!options) options = {};
+  var dir = options.dir !== undefined ? options.dir : null;
+  var headx = options.headx !== undefined ? options.headx : 0;
+  var extrax = options.extrax !== undefined ? options.extrax : 0;
+  var flag = options.flag !== undefined ? options.flag : null;
+  var dot = options.dot !== undefined ? options.dot : 0;
+  var dotshiftx = options.dotshiftx !== undefined ? options.dotshiftx : 0;
+  var scale = options.scale !== undefined ? options.scale : 1;
+  var accidentalSlot = options.accidentalSlot !== undefined ? options.accidentalSlot : [];
+  var shouldExtendStem = options.shouldExtendStem !== undefined ? options.shouldExtendStem : false;
+  var printAccidentals = options.printAccidentals !== undefined ? options.printAccidentals : true; // TODO scale the dot as well
+
   var pitch = pitchelem.verticalPos;
   var notehead;
   var accidentalshiftx = 0;
@@ -18430,7 +18133,7 @@ var createNoteHead = function createNoteHead(abselem, c, pitchelem, dir, headx, 
   }
   if (notehead) notehead.highestVert = pitchelem.highestVert;
 
-  if (pitchelem.accidental) {
+  if (printAccidentals && pitchelem.accidental) {
     var symb;
 
     switch (pitchelem.accidental) {
@@ -18511,20 +18214,6 @@ module.exports = createNoteHead;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_create_time_signature.js
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
 
 var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
@@ -18623,20 +18312,6 @@ module.exports = createTimeSignature;
 /***/ (function(module, exports) {
 
 //    abc_crescendo_element.js: Definition of the CrescendoElem class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var CrescendoElem = function CrescendoElem(anchor1, anchor2, dir, positioning) {
   this.type = "CrescendoElem";
   this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
@@ -18661,20 +18336,6 @@ module.exports = CrescendoElem;
 /***/ (function(module, exports, __webpack_require__) {
 
 // abc_decoration.js: Creates a data structure suitable for printing a line of abc
-// Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) & Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var DynamicDecoration = __webpack_require__(/*! ./abc_dynamic_decoration */ "./src/write/abc_dynamic_decoration.js");
 
 var CrescendoElem = __webpack_require__(/*! ./abc_crescendo_element */ "./src/write/abc_crescendo_element.js");
@@ -19069,20 +18730,6 @@ module.exports = Decoration;
 /***/ (function(module, exports) {
 
 //    abc_dynamic_decoration.js: Definition of the DynamicDecoration class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
   this.type = "DynamicDecoration";
   this.anchor = anchor;
@@ -19103,20 +18750,6 @@ module.exports = DynamicDecoration;
 /***/ (function(module, exports) {
 
 //    abc_ending_element.js: Definition of the EndingElement class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var EndingElem = function EndingElem(text, anchor1, anchor2) {
   this.type = "EndingElem";
   this.text = text; // text to be displayed top left
@@ -19141,20 +18774,6 @@ module.exports = EndingElem;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_engraver_controller.js: Controls the engraving process of an ABCJS abstract syntax tree as produced by ABCJS/parse
-//    Copyright (C) 2014-2020 Gregory Dyke (gregdyke at gmail dot com)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /*global Math */
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
@@ -19344,8 +18963,9 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
   this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
     bagpipes: abcTune.formatting.bagpipes,
     flatbeams: abcTune.formatting.flatbeams,
-    graceSlurs: abcTune.formatting.graceSlurs !== false // undefined is the default, which is true
-
+    graceSlurs: abcTune.formatting.graceSlurs !== false,
+    // undefined is the default, which is true
+    percmap: abcTune.formatting.percmap
   });
   this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
   this.engraver.measureLength = abcTune.getMeterFraction().num / abcTune.getMeterFraction().den;
@@ -19440,20 +19060,6 @@ module.exports = EngraverController;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2009-2020 Gregory Dyke (gregdyke at gmail dot com) Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
 /**
  * Glyphs and some methods to adjust for their x and y baseline
@@ -19923,6 +19529,11 @@ glyphs['noteheads.harmonic.quarter'] = {
   w: 7.5,
   h: 8.165
 };
+glyphs['noteheads.triangle.quarter'] = {
+  d: [['M', 0, 0], ['l', 9, 0], ['l', -4.5, -9], ['z']],
+  w: 9,
+  h: 9
+};
 
 var pathClone = function pathClone(pathArray) {
   var res = [];
@@ -20087,20 +19698,6 @@ module.exports = Glyphs; // we need the glyphs for layout information
 /***/ (function(module, exports) {
 
 //    abc_relative_element.js: Definition of the RelativeElement class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
   opt = opt || {};
   this.x = 0;
@@ -20219,20 +19816,6 @@ module.exports = RelativeElement;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_renderer.js: API to render to SVG/Raphael/whatever rendering engine
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /*global Math */
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
@@ -20426,20 +20009,6 @@ module.exports = Renderer;
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-//    Copyright (C) 2014-2020 Gregory Dyke (gregdyke at gmail dot com)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var spacing = {};
 spacing.FONTEM = 360;
 spacing.FONTSIZE = 30;
@@ -20460,20 +20029,6 @@ module.exports = spacing;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_staff_group_element.js: Definition of the StaffGroupElement class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // StaffGroupElement contains all the elements that go together to make one line of music.
 // That might be multiple staves that are tied together, and it might be multiple voices on one staff.
 //
@@ -20584,20 +20139,6 @@ module.exports = StaffGroupElement;
 /***/ (function(module, exports, __webpack_require__) {
 
 //    abc_tempo_element.js: Definition of the TempoElement class.
-//    Copyright (C) 2014-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
 
 var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
@@ -20682,7 +20223,12 @@ TempoElement.prototype.createNote = function (createNoteHead, tempo, tuneNumber)
   var ret = createNoteHead(absElem, note, {
     verticalPos: 0
   }, // This is just temporary: we'll offset the vertical positioning when we get the actual vertical spot.
-  "up", 0, 0, flag, dot, 0, temposcale, [], false);
+  {
+    dir: "up",
+    flag: flag,
+    dot: dot,
+    scale: temposcale
+  });
   var tempoNote = ret.notehead;
   absElem.addHead(tempoNote);
   var stem;
@@ -20715,20 +20261,6 @@ module.exports = TempoElement;
 /***/ (function(module, exports) {
 
 //    abc_tie_element.js: Definition of the TieElement class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var TieElem = function TieElem(options) {
   this.type = "TieElem"; //	console.log("constructor", options.anchor1 ? options.anchor1.pitch : "N/A", options.anchor2 ? options.anchor2.pitch : "N/A", options.isTie, options.isGrace);
 
@@ -20878,20 +20410,6 @@ module.exports = TieElem;
 /***/ (function(module, exports) {
 
 //    abc_triplet_element.js: Definition of the TripletElem class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var TripletElem = function TripletElem(number, anchor1, options) {
   this.type = "TripletElem";
   this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
@@ -20930,20 +20448,6 @@ module.exports = TripletElem;
 /***/ (function(module, exports) {
 
 //    abc_voice_element.js: Definition of the VoiceElement class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
   this.children = [];
   this.beams = [];
@@ -22181,7 +21685,7 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
     for (var i = 0; i < symbol.length; i++) {
       var s = symbol.charAt(i);
       ycorr = glyphs.getYCorr(s);
-      el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, '', "", "");
+      el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, '', "none", renderer.foregroundColor);
 
       if (el) {
         if (i < symbol.length - 1) dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));
@@ -23381,7 +22885,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 
   for (i = 0; i < params.children.length; i++) {
     child = params.children[i];
-    if (child.type === 'note') foundNote = true;
+    if (child.type === 'note' || child.type === 'rest') foundNote = true;
     var justInitializedMeasureNumber = false;
 
     if (child.type !== 'staff-extra' && !renderer.controller.classes.isInMeasure()) {
@@ -24881,20 +24385,6 @@ module.exports = layoutVoice;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-//    Copyright (C) 2020 Paul Rosen (paul at paulrosen dot net)
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
 
 function setupSelection(engraver) {
@@ -25077,12 +24567,19 @@ function findElementByCoord(self, x, y) {
   return closestIndex >= 0 && minDistance <= 12 ? closestIndex : -1;
 }
 
-function getBestMatchCoordinates(dim, ev) {
+function getBestMatchCoordinates(dim, ev, scale) {
   // Different browsers have conflicting meanings for the coordinates that are returned.
   // If the item we want is clicked on directly, then we will just see what is the best match.
   // This seems like less of a hack than browser sniffing.
-  if (dim.x <= ev.offsetX && dim.x + dim.width >= ev.offsetX && dim.y <= ev.offsetY && dim.y + dim.height >= ev.offsetY) return [ev.offsetX, ev.offsetY];
-  return [ev.layerX, ev.layerY];
+  if (dim.x <= ev.offsetX && dim.x + dim.width >= ev.offsetX && dim.y <= ev.offsetY && dim.y + dim.height >= ev.offsetY) return [ev.offsetX, ev.offsetY]; // Firefox returns a weird value for offset, but layer is correct.
+  // Safari and Chrome return the correct value for offset, but layer is multiplied by the scale (that is, if it were rendered with { scale: 2 })
+  // For instance (if scale is 2):
+  // Firefox: { offsetY: 5, layerY: 335 }
+  // Others: {offsetY: 335, layerY: 670} (there could be a little rounding, so the number might not be exactly 2x)
+  // So, if layerY/scale is approx. offsetY, then use offsetY, otherwise use layerY
+
+  var epsilon = Math.abs(ev.layerY / scale - ev.offsetY);
+  if (epsilon < 3) return [ev.offsetX, ev.offsetY];else return [ev.layerX, ev.layerY];
 }
 
 function getTarget(target) {
@@ -25108,7 +24605,7 @@ function getMousePosition(self, ev) {
 
   if (clickedOn >= 0) {
     // There was a direct hit on an element.
-    box = getBestMatchCoordinates(self.selectables[clickedOn].svgEl.getBBox(), ev);
+    box = getBestMatchCoordinates(self.selectables[clickedOn].svgEl.getBBox(), ev, self.scale);
     x = box[0];
     y = box[1]; //console.log("clicked on", clickedOn, x, y, self.selectables[clickedOn].svgEl.getBBox(), ev.target.getBBox());
   } else {
@@ -25411,20 +24908,6 @@ module.exports = Subtitle;
 /***/ (function(module, exports) {
 
 //    abc_voice_element.js: Definition of the VoiceElement class.
-//    Copyright (C) 2010-2020 Gregory Dyke (gregdyke at gmail dot com) and Paul Rosen
-//
-//    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-//    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-//    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-//    to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-//    BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//    NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-//    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /*global module */
 var svgNS = "http://www.w3.org/2000/svg";
@@ -25582,6 +25065,7 @@ Svg.prototype.rectBeneath = function (attr) {
 
 Svg.prototype.text = function (text, attr, target) {
   var el = document.createElementNS(svgNS, 'text');
+  el.setAttribute("stroke", "none");
 
   for (var key in attr) {
     if (attr.hasOwnProperty(key)) {
@@ -25749,6 +25233,10 @@ function createSvg() {
   svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
   svg.setAttribute('role', 'img'); // for accessibility
 
+  svg.setAttribute('fill', 'currentColor'); // for automatically picking up dark mode and high contrast
+
+  svg.setAttribute('stroke', 'currentColor'); // for automatically picking up dark mode and high contrast
+
   return svg;
 }
 
@@ -25886,7 +25374,7 @@ module.exports = __webpack_require__(/*! ../index */ "./index.js");
 /***/ (function(module, exports) {
 
 /**!
-Copyright (c) 2009-2020 Paul Rosen and Gregory Dyke
+Copyright (c) 2009-2021 Paul Rosen and Gregory Dyke
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

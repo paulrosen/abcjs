@@ -1,3 +1,45 @@
+# Version 6.0.0-beta.28
+
+## Bugs
+
+* Fix some problems with the visual synth control getting out of sync with the music.
+
+* Fix stem direction on overlay voices.
+
+* Don't print accidentals on percussion staves.
+
+* Keep dragging notes from jumping around when the svg is scaled (on Chrome & Safari)
+
+* Fix placement of multi-measure rest.
+
+* Fix crash when using the parser twice instead of creating a new one.
+
+* Fix bug in drawing slurs over the end of a line when there is more than one staff.
+
+* Fix bug in counting measures in the element classes.
+
+## Features
+
+* Support dark mode.
+
+* Add support for `%%percmap`, allowing specifying a shape for each sound.
+  
+* Implement the audio for `%%percmap`.
+
+* Add "triangle" as a note head shape.
+
+## Documentation
+
+* Add a "Start here" section to the demo TOC.
+
+* Add demo of tune analysis; fix docs on tune analysis
+
+* Add "zoom to fit" demo.
+
+## Build
+
+* Move SVG to separate files.
+
 # Version 6.0.0-beta.27
 
 ## Bugs

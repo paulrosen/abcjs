@@ -8,6 +8,10 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
+## Last version supporting midi.js is 6.0.0-beta.28
+
+The file [abcjs version supporting midi.js](https://raw.github.io/paulrosen/abcjs/master/bin/abcjs_midi-min.js) is the last version of the old style of sound production that will receive updates.
+
 ## Rename the default branch to `main`
 
 The default branch is now named `main`. If you have cloned this repo previously, you can change it with:
@@ -17,7 +21,7 @@ git fetch origin
 git branch -u origin/main main
 ```
 
-## New css for audio control 6.0.0.27
+## New css for audio control 6.0.0-beta.27
 
 Be sure to download the latest abcjs-audio.css file if you are using it. If you are styling the audio control with your own css, add the rule:
 ```css
@@ -26,11 +30,11 @@ Be sure to download the latest abcjs-audio.css file if you are using it. If you 
 }
 ```
 
-## Historical abcjs Packages 6.0.0.27
+## Historical abcjs Packages 6.0.0-beta.27
 
-Old versions of abcjs have been removed from this repo. If you are looking for them, you can find them here: https://github.com/paulrosen/historical-abcjs-versions
+Old versions of abcjs have been removed from this repo. If you are looking for them, you can find them here: [Historical Versions](https://github.com/paulrosen/historical-abcjs-versions)
 
-## Breaking change when using midi.js for 6.0.0.26
+## Breaking change when using midi.js for 6.0.0-beta.26
 
 The midi.js package is no longer a direct dependency, it is now a peerDependency so it is not included by default. That way, users who aren't using the old style of sound generation won't need to load the package. If you are using the old style that uses midi.js, include this line in your `package.json` file:
 
@@ -39,11 +43,11 @@ The midi.js package is no longer a direct dependency, it is now a peerDependency
 ```
 Note that if you are using the minified version of the library with a `<script>` tag this does not apply to you.
 
-## Change in wrapping behavior for 6.0.0.25
+## Change in wrapping behavior for 6.0.0-beta.25
 
 There have been some tweaks to the way wrapping is calculated. Hopefully this will make your music layout a little better. If you start seeing odd results, let me know.
 
-## Change in output folders for 6.0.0.25
+## Change in output folders for 6.0.0-beta.25
 
 The files in `/bin` are being phased out. You can get the executables from `/dist` and the file names will not have the version number attached.
 
@@ -51,7 +55,7 @@ Many of the old versions that were in `/bin` are no longer kept in the active br
 
 The last version in each major version number is still available in the active branch as well as many recent versions.
 
-## Default soundfont change for 6.0.0.beta.21
+## Default soundfont change for 6.0.0-beta.21
 
 In this beta the default soundfont was changed to https://paulrosen.github.io/midi-js-soundfonts/abcjs/ Hopefully you will find that sounds better. If you set the soundfont directly then you won't notice any change. If you prefer the old soundfont, use the `soundFontUrl: "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/"` option when calling the synth functions.
 
