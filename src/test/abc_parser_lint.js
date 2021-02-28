@@ -100,7 +100,7 @@ var ParserLint = function() {
 
 	var percMapElement = {
 		type: 'object', optional: true, properties: {
-			sound: { type: 'string' },
+			sound: { type: 'number', minimum: 35, maximum: 81  },
 			noteHead: { type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x', 'triangle'], optional: true },
 		}
 	};

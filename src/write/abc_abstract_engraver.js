@@ -18,6 +18,7 @@ var TieElem = require('./abc_tie_element');
 var TripletElem = require('./abc_triplet_element');
 var VoiceElement = require('./abc_voice_element');
 var addChord = require('./add-chord');
+var pitchesToPerc = require('../synth/pitches-to-perc')
 
 var parseCommon = require('../parse/abc_common');
 
@@ -41,65 +42,6 @@ var hint = false;
 		uflags:{3:"flags.u8th", 4:"flags.u16th", 5:"flags.u32nd", 6:"flags.u64th"},
 		dflags:{3:"flags.d8th", 4:"flags.d16th", 5:"flags.d32nd", 6:"flags.d64th"}
 	};
-
-	var pitchesToPerc = {
-		f0: "_C",
-		n0: "=C",
-		s0: "^C",
-		x0: "C",
-		f1: "_D",
-		n1: "=D",
-		s1: "^D",
-		x1: "D",
-		f2: "_E",
-		n2: "=E",
-		s2: "^E",
-		x2: "E",
-		f3: "_F",
-		n3: "=F",
-		s3: "^F",
-		x3: "F",
-		f4: "_G",
-		n4: "=G",
-		s4: "^G",
-		x4: "G",
-		f5: "_A",
-		n5: "=A",
-		s5: "^A",
-		x5: "A",
-		f6: "_B",
-		n6: "=B",
-		s6: "^B",
-		x6: "B",
-		f7: "_c",
-		n7: "=c",
-		s7: "^c",
-		x7: "c",
-		f8: "_d",
-		n8: "=d",
-		s8: "^d",
-		x8: "d",
-		f9: "_e",
-		n9: "=e",
-		s9: "^e",
-		x9: "e",
-		f10: "_f",
-		n10: "=f",
-		s10: "^f",
-		x10: "f",
-		f11: "_g",
-		n11: "=g",
-		s11: "^g",
-		x11: "g",
-		f12: "_a",
-		n12: "=a",
-		s12: "^a",
-		x12: "a",
-		f13: "_b",
-		n13: "=b",
-		s13: "^b",
-		x13: "b",
-	}
 
 var AbstractEngraver = function(getTextSize, tuneNumber, options) {
 	this.decoration = new Decoration();
@@ -712,8 +654,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				c = chartable[elem.pitches[p].style][-durlog];
 			} else if (voice.isPercussion && this.percmap) {
 				c = noteSymbol;
-				var pitch = (elem.pitches[p].accidental ? elem.pitches[p].accidental[0] : 'x') + elem.pitches[p].verticalPos;
-				var percHead = this.percmap[pitchesToPerc[pitch]];
+				var percHead = this.percmap[pitchesToPerc(elem.pitches[p])];
 				if (percHead && percHead.noteHead) {
 					if (chartable[percHead.noteHead])
 						c = chartable[percHead.noteHead][-durlog];

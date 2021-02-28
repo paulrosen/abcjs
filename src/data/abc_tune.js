@@ -547,7 +547,7 @@ var Tune = function() {
 	this.setUpAudio = function(options) {
 		if (!options) options = {};
 		var seq = sequence(this, options);
-		return flatten(seq, options);
+		return flatten(seq, options, this.formatting.percmap);
 	};
 };
 
