@@ -47,6 +47,7 @@
     "@tarp/require": "1.4.3",
     "babel-loader": "8.2.2",
     "chai": "4.3.4",
+    "core-js": "3.9.0",
     "mocha": "8.3.2",
     "vuepress": "2.0.0-beta.8",
     "vuex": "4.0.0",
