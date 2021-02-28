@@ -1,3 +1,4 @@
+require('./static-wrappers/license')
 var version = require('./version');
 var animation = require('./src/api/abc_animation');
 var tuneBook = require('./src/api/abc_tunebook');
