@@ -34,7 +34,7 @@ All new work should be done in the `dev` branch.
 
 [_] Check the minified versions and other changed files in.
 
-[_] Merge the `dev` branch into `master`. 
+[_] Merge the `dev` branch into `main`. 
 
 [_] Update npm with `npm publish` or `npm publish --tag beta`.
     To do this in docker:

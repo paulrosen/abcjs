@@ -4,13 +4,13 @@
 
 This library makes it easy to incorporate **sheet music** into your **websites**. You can also turn visible **ABC** text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of one javascript file. You can also generate **MIDI files** or play them directly in your browser.
 
-[List of Examples](https://cdn.rawgit.com/paulrosen/abcjs/master/examples/toc.html)
+[List of Examples](https://cdn.rawgit.com/paulrosen/abcjs/main/examples/toc.html)
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
 ## Last version supporting midi.js is 6.0.0-beta.28
 
-The file [abcjs version supporting midi.js](https://raw.github.io/paulrosen/abcjs/master/bin/abcjs_midi-min.js) is the last version of the old style of sound production that will receive updates.
+The file [abcjs version supporting midi.js](https://raw.github.io/paulrosen/abcjs/main/bin/abcjs_midi-min.js) is the last version of the old style of sound production that will receive updates.
 
 ## Rename the default branch to `main`
 
@@ -90,4 +90,4 @@ And I would love some help on this project, including documentation, bug fixes, 
 ## Supported by BrowserStack
 If you aren't using the same browser and machine that I use, you can thank [BrowserStack](https://browserstack.com/) for their support of this open-source project.
 
-![BrowserStack](https://cdn.rawgit.com/paulrosen/abcjs/master/docs/.vuepress/public/img/browserstack-logo-600x315.png)
+![BrowserStack](https://cdn.rawgit.com/paulrosen/abcjs/main/docs/.vuepress/public/img/browserstack-logo-600x315.png)

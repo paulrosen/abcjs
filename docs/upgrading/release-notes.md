@@ -1,6 +1,6 @@
 # Release Notes
 
-Full release notes can be found in the [RELEASE.md](https://github.com/paulrosen/abcjs/blob/master/RELEASE.md) file.
+Full release notes can be found in the [RELEASE.md](https://github.com/paulrosen/abcjs/blob/main/RELEASE.md) file.
 
 ## Notes for Version 6.0.0
 
