@@ -3,11 +3,11 @@ var registerAudioContext = require('./register-audio-context');
 var activeAudioContext = require('./active-audio-context');
 var parseCommon = require('../parse/abc_common');
 
-var loopImage = require('./images/loop.svg');
-var playImage = require('./images/play.svg');
-var pauseImage = require('./images/pause.svg');
-var loadingImage = require('./images/loading.svg');
-var resetImage = require('./images/reset.svg');
+var loopImage = require('./images/loop.svg.js');
+var playImage = require('./images/play.svg.js');
+var pauseImage = require('./images/pause.svg.js');
+var loadingImage = require('./images/loading.svg.js');
+var resetImage = require('./images/reset.svg.js');
 
 function CreateSynthControl(parent, options) {
 	var self = this;
