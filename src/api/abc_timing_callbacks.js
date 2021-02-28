@@ -207,21 +207,22 @@ var TimingCallbacks = function(target, params) {
 		self.isRunning = true;
 		if (self.isPaused) {
 			self.isPaused = false;
-			self.justUnpaused = true;
+			if (offsetPercent === undefined)
+				self.justUnpaused = true;
 		}
 		if (offsetPercent) {
 			self.setProgress(offsetPercent);
+		} else if (offsetPercent === 0) {
+			self.reset();
 		} else if (self.pausedPercent !== null) {
 			var now = performance.now();
 			var currentTime = self.lastMoment * self.pausedPercent;
 			self.startTime = now - currentTime;
 			self.pausedPercent = null;
 			self.reportNext = true;
-			requestAnimationFrame(self.doTiming);
-		} else {
-			requestAnimationFrame(self.doTiming);
-			self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
 		}
+		requestAnimationFrame(self.doTiming);
+		self.joggerTimer = setTimeout(self.animationJogger, JOGGING_INTERVAL);
 	};
 	self.pause = function() {
 		self.isPaused = true;
@@ -236,6 +237,7 @@ var TimingCallbacks = function(target, params) {
 	self.reset = function() {
 		self.currentBeat = 0;
 		self.currentEvent = 0;
+		self.currentLine = 0;
 		self.startTime = null;
 		self.pausedPercent = null;
 	};

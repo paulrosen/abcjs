@@ -126,14 +126,34 @@ The `endTimings` array elements are of the same type as the `info` parameter.
 
 These are the entry points that can be called on the `timingCallbacks` object.
 
-| Name | Description |
+### start(offsetPercent)
+
+This starts the timer that triggers the callbacks. This is called to both start and resume after calling pause.
+
+| `offsetPercent` value | Description |
 | ------------- | ----------- |
-| replaceTarget(visualObj) | If the underlying music changes on the fly, this replaces the current object without having to destroy the object and start over. |
-| start() | Start or resume the animation immediately. |
-| pause() | Pause the animation. After calling this, the next call to `start()` will pick up where it left off. |
-| reset() | Move the timer back to the beginning, so the animation starts over. |
-| stop() | Stop the animation. After calling this, the next call to `start()` will start at the beginning. |
-| setProgress(percent) | Change the position of the animation. This allows random access to any place in the tune. |
+| undefined | If the previous call was to `pause()`, then the animation continues from where it left off. If there was no pause, then the animation starts from the beginning. |
+| From 0 to 1 | The percentage into the animation to jump to. This is like doing a seek first. |
+
+### pause()
+
+Pauses the animation. Calling `start()` afterwards will resume from where it left off.
+
+### stop()
+
+Stop the animation. After calling this, the next call to `start()` will start at the beginning.
+
+### reset()
+
+Move the timer back to the beginning, so the animation starts over. This can be called either when the animation is currently running or when it is paused.
+
+### setProgress(percent)
+
+Change the position of the animation. This allows random access to any place in the tune. The `percent` passed in is a number between 0 and 1. This can be called either when the animation is currently running or when it is paused. 
+
+### replaceTarget(visualObj)
+
+If the underlying music changes on the fly, this replaces the current object without having to destroy the object and start over. `visualObj` is the return value from `renderAbc`.
 
 ## Example
 

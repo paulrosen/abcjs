@@ -157,7 +157,7 @@ function SynthController() {
 				if (self.cursorControl && self.cursorControl.onStart && typeof self.cursorControl.onStart === 'function')
 					self.cursorControl.onStart();
 				self.midiBuffer.start();
-				self.timer.start();
+				self.timer.start(self.percent);
 				if (self.control)
 					self.control.pushPlay(true);
 			} else {
@@ -247,9 +247,10 @@ function SynthController() {
 	self.finished = function () {
 		self.timer.reset();
 		if (self.isLooping) {
-			self.timer.start();
+			self.timer.start(0);
 			self.midiBuffer.finished();
 			self.midiBuffer.start();
+			return "continue";
 		} else {
 			self.timer.stop();
 			if (self.isStarted) {
@@ -276,7 +277,7 @@ function SynthController() {
 			if (self.cursorControl && self.cursorControl.onEvent && typeof self.cursorControl.onEvent  === 'function')
 				self.cursorControl.onEvent(event);
 		} else {
-			self.finished();
+			return self.finished();
 		}
 	};
 
