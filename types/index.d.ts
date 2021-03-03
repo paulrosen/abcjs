@@ -63,7 +63,6 @@ declare module 'abcjs' {
 	//
 	// Basic Audio Stuff
 	//
-
 	export namespace synth {
 		let instrumentIndexToName: [string]
 		let pitchToNoteName: [string]
@@ -76,7 +75,5 @@ declare module 'abcjs' {
 		export function synthSequence(): AudioSequence
 		export function playEvent(pitches: Pitches, graceNotes: Pitches, milliSecondsPerMesure: number): Promise<any>
 		export function activeAudioContext(): AudioContext
-
-		// export function  SynthController =  (() => SynthObjectController) ;
 	}
 }
