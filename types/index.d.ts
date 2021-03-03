@@ -2,10 +2,12 @@ declare module 'abcjs' {
 	//
 	// Global syntactic sugar types
 	//
-	export type TuneObjectArray = [Object]
+	export type TuneObjectArray = [any]
 	export type AudioContext = any
 	export type AudioControl = any
 	export type AudioSequence = any
+	export type Selector = String | HTMLElement
+	export type MidiFile = any
 
 	// TODO : to be detailed and enhanced later
 	export type Pitches = [any]
@@ -22,17 +24,17 @@ declare module 'abcjs' {
 
 		onStart?(): void
 		onFinished?(): void
-		onBeat?(beatNumber: number): void
+		onBeat?(beatNumber: number, totalBeats?: number, totalTime?: number): void
 		onEvent?(event: any): void
 	}
 
 	export interface MidiBuffer {
-		init(params: AudioContext): Promise<AudioContextPromise>
-		prime(): Promise<void>
-		start(): void
-		pause(): void
-		resume(): void
-		download(): any // returns audio buffer in wav format
+		init?(params: AudioContext): Promise<AudioContextPromise>
+		prime?(): Promise<void>
+		start?(): void
+		pause?(): void
+		resume?(): void
+		download?(): any // returns audio buffer in wav format
 	}
 
 	//
@@ -40,7 +42,7 @@ declare module 'abcjs' {
 	//
 	export interface SynthObjectController {
 		disable(isDisabled: boolean): void
-		setTune(visualObj: TuneObjectArray, userAction: Boolean, audioParams: AbcParams): void
+		setTune(visualObj: TuneObjectArray, userAction: Boolean, audioParams?: AbcParams): Promise<any>
 		load(selector: string, cursorControl?: any, visualOptions?: AbcParams): void
 		play(): void
 		pause(): void
@@ -56,7 +58,7 @@ declare module 'abcjs' {
 	//
 	let signature: string
 
-	export function renderAbc(target: string | HTMLElement, code: string, params: AbcParams): TuneObjectArray
+	export function renderAbc(target: Selector, code: string, params: AbcParams): TuneObjectArray
 
 	//
 	// Basic Audio Stuff
@@ -66,11 +68,11 @@ declare module 'abcjs' {
 		let instrumentIndexToName: [string]
 		let pitchToNoteName: [string]
 		let SynthController: { new (): SynthObjectController }
+		let CreateSynth: { new (): MidiBuffer }
 
 		export function supportsAudio(): boolean
-		export function CreateSynth(): MidiBuffer
-		export function CreateSynthControl(element: string, options: AbcParams): AudioControl
-		export function getMidiFile(abcString: string, options: AbcParams): void
+		export function CreateSynthControl(element: Selector, options: AbcParams): AudioControl
+		export function getMidiFile(abcString: string, options?: AbcParams): MidiFile
 		export function synthSequence(): AudioSequence
 		export function playEvent(pitches: Pitches, graceNotes: Pitches, milliSecondsPerMesure: number): Promise<any>
 		export function activeAudioContext(): AudioContext
