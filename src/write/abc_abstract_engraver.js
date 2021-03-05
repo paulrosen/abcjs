@@ -330,7 +330,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
     if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
     break;
   case "stem":
-    this.stemdir=elem.direction;
+    this.stemdir=elem.direction === "auto" ? undefined : elem.direction;
     break;
   case "part":
     var abselem = new AbsoluteElement(elem,0,0, 'part', this.tuneNumber);
