@@ -1,18 +1,15 @@
 {
   "name": "abcjs",
-  "version": "6.0.0-beta.28",
+  "version": "6.0.0-beta.29",
   "description": "Renderer for abc music notation",
   "main": "index.js",
   "types": "types/index.d.ts",
   "scripts": {
     "webpack": "webpack",
-    "build": "npm run fix-versions && npm run build:basic && npm run build:basic-min && npm run build:midi && npm run build:plugin && npm run copy-output",
+    "build": "npm run build:basic && npm run build:basic-min && npm run build:plugin",
     "build:basic": "npm run webpack -- --env.mode development --env.type basic -o dist/abcjs-basic.js",
     "build:basic-min": "npm run webpack -- --env.mode production --env.type basic",
     "build:plugin": "npm run webpack -- --env.mode production --env.type plugin",
-    "build:midi": "npm run webpack -- --env.mode production --env.type midi",
-    "fix-versions": "./fix-versions.sh 6.0.0-beta.28",
-    "copy-output": "./build-copy.sh 6.0.0-beta.28",
     "test": "mocha 'tests/**/*.js'",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
@@ -63,8 +60,5 @@
     "webpack-merge": "5.1.2",
     "webpack-node-externals": "2.5.2",
     "workbox-webpack-plugin": "5.1.3"
-  },
-  "peerDependencies": {
-    "midi": "https://github.com/paulrosen/MIDI.js.git#abcjs"
   }
 }

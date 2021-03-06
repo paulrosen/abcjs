@@ -16864,7 +16864,7 @@ AbstractEngraver.prototype.createABCElement = function (isFirstStaff, isSingleLi
       break;
 
     case "stem":
-      this.stemdir = elem.direction;
+      this.stemdir = elem.direction === "auto" ? undefined : elem.direction;
       break;
 
     case "part":
@@ -25406,7 +25406,7 @@ THE SOFTWARE.
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-var version = '6.0.0-beta.28';
+var version = '6.0.0-beta.29';
 module.exports = version;
 
 /***/ })
