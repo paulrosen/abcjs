@@ -58,7 +58,7 @@ declare module 'abcjs' {
 	//
 	let signature: string
 
-	export function renderAbc(target: Selector, code: string, params: AbcParams): TuneObjectArray
+	export function renderAbc(target: Selector, code: string, params?: AbcParams): TuneObjectArray
 
 	//
 	// Basic Audio Stuff
