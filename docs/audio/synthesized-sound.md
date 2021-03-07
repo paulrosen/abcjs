@@ -18,9 +18,9 @@
 
 ## Examples
 
-See [Basic Synth](https://raw.githubusercontent.com/paulrosen/abcjs/master/examples/basic-synth.html) for the simplest possible way of making sound.
+See [Basic Synth](https://raw.githubusercontent.com/paulrosen/abcjs/main/examples/basic-synth.html) for the simplest possible way of making sound.
 
-See [Full Synth](https://raw.githubusercontent.com/paulrosen/abcjs/master/examples/full-synth.html) for an example that incorporates a bouncing-ball type animation and an audio control.
+See [Full Synth](https://raw.githubusercontent.com/paulrosen/abcjs/main/examples/full-synth.html) for an example that incorporates a bouncing-ball type animation and an audio control.
 
 ## API
 

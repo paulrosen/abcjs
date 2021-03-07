@@ -32,7 +32,7 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 If you aren't using the same browser and machine that I use, you can thank [BrowserStack](https://browserstack.com/) for their support of this open-source project.
 
-![BrowserStack](https://cdn.rawgit.com/paulrosen/abcjs/master/docs/browserstack-logo-600x315.png)
+![BrowserStack](https://cdn.rawgit.com/paulrosen/abcjs/main/docs/browserstack-logo-600x315.png)
 
 ## License
 

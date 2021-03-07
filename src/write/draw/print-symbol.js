@@ -17,7 +17,7 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
 		for (var i = 0; i < symbol.length; i++) {
 			var s = symbol.charAt(i);
 			ycorr = glyphs.getYCorr(s);
-			el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, '', "", "");
+			el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, '', "none", renderer.foregroundColor);
 			if (el) {
 				if (i < symbol.length - 1)
 					dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));

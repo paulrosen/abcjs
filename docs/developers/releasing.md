@@ -12,15 +12,9 @@ All new work should be done in the `dev` branch.
 
 ### To begin a new version:
 
-[_] Switch to the `dev` branch and do all new work there.
+[_] Run the script `./start-version.sh ${version}`.
 
-[_] Find any hardcoded version numbers in [the package file](../package.json) and change them. 
-
-[_] Find any hardcoded version numbers in any examples and change them. 
-
-[_] Minify the various library versions with `npm run build` just to get the next version's examples set up.
-
-[_] Add the new files: `git add bin/abcjs*_x.x.x*`.
+[_] Check in the changed files.
 
 ### To release a new version, this checklist should be followed:
 
@@ -34,7 +28,7 @@ All new work should be done in the `dev` branch.
 
 [_] Check the minified versions and other changed files in.
 
-[_] Merge the `dev` branch into `master`. 
+[_] Merge the `dev` branch into `main`. 
 
 [_] Update npm with `npm publish` or `npm publish --tag beta`.
     To do this in docker:

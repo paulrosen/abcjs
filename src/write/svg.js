@@ -168,6 +168,7 @@ Svg.prototype.rectBeneath = function(attr) {
 
 Svg.prototype.text = function(text, attr, target) {
 	var el = document.createElementNS(svgNS, 'text');
+	el.setAttribute("stroke", "none");
 	for (var key in attr) {
 		if (attr.hasOwnProperty(key)) {
 			el.setAttribute(key, attr[key]);

@@ -6,6 +6,7 @@
 
 var flatten;
 var parseCommon = require("../parse/abc_common");
+var pitchesToPerc = require('./pitches-to-perc');
 
 (function() {
 	"use strict";
@@ -55,13 +56,14 @@ var parseCommon = require("../parse/abc_common");
 	var drumDefinition = {};
 
 	var pickupLength = 0;
+	var percmap;
 
 	// The gaps per beat. The first two are in seconds, the third is in fraction of a duration.
 	var normalBreakBetweenNotes = 0; //0.000520833333325*1.5; // for articulation (matches muse score value)
 	var slurredBreakBetweenNotes = -0.001; // make the slurred notes actually overlap
 	var staccatoBreakBetweenNotes = 0.4; // some people say staccato is half duration, some say 3/4 so this splits it
 
-	flatten = function(voices, options) {
+	flatten = function(voices, options, percmap_) {
 		if (!options) options = {};
 		barAccidentals = [];
 		accidentals = [0,0,0,0,0,0,0];
@@ -76,6 +78,7 @@ var parseCommon = require("../parse/abc_common");
 		currentTrack = undefined;
 		currentTrackName = undefined;
 		lastEventTime = 0;
+		percmap = percmap_;
 
 		// For resolving chords.
 		meter = { num: 4, den: 4 };
@@ -634,6 +637,11 @@ var parseCommon = require("../parse/abc_common");
 				if (note.endSlur)
 					slurCount -= note.endSlur.length;
 				var actualPitch = note.actualPitch ? note.actualPitch : adjustPitch(note);
+				if (currentInstrument === drumInstrument && percmap) {
+					var name = pitchesToPerc(note)
+					if (name && percmap[name])
+						actualPitch = percmap[name].sound;
+				}
 				var p = { cmd: 'note', pitch: actualPitch, volume: velocity, start: timeToRealTime(elem.time), duration: durationRounded(note.duration), instrument: currentInstrument };
 				if (elem.gracenotes) {
 					p.duration = p.duration / 2;

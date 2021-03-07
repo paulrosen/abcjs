@@ -31,13 +31,11 @@ If you are looking at someone else's website and see ABC on the page and want to
 
 Here are the latest versions. You can just download one of these:
 
-- [Basic](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_basic_5.10.3-min.js)
+- [Basic](https://raw.githubusercontent.com/paulrosen/abcjs/main/dist/abcjs-basic-min.js)
 
-- [Plugin](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.10.3-min.js)
+- [Plugin](https://raw.githubusercontent.com/paulrosen/abcjs/main/dist/abcjs-plugin-min.js)
 
-- [Greasemonkey script](https://raw.github.com/paulrosen/abcjs/master/bin/abcjs_plugin_5.10.3.user.js)
-
-- [Styles for the Audio control](https://raw.github.com/paulrosen/abcjs/master/abcjs-audio.css)
+- [Styles for the Audio control](https://raw.githubusercontent.com/paulrosen/abcjs/main/abcjs-audio.css)
 
 **NOTE: Do NOT link to these files directly! Upload them to your own server! [Here's why.](https://github.com/blog/1482-heads-up-nosniff-header-support-coming-to-chrome-and-firefox)**
 
