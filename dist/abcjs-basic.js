@@ -25399,7 +25399,7 @@ THE SOFTWARE.
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-var version = '6.0.0-beta.29';
+var version = '6.0.0-beta.30';
 module.exports = version;
 
 /***/ })

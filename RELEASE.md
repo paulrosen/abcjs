@@ -1,3 +1,9 @@
+# Version 6.0.0-beta.30
+
+## Bugs
+
+* Fix npm deployment.
+
 # Version 6.0.0-beta.29
 
 ## Bugs

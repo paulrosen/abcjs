@@ -5,7 +5,6 @@ dist/
 docs/
 examples/
 font_generator/
-static-wrappers/
 tests/
 tmp/
 
