@@ -56,18 +56,11 @@ module.exports = (env = {} , argv) => {
       name: 'plugin',
       entry: `./static-wrappers/plugin.js`,
       ...defaults(argv, 'plugin')
-    }, {
-      name: 'midi',
-      entry: `./midi.js`,
-      ...defaults(argv, 'midi')
     }
   ]
 };
 
 function makeBanner(type) {
   let banner = `abcjs_${type} v${pkg.version} Copyright © 2009-2021 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`
-  if (type === 'midi') {
-    banner += `/*! midi.js Copyright © Michael Deal (http://mudcu.be) */\n`;
-  }
   return banner + `/*! For license information please see abcjs_${type}.LICENSE`;
 }

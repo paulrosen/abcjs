@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./static-wrappers/basic.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./index.js");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -102,6 +102,8 @@ return /******/ (function(modules) { // webpackBootstrap
   \******************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(/*! ./static-wrappers/license */ "./static-wrappers/license.js");
 
 var version = __webpack_require__(/*! ./version */ "./version.js");
 
@@ -25350,19 +25352,6 @@ var unhighlight = function unhighlight(klass, color) {
 };
 
 module.exports = unhighlight;
-
-/***/ }),
-
-/***/ "./static-wrappers/basic.js":
-/*!**********************************!*\
-  !*** ./static-wrappers/basic.js ***!
-  \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(/*! ./license */ "./static-wrappers/license.js");
-
-module.exports = __webpack_require__(/*! ../index */ "./index.js");
 
 /***/ }),
 

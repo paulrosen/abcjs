@@ -15,5 +15,5 @@ tmp/
 deploy-docs.sh
 docker-compose.yml
 Dockerfile
-fix-versions.sh
+start-version.sh
 webpack.config.js
