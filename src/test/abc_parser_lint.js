@@ -264,7 +264,7 @@ var ParserLint = function() {
 			volumePosition: { type: 'string', Enum: [ 'above', 'below', 'hidden' ], optional: true}
 		}},
 		rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'lyric' ], properties: {
-			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest', 'multimeasure', 'whole' ] },	// multimeasure requires duration to be the number of measures.
+			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest', 'multimeasure', 'invisible-multimeasure', 'whole' ] },	// multimeasure requires duration to be the number of measures.
 			text: { type: 'number', minimum: 1, maximum: 100, optional: true },
 			endTie: { type: 'boolean', Enum: [ true ], optional: true },
 			startTie: tieProperties

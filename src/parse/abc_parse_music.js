@@ -1058,7 +1058,7 @@ var addEndBeam = function(el) {
 };
 
 var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
-var rests = {x: 'invisible', y: 'spacer', z: 'rest', Z: 'multimeasure' };
+var rests = {x: 'invisible', X: 'invisible-multimeasure', y: 'spacer', z: 'rest', Z: 'multimeasure' };
 var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 	//var el = { startChar: index };
 	var isComplete = function(state) {
@@ -1154,6 +1154,7 @@ var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 				else return null;
 				break;
 			case 'x':
+			case 'X':
 			case 'y':
 			case 'z':
 			case 'Z':
@@ -1169,7 +1170,7 @@ var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 					delete el.end_beam;
 					delete el.grace_notes;
 					// At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
-					if (el.rest.type === 'multimeasure') {
+					if (el.rest.type.indexOf('multimeasure') >= 0) {
 						el.duration = tune.getBarLength();
 						el.rest.text = 1;
 						state = 'Zduration';

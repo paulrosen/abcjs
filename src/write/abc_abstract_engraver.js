@@ -553,6 +553,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				elem.maxpitch = restpitch;
 				break;
 			case "invisible":
+			case "invisible-multimeasure":
 			case "spacer":
 				c = "";
 				elem.averagepitch = restpitch;
@@ -570,7 +571,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				var numMeasures = new RelativeElement("" + elem.rest.text, mmWidth, mmWidth, 16, {type: "multimeasure-text"});
 				abselem.addExtra(numMeasures);
 		}
-		if (elem.rest.type !== "multimeasure") {
+		if (elem.rest.type.indexOf("multimeasure") < 0) {
 			var ret = createNoteHead(abselem, c, {verticalPos: restpitch},
 				{ dot: dot, scale: voiceScale});
 			noteHead = ret.notehead;
@@ -769,12 +770,14 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   var durationForSpacing = duration * this.tripletmultiplier;
   if (elem.rest && elem.rest.type === 'multimeasure')
   	durationForSpacing = 1;
+  if (elem.rest && elem.rest.type === 'invisible-multimeasure')
+  	durationForSpacing = this.measureLength*elem.rest.text;
   var absType = elem.rest ? "rest" : "note";
   var abselem = new AbsoluteElement(elem, durationForSpacing, 1, absType, this.tuneNumber, { durationClassOveride: elem.duration * this.tripletmultiplier});
   if (hint) abselem.setHint();
 
   if (elem.rest) {
-  	if (this.measureLength === duration && elem.rest.type !== 'invisible' && elem.rest.type !== 'spacer' && elem.rest.type !== 'multimeasure')
+  	if (this.measureLength === duration && elem.rest.type !== 'invisible' && elem.rest.type !== 'spacer' && elem.rest.type.indexOf('multimeasure') < 0)
 	    elem.rest.type = 'whole'; // If the rest is exactly a measure, always use a whole rest
 	  var ret1 = addRestToAbsElement(abselem, elem, duration, dot, voice.voicetotal > 1, this.stemdir, isSingleLineStaff, durlog, this.voiceScale);
 	  notehead = ret1.noteHead;
