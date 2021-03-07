@@ -18,34 +18,30 @@ module.exports = (env = {} , argv) => {
         filename: argv.mode === 'development' ? `abcjs-${type}.js` : `abcjs-${type}-min.js`,
       },
       devtool: argv.mode === 'development' ? 'source-map' : false,
-			module: {
-				rules: [
-					{
-						test: /\.js$/,
-						exclude: /node_modules/,
-						use: {
-							loader: "babel-loader",
-							options: {
-								presets: [
-									[
-									'@babel/preset-env',
-									{
-										debug: true,
-										corejs: '3.9',
-										useBuiltIns: 'usage',
-										targets: 'defaults, not ie 11'
-									}
-									]
-								]
-							}
-						}
-					},
-					{
-						test: /\.svg$/,
-						loader: 'svg-inline-loader'
-					}
-				]
-			},
+      module: {
+        rules: [
+          {
+            test: /\.js$/,
+            exclude: /node_modules/,
+            use: {
+              loader: "babel-loader",
+              options: {
+                presets: [
+                  [
+                    '@babel/preset-env',
+                    {
+                      debug: false,
+                      corejs: '3.9',
+                      useBuiltIns: 'usage',
+                      targets: 'defaults, ie >= 9, safari >= 5.1'
+                    }
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+      },
       mode: 'production',
       optimization:{
         minimizer: [
