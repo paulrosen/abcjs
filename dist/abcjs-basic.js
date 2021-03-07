@@ -8025,6 +8025,7 @@ var pitches = {
 };
 var rests = {
   x: 'invisible',
+  X: 'invisible-multimeasure',
   y: 'spacer',
   z: 'rest',
   Z: 'multimeasure'
@@ -8178,6 +8179,7 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
         break;
 
       case 'x':
+      case 'X':
       case 'y':
       case 'z':
       case 'Z':
@@ -8195,7 +8197,7 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
           delete el.end_beam;
           delete el.grace_notes; // At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
 
-          if (el.rest.type === 'multimeasure') {
+          if (el.rest.type.indexOf('multimeasure') >= 0) {
             el.duration = tune.getBarLength();
             el.rest.text = 1;
             state = 'Zduration';
@@ -17139,6 +17141,7 @@ function addRestToAbsElement(abselem, elem, duration, dot, isMultiVoice, stemdir
       break;
 
     case "invisible":
+    case "invisible-multimeasure":
     case "spacer":
       c = "";
       elem.averagepitch = restpitch;
@@ -17160,7 +17163,7 @@ function addRestToAbsElement(abselem, elem, duration, dot, isMultiVoice, stemdir
       abselem.addExtra(numMeasures);
   }
 
-  if (elem.rest.type !== "multimeasure") {
+  if (elem.rest.type.indexOf("multimeasure") < 0) {
     var ret = createNoteHead(abselem, c, {
       verticalPos: restpitch
     }, {
@@ -17413,6 +17416,7 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
 
   var durationForSpacing = duration * this.tripletmultiplier;
   if (elem.rest && elem.rest.type === 'multimeasure') durationForSpacing = 1;
+  if (elem.rest && elem.rest.type === 'invisible-multimeasure') durationForSpacing = this.measureLength * elem.rest.text;
   var absType = elem.rest ? "rest" : "note";
   var abselem = new AbsoluteElement(elem, durationForSpacing, 1, absType, this.tuneNumber, {
     durationClassOveride: elem.duration * this.tripletmultiplier
@@ -17420,7 +17424,7 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
   if (hint) abselem.setHint();
 
   if (elem.rest) {
-    if (this.measureLength === duration && elem.rest.type !== 'invisible' && elem.rest.type !== 'spacer' && elem.rest.type !== 'multimeasure') elem.rest.type = 'whole'; // If the rest is exactly a measure, always use a whole rest
+    if (this.measureLength === duration && elem.rest.type !== 'invisible' && elem.rest.type !== 'spacer' && elem.rest.type.indexOf('multimeasure') < 0) elem.rest.type = 'whole'; // If the rest is exactly a measure, always use a whole rest
 
     var ret1 = addRestToAbsElement(abselem, elem, duration, dot, voice.voicetotal > 1, this.stemdir, isSingleLineStaff, durlog, this.voiceScale);
     notehead = ret1.noteHead;

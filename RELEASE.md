@@ -1,3 +1,23 @@
+# Version 6.0.0-beta.29
+
+## Bugs
+
+* Fix stem direction on overlay voices.
+
+## Features
+
+* Add support for invisible multi-measure rest "X"
+
+* enhance typescript types
+
+## Build
+
+* Remove build of midi version
+    
+* Simplify the webpack config
+
+* Remove references to "master"
+
 # Version 6.0.0-beta.28
 
 ## Bugs
