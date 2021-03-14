@@ -2,6 +2,7 @@ require('./static-wrappers/license')
 var version = require('./version');
 var animation = require('./src/api/abc_animation');
 var tuneBook = require('./src/api/abc_tunebook');
+var sequence = require('./src/synth/abc_midi_sequencer');
 
 var abcjs = {};
 
@@ -45,6 +46,7 @@ abcjs.synth = {
 	supportsAudio: supportsAudio,
 	playEvent: playEvent,
 	getMidiFile: getMidiFile,
+	sequence: sequence,
 };
 
 abcjs['Editor'] = require('./src/edit/abc_editor');
