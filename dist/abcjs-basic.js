@@ -12486,6 +12486,14 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
         case "dblflat":
           barAccidentals[pitch] = -2;
           break;
+
+        case "quartersharp":
+          barAccidentals[pitch] = 0.5;
+          break;
+
+        case "quarterflat":
+          barAccidentals[pitch] = -0.5;
+          break;
       }
     }
 
@@ -15605,7 +15613,21 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
   source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
 
   source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
-  source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec); // connect all the nodes
+  source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
+  console.log("sound", sound);
+  var centsFactor = [1.0, 1.00057778950655, 1.00115591285382, 1.0017343702347, 1.00231316184217, 1.00289228786937, 1.0034717485095, 1.00405154395592, 1.00463167440205, 1.00521214004148, 1.00579294106785];
+  var quarterToneFactor = 1.02930223664349;
+
+  if (sound.pitch === 74) {
+    if (!window.cents) window.cents = 0;
+    source.playbackRate.value = centsFactor[window.cents];
+  } //1.0293 = quarter tone
+  // half step: 21:20 	84.47
+  // quarter step: 28:27 62.96
+  // quarter step: 33:32 53.27
+  //
+  // connect all the nodes
+
 
   if (source.panNode) {
     source.panNode.connect(offlineCtx.destination);
@@ -25399,7 +25421,7 @@ THE SOFTWARE.
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-var version = '6.0.0-beta.30';
+var version = '6.0.0-beta.31';
 module.exports = version;
 
 /***/ })

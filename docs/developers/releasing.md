@@ -52,7 +52,7 @@ All new work should be done in the `dev` branch.
 
 [_] Read through all the issues to see if any should be closed.
 
-[_] Update https://abcjs.net and the examples on github.
+[_] Update https://abcjs.net.
 
 [_] Release a new version of the [WordPress plugin](https://wordpress.org/plugins/abc-notation/).
 
