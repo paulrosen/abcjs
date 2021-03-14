@@ -366,9 +366,28 @@ var Parse = function() {
 	};
 
 	var parseLine = function(line) {
+		if (parseCommon.startsWith(line, '%%')) {
+			var err = parseDirective.addDirective(line.substring(2));
+			if (err) warn(err, line, 2);
+			return;
+		}
+
+		var i = line.indexOf('%');
+		if (i >= 0)
+			line = line.substring(0, i);
+		line = line.replace(/\s+$/, '');
+
+		if (line.length === 0)
+			return;
+
+		if (line.length < 2 || line.charAt(1) !== ':') {
+			music.parseMusic(line);
+			return
+		}
+
 		var ret = header.parseHeader(line);
 		if (ret.regular)
-			music.parseMusic(ret.str);
+			music.parseMusic(line);
 		if (ret.newline)
 			music.startNewLine();
 		if (ret.words)
@@ -457,9 +476,9 @@ var Parse = function() {
 		header.reset(tokenizer, warn, multilineVars, tune);
 
 		// Take care of whatever line endings come our way
-		strTune = parseCommon.gsub(strTune, '\r\n', '\n');
-		strTune = parseCommon.gsub(strTune, '\r', '\n');
-		strTune += '\n';	// Tacked on temporarily to make the last line continuation work
+		// Tack on newline temporarily to make the last line continuation work
+		strTune = strTune.replace(/\r\n?/g, '\n') + '\n';
+
 		// get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
 		var arr = strTune.split("\n\\");
 		if (arr.length > 1) {
@@ -472,8 +491,7 @@ var Parse = function() {
 			strTune = arr.join("  "); //. the split removed two characters, so this puts them back
 		}
 		var continuationReplacement = function(all, backslash, comment){
-			var spaces = "                                                                                                                                                                                                     ";
-			var padding = comment ? spaces.substring(0, comment.length) : "";
+			var padding = comment ? Array(comment.length +1).join(' ') : "";
 			return backslash + " \x12" + padding;
 		};
 		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
@@ -525,23 +543,31 @@ var Parse = function() {
 				}
 				multilineVars.iChar += line.length + 1;
 			});
-			var ph = 11*72;
-			var pl = 8.5*72;
-			switch (multilineVars.papersize) {
-				//case "letter": ph = 11*72; pl = 8.5*72; break;
-				case "legal": ph = 14*72; pl = 8.5*72; break;
-				case "A4": ph = 11.7*72; pl = 8.3*72; break;
-			}
-			if (multilineVars.landscape) {
-				var x = ph;
-				ph = pl;
-				pl = x;
-			}
-			multilineVars.openSlurs = tuneBuilder.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
+
+			multilineVars.openSlurs = tuneBuilder.cleanUp(multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
+
 		} catch (err) {
 			if (err !== "normal_abort")
 				throw err;
 		}
+
+		var ph = 11*72;
+		var pl = 8.5*72;
+		switch (multilineVars.papersize) {
+			//case "letter": ph = 11*72; pl = 8.5*72; break;
+			case "legal": ph = 14*72; pl = 8.5*72; break;
+			case "A4": ph = 11.7*72; pl = 8.3*72; break;
+		}
+		if (multilineVars.landscape) {
+			var x = ph;
+			ph = pl;
+			pl = x;
+		}
+		if (!tune.formatting.pagewidth)
+			tune.formatting.pagewidth = pl;
+		if (!tune.formatting.pageheight)
+			tune.formatting.pageheight = ph;
+
 		if (switches.hint_measures) {
 			addHintMeasures();
 		}
