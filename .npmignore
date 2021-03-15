@@ -1,7 +1,6 @@
 .idea/
 bin/
 build-utils/
-dist/
 docs/
 examples/
 font_generator/
