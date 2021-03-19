@@ -477,8 +477,6 @@ MusicParser.prototype.parseMusic = function(line) {
 							// TODO-PER: straighten this out so there is not so much copying: getCoreNote shouldn't change e'
 							if (core.accidental !== undefined) el.pitches[0].accidental = core.accidental;
 							el.pitches[0].pitch = core.pitch;
-							if (core.soundPitch || core.soundPitch === 0)
-								el.pitches[0].soundPitch = core.soundPitch;
 							if (core.midipitch || core.midipitch === 0)
 								el.pitches[0].midipitch = core.midipitch;
 							if (core.endSlur !== undefined) el.pitches[0].endSlur = core.endSlur;
@@ -1136,20 +1134,17 @@ var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 						}
 						if (tune.formatting && tune.formatting.midi && tune.formatting.midi.drummap)
 						el.midipitch = tune.formatting.midi.drummap[key];
-					} else if (multilineVars.clef && multilineVars.clef.type.indexOf('-') >= 0) {
-						el.soundPitch = el.pitch-7;
-					} else if (multilineVars.clef && multilineVars.clef.type.indexOf('+') >= 0)
-						el.soundPitch = el.pitch+7;
+					}
 				} else if (isComplete(state)) {el.endChar = index;return el;}
 				else return null;
 				break;
 			case ',':
-				if (state === 'octave') {el.pitch -= 7; if (el.soundPitch!==undefined) el.soundPitch -=7;}
+				if (state === 'octave') {el.pitch -= 7; }
 				else if (isComplete(state)) {el.endChar = index;return el;}
 				else return null;
 				break;
 			case '\'':
-				if (state === 'octave') {el.pitch += 7; if (el.soundPitch!==undefined) el.soundPitch +=7;}
+				if (state === 'octave') {el.pitch += 7; }
 				else if (isComplete(state)) {el.endChar = index;return el;}
 				else return null;
 				break;

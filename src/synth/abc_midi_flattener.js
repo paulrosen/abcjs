@@ -692,7 +692,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 	function adjustPitch(note) {
 		if (note.midipitch !== undefined)
 			return note.midipitch; // The pitch might already be known, for instance if there is a drummap.
-		var pitch = note.soundPitch || note.soundPitch === 0 ? note.soundPitch : note.pitch;
+		var pitch = note.pitch;
 		if (note.accidental) {
 			switch(note.accidental) { // change that pitch (not other octaves) for the rest of the bar
 				case "sharp":
