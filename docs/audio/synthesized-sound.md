@@ -279,17 +279,19 @@ if (ABCJS.synth.supportsAudio()) {
 }
 ```
 
-## getMidiFile(abcString, options)
+## getMidiFile(source, options)
 
 This is called to get the audio in MIDI format, instead of as a playable audio buffer.
 
 ```javascript
-ABCJS.synth.getMidiFile(abcString, { midiOutputType: 'binary', bpm: 100 })
+ABCJS.synth.getMidiFile(source, { midiOutputType: 'binary', bpm: 100 })
 ```
 
-### abcString
+### source
 
-The ABC string to create the MIDI from.
+Either the ABC string to create the MIDI from or the object that is returned from `renderAbc`.
+Note that `renderAbc` returns an array, so to get the first tune, for instance, you need to use `[0]`.
+When using the object many of the options passed in are ignored because the tune is already created.
 
 ### options
 
@@ -329,7 +331,7 @@ If you'd like to use the title in the label but modify it, use `%T`. That is: `d
 ```
 
 ```javascript
-var midi = new ABCJS.synth.getMidiFile("X:1\nT:Cooley's\netc...", { chordsOff: true, midiOutputType: "link" });
+var midi = ABCJS.synth.getMidiFile("X:1\nT:Cooley's\netc...", { chordsOff: true, midiOutputType: "link" });
 document.getElementById("midi-link").innerHTML = midi;
 ```
 That results in the following html:
@@ -347,15 +349,23 @@ That results in the following html:
 ```
 
 ```javascript
-var midi = new ABCJS.synth.getMidiFile("X:1\nT:Cooley's\netc...", { chordsOff: true, midiOutputType: "encoded" });
+var midi = ABCJS.synth.getMidiFile("X:1\nT:Cooley's\netc...", { chordsOff: true, midiOutputType: "encoded" });
 document.getElementById("midi-link").setAttribute("html", midi);
 ```
 
 #### Actual midi file to pass to another library
 
 ```javascript
-var midi = new ABCJS.synth.getMidiFile("X:1\nT:Cooley's\netc...", { chordsOff: true, midiOutputType: "binary" });
+var midi = ABCJS.synth.getMidiFile("X:1\nT:Cooley's\netc...", { chordsOff: true, midiOutputType: "binary" });
 otherLibraryMidiPlayer.loadTune(midi);
+```
+
+#### Passing an object
+
+If you already have parsed the tune you can just pass it in:
+```javascript
+var visualObj = ABCJS.renderAbc("paper", "X:1\nT:Cooley's\netc...");
+var midi = ABCJS.synth.getMidiFile(visualObj[0], { midiOutputType: "encoded" });
 ```
 
 ## CreateSynthControl

@@ -1,7 +1,7 @@
 var tunebook = require('../api/abc_tunebook');
 var midiCreate = require('../midi/abc_midi_create');
 
-var getMidiFile = function(abcString, options) {
+var getMidiFile = function(source, options) {
 	var params = {};
 	if (options) {
 		for (var key in options) {
@@ -12,7 +12,7 @@ var getMidiFile = function(abcString, options) {
 	}
 	params.generateInline = false;
 
-	function callback(div, tune, index, abcString) {
+	function callback(div, tune, index) {
 		var downloadMidi = midiCreate(tune, params);
 		switch (params.midiOutputType) {
 			case "encoded":
@@ -35,7 +35,10 @@ var getMidiFile = function(abcString, options) {
 		}
 	}
 
-	return tunebook.renderEngine(callback, "*", abcString, params);
+	if (typeof source === "string")
+		return tunebook.renderEngine(callback, "*", source, params);
+	else
+		return callback(null, source, 0);
 };
 
 function isFunction(functionToCheck) {

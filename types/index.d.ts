@@ -2,7 +2,8 @@ declare module 'abcjs' {
 	//
 	// Global syntactic sugar types
 	//
-	export type TuneObjectArray = [any]
+	export type TuneObject = any
+	export type TuneObjectArray = [TuneObject]
 	export type AudioContext = any
 	export type AudioControl = any
 	export type AudioSequence = any
@@ -42,7 +43,7 @@ declare module 'abcjs' {
 	//
 	export interface SynthObjectController {
 		disable(isDisabled: boolean): void
-		setTune(visualObj: TuneObjectArray, userAction: Boolean, audioParams?: AbcParams): Promise<any>
+		setTune(visualObj: TuneObject, userAction: Boolean, audioParams?: AbcParams): Promise<any>
 		load(selector: string, cursorControl?: any, visualOptions?: AbcParams): void
 		play(): void
 		pause(): void
@@ -71,9 +72,9 @@ declare module 'abcjs' {
 
 		export function supportsAudio(): boolean
 		export function CreateSynthControl(element: Selector, options: AbcParams): AudioControl
-		export function getMidiFile(abcString: string, options?: AbcParams): MidiFile
+		export function getMidiFile(source: String | TuneObject, options?: AbcParams): MidiFile
 		export function synthSequence(): AudioSequence
-		export function playEvent(pitches: Pitches, graceNotes: Pitches, milliSecondsPerMesure: number): Promise<any>
+		export function playEvent(pitches: Pitches, graceNotes: Pitches, milliSecondsPerMeasure: number): Promise<any>
 		export function activeAudioContext(): AudioContext
 	}
 }
