@@ -15,3 +15,4 @@ docker-compose.yml
 Dockerfile
 start-version.sh
 webpack.config.js
+to-*.sh
