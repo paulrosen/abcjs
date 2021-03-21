@@ -16,6 +16,7 @@ var MusicParser = function(_tokenizer, _warn, _multilineVars, _tune, _tuneBuilde
 	tune = _tune;
 	tuneBuilder = _tuneBuilder;
 	header = _header;
+	this.lineContinuation = false;
 }
 
 //
@@ -89,6 +90,7 @@ var isInTie = function(multilineVars, overlayLevel, el) {
 	return false;
 };
 
+var el = { };
 MusicParser.prototype.parseMusic = function(line) {
 	header.resolveTempo();
 	//multilineVars.havent_set_length = false;	// To late to set this now.
@@ -113,11 +115,12 @@ MusicParser.prototype.parseMusic = function(line) {
 	var retHeader = header.letter_to_body_header(line, i);
 	if (retHeader[0] > 0) {
 		i += retHeader[0];
+		// fixes bug on this: c[V:2]d
 		if (retHeader[1] === 'V')
-			delayStartNewLine = true; // fixes bug on this: c[V:2]d
+			this.startNewLine();
+			// delayStartNewLine = true;
 		// TODO-PER: Handle inline headers
 	}
-	var el = { };
 
 	var overlayLevel = 0;
 	while (i < line.length)
@@ -135,7 +138,7 @@ MusicParser.prototype.parseMusic = function(line) {
 			//multilineVars.start_new_line = false;
 		} else {
 			// Wait until here to actually start the line because we know we're past the inline statements.
-			if (delayStartNewLine) {
+			if (!tuneBuilder.hasBeginMusic() || (delayStartNewLine && !this.lineContinuation)) {
 				this.startNewLine();
 				delayStartNewLine = false;
 			}
@@ -562,6 +565,7 @@ MusicParser.prototype.parseMusic = function(line) {
 			}
 		}
 	}
+	this.lineContinuation = line.indexOf('\x12') >= 0 || (retHeader[0] > 0)
 };
 
 var setIsInTie =function(multilineVars, overlayLevel, value) {

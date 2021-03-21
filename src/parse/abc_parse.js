@@ -15,6 +15,8 @@ var Parse = function() {
 	var tune = new Tune();
 	var tuneBuilder = new TuneBuilder(tune);
 	var tokenizer;
+	var wordsContinuation = '';
+	var symbolContinuation = '';
 
 	this.getTune = function() {
 		var t = {
@@ -205,6 +207,13 @@ var Parse = function() {
 	};
 
 	var addWords = function(line, words) {
+		if (words.indexOf('\x12') >= 0) {
+			wordsContinuation += words
+			return
+		}
+		words = wordsContinuation + words
+		wordsContinuation = ''
+
 		if (!line) { warn("Can't add words before the first line of music", line, 0); return; }
 		words = parseCommon.strip(words);
 		if (words.charAt(words.length-1) !== '-')
@@ -289,6 +298,13 @@ var Parse = function() {
 	};
 
 	var addSymbols = function(line, words) {
+		if (words.indexOf('\x12') >= 0) {
+			symbolContinuation += words
+			return
+		}
+		words = symbolContinuation + words
+		symbolContinuation = ''
+
 		// TODO-PER: Currently copied from w: line. This needs to be read as symbols instead.
 		if (!line) { warn("Can't add symbols before the first line of music", line, 0); return; }
 		words = parseCommon.strip(words);
@@ -380,7 +396,15 @@ var Parse = function() {
 		if (line.length === 0)
 			return;
 
-		if (line.length < 2 || line.charAt(1) !== ':') {
+		if (wordsContinuation) {
+			addWords(tuneBuilder.getCurrentVoice(), line.substring(2));
+			return
+		}
+		if (symbolContinuation) {
+			addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
+			return
+		}
+		if (line.length < 2 || line.charAt(1) !== ':' || music.lineContinuation) {
 			music.parseMusic(line);
 			return
 		}
@@ -472,7 +496,7 @@ var Parse = function() {
 		// take care of line continuations right away, but keep the same number of characters
 		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, function(all, backslash, comment){
 			var padding = comment ? Array(comment.length +1).join(' ') : "";
-			return backslash + " \x12" + padding;
+			return backslash + "\x12" + padding + '\n';
 		});
 		var lines = strTune.split('\n')
 		if (parseCommon.last(lines).length === 0)	// remove the blank line we added above.
@@ -548,6 +572,12 @@ var Parse = function() {
 				line = tokenizer.nextLine();
 			}
 
+			if (wordsContinuation) {
+				addWords(tuneBuilder.getCurrentVoice(), '');
+			}
+			if (symbolContinuation) {
+				addSymbols(tuneBuilder.getCurrentVoice(), '');
+			}
 			multilineVars.openSlurs = tuneBuilder.cleanUp(multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
 
 		} catch (err) {
