@@ -472,7 +472,7 @@ var Parse = function() {
 		// take care of line continuations right away, but keep the same number of characters
 		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, function(all, backslash, comment){
 			var padding = comment ? Array(comment.length +1).join(' ') : "";
-			return backslash + " \x12" + padding;
+			return backslash + "\x12" + padding + '\n';
 		});
 		var lines = strTune.split('\n')
 		if (parseCommon.last(lines).length === 0)	// remove the blank line we added above.
