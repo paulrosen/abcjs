@@ -43,6 +43,10 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 	source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
 	source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
 
+	if (sound.warp) {
+		source.playbackRate.value = sound.warp;
+	}
+
 	// connect all the nodes
 	if (source.panNode) {
 		source.panNode.connect(offlineCtx.destination);

@@ -31,6 +31,8 @@ var createNoteMap = function(sequence) {
 						};
 						if (ev.style)
 							obj.style = ev.style;
+						if (ev.warp)
+							obj.warp = ev.warp;
 						map[i].push(obj);
 					}
 					break;

@@ -8,6 +8,10 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
+## Fix to audio in octave clefs 6.0.0-beta.31
+
+If you are using an octave clef (for instance `K:C clef=treble-8`) it will now sound an octave different. The octave calculation was happening twice.
+
 ## Last version supporting midi.js is 6.0.0-beta.28
 
 The file [abcjs version supporting midi.js](https://raw.github.io/paulrosen/abcjs/main/bin/abcjs_midi-min.js) is the last version of the old style of sound production that will receive updates.
