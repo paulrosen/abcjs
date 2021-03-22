@@ -8,6 +8,7 @@ var multilineVars;
 var tune;
 var tuneBuilder;
 var header;
+var lineContinuation = false;;
 
 var MusicParser = function(_tokenizer, _warn, _multilineVars, _tune, _tuneBuilder, _header) {
 	tokenizer = _tokenizer;
@@ -135,7 +136,7 @@ MusicParser.prototype.parseMusic = function(line) {
 			//multilineVars.start_new_line = false;
 		} else {
 			// Wait until here to actually start the line because we know we're past the inline statements.
-			if (delayStartNewLine) {
+			if (!tuneBuilder.hasBeginMusic() || (delayStartNewLine && !lineContinuation)) {
 				this.startNewLine();
 				delayStartNewLine = false;
 			}
@@ -562,6 +563,7 @@ MusicParser.prototype.parseMusic = function(line) {
 			}
 		}
 	}
+	lineContinuation = line.indexOf('\x12') >= 0;
 };
 
 var setIsInTie =function(multilineVars, overlayLevel, value) {

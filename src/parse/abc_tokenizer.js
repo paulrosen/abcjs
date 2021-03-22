@@ -6,7 +6,10 @@ var parseCommon = require('./abc_common');
 // the return is the number of characters consumed, so 0 means that the element wasn't found.
 // also returned is the element found. This may be a different length because spaces may be consumed that aren't part of the string.
 // The return structure for most calls is { len: num_chars_consumed, token: str }
-var Tokenizer = function() {
+var Tokenizer = function(lines) {
+	this.lineIndex = 0
+	this.lines = lines
+
 	this.skipWhiteSpace = function(str) {
 		for (var i = 0; i < str.length; i++) {
 		  if (!this.isWhiteSpace(str.charAt(i)))
@@ -737,5 +740,14 @@ var Tokenizer = function() {
 		}
 	};
 };
+
+Tokenizer.prototype.nextLine = function() {
+	if (this.lineIndex < this.lines.length) {
+		var result = this.lines[this.lineIndex]
+		this.lineIndex++
+		return result
+	}
+	return null
+}
 
 module.exports = Tokenizer;

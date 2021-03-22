@@ -14,7 +14,7 @@ var Parse = function() {
 	"use strict";
 	var tune = new Tune();
 	var tuneBuilder = new TuneBuilder(tune);
-	var tokenizer = new Tokenizer();
+	var tokenizer;
 
 	this.getTune = function() {
 		var t = {
@@ -453,6 +453,31 @@ var Parse = function() {
 		if (!switches) switches = {};
 		if (!startPos) startPos = 0;
 		tuneBuilder.reset();
+
+		// Take care of whatever line endings come our way
+		// Tack on newline temporarily to make the last line continuation work
+		strTune = strTune.replace(/\r\n?/g, '\n') + '\n';
+
+		// get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
+		var arr = strTune.split("\n\\");
+		if (arr.length > 1) {
+			for (var i2 = 1; i2 < arr.length; i2++) {
+				while (arr[i2].length > 0 && arr[i2][0] !== "\n") {
+					arr[i2] = arr[i2].substr(1);
+					arr[i2-1] += ' ';
+				}
+			}
+			strTune = arr.join("  "); //. the split removed two characters, so this puts them back
+		}
+		// take care of line continuations right away, but keep the same number of characters
+		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, function(all, backslash, comment){
+			var padding = comment ? Array(comment.length +1).join(' ') : "";
+			return backslash + "\x12" + padding + '\n';
+		});
+		var lines = strTune.split('\n')
+		if (parseCommon.last(lines).length === 0)	// remove the blank line we added above.
+			lines.pop();
+		tokenizer = new Tokenizer(lines);
 		header = new ParseHeader(tokenizer, warn, multilineVars, tune, tuneBuilder);
 		music = new ParseMusic(tokenizer, warn, multilineVars, tune, tuneBuilder, header);
 
@@ -475,34 +500,12 @@ var Parse = function() {
 		}
 		header.reset(tokenizer, warn, multilineVars, tune);
 
-		// Take care of whatever line endings come our way
-		// Tack on newline temporarily to make the last line continuation work
-		strTune = strTune.replace(/\r\n?/g, '\n') + '\n';
-
-		// get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
-		var arr = strTune.split("\n\\");
-		if (arr.length > 1) {
-			for (var i2 = 1; i2 < arr.length; i2++) {
-				while (arr[i2].length > 0 && arr[i2][0] !== "\n") {
-					arr[i2] = arr[i2].substr(1);
-					arr[i2-1] += ' ';
-				}
-			}
-			strTune = arr.join("  "); //. the split removed two characters, so this puts them back
-		}
-		var continuationReplacement = function(all, backslash, comment){
-			var padding = comment ? Array(comment.length +1).join(' ') : "";
-			return backslash + " \x12" + padding;
-		};
-		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
-		var lines = strTune.split('\n');
-		if (parseCommon.last(lines).length === 0)	// remove the blank line we added above.
-			lines.pop();
 		try {
 			if (switches.format) {
 				parseDirective.globalFormatting(switches.format);
 			}
-			parseCommon.each(lines,  function(line) {
+			var line = tokenizer.nextLine();
+			while (line) {
 				if (switches.header_only && multilineVars.is_in_header === false)
 					throw "normal_abort";
 				if (switches.stop_on_warning && multilineVars.warnings)
@@ -542,7 +545,8 @@ var Parse = function() {
 					}
 				}
 				multilineVars.iChar += line.length + 1;
-			});
+				line = tokenizer.nextLine();
+			}
 
 			multilineVars.openSlurs = tuneBuilder.cleanUp(multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
 
