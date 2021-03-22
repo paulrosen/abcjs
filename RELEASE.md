@@ -1,3 +1,29 @@
+# Version 6.0.0-beta.31
+
+## Bugs
+
+* Fix crash when no key signature is passed in.
+
+* Octave clefs were double transposing.
+
+* Made the audio control more robust in dark mode and when the page's css defines basic buttons.
+
+## Features
+
+* Support audio for quarter sharp and quarter flat.
+
+* Allow getMidiFile to accept a tune object as well as a string.
+
+## Build
+
+* Remove more of the midi.js code
+
+* Deliver the /dist folder for npm.
+
+* Add entry points for testing.
+
+* Start of parser refactoring
+
 # Version 6.0.0-beta.30
 
 ## Bugs

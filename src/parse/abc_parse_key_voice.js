@@ -365,6 +365,12 @@ var parseKeyVoice = {};
 		var tokens = tokenizer.tokenize(str, 0, str.length);
 		var ret = {};
 
+		// Be sure that a key was passed in
+		if (tokens.length === 0) {
+			warn("Must pass in key signature.", str, 0);
+			return ret;
+		}
+
 		// first the key
 		switch (tokens[0].token) {
 			case 'HP':

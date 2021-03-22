@@ -1,7 +1,6 @@
 .idea/
 bin/
 build-utils/
-dist/
 docs/
 examples/
 font_generator/
@@ -16,3 +15,4 @@ docker-compose.yml
 Dockerfile
 start-version.sh
 webpack.config.js
+to-*.sh

@@ -474,115 +474,90 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	};
 
 	this.parseHeader = function(line) {
-		if (parseCommon.startsWith(line, '%%')) {
-			var err = parseDirective.addDirective(line.substring(2));
-			if (err) warn(err, line, 2);
-			return {};
+		var nextLine = "";
+		if (line.indexOf('\x12') >= 0) {
+			nextLine = line.substring(line.indexOf('\x12')+1);
+			line = line.substring(0, line.indexOf('\x12'));	//This handles a continuation mark on a header field
 		}
-		var i = line.indexOf('%');
-		if (i >= 0)
-			line = line.substring(0, i);
-		line = line.replace(/\s+$/, '');
-
-		if (line.length === 0)
+		var field = metaTextHeaders[line.charAt(0)];
+		if (field !== undefined) {
+			if (field === 'unalignedWords')
+				tuneBuilder.addMetaTextArray(field, parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))));
+			else
+				tuneBuilder.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
 			return {};
-
-		if (line.length >= 2) {
-			if (line.charAt(1) === ':') {
-				var nextLine = "";
-				if (line.indexOf('\x12') >= 0 && line.charAt(0) !== 'w') {	// w: is the only header field that can have a continuation.
-					nextLine = line.substring(line.indexOf('\x12')+1);
-					line = line.substring(0, line.indexOf('\x12'));	//This handles a continuation mark on a header field
-				}
-				var field = metaTextHeaders[line.charAt(0)];
-				if (field !== undefined) {
-					if (field === 'unalignedWords')
-						tuneBuilder.addMetaTextArray(field, parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))));
-					else
-						tuneBuilder.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
-					return {};
-				} else {
-					var startChar = multilineVars.iChar;
-					var endChar = startChar + line.length;
-					switch(line.charAt(0))
-					{
-						case  'H':
-							tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
-							multilineVars.is_in_history = true;
-							break;
-						case  'K':
-							// since the key is the last thing that can happen in the header, we can resolve the tempo now
-							this.resolveTempo();
-							var result = parseKeyVoice.parseKey(line.substring(2));
-							if (!multilineVars.is_in_header && tuneBuilder.hasBeginMusic()) {
-								if (result.foundClef)
-									tuneBuilder.appendStartingElement('clef', startChar, endChar, multilineVars.clef);
-								if (result.foundKey)
-									tuneBuilder.appendStartingElement('key', startChar, endChar, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
-							}
-							multilineVars.is_in_header = false;	// The first key signifies the end of the header.
-							break;
-						case  'L':
-							this.setDefaultLength(line, 2, line.length);
-							break;
-						case  'M':
-							multilineVars.origMeter = multilineVars.meter = this.setMeter(line.substring(2));
-							break;
-						case  'P':
-							// TODO-PER: There is more to do with parts, but the writer doesn't care.
-							if (multilineVars.is_in_header)
-								tuneBuilder.addMetaText("partOrder", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
-							else
-								multilineVars.partForNextLine = { title: tokenizer.translateString(tokenizer.stripComment(line.substring(2))), startChar: startChar, endChar: endChar};
-							break;
-						case  'Q':
-							var tempo = this.setTempo(line, 2, line.length);
-							if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;
-							else if (tempo.type === 'immediate') {
-								if (!tune.metaText.tempo)
-									tune.metaText.tempo = tempo.tempo;
-								else
-									multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo]
-							}
-							break;
-						case  'T':
-							this.setTitle(line.substring(2));
-							break;
-						case 'U':
-							this.addUserDefinition(line, 2, line.length);
-							break;
-						case  'V':
-							parseKeyVoice.parseVoice(line, 2, line.length);
-							if (!multilineVars.is_in_header)
-								return {newline: true};
-							break;
-						case  's':
-							return {symbols: true};
-						case  'w':
-							return {words: true};
-						case 'X':
-							break;
-						case 'E':
-						case 'm':
-							warn("Ignored header", line, 0);
-							break;
-						default:
-							// It wasn't a recognized header value, so parse it as music.
-							if (nextLine.length)
-								nextLine = "\x12" + nextLine;
-							//parseRegularMusicLine(line+nextLine);
-							//nextLine = "";
-							return {regular: true, str: line+nextLine};
+		} else {
+			var startChar = multilineVars.iChar;
+			var endChar = startChar + line.length;
+			switch(line.charAt(0))
+			{
+				case  'H':
+					tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+					multilineVars.is_in_history = true;
+					break;
+				case  'K':
+					// since the key is the last thing that can happen in the header, we can resolve the tempo now
+					this.resolveTempo();
+					var result = parseKeyVoice.parseKey(line.substring(2));
+					if (!multilineVars.is_in_header && tuneBuilder.hasBeginMusic()) {
+						if (result.foundClef)
+							tuneBuilder.appendStartingElement('clef', startChar, endChar, multilineVars.clef);
+						if (result.foundKey)
+							tuneBuilder.appendStartingElement('key', startChar, endChar, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
 					}
-				}
-				if (nextLine.length > 0)
-					return {recurse: true, str: nextLine};
-				return {};
+					multilineVars.is_in_header = false;	// The first key signifies the end of the header.
+					break;
+				case  'L':
+					this.setDefaultLength(line, 2, line.length);
+					break;
+				case  'M':
+					multilineVars.origMeter = multilineVars.meter = this.setMeter(line.substring(2));
+					break;
+				case  'P':
+					// TODO-PER: There is more to do with parts, but the writer doesn't care.
+					if (multilineVars.is_in_header)
+						tuneBuilder.addMetaText("partOrder", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+					else
+						multilineVars.partForNextLine = { title: tokenizer.translateString(tokenizer.stripComment(line.substring(2))), startChar: startChar, endChar: endChar};
+					break;
+				case  'Q':
+					var tempo = this.setTempo(line, 2, line.length);
+					if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;
+					else if (tempo.type === 'immediate') {
+						if (!tune.metaText.tempo)
+							tune.metaText.tempo = tempo.tempo;
+						else
+							multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo]
+					}
+					break;
+				case  'T':
+					this.setTitle(line.substring(2));
+					break;
+				case 'U':
+					this.addUserDefinition(line, 2, line.length);
+					break;
+				case  'V':
+					parseKeyVoice.parseVoice(line, 2, line.length);
+					if (!multilineVars.is_in_header)
+						return {newline: true};
+					break;
+				case  's':
+					return {symbols: true};
+				case  'w':
+					return {words: true};
+				case 'X':
+					break;
+				case 'E':
+				case 'm':
+					warn("Ignored header", line, 0);
+					break;
+				default:
+					return {regular: true};
 			}
 		}
-
-		// If we got this far, we have a regular line of mulsic
-		return {regular: true, str: line};
+		if (nextLine.length > 0)
+			return {recurse: true, str: nextLine};
+		return {};
 	};
 };
 

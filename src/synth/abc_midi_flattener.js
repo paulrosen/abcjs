@@ -643,6 +643,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 						actualPitch = percmap[name].sound;
 				}
 				var p = { cmd: 'note', pitch: actualPitch, volume: velocity, start: timeToRealTime(elem.time), duration: durationRounded(note.duration), instrument: currentInstrument };
+				p = adjustForMicroTone(p);
 				if (elem.gracenotes) {
 					p.duration = p.duration / 2;
 					p.start = p.start + p.duration;
@@ -692,7 +693,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 	function adjustPitch(note) {
 		if (note.midipitch !== undefined)
 			return note.midipitch; // The pitch might already be known, for instance if there is a drummap.
-		var pitch = note.soundPitch || note.soundPitch === 0 ? note.soundPitch : note.pitch;
+		var pitch = note.pitch;
 		if (note.accidental) {
 			switch(note.accidental) { // change that pitch (not other octaves) for the rest of the bar
 				case "sharp":
@@ -705,26 +706,18 @@ var pitchesToPerc = require('./pitches-to-perc');
 					barAccidentals[pitch]=2; break;
 				case "dblflat":
 					barAccidentals[pitch]=-2; break;
+				case "quartersharp":
+					barAccidentals[pitch]=0.25; break;
+				case "quarterflat":
+					barAccidentals[pitch]=-0.25; break;
 			}
 		}
 
 		var actualPitch = extractOctave(pitch) *12 + scale[extractNote(pitch)] + 60;
 
 		if ( barAccidentals[pitch]!==undefined) {
-			// If there is no accidental in the key signature then the accidental is taken at face value.
-			// If there is a sharp in the key sig and a sharp is given, then it is ignored. Ditto with flat.
-			// If there is a sharp or flat in the key sig and natural is given, then there is a half pitch alteration.
-			var keySigAlteration = accidentals[extractNote(pitch)];
-			var barAccidental = barAccidentals[pitch];
-			var alteration = 0;
-			if (keySigAlteration === -1) {
-				alteration = barAccidental + 1;
-			} else if (keySigAlteration === 0) {
-				alteration = barAccidental;
-			} else if (keySigAlteration === 1) {
-				alteration = barAccidental - 1;
-			}
-			actualPitch += keySigAlteration + alteration;
+			// An accidental is always taken at face value and supersedes the key signature.
+			actualPitch += barAccidentals[pitch];
 		} else { // use normal accidentals
 			actualPitch +=  accidentals[extractNote(pitch)];
 		}
@@ -737,7 +730,14 @@ var pitchesToPerc = require('./pitches-to-perc');
 		if (!elem.accidentals) return accidentals;
 		for (var i = 0; i < elem.accidentals.length; i++) {
 			var acc = elem.accidentals[i];
-			var d = (acc.acc === "sharp") ? 1 : (acc.acc === "natural") ?0 : -1;
+			var d;
+			switch (acc.acc) {
+				case "flat": d = -1; break;
+				case "quarterflat": d = -0.25; break;
+				case "sharp": d = 1; break;
+				case "quartersharp": d = 0.25; break;
+				default: d = 0; break;
+			}
 
 			var lowercase = acc.note.toLowerCase();
 			var note = extractNote(lowercase.charCodeAt(0)-'c'.charCodeAt(0));
@@ -759,8 +759,9 @@ var pitchesToPerc = require('./pitches-to-perc');
 
 		for (g = 0; g < graces.length; g++) {
 			grace = graces[g];
-			var pitch = adjustPitch(grace);
-			ret.push({ pitch: pitch, duration: grace.duration*multiplier });
+			var pitch = { pitch: adjustPitch(grace), duration: grace.duration*multiplier };
+			pitch = adjustForMicroTone(pitch);
+			ret.push(pitch);
 		}
 		return ret;
 	}
@@ -780,6 +781,21 @@ var pitchesToPerc = require('./pitches-to-perc');
 			start += gp.duration;
 		}
 		return midiGrace;
+	}
+
+	var quarterToneFactor = 0.02930223664349;
+	function adjustForMicroTone(description) {
+		// if the pitch is not a whole number then make it a whole number and add a tuning factor
+		var pitch = ''+description.pitch;
+		if (pitch.indexOf(".75") >= 0) {
+			description.pitch = Math.round(description.pitch);
+			description.warp = 1 - quarterToneFactor;
+		} else if (pitch.indexOf(".25") >= 0) {
+			description.pitch = Math.round(description.pitch);
+			description.warp = 1 + quarterToneFactor;
+		}
+
+		return description;
 	}
 
 	function extractOctave(pitch) {

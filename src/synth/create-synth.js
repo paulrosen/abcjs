@@ -244,7 +244,7 @@ function CreateSynth() {
 			noteMapTracks.forEach(function(noteMap, trackNumber) {
 				var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
 				noteMap.forEach(function(note) {
-					var key = note.instrument + ':' + note.pitch + ':' +note.volume + ':' + Math.round((note.end-note.start)*1000)/1000 + ':' + panDistance + ':' + tempoMultiplier;
+					var key = note.instrument + ':' + note.pitch + ':' +note.volume + ':' + Math.round((note.end-note.start)*1000)/1000 + ':' + panDistance + ':' + tempoMultiplier + ':' + note.warp;
 					if (!uniqueSounds[key])
 						uniqueSounds[key] = [];
 					uniqueSounds[key].push(note.start);
@@ -257,7 +257,8 @@ function CreateSynth() {
 			for (var key2 = 0; key2 < Object.keys(uniqueSounds).length; key2++) {
 				var k = Object.keys(uniqueSounds)[key2];
 				var parts = k.split(":");
-				parts = { instrument: parts[0], pitch: parseInt(parts[1],10), volume: parseInt(parts[2], 10), len: parseFloat(parts[3]), pan: parseFloat(parts[4]), tempoMultiplier: parseFloat(parts[5])};
+				var warp = parts[6] !== "undefined" ? parseFloat(parts[6]) : undefined;
+ 				parts = { instrument: parts[0], pitch: parseInt(parts[1],10), volume: parseInt(parts[2], 10), len: parseFloat(parts[3]), pan: parseFloat(parts[4]), tempoMultiplier: parseFloat(parts[5]), warp: warp};
 				allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd/1000));
 			}
 			self.audioBuffers = [audioBuffer];

@@ -111,6 +111,8 @@ var animation = __webpack_require__(/*! ./src/api/abc_animation */ "./src/api/ab
 
 var tuneBook = __webpack_require__(/*! ./src/api/abc_tunebook */ "./src/api/abc_tunebook.js");
 
+var sequence = __webpack_require__(/*! ./src/synth/abc_midi_sequencer */ "./src/synth/abc_midi_sequencer.js");
+
 var abcjs = {};
 abcjs.signature = "abcjs-basic v" + version;
 Object.keys(animation).forEach(function (key) {
@@ -159,7 +161,8 @@ abcjs.synth = {
   activeAudioContext: activeAudioContext,
   supportsAudio: supportsAudio,
   playEvent: playEvent,
-  getMidiFile: getMidiFile
+  getMidiFile: getMidiFile,
+  sequence: sequence
 };
 abcjs['Editor'] = __webpack_require__(/*! ./src/edit/abc_editor */ "./src/edit/abc_editor.js");
 abcjs['EditArea'] = __webpack_require__(/*! ./src/edit/abc_editarea */ "./src/edit/abc_editarea.js");
@@ -3227,8 +3230,24 @@ var Parse = function Parse() {
   };
 
   var parseLine = function parseLine(line) {
+    if (parseCommon.startsWith(line, '%%')) {
+      var err = parseDirective.addDirective(line.substring(2));
+      if (err) warn(err, line, 2);
+      return;
+    }
+
+    var i = line.indexOf('%');
+    if (i >= 0) line = line.substring(0, i);
+    line = line.replace(/\s+$/, '');
+    if (line.length === 0) return;
+
+    if (line.length < 2 || line.charAt(1) !== ':') {
+      music.parseMusic(line);
+      return;
+    }
+
     var ret = header.parseHeader(line);
-    if (ret.regular) music.parseMusic(ret.str);
+    if (ret.regular) music.parseMusic(line);
     if (ret.newline) music.startNewLine();
     if (ret.words) addWords(tuneBuilder.getCurrentVoice(), line.substring(2));
     if (ret.symbols) addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
@@ -3315,11 +3334,9 @@ var Parse = function Parse() {
     }
 
     header.reset(tokenizer, warn, multilineVars, tune); // Take care of whatever line endings come our way
+    // Tack on newline temporarily to make the last line continuation work
 
-    strTune = parseCommon.gsub(strTune, '\r\n', '\n');
-    strTune = parseCommon.gsub(strTune, '\r', '\n');
-    strTune += '\n'; // Tacked on temporarily to make the last line continuation work
-    // get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
+    strTune = strTune.replace(/\r\n?/g, '\n') + '\n'; // get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
 
     var arr = strTune.split("\n\\");
 
@@ -3335,8 +3352,7 @@ var Parse = function Parse() {
     }
 
     var continuationReplacement = function continuationReplacement(all, backslash, comment) {
-      var spaces = "                                                                                                                                                                                                     ";
-      var padding = comment ? spaces.substring(0, comment.length) : "";
+      var padding = comment ? Array(comment.length + 1).join(' ') : "";
       return backslash + " \x12" + padding;
     };
 
@@ -3386,32 +3402,35 @@ var Parse = function Parse() {
 
         multilineVars.iChar += line.length + 1;
       });
-      var ph = 11 * 72;
-      var pl = 8.5 * 72;
-
-      switch (multilineVars.papersize) {
-        //case "letter": ph = 11*72; pl = 8.5*72; break;
-        case "legal":
-          ph = 14 * 72;
-          pl = 8.5 * 72;
-          break;
-
-        case "A4":
-          ph = 11.7 * 72;
-          pl = 8.3 * 72;
-          break;
-      }
-
-      if (multilineVars.landscape) {
-        var x = ph;
-        ph = pl;
-        pl = x;
-      }
-
-      multilineVars.openSlurs = tuneBuilder.cleanUp(pl, ph, multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
+      multilineVars.openSlurs = tuneBuilder.cleanUp(multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
     } catch (err) {
       if (err !== "normal_abort") throw err;
     }
+
+    var ph = 11 * 72;
+    var pl = 8.5 * 72;
+
+    switch (multilineVars.papersize) {
+      //case "letter": ph = 11*72; pl = 8.5*72; break;
+      case "legal":
+        ph = 14 * 72;
+        pl = 8.5 * 72;
+        break;
+
+      case "A4":
+        ph = 11.7 * 72;
+        pl = 8.3 * 72;
+        break;
+    }
+
+    if (multilineVars.landscape) {
+      var x = ph;
+      ph = pl;
+      pl = x;
+    }
+
+    if (!tune.formatting.pagewidth) tune.formatting.pagewidth = pl;
+    if (!tune.formatting.pageheight) tune.formatting.pageheight = ph;
 
     if (switches.hint_measures) {
       addHintMeasures();
@@ -5520,138 +5539,111 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
   };
 
   this.parseHeader = function (line) {
-    if (parseCommon.startsWith(line, '%%')) {
-      var err = parseDirective.addDirective(line.substring(2));
-      if (err) warn(err, line, 2);
-      return {};
+    var nextLine = "";
+
+    if (line.indexOf('\x12') >= 0) {
+      nextLine = line.substring(line.indexOf('\x12') + 1);
+      line = line.substring(0, line.indexOf('\x12')); //This handles a continuation mark on a header field
     }
 
-    var i = line.indexOf('%');
-    if (i >= 0) line = line.substring(0, i);
-    line = line.replace(/\s+$/, '');
-    if (line.length === 0) return {};
+    var field = metaTextHeaders[line.charAt(0)];
 
-    if (line.length >= 2) {
-      if (line.charAt(1) === ':') {
-        var nextLine = "";
+    if (field !== undefined) {
+      if (field === 'unalignedWords') tuneBuilder.addMetaTextArray(field, parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))));else tuneBuilder.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+      return {};
+    } else {
+      var startChar = multilineVars.iChar;
+      var endChar = startChar + line.length;
 
-        if (line.indexOf('\x12') >= 0 && line.charAt(0) !== 'w') {
-          // w: is the only header field that can have a continuation.
-          nextLine = line.substring(line.indexOf('\x12') + 1);
-          line = line.substring(0, line.indexOf('\x12')); //This handles a continuation mark on a header field
-        }
+      switch (line.charAt(0)) {
+        case 'H':
+          tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+          multilineVars.is_in_history = true;
+          break;
 
-        var field = metaTextHeaders[line.charAt(0)];
+        case 'K':
+          // since the key is the last thing that can happen in the header, we can resolve the tempo now
+          this.resolveTempo();
+          var result = parseKeyVoice.parseKey(line.substring(2));
 
-        if (field !== undefined) {
-          if (field === 'unalignedWords') tuneBuilder.addMetaTextArray(field, parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))));else tuneBuilder.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
-          return {};
-        } else {
-          var startChar = multilineVars.iChar;
-          var endChar = startChar + line.length;
-
-          switch (line.charAt(0)) {
-            case 'H':
-              tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
-              multilineVars.is_in_history = true;
-              break;
-
-            case 'K':
-              // since the key is the last thing that can happen in the header, we can resolve the tempo now
-              this.resolveTempo();
-              var result = parseKeyVoice.parseKey(line.substring(2));
-
-              if (!multilineVars.is_in_header && tuneBuilder.hasBeginMusic()) {
-                if (result.foundClef) tuneBuilder.appendStartingElement('clef', startChar, endChar, multilineVars.clef);
-                if (result.foundKey) tuneBuilder.appendStartingElement('key', startChar, endChar, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
-              }
-
-              multilineVars.is_in_header = false; // The first key signifies the end of the header.
-
-              break;
-
-            case 'L':
-              this.setDefaultLength(line, 2, line.length);
-              break;
-
-            case 'M':
-              multilineVars.origMeter = multilineVars.meter = this.setMeter(line.substring(2));
-              break;
-
-            case 'P':
-              // TODO-PER: There is more to do with parts, but the writer doesn't care.
-              if (multilineVars.is_in_header) tuneBuilder.addMetaText("partOrder", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));else multilineVars.partForNextLine = {
-                title: tokenizer.translateString(tokenizer.stripComment(line.substring(2))),
-                startChar: startChar,
-                endChar: endChar
-              };
-              break;
-
-            case 'Q':
-              var tempo = this.setTempo(line, 2, line.length);
-              if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;else if (tempo.type === 'immediate') {
-                if (!tune.metaText.tempo) tune.metaText.tempo = tempo.tempo;else multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo];
-              }
-              break;
-
-            case 'T':
-              this.setTitle(line.substring(2));
-              break;
-
-            case 'U':
-              this.addUserDefinition(line, 2, line.length);
-              break;
-
-            case 'V':
-              parseKeyVoice.parseVoice(line, 2, line.length);
-              if (!multilineVars.is_in_header) return {
-                newline: true
-              };
-              break;
-
-            case 's':
-              return {
-                symbols: true
-              };
-
-            case 'w':
-              return {
-                words: true
-              };
-
-            case 'X':
-              break;
-
-            case 'E':
-            case 'm':
-              warn("Ignored header", line, 0);
-              break;
-
-            default:
-              // It wasn't a recognized header value, so parse it as music.
-              if (nextLine.length) nextLine = "\x12" + nextLine; //parseRegularMusicLine(line+nextLine);
-              //nextLine = "";
-
-              return {
-                regular: true,
-                str: line + nextLine
-              };
+          if (!multilineVars.is_in_header && tuneBuilder.hasBeginMusic()) {
+            if (result.foundClef) tuneBuilder.appendStartingElement('clef', startChar, endChar, multilineVars.clef);
+            if (result.foundKey) tuneBuilder.appendStartingElement('key', startChar, endChar, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
           }
-        }
 
-        if (nextLine.length > 0) return {
-          recurse: true,
-          str: nextLine
-        };
-        return {};
+          multilineVars.is_in_header = false; // The first key signifies the end of the header.
+
+          break;
+
+        case 'L':
+          this.setDefaultLength(line, 2, line.length);
+          break;
+
+        case 'M':
+          multilineVars.origMeter = multilineVars.meter = this.setMeter(line.substring(2));
+          break;
+
+        case 'P':
+          // TODO-PER: There is more to do with parts, but the writer doesn't care.
+          if (multilineVars.is_in_header) tuneBuilder.addMetaText("partOrder", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));else multilineVars.partForNextLine = {
+            title: tokenizer.translateString(tokenizer.stripComment(line.substring(2))),
+            startChar: startChar,
+            endChar: endChar
+          };
+          break;
+
+        case 'Q':
+          var tempo = this.setTempo(line, 2, line.length);
+          if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;else if (tempo.type === 'immediate') {
+            if (!tune.metaText.tempo) tune.metaText.tempo = tempo.tempo;else multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo];
+          }
+          break;
+
+        case 'T':
+          this.setTitle(line.substring(2));
+          break;
+
+        case 'U':
+          this.addUserDefinition(line, 2, line.length);
+          break;
+
+        case 'V':
+          parseKeyVoice.parseVoice(line, 2, line.length);
+          if (!multilineVars.is_in_header) return {
+            newline: true
+          };
+          break;
+
+        case 's':
+          return {
+            symbols: true
+          };
+
+        case 'w':
+          return {
+            words: true
+          };
+
+        case 'X':
+          break;
+
+        case 'E':
+        case 'm':
+          warn("Ignored header", line, 0);
+          break;
+
+        default:
+          return {
+            regular: true
+          };
       }
-    } // If we got this far, we have a regular line of mulsic
+    }
 
-
-    return {
-      regular: true,
-      str: line
+    if (nextLine.length > 0) return {
+      recurse: true,
+      str: nextLine
     };
+    return {};
   };
 };
 
@@ -6222,7 +6214,13 @@ var parseKeyVoice = {};
     }
 
     var tokens = tokenizer.tokenize(str, 0, str.length);
-    var ret = {}; // first the key
+    var ret = {}; // Be sure that a key was passed in
+
+    if (tokens.length === 0) {
+      warn("Must pass in key signature.", str, 0);
+      return ret;
+    } // first the key
+
 
     switch (tokens[0].token) {
       case 'HP':
@@ -7448,7 +7446,6 @@ MusicParser.prototype.parseMusic = function (line) {
 
               if (core.accidental !== undefined) el.pitches[0].accidental = core.accidental;
               el.pitches[0].pitch = core.pitch;
-              if (core.soundPitch || core.soundPitch === 0) el.pitches[0].soundPitch = core.soundPitch;
               if (core.midipitch || core.midipitch === 0) el.pitches[0].midipitch = core.midipitch;
               if (core.endSlur !== undefined) el.pitches[0].endSlur = core.endSlur;
               if (core.endTie !== undefined) el.pitches[0].endTie = core.endTie;
@@ -8146,9 +8143,7 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
             }
 
             if (tune.formatting && tune.formatting.midi && tune.formatting.midi.drummap) el.midipitch = tune.formatting.midi.drummap[key];
-          } else if (multilineVars.clef && multilineVars.clef.type.indexOf('-') >= 0) {
-            el.soundPitch = el.pitch - 7;
-          } else if (multilineVars.clef && multilineVars.clef.type.indexOf('+') >= 0) el.soundPitch = el.pitch + 7;
+          }
         } else if (isComplete(state)) {
           el.endChar = index;
           return el;
@@ -8159,7 +8154,6 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
       case ',':
         if (state === 'octave') {
           el.pitch -= 7;
-          if (el.soundPitch !== undefined) el.soundPitch -= 7;
         } else if (isComplete(state)) {
           el.endChar = index;
           return el;
@@ -8170,7 +8164,6 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
       case '\'':
         if (state === 'octave') {
           el.pitch += 7;
-          if (el.soundPitch !== undefined) el.soundPitch += 7;
         } else if (isComplete(state)) {
           el.endChar = index;
           return el;
@@ -10241,7 +10234,7 @@ var TuneBuilder = function TuneBuilder(tune) {
     }
   }
 
-  this.cleanUp = function (defWidth, defLength, barsperstaff, staffnonote, currSlur) {
+  this.cleanUp = function (barsperstaff, staffnonote, currSlur) {
     this.closeLine(); // Close the last line.
 
     delete tune.runningFonts; // If the tempo was created with a string like "Allegro", then the duration of a beat needs to be set at the last moment, when it is most likely known.
@@ -10570,10 +10563,8 @@ var TuneBuilder = function TuneBuilder(tune) {
           }
         }
       }
-    }
+    } // Remove temporary variables that the outside doesn't need to know about
 
-    if (!tune.formatting.pagewidth) tune.formatting.pagewidth = defWidth;
-    if (!tune.formatting.pageheight) tune.formatting.pageheight = defLength; // Remove temporary variables that the outside doesn't need to know about
 
     delete tune.staffNum;
     delete tune.voiceNum;
@@ -12411,6 +12402,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
           duration: durationRounded(note.duration),
           instrument: currentInstrument
         };
+        p = adjustForMicroTone(p);
 
         if (elem.gracenotes) {
           p.duration = p.duration / 2;
@@ -12462,7 +12454,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
   function adjustPitch(note) {
     if (note.midipitch !== undefined) return note.midipitch; // The pitch might already be known, for instance if there is a drummap.
 
-    var pitch = note.soundPitch || note.soundPitch === 0 ? note.soundPitch : note.pitch;
+    var pitch = note.pitch;
 
     if (note.accidental) {
       switch (note.accidental) {
@@ -12486,28 +12478,22 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
         case "dblflat":
           barAccidentals[pitch] = -2;
           break;
+
+        case "quartersharp":
+          barAccidentals[pitch] = 0.25;
+          break;
+
+        case "quarterflat":
+          barAccidentals[pitch] = -0.25;
+          break;
       }
     }
 
     var actualPitch = extractOctave(pitch) * 12 + scale[extractNote(pitch)] + 60;
 
     if (barAccidentals[pitch] !== undefined) {
-      // If there is no accidental in the key signature then the accidental is taken at face value.
-      // If there is a sharp in the key sig and a sharp is given, then it is ignored. Ditto with flat.
-      // If there is a sharp or flat in the key sig and natural is given, then there is a half pitch alteration.
-      var keySigAlteration = accidentals[extractNote(pitch)];
-      var barAccidental = barAccidentals[pitch];
-      var alteration = 0;
-
-      if (keySigAlteration === -1) {
-        alteration = barAccidental + 1;
-      } else if (keySigAlteration === 0) {
-        alteration = barAccidental;
-      } else if (keySigAlteration === 1) {
-        alteration = barAccidental - 1;
-      }
-
-      actualPitch += keySigAlteration + alteration;
+      // An accidental is always taken at face value and supersedes the key signature.
+      actualPitch += barAccidentals[pitch];
     } else {
       // use normal accidentals
       actualPitch += accidentals[extractNote(pitch)];
@@ -12523,7 +12509,30 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
 
     for (var i = 0; i < elem.accidentals.length; i++) {
       var acc = elem.accidentals[i];
-      var d = acc.acc === "sharp" ? 1 : acc.acc === "natural" ? 0 : -1;
+      var d;
+
+      switch (acc.acc) {
+        case "flat":
+          d = -1;
+          break;
+
+        case "quarterflat":
+          d = -0.25;
+          break;
+
+        case "sharp":
+          d = 1;
+          break;
+
+        case "quartersharp":
+          d = 0.25;
+          break;
+
+        default:
+          d = 0;
+          break;
+      }
+
       var lowercase = acc.note.toLowerCase();
       var note = extractNote(lowercase.charCodeAt(0) - 'c'.charCodeAt(0));
       accidentals[note] += d;
@@ -12547,11 +12556,12 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
 
     for (g = 0; g < graces.length; g++) {
       grace = graces[g];
-      var pitch = adjustPitch(grace);
-      ret.push({
-        pitch: pitch,
+      var pitch = {
+        pitch: adjustPitch(grace),
         duration: grace.duration * multiplier
-      });
+      };
+      pitch = adjustForMicroTone(pitch);
+      ret.push(pitch);
     }
 
     return ret;
@@ -12583,6 +12593,23 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
     }
 
     return midiGrace;
+  }
+
+  var quarterToneFactor = 0.02930223664349;
+
+  function adjustForMicroTone(description) {
+    // if the pitch is not a whole number then make it a whole number and add a tuning factor
+    var pitch = '' + description.pitch;
+
+    if (pitch.indexOf(".75") >= 0) {
+      description.pitch = Math.round(description.pitch);
+      description.warp = 1 - quarterToneFactor;
+    } else if (pitch.indexOf(".25") >= 0) {
+      description.pitch = Math.round(description.pitch);
+      description.warp = 1 + quarterToneFactor;
+    }
+
+    return description;
   }
 
   function extractOctave(pitch) {
@@ -14311,6 +14338,7 @@ var createNoteMap = function createNoteMap(sequence) {
               volume: ev.volume
             };
             if (ev.style) obj.style = ev.style;
+            if (ev.warp) obj.warp = ev.warp;
             map[i].push(obj);
           }
 
@@ -14825,7 +14853,7 @@ function CreateSynth() {
       noteMapTracks.forEach(function (noteMap, trackNumber) {
         var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
         noteMap.forEach(function (note) {
-          var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + Math.round((note.end - note.start) * 1000) / 1000 + ':' + panDistance + ':' + tempoMultiplier;
+          var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + Math.round((note.end - note.start) * 1000) / 1000 + ':' + panDistance + ':' + tempoMultiplier + ':' + note.warp;
           if (!uniqueSounds[key]) uniqueSounds[key] = [];
           uniqueSounds[key].push(note.start);
         });
@@ -14837,13 +14865,15 @@ function CreateSynth() {
       for (var key2 = 0; key2 < Object.keys(uniqueSounds).length; key2++) {
         var k = Object.keys(uniqueSounds)[key2];
         var parts = k.split(":");
+        var warp = parts[6] !== "undefined" ? parseFloat(parts[6]) : undefined;
         parts = {
           instrument: parts[0],
           pitch: parseInt(parts[1], 10),
           volume: parseInt(parts[2], 10),
           len: parseFloat(parts[3]),
           pan: parseFloat(parts[4]),
-          tempoMultiplier: parseFloat(parts[5])
+          tempoMultiplier: parseFloat(parts[5]),
+          warp: warp
         };
         allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd / 1000));
       }
@@ -15109,7 +15139,7 @@ var tunebook = __webpack_require__(/*! ../api/abc_tunebook */ "./src/api/abc_tun
 
 var midiCreate = __webpack_require__(/*! ../midi/abc_midi_create */ "./src/midi/abc_midi_create.js");
 
-var getMidiFile = function getMidiFile(abcString, options) {
+var getMidiFile = function getMidiFile(source, options) {
   var params = {};
 
   if (options) {
@@ -15122,7 +15152,7 @@ var getMidiFile = function getMidiFile(abcString, options) {
 
   params.generateInline = false;
 
-  function callback(div, tune, index, abcString) {
+  function callback(div, tune, index) {
     var downloadMidi = midiCreate(tune, params);
 
     switch (params.midiOutputType) {
@@ -15150,7 +15180,7 @@ var getMidiFile = function getMidiFile(abcString, options) {
     }
   }
 
-  return tunebook.renderEngine(callback, "*", abcString, params);
+  if (typeof source === "string") return tunebook.renderEngine(callback, "*", source, params);else return callback(null, source, 0);
 };
 
 function isFunction(functionToCheck) {
@@ -15605,7 +15635,12 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
   source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
 
   source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
-  source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec); // connect all the nodes
+  source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
+
+  if (sound.warp) {
+    source.playbackRate.value = sound.warp;
+  } // connect all the nodes
+
 
   if (source.panNode) {
     source.panNode.connect(offlineCtx.destination);
@@ -25399,7 +25434,7 @@ THE SOFTWARE.
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-var version = '6.0.0-beta.30';
+var version = '6.0.0-beta.31';
 module.exports = version;
 
 /***/ })

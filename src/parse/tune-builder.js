@@ -156,7 +156,7 @@ var TuneBuilder = function(tune) {
 		}
 	}
 
-	this.cleanUp = function(defWidth, defLength, barsperstaff, staffnonote, currSlur) {
+	this.cleanUp = function(barsperstaff, staffnonote, currSlur) {
 		this.closeLine();	// Close the last line.
 		delete tune.runningFonts;
 
@@ -460,11 +460,6 @@ var TuneBuilder = function(tune) {
 				}
 			}
 		}
-
-		if (!tune.formatting.pagewidth)
-			tune.formatting.pagewidth = defWidth;
-		if (!tune.formatting.pageheight)
-			tune.formatting.pageheight = defLength;
 
 		// Remove temporary variables that the outside doesn't need to know about
 		delete tune.staffNum;

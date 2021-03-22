@@ -15,12 +15,13 @@
 }
 
 .abcjs-inline-audio .abcjs-btn {
+	display: inherit;
 	width: 28px;
 	height: 26px;
 	margin-right: 2px;
 	padding: 3px 4px;
 
-	background: none;
+	background: none !important;
 	border: 1px solid transparent;
 	box-sizing: border-box;
 }
@@ -70,7 +71,7 @@
 }
 
 .abcjs-inline-audio .abcjs-midi-start.abcjs-pushed .abcjs-pause-svg {
-	display: inherit;
+	display: block;
 }
 
 .abcjs-inline-audio .abcjs-midi-progress-background {

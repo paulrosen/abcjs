@@ -99,7 +99,7 @@
 				// The beats are 0.25 long so the amount of swing needs to be between 0 and 0.125,
 				// but practically it needs to be a bit smaller so that it doesn't sound like a grace note.
 				var swing = 0.1 - 0.1 / document.getElementById("swing").value;
-				document.getElementById("coefficient").value = swing;
+				document.getElementById("coefficient").innerText = swing;
 				var track = tracks[0];
 				for (var i = 0; i < track.length; i++) {
 					var event = track[i];
@@ -124,8 +124,8 @@
     <main> 
       <p>Demonstration of changing the synth on the fly if you want to make adjustments.</p>
       <p>This example adds some "swing" to the tune.</p>
-      <label>Amount of swing (0 to 6): <input id="swing" type="number" min="0" max="6" value="2"></label>
-      <label>Swing coefficient: <input type="text" readonly id="coefficient"></label>
+        <p><label>Amount of swing (1 to 6): <input id="swing" type="number" min="1" max="6" value="2"></label></p>
+        <p><label>Calculated swing coefficient:</label> <code id="coefficient">??</code></p>
       <div id="paper"></div>
       <p class="suspend-explanation">Browsers won't allow audio to work unless the audio is started in response to a user action. This prevents auto-playing web sites. Therefore, the
         following button is needed to do the initialization:</p>
