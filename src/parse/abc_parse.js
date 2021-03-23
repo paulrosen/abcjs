@@ -534,18 +534,8 @@ var Parse = function() {
 					throw "normal_abort";
 				if (switches.stop_on_warning && multilineVars.warnings)
 					throw "normal_abort";
-				if (multilineVars.inTextBlock) {
-					if (parseCommon.startsWith(line, "%%endtext")) {
-						tuneBuilder.addText(multilineVars.textBlock);
-						multilineVars.inTextBlock = false;
-					}
-					else {
-						if (parseCommon.startsWith(line, "%%"))
-							multilineVars.textBlock += line.substring(2) + "\n";
-						else
-							multilineVars.textBlock += line + "\n";
-					}
-				} else if (multilineVars.inPsBlock) {
+
+				if (multilineVars.inPsBlock) {
 					if (parseCommon.startsWith(line, "%%endps")) {
 						// Just ignore postscript
 						multilineVars.inPsBlock = false;
