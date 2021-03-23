@@ -535,22 +535,13 @@ var Parse = function() {
 				if (switches.stop_on_warning && multilineVars.warnings)
 					throw "normal_abort";
 
-				if (multilineVars.inPsBlock) {
-					if (parseCommon.startsWith(line, "%%endps")) {
-						// Just ignore postscript
-						multilineVars.inPsBlock = false;
-					}
-					else
-						multilineVars.textBlock += ' ' + line;
-				} else {
-					var wasInHeader = multilineVars.is_in_header;
-					parseLine(line);
-					if (wasInHeader && !multilineVars.is_in_header) {
-						tuneBuilder.setRunningFont("annotationfont", multilineVars.annotationfont);
-						tuneBuilder.setRunningFont("gchordfont", multilineVars.gchordfont);
-						tuneBuilder.setRunningFont("tripletfont", multilineVars.tripletfont);
-						tuneBuilder.setRunningFont("vocalfont", multilineVars.vocalfont);
-					}
+				var wasInHeader = multilineVars.is_in_header;
+				parseLine(line);
+				if (wasInHeader && !multilineVars.is_in_header) {
+					tuneBuilder.setRunningFont("annotationfont", multilineVars.annotationfont);
+					tuneBuilder.setRunningFont("gchordfont", multilineVars.gchordfont);
+					tuneBuilder.setRunningFont("tripletfont", multilineVars.tripletfont);
+					tuneBuilder.setRunningFont("vocalfont", multilineVars.vocalfont);
 				}
 				line = tokenizer.nextLine();
 			}

@@ -710,6 +710,7 @@ var parseDirective = {};
 		restOfString = tokenizer.stripComment(restOfString);
 		var cmd = tokens.shift().token.toLowerCase();
 		var scratch = "";
+		var line;
 		switch (cmd)
 		{
 			// The following directives were added to abc_parser_lint, but haven't been implemented here.
@@ -872,7 +873,7 @@ var parseDirective = {};
 				multilineVars.currBarNumber = tuneBuilder.setBarNumberImmediate(tokens[0].intt);
 				break;
 			case "begintext":
-				var line = tokenizer.nextLine()
+				line = tokenizer.nextLine()
 				while(line && line.indexOf('%%endtext') !== 0) {
 					if (parseCommon.startsWith(line, "%%"))
 						multilineVars.textBlock += line.substring(2) + "\n";
@@ -886,7 +887,10 @@ var parseDirective = {};
 				multilineVars.continueall = true;
 				break;
 			case "beginps":
-				multilineVars.inPsBlock = true;
+				line = tokenizer.nextLine()
+				while(line && line.indexOf('%%endps') !== 0) {
+					tokenizer.nextLine()
+				}
 				warn("Postscript ignored", str, 0);
 				break;
 			case "deco":
