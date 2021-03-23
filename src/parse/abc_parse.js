@@ -501,7 +501,7 @@ var Parse = function() {
 		var lines = strTune.split('\n')
 		if (parseCommon.last(lines).length === 0)	// remove the blank line we added above.
 			lines.pop();
-		tokenizer = new Tokenizer(lines);
+		tokenizer = new Tokenizer(lines, multilineVars);
 		header = new ParseHeader(tokenizer, warn, multilineVars, tune, tuneBuilder);
 		music = new ParseMusic(tokenizer, warn, multilineVars, tune, tuneBuilder, header);
 
@@ -534,13 +534,7 @@ var Parse = function() {
 					throw "normal_abort";
 				if (switches.stop_on_warning && multilineVars.warnings)
 					throw "normal_abort";
-				if (multilineVars.is_in_history) {
-					if (line.charAt(1) === ':') {
-						multilineVars.is_in_history = false;
-						parseLine(line);
-					} else
-						tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
-				} else if (multilineVars.inTextBlock) {
+				if (multilineVars.inTextBlock) {
 					if (parseCommon.startsWith(line, "%%endtext")) {
 						tuneBuilder.addText(multilineVars.textBlock);
 						multilineVars.inTextBlock = false;
@@ -568,7 +562,6 @@ var Parse = function() {
 						tuneBuilder.setRunningFont("vocalfont", multilineVars.vocalfont);
 					}
 				}
-				multilineVars.iChar += line.length + 1;
 				line = tokenizer.nextLine();
 			}
 

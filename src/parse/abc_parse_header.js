@@ -493,7 +493,12 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 			{
 				case  'H':
 					tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
-					multilineVars.is_in_history = true;
+					line = tokenizer.peekLine()
+					while (line && line.charAt(1) !== ':') {
+						tokenizer.nextLine()
+						tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
+						line = tokenizer.peekLine()
+					}
 					break;
 				case  'K':
 					// since the key is the last thing that can happen in the header, we can resolve the tempo now
