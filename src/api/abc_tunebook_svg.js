@@ -243,7 +243,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
         abcParser.parse(abcString, ret.revisedParams);
         tune = abcParser.getTune();
     }
-    if (!params.oneSvgPerLine || ret.tune.lines.length < 2)
+    if (!params.oneSvgPerLine || tune.lines.length < 2)
         renderOne(div, tune, ret.revisedParams, tuneNumber);
     else
         renderEachLineSeparately(div, tune, ret.revisedParams, tuneNumber);
