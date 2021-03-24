@@ -1164,7 +1164,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
     tune = abcParser.getTune();
   }
 
-  if (!params.oneSvgPerLine || ret.tune.lines.length < 2) renderOne(div, tune, ret.revisedParams, tuneNumber);else renderEachLineSeparately(div, tune, ret.revisedParams, tuneNumber);
+  if (!params.oneSvgPerLine || tune.lines.length < 2) renderOne(div, tune, ret.revisedParams, tuneNumber);else renderEachLineSeparately(div, tune, ret.revisedParams, tuneNumber);
   tune.explanation = ret.explanation;
   return tune;
 }
@@ -25434,7 +25434,7 @@ THE SOFTWARE.
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-var version = '6.0.0-beta.31';
+var version = '6.0.0-beta.32';
 module.exports = version;
 
 /***/ })
