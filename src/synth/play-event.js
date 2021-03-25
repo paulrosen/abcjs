@@ -1,5 +1,6 @@
 var SynthSequence = require('./synth-sequence');
 var CreateSynth = require('./create-synth');
+var activeAudioContext = require("./active-audio-context");
 
 function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
 	var sequence = new SynthSequence();
@@ -17,6 +18,17 @@ function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
 		sequence.appendNote(trackNum, note.pitch, note.duration, note.volume);
 	}
 
+	var ac = activeAudioContext();
+	if (ac.state === "suspended") {
+		return ac.resume().then(function () {
+			return doPlay(sequence, millisecondsPerMeasure);
+		});
+	} else {
+		return doPlay(sequence, millisecondsPerMeasure);
+	}
+}
+
+function doPlay(sequence, millisecondsPerMeasure) {
 	var buffer = new CreateSynth();
 	return buffer.init({
 		sequence: sequence,
@@ -24,7 +36,9 @@ function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
 	}).then(function () {
 		return buffer.prime();
 	}).then(function () {
-		return buffer.start();
+		buffer.start();
+		return Promise.resolve();
 	});
 }
+
 module.exports = playEvent;
