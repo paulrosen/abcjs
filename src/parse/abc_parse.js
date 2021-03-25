@@ -192,7 +192,7 @@ var Parse = function() {
 		var clean_line = encode(line.substring(0, col_num)) +
 			'<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' +
 			encode(line.substring(col_num+1));
-		addWarning("Music Line:" + tuneBuilder.getNumLines() + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
+		addWarning("Music Line:" + tokenizer.lineIndex + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
 		addWarningObject({message:str, line:line, startChar: multilineVars.iChar + col_num, column: col_num});
 	};
 

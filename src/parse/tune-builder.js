@@ -3,7 +3,7 @@ var parseCommon = require('../parse/abc_common');
 
 var TuneBuilder = function(tune) {
 	var self = this;
-	
+
 	this.reset = function () {
 		tune.version = "1.1.0";
 		tune.media = "screen";
@@ -655,10 +655,6 @@ var TuneBuilder = function(tune) {
 			// We didn't see either that type or a note, so replace the element to the staff.
 			tune.lines[tune.lineNum].staff[tune.staffNum][type] = hashParams2;
 		}
-	};
-
-	this.getNumLines = function() {
-		return tune.lines.length;
 	};
 
 	this.pushLine = function(hash) {
