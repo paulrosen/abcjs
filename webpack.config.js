@@ -54,7 +54,7 @@ module.exports = (env = {} , argv) => {
       ...defaults(argv, 'basic')
     }, {
       name: 'plugin',
-      entry: `./static-wrappers/plugin.js`,
+      entry: `./plugin.js`,
       ...defaults(argv, 'plugin')
     }
   ]
