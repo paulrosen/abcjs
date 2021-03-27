@@ -873,15 +873,16 @@ var parseDirective = {};
 				multilineVars.currBarNumber = tuneBuilder.setBarNumberImmediate(tokens[0].intt);
 				break;
 			case "begintext":
+				var textBlock = '';
 				line = tokenizer.nextLine()
 				while(line && line.indexOf('%%endtext') !== 0) {
 					if (parseCommon.startsWith(line, "%%"))
-						multilineVars.textBlock += line.substring(2) + "\n";
+						textBlock += line.substring(2) + "\n";
 					else
-						multilineVars.textBlock += line + "\n";
+						textBlock += line + "\n";
 					line = tokenizer.nextLine()
 				}
-				tuneBuilder.addText(multilineVars.textBlock);
+				tuneBuilder.addText(textBlock);
 				break;
 			case "continueall":
 				multilineVars.continueall = true;
