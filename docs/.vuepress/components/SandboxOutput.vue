@@ -8,7 +8,7 @@
 
 <script>
 import {mapGetters} from 'vuex'
-import Vue from "vue"
+import { nextTick } from "vue"
 const abcjs = require('../../../index');
 
 export default {
@@ -43,7 +43,7 @@ EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
 |:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
 eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|`;
 
-			Vue.nextTick().then(() => {
+			nextTick().then(() => {
 				eval(this.sheetMusicJsNode)
 			})
 		}
@@ -56,7 +56,7 @@ eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|`;
 	border: 1px solid #888888;
 	padding: 10px;
 	background: #fefffa;
-	box-shadow: -1px -1px 1px #aaaaaa, 1px 2px 4px #aaaaaa;;
+	box-shadow: -1px -1px 1px #aaaaaa, 1px 2px 4px #aaaaaa;
 	border-top: none;
 	border-left: none;
 	width: 800px;

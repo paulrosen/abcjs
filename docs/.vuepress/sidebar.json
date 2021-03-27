@@ -1,69 +1,78 @@
 [
-  {
-	"title": "Overview",
-	"children": [
-	  "/overview/purpose.md",
-	  "/overview/examples.md",
-	  "/overview/getting-started.md",
-		"/overview/example-generator.md",
-	  "/overview/abc-notation.md",
-		"/overview/faq.md"
-	]
-  },
-  {
-	"title": "Visual",
-	"children": [
-	  "/visual/overview.md",
-	  "/visual/render-abc-options.md",
-	  "/visual/render-abc-result.md",
-	  "/visual/classes.md",
-	  "/visual/click-listener.md",
-	  "/visual/dragging.md"
-	]
-  },
-  {
-	"title": "Audio",
-	"children": [
-	  "/audio/synthesized-sound.md"
-	]
-  },
-  {
-	"title": "Animation",
-	"children": [
-	  "/animation/timing-callbacks.md"
-	]
-  },
-  {
-	"title": "Interactive",
-	"children": [
-	  "/interactive/interactive-editor.md"
-	]
-  },
-  {
-	"title": "Analysis",
-	"children": [
-	  "/analysis/tune-book.md"
-	]
-  },
-  {
-	"title": "Deprecated",
-	"children": [
-	  "/deprecated/deprecated-api.md"
-	]
-  },
-  {
-	"title": "Developers",
-	"children": [
-	  "/developers/pull-requests.md",
-	  "/developers/basic-architecture.md",
-	  "/developers/releasing.md"
-	]
-  },
-  {
-	"title": "Upgrading",
-	"children": [
-	  "/upgrading/release-notes.md",
-	  "/upgrading/midijs.md"
-	]
-  }
+	{
+		"isGroup": true,
+		"text": "Overview",
+		"children": [
+			"/overview/purpose.md",
+			"/overview/examples.md",
+			"/overview/getting-started.md",
+			"/overview/example-generator.md",
+			"/overview/abc-notation.md",
+			"/overview/faq.md"
+		]
+	},
+	{
+		"isGroup": true,
+		"text": "Visual",
+		"children": [
+			"/visual/overview.md",
+			"/visual/render-abc-options.md",
+			"/visual/render-abc-result.md",
+			"/visual/classes.md",
+			"/visual/click-listener.md",
+			"/visual/dragging.md"
+		]
+	},
+	{
+		"isGroup": true,
+		"text": "Audio",
+		"children": [
+			"/audio/synthesized-sound.md"
+		]
+	},
+	{
+		"isGroup": true,
+		"text": "Animation",
+		"children": [
+			"/animation/timing-callbacks.md"
+		]
+	},
+	{
+		"isGroup": true,
+		"text": "Interactive",
+		"children": [
+			"/interactive/interactive-editor.md"
+		]
+	},
+	{
+		"isGroup": true,
+		"text": "Analysis",
+		"children": [
+			"/analysis/tune-book.md"
+		]
+	},
+	{
+		"isGroup": true,
+		"text": "Deprecated",
+		"children": [
+			"/deprecated/deprecated-api.md"
+		]
+	},
+	{
+		"isGroup": true,
+		"text": "Developers",
+		"children": [
+			"/developers/pull-requests.md",
+			"/developers/basic-architecture.md",
+			"/developers/releasing.md"
+		]
+	},
+	{
+		"isGroup": true,
+		"text": "Upgrading",
+		"children": [
+			"/upgrading/release-notes.md",
+			"/upgrading/midijs.md"
+		]
+	}
 ]

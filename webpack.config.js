@@ -6,7 +6,7 @@ const WebpackBundleAnalyzer = require("webpack-bundle-analyzer")
 module.exports = (env = {} , argv) => {
   const defaults = (argv, type) => {
     const config = {
-			target: ['web', 'es5'],
+      target: ['web', 'es5'],
       output: {
         library: {
           amd: 'abcjs',
@@ -32,7 +32,7 @@ module.exports = (env = {} , argv) => {
         minimizer: [
           new TerserPlugin({
             extractComments: {
-							filename: '[file].LICENSE',
+              filename: '[file].LICENSE',
               condition: /^\*\**!/i,
               banner: makeBanner(type)
             },

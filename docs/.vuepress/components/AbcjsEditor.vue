@@ -7,7 +7,7 @@
 </template>
 
 <script>
-	import Vue from 'vue';
+	import { nextTick } from 'vue';
 
 	export default {
 		name: "abcjs-editor",
@@ -38,7 +38,7 @@
 			},
 		},
 		mounted() {
-			Vue.nextTick(() => {
+			nextTick(() => {
 				this.$refs.textarea.value = this.abc;
 				const abcjs = require('../../../index');
 				const abc_editor = new abcjs.Editor("abc", {
