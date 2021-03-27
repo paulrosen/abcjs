@@ -12,10 +12,10 @@ function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
 		if (i === 0 && midiGracePitches) {
 			for (var j = 0; j < midiGracePitches.length; j++) {
 				var grace = midiGracePitches[j];
-				sequence.appendNote(trackNum, grace.pitch, 1 / 64, grace.volume);
+				sequence.appendNote(trackNum, grace.pitch, 1 / 64, grace.volume, grace.warp);
 			}
 		}
-		sequence.appendNote(trackNum, note.pitch, note.duration, note.volume);
+		sequence.appendNote(trackNum, note.pitch, note.duration, note.volume, note.warp);
 	}
 
 	var ac = activeAudioContext();
