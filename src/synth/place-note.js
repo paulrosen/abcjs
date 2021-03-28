@@ -1,5 +1,6 @@
 var soundsCache = require('./sounds-cache');
 var pitchToNoteName = require('./pitch-to-note-name');
+var centsToFactor = require("./cents-to-factor");
 
 function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec, noteEndSec) {
 	// sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
@@ -43,8 +44,8 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 	source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
 	source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
 
-	if (sound.warp) {
-		source.playbackRate.value = sound.warp;
+	if (sound.cents) {
+		source.playbackRate.value = centsToFactor(sound.cents);
 	}
 
 	// connect all the nodes

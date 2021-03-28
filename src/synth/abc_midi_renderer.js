@@ -1,5 +1,6 @@
 //    abc_midi_renderer.js: Create the actual format for the midi.
 
+var centsToFactor = require("./cents-to-factor");
 var rendererFactory;
 
 (function() {
@@ -105,13 +106,13 @@ var rendererFactory;
 	};
 
 	var HALF_STEP = 4096; // For the pitch wheel - (i.e. the distance from C to C#)
-	Midi.prototype.startNote = function(pitch, loudness, warp) {
+	Midi.prototype.startNote = function(pitch, loudness, cents) {
 		this.track += toDurationHex(this.silencelength); // only need to shift by amount of silence (if there is any)
 		this.silencelength = 0;
-		if (warp) {
+		if (cents) {
 			// the pitch is altered so send a midi pitch wheel event
 			this.track += "%e" + this.channel.toString(16);
-			var bend = Math.round(warp*HALF_STEP);
+			var bend = Math.round(centsToFactor(cents)*HALF_STEP);
 			this.track += to7BitHex(0x2000 + bend);
 			this.track += toDurationHex(0); // this all happens at once so there is a zero length here
 			this.noteWarped[pitch] = true;

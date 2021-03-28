@@ -43,7 +43,7 @@ var create;
 						// TODO: end is affected by event.gap, too.
 						if (!notePlacement[start])
 							notePlacement[start] = [];
-						notePlacement[start].push({ pitch: event.pitch, volume: event.volume, warp: event.warp });
+						notePlacement[start].push({ pitch: event.pitch, volume: event.volume, cents: event.cents });
 						if (!notePlacement[end])
 							notePlacement[end] = [];
 						notePlacement[end].push({ pitch: event.pitch, volume: 0 });
@@ -77,7 +77,7 @@ var create;
 			for (var j = 0; j < events.length; j++) {
 				var event = events[j];
 				if (event.volume) {
-					midi.startNote(event.pitch, event.volume, event.warp);
+					midi.startNote(event.pitch, event.volume, event.cents);
 				} else {
 					midi.endNote(event.pitch);
 				}

@@ -21,7 +21,7 @@ var SynthSequence = function() {
 		self.currentInstrument[trackNumber] = instrumentNumber;
 	};
 
-	self.appendNote = function(trackNumber, pitch, durationInMeasures, volume, warp) {
+	self.appendNote = function(trackNumber, pitch, durationInMeasures, volume, cents) {
 		var note = {
 			cmd: "note",
 			duration: durationInMeasures,
@@ -31,8 +31,8 @@ var SynthSequence = function() {
 			start: self.starts[trackNumber],
 			volume: volume
 		};
-		if (warp)
-			note.warp = warp;
+		if (cents)
+			note.cents = cents;
 		self.tracks[trackNumber].push(note);
 		self.starts[trackNumber] += durationInMeasures;
 
