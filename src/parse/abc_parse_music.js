@@ -566,6 +566,7 @@ MusicParser.prototype.parseMusic = function(line) {
 		}
 	}
 	this.lineContinuation = line.indexOf('\x12') >= 0 || (retHeader[0] > 0)
+	if (!this.lineContinuation) { el = { } }
 };
 
 var setIsInTie =function(multilineVars, overlayLevel, value) {
