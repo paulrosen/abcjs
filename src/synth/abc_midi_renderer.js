@@ -45,6 +45,7 @@ var rendererFactory;
 	};
 
 	Midi.prototype.startTrack = function() {
+		this.noteWarped = {};
 		this.track = "";
 		this.trackName = "";
 		this.trackInstrument = "";
@@ -103,9 +104,18 @@ var rendererFactory;
 		this.noteOffAndChannel = "%8" + this.channel.toString(16);
 	};
 
-	Midi.prototype.startNote = function(pitch, loudness) {
+	var HALF_STEP = 4096; // For the pitch wheel - (i.e. the distance from C to C#)
+	Midi.prototype.startNote = function(pitch, loudness, warp) {
 		this.track += toDurationHex(this.silencelength); // only need to shift by amount of silence (if there is any)
 		this.silencelength = 0;
+		if (warp) {
+			// the pitch is altered so send a midi pitch wheel event
+			this.track += "%e" + this.channel.toString(16);
+			var bend = Math.round(warp*HALF_STEP);
+			this.track += to7BitHex(0x2000 + bend);
+			this.track += toDurationHex(0); // this all happens at once so there is a zero length here
+			this.noteWarped[pitch] = true;
+		}
 		this.track += this.noteOnAndChannel;
 		this.track += "%" + pitch.toString(16) + toHex(loudness, 2); //note
 	};
@@ -113,7 +123,13 @@ var rendererFactory;
 	Midi.prototype.endNote = function(pitch) {
 		this.track += toDurationHex(this.silencelength); // only need to shift by amount of silence (if there is any)
 		this.silencelength = 0;
-//		this.track += toDurationHex(length); //duration
+		if (this.noteWarped[pitch]) {
+			// the pitch was altered so alter it back.
+			this.track += "%e" + this.channel.toString(16);
+			this.track += to7BitHex(0x2000);
+			this.track += toDurationHex(0); // this all happens at once so there is a zero length here
+			this.noteWarped[pitch] = false;
+		}
 		this.track += this.noteOffAndChannel;
 		this.track += "%" + pitch.toString(16) + "%00";//end note
 	};
@@ -228,10 +244,21 @@ var rendererFactory;
 
 	function toHex(n, padding) {
 		var s = n.toString(16);
+		s = s.split(".")[0];
 		while (s.length < padding) {
 			s = "0" + s;
 		}
+		if (s.length > padding)
+			s = s.substring(0,padding)
 		return encodeHex(s);
+	}
+
+	function to7BitHex(n) {
+		// this takes a number and shifts all digits from the 7th one to the left.
+		n = Math.round(n);
+		var lower = n % 128;
+		var higher = n - lower;
+		return toHex(higher*2+lower, 4);
 	}
 
 	function toDurationHex(n) {

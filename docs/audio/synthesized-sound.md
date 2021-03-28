@@ -303,10 +303,13 @@ options = {
     // The following OPTIONAL parameters are only used when the type is "link":
     downloadClass: "class-name-to-add",
     preTextDownload: "text that appears before the link",
-    downloadLabel: "the text that appears as the body of the anchor tag that is clickable",
-    postTextDownload: "text that appears after the link"
+    downloadLabel: function() | "the text that appears as the body of the anchor tag that is clickable",
+    postTextDownload: "text that appears after the link",
+    fileName: "the name of the file that the midi will be saved as"
 }
 ```
+Note that `downloadLabel` can be either a string or a function that is passed the tune object and the tune index.
+The return of that function must be a string. If downloadLabel is text and contains `%T` then that is replaced by the tune's title.
 
 #### midiOutputType
 
