@@ -101,18 +101,17 @@
 			"T:مجنون نبودم\n" +
 			"R:Moderato \n" +
 			"Q:1/4=112\n" +
-			"%%graceslurs 0\n" +
 			"L:1/4\n" +
 			"M:2/4\n" +
-			"K: Bb ^/A\n" +
+			"K: Bb _/A\n" +
 			"F/G/ G/G/ | Gd|c/d/ B/c/|cd|c/d/ B/c/|\n" +
 			"Bc|B/c/ A/B/|Gz|F,/G,/ G,/G,/|G,D| \n" +
 			"C/D/ B,/C/| CD|C/D/ B,/C/|B,C|B,/C/ A,/B,/|\n" +
 			"G,z/D/|CB,/C/|B, z/D/|CB,/C/|B,zD/|\n" +
-			"CB,/C/|{B,}(A,{G,})z/C/|B,A,/B,/|AG|:F/G//G// G/G/|\n" +
+			"CB,/C/|A,z/C/|B,A,/B,/|A,G,|:F/G//G// G/G/|\n" +
 			"Gd|c/c//d// B/c/|cd|c/c//d// B/c/|Bc|\n" +
 			"B/B//c// A/B/ |1Gz:|2G z/d/||cB/c/|Bz/d/|\n" +
-			"cB/c/|Bz/d/|cB/c/|{B}(A {G})z/c/|BA/B/|\n" +
+			"cB/c/|Bz/d/|cB/c/|A z/c/|BA/B/|\n" +
 			"AG/C/|Gz|]";
 
 		var currentTune = 0;
@@ -224,7 +223,7 @@
 		function setTune(userAction) {
 			synthControl.disable(true);
 			var visualObj = ABCJS.renderAbc("paper", abc, abcOptions)[0];
-			var midi = ABCJS.synth.getMidiFile(abc, { fileName: "crazy.midi"});
+			var midi = ABCJS.synth.getMidiFile(abc, { fileName: "i-was-not-insane.midi"});
 			var midiButton = document.querySelector(".midi");
 			midiButton.innerHTML = midi;
 
