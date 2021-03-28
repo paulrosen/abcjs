@@ -474,11 +474,6 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	};
 
 	this.parseHeader = function(line) {
-		var nextLine = "";
-		if (line.indexOf('\x12') >= 0) {
-			nextLine = line.substring(line.indexOf('\x12')+1);
-			line = line.substring(0, line.indexOf('\x12'));	//This handles a continuation mark on a header field
-		}
 		var field = metaTextHeaders[line.charAt(0)];
 		if (field !== undefined) {
 			if (field === 'unalignedWords')
@@ -560,8 +555,6 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 					return {regular: true};
 			}
 		}
-		if (nextLine.length > 0)
-			return {recurse: true, str: nextLine};
 		return {};
 	};
 };

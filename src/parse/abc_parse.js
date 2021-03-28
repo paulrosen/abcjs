@@ -414,8 +414,6 @@ var Parse = function() {
 			addWords(tuneBuilder.getCurrentVoice(), line.substring(2));
 		if (ret.symbols)
 			addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
-		if (ret.recurse)
-			parseLine(ret.str);
 	};
 
 	function appendLastMeasure(voice, nextVoice) {
