@@ -14,7 +14,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 	len -= noteEndSec;
 	if (len < 0)
 		len = 0.005; // Have some small audible length no matter how short the note is.
-	var offlineCtx = new OfflineAC(2,Math.floor((len+fadeTimeSec)*sampleRate*2),sampleRate);
+	var offlineCtx = new OfflineAC(2,Math.floor((len+fadeTimeSec)*sampleRate),sampleRate);
 	var noteName = pitchToNoteName[sound.pitch];
 	var noteBuffer = soundsCache[sound.instrument][noteName];
 	if (noteBuffer === "error" || noteBuffer === "pending") { // If the note isn't available, just leave a blank spot
