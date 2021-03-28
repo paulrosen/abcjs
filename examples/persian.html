@@ -221,25 +221,6 @@
 			setTune(false);
 		}
 
-		function start() {
-			if (synthControl)
-				synthControl.play();
-		}
-
-		function seek() {
-			synthControl.seek(0.50)
-		}
-
-		function warp() {
-			var el = document.querySelector(".warp");
-			el.setAttribute("disabled", true)
-			var amount = Math.random()
-			console.log("warp", amount)
-			synthControl.setWarp(amount*100).then(function () {
-				el.removeAttribute("disabled")
-			})
-		}
-
 		function setTune(userAction) {
 			synthControl.disable(true);
 			var visualObj = ABCJS.renderAbc("paper", abc, abcOptions)[0];
@@ -262,7 +243,6 @@
 					// pan: [ -0.5, 0.5 ]
 				}
 			}).then(function (response) {
-				console.log(response);
 				if (synthControl) {
 					synthControl.setTune(visualObj, userAction).then(function (response) {
 						console.log("Audio successfully loaded.")
