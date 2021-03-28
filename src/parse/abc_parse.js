@@ -14,7 +14,9 @@ var Parse = function() {
 	"use strict";
 	var tune = new Tune();
 	var tuneBuilder = new TuneBuilder(tune);
-	var tokenizer = new Tokenizer();
+	var tokenizer;
+	var wordsContinuation = '';
+	var symbolContinuation = '';
 
 	this.getTune = function() {
 		var t = {
@@ -75,7 +77,6 @@ var Parse = function() {
 			this.next_note_duration = 0;
 			this.start_new_line = true;
 			this.is_in_header = true;
-			this.is_in_history = false;
 			this.partForNextLine = {};
 			this.tempoForNextLine = [];
 			this.havent_set_length = true;
@@ -84,10 +85,7 @@ var Parse = function() {
 			this.macros = {};
 			this.currBarNumber = 1;
 			this.barCounter = {};
-			this.inTextBlock = false;
-			this.inPsBlock = false;
 			this.ignoredDecorations = [];
-			this.textBlock = "";
 			this.score_is_present = false;	// Can't have original V: lines when there is the score directive
 			this.inEnding = false;
 			this.inTie = [];
@@ -190,7 +188,7 @@ var Parse = function() {
 		var clean_line = encode(line.substring(0, col_num)) +
 			'<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' +
 			encode(line.substring(col_num+1));
-		addWarning("Music Line:" + tuneBuilder.getNumLines() + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
+		addWarning("Music Line:" + tokenizer.lineIndex + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
 		addWarningObject({message:str, line:line, startChar: multilineVars.iChar + col_num, column: col_num});
 	};
 
@@ -205,6 +203,13 @@ var Parse = function() {
 	};
 
 	var addWords = function(line, words) {
+		if (words.indexOf('\x12') >= 0) {
+			wordsContinuation += words
+			return
+		}
+		words = wordsContinuation + words
+		wordsContinuation = ''
+
 		if (!line) { warn("Can't add words before the first line of music", line, 0); return; }
 		words = parseCommon.strip(words);
 		if (words.charAt(words.length-1) !== '-')
@@ -289,6 +294,13 @@ var Parse = function() {
 	};
 
 	var addSymbols = function(line, words) {
+		if (words.indexOf('\x12') >= 0) {
+			symbolContinuation += words
+			return
+		}
+		words = symbolContinuation + words
+		symbolContinuation = ''
+
 		// TODO-PER: Currently copied from w: line. This needs to be read as symbols instead.
 		if (!line) { warn("Can't add symbols before the first line of music", line, 0); return; }
 		words = parseCommon.strip(words);
@@ -380,7 +392,15 @@ var Parse = function() {
 		if (line.length === 0)
 			return;
 
-		if (line.length < 2 || line.charAt(1) !== ':') {
+		if (wordsContinuation) {
+			addWords(tuneBuilder.getCurrentVoice(), line.substring(2));
+			return
+		}
+		if (symbolContinuation) {
+			addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
+			return
+		}
+		if (line.length < 2 || line.charAt(1) !== ':' || music.lineContinuation) {
 			music.parseMusic(line);
 			return
 		}
@@ -394,8 +414,6 @@ var Parse = function() {
 			addWords(tuneBuilder.getCurrentVoice(), line.substring(2));
 		if (ret.symbols)
 			addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
-		if (ret.recurse)
-			parseLine(ret.str);
 	};
 
 	function appendLastMeasure(voice, nextVoice) {
@@ -453,6 +471,31 @@ var Parse = function() {
 		if (!switches) switches = {};
 		if (!startPos) startPos = 0;
 		tuneBuilder.reset();
+
+		// Take care of whatever line endings come our way
+		// Tack on newline temporarily to make the last line continuation work
+		strTune = strTune.replace(/\r\n?/g, '\n') + '\n';
+
+		// get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
+		var arr = strTune.split("\n\\");
+		if (arr.length > 1) {
+			for (var i2 = 1; i2 < arr.length; i2++) {
+				while (arr[i2].length > 0 && arr[i2][0] !== "\n") {
+					arr[i2] = arr[i2].substr(1);
+					arr[i2-1] += ' ';
+				}
+			}
+			strTune = arr.join("  "); //. the split removed two characters, so this puts them back
+		}
+		// take care of line continuations right away, but keep the same number of characters
+		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, function(all, backslash, comment){
+			var padding = comment ? Array(comment.length +1).join(' ') : "";
+			return backslash + "\x12" + padding + '\n';
+		});
+		var lines = strTune.split('\n')
+		if (parseCommon.last(lines).length === 0)	// remove the blank line we added above.
+			lines.pop();
+		tokenizer = new Tokenizer(lines, multilineVars);
 		header = new ParseHeader(tokenizer, warn, multilineVars, tune, tuneBuilder);
 		music = new ParseMusic(tokenizer, warn, multilineVars, tune, tuneBuilder, header);
 
@@ -475,75 +518,34 @@ var Parse = function() {
 		}
 		header.reset(tokenizer, warn, multilineVars, tune);
 
-		// Take care of whatever line endings come our way
-		// Tack on newline temporarily to make the last line continuation work
-		strTune = strTune.replace(/\r\n?/g, '\n') + '\n';
-
-		// get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
-		var arr = strTune.split("\n\\");
-		if (arr.length > 1) {
-			for (var i2 = 1; i2 < arr.length; i2++) {
-				while (arr[i2].length > 0 && arr[i2][0] !== "\n") {
-					arr[i2] = arr[i2].substr(1);
-					arr[i2-1] += ' ';
-				}
-			}
-			strTune = arr.join("  "); //. the split removed two characters, so this puts them back
-		}
-		var continuationReplacement = function(all, backslash, comment){
-			var padding = comment ? Array(comment.length +1).join(' ') : "";
-			return backslash + " \x12" + padding;
-		};
-		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
-		var lines = strTune.split('\n');
-		if (parseCommon.last(lines).length === 0)	// remove the blank line we added above.
-			lines.pop();
 		try {
 			if (switches.format) {
 				parseDirective.globalFormatting(switches.format);
 			}
-			parseCommon.each(lines,  function(line) {
+			var line = tokenizer.nextLine();
+			while (line) {
 				if (switches.header_only && multilineVars.is_in_header === false)
 					throw "normal_abort";
 				if (switches.stop_on_warning && multilineVars.warnings)
 					throw "normal_abort";
-				if (multilineVars.is_in_history) {
-					if (line.charAt(1) === ':') {
-						multilineVars.is_in_history = false;
-						parseLine(line);
-					} else
-						tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
-				} else if (multilineVars.inTextBlock) {
-					if (parseCommon.startsWith(line, "%%endtext")) {
-						tuneBuilder.addText(multilineVars.textBlock);
-						multilineVars.inTextBlock = false;
-					}
-					else {
-						if (parseCommon.startsWith(line, "%%"))
-							multilineVars.textBlock += line.substring(2) + "\n";
-						else
-							multilineVars.textBlock += line + "\n";
-					}
-				} else if (multilineVars.inPsBlock) {
-					if (parseCommon.startsWith(line, "%%endps")) {
-						// Just ignore postscript
-						multilineVars.inPsBlock = false;
-					}
-					else
-						multilineVars.textBlock += ' ' + line;
-				} else {
-					var wasInHeader = multilineVars.is_in_header;
-					parseLine(line);
-					if (wasInHeader && !multilineVars.is_in_header) {
-						tuneBuilder.setRunningFont("annotationfont", multilineVars.annotationfont);
-						tuneBuilder.setRunningFont("gchordfont", multilineVars.gchordfont);
-						tuneBuilder.setRunningFont("tripletfont", multilineVars.tripletfont);
-						tuneBuilder.setRunningFont("vocalfont", multilineVars.vocalfont);
-					}
-				}
-				multilineVars.iChar += line.length + 1;
-			});
 
+				var wasInHeader = multilineVars.is_in_header;
+				parseLine(line);
+				if (wasInHeader && !multilineVars.is_in_header) {
+					tuneBuilder.setRunningFont("annotationfont", multilineVars.annotationfont);
+					tuneBuilder.setRunningFont("gchordfont", multilineVars.gchordfont);
+					tuneBuilder.setRunningFont("tripletfont", multilineVars.tripletfont);
+					tuneBuilder.setRunningFont("vocalfont", multilineVars.vocalfont);
+				}
+				line = tokenizer.nextLine();
+			}
+
+			if (wordsContinuation) {
+				addWords(tuneBuilder.getCurrentVoice(), '');
+			}
+			if (symbolContinuation) {
+				addSymbols(tuneBuilder.getCurrentVoice(), '');
+			}
 			multilineVars.openSlurs = tuneBuilder.cleanUp(multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
 
 		} catch (err) {
