@@ -26,6 +26,7 @@ module.exports = (env = {} , argv) => {
             use: {
               loader: "babel-loader",
               options: {
+                cacheDirectory: (argv.mode === 'development'),
                 presets: [
                   [
                     '@babel/preset-env',
