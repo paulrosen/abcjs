@@ -6,7 +6,7 @@
 </template>
 
 <script>
-	import Vue from 'vue';
+	import { nextTick } from 'vue';
 	import RenderAbc from "./RenderAbc";
 	export default {
 		name: "show-and-render-abc",
@@ -24,7 +24,7 @@
 			};
 		},
 		mounted() {
-			Vue.nextTick(() => {
+			nextTick(() => {
 				const abcjs = require('../../../index');
 				const el = this.$refs.paper;
 				this.visualObj = abcjs.renderAbc(el, this.abc, this.defaultOptions);

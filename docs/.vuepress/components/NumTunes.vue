@@ -10,7 +10,7 @@
 </template>
 
 <script>
-	import Vue from 'vue';
+	import { nextTick } from 'vue';
 	export default {
 		name: "num-tunes",
 		data() {
@@ -20,7 +20,7 @@
 			};
 		},
 		mounted() {
-			Vue.nextTick(() => {
+			nextTick(() => {
 				this.abcjs = require('../../../index');
 			});
 		},
