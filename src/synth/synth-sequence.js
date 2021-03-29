@@ -21,8 +21,8 @@ var SynthSequence = function() {
 		self.currentInstrument[trackNumber] = instrumentNumber;
 	};
 
-	self.appendNote = function(trackNumber, pitch, durationInMeasures, volume) {
-		self.tracks[trackNumber].push({
+	self.appendNote = function(trackNumber, pitch, durationInMeasures, volume, cents) {
+		var note = {
 			cmd: "note",
 			duration: durationInMeasures,
 			gap: 0,
@@ -30,7 +30,10 @@ var SynthSequence = function() {
 			pitch: pitch,
 			start: self.starts[trackNumber],
 			volume: volume
-		});
+		};
+		if (cents)
+			note.cents = cents;
+		self.tracks[trackNumber].push(note);
 		self.starts[trackNumber] += durationInMeasures;
 
 		self.totalDuration = Math.max(self.totalDuration, self.starts[trackNumber]);

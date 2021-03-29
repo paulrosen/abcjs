@@ -125,6 +125,44 @@ describe("Automatic line wrapping", function() {
 	var expectedQuartetLineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":18},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":19,"end":37},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":38,"end":52},{"ogLine":0,"line":3,"staff":0,"voice":0,"start":53,"end":71},{"ogLine":0,"line":4,"staff":0,"voice":0,"start":72,"end":91},{"ogLine":0,"line":0,"staff":0,"voice":1,"start":0,"end":14},{"ogLine":0,"line":1,"staff":0,"voice":1,"start":15,"end":33},{"ogLine":0,"line":2,"staff":0,"voice":1,"start":34,"end":48},{"ogLine":0,"line":3,"staff":0,"voice":1,"start":49,"end":67},{"ogLine":0,"line":4,"staff":0,"voice":1,"start":68,"end":87},{"ogLine":0,"line":0,"staff":1,"voice":0,"start":0,"end":9},{"ogLine":0,"line":1,"staff":1,"voice":0,"start":10,"end":19},{"ogLine":0,"line":2,"staff":1,"voice":0,"start":20,"end":31},{"ogLine":0,"line":3,"staff":1,"voice":0,"start":32,"end":41},{"ogLine":0,"line":4,"staff":1,"voice":0,"start":42,"end":52},{"ogLine":0,"line":0,"staff":2,"voice":0,"start":0,"end":4},{"ogLine":0,"line":1,"staff":2,"voice":0,"start":5,"end":9},{"ogLine":0,"line":2,"staff":2,"voice":0,"start":10,"end":21},{"ogLine":0,"line":3,"staff":2,"voice":0,"start":22,"end":26},{"ogLine":0,"line":4,"staff":2,"voice":0,"start":27,"end":32}]
 
 
+	var abcVoicesShareStaff = "X:0\n" +
+		"%%score { ( 1 2 ) | ( 3 4 ) }\n" +
+		"L:1/4\n" +
+		"M:4/4\n" +
+		"K:Bb\n" +
+		"V:1 treble\n" +
+		"V:2 treble\n" +
+		"V:3 bass\n" +
+		"V:4 bass\n" +
+		"V:1\n" +
+		"G A B G | ^F A G B | A G F2 |]\n" +
+		"V:2\n" +
+		"D F F E | D ^F G =F | F B,/C/ D2 |]\n" +
+		"V:3\n" +
+		"B, C D C/B,/ | A, D B, D | D G,/A,/ B,2 |] \n" +
+		"V:4\n" +
+		"G, F, B,, C, | D, D, G, B,,/C,/ | D, E, B,,2 |]";
+
+	var expectedVoicesShareStaff = [
+		[
+			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [5]}, {el_type: "note", pitches: [6]}, {el_type: "note", pitches: [4]}, { el_type: "bar"}],
+			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [1]}, {el_type: "note", pitches: [3]}, {el_type: "note", pitches: [3]}, {el_type: "note", pitches: [2]}, { el_type: "bar"}],
+			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [11]}, {el_type: "note", pitches: [12]}, {el_type: "note", pitches: [13]}, {el_type: "note", pitches: [12]}, {el_type: "note", pitches: [11]}, { el_type: "bar"}],
+			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [9]}, {el_type: "note", pitches: [8]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [5]}, { el_type: "bar"}],
+		],
+		[
+			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [3]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [6]}, { el_type: "bar"}],
+			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [2]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [5]}, {el_type: "note", pitches: [4]}, { el_type: "bar"}],
+			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [10]}, {el_type: "note", pitches: [13]}, {el_type: "note", pitches: [11]}, {el_type: "note", pitches: [13]}, { el_type: "bar"}],
+			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [6]}, {el_type: "note", pitches: [6]}, {el_type: "note", pitches: [9]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [5]}, { el_type: "bar"}],
+		],
+		[
+			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [5]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [3]}, { el_type: "bar"}],
+			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [3]}, {el_type: "note", pitches: [-1]}, {el_type: "note", pitches: [0]}, {el_type: "note", pitches: [1]}, { el_type: "bar"}],
+			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [13]}, {el_type: "note", pitches: [9]}, {el_type: "note", pitches: [10]}, {el_type: "note", pitches: [11]}, { el_type: "bar"}],
+			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [6]}, {el_type: "note", pitches: [7]}, {el_type: "note", pitches: [4]}, { el_type: "bar"}],
+		],
+	];
 
 	//////////////////////////////////////////////////////////////
 
@@ -155,9 +193,59 @@ describe("Automatic line wrapping", function() {
 	it("quartet-wrap", function() {
 		doWrapTest(abcQuartet, expectedQuartet, expectedQuartetLineBreaks, 500);
 	})
+
+	it("share-staff", function() {
+		doWrapTestContents(abcVoicesShareStaff, expectedVoicesShareStaff, 300);
+	})
 })
 
 //////////////////////////////////////////////////////////
+
+function doWrapTestContents(abc, expected, width) {
+	var visualObj = abcjs.renderAbc("paper", abc, {
+		staffwidth: width,
+		wrap: {
+			minSpacing: 1.8,
+			maxSpacing: 2.8,
+			preferredMeasuresPerLine: 4
+		}
+	});
+	var lines = [];
+	for (var i = 0; i < visualObj[0].lines.length; i++) {
+		var staves = visualObj[0].lines[i].staff;
+		if (!staves)
+			continue;
+		var line = [];
+		for (var j = 0; j < staves.length; j++) {
+			for (var k = 0; k < staves[j].voices.length; k++) {
+				var els = [];
+				for (var kk = 0; kk < staves[j].voices[k].length; kk++) {
+					var el = {el_type: staves[j].voices[k][kk].el_type};
+					if (el.el_type === "stem")
+						el.direction = staves[j].voices[k][kk].direction;
+					else if (el.el_type === "note") {
+						el.pitches = [];
+						for (var ii = 0; ii < staves[j].voices[k][kk].pitches.length; ii++)
+							el.pitches.push(staves[j].voices[k][kk].pitches[ii].pitch)
+					}
+					els.push(el);
+				}
+			}
+			line.push(els);
+		}
+		lines.push(line);
+	}
+	console.log(lines)
+	for (i = 0; i < lines.length; i++) {
+		for (j = 0; j < lines[i].length; j++) {
+			for (k = 0; k < lines[i][j].length; k++) {
+				var msg = "\nrcv: " + JSON.stringify(lines[i][j][k]) + "\n" +
+					"exp: " + JSON.stringify(expected[i][j][k]) + "\nLine: " + i + '  Voice: ' + j + '  Element: ' + k + '\n';
+				chai.assert.deepStrictEqual(lines[i][j][k], expected[i][j][k], msg);
+			}
+		}
+	}
+}
 
 function doWrapTest(abc, expected, expectedLineBreaks, width) {
 	var visualObj = abcjs.renderAbc("paper", abc, {
@@ -177,6 +265,7 @@ function doWrapTest(abc, expected, expectedLineBreaks, width) {
 		for (var j = 0; j < staves.length; j++) {
 			var staff = [];
 			for (var k = 0; k < staves[j].voices.length; k++) {
+				console.log(staves[j].voices[k])
 				staff.push(staves[j].voices[k].length);
 			}
 			line.push(staff);

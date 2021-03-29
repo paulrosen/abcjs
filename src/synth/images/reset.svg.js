@@ -1,4 +1,4 @@
-const svg = `
+var svg = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25">
   <g>
     <polygon points="5 12.5 24 0 24 25"/>

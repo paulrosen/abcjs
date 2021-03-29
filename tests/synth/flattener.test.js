@@ -1744,17 +1744,17 @@ describe("Audio flattener", function() {
 
 				{"cmd":"note","pitch":78,"volume":95,"start":5,"duration":0.25,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":71,"volume":70,"start":5.25,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
-				{"cmd":"note","pitch":73,"volume":70,"start":5.3125,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":70,"volume":70,"start":5.25,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":72,"volume":70,"start":5.3125,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":74,"volume":70,"start":5.375,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
-				{"cmd":"note","pitch":76,"volume":70,"start":5.4375,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
-				{"cmd":"note","pitch":78,"volume":105,"start":5.5,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":75,"volume":70,"start":5.4375,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":77,"volume":105,"start":5.5,"duration":0.25,"instrument":0,"gap":0},
 
-				{"cmd":"note","pitch":71,"volume":63,"start":5.75,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
-				{"cmd":"note","pitch":73,"volume":63,"start":5.8125,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":70,"volume":63,"start":5.75,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":72,"volume":63,"start":5.8125,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
 				{"cmd":"note","pitch":74,"volume":63,"start":5.875,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
-				{"cmd":"note","pitch":76,"volume":63,"start":5.9375,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
-				{"cmd":"note","pitch":78,"volume":95,"start":6,"duration":0.25,"instrument":0,"gap":0}
+				{"cmd":"note","pitch":75,"volume":63,"start":5.9375,"duration":0.0625,"gap":0,"instrument":0, "style": "grace"},
+				{"cmd":"note","pitch":77,"volume":95,"start":6,"duration":0.25,"instrument":0,"gap":0}
 			]
 		]
 	};
@@ -2460,11 +2460,11 @@ describe("Audio flattener", function() {
 			[
 				{"cmd": "program", "channel": 0, "instrument": 0},
 				{"cmd": "note", "pitch": 68, "volume": 85, "start": 0, "duration": 0.125, "instrument": 0, "gap": 0},
-				{"cmd": "note", "pitch": 71, "volume": 85, "start": 0.125, "duration": 0.125, "instrument": 0, "gap": 0, warp: 0.97069776335651 },
+				{"cmd": "note", "pitch": 71, "volume": 85, "start": 0.125, "duration": 0.125, "instrument": 0, "gap": 0, cents: -50 },
 				{"cmd": "note", "pitch": 72, "volume": 85, "start": 0.25, "duration": 0.125, "instrument": 0, "gap": 0 },
 				{"cmd": "note", "pitch": 75, "volume": 85, "start": 0.375, "duration": 0.125, "instrument": 0, "gap": 0 },
 				{"cmd": "note", "pitch": 76, "volume": 85, "start": 0.5, "duration": 0.125, "instrument": 0, "gap": 0 },
-				{"cmd": "note", "pitch": 77, "volume": 85, "start": 0.625, "duration": 0.125, "instrument": 0, "gap": 0, warp: 1.02930223664349 },
+				{"cmd": "note", "pitch": 77, "volume": 85, "start": 0.625, "duration": 0.125, "instrument": 0, "gap": 0, cents: 50 },
 
 				// all flats
 				{"cmd": "note", "pitch": 68, "volume": 105, "start": 0.75, "duration": 0.125, "instrument": 0, "gap": 0},
@@ -2482,19 +2482,19 @@ describe("Audio flattener", function() {
 				{"cmd": "note", "pitch": 76, "volume": 85, "start": 2.125, "duration": 0.125, "instrument": 0, "gap": 0 },
 
 				// all quarter flats
-				{"cmd": "note", "pitch": 69, "volume": 105, "start": 2.25, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0},
-				{"cmd": "note", "pitch": 71, "volume": 85, "start": 2.375, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0 },
-				{"cmd": "note", "pitch": 72, "volume": 85, "start": 2.5, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0 },
-				{"cmd": "note", "pitch": 74, "volume": 95, "start": 2.625, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0 },
-				{"cmd": "note", "pitch": 76, "volume": 85, "start": 2.75, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0 },
-				{"cmd": "note", "pitch": 77, "volume": 85, "start": 2.875, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0 },
+				{"cmd": "note", "pitch": 69, "volume": 105, "start": 2.25, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0},
+				{"cmd": "note", "pitch": 71, "volume": 85, "start": 2.375, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0 },
+				{"cmd": "note", "pitch": 72, "volume": 85, "start": 2.5, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0 },
+				{"cmd": "note", "pitch": 74, "volume": 95, "start": 2.625, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0 },
+				{"cmd": "note", "pitch": 76, "volume": 85, "start": 2.75, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0 },
+				{"cmd": "note", "pitch": 77, "volume": 85, "start": 2.875, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0 },
 
-				{"cmd": "note", "pitch": 69, "volume": 95, "start": 3, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0},
-				{"cmd": "note", "pitch": 71, "volume": 85, "start": 3.125, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0 },
-				{"cmd": "note", "pitch": 72, "volume": 85, "start": 3.25, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0 },
-				{"cmd": "note", "pitch": 74, "volume": 95, "start": 3.375, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0 },
-				{"cmd": "note", "pitch": 76, "volume": 85, "start": 3.5, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0 },
-				{"cmd": "note", "pitch": 77, "volume": 85, "start": 3.625, "duration": 0.125, "instrument": 0, warp: 0.97069776335651, "gap": 0 },
+				{"cmd": "note", "pitch": 69, "volume": 95, "start": 3, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0},
+				{"cmd": "note", "pitch": 71, "volume": 85, "start": 3.125, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0 },
+				{"cmd": "note", "pitch": 72, "volume": 85, "start": 3.25, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0 },
+				{"cmd": "note", "pitch": 74, "volume": 95, "start": 3.375, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0 },
+				{"cmd": "note", "pitch": 76, "volume": 85, "start": 3.5, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0 },
+				{"cmd": "note", "pitch": 77, "volume": 85, "start": 3.625, "duration": 0.125, "instrument": 0, cents: -50, "gap": 0 },
 
 				// all natural
 				{"cmd": "note", "pitch": 69, "volume": 105, "start": 3.75, "duration": 0.125, "instrument": 0, "gap": 0},
@@ -2512,19 +2512,19 @@ describe("Audio flattener", function() {
 				{"cmd": "note", "pitch": 77, "volume": 85, "start": 5.125, "duration": 0.125, "instrument": 0, "gap": 0 },
 
 				// all quarter sharp
-				{"cmd": "note", "pitch": 69, "volume": 105, "start": 5.25, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0},
-				{"cmd": "note", "pitch": 71, "volume": 85, "start": 5.375, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0 },
-				{"cmd": "note", "pitch": 72, "volume": 85, "start": 5.5, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0 },
-				{"cmd": "note", "pitch": 74, "volume": 95, "start": 5.625, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0 },
-				{"cmd": "note", "pitch": 76, "volume": 85, "start": 5.75, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0 },
-				{"cmd": "note", "pitch": 77, "volume": 85, "start": 5.875, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0 },
+				{"cmd": "note", "pitch": 69, "volume": 105, "start": 5.25, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0},
+				{"cmd": "note", "pitch": 71, "volume": 85, "start": 5.375, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0 },
+				{"cmd": "note", "pitch": 72, "volume": 85, "start": 5.5, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0 },
+				{"cmd": "note", "pitch": 74, "volume": 95, "start": 5.625, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0 },
+				{"cmd": "note", "pitch": 76, "volume": 85, "start": 5.75, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0 },
+				{"cmd": "note", "pitch": 77, "volume": 85, "start": 5.875, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0 },
 
-				{"cmd": "note", "pitch": 69, "volume": 95, "start": 6, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0},
-				{"cmd": "note", "pitch": 71, "volume": 85, "start": 6.125, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0 },
-				{"cmd": "note", "pitch": 72, "volume": 85, "start": 6.25, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0 },
-				{"cmd": "note", "pitch": 74, "volume": 95, "start": 6.375, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0 },
-				{"cmd": "note", "pitch": 76, "volume": 85, "start": 6.5, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0 },
-				{"cmd": "note", "pitch": 77, "volume": 85, "start": 6.625, "duration": 0.125, "instrument": 0, warp: 1.02930223664349, "gap": 0 },
+				{"cmd": "note", "pitch": 69, "volume": 95, "start": 6, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0},
+				{"cmd": "note", "pitch": 71, "volume": 85, "start": 6.125, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0 },
+				{"cmd": "note", "pitch": 72, "volume": 85, "start": 6.25, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0 },
+				{"cmd": "note", "pitch": 74, "volume": 95, "start": 6.375, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0 },
+				{"cmd": "note", "pitch": 76, "volume": 85, "start": 6.5, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0 },
+				{"cmd": "note", "pitch": 77, "volume": 85, "start": 6.625, "duration": 0.125, "instrument": 0, cents: 50, "gap": 0 },
 
 				// all sharp
 				{"cmd": "note", "pitch": 70, "volume": 105, "start": 6.75, "duration": 0.125, "instrument": 0, "gap": 0},

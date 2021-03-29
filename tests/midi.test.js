@@ -1,6 +1,6 @@
-const assert = require('chai').assert
-const basic = require('../index')
-const midi = require('../midi')
+var assert = require('chai').assert
+var basic = require('../index')
+var midi = require('../midi')
 
 describe("ABCJS Midi", function () {
 	it("should extend ABCJS basic", function () {

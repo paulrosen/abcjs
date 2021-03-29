@@ -789,10 +789,10 @@ var pitchesToPerc = require('./pitches-to-perc');
 		var pitch = ''+description.pitch;
 		if (pitch.indexOf(".75") >= 0) {
 			description.pitch = Math.round(description.pitch);
-			description.warp = 1 - quarterToneFactor;
+			description.cents = -50;
 		} else if (pitch.indexOf(".25") >= 0) {
 			description.pitch = Math.round(description.pitch);
-			description.warp = 1 + quarterToneFactor;
+			description.cents = 50;
 		}
 
 		return description;

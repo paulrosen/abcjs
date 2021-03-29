@@ -1,11 +1,12 @@
+require('./license');
 //    abc_plugin.js: Find everything which looks like abc and convert it
 
 /*global abcjs_is_user_script, abcjs_plugin_autostart */
 "use strict";
 
-var TuneBook = require('../api/abc_tunebook').TuneBook;
-var Parse = require('../parse/abc_parse');
-var EngraverController = require('../write/abc_engraver_controller');
+var TuneBook = require('./src/api/abc_tunebook').TuneBook;
+var Parse = require('./src/parse/abc_parse');
+var EngraverController = require('./src/write/abc_engraver_controller');
 
 var Plugin = function() {
 	"use strict";
@@ -224,4 +225,8 @@ if (autostart &&
   }
 }
 
-module.exports = plugin;
+var abcjs = {
+	plugin: Plugin
+};
+
+module.exports = abcjs;

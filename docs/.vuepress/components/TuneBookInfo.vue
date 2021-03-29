@@ -16,7 +16,6 @@
 </template>
 
 <script>
-	import Vue from 'vue';
 	export default {
 		name: "tune-book-info",
 		props: {

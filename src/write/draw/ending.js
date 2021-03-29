@@ -1,7 +1,7 @@
 var sprintf = require('./sprintf');
 var renderText = require('./text');
 var printPath = require('./print-path');
-const roundNumber = require("./round-number");
+var roundNumber = require("./round-number");
 
 function drawEnding(renderer, params, linestartx, lineendx, selectables) {
 	if (params.pitch === undefined)

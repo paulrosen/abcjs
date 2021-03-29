@@ -1,5 +1,5 @@
 var elementGroup = require('./group-elements');
-const roundNumber = require("./round-number");
+var roundNumber = require("./round-number");
 
 function printStem(renderer, x, dx, y1, y2) {
 	if (dx<0 || y1<y2) { // correct path "handedness" for intersection with other elements

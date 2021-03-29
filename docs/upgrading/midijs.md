@@ -1,5 +1,9 @@
 # MIDI.JS Usage
 
+## Midi.js removed
+
+The last version supporting this interface is 6.0.0-beta.28.
+
 ## Notes for Version 5.8.0
 
 This way of creating midi is being deprecated by a new method that is much smaller, less buggy and integrates with the TimingCallbacks object. This will continue to work for the forseeable future, but probably won't change much.

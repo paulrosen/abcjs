@@ -5,7 +5,7 @@
 </template>
 
 <script>
-	import Vue from 'vue';
+	import { nextTick } from 'vue';
 	import AbcjsEditor from "./AbcjsEditor";
 
 	export default {
@@ -35,7 +35,7 @@
 			},
 		},
 		mounted() {
-			Vue.nextTick(() => {
+			nextTick(() => {
 				this.abcjs = require('../../../index');
 			});
 		},

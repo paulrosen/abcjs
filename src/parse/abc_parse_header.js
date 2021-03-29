@@ -474,11 +474,6 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	};
 
 	this.parseHeader = function(line) {
-		var nextLine = "";
-		if (line.indexOf('\x12') >= 0) {
-			nextLine = line.substring(line.indexOf('\x12')+1);
-			line = line.substring(0, line.indexOf('\x12'));	//This handles a continuation mark on a header field
-		}
 		var field = metaTextHeaders[line.charAt(0)];
 		if (field !== undefined) {
 			if (field === 'unalignedWords')
@@ -493,7 +488,12 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 			{
 				case  'H':
 					tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
-					multilineVars.is_in_history = true;
+					line = tokenizer.peekLine()
+					while (line && line.charAt(1) !== ':') {
+						tokenizer.nextLine()
+						tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
+						line = tokenizer.peekLine()
+					}
 					break;
 				case  'K':
 					// since the key is the last thing that can happen in the header, we can resolve the tempo now
@@ -555,8 +555,6 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 					return {regular: true};
 			}
 		}
-		if (nextLine.length > 0)
-			return {recurse: true, str: nextLine};
 		return {};
 	};
 };

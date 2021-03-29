@@ -2,7 +2,7 @@
  * Begin a group of glyphs that will always be moved, scaled and highlighted together
  */
 
-const roundNumber = require("./round-number");
+var roundNumber = require("./round-number");
 
 	function Group() {
 		this.ingroup = false;

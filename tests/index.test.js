@@ -1,5 +1,5 @@
-const assert = require('chai').assert
-const basic = require('../index')
+var assert = require('chai').assert
+var basic = require('../index')
 
 describe("ABCJS Basic", function () {
 	it('should expose ABCJS as an object', function () {

@@ -1,7 +1,7 @@
 var sprintf = require('./sprintf');
 var renderText = require('./text');
 var printPath = require('./print-path');
-const roundNumber = require("./round-number");
+var roundNumber = require("./round-number");
 
 function drawTriplet(renderer, params, selectables) {
 	renderer.paper.openGroup({ klass: renderer.controller.classes.generate('triplet '+params.durationClass)});

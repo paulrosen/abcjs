@@ -62,7 +62,8 @@ var generateMidiDownloadLink = function(tune, midiParams, midi, index) {
 	else
 		label = "Download MIDI for \"" + title + "\"";
 	title = title.toLowerCase().replace(/'/g, '').replace(/\W/g, '_').replace(/__/g, '_');
-	html += '<a download="' + title + '.midi" href="' + midi + '">' + label + '</a>';
+	var filename = (midiParams.fileName) ? midiParams.fileName :  title + '.midi';
+	html += '<a download="' + filename + '" href="' + midi + '">' + label + '</a>';
 	if (midiParams.postTextDownload)
 		html += midiParams.postTextDownload;
 	return html + "</div>";

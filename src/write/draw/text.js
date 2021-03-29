@@ -1,4 +1,4 @@
-const roundNumber = require("./round-number");
+var roundNumber = require("./round-number");
 
 function renderText(renderer, params) {
 	var y = params.y;

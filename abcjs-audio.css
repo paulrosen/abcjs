@@ -15,11 +15,11 @@
 }
 
 .abcjs-inline-audio .abcjs-btn {
-	display: inherit;
+	display: block;
 	width: 28px;
-	height: 26px;
+	height: 34px;
 	margin-right: 2px;
-	padding: 3px 4px;
+	padding: 7px 4px;
 
 	background: none !important;
 	border: 1px solid transparent;
