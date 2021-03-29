@@ -1,3 +1,51 @@
+# Version 6.0.0-beta.32
+
+## Bugs
+
+* Some fixes to startChar and endChar when there are line continuations
+
+* Error messages now report the absolute line in the file that the error occurs, not the offset from the first music line.
+
+* Fix bug where multiple text lines would duplicate text.
+
+* `a b !+!c` removing the end `!` from the `!+!` will cause the decoration to bleed to the first element in the line.
+
+* Fix audio control buttons on Safari
+
+* Make creating audio more efficient. (was creating buffer twice as long as needed.)
+
+* Fix click-a-note-to-play-it to handle microtones.
+
+* Get rid of audio warning when key changes.
+
+* Fix Safari not making sound when first using playEvent.
+
+* Fix crash when wrapping when using oneSvgPerLine.
+
+## Features
+
+* Change the pitch change variable from "warp" to "cents".
+
+* support microtones in midi output.
+
+## Refactoring
+
+* Improvements to the handling of line continuations
+
+* Remove some midi.js remnants
+
+* Refactoring of the parser
+
+## Build
+
+* update dependencies and fix webpack for v5
+
+## Documentation
+
+* Add microtone demo.
+
+* update docs to vuepress2
+
 # Version 6.0.0-beta.31
 
 ## Bugs

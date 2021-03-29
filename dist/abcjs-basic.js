@@ -8,102 +8,16 @@
 	else
 		root["ABCJS"] = factory();
 })(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// create a fake namespace object
-/******/ 	// mode & 1: value is a module id, require it
-/******/ 	// mode & 2: merge all properties of value into the ns
-/******/ 	// mode & 4: return value when already ns object
-/******/ 	// mode & 8|1: behave like require
-/******/ 	__webpack_require__.t = function(value, mode) {
-/******/ 		if(mode & 1) value = __webpack_require__(value);
-/******/ 		if(mode & 8) return value;
-/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
-/******/ 		__webpack_require__.r(ns);
-/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 		return ns;
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./index.js");
-/******/ })
-/************************************************************************/
-/******/ ({
+return /******/ (function() { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
 
 /***/ "./index.js":
 /*!******************!*\
   !*** ./index.js ***!
   \******************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-__webpack_require__(/*! ./static-wrappers/license */ "./static-wrappers/license.js");
+__webpack_require__(/*! ./license */ "./license.js");
 
 var version = __webpack_require__(/*! ./version */ "./version.js");
 
@@ -170,12 +84,43 @@ module.exports = abcjs;
 
 /***/ }),
 
+/***/ "./license.js":
+/*!********************!*\
+  !*** ./license.js ***!
+  \********************/
+/***/ (function() {
+
+/**!
+Copyright (c) 2009-2021 Paul Rosen and Gregory Dyke
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+**This text is from: http://opensource.org/licenses/MIT**
+!**/
+
+/***/ }),
+
 /***/ "./src/api/abc_animation.js":
 /*!**********************************!*\
   !*** ./src/api/abc_animation.js ***!
   \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_animation.js: handles animating the music in real time.
 var TimingCallbacks = __webpack_require__(/*! ./abc_timing_callbacks */ "./src/api/abc_timing_callbacks.js");
@@ -293,8 +238,7 @@ module.exports = animation;
 /*!*****************************************!*\
   !*** ./src/api/abc_timing_callbacks.js ***!
   \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var TimingCallbacks = function TimingCallbacks(target, params) {
   var self = this;
@@ -637,8 +581,7 @@ module.exports = TimingCallbacks;
 /*!*********************************!*\
   !*** ./src/api/abc_tunebook.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -907,8 +850,7 @@ module.exports = tunebook;
 /*!*************************************!*\
   !*** ./src/api/abc_tunebook_svg.js ***!
   \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var tunebook = __webpack_require__(/*! ./abc_tunebook */ "./src/api/abc_tunebook.js");
 
@@ -1177,8 +1119,7 @@ module.exports = renderAbc;
 /*!******************************!*\
   !*** ./src/data/abc_tune.js ***!
   \******************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_tune.js: a computer usable internal structure representing one tune.
 var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
@@ -1779,8 +1720,7 @@ module.exports = Tune;
 /*!**********************************!*\
   !*** ./src/edit/abc_editarea.js ***!
   \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 // abc_editor.js
 // window.ABCJS.Editor is the interface class for the area that contains the ABC text. It is responsible for
@@ -1908,8 +1848,7 @@ module.exports = EditArea;
 /*!********************************!*\
   !*** ./src/edit/abc_editor.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 // window.ABCJS.Editor:
 //
@@ -2307,12 +2246,9 @@ module.exports = Editor;
 /*!*************************************!*\
   !*** ./src/midi/abc_midi_create.js ***!
   \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_midi_create.js: Turn a linear series of events into a midi file.
-var Preparer = __webpack_require__(/*! ./abc_midi_js_preparer */ "./src/midi/abc_midi_js_preparer.js");
-
 var rendererFactory = __webpack_require__(/*! ../synth/abc_midi_renderer */ "./src/synth/abc_midi_renderer.js");
 
 var create;
@@ -2326,17 +2262,14 @@ var create;
     if (options === undefined) options = {};
     var commands = abcTune.setUpAudio(options);
     var midi = rendererFactory();
-    var midiJs = new Preparer();
     var title = abcTune.metaText ? abcTune.metaText.title : undefined;
     if (title && title.length > 128) title = title.substring(0, 124) + '...';
     var key = abcTune.getKeySignature();
     var time = abcTune.getMeterFraction();
     midi.setGlobalInfo(commands.tempo, title, key, time);
-    midiJs.setGlobalInfo(commands.tempo, title);
 
     for (var i = 0; i < commands.tracks.length; i++) {
       midi.startTrack();
-      midiJs.startTrack();
       var notePlacement = {};
 
       for (var j = 0; j < commands.tracks[i].length; j++) {
@@ -2352,8 +2285,6 @@ var create;
             if (options.pan && options.pan.length > i) pan = options.pan[i];
             midi.setChannel(event.channel, pan);
             midi.setInstrument(event.instrument);
-            midiJs.setChannel(event.channel);
-            midiJs.setInstrument(event.instrument);
             break;
 
           case 'note':
@@ -2363,7 +2294,8 @@ var create;
             if (!notePlacement[start]) notePlacement[start] = [];
             notePlacement[start].push({
               pitch: event.pitch,
-              volume: event.volume
+              volume: event.volume,
+              cents: event.cents
             });
             if (!notePlacement[end]) notePlacement[end] = [];
             notePlacement[end].push({
@@ -2377,22 +2309,14 @@ var create;
         }
       }
 
-      addNotes(midi, midiJs, notePlacement, baseDuration);
+      addNotes(midi, notePlacement, baseDuration);
       midi.endTrack();
-      midiJs.endTrack();
     }
 
-    var midiFile = midi.getData();
-    var midiInline = midiJs.getData();
-    if (options.generateInline === undefined) // default is to generate inline controls.
-      options.generateInline = true;
-    if (options.generateInline && options.generateDownload) return {
-      download: midiFile,
-      inline: midiInline
-    };else if (options.generateInline) return midiInline;else return midiFile;
+    return midi.getData();
   };
 
-  function addNotes(midi, midiJs, notePlacement, baseDuration) {
+  function addNotes(midi, notePlacement, baseDuration) {
     var times = Object.keys(notePlacement);
 
     for (var h = 0; h < times.length; h++) {
@@ -2410,7 +2334,6 @@ var create;
       if (times[i] > lastTime) {
         var distance = (times[i] - lastTime) * baseDuration;
         midi.addRest(distance);
-        midiJs.addRest(distance);
         lastTime = times[i];
       }
 
@@ -2418,11 +2341,9 @@ var create;
         var event = events[j];
 
         if (event.volume) {
-          midi.startNote(event.pitch, event.volume);
-          midiJs.startNote(event.pitch, event.volume);
+          midi.startNote(event.pitch, event.volume, event.cents);
         } else {
           midi.endNote(event.pitch);
-          midiJs.endNote(event.pitch);
         }
       }
     }
@@ -2433,226 +2354,11 @@ module.exports = create;
 
 /***/ }),
 
-/***/ "./src/midi/abc_midi_js_preparer.js":
-/*!******************************************!*\
-  !*** ./src/midi/abc_midi_js_preparer.js ***!
-  \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-//    abc_midi_js_preparer.js: Create the structure that MIDI.js expects.
-var Preparer;
-
-(function () {
-  "use strict";
-
-  Preparer = function Preparer() {
-    this.tempo = 0;
-    this.timeFactor = 0;
-    this.output = [];
-    this.currentChannel = 0;
-    this.currentInstrument = 0;
-    this.track = 0;
-    this.nextDuration = 0;
-    this.tracks = [[]];
-  };
-
-  Preparer.prototype.setInstrument = function (instrument) {
-    this.currentInstrument = instrument;
-    var ev = [{
-      ticksToEvent: 0,
-      track: this.track,
-      event: {
-        channel: this.currentChannel,
-        deltaTime: 0,
-        programNumber: this.currentInstrument,
-        subtype: 'programChange',
-        type: 'channel'
-      }
-    }, this.nextDuration * this.timeFactor];
-    this.tracks[this.track].push(ev);
-  };
-
-  Preparer.prototype.setChannel = function (channel) {
-    this.currentChannel = channel;
-  };
-
-  Preparer.prototype.startTrack = function () {
-    this.track++;
-    this.tracks[this.track] = [];
-    this.nextDuration = 0;
-  };
-
-  Preparer.prototype.setGlobalInfo = function (tempo, title) {
-    this.tempo = tempo;
-    var mspb = Math.round(1.0 / tempo * 60000000);
-    this.timeFactor = mspb / 480000;
-    var ev = [{
-      ticksToEvent: 0,
-      track: this.track,
-      event: {
-        deltaTime: 0,
-        microsecondsPerBeat: mspb,
-        subtype: 'setTempo',
-        type: 'meta'
-      }
-    }, this.nextDuration * this.timeFactor]; //		this.tracks[this.track].push(ev);
-
-    ev = [{
-      ticksToEvent: 0,
-      track: this.track,
-      event: {
-        deltaTime: 0,
-        subtype: 'trackName',
-        text: title,
-        type: 'meta'
-      }
-    }, this.nextDuration * this.timeFactor]; //		this.tracks[this.track].push(ev);
-
-    ev = [{
-      ticksToEvent: 0,
-      track: this.track,
-      event: {
-        deltaTime: 0,
-        subtype: 'endOfTrack',
-        type: 'meta'
-      }
-    }, this.nextDuration * this.timeFactor]; //		this.tracks[this.track].push(ev);
-  };
-
-  Preparer.prototype.startNote = function (pitch, volume) {
-    var deltaTime = Math.floor(this.nextDuration / 5) * 5;
-    var ev = [{
-      ticksToEvent: deltaTime,
-      track: this.track,
-      event: {
-        deltaTime: deltaTime,
-        channel: this.currentChannel,
-        type: "channel",
-        noteNumber: pitch,
-        velocity: volume,
-        subtype: "noteOn"
-      }
-    }, this.nextDuration * this.timeFactor];
-    this.tracks[this.track].push(ev);
-    this.nextDuration = 0;
-  };
-
-  Preparer.prototype.endNote = function (pitch) {
-    var deltaTime = Math.floor(this.nextDuration / 5) * 5;
-    var ev = [{
-      ticksToEvent: deltaTime,
-      track: this.track,
-      event: {
-        deltaTime: deltaTime,
-        channel: this.currentChannel,
-        type: "channel",
-        noteNumber: pitch,
-        velocity: 0,
-        subtype: "noteOff"
-      }
-    }, this.nextDuration * this.timeFactor];
-    this.tracks[this.track].push(ev);
-    this.nextDuration = 0;
-  };
-
-  Preparer.prototype.addRest = function (duration) {
-    this.nextDuration += duration;
-  };
-
-  Preparer.prototype.endTrack = function () {
-    var ev = [{
-      ticksToEvent: 0,
-      track: this.track,
-      event: {
-        deltaTime: 0,
-        type: "meta",
-        subtype: "endOfTrack"
-      }
-    }, 0]; //		this.tracks[this.track].push(ev);
-  };
-
-  function addAbsoluteTime(tracks) {
-    for (var i = 0; i < tracks.length; i++) {
-      var absTime = 0;
-
-      for (var j = 0; j < tracks[i].length; j++) {
-        absTime += tracks[i][j][1];
-        tracks[i][j].absTime = absTime;
-      }
-    }
-  }
-
-  function combineTracks(tracks) {
-    var output = [];
-
-    for (var i = 0; i < tracks.length; i++) {
-      for (var j = 0; j < tracks[i].length; j++) {
-        output.push(tracks[i][j]);
-      }
-    }
-
-    return output;
-  }
-
-  function sortTracks(output) {
-    // First sort by time. If the time is the same, sort by channel, if the channel is the same, put the programChange first.
-    return output.sort(function (a, b) {
-      if (a.absTime > b.absTime) return 1;
-
-      if (a.absTime === b.absTime) {
-        if (a.length > 0 && b.length > 0 && a[0].event && b[0].event) {
-          // I think that there will always be at least one event, but testing just in case.
-          var aChannel = a[0].event.channel;
-          var bChannel = b[0].event.channel;
-          if (aChannel > bChannel) return 1;else if (aChannel < bChannel) return -1;else {
-            var bIsPreferred = b[0].event.subtype === "programChange";
-            if (bIsPreferred) return 1;
-          }
-        }
-      }
-
-      return -1;
-    });
-  }
-
-  function adjustTime(output) {
-    var lastTime = 0;
-
-    for (var i = 0; i < output.length; i++) {
-      var thisTime = output[i].absTime;
-      output[i][1] = thisTime - lastTime;
-      lastTime = thisTime;
-    }
-  }
-
-  function weaveTracks(tracks) {
-    // Each track has a progression of delta times. To combine them, first assign an absolute time to each event,
-    // then make one large track of all the tracks, sort it by absolute time, then adjust the amount of time each
-    // event causes time to move. That is, the movement was figured out as the distance from the last note in the track,
-    // but now we want the distance from the last note on ANY track.
-    addAbsoluteTime(tracks);
-    var output = combineTracks(tracks);
-    output = sortTracks(output);
-    adjustTime(output);
-    return output;
-  }
-
-  Preparer.prototype.getData = function () {
-    return weaveTracks(this.tracks);
-  };
-})();
-
-module.exports = Preparer;
-
-/***/ }),
-
 /***/ "./src/parse/abc_common.js":
 /*!*********************************!*\
   !*** ./src/parse/abc_common.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
 var parseCommon = {};
@@ -2773,8 +2479,7 @@ module.exports = parseCommon;
 /*!********************************!*\
   !*** ./src/parse/abc_parse.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
@@ -2798,7 +2503,9 @@ var Parse = function Parse() {
 
   var tune = new Tune();
   var tuneBuilder = new TuneBuilder(tune);
-  var tokenizer = new Tokenizer();
+  var tokenizer;
+  var wordsContinuation = '';
+  var symbolContinuation = '';
 
   this.getTune = function () {
     var t = {
@@ -2867,7 +2574,6 @@ var Parse = function Parse() {
       this.next_note_duration = 0;
       this.start_new_line = true;
       this.is_in_header = true;
-      this.is_in_history = false;
       this.partForNextLine = {};
       this.tempoForNextLine = [];
       this.havent_set_length = true;
@@ -2876,10 +2582,7 @@ var Parse = function Parse() {
       this.macros = {};
       this.currBarNumber = 1;
       this.barCounter = {};
-      this.inTextBlock = false;
-      this.inPsBlock = false;
       this.ignoredDecorations = [];
-      this.textBlock = "";
       this.score_is_present = false; // Can't have original V: lines when there is the score directive
 
       this.inEnding = false;
@@ -2981,7 +2684,7 @@ var Parse = function Parse() {
     var bad_char = line.charAt(col_num);
     if (bad_char === ' ') bad_char = "SPACE";
     var clean_line = encode(line.substring(0, col_num)) + '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' + encode(line.substring(col_num + 1));
-    addWarning("Music Line:" + tuneBuilder.getNumLines() + ":" + (col_num + 1) + ': ' + str + ":  " + clean_line);
+    addWarning("Music Line:" + tokenizer.lineIndex + ":" + (col_num + 1) + ': ' + str + ":  " + clean_line);
     addWarningObject({
       message: str,
       line: line,
@@ -3002,6 +2705,14 @@ var Parse = function Parse() {
   };
 
   var addWords = function addWords(line, words) {
+    if (words.indexOf('\x12') >= 0) {
+      wordsContinuation += words;
+      return;
+    }
+
+    words = wordsContinuation + words;
+    wordsContinuation = '';
+
     if (!line) {
       warn("Can't add words before the first line of music", line, 0);
       return;
@@ -3121,7 +2832,14 @@ var Parse = function Parse() {
   };
 
   var addSymbols = function addSymbols(line, words) {
-    // TODO-PER: Currently copied from w: line. This needs to be read as symbols instead.
+    if (words.indexOf('\x12') >= 0) {
+      symbolContinuation += words;
+      return;
+    }
+
+    words = symbolContinuation + words;
+    symbolContinuation = ''; // TODO-PER: Currently copied from w: line. This needs to be read as symbols instead.
+
     if (!line) {
       warn("Can't add symbols before the first line of music", line, 0);
       return;
@@ -3241,7 +2959,17 @@ var Parse = function Parse() {
     line = line.replace(/\s+$/, '');
     if (line.length === 0) return;
 
-    if (line.length < 2 || line.charAt(1) !== ':') {
+    if (wordsContinuation) {
+      addWords(tuneBuilder.getCurrentVoice(), line.substring(2));
+      return;
+    }
+
+    if (symbolContinuation) {
+      addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
+      return;
+    }
+
+    if (line.length < 2 || line.charAt(1) !== ':' || music.lineContinuation) {
       music.parseMusic(line);
       return;
     }
@@ -3251,7 +2979,6 @@ var Parse = function Parse() {
     if (ret.newline) music.startNewLine();
     if (ret.words) addWords(tuneBuilder.getCurrentVoice(), line.substring(2));
     if (ret.symbols) addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
-    if (ret.recurse) parseLine(ret.str);
   };
 
   function appendLastMeasure(voice, nextVoice) {
@@ -3316,7 +3043,33 @@ var Parse = function Parse() {
     // switches.transpose: change the key signature, chords, and notes by a number of half-steps.
     if (!switches) switches = {};
     if (!startPos) startPos = 0;
-    tuneBuilder.reset();
+    tuneBuilder.reset(); // Take care of whatever line endings come our way
+    // Tack on newline temporarily to make the last line continuation work
+
+    strTune = strTune.replace(/\r\n?/g, '\n') + '\n'; // get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
+
+    var arr = strTune.split("\n\\");
+
+    if (arr.length > 1) {
+      for (var i2 = 1; i2 < arr.length; i2++) {
+        while (arr[i2].length > 0 && arr[i2][0] !== "\n") {
+          arr[i2] = arr[i2].substr(1);
+          arr[i2 - 1] += ' ';
+        }
+      }
+
+      strTune = arr.join("  "); //. the split removed two characters, so this puts them back
+    } // take care of line continuations right away, but keep the same number of characters
+
+
+    strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, function (all, backslash, comment) {
+      var padding = comment ? Array(comment.length + 1).join(' ') : "";
+      return backslash + "\x12" + padding + '\n';
+    });
+    var lines = strTune.split('\n');
+    if (parseCommon.last(lines).length === 0) // remove the blank line we added above.
+      lines.pop();
+    tokenizer = new Tokenizer(lines, multilineVars);
     header = new ParseHeader(tokenizer, warn, multilineVars, tune, tuneBuilder);
     music = new ParseMusic(tokenizer, warn, multilineVars, tune, tuneBuilder, header);
     if (switches.print) tune.media = 'print';
@@ -3333,75 +3086,39 @@ var Parse = function Parse() {
       multilineVars.lineBreaks = switches.lineBreaks; //multilineVars.continueall = true;
     }
 
-    header.reset(tokenizer, warn, multilineVars, tune); // Take care of whatever line endings come our way
-    // Tack on newline temporarily to make the last line continuation work
-
-    strTune = strTune.replace(/\r\n?/g, '\n') + '\n'; // get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
-
-    var arr = strTune.split("\n\\");
-
-    if (arr.length > 1) {
-      for (var i2 = 1; i2 < arr.length; i2++) {
-        while (arr[i2].length > 0 && arr[i2][0] !== "\n") {
-          arr[i2] = arr[i2].substr(1);
-          arr[i2 - 1] += ' ';
-        }
-      }
-
-      strTune = arr.join("  "); //. the split removed two characters, so this puts them back
-    }
-
-    var continuationReplacement = function continuationReplacement(all, backslash, comment) {
-      var padding = comment ? Array(comment.length + 1).join(' ') : "";
-      return backslash + " \x12" + padding;
-    };
-
-    strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement); // take care of line continuations right away, but keep the same number of characters
-
-    var lines = strTune.split('\n');
-    if (parseCommon.last(lines).length === 0) // remove the blank line we added above.
-      lines.pop();
+    header.reset(tokenizer, warn, multilineVars, tune);
 
     try {
       if (switches.format) {
         parseDirective.globalFormatting(switches.format);
       }
 
-      parseCommon.each(lines, function (line) {
+      var line = tokenizer.nextLine();
+
+      while (line) {
         if (switches.header_only && multilineVars.is_in_header === false) throw "normal_abort";
         if (switches.stop_on_warning && multilineVars.warnings) throw "normal_abort";
+        var wasInHeader = multilineVars.is_in_header;
+        parseLine(line);
 
-        if (multilineVars.is_in_history) {
-          if (line.charAt(1) === ':') {
-            multilineVars.is_in_history = false;
-            parseLine(line);
-          } else tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
-        } else if (multilineVars.inTextBlock) {
-          if (parseCommon.startsWith(line, "%%endtext")) {
-            tuneBuilder.addText(multilineVars.textBlock);
-            multilineVars.inTextBlock = false;
-          } else {
-            if (parseCommon.startsWith(line, "%%")) multilineVars.textBlock += line.substring(2) + "\n";else multilineVars.textBlock += line + "\n";
-          }
-        } else if (multilineVars.inPsBlock) {
-          if (parseCommon.startsWith(line, "%%endps")) {
-            // Just ignore postscript
-            multilineVars.inPsBlock = false;
-          } else multilineVars.textBlock += ' ' + line;
-        } else {
-          var wasInHeader = multilineVars.is_in_header;
-          parseLine(line);
-
-          if (wasInHeader && !multilineVars.is_in_header) {
-            tuneBuilder.setRunningFont("annotationfont", multilineVars.annotationfont);
-            tuneBuilder.setRunningFont("gchordfont", multilineVars.gchordfont);
-            tuneBuilder.setRunningFont("tripletfont", multilineVars.tripletfont);
-            tuneBuilder.setRunningFont("vocalfont", multilineVars.vocalfont);
-          }
+        if (wasInHeader && !multilineVars.is_in_header) {
+          tuneBuilder.setRunningFont("annotationfont", multilineVars.annotationfont);
+          tuneBuilder.setRunningFont("gchordfont", multilineVars.gchordfont);
+          tuneBuilder.setRunningFont("tripletfont", multilineVars.tripletfont);
+          tuneBuilder.setRunningFont("vocalfont", multilineVars.vocalfont);
         }
 
-        multilineVars.iChar += line.length + 1;
-      });
+        line = tokenizer.nextLine();
+      }
+
+      if (wordsContinuation) {
+        addWords(tuneBuilder.getCurrentVoice(), '');
+      }
+
+      if (symbolContinuation) {
+        addSymbols(tuneBuilder.getCurrentVoice(), '');
+      }
+
       multilineVars.openSlurs = tuneBuilder.cleanUp(multilineVars.barsperstaff, multilineVars.staffnonote, multilineVars.openSlurs);
     } catch (err) {
       if (err !== "normal_abort") throw err;
@@ -3448,8 +3165,7 @@ module.exports = Parse;
 /*!*************************************!*\
   !*** ./src/parse/abc_parse_book.js ***!
   \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_parse_book.js: parses a string representing ABC Music Notation into a usable internal structure.
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
@@ -3522,8 +3238,7 @@ module.exports = bookParser;
 /*!******************************************!*\
   !*** ./src/parse/abc_parse_directive.js ***!
   \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
 
@@ -4432,6 +4147,7 @@ var parseDirective = {};
     restOfString = tokenizer.stripComment(restOfString);
     var cmd = tokens.shift().token.toLowerCase();
     var scratch = "";
+    var line;
 
     switch (cmd) {
       // The following directives were added to abc_parser_lint, but haven't been implemented here.
@@ -4618,7 +4334,15 @@ var parseDirective = {};
         break;
 
       case "begintext":
-        multilineVars.inTextBlock = true;
+        var textBlock = '';
+        line = tokenizer.nextLine();
+
+        while (line && line.indexOf('%%endtext') !== 0) {
+          if (parseCommon.startsWith(line, "%%")) textBlock += line.substring(2) + "\n";else textBlock += line + "\n";
+          line = tokenizer.nextLine();
+        }
+
+        tuneBuilder.addText(textBlock);
         break;
 
       case "continueall":
@@ -4626,7 +4350,12 @@ var parseDirective = {};
         break;
 
       case "beginps":
-        multilineVars.inPsBlock = true;
+        line = tokenizer.nextLine();
+
+        while (line && line.indexOf('%%endps') !== 0) {
+          tokenizer.nextLine();
+        }
+
         warn("Postscript ignored", str, 0);
         break;
 
@@ -4997,8 +4726,7 @@ module.exports = parseDirective;
 /*!***************************************!*\
   !*** ./src/parse/abc_parse_header.js ***!
   \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_parse_header.js: parses a the header fields from a string representing ABC Music Notation into a usable internal structure.
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
@@ -5539,13 +5267,6 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
   };
 
   this.parseHeader = function (line) {
-    var nextLine = "";
-
-    if (line.indexOf('\x12') >= 0) {
-      nextLine = line.substring(line.indexOf('\x12') + 1);
-      line = line.substring(0, line.indexOf('\x12')); //This handles a continuation mark on a header field
-    }
-
     var field = metaTextHeaders[line.charAt(0)];
 
     if (field !== undefined) {
@@ -5558,7 +5279,14 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
       switch (line.charAt(0)) {
         case 'H':
           tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
-          multilineVars.is_in_history = true;
+          line = tokenizer.peekLine();
+
+          while (line && line.charAt(1) !== ':') {
+            tokenizer.nextLine();
+            tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
+            line = tokenizer.peekLine();
+          }
+
           break;
 
         case 'K':
@@ -5639,10 +5367,6 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
       }
     }
 
-    if (nextLine.length > 0) return {
-      recurse: true,
-      str: nextLine
-    };
     return {};
   };
 };
@@ -5655,8 +5379,7 @@ module.exports = ParseHeader;
 /*!******************************************!*\
   !*** ./src/parse/abc_parse_key_voice.js ***!
   \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
 
@@ -6954,8 +6677,7 @@ module.exports = parseKeyVoice;
 /*!**************************************!*\
   !*** ./src/parse/abc_parse_music.js ***!
   \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
 
@@ -6977,6 +6699,7 @@ var MusicParser = function MusicParser(_tokenizer, _warn, _multilineVars, _tune,
   tune = _tune;
   tuneBuilder = _tuneBuilder;
   header = _header;
+  this.lineContinuation = false;
 }; //
 // Parse line of music
 //
@@ -7046,6 +6769,8 @@ var isInTie = function isInTie(multilineVars, overlayLevel, el) {
   return false;
 };
 
+var el = {};
+
 MusicParser.prototype.parseMusic = function (line) {
   header.resolveTempo(); //multilineVars.havent_set_length = false;	// To late to set this now.
 
@@ -7067,12 +6792,12 @@ MusicParser.prototype.parseMusic = function (line) {
   var retHeader = header.letter_to_body_header(line, i);
 
   if (retHeader[0] > 0) {
-    i += retHeader[0];
-    if (retHeader[1] === 'V') delayStartNewLine = true; // fixes bug on this: c[V:2]d
+    i += retHeader[0]; // fixes bug on this: c[V:2]d
+
+    if (retHeader[1] === 'V') this.startNewLine(); // delayStartNewLine = true;
     // TODO-PER: Handle inline headers
   }
 
-  var el = {};
   var overlayLevel = 0;
 
   while (i < line.length) {
@@ -7087,7 +6812,7 @@ MusicParser.prototype.parseMusic = function (line) {
       //multilineVars.start_new_line = false;
     } else {
       // Wait until here to actually start the line because we know we're past the inline statements.
-      if (delayStartNewLine) {
+      if (!tuneBuilder.hasBeginMusic() || delayStartNewLine && !this.lineContinuation) {
         this.startNewLine();
         delayStartNewLine = false;
       } // We need to decide if the following characters are a bar-marking or a note-group.
@@ -7522,6 +7247,12 @@ MusicParser.prototype.parseMusic = function (line) {
         }
       }
     }
+  }
+
+  this.lineContinuation = line.indexOf('\x12') >= 0 || retHeader[0] > 0;
+
+  if (!this.lineContinuation) {
+    el = {};
   }
 };
 
@@ -8367,8 +8098,7 @@ module.exports = MusicParser;
 /*!************************************!*\
   !*** ./src/parse/abc_tokenizer.js ***!
   \************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_tokenizer.js: tokenizes an ABC Music Notation string to support abc_parse.
 var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js"); // this is a series of functions that get a particular element out of the passed stream.
@@ -8377,7 +8107,11 @@ var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_commo
 // The return structure for most calls is { len: num_chars_consumed, token: str }
 
 
-var Tokenizer = function Tokenizer() {
+var Tokenizer = function Tokenizer(lines, multilineVars) {
+  this.lineIndex = 0;
+  this.lines = lines;
+  this.multilineVars = multilineVars;
+
   this.skipWhiteSpace = function (str) {
     for (var i = 0; i < str.length; i++) {
       if (!this.isWhiteSpace(str.charAt(i))) return i;
@@ -9777,6 +9511,24 @@ var Tokenizer = function Tokenizer() {
   };
 };
 
+Tokenizer.prototype.peekLine = function () {
+  return this.lines[this.lineIndex];
+};
+
+Tokenizer.prototype.nextLine = function () {
+  if (this.lineIndex > 0) {
+    this.multilineVars.iChar += this.lines[this.lineIndex - 1].length + 1;
+  }
+
+  if (this.lineIndex < this.lines.length) {
+    var result = this.lines[this.lineIndex];
+    this.lineIndex++;
+    return result;
+  }
+
+  return null;
+};
+
 module.exports = Tokenizer;
 
 /***/ }),
@@ -9785,8 +9537,7 @@ module.exports = Tokenizer;
 /*!************************************!*\
   !*** ./src/parse/abc_transpose.js ***!
   \************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_transpose.js: Handles the automatic transposition of key signatures, chord symbols, and notes.
 var transpose = {};
@@ -10032,8 +9783,7 @@ module.exports = transpose;
 /*!***********************************!*\
   !*** ./src/parse/tune-builder.js ***!
   \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var parseKeyVoice = __webpack_require__(/*! ../parse/abc_parse_key_voice */ "./src/parse/abc_parse_key_voice.js");
 
@@ -10782,10 +10532,6 @@ var TuneBuilder = function TuneBuilder(tune) {
     }
   };
 
-  this.getNumLines = function () {
-    return tune.lines.length;
-  };
-
   this.pushLine = function (hash) {
     if (tune.vskipPending) {
       hash.vskip = tune.vskipPending;
@@ -11078,8 +10824,7 @@ module.exports = TuneBuilder;
 /*!*********************************!*\
   !*** ./src/parse/wrap_lines.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    wrap_lines.js: does line wrap on an already parsed tune.
 function wrapLines(tune, lineBreaks) {
@@ -11613,8 +11358,7 @@ module.exports = {
 /*!*****************************************!*\
   !*** ./src/synth/abc_midi_flattener.js ***!
   \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_midi_flattener.js: Turn a linear series of events into a series of MIDI commands.
 // We input a set of voices, but the notes are still complex. This pass changes the logical definitions
@@ -12603,10 +12347,10 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
 
     if (pitch.indexOf(".75") >= 0) {
       description.pitch = Math.round(description.pitch);
-      description.warp = 1 - quarterToneFactor;
+      description.cents = -50;
     } else if (pitch.indexOf(".25") >= 0) {
       description.pitch = Math.round(description.pitch);
-      description.warp = 1 + quarterToneFactor;
+      description.cents = 50;
     }
 
     return description;
@@ -13163,10 +12907,11 @@ module.exports = flatten;
 /*!****************************************!*\
   !*** ./src/synth/abc_midi_renderer.js ***!
   \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_midi_renderer.js: Create the actual format for the midi.
+var centsToFactor = __webpack_require__(/*! ./cents-to-factor */ "./src/synth/cents-to-factor.js");
+
 var rendererFactory;
 
 (function () {
@@ -13213,6 +12958,7 @@ var rendererFactory;
   };
 
   Midi.prototype.startTrack = function () {
+    this.noteWarped = {};
     this.track = "";
     this.trackName = "";
     this.trackInstrument = "";
@@ -13275,10 +13021,23 @@ var rendererFactory;
     this.noteOffAndChannel = "%8" + this.channel.toString(16);
   };
 
-  Midi.prototype.startNote = function (pitch, loudness) {
+  var HALF_STEP = 4096; // For the pitch wheel - (i.e. the distance from C to C#)
+
+  Midi.prototype.startNote = function (pitch, loudness, cents) {
     this.track += toDurationHex(this.silencelength); // only need to shift by amount of silence (if there is any)
 
     this.silencelength = 0;
+
+    if (cents) {
+      // the pitch is altered so send a midi pitch wheel event
+      this.track += "%e" + this.channel.toString(16);
+      var bend = Math.round(centsToFactor(cents) * HALF_STEP);
+      this.track += to7BitHex(0x2000 + bend);
+      this.track += toDurationHex(0); // this all happens at once so there is a zero length here
+
+      this.noteWarped[pitch] = true;
+    }
+
     this.track += this.noteOnAndChannel;
     this.track += "%" + pitch.toString(16) + toHex(loudness, 2); //note
   };
@@ -13286,7 +13045,16 @@ var rendererFactory;
   Midi.prototype.endNote = function (pitch) {
     this.track += toDurationHex(this.silencelength); // only need to shift by amount of silence (if there is any)
 
-    this.silencelength = 0; //		this.track += toDurationHex(length); //duration
+    this.silencelength = 0;
+
+    if (this.noteWarped[pitch]) {
+      // the pitch was altered so alter it back.
+      this.track += "%e" + this.channel.toString(16);
+      this.track += to7BitHex(0x2000);
+      this.track += toDurationHex(0); // this all happens at once so there is a zero length here
+
+      this.noteWarped[pitch] = false;
+    }
 
     this.track += this.noteOffAndChannel;
     this.track += "%" + pitch.toString(16) + "%00"; //end note
@@ -13412,12 +13180,22 @@ var rendererFactory;
 
   function toHex(n, padding) {
     var s = n.toString(16);
+    s = s.split(".")[0];
 
     while (s.length < padding) {
       s = "0" + s;
     }
 
+    if (s.length > padding) s = s.substring(0, padding);
     return encodeHex(s);
+  }
+
+  function to7BitHex(n) {
+    // this takes a number and shifts all digits from the 7th one to the left.
+    n = Math.round(n);
+    var lower = n % 128;
+    var higher = n - lower;
+    return toHex(higher * 2 + lower, 4);
   }
 
   function toDurationHex(n) {
@@ -13461,8 +13239,7 @@ module.exports = rendererFactory;
 /*!*****************************************!*\
   !*** ./src/synth/abc_midi_sequencer.js ***!
   \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_midi_sequencer.js: Turn parsed abc into a linear series of events.
 var sequence;
@@ -14284,8 +14061,7 @@ module.exports = sequence;
 /*!*******************************************!*\
   !*** ./src/synth/active-audio-context.js ***!
   \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var registerAudioContext = __webpack_require__(/*! ./register-audio-context.js */ "./src/synth/register-audio-context.js");
 
@@ -14298,12 +14074,29 @@ module.exports = activeAudioContext;
 
 /***/ }),
 
+/***/ "./src/synth/cents-to-factor.js":
+/*!**************************************!*\
+  !*** ./src/synth/cents-to-factor.js ***!
+  \**************************************/
+/***/ (function(module) {
+
+// This turns the number of cents to detune into a value that is convenient to use in pitch calculations
+// A cent is 1/100 of a musical half step and is calculated exponentially over the course of an octave.
+// The equation is:
+// Two to the power of cents divided by 1200
+function centsToFactor(cents) {
+  return Math.pow(2, cents / 1200);
+}
+
+module.exports = centsToFactor;
+
+/***/ }),
+
 /***/ "./src/synth/create-note-map.js":
 /*!**************************************!*\
   !*** ./src/synth/create-note-map.js ***!
   \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 // Convert the input structure to a more useful structure where each item has a length of its own.
 var instrumentIndexToName = __webpack_require__(/*! ./instrument-index-to-name */ "./src/synth/instrument-index-to-name.js");
@@ -14338,7 +14131,7 @@ var createNoteMap = function createNoteMap(sequence) {
               volume: ev.volume
             };
             if (ev.style) obj.style = ev.style;
-            if (ev.warp) obj.warp = ev.warp;
+            if (ev.cents) obj.cents = ev.cents;
             map[i].push(obj);
           }
 
@@ -14369,8 +14162,7 @@ module.exports = createNoteMap;
 /*!*******************************************!*\
   !*** ./src/synth/create-synth-control.js ***!
   \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var supportsAudio = __webpack_require__(/*! ./supports-audio */ "./src/synth/supports-audio.js");
 
@@ -14608,8 +14400,7 @@ module.exports = CreateSynthControl;
 /*!***********************************!*\
   !*** ./src/synth/create-synth.js ***!
   \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var getNote = __webpack_require__(/*! ./load-note */ "./src/synth/load-note.js");
 
@@ -14853,7 +14644,7 @@ function CreateSynth() {
       noteMapTracks.forEach(function (noteMap, trackNumber) {
         var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
         noteMap.forEach(function (note) {
-          var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + Math.round((note.end - note.start) * 1000) / 1000 + ':' + panDistance + ':' + tempoMultiplier + ':' + note.warp;
+          var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + Math.round((note.end - note.start) * 1000) / 1000 + ':' + panDistance + ':' + tempoMultiplier + ':' + note.cents;
           if (!uniqueSounds[key]) uniqueSounds[key] = [];
           uniqueSounds[key].push(note.start);
         });
@@ -14865,7 +14656,7 @@ function CreateSynth() {
       for (var key2 = 0; key2 < Object.keys(uniqueSounds).length; key2++) {
         var k = Object.keys(uniqueSounds)[key2];
         var parts = k.split(":");
-        var warp = parts[6] !== "undefined" ? parseFloat(parts[6]) : undefined;
+        var cents = parts[6] !== "undefined" ? parseFloat(parts[6]) : undefined;
         parts = {
           instrument: parts[0],
           pitch: parseInt(parts[1], 10),
@@ -14873,7 +14664,7 @@ function CreateSynth() {
           len: parseFloat(parts[3]),
           pan: parseFloat(parts[4]),
           tempoMultiplier: parseFloat(parts[5]),
-          warp: warp
+          cents: cents
         };
         allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd / 1000));
       }
@@ -15044,8 +14835,7 @@ module.exports = CreateSynth;
 /*!**************************************!*\
   !*** ./src/synth/download-buffer.js ***!
   \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var downloadBuffer = function downloadBuffer(buffer) {
   return window.URL.createObjectURL(bufferToWave(buffer.audioBuffers));
@@ -15132,8 +14922,7 @@ module.exports = downloadBuffer;
 /*!************************************!*\
   !*** ./src/synth/get-midi-file.js ***!
   \************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var tunebook = __webpack_require__(/*! ../api/abc_tunebook */ "./src/api/abc_tunebook.js");
 
@@ -15197,7 +14986,8 @@ var generateMidiDownloadLink = function generateMidiDownloadLink(tune, midiParam
   var label;
   if (midiParams.downloadLabel && isFunction(midiParams.downloadLabel)) label = midiParams.downloadLabel(tune, index);else if (midiParams.downloadLabel) label = midiParams.downloadLabel.replace(/%T/, title);else label = "Download MIDI for \"" + title + "\"";
   title = title.toLowerCase().replace(/'/g, '').replace(/\W/g, '_').replace(/__/g, '_');
-  html += '<a download="' + title + '.midi" href="' + midi + '">' + label + '</a>';
+  var filename = midiParams.fileName ? midiParams.fileName : title + '.midi';
+  html += '<a download="' + filename + '" href="' + midi + '">' + label + '</a>';
   if (midiParams.postTextDownload) html += midiParams.postTextDownload;
   return html + "</div>";
 };
@@ -15210,8 +15000,7 @@ module.exports = getMidiFile;
 /*!*****************************************!*\
   !*** ./src/synth/images/loading.svg.js ***!
   \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var svg = "\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" class=\"abcjs-loading-svg\">\n    <circle cx=\"50\" cy=\"50\" fill=\"none\" stroke-width=\"20\" r=\"35\" stroke-dasharray=\"160 55\"></circle>\n</svg>\n";
 module.exports = svg;
@@ -15222,8 +15011,7 @@ module.exports = svg;
 /*!**************************************!*\
   !*** ./src/synth/images/loop.svg.js ***!
   \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var svg = "\n<svg version=\"1.0\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 700 700\" preserveAspectRatio=\"xMidYMid meet\">\n\t<g transform=\"translate(0,700) scale(0.1,-0.1)\" >\n\t<path d=\"M3111 6981 c-20 -37 -90 -55 -364 -96 -120 -18 -190 -33 -244 -55\n\t-42 -17 -124 -42 -182 -56 -78 -18 -119 -34 -157 -60 -28 -19 -86 -46 -128\n\t-60 -43 -13 -107 -42 -144 -64 -37 -23 -84 -46 -106 -52 -21 -7 -56 -29 -79\n\t-50 -22 -22 -61 -50 -86 -63 -26 -13 -67 -40 -91 -60 -24 -20 -65 -47 -90 -60\n\t-25 -13 -53 -31 -61 -41 -8 -9 -32 -30 -54 -46 -75 -54 -486 -460 -512 -507\n\t-15 -25 -48 -69 -75 -98 -26 -28 -48 -57 -48 -63 0 -6 -18 -29 -39 -53 -21\n\t-23 -56 -71 -77 -107 -20 -36 -50 -80 -65 -97 -16 -18 -33 -52 -40 -75 -12\n\t-47 -47 -115 -84 -166 -13 -18 -30 -56 -38 -83 -8 -27 -34 -80 -56 -118 -33\n\t-53 -46 -91 -62 -167 -12 -63 -34 -127 -59 -179 -42 -84 -60 -166 -60 -270 0\n\t-90 26 -122 125 -154 54 -17 96 -19 430 -20 305 -1 381 2 430 14 82 22 140 51\n\t153 78 6 12 22 47 37 77 14 30 38 77 54 103 15 27 34 73 40 103 7 30 28 78 48\n\t107 19 28 44 74 55 101 10 28 34 67 53 87 18 20 49 61 68 90 19 30 44 63 57\n\t74 13 11 36 40 52 65 59 94 232 270 306 313 20 11 57 37 82 58 25 20 70 52\n\t100 72 30 19 66 47 79 61 13 14 49 35 80 46 30 12 80 37 111 56 31 19 95 45\n\t143 58 48 12 110 37 139 55 63 40 127 55 323 76 83 9 208 28 279 41 156 29\n\t165 29 330 4 453 -71 514 -84 606 -130 31 -16 83 -36 116 -45 32 -9 84 -34\n\t115 -56 31 -21 82 -48 113 -60 32 -11 72 -33 89 -48 18 -16 59 -45 92 -65 33\n\t-21 74 -51 90 -66 17 -15 49 -40 73 -54 52 -32 65 -61 50 -113 -8 -31 -61 -90\n\t-277 -308 -300 -303 -361 -382 -369 -481 -2 -29 0 -66 6 -81 13 -40 88 -138\n\t115 -151 12 -6 54 -26 92 -44 l70 -33 945 -2 c520 -1 975 2 1012 7 64 8 191\n\t50 231 76 11 7 33 34 50 60 22 34 42 51 65 58 l32 9 0 1101 0 1102 -32 9 c-21\n\t7 -44 26 -64 55 -60 84 -77 97 -140 110 -44 9 -76 10 -127 2 -59 -9 -77 -17\n\t-134 -62 -37 -28 -172 -155 -301 -281 -129 -127 -249 -237 -267 -245 -25 -10\n\t-41 -11 -71 -2 -58 15 -112 45 -124 69 -6 11 -35 35 -64 54 -28 18 -58 41 -66\n\t50 -8 9 -41 35 -75 58 -33 22 -77 56 -99 75 -21 18 -64 46 -95 61 -31 14 -73\n\t39 -93 55 -20 15 -70 40 -110 55 -40 15 -97 44 -127 64 -29 21 -78 44 -107 53\n\t-30 8 -77 31 -105 51 -42 28 -73 39 -173 60 -68 14 -154 39 -196 58 -95 43\n\t-131 51 -343 76 -209 24 -242 32 -279 70 l-30 29 -328 0 c-312 0 -330 -1 -339\n\t-19z\"></path>\n\t<path d=\"M254 2875 c-89 -16 -107 -26 -145 -78 -32 -44 -62 -66 -91 -67 -17 0\n\t-18 -61 -18 -1140 l0 -1140 24 0 c16 0 41 -17 72 -50 40 -42 61 -55 117 -72\n\tl69 -21 82 23 c44 12 96 30 114 39 18 9 148 132 290 272 141 141 267 261 279\n\t268 51 26 86 14 176 -61 32 -26 62 -48 66 -48 5 0 36 -25 70 -55 34 -30 74\n\t-61 89 -69 15 -8 37 -28 50 -45 12 -17 50 -45 84 -62 34 -17 78 -44 98 -60 19\n\t-16 61 -37 93 -48 32 -11 81 -37 107 -56 27 -20 76 -45 109 -56 33 -12 75 -31\n\t93 -44 62 -45 93 -58 191 -82 54 -12 130 -37 168 -54 68 -29 180 -58 226 -59\n\t62 0 183 -64 183 -96 0 -12 88 -14 639 -14 l639 0 12 30 c18 44 76 66 233 89\n\t89 14 160 30 200 47 34 15 106 42 159 60 54 18 112 44 130 57 47 35 85 52 146\n\t67 29 7 76 28 105 48 29 20 77 48 107 63 30 15 66 39 80 54 14 15 50 40 81 56\n\t31 15 78 46 104 69 26 22 61 46 79 54 17 7 43 26 56 42 14 16 41 41 60 56 64\n\t48 380 362 408 405 15 23 40 51 55 63 15 12 36 38 46 58 11 21 37 57 58 82 22\n\t25 49 62 62 83 13 20 38 56 57 78 19 23 50 74 69 113 19 39 46 86 59 104 14\n\t18 34 62 46 98 12 36 32 77 45 92 31 38 60 97 80 167 9 33 26 76 37 95 29 50\n\t47 103 68 206 10 52 32 117 51 155 29 56 33 74 34 140 0 94 -10 108 -101 138\n\t-61 20 -83 21 -463 21 -226 0 -421 -4 -451 -10 -63 -12 -86 -30 -110 -85 -10\n\t-22 -33 -63 -52 -92 -21 -31 -42 -80 -53 -123 -11 -44 -32 -93 -56 -128 -20\n\t-32 -47 -83 -59 -115 -12 -32 -37 -77 -56 -100 -19 -23 -50 -65 -69 -94 -19\n\t-29 -44 -57 -54 -63 -11 -5 -29 -27 -42 -47 -52 -85 -234 -277 -300 -315 -25\n\t-15 -53 -38 -62 -51 -9 -14 -42 -39 -74 -57 -32 -18 -75 -48 -95 -66 -21 -18\n\t-59 -44 -85 -58 -26 -13 -72 -40 -100 -59 -35 -24 -78 -41 -128 -52 -47 -11\n\t-99 -31 -139 -56 -69 -42 -94 -49 -391 -110 -245 -51 -425 -66 -595 -50 -168\n\t16 -230 27 -330 61 -47 16 -123 35 -170 44 -98 17 -123 25 -172 58 -20 14 -71\n\t37 -114 53 -44 15 -95 40 -115 56 -20 16 -70 42 -110 59 -40 16 -88 45 -108\n\t63 -20 19 -55 46 -78 61 -24 14 -49 35 -55 47 -7 11 -34 33 -60 49 -50 31 -65\n\t61 -53 102 4 13 130 147 281 298 236 238 277 283 299 335 15 32 35 71 46 86\n\t12 18 19 44 19 76 0 42 -8 63 -53 138 -92 151 11 139 -1207 141 -798 2 -1030\n\t0 -1086 -11z\"></path>\n\t</g>\n</svg>\n";
 module.exports = svg;
@@ -15234,8 +15022,7 @@ module.exports = svg;
 /*!***************************************!*\
   !*** ./src/synth/images/pause.svg.js ***!
   \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var svg = "\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 25 25\" class=\"abcjs-pause-svg\">\n  <g>\n    <rect width=\"8.23\" height=\"25\"/>\n    <rect width=\"8.23\" height=\"25\" x=\"17\"/>\n  </g>\n</svg>\n";
 module.exports = svg;
@@ -15246,8 +15033,7 @@ module.exports = svg;
 /*!**************************************!*\
   !*** ./src/synth/images/play.svg.js ***!
   \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var svg = "\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 25 25\" class=\"abcjs-play-svg\">\n    <g>\n    <polygon points=\"4 0 23 12.5 4 25\"/>\n    </g>\n</svg>\n";
 module.exports = svg;
@@ -15258,8 +15044,7 @@ module.exports = svg;
 /*!***************************************!*\
   !*** ./src/synth/images/reset.svg.js ***!
   \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var svg = "\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 25 25\">\n  <g>\n    <polygon points=\"5 12.5 24 0 24 25\"/>\n    <rect width=\"3\" height=\"25\" x=\"0\" y=\"0\"/>\n  </g>\n</svg>\n";
 module.exports = svg;
@@ -15270,8 +15055,7 @@ module.exports = svg;
 /*!***********************************************!*\
   !*** ./src/synth/instrument-index-to-name.js ***!
   \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var instrumentIndexToName = ["acoustic_grand_piano", "bright_acoustic_piano", "electric_grand_piano", "honkytonk_piano", "electric_piano_1", "electric_piano_2", "harpsichord", "clavinet", "celesta", "glockenspiel", "music_box", "vibraphone", "marimba", "xylophone", "tubular_bells", "dulcimer", "drawbar_organ", "percussive_organ", "rock_organ", "church_organ", "reed_organ", "accordion", "harmonica", "tango_accordion", "acoustic_guitar_nylon", "acoustic_guitar_steel", "electric_guitar_jazz", "electric_guitar_clean", "electric_guitar_muted", "overdriven_guitar", "distortion_guitar", "guitar_harmonics", "acoustic_bass", "electric_bass_finger", "electric_bass_pick", "fretless_bass", "slap_bass_1", "slap_bass_2", "synth_bass_1", "synth_bass_2", "violin", "viola", "cello", "contrabass", "tremolo_strings", "pizzicato_strings", "orchestral_harp", "timpani", "string_ensemble_1", "string_ensemble_2", "synth_strings_1", "synth_strings_2", "choir_aahs", "voice_oohs", "synth_choir", "orchestra_hit", "trumpet", "trombone", "tuba", "muted_trumpet", "french_horn", "brass_section", "synth_brass_1", "synth_brass_2", "soprano_sax", "alto_sax", "tenor_sax", "baritone_sax", "oboe", "english_horn", "bassoon", "clarinet", "piccolo", "flute", "recorder", "pan_flute", "blown_bottle", "shakuhachi", "whistle", "ocarina", "lead_1_square", "lead_2_sawtooth", "lead_3_calliope", "lead_4_chiff", "lead_5_charang", "lead_6_voice", "lead_7_fifths", "lead_8_bass_lead", "pad_1_new_age", "pad_2_warm", "pad_3_polysynth", "pad_4_choir", "pad_5_bowed", "pad_6_metallic", "pad_7_halo", "pad_8_sweep", "fx_1_rain", "fx_2_soundtrack", "fx_3_crystal", "fx_4_atmosphere", "fx_5_brightness", "fx_6_goblins", "fx_7_echoes", "fx_8_scifi", "sitar", "banjo", "shamisen", "koto", "kalimba", "bagpipe", "fiddle", "shanai", "tinkle_bell", "agogo", "steel_drums", "woodblock", "taiko_drum", "melodic_tom", "synth_drum", "reverse_cymbal", "guitar_fret_noise", "breath_noise", "seashore", "bird_tweet", "telephone_ring", "helicopter", "applause", "gunshot", "percussion"];
 module.exports = instrumentIndexToName;
@@ -15282,8 +15066,7 @@ module.exports = instrumentIndexToName;
 /*!********************************!*\
   !*** ./src/synth/load-note.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 // Load one mp3 file for one note.
 // url = the base url for the soundfont
@@ -15400,8 +15183,7 @@ module.exports = getNote;
 /*!*****************************************!*\
   !*** ./src/synth/pitch-to-note-name.js ***!
   \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var pitchToNoteName = {
   21: 'A0',
@@ -15514,8 +15296,7 @@ module.exports = pitchToNoteName;
 /*!**************************************!*\
   !*** ./src/synth/pitches-to-perc.js ***!
   \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var pitchMap = {
   f0: "_C",
@@ -15589,12 +15370,13 @@ module.exports = pitchesToPerc;
 /*!*********************************!*\
   !*** ./src/synth/place-note.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var soundsCache = __webpack_require__(/*! ./sounds-cache */ "./src/synth/sounds-cache.js");
 
 var pitchToNoteName = __webpack_require__(/*! ./pitch-to-note-name */ "./src/synth/pitch-to-note-name.js");
+
+var centsToFactor = __webpack_require__(/*! ./cents-to-factor */ "./src/synth/cents-to-factor.js");
 
 function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec, noteEndSec) {
   // sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
@@ -15606,7 +15388,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
   len -= noteEndSec;
   if (len < 0) len = 0.005; // Have some small audible length no matter how short the note is.
 
-  var offlineCtx = new OfflineAC(2, Math.floor((len + fadeTimeSec) * sampleRate * 2), sampleRate);
+  var offlineCtx = new OfflineAC(2, Math.floor((len + fadeTimeSec) * sampleRate), sampleRate);
   var noteName = pitchToNoteName[sound.pitch];
   var noteBuffer = soundsCache[sound.instrument][noteName];
 
@@ -15637,8 +15419,8 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
   source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
   source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
 
-  if (sound.warp) {
-    source.playbackRate.value = sound.warp;
+  if (sound.cents) {
+    source.playbackRate.value = centsToFactor(sound.cents);
   } // connect all the nodes
 
 
@@ -15703,12 +15485,13 @@ module.exports = placeNote;
 /*!*********************************!*\
   !*** ./src/synth/play-event.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var SynthSequence = __webpack_require__(/*! ./synth-sequence */ "./src/synth/synth-sequence.js");
 
 var CreateSynth = __webpack_require__(/*! ./create-synth */ "./src/synth/create-synth.js");
+
+var activeAudioContext = __webpack_require__(/*! ./active-audio-context */ "./src/synth/active-audio-context.js");
 
 function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
   var sequence = new SynthSequence();
@@ -15721,13 +15504,25 @@ function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
     if (i === 0 && midiGracePitches) {
       for (var j = 0; j < midiGracePitches.length; j++) {
         var grace = midiGracePitches[j];
-        sequence.appendNote(trackNum, grace.pitch, 1 / 64, grace.volume);
+        sequence.appendNote(trackNum, grace.pitch, 1 / 64, grace.volume, grace.cents);
       }
     }
 
-    sequence.appendNote(trackNum, note.pitch, note.duration, note.volume);
+    sequence.appendNote(trackNum, note.pitch, note.duration, note.volume, note.cents);
   }
 
+  var ac = activeAudioContext();
+
+  if (ac.state === "suspended") {
+    return ac.resume().then(function () {
+      return doPlay(sequence, millisecondsPerMeasure);
+    });
+  } else {
+    return doPlay(sequence, millisecondsPerMeasure);
+  }
+}
+
+function doPlay(sequence, millisecondsPerMeasure) {
   var buffer = new CreateSynth();
   return buffer.init({
     sequence: sequence,
@@ -15735,7 +15530,8 @@ function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
   }).then(function () {
     return buffer.prime();
   }).then(function () {
-    return buffer.start();
+    buffer.start();
+    return Promise.resolve();
   });
 }
 
@@ -15747,8 +15543,7 @@ module.exports = playEvent;
 /*!*********************************************!*\
   !*** ./src/synth/register-audio-context.js ***!
   \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 // Call this when it is safe for the abcjs to produce sound. This is after the first user gesture on the page.
 // If you call it with no parameters, then an AudioContext is created and stored.
@@ -15773,8 +15568,7 @@ module.exports = registerAudioContext;
 /*!***********************************!*\
   !*** ./src/synth/sounds-cache.js ***!
   \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var soundsCache = {};
 module.exports = soundsCache;
@@ -15785,8 +15579,7 @@ module.exports = soundsCache;
 /*!*************************************!*\
   !*** ./src/synth/supports-audio.js ***!
   \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var activeAudioContext = __webpack_require__(/*! ./active-audio-context */ "./src/synth/active-audio-context.js"); //
 // Support for audio depends on three things: support for Promise, support for AudioContext, and support for AudioContext.resume.
@@ -15813,8 +15606,7 @@ module.exports = supportsAudio;
 /*!***************************************!*\
   !*** ./src/synth/synth-controller.js ***!
   \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var CreateSynthControl = __webpack_require__(/*! ./create-synth-control */ "./src/synth/create-synth-control.js");
 
@@ -16123,8 +15915,7 @@ module.exports = SynthController;
 /*!*************************************!*\
   !*** ./src/synth/synth-sequence.js ***!
   \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var SynthSequence = function SynthSequence() {
   var self = this;
@@ -16149,8 +15940,8 @@ var SynthSequence = function SynthSequence() {
     self.currentInstrument[trackNumber] = instrumentNumber;
   };
 
-  self.appendNote = function (trackNumber, pitch, durationInMeasures, volume) {
-    self.tracks[trackNumber].push({
+  self.appendNote = function (trackNumber, pitch, durationInMeasures, volume, cents) {
+    var note = {
       cmd: "note",
       duration: durationInMeasures,
       gap: 0,
@@ -16158,7 +15949,9 @@ var SynthSequence = function SynthSequence() {
       pitch: pitch,
       start: self.starts[trackNumber],
       volume: volume
-    });
+    };
+    if (cents) note.cents = cents;
+    self.tracks[trackNumber].push(note);
     self.starts[trackNumber] += durationInMeasures;
     self.totalDuration = Math.max(self.totalDuration, self.starts[trackNumber]);
   };
@@ -16172,8 +15965,7 @@ module.exports = SynthSequence;
 /*!*******************************************!*\
   !*** ./src/write/abc_absolute_element.js ***!
   \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_absolute_element.js: Definition of the AbsoluteElement class.
 var setClass = __webpack_require__(/*! ./set-class */ "./src/write/set-class.js");
@@ -16430,8 +16222,7 @@ module.exports = AbsoluteElement;
 /*!********************************************!*\
   !*** ./src/write/abc_abstract_engraver.js ***!
   \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 // abc_abstract_engraver.js: Creates a data structure suitable for printing a line of abc
 var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
@@ -17737,8 +17528,7 @@ module.exports = AbstractEngraver;
 /*!***************************************!*\
   !*** ./src/write/abc_beam_element.js ***!
   \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_beam_element.js: Definition of the BeamElem class.
 // Most elements on the page are related to a particular absolute element -- notes, rests, bars, etc. Beams, however, span multiple elements.
@@ -17842,8 +17632,7 @@ module.exports = BeamElem;
 /*!****************************************!*\
   !*** ./src/write/abc_brace_element.js ***!
   \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_brace_element.js: Definition of the BraceElement class.
 var BraceElem = function BraceElem(voice, type) {
@@ -17882,8 +17671,7 @@ module.exports = BraceElem;
 /*!**************************************!*\
   !*** ./src/write/abc_create_clef.js ***!
   \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_create_clef.js
 var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
@@ -18034,8 +17822,7 @@ module.exports = createClef;
 /*!***********************************************!*\
   !*** ./src/write/abc_create_key_signature.js ***!
   \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_create_key_signature.js
 var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
@@ -18048,7 +17835,6 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
 
 var createKeySignature = function createKeySignature(elem, tuneNumber) {
   if (!elem.accidentals || elem.accidentals.length === 0) return null;
-  elem.el_type = "keySignature";
   var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra key-signature', tuneNumber);
   abselem.isKeySig = true;
   var dx = 0;
@@ -18103,8 +17889,7 @@ module.exports = createKeySignature;
 /*!*******************************************!*\
   !*** ./src/write/abc_create_note_head.js ***!
   \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
 
@@ -18251,8 +18036,7 @@ module.exports = createNoteHead;
 /*!************************************************!*\
   !*** ./src/write/abc_create_time_signature.js ***!
   \************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_create_time_signature.js
 var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
@@ -18349,8 +18133,7 @@ module.exports = createTimeSignature;
 /*!********************************************!*\
   !*** ./src/write/abc_crescendo_element.js ***!
   \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_crescendo_element.js: Definition of the CrescendoElem class.
 var CrescendoElem = function CrescendoElem(anchor1, anchor2, dir, positioning) {
@@ -18373,8 +18156,7 @@ module.exports = CrescendoElem;
 /*!*************************************!*\
   !*** ./src/write/abc_decoration.js ***!
   \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 // abc_decoration.js: Creates a data structure suitable for printing a line of abc
 var DynamicDecoration = __webpack_require__(/*! ./abc_dynamic_decoration */ "./src/write/abc_dynamic_decoration.js");
@@ -18767,8 +18549,7 @@ module.exports = Decoration;
 /*!*********************************************!*\
   !*** ./src/write/abc_dynamic_decoration.js ***!
   \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_dynamic_decoration.js: Definition of the DynamicDecoration class.
 var DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
@@ -18787,8 +18568,7 @@ module.exports = DynamicDecoration;
 /*!*****************************************!*\
   !*** ./src/write/abc_ending_element.js ***!
   \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_ending_element.js: Definition of the EndingElement class.
 var EndingElem = function EndingElem(text, anchor1, anchor2) {
@@ -18811,8 +18591,7 @@ module.exports = EndingElem;
 /*!**********************************************!*\
   !*** ./src/write/abc_engraver_controller.js ***!
   \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_engraver_controller.js: Controls the engraving process of an ABCJS abstract syntax tree as produced by ABCJS/parse
 
@@ -19098,8 +18877,7 @@ module.exports = EngraverController;
 /*!*********************************!*\
   !*** ./src/write/abc_glyphs.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
 /**
@@ -19735,8 +19513,7 @@ module.exports = Glyphs; // we need the glyphs for layout information
 /*!*******************************************!*\
   !*** ./src/write/abc_relative_element.js ***!
   \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_relative_element.js: Definition of the RelativeElement class.
 var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
@@ -19853,8 +19630,7 @@ module.exports = RelativeElement;
 /*!***********************************!*\
   !*** ./src/write/abc_renderer.js ***!
   \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_renderer.js: API to render to SVG/Raphael/whatever rendering engine
 
@@ -20047,8 +19823,7 @@ module.exports = Renderer;
 /*!**********************************!*\
   !*** ./src/write/abc_spacing.js ***!
   \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var spacing = {};
 spacing.FONTEM = 360;
@@ -20066,8 +19841,7 @@ module.exports = spacing;
 /*!**********************************************!*\
   !*** ./src/write/abc_staff_group_element.js ***!
   \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_staff_group_element.js: Definition of the StaffGroupElement class.
 // StaffGroupElement contains all the elements that go together to make one line of music.
@@ -20176,8 +19950,7 @@ module.exports = StaffGroupElement;
 /*!****************************************!*\
   !*** ./src/write/abc_tempo_element.js ***!
   \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_tempo_element.js: Definition of the TempoElement class.
 var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
@@ -20298,8 +20071,7 @@ module.exports = TempoElement;
 /*!**************************************!*\
   !*** ./src/write/abc_tie_element.js ***!
   \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_tie_element.js: Definition of the TieElement class.
 var TieElem = function TieElem(options) {
@@ -20447,8 +20219,7 @@ module.exports = TieElem;
 /*!******************************************!*\
   !*** ./src/write/abc_triplet_element.js ***!
   \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_triplet_element.js: Definition of the TripletElem class.
 var TripletElem = function TripletElem(number, anchor1, options) {
@@ -20485,8 +20256,7 @@ module.exports = TripletElem;
 /*!****************************************!*\
   !*** ./src/write/abc_voice_element.js ***!
   \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_voice_element.js: Definition of the VoiceElement class.
 var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
@@ -20586,8 +20356,7 @@ module.exports = VoiceElement;
 /*!********************************!*\
   !*** ./src/write/add-chord.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
 
@@ -20713,8 +20482,7 @@ module.exports = addChord;
 /*!**********************************!*\
   !*** ./src/write/bottom-text.js ***!
   \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function BottomText(metaText, width, isPrint, paddingLeft, spacing, getTextSize) {
   this.rows = [];
@@ -20848,8 +20616,7 @@ module.exports = BottomText;
 /*!*********************************!*\
   !*** ./src/write/calcHeight.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var calcHeight = function calcHeight(staffGroup) {
   // the height is calculated here in a parallel way to the drawing below in hopes that both of these functions will be modified together.
@@ -20876,8 +20643,7 @@ module.exports = calcHeight;
 /*!******************************!*\
   !*** ./src/write/classes.js ***!
   \******************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var Classes = function Classes(options) {
   this.shouldAddClasses = options.shouldAddClasses;
@@ -20984,8 +20750,7 @@ module.exports = Classes;
 /*!************************************!*\
   !*** ./src/write/draw/absolute.js ***!
   \************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var drawTempo = __webpack_require__(/*! ./tempo */ "./src/write/draw/tempo.js");
 
@@ -21072,8 +20837,7 @@ module.exports = drawAbsolute;
 /*!********************************!*\
   !*** ./src/write/draw/beam.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var printPath = __webpack_require__(/*! ./print-path */ "./src/write/draw/print-path.js");
 
@@ -21141,8 +20905,7 @@ module.exports = drawBeam;
 /*!*********************************!*\
   !*** ./src/write/draw/brace.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
@@ -21248,8 +21011,7 @@ module.exports = drawBrace;
 /*!*************************************!*\
   !*** ./src/write/draw/crescendo.js ***!
   \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
@@ -21305,8 +21067,7 @@ module.exports = drawCrescendo;
 /*!*************************************!*\
   !*** ./src/write/draw/debug-box.js ***!
   \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function printDebugBox(renderer, attr, comment) {
   var box = renderer.paper.rectBeneath(attr);
@@ -21329,8 +21090,7 @@ module.exports = printDebugBox;
 /*!********************************!*\
   !*** ./src/write/draw/draw.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var drawStaffGroup = __webpack_require__(/*! ./staff-group */ "./src/write/draw/staff-group.js");
 
@@ -21406,8 +21166,7 @@ module.exports = draw;
 /*!************************************!*\
   !*** ./src/write/draw/dynamics.js ***!
   \************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var printSymbol = __webpack_require__(/*! ./print-symbol */ "./src/write/draw/print-symbol.js");
 
@@ -21433,8 +21192,7 @@ module.exports = drawDynamics;
 /*!**********************************!*\
   !*** ./src/write/draw/ending.js ***!
   \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
@@ -21495,8 +21253,7 @@ module.exports = drawEnding;
 /*!******************************************!*\
   !*** ./src/write/draw/group-elements.js ***!
   \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /**
  * Begin a group of glyphs that will always be moved, scaled and highlighted together
@@ -21572,8 +21329,7 @@ module.exports = elementGroup;
 /*!*************************************!*\
   !*** ./src/write/draw/non-music.js ***!
   \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var drawSeparator = __webpack_require__(/*! ./separator */ "./src/write/draw/separator.js");
 
@@ -21631,8 +21387,7 @@ module.exports = nonMusic;
 /*!**************************************!*\
   !*** ./src/write/draw/print-path.js ***!
   \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function printPath(renderer, attrs, params) {
   var ret = renderer.paper.path(attrs);
@@ -21647,8 +21402,7 @@ module.exports = printPath;
 /*!**************************************!*\
   !*** ./src/write/draw/print-stem.js ***!
   \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var elementGroup = __webpack_require__(/*! ./group-elements */ "./src/write/draw/group-elements.js");
 
@@ -21697,8 +21451,7 @@ module.exports = printStem;
 /*!****************************************!*\
   !*** ./src/write/draw/print-symbol.js ***!
   \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var renderText = __webpack_require__(/*! ./text */ "./src/write/draw/text.js");
 
@@ -21785,8 +21538,7 @@ module.exports = printSymbol;
 /*!************************************!*\
   !*** ./src/write/draw/relative.js ***!
   \************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var renderText = __webpack_require__(/*! ./text */ "./src/write/draw/text.js");
 
@@ -21946,8 +21698,7 @@ module.exports = drawRelativeElement;
 /*!****************************************!*\
   !*** ./src/write/draw/round-number.js ***!
   \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function roundNumber(x) {
   return parseFloat(x.toFixed(2));
@@ -21961,8 +21712,7 @@ module.exports = roundNumber;
 /*!***************************************!*\
   !*** ./src/write/draw/selectables.js ***!
   \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var highlight = __webpack_require__(/*! ../highlight */ "./src/write/highlight.js");
 
@@ -22033,8 +21783,7 @@ module.exports = Selectables;
 /*!*************************************!*\
   !*** ./src/write/draw/separator.js ***!
   \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function drawSeparator(renderer, width) {
   var fill = "rgba(0,0,0,255)";
@@ -22060,8 +21809,7 @@ module.exports = drawSeparator;
 /*!******************************************!*\
   !*** ./src/write/draw/set-paper-size.js ***!
   \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function setPaperSize(renderer, maxwidth, scale, responsive) {
   var w = (maxwidth + renderer.padding.right) * scale;
@@ -22106,8 +21854,7 @@ module.exports = setPaperSize;
 /*!***********************************!*\
   !*** ./src/write/draw/sprintf.js ***!
   \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -22217,8 +21964,7 @@ module.exports = sprintf;
 /*!***************************************!*\
   !*** ./src/write/draw/staff-group.js ***!
   \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var spacing = __webpack_require__(/*! ../abc_spacing */ "./src/write/abc_spacing.js");
 
@@ -22446,8 +22192,7 @@ module.exports = drawStaffGroup;
 /*!**************************************!*\
   !*** ./src/write/draw/staff-line.js ***!
   \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
@@ -22480,8 +22225,7 @@ module.exports = printStaffLine;
 /*!*********************************!*\
   !*** ./src/write/draw/staff.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var printStaffLine = __webpack_require__(/*! ./staff-line */ "./src/write/draw/staff-line.js");
 
@@ -22512,8 +22256,7 @@ module.exports = printStaff;
 /*!*********************************!*\
   !*** ./src/write/draw/tempo.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var drawRelativeElement = __webpack_require__(/*! ./relative */ "./src/write/draw/relative.js");
 
@@ -22602,8 +22345,7 @@ module.exports = drawTempo;
 /*!********************************!*\
   !*** ./src/write/draw/text.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
 
@@ -22692,8 +22434,7 @@ module.exports = renderText;
 /*!*******************************!*\
   !*** ./src/write/draw/tie.js ***!
   \*******************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
@@ -22802,8 +22543,7 @@ module.exports = drawTie;
 /*!***********************************!*\
   !*** ./src/write/draw/triplet.js ***!
   \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 
@@ -22878,8 +22618,7 @@ module.exports = drawTriplet;
 /*!*********************************!*\
   !*** ./src/write/draw/voice.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var drawCrescendo = __webpack_require__(/*! ./crescendo */ "./src/write/draw/crescendo.js");
 
@@ -23011,8 +22750,7 @@ module.exports = drawVoice;
 /*!********************************!*\
   !*** ./src/write/free-text.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function FreeText(text, vskip, getFontAndAttr, paddingLeft, width, getTextSize) {
   this.rows = [];
@@ -23077,8 +22815,7 @@ module.exports = FreeText;
 /*!****************************************!*\
   !*** ./src/write/get-font-and-attr.js ***!
   \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var GetFontAndAttr = function GetFontAndAttr(formatting, classes) {
   this.formatting = formatting;
@@ -23145,8 +22882,7 @@ module.exports = GetFontAndAttr;
 /*!************************************!*\
   !*** ./src/write/get-text-size.js ***!
   \************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var GetTextSize = function GetTextSize(getFontAndAttr, svg) {
   this.getFontAndAttr = getFontAndAttr;
@@ -23212,8 +22948,7 @@ module.exports = GetTextSize;
 /*!********************************!*\
   !*** ./src/write/highlight.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var setClass = __webpack_require__(/*! ./set-class */ "./src/write/set-class.js");
 
@@ -23231,8 +22966,7 @@ module.exports = highlight;
 /*!*******************************************!*\
   !*** ./src/write/layout/VoiceElements.js ***!
   \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var VoiceElement = function VoiceElements() {};
 
@@ -23336,8 +23070,7 @@ module.exports = VoiceElement;
 /*!**********************************!*\
   !*** ./src/write/layout/beam.js ***!
   \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var RelativeElement = __webpack_require__(/*! ../abc_relative_element */ "./src/write/abc_relative_element.js");
 
@@ -23579,8 +23312,7 @@ module.exports = layoutBeam;
 /*!****************************************************!*\
   !*** ./src/write/layout/get-left-edge-of-staff.js ***!
   \****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
   var x = renderer.padding.left; // find out how much space will be taken up by voice headers
@@ -23648,8 +23380,7 @@ module.exports = getLeftEdgeOfStaff;
 /*!***************************************!*\
   !*** ./src/write/layout/getBarYAt.js ***!
   \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function getBarYAt(startx, starty, endx, endy, x) {
   return starty + (endy - starty) / (endx - startx) * (x - startx);
@@ -23663,8 +23394,7 @@ module.exports = getBarYAt;
 /*!************************************!*\
   !*** ./src/write/layout/layout.js ***!
   \************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var layoutVoice = __webpack_require__(/*! ./voice */ "./src/write/layout/voice.js");
 
@@ -23787,8 +23517,7 @@ module.exports = layout;
 /*!******************************************************!*\
   !*** ./src/write/layout/setUpperAndLowerElements.js ***!
   \******************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var spacing = __webpack_require__(/*! ../abc_spacing */ "./src/write/abc_spacing.js");
 
@@ -24044,8 +23773,7 @@ module.exports = setUpperAndLowerElements;
 /*!****************************************!*\
   !*** ./src/write/layout/staffGroup.js ***!
   \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var layoutVoiceElements = __webpack_require__(/*! ./VoiceElements */ "./src/write/layout/VoiceElements.js");
 
@@ -24173,8 +23901,7 @@ module.exports = layoutStaffGroup;
 /*!*************************************!*\
   !*** ./src/write/layout/triplet.js ***!
   \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var getBarYAt = __webpack_require__(/*! ./getBarYAt */ "./src/write/layout/getBarYAt.js");
 
@@ -24258,8 +23985,7 @@ module.exports = layoutTriplet;
 /*!***********************************!*\
   !*** ./src/write/layout/voice.js ***!
   \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var layoutBeam = __webpack_require__(/*! ./beam */ "./src/write/layout/beam.js");
 
@@ -24423,8 +24149,7 @@ module.exports = layoutVoice;
 /*!********************************!*\
   !*** ./src/write/selection.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
 
@@ -24857,8 +24582,7 @@ module.exports = setupSelection;
 /*!********************************!*\
   !*** ./src/write/separator.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function Separator(spaceAbove, lineLength, spaceBelow) {
   this.rows = [];
@@ -24881,8 +24605,7 @@ module.exports = Separator;
 /*!********************************!*\
   !*** ./src/write/set-class.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var setClass = function setClass(elemset, addClass, removeClass, color) {
   if (!elemset) return;
@@ -24914,8 +24637,7 @@ module.exports = setClass;
 /*!*******************************!*\
   !*** ./src/write/subtitle.js ***!
   \*******************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function Subtitle(spaceAbove, formatting, text, center, paddingLeft, getTextSize) {
   this.rows = [];
@@ -24945,8 +24667,7 @@ module.exports = Subtitle;
 /*!**************************!*\
   !*** ./src/write/svg.js ***!
   \**************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 //    abc_voice_element.js: Definition of the VoiceElement class.
 
@@ -25289,8 +25010,7 @@ module.exports = Svg;
 /*!*******************************!*\
   !*** ./src/write/top-text.js ***!
   \*******************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
   this.rows = [];
@@ -25379,8 +25099,7 @@ module.exports = TopText;
 /*!**********************************!*\
   !*** ./src/write/unhighlight.js ***!
   \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var setClass = __webpack_require__(/*! ./set-class */ "./src/write/set-class.js");
 
@@ -25394,51 +25113,52 @@ module.exports = unhighlight;
 
 /***/ }),
 
-/***/ "./static-wrappers/license.js":
-/*!************************************!*\
-  !*** ./static-wrappers/license.js ***!
-  \************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-/**!
-Copyright (c) 2009-2021 Paul Rosen and Gregory Dyke
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-**This text is from: http://opensource.org/licenses/MIT**
-!**/
-
-/***/ }),
-
 /***/ "./version.js":
 /*!********************!*\
   !*** ./version.js ***!
   \********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
 var version = '6.0.0-beta.32';
 module.exports = version;
 
 /***/ })
 
-/******/ });
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__("./index.js");
+/******/ 	
+/******/ 	return __webpack_exports__;
+/******/ })()
+;
 });
 //# sourceMappingURL=abcjs-basic.js.map
