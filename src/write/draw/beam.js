@@ -1,5 +1,5 @@
 var printPath = require('./print-path');
-const roundNumber = require("./round-number");
+var roundNumber = require("./round-number");
 
 function drawBeam(renderer, params) {
 	if (params.beams.length === 0) return;

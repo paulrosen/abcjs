@@ -1,5 +1,5 @@
-const assert = require('chai').assert
-const Tunebook = require("../../src/api/abc_tunebook")
+var assert = require('chai').assert
+var Tunebook = require("../../src/api/abc_tunebook")
 /**
  * http://abcnotation.com/wiki/abc:standard:v2.1#xreference_number
  * http://abcnotation.com/wiki/abc:standard:v2.1#ttune_title

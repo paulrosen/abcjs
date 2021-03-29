@@ -1,5 +1,5 @@
 var sprintf = require('./sprintf');
-const roundNumber = require("./round-number");
+var roundNumber = require("./round-number");
 
 function printStaffLine(renderer, x1,x2, pitch, klass) {
 	var dy = 0.35;

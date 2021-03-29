@@ -1,6 +1,6 @@
-const assert = require('chai').assert
-const render = require('../../src/api/abc_tunebook_svg')
-const tunebook = require('../../src/api/abc_tunebook')
+var assert = require('chai').assert
+var render = require('../../src/api/abc_tunebook_svg')
+var tunebook = require('../../src/api/abc_tunebook')
 
 // mock renderEngine Call
 tunebook.renderEngine = function (...args) {
