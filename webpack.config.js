@@ -43,7 +43,9 @@ module.exports = (env = {} , argv) => {
 
     if (env.analyze) {
       config.plugins = [
-        new WebpackBundleAnalyzer()
+        new WebpackBundleAnalyzer({
+          analyzerMode: "static"
+        })
       ]
     }
     return config
