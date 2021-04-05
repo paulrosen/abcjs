@@ -42,6 +42,7 @@ var Parse = function() {
 			setupEvents: tune.setupEvents,
 			setTiming: tune.setTiming,
 			setUpAudio: tune.setUpAudio,
+			deline: tune.deline,
 		};
 		if (tune.lineBreaks)
 			t.lineBreaks = tune.lineBreaks;
