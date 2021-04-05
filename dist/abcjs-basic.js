@@ -1129,6 +1129,8 @@ var spacing = __webpack_require__(/*! ../write/abc_spacing */ "./src/write/abc_s
 var sequence = __webpack_require__(/*! ../synth/abc_midi_sequencer */ "./src/synth/abc_midi_sequencer.js");
 
 var flatten = __webpack_require__(/*! ../synth/abc_midi_flattener */ "./src/synth/abc_midi_flattener.js");
+
+var delineTune = __webpack_require__(/*! ./deline-tune */ "./src/data/deline-tune.js");
 /**
  * This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
  * Also known as the ABCJS Abstract Syntax Tree
@@ -1525,6 +1527,7 @@ var Tune = function Tune() {
     var isTiedState;
     var nextIsBar = true;
     var voices = this.makeVoicesArray();
+    var maxVoiceTimeMilliseconds = 0;
 
     for (var v = 0; v < voices.length; v++) {
       var voiceTime = time;
@@ -1599,6 +1602,8 @@ var Tune = function Tune() {
           if (startRepeat) startingRepeatElem = elem;
         }
       }
+
+      maxVoiceTimeMilliseconds = Math.max(maxVoiceTimeMilliseconds, voiceTimeMilliseconds);
     } // now we have all the events, but if there are multiple voices then there may be events out of order or duplicated, so normalize it.
 
 
@@ -1607,7 +1612,7 @@ var Tune = function Tune() {
     addEndPoints(this.lines, timingEvents);
     timingEvents.push({
       type: "end",
-      milliseconds: voiceTimeMilliseconds
+      milliseconds: maxVoiceTimeMilliseconds
     });
     this.addUsefulCallbackInfo(timingEvents, bpm * warp);
     return timingEvents;
@@ -1710,9 +1715,247 @@ var Tune = function Tune() {
     var seq = sequence(this, options);
     return flatten(seq, options, this.formatting.percmap);
   };
+
+  this.deline = function () {
+    return delineTune(this.lines);
+  };
 };
 
 module.exports = Tune;
+
+/***/ }),
+
+/***/ "./src/data/deline-tune.js":
+/*!*********************************!*\
+  !*** ./src/data/deline-tune.js ***!
+  \*********************************/
+/***/ (function(module) {
+
+function delineTune(inputLines) {
+  var outputLines = [];
+  var inMusicLine = false;
+  var currentMeter = [];
+  var currentKey = [];
+  var currentClef = [];
+  var currentVocalFont = [];
+  var currentGChordFont = [];
+  var currentTripletFont = [];
+  var currentAnnotationFont = [];
+
+  for (var i = 0; i < inputLines.length; i++) {
+    var inputLine = inputLines[i];
+
+    if (inputLine.staff) {
+      if (inMusicLine && !inputLine.vskip) {
+        var outputLine = outputLines[outputLines.length - 1];
+        findMismatchKeys(inputLine, outputLine, ["staff", "staffGroup"], "line", i);
+
+        for (var s = 0; s < outputLine.staff.length; s++) {
+          var inputStaff = inputLine.staff[s];
+          var outputStaff = outputLine.staff[s];
+
+          if (inputStaff) {
+            if (!objEqual(inputStaff.meter, currentMeter[s])) {
+              // The meter changed for this line, otherwise it wouldn't have been set
+              addMeterToVoices(inputStaff.meter, inputStaff.voices);
+              currentMeter[s] = inputStaff.meter;
+              delete inputStaff.meter;
+            }
+
+            if (!objEqual(inputStaff.key, currentKey[s])) {
+              addKeyToVoices(inputStaff.key, inputStaff.voices);
+              currentKey[s] = inputStaff.key;
+              delete inputStaff.key;
+            }
+
+            if (inputStaff.title) outputStaff.abbrevTitle = inputStaff.title;
+
+            if (!objEqual(inputStaff.clef, currentClef[s])) {
+              addClefToVoices(inputStaff.clef, inputStaff.voices);
+              currentClef[s] = inputStaff.clef;
+              delete inputStaff.clef;
+            }
+
+            if (!objEqual(inputStaff.vocalfont, currentVocalFont[s])) {
+              addFontToVoices(inputStaff.vocalfont, inputStaff.voices, 'vocalfont');
+              currentVocalFont[s] = inputStaff.vocalfont;
+              delete inputStaff.vocalfont;
+            }
+
+            if (!objEqual(inputStaff.gchordfont, currentGChordFont[s])) {
+              addFontToVoices(inputStaff.gchordfont, inputStaff.voices, 'gchordfont');
+              currentGChordFont[s] = inputStaff.gchordfont;
+              delete inputStaff.gchordfont;
+            }
+
+            if (!objEqual(inputStaff.tripletfont, currentTripletFont[s])) {
+              addFontToVoices(inputStaff.tripletfont, inputStaff.voices, 'tripletfont');
+              currentTripletFont[s] = inputStaff.tripletfont;
+              delete inputStaff.tripletfont;
+            }
+
+            if (!objEqual(inputStaff.annotationfont, currentAnnotationFont[s])) {
+              addFontToVoices(inputStaff.annotationfont, inputStaff.voices, 'annotationfont');
+              currentAnnotationFont[s] = inputStaff.annotationfont;
+              delete inputStaff.annotationfont;
+            }
+          }
+
+          findMismatchKeys(inputStaff, outputStaff, ["voices", "title", "abbrevTitle", "barNumber", "meter", "key", "clef", "vocalfont", "gchordfont", "tripletfont", "annotationfont"], "staff", i + ' ' + s);
+
+          if (inputStaff) {
+            for (var v = 0; v < outputStaff.voices.length; v++) {
+              var outputVoice = outputStaff.voices[v];
+              var inputVoice = inputStaff.voices[v];
+              outputVoice.push({
+                el_type: "break"
+              });
+              if (inputVoice) outputStaff.voices[v] = outputVoice.concat(inputVoice);
+            }
+          }
+        }
+      } else {
+        for (var ii = 0; ii < inputLine.staff.length; ii++) {
+          currentKey[ii] = inputLine.staff[ii].key;
+          currentMeter[ii] = inputLine.staff[ii].meter;
+        } // copy this because we are going to change it and we don't want to change the original.
+
+
+        outputLines.push(cloneLine(inputLine));
+      }
+
+      inMusicLine = true;
+    } else {
+      inMusicLine = false;
+      outputLines.push(inputLine);
+    }
+  }
+
+  return outputLines;
+}
+
+function findMismatchKeys(input, output, ignore, context, context2) {
+  if (!input) {
+    return;
+  }
+
+  var outputKeys = Object.keys(output);
+  var inputKeys = Object.keys(input);
+
+  for (var ii = 0; ii < ignore.length; ii++) {
+    if (outputKeys.indexOf(ignore[ii]) >= 0) {
+      outputKeys.splice(outputKeys.indexOf(ignore[ii]), 1);
+    }
+
+    if (inputKeys.indexOf(ignore[ii]) >= 0) {
+      inputKeys.splice(inputKeys.indexOf(ignore[ii]), 1);
+    }
+  }
+
+  if (inputKeys.join(",") !== outputKeys.join(",")) {
+    console.log("keys mismatch " + context + ' ' + context2, input, output);
+  }
+
+  for (var k = 0; k < inputKeys.length; k++) {
+    var key = inputKeys[k];
+
+    if (ignore.indexOf(key) < 0) {
+      var inputValue = JSON.stringify(input[key], replacer);
+      var outputValue = JSON.stringify(output[key], replacer);
+      if (inputValue !== outputValue) console.log("value mismatch " + context + ' ' + context2 + ' ' + key, inputValue, outputValue);
+    }
+  }
+}
+
+function replacer(key, value) {
+  // Filtering out properties
+  if (key === 'abselem') {
+    return 'abselem';
+  }
+
+  return value;
+}
+
+function addMeterToVoices(meter, voices) {
+  meter.el_type = "meter";
+  meter.startChar = -1;
+  meter.endChar = -1;
+
+  for (var i = 0; i < voices.length; i++) {
+    voices[i].unshift(meter);
+  }
+}
+
+function addKeyToVoices(key, voices) {
+  key.el_type = "key";
+  key.startChar = -1;
+  key.endChar = -1;
+
+  for (var i = 0; i < voices.length; i++) {
+    voices[i].unshift(key);
+  }
+}
+
+function addClefToVoices(clef, voices) {
+  clef.el_type = "clef";
+  clef.startChar = -1;
+  clef.endChar = -1;
+
+  for (var i = 0; i < voices.length; i++) {
+    voices[i].unshift(clef);
+  }
+}
+
+function addFontToVoices(font, voices, type) {
+  font.el_type = "font";
+  font.type = type;
+  font.startChar = -1;
+  font.endChar = -1;
+
+  for (var i = 0; i < voices.length; i++) {
+    voices[i].unshift(font);
+  }
+}
+
+function objEqual(input, output) {
+  if (!input) return true; // the default is whatever the old output is.
+
+  var inputValue = JSON.stringify(input, replacer);
+  var outputValue = JSON.stringify(output, replacer);
+  return inputValue === outputValue;
+}
+
+function cloneLine(line) {
+  var output = {};
+  var keys = Object.keys(line);
+
+  for (var i = 0; i < keys.length; i++) {
+    if (keys[i] !== "staff") output[keys[i]] = line[keys[i]];else {
+      output.staff = [];
+
+      for (var j = 0; j < line.staff.length; j++) {
+        var staff = {};
+        var keys2 = Object.keys(line.staff[j]);
+
+        for (var k = 0; k < keys2.length; k++) {
+          if (keys2[k] !== "voices") staff[keys2[k]] = line.staff[j][keys2[k]];else {
+            staff.voices = [];
+
+            for (var v = 0; v < line.staff[j].voices.length; v++) {
+              staff.voices.push([].concat(line.staff[j].voices[v]));
+            }
+          }
+        }
+
+        output.staff.push(staff);
+      }
+    }
+  }
+
+  return output;
+}
+
+module.exports = delineTune;
 
 /***/ }),
 
@@ -2529,7 +2772,8 @@ var Parse = function Parse() {
       millisecondsPerMeasure: tune.millisecondsPerMeasure,
       setupEvents: tune.setupEvents,
       setTiming: tune.setTiming,
-      setUpAudio: tune.setUpAudio
+      setUpAudio: tune.setUpAudio,
+      deline: tune.deline
     };
     if (tune.lineBreaks) t.lineBreaks = tune.lineBreaks;
     if (tune.visualTranspose) t.visualTranspose = tune.visualTranspose;
@@ -13396,10 +13640,11 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
     var skipEndingPlaceholder = []; // This is the place where the first ending starts.
 
     var startingDrumSet = false;
+    var lines = abctune.deline();
 
-    for (var i = 0; i < abctune.lines.length; i++) {
+    for (var i = 0; i < lines.length; i++) {
       // For each group of staff lines in the tune.
-      var line = abctune.lines[i];
+      var line = lines[i];
 
       if (line.staff) {
         var setDynamics = function setDynamics(elem) {
@@ -13482,26 +13727,11 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                 if (voices[voiceNumber][cl].el_type === 'instrument') voices[voiceNumber][cl].program = PERCUSSION_PROGRAM;
               }
             } else if (staff.key) {
-              if (staff.key.root === 'HP') voices[voiceNumber].push({
-                el_type: 'key',
-                accidentals: [{
-                  acc: 'natural',
-                  note: 'g'
-                }, {
-                  acc: 'sharp',
-                  note: 'f'
-                }, {
-                  acc: 'sharp',
-                  note: 'c'
-                }]
-              });else voices[voiceNumber].push({
-                el_type: 'key',
-                accidentals: staff.key.accidentals
-              });
+              addKey(voices[voiceNumber], staff.key);
             }
 
             if (staff.meter) {
-              voices[voiceNumber].push(interpretMeter(staff.meter));
+              addMeter(voices[voiceNumber], staff.meter);
             }
 
             if (!startingDrumSet && drumOn) {
@@ -13632,26 +13862,11 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                   break;
 
                 case "key":
-                  if (elem.root === 'HP') voices[voiceNumber].push({
-                    el_type: 'key',
-                    accidentals: [{
-                      acc: 'natural',
-                      note: 'g'
-                    }, {
-                      acc: 'sharp',
-                      note: 'f'
-                    }, {
-                      acc: 'sharp',
-                      note: 'c'
-                    }]
-                  });else voices[voiceNumber].push({
-                    el_type: 'key',
-                    accidentals: elem.accidentals
-                  });
+                  addKey(voices[voiceNumber], elem);
                   break;
 
                 case "meter":
-                  voices[voiceNumber].push(interpretMeter(elem));
+                  addMeter(voices[voiceNumber], elem);
                   break;
 
                 case "clef":
@@ -13739,6 +13954,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
 
                 case 'stem':
                 case 'scale':
+                case 'break':
+                case 'font':
                   // These elements don't affect sound
                   break;
 
@@ -13780,7 +13997,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                       break;
 
                     case "program":
-                      voices[voiceNumber].push({
+                      addIfDifferent(voices[voiceNumber], {
                         el_type: 'instrument',
                         program: elem.params[0]
                       });
@@ -14050,6 +14267,53 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
 
     measureLength = meter.num / meter.den;
     return meter;
+  }
+
+  function removeNaturals(accidentals) {
+    var acc = [];
+
+    for (var i = 0; i < accidentals.length; i++) {
+      if (accidentals[i].acc !== "natural") acc.push(accidentals[i]);
+    }
+
+    return acc;
+  }
+
+  function addKey(arr, key) {
+    var newKey;
+    if (key.root === 'HP') newKey = {
+      el_type: 'key',
+      accidentals: [{
+        acc: 'natural',
+        note: 'g'
+      }, {
+        acc: 'sharp',
+        note: 'f'
+      }, {
+        acc: 'sharp',
+        note: 'c'
+      }]
+    };else newKey = {
+      el_type: 'key',
+      accidentals: removeNaturals(key.accidentals)
+    };
+    addIfDifferent(arr, newKey);
+  }
+
+  function addMeter(arr, meter) {
+    var newMeter = interpretMeter(meter);
+    addIfDifferent(arr, newMeter);
+  }
+
+  function addIfDifferent(arr, item) {
+    for (var i = arr.length - 1; i >= 0; i--) {
+      if (arr[i].el_type === item.el_type) {
+        if (JSON.stringify(arr[i]) !== JSON.stringify(item)) arr.push(item);
+        return;
+      }
+    }
+
+    arr.push(item);
   }
 })();
 
@@ -14656,7 +14920,7 @@ function CreateSynth() {
       for (var key2 = 0; key2 < Object.keys(uniqueSounds).length; key2++) {
         var k = Object.keys(uniqueSounds)[key2];
         var parts = k.split(":");
-        var cents = parts[6] !== "undefined" ? parseFloat(parts[6]) : undefined;
+        var cents = parts[6] !== undefined ? parseFloat(parts[6]) : 0;
         parts = {
           instrument: parts[0],
           pitch: parseInt(parts[1], 10),
@@ -25119,7 +25383,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.0.0-beta.32';
+var version = '6.0.0-beta.33';
 module.exports = version;
 
 /***/ })
