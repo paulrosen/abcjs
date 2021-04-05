@@ -257,7 +257,7 @@ function CreateSynth() {
 			for (var key2 = 0; key2 < Object.keys(uniqueSounds).length; key2++) {
 				var k = Object.keys(uniqueSounds)[key2];
 				var parts = k.split(":");
-				var cents = parts[6] !== "undefined" ? parseFloat(parts[6]) : undefined;
+				var cents = parts[6] !== undefined ? parseFloat(parts[6]) : 0;
  				parts = { instrument: parts[0], pitch: parseInt(parts[1],10), volume: parseInt(parts[2], 10), len: parseFloat(parts[3]), pan: parseFloat(parts[4]), tempoMultiplier: parseFloat(parts[5]), cents: cents};
 				allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd/1000));
 			}

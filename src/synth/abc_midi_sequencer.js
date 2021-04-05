@@ -143,9 +143,10 @@ var parseCommon = require("../parse/abc_common");
 		var startRepeatPlaceholder = []; // There is a place holder for each voice.
 		var skipEndingPlaceholder = []; // This is the place where the first ending starts.
 		var startingDrumSet = false;
-		for (var i = 0; i < abctune.lines.length; i++) {
+		var lines = abctune.lines; //abctune.deline(); TODO-PER: can switch to this, then simplify the loops below.
+		for (var i = 0; i < lines.length; i++) {
 			// For each group of staff lines in the tune.
-			var line = abctune.lines[i];
+			var line = lines[i];
 			if (line.staff) {
 				var staves = line.staff;
 				var voiceNumber = 0;
@@ -171,13 +172,10 @@ var parseCommon = require("../parse/abc_common");
 									voices[voiceNumber][cl].program = PERCUSSION_PROGRAM;
 							}
 						} else if (staff.key) {
-							if (staff.key.root === 'HP')
-								voices[voiceNumber].push({el_type: 'key', accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}]});
-							else
-								voices[voiceNumber].push({el_type: 'key', accidentals: staff.key.accidentals });
+							addKey(voices[voiceNumber], staff.key);
 						}
 						if (staff.meter) {
-							voices[voiceNumber].push(interpretMeter(staff.meter));
+							addMeter(voices[voiceNumber], staff.meter);
 						}
 						if (!startingDrumSet && drumOn) { // drum information is only needed once, so use the first line and track 0.
 							voices[voiceNumber].push({el_type: 'drum', params: {pattern: drumPattern, bars: drumBars, on: drumOn, intro: drumIntro}});
@@ -266,13 +264,10 @@ var parseCommon = require("../parse/abc_common");
 									}
 									break;
 								case "key":
-									if (elem.root === 'HP')
-										voices[voiceNumber].push({el_type: 'key', accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}]});
-									else
-										voices[voiceNumber].push({el_type: 'key', accidentals: elem.accidentals });
+									addKey(voices[voiceNumber], elem);
 									break;
 								case "meter":
-									voices[voiceNumber].push(interpretMeter(elem));
+									addMeter(voices[voiceNumber], elem);
 									break;
 								case "clef": // need to keep this to catch the "transpose" element.
 									if (elem.transpose)
@@ -332,6 +327,8 @@ var parseCommon = require("../parse/abc_common");
 									break;
 								case 'stem':
 								case 'scale':
+								case 'break':
+								case 'font':
 									// These elements don't affect sound
 									break;
 								case 'midi':
@@ -351,7 +348,7 @@ var parseCommon = require("../parse/abc_common");
 												voices[voiceNumber].push({ el_type: 'instrument', program: PERCUSSION_PROGRAM });
 											break;
 										case "program":
-											voices[voiceNumber].push({ el_type: 'instrument', program: elem.params[0] });
+											addIfDifferent(voices[voiceNumber], { el_type: 'instrument', program: elem.params[0] });
 											channelExplicitlySet = true;
 											break;
 										case "transpose":
@@ -601,6 +598,38 @@ var parseCommon = require("../parse/abc_common");
 		measureLength = meter.num/meter.den;
 		return meter;
 	}
+
+	function removeNaturals(accidentals) {
+		var acc = [];
+		for (var i = 0; i < accidentals.length; i++) {
+			if (accidentals[i].acc !== "natural")
+				acc.push(accidentals[i])
+		}
+		return acc;
+	}
+	function addKey(arr, key) {
+		var newKey;
+		if (key.root === 'HP')
+			newKey = {el_type: 'key', accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}]};
+		else
+			newKey = {el_type: 'key', accidentals: removeNaturals(key.accidentals) };
+		addIfDifferent(arr, newKey);
+	}
+	function addMeter(arr, meter) {
+		var newMeter = interpretMeter(meter);
+		addIfDifferent(arr, newMeter);
+	}
+	function addIfDifferent(arr, item) {
+		for (var i = arr.length-1; i >= 0; i--) {
+			if (arr[i].el_type === item.el_type) {
+				if (JSON.stringify(arr[i]) !== JSON.stringify(item))
+					arr.push(item);
+				return;
+			}
+		}
+		arr.push(item);
+	}
+
 })();
 
 module.exports = sequence;
