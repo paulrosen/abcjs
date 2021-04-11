@@ -1,6 +1,6 @@
 function delineTune(inputLines, options) {
 	if (!options) options = {};
-	var noLineBreaks = !!options.noLineBreaks;
+	var lineBreaks = !!options.lineBreaks;
 	var outputLines = [];
 	var inMusicLine = false;
 	var currentMeter = [];
@@ -64,7 +64,7 @@ function delineTune(inputLines, options) {
 						for (var v = 0; v < outputStaff.voices.length; v++) {
 							var outputVoice = outputStaff.voices[v];
 							var inputVoice = inputStaff.voices[v];
-							if (!noLineBreaks)
+							if (lineBreaks)
 								outputVoice.push({el_type: "break"});
 							if (inputVoice)
 								outputStaff.voices[v] = outputVoice.concat(inputVoice)

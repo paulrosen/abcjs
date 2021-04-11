@@ -7,7 +7,7 @@ function wrapLines(tune, lineBreaks) {
 	// tune.lines contains nested arrays: there is an array of lines (that's the part this function rewrites),
 	// there is an array of staffs per line (for instance, piano will have 2, orchestra will have many)
 	// there is an array of voices per staff (for instance, 4-part harmony might have bass and tenor on a single staff)
-	var lines = tune.deline({noLineBreaks: true});
+	var lines = tune.deline({lineBreaks: false});
 	var linesBreakElements = findLineBreaks(lines, lineBreaks);
 	//console.log(JSON.stringify(linesBreakElements))
 	tune.lines = addLineBreaks(lines, linesBreakElements);
