@@ -552,8 +552,8 @@ var Tune = function() {
 		var seq = sequence(this, options);
 		return flatten(seq, options, this.formatting.percmap);
 	};
-	this.deline = function() {
-		return delineTune(this.lines);
+	this.deline = function(options) {
+		return delineTune(this.lines, options);
 	}
 };
 

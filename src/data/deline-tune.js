@@ -1,4 +1,6 @@
-function delineTune(inputLines) {
+function delineTune(inputLines, options) {
+	if (!options) options = {};
+	var noLineBreaks = !!options.noLineBreaks;
 	var outputLines = [];
 	var inMusicLine = false;
 	var currentMeter = [];
@@ -62,7 +64,8 @@ function delineTune(inputLines) {
 						for (var v = 0; v < outputStaff.voices.length; v++) {
 							var outputVoice = outputStaff.voices[v];
 							var inputVoice = inputStaff.voices[v];
-							outputVoice.push({el_type: "break"});
+							if (!noLineBreaks)
+								outputVoice.push({el_type: "break"});
 							if (inputVoice)
 								outputStaff.voices[v] = outputVoice.concat(inputVoice)
 						}
@@ -72,6 +75,7 @@ function delineTune(inputLines) {
 				for (var ii = 0; ii < inputLine.staff.length; ii++) {
 					currentKey[ii] = inputLine.staff[ii].key;
 					currentMeter[ii] = inputLine.staff[ii].meter;
+					currentClef[ii] = inputLine.staff[ii].clef;
 				}
 				// copy this because we are going to change it and we don't want to change the original.
 				outputLines.push(cloneLine(inputLine));

@@ -7,7 +7,7 @@ function wrapLines(tune, lineBreaks) {
 	// tune.lines contains nested arrays: there is an array of lines (that's the part this function rewrites),
 	// there is an array of staffs per line (for instance, piano will have 2, orchestra will have many)
 	// there is an array of voices per staff (for instance, 4-part harmony might have bass and tenor on a single staff)
-	var lines = removeLineBreaks(tune.lines);
+	var lines = tune.deline({noLineBreaks: true});
 	var linesBreakElements = findLineBreaks(lines, lineBreaks);
 	//console.log(JSON.stringify(linesBreakElements))
 	tune.lines = addLineBreaks(lines, linesBreakElements);
@@ -24,6 +24,7 @@ function addLineBreaks(lines, linesBreakElements) {
 	// If the item doesn't contain "staff" then it is a non music line and should just be copied.
 	var outputLines = [];
 	var lastKeySig = []; // This is per staff - if the key changed then this will be populated.
+	var lastStem = [];
 	for (var i = 0; i < linesBreakElements.length; i++) {
 		var action = linesBreakElements[i];
 		if (lines[action.ogLine].staff) {
@@ -43,12 +44,15 @@ function addLineBreaks(lines, linesBreakElements) {
 				}
 				if (lastKeySig[action.staff])
 					outputLines[action.line].staff[action.staff].key = lastKeySig[action.staff];
+
 			}
 			if (!outputLines[action.line].staff[action.staff].voices[action.voice]) {
 				outputLines[action.line].staff[action.staff].voices[action.voice] = [];
 			}
 			outputLines[action.line].staff[action.staff].voices[action.voice] =
 				lines[action.ogLine].staff[action.staff].voices[action.voice].slice(action.start, action.end+1);
+			if (lastStem[action.staff*10+action.voice])
+				outputLines[action.line].staff[action.staff].voices[action.voice].unshift({el_type: "stem", direction: lastStem[action.staff*10+action.voice].direction})
 			var currVoice = outputLines[action.line].staff[action.staff].voices[action.voice];
 			for (var kk = currVoice.length-1; kk >= 0; kk--) {
 				if (currVoice[kk].el_type === "key") {
@@ -57,6 +61,14 @@ function addLineBreaks(lines, linesBreakElements) {
 						acc: currVoice[kk].acc,
 						mode: currVoice[kk].mode,
 						accidentals: currVoice[kk].accidentals.filter(function (acc) { return acc.acc !== 'natural' })
+					};
+					break;
+				}
+			}
+			for (kk = currVoice.length-1; kk >= 0; kk--) {
+				if (currVoice[kk].el_type === "stem") {
+					lastStem[action.staff*10+action.voice] = {
+						direction: currVoice[kk].direction,
 					};
 					break;
 				}
@@ -128,41 +140,6 @@ function findLineBreaks(lines, lineBreakArray) {
 	return lineBreakIndexes;
 }
 
-function removeLineBreaks(lines) {
-	// This concatenates all the music lines. If there is a non-music line then it leaves it,
-	// so it returns an array of lines where there is no more than one staff line in a row.
-	var outputLines = [];
-	var startLine = true;
-	for (var i = 0; i < lines.length; i++) {
-		var line = lines[i];
-		if (line.staff) {
-			if (startLine) {
-				outputLines.push(line);
-				startLine = false;
-			} else {
-				//	copy all voices to the previous line
-				var output = outputLines[outputLines.length - 1];
-				var staffs = line.staff;
-				for (var j = 0; j < staffs.length; j++) {
-					if (output.staff.length <= j)
-						output.staff.push({ voices: []})
-					var staff = staffs[j];
-					var voices = staff.voices;
-					for (var k = 0; k < voices.length; k++) {
-						if (output.staff[j].voices.length < k)
-							output.staff[j].voices.push([]);
-						var voice = voices[k];
-						output.staff[j].voices[k] = output.staff[j].voices[k].concat(voice);
-					}
-				}
-			}
-		} else {
-			startLine = true;
-			outputLines.push(line);
-		}
-	}
-	return outputLines;
-}
 
 function freeFormLineBreaks(widths, lineBreakPoint) {
 	var lineBreaks = [];
