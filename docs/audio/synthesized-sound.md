@@ -223,6 +223,7 @@ The `options` element above can have the following properties:
 | defaultQpm | null | The tempo to use, only if there is no tempo in the tune. |
 | chordsOff | false | If true, then don't turn the guitar chord symbols into sound. (But do play the metronome if there is one.) |
 | voicesOff | false | If true, play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. This can also be an array of voices to turn off. The voices are numbered starting at zero. |
+| detuneOctave | 0 | The number of cents to raise the pitch of the top note of an octave that is played at the same time. That is, in multipart music, if the tenor and soprano parts are an octave apart the soprano note gets lost in the overtones. Making the top note slightly sharp brings it out without making it sound out of tune. |
 
 ### play(), pause(), toggleLoop(), restart(), setProgress(ev)
 
