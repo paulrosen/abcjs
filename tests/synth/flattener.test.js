@@ -2576,6 +2576,25 @@ describe("Audio flattener", function() {
 
 	//////////////////////////////////////////////////////////
 
+	var abcTempoOverride = 'X:1\n' +
+		'T:tempo-override\n' +
+		'L:1/4\n' +
+		'Q:1/4=150\n' +
+		'M:4/4\n' +
+		'K:G\n' +
+		'C D E F|\n';
+
+	var expectedTempoOverride = {"tempo":60,"instrument":0,"tracks":[[{"cmd":"program","channel":0,"instrument":0},{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":0.25,"instrument":0,"gap":0},{"cmd":"note","pitch":62,"volume":95,"start":0.25,"duration":0.25,"instrument":0,"gap":0},{"cmd":"note","pitch":64,"volume":95,"start":0.5,"duration":0.25,"instrument":0,"gap":0},{"cmd":"note","pitch":66,"volume":95,"start":0.75,"duration":0.25,"instrument":0,"gap":0}]],"totalDuration":1};
+
+	var expectedTempoOverrideTiming = [
+		{"ms":0,"ln":0,"x1":89.096,"ch":[47],"x2":131.52240687119286,"midiPitches":["60 0.25"]},
+		{"ms":1000,"ln":0,"x1":131.52240687119286,"ch":[49],"x2":173.9488137423857,"midiPitches":["62 0.25"]},
+		{"ms":2000,"ln":0,"x1":173.9488137423857,"ch":[51],"x2":216.37522061357856,"midiPitches":["64 0.25"]},
+		{"ms":3000,"ln":0,"x1":216.37522061357856,"ch":[53],"x2":259.8016274847714,"midiPitches":["66 0.25"]}
+	];
+
+	//////////////////////////////////////////////////////////
+
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
 	})
@@ -2703,13 +2722,17 @@ describe("Audio flattener", function() {
 		doFlattenTest(abcQuarterTones, expectedQuarterTones);
 	})
 
+	it("flatten-tempo-override", function() {
+		doFlattenTest(abcTempoOverride, expectedTempoOverride, { qpm: 60 });
+		doTimingObjTest(abcTempoOverride, expectedTempoOverrideTiming, { qpm: 60 });
+	})
 })
 
 //////////////////////////////////////////////////////////
 
-function doFlattenTest(abc, expected) {
+function doFlattenTest(abc, expected, options) {
 	var visualObj = abcjs.renderAbc("paper", abc, {});
-	var flatten = visualObj[0].setUpAudio();
+	var flatten = visualObj[0].setUpAudio(options);
 	console.log(JSON.stringify(flatten))
 	chai.assert.equal(flatten.tempo, expected.tempo, "Tempo")
 	chai.assert.equal(flatten.tracks.length, expected.tracks.length, "Number of Tracks")
@@ -2724,10 +2747,10 @@ function doFlattenTest(abc, expected) {
 	}
 }
 
-function doTimingObjTest(abc, expected) {
+function doTimingObjTest(abc, expected, options) {
 	var visualObj = abcjs.renderAbc("paper", abc, {});
-	visualObj[0].setUpAudio();
-	var timing = visualObj[0].setTiming();
+	visualObj[0].setUpAudio(options);
+	var timing = visualObj[0].setTiming(options.qpm);
 	var output = [];
 	for (var i = 0; i < timing.length; i++) {
 		var t = timing[i];
