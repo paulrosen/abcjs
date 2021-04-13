@@ -65,7 +65,6 @@ function CreateSynth() {
 		p = params.noteEnd !== undefined ? parseInt(params.noteEnd,10) : NaN;
 		self.noteEnd = isNaN(p) ? 0 : p;
 
-		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure(options.bpm) : 1000);
 		self.pan = params.pan;
 		self.meterSize = 1;
 		if (options.visualObj) {
@@ -77,6 +76,7 @@ function CreateSynth() {
 			self.flattened = options.sequence;
 		else
 			return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
+		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure(self.flattened.tempo) : 1000);
 		self.sequenceCallback = params.sequenceCallback;
 		self.callbackContext = params.callbackContext;
 		self.onEnded = params.onEnded;

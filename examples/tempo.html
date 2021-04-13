@@ -42,16 +42,21 @@
 			var visualObjD = ABCJS.renderAbc("paper-default", abc, {
 				responsive: "resize" })[0];
 
+			var visualObjDQ = ABCJS.renderAbc("paper-default-q", abcQ, {
+				responsive: "resize" })[0];
+
 			var visualObjs = {
 				q: visualObjQ,
 				param: visualObjP,
-				default: visualObjD
+				default: visualObjD,
+				defaultQ: visualObjDQ,
 			}
 
 			var options = {
 				q: { visualObj: visualObjQ },
-				param: { visualObj: visualObjP, options: { qpm: 100 } },
-				default: { visualObj: visualObjD, options: { defaultQpm: 60 } }
+				param: { visualObj: visualObjP, bpm: 100, options: { qpm: 100 } },
+				default: { visualObj: visualObjD, options: { defaultQpm: 60 } },
+				defaultQ: { visualObj: visualObjDQ, options: { defaultQpm: 60 } },
 			}
 
 			// This object is the class that will contain the buffer
@@ -155,6 +160,15 @@
 			<div>
 				<button class="activate-audio" data-type="default">Activate Audio Context And Play</button>
 				<button class="stop-audio" data-type="default" style="display:none;">Stop Audio</button>
+			</div>
+		</div>
+
+		<p>The tempo is set using the <span class="code">{ defaultQpm: 60 }</span> attribute. However, there is a <span class="code">Q:</span> line, so that takes precedence.</p>
+		<div id="paper-default-q"></div>
+		<div class="row">
+			<div>
+				<button class="activate-audio" data-type="defaultQ">Activate Audio Context And Play</button>
+				<button class="stop-audio" data-type="defaultQ" style="display:none;">Stop Audio</button>
 			</div>
 		</div>
 
