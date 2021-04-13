@@ -69,7 +69,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 		accidentals = [0,0,0,0,0,0,0];
 		bagpipes = false;
 		tracks = [];
-		startingTempo = undefined;
+		startingTempo = options.qpm;
 		startingMeter = undefined;
 		tempoChangeFactor = 1;
 		instrument = undefined;
@@ -112,7 +112,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 			pickupLength = voices[0][0].pickupLength;
 
 		// First adjust the input to resolve ties, set the starting time for each note, etc. That will make the rest of the logic easier
-		preProcess(voices);
+		preProcess(voices, options);
 
 		for (var i = 0; i < voices.length; i++) {
 			transpose = 0;
@@ -254,11 +254,11 @@ var pitchesToPerc = require('./pitches-to-perc');
 		return Math.round(duration*tempoChangeFactor*1000000)/1000000;
 	}
 
-	function preProcess(voices) {
+	function preProcess(voices, options) {
 		for (var i = 0; i < voices.length; i++) {
 			var voice = voices[i];
 			var ties = {};
-			var startingTempo = 0;
+			var startingTempo = options.qpm;
 			var timeCounter = 0;
 			var tempoMultiplier = 1;
 			for (var j = 0; j < voice.length; j++) {
