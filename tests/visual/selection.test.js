@@ -42,13 +42,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"font-size": "29",
-				"font-style": "normal",
-				"font-family": "Times New Roman",
-				"font-weight": "normal",
-				"text-decoration": "none",
-				"class": "",
-				"text-anchor": "middle",
 				"x": "385",
 				"y": "51.56",
 				"selectable": "true",
@@ -71,13 +64,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"font-size": "21",
-				"font-style": "normal",
-				"font-family": "\"Times New Roman\"",
-				"font-weight": "normal",
-				"text-decoration": "none",
-				"class": "",
-				"text-anchor": "middle",
 				"x": "385",
 				"y": "79.34",
 				"selectable": "true",
@@ -100,13 +86,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"font-size": "19",
-				"font-style": "italic",
-				"font-family": "\"Times New Roman\"",
-				"font-weight": "normal",
-				"text-decoration": "none",
-				"class": "",
-				"text-anchor": "start",
 				"x": "15",
 				"y": "108.9",
 				"selectable": "true",
@@ -129,13 +108,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"font-size": "19",
-				"font-style": "italic",
-				"font-family": "\"Times New Roman\"",
-				"font-weight": "normal",
-				"text-decoration": "none",
-				"class": "",
-				"text-anchor": "end",
 				"x": "755",
 				"y": "108.9",
 				"selectable": "true",
@@ -158,13 +130,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"font-size": "19",
-				"font-style": "italic",
-				"font-family": "\"Times New Roman\"",
-				"font-weight": "normal",
-				"text-decoration": "none",
-				"class": "",
-				"text-anchor": "end",
 				"x": "755",
 				"y": "129.98",
 				"selectable": "true",
@@ -187,7 +152,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"fill": "#000000",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "5"
@@ -208,13 +172,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"font-size": "21",
-				"font-style": "normal",
-				"font-family": "\"Times New Roman\"",
-				"font-weight": "normal",
-				"text-decoration": "none",
-				"class": "",
-				"text-anchor": "start",
 				"x": "15",
 				"y": "193.59",
 				"selectable": "true",
@@ -237,9 +194,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "#000000",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "7"
@@ -259,13 +213,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"font-size": "13",
-				"font-style": "normal",
-				"font-family": "Helvetica",
-				"font-weight": "bold",
-				"text-decoration": "none",
-				"class": "",
-				"text-anchor": "start",
 				"x": "15",
 				"y": "360.25",
 				"selectable": "true",
@@ -288,9 +235,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "9"
@@ -311,9 +255,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "10"
@@ -334,7 +275,6 @@ describe("Selection", function() {
 				"root": "B",
 				"acc": "b",
 				"mode": "",
-				"el_type": "keySignature"
 			},
 			"size": {
 				"x": 88,
@@ -346,9 +286,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "11"
@@ -396,7 +333,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"fill": "#000000",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "13"
@@ -417,9 +353,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "14"
@@ -463,9 +396,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "15"
@@ -497,9 +427,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "16"
@@ -531,9 +458,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "17"
@@ -564,9 +488,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "18"
@@ -588,9 +509,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "19"
@@ -629,9 +547,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "20"
@@ -670,9 +585,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "21"
@@ -694,9 +606,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "22"
@@ -723,9 +632,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "23"
@@ -765,9 +671,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "24"
@@ -798,9 +701,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "25"
@@ -831,9 +731,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "26"
@@ -868,9 +765,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "27"
@@ -904,9 +798,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "28"
@@ -937,9 +828,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "29"
@@ -972,9 +860,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "30"
@@ -1008,9 +893,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "31"
@@ -1058,9 +940,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "33"
@@ -1099,9 +978,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "34"
@@ -1128,9 +1004,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "35"
@@ -1166,9 +1039,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "36"
@@ -1190,9 +1060,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "37"
@@ -1231,9 +1098,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "38"
@@ -1273,9 +1137,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "39"
@@ -1297,9 +1158,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "40"
@@ -1338,9 +1196,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "41"
@@ -1374,9 +1229,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "42"
@@ -1417,9 +1269,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"highlight": "stroke",
-				"stroke": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "44"
@@ -1439,9 +1288,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "45"
@@ -1480,9 +1326,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"highlight": "stroke",
-				"stroke": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "47"
@@ -1502,9 +1345,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "48"
@@ -1525,9 +1365,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "49"
@@ -1548,9 +1385,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"highlight": "stroke",
-				"stroke": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "50"
@@ -1570,9 +1404,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "51"
@@ -1604,9 +1435,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "52"
@@ -1639,9 +1467,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "53"
@@ -1673,9 +1498,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "54"
@@ -1706,9 +1528,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "55"
@@ -1752,9 +1571,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "56"
@@ -1797,9 +1613,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "57"
@@ -1830,9 +1643,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "58"
@@ -1863,9 +1673,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "59"
@@ -1896,9 +1703,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "60"
@@ -1929,9 +1733,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "61"
@@ -1962,9 +1763,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "62"
@@ -1995,9 +1793,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "63"
@@ -2028,9 +1823,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "64"
@@ -2061,9 +1853,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "65"
@@ -2094,9 +1883,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "66"
@@ -2127,9 +1913,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "67"
@@ -2160,9 +1943,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "68"
@@ -2193,9 +1973,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "69"
@@ -2226,9 +2003,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "70"
@@ -2259,9 +2033,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "71"
@@ -2292,9 +2063,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "72"
@@ -2325,9 +2093,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "73"
@@ -2358,9 +2123,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "74"
@@ -2391,9 +2153,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "75"
@@ -2413,9 +2172,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "76"
@@ -2435,9 +2191,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "77"
@@ -2457,9 +2210,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "78"
@@ -2479,13 +2229,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"font-size": "13",
-				"font-style": "normal",
-				"font-family": "Helvetica",
-				"font-weight": "bold",
-				"text-decoration": "none",
-				"class": "",
-				"text-anchor": "start",
 				"x": "15",
 				"y": "493.56",
 				"selectable": "true",
@@ -2508,9 +2251,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "80"
@@ -2531,9 +2271,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "81"
@@ -2554,7 +2291,6 @@ describe("Selection", function() {
 				"root": "B",
 				"acc": "b",
 				"mode": "",
-				"el_type": "keySignature"
 			},
 			"size": {
 				"x": 88,
@@ -2566,9 +2302,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "82"
@@ -2593,9 +2326,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "83"
@@ -2626,9 +2356,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "84"
@@ -2659,9 +2386,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "85"
@@ -2702,9 +2426,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "86"
@@ -2725,9 +2446,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "87"
@@ -2759,9 +2477,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "88"
@@ -2793,9 +2508,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "89"
@@ -2826,9 +2538,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "90"
@@ -2859,9 +2568,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "91"
@@ -2893,9 +2599,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "92"
@@ -2926,9 +2629,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "93"
@@ -2960,9 +2660,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "94"
@@ -2983,9 +2680,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "95"
@@ -3017,9 +2711,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "96"
@@ -3051,9 +2742,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "97"
@@ -3084,9 +2772,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "98"
@@ -3117,9 +2802,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "99"
@@ -3151,9 +2833,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "100"
@@ -3185,9 +2864,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "101"
@@ -3208,9 +2884,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "102"
@@ -3251,9 +2924,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "103"
@@ -3280,9 +2950,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "104"
@@ -3318,9 +2985,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "105"
@@ -3341,9 +3005,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "106"
@@ -3374,9 +3035,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "107"
@@ -3407,9 +3065,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "108"
@@ -3430,9 +3085,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "109"
@@ -3463,9 +3115,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "110"
@@ -3497,9 +3146,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "111"
@@ -3530,9 +3176,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "112"
@@ -3563,9 +3206,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "113"
@@ -3597,9 +3237,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "114"
@@ -3620,9 +3257,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "#000000",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "115"
@@ -3642,9 +3276,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "116"
@@ -3665,9 +3296,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "117"
@@ -3688,7 +3316,6 @@ describe("Selection", function() {
 				"root": "B",
 				"acc": "b",
 				"mode": "",
-				"el_type": "keySignature"
 			},
 			"size": {
 				"x": 59,
@@ -3700,9 +3327,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "118"
@@ -3742,9 +3366,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "119"
@@ -3786,9 +3407,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "120"
@@ -3815,9 +3433,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "121"
@@ -3855,9 +3470,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "122"
@@ -3879,9 +3491,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "123"
@@ -3928,9 +3537,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "124"
@@ -3967,9 +3573,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "125"
@@ -3992,9 +3595,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "126"
@@ -4030,9 +3630,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "127"
@@ -4068,9 +3665,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "128"
@@ -4097,9 +3691,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "129"
@@ -4121,9 +3712,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "130"
@@ -4159,9 +3747,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "131"
@@ -4192,9 +3777,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "132"
@@ -4216,9 +3798,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "133"
@@ -4257,9 +3836,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "134"
@@ -4291,9 +3867,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "135"
@@ -4324,9 +3897,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "136"
@@ -4357,9 +3927,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "137"
@@ -4391,9 +3958,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "138"
@@ -4425,9 +3989,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "139"
@@ -4458,9 +4019,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "140"
@@ -4491,9 +4049,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "141"
@@ -4528,9 +4083,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "142"
@@ -4552,9 +4104,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "143"
@@ -4588,9 +4137,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "144"
@@ -4612,9 +4158,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "145"
@@ -4654,9 +4197,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"highlight": "stroke",
-				"stroke": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "147"
@@ -4696,9 +4236,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "149"
@@ -4729,9 +4266,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "150"
@@ -4762,9 +4296,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "151"
@@ -4795,9 +4326,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "152"
@@ -4828,9 +4356,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "153"
@@ -4861,9 +4386,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "154"
@@ -4894,9 +4416,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "155"
@@ -4927,9 +4446,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "156"
@@ -4960,9 +4476,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "157"
@@ -4993,9 +4506,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "158"
@@ -5026,9 +4536,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "159"
@@ -5059,9 +4566,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "160"
@@ -5092,9 +4596,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "161"
@@ -5125,9 +4626,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "162"
@@ -5158,9 +4656,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "163"
@@ -5191,9 +4686,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "164"
@@ -5224,9 +4716,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "165"
@@ -5263,9 +4752,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "166"
@@ -5296,9 +4782,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "167"
@@ -5329,9 +4812,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "168"
@@ -5362,9 +4842,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "169"
@@ -5395,9 +4872,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "170"
@@ -5428,9 +4902,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "171"
@@ -5461,9 +4932,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "172"
@@ -5494,9 +4962,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "173"
@@ -5517,9 +4982,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "174"
@@ -5540,7 +5002,6 @@ describe("Selection", function() {
 				"root": "B",
 				"acc": "b",
 				"mode": "",
-				"el_type": "keySignature"
 			},
 			"size": {
 				"x": 59,
@@ -5552,9 +5013,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "175"
@@ -5586,9 +5044,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "176"
@@ -5619,9 +5074,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "177"
@@ -5652,9 +5104,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "178"
@@ -5686,9 +5135,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "179"
@@ -5725,9 +5171,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "180"
@@ -5758,9 +5201,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "181"
@@ -5791,9 +5231,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "182"
@@ -5828,9 +5265,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "183"
@@ -5861,9 +5295,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "184"
@@ -5894,9 +5325,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "185"
@@ -5917,9 +5345,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "186"
@@ -5955,9 +5380,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "187"
@@ -5998,9 +5420,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "188"
@@ -6021,9 +5440,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "189"
@@ -6055,9 +5471,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "190"
@@ -6089,9 +5502,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "191"
@@ -6123,9 +5533,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "192"
@@ -6157,9 +5564,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "193"
@@ -6191,9 +5595,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "194"
@@ -6224,9 +5625,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "195"
@@ -6257,9 +5655,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "196"
@@ -6291,9 +5686,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "197"
@@ -6325,9 +5717,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "198"
@@ -6359,9 +5748,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "199"
@@ -6382,9 +5768,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "200"
@@ -6416,9 +5799,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "201"
@@ -6450,9 +5830,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "202"
@@ -6484,9 +5861,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "203"
@@ -6518,9 +5892,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "204"
@@ -6551,9 +5922,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "205"
@@ -6585,9 +5953,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "206"
@@ -6618,9 +5983,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "207"
@@ -6651,9 +6013,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "208"
@@ -6685,9 +6044,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "209"
@@ -6708,9 +6064,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "210"
@@ -6741,9 +6094,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "211"
@@ -6774,9 +6124,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "212"
@@ -6812,9 +6159,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "213"
@@ -6841,9 +6185,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "214"
@@ -6864,9 +6205,6 @@ describe("Selection", function() {
 		{
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "215"
@@ -6897,9 +6235,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "216"
@@ -6920,9 +6255,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "217"
@@ -6942,7 +6274,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"class": "abcjs-meta-bottom abcjs-unaligned-words",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "218"
@@ -6963,13 +6294,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"font-size": "21",
-				"font-style": "normal",
-				"font-family": "\"Times New Roman\"",
-				"font-weight": "normal",
-				"text-decoration": "none",
-				"class": "",
-				"text-anchor": "start",
 				"x": "15",
 				"y": "951.61",
 				"selectable": "true",
@@ -7003,9 +6327,6 @@ describe("Selection", function() {
 		{
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "0"
@@ -7015,9 +6336,6 @@ describe("Selection", function() {
 		}, {
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "1"
@@ -7036,9 +6354,6 @@ describe("Selection", function() {
 		}, {
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "3"
@@ -7057,9 +6372,6 @@ describe("Selection", function() {
 		}, {
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "4"
@@ -7087,9 +6399,6 @@ describe("Selection", function() {
 		}, {
 			"draggable": true,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "6"
@@ -7108,9 +6417,6 @@ describe("Selection", function() {
 		}, {
 			"draggable": false,
 			"svgEl": {
-				"stroke": "none",
-				"fill": "#000000",
-				"class": "",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "7"
@@ -7118,6 +6424,167 @@ describe("Selection", function() {
 			"abcEl": {"type": "bar_thin", "el_type": "bar", "startChar": 77, "endChar": 78},
 			"size": {"x": 252, "y": 64, "width": 1, "height": 31}
 		}]
+//////////////////////////////////////////////////////////
+	var abcClefs = 'X:1\n' +
+		'M:4/4\n' +
+		'L:1/4\n' +
+		'K:C clef=treble\n' +
+		'C D E F |\n' +
+		'K:C clef=treble+8\n' +
+		'C D E F |\n' +
+		'K:C clef=treble-8\n' +
+		'C D E F |\n' +
+		'K:C clef=tenor\n' +
+		'C D E F |\n' +
+		'K:C clef=bass-8\n' +
+		'C D E F |\n' +
+		'K:C clef=bass+8\n' +
+		'C D E F |\n' +
+		'K:C clef=bass\n' +
+		'C D E F |\n' +
+		'\n';
+
+	var expectedClefs = [{
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "0"},
+		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 6}], "duration": 0.25, "el_type": "note", "startChar": 32, "endChar": 34, "averagepitch": 0, "minpitch": 0, "maxpitch": 0},
+		"size": {"x": 71, "y": 60, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "1"},
+		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 1, "highestVert": 7}], "duration": 0.25, "el_type": "note", "startChar": 34, "endChar": 36, "averagepitch": 1, "minpitch": 1, "maxpitch": 1},
+		"size": {"x": 233, "y": 56, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "2"},
+		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 2, "highestVert": 8}], "duration": 0.25, "el_type": "note", "startChar": 36, "endChar": 38, "averagepitch": 2, "minpitch": 2, "maxpitch": 2},
+		"size": {"x": 395, "y": 52, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "3"},
+		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 3, "highestVert": 9}], "duration": 0.25, "el_type": "note", "startChar": 38, "endChar": 40, "averagepitch": 3, "minpitch": 3, "maxpitch": 3},
+		"size": {"x": 558, "y": 49, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "4"},
+		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 6}], "duration": 0.25, "el_type": "note", "startChar": 60, "endChar": 62, "averagepitch": 0, "minpitch": 0, "maxpitch": 0},
+		"size": {"x": 49, "y": 153, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "5"},
+		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 1, "highestVert": 7}], "duration": 0.25, "el_type": "note", "startChar": 62, "endChar": 64, "averagepitch": 1, "minpitch": 1, "maxpitch": 1},
+		"size": {"x": 217, "y": 149, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "6"},
+		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 2, "highestVert": 8}], "duration": 0.25, "el_type": "note", "startChar": 64, "endChar": 66, "averagepitch": 2, "minpitch": 2, "maxpitch": 2},
+		"size": {"x": 385, "y": 145, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "7"},
+		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 3, "highestVert": 9}], "duration": 0.25, "el_type": "note", "startChar": 66, "endChar": 68, "averagepitch": 3, "minpitch": 3, "maxpitch": 3},
+		"size": {"x": 552, "y": 141, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "8"},
+		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 6}], "duration": 0.25, "el_type": "note", "startChar": 88, "endChar": 90, "averagepitch": 0, "minpitch": 0, "maxpitch": 0},
+		"size": {"x": 49, "y": 245, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "9"},
+		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 1, "highestVert": 7}], "duration": 0.25, "el_type": "note", "startChar": 90, "endChar": 92, "averagepitch": 1, "minpitch": 1, "maxpitch": 1},
+		"size": {"x": 216, "y": 241, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "10"},
+		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 2, "highestVert": 8}], "duration": 0.25, "el_type": "note", "startChar": 92, "endChar": 94, "averagepitch": 2, "minpitch": 2, "maxpitch": 2},
+		"size": {"x": 384, "y": 237, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "11"},
+		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 3, "highestVert": 9}], "duration": 0.25, "el_type": "note", "startChar": 94, "endChar": 96, "averagepitch": 3, "minpitch": 3, "maxpitch": 3},
+		"size": {"x": 551, "y": 233, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "12"},
+		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 8, "highestVert": 8}], "duration": 0.25, "el_type": "note", "startChar": 113, "endChar": 115, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 50, "y": 329, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "13"},
+		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 9, "highestVert": 9}], "duration": 0.25, "el_type": "note", "startChar": 115, "endChar": 117, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
+		"size": {"x": 217, "y": 325, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "14"},
+		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 10, "highestVert": 10}], "duration": 0.25, "el_type": "note", "startChar": 117, "endChar": 119, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 385, "y": 322, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "15"},
+		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 11, "highestVert": 11}], "duration": 0.25, "el_type": "note", "startChar": 119, "endChar": 121, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 552, "y": 318, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "16"},
+		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}], "duration": 0.25, "el_type": "note", "startChar": 139, "endChar": 141, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
+		"size": {"x": 50, "y": 406, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "17"},
+		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 13, "highestVert": 13}], "duration": 0.25, "el_type": "note", "startChar": 141, "endChar": 143, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
+		"size": {"x": 217, "y": 402, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "18"},
+		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 14, "highestVert": 14}], "duration": 0.25, "el_type": "note", "startChar": 143, "endChar": 145, "averagepitch": 14, "minpitch": 14, "maxpitch": 14},
+		"size": {"x": 385, "y": 398, "width": 10, "height": 35}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "19"},
+		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 15, "highestVert": 15}], "duration": 0.25, "el_type": "note", "startChar": 145, "endChar": 147, "averagepitch": 15, "minpitch": 15, "maxpitch": 15},
+		"size": {"x": 552, "y": 394, "width": 10, "height": 39}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "20"},
+		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}], "duration": 0.25, "el_type": "note", "startChar": 165, "endChar": 167, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
+		"size": {"x": 50, "y": 498, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "21"},
+		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 13, "highestVert": 13}], "duration": 0.25, "el_type": "note", "startChar": 167, "endChar": 169, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
+		"size": {"x": 217, "y": 495, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "22"},
+		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 14, "highestVert": 14}], "duration": 0.25, "el_type": "note", "startChar": 169, "endChar": 171, "averagepitch": 14, "minpitch": 14, "maxpitch": 14},
+		"size": {"x": 385, "y": 491, "width": 10, "height": 35}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "23"},
+		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 15, "highestVert": 15}], "duration": 0.25, "el_type": "note", "startChar": 171, "endChar": 173, "averagepitch": 15, "minpitch": 15, "maxpitch": 15},
+		"size": {"x": 552, "y": 487, "width": 10, "height": 39}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "24"},
+		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}], "duration": 0.25, "el_type": "note", "startChar": 189, "endChar": 191, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
+		"size": {"x": 50, "y": 599, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "25"},
+		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 13, "highestVert": 13}], "duration": 0.25, "el_type": "note", "startChar": 191, "endChar": 193, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
+		"size": {"x": 93, "y": 595, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "26"},
+		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 14, "highestVert": 14}], "duration": 0.25, "el_type": "note", "startChar": 193, "endChar": 195, "averagepitch": 14, "minpitch": 14, "maxpitch": 14},
+		"size": {"x": 135, "y": 591, "width": 10, "height": 35}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "27"},
+		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 15, "highestVert": 15}], "duration": 0.25, "el_type": "note", "startChar": 195, "endChar": 197, "averagepitch": 15, "minpitch": 15, "maxpitch": 15},
+		"size": {"x": 177, "y": 587, "width": 10, "height": 39}
+	}];
 
 //////////////////////////////////////////////////////////
 	it("selection-multiple", function() {
@@ -7130,13 +6597,17 @@ describe("Selection", function() {
 	it("selection-none", function() {
 		doSelectionTest(abcMultiple, expectedMultiple, {});
 	})
-
+	it("selection-clefs", function() {
+		doSelectionTest(abcClefs, expectedClefs, {selectTypes: [ 'note' ]}, true);
+	})
 })
 
 //////////////////////////////////////////////////////////
 
-function doSelectionTest(abc, expected, options) {
+function doSelectionTest(abc, expected, options, audio) {
 	var visualObj = abcjs.renderAbc("paper", abc, options);
+	if (audio)
+		visualObj[0].setUpAudio();
 	var selection = visualObj[0].engraver.selectables;
 	var results = []
 	for (var i = 0; i < selection.length; i++) {
@@ -7172,11 +6643,13 @@ function copyAbcEl(abcEl) {
 	return el;
 }
 
+var interestingAttributes = ['x', 'y', 'selectable', 'tabindex', 'data-index'];
+
 function copySvgEl(svgEl) {
 	var el = {};
 	var attr = svgEl.attributes;
 	for (var i = 0; i < attr.length; i++) {
-		if (attr[i].nodeName !== 'd')
+		if (interestingAttributes.indexOf(attr[i].nodeName) >= 0)
 			el[attr[i].nodeName] = attr[i].nodeValue;
 	}
 	return el;
