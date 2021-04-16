@@ -6429,161 +6429,140 @@ describe("Selection", function() {
 		'M:4/4\n' +
 		'L:1/4\n' +
 		'K:C clef=treble\n' +
-		'C D E F |\n' +
+		'C4 |\n' +
 		'K:C clef=treble+8\n' +
-		'C D E F |\n' +
+		'C4 |\n' +
 		'K:C clef=treble-8\n' +
-		'C D E F |\n' +
+		'C4 |\n' +
 		'K:C clef=tenor\n' +
-		'C D E F |\n' +
+		'C4 |\n' +
 		'K:C clef=bass-8\n' +
-		'C D E F |\n' +
+		'C4 |\n' +
 		'K:C clef=bass+8\n' +
-		'C D E F |\n' +
+		'C4 |\n' +
 		'K:C clef=bass\n' +
-		'C D E F |\n' +
+		'C4 |\n' +
 		'\n';
 
 	var expectedClefs = [{
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "0"},
-		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 6}], "duration": 0.25, "el_type": "note", "startChar": 32, "endChar": 34, "averagepitch": 0, "minpitch": 0, "maxpitch": 0},
-		"size": {"x": 71, "y": 60, "width": 10, "height": 31}
+		"abcEl": {
+			"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 0}],
+			"duration": 1,
+			"el_type": "note",
+			"startChar": 32,
+			"endChar": 35,
+			"averagepitch": 0,
+			"minpitch": 0,
+			"maxpitch": 0,
+			"currentTrackMilliseconds": 0,
+			"currentTrackWholeNotes": 0,
+			"midiPitches": [{"cmd": "note", "pitch": 60, "volume": 105, "start": 0, "duration": 1, "instrument": 0, "gap": 0}]
+		},
+		"size": {"x": 71, "y": 83, "width": 15, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "1"},
-		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 1, "highestVert": 7}], "duration": 0.25, "el_type": "note", "startChar": 34, "endChar": 36, "averagepitch": 1, "minpitch": 1, "maxpitch": 1},
-		"size": {"x": 233, "y": 56, "width": 10, "height": 31}
+		"abcEl": {
+			"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 0}],
+			"duration": 1,
+			"el_type": "note",
+			"startChar": 55,
+			"endChar": 58,
+			"averagepitch": 0,
+			"minpitch": 0,
+			"maxpitch": 0,
+			"currentTrackMilliseconds": 1333.3333333333335,
+			"currentTrackWholeNotes": 1,
+			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 1, "duration": 1, "instrument": 0, "gap": 0}]
+		},
+		"size": {"x": 49, "y": 176, "width": 15, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "2"},
-		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 2, "highestVert": 8}], "duration": 0.25, "el_type": "note", "startChar": 36, "endChar": 38, "averagepitch": 2, "minpitch": 2, "maxpitch": 2},
-		"size": {"x": 395, "y": 52, "width": 10, "height": 31}
+		"abcEl": {
+			"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 0}],
+			"duration": 1,
+			"el_type": "note",
+			"startChar": 78,
+			"endChar": 81,
+			"averagepitch": 0,
+			"minpitch": 0,
+			"maxpitch": 0,
+			"currentTrackMilliseconds": 2666.666666666667,
+			"currentTrackWholeNotes": 2,
+			"midiPitches": [{"cmd": "note", "pitch": 48, "volume": 105, "start": 2, "duration": 1, "instrument": 0, "gap": 0}]
+		},
+		"size": {"x": 49, "y": 268, "width": 15, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "3"},
-		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 3, "highestVert": 9}], "duration": 0.25, "el_type": "note", "startChar": 38, "endChar": 40, "averagepitch": 3, "minpitch": 3, "maxpitch": 3},
-		"size": {"x": 558, "y": 49, "width": 10, "height": 31}
+		"abcEl": {
+			"pitches": [{"pitch": 0, "verticalPos": 8, "highestVert": 8}],
+			"duration": 1,
+			"el_type": "note",
+			"startChar": 98,
+			"endChar": 101,
+			"averagepitch": 8,
+			"minpitch": 8,
+			"maxpitch": 8,
+			"currentTrackMilliseconds": 4000,
+			"currentTrackWholeNotes": 3,
+			"midiPitches": [{"cmd": "note", "pitch": 48, "volume": 105, "start": 3, "duration": 1, "instrument": 0, "gap": 0}]
+		},
+		"size": {"x": 50, "y": 329, "width": 15, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "4"},
-		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 6}], "duration": 0.25, "el_type": "note", "startChar": 60, "endChar": 62, "averagepitch": 0, "minpitch": 0, "maxpitch": 0},
-		"size": {"x": 49, "y": 153, "width": 10, "height": 31}
+		"abcEl": {
+			"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}],
+			"duration": 1,
+			"el_type": "note",
+			"startChar": 119,
+			"endChar": 122,
+			"averagepitch": 12,
+			"minpitch": 12,
+			"maxpitch": 12,
+			"currentTrackMilliseconds": 5333.333333333334,
+			"currentTrackWholeNotes": 4,
+			"midiPitches": [{"cmd": "note", "pitch": 48, "volume": 105, "start": 4, "duration": 1, "instrument": 0, "gap": 0}]
+		},
+		"size": {"x": 50, "y": 406, "width": 15, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "5"},
-		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 1, "highestVert": 7}], "duration": 0.25, "el_type": "note", "startChar": 62, "endChar": 64, "averagepitch": 1, "minpitch": 1, "maxpitch": 1},
-		"size": {"x": 217, "y": 149, "width": 10, "height": 31}
+		"abcEl": {
+			"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}],
+			"duration": 1,
+			"el_type": "note",
+			"startChar": 140,
+			"endChar": 143,
+			"averagepitch": 12,
+			"minpitch": 12,
+			"maxpitch": 12,
+			"currentTrackMilliseconds": 6666.666666666666,
+			"currentTrackWholeNotes": 5,
+			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 5, "duration": 1, "instrument": 0, "gap": 0}]
+		},
+		"size": {"x": 50, "y": 498, "width": 15, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "6"},
-		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 2, "highestVert": 8}], "duration": 0.25, "el_type": "note", "startChar": 64, "endChar": 66, "averagepitch": 2, "minpitch": 2, "maxpitch": 2},
-		"size": {"x": 385, "y": 145, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "7"},
-		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 3, "highestVert": 9}], "duration": 0.25, "el_type": "note", "startChar": 66, "endChar": 68, "averagepitch": 3, "minpitch": 3, "maxpitch": 3},
-		"size": {"x": 552, "y": 141, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "8"},
-		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 6}], "duration": 0.25, "el_type": "note", "startChar": 88, "endChar": 90, "averagepitch": 0, "minpitch": 0, "maxpitch": 0},
-		"size": {"x": 49, "y": 245, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "9"},
-		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 1, "highestVert": 7}], "duration": 0.25, "el_type": "note", "startChar": 90, "endChar": 92, "averagepitch": 1, "minpitch": 1, "maxpitch": 1},
-		"size": {"x": 216, "y": 241, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "10"},
-		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 2, "highestVert": 8}], "duration": 0.25, "el_type": "note", "startChar": 92, "endChar": 94, "averagepitch": 2, "minpitch": 2, "maxpitch": 2},
-		"size": {"x": 384, "y": 237, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "11"},
-		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 3, "highestVert": 9}], "duration": 0.25, "el_type": "note", "startChar": 94, "endChar": 96, "averagepitch": 3, "minpitch": 3, "maxpitch": 3},
-		"size": {"x": 551, "y": 233, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "12"},
-		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 8, "highestVert": 8}], "duration": 0.25, "el_type": "note", "startChar": 113, "endChar": 115, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
-		"size": {"x": 50, "y": 329, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "13"},
-		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 9, "highestVert": 9}], "duration": 0.25, "el_type": "note", "startChar": 115, "endChar": 117, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
-		"size": {"x": 217, "y": 325, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "14"},
-		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 10, "highestVert": 10}], "duration": 0.25, "el_type": "note", "startChar": 117, "endChar": 119, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
-		"size": {"x": 385, "y": 322, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "15"},
-		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 11, "highestVert": 11}], "duration": 0.25, "el_type": "note", "startChar": 119, "endChar": 121, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
-		"size": {"x": 552, "y": 318, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "16"},
-		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}], "duration": 0.25, "el_type": "note", "startChar": 139, "endChar": 141, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
-		"size": {"x": 50, "y": 406, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "17"},
-		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 13, "highestVert": 13}], "duration": 0.25, "el_type": "note", "startChar": 141, "endChar": 143, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
-		"size": {"x": 217, "y": 402, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "18"},
-		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 14, "highestVert": 14}], "duration": 0.25, "el_type": "note", "startChar": 143, "endChar": 145, "averagepitch": 14, "minpitch": 14, "maxpitch": 14},
-		"size": {"x": 385, "y": 398, "width": 10, "height": 35}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "19"},
-		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 15, "highestVert": 15}], "duration": 0.25, "el_type": "note", "startChar": 145, "endChar": 147, "averagepitch": 15, "minpitch": 15, "maxpitch": 15},
-		"size": {"x": 552, "y": 394, "width": 10, "height": 39}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "20"},
-		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}], "duration": 0.25, "el_type": "note", "startChar": 165, "endChar": 167, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
-		"size": {"x": 50, "y": 498, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "21"},
-		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 13, "highestVert": 13}], "duration": 0.25, "el_type": "note", "startChar": 167, "endChar": 169, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
-		"size": {"x": 217, "y": 495, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "22"},
-		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 14, "highestVert": 14}], "duration": 0.25, "el_type": "note", "startChar": 169, "endChar": 171, "averagepitch": 14, "minpitch": 14, "maxpitch": 14},
-		"size": {"x": 385, "y": 491, "width": 10, "height": 35}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "23"},
-		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 15, "highestVert": 15}], "duration": 0.25, "el_type": "note", "startChar": 171, "endChar": 173, "averagepitch": 15, "minpitch": 15, "maxpitch": 15},
-		"size": {"x": 552, "y": 487, "width": 10, "height": 39}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "24"},
-		"abcEl": {"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}], "duration": 0.25, "el_type": "note", "startChar": 189, "endChar": 191, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
-		"size": {"x": 50, "y": 599, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "25"},
-		"abcEl": {"pitches": [{"pitch": 1, "verticalPos": 13, "highestVert": 13}], "duration": 0.25, "el_type": "note", "startChar": 191, "endChar": 193, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
-		"size": {"x": 93, "y": 595, "width": 10, "height": 31}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "26"},
-		"abcEl": {"pitches": [{"pitch": 2, "verticalPos": 14, "highestVert": 14}], "duration": 0.25, "el_type": "note", "startChar": 193, "endChar": 195, "averagepitch": 14, "minpitch": 14, "maxpitch": 14},
-		"size": {"x": 135, "y": 591, "width": 10, "height": 35}
-	}, {
-		"draggable": true,
-		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "27"},
-		"abcEl": {"pitches": [{"pitch": 3, "verticalPos": 15, "highestVert": 15}], "duration": 0.25, "el_type": "note", "startChar": 195, "endChar": 197, "averagepitch": 15, "minpitch": 15, "maxpitch": 15},
-		"size": {"x": 177, "y": 587, "width": 10, "height": 39}
+		"abcEl": {
+			"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}],
+			"duration": 1,
+			"el_type": "note",
+			"startChar": 159,
+			"endChar": 162,
+			"averagepitch": 12,
+			"minpitch": 12,
+			"maxpitch": 12,
+			"currentTrackMilliseconds": 8000,
+			"currentTrackWholeNotes": 6,
+			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 6, "duration": 1, "instrument": 0, "gap": 0}]
+		},
+		"size": {"x": 50, "y": 599, "width": 15, "height": 8}
 	}];
 
 //////////////////////////////////////////////////////////
