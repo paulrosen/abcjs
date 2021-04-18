@@ -1,4 +1,4 @@
-## Releasing
+# Releasing
 
 ::: danger Important!
 Note: The following checklist is for committers only! 
@@ -10,13 +10,13 @@ For people who want to contribute a pull request, this isn't relevant!
 All new work should be done in the `dev` branch.
 :::
 
-### To begin a new version:
+## To begin a new version:
 
 [_] Run the script `./start-version.sh ${version}`.
 
 [_] Check in the changed files.
 
-### To release a new version, this checklist should be followed:
+## To release a new version, this checklist should be followed:
 
 [_] Get all commits since the last release with `git log > temp.txt`.
 
