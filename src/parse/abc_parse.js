@@ -28,6 +28,8 @@ var Parse = function() {
 
 			addElementToEvents: tune.addElementToEvents,
 			addUsefulCallbackInfo: tune.addUsefulCallbackInfo,
+			getTotalTime: tune.getTotalTime,
+			getTotalBeats: tune.getTotalBeats,
 			getBarLength: tune.getBarLength,
 			getBeatLength: tune.getBeatLength,
 			getBeatsPerMeasure: tune.getBeatsPerMeasure,

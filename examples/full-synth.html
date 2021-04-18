@@ -39,6 +39,13 @@
 			margin-top: 20px;
 			margin-left: 5px;
 		}
+		.seek-controls {
+			margin-top: 5px;
+		}
+		.seek-controls.disabled {
+			background-color: #cccccc;
+			opacity: 0.5;
+		}
 	</style>
 
 	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
@@ -186,6 +193,8 @@
 			document.querySelector(".start").addEventListener("click", start);
 			document.querySelector(".warp").addEventListener("click", warp);
 			document.querySelector(".seek").addEventListener("click", seek);
+			document.querySelector(".seek2").addEventListener("click", seek2);
+			document.querySelector("#seek-units").addEventListener("change", seekExplanation);
 
 			if (ABCJS.synth.supportsAudio()) {
 				synthControl = new ABCJS.synth.SynthController();
@@ -210,6 +219,31 @@
 			synthControl.seek(0.50)
 		}
 
+		function seekExplanation() {
+			var explanation = document.getElementById("unit-explanation");
+			if (!synthControl.visualObj.noteTimings) {
+				explanation.innerText = "First start playing to load audio before seeking.";
+				return;
+			}
+			var units = this.value;
+			var max = 1;
+			switch (units) {
+				case "seconds":
+					max = synthControl.visualObj.getTotalTime();
+					break;
+				case "beats":
+					max = synthControl.visualObj.getTotalBeats();
+					break;
+			}
+			explanation.innerText = "Enter a number between 0 and {0}.".replace("{0}", max);
+		}
+
+		function seek2() {
+			var amount = document.getElementById("seek-amount").value;
+			var units = document.getElementById("seek-units").value;
+			synthControl.seek(amount, units)
+		}
+
 		function warp() {
 			var el = document.querySelector(".warp");
 			el.setAttribute("disabled", true)
@@ -221,6 +255,8 @@
 		}
 
 		function setTune(userAction) {
+			var seekControls = document.querySelector(".seek-controls");
+			seekControls.classList.add("disabled");
 			synthControl.disable(true);
 			var visualObj = ABCJS.renderAbc("paper", abc[currentTune], abcOptions)[0];
 			var midi = ABCJS.synth.getMidiFile(abc[currentTune]);
@@ -247,6 +283,8 @@
 				if (synthControl) {
 					synthControl.setTune(visualObj, userAction).then(function (response) {
 						console.log("Audio successfully loaded.")
+						seekControls.classList.remove("disabled");
+						seekExplanation();
 					}).catch(function (error) {
 						console.warn("Audio problem:", error);
 					});
@@ -283,6 +321,16 @@
       <button class="warp">Rand. Warp</button>
       <button class="seek">Seek to Middle</button>
 		<button class="download" style="display: none;">Download</button>
+		<div class="seek-controls disabled">
+			<label>Seek: <input type="number" min="0" id="seek-amount"></label>
+			<select aria-label="seek units" id="seek-units">
+				<option value="percent">Percent</option>
+				<option value="seconds">Seconds</option>
+				<option value="beats">Beats</option>
+			</select>
+			<button class="seek2">Seek</button>
+			<span id="unit-explanation" class="click-explanation">First start playing to load audio before seeking.</span>
+		</div>
       <div class="midi">MIDI</div>
       <div id="paper"></div>
       <div id="audio"></div>

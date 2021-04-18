@@ -147,9 +147,17 @@ Stop the animation. After calling this, the next call to `start()` will start at
 
 Move the timer back to the beginning, so the animation starts over. This can be called either when the animation is currently running or when it is paused.
 
-### setProgress(percent)
+### setProgress(percent, units)
 
-Change the position of the animation. This allows random access to any place in the tune. The `percent` passed in is a number between 0 and 1. This can be called either when the animation is currently running or when it is paused. 
+Change the position of the animation. This allows random access to any place in the tune. 
+
+If the second parameter is not present, then `units` equals "percent". The possible values are:
+
+* `"percent"`: The percent passed in is a number between 0 and 1. This can be called either when the animation is currently running or when it is paused. 
+
+* `"seconds"`: The seconds from the beginning of the tune. If this is passed the end of the tune it is changed to the end.
+
+* `"beats"`: The beats from the beginning of the tune. If this is passed the end of the tune it is changed to the end.
 
 ### replaceTarget(visualObj)
 

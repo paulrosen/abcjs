@@ -125,9 +125,17 @@ Call this after `prime()` has returned its promise. This will happen fast and do
 
 After `start()` has been called, pause and resume can be called to control the playback.
 
-### seek(percent)
+### seek(percent, units)
 
-This changes the playback position. It can be called whether the sound is currently playing or not. The percent is a number between 0 and 1.
+This changes the playback position. It can be called whether the sound is currently playing or not.
+
+If the second parameter is not present, then `units` equals "percent". The possible values are:
+
+* `"percent"`: The percent passed in is a number between 0 and 1. This can be called either when the animation is currently running or when it is paused.
+
+* `"seconds"`: The seconds from the beginning of the tune. If this is passed the end of the tune it is changed to the end.
+
+* `"beats"`: The beats from the beginning of the tune. If this is passed the end of the tune it is changed to the end.
 
 ### stop()
 

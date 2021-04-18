@@ -100,6 +100,14 @@ var Tune = function() {
 		return meter.num / meter.den;
 	};
 
+	this.getTotalTime = function() {
+		return this.totalTime;
+	};
+
+	this.getTotalBeats = function() {
+		return this.totalBeats;
+	};
+
 	this.millisecondsPerMeasure = function(bpmOverride) {
 		var bpm;
 		if (bpmOverride) {
@@ -544,6 +552,13 @@ var Tune = function() {
 		var timeDivider = beatLength * beatsPerSecond;
 
 		this.noteTimings = this.setupEvents(startingDelay, timeDivider, bpm, warp);
+		if (this.noteTimings.length > 0) {
+			this.totalTime = this.noteTimings[this.noteTimings.length - 1].milliseconds / 1000;
+			this.totalBeats = this.totalTime * beatsPerSecond;
+		} else {
+			this.totalTime = undefined;
+			this.totalBeats = undefined;
+		}
 		return this.noteTimings;
 	};
 

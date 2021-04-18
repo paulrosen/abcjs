@@ -77,6 +77,7 @@ function CreateSynth() {
 		else
 			return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
 		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure(self.flattened.tempo) : 1000);
+		self.beatsPerMeasure = options.visualObj ? options.visualObj.getBeatsPerMeasure() : 4;
 		self.sequenceCallback = params.sequenceCallback;
 		self.callbackContext = params.callbackContext;
 		self.onEnded = params.onEnded;
@@ -352,8 +353,20 @@ function CreateSynth() {
 		self.start();
 	};
 
-	self.seek = function(percent) {
-		var offset = (self.duration-self.fadeLength/1000) * percent;
+	self.seek = function(position, units) {
+		var offset;
+		switch (units) {
+			case "seconds":
+				offset = position;
+				break;
+			case "beats":
+				offset = position * self.millisecondsPerMeasure / self.beatsPerMeasure / 1000;
+				break;
+			default:
+				// this is "percent" or any illegal value
+				offset = (self.duration-self.fadeLength/1000) * position;
+				break;
+		}
 
 		// TODO-PER: can seek when paused or when playing
 		if (!self.audioBufferPossible)
