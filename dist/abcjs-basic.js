@@ -513,14 +513,38 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     self.reset();
   };
 
-  self.setProgress = function (percent) {
-    // this is passed a value between 0 and 1.
+  self.setProgress = function (position, units) {
     // the effect of this function is to move startTime so that the callbacks happen correctly for the new seek.
-    if (percent < 0) percent = 0;
-    if (percent > 1) percent = 1;
+    var currentTime;
+    var percent;
+
+    switch (units) {
+      case "seconds":
+        currentTime = position * 1000;
+        if (currentTime < 0) currentTime = 0;
+        if (currentTime > self.lastMoment) currentTime = self.lastMoment;
+        percent = currentTime / self.lastMoment;
+        break;
+
+      case "beats":
+        currentTime = position * self.millisecondsPerBeat * self.beatSubdivisions;
+        if (currentTime < 0) currentTime = 0;
+        if (currentTime > self.lastMoment) currentTime = self.lastMoment;
+        percent = currentTime / self.lastMoment;
+        break;
+
+      default:
+        // this is "percent" or any illegal value
+        // this is passed a value between 0 and 1.
+        percent = position;
+        if (percent < 0) percent = 0;
+        if (percent > 1) percent = 1;
+        currentTime = self.lastMoment * percent;
+        break;
+    }
+
     if (!self.isRunning) self.pausedPercent = percent;
     var now = performance.now();
-    var currentTime = self.lastMoment * percent;
     self.startTime = now - currentTime;
     var oldEvent = self.currentEvent;
     self.currentEvent = 0;
@@ -1219,6 +1243,14 @@ var Tune = function Tune() {
     return meter.num / meter.den;
   };
 
+  this.getTotalTime = function () {
+    return this.totalTime;
+  };
+
+  this.getTotalBeats = function () {
+    return this.totalBeats;
+  };
+
   this.millisecondsPerMeasure = function (bpmOverride) {
     var bpm;
 
@@ -1707,6 +1739,15 @@ var Tune = function Tune() {
     if (startingDelay) startingDelay -= this.getPickupLength() / beatLength / beatsPerSecond;
     var timeDivider = beatLength * beatsPerSecond;
     this.noteTimings = this.setupEvents(startingDelay, timeDivider, bpm, warp);
+
+    if (this.noteTimings.length > 0) {
+      this.totalTime = this.noteTimings[this.noteTimings.length - 1].milliseconds / 1000;
+      this.totalBeats = this.totalTime * beatsPerSecond;
+    } else {
+      this.totalTime = undefined;
+      this.totalBeats = undefined;
+    }
+
     return this.noteTimings;
   };
 
@@ -1716,8 +1757,8 @@ var Tune = function Tune() {
     return flatten(seq, options, this.formatting.percmap);
   };
 
-  this.deline = function () {
-    return delineTune(this.lines);
+  this.deline = function (options) {
+    return delineTune(this.lines, options);
   };
 };
 
@@ -1731,7 +1772,9 @@ module.exports = Tune;
   \*********************************/
 /***/ (function(module) {
 
-function delineTune(inputLines) {
+function delineTune(inputLines, options) {
+  if (!options) options = {};
+  var lineBreaks = !!options.lineBreaks;
   var outputLines = [];
   var inMusicLine = false;
   var currentMeter = [];
@@ -1747,8 +1790,7 @@ function delineTune(inputLines) {
 
     if (inputLine.staff) {
       if (inMusicLine && !inputLine.vskip) {
-        var outputLine = outputLines[outputLines.length - 1];
-        findMismatchKeys(inputLine, outputLine, ["staff", "staffGroup"], "line", i);
+        var outputLine = outputLines[outputLines.length - 1]; //findMismatchKeys(inputLine, outputLine, ["staff", "staffGroup"], "line", i)
 
         for (var s = 0; s < outputLine.staff.length; s++) {
           var inputStaff = inputLine.staff[s];
@@ -1799,15 +1841,14 @@ function delineTune(inputLines) {
               currentAnnotationFont[s] = inputStaff.annotationfont;
               delete inputStaff.annotationfont;
             }
-          }
+          } //findMismatchKeys(inputStaff, outputStaff, ["voices", "title", "abbrevTitle", "barNumber", "meter", "key", "clef", "vocalfont", "gchordfont", "tripletfont", "annotationfont"], "staff", i + ' ' + s)
 
-          findMismatchKeys(inputStaff, outputStaff, ["voices", "title", "abbrevTitle", "barNumber", "meter", "key", "clef", "vocalfont", "gchordfont", "tripletfont", "annotationfont"], "staff", i + ' ' + s);
 
           if (inputStaff) {
             for (var v = 0; v < outputStaff.voices.length; v++) {
               var outputVoice = outputStaff.voices[v];
               var inputVoice = inputStaff.voices[v];
-              outputVoice.push({
+              if (lineBreaks) outputVoice.push({
                 el_type: "break"
               });
               if (inputVoice) outputStaff.voices[v] = outputVoice.concat(inputVoice);
@@ -1818,6 +1859,7 @@ function delineTune(inputLines) {
         for (var ii = 0; ii < inputLine.staff.length; ii++) {
           currentKey[ii] = inputLine.staff[ii].key;
           currentMeter[ii] = inputLine.staff[ii].meter;
+          currentClef[ii] = inputLine.staff[ii].clef;
         } // copy this because we are going to change it and we don't want to change the original.
 
 
@@ -1832,40 +1874,34 @@ function delineTune(inputLines) {
   }
 
   return outputLines;
-}
+} // function findMismatchKeys(input, output, ignore, context, context2) {
+// 	if (!input) {
+// 		return;
+// 	}
+// 	var outputKeys = Object.keys(output);
+// 	var inputKeys = Object.keys(input);
+// 	for (var ii = 0; ii < ignore.length; ii++) {
+// 		if (outputKeys.indexOf(ignore[ii]) >= 0) {
+// 			outputKeys.splice(outputKeys.indexOf(ignore[ii]), 1);
+// 		}
+// 		if (inputKeys.indexOf(ignore[ii]) >= 0) {
+// 			inputKeys.splice(inputKeys.indexOf(ignore[ii]), 1);
+// 		}
+// 	}
+// 	if (inputKeys.join(",") !== outputKeys.join(",")) {
+// 		console.log("keys mismatch "+context + ' ' + context2, input, output);
+// 	}
+// 	for (var k = 0; k < inputKeys.length; k++) {
+// 		var key = inputKeys[k];
+// 		if (ignore.indexOf(key) < 0) {
+// 			var inputValue = JSON.stringify(input[key], replacer);
+// 			var outputValue = JSON.stringify(output[key], replacer);
+// 			if (inputValue !== outputValue)
+// 				console.log("value mismatch "+context + ' ' + context2 + ' ' + key, inputValue, outputValue)
+// 		}
+// 	}
+// }
 
-function findMismatchKeys(input, output, ignore, context, context2) {
-  if (!input) {
-    return;
-  }
-
-  var outputKeys = Object.keys(output);
-  var inputKeys = Object.keys(input);
-
-  for (var ii = 0; ii < ignore.length; ii++) {
-    if (outputKeys.indexOf(ignore[ii]) >= 0) {
-      outputKeys.splice(outputKeys.indexOf(ignore[ii]), 1);
-    }
-
-    if (inputKeys.indexOf(ignore[ii]) >= 0) {
-      inputKeys.splice(inputKeys.indexOf(ignore[ii]), 1);
-    }
-  }
-
-  if (inputKeys.join(",") !== outputKeys.join(",")) {
-    console.log("keys mismatch " + context + ' ' + context2, input, output);
-  }
-
-  for (var k = 0; k < inputKeys.length; k++) {
-    var key = inputKeys[k];
-
-    if (ignore.indexOf(key) < 0) {
-      var inputValue = JSON.stringify(input[key], replacer);
-      var outputValue = JSON.stringify(output[key], replacer);
-      if (inputValue !== outputValue) console.log("value mismatch " + context + ' ' + context2 + ' ' + key, inputValue, outputValue);
-    }
-  }
-}
 
 function replacer(key, value) {
   // Filtering out properties
@@ -2759,6 +2795,8 @@ var Parse = function Parse() {
       version: tune.version,
       addElementToEvents: tune.addElementToEvents,
       addUsefulCallbackInfo: tune.addUsefulCallbackInfo,
+      getTotalTime: tune.getTotalTime,
+      getTotalBeats: tune.getTotalBeats,
       getBarLength: tune.getBarLength,
       getBeatLength: tune.getBeatLength,
       getBeatsPerMeasure: tune.getBeatsPerMeasure,
@@ -7395,7 +7433,7 @@ MusicParser.prototype.parseMusic = function (line) {
                 }
 
                 multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-                tuneBuilder.appendElement('note', startOfLine + chordStartChar, startOfLine + i, el);
+                tuneBuilder.appendElement('note', startOfLine + startI, startOfLine + i, el);
                 multilineVars.measureNotEmpty = true;
                 el = {};
               }
@@ -10729,7 +10767,7 @@ var TuneBuilder = function TuneBuilder(tune) {
 
     var hashParams = parseCommon.clone(hashParams2);
 
-    if (tune.lines[tune.lineNum].staff) {
+    if (tune.lines[tune.lineNum] && tune.lines[tune.lineNum].staff) {
       // be sure that we are on a music type line before doing the following.
       // If tune is the first item in tune staff, then we might have to initialize the staff, first.
       if (tune.lines[tune.lineNum].staff.length <= tune.staffNum) {
@@ -11076,7 +11114,9 @@ function wrapLines(tune, lineBreaks) {
   // there is an array of staffs per line (for instance, piano will have 2, orchestra will have many)
   // there is an array of voices per staff (for instance, 4-part harmony might have bass and tenor on a single staff)
 
-  var lines = removeLineBreaks(tune.lines);
+  var lines = tune.deline({
+    lineBreaks: false
+  });
   var linesBreakElements = findLineBreaks(lines, lineBreaks); //console.log(JSON.stringify(linesBreakElements))
 
   tune.lines = addLineBreaks(lines, linesBreakElements);
@@ -11093,6 +11133,8 @@ function addLineBreaks(lines, linesBreakElements) {
   // If the item doesn't contain "staff" then it is a non music line and should just be copied.
   var outputLines = [];
   var lastKeySig = []; // This is per staff - if the key changed then this will be populated.
+
+  var lastStem = [];
 
   for (var i = 0; i < linesBreakElements.length; i++) {
     var action = linesBreakElements[i];
@@ -11126,6 +11168,10 @@ function addLineBreaks(lines, linesBreakElements) {
       }
 
       outputLines[action.line].staff[action.staff].voices[action.voice] = lines[action.ogLine].staff[action.staff].voices[action.voice].slice(action.start, action.end + 1);
+      if (lastStem[action.staff * 10 + action.voice]) outputLines[action.line].staff[action.staff].voices[action.voice].unshift({
+        el_type: "stem",
+        direction: lastStem[action.staff * 10 + action.voice].direction
+      });
       var currVoice = outputLines[action.line].staff[action.staff].voices[action.voice];
 
       for (var kk = currVoice.length - 1; kk >= 0; kk--) {
@@ -11137,6 +11183,15 @@ function addLineBreaks(lines, linesBreakElements) {
             accidentals: currVoice[kk].accidentals.filter(function (acc) {
               return acc.acc !== 'natural';
             })
+          };
+          break;
+        }
+      }
+
+      for (kk = currVoice.length - 1; kk >= 0; kk--) {
+        if (currVoice[kk].el_type === "stem") {
+          lastStem[action.staff * 10 + action.voice] = {
+            direction: currVoice[kk].direction
           };
           break;
         }
@@ -11231,47 +11286,6 @@ function findLineBreaks(lines, lineBreakArray) {
   }
 
   return lineBreakIndexes;
-}
-
-function removeLineBreaks(lines) {
-  // This concatenates all the music lines. If there is a non-music line then it leaves it,
-  // so it returns an array of lines where there is no more than one staff line in a row.
-  var outputLines = [];
-  var startLine = true;
-
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i];
-
-    if (line.staff) {
-      if (startLine) {
-        outputLines.push(line);
-        startLine = false;
-      } else {
-        //	copy all voices to the previous line
-        var output = outputLines[outputLines.length - 1];
-        var staffs = line.staff;
-
-        for (var j = 0; j < staffs.length; j++) {
-          if (output.staff.length <= j) output.staff.push({
-            voices: []
-          });
-          var staff = staffs[j];
-          var voices = staff.voices;
-
-          for (var k = 0; k < voices.length; k++) {
-            if (output.staff[j].voices.length < k) output.staff[j].voices.push([]);
-            var voice = voices[k];
-            output.staff[j].voices[k] = output.staff[j].voices[k].concat(voice);
-          }
-        }
-      }
-    } else {
-      startLine = true;
-      outputLines.push(line);
-    }
-  }
-
-  return outputLines;
 }
 
 function freeFormLineBreaks(widths, lineBreakPoint) {
@@ -11676,7 +11690,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
     accidentals = [0, 0, 0, 0, 0, 0, 0];
     bagpipes = false;
     tracks = [];
-    startingTempo = undefined;
+    startingTempo = options.qpm;
     startingMeter = undefined;
     tempoChangeFactor = 1;
     instrument = undefined;
@@ -11717,7 +11731,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
     drumDefinition = {};
     if (voices.length > 0 && voices[0].length > 0) pickupLength = voices[0][0].pickupLength; // First adjust the input to resolve ties, set the starting time for each note, etc. That will make the rest of the logic easier
 
-    preProcess(voices);
+    preProcess(voices, options);
 
     for (var i = 0; i < voices.length; i++) {
       transpose = 0;
@@ -11851,35 +11865,12 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
         chordTrackFinished = true;
       if (drumTrack.length > 0) // Don't do drums on more than one track, so turn off drum after we create it.
         drumTrackFinished = true;
-    }
+    } // See if any notes are octaves played at the same time. If so, raise the pitch of the higher one.
 
+
+    if (options.detuneOctave) findOctaves(tracks, parseInt(options.detuneOctave, 10));
     if (chordTrack.length > 0) tracks.push(chordTrack);
-    if (drumTrack.length > 0) tracks.push(drumTrack); // Adjust the tempo according to the meter. The rules are this:
-    // 1) If the denominator is 2 or 4, then always make a beat be the denominator.
-    //
-    // 2) If the denominator is 8 or 16, then:
-    // a) If the numerator is divisible by 3, the beat is 3*denominator.
-    // b) Otherwise the beat is the denominator.
-    //
-    // 3) If the denominator is anything else, then don't worry about it because it doesn't make sense. Don't modify it and hope for the best.
-    //
-    // Right now, the startingTempo is calculated for a quarter note, so modify it if necessary.
-    // var num = startingMeter ? parseInt(startingMeter.num, 10) : meter.num;
-    // var den = startingMeter ? parseInt(startingMeter.den, 10) : meter.den;
-    // if (den === 2)
-    // 	startingTempo *= 2;
-    // else if (den === 8) {
-    // 	if (parseInt(num, 10) % 3 === 0)
-    // 		startingTempo *= 3/2;
-    // 	else
-    // 		startingTempo /= 2;
-    // } else if (den === 16) {
-    // 	if (num % 3 === 0)
-    // 		startingTempo *= 3/4;
-    // 	else
-    // 		startingTempo /= 4;
-    // }
-
+    if (drumTrack.length > 0) tracks.push(drumTrack);
     return {
       tempo: startingTempo,
       instrument: instrument,
@@ -11905,11 +11896,11 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
     return Math.round(duration * tempoChangeFactor * 1000000) / 1000000;
   }
 
-  function preProcess(voices) {
+  function preProcess(voices, options) {
     for (var i = 0; i < voices.length; i++) {
       var voice = voices[i];
       var ties = {};
-      var startingTempo = 0;
+      var startingTempo = options.qpm;
       var timeCounter = 0;
       var tempoMultiplier = 1;
 
@@ -13141,6 +13132,50 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
       start += len;
     }
   }
+
+  function findOctaves(tracks, detuneCents) {
+    var timing = {};
+
+    for (var i = 0; i < tracks.length; i++) {
+      for (var j = 0; j < tracks[i].length; j++) {
+        var note = tracks[i][j];
+
+        if (note.cmd === "note") {
+          if (timing[note.start] === undefined) timing[note.start] = [];
+          timing[note.start].push({
+            track: i,
+            event: j,
+            pitch: note.pitch
+          });
+        }
+      }
+    }
+
+    var keys = Object.keys(timing);
+
+    for (i = 0; i < keys.length; i++) {
+      var arr = timing[keys[i]];
+
+      if (arr.length > 1) {
+        arr = arr.sort(function (a, b) {
+          return a.pitch - b.pitch;
+        });
+        var topEvent = arr[arr.length - 1];
+        var topNote = topEvent.pitch % 12;
+        var found = false;
+
+        for (j = 0; !found && j < arr.length - 1; j++) {
+          if (arr[j].pitch % 12 === topNote) found = true;
+        }
+
+        if (found) {
+          var event = tracks[topEvent.track][topEvent.event];
+          if (!event.cents) event.cents = 0;
+          event.cents += detuneCents;
+        }
+      }
+    }
+  }
 })();
 
 module.exports = flatten;
@@ -13640,7 +13675,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
     var skipEndingPlaceholder = []; // This is the place where the first ending starts.
 
     var startingDrumSet = false;
-    var lines = abctune.deline();
+    var lines = abctune.lines; //abctune.deline(); TODO-PER: can switch to this, then simplify the loops below.
 
     for (var i = 0; i < lines.length; i++) {
       // For each group of staff lines in the tune.
@@ -14733,7 +14768,6 @@ function CreateSynth() {
     self.fadeLength = isNaN(p) ? 200 : p;
     p = params.noteEnd !== undefined ? parseInt(params.noteEnd, 10) : NaN;
     self.noteEnd = isNaN(p) ? 0 : p;
-    self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : options.visualObj ? options.visualObj.millisecondsPerMeasure(options.bpm) : 1000;
     self.pan = params.pan;
     self.meterSize = 1;
 
@@ -14743,6 +14777,8 @@ function CreateSynth() {
       if (meter.den) self.meterSize = options.visualObj.getMeterFraction().num / options.visualObj.getMeterFraction().den;
     } else if (options.sequence) self.flattened = options.sequence;else return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
 
+    self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : options.visualObj ? options.visualObj.millisecondsPerMeasure(self.flattened.tempo) : 1000;
+    self.beatsPerMeasure = options.visualObj ? options.visualObj.getBeatsPerMeasure() : 4;
     self.sequenceCallback = params.sequenceCallback;
     self.callbackContext = params.callbackContext;
     self.onEnded = params.onEnded;
@@ -15017,8 +15053,24 @@ function CreateSynth() {
     self.start();
   };
 
-  self.seek = function (percent) {
-    var offset = (self.duration - self.fadeLength / 1000) * percent; // TODO-PER: can seek when paused or when playing
+  self.seek = function (position, units) {
+    var offset;
+
+    switch (units) {
+      case "seconds":
+        offset = position;
+        break;
+
+      case "beats":
+        offset = position * self.millisecondsPerMeasure / self.beatsPerMeasure / 1000;
+        break;
+
+      default:
+        // this is "percent" or any illegal value
+        offset = (self.duration - self.fadeLength / 1000) * position;
+        break;
+    } // TODO-PER: can seek when paused or when playing
+
 
     if (!self.audioBufferPossible) throw new Error(notSupportedMessage);
     if (self.debugCallback) self.debugCallback("seek called sec=" + offset);
@@ -16074,9 +16126,11 @@ function SynthController() {
     });
   };
 
-  self.seek = function (percent) {
-    self.timer.setProgress(percent);
-    self.midiBuffer.seek(percent);
+  self.seek = function (percent, units) {
+    if (self.timer && self.midiBuffer) {
+      self.timer.setProgress(percent, units);
+      self.midiBuffer.seek(percent, units);
+    }
   };
 
   self.setWarp = function (newWarp) {
