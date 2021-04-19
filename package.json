@@ -1,6 +1,6 @@
 {
   "name": "abcjs",
-  "version": "6.0.0-beta.32",
+  "version": "6.0.0-beta.33",
   "description": "Renderer for abc music notation",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -42,7 +42,7 @@
   },
   "homepage": "https://abcjs.net",
   "devDependencies": {
-    "@babel/core": "7.13.13",
+    "@babel/core": "7.13.14",
     "@babel/preset-env": "7.13.12",
     "@tarp/require": "1.4.3",
     "babel-loader": "8.2.2",
@@ -50,7 +50,7 @@
     "mocha": "^8.3.2",
     "vuepress": "2.0.0-beta.6",
     "vuex": "4.0.0",
-    "webpack": "5.28.0",
+    "webpack": "5.30.0",
     "webpack-bundle-analyzer": "4.4.0",
     "webpack-cli": "^4.6.0"
   }

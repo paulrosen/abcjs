@@ -145,22 +145,22 @@ describe("Automatic line wrapping", function() {
 
 	var expectedVoicesShareStaff = [
 		[
-			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [5]}, {el_type: "note", pitches: [6]}, {el_type: "note", pitches: [4]}, { el_type: "bar"}],
-			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [1]}, {el_type: "note", pitches: [3]}, {el_type: "note", pitches: [3]}, {el_type: "note", pitches: [2]}, { el_type: "bar"}],
-			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [11]}, {el_type: "note", pitches: [12]}, {el_type: "note", pitches: [13]}, {el_type: "note", pitches: [12]}, {el_type: "note", pitches: [11]}, { el_type: "bar"}],
-			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [9]}, {el_type: "note", pitches: [8]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [5]}, { el_type: "bar"}],
+			[{"el_type":"stem","direction":"up"},{"el_type":"note","pitches":[4]},{"el_type":"note","pitches":[5]},{"el_type":"note","pitches":[6]},{"el_type":"note","pitches":[4]},{"el_type":"bar"}],
+			[{"el_type":"stem","direction":"down"},{"el_type":"note","pitches":[1]},{"el_type":"note","pitches":[3]},{"el_type":"note","pitches":[3]},{"el_type":"note","pitches":[2]},{"el_type":"bar"}],
+			[{"el_type":"stem","direction":"up"},{"el_type":"note","pitches":[-1]},{"el_type":"note","pitches":[0]},{"el_type":"note","pitches":[1]},{"el_type":"note","pitches":[0]},{"el_type":"note","pitches":[-1]},{"el_type":"bar"}],
+			[{"el_type":"stem","direction":"down"},{"el_type":"note","pitches":[-3]},{"el_type":"note","pitches":[-4]},{"el_type":"note","pitches":[-8]},{"el_type":"note","pitches":[-7]},{"el_type":"bar"}]
 		],
 		[
-			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [3]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [6]}, { el_type: "bar"}],
-			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [2]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [5]}, {el_type: "note", pitches: [4]}, { el_type: "bar"}],
-			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [10]}, {el_type: "note", pitches: [13]}, {el_type: "note", pitches: [11]}, {el_type: "note", pitches: [13]}, { el_type: "bar"}],
-			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [6]}, {el_type: "note", pitches: [6]}, {el_type: "note", pitches: [9]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [5]}, { el_type: "bar"}],
+			[{"el_type":"stem","direction":"up"},{"el_type":"note","pitches":[3]},{"el_type":"note","pitches":[5]},{"el_type":"note","pitches":[4]},{"el_type":"note","pitches":[6]},{"el_type":"bar"}],
+			[{"el_type":"stem","direction":"down"},{"el_type":"note","pitches":[1]},{"el_type":"note","pitches":[3]},{"el_type":"note","pitches":[4]},{"el_type":"note","pitches":[3]},{"el_type":"bar"}],
+			[{"el_type":"stem","direction":"up"},{"el_type":"note","pitches":[-2]},{"el_type":"note","pitches":[1]},{"el_type":"note","pitches":[-1]},{"el_type":"note","pitches":[1]},{"el_type":"bar"}],
+			[{"el_type":"stem","direction":"down"},{"el_type":"note","pitches":[-6]},{"el_type":"note","pitches":[-6]},{"el_type":"note","pitches":[-3]},{"el_type":"note","pitches":[-8]},{"el_type":"note","pitches":[-7]},{"el_type":"bar"}]
 		],
 		[
-			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [5]}, {el_type: "note", pitches: [4]}, {el_type: "note", pitches: [3]}, { el_type: "bar"}],
-			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [3]}, {el_type: "note", pitches: [-1]}, {el_type: "note", pitches: [0]}, {el_type: "note", pitches: [1]}, { el_type: "bar"}],
-			[{el_type: "stem", direction: "up"}, {el_type: "note", pitches: [13]}, {el_type: "note", pitches: [9]}, {el_type: "note", pitches: [10]}, {el_type: "note", pitches: [11]}, { el_type: "bar"}],
-			[{el_type: "stem", direction: "down"}, {el_type: "note", pitches: [6]}, {el_type: "note", pitches: [7]}, {el_type: "note", pitches: [4]}, { el_type: "bar"}],
+			[{"el_type":"stem","direction":"up"},{"el_type":"note","pitches":[5]},{"el_type":"note","pitches":[4]},{"el_type":"note","pitches":[3]},{"el_type":"bar"}],
+			[{"el_type":"stem","direction":"down"},{"el_type":"note","pitches":[3]},{"el_type":"note","pitches":[-1]},{"el_type":"note","pitches":[0]},{"el_type":"note","pitches":[1]},{"el_type":"bar"}],
+			[{"el_type":"stem","direction":"up"},{"el_type":"note","pitches":[1]},{"el_type":"note","pitches":[-3]},{"el_type":"note","pitches":[-2]},{"el_type":"note","pitches":[-1]},{"el_type":"bar"}],
+			[{"el_type":"stem","direction":"down"},{"el_type":"note","pitches":[-6]},{"el_type":"note","pitches":[-5]},{"el_type":"note","pitches":[-8]},{"el_type":"bar"}]
 		],
 	];
 
@@ -230,8 +230,8 @@ function doWrapTestContents(abc, expected, width) {
 					}
 					els.push(el);
 				}
+				line.push(els);
 			}
-			line.push(els);
 		}
 		lines.push(line);
 	}

@@ -56,7 +56,13 @@ textarea {
   display: none;
 }
 
-pre {
+.audio-error {
+  color: red;
+  border: 2px solid red;
+  padding: 10px;
+}
+
+pre, span.code {
   font-size: 14px;
   padding: 5px;
   font-family: Monaco, monospace;

@@ -108,6 +108,14 @@ This returns the internal representation of the key signature with all of its pi
 
 `charIndex` is a character position in the original ABC. This searches through the tune for the element that matches that character. If you pass in the index of a non-note element it returns null.
 
+### getTotalBeats
+
+Returns `undefined` until `setUpAudio` is called, then it returns the total number of beats that the tune has.
+
+### getTotalTime
+
+Returns `undefined` until `setUpAudio` is called, then it returns the total number of seconds that the tune will take at the tempo that was specified in `setUpAudio`.
+
 ### millisecondsPerMeasure()
 
 This does the calculation using beats per minute and beats per measure.

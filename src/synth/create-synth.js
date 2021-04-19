@@ -65,7 +65,6 @@ function CreateSynth() {
 		p = params.noteEnd !== undefined ? parseInt(params.noteEnd,10) : NaN;
 		self.noteEnd = isNaN(p) ? 0 : p;
 
-		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure(options.bpm) : 1000);
 		self.pan = params.pan;
 		self.meterSize = 1;
 		if (options.visualObj) {
@@ -77,6 +76,8 @@ function CreateSynth() {
 			self.flattened = options.sequence;
 		else
 			return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
+		self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : (options.visualObj ? options.visualObj.millisecondsPerMeasure(self.flattened.tempo) : 1000);
+		self.beatsPerMeasure = options.visualObj ? options.visualObj.getBeatsPerMeasure() : 4;
 		self.sequenceCallback = params.sequenceCallback;
 		self.callbackContext = params.callbackContext;
 		self.onEnded = params.onEnded;
@@ -257,7 +258,7 @@ function CreateSynth() {
 			for (var key2 = 0; key2 < Object.keys(uniqueSounds).length; key2++) {
 				var k = Object.keys(uniqueSounds)[key2];
 				var parts = k.split(":");
-				var cents = parts[6] !== "undefined" ? parseFloat(parts[6]) : undefined;
+				var cents = parts[6] !== undefined ? parseFloat(parts[6]) : 0;
  				parts = { instrument: parts[0], pitch: parseInt(parts[1],10), volume: parseInt(parts[2], 10), len: parseFloat(parts[3]), pan: parseFloat(parts[4]), tempoMultiplier: parseFloat(parts[5]), cents: cents};
 				allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd/1000));
 			}
@@ -352,8 +353,20 @@ function CreateSynth() {
 		self.start();
 	};
 
-	self.seek = function(percent) {
-		var offset = (self.duration-self.fadeLength/1000) * percent;
+	self.seek = function(position, units) {
+		var offset;
+		switch (units) {
+			case "seconds":
+				offset = position;
+				break;
+			case "beats":
+				offset = position * self.millisecondsPerMeasure / self.beatsPerMeasure / 1000;
+				break;
+			default:
+				// this is "percent" or any illegal value
+				offset = (self.duration-self.fadeLength/1000) * position;
+				break;
+		}
 
 		// TODO-PER: can seek when paused or when playing
 		if (!self.audioBufferPossible)

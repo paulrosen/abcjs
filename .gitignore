@@ -5,3 +5,4 @@ tmp/*
 to-*.sh
 docs/.vuepress/.cache/*
 docs/.vuepress/.temp/*
+dist/report.html

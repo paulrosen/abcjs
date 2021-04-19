@@ -204,9 +204,11 @@ function SynthController() {
 		return Promise.resolve({status: "ok"});
 	};
 
-	self.seek = function (percent) {
-		self.timer.setProgress(percent);
-		self.midiBuffer.seek(percent);
+	self.seek = function (percent, units) {
+		if (self.timer && self.midiBuffer) {
+			self.timer.setProgress(percent, units);
+			self.midiBuffer.seek(percent, units);
+		}
 	};
 
 	self.setWarp = function (newWarp) {

@@ -461,7 +461,7 @@ MusicParser.prototype.parseMusic = function(line) {
 								}
 
 								multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-								tuneBuilder.appendElement('note', startOfLine+chordStartChar, startOfLine+i, el);
+								tuneBuilder.appendElement('note', startOfLine+startI, startOfLine+i, el);
 								multilineVars.measureNotEmpty = true;
 								el = {};
 							}

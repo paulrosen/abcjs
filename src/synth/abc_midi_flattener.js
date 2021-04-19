@@ -69,7 +69,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 		accidentals = [0,0,0,0,0,0,0];
 		bagpipes = false;
 		tracks = [];
-		startingTempo = undefined;
+		startingTempo = options.qpm;
 		startingMeter = undefined;
 		tempoChangeFactor = 1;
 		instrument = undefined;
@@ -112,7 +112,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 			pickupLength = voices[0][0].pickupLength;
 
 		// First adjust the input to resolve ties, set the starting time for each note, etc. That will make the rest of the logic easier
-		preProcess(voices);
+		preProcess(voices, options);
 
 		for (var i = 0; i < voices.length; i++) {
 			transpose = 0;
@@ -225,35 +225,14 @@ var pitchesToPerc = require('./pitches-to-perc');
 			if (drumTrack.length > 0) // Don't do drums on more than one track, so turn off drum after we create it.
 				drumTrackFinished = true;
 		}
+		// See if any notes are octaves played at the same time. If so, raise the pitch of the higher one.
+		if (options.detuneOctave)
+			findOctaves(tracks, parseInt(options.detuneOctave, 10));
+
 		if (chordTrack.length > 0)
 			tracks.push(chordTrack);
 		if (drumTrack.length > 0)
 			tracks.push(drumTrack);
-		// Adjust the tempo according to the meter. The rules are this:
-		// 1) If the denominator is 2 or 4, then always make a beat be the denominator.
-		//
-		// 2) If the denominator is 8 or 16, then:
-		// a) If the numerator is divisible by 3, the beat is 3*denominator.
-		// b) Otherwise the beat is the denominator.
-		//
-		// 3) If the denominator is anything else, then don't worry about it because it doesn't make sense. Don't modify it and hope for the best.
-		//
-		// Right now, the startingTempo is calculated for a quarter note, so modify it if necessary.
-		// var num = startingMeter ? parseInt(startingMeter.num, 10) : meter.num;
-		// var den = startingMeter ? parseInt(startingMeter.den, 10) : meter.den;
-		// if (den === 2)
-		// 	startingTempo *= 2;
-		// else if (den === 8) {
-		// 	if (parseInt(num, 10) % 3 === 0)
-		// 		startingTempo *= 3/2;
-		// 	else
-		// 		startingTempo /= 2;
-		// } else if (den === 16) {
-		// 	if (num % 3 === 0)
-		// 		startingTempo *= 3/4;
-		// 	else
-		// 		startingTempo /= 4;
-		// }
 
 		return { tempo: startingTempo, instrument: instrument, tracks: tracks, totalDuration: lastEventTime };
 	};
@@ -275,11 +254,11 @@ var pitchesToPerc = require('./pitches-to-perc');
 		return Math.round(duration*tempoChangeFactor*1000000)/1000000;
 	}
 
-	function preProcess(voices) {
+	function preProcess(voices, options) {
 		for (var i = 0; i < voices.length; i++) {
 			var voice = voices[i];
 			var ties = {};
-			var startingTempo = 0;
+			var startingTempo = options.qpm;
 			var timeCounter = 0;
 			var tempoMultiplier = 1;
 			for (var j = 0; j < voice.length; j++) {
@@ -1255,6 +1234,42 @@ var pitchesToPerc = require('./pitches-to-perc');
 					instrument: drumInstrument});
 			}
 			start += len;
+		}
+	}
+
+	function findOctaves(tracks, detuneCents) {
+		var timing = {};
+		for (var i = 0; i < tracks.length; i++) {
+			for (var j = 0; j < tracks[i].length; j++) {
+				var note = tracks[i][j];
+				if (note.cmd === "note") {
+					if (timing[note.start] === undefined)
+						timing[note.start] = [];
+					timing[note.start].push({track: i, event: j, pitch: note.pitch});
+				}
+			}
+		}
+		var keys = Object.keys(timing);
+		for (i = 0; i < keys.length; i++) {
+			var arr = timing[keys[i]];
+			if (arr.length > 1) {
+				arr = arr.sort(function(a,b) {
+					return a.pitch - b.pitch;
+				});
+				var topEvent = arr[arr.length-1];
+				var topNote = topEvent.pitch % 12;
+				var found = false;
+				for (j = 0; !found && j < arr.length-1; j++) {
+					if (arr[j].pitch % 12 === topNote)
+						found = true;
+				}
+				if (found) {
+					var event = tracks[topEvent.track][topEvent.event];
+					if (!event.cents)
+						event.cents = 0;
+					event.cents += detuneCents;
+				}
+			}
 		}
 	}
 })();

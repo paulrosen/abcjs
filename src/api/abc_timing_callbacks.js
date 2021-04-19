@@ -245,17 +245,37 @@ var TimingCallbacks = function(target, params) {
 		self.pause();
 		self.reset();
 	};
-	self.setProgress = function(percent) {
-		// this is passed a value between 0 and 1.
+	self.setProgress = function(position, units) {
 		// the effect of this function is to move startTime so that the callbacks happen correctly for the new seek.
-		if (percent < 0) percent = 0;
-		if (percent > 1) percent = 1;
+		var currentTime;
+		var percent;
+		switch (units) {
+			case "seconds":
+				currentTime = position * 1000;
+				if (currentTime < 0) currentTime = 0;
+				if (currentTime > self.lastMoment) currentTime = self.lastMoment;
+				percent = currentTime / self.lastMoment;
+				break;
+			case "beats":
+				currentTime = position * self.millisecondsPerBeat * self.beatSubdivisions;
+				if (currentTime < 0) currentTime = 0;
+				if (currentTime > self.lastMoment) currentTime = self.lastMoment;
+				percent = currentTime / self.lastMoment;
+				break;
+			default:
+				// this is "percent" or any illegal value
+				// this is passed a value between 0 and 1.
+				percent = position;
+				if (percent < 0) percent = 0;
+				if (percent > 1) percent = 1;
+				currentTime = self.lastMoment * percent;
+				break;
+		}
 
 		if (!self.isRunning)
 			self.pausedPercent = percent;
 
 		var now = performance.now();
-		var currentTime = self.lastMoment * percent;
 		self.startTime = now - currentTime;
 
 		var oldEvent = self.currentEvent;

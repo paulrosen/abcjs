@@ -4,6 +4,7 @@ var parseCommon = require('../parse/abc_common');
 var spacing = require('../write/abc_spacing');
 var sequence = require('../synth/abc_midi_sequencer');
 var flatten = require('../synth/abc_midi_flattener');
+var delineTune = require("./deline-tune");
 
 /**
  * This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
@@ -97,6 +98,14 @@ var Tune = function() {
 	this.getBarLength = function() {
 		var meter = this.getMeterFraction();
 		return meter.num / meter.den;
+	};
+
+	this.getTotalTime = function() {
+		return this.totalTime;
+	};
+
+	this.getTotalBeats = function() {
+		return this.totalBeats;
 	};
 
 	this.millisecondsPerMeasure = function(bpmOverride) {
@@ -379,6 +388,7 @@ var Tune = function() {
 		var isTiedState;
 		var nextIsBar = true;
 		var voices = this.makeVoicesArray();
+		var maxVoiceTimeMilliseconds = 0;
 		for (var v = 0; v < voices.length; v++) {
 			var voiceTime = time;
 			var voiceTimeMilliseconds = Math.round(voiceTime * 1000);
@@ -445,12 +455,13 @@ var Tune = function() {
 						startingRepeatElem = elem;
 				}
 			}
+			maxVoiceTimeMilliseconds = Math.max(maxVoiceTimeMilliseconds, voiceTimeMilliseconds)
 		}
 		// now we have all the events, but if there are multiple voices then there may be events out of order or duplicated, so normalize it.
 		timingEvents = makeSortedArray(eventHash);
 		addVerticalInfo(timingEvents);
 		addEndPoints(this.lines, timingEvents)
-		timingEvents.push({ type: "end", milliseconds: voiceTimeMilliseconds });
+		timingEvents.push({ type: "end", milliseconds: maxVoiceTimeMilliseconds });
 		this.addUsefulCallbackInfo(timingEvents, bpm*warp);
 		return timingEvents;
 	};
@@ -541,6 +552,13 @@ var Tune = function() {
 		var timeDivider = beatLength * beatsPerSecond;
 
 		this.noteTimings = this.setupEvents(startingDelay, timeDivider, bpm, warp);
+		if (this.noteTimings.length > 0) {
+			this.totalTime = this.noteTimings[this.noteTimings.length - 1].milliseconds / 1000;
+			this.totalBeats = this.totalTime * beatsPerSecond;
+		} else {
+			this.totalTime = undefined;
+			this.totalBeats = undefined;
+		}
 		return this.noteTimings;
 	};
 
@@ -549,6 +567,9 @@ var Tune = function() {
 		var seq = sequence(this, options);
 		return flatten(seq, options, this.formatting.percmap);
 	};
+	this.deline = function(options) {
+		return delineTune(this.lines, options);
+	}
 };
 
 module.exports = Tune;

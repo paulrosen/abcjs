@@ -125,9 +125,17 @@ Call this after `prime()` has returned its promise. This will happen fast and do
 
 After `start()` has been called, pause and resume can be called to control the playback.
 
-### seek(percent)
+### seek(percent, units)
 
-This changes the playback position. It can be called whether the sound is currently playing or not. The percent is a number between 0 and 1.
+This changes the playback position. It can be called whether the sound is currently playing or not.
+
+If the second parameter is not present, then `units` equals "percent". The possible values are:
+
+* `"percent"`: The percent passed in is a number between 0 and 1. This can be called either when the animation is currently running or when it is paused.
+
+* `"seconds"`: The seconds from the beginning of the tune. If this is passed the end of the tune it is changed to the end.
+
+* `"beats"`: The beats from the beginning of the tune. If this is passed the end of the tune it is changed to the end.
 
 ### stop()
 
@@ -223,6 +231,7 @@ The `options` element above can have the following properties:
 | defaultQpm | null | The tempo to use, only if there is no tempo in the tune. |
 | chordsOff | false | If true, then don't turn the guitar chord symbols into sound. (But do play the metronome if there is one.) |
 | voicesOff | false | If true, play the metronome and accompaniment; do the animation callbacks, but don't play any melody lines. This can also be an array of voices to turn off. The voices are numbered starting at zero. |
+| detuneOctave | 0 | The number of cents to raise the pitch of the top note of an octave that is played at the same time. That is, in multipart music, if the tenor and soprano parts are an octave apart the soprano note gets lost in the overtones. Making the top note slightly sharp brings it out without making it sound out of tune. |
 
 ### play(), pause(), toggleLoop(), restart(), setProgress(ev)
 

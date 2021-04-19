@@ -1,3 +1,35 @@
+# Version 6.0.0-beta.33
+
+## Bugs
+
+* Fix crash when there is a missing close bracket on an inline command.
+
+* Fix the startChar position of chords
+
+* Fix overriding the tempo.
+
+* Fix passing qpm in.
+
+* Fix stem direction bug on wrap.
+
+* Fix bug in calculating the endpoint of the audio when there are multiple voices.
+
+## Features
+
+* Add getBarLength() and getTotalTime() to the tune object; 
+
+* Add second parameter to seek() for the units percent, seconds, and beats.
+
+* Add `detuneOctave` parameter
+
+## Documentation
+
+* Example of controlling the tempo.
+
+## Build
+
+* Remove bin folder
+
 # Version 6.0.0-beta.32
 
 ## Bugs
