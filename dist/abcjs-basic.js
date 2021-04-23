@@ -16688,6 +16688,7 @@ var AbstractEngraver = function AbstractEngraver(getTextSize, tuneNumber, option
   this.flatBeams = options.flatbeams;
   this.graceSlurs = options.graceSlurs;
   this.percmap = options.percmap;
+  this.initialSignature = options.initialSignature;
   this.reset();
 };
 
@@ -16750,7 +16751,7 @@ AbstractEngraver.prototype.containsLyrics = function (staves) {
   }
 };
 
-AbstractEngraver.prototype.createABCLine = function (staffs, tempo) {
+AbstractEngraver.prototype.createABCLine = function (staffs, tempo, l) {
   this.minY = 2; // PER: This will be the lowest that any note reaches. It will be used to set the dynamics row.
   // See if there are any lyrics on this line.
 
@@ -16761,18 +16762,19 @@ AbstractEngraver.prototype.createABCLine = function (staffs, tempo) {
   for (var s = 0; s < staffs.length; s++) {
     if (hint) this.restoreState();
     hint = false;
-    this.createABCStaff(staffgroup, staffs[s], tempo, s);
+    this.createABCStaff(staffgroup, staffs[s], tempo, s, l);
   }
 
   return staffgroup;
 };
 
-AbstractEngraver.prototype.createABCStaff = function (staffgroup, abcstaff, tempo, s) {
+AbstractEngraver.prototype.createABCStaff = function (staffgroup, abcstaff, tempo, s, l) {
   // If the tempo is passed in, then the first element should get the tempo attached to it.
   staffgroup.getTextSize.updateFonts(abcstaff);
 
   for (var v = 0; v < abcstaff.voices.length; v++) {
     var voice = new VoiceElement(v, abcstaff.voices.length);
+    voice.omitStaffExtra = this.initialSignature && l > 0;
 
     if (v === 0) {
       voice.barfrom = abcstaff.connectBarLines === "start" || abcstaff.connectBarLines === "continue";
@@ -18965,6 +18967,7 @@ var EngraverController = function EngraverController(paper, params) {
   this.selectTypes = params.selectTypes;
   this.responsive = params.responsive;
   this.space = 3 * spacing.SPACE;
+  this.initialSignature = params.initialSignature;
   this.scale = params.scale ? parseFloat(params.scale) : 0;
   this.classes = new Classes({
     shouldAddClasses: params.add_classes
@@ -19135,7 +19138,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 
     if (abcLine.staff) {
       hasSeenNonSubtitle = true;
-      abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo : null);
+      abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo : null, i);
       hasPrintedTempo = true;
     } else if (abcLine.subtitle) {
       // If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
@@ -20584,6 +20587,7 @@ var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
 
   this.w = 0;
   this.duplicate = false;
+  this.omitStaffExtra = false;
   this.voicenumber = voicenumber; //number of the voice on a given stave (not staffgroup)
 
   this.voicetotal = voicetotal;
@@ -20605,7 +20609,12 @@ var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
 };
 
 VoiceElement.prototype.addChild = function (absElem) {
-  // This is always passed an AbsoluteElement
+  // Ignore staff-extra elements?
+  if (absElem.type.split(' ')[0] === 'staff-extra' && this.omitStaffExtra) {
+    return;
+  } // This is always passed an AbsoluteElement
+
+
   if (absElem.type === 'bar') {
     var firstItem = true;
 

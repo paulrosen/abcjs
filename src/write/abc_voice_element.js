@@ -6,6 +6,7 @@ var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
 	this.otherchildren = []; // ties, slurs, triplets
 	this.w = 0;
 	this.duplicate = false;
+	this.omitExtraClefs = false;
 	this.voicenumber = voicenumber; //number of the voice on a given stave (not staffgroup)
 	this.voicetotal = voicetotal;
 	this.bottom = 7;
@@ -27,6 +28,9 @@ var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
 };
 
 VoiceElement.prototype.addChild = function (absElem) {
+	if (absElem.endsWith('clef') && this.omitExtraClefs) {
+		return
+	}
 	// This is always passed an AbsoluteElement
 	if (absElem.type === 'bar') {
 		var firstItem = true;

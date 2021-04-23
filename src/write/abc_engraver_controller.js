@@ -38,6 +38,7 @@ var EngraverController = function(paper, params) {
   this.selectTypes = params.selectTypes;
   this.responsive = params.responsive;
   this.space = 3*spacing.SPACE;
+  this.initialSignature = params.initialSignature
   this.scale = params.scale ? parseFloat(params.scale) : 0;
   this.classes = new Classes({ shouldAddClasses: params.add_classes });
   if (!(this.scale > 0.1))
@@ -200,7 +201,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 		abcLine = abcTune.lines[i];
 		if (abcLine.staff) {
 			hasSeenNonSubtitle = true;
-			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null);
+			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null, i);
 			hasPrintedTempo = true;
 		} else if (abcLine.subtitle) {
 			// If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
