@@ -219,7 +219,7 @@ Default: null
  
  `lastLineLimit`: if it works out that there is a single measure on the last line, then try a different layout.
  
- `minSpacing` values until the last line is no more spread out than this limit. 
+ `minSpacingLimit` values until the last line is no more spread out than this limit. 
  
  A reasonable thing to set these values to is `{ minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 }`. 
  
