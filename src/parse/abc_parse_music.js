@@ -318,6 +318,7 @@ MusicParser.prototype.parseMusic = function(line) {
 						else {
 							el.startTriplet = ret.triplet;
 							el.tripletMultiplier = ret.tripletQ / ret.triplet;
+							el.tripletR = ret.num_notes;
 							tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
 						}
 					}
