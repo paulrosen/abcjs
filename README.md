@@ -68,11 +68,13 @@ I'm trying to get all the issues that will create breaking changes done before r
 
 I am going to try to release new beta versions regularly with a few improvements in each.
 
-The two changes that are coming soon that might affect your code are:
-1) Break apart the paths in the SVG so that parts of the note can be targeted. (For instance, just the flag, or one note in a chord.)
-2) Be able to set the minimum spacing for notes when there are lots of notes on a line.
-
-There will also be a number of the open issues considered for each beta version.
+These are the changes that are planned:
+* Improve the API for controlling the synth. That is, make the parameters less confusing.
+* Test and improve the sound of the soundfont.
+* Add all the typescript definitions.
+* Break apart the paths in the SVG so that parts of the note can be targeted. (For instance, just the flag, or one note in a chord.)
+* Control the spacing of the elements on the line better: support equal size measures, and support allowing control of the spacing between notes.
+* Bug fixes.
 
 If you have a particular issue that is impeding your usage of this library, please mention it in the issue.
 
