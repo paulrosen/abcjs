@@ -57,7 +57,6 @@ declare module 'abcjs' {
 		wrap?: Wrap;
 	}
 
-	export type AbcParams = any
 	export interface AudioContextPromise {
 		cached: [any]
 		error: [any]
@@ -87,8 +86,8 @@ declare module 'abcjs' {
 	//
 	export interface SynthObjectController {
 		disable(isDisabled: boolean): void
-		setTune(visualObj: TuneObject, userAction: Boolean, audioParams?: AbcParams): Promise<any>
-		load(selector: string, cursorControl?: any, visualOptions?: AbcParams): void
+		setTune(visualObj: TuneObject, userAction: Boolean, audioParams?: AbcVisualParams): Promise<any>
+		load(selector: string, cursorControl?: any, visualOptions?: AbcVisualParams): void
 		play(): void
 		pause(): void
 		toggleLoop(): void
@@ -101,15 +100,54 @@ declare module 'abcjs' {
 	//
 	// Visual
 	//
-	export type signature = string;
+	let signature: string;
 
 	export function renderAbc(target: Selector, code: string, params?: AbcVisualParams): TuneObjectArray
 
-	export function parseOnly(abc: string, params?: AbcParams) : TuneObjectArray
+	export function parseOnly(abc: string, params?: AbcVisualParams) : TuneObjectArray
+
+	//
+	// Editor
+	//
+	export type OnChange = (editor: Editor) => void;
+	export type SelectionChangeCallback = (startChar: number, endChar: number) => void;
+	export interface EditorSynth {
+		synthControl?: SynthObjectController;
+		el: Selector;
+		cursorControl: CursorControl;
+		options: SynthOptions;
+	}
+
+	export interface EditorOptions {
+		canvas_id?: Selector;
+		paper_id?: Selector;
+		generate_warnings?: boolean;
+		warnings_id?: Selector;
+		onchange?: OnChange;
+		selectionChangeCallback?: SelectionChangeCallback;
+		abcjsParams?: AbcVisualParams;
+		indicate_changed?: boolean;
+		synth?: EditorSynth;
+	}
+
+	export class Editor {
+		constructor(target: Selector, options: EditorOptions);
+		paramChanged(options: AbcVisualParams): void;
+		synthParamChanged(options: SynthOptions): void;
+		setNotDirty(): void;
+		isDirty(): boolean;
+		pause(shouldPause: boolean): void;
+		millisecondsPerMeasure(): number;
+		pauseMidi(shouldPause: boolean): void;
+	}
 
 	//
 	// Audio
 	//
+	export interface SynthOptions {
+
+	}
+
 	export namespace synth {
 		let instrumentIndexToName: [string]
 		let pitchToNoteName: [string]
@@ -117,8 +155,8 @@ declare module 'abcjs' {
 		let CreateSynth: { new (): MidiBuffer }
 
 		export function supportsAudio(): boolean
-		export function CreateSynthControl(element: Selector, options: AbcParams): AudioControl
-		export function getMidiFile(source: String | TuneObject, options?: AbcParams): MidiFile
+		export function CreateSynthControl(element: Selector, options: AbcVisualParams): AudioControl
+		export function getMidiFile(source: String | TuneObject, options?: AbcVisualParams): MidiFile
 		export function synthSequence(): AudioSequence
 		export function playEvent(pitches: Pitches, graceNotes: Pitches, milliSecondsPerMeasure: number): Promise<any>
 		export function activeAudioContext(): AudioContext
@@ -142,5 +180,16 @@ declare module 'abcjs' {
 		tunes: Array<AnalyzedTune>;
 	}
 
-	export function extractMeasures(abc: string) : void;
+	export interface MeasureDef {
+		abc: string;
+		startEnding?: string;
+		endEnding?: true;
+	}
+	export interface MeasureList {
+		header: string;
+		measures: Array<MeasureDef>;
+		hasPickup: boolean
+	}
+
+	export function extractMeasures(abc: string) : MeasureList;
 }
