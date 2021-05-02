@@ -99,14 +99,16 @@ declare module 'abcjs' {
 	}
 
 	//
-	// Basic Visual  stuff
+	// Visual
 	//
-	let signature: string
+	export type signature = string;
 
 	export function renderAbc(target: Selector, code: string, params?: AbcVisualParams): TuneObjectArray
 
+	export function parseOnly(abc: string, params?: AbcParams) : TuneObjectArray
+
 	//
-	// Basic Audio Stuff
+	// Audio
 	//
 	export namespace synth {
 		let instrumentIndexToName: [string]
@@ -122,5 +124,23 @@ declare module 'abcjs' {
 		export function activeAudioContext(): AudioContext
 	}
 
-	export function parseOnly(abc: string, params?: AbcParams) : TuneObject
+	//
+	// Analysis
+	//
+	export interface AnalyzedTune {
+		abc: string;
+		id: string;
+		pure: string;
+		startPos: number;
+		title: string;
+	}
+	export class TuneBook {
+		constructor(tunebookString: string) ;
+		getTuneById(id: string | number): AnalyzedTune;
+		getTuneByTitle(id: string): AnalyzedTune;
+
+		tunes: Array<AnalyzedTune>;
+	}
+
+	export function extractMeasures(abc: string) : void;
 }
