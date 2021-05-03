@@ -107,6 +107,61 @@ declare module 'abcjs' {
 	export function parseOnly(abc: string, params?: AbcVisualParams) : TuneObjectArray
 
 	//
+	// Animation
+	//
+	export interface TimingEvent {
+		type: "event";
+		milliseconds: number;
+		millisecondsPerMeasure: number;
+		line: number;
+		measureNumber: number;
+		top: number;
+		height: number;
+		left: number;
+		width: number;
+		elements: Array< any>;
+		startCharArray: Array<number>;
+		endCharArray: Array<number>;
+		midiPitches: Array<{
+				pitch: number;
+				durationInMeasures: number;
+				volume: number;
+				instrument: number;
+		}>
+	}
+	export type BeatCallback = (beatNumber, totalBeats, totalTime, position, debugInfo) => void;
+	export type EventCallback = (event: TimingEvent) => void;
+	export interface LineEndInfo {
+		milliseconds: number;
+		top: number;
+		bottom: number;
+	}
+	export interface LineEndDetails {
+		line: number;
+		endTimings: Array<LineEndInfo>;
+	}
+	export type LineEndCallback = (info : LineEndInfo, event: TimingEvent, details: LineEndDetails) => void;
+
+	export interface AnimationOptions {
+		qpm?: number;
+		extraMeasuresAtBeginning?: number;
+		lineEndAnticipation?: number;
+		beatSubdivisions?: number;
+		beatCallback?: BeatCallback;
+		eventCallback?: EventCallback;
+		lineEndCallback?: LineEndCallback;
+	}
+	export class TimingCallbacks {
+		constructor(visualObj: TuneObject, options?: AnimationOptions) ;
+		replaceTarget(visualObj: TuneObject): void;
+		start(offsetPercent?: number) : void;
+		pause() : void;
+		reset() : void;
+		stop() : void;
+		setProgress(position: number, units?: "seconds" | "beats" | "percent" ) : void;
+	}
+
+	//
 	// Editor
 	//
 	export type OnChange = (editor: Editor) => void;
