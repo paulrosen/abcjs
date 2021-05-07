@@ -33,7 +33,7 @@ declare module 'abcjs' {
 		dragColor?: string;
 		dragging?: any;
 		foregroundColor?: string;
-		format?: { any };
+		format?: { any: any };
 		lineBreaks?: Array<number>;
 		minPadding?: number;
 		oneSvgPerLine?: boolean;
@@ -81,13 +81,23 @@ declare module 'abcjs' {
 		download?(): any // returns audio buffer in wav format
 	}
 
+		export interface SynthVisualOptions {
+			displayLoop: boolean | false
+			displayRestart: boolean | false
+			displayPlay: boolean | false
+			displayProgress: boolean | false
+			displayWarp: boolean | false
+		}
+
+
+
 	//
 	// Synth widget controller
 	//
 	export interface SynthObjectController {
 		disable(isDisabled: boolean): void
 		setTune(visualObj: TuneObject, userAction: Boolean, audioParams?: AbcVisualParams): Promise<any>
-		load(selector: string, cursorControl?: any, visualOptions?: AbcVisualParams): void
+		load(selector: string, cursorControl?: any, visualOptions?: SynthVisualOptions): void
 		play(): void
 		pause(): void
 		toggleLoop(): void
@@ -129,7 +139,7 @@ declare module 'abcjs' {
 				instrument: number;
 		}>
 	}
-	export type BeatCallback = (beatNumber, totalBeats, totalTime, position, debugInfo) => void;
+	export type BeatCallback = (beatNumber: any, totalBeats: any, totalTime: any, position: any, debugInfo: any) => void;
 	export type EventCallback = (event: TimingEvent) => void;
 	export interface LineEndInfo {
 		milliseconds: number;
@@ -203,6 +213,14 @@ declare module 'abcjs' {
 
 	}
 
+	export interface MidiFileOptions extends SynthOptions {
+		midiOutputType: 'encoded' | 'binary' | 'link'
+		downloadClass?: string 
+		preTextDownload?: string
+		downloadLabel?: () => any
+		postTextDownload?: string 
+		fileName?: string
+	}
 	export namespace synth {
 		let instrumentIndexToName: [string]
 		let pitchToNoteName: [string]
@@ -211,7 +229,7 @@ declare module 'abcjs' {
 
 		export function supportsAudio(): boolean
 		export function CreateSynthControl(element: Selector, options: AbcVisualParams): AudioControl
-		export function getMidiFile(source: String | TuneObject, options?: AbcVisualParams): MidiFile
+		export function getMidiFile(source: String | TuneObject, options?: MidiFileOptions): MidiFile
 		export function synthSequence(): AudioSequence
 		export function playEvent(pitches: Pitches, graceNotes: Pitches, milliSecondsPerMeasure: number): Promise<any>
 		export function activeAudioContext(): AudioContext
