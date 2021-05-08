@@ -16,6 +16,7 @@
 </template>
 
 <script>
+import { nextTick } from 'vue';
 	export default {
 		name: "tune-book-info",
 		props: {
@@ -40,7 +41,7 @@
 			};
 		},
 		mounted() {
-			this.$nextTick(() => {
+			nextTick(() => {
 				this.abcjs = require('../../../index');
 			});
 		},
