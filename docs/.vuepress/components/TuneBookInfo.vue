@@ -40,7 +40,7 @@
 			};
 		},
 		mounted() {
-			Vue.nextTick(() => {
+			this.$nextTick(() => {
 				this.abcjs = require('../../../index');
 			});
 		},
