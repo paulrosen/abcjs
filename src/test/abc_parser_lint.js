@@ -271,6 +271,7 @@ var ParserLint = function() {
 		startSlur: slurProperties,
 		startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true },
 		tripletMultiplier: { type: 'number', minimum: .1, maximum: 9, optional: true },
+		tripletR: { type: 'number', minimum: .1, maximum: 9, optional: true },
 		stemConnectsToAbove: { type: 'boolean', Enum: [ true ], optional: true },
 		style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x', 'triangle'], optional: true }
 };
