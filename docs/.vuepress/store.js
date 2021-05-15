@@ -12,6 +12,7 @@ const state = {
 		sheetMusic: true,
 		cursor: false,
 		hideMeasures: false,
+		initialClef: false,
 		responsive: false,
 		changes: 'programmatic',
 
@@ -48,6 +49,7 @@ const getters = {
 	sheetMusic(state) { return state.examples.sheetMusic },
 	cursor(state) { return state.examples.cursor },
 	hideMeasures(state) { return state.examples.hideMeasures },
+	initialClef(state) { return state.examples.initialClef },
 	responsive(state) { return state.examples.responsive },
 	changes(state) { return state.examples.changes },
 	hasSound(state) { return state.examples.hasSound },
@@ -153,6 +155,7 @@ const mutations = {
 	sheetMusic(state, payload) { state.examples.sheetMusic = payload },
 	cursor(state, payload) { state.examples.cursor = payload },
 	hideMeasures(state, payload) { state.examples.hideMeasures = payload },
+	initialClef(state, payload) { state.examples.initialClef = payload },
 	responsive(state, payload) { state.examples.responsive = payload },
 	changes(state, payload) { state.examples.changes = payload },
 	hasSound(state, payload) { state.examples.hasSound = payload },
@@ -195,7 +198,8 @@ function sheetMusicJsBuilder(getters, usingNode) {
 		getters.responsive,
 		getters.sheetMusic && getters.usingCallbacks,
 		getters.hasSound && getters.metronome,
-		getters.hideMeasures
+		getters.hideMeasures,
+		getters.initialClef,
 	);  // will be passed to renderAbc()
 	return `${renderAbcString(usingNode, !getters.hasEditor, getters.sheetMusic, visualOptions)}
 ${editorJsString(usingNode, getters.hasEditor, getters.sheetMusic)}

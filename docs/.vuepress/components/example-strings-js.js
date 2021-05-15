@@ -26,7 +26,7 @@ var editor = new ${entryPoint(usingNode)}.Editor("abc", {
 });`
 };
 
-export const visualOptionsString = (responsive, callbacks, metronome, hideMeasures) => {
+export const visualOptionsString = (responsive, callbacks, metronome, hideMeasures, initialClef) => {
 	let options = [];
 	if (responsive)
 		options.push("responsive: 'resize'");
@@ -35,6 +35,9 @@ export const visualOptionsString = (responsive, callbacks, metronome, hideMeasur
 	}
 	if (callbacks || hideMeasures) {
 		options.push("add_classes: true");
+	}
+	if (initialClef) {
+		options.push("initialClef: true");
 	}
 	if (metronome)
 		options.push("drum: 'dddd 76 77 77 77 60 30 30 30'");
