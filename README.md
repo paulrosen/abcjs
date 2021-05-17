@@ -14,7 +14,7 @@ If you are using an octave clef (for instance `K:C clef=treble-8`) it will now s
 
 ## Last version supporting midi.js is 6.0.0-beta.28
 
-The file [abcjs version supporting midi.js](https://raw.github.io/paulrosen/abcjs/main/bin/abcjs_midi-min.js) is the last version of the old style of sound production that will receive updates.
+The file [abcjs version supporting midi.js](https://github.com/paulrosen/historical-abcjs-versions/blob/main/version-6/abcjs_midi-min.js) is the last version of the old style of sound production that will receive updates.
 
 ## Rename the default branch to `main`
 
