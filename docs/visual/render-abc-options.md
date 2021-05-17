@@ -77,6 +77,12 @@ Default: false
  
 Repeat the next measure at the end of the previous line, with a unique css class. 
 
+## initialClef
+
+Default: false
+
+Show clef only on the first line.
+
 ## lineBreaks
 Default: undefined
 

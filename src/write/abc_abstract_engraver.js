@@ -51,6 +51,7 @@ var AbstractEngraver = function(getTextSize, tuneNumber, options) {
 	this.flatBeams = options.flatbeams;
 	this.graceSlurs = options.graceSlurs;
 	this.percmap = options.percmap;
+	this.initialClef = options.initialClef
 	this.reset();
 };
 
@@ -114,7 +115,7 @@ AbstractEngraver.prototype.popCrossLineElems = function(s,v) {
 		}
 	};
 
-AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
+AbstractEngraver.prototype.createABCLine = function(staffs, tempo, l) {
     this.minY = 2; // PER: This will be the lowest that any note reaches. It will be used to set the dynamics row.
 	// See if there are any lyrics on this line.
 	this.containsLyrics(staffs);
@@ -124,12 +125,12 @@ AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
 	  if (hint)
 		  this.restoreState();
 	  hint = false;
-    this.createABCStaff(staffgroup, staffs[s], tempo, s);
+    this.createABCStaff(staffgroup, staffs[s], tempo, s, l);
   }
   return staffgroup;
 };
 
-AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo, s) {
+AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo, s, l) {
 // If the tempo is passed in, then the first element should get the tempo attached to it.
 	staffgroup.getTextSize.updateFonts(abcstaff);
   for (var v = 0; v < abcstaff.voices.length; v++) {
@@ -146,7 +147,7 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
 	}
     if (abcstaff.clef && abcstaff.clef.type === "perc")
     	voice.isPercussion = true;
-	  var clef = createClef(abcstaff.clef, this.tuneNumber);
+	  var clef = (!this.initialClef || l === 0) && createClef(abcstaff.clef, this.tuneNumber);
 	  if (clef) {
 		  if (v ===0 && abcstaff.barNumber) {
 			  this.addMeasureNumber(abcstaff.barNumber, clef);
