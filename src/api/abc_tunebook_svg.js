@@ -5,6 +5,8 @@ var EngraverController = require('../write/abc_engraver_controller');
 var Parse = require('../parse/abc_parse');
 var wrap = require('../parse/wrap_lines');
 var parseCommon = require("../parse/abc_common");
+var tablatures = require('./abc_tablatures');
+
 
 var resizeDivs = {};
 function resizeOuter() {
@@ -48,6 +50,10 @@ function renderOne(div, tune, params, tuneNumber) {
     else
 	    div.innerHTML = "";
     var engraver_controller = new EngraverController(div, params);
+    // 
+    tablatures.init();
+    tune.tablatures = tablatures.preparePlugins(engraver_controller, tune, tuneNumber, params)
+    //
     engraver_controller.engraveABC(tune, tuneNumber);
     tune.engraver = engraver_controller;
     if (params.viewportVertical || params.viewportHorizontal) {

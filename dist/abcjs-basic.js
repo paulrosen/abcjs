@@ -234,6 +234,115 @@ module.exports = animation;
 
 /***/ }),
 
+/***/ "./src/api/abc_tablatures.js":
+/*!***********************************!*\
+  !*** ./src/api/abc_tablatures.js ***!
+  \***********************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/*
+ * Tablature Plugins
+ * tablature are defined dynamically and registered inside abcjs
+ * by calling abcTablatures.register(plugin) 
+ * where plugin represents a plugin instance 
+ * 
+ */
+var ViolinTablature = __webpack_require__(/*! ../tablatures/instruments/violin/tab_violin */ "./src/tablatures/instruments/violin/tab_violin.js");
+
+var abcTablatures = {
+  inited: false,
+  plugins: {},
+  errordiv: null,
+
+  /**
+   * to be called once per plugin for registration 
+   * @param {*} plugin 
+   */
+  register: function register(plugin) {
+    var name = plugin.name;
+    var tablature = plugin.tablature;
+    this.plugins[name] = tablature;
+  },
+  emit_error: function emit_error(msg) {
+    if (this.errordiv) {
+      if (msg) {
+        this.errordiv.innerHTML = [msg].join('<br />');
+      }
+    } else {
+      // default to console logging
+      console.error('tablatures plugins ERROR :' + msg);
+    }
+  },
+  init_error_handler: function init_error_handler(warnings_id) {
+    if (warnings_id) {
+      if (typeof warnings_id === "string") this.errordiv = document.getElementById(warnings_id);else this.errordiv = warnings_id;
+    }
+  },
+
+  /**
+   * handle params for current processed score
+   * @param {*} renderer current tune renderer
+   * @param {*} tune current tune 
+   * @param {*} tuneNumber number in tune list
+   * @param {*} params params to be processed for tablature
+   * @return prepared tablatures plugin instances for current tune
+   */
+  preparePlugins: function preparePlugins(renderer, tune, tuneNumber, params) {
+    console.log('Tablatures plugins manager preparing Plugins ...');
+    var returned = null;
+    var nbPlugins = 0;
+
+    if (params.tablatures) {
+      // validate requested plugins 
+      var tabs = params.tablatures;
+      this.init_error_handler(tabs.warnings_id);
+
+      for (ii = 0; ii < tabs.length; ii++) {
+        returned = [];
+        var tab = tabs[ii];
+
+        if (tab.length > 0) {
+          var tabName = tab[0];
+          var args = null;
+
+          if (tab.length > 1) {
+            args = tab[1];
+          }
+
+          var plugin = this.plugins[tabName];
+
+          if (plugin) {
+            // proceed with tab plugin  init 
+            plugin.init(renderer, tune, tuneNumber, args);
+            returned[ii] = plugin;
+            nbPlugins++;
+          } else {
+            // unknown tab plugin 
+            this.emit_error('Undefined tablature plugin: ' + tabName);
+          }
+        }
+      }
+    }
+
+    console.log('Tablatures plugins manager ' + nbPlugins + ' Plugin(s) ready');
+    return returned;
+  },
+
+  /**
+   * called once internally to register internal plugins
+   */
+  init: function init() {
+    // just register plugin hosted by abcjs 
+    if (!this.inited) {
+      this.register(new ViolinTablature());
+      this.inited = true;
+    }
+  }
+};
+module.exports = abcTablatures;
+
+/***/ }),
+
 /***/ "./src/api/abc_timing_callbacks.js":
 /*!*****************************************!*\
   !*** ./src/api/abc_timing_callbacks.js ***!
@@ -888,6 +997,8 @@ var wrap = __webpack_require__(/*! ../parse/wrap_lines */ "./src/parse/wrap_line
 
 var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
 
+var tablatures = __webpack_require__(/*! ./abc_tablatures */ "./src/api/abc_tablatures.js");
+
 var resizeDivs = {};
 
 function resizeOuter() {
@@ -930,7 +1041,11 @@ function renderOne(div, tune, params, tuneNumber) {
     div = div.children[0]; // The music should be rendered in the inner div.
   } else div.innerHTML = "";
 
-  var engraver_controller = new EngraverController(div, params);
+  var engraver_controller = new EngraverController(div, params); // 
+
+  tablatures.init();
+  tune.tablatures = tablatures.preparePlugins(engraver_controller, tune, tuneNumber, params); //
+
   engraver_controller.engraveABC(tune, tuneNumber);
   tune.engraver = engraver_controller;
 
@@ -2219,6 +2334,15 @@ function gatherAbcParams(params) {
       if (params.render_options.hasOwnProperty(key)) {
         abcjsParams[key] = params.render_options[key];
       }
+    }
+  }
+
+  if (params.tablature_options) {
+    abcjsParams['tablatures'] = params.tablature_options;
+
+    if (params.warnings_id) {
+      // store for plugin error handling
+      abcjsParams['tablatures'].warnings_id = params.warnings_id;
     }
   }
 
@@ -7278,6 +7402,7 @@ MusicParser.prototype.parseMusic = function (line) {
             if (tripletNotesLeft > 0) warn("Can't nest triplets", line, i);else {
               el.startTriplet = ret.triplet;
               el.tripletMultiplier = ret.tripletQ / ret.triplet;
+              el.tripletR = ret.num_notes;
               tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
             }
           }
@@ -13864,6 +13989,20 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                     if (elem.startTriplet) {
                       tripletMultiplier = elem.tripletMultiplier;
                       tripletDurationTotal = elem.startTriplet * tripletMultiplier * elem.duration;
+
+                      if (elem.startTriplet != elem.tripletR) {
+                        // most commonly (3:2:2
+                        if (v + elem.tripletR <= voice.length) {
+                          var durationTotal = 0;
+
+                          for (var w = v; w < v + elem.tripletR; w++) {
+                            durationTotal += voice[w].duration;
+                          }
+
+                          tripletDurationTotal = tripletMultiplier * durationTotal;
+                        }
+                      }
+
                       noteElem.duration = noteElem.duration * tripletMultiplier;
                       noteElem.duration = Math.round(noteElem.duration * 1000000) / 1000000;
                       tripletDurationCount = noteElem.duration;
@@ -16279,6 +16418,55 @@ module.exports = SynthSequence;
 
 /***/ }),
 
+/***/ "./src/tablatures/instruments/violin/tab_violin.js":
+/*!*********************************************************!*\
+  !*** ./src/tablatures/instruments/violin/tab_violin.js ***!
+  \*********************************************************/
+/***/ (function(module) {
+
+/*
+Emit tab for violin staff
+*/
+var plugin = {
+  /**
+   * upon init mainly store provided instances for later usage
+   * @param {*} renderer the abcjs renderer
+   * @param {*} abcTune  the parsed tune AST tree
+  *  @param {*} tuneNumber  the parsed tune AST tree
+   * @param {*} params  complementary args provided to Tablature Plugin
+   */
+  init: function init(renderer, abcTune, tuneNumber, params) {
+    this.renderer = renderer;
+    this.tune = abcTune;
+    this.params = params;
+    this.tuneNumber = tuneNumber;
+    console.log('ViolinTab plugin inited');
+  },
+
+  /**
+   * render line using current abcjs renderer 
+   * NB : we assume that renderer , current tunes info + tab params 
+   * operational inside plugin instance
+   * @param {*} line 
+   */
+  render: function render(line) {
+    console.log('ViolinTab plugin rendered');
+  }
+}; //
+// Tablature plugin definition
+//
+
+var AbcViolinTab = function AbcViolinTab() {
+  return {
+    name: 'ViolinTab',
+    tablature: plugin
+  };
+};
+
+module.exports = AbcViolinTab;
+
+/***/ }),
+
 /***/ "./src/write/abc_absolute_element.js":
 /*!*******************************************!*\
   !*** ./src/write/abc_absolute_element.js ***!
@@ -16688,6 +16876,7 @@ var AbstractEngraver = function AbstractEngraver(getTextSize, tuneNumber, option
   this.flatBeams = options.flatbeams;
   this.graceSlurs = options.graceSlurs;
   this.percmap = options.percmap;
+  this.initialClef = options.initialClef;
   this.reset();
 };
 
@@ -16750,7 +16939,7 @@ AbstractEngraver.prototype.containsLyrics = function (staves) {
   }
 };
 
-AbstractEngraver.prototype.createABCLine = function (staffs, tempo) {
+AbstractEngraver.prototype.createABCLine = function (staffs, tempo, l) {
   this.minY = 2; // PER: This will be the lowest that any note reaches. It will be used to set the dynamics row.
   // See if there are any lyrics on this line.
 
@@ -16761,13 +16950,13 @@ AbstractEngraver.prototype.createABCLine = function (staffs, tempo) {
   for (var s = 0; s < staffs.length; s++) {
     if (hint) this.restoreState();
     hint = false;
-    this.createABCStaff(staffgroup, staffs[s], tempo, s);
+    this.createABCStaff(staffgroup, staffs[s], tempo, s, l);
   }
 
   return staffgroup;
 };
 
-AbstractEngraver.prototype.createABCStaff = function (staffgroup, abcstaff, tempo, s) {
+AbstractEngraver.prototype.createABCStaff = function (staffgroup, abcstaff, tempo, s, l) {
   // If the tempo is passed in, then the first element should get the tempo attached to it.
   staffgroup.getTextSize.updateFonts(abcstaff);
 
@@ -16787,7 +16976,7 @@ AbstractEngraver.prototype.createABCStaff = function (staffgroup, abcstaff, temp
     }
 
     if (abcstaff.clef && abcstaff.clef.type === "perc") voice.isPercussion = true;
-    var clef = createClef(abcstaff.clef, this.tuneNumber);
+    var clef = (!this.initialClef || l === 0) && createClef(abcstaff.clef, this.tuneNumber);
 
     if (clef) {
       if (v === 0 && abcstaff.barNumber) {
@@ -18965,6 +19154,7 @@ var EngraverController = function EngraverController(paper, params) {
   this.selectTypes = params.selectTypes;
   this.responsive = params.responsive;
   this.space = 3 * spacing.SPACE;
+  this.initialClef = params.initialClef;
   this.scale = params.scale ? parseFloat(params.scale) : 0;
   this.classes = new Classes({
     shouldAddClasses: params.add_classes
@@ -19103,7 +19293,8 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
     flatbeams: abcTune.formatting.flatbeams,
     graceSlurs: abcTune.formatting.graceSlurs !== false,
     // undefined is the default, which is true
-    percmap: abcTune.formatting.percmap
+    percmap: abcTune.formatting.percmap,
+    initialClef: this.initialClef
   });
   this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
   this.engraver.measureLength = abcTune.getMeterFraction().num / abcTune.getMeterFraction().den;
@@ -19135,7 +19326,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 
     if (abcLine.staff) {
       hasSeenNonSubtitle = true;
-      abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo : null);
+      abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo : null, i);
       hasPrintedTempo = true;
     } else if (abcLine.subtitle) {
       // If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
@@ -21422,10 +21613,13 @@ var Selectables = __webpack_require__(/*! ./selectables */ "./src/write/draw/sel
 
 function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber) {
   var selectables = new Selectables(renderer.paper, selectTypes, tuneNumber);
+  var tablatures = abcTune.tablatures; // undefined if no tablatures in progress
+
   renderer.moveY(renderer.padding.top);
   nonMusic(renderer, abcTune.topText, selectables);
   renderer.moveY(renderer.spacing.music);
   var staffgroups = [];
+  var staffNumber = 0;
 
   for (var line = 0; line < abcTune.lines.length; line++) {
     classes.incrLine();
@@ -21438,9 +21632,17 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 
       if (staffgroups.length >= 1) addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
       var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables);
+
+      if (tablatures) {
+        if (staffNumber < tablatures.length) {
+          tablatures[staffNumber].render(line);
+        }
+      }
+
       staffgroup.line = line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
 
       staffgroups.push(staffgroup);
+      staffNumber++;
     } else if (abcLine.nonMusic) {
       nonMusic(renderer, abcLine.nonMusic, selectables);
     }
