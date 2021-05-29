@@ -18,7 +18,6 @@ var Decoration = function Decoration() {
 		for (var i=0;i<decoration.length; i++) {
 			if (decoration[i]==="staccato" || decoration[i]==="tenuto" || decoration[i] === "accent") {
 				var symbol = "scripts." + decoration[i];
-				if (decoration[i] === "accent") symbol = "scripts.sforzato";
 				if (yPos === undefined)
 					yPos = (dir==="down") ? pitch+2:minPitch-2;
 				else
@@ -180,6 +179,9 @@ var Decoration = function Decoration() {
 			"dmarcato": "scripts.dmarcato",
 			"umarcato": "scripts.umarcato",
 			"turn": "scripts.turn",
+			"invertedturn": "scripts.invertedturn",
+			"turnx": "scripts.turnx",
+			"invertedturnx": "scripts.invertedturnx",
 			"uppermordent": "scripts.prall",
 			"pralltriller": "scripts.prall",
 			"mordent": "scripts.mordent",
@@ -225,6 +227,9 @@ var Decoration = function Decoration() {
 				case "marcato":
 				case "dmarcato":
 				case "turn":
+				case "invertedturn":
+				case "turnx":
+				case "invertedturnx":
 				case "uppermordent":
 				case "pralltriller":
 				case "mordent":

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+	<title>abcjs: Basic Editor Demo</title>
+	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		window.onload = function() {
+			new ABCJS.Editor("abc", { canvas_id: "paper",
+				warnings_id: "warnings",
+				abcjsParams: {}
+			});
+		}
+
+	</script>
+	<style type="text/css">
+@font-face {
+	font-family: "Bravura";
+	src: url("../fonts/Bravura.woff2") format("woff2"),
+	     url("../fonts/Bravura.woff") format("woff");
+}
+body {
+	font-family: "Bravura"
+}
+
+	</style>
+</head>
+<body>
+<textarea id="abc" cols="80" rows="15">L: 1/4
+!trill!c | !trill(!c | c!trill)! | !lowermordent!c | !uppermordent!c
+s:!trill! | !trill(! | !trill)! | !lowermordent! | !uppermordent!
+|
+\
+!mordent!c | !pralltriller!c | !roll!c | !turn!c | !turnx!c
+s:!mordent! | !pralltriller! | !roll! | !turn! | !turnx!
+|
+\
+!invertedturn!c | !invertedturnx!c | !arpeggio!c | !>!c | !accent!c
+s:!invertedturn! | !invertedturnx! | !arpeggio! | !>! | !accent!
+|
+\
+!emphasis!c | !fermata!c | !invertedfermata!c | !tenuto!c | !0!c
+s:!emphasis! | !fermata! | !invertedfermata! | !tenuto! | !0!
+|
+\
+!1!c | !2!c | !3!c | !4!c | !5!c
+s:!1! | !2! | !3! | !4! | !5!
+|
+\
+!+!c | !plus!c | !snap!c | !slide!c | !wedge!c
+s:!+! | !plus! | !snap! | !slide! | !wedge!
+|
+\
+!upbow!c | !downbow!c | !open!c | !thumb!c | !breath!c
+s:!upbow! | !downbow! | !open! | !thumb! | !breath!
+|
+\
+!pppp!c | !ppp!c | !pp!c | !p!c | !mp!c
+s:!pppp! | !ppp! | !pp! | !p! | !mp!
+|
+\
+!mf!c | !f!c | !ff!c | !fff!c | !ffff!c
+s:!mf! | !f! | !ff! | !fff! | !ffff!
+|
+\
+!sfz!c | !crescendo(!c | !crescendo)!c | !<(!c | !<)!c
+s:!sfz! | !crescendo(! | !crescendo)! | !<(! | !<)!
+														 |
+\
+!diminuendo(!c | !diminuendo)!c | !>(!c | !>)!c | !segno!c
+s:!diminuendo(! | !diminuendo)! | !>(! | !>)! | !segno!
+|
+\
+!coda!c | !D.S.!c | !D.C.!c | !dacoda!c | !dacapo!c
+s:!coda! | !D.S.! | !D.C.! | !dacoda! | !dacapo!
+|
+\
+!fine!c | !shortphrase!c | !mediumphrase!c | !longphrase!c
+s:!fine! | !shortphrase! | !mediumphrase! | !longphrase!
+|
+</textarea>
+
+<div id="warnings"></div>
+<hr>
+<div id="paper" style="font-size:xx-large;"></div>
+</body>
+</html>

@@ -30,7 +30,7 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
 	} else {
 		ycorr = glyphs.getYCorr(symbol);
 		if (elementGroup.isInGroup()) {
-			elementGroup.addPath(glyphs.getPathForSymbol(x, renderer.calcY(offset + ycorr), symbol, scalex, scaley));
+			glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, klass, "none", "#000000");
 		} else {
 			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, klass, "none", renderer.foregroundColor);
 			if (el) {
