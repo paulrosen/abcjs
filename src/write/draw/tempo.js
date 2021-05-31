@@ -6,10 +6,10 @@ function drawTempo(renderer, params) {
 	if (params.pitch === undefined)
 		window.console.error("Tempo Element y-coordinate not set.");
 
-	var tempoGroup;
+	//var tempoGroup;
 	params.tempo.el_type = "tempo";
 //	renderer.wrapInAbsElem(params.tempo, "abcjs-tempo", function () {
-		renderer.paper.openGroup({klass: renderer.controller.classes.generate("tempo")});
+		//renderer.paper.openGroup({klass: renderer.controller.classes.generate("tempo wha")});
 		// The text is aligned with extra room for descenders but numbers look like they are a little too high, so bump it a little.
 	var descenderHeight = 2;
 		var y = renderer.calcY(params.pitch) + 2;
@@ -37,9 +37,9 @@ function drawTempo(renderer, params) {
 		if (params.tempo.postString) {
 			renderText(renderer, {x:x, y: y, text: params.tempo.postString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true});
 		}
-		tempoGroup = renderer.paper.closeGroup();
+		//tempoGroup = renderer.paper.closeGroup();
 //	});
-	return [tempoGroup];
+	//return [tempoGroup];
 }
 
 module.exports = drawTempo;

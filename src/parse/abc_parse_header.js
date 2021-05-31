@@ -13,13 +13,13 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 
 	this.setTitle = function(title) {
 		if (multilineVars.hasMainTitle)
-			tuneBuilder.addSubtitle(tokenizer.translateString(tokenizer.stripComment(title)));	// display secondary title
+			tuneBuilder.addSubtitle(tokenizer.translateString(tokenizer.stripComment(title)), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+title.length+2});	// display secondary title
 		else
 		{
 			var titleStr = tokenizer.translateString(tokenizer.theReverser(tokenizer.stripComment(title)));
 			if (multilineVars.titlecaps)
 				titleStr = titleStr.toUpperCase();
-			tuneBuilder.addMetaText("title", titleStr);
+			tuneBuilder.addMetaText("title", titleStr, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+title.length+2});
 			multilineVars.hasMainTitle = true;
 		}
 	};
@@ -477,9 +477,9 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 		var field = metaTextHeaders[line.charAt(0)];
 		if (field !== undefined) {
 			if (field === 'unalignedWords')
-				tuneBuilder.addMetaTextArray(field, parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))));
+				tuneBuilder.addMetaTextArray(field, parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+line.length});
 			else
-				tuneBuilder.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+				tuneBuilder.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+line.length});
 			return {};
 		} else {
 			var startChar = multilineVars.iChar;
@@ -487,11 +487,11 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 			switch(line.charAt(0))
 			{
 				case  'H':
-					tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+					tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+line.length});
 					line = tokenizer.peekLine()
 					while (line && line.charAt(1) !== ':') {
 						tokenizer.nextLine()
-						tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
+						tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+line.length});
 						line = tokenizer.peekLine()
 					}
 					break;
@@ -516,7 +516,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 				case  'P':
 					// TODO-PER: There is more to do with parts, but the writer doesn't care.
 					if (multilineVars.is_in_header)
-						tuneBuilder.addMetaText("partOrder", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+						tuneBuilder.addMetaText("partOrder", tokenizer.translateString(tokenizer.stripComment(line.substring(2))), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+line.length});
 					else
 						multilineVars.partForNextLine = { title: tokenizer.translateString(tokenizer.stripComment(line.substring(2))), startChar: startChar, endChar: endChar};
 					break;

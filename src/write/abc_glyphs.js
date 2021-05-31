@@ -125,7 +125,7 @@ var pathScale = function (pathArray, kx, ky) {
 };
 
 var Glyphs = {
-	printSymbol: function (x,y,symb,paper, klass, stroke, fill) {
+	printSymbol: function (x,y,symb,paper, attrs) {
     if (!glyphs[symb]) return null;
     var pathArray = pathClone(glyphs[symb].d);
     pathArray[0][1] +=x;
@@ -133,7 +133,8 @@ var Glyphs = {
     var path = "";
     for (var i = 0; i < pathArray.length; i++)
     	path += pathArray[i].join(" ");
-    return paper.path({path:path, stroke:stroke, fill:fill, 'class': klass });
+    attrs.path = path;
+    return paper.path(attrs);
    },
 
   getPathForSymbol: function (x,y,symb,scalex, scaley) {

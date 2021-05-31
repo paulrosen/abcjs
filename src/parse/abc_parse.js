@@ -24,6 +24,7 @@ var Parse = function() {
 			lines: tune.lines,
 			media: tune.media,
 			metaText: tune.metaText,
+			metaTextInfo: tune.metaTextInfo,
 			version: tune.version,
 
 			addElementToEvents: tune.addElementToEvents,
@@ -473,7 +474,7 @@ var Parse = function() {
 		// switches.transpose: change the key signature, chords, and notes by a number of half-steps.
 		if (!switches) switches = {};
 		if (!startPos) startPos = 0;
-		tuneBuilder.reset();
+		tune.reset();
 
 		// Take care of whatever line endings come our way
 		// Tack on newline temporarily to make the last line continuation work

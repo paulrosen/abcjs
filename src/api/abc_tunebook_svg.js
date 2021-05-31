@@ -63,8 +63,6 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
         obj.formatting = tune.formatting;
         obj.media = tune.media;
         obj.version = tune.version;
-        obj.metaText = {};
-        obj.lines = [];
         return obj;
     }
 
@@ -80,14 +78,7 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 
         if (i === 0) {
             // These items go on top of the music
-            tuneLine.metaText.tempo = tune.metaText.tempo;
-            tuneLine.metaText.title = tune.metaText.title;
-            tuneLine.metaText.header = tune.metaText.header;
-            tuneLine.metaText.rhythm = tune.metaText.rhythm;
-            tuneLine.metaText.origin = tune.metaText.origin;
-            tuneLine.metaText.composer = tune.metaText.composer;
-            tuneLine.metaText.author = tune.metaText.author;
-            tuneLine.metaText.partOrder = tune.metaText.partOrder;
+            tuneLine.copyTopInfo(tune);
         }
 
         // push the lines until we get to a music line
@@ -106,17 +97,7 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 
     // These items go below the music
     tuneLine = tunes[tunes.length-1];
-    tuneLine.metaText.unalignedWords = tune.metaText.unalignedWords;
-    tuneLine.metaText.book = tune.metaText.book;
-    tuneLine.metaText.source = tune.metaText.source;
-    tuneLine.metaText.discography = tune.metaText.discography;
-    tuneLine.metaText.notes = tune.metaText.notes;
-    tuneLine.metaText.transcription = tune.metaText.transcription;
-    tuneLine.metaText.history = tune.metaText.history;
-    tuneLine.metaText['abc-copyright'] = tune.metaText['abc-copyright'];
-    tuneLine.metaText['abc-creator'] = tune.metaText['abc-creator'];
-    tuneLine.metaText['abc-edited-by'] = tune.metaText['abc-edited-by'];
-    tuneLine.metaText.footer = tune.metaText.footer;
+    tuneLine.copyBottomInfo(tune);
 
     // Now create sub-divs and render each line. Need to copy the params to change the padding for the interior slices.
     var ep = {};

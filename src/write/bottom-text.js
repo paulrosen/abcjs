@@ -1,3 +1,5 @@
+const addTextIf = require("./add-text-if");
+
 function BottomText(metaText, width, isPrint, paddingLeft, spacing, getTextSize) {
 	this.rows = [];
 	if (metaText.unalignedWords && metaText.unalignedWords.length > 0)
@@ -20,7 +22,7 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
 		if (unalignedWords[j] === '')
 			this.rows.push({move: space.height});
 		else if (typeof unalignedWords[j] === 'string') {
-			this.addTextIf(paddingLeft + indent, unalignedWords[j], defFont, klass, 0, 0, "start", getTextSize, null, true);
+			addTextIf(this.rows, { marginLeft: paddingLeft + indent, text: unalignedWords[j], font: defFont, klass: klass, inGroup: true, name: "words"}, getTextSize);
 		} else {
 			var largestY = 0;
 			var offsetX = 0;
@@ -60,7 +62,7 @@ BottomText.prototype.extraText = function (metaText, marginLeft, spacing, getTex
 	if (metaText['abc-creator']) extraText += "Creator: " + metaText['abc-creator'] + "\n";
 	if (metaText['abc-edited-by']) extraText += "Edited By: " + metaText['abc-edited-by'] + "\n";
 	if (extraText.length > 0) {
-			this.addTextIf(marginLeft, extraText, 'historyfont', 'meta-bottom extra-text', spacing.info, 0, "start", getTextSize, "extraText");
+			addTextIf(this.rows, { marginLeft: marginLeft, text: extraText, font: 'historyfont', klass: 'meta-bottom extra-text', marginTop: spacing.info, absElemType: "extraText", name: "description"}, getTextSize);
 	}
 }
 
@@ -69,32 +71,9 @@ BottomText.prototype.footer = function (footer, width, paddingLeft, getTextSize)
 	var font = "footerfont";
 	this.rows.push({startGroup: "footer", klass: klass});
 	// Note: whether there is a footer or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
-	this.addTextIf(paddingLeft, footer.left, font, klass, 0, 0, 'start', getTextSize);
-	this.addTextIf(paddingLeft + width / 2, footer.center, font, klass, 0, 0, 'middle', getTextSize);
-	this.addTextIf(paddingLeft + width, footer.right, font, klass, 0, 0, 'end', getTextSize);
-}
-
-BottomText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType, inGroup) {
-	if (!text)
-		return;
-	if (marginTop)
-		this.rows.push({move: marginTop});
-	var attr = {left: marginLeft, text: text, font: font, anchor: anchor};
-	if (absElemType)
-		attr.absElemType = absElemType;
-	if (!inGroup) {
-		attr.klass = klass;
-	}
-	this.rows.push(attr);
-	// If there are blank lines they won't be counted by getTextSize, so just get the height of one line and multiply
-	var size = getTextSize.calc("A", font, klass);
-	var numLines = text.split("\n").length;
-	if (text[text.length-1] === '\n')
-		numLines--; // If there is a new line at the end of the string, then an extra line will be counted.
-	var h = (size.height*1.1) * numLines;
-	this.rows.push({move: Math.round(h)});
-	if (marginBottom)
-		this.rows.push({move: marginBottom});
+	addTextIf(this.rows, { marginLeft: paddingLeft, text: footer.left, font: font, klass: klass, name: "footer"}, getTextSize);
+	addTextIf(this.rows, { marginLeft: paddingLeft + width / 2, text: footer.center, font: font, klass: klass, anchor: 'middle', name: "footer"} , getTextSize);
+	addTextIf(this.rows, { marginLeft: paddingLeft + width, text: footer.right, font: font, klass: klass, anchor: 'end', name: "footer"}, getTextSize);
 }
 
 module.exports = BottomText;

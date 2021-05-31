@@ -11,17 +11,12 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 	elementGroup.beginGroup(renderer.paper, renderer.controller);
 	for (var i=0; i<params.children.length; i++) {
 		var child = params.children[i];
-		var el;
 		switch (child.type) {
 			case "TempoElement":
-				el = drawTempo(renderer, child);
-				if (el)
-					params.elemset = params.elemset.concat(el);
+				drawTempo(renderer, child);
 				break;
 			default:
-				el = drawRelativeElement(renderer, child, bartop);
-				if (el)
-					params.elemset.push(el);
+				drawRelativeElement(renderer, child, bartop);
 		}
 	}
 	var klass = params.type;
@@ -40,7 +35,7 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 		if (isTempo && params.elemset.length > 0) {
 			// If this is a tempo element there are text portions that are in params.elemset[0] already.
 			// The graphic portion (the drawn note) is in g and that should just be added to the text so that it is a single element for selecting.
-			renderer.paper.moveElementToChild(params.elemset[0], g);
+			//renderer.paper.moveElementToChild(params.elemset[0], g);
 			selectables.add(params, params.elemset[0], false, staffPos);
 		} else {
 			params.elemset.push(g);

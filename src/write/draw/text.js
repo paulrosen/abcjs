@@ -28,7 +28,7 @@ function renderText(renderer, params) {
 	text = text.replace(/^\n/, "\xA0\n");
 
 	if (hash.font.box) {
-		renderer.paper.openGroup({klass: hash.attr['class'], fill: renderer.foregroundColor});
+		renderer.paper.openGroup({klass: hash.attr['class'], fill: renderer.foregroundColor, "data-name": params.name});
 		if (hash.attr["text-anchor"] === "end") {
 			hash.attr.x -= hash.font.padding;
 		} else if (hash.attr["text-anchor"] === "start") {
@@ -41,6 +41,8 @@ function renderText(renderer, params) {
 		delete hash.attr['class'];
 	hash.attr.x = roundNumber(hash.attr.x);
 	hash.attr.y = roundNumber(hash.attr.y);
+	if (!hash.font.box && params.name)
+		hash.attr["data-name"] = params.name;
 	var elem = renderer.paper.text(text, hash.attr);
 	if (hash.font.box) {
 		var size = elem.getBBox();

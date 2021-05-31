@@ -228,6 +228,7 @@ var ParserLint = function() {
 				endSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 				endTie: { type: 'boolean', Enum: [ true ], optional: true },
 				midipitch: { type: 'number', optional: true },
+				name: { type: 'string' },
 				pitch: { type: 'number' },
 				verticalPos: { type: 'number' },
 				startBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'endBeam', 'beambr' ], optional: true },
@@ -247,6 +248,7 @@ var ParserLint = function() {
 					endSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 					endTie: { type: 'boolean', Enum: [ true ], optional: true },
 					midipitch: { type: 'number', optional: true },
+					name: { type: 'string' },
 					pitch: { type: 'number' },
 					verticalPos: { type: 'number' },
 					startSlur: slurProperties,
@@ -679,7 +681,37 @@ var ParserLint = function() {
 					unalignedWords: { type: 'array', optional: true, items: textFieldProperties },
 					url: { type: "string", optional: true }
 				}
-			}
+			},
+			metaTextInfo: {type:"object",
+				description: "There can only be one of these per tune",
+				properties: {
+					"abc-copyright": { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					"abc-creator": { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					"abc-version": { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					"abc-charset": { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					"abc-edited-by": { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					author: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					book: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					composer: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					discography: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					footer: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					group: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					header: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					history: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					instruction: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					notes: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					origin: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					partOrder: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					rhythm: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					source: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					tempo: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					textBlock: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					title: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					transcription: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					unalignedWords: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					url: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+				}
+			},
 		}
 	};
 

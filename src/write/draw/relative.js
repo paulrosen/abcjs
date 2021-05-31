@@ -12,7 +12,15 @@ function drawRelativeElement(renderer, params, bartop) {
 			if (params.c===null) return null;
 			var klass = "symbol";
 			if (params.klass) klass += " " + params.klass;
-			params.graphelem = printSymbol(renderer, params.x, params.pitch, params.c, params.scalex, params.scaley, renderer.controller.classes.generate(klass), "none", renderer.foregroundColor); break;
+			params.graphelem = printSymbol(renderer, params.x, params.pitch, params.c, {
+				scalex: params.scalex,
+				scaley: params.scaley,
+				klass: renderer.controller.classes.generate(klass),
+//				fill:"none",
+//				stroke: renderer.foregroundColor,
+				name: params.name
+			});
+			break;
 		case "debug":
 			params.graphelem = renderText(renderer, { x: params.x, y: renderer.calcY(15), text: ""+params.c, type: "debugfont", klass: renderer.controller.classes.generate('debug-msg'), anchor: 'start', centerVertically: false, dim: params.dim}); break;
 		case "barNumber":
@@ -38,11 +46,11 @@ function drawRelativeElement(renderer, params, bartop) {
 			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'partsfont', klass: renderer.controller.classes.generate("part"), anchor: "start", dim: params.dim});
 			break;
 		case "bar":
-			params.graphelem = printStem(renderer, params.x, params.linewidth, y, (bartop)?bartop:renderer.calcY(params.pitch2)); break; // bartop can't be 0
+			params.graphelem = printStem(renderer, params.x, params.linewidth, y, (bartop)?bartop:renderer.calcY(params.pitch2), null); break; // bartop can't be 0
 		case "stem":
-			params.graphelem = printStem(renderer, params.x, params.linewidth, y, renderer.calcY(params.pitch2)); break;
+			params.graphelem = printStem(renderer, params.x, params.linewidth, y, renderer.calcY(params.pitch2), 'abcjs-stem'); break;
 		case "ledger":
-			params.graphelem = printStaffLine(renderer, params.x, params.x+params.w, params.pitch, renderer.controller.classes.generate("ledger")); break;
+			params.graphelem = printStaffLine(renderer, params.x, params.x+params.w, params.pitch, "abcjs-ledger"); break;
 	}
 	if (params.scalex!==1 && params.graphelem) {
 		scaleExistingElem(renderer.paper, params.graphelem, params.scalex, params.scaley, params.x, y);

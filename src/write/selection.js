@@ -5,7 +5,7 @@ function setupSelection(engraver) {
 	if (engraver.dragging) {
 		for (var h = 0; h < engraver.selectables.length; h++) {
 			var hist = engraver.selectables[h];
-			if (hist.selectable) {
+			if (hist.svgEl.getAttribute("selectable") === "true") {
 				hist.svgEl.setAttribute("tabindex", 0);
 				hist.svgEl.setAttribute("data-index", h);
 				hist.svgEl.addEventListener("keydown", keyboardDown.bind(engraver));
@@ -79,7 +79,7 @@ function keyboardSelection(ev) {
 			this.dragTarget = this.selectables[index];
 			this.dragIndex = index;
 			this.dragMechanism = "keyboard";
-			mouseUp.bind(this)();
+			mouseUp.bind(this)(ev);
 			break;
 		case 38: // arrow up
 			handled = true;
@@ -107,7 +107,7 @@ function keyboardSelection(ev) {
 		case 9: // tab
 			// This is losing focus - if there had been dragging, then do the callback
 			if (this.dragYStep !== 0) {
-				mouseUp.bind(this)();
+				mouseUp.bind(this)(ev);
 			}
 			break;
 		default:
@@ -186,7 +186,7 @@ function getBestMatchCoordinates(dim, ev, scale) {
 }
 
 function getTarget(target) {
-	// This searches up the dom for the first item containig the attribute "selectable", or stopping at the SVG.
+	// This searches up the dom for the first item containing the attribute "selectable", or stopping at the SVG.
 	if (target.tagName === "svg")
 		return target;
 
@@ -284,7 +284,7 @@ function setSelection(dragIndex) {
 		this.dragTarget = this.selectables[dragIndex];
 		this.dragIndex = dragIndex;
 		this.dragMechanism = "keyboard";
-		mouseUp.bind(this)();
+		mouseUp.bind(this)(ev);
 	}
 }
 

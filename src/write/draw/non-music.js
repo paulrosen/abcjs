@@ -14,13 +14,15 @@ function nonMusic(renderer, obj, selectables) {
 				text: row.text,
 				type: row.font,
 				klass: row.klass,
+				name: row.name,
 				anchor: row.anchor
 			});
 			if (row.absElemType) {
 				selectables.wrapSvgEl({
 					el_type: row.absElemType,
-					startChar: -1,
-					endChar: -1,
+					name: row.name,
+					startChar: row.startChar,
+					endChar: row.endChar,
 					text: row.text
 				}, el);
 			}
@@ -34,8 +36,9 @@ function nonMusic(renderer, obj, selectables) {
 			if (row.absElemType)
 				selectables.wrapSvgEl({
 					el_type: row.absElemType,
-					startChar: -1,
-					endChar: -1,
+					name: row.name,
+					startChar: row.startChar,
+					endChar: row.endChar,
 					text: ""
 				}, g);
 		}

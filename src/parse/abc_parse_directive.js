@@ -1067,7 +1067,7 @@ var parseDirective = {};
 					case "-version":
 					case "-charset":
 						var subCmd = arr.shift();
-						tuneBuilder.addMetaText(cmd+subCmd, arr.join(' '));
+						tuneBuilder.addMetaText(cmd+subCmd, arr.join(' '), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+restOfString.length+5});
 						break;
 					default:
 						return "Unknown directive: " + cmd+arr[0];
@@ -1090,7 +1090,7 @@ var parseDirective = {};
 				if (footerArr.length > 3)
 					warn("Too many tabs in " + cmd + ": " + footerArr.length + " found.", restOfString, 0);
 
-				tuneBuilder.addMetaTextObj(cmd, footer);
+				tuneBuilder.addMetaTextObj(cmd, footer, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+str.length});
 				break;
 
 			case "midi":
