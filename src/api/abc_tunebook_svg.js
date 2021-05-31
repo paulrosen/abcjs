@@ -51,8 +51,10 @@ function renderOne(div, tune, params, tuneNumber) {
 	    div.innerHTML = "";
     var engraver_controller = new EngraverController(div, params);
     // 
-    tablatures.init();
-    tune.tablatures = tablatures.preparePlugins(engraver_controller, tune, tuneNumber, params)
+    if (params.tablatures) {
+        tablatures.init();
+        tune.tablatures = tablatures.preparePlugins(tune, tuneNumber, params);
+    }
     //
     engraver_controller.engraveABC(tune, tuneNumber);
     tune.engraver = engraver_controller;

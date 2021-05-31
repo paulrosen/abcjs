@@ -9,7 +9,10 @@ function drawRelativeElement(renderer, params, bartop) {
 	var y = renderer.calcY(params.pitch);
 	switch(params.type) {
 		case "symbol":
-			if (params.c===null) return null;
+			if (params.c === null) return null;
+			if (params.c == "clefs.G") {
+				console.log("clefs G");
+			}
 			var klass = "symbol";
 			if (params.klass) klass += " " + params.klass;
 			params.graphelem = printSymbol(renderer, params.x, params.pitch, params.c, params.scalex, params.scaley, renderer.controller.classes.generate(klass), "none", renderer.foregroundColor); break;

@@ -5,13 +5,11 @@ var plugin = {
 
   /**
    * upon init mainly store provided instances for later usage
-   * @param {*} renderer the abcjs renderer
    * @param {*} abcTune  the parsed tune AST tree
   *  @param {*} tuneNumber  the parsed tune AST tree
    * @param {*} params  complementary args provided to Tablature Plugin
    */
-  init: function (renderer, abcTune , tuneNumber ,params) {
-    this.renderer = renderer; 
+  init: function ( abcTune , tuneNumber ,params) {
     this.tune = abcTune;
     this.params = params;
     this.tuneNumber = tuneNumber;
@@ -19,12 +17,12 @@ var plugin = {
   },
 
   /**
-   * render line using current abcjs renderer 
+   * render a score line staff using current abcjs renderer 
    * NB : we assume that renderer , current tunes info + tab params 
    * operational inside plugin instance
-   * @param {*} line 
+   * @param {*} staff 
    */
-  render: function (line) {
+  render: function ( renderer , staff) {
     console.log('ViolinTab plugin rendered');
   }
 };

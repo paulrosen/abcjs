@@ -6,13 +6,10 @@ var Selectables = require('./selectables');
 
 function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber) {
 	var selectables = new Selectables(renderer.paper, selectTypes, tuneNumber);
-	var tablatures = abcTune.tablatures; // undefined if no tablatures in progress
 	renderer.moveY(renderer.padding.top);
 	nonMusic(renderer, abcTune.topText, selectables);
 	renderer.moveY(renderer.spacing.music);
-  
 	var staffgroups = [];
-	var staffNumber = 0;
 	for (var line = 0; line < abcTune.lines.length; line++) {
 		classes.incrLine();
 		var abcLine = abcTune.lines[line];
@@ -23,14 +20,8 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 			if (staffgroups.length >= 1)
 				addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
 			var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables);
-			if (tablatures) {
-				if (staffNumber < tablatures.length) {
-					tablatures[staffNumber].render(line)
-				}
-			}
 			staffgroup.line = line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
 			staffgroups.push(staffgroup);
-			staffNumber++;
 		} else if (abcLine.nonMusic) {
 			nonMusic(renderer, abcLine.nonMusic, selectables);
 		}

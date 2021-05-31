@@ -4,6 +4,7 @@ var drawVoice = require('./voice');
 var printStaff = require('./staff');
 var printDebugBox = require('./debug-box');
 var printStem = require('./print-stem');
+var tablatures = require('../../api/abc_tablatures');
 
 function drawStaffGroup(renderer, params, selectables) {
 	// We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
@@ -96,6 +97,10 @@ function drawStaffGroup(renderer, params, selectables) {
 			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
 //			if (staff.bottom < 0)
 //				renderer.moveY(spacing.STEP, -staff.bottom);
+		}
+		// Deal with tablature for staff
+		if (renderer.abctune.tablatures) {
+			tablatures.renderStaffLine(renderer, staff, i);
 		}
 	}
 	renderer.controller.classes.newMeasure();

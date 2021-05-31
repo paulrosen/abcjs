@@ -45,13 +45,12 @@ var abcTablatures = {
 
   /**
    * handle params for current processed score
-   * @param {*} renderer current tune renderer
    * @param {*} tune current tune 
    * @param {*} tuneNumber number in tune list
    * @param {*} params params to be processed for tablature
    * @return prepared tablatures plugin instances for current tune
    */
-  preparePlugins: function(renderer,tune,tuneNumber,params) {
+  preparePlugins: function(tune,tuneNumber,params) {
     console.log('Tablatures plugins manager preparing Plugins ...')
     var returned = null;
     var nbPlugins = 0;
@@ -71,7 +70,7 @@ var abcTablatures = {
           var plugin = this.plugins[tabName];
           if (plugin) {
             // proceed with tab plugin  init 
-            plugin.init(renderer,tune,tuneNumber,args)
+            plugin.init(tune,tuneNumber,args)
             returned[ii] = plugin
             nbPlugins++;
           } else {
@@ -83,6 +82,23 @@ var abcTablatures = {
     }
     console.log('Tablatures plugins manager '+nbPlugins+' Plugin(s) ready')
     return returned; 
+  },
+
+  /**
+   * Staff line dispatcher to tablature plugins 
+   * @param {*} renderer 
+   * @param {*} staff 
+   * @param {*} staffNumber 
+   */
+  renderStaffLine: function (renderer, staff, staffNumber) {
+    var tune = renderer.abctune;
+    var tabs = tune.tablatures;
+    if (staffNumber < tabs.length) {
+      tabPlugin = tabs[staffNumber];
+      if (tabPlugin) {
+        tabPlugin.render(renderer,staff);
+      }
+    }
   },
 
   /**
