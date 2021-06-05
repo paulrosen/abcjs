@@ -722,7 +722,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			var dx = (dir==="down" || abselem.heads.length === 0)?0:abselem.heads[0].w;
 			var width = (dir==="down")?1:-1;
 			// TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
-			if (noteHead.c === 'noteheads.slash.quarter') {
+			if (noteHead && noteHead.c === 'noteheads.slash.quarter') {
 				if (dir === 'down')
 					p2 -= 1;
 				else
