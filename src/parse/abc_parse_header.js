@@ -235,7 +235,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 		prestissimo: 210,
 	};
 
-	this.setTempo = function(line, start, end) {
+	this.setTempo = function(line, start, end, iChar) {
 		//Q - tempo; can be used to specify the notes per minute, e.g. If
 		//the meter denominator is a 4 note then Q:120 or Q:C=120
 		//is 120 quarter notes per minute. Similarly  Q:C3=40 would be 40
@@ -255,7 +255,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 
 			if (tokens.length === 0) throw "Missing parameter in Q: field";
 
-			var tempo = {};
+			var tempo = { startChar: iChar+start-2, endChar: iChar+end };
 			var delaySet = true;
 			var token = tokens.shift();
 			if (token.type === 'quote') {
@@ -381,7 +381,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 					return [ e-i+1+ws ];
 				case "[Q:":
 					if (e > 0) {
-						var tempo = this.setTempo(line, i+3, e);
+						var tempo = this.setTempo(line, i+3, e, multilineVars.iChar);
 						if (tempo.type === 'delaySet') {
 							if (tuneBuilder.hasBeginMusic())
 								tuneBuilder.appendElement('tempo', startChar, endChar, this.calcTempo(tempo.tempo));
@@ -442,7 +442,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 				case "Q:":
 					var e = line.indexOf('\x12', i+2);
 					if (e === -1) e = line.length;
-					var tempo = this.setTempo(line, i+2, e);
+					var tempo = this.setTempo(line, i+2, e, multilineVars.iChar);
 					if (tempo.type === 'delaySet') tuneBuilder.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, this.calcTempo(tempo.tempo));
 					else if (tempo.type === 'immediate') tuneBuilder.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, tempo.tempo);
 				return [ e, line.charAt(i), parseCommon.strip(line.substring(i+2))];
@@ -521,7 +521,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 						multilineVars.partForNextLine = { title: tokenizer.translateString(tokenizer.stripComment(line.substring(2))), startChar: startChar, endChar: endChar};
 					break;
 				case  'Q':
-					var tempo = this.setTempo(line, 2, line.length);
+					var tempo = this.setTempo(line, 2, line.length, multilineVars.iChar);
 					if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;
 					else if (tempo.type === 'immediate') {
 						if (!tune.metaText.tempo)

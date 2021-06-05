@@ -7,6 +7,7 @@ var RelativeElement = require('./abc_relative_element');
 var parseCommon = require('../parse/abc_common');
 
 var createKeySignature = function(elem, tuneNumber) {
+	elem.el_type = "keySignature";
 		if (!elem.accidentals || elem.accidentals.length === 0)
 			return null;
 		var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra key-signature', tuneNumber);

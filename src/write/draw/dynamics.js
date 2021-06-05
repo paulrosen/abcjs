@@ -11,6 +11,7 @@ function drawDynamics(renderer, params, selectables) {
 		klass: renderer.controller.classes.generate('decoration dynamics'),
 		fill:renderer.foregroundColor,
 		stroke: "none",
+		name: "dynamics"
 	});
 	selectables.wrapSvgEl({el_type: "dynamicDecoration", startChar: -1, endChar: -1, decoration: params.dec}, el);
 	return [el];

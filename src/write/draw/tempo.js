@@ -16,7 +16,7 @@ function drawTempo(renderer, params) {
 		var text;
 		var size;
 		if (params.tempo.preString) {
-			text = renderText(renderer, {x:x, y: y, text: params.tempo.preString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true, "dominant-baseline": "ideographic"});
+			text = renderText(renderer, {x:x, y: y, text: params.tempo.preString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true, "dominant-baseline": "ideographic", name: "pre"}, true);
 			size = renderer.controller.getTextSize.calc(params.tempo.preString, 'tempofont', 'tempo', text);
 			var preWidth = size.width;
 			var charWidth = preWidth / params.tempo.preString.length; // Just get some average number to increase the spacing.
@@ -28,14 +28,14 @@ function drawTempo(renderer, params) {
 				drawRelativeElement(renderer, params.note.children[i], x);
 			x += (params.note.w + 5);
 			var str = "= " + params.tempo.bpm;
-			text = renderText(renderer, {x:x, y: y, text: str, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true});
+			text = renderText(renderer, {x:x, y: y, text: str, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true, name: "beats"});
 			size = renderer.controller.getTextSize.calc(str, 'tempofont', 'tempo', text);
 			var postWidth = size.width;
 			var charWidth2 = postWidth / str.length; // Just get some average number to increase the spacing.
 			x += postWidth + charWidth2;
 		}
 		if (params.tempo.postString) {
-			renderText(renderer, {x:x, y: y, text: params.tempo.postString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true});
+			renderText(renderer, {x:x, y: y, text: params.tempo.postString, type: 'tempofont', klass: 'abcjs-tempo', anchor: "start", noClass: true, name: "post"}, true);
 		}
 		//tempoGroup = renderer.paper.closeGroup();
 //	});

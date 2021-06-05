@@ -137,7 +137,7 @@ Svg.prototype.rect = function(attr) {
 	lines.push(constructVLine(x2, y1, y2));
 	lines.push(constructVLine(x1, y2, y1));
 
-	return this.path({ path: lines.join(" "), stroke: "none"});
+	return this.path({ path: lines.join(" "), stroke: "none", "data-name": attr["data-name"] });
 };
 
 Svg.prototype.dottedLine = function(attr) {

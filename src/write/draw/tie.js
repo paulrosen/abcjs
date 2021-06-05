@@ -83,12 +83,12 @@ var drawArc = function(renderer, x1, x2, pitch1, pitch2, above, klass, isTie, do
 		klass += ' dotted';
 		var pathString2 = sprintf("M %f %f C %f %f %f %f %f %f", x1, y1,
 			controlx1, controly1, controlx2, controly2, x2, y2);
-		ret = renderer.paper.path({path:pathString2, stroke:renderer.foregroundColor, fill:"none", 'stroke-dasharray': "5 5", 'class': renderer.controller.classes.generate(klass)});
+		ret = renderer.paper.path({path:pathString2, stroke:renderer.foregroundColor, fill:"none", 'stroke-dasharray': "5 5", 'class': renderer.controller.classes.generate(klass), "data-name": isTie ? "tie" : "slur"});
 	} else {
 		var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
 			controlx1, controly1, controlx2, controly2, x2, y2,
 			roundNumber(controlx2 - thickness * uy), roundNumber(controly2 + thickness * ux), roundNumber(controlx1 - thickness * uy), roundNumber(controly1 + thickness * ux), x1, y1);
-		ret = renderer.paper.path({path:pathString, stroke:"none", fill:renderer.foregroundColor, 'class': renderer.controller.classes.generate(klass)});
+		ret = renderer.paper.path({path:pathString, stroke:"none", fill:renderer.foregroundColor, 'class': renderer.controller.classes.generate(klass), "data-name": isTie ? "tie" : "slur"});
 	}
 
 	return ret;

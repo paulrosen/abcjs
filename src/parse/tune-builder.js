@@ -664,12 +664,12 @@ var TuneBuilder = function(tune) {
 		this.pushLine({newpage: num});
 	};
 
-	this.addSeparator = function(spaceAbove, spaceBelow, lineLength) {
-		this.pushLine({separator: {spaceAbove: Math.round(spaceAbove), spaceBelow: Math.round(spaceBelow), lineLength: Math.round(lineLength)}});
+	this.addSeparator = function(spaceAbove, spaceBelow, lineLength, info) {
+		this.pushLine({separator: {spaceAbove: Math.round(spaceAbove), spaceBelow: Math.round(spaceBelow), lineLength: Math.round(lineLength)}, startChar: info.startChar, endChar: info.endChar});
 	};
 
-	this.addText = function(str) {
-		this.pushLine({text: str});
+	this.addText = function(str, info) {
+		this.pushLine({text: str, startChar: info.startChar, endChar: info.endChar});
 	};
 
 	this.addCentered = function(str) {

@@ -13,7 +13,7 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
 	var indent = 50;
 	var klass = 'meta-bottom unaligned-words';
 	var defFont = 'wordsfont';
-	this.rows.push({startGroup: "unalignedWords", klass: 'abcjs-meta-bottom abcjs-unaligned-words'});
+	this.rows.push({startGroup: "unalignedWords", klass: 'abcjs-meta-bottom abcjs-unaligned-words', name: "words"});
 	var space = getTextSize.calc("i", defFont, klass);
 
 	this.rows.push({move: spacing.words});

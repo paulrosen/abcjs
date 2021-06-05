@@ -1,7 +1,7 @@
 var elementGroup = require('./group-elements');
 var roundNumber = require("./round-number");
 
-function printStem(renderer, x, dx, y1, y2, klass) {
+function printStem(renderer, x, dx, y1, y2, klass, name) {
 	if (dx<0 || y1<y2) { // correct path "handedness" for intersection with other elements
 		var tmp = roundNumber(y2);
 		y2 = roundNumber(y1);
@@ -18,6 +18,8 @@ function printStem(renderer, x, dx, y1, y2, klass) {
 		attr.path += pathArray[i].join(" ");
 	if (klass)
 		attr['class'] = klass;
+	if (name)
+		attr['data-name'] = name;
 	if (!elementGroup.isInGroup()) {
 		attr.stroke ="none";
 		attr.fill = renderer.foregroundColor;

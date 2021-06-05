@@ -42,7 +42,7 @@ var roundNumber = require("./round-number");
 	/**
 	 * End a group of glyphs that will always be moved, scaled and highlighted together
 	 */
-	Group.prototype.endGroup = function (klass) {
+	Group.prototype.endGroup = function (klass, name) {
 		this.ingroup = false;
 		//if (this.path.length === 0) return null;
 		var path = "";
@@ -55,6 +55,7 @@ var roundNumber = require("./round-number");
 			ret.setAttribute("class", this.controller.classes.generate(klass))
 			ret.setAttribute("fill", this.controller.renderer.foregroundColor)
 			ret.setAttribute("stroke", "none")
+			ret.setAttribute("data-name", name)
 		}
 		return ret;
 	};

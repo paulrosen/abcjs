@@ -25,8 +25,8 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
 	pathString += sprintf("M %f %f L %f %f ",
 		linestartx, y, lineendx, y);
 
-	renderer.paper.openGroup({klass: renderer.controller.classes.generate("ending")});
-	printPath(renderer, {path: pathString, stroke: renderer.foregroundColor, fill: renderer.foregroundColor});
+	renderer.paper.openGroup({klass: renderer.controller.classes.generate("ending"), "data-name": "ending"});
+	printPath(renderer, {path: pathString, stroke: renderer.foregroundColor, fill: renderer.foregroundColor, "data-name": "line"});
 	if (params.anchor1)
 		renderText(renderer, {
 			x: roundNumber(linestartx + 5),
@@ -35,7 +35,8 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
 			type: 'repeatfont',
 			klass: 'ending',
 			anchor: "start",
-			noClass: true
+			noClass: true,
+			name: params.text
 		});
 	var g = renderer.paper.closeGroup();
 	selectables.wrapSvgEl({el_type: "ending", startChar: -1, endChar: -1}, g);
