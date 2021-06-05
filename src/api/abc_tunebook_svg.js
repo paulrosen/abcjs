@@ -223,6 +223,9 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
         var abcParser = new Parse();
         abcParser.parse(abcString, ret.revisedParams);
         tune = abcParser.getTune();
+        var warnings = abcParser.getWarnings();
+        if (warnings)
+            tune.warnings = warnings;
     }
     if (!params.oneSvgPerLine || tune.lines.length < 2)
         renderOne(div, tune, ret.revisedParams, tuneNumber);
