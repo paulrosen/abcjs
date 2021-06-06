@@ -67,8 +67,10 @@ var ParserLint = function() {
 	var tempoProperties =  {
 		duration: { type: "array", optional: true, output: "join", requires: [ 'bpm'], items: { type: "number"} },
 		bpm: { type: "number", optional: true, requires: [ 'duration'] },
+		endChar: { type: 'number'},
 		preString: { type: 'string', optional: true},
 		postString: { type: 'string', optional: true},
+		startChar: { type: 'number'},
 		suppress: { type: 'boolean', Enum: [ true ], optional: true},
 		suppressBpm: { type: 'boolean', Enum: [ true ], optional: true}
 	};
@@ -161,6 +163,7 @@ var ParserLint = function() {
 
 	var clefProperties = {
 		stafflines: { type: 'number', minimum: 0, maximum: 10, optional: true },
+		staffscale: { type: 'number', minimum: 0.1, maximum: 10, optional: true },
 		transpose: { type: 'number', minimum: -24, maximum: 24, optional: true },
 		type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none', 'perc' ] },
 		verticalPos: { type: 'number', minimum: -20, maximum: 10 },	// the pitch that goes in the middle of the staff C=0
@@ -356,9 +359,11 @@ var ParserLint = function() {
 	var textFieldProperties = { type: "stringorarray", optional: true, output: 'noindex',
 		items: {
 			type: 'object', properties: {
+				endChar: { type: 'number', optional: true},
 				font: fontType,
 				text: { type: 'string' },
-				center: { type: 'boolean', Enum: [ true ], optional: true }
+				center: { type: 'boolean', Enum: [ true ], optional: true },
+				startChar: { type: 'number', optional: true}
 			}
 		}
 	};
@@ -589,13 +594,27 @@ var ParserLint = function() {
 				staffbreak: { type: 'number', optional: true },
 				separator: { type: 'object', optional: true, prohibits: [ 'staff', 'text', 'subtitle' ],
 					properties: {
+						endChar: { type: 'number'},
 						lineLength: { type: 'number', optional: true },
 						spaceAbove: { type: 'number', optional: true },
-						spaceBelow: { type: 'number', optional: true }
+						spaceBelow: { type: 'number', optional: true },
+						startChar: { type: 'number'}
 					}
 				},
-				subtitle: { type: "string", optional: true, prohibits: [ 'staff', 'text', 'separator' ]  },
-				text: addProhibits(textFieldProperties, [ 'staff', 'subtitle', 'separator' ]),
+				subtitle: { type: "object", optional: true, prohibits: [ 'staff', 'text', 'separator' ],
+					properties: {
+						endChar: { type: 'number'},
+						startChar: { type: 'number'},
+						text: { type: 'string'}
+					}
+				},
+				text: { type: "object", optional: true, prohibits: [ 'staff', 'subtitle', 'separator' ],
+					properties: {
+						endChar: { type: 'number'},
+						startChar: { type: 'number'},
+						text: textFieldProperties
+					}
+				},
 				staff: { type: 'array', optional: true, prohibits: [ 'subtitle', 'text', 'separator' ],
 					items: { type: 'object',
 						properties: {

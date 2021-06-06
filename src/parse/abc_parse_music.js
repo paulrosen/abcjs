@@ -674,12 +674,17 @@ var letter_to_grace =  function(line, i) {
 
 				ii  = note.endChar;
 				delete note.endChar;
+
+				if (note.end_beam) {
+					note.endBeam = true;
+					delete note.end_beam;
+				}
 			}
 			else {
 				// We shouldn't get anything but notes or a space here, so report an error
 				if (gra[1].charAt(ii) === ' ') {
 					if (gracenotes.length > 0)
-						gracenotes[gracenotes.length-1].end_beam = true;
+						gracenotes[gracenotes.length-1].endBeam = true;
 				} else
 					warn("Unknown character '" + gra[1].charAt(ii) + "' while parsing grace note", line, i);
 				ii++;

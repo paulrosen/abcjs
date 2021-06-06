@@ -653,7 +653,7 @@ var TuneBuilder = function(tune) {
 	};
 
 	this.addSubtitle = function(str, info) {
-		this.pushLine({subtitle: str, startChar: info.startChar, endChar: info.endChar});
+		this.pushLine({subtitle: { text: str, startChar: info.startChar, endChar: info.endChar}});
 	};
 
 	this.addSpacing = function(num) {
@@ -665,11 +665,11 @@ var TuneBuilder = function(tune) {
 	};
 
 	this.addSeparator = function(spaceAbove, spaceBelow, lineLength, info) {
-		this.pushLine({separator: {spaceAbove: Math.round(spaceAbove), spaceBelow: Math.round(spaceBelow), lineLength: Math.round(lineLength)}, startChar: info.startChar, endChar: info.endChar});
+		this.pushLine({separator: {spaceAbove: Math.round(spaceAbove), spaceBelow: Math.round(spaceBelow), lineLength: Math.round(lineLength), startChar: info.startChar, endChar: info.endChar}});
 	};
 
 	this.addText = function(str, info) {
-		this.pushLine({text: str, startChar: info.startChar, endChar: info.endChar});
+		this.pushLine({text: { text: str, startChar: info.startChar, endChar: info.endChar}});
 	};
 
 	this.addCentered = function(str) {
