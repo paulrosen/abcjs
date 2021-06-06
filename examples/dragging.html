@@ -107,8 +107,8 @@
 				currentIndex = drag.index;
 				maxIndex = drag.max;
 			}
+			var originalText = abcString.substring(abcelem.startChar, abcelem.endChar);
 			if (abcelem.pitches && drag && drag.step && abcelem.startChar >= 0 && abcelem.endChar >= 0) {
-				var originalText = abcString.substring(abcelem.startChar, abcelem.endChar);
 				var arr = tokenize(originalText);
 				// arr now contains elements that are either a chord, a decoration, a note name, or anything else. It can be put back to its original string with .join("").
 				for (var i = 0; i < arr.length; i++) {
@@ -121,6 +121,19 @@
 				draw();
 			} else if (abcelem.startChar >= 0 && abcelem.endChar >= 0)
 				formatAbc(abcelem.startChar, abcelem.endChar);
+
+			var data = "";
+			if (abcelem.startChar >= 0)
+				data += "src: " + originalText + "<br>";
+			else
+				data += "src: unknown<br>";
+			data += "type: " + abcelem.type + "<br>";
+			data += "el_type: " + abcelem.el_type + "<br>";
+			data += "name: " + analysis.name + "<br>";
+			data += "clickedName: " + analysis.clickedName + "<br>";
+			data += "clickedClasses: " + analysis.clickedClasses + "<br>";
+			data += "classes: " + analysis.parentClasses + "<br>";
+			document.getElementById("click-data").innerHTML = data;
 		}
 		function optionChanged() {
 			formatAbc(-1,-1);
@@ -171,6 +184,9 @@
 			'A,3C B,3D G,F,E,D, F,2A,2|D,2C,2 B,,2A,,2 G,,4 F,,A,,C,F,|F,,6 D,,2 [D,4G,,4] z4|B,,16:|' + '\n';
 	</script>
 	<style>
+		.side-by-side {
+			display: flex;
+		}
 		.row {
 			display: flex;
 			flex-wrap: wrap;
@@ -198,15 +214,27 @@
 		label {
 			font-weight: bold;
 		}
+		.click-data {
+			background: #dddddd;
+			padding: 10px;
+			margin-left: 10px;
+			width: 200px;
+		}
+		.click-data h2 {
+			margin: 0;
+			padding: 0;
+			font-weight: normal;
+		}
 	</style>
 </head>
 <body onload="load()">
   <header>
     <img src="../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
-    <h1>Dragging</h1>
+    <h1>Drag and drop demo</h1>
   </header>
   <div class="container">
-    <h1>Drag and drop demo</h1>
+	  <div class="side-by-side">
+		  <div>
     <div>Render Time: <span id="time"></span>ms</div>
     <div>SVG size: <span id="size"></span>K</div>
     <ul>
@@ -222,6 +250,14 @@
       </li>
       <li><button onclick="selectPrevious()">Previous</button><button onclick="selectNext()">Next</button></li>
     </ul>
+		  </div>
+		  <div class="click-data">
+			  <h2>Last Click</h2>
+			  <div id="click-data">
+
+			  </div>
+		  </div>
+	  </div>
     <div class="row">
       <div>
         <h2>Output</h2>

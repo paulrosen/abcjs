@@ -37,8 +37,14 @@ An object containing the following info about the item clicked:
     measure: 0, // zero-based measure from the beginning of the line
     voice: 0, // zero-based voice 
     staffPos: { top: 0, height: 0, zero: 0 } // the Y-coordinates in the SVG for the staff system that contains the item. "zero" is the Y-coordinate of the middle-C.
+    name: "", // The name of the parent item that was clicked.
+	clickedName: "", // If the item is compound, then this is the name on the part that was clicked.
+	parentClasses: "", // The classes on the parent item
+	clickedClasses: "", // The classes on the clicked element
 }
 ```
+The svg elements may be wrapped in a `<g>` because there is more than one element that is contained. For instance, in `[Ac]` (when L:1/8), there is a `<g>` that contains and element for a notehead on the `A` line, a notehead on the `c` line, a stem, and an eighth note flag. Clicking anywhere on that `<g>` will cause the name to be "note" but if you click directly on a notehead, the name will still be "note" but the clickedName will be "A" or "c".
+
 
 ## drag
 

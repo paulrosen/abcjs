@@ -284,7 +284,7 @@ function setSelection(dragIndex) {
 		this.dragTarget = this.selectables[dragIndex];
 		this.dragIndex = dragIndex;
 		this.dragMechanism = "keyboard";
-		mouseUp.bind(this)(ev);
+		mouseUp.bind(this)({target: this.dragTarget.svgEl});
 	}
 }
 
@@ -311,6 +311,16 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
 	}
 	if (target.staffPos)
 		analysis.staffPos = target.staffPos;
+	var closest = ev.target;
+	while (!closest.dataset.name && closest.tagName.toLowerCase() !== 'svg')
+		closest = closest.parentNode;
+	var parent = ev.target;
+	while (!parent.dataset.index && parent.tagName.toLowerCase() !== 'svg')
+		parent = parent.parentNode;
+	analysis.name = parent.dataset.name;
+	analysis.clickedName = closest.dataset.name;
+	analysis.parentClasses = parent.classList;
+	analysis.clickedClasses = closest.classList;
 
 	for (var i=0; i<this.listeners.length;i++) {
 		this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, { step: dragStep, max: dragMax, index: dragIndex, setSelection: setSelection.bind(this)}, ev);
