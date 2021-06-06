@@ -43,7 +43,7 @@ An object containing the following info about the item clicked:
 	clickedClasses: "", // The classes on the clicked element
 }
 ```
-The svg elements may be wrapped in a `<g>` because there is more than one element that is contained. For instance, in `[Ac]` (when L:1/8), there is a `<g>` that contains and element for a notehead on the `A` line, a notehead on the `c` line, a stem, and an eighth note flag. Clicking anywhere on that `<g>` will cause the name to be "note" but if you click directly on a notehead, the name will still be "note" but the clickedName will be "A" or "c".
+The svg elements may be wrapped in a `<g>` because there is more than one element that is contained. For instance, in `[Ac]` (when L:1/8), there is a `<g>` that contains an element for a notehead on the `A` line, a notehead on the `c` line, a stem, and an eighth note flag. Clicking anywhere on that `<g>` will cause the name to be "note" but if you click directly on a notehead, the name will still be "note" but the clickedName will be "A" or "c".
 
 
 ## drag
