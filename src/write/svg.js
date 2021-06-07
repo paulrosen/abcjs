@@ -6,6 +6,7 @@ var svgNS = "http://www.w3.org/2000/svg";
 
 function Svg(wrapper) {
 	this.svg = createSvg();
+	this.currentGroup = [];
 	wrapper.appendChild(this.svg);
 }
 
@@ -13,6 +14,7 @@ Svg.prototype.clear = function() {
 	if (this.svg) {
 		var wrapper = this.svg.parentNode;
 		this.svg = createSvg();
+		this.currentGroup = [];
 		if (wrapper) {
 			// TODO-PER: If the wrapper is not present, then the underlying div was pulled out from under this instance. It's possible that is still useful (for creating the music off page?)
 			wrapper.innerHTML = "";
@@ -135,7 +137,7 @@ Svg.prototype.rect = function(attr) {
 	lines.push(constructVLine(x2, y1, y2));
 	lines.push(constructVLine(x1, y2, y1));
 
-	return this.path({ path: lines.join(" "), stroke: "none"});
+	return this.path({ path: lines.join(" "), stroke: "none", "data-name": attr["data-name"] });
 };
 
 Svg.prototype.dottedLine = function(attr) {
@@ -252,8 +254,8 @@ Svg.prototype.getTextSize = function(text, attr, el) {
 		size = this.guessWidth(text, attr);
 	}
 	if (removeLater) {
-		if (this.currentGroup)
-			this.currentGroup.removeChild(el);
+		if (this.currentGroup.length > 0)
+			this.currentGroup[0].removeChild(el);
 		else
 			this.svg.removeChild(el);
 	}
@@ -271,18 +273,24 @@ Svg.prototype.openGroup = function(options) {
 		el.setAttribute("fill", options.fill);
 	if (options.stroke)
 		el.setAttribute("stroke", options.stroke);
+	if (options['data-name'])
+		el.setAttribute("data-name", options['data-name']);
 
 	if (options.prepend)
-		this.svg.insertBefore(el, this.svg.firstChild);
+		this.prepend(el);
 	else
-		this.svg.appendChild(el);
-	this.currentGroup = el;
+		this.append(el);
+	this.currentGroup.unshift(el);
 	return el;
 };
 
 Svg.prototype.closeGroup = function() {
-	var g = this.currentGroup;
-	this.currentGroup = null;
+	var g = this.currentGroup.shift();
+	if (g && g.children.length === 0) {
+		// If nothing was added to the group it is because all the elements were invisible. We don't need the group, then.
+		this.svg.removeChild(g);
+		return null;
+	}
 	return g;
 };
 
@@ -292,7 +300,7 @@ Svg.prototype.path = function(attr) {
 		if (attr.hasOwnProperty(key)) {
 			if (key === 'path')
 				el.setAttributeNS(null, 'd', attr.path);
-			else
+			else if (attr[key] !== undefined)
 				el.setAttributeNS(null, key, attr[key]);
 		}
 	}
@@ -315,16 +323,16 @@ Svg.prototype.pathToBack = function(attr) {
 };
 
 Svg.prototype.append = function(el) {
-	if (this.currentGroup)
-		this.currentGroup.appendChild(el);
+	if (this.currentGroup.length > 0)
+		this.currentGroup[0].appendChild(el);
 	else
 		this.svg.appendChild(el);
 };
 
 Svg.prototype.prepend = function(el) {
 	// The entire group is prepended, so don't prepend the individual elements.
-	if (this.currentGroup)
-		this.currentGroup.appendChild(el);
+	if (this.currentGroup.length > 0)
+		this.currentGroup[0].appendChild(el);
 	else
 		this.svg.insertBefore(el, this.svg.firstChild);
 };

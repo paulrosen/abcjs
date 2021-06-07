@@ -107,7 +107,7 @@ function drawStaffGroup(renderer, params, selectables) {
 
 	// connect all the staves together with a vertical line
 	if (params.staffs.length>1) {
-		printStem(renderer, params.startx, 0.6, topLine, bottomLine);
+		printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
 	}
 	renderer.y = startY;
 

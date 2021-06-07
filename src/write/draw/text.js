@@ -1,6 +1,6 @@
 var roundNumber = require("./round-number");
 
-function renderText(renderer, params) {
+function renderText(renderer, params, alreadyInGroup) {
 	var y = params.y;
 	if (params.lane) {
 		var laneMargin = params.dim.font.size*0.25;
@@ -28,7 +28,8 @@ function renderText(renderer, params) {
 	text = text.replace(/^\n/, "\xA0\n");
 
 	if (hash.font.box) {
-		renderer.paper.openGroup({klass: hash.attr['class'], fill: renderer.foregroundColor});
+		if (!alreadyInGroup)
+			renderer.paper.openGroup({klass: hash.attr['class'], fill: renderer.foregroundColor, "data-name": params.name});
 		if (hash.attr["text-anchor"] === "end") {
 			hash.attr.x -= hash.font.padding;
 		} else if (hash.attr["text-anchor"] === "start") {
@@ -41,6 +42,8 @@ function renderText(renderer, params) {
 		delete hash.attr['class'];
 	hash.attr.x = roundNumber(hash.attr.x);
 	hash.attr.y = roundNumber(hash.attr.y);
+	if (params.name)
+		hash.attr["data-name"] = params.name;
 	var elem = renderer.paper.text(text, hash.attr);
 	if (hash.font.box) {
 		var size = elem.getBBox();
@@ -55,8 +58,9 @@ function renderText(renderer, params) {
 		if (params.centerVertically) {
 			deltaY = size.height - hash.font.padding;
 		}
-		renderer.paper.rect({ x: Math.round(params.x - delta), y: Math.round(y - deltaY), width: Math.round(size.width + hash.font.padding*2), height: Math.round(size.height + hash.font.padding*2)});
-		elem = renderer.paper.closeGroup();
+		renderer.paper.rect({ "data-name": "box", x: Math.round(params.x - delta), y: Math.round(y - deltaY), width: Math.round(size.width + hash.font.padding*2), height: Math.round(size.height + hash.font.padding*2)});
+		if (!alreadyInGroup)
+			elem = renderer.paper.closeGroup();
 	}
 	return elem;
 }

@@ -365,31 +365,34 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 6,
+						"name": "B",
 						"verticalPos": 6,
 						"highestVert": 6
 					},
 					{
 						"pitch": 8,
+						"name": "d",
 						"verticalPos": 8,
 						"highestVert": 8
 					},
 					{
 						"pitch": 13,
+						"name": "b",
 						"verticalPos": 13,
 						"highestVert": 13
 					}
 				],
 				"el_type": "note",
-				"startChar": 705,
+				"startChar": 700,
 				"endChar": 714,
 				"averagepitch": 9,
 				"minpitch": 6,
 				"maxpitch": 13
 			},
 			"size": {
-				"x": 136,
+				"x": 134,
 				"y": 314,
-				"width": 10,
+				"width": 14,
 				"height": 58
 			}
 		},
@@ -404,6 +407,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 10,
+						"name": "f",
 						"verticalPos": 10,
 						"highestVert": 16
 					}
@@ -435,6 +439,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 11,
+						"name": "g",
 						"verticalPos": 11,
 						"highestVert": 17
 					}
@@ -466,6 +471,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 10,
+						"name": "f",
 						"verticalPos": 10,
 						"highestVert": 16
 					}
@@ -500,10 +506,10 @@ describe("Selection", function() {
 				"endChar": 721
 			},
 			"size": {
-				"x": 220,
-				"y": 352,
-				"width": 1,
-				"height": 31
+				"x": 216,
+				"y": 334,
+				"width": 8,
+				"height": 49
 			}
 		},
 		{
@@ -521,26 +527,28 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 8,
+						"name": "d",
 						"verticalPos": 8,
 						"highestVert": 8
 					},
 					{
 						"pitch": 13,
+						"name": "b",
 						"verticalPos": 13,
 						"highestVert": 13
 					}
 				],
 				"el_type": "note",
-				"startChar": 725,
+				"startChar": 721,
 				"endChar": 734,
 				"averagepitch": 10.5,
 				"minpitch": 8,
 				"maxpitch": 13
 			},
 			"size": {
-				"x": 244,
+				"x": 242,
 				"y": 314,
-				"width": 17,
+				"width": 19,
 				"height": 51
 			}
 		},
@@ -559,26 +567,28 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 11,
+						"name": "g",
 						"verticalPos": 11,
 						"highestVert": 11
 					},
 					{
 						"pitch": 13,
+						"name": "b",
 						"verticalPos": 13,
 						"highestVert": 13
 					}
 				],
 				"el_type": "note",
-				"startChar": 738,
+				"startChar": 734,
 				"endChar": 744,
 				"averagepitch": 12,
 				"minpitch": 11,
 				"maxpitch": 13
 			},
 			"size": {
-				"x": 317,
+				"x": 315,
 				"y": 314,
-				"width": 10,
+				"width": 14,
 				"height": 39
 			}
 		},
@@ -597,10 +607,10 @@ describe("Selection", function() {
 				"endChar": 745
 			},
 			"size": {
-				"x": 354,
-				"y": 352,
-				"width": 1,
-				"height": 31
+				"x": 350,
+				"y": 334,
+				"width": 8,
+				"height": 49
 			}
 		},
 		{
@@ -643,6 +653,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 13,
+						"name": "b",
 						"startSlur": [
 							{
 								"label": 101
@@ -662,9 +673,9 @@ describe("Selection", function() {
 				"maxpitch": 13
 			},
 			"size": {
-				"x": 389,
+				"x": 387,
 				"y": 306,
-				"width": 10,
+				"width": 14,
 				"height": 39
 			}
 		},
@@ -679,6 +690,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 10,
+						"name": "f",
 						"verticalPos": 10,
 						"highestVert": 16
 					}
@@ -709,6 +721,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 8,
+						"name": "d",
 						"verticalPos": 8,
 						"highestVert": 14
 					}
@@ -739,6 +752,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 10,
+						"name": "f",
 						"endSlur": [
 							101
 						],
@@ -772,9 +786,11 @@ describe("Selection", function() {
 			"abcEl": {
 				"startTriplet": 3,
 				"tripletMultiplier": 0.6666666666666666,
+				"tripletR":3,
 				"pitches": [
 					{
 						"pitch": 6,
+						"name": "B",
 						"verticalPos": 6,
 						"highestVert": 12
 					}
@@ -806,6 +822,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 8,
+						"name": "d",
 						"verticalPos": 8,
 						"highestVert": 14
 					}
@@ -836,6 +853,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 7,
+						"name": "c",
 						"verticalPos": 7,
 						"highestVert": 13
 					}
@@ -871,6 +889,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 6,
+						"name": "B",
 						"verticalPos": 6,
 						"highestVert": 12
 					}
@@ -905,10 +924,10 @@ describe("Selection", function() {
 				"endChar": 776
 			},
 			"size": {
-				"x": 492,
-				"y": 352,
-				"width": 1,
-				"height": 31
+				"x": 488,
+				"y": 334,
+				"width": 8,
+				"height": 49
 			}
 		},
 		{
@@ -952,17 +971,19 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 7,
+						"name": "c",
 						"verticalPos": 7,
 						"highestVert": 7
 					},
 					{
 						"pitch": 10,
+						"name": "f",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
 				],
 				"el_type": "note",
-				"startChar": 804,
+				"startChar": 801,
 				"endChar": 811,
 				"averagepitch": 8.5,
 				"minpitch": 7,
@@ -1013,11 +1034,13 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 8,
+						"name": "d",
 						"verticalPos": 8,
 						"highestVert": 8
 					},
 					{
 						"pitch": 13,
+						"name": "b",
 						"verticalPos": 13,
 						"highestVert": 13
 					}
@@ -1030,9 +1053,9 @@ describe("Selection", function() {
 				"maxpitch": 13
 			},
 			"size": {
-				"x": 536,
+				"x": 534,
 				"y": 314,
-				"width": 10,
+				"width": 14,
 				"height": 51
 			}
 		},
@@ -1051,10 +1074,10 @@ describe("Selection", function() {
 				"endChar": 821
 			},
 			"size": {
-				"x": 569,
-				"y": 352,
-				"width": 1,
-				"height": 31
+				"x": 565,
+				"y": 334,
+				"width": 8,
+				"height": 49
 			}
 		},
 		{
@@ -1072,17 +1095,19 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 4,
+						"name": "G",
 						"verticalPos": 4,
 						"highestVert": 4
 					},
 					{
 						"pitch": 9,
+						"name": "e",
 						"verticalPos": 9,
 						"highestVert": 9
 					}
 				],
 				"el_type": "note",
-				"startChar": 825,
+				"startChar": 821,
 				"endChar": 832,
 				"averagepitch": 6.5,
 				"minpitch": 4,
@@ -1111,17 +1136,19 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 7,
+						"name": "c",
 						"verticalPos": 7,
 						"highestVert": 7
 					},
 					{
 						"pitch": 10,
+						"name": "f",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
 				],
 				"el_type": "note",
-				"startChar": 834,
+				"startChar": 832,
 				"endChar": 840,
 				"averagepitch": 8.5,
 				"minpitch": 7,
@@ -1149,10 +1176,10 @@ describe("Selection", function() {
 				"endChar": 841
 			},
 			"size": {
-				"x": 646,
-				"y": 352,
-				"width": 1,
-				"height": 31
+				"x": 642,
+				"y": 334,
+				"width": 8,
+				"height": 49
 			}
 		},
 		{
@@ -1170,17 +1197,19 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 8,
+						"name": "d",
 						"verticalPos": 8,
 						"highestVert": 8
 					},
 					{
 						"pitch": 10,
+						"name": "f",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
 				],
 				"el_type": "note",
-				"startChar": 845,
+				"startChar": 841,
 				"endChar": 854,
 				"averagepitch": 9,
 				"minpitch": 8,
@@ -1207,6 +1236,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 11,
+						"name": "g",
 						"verticalPos": 11,
 						"highestVert": 17
 					}
@@ -1412,6 +1442,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"startTie": {},
 						"verticalPos": -1,
 						"highestVert": -1
@@ -1426,9 +1457,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 136,
+				"x": 134,
 				"y": 391,
-				"width": 10,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1443,6 +1474,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"startTie": {},
 						"endTie": true,
 						"verticalPos": -1,
@@ -1458,9 +1490,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 152,
+				"x": 150,
 				"y": 391,
-				"width": 10,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1475,6 +1507,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"endTie": true,
 						"verticalPos": -1,
 						"highestVert": -1
@@ -1489,9 +1522,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 176,
+				"x": 174,
 				"y": 391,
-				"width": 10,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1506,6 +1539,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1519,9 +1553,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 204,
+				"x": 202,
 				"y": 391,
-				"width": 10,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1542,6 +1576,7 @@ describe("Selection", function() {
 				"gracenotes": [
 					{
 						"pitch": 0,
+						"name": "C",
 						"duration": 0.125,
 						"verticalPos": 0
 					}
@@ -1549,6 +1584,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1562,10 +1598,10 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 234,
-				"y": 375,
-				"width": 20,
-				"height": 47
+				"x": 233,
+				"y": 267,
+				"width": 29,
+				"height": 155
 			}
 		},
 		{
@@ -1579,11 +1615,13 @@ describe("Selection", function() {
 				"gracenotes": [
 					{
 						"pitch": 0,
+						"name": "C",
 						"duration": 0.125,
 						"verticalPos": 0
 					},
 					{
 						"pitch": 1,
+						"name": "D",
 						"duration": 0.125,
 						"verticalPos": 1
 					}
@@ -1591,6 +1629,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1604,9 +1643,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 264,
+				"x": 263,
 				"y": 368,
-				"width": 30,
+				"width": 33,
 				"height": 54
 			}
 		},
@@ -1621,6 +1660,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1634,9 +1674,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 300,
+				"x": 298,
 				"y": 391,
-				"width": 10,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1651,6 +1691,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1664,9 +1705,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 317,
+				"x": 315,
 				"y": 391,
-				"width": 10,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1681,6 +1722,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1694,9 +1736,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 365,
+				"x": 363,
 				"y": 391,
-				"width": 10,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1711,6 +1753,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1741,6 +1784,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1771,6 +1815,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1801,6 +1846,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1831,6 +1877,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1861,6 +1908,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1891,6 +1939,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1921,6 +1970,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1951,6 +2001,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -1981,6 +2032,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -2011,6 +2063,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -2041,6 +2094,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -2071,6 +2125,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -2101,6 +2156,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -2131,6 +2187,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -2334,6 +2391,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": 11,
 						"highestVert": 11
 					}
@@ -2364,6 +2422,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 1,
+						"name": "B,",
 						"verticalPos": 13,
 						"highestVert": 13
 					}
@@ -2395,16 +2454,19 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
+						"name": "F,",
 						"verticalPos": 8,
 						"highestVert": 8
 					},
 					{
 						"pitch": -2,
+						"name": "A,",
 						"verticalPos": 10,
 						"highestVert": 10
 					},
 					{
 						"pitch": 3,
+						"name": "E",
 						"verticalPos": 15,
 						"highestVert": 15
 					}
@@ -2454,6 +2516,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": 11,
 						"highestVert": 11
 					}
@@ -2485,6 +2548,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -8,
+						"name": "B,,",
 						"verticalPos": 4,
 						"highestVert": 10
 					}
@@ -2516,6 +2580,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -7,
+						"name": "B,,",
 						"verticalPos": 5,
 						"highestVert": 11
 					}
@@ -2546,6 +2611,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -6,
+						"name": "B,,",
 						"verticalPos": 6,
 						"highestVert": 6
 					}
@@ -2576,6 +2642,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -5,
+						"name": "B,,",
 						"verticalPos": 7,
 						"highestVert": 7
 					}
@@ -2607,6 +2674,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
+						"name": "B,,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -2637,6 +2705,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
+						"name": "B,,",
 						"verticalPos": 9,
 						"highestVert": 9
 					}
@@ -2688,6 +2757,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
+						"name": "B,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -2719,6 +2789,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -2,
+						"name": "B,",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
@@ -2750,6 +2821,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 1,
+						"name": "D",
 						"verticalPos": 13,
 						"highestVert": 13
 					}
@@ -2780,6 +2852,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 1,
+						"name": "D",
 						"verticalPos": 13,
 						"highestVert": 13
 					}
@@ -2810,6 +2883,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
+						"name": "B,",
 						"verticalPos": 9,
 						"highestVert": 9
 					}
@@ -2841,6 +2915,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -5,
+						"name": "B,",
 						"verticalPos": 7,
 						"highestVert": 7
 					}
@@ -2893,16 +2968,19 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
+						"name": "B,",
 						"verticalPos": 8,
 						"highestVert": 8
 					},
 					{
 						"pitch": -2,
+						"name": "A,",
 						"verticalPos": 10,
 						"highestVert": 10
 					},
 					{
 						"pitch": 0,
+						"name": "C",
 						"verticalPos": 12,
 						"highestVert": 12
 					}
@@ -2959,11 +3037,13 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": 11,
 						"highestVert": 11
 					},
 					{
 						"pitch": 3,
+						"name": "E",
 						"verticalPos": 15,
 						"highestVert": 15
 					}
@@ -3013,6 +3093,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
+						"name": "B,",
 						"verticalPos": 9,
 						"highestVert": 9
 					}
@@ -3043,6 +3124,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -2,
+						"name": "A,",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
@@ -3093,6 +3175,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -2,
+						"name": "A,",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
@@ -3123,6 +3206,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": 11,
 						"highestVert": 11
 					}
@@ -3154,6 +3238,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
+						"name": "G,",
 						"verticalPos": 9,
 						"highestVert": 9
 					}
@@ -3184,6 +3269,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -6,
+						"name": "B,,",
 						"verticalPos": 6,
 						"highestVert": 6
 					}
@@ -3214,6 +3300,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -5,
+						"name": "B,,",
 						"verticalPos": 7,
 						"highestVert": 7
 					}
@@ -3338,6 +3425,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 12,
+						"name": "g",
 						"verticalPos": 12,
 						"highestVert": 18
 					}
@@ -3375,11 +3463,13 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 11,
+						"name": "g",
 						"verticalPos": 11,
 						"highestVert": 11
 					},
 					{
 						"pitch": 13,
+						"name": "b",
 						"verticalPos": 13,
 						"highestVert": 13
 					}
@@ -3442,6 +3532,7 @@ describe("Selection", function() {
 					{
 						"accidental": "natural",
 						"pitch": 9,
+						"name": "e",
 						"verticalPos": 9,
 						"highestVert": 15
 					}
@@ -3500,16 +3591,19 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 5,
+						"name": "A",
 						"verticalPos": 5,
 						"highestVert": 5
 					},
 					{
 						"pitch": 7,
+						"name": "c",
 						"verticalPos": 7,
 						"highestVert": 7
 					},
 					{
 						"pitch": 10,
+						"name": "f",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
@@ -3545,6 +3639,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 8,
+						"name": "d",
 						"verticalPos": 8,
 						"highestVert": 14
 					}
@@ -3604,11 +3699,13 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 3,
+						"name": "E",
 						"verticalPos": 3,
 						"highestVert": 3
 					},
 					{
 						"pitch": 7,
+						"name": "c",
 						"verticalPos": 7,
 						"highestVert": 7
 					}
@@ -3639,11 +3736,13 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 4,
+						"name": "F",
 						"verticalPos": 4,
 						"highestVert": 4
 					},
 					{
 						"pitch": 6,
+						"name": "B",
 						"verticalPos": 6,
 						"highestVert": 6
 					}
@@ -3721,11 +3820,13 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 6,
+						"name": "B",
 						"verticalPos": 6,
 						"highestVert": 6
 					},
 					{
 						"pitch": 8,
+						"name": "d",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -3755,6 +3856,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 5,
+						"name": "F",
 						"verticalPos": 5,
 						"highestVert": 11
 					}
@@ -3810,11 +3912,13 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 1,
+						"name": "D",
 						"verticalPos": 1,
 						"highestVert": 1
 					},
 					{
 						"pitch": 5,
+						"name": "F",
 						"verticalPos": 5,
 						"highestVert": 5
 					}
@@ -3844,6 +3948,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 6,
+						"name": "B",
 						"verticalPos": 6,
 						"highestVert": 12
 					}
@@ -3875,6 +3980,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 7,
+						"name": "c",
 						"verticalPos": 7,
 						"highestVert": 13
 					}
@@ -3905,6 +4011,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 8,
+						"name": "d",
 						"verticalPos": 8,
 						"highestVert": 14
 					}
@@ -3935,6 +4042,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 9,
+						"name": "e",
 						"verticalPos": 9,
 						"highestVert": 15
 					}
@@ -3966,6 +4074,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 10,
+						"name": "f",
 						"verticalPos": 10,
 						"highestVert": 16
 					}
@@ -3997,6 +4106,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 5,
+						"name": "G",
 						"verticalPos": 5,
 						"highestVert": 11
 					}
@@ -4027,6 +4137,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 6,
+						"name": "B",
 						"verticalPos": 6,
 						"highestVert": 12
 					}
@@ -4060,6 +4171,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 7,
+						"name": "c",
 						"verticalPos": 7,
 						"highestVert": 13
 					}
@@ -4115,6 +4227,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 8,
+						"name": "d",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -4244,6 +4357,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4274,6 +4388,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4304,6 +4419,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4334,6 +4450,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4364,6 +4481,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4394,6 +4512,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4424,6 +4543,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4454,6 +4574,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4484,6 +4605,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4514,6 +4636,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4544,6 +4667,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4574,6 +4698,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4604,6 +4729,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4634,6 +4760,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4664,6 +4791,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4694,6 +4822,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4730,6 +4859,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4760,6 +4890,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4790,6 +4921,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4820,6 +4952,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4850,6 +4983,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4880,6 +5014,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4910,6 +5045,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -4940,6 +5076,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": -1
 					}
@@ -5021,6 +5158,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
+						"name": "B,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -5052,6 +5190,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
+						"name": "G,",
 						"verticalPos": 9,
 						"highestVert": 9
 					}
@@ -5082,6 +5221,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -2,
+						"name": "A,",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
@@ -5112,6 +5252,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
+						"name": "G,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -5143,6 +5284,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
+						"name": "G,",
 						"startSlur": [
 							{
 								"label": 101
@@ -5179,6 +5321,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -2,
+						"name": "A,",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
@@ -5209,6 +5352,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": 11,
 						"highestVert": 11
 					}
@@ -5239,6 +5383,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
+						"name": "G,",
 						"endSlur": [
 							101
 						],
@@ -5273,6 +5418,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 0,
+						"name": "C",
 						"verticalPos": 12,
 						"highestVert": 12
 					}
@@ -5303,6 +5449,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 0,
+						"name": "C",
 						"verticalPos": 12,
 						"highestVert": 12
 					}
@@ -5354,11 +5501,13 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -7,
+						"name": "C,",
 						"verticalPos": 5,
 						"highestVert": 5
 					},
 					{
 						"pitch": -2,
+						"name": "A,",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
@@ -5389,16 +5538,19 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
+						"name": "B,",
 						"verticalPos": 8,
 						"highestVert": 8
 					},
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": 11,
 						"highestVert": 11
 					},
 					{
 						"pitch": 3,
+						"name": "E",
 						"verticalPos": 15,
 						"highestVert": 15
 					}
@@ -5448,6 +5600,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -2,
+						"name": "A,",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
@@ -5479,6 +5632,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 0,
+						"name": "C",
 						"verticalPos": 12,
 						"highestVert": 12
 					}
@@ -5510,6 +5664,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -1,
+						"name": "B,",
 						"verticalPos": 11,
 						"highestVert": 11
 					}
@@ -5541,6 +5696,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 1,
+						"name": "D",
 						"verticalPos": 13,
 						"highestVert": 13
 					}
@@ -5572,6 +5728,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
+						"name": "F,",
 						"verticalPos": 9,
 						"highestVert": 9
 					}
@@ -5603,6 +5760,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
+						"name": "E,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -5633,6 +5791,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -5,
+						"name": "E,",
 						"verticalPos": 7,
 						"highestVert": 7
 					}
@@ -5663,6 +5822,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -6,
+						"name": "C,",
 						"verticalPos": 6,
 						"highestVert": 6
 					}
@@ -5694,6 +5854,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
+						"name": "F,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -5725,6 +5886,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -2,
+						"name": "A,",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
@@ -5776,6 +5938,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -6,
+						"name": "C,",
 						"verticalPos": 6,
 						"highestVert": 6
 					}
@@ -5807,6 +5970,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -7,
+						"name": "C,",
 						"verticalPos": 5,
 						"highestVert": 11
 					}
@@ -5838,6 +6002,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -8,
+						"name": "B,",
 						"verticalPos": 4,
 						"highestVert": 10
 					}
@@ -5869,6 +6034,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -9,
+						"name": "B,",
 						"verticalPos": 3,
 						"highestVert": 9
 					}
@@ -5900,6 +6066,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -10,
+						"name": "B,",
 						"verticalPos": 2,
 						"highestVert": 8
 					}
@@ -5930,6 +6097,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -11,
+						"name": "B,",
 						"verticalPos": 1,
 						"highestVert": 7
 					}
@@ -5961,6 +6129,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -9,
+						"name": "B,",
 						"verticalPos": 3,
 						"highestVert": 9
 					}
@@ -5991,6 +6160,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -7,
+						"name": "B,",
 						"verticalPos": 5,
 						"highestVert": 11
 					}
@@ -6021,6 +6191,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
+						"name": "B,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -6072,6 +6243,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -11,
+						"name": "B,",
 						"verticalPos": 1,
 						"highestVert": 7
 					}
@@ -6102,6 +6274,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -13,
+						"name": "B,",
 						"verticalPos": -1,
 						"highestVert": 5
 					}
@@ -6133,11 +6306,13 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -10,
+						"name": "B,",
 						"verticalPos": 2,
 						"highestVert": 2
 					},
 					{
 						"pitch": -6,
+						"name": "B,",
 						"verticalPos": 6,
 						"highestVert": 6
 					}
@@ -6213,6 +6388,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -8,
+						"name": "B,",
 						"verticalPos": 4,
 						"highestVert": 4
 					}
@@ -6359,7 +6535,7 @@ describe("Selection", function() {
 				"data-index": "3"
 			},
 			"abcEl": {
-				"pitches": [{"pitch": 4, "verticalPos": 4, "highestVert": 4}],
+				"pitches": [{"pitch": 4, "name": "G", "verticalPos": 4, "highestVert": 4}],
 				"duration": 1,
 				"el_type": "note",
 				"startChar": 44,
@@ -6404,7 +6580,7 @@ describe("Selection", function() {
 				"data-index": "6"
 			},
 			"abcEl": {
-				"pitches": [{"pitch": 5, "verticalPos": 5, "highestVert": 5}],
+				"pitches": [{"pitch": 5, "name": "A", "verticalPos": 5, "highestVert": 5}],
 				"duration": 1,
 				"el_type": "note",
 				"startChar": 73,
@@ -6444,11 +6620,12 @@ describe("Selection", function() {
 		'C4 |\n' +
 		'\n';
 
-	var expectedClefs = [{
+	var expectedClefs = [
+		{
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "0"},
 		"abcEl": {
-			"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 0}],
+			"pitches": [{"pitch": 0, "name":"C","verticalPos": 0, "highestVert": 0}],
 			"duration": 1,
 			"el_type": "note",
 			"startChar": 32,
@@ -6460,12 +6637,12 @@ describe("Selection", function() {
 			"currentTrackWholeNotes": 0,
 			"midiPitches": [{"cmd": "note", "pitch": 60, "volume": 105, "start": 0, "duration": 1, "instrument": 0, "gap": 0}]
 		},
-		"size": {"x": 71, "y": 83, "width": 15, "height": 8}
+		"size": {"x": 69, "y": 83, "width": 19, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "1"},
 		"abcEl": {
-			"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 0}],
+			"pitches": [{"pitch": 0, "name":"C","verticalPos": 0, "highestVert": 0}],
 			"duration": 1,
 			"el_type": "note",
 			"startChar": 55,
@@ -6477,12 +6654,12 @@ describe("Selection", function() {
 			"currentTrackWholeNotes": 1,
 			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 1, "duration": 1, "instrument": 0, "gap": 0}]
 		},
-		"size": {"x": 49, "y": 176, "width": 15, "height": 8}
+		"size": {"x": 47, "y": 176, "width": 19, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "2"},
 		"abcEl": {
-			"pitches": [{"pitch": 0, "verticalPos": 0, "highestVert": 0}],
+			"pitches": [{"pitch": 0, "name":"C","verticalPos": 0, "highestVert": 0}],
 			"duration": 1,
 			"el_type": "note",
 			"startChar": 78,
@@ -6494,12 +6671,12 @@ describe("Selection", function() {
 			"currentTrackWholeNotes": 2,
 			"midiPitches": [{"cmd": "note", "pitch": 48, "volume": 105, "start": 2, "duration": 1, "instrument": 0, "gap": 0}]
 		},
-		"size": {"x": 49, "y": 268, "width": 15, "height": 8}
+		"size": {"x": 47, "y": 268, "width": 19, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "3"},
 		"abcEl": {
-			"pitches": [{"pitch": 0, "verticalPos": 8, "highestVert": 8}],
+			"pitches": [{"pitch": 0, "name":"C","verticalPos": 8, "highestVert": 8}],
 			"duration": 1,
 			"el_type": "note",
 			"startChar": 98,
@@ -6516,7 +6693,7 @@ describe("Selection", function() {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "4"},
 		"abcEl": {
-			"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}],
+			"pitches": [{"pitch": 0, "name":"C","verticalPos": 12, "highestVert": 12}],
 			"duration": 1,
 			"el_type": "note",
 			"startChar": 119,
@@ -6528,12 +6705,12 @@ describe("Selection", function() {
 			"currentTrackWholeNotes": 4,
 			"midiPitches": [{"cmd": "note", "pitch": 48, "volume": 105, "start": 4, "duration": 1, "instrument": 0, "gap": 0}]
 		},
-		"size": {"x": 50, "y": 406, "width": 15, "height": 8}
+		"size": {"x": 48, "y": 406, "width": 19, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "5"},
 		"abcEl": {
-			"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}],
+			"pitches": [{"pitch": 0, "name":"C","verticalPos": 12, "highestVert": 12}],
 			"duration": 1,
 			"el_type": "note",
 			"startChar": 140,
@@ -6545,12 +6722,12 @@ describe("Selection", function() {
 			"currentTrackWholeNotes": 5,
 			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 5, "duration": 1, "instrument": 0, "gap": 0}]
 		},
-		"size": {"x": 50, "y": 498, "width": 15, "height": 8}
+		"size": {"x": 48, "y": 498, "width": 19, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "true", "tabindex": "0", "data-index": "6"},
 		"abcEl": {
-			"pitches": [{"pitch": 0, "verticalPos": 12, "highestVert": 12}],
+			"pitches": [{"pitch": 0, "name":"C","verticalPos": 12, "highestVert": 12}],
 			"duration": 1,
 			"el_type": "note",
 			"startChar": 159,
@@ -6562,7 +6739,7 @@ describe("Selection", function() {
 			"currentTrackWholeNotes": 6,
 			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 6, "duration": 1, "instrument": 0, "gap": 0}]
 		},
-		"size": {"x": 50, "y": 599, "width": 15, "height": 8}
+		"size": {"x": 48, "y": 599, "width": 19, "height": 8}
 	}];
 
 //////////////////////////////////////////////////////////

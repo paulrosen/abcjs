@@ -14,6 +14,7 @@ var roundNumber = require("./round-number");
 		this.path = [];
 		this.lastM = [0, 0];
 		this.ingroup = true;
+		this.paper.openGroup();
 	};
 
 	Group.prototype.isInGroup = function() {
@@ -41,20 +42,21 @@ var roundNumber = require("./round-number");
 	/**
 	 * End a group of glyphs that will always be moved, scaled and highlighted together
 	 */
-	Group.prototype.endGroup = function (klass) {
+	Group.prototype.endGroup = function (klass, name) {
 		this.ingroup = false;
-		if (this.path.length === 0) return null;
+		//if (this.path.length === 0) return null;
 		var path = "";
 		for (var i = 0; i < this.path.length; i++)
 			path += this.path[i].join(" ");
-		var ret = this.paper.path({
-			path: path,
-			stroke: "none",
-			fill: this.controller.renderer.foregroundColor,
-			'class': this.controller.classes.generate(klass)
-		});
 		this.path = [];
 
+		var ret = this.paper.closeGroup();
+		if (ret) {
+			ret.setAttribute("class", this.controller.classes.generate(klass))
+			ret.setAttribute("fill", this.controller.renderer.foregroundColor)
+			ret.setAttribute("stroke", "none")
+			ret.setAttribute("data-name", name)
+		}
 		return ret;
 	};
 

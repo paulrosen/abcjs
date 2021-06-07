@@ -1083,8 +1083,6 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
     obj.formatting = tune.formatting;
     obj.media = tune.media;
     obj.version = tune.version;
-    obj.metaText = {};
-    obj.lines = [];
     return obj;
   } // Before rendering, chop up the returned tune into an array where each element is a line.
   // The first element of the array gets the title and other items that go on top, the last element
@@ -1100,14 +1098,7 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 
     if (i === 0) {
       // These items go on top of the music
-      tuneLine.metaText.tempo = tune.metaText.tempo;
-      tuneLine.metaText.title = tune.metaText.title;
-      tuneLine.metaText.header = tune.metaText.header;
-      tuneLine.metaText.rhythm = tune.metaText.rhythm;
-      tuneLine.metaText.origin = tune.metaText.origin;
-      tuneLine.metaText.composer = tune.metaText.composer;
-      tuneLine.metaText.author = tune.metaText.author;
-      tuneLine.metaText.partOrder = tune.metaText.partOrder;
+      tuneLine.copyTopInfo(tune);
     } // push the lines until we get to a music line
 
 
@@ -1130,17 +1121,7 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 
 
   tuneLine = tunes[tunes.length - 1];
-  tuneLine.metaText.unalignedWords = tune.metaText.unalignedWords;
-  tuneLine.metaText.book = tune.metaText.book;
-  tuneLine.metaText.source = tune.metaText.source;
-  tuneLine.metaText.discography = tune.metaText.discography;
-  tuneLine.metaText.notes = tune.metaText.notes;
-  tuneLine.metaText.transcription = tune.metaText.transcription;
-  tuneLine.metaText.history = tune.metaText.history;
-  tuneLine.metaText['abc-copyright'] = tune.metaText['abc-copyright'];
-  tuneLine.metaText['abc-creator'] = tune.metaText['abc-creator'];
-  tuneLine.metaText['abc-edited-by'] = tune.metaText['abc-edited-by'];
-  tuneLine.metaText.footer = tune.metaText.footer; // Now create sub-divs and render each line. Need to copy the params to change the padding for the interior slices.
+  tuneLine.copyBottomInfo(tune); // Now create sub-divs and render each line. Need to copy the params to change the padding for the interior slices.
 
   var ep = {};
 
@@ -1264,6 +1245,8 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
     var abcParser = new Parse();
     abcParser.parse(abcString, ret.revisedParams);
     tune = abcParser.getTune();
+    var warnings = abcParser.getWarnings();
+    if (warnings) tune.warnings = warnings;
   }
 
   if (!params.oneSvgPerLine || tune.lines.length < 2) renderOne(div, tune, ret.revisedParams, tuneNumber);else renderEachLineSeparately(div, tune, ret.revisedParams, tuneNumber);
@@ -1299,7 +1282,39 @@ var delineTune = __webpack_require__(/*! ./deline-tune */ "./src/data/deline-tun
 
 
 var Tune = function Tune() {
-  // The structure consists of a hash with the following two items:
+  this.reset = function () {
+    this.version = "1.1.0";
+    this.media = "screen";
+    this.metaText = {};
+    this.metaTextInfo = {};
+    this.formatting = {};
+    this.lines = [];
+    this.staffNum = 0;
+    this.voiceNum = 0;
+    this.lineNum = 0;
+    this.runningFonts = {};
+    delete this.visualTranspose;
+  };
+
+  this.reset();
+
+  function copy(src, prop, attrs) {
+    for (var i = 0; i < attrs.length; i++) {
+      this[prop][attrs[i]] = src[prop][attrs[i]];
+    }
+  }
+
+  this.copyTopInfo = function (src) {
+    var attrs = ['tempo', 'title', 'header', 'rhythm', 'origin', 'composer', 'author', 'partOrder'];
+    copy(src, "metaText", attrs);
+    copy(src, "metaTextInfo", attrs);
+  };
+
+  this.copyBottomInfo = function (src) {
+    var attrs = ['unalignedWords', 'book', 'source', 'discography', 'notes', 'transcription', 'history', 'abc-copyright', 'abc-creator', 'abc-edited-by', 'footer'];
+    copy(src, "metaText", attrs);
+    copy(src, "metaTextInfo", attrs);
+  }; // The structure consists of a hash with the following two items:
   // metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...
   // tempo: { noteLength: number (e.g. .125), bpm: number }
   // lines: an array of elements, or one of the following:
@@ -1331,6 +1346,8 @@ var Tune = function Tune() {
   //		accidentals[]: { acc:sharp|dblsharp|natural|flat|dblflat,  note:a|b|c|d|e|f|g }
   // METER: type: common_time,cut_time,specified
   //		if specified, { num: 99, den: 99 }
+
+
   this.getBeatLength = function () {
     // This returns a fraction: for instance 1/4 for a quarter
     // There are two types of meters: compound and regular. Compound meter has 3 beats counted as one.
@@ -2937,6 +2954,7 @@ var Parse = function Parse() {
       lines: tune.lines,
       media: tune.media,
       metaText: tune.metaText,
+      metaTextInfo: tune.metaTextInfo,
       version: tune.version,
       addElementToEvents: tune.addElementToEvents,
       addUsefulCallbackInfo: tune.addUsefulCallbackInfo,
@@ -3110,7 +3128,7 @@ var Parse = function Parse() {
     if (!line) line = " ";
     var bad_char = line.charAt(col_num);
     if (bad_char === ' ') bad_char = "SPACE";
-    var clean_line = encode(line.substring(0, col_num)) + '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' + encode(line.substring(col_num + 1));
+    var clean_line = encode(line.substring(col_num - 64, col_num)) + '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' + encode(line.substring(col_num + 1).substring(0, 64));
     addWarning("Music Line:" + tokenizer.lineIndex + ":" + (col_num + 1) + ': ' + str + ":  " + clean_line);
     addWarningObject({
       message: str,
@@ -3470,7 +3488,7 @@ var Parse = function Parse() {
     // switches.transpose: change the key signature, chords, and notes by a number of half-steps.
     if (!switches) switches = {};
     if (!startPos) startPos = 0;
-    tuneBuilder.reset(); // Take care of whatever line endings come our way
+    tune.reset(); // Take care of whatever line endings come our way
     // Tack on newline temporarily to make the last line continuation work
 
     strTune = strTune.replace(/\r\n?/g, '\n') + '\n'; // get rid of latex commands. If a line starts with a backslash, then it is replaced by spaces to keep the character count the same.
@@ -4704,7 +4722,10 @@ var parseDirective = {};
         break;
 
       case "sep":
-        if (tokens.length === 0) tuneBuilder.addSeparator(14, 14, 85); // If no parameters are given, then there is a default size.
+        if (tokens.length === 0) tuneBuilder.addSeparator(14, 14, 85, {
+          startChar: multilineVars.iChar,
+          endChar: multilineVars.iChar + 5
+        }); // If no parameters are given, then there is a default size.
         else {
             var points = tokenizer.getMeasurement(tokens);
             if (points.used === 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
@@ -4715,7 +4736,10 @@ var parseDirective = {};
             points = tokenizer.getMeasurement(tokens);
             if (points.used === 0 || tokens.length !== 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
             var lenLine = points.value;
-            tuneBuilder.addSeparator(spaceAbove, spaceBelow, lenLine);
+            tuneBuilder.addSeparator(spaceAbove, spaceBelow, lenLine, {
+              startChar: multilineVars.iChar,
+              endChar: multilineVars.iChar + restOfString.length
+            });
           }
         break;
 
@@ -4769,7 +4793,10 @@ var parseDirective = {};
           line = tokenizer.nextLine();
         }
 
-        tuneBuilder.addText(textBlock);
+        tuneBuilder.addText(textBlock, {
+          startChar: multilineVars.iChar,
+          endChar: multilineVars.iChar + textBlock.length + 7
+        });
         break;
 
       case "continueall":
@@ -4793,7 +4820,10 @@ var parseDirective = {};
 
       case "text":
         var textstr = tokenizer.translateString(restOfString);
-        tuneBuilder.addText(parseDirective.parseFontChangeLine(textstr));
+        tuneBuilder.addText(parseDirective.parseFontChangeLine(textstr), {
+          startChar: multilineVars.iChar,
+          endChar: multilineVars.iChar + restOfString.length + 7
+        });
         break;
 
       case "center":
@@ -4995,7 +5025,10 @@ var parseDirective = {};
           case "-version":
           case "-charset":
             var subCmd = arr.shift();
-            tuneBuilder.addMetaText(cmd + subCmd, arr.join(' '));
+            tuneBuilder.addMetaText(cmd + subCmd, arr.join(' '), {
+              startChar: multilineVars.iChar,
+              endChar: multilineVars.iChar + restOfString.length + 5
+            });
             break;
 
           default:
@@ -5025,7 +5058,10 @@ var parseDirective = {};
           right: footerArr[2]
         };
         if (footerArr.length > 3) warn("Too many tabs in " + cmd + ": " + footerArr.length + " found.", restOfString, 0);
-        tuneBuilder.addMetaTextObj(cmd, footer);
+        tuneBuilder.addMetaTextObj(cmd, footer, {
+          startChar: multilineVars.iChar,
+          endChar: multilineVars.iChar + str.length
+        });
         break;
 
       case "midi":
@@ -5171,11 +5207,17 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
   this.reset(tokenizer, warn, multilineVars, tune);
 
   this.setTitle = function (title) {
-    if (multilineVars.hasMainTitle) tuneBuilder.addSubtitle(tokenizer.translateString(tokenizer.stripComment(title))); // display secondary title
+    if (multilineVars.hasMainTitle) tuneBuilder.addSubtitle(tokenizer.translateString(tokenizer.stripComment(title)), {
+      startChar: multilineVars.iChar,
+      endChar: multilineVars.iChar + title.length + 2
+    }); // display secondary title
     else {
         var titleStr = tokenizer.translateString(tokenizer.theReverser(tokenizer.stripComment(title)));
         if (multilineVars.titlecaps) titleStr = titleStr.toUpperCase();
-        tuneBuilder.addMetaText("title", titleStr);
+        tuneBuilder.addMetaText("title", titleStr, {
+          startChar: multilineVars.iChar,
+          endChar: multilineVars.iChar + title.length + 2
+        });
         multilineVars.hasMainTitle = true;
       }
   };
@@ -5430,7 +5472,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
     prestissimo: 210
   };
 
-  this.setTempo = function (line, start, end) {
+  this.setTempo = function (line, start, end, iChar) {
     //Q - tempo; can be used to specify the notes per minute, e.g. If
     //the meter denominator is a 4 note then Q:120 or Q:C=120
     //is 120 quarter notes per minute. Similarly  Q:C3=40 would be 40
@@ -5448,7 +5490,10 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
     try {
       var tokens = tokenizer.tokenize(line, start, end);
       if (tokens.length === 0) throw "Missing parameter in Q: field";
-      var tempo = {};
+      var tempo = {
+        startChar: iChar + start - 2,
+        endChar: iChar + end
+      };
       var delaySet = true;
       var token = tokens.shift();
 
@@ -5598,7 +5643,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
 
         case "[Q:":
           if (e > 0) {
-            var tempo = this.setTempo(line, i + 3, e);
+            var tempo = this.setTempo(line, i + 3, e, multilineVars.iChar);
 
             if (tempo.type === 'delaySet') {
               if (tuneBuilder.hasBeginMusic()) tuneBuilder.appendElement('tempo', startChar, endChar, this.calcTempo(tempo.tempo));else multilineVars.tempoForNextLine = ['tempo', startChar, endChar, this.calcTempo(tempo.tempo)];
@@ -5660,7 +5705,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
         case "Q:":
           var e = line.indexOf('\x12', i + 2);
           if (e === -1) e = line.length;
-          var tempo = this.setTempo(line, i + 2, e);
+          var tempo = this.setTempo(line, i + 2, e, multilineVars.iChar);
           if (tempo.type === 'delaySet') tuneBuilder.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, this.calcTempo(tempo.tempo));else if (tempo.type === 'immediate') tuneBuilder.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, tempo.tempo);
           return [e, line.charAt(i), parseCommon.strip(line.substring(i + 2))];
 
@@ -5697,7 +5742,13 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
     var field = metaTextHeaders[line.charAt(0)];
 
     if (field !== undefined) {
-      if (field === 'unalignedWords') tuneBuilder.addMetaTextArray(field, parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))));else tuneBuilder.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+      if (field === 'unalignedWords') tuneBuilder.addMetaTextArray(field, parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))), {
+        startChar: multilineVars.iChar,
+        endChar: multilineVars.iChar + line.length
+      });else tuneBuilder.addMetaText(field, tokenizer.translateString(tokenizer.stripComment(line.substring(2))), {
+        startChar: multilineVars.iChar,
+        endChar: multilineVars.iChar + line.length
+      });
       return {};
     } else {
       var startChar = multilineVars.iChar;
@@ -5705,12 +5756,18 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
 
       switch (line.charAt(0)) {
         case 'H':
-          tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));
+          tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))), {
+            startChar: multilineVars.iChar,
+            endChar: multilineVars.iChar + line.length
+          });
           line = tokenizer.peekLine();
 
           while (line && line.charAt(1) !== ':') {
             tokenizer.nextLine();
-            tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
+            tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)), {
+              startChar: multilineVars.iChar,
+              endChar: multilineVars.iChar + line.length
+            });
             line = tokenizer.peekLine();
           }
 
@@ -5740,7 +5797,10 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
 
         case 'P':
           // TODO-PER: There is more to do with parts, but the writer doesn't care.
-          if (multilineVars.is_in_header) tuneBuilder.addMetaText("partOrder", tokenizer.translateString(tokenizer.stripComment(line.substring(2))));else multilineVars.partForNextLine = {
+          if (multilineVars.is_in_header) tuneBuilder.addMetaText("partOrder", tokenizer.translateString(tokenizer.stripComment(line.substring(2))), {
+            startChar: multilineVars.iChar,
+            endChar: multilineVars.iChar + line.length
+          });else multilineVars.partForNextLine = {
             title: tokenizer.translateString(tokenizer.stripComment(line.substring(2))),
             startChar: startChar,
             endChar: endChar
@@ -5748,7 +5808,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
           break;
 
         case 'Q':
-          var tempo = this.setTempo(line, 2, line.length);
+          var tempo = this.setTempo(line, 2, line.length, multilineVars.iChar);
           if (tempo.type === 'delaySet') multilineVars.tempo = tempo.tempo;else if (tempo.type === 'immediate') {
             if (!tune.metaText.tempo) tune.metaText.tempo = tempo.tempo;else multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo];
           }
@@ -7599,6 +7659,7 @@ MusicParser.prototype.parseMusic = function (line) {
 
               if (core.accidental !== undefined) el.pitches[0].accidental = core.accidental;
               el.pitches[0].pitch = core.pitch;
+              el.pitches[0].name = core.name;
               if (core.midipitch || core.midipitch === 0) el.pitches[0].midipitch = core.midipitch;
               if (core.endSlur !== undefined) el.pitches[0].endSlur = core.endSlur;
               if (core.endTie !== undefined) el.pitches[0].endTie = core.endTie;
@@ -7788,10 +7849,15 @@ var letter_to_grace = function letter_to_grace(line, i) {
         if (note.startTie) inTie = true;
         ii = note.endChar;
         delete note.endChar;
+
+        if (note.end_beam) {
+          note.endBeam = true;
+          delete note.end_beam;
+        }
       } else {
         // We shouldn't get anything but notes or a space here, so report an error
         if (gra[1].charAt(ii) === ' ') {
-          if (gracenotes.length > 0) gracenotes[gracenotes.length - 1].end_beam = true;
+          if (gracenotes.length > 0) gracenotes[gracenotes.length - 1].endBeam = true;
         } else warn("Unknown character '" + gra[1].charAt(ii) + "' while parsing grace note", line, i);
 
         ii++;
@@ -8186,6 +8252,15 @@ var rests = {
   z: 'rest',
   Z: 'multimeasure'
 };
+var accMap = {
+  'dblflat': '__',
+  'flat': '_',
+  'natural': '=',
+  'sharp': '^',
+  'dblsharp': '^^',
+  'quarterflat': '_/',
+  'quartersharp': '^/'
+};
 
 var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
   //var el = { startChar: index };
@@ -8277,6 +8352,8 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
       case 'g':
         if (state === 'startSlur' || state === 'sharp2' || state === 'flat2' || state === 'pitch') {
           el.pitch = pitches[line.charAt(index)];
+          el.name = line.charAt(index);
+          if (el.accidental) el.name = accMap[el.accidental] + el.name;
           transpose.note(multilineVars, el);
           state = 'octave'; // At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
 
@@ -8291,13 +8368,6 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
             var key = line.charAt(index);
 
             if (el.accidental) {
-              var accMap = {
-                'dblflat': '__',
-                'flat': '_',
-                'natural': '=',
-                'sharp': '^',
-                'dblsharp': '^^'
-              };
               key = accMap[el.accidental] + key;
             }
 
@@ -8313,6 +8383,7 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
       case ',':
         if (state === 'octave') {
           el.pitch -= 7;
+          el.name += ',';
         } else if (isComplete(state)) {
           el.endChar = index;
           return el;
@@ -8323,6 +8394,7 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
       case '\'':
         if (state === 'octave') {
           el.pitch += 7;
+          el.name += "'";
         } else if (isComplete(state)) {
           el.endChar = index;
           return el;
@@ -10220,19 +10292,6 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
 var TuneBuilder = function TuneBuilder(tune) {
   var self = this;
 
-  this.reset = function () {
-    tune.version = "1.1.0";
-    tune.media = "screen";
-    tune.metaText = {};
-    tune.formatting = {};
-    tune.lines = [];
-    tune.staffNum = 0;
-    tune.voiceNum = 0;
-    tune.lineNum = 0;
-    tune.runningFonts = {};
-    delete tune.visualTranspose;
-  };
-
   this.setVisualTranspose = function (visualTranspose) {
     if (visualTranspose) tune.visualTranspose = visualTranspose;
   };
@@ -10753,7 +10812,7 @@ var TuneBuilder = function TuneBuilder(tune) {
     return currSlur;
   };
 
-  this.reset();
+  tune.reset();
 
   this.getLastNote = function () {
     if (tune.lines[tune.lineNum] && tune.lines[tune.lineNum].staff && tune.lines[tune.lineNum].staff[tune.staffNum] && tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum]) {
@@ -10969,9 +11028,13 @@ var TuneBuilder = function TuneBuilder(tune) {
     tune.lines.push(hash);
   };
 
-  this.addSubtitle = function (str) {
+  this.addSubtitle = function (str, info) {
     this.pushLine({
-      subtitle: str
+      subtitle: {
+        text: str,
+        startChar: info.startChar,
+        endChar: info.endChar
+      }
     });
   };
 
@@ -10985,19 +11048,25 @@ var TuneBuilder = function TuneBuilder(tune) {
     });
   };
 
-  this.addSeparator = function (spaceAbove, spaceBelow, lineLength) {
+  this.addSeparator = function (spaceAbove, spaceBelow, lineLength, info) {
     this.pushLine({
       separator: {
         spaceAbove: Math.round(spaceAbove),
         spaceBelow: Math.round(spaceBelow),
-        lineLength: Math.round(lineLength)
+        lineLength: Math.round(lineLength),
+        startChar: info.startChar,
+        endChar: info.endChar
       }
     });
   };
 
-  this.addText = function (str) {
+  this.addText = function (str, info) {
     this.pushLine({
-      text: str
+      text: {
+        text: str,
+        startChar: info.startChar,
+        endChar: info.endChar
+      }
     });
   };
 
@@ -11231,16 +11300,29 @@ var TuneBuilder = function TuneBuilder(tune) {
     tune.lineNum = i;
   };
 
-  this.addMetaText = function (key, value) {
-    if (tune.metaText[key] === undefined) tune.metaText[key] = value;else tune.metaText[key] += "\n" + value;
+  this.addMetaText = function (key, value, info) {
+    if (tune.metaText[key] === undefined) {
+      tune.metaText[key] = value;
+      tune.metaTextInfo[key] = info;
+    } else {
+      tune.metaText[key] += "\n" + value;
+      tune.metaTextInfo[key].endChar = info.endChar;
+    }
   };
 
-  this.addMetaTextArray = function (key, value) {
-    if (tune.metaText[key] === undefined) tune.metaText[key] = [value];else tune.metaText[key].push(value);
+  this.addMetaTextArray = function (key, value, info) {
+    if (tune.metaText[key] === undefined) {
+      tune.metaText[key] = [value];
+      tune.metaTextInfo[key] = info;
+    } else {
+      tune.metaText[key].push(value);
+      tune.metaTextInfo[key].endChar = info.endChar;
+    }
   };
 
-  this.addMetaTextObj = function (key, value) {
+  this.addMetaTextObj = function (key, value, info) {
     tune.metaText[key] = value;
+    tune.metaTextInfo[key] = info;
   };
 };
 
@@ -18428,6 +18510,7 @@ var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/w
 var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
 
 var createKeySignature = function createKeySignature(elem, tuneNumber) {
+  elem.el_type = "keySignature";
   if (!elem.accidentals || elem.accidentals.length === 0) return null;
   var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra key-signature', tuneNumber);
   abselem.isKeySig = true;
@@ -18522,7 +18605,8 @@ var createNoteHead = function createNoteHead(abselem, c, pitchelem, options) {
     var opts = {
       scalex: scale,
       scaley: scale,
-      thickness: glyphs.symbolHeightInPitches(c) * scale
+      thickness: glyphs.symbolHeightInPitches(c) * scale,
+      name: pitchelem.name
     };
     notehead = new RelativeElement(c, shiftheadx, glyphs.getSymbolWidth(c) * scale, pitch, opts);
     notehead.stemDir = dir;
@@ -19401,7 +19485,7 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 };
 
 EngraverController.prototype.constructTuneElements = function (abcTune) {
-  abcTune.topText = new TopText(abcTune.metaText, abcTune.formatting, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize); // Generate the raw staff line data
+  abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize); // Generate the raw staff line data
 
   var i;
   var abcLine;
@@ -19951,7 +20035,7 @@ var pathScale = function pathScale(pathArray, kx, ky) {
 };
 
 var Glyphs = {
-  printSymbol: function printSymbol(x, y, symb, paper, klass, stroke, fill) {
+  printSymbol: function printSymbol(x, y, symb, paper, attrs) {
     if (!glyphs[symb]) return null;
     var pathArray = pathClone(glyphs[symb].d);
     pathArray[0][1] += x;
@@ -19962,12 +20046,8 @@ var Glyphs = {
       path += pathArray[i].join(" ");
     }
 
-    return paper.path({
-      path: path,
-      stroke: stroke,
-      fill: fill,
-      'class': klass
-    });
+    attrs.path = path;
+    return paper.path(attrs);
   },
   getPathForSymbol: function getPathForSymbol(x, y, symb, scalex, scaley) {
     scalex = scalex || 1;
@@ -20127,6 +20207,7 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 
   if (opt.top) this.top = opt.top;
   if (opt.bottom) this.bottom = opt.bottom;
+  if (opt.name) this.name = opt.name;else if (this.c) this.name = this.c;else this.name = this.type;
   if (opt.realWidth) this.realWidth = opt.realWidth;else this.realWidth = this.w;
   this.centerVertically = false;
 
@@ -21049,11 +21130,63 @@ module.exports = addChord;
 
 /***/ }),
 
+/***/ "./src/write/add-text-if.js":
+/*!**********************************!*\
+  !*** ./src/write/add-text-if.js ***!
+  \**********************************/
+/***/ (function(module) {
+
+function addTextIf(rows, params, getTextSize) {
+  if (!params.text) return;
+  if (!params.marginLeft) params.marginLeft = 0;
+  if (!params.klass) params.klass = '';
+  if (!params.anchor) params.anchor = 'start';
+  if (!params.info) params.info = {
+    startChar: -2,
+    endChar: -2
+  };
+  if (params.marginTop) rows.push({
+    move: params.marginTop
+  });
+  var attr = {
+    left: params.marginLeft,
+    text: params.text,
+    font: params.font,
+    anchor: params.anchor,
+    startChar: params.info.startChar,
+    endChar: params.info.endChar
+  };
+  if (params.absElemType) attr.absElemType = params.absElemType;
+  if (!params.inGroup) attr.klass = params.klass;
+  if (params.name) attr.name = params.name;
+  rows.push(attr); // If there are blank lines they won't be counted by getTextSize, so just get the height of one line and multiply
+
+  var size = getTextSize.calc("A", params.font, params.klass);
+  var numLines = params.text.split("\n").length;
+  if (params.text[params.text.length - 1] === '\n') numLines--; // If there is a new line at the end of the string, then an extra line will be counted.
+
+  if (!params.noMove) {
+    var h = size.height * 1.1 * numLines;
+    rows.push({
+      move: Math.round(h)
+    });
+    if (params.marginBottom) rows.push({
+      move: params.marginBottom
+    });
+  }
+}
+
+module.exports = addTextIf;
+
+/***/ }),
+
 /***/ "./src/write/bottom-text.js":
 /*!**********************************!*\
   !*** ./src/write/bottom-text.js ***!
   \**********************************/
-/***/ (function(module) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var addTextIf = __webpack_require__(/*! ./add-text-if */ "./src/write/add-text-if.js");
 
 function BottomText(metaText, width, isPrint, paddingLeft, spacing, getTextSize) {
   this.rows = [];
@@ -21068,7 +21201,8 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
   var defFont = 'wordsfont';
   this.rows.push({
     startGroup: "unalignedWords",
-    klass: 'abcjs-meta-bottom abcjs-unaligned-words'
+    klass: 'abcjs-meta-bottom abcjs-unaligned-words',
+    name: "words"
   });
   var space = getTextSize.calc("i", defFont, klass);
   this.rows.push({
@@ -21079,7 +21213,14 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
     if (unalignedWords[j] === '') this.rows.push({
       move: space.height
     });else if (typeof unalignedWords[j] === 'string') {
-      this.addTextIf(paddingLeft + indent, unalignedWords[j], defFont, klass, 0, 0, "start", getTextSize, null, true);
+      addTextIf(this.rows, {
+        marginLeft: paddingLeft + indent,
+        text: unalignedWords[j],
+        font: defFont,
+        klass: klass,
+        inGroup: true,
+        name: "words"
+      }, getTextSize);
     } else {
       var largestY = 0;
       var offsetX = 0;
@@ -21130,7 +21271,15 @@ BottomText.prototype.extraText = function (metaText, marginLeft, spacing, getTex
   if (metaText['abc-edited-by']) extraText += "Edited By: " + metaText['abc-edited-by'] + "\n";
 
   if (extraText.length > 0) {
-    this.addTextIf(marginLeft, extraText, 'historyfont', 'meta-bottom extra-text', spacing.info, 0, "start", getTextSize, "extraText");
+    addTextIf(this.rows, {
+      marginLeft: marginLeft,
+      text: extraText,
+      font: 'historyfont',
+      klass: 'meta-bottom extra-text',
+      marginTop: spacing.info,
+      absElemType: "extraText",
+      name: "description"
+    }, getTextSize);
   }
 };
 
@@ -21142,41 +21291,29 @@ BottomText.prototype.footer = function (footer, width, paddingLeft, getTextSize)
     klass: klass
   }); // Note: whether there is a footer or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
 
-  this.addTextIf(paddingLeft, footer.left, font, klass, 0, 0, 'start', getTextSize);
-  this.addTextIf(paddingLeft + width / 2, footer.center, font, klass, 0, 0, 'middle', getTextSize);
-  this.addTextIf(paddingLeft + width, footer.right, font, klass, 0, 0, 'end', getTextSize);
-};
-
-BottomText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType, inGroup) {
-  if (!text) return;
-  if (marginTop) this.rows.push({
-    move: marginTop
-  });
-  var attr = {
-    left: marginLeft,
-    text: text,
+  addTextIf(this.rows, {
+    marginLeft: paddingLeft,
+    text: footer.left,
     font: font,
-    anchor: anchor
-  };
-  if (absElemType) attr.absElemType = absElemType;
-
-  if (!inGroup) {
-    attr.klass = klass;
-  }
-
-  this.rows.push(attr); // If there are blank lines they won't be counted by getTextSize, so just get the height of one line and multiply
-
-  var size = getTextSize.calc("A", font, klass);
-  var numLines = text.split("\n").length;
-  if (text[text.length - 1] === '\n') numLines--; // If there is a new line at the end of the string, then an extra line will be counted.
-
-  var h = size.height * 1.1 * numLines;
-  this.rows.push({
-    move: Math.round(h)
-  });
-  if (marginBottom) this.rows.push({
-    move: marginBottom
-  });
+    klass: klass,
+    name: "footer"
+  }, getTextSize);
+  addTextIf(this.rows, {
+    marginLeft: paddingLeft + width / 2,
+    text: footer.center,
+    font: font,
+    klass: klass,
+    anchor: 'middle',
+    name: "footer"
+  }, getTextSize);
+  addTextIf(this.rows, {
+    marginLeft: paddingLeft + width,
+    text: footer.right,
+    font: font,
+    klass: klass,
+    anchor: 'end',
+    name: "footer"
+  }, getTextSize);
 };
 
 module.exports = BottomText;
@@ -21341,17 +21478,14 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 
   for (var i = 0; i < params.children.length; i++) {
     var child = params.children[i];
-    var el;
 
     switch (child.type) {
       case "TempoElement":
-        el = drawTempo(renderer, child);
-        if (el) params.elemset = params.elemset.concat(el);
+        drawTempo(renderer, child);
         break;
 
       default:
-        el = drawRelativeElement(renderer, child, bartop);
-        if (el) params.elemset.push(el);
+        drawRelativeElement(renderer, child, bartop);
     }
   }
 
@@ -21369,14 +21503,13 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
     }
   }
 
-  var g = elementGroup.endGroup(klass);
+  var g = elementGroup.endGroup(klass, params.type);
 
   if (g) {
-    if (isTempo && params.elemset.length > 0) {
-      // If this is a tempo element there are text portions that are in params.elemset[0] already.
-      // The graphic portion (the drawn note) is in g and that should just be added to the text so that it is a single element for selecting.
-      renderer.paper.moveElementToChild(params.elemset[0], g);
-      selectables.add(params, params.elemset[0], false, staffPos);
+    if (isTempo) {
+      params.startChar = params.abcelem.startChar;
+      params.endChar = params.abcelem.endChar;
+      selectables.add(params, g, false, staffPos);
     } else {
       params.elemset.push(g);
       selectables.add(params, g, params.type === 'note', staffPos);
@@ -21519,7 +21652,8 @@ function straightPath(renderer, xLeft, yTop, yBottom, type) {
     path: pathString,
     stroke: renderer.foregroundColor,
     fill: renderer.foregroundColor,
-    'class': renderer.controller.classes.generate(type)
+    'class': renderer.controller.classes.generate(type),
+    "data-name": type
   });
 }
 
@@ -21531,7 +21665,8 @@ function curvyPath(renderer, xLeft, yTop, yBottom, type) {
     path: pathString,
     stroke: renderer.foregroundColor,
     fill: renderer.foregroundColor,
-    'class': renderer.controller.classes.generate(type)
+    'class': renderer.controller.classes.generate(type),
+    "data-name": type
   });
 }
 
@@ -21545,7 +21680,8 @@ var draw = function draw(renderer, xLeft, yTop, yBottom, type, header, selectabl
 
   if (header) {
     renderer.paper.openGroup({
-      klass: renderer.controller.classes.generate("staff-extra voice-name")
+      klass: renderer.controller.classes.generate("staff-extra voice-name"),
+      "data-name": type
     });
     var position = yTop + (yBottom - yTop) / 2;
     position = position - renderer.controller.getTextSize.baselineToCenter(header, "voicefont", 'staff-extra voice-name', 0, 1);
@@ -21626,7 +21762,8 @@ var drawLine = function drawLine(renderer, y1, y2, y3, y4, left, right) {
     path: pathString,
     highlight: "stroke",
     stroke: renderer.foregroundColor,
-    'class': renderer.controller.classes.generate('dynamics decoration')
+    'class': renderer.controller.classes.generate('dynamics decoration'),
+    "data-name": "dynamics"
   });
 };
 
@@ -21745,7 +21882,14 @@ function drawDynamics(renderer, params, selectables) {
   if (params.pitch === undefined) window.console.error("Dynamic Element y-coordinate not set.");
   var scalex = 1;
   var scaley = 1;
-  var el = printSymbol(renderer, params.anchor.x, params.pitch, params.dec, scalex, scaley, renderer.controller.classes.generate('decoration dynamics'));
+  var el = printSymbol(renderer, params.anchor.x, params.pitch, params.dec, {
+    scalex: scalex,
+    scaley: scaley,
+    klass: renderer.controller.classes.generate('decoration dynamics'),
+    fill: renderer.foregroundColor,
+    stroke: "none",
+    name: "dynamics"
+  });
   selectables.wrapSvgEl({
     el_type: "dynamicDecoration",
     startChar: -1,
@@ -21791,12 +21935,14 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
 
   pathString += sprintf("M %f %f L %f %f ", linestartx, y, lineendx, y);
   renderer.paper.openGroup({
-    klass: renderer.controller.classes.generate("ending")
+    klass: renderer.controller.classes.generate("ending"),
+    "data-name": "ending"
   });
   printPath(renderer, {
     path: pathString,
     stroke: renderer.foregroundColor,
-    fill: renderer.foregroundColor
+    fill: renderer.foregroundColor,
+    "data-name": "line"
   });
   if (params.anchor1) renderText(renderer, {
     x: roundNumber(linestartx + 5),
@@ -21805,7 +21951,8 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
     type: 'repeatfont',
     klass: 'ending',
     anchor: "start",
-    noClass: true
+    noClass: true,
+    name: params.text
   });
   var g = renderer.paper.closeGroup();
   selectables.wrapSvgEl({
@@ -21841,6 +21988,7 @@ Group.prototype.beginGroup = function (paper, controller) {
   this.path = [];
   this.lastM = [0, 0];
   this.ingroup = true;
+  this.paper.openGroup();
 };
 
 Group.prototype.isInGroup = function () {
@@ -21871,22 +22019,25 @@ Group.prototype.addPath = function (path) {
  */
 
 
-Group.prototype.endGroup = function (klass) {
-  this.ingroup = false;
-  if (this.path.length === 0) return null;
+Group.prototype.endGroup = function (klass, name) {
+  this.ingroup = false; //if (this.path.length === 0) return null;
+
   var path = "";
 
   for (var i = 0; i < this.path.length; i++) {
     path += this.path[i].join(" ");
   }
 
-  var ret = this.paper.path({
-    path: path,
-    stroke: "none",
-    fill: this.controller.renderer.foregroundColor,
-    'class': this.controller.classes.generate(klass)
-  });
   this.path = [];
+  var ret = this.paper.closeGroup();
+
+  if (ret) {
+    ret.setAttribute("class", this.controller.classes.generate(klass));
+    ret.setAttribute("fill", this.controller.renderer.foregroundColor);
+    ret.setAttribute("stroke", "none");
+    ret.setAttribute("data-name", name);
+  }
+
   return ret;
 }; // There is just a singleton of this object.
 
@@ -21920,14 +22071,16 @@ function nonMusic(renderer, obj, selectables) {
         text: row.text,
         type: row.font,
         klass: row.klass,
+        name: row.name,
         anchor: row.anchor
       });
 
       if (row.absElemType) {
         selectables.wrapSvgEl({
           el_type: row.absElemType,
-          startChar: -1,
-          endChar: -1,
+          name: row.name,
+          startChar: row.startChar,
+          endChar: row.endChar,
           text: row.text
         }, el);
       }
@@ -21935,15 +22088,17 @@ function nonMusic(renderer, obj, selectables) {
       drawSeparator(renderer, row.separator);
     } else if (row.startGroup) {
       renderer.paper.openGroup({
-        klass: row.klass
+        klass: row.klass,
+        "data-name": row.name
       });
     } else if (row.endGroup) {
       // TODO-PER: also create a history element with the title "row.endGroup"
       var g = renderer.paper.closeGroup();
       if (row.absElemType) selectables.wrapSvgEl({
         el_type: row.absElemType,
-        startChar: -1,
-        endChar: -1,
+        name: row.name,
+        startChar: row.startChar,
+        endChar: row.endChar,
         text: ""
       }, g);
     }
@@ -21979,7 +22134,7 @@ var elementGroup = __webpack_require__(/*! ./group-elements */ "./src/write/draw
 
 var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
 
-function printStem(renderer, x, dx, y1, y2) {
+function printStem(renderer, x, dx, y1, y2, klass, name) {
   if (dx < 0 || y1 < y2) {
     // correct path "handedness" for intersection with other elements
     var tmp = roundNumber(y2);
@@ -21992,26 +22147,24 @@ function printStem(renderer, x, dx, y1, y2) {
 
   x = roundNumber(x);
   var x2 = roundNumber(x + dx);
-  var fill = renderer.foregroundColor;
   var pathArray = [["M", x, y1], ["L", x, y2], ["L", x2, y2], ["L", x2, y1], ["z"]];
+  var attr = {
+    path: ""
+  };
 
-  if (elementGroup.isInGroup()) {
-    elementGroup.addPath(pathArray);
-  } else {
-    var path = "";
-
-    for (var i = 0; i < pathArray.length; i++) {
-      path += pathArray[i].join(" ");
-    }
-
-    var ret = renderer.paper.pathToBack({
-      path: path,
-      stroke: "none",
-      fill: fill,
-      'class': renderer.controller.classes.generate('stem')
-    });
-    return ret;
+  for (var i = 0; i < pathArray.length; i++) {
+    attr.path += pathArray[i].join(" ");
   }
+
+  if (klass) attr['class'] = klass;
+  if (name) attr['data-name'] = name;
+
+  if (!elementGroup.isInGroup()) {
+    attr.stroke = "none";
+    attr.fill = renderer.foregroundColor;
+  }
+
+  return renderer.paper.pathToBack(attr);
 }
 
 module.exports = printStem;
@@ -22036,21 +22189,26 @@ var elementGroup = __webpack_require__(/*! ./group-elements */ "./src/write/draw
  */
 
 
-function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
+function printSymbol(renderer, x, offset, symbol, options) {
+  // TODO-PER: what happened to scalex, and scaley? That might have been a bug introduced in refactoring
   var el;
   var ycorr;
   if (!symbol) return null;
 
   if (symbol.length > 1 && symbol.indexOf(".") < 0) {
     renderer.paper.openGroup({
-      klass: klass
+      "data-name": options.name
     });
     var dx = 0;
 
     for (var i = 0; i < symbol.length; i++) {
       var s = symbol.charAt(i);
       ycorr = glyphs.getYCorr(s);
-      el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, '', "none", renderer.foregroundColor);
+      el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, {
+        stroke: options.stroke,
+        fill: options.fill,
+        "data-name": options.name
+      });
 
       if (el) {
         if (i < symbol.length - 1) dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));
@@ -22062,7 +22220,7 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
           type: "debugfont",
           klass: 'debug-msg',
           anchor: 'start'
-        });
+        }, false);
       }
     }
 
@@ -22072,22 +22230,30 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
     ycorr = glyphs.getYCorr(symbol);
 
     if (elementGroup.isInGroup()) {
-      elementGroup.addPath(glyphs.getPathForSymbol(x, renderer.calcY(offset + ycorr), symbol, scalex, scaley));
+      el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, {
+        "data-name": options.name
+      });
     } else {
-      el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, klass, "none", renderer.foregroundColor);
-
-      if (el) {
-        return el;
-      } else renderText(renderer, {
-        x: x,
-        y: renderer.y,
-        text: "no symbol:" + symbol,
-        type: "debugfont",
-        klass: 'debug-msg',
-        anchor: 'start'
+      el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, {
+        klass: options.klass,
+        stroke: options.stroke,
+        fill: options.fill,
+        "data-name": options.name
       });
     }
 
+    if (el) {
+      return el;
+    }
+
+    renderText(renderer, {
+      x: x,
+      y: renderer.y,
+      text: "no symbol:" + symbol,
+      type: "debugfont",
+      klass: 'debug-msg',
+      anchor: 'start'
+    }, false);
     return null;
   }
 }
@@ -22133,7 +22299,14 @@ function drawRelativeElement(renderer, params, bartop) {
 
       var klass = "symbol";
       if (params.klass) klass += " " + params.klass;
-      params.graphelem = printSymbol(renderer, params.x, params.pitch, params.c, params.scalex, params.scaley, renderer.controller.classes.generate(klass), "none", renderer.foregroundColor);
+      params.graphelem = printSymbol(renderer, params.x, params.pitch, params.c, {
+        scalex: params.scalex,
+        scaley: params.scaley,
+        klass: renderer.controller.classes.generate(klass),
+        //				fill:"none",
+        //				stroke: renderer.foregroundColor,
+        name: params.name
+      });
       break;
 
     case "debug":
@@ -22146,7 +22319,7 @@ function drawRelativeElement(renderer, params, bartop) {
         anchor: 'start',
         centerVertically: false,
         dim: params.dim
-      });
+      }, false);
       break;
 
     case "barNumber":
@@ -22157,8 +22330,9 @@ function drawRelativeElement(renderer, params, bartop) {
         type: "measurefont",
         klass: renderer.controller.classes.generate('bar-number'),
         anchor: "middle",
-        dim: params.dim
-      });
+        dim: params.dim,
+        name: "bar-number"
+      }, true);
       break;
 
     case "lyric":
@@ -22169,8 +22343,9 @@ function drawRelativeElement(renderer, params, bartop) {
         type: "vocalfont",
         klass: renderer.controller.classes.generate('lyric'),
         anchor: "middle",
-        dim: params.dim
-      });
+        dim: params.dim,
+        name: "lyric"
+      }, false);
       break;
 
     case "chord":
@@ -22182,8 +22357,9 @@ function drawRelativeElement(renderer, params, bartop) {
         klass: renderer.controller.classes.generate("chord"),
         anchor: "middle",
         dim: params.dim,
-        lane: params.getLane()
-      });
+        lane: params.getLane(),
+        name: "chord"
+      }, false);
       break;
 
     case "decoration":
@@ -22197,7 +22373,7 @@ function drawRelativeElement(renderer, params, bartop) {
         anchor: "middle",
         centerVertically: true,
         dim: params.dim
-      });
+      }, false);
       break;
 
     case "text":
@@ -22210,8 +22386,9 @@ function drawRelativeElement(renderer, params, bartop) {
         anchor: "start",
         centerVertically: params.centerVertically,
         dim: params.dim,
-        lane: params.getLane()
-      });
+        lane: params.getLane(),
+        name: "annotation"
+      }, false);
       break;
 
     case "multimeasure-text":
@@ -22224,7 +22401,7 @@ function drawRelativeElement(renderer, params, bartop) {
         anchor: "middle",
         centerVertically: false,
         dim: params.dim
-      });
+      }, false);
       break;
 
     case "part":
@@ -22235,21 +22412,22 @@ function drawRelativeElement(renderer, params, bartop) {
         type: 'partsfont',
         klass: renderer.controller.classes.generate("part"),
         anchor: "start",
-        dim: params.dim
-      });
+        dim: params.dim,
+        name: params.c
+      }, true);
       break;
 
     case "bar":
-      params.graphelem = printStem(renderer, params.x, params.linewidth, y, bartop ? bartop : renderer.calcY(params.pitch2));
+      params.graphelem = printStem(renderer, params.x, params.linewidth, y, bartop ? bartop : renderer.calcY(params.pitch2), null, "bar");
       break;
     // bartop can't be 0
 
     case "stem":
-      params.graphelem = printStem(renderer, params.x, params.linewidth, y, renderer.calcY(params.pitch2));
+      params.graphelem = printStem(renderer, params.x, params.linewidth, y, renderer.calcY(params.pitch2), 'abcjs-stem', 'stem');
       break;
 
     case "ledger":
-      params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, renderer.controller.classes.generate("ledger"));
+      params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, "abcjs-ledger", "ledger");
       break;
   }
 
@@ -22673,7 +22851,7 @@ function drawStaffGroup(renderer, params, selectables) {
   renderer.controller.classes.newMeasure(); // connect all the staves together with a vertical line
 
   if (params.staffs.length > 1) {
-    printStem(renderer, params.startx, 0.6, topLine, bottomLine);
+    printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
   }
 
   renderer.y = startY;
@@ -22781,7 +22959,7 @@ var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js"
 
 var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
 
-function printStaffLine(renderer, x1, x2, pitch, klass) {
+function printStaffLine(renderer, x1, x2, pitch, klass, name) {
   var dy = 0.35;
   var fill = renderer.foregroundColor;
   var y = renderer.calcY(pitch);
@@ -22795,6 +22973,7 @@ function printStaffLine(renderer, x1, x2, pitch, klass) {
     stroke: "none",
     fill: fill
   };
+  if (name) options['data-name'] = name;
   if (klass) options['class'] = klass;
   var ret = renderer.paper.pathToBack(options);
   return ret;
@@ -22847,13 +23026,11 @@ var renderText = __webpack_require__(/*! ./text */ "./src/write/draw/text.js");
 
 function drawTempo(renderer, params) {
   var x = params.x;
-  if (params.pitch === undefined) window.console.error("Tempo Element y-coordinate not set.");
-  var tempoGroup;
-  params.tempo.el_type = "tempo"; //	renderer.wrapInAbsElem(params.tempo, "abcjs-tempo", function () {
+  if (params.pitch === undefined) window.console.error("Tempo Element y-coordinate not set."); //var tempoGroup;
 
-  renderer.paper.openGroup({
-    klass: renderer.controller.classes.generate("tempo")
-  }); // The text is aligned with extra room for descenders but numbers look like they are a little too high, so bump it a little.
+  params.tempo.el_type = "tempo"; //	renderer.wrapInAbsElem(params.tempo, "abcjs-tempo", function () {
+  //renderer.paper.openGroup({klass: renderer.controller.classes.generate("tempo wha")});
+  // The text is aligned with extra room for descenders but numbers look like they are a little too high, so bump it a little.
 
   var descenderHeight = 2;
   var y = renderer.calcY(params.pitch) + 2;
@@ -22869,8 +23046,9 @@ function drawTempo(renderer, params) {
       klass: 'abcjs-tempo',
       anchor: "start",
       noClass: true,
-      "dominant-baseline": "ideographic"
-    });
+      "dominant-baseline": "ideographic",
+      name: "pre"
+    }, true);
     size = renderer.controller.getTextSize.calc(params.tempo.preString, 'tempofont', 'tempo', text);
     var preWidth = size.width;
     var charWidth = preWidth / params.tempo.preString.length; // Just get some average number to increase the spacing.
@@ -22894,7 +23072,8 @@ function drawTempo(renderer, params) {
       type: 'tempofont',
       klass: 'abcjs-tempo',
       anchor: "start",
-      noClass: true
+      noClass: true,
+      name: "beats"
     });
     size = renderer.controller.getTextSize.calc(str, 'tempofont', 'tempo', text);
     var postWidth = size.width;
@@ -22911,13 +23090,13 @@ function drawTempo(renderer, params) {
       type: 'tempofont',
       klass: 'abcjs-tempo',
       anchor: "start",
-      noClass: true
-    });
-  }
+      noClass: true,
+      name: "post"
+    }, true);
+  } //tempoGroup = renderer.paper.closeGroup();
+  //	});
+  //return [tempoGroup];
 
-  tempoGroup = renderer.paper.closeGroup(); //	});
-
-  return [tempoGroup];
 }
 
 module.exports = drawTempo;
@@ -22932,7 +23111,7 @@ module.exports = drawTempo;
 
 var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
 
-function renderText(renderer, params) {
+function renderText(renderer, params, alreadyInGroup) {
   var y = params.y;
 
   if (params.lane) {
@@ -22961,9 +23140,10 @@ function renderText(renderer, params) {
   text = text.replace(/^\n/, "\xA0\n");
 
   if (hash.font.box) {
-    renderer.paper.openGroup({
+    if (!alreadyInGroup) renderer.paper.openGroup({
       klass: hash.attr['class'],
-      fill: renderer.foregroundColor
+      fill: renderer.foregroundColor,
+      "data-name": params.name
     });
 
     if (hash.attr["text-anchor"] === "end") {
@@ -22979,6 +23159,7 @@ function renderText(renderer, params) {
   if (params.noClass) delete hash.attr['class'];
   hash.attr.x = roundNumber(hash.attr.x);
   hash.attr.y = roundNumber(hash.attr.y);
+  if (params.name) hash.attr["data-name"] = params.name;
   var elem = renderer.paper.text(text, hash.attr);
 
   if (hash.font.box) {
@@ -22998,12 +23179,13 @@ function renderText(renderer, params) {
     }
 
     renderer.paper.rect({
+      "data-name": "box",
       x: Math.round(params.x - delta),
       y: Math.round(y - deltaY),
       width: Math.round(size.width + hash.font.padding * 2),
       height: Math.round(size.height + hash.font.padding * 2)
     });
-    elem = renderer.paper.closeGroup();
+    if (!alreadyInGroup) elem = renderer.paper.closeGroup();
   }
 
   return elem;
@@ -23103,7 +23285,8 @@ var drawArc = function drawArc(renderer, x1, x2, pitch1, pitch2, above, klass, i
       stroke: renderer.foregroundColor,
       fill: "none",
       'stroke-dasharray': "5 5",
-      'class': renderer.controller.classes.generate(klass)
+      'class': renderer.controller.classes.generate(klass),
+      "data-name": isTie ? "tie" : "slur"
     });
   } else {
     var pathString = sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1, controlx1, controly1, controlx2, controly2, x2, y2, roundNumber(controlx2 - thickness * uy), roundNumber(controly2 + thickness * ux), roundNumber(controlx1 - thickness * uy), roundNumber(controly1 + thickness * ux), x1, y1);
@@ -23111,7 +23294,8 @@ var drawArc = function drawArc(renderer, x1, x2, pitch1, pitch2, above, klass, i
       path: pathString,
       stroke: "none",
       fill: renderer.foregroundColor,
-      'class': renderer.controller.classes.generate(klass)
+      'class': renderer.controller.classes.generate(klass),
+      "data-name": isTie ? "tie" : "slur"
     });
   }
 
@@ -23138,7 +23322,8 @@ var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/ro
 
 function drawTriplet(renderer, params, selectables) {
   renderer.paper.openGroup({
-    klass: renderer.controller.classes.generate('triplet ' + params.durationClass)
+    klass: renderer.controller.classes.generate('triplet ' + params.durationClass),
+    "data-name": "triplet"
   });
 
   if (!params.hasBeam) {
@@ -23153,8 +23338,9 @@ function drawTriplet(renderer, params, selectables) {
     type: 'tripletfont',
     anchor: "middle",
     centerVertically: true,
-    noClass: true
-  });
+    noClass: true,
+    name: "" + params.number
+  }, true);
   var g = renderer.paper.closeGroup();
   selectables.wrapSvgEl({
     el_type: "triplet",
@@ -23189,7 +23375,8 @@ function drawBracket(renderer, x1, y1, x2, y2) {
   pathString += drawLine(rightStartX, rightStartY, x2, y2);
   printPath(renderer, {
     path: pathString,
-    stroke: renderer.foregroundColor
+    stroke: renderer.foregroundColor,
+    "data-name": "triplet-bracket"
   });
 }
 
@@ -23232,8 +23419,9 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
       type: 'voicefont',
       klass: 'staff-extra voice-name',
       anchor: 'start',
-      centerVertically: true
-    });
+      centerVertically: true,
+      name: "voice-name"
+    }, true);
     selectables.wrapSvgEl({
       el_type: "voiceName",
       startChar: -1,
@@ -23335,7 +23523,8 @@ module.exports = drawVoice;
   \********************************/
 /***/ (function(module) {
 
-function FreeText(text, vskip, getFontAndAttr, paddingLeft, width, getTextSize) {
+function FreeText(info, vskip, getFontAndAttr, paddingLeft, width, getTextSize) {
+  var text = info.text;
   this.rows = [];
   var size;
   if (vskip) this.rows.push({
@@ -23359,7 +23548,10 @@ function FreeText(text, vskip, getFontAndAttr, paddingLeft, width, getTextSize) 
       font: 'textfont',
       klass: 'defined-text',
       anchor: "start",
-      absElemType: "freeText"
+      startChar: info.startChar,
+      endChar: info.endChar,
+      absElemType: "freeText",
+      name: "free-text"
     });
     size = getTextSize.calc(text, 'textfont', 'defined-text');
     this.rows.push({
@@ -23369,20 +23561,23 @@ function FreeText(text, vskip, getFontAndAttr, paddingLeft, width, getTextSize) 
     var currentFont = 'textfont';
     var isCentered = false; // The structure is wrong here: it requires an array to do centering, but it shouldn't have.
 
-    for (var i = 0; i < text.length; i++) {
-      if (text[i].font) currentFont = text[i].font;else currentFont = 'textfont';
-      if (text[i].center) isCentered = true;
+    for (var i = 0; i < info.length; i++) {
+      if (info[i].font) currentFont = info[i].font;else currentFont = 'textfont';
+      if (info[i].center) isCentered = true;
       var alignment = isCentered ? 'middle' : 'start';
       var x = isCentered ? width / 2 : paddingLeft;
       this.rows.push({
         left: x,
-        text: text[i].text,
+        text: info[i].text,
         font: currentFont,
         klass: 'defined-text',
         anchor: alignment,
-        absElemType: "freeText"
+        startChar: info.startChar,
+        endChar: info.endChar,
+        absElemType: "freeText",
+        name: "free-text"
       });
-      size = getTextSize.calc(text[i].text, currentFont, 'defined-text');
+      size = getTextSize.calc(info[i].text, currentFont, 'defined-text');
       this.rows.push({
         move: size.height
       });
@@ -24743,7 +24938,7 @@ function setupSelection(engraver) {
     for (var h = 0; h < engraver.selectables.length; h++) {
       var hist = engraver.selectables[h];
 
-      if (hist.selectable) {
+      if (hist.svgEl.getAttribute("selectable") === "true") {
         hist.svgEl.setAttribute("tabindex", 0);
         hist.svgEl.setAttribute("data-index", h);
         hist.svgEl.addEventListener("keydown", keyboardDown.bind(engraver));
@@ -24815,7 +25010,7 @@ function keyboardSelection(ev) {
       this.dragTarget = this.selectables[index];
       this.dragIndex = index;
       this.dragMechanism = "keyboard";
-      mouseUp.bind(this)();
+      mouseUp.bind(this)(ev);
       break;
 
     case 38:
@@ -24851,7 +25046,7 @@ function keyboardSelection(ev) {
       // tab
       // This is losing focus - if there had been dragging, then do the callback
       if (this.dragYStep !== 0) {
-        mouseUp.bind(this)();
+        mouseUp.bind(this)(ev);
       }
 
       break;
@@ -24932,7 +25127,7 @@ function getBestMatchCoordinates(dim, ev, scale) {
 }
 
 function getTarget(target) {
-  // This searches up the dom for the first item containig the attribute "selectable", or stopping at the SVG.
+  // This searches up the dom for the first item containing the attribute "selectable", or stopping at the SVG.
   if (target.tagName === "svg") return target;
   var found = target.getAttribute("selectable");
 
@@ -25030,7 +25225,9 @@ function setSelection(dragIndex) {
     this.dragTarget = this.selectables[dragIndex];
     this.dragIndex = dragIndex;
     this.dragMechanism = "keyboard";
-    mouseUp.bind(this)();
+    mouseUp.bind(this)({
+      target: this.dragTarget.svgEl
+    });
   }
 }
 
@@ -25066,6 +25263,22 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
   }
 
   if (target.staffPos) analysis.staffPos = target.staffPos;
+  var closest = ev.target;
+
+  while (!closest.dataset.name && closest.tagName.toLowerCase() !== 'svg') {
+    closest = closest.parentNode;
+  }
+
+  var parent = ev.target;
+
+  while (!parent.dataset.index && parent.tagName.toLowerCase() !== 'svg') {
+    parent = parent.parentNode;
+  }
+
+  analysis.name = parent.dataset.name;
+  analysis.clickedName = closest.dataset.name;
+  analysis.parentClasses = parent.classList;
+  analysis.clickedClasses = closest.classList;
 
   for (var i = 0; i < this.listeners.length; i++) {
     this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, {
@@ -25173,7 +25386,8 @@ function Separator(spaceAbove, lineLength, spaceBelow) {
     move: spaceAbove
   });
   this.rows.push({
-    separator: lineLength
+    separator: lineLength,
+    absElemType: "separator"
   });
   if (spaceBelow) this.rows.push({
     move: spaceBelow
@@ -25222,7 +25436,7 @@ module.exports = setClass;
   \*******************************/
 /***/ (function(module) {
 
-function Subtitle(spaceAbove, formatting, text, center, paddingLeft, getTextSize) {
+function Subtitle(spaceAbove, formatting, info, center, paddingLeft, getTextSize) {
   this.rows = [];
   if (spaceAbove) this.rows.push({
     move: spaceAbove
@@ -25231,12 +25445,16 @@ function Subtitle(spaceAbove, formatting, text, center, paddingLeft, getTextSize
   var tLeft = formatting.titleleft ? paddingLeft : center;
   this.rows.push({
     left: tLeft,
-    text: text,
+    text: info.text,
     font: 'subtitlefont',
     klass: 'text subtitle',
-    anchor: tAnchor
+    anchor: tAnchor,
+    startChar: info.startChar,
+    endChar: info.endChar,
+    absElemType: "subtitle",
+    name: "subtitle"
   });
-  var size = getTextSize.calc(text, 'subtitlefont', 'text subtitle');
+  var size = getTextSize.calc(info.text, 'subtitlefont', 'text subtitle');
   this.rows.push({
     move: size.height
   });
@@ -25259,6 +25477,7 @@ var svgNS = "http://www.w3.org/2000/svg";
 
 function Svg(wrapper) {
   this.svg = createSvg();
+  this.currentGroup = [];
   wrapper.appendChild(this.svg);
 }
 
@@ -25266,6 +25485,7 @@ Svg.prototype.clear = function () {
   if (this.svg) {
     var wrapper = this.svg.parentNode;
     this.svg = createSvg();
+    this.currentGroup = [];
 
     if (wrapper) {
       // TODO-PER: If the wrapper is not present, then the underlying div was pulled out from under this instance. It's possible that is still useful (for creating the music off page?)
@@ -25380,7 +25600,8 @@ Svg.prototype.rect = function (attr) {
   lines.push(constructVLine(x1, y2, y1));
   return this.path({
     path: lines.join(" "),
-    stroke: "none"
+    stroke: "none",
+    "data-name": attr["data-name"]
   });
 };
 
@@ -25502,7 +25723,7 @@ Svg.prototype.getTextSize = function (text, attr, el) {
   }
 
   if (removeLater) {
-    if (this.currentGroup) this.currentGroup.removeChild(el);else this.svg.removeChild(el);
+    if (this.currentGroup.length > 0) this.currentGroup[0].removeChild(el);else this.svg.removeChild(el);
   }
 
   if (key) sizeCache[key] = size;
@@ -25515,14 +25736,21 @@ Svg.prototype.openGroup = function (options) {
   if (options.klass) el.setAttribute("class", options.klass);
   if (options.fill) el.setAttribute("fill", options.fill);
   if (options.stroke) el.setAttribute("stroke", options.stroke);
-  if (options.prepend) this.svg.insertBefore(el, this.svg.firstChild);else this.svg.appendChild(el);
-  this.currentGroup = el;
+  if (options['data-name']) el.setAttribute("data-name", options['data-name']);
+  if (options.prepend) this.prepend(el);else this.append(el);
+  this.currentGroup.unshift(el);
   return el;
 };
 
 Svg.prototype.closeGroup = function () {
-  var g = this.currentGroup;
-  this.currentGroup = null;
+  var g = this.currentGroup.shift();
+
+  if (g && g.children.length === 0) {
+    // If nothing was added to the group it is because all the elements were invisible. We don't need the group, then.
+    this.svg.removeChild(g);
+    return null;
+  }
+
   return g;
 };
 
@@ -25531,7 +25759,7 @@ Svg.prototype.path = function (attr) {
 
   for (var key in attr) {
     if (attr.hasOwnProperty(key)) {
-      if (key === 'path') el.setAttributeNS(null, 'd', attr.path);else el.setAttributeNS(null, key, attr[key]);
+      if (key === 'path') el.setAttributeNS(null, 'd', attr.path);else if (attr[key] !== undefined) el.setAttributeNS(null, key, attr[key]);
     }
   }
 
@@ -25553,12 +25781,12 @@ Svg.prototype.pathToBack = function (attr) {
 };
 
 Svg.prototype.append = function (el) {
-  if (this.currentGroup) this.currentGroup.appendChild(el);else this.svg.appendChild(el);
+  if (this.currentGroup.length > 0) this.currentGroup[0].appendChild(el);else this.svg.appendChild(el);
 };
 
 Svg.prototype.prepend = function (el) {
   // The entire group is prepended, so don't prepend the individual elements.
-  if (this.currentGroup) this.currentGroup.appendChild(el);else this.svg.insertBefore(el, this.svg.firstChild);
+  if (this.currentGroup.length > 0) this.currentGroup[0].appendChild(el);else this.svg.insertBefore(el, this.svg.firstChild);
 };
 
 Svg.prototype.setAttributeOnElement = function (el, attr) {
@@ -25593,18 +25821,46 @@ module.exports = Svg;
 /*!*******************************!*\
   !*** ./src/write/top-text.js ***!
   \*******************************/
-/***/ (function(module) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
+var addTextIf = __webpack_require__(/*! ./add-text-if */ "./src/write/add-text-if.js");
+
+function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
   this.rows = [];
 
   if (metaText.header && isPrint) {
     // Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
     // This text goes above the margin, so we'll temporarily move up.
     var headerTextHeight = getTextSize.calc("X", "headerfont", 'abcjs-header abcjs-meta-top').height;
-    this.addTextIf(paddingLeft, metaText.header.left, 'headerfont', 'header meta-top', -headerTextHeight, 0, 'start', getTextSize);
-    this.addTextIf(paddingLeft + width / 2, metaText.header.center, 'headerfont', 'header meta-top', -headerTextHeight, null, 'middle', getTextSize);
-    this.addTextIf(paddingLeft + width, metaText.header.right, 'headerfont', 'header meta-top', -headerTextHeight, null, 'end', getTextSize);
+    addTextIf(this.rows, {
+      marginLeft: paddingLeft,
+      text: metaText.header.left,
+      font: 'headerfont',
+      klass: 'header meta-top',
+      marginTop: -headerTextHeight,
+      info: metaTextInfo.header,
+      name: "header"
+    }, getTextSize);
+    addTextIf(this.rows, {
+      marginLeft: paddingLeft + width / 2,
+      text: metaText.header.center,
+      font: 'headerfont',
+      klass: 'header meta-top',
+      marginTop: -headerTextHeight,
+      anchor: 'middle',
+      info: metaTextInfo.header,
+      name: "header"
+    }, getTextSize);
+    addTextIf(this.rows, {
+      marginLeft: paddingLeft + width,
+      text: metaText.header.right,
+      font: 'headerfont',
+      klass: 'header meta-top',
+      marginTop: -headerTextHeight,
+      anchor: 'end',
+      info: metaTextInfo.header,
+      name: "header"
+    }, getTextSize); //		TopText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType, noMove) {
   }
 
   if (isPrint) this.rows.push({
@@ -25614,11 +25870,31 @@ function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spaci
   var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
 
   if (metaText.title) {
-    this.addTextIf(tLeft, metaText.title, 'titlefont', 'title meta-top', spacing.title, 0, tAnchor, getTextSize, "title");
+    addTextIf(this.rows, {
+      marginLeft: tLeft,
+      text: metaText.title,
+      font: 'titlefont',
+      klass: 'title meta-top',
+      marginTop: spacing.title,
+      anchor: tAnchor,
+      absElemType: "title",
+      info: metaTextInfo.title,
+      name: "title"
+    }, getTextSize);
   }
 
   if (lines[0] && lines[0].subtitle) {
-    this.addTextIf(tLeft, lines[0].subtitle, 'subtitlefont', 'text meta-top subtitle', spacing.subtitle, 0, tAnchor, getTextSize, "subtitle");
+    addTextIf(this.rows, {
+      marginLeft: tLeft,
+      text: lines[0].subtitle.text,
+      font: 'subtitlefont',
+      klass: 'text meta-top subtitle',
+      marginTop: spacing.subtitle,
+      anchor: tAnchor,
+      absElemType: "subtitle",
+      info: lines[0].subtitle,
+      name: "subtitle"
+    }, getTextSize);
   }
 
   if (metaText.rhythm || metaText.origin || metaText.composer) {
@@ -25628,7 +25904,16 @@ function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spaci
 
     if (metaText.rhythm && metaText.rhythm.length > 0) {
       var noMove = !!(metaText.composer || metaText.origin);
-      this.addTextIf(paddingLeft, metaText.rhythm, 'infofont', 'meta-top rhythm', 0, null, "start", getTextSize, "rhythm", noMove);
+      addTextIf(this.rows, {
+        marginLeft: paddingLeft,
+        text: metaText.rhythm,
+        font: 'infofont',
+        klass: 'meta-top rhythm',
+        absElemType: "rhythm",
+        noMove: true,
+        info: metaTextInfo.rhythm,
+        name: "rhythm"
+      }, getTextSize);
     }
 
     var composerLine = "";
@@ -25636,43 +25921,44 @@ function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spaci
     if (metaText.origin) composerLine += ' (' + metaText.origin + ')';
 
     if (composerLine.length > 0) {
-      this.addTextIf(paddingLeft + width, composerLine, 'composerfont', 'meta-top composer', 0, null, "end", getTextSize, "composer");
+      addTextIf(this.rows, {
+        marginLeft: paddingLeft + width,
+        text: composerLine,
+        font: 'composerfont',
+        klass: 'meta-top composer',
+        anchor: "end",
+        absElemType: "composer",
+        info: metaTextInfo.composer,
+        name: "composer"
+      }, getTextSize);
     }
   }
 
   if (metaText.author && metaText.author.length > 0) {
-    this.addTextIf(paddingLeft + width, metaText.author, 'composerfont', 'meta-top author', 0, 0, "end", getTextSize, "author");
+    addTextIf(this.rows, {
+      marginLeft: paddingLeft + width,
+      text: metaText.author,
+      font: 'composerfont',
+      klass: 'meta-top author',
+      anchor: "end",
+      absElemType: "author",
+      info: metaTextInfo.author,
+      name: "author"
+    }, getTextSize);
   }
 
   if (metaText.partOrder && metaText.partOrder.length > 0) {
-    this.addTextIf(paddingLeft, metaText.partOrder, 'partsfont', 'meta-top part-order', 0, 0, "start", getTextSize, "partOrder");
+    addTextIf(this.rows, {
+      marginLeft: paddingLeft,
+      text: metaText.partOrder,
+      font: 'partsfont',
+      klass: 'meta-top part-order',
+      absElemType: "partOrder",
+      info: metaTextInfo.partOrder,
+      name: "part-order"
+    }, getTextSize);
   }
 }
-
-TopText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType, noMove) {
-  if (!text) return;
-  if (marginTop) this.rows.push({
-    move: marginTop
-  });
-  this.rows.push({
-    left: marginLeft,
-    text: text,
-    font: font,
-    klass: klass,
-    anchor: anchor,
-    absElemType: absElemType
-  });
-
-  if (!noMove) {
-    var size = getTextSize.calc(text, font, klass);
-    this.rows.push({
-      move: size.height
-    });
-    if (marginBottom) this.rows.push({
-      move: marginBottom
-    });
-  }
-};
 
 module.exports = TopText;
 

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Mouse Click Tests</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+</head>
+<body>
+<div id="mocha"></div>
+<div id="paper"></div>
+<script src="../node_modules/chai/chai.js"></script>
+<script src="../node_modules/mocha/mocha.js"></script>
+<script class="mocha-init">
+	mocha.setup({ui: 'bdd', globals: ['__VUE_DEVTOOLS_TOAST__']});
+	mocha.checkLeaks();
+</script>
+
+<script src="visual/mouse-click.test.js"></script>
+
+<script src="../node_modules/@tarp/require/require.min.js"></script>
+<script>
+	Tarp.require({main: "../index.js"}).then(function (response) {
+		window.abcjs = response;
+		mocha.run();
+	});
+</script>
+
+</body>
+</html>

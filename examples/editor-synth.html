@@ -27,6 +27,8 @@
         },
         selectionChangeCallback: selectionChangeCallback
       });
+
+      document.getElementById("midi").addEventListener("click", downloadMidi);
     };
 
     function clickListener(abcElem, tuneNumber, classes, analysis, drag, mouseEvent) {
@@ -47,6 +49,14 @@
         console.log(el);
       }
     }
+
+    function downloadMidi() {
+   		var abc = document.getElementById("abc").value;
+   		var a = document.getElementById("midi-download");
+   		var midi = ABCJS.synth.getMidiFile(abc, { midiOutputType: "encoded" })
+		a.setAttribute("href", midi)
+		a.click();
+	}
   </script>
 </head>
 <body>
@@ -72,6 +82,9 @@ eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
     <hr>
     <div id="paper"></div>
     <div id="audio"></div>
+	  <br>
+	  <button id="midi">Download MIDI</button>
+	  <a id="midi-download" download="example.mid"></a>
   </div>
 </body>
 </html>
