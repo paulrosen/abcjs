@@ -1,6 +1,7 @@
 /*
 Emit tab for violin staff
 */
+var TabUtils = require('../../tab_utils') 
 var plugin = {
 
   /**
@@ -13,6 +14,7 @@ var plugin = {
     this.tune = abcTune;
     this.params = params;
     this.tuneNumber = tuneNumber;
+    this.tools = null;
     console.log('ViolinTab plugin inited');
   },
 
@@ -24,6 +26,16 @@ var plugin = {
    */
   render: function ( renderer , staff) {
     console.log('ViolinTab plugin rendered');
+    if (this.tools == null) {
+      this.tools = new TabUtils(renderer);
+    }
+    // write instrument name first
+    var name = this.params.name;
+    if (!name) {
+      name = 'violin';
+    }
+    this.tools.drawInstrumentName(name);
+ 
   }
 };
 

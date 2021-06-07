@@ -16439,15 +16439,41 @@ module.exports = SynthSequence;
 
 /***/ }),
 
+/***/ "./src/tablatures/instrument_name.js":
+/*!*******************************************!*\
+  !*** ./src/tablatures/instrument_name.js ***!
+  \*******************************************/
+/***/ (function(module) {
+
+function TabInstrumentName(text, getTextSize) {
+  this.rows = [];
+  this.rows.push({
+    text: text,
+    font: 'subtitlefont',
+    klass: 'text subtitle',
+    anchor: 'start'
+  });
+  var size = getTextSize.calc(text, 'subtitlefont', 'text subtitle');
+  this.rows.push({
+    move: size.height
+  });
+}
+
+module.exports = TabInstrumentName;
+
+/***/ }),
+
 /***/ "./src/tablatures/instruments/violin/tab_violin.js":
 /*!*********************************************************!*\
   !*** ./src/tablatures/instruments/violin/tab_violin.js ***!
   \*********************************************************/
-/***/ (function(module) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /*
 Emit tab for violin staff
 */
+var TabUtils = __webpack_require__(/*! ../../tab_utils */ "./src/tablatures/tab_utils.js");
+
 var plugin = {
   /**
    * upon init mainly store provided instances for later usage
@@ -16459,6 +16485,7 @@ var plugin = {
     this.tune = abcTune;
     this.params = params;
     this.tuneNumber = tuneNumber;
+    this.tools = null;
     console.log('ViolinTab plugin inited');
   },
 
@@ -16470,6 +16497,19 @@ var plugin = {
    */
   render: function render(renderer, staff) {
     console.log('ViolinTab plugin rendered');
+
+    if (this.tools == null) {
+      this.tools = new TabUtils(renderer);
+    } // write instrument name first
+
+
+    var name = this.params.name;
+
+    if (!name) {
+      name = 'violin';
+    }
+
+    this.tools.drawInstrumentName('violin');
   }
 }; //
 // Tablature plugin definition
@@ -16483,6 +16523,34 @@ var AbcViolinTab = function AbcViolinTab() {
 };
 
 module.exports = AbcViolinTab;
+
+/***/ }),
+
+/***/ "./src/tablatures/tab_utils.js":
+/*!*************************************!*\
+  !*** ./src/tablatures/tab_utils.js ***!
+  \*************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var printStaffLine = __webpack_require__(/*! ../write/draw/staff-line */ "./src/write/draw/staff-line.js");
+
+var TabInstrumentName = __webpack_require__(/*! ./instrument_name */ "./src/tablatures/instrument_name.js");
+
+function TabUtils(renderer) {
+  this.renderer = renderer;
+  this.controller = renderer.controller;
+}
+
+TabUtils.prototype.drawLine = function (x1, x2, pitch) {};
+
+TabUtils.prototype.drawTab = function (x1, x2, pitch) {};
+
+TabUtils.prototype.drawInstrumentName = function (name) {
+  var textSize = this.controller.getTextSize;
+  var name = new TabInstrumentName(name, textSize);
+};
+
+module.exports = TabUtils;
 
 /***/ }),
 
