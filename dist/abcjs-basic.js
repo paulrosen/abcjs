@@ -247,7 +247,7 @@ module.exports = animation;
  * where plugin represents a plugin instance 
  * 
  */
-var ViolinTablature = __webpack_require__(/*! ../tablatures/instruments/violin/tab_violin */ "./src/tablatures/instruments/violin/tab_violin.js");
+var ViolinTablature = __webpack_require__(/*! ../tablatures/instruments/violin/tab-violin */ "./src/tablatures/instruments/violin/tab-violin.js");
 
 var abcTablatures = {
   inited: false,
@@ -332,6 +332,7 @@ var abcTablatures = {
    * @param {*} renderer 
    * @param {*} staff 
    * @param {*} staffNumber 
+   * @return tablature height size
    */
   renderStaffLine: function renderStaffLine(renderer, staff, staffNumber) {
     var tune = renderer.abctune;
@@ -341,9 +342,11 @@ var abcTablatures = {
       tabPlugin = tabs[staffNumber];
 
       if (tabPlugin) {
-        tabPlugin.render(renderer, staff);
+        return tabPlugin.render(renderer, staff, staffNumber);
       }
     }
+
+    return 0; // 0 tab size
   },
 
   /**
@@ -16521,42 +16524,47 @@ module.exports = SynthSequence;
 
 /***/ }),
 
-/***/ "./src/tablatures/instrument_name.js":
-/*!*******************************************!*\
-  !*** ./src/tablatures/instrument_name.js ***!
-  \*******************************************/
-/***/ (function(module) {
-
-function TabInstrumentName(text, getTextSize) {
-  this.rows = [];
-  this.rows.push({
-    text: text,
-    font: 'subtitlefont',
-    klass: 'text subtitle',
-    anchor: 'start'
-  });
-  var size = getTextSize.calc(text, 'subtitlefont', 'text subtitle');
-  this.rows.push({
-    move: size.height
-  });
-}
-
-module.exports = TabInstrumentName;
-
-/***/ }),
-
-/***/ "./src/tablatures/instruments/violin/tab_violin.js":
+/***/ "./src/tablatures/instruments/violin/tab-violin.js":
 /*!*********************************************************!*\
-  !*** ./src/tablatures/instruments/violin/tab_violin.js ***!
+  !*** ./src/tablatures/instruments/violin/tab-violin.js ***!
   \*********************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /*
 Emit tab for violin staff
 */
-var TabUtils = __webpack_require__(/*! ../../tab_utils */ "./src/tablatures/tab_utils.js");
+var TabRenderer = __webpack_require__(/*! ../../tab-renderer */ "./src/tablatures/tab-renderer.js");
+
+var TabDrawer = __webpack_require__(/*! ../../tab-drawer */ "./src/tablatures/tab-drawer.js");
+
+var Tablature = __webpack_require__(/*! ./tablature */ "./src/tablatures/instruments/violin/tablature.js");
 
 var plugin = {
+  // private stuff
+  renderVoice: function renderVoice(tablature, voice) {
+    var absChild;
+
+    for (ii = 0; ii < voice.children.length; ii++) {
+      absChild = voice.children[ii];
+
+      for (jj = 0; jj < absChild.children.length; jj++) {
+        var relChild = absChild.children[jj];
+        var scoreType = relChild.parent.abcelem.el_type;
+
+        switch (scoreType) {
+          case 'clef':
+            tablature.tab(relChild);
+            break;
+
+          case 'bar':
+            tablature.bar(relChild);
+            break;
+        }
+      }
+    }
+  },
+  // public stuf
+
   /**
    * upon init mainly store provided instances for later usage
    * @param {*} abcTune  the parsed tune AST tree
@@ -16567,7 +16575,11 @@ var plugin = {
     this.tune = abcTune;
     this.params = params;
     this.tuneNumber = tuneNumber;
-    this.tools = null;
+    this.tabRenderer = null;
+    this.tabDrawer = null;
+    this.lineSpace = 12;
+    this.nbLines = 4;
+    this.topStaffY = -1;
     console.log('ViolinTab plugin inited');
   },
 
@@ -16575,23 +16587,44 @@ var plugin = {
    * render a score line staff using current abcjs renderer 
    * NB : we assume that renderer , current tunes info + tab params 
    * operational inside plugin instance
-   * @param {*} staff 
+   * @param {*} renderer
+   * @param {*} staff
+   * @return the current height of displayed tab 
    */
-  render: function render(renderer, staff) {
+  render: function render(renderer, voice, curVoice) {
     console.log('ViolinTab plugin rendered');
 
-    if (this.tools == null) {
-      this.tools = new TabUtils(renderer);
-    } // write instrument name first
+    if (this.tabRenderer == null) {
+      this.tabRenderer = new TabRenderer(renderer);
+    }
 
+    if (this.tabDrawer == null) {
+      this.tabDrawer = new TabDrawer(renderer);
+    }
+
+    this.topStaffY = renderer.tablatures.topStaff; // write instrument name first
 
     var name = this.params.name;
 
     if (!name) {
       name = 'violin';
-    }
+    } // Instrument name + tablature frame
 
-    this.tools.drawInstrumentName('violin');
+
+    this.tabRenderer.instrumentName(name);
+    this.tabDrawer.drawNonMusic(this.tabRenderer.rendered);
+    var tablature = new Tablature(this.tabDrawer, this.nbLines, this.lineSpace);
+    tablature.print(); // draw starting vertical line 
+
+    tablature.verticalLine(tablature.startx, this.topStaffY, tablature.bottomLine); // deal with current voice line
+
+    this.renderVoice(tablature, voice); // draw ending vertical line
+
+    tablature.verticalLine(tablature.endx, this.topStaffY, tablature.bottomLine); // cleanup tabRenderer
+
+    this.tabRenderer.reset(); // return tab size
+
+    return this.lineSpace * this.nbLines;
   }
 }; //
 // Tablature plugin definition
@@ -16608,31 +16641,214 @@ module.exports = AbcViolinTab;
 
 /***/ }),
 
-/***/ "./src/tablatures/tab_utils.js":
-/*!*************************************!*\
-  !*** ./src/tablatures/tab_utils.js ***!
-  \*************************************/
+/***/ "./src/tablatures/instruments/violin/tablature.js":
+/*!********************************************************!*\
+  !*** ./src/tablatures/instruments/violin/tablature.js ***!
+  \********************************************************/
+/***/ (function(module) {
+
+/*
+ *
+ *  Violin / Mandolin / tenor Banjo tablature  
+ * 
+ */
+function Tablature(drawer, numLines, lineSpace) {
+  this.drawer = drawer;
+  this.renderer = drawer.renderer;
+  this.startx = this.renderer.tablatures.startx;
+  this.endx = this.renderer.tablatures.w;
+  this.numLines = numLines;
+  this.lineSpace = lineSpace;
+  this.lines = [];
+  this.topLine = -1;
+  this.bottomLine = -1;
+  this.staffY = -1;
+  this.dotY = null;
+}
+
+Tablature.prototype.print = function () {
+  var klass = "abcjs-top-tab";
+  this.renderer.paper.openGroup({
+    prepend: true,
+    klass: this.renderer.controller.classes.generate("abcjs-tab")
+  }); // since numbers will be on lines , use fixed size space between lines
+
+  for (var i = 1; i <= this.numLines; i++) {
+    this.lines[i] = this.drawer.drawHLine(this.startx, this.endx, i, this.lineSpace, klass);
+    klass = undefined;
+  }
+
+  this.topLine = this.lines[1];
+  this.bottomLine = this.lines[this.numLines];
+  this.renderer.paper.closeGroup();
+};
+
+Tablature.prototype.getY = function (pos, lineNumber, pitch) {
+  if (!pitch) pitch = 2;
+  var interval = (this.lines[1] - this.lines[2]) / 2;
+
+  switch (pos) {
+    case "above":
+      // above line
+      if (lineNumber == 1) {
+        return this.lines[1] - pitch;
+      } else {
+        return this.lines[lineNumber] - interval;
+      }
+
+    case "on":
+      // on line
+      return this.lines[lineNumber];
+
+    case "below":
+      // below line
+      if (lineNumber >= this.lines.length) {
+        return this.lines[this.lines.length - 1] + pitch;
+      } else {
+        return this.lines[lineNumber] + interval;
+      }
+
+  }
+};
+
+Tablature.prototype.verticalLine = function (x, y1, y2) {
+  var klass = "abcjs-vert-tab";
+  this.renderer.paper.openGroup({
+    prepend: true,
+    klass: this.renderer.controller.classes.generate("abcjs-vert-tab")
+  });
+  this.drawer.drawVLine(y1, y2, x, klass);
+  this.renderer.paper.closeGroup();
+};
+
+Tablature.prototype.bar = function (staffInfos) {
+  if (this.dotY == null) {
+    this.dotY = this.getY('on', 2);
+  } else {
+    this.dotY = this.getY('on', 3);
+  }
+
+  switch (staffInfos.type) {
+    case 'bar':
+      this.drawer.drawBar(this.topLine, this.bottomLine, staffInfos.x, null, "tabbar", staffInfos.linewidth);
+      break;
+
+    case 'symbol':
+      this.drawer.drawSymbol(staffInfos.x, this.dotY, staffInfos.name);
+      break;
+  }
+
+  if (this.dotY == this.getY('on', 3)) {
+    this.dotY = null; // just reset
+  }
+};
+
+Tablature.prototype.tab = function (staffInfos) {
+  this.drawer.drawTab(staffInfos.x, this.getY('above', 2), staffInfos.pitch);
+};
+
+module.exports = Tablature;
+
+/***/ }),
+
+/***/ "./src/tablatures/tab-drawer.js":
+/*!**************************************!*\
+  !*** ./src/tablatures/tab-drawer.js ***!
+  \**************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var printStaffLine = __webpack_require__(/*! ../write/draw/staff-line */ "./src/write/draw/staff-line.js");
+var nonMusic = __webpack_require__(/*! ../write/draw/non-music */ "./src/write/draw/non-music.js");
 
-var TabInstrumentName = __webpack_require__(/*! ./instrument_name */ "./src/tablatures/instrument_name.js");
+var Line = __webpack_require__(/*! ../write/draw/tab-line */ "./src/write/draw/tab-line.js");
 
-function TabUtils(renderer) {
+var printSymbol = __webpack_require__(/*! ../write/draw/print-symbol */ "./src/write/draw/print-symbol.js");
+
+var glyphs = __webpack_require__(/*! ../write/abc_glyphs */ "./src/write/abc_glyphs.js");
+
+var printStem = __webpack_require__(/*! ../write/draw/print-stem */ "./src/write/draw/print-stem.js");
+
+function TabDrawer(renderer) {
   this.renderer = renderer;
   this.controller = renderer.controller;
 }
 
-TabUtils.prototype.drawLine = function (x1, x2, pitch) {};
-
-TabUtils.prototype.drawTab = function (x1, x2, pitch) {};
-
-TabUtils.prototype.drawInstrumentName = function (name) {
-  var textSize = this.controller.getTextSize;
-  var name = new TabInstrumentName(name, textSize);
+TabDrawer.prototype.drawSymbol = function (x, y, symbol) {
+  var ycorr = glyphs.getYCorr(symbol);
+  var el = glyphs.printSymbol(x, y + ycorr, symbol, this.renderer.paper, {});
+  return el;
 };
 
-module.exports = TabUtils;
+TabDrawer.prototype.drawNonMusic = function (content) {
+  nonMusic(this.renderer, content);
+};
+
+TabDrawer.prototype.drawHLine = function (x1, x2, numLine, lineSpace, klass, name) {
+  var y = this.renderer.y + numLine * lineSpace;
+  var line = new Line(this.renderer, klass, name, 0.35);
+  line.printHorizontal(x1, x2, y);
+  return y;
+};
+
+TabDrawer.prototype.drawVLine = function (y1, y2, x, klass, name, dx) {
+  var line = new Line(this.renderer, klass, name, dx);
+  line.printVertical(y1, y2, x);
+};
+
+TabDrawer.prototype.drawBar = function (y1, y2, x, klass, name, dx) {
+  return printStem(this.renderer, x, dx, y1, y2, klass, name);
+};
+
+TabDrawer.prototype.drawTab = function (x, y, pitch) {
+  return this.drawSymbol(x, y, "tab.tiny");
+};
+
+module.exports = TabDrawer;
+
+/***/ }),
+
+/***/ "./src/tablatures/tab-renderer.js":
+/*!****************************************!*\
+  !*** ./src/tablatures/tab-renderer.js ***!
+  \****************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var printStaffLine = __webpack_require__(/*! ../write/draw/staff-line */ "./src/write/draw/staff-line.js");
+
+var renderText = __webpack_require__(/*! ../write/draw/text */ "./src/write/draw/text.js");
+
+var FreeText = __webpack_require__(/*! ../write/free-text */ "./src/write/free-text.js");
+
+var nonMusic = __webpack_require__(/*! ../write/draw/non-music */ "./src/write/draw/non-music.js");
+
+function TabRenderer(renderer) {
+  this.renderer = renderer;
+  this.controller = renderer.controller;
+  this.reset();
+}
+
+TabRenderer.prototype.reset = function () {
+  this.rendered = {
+    rows: []
+  };
+};
+
+TabRenderer.prototype.instrumentName = function (name) {
+  var textSize = this.controller.getTextSize;
+  var rows = this.rendered.rows;
+  rows.push({
+    left: 18,
+    text: name,
+    font: 'infofont',
+    klass: 'text instrumentname',
+    anchor: 'start'
+  });
+  var size = textSize.calc(name, 'infofont', 'text instrumentname');
+  rows.push({
+    move: size.height
+  });
+};
+
+module.exports = TabRenderer;
 
 /***/ }),
 
@@ -22109,6 +22325,39 @@ module.exports = nonMusic;
 
 /***/ }),
 
+/***/ "./src/write/draw/print-line.js":
+/*!**************************************!*\
+  !*** ./src/write/draw/print-line.js ***!
+  \**************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
+
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+
+function printLine(renderer, x1, x2, y, klass, name, dy) {
+  if (!dy) dy = 0.35;
+  var fill = renderer.foregroundColor;
+  x1 = roundNumber(x1);
+  x2 = roundNumber(x2);
+  var y1 = roundNumber(y - dy);
+  var y2 = roundNumber(y + dy);
+  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y1, x2, y1, x2, y2, x1, y2);
+  var options = {
+    path: pathString,
+    stroke: "none",
+    fill: fill
+  };
+  if (name) options['data-name'] = name;
+  if (klass) options['class'] = klass;
+  var ret = renderer.paper.pathToBack(options);
+  return ret;
+}
+
+module.exports = printLine;
+
+/***/ }),
+
 /***/ "./src/write/draw/print-path.js":
 /*!**************************************!*\
   !*** ./src/write/draw/print-path.js ***!
@@ -22292,11 +22541,6 @@ function drawRelativeElement(renderer, params, bartop) {
   switch (params.type) {
     case "symbol":
       if (params.c === null) return null;
-
-      if (params.c == "clefs.G") {
-        console.log("clefs G");
-      }
-
       var klass = "symbol";
       if (params.klass) klass += " " + params.klass;
       params.graphelem = printSymbol(renderer, params.x, params.pitch, params.c, {
@@ -22807,6 +23051,7 @@ function drawStaffGroup(renderer, params, selectables) {
   var topLine; // these are to connect multiple staves. We need to remember where they are.
 
   var bottomLine;
+  var tabHeight = 0;
   var bartop = 0;
 
   for (var i = 0; i < params.voices.length; i++) {
@@ -22844,7 +23089,13 @@ function drawStaffGroup(renderer, params, selectables) {
 
 
     if (renderer.abctune.tablatures) {
-      tablatures.renderStaffLine(renderer, staff, i);
+      renderer.tablatures = {};
+      renderer.tablatures.startx = params.startx;
+      renderer.tablatures.w = params.w;
+      renderer.tablatures.topStaff = topLine;
+      renderer.tablatures.bottomStaff = bottomLine; // height of displayed tab returned by tablature plugin
+
+      tabHeight = tablatures.renderStaffLine(renderer, params.voices[i], i);
     }
   }
 
@@ -22854,7 +23105,7 @@ function drawStaffGroup(renderer, params, selectables) {
     printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
   }
 
-  renderer.y = startY;
+  renderer.y = startY + tabHeight;
 
   function debugPrintGridItem(staff, key) {
     var colors = ["rgb(207,27,36)", "rgb(168,214,80)", "rgb(110,161,224)", "rgb(191,119,218)", "rgb(195,30,151)", "rgb(31,170,177)", "rgb(220,166,142)"];
@@ -22955,28 +23206,11 @@ module.exports = drawStaffGroup;
   \**************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
-
-var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+var printLine = __webpack_require__(/*! ./print-line */ "./src/write/draw/print-line.js");
 
 function printStaffLine(renderer, x1, x2, pitch, klass, name) {
-  var dy = 0.35;
-  var fill = renderer.foregroundColor;
   var y = renderer.calcY(pitch);
-  x1 = roundNumber(x1);
-  x2 = roundNumber(x2);
-  var y1 = roundNumber(y - dy);
-  var y2 = roundNumber(y + dy);
-  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y1, x2, y1, x2, y2, x1, y2);
-  var options = {
-    path: pathString,
-    stroke: "none",
-    fill: fill
-  };
-  if (name) options['data-name'] = name;
-  if (klass) options['class'] = klass;
-  var ret = renderer.paper.pathToBack(options);
-  return ret;
+  return printLine(renderer, x1, x2, y, klass, name);
 }
 
 module.exports = printStaffLine;
@@ -23011,6 +23245,51 @@ function printStaff(renderer, startx, endx, numLines) {
 }
 
 module.exports = printStaff;
+
+/***/ }),
+
+/***/ "./src/write/draw/tab-line.js":
+/*!************************************!*\
+  !*** ./src/write/draw/tab-line.js ***!
+  \************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
+
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+
+var printStem = __webpack_require__(/*! ./print-stem */ "./src/write/draw/print-stem.js");
+
+function TabLine(renderer, klass, name, dx) {
+  this.renderer = renderer;
+  if (!dx) dx = 0.35; // default
+
+  this.dx = dx;
+  this.klass = klass;
+  this.name = name;
+  var fill = renderer.foregroundColor;
+  this.options = {
+    stroke: "none",
+    fill: fill
+  };
+  if (name) this.options['data-name'] = name;
+  if (klass) this.options['class'] = klass;
+}
+
+TabLine.prototype.printVertical = function (y1, y2, x) {
+  return printStem(this.renderer, x, this.dx, y1, y2, this.options.klass, this.options.name);
+};
+
+TabLine.prototype.printHorizontal = function (x1, x2, y) {
+  x1 = roundNumber(x1);
+  x2 = roundNumber(x2);
+  var y1 = roundNumber(y - this.dx);
+  var y2 = roundNumber(y + this.dx);
+  this.options.path = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y1, x2, y1, x2, y2, x1, y2);
+  return this.renderer.paper.pathToBack(this.options);
+};
+
+module.exports = TabLine;
 
 /***/ }),
 

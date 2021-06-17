@@ -5,7 +5,7 @@
  * where plugin represents a plugin instance 
  * 
  */
-var ViolinTablature = require('../tablatures/instruments/violin/tab_violin');
+var ViolinTablature = require('../tablatures/instruments/violin/tab-violin');
 
 var abcTablatures = {
 
@@ -89,6 +89,7 @@ var abcTablatures = {
    * @param {*} renderer 
    * @param {*} staff 
    * @param {*} staffNumber 
+   * @return tablature height size
    */
   renderStaffLine: function (renderer, staff, staffNumber) {
     var tune = renderer.abctune;
@@ -96,9 +97,10 @@ var abcTablatures = {
     if (staffNumber < tabs.length) {
       tabPlugin = tabs[staffNumber];
       if (tabPlugin) {
-        tabPlugin.render(renderer,staff);
+        return tabPlugin.render(renderer, staff, staffNumber);
       }
     }
+    return 0; // 0 tab size
   },
 
   /**
