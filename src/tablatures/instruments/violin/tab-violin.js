@@ -4,26 +4,33 @@ Emit tab for violin staff
 var TabRenderer = require('../../tab-renderer');
 var TabDrawer = require('../../tab-drawer');
 var Tablature = require('./tablature');
+var ViolinPatterns = require('./violin-patterns');
+var setViolinFonts = require('./violin-fonts');
 
 var plugin = {
 
   // private stuff
-
-
   renderVoice: function (tablature, voice) {
     var absChild; 
     for (ii = 0; ii < voice.children.length; ii++) {
       absChild = voice.children[ii];
+      var scoreType;
       for (jj = 0; jj < absChild.children.length; jj++) {
         var relChild = absChild.children[jj];
-        var scoreType = relChild.parent.abcelem.el_type;
+        scoreType = relChild.parent.abcelem.el_type;
         switch (scoreType) {
           case 'clef':
             tablature.tab(relChild);
             break;
           case 'bar':
             tablature.bar(relChild);
-            break
+            break;
+        }
+        if (scoreType == 'note') {
+          var pitches = absChild.abcelem.pitches;
+          var graceNotes = absChild.gracenotes;
+          tabPos = this.semantics.violinStrings.notesToNumber(pitches, graceNotes);
+          this.tabRenderer.numbers(absChild.x, tablature, tabPos);
         }
       }
     }
@@ -46,6 +53,8 @@ var plugin = {
     this.lineSpace = 12;
     this.nbLines = 4;
     this.topStaffY = -1;
+    var semantics = new ViolinPatterns(this.params.tuning);
+    this.semantics = semantics;
     console.log('ViolinTab plugin inited');
   },
 
@@ -64,32 +73,41 @@ var plugin = {
       this.tabRenderer = new TabRenderer(renderer);
     }
     if (this.tabDrawer == null) {
-      this.tabDrawer = new TabDrawer(renderer);
+      this.tabDrawer = new TabDrawer(this.tabRenderer);
+      this.tabRenderer.drawer = this.tabDrawer;
     }
+    // set violin tab fonts
+    setViolinFonts(this.tune);
+    //
     this.topStaffY = renderer.tablatures.topStaff;
+    // top empty filler
+    this.tabRenderer.fillerY(20);
+    
     // write instrument name first
     var name = this.params.name;
     if (!name) {
       name = 'violin';
     }
-    // Instrument name + tablature frame
-    this.tabRenderer.instrumentName(name);
-    this.tabDrawer.drawNonMusic(this.tabRenderer.rendered)
+    //  tablature frame
     var tablature = new Tablature(this.tabDrawer,
       this.nbLines,
       this.lineSpace);
     tablature.print();
-    // draw starting vertical line 
+    // Instrument name 
+    var yName = tablature.getY('on', tablature.numLines-1);
+    var verticalSize = this.tabRenderer.instrumentName(name, yName);
+    // draw starting vertical line
     tablature.verticalLine(tablature.startx, this.topStaffY, tablature.bottomLine);
+
     // deal with current voice line
     this.renderVoice(tablature,voice);
 
     // draw ending vertical line
     tablature.verticalLine(tablature.endx, this.topStaffY, tablature.bottomLine);
-    // cleanup tabRenderer
-    this.tabRenderer.reset();
-    // return tab size
-    return this.lineSpace * this.nbLines;
+    // update vertical size
+    verticalSize += this.lineSpace * this.nbLines;
+    // return back the vertical size used by tab line
+    return verticalSize;
   }
 };
 

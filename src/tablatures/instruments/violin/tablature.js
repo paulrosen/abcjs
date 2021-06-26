@@ -1,6 +1,6 @@
 /*
  *
- *  Violin / Mandolin / tenor Banjo tablature  
+ *  Violin / Mandolin / tenor Banjo tablature layout   
  * 
  */
 
@@ -22,7 +22,7 @@ Tablature.prototype.print = function () {
   var klass = "abcjs-top-tab";
   this.renderer.paper.openGroup({ prepend: true, klass: this.renderer.controller.classes.generate("abcjs-tab") });
   // since numbers will be on lines , use fixed size space between lines
-  for (var i = 1; i <= this.numLines; i++) {
+  for (var i = 0; i <= this.numLines-1; i++) {
     this.lines[i] = this.drawer.drawHLine(
       this.startx,
       this.endx,
@@ -31,29 +31,25 @@ Tablature.prototype.print = function () {
       klass);
     klass = undefined;
   }
-  this.topLine = this.lines[1];
-  this.bottomLine = this.lines[this.numLines];
+  this.nbLines = 
+  this.topLine = this.lines[0];
+  this.bottomLine = this.lines[this.numLines-1];
   this.renderer.paper.closeGroup();  
 }
 
 Tablature.prototype.getY = function (pos, lineNumber, pitch) {
-  if (!pitch) pitch = 2;
-  var interval = (this.lines[1] - this.lines[2])/2;
+  if (!pitch) pitch = 0;
+  var interval = (this.lines[2] - this.lines[1])/2;
   switch (pos) {
     case "above": // above line
-      if (lineNumber == 1) {
-        return this.lines[1] - pitch;
-      } else {
-        return this.lines[lineNumber] - interval;
-      }
+      return this.lines[lineNumber] - interval - pitch;
     case "on": // on line
-      return this.lines[lineNumber];
+      return this.lines[lineNumber] + pitch ;
     case "below": // below line
-      if ( lineNumber >= this.lines.length ) {
-        return this.lines[this.lines.length-1] + pitch;
-      } else {
-        return this.lines[lineNumber] + interval;
+      if (lineNumber >= this.lines.length - 1) {
+        lineNumber = this.lines.length - 1
       }
+      return this.lines[lineNumber] + interval + pitch;
   }
 }
 
@@ -66,9 +62,9 @@ Tablature.prototype.verticalLine = function (x, y1, y2) {
 
 Tablature.prototype.bar = function ( staffInfos ) {
   if (this.dotY == null) {
-    this.dotY = this.getY('on', 2);
+    this.dotY = this.getY('on', 1);
   } else {
-    this.dotY = this.getY('on', 3);
+    this.dotY = this.getY('on', 2);
   }
   switch (staffInfos.type) {
     case 'bar':
@@ -78,14 +74,14 @@ Tablature.prototype.bar = function ( staffInfos ) {
       this.drawer.drawSymbol(staffInfos.x,this.dotY,staffInfos.name);
       break;
   }
-  if (this.dotY == this.getY('on', 3)) {
+  if (this.dotY == this.getY('on', 2)) {
     this.dotY = null; // just reset
   }
 }
 
 Tablature.prototype.tab = function (staffInfos) {
   this.drawer.drawTab(staffInfos.x,
-    this.getY('above', 2),
+    this.getY('below', 1),
     staffInfos.pitch);
 }
 

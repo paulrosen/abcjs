@@ -5,9 +5,10 @@ var glyphs = require('../write/abc_glyphs');
 
 var printStem = require('../write/draw/print-stem');
 
-function TabDrawer(renderer) {
-  this.renderer = renderer;
-  this.controller = renderer.controller;
+function TabDrawer(tabRenderer) {
+  this.tabRenderer = tabRenderer;
+  this.renderer = tabRenderer.renderer;
+  this.controller = this.renderer.controller;
 }
 
 TabDrawer.prototype.drawSymbol = function (x,y, symbol) {
@@ -16,8 +17,9 @@ TabDrawer.prototype.drawSymbol = function (x,y, symbol) {
   return el
 }
 
-TabDrawer.prototype.drawNonMusic = function (content) {
-  nonMusic(this.renderer, content);
+TabDrawer.prototype.drawRendered = function () {
+  nonMusic(this.renderer, this.tabRenderer.rendered);
+  this.tabRenderer.reset(); // cleanup after drawing
 }
 
 TabDrawer.prototype.drawHLine = function ( x1, x2, numLine, lineSpace, klass, name) {
@@ -35,7 +37,6 @@ TabDrawer.prototype.drawVLine = function (y1, y2, x, klass, name,dx) {
 TabDrawer.prototype.drawBar = function (y1, y2, x, klass, name, dx) {
   return printStem(this.renderer, x,dx,y1,y2,klass,name)  
 }
-
 
 TabDrawer.prototype.drawTab = function (x,y, pitch) {
   return this.drawSymbol(x, y, "tab.tiny");

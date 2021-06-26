@@ -16524,6 +16524,163 @@ module.exports = SynthSequence;
 
 /***/ }),
 
+/***/ "./src/tablatures/instruments/string-patterns.js":
+/*!*******************************************************!*\
+  !*** ./src/tablatures/instruments/string-patterns.js ***!
+  \*******************************************************/
+/***/ (function(module) {
+
+/**
+ * Handles Violin score to tabs conversion
+ * @param {} tuning 
+ */
+var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G']; // private
+
+function buildNote(pos, hasComma, isLower, isQuoted, sharp) {
+  var returned = notes[pos];
+
+  if (sharp) {
+    returned = sharp + returned;
+  }
+
+  if (hasComma) {
+    returned += ',';
+  } else {
+    if (isLower) {
+      returned = returned.toLowerCase();
+
+      if (isQuoted) {
+        returned += "'";
+      }
+    }
+  }
+
+  return returned;
+} // private
+
+
+function buildNoteList(fromNote, toNote) {
+  var buildReturned = [];
+  var fromN = fromNote.charAt(0).toUpperCase();
+  var toN = toNote.charAt(0).toUpperCase();
+  var startIndex = notes.indexOf(fromN);
+  var toIndex = notes.indexOf(toN);
+
+  if (startIndex == -1 || toIndex == -1) {
+    return buildReturned;
+  }
+
+  var hasComma = fromNote.indexOf(',') != -1;
+  var isLower = fromNote.charAt(0) == fromNote.charAt(0).toLowerCase();
+  var isQuoted = false;
+  var finished = false;
+  var curPos = startIndex;
+
+  while (!finished) {
+    var curNote = notes[curPos];
+    buildReturned.push(buildNote(curPos, hasComma, isLower, isQuoted));
+
+    if (curNote != 'E' && curNote != 'B') {
+      buildReturned.push(buildNote(curPos, hasComma, isLower, isQuoted, '^'));
+    }
+
+    if (curNote == 'B') {
+      if (hasComma) {
+        hasComma = false;
+      } else {
+        if (!isLower) {
+          isLower = true;
+        } else {
+          isQuoted = true;
+        }
+      }
+    }
+
+    curPos++;
+
+    if (curPos >= notes.length) {
+      curPos = 0;
+    }
+
+    if (notes[curPos] == toN) finished = true;
+  }
+
+  return buildReturned;
+}
+
+function buildPatterns(self) {
+  var strings = [];
+  var pos = self.tuning.length - 1;
+
+  for (iii = 0; iii < self.tuning.length; iii++) {
+    var nextNote = "d'"; // highest handled note
+
+    if (iii != self.tuning.length - 1) {
+      nextNote = self.tuning[iii + 1];
+    }
+
+    strings[pos--] = buildNoteList(self.tuning[iii], nextNote);
+  }
+
+  return strings;
+}
+
+function toNumber(self, note) {
+  var num = -1;
+  var str = 0;
+
+  while (str < self.strings.length) {
+    num = self.strings[str].indexOf(note);
+
+    if (num != -1) {
+      return {
+        num: num,
+        str: str
+      };
+    }
+
+    str++;
+  }
+
+  return null; // not found
+}
+
+StringPatterns.prototype.notesToNumber = function (notes, graces) {
+  if (notes) {
+    var retNotes = [];
+
+    for (iiii = 0; iiii < notes.length; iiii++) {
+      retNotes.push(toNumber(this, notes[iiii].name));
+    }
+
+    var retGraces = null;
+
+    if (graces) {
+      retGraces = [];
+
+      for (iiii = 0; iiii < notes.length; iiii++) {
+        retGraces.push(toNumber(this, graces[iiii].name));
+      }
+    }
+
+    return {
+      notes: retNotes,
+      graces: retGraces
+    };
+  }
+
+  return null;
+};
+
+function StringPatterns(tuning) {
+  this.tuning = tuning;
+  this.strings = buildPatterns(this);
+}
+
+module.exports = StringPatterns;
+
+/***/ }),
+
 /***/ "./src/tablatures/instruments/violin/tab-violin.js":
 /*!*********************************************************!*\
   !*** ./src/tablatures/instruments/violin/tab-violin.js ***!
@@ -16539,6 +16696,10 @@ var TabDrawer = __webpack_require__(/*! ../../tab-drawer */ "./src/tablatures/ta
 
 var Tablature = __webpack_require__(/*! ./tablature */ "./src/tablatures/instruments/violin/tablature.js");
 
+var ViolinPatterns = __webpack_require__(/*! ./violin-patterns */ "./src/tablatures/instruments/violin/violin-patterns.js");
+
+var setViolinFonts = __webpack_require__(/*! ./violin-fonts */ "./src/tablatures/instruments/violin/violin-fonts.js");
+
 var plugin = {
   // private stuff
   renderVoice: function renderVoice(tablature, voice) {
@@ -16546,10 +16707,11 @@ var plugin = {
 
     for (ii = 0; ii < voice.children.length; ii++) {
       absChild = voice.children[ii];
+      var scoreType;
 
       for (jj = 0; jj < absChild.children.length; jj++) {
         var relChild = absChild.children[jj];
-        var scoreType = relChild.parent.abcelem.el_type;
+        scoreType = relChild.parent.abcelem.el_type;
 
         switch (scoreType) {
           case 'clef':
@@ -16559,6 +16721,13 @@ var plugin = {
           case 'bar':
             tablature.bar(relChild);
             break;
+        }
+
+        if (scoreType == 'note') {
+          var pitches = absChild.abcelem.pitches;
+          var graceNotes = absChild.gracenotes;
+          tabPos = this.semantics.violinStrings.notesToNumber(pitches, graceNotes);
+          this.tabRenderer.numbers(absChild.x, tablature, tabPos);
         }
       }
     }
@@ -16580,6 +16749,8 @@ var plugin = {
     this.lineSpace = 12;
     this.nbLines = 4;
     this.topStaffY = -1;
+    var semantics = new ViolinPatterns(this.params.tuning);
+    this.semantics = semantics;
     console.log('ViolinTab plugin inited');
   },
 
@@ -16599,32 +16770,39 @@ var plugin = {
     }
 
     if (this.tabDrawer == null) {
-      this.tabDrawer = new TabDrawer(renderer);
-    }
+      this.tabDrawer = new TabDrawer(this.tabRenderer);
+      this.tabRenderer.drawer = this.tabDrawer;
+    } // set violin tab fonts
 
-    this.topStaffY = renderer.tablatures.topStaff; // write instrument name first
+
+    setViolinFonts(this.tune); //
+
+    this.topStaffY = renderer.tablatures.topStaff; // top empty filler
+
+    this.tabRenderer.fillerY(20); // write instrument name first
 
     var name = this.params.name;
 
     if (!name) {
       name = 'violin';
-    } // Instrument name + tablature frame
+    } //  tablature frame
 
 
-    this.tabRenderer.instrumentName(name);
-    this.tabDrawer.drawNonMusic(this.tabRenderer.rendered);
     var tablature = new Tablature(this.tabDrawer, this.nbLines, this.lineSpace);
-    tablature.print(); // draw starting vertical line 
+    tablature.print(); // Instrument name 
+
+    var yName = tablature.getY('on', tablature.numLines - 1);
+    var verticalSize = this.tabRenderer.instrumentName(name, yName); // draw starting vertical line
 
     tablature.verticalLine(tablature.startx, this.topStaffY, tablature.bottomLine); // deal with current voice line
 
     this.renderVoice(tablature, voice); // draw ending vertical line
 
-    tablature.verticalLine(tablature.endx, this.topStaffY, tablature.bottomLine); // cleanup tabRenderer
+    tablature.verticalLine(tablature.endx, this.topStaffY, tablature.bottomLine); // update vertical size
 
-    this.tabRenderer.reset(); // return tab size
+    verticalSize += this.lineSpace * this.nbLines; // return back the vertical size used by tab line
 
-    return this.lineSpace * this.nbLines;
+    return verticalSize;
   }
 }; //
 // Tablature plugin definition
@@ -16649,7 +16827,7 @@ module.exports = AbcViolinTab;
 
 /*
  *
- *  Violin / Mandolin / tenor Banjo tablature  
+ *  Violin / Mandolin / tenor Banjo tablature layout   
  * 
  */
 function Tablature(drawer, numLines, lineSpace) {
@@ -16673,41 +16851,36 @@ Tablature.prototype.print = function () {
     klass: this.renderer.controller.classes.generate("abcjs-tab")
   }); // since numbers will be on lines , use fixed size space between lines
 
-  for (var i = 1; i <= this.numLines; i++) {
+  for (var i = 0; i <= this.numLines - 1; i++) {
     this.lines[i] = this.drawer.drawHLine(this.startx, this.endx, i, this.lineSpace, klass);
     klass = undefined;
   }
 
-  this.topLine = this.lines[1];
-  this.bottomLine = this.lines[this.numLines];
+  this.nbLines = this.topLine = this.lines[0];
+  this.bottomLine = this.lines[this.numLines - 1];
   this.renderer.paper.closeGroup();
 };
 
 Tablature.prototype.getY = function (pos, lineNumber, pitch) {
-  if (!pitch) pitch = 2;
-  var interval = (this.lines[1] - this.lines[2]) / 2;
+  if (!pitch) pitch = 0;
+  var interval = (this.lines[2] - this.lines[1]) / 2;
 
   switch (pos) {
     case "above":
       // above line
-      if (lineNumber == 1) {
-        return this.lines[1] - pitch;
-      } else {
-        return this.lines[lineNumber] - interval;
-      }
+      return this.lines[lineNumber] - interval - pitch;
 
     case "on":
       // on line
-      return this.lines[lineNumber];
+      return this.lines[lineNumber] + pitch;
 
     case "below":
       // below line
-      if (lineNumber >= this.lines.length) {
-        return this.lines[this.lines.length - 1] + pitch;
-      } else {
-        return this.lines[lineNumber] + interval;
+      if (lineNumber >= this.lines.length - 1) {
+        lineNumber = this.lines.length - 1;
       }
 
+      return this.lines[lineNumber] + interval + pitch;
   }
 };
 
@@ -16723,9 +16896,9 @@ Tablature.prototype.verticalLine = function (x, y1, y2) {
 
 Tablature.prototype.bar = function (staffInfos) {
   if (this.dotY == null) {
-    this.dotY = this.getY('on', 2);
+    this.dotY = this.getY('on', 1);
   } else {
-    this.dotY = this.getY('on', 3);
+    this.dotY = this.getY('on', 2);
   }
 
   switch (staffInfos.type) {
@@ -16738,16 +16911,74 @@ Tablature.prototype.bar = function (staffInfos) {
       break;
   }
 
-  if (this.dotY == this.getY('on', 3)) {
+  if (this.dotY == this.getY('on', 2)) {
     this.dotY = null; // just reset
   }
 };
 
 Tablature.prototype.tab = function (staffInfos) {
-  this.drawer.drawTab(staffInfos.x, this.getY('above', 2), staffInfos.pitch);
+  this.drawer.drawTab(staffInfos.x, this.getY('below', 1), staffInfos.pitch);
 };
 
 module.exports = Tablature;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/violin/violin-fonts.js":
+/*!***********************************************************!*\
+  !*** ./src/tablatures/instruments/violin/violin-fonts.js ***!
+  \***********************************************************/
+/***/ (function(module) {
+
+/**
+ * Dedicated fonts for violin tabs
+ */
+
+/**
+ * Set here the fonts used by renderer/drawer 
+ * for the violin plugin
+ * @param {} tune 
+ */
+function setViolinFonts(tune) {
+  tune.formatting.tabnumberfont = {
+    face: "\"Times New Roman\"",
+    size: 9,
+    weight: "normal",
+    style: "normal",
+    decoration: "none"
+  };
+  tune.formatting.tabgracefont = {
+    face: "\"Times New Roman\"",
+    size: 7,
+    weight: "normal",
+    style: "normal",
+    decoration: "none"
+  };
+}
+
+module.exports = setViolinFonts;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/violin/violin-patterns.js":
+/*!**************************************************************!*\
+  !*** ./src/tablatures/instruments/violin/violin-patterns.js ***!
+  \**************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var StringPatterns = __webpack_require__(/*! ../string-patterns */ "./src/tablatures/instruments/string-patterns.js");
+
+function ViolinPatterns(tuning) {
+  this.tuning = tuning;
+
+  if (!tuning) {
+    this.tuning = ['G,', 'D', 'A', 'e'];
+  }
+
+  this.violinStrings = new StringPatterns(tuning);
+}
+
+module.exports = ViolinPatterns;
 
 /***/ }),
 
@@ -16767,9 +16998,10 @@ var glyphs = __webpack_require__(/*! ../write/abc_glyphs */ "./src/write/abc_gly
 
 var printStem = __webpack_require__(/*! ../write/draw/print-stem */ "./src/write/draw/print-stem.js");
 
-function TabDrawer(renderer) {
-  this.renderer = renderer;
-  this.controller = renderer.controller;
+function TabDrawer(tabRenderer) {
+  this.tabRenderer = tabRenderer;
+  this.renderer = tabRenderer.renderer;
+  this.controller = this.renderer.controller;
 }
 
 TabDrawer.prototype.drawSymbol = function (x, y, symbol) {
@@ -16778,8 +17010,9 @@ TabDrawer.prototype.drawSymbol = function (x, y, symbol) {
   return el;
 };
 
-TabDrawer.prototype.drawNonMusic = function (content) {
-  nonMusic(this.renderer, content);
+TabDrawer.prototype.drawRendered = function () {
+  nonMusic(this.renderer, this.tabRenderer.rendered);
+  this.tabRenderer.reset(); // cleanup after drawing
 };
 
 TabDrawer.prototype.drawHLine = function (x1, x2, numLine, lineSpace, klass, name) {
@@ -16818,11 +17051,32 @@ var renderText = __webpack_require__(/*! ../write/draw/text */ "./src/write/draw
 
 var FreeText = __webpack_require__(/*! ../write/free-text */ "./src/write/free-text.js");
 
-var nonMusic = __webpack_require__(/*! ../write/draw/non-music */ "./src/write/draw/non-music.js");
+var nonMusic = __webpack_require__(/*! ../write/draw/non-music */ "./src/write/draw/non-music.js"); // private
+
+
+function number(self, x, y, number) {
+  var textSize = self.controller.getTextSize;
+  var str = number.toString();
+  var size = textSize.calc(str, 'tabnumberfont', 'text instrumentname');
+  y -= size.height / 2 + 1;
+  var rows = self.rendered.rows;
+  rows.push({
+    absmove: y
+  });
+  rows.push({
+    left: x,
+    text: str,
+    font: 'tabnumberfont',
+    klass: 'text instrumentname',
+    anchor: 'start'
+  });
+  self.drawer.drawRendered();
+}
 
 function TabRenderer(renderer) {
   this.renderer = renderer;
   this.controller = renderer.controller;
+  this.drawer = null;
   this.reset();
 }
 
@@ -16832,9 +17086,12 @@ TabRenderer.prototype.reset = function () {
   };
 };
 
-TabRenderer.prototype.instrumentName = function (name) {
+TabRenderer.prototype.instrumentName = function (name, y) {
   var textSize = this.controller.getTextSize;
   var rows = this.rendered.rows;
+  rows.push({
+    absmove: y
+  });
   rows.push({
     left: 18,
     text: name,
@@ -16846,6 +17103,35 @@ TabRenderer.prototype.instrumentName = function (name) {
   rows.push({
     move: size.height
   });
+  this.drawer.drawRendered();
+  return size.height;
+};
+
+TabRenderer.prototype.numbers = function (x, tablature, tabPos) {
+  var notes = tabPos.notes;
+  var graces = tabPos.graces;
+
+  for (jjjj = 0; jjjj < notes.length; jjjj++) {
+    var y = tablature.getY('on', notes[jjjj].str, 0);
+    number(this, x, y, notes[jjjj].num);
+
+    if (graces) {// TODO: graces
+    }
+  }
+};
+/**
+ * Empty space filler
+ * @param {*} size 
+ */
+
+
+TabRenderer.prototype.fillerY = function (size) {
+  var rows = this.rendered.rows;
+  rows.push({
+    move: size
+  });
+  this.drawer.drawRendered();
+  return size;
 };
 
 module.exports = TabRenderer;
@@ -20683,6 +20969,10 @@ Renderer.prototype.moveY = function (em, numLines) {
   this.y += em * numLines;
 };
 
+Renderer.prototype.absolutemoveY = function (y) {
+  this.y = y;
+};
+
 module.exports = Renderer;
 
 /***/ }),
@@ -22277,7 +22567,9 @@ function nonMusic(renderer, obj, selectables) {
   for (var i = 0; i < obj.rows.length; i++) {
     var row = obj.rows[i];
 
-    if (row.move) {
+    if (row.absmove) {
+      renderer.absolutemoveY(row.absmove);
+    } else if (row.move) {
       renderer.moveY(row.move);
     } else if (row.text) {
       var x = row.left ? row.left : 0;
