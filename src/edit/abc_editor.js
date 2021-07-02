@@ -258,6 +258,8 @@ Editor.prototype.paramChanged = function(engraverParams) {
 };
 
 Editor.prototype.synthParamChanged = function(options) {
+	if (!this.synth)
+		return;
 	this.synth.options = {};
 	if (options) {
 		for (var key in options) {
@@ -378,6 +380,8 @@ Editor.prototype.pause = function(shouldPause) {
 };
 
 Editor.prototype.millisecondsPerMeasure = function() {
+	if (!this.synth || !this.synth.synthControl || !this.synth.synthControl.visualObj)
+		return 0;
 	return this.synth.synthControl.visualObj.millisecondsPerMeasure();
 };
 

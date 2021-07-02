@@ -10,7 +10,10 @@ function registerAudioContext(ac) {
 		// no audio context passed in, so create it unless there is already one from before.
 		if (!window.abcjsAudioContext) {
 			var AudioContext = window.AudioContext || window.webkitAudioContext;
-			window.abcjsAudioContext = new AudioContext();
+			if (AudioContext)
+				window.abcjsAudioContext = new AudioContext();
+			else
+				return false;
 		}
 	}
 	return window.abcjsAudioContext.state !== "suspended";

@@ -27,15 +27,15 @@ var Tune = function() {
 	};
 	this.reset();
 
-	function copy(src, prop, attrs) {
+	function copy(dest, src, prop, attrs) {
 		for (var i = 0; i < attrs.length; i++)
-			this[prop][attrs[i]] = src[prop][attrs[i]];
+			dest[prop][attrs[i]] = src[prop][attrs[i]];
 	}
 
 	this.copyTopInfo = function(src) {
 		var attrs = ['tempo', 'title', 'header', 'rhythm', 'origin', 'composer', 'author', 'partOrder'];
-		copy(src, "metaText", attrs);
-		copy(src, "metaTextInfo", attrs);
+		copy(this, src, "metaText", attrs);
+		copy(this, src, "metaTextInfo", attrs);
 	};
 
 	this.copyBottomInfo = function(src) {
@@ -50,8 +50,8 @@ var Tune = function() {
 			'abc-creator',
 			'abc-edited-by',
 			'footer']
-		copy(src, "metaText", attrs);
-		copy(src, "metaTextInfo", attrs);
+		copy(this, src, "metaText", attrs);
+		copy(this, src, "metaTextInfo", attrs);
 	};
 
 	// The structure consists of a hash with the following two items:
