@@ -249,6 +249,8 @@ module.exports = animation;
  */
 var ViolinTablature = __webpack_require__(/*! ../tablatures/instruments/violin/tab-violin */ "./src/tablatures/instruments/violin/tab-violin.js");
 
+var GuitarTablature = __webpack_require__(/*! ../tablatures/instruments/guitar/tab-guitar */ "./src/tablatures/instruments/guitar/tab-guitar.js");
+
 var abcTablatures = {
   inited: false,
   plugins: {},
@@ -263,19 +265,11 @@ var abcTablatures = {
     var tablature = plugin.tablature;
     this.plugins[name] = tablature;
   },
-  emit_error: function emit_error(msg) {
-    if (this.errordiv) {
-      if (msg) {
-        this.errordiv.innerHTML = [msg].join('<br />');
-      }
+  setError: function setError(tune, msg) {
+    if (tune.warnings) {
+      tune.warning.push(msg);
     } else {
-      // default to console logging
-      console.error('tablatures plugins ERROR :' + msg);
-    }
-  },
-  init_error_handler: function init_error_handler(warnings_id) {
-    if (warnings_id) {
-      if (typeof warnings_id === "string") this.errordiv = document.getElementById(warnings_id);else this.errordiv = warnings_id;
+      tune.warnings = [msg];
     }
   },
 
@@ -294,7 +288,6 @@ var abcTablatures = {
     if (params.tablatures) {
       // validate requested plugins 
       var tabs = params.tablatures;
-      this.init_error_handler(tabs.warnings_id);
 
       for (ii = 0; ii < tabs.length; ii++) {
         returned = [];
@@ -317,7 +310,9 @@ var abcTablatures = {
             nbPlugins++;
           } else {
             // unknown tab plugin 
-            this.emit_error('Undefined tablature plugin: ' + tabName);
+            //this.emit_error('Undefined tablature plugin: ' + tabName)
+            this.setError(tune, 'Undefined tablature plugin: ' + tabName);
+            return returned;
           }
         }
       }
@@ -356,6 +351,7 @@ var abcTablatures = {
     // just register plugin hosted by abcjs 
     if (!this.inited) {
       this.register(new ViolinTablature());
+      this.register(new GuitarTablature());
       this.inited = true;
     }
   }
@@ -16524,6 +16520,149 @@ module.exports = SynthSequence;
 
 /***/ }),
 
+/***/ "./src/tablatures/instruments/guitar/guitar-fonts.js":
+/*!***********************************************************!*\
+  !*** ./src/tablatures/instruments/guitar/guitar-fonts.js ***!
+  \***********************************************************/
+/***/ (function(module) {
+
+/**
+ * Dedicated fonts for violin tabs
+ */
+
+/**
+ * Set here the fonts used by renderer/drawer 
+ * for the violin plugin
+ * @param {} tune 
+ */
+function setGuitarFonts(tune) {
+  tune.formatting.tabnumberfont = {
+    face: "\"Times New Roman\"",
+    size: 9,
+    weight: "normal",
+    style: "normal",
+    decoration: "none"
+  };
+  tune.formatting.tabgracefont = {
+    face: "\"Times New Roman\"",
+    size: 7,
+    weight: "normal",
+    style: "normal",
+    decoration: "none"
+  };
+}
+
+module.exports = setGuitarFonts;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/guitar/guitar-patterns.js":
+/*!**************************************************************!*\
+  !*** ./src/tablatures/instruments/guitar/guitar-patterns.js ***!
+  \**************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var StringPatterns = __webpack_require__(/*! ../string-patterns */ "./src/tablatures/instruments/string-patterns.js");
+
+function GuitarPatterns(tuning) {
+  this.tuning = tuning;
+
+  if (!tuning) {
+    this.tuning = ['E,', 'A', 'D', 'G', 'B', 'e'];
+  }
+
+  this.strings = new StringPatterns(tuning);
+}
+
+module.exports = GuitarPatterns;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/guitar/tab-guitar.js":
+/*!*********************************************************!*\
+  !*** ./src/tablatures/instruments/guitar/tab-guitar.js ***!
+  \*********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/*
+Emit tab for Guitar staff
+*/
+var Tablature = __webpack_require__(/*! ../string-tablature */ "./src/tablatures/instruments/string-tablature.js");
+
+var GuitarPatterns = __webpack_require__(/*! ./guitar-patterns */ "./src/tablatures/instruments/guitar/guitar-patterns.js");
+
+var TabCommon = __webpack_require__(/*! ../../tab-common */ "./src/tablatures/tab-common.js");
+
+var StringRenderer = __webpack_require__(/*! ../string-renderer */ "./src/tablatures/instruments/string-renderer.js");
+
+var setGuitarFonts = __webpack_require__(/*! ./guitar-fonts */ "./src/tablatures/instruments/guitar/guitar-fonts.js");
+
+var plugin = {
+  /**
+  * upon init mainly store provided instances for later usage
+  * @param {*} abcTune  the parsed tune AST tree
+  *  @param {*} tuneNumber  the parsed tune AST tree
+  * @param {*} params  complementary args provided to Tablature Plugin
+  */
+  init: function init(abcTune, tuneNumber, params) {
+    this._super = new TabCommon(abcTune, tuneNumber, params);
+    this.lineSpace = 12;
+    this.nbLines = 6;
+    var semantics = new GuitarPatterns(params.tuning);
+    this.semantics = semantics;
+    console.log('GuitarTab plugin inited');
+  },
+
+  /**
+   * render a score line staff using current abcjs renderer 
+   * NB : we assume that renderer , current tunes info + tab params 
+   * operational inside plugin instance
+   * @param {*} renderer
+   * @param {*} staff
+   * @return the current height of displayed tab 
+   */
+  render: function render(renderer, voice, curVoice) {
+    console.log('GuitarTab plugin rendered');
+    var _super = this._super;
+    var strRenderer = new StringRenderer(this, renderer); // set guitar tab fonts
+
+    setGuitarFonts(_super.tune);
+    _super.topStaffY = renderer.tablatures.topStaff; // top empty filler
+
+    _super.tabRenderer.fillerY(30); //  tablature frame
+
+
+    var tablature = new Tablature(_super.tabDrawer, this.nbLines, this.lineSpace);
+    tablature.tabFontName = 'tab.big';
+    tablature.tabYPos = 2;
+    tablature.print(); // Instrument name 
+
+    var yName = tablature.getY('on', tablature.numLines - 1);
+    var name = _super.params.name + '(' + this.semantics.strings.toString() + ')';
+
+    var verticalSize = _super.tabRenderer.instrumentName(name, yName); // deal with current voice line
+
+
+    strRenderer.render(tablature, this.semantics, voice); // update vertical size
+
+    verticalSize += this.lineSpace * this.nbLines;
+    return verticalSize;
+  }
+}; //
+// Tablature plugin definition
+//
+
+var AbcGuitarTab = function AbcGuitarTab() {
+  return {
+    name: 'GuitarTab',
+    tablature: plugin
+  };
+};
+
+module.exports = AbcGuitarTab;
+
+/***/ }),
+
 /***/ "./src/tablatures/instruments/string-patterns.js":
 /*!*******************************************************!*\
   !*** ./src/tablatures/instruments/string-patterns.js ***!
@@ -16672,6 +16811,10 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
   return null;
 };
 
+StringPatterns.prototype.toString = function () {
+  return this.tuning.join('').replaceAll(',', '').toUpperCase();
+};
+
 function StringPatterns(tuning) {
   this.tuning = tuning;
   this.strings = buildPatterns(this);
@@ -16681,147 +16824,81 @@ module.exports = StringPatterns;
 
 /***/ }),
 
-/***/ "./src/tablatures/instruments/violin/tab-violin.js":
-/*!*********************************************************!*\
-  !*** ./src/tablatures/instruments/violin/tab-violin.js ***!
-  \*********************************************************/
+/***/ "./src/tablatures/instruments/string-renderer.js":
+/*!*******************************************************!*\
+  !*** ./src/tablatures/instruments/string-renderer.js ***!
+  \*******************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-/*
-Emit tab for violin staff
-*/
-var TabRenderer = __webpack_require__(/*! ../../tab-renderer */ "./src/tablatures/tab-renderer.js");
+var TabRenderer = __webpack_require__(/*! ../tab-renderer */ "./src/tablatures/tab-renderer.js");
 
-var TabDrawer = __webpack_require__(/*! ../../tab-drawer */ "./src/tablatures/tab-drawer.js");
+var TabDrawer = __webpack_require__(/*! ../tab-drawer */ "./src/tablatures/tab-drawer.js");
+/**
+ * render tablature for string voice
+ * @param {*} tablature 
+ * @param {*} voice 
+ */
 
-var Tablature = __webpack_require__(/*! ./tablature */ "./src/tablatures/instruments/violin/tablature.js");
 
-var ViolinPatterns = __webpack_require__(/*! ./violin-patterns */ "./src/tablatures/instruments/violin/violin-patterns.js");
+function StringTabRenderer(self, renderer) {
+  this._super = self._super;
+  var _super = this._super;
 
-var setViolinFonts = __webpack_require__(/*! ./violin-fonts */ "./src/tablatures/instruments/violin/violin-fonts.js");
+  if (_super.tabRenderer == null) {
+    _super.tabRenderer = new TabRenderer(renderer);
+  }
 
-var plugin = {
-  // private stuff
-  renderVoice: function renderVoice(tablature, voice) {
-    var absChild;
+  if (_super.tabDrawer == null) {
+    _super.tabDrawer = new TabDrawer(_super.tabRenderer);
+    _super.tabRenderer.drawer = _super.tabDrawer;
+  }
+}
 
-    for (ii = 0; ii < voice.children.length; ii++) {
-      absChild = voice.children[ii];
-      var scoreType;
+StringTabRenderer.prototype.render = function (tablature, semantics, voice) {
+  var absChild;
+  var _super = this._super; // draw starting vertical line
 
-      for (jj = 0; jj < absChild.children.length; jj++) {
-        var relChild = absChild.children[jj];
-        scoreType = relChild.parent.abcelem.el_type;
+  tablature.verticalLine(tablature.startx, _super.topStaffY, tablature.bottomLine);
 
-        switch (scoreType) {
-          case 'clef':
-            tablature.tab(relChild);
-            break;
+  for (ii = 0; ii < voice.children.length; ii++) {
+    absChild = voice.children[ii];
+    var scoreType;
 
-          case 'bar':
-            tablature.bar(relChild);
-            break;
-        }
+    for (jj = 0; jj < absChild.children.length; jj++) {
+      var relChild = absChild.children[jj];
+      scoreType = relChild.parent.abcelem.el_type;
 
-        if (scoreType == 'note') {
-          var pitches = absChild.abcelem.pitches;
-          var graceNotes = absChild.gracenotes;
-          tabPos = this.semantics.violinStrings.notesToNumber(pitches, graceNotes);
-          this.tabRenderer.numbers(absChild.x, tablature, tabPos);
-        }
+      switch (scoreType) {
+        case 'clef':
+          tablature.tab(relChild);
+          break;
+
+        case 'bar':
+          tablature.bar(relChild);
+          break;
+      }
+
+      if (scoreType == 'note') {
+        var pitches = absChild.abcelem.pitches;
+        var graceNotes = absChild.gracenotes;
+        tabPos = semantics.strings.notesToNumber(pitches, graceNotes);
+
+        _super.tabRenderer.numbers(absChild.x, tablature, tabPos);
       }
     }
-  },
-  // public stuf
-
-  /**
-   * upon init mainly store provided instances for later usage
-   * @param {*} abcTune  the parsed tune AST tree
-  *  @param {*} tuneNumber  the parsed tune AST tree
-   * @param {*} params  complementary args provided to Tablature Plugin
-   */
-  init: function init(abcTune, tuneNumber, params) {
-    this.tune = abcTune;
-    this.params = params;
-    this.tuneNumber = tuneNumber;
-    this.tabRenderer = null;
-    this.tabDrawer = null;
-    this.lineSpace = 12;
-    this.nbLines = 4;
-    this.topStaffY = -1;
-    var semantics = new ViolinPatterns(this.params.tuning);
-    this.semantics = semantics;
-    console.log('ViolinTab plugin inited');
-  },
-
-  /**
-   * render a score line staff using current abcjs renderer 
-   * NB : we assume that renderer , current tunes info + tab params 
-   * operational inside plugin instance
-   * @param {*} renderer
-   * @param {*} staff
-   * @return the current height of displayed tab 
-   */
-  render: function render(renderer, voice, curVoice) {
-    console.log('ViolinTab plugin rendered');
-
-    if (this.tabRenderer == null) {
-      this.tabRenderer = new TabRenderer(renderer);
-    }
-
-    if (this.tabDrawer == null) {
-      this.tabDrawer = new TabDrawer(this.tabRenderer);
-      this.tabRenderer.drawer = this.tabDrawer;
-    } // set violin tab fonts
+  } // draw ending vertical line
 
 
-    setViolinFonts(this.tune); //
-
-    this.topStaffY = renderer.tablatures.topStaff; // top empty filler
-
-    this.tabRenderer.fillerY(20); // write instrument name first
-
-    var name = this.params.name;
-
-    if (!name) {
-      name = 'violin';
-    } //  tablature frame
-
-
-    var tablature = new Tablature(this.tabDrawer, this.nbLines, this.lineSpace);
-    tablature.print(); // Instrument name 
-
-    var yName = tablature.getY('on', tablature.numLines - 1);
-    var verticalSize = this.tabRenderer.instrumentName(name, yName); // draw starting vertical line
-
-    tablature.verticalLine(tablature.startx, this.topStaffY, tablature.bottomLine); // deal with current voice line
-
-    this.renderVoice(tablature, voice); // draw ending vertical line
-
-    tablature.verticalLine(tablature.endx, this.topStaffY, tablature.bottomLine); // update vertical size
-
-    verticalSize += this.lineSpace * this.nbLines; // return back the vertical size used by tab line
-
-    return verticalSize;
-  }
-}; //
-// Tablature plugin definition
-//
-
-var AbcViolinTab = function AbcViolinTab() {
-  return {
-    name: 'ViolinTab',
-    tablature: plugin
-  };
+  tablature.verticalLine(tablature.endx, _super.topStaffY, tablature.bottomLine);
 };
 
-module.exports = AbcViolinTab;
+module.exports = StringTabRenderer;
 
 /***/ }),
 
-/***/ "./src/tablatures/instruments/violin/tablature.js":
+/***/ "./src/tablatures/instruments/string-tablature.js":
 /*!********************************************************!*\
-  !*** ./src/tablatures/instruments/violin/tablature.js ***!
+  !*** ./src/tablatures/instruments/string-tablature.js ***!
   \********************************************************/
 /***/ (function(module) {
 
@@ -16842,6 +16919,8 @@ function Tablature(drawer, numLines, lineSpace) {
   this.bottomLine = -1;
   this.staffY = -1;
   this.dotY = null;
+  this.tabFontName = 'tab.tiny';
+  this.tabYPos = 1;
 }
 
 Tablature.prototype.print = function () {
@@ -16856,7 +16935,7 @@ Tablature.prototype.print = function () {
     klass = undefined;
   }
 
-  this.nbLines = this.topLine = this.lines[0];
+  this.topLine = this.lines[0];
   this.bottomLine = this.lines[this.numLines - 1];
   this.renderer.paper.closeGroup();
 };
@@ -16895,10 +16974,13 @@ Tablature.prototype.verticalLine = function (x, y1, y2) {
 };
 
 Tablature.prototype.bar = function (staffInfos) {
+  var nbLines = this.lines.length;
+  var dotPos = Math.round(nbLines / 2);
+
   if (this.dotY == null) {
-    this.dotY = this.getY('on', 1);
+    this.dotY = this.getY('on', dotPos - 1);
   } else {
-    this.dotY = this.getY('on', 2);
+    this.dotY = this.getY('on', dotPos);
   }
 
   switch (staffInfos.type) {
@@ -16911,16 +16993,112 @@ Tablature.prototype.bar = function (staffInfos) {
       break;
   }
 
-  if (this.dotY == this.getY('on', 2)) {
+  if (this.dotY == this.getY('on', dotPos)) {
     this.dotY = null; // just reset
   }
 };
 
 Tablature.prototype.tab = function (staffInfos) {
-  this.drawer.drawTab(staffInfos.x, this.getY('below', 1), staffInfos.pitch);
+  this.drawer.drawTab(staffInfos.x, this.getY('below', this.tabYPos), this.tabFontName);
 };
 
 module.exports = Tablature;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/violin/tab-violin.js":
+/*!*********************************************************!*\
+  !*** ./src/tablatures/instruments/violin/tab-violin.js ***!
+  \*********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/*
+Emit tab for violin staff
+*/
+var Tablature = __webpack_require__(/*! ../string-tablature */ "./src/tablatures/instruments/string-tablature.js");
+
+var ViolinPatterns = __webpack_require__(/*! ./violin-patterns */ "./src/tablatures/instruments/violin/violin-patterns.js");
+
+var setViolinFonts = __webpack_require__(/*! ./violin-fonts */ "./src/tablatures/instruments/violin/violin-fonts.js");
+
+var TabCommon = __webpack_require__(/*! ../../tab-common */ "./src/tablatures/tab-common.js");
+
+var StringRenderer = __webpack_require__(/*! ../string-renderer */ "./src/tablatures/instruments/string-renderer.js");
+
+var plugin = {
+  // public stuff
+
+  /**
+   * upon init mainly store provided instances for later usage
+   * @param {*} abcTune  the parsed tune AST tree
+  *  @param {*} tuneNumber  the parsed tune AST tree
+   * @param {*} params  complementary args provided to Tablature Plugin
+   */
+  init: function init(abcTune, tuneNumber, params) {
+    var _super = new TabCommon(abcTune, tuneNumber, params);
+
+    this._super = _super;
+    this.lineSpace = 12;
+    this.nbLines = 4;
+    var semantics = new ViolinPatterns(_super.params.tuning);
+    this.semantics = semantics;
+    console.log('ViolinTab plugin inited');
+  },
+
+  /**
+   * render a score line staff using current abcjs renderer 
+   * NB : we assume that renderer , current tunes info + tab params 
+   * operational inside plugin instance
+   * @param {*} renderer
+   * @param {*} staff
+   * @return the current height of displayed tab 
+   */
+  render: function render(renderer, voice, curVoice) {
+    console.log('ViolinTab plugin rendered');
+    var _super = this._super;
+    var strRenderer = new StringRenderer(this, renderer); // set violin tab fonts
+
+    setViolinFonts(_super.tune); //
+
+    _super.topStaffY = renderer.tablatures.topStaff; // top empty filler
+
+    _super.tabRenderer.fillerY(20); // get displayed instrument name
+
+
+    var name = _super.params.name;
+
+    if (!name) {
+      name = 'violin';
+    } //  tablature frame
+
+
+    var tablature = new Tablature(_super.tabDrawer, this.nbLines, this.lineSpace);
+    tablature.print(); // Instrument name 
+
+    var yName = tablature.getY('on', tablature.numLines - 1);
+    name += '(' + this.semantics.strings.toString() + ')';
+
+    var verticalSize = _super.tabRenderer.instrumentName(name, yName); // deal with current voice line
+
+
+    strRenderer.render(tablature, this.semantics, voice); // update vertical size
+
+    verticalSize += this.lineSpace * this.nbLines; // return back the vertical size used by tab line
+
+    return verticalSize;
+  }
+}; //
+// Tablature plugin definition
+//
+
+var AbcViolinTab = function AbcViolinTab() {
+  return {
+    name: 'ViolinTab',
+    tablature: plugin
+  };
+};
+
+module.exports = AbcViolinTab;
 
 /***/ }),
 
@@ -16975,10 +17153,34 @@ function ViolinPatterns(tuning) {
     this.tuning = ['G,', 'D', 'A', 'e'];
   }
 
-  this.violinStrings = new StringPatterns(tuning);
+  this.strings = new StringPatterns(tuning);
 }
 
 module.exports = ViolinPatterns;
+
+/***/ }),
+
+/***/ "./src/tablatures/tab-common.js":
+/*!**************************************!*\
+  !*** ./src/tablatures/tab-common.js ***!
+  \**************************************/
+/***/ (function(module) {
+
+/**
+ * 
+ * Common Class/Method available for all instruments 
+ * 
+ */
+function TabCommon(abcTune, tuneNumber, params) {
+  this.tune = abcTune;
+  this.params = params;
+  this.tuneNumber = tuneNumber;
+  this.tabRenderer = null;
+  this.tabDrawer = null;
+  this.topStaffY = -1;
+}
+
+module.exports = TabCommon;
 
 /***/ }),
 
@@ -17031,8 +17233,8 @@ TabDrawer.prototype.drawBar = function (y1, y2, x, klass, name, dx) {
   return printStem(this.renderer, x, dx, y1, y2, klass, name);
 };
 
-TabDrawer.prototype.drawTab = function (x, y, pitch) {
-  return this.drawSymbol(x, y, "tab.tiny");
+TabDrawer.prototype.drawTab = function (x, y, fontName) {
+  return this.drawSymbol(x, y, fontName);
 };
 
 module.exports = TabDrawer;

@@ -16,6 +16,8 @@ function Tablature(drawer, numLines, lineSpace) {
   this.bottomLine = -1;
   this.staffY = -1;
   this.dotY = null;
+  this.tabFontName = 'tab.tiny'
+  this.tabYPos = 1
 }
 
 Tablature.prototype.print = function () {
@@ -31,7 +33,6 @@ Tablature.prototype.print = function () {
       klass);
     klass = undefined;
   }
-  this.nbLines = 
   this.topLine = this.lines[0];
   this.bottomLine = this.lines[this.numLines-1];
   this.renderer.paper.closeGroup();  
@@ -60,11 +61,13 @@ Tablature.prototype.verticalLine = function (x, y1, y2) {
   this.renderer.paper.closeGroup();
 }
 
-Tablature.prototype.bar = function ( staffInfos ) {
+Tablature.prototype.bar = function (staffInfos) {
+  var nbLines = this.lines.length;
+  var dotPos = Math.round(nbLines / 2);
   if (this.dotY == null) {
-    this.dotY = this.getY('on', 1);
+    this.dotY = this.getY('on', dotPos-1);
   } else {
-    this.dotY = this.getY('on', 2);
+    this.dotY = this.getY('on', dotPos);
   }
   switch (staffInfos.type) {
     case 'bar':
@@ -74,15 +77,15 @@ Tablature.prototype.bar = function ( staffInfos ) {
       this.drawer.drawSymbol(staffInfos.x,this.dotY,staffInfos.name);
       break;
   }
-  if (this.dotY == this.getY('on', 2)) {
+  if (this.dotY == this.getY('on', dotPos)) {
     this.dotY = null; // just reset
   }
 }
 
 Tablature.prototype.tab = function (staffInfos) {
   this.drawer.drawTab(staffInfos.x,
-    this.getY('below', 1),
-    staffInfos.pitch);
+    this.getY('below', this.tabYPos),
+    this.tabFontName);
 }
 
 module.exports = Tablature;

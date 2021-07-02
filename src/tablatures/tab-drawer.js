@@ -38,8 +38,8 @@ TabDrawer.prototype.drawBar = function (y1, y2, x, klass, name, dx) {
   return printStem(this.renderer, x,dx,y1,y2,klass,name)  
 }
 
-TabDrawer.prototype.drawTab = function (x,y, pitch) {
-  return this.drawSymbol(x, y, "tab.tiny");
+TabDrawer.prototype.drawTab = function (x,y, fontName) {
+  return this.drawSymbol(x, y, fontName);
 };
 
 

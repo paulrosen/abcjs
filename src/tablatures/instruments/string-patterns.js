@@ -116,6 +116,9 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
   return null; 
 }
 
+StringPatterns.prototype.toString = function () {
+  return this.tuning.join('').replaceAll(',','').toUpperCase();
+}
 
 function StringPatterns(tuning) {
   this.tuning = tuning;

@@ -1,11 +1,11 @@
 var StringPatterns = require('../string-patterns');
 
-function ViolinPatterns(tuning) {
+function GuitarPatterns(tuning) {
   this.tuning = tuning;
   if (!tuning) {
-    this.tuning = ['G,', 'D', 'A', 'e'];
+    this.tuning = ['E,', 'A', 'D', 'G' , 'B' , 'e'];
   }
   this.strings = new StringPatterns(tuning);
 }
 
-module.exports = ViolinPatterns;
+module.exports = GuitarPatterns;

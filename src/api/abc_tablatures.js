@@ -6,6 +6,7 @@
  * 
  */
 var ViolinTablature = require('../tablatures/instruments/violin/tab-violin');
+var GuitarTablature = require('../tablatures/instruments/guitar/tab-guitar');
 
 var abcTablatures = {
 
@@ -23,24 +24,12 @@ var abcTablatures = {
     this.plugins[name] = tablature;
   },
 
-  emit_error: function (msg) {
-    if (this.errordiv) {
-      if (msg) {
-        this.errordiv.innerHTML = [msg].join('<br />');
-      }
+  setError: function (tune, msg) {
+    if (tune.warnings) {
+      tune.warning.push(msg);
     } else {
-      // default to console logging
-      console.error('tablatures plugins ERROR :' + msg);
+      tune.warnings = [msg];
     }
-  },
-
-  init_error_handler: function (warnings_id) {
-    if (warnings_id) {
-      if (typeof (warnings_id) === "string")
-        this.errordiv = document.getElementById(warnings_id);
-      else
-        this.errordiv = warnings_id;
-    } 
   },
 
   /**
@@ -57,7 +46,6 @@ var abcTablatures = {
     if (params.tablatures) {
        // validate requested plugins 
       var tabs = params.tablatures;
-      this.init_error_handler(tabs.warnings_id);
       for (ii = 0; ii < tabs.length; ii++) {
         returned = [];
         var tab = tabs[ii];
@@ -75,7 +63,9 @@ var abcTablatures = {
             nbPlugins++;
           } else {
             // unknown tab plugin 
-            this.emit_error('Undefined tablature plugin: '+ tabName)
+            //this.emit_error('Undefined tablature plugin: ' + tabName)
+            this.setError(tune, 'Undefined tablature plugin: ' + tabName);
+            return returned
           }
         } 
       }
@@ -110,6 +100,7 @@ var abcTablatures = {
     // just register plugin hosted by abcjs 
     if (!this.inited) {
       this.register(new ViolinTablature());
+      this.register(new GuitarTablature());
       this.inited = true;
     }
   }
