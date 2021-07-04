@@ -34,13 +34,16 @@ var plugin = {
    * @param {*} staff
    * @return the current height of displayed tab 
    */
-  render: function (renderer, voice, curVoice) {
+  render: function (renderer, voice, curVoice , lineNumber) {
     console.log('ViolinTab plugin rendered');
     var _super = this._super;
     var strRenderer = new StringRenderer(this, renderer);
     // set violin tab fonts
     setViolinFonts(_super.tune);
     //
+    // get staff accidentals
+    this.semantics.strings.accidentals = _super.setAccidentals(lineNumber, curVoice);
+
     _super.topStaffY = renderer.tablatures.topStaff;
     // top empty filler
     _super.tabRenderer.fillerY(20);

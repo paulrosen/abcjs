@@ -254,7 +254,6 @@ var GuitarTablature = __webpack_require__(/*! ../tablatures/instruments/guitar/t
 var abcTablatures = {
   inited: false,
   plugins: {},
-  errordiv: null,
 
   /**
    * to be called once per plugin for registration 
@@ -329,7 +328,7 @@ var abcTablatures = {
    * @param {*} staffNumber 
    * @return tablature height size
    */
-  renderStaffLine: function renderStaffLine(renderer, staff, staffNumber) {
+  renderStaffLine: function renderStaffLine(renderer, staff, staffNumber, lineNumber) {
     var tune = renderer.abctune;
     var tabs = tune.tablatures;
 
@@ -337,7 +336,7 @@ var abcTablatures = {
       tabPlugin = tabs[staffNumber];
 
       if (tabPlugin) {
-        return tabPlugin.render(renderer, staff, staffNumber);
+        return tabPlugin.render(renderer, staff, staffNumber, lineNumber);
       }
     }
 
@@ -1297,22 +1296,22 @@ var Tune = function Tune() {
 
   this.reset();
 
-  function copy(src, prop, attrs) {
+  function copy(dest, src, prop, attrs) {
     for (var i = 0; i < attrs.length; i++) {
-      this[prop][attrs[i]] = src[prop][attrs[i]];
+      dest[prop][attrs[i]] = src[prop][attrs[i]];
     }
   }
 
   this.copyTopInfo = function (src) {
     var attrs = ['tempo', 'title', 'header', 'rhythm', 'origin', 'composer', 'author', 'partOrder'];
-    copy(src, "metaText", attrs);
-    copy(src, "metaTextInfo", attrs);
+    copy(this, src, "metaText", attrs);
+    copy(this, src, "metaTextInfo", attrs);
   };
 
   this.copyBottomInfo = function (src) {
     var attrs = ['unalignedWords', 'book', 'source', 'discography', 'notes', 'transcription', 'history', 'abc-copyright', 'abc-creator', 'abc-edited-by', 'footer'];
-    copy(src, "metaText", attrs);
-    copy(src, "metaTextInfo", attrs);
+    copy(this, src, "metaText", attrs);
+    copy(this, src, "metaTextInfo", attrs);
   }; // The structure consists of a hash with the following two items:
   // metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...
   // tempo: { noteLength: number (e.g. .125), bpm: number }
@@ -2551,6 +2550,7 @@ Editor.prototype.paramChanged = function (engraverParams) {
 };
 
 Editor.prototype.synthParamChanged = function (options) {
+  if (!this.synth) return;
   this.synth.options = {};
 
   if (options) {
@@ -2670,6 +2670,7 @@ Editor.prototype.pause = function (shouldPause) {
 };
 
 Editor.prototype.millisecondsPerMeasure = function () {
+  if (!this.synth || !this.synth.synthControl || !this.synth.synthControl.visualObj) return 0;
   return this.synth.synthControl.visualObj.millisecondsPerMeasure();
 };
 
@@ -16111,7 +16112,7 @@ function registerAudioContext(ac) {
     // no audio context passed in, so create it unless there is already one from before.
     if (!window.abcjsAudioContext) {
       var AudioContext = window.AudioContext || window.webkitAudioContext;
-      window.abcjsAudioContext = new AudioContext();
+      if (AudioContext) window.abcjsAudioContext = new AudioContext();else return false;
     }
   }
   return window.abcjsAudioContext.state !== "suspended";
@@ -16149,10 +16150,10 @@ var activeAudioContext = __webpack_require__(/*! ./active-audio-context */ "./sr
 
 
 function supportsAudio() {
+  if (!window.Promise) return false;
+  if (!window.AudioContext && !window.webkitAudioContext && !navigator.mozAudioContext && !navigator.msAudioContext) return false;
   var aac = activeAudioContext();
   if (aac) return aac.resume !== undefined;
-  if (!window.Promise) return false;
-  return !!window.AudioContext || !!window.webkitAudioContext || !!navigator.mozAudioContext || !!navigator.msAudioContext;
 }
 
 module.exports = supportsAudio;
@@ -16621,10 +16622,12 @@ var plugin = {
    * @param {*} staff
    * @return the current height of displayed tab 
    */
-  render: function render(renderer, voice, curVoice) {
+  render: function render(renderer, voice, curVoice, lineNumber) {
     console.log('GuitarTab plugin rendered');
     var _super = this._super;
-    var strRenderer = new StringRenderer(this, renderer); // set guitar tab fonts
+    var strRenderer = new StringRenderer(this, renderer); // get staff accidentals
+
+    this.semantics.strings.accidentals = _super.setAccidentals(lineNumber, curVoice); // set guitar tab fonts
 
     setGuitarFonts(_super.tune);
     _super.topStaffY = renderer.tablatures.topStaff; // top empty filler
@@ -16763,17 +16766,48 @@ function buildPatterns(self) {
 
   return strings;
 }
+/**
+ * 
+ * @param {} self 
+ * @param {*} note 
+ * @returns 0 : noAccident ; -1 flat ; +1 sharp
+ */
+
+
+function accidentalCheck(self, note) {
+  var accidentals = self.accidentals;
+  var n = note.charAt(0).toUpperCase();
+  var returned = 0;
+
+  if (accidentals) {
+    for (ai = 0; ai < accidentals.length; ai++) {
+      var acc = accidentals[ai];
+
+      if (acc.note.toUpperCase() == n) {
+        if (acc.acc == "flat") {
+          returned = -1;
+        } else {
+          returned = 1;
+        }
+      }
+    }
+  }
+
+  return returned;
+}
 
 function toNumber(self, note) {
   var num = -1;
   var str = 0;
+  var acc = 0;
 
   while (str < self.strings.length) {
     num = self.strings[str].indexOf(note);
 
     if (num != -1) {
+      acc = accidentalCheck(self, note);
       return {
-        num: num,
+        num: num + acc,
         str: str
       };
     }
@@ -16817,6 +16851,7 @@ StringPatterns.prototype.toString = function () {
 
 function StringPatterns(tuning) {
   this.tuning = tuning;
+  this.accidentals = null;
   this.strings = buildPatterns(this);
 }
 
@@ -17053,13 +17088,15 @@ var plugin = {
    * @param {*} staff
    * @return the current height of displayed tab 
    */
-  render: function render(renderer, voice, curVoice) {
+  render: function render(renderer, voice, curVoice, lineNumber) {
     console.log('ViolinTab plugin rendered');
     var _super = this._super;
     var strRenderer = new StringRenderer(this, renderer); // set violin tab fonts
 
     setViolinFonts(_super.tune); //
+    // get staff accidentals
 
+    this.semantics.strings.accidentals = _super.setAccidentals(lineNumber, curVoice);
     _super.topStaffY = renderer.tablatures.topStaff; // top empty filler
 
     _super.tabRenderer.fillerY(20); // get displayed instrument name
@@ -17179,6 +17216,20 @@ function TabCommon(abcTune, tuneNumber, params) {
   this.tabDrawer = null;
   this.topStaffY = -1;
 }
+/**
+ * Get Key accidentals for current staff
+ * @param {*} line 
+ * @param {*} staffNumber 
+ * @returns 
+ */
+
+
+TabCommon.prototype.setAccidentals = function (line, staffNumber) {
+  var tune = this.tune;
+  var line = tune.lines[line];
+  var staff = line.staff[staffNumber];
+  return staff.key.accidentals;
+};
 
 module.exports = TabCommon;
 
@@ -22535,7 +22586,7 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
       }
 
       if (staffgroups.length >= 1) addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
-      var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables);
+      var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables, line);
       staffgroup.line = line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
 
       staffgroups.push(staffgroup);
@@ -22555,8 +22606,8 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
   };
 }
 
-function engraveStaffLine(renderer, staffGroup, selectables) {
-  drawStaffGroup(renderer, staffGroup, selectables);
+function engraveStaffLine(renderer, staffGroup, selectables, lineNumber) {
+  drawStaffGroup(renderer, staffGroup, selectables, lineNumber);
   var height = staffGroup.height * spacing.STEP;
   renderer.y += height;
   return staffGroup;
@@ -23472,7 +23523,7 @@ var printStem = __webpack_require__(/*! ./print-stem */ "./src/write/draw/print-
 
 var tablatures = __webpack_require__(/*! ../../api/abc_tablatures */ "./src/api/abc_tablatures.js");
 
-function drawStaffGroup(renderer, params, selectables) {
+function drawStaffGroup(renderer, params, selectables, lineNumber) {
   // We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
   // All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
   // renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
@@ -23589,7 +23640,7 @@ function drawStaffGroup(renderer, params, selectables) {
       renderer.tablatures.topStaff = topLine;
       renderer.tablatures.bottomStaff = bottomLine; // height of displayed tab returned by tablature plugin
 
-      tabHeight = tablatures.renderStaffLine(renderer, params.voices[i], i);
+      tabHeight = tablatures.renderStaffLine(renderer, params.voices[i], i, lineNumber);
     }
   }
 

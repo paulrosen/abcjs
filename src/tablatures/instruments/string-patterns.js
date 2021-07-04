@@ -79,14 +79,41 @@ function buildPatterns(self) {
   return strings;
 }
 
+/**
+ * 
+ * @param {} self 
+ * @param {*} note 
+ * @returns 0 : noAccident ; -1 flat ; +1 sharp
+ */
+function accidentalCheck(self,note) {
+  var accidentals = self.accidentals;
+  var n = note.charAt(0).toUpperCase();
+  var returned = 0;
+  if (accidentals) {
+    for (ai = 0; ai < accidentals.length; ai++) {
+      var acc = accidentals[ai];
+      if (acc.note.toUpperCase() == n) {
+        if (acc.acc == "flat") {
+          returned = -1;
+        } else {
+          returned = 1;
+        }
+      }
+    }
+  }
+  return returned;
+}
+
 function toNumber (self,note) {
   var num = -1;
   var str = 0;
+  var acc = 0
   while (str < self.strings.length) {
     num = self.strings[str].indexOf(note);
     if (num != -1) {
+      acc = accidentalCheck(self, note);
       return {
-        num: num,
+        num: (num+acc) ,
         str: str
       }
     }
@@ -122,6 +149,7 @@ StringPatterns.prototype.toString = function () {
 
 function StringPatterns(tuning) {
   this.tuning = tuning;
+  this.accidentals = null;
   this.strings = buildPatterns(this);
 }
 

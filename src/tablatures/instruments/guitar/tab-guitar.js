@@ -33,10 +33,12 @@ var plugin = {
    * @param {*} staff
    * @return the current height of displayed tab 
    */
-  render: function (renderer, voice, curVoice) {
+  render: function (renderer, voice, curVoice, lineNumber) {
     console.log('GuitarTab plugin rendered');
     var _super = this._super;
     var strRenderer = new StringRenderer(this, renderer);
+    // get staff accidentals
+    this.semantics.strings.accidentals = _super.setAccidentals(lineNumber, curVoice);
     // set guitar tab fonts
     setGuitarFonts(_super.tune);
 

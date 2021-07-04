@@ -12,7 +12,7 @@ var abcTablatures = {
 
   inited: false ,
   plugins: {},
-  errordiv : null,
+
   
   /**
    * to be called once per plugin for registration 
@@ -81,13 +81,13 @@ var abcTablatures = {
    * @param {*} staffNumber 
    * @return tablature height size
    */
-  renderStaffLine: function (renderer, staff, staffNumber) {
+  renderStaffLine: function (renderer, staff, staffNumber, lineNumber) {
     var tune = renderer.abctune;
     var tabs = tune.tablatures;
     if (staffNumber < tabs.length) {
       tabPlugin = tabs[staffNumber];
       if (tabPlugin) {
-        return tabPlugin.render(renderer, staff, staffNumber);
+        return tabPlugin.render(renderer, staff, staffNumber, lineNumber);
       }
     }
     return 0; // 0 tab size

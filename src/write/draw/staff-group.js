@@ -6,7 +6,7 @@ var printDebugBox = require('./debug-box');
 var printStem = require('./print-stem');
 var tablatures = require('../../api/abc_tablatures');
 
-function drawStaffGroup(renderer, params, selectables) {
+function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	// We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
 	// All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
 	// renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
@@ -107,7 +107,7 @@ function drawStaffGroup(renderer, params, selectables) {
 			renderer.tablatures.topStaff = topLine;
 			renderer.tablatures.bottomStaff = bottomLine;
 			// height of displayed tab returned by tablature plugin
-			tabHeight = tablatures.renderStaffLine(renderer, params.voices[i], i);
+			tabHeight = tablatures.renderStaffLine(renderer, params.voices[i],i ,lineNumber);
 		}
 	}
 	renderer.controller.classes.newMeasure();
