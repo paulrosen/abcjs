@@ -2,10 +2,12 @@
  * Handles Violin score to tabs conversion
  * @param {} tuning 
  */
+var TabNotes = require('./tab-notes');
 
-var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+// var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
 // private
+/*
 function buildNote(pos, hasComma, isLower, isQuoted, sharp) {
   var returned = notes[pos];
   if (sharp) {
@@ -23,8 +25,11 @@ function buildNote(pos, hasComma, isLower, isQuoted, sharp) {
   }
   return returned
 }
+*/
+
 
 // private
+/*
 function buildNoteList(fromNote, toNote) {
   var buildReturned = [];
   var fromN = fromNote.charAt(0).toUpperCase();
@@ -36,7 +41,7 @@ function buildNoteList(fromNote, toNote) {
   }
   var hasComma = fromNote.indexOf(',') != -1;
   var isLower = (fromNote.charAt(0) == fromNote.charAt(0).toLowerCase());
-  var isQuoted = false;
+  var isQuoted = fromNote.indexOf("'") != -1;;
   var finished = false;
   var curPos = startIndex;
   while (!finished) {
@@ -60,11 +65,13 @@ function buildNoteList(fromNote, toNote) {
     if ( curPos >= notes.length) {
       curPos = 0;
     } 
-    if (notes[curPos] == toN) finished = true;
+    if (notes[curPos] == toN) {
+      finished = true;
+    } 
   }
   return buildReturned;
 }
-
+*/
 
 function buildPatterns(self) {
   var strings = []
@@ -74,7 +81,8 @@ function buildPatterns(self) {
     if (iii != self.tuning.length - 1) {
       nextNote = self.tuning[iii + 1];
     }
-    strings[pos--] = buildNoteList(self.tuning[iii], nextNote);
+    tabNotes = new TabNotes(self.tuning[iii], nextNote);
+    strings[pos--] = tabNotes.build();
   }
   return strings;
 }

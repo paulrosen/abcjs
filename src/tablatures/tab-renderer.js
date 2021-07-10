@@ -43,10 +43,13 @@ TabRenderer.prototype.numbers = function (x, tablature, tabPos) {
   var notes = tabPos.notes;
   var graces = tabPos.graces;
   for (jjjj = 0; jjjj < notes.length; jjjj++) {
-    var y = tablature.getY('on', notes[jjjj].str,0);
-    number(this, x, y, notes[jjjj].num);
-    if (graces) {
-      // TODO: graces
+    var note = notes[jjjj];
+    if (note) {
+      var y = tablature.getY('on', note.str, 0);
+      number(this, x, y, note.num);
+      if (graces) {
+        // TODO: graces
+      }
     }
   }
 }

@@ -16670,62 +16670,57 @@ module.exports = AbcGuitarTab;
 /*!*******************************************************!*\
   !*** ./src/tablatures/instruments/string-patterns.js ***!
   \*******************************************************/
-/***/ (function(module) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /**
  * Handles Violin score to tabs conversion
  * @param {} tuning 
  */
-var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G']; // private
+var TabNotes = __webpack_require__(/*! ./tab-notes */ "./src/tablatures/instruments/tab-notes.js"); // var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+// private
 
+/*
 function buildNote(pos, hasComma, isLower, isQuoted, sharp) {
   var returned = notes[pos];
-
   if (sharp) {
     returned = sharp + returned;
   }
-
   if (hasComma) {
     returned += ',';
   } else {
     if (isLower) {
       returned = returned.toLowerCase();
-
       if (isQuoted) {
         returned += "'";
       }
-    }
+    } 
   }
+  return returned
+}
+*/
+// private
 
-  return returned;
-} // private
-
-
+/*
 function buildNoteList(fromNote, toNote) {
   var buildReturned = [];
   var fromN = fromNote.charAt(0).toUpperCase();
   var toN = toNote.charAt(0).toUpperCase();
   var startIndex = notes.indexOf(fromN);
   var toIndex = notes.indexOf(toN);
-
-  if (startIndex == -1 || toIndex == -1) {
+  if ((startIndex == -1) || (toIndex == -1)) {
     return buildReturned;
   }
-
   var hasComma = fromNote.indexOf(',') != -1;
-  var isLower = fromNote.charAt(0) == fromNote.charAt(0).toLowerCase();
-  var isQuoted = false;
+  var isLower = (fromNote.charAt(0) == fromNote.charAt(0).toLowerCase());
+  var isQuoted = fromNote.indexOf("'") != -1;;
   var finished = false;
   var curPos = startIndex;
-
   while (!finished) {
     var curNote = notes[curPos];
-    buildReturned.push(buildNote(curPos, hasComma, isLower, isQuoted));
-
+    buildReturned.push(buildNote(curPos, hasComma, isLower,isQuoted))
     if (curNote != 'E' && curNote != 'B') {
-      buildReturned.push(buildNote(curPos, hasComma, isLower, isQuoted, '^'));
+      buildReturned.push(buildNote(curPos, hasComma, isLower,isQuoted, '^'));
     }
-
     if (curNote == 'B') {
       if (hasComma) {
         hasComma = false;
@@ -16737,18 +16732,18 @@ function buildNoteList(fromNote, toNote) {
         }
       }
     }
-
     curPos++;
-
-    if (curPos >= notes.length) {
+    if ( curPos >= notes.length) {
       curPos = 0;
-    }
-
-    if (notes[curPos] == toN) finished = true;
+    } 
+    if (notes[curPos] == toN) {
+      finished = true;
+    } 
   }
-
   return buildReturned;
 }
+*/
+
 
 function buildPatterns(self) {
   var strings = [];
@@ -16761,7 +16756,8 @@ function buildPatterns(self) {
       nextNote = self.tuning[iii + 1];
     }
 
-    strings[pos--] = buildNoteList(self.tuning[iii], nextNote);
+    tabNotes = new TabNotes(self.tuning[iii], nextNote);
+    strings[pos--] = tabNotes.build();
   }
 
   return strings;
@@ -17038,6 +17034,134 @@ Tablature.prototype.tab = function (staffInfos) {
 };
 
 module.exports = Tablature;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/tab-note.js":
+/*!************************************************!*\
+  !*** ./src/tablatures/instruments/tab-note.js ***!
+  \************************************************/
+/***/ (function(module) {
+
+/**
+ * 
+ * Note structure for Tabs
+ * 
+ */
+function TabNote(note) {
+  this.note = note.charAt(0).toUpperCase();
+  this.hasComma = note.indexOf(',') != -1;
+  this.isLower = note.charAt(0) == note.charAt(0).toLowerCase();
+  this.isQuoted = note.indexOf("'") != -1;
+  this.sharp = note.indexOf('^') != -1;
+  this.flat = note.indexOf('_') != -1;
+}
+
+TabNote.prototype.sameNoteAs = function (note) {
+  if (this.note == note.note && this.hasComma == note.hasComma && this.isLower == note.isLower && this.isQuoted == note.isQuoted && this.sharp == note.sharp && this.flat == note.flat) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+TabNote.prototype.emit = function () {
+  var returned = this.note;
+
+  if (this.sharp) {
+    returned = '^' + returned;
+  }
+
+  if (this.flat) {
+    returned = '_' + returned;
+  }
+
+  if (this.hasComma) {
+    returned += ',';
+  } else {
+    if (this.isLower) {
+      returned = returned.toLowerCase();
+
+      if (this.isQuoted) {
+        returned += "'";
+      }
+    }
+  }
+
+  return returned;
+};
+
+module.exports = TabNote;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/tab-notes.js":
+/*!*************************************************!*\
+  !*** ./src/tablatures/instruments/tab-notes.js ***!
+  \*************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var TabNote = __webpack_require__(/*! ./tab-note */ "./src/tablatures/instruments/tab-note.js");
+
+var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+function TabNotes(fromNote, toNote) {
+  this.fromN = new TabNote(fromNote);
+  this.toN = new TabNote(toNote);
+}
+
+TabNotes.prototype.build = function () {
+  var fromN = this.fromN;
+  var toN = this.toN;
+  var buildReturned = [];
+  var startIndex = notes.indexOf(fromN.note);
+  var toIndex = notes.indexOf(toN.note);
+
+  if (startIndex == -1 || toIndex == -1) {
+    return buildReturned;
+  }
+
+  var finished = false;
+  var curPos = startIndex;
+
+  while (!finished) {
+    buildReturned.push(fromN.emit());
+
+    if (fromN.note != 'E' && fromN.note != 'B') {
+      fromN.sharp = true;
+      buildReturned.push(fromN.emit());
+      fromN.sharp = false;
+    }
+
+    if (fromN.note == 'B') {
+      if (fromN.hasComma) {
+        fromN.hasComma = false;
+      } else {
+        if (!fromN.isLower) {
+          fromN.isLower = true;
+        } else {
+          fromN.isQuoted = true;
+        }
+      }
+    }
+
+    curPos++;
+
+    if (curPos >= notes.length) {
+      curPos = 0;
+    }
+
+    fromN.note = notes[curPos];
+
+    if (fromN.sameNoteAs(toN)) {
+      finished = true;
+    }
+  }
+
+  return buildReturned;
+};
+
+module.exports = TabNotes;
 
 /***/ }),
 
@@ -17365,10 +17489,14 @@ TabRenderer.prototype.numbers = function (x, tablature, tabPos) {
   var graces = tabPos.graces;
 
   for (jjjj = 0; jjjj < notes.length; jjjj++) {
-    var y = tablature.getY('on', notes[jjjj].str, 0);
-    number(this, x, y, notes[jjjj].num);
+    var note = notes[jjjj];
 
-    if (graces) {// TODO: graces
+    if (note) {
+      var y = tablature.getY('on', note.str, 0);
+      number(this, x, y, note.num);
+
+      if (graces) {// TODO: graces
+      }
     }
   }
 };
