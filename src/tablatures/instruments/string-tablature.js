@@ -54,10 +54,12 @@ Tablature.prototype.getY = function (pos, lineNumber, pitch) {
   }
 }
 
-Tablature.prototype.verticalLine = function (x, y1, y2) {
+Tablature.prototype.verticalLine = function (x, y1, y2,thickLine) {
   var klass = "abcjs-vert-tab";
+  var dx = 0.6;
+  if (thickLine) dx = 4;
   this.renderer.paper.openGroup({ prepend: true, klass: this.renderer.controller.classes.generate("abcjs-vert-tab") });
-  this.drawer.drawVLine(y1, y2,x,klass);
+  this.drawer.drawVLine(y1, y2,x,klass,dx);
   this.renderer.paper.closeGroup();
 }
 

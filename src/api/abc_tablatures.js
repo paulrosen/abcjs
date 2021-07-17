@@ -77,18 +77,17 @@ var abcTablatures = {
   /**
    * Staff line dispatcher to tablature plugins 
    * @param {*} renderer 
-   * @param {*} staff 
-   * @param {*} staffNumber 
+   * @param {*} voice 
+   * @param {*} voiceNumber 
    * @return tablature height size
    */
-  renderStaffLine: function (renderer, staff, staffNumber, lineNumber) {
+  renderStaffLine: function (renderer, nbStaffs , voice, voiceNumber, lineNumber) {
     var tune = renderer.abctune;
     var tabs = tune.tablatures;
-    if (staffNumber < tabs.length) {
-      tabPlugin = tabs[staffNumber];
-      if (tabPlugin) {
-        return tabPlugin.render(renderer, staff, staffNumber, lineNumber);
-      }
+    // To be enhanced for multiple staffs instruments
+    tabPlugin = tabs[0];
+    if (tabPlugin) {
+      return tabPlugin.render(renderer, nbStaffs ,voice, voiceNumber, lineNumber);
     }
     return 0; // 0 tab size
   },

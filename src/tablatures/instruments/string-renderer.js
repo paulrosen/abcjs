@@ -1,10 +1,17 @@
 var TabRenderer = require('../tab-renderer');
 var TabDrawer = require('../tab-drawer');
 
-/**
+// private stuff
+function isRepeat(absChild) {
+  var type = absChild.abcelem.type;
+  if (type) {
+    if  ( type.endsWith('_repeat') )  return true;
+  }
+  return false;
+}
+
+/*
  * render tablature for string voice
- * @param {*} tablature 
- * @param {*} voice 
  */
 
 function StringTabRenderer(self,renderer) {
@@ -19,12 +26,13 @@ function StringTabRenderer(self,renderer) {
   }
 }
 
-
 StringTabRenderer.prototype.render = function(tablature, semantics, voice) {
   var absChild;
+  var thickBar = false;
   var _super = this._super;
   // draw starting vertical line
   tablature.verticalLine(tablature.startx, _super.topStaffY, tablature.bottomLine);
+  var lastX = tablature.endx;
 
   for (ii = 0; ii < voice.children.length; ii++) {
     absChild = voice.children[ii];
@@ -38,18 +46,22 @@ StringTabRenderer.prototype.render = function(tablature, semantics, voice) {
           break;
         case 'bar':
           tablature.bar(relChild);
+          if (ii == voice.children.length - 1) {
+            thickBar = isRepeat(absChild);
+          }
+          lastX = relChild.x;
           break;
       }
       if (scoreType == 'note') {
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.gracenotes;
         tabPos = semantics.strings.notesToNumber(pitches, graceNotes);
-        _super.tabRenderer.numbers(absChild.x, tablature, tabPos);
+        _super.tabRenderer.numbers(absChild.x, tablature, tabPos, thickBar);
       }
     }
   }
   // draw ending vertical line
-  tablature.verticalLine(tablature.endx, _super.topStaffY, tablature.bottomLine);
+  tablature.verticalLine(lastX, _super.topStaffY, tablature.bottomLine,thickBar);
 
 }
 

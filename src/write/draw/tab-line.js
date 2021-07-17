@@ -2,7 +2,7 @@ var sprintf = require('./sprintf');
 var roundNumber = require('./round-number');
 var printStem = require('./print-stem');
 
-function TabLine(renderer , klass , name , dx ) {
+function TabLine(renderer , klass , dx , name) {
   this.renderer = renderer;
   if (!dx) dx = 0.35; // default
   this.dx = dx;

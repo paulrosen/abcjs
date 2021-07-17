@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="../examples-styles.css"/>
+
+  <title>Basic Editor with tablatures</title>
+  <script src="../../dist/abcjs-basic.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    window.onload = function() {
+      new ABCJS.Editor("abc", 
+      { canvas_id: "paper",
+        warnings_id: "warnings",
+        abcjsParams: {} ,
+        tablature_options : [
+          // first and only staff
+          [ 
+            "ViolinTab" ,
+            {
+              name : 'Violin' ,
+              tuning : ['G,', 'D', 'A' , 'e']
+            }
+          ]
+        ]
+      });
+    }
+
+  </script>
+</head>
+<body>
+  <header>
+    <img src="../../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+    <h1>abcjs editor with tablatures</h1>
+  </header>
+  <div class="container">
+    <textarea id="abc" cols="80" rows="12" spellcheck="false">
+X: 1
+T: Cooley's
+M: 4/4
+L: 1/8
+R: reel
+K: Emin
+V:1
+De|
+V:2
+G,B|
+    </textarea>
+
+    <div id="warnings"></div>
+    <hr>
+    <div id="paper"></div>
+  </div>
+</body>
+</html>

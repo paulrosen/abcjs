@@ -69,11 +69,12 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	var topLine; // these are to connect multiple staves. We need to remember where they are.
 	var bottomLine;
 
-	var tabHeight = 0; 
+	var tabHeight = 0;
+	var tabHeights = 0;
 	var bartop = 0;
 	for (var i=0;i<params.voices.length;i++) {
 		var staff = params.voices[i].staff;
-		renderer.y = staff.absoluteY ;
+		renderer.y = staff.absoluteY + tabHeight;
 		renderer.controller.classes.incrVoice();
 		//renderer.y = staff.y;
 		// offset for starting the counting at middle C
@@ -101,13 +102,19 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 		}
 		// Deal with tablature for staff
 		if (renderer.abctune.tablatures) {
+			var nbStaffs = params.staffs.length;
+			var lastVoice = false;
+			if (i == params.voices.length) {
+				lastVoice = true; 
+			}
 			renderer.tablatures = {};
 			renderer.tablatures.startx = params.startx;
 			renderer.tablatures.w = params.w;
 			renderer.tablatures.topStaff = topLine;
 			renderer.tablatures.bottomStaff = bottomLine;
 			// height of displayed tab returned by tablature plugin
-			tabHeight = tablatures.renderStaffLine(renderer, params.voices[i],i ,lineNumber);
+			tabHeight = tablatures.renderStaffLine(renderer, nbStaffs ,params.voices[i], lastVoice, lineNumber);
+			tabHeights += tabHeight;
 		}
 	}
 	renderer.controller.classes.newMeasure();
@@ -116,7 +123,7 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	if (params.staffs.length>1) {
 		printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
 	}
-	renderer.y = startY + tabHeight;
+	renderer.y = startY + tabHeights;
 
 	function debugPrintGridItem(staff, key) {
 		var colors = [ "rgb(207,27,36)", "rgb(168,214,80)", "rgb(110,161,224)", "rgb(191,119,218)", "rgb(195,30,151)",

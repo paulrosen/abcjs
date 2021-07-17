@@ -25,6 +25,25 @@ var plugin = {
     console.log('GuitarTab plugin inited');
   },
 
+  buildTablature: function (name) {
+    var _super = this._super;
+    var verticalSize = 0;
+
+    _super.curTablature = new Tablature(_super.tabDrawer,
+      this.nbLines,
+      this.lineSpace);
+    _super.curTablature.tabFontName = 'tab.big';
+    _super.curTablature.tabYPos = 2;
+    _super.curTablature.print();
+    // Instrument name 
+    var yName = _super.curTablature.getY('on', _super.curTablature.numLines - 1);
+    var name = _super.params.name + '(' + this.semantics.strings.toString() + ')'
+    verticalSize = _super.tabRenderer.instrumentName(name, yName);
+    // update vertical size
+    verticalSize += this.lineSpace * this.nbLines;
+        return verticalSize;
+  },
+
   /**
    * render a score line staff using current abcjs renderer 
    * NB : we assume that renderer , current tunes info + tab params 
@@ -33,12 +52,12 @@ var plugin = {
    * @param {*} staff
    * @return the current height of displayed tab 
    */
-  render: function (renderer, voice, curVoice, lineNumber) {
+  render: function (renderer, nbStaffs,  voice, lastVoice, lineNumber) {
     console.log('GuitarTab plugin rendered');
     var _super = this._super;
     var strRenderer = new StringRenderer(this, renderer);
-    // get staff accidentals
-    this.semantics.strings.accidentals = _super.setAccidentals(lineNumber, curVoice);
+    // get staff accidentals (assume staff index 0 => to be pondered  later)
+    this.semantics.strings.accidentals = _super.setAccidentals(lineNumber, 0);
     // set guitar tab fonts
     setGuitarFonts(_super.tune);
 
@@ -47,24 +66,19 @@ var plugin = {
     _super.tabRenderer.fillerY(30);
 
     //  tablature frame
-    var tablature = new Tablature(_super.tabDrawer,
-      this.nbLines,
-      this.lineSpace);
-    tablature.tabFontName = 'tab.big';
-    tablature.tabYPos = 2;
-
-    tablature.print();
-
-    // Instrument name 
-    var yName = tablature.getY('on', tablature.numLines - 1);
-    var name = _super.params.name + '(' + this.semantics.strings.toString() + ')'
-    var verticalSize = _super.tabRenderer.instrumentName(name, yName);
+    var verticalSize = 0;
+    if (_super.curTablature == null) {
+      verticalSize = this.buildTablature(name);
+    }
 
     // deal with current voice line
-    strRenderer.render(tablature, this.semantics, voice);
+    strRenderer.render(_super.curTablature, this.semantics, voice);
 
-    // update vertical size
-    verticalSize += this.lineSpace * this.nbLines;
+    // return back the vertical size used by tab line
+    // is 0 with successive voices when nbStaffs is 1 
+    if ((nbStaffs == 1) || (lastVoice)) {
+      _super.curTablature = null;
+    }
 
     return verticalSize;
   }

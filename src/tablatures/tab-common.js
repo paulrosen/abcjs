@@ -2,14 +2,14 @@
  * 
  * Common Class/Method available for all instruments 
  * 
- */
-function TabCommon(abcTune, tuneNumber, params) {
+ */function TabCommon(abcTune, tuneNumber, params) {
   this.tune = abcTune;
   this.params = params;
   this.tuneNumber = tuneNumber;
   this.tabRenderer = null;
   this.tabDrawer = null;
   this.topStaffY = -1;
+  this.curTablature = null;
 }
 
 /**
@@ -23,6 +23,11 @@ TabCommon.prototype.setAccidentals = function (line , staffNumber ) {
   var line = tune.lines[line];
   var staff = line.staff[staffNumber];
   return staff.key.accidentals;
+}
+
+TabCommon.prototype.newTablature = function (Tablature,semantics,name) {
+  var verticalSize = 0;
+  return verticalSize;
 }
 
 module.exports = TabCommon;
