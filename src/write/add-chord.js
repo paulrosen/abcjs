@@ -12,7 +12,7 @@ var addChord = function (getTextSize, abselem, elem, roomTaken, roomTakenRight, 
 				var y;
 				var font;
 				var klass;
-				if (pos === "left" || pos === "right" || pos === "below" || pos === "above") {
+				if (pos === "left" || pos === "right" || pos === "below" || pos === "above" || !!rel_position) {
 					font = 'annotationfont';
 					klass = "annotation";
 				} else {
