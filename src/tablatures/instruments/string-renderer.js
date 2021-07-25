@@ -14,7 +14,7 @@ function isRepeat(absChild) {
  * render tablature for string voice
  */
 
-function StringTabRenderer(self,renderer) {
+function StringTabRenderer(self, renderer) {
   this._super = self._super;
   var _super = this._super;
   if (_super.tabRenderer == null) {
@@ -62,7 +62,6 @@ StringTabRenderer.prototype.render = function(tablature, semantics, voice) {
   }
   // draw ending vertical line
   tablature.verticalLine(lastX, _super.topStaffY, tablature.bottomLine,thickBar);
-
 }
 
 module.exports = StringTabRenderer;

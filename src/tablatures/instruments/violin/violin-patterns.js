@@ -1,6 +1,6 @@
 var StringPatterns = require('../string-patterns');
 
-function ViolinPatterns(tuning) {
+function ViolinPatterns(tuning,capo) {
   this.tuning = tuning;
   if (!tuning) {
     this.tuning = ['G,', 'D', 'A', 'e'];

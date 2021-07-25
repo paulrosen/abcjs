@@ -103,17 +103,14 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 		// Deal with tablature for staff
 		if (renderer.abctune.tablatures) {
 			var nbStaffs = params.staffs.length;
-			var lastVoice = false;
-			if (i == params.voices.length) {
-				lastVoice = true; 
-			}
 			renderer.tablatures = {};
 			renderer.tablatures.startx = params.startx;
 			renderer.tablatures.w = params.w;
 			renderer.tablatures.topStaff = topLine;
 			renderer.tablatures.bottomStaff = bottomLine;
+			renderer.tablatures.lyricHeight = staff.specialY.lyricHeightBelow;
 			// height of displayed tab returned by tablature plugin
-			tabHeight = tablatures.renderStaffLine(renderer, nbStaffs ,params.voices[i], lastVoice, lineNumber);
+			tabHeight = tablatures.renderStaffLine(renderer, nbStaffs, params.voices, i, lineNumber);
 			tabHeights += tabHeight;
 		}
 	}

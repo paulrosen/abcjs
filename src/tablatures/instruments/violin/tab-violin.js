@@ -21,6 +21,11 @@ var plugin = {
     this._super = _super;
     this.lineSpace = 12;
     this.nbLines = 4;
+    // for 4 string instruments using Capo
+    this.capo = 0;
+    if (params.capo) {
+      this.capo = params.capo;
+    }
     var semantics = new ViolinPatterns(_super.params.tuning);
     this.semantics = semantics;
     console.log('ViolinTab plugin inited');
@@ -28,10 +33,10 @@ var plugin = {
 
   buildTablature: function (name) {
     var _super = this._super;
-    var verticalSize = 0;
     _super.curTablature = new Tablature(_super.tabDrawer,
       this.nbLines,
       this.lineSpace);
+    var verticalSize = 0;
     _super.curTablature.print();
     // Instrument name 
     var yName = _super.curTablature.getY('on', _super.curTablature.numLines - 1);
@@ -39,6 +44,7 @@ var plugin = {
     verticalSize = _super.tabRenderer.instrumentName(name, yName);
     // update vertical size
     verticalSize += this.lineSpace * this.nbLines;
+    _super.curTablature.verticalSize = verticalSize;
     return verticalSize;
   },
 
@@ -50,8 +56,10 @@ var plugin = {
    * @param {*} staff
    * @return the current height of displayed tab 
    */
-  render: function (renderer, nbStaffs, voice, lastVoice, lineNumber) {
+  render: function (renderer, nbStaffs, voices, curVoice, lineNumber) {
     console.log('ViolinTab plugin rendered');
+    var nbVoices = voices.length;
+    var voice = voices[curVoice];
     var _super = this._super;
     var strRenderer = new StringRenderer(this, renderer);
     // set violin tab fonts
@@ -79,11 +87,7 @@ var plugin = {
 
     // return back the vertical size used by tab line
     // is 0 with successive voices when nbStaffs is 1 
-    if ((nbStaffs == 1) || (lastVoice)) {
-      _super.curTablature = null;
-    }
-
-    return verticalSize;
+    return _super.staffFinalization(voice,nbStaffs,nbVoices,verticalSize);
   }
 };
 

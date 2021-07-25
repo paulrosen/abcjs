@@ -2,7 +2,9 @@
  * 
  * Common Class/Method available for all instruments 
  * 
- */function TabCommon(abcTune, tuneNumber, params) {
+ */
+
+function TabCommon(abcTune, tuneNumber, params) {
   this.tune = abcTune;
   this.params = params;
   this.tuneNumber = tuneNumber;
@@ -30,4 +32,22 @@ TabCommon.prototype.newTablature = function (Tablature,semantics,name) {
   return verticalSize;
 }
 
-module.exports = TabCommon;
+
+TabCommon.prototype.staffFinalization = function(voice,nbStaffs, nbVoices,verticalSize){
+  if (nbStaffs == 1) {
+    if (nbVoices == 1) {
+      this.curTablature = null;
+    } else {
+      // reset Y to initial value when current staff 
+      // has Multiple voices
+      var staff = voice.staff;
+      staff.absoluteY -= verticalSize;
+    }
+  } else {
+    this.curTablature = null;
+  }
+  return verticalSize;
+}
+
+module.exports = TabCommon; 
+

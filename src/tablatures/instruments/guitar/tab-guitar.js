@@ -20,6 +20,10 @@ var plugin = {
     this._super = new TabCommon(abcTune, tuneNumber, params);
     this.lineSpace = 12;
     this.nbLines = 6;
+    this.capo = 0;
+    if (params.capo) {
+      this.capo = params.capo;
+    }
     var semantics = new GuitarPatterns(params.tuning);
     this.semantics = semantics;
     console.log('GuitarTab plugin inited');
@@ -52,8 +56,10 @@ var plugin = {
    * @param {*} staff
    * @return the current height of displayed tab 
    */
-  render: function (renderer, nbStaffs,  voice, lastVoice, lineNumber) {
+  render: function (renderer, nbStaffs, voices, curVoice, lineNumber) {
     console.log('GuitarTab plugin rendered');
+    var nbVoices = voices.length;
+    var voice = voices[curVoice];
     var _super = this._super;
     var strRenderer = new StringRenderer(this, renderer);
     // get staff accidentals (assume staff index 0 => to be pondered  later)
@@ -76,11 +82,8 @@ var plugin = {
 
     // return back the vertical size used by tab line
     // is 0 with successive voices when nbStaffs is 1 
-    if ((nbStaffs == 1) || (lastVoice)) {
-      _super.curTablature = null;
-    }
+    return _super.staffFinalization(voice, nbStaffs, nbVoices, verticalSize);
 
-    return verticalSize;
   }
 
 }

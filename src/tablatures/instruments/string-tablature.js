@@ -4,6 +4,17 @@
  * 
  */
 
+/**
+ * guess potential lyric height
+ * @param {*} renderer 
+ */
+function getLyricHeight(renderer) {
+  var svg = renderer.paper;
+  var fontAndAttr = renderer.controller.getFontAndAttr.calc('vocalFont', '');
+  //var getTextSize = new GetTextSize(fontAndAttr, 'text');
+  size = svg.guessWidth('A', fontAndAttr);
+  return size.height;
+}
 function Tablature(drawer, numLines, lineSpace) {
   this.drawer = drawer;
   this.renderer = drawer.renderer;
@@ -17,12 +28,19 @@ function Tablature(drawer, numLines, lineSpace) {
   this.staffY = -1;
   this.dotY = null;
   this.tabFontName = 'tab.tiny'
-  this.tabYPos = 1
+  this.tabYPos = 1;
+  this.capo = 0;
+  this.verticalSize = 0;
 }
 
 Tablature.prototype.print = function () {
   var klass = "abcjs-top-tab";
   this.renderer.paper.openGroup({ prepend: true, klass: this.renderer.controller.classes.generate("abcjs-tab") });
+  var lyricHeight = 0;
+  if (this.renderer.tablatures.lyricHeight > 0) {
+    lyricHeight = getLyricHeight(this.renderer);
+  }
+  this.renderer.y += lyricHeight;
   // since numbers will be on lines , use fixed size space between lines
   for (var i = 0; i <= this.numLines-1; i++) {
     this.lines[i] = this.drawer.drawHLine(

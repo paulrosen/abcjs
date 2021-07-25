@@ -1,6 +1,6 @@
 var StringPatterns = require('../string-patterns');
 
-function GuitarPatterns(tuning) {
+function GuitarPatterns(tuning,capo) {
   this.tuning = tuning;
   if (!tuning) {
     this.tuning = ['E,', 'A', 'D', 'G' , 'B' , 'e'];
