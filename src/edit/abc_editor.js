@@ -84,6 +84,13 @@ function gatherAbcParams(params) {
 	}
 	if (params.tablature_options) {
 		abcjsParams['tablatures'] = params.tablature_options;
+	}
+	if (abcjsParams.tablature) {
+		// accept both tablature and tablatures
+		abcjsParams.tablatures = abcjsParams.tablature;
+		abcjsParams.tablature = "undefined";
+	}
+	if (abcjsParams.tablatures) {
 		if (params.warnings_id) {
 			// store for plugin error handling
 			abcjsParams['tablatures'].warnings_id = params.warnings_id
