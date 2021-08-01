@@ -14,17 +14,19 @@
       new ABCJS.Editor("abc", 
       { canvas_id: "paper",
         warnings_id: "warnings",
-        abcjsParams: {} ,
-        tablature_options : [
-          // first and only staff
-          [ 
-            "ViolinTab" ,
-            {
-              name : 'Violin' ,
-              tuning : ['G,', 'D', 'A' , 'e']
-            }
+        abcjsParams: {
+          tablature: [
+            // first and only staff
+            [
+              "ViolinTab",
+              {
+                name: 'Violin',
+                tuning: ['G,', 'D', 'A', 'e']
+              }
+            ]
           ]
-        ]
+
+        } ,
       });
     }
 
@@ -43,7 +45,8 @@ M: 4/4
 L: 1/8
 R: reel
 K: Emin
-|:D2| [Ad]:|
+|: [Ad] BBB | D2 :|
+| _D_E^ED^DE^EF^FG^GA^AB^B|_D_E_F_G_A_B_C|
     </textarea>
 
     <div id="warnings"></div>
