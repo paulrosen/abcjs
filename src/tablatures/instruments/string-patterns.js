@@ -8,7 +8,7 @@ function buildPatterns(self) {
   var strings = []
   var pos = self.tuning.length-1;
   for (iii = 0; iii < self.tuning.length; iii++) {
-    var nextNote = "d'"; // highest handled note
+    var nextNote = "f'"; // highest handled note
     if (iii != self.tuning.length - 1) {
       nextNote = self.tuning[iii + 1];
     }
