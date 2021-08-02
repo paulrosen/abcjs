@@ -28,12 +28,30 @@ function buildSecond(first) {
   return seconds;
 }
  
-function checkNote(note) {
+function checkKeyAccidentals(note, accidentals ) {
+  if (accidentals) {
+    for (iii = 0; iii < accidentals.length; iii++) {
+      if (note[0].toUpperCase() == accidentals[iii].note.toUpperCase()) {
+        if (accidentals[iii].acc == 'flat') {
+          return '_' + note;
+        }
+        if (accidentals[iii].acc == 'sharp') {
+          return '^' + note;
+        }
+      }
+    }
+  }
+  return note;
+}
+
+function checkNote(note,accidentals) {
   var isFlat = false;
   var newNote = note;
   var isSharp = false;
   var isAltered = false;
   var acc = 0;
+
+  note = checkKeyAccidentals(note,accidentals);
   if (note.startsWith('_')) {
     isFlat = true;
     acc = -1;
@@ -42,25 +60,24 @@ function checkNote(note) {
     acc = +1;
   }
   isAltered = isFlat || isSharp;
-  if (isAltered) {
+  if (isFlat) {
     newNote = note.slice(1);
   }
   return {
     'isAltered': isAltered,
     'isSharp': isSharp,
     'isFlat': isFlat,
-    'note': newNote,
+    'name': newNote,
     'acc' : acc
   }
 }
 
-function noteToNumber(self, nNote, stringNumber , secondPosition )  {
-  var note = checkNote(nNote);
+function noteToNumber(self, note, stringNumber , secondPosition )  {
   var strings = self.strings;
   if (secondPosition) {
     strings = secondPosition;
   }
-  num = strings[stringNumber].indexOf(note.note);
+  num = strings[stringNumber].indexOf(note.name);
   if (num != -1) {
     if (secondPosition) {
       num += 7;
@@ -73,17 +90,17 @@ function noteToNumber(self, nNote, stringNumber , secondPosition )  {
     return {
       num: (num + note.acc),
       str: stringNumber,
-      name: nNote
+      note: note
     }
   }
   return null;
 }
 
-function toNumber (self, nNote ) {
+function toNumber (self, note ) {
   var num = null;
   var str = 0;
   while (str < self.strings.length) {
-    num = noteToNumber(self,nNote,str);
+    num = noteToNumber(self,note,str);
     if (num) {
       return num;
     }
@@ -106,14 +123,14 @@ function sameString(self, chord) {
       if (nextPos.num < curPos.num) {
         nextPos.str++;
         nextPos = noteToNumber(self,
-          nextPos.name,
+          nextPos.note,
           nextPos.str,
           self.secondPos
         );
       } else {
         curPos.str++;
         curPos = noteToNumber(self,
-          curPos.name,
+          curPos.note,
           curPos.str,
           self.secondPos
         );
@@ -132,7 +149,8 @@ function sameString(self, chord) {
 function handleChordNotes(self,notes) {
   retNotes = [];
   for (iiii = 0; iiii < notes.length; iiii++) {
-    var curPos = toNumber(self, notes[iiii].name);
+    var note = checkNote(notes[iiii].name, this.accidentals);
+    var curPos = toNumber(self, note);
     retNotes.push(curPos);
   }
   var error = sameString(self, retNotes)
@@ -145,13 +163,15 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
     if (notes.length > 1) {
       retNotes = handleChordNotes(this,notes);
     } else {
-      retNotes.push(toNumber(this, notes[0].name));
+      var note = checkNote(notes[0].name, this.accidentals);
+      retNotes.push(toNumber(this, note));
     }
     var retGraces = null;
     if (graces) {
       retGraces = [];
       for (iiii = 0; iiii < graces.length; iiii++) {
-        retGraces.push(toNumber(this, graces[iiii].name));
+        var note = checkNote(graces[0].name, this.accidentals);
+        retGraces.push(toNumber(this, note));
       }
     }
     return {
