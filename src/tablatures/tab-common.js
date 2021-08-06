@@ -27,6 +27,18 @@ TabCommon.prototype.setAccidentals = function (line , staffNumber ) {
   return staff.key.accidentals;
 }
 
+TabCommon.prototype.setError = function (semantics) {
+  var tune = this.tune;
+  var errors = semantics.strings.hasError;
+  if (errors) {
+    if (tune.warnings) {
+      tune.warning.push(errors);
+    } else {
+      tune.warnings = [errors];
+    }
+  }
+}
+
 TabCommon.prototype.newTablature = function (Tablature,semantics,name) {
   var verticalSize = 0;
   return verticalSize;

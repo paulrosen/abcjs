@@ -14,20 +14,18 @@
       new ABCJS.Editor("abc", 
       { canvas_id: "paper",
         warnings_id: "warnings",
-        abcjsParams: {
-          tablature: [
-            // first and only staff
-            [
-              "ViolinTab",
-              {
-                name: 'Violin',
-                tuning: ['G,', 'D', 'A', 'e'],
-                highestNote: "f'"
-              }
-            ]
+        abcjsParams: {} ,
+        tablature_options : [
+          // first and only staff
+          [ 
+            "GuitarTab" ,
+            {
+              name : 'Guitar' ,
+              tuning : ['D,','A,','D','G','A','d'],
+              capo: 2
+            }
           ]
-
-        } 
+        ]
       });
     }
 
@@ -40,17 +38,12 @@
   </header>
   <div class="container">
     <textarea id="abc" cols="80" rows="12" spellcheck="false">
-X: 1
-T: Cooley's
-M: 4/4
-L: 1/8
-R: reel
-K: Emin
-|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
-EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
-|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
-eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
-    </textarea>
+X:1
+T:Andro Guitar
+M: 2/4
+K:F
+|: [EE,]^FGA [B2B,]BA | [G2A,]^FE [B,B]^cBA | [G2A,]^FE [B,4^FB]:| 
+</textarea>
 
     <div id="warnings"></div>
     <hr>

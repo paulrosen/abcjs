@@ -2,17 +2,38 @@
  * Handles Violin score to tabs conversion
  * @param {} tuning 
  */
+var TabNote  = require('./tab-note');
 var TabNotes = require('./tab-notes');
+
+function buildCapo(self) {
+  var capoTuning = null;
+  var tuning = self.tuning;
+  if (self.capo > 0) {
+    capoTuning = [];
+    for (iii = 0; iii < tuning.length; iii++) {
+      var curNote = new TabNote.TabNote(tuning[iii]);
+      for (jjj = 0; jjj < self.capo; jjj++) {
+        curNote = curNote.nextNote();
+      }
+      capoTuning[iii] = curNote.emit();
+    }
+  }
+  return capoTuning;
+}
 
 function buildPatterns(self) {
   var strings = []
-  var pos = self.tuning.length-1;
-  for (iii = 0; iii < self.tuning.length; iii++) {
-    var nextNote = "f'"; // highest handled note
-    if (iii != self.tuning.length - 1) {
-      nextNote = self.tuning[iii + 1];
+  var tuning = self.tuning;
+  if (self.capo > 0) {
+    tuning = self.capoTuning;
+  }
+  var pos = tuning.length-1;
+  for (iii = 0; iii < tuning.length; iii++) {
+    var nextNote = self.highestNote ; // highest handled note
+    if (iii != tuning.length - 1) {
+      nextNote = tuning[iii + 1];
     }
-    tabNotes = new TabNotes(self.tuning[iii], nextNote);
+    tabNotes = new TabNotes(tuning[iii], nextNote);
     strings[pos--] = tabNotes.build();
   }
   return strings;
@@ -117,7 +138,7 @@ function sameString(self, chord) {
       // same String
       // => change lower pos 
       if (curPos.str == self.strings.length - 1) {
-        return 'Invalid tab Chord position for instrument';
+        self.hasError = 'Invalid tab Chord position for instrument';
       }
       // change lower pitch on lowest string
       if (nextPos.num < curPos.num) {
@@ -136,7 +157,7 @@ function sameString(self, chord) {
         );
       }
       if (nextPos == null || curPos == null) {
-        return "Can't map tab Chord position for instrument";
+        self.hasError =  "Can't map tab Chord position for instrument";
       }
       // update table
       chord[jjjj] = curPos;
@@ -186,8 +207,21 @@ StringPatterns.prototype.toString = function () {
   return this.tuning.join('').replaceAll(',','').toUpperCase();
 }
 
-function StringPatterns(tuning) {
+function StringPatterns(tuning, capo , highestNote) {
+  this.highestNote = "f'";
+  this.hasError = null; // collect errors here if any
+  if (highestNote) {
+    // override default
+    this.highestNote = highestNote;
+  }
+  this.capo = 0;
+  if (capo) {
+    this.capo = capo;
+  }
   this.tuning = tuning;
+  if (this.capo > 0) {
+    this.capoTuning = buildCapo(this);
+  }
   this.strings = buildPatterns(this);
   // second position pattern per string
   this.secondPos = buildSecond(this);

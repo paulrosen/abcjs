@@ -21,12 +21,12 @@ var plugin = {
     this._super = _super;
     this.lineSpace = 12;
     this.nbLines = 4;
-    // for 4 string instruments using Capo
-    this.capo = 0;
-    if (params.capo) {
-      this.capo = params.capo;
-    }
-    var semantics = new ViolinPatterns(_super.params.tuning);
+    this.capo = params.capo;
+    var semantics = new ViolinPatterns(
+      _super.params.tuning ,
+      this.capo ,
+      params.higestNote
+    );
     this.semantics = semantics;
     console.log('ViolinTab plugin inited');
   },
@@ -41,6 +41,11 @@ var plugin = {
     // Instrument name 
     var yName = _super.curTablature.getY('on', _super.curTablature.numLines - 1);
     name += '(' + this.semantics.strings.toString() + ')'
+    if (this.capo > 0) {
+      name += ' capo:' + this.capo + ' )';
+    } else {
+      name += ')';
+    }
     verticalSize = _super.tabRenderer.instrumentName(name, yName);
     // update vertical size
     verticalSize += this.lineSpace * this.nbLines;
@@ -85,6 +90,7 @@ var plugin = {
     // deal with current voice line
     strRenderer.render(_super.curTablature, this.semantics, voice);
 
+    _super.setError(this.semantics); // check any error messages
     // return back the vertical size used by tab line
     // is 0 with successive voices when nbStaffs is 1 
     return _super.staffFinalization(voice,nbStaffs,nbVoices,verticalSize);

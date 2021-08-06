@@ -20,16 +20,16 @@ var plugin = {
     this._super = new TabCommon(abcTune, tuneNumber, params);
     this.lineSpace = 12;
     this.nbLines = 6;
-    this.capo = 0;
-    if (params.capo) {
-      this.capo = params.capo;
-    }
-    var semantics = new GuitarPatterns(params.tuning);
+    this.capo = params.capo;
+    var semantics = new GuitarPatterns(params.tuning,
+      this.capo ,
+      params.highestNote
+    );
     this.semantics = semantics;
     console.log('GuitarTab plugin inited');
   },
 
-  buildTablature: function (name) {
+  buildTablature: function () {
     var _super = this._super;
     var verticalSize = 0;
 
@@ -41,7 +41,13 @@ var plugin = {
     _super.curTablature.print();
     // Instrument name 
     var yName = _super.curTablature.getY('on', _super.curTablature.numLines - 1);
-    var name = _super.params.name + '(' + this.semantics.strings.toString() + ')'
+    var name = _super.params.name + '(' + this.semantics.strings.toString();
+    if (this.capo > 0) {
+      name += ' capo:' + this.capo + ' )';
+    } else {
+      name += ')';
+    }
+
     verticalSize = _super.tabRenderer.instrumentName(name, yName);
     // update vertical size
     verticalSize += this.lineSpace * this.nbLines;
@@ -74,12 +80,13 @@ var plugin = {
     //  tablature frame
     var verticalSize = 0;
     if (_super.curTablature == null) {
-      verticalSize = this.buildTablature(name);
+      verticalSize = this.buildTablature();
     }
 
     // deal with current voice line
     strRenderer.render(_super.curTablature, this.semantics, voice);
 
+    _super.setError(this.semantics); // check any error messages
     // return back the vertical size used by tab line
     // is 0 with successive voices when nbStaffs is 1 
     return _super.staffFinalization(voice, nbStaffs, nbVoices, verticalSize);

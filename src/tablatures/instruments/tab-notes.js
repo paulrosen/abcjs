@@ -1,13 +1,13 @@
 
 var TabNote = require('./tab-note');
 
-var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-
+var notes = TabNote.notes;
 
 function TabNotes(fromNote, toNote) {
-  this.fromN = new TabNote(fromNote);
-  this.toN = new TabNote(toNote);
+  this.fromN = new TabNote.TabNote(fromNote);
+  this.toN = new TabNote.TabNote(toNote);
 }
+
 
 TabNotes.prototype.build = function () {
   var fromN = this.fromN;
@@ -22,27 +22,7 @@ TabNotes.prototype.build = function () {
   var curPos = startIndex;
   while (!finished) {
     buildReturned.push(fromN.emit())
-    if (fromN.note != 'E' && fromN.note != 'B') {
-      fromN.sharp = true;
-      buildReturned.push(fromN.emit());
-      fromN.sharp = false;
-    }
-    if (fromN.note == 'B') {
-      if (fromN.hasComma) {
-        fromN.hasComma = false;
-      } else {
-        if (!fromN.isLower) {
-          fromN.isLower = true;
-        } else {
-          fromN.isQuoted = true;
-        }
-      }
-    }
-    curPos++;
-    if (curPos >= notes.length) {
-      curPos = 0;
-    }
-    fromN.note = notes[curPos];
+    fromN = fromN.nextNote();
     if ( fromN.sameNoteAs(toN)) {
       finished = true;
     }
