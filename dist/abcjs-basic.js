@@ -16594,8 +16594,6 @@ module.exports = GuitarPatterns;
 /*
 Emit tab for Guitar staff
 */
-var Tablature = __webpack_require__(/*! ../string-tablature */ "./src/tablatures/instruments/string-tablature.js");
-
 var GuitarPatterns = __webpack_require__(/*! ./guitar-patterns */ "./src/tablatures/instruments/guitar/guitar-patterns.js");
 
 var TabCommon = __webpack_require__(/*! ../../tab-common */ "./src/tablatures/tab-common.js");
@@ -16619,31 +16617,6 @@ var plugin = {
     var semantics = new GuitarPatterns(params.tuning, this.capo, params.highestNote);
     this.semantics = semantics;
     console.log('GuitarTab plugin inited');
-  },
-  buildTablature: function buildTablature() {
-    var _super = this._super;
-    var verticalSize = 0;
-    _super.curTablature = new Tablature(_super.tabDrawer, this.nbLines, this.lineSpace);
-    _super.curTablature.tabFontName = 'tab.big';
-    _super.curTablature.tabYPos = 2;
-
-    _super.curTablature.print(); // Instrument name 
-
-
-    var yName = _super.curTablature.getY('on', _super.curTablature.numLines - 1);
-
-    var name = _super.params.name + '(' + this.semantics.strings.toString();
-
-    if (this.capo > 0) {
-      name += ' capo:' + this.capo + ' )';
-    } else {
-      name += ')';
-    }
-
-    verticalSize = _super.tabRenderer.instrumentName(name, yName); // update vertical size
-
-    verticalSize += this.lineSpace * this.nbLines;
-    return verticalSize;
   },
 
   /**
@@ -16672,7 +16645,14 @@ var plugin = {
     var verticalSize = 0;
 
     if (_super.curTablature == null) {
-      verticalSize = this.buildTablature();
+      verticalSize = _super.buildTablature(this.semantics, {
+        voice: voice,
+        capo: this.capo,
+        lineSpace: this.lineSpace,
+        nbLines: this.nbLines,
+        tabFontName: 'tab.big',
+        tabYPos: 2
+      });
     } // deal with current voice line
 
 
@@ -16713,6 +16693,8 @@ module.exports = AbcGuitarTab;
 var TabNote = __webpack_require__(/*! ./tab-note */ "./src/tablatures/instruments/tab-note.js");
 
 var TabNotes = __webpack_require__(/*! ./tab-notes */ "./src/tablatures/instruments/tab-notes.js");
+
+var Tablature = __webpack_require__(/*! ./string-tablature */ "./src/tablatures/instruments/string-tablature.js");
 
 function buildCapo(self) {
   var capoTuning = null;
@@ -16801,8 +16783,7 @@ function checkNote(note, accidentals) {
     isFlat = true;
     acc = -1;
   } else if (note.startsWith('^')) {
-    isSharp = true;
-    acc = +1;
+    isSharp = true; // acc = +1;
   }
 
   isAltered = isFlat || isSharp;
@@ -16820,6 +16801,49 @@ function checkNote(note, accidentals) {
   };
 }
 
+function EBsharp(note) {
+  if (note.isSharp) {
+    var name = note.name[1];
+
+    if (name == 'B' || name == 'E') {
+      // unusual #B and E case
+      note.isSharp = false;
+      note.isAltered = false;
+      note.acc = 0;
+
+      switch (note.name[1]) {
+        case 'E':
+          if (note.name.length > 2) {
+            note.name = 'F';
+          } else {
+            note.name = 'f';
+          }
+
+          break;
+
+        case 'e':
+          note.name = 'F';
+          break;
+
+        case 'B':
+          if (note.name.length > 2) {
+            note.name = 'C';
+          } else {
+            note.name = 'c';
+          }
+
+          break;
+
+        case 'b':
+          note.name = 'c';
+          break;
+      }
+    }
+  }
+
+  return note;
+}
+
 function noteToNumber(self, note, stringNumber, secondPosition) {
   var strings = self.strings;
 
@@ -16827,6 +16851,7 @@ function noteToNumber(self, note, stringNumber, secondPosition) {
     strings = secondPosition;
   }
 
+  note = EBsharp(note);
   num = strings[stringNumber].indexOf(note.name);
 
   if (num != -1) {
@@ -16836,7 +16861,7 @@ function noteToNumber(self, note, stringNumber, secondPosition) {
 
     if (note.isFlat && num == 0) {
       // flat on 0 pos => previous string Fifth position
-      str = stringNumber + 1;
+      stringNumber++;
       num = 7;
     }
 
@@ -16912,6 +16937,30 @@ function handleChordNotes(self, notes) {
   return retNotes;
 }
 
+function nbLyrics(voice) {
+  var nbVoices = 0;
+
+  for (iiii = 0; iiii < voice.children.length; iiii++) {
+    absChild = voice.children[iiii];
+
+    for (jj = 0; jj < absChild.children.length; jj++) {
+      var relChild = absChild.children[jj];
+      var type = relChild.type;
+
+      if (type == 'lyric') {
+        var text = relChild.name;
+        var nbLines = text.split('\n').length - 1;
+
+        if (nbLines > nbVoices) {
+          nbVoices = nbLines;
+        }
+      }
+    }
+  }
+
+  return nbVoices;
+}
+
 StringPatterns.prototype.notesToNumber = function (notes, graces) {
   if (notes) {
     var retNotes = [];
@@ -16945,6 +16994,31 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
 
 StringPatterns.prototype.toString = function () {
   return this.tuning.join('').replaceAll(',', '').toUpperCase();
+};
+
+StringPatterns.prototype.buildTablature = function (_super, params) {
+  var verticalSize = 0;
+  _super.curTablature = new Tablature(_super.tabDrawer, params.nbLines, params.lineSpace);
+  _super.curTablature.tabFontName = params.tabFontName;
+  _super.curTablature.tabYPos = params.tabYPos;
+
+  _super.curTablature.print(nbLyrics(params.voice)); // Instrument name 
+
+
+  var yName = _super.curTablature.getY('on', _super.curTablature.numLines - 1);
+
+  var name = _super.params.name + '(' + this.toString();
+
+  if (params.capo > 0) {
+    name += ' capo:' + params.capo + ' )';
+  } else {
+    name += ')';
+  }
+
+  verticalSize = _super.tabRenderer.instrumentName(name, yName); // update vertical size
+
+  verticalSize += params.lineSpace * params.nbLines;
+  return verticalSize;
 };
 
 function StringPatterns(tuning, capo, highestNote) {
@@ -17108,7 +17182,7 @@ function Tablature(drawer, numLines, lineSpace) {
   this.verticalSize = 0;
 }
 
-Tablature.prototype.print = function () {
+Tablature.prototype.print = function (nbLyrics) {
   var klass = "abcjs-top-tab";
   this.renderer.paper.openGroup({
     prepend: true,
@@ -17117,7 +17191,7 @@ Tablature.prototype.print = function () {
   var lyricHeight = 0;
 
   if (this.renderer.tablatures.lyricHeight > 0) {
-    lyricHeight = getLyricHeight(this.renderer);
+    lyricHeight = getLyricHeight(this.renderer) * nbLyrics;
   }
 
   this.renderer.y += lyricHeight; // since numbers will be on lines , use fixed size space between lines
@@ -17394,30 +17468,6 @@ var plugin = {
     this.semantics = semantics;
     console.log('ViolinTab plugin inited');
   },
-  buildTablature: function buildTablature(name) {
-    var _super = this._super;
-    _super.curTablature = new Tablature(_super.tabDrawer, this.nbLines, this.lineSpace);
-    var verticalSize = 0;
-
-    _super.curTablature.print(); // Instrument name 
-
-
-    var yName = _super.curTablature.getY('on', _super.curTablature.numLines - 1);
-
-    name += '(' + this.semantics.strings.toString() + ')';
-
-    if (this.capo > 0) {
-      name += ' capo:' + this.capo + ' )';
-    } else {
-      name += ')';
-    }
-
-    verticalSize = _super.tabRenderer.instrumentName(name, yName); // update vertical size
-
-    verticalSize += this.lineSpace * this.nbLines;
-    _super.curTablature.verticalSize = verticalSize;
-    return verticalSize;
-  },
 
   /**
    * render a score line staff using current abcjs renderer 
@@ -17440,20 +17490,20 @@ var plugin = {
     this.semantics.strings.accidentals = _super.setAccidentals(lineNumber, 0);
     _super.topStaffY = renderer.tablatures.topStaff; // top empty filler
 
-    _super.tabRenderer.fillerY(20); // get displayed instrument name
-
-
-    var name = _super.params.name;
-
-    if (!name) {
-      name = 'violin';
-    } //  tablature frame
+    _super.tabRenderer.fillerY(20); //  tablature frame
 
 
     var verticalSize = 0;
 
     if (_super.curTablature == null) {
-      verticalSize = this.buildTablature(name);
+      verticalSize = _super.buildTablature(this.semantics, {
+        voice: voice,
+        capo: this.capo,
+        lineSpace: this.lineSpace,
+        nbLines: this.nbLines,
+        tabFontName: 'tab.tiny',
+        tabYPos: 1
+      });
     } // deal with current voice line
 
 
@@ -17587,9 +17637,12 @@ TabCommon.prototype.setError = function (semantics) {
   }
 };
 
-TabCommon.prototype.newTablature = function (Tablature, semantics, name) {
-  var verticalSize = 0;
-  return verticalSize;
+TabCommon.prototype.buildTablature = function (semantics, params) {
+  if (semantics) {
+    return semantics.strings.buildTablature(this, params);
+  }
+
+  return 0;
 };
 
 TabCommon.prototype.staffFinalization = function (voice, nbStaffs, nbVoices, verticalSize) {

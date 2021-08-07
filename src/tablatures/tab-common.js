@@ -39,12 +39,12 @@ TabCommon.prototype.setError = function (semantics) {
   }
 }
 
-TabCommon.prototype.newTablature = function (Tablature,semantics,name) {
-  var verticalSize = 0;
-  return verticalSize;
+TabCommon.prototype.buildTablature = function (semantics,params) {
+  if (semantics) {
+    return semantics.strings.buildTablature(this,params)
+  }
+  return 0;
 }
-
-
 TabCommon.prototype.staffFinalization = function(voice,nbStaffs, nbVoices,verticalSize){
   if (nbStaffs == 1) {
     if (nbVoices == 1) {

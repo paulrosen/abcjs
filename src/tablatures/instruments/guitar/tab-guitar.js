@@ -1,7 +1,6 @@
 /*
 Emit tab for Guitar staff
 */
-var Tablature = require('../string-tablature');
 var GuitarPatterns = require('./guitar-patterns');
 var TabCommon = require('../../tab-common');
 var StringRenderer = require('../string-renderer');
@@ -27,31 +26,6 @@ var plugin = {
     );
     this.semantics = semantics;
     console.log('GuitarTab plugin inited');
-  },
-
-  buildTablature: function () {
-    var _super = this._super;
-    var verticalSize = 0;
-
-    _super.curTablature = new Tablature(_super.tabDrawer,
-      this.nbLines,
-      this.lineSpace);
-    _super.curTablature.tabFontName = 'tab.big';
-    _super.curTablature.tabYPos = 2;
-    _super.curTablature.print();
-    // Instrument name 
-    var yName = _super.curTablature.getY('on', _super.curTablature.numLines - 1);
-    var name = _super.params.name + '(' + this.semantics.strings.toString();
-    if (this.capo > 0) {
-      name += ' capo:' + this.capo + ' )';
-    } else {
-      name += ')';
-    }
-
-    verticalSize = _super.tabRenderer.instrumentName(name, yName);
-    // update vertical size
-    verticalSize += this.lineSpace * this.nbLines;
-        return verticalSize;
   },
 
   /**
@@ -80,7 +54,17 @@ var plugin = {
     //  tablature frame
     var verticalSize = 0;
     if (_super.curTablature == null) {
-      verticalSize = this.buildTablature();
+      verticalSize = _super.buildTablature(
+        this.semantics,
+        {
+          voice: voice,
+          capo: this.capo,
+          lineSpace: this.lineSpace,
+          nbLines: this.nbLines,
+          tabFontName: 'tab.big',
+          tabYPos: 2
+        }
+      );
     }
 
     // deal with current voice line

@@ -31,28 +31,6 @@ var plugin = {
     console.log('ViolinTab plugin inited');
   },
 
-  buildTablature: function (name) {
-    var _super = this._super;
-    _super.curTablature = new Tablature(_super.tabDrawer,
-      this.nbLines,
-      this.lineSpace);
-    var verticalSize = 0;
-    _super.curTablature.print();
-    // Instrument name 
-    var yName = _super.curTablature.getY('on', _super.curTablature.numLines - 1);
-    name += '(' + this.semantics.strings.toString() + ')'
-    if (this.capo > 0) {
-      name += ' capo:' + this.capo + ' )';
-    } else {
-      name += ')';
-    }
-    verticalSize = _super.tabRenderer.instrumentName(name, yName);
-    // update vertical size
-    verticalSize += this.lineSpace * this.nbLines;
-    _super.curTablature.verticalSize = verticalSize;
-    return verticalSize;
-  },
-
   /**
    * render a score line staff using current abcjs renderer 
    * NB : we assume that renderer , current tunes info + tab params 
@@ -76,15 +54,20 @@ var plugin = {
     // top empty filler
     _super.tabRenderer.fillerY(20);
     
-    // get displayed instrument name
-    var name = _super.params.name;
-    if (!name) {
-      name = 'violin';
-    }
     //  tablature frame
     var verticalSize = 0;
     if (_super.curTablature == null) {
-      verticalSize = this.buildTablature(name);
+      verticalSize = _super.buildTablature(
+        this.semantics,
+        {
+          voice: voice,
+          capo: this.capo,
+          lineSpace: this.lineSpace,
+          nbLines: this.nbLines,
+          tabFontName: 'tab.tiny',
+          tabYPos: 1
+        }
+      );
     }
 
     // deal with current voice line

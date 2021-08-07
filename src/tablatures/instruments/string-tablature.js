@@ -33,12 +33,12 @@ function Tablature(drawer, numLines, lineSpace) {
   this.verticalSize = 0;
 }
 
-Tablature.prototype.print = function () {
+Tablature.prototype.print = function (nbLyrics) {
   var klass = "abcjs-top-tab";
   this.renderer.paper.openGroup({ prepend: true, klass: this.renderer.controller.classes.generate("abcjs-tab") });
   var lyricHeight = 0;
   if (this.renderer.tablatures.lyricHeight > 0) {
-    lyricHeight = getLyricHeight(this.renderer);
+    lyricHeight = getLyricHeight(this.renderer) * nbLyrics;
   }
   this.renderer.y += lyricHeight;
   // since numbers will be on lines , use fixed size space between lines

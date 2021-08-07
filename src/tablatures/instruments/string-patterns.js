@@ -4,6 +4,8 @@
  */
 var TabNote  = require('./tab-note');
 var TabNotes = require('./tab-notes');
+var Tablature = require('./string-tablature');
+
 
 function buildCapo(self) {
   var capoTuning = null;
@@ -78,7 +80,7 @@ function checkNote(note,accidentals) {
     acc = -1;
   } else if (note.startsWith('^')) {
     isSharp = true;
-    acc = +1;
+    // acc = +1;
   }
   isAltered = isFlat || isSharp;
   if (isFlat) {
@@ -93,11 +95,48 @@ function checkNote(note,accidentals) {
   }
 }
 
+function EBsharp(note) {
+  if (note.isSharp) {
+    var name = note.name[1];
+    if ( (name == 'B') || (name == 'E' ) ) {
+      // unusual #B and E case
+      note.isSharp = false;
+      note.isAltered = false;
+      note.acc = 0;
+      switch (note.name[1]) {
+        case 'E':
+          if (note.name.length > 2) {
+            note.name = 'F'
+          } else {
+            note.name = 'f';
+          }
+          break;
+        case 'e':
+          note.name = 'F';
+          break;
+        case 'B':
+          if (note.name.length > 2) {
+            note.name = 'C'
+          } else {
+            note.name = 'c';
+          }
+          break;
+        case 'b':
+          note.name = 'c';
+          break;
+      }
+    }
+  }
+  return note;
+}
+
+
 function noteToNumber(self, note, stringNumber , secondPosition )  {
   var strings = self.strings;
   if (secondPosition) {
     strings = secondPosition;
   }
+  note = EBsharp(note);
   num = strings[stringNumber].indexOf(note.name);
   if (num != -1) {
     if (secondPosition) {
@@ -105,7 +144,7 @@ function noteToNumber(self, note, stringNumber , secondPosition )  {
     }
     if (note.isFlat && (num == 0)) {
       // flat on 0 pos => previous string Fifth position
-      str = stringNumber+1;
+      stringNumber++;
       num = 7;
     }
     return {
@@ -178,6 +217,25 @@ function handleChordNotes(self,notes) {
   return retNotes;
 }
 
+function nbLyrics(voice) {
+  var nbVoices = 0
+  for (iiii = 0; iiii < voice.children.length; iiii++) {
+    absChild = voice.children[iiii];
+    for (jj = 0; jj < absChild.children.length; jj++) {
+      var relChild = absChild.children[jj];
+      var type = relChild.type;
+      if (type == 'lyric') {
+        var text = relChild.name;
+        var nbLines = text.split('\n').length - 1;
+        if (nbLines > nbVoices) {
+          nbVoices = nbLines;
+        }
+      }
+    }
+  }
+  return nbVoices;
+}
+
 StringPatterns.prototype.notesToNumber = function (notes, graces) {
   if (notes) {
     var retNotes = [];
@@ -205,6 +263,30 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
 
 StringPatterns.prototype.toString = function () {
   return this.tuning.join('').replaceAll(',','').toUpperCase();
+}
+
+StringPatterns.prototype.buildTablature = function (_super,params) {
+  var verticalSize = 0;
+
+  _super.curTablature = new Tablature(_super.tabDrawer,
+    params.nbLines,
+    params.lineSpace);
+  _super.curTablature.tabFontName = params.tabFontName;
+  _super.curTablature.tabYPos = params.tabYPos;
+  _super.curTablature.print(nbLyrics(params.voice));
+  // Instrument name 
+  var yName = _super.curTablature.getY('on', _super.curTablature.numLines - 1);
+  var name = _super.params.name + '(' + this.toString();
+  if (params.capo > 0) {
+    name += ' capo:' + params.capo + ' )';
+  } else {
+    name += ')';
+  }
+
+  verticalSize = _super.tabRenderer.instrumentName(name, yName);
+  // update vertical size
+  verticalSize += params.lineSpace * params.nbLines;
+  return verticalSize;
 }
 
 function StringPatterns(tuning, capo , highestNote) {
