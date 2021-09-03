@@ -10,7 +10,7 @@ var GuitarTablature = require('../tablatures/instruments/guitar/tab-guitar');
 
 var abcTablatures = {
 
-  inited: false ,
+  inited: false,
   plugins: {},
 
   
@@ -39,62 +39,40 @@ var abcTablatures = {
    * @param {*} params params to be processed for tablature
    * @return prepared tablatures plugin instances for current tune
    */
-  preparePlugins: function(tune,tuneNumber,params) {
-    console.log('Tablatures plugins manager preparing Plugins ...')
+  preparePlugins: function (tune, tuneNumber, params) {
+    console.log('Tablatures plugins manager preparing Plugins ...');
     var returned = null;
     var nbPlugins = 0;
     if (params.tablatures) {
-       // validate requested plugins 
+      // validate requested plugins 
       var tabs = params.tablatures;
-      for (ii = 0; ii < tabs.length; ii++) {
+      for (var ii = 0; ii < tabs.length; ii++) {
         returned = [];
         var tab = tabs[ii];
         if (tab.length > 0) {
-          var tabName = tab[0]
+          var tabName = tab[0];
           var args = null;
           if (tab.length > 1) {
-            args = tab[1] 
+            args = tab[1];
           }
           var plugin = this.plugins[tabName];
           if (plugin) {
             // proceed with tab plugin  init 
-            plugin.init(tune,tuneNumber,args,ii)
-            returned[ii] = plugin
+            plugin.init(tune, tuneNumber, args, ii);
+            returned[ii] = plugin;
             nbPlugins++;
           } else {
             // unknown tab plugin 
             //this.emit_error('Undefined tablature plugin: ' + tabName)
             this.setError(tune, 'Undefined tablature plugin: ' + tabName);
-            return returned
+            return returned;
           }
-        } 
+        }
       }
     }
-    console.log('Tablatures plugins manager '+nbPlugins+' Plugin(s) ready')
-    return returned; 
+    console.log('Tablatures plugins manager ' + nbPlugins + ' Plugin(s) ready');
+    return returned;
   },
-
-  /**
-   * Staff line dispatcher to tablature plugins 
-   * @param {*} renderer 
-   * @param {*} voice 
-   * @param {*} voiceNumber 
-   * @return tablature height size
-   */
-  /*
-  renderStaffLine: function (renderer, nbStaffs , voice, voiceNumber, lineNumber) {
-    var tune = renderer.abctune;
-    var tabs = tune.tablatures;
-    // To be enhanced for multiple staffs instruments
-    tabPlugin = tabs[0];
-    if (tabPlugin) {
-      if (!tabPlugin.refactored) {
-        return tabPlugin.render(renderer, nbStaffs, voice, voiceNumber, lineNumber);
-      }
-    }
-    return 0; // 0 tab size
-  },
-  */
 
   /**
    * Call requested plugin
@@ -106,12 +84,12 @@ var abcTablatures = {
     // chack tabs request for each staffs
     for (var ii = 0; ii < abcTune.lines.length; ii++) {
       var line = abcTune.lines[ii];
-      var curStaff= line.staff
+      var curStaff = line.staff;
       for (var jj = 0; jj < curStaff.length; jj++) {
         if (tabs[jj]) {
           // tablature requested for staff
-          tabPlugin = tabs[jj];
-          tabPlugin.render(renderer, line , jj);
+          var tabPlugin = tabs[jj];
+          tabPlugin.render(renderer, line, jj);
         }
       }
     }
@@ -120,7 +98,7 @@ var abcTablatures = {
   /**
    * called once internally to register internal plugins
    */
-  init: function() {
+  init: function () {
     // just register plugin hosted by abcjs 
     if (!this.inited) {
       this.register(new ViolinTablature());
@@ -128,7 +106,7 @@ var abcTablatures = {
       this.inited = true;
     }
   }
-}  
+};
 
 
 module.exports = abcTablatures ;

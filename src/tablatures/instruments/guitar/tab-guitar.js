@@ -28,7 +28,7 @@ var plugin = {
       this.linePitch);
 
     var semantics = new GuitarPatterns(_super.params.tuning,
-      this.capo ,
+      this.capo,
       params.highestNote,
       this.linePitch
     );
@@ -38,18 +38,18 @@ var plugin = {
   render: function (renderer, line, staffIndex) {
     console.log('GuitarTab plugin rendered');
     setGuitarFonts(this.abcTune);
-    var renderer = new TabRenderer(this, renderer, line, staffIndex)
-    renderer.doLayout();
+    var rndrer = new TabRenderer(this, renderer, line, staffIndex);
+    rndrer.doLayout();
   }
 
-}
+};
 
 //
 // Tablature plugin definition
 //
 var AbcGuitarTab = function () {
   return { name: 'GuitarTab', tablature: plugin };
-}
+};
 
 
 module.exports = AbcGuitarTab;

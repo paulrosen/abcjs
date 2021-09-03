@@ -11,12 +11,12 @@ function GuitarPatterns(tuning,capo,highestNote,linePitch) {
 GuitarPatterns.prototype.notesToNumber = function (notes, graces) {
   var converter = this.strings;
   return converter.notesToNumber(notes, graces);
-}
+};
 
 GuitarPatterns.prototype.stringToPitch = function (stringNumber) {
   var converter = this.strings;
   return converter.stringToPitch(stringNumber);
-}
+};
 
 
 module.exports = GuitarPatterns;

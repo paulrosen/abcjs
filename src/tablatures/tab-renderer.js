@@ -18,7 +18,7 @@ function initSpecialY() {
 }
 
 function getLyricHeight(voice) {
-  var toto = 0 ;  var maxLyricHeight = 0;
+  var maxLyricHeight = 0;
   for ( var ii=0; ii < voice.children.length; ii++) {
     var curAbs = voice.children[ii];
     if (curAbs.specialY) {

@@ -36,8 +36,8 @@ var plugin = {
   render: function (renderer, line, staffIndex) {
     console.log('ViolinTab plugin rendered');
     setViolinFonts(this.abcTune);
-    var renderer = new TabRenderer(this, renderer, line, staffIndex)
-    renderer.doLayout();
+    var rndrer = new TabRenderer(this, renderer, line, staffIndex);
+    rndrer.doLayout();
   }
 
 };
@@ -47,6 +47,6 @@ var plugin = {
 //
 var AbcViolinTab = function () {
   return { name: 'ViolinTab', tablature: plugin };
-}
+};
 
 module.exports = AbcViolinTab;

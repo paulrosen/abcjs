@@ -288,7 +288,7 @@ var abcTablatures = {
       // validate requested plugins 
       var tabs = params.tablatures;
 
-      for (ii = 0; ii < tabs.length; ii++) {
+      for (var ii = 0; ii < tabs.length; ii++) {
         returned = [];
         var tab = tabs[ii];
 
@@ -322,29 +322,6 @@ var abcTablatures = {
   },
 
   /**
-   * Staff line dispatcher to tablature plugins 
-   * @param {*} renderer 
-   * @param {*} voice 
-   * @param {*} voiceNumber 
-   * @return tablature height size
-   */
-
-  /*
-  renderStaffLine: function (renderer, nbStaffs , voice, voiceNumber, lineNumber) {
-    var tune = renderer.abctune;
-    var tabs = tune.tablatures;
-    // To be enhanced for multiple staffs instruments
-    tabPlugin = tabs[0];
-    if (tabPlugin) {
-      if (!tabPlugin.refactored) {
-        return tabPlugin.render(renderer, nbStaffs, voice, voiceNumber, lineNumber);
-      }
-    }
-    return 0; // 0 tab size
-  },
-  */
-
-  /**
    * Call requested plugin
    * @param {*} renderer 
    * @param {*} abcTune 
@@ -359,7 +336,7 @@ var abcTablatures = {
       for (var jj = 0; jj < curStaff.length; jj++) {
         if (tabs[jj]) {
           // tablature requested for staff
-          tabPlugin = tabs[jj];
+          var tabPlugin = tabs[jj];
           tabPlugin.render(renderer, line, jj);
         }
       }
@@ -17278,8 +17255,8 @@ var plugin = {
   render: function render(renderer, line, staffIndex) {
     console.log('ViolinTab plugin rendered');
     setViolinFonts(this.abcTune);
-    var renderer = new TabRenderer(this, renderer, line, staffIndex);
-    renderer.doLayout();
+    var rndrer = new TabRenderer(this, renderer, line, staffIndex);
+    rndrer.doLayout();
   }
 }; //
 // Tablature plugin definition

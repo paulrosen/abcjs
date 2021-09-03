@@ -20,7 +20,7 @@ function TabNote(note) {
   this.flat = note.indexOf('_') != -1;
 }
 
-TabNote.prototype.sameNoteAs = function(note) {
+TabNote.prototype.sameNoteAs = function (note) {
   if ((this.note == note.note) &&
     (this.hasComma == note.hasComma) &&
     (this.isLower == note.isLower) &&
@@ -31,7 +31,7 @@ TabNote.prototype.sameNoteAs = function(note) {
   } else {
     return false;
   }
-}
+};
 
 TabNote.prototype.nextNote = function () {
   var newNote = this.note;
@@ -40,7 +40,7 @@ TabNote.prototype.nextNote = function () {
   newTabNote.isLower = this.isLower;
   newTabNote.isQuoted = this.isQuoted;
 
-  if ( !this.sharp ) {
+  if (!this.sharp) {
     if (this.note != 'E' && this.note != 'B') {
       newTabNote.sharp = true;
       return newTabNote;
@@ -48,7 +48,7 @@ TabNote.prototype.nextNote = function () {
   }
   var noteIndex = notes.indexOf(newNote);
   if (noteIndex == notes.length - 1) {
-    noteIndex = 0; 
+    noteIndex = 0;
   } else {
     noteIndex++;
   }
@@ -65,7 +65,7 @@ TabNote.prototype.nextNote = function () {
     }
   }
   return newTabNote;
-}
+};
 
 TabNote.prototype.emit = function () {
   var returned = this.note;
@@ -85,8 +85,8 @@ TabNote.prototype.emit = function () {
       }
     }
   }
-  return returned
-}
+  return returned;
+};
 
 module.exports = {
   'TabNote': TabNote,

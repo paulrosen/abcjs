@@ -1,5 +1,3 @@
-var AbsoluteElement = require('../../write/abc_absolute_element');
-var RelativeElement = require('../../write/abc_relative_element');
 
 /**
  * Layout tablature informations for draw
@@ -14,20 +12,20 @@ function StringTablature(numLines, lineSpace) {
   var pitch = 3;
   this.bar = {
     pitch: pitch,
-    pitch2: lineSpace * numLines ,
+    pitch2: lineSpace * numLines,
     height: 5,
-  }
+  };
 }
 
-StringTablature.prototype.setRelative = function(child,relative,first) {
+StringTablature.prototype.setRelative = function (child, relative, first) {
   switch (child.type) {
     case 'bar':
       relative.pitch = this.bar.pitch;
-      relative.pitch2 = this.bar.pitch2 ;
+      relative.pitch2 = this.bar.pitch2;
       relative.height = this.height;
-    break;
+      break;
     case 'symbol':
-      var top = this.bar.pitch2/2
+      var top = this.bar.pitch2 / 2;
       if (child.name == 'dots.dot') {
         if (first) {
           relative.pitch = top;
@@ -37,9 +35,9 @@ StringTablature.prototype.setRelative = function(child,relative,first) {
           return true;
         }
       }
-    break;
+      break;
   }
   return first;
-}
+};
 
 module.exports = StringTablature;

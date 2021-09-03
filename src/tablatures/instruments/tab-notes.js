@@ -19,15 +19,14 @@ TabNotes.prototype.build = function () {
     return buildReturned;
   }
   var finished = false;
-  var curPos = startIndex;
   while (!finished) {
-    buildReturned.push(fromN.emit())
+    buildReturned.push(fromN.emit());
     fromN = fromN.nextNote();
-    if ( fromN.sameNoteAs(toN)) {
+    if (fromN.sameNoteAs(toN)) {
       finished = true;
     }
   }
   return buildReturned;
-}
+};
 
 module.exports = TabNotes;
