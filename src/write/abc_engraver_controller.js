@@ -17,6 +17,7 @@ var GetFontAndAttr = require('./get-font-and-attr');
 var GetTextSize = require('./get-text-size');
 var draw = require('./draw/draw');
 var calcHeight = require('./calcHeight');
+var tablatures = require('../api/abc_tablatures');
 
 /**
  * @class
@@ -221,6 +222,10 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 	abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
 };
 
+function dumpTune(abcTune) {
+	console.log(abcTune.lines);
+}
+
 EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
 	var scale = this.setupTune(abcTune, tuneNumber);
 
@@ -230,6 +235,13 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
 	// Do all the positioning, both horizontally and vertically
 	var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
 
+	dumpTune(abcTune);
+	// Deal with tablature for staff
+	if (abcTune.tablatures) {
+		tablatures.layoutTablatures(this.renderer, abcTune);
+	}
+
+	dumpTune(abcTune);
 	// Do all the writing to the SVG
 	var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber);
 	this.staffgroups = ret.staffgroups;

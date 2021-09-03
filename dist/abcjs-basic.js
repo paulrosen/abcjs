@@ -304,7 +304,7 @@ var abcTablatures = {
 
           if (plugin) {
             // proceed with tab plugin  init 
-            plugin.init(tune, tuneNumber, args);
+            plugin.init(tune, tuneNumber, args, ii);
             returned[ii] = plugin;
             nbPlugins++;
           } else {
@@ -328,17 +328,42 @@ var abcTablatures = {
    * @param {*} voiceNumber 
    * @return tablature height size
    */
-  renderStaffLine: function renderStaffLine(renderer, nbStaffs, voice, voiceNumber, lineNumber) {
+
+  /*
+  renderStaffLine: function (renderer, nbStaffs , voice, voiceNumber, lineNumber) {
     var tune = renderer.abctune;
-    var tabs = tune.tablatures; // To be enhanced for multiple staffs instruments
-
+    var tabs = tune.tablatures;
+    // To be enhanced for multiple staffs instruments
     tabPlugin = tabs[0];
-
     if (tabPlugin) {
-      return tabPlugin.render(renderer, nbStaffs, voice, voiceNumber, lineNumber);
+      if (!tabPlugin.refactored) {
+        return tabPlugin.render(renderer, nbStaffs, voice, voiceNumber, lineNumber);
+      }
     }
-
     return 0; // 0 tab size
+  },
+  */
+
+  /**
+   * Call requested plugin
+   * @param {*} renderer 
+   * @param {*} abcTune 
+   */
+  layoutTablatures: function layoutTablatures(renderer, abcTune) {
+    var tabs = abcTune.tablatures; // chack tabs request for each staffs
+
+    for (var ii = 0; ii < abcTune.lines.length; ii++) {
+      var line = abcTune.lines[ii];
+      var curStaff = line.staff;
+
+      for (var jj = 0; jj < curStaff.length; jj++) {
+        if (tabs[jj]) {
+          // tablature requested for staff
+          tabPlugin = tabs[jj];
+          tabPlugin.render(renderer, line, jj);
+        }
+      }
+    }
   },
 
   /**
@@ -16571,15 +16596,25 @@ module.exports = setGuitarFonts;
 
 var StringPatterns = __webpack_require__(/*! ../string-patterns */ "./src/tablatures/instruments/string-patterns.js");
 
-function GuitarPatterns(tuning, capo, highestNote) {
+function GuitarPatterns(tuning, capo, highestNote, linePitch) {
   this.tuning = tuning;
 
   if (!tuning) {
     this.tuning = ['E,', 'A', 'D', 'G', 'B', 'e'];
   }
 
-  this.strings = new StringPatterns(tuning, capo, highestNote);
+  this.strings = new StringPatterns(tuning, capo, highestNote, linePitch);
 }
+
+GuitarPatterns.prototype.notesToNumber = function (notes, graces) {
+  var converter = this.strings;
+  return converter.notesToNumber(notes, graces);
+};
+
+GuitarPatterns.prototype.stringToPitch = function (stringNumber) {
+  var converter = this.strings;
+  return converter.stringToPitch(stringNumber);
+};
 
 module.exports = GuitarPatterns;
 
@@ -16594,11 +16629,13 @@ module.exports = GuitarPatterns;
 /*
 Emit tab for Guitar staff
 */
-var GuitarPatterns = __webpack_require__(/*! ./guitar-patterns */ "./src/tablatures/instruments/guitar/guitar-patterns.js");
+var StringTablature = __webpack_require__(/*! ../string-tablature */ "./src/tablatures/instruments/string-tablature.js");
 
 var TabCommon = __webpack_require__(/*! ../../tab-common */ "./src/tablatures/tab-common.js");
 
-var StringRenderer = __webpack_require__(/*! ../string-renderer */ "./src/tablatures/instruments/string-renderer.js");
+var TabRenderer = __webpack_require__(/*! ../../tab-renderer */ "./src/tablatures/tab-renderer.js");
+
+var GuitarPatterns = __webpack_require__(/*! ./guitar-patterns */ "./src/tablatures/instruments/guitar/guitar-patterns.js");
 
 var setGuitarFonts = __webpack_require__(/*! ./guitar-fonts */ "./src/tablatures/instruments/guitar/guitar-fonts.js");
 
@@ -16610,60 +16647,23 @@ var plugin = {
   * @param {*} params  complementary args provided to Tablature Plugin
   */
   init: function init(abcTune, tuneNumber, params) {
-    this._super = new TabCommon(abcTune, tuneNumber, params);
-    this.lineSpace = 12;
+    var _super = new TabCommon(abcTune, tuneNumber, params);
+
+    this._super = _super;
+    this.abcTune = abcTune;
+    this.linePitch = 3;
     this.nbLines = 6;
+    this.isTabBig = true;
     this.capo = params.capo;
-    var semantics = new GuitarPatterns(params.tuning, this.capo, params.highestNote);
+    this.tablature = new StringTablature(this.nbLines, this.linePitch);
+    var semantics = new GuitarPatterns(_super.params.tuning, this.capo, params.highestNote, this.linePitch);
     this.semantics = semantics;
-    console.log('GuitarTab plugin inited');
   },
-
-  /**
-   * render a score line staff using current abcjs renderer 
-   * NB : we assume that renderer , current tunes info + tab params 
-   * operational inside plugin instance
-   * @param {*} renderer
-   * @param {*} staff
-   * @return the current height of displayed tab 
-   */
-  render: function render(renderer, nbStaffs, voices, curVoice, lineNumber) {
+  render: function render(renderer, line, staffIndex) {
     console.log('GuitarTab plugin rendered');
-    var nbVoices = voices.length;
-    var voice = voices[curVoice];
-    var _super = this._super;
-    var strRenderer = new StringRenderer(this, renderer); // get staff accidentals (assume staff index 0 => to be pondered  later)
-
-    this.semantics.strings.accidentals = _super.setAccidentals(lineNumber, 0); // set guitar tab fonts
-
-    setGuitarFonts(_super.tune);
-    _super.topStaffY = renderer.tablatures.topStaff; // top empty filler
-
-    _super.tabRenderer.fillerY(30); //  tablature frame
-
-
-    var verticalSize = 0;
-
-    if (_super.curTablature == null) {
-      verticalSize = _super.buildTablature(this.semantics, {
-        voice: voice,
-        capo: this.capo,
-        lineSpace: this.lineSpace,
-        nbLines: this.nbLines,
-        tabFontName: 'tab.big',
-        tabYPos: 2
-      });
-    } // deal with current voice line
-
-
-    strRenderer.render(_super.curTablature, this.semantics, voice);
-
-    _super.setError(this.semantics); // check any error messages
-    // return back the vertical size used by tab line
-    // is 0 with successive voices when nbStaffs is 1 
-
-
-    return _super.staffFinalization(voice, nbStaffs, nbVoices, verticalSize);
+    setGuitarFonts(this.abcTune);
+    var renderer = new TabRenderer(this, renderer, line, staffIndex);
+    renderer.doLayout();
   }
 }; //
 // Tablature plugin definition
@@ -16686,15 +16686,9 @@ module.exports = AbcGuitarTab;
   \*******************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-/**
- * Handles Violin score to tabs conversion
- * @param {} tuning 
- */
 var TabNote = __webpack_require__(/*! ./tab-note */ "./src/tablatures/instruments/tab-note.js");
 
 var TabNotes = __webpack_require__(/*! ./tab-notes */ "./src/tablatures/instruments/tab-notes.js");
-
-var Tablature = __webpack_require__(/*! ./string-tablature */ "./src/tablatures/instruments/string-tablature.js");
 
 function buildCapo(self) {
   var capoTuning = null;
@@ -16801,6 +16795,51 @@ function checkNote(note, accidentals) {
   };
 }
 
+function sameString(self, chord) {
+  for (jjjj = 0; jjjj < chord.length - 1; jjjj++) {
+    var curPos = chord[jjjj];
+    var nextPos = chord[jjjj + 1];
+
+    if (curPos.str == nextPos.str) {
+      // same String
+      // => change lower pos 
+      if (curPos.str == self.strings.length - 1) {
+        self.hasError = 'Invalid tab Chord position for instrument';
+      } // change lower pitch on lowest string
+
+
+      if (nextPos.num < curPos.num) {
+        nextPos.str++;
+        nextPos = noteToNumber(self, nextPos.note, nextPos.str, self.secondPos);
+      } else {
+        curPos.str++;
+        curPos = noteToNumber(self, curPos.note, curPos.str, self.secondPos);
+      }
+
+      if (nextPos == null || curPos == null) {
+        self.hasError = "Can't map tab Chord position for instrument";
+      } // update table
+
+
+      chord[jjjj] = curPos;
+      chord[jjjj + 1] = nextPos;
+    }
+  }
+}
+
+function handleChordNotes(self, notes) {
+  retNotes = [];
+
+  for (iiii = 0; iiii < notes.length; iiii++) {
+    var note = checkNote(notes[iiii].name, this.accidentals);
+    var curPos = toNumber(self, note);
+    retNotes.push(curPos);
+  }
+
+  var error = sameString(self, retNotes);
+  return retNotes;
+}
+
 function EBsharp(note) {
   if (note.isSharp) {
     var name = note.name[1];
@@ -16814,15 +16853,15 @@ function EBsharp(note) {
       switch (note.name[1]) {
         case 'E':
           if (note.name.length > 2) {
-            note.name = 'F';
-          } else {
             note.name = 'f';
+          } else {
+            note.name = 'F';
           }
 
           break;
 
         case 'e':
-          note.name = 'F';
+          note.name = 'f';
           break;
 
         case 'B':
@@ -16892,74 +16931,11 @@ function toNumber(self, note) {
   return null; // not found
 }
 
-function sameString(self, chord) {
-  for (jjjj = 0; jjjj < chord.length - 1; jjjj++) {
-    var curPos = chord[jjjj];
-    var nextPos = chord[jjjj + 1];
-
-    if (curPos.str == nextPos.str) {
-      // same String
-      // => change lower pos 
-      if (curPos.str == self.strings.length - 1) {
-        self.hasError = 'Invalid tab Chord position for instrument';
-      } // change lower pitch on lowest string
-
-
-      if (nextPos.num < curPos.num) {
-        nextPos.str++;
-        nextPos = noteToNumber(self, nextPos.note, nextPos.str, self.secondPos);
-      } else {
-        curPos.str++;
-        curPos = noteToNumber(self, curPos.note, curPos.str, self.secondPos);
-      }
-
-      if (nextPos == null || curPos == null) {
-        self.hasError = "Can't map tab Chord position for instrument";
-      } // update table
-
-
-      chord[jjjj] = curPos;
-      chord[jjjj + 1] = nextPos;
-    }
-  }
-}
-
-function handleChordNotes(self, notes) {
-  retNotes = [];
-
-  for (iiii = 0; iiii < notes.length; iiii++) {
-    var note = checkNote(notes[iiii].name, this.accidentals);
-    var curPos = toNumber(self, note);
-    retNotes.push(curPos);
-  }
-
-  var error = sameString(self, retNotes);
-  return retNotes;
-}
-
-function nbLyrics(voice) {
-  var nbVoices = 0;
-
-  for (iiii = 0; iiii < voice.children.length; iiii++) {
-    absChild = voice.children[iiii];
-
-    for (jj = 0; jj < absChild.children.length; jj++) {
-      var relChild = absChild.children[jj];
-      var type = relChild.type;
-
-      if (type == 'lyric') {
-        var text = relChild.name;
-        var nbLines = text.split('\n').length - 1;
-
-        if (nbLines > nbVoices) {
-          nbVoices = nbLines;
-        }
-      }
-    }
-  }
-
-  return nbVoices;
-}
+StringPatterns.prototype.stringToPitch = function (stringNumber) {
+  var startingPitch = 5.3;
+  var bottom = this.strings.length - 1;
+  return startingPitch + (bottom - stringNumber) * this.linePitch;
+};
 
 StringPatterns.prototype.notesToNumber = function (notes, graces) {
   if (notes) {
@@ -16996,32 +16972,28 @@ StringPatterns.prototype.toString = function () {
   return this.tuning.join('').replaceAll(',', '').toUpperCase();
 };
 
-StringPatterns.prototype.buildTablature = function (_super, params) {
-  var verticalSize = 0;
-  _super.curTablature = new Tablature(_super.tabDrawer, params.nbLines, params.lineSpace);
-  _super.curTablature.tabFontName = params.tabFontName;
-  _super.curTablature.tabYPos = params.tabYPos;
-
-  _super.curTablature.print(nbLyrics(params.voice)); // Instrument name 
-
-
-  var yName = _super.curTablature.getY('on', _super.curTablature.numLines - 1);
-
+StringPatterns.prototype.tabInfos = function (plugin) {
+  var _super = plugin._super;
   var name = _super.params.name + '(' + this.toString();
 
-  if (params.capo > 0) {
-    name += ' capo:' + params.capo + ' )';
+  if (plugin.capo > 0) {
+    name += ' capo:' + plugin.capo + ' )';
   } else {
     name += ')';
   }
 
-  verticalSize = _super.tabRenderer.instrumentName(name, yName); // update vertical size
-
-  verticalSize += params.lineSpace * params.nbLines;
-  return verticalSize;
+  return name;
 };
+/**
+ * Common patterns for all string instruments
+ * @param {} tuning 
+ * @param {*} capo 
+ * @param {*} highestNote 
+ */
 
-function StringPatterns(tuning, capo, highestNote) {
+
+function StringPatterns(tuning, capo, highestNote, linePitch) {
+  this.linePitch = linePitch;
   this.highestNote = "f'";
   this.hasError = null; // collect errors here if any
 
@@ -17051,226 +17023,62 @@ module.exports = StringPatterns;
 
 /***/ }),
 
-/***/ "./src/tablatures/instruments/string-renderer.js":
-/*!*******************************************************!*\
-  !*** ./src/tablatures/instruments/string-renderer.js ***!
-  \*******************************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var TabRenderer = __webpack_require__(/*! ../tab-renderer */ "./src/tablatures/tab-renderer.js");
-
-var TabDrawer = __webpack_require__(/*! ../tab-drawer */ "./src/tablatures/tab-drawer.js"); // private stuff
-
-
-function isRepeat(absChild) {
-  var type = absChild.abcelem.type;
-
-  if (type) {
-    if (type.endsWith('_repeat')) return true;
-  }
-
-  return false;
-}
-/*
- * render tablature for string voice
- */
-
-
-function StringTabRenderer(self, renderer) {
-  this._super = self._super;
-  var _super = this._super;
-
-  if (_super.tabRenderer == null) {
-    _super.tabRenderer = new TabRenderer(renderer);
-  }
-
-  if (_super.tabDrawer == null) {
-    _super.tabDrawer = new TabDrawer(_super.tabRenderer);
-    _super.tabRenderer.drawer = _super.tabDrawer;
-  }
-}
-
-StringTabRenderer.prototype.render = function (tablature, semantics, voice) {
-  var absChild;
-  var thickBar = false;
-  var _super = this._super; // draw starting vertical line
-
-  tablature.verticalLine(tablature.startx, _super.topStaffY, tablature.bottomLine);
-  var lastX = tablature.endx;
-
-  for (ii = 0; ii < voice.children.length; ii++) {
-    absChild = voice.children[ii];
-    var scoreType;
-
-    for (jj = 0; jj < absChild.children.length; jj++) {
-      var relChild = absChild.children[jj];
-      scoreType = relChild.parent.abcelem.el_type;
-
-      switch (scoreType) {
-        case 'clef':
-          tablature.tab(relChild);
-          break;
-
-        case 'bar':
-          tablature.bar(relChild);
-
-          if (ii == voice.children.length - 1) {
-            thickBar = isRepeat(absChild);
-          }
-
-          lastX = relChild.x;
-          break;
-      }
-
-      if (scoreType == 'note') {
-        var pitches = absChild.abcelem.pitches;
-        var graceNotes = absChild.gracenotes;
-        tabPos = semantics.strings.notesToNumber(pitches, graceNotes);
-
-        _super.tabRenderer.numbers(absChild.x, tablature, tabPos, thickBar);
-      }
-    }
-  } // draw ending vertical line
-
-
-  tablature.verticalLine(lastX, _super.topStaffY, tablature.bottomLine, thickBar);
-};
-
-module.exports = StringTabRenderer;
-
-/***/ }),
-
 /***/ "./src/tablatures/instruments/string-tablature.js":
 /*!********************************************************!*\
   !*** ./src/tablatures/instruments/string-tablature.js ***!
   \********************************************************/
-/***/ (function(module) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-/*
- *
- *  Violin / Mandolin / tenor Banjo tablature layout   
- * 
- */
+var AbsoluteElement = __webpack_require__(/*! ../../write/abc_absolute_element */ "./src/write/abc_absolute_element.js");
 
+var RelativeElement = __webpack_require__(/*! ../../write/abc_relative_element */ "./src/write/abc_relative_element.js");
 /**
- * guess potential lyric height
- * @param {*} renderer 
+ * Layout tablature informations for draw
+ * @param {*} numLines 
+ * @param {*} lineSpace 
  */
-function getLyricHeight(renderer) {
-  var svg = renderer.paper;
-  var fontAndAttr = renderer.controller.getFontAndAttr.calc('vocalFont', ''); //var getTextSize = new GetTextSize(fontAndAttr, 'text');
 
-  size = svg.guessWidth('A', fontAndAttr);
-  return size.height;
-}
 
-function Tablature(drawer, numLines, lineSpace) {
-  this.drawer = drawer;
-  this.renderer = drawer.renderer;
-  this.startx = this.renderer.tablatures.startx;
-  this.endx = this.renderer.tablatures.w;
+function StringTablature(numLines, lineSpace) {
   this.numLines = numLines;
   this.lineSpace = lineSpace;
-  this.lines = [];
-  this.topLine = -1;
-  this.bottomLine = -1;
-  this.staffY = -1;
-  this.dotY = null;
-  this.tabFontName = 'tab.tiny';
-  this.tabYPos = 1;
-  this.capo = 0;
-  this.verticalSize = 0;
+  this.verticalSize = this.numLines * this.lineSpace;
+  var pitch = 3;
+  this.bar = {
+    pitch: pitch,
+    pitch2: lineSpace * numLines,
+    height: 5
+  };
 }
 
-Tablature.prototype.print = function (nbLyrics) {
-  var klass = "abcjs-top-tab";
-  this.renderer.paper.openGroup({
-    prepend: true,
-    klass: this.renderer.controller.classes.generate("abcjs-tab")
-  });
-  var lyricHeight = 0;
-
-  if (this.renderer.tablatures.lyricHeight > 0) {
-    lyricHeight = getLyricHeight(this.renderer) * nbLyrics;
-  }
-
-  this.renderer.y += lyricHeight; // since numbers will be on lines , use fixed size space between lines
-
-  for (var i = 0; i <= this.numLines - 1; i++) {
-    this.lines[i] = this.drawer.drawHLine(this.startx, this.endx, i, this.lineSpace, klass);
-    klass = undefined;
-  }
-
-  this.topLine = this.lines[0];
-  this.bottomLine = this.lines[this.numLines - 1];
-  this.renderer.paper.closeGroup();
-};
-
-Tablature.prototype.getY = function (pos, lineNumber, pitch) {
-  if (!pitch) pitch = 0;
-  var interval = (this.lines[2] - this.lines[1]) / 2;
-
-  switch (pos) {
-    case "above":
-      // above line
-      return this.lines[lineNumber] - interval - pitch;
-
-    case "on":
-      // on line
-      return this.lines[lineNumber] + pitch;
-
-    case "below":
-      // below line
-      if (lineNumber >= this.lines.length - 1) {
-        lineNumber = this.lines.length - 1;
-      }
-
-      return this.lines[lineNumber] + interval + pitch;
-  }
-};
-
-Tablature.prototype.verticalLine = function (x, y1, y2, thickLine) {
-  var klass = "abcjs-vert-tab";
-  var dx = 0.6;
-  if (thickLine) dx = 4;
-  this.renderer.paper.openGroup({
-    prepend: true,
-    klass: this.renderer.controller.classes.generate("abcjs-vert-tab")
-  });
-  this.drawer.drawVLine(y1, y2, x, klass, dx);
-  this.renderer.paper.closeGroup();
-};
-
-Tablature.prototype.bar = function (staffInfos) {
-  var nbLines = this.lines.length;
-  var dotPos = Math.round(nbLines / 2);
-
-  if (this.dotY == null) {
-    this.dotY = this.getY('on', dotPos - 1);
-  } else {
-    this.dotY = this.getY('on', dotPos);
-  }
-
-  switch (staffInfos.type) {
+StringTablature.prototype.setRelative = function (child, relative, first) {
+  switch (child.type) {
     case 'bar':
-      this.drawer.drawBar(this.topLine, this.bottomLine, staffInfos.x, null, "tabbar", staffInfos.linewidth);
+      relative.pitch = this.bar.pitch;
+      relative.pitch2 = this.bar.pitch2;
+      relative.height = this.height;
       break;
 
     case 'symbol':
-      this.drawer.drawSymbol(staffInfos.x, this.dotY, staffInfos.name);
+      var top = this.bar.pitch2 / 2;
+
+      if (child.name == 'dots.dot') {
+        if (first) {
+          relative.pitch = top;
+          return false;
+        } else {
+          relative.pitch = top + this.lineSpace;
+          return true;
+        }
+      }
+
       break;
   }
 
-  if (this.dotY == this.getY('on', dotPos)) {
-    this.dotY = null; // just reset
-  }
+  return first;
 };
 
-Tablature.prototype.tab = function (staffInfos) {
-  this.drawer.drawTab(staffInfos.x, this.getY('below', this.tabYPos), this.tabFontName);
-};
-
-module.exports = Tablature;
+module.exports = StringTablature;
 
 /***/ }),
 
@@ -17435,18 +17243,15 @@ module.exports = TabNotes;
   \*********************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-/*
-Emit tab for violin staff
-*/
-var Tablature = __webpack_require__(/*! ../string-tablature */ "./src/tablatures/instruments/string-tablature.js");
+var StringTablature = __webpack_require__(/*! ../string-tablature */ "./src/tablatures/instruments/string-tablature.js");
+
+var TabCommon = __webpack_require__(/*! ../../tab-common */ "./src/tablatures/tab-common.js");
+
+var TabRenderer = __webpack_require__(/*! ../../tab-renderer */ "./src/tablatures/tab-renderer.js");
 
 var ViolinPatterns = __webpack_require__(/*! ./violin-patterns */ "./src/tablatures/instruments/violin/violin-patterns.js");
 
 var setViolinFonts = __webpack_require__(/*! ./violin-fonts */ "./src/tablatures/instruments/violin/violin-fonts.js");
-
-var TabCommon = __webpack_require__(/*! ../../tab-common */ "./src/tablatures/tab-common.js");
-
-var StringRenderer = __webpack_require__(/*! ../string-renderer */ "./src/tablatures/instruments/string-renderer.js");
 
 var plugin = {
   // public stuff
@@ -17460,61 +17265,21 @@ var plugin = {
   init: function init(abcTune, tuneNumber, params) {
     var _super = new TabCommon(abcTune, tuneNumber, params);
 
+    this.abcTune = abcTune;
     this._super = _super;
-    this.lineSpace = 12;
+    this.linePitch = 3;
     this.nbLines = 4;
+    this.isTabBig = false;
     this.capo = params.capo;
-    var semantics = new ViolinPatterns(_super.params.tuning, this.capo, params.higestNote);
+    this.tablature = new StringTablature(this.nbLines, this.linePitch);
+    var semantics = new ViolinPatterns(_super.params.tuning, this.capo, params.higestNote, this.linePitch);
     this.semantics = semantics;
-    console.log('ViolinTab plugin inited');
   },
-
-  /**
-   * render a score line staff using current abcjs renderer 
-   * NB : we assume that renderer , current tunes info + tab params 
-   * operational inside plugin iÒnstance
-   * @param {*} renderer
-   * @param {*} staff
-   * @return the current height of displayed tab 
-   */
-  render: function render(renderer, nbStaffs, voices, curVoice, lineNumber) {
+  render: function render(renderer, line, staffIndex) {
     console.log('ViolinTab plugin rendered');
-    var nbVoices = voices.length;
-    var voice = voices[curVoice];
-    var _super = this._super;
-    var strRenderer = new StringRenderer(this, renderer); // set violin tab fonts
-
-    setViolinFonts(_super.tune); //
-    // get staff accidentals (assume staff index 0 => to be pondered  later)
-
-    this.semantics.strings.accidentals = _super.setAccidentals(lineNumber, 0);
-    _super.topStaffY = renderer.tablatures.topStaff; // top empty filler
-
-    _super.tabRenderer.fillerY(20); //  tablature frame
-
-
-    var verticalSize = 0;
-
-    if (_super.curTablature == null) {
-      verticalSize = _super.buildTablature(this.semantics, {
-        voice: voice,
-        capo: this.capo,
-        lineSpace: this.lineSpace,
-        nbLines: this.nbLines,
-        tabFontName: 'tab.tiny',
-        tabYPos: 1
-      });
-    } // deal with current voice line
-
-
-    strRenderer.render(_super.curTablature, this.semantics, voice);
-
-    _super.setError(this.semantics); // check any error messages
-    // return back the vertical size used by tab line
-    // is 0 with successive voices when nbStaffs is 1 
-
-
-    return _super.staffFinalization(voice, nbStaffs, nbVoices, verticalSize);
+    setViolinFonts(this.abcTune);
+    var renderer = new TabRenderer(this, renderer, line, staffIndex);
+    renderer.doLayout();
   }
 }; //
 // Tablature plugin definition
@@ -17575,17 +17340,178 @@ module.exports = setViolinFonts;
 
 var StringPatterns = __webpack_require__(/*! ../string-patterns */ "./src/tablatures/instruments/string-patterns.js");
 
-function ViolinPatterns(tuning, capo, highestNote) {
+function ViolinPatterns(tuning, capo, highestNote, linePitch) {
   this.tuning = tuning;
 
   if (!tuning) {
     this.tuning = ['G,', 'D', 'A', 'e'];
   }
 
-  this.strings = new StringPatterns(tuning, capo, highestNote);
+  this.strings = new StringPatterns(tuning, capo, highestNote, linePitch);
 }
 
+ViolinPatterns.prototype.notesToNumber = function (notes, graces) {
+  var converter = this.strings;
+  return converter.notesToNumber(notes, graces);
+};
+
+ViolinPatterns.prototype.stringToPitch = function (stringNumber) {
+  var converter = this.strings;
+  return converter.stringToPitch(stringNumber);
+};
+
 module.exports = ViolinPatterns;
+
+/***/ }),
+
+/***/ "./src/tablatures/tab-absolute-elements.js":
+/*!*************************************************!*\
+  !*** ./src/tablatures/tab-absolute-elements.js ***!
+  \*************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/**
+ * Tablature Absolute elements factory
+ */
+var AbsoluteElement = __webpack_require__(/*! ../write/abc_absolute_element */ "./src/write/abc_absolute_element.js");
+
+var RelativeElement = __webpack_require__(/*! ../write/abc_relative_element */ "./src/write/abc_relative_element.js");
+
+function isObject(a) {
+  return a != null && a.constructor === Object;
+}
+
+function clone(dest, src) {
+  for (var prop in src) {
+    if (src.hasOwnProperty(prop)) {
+      if (!(Array.isArray(src[prop]) || isObject(src[prop]))) {
+        dest[prop] = src[prop];
+      }
+    }
+  }
+}
+
+function cloneAbsolute(absSrc) {
+  var returned = new AbsoluteElement('', 0, 0, '', 0);
+  clone(returned, absSrc);
+  returned.top = 0;
+  returned.bottom = -1;
+  return returned;
+}
+
+function cloneAbsoluteAndRelatives(absSrc, plugin) {
+  var returned = cloneAbsolute(absSrc);
+
+  if (plugin) {
+    var children = absSrc.children; // proceed with relative as well
+
+    var first = true;
+
+    for (var ii = 0; ii < children.length; ii++) {
+      var child = children[ii];
+      var relative = new RelativeElement('', 0, 0, 0, '');
+      clone(relative, child);
+      first = plugin.tablature.setRelative(child, relative, first);
+      returned.children.push(relative);
+    }
+  }
+
+  return returned;
+}
+
+function buildTabAbsolute(plugin, absX, relX) {
+  var tabIcon = 'tab.tiny';
+  var tabYPos = 7.5;
+
+  if (plugin.isTabBig) {
+    tabIcon = 'tab.big';
+    tabYPos = 10;
+  }
+
+  var element = {
+    el_type: "tab",
+    icon: tabIcon,
+    Ypos: tabYPos
+  };
+  var tabAbsolute = new AbsoluteElement(element, 0, 0, "symbol", 0);
+  tabAbsolute.x = absX;
+  var tabRelative = new RelativeElement(tabIcon, 0, 0, 7.5, "tab");
+  tabRelative.x = relX;
+  tabAbsolute.children.push(tabRelative);
+
+  if (tabAbsolute.abcelem.el_type == 'tab') {
+    tabRelative.pitch = tabYPos;
+  }
+
+  return tabAbsolute;
+}
+
+function lyricsDim(abs) {
+  if (abs.extra) {
+    for (var ii = 0; ii < abs.extra.length; ii++) {
+      var extra = abs.extra[ii];
+
+      if (extra.type == 'lyric') {
+        return {
+          bottom: extra.bottom,
+          height: extra.height
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+function TabAbsoluteElements() {}
+/**
+ * Build tab absolutes by scanning current staff line absolute array
+ * @param {*} staffAbsolute
+ */
+
+
+TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute) {
+  var source = staffAbsolute[0];
+  var dest = staffAbsolute[1];
+
+  for (var ii = 0; ii < source.children.length; ii++) {
+    var absChild = source.children[ii];
+    var absX = absChild.x;
+    var relX = absChild.children[0].x;
+
+    if (absChild.isClef) {
+      dest.children.push(buildTabAbsolute(plugin, absX, relX));
+    }
+
+    switch (absChild.type) {
+      case 'bar':
+        dest.children.push(cloneAbsoluteAndRelatives(absChild, plugin));
+        break;
+
+      case 'note':
+        var abs = cloneAbsolute(absChild);
+        abs.lyricDim = lyricsDim(absChild);
+        var pitches = absChild.abcelem.pitches;
+        var graceNotes = absChild.gracenotes;
+        var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
+        abs.type = 'tabNumber'; // convert note to number
+
+        for (var jj = 0; jj < tabPos.notes.length; jj++) {
+          var pitch = plugin.semantics.stringToPitch(tabPos.notes[jj].str);
+          var tabNoteRelative = new RelativeElement(tabPos.notes[jj].num.toString(), 0, 0, pitch, {
+            type: 'tabNumber'
+          });
+          tabNoteRelative.x = relX;
+          abs.children.push(tabNoteRelative);
+        }
+
+        dest.children.push(abs);
+        break;
+    }
+  }
+};
+
+module.exports = TabAbsoluteElements;
 
 /***/ }),
 
@@ -17596,130 +17522,17 @@ module.exports = ViolinPatterns;
 /***/ (function(module) {
 
 /**
- * 
- * Common Class/Method available for all instruments 
- * 
+ *
+ * Common Class/Method available for all instruments
+ *
  */
 function TabCommon(abcTune, tuneNumber, params) {
   this.tune = abcTune;
   this.params = params;
   this.tuneNumber = tuneNumber;
-  this.tabRenderer = null;
-  this.tabDrawer = null;
-  this.topStaffY = -1;
-  this.curTablature = null;
 }
-/**
- * Get Key accidentals for current staff
- * @param {*} line 
- * @param {*} staffNumber 
- * @returns 
- */
-
-
-TabCommon.prototype.setAccidentals = function (line, staffNumber) {
-  var tune = this.tune;
-  var line = tune.lines[line];
-  var staff = line.staff[staffNumber];
-  return staff.key.accidentals;
-};
-
-TabCommon.prototype.setError = function (semantics) {
-  var tune = this.tune;
-  var errors = semantics.strings.hasError;
-
-  if (errors) {
-    if (tune.warnings) {
-      tune.warning.push(errors);
-    } else {
-      tune.warnings = [errors];
-    }
-  }
-};
-
-TabCommon.prototype.buildTablature = function (semantics, params) {
-  if (semantics) {
-    return semantics.strings.buildTablature(this, params);
-  }
-
-  return 0;
-};
-
-TabCommon.prototype.staffFinalization = function (voice, nbStaffs, nbVoices, verticalSize) {
-  if (nbStaffs == 1) {
-    if (nbVoices == 1) {
-      this.curTablature = null;
-    } else {
-      // reset Y to initial value when current staff 
-      // has Multiple voices
-      var staff = voice.staff;
-      staff.absoluteY -= verticalSize;
-    }
-  } else {
-    this.curTablature = null;
-  }
-
-  return verticalSize;
-};
 
 module.exports = TabCommon;
-
-/***/ }),
-
-/***/ "./src/tablatures/tab-drawer.js":
-/*!**************************************!*\
-  !*** ./src/tablatures/tab-drawer.js ***!
-  \**************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var nonMusic = __webpack_require__(/*! ../write/draw/non-music */ "./src/write/draw/non-music.js");
-
-var Line = __webpack_require__(/*! ../write/draw/tab-line */ "./src/write/draw/tab-line.js");
-
-var printSymbol = __webpack_require__(/*! ../write/draw/print-symbol */ "./src/write/draw/print-symbol.js");
-
-var glyphs = __webpack_require__(/*! ../write/abc_glyphs */ "./src/write/abc_glyphs.js");
-
-var printStem = __webpack_require__(/*! ../write/draw/print-stem */ "./src/write/draw/print-stem.js");
-
-function TabDrawer(tabRenderer) {
-  this.tabRenderer = tabRenderer;
-  this.renderer = tabRenderer.renderer;
-  this.controller = this.renderer.controller;
-}
-
-TabDrawer.prototype.drawSymbol = function (x, y, symbol) {
-  var ycorr = glyphs.getYCorr(symbol);
-  var el = glyphs.printSymbol(x, y + ycorr, symbol, this.renderer.paper, {});
-  return el;
-};
-
-TabDrawer.prototype.drawRendered = function () {
-  nonMusic(this.renderer, this.tabRenderer.rendered);
-  this.tabRenderer.reset(); // cleanup after drawing
-};
-
-TabDrawer.prototype.drawHLine = function (x1, x2, numLine, lineSpace, klass, name) {
-  var y = this.renderer.y + numLine * lineSpace;
-  var line = new Line(this.renderer, klass, name, 0.35);
-  line.printHorizontal(x1, x2, y);
-  return y;
-};
-
-TabDrawer.prototype.drawVLine = function (y1, y2, x, klass, name, dx) {
-  var line = new Line(this.renderer, klass, name, dx);
-  line.printVertical(y1, y2, x);
-};
-
-TabDrawer.prototype.drawBar = function (y1, y2, x, klass, name, dx) {
-  return printStem(this.renderer, x, dx, y1, y2, klass, name);
-};
-
-TabDrawer.prototype.drawTab = function (x, y, fontName) {
-  return this.drawSymbol(x, y, fontName);
-};
-
-module.exports = TabDrawer;
 
 /***/ }),
 
@@ -17729,97 +17542,116 @@ module.exports = TabDrawer;
   \****************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var printStaffLine = __webpack_require__(/*! ../write/draw/staff-line */ "./src/write/draw/staff-line.js");
+var VoiceElement = __webpack_require__(/*! ../write/abc_voice_element */ "./src/write/abc_voice_element.js");
 
-var renderText = __webpack_require__(/*! ../write/draw/text */ "./src/write/draw/text.js");
+var TabAbsoluteElements = __webpack_require__(/*! ./tab-absolute-elements */ "./src/tablatures/tab-absolute-elements.js");
 
-var FreeText = __webpack_require__(/*! ../write/free-text */ "./src/write/free-text.js");
-
-var nonMusic = __webpack_require__(/*! ../write/draw/non-music */ "./src/write/draw/non-music.js"); // private
-
-
-function number(self, x, y, number) {
-  var textSize = self.controller.getTextSize;
-  var str = number.toString();
-  var size = textSize.calc(str, 'tabnumberfont', 'text instrumentname');
-  y -= size.height / 2 + 1;
-  var rows = self.rendered.rows;
-  rows.push({
-    absmove: y
-  });
-  rows.push({
-    left: x,
-    text: str,
-    font: 'tabnumberfont',
-    klass: 'text instrumentname',
-    anchor: 'start'
-  });
-  self.drawer.drawRendered();
-}
-
-function TabRenderer(renderer) {
-  this.renderer = renderer;
-  this.controller = renderer.controller;
-  this.drawer = null;
-  this.reset();
-}
-
-TabRenderer.prototype.reset = function () {
-  this.rendered = {
-    rows: []
+function initSpecialY() {
+  return {
+    tempoHeightAbove: 0,
+    partHeightAbove: 0,
+    volumeHeightAbove: 0,
+    dynamicHeightAbove: 0,
+    endingHeightAbove: 0,
+    chordHeightAbove: 0,
+    lyricHeightAbove: 0,
+    lyricHeightBelow: 0,
+    chordHeightBelow: 0,
+    volumeHeightBelow: 0,
+    dynamicHeightBelow: 0
   };
-};
+}
 
-TabRenderer.prototype.instrumentName = function (name, y) {
-  var textSize = this.controller.getTextSize;
-  var rows = this.rendered.rows;
-  rows.push({
-    absmove: y
-  });
-  rows.push({
-    left: 18,
-    text: name,
-    font: 'infofont',
-    klass: 'text instrumentname',
-    anchor: 'start'
-  });
-  var size = textSize.calc(name, 'infofont', 'text instrumentname');
-  rows.push({
-    move: size.height
-  });
-  this.drawer.drawRendered();
-  return size.height;
-};
+function getLyricHeight(voice) {
+  var toto = 0;
+  var maxLyricHeight = 0;
 
-TabRenderer.prototype.numbers = function (x, tablature, tabPos) {
-  var notes = tabPos.notes;
-  var graces = tabPos.graces;
+  for (var ii = 0; ii < voice.children.length; ii++) {
+    var curAbs = voice.children[ii];
 
-  for (jjjj = 0; jjjj < notes.length; jjjj++) {
-    var note = notes[jjjj];
-
-    if (note) {
-      var y = tablature.getY('on', note.str, 0);
-      number(this, x, y, note.num);
-
-      if (graces) {// TODO: graces
+    if (curAbs.specialY) {
+      if (curAbs.specialY.lyricHeightBelow > maxLyricHeight) {
+        maxLyricHeight = curAbs.specialY.lyricHeightBelow;
       }
     }
   }
-};
+
+  return maxLyricHeight; // add spacing
+}
+
+function buildTabName(self, dest) {
+  var stringSemantics = self.plugin.semantics.strings;
+  var controller = self.renderer.controller;
+  var textSize = controller.getTextSize;
+  var tabName = stringSemantics.tabInfos(self.plugin);
+  var size = textSize.calc(tabName, 'infofont', 'text instrumentname');
+  dest.tabNameInfos = {
+    textSize: size,
+    name: tabName
+  };
+  return size.height;
+}
 /**
- * Empty space filler
- * @param {*} size 
+ * Laying out tabs
+ * @param {*} renderer
+ * @param {*} line
+ * @param {*} staffIndex
+ * @param {*} tablatureLayout
  */
 
 
-TabRenderer.prototype.fillerY = function (size) {
-  var rows = this.rendered.rows;
-  rows.push({
-    move: size
-  });
-  this.drawer.drawRendered();
-  return size;
+function TabRenderer(plugin, renderer, line, staffIndex) {
+  this.renderer = renderer;
+  this.plugin = plugin;
+  this.line = line;
+  this.absolutes = new TabAbsoluteElements();
+  this.staffIndex = staffIndex + 1;
+  this.tabStaff = {
+    clef: {
+      type: 'TAB'
+    }
+  };
+  this.tabSize = plugin.linePitch * plugin.nbLines;
+}
+
+TabRenderer.prototype.doLayout = function () {
+  var staffs = this.line.staff;
+
+  if (staffs) {
+    staffs.splice(this.staffIndex, 0, this.tabStaff);
+  }
+
+  var staffGroup = this.line.staffGroup;
+  var voices = staffGroup.voices;
+  var firstVoice = voices[0];
+  var lyricsHeight = getLyricHeight(firstVoice);
+  var curStaffHeight; // start using pos and height of above staff
+
+  if (lyricsHeight > 0) {
+    curStaffHeight = staffGroup.height - 8; // adjust strange behavior with lyrics
+  } else {
+    curStaffHeight = staffGroup.height;
+  }
+
+  var tabTop = curStaffHeight;
+  var staffGroupInfos = {
+    bottom: -1,
+    specialY: initSpecialY(),
+    lines: this.plugin.nbLines,
+    linePitch: this.plugin.linePitch,
+    dy: 0.15,
+    top: tabTop
+  }; //staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
+
+  staffGroup.staffs.push(staffGroupInfos);
+  staffGroup.height += this.tabSize;
+  var tabVoice = new VoiceElement(0, 0);
+  var nameHeight = buildTabName(this, tabVoice);
+  staffGroup.height += nameHeight;
+  tabVoice.staff = staffGroupInfos;
+  voices.push(tabVoice); // build from staff
+
+  this.absolutes.build(this.plugin, voices);
 };
 
 module.exports = TabRenderer;
@@ -20493,6 +20325,8 @@ var GetTextSize = __webpack_require__(/*! ./get-text-size */ "./src/write/get-te
 var draw = __webpack_require__(/*! ./draw/draw */ "./src/write/draw/draw.js");
 
 var calcHeight = __webpack_require__(/*! ./calcHeight */ "./src/write/calcHeight.js");
+
+var tablatures = __webpack_require__(/*! ../api/abc_tablatures */ "./src/api/abc_tablatures.js");
 /**
  * @class
  * Controls the engraving process, from ABCJS Abstract Syntax Tree (ABCJS AST) to rendered score sheet
@@ -20707,12 +20541,23 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
   abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
 };
 
+function dumpTune(abcTune) {
+  console.log(abcTune.lines);
+}
+
 EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
   var scale = this.setupTune(abcTune, tuneNumber); // Create all of the element objects that will appear on the page.
 
   this.constructTuneElements(abcTune); // Do all the positioning, both horizontally and vertically
 
-  var maxWidth = layout(this.renderer, abcTune, this.width, this.space); // Do all the writing to the SVG
+  var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
+  dumpTune(abcTune); // Deal with tablature for staff
+
+  if (abcTune.tablatures) {
+    tablatures.layoutTablatures(this.renderer, abcTune);
+  }
+
+  dumpTune(abcTune); // Do all the writing to the SVG
 
   var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber);
   this.staffgroups = ret.staffgroups;
@@ -23546,6 +23391,19 @@ function drawRelativeElement(renderer, params, bartop) {
       }, false);
       break;
 
+    case "tabNumber":
+      params.graphelem = renderText(renderer, {
+        x: params.x,
+        y: y,
+        text: "" + params.c,
+        type: "tabnumberfont",
+        klass: renderer.controller.classes.generate('text instrumentname'),
+        anchor: 'start',
+        centerVertically: false,
+        dim: params.dim
+      }, false);
+      break;
+
     case "barNumber":
       params.graphelem = renderText(renderer, {
         x: params.x,
@@ -23956,7 +23814,7 @@ var printDebugBox = __webpack_require__(/*! ./debug-box */ "./src/write/draw/deb
 
 var printStem = __webpack_require__(/*! ./print-stem */ "./src/write/draw/print-stem.js");
 
-var tablatures = __webpack_require__(/*! ../../api/abc_tablatures */ "./src/api/abc_tablatures.js");
+var nonMusic = __webpack_require__(/*! ./non-music */ "./src/write/draw/non-music.js");
 
 function drawStaffGroup(renderer, params, selectables, lineNumber) {
   // We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
@@ -24031,24 +23889,28 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
   var topLine; // these are to connect multiple staves. We need to remember where they are.
 
   var bottomLine;
-  var tabHeight = 0;
-  var tabHeights = 0;
+  var linePitch = 2;
   var bartop = 0;
 
   for (var i = 0; i < params.voices.length; i++) {
     var staff = params.voices[i].staff;
-    renderer.y = staff.absoluteY + tabHeight;
+    var tabName = params.voices[i].tabNameInfos;
+    renderer.y = staff.absoluteY;
     renderer.controller.classes.incrVoice(); //renderer.y = staff.y;
     // offset for starting the counting at middle C
 
     if (!params.voices[i].duplicate) {
       //			renderer.moveY(spacing.STEP, staff.top);
       if (!topLine) topLine = renderer.calcY(10);
-      bottomLine = renderer.calcY(2);
+      bottomLine = renderer.calcY(linePitch);
 
       if (staff.lines !== 0) {
+        if (staff.linePitch) {
+          linePitch = staff.linePitch;
+        }
+
         renderer.controller.classes.newMeasure();
-        printStaff(renderer, params.startx, params.w, staff.lines);
+        bottomLine = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, staff.dy);
       }
 
       printBrace(renderer, staff.absoluteY, params.brace, i, selectables);
@@ -24060,26 +23922,34 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
       zero: renderer.y,
       height: params.height * spacing.STEP
     });
+
+    if (tabName) {
+      // print tab infos on staffBottom
+      var r = {
+        rows: []
+      };
+      r.rows.push({
+        absmove: bottomLine + 2
+      });
+      r.rows.push({
+        left: params.startx,
+        text: tabName.name,
+        font: 'infofont',
+        klass: 'text instrumentname',
+        anchor: 'start'
+      });
+      r.rows.push({
+        move: tabName.textSize.height
+      });
+      nonMusic(renderer, r);
+    }
+
     renderer.controller.classes.newMeasure();
 
     if (!params.voices[i].duplicate) {
       bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
       //			if (staff.bottom < 0)
       //				renderer.moveY(spacing.STEP, -staff.bottom);
-    } // Deal with tablature for staff
-
-
-    if (renderer.abctune.tablatures) {
-      var nbStaffs = params.staffs.length;
-      renderer.tablatures = {};
-      renderer.tablatures.startx = params.startx;
-      renderer.tablatures.w = params.w;
-      renderer.tablatures.topStaff = topLine;
-      renderer.tablatures.bottomStaff = bottomLine;
-      renderer.tablatures.lyricHeight = staff.specialY.lyricHeightBelow; // height of displayed tab returned by tablature plugin
-
-      tabHeight = tablatures.renderStaffLine(renderer, nbStaffs, params.voices, i, lineNumber);
-      tabHeights += tabHeight;
     }
   }
 
@@ -24089,7 +23959,7 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
     printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
   }
 
-  renderer.y = startY + tabHeights;
+  renderer.y = startY;
 
   function debugPrintGridItem(staff, key) {
     var colors = ["rgb(207,27,36)", "rgb(168,214,80)", "rgb(110,161,224)", "rgb(191,119,218)", "rgb(195,30,151)", "rgb(31,170,177)", "rgb(220,166,142)"];
@@ -24192,9 +24062,9 @@ module.exports = drawStaffGroup;
 
 var printLine = __webpack_require__(/*! ./print-line */ "./src/write/draw/print-line.js");
 
-function printStaffLine(renderer, x1, x2, pitch, klass, name) {
+function printStaffLine(renderer, x1, x2, pitch, klass, name, dy) {
   var y = renderer.calcY(pitch);
-  return printLine(renderer, x1, x2, y, klass, name);
+  return printLine(renderer, x1, x2, y, klass, name, dy);
 }
 
 module.exports = printStaffLine;
@@ -24209,71 +24079,37 @@ module.exports = printStaffLine;
 
 var printStaffLine = __webpack_require__(/*! ./staff-line */ "./src/write/draw/staff-line.js");
 
-function printStaff(renderer, startx, endx, numLines) {
+function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
   var klass = "abcjs-top-line";
+  var pitch = 2;
+
+  if (linePitch) {
+    pitch = linePitch;
+  }
+
   renderer.paper.openGroup({
     prepend: true,
     klass: renderer.controller.classes.generate("abcjs-staff")
   }); // If there is one line, it is the B line. Otherwise, the bottom line is the E line.
 
+  var lastYLine = 0;
+
   if (numLines === 1) {
     printStaffLine(renderer, startx, endx, 6, klass);
   } else {
     for (var i = numLines - 1; i >= 0; i--) {
-      printStaffLine(renderer, startx, endx, (i + 1) * 2, klass);
+      var curpitch = (i + 1) * pitch;
+      lastYLine = renderer.calcY(curpitch);
+      printStaffLine(renderer, startx, endx, curpitch, klass, null, dy);
       klass = undefined;
     }
   }
 
   renderer.paper.closeGroup();
+  return lastYLine;
 }
 
 module.exports = printStaff;
-
-/***/ }),
-
-/***/ "./src/write/draw/tab-line.js":
-/*!************************************!*\
-  !*** ./src/write/draw/tab-line.js ***!
-  \************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
-
-var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
-
-var printStem = __webpack_require__(/*! ./print-stem */ "./src/write/draw/print-stem.js");
-
-function TabLine(renderer, klass, dx, name) {
-  this.renderer = renderer;
-  if (!dx) dx = 0.35; // default
-
-  this.dx = dx;
-  this.klass = klass;
-  this.name = name;
-  var fill = renderer.foregroundColor;
-  this.options = {
-    stroke: "none",
-    fill: fill
-  };
-  if (name) this.options['data-name'] = name;
-  if (klass) this.options['class'] = klass;
-}
-
-TabLine.prototype.printVertical = function (y1, y2, x) {
-  return printStem(this.renderer, x, this.dx, y1, y2, this.options.klass, this.options.name);
-};
-
-TabLine.prototype.printHorizontal = function (x1, x2, y) {
-  x1 = roundNumber(x1);
-  x2 = roundNumber(x2);
-  var y1 = roundNumber(y - this.dx);
-  var y2 = roundNumber(y + this.dx);
-  this.options.path = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y1, x2, y1, x2, y2, x1, y2);
-  return this.renderer.paper.pathToBack(this.options);
-};
-
-module.exports = TabLine;
 
 /***/ }),
 

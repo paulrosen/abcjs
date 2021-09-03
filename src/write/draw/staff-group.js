@@ -4,7 +4,7 @@ var drawVoice = require('./voice');
 var printStaff = require('./staff');
 var printDebugBox = require('./debug-box');
 var printStem = require('./print-stem');
-var tablatures = require('../../api/abc_tablatures');
+var nonMusic = require('./non-music');
 
 function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	// We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
@@ -15,7 +15,7 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	var colorIndex;
 
 	// An invisible marker is useful to be able to find where each system starts.
-	addInvisibleMarker(renderer,"abcjs-top-of-system");
+	addInvisibleMarker(renderer, "abcjs-top-of-system");
 
 	var startY = renderer.y; // So that it can be restored after we're done.
 	// Set the absolute Y position for each staff here, so the voice drawing below can just use if.
@@ -69,22 +69,25 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	var topLine; // these are to connect multiple staves. We need to remember where they are.
 	var bottomLine;
 
-	var tabHeight = 0;
-	var tabHeights = 0;
+	var linePitch = 2;
 	var bartop = 0;
 	for (var i=0;i<params.voices.length;i++) {
 		var staff = params.voices[i].staff;
-		renderer.y = staff.absoluteY + tabHeight;
+		var tabName = params.voices[i].tabNameInfos;
+		renderer.y = staff.absoluteY ;
 		renderer.controller.classes.incrVoice();
 		//renderer.y = staff.y;
 		// offset for starting the counting at middle C
 		if (!params.voices[i].duplicate) {
 //			renderer.moveY(spacing.STEP, staff.top);
 			if (!topLine) topLine  = renderer.calcY(10);
-			bottomLine  = renderer.calcY(2);
+			bottomLine  = renderer.calcY(linePitch);
 			if (staff.lines !== 0) {
+				if (staff.linePitch) {
+					linePitch = staff.linePitch; 
+				}
 				renderer.controller.classes.newMeasure();
-				printStaff(renderer, params.startx, params.w, staff.lines);
+				bottomLine = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, staff.dy);
 			}
 			printBrace(renderer, staff.absoluteY, params.brace, i, selectables);
 			printBrace(renderer, staff.absoluteY, params.bracket, i, selectables);
@@ -94,24 +97,20 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 			zero: renderer.y,
 			height: params.height*spacing.STEP
 		});
+		if (tabName) {
+			// print tab infos on staffBottom
+			var r = { rows: [] };
+			r.rows.push({ absmove: bottomLine + 2 });
+			r.rows.push({ left: params.startx, text: tabName.name, font: 'infofont', klass: 'text instrumentname', anchor: 'start' });
+			r.rows.push({ move: tabName.textSize.height })
+			nonMusic(renderer, r);
+		}
+
 		renderer.controller.classes.newMeasure();
 		if (!params.voices[i].duplicate) {
 			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
 //			if (staff.bottom < 0)
 //				renderer.moveY(spacing.STEP, -staff.bottom);
-		}
-		// Deal with tablature for staff
-		if (renderer.abctune.tablatures) {
-			var nbStaffs = params.staffs.length;
-			renderer.tablatures = {};
-			renderer.tablatures.startx = params.startx;
-			renderer.tablatures.w = params.w;
-			renderer.tablatures.topStaff = topLine;
-			renderer.tablatures.bottomStaff = bottomLine;
-			renderer.tablatures.lyricHeight = staff.specialY.lyricHeightBelow;
-			// height of displayed tab returned by tablature plugin
-			tabHeight = tablatures.renderStaffLine(renderer, nbStaffs, params.voices, i, lineNumber);
-			tabHeights += tabHeight;
 		}
 	}
 	renderer.controller.classes.newMeasure();
@@ -120,7 +119,7 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	if (params.staffs.length>1) {
 		printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
 	}
-	renderer.y = startY + tabHeights;
+	renderer.y = startY;
 
 	function debugPrintGridItem(staff, key) {
 		var colors = [ "rgb(207,27,36)", "rgb(168,214,80)", "rgb(110,161,224)", "rgb(191,119,218)", "rgb(195,30,151)",

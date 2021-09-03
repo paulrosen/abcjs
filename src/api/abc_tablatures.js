@@ -58,7 +58,7 @@ var abcTablatures = {
           var plugin = this.plugins[tabName];
           if (plugin) {
             // proceed with tab plugin  init 
-            plugin.init(tune,tuneNumber,args)
+            plugin.init(tune,tuneNumber,args,ii)
             returned[ii] = plugin
             nbPlugins++;
           } else {
@@ -81,15 +81,40 @@ var abcTablatures = {
    * @param {*} voiceNumber 
    * @return tablature height size
    */
+  /*
   renderStaffLine: function (renderer, nbStaffs , voice, voiceNumber, lineNumber) {
     var tune = renderer.abctune;
     var tabs = tune.tablatures;
     // To be enhanced for multiple staffs instruments
     tabPlugin = tabs[0];
     if (tabPlugin) {
-      return tabPlugin.render(renderer, nbStaffs ,voice, voiceNumber, lineNumber);
+      if (!tabPlugin.refactored) {
+        return tabPlugin.render(renderer, nbStaffs, voice, voiceNumber, lineNumber);
+      }
     }
     return 0; // 0 tab size
+  },
+  */
+
+  /**
+   * Call requested plugin
+   * @param {*} renderer 
+   * @param {*} abcTune 
+   */
+  layoutTablatures: function (renderer, abcTune) {
+    var tabs = abcTune.tablatures;
+    // chack tabs request for each staffs
+    for (var ii = 0; ii < abcTune.lines.length; ii++) {
+      var line = abcTune.lines[ii];
+      var curStaff= line.staff
+      for (var jj = 0; jj < curStaff.length; jj++) {
+        if (tabs[jj]) {
+          // tablature requested for staff
+          tabPlugin = tabs[jj];
+          tabPlugin.render(renderer, line , jj);
+        }
+      }
+    }
   },
 
   /**

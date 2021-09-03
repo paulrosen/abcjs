@@ -14,19 +14,18 @@
       new ABCJS.Editor("abc", 
       { canvas_id: "paper",
         warnings_id: "warnings",
-        abcjsParams: {
-          tablature: [
-            // first and only staff
-            [
-              "ViolinTab",
-              {
-                name: 'Violin',
-                tuning: ['G,', 'D', 'A', 'e']
-              }
-            ]
+        abcjsParams: {} ,
+        tablature_options: [
+          // first and only staff
+          [
+            "ViolinTab",
+            {
+              name: 'Violin',
+              tuning: ['G,', 'D', 'A', 'e']
+            }
           ]
 
-        } ,
+        ]
       });
     }
 
@@ -39,14 +38,25 @@
   </header>
   <div class="container">
     <textarea id="abc" cols="80" rows="12" spellcheck="false">
-X: 1
-T: Cooley's
-M: 4/4
-L: 1/8
-R: reel
-K: Emin
-|: ^B ^E ^B ^A ^E _D [Ad] [AA] BBB | D2 :|
-| _D_E^ED^DE^EF^FG^GA^AB^B|_D_E_F_G_A_B_C|
+%%staffwidth 300
+X:1
+T: TEST: Vocal SATB score.
+N: All parts written "on the staff" with commas.
+N: All parts should show scale from C below to above staff.
+K: C
+V:S name="soprano" clef=treble middle=B
+V:A name="alto" clef=treble middle=B
+V:T name="tenor" clef=tenor middle=B,
+V:B name="bass" clef=bass,,
+%
+[V:S] | CDEF GABc | cdef gabc' |
+w: C D E F G A B c | c d e f g a b c' |
+[V:A] | CDEF GABc | cdef gabc' |
+w: C D E F G A B c | c d e f g a b c' |
+[V:T] | C,D,E,F, G,A,B,C | CDEF GABc |
+w: C, D, E, F, G, A, B, C | C D E F G A B c |
+[V:B] | C,,D,,E,,F,, G,,A,,B,,C, | C,D,E,F, G,A,B,C |
+w: C,, D,, E,, F,, G,, A,, B,, C, | C, D, E, F, G, A, B, C |
     </textarea>
 
     <div id="warnings"></div>
