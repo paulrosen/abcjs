@@ -16639,8 +16639,8 @@ var plugin = {
   render: function render(renderer, line, staffIndex) {
     console.log('GuitarTab plugin rendered');
     setGuitarFonts(this.abcTune);
-    var renderer = new TabRenderer(this, renderer, line, staffIndex);
-    renderer.doLayout();
+    var rndrer = new TabRenderer(this, renderer, line, staffIndex);
+    rndrer.doLayout();
   }
 }; //
 // Tablature plugin definition
@@ -17004,18 +17004,13 @@ module.exports = StringPatterns;
 /*!********************************************************!*\
   !*** ./src/tablatures/instruments/string-tablature.js ***!
   \********************************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/***/ (function(module) {
 
-var AbsoluteElement = __webpack_require__(/*! ../../write/abc_absolute_element */ "./src/write/abc_absolute_element.js");
-
-var RelativeElement = __webpack_require__(/*! ../../write/abc_relative_element */ "./src/write/abc_relative_element.js");
 /**
  * Layout tablature informations for draw
  * @param {*} numLines 
  * @param {*} lineSpace 
  */
-
-
 function StringTablature(numLines, lineSpace) {
   this.numLines = numLines;
   this.lineSpace = lineSpace;
@@ -17196,7 +17191,6 @@ TabNotes.prototype.build = function () {
   }
 
   var finished = false;
-  var curPos = startIndex;
 
   while (!finished) {
     buildReturned.push(fromN.emit());
@@ -17540,7 +17534,6 @@ function initSpecialY() {
 }
 
 function getLyricHeight(voice) {
-  var toto = 0;
   var maxLyricHeight = 0;
 
   for (var ii = 0; ii < voice.children.length; ii++) {
@@ -17599,18 +17592,14 @@ TabRenderer.prototype.doLayout = function () {
   }
 
   var staffGroup = this.line.staffGroup;
+  var lastInGroup = staffGroup.staffs.length - 1;
+  var lastStaffInGroup = staffGroup.staffs[lastInGroup];
   var voices = staffGroup.voices;
-  var firstVoice = voices[0];
+  var firstVoice = voices[0]; // take lyrics into account if any
+
   var lyricsHeight = getLyricHeight(firstVoice);
-  var curStaffHeight; // start using pos and height of above staff
+  var tabTop = lastStaffInGroup.top + lyricsHeight; // + curStaffHeight ;
 
-  if (lyricsHeight > 0) {
-    curStaffHeight = staffGroup.height - 8; // adjust strange behavior with lyrics
-  } else {
-    curStaffHeight = staffGroup.height;
-  }
-
-  var tabTop = curStaffHeight;
   var staffGroupInfos = {
     bottom: -1,
     specialY: initSpecialY(),
@@ -17618,7 +17607,7 @@ TabRenderer.prototype.doLayout = function () {
     linePitch: this.plugin.linePitch,
     dy: 0.15,
     top: tabTop
-  }; //staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
+  }; // staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
 
   staffGroup.staffs.push(staffGroupInfos);
   staffGroup.height += this.tabSize;

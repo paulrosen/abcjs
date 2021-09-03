@@ -73,18 +73,15 @@ TabRenderer.prototype.doLayout = function () {
     );
   }
   var staffGroup = this.line.staffGroup;
+  var lastInGroup = staffGroup.staffs.length-1;
+  var lastStaffInGroup = staffGroup.staffs[lastInGroup];
+
   var voices = staffGroup.voices;
   var firstVoice = voices[0];
+  // take lyrics into account if any
   var lyricsHeight = getLyricHeight(firstVoice);
-  var curStaffHeight;
-  // start using pos and height of above staff
-  if (lyricsHeight > 0) {
-    curStaffHeight = staffGroup.height -8 ; // adjust strange behavior with lyrics
-  } else {
-    curStaffHeight = staffGroup.height;
-  }
   
-  var tabTop = curStaffHeight;
+  var tabTop = lastStaffInGroup.top + lyricsHeight ; // + curStaffHeight ;
   var staffGroupInfos = {
     bottom: -1,
     specialY: initSpecialY(),
@@ -93,7 +90,7 @@ TabRenderer.prototype.doLayout = function () {
     dy: 0.15,
     top: tabTop,
   };
-  //staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
+  // staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
   staffGroup.staffs.push(staffGroupInfos);
   staffGroup.height += this.tabSize;
   var tabVoice = new VoiceElement(0, 0);
