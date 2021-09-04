@@ -1,5 +1,6 @@
 var VoiceElement = require('../write/abc_voice_element');
 var TabAbsoluteElements = require('./tab-absolute-elements');
+var spacing = require('../write/abc_spacing');
 
 function initSpecialY() {
   return {
@@ -73,8 +74,8 @@ TabRenderer.prototype.doLayout = function () {
     );
   }
   var staffGroup = this.line.staffGroup;
-  var lastInGroup = staffGroup.staffs.length-1;
-  var lastStaffInGroup = staffGroup.staffs[lastInGroup];
+  var lastInGroupIndex = staffGroup.staffs.length-1;
+  var lastStaffInGroup = staffGroup.staffs[lastInGroupIndex];
 
   var voices = staffGroup.voices;
   var firstVoice = voices[0];
@@ -95,7 +96,7 @@ TabRenderer.prototype.doLayout = function () {
   staffGroup.height += this.tabSize;
   var tabVoice = new VoiceElement(0, 0);
   var nameHeight = buildTabName(this,tabVoice);
-  staffGroup.height += nameHeight;
+  staffGroup.height += nameHeight/spacing.STEP;
   tabVoice.staff = staffGroupInfos;
   voices.push(tabVoice);
   // build from staff

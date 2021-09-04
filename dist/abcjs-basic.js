@@ -17517,6 +17517,8 @@ var VoiceElement = __webpack_require__(/*! ../write/abc_voice_element */ "./src/
 
 var TabAbsoluteElements = __webpack_require__(/*! ./tab-absolute-elements */ "./src/tablatures/tab-absolute-elements.js");
 
+var spacing = __webpack_require__(/*! ../write/abc_spacing */ "./src/write/abc_spacing.js");
+
 function initSpecialY() {
   return {
     tempoHeightAbove: 0,
@@ -17592,8 +17594,8 @@ TabRenderer.prototype.doLayout = function () {
   }
 
   var staffGroup = this.line.staffGroup;
-  var lastInGroup = staffGroup.staffs.length - 1;
-  var lastStaffInGroup = staffGroup.staffs[lastInGroup];
+  var lastInGroupIndex = staffGroup.staffs.length - 1;
+  var lastStaffInGroup = staffGroup.staffs[lastInGroupIndex];
   var voices = staffGroup.voices;
   var firstVoice = voices[0]; // take lyrics into account if any
 
@@ -17613,7 +17615,7 @@ TabRenderer.prototype.doLayout = function () {
   staffGroup.height += this.tabSize;
   var tabVoice = new VoiceElement(0, 0);
   var nameHeight = buildTabName(this, tabVoice);
-  staffGroup.height += nameHeight;
+  staffGroup.height += nameHeight / spacing.STEP;
   tabVoice.staff = staffGroupInfos;
   voices.push(tabVoice); // build from staff
 
