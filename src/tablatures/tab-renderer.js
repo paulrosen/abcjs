@@ -74,15 +74,14 @@ TabRenderer.prototype.doLayout = function () {
     );
   }
   var staffGroup = this.line.staffGroup;
-  var lastInGroupIndex = staffGroup.staffs.length-1;
-  var lastStaffInGroup = staffGroup.staffs[lastInGroupIndex];
 
   var voices = staffGroup.voices;
   var firstVoice = voices[0];
   // take lyrics into account if any
   var lyricsHeight = getLyricHeight(firstVoice);
   
-  var tabTop = lastStaffInGroup.top + lyricsHeight ; // + curStaffHeight ;
+  var previousStaff = staffGroup.staffs[this.staffIndex - 1];
+  var tabTop = previousStaff.top + 2 + lyricsHeight ; 
   var staffGroupInfos = {
     bottom: -1,
     specialY: initSpecialY(),
@@ -91,14 +90,17 @@ TabRenderer.prototype.doLayout = function () {
     dy: 0.15,
     top: tabTop,
   };
-  // staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
-  staffGroup.staffs.push(staffGroupInfos);
+  staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
+  // staffGroup.staffs.push(staffGroupInfos);
+  for (var ii = this.staffIndex + 1; ii < staffGroup.staffs.length; ii++) {
+    staffGroup.staffs[ii].top += 2 ;
+  }
   staffGroup.height += this.tabSize;
   var tabVoice = new VoiceElement(0, 0);
   var nameHeight = buildTabName(this,tabVoice);
   staffGroup.height += nameHeight/spacing.STEP;
   tabVoice.staff = staffGroupInfos;
-  voices.push(tabVoice);
+  voices.splice(this.staffIndex, 0 ,tabVoice);
   // build from staff
   this.absolutes.build(this.plugin, voices);
 };

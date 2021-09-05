@@ -7,9 +7,9 @@ function buildCapo(self) {
   var tuning = self.tuning;
   if (self.capo > 0) {
     capoTuning = [];
-    for (iii = 0; iii < tuning.length; iii++) {
+    for (var iii = 0; iii < tuning.length; iii++) {
       var curNote = new TabNote.TabNote(tuning[iii]);
-      for (jjj = 0; jjj < self.capo; jjj++) {
+      for (var jjj = 0; jjj < self.capo; jjj++) {
         curNote = curNote.nextNote();
       }
       capoTuning[iii] = curNote.emit();
@@ -19,18 +19,18 @@ function buildCapo(self) {
 }
 
 function buildPatterns(self) {
-  var strings = []
+  var strings = [];
   var tuning = self.tuning;
   if (self.capo > 0) {
     tuning = self.capoTuning;
   }
   var pos = tuning.length - 1;
-  for (iii = 0; iii < tuning.length; iii++) {
+  for (var iii = 0; iii < tuning.length; iii++) {
     var nextNote = self.highestNote; // highest handled note
     if (iii != tuning.length - 1) {
       nextNote = tuning[iii + 1];
     }
-    tabNotes = new TabNotes(tuning[iii], nextNote);
+    var tabNotes = new TabNotes(tuning[iii], nextNote);
     strings[pos--] = tabNotes.build();
   }
   return strings;
@@ -40,8 +40,8 @@ function buildPatterns(self) {
 function buildSecond(first) {
   var seconds = [];
   seconds[0] = [];
-  var strings = first.strings
-  for (iii = 1; iii < strings.length; iii++) {
+  var strings = first.strings;
+  for (var iii = 1; iii < strings.length; iii++) {
     seconds[iii] = strings[iii - 1];
   }
   return seconds;
@@ -49,7 +49,7 @@ function buildSecond(first) {
 
 function checkKeyAccidentals(note, accidentals) {
   if (accidentals) {
-    for (iii = 0; iii < accidentals.length; iii++) {
+    for (var iii = 0; iii < accidentals.length; iii++) {
       if (note[0].toUpperCase() == accidentals[iii].note.toUpperCase()) {
         if (accidentals[iii].acc == 'flat') {
           return '_' + note;
@@ -88,11 +88,11 @@ function checkNote(note, accidentals) {
     'isFlat': isFlat,
     'name': newNote,
     'acc': acc
-  }
+  };
 }
 
 function sameString(self, chord) {
-  for (jjjj = 0; jjjj < chord.length - 1; jjjj++) {
+  for (var jjjj = 0; jjjj < chord.length - 1; jjjj++) {
     var curPos = chord[jjjj];
     var nextPos = chord[jjjj + 1];
     if (curPos.str == nextPos.str) {
@@ -128,13 +128,13 @@ function sameString(self, chord) {
 }
 
 function handleChordNotes(self, notes) {
-  retNotes = [];
-  for (iiii = 0; iiii < notes.length; iiii++) {
+  var retNotes = [];
+  for (var iiii = 0; iiii < notes.length; iiii++) {
     var note = checkNote(notes[iiii].name, this.accidentals);
     var curPos = toNumber(self, note);
     retNotes.push(curPos);
   }
-  var error = sameString(self, retNotes)
+  var error = sameString(self, retNotes);
   return retNotes;
 }
 
@@ -149,7 +149,7 @@ function EBsharp(note) {
       switch (note.name[1]) {
         case 'E':
           if (note.name.length > 2) {
-            note.name = 'f'
+            note.name = 'f';
           } else {
             note.name = 'F';
           }
@@ -159,7 +159,7 @@ function EBsharp(note) {
           break;
         case 'B':
           if (note.name.length > 2) {
-            note.name = 'C'
+            note.name = 'C';
           } else {
             note.name = 'c';
           }
@@ -181,7 +181,7 @@ function noteToNumber(self, note, stringNumber, secondPosition) {
     strings = secondPosition;
   }
   note = EBsharp(note);
-  num = strings[stringNumber].indexOf(note.name);
+  var num = strings[stringNumber].indexOf(note.name);
   if (num != -1) {
     if (secondPosition) {
       num += 7;
@@ -195,7 +195,7 @@ function noteToNumber(self, note, stringNumber, secondPosition) {
       num: (num + note.acc),
       str: stringNumber,
       note: note
-    }
+    };
   }
   return null;
 }
@@ -217,37 +217,38 @@ StringPatterns.prototype.stringToPitch = function (stringNumber) {
   var startingPitch = 5.3;
   var bottom = this.strings.length - 1;
   return startingPitch + ((bottom - stringNumber) * this.linePitch);
-}
+};
 
 
 StringPatterns.prototype.notesToNumber = function (notes, graces) {
+  var note;
   if (notes) {
     var retNotes = [];
     if (notes.length > 1) {
       retNotes = handleChordNotes(this, notes);
     } else {
-      var note = checkNote(notes[0].name, this.accidentals);
+      note = checkNote(notes[0].name, this.accidentals);
       retNotes.push(toNumber(this, note));
     }
     var retGraces = null;
     if (graces) {
       retGraces = [];
-      for (iiii = 0; iiii < graces.length; iiii++) {
-        var note = checkNote(graces[0].name, this.accidentals);
+      for (var iiii = 0; iiii < graces.length; iiii++) {
+        note = checkNote(graces[0].name, this.accidentals);
         retGraces.push(toNumber(this, note));
       }
     }
     return {
       notes: retNotes,
       graces: retGraces
-    }
+    };
   }
   return null;
-}
+};
 
 StringPatterns.prototype.toString = function () {
   return this.tuning.join('').replaceAll(',', '').toUpperCase();
-}
+};
 
 StringPatterns.prototype.tabInfos = function (plugin) {
   var _super = plugin._super;
@@ -258,7 +259,7 @@ StringPatterns.prototype.tabInfos = function (plugin) {
     name += ')';
   }
   return name;
-}
+};
 
 /**
  * Common patterns for all string instruments

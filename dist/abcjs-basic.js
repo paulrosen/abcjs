@@ -16674,10 +16674,10 @@ function buildCapo(self) {
   if (self.capo > 0) {
     capoTuning = [];
 
-    for (iii = 0; iii < tuning.length; iii++) {
+    for (var iii = 0; iii < tuning.length; iii++) {
       var curNote = new TabNote.TabNote(tuning[iii]);
 
-      for (jjj = 0; jjj < self.capo; jjj++) {
+      for (var jjj = 0; jjj < self.capo; jjj++) {
         curNote = curNote.nextNote();
       }
 
@@ -16698,14 +16698,14 @@ function buildPatterns(self) {
 
   var pos = tuning.length - 1;
 
-  for (iii = 0; iii < tuning.length; iii++) {
+  for (var iii = 0; iii < tuning.length; iii++) {
     var nextNote = self.highestNote; // highest handled note
 
     if (iii != tuning.length - 1) {
       nextNote = tuning[iii + 1];
     }
 
-    tabNotes = new TabNotes(tuning[iii], nextNote);
+    var tabNotes = new TabNotes(tuning[iii], nextNote);
     strings[pos--] = tabNotes.build();
   }
 
@@ -16717,7 +16717,7 @@ function buildSecond(first) {
   seconds[0] = [];
   var strings = first.strings;
 
-  for (iii = 1; iii < strings.length; iii++) {
+  for (var iii = 1; iii < strings.length; iii++) {
     seconds[iii] = strings[iii - 1];
   }
 
@@ -16726,7 +16726,7 @@ function buildSecond(first) {
 
 function checkKeyAccidentals(note, accidentals) {
   if (accidentals) {
-    for (iii = 0; iii < accidentals.length; iii++) {
+    for (var iii = 0; iii < accidentals.length; iii++) {
       if (note[0].toUpperCase() == accidentals[iii].note.toUpperCase()) {
         if (accidentals[iii].acc == 'flat') {
           return '_' + note;
@@ -16773,7 +16773,7 @@ function checkNote(note, accidentals) {
 }
 
 function sameString(self, chord) {
-  for (jjjj = 0; jjjj < chord.length - 1; jjjj++) {
+  for (var jjjj = 0; jjjj < chord.length - 1; jjjj++) {
     var curPos = chord[jjjj];
     var nextPos = chord[jjjj + 1];
 
@@ -16805,9 +16805,9 @@ function sameString(self, chord) {
 }
 
 function handleChordNotes(self, notes) {
-  retNotes = [];
+  var retNotes = [];
 
-  for (iiii = 0; iiii < notes.length; iiii++) {
+  for (var iiii = 0; iiii < notes.length; iiii++) {
     var note = checkNote(notes[iiii].name, this.accidentals);
     var curPos = toNumber(self, note);
     retNotes.push(curPos);
@@ -16868,7 +16868,7 @@ function noteToNumber(self, note, stringNumber, secondPosition) {
   }
 
   note = EBsharp(note);
-  num = strings[stringNumber].indexOf(note.name);
+  var num = strings[stringNumber].indexOf(note.name);
 
   if (num != -1) {
     if (secondPosition) {
@@ -16915,13 +16915,15 @@ StringPatterns.prototype.stringToPitch = function (stringNumber) {
 };
 
 StringPatterns.prototype.notesToNumber = function (notes, graces) {
+  var note;
+
   if (notes) {
     var retNotes = [];
 
     if (notes.length > 1) {
       retNotes = handleChordNotes(this, notes);
     } else {
-      var note = checkNote(notes[0].name, this.accidentals);
+      note = checkNote(notes[0].name, this.accidentals);
       retNotes.push(toNumber(this, note));
     }
 
@@ -16930,8 +16932,8 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
     if (graces) {
       retGraces = [];
 
-      for (iiii = 0; iiii < graces.length; iiii++) {
-        var note = checkNote(graces[0].name, this.accidentals);
+      for (var iiii = 0; iiii < graces.length; iiii++) {
+        note = checkNote(graces[0].name, this.accidentals);
         retGraces.push(toNumber(this, note));
       }
     }
@@ -17593,15 +17595,15 @@ TabRenderer.prototype.doLayout = function () {
     staffs.splice(this.staffIndex, 0, this.tabStaff);
   }
 
-  var staffGroup = this.line.staffGroup;
-  var lastInGroupIndex = staffGroup.staffs.length - 1;
-  var lastStaffInGroup = staffGroup.staffs[lastInGroupIndex];
+  var staffGroup = this.line.staffGroup; // var lastInGroupIndex = staffGroup.staffs.length-1;
+  // var lastStaffInGroup = staffGroup.staffs[lastInGroupIndex];
+
   var voices = staffGroup.voices;
   var firstVoice = voices[0]; // take lyrics into account if any
 
   var lyricsHeight = getLyricHeight(firstVoice);
-  var tabTop = lastStaffInGroup.top + lyricsHeight; // + curStaffHeight ;
-
+  var previousStaff = staffGroup.staffs[this.staffIndex - 1];
+  var tabTop = previousStaff.top + 2 + lyricsHeight;
   var staffGroupInfos = {
     bottom: -1,
     specialY: initSpecialY(),
@@ -17609,15 +17611,19 @@ TabRenderer.prototype.doLayout = function () {
     linePitch: this.plugin.linePitch,
     dy: 0.15,
     top: tabTop
-  }; // staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
+  };
+  staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos); // staffGroup.staffs.push(staffGroupInfos);
 
-  staffGroup.staffs.push(staffGroupInfos);
+  for (var ii = this.staffIndex + 1; ii < staffGroup.staffs.length; ii++) {
+    staffGroup.staffs[ii].top += 2;
+  }
+
   staffGroup.height += this.tabSize;
   var tabVoice = new VoiceElement(0, 0);
   var nameHeight = buildTabName(this, tabVoice);
   staffGroup.height += nameHeight / spacing.STEP;
   tabVoice.staff = staffGroupInfos;
-  voices.push(tabVoice); // build from staff
+  voices.splice(this.staffIndex, 0, tabVoice); // build from staff
 
   this.absolutes.build(this.plugin, voices);
 };
