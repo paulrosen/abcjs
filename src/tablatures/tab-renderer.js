@@ -81,7 +81,7 @@ TabRenderer.prototype.doLayout = function () {
   var lyricsHeight = getLyricHeight(firstVoice);
   
   var previousStaff = staffGroup.staffs[this.staffIndex - 1];
-  var tabTop = previousStaff.top + 2 + lyricsHeight ; 
+  var tabTop = previousStaff.top + lyricsHeight ; 
   var staffGroupInfos = {
     bottom: -1,
     specialY: initSpecialY(),
@@ -92,13 +92,13 @@ TabRenderer.prototype.doLayout = function () {
   };
   staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
-  for (var ii = this.staffIndex + 1; ii < staffGroup.staffs.length; ii++) {
-    staffGroup.staffs[ii].top += 2 ;
-  }
-  staffGroup.height += this.tabSize;
+  staffGroup.height += this.tabSize  ;
   var tabVoice = new VoiceElement(0, 0);
-  var nameHeight = buildTabName(this,tabVoice);
-  staffGroup.height += nameHeight/spacing.STEP;
+  var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
+  for (var ii = this.staffIndex + 1; ii < staffGroup.staffs.length; ii++) {
+    staffGroup.staffs[ii].top += nameHeight;
+  }
+  staffGroup.height += nameHeight;
   tabVoice.staff = staffGroupInfos;
   voices.splice(this.staffIndex, 0 ,tabVoice);
   // build from staff

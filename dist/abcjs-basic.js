@@ -17595,15 +17595,13 @@ TabRenderer.prototype.doLayout = function () {
     staffs.splice(this.staffIndex, 0, this.tabStaff);
   }
 
-  var staffGroup = this.line.staffGroup; // var lastInGroupIndex = staffGroup.staffs.length-1;
-  // var lastStaffInGroup = staffGroup.staffs[lastInGroupIndex];
-
+  var staffGroup = this.line.staffGroup;
   var voices = staffGroup.voices;
   var firstVoice = voices[0]; // take lyrics into account if any
 
   var lyricsHeight = getLyricHeight(firstVoice);
   var previousStaff = staffGroup.staffs[this.staffIndex - 1];
-  var tabTop = previousStaff.top + 2 + lyricsHeight;
+  var tabTop = previousStaff.top + lyricsHeight;
   var staffGroupInfos = {
     bottom: -1,
     specialY: initSpecialY(),
@@ -17614,14 +17612,15 @@ TabRenderer.prototype.doLayout = function () {
   };
   staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos); // staffGroup.staffs.push(staffGroupInfos);
 
-  for (var ii = this.staffIndex + 1; ii < staffGroup.staffs.length; ii++) {
-    staffGroup.staffs[ii].top += 2;
-  }
-
   staffGroup.height += this.tabSize;
   var tabVoice = new VoiceElement(0, 0);
-  var nameHeight = buildTabName(this, tabVoice);
-  staffGroup.height += nameHeight / spacing.STEP;
+  var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
+
+  for (var ii = this.staffIndex + 1; ii < staffGroup.staffs.length; ii++) {
+    staffGroup.staffs[ii].top += nameHeight;
+  }
+
+  staffGroup.height += nameHeight;
   tabVoice.staff = staffGroupInfos;
   voices.splice(this.staffIndex, 0, tabVoice); // build from staff
 
@@ -20297,8 +20296,6 @@ var GetFontAndAttr = __webpack_require__(/*! ./get-font-and-attr */ "./src/write
 var GetTextSize = __webpack_require__(/*! ./get-text-size */ "./src/write/get-text-size.js");
 
 var draw = __webpack_require__(/*! ./draw/draw */ "./src/write/draw/draw.js");
-
-var calcHeight = __webpack_require__(/*! ./calcHeight */ "./src/write/calcHeight.js");
 
 var tablatures = __webpack_require__(/*! ../api/abc_tablatures */ "./src/api/abc_tablatures.js");
 /**
@@ -23896,6 +23893,7 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
       zero: renderer.y,
       height: params.height * spacing.STEP
     });
+    var tabNameHeight = 0;
 
     if (tabName) {
       // print tab infos on staffBottom
@@ -23916,12 +23914,13 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
         move: tabName.textSize.height
       });
       nonMusic(renderer, r);
+      tabNameHeight = tabName.textSize.height;
     }
 
     renderer.controller.classes.newMeasure();
 
     if (!params.voices[i].duplicate) {
-      bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
+      bartop = renderer.calcY(2 + tabNameHeight); // This connects the bar lines between two different staves.
       //			if (staff.bottom < 0)
       //				renderer.moveY(spacing.STEP, -staff.bottom);
     }

@@ -29,7 +29,7 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 				boxAllElements(renderer, params.voices, staff1.voices);
 			}
 			if (renderer.showDebug.indexOf("grid") >= 0) {
-				renderer.paper.dottedLine({x1: renderer.padding.left, x2: renderer.padding.left+renderer.controller.width, y1: startY, y2: startY, stroke: "#0000ff"})
+				renderer.paper.dottedLine({x1: renderer.padding.left, x2: renderer.padding.left+renderer.controller.width, y1: startY, y2: startY, stroke: "#0000ff"});
 				printDebugBox(renderer,
 					{ x: renderer.padding.left,
 						y: renderer.calcY(staff1.originalTop),
@@ -97,18 +97,20 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 			zero: renderer.y,
 			height: params.height*spacing.STEP
 		});
+		var tabNameHeight = 0; 
 		if (tabName) {
 			// print tab infos on staffBottom
 			var r = { rows: [] };
 			r.rows.push({ absmove: bottomLine + 2 });
 			r.rows.push({ left: params.startx, text: tabName.name, font: 'infofont', klass: 'text instrumentname', anchor: 'start' });
-			r.rows.push({ move: tabName.textSize.height })
+			r.rows.push({ move: tabName.textSize.height });
 			nonMusic(renderer, r);
+			tabNameHeight = tabName.textSize.height;
 		}
 
 		renderer.controller.classes.newMeasure();
 		if (!params.voices[i].duplicate) {
-			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
+			bartop = renderer.calcY(2+tabNameHeight); // This connects the bar lines between two different staves.
 //			if (staff.bottom < 0)
 //				renderer.moveY(spacing.STEP, -staff.bottom);
 		}
