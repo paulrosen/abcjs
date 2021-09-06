@@ -79,7 +79,7 @@ function checkNote(note, accidentals) {
     // acc = +1;
   }
   isAltered = isFlat || isSharp;
-  if (isFlat) {
+  if (isAltered) {
     newNote = note.slice(1);
   }
   return {

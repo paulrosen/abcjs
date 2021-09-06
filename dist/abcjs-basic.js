@@ -16759,7 +16759,7 @@ function checkNote(note, accidentals) {
 
   isAltered = isFlat || isSharp;
 
-  if (isFlat) {
+  if (isAltered) {
     newNote = note.slice(1);
   }
 
