@@ -5,7 +5,7 @@ var AbsoluteElement = require('../write/abc_absolute_element');
 var RelativeElement = require('../write/abc_relative_element');
 
 function isObject(a) { return a != null && a.constructor === Object; }
-function clone(dest,src) {
+function clone(dest, src) {
   for (var prop in src) {
     if (src.hasOwnProperty(prop)) {
       if (!(Array.isArray(src[prop]) || isObject(src[prop]))) {
@@ -40,7 +40,7 @@ function cloneAbsoluteAndRelatives(absSrc, plugin) {
   return returned;
 }
 
-function buildTabAbsolute(plugin , absX , relX ) {
+function buildTabAbsolute(plugin, absX, relX) {
   var tabIcon = 'tab.tiny';
   var tabYPos = 7.5;
   if (plugin.isTabBig) {
@@ -78,13 +78,13 @@ function lyricsDim(abs) {
   return null;
 }
 
-function TabAbsoluteElements() {}
+function TabAbsoluteElements() { }
 
 /**
  * Build tab absolutes by scanning current staff line absolute array
  * @param {*} staffAbsolute
  */
-TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute) {
+TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice) {
   var source = staffAbsolute[0];
   var dest = staffAbsolute[1];
   for (var ii = 0; ii < source.children.length; ii++) {
@@ -96,7 +96,12 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute) {
     }
     switch (absChild.type) {
       case 'bar':
-        
+        tabVoice.push({
+          el_type: absChild.abcelem.el_type,
+          type: absChild.abcelem.type,
+          endChar: absChild.abcelem.endChar,
+          startChar: absChild.abcelem.startChar,
+        });
         dest.children.push(cloneAbsoluteAndRelatives(absChild, plugin));
         break;
       case 'note':
@@ -107,8 +112,10 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute) {
         var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
         abs.type = 'tabNumber';
         // convert note to number
+        var def = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [] };
         for (var jj = 0; jj < tabPos.notes.length; jj++) {
           var pitch = plugin.semantics.stringToPitch(tabPos.notes[jj].str);
+          def.notes.push({ num: tabPos.notes[jj].num, str: tabPos.notes[jj].str, pitch: tabPos.notes[jj].note.name });
           var tabNoteRelative = new RelativeElement(
             tabPos.notes[jj].num.toString(), 0, 0, pitch,
             { type: 'tabNumber' });
@@ -116,6 +123,7 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute) {
           abs.children.push(tabNoteRelative);
         }
         dest.children.push(abs);
+        tabVoice.push(def);
         break;
     }
   }

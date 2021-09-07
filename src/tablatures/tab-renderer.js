@@ -20,7 +20,7 @@ function initSpecialY() {
 
 function getLyricHeight(voice) {
   var maxLyricHeight = 0;
-  for ( var ii=0; ii < voice.children.length; ii++) {
+  for (var ii = 0; ii < voice.children.length; ii++) {
     var curAbs = voice.children[ii];
     if (curAbs.specialY) {
       if (curAbs.specialY.lyricHeightBelow > maxLyricHeight) {
@@ -28,10 +28,10 @@ function getLyricHeight(voice) {
       }
     }
   }
-  return maxLyricHeight ; // add spacing
+  return maxLyricHeight; // add spacing
 }
 
-function buildTabName(self,dest) {
+function buildTabName(self, dest) {
   var stringSemantics = self.plugin.semantics.strings;
   var controller = self.renderer.controller;
   var textSize = controller.getTextSize;
@@ -51,7 +51,7 @@ function buildTabName(self,dest) {
  * @param {*} staffIndex
  * @param {*} tablatureLayout
  */
-function TabRenderer(plugin,renderer, line, staffIndex) {
+function TabRenderer(plugin, renderer, line, staffIndex) {
   this.renderer = renderer;
   this.plugin = plugin;
   this.line = line;
@@ -79,9 +79,9 @@ TabRenderer.prototype.doLayout = function () {
   var firstVoice = voices[0];
   // take lyrics into account if any
   var lyricsHeight = getLyricHeight(firstVoice);
-  
+
   var previousStaff = staffGroup.staffs[this.staffIndex - 1];
-  var tabTop = previousStaff.top + lyricsHeight ; 
+  var tabTop = previousStaff.top + lyricsHeight;
   var staffGroupInfos = {
     bottom: -1,
     specialY: initSpecialY(),
@@ -92,7 +92,7 @@ TabRenderer.prototype.doLayout = function () {
   };
   staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
-  staffGroup.height += this.tabSize  ;
+  staffGroup.height += this.tabSize;
   var tabVoice = new VoiceElement(0, 0);
   var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
   for (var ii = this.staffIndex + 1; ii < staffGroup.staffs.length; ii++) {
@@ -100,9 +100,10 @@ TabRenderer.prototype.doLayout = function () {
   }
   staffGroup.height += nameHeight;
   tabVoice.staff = staffGroupInfos;
-  voices.splice(this.staffIndex, 0 ,tabVoice);
+  voices.splice(this.staffIndex, 0, tabVoice);
   // build from staff
-  this.absolutes.build(this.plugin, voices);
+  this.tabStaff.voices = [];
+  this.absolutes.build(this.plugin, voices, this.tabStaff.voices);
 };
 
 

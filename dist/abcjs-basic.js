@@ -17443,7 +17443,7 @@ function TabAbsoluteElements() {}
  */
 
 
-TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute) {
+TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice) {
   var source = staffAbsolute[0];
   var dest = staffAbsolute[1];
 
@@ -17458,6 +17458,12 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute) {
 
     switch (absChild.type) {
       case 'bar':
+        tabVoice.push({
+          el_type: absChild.abcelem.el_type,
+          type: absChild.abcelem.type,
+          endChar: absChild.abcelem.endChar,
+          startChar: absChild.abcelem.startChar
+        });
         dest.children.push(cloneAbsoluteAndRelatives(absChild, plugin));
         break;
 
@@ -17469,8 +17475,20 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute) {
         var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
         abs.type = 'tabNumber'; // convert note to number
 
+        var def = {
+          el_type: "note",
+          startChar: absChild.abcelem.startChar,
+          endChar: absChild.abcelem.endChar,
+          notes: []
+        };
+
         for (var jj = 0; jj < tabPos.notes.length; jj++) {
           var pitch = plugin.semantics.stringToPitch(tabPos.notes[jj].str);
+          def.notes.push({
+            num: tabPos.notes[jj].num,
+            str: tabPos.notes[jj].str,
+            pitch: tabPos.notes[jj].note.name
+          });
           var tabNoteRelative = new RelativeElement(tabPos.notes[jj].num.toString(), 0, 0, pitch, {
             type: 'tabNumber'
           });
@@ -17479,6 +17497,7 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute) {
         }
 
         dest.children.push(abs);
+        tabVoice.push(def);
         break;
     }
   }
@@ -17624,7 +17643,8 @@ TabRenderer.prototype.doLayout = function () {
   tabVoice.staff = staffGroupInfos;
   voices.splice(this.staffIndex, 0, tabVoice); // build from staff
 
-  this.absolutes.build(this.plugin, voices);
+  this.tabStaff.voices = [];
+  this.absolutes.build(this.plugin, voices, this.tabStaff.voices);
 };
 
 module.exports = TabRenderer;
