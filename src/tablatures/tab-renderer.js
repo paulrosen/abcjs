@@ -92,13 +92,13 @@ TabRenderer.prototype.doLayout = function () {
   };
   staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
-  staffGroup.height += this.tabSize;
+  staffGroup.height += this.tabSize ;
   var tabVoice = new VoiceElement(0, 0);
   var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
   for (var ii = this.staffIndex + 1; ii < staffGroup.staffs.length; ii++) {
     staffGroup.staffs[ii].top += nameHeight;
   }
-  staffGroup.height += nameHeight;
+  staffGroup.height += nameHeight * spacing.STEP ;
   tabVoice.staff = staffGroupInfos;
   voices.splice(this.staffIndex, 0, tabVoice);
   // build from staff

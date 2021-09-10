@@ -17683,7 +17683,7 @@ TabRenderer.prototype.doLayout = function () {
     staffGroup.staffs[ii].top += nameHeight;
   }
 
-  staffGroup.height += nameHeight;
+  staffGroup.height += nameHeight * spacing.STEP;
   tabVoice.staff = staffGroupInfos;
   voices.splice(this.staffIndex, 0, tabVoice); // build from staff
 
