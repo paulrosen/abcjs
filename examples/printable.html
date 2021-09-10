@@ -26,7 +26,6 @@
           oneSvgPerLine: true
         }
       });
-      ABCJS.renderAbc("logo", "X:1\n%%staffwidth 90\nK:D\nAB c", { responsive: "resize" });
     };
   </script>
   <style>
@@ -37,6 +36,9 @@
       main section.output {
         display: block;
       }
+        [fill="#ff0000"] {
+            fill: currentColor;
+        }
     }
   </style>
 </head>
@@ -81,7 +83,7 @@ eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
       </section>
       <section class="output">
         <nav>
-          <button onclick="window.print()"><i class="fa fa-print" aria-hidden="true"></i> Print</button>
+          <button onclick="window.print()">Print</button>
         </nav>
         <div id="canvas" class="visible-background"></div>
       </section>
