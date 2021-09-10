@@ -16781,7 +16781,9 @@ function sameString(self, chord) {
       // same String
       // => change lower pos 
       if (curPos.str == self.strings.length - 1) {
-        self.hasError = 'Invalid tab Chord position for instrument';
+        return {
+          error: 'Invalid tab Chord position for instrument'
+        };
       } // change lower pitch on lowest string
 
 
@@ -16791,10 +16793,6 @@ function sameString(self, chord) {
       } else {
         curPos.str++;
         curPos = noteToNumber(self, curPos.note, curPos.str, self.secondPos);
-      }
-
-      if (nextPos == null || curPos == null) {
-        self.hasError = "Can't map tab Chord position for instrument";
       } // update table
 
 
@@ -16802,6 +16800,8 @@ function sameString(self, chord) {
       chord[jjjj + 1] = nextPos;
     }
   }
+
+  return null;
 }
 
 function handleChordNotes(self, notes) {
@@ -16814,6 +16814,11 @@ function handleChordNotes(self, notes) {
   }
 
   var error = sameString(self, retNotes);
+
+  if (error) {
+    return error;
+  }
+
   return retNotes;
 }
 
@@ -16916,15 +16921,28 @@ StringPatterns.prototype.stringToPitch = function (stringNumber) {
 
 StringPatterns.prototype.notesToNumber = function (notes, graces) {
   var note;
+  var number;
 
   if (notes) {
     var retNotes = [];
 
     if (notes.length > 1) {
       retNotes = handleChordNotes(this, notes);
+
+      if (retNotes.error) {
+        return retNotes.error;
+      }
     } else {
       note = checkNote(notes[0].name, this.accidentals);
-      retNotes.push(toNumber(this, note));
+      number = toNumber(this, note);
+
+      if (number) {
+        retNotes.push(number);
+      } else {
+        return {
+          error: notes[0].name + ': unexpected note for instrument'
+        };
+      }
     }
 
     var retGraces = null;
@@ -16934,7 +16952,15 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
 
       for (var iiii = 0; iiii < graces.length; iiii++) {
         note = checkNote(graces[0].name, this.accidentals);
-        retGraces.push(toNumber(this, note));
+        number = toNumber(this, note);
+
+        if (number) {
+          retGraces.push(number);
+        } else {
+          return {
+            error: notes[0].name + ': unexpected note for instrument'
+          };
+        }
       }
     }
 
@@ -16973,7 +16999,7 @@ StringPatterns.prototype.tabInfos = function (plugin) {
 
 function StringPatterns(tuning, capo, highestNote, linePitch) {
   this.linePitch = linePitch;
-  this.highestNote = "f'";
+  this.highestNote = "a'";
   this.hasError = null; // collect errors here if any
 
   if (highestNote) {
@@ -17245,7 +17271,7 @@ var plugin = {
     this.isTabBig = false;
     this.capo = params.capo;
     this.tablature = new StringTablature(this.nbLines, this.linePitch);
-    var semantics = new ViolinPatterns(_super.params.tuning, this.capo, params.higestNote, this.linePitch);
+    var semantics = new ViolinPatterns(_super.params.tuning, this.capo, params.highestNote, this.linePitch);
     this.semantics = semantics;
   },
   render: function render(renderer, line, staffIndex) {
@@ -17473,31 +17499,37 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.gracenotes;
         var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
-        abs.type = 'tabNumber'; // convert note to number
 
-        var def = {
-          el_type: "note",
-          startChar: absChild.abcelem.startChar,
-          endChar: absChild.abcelem.endChar,
-          notes: []
-        };
+        if (tabPos.error) {
+          plugin._super.setError(tabPos.error);
+        } else {
+          abs.type = 'tabNumber'; // convert note to number
 
-        for (var jj = 0; jj < tabPos.notes.length; jj++) {
-          var pitch = plugin.semantics.stringToPitch(tabPos.notes[jj].str);
-          def.notes.push({
-            num: tabPos.notes[jj].num,
-            str: tabPos.notes[jj].str,
-            pitch: tabPos.notes[jj].note.name
-          });
-          var tabNoteRelative = new RelativeElement(tabPos.notes[jj].num.toString(), 0, 0, pitch, {
-            type: 'tabNumber'
-          });
-          tabNoteRelative.x = relX;
-          abs.children.push(tabNoteRelative);
+          var def = {
+            el_type: "note",
+            startChar: absChild.abcelem.startChar,
+            endChar: absChild.abcelem.endChar,
+            notes: []
+          };
+
+          for (var jj = 0; jj < tabPos.notes.length; jj++) {
+            var pitch = plugin.semantics.stringToPitch(tabPos.notes[jj].str);
+            def.notes.push({
+              num: tabPos.notes[jj].num,
+              str: tabPos.notes[jj].str,
+              pitch: tabPos.notes[jj].note.name
+            });
+            var tabNoteRelative = new RelativeElement(tabPos.notes[jj].num.toString(), 0, 0, pitch, {
+              type: 'tabNumber'
+            });
+            tabNoteRelative.x = relX;
+            abs.children.push(tabNoteRelative);
+          }
+
+          dest.children.push(abs);
+          tabVoice.push(def);
         }
 
-        dest.children.push(abs);
-        tabVoice.push(def);
         break;
     }
   }
@@ -17523,6 +17555,18 @@ function TabCommon(abcTune, tuneNumber, params) {
   this.params = params;
   this.tuneNumber = tuneNumber;
 }
+
+TabCommon.prototype.setError = function (error) {
+  var tune = this.tune;
+
+  if (error) {
+    if (tune.warnings) {
+      tune.warnings.push(error);
+    } else {
+      tune.warnings = [error];
+    }
+  }
+};
 
 module.exports = TabCommon;
 

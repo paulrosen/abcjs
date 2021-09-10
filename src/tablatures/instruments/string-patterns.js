@@ -99,7 +99,7 @@ function sameString(self, chord) {
       // same String
       // => change lower pos 
       if (curPos.str == self.strings.length - 1) {
-        self.hasError = 'Invalid tab Chord position for instrument';
+        return { error: 'Invalid tab Chord position for instrument'  };
       }
       // change lower pitch on lowest string
       if (nextPos.num < curPos.num) {
@@ -117,14 +117,12 @@ function sameString(self, chord) {
           self.secondPos
         );
       }
-      if (nextPos == null || curPos == null) {
-        self.hasError = "Can't map tab Chord position for instrument";
-      }
       // update table
       chord[jjjj] = curPos;
       chord[jjjj + 1] = nextPos;
     }
   }
+  return null;
 }
 
 function handleChordNotes(self, notes) {
@@ -135,6 +133,9 @@ function handleChordNotes(self, notes) {
     retNotes.push(curPos);
   }
   var error = sameString(self, retNotes);
+  if (error) {
+    return error;
+  }
   return retNotes;
 }
 
@@ -222,20 +223,34 @@ StringPatterns.prototype.stringToPitch = function (stringNumber) {
 
 StringPatterns.prototype.notesToNumber = function (notes, graces) {
   var note;
+  var number;
   if (notes) {
     var retNotes = [];
     if (notes.length > 1) {
       retNotes = handleChordNotes(this, notes);
+      if (retNotes.error) {
+        return retNotes.error;
+      } 
     } else {
       note = checkNote(notes[0].name, this.accidentals);
-      retNotes.push(toNumber(this, note));
+      number = toNumber(this, note);
+      if (number) {
+        retNotes.push(number);
+      } else {
+        return { error: notes[0].name + ': unexpected note for instrument'};
+      }
     }
     var retGraces = null;
     if (graces) {
       retGraces = [];
       for (var iiii = 0; iiii < graces.length; iiii++) {
         note = checkNote(graces[0].name, this.accidentals);
-        retGraces.push(toNumber(this, note));
+        number = toNumber(this, note);
+        if (number) {
+          retGraces.push(number);
+        } else {
+          return { error: notes[0].name + ': unexpected note for instrument' };
+        }        
       }
     }
     return {
@@ -269,7 +284,7 @@ StringPatterns.prototype.tabInfos = function (plugin) {
  */
 function StringPatterns(tuning, capo, highestNote, linePitch) {
   this.linePitch = linePitch;
-  this.highestNote = "f'";
+  this.highestNote = "a'";
   this.hasError = null; // collect errors here if any
   if (highestNote) {
     // override default

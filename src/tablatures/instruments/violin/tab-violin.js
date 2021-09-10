@@ -27,7 +27,7 @@ var plugin = {
     var semantics = new ViolinPatterns(
       _super.params.tuning,
       this.capo,
-      params.higestNote,
+      params.highestNote,
       this.linePitch
     );
     this.semantics = semantics;

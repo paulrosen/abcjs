@@ -110,20 +110,24 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.gracenotes;
         var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
-        abs.type = 'tabNumber';
-        // convert note to number
-        var def = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [] };
-        for (var jj = 0; jj < tabPos.notes.length; jj++) {
-          var pitch = plugin.semantics.stringToPitch(tabPos.notes[jj].str);
-          def.notes.push({ num: tabPos.notes[jj].num, str: tabPos.notes[jj].str, pitch: tabPos.notes[jj].note.name });
-          var tabNoteRelative = new RelativeElement(
-            tabPos.notes[jj].num.toString(), 0, 0, pitch,
-            { type: 'tabNumber' });
-          tabNoteRelative.x = relX;
-          abs.children.push(tabNoteRelative);
+        if (tabPos.error) {
+          plugin._super.setError(tabPos.error);
+        } else {
+          abs.type = 'tabNumber';
+          // convert note to number
+          var def = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [] };
+          for (var jj = 0; jj < tabPos.notes.length; jj++) {
+            var pitch = plugin.semantics.stringToPitch(tabPos.notes[jj].str);
+            def.notes.push({ num: tabPos.notes[jj].num, str: tabPos.notes[jj].str, pitch: tabPos.notes[jj].note.name });
+            var tabNoteRelative = new RelativeElement(
+              tabPos.notes[jj].num.toString(), 0, 0, pitch,
+              { type: 'tabNumber' });
+            tabNoteRelative.x = relX;
+            abs.children.push(tabNoteRelative);
+          }
+          dest.children.push(abs);
+          tabVoice.push(def);
         }
-        dest.children.push(abs);
-        tabVoice.push(def);
         break;
     }
   }
