@@ -119,10 +119,13 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
           for (var jj = 0; jj < tabPos.notes.length; jj++) {
             var pitch = plugin.semantics.stringToPitch(tabPos.notes[jj].str);
             def.notes.push({ num: tabPos.notes[jj].num, str: tabPos.notes[jj].str, pitch: tabPos.notes[jj].note.name });
+            var opt = {
+              type: 'tabNumber'
+            };
             var tabNoteRelative = new RelativeElement(
-              tabPos.notes[jj].num.toString(), 0, 0, pitch,
-              { type: 'tabNumber' });
+              tabPos.notes[jj].num.toString(), 0, 0, pitch,opt);
             tabNoteRelative.x = relX;
+            tabNoteRelative.anchor = 'center';
             abs.children.push(tabNoteRelative);
           }
           dest.children.push(abs);

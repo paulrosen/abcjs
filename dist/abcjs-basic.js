@@ -17519,10 +17519,12 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
               str: tabPos.notes[jj].str,
               pitch: tabPos.notes[jj].note.name
             });
-            var tabNoteRelative = new RelativeElement(tabPos.notes[jj].num.toString(), 0, 0, pitch, {
+            var opt = {
               type: 'tabNumber'
-            });
+            };
+            var tabNoteRelative = new RelativeElement(tabPos.notes[jj].num.toString(), 0, 0, pitch, opt);
             tabNoteRelative.x = relX;
+            tabNoteRelative.anchor = 'center';
             abs.children.push(tabNoteRelative);
           }
 
@@ -23432,7 +23434,7 @@ function drawRelativeElement(renderer, params, bartop) {
         y: y,
         text: "" + params.c,
         type: "tabnumberfont",
-        klass: renderer.controller.classes.generate('text instrumentname'),
+        klass: renderer.controller.classes.generate('text tab-number'),
         anchor: 'start',
         centerVertically: false,
         dim: params.dim
