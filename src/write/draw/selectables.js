@@ -10,9 +10,9 @@ function Selectables(paper, selectTypes, tuneNumber) {
 
 Selectables.prototype.getElements = function () {
 	return this.elements;
-}
+};
 
-Selectables.prototype.add = function (absEl, svgEl, isNote, staffPos) {
+Selectables.prototype.add = function (absEl, svgEl, isNoteOrTabNumber, staffPos) {
 	if (!this.canSelect(absEl))
 		return;
 	var params;
@@ -21,7 +21,7 @@ Selectables.prototype.add = function (absEl, svgEl, isNote, staffPos) {
 	else
 		params = { selectable: true, tabindex: 0, "data-index": this.elements.length};
 	this.paper.setAttributeOnElement(svgEl, params);
-	var sel = { absEl: absEl, svgEl: svgEl, isDraggable: isNote };
+	var sel = { absEl: absEl, svgEl: svgEl, isDraggable: isNoteOrTabNumber };
 	if (staffPos !== undefined)
 		sel.staffPos = staffPos;
 	this.elements.push(sel);
@@ -36,8 +36,11 @@ Selectables.prototype.canSelect = function (absEl) {
 	if (this.selectTypes === true)
 		return true;
 	if (this.selectTypes === undefined) {
-		// by default, only notes can be clicked.
-		return absEl.abcelem.el_type === 'note';
+		// by default, only notes and tab numbers can be clicked.
+		if (absEl.abcelem.el_type === 'note' || absEl.abcelem.el_type === 'tabNumber') {
+			return true;
+		}
+		return false;
 	}
 	return this.selectTypes.indexOf(absEl.abcelem.el_type) >= 0;
 };
@@ -49,7 +52,7 @@ Selectables.prototype.wrapSvgEl = function(abcelem, el) {
 		elemset: [el],
 		highlight: highlight,
 		unhighlight: unhighlight
-	}
+	};
 	this.add(absEl, el, false);
 };
 

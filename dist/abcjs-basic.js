@@ -17380,7 +17380,7 @@ function isObject(a) {
   return a != null && a.constructor === Object;
 }
 
-function clone(dest, src) {
+function cloneObject(dest, src) {
   for (var prop in src) {
     if (src.hasOwnProperty(prop)) {
       if (!(Array.isArray(src[prop]) || isObject(src[prop]))) {
@@ -17392,9 +17392,16 @@ function clone(dest, src) {
 
 function cloneAbsolute(absSrc) {
   var returned = new AbsoluteElement('', 0, 0, '', 0);
-  clone(returned, absSrc);
+  cloneObject(returned, absSrc);
   returned.top = 0;
   returned.bottom = -1;
+
+  if (absSrc.abcelem) {
+    returned.abcelem = {};
+    cloneObject(returned.abcelem, absSrc.abcelem);
+    returned.abcelem.el_type = 'tabNumber';
+  }
+
   return returned;
 }
 
@@ -17409,7 +17416,7 @@ function cloneAbsoluteAndRelatives(absSrc, plugin) {
     for (var ii = 0; ii < children.length; ii++) {
       var child = children[ii];
       var relative = new RelativeElement('', 0, 0, 0, '');
-      clone(relative, child);
+      cloneObject(relative, child);
       first = plugin.tablature.setRelative(child, relative, first);
       returned.children.push(relative);
     }
@@ -17513,18 +17520,19 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
           };
 
           for (var jj = 0; jj < tabPos.notes.length; jj++) {
-            var pitch = plugin.semantics.stringToPitch(tabPos.notes[jj].str);
+            var curNote = tabPos.notes[jj];
+            var pitch = plugin.semantics.stringToPitch(curNote.str);
             def.notes.push({
-              num: tabPos.notes[jj].num,
-              str: tabPos.notes[jj].str,
-              pitch: tabPos.notes[jj].note.name
+              num: curNote.num,
+              str: curNote.str,
+              pitch: curNote.note.name
             });
             var opt = {
               type: 'tabNumber'
             };
-            var tabNoteRelative = new RelativeElement(tabPos.notes[jj].num.toString(), 0, 0, pitch, opt);
+            var tabNoteRelative = new RelativeElement(curNote.num.toString(), 0, 0, pitch, opt);
             tabNoteRelative.x = relX;
-            tabNoteRelative.anchor = 'center';
+            tabNoteRelative.isAltered = curNote.note.isAltered;
             abs.children.push(tabNoteRelative);
           }
 
@@ -22588,7 +22596,13 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
       selectables.add(params, g, false, staffPos);
     } else {
       params.elemset.push(g);
-      selectables.add(params, g, params.type === 'note', staffPos);
+      var isSelectable = false;
+
+      if (params.type === 'note' || params.type === 'tabNumber') {
+        isSelectable = true;
+      }
+
+      selectables.add(params, g, isSelectable, staffPos);
     }
   } else if (params.elemset.length > 0) selectables.add(params, params.elemset[0], params.type === 'note', staffPos); // If there was no output, then don't add to the selectables. This happens when using the "y" spacer, for instance.
 
@@ -23429,15 +23443,17 @@ function drawRelativeElement(renderer, params, bartop) {
       break;
 
     case "tabNumber":
+      var hAnchor = "start";
       params.graphelem = renderText(renderer, {
         x: params.x,
         y: y,
         text: "" + params.c,
         type: "tabnumberfont",
         klass: renderer.controller.classes.generate('text tab-number'),
-        anchor: 'start',
+        anchor: hAnchor,
         centerVertically: false,
-        dim: params.dim
+        dim: params.dim,
+        cursor: 'default'
       }, false);
       break;
 
@@ -23602,7 +23618,7 @@ Selectables.prototype.getElements = function () {
   return this.elements;
 };
 
-Selectables.prototype.add = function (absEl, svgEl, isNote, staffPos) {
+Selectables.prototype.add = function (absEl, svgEl, isNoteOrTabNumber, staffPos) {
   if (!this.canSelect(absEl)) return;
   var params;
   if (this.selectTypes === undefined) params = {
@@ -23618,7 +23634,7 @@ Selectables.prototype.add = function (absEl, svgEl, isNote, staffPos) {
   var sel = {
     absEl: absEl,
     svgEl: svgEl,
-    isDraggable: isNote
+    isDraggable: isNoteOrTabNumber
   };
   if (staffPos !== undefined) sel.staffPos = staffPos;
   this.elements.push(sel);
@@ -23630,8 +23646,12 @@ Selectables.prototype.canSelect = function (absEl) {
   if (this.selectTypes === true) return true;
 
   if (this.selectTypes === undefined) {
-    // by default, only notes can be clicked.
-    return absEl.abcelem.el_type === 'note';
+    // by default, only notes and tab numbers can be clicked.
+    if (absEl.abcelem.el_type === 'note' || absEl.abcelem.el_type === 'tabNumber') {
+      return true;
+    }
+
+    return false;
   }
 
   return this.selectTypes.indexOf(absEl.abcelem.el_type) >= 0;
@@ -24272,6 +24292,10 @@ function renderText(renderer, params, alreadyInGroup) {
   if (params.type === 'debugfont') {
     console.log("Debug msg: " + params.text);
     hash.attr.stroke = "#ff0000";
+  }
+
+  if (params.cursor) {
+    hash.attr.cursor = params.cursor;
   }
 
   var text = params.text.replace(/\n\n/g, "\n \n");

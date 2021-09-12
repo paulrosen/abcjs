@@ -23,6 +23,9 @@ function renderText(renderer, params, alreadyInGroup) {
 		console.log("Debug msg: " + params.text);
 		hash.attr.stroke = "#ff0000";
 	}
+	if (params.cursor) {
+		hash.attr.cursor = params.cursor;
+	}
 
 	var text = params.text.replace(/\n\n/g, "\n \n");
 	text = text.replace(/^\n/, "\xA0\n");

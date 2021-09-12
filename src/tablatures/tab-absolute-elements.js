@@ -5,7 +5,7 @@ var AbsoluteElement = require('../write/abc_absolute_element');
 var RelativeElement = require('../write/abc_relative_element');
 
 function isObject(a) { return a != null && a.constructor === Object; }
-function clone(dest, src) {
+function cloneObject(dest, src) {
   for (var prop in src) {
     if (src.hasOwnProperty(prop)) {
       if (!(Array.isArray(src[prop]) || isObject(src[prop]))) {
@@ -17,9 +17,14 @@ function clone(dest, src) {
 
 function cloneAbsolute(absSrc) {
   var returned = new AbsoluteElement('', 0, 0, '', 0);
-  clone(returned, absSrc);
+  cloneObject(returned, absSrc);
   returned.top = 0;
   returned.bottom = -1;
+  if (absSrc.abcelem) {
+    returned.abcelem = {};
+    cloneObject(returned.abcelem, absSrc.abcelem);
+    returned.abcelem.el_type = 'tabNumber';
+  }
   return returned;
 }
 
@@ -32,7 +37,7 @@ function cloneAbsoluteAndRelatives(absSrc, plugin) {
     for (var ii = 0; ii < children.length; ii++) {
       var child = children[ii];
       var relative = new RelativeElement('', 0, 0, 0, '');
-      clone(relative, child);
+      cloneObject(relative, child);
       first = plugin.tablature.setRelative(child, relative, first);
       returned.children.push(relative);
     }
@@ -117,15 +122,16 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
           // convert note to number
           var def = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [] };
           for (var jj = 0; jj < tabPos.notes.length; jj++) {
-            var pitch = plugin.semantics.stringToPitch(tabPos.notes[jj].str);
-            def.notes.push({ num: tabPos.notes[jj].num, str: tabPos.notes[jj].str, pitch: tabPos.notes[jj].note.name });
+            var curNote = tabPos.notes[jj];
+            var pitch = plugin.semantics.stringToPitch(curNote.str);
+            def.notes.push({ num: curNote.num, str: curNote.str, pitch: curNote.note.name });
             var opt = {
               type: 'tabNumber'
             };
             var tabNoteRelative = new RelativeElement(
-              tabPos.notes[jj].num.toString(), 0, 0, pitch,opt);
+              curNote.num.toString(), 0, 0, pitch, opt);
             tabNoteRelative.x = relX;
-            tabNoteRelative.anchor = 'center';
+            tabNoteRelative.isAltered = curNote.note.isAltered;
             abs.children.push(tabNoteRelative);
           }
           dest.children.push(abs);
