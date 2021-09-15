@@ -16638,7 +16638,9 @@ var plugin = {
   },
   render: function render(renderer, line, staffIndex) {
     console.log('GuitarTab plugin rendered');
+    var _super = this._super;
     setGuitarFonts(this.abcTune);
+    this.semantics.strings.accidentals = _super.setAccidentals(line, 0);
     var rndrer = new TabRenderer(this, renderer, line, staffIndex);
     rndrer.doLayout();
   }
@@ -16808,7 +16810,7 @@ function handleChordNotes(self, notes) {
   var retNotes = [];
 
   for (var iiii = 0; iiii < notes.length; iiii++) {
-    var note = checkNote(notes[iiii].name, this.accidentals);
+    var note = checkNote(notes[iiii].name, self.accidentals);
     var curPos = toNumber(self, note);
     retNotes.push(curPos);
   }
@@ -17276,7 +17278,9 @@ var plugin = {
   },
   render: function render(renderer, line, staffIndex) {
     console.log('ViolinTab plugin rendered');
+    var _super = this._super;
     setViolinFonts(this.abcTune);
+    this.semantics.strings.accidentals = _super.setAccidentals(line, 0);
     var rndrer = new TabRenderer(this, renderer, line, staffIndex);
     rndrer.doLayout();
   }
@@ -17577,6 +17581,18 @@ TabCommon.prototype.setError = function (error) {
     }
   }
 };
+/**
+ * Get Key accidentals for current staff
+ * @param {*} lineNumber 
+ * @param {*} staffNumber 
+ * @returns 
+ */
+
+
+TabCommon.prototype.setAccidentals = function (line, staffNumber) {
+  var staff = line.staff[staffNumber];
+  return staff.key.accidentals;
+};
 
 module.exports = TabCommon;
 
@@ -17673,8 +17689,9 @@ TabRenderer.prototype.doLayout = function () {
   var firstVoice = voices[0]; // take lyrics into account if any
 
   var lyricsHeight = getLyricHeight(firstVoice);
+  var padd = 4;
   var previousStaff = staffGroup.staffs[this.staffIndex - 1];
-  var tabTop = previousStaff.top + lyricsHeight;
+  var tabTop = previousStaff.top + padd + lyricsHeight;
   var staffGroupInfos = {
     bottom: -1,
     specialY: initSpecialY(),
@@ -17685,7 +17702,7 @@ TabRenderer.prototype.doLayout = function () {
   };
   staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos); // staffGroup.staffs.push(staffGroupInfos);
 
-  staffGroup.height += this.tabSize;
+  staffGroup.height += this.tabSize + padd;
   var tabVoice = new VoiceElement(0, 0);
   var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
 

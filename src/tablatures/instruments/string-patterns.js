@@ -128,7 +128,7 @@ function sameString(self, chord) {
 function handleChordNotes(self, notes) {
   var retNotes = [];
   for (var iiii = 0; iiii < notes.length; iiii++) {
-    var note = checkNote(notes[iiii].name, this.accidentals);
+    var note = checkNote(notes[iiii].name, self.accidentals);
     var curPos = toNumber(self, note);
     retNotes.push(curPos);
   }
