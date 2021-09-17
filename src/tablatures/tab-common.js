@@ -24,7 +24,7 @@ TabCommon.prototype.setError = function (error) {
 
 /**
  * Get Key accidentals for current staff
- * @param {*} lineNumber 
+ * @param {*} line
  * @param {*} staffNumber 
  * @returns 
  */

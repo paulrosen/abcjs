@@ -76,7 +76,7 @@ function checkNote(note, accidentals) {
     acc = -1;
   } else if (note.startsWith('^')) {
     isSharp = true;
-    // acc = +1;
+    acc = +1;
   }
   isAltered = isFlat || isSharp;
   if (isAltered) {

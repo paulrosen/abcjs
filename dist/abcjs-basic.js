@@ -16756,7 +16756,8 @@ function checkNote(note, accidentals) {
     isFlat = true;
     acc = -1;
   } else if (note.startsWith('^')) {
-    isSharp = true; // acc = +1;
+    isSharp = true;
+    acc = +1;
   }
 
   isAltered = isFlat || isSharp;
@@ -17583,7 +17584,7 @@ TabCommon.prototype.setError = function (error) {
 };
 /**
  * Get Key accidentals for current staff
- * @param {*} lineNumber 
+ * @param {*} line
  * @param {*} staffNumber 
  * @returns 
  */
