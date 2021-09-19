@@ -124,7 +124,8 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
           for (var jj = 0; jj < tabPos.notes.length; jj++) {
             var curNote = tabPos.notes[jj];
             var pitch = plugin.semantics.stringToPitch(curNote.str);
-            def.notes.push({ num: curNote.num, str: curNote.str, pitch: curNote.note.name });
+            var acc = curNote.note.isFlat ? '_' : (curNote.note.isSharp ? '^' : '');
+            def.notes.push({ num: curNote.num, str: curNote.str, pitch: acc + curNote.note.name });
             var opt = {
               type: 'tabNumber'
             };
