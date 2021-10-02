@@ -303,7 +303,13 @@ var abcTablatures = {
           var plugin = this.plugins[tabName];
 
           if (plugin) {
-            // proceed with tab plugin  init 
+            if (params.visualTranspose != 0) {
+              // populate transposition request to tabs
+              args.visualTranspose = params.visualTranspose;
+            }
+
+            args.abcSrc = params.tablatures.abcSrc; // proceed with tab plugin  init 
+
             plugin.init(tune, tuneNumber, args, ii);
             returned[ii] = plugin;
             nbPlugins++;
@@ -2380,7 +2386,7 @@ function gatherAbcParams(params) {
   if (abcjsParams.tablature) {
     // accept both tablature and tablatures
     abcjsParams.tablatures = abcjsParams.tablature;
-    abcjsParams.tablature = "undefined";
+    delete abcjsParams.tablature;
   }
 
   if (abcjsParams.tablatures) {
@@ -16573,14 +16579,14 @@ module.exports = setGuitarFonts;
 
 var StringPatterns = __webpack_require__(/*! ../string-patterns */ "./src/tablatures/instruments/string-patterns.js");
 
-function GuitarPatterns(tuning, capo, highestNote, linePitch) {
+function GuitarPatterns(tuning, capo, highestNote, linePitch, abcSrc) {
   this.tuning = tuning;
 
   if (!tuning) {
     this.tuning = ['E,', 'A', 'D', 'G', 'B', 'e'];
   }
 
-  this.strings = new StringPatterns(tuning, capo, highestNote, linePitch);
+  this.strings = new StringPatterns(tuning, capo, highestNote, linePitch, abcSrc);
 }
 
 GuitarPatterns.prototype.notesToNumber = function (notes, graces) {
@@ -16632,6 +16638,7 @@ var plugin = {
     this.nbLines = 6;
     this.isTabBig = true;
     this.capo = params.capo;
+    this.transpose = params.visualTranspose;
     this.tablature = new StringTablature(this.nbLines, this.linePitch);
     var semantics = new GuitarPatterns(_super.params.tuning, this.capo, params.highestNote, this.linePitch);
     this.semantics = semantics;
@@ -16749,6 +16756,7 @@ function checkNote(note, accidentals) {
   var newNote = note;
   var isSharp = false;
   var isAltered = false;
+  var natural = null;
   var acc = 0;
   note = checkKeyAccidentals(note, accidentals);
 
@@ -16758,11 +16766,14 @@ function checkNote(note, accidentals) {
   } else if (note.startsWith('^')) {
     isSharp = true;
     acc = +1;
+  } else if (note.startsWith('=')) {
+    natural = true;
+    acc = 0;
   }
 
   isAltered = isFlat || isSharp;
 
-  if (isAltered) {
+  if (isAltered || natural) {
     newNote = note.slice(1);
   }
 
@@ -16771,7 +16782,8 @@ function checkNote(note, accidentals) {
     'isSharp': isSharp,
     'isFlat': isFlat,
     'name': newNote,
-    'acc': acc
+    'acc': acc,
+    'natural': natural
   };
 }
 
@@ -17115,6 +17127,17 @@ function TabNote(note) {
   this.flat = note.indexOf('_') != -1;
 }
 
+function cloneNote(self) {
+  var newNote = self.note;
+  var newTabNote = new TabNote(newNote);
+  newTabNote.hasComma = self.hasComma;
+  newTabNote.isLower = self.isLower;
+  newTabNote.isQuoted = self.isQuoted;
+  newTabNote.sharp = self.sharp;
+  newTabNote.flat = self.flat;
+  return newTabNote;
+}
+
 TabNote.prototype.sameNoteAs = function (note) {
   if (this.note == note.note && this.hasComma == note.hasComma && this.isLower == note.isLower && this.isQuoted == note.isQuoted && this.sharp == note.sharp && this.flat == note.flat) {
     return true;
@@ -17123,21 +17146,33 @@ TabNote.prototype.sameNoteAs = function (note) {
   }
 };
 
+TabNote.prototype.getAccidentalEquiv = function () {
+  var cloned = cloneNote(this);
+
+  if (cloned.sharp) {
+    cloned = cloned.nextNote();
+    cloned.flat = true;
+  } else if (cloned.flat) {
+    cloned = cloned.prevNote();
+    cloned.sharp = true;
+  }
+
+  return cloned;
+};
+
 TabNote.prototype.nextNote = function () {
-  var newNote = this.note;
-  var newTabNote = new TabNote(newNote);
-  newTabNote.hasComma = this.hasComma;
-  newTabNote.isLower = this.isLower;
-  newTabNote.isQuoted = this.isQuoted;
+  var newTabNote = cloneNote(this);
 
   if (!this.sharp) {
     if (this.note != 'E' && this.note != 'B') {
       newTabNote.sharp = true;
       return newTabNote;
     }
+  } else {
+    newTabNote.sharp = false; // cleanup
   }
 
-  var noteIndex = notes.indexOf(newNote);
+  var noteIndex = notes.indexOf(this.note);
 
   if (noteIndex == notes.length - 1) {
     noteIndex = 0;
@@ -17162,6 +17197,48 @@ TabNote.prototype.nextNote = function () {
   return newTabNote;
 };
 
+TabNote.prototype.prevNote = function () {
+  var newTabNote = cloneNote(this);
+
+  if (this.sharp) {
+    newTabNote.sharp = false;
+    return newTabNote;
+  }
+
+  var noteIndex = notes.indexOf(this.note);
+
+  if (noteIndex == 0) {
+    noteIndex = notes.length - 1;
+  } else {
+    noteIndex--;
+  }
+
+  newTabNote.note = notes[noteIndex];
+
+  if (newTabNote.note == 'B') {
+    if (newTabNote.isLower) {
+      newTabNote.hasComma = true;
+    } else {
+      if (newTabNote.isQuoted) {
+        newTabNote.isQuoted = false;
+      } else {
+        newTabNote.isLower = true;
+      }
+    }
+  }
+
+  if (this.flat) {
+    newTabNote.flat = false;
+    return newTabNote;
+  } else {
+    if (this.note != 'E' && this.note != 'B') {
+      newTabNote.sharp = true;
+    }
+  }
+
+  return newTabNote;
+};
+
 TabNote.prototype.emit = function () {
   var returned = this.note;
 
@@ -17171,6 +17248,10 @@ TabNote.prototype.emit = function () {
 
   if (this.flat) {
     returned = '_' + returned;
+  }
+
+  if (this.natural) {
+    returned = '=' + returned;
   }
 
   if (this.hasComma) {
@@ -17273,6 +17354,7 @@ var plugin = {
     this.nbLines = 4;
     this.isTabBig = false;
     this.capo = params.capo;
+    this.transpose = params.visualTranspose;
     this.tablature = new StringTablature(this.nbLines, this.linePitch);
     var semantics = new ViolinPatterns(_super.params.tuning, this.capo, params.highestNote, this.linePitch);
     this.semantics = semantics;
@@ -17344,14 +17426,14 @@ module.exports = setViolinFonts;
 
 var StringPatterns = __webpack_require__(/*! ../string-patterns */ "./src/tablatures/instruments/string-patterns.js");
 
-function ViolinPatterns(tuning, capo, highestNote, linePitch) {
+function ViolinPatterns(tuning, capo, highestNote, linePitch, abcSrc) {
   this.tuning = tuning;
 
   if (!tuning) {
     this.tuning = ['G,', 'D', 'A', 'e'];
   }
 
-  this.strings = new StringPatterns(tuning, capo, highestNote, linePitch);
+  this.strings = new StringPatterns(tuning, capo, highestNote, linePitch, abcSrc);
 }
 
 ViolinPatterns.prototype.notesToNumber = function (notes, graces) {
@@ -17380,6 +17462,8 @@ module.exports = ViolinPatterns;
 var AbsoluteElement = __webpack_require__(/*! ../write/abc_absolute_element */ "./src/write/abc_absolute_element.js");
 
 var RelativeElement = __webpack_require__(/*! ../write/abc_relative_element */ "./src/write/abc_relative_element.js");
+
+var Transposer = __webpack_require__(/*! ./transposer */ "./src/tablatures/transposer.js");
 
 function isObject(a) {
   return a != null && a.constructor === Object;
@@ -17484,6 +17568,7 @@ function TabAbsoluteElements() {}
 TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice) {
   var source = staffAbsolute[0];
   var dest = staffAbsolute[1];
+  var transposer = null;
 
   for (var ii = 0; ii < source.children.length; ii++) {
     var absChild = source.children[ii];
@@ -17495,6 +17580,13 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
     }
 
     switch (absChild.type) {
+      case 'staff-extra key-signature':
+        if (plugin.transpose) {
+          transposer = new Transposer(absChild.abcelem.accidentals, plugin.transpose);
+        }
+
+        break;
+
       case 'bar':
         tabVoice.push({
           el_type: absChild.abcelem.el_type,
@@ -17509,7 +17601,21 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
         var abs = cloneAbsolute(absChild);
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
-        var graceNotes = absChild.gracenotes;
+        var graceNotes = absChild.gracenotes; // check transpose
+
+        if (plugin.transpose) {
+          //transposer.transpose(plugin.transpose);
+          for (var jj = 0; jj < pitches.length; jj++) {
+            pitches[jj] = transposer.transposeNote(pitches[jj]);
+          }
+
+          if (graceNotes) {
+            for (var kk = 0; kk < graceNotes.length; kk++) {
+              graceNotes[kk] = transposer.transposeNote(graceNotes[kk]);
+            }
+          }
+        }
+
         var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
 
         if (tabPos.error) {
@@ -17524,13 +17630,14 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
             notes: []
           };
 
-          for (var jj = 0; jj < tabPos.notes.length; jj++) {
-            var curNote = tabPos.notes[jj];
+          for (var ll = 0; ll < tabPos.notes.length; ll++) {
+            var curNote = tabPos.notes[ll];
             var pitch = plugin.semantics.stringToPitch(curNote.str);
+            var acc = curNote.note.isFlat ? '_' : curNote.note.isSharp ? '^' : '';
             def.notes.push({
               num: curNote.num,
               str: curNote.str,
-              pitch: curNote.note.name
+              pitch: acc + curNote.note.name
             });
             var opt = {
               type: 'tabNumber'
@@ -17720,6 +17827,129 @@ TabRenderer.prototype.doLayout = function () {
 };
 
 module.exports = TabRenderer;
+
+/***/ }),
+
+/***/ "./src/tablatures/transposer.js":
+/*!**************************************!*\
+  !*** ./src/tablatures/transposer.js ***!
+  \**************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/**
+ *
+ * generic transposer
+ *
+ */
+var TabNote = __webpack_require__(/*! ./instruments/tab-note */ "./src/tablatures/instruments/tab-note.js");
+
+function buildAccEquiv(acc, note) {
+  var equiv = note.getAccidentalEquiv();
+
+  if (acc.note.toUpperCase() == equiv.note.toUpperCase()) {
+    equiv.sharp = false;
+    equiv.flat = false;
+    return equiv;
+  }
+
+  return note;
+}
+
+function adjustNoteToKey(acc, note) {
+  if (acc.acc == 'sharp') {
+    if (note.flat) {
+      return buildAccEquiv(acc, note);
+    } else if (note.sharp) {
+      if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+        note.sharp = false;
+      } else {
+        if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+          note.natural = true;
+        }
+      }
+    }
+  } else if (acc.acc == 'flat') {
+    if (note.sharp) {
+      return buildAccEquiv(acc, note);
+    } else if (note.flat) {
+      if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+        note.flat = false;
+      }
+    } else {
+      if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+        note.natural = true;
+      }
+    }
+  }
+
+  return note;
+}
+
+function replaceNote(self, newNote, start, end) {
+  if (self.lastEnd) {
+    while (start > self.lastEnd) {
+      self.updatedSrc.push(self.abcSrc[self.lastEnd]);
+      self.lastEnd++;
+    }
+  }
+
+  var nNote = newNote.split('');
+
+  for (var ii = 0; ii < nNote.length; ii++) {
+    self.updatedSrc.push(nNote[ii]);
+  }
+
+  var curPos = start + ii;
+
+  while (end >= curPos) {
+    self.updatedSrc.push(nNote[curPos]);
+    curPos++;
+  }
+
+  self.lastEnd = end;
+}
+
+function checkKeys(self, note) {
+  var accs = self.transposedKey;
+
+  for (var ii = 0; ii < accs.length; ii++) {
+    note = adjustNoteToKey(accs[ii], note);
+  }
+
+  return note;
+}
+
+Transposer.prototype.transposeNote = function (note) {
+  var returned = note;
+  var curNote = new TabNote.TabNote(returned.name);
+
+  if (this.transposeBy > 0) {
+    for (var ii = 0; ii < this.transposeBy; ii++) {
+      curNote = checkKeys(this, curNote.nextNote());
+    }
+  } else if (this.transposeBy < 0) {
+    for (var jj = this.transposeBy; jj < 0; jj++) {
+      curNote = checkKeys(this, curNote.prevNote());
+    }
+  }
+
+  returned.name = curNote.emit();
+  return returned;
+};
+
+Transposer.prototype.upgradeSource = function (note, startChar, endChar) {
+  var n = new TabNote.TabNote(note.name);
+  var newNote = n.emit();
+  replaceNote(this, newNote, startChar, endChar - 1);
+};
+
+function Transposer(transposedKey, transposeBy) {
+  this.transposeBy = transposeBy;
+  this.transposedKey = transposedKey;
+  this.lastEnd = this.kEnd + 1;
+}
+
+module.exports = Transposer;
 
 /***/ }),
 

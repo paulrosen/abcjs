@@ -22,6 +22,7 @@ var plugin = {
     this.nbLines = 4;
     this.isTabBig = false;
     this.capo = params.capo;
+    this.transpose = params.visualTranspose;
     this.tablature = new StringTablature(this.nbLines,
       this.linePitch);
     var semantics = new ViolinPatterns(

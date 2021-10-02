@@ -20,6 +20,16 @@ function TabNote(note) {
   this.flat = note.indexOf('_') != -1;
 }
 
+function cloneNote(self) {
+  var newNote = self.note;
+  var newTabNote = new TabNote(newNote);
+  newTabNote.hasComma = self.hasComma;
+  newTabNote.isLower = self.isLower;
+  newTabNote.isQuoted = self.isQuoted;
+  newTabNote.sharp = self.sharp;
+  newTabNote.flat = self.flat;
+  return newTabNote;
+} 
 TabNote.prototype.sameNoteAs = function (note) {
   if ((this.note == note.note) &&
     (this.hasComma == note.hasComma) &&
@@ -33,20 +43,31 @@ TabNote.prototype.sameNoteAs = function (note) {
   }
 };
 
+TabNote.prototype.getAccidentalEquiv = function () {
+  var cloned = cloneNote(this);
+  if (cloned.sharp) {
+    cloned = cloned.nextNote();
+    cloned.flat = true;
+  } else if (cloned.flat) {
+    cloned = cloned.prevNote();
+    cloned.sharp = true;
+  }
+  return cloned;
+};
+
+
 TabNote.prototype.nextNote = function () {
-  var newNote = this.note;
-  var newTabNote = new TabNote(newNote);
-  newTabNote.hasComma = this.hasComma;
-  newTabNote.isLower = this.isLower;
-  newTabNote.isQuoted = this.isQuoted;
+  var newTabNote = cloneNote(this);
 
   if (!this.sharp) {
     if (this.note != 'E' && this.note != 'B') {
       newTabNote.sharp = true;
       return newTabNote;
     }
+  } else {
+    newTabNote.sharp = false; // cleanup
   }
-  var noteIndex = notes.indexOf(newNote);
+  var noteIndex = notes.indexOf(this.note);
   if (noteIndex == notes.length - 1) {
     noteIndex = 0;
   } else {
@@ -67,6 +88,42 @@ TabNote.prototype.nextNote = function () {
   return newTabNote;
 };
 
+TabNote.prototype.prevNote = function () {
+  var newTabNote = cloneNote(this);
+
+  if (this.sharp) {
+    newTabNote.sharp = false;
+    return newTabNote;
+  }
+  var noteIndex = notes.indexOf(this.note);
+  if (noteIndex == 0) {
+    noteIndex = notes.length - 1;
+  } else {
+    noteIndex--;
+  }
+  newTabNote.note = notes[noteIndex];
+  if (newTabNote.note == 'B') {
+    if (newTabNote.isLower) {
+      newTabNote.hasComma = true;
+    } else {
+      if (newTabNote.isQuoted) {
+        newTabNote.isQuoted = false;
+      } else {
+        newTabNote.isLower = true;
+      }
+    }
+  }
+  if (this.flat) {
+    newTabNote.flat = false;
+    return newTabNote;
+  } else {
+    if (this.note != 'E' && this.note != 'B') {
+      newTabNote.sharp = true;
+    }
+  }
+  return newTabNote;
+};
+
 TabNote.prototype.emit = function () {
   var returned = this.note;
   if (this.sharp) {
@@ -74,6 +131,9 @@ TabNote.prototype.emit = function () {
   }
   if (this.flat) {
     returned = '_' + returned;
+  }
+  if (this.natural) {
+    returned = '=' + returned;
   }
   if (this.hasComma) {
     returned += ',';

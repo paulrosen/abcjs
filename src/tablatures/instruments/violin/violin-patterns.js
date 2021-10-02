@@ -1,11 +1,11 @@
 var StringPatterns = require('../string-patterns');
 
-function ViolinPatterns(tuning,capo,highestNote,linePitch) {
+function ViolinPatterns(tuning,capo,highestNote,linePitch,abcSrc) {
   this.tuning = tuning;
   if (!tuning) {
     this.tuning = ['G,', 'D', 'A', 'e'];
   }
-  this.strings = new StringPatterns(tuning,capo,highestNote,linePitch);
+  this.strings = new StringPatterns(tuning,capo,highestNote,linePitch,abcSrc);
 }
 
 ViolinPatterns.prototype.notesToNumber = function (notes, graces) {

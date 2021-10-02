@@ -57,6 +57,11 @@ var abcTablatures = {
           }
           var plugin = this.plugins[tabName];
           if (plugin) {
+            if (params.visualTranspose != 0) {
+              // populate transposition request to tabs
+              args.visualTranspose = params.visualTranspose;
+            }
+            args.abcSrc = params.tablatures.abcSrc;
             // proceed with tab plugin  init 
             plugin.init(tune, tuneNumber, args, ii);
             returned[ii] = plugin;

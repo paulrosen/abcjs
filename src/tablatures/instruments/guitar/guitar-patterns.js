@@ -1,11 +1,11 @@
 var StringPatterns = require('../string-patterns');
 
-function GuitarPatterns(tuning,capo,highestNote,linePitch) {
+function GuitarPatterns(tuning,capo,highestNote,linePitch,abcSrc) {
   this.tuning = tuning;
   if (!tuning) {
     this.tuning = ['E,', 'A', 'D', 'G' , 'B' , 'e'];
   }
-  this.strings = new StringPatterns(tuning,capo,highestNote,linePitch);
+  this.strings = new StringPatterns(tuning,capo,highestNote,linePitch,abcSrc);
 }
 
 GuitarPatterns.prototype.notesToNumber = function (notes, graces) {

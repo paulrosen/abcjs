@@ -88,12 +88,12 @@ function gatherAbcParams(params) {
 	if (abcjsParams.tablature) {
 		// accept both tablature and tablatures
 		abcjsParams.tablatures = abcjsParams.tablature;
-		abcjsParams.tablature = "undefined";
+		delete(abcjsParams.tablature);
 	}
 	if (abcjsParams.tablatures) {
 		if (params.warnings_id) {
 			// store for plugin error handling
-			abcjsParams['tablatures'].warnings_id = params.warnings_id
+			abcjsParams['tablatures'].warnings_id = params.warnings_id;
 		}
 	}
 	return abcjsParams;
@@ -137,7 +137,7 @@ var Editor = function(editarea, params) {
 		    el: params.synth.el,
 		    cursorControl: params.synth.cursorControl,
 		    options: params.synth.options
-	    }
+	    };
     }
   }
 	// If the user wants midi, then store the elements that it will be written to. The element could either be passed in as an id,

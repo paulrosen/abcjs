@@ -3,6 +3,7 @@
  */
 var AbsoluteElement = require('../write/abc_absolute_element');
 var RelativeElement = require('../write/abc_relative_element');
+var Transposer = require('./transposer');
 
 function isObject(a) { return a != null && a.constructor === Object; }
 function cloneObject(dest, src) {
@@ -82,7 +83,6 @@ function lyricsDim(abs) {
   }
   return null;
 }
-
 function TabAbsoluteElements() { }
 
 /**
@@ -92,14 +92,25 @@ function TabAbsoluteElements() { }
 TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice) {
   var source = staffAbsolute[0];
   var dest = staffAbsolute[1];
+  var transposer = null;
   for (var ii = 0; ii < source.children.length; ii++) {
     var absChild = source.children[ii];
     var absX = absChild.x;
     var relX = absChild.children[0].x;
+
     if (absChild.isClef) {
       dest.children.push(buildTabAbsolute(plugin, absX, relX));
     }
     switch (absChild.type) {
+
+      case 'staff-extra key-signature':
+        if (plugin.transpose) {
+          transposer = new Transposer(
+            absChild.abcelem.accidentals,
+            plugin.transpose 
+          );
+        }
+        break;
       case 'bar':
         tabVoice.push({
           el_type: absChild.abcelem.el_type,
@@ -114,6 +125,18 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.gracenotes;
+        // check transpose
+        if (plugin.transpose) {
+          //transposer.transpose(plugin.transpose);
+          for (var jj = 0; jj < pitches.length; jj++) {
+            pitches[jj] = transposer.transposeNote(pitches[jj]);
+          }
+          if (graceNotes) {
+            for (var kk = 0; kk < graceNotes.length; kk++) {
+              graceNotes[kk] = transposer.transposeNote(graceNotes[kk]);
+            }
+          }
+        }
         var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
         if (tabPos.error) {
           plugin._super.setError(tabPos.error);
@@ -121,8 +144,8 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
           abs.type = 'tabNumber';
           // convert note to number
           var def = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [] };
-          for (var jj = 0; jj < tabPos.notes.length; jj++) {
-            var curNote = tabPos.notes[jj];
+          for (var ll = 0; ll < tabPos.notes.length; ll++) {
+            var curNote = tabPos.notes[ll];
             var pitch = plugin.semantics.stringToPitch(curNote.str);
             var acc = curNote.note.isFlat ? '_' : (curNote.note.isSharp ? '^' : '');
             def.notes.push({ num: curNote.num, str: curNote.str, pitch: acc + curNote.note.name });

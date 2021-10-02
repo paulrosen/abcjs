@@ -24,6 +24,7 @@ var plugin = {
     this.nbLines = 6;
     this.isTabBig = true;
     this.capo = params.capo;
+    this.transpose = params.visualTranspose;
     this.tablature = new StringTablature(this.nbLines,
       this.linePitch);
 

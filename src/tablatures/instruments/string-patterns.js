@@ -68,6 +68,7 @@ function checkNote(note, accidentals) {
   var newNote = note;
   var isSharp = false;
   var isAltered = false;
+  var natural = null;
   var acc = 0;
 
   note = checkKeyAccidentals(note, accidentals);
@@ -77,9 +78,12 @@ function checkNote(note, accidentals) {
   } else if (note.startsWith('^')) {
     isSharp = true;
     acc = +1;
+  } else if (note.startsWith('=')) {
+    natural = true;
+    acc = 0; 
   }
   isAltered = isFlat || isSharp;
-  if (isAltered) {
+  if (isAltered || natural ) {
     newNote = note.slice(1);
   }
   return {
@@ -87,7 +91,8 @@ function checkNote(note, accidentals) {
     'isSharp': isSharp,
     'isFlat': isFlat,
     'name': newNote,
-    'acc': acc
+    'acc': acc,
+    'natural': natural
   };
 }
 
