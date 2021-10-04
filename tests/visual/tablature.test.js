@@ -190,6 +190,28 @@ describe("Tablature", function() {
 		]
 	];
 
+	var transposeDoubleStopsOutput = [
+		[
+			{"el_type":"note","startChar":10,"endChar":15,"notes":[{"num":9,"str":3,"pitch":"^F"},
+					{"num":2,"str":2,"pitch":"^F"}]},
+			{"el_type":"note","startChar":15,"endChar":20,"notes":[{"num":8,"str":2,"pitch":"B"},
+					{"num":2,"str":1,"pitch":"B"}]},
+			{"el_type":"note","startChar":20,"endChar":25,"notes":[{"num":9,"str":1,"pitch":"^f"},
+					{"num":2,"str":0,"pitch":"^f"}]},
+			{"el_type":"note","startChar":25,"endChar":31,"notes":[{"num":7,"str":3,"pitch":"E"},
+					{"num":4,"str":2,"pitch":"^G"}]},
+			{"el_type":"note","startChar":31,"endChar":37,"notes":[{"num":6,"str":3,"pitch":"^F"},
+					{"num":1,"str":1,"pitch":"^A"}]},
+			{"el_type":"note","startChar":37,"endChar":43,"notes":[{"num":8,"str":2,"pitch":"^G"},
+					{"num":1,"str":1,"pitch":"^A"}]},
+			{"el_type":"note","startChar":43,"endChar":48,"notes":[{"num":11,"str":2,"pitch":"B"},
+					{"num":6,"str":1,"pitch":"^d"}]},
+			{"el_type":"note","startChar":48,"endChar":53,"notes":[{"num":13,"str":1,"pitch":"^a"},
+					{"num":9,"str":0,"pitch":"^c"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":54,"startChar":53}
+		]
+	];
+
 	var violinUnusualAccidentals = "L:1/4\nK:C\n^/G ^^A __B _/c|\n";
 
 	var violinUnusualAccidentalsOutput = [
@@ -237,7 +259,7 @@ describe("Tablature", function() {
 		"L: 1/8\n" +
 		"K: Em\n" +
 		"V:1\n" +
-		"d|BGD\n" +
+		"d|BGDg|\n" +
 		"V:2\n" +
 		"G|ABAB|"
 
@@ -247,25 +269,48 @@ describe("Tablature", function() {
 			{"el_type":"bar","type":"bar_thin","endChar":40,"startChar":39},
 			{"el_type":"note","startChar":40,"endChar":41,"notes":[{"num":2,"str":1,"pitch":"B"}]},
 			{"el_type":"note","startChar":41,"endChar":42,"notes":[{"num":5,"str":2,"pitch":"G"}]},
-			{"el_type":"note","startChar":42,"endChar":43,"notes":[{"num":0,"str":2,"pitch":"D"}]}
-		]
+			{"el_type":"note","startChar":42,"endChar":43,"notes":[{"num":0,"str":2,"pitch":"D"}]},
+			{"el_type":"note","startChar":43,"endChar":44,"notes":[{"num":3,"str":0,"pitch":"g"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":45,"startChar":44},
+		],
+		[
+			{"el_type":"note","startChar":38,"endChar":39,"notes":[{"num":5,"str":1,"pitch":"G"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":40,"startChar":39},
+			{"el_type":"note","startChar":40,"endChar":41,"notes":[{"num":2,"str":1,"pitch":"A"}]},
+			{"el_type":"note","startChar":41,"endChar":42,"notes":[{"num":5,"str":2,"pitch":"B"}]},
+			{"el_type":"note","startChar":42,"endChar":43,"notes":[{"num":0,"str":2,"pitch":"A"}]},
+			{"el_type":"note","startChar":41,"endChar":42,"notes":[{"num":5,"str":2,"pitch":"B"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":40,"startChar":39},
+		],
 	];
 
-	var twoStaves = "M: 4/4\n" +
+	var twoStaves = "%%score 1|2\n" +
+		"M: 4/4\n" +
 		"L: 1/8\n" +
 		"K: Em\n" +
 		"V:1\n" +
-		"d|BGD\n" +
+		"d|BGDg|\n" +
 		"V:2\n" +
 		"G|ABAB|"
 
 	var twoStavesOutput = [
 		[
-			{"el_type":"note","startChar":24,"endChar":25,"notes":[{"num":5,"str":1,"pitch":"d"}]},
-			{"el_type":"bar","type":"bar_thin","endChar":26,"startChar":25},
-			{"el_type":"note","startChar":26,"endChar":27,"notes":[{"num":2,"str":1,"pitch":"B"}]},
-			{"el_type":"note","startChar":27,"endChar":28,"notes":[{"num":5,"str":2,"pitch":"G"}]},
-			{"el_type":"note","startChar":28,"endChar":29,"notes":[{"num":0,"str":2,"pitch":"D"}]}]
+			{"el_type":"note","startChar":36,"endChar":37,"notes":[{"num":5,"str":1,"pitch":"d"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":38,"startChar":37},
+			{"el_type":"note","startChar":38,"endChar":39,"notes":[{"num":2,"str":1,"pitch":"B"}]},
+			{"el_type":"note","startChar":39,"endChar":40,"notes":[{"num":5,"str":2,"pitch":"G"}]},
+			{"el_type":"note","startChar":40,"endChar":41,"notes":[{"num":0,"str":2,"pitch":"D"}]},
+			{"el_type":"note","startChar":41,"endChar":42,"notes":[{"num":3,"str":0,"pitch":"g"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":43,"startChar":42},
+		],
+		[
+			{"el_type":"note","startChar":45,"endChar":46,"notes":[{"num":5,"str":1,"pitch":"G"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":47,"startChar":46},
+			{"el_type":"note","startChar":47,"endChar":48,"notes":[{"num":2,"str":1,"pitch":"A"}]},
+			{"el_type":"note","startChar":48,"endChar":49,"notes":[{"num":5,"str":2,"pitch":"B"}]},
+			{"el_type":"note","startChar":49,"endChar":50,"notes":[{"num":0,"str":2,"pitch":"A"}]},
+			{"el_type":"note","startChar":50,"endChar":51,"notes":[{"num":0,"str":3,"pitch":"B"}]},
+		],
 	];
 
 	var guitarParams = [[
@@ -328,10 +373,22 @@ describe("Tablature", function() {
 	it("two staves", function() {
 		doTest(twoStaves, twoStavesOutput, violinParams)
 	})
+
+	it("transpose", function() {
+		doTest(violinDoubleStops, transposeDoubleStopsOutput, violinCrossTuneParams, { visualTranspose: 2})
+	})
+
 })
 
-function doTest(abc, expected, params) {
-	var visualObj = abcjs.renderAbc("paper", abc, { add_classes: true, tablatures: params});
+function doTest(abc, expected, tabParams, params) {
+	var options = { add_classes: true, tablatures: tabParams};
+	if (params) {
+		var keys = Object.keys(params)
+		for (var k = 0; k < keys.length; k++) {
+			options[keys[k]] = params[keys[k]]
+		}
+	}
+	var visualObj = abcjs.renderAbc("paper", abc, options);
 	for (var i = 0; i < visualObj[0].lines.length; i++) {
 		var line = visualObj[0].lines[i];
 		var info = line.staffGroup.voices[1].tabNameInfos;
@@ -343,5 +400,7 @@ function doTest(abc, expected, params) {
 				"exp: " + JSON.stringify(expected[i][j]) + "\n";
 			chai.assert.deepStrictEqual(el, expected[i][j], msg);
 		}
+		chai.assert.equal(tab.length, expected[i].length, "line "+i+ " length mismatch")
 	}
+	chai.assert.equal(visualObj[0].lines.length, expected.length, "different numbers of lines")
 }
