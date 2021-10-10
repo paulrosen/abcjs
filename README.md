@@ -96,4 +96,4 @@ And I would love some help on this project, including documentation, bug fixes, 
 ## Supported by BrowserStack
 If you aren't using the same browser and machine that I use, you can thank [BrowserStack](https://browserstack.com/) for their support of this open-source project.
 
-![BrowserStack](https://cdn.rawgit.com/paulrosen/abcjs/main/docs/.vuepress/public/img/browserstack-logo-600x315.png)
+![BrowserStack](https://paulrosen.github.io/abcjs/img/browserstack-logo-600x315.png)
