@@ -126,14 +126,11 @@ The `endTimings` array elements are of the same type as the `info` parameter.
 
 These are the entry points that can be called on the `timingCallbacks` object.
 
-### start(offsetPercent)
+### start(position, units)
 
-This starts the timer that triggers the callbacks. This is called to both start and resume after calling pause.
+This starts the timer that triggers the callbacks. This is called to both start and resume after calling pause. See the `setProgress` method below for explanation of the parameters with one special case:
 
-| `offsetPercent` value | Description |
-| ------------- | ----------- |
-| undefined | If the previous call was to `pause()`, then the animation continues from where it left off. If there was no pause, then the animation starts from the beginning. |
-| From 0 to 1 | The percentage into the animation to jump to. This is like doing a seek first. |
+If `position` is undefined then if the previous call was to `pause()`, then the animation continues from where it left off. If there was no pause, then the animation starts from the beginning.
 
 ### pause()
 
@@ -147,7 +144,7 @@ Stop the animation. After calling this, the next call to `start()` will start at
 
 Move the timer back to the beginning, so the animation starts over. This can be called either when the animation is currently running or when it is paused.
 
-### setProgress(percent, units)
+### setProgress(position, units)
 
 Change the position of the animation. This allows random access to any place in the tune. 
 

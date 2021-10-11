@@ -204,7 +204,7 @@ var TimingCallbacks = function(target, params) {
 		}
 	};
 
-	self.start = function(offsetPercent) {
+	self.start = function(offsetPercent, units) {
 		self.isRunning = true;
 		if (self.isPaused) {
 			self.isPaused = false;
@@ -212,7 +212,7 @@ var TimingCallbacks = function(target, params) {
 				self.justUnpaused = true;
 		}
 		if (offsetPercent) {
-			self.setProgress(offsetPercent);
+			self.setProgress(offsetPercent, units);
 		} else if (offsetPercent === 0) {
 			self.reset();
 		} else if (self.pausedPercent !== null) {
