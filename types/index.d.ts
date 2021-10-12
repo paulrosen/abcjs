@@ -59,12 +59,14 @@ declare module 'abcjs' {
 		beat_division?: Array<MeterFraction>;
 	}
 
+	export interface Accidental {
+		acc: AccidentalName;
+		note: NoteLetter;
+		verticalPos: number;
+	}
+
 	export interface KeySignature {
-		accidentals?: Array<{
-			acc: AccidentalName;
-			note: NoteLetter;
-			verticalPos: number
-		}>;
+		accidentals?: Array<Accidental>;
 		root: KeyRoot;
 		acc: KeyAccidentalName;
 		mode: Mode;
@@ -102,10 +104,21 @@ declare module 'abcjs' {
 		endChar: number;
 	}
 
-	export type MidiParam = any; // TODO
+	export type MidiParam = Array<string|number>;
 
-	// TODO : to be detailed and enhanced later
-	export type Pitches = [any] // TODO
+	export type MidiGracePitches = Array<{instrument: string; pitch: number; volume: number; cents?: number}>;
+
+	export interface MidiPitch {
+		instrument: string;
+		pitch: number;
+		duration: number;
+		volume: number;
+		cents?: number
+	}
+
+	export type MidiPitches = Array<MidiPitch>;
+
+	export type AbsoluteElement = any; // TODO
 
 	//
 	// Input Types
@@ -184,9 +197,30 @@ declare module 'abcjs' {
 	}
 
 	// Audio
-	export interface SynthOptions {
-		// TODO
+	export interface NoteMapTrackItem {
+		pitch: number;
+		instrument: number;
+		start: number;
+		end: number;
+		volume: number;
+		style?: string;
+		cents?: number;
 	}
+	export type NoteMapTrack = Array<NoteMapTrackItem>
+
+	export interface SynthOptions {
+		soundFontUrl?: string;
+		soundFontVolumeMultiplier?: number;
+		programOffsets?: {[instrument: string]: number}
+		fadeLength?: number;
+		sequenceCallback?: (sequence: Array<NoteMapTrack>, context: any) => Array<NoteMapTrack>;
+		callbackContext?: any; // Anything is ok. It is just passed back in the callback
+		onEnded?: () => void;
+		pan?: Array<number>;
+		voicesOff?: boolean | Array<number>;
+		drum?: string;
+		drumIntro?: number;
+}
 
 	export interface SynthVisualOptions {
 		displayLoop: boolean | false
@@ -196,13 +230,25 @@ declare module 'abcjs' {
 		displayWarp: boolean | false
 	}
 
+	export type DownloadLabelFn = (visualObj: TuneObject, index: number) => string;
+
 	export interface MidiFileOptions extends SynthOptions {
-		midiOutputType: MidiOutputType
+		midiOutputType?: MidiOutputType
 		downloadClass?: string
 		preTextDownload?: string
-		downloadLabel?: () => any // TODO
+		downloadLabel?: string | DownloadLabelFn
 		postTextDownload?: string
 		fileName?: string
+	}
+
+	export interface MidiBufferOptions {
+		audioContext? : AudioContext;
+		visualObj?: TuneObject;
+		sequence?: AudioSequence;
+		millisecondsPerMeasure?: number;
+		debugCallback? : (message: string) => void;
+		options?: SynthOptions;
+		onEnded?: (context: any) => void;
 	}
 
 	// Glyph
@@ -230,7 +276,7 @@ declare module 'abcjs' {
 		left?: number;
 		line?: number;
 		measureNumber?: number;
-		midiPitches?: [any]; // TODO
+		midiPitches?: MidiPitches;
 		startChar?: number;
 		startCharArray?: Array<number>;
 		top?: number;
@@ -446,8 +492,80 @@ declare module 'abcjs' {
 		url: CharRange;
 	}
 
+	export interface VoiceItemClef {
+		el_type: "clef";
+		// TODO
+	}
+
+	export interface VoiceItemBar {
+		el_type: "bar";
+		// TODO
+	}
+
+	export interface VoiceItemGap {
+		el_type: "gap";
+		// TODO
+	}
+
+	export interface VoiceItemKey {
+		el_type: "key";
+		// TODO
+	}
+
+	export interface VoiceItemMeter {
+		el_type: "meter";
+		// TODO
+	}
+
+	export interface VoiceItemMidi {
+		el_type: "midi";
+		// TODO
+	}
+
+	export interface VoiceItemOverlay {
+		el_type: "overlay";
+		// TODO
+	}
+
+	export interface VoiceItemPart {
+		el_type: "part";
+		// TODO
+	}
+
+	export interface VoiceItemScale {
+		el_type: "scale";
+		// TODO
+	}
+
+	export interface VoiceItemStem {
+		el_type: "stem";
+		// TODO
+	}
+
+	export interface VoiceItemStyle {
+		el_type: "style";
+		// TODO
+	}
+
+	export interface VoiceItemTempo {
+		el_type: "tempo";
+		// TODO
+	}
+
+	export interface VoiceItemTranspose {
+		el_type: "transpose";
+		// TODO
+	}
+
+	export interface VoiceItemNote {
+		el_type: "note";
+		// TODO
+	}
+
+	export type VoiceItem = VoiceItemClef | VoiceItemBar | VoiceItemGap | VoiceItemKey | VoiceItemMeter | VoiceItemMidi | VoiceItemOverlay | VoiceItemPart | VoiceItemScale | VoiceItemStem | VoiceItemStyle | VoiceItemTempo | VoiceItemTranspose | VoiceItemNote;
+
 	export interface TuneLine {
-		columns?: any; // TODO
+		columns?: { formatting: any, lines: any };
 		image?: string;
 		newpage?: number;
 		staffbreak?: number;
@@ -485,7 +603,7 @@ declare module 'abcjs' {
 					stafflines?: number;
 					staffscale?: number;
 					title?: Array<string>;
-					voices?: Array<any>; // TODO
+					voices?: Array<Array<VoiceItem>>;
 			}>
 		vskip?: number;
 	}
@@ -545,20 +663,80 @@ declare module 'abcjs' {
 		elements: Array< any>; // TODO
 		startCharArray: Array<number>;
 		endCharArray: Array<number>;
-		midiPitches: Array<{
-			pitch: number;
-			durationInMeasures: number;
-			volume: number;
-			instrument: number;
-		}>
+		midiPitches: MidiPitches
 	}
 
 	// Audio
-	export type AudioSequence = any // TODO
+	export interface SequenceInstrument {
+		el_type: "instrument";
+		program: number;
+		pickupLength: number;
+	}
 
-	export type MidiFile = any // TODO
+	export interface SequenceChannel {
+		el_type: "channel";
+		channel: number;
+	}
 
-	export interface AudioContextPromise {
+	export interface SequenceTranspose {
+		el_type: "transpose";
+		transpose: number;
+	}
+
+	export interface SequenceName {
+		el_type: "name";
+		trackName: string;
+	}
+
+	export interface SequenceDrum {
+		el_type: "drum";
+		pattern: string;
+		on: boolean;
+		bars?: number;
+		intro?: number;
+	}
+
+	export interface SequenceTempo {
+		el_type: "tempo";
+		qpm: number;
+	}
+
+	export interface SequenceKey {
+		el_type: "key";
+		accidentals: Array<Accidental>;
+	}
+
+	export interface SequenceBeat {
+		el_type: "beat";
+		beats: any; // TODO
+	}
+
+	export interface SequenceBeatAccents {
+		el_type: "beataccents";
+		value: boolean;
+	}
+
+	export interface SequenceBagpipes {
+		el_type: "bagpipes";
+	}
+
+	export interface SequenceNote {
+		el_type: "note";
+		duration: number;
+		elem: AbsoluteElement;
+		pitches: {pitch: number; name: NoteLetter};
+		timing: number;
+	}
+
+	export type AudioSequenceElement = SequenceInstrument | SequenceChannel | SequenceTranspose | SequenceName | SequenceDrum | SequenceTempo | SequenceKey | SequenceBeat | SequenceBeatAccents | SequenceBagpipes | SequenceNote;
+
+	export type AudioSequenceVoice = Array<AudioSequenceElement>;
+
+	export type AudioSequence = Array<AudioSequenceVoice>;
+
+	export type MidiFile = any // This is a standard midi file format
+
+	export interface MidiBufferPromise {
 		cached: [any] // TODO
 		error: [any] // TODO
 		loaded: [any] // TODO
@@ -618,22 +796,6 @@ declare module 'abcjs' {
 	}
 
 	//
-	// Synth widget controller
-	//
-	export interface SynthObjectController {
-		disable(isDisabled: boolean): void
-		setTune(visualObj: TuneObject, userAction: Boolean, audioParams?: AbcVisualParams): Promise<any> // TODO
-		load(selector: string, cursorControl?: any, visualOptions?: SynthVisualOptions): void // TODO
-		play(): void
-		pause(): void
-		toggleLoop(): void
-		restart(): void
-		setProgress(ev: number): void
-		setWarp(percent: number): void
-		download(fName: string): void
-	}
-
-	//
 	// Visual
 	//
 	let signature: string;
@@ -678,38 +840,48 @@ declare module 'abcjs' {
 	export type AudioControl = any // TODO
 
 	export interface MidiBuffer {
-		init?(params: AudioContext): Promise<AudioContextPromise>
-		prime?(): Promise<void>
-		start?(): void
-		pause?(): void
-		resume?(): void
-		download?(): any // returns audio buffer in wav format
+		init(params?: MidiBufferOptions): Promise<MidiBufferPromise>
+		prime(): Promise<void>
+		start(): void
+		pause(): void
+		resume(): void
+		seek(position: number, units: ProgressUnit): void
+		stop(): void
+		download(): any // returns audio buffer in wav format
+	}
+
+	export interface SynthObjectController { // TODO
+		disable(isDisabled: boolean): void
+		setTune(visualObj: TuneObject, userAction: Boolean, audioParams?: AbcVisualParams): Promise<any> // TODO
+		load(selector: string, cursorControl?: any, visualOptions?: SynthVisualOptions): void // TODO
+		play(): void
+		pause(): void
+		toggleLoop(): void
+		restart(): void
+		setProgress(ev: number): void
+		setWarp(percent: number): void
+		download(fName: string): void
+	}
+
+	export interface SynthSequenceClass {
+		// TODO
 	}
 
 	export namespace synth {
-		//0: "CreateSynth"
-		// 1: "instrumentIndexToName"
-		// 2: "pitchToNoteName"
-		// 3: "SynthController"
-		// 4: "SynthSequence"
-		// 5: "CreateSynthControl"
-		// 6: "registerAudioContext"
-		// 7: "activeAudioContext"
-		// 8: "supportsAudio"
-		// 9: "playEvent"
-		// 10: "getMidiFile"
-		// 11: "sequence"
 		let instrumentIndexToName: [string]
 		let pitchToNoteName: [string]
 		let SynthController: { new (): SynthObjectController }
 		let CreateSynth: { new (): MidiBuffer }
+		let SynthSequence: { new (): SynthSequenceClass }
 
 		export function supportsAudio(): boolean
-		export function CreateSynthControl(element: Selector, options: AbcVisualParams): AudioControl
-		export function getMidiFile(source: String | TuneObject, options?: MidiFileOptions): MidiFile
-		export function synthSequence(): AudioSequence
-		export function playEvent(pitches: Pitches, graceNotes: Pitches, milliSecondsPerMeasure: number): Promise<any> // TODO
+		export function registerAudioContext(AudioContext): boolean
 		export function activeAudioContext(): AudioContext
+		export function CreateSynthControl(element: Selector, options: AbcVisualParams): AudioControl // TODO
+		export function getMidiFile(source: String | TuneObject, options?: MidiFileOptions): MidiFile;
+		export function playEvent(pitches: MidiPitches, graceNotes: MidiGracePitches, milliSecondsPerMeasure: number): Promise<void>;
+		export function activeAudioContext(): AudioContext
+		export function sequence(visualObj: TuneObject, options: AbcVisualParams): AudioSequence
 	}
 
 	//
