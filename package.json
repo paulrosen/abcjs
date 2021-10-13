@@ -48,13 +48,16 @@
     "babel-loader": "8.2.2",
     "chai": "4.3.4",
     "mocha": "8.4.0",
-    "vuepress": "2.0.0-beta.8",
+    "vuepress": "2.0.0-beta.26",
     "vuex": "4.0.0",
-    "webpack": "5.38.1",
     "webpack-bundle-analyzer": "4.4.2",
+<<<<<<< HEAD
     "webpack-cli": "4.7.0"
   },
   "dependencies": {
     "global": "^4.4.0"
+=======
+    "webpack-cli": "4.9.0"
+>>>>>>> dev
   }
 }
