@@ -406,6 +406,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     self.currentBeat = 0;
     self.currentEvent = 0;
     self.currentLine = 0;
+    self.currentTime = 0;
     self.isPaused = false;
     self.isRunning = false;
     self.pausedPercent = null;
@@ -433,50 +434,50 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     }
 
     if (!self.isPaused && self.isRunning) {
-      var currentTime = timestamp - self.startTime;
-      currentTime += 16; // Add a little slop because this function isn't called exactly.
+      self.currentTime = timestamp - self.startTime;
+      self.currentTime += 16; // Add a little slop because this function isn't called exactly.
 
-      while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
+      while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < self.currentTime) {
         if (self.eventCallback && self.noteTimings[self.currentEvent].type === 'event') {
           var thisStartTime = self.startTime; // the event callback can call seek and change the position from beneath us.
 
           self.eventCallback(self.noteTimings[self.currentEvent]);
 
           if (thisStartTime !== self.startTime) {
-            currentTime = timestamp - self.startTime;
+            self.currentTime = timestamp - self.startTime;
           }
         }
 
         self.currentEvent++;
       }
 
-      if (self.lineEndCallback && self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < currentTime && self.currentEvent < self.noteTimings.length) {
-        var leftEvent = self.noteTimings[self.currentEvent].milliseconds === currentTime ? self.noteTimings[self.currentEvent] : self.noteTimings[self.currentEvent - 1];
+      if (self.lineEndCallback && self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < self.currentTime && self.currentEvent < self.noteTimings.length) {
+        var leftEvent = self.noteTimings[self.currentEvent].milliseconds === self.currentTime ? self.noteTimings[self.currentEvent] : self.noteTimings[self.currentEvent - 1];
         self.lineEndCallback(self.lineEndTimings[self.currentLine], leftEvent, {
           line: self.currentLine,
           endTimings: self.lineEndTimings,
-          currentTime: currentTime
+          currentTime: self.currentTime
         });
         self.currentLine++;
       }
 
-      if (currentTime < self.lastMoment) {
+      if (self.currentTime < self.lastMoment) {
         requestAnimationFrame(self.doTiming);
 
-        if (self.currentBeat * self.millisecondsPerBeat < currentTime) {
+        if (self.currentBeat * self.millisecondsPerBeat < self.currentTime) {
           var ret = self.doBeatCallback(timestamp);
-          if (ret !== null) currentTime = ret;
+          if (ret !== null) self.currentTime = ret;
         }
       } else if (self.currentBeat <= self.totalBeats) {
         // Because of timing issues (for instance, if the browser tab isn't active), the beat callbacks might not have happened when they are supposed to. To keep the client programs from having to deal with that, this will keep calling the loop until all of them have been sent.
         if (self.beatCallback) {
           var ret2 = self.doBeatCallback(timestamp);
-          if (ret2 !== null) currentTime = ret2;
+          if (ret2 !== null) self.currentTime = ret2;
           requestAnimationFrame(self.doTiming);
         }
       }
 
-      if (currentTime >= self.lastMoment) {
+      if (self.currentTime >= self.lastMoment) {
         if (self.eventCallback) {
           // At the end, the event callback can return "continue" to keep from stopping.
           // The event callback can either be a promise or not.
@@ -595,7 +596,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     }
   };
 
-  self.start = function (offsetPercent) {
+  self.start = function (offsetPercent, units) {
     self.isRunning = true;
 
     if (self.isPaused) {
@@ -604,13 +605,13 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     }
 
     if (offsetPercent) {
-      self.setProgress(offsetPercent);
+      self.setProgress(offsetPercent, units);
     } else if (offsetPercent === 0) {
       self.reset();
     } else if (self.pausedPercent !== null) {
       var now = performance.now();
-      var currentTime = self.lastMoment * self.pausedPercent;
-      self.startTime = now - currentTime;
+      self.currentTime = self.lastMoment * self.pausedPercent;
+      self.startTime = now - self.currentTime;
       self.pausedPercent = null;
       self.reportNext = true;
     }
@@ -631,6 +632,10 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     }
   };
 
+  self.currentMillisecond = function () {
+    return self.currentTime;
+  };
+
   self.reset = function () {
     self.currentBeat = 0;
     self.currentEvent = 0;
@@ -646,22 +651,21 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
 
   self.setProgress = function (position, units) {
     // the effect of this function is to move startTime so that the callbacks happen correctly for the new seek.
-    var currentTime;
     var percent;
 
     switch (units) {
       case "seconds":
-        currentTime = position * 1000;
-        if (currentTime < 0) currentTime = 0;
-        if (currentTime > self.lastMoment) currentTime = self.lastMoment;
-        percent = currentTime / self.lastMoment;
+        self.currentTime = position * 1000;
+        if (self.currentTime < 0) self.currentTime = 0;
+        if (self.currentTime > self.lastMoment) self.currentTime = self.lastMoment;
+        percent = self.currentTime / self.lastMoment;
         break;
 
       case "beats":
-        currentTime = position * self.millisecondsPerBeat * self.beatSubdivisions;
-        if (currentTime < 0) currentTime = 0;
-        if (currentTime > self.lastMoment) currentTime = self.lastMoment;
-        percent = currentTime / self.lastMoment;
+        self.currentTime = position * self.millisecondsPerBeat * self.beatSubdivisions;
+        if (self.currentTime < 0) self.currentTime = 0;
+        if (self.currentTime > self.lastMoment) self.currentTime = self.lastMoment;
+        percent = self.currentTime / self.lastMoment;
         break;
 
       default:
@@ -670,32 +674,32 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
         percent = position;
         if (percent < 0) percent = 0;
         if (percent > 1) percent = 1;
-        currentTime = self.lastMoment * percent;
+        self.currentTime = self.lastMoment * percent;
         break;
     }
 
     if (!self.isRunning) self.pausedPercent = percent;
     var now = performance.now();
-    self.startTime = now - currentTime;
+    self.startTime = now - self.currentTime;
     var oldEvent = self.currentEvent;
     self.currentEvent = 0;
 
-    while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
+    while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < self.currentTime) {
       self.currentEvent++;
     }
 
     if (self.lineEndCallback) {
       self.currentLine = 0;
 
-      while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds + self.lineEndAnticipation < currentTime) {
+      while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds + self.lineEndAnticipation < self.currentTime) {
         self.currentLine++;
       }
     }
 
     var oldBeat = self.currentBeat;
-    self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
+    self.currentBeat = Math.floor(self.currentTime / self.millisecondsPerBeat);
     if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
-      self.doBeatCallback(self.startTime + currentTime);
+      self.doBeatCallback(self.startTime + self.currentTime);
     if (self.eventCallback && self.currentEvent >= 0 && self.noteTimings[self.currentEvent].type === 'event') self.eventCallback(self.noteTimings[self.currentEvent]);
     if (self.lineEndCallback) self.lineEndCallback(self.lineEndTimings[self.currentLine], self.noteTimings[self.currentEvent], {
       line: self.currentLine,
