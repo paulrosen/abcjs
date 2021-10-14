@@ -83,6 +83,14 @@ Default: false
 
 Show clef only on the first line.
 
+## jazzchords
+
+Default: false
+
+Format the chord symbols in a way that is sometimes found in fake books. The root of the chord (along with sharp or flat) is shown at the size that is specified. The rest of the chord is shown smaller and as a superscript. If there is a bass note, that is shown smaller and as a subscript.
+
+For example, for the chord "F#m7b5/C#", `F#` is regular size, `m7b5` is smaller and a superscript, and `/C#` is smaller and a subscript.
+
 ## lineBreaks
 Default: undefined
 
