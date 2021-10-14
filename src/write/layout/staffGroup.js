@@ -44,7 +44,7 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup, leftEdge) 
 		spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
 		var spacingduration = 0;
 		for (i=0;i<currentvoices.length;i++) {
-			//console.log("greatest spacing unit", x, currentvoices[i].getNextX(), currentvoices[i].getSpacingUnits(), currentvoices[i].spacingduration);
+			//console.log("greatest spacing unit", x, layoutVoiceElements.getNextX(currentvoices[i]), layoutVoiceElements.getSpacingUnits(currentvoices[i]), currentvoices[i].spacingduration);
 			if (layoutVoiceElements.getNextX(currentvoices[i])>x) {
 				x=layoutVoiceElements.getNextX(currentvoices[i]);
 				spacingunit=layoutVoiceElements.getSpacingUnits(currentvoices[i]);
@@ -56,7 +56,7 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup, leftEdge) 
 		if (debug) console.log("currentduration: ",currentduration, spacingunits, minspace);
 
 		for (i=0;i<currentvoices.length;i++) {
-			var voicechildx = layoutVoiceElements.layoutOneItem(x,spacing, currentvoices[i], renderer.minPadding);
+			var voicechildx = layoutVoiceElements.layoutOneItem(x,spacing, currentvoices[i], renderer.minPadding, currentvoices[0]);
 			var dx = voicechildx-x;
 			if (dx>0) {
 				x = voicechildx; //update x
