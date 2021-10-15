@@ -275,6 +275,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     self.currentBeat = 0;
     self.currentEvent = 0;
     self.currentLine = 0;
+    self.currentTime = 0;
     self.isPaused = false;
     self.isRunning = false;
     self.pausedPercent = null;
@@ -302,50 +303,50 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     }
 
     if (!self.isPaused && self.isRunning) {
-      var currentTime = timestamp - self.startTime;
-      currentTime += 16; // Add a little slop because this function isn't called exactly.
+      self.currentTime = timestamp - self.startTime;
+      self.currentTime += 16; // Add a little slop because this function isn't called exactly.
 
-      while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
+      while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < self.currentTime) {
         if (self.eventCallback && self.noteTimings[self.currentEvent].type === 'event') {
           var thisStartTime = self.startTime; // the event callback can call seek and change the position from beneath us.
 
           self.eventCallback(self.noteTimings[self.currentEvent]);
 
           if (thisStartTime !== self.startTime) {
-            currentTime = timestamp - self.startTime;
+            self.currentTime = timestamp - self.startTime;
           }
         }
 
         self.currentEvent++;
       }
 
-      if (self.lineEndCallback && self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < currentTime && self.currentEvent < self.noteTimings.length) {
-        var leftEvent = self.noteTimings[self.currentEvent].milliseconds === currentTime ? self.noteTimings[self.currentEvent] : self.noteTimings[self.currentEvent - 1];
+      if (self.lineEndCallback && self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds < self.currentTime && self.currentEvent < self.noteTimings.length) {
+        var leftEvent = self.noteTimings[self.currentEvent].milliseconds === self.currentTime ? self.noteTimings[self.currentEvent] : self.noteTimings[self.currentEvent - 1];
         self.lineEndCallback(self.lineEndTimings[self.currentLine], leftEvent, {
           line: self.currentLine,
           endTimings: self.lineEndTimings,
-          currentTime: currentTime
+          currentTime: self.currentTime
         });
         self.currentLine++;
       }
 
-      if (currentTime < self.lastMoment) {
+      if (self.currentTime < self.lastMoment) {
         requestAnimationFrame(self.doTiming);
 
-        if (self.currentBeat * self.millisecondsPerBeat < currentTime) {
+        if (self.currentBeat * self.millisecondsPerBeat < self.currentTime) {
           var ret = self.doBeatCallback(timestamp);
-          if (ret !== null) currentTime = ret;
+          if (ret !== null) self.currentTime = ret;
         }
       } else if (self.currentBeat <= self.totalBeats) {
         // Because of timing issues (for instance, if the browser tab isn't active), the beat callbacks might not have happened when they are supposed to. To keep the client programs from having to deal with that, this will keep calling the loop until all of them have been sent.
         if (self.beatCallback) {
           var ret2 = self.doBeatCallback(timestamp);
-          if (ret2 !== null) currentTime = ret2;
+          if (ret2 !== null) self.currentTime = ret2;
           requestAnimationFrame(self.doTiming);
         }
       }
 
-      if (currentTime >= self.lastMoment) {
+      if (self.currentTime >= self.lastMoment) {
         if (self.eventCallback) {
           // At the end, the event callback can return "continue" to keep from stopping.
           // The event callback can either be a promise or not.
@@ -464,7 +465,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     }
   };
 
-  self.start = function (offsetPercent) {
+  self.start = function (offsetPercent, units) {
     self.isRunning = true;
 
     if (self.isPaused) {
@@ -473,13 +474,13 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     }
 
     if (offsetPercent) {
-      self.setProgress(offsetPercent);
+      self.setProgress(offsetPercent, units);
     } else if (offsetPercent === 0) {
       self.reset();
     } else if (self.pausedPercent !== null) {
       var now = performance.now();
-      var currentTime = self.lastMoment * self.pausedPercent;
-      self.startTime = now - currentTime;
+      self.currentTime = self.lastMoment * self.pausedPercent;
+      self.startTime = now - self.currentTime;
       self.pausedPercent = null;
       self.reportNext = true;
     }
@@ -500,6 +501,10 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     }
   };
 
+  self.currentMillisecond = function () {
+    return self.currentTime;
+  };
+
   self.reset = function () {
     self.currentBeat = 0;
     self.currentEvent = 0;
@@ -515,22 +520,21 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
 
   self.setProgress = function (position, units) {
     // the effect of this function is to move startTime so that the callbacks happen correctly for the new seek.
-    var currentTime;
     var percent;
 
     switch (units) {
       case "seconds":
-        currentTime = position * 1000;
-        if (currentTime < 0) currentTime = 0;
-        if (currentTime > self.lastMoment) currentTime = self.lastMoment;
-        percent = currentTime / self.lastMoment;
+        self.currentTime = position * 1000;
+        if (self.currentTime < 0) self.currentTime = 0;
+        if (self.currentTime > self.lastMoment) self.currentTime = self.lastMoment;
+        percent = self.currentTime / self.lastMoment;
         break;
 
       case "beats":
-        currentTime = position * self.millisecondsPerBeat * self.beatSubdivisions;
-        if (currentTime < 0) currentTime = 0;
-        if (currentTime > self.lastMoment) currentTime = self.lastMoment;
-        percent = currentTime / self.lastMoment;
+        self.currentTime = position * self.millisecondsPerBeat * self.beatSubdivisions;
+        if (self.currentTime < 0) self.currentTime = 0;
+        if (self.currentTime > self.lastMoment) self.currentTime = self.lastMoment;
+        percent = self.currentTime / self.lastMoment;
         break;
 
       default:
@@ -539,32 +543,32 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
         percent = position;
         if (percent < 0) percent = 0;
         if (percent > 1) percent = 1;
-        currentTime = self.lastMoment * percent;
+        self.currentTime = self.lastMoment * percent;
         break;
     }
 
     if (!self.isRunning) self.pausedPercent = percent;
     var now = performance.now();
-    self.startTime = now - currentTime;
+    self.startTime = now - self.currentTime;
     var oldEvent = self.currentEvent;
     self.currentEvent = 0;
 
-    while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < currentTime) {
+    while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < self.currentTime) {
       self.currentEvent++;
     }
 
     if (self.lineEndCallback) {
       self.currentLine = 0;
 
-      while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds + self.lineEndAnticipation < currentTime) {
+      while (self.lineEndTimings.length > self.currentLine && self.lineEndTimings[self.currentLine].milliseconds + self.lineEndAnticipation < self.currentTime) {
         self.currentLine++;
       }
     }
 
     var oldBeat = self.currentBeat;
-    self.currentBeat = Math.floor(currentTime / self.millisecondsPerBeat);
+    self.currentBeat = Math.floor(self.currentTime / self.millisecondsPerBeat);
     if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
-      self.doBeatCallback(self.startTime + currentTime);
+      self.doBeatCallback(self.startTime + self.currentTime);
     if (self.eventCallback && self.currentEvent >= 0 && self.noteTimings[self.currentEvent].type === 'event') self.eventCallback(self.noteTimings[self.currentEvent]);
     if (self.lineEndCallback) self.lineEndCallback(self.lineEndTimings[self.currentLine], self.noteTimings[self.currentEvent], {
       line: self.currentLine,
@@ -1162,22 +1166,22 @@ var Tune = function Tune() {
 
   this.reset();
 
-  function copy(src, prop, attrs) {
+  function copy(dest, src, prop, attrs) {
     for (var i = 0; i < attrs.length; i++) {
-      this[prop][attrs[i]] = src[prop][attrs[i]];
+      dest[prop][attrs[i]] = src[prop][attrs[i]];
     }
   }
 
   this.copyTopInfo = function (src) {
     var attrs = ['tempo', 'title', 'header', 'rhythm', 'origin', 'composer', 'author', 'partOrder'];
-    copy(src, "metaText", attrs);
-    copy(src, "metaTextInfo", attrs);
+    copy(this, src, "metaText", attrs);
+    copy(this, src, "metaTextInfo", attrs);
   };
 
   this.copyBottomInfo = function (src) {
     var attrs = ['unalignedWords', 'book', 'source', 'discography', 'notes', 'transcription', 'history', 'abc-copyright', 'abc-creator', 'abc-edited-by', 'footer'];
-    copy(src, "metaText", attrs);
-    copy(src, "metaTextInfo", attrs);
+    copy(this, src, "metaText", attrs);
+    copy(this, src, "metaTextInfo", attrs);
   }; // The structure consists of a hash with the following two items:
   // metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...
   // tempo: { noteLength: number (e.g. .125), bpm: number }
@@ -2407,6 +2411,7 @@ Editor.prototype.paramChanged = function (engraverParams) {
 };
 
 Editor.prototype.synthParamChanged = function (options) {
+  if (!this.synth) return;
   this.synth.options = {};
 
   if (options) {
@@ -2526,6 +2531,7 @@ Editor.prototype.pause = function (shouldPause) {
 };
 
 Editor.prototype.millisecondsPerMeasure = function () {
+  if (!this.synth || !this.synth.synthControl || !this.synth.synthControl.visualObj) return 0;
   return this.synth.synthControl.visualObj.millisecondsPerMeasure();
 };
 
@@ -4485,6 +4491,10 @@ var parseDirective = {};
         tune.formatting.flatbeams = true;
         break;
 
+      case "jazzchords":
+        tune.formatting.jazzchords = true;
+        break;
+
       case "landscape":
         multilineVars.landscape = true;
         break;
@@ -4582,20 +4592,20 @@ var parseDirective = {};
           endChar: multilineVars.iChar + 5
         }); // If no parameters are given, then there is a default size.
         else {
-            var points = tokenizer.getMeasurement(tokens);
-            if (points.used === 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
-            var spaceAbove = points.value;
-            points = tokenizer.getMeasurement(tokens);
-            if (points.used === 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
-            var spaceBelow = points.value;
-            points = tokenizer.getMeasurement(tokens);
-            if (points.used === 0 || tokens.length !== 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
-            var lenLine = points.value;
-            tuneBuilder.addSeparator(spaceAbove, spaceBelow, lenLine, {
-              startChar: multilineVars.iChar,
-              endChar: multilineVars.iChar + restOfString.length
-            });
-          }
+          var points = tokenizer.getMeasurement(tokens);
+          if (points.used === 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
+          var spaceAbove = points.value;
+          points = tokenizer.getMeasurement(tokens);
+          if (points.used === 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
+          var spaceBelow = points.value;
+          points = tokenizer.getMeasurement(tokens);
+          if (points.used === 0 || tokens.length !== 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
+          var lenLine = points.value;
+          tuneBuilder.addSeparator(spaceAbove, spaceBelow, lenLine, {
+            startChar: multilineVars.iChar,
+            endChar: multilineVars.iChar + restOfString.length
+          });
+        }
         break;
 
       case "barsperstaff":
@@ -5016,20 +5026,20 @@ var parseDirective = {};
       value: 1
     }; // if there is no value then the presence of this is the same as "true"
     else if (tokens.length === 1) {
-        if (tokens[0].type === "number") {
-          if (tokens[0].floatt >= 0 || tokens[0].floatt <= 1) return {
-            value: tokens[0].floatt
-          };
-        } else if (tokens[0].token === 'false') {
-          return {
-            value: 0
-          };
-        } else if (tokens[0].token === 'true') {
-          return {
-            value: 1
-          };
-        }
+      if (tokens[0].type === "number") {
+        if (tokens[0].floatt >= 0 || tokens[0].floatt <= 1) return {
+          value: tokens[0].floatt
+        };
+      } else if (tokens[0].token === 'false') {
+        return {
+          value: 0
+        };
+      } else if (tokens[0].token === 'true') {
+        return {
+          value: 1
+        };
       }
+    }
     return {
       error: "Directive stretchlast requires zero or one parameter: false, true, or number between 0 and 1 (received " + tokens[0].token + ')'
     };
@@ -5067,14 +5077,14 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
       endChar: multilineVars.iChar + title.length + 2
     }); // display secondary title
     else {
-        var titleStr = tokenizer.translateString(tokenizer.theReverser(tokenizer.stripComment(title)));
-        if (multilineVars.titlecaps) titleStr = titleStr.toUpperCase();
-        tuneBuilder.addMetaText("title", titleStr, {
-          startChar: multilineVars.iChar,
-          endChar: multilineVars.iChar + title.length + 2
-        });
-        multilineVars.hasMainTitle = true;
-      }
+      var titleStr = tokenizer.translateString(tokenizer.theReverser(tokenizer.stripComment(title)));
+      if (multilineVars.titlecaps) titleStr = titleStr.toUpperCase();
+      tuneBuilder.addMetaText("title", titleStr, {
+        startChar: multilineVars.iChar,
+        endChar: multilineVars.iChar + title.length + 2
+      });
+      multilineVars.hasMainTitle = true;
+    }
   };
 
   this.setMeter = function (line) {
@@ -15967,7 +15977,7 @@ function registerAudioContext(ac) {
     // no audio context passed in, so create it unless there is already one from before.
     if (!window.abcjsAudioContext) {
       var AudioContext = window.AudioContext || window.webkitAudioContext;
-      window.abcjsAudioContext = new AudioContext();
+      if (AudioContext) window.abcjsAudioContext = new AudioContext();else return false;
     }
   }
   return window.abcjsAudioContext.state !== "suspended";
@@ -16005,10 +16015,10 @@ var activeAudioContext = __webpack_require__(/*! ./active-audio-context */ "./sr
 
 
 function supportsAudio() {
+  if (!window.Promise) return false;
+  if (!window.AudioContext && !window.webkitAudioContext && !navigator.mozAudioContext && !navigator.msAudioContext) return false;
   var aac = activeAudioContext();
   if (aac) return aac.resume !== undefined;
-  if (!window.Promise) return false;
-  return !!window.AudioContext || !!window.webkitAudioContext || !!navigator.mozAudioContext || !!navigator.msAudioContext;
 }
 
 module.exports = supportsAudio;
@@ -16786,6 +16796,7 @@ var AbstractEngraver = function AbstractEngraver(getTextSize, tuneNumber, option
   this.graceSlurs = options.graceSlurs;
   this.percmap = options.percmap;
   this.initialClef = options.initialClef;
+  this.jazzchords = !!options.jazzchords;
   this.reset();
 };
 
@@ -17705,7 +17716,7 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
   ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
 
   if (elem.chord !== undefined) {
-    var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth);
+    var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth, this.jazzchords);
     roomtaken = ret3.roomTaken;
     roomtakenright = ret3.roomTakenRight;
   }
@@ -19088,6 +19099,7 @@ var EngraverController = function EngraverController(paper, params) {
   this.renderer = new Renderer(paper);
   this.renderer.setPaddingOverride(params);
   if (params.showDebug) this.renderer.showDebug = params.showDebug;
+  if (params.jazzchords) this.jazzchords = params.jazzchords;
   this.renderer.controller = this; // TODO-GD needed for highlighting
 
   this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
@@ -19205,7 +19217,8 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
     graceSlurs: abcTune.formatting.graceSlurs !== false,
     // undefined is the default, which is true
     percmap: abcTune.formatting.percmap,
-    initialClef: this.initialClef
+    initialClef: this.initialClef,
+    jazzchords: this.jazzchords
   });
   this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
   this.engraver.measureLength = abcTune.getMeterFraction().num / abcTune.getMeterFraction().den;
@@ -20576,7 +20589,7 @@ TieElem.prototype.calcX = function (lineStartX, lineEndX) {
 
   if (this.anchor2) this.endX = this.anchor2.x; // The normal case where there is a starting element to attach to.
   else if (this.endLimitX) this.endX = this.endLimitX.x; // if there is no start element, but there is a repeat mark before the start of the line.
-    else this.endX = lineEndX; // There is no element and no repeat mark: extend to the beginning of the line.
+  else this.endX = lineEndX; // There is no element and no repeat mark: extend to the beginning of the line.
 };
 
 TieElem.prototype.calcTieY = function () {
@@ -20779,7 +20792,9 @@ var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/w
 
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
 
-var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth) {
+var formatJazzChord = __webpack_require__(/*! ./format-jazz-chord */ "./src/write/format-jazz-chord.js");
+
+var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth, jazzchords) {
   for (var i = 0; i < elem.chord.length; i++) {
     var pos = elem.chord[i].position;
     var rel_position = elem.chord[i].rel_position;
@@ -20793,12 +20808,13 @@ var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTake
       var font;
       var klass;
 
-      if (pos === "left" || pos === "right" || pos === "below" || pos === "above") {
+      if (pos === "left" || pos === "right" || pos === "below" || pos === "above" || !!rel_position) {
         font = 'annotationfont';
         klass = "annotation";
       } else {
         font = 'gchordfont';
         klass = "chord";
+        if (jazzchords) chord = formatJazzChord(chord);
       }
 
       var attr = getTextSize.attr(font, klass);
@@ -21962,7 +21978,8 @@ function printSymbol(renderer, x, offset, symbol, options) {
 
   if (symbol.length > 1 && symbol.indexOf(".") < 0) {
     renderer.paper.openGroup({
-      "data-name": options.name
+      "data-name": options.name,
+      klass: options.klass
     });
     var dx = 0;
 
@@ -22251,10 +22268,10 @@ Selectables.prototype.add = function (absEl, svgEl, isNote, staffPos) {
     "data-index": this.elements.length
   }; // This is the old behavior.
   else params = {
-      selectable: true,
-      tabindex: 0,
-      "data-index": this.elements.length
-    };
+    selectable: true,
+    tabindex: 0,
+    "data-index": this.elements.length
+  };
   this.paper.setAttributeOnElement(svgEl, params);
   var sel = {
     absEl: absEl,
@@ -23270,6 +23287,31 @@ module.exports = drawVoice;
 
 /***/ }),
 
+/***/ "./src/write/format-jazz-chord.js":
+/*!****************************************!*\
+  !*** ./src/write/format-jazz-chord.js ***!
+  \****************************************/
+/***/ (function(module) {
+
+function formatJazzChord(chordString) {
+  // This puts markers in the pieces of the chord that are read by the svg creator.
+  // After the main part of the chord (the letter, a sharp or flat, and "m") a marker is added. Before a slash a marker is added.
+  var lines = chordString.split("\n");
+
+  for (var i = 0; i < lines.length; i++) {
+    var chord = lines[i]; // If the chord isn't in a recognizable format then just skip the formatting.
+
+    var reg = chord.match(/([ABCDEFG][♯♭]?)([^\/]+)?(\/[ABCDEFG][#b]?)?/);
+    lines[i] = reg[1] + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
+  }
+
+  return lines.join("\n");
+}
+
+module.exports = formatJazzChord;
+
+/***/ }),
+
 /***/ "./src/write/free-text.js":
 /*!********************************!*\
   !*** ./src/write/free-text.js ***!
@@ -23530,12 +23572,37 @@ VoiceElement.getSpacingUnits = function (voice) {
 // can't call this function more than once per iteration
 
 
-VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding) {
+VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding, firstVoice) {
   var child = voice.children[voice.i];
   if (!child) return 0;
   var er = x - voice.minx; // available extrawidth to the left
 
   var pad = voice.durationindex + child.duration > 0 ? minPadding : 0; // only add padding to the items that aren't fixed to the left edge.
+  // See if this item overlaps the item in the first voice. If firstVoice.voicenumber is not 0 then this item is by itself, so there is no problem.
+
+  if (voice.voicenumber !== 0 && firstVoice.voicenumber === 0) {
+    var firstChild = firstVoice.children[firstVoice.i]; // It overlaps if the either the child's top or bottom is inside the firstChild's
+    // Notes a third apart will overlap by less than half a pixel, so compensate for that.
+
+    var overlaps = child.fixed.t < firstChild.fixed.t && child.fixed.t - 0.5 > firstChild.fixed.b || child.fixed.b < firstChild.fixed.t && child.fixed.b > firstChild.fixed.b; // If this note overlaps the note in the first voice and we haven't moved the note yet (this can be called multiple times)
+
+    if (overlaps) {
+      // I think that firstChild should always have at least one note head, but defensively make sure.
+      // There was a problem with this being called more than once so if a value is adjusted then it is saved so it is only adjusted once.
+      var firstChildNoteWidth = firstChild.heads && firstChild.heads.length > 0 ? firstChild.heads[0].realWidth : firstChild.fixed.w;
+      if (!child.adjustedWidth) child.adjustedWidth = firstChildNoteWidth + child.w;
+      child.w = child.adjustedWidth;
+
+      for (var j = 0; j < child.children.length; j++) {
+        var relativeChild = child.children[j];
+
+        if (relativeChild.name.indexOf("accidental") < 0) {
+          if (!relativeChild.adjustedWidth) relativeChild.adjustedWidth = relativeChild.dx + firstChildNoteWidth;
+          relativeChild.dx = relativeChild.adjustedWidth;
+        }
+      }
+    }
+  }
 
   var extraWidth = getExtraWidth(child, pad);
 
@@ -23728,6 +23795,7 @@ function createStems(elems, asc, beam, dy, mainNote) {
     var pitch = furthestHead.pitch + (asc ? ovalDelta : -ovalDelta);
     var dx = asc ? furthestHead.w : 0; // down-pointing stems start on the left side of the note, up-pointing stems start on the right side, so we offset by the note width.
 
+    dx += furthestHead.dx;
     var x = furthestHead.x + dx; // this is now the actual x location in pixels.
 
     var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
@@ -24355,7 +24423,7 @@ var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staff
     var spacingduration = 0;
 
     for (i = 0; i < currentvoices.length; i++) {
-      //console.log("greatest spacing unit", x, currentvoices[i].getNextX(), currentvoices[i].getSpacingUnits(), currentvoices[i].spacingduration);
+      //console.log("greatest spacing unit", x, layoutVoiceElements.getNextX(currentvoices[i]), layoutVoiceElements.getSpacingUnits(currentvoices[i]), currentvoices[i].spacingduration);
       if (layoutVoiceElements.getNextX(currentvoices[i]) > x) {
         x = layoutVoiceElements.getNextX(currentvoices[i]);
         spacingunit = layoutVoiceElements.getSpacingUnits(currentvoices[i]);
@@ -24368,7 +24436,7 @@ var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staff
     if (debug) console.log("currentduration: ", currentduration, spacingunits, minspace);
 
     for (i = 0; i < currentvoices.length; i++) {
-      var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, currentvoices[i], renderer.minPadding);
+      var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, currentvoices[i], renderer.minPadding, currentvoices[0]);
       var dx = voicechildx - x;
 
       if (dx > 0) {
@@ -25396,9 +25464,30 @@ Svg.prototype.text = function (text, attr, target) {
 
   for (var i = 0; i < lines.length; i++) {
     var line = document.createElementNS(svgNS, 'tspan');
-    line.textContent = lines[i];
     line.setAttribute("x", attr.x ? attr.x : 0);
     if (i !== 0) line.setAttribute("dy", "1.2em");
+
+    if (lines[i].indexOf("\x03") !== -1) {
+      var parts = lines[i].split('\x03');
+      line.textContent = parts[0];
+
+      if (parts[1]) {
+        var ts2 = document.createElementNS(svgNS, 'tspan');
+        ts2.setAttribute("dy", "-0.3em");
+        ts2.setAttribute("style", "font-size:0.7em");
+        ts2.textContent = parts[1];
+        line.appendChild(ts2);
+      }
+
+      if (parts[2]) {
+        var ts3 = document.createElementNS(svgNS, 'tspan');
+        ts3.setAttribute("dy", "0.1em");
+        ts3.setAttribute("style", "font-size:0.7em");
+        ts3.textContent = parts[2];
+        line.appendChild(ts3);
+      }
+    } else line.textContent = lines[i];
+
     el.appendChild(line);
   }
 
@@ -25419,9 +25508,9 @@ Svg.prototype.guessWidth = function (text, attr) {
         height: attr['font-size'] + 2
       }; // Just a wild guess.
     else size = {
-        width: size.width,
-        height: size.height
-      };
+      width: size.width,
+      height: size.height
+    };
   } catch (ex) {
     size = {
       width: attr['font-size'] / 2,
