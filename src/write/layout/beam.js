@@ -116,7 +116,8 @@ function createStems(elems, asc, beam, dy, mainNote) {
 		var ovalDelta = 1 / 5;//(isGrace)?1/3:1/5;
 		var pitch = furthestHead.pitch + ((asc) ? ovalDelta : -ovalDelta);
 		var dx = asc ? furthestHead.w : 0; // down-pointing stems start on the left side of the note, up-pointing stems start on the right side, so we offset by the note width.
-		dx += furthestHead.dx;
+		if (!isGrace)
+			dx += furthestHead.dx;
 		var x = furthestHead.x + dx; // this is now the actual x location in pixels.
 		var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
 		var lineWidth = (asc) ? -0.6 : 0.6;

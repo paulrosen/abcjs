@@ -295,7 +295,7 @@ function doClickTest(abcString, expected) {
 	results = [];
 	testString = abcString;
 	selectAll();
-	console.log(JSON.stringify(results))
+	//console.log(JSON.stringify(results))
 	for (var i = 0; i < results.length; i++) {
 		var msg = "index: " + i + "\nrcv: " + JSON.stringify(results[i]) + "\n" +
 			"exp: " + JSON.stringify(expected[i]) + "\n";
