@@ -272,6 +272,7 @@ var parseCommon = require("../parse/abc_common");
 										durationCounter[voiceNumber] += noteElem.duration;
 									}
 									break;
+								case "key":
 								case "keySignature":
 									addKey(voices[voiceNumber], elem);
 									break;
