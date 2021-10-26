@@ -4745,20 +4745,20 @@ var parseDirective = {};
           endChar: multilineVars.iChar + 5
         }); // If no parameters are given, then there is a default size.
         else {
-            var points = tokenizer.getMeasurement(tokens);
-            if (points.used === 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
-            var spaceAbove = points.value;
-            points = tokenizer.getMeasurement(tokens);
-            if (points.used === 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
-            var spaceBelow = points.value;
-            points = tokenizer.getMeasurement(tokens);
-            if (points.used === 0 || tokens.length !== 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
-            var lenLine = points.value;
-            tuneBuilder.addSeparator(spaceAbove, spaceBelow, lenLine, {
-              startChar: multilineVars.iChar,
-              endChar: multilineVars.iChar + restOfString.length
-            });
-          }
+          var points = tokenizer.getMeasurement(tokens);
+          if (points.used === 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
+          var spaceAbove = points.value;
+          points = tokenizer.getMeasurement(tokens);
+          if (points.used === 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
+          var spaceBelow = points.value;
+          points = tokenizer.getMeasurement(tokens);
+          if (points.used === 0 || tokens.length !== 0) return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
+          var lenLine = points.value;
+          tuneBuilder.addSeparator(spaceAbove, spaceBelow, lenLine, {
+            startChar: multilineVars.iChar,
+            endChar: multilineVars.iChar + restOfString.length
+          });
+        }
         break;
 
       case "barsperstaff":
@@ -5179,20 +5179,20 @@ var parseDirective = {};
       value: 1
     }; // if there is no value then the presence of this is the same as "true"
     else if (tokens.length === 1) {
-        if (tokens[0].type === "number") {
-          if (tokens[0].floatt >= 0 || tokens[0].floatt <= 1) return {
-            value: tokens[0].floatt
-          };
-        } else if (tokens[0].token === 'false') {
-          return {
-            value: 0
-          };
-        } else if (tokens[0].token === 'true') {
-          return {
-            value: 1
-          };
-        }
+      if (tokens[0].type === "number") {
+        if (tokens[0].floatt >= 0 || tokens[0].floatt <= 1) return {
+          value: tokens[0].floatt
+        };
+      } else if (tokens[0].token === 'false') {
+        return {
+          value: 0
+        };
+      } else if (tokens[0].token === 'true') {
+        return {
+          value: 1
+        };
       }
+    }
     return {
       error: "Directive stretchlast requires zero or one parameter: false, true, or number between 0 and 1 (received " + tokens[0].token + ')'
     };
@@ -5230,14 +5230,14 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
       endChar: multilineVars.iChar + title.length + 2
     }); // display secondary title
     else {
-        var titleStr = tokenizer.translateString(tokenizer.theReverser(tokenizer.stripComment(title)));
-        if (multilineVars.titlecaps) titleStr = titleStr.toUpperCase();
-        tuneBuilder.addMetaText("title", titleStr, {
-          startChar: multilineVars.iChar,
-          endChar: multilineVars.iChar + title.length + 2
-        });
-        multilineVars.hasMainTitle = true;
-      }
+      var titleStr = tokenizer.translateString(tokenizer.theReverser(tokenizer.stripComment(title)));
+      if (multilineVars.titlecaps) titleStr = titleStr.toUpperCase();
+      tuneBuilder.addMetaText("title", titleStr, {
+        startChar: multilineVars.iChar,
+        endChar: multilineVars.iChar + title.length + 2
+      });
+      multilineVars.hasMainTitle = true;
+    }
   };
 
   this.setMeter = function (line) {
@@ -22147,7 +22147,7 @@ TieElem.prototype.calcX = function (lineStartX, lineEndX) {
 
   if (this.anchor2) this.endX = this.anchor2.x; // The normal case where there is a starting element to attach to.
   else if (this.endLimitX) this.endX = this.endLimitX.x; // if there is no start element, but there is a repeat mark before the start of the line.
-    else this.endX = lineEndX; // There is no element and no repeat mark: extend to the beginning of the line.
+  else this.endX = lineEndX; // There is no element and no repeat mark: extend to the beginning of the line.
 };
 
 TieElem.prototype.calcTieY = function () {
@@ -23878,10 +23878,10 @@ Selectables.prototype.add = function (absEl, svgEl, isNoteOrTabNumber, staffPos)
     "data-index": this.elements.length
   }; // This is the old behavior.
   else params = {
-      selectable: true,
-      tabindex: 0,
-      "data-index": this.elements.length
-    };
+    selectable: true,
+    tabindex: 0,
+    "data-index": this.elements.length
+  };
   this.paper.setAttributeOnElement(svgEl, params);
   var sel = {
     absEl: absEl,
@@ -27080,9 +27080,9 @@ Svg.prototype.guessWidth = function (text, attr) {
         height: attr['font-size'] + 2
       }; // Just a wild guess.
     else size = {
-        width: size.width,
-        height: size.height
-      };
+      width: size.width,
+      height: size.height
+    };
   } catch (ex) {
     size = {
       width: attr['font-size'] / 2,
