@@ -13,7 +13,7 @@ function printSymbol(renderer, x, offset, symbol, options) {
 	var ycorr;
 	if (!symbol) return null;
 	if (symbol.length > 1 && symbol.indexOf(".") < 0) {
-		renderer.paper.openGroup({"data-name": options.name});
+		renderer.paper.openGroup({"data-name": options.name, klass: options.klass});
 		var dx = 0;
 		for (var i = 0; i < symbol.length; i++) {
 			var s = symbol.charAt(i);

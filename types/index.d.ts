@@ -198,6 +198,7 @@ declare module 'abcjs' {
 		format?: { [attr: FormatAttributes]: any };
 		header_only?: boolean;
 		initialClef?: boolean;
+		jazzchords?: boolean;
 		lineBreaks?: Array<number>;
 		minPadding?: number;
 		oneSvgPerLine?: boolean;

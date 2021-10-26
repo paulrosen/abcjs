@@ -4648,6 +4648,10 @@ var parseDirective = {};
         tune.formatting.flatbeams = true;
         break;
 
+      case "jazzchords":
+        tune.formatting.jazzchords = true;
+        break;
+
       case "landscape":
         multilineVars.landscape = true;
         break;
@@ -18367,6 +18371,7 @@ var AbstractEngraver = function AbstractEngraver(getTextSize, tuneNumber, option
   this.graceSlurs = options.graceSlurs;
   this.percmap = options.percmap;
   this.initialClef = options.initialClef;
+  this.jazzchords = !!options.jazzchords;
   this.reset();
 };
 
@@ -19286,7 +19291,7 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
   ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
 
   if (elem.chord !== undefined) {
-    var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth);
+    var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth, this.jazzchords);
     roomtaken = ret3.roomTaken;
     roomtakenright = ret3.roomTakenRight;
   }
@@ -20669,6 +20674,7 @@ var EngraverController = function EngraverController(paper, params) {
   this.renderer = new Renderer(paper);
   this.renderer.setPaddingOverride(params);
   if (params.showDebug) this.renderer.showDebug = params.showDebug;
+  if (params.jazzchords) this.jazzchords = params.jazzchords;
   this.renderer.controller = this; // TODO-GD needed for highlighting
 
   this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
@@ -20786,7 +20792,8 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
     graceSlurs: abcTune.formatting.graceSlurs !== false,
     // undefined is the default, which is true
     percmap: abcTune.formatting.percmap,
-    initialClef: this.initialClef
+    initialClef: this.initialClef,
+    jazzchords: this.jazzchords
   });
   this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
   this.engraver.measureLength = abcTune.getMeterFraction().num / abcTune.getMeterFraction().den;
@@ -22350,7 +22357,9 @@ var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/w
 
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
 
-var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth) {
+var formatJazzChord = __webpack_require__(/*! ./format-jazz-chord */ "./src/write/format-jazz-chord.js");
+
+var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth, jazzchords) {
   for (var i = 0; i < elem.chord.length; i++) {
     var pos = elem.chord[i].position;
     var rel_position = elem.chord[i].rel_position;
@@ -22370,6 +22379,7 @@ var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTake
       } else {
         font = 'gchordfont';
         klass = "chord";
+        if (jazzchords) chord = formatJazzChord(chord);
       }
 
       var attr = getTextSize.attr(font, klass);
@@ -23574,7 +23584,8 @@ function printSymbol(renderer, x, offset, symbol, options) {
 
   if (symbol.length > 1 && symbol.indexOf(".") < 0) {
     renderer.paper.openGroup({
-      "data-name": options.name
+      "data-name": options.name,
+      klass: options.klass
     });
     var dx = 0;
 
@@ -24931,6 +24942,31 @@ module.exports = drawVoice;
 
 /***/ }),
 
+/***/ "./src/write/format-jazz-chord.js":
+/*!****************************************!*\
+  !*** ./src/write/format-jazz-chord.js ***!
+  \****************************************/
+/***/ (function(module) {
+
+function formatJazzChord(chordString) {
+  // This puts markers in the pieces of the chord that are read by the svg creator.
+  // After the main part of the chord (the letter, a sharp or flat, and "m") a marker is added. Before a slash a marker is added.
+  var lines = chordString.split("\n");
+
+  for (var i = 0; i < lines.length; i++) {
+    var chord = lines[i]; // If the chord isn't in a recognizable format then just skip the formatting.
+
+    var reg = chord.match(/([ABCDEFG][♯♭]?)([^\/]+)?(\/[ABCDEFG][#b]?)?/);
+    lines[i] = reg[1] + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
+  }
+
+  return lines.join("\n");
+}
+
+module.exports = formatJazzChord;
+
+/***/ }),
+
 /***/ "./src/write/free-text.js":
 /*!********************************!*\
   !*** ./src/write/free-text.js ***!
@@ -25191,12 +25227,37 @@ VoiceElement.getSpacingUnits = function (voice) {
 // can't call this function more than once per iteration
 
 
-VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding) {
+VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding, firstVoice) {
   var child = voice.children[voice.i];
   if (!child) return 0;
   var er = x - voice.minx; // available extrawidth to the left
 
   var pad = voice.durationindex + child.duration > 0 ? minPadding : 0; // only add padding to the items that aren't fixed to the left edge.
+  // See if this item overlaps the item in the first voice. If firstVoice.voicenumber is not 0 then this item is by itself, so there is no problem.
+
+  if (voice.voicenumber !== 0 && firstVoice.voicenumber === 0) {
+    var firstChild = firstVoice.children[firstVoice.i]; // It overlaps if the either the child's top or bottom is inside the firstChild's
+    // Notes a third apart will overlap by less than half a pixel, so compensate for that.
+
+    var overlaps = child.fixed.t < firstChild.fixed.t && child.fixed.t - 0.5 > firstChild.fixed.b || child.fixed.b < firstChild.fixed.t && child.fixed.b > firstChild.fixed.b; // If this note overlaps the note in the first voice and we haven't moved the note yet (this can be called multiple times)
+
+    if (overlaps) {
+      // I think that firstChild should always have at least one note head, but defensively make sure.
+      // There was a problem with this being called more than once so if a value is adjusted then it is saved so it is only adjusted once.
+      var firstChildNoteWidth = firstChild.heads && firstChild.heads.length > 0 ? firstChild.heads[0].realWidth : firstChild.fixed.w;
+      if (!child.adjustedWidth) child.adjustedWidth = firstChildNoteWidth + child.w;
+      child.w = child.adjustedWidth;
+
+      for (var j = 0; j < child.children.length; j++) {
+        var relativeChild = child.children[j];
+
+        if (relativeChild.name.indexOf("accidental") < 0) {
+          if (!relativeChild.adjustedWidth) relativeChild.adjustedWidth = relativeChild.dx + firstChildNoteWidth;
+          relativeChild.dx = relativeChild.adjustedWidth;
+        }
+      }
+    }
+  }
 
   var extraWidth = getExtraWidth(child, pad);
 
@@ -25389,6 +25450,7 @@ function createStems(elems, asc, beam, dy, mainNote) {
     var pitch = furthestHead.pitch + (asc ? ovalDelta : -ovalDelta);
     var dx = asc ? furthestHead.w : 0; // down-pointing stems start on the left side of the note, up-pointing stems start on the right side, so we offset by the note width.
 
+    dx += furthestHead.dx;
     var x = furthestHead.x + dx; // this is now the actual x location in pixels.
 
     var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
@@ -26016,7 +26078,7 @@ var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staff
     var spacingduration = 0;
 
     for (i = 0; i < currentvoices.length; i++) {
-      //console.log("greatest spacing unit", x, currentvoices[i].getNextX(), currentvoices[i].getSpacingUnits(), currentvoices[i].spacingduration);
+      //console.log("greatest spacing unit", x, layoutVoiceElements.getNextX(currentvoices[i]), layoutVoiceElements.getSpacingUnits(currentvoices[i]), currentvoices[i].spacingduration);
       if (layoutVoiceElements.getNextX(currentvoices[i]) > x) {
         x = layoutVoiceElements.getNextX(currentvoices[i]);
         spacingunit = layoutVoiceElements.getSpacingUnits(currentvoices[i]);
@@ -26029,7 +26091,7 @@ var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staff
     if (debug) console.log("currentduration: ", currentduration, spacingunits, minspace);
 
     for (i = 0; i < currentvoices.length; i++) {
-      var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, currentvoices[i], renderer.minPadding);
+      var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, currentvoices[i], renderer.minPadding, currentvoices[0]);
       var dx = voicechildx - x;
 
       if (dx > 0) {
@@ -27057,9 +27119,30 @@ Svg.prototype.text = function (text, attr, target) {
 
   for (var i = 0; i < lines.length; i++) {
     var line = document.createElementNS(svgNS, 'tspan');
-    line.textContent = lines[i];
     line.setAttribute("x", attr.x ? attr.x : 0);
     if (i !== 0) line.setAttribute("dy", "1.2em");
+
+    if (lines[i].indexOf("\x03") !== -1) {
+      var parts = lines[i].split('\x03');
+      line.textContent = parts[0];
+
+      if (parts[1]) {
+        var ts2 = document.createElementNS(svgNS, 'tspan');
+        ts2.setAttribute("dy", "-0.3em");
+        ts2.setAttribute("style", "font-size:0.7em");
+        ts2.textContent = parts[1];
+        line.appendChild(ts2);
+      }
+
+      if (parts[2]) {
+        var ts3 = document.createElementNS(svgNS, 'tspan');
+        ts3.setAttribute("dy", "0.1em");
+        ts3.setAttribute("style", "font-size:0.7em");
+        ts3.textContent = parts[2];
+        line.appendChild(ts3);
+      }
+    } else line.textContent = lines[i];
+
     el.appendChild(line);
   }
 

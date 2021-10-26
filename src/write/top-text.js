@@ -20,8 +20,12 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
 	if (metaText.title) {
 		addTextIf(this.rows, { marginLeft: tLeft, text: metaText.title, font: 'titlefont', klass: 'title meta-top', marginTop: spacing.title, anchor: tAnchor, absElemType: "title", info: metaTextInfo.title, name: "title"}, getTextSize);
 	}
-	if (lines[0] && lines[0].subtitle) {
-		addTextIf(this.rows, { marginLeft: tLeft, text: lines[0].subtitle.text, font: 'subtitlefont', klass: 'text meta-top subtitle', marginTop: spacing.subtitle, anchor: tAnchor, absElemType: "subtitle" , info: lines[0].subtitle, name: "subtitle"}, getTextSize);
+	if (lines.length) {
+		var index = 0;
+		while (index < lines.length && lines[index].subtitle) {
+			addTextIf(this.rows, {marginLeft: tLeft, text: lines[index].subtitle.text, font: 'subtitlefont', klass: 'text meta-top subtitle', marginTop: spacing.subtitle, anchor: tAnchor, absElemType: "subtitle", info: lines[index].subtitle, name: "subtitle"}, getTextSize);
+			index++;
+		}
 	}
 
 	if (metaText.rhythm || metaText.origin || metaText.composer) {
