@@ -573,7 +573,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				var numMeasures = new RelativeElement("" + elem.rest.text, mmWidth, mmWidth, 16, {type: "multimeasure-text"});
 				abselem.addExtra(numMeasures);
 		}
-		if (elem.rest.type.indexOf("multimeasure") < 0) {
+		if (elem.rest.type.indexOf("multimeasure") < 0 && elem.rest.type !== "invisible") {
 			var ret = createNoteHead(abselem, c, {verticalPos: restpitch},
 				{ dot: dot, scale: voiceScale});
 			noteHead = ret.notehead;

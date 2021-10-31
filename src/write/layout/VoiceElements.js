@@ -32,12 +32,19 @@ VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding, firstVoice
 	if (!child) return 0;
 	var er = x - voice.minx; // available extrawidth to the left
 	var pad = voice.durationindex + child.duration > 0 ? minPadding : 0; // only add padding to the items that aren't fixed to the left edge.
-	// See if this item overlaps the item in the first voice. If firstVoice.voicenumber is not 0 then this item is by itself, so there is no problem.
-	if (voice.voicenumber !== 0 && firstVoice.voicenumber === 0) {
+	// See if this item overlaps the item in the first voice. If firstVoice is undefined then there's nothing to compare.
+	if (child.abcelem.el_type === "note" && !child.abcelem.rest && voice.voicenumber !== 0 && firstVoice) {
 		var firstChild = firstVoice.children[firstVoice.i];
-		// It overlaps if the either the child's top or bottom is inside the firstChild's
-		// Notes a third apart will overlap by less than half a pixel, so compensate for that.
-		var overlaps = (child.fixed.t < firstChild.fixed.t && child.fixed.t-0.5 > firstChild.fixed.b) || (child.fixed.b < firstChild.fixed.t && child.fixed.b > firstChild.fixed.b)
+		// It overlaps if the either the child's top or bottom is inside the firstChild's or at least within 1
+		// A special case is if the element is on the same line then it can share a note head, if the notehead is the same
+		var overlaps = firstChild &&
+			((child.abcelem.maxpitch <= firstChild.abcelem.maxpitch+1 && child.abcelem.maxpitch >= firstChild.abcelem.minpitch-1) ||
+			(child.abcelem.minpitch <= firstChild.abcelem.maxpitch+1 && child.abcelem.minpitch >= firstChild.abcelem.minpitch-1))
+		// See if they can share a note head
+		if (overlaps && child.abcelem.minpitch === firstChild.abcelem.minpitch && child.abcelem.maxpitch === firstChild.abcelem.maxpitch &&
+		firstChild.heads && firstChild.heads.length > 0 && child.heads && child.heads.length > 0 &&
+		firstChild.heads[0].c === child.heads[0].c)
+			overlaps = false;
 		// If this note overlaps the note in the first voice and we haven't moved the note yet (this can be called multiple times)
 		if (overlaps) {
 			// I think that firstChild should always have at least one note head, but defensively make sure.
