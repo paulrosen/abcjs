@@ -30,7 +30,7 @@ function buildPatterns(self) {
     if (iii != tuning.length - 1) {
       nextNote = tuning[iii + 1];
     }
-    var tabNotes = new TabNotes(tuning[iii], nextNote);
+    var tabNotes = new TabNotes(tuning[iii],nextNote);
     strings[pos--] = tabNotes.build();
   }
   return strings;
@@ -45,55 +45,6 @@ function buildSecond(first) {
     seconds[iii] = strings[iii - 1];
   }
   return seconds;
-}
-
-function checkKeyAccidentals(note, accidentals) {
-  if (accidentals) {
-    for (var iii = 0; iii < accidentals.length; iii++) {
-      if (note[0].toUpperCase() == accidentals[iii].note.toUpperCase()) {
-        if (accidentals[iii].acc == 'flat') {
-          return '_' + note;
-        }
-        if (accidentals[iii].acc == 'sharp') {
-          return '^' + note;
-        }
-      }
-    }
-  }
-  return note;
-}
-
-function checkNote(note, accidentals) {
-  var isFlat = false;
-  var newNote = note;
-  var isSharp = false;
-  var isAltered = false;
-  var natural = null;
-  var acc = 0;
-
-  note = checkKeyAccidentals(note, accidentals);
-  if (note.startsWith('_')) {
-    isFlat = true;
-    acc = -1;
-  } else if (note.startsWith('^')) {
-    isSharp = true;
-    acc = +1;
-  } else if (note.startsWith('=')) {
-    natural = true;
-    acc = 0; 
-  }
-  isAltered = isFlat || isSharp;
-  if (isAltered || natural ) {
-    newNote = note.slice(1);
-  }
-  return {
-    'isAltered': isAltered,
-    'isSharp': isSharp,
-    'isFlat': isFlat,
-    'name': newNote,
-    'acc': acc,
-    'natural': natural
-  };
 }
 
 function sameString(self, chord) {
@@ -133,7 +84,7 @@ function sameString(self, chord) {
 function handleChordNotes(self, notes) {
   var retNotes = [];
   for (var iiii = 0; iiii < notes.length; iiii++) {
-    var note = checkNote(notes[iiii].name, self.accidentals);
+    var note = new TabNote.TabNote(notes[iiii].name);
     var curPos = toNumber(self, note);
     retNotes.push(curPos);
   }
@@ -144,56 +95,29 @@ function handleChordNotes(self, notes) {
   return retNotes;
 }
 
-function EBsharp(note) {
-  if (note.isSharp) {
-    var name = note.name[1];
-    if ((name == 'B') || (name == 'E')) {
-      // unusual #B and E case
-      note.isSharp = false;
-      note.isAltered = false;
-      note.acc = 0;
-      switch (note.name[1]) {
-        case 'E':
-          if (note.name.length > 2) {
-            note.name = 'f';
-          } else {
-            note.name = 'F';
-          }
-          break;
-        case 'e':
-          note.name = 'f';
-          break;
-        case 'B':
-          if (note.name.length > 2) {
-            note.name = 'C';
-          } else {
-            note.name = 'c';
-          }
-          break;
-        case 'b':
-          note.name = 'c';
-          break;
-      }
-    }
-  }
-  return note;
-}
-
-
-
 function noteToNumber(self, note, stringNumber, secondPosition) {
   var strings = self.strings;
+  note.checkKeyAccidentals(self.accidentals) ;
   if (secondPosition) {
     strings = secondPosition;
   }
-  note = EBsharp(note);
-  var num = strings[stringNumber].indexOf(note.name);
+  var noteName = note.name;
+  if (note.isLower) {
+    noteName = noteName.toLowerCase();
+  }
+  for (var ii = 0; ii < note.isQuoted; ii++) {
+    noteName += "'";
+  }
+  for (var jj = 0; jj < note.hasComma; jj++ ) {
+    noteName += ",";
+  }
+  var num = strings[stringNumber].indexOf(noteName);
   if (num != -1) {
     if (secondPosition) {
       num += 7;
     }
-    if (note.isFlat && (num == 0)) {
-      // flat on 0 pos => previous string Fifth position
+    if ( (note.isFlat || note.acc == -1) && (num == 0)) {
+      // flat on 0 pos => previous string 7th position
       stringNumber++;
       num = 7;
     }
@@ -209,6 +133,16 @@ function noteToNumber(self, note, stringNumber, secondPosition) {
 function toNumber(self, note) {
   var num = null;
   var str = 0;
+  var lowestString = self.strings[self.strings.length - 1];
+  var lowestNote = new TabNote.TabNote(lowestString[0]);
+  if (note.isLowerThan(lowestNote) ) {
+    return {
+      num: "?",
+      str: self.strings.length - 1,
+      note: note,
+      error: note.emit() + ': unexpected note for instrument' 
+    };
+  }
   while (str < self.strings.length) {
     num = noteToNumber(self, note, str);
     if (num) {
@@ -225,10 +159,20 @@ StringPatterns.prototype.stringToPitch = function (stringNumber) {
   return startingPitch + ((bottom - stringNumber) * this.linePitch);
 };
 
+function invalidNumber( retNotes , note ) {
+  var number = {
+    num: "?",
+    str: 0,
+    note: note
+  };
+  retNotes.push(number);
+  retNotes.error = note.emit() + ': unexpected note for instrument' ;
+} 
 
 StringPatterns.prototype.notesToNumber = function (notes, graces) {
   var note;
   var number;
+  var error = null; 
   if (notes) {
     var retNotes = [];
     if (notes.length > 1) {
@@ -237,30 +181,33 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
         return retNotes.error;
       } 
     } else {
-      note = checkNote(notes[0].name, this.accidentals);
+      note = new TabNote.TabNote(notes[0].name);
       number = toNumber(this, note);
       if (number) {
         retNotes.push(number);
       } else {
-        return { error: notes[0].name + ': unexpected note for instrument'};
+        invalidNumber(retNotes, note);
+        error = retNotes.error;
       }
     }
     var retGraces = null;
     if (graces) {
       retGraces = [];
       for (var iiii = 0; iiii < graces.length; iiii++) {
-        note = checkNote(graces[0].name, this.accidentals);
+        note = new TabNote.TabNote(graces[0].name);
         number = toNumber(this, note);
         if (number) {
           retGraces.push(number);
         } else {
-          return { error: notes[0].name + ': unexpected note for instrument' };
-        }        
+          invalidNumber(retGraces, note);
+          error = retNotes.error;
+        }
       }
     }
     return {
       notes: retNotes,
-      graces: retGraces
+      graces: retGraces,
+      error: error
     };
   }
   return null;

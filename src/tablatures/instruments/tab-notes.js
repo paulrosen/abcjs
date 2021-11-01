@@ -13,8 +13,8 @@ TabNotes.prototype.build = function () {
   var fromN = this.fromN;
   var toN = this.toN;
   var buildReturned = [];
-  var startIndex = notes.indexOf(fromN.note);
-  var toIndex = notes.indexOf(toN.note);
+  var startIndex = notes.indexOf(fromN.name);
+  var toIndex = notes.indexOf(toN.name);
   if ((startIndex == -1) || (toIndex == -1)) {
     return buildReturned;
   }

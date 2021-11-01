@@ -102,7 +102,6 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
       dest.children.push(buildTabAbsolute(plugin, absX, relX));
     }
     switch (absChild.type) {
-
       case 'staff-extra key-signature':
         if (plugin.transpose) {
           transposer = new Transposer(
@@ -140,27 +139,31 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
         var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
         if (tabPos.error) {
           plugin._super.setError(tabPos.error);
-        } else {
-          abs.type = 'tabNumber';
-          // convert note to number
-          var def = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [] };
-          for (var ll = 0; ll < tabPos.notes.length; ll++) {
-            var curNote = tabPos.notes[ll];
-            var pitch = plugin.semantics.stringToPitch(curNote.str);
-            var acc = curNote.note.isFlat ? '_' : (curNote.note.isSharp ? '^' : '');
-            def.notes.push({ num: curNote.num, str: curNote.str, pitch: acc + curNote.note.name });
-            var opt = {
-              type: 'tabNumber'
-            };
-            var tabNoteRelative = new RelativeElement(
-              curNote.num.toString(), 0, 0, pitch, opt);
-            tabNoteRelative.x = relX;
-            tabNoteRelative.isAltered = curNote.note.isAltered;
-            abs.children.push(tabNoteRelative);
+        } 
+        var def = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [] };
+        abs.type = 'tabNumber';
+        // convert note to number
+        for (var ll = 0; ll < tabPos.notes.length; ll++) {
+          var curNote = tabPos.notes[ll];
+          var strNote = curNote.num;
+          if (curNote.note.quarter != null) {
+            // add tab quarter => needs to string conversion then 
+            strNote = strNote.toString();
+            strNote += curNote.note.quarter;
           }
-          dest.children.push(abs);
-          tabVoice.push(def);
+          var pitch = plugin.semantics.stringToPitch(curNote.str);
+          def.notes.push({ num: strNote, str: curNote.str, pitch: curNote.note.emit() });
+          var opt = {
+            type: 'tabNumber'
+          };
+          var tabNoteRelative = new RelativeElement(
+            strNote, 0, 0, pitch, opt);
+          tabNoteRelative.x = relX;
+          tabNoteRelative.isAltered = curNote.note.isAltered;
+          abs.children.push(tabNoteRelative);
         }
+        dest.children.push(abs);
+        tabVoice.push(def);
         break;
     }
   }

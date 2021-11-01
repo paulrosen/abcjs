@@ -106,7 +106,7 @@ describe("Tablature", function () {
 			{ "el_type": "note", "startChar": 12, "endChar": 14, "notes": [{ "num": "?", "str": 3, "pitch": "F," }] },
 			{ "el_type": "note", "startChar": 14, "endChar": 17, "notes": [{ "num": "?", "str": 3, "pitch": "^F," }] },
 			{ "el_type": "note", "startChar": 17, "endChar": 19, "notes": [{ "num": 0, "str": 3, "pitch": "G," }] },
-			{ "el_type": "note", "startChar": 19, "endChar": 23, "notes": [{ "num": "?", "str": 0, "pitch": "e'" }] },
+			{ "el_type": "note", "startChar": 19, "endChar": 23, "notes": [{ "num": "?", "str": 0, "pitch": "e'''" }] },
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 24, "startChar": 23 }
 		]
 	];
@@ -248,7 +248,7 @@ describe("Tablature", function () {
 
 	var violinUnusualAccidentalsOutput = [
 		[
-			{ "el_type": "note", "startChar": 9, "endChar": 14, "notes": [{ "num": "5^", "str": 2, "pitch": "^/G" }] },
+			{ "el_type": "note", "startChar": 10, "endChar": 14, "notes": [{ "num": "5^", "str": 2, "pitch": "^/G" }] },
 			{ "el_type": "note", "startChar": 14, "endChar": 18, "notes": [{ "num": 2, "str": 1, "pitch": "^^A" }] },
 			{ "el_type": "note", "startChar": 18, "endChar": 22, "notes": [{ "num": 0, "str": 1, "pitch": "__B" }] },
 			{ "el_type": "note", "startChar": 22, "endChar": 25, "notes": [{ "num": "3v", "str": 1, "pitch": "_/c" }] },

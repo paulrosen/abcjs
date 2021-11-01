@@ -2725,6 +2725,8 @@ var create;
     if (title && title.length > 128) title = title.substring(0, 124) + '...';
     var key = abcTune.getKeySignature();
     var time = abcTune.getMeterFraction();
+    var beatsPerSecond = commands.tempo / 60; //var beatLength = abcTune.getBeatLength();
+
     midi.setGlobalInfo(commands.tempo, title, key, time);
 
     for (var i = 0; i < commands.tracks.length; i++) {
@@ -2747,9 +2749,11 @@ var create;
             break;
 
           case 'note':
-            var start = event.start;
-            var end = start + event.duration; // TODO: end is affected by event.gap, too.
+            var gapLengthInBeats = event.gap * beatsPerSecond;
+            var start = event.start; // The staccato and legato are indicated by event.gap.
+            // event.gap is in seconds but the durations are in whole notes.
 
+            var end = start + event.duration - gapLengthInBeats;
             if (!notePlacement[start]) notePlacement[start] = [];
             notePlacement[start].push({
               pitch: event.pitch,
@@ -14161,6 +14165,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                   break;
 
                 case "key":
+                case "keySignature":
                   addKey(voices[voiceNumber], elem);
                   break;
 
@@ -16741,60 +16746,6 @@ function buildSecond(first) {
   return seconds;
 }
 
-function checkKeyAccidentals(note, accidentals) {
-  if (accidentals) {
-    for (var iii = 0; iii < accidentals.length; iii++) {
-      if (note[0].toUpperCase() == accidentals[iii].note.toUpperCase()) {
-        if (accidentals[iii].acc == 'flat') {
-          return '_' + note;
-        }
-
-        if (accidentals[iii].acc == 'sharp') {
-          return '^' + note;
-        }
-      }
-    }
-  }
-
-  return note;
-}
-
-function checkNote(note, accidentals) {
-  var isFlat = false;
-  var newNote = note;
-  var isSharp = false;
-  var isAltered = false;
-  var natural = null;
-  var acc = 0;
-  note = checkKeyAccidentals(note, accidentals);
-
-  if (note.startsWith('_')) {
-    isFlat = true;
-    acc = -1;
-  } else if (note.startsWith('^')) {
-    isSharp = true;
-    acc = +1;
-  } else if (note.startsWith('=')) {
-    natural = true;
-    acc = 0;
-  }
-
-  isAltered = isFlat || isSharp;
-
-  if (isAltered || natural) {
-    newNote = note.slice(1);
-  }
-
-  return {
-    'isAltered': isAltered,
-    'isSharp': isSharp,
-    'isFlat': isFlat,
-    'name': newNote,
-    'acc': acc,
-    'natural': natural
-  };
-}
-
 function sameString(self, chord) {
   for (var jjjj = 0; jjjj < chord.length - 1; jjjj++) {
     var curPos = chord[jjjj];
@@ -16831,7 +16782,7 @@ function handleChordNotes(self, notes) {
   var retNotes = [];
 
   for (var iiii = 0; iiii < notes.length; iiii++) {
-    var note = checkNote(notes[iiii].name, self.accidentals);
+    var note = new TabNote.TabNote(notes[iiii].name);
     var curPos = toNumber(self, note);
     retNotes.push(curPos);
   }
@@ -16845,66 +16796,37 @@ function handleChordNotes(self, notes) {
   return retNotes;
 }
 
-function EBsharp(note) {
-  if (note.isSharp) {
-    var name = note.name[1];
-
-    if (name == 'B' || name == 'E') {
-      // unusual #B and E case
-      note.isSharp = false;
-      note.isAltered = false;
-      note.acc = 0;
-
-      switch (note.name[1]) {
-        case 'E':
-          if (note.name.length > 2) {
-            note.name = 'f';
-          } else {
-            note.name = 'F';
-          }
-
-          break;
-
-        case 'e':
-          note.name = 'f';
-          break;
-
-        case 'B':
-          if (note.name.length > 2) {
-            note.name = 'C';
-          } else {
-            note.name = 'c';
-          }
-
-          break;
-
-        case 'b':
-          note.name = 'c';
-          break;
-      }
-    }
-  }
-
-  return note;
-}
-
 function noteToNumber(self, note, stringNumber, secondPosition) {
   var strings = self.strings;
+  note.checkKeyAccidentals(self.accidentals);
 
   if (secondPosition) {
     strings = secondPosition;
   }
 
-  note = EBsharp(note);
-  var num = strings[stringNumber].indexOf(note.name);
+  var noteName = note.name;
+
+  if (note.isLower) {
+    noteName = noteName.toLowerCase();
+  }
+
+  for (var ii = 0; ii < note.isQuoted; ii++) {
+    noteName += "'";
+  }
+
+  for (var jj = 0; jj < note.hasComma; jj++) {
+    noteName += ",";
+  }
+
+  var num = strings[stringNumber].indexOf(noteName);
 
   if (num != -1) {
     if (secondPosition) {
       num += 7;
     }
 
-    if (note.isFlat && num == 0) {
-      // flat on 0 pos => previous string Fifth position
+    if ((note.isFlat || note.acc == -1) && num == 0) {
+      // flat on 0 pos => previous string 7th position
       stringNumber++;
       num = 7;
     }
@@ -16922,6 +16844,17 @@ function noteToNumber(self, note, stringNumber, secondPosition) {
 function toNumber(self, note) {
   var num = null;
   var str = 0;
+  var lowestString = self.strings[self.strings.length - 1];
+  var lowestNote = new TabNote.TabNote(lowestString[0]);
+
+  if (note.isLowerThan(lowestNote)) {
+    return {
+      num: "?",
+      str: self.strings.length - 1,
+      note: note,
+      error: note.emit() + ': unexpected note for instrument'
+    };
+  }
 
   while (str < self.strings.length) {
     num = noteToNumber(self, note, str);
@@ -16942,9 +16875,20 @@ StringPatterns.prototype.stringToPitch = function (stringNumber) {
   return startingPitch + (bottom - stringNumber) * this.linePitch;
 };
 
+function invalidNumber(retNotes, note) {
+  var number = {
+    num: "?",
+    str: 0,
+    note: note
+  };
+  retNotes.push(number);
+  retNotes.error = note.emit() + ': unexpected note for instrument';
+}
+
 StringPatterns.prototype.notesToNumber = function (notes, graces) {
   var note;
   var number;
+  var error = null;
 
   if (notes) {
     var retNotes = [];
@@ -16956,15 +16900,14 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
         return retNotes.error;
       }
     } else {
-      note = checkNote(notes[0].name, this.accidentals);
+      note = new TabNote.TabNote(notes[0].name);
       number = toNumber(this, note);
 
       if (number) {
         retNotes.push(number);
       } else {
-        return {
-          error: notes[0].name + ': unexpected note for instrument'
-        };
+        invalidNumber(retNotes, note);
+        error = retNotes.error;
       }
     }
 
@@ -16974,22 +16917,22 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
       retGraces = [];
 
       for (var iiii = 0; iiii < graces.length; iiii++) {
-        note = checkNote(graces[0].name, this.accidentals);
+        note = new TabNote.TabNote(graces[0].name);
         number = toNumber(this, note);
 
         if (number) {
           retGraces.push(number);
         } else {
-          return {
-            error: notes[0].name + ': unexpected note for instrument'
-          };
+          invalidNumber(retGraces, note);
+          error = retNotes.error;
         }
       }
     }
 
     return {
       notes: retNotes,
-      graces: retGraces
+      graces: retGraces,
+      error: error
     };
   }
 
@@ -17119,50 +17062,145 @@ module.exports = StringTablature;
 var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
 function TabNote(note) {
-  var first = note.charAt(0);
+  var isFlat = false;
+  var newNote = note;
+  var isSharp = false;
+  var isAltered = false;
+  var natural = null;
+  var quarter = null;
+  var isDouble = false;
+  var acc = 0;
 
-  if (first == '_' || first == '^') {
-    this.note = note.charAt(1);
-  } else {
-    this.note = note.charAt(0);
+  if (note.startsWith('_')) {
+    isFlat = true;
+    acc = -1; // check quarter flat
+
+    if (note[1] == '/') {
+      isFlat = false;
+      quarter = "v";
+      acc = 0;
+    } else if (note[1] == '_') {
+      // double flat
+      isDouble = true;
+      acc -= 1;
+    }
+  } else if (note.startsWith('^')) {
+    isSharp = true;
+    acc = +1; // check quarter sharp
+
+    if (note[1] == '/') {
+      isSharp = false;
+      quarter = "^";
+      acc = 0;
+    } else if (note[1] == '^') {
+      // double sharp
+      isDouble = true;
+      acc += 1;
+    }
+  } else if (note.startsWith('=')) {
+    natural = true;
+    acc = 0;
   }
 
-  this.isLower = this.note == this.note.toLowerCase();
-  this.note = this.note.toUpperCase();
-  this.hasComma = note.indexOf(',') != -1;
-  this.isQuoted = note.indexOf("'") != -1;
-  this.sharp = note.indexOf('^') != -1;
-  this.flat = note.indexOf('_') != -1;
+  isAltered = isFlat || isSharp || quarter != null;
+
+  if (isAltered || natural) {
+    if (quarter != null || isDouble) {
+      newNote = note.slice(2);
+    } else {
+      newNote = note.slice(1);
+    }
+  }
+
+  var hasComma = (note.match(/,/g) || []).length;
+  var hasQuote = (note.match(/'/g) || []).length;
+  this.name = newNote;
+  this.acc = acc;
+  this.isSharp = isSharp;
+  this.isDouble = isDouble;
+  this.isAltered = isAltered;
+  this.isFlat = isFlat;
+  this.natural = natural;
+  this.quarter = quarter;
+  this.isLower = this.name == this.name.toLowerCase();
+  this.name = this.name[0].toUpperCase();
+  this.hasComma = hasComma;
+  this.isQuoted = hasQuote;
 }
 
 function cloneNote(self) {
-  var newNote = self.note;
+  var newNote = self.name;
   var newTabNote = new TabNote(newNote);
   newTabNote.hasComma = self.hasComma;
   newTabNote.isLower = self.isLower;
   newTabNote.isQuoted = self.isQuoted;
-  newTabNote.sharp = self.sharp;
-  newTabNote.flat = self.flat;
+  newTabNote.isSharp = self.isSharp;
+  newTabNote.isFlat = self.isFlat;
   return newTabNote;
 }
 
 TabNote.prototype.sameNoteAs = function (note) {
-  if (this.note == note.note && this.hasComma == note.hasComma && this.isLower == note.isLower && this.isQuoted == note.isQuoted && this.sharp == note.sharp && this.flat == note.flat) {
+  if (this.name == note.name && this.hasComma == note.hasComma && this.isLower == note.isLower && this.isQuoted == note.isQuoted && this.isSharp == note.isSharp && this.isFlat == note.isFlat) {
     return true;
   } else {
     return false;
   }
 };
 
+function isUpperCase(candidate) {
+  return /^[A-Z]*$/.test(candidate);
+}
+
+TabNote.prototype.isLowerThan = function (note) {
+  var noteComparator = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+  if (this.hasComma > note.hasComma) return true;
+  if (note.hasComma > this.hasComma) return false;
+  if (this.isQuoted > note.isQuoted) return false;
+  if (note.isQuoted > this.isQuoted) return true;
+  var noteName = note.name[0];
+  var thisName = this.name[0];
+
+  if (isUpperCase(noteName)) {
+    if (!isUpperCase(thisName)) return true;
+  } else {
+    if (isUpperCase(thisName)) return false;
+  }
+
+  thisName = thisName.toUpperCase();
+  noteName = noteName.toUpperCase();
+  if (noteComparator.indexOf(thisName) < noteComparator.indexOf(noteName)) return true;
+  return false;
+};
+
+TabNote.prototype.checkKeyAccidentals = function (accidentals) {
+  if (accidentals) {
+    var curNote = this.name;
+
+    for (var iii = 0; iii < accidentals.length; iii++) {
+      var curAccidentals = accidentals[iii];
+
+      if (curNote == curAccidentals.note.toUpperCase()) {
+        if (curAccidentals.acc == 'flat') {
+          this.acc = -1;
+        }
+
+        if (curAccidentals.acc == 'sharp') {
+          this.acc = +1;
+        }
+      }
+    }
+  }
+};
+
 TabNote.prototype.getAccidentalEquiv = function () {
   var cloned = cloneNote(this);
 
-  if (cloned.sharp) {
+  if (cloned.isSharp) {
     cloned = cloned.nextNote();
-    cloned.flat = true;
-  } else if (cloned.flat) {
+    cloned.isFlat = true;
+  } else if (cloned.isFlat) {
     cloned = cloned.prevNote();
-    cloned.sharp = true;
+    cloned.isSharp = true;
   }
 
   return cloned;
@@ -17171,16 +17209,16 @@ TabNote.prototype.getAccidentalEquiv = function () {
 TabNote.prototype.nextNote = function () {
   var newTabNote = cloneNote(this);
 
-  if (!this.sharp) {
-    if (this.note != 'E' && this.note != 'B') {
-      newTabNote.sharp = true;
+  if (!this.isSharp) {
+    if (this.name != 'E' && this.name != 'B') {
+      newTabNote.isSharp = true;
       return newTabNote;
     }
   } else {
-    newTabNote.sharp = false; // cleanup
+    newTabNote.isSharp = false; // cleanup
   }
 
-  var noteIndex = notes.indexOf(this.note);
+  var noteIndex = notes.indexOf(this.name);
 
   if (noteIndex == notes.length - 1) {
     noteIndex = 0;
@@ -17188,9 +17226,9 @@ TabNote.prototype.nextNote = function () {
     noteIndex++;
   }
 
-  newTabNote.note = notes[noteIndex];
+  newTabNote.name = notes[noteIndex];
 
-  if (newTabNote.note == 'C') {
+  if (newTabNote.name == 'C') {
     if (newTabNote.hasComma) {
       newTabNote.hasComma = false;
     } else {
@@ -17208,12 +17246,12 @@ TabNote.prototype.nextNote = function () {
 TabNote.prototype.prevNote = function () {
   var newTabNote = cloneNote(this);
 
-  if (this.sharp) {
-    newTabNote.sharp = false;
+  if (this.isSharp) {
+    newTabNote.isSharp = false;
     return newTabNote;
   }
 
-  var noteIndex = notes.indexOf(this.note);
+  var noteIndex = notes.indexOf(this.name);
 
   if (noteIndex == 0) {
     noteIndex = notes.length - 1;
@@ -17221,26 +17259,26 @@ TabNote.prototype.prevNote = function () {
     noteIndex--;
   }
 
-  newTabNote.note = notes[noteIndex];
+  newTabNote.name = notes[noteIndex];
 
-  if (newTabNote.note == 'B') {
+  if (newTabNote.name == 'B') {
     if (newTabNote.isLower) {
-      newTabNote.hasComma = true;
+      newTabNote.hasComma = 1;
     } else {
-      if (newTabNote.isQuoted) {
-        newTabNote.isQuoted = false;
+      if (newTabNote.isQuoted > 0) {
+        newTabNote.isQuoted -= 1;
       } else {
         newTabNote.isLower = true;
       }
     }
   }
 
-  if (this.flat) {
-    newTabNote.flat = false;
+  if (this.isFlat) {
+    newTabNote.isFlat = false;
     return newTabNote;
   } else {
-    if (this.note != 'E' && this.note != 'B') {
-      newTabNote.sharp = true;
+    if (this.name != 'E' && this.name != 'B') {
+      newTabNote.isSharp = true;
     }
   }
 
@@ -17248,29 +17286,45 @@ TabNote.prototype.prevNote = function () {
 };
 
 TabNote.prototype.emit = function () {
-  var returned = this.note;
+  var returned = this.name;
 
-  if (this.sharp) {
+  if (this.isSharp) {
     returned = '^' + returned;
+
+    if (this.isDouble) {
+      returned = '^' + returned;
+    }
   }
 
-  if (this.flat) {
+  if (this.isFlat) {
     returned = '_' + returned;
+
+    if (this.isDouble) {
+      returned = '_' + returned;
+    }
+  }
+
+  if (this.quarter) {
+    if (this.quarter == "^") {
+      returned = "^/" + returned;
+    } else {
+      returned = "_/" + returned;
+    }
   }
 
   if (this.natural) {
     returned = '=' + returned;
   }
 
-  if (this.hasComma) {
+  for (var ii = 1; ii <= this.hasComma; ii++) {
     returned += ',';
-  } else {
-    if (this.isLower) {
-      returned = returned.toLowerCase();
+  }
 
-      if (this.isQuoted) {
-        returned += "'";
-      }
+  if (this.isLower) {
+    returned = returned.toLowerCase();
+
+    for (var jj = 1; jj <= this.isQuoted; jj++) {
+      returned += "'";
     }
   }
 
@@ -17303,8 +17357,8 @@ TabNotes.prototype.build = function () {
   var fromN = this.fromN;
   var toN = this.toN;
   var buildReturned = [];
-  var startIndex = notes.indexOf(fromN.note);
-  var toIndex = notes.indexOf(toN.note);
+  var startIndex = notes.indexOf(fromN.name);
+  var toIndex = notes.indexOf(toN.name);
 
   if (startIndex == -1 || toIndex == -1) {
     return buildReturned;
@@ -17628,38 +17682,43 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
 
         if (tabPos.error) {
           plugin._super.setError(tabPos.error);
-        } else {
-          abs.type = 'tabNumber'; // convert note to number
-
-          var def = {
-            el_type: "note",
-            startChar: absChild.abcelem.startChar,
-            endChar: absChild.abcelem.endChar,
-            notes: []
-          };
-
-          for (var ll = 0; ll < tabPos.notes.length; ll++) {
-            var curNote = tabPos.notes[ll];
-            var pitch = plugin.semantics.stringToPitch(curNote.str);
-            var acc = curNote.note.isFlat ? '_' : curNote.note.isSharp ? '^' : '';
-            def.notes.push({
-              num: curNote.num,
-              str: curNote.str,
-              pitch: acc + curNote.note.name
-            });
-            var opt = {
-              type: 'tabNumber'
-            };
-            var tabNoteRelative = new RelativeElement(curNote.num.toString(), 0, 0, pitch, opt);
-            tabNoteRelative.x = relX;
-            tabNoteRelative.isAltered = curNote.note.isAltered;
-            abs.children.push(tabNoteRelative);
-          }
-
-          dest.children.push(abs);
-          tabVoice.push(def);
         }
 
+        var def = {
+          el_type: "note",
+          startChar: absChild.abcelem.startChar,
+          endChar: absChild.abcelem.endChar,
+          notes: []
+        };
+        abs.type = 'tabNumber'; // convert note to number
+
+        for (var ll = 0; ll < tabPos.notes.length; ll++) {
+          var curNote = tabPos.notes[ll];
+          var strNote = curNote.num;
+
+          if (curNote.note.quarter != null) {
+            // add tab quarter => needs to string conversion then 
+            strNote = strNote.toString();
+            strNote += curNote.note.quarter;
+          }
+
+          var pitch = plugin.semantics.stringToPitch(curNote.str);
+          def.notes.push({
+            num: strNote,
+            str: curNote.str,
+            pitch: curNote.note.emit()
+          });
+          var opt = {
+            type: 'tabNumber'
+          };
+          var tabNoteRelative = new RelativeElement(strNote, 0, 0, pitch, opt);
+          tabNoteRelative.x = relX;
+          tabNoteRelative.isAltered = curNote.note.isAltered;
+          abs.children.push(tabNoteRelative);
+        }
+
+        dest.children.push(abs);
+        tabVoice.push(def);
         break;
     }
   }
@@ -17855,8 +17914,8 @@ function buildAccEquiv(acc, note) {
   var equiv = note.getAccidentalEquiv();
 
   if (acc.note.toUpperCase() == equiv.note.toUpperCase()) {
-    equiv.sharp = false;
-    equiv.flat = false;
+    equiv.isSharp = false;
+    equiv.isFlat = false;
     return equiv;
   }
 
@@ -17865,11 +17924,11 @@ function buildAccEquiv(acc, note) {
 
 function adjustNoteToKey(acc, note) {
   if (acc.acc == 'sharp') {
-    if (note.flat) {
+    if (note.isFlat) {
       return buildAccEquiv(acc, note);
-    } else if (note.sharp) {
+    } else if (note.isSharp) {
       if (acc.note.toUpperCase() == note.note.toUpperCase()) {
-        note.sharp = false;
+        note.isSharp = false;
       } else {
         if (acc.note.toUpperCase() == note.note.toUpperCase()) {
           note.natural = true;
@@ -17877,11 +17936,11 @@ function adjustNoteToKey(acc, note) {
       }
     }
   } else if (acc.acc == 'flat') {
-    if (note.sharp) {
+    if (note.isSharp) {
       return buildAccEquiv(acc, note);
-    } else if (note.flat) {
+    } else if (note.isFlat) {
       if (acc.note.toUpperCase() == note.note.toUpperCase()) {
-        note.flat = false;
+        note.isFlat = false;
       }
     } else {
       if (acc.note.toUpperCase() == note.note.toUpperCase()) {
@@ -24957,7 +25016,7 @@ function formatJazzChord(chordString) {
     var chord = lines[i]; // If the chord isn't in a recognizable format then just skip the formatting.
 
     var reg = chord.match(/([ABCDEFG][♯♭]?)([^\/]+)?(\/[ABCDEFG][#b]?)?/);
-    lines[i] = reg[1] + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
+    if (reg) lines[i] = reg[1] + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
   }
 
   return lines.join("\n");
@@ -25450,7 +25509,7 @@ function createStems(elems, asc, beam, dy, mainNote) {
     var pitch = furthestHead.pitch + (asc ? ovalDelta : -ovalDelta);
     var dx = asc ? furthestHead.w : 0; // down-pointing stems start on the left side of the note, up-pointing stems start on the right side, so we offset by the note width.
 
-    dx += furthestHead.dx;
+    if (!isGrace) dx += furthestHead.dx;
     var x = furthestHead.x + dx; // this is now the actual x location in pixels.
 
     var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
@@ -27380,18 +27439,23 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
     }, getTextSize);
   }
 
-  if (lines[0] && lines[0].subtitle) {
-    addTextIf(this.rows, {
-      marginLeft: tLeft,
-      text: lines[0].subtitle.text,
-      font: 'subtitlefont',
-      klass: 'text meta-top subtitle',
-      marginTop: spacing.subtitle,
-      anchor: tAnchor,
-      absElemType: "subtitle",
-      info: lines[0].subtitle,
-      name: "subtitle"
-    }, getTextSize);
+  if (lines.length) {
+    var index = 0;
+
+    while (index < lines.length && lines[index].subtitle) {
+      addTextIf(this.rows, {
+        marginLeft: tLeft,
+        text: lines[index].subtitle.text,
+        font: 'subtitlefont',
+        klass: 'text meta-top subtitle',
+        marginTop: spacing.subtitle,
+        anchor: tAnchor,
+        absElemType: "subtitle",
+        info: lines[index].subtitle,
+        name: "subtitle"
+      }, getTextSize);
+      index++;
+    }
   }
 
   if (metaText.rhythm || metaText.origin || metaText.composer) {

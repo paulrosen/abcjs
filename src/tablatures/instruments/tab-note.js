@@ -5,52 +5,142 @@
  */
 var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
+
 function TabNote(note) {
-  var first = note.charAt(0);
-  if (first == '_' || first == '^') {
-    this.note = note.charAt(1);
-  } else {
-    this.note = note.charAt(0);
+  var isFlat = false;
+  var newNote = note;
+  var isSharp = false;
+  var isAltered = false;
+  var natural = null;
+  var quarter = null;
+  var isDouble = false;
+  var acc = 0;
+
+  if (note.startsWith('_')) {
+    isFlat = true;
+    acc = -1;
+    // check quarter flat
+    if (note[1] == '/') {
+      isFlat = false;
+      quarter = "v";
+      acc = 0;
+    } else if (note[1] == '_') {
+      // double flat
+      isDouble = true;
+      acc -= 1;
+    }
+  } else if (note.startsWith('^')) {
+    isSharp = true;
+    acc = +1;
+    // check quarter sharp
+    if (note[1] == '/') {
+      isSharp = false;
+      quarter = "^";
+      acc = 0;
+    } else if (note[1] == '^') {
+      // double sharp
+      isDouble = true;
+      acc += 1;
+    }
+  } else if (note.startsWith('=')) {
+    natural = true;
+    acc = 0;
   }
-  this.isLower = (this.note == this.note.toLowerCase());
-  this.note = this.note.toUpperCase();
-  this.hasComma = note.indexOf(',') != -1;
-  this.isQuoted = note.indexOf("'") != -1;
-  this.sharp = note.indexOf('^') != -1;
-  this.flat = note.indexOf('_') != -1;
+  isAltered = isFlat || isSharp || (quarter != null);
+  if (isAltered || natural) {
+    if ((quarter != null) || (isDouble)) {
+      newNote = note.slice(2);
+    } else {
+      newNote = note.slice(1);
+    }
+  }
+  var hasComma = (note.match(/,/g) || []).length;
+  var hasQuote = (note.match(/'/g) || []).length;
+
+  this.name = newNote;
+  this.acc = acc;
+  this.isSharp = isSharp;
+  this.isDouble = isDouble;
+  this.isAltered = isAltered;
+  this.isFlat = isFlat;
+  this.natural = natural;
+  this.quarter = quarter;
+  this.isLower = (this.name == this.name.toLowerCase());
+  this.name = this.name[0].toUpperCase();
+  this.hasComma = hasComma;
+  this.isQuoted = hasQuote;
 }
 
 function cloneNote(self) {
-  var newNote = self.note;
+  var newNote = self.name;
   var newTabNote = new TabNote(newNote);
   newTabNote.hasComma = self.hasComma;
   newTabNote.isLower = self.isLower;
   newTabNote.isQuoted = self.isQuoted;
-  newTabNote.sharp = self.sharp;
-  newTabNote.flat = self.flat;
+  newTabNote.isSharp = self.isSharp;
+  newTabNote.isFlat = self.isFlat;
   return newTabNote;
 } 
 TabNote.prototype.sameNoteAs = function (note) {
-  if ((this.note == note.note) &&
+  if ((this.name == note.name) &&
     (this.hasComma == note.hasComma) &&
     (this.isLower == note.isLower) &&
     (this.isQuoted == note.isQuoted) &&
-    (this.sharp == note.sharp) &&
-    (this.flat == note.flat)) {
+    (this.isSharp == note.isSharp) &&
+    (this.isFlat == note.isFlat)) {
     return true;
   } else {
     return false;
   }
 };
 
+function isUpperCase(candidate) {
+  return  /^[A-Z]*$/.test(candidate);
+}
+TabNote.prototype.isLowerThan = function (note) {
+  var noteComparator = ['C','D','E','F','G','A','B'];
+  if (this.hasComma > note.hasComma) return true;
+  if (note.hasComma > this.hasComma) return false;
+  if (this.isQuoted > note.isQuoted) return false;
+  if (note.isQuoted > this.isQuoted) return true;
+  var noteName = note.name[0];
+  var thisName = this.name[0];
+  if (isUpperCase(noteName)) {
+    if (!isUpperCase(thisName)) return true;
+  } else {
+    if (isUpperCase(thisName)) return false;
+  }
+  thisName = thisName.toUpperCase();
+  noteName = noteName.toUpperCase();
+  if (noteComparator.indexOf(thisName) < noteComparator.indexOf(noteName)) return true;
+  return false;
+};
+
+TabNote.prototype.checkKeyAccidentals = function(accidentals) {
+  if (accidentals) {
+    var curNote = this.name;
+    for (var iii = 0; iii < accidentals.length; iii++) {
+      var curAccidentals = accidentals[iii];
+      if (curNote == curAccidentals.note.toUpperCase()) {
+        if (curAccidentals.acc == 'flat') {
+          this.acc = -1;
+        }
+        if (curAccidentals.acc == 'sharp') {
+          this.acc = +1;
+        }
+      }
+    }
+  }
+};
+
 TabNote.prototype.getAccidentalEquiv = function () {
   var cloned = cloneNote(this);
-  if (cloned.sharp) {
+  if (cloned.isSharp) {
     cloned = cloned.nextNote();
-    cloned.flat = true;
-  } else if (cloned.flat) {
+    cloned.isFlat = true;
+  } else if (cloned.isFlat) {
     cloned = cloned.prevNote();
-    cloned.sharp = true;
+    cloned.isSharp = true;
   }
   return cloned;
 };
@@ -59,22 +149,22 @@ TabNote.prototype.getAccidentalEquiv = function () {
 TabNote.prototype.nextNote = function () {
   var newTabNote = cloneNote(this);
 
-  if (!this.sharp) {
-    if (this.note != 'E' && this.note != 'B') {
-      newTabNote.sharp = true;
+  if (!this.isSharp) {
+    if (this.name != 'E' && this.name != 'B') {
+      newTabNote.isSharp = true;
       return newTabNote;
     }
   } else {
-    newTabNote.sharp = false; // cleanup
+    newTabNote.isSharp = false; // cleanup
   }
-  var noteIndex = notes.indexOf(this.note);
+  var noteIndex = notes.indexOf(this.name);
   if (noteIndex == notes.length - 1) {
     noteIndex = 0;
   } else {
     noteIndex++;
   }
-  newTabNote.note = notes[noteIndex];
-  if (newTabNote.note == 'C') {
+  newTabNote.name = notes[noteIndex];
+  if (newTabNote.name == 'C') {
     if (newTabNote.hasComma) {
       newTabNote.hasComma = false;
     } else {
@@ -91,58 +181,71 @@ TabNote.prototype.nextNote = function () {
 TabNote.prototype.prevNote = function () {
   var newTabNote = cloneNote(this);
 
-  if (this.sharp) {
-    newTabNote.sharp = false;
+  if (this.isSharp) {
+    newTabNote.isSharp = false;
     return newTabNote;
   }
-  var noteIndex = notes.indexOf(this.note);
+  var noteIndex = notes.indexOf(this.name);
   if (noteIndex == 0) {
     noteIndex = notes.length - 1;
   } else {
     noteIndex--;
   }
-  newTabNote.note = notes[noteIndex];
-  if (newTabNote.note == 'B') {
+  newTabNote.name = notes[noteIndex];
+  if (newTabNote.name == 'B') {
     if (newTabNote.isLower) {
-      newTabNote.hasComma = true;
+      newTabNote.hasComma = 1;
     } else {
-      if (newTabNote.isQuoted) {
-        newTabNote.isQuoted = false;
+      if (newTabNote.isQuoted > 0) {
+        newTabNote.isQuoted -= 1;
       } else {
         newTabNote.isLower = true;
       }
     }
   }
-  if (this.flat) {
-    newTabNote.flat = false;
+  if (this.isFlat) {
+    newTabNote.isFlat = false;
     return newTabNote;
   } else {
-    if (this.note != 'E' && this.note != 'B') {
-      newTabNote.sharp = true;
+    if (this.name != 'E' && this.name != 'B') {
+      newTabNote.isSharp = true;
     }
   }
   return newTabNote;
 };
 
 TabNote.prototype.emit = function () {
-  var returned = this.note;
-  if (this.sharp) {
+  var returned = this.name;
+  if (this.isSharp) {
     returned = '^' + returned;
+    if (this.isDouble) {
+      returned = '^' + returned;
+    }
   }
-  if (this.flat) {
+  if (this.isFlat) {
     returned = '_' + returned;
+    if (this.isDouble) {
+      returned = '_' + returned;
+    }
+  }
+  if (this.quarter) {
+    if (this.quarter == "^") {
+      returned = "^/" + returned;
+    } else {
+      returned = "_/" + returned;
+    }
   }
   if (this.natural) {
     returned = '=' + returned;
   }
-  if (this.hasComma) {
+  for (var ii = 1; ii <= this.hasComma; ii++) {
     returned += ',';
-  } else {
-    if (this.isLower) {
-      returned = returned.toLowerCase();
-      if (this.isQuoted) {
-        returned += "'";
-      }
+  }
+  
+  if (this.isLower) {
+    returned = returned.toLowerCase();
+    for (var jj = 1; jj <= this.isQuoted; jj++) {
+      returned += "'";
     }
   }
   return returned;

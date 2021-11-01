@@ -10,8 +10,8 @@ var TabNote = require('./instruments/tab-note');
 function buildAccEquiv(acc,note) {
   var equiv = note.getAccidentalEquiv();
   if (acc.note.toUpperCase() == equiv.note.toUpperCase()) {
-    equiv.sharp = false;
-    equiv.flat = false;
+    equiv.isSharp = false;
+    equiv.isFlat = false;
     return equiv;
   }
   return note;
@@ -19,11 +19,11 @@ function buildAccEquiv(acc,note) {
 
 function adjustNoteToKey(acc, note) {
   if (acc.acc == 'sharp') {
-    if (note.flat) {
+    if (note.isFlat) {
       return buildAccEquiv(acc, note);
-    } else if (note.sharp) {
+    } else if (note.isSharp) {
       if (acc.note.toUpperCase() == note.note.toUpperCase()) {
-        note.sharp = false;
+        note.isSharp = false;
       } else {
         if (acc.note.toUpperCase() == note.note.toUpperCase()) {
           note.natural = true;
@@ -31,11 +31,11 @@ function adjustNoteToKey(acc, note) {
       }
     }
   } else if (acc.acc == 'flat') {
-    if (note.sharp) {
+    if (note.isSharp) {
       return buildAccEquiv(acc, note);
-    } else if (note.flat) {
+    } else if (note.isFlat) {
       if (acc.note.toUpperCase() == note.note.toUpperCase()) {
-        note.flat = false;
+        note.isFlat = false;
       }
     } else {
       if (acc.note.toUpperCase() == note.note.toUpperCase()) {
