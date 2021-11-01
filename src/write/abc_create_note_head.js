@@ -30,7 +30,7 @@ var createNoteHead = function(abselem, c, pitchelem, options) {
 				var adjust = (pitchelem.printer_shift==="same")?1:0;
 				shiftheadx = (dir==="down")?-glyphs.getSymbolWidth(c)*scale+adjust:glyphs.getSymbolWidth(c)*scale-adjust;
 			}
-			var opts = {scalex:scale, scaley: scale, thickness: glyphs.symbolHeightInPitches(c)*scale };
+			var opts = {scalex:scale, scaley: scale, thickness: glyphs.symbolHeightInPitches(c)*scale, name: pitchelem.name };
 			notehead = new RelativeElement(c, shiftheadx, glyphs.getSymbolWidth(c)*scale, pitch, opts);
 			notehead.stemDir = dir;
 			if (flag) {

@@ -141,7 +141,7 @@ describe("Timing", function() {
 	});
 
 	it("repeated sections callback", function() {
-		doClickTest(abcRepeatedSections, expectedRepeatedSections);
+		doClickTest2(abcRepeatedSections, expectedRepeatedSections);
 	});
 
 	it("of 11/8", function() {
@@ -219,7 +219,7 @@ var trans = function(nt, i, ms) { console.log(nt[i].milliseconds, nt[i].midiPitc
 
 //////////////////////////////////////////////////////////
 
-function doClickTest(abc, expected) {
+function doClickTest2(abc, expected) {
 	var visualObj = abcjs.renderAbc("paper", abc);
 	visualObj[0].setUpAudio();
 	var selectables = visualObj[0].engraver.selectables;

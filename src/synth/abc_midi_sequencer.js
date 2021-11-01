@@ -235,6 +235,15 @@ var parseCommon = require("../parse/abc_common");
 										if (elem.startTriplet) {
 											tripletMultiplier = elem.tripletMultiplier;
 											tripletDurationTotal = elem.startTriplet * tripletMultiplier * elem.duration;
+											if (elem.startTriplet != elem.tripletR) { // most commonly (3:2:2
+												if (v + elem.tripletR <= voice.length) {
+													var durationTotal = 0;
+													for (var w = v; w < v + elem.tripletR; w++) {
+														durationTotal += voice[w].duration;
+													}
+													tripletDurationTotal = tripletMultiplier * durationTotal;
+												}
+											}
 											noteElem.duration = noteElem.duration * tripletMultiplier;
 											noteElem.duration = Math.round(noteElem.duration*1000000)/1000000;
 											tripletDurationCount = noteElem.duration;
@@ -264,6 +273,7 @@ var parseCommon = require("../parse/abc_common");
 									}
 									break;
 								case "key":
+								case "keySignature":
 									addKey(voices[voiceNumber], elem);
 									break;
 								case "meter":

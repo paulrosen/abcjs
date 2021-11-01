@@ -318,6 +318,7 @@ MusicParser.prototype.parseMusic = function(line) {
 						else {
 							el.startTriplet = ret.triplet;
 							el.tripletMultiplier = ret.tripletQ / ret.triplet;
+							el.tripletR = ret.num_notes;
 							tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
 						}
 					}
@@ -480,6 +481,7 @@ MusicParser.prototype.parseMusic = function(line) {
 							// TODO-PER: straighten this out so there is not so much copying: getCoreNote shouldn't change e'
 							if (core.accidental !== undefined) el.pitches[0].accidental = core.accidental;
 							el.pitches[0].pitch = core.pitch;
+							el.pitches[0].name = core.name;
 							if (core.midipitch || core.midipitch === 0)
 								el.pitches[0].midipitch = core.midipitch;
 							if (core.endSlur !== undefined) el.pitches[0].endSlur = core.endSlur;
@@ -672,12 +674,17 @@ var letter_to_grace =  function(line, i) {
 
 				ii  = note.endChar;
 				delete note.endChar;
+
+				if (note.end_beam) {
+					note.endBeam = true;
+					delete note.end_beam;
+				}
 			}
 			else {
 				// We shouldn't get anything but notes or a space here, so report an error
 				if (gra[1].charAt(ii) === ' ') {
 					if (gracenotes.length > 0)
-						gracenotes[gracenotes.length-1].end_beam = true;
+						gracenotes[gracenotes.length-1].endBeam = true;
 				} else
 					warn("Unknown character '" + gra[1].charAt(ii) + "' while parsing grace note", line, i);
 				ii++;
@@ -1062,6 +1069,7 @@ var addEndBeam = function(el) {
 
 var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
 var rests = {x: 'invisible', X: 'invisible-multimeasure', y: 'spacer', z: 'rest', Z: 'multimeasure' };
+var accMap = { 'dblflat': '__', 'flat': '_', 'natural': '=', 'sharp': '^', 'dblsharp': '^^', 'quarterflat': '_/', 'quartersharp': '^/'};
 var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 	//var el = { startChar: index };
 	var isComplete = function(state) {
@@ -1120,6 +1128,9 @@ var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 			case 'g':
 				if (state === 'startSlur' || state === 'sharp2' || state === 'flat2' || state === 'pitch') {
 					el.pitch = pitches[line.charAt(index)];
+					el.name = line.charAt(index);
+					if (el.accidental)
+						el.name = accMap[el.accidental] + el.name;
 					transpose.note(multilineVars, el);
 					state = 'octave';
 					// At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
@@ -1134,7 +1145,6 @@ var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 						(multilineVars.currentVoice && multilineVars.currentVoice.clef === "perc")) {
 						var key = line.charAt(index);
 						if (el.accidental) {
-							var accMap = { 'dblflat': '__', 'flat': '_', 'natural': '=', 'sharp': '^', 'dblsharp': '^^'};
 							key = accMap[el.accidental] + key;
 						}
 						if (tune.formatting && tune.formatting.midi && tune.formatting.midi.drummap)
@@ -1144,12 +1154,12 @@ var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 				else return null;
 				break;
 			case ',':
-				if (state === 'octave') {el.pitch -= 7; }
+				if (state === 'octave') {el.pitch -= 7; el.name += ','; }
 				else if (isComplete(state)) {el.endChar = index;return el;}
 				else return null;
 				break;
 			case '\'':
-				if (state === 'octave') {el.pitch += 7; }
+				if (state === 'octave') {el.pitch += 7; el.name += "'";  }
 				else if (isComplete(state)) {el.endChar = index;return el;}
 				else return null;
 				break;

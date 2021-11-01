@@ -742,6 +742,7 @@ var parseDirective = {};
 			//					titleformat: { type: "string", optional: true },
 			case "bagpipes":tune.formatting.bagpipes = true;break;
 			case "flatbeams":tune.formatting.flatbeams = true;break;
+			case "jazzchords":tune.formatting.jazzchords = true;break;
 			case "landscape":multilineVars.landscape = true;break;
 			case "papersize":multilineVars.papersize = restOfString;break;
 			case "graceslurs":
@@ -814,7 +815,7 @@ var parseDirective = {};
 				break;
 			case "sep":
 				if (tokens.length === 0)
-					tuneBuilder.addSeparator(14,14,85); // If no parameters are given, then there is a default size.
+					tuneBuilder.addSeparator(14,14,85, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+5}); // If no parameters are given, then there is a default size.
 				else {
 					var points = tokenizer.getMeasurement(tokens);
 					if (points.used === 0)
@@ -830,7 +831,7 @@ var parseDirective = {};
 					if (points.used === 0 || tokens.length !== 0)
 						return "Directive \"" + cmd + "\" requires 3 numbers: space above, space below, length of line";
 					var lenLine = points.value;
-					tuneBuilder.addSeparator(spaceAbove, spaceBelow, lenLine);
+					tuneBuilder.addSeparator(spaceAbove, spaceBelow, lenLine, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+restOfString.length});
 				}
 				break;
 			case "barsperstaff":
@@ -882,7 +883,7 @@ var parseDirective = {};
 						textBlock += line + "\n";
 					line = tokenizer.nextLine()
 				}
-				tuneBuilder.addText(textBlock);
+				tuneBuilder.addText(textBlock, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+textBlock.length+7});
 				break;
 			case "continueall":
 				multilineVars.continueall = true;
@@ -901,7 +902,7 @@ var parseDirective = {};
 				break;
 			case "text":
 				var textstr = tokenizer.translateString(restOfString);
-				tuneBuilder.addText(parseDirective.parseFontChangeLine(textstr));
+				tuneBuilder.addText(parseDirective.parseFontChangeLine(textstr), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+restOfString.length+7});
 				break;
 			case "center":
 				var centerstr = tokenizer.translateString(restOfString);
@@ -1067,7 +1068,7 @@ var parseDirective = {};
 					case "-version":
 					case "-charset":
 						var subCmd = arr.shift();
-						tuneBuilder.addMetaText(cmd+subCmd, arr.join(' '));
+						tuneBuilder.addMetaText(cmd+subCmd, arr.join(' '), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+restOfString.length+5});
 						break;
 					default:
 						return "Unknown directive: " + cmd+arr[0];
@@ -1090,7 +1091,7 @@ var parseDirective = {};
 				if (footerArr.length > 3)
 					warn("Too many tabs in " + cmd + ": " + footerArr.length + " found.", restOfString, 0);
 
-				tuneBuilder.addMetaTextObj(cmd, footer);
+				tuneBuilder.addMetaTextObj(cmd, footer, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+str.length});
 				break;
 
 			case "midi":

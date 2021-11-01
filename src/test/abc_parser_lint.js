@@ -60,15 +60,17 @@ var ParserLint = function() {
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
 		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
 		"upbow", "downbow", "staccato", "trem1", "trem2", "trem3", "trem4",
-		"/", "//", "//", "///", "////", "turnx", "invertedturn", "invertedturnx", "arpeggio", "trill(", "trill)", "xstem",
+		"/", "//", "///", "////", "turnx", "invertedturn", "invertedturnx", "arpeggio", "trill(", "trill)", "xstem",
 		"mark", "marcato", "umarcato"
 	] } };
 
 	var tempoProperties =  {
 		duration: { type: "array", optional: true, output: "join", requires: [ 'bpm'], items: { type: "number"} },
 		bpm: { type: "number", optional: true, requires: [ 'duration'] },
+		endChar: { type: 'number'},
 		preString: { type: 'string', optional: true},
 		postString: { type: 'string', optional: true},
+		startChar: { type: 'number'},
 		suppress: { type: 'boolean', Enum: [ true ], optional: true},
 		suppressBpm: { type: 'boolean', Enum: [ true ], optional: true}
 	};
@@ -161,6 +163,7 @@ var ParserLint = function() {
 
 	var clefProperties = {
 		stafflines: { type: 'number', minimum: 0, maximum: 10, optional: true },
+		staffscale: { type: 'number', minimum: 0.1, maximum: 10, optional: true },
 		transpose: { type: 'number', minimum: -24, maximum: 24, optional: true },
 		type: { type: 'string', Enum: [ 'treble', 'tenor', 'bass', 'alto', 'treble+8', 'tenor+8', 'bass+8', 'alto+8', 'treble-8', 'tenor-8', 'bass-8', 'alto-8', 'none', 'perc' ] },
 		verticalPos: { type: 'number', minimum: -20, maximum: 10 },	// the pitch that goes in the middle of the staff C=0
@@ -228,6 +231,7 @@ var ParserLint = function() {
 				endSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 				endTie: { type: 'boolean', Enum: [ true ], optional: true },
 				midipitch: { type: 'number', optional: true },
+				name: { type: 'string' },
 				pitch: { type: 'number' },
 				verticalPos: { type: 'number' },
 				startBeam: { type: 'boolean', Enum: [ true ], prohibits: [ 'endBeam', 'beambr' ], optional: true },
@@ -247,6 +251,7 @@ var ParserLint = function() {
 					endSlur: { type: 'array', optional: true, output: "join", items: { type: 'number', minimum: 0 } },
 					endTie: { type: 'boolean', Enum: [ true ], optional: true },
 					midipitch: { type: 'number', optional: true },
+					name: { type: 'string' },
 					pitch: { type: 'number' },
 					verticalPos: { type: 'number' },
 					startSlur: slurProperties,
@@ -271,6 +276,7 @@ var ParserLint = function() {
 		startSlur: slurProperties,
 		startTriplet: { type: 'number', minimum: 2, maximum: 9, optional: true },
 		tripletMultiplier: { type: 'number', minimum: .1, maximum: 9, optional: true },
+		tripletR: { type: 'number', minimum: .1, maximum: 9, optional: true },
 		stemConnectsToAbove: { type: 'boolean', Enum: [ true ], optional: true },
 		style: {	type: 'string', Enum: ['normal', 'harmonic', 'rhythm', 'x', 'triangle'], optional: true }
 };
@@ -353,9 +359,11 @@ var ParserLint = function() {
 	var textFieldProperties = { type: "stringorarray", optional: true, output: 'noindex',
 		items: {
 			type: 'object', properties: {
+				endChar: { type: 'number', optional: true},
 				font: fontType,
 				text: { type: 'string' },
-				center: { type: 'boolean', Enum: [ true ], optional: true }
+				center: { type: 'boolean', Enum: [ true ], optional: true },
+				startChar: { type: 'number', optional: true}
 			}
 		}
 	};
@@ -453,6 +461,7 @@ var ParserLint = function() {
 			infoline: { type: "boolean", optional: true },
 			infospace: { type: "number", optional: true },
 //					landscape: { type: "boolean", optional: true },
+			jazzchords: { type: "boolean", optional: true },
 			leftmargin: { type: "number", optional: true },
 			linesep: { type: "number", optional: true },
 			lineskipfac: { type: "number", optional: true },
@@ -586,13 +595,27 @@ var ParserLint = function() {
 				staffbreak: { type: 'number', optional: true },
 				separator: { type: 'object', optional: true, prohibits: [ 'staff', 'text', 'subtitle' ],
 					properties: {
+						endChar: { type: 'number'},
 						lineLength: { type: 'number', optional: true },
 						spaceAbove: { type: 'number', optional: true },
-						spaceBelow: { type: 'number', optional: true }
+						spaceBelow: { type: 'number', optional: true },
+						startChar: { type: 'number'}
 					}
 				},
-				subtitle: { type: "string", optional: true, prohibits: [ 'staff', 'text', 'separator' ]  },
-				text: addProhibits(textFieldProperties, [ 'staff', 'subtitle', 'separator' ]),
+				subtitle: { type: "object", optional: true, prohibits: [ 'staff', 'text', 'separator' ],
+					properties: {
+						endChar: { type: 'number'},
+						startChar: { type: 'number'},
+						text: { type: 'string'}
+					}
+				},
+				text: { type: "object", optional: true, prohibits: [ 'staff', 'subtitle', 'separator' ],
+					properties: {
+						endChar: { type: 'number'},
+						startChar: { type: 'number'},
+						text: textFieldProperties
+					}
+				},
 				staff: { type: 'array', optional: true, prohibits: [ 'subtitle', 'text', 'separator' ],
 					items: { type: 'object',
 						properties: {
@@ -678,7 +701,37 @@ var ParserLint = function() {
 					unalignedWords: { type: 'array', optional: true, items: textFieldProperties },
 					url: { type: "string", optional: true }
 				}
-			}
+			},
+			metaTextInfo: {type:"object",
+				description: "There can only be one of these per tune",
+				properties: {
+					"abc-copyright": { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					"abc-creator": { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					"abc-version": { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					"abc-charset": { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					"abc-edited-by": { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					author: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					book: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					composer: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					discography: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					footer: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					group: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					header: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					history: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					instruction: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					notes: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					origin: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					partOrder: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					rhythm: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					source: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					tempo: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					textBlock: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					title: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					transcription: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					unalignedWords: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+					url: { type: "object", optional: true, properties: { startChar: { type: "number"}, endChar: { type: "number"}, } },
+				}
+			},
 		}
 	};
 

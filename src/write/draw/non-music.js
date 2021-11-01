@@ -14,28 +14,31 @@ function nonMusic(renderer, obj, selectables) {
 				text: row.text,
 				type: row.font,
 				klass: row.klass,
+				name: row.name,
 				anchor: row.anchor
 			});
 			if (row.absElemType) {
 				selectables.wrapSvgEl({
 					el_type: row.absElemType,
-					startChar: -1,
-					endChar: -1,
+					name: row.name,
+					startChar: row.startChar,
+					endChar: row.endChar,
 					text: row.text
 				}, el);
 			}
 		} else if (row.separator) {
 			drawSeparator(renderer, row.separator)
 		} else if (row.startGroup) {
-			renderer.paper.openGroup({klass: row.klass});
+			renderer.paper.openGroup({klass: row.klass, "data-name": row.name});
 		} else if (row.endGroup) {
 			// TODO-PER: also create a history element with the title "row.endGroup"
 			var g = renderer.paper.closeGroup();
 			if (row.absElemType)
 				selectables.wrapSvgEl({
 					el_type: row.absElemType,
-					startChar: -1,
-					endChar: -1,
+					name: row.name,
+					startChar: row.startChar,
+					endChar: row.endChar,
 					text: ""
 				}, g);
 		}

@@ -11,17 +11,18 @@ var activeAudioContext = require('./active-audio-context');
 // But then, call it again after a user interaction to test for resume.
 
 function supportsAudio() {
-	var aac = activeAudioContext();
-	if (aac)
-		return aac.resume !== undefined;
-
 	if (!window.Promise)
 		return false;
 
-	return !!window.AudioContext ||
-		!!window.webkitAudioContext ||
-		!!navigator.mozAudioContext ||
-		!!navigator.msAudioContext;
+	if (!window.AudioContext &&
+		!window.webkitAudioContext &&
+		!navigator.mozAudioContext &&
+		!navigator.msAudioContext)
+		return false;
+
+	var aac = activeAudioContext();
+	if (aac)
+		return aac.resume !== undefined;
 }
 
 module.exports = supportsAudio;

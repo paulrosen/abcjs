@@ -11,6 +11,7 @@ tmp/
 .eslintrc
 .gitmodules
 deploy-docs.sh
+docker-start.sh
 docker-compose.yml
 Dockerfile
 start-version.sh

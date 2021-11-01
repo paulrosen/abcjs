@@ -38,6 +38,7 @@ var EngraverController = function(paper, params) {
   this.selectTypes = params.selectTypes;
   this.responsive = params.responsive;
   this.space = 3*spacing.SPACE;
+  this.initialClef = params.initialClef
   this.scale = params.scale ? parseFloat(params.scale) : 0;
   this.classes = new Classes({ shouldAddClasses: params.add_classes });
   if (!(this.scale > 0.1))
@@ -60,6 +61,8 @@ var EngraverController = function(paper, params) {
 	this.renderer.setPaddingOverride(params);
 	if (params.showDebug)
 		this.renderer.showDebug = params.showDebug;
+	if (params.jazzchords)
+		this.jazzchords = params.jazzchords;
   this.renderer.controller = this; // TODO-GD needed for highlighting
 	this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
 	if (params.ariaLabel)
@@ -170,7 +173,9 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 		bagpipes: abcTune.formatting.bagpipes,
 		flatbeams: abcTune.formatting.flatbeams,
 		graceSlurs: abcTune.formatting.graceSlurs !== false, // undefined is the default, which is true
-		percmap: abcTune.formatting.percmap
+		percmap: abcTune.formatting.percmap,
+		initialClef: this.initialClef,
+		jazzchords: this.jazzchords
 	});
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.engraver.measureLength = abcTune.getMeterFraction().num/abcTune.getMeterFraction().den;
@@ -189,7 +194,7 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 };
 
 EngraverController.prototype.constructTuneElements = function (abcTune) {
-	abcTune.topText = new TopText(abcTune.metaText, abcTune.formatting, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+	abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
 
 	// Generate the raw staff line data
 	var i;
@@ -200,7 +205,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 		abcLine = abcTune.lines[i];
 		if (abcLine.staff) {
 			hasSeenNonSubtitle = true;
-			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null);
+			abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo: null, i);
 			hasPrintedTempo = true;
 		} else if (abcLine.subtitle) {
 			// If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.

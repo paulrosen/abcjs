@@ -7,22 +7,23 @@ var elementGroup = require('./group-elements');
  * if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
  * not scaled if not in printgroup
  */
-function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
+function printSymbol(renderer, x, offset, symbol, options) {
+	// TODO-PER: what happened to scalex, and scaley? That might have been a bug introduced in refactoring
 	var el;
 	var ycorr;
 	if (!symbol) return null;
 	if (symbol.length > 1 && symbol.indexOf(".") < 0) {
-		renderer.paper.openGroup({klass: klass});
+		renderer.paper.openGroup({"data-name": options.name, klass: options.klass});
 		var dx = 0;
 		for (var i = 0; i < symbol.length; i++) {
 			var s = symbol.charAt(i);
 			ycorr = glyphs.getYCorr(s);
-			el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, '', "none", renderer.foregroundColor);
+			el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, {stroke: options.stroke, fill: options.fill, "data-name": options.name});
 			if (el) {
 				if (i < symbol.length - 1)
 					dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));
 			} else {
-				renderText(renderer, { x: x, y: renderer.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'});
+				renderText(renderer, { x: x, y: renderer.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'}, false);
 			}
 		}
 		var g = renderer.paper.closeGroup();
@@ -30,14 +31,14 @@ function printSymbol(renderer, x, offset, symbol, scalex, scaley, klass) {
 	} else {
 		ycorr = glyphs.getYCorr(symbol);
 		if (elementGroup.isInGroup()) {
-			elementGroup.addPath(glyphs.getPathForSymbol(x, renderer.calcY(offset + ycorr), symbol, scalex, scaley));
+			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, {"data-name": options.name});
 		} else {
-			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, klass, "none", renderer.foregroundColor);
-			if (el) {
-				return el;
-			} else
-				renderText(renderer, { x: x, y: renderer.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'});
+			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, {klass: options.klass, stroke: options.stroke, fill: options.fill, "data-name": options.name});
 		}
+		if (el) {
+			return el;
+		}
+		renderText(renderer, { x: x, y: renderer.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'}, false);
 		return null;
 	}
 }

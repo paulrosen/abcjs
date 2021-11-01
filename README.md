@@ -14,7 +14,7 @@ If you are using an octave clef (for instance `K:C clef=treble-8`) it will now s
 
 ## Last version supporting midi.js is 6.0.0-beta.28
 
-The file [abcjs version supporting midi.js](https://raw.github.io/paulrosen/abcjs/main/bin/abcjs_midi-min.js) is the last version of the old style of sound production that will receive updates.
+The file [abcjs version supporting midi.js](https://github.com/paulrosen/historical-abcjs-versions/blob/main/version-6/abcjs_midi-min.js) is the last version of the old style of sound production that will receive updates.
 
 ## Rename the default branch to `main`
 
@@ -68,11 +68,13 @@ I'm trying to get all the issues that will create breaking changes done before r
 
 I am going to try to release new beta versions regularly with a few improvements in each.
 
-The two changes that are coming soon that might affect your code are:
-1) Break apart the paths in the SVG so that parts of the note can be targeted. (For instance, just the flag, or one note in a chord.)
-2) Be able to set the minimum spacing for notes when there are lots of notes on a line.
-
-There will also be a number of the open issues considered for each beta version.
+These are the changes that are planned:
+* Improve the API for controlling the synth. That is, make the parameters less confusing.
+* Test and improve the sound of the soundfont.
+* Add all the typescript definitions.
+* Break apart the paths in the SVG so that parts of the note can be targeted. (For instance, just the flag, or one note in a chord.)
+* Control the spacing of the elements on the line better: support equal size measures, and support allowing control of the spacing between notes.
+* Bug fixes.
 
 If you have a particular issue that is impeding your usage of this library, please mention it in the issue.
 
@@ -94,4 +96,4 @@ And I would love some help on this project, including documentation, bug fixes, 
 ## Supported by BrowserStack
 If you aren't using the same browser and machine that I use, you can thank [BrowserStack](https://browserstack.com/) for their support of this open-source project.
 
-![BrowserStack](https://cdn.rawgit.com/paulrosen/abcjs/main/docs/.vuepress/public/img/browserstack-logo-600x315.png)
+![BrowserStack](https://paulrosen.github.io/abcjs/img/browserstack-logo-600x315.png)

@@ -17,7 +17,8 @@
 					:sub-options="[
         { text: 'The width of the music should change with the width of the display', value: 'responsive' },
         { text: 'Cursor should follow the playback', value: 'cursor' },
-        { text: 'Measures should hide as they finish playing', value: 'hideMeasures'}
+        { text: 'Measures should hide as they finish playing', value: 'hideMeasures'},
+        { text: 'Clef should be shown only on the first line', value: 'initialClef'}
     ]"
 					value="sheetMusic">
 				</check-box>

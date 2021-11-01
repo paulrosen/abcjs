@@ -20,15 +20,40 @@ describe("MIDI file creation", function() {
 		"MTrk%00%00%00%43%00%FF%03%09%4c%65%66%74%20%48%61%6e%64%00%C0%04%00%B4%79%00%00%B4%40%00%00%B4%5B%30%00%B4%0A%60%00%B4%07%64" +
 		"%00%94%37%69%83%60%84%37%00%00%94%39%5f%83%60%84%39%00%00%94%37%5f%87%40%84%37%00%00%FF%2F%00";
 
+	var abcStaccato = "X:1\n" +
+		'T: staccato\n' +
+		'L:1/4\n' +
+		'Q:1/4=59\n' +
+		'K:cm\n' +
+		'.A.Bcd(ef)|\n';
+
+	var expectedStaccato = "data:audio/midi,MThd%00%00%00%06%00%01%00%02%01%e0" +
+		"MTrk%00%00%00%25%00%FF%51%03%0f%84%75%00%FF%59%02%00%00%00%FF%58%04%04%02%18%08%00%FF%01%08%73%74%61%63%63%61%74%6f%00%FF%2F%00" +
+		"MTrk%00%00%00%53%00%C0%00%00%B0%79%00%00%B0%40%00%00%B0%5B%30%00%B0%0A%40%00%B0%07%64%00%90%45%55%82%26%80%45%00%81%3a%90%47%55%82%26%80%47%00%81%3a%90%48%5f%83%60%80%48%00%00%90%4a%5f%83%60%80%4a%00%00%90%4c%5f%83%60%90%4d%5f%02%80%4c%00%83%5e%80%4d%00%00%FF%2F%00"
+
 	it("midi-piano", function() {
 		var midi = abcjs.synth.getMidiFile(abcMidi, { midiOutputType: "link", pan: [ -0.5, 0.5 ]});
-		var el = document.getElementById("midi");
-		el.innerHTML = midi;
-		el = el.querySelector("a");
-		var contents = el.href;
+		var contents = setMidiLink(midi);
 
 		var msg = "\nrcv: " + JSON.stringify(contents) + "\n" +
 			"exp: " + JSON.stringify(expectedMidi) + "\n";
 		chai.assert.strictEqual(contents, expectedMidi, msg);
 	})
+
+	it("midi-staccato", function() {
+		var midi = abcjs.synth.getMidiFile(abcStaccato, { midiOutputType: "link"});
+		var contents = setMidiLink(midi);
+//		console.log(midi)
+		var msg = "\nrcv: " + JSON.stringify(contents) + "\n" +
+			"exp: " + JSON.stringify(expectedStaccato) + "\n";
+		chai.assert.strictEqual(contents, expectedStaccato, msg);
+	})
 })
+
+function setMidiLink(midi) {
+	var el = document.getElementById("midi");
+	el.innerHTML = midi;
+	el = el.querySelector("a");
+	var contents = el.href;
+	return contents;
+}

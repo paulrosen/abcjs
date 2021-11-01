@@ -1,3 +1,8 @@
+# Get the examples somewhere they can be served
+cp -r examples docs/.vuepress/dist/examples
+cp -r dist docs/.vuepress/dist/dist
+cp abcjs-audio.css docs/.vuepress/dist
+
 # navigate into the build output directory
 cd docs/.vuepress/dist
 

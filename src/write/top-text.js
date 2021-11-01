@@ -1,59 +1,53 @@
-function TopText(metaText, formatting, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
+const addTextIf = require("./add-text-if");
+
+function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
 	this.rows = [];
 
 	if (metaText.header && isPrint) {
 		// Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
 		// This text goes above the margin, so we'll temporarily move up.
 		var headerTextHeight = getTextSize.calc("X", "headerfont", 'abcjs-header abcjs-meta-top').height;
-		this.addTextIf(paddingLeft, metaText.header.left, 'headerfont', 'header meta-top', -headerTextHeight, 0, 'start', getTextSize);
-		this.addTextIf(paddingLeft + width / 2, metaText.header.center, 'headerfont', 'header meta-top', -headerTextHeight, null, 'middle', getTextSize);
-		this.addTextIf(paddingLeft + width, metaText.header.right, 'headerfont', 'header meta-top', -headerTextHeight, null, 'end', getTextSize);
+		addTextIf(this.rows, { marginLeft: paddingLeft, text: metaText.header.left, font: 'headerfont', klass: 'header meta-top', marginTop: -headerTextHeight, info: metaTextInfo.header, name: "header"}, getTextSize);
+		addTextIf(this.rows, { marginLeft: paddingLeft + width / 2, text: metaText.header.center, font: 'headerfont', klass: 'header meta-top', marginTop: -headerTextHeight, anchor: 'middle', info: metaTextInfo.header, name: "header"}, getTextSize);
+		addTextIf(this.rows, { marginLeft: paddingLeft + width, text: metaText.header.right, font: 'headerfont', klass: 'header meta-top', marginTop: -headerTextHeight, anchor: 'end', info: metaTextInfo.header, name: "header"}, getTextSize);
+
+//		TopText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType, noMove) {
 	}
 	if (isPrint)
 		this.rows.push({move: spacing.top});
 	var tAnchor = formatting.titleleft ? 'start' : 'middle';
 	var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
 	if (metaText.title) {
-		this.addTextIf(tLeft, metaText.title, 'titlefont', 'title meta-top', spacing.title, 0, tAnchor, getTextSize, "title");
+		addTextIf(this.rows, { marginLeft: tLeft, text: metaText.title, font: 'titlefont', klass: 'title meta-top', marginTop: spacing.title, anchor: tAnchor, absElemType: "title", info: metaTextInfo.title, name: "title"}, getTextSize);
 	}
-	if (lines[0] && lines[0].subtitle) {
-		this.addTextIf(tLeft, lines[0].subtitle, 'subtitlefont', 'text meta-top subtitle', spacing.subtitle, 0, tAnchor, getTextSize, "subtitle");
+	if (lines.length) {
+		var index = 0;
+		while (index < lines.length && lines[index].subtitle) {
+			addTextIf(this.rows, {marginLeft: tLeft, text: lines[index].subtitle.text, font: 'subtitlefont', klass: 'text meta-top subtitle', marginTop: spacing.subtitle, anchor: tAnchor, absElemType: "subtitle", info: lines[index].subtitle, name: "subtitle"}, getTextSize);
+			index++;
+		}
 	}
 
 	if (metaText.rhythm || metaText.origin || metaText.composer) {
 		this.rows.push({move: spacing.composer});
 		if (metaText.rhythm && metaText.rhythm.length > 0) {
 			var noMove = !!(metaText.composer || metaText.origin);
-			this.addTextIf(paddingLeft, metaText.rhythm, 'infofont', 'meta-top rhythm', 0, null, "start", getTextSize, "rhythm", noMove);
+			addTextIf(this.rows, { marginLeft: paddingLeft, text: metaText.rhythm, font: 'infofont', klass: 'meta-top rhythm', absElemType: "rhythm", noMove: true, info: metaTextInfo.rhythm, name: "rhythm"}, getTextSize);
 		}
 		var composerLine = "";
 		if (metaText.composer) composerLine += metaText.composer;
 		if (metaText.origin) composerLine += ' (' + metaText.origin + ')';
 		if (composerLine.length > 0) {
-			this.addTextIf(paddingLeft + width, composerLine, 'composerfont', 'meta-top composer', 0, null, "end", getTextSize, "composer");
+			addTextIf(this.rows, { marginLeft: paddingLeft + width, text: composerLine, font: 'composerfont', klass: 'meta-top composer', anchor: "end", absElemType: "composer", info: metaTextInfo.composer, name: "composer"}, getTextSize);
 		}
 	}
 
 	if (metaText.author && metaText.author.length > 0) {
-		this.addTextIf(paddingLeft + width, metaText.author, 'composerfont', 'meta-top author', 0, 0, "end", getTextSize, "author");
+		addTextIf(this.rows, { marginLeft: paddingLeft + width, text: metaText.author, font: 'composerfont', klass: 'meta-top author', anchor: "end", absElemType: "author", info: metaTextInfo.author, name: "author" }, getTextSize);
 	}
 
 	if (metaText.partOrder && metaText.partOrder.length > 0) {
-		this.addTextIf(paddingLeft, metaText.partOrder, 'partsfont', 'meta-top part-order', 0, 0, "start", getTextSize, "partOrder");
-	}
-}
-
-TopText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType, noMove) {
-	if (!text)
-		return;
-	if (marginTop)
-		this.rows.push({move: marginTop});
-	this.rows.push({left: marginLeft, text: text, font: font, klass: klass, anchor: anchor, absElemType: absElemType});
-	if (!noMove) {
-		var size = getTextSize.calc(text, font, klass);
-		this.rows.push({move: size.height});
-		if (marginBottom)
-			this.rows.push({move: marginBottom});
+		addTextIf(this.rows, { marginLeft: paddingLeft, text: metaText.partOrder, font: 'partsfont', klass: 'meta-top part-order', absElemType: "partOrder", info: metaTextInfo.partOrder, name: "part-order"}, getTextSize);
 	}
 }
 

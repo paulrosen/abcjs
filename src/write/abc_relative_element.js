@@ -36,6 +36,12 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 		this.top = opt.top;
 	if (opt.bottom)
 		this.bottom = opt.bottom;
+	if (opt.name)
+		this.name = opt.name;
+	else if (this.c)
+		this.name = this.c;
+	else
+		this.name = this.type;
 	if (opt.realWidth)
 		this.realWidth = opt.realWidth;
 	else

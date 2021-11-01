@@ -4,19 +4,6 @@ var parseCommon = require('../parse/abc_common');
 var TuneBuilder = function(tune) {
 	var self = this;
 
-	this.reset = function () {
-		tune.version = "1.1.0";
-		tune.media = "screen";
-		tune.metaText = {};
-		tune.formatting = {};
-		tune.lines = [];
-		tune.staffNum = 0;
-		tune.voiceNum = 0;
-		tune.lineNum = 0;
-		tune.runningFonts = {};
-		delete tune.visualTranspose;
-	};
-
 	this.setVisualTranspose = function(visualTranspose) {
 		if (visualTranspose)
 			tune.visualTranspose = visualTranspose;
@@ -472,7 +459,7 @@ var TuneBuilder = function(tune) {
 		return currSlur;
 	};
 
-	this.reset();
+	tune.reset();
 
 	this.getLastNote = function() {
 		if (tune.lines[tune.lineNum] && tune.lines[tune.lineNum].staff && tune.lines[tune.lineNum].staff[tune.staffNum] &&
@@ -665,8 +652,8 @@ var TuneBuilder = function(tune) {
 		tune.lines.push(hash);
 	};
 
-	this.addSubtitle = function(str) {
-		this.pushLine({subtitle: str});
+	this.addSubtitle = function(str, info) {
+		this.pushLine({subtitle: { text: str, startChar: info.startChar, endChar: info.endChar}});
 	};
 
 	this.addSpacing = function(num) {
@@ -677,12 +664,12 @@ var TuneBuilder = function(tune) {
 		this.pushLine({newpage: num});
 	};
 
-	this.addSeparator = function(spaceAbove, spaceBelow, lineLength) {
-		this.pushLine({separator: {spaceAbove: Math.round(spaceAbove), spaceBelow: Math.round(spaceBelow), lineLength: Math.round(lineLength)}});
+	this.addSeparator = function(spaceAbove, spaceBelow, lineLength, info) {
+		this.pushLine({separator: {spaceAbove: Math.round(spaceAbove), spaceBelow: Math.round(spaceBelow), lineLength: Math.round(lineLength), startChar: info.startChar, endChar: info.endChar}});
 	};
 
-	this.addText = function(str) {
-		this.pushLine({text: str});
+	this.addText = function(str, info) {
+		this.pushLine({text: { text: str, startChar: info.startChar, endChar: info.endChar}});
 	};
 
 	this.addCentered = function(str) {
@@ -881,23 +868,29 @@ var TuneBuilder = function(tune) {
 		tune.lineNum =  i;
 	};
 
-	this.addMetaText = function(key, value) {
-		if (tune.metaText[key] === undefined)
+	this.addMetaText = function(key, value, info) {
+		if (tune.metaText[key] === undefined) {
 			tune.metaText[key] = value;
-		else
+			tune.metaTextInfo[key] = info;
+		} else {
 			tune.metaText[key] += "\n" + value;
+			tune.metaTextInfo[key].endChar = info.endChar;
+		}
 	};
 
-	this.addMetaTextArray = function(key, value) {
-		if (tune.metaText[key] === undefined)
+	this.addMetaTextArray = function(key, value, info) {
+		if (tune.metaText[key] === undefined) {
 			tune.metaText[key] = [value];
-		else
+			tune.metaTextInfo[key] = info;
+		} else {
 			tune.metaText[key].push(value);
+			tune.metaTextInfo[key].endChar = info.endChar;
+		}
 	};
-	this.addMetaTextObj = function(key, value) {
+	this.addMetaTextObj = function(key, value, info) {
 		tune.metaText[key] = value;
+		tune.metaTextInfo[key] = info;
 	};
-
 };
 
 module.exports = TuneBuilder;

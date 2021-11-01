@@ -27,11 +27,43 @@ VoiceElement.getSpacingUnits = function (voice) {
 // x - position to try to layout the element at
 // spacing - base spacing
 // can't call this function more than once per iteration
-VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding) {
+VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding, firstVoice) {
 	var child = voice.children[voice.i];
 	if (!child) return 0;
 	var er = x - voice.minx; // available extrawidth to the left
 	var pad = voice.durationindex + child.duration > 0 ? minPadding : 0; // only add padding to the items that aren't fixed to the left edge.
+	// See if this item overlaps the item in the first voice. If firstVoice is undefined then there's nothing to compare.
+	if (child.abcelem.el_type === "note" && !child.abcelem.rest && voice.voicenumber !== 0 && firstVoice) {
+		var firstChild = firstVoice.children[firstVoice.i];
+		// It overlaps if the either the child's top or bottom is inside the firstChild's or at least within 1
+		// A special case is if the element is on the same line then it can share a note head, if the notehead is the same
+		var overlaps = firstChild &&
+			((child.abcelem.maxpitch <= firstChild.abcelem.maxpitch+1 && child.abcelem.maxpitch >= firstChild.abcelem.minpitch-1) ||
+			(child.abcelem.minpitch <= firstChild.abcelem.maxpitch+1 && child.abcelem.minpitch >= firstChild.abcelem.minpitch-1))
+		// See if they can share a note head
+		if (overlaps && child.abcelem.minpitch === firstChild.abcelem.minpitch && child.abcelem.maxpitch === firstChild.abcelem.maxpitch &&
+		firstChild.heads && firstChild.heads.length > 0 && child.heads && child.heads.length > 0 &&
+		firstChild.heads[0].c === child.heads[0].c)
+			overlaps = false;
+		// If this note overlaps the note in the first voice and we haven't moved the note yet (this can be called multiple times)
+		if (overlaps) {
+			// I think that firstChild should always have at least one note head, but defensively make sure.
+			// There was a problem with this being called more than once so if a value is adjusted then it is saved so it is only adjusted once.
+			var firstChildNoteWidth = firstChild.heads && firstChild.heads.length > 0 ? firstChild.heads[0].realWidth : firstChild.fixed.w;
+			if (!child.adjustedWidth)
+				child.adjustedWidth = firstChildNoteWidth + child.w;
+			child.w = child.adjustedWidth
+			for (var j = 0; j < child.children.length; j++) {
+				var relativeChild = child.children[j];
+				if (relativeChild.name.indexOf("accidental") < 0) {
+					if (!relativeChild.adjustedWidth)
+						relativeChild.adjustedWidth = relativeChild.dx + firstChildNoteWidth;
+					relativeChild.dx = relativeChild.adjustedWidth
+				}
+			}
+
+		}
+	}
 	var extraWidth = getExtraWidth(child, pad);
 	if (er<extraWidth) { // shift right by needed amount
 		// There's an exception if a bar element is after a Part element, there is no shift.

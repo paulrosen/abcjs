@@ -12,6 +12,48 @@ var delineTune = require("./deline-tune");
  * @alternateClassName ABCJS.Tune
  */
 var Tune = function() {
+	this.reset = function () {
+		this.version = "1.1.0";
+		this.media = "screen";
+		this.metaText = {};
+		this.metaTextInfo = {};
+		this.formatting = {};
+		this.lines = [];
+		this.staffNum = 0;
+		this.voiceNum = 0;
+		this.lineNum = 0;
+		this.runningFonts = {};
+		delete this.visualTranspose;
+	};
+	this.reset();
+
+	function copy(dest, src, prop, attrs) {
+		for (var i = 0; i < attrs.length; i++)
+			dest[prop][attrs[i]] = src[prop][attrs[i]];
+	}
+
+	this.copyTopInfo = function(src) {
+		var attrs = ['tempo', 'title', 'header', 'rhythm', 'origin', 'composer', 'author', 'partOrder'];
+		copy(this, src, "metaText", attrs);
+		copy(this, src, "metaTextInfo", attrs);
+	};
+
+	this.copyBottomInfo = function(src) {
+		var attrs = ['unalignedWords',
+			'book',
+			'source',
+			'discography',
+			'notes',
+			'transcription',
+			'history',
+			'abc-copyright',
+			'abc-creator',
+			'abc-edited-by',
+			'footer']
+		copy(this, src, "metaText", attrs);
+		copy(this, src, "metaTextInfo", attrs);
+	};
+
 	// The structure consists of a hash with the following two items:
 	// metaText: a hash of {key, value}, where key is one of: title, author, rhythm, source, transcription, unalignedWords, etc...
 	// tempo: { noteLength: number (e.g. .125), bpm: number }

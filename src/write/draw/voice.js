@@ -12,7 +12,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 	renderer.staffbottom = params.staff.bottom;
 
 	if (params.header) { // print voice name
-		var textEl = renderText(renderer, {x: renderer.padding.left, y: renderer.calcY(params.headerPosition), text: params.header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start', centerVertically: true});
+		var textEl = renderText(renderer, {x: renderer.padding.left, y: renderer.calcY(params.headerPosition), text: params.header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start', centerVertically: true, name: "voice-name"}, true);
 		selectables.wrapSvgEl({ el_type: "voiceName", startChar: -1, endChar: -1, text: params.header }, textEl);
 	}
 

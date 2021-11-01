@@ -45,7 +45,7 @@ function straightPath(renderer, xLeft, yTop, yBottom, type) {
 		-wCurve*0.1, -hCurve*0.3,
 		-wCurve, -hCurve-spacing.STEP // left bottom
 	);
-	return renderer.paper.path({path:pathString, stroke:renderer.foregroundColor, fill:renderer.foregroundColor, 'class': renderer.controller.classes.generate(type)});
+	return renderer.paper.path({path:pathString, stroke:renderer.foregroundColor, fill:renderer.foregroundColor, 'class': renderer.controller.classes.generate(type), "data-name": type});
 }
 
 function curvyPath(renderer, xLeft, yTop, yBottom, type) {
@@ -61,7 +61,7 @@ function curvyPath(renderer, xLeft, yTop, yBottom, type) {
 		[0, 17.5, -7.5, 6.6, -5, 20, 0],
 		[yHeight/2, yHeight/1.46, yHeight/1.22, yHeight, yHeight/1.19, yHeight/1.42, yHeight/2]);
 
-	return renderer.paper.path({path:pathString, stroke:renderer.foregroundColor, fill:renderer.foregroundColor, 'class': renderer.controller.classes.generate(type)});
+	return renderer.paper.path({path:pathString, stroke:renderer.foregroundColor, fill:renderer.foregroundColor, 'class': renderer.controller.classes.generate(type), "data-name": type});
 }
 
 function curve(xLeft, yTop, xCurve, yCurve) {
@@ -78,7 +78,7 @@ function curve(xLeft, yTop, xCurve, yCurve) {
 var draw = function (renderer, xLeft, yTop, yBottom, type, header, selectables) {//Tony
 	var ret;
 	if (header) {
-		renderer.paper.openGroup({klass: renderer.controller.classes.generate("staff-extra voice-name")});
+		renderer.paper.openGroup({klass: renderer.controller.classes.generate("staff-extra voice-name"), "data-name": type});
 		var position = yTop + (yBottom - yTop) / 2;
 		position = position - renderer.controller.getTextSize.baselineToCenter(header, "voicefont", 'staff-extra voice-name', 0, 1);
 

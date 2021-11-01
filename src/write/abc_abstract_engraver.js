@@ -51,6 +51,8 @@ var AbstractEngraver = function(getTextSize, tuneNumber, options) {
 	this.flatBeams = options.flatbeams;
 	this.graceSlurs = options.graceSlurs;
 	this.percmap = options.percmap;
+	this.initialClef = options.initialClef
+	this.jazzchords = !!options.jazzchords
 	this.reset();
 };
 
@@ -114,7 +116,7 @@ AbstractEngraver.prototype.popCrossLineElems = function(s,v) {
 		}
 	};
 
-AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
+AbstractEngraver.prototype.createABCLine = function(staffs, tempo, l) {
     this.minY = 2; // PER: This will be the lowest that any note reaches. It will be used to set the dynamics row.
 	// See if there are any lyrics on this line.
 	this.containsLyrics(staffs);
@@ -124,12 +126,12 @@ AbstractEngraver.prototype.createABCLine = function(staffs, tempo) {
 	  if (hint)
 		  this.restoreState();
 	  hint = false;
-    this.createABCStaff(staffgroup, staffs[s], tempo, s);
+    this.createABCStaff(staffgroup, staffs[s], tempo, s, l);
   }
   return staffgroup;
 };
 
-AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo, s) {
+AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo, s, l) {
 // If the tempo is passed in, then the first element should get the tempo attached to it.
 	staffgroup.getTextSize.updateFonts(abcstaff);
   for (var v = 0; v < abcstaff.voices.length; v++) {
@@ -146,7 +148,7 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
 	}
     if (abcstaff.clef && abcstaff.clef.type === "perc")
     	voice.isPercussion = true;
-	  var clef = createClef(abcstaff.clef, this.tuneNumber);
+	  var clef = (!this.initialClef || l === 0) && createClef(abcstaff.clef, this.tuneNumber);
 	  if (clef) {
 		  if (v ===0 && abcstaff.barNumber) {
 			  this.addMeasureNumber(abcstaff.barNumber, clef);
@@ -571,7 +573,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				var numMeasures = new RelativeElement("" + elem.rest.text, mmWidth, mmWidth, 16, {type: "multimeasure-text"});
 				abselem.addExtra(numMeasures);
 		}
-		if (elem.rest.type.indexOf("multimeasure") < 0) {
+		if (elem.rest.type.indexOf("multimeasure") < 0 && elem.rest.type !== "invisible") {
 			var ret = createNoteHead(abselem, c, {verticalPos: restpitch},
 				{ dot: dot, scale: voiceScale});
 			noteHead = ret.notehead;
@@ -721,7 +723,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			var dx = (dir==="down" || abselem.heads.length === 0)?0:abselem.heads[0].w;
 			var width = (dir==="down")?1:-1;
 			// TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
-			if (noteHead.c === 'noteheads.slash.quarter') {
+			if (noteHead && noteHead.c === 'noteheads.slash.quarter') {
 				if (dir === 'down')
 					p2 -= 1;
 				else
@@ -815,7 +817,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 	ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
 
   if (elem.chord !== undefined) {
-  	var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth);
+ 	var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth, this.jazzchords);
 	  roomtaken = ret3.roomTaken;
 	  roomtakenright = ret3.roomTakenRight;
   }
