@@ -114,17 +114,20 @@ function noteToNumber(self, note, stringNumber, secondPosition , firstSize) {
     noteName += ",";
   }
   var num = strings[stringNumber].indexOf(noteName);
+  var acc = note.acc;
   if (num != -1) {
     if (secondPosition) {
       num += firstSize;
     }
     if ( (note.isFlat || note.acc == -1) && (num == 0)) {
       // flat on 0 pos => previous string 7th position
+      var noteEquiv = note.getAccidentalEquiv();
       stringNumber++;
-      num = firstSize;
+      num = strings[stringNumber].indexOf(noteEquiv.emit());
+      acc = 0;
     }
     return {
-      num: (num + note.acc),
+      num: (num + acc),
       str: stringNumber,
       note: note
     };

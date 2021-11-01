@@ -80,7 +80,9 @@ function cloneNote(self) {
   newTabNote.isLower = self.isLower;
   newTabNote.isQuoted = self.isQuoted;
   newTabNote.isSharp = self.isSharp;
+  newTabNote.isKeySharp = self.isKeySharp;
   newTabNote.isFlat = self.isFlat;
+  newTabNote.isKeyFlat = self.isKeyFlat;
   return newTabNote;
 } 
 TabNote.prototype.sameNoteAs = function (note) {
@@ -139,12 +141,16 @@ TabNote.prototype.checkKeyAccidentals = function(accidentals) {
 
 TabNote.prototype.getAccidentalEquiv = function () {
   var cloned = cloneNote(this);
-  if (cloned.isSharp) {
+  if (cloned.isSharp || cloned.isKeySharp ) {
     cloned = cloned.nextNote();
     cloned.isFlat = true;
-  } else if (cloned.isFlat) {
+    cloned.isSharp = false;
+    cloned.isKeySharp = false;
+  } else if (cloned.isFlat || cloned.isKeyFlat ) {
     cloned = cloned.prevNote();
     cloned.isSharp = true;
+    cloned.isFlat = false;
+    cloned.isKeyFlat = false;
   }
   return cloned;
 };

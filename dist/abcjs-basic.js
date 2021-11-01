@@ -16817,6 +16817,7 @@ function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
   }
 
   var num = strings[stringNumber].indexOf(noteName);
+  var acc = note.acc;
 
   if (num != -1) {
     if (secondPosition) {
@@ -16825,12 +16826,14 @@ function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
 
     if ((note.isFlat || note.acc == -1) && num == 0) {
       // flat on 0 pos => previous string 7th position
+      var noteEquiv = note.getAccidentalEquiv();
       stringNumber++;
-      num = firstSize;
+      num = strings[stringNumber].indexOf(noteEquiv.emit());
+      acc = 0;
     }
 
     return {
-      num: num + note.acc,
+      num: num + acc,
       str: stringNumber,
       note: note
     };
@@ -17135,7 +17138,9 @@ function cloneNote(self) {
   newTabNote.isLower = self.isLower;
   newTabNote.isQuoted = self.isQuoted;
   newTabNote.isSharp = self.isSharp;
+  newTabNote.isKeySharp = self.isKeySharp;
   newTabNote.isFlat = self.isFlat;
+  newTabNote.isKeyFlat = self.isKeyFlat;
   return newTabNote;
 }
 
@@ -17197,12 +17202,16 @@ TabNote.prototype.checkKeyAccidentals = function (accidentals) {
 TabNote.prototype.getAccidentalEquiv = function () {
   var cloned = cloneNote(this);
 
-  if (cloned.isSharp) {
+  if (cloned.isSharp || cloned.isKeySharp) {
     cloned = cloned.nextNote();
     cloned.isFlat = true;
-  } else if (cloned.isFlat) {
+    cloned.isSharp = false;
+    cloned.isKeySharp = false;
+  } else if (cloned.isFlat || cloned.isKeyFlat) {
     cloned = cloned.prevNote();
     cloned.isSharp = true;
+    cloned.isFlat = false;
+    cloned.isKeyFlat = false;
   }
 
   return cloned;
