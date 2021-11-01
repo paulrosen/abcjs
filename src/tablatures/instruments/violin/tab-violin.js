@@ -36,9 +36,7 @@ var plugin = {
 
   render: function (renderer, line, staffIndex) {
     console.log('ViolinTab plugin rendered');
-    var _super = this._super;
     setViolinFonts(this.abcTune);
-    this.semantics.strings.accidentals = _super.setAccidentals(line, 0);
     var rndrer = new TabRenderer(this, renderer, line, staffIndex);
     rndrer.doLayout();
   }

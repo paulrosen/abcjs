@@ -83,7 +83,9 @@ function lyricsDim(abs) {
   }
   return null;
 }
-function TabAbsoluteElements() { }
+function TabAbsoluteElements() {
+  this.accidentals = null;
+}
 
 /**
  * Build tab absolutes by scanning current staff line absolute array
@@ -103,6 +105,9 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
     }
     switch (absChild.type) {
       case 'staff-extra key-signature':
+        // refresh key accidentals
+        this.accidentals = absChild.abcelem.accidentals;
+        plugin.semantics.strings.accidentals = this.accidentals;
         if (plugin.transpose) {
           transposer = new Transposer(
             absChild.abcelem.accidentals,

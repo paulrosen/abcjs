@@ -22,17 +22,5 @@ TabCommon.prototype.setError = function (error) {
   }
 };
 
-/**
- * Get Key accidentals for current staff
- * @param {*} line
- * @param {*} staffNumber 
- * @returns 
- */
-TabCommon.prototype.setAccidentals = function (line, staffNumber) {
-  var staff = line.staff[staffNumber];
-  return staff.key.accidentals;
-};
-
-
 
 module.exports = TabCommon;

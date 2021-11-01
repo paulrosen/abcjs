@@ -16657,10 +16657,10 @@ var plugin = {
     this.semantics = semantics;
   },
   render: function render(renderer, line, staffIndex) {
-    console.log('GuitarTab plugin rendered');
-    var _super = this._super;
-    setGuitarFonts(this.abcTune);
-    this.semantics.strings.accidentals = _super.setAccidentals(line, 0);
+    console.log('GuitarTab plugin rendered'); // var _super = this._super;
+
+    setGuitarFonts(this.abcTune); // this.semantics.strings.accidentals = _super.setAccidentals(line, 0);
+
     var rndrer = new TabRenderer(this, renderer, line, staffIndex);
     rndrer.doLayout();
   }
@@ -17117,9 +17117,11 @@ function TabNote(note) {
   this.name = newNote;
   this.acc = acc;
   this.isSharp = isSharp;
+  this.isKeySharp = false;
   this.isDouble = isDouble;
   this.isAltered = isAltered;
   this.isFlat = isFlat;
+  this.isKeyFlat = false;
   this.natural = natural;
   this.quarter = quarter;
   this.isLower = this.name == this.name.toLowerCase();
@@ -17182,10 +17184,12 @@ TabNote.prototype.checkKeyAccidentals = function (accidentals) {
       if (curNote == curAccidentals.note.toUpperCase()) {
         if (curAccidentals.acc == 'flat') {
           this.acc = -1;
+          this.isKeyFlat = true;
         }
 
         if (curAccidentals.acc == 'sharp') {
           this.acc = +1;
+          this.isKeySharp = true;
         }
       }
     }
@@ -17288,7 +17292,7 @@ TabNote.prototype.prevNote = function () {
 TabNote.prototype.emit = function () {
   var returned = this.name;
 
-  if (this.isSharp) {
+  if (this.isSharp || this.isKeySharp) {
     returned = '^' + returned;
 
     if (this.isDouble) {
@@ -17296,7 +17300,7 @@ TabNote.prototype.emit = function () {
     }
   }
 
-  if (this.isFlat) {
+  if (this.isFlat || this.isKeyFlat) {
     returned = '_' + returned;
 
     if (this.isDouble) {
@@ -17422,10 +17426,10 @@ var plugin = {
     this.semantics = semantics;
   },
   render: function render(renderer, line, staffIndex) {
-    console.log('ViolinTab plugin rendered');
-    var _super = this._super;
-    setViolinFonts(this.abcTune);
-    this.semantics.strings.accidentals = _super.setAccidentals(line, 0);
+    console.log('ViolinTab plugin rendered'); // var _super = this._super;
+
+    setViolinFonts(this.abcTune); // this.semantics.strings.accidentals = _super.setAccidentals(line, 0);
+
     var rndrer = new TabRenderer(this, renderer, line, staffIndex);
     rndrer.doLayout();
   }
@@ -17620,7 +17624,9 @@ function lyricsDim(abs) {
   return null;
 }
 
-function TabAbsoluteElements() {}
+function TabAbsoluteElements() {
+  this.accidentals = null;
+}
 /**
  * Build tab absolutes by scanning current staff line absolute array
  * @param {*} staffAbsolute
@@ -17643,6 +17649,10 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice)
 
     switch (absChild.type) {
       case 'staff-extra key-signature':
+        // refresh key accidentals
+        this.accidentals = absChild.abcelem.accidentals;
+        plugin.semantics.strings.accidentals = this.accidentals;
+
         if (plugin.transpose) {
           transposer = new Transposer(absChild.abcelem.accidentals, plugin.transpose);
         }
@@ -17763,11 +17773,13 @@ TabCommon.prototype.setError = function (error) {
  * @returns 
  */
 
-
+/*
 TabCommon.prototype.setAccidentals = function (line, staffNumber) {
   var staff = line.staff[staffNumber];
   return staff.key.accidentals;
 };
+*/
+
 
 module.exports = TabCommon;
 

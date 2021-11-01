@@ -60,9 +60,11 @@ function TabNote(note) {
   this.name = newNote;
   this.acc = acc;
   this.isSharp = isSharp;
+  this.isKeySharp = false;
   this.isDouble = isDouble;
   this.isAltered = isAltered;
   this.isFlat = isFlat;
+  this.isKeyFlat = false;
   this.natural = natural;
   this.quarter = quarter;
   this.isLower = (this.name == this.name.toLowerCase());
@@ -124,9 +126,11 @@ TabNote.prototype.checkKeyAccidentals = function(accidentals) {
       if (curNote == curAccidentals.note.toUpperCase()) {
         if (curAccidentals.acc == 'flat') {
           this.acc = -1;
+          this.isKeyFlat = true;
         }
         if (curAccidentals.acc == 'sharp') {
           this.acc = +1;
+          this.isKeySharp = true;
         }
       }
     }
@@ -216,13 +220,13 @@ TabNote.prototype.prevNote = function () {
 
 TabNote.prototype.emit = function () {
   var returned = this.name;
-  if (this.isSharp) {
+  if (this.isSharp || this.isKeySharp ) {
     returned = '^' + returned;
     if (this.isDouble) {
       returned = '^' + returned;
     }
   }
-  if (this.isFlat) {
+  if (this.isFlat || this.isKeyFlat) {
     returned = '_' + returned;
     if (this.isDouble) {
       returned = '_' + returned;
