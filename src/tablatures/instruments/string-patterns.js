@@ -63,14 +63,16 @@ function sameString(self, chord) {
         nextPos = noteToNumber(self,
           nextPos.note,
           nextPos.str,
-          self.secondPos
+          self.secondPos,
+          self.strings[nextPos.str].length
         );
       } else {
         curPos.str++;
         curPos = noteToNumber(self,
           curPos.note,
           curPos.str,
-          self.secondPos
+          self.secondPos,
+          self.strings[curPos.str].length
         );
       }
       // update table
@@ -95,7 +97,7 @@ function handleChordNotes(self, notes) {
   return retNotes;
 }
 
-function noteToNumber(self, note, stringNumber, secondPosition) {
+function noteToNumber(self, note, stringNumber, secondPosition , firstSize) {
   var strings = self.strings;
   note.checkKeyAccidentals(self.accidentals) ;
   if (secondPosition) {
@@ -114,12 +116,12 @@ function noteToNumber(self, note, stringNumber, secondPosition) {
   var num = strings[stringNumber].indexOf(noteName);
   if (num != -1) {
     if (secondPosition) {
-      num += 7;
+      num += firstSize;
     }
     if ( (note.isFlat || note.acc == -1) && (num == 0)) {
       // flat on 0 pos => previous string 7th position
       stringNumber++;
-      num = 7;
+      num = firstSize;
     }
     return {
       num: (num + note.acc),

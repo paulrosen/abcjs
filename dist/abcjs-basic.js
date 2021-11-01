@@ -16657,10 +16657,8 @@ var plugin = {
     this.semantics = semantics;
   },
   render: function render(renderer, line, staffIndex) {
-    console.log('GuitarTab plugin rendered'); // var _super = this._super;
-
-    setGuitarFonts(this.abcTune); // this.semantics.strings.accidentals = _super.setAccidentals(line, 0);
-
+    console.log('GuitarTab plugin rendered');
+    setGuitarFonts(this.abcTune);
     var rndrer = new TabRenderer(this, renderer, line, staffIndex);
     rndrer.doLayout();
   }
@@ -16763,10 +16761,10 @@ function sameString(self, chord) {
 
       if (nextPos.num < curPos.num) {
         nextPos.str++;
-        nextPos = noteToNumber(self, nextPos.note, nextPos.str, self.secondPos);
+        nextPos = noteToNumber(self, nextPos.note, nextPos.str, self.secondPos, self.strings[nextPos.str].length);
       } else {
         curPos.str++;
-        curPos = noteToNumber(self, curPos.note, curPos.str, self.secondPos);
+        curPos = noteToNumber(self, curPos.note, curPos.str, self.secondPos, self.strings[curPos.str].length);
       } // update table
 
 
@@ -16796,7 +16794,7 @@ function handleChordNotes(self, notes) {
   return retNotes;
 }
 
-function noteToNumber(self, note, stringNumber, secondPosition) {
+function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
   var strings = self.strings;
   note.checkKeyAccidentals(self.accidentals);
 
@@ -16822,13 +16820,13 @@ function noteToNumber(self, note, stringNumber, secondPosition) {
 
   if (num != -1) {
     if (secondPosition) {
-      num += 7;
+      num += firstSize;
     }
 
     if ((note.isFlat || note.acc == -1) && num == 0) {
       // flat on 0 pos => previous string 7th position
       stringNumber++;
-      num = 7;
+      num = firstSize;
     }
 
     return {
@@ -17426,10 +17424,8 @@ var plugin = {
     this.semantics = semantics;
   },
   render: function render(renderer, line, staffIndex) {
-    console.log('ViolinTab plugin rendered'); // var _super = this._super;
-
-    setViolinFonts(this.abcTune); // this.semantics.strings.accidentals = _super.setAccidentals(line, 0);
-
+    console.log('ViolinTab plugin rendered');
+    setViolinFonts(this.abcTune);
     var rndrer = new TabRenderer(this, renderer, line, staffIndex);
     rndrer.doLayout();
   }
@@ -17766,20 +17762,6 @@ TabCommon.prototype.setError = function (error) {
     }
   }
 };
-/**
- * Get Key accidentals for current staff
- * @param {*} line
- * @param {*} staffNumber 
- * @returns 
- */
-
-/*
-TabCommon.prototype.setAccidentals = function (line, staffNumber) {
-  var staff = line.staff[staffNumber];
-  return staff.key.accidentals;
-};
-*/
-
 
 module.exports = TabCommon;
 
