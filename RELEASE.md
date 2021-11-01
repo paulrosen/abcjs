@@ -1,3 +1,63 @@
+# Version 6.0.0-beta.34
+
+## Bugs
+
+* Fix regression on creating oneSvgPerLine
+   
+* Fix notes that are one step apart from colliding.
+   
+* Fix crash on bad notelength
+   
+* Fix note durations in triplets where p != r
+   
+* Don't crash if a browser doesn't contain AudioContext
+   
+* Don't swallow warning after wrapping.
+   
+* Fix some regressions with placing and styling text.
+   
+* Fix font on relatively positioned annotations.
+   
+* Protect the editor from crashing when synth is attempted and the browser doesn't support AudioContext.
+
+## Features
+
+* Create parameter `jazzchords`
+
+* Add many types to the typescript definitions.
+
+* Add `units` to TimingCallback.start
+
+* Add staccato to midi creation.
+
+* Add classes to dynamics elements.
+
+* Add more info to the click handler
+
+* Limit the size of the warning message if there is a long string.
+
+* Add initialClef option
+ 
+* Keep and pass back current time from the timer callbacks.
+
+## Documentation
+
+* Fix path for favicon in docs
+   
+* Tweak to printing example
+   
+* Move examples to github pages.
+   
+* Add MIDI download example.
+   
+* Fixes to doc building from the vuepress upgrade.
+   
+* Add mention of a CDN to load library from.
+   
+* Add a couple of errors to analysis demo to show the warning data.
+   
+* Option to only render the clef on the first line. 
+
 # Version 6.0.0-beta.33
 
 ## Bugs

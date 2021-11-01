@@ -24,6 +24,8 @@ All new work should be done in the `dev` branch.
 
 [_] Be sure [the read me file](../README.md) is up to date, along with all the files in [docs](../docs).
 
+[_] Create a docker instance with `./docker-start.sh`.
+
 [_] Minify the various library versions with `npm run build`.
 
 [_] Check the minified versions and other changed files in.

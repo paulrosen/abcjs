@@ -2568,6 +2568,8 @@ var create;
     if (title && title.length > 128) title = title.substring(0, 124) + '...';
     var key = abcTune.getKeySignature();
     var time = abcTune.getMeterFraction();
+    var beatsPerSecond = commands.tempo / 60; //var beatLength = abcTune.getBeatLength();
+
     midi.setGlobalInfo(commands.tempo, title, key, time);
 
     for (var i = 0; i < commands.tracks.length; i++) {
@@ -2590,9 +2592,11 @@ var create;
             break;
 
           case 'note':
-            var start = event.start;
-            var end = start + event.duration; // TODO: end is affected by event.gap, too.
+            var gapLengthInBeats = event.gap * beatsPerSecond;
+            var start = event.start; // The staccato and legato are indicated by event.gap.
+            // event.gap is in seconds but the durations are in whole notes.
 
+            var end = start + event.duration - gapLengthInBeats;
             if (!notePlacement[start]) notePlacement[start] = [];
             notePlacement[start].push({
               pitch: event.pitch,
@@ -14004,6 +14008,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                   break;
 
                 case "key":
+                case "keySignature":
                   addKey(voices[voiceNumber], elem);
                   break;
 
@@ -17416,7 +17421,7 @@ function addRestToAbsElement(abselem, elem, duration, dot, isMultiVoice, stemdir
       abselem.addExtra(numMeasures);
   }
 
-  if (elem.rest.type.indexOf("multimeasure") < 0) {
+  if (elem.rest.type.indexOf("multimeasure") < 0 && elem.rest.type !== "invisible") {
     var ret = createNoteHead(abselem, c, {
       verticalPos: restpitch
     }, {
@@ -23302,7 +23307,7 @@ function formatJazzChord(chordString) {
     var chord = lines[i]; // If the chord isn't in a recognizable format then just skip the formatting.
 
     var reg = chord.match(/([ABCDEFG][♯♭]?)([^\/]+)?(\/[ABCDEFG][#b]?)?/);
-    lines[i] = reg[1] + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
+    if (reg) lines[i] = reg[1] + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
   }
 
   return lines.join("\n");
@@ -23352,27 +23357,52 @@ function FreeText(info, vskip, getFontAndAttr, paddingLeft, width, getTextSize) 
     this.rows.push({
       move: size.height
     });
-  } else {
+  } else if (text) {
+    var maxHeight = 0;
+    var leftSide = paddingLeft;
     var currentFont = 'textfont';
-    var isCentered = false; // The structure is wrong here: it requires an array to do centering, but it shouldn't have.
 
-    for (var i = 0; i < info.length; i++) {
-      if (info[i].font) currentFont = info[i].font;else currentFont = 'textfont';
-      if (info[i].center) isCentered = true;
-      var alignment = isCentered ? 'middle' : 'start';
-      var x = isCentered ? width / 2 : paddingLeft;
+    for (var i = 0; i < text.length; i++) {
+      if (text[i].font) {
+        currentFont = text[i].font;
+      } else currentFont = 'textfont';
+
       this.rows.push({
-        left: x,
-        text: info[i].text,
+        left: leftSide,
+        text: text[i].text,
         font: currentFont,
         klass: 'defined-text',
-        anchor: alignment,
+        anchor: 'start',
         startChar: info.startChar,
         endChar: info.endChar,
         absElemType: "freeText",
         name: "free-text"
       });
-      size = getTextSize.calc(info[i].text, currentFont, 'defined-text');
+      size = getTextSize.calc(text[i].text, getFontAndAttr.calc(currentFont, 'defined-text').font, 'defined-text');
+      leftSide += size.width + size.height / 2; // add a little padding to the right side. The height of the font is probably a close enough approximation.
+
+      maxHeight = Math.max(maxHeight, size.height);
+    }
+
+    this.rows.push({
+      move: maxHeight
+    });
+  } else {
+    // The structure is wrong here: it requires an array to do centering, but it shouldn't have.
+    if (info.length === 1) {
+      var x = width / 2;
+      this.rows.push({
+        left: x,
+        text: info[0].text,
+        font: 'textfont',
+        klass: 'defined-text',
+        anchor: 'middle',
+        startChar: info.startChar,
+        endChar: info.endChar,
+        absElemType: "freeText",
+        name: "free-text"
+      });
+      size = getTextSize.calc(info[0].text, 'textfont', 'defined-text');
       this.rows.push({
         move: size.height
       });
@@ -23578,13 +23608,15 @@ VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding, firstVoice
   var er = x - voice.minx; // available extrawidth to the left
 
   var pad = voice.durationindex + child.duration > 0 ? minPadding : 0; // only add padding to the items that aren't fixed to the left edge.
-  // See if this item overlaps the item in the first voice. If firstVoice.voicenumber is not 0 then this item is by itself, so there is no problem.
+  // See if this item overlaps the item in the first voice. If firstVoice is undefined then there's nothing to compare.
 
-  if (voice.voicenumber !== 0 && firstVoice.voicenumber === 0) {
-    var firstChild = firstVoice.children[firstVoice.i]; // It overlaps if the either the child's top or bottom is inside the firstChild's
-    // Notes a third apart will overlap by less than half a pixel, so compensate for that.
+  if (child.abcelem.el_type === "note" && !child.abcelem.rest && voice.voicenumber !== 0 && firstVoice) {
+    var firstChild = firstVoice.children[firstVoice.i]; // It overlaps if the either the child's top or bottom is inside the firstChild's or at least within 1
+    // A special case is if the element is on the same line then it can share a note head, if the notehead is the same
 
-    var overlaps = child.fixed.t < firstChild.fixed.t && child.fixed.t - 0.5 > firstChild.fixed.b || child.fixed.b < firstChild.fixed.t && child.fixed.b > firstChild.fixed.b; // If this note overlaps the note in the first voice and we haven't moved the note yet (this can be called multiple times)
+    var overlaps = firstChild && (child.abcelem.maxpitch <= firstChild.abcelem.maxpitch + 1 && child.abcelem.maxpitch >= firstChild.abcelem.minpitch - 1 || child.abcelem.minpitch <= firstChild.abcelem.maxpitch + 1 && child.abcelem.minpitch >= firstChild.abcelem.minpitch - 1); // See if they can share a note head
+
+    if (overlaps && child.abcelem.minpitch === firstChild.abcelem.minpitch && child.abcelem.maxpitch === firstChild.abcelem.maxpitch && firstChild.heads && firstChild.heads.length > 0 && child.heads && child.heads.length > 0 && firstChild.heads[0].c === child.heads[0].c) overlaps = false; // If this note overlaps the note in the first voice and we haven't moved the note yet (this can be called multiple times)
 
     if (overlaps) {
       // I think that firstChild should always have at least one note head, but defensively make sure.
@@ -23795,7 +23827,7 @@ function createStems(elems, asc, beam, dy, mainNote) {
     var pitch = furthestHead.pitch + (asc ? ovalDelta : -ovalDelta);
     var dx = asc ? furthestHead.w : 0; // down-pointing stems start on the left side of the note, up-pointing stems start on the right side, so we offset by the note width.
 
-    dx += furthestHead.dx;
+    if (!isGrace) dx += furthestHead.dx;
     var x = furthestHead.x + dx; // this is now the actual x location in pixels.
 
     var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
@@ -24434,9 +24466,14 @@ var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staff
     spacingunits += spacingunit;
     minspace = Math.min(minspace, spacingunit);
     if (debug) console.log("currentduration: ", currentduration, spacingunits, minspace);
+    var lastTopVoice = undefined;
 
     for (i = 0; i < currentvoices.length; i++) {
-      var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, currentvoices[i], renderer.minPadding, currentvoices[0]);
+      var v = currentvoices[i];
+      if (v.voicenumber === 0) lastTopVoice = i;
+      var topVoice = lastTopVoice !== undefined && currentvoices[lastTopVoice].voicenumber !== v.voicenumber ? currentvoices[lastTopVoice] : undefined;
+      if (!isSameStaff(v, topVoice)) topVoice = undefined;
+      var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, v, renderer.minPadding, topVoice);
       var dx = voicechildx - x;
 
       if (dx > 0) {
@@ -24490,6 +24527,12 @@ function finished(voices) {
 
 function getDurationIndex(element) {
   return element.durationindex - (element.children[element.i] && element.children[element.i].duration > 0 ? 0 : 0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
+}
+
+function isSameStaff(voice1, voice2) {
+  if (!voice1 || !voice1.staff || !voice1.staff.voices || voice1.staff.voices.length === 0) return false;
+  if (!voice2 || !voice2.staff || !voice2.staff.voices || voice2.staff.voices.length === 0) return false;
+  return voice1.staff.voices[0] === voice2.staff.voices[0];
 }
 
 module.exports = layoutStaffGroup;
@@ -25725,18 +25768,23 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
     }, getTextSize);
   }
 
-  if (lines[0] && lines[0].subtitle) {
-    addTextIf(this.rows, {
-      marginLeft: tLeft,
-      text: lines[0].subtitle.text,
-      font: 'subtitlefont',
-      klass: 'text meta-top subtitle',
-      marginTop: spacing.subtitle,
-      anchor: tAnchor,
-      absElemType: "subtitle",
-      info: lines[0].subtitle,
-      name: "subtitle"
-    }, getTextSize);
+  if (lines.length) {
+    var index = 0;
+
+    while (index < lines.length && lines[index].subtitle) {
+      addTextIf(this.rows, {
+        marginLeft: tLeft,
+        text: lines[index].subtitle.text,
+        font: 'subtitlefont',
+        klass: 'text meta-top subtitle',
+        marginTop: spacing.subtitle,
+        anchor: tAnchor,
+        absElemType: "subtitle",
+        info: lines[index].subtitle,
+        name: "subtitle"
+      }, getTextSize);
+      index++;
+    }
   }
 
   if (metaText.rhythm || metaText.origin || metaText.composer) {
