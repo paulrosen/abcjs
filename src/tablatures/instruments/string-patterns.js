@@ -103,16 +103,7 @@ function noteToNumber(self, note, stringNumber, secondPosition , firstSize) {
   if (secondPosition) {
     strings = secondPosition;
   }
-  var noteName = note.name;
-  if (note.isLower) {
-    noteName = noteName.toLowerCase();
-  }
-  for (var ii = 0; ii < note.isQuoted; ii++) {
-    noteName += "'";
-  }
-  for (var jj = 0; jj < note.hasComma; jj++ ) {
-    noteName += ",";
-  }
+  var noteName = note.emitNoAccidentals();
   var num = strings[stringNumber].indexOf(noteName);
   var acc = note.acc;
   if (num != -1) {

@@ -159,13 +159,15 @@ TabNote.prototype.getAccidentalEquiv = function () {
 TabNote.prototype.nextNote = function () {
   var newTabNote = cloneNote(this);
 
-  if (!this.isSharp) {
+  if (!this.isSharp && !this.isKeySharp ) {
     if (this.name != 'E' && this.name != 'B') {
       newTabNote.isSharp = true;
       return newTabNote;
     }
   } else {
-    newTabNote.isSharp = false; // cleanup
+    // cleanup
+    newTabNote.isSharp = false; 
+    newTabNote.isKeySharp = false; 
   }
   var noteIndex = notes.indexOf(this.name);
   if (noteIndex == notes.length - 1) {
@@ -222,6 +224,20 @@ TabNote.prototype.prevNote = function () {
     }
   }
   return newTabNote;
+};
+
+TabNote.prototype.emitNoAccidentals = function (  ) {
+  var returned = this.name;
+  if (this.isLower) {
+    returned = returned.toLowerCase();
+  }
+  for (var ii = 0; ii < this.isQuoted; ii++) {
+    returned += "'";
+  }
+  for (var jj = 0; jj < this.hasComma; jj++) {
+    returned += ",";
+  }
+  return returned;
 };
 
 TabNote.prototype.emit = function () {

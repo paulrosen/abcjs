@@ -9,7 +9,7 @@ var TabNote = require('./instruments/tab-note');
 
 function buildAccEquiv(acc,note) {
   var equiv = note.getAccidentalEquiv();
-  if (acc.note.toUpperCase() == equiv.note.toUpperCase()) {
+  if (acc.note.toUpperCase() == equiv.name.toUpperCase()) {
     equiv.isSharp = false;
     equiv.isFlat = false;
     return equiv;
@@ -22,10 +22,11 @@ function adjustNoteToKey(acc, note) {
     if (note.isFlat) {
       return buildAccEquiv(acc, note);
     } else if (note.isSharp) {
-      if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
         note.isSharp = false;
+        note.isKeySharp = true;
       } else {
-        if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+        if (acc.note.toUpperCase() == note.name.toUpperCase()) {
           note.natural = true;
         }
       }
@@ -34,11 +35,12 @@ function adjustNoteToKey(acc, note) {
     if (note.isSharp) {
       return buildAccEquiv(acc, note);
     } else if (note.isFlat) {
-      if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
         note.isFlat = false;
+        note.isKeyFlat = true;
       }
     } else {
-      if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
         note.natural = true;
       }
     }

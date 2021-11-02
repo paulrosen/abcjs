@@ -213,7 +213,7 @@ describe("Tablature", function () {
 				{ "num": 2, "str": 2, "pitch": "^F" }]
 			},
 			{
-				"el_type": "note", "startChar": 15, "endChar": 20, "notes": [{ "num": 8, "str": 2, "pitch": "B" },
+				"el_type": "note", "startChar": 15, "endChar": 20, "notes": [{ "num": 7, "str": 2, "pitch": "B" },
 				{ "num": 2, "str": 1, "pitch": "B" }]
 			},
 			{
@@ -225,20 +225,20 @@ describe("Tablature", function () {
 				{ "num": 4, "str": 2, "pitch": "^G" }]
 			},
 			{
-				"el_type": "note", "startChar": 31, "endChar": 37, "notes": [{ "num": 6, "str": 3, "pitch": "^F" },
+				"el_type": "note", "startChar": 31, "endChar": 37, "notes": [{ "num": 2, "str": 2, "pitch": "^F" },
 				{ "num": 1, "str": 1, "pitch": "^A" }]
 			},
 			{
-				"el_type": "note", "startChar": 37, "endChar": 43, "notes": [{ "num": 8, "str": 2, "pitch": "^G" },
+				"el_type": "note", "startChar": 37, "endChar": 43, "notes": [{ "num": 4, "str": 2, "pitch": "^G" },
 				{ "num": 1, "str": 1, "pitch": "^A" }]
 			},
 			{
-				"el_type": "note", "startChar": 43, "endChar": 48, "notes": [{ "num": 11, "str": 2, "pitch": "B" },
+				"el_type": "note", "startChar": 43, "endChar": 48, "notes": [{ "num": 7, "str": 2, "pitch": "B" },
 				{ "num": 6, "str": 1, "pitch": "^d" }]
 			},
 			{
 				"el_type": "note", "startChar": 48, "endChar": 53, "notes": [{ "num": 13, "str": 1, "pitch": "^a" },
-				{ "num": 9, "str": 0, "pitch": "^c" }]
+				{ "num": 9, "str": 0, "pitch": "^c'" }]
 			},
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 54, "startChar": 53 }
 		]
@@ -267,22 +267,22 @@ describe("Tablature", function () {
 			{ "el_type": "note", "startChar": 19, "endChar": 21, "notes": [{ "num": 2, "str": 3, "pitch": "^F" }] },
 			{ "el_type": "note", "startChar": 21, "endChar": 22, "notes": [{ "num": 3, "str": 3, "pitch": "G" }] },
 			{ "el_type": "note", "startChar": 22, "endChar": 24, "notes": [{ "num": 0, "str": 2, "pitch": "A" }] },
-			{ "el_type": "note", "startChar": 24, "endChar": 30, "notes": [{ "num": 6, "str": 5, "pitch": "_B," }, { "num": 6, "str": 2, "pitch": "_B" }] },
-			{ "el_type": "note", "startChar": 30, "endChar": 31, "notes": [{ "num": 6, "str": 2, "pitch": "_B" }] },
+			{ "el_type": "note", "startChar": 24, "endChar": 30, "notes": [{ "num": 6, "str": 5, "pitch": "_B," }, { "num": 1, "str": 2, "pitch": "_B" }] },
+			{ "el_type": "note", "startChar": 30, "endChar": 31, "notes": [{ "num": 1, "str": 2, "pitch": "_B" }] },
 			{ "el_type": "note", "startChar": 31, "endChar": 33, "notes": [{ "num": 0, "str": 2, "pitch": "A" }] },
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 34, "startChar": 33 },
 			{ "el_type": "note", "startChar": 34, "endChar": 41, "notes": [{ "num": 5, "str": 5, "pitch": "A," }, { "num": 3, "str": 3, "pitch": "G" }] },
 			{ "el_type": "note", "startChar": 41, "endChar": 43, "notes": [{ "num": 2, "str": 3, "pitch": "^F" }] },
 			{ "el_type": "note", "startChar": 43, "endChar": 45, "notes": [{ "num": 0, "str": 3, "pitch": "E" }] },
-			{ "el_type": "note", "startChar": 45, "endChar": 50, "notes": [{ "num": 6, "str": 5, "pitch": "_B," }, { "num": 6, "str": 2, "pitch": "_B" }] },
+			{ "el_type": "note", "startChar": 45, "endChar": 50, "notes": [{ "num": 6, "str": 5, "pitch": "_B," }, { "num": 1, "str": 2, "pitch": "_B" }] },
 			{ "el_type": "note", "startChar": 50, "endChar": 52, "notes": [{ "num": 2, "str": 1, "pitch": "^c" }] },
-			{ "el_type": "note", "startChar": 52, "endChar": 53, "notes": [{ "num": 6, "str": 2, "pitch": "_B" }] },
+			{ "el_type": "note", "startChar": 52, "endChar": 53, "notes": [{ "num": 1, "str": 2, "pitch": "_B" }] },
 			{ "el_type": "note", "startChar": 53, "endChar": 55, "notes": [{ "num": 0, "str": 2, "pitch": "A" }] },
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 56, "startChar": 55 },
 			{ "el_type": "note", "startChar": 56, "endChar": 63, "notes": [{ "num": 5, "str": 5, "pitch": "A," }, { "num": 3, "str": 3, "pitch": "G" }] },
 			{ "el_type": "note", "startChar": 63, "endChar": 65, "notes": [{ "num": 2, "str": 3, "pitch": "^F" }] },
 			{ "el_type": "note", "startChar": 65, "endChar": 67, "notes": [{ "num": 0, "str": 3, "pitch": "E" }] },
-			{ "el_type": "note", "startChar": 67, "endChar": 75, "notes": [{ "num": 6, "str": 5, "pitch": "_B," }, { "num": 2, "str": 3, "pitch": "^F" }, { "num": 6, "str": 2, "pitch": "_B" }] },
+			{ "el_type": "note", "startChar": 67, "endChar": 75, "notes": [{ "num": 6, "str": 5, "pitch": "_B," }, { "num": 2, "str": 3, "pitch": "^F" }, { "num": 1, "str": 2, "pitch": "_B" }] },
 			{ "el_type": "bar", "type": "bar_right_repeat", "endChar": 77, "startChar": 75 }]
 	];
 

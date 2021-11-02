@@ -16802,20 +16802,7 @@ function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
     strings = secondPosition;
   }
 
-  var noteName = note.name;
-
-  if (note.isLower) {
-    noteName = noteName.toLowerCase();
-  }
-
-  for (var ii = 0; ii < note.isQuoted; ii++) {
-    noteName += "'";
-  }
-
-  for (var jj = 0; jj < note.hasComma; jj++) {
-    noteName += ",";
-  }
-
+  var noteName = note.emitNoAccidentals();
   var num = strings[stringNumber].indexOf(noteName);
   var acc = note.acc;
 
@@ -17220,13 +17207,15 @@ TabNote.prototype.getAccidentalEquiv = function () {
 TabNote.prototype.nextNote = function () {
   var newTabNote = cloneNote(this);
 
-  if (!this.isSharp) {
+  if (!this.isSharp && !this.isKeySharp) {
     if (this.name != 'E' && this.name != 'B') {
       newTabNote.isSharp = true;
       return newTabNote;
     }
   } else {
-    newTabNote.isSharp = false; // cleanup
+    // cleanup
+    newTabNote.isSharp = false;
+    newTabNote.isKeySharp = false;
   }
 
   var noteIndex = notes.indexOf(this.name);
@@ -17294,6 +17283,24 @@ TabNote.prototype.prevNote = function () {
   }
 
   return newTabNote;
+};
+
+TabNote.prototype.emitNoAccidentals = function () {
+  var returned = this.name;
+
+  if (this.isLower) {
+    returned = returned.toLowerCase();
+  }
+
+  for (var ii = 0; ii < this.isQuoted; ii++) {
+    returned += "'";
+  }
+
+  for (var jj = 0; jj < this.hasComma; jj++) {
+    returned += ",";
+  }
+
+  return returned;
 };
 
 TabNote.prototype.emit = function () {
@@ -17916,7 +17923,7 @@ var TabNote = __webpack_require__(/*! ./instruments/tab-note */ "./src/tablature
 function buildAccEquiv(acc, note) {
   var equiv = note.getAccidentalEquiv();
 
-  if (acc.note.toUpperCase() == equiv.note.toUpperCase()) {
+  if (acc.note.toUpperCase() == equiv.name.toUpperCase()) {
     equiv.isSharp = false;
     equiv.isFlat = false;
     return equiv;
@@ -17930,10 +17937,11 @@ function adjustNoteToKey(acc, note) {
     if (note.isFlat) {
       return buildAccEquiv(acc, note);
     } else if (note.isSharp) {
-      if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
         note.isSharp = false;
+        note.isKeySharp = true;
       } else {
-        if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+        if (acc.note.toUpperCase() == note.name.toUpperCase()) {
           note.natural = true;
         }
       }
@@ -17942,11 +17950,12 @@ function adjustNoteToKey(acc, note) {
     if (note.isSharp) {
       return buildAccEquiv(acc, note);
     } else if (note.isFlat) {
-      if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
         note.isFlat = false;
+        note.isKeyFlat = true;
       }
     } else {
-      if (acc.note.toUpperCase() == note.note.toUpperCase()) {
+      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
         note.natural = true;
       }
     }
