@@ -17645,9 +17645,9 @@ function TabAbsoluteElements() {
  */
 
 
-TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice) {
-  var source = staffAbsolute[0];
-  var dest = staffAbsolute[1];
+TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice, nbVoices, voiceIndex) {
+  var source = staffAbsolute[voiceIndex];
+  var dest = staffAbsolute[nbVoices + voiceIndex];
   var transposer = null;
 
   for (var ii = 0; ii < source.children.length; ii++) {
@@ -17888,19 +17888,23 @@ TabRenderer.prototype.doLayout = function () {
   staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos); // staffGroup.staffs.push(staffGroupInfos);
 
   staffGroup.height += this.tabSize + padd;
-  var tabVoice = new VoiceElement(0, 0);
-  var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
-
-  for (var ii = this.staffIndex + 1; ii < staffGroup.staffs.length; ii++) {
-    staffGroup.staffs[ii].top += nameHeight;
-  }
-
-  staffGroup.height += nameHeight * spacing.STEP;
-  tabVoice.staff = staffGroupInfos;
-  voices.splice(this.staffIndex, 0, tabVoice); // build from staff
+  var nbVoices = staffGroup.voices.length; // build from staff
 
   this.tabStaff.voices = [];
-  this.absolutes.build(this.plugin, voices, this.tabStaff.voices);
+
+  for (var ii = 0; ii < nbVoices; ii++) {
+    var tabVoice = new VoiceElement(0, 0);
+    var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
+
+    for (var jj = this.staffIndex + 1; jj < staffGroup.staffs.length; ii++) {
+      staffGroup.staffs[jj].top += nameHeight;
+    }
+
+    staffGroup.height += nameHeight * spacing.STEP;
+    tabVoice.staff = staffGroupInfos;
+    voices.splice(voices.length, 0, tabVoice);
+    this.absolutes.build(this.plugin, voices, this.tabStaff.voices, nbVoices, ii);
+  }
 };
 
 module.exports = TabRenderer;

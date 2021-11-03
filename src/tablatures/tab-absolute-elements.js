@@ -91,9 +91,13 @@ function TabAbsoluteElements() {
  * Build tab absolutes by scanning current staff line absolute array
  * @param {*} staffAbsolute
  */
-TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice) {
-  var source = staffAbsolute[0];
-  var dest = staffAbsolute[1];
+TabAbsoluteElements.prototype.build = function (plugin,
+  staffAbsolute,
+  tabVoice,
+  nbVoices,
+  voiceIndex ) {
+  var source = staffAbsolute[voiceIndex];
+  var dest = staffAbsolute[nbVoices+voiceIndex];
   var transposer = null;
   for (var ii = 0; ii < source.children.length; ii++) {
     var absChild = source.children[ii];

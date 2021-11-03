@@ -92,18 +92,21 @@ TabRenderer.prototype.doLayout = function () {
   };
   staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
-  staffGroup.height += this.tabSize + padd ;
-  var tabVoice = new VoiceElement(0, 0);
-  var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
-  for (var ii = this.staffIndex + 1; ii < staffGroup.staffs.length; ii++) {
-    staffGroup.staffs[ii].top += nameHeight;
-  }
-  staffGroup.height += nameHeight * spacing.STEP ;
-  tabVoice.staff = staffGroupInfos;
-  voices.splice(this.staffIndex, 0, tabVoice);
+  staffGroup.height += this.tabSize + padd;
+  var nbVoices = staffGroup.voices.length;
   // build from staff
   this.tabStaff.voices = [];
-  this.absolutes.build(this.plugin, voices, this.tabStaff.voices);
+  for (var ii = 0; ii < nbVoices; ii++) {
+    var tabVoice = new VoiceElement(0, 0);
+    var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
+    for (var jj = this.staffIndex + 1; jj < staffGroup.staffs.length; ii++) {
+      staffGroup.staffs[jj].top += nameHeight;
+    }
+    staffGroup.height += nameHeight * spacing.STEP;
+    tabVoice.staff = staffGroupInfos;
+    voices.splice(voices.length, 0, tabVoice);
+    this.absolutes.build(this.plugin, voices, this.tabStaff.voices, nbVoices, ii );
+  }
 };
 
 
