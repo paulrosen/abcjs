@@ -19,6 +19,8 @@ var create;
 			title = title.substring(0,124) + '...';
 		var key = abcTune.getKeySignature();
 		var time = abcTune.getMeterFraction();
+		var beatsPerSecond = commands.tempo / 60;
+		//var beatLength = abcTune.getBeatLength();
 		midi.setGlobalInfo(commands.tempo, title, key, time);
 
 		for (var i = 0; i < commands.tracks.length; i++) {
@@ -38,9 +40,11 @@ var create;
 						midi.setInstrument(event.instrument);
 						break;
 					case 'note':
+						var gapLengthInBeats = event.gap * beatsPerSecond;
 						var start = event.start;
-						var end = start + event.duration;
-						// TODO: end is affected by event.gap, too.
+						// The staccato and legato are indicated by event.gap.
+						// event.gap is in seconds but the durations are in whole notes.
+						var end = start + event.duration - gapLengthInBeats;
 						if (!notePlacement[start])
 							notePlacement[start] = [];
 						notePlacement[start].push({ pitch: event.pitch, volume: event.volume, cents: event.cents });

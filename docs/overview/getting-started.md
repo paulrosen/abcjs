@@ -39,6 +39,8 @@ Here are the latest versions. You can just download one of these:
 
 **NOTE: Do NOT link to these files directly! Upload them to your own server! [Here's why.](https://github.com/blog/1482-heads-up-nosniff-header-support-coming-to-chrome-and-firefox)**
 
+You can also use this CDN: `https://cdn.jsdelivr.net/npm/abcjs@VERSION/dist/abcjs-basic-min.js` where `VERSION` is the version of the library you want to use. Note that I don't maintain those files, so I can't guarantee that will still work in the future.
+
 When loading the library directly, you will find the library at `window.ABCJS`.
 
 ## Simplest Usage

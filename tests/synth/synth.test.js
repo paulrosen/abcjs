@@ -49,7 +49,69 @@ describe("Synth", function() {
 			});
 		});
 	})
+
+	it("two-at-once", function() {
+		this.timeout(5000);
+		const startTime = Date.now();
+		const tune = abcjs.renderAbc("paper", "CDEFGA|", {})
+		const tune2 = abcjs.renderAbc("paper2", "EFGABc|", {})
+		const midiBuffer = new abcjs.synth.CreateSynth();
+		const midiBuffer2 = new abcjs.synth.CreateSynth();
+
+		const promise1 = midiBuffer.init({
+			visualObj: tune[0],
+			millisecondsPerMeasure: tune[0].millisecondsPerMeasure()
+		})
+
+		const promise2 = midiBuffer2.init({
+			visualObj: tune2[0],
+			millisecondsPerMeasure: tune2[0].millisecondsPerMeasure()
+		})
+		console.log("after init started", Date.now()-startTime)
+		Promise.allSettled([promise1, promise2]).then(function () {
+			console.log("init settled", Date.now()-startTime)
+			const promise3 = midiBuffer.prime();
+			const promise4 = midiBuffer2.prime();
+			console.log("after prime started", Date.now()-startTime)
+			Promise.allSettled([promise3, promise4]).then(function () {
+				console.log("prime settled", Date.now()-startTime)
+				midiBuffer.start();
+				midiBuffer2.start();
+				console.log("after start", Date.now()-startTime)
+			})
+		})
+
+	})
 })
+
+function setUpSynth() {
+	midiBuffer = new ABCJS.synth.CreateSynth();
+
+	// midiBuffer.init preloads and caches all the notes needed. There may be significant network traffic here.
+	return midiBuffer.init({
+		visualObj: visualObj,
+		audioContext: audioContext,
+		millisecondsPerMeasure: visualObj.millisecondsPerMeasure()
+	}).then(function (response) {
+		statusDiv.innerHTML += "<div>Audio object has been initialized</div>";
+		// console.log(response); // this contains the list of notes that were loaded.
+		// midiBuffer.prime actually builds the output buffer.
+		return midiBuffer.prime();
+	}).then(function () {
+		statusDiv.innerHTML += "<div>Audio object has been primed</div>";
+		// At this point, everything slow has happened. midiBuffer.start will return very quickly and will start playing very quickly without lag.
+		midiBuffer.start();
+		statusDiv.innerHTML += "<div>Audio started</div>";
+		return Promise.resolve();
+	}).catch(function (error) {
+		if (error.status === "NotSupported") {
+			stopAudioButton.setAttribute("style", "display:none;");
+			var audioError = document.querySelector(".audio-error");
+			audioError.setAttribute("style", "");
+		} else
+			console.warn("synth error", error);
+	});
+}
 
 function getDrumString(meter) {
 	let num;

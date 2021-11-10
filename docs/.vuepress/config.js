@@ -6,5 +6,8 @@ module.exports = {
 		logo: '/img/abcjs_comp_extended_08.svg',
 		displayAllHeaders: true,
 		sidebar: require("./sidebar")
-	}
+	},
+	head: [
+		['link', { rel: 'icon', href: '/abcjs/favicon.ico' }]
+	],
 };

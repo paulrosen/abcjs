@@ -44,7 +44,7 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup, leftEdge) 
 		spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
 		var spacingduration = 0;
 		for (i=0;i<currentvoices.length;i++) {
-			//console.log("greatest spacing unit", x, currentvoices[i].getNextX(), currentvoices[i].getSpacingUnits(), currentvoices[i].spacingduration);
+			//console.log("greatest spacing unit", x, layoutVoiceElements.getNextX(currentvoices[i]), layoutVoiceElements.getSpacingUnits(currentvoices[i]), currentvoices[i].spacingduration);
 			if (layoutVoiceElements.getNextX(currentvoices[i])>x) {
 				x=layoutVoiceElements.getNextX(currentvoices[i]);
 				spacingunit=layoutVoiceElements.getSpacingUnits(currentvoices[i]);
@@ -55,8 +55,15 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup, leftEdge) 
 		minspace = Math.min(minspace,spacingunit);
 		if (debug) console.log("currentduration: ",currentduration, spacingunits, minspace);
 
+		var lastTopVoice = undefined;
 		for (i=0;i<currentvoices.length;i++) {
-			var voicechildx = layoutVoiceElements.layoutOneItem(x,spacing, currentvoices[i], renderer.minPadding);
+			var v = currentvoices[i];
+			if (v.voicenumber === 0)
+				lastTopVoice = i;
+			var topVoice = (lastTopVoice !== undefined && currentvoices[lastTopVoice].voicenumber !== v.voicenumber) ? currentvoices[lastTopVoice] : undefined;
+			if (!isSameStaff(v, topVoice))
+				topVoice = undefined;
+			var voicechildx = layoutVoiceElements.layoutOneItem(x,spacing, v, renderer.minPadding, topVoice);
 			var dx = voicechildx-x;
 			if (dx>0) {
 				x = voicechildx; //update x
@@ -104,6 +111,14 @@ function finished(voices) {
 
 function getDurationIndex(element) {
 	return element.durationindex - (element.children[element.i] && (element.children[element.i].duration>0)?0:0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
+}
+
+function isSameStaff(voice1, voice2) {
+	if (!voice1 || !voice1.staff || !voice1.staff.voices || voice1.staff.voices.length === 0)
+		return false;
+	if (!voice2 || !voice2.staff || !voice2.staff.voices || voice2.staff.voices.length === 0)
+		return false;
+	return (voice1.staff.voices[0] === voice2.staff.voices[0])
 }
 
 module.exports = layoutStaffGroup;

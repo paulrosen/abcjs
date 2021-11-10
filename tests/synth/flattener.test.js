@@ -2748,6 +2748,7 @@ function doFlattenTest(abc, expected, options) {
 }
 
 function doTimingObjTest(abc, expected, options) {
+	if (!options) options = {};
 	var visualObj = abcjs.renderAbc("paper", abc, {});
 	visualObj[0].setUpAudio(options);
 	var timing = visualObj[0].setTiming(options.qpm);

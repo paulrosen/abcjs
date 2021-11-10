@@ -273,6 +273,7 @@ var parseCommon = require("../parse/abc_common");
 									}
 									break;
 								case "key":
+								case "keySignature":
 									addKey(voices[voiceNumber], elem);
 									break;
 								case "meter":

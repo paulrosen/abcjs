@@ -52,6 +52,7 @@ var AbstractEngraver = function(getTextSize, tuneNumber, options) {
 	this.graceSlurs = options.graceSlurs;
 	this.percmap = options.percmap;
 	this.initialClef = options.initialClef
+	this.jazzchords = !!options.jazzchords
 	this.reset();
 };
 
@@ -572,7 +573,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				var numMeasures = new RelativeElement("" + elem.rest.text, mmWidth, mmWidth, 16, {type: "multimeasure-text"});
 				abselem.addExtra(numMeasures);
 		}
-		if (elem.rest.type.indexOf("multimeasure") < 0) {
+		if (elem.rest.type.indexOf("multimeasure") < 0 && elem.rest.type !== "invisible") {
 			var ret = createNoteHead(abselem, c, {verticalPos: restpitch},
 				{ dot: dot, scale: voiceScale});
 			noteHead = ret.notehead;
@@ -816,7 +817,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 	ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
 
   if (elem.chord !== undefined) {
-  	var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth);
+ 	var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth, this.jazzchords);
 	  roomtaken = ret3.roomTaken;
 	  roomtakenright = ret3.roomTakenRight;
   }

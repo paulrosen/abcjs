@@ -179,10 +179,28 @@ Svg.prototype.text = function(text, attr, target) {
 	var lines = (""+text).split("\n");
 	for (var i = 0; i < lines.length; i++) {
 		var line = document.createElementNS(svgNS, 'tspan');
-		line.textContent = lines[i];
 		line.setAttribute("x", attr.x ? attr.x : 0);
 		if (i !== 0)
 			line.setAttribute("dy", "1.2em");
+		if (lines[i].indexOf("\x03") !== -1) {
+			var parts = lines[i].split('\x03')
+			line.textContent = parts[0];
+			if (parts[1]) {
+				var ts2 = document.createElementNS(svgNS, 'tspan');
+				ts2.setAttribute("dy", "-0.3em");
+				ts2.setAttribute("style", "font-size:0.7em");
+				ts2.textContent = parts[1];
+				line.appendChild(ts2);
+			}
+			if (parts[2]) {
+				var ts3 = document.createElementNS(svgNS, 'tspan');
+				ts3.setAttribute("dy", "0.1em");
+				ts3.setAttribute("style", "font-size:0.7em");
+				ts3.textContent = parts[2];
+				line.appendChild(ts3);
+			}
+		} else
+			line.textContent = lines[i];
 		el.appendChild(line);
 	}
 	if (target)

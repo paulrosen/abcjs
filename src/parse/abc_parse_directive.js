@@ -742,6 +742,7 @@ var parseDirective = {};
 			//					titleformat: { type: "string", optional: true },
 			case "bagpipes":tune.formatting.bagpipes = true;break;
 			case "flatbeams":tune.formatting.flatbeams = true;break;
+			case "jazzchords":tune.formatting.jazzchords = true;break;
 			case "landscape":multilineVars.landscape = true;break;
 			case "papersize":multilineVars.papersize = restOfString;break;
 			case "graceslurs":
