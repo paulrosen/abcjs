@@ -43,7 +43,7 @@ function CreateSynth() {
 		self.soundFontUrl = params.soundFontUrl ? params.soundFontUrl : defaultSoundFontUrl;
 		if (self.soundFontUrl[self.soundFontUrl.length-1] !== '/')
 			self.soundFontUrl += '/';
-		if (params.soundFontVolumeMultiplier)
+		if (params.soundFontVolumeMultiplier || params.soundFontVolumeMultiplier === 0)
 			self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;
 		else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2)
 			self.soundFontVolumeMultiplier = 5.0;
