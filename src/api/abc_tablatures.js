@@ -46,8 +46,8 @@ var abcTablatures = {
     if (params.tablatures) {
       // validate requested plugins 
       var tabs = params.tablatures;
+      returned = [];
       for (var ii = 0; ii < tabs.length; ii++) {
-        returned = [];
         var tab = tabs[ii];
         if (tab.length > 0) {
           var tabName = tab[0];
@@ -64,7 +64,7 @@ var abcTablatures = {
             args.abcSrc = params.tablatures.abcSrc;
             // proceed with tab plugin  init 
             plugin.init(tune, tuneNumber, args, ii);
-            returned[ii] = plugin;
+            returned.push(plugin);
             nbPlugins++;
           } else {
             // unknown tab plugin 

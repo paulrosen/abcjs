@@ -87,7 +87,22 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 					linePitch = staff.linePitch; 
 				}
 				renderer.controller.classes.newMeasure();
-				bottomLine = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, staff.dy);
+				var lines = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, staff.dy);
+				bottomLine = lines[1];
+				staff.bottomLine = bottomLine;
+				staff.topLine = lines[0];
+				// rework bartop when tabs are present with current staff
+				if (staff.hasTab) {
+					// do not link to staff above  (ugly looking)
+					bartop = staff.topLine;
+				}
+				if (staff.hasStaff) {
+					// this is a tab
+					bartop = staff.hasStaff.topLine;
+					params.voices[i].barto = true;
+					params.voices[i].topLine = topLine;
+				}
+
 			}
 			printBrace(renderer, staff.absoluteY, params.brace, i, selectables);
 			printBrace(renderer, staff.absoluteY, params.bracket, i, selectables);
@@ -110,7 +125,7 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 
 		renderer.controller.classes.newMeasure();
 		if (!params.voices[i].duplicate) {
-			bartop = renderer.calcY(2+tabNameHeight); // This connects the bar lines between two different staves.
+				bartop = renderer.calcY(2 + tabNameHeight); // This connects the bar lines between two different staves.
 //			if (staff.bottom < 0)
 //				renderer.moveY(spacing.STEP, -staff.bottom);
 		}
@@ -118,7 +133,10 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	renderer.controller.classes.newMeasure();
 
 	// connect all the staves together with a vertical line
-	if (params.staffs.length>1) {
+	var staffSize = params.staffs.length;
+	if (staffSize > 1) {
+		topLine = params.staffs[0].topLine;
+		bottomLine = params.staffs[staffSize - 1].bottomLine;
 		printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
 	}
 	renderer.y = startY;

@@ -87,6 +87,14 @@ function TabAbsoluteElements() {
   this.accidentals = null;
 }
 
+function getInitialStaffSize(staffGroup) {
+  var returned = 0;
+  for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (!staffGroup[ii].tabNameInfos) returned++;
+  }
+  return returned;
+}
+
 /**
  * Build tab absolutes by scanning current staff line absolute array
  * @param {*} staffAbsolute
@@ -94,10 +102,11 @@ function TabAbsoluteElements() {
 TabAbsoluteElements.prototype.build = function (plugin,
   staffAbsolute,
   tabVoice,
-  nbVoices,
-  voiceIndex ) {
-  var source = staffAbsolute[voiceIndex];
-  var dest = staffAbsolute[nbVoices+voiceIndex];
+  voiceIndex,
+  staffIndex) {
+  var staffSize = getInitialStaffSize(staffAbsolute);
+  var source = staffAbsolute[staffIndex+voiceIndex];
+  var dest = staffAbsolute[staffSize+staffIndex+voiceIndex];
   var transposer = null;
   for (var ii = 0; ii < source.children.length; ii++) {
     var absChild = source.children[ii];
@@ -120,13 +129,21 @@ TabAbsoluteElements.prototype.build = function (plugin,
         }
         break;
       case 'bar':
+        var lastBar = false;
+        if (ii == source.children.length-1) {
+          // used for final line bar drawing
+          // for multi tabs / multi staves
+          lastBar = true;
+        }
         tabVoice.push({
           el_type: absChild.abcelem.el_type,
           type: absChild.abcelem.type,
           endChar: absChild.abcelem.endChar,
-          startChar: absChild.abcelem.startChar,
+          startChar: absChild.abcelem.startChar
         });
-        dest.children.push(cloneAbsoluteAndRelatives(absChild, plugin));
+        var cloned = cloneAbsoluteAndRelatives(absChild, plugin);
+        cloned.abcelem.lastBar = lastBar;
+        dest.children.push(cloned);
         break;
       case 'note':
         var abs = cloneAbsolute(absChild);

@@ -287,9 +287,9 @@ var abcTablatures = {
     if (params.tablatures) {
       // validate requested plugins 
       var tabs = params.tablatures;
+      returned = [];
 
       for (var ii = 0; ii < tabs.length; ii++) {
-        returned = [];
         var tab = tabs[ii];
 
         if (tab.length > 0) {
@@ -311,7 +311,7 @@ var abcTablatures = {
             args.abcSrc = params.tablatures.abcSrc; // proceed with tab plugin  init 
 
             plugin.init(tune, tuneNumber, args, ii);
-            returned[ii] = plugin;
+            returned.push(plugin);
             nbPlugins++;
           } else {
             // unknown tab plugin 
@@ -17639,15 +17639,26 @@ function lyricsDim(abs) {
 function TabAbsoluteElements() {
   this.accidentals = null;
 }
+
+function getInitialStaffSize(staffGroup) {
+  var returned = 0;
+
+  for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (!staffGroup[ii].tabNameInfos) returned++;
+  }
+
+  return returned;
+}
 /**
  * Build tab absolutes by scanning current staff line absolute array
  * @param {*} staffAbsolute
  */
 
 
-TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice, nbVoices, voiceIndex) {
-  var source = staffAbsolute[voiceIndex];
-  var dest = staffAbsolute[nbVoices + voiceIndex];
+TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice, voiceIndex, staffIndex) {
+  var staffSize = getInitialStaffSize(staffAbsolute);
+  var source = staffAbsolute[staffIndex + voiceIndex];
+  var dest = staffAbsolute[staffSize + staffIndex + voiceIndex];
   var transposer = null;
 
   for (var ii = 0; ii < source.children.length; ii++) {
@@ -17672,13 +17683,23 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
         break;
 
       case 'bar':
+        var lastBar = false;
+
+        if (ii == source.children.length - 1) {
+          // used for final line bar drawing
+          // for multi tabs / multi staves
+          lastBar = true;
+        }
+
         tabVoice.push({
           el_type: absChild.abcelem.el_type,
           type: absChild.abcelem.type,
           endChar: absChild.abcelem.endChar,
           startChar: absChild.abcelem.startChar
         });
-        dest.children.push(cloneAbsoluteAndRelatives(absChild, plugin));
+        var cloned = cloneAbsoluteAndRelatives(absChild, plugin);
+        cloned.abcelem.lastBar = lastBar;
+        dest.children.push(cloned);
         break;
 
       case 'note':
@@ -17789,6 +17810,7 @@ module.exports = TabCommon;
   \****************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
+/* eslint-disable no-debugger */
 var VoiceElement = __webpack_require__(/*! ../write/abc_voice_element */ "./src/write/abc_voice_element.js");
 
 var TabAbsoluteElements = __webpack_require__(/*! ./tab-absolute-elements */ "./src/tablatures/tab-absolute-elements.js");
@@ -17853,7 +17875,7 @@ function TabRenderer(plugin, renderer, line, staffIndex) {
   this.plugin = plugin;
   this.line = line;
   this.absolutes = new TabAbsoluteElements();
-  this.staffIndex = staffIndex + 1;
+  this.staffIndex = staffIndex;
   this.tabStaff = {
     clef: {
       type: 'TAB'
@@ -17862,11 +17884,47 @@ function TabRenderer(plugin, renderer, line, staffIndex) {
   this.tabSize = plugin.linePitch * plugin.nbLines;
 }
 
+function getTabStaff(self, staffGroup) {
+  var tabIndex = self.staffIndex;
+  var prevIndex = 0;
+
+  for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (!staffGroup[ii].isTabStaff) {
+      if (prevIndex == tabIndex) return prevIndex;
+      prevIndex++;
+    }
+  }
+
+  return -1;
+}
+
+function getNbTabs(self, staffGroup) {
+  var nbTabs = self.staffIndex;
+
+  for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (staffGroup[ii].isTabStaff) {
+      nbTabs++;
+    }
+  }
+
+  return nbTabs;
+}
+
+function linkStaffAndTabs(staffGroup) {
+  for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (staffGroup[ii].isTabStaff) {
+      // link to previous staff
+      staffGroup[ii].hasStaff = staffGroup[ii - 1];
+      staffGroup[ii - 1].hasTab = staffGroup[ii];
+    }
+  }
+}
+
 TabRenderer.prototype.doLayout = function () {
   var staffs = this.line.staff;
 
   if (staffs) {
-    staffs.splice(this.staffIndex, 0, this.tabStaff);
+    staffs.splice(staffs.length, 0, this.tabStaff);
   }
 
   var staffGroup = this.line.staffGroup;
@@ -17875,20 +17933,23 @@ TabRenderer.prototype.doLayout = function () {
 
   var lyricsHeight = getLyricHeight(firstVoice);
   var padd = 4;
-  var previousStaff = staffGroup.staffs[this.staffIndex - 1];
+  var prevIndex = getTabStaff(this, staffGroup.staffs);
+  var nbTabs = getNbTabs(this, staffGroup.staffs);
+  var previousStaff = staffGroup.staffs[prevIndex];
   var tabTop = previousStaff.top + padd + lyricsHeight;
   var staffGroupInfos = {
     bottom: -1,
+    isTabStaff: true,
     specialY: initSpecialY(),
     lines: this.plugin.nbLines,
     linePitch: this.plugin.linePitch,
     dy: 0.15,
     top: tabTop
   };
-  staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos); // staffGroup.staffs.push(staffGroupInfos);
+  staffGroup.staffs.splice(this.staffIndex + 1 + nbTabs, 0, staffGroupInfos); // staffGroup.staffs.push(staffGroupInfos);
 
   staffGroup.height += this.tabSize + padd;
-  var nbVoices = staffGroup.voices.length; // build from staff
+  var nbVoices = staffs[this.staffIndex].voices.length; // build from staff
 
   this.tabStaff.voices = [];
 
@@ -17896,15 +17957,17 @@ TabRenderer.prototype.doLayout = function () {
     var tabVoice = new VoiceElement(0, 0);
     var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
 
-    for (var jj = this.staffIndex + 1; jj < staffGroup.staffs.length; ii++) {
+    for (var jj = this.staffIndex + 1; jj < staffGroup.staffs.length; jj++) {
       staffGroup.staffs[jj].top += nameHeight;
     }
 
     staffGroup.height += nameHeight * spacing.STEP;
     tabVoice.staff = staffGroupInfos;
     voices.splice(voices.length, 0, tabVoice);
-    this.absolutes.build(this.plugin, voices, this.tabStaff.voices, nbVoices, ii);
+    this.absolutes.build(this.plugin, voices, this.tabStaff.voices, ii, this.staffIndex);
   }
+
+  linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
 };
 
 module.exports = TabRenderer;
@@ -24305,7 +24368,22 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
         }
 
         renderer.controller.classes.newMeasure();
-        bottomLine = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, staff.dy);
+        var lines = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, staff.dy);
+        bottomLine = lines[1];
+        staff.bottomLine = bottomLine;
+        staff.topLine = lines[0]; // rework bartop when tabs are present with current staff
+
+        if (staff.hasTab) {
+          // do not link to staff above  (ugly looking)
+          bartop = staff.topLine;
+        }
+
+        if (staff.hasStaff) {
+          // this is a tab
+          bartop = staff.hasStaff.topLine;
+          params.voices[i].barto = true;
+          params.voices[i].topLine = topLine;
+        }
       }
 
       printBrace(renderer, staff.absoluteY, params.brace, i, selectables);
@@ -24352,7 +24430,11 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
 
   renderer.controller.classes.newMeasure(); // connect all the staves together with a vertical line
 
-  if (params.staffs.length > 1) {
+  var staffSize = params.staffs.length;
+
+  if (staffSize > 1) {
+    topLine = params.staffs[0].topLine;
+    bottomLine = params.staffs[staffSize - 1].bottomLine;
     printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
   }
 
@@ -24489,6 +24571,7 @@ function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
     klass: renderer.controller.classes.generate("abcjs-staff")
   }); // If there is one line, it is the B line. Otherwise, the bottom line is the E line.
 
+  var firstYLine = 0;
   var lastYLine = 0;
 
   if (numLines === 1) {
@@ -24497,13 +24580,18 @@ function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
     for (var i = numLines - 1; i >= 0; i--) {
       var curpitch = (i + 1) * pitch;
       lastYLine = renderer.calcY(curpitch);
+
+      if (firstYLine == 0) {
+        firstYLine = lastYLine;
+      }
+
       printStaffLine(renderer, startx, endx, curpitch, klass, null, dy);
       klass = undefined;
     }
   }
 
   renderer.paper.closeGroup();
-  return lastYLine;
+  return [firstYLine, lastYLine];
 }
 
 module.exports = printStaff;
@@ -24949,6 +25037,12 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
       // 	child.elemset = drawTempo(renderer, child);
       // 	break;
       default:
+        if (child.type == 'bar' && params.staff.isTabStaff) {
+          if (child.abcelem.lastBar) {
+            bartop = params.topLine;
+          }
+        }
+
         drawAbsolute(renderer, child, params.barto || i === params.children.length - 1 ? bartop : 0, selectables, staffPos);
     }
 

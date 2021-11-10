@@ -16,7 +16,7 @@ var plugin = {
  *  @param {*} tuneNumber  the parsed tune AST tree
   * @param {*} params  complementary args provided to Tablature Plugin
   */
-  init: function (abcTune, tuneNumber, params) {
+  init: function (abcTune, tuneNumber, params ) {
     var _super = new TabCommon(abcTune, tuneNumber, params);
     this._super = _super;
     this.abcTune = abcTune;

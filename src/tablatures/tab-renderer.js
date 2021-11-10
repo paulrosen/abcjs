@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 var VoiceElement = require('../write/abc_voice_element');
 var TabAbsoluteElements = require('./tab-absolute-elements');
 var spacing = require('../write/abc_spacing');
@@ -56,7 +57,7 @@ function TabRenderer(plugin, renderer, line, staffIndex) {
   this.plugin = plugin;
   this.line = line;
   this.absolutes = new TabAbsoluteElements();
-  this.staffIndex = staffIndex + 1;
+  this.staffIndex = staffIndex ;
   this.tabStaff = {
     clef: {
       type: 'TAB'
@@ -65,11 +66,42 @@ function TabRenderer(plugin, renderer, line, staffIndex) {
   this.tabSize = (plugin.linePitch * plugin.nbLines);
 }
 
+function getTabStaff(self ,staffGroup) {
+  var tabIndex = self.staffIndex;
+  var prevIndex = 0; 
+  for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (!staffGroup[ii].isTabStaff) {
+      if (prevIndex == tabIndex) return prevIndex;
+      prevIndex++;
+    }
+  }
+  return -1;
+}
+
+function getNbTabs(self, staffGroup) {
+  var nbTabs = self.staffIndex;
+  for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (staffGroup[ii].isTabStaff) {
+      nbTabs++;
+    }
+  }
+  return nbTabs;
+}
+
+function linkStaffAndTabs(staffGroup) {
+  for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (staffGroup[ii].isTabStaff) {
+      // link to previous staff
+      staffGroup[ii].hasStaff = staffGroup[ii-1];
+      staffGroup[ii - 1].hasTab = staffGroup[ii];
+    }
+  }
+}
 TabRenderer.prototype.doLayout = function () {
   var staffs = this.line.staff;
   if (staffs) {
     staffs.splice(
-      this.staffIndex, 0,
+      staffs.length, 0,
       this.tabStaff
     );
   }
@@ -80,33 +112,37 @@ TabRenderer.prototype.doLayout = function () {
   // take lyrics into account if any
   var lyricsHeight = getLyricHeight(firstVoice);
   var padd = 4;
-  var previousStaff = staffGroup.staffs[this.staffIndex - 1];
+  var prevIndex = getTabStaff(this, staffGroup.staffs);
+  var nbTabs = getNbTabs(this, staffGroup.staffs);
+  var previousStaff = staffGroup.staffs[prevIndex];
   var tabTop = previousStaff.top + padd + lyricsHeight;
   var staffGroupInfos = {
     bottom: -1,
+    isTabStaff: true,
     specialY: initSpecialY(),
     lines: this.plugin.nbLines,
     linePitch: this.plugin.linePitch,
     dy: 0.15,
     top: tabTop,
   };
-  staffGroup.staffs.splice(this.staffIndex, 0, staffGroupInfos);
+  staffGroup.staffs.splice(this.staffIndex+1+nbTabs, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
   staffGroup.height += this.tabSize + padd;
-  var nbVoices = staffGroup.voices.length;
+  var nbVoices = staffs[this.staffIndex].voices.length;
   // build from staff
   this.tabStaff.voices = [];
   for (var ii = 0; ii < nbVoices; ii++) {
     var tabVoice = new VoiceElement(0, 0);
     var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
-    for (var jj = this.staffIndex + 1; jj < staffGroup.staffs.length; ii++) {
+    for (var jj = this.staffIndex + 1; jj < staffGroup.staffs.length; jj++) {
       staffGroup.staffs[jj].top += nameHeight;
     }
     staffGroup.height += nameHeight * spacing.STEP;
     tabVoice.staff = staffGroupInfos;
     voices.splice(voices.length, 0, tabVoice);
-    this.absolutes.build(this.plugin, voices, this.tabStaff.voices, nbVoices, ii );
+    this.absolutes.build(this.plugin, voices, this.tabStaff.voices, ii , this.staffIndex);
   }
+  linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
 };
 
 
