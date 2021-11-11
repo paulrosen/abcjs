@@ -52,7 +52,7 @@ from the lowest pitch. For example:
 ```javascript
 tablatures: [
 	{
-		name: 'guitar',
+		instrument: 'guitar',
 		label: "Guitar (%T)",
 		tuning: ['D,', 'A,', 'D', 'G', 'A', 'd']
 	}
@@ -71,11 +71,11 @@ defaults:
 ```javascript
 tablatures: [
 	{
-		name: 'violin',
+		instrument: 'violin',
 		tuning: ['G,', 'D,', 'A', 'e']
 	},
 	{
-		name: 'guitar',
+		instrument: 'guitar',
 		tuning: ['E,', 'A,', 'D', 'G', 'B', 'e']
 	}
 ]
