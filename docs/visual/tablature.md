@@ -90,7 +90,7 @@ The number of frets that a capo is placed. This will transpose the numbers so th
 string is on the fret of the capo.
 
 ### highestNote
-default: for guitar: `e'`, for violin: `a'`.
+default: `a'`.
 
 This defines the highest note that can be played on that instrument. If a note is out of range a question mark will be printed instead.
 
