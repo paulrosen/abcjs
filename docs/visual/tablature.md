@@ -31,6 +31,8 @@ abcjs.renderAbc("paper", abc, {
 	]
 })
 ```
+If there are more voices in the music than are in the above array, the extra voices will not have tablature. If there
+are more voices in the above array then in the music, then the extra voices will be ignored.
 
 ## Tablature options
 
@@ -86,6 +88,11 @@ default: 0
 
 The number of frets that a capo is placed. This will transpose the numbers so that the open
 string is on the fret of the capo.
+
+### highestNote
+default: for guitar: `e'`, for violin: `a'`.
+
+This defines the highest note that can be played on that instrument. If a note is out of range a question mark will be printed instead.
 
 ## Fonts
 
