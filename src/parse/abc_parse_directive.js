@@ -39,6 +39,8 @@ var parseDirective = {};
 		tune.formatting.footerfont  = { face: "\"Times New Roman\"", size: 12, weight: "normal", style: "normal", decoration: "none" };
 		tune.formatting.headerfont  = { face: "\"Times New Roman\"", size: 12, weight: "normal", style: "normal", decoration: "none" };
 		tune.formatting.voicefont  = { face: "\"Times New Roman\"", size: 13, weight: "bold", style: "normal", decoration: "none" };
+		tune.formatting.tablabelfont  = { face: "\"Times New Roman\"", size: 19, weight: "normal", style: "italic", decoration: "none" };
+		tune.formatting.tabnumberfont  = { face: "\"Times New Roman\"", size: 12, weight: "normal", style: "normal", decoration: "none" };
 
 		// these are the default fonts for these element types. In the printer, these fonts might change as the tune progresses.
 		tune.formatting.annotationfont  = multilineVars.annotationfont;

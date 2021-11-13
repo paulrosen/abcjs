@@ -552,6 +552,8 @@ var ParserLint = function() {
 			subtitlespace: { type: "number", optional: true },
 			sysstaffsep: { type: "number", optional: true },
 			systemsep: { type: "number", optional: true },
+			tablabelfont: fontType,
+			tabnumberfont: fontType,
 			tempofont: fontType,
 			textfont: fontType,
 			textspace: { type: "number", optional: true },
