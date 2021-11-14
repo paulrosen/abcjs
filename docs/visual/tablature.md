@@ -5,12 +5,16 @@ of representing music, usually used for string instruments. You can find many ex
 how tablature works around the web. The lines of the staff represent the strings on that
 instrument and a number is placed instead of a note head to represent which fret is to be played.
 
-Here is a simple example:
+Here is a simple example using the options `{tablature: [{instrument: 'violin'}]}`:
 
-<show-and-render-abc abc="X:1\n T: Cooley's\n M: 4/4\n L: 1/8\n R: reel\n K: G\n |:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" :options="{tablature: 'violin'}">
+<show-and-render-abc :abc="`X:1\nT: Cooley's\nM: 4/4\nL: 1/8\nR: reel\nK: G\n|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n`" :options="{tablature: [ {instrument: 'violin'}]}">
 </show-and-render-abc>
 
 To get tablature to appear, add the option `abcjs.renderAbc("paper", abc, { tablatures: [...] }` as described below.
+
+::: tip Credits
+Thanks to Jean-Yves Mengant ([@jymen](https://github.com/jymen)) for leading the effort to include tablature and for writing the code. Check out his site [ABCMusicStudio](https://www.jymengant.org/).
+:::
 
 ## General Structure
 
@@ -66,8 +70,8 @@ will print the string `Guitar (DADGAD)` under each tablature line.
 ### tuning
 default: The standard tuning for that instrument
 
-This is an array of notes that represent the open strings, starting from the lowest pitch,
-of the instrument. This is useful for styles that use alternate tunings. The following are the
+This is an array of notes that represent the open strings, starting from the lowest pitch
+of the instrument. This is useful for musical styles that use alternate tunings. The following are the
 defaults:
 
 ```javascript
@@ -121,7 +125,7 @@ You can also use a preprocessing directive inside the abc string:
 
 ```
 %%tablabelfont name size italic bold box
-%%tabnumberfont name size italic bold box
+%%tabnumberfont name size italic bold
 ```
 
 ## Use with the editor
