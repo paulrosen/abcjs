@@ -138,8 +138,10 @@ var Parse = function() {
 			};
 			for (var i = 0; i < this.inTie.length; i++) {
 				this.endingHoldOver.inTie.push([]);
-				for (var j = 0; j < this.inTie[i].length; j++) {
-					this.endingHoldOver.inTie[i].push(this.inTie[i][j]);
+				if (this.inTie[i]) { // if a voice is suppressed there might be a gap in the array.
+					for (var j = 0; j < this.inTie[i].length; j++) {
+						this.endingHoldOver.inTie[i].push(this.inTie[i][j]);
+					}
 				}
 			}
 			for (var key in this.inTieChord) {
