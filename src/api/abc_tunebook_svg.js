@@ -116,6 +116,8 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
     }
     var origPaddingTop = ep.paddingtop;
     var origPaddingBottom = ep.paddingbottom;
+    var currentScrollY = div.parentNode.scrollTop; // If there is scrolling it will be lost during the redraw so remember it.
+    var currentScrollX = div.parentNode.scrollLeft;
     div.innerHTML = "";
     for (var k = 0; k < tunes.length; k++) {
         var lineEl = document.createElement("div");
@@ -145,6 +147,9 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
             else if (tunes[k].engraver.staffgroups.length > 0)
                 tune.engraver.staffgroups.push(tunes[k].engraver.staffgroups[0]);
         }
+    }
+    if (currentScrollX || currentScrollY) {
+        div.parentNode.scrollTo(currentScrollX, currentScrollY)
     }
 }
 

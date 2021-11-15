@@ -193,8 +193,9 @@ Svg.prototype.text = function(text, attr, target) {
 				line.appendChild(ts2);
 			}
 			if (parts[2]) {
+				var dist = parts[1] ? "0.4em" : "0.1em";
 				var ts3 = document.createElementNS(svgNS, 'tspan');
-				ts3.setAttribute("dy", "0.1em");
+				ts3.setAttribute("dy", dist);
 				ts3.setAttribute("style", "font-size:0.7em");
 				ts3.textContent = parts[2];
 				line.appendChild(ts3);

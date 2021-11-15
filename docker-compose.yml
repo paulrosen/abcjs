@@ -4,10 +4,7 @@ services:
   app:
     image: abcjs
     build: .
-    environment:
-      - "CMD=${CMD}"
     container_name: abcjs
-    command: npm ${CMD}
     volumes:
       - .:/srv/app
       - ./node_modules:/srv/app/node_modules
