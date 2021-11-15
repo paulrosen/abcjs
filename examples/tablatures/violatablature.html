@@ -15,13 +15,13 @@
       { canvas_id: "paper",
         warnings_id: "warnings",
         abcjsParams: {
+          visualTranspose : 0,
           tablature: [
             // first and only staff
             {
-              instrument: 'guitar',
-              label: 'Guitare (%T)',
-              tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
-              capo: 2
+              instrument: 'violin',
+              label: 'Viola/Mandola (%T)',
+              tuning: ['C,', 'G,', 'D', 'A']
             }
           ]
         } 
@@ -38,11 +38,12 @@
   <div class="container">
     <textarea id="abc" cols="80" rows="12" spellcheck="false">
 X:1
-T:Andro Guitar
-M: 2/4
-K:F
-|: [EE,]^FGA [B2B,]BA | [G2A,]^FE [B,B]^cBA | [G2A,]^FE [B,4^FB]:| 
-</textarea>
+T:Home On The Range
+M:3/4
+L:1/4
+K:C clef=alto
+G,|G,CE|E2 C/B,/|A,3/2 F/F|F2|]
+  </textarea>
 
     <div id="warnings"></div>
     <hr>

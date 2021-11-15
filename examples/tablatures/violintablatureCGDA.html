@@ -14,17 +14,16 @@
       new ABCJS.Editor("abc", 
       { canvas_id: "paper",
         warnings_id: "warnings",
-        abcjsParams: {} ,
-        tablature_options : [
-          // first and only staff
-          [ 
-            "ViolinTab" ,
+        abcjsParams: {
+          tablature: [
+            // first and only staff
             {
-              name : 'mandola' ,
+              instrument : 'violin',
+              label : 'mandola (%T)' ,
               tuning : ['C,', 'G', 'D', 'A']
             }
           ]
-        ]
+          }    
       });
     }
 

@@ -12,6 +12,15 @@ function TabNotes(fromNote, toNote) {
 TabNotes.prototype.build = function () {
   var fromN = this.fromN;
   var toN = this.toN;
+  // check that toN is not lower than fromN
+  if (toN.isLowerThan(fromN)) {
+    var from = fromN.emit();
+    var tn = toN.emit();
+    return {
+      error: 'Invalid string Instrument tuning : ' +
+        tn + ' string lower than ' + from + ' string'
+    };
+  }
   var buildReturned = [];
   var startIndex = notes.indexOf(fromN.name);
   var toIndex = notes.indexOf(toN.name);

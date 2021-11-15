@@ -8,6 +8,14 @@
 var ViolinTablature = require('../tablatures/instruments/violin/tab-violin');
 var GuitarTablature = require('../tablatures/instruments/guitar/tab-guitar');
 
+/* extend the table below when adding a new instrument plugin */
+
+// Existing tab classes 
+var pluginTab = {
+  'violin': 'ViolinTab',
+  'guitar': 'GuitarTab'
+};
+
 var abcTablatures = {
 
   inited: false,
@@ -43,35 +51,43 @@ var abcTablatures = {
     console.log('Tablatures plugins manager preparing Plugins ...');
     var returned = null;
     var nbPlugins = 0;
-    if (params.tablatures) {
+    if (params.tablature) {
       // validate requested plugins 
-      var tabs = params.tablatures;
+      var tabs = params.tablature;
       returned = [];
       for (var ii = 0; ii < tabs.length; ii++) {
-        var tab = tabs[ii];
-        if (tab.length > 0) {
-          var tabName = tab[0];
-          var args = null;
-          if (tab.length > 1) {
-            args = tab[1];
+        var args = tabs[ii];
+        var instrument = args['instrument'];
+        if (instrument == null) {
+          this.setError(tune, "tablature 'instrument' is missing");
+          return returned;
+        }
+        var tabName = pluginTab[instrument];
+        var plugin = null;
+        if (tabName) {
+          plugin = this.plugins[tabName];
+        }
+        if (plugin) {
+          if (params.visualTranspose != 0) {
+            // populate transposition request to tabs
+            args.visualTranspose = params.visualTranspose;
           }
-          var plugin = this.plugins[tabName];
-          if (plugin) {
-            if (params.visualTranspose != 0) {
-              // populate transposition request to tabs
-              args.visualTranspose = params.visualTranspose;
-            }
-            args.abcSrc = params.tablatures.abcSrc;
-            // proceed with tab plugin  init 
-            plugin.init(tune, tuneNumber, args, ii);
-            returned.push(plugin);
-            nbPlugins++;
-          } else {
-            // unknown tab plugin 
-            //this.emit_error('Undefined tablature plugin: ' + tabName)
-            this.setError(tune, 'Undefined tablature plugin: ' + tabName);
-            return returned;
-          }
+          args.abcSrc = params.tablature.abcSrc;
+          var pluginInstance = {
+            classz: plugin,
+            tuneNumber: tuneNumber,
+            params: args,
+            instance: null,
+          };
+          // proceed with tab plugin  init 
+          // plugin.init(tune, tuneNumber, args, ii);
+          returned.push(pluginInstance);
+          nbPlugins++;
+        } else {
+          // unknown tab plugin 
+          //this.emit_error('Undefined tablature plugin: ' + tabName)
+          this.setError(tune, 'Undefined tablature plugin: ' + instrument);
+          return returned;
         }
       }
     }
@@ -94,7 +110,18 @@ var abcTablatures = {
         if (tabs[jj]) {
           // tablature requested for staff
           var tabPlugin = tabs[jj];
-          tabPlugin.render(renderer, line, jj);
+          if (tabPlugin.instance == null) {
+            tabPlugin.instance = new tabPlugin.classz();
+            // plugin.init(tune, tuneNumber, args, ii);
+            // call initer first
+            tabPlugin.instance.init(abcTune,
+              tabPlugin.tuneNumber,
+              tabPlugin.params,
+              jj
+            );
+          }
+          // render next
+          tabPlugin.instance.render(renderer, line, jj);
         }
       }
     }

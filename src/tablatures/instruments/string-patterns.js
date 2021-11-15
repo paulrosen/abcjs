@@ -31,7 +31,11 @@ function buildPatterns(self) {
       nextNote = tuning[iii + 1];
     }
     var tabNotes = new TabNotes(tuning[iii],nextNote);
-    strings[pos--] = tabNotes.build();
+    var stringNotes = tabNotes.build();
+    if (stringNotes.error) {
+      return stringNotes;
+    }
+    strings[pos--] = stringNotes;
   }
   return strings;
 }
@@ -215,25 +219,35 @@ StringPatterns.prototype.toString = function () {
 
 StringPatterns.prototype.tabInfos = function (plugin) {
   var _super = plugin._super;
-  var name = _super.params.name + '(' + this.toString();
-  if (plugin.capo > 0) {
-    name += ' capo:' + plugin.capo + ' )';
-  } else {
-    name += ')';
+  var name = _super.params.label;
+  if (name) {
+    var tunePos = name.indexOf('%T');
+    var tuning = "";
+    if (tunePos != -1) {
+      tuning = this.toString();
+      if (plugin.capo > 0) {
+        tuning += ' capo:' + plugin.capo;
+      }
+      name = name.replace('%T', tuning);
+    }
+    return name;
   }
-  return name;
+  return '';
 };
 
 /**
  * Common patterns for all string instruments
- * @param {} tuning 
- * @param {*} capo 
+ * @param {} plugin
+ * @param {} tuning
+ * @param {*} capo
  * @param {*} highestNote 
  */
-function StringPatterns(tuning, capo, highestNote, linePitch) {
-  this.linePitch = linePitch;
+function StringPatterns(plugin) {
+  var tuning = plugin.tuning;
+  var capo = plugin.capo;
+  var highestNote = plugin._super.params.highestNote;
+  this.linePitch = plugin.linePitch;
   this.highestNote = "a'";
-  this.hasError = null; // collect errors here if any
   if (highestNote) {
     // override default
     this.highestNote = highestNote;
@@ -247,6 +261,11 @@ function StringPatterns(tuning, capo, highestNote, linePitch) {
     this.capoTuning = buildCapo(this);
   }
   this.strings = buildPatterns(this);
+  if (this.strings.error) {
+    plugin._super.setError(this.strings.error);
+    plugin.inError = true;
+    return;
+  }
   // second position pattern per string
   this.secondPos = buildSecond(this);
 }

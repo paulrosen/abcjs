@@ -98,24 +98,19 @@ TabNote.prototype.sameNoteAs = function (note) {
   }
 };
 
-function isUpperCase(candidate) {
-  return  /^[A-Z]*$/.test(candidate);
-}
 TabNote.prototype.isLowerThan = function (note) {
   var noteComparator = ['C','D','E','F','G','A','B'];
   if (this.hasComma > note.hasComma) return true;
   if (note.hasComma > this.hasComma) return false;
   if (this.isQuoted > note.isQuoted) return false;
   if (note.isQuoted > this.isQuoted) return true;
-  var noteName = note.name[0];
-  var thisName = this.name[0];
-  if (isUpperCase(noteName)) {
-    if (!isUpperCase(thisName)) return true;
+  if (this.isLower) {
+    if (!note.isLower) return false;
   } else {
-    if (isUpperCase(thisName)) return false;
+    if (note.isLower) return true;
   }
-  thisName = thisName.toUpperCase();
-  noteName = noteName.toUpperCase();
+  var noteName = note.name[0].toUpperCase();
+  var thisName = this.name[0].toUpperCase();
   if (noteComparator.indexOf(thisName) < noteComparator.indexOf(noteName)) return true;
   return false;
 };
@@ -177,8 +172,8 @@ TabNote.prototype.nextNote = function () {
   }
   newTabNote.name = notes[noteIndex];
   if (newTabNote.name == 'C') {
-    if (newTabNote.hasComma) {
-      newTabNote.hasComma = false;
+    if (newTabNote.hasComma > 0) {
+      newTabNote.hasComma--;
     } else {
       if (!newTabNote.isLower) {
         newTabNote.isLower = true;
@@ -208,10 +203,14 @@ TabNote.prototype.prevNote = function () {
     if (newTabNote.isLower) {
       newTabNote.hasComma = 1;
     } else {
-      if (newTabNote.isQuoted > 0) {
-        newTabNote.isQuoted -= 1;
+      if (newTabNote.hasComma > 0) {
+        newTabNote.hasComma++;
       } else {
-        newTabNote.isLower = true;
+        if (newTabNote.isQuoted > 0) {
+          newTabNote.isQuoted -= 1;
+        } else {
+          newTabNote.isLower = true;
+        }
       }
     }
   }

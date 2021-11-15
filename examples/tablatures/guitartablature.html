@@ -14,18 +14,18 @@
       new ABCJS.Editor("abc", 
       { canvas_id: "paper",
         warnings_id: "warnings",
-        abcjsParams: {} ,
-        tablature_options : [
-          // first and only staff
-          [ 
-            "GuitarTab" ,
+        abcjsParams: {
+          visualTranspose: 0,
+          tablature: [
+            // first and only staff
             {
-              name : 'Guitar' ,
-              tuning : ['D,','A,','D','G','A','d'],
+              instrument: 'guitar',
+              label: 'Guitare (%T)',
+              tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
               capo: 0
             }
           ]
-        ]
+        }
       });
     }
 

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="./examples-styles.css" />
+
+  <title>Tablatures</title>
+  <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+</head>
+
+<body>
+  <header>
+    <img src="../../docs/.vuepress/public/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+    <h1>abcjs with tablatures</h1>
+  </header>
+  <div class="container">
+    <h2>Guitar and Editor</h2>
+    <textarea id="abc" cols="80" rows="12" spellcheck="false">
+X:1
+T:Andro Guitar
+M: 2/4
+K:F
+|: [DD,]EFG [A2A,]AG | [F2G,]ED [A,A]BAG | [FD,]EFG [A2D,]AAG | [F2G,]ED [A,4EA]:|
+w: ros si gno let du bois jo li quand il s'a git des a mou reux
+|: [F2B,]GA [F3B,]A |[GA,]FEG [F2A,2]ED | [F2G,]GA [F3G,]A |[GA,]FEF [D4D,] :|
+w: vas t'en lui por ter u ne le ttre
+    </textarea>
+
+    <div id="warnings"></div>
+    <hr>
+    <div id="paper1"></div>
+    <h2>Guitar with Capo</h2>
+    <div id="paper2"></div>
+    <h2>Violin</h2>
+    <div id="paper3"></div>
+    <h2>Viola</h2>
+    <div id="paper4"></div>
+    <h2>Multi Voice</h2>
+    <div id="paper5"></div>
+  </div>
+  <script type="text/javascript">
+    window.onload = function () {
+      // Guitar and Editor
+      new ABCJS.Editor("abc",
+        {
+          canvas_id: "paper1",
+          warnings_id: "warnings",
+          abcjsParams: {
+            tablature: [
+              // first and only staff
+              {
+                  instrument: 'guitar',
+                  label: 'Guitar (%T)',
+                  tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
+                  capo: 0
+              }
+            ]
+          }
+        });
+
+      // Guitar with Capo
+      var abc2 = "X:1\n" +
+        "T:Andro Guitar\n" +
+        "M: 2/4\n" +
+        "K:F\n" +
+        "|: [EE,]^FGA [B2B,]BA | [G2A,]^FE [B,B]^cBA | [G2A,]^FE [B,4^FB]:| \n";
+      var options2 = {
+        tablature: [
+          // first and only staff
+          {
+              instrument: 'guitar',
+              label: 'Guitar (%T)',
+              tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
+              capo: 2
+          }
+        ]
+      }
+      ABCJS.renderAbc("paper2", abc2, options2)
+
+      // Violin
+      var abc3 = "X: 1\n" +
+        "T: Cooley's\n" +
+        "M: 4/4\n" +
+        "L: 1/8\n" +
+        "R: reel\n" +
+        "K: G\n" +
+        "|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
+        "EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|\n" +
+        "|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
+        "eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|\n"
+      var options3 = {
+        tablature: [
+          {
+            instrument: 'violin',
+            label : 'Violin',
+            tuning: ['G,', 'D', 'A', 'e'],
+            highestNote: "f'"
+          }
+        ]
+      }
+      ABCJS.renderAbc("paper3", abc3, options3)
+
+      // Viola
+      var abc4 = "X:1\n" +
+        "T:Home On The Range\n" +
+        "M:3/4\n" +
+        "L:1/4\n" +
+        "K:C clef=alto\n" +
+        "G,|G,CE|E2 C/B,/|A,3/2 F/F|F2|]\t\n"
+      var options4 = {
+        tablature: [
+          {
+              instrument: 'violin',
+              label: 'Viola/Mandola (%T)',
+              tuning: ['C,', 'G,', 'D', 'A']
+          }
+        ]
+      }
+      ABCJS.renderAbc("paper4", abc4, options4 )
+
+      // Multi Voice
+      var abc5 = "X:1\n" +
+        "T: Sleepers Awake\n" +
+        "M: C\n" +
+        "L: 1/4\n" +
+        "K: G\n" +
+        "V:S name=\"Violin I\"\n" +
+        "V:A name=\"Violin II\"\n" +
+        "V:T name=\"Viola\" clef=alto\n" +
+        "V:B name=\"Cello\" clef=bass\n" +
+        "%\n" +
+        "V:S\n" +
+        "D/|G//A//B/ B/A/ c/B/ D/C/ |: B//G//A/ C/B,/ F/G/ z|D/E/E/F/ F/G/ G,|\n" +
+        "V:A\n" +
+        "z/|DEFG|:D2B,z/D/|G//A//B/ B/A/ c/B/ D/C/|\n" +
+        "V:T\n" +
+        "z/|B,CDG,|:G,F,G,z|B,CDG/G,/|\n" +
+        "V:B\n" +
+        "z/|G,,G,,G,,B,,|:C,D,G,,z|G,,G,,G,,B,,|\n"
+      var options5 = {
+        tablature: 
+          [
+            {
+              instrument: 'violin',
+              label: 'Violin I',
+              tuning: ['G,', 'D', 'A', 'e']
+            },
+            {
+              instrument: 'violin',
+              label: 'Violin II',
+              tuning: ['G,', 'D', 'A', 'e']
+            },
+            {
+              instrument: 'violin',
+              label: 'Viola (%T)',
+              tuning: ['C,', 'G,', 'D', 'A']
+            },
+            {
+              instrument: 'violin',
+              label: 'Cello (%T)',
+              tuning: ['C,,', 'G,,', 'D,', 'A,']
+            }
+          ],
+      }
+      ABCJS.renderAbc("paper5", abc5, options5)
+    }
+
+  </script>
+</body>
+
+</html>

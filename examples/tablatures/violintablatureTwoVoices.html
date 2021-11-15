@@ -14,17 +14,16 @@
       new ABCJS.Editor("abc", 
       { canvas_id: "paper",
         warnings_id: "warnings",
-        abcjsParams: {} ,
-        tablature_options : [
-          // first and only voice
-          [ 
-            "ViolinTab" ,
+        abcjsParams: {
+          tablature: [
+            // first and only staff
             {
-              name : 'Violin' ,
-              tuning : ['G,', 'D', 'A' , 'e']
+              instrument: 'violin',
+              label: 'Violin (%T)',
+              tuning: ['G,', 'D', 'A', 'e']
             }
           ]
-        ]
+        } ,
       });
     }
 

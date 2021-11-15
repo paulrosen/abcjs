@@ -250,7 +250,14 @@ module.exports = animation;
 var ViolinTablature = __webpack_require__(/*! ../tablatures/instruments/violin/tab-violin */ "./src/tablatures/instruments/violin/tab-violin.js");
 
 var GuitarTablature = __webpack_require__(/*! ../tablatures/instruments/guitar/tab-guitar */ "./src/tablatures/instruments/guitar/tab-guitar.js");
+/* extend the table below when adding a new instrument plugin */
+// Existing tab classes 
 
+
+var pluginTab = {
+  'violin': 'ViolinTab',
+  'guitar': 'GuitarTab'
+};
 var abcTablatures = {
   inited: false,
   plugins: {},
@@ -284,41 +291,49 @@ var abcTablatures = {
     var returned = null;
     var nbPlugins = 0;
 
-    if (params.tablatures) {
+    if (params.tablature) {
       // validate requested plugins 
-      var tabs = params.tablatures;
+      var tabs = params.tablature;
       returned = [];
 
       for (var ii = 0; ii < tabs.length; ii++) {
-        var tab = tabs[ii];
+        var args = tabs[ii];
+        var instrument = args['instrument'];
 
-        if (tab.length > 0) {
-          var tabName = tab[0];
-          var args = null;
+        if (instrument == null) {
+          this.setError(tune, "tablature 'instrument' is missing");
+          return returned;
+        }
 
-          if (tab.length > 1) {
-            args = tab[1];
+        var tabName = pluginTab[instrument];
+        var plugin = null;
+
+        if (tabName) {
+          plugin = this.plugins[tabName];
+        }
+
+        if (plugin) {
+          if (params.visualTranspose != 0) {
+            // populate transposition request to tabs
+            args.visualTranspose = params.visualTranspose;
           }
 
-          var plugin = this.plugins[tabName];
+          args.abcSrc = params.tablature.abcSrc;
+          var pluginInstance = {
+            classz: plugin,
+            tuneNumber: tuneNumber,
+            params: args,
+            instance: null
+          }; // proceed with tab plugin  init 
+          // plugin.init(tune, tuneNumber, args, ii);
 
-          if (plugin) {
-            if (params.visualTranspose != 0) {
-              // populate transposition request to tabs
-              args.visualTranspose = params.visualTranspose;
-            }
-
-            args.abcSrc = params.tablatures.abcSrc; // proceed with tab plugin  init 
-
-            plugin.init(tune, tuneNumber, args, ii);
-            returned.push(plugin);
-            nbPlugins++;
-          } else {
-            // unknown tab plugin 
-            //this.emit_error('Undefined tablature plugin: ' + tabName)
-            this.setError(tune, 'Undefined tablature plugin: ' + tabName);
-            return returned;
-          }
+          returned.push(pluginInstance);
+          nbPlugins++;
+        } else {
+          // unknown tab plugin 
+          //this.emit_error('Undefined tablature plugin: ' + tabName)
+          this.setError(tune, 'Undefined tablature plugin: ' + instrument);
+          return returned;
         }
       }
     }
@@ -343,7 +358,16 @@ var abcTablatures = {
         if (tabs[jj]) {
           // tablature requested for staff
           var tabPlugin = tabs[jj];
-          tabPlugin.render(renderer, line, jj);
+
+          if (tabPlugin.instance == null) {
+            tabPlugin.instance = new tabPlugin.classz(); // plugin.init(tune, tuneNumber, args, ii);
+            // call initer first
+
+            tabPlugin.instance.init(abcTune, tabPlugin.tuneNumber, tabPlugin.params, jj);
+          } // render next
+
+
+          tabPlugin.instance.render(renderer, line, jj);
         }
       }
     }
@@ -1069,7 +1093,7 @@ function renderOne(div, tune, params, tuneNumber) {
 
   var engraver_controller = new EngraverController(div, params); // 
 
-  if (params.tablatures) {
+  if (params.tablature) {
     tablatures.init();
     tune.tablatures = tablatures.preparePlugins(tune, tuneNumber, params);
   } //
@@ -1198,6 +1222,10 @@ var renderAbc = function renderAbc(output, abc, parserParams, engraverParams, re
       if (parserParams.hasOwnProperty(key)) {
         params[key] = parserParams[key];
       }
+    }
+
+    if (params.warnings_id && params.tablature) {
+      params.tablature.warning_id = params.warnings_id;
     }
   }
 
@@ -2382,21 +2410,17 @@ function gatherAbcParams(params) {
       }
     }
   }
-
+  /*
   if (params.tablature_options) {
-    abcjsParams['tablatures'] = params.tablature_options;
+  	abcjsParams['tablatures'] = params.tablature_options;
   }
+  */
+
 
   if (abcjsParams.tablature) {
-    // accept both tablature and tablatures
-    abcjsParams.tablatures = abcjsParams.tablature;
-    delete abcjsParams.tablature;
-  }
-
-  if (abcjsParams.tablatures) {
     if (params.warnings_id) {
       // store for plugin error handling
-      abcjsParams['tablatures'].warnings_id = params.warnings_id;
+      abcjsParams.tablature.warnings_id = params.warnings_id;
     }
   }
 
@@ -15028,7 +15052,7 @@ function CreateSynth() {
     var params = options.options ? options.options : {};
     self.soundFontUrl = params.soundFontUrl ? params.soundFontUrl : defaultSoundFontUrl;
     if (self.soundFontUrl[self.soundFontUrl.length - 1] !== '/') self.soundFontUrl += '/';
-    if (params.soundFontVolumeMultiplier) self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2) self.soundFontVolumeMultiplier = 5.0;else if (self.soundFontUrl === defaultSoundFontUrl) self.soundFontVolumeMultiplier = 0.5;else self.soundFontVolumeMultiplier = 1.0;
+    if (params.soundFontVolumeMultiplier || params.soundFontVolumeMultiplier === 0) self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2) self.soundFontVolumeMultiplier = 5.0;else if (self.soundFontUrl === defaultSoundFontUrl) self.soundFontVolumeMultiplier = 0.5;else self.soundFontVolumeMultiplier = 1.0;
     if (params.programOffsets) self.programOffsets = params.programOffsets;else if (self.soundFontUrl === defaultSoundFontUrl) self.programOffsets = {
       "violin": 113,
       "trombone": 200
@@ -16592,14 +16616,15 @@ module.exports = setGuitarFonts;
 
 var StringPatterns = __webpack_require__(/*! ../string-patterns */ "./src/tablatures/instruments/string-patterns.js");
 
-function GuitarPatterns(tuning, capo, highestNote, linePitch, abcSrc) {
-  this.tuning = tuning;
+function GuitarPatterns(plugin) {
+  this.tuning = plugin._super.params.tuning;
 
-  if (!tuning) {
+  if (!this.tuning) {
     this.tuning = ['E,', 'A', 'D', 'G', 'B', 'e'];
   }
 
-  this.strings = new StringPatterns(tuning, capo, highestNote, linePitch, abcSrc);
+  plugin.tuning = this.tuning;
+  this.strings = new StringPatterns(plugin);
 }
 
 GuitarPatterns.prototype.notesToNumber = function (notes, graces) {
@@ -16634,42 +16659,46 @@ var TabRenderer = __webpack_require__(/*! ../../tab-renderer */ "./src/tablature
 var GuitarPatterns = __webpack_require__(/*! ./guitar-patterns */ "./src/tablatures/instruments/guitar/guitar-patterns.js");
 
 var setGuitarFonts = __webpack_require__(/*! ./guitar-fonts */ "./src/tablatures/instruments/guitar/guitar-fonts.js");
+/**
+* upon init mainly store provided instances for later usage
+* @param {*} abcTune  the parsed tune AST tree
+*  @param {*} tuneNumber  the parsed tune AST tree
+* @param {*} params  complementary args provided to Tablature Plugin
+*/
 
-var plugin = {
-  /**
-  * upon init mainly store provided instances for later usage
-  * @param {*} abcTune  the parsed tune AST tree
-  *  @param {*} tuneNumber  the parsed tune AST tree
-  * @param {*} params  complementary args provided to Tablature Plugin
-  */
-  init: function init(abcTune, tuneNumber, params) {
-    var _super = new TabCommon(abcTune, tuneNumber, params);
 
-    this._super = _super;
-    this.abcTune = abcTune;
-    this.linePitch = 3;
-    this.nbLines = 6;
-    this.isTabBig = true;
-    this.capo = params.capo;
-    this.transpose = params.visualTranspose;
-    this.tablature = new StringTablature(this.nbLines, this.linePitch);
-    var semantics = new GuitarPatterns(_super.params.tuning, this.capo, params.highestNote, this.linePitch);
-    this.semantics = semantics;
-  },
-  render: function render(renderer, line, staffIndex) {
-    console.log('GuitarTab plugin rendered');
-    setGuitarFonts(this.abcTune);
-    var rndrer = new TabRenderer(this, renderer, line, staffIndex);
-    rndrer.doLayout();
-  }
-}; //
+Plugin.prototype.init = function (abcTune, tuneNumber, params) {
+  var _super = new TabCommon(abcTune, tuneNumber, params);
+
+  this._super = _super;
+  this.abcTune = abcTune;
+  this.linePitch = 3;
+  this.nbLines = 6;
+  this.isTabBig = true;
+  this.capo = params.capo;
+  this.transpose = params.visualTranspose;
+  this.tablature = new StringTablature(this.nbLines, this.linePitch);
+  var semantics = new GuitarPatterns(this);
+  this.semantics = semantics;
+};
+
+Plugin.prototype.render = function (renderer, line, staffIndex) {
+  if (this.inError) return;
+  console.log('GuitarTab plugin rendered');
+  setGuitarFonts(this.abcTune);
+  var rndrer = new TabRenderer(this, renderer, line, staffIndex);
+  rndrer.doLayout();
+};
+
+function Plugin() {} //
 // Tablature plugin definition
 //
+
 
 var AbcGuitarTab = function AbcGuitarTab() {
   return {
     name: 'GuitarTab',
-    tablature: plugin
+    tablature: Plugin
   };
 };
 
@@ -16726,7 +16755,13 @@ function buildPatterns(self) {
     }
 
     var tabNotes = new TabNotes(tuning[iii], nextNote);
-    strings[pos--] = tabNotes.build();
+    var stringNotes = tabNotes.build();
+
+    if (stringNotes.error) {
+      return stringNotes;
+    }
+
+    strings[pos--] = stringNotes;
   }
 
   return strings;
@@ -16933,28 +16968,42 @@ StringPatterns.prototype.toString = function () {
 
 StringPatterns.prototype.tabInfos = function (plugin) {
   var _super = plugin._super;
-  var name = _super.params.name + '(' + this.toString();
+  var name = _super.params.label;
 
-  if (plugin.capo > 0) {
-    name += ' capo:' + plugin.capo + ' )';
-  } else {
-    name += ')';
+  if (name) {
+    var tunePos = name.indexOf('%T');
+    var tuning = "";
+
+    if (tunePos != -1) {
+      tuning = this.toString();
+
+      if (plugin.capo > 0) {
+        tuning += ' capo:' + plugin.capo;
+      }
+
+      name = name.replace('%T', tuning);
+    }
+
+    return name;
   }
 
-  return name;
+  return '';
 };
 /**
  * Common patterns for all string instruments
- * @param {} tuning 
- * @param {*} capo 
+ * @param {} plugin
+ * @param {} tuning
+ * @param {*} capo
  * @param {*} highestNote 
  */
 
 
-function StringPatterns(tuning, capo, highestNote, linePitch) {
-  this.linePitch = linePitch;
+function StringPatterns(plugin) {
+  var tuning = plugin.tuning;
+  var capo = plugin.capo;
+  var highestNote = plugin._super.params.highestNote;
+  this.linePitch = plugin.linePitch;
   this.highestNote = "a'";
-  this.hasError = null; // collect errors here if any
 
   if (highestNote) {
     // override default
@@ -16973,7 +17022,15 @@ function StringPatterns(tuning, capo, highestNote, linePitch) {
     this.capoTuning = buildCapo(this);
   }
 
-  this.strings = buildPatterns(this); // second position pattern per string
+  this.strings = buildPatterns(this);
+
+  if (this.strings.error) {
+    plugin._super.setError(this.strings.error);
+
+    plugin.inError = true;
+    return;
+  } // second position pattern per string
+
 
   this.secondPos = buildSecond(this);
 }
@@ -17139,27 +17196,21 @@ TabNote.prototype.sameNoteAs = function (note) {
   }
 };
 
-function isUpperCase(candidate) {
-  return /^[A-Z]*$/.test(candidate);
-}
-
 TabNote.prototype.isLowerThan = function (note) {
   var noteComparator = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
   if (this.hasComma > note.hasComma) return true;
   if (note.hasComma > this.hasComma) return false;
   if (this.isQuoted > note.isQuoted) return false;
   if (note.isQuoted > this.isQuoted) return true;
-  var noteName = note.name[0];
-  var thisName = this.name[0];
 
-  if (isUpperCase(noteName)) {
-    if (!isUpperCase(thisName)) return true;
+  if (this.isLower) {
+    if (!note.isLower) return false;
   } else {
-    if (isUpperCase(thisName)) return false;
+    if (note.isLower) return true;
   }
 
-  thisName = thisName.toUpperCase();
-  noteName = noteName.toUpperCase();
+  var noteName = note.name[0].toUpperCase();
+  var thisName = this.name[0].toUpperCase();
   if (noteComparator.indexOf(thisName) < noteComparator.indexOf(noteName)) return true;
   return false;
 };
@@ -17229,8 +17280,8 @@ TabNote.prototype.nextNote = function () {
   newTabNote.name = notes[noteIndex];
 
   if (newTabNote.name == 'C') {
-    if (newTabNote.hasComma) {
-      newTabNote.hasComma = false;
+    if (newTabNote.hasComma > 0) {
+      newTabNote.hasComma--;
     } else {
       if (!newTabNote.isLower) {
         newTabNote.isLower = true;
@@ -17265,10 +17316,14 @@ TabNote.prototype.prevNote = function () {
     if (newTabNote.isLower) {
       newTabNote.hasComma = 1;
     } else {
-      if (newTabNote.isQuoted > 0) {
-        newTabNote.isQuoted -= 1;
+      if (newTabNote.hasComma > 0) {
+        newTabNote.hasComma++;
       } else {
-        newTabNote.isLower = true;
+        if (newTabNote.isQuoted > 0) {
+          newTabNote.isQuoted -= 1;
+        } else {
+          newTabNote.isLower = true;
+        }
       }
     }
   }
@@ -17373,7 +17428,16 @@ function TabNotes(fromNote, toNote) {
 
 TabNotes.prototype.build = function () {
   var fromN = this.fromN;
-  var toN = this.toN;
+  var toN = this.toN; // check that toN is not lower than fromN
+
+  if (toN.isLowerThan(fromN)) {
+    var from = fromN.emit();
+    var tn = toN.emit();
+    return {
+      error: 'Invalid string Instrument tuning : ' + tn + ' string lower than ' + from + ' string'
+    };
+  }
+
   var buildReturned = [];
   var startIndex = notes.indexOf(fromN.name);
   var toIndex = notes.indexOf(toN.name);
@@ -17415,44 +17479,46 @@ var TabRenderer = __webpack_require__(/*! ../../tab-renderer */ "./src/tablature
 var ViolinPatterns = __webpack_require__(/*! ./violin-patterns */ "./src/tablatures/instruments/violin/violin-patterns.js");
 
 var setViolinFonts = __webpack_require__(/*! ./violin-fonts */ "./src/tablatures/instruments/violin/violin-fonts.js");
+/**
+ * upon init mainly store provided instances for later usage
+ * @param {*} abcTune  the parsed tune AST tree
+*  @param {*} tuneNumber  the parsed tune AST tree
+ * @param {*} params  complementary args provided to Tablature Plugin
+ */
 
-var plugin = {
-  // public stuff
 
-  /**
-   * upon init mainly store provided instances for later usage
-   * @param {*} abcTune  the parsed tune AST tree
-  *  @param {*} tuneNumber  the parsed tune AST tree
-   * @param {*} params  complementary args provided to Tablature Plugin
-   */
-  init: function init(abcTune, tuneNumber, params) {
-    var _super = new TabCommon(abcTune, tuneNumber, params);
+Plugin.prototype.init = function (abcTune, tuneNumber, params) {
+  var _super = new TabCommon(abcTune, tuneNumber, params);
 
-    this.abcTune = abcTune;
-    this._super = _super;
-    this.linePitch = 3;
-    this.nbLines = 4;
-    this.isTabBig = false;
-    this.capo = params.capo;
-    this.transpose = params.visualTranspose;
-    this.tablature = new StringTablature(this.nbLines, this.linePitch);
-    var semantics = new ViolinPatterns(_super.params.tuning, this.capo, params.highestNote, this.linePitch);
-    this.semantics = semantics;
-  },
-  render: function render(renderer, line, staffIndex) {
-    console.log('ViolinTab plugin rendered');
-    setViolinFonts(this.abcTune);
-    var rndrer = new TabRenderer(this, renderer, line, staffIndex);
-    rndrer.doLayout();
-  }
-}; //
+  this.abcTune = abcTune;
+  this._super = _super;
+  this.linePitch = 3;
+  this.nbLines = 4;
+  this.isTabBig = false;
+  this.capo = params.capo;
+  this.transpose = params.visualTranspose;
+  this.tablature = new StringTablature(this.nbLines, this.linePitch);
+  var semantics = new ViolinPatterns(this);
+  this.semantics = semantics;
+};
+
+Plugin.prototype.render = function (renderer, line, staffIndex) {
+  if (this.inError) return;
+  console.log('ViolinTab plugin rendered');
+  setViolinFonts(this.abcTune);
+  var rndrer = new TabRenderer(this, renderer, line, staffIndex);
+  rndrer.doLayout();
+};
+
+function Plugin() {} //
 // Tablature plugin definition
 //
+
 
 var AbcViolinTab = function AbcViolinTab() {
   return {
     name: 'ViolinTab',
-    tablature: plugin
+    tablature: Plugin
   };
 };
 
@@ -17504,14 +17570,15 @@ module.exports = setViolinFonts;
 
 var StringPatterns = __webpack_require__(/*! ../string-patterns */ "./src/tablatures/instruments/string-patterns.js");
 
-function ViolinPatterns(tuning, capo, highestNote, linePitch, abcSrc) {
-  this.tuning = tuning;
+function ViolinPatterns(plugin) {
+  this.tuning = plugin._super.params.tuning;
 
-  if (!tuning) {
+  if (!this.tuning) {
     this.tuning = ['G,', 'D', 'A', 'e'];
   }
 
-  this.strings = new StringPatterns(tuning, capo, highestNote, linePitch, abcSrc);
+  plugin.tuning = this.tuning;
+  this.strings = new StringPatterns(plugin);
 }
 
 ViolinPatterns.prototype.notesToNumber = function (notes, graces) {

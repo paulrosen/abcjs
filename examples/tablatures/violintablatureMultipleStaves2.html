@@ -15,19 +15,29 @@
       { canvas_id: "paper",
         warnings_id: "warnings",
         abcjsParams: {
-          tablature: [
-            {
-              instrument: 'violin',
-              label:'violin (%T)',
-              tuning: ['G,', 'D', 'A', 'e']
-            },
-            // second
-            {
-              instrument: 'guitar',
-              label: 'guitar (%T)',
-              tuning: ['D,', 'A,', 'D', 'G', 'A', 'd']
-            }
-          ]
+          tablature:
+            [
+              {
+                instrument: 'violin',
+                label: 'Violin I',
+                tuning: ['G,', 'D', 'A', 'e']
+              },
+              {
+                instrument: 'violin',
+                label: 'Violin II',
+                tuning: ['G,', 'D', 'A', 'e']
+              },
+              {
+                instrument: 'violin',
+                label: 'Viola (%T)',
+                tuning: ['C,', 'G,', 'D', 'A']
+              },
+              {
+                instrument: 'violin',
+                label: 'Cello (%T)',
+                tuning: ['C,,', 'G,,', 'D,', 'A,']
+              }
+            ],
         } ,
       });
     }
@@ -41,16 +51,24 @@
   </header>
   <div class="container">
     <textarea id="abc" cols="80" rows="12" spellcheck="false">
-X: 1
-T: Cooley's
-%%score 1|2
-M: 4/4
-L: 1/8
-K: Em
-V:1
-d|BGDg|
-V:2
-G|ABAB|
+X:1
+T: Sleepers Awake
+M: C
+L: 1/4
+K: G
+V:S name="Violin I"
+V:A name="Violin II"
+V:T name="Viola" clef=alto
+V:B name="Cello" clef=bass
+%
+V:S
+D/|G//A//B/ B/A/ c/B/ D/C/ |: B//G//A/ C/B,/ F/G/ z|D/E/E/F/ F/G/ G,|
+V:A
+z/|DEFG|:D2B,z/D/|G//A//B/ B/A/ c/B/ D/C/|
+V:T
+|B,CDG,|:G,F,G,z|B,CDG/G,/|
+V:B
+z/|G,,G,,G,,B,,|:C,D,G,,z|G,,G,,G,,B,,|
     </textarea>
 
     <div id="warnings"></div>

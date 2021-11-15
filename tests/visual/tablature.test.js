@@ -342,59 +342,81 @@ describe("Tablature", function () {
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 43, "startChar": 42 },
 		],
 		[
-			{ "el_type": "note", "startChar": 48, "endChar": 49, "notes": [{ "num": 0, "str": 2, "pitch": "G" }] },
+			{ "el_type": "note", "startChar": 48, "endChar": 49, "notes": [{ "num": 3, "str": 3, "pitch": "G" }] },
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 50, "startChar": 49 },
-			{ "el_type": "note", "startChar": 50, "endChar": 51, "notes": [{ "num": 0, "str": 1, "pitch": "A" }] },
-			{ "el_type": "note", "startChar": 51, "endChar": 52, "notes": [{ "num": 2, "str": 1, "pitch": "B" }] },
-			{ "el_type": "note", "startChar": 52, "endChar": 53, "notes": [{ "num": 0, "str": 1, "pitch": "A" }] },
-			{ "el_type": "note", "startChar": 53, "endChar": 54, "notes": [{ "num": 2, "str": 1, "pitch": "B" }] },
+			{ "el_type": "note", "startChar": 50, "endChar": 51, "notes": [{ "num": 0, "str": 2, "pitch": "A" }] },
+			{ "el_type": "note", "startChar": 51, "endChar": 52, "notes": [{ "num": 0, "str": 1, "pitch": "B" }] },
+			{ "el_type": "note", "startChar": 52, "endChar": 53, "notes": [{ "num": 0, "str": 2, "pitch": "A" }] },
+			{ "el_type": "note", "startChar": 53, "endChar": 54, "notes": [{ "num": 0, "str": 1, "pitch": "B" }] },
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 55, "startChar": 54 },
 		],
 	];
 
-	var guitarParams = [[
-		"GuitarTab",
+	var guitarParams = [
 		{
-			name: 'Guitar',
+			instrument: 'guitar',
+			label : 'Guitar (%T)',
 			tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
 			capo: 2
 		}
-	]];
+	];
 
-	var violinParams = [[
-		"ViolinTab",
+	var violinParams = [
 		{
-			name: 'Violin',
+			instrument: 'violin',
+			label: 'Violin',
 			tuning: ['G,', 'D', 'A', 'e']
 		}
-	]];
+	];
 
 	var violinGuitarParams = [
 		// first 
-		[
-			"ViolinTab",
-			{
-				name: 'Violin',
-				tuning: ['G,', 'D', 'A', 'e']
-			}
-		],
+   	{
+	  	instrument: 'violin',
+	  	label: 'Violin',
+	  	tuning: ['G,', 'D', 'A', 'e']
+	  },
 		// second
-		[
-			"GuitarTab",
-			{
-				name: 'Guitar',
-				tuning: ['D,', 'A,', 'D', 'G', 'A', 'd']
-			}
-		],
+		{
+			instrument: 'guitar',
+			label: 'Guitar (%T)',
+			tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
+			capo: 2
+		}
 	];
 
-	var violinCrossTuneParams = [[
-		"ViolinTab",
+	var violinCrossTuneParams = [
 		{
-			name: 'Violin',
+			instrument: 'violin',
+			label: 'Violin (%T)',
 			tuning: ['A,', 'E', 'A', 'e']
 		}
-	]];
+	];
+
+	var graceNotes = "M: 4/4\n" +
+		"L: 1/4\n" +
+		"K: C\n" +
+		"{B}A {dB}G {ABcd efga}b|";
+
+	var graceNotesOutput = [
+		[
+			{ "el_type": "note", "startChar": 19, "endChar": 24, "notes": [{ "num": 2, "str": 1, "pitch": "A" }], "grace": true },
+			{ "el_type": "note", "startChar": 19, "endChar": 24, "notes": [{ "num": 0, "str": 1, "pitch": "A" }] },
+			{ "el_type": "note", "startChar": 24, "endChar": 30, "notes": [{ "num": 12, "str": 2, "pitch": "d" }], "grace": true },
+			{ "el_type": "note", "startChar": 24, "endChar": 30, "notes": [{ "num": 9, "str": 2, "pitch": "B" }], "grace": true },
+			{ "el_type": "note", "startChar": 24, "endChar": 30, "notes": [{ "num": 5, "str": 2, "pitch": "G" }] },
+			{ "el_type": "note", "startChar": 30, "endChar": 42, "notes": [{ "num": 0, "str": 1, "pitch": "A" }], "grace": true },
+			{ "el_type": "note", "startChar": 30, "endChar": 42, "notes": [{ "num": 2, "str": 1, "pitch": "B" }], "grace": true },
+			{ "el_type": "note", "startChar": 30, "endChar": 42, "notes": [{ "num": 3, "str": 1, "pitch": "c" }], "grace": true },
+			{ "el_type": "note", "startChar": 30, "endChar": 42, "notes": [{ "num": 5, "str": 1, "pitch": "d" }], "grace": true },
+			{ "el_type": "note", "startChar": 30, "endChar": 42, "notes": [{ "num": 0, "str": 0, "pitch": "e" }], "grace": true },
+			{ "el_type": "note", "startChar": 30, "endChar": 42, "notes": [{ "num": 1, "str": 0, "pitch": "f" }], "grace": true },
+			{ "el_type": "note", "startChar": 30, "endChar": 42, "notes": [{ "num": 3, "str": 0, "pitch": "g" }], "grace": true },
+			{ "el_type": "note", "startChar": 30, "endChar": 42, "notes": [{ "num": 5, "str": 0, "pitch": "a" }], "grace": true },
+			{ "el_type": "note", "startChar": 30, "endChar": 42, "notes": [{ "num": 7, "str": 0, "pitch": "b" }] },
+			{ "el_type": "bar", "type": "bar_thin", "endChar": 43, "startChar": 42 }
+		]
+	];
 
 	it("accidentals", function () {
 		doStaffTest(violinAllNotes, violinAllNotesOutput, violinParams);
@@ -438,15 +460,18 @@ describe("Tablature", function () {
 
 });
 
-function doRender(abc,tabParams, params) {
-	var options = { add_classes: true, tablatures: tabParams };
+function doRender(abc, tabParams, params) {
+	var options = {
+		add_classes: true,
+		tablature: tabParams
+	};
 	if (params) {
 		var keys = Object.keys(params);
 		for (var k = 0; k < keys.length; k++) {
 			options[keys[k]] = params[keys[k]];
 		}
 	}
-	var visualObj = abcjs.renderAbc("paper", abc, options);
+	var visualObj = abcjs.renderAbc("paper", abc, options );
   return visualObj;
 }
 
