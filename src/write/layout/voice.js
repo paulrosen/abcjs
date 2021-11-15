@@ -51,7 +51,8 @@ function moveDecorations(beam) {
 }
 
 function placeInLane(rightMost, relElem) {
-	// These items are centered so figure the coordinates accordingly and add a little margin.
+	// These items are centered so figure the coordinates accordingly.
+	// The font reports some extra space so the margin is built in.
 	var xCoords = relElem.getChordDim();
 	if (xCoords) {
 		for (var i = 0; i < rightMost.length; i++) {
