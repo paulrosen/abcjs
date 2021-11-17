@@ -78,24 +78,23 @@ function getTabStaff(self ,staffGroup) {
   return -1;
 }
 
-function getNbTabs(self, staffGroup) {
-  var nbTabs = self.staffIndex;
-  for (var ii = 0; ii < staffGroup.length; ii++) {
-    if (staffGroup[ii].isTabStaff) {
-      nbTabs++;
-    }
-  }
-  return nbTabs;
-}
-
 function linkStaffAndTabs(staffGroup) {
   for (var ii = 0; ii < staffGroup.length; ii++) {
     if (staffGroup[ii].isTabStaff) {
       // link to previous staff
       staffGroup[ii].hasStaff = staffGroup[ii-1];
       staffGroup[ii - 1].hasTab = staffGroup[ii];
-    }
+    } 
   }
+}
+
+function getNextTabPos(staffGroup) {
+  for (var ii = 1; ii < staffGroup.length; ii+=2) {
+    if (!staffGroup[ii].isTabStaff) {
+      return ii;
+    } 
+  }
+  return staffGroup.length;
 }
 TabRenderer.prototype.doLayout = function () {
   var staffs = this.line.staff;
@@ -113,7 +112,6 @@ TabRenderer.prototype.doLayout = function () {
   var lyricsHeight = getLyricHeight(firstVoice);
   var padd = 4;
   var prevIndex = getTabStaff(this, staffGroup.staffs);
-  var nbTabs = getNbTabs(this, staffGroup.staffs);
   var previousStaff = staffGroup.staffs[prevIndex];
   var tabTop = previousStaff.top + padd + lyricsHeight;
   var staffGroupInfos = {
@@ -125,7 +123,9 @@ TabRenderer.prototype.doLayout = function () {
     dy: 0.15,
     top: tabTop,
   };
-  staffGroup.staffs.splice(this.staffIndex+1+nbTabs, 0, staffGroupInfos);
+  var nextTabPos = getNextTabPos(staffGroup.staffs);
+
+  staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
   staffGroup.height += this.tabSize + padd;
   var nbVoices = staffs[this.staffIndex].voices.length;
@@ -134,9 +134,7 @@ TabRenderer.prototype.doLayout = function () {
   for (var ii = 0; ii < nbVoices; ii++) {
     var tabVoice = new VoiceElement(0, 0);
     var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
-    for (var jj = this.staffIndex + 1; jj < staffGroup.staffs.length; jj++) {
-      staffGroup.staffs[jj].top += nameHeight;
-    }
+    staffGroup.staffs[this.staffIndex].top += nameHeight;
     staffGroup.height += nameHeight * spacing.STEP;
     tabVoice.staff = staffGroupInfos;
     voices.splice(voices.length, 0, tabVoice);

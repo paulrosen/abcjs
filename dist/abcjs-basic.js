@@ -1165,6 +1165,9 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 
   var origPaddingTop = ep.paddingtop;
   var origPaddingBottom = ep.paddingbottom;
+  var currentScrollY = div.parentNode.scrollTop; // If there is scrolling it will be lost during the redraw so remember it.
+
+  var currentScrollX = div.parentNode.scrollLeft;
   div.innerHTML = "";
 
   for (var k = 0; k < tunes.length; k++) {
@@ -1192,6 +1195,10 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
     if (k === 0) tune.engraver = tunes[k].engraver;else {
       if (!tune.engraver.staffgroups) tune.engraver.staffgroups = tunes[k].engraver.staffgroups;else if (tunes[k].engraver.staffgroups.length > 0) tune.engraver.staffgroups.push(tunes[k].engraver.staffgroups[0]);
     }
+  }
+
+  if (currentScrollX || currentScrollY) {
+    div.parentNode.scrollTo(currentScrollX, currentScrollY);
   }
 } // A quick way to render a tune from javascript when interactivity is not required.
 // This is used when a javascript routine has some abc text that it wants to render
@@ -1702,33 +1709,36 @@ var Tune = function Tune() {
 
     for (var line = 0; line < this.engraver.staffgroups.length; line++) {
       var group = this.engraver.staffgroups[line];
-      var firstStaff = group.staffs[0];
-      var middleC = firstStaff.absoluteY;
-      var top = middleC - firstStaff.top * spacing.STEP;
-      var lastStaff = group.staffs[group.staffs.length - 1];
-      middleC = lastStaff.absoluteY;
-      var bottom = middleC - lastStaff.bottom * spacing.STEP;
-      var height = bottom - top;
-      var voices = group.voices;
 
-      for (var v = 0; v < voices.length; v++) {
-        var noteFound = false;
-        if (!voicesArr[v]) voicesArr[v] = [];
-        if (measureNumber[v] === undefined) measureNumber[v] = 0;
-        var elements = voices[v].children;
+      if (group && group.staffs && group.staffs.length > 0) {
+        var firstStaff = group.staffs[0];
+        var middleC = firstStaff.absoluteY;
+        var top = middleC - firstStaff.top * spacing.STEP;
+        var lastStaff = group.staffs[group.staffs.length - 1];
+        middleC = lastStaff.absoluteY;
+        var bottom = middleC - lastStaff.bottom * spacing.STEP;
+        var height = bottom - top;
+        var voices = group.voices;
 
-        for (var elem = 0; elem < elements.length; elem++) {
-          if (elements[elem].type === "tempo") tempos[measureNumber[v]] = this.getBpm(elements[elem].abcelem);
-          voicesArr[v].push({
-            top: top,
-            height: height,
-            line: group.line,
-            measureNumber: measureNumber[v],
-            elem: elements[elem]
-          });
-          if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
-            measureNumber[v]++;
-          if (elements[elem].type === 'note' || elements[elem].type === 'rest') noteFound = true;
+        for (var v = 0; v < voices.length; v++) {
+          var noteFound = false;
+          if (!voicesArr[v]) voicesArr[v] = [];
+          if (measureNumber[v] === undefined) measureNumber[v] = 0;
+          var elements = voices[v].children;
+
+          for (var elem = 0; elem < elements.length; elem++) {
+            if (elements[elem].type === "tempo") tempos[measureNumber[v]] = this.getBpm(elements[elem].abcelem);
+            voicesArr[v].push({
+              top: top,
+              height: height,
+              line: group.line,
+              measureNumber: measureNumber[v],
+              elem: elements[elem]
+            });
+            if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
+              measureNumber[v]++;
+            if (elements[elem].type === 'note' || elements[elem].type === 'rest') noteFound = true;
+          }
         }
       }
     }
@@ -11139,7 +11149,7 @@ var TuneBuilder = function TuneBuilder(tune) {
 
   this.containsNotesStrict = function (voice) {
     for (var i = 0; i < voice.length; i++) {
-      if (voice[i].el_type === 'note' && voice[i].rest === undefined) return true;
+      if (voice[i].el_type === 'note' && (voice[i].rest === undefined || voice[i].chord !== undefined)) return true;
     }
 
     return false;
@@ -17965,18 +17975,6 @@ function getTabStaff(self, staffGroup) {
   return -1;
 }
 
-function getNbTabs(self, staffGroup) {
-  var nbTabs = self.staffIndex;
-
-  for (var ii = 0; ii < staffGroup.length; ii++) {
-    if (staffGroup[ii].isTabStaff) {
-      nbTabs++;
-    }
-  }
-
-  return nbTabs;
-}
-
 function linkStaffAndTabs(staffGroup) {
   for (var ii = 0; ii < staffGroup.length; ii++) {
     if (staffGroup[ii].isTabStaff) {
@@ -17985,6 +17983,16 @@ function linkStaffAndTabs(staffGroup) {
       staffGroup[ii - 1].hasTab = staffGroup[ii];
     }
   }
+}
+
+function getNextTabPos(staffGroup) {
+  for (var ii = 1; ii < staffGroup.length; ii += 2) {
+    if (!staffGroup[ii].isTabStaff) {
+      return ii;
+    }
+  }
+
+  return staffGroup.length;
 }
 
 TabRenderer.prototype.doLayout = function () {
@@ -18001,7 +18009,6 @@ TabRenderer.prototype.doLayout = function () {
   var lyricsHeight = getLyricHeight(firstVoice);
   var padd = 4;
   var prevIndex = getTabStaff(this, staffGroup.staffs);
-  var nbTabs = getNbTabs(this, staffGroup.staffs);
   var previousStaff = staffGroup.staffs[prevIndex];
   var tabTop = previousStaff.top + padd + lyricsHeight;
   var staffGroupInfos = {
@@ -18013,7 +18020,8 @@ TabRenderer.prototype.doLayout = function () {
     dy: 0.15,
     top: tabTop
   };
-  staffGroup.staffs.splice(this.staffIndex + 1 + nbTabs, 0, staffGroupInfos); // staffGroup.staffs.push(staffGroupInfos);
+  var nextTabPos = getNextTabPos(staffGroup.staffs);
+  staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos); // staffGroup.staffs.push(staffGroupInfos);
 
   staffGroup.height += this.tabSize + padd;
   var nbVoices = staffs[this.staffIndex].voices.length; // build from staff
@@ -18023,11 +18031,7 @@ TabRenderer.prototype.doLayout = function () {
   for (var ii = 0; ii < nbVoices; ii++) {
     var tabVoice = new VoiceElement(0, 0);
     var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
-
-    for (var jj = this.staffIndex + 1; jj < staffGroup.staffs.length; jj++) {
-      staffGroup.staffs[jj].top += nameHeight;
-    }
-
+    staffGroup.staffs[this.staffIndex].top += nameHeight;
     staffGroup.height += nameHeight * spacing.STEP;
     tabVoice.staff = staffGroupInfos;
     voices.splice(voices.length, 0, tabVoice);
@@ -21784,11 +21788,14 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 RelativeElement.prototype.getChordDim = function () {
   if (this.type === "debug") return null;
   if (!this.chordHeightAbove && !this.chordHeightBelow) return null; // Chords are centered, annotations are left justified.
+  // NOTE: the font reports extra space to the left and right anyway, so there is a built in margin.
   // We add a little margin so that items can't touch - we use half the font size as the margin, so that is 1/4 on each side.
   // if there is only one character that we're printing, use half of that margin.
+  // var margin = this.dim.font.size/4;
+  // if (this.c.length === 1)
+  // 	margin = margin / 2;
 
-  var margin = this.dim.font.size / 4;
-  if (this.c.length === 1) margin = margin / 2;
+  var margin = 0;
   var offset = this.type === "chord" ? this.realWidth / 2 : 0;
   var left = this.x - offset - margin;
   var right = left + this.realWidth + margin;
@@ -26294,6 +26301,26 @@ module.exports = setUpperAndLowerElements;
 
 var layoutVoiceElements = __webpack_require__(/*! ./VoiceElements */ "./src/write/layout/VoiceElements.js");
 
+function checkLastBarX(voices) {
+  var maxX = 0;
+
+  for (var i = 0; i < voices.length; i++) {
+    var curVoice = voices[i];
+    var lastChild = curVoice.children.length - 1;
+    var maxChild = curVoice.children[lastChild];
+
+    if (maxChild.abcelem.el_type == 'bar') {
+      var barX = maxChild.children[0].x;
+
+      if (barX > maxX) {
+        maxX = barX;
+      } else {
+        maxChild.children[0].x = maxX;
+      }
+    }
+  }
+}
+
 var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staffGroup, leftEdge) {
   var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
 
@@ -26392,8 +26419,10 @@ var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staff
       x = layoutVoiceElements.getNextX(staffGroup.voices[i]);
       spacingunit = layoutVoiceElements.getSpacingUnits(staffGroup.voices[i]);
     }
-  } //console.log("greatest remaining",spacingunit,x);
+  } // adjust lastBar when needed (multi staves)
 
+
+  checkLastBarX(staffGroup.voices); //console.log("greatest remaining",spacingunit,x);
 
   spacingunits += spacingunit;
   staffGroup.setWidth(x);
@@ -26577,7 +26606,8 @@ function moveDecorations(beam) {
 }
 
 function placeInLane(rightMost, relElem) {
-  // These items are centered so figure the coordinates accordingly and add a little margin.
+  // These items are centered so figure the coordinates accordingly.
+  // The font reports some extra space so the margin is built in.
   var xCoords = relElem.getChordDim();
 
   if (xCoords) {
@@ -27409,8 +27439,9 @@ Svg.prototype.text = function (text, attr, target) {
       }
 
       if (parts[2]) {
+        var dist = parts[1] ? "0.4em" : "0.1em";
         var ts3 = document.createElementNS(svgNS, 'tspan');
-        ts3.setAttribute("dy", "0.1em");
+        ts3.setAttribute("dy", dist);
         ts3.setAttribute("style", "font-size:0.7em");
         ts3.textContent = parts[2];
         line.appendChild(ts3);
