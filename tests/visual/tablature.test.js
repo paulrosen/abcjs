@@ -400,10 +400,10 @@ describe("Tablature", function () {
 
 	var graceNotesOutput = [
 		[
-			{ "el_type": "note", "startChar": 19, "endChar": 24, "notes": [{ "num": 2, "str": 1, "pitch": "A" }], "grace": true },
+			{ "el_type": "note", "startChar": 19, "endChar": 24, "notes": [{ "num": 2, "str": 1, "pitch": "B" }], "grace": true },
 			{ "el_type": "note", "startChar": 19, "endChar": 24, "notes": [{ "num": 0, "str": 1, "pitch": "A" }] },
-			{ "el_type": "note", "startChar": 24, "endChar": 30, "notes": [{ "num": 12, "str": 2, "pitch": "d" }], "grace": true },
-			{ "el_type": "note", "startChar": 24, "endChar": 30, "notes": [{ "num": 9, "str": 2, "pitch": "B" }], "grace": true },
+			{ "el_type": "note", "startChar": 24, "endChar": 30, "notes": [{ "num": 5, "str": 1, "pitch": "d" }], "grace": true },
+			{ "el_type": "note", "startChar": 24, "endChar": 30, "notes": [{ "num": 2, "str": 1, "pitch": "B" }], "grace": true },
 			{ "el_type": "note", "startChar": 24, "endChar": 30, "notes": [{ "num": 5, "str": 2, "pitch": "G" }] },
 			{ "el_type": "note", "startChar": 30, "endChar": 42, "notes": [{ "num": 0, "str": 1, "pitch": "A" }], "grace": true },
 			{ "el_type": "note", "startChar": 30, "endChar": 42, "notes": [{ "num": 2, "str": 1, "pitch": "B" }], "grace": true },
@@ -456,6 +456,10 @@ describe("Tablature", function () {
 
 	it("transpose", function () {
 		doStaffTest(violinDoubleStops, transposeDoubleStopsOutput, violinCrossTuneParams, { visualTranspose: 2 });
+	});
+
+	it("grace notes", function () {
+		doStaffTest(graceNotes, graceNotesOutput, violinParams);
 	});
 
 });

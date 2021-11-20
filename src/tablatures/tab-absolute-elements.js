@@ -95,6 +95,42 @@ function getInitialStaffSize(staffGroup) {
   return returned;
 }
 
+function buildRelativeTabNote( plugin , relX , def , curNote , isGrace ) {
+  var strNote = curNote.num;
+  if (curNote.note.quarter != null) {
+    // add tab quarter => needs to string conversion then 
+    strNote = strNote.toString();
+    strNote += curNote.note.quarter;
+  }
+  var pitch = plugin.semantics.stringToPitch(curNote.str);
+  def.notes.push({ num: strNote, str: curNote.str, pitch: curNote.note.emit() });
+  var opt = {
+    type: 'tabNumber'
+  };
+  var tabNoteRelative = new RelativeElement(
+    strNote, 0, 0, pitch, opt);
+  tabNoteRelative.x = relX;
+  tabNoteRelative.isGrace = isGrace;
+  tabNoteRelative.isAltered = curNote.note.isAltered;
+  return tabNoteRelative;
+}
+
+function getXGrace(abs, index) {
+  var found = 0;
+  if (abs.extra) {
+    for (var ii = 0; ii < abs.extra.length; ii++) {
+      if (abs.extra[ii].c == 'noteheads.quarter') {
+        if (found == index) {
+          return abs.extra[ii].x;
+        } else {
+          found++;
+        }
+      }
+    }
+  }
+  return -1;
+}
+
 /**
  * Build tab absolutes by scanning current staff line absolute array
  * @param {*} staffAbsolute
@@ -149,7 +185,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
         var abs = cloneAbsolute(absChild);
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
-        var graceNotes = absChild.gracenotes;
+        var graceNotes = absChild.abcelem.gracenotes;
         // check transpose
         if (plugin.transpose) {
           //transposer.transpose(plugin.transpose);
@@ -166,30 +202,31 @@ TabAbsoluteElements.prototype.build = function (plugin,
         if (tabPos.error) {
           plugin._super.setError(tabPos.error);
         } 
-        var def = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [] };
         abs.type = 'tabNumber';
+        if (tabPos.graces) {
+          // add graces to last note in notes
+          var posNote = tabPos.notes.length - 1;
+          tabPos.notes[posNote].graces = tabPos.graces;
+        }
         // convert note to number
+        var defNote = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [] };
         for (var ll = 0; ll < tabPos.notes.length; ll++) {
           var curNote = tabPos.notes[ll];
-          var strNote = curNote.num;
-          if (curNote.note.quarter != null) {
-            // add tab quarter => needs to string conversion then 
-            strNote = strNote.toString();
-            strNote += curNote.note.quarter;
+          if (curNote.graces) {
+            for (var mm = 0; mm < curNote.graces.length; mm++) {
+              var defGrace = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [], grace: true };
+              var graceX = getXGrace(absChild , mm);
+              var curGrace = curNote.graces[mm];
+              var tabGraceRelative = buildRelativeTabNote(plugin, graceX, defGrace, curGrace, true);
+              abs.children.push(tabGraceRelative);
+              tabVoice.push(defGrace);
+            }
           }
-          var pitch = plugin.semantics.stringToPitch(curNote.str);
-          def.notes.push({ num: strNote, str: curNote.str, pitch: curNote.note.emit() });
-          var opt = {
-            type: 'tabNumber'
-          };
-          var tabNoteRelative = new RelativeElement(
-            strNote, 0, 0, pitch, opt);
-          tabNoteRelative.x = relX;
-          tabNoteRelative.isAltered = curNote.note.isAltered;
+          var tabNoteRelative = buildRelativeTabNote(plugin, relX, defNote, curNote, false);
           abs.children.push(tabNoteRelative);
         }
+        tabVoice.push(defNote);
         dest.children.push(abs);
-        tabVoice.push(def);
         break;
     }
   }

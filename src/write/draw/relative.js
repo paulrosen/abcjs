@@ -26,7 +26,12 @@ function drawRelativeElement(renderer, params, bartop) {
 			break;
 		case "tabNumber":
 			var hAnchor = "start";
-			params.graphelem = renderText(renderer, { x: params.x, y: y, text: "" + params.c, type: "tabnumberfont", klass: renderer.controller.classes.generate('text tab-number'), anchor: hAnchor, centerVertically: false, dim: params.dim , cursor: 'default'}, false);
+			var tabFont = "tabnumberfont";
+			if (params.isGrace) {
+				tabFont = "tabgracefont";
+				y += 2.5; 
+			}
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: "" + params.c, type: tabFont, klass: renderer.controller.classes.generate('text tab-number'), anchor: hAnchor, centerVertically: false, dim: params.dim , cursor: 'default'}, false);
 			break;
 		case "barNumber":
 			params.graphelem = renderText(renderer, { x: params.x, y: y, text: ""+params.c, type: "measurefont", klass: renderer.controller.classes.generate('bar-number'), anchor: "middle", dim: params.dim, name: "bar-number"}, true);

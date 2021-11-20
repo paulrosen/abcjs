@@ -194,7 +194,7 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
     if (graces) {
       retGraces = [];
       for (var iiii = 0; iiii < graces.length; iiii++) {
-        note = new TabNote.TabNote(graces[0].name);
+        note = new TabNote.TabNote(graces[iiii].name);
         number = toNumber(this, note);
         if (number) {
           retGraces.push(number);
