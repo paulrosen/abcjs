@@ -12,7 +12,7 @@ const state = {
 		sheetMusic: true,
 		cursor: false,
 		hideMeasures: false,
-		initialClef: false,
+		jazzChords: false,
 		responsive: false,
 		changes: 'programmatic',
 
@@ -38,6 +38,7 @@ const state = {
 		tweak: false,
 		midi: false,
 		playImmediate: false,
+		switchTunes: false,
 
 		isDownloading: false,
 	}
@@ -49,7 +50,7 @@ const getters = {
 	sheetMusic(state) { return state.examples.sheetMusic },
 	cursor(state) { return state.examples.cursor },
 	hideMeasures(state) { return state.examples.hideMeasures },
-	initialClef(state) { return state.examples.initialClef },
+	jazzChords(state) { return state.examples.jazzChords },
 	responsive(state) { return state.examples.responsive },
 	changes(state) { return state.examples.changes },
 	hasSound(state) { return state.examples.hasSound },
@@ -72,6 +73,7 @@ const getters = {
 	tweak(state) { return state.examples.tweak },
 	midi(state) { return state.examples.midi },
 	playImmediate(state) { return state.examples.playImmediate },
+	switchTunes(state) { return state.examples.switchTunes },
 	isDownloading(state) { return state.examples.isDownloading },
 
 	declaration(state, getters) {
@@ -155,7 +157,7 @@ const mutations = {
 	sheetMusic(state, payload) { state.examples.sheetMusic = payload },
 	cursor(state, payload) { state.examples.cursor = payload },
 	hideMeasures(state, payload) { state.examples.hideMeasures = payload },
-	initialClef(state, payload) { state.examples.initialClef = payload },
+	jazzChords(state, payload) { state.examples.jazzChords = payload },
 	responsive(state, payload) { state.examples.responsive = payload },
 	changes(state, payload) { state.examples.changes = payload },
 	hasSound(state, payload) { state.examples.hasSound = payload },
@@ -178,6 +180,7 @@ const mutations = {
 	tweak(state, payload) { state.examples.tweak = payload },
 	midi(state, payload) { state.examples.midi = payload },
 	playImmediate(state, payload) { state.examples.playImmediate = payload },
+	switchTunes(state, payload) { state.examples.switchTunes = payload },
 	isDownloading(state, payload) { state.examples.isDownloading = payload },
 }
 
@@ -199,7 +202,7 @@ function sheetMusicJsBuilder(getters, usingNode) {
 		getters.sheetMusic && getters.usingCallbacks,
 		getters.hasSound && getters.metronome,
 		getters.hideMeasures,
-		getters.initialClef,
+		getters.jazzChords,
 	);  // will be passed to renderAbc()
 	return `${renderAbcString(usingNode, !getters.hasEditor, getters.sheetMusic, visualOptions)}
 ${editorJsString(usingNode, getters.hasEditor, getters.sheetMusic)}

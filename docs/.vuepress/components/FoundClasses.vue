@@ -84,7 +84,7 @@
 	}
 </script>
 
-<style>
+<style scoped>
 	.checkboxes {
 		display: flex;
 		flex-wrap: wrap;

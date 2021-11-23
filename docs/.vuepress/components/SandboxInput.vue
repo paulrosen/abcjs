@@ -18,7 +18,7 @@
         { text: 'The width of the music should change with the width of the display', value: 'responsive' },
         { text: 'Cursor should follow the playback', value: 'cursor' },
         { text: 'Measures should hide as they finish playing', value: 'hideMeasures'},
-        { text: 'Clef should be shown only on the first line', value: 'initialClef'}
+        { text: 'I want to style the chords like a fake book', value: 'jazzChords'}
     ]"
 					value="sheetMusic">
 				</check-box>
@@ -71,6 +71,7 @@
     { text: 'I want to be able to tweak the audio before it is created.', value: 'tweak' },
     { text: 'I want to download a MIDI file', value: 'midi' },
     { text: 'I want to play an arbitrary note without ABC', value: 'playImmediate' },
+    { text: 'I want to switch tunes dynamically', value: 'switchTunes' },
     { text: 'I have my own soundfont', value: 'soundfont' },
     ]"
 				></check-box>
