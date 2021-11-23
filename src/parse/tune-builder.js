@@ -686,7 +686,7 @@ var TuneBuilder = function(tune) {
 
 	this.containsNotesStrict = function(voice) {
 		for (var i = 0; i < voice.length; i++) {
-			if (voice[i].el_type === 'note' && voice[i].rest === undefined)
+			if (voice[i].el_type === 'note' && (voice[i].rest === undefined || voice[i].chord !== undefined))
 				return true;
 		}
 		return false;

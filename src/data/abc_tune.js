@@ -388,30 +388,32 @@ var Tune = function() {
 		var tempos = {};
 		for (var line = 0; line < this.engraver.staffgroups.length; line++) {
 			var group = this.engraver.staffgroups[line];
-			var firstStaff = group.staffs[0];
-			var middleC = firstStaff.absoluteY;
-			var top = middleC - firstStaff.top * spacing.STEP;
-			var lastStaff = group.staffs[group.staffs.length - 1];
-			middleC = lastStaff.absoluteY;
-			var bottom = middleC - lastStaff.bottom * spacing.STEP;
-			var height = bottom - top;
+			if (group && group.staffs && group.staffs.length > 0) {
+				var firstStaff = group.staffs[0];
+				var middleC = firstStaff.absoluteY;
+				var top = middleC - firstStaff.top * spacing.STEP;
+				var lastStaff = group.staffs[group.staffs.length - 1];
+				middleC = lastStaff.absoluteY;
+				var bottom = middleC - lastStaff.bottom * spacing.STEP;
+				var height = bottom - top;
 
-			var voices = group.voices;
-			for (var v = 0; v < voices.length; v++) {
-				var noteFound = false;
-				if (!voicesArr[v])
-					voicesArr[v] = [];
-				if (measureNumber[v] === undefined)
-					measureNumber[v] = 0;
-				var elements = voices[v].children;
-				for (var elem = 0; elem < elements.length; elem++) {
-					if (elements[elem].type === "tempo")
-						tempos[measureNumber[v]] = this.getBpm(elements[elem].abcelem);
-					voicesArr[v].push({top: top, height: height, line: group.line, measureNumber: measureNumber[v], elem: elements[elem]});
-					if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
-						measureNumber[v]++;
-					if (elements[elem].type === 'note' || elements[elem].type === 'rest')
-						noteFound = true;
+				var voices = group.voices;
+				for (var v = 0; v < voices.length; v++) {
+					var noteFound = false;
+					if (!voicesArr[v])
+						voicesArr[v] = [];
+					if (measureNumber[v] === undefined)
+						measureNumber[v] = 0;
+					var elements = voices[v].children;
+					for (var elem = 0; elem < elements.length; elem++) {
+						if (elements[elem].type === "tempo")
+							tempos[measureNumber[v]] = this.getBpm(elements[elem].abcelem);
+						voicesArr[v].push({top: top, height: height, line: group.line, measureNumber: measureNumber[v], elem: elements[elem]});
+						if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
+							measureNumber[v]++;
+						if (elements[elem].type === 'note' || elements[elem].type === 'rest')
+							noteFound = true;
+					}
 				}
 			}
 		}

@@ -82,11 +82,13 @@ RelativeElement.prototype.getChordDim = function () {
 	if (!this.chordHeightAbove && !this.chordHeightBelow)
 		return null;
 	// Chords are centered, annotations are left justified.
+	// NOTE: the font reports extra space to the left and right anyway, so there is a built in margin.
 	// We add a little margin so that items can't touch - we use half the font size as the margin, so that is 1/4 on each side.
 	// if there is only one character that we're printing, use half of that margin.
-	var margin = this.dim.font.size/4;
-	if (this.c.length === 1)
-		margin = margin / 2;
+	// var margin = this.dim.font.size/4;
+	// if (this.c.length === 1)
+	// 	margin = margin / 2;
+	var margin = 0;
 
 	var offset = this.type === "chord" ? this.realWidth/2 : 0;
 	var left = this.x - offset - margin;

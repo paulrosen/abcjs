@@ -25878,7 +25878,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.0.0-beta.34';
+var version = '6.0.0-beta.36';
 module.exports = version;
 
 /***/ })
