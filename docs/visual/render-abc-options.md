@@ -201,6 +201,11 @@ Default: 0.10
  
 What percentage of the font size should the box that is drawn around the font be padded by? 
 
+## tablatures
+Default: undefined
+
+Add a tablature-style staff below the standard music output. See [the tablature documentation](./tablature.md) for details.
+
 ## viewportHorizontal
 Default: false
  
