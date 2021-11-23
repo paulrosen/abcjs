@@ -135,8 +135,8 @@ AbsoluteElement.prototype.addRight = function (right) {
 	if (right.bottom !== undefined) {
 		if (this.fixed.b === undefined) this.fixed.b = right.bottom; else this.fixed.b = Math.min(this.fixed.b, right.bottom);
 	}
-	if (isNaN(this.fixed.t) || isNaN(this.fixed.b))
-		debugger;
+	// if (isNaN(this.fixed.t) || isNaN(this.fixed.b))
+	// 	debugger;
 	if (right.dx+right.w>this.w) this.w = right.dx+right.w;
 	this.right[this.right.length] = right;
 	this._addChild(right);
