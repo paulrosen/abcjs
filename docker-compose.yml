@@ -10,4 +10,3 @@ services:
       - ./node_modules:/srv/app/node_modules
     ports:
       - $abcjs_docs:8080
-      - 8888:8888
