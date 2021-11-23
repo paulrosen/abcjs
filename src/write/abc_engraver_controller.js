@@ -168,6 +168,9 @@ EngraverController.prototype.getMeasureWidths = function(abcTune) {
 EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 	this.classes.reset();
 
+	if (abcTune.formatting.jazzchords !== undefined)
+		this.jazzchords = abcTune.formatting.jazzchords;
+
 	this.renderer.newTune(abcTune);
 	this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
 		bagpipes: abcTune.formatting.bagpipes,
