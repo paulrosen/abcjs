@@ -34,7 +34,7 @@
         { text: 'User changes the tune with a text editor', value: 'editor' },  ]">
 		</radio-group>
 
-<!--		<field-set label="Audio Control">
+		<field-set label="Audio Control">
 			<template v-slot:controls>
 				<check-box
 					label="Show playback widget"
@@ -60,23 +60,10 @@
 				<check-box
 					label="I want sound"
 					value="hasSound"
-					:sub-options="[
-    { text: 'I want a metronome accompaniment', value: 'metronome' },
-    { text: 'I want to control the tempo programmatically', value: 'tempo' },
-    { text: 'I want to create a stereo effect', value: 'stereo' },
-    { text: 'I want to set the instrument(s) that are played back', value: 'instrument' },
-    { text: 'I want to transpose', value: 'transpose' },
-    { text: 'I want to turn off the chord accompaniment', value: 'noChords' },
-    { text: 'I want to turn off a voice', value: 'noVoice' },
-    { text: 'I want to be able to tweak the audio before it is created.', value: 'tweak' },
-    { text: 'I want to download a MIDI file', value: 'midi' },
-    { text: 'I want to play an arbitrary note without ABC', value: 'playImmediate' },
-    { text: 'I want to switch tunes dynamically', value: 'switchTunes' },
-    { text: 'I have my own soundfont', value: 'soundfont' },
-    ]"
+					:sub-options="audioOptions"
 				></check-box>
 			</template>
-		</field-set> -->
+		</field-set>
 
 		<field-set label="Timing">
 			<template v-slot:controls>
@@ -107,6 +94,28 @@ export default {
 			'sheetMusic',
 		]),
 	},
+	data() {
+		return {
+			audioOptions: [
+				{ text: 'I want a metronome accompaniment', value: 'metronome' },
+				{ text: 'I want to control the tempo programmatically', value: 'tempo' },
+				{ text: 'I want to create a stereo effect', value: 'stereo' },
+				{ text: 'I want to set the instrument(s) that are played back', value: 'instrument' },
+				{ text: 'I want to transpose', value: 'transpose' },
+				{ text: 'I want to turn off the chord accompaniment', value: 'noChords' },
+				{ text: 'I want to turn off a voice', value: 'noVoice' },
+				{ text: 'I want to be able to tweak the audio before it is created.', value: 'tweak', todo: true },
+				{ text: 'I want to download a MIDI file', value: 'midi' },
+				{ text: 'I want to play an arbitrary note without ABC', value: 'playImmediate' },
+				{ text: 'I want to switch tunes dynamically', value: 'switchTunes', todo: true },
+				{ text: 'I want to hide a voice visually but play it', value: 'hideVoice' },
+				{ text: 'I want to preload notes', value: 'preload', todo: true },
+				{ text: 'I want to loop some measures', value: 'loopMeasures', todo: true },
+				{ text: 'I want to add swing feel', value: 'swingFeel', todo: true },
+				{ text: 'I have my own soundfont', value: 'soundfont' },
+			]
+		}
+	}
 }
 </script>
 

@@ -3,6 +3,7 @@ import {cssString} from "./components/example-strings-css";
 import {clickListenerJsString, editorJsString, renderAbcString, visualOptionsString} from "./components/example-strings-js";
 import {cursorJsString} from "./components/example-strings-js-cursor";
 import {dragJsString} from "./components/example-strings-js-drag";
+import {soundJsString} from "./components/example-strings-js-audio";
 
 const state = {
 	examples: {
@@ -15,6 +16,10 @@ const state = {
 		jazzChords: false,
 		responsive: false,
 		changes: 'programmatic',
+		hideVoice: false,
+		preload: false,
+		loopMeasures: false,
+		swingFeel: false,
 
 		hasSound: false,
 		playbackWidget: true,
@@ -51,6 +56,10 @@ const getters = {
 	cursor(state) { return state.examples.cursor },
 	hideMeasures(state) { return state.examples.hideMeasures },
 	jazzChords(state) { return state.examples.jazzChords },
+	hideVoice(state) { return state.examples.hideVoice },
+	preload(state) { return state.examples.preload },
+	loopMeasures(state) { return state.examples.loopMeasures },
+	swingFeel(state) { return state.examples.swingFeel },
 	responsive(state) { return state.examples.responsive },
 	changes(state) { return state.examples.changes },
 	hasSound(state) { return state.examples.hasSound },
@@ -117,6 +126,7 @@ ${startTimerHtmlString(getters.sheetMusic && (getters.cursor || getters.hideMeas
 		if (getters.sheetMusic && getters.responsive) options.push("responsive");
 		if (getters.sheetMusic && getters.cursor) options.push("cursor");
 		if (getters.sheetMusic && getters.hideMeasures) options.push("hide");
+		if (getters.sheetMusic && getters.jazzChords) options.push("jazz");
 		options.push(getters.changes);
 		if (getters.sheetMusic && getters.usingCallbacks) options.push("callback");
 		if (getters.hasSound) options.push("sound");
@@ -138,6 +148,11 @@ ${startTimerHtmlString(getters.sheetMusic && (getters.cursor || getters.hideMeas
 		if (getters.hasSound && getters.tweak) options.push("tweak");
 		if (getters.hasSound && getters.midi) options.push("midi");
 		if (getters.hasSound && getters.playImmediate) options.push("immediate");
+		if (getters.hasSound && getters.switchTunes) options.push("switchtunes");
+		if (getters.hasSound && getters.hideVoice) options.push("hideVoice");
+		if (getters.hasSound && getters.preload) options.push("preload");
+		if (getters.hasSound && getters.loopMeasures) options.push("loopmeasures");
+		if (getters.hasSound && getters.swingFeel) options.push("swing");
 		if (getters.hasSound && getters.soundfont) options.push("soundfont");
 
 		return options.join(' ');
@@ -158,6 +173,10 @@ const mutations = {
 	cursor(state, payload) { state.examples.cursor = payload },
 	hideMeasures(state, payload) { state.examples.hideMeasures = payload },
 	jazzChords(state, payload) { state.examples.jazzChords = payload },
+	hideVoice(state, payload) { state.examples.hideVoice = payload },
+	preload(state, payload) { state.examples.preload = payload },
+	loopMeasures(state, payload) { state.examples.loopMeasures = payload },
+	swingFeel(state, payload) { state.examples.swingFeel = payload },
 	responsive(state, payload) { state.examples.responsive = payload },
 	changes(state, payload) { state.examples.changes = payload },
 	hasSound(state, payload) { state.examples.hasSound = payload },
@@ -196,18 +215,19 @@ export const store = {
 
 function sheetMusicJsBuilder(getters, usingNode) {
 
-	// SETUP
 	const visualOptions = visualOptionsString(
 		getters.responsive,
 		getters.sheetMusic && getters.usingCallbacks,
 		getters.hasSound && getters.metronome,
 		getters.hideMeasures,
 		getters.jazzChords,
-	);  // will be passed to renderAbc()
-	return `${renderAbcString(usingNode, !getters.hasEditor, getters.sheetMusic, visualOptions)}
+	);
+	const str =`${renderAbcString(usingNode, !getters.hasEditor, getters.sheetMusic, visualOptions)}
 ${editorJsString(usingNode, getters.hasEditor, getters.sheetMusic)}
+${soundJsString(usingNode, getters)}
 ${clickListenerJsString(getters.sheetMusic && getters.usingCallbacks)}
 ${cursorJsString(usingNode, getters.sheetMusic && getters.cursor, getters.sheetMusic && getters.hideMeasures)}
 ${dragJsString(usingNode, getters.changes === 'drag')}
 `;
+	return str.replace(/\t/g,"    ");
 }
