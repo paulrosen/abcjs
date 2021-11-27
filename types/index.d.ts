@@ -291,11 +291,11 @@ declare module 'abcjs' {
 }
 
 	export interface SynthVisualOptions {
-		displayLoop: boolean | false
-		displayRestart: boolean | false
-		displayPlay: boolean | false
-		displayProgress: boolean | false
-		displayWarp: boolean | false
+		displayLoop?: boolean;
+		displayRestart?: boolean;
+		displayPlay?: boolean;
+		displayProgress?: boolean;
+		displayWarp?: boolean;
 	}
 
 	export type DownloadLabelFn = (visualObj: TuneObject, index: number) => string;

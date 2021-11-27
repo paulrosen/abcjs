@@ -13,7 +13,7 @@
 		</label>
 
 		<div v-if="subOptions" class="sub-options">
-			<check-box v-for="option in subOptions" :label="option.text" :value="option.value" :disabled="disabled || !item"></check-box>
+			<check-box v-for="option in subOptions" :label="option.text" :value="option.value" :disabled="disabled || !item || option.todo" :class="{todo: option.todo}"></check-box>
 		</div>
 	</div>
 </template>
@@ -121,6 +121,10 @@ export default {
 }
 .checkbox__input input:disabled + .checkbox__control {
 	color: #959495;
+}
+
+.todo {
+	text-decoration: line-through;
 }
 
 </style>

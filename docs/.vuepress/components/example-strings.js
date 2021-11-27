@@ -32,6 +32,7 @@ export const audioString = (showAudio, isLarge) => {
 			audio = `<div id="audio" class="abcjs-large"></div>`;
 		}
 		else audio = '<div id="audio"></div>';
+		audio += `<button class="activate-audio">Activate Audio</button>`
 	}
 	return audio;
 };

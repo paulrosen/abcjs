@@ -3,6 +3,7 @@ import {cssString} from "./components/example-strings-css";
 import {clickListenerJsString, editorJsString, renderAbcString, visualOptionsString} from "./components/example-strings-js";
 import {cursorJsString} from "./components/example-strings-js-cursor";
 import {dragJsString} from "./components/example-strings-js-drag";
+import {soundJsString} from "./components/example-strings-js-audio";
 
 const state = {
 	examples: {
@@ -12,9 +13,13 @@ const state = {
 		sheetMusic: true,
 		cursor: false,
 		hideMeasures: false,
-		initialClef: false,
+		jazzChords: false,
 		responsive: false,
 		changes: 'programmatic',
+		hideVoice: false,
+		preload: false,
+		loopMeasures: false,
+		swingFeel: false,
 
 		hasSound: false,
 		playbackWidget: true,
@@ -38,6 +43,7 @@ const state = {
 		tweak: false,
 		midi: false,
 		playImmediate: false,
+		switchTunes: false,
 
 		isDownloading: false,
 	}
@@ -49,7 +55,11 @@ const getters = {
 	sheetMusic(state) { return state.examples.sheetMusic },
 	cursor(state) { return state.examples.cursor },
 	hideMeasures(state) { return state.examples.hideMeasures },
-	initialClef(state) { return state.examples.initialClef },
+	jazzChords(state) { return state.examples.jazzChords },
+	hideVoice(state) { return state.examples.hideVoice },
+	preload(state) { return state.examples.preload },
+	loopMeasures(state) { return state.examples.loopMeasures },
+	swingFeel(state) { return state.examples.swingFeel },
 	responsive(state) { return state.examples.responsive },
 	changes(state) { return state.examples.changes },
 	hasSound(state) { return state.examples.hasSound },
@@ -72,6 +82,7 @@ const getters = {
 	tweak(state) { return state.examples.tweak },
 	midi(state) { return state.examples.midi },
 	playImmediate(state) { return state.examples.playImmediate },
+	switchTunes(state) { return state.examples.switchTunes },
 	isDownloading(state) { return state.examples.isDownloading },
 
 	declaration(state, getters) {
@@ -115,6 +126,7 @@ ${startTimerHtmlString(getters.sheetMusic && (getters.cursor || getters.hideMeas
 		if (getters.sheetMusic && getters.responsive) options.push("responsive");
 		if (getters.sheetMusic && getters.cursor) options.push("cursor");
 		if (getters.sheetMusic && getters.hideMeasures) options.push("hide");
+		if (getters.sheetMusic && getters.jazzChords) options.push("jazz");
 		options.push(getters.changes);
 		if (getters.sheetMusic && getters.usingCallbacks) options.push("callback");
 		if (getters.hasSound) options.push("sound");
@@ -136,6 +148,11 @@ ${startTimerHtmlString(getters.sheetMusic && (getters.cursor || getters.hideMeas
 		if (getters.hasSound && getters.tweak) options.push("tweak");
 		if (getters.hasSound && getters.midi) options.push("midi");
 		if (getters.hasSound && getters.playImmediate) options.push("immediate");
+		if (getters.hasSound && getters.switchTunes) options.push("switchtunes");
+		if (getters.hasSound && getters.hideVoice) options.push("hideVoice");
+		if (getters.hasSound && getters.preload) options.push("preload");
+		if (getters.hasSound && getters.loopMeasures) options.push("loopmeasures");
+		if (getters.hasSound && getters.swingFeel) options.push("swing");
 		if (getters.hasSound && getters.soundfont) options.push("soundfont");
 
 		return options.join(' ');
@@ -155,7 +172,11 @@ const mutations = {
 	sheetMusic(state, payload) { state.examples.sheetMusic = payload },
 	cursor(state, payload) { state.examples.cursor = payload },
 	hideMeasures(state, payload) { state.examples.hideMeasures = payload },
-	initialClef(state, payload) { state.examples.initialClef = payload },
+	jazzChords(state, payload) { state.examples.jazzChords = payload },
+	hideVoice(state, payload) { state.examples.hideVoice = payload },
+	preload(state, payload) { state.examples.preload = payload },
+	loopMeasures(state, payload) { state.examples.loopMeasures = payload },
+	swingFeel(state, payload) { state.examples.swingFeel = payload },
 	responsive(state, payload) { state.examples.responsive = payload },
 	changes(state, payload) { state.examples.changes = payload },
 	hasSound(state, payload) { state.examples.hasSound = payload },
@@ -178,6 +199,7 @@ const mutations = {
 	tweak(state, payload) { state.examples.tweak = payload },
 	midi(state, payload) { state.examples.midi = payload },
 	playImmediate(state, payload) { state.examples.playImmediate = payload },
+	switchTunes(state, payload) { state.examples.switchTunes = payload },
 	isDownloading(state, payload) { state.examples.isDownloading = payload },
 }
 
@@ -193,18 +215,19 @@ export const store = {
 
 function sheetMusicJsBuilder(getters, usingNode) {
 
-	// SETUP
 	const visualOptions = visualOptionsString(
 		getters.responsive,
 		getters.sheetMusic && getters.usingCallbacks,
 		getters.hasSound && getters.metronome,
 		getters.hideMeasures,
-		getters.initialClef,
-	);  // will be passed to renderAbc()
-	return `${renderAbcString(usingNode, !getters.hasEditor, getters.sheetMusic, visualOptions)}
+		getters.jazzChords,
+	);
+	const str =`${renderAbcString(usingNode, !getters.hasEditor, getters.sheetMusic, visualOptions)}
 ${editorJsString(usingNode, getters.hasEditor, getters.sheetMusic)}
+${soundJsString(usingNode, getters)}
 ${clickListenerJsString(getters.sheetMusic && getters.usingCallbacks)}
 ${cursorJsString(usingNode, getters.sheetMusic && getters.cursor, getters.sheetMusic && getters.hideMeasures)}
 ${dragJsString(usingNode, getters.changes === 'drag')}
 `;
+	return str.replace(/\t/g,"    ");
 }
