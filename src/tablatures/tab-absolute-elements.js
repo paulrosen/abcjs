@@ -108,7 +108,7 @@ function buildRelativeTabNote( plugin , relX , def , curNote , isGrace ) {
     type: 'tabNumber'
   };
   var tabNoteRelative = new RelativeElement(
-    strNote, 0, 0, pitch, opt);
+    strNote, 0, 0, pitch+0.3, opt);
   tabNoteRelative.x = relX;
   tabNoteRelative.isGrace = isGrace;
   tabNoteRelative.isAltered = curNote.note.isAltered;
@@ -139,11 +139,16 @@ TabAbsoluteElements.prototype.build = function (plugin,
   staffAbsolute,
   tabVoice,
   voiceIndex,
-  staffIndex) {
+  staffIndex,
+  keySig ) {
   var staffSize = getInitialStaffSize(staffAbsolute);
   var source = staffAbsolute[staffIndex+voiceIndex];
   var dest = staffAbsolute[staffSize+staffIndex+voiceIndex];
   var transposer = null;
+  if (source.children[0].abcelem.el_type != 'clef') {
+    // keysig missing => provide one for tabs
+    source.children.splice(0,0,keySig);
+  }
   for (var ii = 0; ii < source.children.length; ii++) {
     var absChild = source.children[ii];
     var absX = absChild.x;

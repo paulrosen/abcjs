@@ -29,7 +29,7 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 };
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this.inError) return;
+  if (this.abcTune.warnings) return;
   console.log('ViolinTab plugin rendered');
   setViolinFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);

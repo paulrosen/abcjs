@@ -66,36 +66,105 @@ function TabRenderer(plugin, renderer, line, staffIndex) {
   this.tabSize = (plugin.linePitch * plugin.nbLines);
 }
 
-function getTabStaff(self ,staffGroup) {
-  var tabIndex = self.staffIndex;
-  var prevIndex = 0; 
-  for (var ii = 0; ii < staffGroup.length; ii++) {
-    if (!staffGroup[ii].isTabStaff) {
-      if (prevIndex == tabIndex) return prevIndex;
-      prevIndex++;
+function islastTabInStaff(index, staffGroup) {
+  if (staffGroup[index].isTabStaff) {
+    if (index == staffGroup.length - 1) return true;
+    if (staffGroup[index + 1].isTabStaff) {
+      return false; 
+    } else {
+      return true;
+    }
+  }
+  return false;
+}
+
+function getStaffNumbers(staffs) {
+  var nbStaffs = 0; 
+  for (var ii = 0; ii < staffs.length; ii++) {
+    if (!staffs[ii].isTabStaff) {
+      nbStaffs++;
+    }
+  }
+  return nbStaffs;
+}
+
+function getParentStaffIndex(staffs, index) {
+  for (var ii = index; ii >= 0; ii--) {
+    if (!staffs[ii].isTabStaff) {
+      return ii;
     }
   }
   return -1;
 }
 
-function linkStaffAndTabs(staffGroup) {
-  for (var ii = 0; ii < staffGroup.length; ii++) {
-    if (staffGroup[ii].isTabStaff) {
-      // link to previous staff
-      staffGroup[ii].hasStaff = staffGroup[ii-1];
-      staffGroup[ii - 1].hasTab = staffGroup[ii];
-    } 
+
+function linkStaffAndTabs(staffs) {
+  for (var ii = 0; ii < staffs.length; ii++) {
+    if (staffs[ii].isTabStaff) {
+      // link to parent staff
+      var parentIndex = getParentStaffIndex(staffs, ii);
+      staffs[ii].hasStaff = staffs[parentIndex];
+      if (!staffs[parentIndex].hasTab) staffs[parentIndex].hasTab = [];
+      staffs[parentIndex].hasTab.push(staffs[ii]);
+    }
   }
 }
 
-function getNextTabPos(staffGroup) {
-  for (var ii = 1; ii < staffGroup.length; ii+=2) {
-    if (!staffGroup[ii].isTabStaff) {
-      return ii;
-    } 
+function isMultiVoiceSingleStaff(staffs , parent) {
+  if ( getStaffNumbers(staffs) == 1) {
+    if (parent.voices.length > 1) return true;
   }
-  return staffGroup.length;
+  return false;
 }
+
+
+function getNextTabPos(self,staffGroup) {
+  var tabIndex = self.staffIndex;
+  var startIndex = 0;
+  var handledVoices = 0;
+  var inProgress = true;
+  var nbVoices = 0;
+  while (inProgress) {
+    //for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (!staffGroup[startIndex].isTabStaff) {
+      nbVoices = staffGroup[startIndex].voices.length; // get number of staff voices
+    }
+    if (staffGroup[startIndex].isTabStaff) {
+      handledVoices++;
+      if (islastTabInStaff(startIndex, staffGroup)) {
+        if (handledVoices < nbVoices) return startIndex + 1;
+      }
+    } else {
+      handledVoices = 0;
+      if (startIndex >= tabIndex) {
+        if (startIndex+1 == staffGroup.length) return startIndex +1;
+        if (!staffGroup[startIndex + 1].isTabStaff) return startIndex + 1;
+      }
+    }
+    startIndex++;
+    // out of space case
+    if (startIndex > staffGroup.length) return -1;
+  }
+}
+
+function getLastStaff(staffs, lastTab) {
+  for (var ii = lastTab; ii >= 0 ; ii-- ) {
+    if (!staffs[ii].isTabStaff) {
+      return staffs[ii];
+    }
+  }
+  return null; 
+}
+
+function checkVoiceKeySig(voices, ii) {
+  var curVoice = voices[ii];
+  // on multivoice multistaff only the first voice has key signature
+  // folling consecutive do not have one => we should provide the first voice key sig back then
+  var elem0 = curVoice.children[0].abcelem;
+  if (elem0.el_type == 'clef') return null;
+  return voices[ii-1].children[0];
+}
+
 TabRenderer.prototype.doLayout = function () {
   var staffs = this.line.staff;
   if (staffs) {
@@ -110,10 +179,13 @@ TabRenderer.prototype.doLayout = function () {
   var firstVoice = voices[0];
   // take lyrics into account if any
   var lyricsHeight = getLyricHeight(firstVoice);
-  var padd = 4;
-  var prevIndex = getTabStaff(this, staffGroup.staffs);
+  var padd = 3;
+  var prevIndex = this.staffIndex;
   var previousStaff = staffGroup.staffs[prevIndex];
   var tabTop = previousStaff.top + padd + lyricsHeight;
+  if (previousStaff.isTabStaff) {
+    tabTop = previousStaff.top;
+  }
   var staffGroupInfos = {
     bottom: -1,
     isTabStaff: true,
@@ -123,12 +195,16 @@ TabRenderer.prototype.doLayout = function () {
     dy: 0.15,
     top: tabTop,
   };
-  var nextTabPos = getNextTabPos(staffGroup.staffs);
-
+  var nextTabPos = getNextTabPos(this,staffGroup.staffs);
+  staffGroupInfos.parentIndex = nextTabPos - 1;
   staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
   staffGroup.height += this.tabSize + padd;
-  var nbVoices = staffs[this.staffIndex].voices.length;
+  var parentStaff = getLastStaff(staffGroup.staffs, nextTabPos); 
+  var nbVoices = 1;
+  if (isMultiVoiceSingleStaff(staffGroup.staffs,parentStaff)) {
+    nbVoices = parentStaff.voices.length;
+  }  
   // build from staff
   this.tabStaff.voices = [];
   for (var ii = 0; ii < nbVoices; ii++) {
@@ -138,7 +214,8 @@ TabRenderer.prototype.doLayout = function () {
     staffGroup.height += nameHeight * spacing.STEP;
     tabVoice.staff = staffGroupInfos;
     voices.splice(voices.length, 0, tabVoice);
-    this.absolutes.build(this.plugin, voices, this.tabStaff.voices, ii , this.staffIndex);
+    var keySig = checkVoiceKeySig(voices, ii + this.staffIndex);
+    this.absolutes.build(this.plugin, voices, this.tabStaff.voices, ii , this.staffIndex ,keySig);
   }
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
 };

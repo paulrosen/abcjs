@@ -348,6 +348,8 @@ var abcTablatures = {
    * @param {*} abcTune 
    */
   layoutTablatures: function layoutTablatures(renderer, abcTune) {
+    // stop on first warning
+    if (abcTune.warnings) return;
     var tabs = abcTune.tablatures; // chack tabs request for each staffs
 
     for (var ii = 0; ii < abcTune.lines.length; ii++) {
@@ -3898,6 +3900,27 @@ var parseDirective = {};
       face: "\"Times New Roman\"",
       size: 13,
       weight: "bold",
+      style: "normal",
+      decoration: "none"
+    };
+    tune.formatting.tablabelfont = {
+      face: "\"Trebuchet MS\"",
+      size: 16,
+      weight: "normal",
+      style: "none",
+      decoration: "none"
+    };
+    tune.formatting.tabnumberfont = {
+      face: "\"Arial\"",
+      size: 11,
+      weight: "normal",
+      style: "normal",
+      decoration: "none"
+    };
+    tune.formatting.tabgracefont = {
+      face: "\"Arial\"",
+      size: 8,
+      weight: "normal",
       style: "normal",
       decoration: "none"
     }; // these are the default fonts for these element types. In the printer, these fonts might change as the tune progresses.
@@ -16607,21 +16630,11 @@ module.exports = SynthSequence;
  * for the violin plugin
  * @param {} tune 
  */
+// eslint-disable-next-line no-unused-vars
 function setGuitarFonts(tune) {
-  tune.formatting.tabnumberfont = {
-    face: "\"Times New Roman\"",
-    size: 9,
-    weight: "normal",
-    style: "normal",
-    decoration: "none"
-  };
-  tune.formatting.tabgracefont = {
-    face: "\"Times New Roman\"",
-    size: 7,
-    weight: "normal",
-    style: "normal",
-    decoration: "none"
-  };
+  /* enhance or change instrument fonts here */
+  // tune.formatting.tabnumberfont = { face: "\"Times New Roman\"", size: 9, weight: "normal", style: "normal", decoration: "none" };
+  // tune.formatting.tabgracefont = { face: "\"Times New Roman\"", size: 7, weight: "normal", style: "normal", decoration: "none" };
 }
 
 module.exports = setGuitarFonts;
@@ -16703,7 +16716,7 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 };
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this.inError) return;
+  if (this.abcTune.warnings) return;
   console.log('GuitarTab plugin rendered');
   setGuitarFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
@@ -17523,7 +17536,7 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 };
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this.inError) return;
+  if (this.abcTune.warnings) return;
   console.log('ViolinTab plugin rendered');
   setViolinFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
@@ -17561,21 +17574,11 @@ module.exports = AbcViolinTab;
  * for the violin plugin
  * @param {} tune 
  */
+// eslint-disable-next-line no-unused-vars
 function setViolinFonts(tune) {
-  tune.formatting.tabnumberfont = {
-    face: "\"Times New Roman\"",
-    size: 9,
-    weight: "normal",
-    style: "normal",
-    decoration: "none"
-  };
-  tune.formatting.tabgracefont = {
-    face: "\"Times New Roman\"",
-    size: 7,
-    weight: "normal",
-    style: "normal",
-    decoration: "none"
-  };
+  /* enhance or change instrument fonts here */
+  // tune.formatting.tabnumberfont = { face: "\"Times New Roman\"", size: 9, weight: "normal", style: "normal", decoration: "none" };
+  // tune.formatting.tabgracefont = { face: "\"Times New Roman\"", size: 7, weight: "normal", style: "normal", decoration: "none" };
 }
 
 module.exports = setViolinFonts;
@@ -17755,7 +17758,7 @@ function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
   var opt = {
     type: 'tabNumber'
   };
-  var tabNoteRelative = new RelativeElement(strNote, 0, 0, pitch, opt);
+  var tabNoteRelative = new RelativeElement(strNote, 0, 0, pitch + 0.3, opt);
   tabNoteRelative.x = relX;
   tabNoteRelative.isGrace = isGrace;
   tabNoteRelative.isAltered = curNote.note.isAltered;
@@ -17785,11 +17788,16 @@ function getXGrace(abs, index) {
  */
 
 
-TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice, voiceIndex, staffIndex) {
+TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice, voiceIndex, staffIndex, keySig) {
   var staffSize = getInitialStaffSize(staffAbsolute);
   var source = staffAbsolute[staffIndex + voiceIndex];
   var dest = staffAbsolute[staffSize + staffIndex + voiceIndex];
   var transposer = null;
+
+  if (source.children[0].abcelem.el_type != 'clef') {
+    // keysig missing => provide one for tabs
+    source.children.splice(0, 0, keySig);
+  }
 
   for (var ii = 0; ii < source.children.length; ii++) {
     var absChild = source.children[ii];
@@ -18021,38 +18029,113 @@ function TabRenderer(plugin, renderer, line, staffIndex) {
   this.tabSize = plugin.linePitch * plugin.nbLines;
 }
 
-function getTabStaff(self, staffGroup) {
-  var tabIndex = self.staffIndex;
-  var prevIndex = 0;
+function islastTabInStaff(index, staffGroup) {
+  if (staffGroup[index].isTabStaff) {
+    if (index == staffGroup.length - 1) return true;
 
-  for (var ii = 0; ii < staffGroup.length; ii++) {
-    if (!staffGroup[ii].isTabStaff) {
-      if (prevIndex == tabIndex) return prevIndex;
-      prevIndex++;
+    if (staffGroup[index + 1].isTabStaff) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function getStaffNumbers(staffs) {
+  var nbStaffs = 0;
+
+  for (var ii = 0; ii < staffs.length; ii++) {
+    if (!staffs[ii].isTabStaff) {
+      nbStaffs++;
+    }
+  }
+
+  return nbStaffs;
+}
+
+function getParentStaffIndex(staffs, index) {
+  for (var ii = index; ii >= 0; ii--) {
+    if (!staffs[ii].isTabStaff) {
+      return ii;
     }
   }
 
   return -1;
 }
 
-function linkStaffAndTabs(staffGroup) {
-  for (var ii = 0; ii < staffGroup.length; ii++) {
-    if (staffGroup[ii].isTabStaff) {
-      // link to previous staff
-      staffGroup[ii].hasStaff = staffGroup[ii - 1];
-      staffGroup[ii - 1].hasTab = staffGroup[ii];
+function linkStaffAndTabs(staffs) {
+  for (var ii = 0; ii < staffs.length; ii++) {
+    if (staffs[ii].isTabStaff) {
+      // link to parent staff
+      var parentIndex = getParentStaffIndex(staffs, ii);
+      staffs[ii].hasStaff = staffs[parentIndex];
+      if (!staffs[parentIndex].hasTab) staffs[parentIndex].hasTab = [];
+      staffs[parentIndex].hasTab.push(staffs[ii]);
     }
   }
 }
 
-function getNextTabPos(staffGroup) {
-  for (var ii = 1; ii < staffGroup.length; ii += 2) {
-    if (!staffGroup[ii].isTabStaff) {
-      return ii;
+function isMultiVoiceSingleStaff(staffs, parent) {
+  if (getStaffNumbers(staffs) == 1) {
+    if (parent.voices.length > 1) return true;
+  }
+
+  return false;
+}
+
+function getNextTabPos(self, staffGroup) {
+  var tabIndex = self.staffIndex;
+  var startIndex = 0;
+  var handledVoices = 0;
+  var inProgress = true;
+  var nbVoices = 0;
+
+  while (inProgress) {
+    //for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (!staffGroup[startIndex].isTabStaff) {
+      nbVoices = staffGroup[startIndex].voices.length; // get number of staff voices
+    }
+
+    if (staffGroup[startIndex].isTabStaff) {
+      handledVoices++;
+
+      if (islastTabInStaff(startIndex, staffGroup)) {
+        if (handledVoices < nbVoices) return startIndex + 1;
+      }
+    } else {
+      handledVoices = 0;
+
+      if (startIndex >= tabIndex) {
+        if (startIndex + 1 == staffGroup.length) return startIndex + 1;
+        if (!staffGroup[startIndex + 1].isTabStaff) return startIndex + 1;
+      }
+    }
+
+    startIndex++; // out of space case
+
+    if (startIndex > staffGroup.length) return -1;
+  }
+}
+
+function getLastStaff(staffs, lastTab) {
+  for (var ii = lastTab; ii >= 0; ii--) {
+    if (!staffs[ii].isTabStaff) {
+      return staffs[ii];
     }
   }
 
-  return staffGroup.length;
+  return null;
+}
+
+function checkVoiceKeySig(voices, ii) {
+  var curVoice = voices[ii]; // on multivoice multistaff only the first voice has key signature
+  // folling consecutive do not have one => we should provide the first voice key sig back then
+
+  var elem0 = curVoice.children[0].abcelem;
+  if (elem0.el_type == 'clef') return null;
+  return voices[ii - 1].children[0];
 }
 
 TabRenderer.prototype.doLayout = function () {
@@ -18067,10 +18150,15 @@ TabRenderer.prototype.doLayout = function () {
   var firstVoice = voices[0]; // take lyrics into account if any
 
   var lyricsHeight = getLyricHeight(firstVoice);
-  var padd = 4;
-  var prevIndex = getTabStaff(this, staffGroup.staffs);
+  var padd = 3;
+  var prevIndex = this.staffIndex;
   var previousStaff = staffGroup.staffs[prevIndex];
   var tabTop = previousStaff.top + padd + lyricsHeight;
+
+  if (previousStaff.isTabStaff) {
+    tabTop = previousStaff.top;
+  }
+
   var staffGroupInfos = {
     bottom: -1,
     isTabStaff: true,
@@ -18080,11 +18168,18 @@ TabRenderer.prototype.doLayout = function () {
     dy: 0.15,
     top: tabTop
   };
-  var nextTabPos = getNextTabPos(staffGroup.staffs);
+  var nextTabPos = getNextTabPos(this, staffGroup.staffs);
+  staffGroupInfos.parentIndex = nextTabPos - 1;
   staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos); // staffGroup.staffs.push(staffGroupInfos);
 
   staffGroup.height += this.tabSize + padd;
-  var nbVoices = staffs[this.staffIndex].voices.length; // build from staff
+  var parentStaff = getLastStaff(staffGroup.staffs, nextTabPos);
+  var nbVoices = 1;
+
+  if (isMultiVoiceSingleStaff(staffGroup.staffs, parentStaff)) {
+    nbVoices = parentStaff.voices.length;
+  } // build from staff
+
 
   this.tabStaff.voices = [];
 
@@ -18095,7 +18190,8 @@ TabRenderer.prototype.doLayout = function () {
     staffGroup.height += nameHeight * spacing.STEP;
     tabVoice.staff = staffGroupInfos;
     voices.splice(voices.length, 0, tabVoice);
-    this.absolutes.build(this.plugin, voices, this.tabStaff.voices, ii, this.staffIndex);
+    var keySig = checkVoiceKeySig(voices, ii + this.staffIndex);
+    this.absolutes.build(this.plugin, voices, this.tabStaff.voices, ii, this.staffIndex, keySig);
   }
 
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
@@ -18380,9 +18476,10 @@ AbsoluteElement.prototype.addRight = function (right) {
 
   if (right.bottom !== undefined) {
     if (this.fixed.b === undefined) this.fixed.b = right.bottom;else this.fixed.b = Math.min(this.fixed.b, right.bottom);
-  }
+  } // if (isNaN(this.fixed.t) || isNaN(this.fixed.b))
+  // 	debugger;
 
-  if (isNaN(this.fixed.t) || isNaN(this.fixed.b)) debugger;
+
   if (right.dx + right.w > this.w) this.w = right.dx + right.w;
   this.right[this.right.length] = right;
 
@@ -21054,6 +21151,7 @@ EngraverController.prototype.getMeasureWidths = function (abcTune) {
 
 EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
   this.classes.reset();
+  if (abcTune.formatting.jazzchords !== undefined) this.jazzchords = abcTune.formatting.jazzchords;
   this.renderer.newTune(abcTune);
   this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
     bagpipes: abcTune.formatting.bagpipes,
@@ -25178,9 +25276,13 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
       // 	child.elemset = drawTempo(renderer, child);
       // 	break;
       default:
-        if (child.type == 'bar' && params.staff.isTabStaff) {
-          if (child.abcelem.lastBar) {
-            bartop = params.topLine;
+        if (params.staff.isTabStaff) {
+          child.invisible = false;
+
+          if (child.type == 'bar') {
+            if (child.abcelem.lastBar) {
+              bartop = params.topLine;
+            }
           }
         }
 
@@ -25266,8 +25368,8 @@ function formatJazzChord(chordString) {
   for (var i = 0; i < lines.length; i++) {
     var chord = lines[i]; // If the chord isn't in a recognizable format then just skip the formatting.
 
-    var reg = chord.match(/([ABCDEFG][♯♭]?)([^\/]+)?(\/[ABCDEFG][#b]?)?/);
-    if (reg) lines[i] = reg[1] + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
+    var reg = chord.match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/[ABCDEFG][#b]?)?/);
+    if (reg) lines[i] = (reg[1] ? reg[1] : '') + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
   }
 
   return lines.join("\n");
