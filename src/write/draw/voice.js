@@ -33,6 +33,14 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 			// 	child.elemset = drawTempo(renderer, child);
 			// 	break;
 			default:
+				if (params.staff.isTabStaff) {
+					child.invisible = false;
+  				if ( child.type == 'bar' ) {
+						if (child.abcelem.lastBar) {
+							bartop = params.topLine;
+						}
+					}
+				} 
 				drawAbsolute(renderer, child,(params.barto || i === params.children.length - 1) ? bartop : 0, selectables, staffPos);
 		}
 		if (child.type === 'note' || isNonSpacerRest(child))
@@ -75,7 +83,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 					child.elemset = drawTie(renderer, child, params.startx + 10, width, selectables);
 					break;
 				default:
-					console.log(child)
+					console.log(child);
 					drawAbsolute(renderer, child, params.startx + 10, width, selectables, staffPos);
 			}
 		}

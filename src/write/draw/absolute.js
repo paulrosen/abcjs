@@ -38,7 +38,11 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 			selectables.add(params, g, false, staffPos);
 		} else {
 			params.elemset.push(g);
-			selectables.add(params, g, params.type === 'note', staffPos);
+			var isSelectable = false;
+			if (params.type === 'note' || params.type === 'tabNumber') {
+				isSelectable = true;
+			}
+			selectables.add(params, g, isSelectable, staffPos);
 		}
 	} else if (params.elemset.length > 0)
 		selectables.add(params, params.elemset[0], params.type === 'note', staffPos);

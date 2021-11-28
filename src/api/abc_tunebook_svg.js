@@ -5,6 +5,8 @@ var EngraverController = require('../write/abc_engraver_controller');
 var Parse = require('../parse/abc_parse');
 var wrap = require('../parse/wrap_lines');
 var parseCommon = require("../parse/abc_common");
+var tablatures = require('./abc_tablatures');
+
 
 var resizeDivs = {};
 function resizeOuter() {
@@ -48,6 +50,12 @@ function renderOne(div, tune, params, tuneNumber) {
     else
 	    div.innerHTML = "";
     var engraver_controller = new EngraverController(div, params);
+    // 
+    if (params.tablature) {
+        tablatures.init();
+        tune.tablatures = tablatures.preparePlugins(tune, tuneNumber, params);
+    }
+    //
     engraver_controller.engraveABC(tune, tuneNumber);
     tune.engraver = engraver_controller;
     if (params.viewportVertical || params.viewportHorizontal) {
@@ -128,7 +136,7 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
         if (k < tunes.length-1) {
             // If it is not the last line, force stretchlast. If it is, stretchlast might have been set by the input parameters.
             tunes[k].formatting = parseCommon.clone(tunes[k].formatting);
-            tunes[k].formatting.stretchlast = true
+            tunes[k].formatting.stretchlast = true;
         }
         renderOne(lineEl, tunes[k], ep, tuneNumber);
         if (k === 0)
@@ -171,6 +179,9 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
             if (parserParams.hasOwnProperty(key)) {
                 params[key] = parserParams[key];
             }
+        }
+        if (params.warnings_id && params.tablature) {
+            params.tablature.warning_id = params.warnings_id;
         }
     }
     if (engraverParams) {

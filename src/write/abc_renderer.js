@@ -174,7 +174,11 @@ Renderer.prototype.calcY = function(ofs) {
 
 Renderer.prototype.moveY = function (em, numLines) {
 	if (numLines === undefined) numLines = 1;
-	this.y += em*numLines;
+	this.y += em * numLines;
+};
+
+Renderer.prototype.absolutemoveY = function (y) {
+	this.y = y;
 };
 
 module.exports = Renderer;

@@ -4,8 +4,9 @@ var drawVoice = require('./voice');
 var printStaff = require('./staff');
 var printDebugBox = require('./debug-box');
 var printStem = require('./print-stem');
+var nonMusic = require('./non-music');
 
-function drawStaffGroup(renderer, params, selectables) {
+function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	// We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
 	// All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
 	// renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
@@ -14,7 +15,7 @@ function drawStaffGroup(renderer, params, selectables) {
 	var colorIndex;
 
 	// An invisible marker is useful to be able to find where each system starts.
-	addInvisibleMarker(renderer,"abcjs-top-of-system");
+	addInvisibleMarker(renderer, "abcjs-top-of-system");
 
 	var startY = renderer.y; // So that it can be restored after we're done.
 	// Set the absolute Y position for each staff here, so the voice drawing below can just use if.
@@ -28,7 +29,7 @@ function drawStaffGroup(renderer, params, selectables) {
 				boxAllElements(renderer, params.voices, staff1.voices);
 			}
 			if (renderer.showDebug.indexOf("grid") >= 0) {
-				renderer.paper.dottedLine({x1: renderer.padding.left, x2: renderer.padding.left+renderer.controller.width, y1: startY, y2: startY, stroke: "#0000ff"})
+				renderer.paper.dottedLine({x1: renderer.padding.left, x2: renderer.padding.left+renderer.controller.width, y1: startY, y2: startY, stroke: "#0000ff"});
 				printDebugBox(renderer,
 					{ x: renderer.padding.left,
 						y: renderer.calcY(staff1.originalTop),
@@ -68,20 +69,40 @@ function drawStaffGroup(renderer, params, selectables) {
 	var topLine; // these are to connect multiple staves. We need to remember where they are.
 	var bottomLine;
 
+	var linePitch = 2;
 	var bartop = 0;
 	for (var i=0;i<params.voices.length;i++) {
 		var staff = params.voices[i].staff;
-		renderer.y = staff.absoluteY;
+		var tabName = params.voices[i].tabNameInfos;
+		renderer.y = staff.absoluteY ;
 		renderer.controller.classes.incrVoice();
 		//renderer.y = staff.y;
 		// offset for starting the counting at middle C
 		if (!params.voices[i].duplicate) {
 //			renderer.moveY(spacing.STEP, staff.top);
 			if (!topLine) topLine  = renderer.calcY(10);
-			bottomLine  = renderer.calcY(2);
+			bottomLine  = renderer.calcY(linePitch);
 			if (staff.lines !== 0) {
+				if (staff.linePitch) {
+					linePitch = staff.linePitch; 
+				}
 				renderer.controller.classes.newMeasure();
-				printStaff(renderer, params.startx, params.w, staff.lines);
+				var lines = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, staff.dy);
+				bottomLine = lines[1];
+				staff.bottomLine = bottomLine;
+				staff.topLine = lines[0];
+				// rework bartop when tabs are present with current staff
+				if (staff.hasTab) {
+					// do not link to staff above  (ugly looking)
+					bartop = staff.topLine;
+				}
+				if (staff.hasStaff) {
+					// this is a tab
+					bartop = staff.hasStaff.topLine;
+					params.voices[i].barto = true;
+					params.voices[i].topLine = topLine;
+				}
+
 			}
 			printBrace(renderer, staff.absoluteY, params.brace, i, selectables);
 			printBrace(renderer, staff.absoluteY, params.bracket, i, selectables);
@@ -91,9 +112,20 @@ function drawStaffGroup(renderer, params, selectables) {
 			zero: renderer.y,
 			height: params.height*spacing.STEP
 		});
+		var tabNameHeight = 0; 
+		if (tabName) {
+			// print tab infos on staffBottom
+			var r = { rows: [] };
+			r.rows.push({ absmove: bottomLine + 2 });
+			r.rows.push({ left: params.startx, text: tabName.name, font: 'infofont', klass: 'text instrumentname', anchor: 'start' });
+			r.rows.push({ move: tabName.textSize.height });
+			nonMusic(renderer, r);
+			tabNameHeight = tabName.textSize.height;
+		}
+
 		renderer.controller.classes.newMeasure();
 		if (!params.voices[i].duplicate) {
-			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
+				bartop = renderer.calcY(2 + tabNameHeight); // This connects the bar lines between two different staves.
 //			if (staff.bottom < 0)
 //				renderer.moveY(spacing.STEP, -staff.bottom);
 		}
@@ -101,7 +133,10 @@ function drawStaffGroup(renderer, params, selectables) {
 	renderer.controller.classes.newMeasure();
 
 	// connect all the staves together with a vertical line
-	if (params.staffs.length>1) {
+	var staffSize = params.staffs.length;
+	if (staffSize > 1) {
+		topLine = params.staffs[0].topLine;
+		bottomLine = params.staffs[staffSize - 1].bottomLine;
 		printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
 	}
 	renderer.y = startY;
