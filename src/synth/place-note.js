@@ -17,74 +17,73 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 		len = 0.005; // Have some small audible length no matter how short the note is.
 	var offlineCtx = new OfflineAC(2,Math.floor((len+fadeTimeSec)*sampleRate),sampleRate);
 	var noteName = pitchToNoteName[sound.pitch];
-	var noteBuffer = soundsCache[sound.instrument][noteName];
-	if (noteBuffer === "error" || noteBuffer === "pending") { // If the note isn't available, just leave a blank spot
-		// If the note is still pending by now that means an error happened when loading. There was probably a timeout.
-		console.log("Didn't load note", sound.instrument, noteName, noteBuffer);
-		return;
-	}
+	var noteBufferPromise = soundsCache[sound.instrument][noteName];
 
-	// create audio buffer
-	var source = offlineCtx.createBufferSource();
-	source.buffer = noteBuffer;
+	noteBufferPromise
+		.then(function (audioBuffer) {
+			// create audio buffer
+			var source = offlineCtx.createBufferSource();
+			source.buffer = audioBuffer;
 
-	// add gain
-	// volume can be between 1 to 127. This translation to gain is just trial and error.
-	// The smaller the first number, the more dynamic range between the quietest to loudest.
-	// The larger the second number, the louder it will be in general.
-	var volume = (sound.volume / 96) * volumeMultiplier;
-	source.gainNode = offlineCtx.createGain();
+			// add gain
+			// volume can be between 1 to 127. This translation to gain is just trial and error.
+			// The smaller the first number, the more dynamic range between the quietest to loudest.
+			// The larger the second number, the louder it will be in general.
+			var volume = (sound.volume / 96) * volumeMultiplier;
+			source.gainNode = offlineCtx.createGain();
 
-	// add pan if supported and present
-	if (sound.pan && offlineCtx.createStereoPanner) {
-		source.panNode = offlineCtx.createStereoPanner();
-		source.panNode.pan.setValueAtTime(sound.pan, 0);
-	}
-	source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
-	source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
-	source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
-
-	if (sound.cents) {
-		source.playbackRate.value = centsToFactor(sound.cents);
-	}
-
-	// connect all the nodes
-	if (source.panNode) {
-		source.panNode.connect(offlineCtx.destination);
-		source.gainNode.connect(source.panNode);
-	} else {
-		source.gainNode.connect(offlineCtx.destination);
-	}
-	source.connect(source.gainNode);
-
-	// Do the process of creating the sound and placing it in the buffer
-	source.start(0);
-
-	if (source.noteOff) {
-		source.noteOff(len + fadeTimeSec);
-	} else {
-		source.stop(len + fadeTimeSec);
-	}
-	var fnResolve;
-	offlineCtx.oncomplete = function(e) {
-		if (e.renderedBuffer) { // If the system gets overloaded then this can start failing. Just drop the note if so.
-			for (var i = 0; i < startArray.length; i++) {
-				//Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
-				var start = startArray[i] * sound.tempoMultiplier;
-				if (ofsMs)
-					start -=ofsMs/1000;
-				if (start < 0)
-					start = 0; // If the item that is moved back is at the very beginning of the buffer then don't move it back. To do that would be to push everything else forward. TODO-PER: this should probably be done at some point but then it would change timing in existing apps.
-				start = Math.floor(start*sampleRate);
-				copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
+			// add pan if supported and present
+			if (sound.pan && offlineCtx.createStereoPanner) {
+				source.panNode = offlineCtx.createStereoPanner();
+				source.panNode.pan.setValueAtTime(sound.pan, 0);
 			}
-		}
-		fnResolve();
-	};
-	offlineCtx.startRendering();
-	return new Promise(function(resolve, reject) {
-		fnResolve = resolve;
-	});
+			source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
+			source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
+			source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
+
+			if (sound.cents) {
+				source.playbackRate.value = centsToFactor(sound.cents);
+			}
+
+			// connect all the nodes
+			if (source.panNode) {
+				source.panNode.connect(offlineCtx.destination);
+				source.gainNode.connect(source.panNode);
+			} else {
+				source.gainNode.connect(offlineCtx.destination);
+			}
+			source.connect(source.gainNode);
+
+			// Do the process of creating the sound and placing it in the buffer
+			source.start(0);
+
+			if (source.noteOff) {
+				source.noteOff(len + fadeTimeSec);
+			} else {
+				source.stop(len + fadeTimeSec);
+			}
+			var fnResolve;
+			offlineCtx.oncomplete = function(e) {
+				if (e.renderedBuffer) { // If the system gets overloaded then this can start failing. Just drop the note if so.
+					for (var i = 0; i < startArray.length; i++) {
+						//Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
+						var start = startArray[i] * sound.tempoMultiplier;
+						if (ofsMs)
+							start -=ofsMs/1000;
+						if (start < 0)
+							start = 0; // If the item that is moved back is at the very beginning of the buffer then don't move it back. To do that would be to push everything else forward. TODO-PER: this should probably be done at some point but then it would change timing in existing apps.
+						start = Math.floor(start*sampleRate);
+						copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
+					}
+				}
+				fnResolve();
+			};
+			offlineCtx.startRendering();
+			return new Promise(function(resolve) {
+				fnResolve = resolve;
+			});
+		})
+		.catch(function () {});
 }
 
 var copyToChannel = function(toBuffer, fromBuffer, start) {

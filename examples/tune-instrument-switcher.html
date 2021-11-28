@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="examples-styles.css"/>
+
+    <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+    <title>abcjs: Tune/Instrument Switcher Demo</title>
+
+    <style>
+        main {
+            max-width: 770px;
+            margin: 0 auto;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .status {
+            padding: 2px 10px 10px 10px;
+            background-color: #f0f0f0;
+            width: 250px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .status {
+                background-color: #000000;
+            }
+        }
+    </style>
+
+    <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+    <script type="text/javascript">
+		var scores = [
+			// Tune 0
+			"T: Cooley's\n" +
+			"M: 4/4\n" +
+			"L: 1/8\n" +
+			"R: reel\n" +
+			"K: Emin\n" +
+			"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
+			"EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|\n" +
+			"|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
+			"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|",
+            // Tune 1
+			'X: 48\n' +
+			'T: Polka från Södermanland\n' +
+			'O: Södermanland\n' +
+			'R: polka\n' +
+			'M: 2/4\n' +
+			'L: 1/16\n' +
+			'K: D\n' +
+			'FG |:\\\n' +
+			'A2f2 d2B2 | A2F2 F2FG | A2f2 d2F2 | A2G2 G2EF | G2e2 d3B | d2c2 c3d |\n' +
+			'c2B2 B3c | B2A2 A2FG | A2f2 d2B2 | A2F2 F2FG | A2f2 d2F2 | A2G2 G4 | g2g2 e3g |\n' +
+			'f2f2 d3f | e2ed cABc |1 d2d2 d2FG :|2 d2d2 d4 |: F4 A3F | D2F2 A2d2 | f2fd AFAd |\n' +
+			'c2B2 B4 | E4 G3E | C2E2 A2c2 | e2ed cAce | d2F2 A2G2 | F4 A3F | D2F2 A2d2 |\n' +
+			'f2fd AFAd | c2B2 B4 | g2g2 e3g | f2f2 d3f | e2ed cABc |1 d2d2 d2A2 :|2 d2d2 d3z |]'
+		];
+		var tunes = [];
+		var buffers = [];
+		var statusTexts = ["", ""];
+		var instrument = 0;
+		var selectedTrack = -1;
+		var playing = false;
+
+		function setStatus(text, i) {
+			if (text === "stopped") playing = false;
+			if (text === "playing") playing = true;
+			statusTexts[i == null ? selectedTrack : i] = text;
+		}
+
+		function load() {
+			var statuses = [
+				document.getElementById("tune-1-status"),
+				document.getElementById("tune-2-status"),
+			];
+			var playButton = document.getElementById("play");
+			var stopButton = document.getElementById("stop");
+			var songPicker = document.getElementById("song-picker");
+			var instrumentPicker = document.getElementById("instrument-picker");
+			var paper1 = document.getElementById("paper1");
+			var paper2 = document.getElementById("paper2");
+
+			function renderTune(abc, i) {
+				return ABCJS.renderAbc("paper" + (i + 1), abc)[0];
+			}
+
+			function primeTune(visualObj, i) {
+				setStatus("preparing", i);
+				updateStatus();
+				var midi = new ABCJS.synth.CreateSynth();
+				return midi.init({
+					visualObj: visualObj,
+					options: {
+						program: instrument,
+						chordsOff: true
+					}
+				}).then(function () {
+					setStatus("priming", i);
+					updateStatus();
+					return midi.prime();
+				}).then(function () {
+					setStatus("ready", i);
+					updateStatus();
+					return midi;
+				});
+			}
+
+			function updateStatus() {
+				statusTexts.forEach(function (text, i) {
+					statuses[i].textContent = text;
+				});
+			}
+
+			function updatePlaybackButtons() {
+				playButton.classList.toggle("hidden", playing);
+				stopButton.classList.toggle("hidden", !playing);
+			}
+
+			function updatePapers() {
+				paper1.classList.toggle("hidden", selectedTrack !== 0);
+				paper2.classList.toggle("hidden", selectedTrack !== 1);
+			}
+
+			function stop() {
+				playing = false;
+				updatePlaybackButtons();
+				return Promise.all(buffers.map(function (buff) {
+					return buff.then(function (synth) {
+						synth.stop();
+						return synth;
+					});
+				}));
+			}
+
+			function play() {
+				stop();
+				var buff = buffers[selectedTrack];
+				if (buff) buff.then(function (synth) {
+					synth.start();
+					playing = true;
+					updatePlaybackButtons();
+				});
+				else alert("Please select a song first");
+			}
+
+			function setTrack(i) {
+				stop().then(function () {
+					selectedTrack = i;
+					updatePapers();
+				});
+			}
+
+			function setInstrument(n) {
+				stop();
+				instrument = n;
+				buffers = tunes.map(primeTune);
+			}
+
+
+			tunes = scores.map(renderTune);
+			buffers = tunes.map(primeTune);
+
+			stopButton.onclick = stop;
+			playButton.onclick = play;
+			songPicker.onchange = function (event) {
+				setTrack(Number(event.target.value));
+			};
+			instrumentPicker.onchange = function (event) {
+                setInstrument(Number(event.target.value));
+			};
+		}
+    </script>
+</head>
+<body onload="load()">
+<main>
+    <header>
+        <img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+        <h1>Tune/Instrument Switcher Demo</h1>
+    </header>
+    <div class="container">
+        <div class="row">
+            <p>
+                <label for="song-picker">
+                    Select song:
+                    <select id="song-picker">
+                        <option value="-1">Select a tune</option>
+                        <option value="0">Cooley's</option>
+                        <option value="1">Polka från Södermanland</option>
+                    </select>
+                </label>
+            </p>
+            <p>
+                <label for="instrument-picker">
+                    Select instrument:
+                    <select id="instrument-picker">
+                        <option value="0">Acoustic Piano</option>
+                        <option value="4">Electric Piano</option>
+                        <option value="6">Harpsichord</option>
+                        <option value="7">Clavi</option>
+                        <option value="8">Celesta</option>
+                        <option value="23">Tango Accordion</option>
+                        <option value="24">Acoustic Guitar (nylon)</option>
+                        <option value="25">Acoustic Guitar (steel)</option>
+                        <option value="26">Electric Guitar (jazz)</option>
+                        <option value="56">Trumpet</option>
+                        <option value="57">Trombone</option>
+                        <option value="58">Tuba</option>
+                        <option value="59">Muted Trumpet</option>
+                        <option value="60">French Horn</option>
+                    </select>
+                </label>
+            </p>
+            <p>
+                <button id="play">Play</button>
+                <button id="stop" class="hidden">Stop</button>
+            </p>
+        </div>
+        <div id="paper1" class="hidden"></div>
+        <div id="paper2" class="hidden"></div>
+        <div>
+            <p class="status">Tune1 status: <span id="tune-1-status"></span></p>
+            <p class="status">Tune2 status: <span id="tune-2-status"></span></p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

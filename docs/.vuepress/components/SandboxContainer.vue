@@ -95,7 +95,7 @@ nav {
 button {
 	font-size: 1em;
 	padding: 5px 10px;
-	background: #e2fdf1;
+	background: #9ce9c7;
 	border: 1px solid #5c5c5c;
 	border-radius: 4px;
 }
@@ -115,5 +115,13 @@ button:hover {
 button.selected:hover {
 	background: #ffffff;
 	color: inherit;
+}
+button.tab.selected:after {
+	content: " ";
+	position: absolute;
+	border-bottom: 2px solid white;
+	bottom: -2px;
+	width: 100%;
+	left: 0;
 }
 </style>
