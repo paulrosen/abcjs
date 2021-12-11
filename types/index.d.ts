@@ -274,7 +274,7 @@ declare module 'abcjs' {
 		fadeLength?: number;
 		sequenceCallback?: (sequence: Array<NoteMapTrack>, context: any) => Array<NoteMapTrack>;
 		callbackContext?: any; // Anything is ok. It is just passed back in the callback
-		onEnded?: () => void;
+		onEnded?: (context: any) => void;
 		pan?: Array<number>;
 		voicesOff?: boolean | Array<number>;
 		drum?: string;
@@ -407,7 +407,7 @@ declare module 'abcjs' {
 			drone?: MidiParam;
 			droneoff?: MidiParam;
 			droneon?: MidiParam;
-			drum: MidiParam;
+			drum?: MidiParam;
 			drumbars?: MidiParam;
 			drummap: MidiParam;
 			drumoff?: MidiParam;
@@ -415,7 +415,7 @@ declare module 'abcjs' {
 			expand?: MidiParam;
 			fermatafixed?: MidiParam;
 			fermataproportional?: MidiParam;
-			gchord: MidiParam;
+			gchord?: MidiParam;
 			gchordon?: MidiParam;
 			gchordoff?: MidiParam;
 			grace?: MidiParam;
@@ -983,10 +983,10 @@ declare module 'abcjs' {
 		init(params?: MidiBufferOptions): Promise<MidiBufferPromise>
 		prime(): Promise<void>
 		start(): void
-		pause(): void
+		pause(): number
 		resume(): void
-		seek(position: number, units: ProgressUnit): void
-		stop(): void
+		seek(position: number, units?: ProgressUnit): void
+		stop(): number
 		download(): any // returns audio buffer in wav format
 	}
 
