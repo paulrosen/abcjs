@@ -345,8 +345,8 @@ function CreateSynth() {
 		if (self.debugCallback)
 			self.debugCallback("pause called");
 
-	 	self.stop();
-		self.pausedTimeSec = activeAudioContext().currentTime - self.startTimeSec;
+		self.pausedTimeSec = self.stop();
+		return self.pausedTimeSec;
 	};
 
 	self.resume = function() {
@@ -395,6 +395,8 @@ function CreateSynth() {
 			}
 		});
 		self.directSource = [];
+		var elapsed = activeAudioContext().currentTime - self.startTimeSec;
+		return elapsed;
 	};
 	self.finished = function() {
 		self.startTimeSec = undefined;
