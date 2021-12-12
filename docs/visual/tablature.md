@@ -101,7 +101,7 @@ This defines the highest note that can be played on that instrument. If a note i
 ## Fonts
 
 You can specify the font of the label and/or the font of the numbers by using the `format` option
-when calling `renderAbc`. The new font directive names are `tablabelfont` and `tabnumberfont`.
+when calling `renderAbc`. The new font directive names are `tablabelfont`, `tabnumberfont`, and `tabgracefont`.
 
 This follows the general format of the other font directives.
 
