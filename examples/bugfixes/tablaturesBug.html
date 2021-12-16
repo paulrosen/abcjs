@@ -46,11 +46,25 @@ w: vas t'en lui por ter u ne le ttre
     window.onload = function () {
 
       // Multi Voice
-      var abc5 = 
-      "X:1\n" +
-      "T: overlay\n"+
-      "K: C\n"+
-      "G8 & C4 D4 | E4 F4 |]"
+      var abc5 = "X:1\n" +
+        "T: Sleepers Awake\n" +
+        "M: C\n" +
+        "L: 1/4\n" +
+        "K: G\n" +
+        "%% score(S A)(T B) \n" +
+        "V:S name=\"Violin I\"\n" +
+        "V:A name=\"Violin II\"\n" +
+        "V:T name=\"Viola\" clef=alto\n" +
+        "V:B name=\"Cello\" clef=bass\n" +
+        "%\n" +
+        "V:S\n" +
+        "D/|G//A//B/ B/A/ c/B/ D/C/ |: B//G//A/ C/B,/ F/G/ z|D/E/E/F/ F/G/ G,|\n" +
+        "V:A\n" +
+        "z/|DEFG|:D2B,z/D/|G//A//B/ B/A/ c/B/ D/C/|\n" +
+        "V:T\n" +
+        "z/|B,CDG,|:G,F,G,z|B,CDG/G,/|\n" +
+        "V:B\n" +
+        "z/|G,,G,,G,,B,,|:C,D,G,,z|G,,G,,G,,B,,|\n"
       var options5 = {
         warnings_id: "warnings",
         tablature: 
@@ -59,6 +73,21 @@ w: vas t'en lui por ter u ne le ttre
               instrument: 'violin',
               label: 'Violin I',
               tuning: ['G,', 'D', 'A', 'e']
+            },
+            {
+              instrument: 'violin',
+              label: 'Violin II',
+              tuning: ['G,', 'D', 'A', 'e']
+            },
+            {
+              instrument: 'violin',
+              label: 'Viola (%T)',
+              tuning: ['C,', 'G,', 'D', 'A']
+            },
+            {
+              instrument: 'violin',
+              label: 'Cello (%T)',
+              tuning: ['C,,', 'G,,', 'D,', 'A,']
             }
           ],
       }

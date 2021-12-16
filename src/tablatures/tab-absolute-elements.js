@@ -152,8 +152,10 @@ TabAbsoluteElements.prototype.build = function (plugin,
   for (var ii = 0; ii < source.children.length; ii++) {
     var absChild = source.children[ii];
     var absX = absChild.x;
-    var relX = absChild.children[0].x;
-
+    var relX = absX;
+    if (absChild.children.length > 0) {
+      relX = absChild.children[0].x;      
+    }
     if (absChild.isClef) {
       dest.children.push(buildTabAbsolute(plugin, absX, relX));
     }

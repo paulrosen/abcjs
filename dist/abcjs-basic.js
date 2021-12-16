@@ -15381,8 +15381,8 @@ function CreateSynth() {
   self.pause = function () {
     if (!self.audioBufferPossible) throw new Error(notSupportedMessage);
     if (self.debugCallback) self.debugCallback("pause called");
-    self.stop();
-    self.pausedTimeSec = activeAudioContext().currentTime - self.startTimeSec;
+    self.pausedTimeSec = self.stop();
+    return self.pausedTimeSec;
   };
 
   self.resume = function () {
@@ -15434,6 +15434,8 @@ function CreateSynth() {
       }
     });
     self.directSource = [];
+    var elapsed = activeAudioContext().currentTime - self.startTimeSec;
+    return elapsed;
   };
 
   self.finished = function () {
@@ -15727,104 +15729,37 @@ module.exports = instrumentIndexToName;
 var soundsCache = __webpack_require__(/*! ./sounds-cache */ "./src/synth/sounds-cache.js");
 
 var getNote = function getNote(url, instrument, name, audioContext) {
-  return new Promise(function (resolve, reject) {
-    if (!soundsCache[instrument]) soundsCache[instrument] = {};
-    var instrumentCache = soundsCache[instrument];
-
-    if (instrumentCache[name] === 'error') {
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "error",
-        message: "Unable to load sound font" + ' ' + url + ' ' + instrument + ' ' + name
-      });
-    }
-
-    if (instrumentCache[name] === 'pending') {
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "pending"
-      });
-    }
-
-    if (instrumentCache[name]) {
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "cached"
-      });
-    } // if (this.debugCallback)
-    // 	this.debugCallback(`Loading sound: ${instrument} ${name}`);
-
-
-    instrumentCache[name] = "pending"; // This can be called in parallel, so don't call it a second time before the first one has loaded.
-
+  if (!soundsCache[instrument]) soundsCache[instrument] = {};
+  var instrumentCache = soundsCache[instrument];
+  if (!instrumentCache[name]) instrumentCache[name] = new Promise(function (resolve, reject) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', url + instrument + '-mp3/' + name + '.mp3', true);
-    xhr.responseType = 'arraybuffer';
-    var self = this;
+    var noteUrl = url + instrument + "-mp3/" + name + ".mp3";
+    xhr.open("GET", noteUrl, true);
+    xhr.responseType = "arraybuffer";
 
-    function onSuccess(audioBuffer) {
-      instrumentCache[name] = audioBuffer; // if (self.debugCallback)
-      // 	self.debugCallback(`Sound loaded: ${instrument} ${name} ${url}`);
-
-      resolve({
-        instrument: instrument,
-        name: name,
-        status: "loaded"
-      });
-    }
-
-    function onFailure(error) {
-      error = "Can't decode sound. " + url + ' ' + instrument + ' ' + name + ' ' + error;
-      if (self.debugCallback) self.debugCallback(error);
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "error",
-        message: error
-      });
-    }
-
-    xhr.onload = function (e) {
-      if (this.status === 200) {
-        try {
-          var promise = audioContext.decodeAudioData(this.response, onSuccess, onFailure); // older browsers only have the callback. Newer ones will report an unhandled
-          // rejection if catch isn't handled so we need both. We don't need to report it twice, though.
-
-          if (promise && promise["catch"]) promise["catch"](function () {});
-        } catch (error) {
-          reject(error);
-        }
-      } else {
-        instrumentCache[name] = "error"; // To keep this from trying to load repeatedly.
-
-        var cantLoadMp3 = "Onload error loading sound: " + name + " " + url + " " + e.currentTarget.status + " " + e.currentTarget.statusText;
-        if (self.debugCallback) self.debugCallback(cantLoadMp3);
-        return resolve({
-          instrument: instrument,
-          name: name,
-          status: "error",
-          message: cantLoadMp3
-        });
+    xhr.onload = function () {
+      if (xhr.status !== 200) {
+        reject(Error("Can't load sound at " + noteUrl));
+        return;
       }
+
+      var maybePromise = audioContext.decodeAudioData(xhr.response, resolve, function () {
+        reject(Error("Can't decode sound at " + noteUrl));
+      }); // In older browsers `BaseAudioContext.decodeAudio()` did not return a promise
+
+      if (maybePromise && typeof maybePromise["catch"] === "function") maybePromise["catch"](reject);
     };
 
-    xhr.addEventListener("error", function () {
-      instrumentCache[name] = "error"; // To keep this from trying to load repeatedly.
+    xhr.onerror = function () {
+      reject(Error("Can't load sound at " + noteUrl));
+    };
 
-      var cantLoadMp3 = "Error in loading sound: " + " " + url;
-      if (self.debugCallback) self.debugCallback(cantLoadMp3);
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "error",
-        message: cantLoadMp3
-      });
-    }, false);
     xhr.send();
+  })["catch"](function (err) {
+    console.error("Didn't load note", instrument, name, ":", err.message);
+    throw err;
   });
+  return instrumentCache[name];
 };
 
 module.exports = getNote;
@@ -16042,80 +15977,74 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 
   var offlineCtx = new OfflineAC(2, Math.floor((len + fadeTimeSec) * sampleRate), sampleRate);
   var noteName = pitchToNoteName[sound.pitch];
-  var noteBuffer = soundsCache[sound.instrument][noteName];
+  var noteBufferPromise = soundsCache[sound.instrument][noteName];
+  noteBufferPromise.then(function (audioBuffer) {
+    // create audio buffer
+    var source = offlineCtx.createBufferSource();
+    source.buffer = audioBuffer; // add gain
+    // volume can be between 1 to 127. This translation to gain is just trial and error.
+    // The smaller the first number, the more dynamic range between the quietest to loudest.
+    // The larger the second number, the louder it will be in general.
 
-  if (noteBuffer === "error" || noteBuffer === "pending") {
-    // If the note isn't available, just leave a blank spot
-    // If the note is still pending by now that means an error happened when loading. There was probably a timeout.
-    console.log("Didn't load note", sound.instrument, noteName, noteBuffer);
-    return;
-  } // create audio buffer
+    var volume = sound.volume / 96 * volumeMultiplier;
+    source.gainNode = offlineCtx.createGain(); // add pan if supported and present
 
-
-  var source = offlineCtx.createBufferSource();
-  source.buffer = noteBuffer; // add gain
-  // volume can be between 1 to 127. This translation to gain is just trial and error.
-  // The smaller the first number, the more dynamic range between the quietest to loudest.
-  // The larger the second number, the louder it will be in general.
-
-  var volume = sound.volume / 96 * volumeMultiplier;
-  source.gainNode = offlineCtx.createGain(); // add pan if supported and present
-
-  if (sound.pan && offlineCtx.createStereoPanner) {
-    source.panNode = offlineCtx.createStereoPanner();
-    source.panNode.pan.setValueAtTime(sound.pan, 0);
-  }
-
-  source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
-
-  source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
-  source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
-
-  if (sound.cents) {
-    source.playbackRate.value = centsToFactor(sound.cents);
-  } // connect all the nodes
-
-
-  if (source.panNode) {
-    source.panNode.connect(offlineCtx.destination);
-    source.gainNode.connect(source.panNode);
-  } else {
-    source.gainNode.connect(offlineCtx.destination);
-  }
-
-  source.connect(source.gainNode); // Do the process of creating the sound and placing it in the buffer
-
-  source.start(0);
-
-  if (source.noteOff) {
-    source.noteOff(len + fadeTimeSec);
-  } else {
-    source.stop(len + fadeTimeSec);
-  }
-
-  var fnResolve;
-
-  offlineCtx.oncomplete = function (e) {
-    if (e.renderedBuffer) {
-      // If the system gets overloaded then this can start failing. Just drop the note if so.
-      for (var i = 0; i < startArray.length; i++) {
-        //Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
-        var start = startArray[i] * sound.tempoMultiplier;
-        if (ofsMs) start -= ofsMs / 1000;
-        if (start < 0) start = 0; // If the item that is moved back is at the very beginning of the buffer then don't move it back. To do that would be to push everything else forward. TODO-PER: this should probably be done at some point but then it would change timing in existing apps.
-
-        start = Math.floor(start * sampleRate);
-        copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
-      }
+    if (sound.pan && offlineCtx.createStereoPanner) {
+      source.panNode = offlineCtx.createStereoPanner();
+      source.panNode.pan.setValueAtTime(sound.pan, 0);
     }
 
-    fnResolve();
-  };
+    source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
 
-  offlineCtx.startRendering();
-  return new Promise(function (resolve, reject) {
-    fnResolve = resolve;
-  });
+    source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
+    source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
+
+    if (sound.cents) {
+      source.playbackRate.value = centsToFactor(sound.cents);
+    } // connect all the nodes
+
+
+    if (source.panNode) {
+      source.panNode.connect(offlineCtx.destination);
+      source.gainNode.connect(source.panNode);
+    } else {
+      source.gainNode.connect(offlineCtx.destination);
+    }
+
+    source.connect(source.gainNode); // Do the process of creating the sound and placing it in the buffer
+
+    source.start(0);
+
+    if (source.noteOff) {
+      source.noteOff(len + fadeTimeSec);
+    } else {
+      source.stop(len + fadeTimeSec);
+    }
+
+    var fnResolve;
+
+    offlineCtx.oncomplete = function (e) {
+      if (e.renderedBuffer) {
+        // If the system gets overloaded then this can start failing. Just drop the note if so.
+        for (var i = 0; i < startArray.length; i++) {
+          //Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
+          var start = startArray[i] * sound.tempoMultiplier;
+          if (ofsMs) start -= ofsMs / 1000;
+          if (start < 0) start = 0; // If the item that is moved back is at the very beginning of the buffer then don't move it back. To do that would be to push everything else forward. TODO-PER: this should probably be done at some point but then it would change timing in existing apps.
+
+          start = Math.floor(start * sampleRate);
+          copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
+        }
+      }
+
+      fnResolve();
+    };
+
+    offlineCtx.startRendering();
+    return new Promise(function (resolve) {
+      fnResolve = resolve;
+    });
+  })["catch"](function () {});
 }
 
 var copyToChannel = function copyToChannel(toBuffer, fromBuffer, start) {
@@ -17802,7 +17731,11 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
   for (var ii = 0; ii < source.children.length; ii++) {
     var absChild = source.children[ii];
     var absX = absChild.x;
-    var relX = absChild.children[0].x;
+    var relX = absX;
+
+    if (absChild.children.length > 0) {
+      relX = absChild.children[0].x;
+    }
 
     if (absChild.isClef) {
       dest.children.push(buildTabAbsolute(plugin, absX, relX));
@@ -24647,8 +24580,8 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
       r.rows.push({
         left: params.startx,
         text: tabName.name,
-        font: 'infofont',
-        klass: 'text instrumentname',
+        font: 'tablabelfont',
+        klass: 'text instrument-name',
         anchor: 'start'
       });
       r.rows.push({
