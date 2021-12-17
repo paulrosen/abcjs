@@ -348,8 +348,6 @@ var abcTablatures = {
    * @param {*} abcTune 
    */
   layoutTablatures: function layoutTablatures(renderer, abcTune) {
-    // stop on first warning
-    if (abcTune.warnings) return;
     var tabs = abcTune.tablatures; // chack tabs request for each staffs
 
     for (var ii = 0; ii < abcTune.lines.length; ii++) {
@@ -16645,7 +16643,7 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 };
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this.abcTune.warnings) return;
+  if (this._super.inError) return;
   console.log('GuitarTab plugin rendered');
   setGuitarFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
@@ -17465,7 +17463,7 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 };
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this.abcTune.warnings) return;
+  if (this._super.inError) return;
   console.log('ViolinTab plugin rendered');
   setViolinFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
@@ -17864,12 +17862,15 @@ function TabCommon(abcTune, tuneNumber, params) {
   this.tune = abcTune;
   this.params = params;
   this.tuneNumber = tuneNumber;
+  this.inError = false;
 }
 
 TabCommon.prototype.setError = function (error) {
   var tune = this.tune;
 
   if (error) {
+    this.inError = true;
+
     if (tune.warnings) {
       tune.warnings.push(error);
     } else {

@@ -101,9 +101,6 @@ var abcTablatures = {
    * @param {*} abcTune 
    */
   layoutTablatures: function (renderer, abcTune) {
-    // stop on first warning
-    if (abcTune.warnings) return;
-
     var tabs = abcTune.tablatures;
     // chack tabs request for each staffs
     for (var ii = 0; ii < abcTune.lines.length; ii++) {
