@@ -173,13 +173,14 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
   var note;
   var number;
   var error = null; 
+  var retNotes = null;
   if (notes) {
-    var retNotes = [];
+    retNotes = [];
     if (notes.length > 1) {
       retNotes = handleChordNotes(this, notes);
       if (retNotes.error) {
-        return retNotes.error;
-      } 
+        error = retNotes.error;
+      }
     } else {
       note = new TabNote.TabNote(notes[0].name);
       number = toNumber(this, note);
@@ -190,27 +191,28 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
         error = retNotes.error;
       }
     }
-    var retGraces = null;
-    if (graces) {
-      retGraces = [];
-      for (var iiii = 0; iiii < graces.length; iiii++) {
-        note = new TabNote.TabNote(graces[iiii].name);
-        number = toNumber(this, note);
-        if (number) {
-          retGraces.push(number);
-        } else {
-          invalidNumber(retGraces, note);
-          error = retNotes.error;
-        }
+  }  
+  if (error) return retNotes;
+  var retGraces = null;
+  if (graces) {
+    retGraces = [];
+    for (var iiii = 0; iiii < graces.length; iiii++) {
+      note = new TabNote.TabNote(graces[iiii].name);
+      number = toNumber(this, note);
+      if (number) {
+        retGraces.push(number);
+      } else {
+        invalidNumber(retGraces, note);
+        error = retNotes.error;
       }
     }
-    return {
-      notes: retNotes,
-      graces: retGraces,
-      error: error
-    };
   }
-  return null;
+    
+  return {
+    notes: retNotes,
+    graces: retGraces,
+    error: error
+  };
 };
 
 StringPatterns.prototype.toString = function () {

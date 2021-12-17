@@ -16875,15 +16875,16 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
   var note;
   var number;
   var error = null;
+  var retNotes = null;
 
   if (notes) {
-    var retNotes = [];
+    retNotes = [];
 
     if (notes.length > 1) {
       retNotes = handleChordNotes(this, notes);
 
       if (retNotes.error) {
-        return retNotes.error;
+        error = retNotes.error;
       }
     } else {
       note = new TabNote.TabNote(notes[0].name);
@@ -16896,33 +16897,32 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
         error = retNotes.error;
       }
     }
-
-    var retGraces = null;
-
-    if (graces) {
-      retGraces = [];
-
-      for (var iiii = 0; iiii < graces.length; iiii++) {
-        note = new TabNote.TabNote(graces[iiii].name);
-        number = toNumber(this, note);
-
-        if (number) {
-          retGraces.push(number);
-        } else {
-          invalidNumber(retGraces, note);
-          error = retNotes.error;
-        }
-      }
-    }
-
-    return {
-      notes: retNotes,
-      graces: retGraces,
-      error: error
-    };
   }
 
-  return null;
+  if (error) return retNotes;
+  var retGraces = null;
+
+  if (graces) {
+    retGraces = [];
+
+    for (var iiii = 0; iiii < graces.length; iiii++) {
+      note = new TabNote.TabNote(graces[iiii].name);
+      number = toNumber(this, note);
+
+      if (number) {
+        retGraces.push(number);
+      } else {
+        invalidNumber(retGraces, note);
+        error = retNotes.error;
+      }
+    }
+  }
+
+  return {
+    notes: retNotes,
+    graces: retGraces,
+    error: error
+  };
 };
 
 StringPatterns.prototype.toString = function () {
@@ -17728,6 +17728,18 @@ function getXGrace(abs, index) {
 
   return -1;
 }
+
+function graceInRest(absElem) {
+  if (absElem.abcelem) {
+    var elem = absElem.abcelem;
+
+    if (elem.rest) {
+      return elem.gracenotes;
+    }
+  }
+
+  return null;
+}
 /**
  * Build tab absolutes by scanning current staff line absolute array
  * @param {*} staffAbsolute
@@ -17794,7 +17806,15 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
         var abs = cloneAbsolute(absChild);
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
-        var graceNotes = absChild.abcelem.gracenotes; // check transpose
+        var graceNotes = absChild.abcelem.gracenotes;
+
+        if (!graceNotes) {
+          // check in consecutive rest
+          if (ii < source.children.length) {
+            graceNotes = graceInRest(source.children[ii + 1]);
+          }
+        } // check transpose
+
 
         if (plugin.transpose) {
           //transposer.transpose(plugin.transpose);
@@ -17813,6 +17833,8 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
 
         if (tabPos.error) {
           plugin._super.setError(tabPos.error);
+
+          return; // give up on error here
         }
 
         abs.type = 'tabNumber';

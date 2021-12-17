@@ -131,6 +131,16 @@ function getXGrace(abs, index) {
   return -1;
 }
 
+function graceInRest( absElem ) {
+  if (absElem.abcelem) {
+    var elem = absElem.abcelem; 
+    if (elem.rest) {
+      return elem.gracenotes;
+    }
+  }
+  return null;
+}
+
 /**
  * Build tab absolutes by scanning current staff line absolute array
  * @param {*} staffAbsolute
@@ -193,6 +203,12 @@ TabAbsoluteElements.prototype.build = function (plugin,
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.abcelem.gracenotes;
+        if (!graceNotes) {
+          // check in consecutive rest
+          if (ii < source.children.length) {
+            graceNotes = graceInRest(source.children[ii + 1]);
+          }  
+        }
         // check transpose
         if (plugin.transpose) {
           //transposer.transpose(plugin.transpose);
@@ -208,6 +224,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
         var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
         if (tabPos.error) {
           plugin._super.setError(tabPos.error);
+          return; // give up on error here
         } 
         abs.type = 'tabNumber';
         if (tabPos.graces) {
