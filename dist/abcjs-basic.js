@@ -354,20 +354,22 @@ var abcTablatures = {
       var line = abcTune.lines[ii];
       var curStaff = line.staff;
 
-      for (var jj = 0; jj < curStaff.length; jj++) {
-        if (tabs[jj]) {
-          // tablature requested for staff
-          var tabPlugin = tabs[jj];
+      if (curStaff) {
+        for (var jj = 0; jj < curStaff.length; jj++) {
+          if (tabs[jj]) {
+            // tablature requested for staff
+            var tabPlugin = tabs[jj];
 
-          if (tabPlugin.instance == null) {
-            tabPlugin.instance = new tabPlugin.classz(); // plugin.init(tune, tuneNumber, args, ii);
-            // call initer first
+            if (tabPlugin.instance == null) {
+              tabPlugin.instance = new tabPlugin.classz(); // plugin.init(tune, tuneNumber, args, ii);
+              // call initer first
 
-            tabPlugin.instance.init(abcTune, tabPlugin.tuneNumber, tabPlugin.params, jj);
-          } // render next
+              tabPlugin.instance.init(abcTune, tabPlugin.tuneNumber, tabPlugin.params, jj);
+            } // render next
 
 
-          tabPlugin.instance.render(renderer, line, jj);
+            tabPlugin.instance.render(renderer, line, jj);
+          }
         }
       }
     }
