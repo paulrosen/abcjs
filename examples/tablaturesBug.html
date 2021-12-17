@@ -21,14 +21,13 @@
     <h2>Guitar and Editor</h2>
     <textarea id="abc" cols="80" rows="12" spellcheck="false">
 X:1
-T:Andro Guitar
-M: 2/4
-K:F
-|: [DD,]EFG [A2A,]AG | [F2G,]ED [A,A]BAG | [FD,]EFG [A2D,]AAG | [F2G,]ED [A,4EA]:|
-w: ros si gno let du bois jo li quand il s'a git des a mou reux
-|: [F2B,]GA [F3B,]A |[GA,]FEG [F2A,2]ED | [F2G,]GA [F3G,]A |[GA,]FEF [D4D,] :|
-w: vas t'en lui por ter u ne le ttre
-    </textarea>
+M:4/4
+L:1/16
+N: srf-3979 srf-3981
+T:overlap slur and slash ornaments
+V:SnareDrum stem=up
+K:C clef=perc stafflines=1
+!mf!!///!B2-!>!B2 {/B}B4 B8|z4 !///!B- !///!BB2 {/B}!>!B2B2|    </textarea>
 
     <div id="warnings"></div>
     <hr>
@@ -44,16 +43,8 @@ w: vas t'en lui por ter u ne le ttre
   </div>
   <script type="text/javascript">
     window.onload = function () {
-
+      var abc5 = document.getElementById("abc").value;
       // Multi Voice
-      var abc5 = 
-      "X:1\n" +
-      "T:placement of seconds\n" +
-      "N:The lower note should always be before the upper note.\n"+
-      "K: C\n"+
-      "L: 1\n"+
-      "[^ d_e] | \n"
-
       var options5 = {
         warnings_id: "warnings",
         tablature: 

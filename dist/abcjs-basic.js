@@ -16644,6 +16644,7 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {
   if (this._super.inError) return;
+  if (this.tablature.bypass(line)) return;
   console.log('GuitarTab plugin rendered');
   setGuitarFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
@@ -17021,6 +17022,21 @@ function StringTablature(numLines, lineSpace) {
     height: 5
   };
 }
+/**
+ * return true if current line should not produce a tab
+ * @param {} line 
+ */
+
+
+StringTablature.prototype.bypass = function (line) {
+  var voices = line.staffGroup.voices;
+
+  if (voices.length > 0) {
+    if (voices[0].isPercussion) return true;
+  }
+
+  return false;
+};
 
 StringTablature.prototype.setRelative = function (child, relative, first) {
   switch (child.type) {
@@ -17464,6 +17480,7 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {
   if (this._super.inError) return;
+  if (this.tablature.bypass(line)) return;
   console.log('ViolinTab plugin rendered');
   setViolinFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
