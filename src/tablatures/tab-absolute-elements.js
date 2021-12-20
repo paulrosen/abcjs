@@ -95,7 +95,7 @@ function getInitialStaffSize(staffGroup) {
   return returned;
 }
 
-function buildRelativeTabNote( plugin , relX , def , curNote , isGrace ) {
+function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
   var strNote = curNote.num;
   if (curNote.note.quarter != null) {
     // add tab quarter => needs to string conversion then 
@@ -141,6 +141,45 @@ function graceInRest( absElem ) {
   return null;
 }
 
+function checkTransposition(plugin, transposer ,pitches, graceNotes) {
+  if (plugin.transpose) {
+    //transposer.transpose(plugin.transpose);
+    for (var jj = 0; jj < pitches.length; jj++) {
+      pitches[jj] = transposer.transposeNote(pitches[jj]);
+    }
+    if (graceNotes) {
+      for (var kk = 0; kk < graceNotes.length; kk++) {
+        graceNotes[kk] = transposer.transposeNote(graceNotes[kk]);
+      }
+    }
+  }
+}
+
+function convertToNumber(plugin, pitches, graceNotes) {
+  var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
+  if (tabPos.error) {
+    plugin._super.setError(tabPos.error);
+    return; // give up on error here
+  }
+  if (tabPos.graces && tabPos.notes) {
+    // add graces to last note in notes
+    var posNote = tabPos.notes.length - 1;
+    tabPos.notes[posNote].graces = tabPos.graces;
+  }
+  return tabPos;
+}
+
+function buildGraceRelativesForRest(plugin,abs,absChild,graceNotes,tabVoice) {
+  for (var mm = 0; mm < graceNotes.length; mm++) {
+    var defGrace = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [], grace: true };
+    var graceX = getXGrace(absChild, mm);
+    var curGrace = graceNotes[mm];
+    var tabGraceRelative = buildRelativeTabNote(plugin, graceX, defGrace, curGrace, true);
+    abs.children.push(tabGraceRelative);
+    tabVoice.push(defGrace);
+  }
+}
+
 /**
  * Build tab absolutes by scanning current staff line absolute array
  * @param {*} staffAbsolute
@@ -155,6 +194,8 @@ TabAbsoluteElements.prototype.build = function (plugin,
   var source = staffAbsolute[staffIndex+voiceIndex];
   var dest = staffAbsolute[staffSize+staffIndex+voiceIndex];
   var transposer = null;
+  var tabPos = null;
+  var defNote = null;
   if (source.children[0].abcelem.el_type != 'clef') {
     // keysig missing => provide one for tabs
     source.children.splice(0,0,keySig);
@@ -198,42 +239,37 @@ TabAbsoluteElements.prototype.build = function (plugin,
         cloned.abcelem.lastBar = lastBar;
         dest.children.push(cloned);
         break;
+      case 'rest':
+        var restGraces = graceInRest(absChild);
+        if (restGraces) {
+          // check transpose
+          checkTransposition(plugin, transposer, null, restGraces);
+          // to number conversion 
+          tabPos = convertToNumber(plugin, null, restGraces);
+          if (tabPos.error) return;
+          // build relative for grace
+          defGrace = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [], grace: true };
+          buildGraceRelativesForRest(plugin, abs, absChild, tabPos.graces, restGraces, tabVoice);
+        }
+        break;
       case 'note':
         var abs = cloneAbsolute(absChild);
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.abcelem.gracenotes;
-        if (!graceNotes) {
-          // check in consecutive rest
-          if (ii < source.children.length) {
-            graceNotes = graceInRest(source.children[ii + 1]);
-          }  
-        }
         // check transpose
-        if (plugin.transpose) {
-          //transposer.transpose(plugin.transpose);
-          for (var jj = 0; jj < pitches.length; jj++) {
-            pitches[jj] = transposer.transposeNote(pitches[jj]);
-          }
-          if (graceNotes) {
-            for (var kk = 0; kk < graceNotes.length; kk++) {
-              graceNotes[kk] = transposer.transposeNote(graceNotes[kk]);
-            }
-          }
-        }
-        var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
-        if (tabPos.error) {
-          plugin._super.setError(tabPos.error);
-          return; // give up on error here
-        } 
         abs.type = 'tabNumber';
+        checkTransposition(plugin, transposer, pitches, graceNotes);
+        // to number conversion 
+        tabPos = convertToNumber(plugin, pitches, graceNotes);   
+        if (tabPos.error) return;
         if (tabPos.graces) {
           // add graces to last note in notes
           var posNote = tabPos.notes.length - 1;
           tabPos.notes[posNote].graces = tabPos.graces;
         }
-        // convert note to number
-        var defNote = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [] };
+        // build relative
+        defNote = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [] };
         for (var ll = 0; ll < tabPos.notes.length; ll++) {
           var curNote = tabPos.notes[ll];
           if (curNote.graces) {
