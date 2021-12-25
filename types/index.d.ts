@@ -1015,12 +1015,11 @@ declare module 'abcjs' {
 		let SynthSequence: { new (): SynthSequenceClass }
 
 		export function supportsAudio(): boolean
-		export function registerAudioContext(AudioContext): boolean
+		export function registerAudioContext(ac?: AudioContext): boolean
 		export function activeAudioContext(): AudioContext
 		export function CreateSynthControl(element: Selector, options: AbcVisualParams): AudioControl // TODO
 		export function getMidiFile(source: String | TuneObject, options?: MidiFileOptions): MidiFile;
 		export function playEvent(pitches: MidiPitches, graceNotes: MidiGracePitches, milliSecondsPerMeasure: number): Promise<void>;
-		export function activeAudioContext(): AudioContext
 		export function sequence(visualObj: TuneObject, options: AbcVisualParams): AudioSequence
 	}
 
