@@ -215,7 +215,8 @@ TabRenderer.prototype.doLayout = function () {
     tabVoice.staff = staffGroupInfos;
     voices.splice(voices.length, 0, tabVoice);
     var keySig = checkVoiceKeySig(voices, ii + this.staffIndex);
-    this.absolutes.build(this.plugin, voices, this.tabStaff.voices, ii , this.staffIndex ,keySig);
+    this.tabStaff.voices[ii] = []
+    this.absolutes.build(this.plugin, voices, this.tabStaff.voices[ii], ii , this.staffIndex ,keySig);
   }
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
 };
