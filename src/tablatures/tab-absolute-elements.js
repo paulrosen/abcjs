@@ -24,7 +24,8 @@ function cloneAbsolute(absSrc) {
   if (absSrc.abcelem) {
     returned.abcelem = {};
     cloneObject(returned.abcelem, absSrc.abcelem);
-    returned.abcelem.el_type = 'tabNumber';
+    if (returned.abcelem.el_type === "note")
+      returned.abcelem.el_type = 'tabNumber';
   }
   return returned;
 }
@@ -224,12 +225,21 @@ TabAbsoluteElements.prototype.build = function (plugin,
         break;
       case 'bar':
         var lastBar = false;
-        if (ii == source.children.length-1) {
+        if (ii === source.children.length-1) {
           // used for final line bar drawing
           // for multi tabs / multi staves
           lastBar = true;
         }
         var cloned = cloneAbsoluteAndRelatives(absChild, plugin);
+        if (cloned.abcelem.barNumber) {
+          delete cloned.abcelem.barNumber
+          for (var bn = 0; bn < cloned.children.length; bn++) {
+            if (cloned.children[bn].type === "barNumber" ) {
+              cloned.children.splice(bn, 1)
+              break
+            }
+          }
+        }
         cloned.abcelem.lastBar = lastBar;
         dest.children.push(cloned);
         tabVoice.push({
