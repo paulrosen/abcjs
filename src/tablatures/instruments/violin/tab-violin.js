@@ -25,11 +25,11 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
     this.linePitch);
   var semantics = new ViolinPatterns(this);
   this.semantics = semantics;
-
 };
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this.abcTune.warnings) return;
+  if (this._super.inError) return;
+  if (this.tablature.bypass(line)) return;
   console.log('ViolinTab plugin rendered');
   setViolinFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);

@@ -17,6 +17,19 @@ function StringTablature(numLines, lineSpace) {
   };
 }
 
+/**
+ * return true if current line should not produce a tab
+ * @param {} line 
+ */
+StringTablature.prototype.bypass = function (line) {
+  var voices = line.staffGroup.voices;
+  if (voices.length > 0) {
+    if (voices[0].isPercussion) return true;
+  }
+  return false;
+};  
+
+
 StringTablature.prototype.setRelative = function (child, relative, first) {
   switch (child.type) {
     case 'bar':

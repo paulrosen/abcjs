@@ -101,32 +101,31 @@ var abcTablatures = {
    * @param {*} abcTune 
    */
   layoutTablatures: function (renderer, abcTune) {
-    // stop on first warning
-    if (abcTune.warnings) return;
-
     var tabs = abcTune.tablatures;
     // chack tabs request for each staffs
     for (var ii = 0; ii < abcTune.lines.length; ii++) {
       var line = abcTune.lines[ii];
       var curStaff = line.staff;
-      for (var jj = 0; jj < curStaff.length; jj++) {
-        if (tabs[jj]) {
-          // tablature requested for staff
-          var tabPlugin = tabs[jj];
-          if (tabPlugin.instance == null) {
-            tabPlugin.instance = new tabPlugin.classz();
-            // plugin.init(tune, tuneNumber, args, ii);
-            // call initer first
-            tabPlugin.instance.init(abcTune,
-              tabPlugin.tuneNumber,
-              tabPlugin.params,
-              jj
-            );
+      if (curStaff) {
+        for (var jj = 0; jj < curStaff.length; jj++) {
+          if (tabs[jj]) {
+            // tablature requested for staff
+            var tabPlugin = tabs[jj];
+            if (tabPlugin.instance == null) {
+              tabPlugin.instance = new tabPlugin.classz();
+              // plugin.init(tune, tuneNumber, args, ii);
+              // call initer first
+              tabPlugin.instance.init(abcTune,
+                tabPlugin.tuneNumber,
+                tabPlugin.params,
+                jj
+              );
+            }
+            // render next
+            tabPlugin.instance.render(renderer, line, jj);
           }
-          // render next
-          tabPlugin.instance.render(renderer, line, jj);
         }
-      }
+      }  
     }
   },
 

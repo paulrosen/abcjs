@@ -348,28 +348,28 @@ var abcTablatures = {
    * @param {*} abcTune 
    */
   layoutTablatures: function layoutTablatures(renderer, abcTune) {
-    // stop on first warning
-    if (abcTune.warnings) return;
     var tabs = abcTune.tablatures; // chack tabs request for each staffs
 
     for (var ii = 0; ii < abcTune.lines.length; ii++) {
       var line = abcTune.lines[ii];
       var curStaff = line.staff;
 
-      for (var jj = 0; jj < curStaff.length; jj++) {
-        if (tabs[jj]) {
-          // tablature requested for staff
-          var tabPlugin = tabs[jj];
+      if (curStaff) {
+        for (var jj = 0; jj < curStaff.length; jj++) {
+          if (tabs[jj]) {
+            // tablature requested for staff
+            var tabPlugin = tabs[jj];
 
-          if (tabPlugin.instance == null) {
-            tabPlugin.instance = new tabPlugin.classz(); // plugin.init(tune, tuneNumber, args, ii);
-            // call initer first
+            if (tabPlugin.instance == null) {
+              tabPlugin.instance = new tabPlugin.classz(); // plugin.init(tune, tuneNumber, args, ii);
+              // call initer first
 
-            tabPlugin.instance.init(abcTune, tabPlugin.tuneNumber, tabPlugin.params, jj);
-          } // render next
+              tabPlugin.instance.init(abcTune, tabPlugin.tuneNumber, tabPlugin.params, jj);
+            } // render next
 
 
-          tabPlugin.instance.render(renderer, line, jj);
+            tabPlugin.instance.render(renderer, line, jj);
+          }
         }
       }
     }
@@ -15381,8 +15381,8 @@ function CreateSynth() {
   self.pause = function () {
     if (!self.audioBufferPossible) throw new Error(notSupportedMessage);
     if (self.debugCallback) self.debugCallback("pause called");
-    self.stop();
-    self.pausedTimeSec = activeAudioContext().currentTime - self.startTimeSec;
+    self.pausedTimeSec = self.stop();
+    return self.pausedTimeSec;
   };
 
   self.resume = function () {
@@ -15434,6 +15434,8 @@ function CreateSynth() {
       }
     });
     self.directSource = [];
+    var elapsed = activeAudioContext().currentTime - self.startTimeSec;
+    return elapsed;
   };
 
   self.finished = function () {
@@ -15727,104 +15729,37 @@ module.exports = instrumentIndexToName;
 var soundsCache = __webpack_require__(/*! ./sounds-cache */ "./src/synth/sounds-cache.js");
 
 var getNote = function getNote(url, instrument, name, audioContext) {
-  return new Promise(function (resolve, reject) {
-    if (!soundsCache[instrument]) soundsCache[instrument] = {};
-    var instrumentCache = soundsCache[instrument];
-
-    if (instrumentCache[name] === 'error') {
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "error",
-        message: "Unable to load sound font" + ' ' + url + ' ' + instrument + ' ' + name
-      });
-    }
-
-    if (instrumentCache[name] === 'pending') {
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "pending"
-      });
-    }
-
-    if (instrumentCache[name]) {
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "cached"
-      });
-    } // if (this.debugCallback)
-    // 	this.debugCallback(`Loading sound: ${instrument} ${name}`);
-
-
-    instrumentCache[name] = "pending"; // This can be called in parallel, so don't call it a second time before the first one has loaded.
-
+  if (!soundsCache[instrument]) soundsCache[instrument] = {};
+  var instrumentCache = soundsCache[instrument];
+  if (!instrumentCache[name]) instrumentCache[name] = new Promise(function (resolve, reject) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', url + instrument + '-mp3/' + name + '.mp3', true);
-    xhr.responseType = 'arraybuffer';
-    var self = this;
+    var noteUrl = url + instrument + "-mp3/" + name + ".mp3";
+    xhr.open("GET", noteUrl, true);
+    xhr.responseType = "arraybuffer";
 
-    function onSuccess(audioBuffer) {
-      instrumentCache[name] = audioBuffer; // if (self.debugCallback)
-      // 	self.debugCallback(`Sound loaded: ${instrument} ${name} ${url}`);
-
-      resolve({
-        instrument: instrument,
-        name: name,
-        status: "loaded"
-      });
-    }
-
-    function onFailure(error) {
-      error = "Can't decode sound. " + url + ' ' + instrument + ' ' + name + ' ' + error;
-      if (self.debugCallback) self.debugCallback(error);
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "error",
-        message: error
-      });
-    }
-
-    xhr.onload = function (e) {
-      if (this.status === 200) {
-        try {
-          var promise = audioContext.decodeAudioData(this.response, onSuccess, onFailure); // older browsers only have the callback. Newer ones will report an unhandled
-          // rejection if catch isn't handled so we need both. We don't need to report it twice, though.
-
-          if (promise && promise["catch"]) promise["catch"](function () {});
-        } catch (error) {
-          reject(error);
-        }
-      } else {
-        instrumentCache[name] = "error"; // To keep this from trying to load repeatedly.
-
-        var cantLoadMp3 = "Onload error loading sound: " + name + " " + url + " " + e.currentTarget.status + " " + e.currentTarget.statusText;
-        if (self.debugCallback) self.debugCallback(cantLoadMp3);
-        return resolve({
-          instrument: instrument,
-          name: name,
-          status: "error",
-          message: cantLoadMp3
-        });
+    xhr.onload = function () {
+      if (xhr.status !== 200) {
+        reject(Error("Can't load sound at " + noteUrl));
+        return;
       }
+
+      var maybePromise = audioContext.decodeAudioData(xhr.response, resolve, function () {
+        reject(Error("Can't decode sound at " + noteUrl));
+      }); // In older browsers `BaseAudioContext.decodeAudio()` did not return a promise
+
+      if (maybePromise && typeof maybePromise["catch"] === "function") maybePromise["catch"](reject);
     };
 
-    xhr.addEventListener("error", function () {
-      instrumentCache[name] = "error"; // To keep this from trying to load repeatedly.
+    xhr.onerror = function () {
+      reject(Error("Can't load sound at " + noteUrl));
+    };
 
-      var cantLoadMp3 = "Error in loading sound: " + " " + url;
-      if (self.debugCallback) self.debugCallback(cantLoadMp3);
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "error",
-        message: cantLoadMp3
-      });
-    }, false);
     xhr.send();
+  })["catch"](function (err) {
+    console.error("Didn't load note", instrument, name, ":", err.message);
+    throw err;
   });
+  return instrumentCache[name];
 };
 
 module.exports = getNote;
@@ -16042,80 +15977,74 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 
   var offlineCtx = new OfflineAC(2, Math.floor((len + fadeTimeSec) * sampleRate), sampleRate);
   var noteName = pitchToNoteName[sound.pitch];
-  var noteBuffer = soundsCache[sound.instrument][noteName];
+  var noteBufferPromise = soundsCache[sound.instrument][noteName];
+  noteBufferPromise.then(function (audioBuffer) {
+    // create audio buffer
+    var source = offlineCtx.createBufferSource();
+    source.buffer = audioBuffer; // add gain
+    // volume can be between 1 to 127. This translation to gain is just trial and error.
+    // The smaller the first number, the more dynamic range between the quietest to loudest.
+    // The larger the second number, the louder it will be in general.
 
-  if (noteBuffer === "error" || noteBuffer === "pending") {
-    // If the note isn't available, just leave a blank spot
-    // If the note is still pending by now that means an error happened when loading. There was probably a timeout.
-    console.log("Didn't load note", sound.instrument, noteName, noteBuffer);
-    return;
-  } // create audio buffer
+    var volume = sound.volume / 96 * volumeMultiplier;
+    source.gainNode = offlineCtx.createGain(); // add pan if supported and present
 
-
-  var source = offlineCtx.createBufferSource();
-  source.buffer = noteBuffer; // add gain
-  // volume can be between 1 to 127. This translation to gain is just trial and error.
-  // The smaller the first number, the more dynamic range between the quietest to loudest.
-  // The larger the second number, the louder it will be in general.
-
-  var volume = sound.volume / 96 * volumeMultiplier;
-  source.gainNode = offlineCtx.createGain(); // add pan if supported and present
-
-  if (sound.pan && offlineCtx.createStereoPanner) {
-    source.panNode = offlineCtx.createStereoPanner();
-    source.panNode.pan.setValueAtTime(sound.pan, 0);
-  }
-
-  source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
-
-  source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
-  source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
-
-  if (sound.cents) {
-    source.playbackRate.value = centsToFactor(sound.cents);
-  } // connect all the nodes
-
-
-  if (source.panNode) {
-    source.panNode.connect(offlineCtx.destination);
-    source.gainNode.connect(source.panNode);
-  } else {
-    source.gainNode.connect(offlineCtx.destination);
-  }
-
-  source.connect(source.gainNode); // Do the process of creating the sound and placing it in the buffer
-
-  source.start(0);
-
-  if (source.noteOff) {
-    source.noteOff(len + fadeTimeSec);
-  } else {
-    source.stop(len + fadeTimeSec);
-  }
-
-  var fnResolve;
-
-  offlineCtx.oncomplete = function (e) {
-    if (e.renderedBuffer) {
-      // If the system gets overloaded then this can start failing. Just drop the note if so.
-      for (var i = 0; i < startArray.length; i++) {
-        //Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
-        var start = startArray[i] * sound.tempoMultiplier;
-        if (ofsMs) start -= ofsMs / 1000;
-        if (start < 0) start = 0; // If the item that is moved back is at the very beginning of the buffer then don't move it back. To do that would be to push everything else forward. TODO-PER: this should probably be done at some point but then it would change timing in existing apps.
-
-        start = Math.floor(start * sampleRate);
-        copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
-      }
+    if (sound.pan && offlineCtx.createStereoPanner) {
+      source.panNode = offlineCtx.createStereoPanner();
+      source.panNode.pan.setValueAtTime(sound.pan, 0);
     }
 
-    fnResolve();
-  };
+    source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
 
-  offlineCtx.startRendering();
-  return new Promise(function (resolve, reject) {
-    fnResolve = resolve;
-  });
+    source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
+    source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
+
+    if (sound.cents) {
+      source.playbackRate.value = centsToFactor(sound.cents);
+    } // connect all the nodes
+
+
+    if (source.panNode) {
+      source.panNode.connect(offlineCtx.destination);
+      source.gainNode.connect(source.panNode);
+    } else {
+      source.gainNode.connect(offlineCtx.destination);
+    }
+
+    source.connect(source.gainNode); // Do the process of creating the sound and placing it in the buffer
+
+    source.start(0);
+
+    if (source.noteOff) {
+      source.noteOff(len + fadeTimeSec);
+    } else {
+      source.stop(len + fadeTimeSec);
+    }
+
+    var fnResolve;
+
+    offlineCtx.oncomplete = function (e) {
+      if (e.renderedBuffer) {
+        // If the system gets overloaded then this can start failing. Just drop the note if so.
+        for (var i = 0; i < startArray.length; i++) {
+          //Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
+          var start = startArray[i] * sound.tempoMultiplier;
+          if (ofsMs) start -= ofsMs / 1000;
+          if (start < 0) start = 0; // If the item that is moved back is at the very beginning of the buffer then don't move it back. To do that would be to push everything else forward. TODO-PER: this should probably be done at some point but then it would change timing in existing apps.
+
+          start = Math.floor(start * sampleRate);
+          copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
+        }
+      }
+
+      fnResolve();
+    };
+
+    offlineCtx.startRendering();
+    return new Promise(function (resolve) {
+      fnResolve = resolve;
+    });
+  })["catch"](function () {});
 }
 
 var copyToChannel = function copyToChannel(toBuffer, fromBuffer, start) {
@@ -16716,7 +16645,8 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 };
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this.abcTune.warnings) return;
+  if (this._super.inError) return;
+  if (this.tablature.bypass(line)) return;
   console.log('GuitarTab plugin rendered');
   setGuitarFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
@@ -16945,15 +16875,16 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
   var note;
   var number;
   var error = null;
+  var retNotes = null;
 
   if (notes) {
-    var retNotes = [];
+    retNotes = [];
 
     if (notes.length > 1) {
       retNotes = handleChordNotes(this, notes);
 
       if (retNotes.error) {
-        return retNotes.error;
+        error = retNotes.error;
       }
     } else {
       note = new TabNote.TabNote(notes[0].name);
@@ -16966,33 +16897,32 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
         error = retNotes.error;
       }
     }
-
-    var retGraces = null;
-
-    if (graces) {
-      retGraces = [];
-
-      for (var iiii = 0; iiii < graces.length; iiii++) {
-        note = new TabNote.TabNote(graces[iiii].name);
-        number = toNumber(this, note);
-
-        if (number) {
-          retGraces.push(number);
-        } else {
-          invalidNumber(retGraces, note);
-          error = retNotes.error;
-        }
-      }
-    }
-
-    return {
-      notes: retNotes,
-      graces: retGraces,
-      error: error
-    };
   }
 
-  return null;
+  if (error) return retNotes;
+  var retGraces = null;
+
+  if (graces) {
+    retGraces = [];
+
+    for (var iiii = 0; iiii < graces.length; iiii++) {
+      note = new TabNote.TabNote(graces[iiii].name);
+      number = toNumber(this, note);
+
+      if (number) {
+        retGraces.push(number);
+      } else {
+        invalidNumber(retGraces, note);
+        error = retNotes.error;
+      }
+    }
+  }
+
+  return {
+    notes: retNotes,
+    graces: retGraces,
+    error: error
+  };
 };
 
 StringPatterns.prototype.toString = function () {
@@ -17094,6 +17024,21 @@ function StringTablature(numLines, lineSpace) {
     height: 5
   };
 }
+/**
+ * return true if current line should not produce a tab
+ * @param {} line 
+ */
+
+
+StringTablature.prototype.bypass = function (line) {
+  var voices = line.staffGroup.voices;
+
+  if (voices.length > 0) {
+    if (voices[0].isPercussion) return true;
+  }
+
+  return false;
+};
 
 StringTablature.prototype.setRelative = function (child, relative, first) {
   switch (child.type) {
@@ -17536,7 +17481,8 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 };
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this.abcTune.warnings) return;
+  if (this._super.inError) return;
+  if (this.tablature.bypass(line)) return;
   console.log('ViolinTab plugin rendered');
   setViolinFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
@@ -17782,6 +17728,68 @@ function getXGrace(abs, index) {
 
   return -1;
 }
+
+function graceInRest(absElem) {
+  if (absElem.abcelem) {
+    var elem = absElem.abcelem;
+
+    if (elem.rest) {
+      return elem.gracenotes;
+    }
+  }
+
+  return null;
+}
+
+function checkTransposition(plugin, transposer, pitches, graceNotes) {
+  if (plugin.transpose) {
+    //transposer.transpose(plugin.transpose);
+    for (var jj = 0; jj < pitches.length; jj++) {
+      pitches[jj] = transposer.transposeNote(pitches[jj]);
+    }
+
+    if (graceNotes) {
+      for (var kk = 0; kk < graceNotes.length; kk++) {
+        graceNotes[kk] = transposer.transposeNote(graceNotes[kk]);
+      }
+    }
+  }
+}
+
+function convertToNumber(plugin, pitches, graceNotes) {
+  var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
+
+  if (tabPos.error) {
+    plugin._super.setError(tabPos.error);
+
+    return; // give up on error here
+  }
+
+  if (tabPos.graces && tabPos.notes) {
+    // add graces to last note in notes
+    var posNote = tabPos.notes.length - 1;
+    tabPos.notes[posNote].graces = tabPos.graces;
+  }
+
+  return tabPos;
+}
+
+function buildGraceRelativesForRest(plugin, abs, absChild, graceNotes, tabVoice) {
+  for (var mm = 0; mm < graceNotes.length; mm++) {
+    var defGrace = {
+      el_type: "note",
+      startChar: absChild.abcelem.startChar,
+      endChar: absChild.abcelem.endChar,
+      notes: [],
+      grace: true
+    };
+    var graceX = getXGrace(absChild, mm);
+    var curGrace = graceNotes[mm];
+    var tabGraceRelative = buildRelativeTabNote(plugin, graceX, defGrace, curGrace, true);
+    abs.children.push(tabGraceRelative);
+    tabVoice.push(defGrace);
+  }
+}
 /**
  * Build tab absolutes by scanning current staff line absolute array
  * @param {*} staffAbsolute
@@ -17793,6 +17801,8 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
   var source = staffAbsolute[staffIndex + voiceIndex];
   var dest = staffAbsolute[staffSize + staffIndex + voiceIndex];
   var transposer = null;
+  var tabPos = null;
+  var defNote = null;
 
   if (source.children[0].abcelem.el_type != 'clef') {
     // keysig missing => provide one for tabs
@@ -17802,7 +17812,11 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
   for (var ii = 0; ii < source.children.length; ii++) {
     var absChild = source.children[ii];
     var absX = absChild.x;
-    var relX = absChild.children[0].x;
+    var relX = absX;
+
+    if (absChild.children.length > 0) {
+      relX = absChild.children[0].x;
+    }
 
     if (absChild.isClef) {
       dest.children.push(buildTabAbsolute(plugin, absX, relX));
@@ -17840,41 +17854,48 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
         dest.children.push(cloned);
         break;
 
+      case 'rest':
+        var restGraces = graceInRest(absChild);
+
+        if (restGraces) {
+          // check transpose
+          checkTransposition(plugin, transposer, null, restGraces); // to number conversion 
+
+          tabPos = convertToNumber(plugin, null, restGraces);
+          if (tabPos.error) return; // build relative for grace
+
+          defGrace = {
+            el_type: "note",
+            startChar: absChild.abcelem.startChar,
+            endChar: absChild.abcelem.endChar,
+            notes: [],
+            grace: true
+          };
+          buildGraceRelativesForRest(plugin, abs, absChild, tabPos.graces, restGraces, tabVoice);
+        }
+
+        break;
+
       case 'note':
         var abs = cloneAbsolute(absChild);
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.abcelem.gracenotes; // check transpose
 
-        if (plugin.transpose) {
-          //transposer.transpose(plugin.transpose);
-          for (var jj = 0; jj < pitches.length; jj++) {
-            pitches[jj] = transposer.transposeNote(pitches[jj]);
-          }
-
-          if (graceNotes) {
-            for (var kk = 0; kk < graceNotes.length; kk++) {
-              graceNotes[kk] = transposer.transposeNote(graceNotes[kk]);
-            }
-          }
-        }
-
-        var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
-
-        if (tabPos.error) {
-          plugin._super.setError(tabPos.error);
-        }
-
         abs.type = 'tabNumber';
+        checkTransposition(plugin, transposer, pitches, graceNotes); // to number conversion 
+
+        tabPos = convertToNumber(plugin, pitches, graceNotes);
+        if (tabPos.error) return;
 
         if (tabPos.graces) {
           // add graces to last note in notes
           var posNote = tabPos.notes.length - 1;
           tabPos.notes[posNote].graces = tabPos.graces;
-        } // convert note to number
+        } // build relative
 
 
-        var defNote = {
+        defNote = {
           el_type: "note",
           startChar: absChild.abcelem.startChar,
           endChar: absChild.abcelem.endChar,
@@ -17931,12 +17952,15 @@ function TabCommon(abcTune, tuneNumber, params) {
   this.tune = abcTune;
   this.params = params;
   this.tuneNumber = tuneNumber;
+  this.inError = false;
 }
 
 TabCommon.prototype.setError = function (error) {
   var tune = this.tune;
 
   if (error) {
+    this.inError = true;
+
     if (tune.warnings) {
       tune.warnings.push(error);
     } else {
@@ -24647,8 +24671,8 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
       r.rows.push({
         left: params.startx,
         text: tabName.name,
-        font: 'infofont',
-        klass: 'text instrumentname',
+        font: 'tablabelfont',
+        klass: 'text instrument-name',
         anchor: 'start'
       });
       r.rows.push({

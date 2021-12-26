@@ -30,7 +30,8 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 };
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this.abcTune.warnings) return;
+  if (this._super.inError) return;
+  if (this.tablature.bypass(line)) return;
   console.log('GuitarTab plugin rendered');
   setGuitarFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);

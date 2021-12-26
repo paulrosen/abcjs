@@ -20,16 +20,23 @@
   <div class="container">
     <h2>Guitar and Editor</h2>
     <textarea id="abc" cols="80" rows="12" spellcheck="false">
-X:1
-T:Andro Guitar
-M: 2/4
-K:F
-|: [DD,]EFG [A2A,]AG | [F2G,]ED [A,A]BAG | [FD,]EFG [A2D,]AAG | [F2G,]ED [A,4EA]:|
-w: ros si gno let du bois jo li quand il s'a git des a mou reux
-|: [F2B,]GA [F3B,]A |[GA,]FEG [F2A,2]ED | [F2G,]GA [F3G,]A |[GA,]FEF [D4D,] :|
-w: vas t'en lui por ter u ne le ttre
-    </textarea>
-
+X: 337
+%%barnumbers 4
+T:Yiddisher Bulgar
+C:traditional/arr. Greenman & Joel Rubin
+M:2/4
+L:1/8
+K:Dphr ^f
+"D"d3 e| de!trill!fe|d2d2|d2d2|(f3 {a})y g| (f{a})yg!trill!ag|
+f4|f4|"Gm"(f{a})y g2 f|f/a/g/f/ e/d/c|"Cm"(f{a})ygc2-|c4|
+G/c/d e/d/c|d/e/f g/f/e|1 "D"d4|d4 :|2 d4-|dded||
+|:"D"a2 (+tenuto+f2|+tenuto+d2) (f{a})yg| f4-| fded|a2(+tenuto+f2|+tenuto+d2)edc=B|
+"Cmin"c2 de|e/d/c-c2|Gc=Bc|dedc|aggf|fe e/d/c|G/c/d e/d/c|
+d/e/f g/f/e|1 "D"d4-|dded :|2 "D" d4|d4||
+|: "D"d/a/-a2 g|Tfed2|d/e/d/e/ fe|Tfed2|d/a/-a2 g|f/g/a b/a/g|
+a4|d'4|d/a/-a2 g|Tfed2|d/e/d/e/ fe|"Cm"e/d/c/=B/ c2|
+G/c/d e/d/c|d/e/f g/f/e|"D"d4-|d4 :|
+</textarea>
     <div id="warnings"></div>
     <hr>
     <div id="paper1"></div>
@@ -44,27 +51,8 @@ w: vas t'en lui por ter u ne le ttre
   </div>
   <script type="text/javascript">
     window.onload = function () {
-
+      var abc5 = document.getElementById("abc").value;
       // Multi Voice
-      var abc5 = "X:1\n" +
-        "T: Sleepers Awake\n" +
-        "M: C\n" +
-        "L: 1/4\n" +
-        "K: G\n" +
-        "%% score(S A)(T B) \n" +
-        "V:S name=\"Violin I\"\n" +
-        "V:A name=\"Violin II\"\n" +
-        "V:T name=\"Viola\" clef=alto\n" +
-        "V:B name=\"Cello\" clef=bass\n" +
-        "%\n" +
-        "V:S\n" +
-        "D/|G//A//B/ B/A/ c/B/ D/C/ |: B//G//A/ C/B,/ F/G/ z|D/E/E/F/ F/G/ G,|\n" +
-        "V:A\n" +
-        "z/|DEFG|:D2B,z/D/|G//A//B/ B/A/ c/B/ D/C/|\n" +
-        "V:T\n" +
-        "z/|B,CDG,|:G,F,G,z|B,CDG/G,/|\n" +
-        "V:B\n" +
-        "z/|G,,G,,G,,B,,|:C,D,G,,z|G,,G,,G,,B,,|\n"
       var options5 = {
         warnings_id: "warnings",
         tablature: 
@@ -73,21 +61,6 @@ w: vas t'en lui por ter u ne le ttre
               instrument: 'violin',
               label: 'Violin I',
               tuning: ['G,', 'D', 'A', 'e']
-            },
-            {
-              instrument: 'violin',
-              label: 'Violin II',
-              tuning: ['G,', 'D', 'A', 'e']
-            },
-            {
-              instrument: 'violin',
-              label: 'Viola (%T)',
-              tuning: ['C,', 'G,', 'D', 'A']
-            },
-            {
-              instrument: 'violin',
-              label: 'Cello (%T)',
-              tuning: ['C,,', 'G,,', 'D,', 'A,']
             }
           ],
       }
