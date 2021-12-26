@@ -249,8 +249,8 @@ TabAbsoluteElements.prototype.build = function (plugin,
           if (tabPos.error) return;
           // build relative for grace
           defGrace = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [], grace: true };
-          buildGraceRelativesForRest(plugin, abs, absChild, tabPos.graces, restGraces, tabVoice);
-        }
+          buildGraceRelativesForRest(plugin, abs, absChild, tabPos.graces, tabVoice);
+       }
         break;
       case 'note':
         var abs = cloneAbsolute(absChild);

@@ -1155,6 +1155,9 @@ var parseDirective = {};
 					case "vocalfont":
 					case "wordsfont":
 					case "annotationfont":
+					case "tablabelfont":
+					case "tabnumberfont":
+					case "tabgracefont":
 						getChangingFont(cmd, tokens, value);
 						break;
 					case "scale":

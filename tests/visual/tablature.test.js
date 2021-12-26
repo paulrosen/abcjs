@@ -497,7 +497,7 @@ describe("Tablature", function () {
 	var graceOnRestOutput = [
 		[
 			{"el_type":"note","startChar":8,"endChar":12,"notes":[{"num":1,"str":0,"pitch":"f"}]},
-			{ "el_type": "note", "startChar": 13, "endChar": 15, "notes": [{ "num": 3, "str": 1, "pitch": "a" }], "grace": true },
+			{ "el_type": "note", "startChar": 12, "endChar": 17, "notes": [{ "num": 5, "str": 0, "pitch": "a" }], "grace": true },
 		]
 	]
 
@@ -610,8 +610,8 @@ describe("Tablature", function () {
 		var number = document.querySelector("#paper .abcjs-tab-number")
 		var grace = document.querySelector("#paper .abcjs-tab-grace")
 		var labelFont = label.getAttribute("font-family")
-		var numberFont = label.getAttribute("font-family")
-		var graceFont = label.getAttribute("font-family")
+		var numberFont = number.getAttribute("font-family")
+		var graceFont = grace.getAttribute("font-family")
 		chai.assert.equal(labelFont, params.format.tablabelfont, "Label font not set")
 		chai.assert.equal(numberFont, params.format.tabnumberfont, "Number font not set")
 		chai.assert.equal(graceFont, params.format.tabgracefont, "Grace font not set")
