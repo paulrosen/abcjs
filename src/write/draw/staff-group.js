@@ -117,7 +117,8 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 			// print tab infos on staffBottom
 			var r = { rows: [] };
 			r.rows.push({ absmove: bottomLine + 2 });
-			r.rows.push({ left: params.startx, text: tabName.name, font: 'tablabelfont', klass: 'text instrument-name', anchor: 'start' });
+			var leftMargin = 8;
+			r.rows.push({ left: params.startx+leftMargin, text: tabName.name, font: 'tablabelfont', klass: 'text instrument-name', anchor: 'start' });
 			r.rows.push({ move: tabName.textSize.height });
 			nonMusic(renderer, r);
 			tabNameHeight = tabName.textSize.height;
