@@ -418,6 +418,121 @@ describe("Tablature", function () {
 		]
 	];
 
+	var warningRecovery = "X:1\n" +
+		"K:C\n" +
+		"Gr";
+
+	var warningRecoveryOutput = [
+		[
+			{"el_type":"note","startChar":8,"endChar":9,"notes":[{"num":5,"str":2,"pitch":"G"}]}
+		]
+	]
+
+	var liningUp = "X: 1\n" +
+		"K:C\n" +
+		"G>^FG>_A G2 D2|\n";
+
+	var liningUpOutput = [
+		[
+
+		]
+	]
+
+	var barNumbers = "X:1\n" +
+		"%% barnumbers 1\n" +
+		"K:C \n" +
+		"F8|G8| \n" +
+		"F8|G8|]"
+
+	var barNumbersOutput = [
+		[
+			{"el_type":"note","startChar":25,"endChar":27,"notes":[{"num":3,"str":2,"pitch":"F"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":28,"startChar":27},
+			{"el_type":"note","startChar":28,"endChar":30,"notes":[{"num":5,"str":2,"pitch":"G"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":31,"startChar":30},
+		],
+		[
+			{"el_type":"note","startChar":33,"endChar":35,"notes":[{"num":3,"str":2,"pitch":"F"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":36,"startChar":35},
+			{"el_type":"note","startChar":36,"endChar":38,"notes":[{"num":5,"str":2,"pitch":"G"}]},
+			{"el_type":"bar","type":"bar_thin_thick","endChar":40,"startChar":38},
+		]
+	]
+
+	var noExtraVertical = "X:1\n" +
+		'"A7"A'
+
+	var extraVertical = "X:1\n" +
+		"Q:150\n" +
+		"P:Verse\n" +
+		'"A7"A'
+
+	var bracketWidth = "X:1\n" +
+		"%%staves {RH LH}\n" +
+		"V:RH clef=treble\n" +
+		"V:LH clef=bass\n" +
+		"K:C\n" +
+		"V:RH\n" +
+		"ABc\n" +
+		"V:LH\n" +
+		"A,B,C"
+
+	var subTitle = "X: 1\n" +
+		"T: First\n" +
+		"T: Second\n" +
+		"M: C\n" +
+		"K: F\n" +
+		"A\n"
+
+	var crashChord = "X: 1\n" +
+		"M: 4/4\n" +
+		"L: 1/4\n" +
+		"K: Bm\n" +
+		"[F,^G,]"
+
+	var graceOnRest = "X:1\n" +
+		"K:C\n" +
+		"(f3 {a})y"
+
+	var graceOnRestOutput = [
+		[
+			{"el_type":"note","startChar":8,"endChar":12,"notes":[{"num":1,"str":0,"pitch":"f"}]},
+			{ "el_type": "note", "startChar": 13, "endChar": 15, "notes": [{ "num": 3, "str": 1, "pitch": "a" }], "grace": true },
+		]
+	]
+
+	var tiedNote = "X:1\n" +
+		"K:C\n" +
+		"f-f"
+
+	var tiedNoteOutput = [
+		[
+			{"el_type":"note","startChar":8,"endChar":10,"notes":[{"num":1,"str":0,"pitch":"f"}]}
+		]
+	]
+
+	var percussionClef = "X:1\n" +
+		"K:C clef=perc stafflines=1 \n" +
+		"B"
+
+	var overlay = "X:1\n" +
+		"K:C\n" +
+		"G8 & C4 D4|E4 F4|]"
+
+	var overlayOutput = [
+		[
+			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"G"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":19,"startChar":18},
+			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"E"}]},
+			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"F"}]},
+		],
+		[
+			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"C"}]},
+			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"D"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":19,"startChar":18}
+		]
+	]
+
 	it("accidentals", function () {
 		doStaffTest(violinAllNotes, violinAllNotesOutput, violinParams);
 	});
@@ -462,6 +577,99 @@ describe("Tablature", function () {
 		doStaffTest(graceNotes, graceNotesOutput, violinParams);
 	});
 
+	it("warning recovery", function () {
+		doStaffTest(warningRecovery, warningRecoveryOutput, violinParams);
+	});
+
+	it("more tabs than voices", function () {
+		doStaffTest(warningRecovery, warningRecoveryOutput, violinGuitarParams);
+	});
+
+	it("grace-on-rest", function () {
+		doStaffTest(graceOnRest, graceOnRestOutput, violinParams);
+	});
+
+	it("tied note", function () {
+		doStaffTest(tiedNote, tiedNoteOutput, violinParams);
+	});
+
+	it("overlay", function () {
+		doStaffTest(overlay, overlayOutput, violinParams);
+	});
+
+	it("fonts", function () {
+		var params = {
+			format: {
+				tablabelfont: "Courier New",
+				tabnumberfont: "cursive",
+				tabgracefont: "serif"
+			}
+		}
+		doRender(graceNotes, violinParams, params);
+		var label = document.querySelector("#paper .abcjs-instrument-name")
+		var number = document.querySelector("#paper .abcjs-tab-number")
+		var grace = document.querySelector("#paper .abcjs-tab-grace")
+		var labelFont = label.getAttribute("font-family")
+		var numberFont = label.getAttribute("font-family")
+		var graceFont = label.getAttribute("font-family")
+		chai.assert.equal(labelFont, params.format.tablabelfont, "Label font not set")
+		chai.assert.equal(numberFont, params.format.tabnumberfont, "Number font not set")
+		chai.assert.equal(graceFont, params.format.tabgracefont, "Grace font not set")
+	});
+
+	it("lining up", function () {
+		var visualObj = doRender(liningUp, violinParams);
+		console.log(visualObj[0].lines[0].staff[0].voices[0], visualObj[0].lines[0].staff[1].voices)
+		chai.assert.equal(1,0,"TODO")
+	});
+
+	it("bar numbers", function () {
+		function  checkForBarNumbers(el, line, element) {
+			if (el.abselem.abcelem.type === 'bar_thin') {
+				for (var i = 0; i < el.abselem.children.length; i++) {
+					var relEl = el.abselem.children[i]
+					if (relEl.type === "barNumber")
+						chai.assert(false, "bar number found on line "+line+" element "+element)
+				}
+			}
+		}
+		doStaffTest(barNumbers, barNumbersOutput, violinParams, undefined, checkForBarNumbers);
+	});
+
+	it("extra vertical", function() {
+		var visualObj = doRender(noExtraVertical, violinParams)
+		var firstLineTop1 = visualObj[0].lines[0].staffGroup.staffs[0].absoluteY
+		var secondLineTop1 = visualObj[0].lines[0].staffGroup.staffs[1].absoluteY
+		var difference1 = secondLineTop1 - firstLineTop1
+		visualObj = doRender(extraVertical, violinParams)
+		var firstLineTop2 = visualObj[0].lines[0].staffGroup.staffs[0].absoluteY
+		var secondLineTop2 = visualObj[0].lines[0].staffGroup.staffs[1].absoluteY
+		var difference2 = secondLineTop2 - firstLineTop2
+		//console.log(firstLineTop1, secondLineTop1, difference1, firstLineTop2, secondLineTop2,  difference2)
+		chai.assert.equal(difference2, difference1, "Spacing between staves is not correct")
+	})
+
+	it("bracket width", function() {
+		var visualObj = doRender(bracketWidth, violinGuitarParams)
+		var name = document.querySelector(".abcjs-instrument-name")
+		var x = name.getAttribute("x")
+		chai.assert.equal(parseInt(x,10), 33, "Not enough left margin for instrument name")
+	})
+
+	it("subtitle", function() {
+		// Just see it not crash
+		var visualObj = doRender(subTitle, violinParams)
+	})
+
+	it("crash chord", function() {
+		// Just see it not crash
+		var visualObj = doRender(crashChord, violinParams)
+	})
+
+	it("percussion clef", function() {
+		var visualObj = doRender(percussionClef, violinParams)
+		chai.assert(visualObj[0].lines[0].staff.length === 1, "Should skip percussion clef")
+	})
 });
 
 function doRender(abc, tabParams, params) {
@@ -482,8 +690,8 @@ function doRender(abc, tabParams, params) {
 function getTabStaff(staffs, number) {
 	var tabNumber = 0;
 	for (var ii = 0; ii < staffs.length; ii++) {
-		if (staffs[ii].clef.type == 'TAB') {
-			if (tabNumber == number) {
+		if (staffs[ii].clef.type === 'TAB') {
+			if (tabNumber === number) {
 				return staffs[ii].voices;
 			}
 			tabNumber++;
@@ -492,7 +700,7 @@ function getTabStaff(staffs, number) {
 	return null;
 }
 
-function doStaffTest(abc, expected, tabParams, params) {
+function doStaffTest(abc, expected, tabParams, params, callback) {
 	var visualObj = doRender(abc, tabParams, params);
 	var lineLength = visualObj[0].lines.length;
 	for (var i = 0; i < lineLength; i++) {
@@ -503,14 +711,17 @@ function doStaffTest(abc, expected, tabParams, params) {
 			chai.assert(false,"unexpected null value getting tab staff");
 		}
 		while (tab != null) {
-			JSON.stringify(tab, replacer);
-			for (var j = 0; j < tab.length; j++) {
-				var el = tab[j];
+			var thisVoice =  tab[0]
+			for (var j = 0; j < thisVoice.length; j++) {
+				var el = Object.assign({}, thisVoice[j]);
+				if (callback)
+					callback(el, i, j)
+				delete el.abselem
 				var msg = "\nrcv: " + JSON.stringify(el, replacer) + "\n" +
-					"exp: " + JSON.stringify(expected[staffNumber][j]) + "\n";
+					"exp: " + JSON.stringify(expected[i+staffNumber][j]) + "\n";
 				chai.assert.deepStrictEqual(el, expected[i+staffNumber][j], msg);
 			}
-			chai.assert.equal(tab.length, expected[i].length, "line " + i + " length mismatch");
+			chai.assert.equal(thisVoice.length, expected[i].length, "line " + i + " length mismatch");
 			staffNumber++;
 			tab = getTabStaff(line.staff, staffNumber);
 		}
