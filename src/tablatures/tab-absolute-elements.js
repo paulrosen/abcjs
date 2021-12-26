@@ -119,9 +119,9 @@ function getXGrace(abs, index) {
   var found = 0;
   if (abs.extra) {
     for (var ii = 0; ii < abs.extra.length; ii++) {
-      if (abs.extra[ii].c == 'noteheads.quarter') {
-        if (found == index) {
-          return abs.extra[ii].x;
+      if (abs.extra[ii].c.indexOf('noteheads') >= 0) {
+        if (found === index) {
+          return abs.extra[ii].x + abs.extra[ii].w/2;
         } else {
           found++;
         }
@@ -204,9 +204,9 @@ TabAbsoluteElements.prototype.build = function (plugin,
     var absChild = source.children[ii];
     var absX = absChild.x;
     var relX = absX;
-    if (absChild.children.length > 0) {
-      relX = absChild.children[0].x;      
-    }
+    // if (absChild.children.length > 0) {
+    //   relX = absChild.children[0].x;
+    // }
     if (absChild.isClef) {
       dest.children.push(buildTabAbsolute(plugin, absX, relX));
     }
@@ -229,15 +229,16 @@ TabAbsoluteElements.prototype.build = function (plugin,
           // for multi tabs / multi staves
           lastBar = true;
         }
+        var cloned = cloneAbsoluteAndRelatives(absChild, plugin);
+        cloned.abcelem.lastBar = lastBar;
+        dest.children.push(cloned);
         tabVoice.push({
           el_type: absChild.abcelem.el_type,
           type: absChild.abcelem.type,
           endChar: absChild.abcelem.endChar,
-          startChar: absChild.abcelem.startChar
+          startChar: absChild.abcelem.startChar,
+          abselem: cloned
         });
-        var cloned = cloneAbsoluteAndRelatives(absChild, plugin);
-        cloned.abcelem.lastBar = lastBar;
-        dest.children.push(cloned);
         break;
       case 'rest':
         var restGraces = graceInRest(absChild);
@@ -254,6 +255,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
         break;
       case 'note':
         var abs = cloneAbsolute(absChild);
+        abs.x += abs.w/2 // center the number
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.abcelem.gracenotes;
@@ -282,9 +284,10 @@ TabAbsoluteElements.prototype.build = function (plugin,
               tabVoice.push(defGrace);
             }
           }
-          var tabNoteRelative = buildRelativeTabNote(plugin, relX, defNote, curNote, false);
+          var tabNoteRelative = buildRelativeTabNote(plugin, abs.x, defNote, curNote, false);
           abs.children.push(tabNoteRelative);
         }
+        defNote.abselem = abs
         tabVoice.push(defNote);
         dest.children.push(abs);
         break;

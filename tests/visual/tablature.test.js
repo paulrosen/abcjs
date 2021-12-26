@@ -523,14 +523,12 @@ describe("Tablature", function () {
 		[
 			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"G"}]},
 			{"el_type":"bar","type":"bar_thin","endChar":19,"startChar":18},
-			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"E"}]},
-			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"F"}]},
-		],
-		[
+			{"el_type":"note","startChar":19,"endChar":22,"notes":[{"num":2,"str":2,"pitch":"E"}]},
+			{"el_type":"note","startChar":22,"endChar":24,"notes":[{"num":3,"str":2,"pitch":"F"}]},
+			{"el_type":"bar","type":"bar_thin_thick","endChar":26,"startChar":24},
 			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"C"}]},
 			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"D"}]},
-			{"el_type":"bar","type":"bar_thin","endChar":19,"startChar":18}
-		]
+		],
 	]
 
 	it("accidentals", function () {
@@ -619,8 +617,13 @@ describe("Tablature", function () {
 
 	it("lining up", function () {
 		var visualObj = doRender(liningUp, violinParams);
-		console.log(visualObj[0].lines[0].staff[0].voices[0], visualObj[0].lines[0].staff[1].voices)
-		chai.assert.equal(1,0,"TODO")
+		var dots = visualObj[0].lines[0].staff[0].voices[0];
+		var tab = visualObj[0].lines[0].staff[1].voices[0];
+		for (var i = 0; i < dots.length; i++) {
+			var dot = dots[i];
+			var number = tab[i];
+			chai.assert.equal(Math.round(number.abselem.x), Math.round(dot.abselem.x + dot.abselem.w /2),"Number not centered")
+		}
 	});
 
 	it("bar numbers", function () {
