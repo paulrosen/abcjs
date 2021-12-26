@@ -37,7 +37,7 @@ function buildTabName(self, dest) {
   var controller = self.renderer.controller;
   var textSize = controller.getTextSize;
   var tabName = stringSemantics.tabInfos(self.plugin);
-  var size = textSize.calc(tabName, 'infofont', 'text instrumentname');
+  var size = textSize.calc(tabName, 'tablabelfont', 'text instrumentname');
   dest.tabNameInfos = {
     textSize: size,
     name: tabName
