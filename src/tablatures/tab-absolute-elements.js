@@ -160,7 +160,7 @@ function convertToNumber(plugin, pitches, graceNotes) {
   var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
   if (tabPos.error) {
     plugin._super.setError(tabPos.error);
-    return; // give up on error here
+    return tabPos; // give up on error here
   }
   if (tabPos.graces && tabPos.notes) {
     // add graces to last note in notes

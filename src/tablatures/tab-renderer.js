@@ -68,7 +68,7 @@ function TabRenderer(plugin, renderer, line, staffIndex) {
 
 function islastTabInStaff(index, staffGroup) {
   if (staffGroup[index].isTabStaff) {
-    if (index == staffGroup.length - 1) return true;
+    if (index === staffGroup.length - 1) return true;
     if (staffGroup[index + 1].isTabStaff) {
       return false; 
     } else {
@@ -111,7 +111,7 @@ function linkStaffAndTabs(staffs) {
 }
 
 function isMultiVoiceSingleStaff(staffs , parent) {
-  if ( getStaffNumbers(staffs) == 1) {
+  if ( getStaffNumbers(staffs) === 1) {
     if (parent.voices.length > 1) return true;
   }
   return false;
@@ -126,6 +126,8 @@ function getNextTabPos(self,staffGroup) {
   var nbVoices = 0;
   while (inProgress) {
     //for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (!staffGroup[startIndex])
+      return -1;
     if (!staffGroup[startIndex].isTabStaff) {
       nbVoices = staffGroup[startIndex].voices.length; // get number of staff voices
     }
@@ -161,7 +163,7 @@ function checkVoiceKeySig(voices, ii) {
   // on multivoice multistaff only the first voice has key signature
   // folling consecutive do not have one => we should provide the first voice key sig back then
   var elem0 = curVoice.children[0].abcelem;
-  if (elem0.el_type == 'clef') return null;
+  if (elem0.el_type === 'clef') return null;
   return voices[ii-1].children[0];
 }
 
@@ -196,6 +198,8 @@ TabRenderer.prototype.doLayout = function () {
     top: tabTop,
   };
   var nextTabPos = getNextTabPos(this,staffGroup.staffs);
+  if (nextTabPos === -1)
+    return
   staffGroupInfos.parentIndex = nextTabPos - 1;
   staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
