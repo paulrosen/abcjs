@@ -312,6 +312,7 @@ describe("Tablature", function () {
 			{ "el_type": "note", "startChar": 42, "endChar": 43, "notes": [{ "num": 0, "str": 2, "pitch": "D" }] },
 			{ "el_type": "note", "startChar": 43, "endChar": 44, "notes": [{ "num": 3, "str": 0, "pitch": "g" }] },
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 45, "startChar": 44 },
+		],[
 			{ "el_type": "note", "startChar": 50, "endChar": 51, "notes": [{ "num": 5, "str": 2, "pitch": "G" }] },
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 52, "startChar": 51 },
 			{ "el_type": "note", "startChar": 52, "endChar": 53, "notes": [{ "num": 0, "str": 1, "pitch": "A" }] },
@@ -526,8 +527,12 @@ describe("Tablature", function () {
 			{"el_type":"note","startChar":19,"endChar":22,"notes":[{"num":2,"str":2,"pitch":"E"}]},
 			{"el_type":"note","startChar":22,"endChar":24,"notes":[{"num":3,"str":2,"pitch":"F"}]},
 			{"el_type":"bar","type":"bar_thin_thick","endChar":26,"startChar":24},
-			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"C"}]},
-			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":5,"str":2,"pitch":"D"}]},
+		],
+		[
+			{"el_type":"note","startChar":12,"endChar":16,"notes":[{"num":5,"str":3,"pitch":"C"}]},
+			{"el_type":"note","startChar":16,"endChar":18,"notes":[{"num":0,"str":2,"pitch":"D"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":19,"startChar":18},
+			{"el_type":"bar","type":"bar_thin_thick","endChar":26,"startChar":24}
 		],
 	]
 
@@ -714,18 +719,20 @@ function doStaffTest(abc, expected, tabParams, params, callback) {
 			chai.assert(false,"unexpected null value getting tab staff");
 		}
 		while (tab != null) {
-			var thisVoice =  tab[0]
-			for (var j = 0; j < thisVoice.length; j++) {
-				var el = Object.assign({}, thisVoice[j]);
-				if (callback)
-					callback(el, i, j)
-				delete el.abselem
-				var msg = "\nrcv: " + JSON.stringify(el, replacer) + "\n" +
-					"exp: " + JSON.stringify(expected[i+staffNumber][j]) + "\n";
-				chai.assert.deepStrictEqual(el, expected[i+staffNumber][j], msg);
+			for (var v = 0; v < tab.length; v++) {
+				var thisVoice = tab[v]
+				for (var j = 0; j < thisVoice.length; j++) {
+					var el = Object.assign({}, thisVoice[j]);
+					if (callback)
+						callback(el, i, j)
+					delete el.abselem
+					var msg = "\nrcv: " + JSON.stringify(el, replacer) + "\n" +
+						"exp: " + JSON.stringify(expected[i + staffNumber][j]) + "\n";
+					chai.assert.deepStrictEqual(el, expected[i + staffNumber][j], msg);
+				}
+				chai.assert.equal(thisVoice.length, expected[v].length, "line " + i + " length mismatch");
+				staffNumber++;
 			}
-			chai.assert.equal(thisVoice.length, expected[i].length, "line " + i + " length mismatch");
-			staffNumber++;
 			tab = getTabStaff(line.staff, staffNumber);
 		}
 	}
