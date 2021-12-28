@@ -545,7 +545,101 @@ describe("Tablature", function () {
 		"K: clef=none\n" +
 		"C |\n"
 
-		it("accidentals", function () {
+	var kitchenSink = "X:1\n" +
+		"M:4/4\n" +
+		"L:1/16\n" +
+		"%%titlefont Times 22.0\n" +
+		"%%partsfont box\n" +
+		"%%barnumbers 1\n" +
+		"T: all-element-types\n" +
+		"T: Everything should be selectable\n" +
+		"C: public domain\n" +
+		"R: Hit it\n" +
+		"A: Yours Truly\n" +
+		"S: My own testing\n" +
+		"W: Now is the time for all good men\n" +
+		"W:\n" +
+		"W: To come to the aid of their party.\n" +
+		"H: This shows every type of thing that can possibly be drawn.\n" +
+		"H:\n" +
+		"H: And two lines of history!\n" +
+		"Q: \"Easy Swing\" 1/4=140\n" +
+		"P: AABB\n" +
+		"%%staves {(PianoRightHand extra) (PianoLeftHand)}\n" +
+		"V:PianoRightHand clef=treble+8 name=RH\n" +
+		"V:PianoLeftHand clef=bass name=LH\n" +
+		"K:Bb\n" +
+		"P:A\n" +
+		"%%text there is some random text\n" +
+		"%%sep 0.4cm 0.4cm 6cm\n" +
+		"[V: PianoRightHand] !mp![b8B8d8] f3g !//!f4|!<(![d12b12] !<)![b4g4]|z4  b^f_df (3B2d2c2 B4|1[Q:\"left\" 1/4=170\"right\"]!f![c4f4] z4 [b8d8]| (3[G8e8] Tu[c8f8] G8|]\n" +
+		"w:Strang- ers\n" +
+		"[V: extra] B,16 | \"Bb\"{C}B,4 ({^CD}B,4 =B,8) |\n" +
+		"T:Inserted subtitle\n" +
+		"[V: PianoLeftHand] B,6 .D2 !arpeggio![F,8F8A,8]|(B,2 B,,2 C,12)|\"^annotation\"F,16|[F,16D,16]|Z2|]\n"
+
+	var octaveClef = "X: 1\n" +
+		"K: C treble-8\n" +
+		" G, G | g g' |\n"
+
+	var octaveClefOutput = [
+		[
+
+		]
+	]
+
+	var unusualFontSize = "X:1\n" +
+		"%%stretchlast\n" +
+		"%%gchordfont Arial 10 box\n" +
+		"L:1/4\n" +
+		"K:C\n" +
+		"|1\"Gbmaj7\"DEGB:|\n" +
+		"%%gchordfont Arial 20 box\n" +
+		"|1\"Gbmaj7\"DEGB:|\n" +
+		"%%gchordfont Arial 40 box\n" +
+		"|1\"Gbmaj7\"DEGB:|\n" +
+		"%%gchordfont Arial 80 box\n" +
+		"|1\"Gbmaj7\"DEGB:|\n" +
+		"%%gchordfont Arial 130 box\n" +
+		"|1\"Gbmaj7\"DEGB:|\n"
+
+	var unusualFontSizeOutput = [
+		[
+
+		]
+	]
+
+	var weirdNoteConstruction = "X:1\n" +
+		"K:C\n" +
+		"a, B'"
+
+	var weirdNoteConstructionOutput = [
+		[
+			{"el_type":"note","startChar":8,"endChar":10,"notes":[{"num":0,"str":1,"pitch":"A"}]},
+			{"el_type":"note","startChar":10,"endChar":11,"notes":[{"num":7,"str":0,"pitch":"b"}]}
+		]
+	]
+
+	var staffPlacement = "X:1\n" +
+		"%%score (1 | 2)\n" +
+		"L:1/4\n" +
+		"M:4/4\n" +
+		"K:D\n" +
+		"V:1\n" +
+		"A G/F/ G A3/4 A/4 |\n" +
+		"[|]1 F z z A :|\n" +
+		"[|]2 F z A d [|] |\n" +
+		"V:2\n" +
+		"F E/D/ E F3/4 F/4 |\n" +
+		"[|]1 D z z A :|\n" +
+		"[|]2 D z F A [|] |\n"
+
+	var staffPlacementOutput = [
+		[
+
+		]
+	]
+	it("accidentals", function () {
 		doStaffTest(violinAllNotes, violinAllNotesOutput, violinParams);
 	});
 
@@ -607,6 +701,22 @@ describe("Tablature", function () {
 
 	it("overlay", function () {
 		doStaffTest(overlay, overlayOutput, violinParams);
+	});
+
+	it("octave clef", function () {
+		doStaffTest(octaveClef, octaveClefOutput, violinParams);
+	});
+
+	it("font-size", function () {
+		doStaffTest(unusualFontSize, unusualFontSizeOutput, violinParams);
+	});
+
+	it("weird note construction", function () {
+		doStaffTest(weirdNoteConstruction, weirdNoteConstructionOutput, violinParams);
+	});
+
+	it("staff-placement", function () {
+		doStaffTest(staffPlacement, staffPlacementOutput, violinParams);
 	});
 
 	it("fonts", function () {
@@ -719,6 +829,12 @@ describe("Tablature", function () {
 		chai.assert(false, "TODO")
 	})
 
+	it("kitchen sink", function() {
+		var visualObj = doRender(kitchenSink, violinGuitarParams)
+		// TODO-PER: need to finish test
+		chai.assert(false, "TODO")
+	})
+
 	it("percussion clef", function() {
 		var visualObj = doRender(percussionClef, violinParams)
 		chai.assert(visualObj[0].lines[0].staff.length === 1, "Should skip percussion clef")
@@ -783,82 +899,3 @@ function doStaffTest(abc, expected, tabParams, params, callback) {
 	}
 	chai.assert.equal((lineLength-1) +staffNumber, expected.length, "different numbers of lines");
 }
-
-// Possible future tests:
-
-// should the notes be considered an octave lower than written?
-// X: 1
-// T: TEST: 8va test 1
-// K: D treble-8
-// |: G,A,B,C DEFG | ABcd efga | bc'ba gfed | cBAG FEDC :|
-
-// vertical spacing way off
-//X:1
-// M:4/4
-// L:1/16
-// %%titlefont Times 22.0
-// %%partsfont box
-// %%barnumbers 1
-// T: all-element-types
-// T: Everything should be selectable
-// C: public domain
-// R: Hit it
-// A: Yours Truly
-// S: My own testing
-// W: Now is the time for all good men
-// W:
-// W: To come to the aid of their party.
-// H: This shows every type of thing that can possibly be drawn.
-// H:
-// H: And two lines of history!
-// Q: "Easy Swing" 1/4=140
-// P: AABB
-// %%staves {(PianoRightHand extra) (PianoLeftHand)}
-// V:PianoRightHand clef=treble+8 name=RH
-// V:PianoLeftHand clef=bass name=LH
-// K:Bb
-// P:A
-// %%text there is some random text
-// %%sep 0.4cm 0.4cm 6cm
-// [V: PianoRightHand] !mp![b8B8d8] f3g !//!f4|!<(![d12b12] !<)![b4g4]|z4  b^f_df (3B2d2c2 B4|1[Q:"left" 1/4=170"right"]!f![c4f4] z4 [b8d8]| (3[G8e8] Tu[c8f8] G8|]
-// w:Strang- ers
-// [V: extra] B,16 | "Bb"{C}B,4 ({^CD}B,4 =B,8) |
-// T:Inserted subtitle
-// [V: PianoLeftHand] B,6 .D2 !arpeggio![F,8F8A,8]|(B,2 B,,2 C,12)|"^annotation"F,16|[F,16D,16]|Z2|]
-
-// vertical placement
-//X:1
-// %%stretchlast
-// %%gchordfont Arial 10 box
-// T:box
-// L:1/4
-// K:C
-// |1"Gbmaj7"DEGB:|
-// %%gchordfont Arial 20 box
-// |1"Gbmaj7"DEGB:|
-// %%gchordfont Arial 40 box
-// |1"Gbmaj7"DEGB:|
-// %%gchordfont Arial 80 box
-// |1"Gbmaj7"DEGB:|
-// %%gchordfont Arial 130 box
-// |1"Gbmaj7"DEGB:|
-
-// Weird constructions
-// for instance: a,     B'
-
-// placement of staves
-//X:1
-// T:first-ending-with-two-voices
-// %%score (1 | 2)
-// L:1/4
-// M:4/4
-// K:D
-// V:1
-//  A G/F/ G A3/4 A/4 |
-//  [|]1 F z z A :|
-//  [|]2 F z A d [|] |
-// V:2
-//  F E/D/ E F3/4 F/4 |
-//  [|]1 D z z A :|
-//  [|]2 D z F A [|] |
-//
