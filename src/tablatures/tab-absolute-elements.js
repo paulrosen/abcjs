@@ -199,7 +199,9 @@ TabAbsoluteElements.prototype.build = function (plugin,
   var defNote = null;
   if (source.children[0].abcelem.el_type != 'clef') {
     // keysig missing => provide one for tabs
-    source.children.splice(0,0,keySig);
+    if (keySig != 'none') {
+      source.children.splice(0, 0, keySig);
+    }  
   }
   for (var ii = 0; ii < source.children.length; ii++) {
     var absChild = source.children[ii];
@@ -208,7 +210,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
     // if (absChild.children.length > 0) {
     //   relX = absChild.children[0].x;
     // }
-    if (absChild.isClef) {
+    if ( (absChild.isClef) ) {
       dest.children.push(buildTabAbsolute(plugin, absX, relX));
     }
     switch (absChild.type) {
@@ -232,11 +234,11 @@ TabAbsoluteElements.prototype.build = function (plugin,
         }
         var cloned = cloneAbsoluteAndRelatives(absChild, plugin);
         if (cloned.abcelem.barNumber) {
-          delete cloned.abcelem.barNumber
+          delete cloned.abcelem.barNumber;
           for (var bn = 0; bn < cloned.children.length; bn++) {
             if (cloned.children[bn].type === "barNumber" ) {
-              cloned.children.splice(bn, 1)
-              break
+              cloned.children.splice(bn, 1);
+              break;
             }
           }
         }
@@ -265,7 +267,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
         break;
       case 'note':
         var abs = cloneAbsolute(absChild);
-        abs.x = absChild.heads[0].x + absChild.heads[0].w/2 // center the number
+        abs.x = absChild.heads[0].x + absChild.heads[0].w / 2; // center the number
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.abcelem.gracenotes;
@@ -297,7 +299,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
           var tabNoteRelative = buildRelativeTabNote(plugin, abs.x+absChild.heads[ll].dx, defNote, curNote, false);
           abs.children.push(tabNoteRelative);
         }
-        defNote.abselem = abs
+        defNote.abselem = abs;
         tabVoice.push(defNote);
         dest.children.push(abs);
         break;

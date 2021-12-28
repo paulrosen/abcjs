@@ -164,6 +164,10 @@ function checkVoiceKeySig(voices, ii) {
   // folling consecutive do not have one => we should provide the first voice key sig back then
   var elem0 = curVoice.children[0].abcelem;
   if (elem0.el_type === 'clef') return null;
+  if (ii == 0) {
+    // not found => clef=none case
+    return 'none';
+  }
   return voices[ii-1].children[0];
 }
 
@@ -199,7 +203,7 @@ TabRenderer.prototype.doLayout = function () {
   };
   var nextTabPos = getNextTabPos(this,staffGroup.staffs);
   if (nextTabPos === -1)
-    return
+    return;
   staffGroupInfos.parentIndex = nextTabPos - 1;
   staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
@@ -219,7 +223,7 @@ TabRenderer.prototype.doLayout = function () {
     tabVoice.staff = staffGroupInfos;
     voices.splice(voices.length, 0, tabVoice);
     var keySig = checkVoiceKeySig(voices, ii + this.staffIndex);
-    this.tabStaff.voices[ii] = []
+    this.tabStaff.voices[ii] = [];
     this.absolutes.build(this.plugin, voices, this.tabStaff.voices[ii], ii , this.staffIndex ,keySig);
   }
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
