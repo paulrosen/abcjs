@@ -431,19 +431,24 @@ describe("Tablature", function () {
 
 	var liningUp = "X: 1\n" +
 		"K:C\n" +
-		"G>^FG>_A G2 D2|\n";
+		'G>^FG>_A G2 "a very very long chord"D2| [CD] {fe}d|\n';
 
-	var liningUpOutput = [
-		[
-
-		]
-	]
+	var bracketPlacement = "X:5\n" +
+		"L:1/8\n" +
+		"%%staves {RH LH}\n" +
+		"V: RH clef=treble\n" +
+		"V: LH clef=bass\n" +
+		"K:C\n" +
+		"[V: RH]\n" +
+		"|: c\n" +
+		"[V: LH]\n" +
+		"|: G,\n"
 
 	var barNumbers = "X:1\n" +
 		"%% barnumbers 1\n" +
 		"K:C \n" +
 		"F8|G8| \n" +
-		"F8|G8|]"
+		"F8|!coda!G8|]"
 
 	var barNumbersOutput = [
 		[
@@ -455,8 +460,8 @@ describe("Tablature", function () {
 		[
 			{"el_type":"note","startChar":33,"endChar":35,"notes":[{"num":3,"str":2,"pitch":"F"}]},
 			{"el_type":"bar","type":"bar_thin","endChar":36,"startChar":35},
-			{"el_type":"note","startChar":36,"endChar":38,"notes":[{"num":5,"str":2,"pitch":"G"}]},
-			{"el_type":"bar","type":"bar_thin_thick","endChar":40,"startChar":38},
+			{"el_type":"note","startChar":36,"endChar":44,"notes":[{"num":5,"str":2,"pitch":"G"}]},
+			{"el_type":"bar","type":"bar_thin_thick","endChar":46,"startChar":44},
 		]
 	]
 
@@ -536,7 +541,11 @@ describe("Tablature", function () {
 		],
 	]
 
-	it("accidentals", function () {
+	var clefNone = "X: 1\n" +
+		"K: clef=none\n" +
+		"C |\n"
+
+		it("accidentals", function () {
 		doStaffTest(violinAllNotes, violinAllNotesOutput, violinParams);
 	});
 
@@ -622,12 +631,37 @@ describe("Tablature", function () {
 
 	it("lining up", function () {
 		var visualObj = doRender(liningUp, violinParams);
+		var noteheads = document.querySelectorAll('path[data-name="G"],path[data-name="^F"],path[data-name="_A"],path[data-name="D"],path[data-name="C"],path[data-name="f"],path[data-name="e"],path[data-name="d"]')
+		var i;
+		for (i = 0; i < noteheads.length; i++) {
+			var dim = noteheads[i].getBBox()
+			console.log(dim)
+			var guide = document.createElementNS("http://www.w3.org/2000/svg", "line");
+			guide.setAttribute("class", "abcjs-cursor");
+			guide.setAttribute('x1', dim.x);
+			guide.setAttribute('y1', dim.y);
+			guide.setAttribute('x2', dim.x);
+			guide.setAttribute('y2', dim.y+100);
+			guide.setAttribute('stroke', "red");
+			var svg = document.querySelector("#paper svg");
+			svg.appendChild(guide);
+			guide = document.createElementNS("http://www.w3.org/2000/svg", "line");
+			guide.setAttribute("class", "abcjs-cursor");
+			guide.setAttribute('x1', dim.x+dim.width);
+			guide.setAttribute('y1', dim.y);
+			guide.setAttribute('x2', dim.x+dim.width);
+			guide.setAttribute('y2', dim.y+100);
+			guide.setAttribute('stroke', "red");
+			svg.appendChild(guide);
+		}
 		var dots = visualObj[0].lines[0].staff[0].voices[0];
 		var tab = visualObj[0].lines[0].staff[1].voices[0];
-		for (var i = 0; i < dots.length; i++) {
-			var dot = dots[i];
-			var number = tab[i];
-			chai.assert.equal(Math.round(number.abselem.x), Math.round(dot.abselem.x + dot.abselem.w /2),"Number not centered")
+		for (i = 0; i < dots.length; i++) {
+			if (dots.el_type === "note") {
+				var dot = dots[i];
+				var number = tab[i];
+				chai.assert.equal(Math.round(number.abselem.x), Math.round(dot.abselem.heads[0].x + dot.abselem.heads[0].w / 2), "Number not centered")
+			}
 		}
 	});
 
@@ -672,6 +706,17 @@ describe("Tablature", function () {
 	it("crash chord", function() {
 		// Just see it not crash
 		var visualObj = doRender(crashChord, violinParams)
+	})
+
+	it("crash-clef", function() {
+		// Just see it not crash
+		var visualObj = doRender(clefNone, violinParams)
+	})
+
+	it("bracket", function() {
+		var visualObj = doRender(bracketPlacement, violinGuitarParams)
+		// TODO-PER: need to finish test
+		chai.assert(false, "TODO")
 	})
 
 	it("percussion clef", function() {
@@ -738,3 +783,82 @@ function doStaffTest(abc, expected, tabParams, params, callback) {
 	}
 	chai.assert.equal((lineLength-1) +staffNumber, expected.length, "different numbers of lines");
 }
+
+// Possible future tests:
+
+// should the notes be considered an octave lower than written?
+// X: 1
+// T: TEST: 8va test 1
+// K: D treble-8
+// |: G,A,B,C DEFG | ABcd efga | bc'ba gfed | cBAG FEDC :|
+
+// vertical spacing way off
+//X:1
+// M:4/4
+// L:1/16
+// %%titlefont Times 22.0
+// %%partsfont box
+// %%barnumbers 1
+// T: all-element-types
+// T: Everything should be selectable
+// C: public domain
+// R: Hit it
+// A: Yours Truly
+// S: My own testing
+// W: Now is the time for all good men
+// W:
+// W: To come to the aid of their party.
+// H: This shows every type of thing that can possibly be drawn.
+// H:
+// H: And two lines of history!
+// Q: "Easy Swing" 1/4=140
+// P: AABB
+// %%staves {(PianoRightHand extra) (PianoLeftHand)}
+// V:PianoRightHand clef=treble+8 name=RH
+// V:PianoLeftHand clef=bass name=LH
+// K:Bb
+// P:A
+// %%text there is some random text
+// %%sep 0.4cm 0.4cm 6cm
+// [V: PianoRightHand] !mp![b8B8d8] f3g !//!f4|!<(![d12b12] !<)![b4g4]|z4  b^f_df (3B2d2c2 B4|1[Q:"left" 1/4=170"right"]!f![c4f4] z4 [b8d8]| (3[G8e8] Tu[c8f8] G8|]
+// w:Strang- ers
+// [V: extra] B,16 | "Bb"{C}B,4 ({^CD}B,4 =B,8) |
+// T:Inserted subtitle
+// [V: PianoLeftHand] B,6 .D2 !arpeggio![F,8F8A,8]|(B,2 B,,2 C,12)|"^annotation"F,16|[F,16D,16]|Z2|]
+
+// vertical placement
+//X:1
+// %%stretchlast
+// %%gchordfont Arial 10 box
+// T:box
+// L:1/4
+// K:C
+// |1"Gbmaj7"DEGB:|
+// %%gchordfont Arial 20 box
+// |1"Gbmaj7"DEGB:|
+// %%gchordfont Arial 40 box
+// |1"Gbmaj7"DEGB:|
+// %%gchordfont Arial 80 box
+// |1"Gbmaj7"DEGB:|
+// %%gchordfont Arial 130 box
+// |1"Gbmaj7"DEGB:|
+
+// Weird constructions
+// for instance: a,     B'
+
+// placement of staves
+//X:1
+// T:first-ending-with-two-voices
+// %%score (1 | 2)
+// L:1/4
+// M:4/4
+// K:D
+// V:1
+//  A G/F/ G A3/4 A/4 |
+//  [|]1 F z z A :|
+//  [|]2 F z A d [|] |
+// V:2
+//  F E/D/ E F3/4 F/4 |
+//  [|]1 D z z A :|
+//  [|]2 D z F A [|] |
+//

@@ -267,7 +267,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
         break;
       case 'note':
         var abs = cloneAbsolute(absChild);
-        abs.x += abs.w/2; // center the number
+        abs.x = absChild.heads[0].x + absChild.heads[0].w / 2; // center the number
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.abcelem.gracenotes;
@@ -296,7 +296,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
               tabVoice.push(defGrace);
             }
           }
-          var tabNoteRelative = buildRelativeTabNote(plugin, abs.x, defNote, curNote, false);
+          var tabNoteRelative = buildRelativeTabNote(plugin, abs.x+absChild.heads[ll].dx, defNote, curNote, false);
           abs.children.push(tabNoteRelative);
         }
         defNote.abselem = abs;

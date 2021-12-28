@@ -17894,7 +17894,7 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
 
       case 'note':
         var abs = cloneAbsolute(absChild);
-        abs.x += abs.w / 2; // center the number
+        abs.x = absChild.heads[0].x + absChild.heads[0].w / 2; // center the number
 
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
@@ -17940,7 +17940,7 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
             }
           }
 
-          var tabNoteRelative = buildRelativeTabNote(plugin, abs.x, defNote, curNote, false);
+          var tabNoteRelative = buildRelativeTabNote(plugin, abs.x + absChild.heads[ll].dx, defNote, curNote, false);
           abs.children.push(tabNoteRelative);
         }
 
