@@ -20,12 +20,15 @@
   <div class="container">
     <h2>Guitar and Editor</h2>
     <textarea id="abc" cols="80" rows="12" spellcheck="false">
-%%staffwidth 300
-X:1
-T:clef: zero stafflines
-K: clef=treble stafflines=0
-abc :|
-</textarea>
+X: 1
+T: bug-breaking-beam
+C: Gustav Mahler (1860-1911)
+R: Langsam (Adagio)
+M: 4/4
+L: 1/4
+N:https://music.stackexchange.com/questions/54341/notation-problems-in-abcjs
+K: Bm
+[F,^G,B,D]/z//[F,G,B,D]///[F,G,B,D]/// [F,G,B,D]/z//[F,G,B,D]///[F,G,B,D]/// !///![F,G,B,D]2 |    </textarea>
     <div id="warnings"></div>
     <hr>
     <div id="paper1"></div>
@@ -47,9 +50,9 @@ abc :|
         tablature: 
           [
             {
-              instrument: 'violin',
-              label: 'Violin I',
-              tuning: ['G,', 'D', 'A', 'e']
+              instrument: 'guitar',
+              label: 'Guitar I',
+              tuning: ['E,', 'A,', 'D', 'G' ,'B' , 'e']
             }
           ],
       }

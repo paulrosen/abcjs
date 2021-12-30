@@ -16754,9 +16754,10 @@ function sameString(self, chord) {
       // same String
       // => change lower pos 
       if (curPos.str == self.strings.length - 1) {
-        return {
-          error: 'Invalid tab Chord position for instrument'
-        };
+        // Invalid tab Chord position for instrument
+        curPos.num = "?";
+        nextPos.num = "?";
+        return;
       } // change lower pitch on lowest string
 
 
@@ -16786,12 +16787,7 @@ function handleChordNotes(self, notes) {
     retNotes.push(curPos);
   }
 
-  var error = sameString(self, retNotes);
-
-  if (error) {
-    return error;
-  }
-
+  sameString(self, retNotes);
   return retNotes;
 }
 
@@ -17978,6 +17974,8 @@ TabCommon.prototype.setError = function (error) {
   var tune = this.tune;
 
   if (error) {
+    console.log("tab error set :" + error);
+    this.error = error;
     this.inError = true;
 
     if (tune.warnings) {
