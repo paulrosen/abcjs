@@ -18193,6 +18193,19 @@ TabRenderer.prototype.doLayout = function () {
   var staffs = this.line.staff;
 
   if (staffs) {
+    // give up on staffline=0 in key 
+    var firstStaff = staffs[0];
+
+    if (firstStaff) {
+      if (firstStaff.clef) {
+        if (firstStaff.clef.stafflines == 0) {
+          this.plugin._super.setError("No tablatures when stafflines=0");
+
+          return;
+        }
+      }
+    }
+
     staffs.splice(staffs.length, 0, this.tabStaff);
   }
 
