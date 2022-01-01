@@ -248,6 +248,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
 	this.selectables = ret.selectables;
 
 	setupSelection(this);
+	spacing.STEP = spacing.DEFAULT_STEP
 };
 
 EngraverController.prototype.getDim = function(historyEl) {

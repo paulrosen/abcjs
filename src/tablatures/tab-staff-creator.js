@@ -4,9 +4,6 @@ function makeTabClef(sourceClef, label, stafflines) {
 		type: "TAB",
 		verticalPos: 0,
 		clefPos: stafflines+1, // this is centered because each line is two pitches, when counting the entire size it is stafflines lines but stafflines-1 spaces, and 0 is two pitches below the first line.
-		// height = stafflines*2-1, bottom = 2, top = height + 2
-		// center = (top - bottom) / 2 + bottom
-		// if stafflines = 4 then (9 - 2) / 2 + 2
 		el_type: "clef",
 		stafflines: stafflines,
 	}
