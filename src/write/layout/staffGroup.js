@@ -1,21 +1,21 @@
 var layoutVoiceElements = require('./VoiceElements');
 
-function checkLastBarX(voices) {
-	var maxX = 0;
-	for (var i = 0; i < voices.length; i++) {
-		var curVoice = voices[i];
-		var lastChild = curVoice.children.length - 1;
-		var maxChild = curVoice.children[lastChild];
-		if (maxChild.abcelem.el_type == 'bar') {
-			var barX = maxChild.children[0].x;
-			if (barX > maxX) {
-				maxX = barX;
-			} else {
-				maxChild.children[0].x = maxX;
-			}
-		}
-	}
-}
+//function checkLastBarX(voices) {
+//	var maxX = 0;
+//	for (var i = 0; i < voices.length; i++) {
+//		var curVoice = voices[i];
+//		var lastChild = curVoice.children.length - 1;
+//		var maxChild = curVoice.children[lastChild];
+//		if (maxChild.abcelem.el_type == 'bar') {
+//			var barX = maxChild.children[0].x;
+//			if (barX > maxX) {
+//				maxX = barX;
+//			} else {
+//				maxChild.children[0].x = maxX;
+//			}
+//		}
+//	}
+//}
 
 var layoutStaffGroup = function(spacing, renderer, debug, staffGroup, leftEdge) {
 	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
@@ -113,7 +113,7 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup, leftEdge) 
 	}
 
 	// adjust lastBar when needed (multi staves)
-	checkLastBarX(staffGroup.voices);
+	//checkLastBarX(staffGroup.voices);
 	//console.log("greatest remaining",spacingunit,x);
 	spacingunits+=spacingunit;
 	staffGroup.setWidth(x);

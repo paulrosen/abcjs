@@ -6,7 +6,8 @@ var printDebugBox = require('./debug-box');
 var printStem = require('./print-stem');
 var nonMusic = require('./non-music');
 
-function drawStaffGroup(renderer, params, selectables,lineNumber) {
+function drawStaffGroup(renderer, params, selectables) {
+//function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	// We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
 	// All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
 	// renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
@@ -17,13 +18,17 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	// An invisible marker is useful to be able to find where each system starts.
 	addInvisibleMarker(renderer, "abcjs-top-of-system");
 
-	var startY = renderer.y; // So that it can be restored after we're done.
-	// Set the absolute Y position for each staff here, so the voice drawing below can just use if.
+	var startY = renderer.y; // If there is more than one voice on a staff, they all need to start at the same place, so this keeps track of it.
 	for (var j = 0; j < params.staffs.length; j++) {
 		var staff1 = params.staffs[j];
+		if (staff1.stepSize)
+			spacing.STEP = staff1.stepSize
+		else
+			spacing.STEP = spacing.DEFAULT_STEP
+
 		//renderer.printHorizontalLine(50, renderer.y, "start");
 		renderer.moveY(spacing.STEP, staff1.top);
-		staff1.absoluteY = renderer.y;
+		staff1.absoluteY = renderer.y; // This is the position of the bottom line (for piano brace)
 		if (renderer.showDebug) {
 			if (renderer.showDebug.indexOf("box") >= 0) {
 				boxAllElements(renderer, params.voices, staff1.voices);
@@ -53,7 +58,7 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 				debugPrintGridItem(staff1, 'volumeHeightBelow');
 			}
 		}
-		renderer.moveY(spacing.STEP, -staff1.bottom);
+		renderer.moveY(spacing.STEP, -staff1.bottom); // Y is now set to the bottom of the staff (including anything below the staff)
 		if (renderer.showDebug) {
 			if (renderer.showDebug.indexOf("grid") >= 0) {
 				renderer.paper.dottedLine({
@@ -71,9 +76,13 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 
 	var linePitch = 2;
 	var bartop = 0;
-	for (var i=0;i<params.voices.length;i++) {
+	for (var i=0;i<params.voices.length;i++) { // for each voice - the voice could be a new staff or on an existing one (those are marked as "duplicate"
 		var staff = params.voices[i].staff;
-		var tabName = params.voices[i].tabNameInfos;
+		if (staff.stepSize)
+			spacing.STEP = staff.stepSize
+		else
+			spacing.STEP = spacing.DEFAULT_STEP
+		//var tabName = params.voices[i].tabNameInfos;
 		renderer.y = staff.absoluteY ;
 		renderer.controller.classes.incrVoice();
 		//renderer.y = staff.y;
@@ -92,10 +101,10 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 				staff.bottomLine = bottomLine;
 				staff.topLine = lines[0];
 				// rework bartop when tabs are present with current staff
-				if (staff.hasTab) {
-					// do not link to staff above  (ugly looking)
-					bartop = staff.topLine;
-				}
+//				if (staff.hasTab) {
+//					// do not link to staff above  (ugly looking)
+//					bartop = staff.topLine;
+//				}
 				if (staff.hasStaff) {
 					// this is a tab
 					bartop = staff.hasStaff.topLine;
@@ -112,21 +121,23 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 			zero: renderer.y,
 			height: params.height*spacing.STEP
 		});
-		var tabNameHeight = 0; 
-		if (tabName) {
-			// print tab infos on staffBottom
-			var r = { rows: [] };
-			r.rows.push({ absmove: bottomLine + 2 });
-			var leftMargin = 8;
-			r.rows.push({ left: params.startx+leftMargin, text: tabName.name, font: 'tablabelfont', klass: 'text instrument-name', anchor: 'start' });
-			r.rows.push({ move: tabName.textSize.height });
-			nonMusic(renderer, r);
-			tabNameHeight = tabName.textSize.height;
-		}
+//		var tabNameHeight = 0;
+		// if (tabName) {
+		// 	// print tab infos on staffBottom
+		// 	var r = { rows: [] };
+		// 	r.rows.push({ absmove: bottomLine + 2 });
+		// 	var leftMargin = 8;
+		// 	r.rows.push({ left: params.startx+leftMargin, text: tabName.name, font: 'tablabelfont', klass: 'text instrument-name', anchor: 'start' });
+		// 	r.rows.push({ move: tabName.textSize.height });
+		// 	nonMusic(renderer, r);
+		// 	tabNameHeight = tabName.textSize.height;
+		// }
 
 		renderer.controller.classes.newMeasure();
 		if (!params.voices[i].duplicate) {
-				bartop = renderer.calcY(2 + tabNameHeight); // This connects the bar lines between two different staves.
+//				bartop = renderer.calcY(2 + tabNameHeight); // This connects the bar lines between two different staves.
+   			bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
+
 //			if (staff.bottom < 0)
 //				renderer.moveY(spacing.STEP, -staff.bottom);
 		}
@@ -140,7 +151,7 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 		bottomLine = params.staffs[staffSize - 1].bottomLine;
 		printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
 	}
-	renderer.y = startY;
+	//renderer.y = startY;
 
 	function debugPrintGridItem(staff, key) {
 		var colors = [ "rgb(207,27,36)", "rgb(168,214,80)", "rgb(110,161,224)", "rgb(191,119,218)", "rgb(195,30,151)",

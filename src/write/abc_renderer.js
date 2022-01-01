@@ -13,7 +13,6 @@ var Renderer = function(paper) {
   this.paper = new Svg(paper);
   this.controller = null;
 
-	this.space = 3*spacing.SPACE;
   this.padding = {}; // renderer's padding is managed by the controller
 	this.reset();
 };
@@ -161,10 +160,6 @@ Renderer.prototype.setVerticalSpace = function(formatting) {
 
 
 /**
- * Leave space before printing a staff system
- */
-
-/**
  * Calculates the y for a given pitch value (relative to the stave the renderer is currently printing)
  * @param {number} ofs pitch value (bottom C on a G clef = 0, D=1, etc.)
  */
@@ -177,8 +172,8 @@ Renderer.prototype.moveY = function (em, numLines) {
 	this.y += em * numLines;
 };
 
-Renderer.prototype.absolutemoveY = function (y) {
-	this.y = y;
-};
+// Renderer.prototype.absolutemoveY = function (y) {
+// 	this.y = y;
+// };
 
 module.exports = Renderer;

@@ -21,7 +21,7 @@ var layout = function (renderer, abctune, width, space) {
 			abcLine = abctune.lines[i];
 			if (abcLine.staffGroup && abcLine.staffGroup.voices) {
 				for (var j = 0; j < abcLine.staffGroup.voices.length; j++)
-					layoutVoice(abcLine.staffGroup.voices[j]);
+					layoutVoice(abcLine.staffGroup.voices[j], abcLine.staffGroup.staffs[j].stepSize);
 				setUpperAndLowerElements(renderer, abcLine.staffGroup);
 			}
 		}

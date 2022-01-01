@@ -4,6 +4,7 @@ var TabCommon = require('../../tab-common');
 var TabRenderer = require('../../tab-renderer');
 var ViolinPatterns = require('./violin-patterns');
 var setViolinFonts = require('./violin-fonts');
+const addTab = require("../../tab-staff-creator");
 
 
 /**
@@ -27,14 +28,26 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
   this.semantics = semantics;
 };
 
-Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this._super.inError) return;
-  if (this.tablature.bypass(line)) return;
-  console.log('ViolinTab plugin rendered');
-  setViolinFonts(this.abcTune);
-  var rndrer = new TabRenderer(this, renderer, line, staffIndex);
-  rndrer.doLayout();
+Plugin.prototype.numberCreator = function(grace, pitch, element, voice) {
+  console.log(grace, pitch, element, voice)
+  return {
+    string: Math.round(Math.random() * 3),
+    number: Math.round(Math.random() * 5 + 8),
+  }
+}
+
+Plugin.prototype.createLine = function (staff, tabDef, spacing) {
+  return addTab(staff, tabDef, spacing, this.numberCreator)
 };
+
+// Plugin.prototype.render = function (renderer, line, staffIndex) {
+//   if (this._super.inError) return;
+//   if (this.tablature.bypass(line)) return;
+//   console.log('ViolinTab plugin rendered');
+//   setViolinFonts(this.abcTune);
+//   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
+//   rndrer.doLayout();
+// };
 
 function Plugin() {}
 

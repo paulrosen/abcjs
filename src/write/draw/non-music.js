@@ -4,9 +4,10 @@ var renderText = require('./text');
 function nonMusic(renderer, obj, selectables) {
 	for (var i = 0; i < obj.rows.length; i++) {
 		var row = obj.rows[i];
-		if (row.absmove) {
-			renderer.absolutemoveY(row.absmove);
-		} else if (row.move) {
+//		if (row.absmove) {
+//			renderer.absolutemoveY(row.absmove);
+//		} else if (row.move) {
+		if (row.move) {
 			renderer.moveY(row.move);
 		} else if (row.text) {
 			var x = row.left ? row.left : 0;

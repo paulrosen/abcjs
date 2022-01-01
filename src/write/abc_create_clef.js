@@ -3,8 +3,9 @@
 var AbsoluteElement = require('./abc_absolute_element');
 var glyphs = require('./abc_glyphs');
 var RelativeElement = require('./abc_relative_element');
+const spacing = require("./abc_spacing");
 
-var createClef = function(elem, tuneNumber) {
+var createClef = function(elem, tuneNumber, getTextSize) {
 		var clef;
 		var octave = 0;
 		elem.el_type = "clef";
@@ -25,7 +26,13 @@ var createClef = function(elem, tuneNumber) {
 			case 'alto-8': clef="clefs.C"; octave = -1; break;
 			case 'none': return null;
 			case 'perc': clef="clefs.perc"; break;
+			case 'TAB': clef="tab.tiny"; break;
 			default: abselem.addFixed(new RelativeElement("clef="+elem.type, 0, 0, undefined, {type:"debug"}));
+		}
+		if (elem.label) {
+			var dim = getTextSize.calc(elem.label, 'tablabelfont', "tab-label");
+			abselem.addFixed(new RelativeElement(elem.label, 10, 0, 1.5, {type:"label"}));
+			abselem.bottom -= dim.height / spacing.STEP
 		}
 		// if (elem.verticalPos) {
 		// pitch = elem.verticalPos;
@@ -34,7 +41,15 @@ var createClef = function(elem, tuneNumber) {
 		if (clef) {
 			var height = glyphs.symbolHeightInPitches(clef);
 			var ofs = clefOffsets(clef);
-			abselem.addRight(new RelativeElement(clef, dx, glyphs.getSymbolWidth(clef), elem.clefPos, { top: height+elem.clefPos+ofs, bottom: elem.clefPos+ofs}));
+			var opt = { top: height+elem.clefPos+ofs, bottom: elem.clefPos+ofs}
+			if (clef === 'tab.tiny' && elem.stafflines) {
+				var staffHeight = (elem.stafflines-1)*2
+				opt.top = staffHeight + 2
+				opt.bottom = 2
+				opt.scalex = Math.min(1.8,staffHeight / height)
+				opt.scaley = Math.min(1.8,staffHeight / height)
+			}
+			abselem.addRight(new RelativeElement(clef, dx, glyphs.getSymbolWidth(clef), elem.clefPos, opt));
 
 			if (octave !== 0) {
 				var scale = 2 / 3;
@@ -65,6 +80,7 @@ var createClef = function(elem, tuneNumber) {
 			case "clefs.C": return -4;
 			case "clefs.F": return -4;
 			case "clefs.perc": return -2;
+//			case "tab.tiny": return -1.7;
 			default: return 0;
 		}
 	}

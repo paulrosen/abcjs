@@ -133,6 +133,11 @@ AbstractEngraver.prototype.createABCLine = function(staffs, tempo, l) {
 
 AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo, s, l) {
 // If the tempo is passed in, then the first element should get the tempo attached to it.
+	if (abcstaff.stepSize)
+		spacing.STEP = abcstaff.stepSize
+	else
+		spacing.STEP = spacing.DEFAULT_STEP
+
 	staffgroup.getTextSize.updateFonts(abcstaff);
   for (var v = 0; v < abcstaff.voices.length; v++) {
     var voice = new VoiceElement(v,abcstaff.voices.length);
@@ -148,7 +153,7 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
 	}
     if (abcstaff.clef && abcstaff.clef.type === "perc")
     	voice.isPercussion = true;
-	  var clef = (!this.initialClef || l === 0) && createClef(abcstaff.clef, this.tuneNumber);
+	  var clef = (!this.initialClef || l === 0) && createClef(abcstaff.clef, this.tuneNumber, this.getTextSize);
 	  if (clef) {
 		  if (v ===0 && abcstaff.barNumber) {
 			  this.addMeasureNumber(abcstaff.barNumber, clef);
@@ -173,7 +178,7 @@ AbstractEngraver.prototype.createABCStaff = function(staffgroup, abcstaff, tempo
 	  if (voice.duplicate)
 		  voice.children = []; // we shouldn't reprint the above if we're reusing the same staff. We just created them to get the right spacing.
     var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
-    staffgroup.addVoice(voice,s,staffLines);
+    staffgroup.addVoice(voice,s,staffLines, spacing.STEP);
 	  var isSingleLineStaff = staffLines === 1;
 	  this.createABCVoice(abcstaff.voices[v],tempo, s, v, isSingleLineStaff, voice);
 	  staffgroup.setStaffLimits(voice);
@@ -308,6 +313,9 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		  this.tripletmultiplier = 1;
 	  }
     break;
+  case "tab":
+	  elemset[0] = this.createTabElement(elem)
+    break;
   case "bar":
     elemset[0] = this.createBarLine(voice, elem, isFirstStaff);
     if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
@@ -319,7 +327,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
     if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
     break;
   case "clef":
-    elemset[0] = createClef(elem, this.tuneNumber);
+    elemset[0] = createClef(elem, this.tuneNumber, this.getTextSize);
 	  if (!elemset[0]) return null;
     if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
     break;
@@ -440,6 +448,19 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 	}
 };
 
+function graceRoom(graceNotes, roomTaken) {
+	var i;
+	var graceOffsets = [];
+	for (i = graceNotes.length - 1; i >= 0; i--) { // figure out where to place each gracenote
+		roomTaken += 10;
+		graceOffsets[i] = roomTaken;
+		if (graceNotes[i].accidental) {
+			roomTaken += 7;
+		}
+	}
+	return { offsets: graceOffsets, roomTaken: roomTaken }
+}
+
 	AbstractEngraver.prototype.addGraceNotes = function (elem, voice, abselem, notehead, stemHeight, isBagpipes, roomtaken) {
 		var gracescale = 3 / 5;
 		var graceScaleStem = 3.5 / 5; // TODO-PER: empirically found constant.
@@ -453,22 +474,18 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 			gracebeam.mainNote = abselem;	// this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
 		}
 
-		var i;
-		var graceoffsets = [];
-		for (i = elem.gracenotes.length - 1; i >= 0; i--) { // figure out where to place each gracenote
-			roomtaken += 10;
-			graceoffsets[i] = roomtaken;
-			if (elem.gracenotes[i].accidental) {
-				roomtaken += 7;
-			}
-		}
+		var ret
+		ret = graceRoom(elem.gracenotes, roomtaken)
+		var graceoffsets = ret.offsets
+		roomtaken = ret.roomTaken
 
+		var i;
 		for (i = 0; i < elem.gracenotes.length; i++) {
 			var gracepitch = elem.gracenotes[i].verticalPos;
 
 			flag = (gracebeam) ? null : chartable.uflags[(isBagpipes) ? 5 : 3];
 			var accidentalSlot = [];
-			var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i],
+			ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i],
 				{dir: "up", headx: -graceoffsets[i], extrax: -graceoffsets[i], flag: flag, scale: gracescale*this.voiceScale, accidentalSlot: accidentalSlot});
 			ret.notehead.highestVert = ret.notehead.pitch + stemHeight;
 			var grace = ret.notehead;
@@ -837,6 +854,36 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
   return abselem;
 };
 
+function tabGraces(elem, abselem, getTextSize, scale) {
+	var ret
+	ret = graceRoom(elem.gracenotes, 0)
+	var graceOffsets = ret.offsets
+	for (var i = 0; i < elem.gracenotes.length; i++) {
+		var pitch = elem.gracenotes[i]
+		var dim = getTextSize.calc(pitch.number, 'tabnumberfont', "tab-number");
+		abselem.addExtra(new RelativeElement(pitch.number, -graceOffsets[i], dim.width*scale, pitch.pitch, {scalex:scale, scaley: scale, type: "tabNumber" }));
+//		abselem.addExtra(grace);
+	}
+}
+
+AbstractEngraver.prototype.createTabElement = function(elem) {
+	var abselem = new AbsoluteElement(elem, getDuration(elem), 1, "tab", this.tuneNumber, { durationClassOveride: elem.duration * this.tripletmultiplier});
+	if (elem.pitches) {
+		var i;
+		if (elem.gracenotes) {
+			var graceScale = 4 / 5 * this.voiceScale;
+			tabGraces(elem, abselem, this.getTextSize, graceScale)
+		}
+		for (i = 0; i < elem.pitches.length; i++) {
+			var pitch = elem.pitches[i]
+			var dim = this.getTextSize.calc(pitch.number, 'tabnumberfont', "tab-number");
+			abselem.addCentered(new RelativeElement(pitch.number, 0, dim.width, pitch.pitch, {type: "tabNumber"}));
+		}
+	} else
+		abselem.invisible = true
+	return abselem;
+}
+
 	AbstractEngraver.prototype.addSlursAndTies = function(abselem, pitchelem, notehead, voice, dir, isGrace) {
 		if (pitchelem.endTie) {
 			if (this.ties.length > 0) {
@@ -915,6 +962,7 @@ AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
 
 AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) {
 // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
+	var top = voice.staff && voice.staff.lines ? voice.staff.lines : 5;
 
   var abselem = new AbsoluteElement(elem, 0, 10, 'bar', this.tuneNumber);
   var anchor = null; // place to attach part lines
@@ -949,12 +997,12 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
   }
 
   if (firstthin) {
-    anchor = new RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":10, linewidth:0.6});
+    anchor = new RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":top*2, linewidth:0.6});
     abselem.addRight(anchor);
   }
 
   if (elem.type==="bar_invisible") {
-    anchor = new RelativeElement(null, dx, 1, 2, {"type": "none", "pitch2":10, linewidth:0.6});
+    anchor = new RelativeElement(null, dx, 1, 2, {"type": "none", "pitch2":top*2, linewidth:0.6});
     abselem.addRight(anchor);
   }
 
@@ -964,7 +1012,7 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
 
   if (thick) {
     dx+=4; //3 hardcoded;
-    anchor = new RelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":10, linewidth:4});
+    anchor = new RelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":top*2, linewidth:4});
     abselem.addRight(anchor);
     dx+=5;
   }
@@ -981,7 +1029,7 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
 
   if (secondthin) {
     dx+=3; //3 hardcoded;
-    anchor = new RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":10, linewidth:0.6});
+    anchor = new RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":top*2, linewidth:0.6});
     abselem.addRight(anchor); // 3 is hardcoded
   }
 

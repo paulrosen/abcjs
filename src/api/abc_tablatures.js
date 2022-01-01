@@ -96,9 +96,44 @@ var abcTablatures = {
   },
 
   /**
+   * Insert tablature definitions into the tune before it is laid out.
+   * @param {*} abcTune
+   * @param {*} tabSpacing
+   */
+  insertTablatures: function (abcTune, tabSpacing) {
+    var tabs = abcTune.tablatures;
+    // check tabs request for each staffs
+    for (var ii = 0; ii < abcTune.lines.length; ii++) {
+      var line = abcTune.lines[ii];
+      var curStaff = line.staff;
+      if (curStaff) {
+        // Since we're inserting lines we have to go backwards
+        for (var jj = curStaff.length-1; jj >= 0; jj--) {
+          if (tabs[jj]) {
+            // tablature requested for staff
+            var tabPlugin = tabs[jj];
+            if (tabPlugin.instance == null) {
+              tabPlugin.instance = new tabPlugin.classz();
+              // call initer first
+              tabPlugin.instance.init(abcTune,
+                  tabPlugin.tuneNumber,
+                  tabPlugin.params,
+                  jj
+              );
+            }
+            // create the tab and insert it into the staves
+            var tabLine = tabPlugin.instance.createLine(curStaff[jj], abcTune.tablatures[jj], tabSpacing);
+            curStaff.splice(jj+1, 0, tabLine)
+          }
+        }
+      }
+    }
+  },
+
+  /**
    * Call requested plugin
-   * @param {*} renderer 
-   * @param {*} abcTune 
+   * @param {*} renderer
+   * @param {*} abcTune
    */
   layoutTablatures: function (renderer, abcTune) {
     var tabs = abcTune.tablatures;

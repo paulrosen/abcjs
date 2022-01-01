@@ -2,10 +2,10 @@ var layoutBeam = require('./beam');
 var getBarYAt = require('./getBarYAt');
 var layoutTriplet = require('./triplet');
 
-var layoutVoice = function(voice) {
+var layoutVoice = function(voice, step) {
 	for (var i = 0; i < voice.beams.length; i++) {
 		if (voice.beams[i].type === 'BeamElem') {
-			layoutBeam(voice.beams[i]);
+			layoutBeam(voice.beams[i], step);
 			moveDecorations(voice.beams[i]);
 			// The above will change the top and bottom of the abselem children, so see if we need to expand our range.
 			for (var j = 0; j < voice.beams[i].elems.length; j++) {

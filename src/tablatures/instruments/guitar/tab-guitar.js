@@ -6,6 +6,7 @@ var TabCommon = require('../../tab-common');
 var TabRenderer = require('../../tab-renderer');
 var GuitarPatterns = require('./guitar-patterns');
 var setGuitarFonts = require('./guitar-fonts');
+const addTab = require("../../tab-staff-creator");
 
 /**
 * upon init mainly store provided instances for later usage
@@ -29,14 +30,26 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
   this.semantics = semantics;
 };
 
-Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this._super.inError) return;
-  if (this.tablature.bypass(line)) return;
-  console.log('GuitarTab plugin rendered');
-  setGuitarFonts(this.abcTune);
-  var rndrer = new TabRenderer(this, renderer, line, staffIndex);
-  rndrer.doLayout();
+Plugin.prototype.numberCreator = function(grace, pitch, element, voice) {
+  console.log(grace, pitch, element, voice)
+  return {
+    string: Math.round(Math.random() * 5),
+    number: Math.round(Math.random() * 5),
+  }
+}
+
+Plugin.prototype.createLine = function (staff, tabDef, spacing) {
+  return addTab(staff, tabDef, spacing, this.numberCreator)
 };
+
+// Plugin.prototype.render = function (renderer, line, staffIndex) {
+//   if (this._super.inError) return;
+//   if (this.tablature.bypass(line)) return;
+//   console.log('GuitarTab plugin rendered');
+//   setGuitarFonts(this.abcTune);
+//   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
+//   rndrer.doLayout();
+// };
 
 function Plugin() {}
 

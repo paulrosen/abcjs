@@ -6,6 +6,10 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 	var lastStaffBottom;
 	for (var i = 0; i < staffGroup.staffs.length; i++) {
 		var staff = staffGroup.staffs[i];
+		if (staff.stepSize)
+			spacing.STEP = staff.stepSize
+		else
+			spacing.STEP = spacing.DEFAULT_STEP
 		// the vertical order of elements that are above is: tempo, part, volume/dynamic, ending/chord, lyric
 		// the vertical order of elements that are below is: lyric, chord, volume/dynamic
 		var positionY = {
@@ -79,15 +83,16 @@ var setUpperAndLowerElements = function(renderer, staffGroup) {
 		}
 		// We might need a little space in between staves if the staves haven't been pushed far enough apart by notes or extra vertical stuff.
 		// Only try to put in extra space if this isn't the top staff.
+		// Note: if the staves have different spacing the calculations can be apples to oranges so translate the last staff's numbers to pixels.
 		if (lastStaffBottom !== undefined) {
-			var thisStaffTop = staff.top - 10;
-			var forcedSpacingBetween = lastStaffBottom + thisStaffTop;
+			var thisStaffTop = staff.top - staff.lines*2; // this is how far above the top line this staff extends.
+			var forcedSpacingBetween = lastStaffBottom/spacing.STEP + thisStaffTop;
 			var minSpacingInPitches = renderer.spacing.systemStaffSeparation/spacing.STEP;
 			var addedSpace = minSpacingInPitches - forcedSpacingBetween;
 			if (addedSpace > 0)
 				staff.top += addedSpace;
 		}
-		lastStaffBottom = 2 - staff.bottom; // the staff starts at position 2 and the bottom variable is negative. Therefore to find out how large the bottom is, we reverse the sign of the bottom, and add the 2 in.
+		lastStaffBottom = (2 - staff.bottom)*spacing.STEP; // the staff starts at position 2 and the bottom variable is negative. Therefore to find out how large the bottom is, we reverse the sign of the bottom, and add the 2 in.
 
 		// Now we need a little margin on the top, so we'll just throw that in.
 		//staff.top += 4;

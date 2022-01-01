@@ -28,12 +28,15 @@ function drawRelativeElement(renderer, params, bartop) {
 			var hAnchor = "middle";
 			var tabFont = "tabnumberfont";
 			var tabClass = 'tab-number';
-			if (params.isGrace) {
-				tabFont = "tabgracefont";
-				y += 2.5;
-				tabClass = 'tab-grace'
-			}
+//			if (params.isGrace) {
+//				tabFont = "tabgracefont";
+//				y += 2.5;
+//				tabClass = 'tab-grace'
+//			}
 			params.graphelem = renderText(renderer, { x: params.x, y: y, text: "" + params.c, type: tabFont, klass: renderer.controller.classes.generate(tabClass), anchor: hAnchor, centerVertically: false, dim: params.dim , cursor: 'default'}, false);
+			break;
+		case "label":
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: "" + params.c, type: "tablabelfont", klass: renderer.controller.classes.generate('staff-label'), anchor: 'start', centerVertically: false, dim: params.dim}, false);
 			break;
 		case "barNumber":
 			params.graphelem = renderText(renderer, { x: params.x, y: y, text: ""+params.c, type: "measurefont", klass: renderer.controller.classes.generate('bar-number'), anchor: "middle", dim: params.dim, name: "bar-number"}, true);
@@ -64,7 +67,7 @@ function drawRelativeElement(renderer, params, bartop) {
 		case "ledger":
 			params.graphelem = printStaffLine(renderer, params.x, params.x+params.w, params.pitch, "abcjs-ledger", "ledger"); break;
 	}
-	if (params.scalex!==1 && params.graphelem) {
+	if ((params.scalex!==1 || params.scaley !== 1) && params.graphelem) {
 		scaleExistingElem(renderer.paper, params.graphelem, params.scalex, params.scaley, params.x, y);
 	}
 	return params.graphelem;

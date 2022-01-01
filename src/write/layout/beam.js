@@ -1,11 +1,10 @@
 var RelativeElement = require('../abc_relative_element');
-var spacing = require('../abc_spacing');
 var getBarYAt = require('./getBarYAt');
 
-var layoutBeam = function(beam) {
+var layoutBeam = function(beam, step) {
 	if (beam.elems.length === 0 || beam.allrests) return;
 
-	var dy = calcDy(beam.stemsUp, beam.isgrace); // This is the width of the beam line.
+	var dy = calcDy(beam.stemsUp, beam.isgrace, step); // This is the width of the beam line.
 
 	// create the main beam
 	var firstElement = beam.elems[0];
@@ -25,7 +24,7 @@ var layoutBeam = function(beam) {
 		beam.addBeam(beams[i]);
 
 	// Now that the main beam is defined, we know how tall the stems should be, so create them and attach them to the original notes.
-	createStems(beam.elems, beam.stemsUp, beam.beams[0], dy, beam.mainNote);
+	createStems(beam.elems, beam.stemsUp, beam.beams[0], dy, beam.mainNote, step);
 };
 
 var getDurlog = function(duration) {
@@ -65,8 +64,8 @@ function calcSlant(leftAveragePitch, rightAveragePitch, numStems, isFlat) {
 	return slant;
 }
 
-function calcDy(asc, isGrace) {
-	var dy = (asc) ? spacing.STEP : -spacing.STEP;
+function calcDy(asc, isGrace, step) {
+	var dy = (asc) ? step : -step;
 	if (isGrace) dy = dy * 0.4;
 	return dy;
 }
@@ -104,7 +103,7 @@ function calcYPos(average, numElements, stemHeight, asc, firstAveragePitch, last
 	return [ startY, endY];
 }
 
-function createStems(elems, asc, beam, dy, mainNote) {
+function createStems(elems, asc, beam, dy, mainNote, step) {
 	for (var i = 0; i < elems.length; i++) {
 		var elem = elems[i];
 		if (elem.abcelem.rest)
@@ -122,7 +121,7 @@ function createStems(elems, asc, beam, dy, mainNote) {
 		var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
 		var lineWidth = (asc) ? -0.6 : 0.6;
 		if (!asc)
-			bary -= (dy / 2) / spacing.STEP;	// TODO-PER: This is just a fudge factor so the down-pointing stems don't overlap.
+			bary -= (dy / 2) / step;	// TODO-PER: This is just a fudge factor so the down-pointing stems don't overlap.
 		if (isGrace)
 			dx += elem.heads[0].dx;
 		// TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:

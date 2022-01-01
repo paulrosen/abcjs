@@ -639,6 +639,17 @@ describe("Tablature", function () {
 
 		]
 	]
+
+	var horizontalSpacing = "X:1\n" +
+		"L:1/4\n" +
+		"%%stretchlast\n" +
+		"K:B\n" +
+		"V:1\n" +
+		"G4|{A}B2 [cd]e/f/|zg//g//g//g//a2|{b}c'4||\t\n" +
+		"V:2\n" +
+		"C2D2|E4|(3F/G/F/ F-FF|B,>A,z2||\n"
+
+
 	it("accidentals", function () {
 		doStaffTest(violinAllNotes, violinAllNotesOutput, violinParams);
 	});
@@ -737,6 +748,18 @@ describe("Tablature", function () {
 		chai.assert.equal(labelFont, params.format.tablabelfont, "Label font not set")
 		chai.assert.equal(numberFont, params.format.tabnumberfont, "Number font not set")
 		chai.assert.equal(graceFont, params.format.tabgracefont, "Grace font not set")
+	});
+
+	it("large print", function () {
+		var params = {
+			format: {
+				tabnumberfont: "Helvetica 24",
+				tabgracefont: "Arial 18"
+			}
+		}
+		doRender(horizontalSpacing, violinParams, params);
+		// TODO-PER: Be sure that the tab lines are large enough to accommodate
+		chai.assert(false, "TODO")
 	});
 
 	it("lining up", function () {
@@ -838,6 +861,11 @@ describe("Tablature", function () {
 	it("percussion clef", function() {
 		var visualObj = doRender(percussionClef, violinParams)
 		chai.assert(visualObj[0].lines[0].staff.length === 1, "Should skip percussion clef")
+	})
+
+	it("horizontal spacing", function() {
+		var visualObj = doRender(horizontalSpacing, violinGuitarParams)
+		chai.assert(false, "Should stay lined up")
 	})
 });
 

@@ -33,14 +33,14 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 			// 	child.elemset = drawTempo(renderer, child);
 			// 	break;
 			default:
-				if (params.staff.isTabStaff) {
-					child.invisible = false;
-  				if ( child.type == 'bar' ) {
-						if (child.abcelem.lastBar) {
-							bartop = params.topLine;
-						}
-					}
-				} 
+//				if (params.staff.isTabStaff) {
+//					child.invisible = false;
+ // 				if ( child.type == 'bar' ) {
+	//					if (child.abcelem.lastBar) {
+//							bartop = params.topLine;
+//						}
+//					}
+//				} 
 				drawAbsolute(renderer, child,(params.barto || i === params.children.length - 1) ? bartop : 0, selectables, staffPos);
 		}
 		if (child.type === 'note' || isNonSpacerRest(child))

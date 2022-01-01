@@ -44,7 +44,7 @@ StaffGroupElement.prototype.setLimit = function(member, voice) {
 		voice.staff.specialY[member] = Math.max(voice.staff.specialY[member], voice.specialY[member]);
 };
 
-StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines) {
+StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines, stepSize) {
 	var voiceNum = this.voices.length;
 	this.voices[voiceNum] = voice;
 	if (this.staffs[staffnumber])
@@ -55,6 +55,7 @@ StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines)
 			top: 10,
 			bottom: 2,
 			lines: stafflines,
+			stepSize: stepSize,
 			voices: [voiceNum],
 			specialY: {
 				tempoHeightAbove: 0,
