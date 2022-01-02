@@ -28,8 +28,8 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
   this.semantics = semantics;
 };
 
-Plugin.prototype.numberCreator = function(grace, pitch, element, voice) {
-  console.log(grace, pitch, element, voice)
+Plugin.prototype.numberCreator = function(pitch) {
+  console.log("V",pitch.pitch)
   return {
     string: Math.round(Math.random() * 3),
     number: Math.round(Math.random() * 5 + 8),

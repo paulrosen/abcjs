@@ -49,15 +49,19 @@ function addTab(staff, tabDef, spacing, callback) {
 							minpitch: 4,
 							maxpitch: 4
 						}
-						for (var k = 0; k < sourceElem.pitches.length; k++) {
-							var thisPitch = sourceElem.pitches[0]
-							if (thisPitch.endTie) {
+						var thisPitch;
+						var thisMidi;
+						var k;
+						for (k = 0; k < sourceElem.pitches.length; k++) {
+							thisPitch = sourceElem.pitches[k]
+							thisMidi = sourceElem.midiPitches[k]
+							if (thisPitch.endTie || !thisMidi) {
 								ev.pitches.push({
 									pitch: 6,
 									number: '',
 								})
 							} else {
-								var ret = callback(null, thisPitch, sourceElem, sourceVoice)
+								var ret = callback(thisMidi)
 								ev.pitches.push({
 									number: ret.number,
 									pitch: ret.string * 2 + 3,
@@ -65,14 +69,15 @@ function addTab(staff, tabDef, spacing, callback) {
 								})
 							}
 						}
-						if (sourceElem.gracenotes) {
+						if (sourceElem.midiGraceNotePitches) {
 							ev.gracenotes = [];
-							for (var g = 0; g < sourceElem.gracenotes.length; g++) {
-								var gn = sourceElem.gracenotes[g]
-								var ret2 = callback(gn, thisPitch, sourceElem, sourceVoice)
+							for (k = 0; k < sourceElem.gracenotes.length; k++) {
+								thisPitch = sourceElem.pitches[k]
+								thisMidi = sourceElem.midiGraceNotePitches[k]
+								var ret2 = callback(thisMidi)
 								ev.gracenotes.push({
-									duration: gn.duration,
-									name: gn.name,
+									duration: thisPitch.duration,
+									name: thisPitch.name,
 									number: ret2.number,
 									pitch: ret2.string * 2 + 3,
 								})
