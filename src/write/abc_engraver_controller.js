@@ -32,6 +32,7 @@ var tablatures = require('../api/abc_tablatures');
  */
 var EngraverController = function(paper, params) {
   params = params || {};
+  this.origParams = params;
   this.selectionColor = params.selectionColor;
   this.dragColor = params.dragColor ? params.dragColor : params.selectionColor;
   this.dragging = !!params.dragging;
@@ -233,7 +234,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
 	// Deal with tablature for staff
 	if (abcTune.tablatures) {
 		var tabSpacing = this.getTextSize.calc("0", "tabnumberfont", "tab-number");
-		tablatures.insertTablatures(abcTune, tabSpacing.height);
+		tablatures.insertTablatures(abcTune, tabSpacing.height, this.origParams);
 	}
 
 	// Create all of the element objects that will appear on the page.

@@ -861,7 +861,7 @@ function tabGraces(elem, abselem, getTextSize, scale) {
 	for (var i = 0; i < elem.gracenotes.length; i++) {
 		var pitch = elem.gracenotes[i]
 		var dim = getTextSize.calc(pitch.number, 'tabnumberfont', "tab-number");
-		abselem.addExtra(new RelativeElement(pitch.number, -graceOffsets[i], dim.width*scale, pitch.pitch, {scalex:scale, scaley: scale, type: "tabNumber" }));
+		abselem.addExtra(new RelativeElement(pitch.number, -graceOffsets[i], dim.width*scale, pitch.pitch, {scalex:scale, scaley: scale, type: "tabNumber", klass: "abcjs-tab-grace" }));
 //		abselem.addExtra(grace);
 	}
 }

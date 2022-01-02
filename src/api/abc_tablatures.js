@@ -99,8 +99,10 @@ var abcTablatures = {
    * Insert tablature definitions into the tune before it is laid out.
    * @param {*} abcTune
    * @param {*} tabSpacing
+   * @param {*} params
    */
-  insertTablatures: function (abcTune, tabSpacing) {
+  insertTablatures: function (abcTune, tabSpacing, params) {
+    abcTune.setUpAudio(params)
     var tabs = abcTune.tablatures;
     // check tabs request for each staffs
     for (var ii = 0; ii < abcTune.lines.length; ii++) {

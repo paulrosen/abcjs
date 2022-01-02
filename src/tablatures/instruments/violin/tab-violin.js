@@ -22,8 +22,8 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
   this.isTabBig = false;
   this.capo = params.capo;
   this.transpose = params.visualTranspose;
-  this.tablature = new StringTablature(this.nbLines,
-    this.linePitch);
+  // this.tablature = new StringTablature(this.nbLines,
+  //   this.linePitch);
   var semantics = new ViolinPatterns(this);
   this.semantics = semantics;
 };

@@ -80,7 +80,6 @@ var createClef = function(elem, tuneNumber, getTextSize) {
 			case "clefs.C": return -4;
 			case "clefs.F": return -4;
 			case "clefs.perc": return -2;
-//			case "tab.tiny": return -1.7;
 			default: return 0;
 		}
 	}

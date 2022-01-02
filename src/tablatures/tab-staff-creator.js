@@ -13,8 +13,9 @@ function makeTabClef(sourceClef, label, stafflines) {
 }
 
 function addTab(staff, tabDef, spacing, callback) {
+	var label = tabDef.instance.semantics.strings.tabInfos(tabDef.instance)
 	var tabStaff = {
-		clef: makeTabClef(staff.clef, tabDef.params.label, tabDef.params.tuning.length),
+		clef: makeTabClef(staff.clef, label, tabDef.params.tuning.length),
 		key: {},
 		voices: [],
 		stepSize: spacing/2

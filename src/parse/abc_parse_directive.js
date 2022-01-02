@@ -41,7 +41,6 @@ var parseDirective = {};
 		tune.formatting.voicefont  = { face: "\"Times New Roman\"", size: 13, weight: "bold", style: "normal", decoration: "none" };
 		tune.formatting.tablabelfont  = { face: "\"Trebuchet MS\"", size: 16, weight: "normal", style: "none", decoration: "none" };
 		tune.formatting.tabnumberfont = { face: "\"Arial\"", size: 11, weight: "normal", style: "normal", decoration: "none" };
-		tune.formatting.tabgracefont = { face: "\"Arial\"", size: 8, weight: "normal", style: "normal", decoration: "none" };
 
 		// these are the default fonts for these element types. In the printer, these fonts might change as the tune progresses.
 		tune.formatting.annotationfont  = multilineVars.annotationfont;
@@ -1157,7 +1156,6 @@ var parseDirective = {};
 					case "annotationfont":
 					case "tablabelfont":
 					case "tabnumberfont":
-					case "tabgracefont":
 						getChangingFont(cmd, tokens, value);
 						break;
 					case "scale":
