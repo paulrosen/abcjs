@@ -59,7 +59,10 @@ function sameString(self, chord) {
       // same String
       // => change lower pos 
       if (curPos.str == self.strings.length - 1) {
-        return { error: 'Invalid tab Chord position for instrument'  };
+        // Invalid tab Chord position for instrument
+        curPos.num = "?";
+        nextPos.num = "?"; 
+        return; 
       }
       // change lower pitch on lowest string
       if (nextPos.num < curPos.num) {
@@ -94,10 +97,7 @@ function handleChordNotes(self, notes) {
     var curPos = toNumber(self, note);
     retNotes.push(curPos);
   }
-  var error = sameString(self, retNotes);
-  if (error) {
-    return error;
-  }
+  sameString(self, retNotes);
   return retNotes;
 }
 
