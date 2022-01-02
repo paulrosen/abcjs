@@ -1001,6 +1001,9 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 
   var origPaddingTop = ep.paddingtop;
   var origPaddingBottom = ep.paddingbottom;
+  var currentScrollY = div.parentNode.scrollTop; // If there is scrolling it will be lost during the redraw so remember it.
+
+  var currentScrollX = div.parentNode.scrollLeft;
   div.innerHTML = "";
 
   for (var k = 0; k < tunes.length; k++) {
@@ -1028,6 +1031,10 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
     if (k === 0) tune.engraver = tunes[k].engraver;else {
       if (!tune.engraver.staffgroups) tune.engraver.staffgroups = tunes[k].engraver.staffgroups;else if (tunes[k].engraver.staffgroups.length > 0) tune.engraver.staffgroups.push(tunes[k].engraver.staffgroups[0]);
     }
+  }
+
+  if (currentScrollX || currentScrollY) {
+    div.parentNode.scrollTo(currentScrollX, currentScrollY);
   }
 } // A quick way to render a tune from javascript when interactivity is not required.
 // This is used when a javascript routine has some abc text that it wants to render
@@ -1534,33 +1541,36 @@ var Tune = function Tune() {
 
     for (var line = 0; line < this.engraver.staffgroups.length; line++) {
       var group = this.engraver.staffgroups[line];
-      var firstStaff = group.staffs[0];
-      var middleC = firstStaff.absoluteY;
-      var top = middleC - firstStaff.top * spacing.STEP;
-      var lastStaff = group.staffs[group.staffs.length - 1];
-      middleC = lastStaff.absoluteY;
-      var bottom = middleC - lastStaff.bottom * spacing.STEP;
-      var height = bottom - top;
-      var voices = group.voices;
 
-      for (var v = 0; v < voices.length; v++) {
-        var noteFound = false;
-        if (!voicesArr[v]) voicesArr[v] = [];
-        if (measureNumber[v] === undefined) measureNumber[v] = 0;
-        var elements = voices[v].children;
+      if (group && group.staffs && group.staffs.length > 0) {
+        var firstStaff = group.staffs[0];
+        var middleC = firstStaff.absoluteY;
+        var top = middleC - firstStaff.top * spacing.STEP;
+        var lastStaff = group.staffs[group.staffs.length - 1];
+        middleC = lastStaff.absoluteY;
+        var bottom = middleC - lastStaff.bottom * spacing.STEP;
+        var height = bottom - top;
+        var voices = group.voices;
 
-        for (var elem = 0; elem < elements.length; elem++) {
-          if (elements[elem].type === "tempo") tempos[measureNumber[v]] = this.getBpm(elements[elem].abcelem);
-          voicesArr[v].push({
-            top: top,
-            height: height,
-            line: group.line,
-            measureNumber: measureNumber[v],
-            elem: elements[elem]
-          });
-          if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
-            measureNumber[v]++;
-          if (elements[elem].type === 'note' || elements[elem].type === 'rest') noteFound = true;
+        for (var v = 0; v < voices.length; v++) {
+          var noteFound = false;
+          if (!voicesArr[v]) voicesArr[v] = [];
+          if (measureNumber[v] === undefined) measureNumber[v] = 0;
+          var elements = voices[v].children;
+
+          for (var elem = 0; elem < elements.length; elem++) {
+            if (elements[elem].type === "tempo") tempos[measureNumber[v]] = this.getBpm(elements[elem].abcelem);
+            voicesArr[v].push({
+              top: top,
+              height: height,
+              line: group.line,
+              measureNumber: measureNumber[v],
+              elem: elements[elem]
+            });
+            if (elements[elem].type === 'bar' && noteFound) // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
+              measureNumber[v]++;
+            if (elements[elem].type === 'note' || elements[elem].type === 'rest') noteFound = true;
+          }
         }
       }
     }
@@ -2378,15 +2388,22 @@ Editor.prototype.modelChanged = function () {
   if (this.bReentry) return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
 
   this.bReentry = true;
-  this.timerId = null;
-  if (this.synth && this.synth.synthControl) this.synth.synthControl.disable(true);
-  this.tunes = renderAbc(this.div, this.currentAbc, this.abcjsParams);
 
-  if (this.tunes.length > 0) {
-    this.warnings = this.tunes[0].warnings;
+  try {
+    this.timerId = null;
+    if (this.synth && this.synth.synthControl) this.synth.synthControl.disable(true);
+    this.tunes = renderAbc(this.div, this.currentAbc, this.abcjsParams);
+
+    if (this.tunes.length > 0) {
+      this.warnings = this.tunes[0].warnings;
+    }
+
+    this.redrawMidi();
+  } catch (error) {
+    console.error("ABCJS error: ", error);
+    if (!this.warnings) this.warnings = [];
+    this.warnings.push(error.message);
   }
-
-  this.redrawMidi();
 
   if (this.warningsdiv) {
     this.warningsdiv.innerHTML = this.warnings ? this.warnings.join("<br />") : "No errors";
@@ -2944,8 +2961,11 @@ var Parse = function Parse() {
       for (var i = 0; i < this.inTie.length; i++) {
         this.endingHoldOver.inTie.push([]);
 
-        for (var j = 0; j < this.inTie[i].length; j++) {
-          this.endingHoldOver.inTie[i].push(this.inTie[i][j]);
+        if (this.inTie[i]) {
+          // if a voice is suppressed there might be a gap in the array.
+          for (var j = 0; j < this.inTie[i].length; j++) {
+            this.endingHoldOver.inTie[i].push(this.inTie[i][j]);
+          }
         }
       }
 
@@ -10958,7 +10978,7 @@ var TuneBuilder = function TuneBuilder(tune) {
 
   this.containsNotesStrict = function (voice) {
     for (var i = 0; i < voice.length; i++) {
-      if (voice[i].el_type === 'note' && voice[i].rest === undefined) return true;
+      if (voice[i].el_type === 'note' && (voice[i].rest === undefined || voice[i].chord !== undefined)) return true;
     }
 
     return false;
@@ -14871,7 +14891,7 @@ function CreateSynth() {
     var params = options.options ? options.options : {};
     self.soundFontUrl = params.soundFontUrl ? params.soundFontUrl : defaultSoundFontUrl;
     if (self.soundFontUrl[self.soundFontUrl.length - 1] !== '/') self.soundFontUrl += '/';
-    if (params.soundFontVolumeMultiplier) self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2) self.soundFontVolumeMultiplier = 5.0;else if (self.soundFontUrl === defaultSoundFontUrl) self.soundFontVolumeMultiplier = 0.5;else self.soundFontVolumeMultiplier = 1.0;
+    if (params.soundFontVolumeMultiplier || params.soundFontVolumeMultiplier === 0) self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2) self.soundFontVolumeMultiplier = 5.0;else if (self.soundFontUrl === defaultSoundFontUrl) self.soundFontVolumeMultiplier = 0.5;else self.soundFontVolumeMultiplier = 1.0;
     if (params.programOffsets) self.programOffsets = params.programOffsets;else if (self.soundFontUrl === defaultSoundFontUrl) self.programOffsets = {
       "violin": 113,
       "trombone": 200
@@ -15157,8 +15177,8 @@ function CreateSynth() {
   self.pause = function () {
     if (!self.audioBufferPossible) throw new Error(notSupportedMessage);
     if (self.debugCallback) self.debugCallback("pause called");
-    self.stop();
-    self.pausedTimeSec = activeAudioContext().currentTime - self.startTimeSec;
+    self.pausedTimeSec = self.stop();
+    return self.pausedTimeSec;
   };
 
   self.resume = function () {
@@ -15210,6 +15230,8 @@ function CreateSynth() {
       }
     });
     self.directSource = [];
+    var elapsed = activeAudioContext().currentTime - self.startTimeSec;
+    return elapsed;
   };
 
   self.finished = function () {
@@ -15503,104 +15525,37 @@ module.exports = instrumentIndexToName;
 var soundsCache = __webpack_require__(/*! ./sounds-cache */ "./src/synth/sounds-cache.js");
 
 var getNote = function getNote(url, instrument, name, audioContext) {
-  return new Promise(function (resolve, reject) {
-    if (!soundsCache[instrument]) soundsCache[instrument] = {};
-    var instrumentCache = soundsCache[instrument];
-
-    if (instrumentCache[name] === 'error') {
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "error",
-        message: "Unable to load sound font" + ' ' + url + ' ' + instrument + ' ' + name
-      });
-    }
-
-    if (instrumentCache[name] === 'pending') {
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "pending"
-      });
-    }
-
-    if (instrumentCache[name]) {
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "cached"
-      });
-    } // if (this.debugCallback)
-    // 	this.debugCallback(`Loading sound: ${instrument} ${name}`);
-
-
-    instrumentCache[name] = "pending"; // This can be called in parallel, so don't call it a second time before the first one has loaded.
-
+  if (!soundsCache[instrument]) soundsCache[instrument] = {};
+  var instrumentCache = soundsCache[instrument];
+  if (!instrumentCache[name]) instrumentCache[name] = new Promise(function (resolve, reject) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', url + instrument + '-mp3/' + name + '.mp3', true);
-    xhr.responseType = 'arraybuffer';
-    var self = this;
+    var noteUrl = url + instrument + "-mp3/" + name + ".mp3";
+    xhr.open("GET", noteUrl, true);
+    xhr.responseType = "arraybuffer";
 
-    function onSuccess(audioBuffer) {
-      instrumentCache[name] = audioBuffer; // if (self.debugCallback)
-      // 	self.debugCallback(`Sound loaded: ${instrument} ${name} ${url}`);
-
-      resolve({
-        instrument: instrument,
-        name: name,
-        status: "loaded"
-      });
-    }
-
-    function onFailure(error) {
-      error = "Can't decode sound. " + url + ' ' + instrument + ' ' + name + ' ' + error;
-      if (self.debugCallback) self.debugCallback(error);
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "error",
-        message: error
-      });
-    }
-
-    xhr.onload = function (e) {
-      if (this.status === 200) {
-        try {
-          var promise = audioContext.decodeAudioData(this.response, onSuccess, onFailure); // older browsers only have the callback. Newer ones will report an unhandled
-          // rejection if catch isn't handled so we need both. We don't need to report it twice, though.
-
-          if (promise && promise["catch"]) promise["catch"](function () {});
-        } catch (error) {
-          reject(error);
-        }
-      } else {
-        instrumentCache[name] = "error"; // To keep this from trying to load repeatedly.
-
-        var cantLoadMp3 = "Onload error loading sound: " + name + " " + url + " " + e.currentTarget.status + " " + e.currentTarget.statusText;
-        if (self.debugCallback) self.debugCallback(cantLoadMp3);
-        return resolve({
-          instrument: instrument,
-          name: name,
-          status: "error",
-          message: cantLoadMp3
-        });
+    xhr.onload = function () {
+      if (xhr.status !== 200) {
+        reject(Error("Can't load sound at " + noteUrl));
+        return;
       }
+
+      var maybePromise = audioContext.decodeAudioData(xhr.response, resolve, function () {
+        reject(Error("Can't decode sound at " + noteUrl));
+      }); // In older browsers `BaseAudioContext.decodeAudio()` did not return a promise
+
+      if (maybePromise && typeof maybePromise["catch"] === "function") maybePromise["catch"](reject);
     };
 
-    xhr.addEventListener("error", function () {
-      instrumentCache[name] = "error"; // To keep this from trying to load repeatedly.
+    xhr.onerror = function () {
+      reject(Error("Can't load sound at " + noteUrl));
+    };
 
-      var cantLoadMp3 = "Error in loading sound: " + " " + url;
-      if (self.debugCallback) self.debugCallback(cantLoadMp3);
-      return resolve({
-        instrument: instrument,
-        name: name,
-        status: "error",
-        message: cantLoadMp3
-      });
-    }, false);
     xhr.send();
+  })["catch"](function (err) {
+    console.error("Didn't load note", instrument, name, ":", err.message);
+    throw err;
   });
+  return instrumentCache[name];
 };
 
 module.exports = getNote;
@@ -15818,80 +15773,74 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 
   var offlineCtx = new OfflineAC(2, Math.floor((len + fadeTimeSec) * sampleRate), sampleRate);
   var noteName = pitchToNoteName[sound.pitch];
-  var noteBuffer = soundsCache[sound.instrument][noteName];
+  var noteBufferPromise = soundsCache[sound.instrument][noteName];
+  noteBufferPromise.then(function (audioBuffer) {
+    // create audio buffer
+    var source = offlineCtx.createBufferSource();
+    source.buffer = audioBuffer; // add gain
+    // volume can be between 1 to 127. This translation to gain is just trial and error.
+    // The smaller the first number, the more dynamic range between the quietest to loudest.
+    // The larger the second number, the louder it will be in general.
 
-  if (noteBuffer === "error" || noteBuffer === "pending") {
-    // If the note isn't available, just leave a blank spot
-    // If the note is still pending by now that means an error happened when loading. There was probably a timeout.
-    console.log("Didn't load note", sound.instrument, noteName, noteBuffer);
-    return;
-  } // create audio buffer
+    var volume = sound.volume / 96 * volumeMultiplier;
+    source.gainNode = offlineCtx.createGain(); // add pan if supported and present
 
-
-  var source = offlineCtx.createBufferSource();
-  source.buffer = noteBuffer; // add gain
-  // volume can be between 1 to 127. This translation to gain is just trial and error.
-  // The smaller the first number, the more dynamic range between the quietest to loudest.
-  // The larger the second number, the louder it will be in general.
-
-  var volume = sound.volume / 96 * volumeMultiplier;
-  source.gainNode = offlineCtx.createGain(); // add pan if supported and present
-
-  if (sound.pan && offlineCtx.createStereoPanner) {
-    source.panNode = offlineCtx.createStereoPanner();
-    source.panNode.pan.setValueAtTime(sound.pan, 0);
-  }
-
-  source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
-
-  source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
-  source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
-
-  if (sound.cents) {
-    source.playbackRate.value = centsToFactor(sound.cents);
-  } // connect all the nodes
-
-
-  if (source.panNode) {
-    source.panNode.connect(offlineCtx.destination);
-    source.gainNode.connect(source.panNode);
-  } else {
-    source.gainNode.connect(offlineCtx.destination);
-  }
-
-  source.connect(source.gainNode); // Do the process of creating the sound and placing it in the buffer
-
-  source.start(0);
-
-  if (source.noteOff) {
-    source.noteOff(len + fadeTimeSec);
-  } else {
-    source.stop(len + fadeTimeSec);
-  }
-
-  var fnResolve;
-
-  offlineCtx.oncomplete = function (e) {
-    if (e.renderedBuffer) {
-      // If the system gets overloaded then this can start failing. Just drop the note if so.
-      for (var i = 0; i < startArray.length; i++) {
-        //Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
-        var start = startArray[i] * sound.tempoMultiplier;
-        if (ofsMs) start -= ofsMs / 1000;
-        if (start < 0) start = 0; // If the item that is moved back is at the very beginning of the buffer then don't move it back. To do that would be to push everything else forward. TODO-PER: this should probably be done at some point but then it would change timing in existing apps.
-
-        start = Math.floor(start * sampleRate);
-        copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
-      }
+    if (sound.pan && offlineCtx.createStereoPanner) {
+      source.panNode = offlineCtx.createStereoPanner();
+      source.panNode.pan.setValueAtTime(sound.pan, 0);
     }
 
-    fnResolve();
-  };
+    source.gainNode.gain.value = volume; // Math.min(2, Math.max(0, volume));
 
-  offlineCtx.startRendering();
-  return new Promise(function (resolve, reject) {
-    fnResolve = resolve;
-  });
+    source.gainNode.gain.linearRampToValueAtTime(source.gainNode.gain.value, len);
+    source.gainNode.gain.linearRampToValueAtTime(0.0, len + fadeTimeSec);
+
+    if (sound.cents) {
+      source.playbackRate.value = centsToFactor(sound.cents);
+    } // connect all the nodes
+
+
+    if (source.panNode) {
+      source.panNode.connect(offlineCtx.destination);
+      source.gainNode.connect(source.panNode);
+    } else {
+      source.gainNode.connect(offlineCtx.destination);
+    }
+
+    source.connect(source.gainNode); // Do the process of creating the sound and placing it in the buffer
+
+    source.start(0);
+
+    if (source.noteOff) {
+      source.noteOff(len + fadeTimeSec);
+    } else {
+      source.stop(len + fadeTimeSec);
+    }
+
+    var fnResolve;
+
+    offlineCtx.oncomplete = function (e) {
+      if (e.renderedBuffer) {
+        // If the system gets overloaded then this can start failing. Just drop the note if so.
+        for (var i = 0; i < startArray.length; i++) {
+          //Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
+          var start = startArray[i] * sound.tempoMultiplier;
+          if (ofsMs) start -= ofsMs / 1000;
+          if (start < 0) start = 0; // If the item that is moved back is at the very beginning of the buffer then don't move it back. To do that would be to push everything else forward. TODO-PER: this should probably be done at some point but then it would change timing in existing apps.
+
+          start = Math.floor(start * sampleRate);
+          copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
+        }
+      }
+
+      fnResolve();
+    };
+
+    offlineCtx.startRendering();
+    return new Promise(function (resolve) {
+      fnResolve = resolve;
+    });
+  })["catch"](function () {});
 }
 
 var copyToChannel = function copyToChannel(toBuffer, fromBuffer, start) {
@@ -16541,9 +16490,10 @@ AbsoluteElement.prototype.addRight = function (right) {
 
   if (right.bottom !== undefined) {
     if (this.fixed.b === undefined) this.fixed.b = right.bottom;else this.fixed.b = Math.min(this.fixed.b, right.bottom);
-  }
+  } // if (isNaN(this.fixed.t) || isNaN(this.fixed.b))
+  // 	debugger;
 
-  if (isNaN(this.fixed.t) || isNaN(this.fixed.b)) debugger;
+
   if (right.dx + right.w > this.w) this.w = right.dx + right.w;
   this.right[this.right.length] = right;
 
@@ -19215,6 +19165,7 @@ EngraverController.prototype.getMeasureWidths = function (abcTune) {
 
 EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
   this.classes.reset();
+  if (abcTune.formatting.jazzchords !== undefined) this.jazzchords = abcTune.formatting.jazzchords;
   this.renderer.newTune(abcTune);
   this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
     bagpipes: abcTune.formatting.bagpipes,
@@ -20023,11 +19974,14 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 RelativeElement.prototype.getChordDim = function () {
   if (this.type === "debug") return null;
   if (!this.chordHeightAbove && !this.chordHeightBelow) return null; // Chords are centered, annotations are left justified.
+  // NOTE: the font reports extra space to the left and right anyway, so there is a built in margin.
   // We add a little margin so that items can't touch - we use half the font size as the margin, so that is 1/4 on each side.
   // if there is only one character that we're printing, use half of that margin.
+  // var margin = this.dim.font.size/4;
+  // if (this.c.length === 1)
+  // 	margin = margin / 2;
 
-  var margin = this.dim.font.size / 4;
-  if (this.c.length === 1) margin = margin / 2;
+  var margin = 0;
   var offset = this.type === "chord" ? this.realWidth / 2 : 0;
   var left = this.x - offset - margin;
   var right = left + this.realWidth + margin;
@@ -23306,8 +23260,8 @@ function formatJazzChord(chordString) {
   for (var i = 0; i < lines.length; i++) {
     var chord = lines[i]; // If the chord isn't in a recognizable format then just skip the formatting.
 
-    var reg = chord.match(/([ABCDEFG][♯♭]?)([^\/]+)?(\/[ABCDEFG][#b]?)?/);
-    if (reg) lines[i] = reg[1] + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
+    var reg = chord.match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/[ABCDEFG][#b]?)?/);
+    if (reg) lines[i] = (reg[1] ? reg[1] : '') + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
   }
 
   return lines.join("\n");
@@ -24691,7 +24645,8 @@ function moveDecorations(beam) {
 }
 
 function placeInLane(rightMost, relElem) {
-  // These items are centered so figure the coordinates accordingly and add a little margin.
+  // These items are centered so figure the coordinates accordingly.
+  // The font reports some extra space so the margin is built in.
   var xCoords = relElem.getChordDim();
 
   if (xCoords) {
@@ -25523,8 +25478,9 @@ Svg.prototype.text = function (text, attr, target) {
       }
 
       if (parts[2]) {
+        var dist = parts[1] ? "0.4em" : "0.1em";
         var ts3 = document.createElementNS(svgNS, 'tspan');
-        ts3.setAttribute("dy", "0.1em");
+        ts3.setAttribute("dy", dist);
         ts3.setAttribute("style", "font-size:0.7em");
         ts3.textContent = parts[2];
         line.appendChild(ts3);
