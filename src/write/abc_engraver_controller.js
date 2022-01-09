@@ -16,7 +16,7 @@ var Classes = require('./classes');
 var GetFontAndAttr = require('./get-font-and-attr');
 var GetTextSize = require('./get-text-size');
 var draw = require('./draw/draw');
-var calcHeight = require('./calcHeight');
+var tablatures = require('../api/abc_tablatures');
 
 /**
  * @class
@@ -38,11 +38,11 @@ var EngraverController = function(paper, params) {
   this.selectTypes = params.selectTypes;
   this.responsive = params.responsive;
   this.space = 3*spacing.SPACE;
-  this.initialClef = params.initialClef
+	this.initialClef = params.initialClef;
   this.scale = params.scale ? parseFloat(params.scale) : 0;
   this.classes = new Classes({ shouldAddClasses: params.add_classes });
   if (!(this.scale > 0.1))
-  	this.scale = undefined;
+    this.scale = undefined;
 
 	if (params.staffwidth) {
 		// Note: Normally all measurements to the engraver are in POINTS. However, if a person is formatting for the
@@ -95,10 +95,10 @@ EngraverController.prototype.engraveABC = function(abctunes, tuneNumber) {
 	this.reset();
 
   for (var i = 0; i < abctunes.length; i++) {
-  	if (tuneNumber === undefined)
-  		tuneNumber = i;
-	  this.getFontAndAttr = new GetFontAndAttr(abctunes[i].formatting, this.classes);
-	  this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
+    if (tuneNumber === undefined)
+      tuneNumber = i;
+    this.getFontAndAttr = new GetFontAndAttr(abctunes[i].formatting, this.classes);
+    this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
     this.engraveTune(abctunes[i], tuneNumber);
   }
 };
@@ -235,6 +235,11 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
 
 	// Do all the positioning, both horizontally and vertically
 	var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
+
+	// Deal with tablature for staff
+	if (abcTune.tablatures) {
+		tablatures.layoutTablatures(this.renderer, abcTune);
+	}
 
 	// Do all the writing to the SVG
 	var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber);

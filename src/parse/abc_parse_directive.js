@@ -39,6 +39,9 @@ var parseDirective = {};
 		tune.formatting.footerfont  = { face: "\"Times New Roman\"", size: 12, weight: "normal", style: "normal", decoration: "none" };
 		tune.formatting.headerfont  = { face: "\"Times New Roman\"", size: 12, weight: "normal", style: "normal", decoration: "none" };
 		tune.formatting.voicefont  = { face: "\"Times New Roman\"", size: 13, weight: "bold", style: "normal", decoration: "none" };
+		tune.formatting.tablabelfont  = { face: "\"Trebuchet MS\"", size: 16, weight: "normal", style: "none", decoration: "none" };
+		tune.formatting.tabnumberfont = { face: "\"Arial\"", size: 11, weight: "normal", style: "normal", decoration: "none" };
+		tune.formatting.tabgracefont = { face: "\"Arial\"", size: 8, weight: "normal", style: "normal", decoration: "none" };
 
 		// these are the default fonts for these element types. In the printer, these fonts might change as the tune progresses.
 		tune.formatting.annotationfont  = multilineVars.annotationfont;
@@ -390,7 +393,7 @@ var parseDirective = {};
 	var interpretPercMap = function(restOfString) {
 		var tokens = restOfString.split(/\s+/); // Allow multiple spaces.
 		if (tokens.length !== 2 && tokens.length !== 3)
-			return { error: 'Expected parameters "abc-note", "drum-sound", and optionally "note-head"'}
+			return { error: 'Expected parameters "abc-note", "drum-sound", and optionally "note-head"'};
 		var key = tokens[0];
 		// The percussion sound can either be a MIDI number or a drum name. If it is not a number then check for a name.
 		var pitch = parseInt(tokens[1], 10);
@@ -403,7 +406,7 @@ var parseDirective = {};
 		if (tokens.length === 3)
 			value.noteHead = tokens[2];
 		return { key: key, value: value };
-	}
+	};
 
 	var getRequiredMeasurement = function(cmd, tokens) {
 		var points = tokenizer.getMeasurement(tokens);
@@ -875,13 +878,13 @@ var parseDirective = {};
 				break;
 			case "begintext":
 				var textBlock = '';
-				line = tokenizer.nextLine()
+				line = tokenizer.nextLine();
 				while(line && line.indexOf('%%endtext') !== 0) {
 					if (parseCommon.startsWith(line, "%%"))
 						textBlock += line.substring(2) + "\n";
 					else
 						textBlock += line + "\n";
-					line = tokenizer.nextLine()
+					line = tokenizer.nextLine();
 				}
 				tuneBuilder.addText(textBlock, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+textBlock.length+7});
 				break;
@@ -889,9 +892,9 @@ var parseDirective = {};
 				multilineVars.continueall = true;
 				break;
 			case "beginps":
-				line = tokenizer.nextLine()
+				line = tokenizer.nextLine();
 				while(line && line.indexOf('%%endps') !== 0) {
-					tokenizer.nextLine()
+					tokenizer.nextLine();
 				}
 				warn("Postscript ignored", str, 0);
 				break;
@@ -1152,6 +1155,9 @@ var parseDirective = {};
 					case "vocalfont":
 					case "wordsfont":
 					case "annotationfont":
+					case "tablabelfont":
+					case "tabnumberfont":
+					case "tabgracefont":
 						getChangingFont(cmd, tokens, value);
 						break;
 					case "scale":

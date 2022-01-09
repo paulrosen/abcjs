@@ -2,6 +2,8 @@
 
 var Parse = require('../parse/abc_parse');
 var bookParser = require('../parse/abc_parse_book');
+var tablatures = require('./abc_tablatures');
+
 
 var tunebook = {};
 
@@ -81,6 +83,13 @@ var tunebook = {};
 				if (currentTune >= 0 && currentTune < book.tunes.length) {
 					abcParser.parse(book.tunes[currentTune].abc, params, book.tunes[currentTune].startPos - book.header.length);
 					var tune = abcParser.getTune();
+					//
+					// Init tablatures plugins
+					//
+					if (params.tablature) {
+						tablatures.init();
+						tune.tablatures = tablatures.preparePlugins(tune, currentTune, params);
+					}
 					var warnings = abcParser.getWarnings();
 					if (warnings)
 						tune.warnings = warnings;
@@ -93,7 +102,7 @@ var tunebook = {};
 			}
 			currentTune++;
 		}
-		return ret;
+	  return ret;
 	};
 
 	function flattenTune(tuneObj) {

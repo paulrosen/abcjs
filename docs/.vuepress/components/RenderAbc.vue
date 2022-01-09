@@ -12,6 +12,11 @@
 			abc: {
 				type: String,
 				required: true
+			},
+			options: {
+				type: Object,
+				required: false,
+				default: {}
 			}
 		},
 		data() {
@@ -24,7 +29,7 @@
 			nextTick(() => {
 				const abcjs = require('../../../index');
 				const el = this.$refs.paper;
-				this.visualObj = abcjs.renderAbc(el, this.abc, this.defaultOptions);
+				this.visualObj = abcjs.renderAbc(el, this.abc, this.defaultOptions, this.options);
 			});
 		},
 		methods: {

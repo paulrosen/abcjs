@@ -9,7 +9,7 @@ function drawRelativeElement(renderer, params, bartop) {
 	var y = renderer.calcY(params.pitch);
 	switch(params.type) {
 		case "symbol":
-			if (params.c===null) return null;
+			if (params.c === null) return null;
 			var klass = "symbol";
 			if (params.klass) klass += " " + params.klass;
 			params.graphelem = printSymbol(renderer, params.x, params.pitch, params.c, {
@@ -22,7 +22,19 @@ function drawRelativeElement(renderer, params, bartop) {
 			});
 			break;
 		case "debug":
-			params.graphelem = renderText(renderer, { x: params.x, y: renderer.calcY(15), text: ""+params.c, type: "debugfont", klass: renderer.controller.classes.generate('debug-msg'), anchor: 'start', centerVertically: false, dim: params.dim}, false); break;
+			params.graphelem = renderText(renderer, { x: params.x, y: renderer.calcY(15), text: "" + params.c, type: "debugfont", klass: renderer.controller.classes.generate('debug-msg'), anchor: 'start', centerVertically: false, dim: params.dim }, false);
+			break;
+		case "tabNumber":
+			var hAnchor = "middle";
+			var tabFont = "tabnumberfont";
+			var tabClass = 'tab-number';
+			if (params.isGrace) {
+				tabFont = "tabgracefont";
+				y += 2.5;
+				tabClass = 'tab-grace'
+			}
+			params.graphelem = renderText(renderer, { x: params.x, y: y, text: "" + params.c, type: tabFont, klass: renderer.controller.classes.generate(tabClass), anchor: hAnchor, centerVertically: false, dim: params.dim , cursor: 'default'}, false);
+			break;
 		case "barNumber":
 			params.graphelem = renderText(renderer, { x: params.x, y: y, text: ""+params.c, type: "measurefont", klass: renderer.controller.classes.generate('bar-number'), anchor: "middle", dim: params.dim, name: "bar-number"}, true);
 			break;

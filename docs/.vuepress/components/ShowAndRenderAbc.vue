@@ -1,7 +1,7 @@
 <template>
 	<div class="show-and-render">
 		<div class="language- extra-class"><pre class="language-text"><code>{{abc}}</code></pre></div>
-		<render-abc :abc="abc"></render-abc>
+		<render-abc :abc="abc" :options="options"></render-abc>
 	</div>
 </template>
 
@@ -15,6 +15,11 @@
 			abc: {
 				type: String,
 				required: true
+			},
+			options: {
+				type: Object,
+				required: false,
+				default: {}
 			}
 		},
 		data() {

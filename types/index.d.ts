@@ -48,7 +48,7 @@ declare module 'abcjs' {
 
 	export type FormatAttributes = "titlefont" | "gchordfont" | "composerfont" | "footerfont" | "headerfont" | "historyfont" | "infofont" |
 		"measurefont" | "partsfont" | "repeatfont" | "subtitlefont" | "tempofont" | "textfont" | "voicefont" | "tripletfont" | "vocalfont" |
-		"wordsfont" | "annotationfont" | "scale" | "partsbox" | "freegchord" | "fontboxpadding" | "stretchlast";
+		"wordsfont" | "annotationfont" | "scale" | "partsbox" | "freegchord" | "fontboxpadding" | "stretchlast" | "tablabelfont" | "tabnumberfont" | "tabgracefont";
 
 	export type MidiCommands = "nobarlines" | "barlines" | "beataccents" | "nobeataccents" | "droneon" | "droneoff" | "noportamento" | "channel" | "c" |
 		"drumon" | "drumoff" | "fermatafixed" | "fermataproportional" | "gchordon" | "gchordoff" | "bassvol" | "chordvol" |
@@ -485,6 +485,9 @@ declare module 'abcjs' {
 		partsfont: Font;
 		repeatfont: Font;
 		subtitlefont: Font;
+		tabgracefont: Font;
+		tablabelfont: Font;
+		tabnumberfont: Font;
 		tempofont: Font;
 		textfont: Font;
 		titlefont: Font;

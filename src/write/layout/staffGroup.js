@@ -1,5 +1,22 @@
 var layoutVoiceElements = require('./VoiceElements');
 
+function checkLastBarX(voices) {
+	var maxX = 0;
+	for (var i = 0; i < voices.length; i++) {
+		var curVoice = voices[i];
+		var lastChild = curVoice.children.length - 1;
+		var maxChild = curVoice.children[lastChild];
+		if (maxChild.abcelem.el_type == 'bar') {
+			var barX = maxChild.children[0].x;
+			if (barX > maxX) {
+				maxX = barX;
+			} else {
+				maxChild.children[0].x = maxX;
+			}
+		}
+	}
+}
+
 var layoutStaffGroup = function(spacing, renderer, debug, staffGroup, leftEdge) {
 	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
 	var spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
@@ -94,6 +111,9 @@ var layoutStaffGroup = function(spacing, renderer, debug, staffGroup, leftEdge) 
 			spacingunit=layoutVoiceElements.getSpacingUnits(staffGroup.voices[i]);
 		}
 	}
+
+	// adjust lastBar when needed (multi staves)
+	checkLastBarX(staffGroup.voices);
 	//console.log("greatest remaining",spacingunit,x);
 	spacingunits+=spacingunit;
 	staffGroup.setWidth(x);
@@ -118,7 +138,7 @@ function isSameStaff(voice1, voice2) {
 		return false;
 	if (!voice2 || !voice2.staff || !voice2.staff.voices || voice2.staff.voices.length === 0)
 		return false;
-	return (voice1.staff.voices[0] === voice2.staff.voices[0])
+	return (voice1.staff.voices[0] === voice2.staff.voices[0]);
 }
 
 module.exports = layoutStaffGroup;
