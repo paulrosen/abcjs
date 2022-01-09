@@ -935,3 +935,38 @@ function doVerticalTest(abc, expected, tabParams, params) {
 		chai.assert.equal(dim.y, expected[i], "Vertical spacing of staves wrong")
 	}
 }
+
+// TODO-PER: Here are some more failures:
+// X:19
+// K:C
+// a,
+//
+// X:45
+// K:Am
+// [d'e'']
+//
+// X:1
+// K:C
+// [^F,_G,]
+//
+// X:1
+// T:small-notes
+// M: 4/4
+// L: 1/8
+// K: Bb
+// %%score (1 2)
+// V:1
+// FF|:"Bb"DDE2=EF3|x8|BB_AG "F7"FG3|x8|
+// "Bb"FB2F"Bb7"B2FF|"Eb"B2Bc- "Ebm"c4|"Bb"zB _AG FDE=E|1"F7"F2_DB,-"Bb"B,2"F+7"zF:|2"F7"F2_DB,-"Bb"B,4||
+// B2_AG FG3 | x8 & B2_AG FG3|BB_AG "F7"FG3|x8 & [I:voicescale 0.6] DDE2=EF3 |
+// V:2 cue=on
+// xx|:x8|DDE2=EF3|x8|"Bb"BF_AG "F7"FG3|
+//
+// X:1
+// T: spacer-in-triplet
+// K: F
+// %%score (L R)
+// V: L
+// d2 d2 (3 c2 y A2 G2 | F8 |
+// V: R
+// G2 G2 E2 y2/3 E2 | D8 |
