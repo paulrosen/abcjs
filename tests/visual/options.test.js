@@ -46,7 +46,7 @@ describe("Visual Options", function() {
 	'%%text more extra text\n';
 
 	var expected10 = [
-		[{"tag":"text","text":"fonts","x":348,"y":22,"w":67,"h":49},{"tag":"path","text":"","x":348,"y":23,"w":74,"h":56}],
+		[{"tag":"text","text":"fonts","x":348,"y":22,"w":67,"h":49},{"tag":"path","text":"","x":349,"y":23,"w":74,"h":56}],
 		[{"tag":"text","text":"changing all fonts","x":295,"y":99,"w":179,"h":26},{"tag":"path","text":"","x":293,"y":94,"w":185,"h":32}],
 		[{"tag":"text","text":"hopping","x":17,"y":142,"w":63,"h":19},{"tag":"path","text":"","x":15,"y":141,"w":67,"h":23}],
 		[{"tag":"text","text":"composer (Origin)","x":666,"y":143,"w":88,"h":12},{"tag":"path","text":"","x":665,"y":141,"w":91,"h":16}],
