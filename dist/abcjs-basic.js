@@ -775,6 +775,8 @@ var Parse = __webpack_require__(/*! ../parse/abc_parse */ "./src/parse/abc_parse
 
 var bookParser = __webpack_require__(/*! ../parse/abc_parse_book */ "./src/parse/abc_parse_book.js");
 
+var tablatures = __webpack_require__(/*! ./abc_tablatures */ "./src/api/abc_tablatures.js");
+
 var tunebook = {};
 
 (function () {
@@ -849,7 +851,15 @@ var tunebook = {};
       if (div) {
         if (currentTune >= 0 && currentTune < book.tunes.length) {
           abcParser.parse(book.tunes[currentTune].abc, params, book.tunes[currentTune].startPos - book.header.length);
-          var tune = abcParser.getTune();
+          var tune = abcParser.getTune(); //
+          // Init tablatures plugins
+          //
+
+          if (params.tablature) {
+            tablatures.init();
+            tune.tablatures = tablatures.preparePlugins(tune, currentTune, params);
+          }
+
           var warnings = abcParser.getWarnings();
           if (warnings) tune.warnings = warnings;
           var override = callback(div, tune, i, book.tunes[currentTune].abc);
@@ -1047,9 +1057,8 @@ var Parse = __webpack_require__(/*! ../parse/abc_parse */ "./src/parse/abc_parse
 
 var wrap = __webpack_require__(/*! ../parse/wrap_lines */ "./src/parse/wrap_lines.js");
 
-var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
+var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js"); // var tablatures = require('./abc_tablatures');
 
-var tablatures = __webpack_require__(/*! ./abc_tablatures */ "./src/api/abc_tablatures.js");
 
 var resizeDivs = {};
 
@@ -1093,14 +1102,7 @@ function renderOne(div, tune, params, tuneNumber) {
     div = div.children[0]; // The music should be rendered in the inner div.
   } else div.innerHTML = "";
 
-  var engraver_controller = new EngraverController(div, params); // 
-
-  if (params.tablature) {
-    tablatures.init();
-    tune.tablatures = tablatures.preparePlugins(tune, tuneNumber, params);
-  } //
-
-
+  var engraver_controller = new EngraverController(div, params);
   engraver_controller.engraveABC(tune, tuneNumber);
   tune.engraver = engraver_controller;
 
@@ -16650,7 +16652,6 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 Plugin.prototype.render = function (renderer, line, staffIndex) {
   if (this._super.inError) return;
   if (this.tablature.bypass(line)) return;
-  console.log('GuitarTab plugin rendered');
   setGuitarFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
   rndrer.doLayout();
@@ -17482,7 +17483,6 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 Plugin.prototype.render = function (renderer, line, staffIndex) {
   if (this._super.inError) return;
   if (this.tablature.bypass(line)) return;
-  console.log('ViolinTab plugin rendered');
   setViolinFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
   rndrer.doLayout();
@@ -17974,7 +17974,6 @@ TabCommon.prototype.setError = function (error) {
   var tune = this.tune;
 
   if (error) {
-    console.log("tab error set :" + error);
     this.error = error;
     this.inError = true;
 
@@ -21276,23 +21275,17 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
   abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
 };
 
-function dumpTune(abcTune) {
-  console.log(abcTune.lines);
-}
-
 EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
   var scale = this.setupTune(abcTune, tuneNumber); // Create all of the element objects that will appear on the page.
 
   this.constructTuneElements(abcTune); // Do all the positioning, both horizontally and vertically
 
-  var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
-  dumpTune(abcTune); // Deal with tablature for staff
+  var maxWidth = layout(this.renderer, abcTune, this.width, this.space); // Deal with tablature for staff
 
   if (abcTune.tablatures) {
     tablatures.layoutTablatures(this.renderer, abcTune);
-  }
+  } // Do all the writing to the SVG
 
-  dumpTune(abcTune); // Do all the writing to the SVG
 
   var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber);
   this.staffgroups = ret.staffgroups;

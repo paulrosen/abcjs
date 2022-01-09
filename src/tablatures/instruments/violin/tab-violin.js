@@ -30,7 +30,6 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 Plugin.prototype.render = function (renderer, line, staffIndex) {
   if (this._super.inError) return;
   if (this.tablature.bypass(line)) return;
-  console.log('ViolinTab plugin rendered');
   setViolinFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
   rndrer.doLayout();

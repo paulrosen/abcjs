@@ -15,7 +15,6 @@ function TabCommon(abcTune, tuneNumber, params) {
 TabCommon.prototype.setError = function (error) {
   var tune = this.tune;
   if (error) {
-    console.log("tab error set :" + error);
     this.error = error;
     this.inError = true;
     if (tune.warnings) {
