@@ -49,6 +49,7 @@ var SynthController = require('../synth/synth-controller');
 var supportsAudio = require('../synth/supports-audio');
 var renderAbc = require('../api/abc_tunebook_svg');
 var EditArea = require('./abc_editarea');
+const {pluginEvent} = require("../api/plugins");
 
 function gatherAbcParams(params) {
 	// There used to be a bunch of ways parameters can be passed in. This just simplifies it.
@@ -117,15 +118,7 @@ var Editor = function(editarea, params) {
   this.clientClickListener = this.abcjsParams.clickListener;
   this.abcjsParams.clickListener = this.highlight.bind(this);
 
-  if (params.synth) {
-  	if (supportsAudio()) {
-	    this.synth = {
-		    el: params.synth.el,
-		    cursorControl: params.synth.cursorControl,
-		    options: params.synth.options
-	    }
-    }
-  }
+	params = pluginEvent("editor-create", {editor: this, params: params})
 	// If the user wants midi, then store the elements that it will be written to. The element could either be passed in as an id,
 	// an element, or nothing. If nothing is passed in, then just put the midi on top of the generated music.
 	if (params.generate_midi) {

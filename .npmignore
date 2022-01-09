@@ -1,19 +1,15 @@
 .idea/
-bin/
-build-utils/
 docs/
 examples/
 font_generator/
 tests/
-tmp/
 
-.babelrc
 .eslintrc
 .gitmodules
 deploy-docs.sh
-docker-start.sh
-docker-compose.yml
+docker-*
 Dockerfile
 start-version.sh
-webpack.config.js
 to-*.sh
+tsconfig.json
+webpack.config.js
