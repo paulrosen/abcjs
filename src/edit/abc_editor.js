@@ -242,10 +242,10 @@ Editor.prototype.modelChanged = function() {
 		}
 		this.redrawMidi();
 	} catch(error) {
-		console.error("ABCJS error: ", error)
+		console.error("ABCJS error: ", error);
 		if (!this.warnings)
 			this.warnings = [];
-		this.warnings.push(error.message)
+		this.warnings.push(error.message);
 	}
 
   if (this.warningsdiv) {

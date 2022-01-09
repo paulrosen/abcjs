@@ -5,7 +5,7 @@ var EngraverController = require('../write/abc_engraver_controller');
 var Parse = require('../parse/abc_parse');
 var wrap = require('../parse/wrap_lines');
 var parseCommon = require("../parse/abc_common");
-var tablatures = require('./abc_tablatures');
+// var tablatures = require('./abc_tablatures');
 
 
 var resizeDivs = {};
@@ -50,12 +50,6 @@ function renderOne(div, tune, params, tuneNumber) {
     else
 	    div.innerHTML = "";
     var engraver_controller = new EngraverController(div, params);
-    // 
-    if (params.tablature) {
-        tablatures.init();
-        tune.tablatures = tablatures.preparePlugins(tune, tuneNumber, params);
-    }
-    //
     engraver_controller.engraveABC(tune, tuneNumber);
     tune.engraver = engraver_controller;
     if (params.viewportVertical || params.viewportHorizontal) {
@@ -149,7 +143,7 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
         }
     }
     if (currentScrollX || currentScrollY) {
-        div.parentNode.scrollTo(currentScrollX, currentScrollY)
+        div.parentNode.scrollTo(currentScrollX, currentScrollY);
     }
 }
 
