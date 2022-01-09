@@ -767,7 +767,6 @@ describe("Tablature", function () {
 		var i;
 		for (i = 0; i < noteheads.length; i++) {
 			var dim = noteheads[i].getBBox()
-			console.log(dim)
 			var guide = document.createElementNS("http://www.w3.org/2000/svg", "line");
 			guide.setAttribute("class", "abcjs-cursor");
 			guide.setAttribute('x1', dim.x);

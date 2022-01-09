@@ -48,7 +48,6 @@ var abcTablatures = {
    * @return prepared tablatures plugin instances for current tune
    */
   preparePlugins: function (tune, tuneNumber, params) {
-    console.log('Tablatures plugins manager preparing Plugins ...');
     var returned = null;
     var nbPlugins = 0;
     if (params.tablature) {
@@ -91,7 +90,6 @@ var abcTablatures = {
         }
       }
     }
-    console.log('Tablatures plugins manager ' + nbPlugins + ' Plugin(s) ready');
     return returned;
   },
 
