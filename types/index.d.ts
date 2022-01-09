@@ -971,7 +971,6 @@ declare module 'abcjs' {
 		isDirty(): boolean;
 		pause(shouldPause: boolean): void;
 		millisecondsPerMeasure(): number;
-		pauseMidi(shouldPause: boolean): void;
 	}
 
 	//

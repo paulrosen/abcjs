@@ -1,5 +1,5 @@
-var tunebook = require('../api/abc_tunebook');
-var midiCreate = require('../midi/abc_midi_create');
+//var tunebook = require('../../src/api/abc_tunebook');
+var midiCreate = require('./abc_midi_create');
 
 var getMidiFile = function(source, options) {
 	var params = {};
@@ -35,9 +35,9 @@ var getMidiFile = function(source, options) {
 		}
 	}
 
-	if (typeof source === "string")
-		return tunebook.renderEngine(callback, "*", source, params);
-	else
+	// if (typeof source === "string")
+	// 	return tunebook.renderEngine(callback, "*", source, params);
+	// else
 		return callback(null, source, 0);
 };
 

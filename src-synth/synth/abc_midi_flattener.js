@@ -5,8 +5,8 @@
 // It also extracts guitar chords to a separate voice and resolves their rhythm.
 
 var flatten;
-var parseCommon = require("../parse/abc_common");
-var pitchesToPerc = require('./pitches-to-perc');
+var parseCommon = require("../../src/parse/abc_common");
+var pitchesToPerc = require('../../src/data/pitches-to-perc');
 
 (function() {
 	"use strict";

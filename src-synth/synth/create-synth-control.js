@@ -1,7 +1,7 @@
 var supportsAudio = require('./supports-audio');
 var registerAudioContext = require('./register-audio-context');
 var activeAudioContext = require('./active-audio-context');
-var parseCommon = require('../parse/abc_common');
+var parseCommon = require('../../src/parse/abc_common');
 
 var loopImage = require('./images/loop.svg.js');
 var playImage = require('./images/play.svg.js');

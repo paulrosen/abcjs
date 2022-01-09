@@ -2,8 +2,6 @@
 
 var parseCommon = require('../parse/abc_common');
 var spacing = require('../write/abc_spacing');
-var sequence = require('../synth/abc_midi_sequencer');
-var flatten = require('../synth/abc_midi_flattener');
 var delineTune = require("./deline-tune");
 
 /**
@@ -606,11 +604,6 @@ var Tune = function() {
 		return this.noteTimings;
 	};
 
-	this.setUpAudio = function(options) {
-		if (!options) options = {};
-		var seq = sequence(this, options);
-		return flatten(seq, options, this.formatting.percmap);
-	};
 	this.deline = function(options) {
 		return delineTune(this.lines, options);
 	}

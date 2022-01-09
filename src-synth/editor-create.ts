@@ -1,17 +1,14 @@
-var supportsAudio = require('../src/synth/supports-audio')
+var editorCreate = function(options: any) : any {
+	var supportsAudio = require('./synth/supports-audio')
+	var synthObject = require('../src-synth/synth-object')
 
-var editorCreate = function(params: any) : any {
-	if (params.synth) {
+	if (options.synth) {
 		if (supportsAudio()) {
-			this.synth = {
-				el: params.synth.el,
-				cursorControl: params.synth.cursorControl,
-				options: params.synth.options
-			}
+			synthObject(options.synth)
 		}
 	}
-	console.log("editorCreate", params)
-	return params
+	console.log("editorCreate", options)
+	return options
 }
 
-module .exports = editorCreate
+module.exports = editorCreate

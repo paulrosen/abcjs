@@ -14,7 +14,8 @@
     "test": "mocha 'tests/**/*.js'",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
-    "build:analyze": "npm run build:basic -- --env analyze"
+    "build:analyze": "npm run build:basic -- --env analyze",
+    "build:analyze:synth": "npm run build:synth -- --env analyze"
   },
   "repository": {
     "type": "git",

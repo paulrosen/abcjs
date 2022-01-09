@@ -18,7 +18,7 @@ var TieElem = require('./abc_tie_element');
 var TripletElem = require('./abc_triplet_element');
 var VoiceElement = require('./abc_voice_element');
 var addChord = require('./add-chord');
-var pitchesToPerc = require('../synth/pitches-to-perc')
+var pitchesToPerc = require('../data/pitches-to-perc')
 
 var parseCommon = require('../parse/abc_common');
 

@@ -45,8 +45,6 @@
 //		Stops the automatic rendering when the user is typing.
 //
 var parseCommon = require('../parse/abc_common');
-var SynthController = require('../synth/synth-controller');
-var supportsAudio = require('../synth/supports-audio');
 var renderAbc = require('../api/abc_tunebook_svg');
 var EditArea = require('./abc_editarea');
 const {pluginEvent} = require("../api/plugins");
@@ -186,29 +184,6 @@ var Editor = function(editarea, params) {
   };
 };
 
-Editor.prototype.redrawMidi = function() {
-	if (this.generate_midi && !this.midiPause) {
-		var event = new window.CustomEvent("generateMidi", {
-			detail: {
-				tunes: this.tunes,
-				abcjsParams: this.abcjsParams,
-				downloadMidiEl: this.downloadMidi,
-				inlineMidiEl: this.inlineMidi,
-				engravingEl: this.div
-			}
-		});
-		window.dispatchEvent(event);
-	}
-	if (this.synth) {
-		var userAction = this.synth.synthControl; // Can't really tell if there was a user action before drawing, but we assume that if the synthControl was created already there was a user action.
-		if (!this.synth.synthControl) {
-			this.synth.synthControl = new SynthController();
-			this.synth.synthControl.load(this.synth.el, this.synth.cursorControl, this.synth.options);
-		}
-		this.synth.synthControl.setTune(this.tunes[0], userAction, this.synth.options);
-	}
-};
-
 Editor.prototype.modelChanged = function() {
   if (this.bReentry)
     return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
@@ -222,7 +197,7 @@ Editor.prototype.modelChanged = function() {
 		if (this.tunes.length > 0) {
 			this.warnings = this.tunes[0].warnings;
 		}
-		this.redrawMidi();
+		pluginEvent("redraw", {visualObj: this.tunes, params: this.abcjsParams})
 	} catch(error) {
 		console.error("ABCJS error: ", error)
 		if (!this.warnings)
@@ -373,15 +348,9 @@ Editor.prototype.pause = function(shouldPause) {
 };
 
 Editor.prototype.millisecondsPerMeasure = function() {
-	if (!this.synth || !this.synth.synthControl || !this.synth.synthControl.visualObj)
-		return 0;
-	return this.synth.synthControl.visualObj.millisecondsPerMeasure();
-};
-
-Editor.prototype.pauseMidi = function(shouldPause) {
-	this.midiPause = shouldPause;
-	if (!shouldPause)
-		this.redrawMidi();
+	var ret = this.tunes[0].millisecondsPerMeasure();
+	if (!ret) ret = 0
+	return 0
 };
 
 module.exports = Editor;

@@ -12,7 +12,7 @@
   <script src="../dist/abcjs-basic-min.js" type="text/javascript"></script>
   <script src="../dist/abcjs-synth-min.js" type="text/javascript"></script>
   <script type="text/javascript">
-	  ABCJS.registerPlugin(SYNTH)
+	  SYNTH("register", ABCJS)
     var abcjsEditor;
 
     window.onload = function () {
@@ -55,7 +55,7 @@
     function downloadMidi() {
    		var abc = document.getElementById("abc").value;
    		var a = document.getElementById("midi-download");
-   		var midi = ABCJS.synth.getMidiFile(abc, { midiOutputType: "encoded" })
+   		var midi = ABCJS.synth.getMidiFile(abcjsEditor.tunes[0], { midiOutputType: "encoded" })
 		a.setAttribute("href", midi)
 		a.click();
 	}
