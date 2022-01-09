@@ -39,7 +39,7 @@ var parseDirective = {};
 		tune.formatting.footerfont  = { face: "\"Times New Roman\"", size: 12, weight: "normal", style: "normal", decoration: "none" };
 		tune.formatting.headerfont  = { face: "\"Times New Roman\"", size: 12, weight: "normal", style: "normal", decoration: "none" };
 		tune.formatting.voicefont  = { face: "\"Times New Roman\"", size: 13, weight: "bold", style: "normal", decoration: "none" };
-		tune.formatting.tablabelfont  = { face: "\"Trebuchet MS\"", size: 16, weight: "normal", style: "none", decoration: "none" };
+		tune.formatting.tablabelfont  = { face: "\"Trebuchet MS\"", size: 16, weight: "normal", style: "normal", decoration: "none" };
 		tune.formatting.tabnumberfont = { face: "\"Arial\"", size: 11, weight: "normal", style: "normal", decoration: "none" };
 		tune.formatting.tabgracefont = { face: "\"Arial\"", size: 8, weight: "normal", style: "normal", decoration: "none" };
 
