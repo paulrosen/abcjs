@@ -578,13 +578,23 @@ describe("Tablature", function () {
 		"T:Inserted subtitle\n" +
 		"[V: PianoLeftHand] B,6 .D2 !arpeggio![F,8F8A,8]|(B,2 B,,2 C,12)|\"^annotation\"F,16|[F,16D,16]|Z2|]\n"
 
+	var kitchenSinkOutput = [
+		// TODO-PER: dummy values for now. Pick reasonable numbers when the staves are placed correctly
+		1,2,3,4
+	]
+
 	var octaveClef = "X: 1\n" +
 		"K: C treble-8\n" +
 		" G, G | g g' |\n"
 
 	var octaveClefOutput = [
 		[
-
+			{"el_type":"note","startChar":20,"endChar":23,"notes":[{"num":"?","str":3,"pitch":"G,"}]},
+			{"el_type":"note","startChar":23,"endChar":25,"notes":[{"num":0,"str":3,"pitch":"G"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":26,"startChar":25},
+			{"el_type":"note","startChar":26,"endChar":29,"notes":[{"num":5,"str":2,"pitch":"g"}]},
+			{"el_type":"note","startChar":29,"endChar":32,"notes":[{"num":3,"str":0,"pitch":"g'"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":33,"startChar":32}
 		]
 	]
 
@@ -604,9 +614,17 @@ describe("Tablature", function () {
 		"|1\"Gbmaj7\"DEGB:|\n"
 
 	var unusualFontSizeOutput = [
-		[
-
-		]
+		// TODO-PER: These positions are just guesses - when the vertical is fixed then figure out reasonable numbers
+		930,
+		837,
+		744,
+		651,
+		558,
+		465,
+		372,
+		279,
+		186,
+		93,
 	]
 
 	var weirdNoteConstruction = "X:1\n" +
@@ -634,10 +652,14 @@ describe("Tablature", function () {
 		"[|]1 D z z A :|\n" +
 		"[|]2 D z F A [|] |\n"
 
+	// TODO-PER: get reasonable numbers when the output looks about right.
 	var staffPlacementOutput = [
-		[
-
-		]
+		1,
+		2,
+		3,
+		4,
+		5,
+		6
 	]
 	it("accidentals", function () {
 		doStaffTest(violinAllNotes, violinAllNotesOutput, violinParams);
@@ -708,7 +730,7 @@ describe("Tablature", function () {
 	});
 
 	it("font-size", function () {
-		doStaffTest(unusualFontSize, unusualFontSizeOutput, violinParams);
+		doVerticalTest(unusualFontSize, unusualFontSizeOutput, violinParams);
 	});
 
 	it("weird note construction", function () {
@@ -716,7 +738,7 @@ describe("Tablature", function () {
 	});
 
 	it("staff-placement", function () {
-		doStaffTest(staffPlacement, staffPlacementOutput, violinParams);
+		doVerticalTest(staffPlacement, staffPlacementOutput, violinParams);
 	});
 
 	it("fonts", function () {
@@ -825,14 +847,19 @@ describe("Tablature", function () {
 
 	it("bracket", function() {
 		var visualObj = doRender(bracketPlacement, violinGuitarParams)
-		// TODO-PER: need to finish test
-		chai.assert(false, "TODO")
+		var lastStaff = document.querySelector(".abcjs-staff.abcjs-l0.abcjs-v3")
+		var dim = lastStaff.getBBox()
+		var bottom = dim.y + dim.height
+		var brace = document.querySelector(".abcjs-brace")
+		dim = brace.getBBox()
+		var braceBottom = dim.y+dim.height
+		chai.assert.equal(braceBottom, bottom, "Brace should go to bottom")
+
+		doVerticalTest(bracketPlacement, bracketPlacementOutput, violinGuitarParams)
 	})
 
 	it("kitchen sink", function() {
-		var visualObj = doRender(kitchenSink, violinGuitarParams)
-		// TODO-PER: need to finish test
-		chai.assert(false, "TODO")
+		doVerticalTest(kitchenSink, kitchenSinkOutput, violinGuitarParams)
 	})
 
 	it("percussion clef", function() {
@@ -898,4 +925,14 @@ function doStaffTest(abc, expected, tabParams, params, callback) {
 		}
 	}
 	chai.assert.equal((lineLength-1) +staffNumber, expected.length, "different numbers of lines");
+}
+
+function doVerticalTest(abc, expected, tabParams, params) {
+	var visualObj = doRender(abc, tabParams, params);
+	var yPos = document.querySelectorAll(".abcjs-top-line")
+	for (var i = 0; i < yPos.length; i++) {
+		var topLine = yPos[i]
+		var dim = topLine.getBBox()
+		chai.assert.equal(dim.y, expected[i], "Vertical spacing of staves wrong")
+	}
 }
