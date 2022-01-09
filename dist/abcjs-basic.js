@@ -234,6 +234,161 @@ module.exports = animation;
 
 /***/ }),
 
+/***/ "./src/api/abc_tablatures.js":
+/*!***********************************!*\
+  !*** ./src/api/abc_tablatures.js ***!
+  \***********************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/*
+ * Tablature Plugins
+ * tablature are defined dynamically and registered inside abcjs
+ * by calling abcTablatures.register(plugin) 
+ * where plugin represents a plugin instance 
+ * 
+ */
+var ViolinTablature = __webpack_require__(/*! ../tablatures/instruments/violin/tab-violin */ "./src/tablatures/instruments/violin/tab-violin.js");
+
+var GuitarTablature = __webpack_require__(/*! ../tablatures/instruments/guitar/tab-guitar */ "./src/tablatures/instruments/guitar/tab-guitar.js");
+/* extend the table below when adding a new instrument plugin */
+// Existing tab classes 
+
+
+var pluginTab = {
+  'violin': 'ViolinTab',
+  'guitar': 'GuitarTab'
+};
+var abcTablatures = {
+  inited: false,
+  plugins: {},
+
+  /**
+   * to be called once per plugin for registration 
+   * @param {*} plugin 
+   */
+  register: function register(plugin) {
+    var name = plugin.name;
+    var tablature = plugin.tablature;
+    this.plugins[name] = tablature;
+  },
+  setError: function setError(tune, msg) {
+    if (tune.warnings) {
+      tune.warning.push(msg);
+    } else {
+      tune.warnings = [msg];
+    }
+  },
+
+  /**
+   * handle params for current processed score
+   * @param {*} tune current tune 
+   * @param {*} tuneNumber number in tune list
+   * @param {*} params params to be processed for tablature
+   * @return prepared tablatures plugin instances for current tune
+   */
+  preparePlugins: function preparePlugins(tune, tuneNumber, params) {
+    var returned = null;
+    var nbPlugins = 0;
+
+    if (params.tablature) {
+      // validate requested plugins 
+      var tabs = params.tablature;
+      returned = [];
+
+      for (var ii = 0; ii < tabs.length; ii++) {
+        var args = tabs[ii];
+        var instrument = args['instrument'];
+
+        if (instrument == null) {
+          this.setError(tune, "tablature 'instrument' is missing");
+          return returned;
+        }
+
+        var tabName = pluginTab[instrument];
+        var plugin = null;
+
+        if (tabName) {
+          plugin = this.plugins[tabName];
+        }
+
+        if (plugin) {
+          if (params.visualTranspose != 0) {
+            // populate transposition request to tabs
+            args.visualTranspose = params.visualTranspose;
+          }
+
+          args.abcSrc = params.tablature.abcSrc;
+          var pluginInstance = {
+            classz: plugin,
+            tuneNumber: tuneNumber,
+            params: args,
+            instance: null
+          }; // proceed with tab plugin  init 
+          // plugin.init(tune, tuneNumber, args, ii);
+
+          returned.push(pluginInstance);
+          nbPlugins++;
+        } else {
+          // unknown tab plugin 
+          //this.emit_error('Undefined tablature plugin: ' + tabName)
+          this.setError(tune, 'Undefined tablature plugin: ' + instrument);
+          return returned;
+        }
+      }
+    }
+
+    return returned;
+  },
+
+  /**
+   * Call requested plugin
+   * @param {*} renderer 
+   * @param {*} abcTune 
+   */
+  layoutTablatures: function layoutTablatures(renderer, abcTune) {
+    var tabs = abcTune.tablatures; // chack tabs request for each staffs
+
+    for (var ii = 0; ii < abcTune.lines.length; ii++) {
+      var line = abcTune.lines[ii];
+      var curStaff = line.staff;
+
+      if (curStaff) {
+        for (var jj = 0; jj < curStaff.length; jj++) {
+          if (tabs[jj]) {
+            // tablature requested for staff
+            var tabPlugin = tabs[jj];
+
+            if (tabPlugin.instance == null) {
+              tabPlugin.instance = new tabPlugin.classz(); // plugin.init(tune, tuneNumber, args, ii);
+              // call initer first
+
+              tabPlugin.instance.init(abcTune, tabPlugin.tuneNumber, tabPlugin.params, jj);
+            } // render next
+
+
+            tabPlugin.instance.render(renderer, line, jj);
+          }
+        }
+      }
+    }
+  },
+
+  /**
+   * called once internally to register internal plugins
+   */
+  init: function init() {
+    // just register plugin hosted by abcjs 
+    if (!this.inited) {
+      this.register(new ViolinTablature());
+      this.register(new GuitarTablature());
+      this.inited = true;
+    }
+  }
+};
+module.exports = abcTablatures;
+
+/***/ }),
+
 /***/ "./src/api/abc_timing_callbacks.js":
 /*!*****************************************!*\
   !*** ./src/api/abc_timing_callbacks.js ***!
@@ -611,12 +766,14 @@ module.exports = TimingCallbacks;
   \*********************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 //    abc_tunebook.js: splits a string representing ABC Music Notation into individual tunes.
 var Parse = __webpack_require__(/*! ../parse/abc_parse */ "./src/parse/abc_parse.js");
 
 var bookParser = __webpack_require__(/*! ../parse/abc_parse_book */ "./src/parse/abc_parse_book.js");
+
+var tablatures = __webpack_require__(/*! ./abc_tablatures */ "./src/api/abc_tablatures.js");
 
 var tunebook = {};
 
@@ -692,7 +849,15 @@ var tunebook = {};
       if (div) {
         if (currentTune >= 0 && currentTune < book.tunes.length) {
           abcParser.parse(book.tunes[currentTune].abc, params, book.tunes[currentTune].startPos - book.header.length);
-          var tune = abcParser.getTune();
+          var tune = abcParser.getTune(); //
+          // Init tablatures plugins
+          //
+
+          if (params.tablature) {
+            tablatures.init();
+            tune.tablatures = tablatures.preparePlugins(tune, currentTune, params);
+          }
+
           var warnings = abcParser.getWarnings();
           if (warnings) tune.warnings = warnings;
           var override = callback(div, tune, i, book.tunes[currentTune].abc);
@@ -890,7 +1055,8 @@ var Parse = __webpack_require__(/*! ../parse/abc_parse */ "./src/parse/abc_parse
 
 var wrap = __webpack_require__(/*! ../parse/wrap_lines */ "./src/parse/wrap_lines.js");
 
-var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
+var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js"); // var tablatures = require('./abc_tablatures');
+
 
 var resizeDivs = {};
 
@@ -1065,6 +1231,10 @@ var renderAbc = function renderAbc(output, abc, parserParams, engraverParams, re
       if (parserParams.hasOwnProperty(key)) {
         params[key] = parserParams[key];
       }
+    }
+
+    if (params.warnings_id && params.tablature) {
+      params.tablature.warning_id = params.warnings_id;
     }
   }
 
@@ -2250,6 +2420,19 @@ function gatherAbcParams(params) {
       if (params.render_options.hasOwnProperty(key)) {
         abcjsParams[key] = params.render_options[key];
       }
+    }
+  }
+  /*
+  if (params.tablature_options) {
+  	abcjsParams['tablatures'] = params.tablature_options;
+  }
+  */
+
+
+  if (abcjsParams.tablature) {
+    if (params.warnings_id) {
+      // store for plugin error handling
+      abcjsParams.tablature.warnings_id = params.warnings_id;
     }
   }
 
@@ -3719,6 +3902,27 @@ var parseDirective = {};
       weight: "bold",
       style: "normal",
       decoration: "none"
+    };
+    tune.formatting.tablabelfont = {
+      face: "\"Trebuchet MS\"",
+      size: 16,
+      weight: "normal",
+      style: "normal",
+      decoration: "none"
+    };
+    tune.formatting.tabnumberfont = {
+      face: "\"Arial\"",
+      size: 11,
+      weight: "normal",
+      style: "normal",
+      decoration: "none"
+    };
+    tune.formatting.tabgracefont = {
+      face: "\"Arial\"",
+      size: 8,
+      weight: "normal",
+      style: "normal",
+      decoration: "none"
     }; // these are the default fonts for these element types. In the printer, these fonts might change as the tune progresses.
 
     tune.formatting.annotationfont = multilineVars.annotationfont;
@@ -5009,6 +5213,9 @@ var parseDirective = {};
           case "vocalfont":
           case "wordsfont":
           case "annotationfont":
+          case "tablabelfont":
+          case "tabnumberfont":
+          case "tabgracefont":
             getChangingFont(cmd, tokens, value);
             break;
 
@@ -16340,6 +16547,1846 @@ module.exports = SynthSequence;
 
 /***/ }),
 
+/***/ "./src/tablatures/instruments/guitar/guitar-fonts.js":
+/*!***********************************************************!*\
+  !*** ./src/tablatures/instruments/guitar/guitar-fonts.js ***!
+  \***********************************************************/
+/***/ (function(module) {
+
+/**
+ * Dedicated fonts for violin tabs
+ */
+
+/**
+ * Set here the fonts used by renderer/drawer 
+ * for the violin plugin
+ * @param {} tune 
+ */
+// eslint-disable-next-line no-unused-vars
+function setGuitarFonts(tune) {
+  /* enhance or change instrument fonts here */
+  // tune.formatting.tabnumberfont = { face: "\"Times New Roman\"", size: 9, weight: "normal", style: "normal", decoration: "none" };
+  // tune.formatting.tabgracefont = { face: "\"Times New Roman\"", size: 7, weight: "normal", style: "normal", decoration: "none" };
+}
+
+module.exports = setGuitarFonts;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/guitar/guitar-patterns.js":
+/*!**************************************************************!*\
+  !*** ./src/tablatures/instruments/guitar/guitar-patterns.js ***!
+  \**************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var StringPatterns = __webpack_require__(/*! ../string-patterns */ "./src/tablatures/instruments/string-patterns.js");
+
+function GuitarPatterns(plugin) {
+  this.tuning = plugin._super.params.tuning;
+
+  if (!this.tuning) {
+    this.tuning = ['E,', 'A', 'D', 'G', 'B', 'e'];
+  }
+
+  plugin.tuning = this.tuning;
+  this.strings = new StringPatterns(plugin);
+}
+
+GuitarPatterns.prototype.notesToNumber = function (notes, graces) {
+  var converter = this.strings;
+  return converter.notesToNumber(notes, graces);
+};
+
+GuitarPatterns.prototype.stringToPitch = function (stringNumber) {
+  var converter = this.strings;
+  return converter.stringToPitch(stringNumber);
+};
+
+module.exports = GuitarPatterns;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/guitar/tab-guitar.js":
+/*!*********************************************************!*\
+  !*** ./src/tablatures/instruments/guitar/tab-guitar.js ***!
+  \*********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/*
+Emit tab for Guitar staff
+*/
+var StringTablature = __webpack_require__(/*! ../string-tablature */ "./src/tablatures/instruments/string-tablature.js");
+
+var TabCommon = __webpack_require__(/*! ../../tab-common */ "./src/tablatures/tab-common.js");
+
+var TabRenderer = __webpack_require__(/*! ../../tab-renderer */ "./src/tablatures/tab-renderer.js");
+
+var GuitarPatterns = __webpack_require__(/*! ./guitar-patterns */ "./src/tablatures/instruments/guitar/guitar-patterns.js");
+
+var setGuitarFonts = __webpack_require__(/*! ./guitar-fonts */ "./src/tablatures/instruments/guitar/guitar-fonts.js");
+/**
+* upon init mainly store provided instances for later usage
+* @param {*} abcTune  the parsed tune AST tree
+*  @param {*} tuneNumber  the parsed tune AST tree
+* @param {*} params  complementary args provided to Tablature Plugin
+*/
+
+
+Plugin.prototype.init = function (abcTune, tuneNumber, params) {
+  var _super = new TabCommon(abcTune, tuneNumber, params);
+
+  this._super = _super;
+  this.abcTune = abcTune;
+  this.linePitch = 3;
+  this.nbLines = 6;
+  this.isTabBig = true;
+  this.capo = params.capo;
+  this.transpose = params.visualTranspose;
+  this.tablature = new StringTablature(this.nbLines, this.linePitch);
+  var semantics = new GuitarPatterns(this);
+  this.semantics = semantics;
+};
+
+Plugin.prototype.render = function (renderer, line, staffIndex) {
+  if (this._super.inError) return;
+  if (this.tablature.bypass(line)) return;
+  setGuitarFonts(this.abcTune);
+  var rndrer = new TabRenderer(this, renderer, line, staffIndex);
+  rndrer.doLayout();
+};
+
+function Plugin() {} //
+// Tablature plugin definition
+//
+
+
+var AbcGuitarTab = function AbcGuitarTab() {
+  return {
+    name: 'GuitarTab',
+    tablature: Plugin
+  };
+};
+
+module.exports = AbcGuitarTab;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/string-patterns.js":
+/*!*******************************************************!*\
+  !*** ./src/tablatures/instruments/string-patterns.js ***!
+  \*******************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var TabNote = __webpack_require__(/*! ./tab-note */ "./src/tablatures/instruments/tab-note.js");
+
+var TabNotes = __webpack_require__(/*! ./tab-notes */ "./src/tablatures/instruments/tab-notes.js");
+
+function buildCapo(self) {
+  var capoTuning = null;
+  var tuning = self.tuning;
+
+  if (self.capo > 0) {
+    capoTuning = [];
+
+    for (var iii = 0; iii < tuning.length; iii++) {
+      var curNote = new TabNote.TabNote(tuning[iii]);
+
+      for (var jjj = 0; jjj < self.capo; jjj++) {
+        curNote = curNote.nextNote();
+      }
+
+      capoTuning[iii] = curNote.emit();
+    }
+  }
+
+  return capoTuning;
+}
+
+function buildPatterns(self) {
+  var strings = [];
+  var tuning = self.tuning;
+
+  if (self.capo > 0) {
+    tuning = self.capoTuning;
+  }
+
+  var pos = tuning.length - 1;
+
+  for (var iii = 0; iii < tuning.length; iii++) {
+    var nextNote = self.highestNote; // highest handled note
+
+    if (iii != tuning.length - 1) {
+      nextNote = tuning[iii + 1];
+    }
+
+    var tabNotes = new TabNotes(tuning[iii], nextNote);
+    var stringNotes = tabNotes.build();
+
+    if (stringNotes.error) {
+      return stringNotes;
+    }
+
+    strings[pos--] = stringNotes;
+  }
+
+  return strings;
+}
+
+function buildSecond(first) {
+  var seconds = [];
+  seconds[0] = [];
+  var strings = first.strings;
+
+  for (var iii = 1; iii < strings.length; iii++) {
+    seconds[iii] = strings[iii - 1];
+  }
+
+  return seconds;
+}
+
+function sameString(self, chord) {
+  for (var jjjj = 0; jjjj < chord.length - 1; jjjj++) {
+    var curPos = chord[jjjj];
+    var nextPos = chord[jjjj + 1];
+
+    if (curPos.str == nextPos.str) {
+      // same String
+      // => change lower pos 
+      if (curPos.str == self.strings.length - 1) {
+        // Invalid tab Chord position for instrument
+        curPos.num = "?";
+        nextPos.num = "?";
+        return;
+      } // change lower pitch on lowest string
+
+
+      if (nextPos.num < curPos.num) {
+        nextPos.str++;
+        nextPos = noteToNumber(self, nextPos.note, nextPos.str, self.secondPos, self.strings[nextPos.str].length);
+      } else {
+        curPos.str++;
+        curPos = noteToNumber(self, curPos.note, curPos.str, self.secondPos, self.strings[curPos.str].length);
+      } // update table
+
+
+      chord[jjjj] = curPos;
+      chord[jjjj + 1] = nextPos;
+    }
+  }
+
+  return null;
+}
+
+function handleChordNotes(self, notes) {
+  var retNotes = [];
+
+  for (var iiii = 0; iiii < notes.length; iiii++) {
+    var note = new TabNote.TabNote(notes[iiii].name);
+    var curPos = toNumber(self, note);
+    retNotes.push(curPos);
+  }
+
+  sameString(self, retNotes);
+  return retNotes;
+}
+
+function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
+  var strings = self.strings;
+  note.checkKeyAccidentals(self.accidentals);
+
+  if (secondPosition) {
+    strings = secondPosition;
+  }
+
+  var noteName = note.emitNoAccidentals();
+  var num = strings[stringNumber].indexOf(noteName);
+  var acc = note.acc;
+
+  if (num != -1) {
+    if (secondPosition) {
+      num += firstSize;
+    }
+
+    if ((note.isFlat || note.acc == -1) && num == 0) {
+      // flat on 0 pos => previous string 7th position
+      var noteEquiv = note.getAccidentalEquiv();
+      stringNumber++;
+      num = strings[stringNumber].indexOf(noteEquiv.emit());
+      acc = 0;
+    }
+
+    return {
+      num: num + acc,
+      str: stringNumber,
+      note: note
+    };
+  }
+
+  return null;
+}
+
+function toNumber(self, note) {
+  var num = null;
+  var str = 0;
+  var lowestString = self.strings[self.strings.length - 1];
+  var lowestNote = new TabNote.TabNote(lowestString[0]);
+
+  if (note.isLowerThan(lowestNote)) {
+    return {
+      num: "?",
+      str: self.strings.length - 1,
+      note: note,
+      error: note.emit() + ': unexpected note for instrument'
+    };
+  }
+
+  while (str < self.strings.length) {
+    num = noteToNumber(self, note, str);
+
+    if (num) {
+      return num;
+    }
+
+    str++;
+  }
+
+  return null; // not found
+}
+
+StringPatterns.prototype.stringToPitch = function (stringNumber) {
+  var startingPitch = 5.3;
+  var bottom = this.strings.length - 1;
+  return startingPitch + (bottom - stringNumber) * this.linePitch;
+};
+
+function invalidNumber(retNotes, note) {
+  var number = {
+    num: "?",
+    str: 0,
+    note: note
+  };
+  retNotes.push(number);
+  retNotes.error = note.emit() + ': unexpected note for instrument';
+}
+
+StringPatterns.prototype.notesToNumber = function (notes, graces) {
+  var note;
+  var number;
+  var error = null;
+  var retNotes = null;
+
+  if (notes) {
+    retNotes = [];
+
+    if (notes.length > 1) {
+      retNotes = handleChordNotes(this, notes);
+
+      if (retNotes.error) {
+        error = retNotes.error;
+      }
+    } else {
+      note = new TabNote.TabNote(notes[0].name);
+      number = toNumber(this, note);
+
+      if (number) {
+        retNotes.push(number);
+      } else {
+        invalidNumber(retNotes, note);
+        error = retNotes.error;
+      }
+    }
+  }
+
+  if (error) return retNotes;
+  var retGraces = null;
+
+  if (graces) {
+    retGraces = [];
+
+    for (var iiii = 0; iiii < graces.length; iiii++) {
+      note = new TabNote.TabNote(graces[iiii].name);
+      number = toNumber(this, note);
+
+      if (number) {
+        retGraces.push(number);
+      } else {
+        invalidNumber(retGraces, note);
+        error = retNotes.error;
+      }
+    }
+  }
+
+  return {
+    notes: retNotes,
+    graces: retGraces,
+    error: error
+  };
+};
+
+StringPatterns.prototype.toString = function () {
+  return this.tuning.join('').replaceAll(',', '').toUpperCase();
+};
+
+StringPatterns.prototype.tabInfos = function (plugin) {
+  var _super = plugin._super;
+  var name = _super.params.label;
+
+  if (name) {
+    var tunePos = name.indexOf('%T');
+    var tuning = "";
+
+    if (tunePos != -1) {
+      tuning = this.toString();
+
+      if (plugin.capo > 0) {
+        tuning += ' capo:' + plugin.capo;
+      }
+
+      name = name.replace('%T', tuning);
+    }
+
+    return name;
+  }
+
+  return '';
+};
+/**
+ * Common patterns for all string instruments
+ * @param {} plugin
+ * @param {} tuning
+ * @param {*} capo
+ * @param {*} highestNote 
+ */
+
+
+function StringPatterns(plugin) {
+  var tuning = plugin.tuning;
+  var capo = plugin.capo;
+  var highestNote = plugin._super.params.highestNote;
+  this.linePitch = plugin.linePitch;
+  this.highestNote = "a'";
+
+  if (highestNote) {
+    // override default
+    this.highestNote = highestNote;
+  }
+
+  this.capo = 0;
+
+  if (capo) {
+    this.capo = capo;
+  }
+
+  this.tuning = tuning;
+
+  if (this.capo > 0) {
+    this.capoTuning = buildCapo(this);
+  }
+
+  this.strings = buildPatterns(this);
+
+  if (this.strings.error) {
+    plugin._super.setError(this.strings.error);
+
+    plugin.inError = true;
+    return;
+  } // second position pattern per string
+
+
+  this.secondPos = buildSecond(this);
+}
+
+module.exports = StringPatterns;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/string-tablature.js":
+/*!********************************************************!*\
+  !*** ./src/tablatures/instruments/string-tablature.js ***!
+  \********************************************************/
+/***/ (function(module) {
+
+/**
+ * Layout tablature informations for draw
+ * @param {*} numLines 
+ * @param {*} lineSpace 
+ */
+function StringTablature(numLines, lineSpace) {
+  this.numLines = numLines;
+  this.lineSpace = lineSpace;
+  this.verticalSize = this.numLines * this.lineSpace;
+  var pitch = 3;
+  this.bar = {
+    pitch: pitch,
+    pitch2: lineSpace * numLines,
+    height: 5
+  };
+}
+/**
+ * return true if current line should not produce a tab
+ * @param {} line 
+ */
+
+
+StringTablature.prototype.bypass = function (line) {
+  var voices = line.staffGroup.voices;
+
+  if (voices.length > 0) {
+    if (voices[0].isPercussion) return true;
+  }
+
+  return false;
+};
+
+StringTablature.prototype.setRelative = function (child, relative, first) {
+  switch (child.type) {
+    case 'bar':
+      relative.pitch = this.bar.pitch;
+      relative.pitch2 = this.bar.pitch2;
+      relative.height = this.height;
+      break;
+
+    case 'symbol':
+      var top = this.bar.pitch2 / 2;
+
+      if (child.name == 'dots.dot') {
+        if (first) {
+          relative.pitch = top;
+          return false;
+        } else {
+          relative.pitch = top + this.lineSpace;
+          return true;
+        }
+      }
+
+      break;
+  }
+
+  return first;
+};
+
+module.exports = StringTablature;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/tab-note.js":
+/*!************************************************!*\
+  !*** ./src/tablatures/instruments/tab-note.js ***!
+  \************************************************/
+/***/ (function(module) {
+
+/**
+ * 
+ * Note structure for Tabs
+ * 
+ */
+var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+function TabNote(note) {
+  var isFlat = false;
+  var newNote = note;
+  var isSharp = false;
+  var isAltered = false;
+  var natural = null;
+  var quarter = null;
+  var isDouble = false;
+  var acc = 0;
+
+  if (note.startsWith('_')) {
+    isFlat = true;
+    acc = -1; // check quarter flat
+
+    if (note[1] == '/') {
+      isFlat = false;
+      quarter = "v";
+      acc = 0;
+    } else if (note[1] == '_') {
+      // double flat
+      isDouble = true;
+      acc -= 1;
+    }
+  } else if (note.startsWith('^')) {
+    isSharp = true;
+    acc = +1; // check quarter sharp
+
+    if (note[1] == '/') {
+      isSharp = false;
+      quarter = "^";
+      acc = 0;
+    } else if (note[1] == '^') {
+      // double sharp
+      isDouble = true;
+      acc += 1;
+    }
+  } else if (note.startsWith('=')) {
+    natural = true;
+    acc = 0;
+  }
+
+  isAltered = isFlat || isSharp || quarter != null;
+
+  if (isAltered || natural) {
+    if (quarter != null || isDouble) {
+      newNote = note.slice(2);
+    } else {
+      newNote = note.slice(1);
+    }
+  }
+
+  var hasComma = (note.match(/,/g) || []).length;
+  var hasQuote = (note.match(/'/g) || []).length;
+  this.name = newNote;
+  this.acc = acc;
+  this.isSharp = isSharp;
+  this.isKeySharp = false;
+  this.isDouble = isDouble;
+  this.isAltered = isAltered;
+  this.isFlat = isFlat;
+  this.isKeyFlat = false;
+  this.natural = natural;
+  this.quarter = quarter;
+  this.isLower = this.name == this.name.toLowerCase();
+  this.name = this.name[0].toUpperCase();
+  this.hasComma = hasComma;
+  this.isQuoted = hasQuote;
+}
+
+function cloneNote(self) {
+  var newNote = self.name;
+  var newTabNote = new TabNote(newNote);
+  newTabNote.hasComma = self.hasComma;
+  newTabNote.isLower = self.isLower;
+  newTabNote.isQuoted = self.isQuoted;
+  newTabNote.isSharp = self.isSharp;
+  newTabNote.isKeySharp = self.isKeySharp;
+  newTabNote.isFlat = self.isFlat;
+  newTabNote.isKeyFlat = self.isKeyFlat;
+  return newTabNote;
+}
+
+TabNote.prototype.sameNoteAs = function (note) {
+  if (this.name == note.name && this.hasComma == note.hasComma && this.isLower == note.isLower && this.isQuoted == note.isQuoted && this.isSharp == note.isSharp && this.isFlat == note.isFlat) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+TabNote.prototype.isLowerThan = function (note) {
+  var noteComparator = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+  if (this.hasComma > note.hasComma) return true;
+  if (note.hasComma > this.hasComma) return false;
+  if (this.isQuoted > note.isQuoted) return false;
+  if (note.isQuoted > this.isQuoted) return true;
+
+  if (this.isLower) {
+    if (!note.isLower) return false;
+  } else {
+    if (note.isLower) return true;
+  }
+
+  var noteName = note.name[0].toUpperCase();
+  var thisName = this.name[0].toUpperCase();
+  if (noteComparator.indexOf(thisName) < noteComparator.indexOf(noteName)) return true;
+  return false;
+};
+
+TabNote.prototype.checkKeyAccidentals = function (accidentals) {
+  if (accidentals) {
+    var curNote = this.name;
+
+    for (var iii = 0; iii < accidentals.length; iii++) {
+      var curAccidentals = accidentals[iii];
+
+      if (curNote == curAccidentals.note.toUpperCase()) {
+        if (curAccidentals.acc == 'flat') {
+          this.acc = -1;
+          this.isKeyFlat = true;
+        }
+
+        if (curAccidentals.acc == 'sharp') {
+          this.acc = +1;
+          this.isKeySharp = true;
+        }
+      }
+    }
+  }
+};
+
+TabNote.prototype.getAccidentalEquiv = function () {
+  var cloned = cloneNote(this);
+
+  if (cloned.isSharp || cloned.isKeySharp) {
+    cloned = cloned.nextNote();
+    cloned.isFlat = true;
+    cloned.isSharp = false;
+    cloned.isKeySharp = false;
+  } else if (cloned.isFlat || cloned.isKeyFlat) {
+    cloned = cloned.prevNote();
+    cloned.isSharp = true;
+    cloned.isFlat = false;
+    cloned.isKeyFlat = false;
+  }
+
+  return cloned;
+};
+
+TabNote.prototype.nextNote = function () {
+  var newTabNote = cloneNote(this);
+
+  if (!this.isSharp && !this.isKeySharp) {
+    if (this.name != 'E' && this.name != 'B') {
+      newTabNote.isSharp = true;
+      return newTabNote;
+    }
+  } else {
+    // cleanup
+    newTabNote.isSharp = false;
+    newTabNote.isKeySharp = false;
+  }
+
+  var noteIndex = notes.indexOf(this.name);
+
+  if (noteIndex == notes.length - 1) {
+    noteIndex = 0;
+  } else {
+    noteIndex++;
+  }
+
+  newTabNote.name = notes[noteIndex];
+
+  if (newTabNote.name == 'C') {
+    if (newTabNote.hasComma > 0) {
+      newTabNote.hasComma--;
+    } else {
+      if (!newTabNote.isLower) {
+        newTabNote.isLower = true;
+      } else {
+        newTabNote.isQuoted = true;
+      }
+    }
+  }
+
+  return newTabNote;
+};
+
+TabNote.prototype.prevNote = function () {
+  var newTabNote = cloneNote(this);
+
+  if (this.isSharp) {
+    newTabNote.isSharp = false;
+    return newTabNote;
+  }
+
+  var noteIndex = notes.indexOf(this.name);
+
+  if (noteIndex == 0) {
+    noteIndex = notes.length - 1;
+  } else {
+    noteIndex--;
+  }
+
+  newTabNote.name = notes[noteIndex];
+
+  if (newTabNote.name == 'B') {
+    if (newTabNote.isLower) {
+      newTabNote.hasComma = 1;
+    } else {
+      if (newTabNote.hasComma > 0) {
+        newTabNote.hasComma++;
+      } else {
+        if (newTabNote.isQuoted > 0) {
+          newTabNote.isQuoted -= 1;
+        } else {
+          newTabNote.isLower = true;
+        }
+      }
+    }
+  }
+
+  if (this.isFlat) {
+    newTabNote.isFlat = false;
+    return newTabNote;
+  } else {
+    if (this.name != 'E' && this.name != 'B') {
+      newTabNote.isSharp = true;
+    }
+  }
+
+  return newTabNote;
+};
+
+TabNote.prototype.emitNoAccidentals = function () {
+  var returned = this.name;
+
+  if (this.isLower) {
+    returned = returned.toLowerCase();
+  }
+
+  for (var ii = 0; ii < this.isQuoted; ii++) {
+    returned += "'";
+  }
+
+  for (var jj = 0; jj < this.hasComma; jj++) {
+    returned += ",";
+  }
+
+  return returned;
+};
+
+TabNote.prototype.emit = function () {
+  var returned = this.name;
+
+  if (this.isSharp || this.isKeySharp) {
+    returned = '^' + returned;
+
+    if (this.isDouble) {
+      returned = '^' + returned;
+    }
+  }
+
+  if (this.isFlat || this.isKeyFlat) {
+    returned = '_' + returned;
+
+    if (this.isDouble) {
+      returned = '_' + returned;
+    }
+  }
+
+  if (this.quarter) {
+    if (this.quarter == "^") {
+      returned = "^/" + returned;
+    } else {
+      returned = "_/" + returned;
+    }
+  }
+
+  if (this.natural) {
+    returned = '=' + returned;
+  }
+
+  for (var ii = 1; ii <= this.hasComma; ii++) {
+    returned += ',';
+  }
+
+  if (this.isLower) {
+    returned = returned.toLowerCase();
+
+    for (var jj = 1; jj <= this.isQuoted; jj++) {
+      returned += "'";
+    }
+  }
+
+  return returned;
+};
+
+module.exports = {
+  'TabNote': TabNote,
+  'notes': notes
+};
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/tab-notes.js":
+/*!*************************************************!*\
+  !*** ./src/tablatures/instruments/tab-notes.js ***!
+  \*************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var TabNote = __webpack_require__(/*! ./tab-note */ "./src/tablatures/instruments/tab-note.js");
+
+var notes = TabNote.notes;
+
+function TabNotes(fromNote, toNote) {
+  this.fromN = new TabNote.TabNote(fromNote);
+  this.toN = new TabNote.TabNote(toNote);
+}
+
+TabNotes.prototype.build = function () {
+  var fromN = this.fromN;
+  var toN = this.toN; // check that toN is not lower than fromN
+
+  if (toN.isLowerThan(fromN)) {
+    var from = fromN.emit();
+    var tn = toN.emit();
+    return {
+      error: 'Invalid string Instrument tuning : ' + tn + ' string lower than ' + from + ' string'
+    };
+  }
+
+  var buildReturned = [];
+  var startIndex = notes.indexOf(fromN.name);
+  var toIndex = notes.indexOf(toN.name);
+
+  if (startIndex == -1 || toIndex == -1) {
+    return buildReturned;
+  }
+
+  var finished = false;
+
+  while (!finished) {
+    buildReturned.push(fromN.emit());
+    fromN = fromN.nextNote();
+
+    if (fromN.sameNoteAs(toN)) {
+      finished = true;
+    }
+  }
+
+  return buildReturned;
+};
+
+module.exports = TabNotes;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/violin/tab-violin.js":
+/*!*********************************************************!*\
+  !*** ./src/tablatures/instruments/violin/tab-violin.js ***!
+  \*********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var StringTablature = __webpack_require__(/*! ../string-tablature */ "./src/tablatures/instruments/string-tablature.js");
+
+var TabCommon = __webpack_require__(/*! ../../tab-common */ "./src/tablatures/tab-common.js");
+
+var TabRenderer = __webpack_require__(/*! ../../tab-renderer */ "./src/tablatures/tab-renderer.js");
+
+var ViolinPatterns = __webpack_require__(/*! ./violin-patterns */ "./src/tablatures/instruments/violin/violin-patterns.js");
+
+var setViolinFonts = __webpack_require__(/*! ./violin-fonts */ "./src/tablatures/instruments/violin/violin-fonts.js");
+/**
+ * upon init mainly store provided instances for later usage
+ * @param {*} abcTune  the parsed tune AST tree
+*  @param {*} tuneNumber  the parsed tune AST tree
+ * @param {*} params  complementary args provided to Tablature Plugin
+ */
+
+
+Plugin.prototype.init = function (abcTune, tuneNumber, params) {
+  var _super = new TabCommon(abcTune, tuneNumber, params);
+
+  this.abcTune = abcTune;
+  this._super = _super;
+  this.linePitch = 3;
+  this.nbLines = 4;
+  this.isTabBig = false;
+  this.capo = params.capo;
+  this.transpose = params.visualTranspose;
+  this.tablature = new StringTablature(this.nbLines, this.linePitch);
+  var semantics = new ViolinPatterns(this);
+  this.semantics = semantics;
+};
+
+Plugin.prototype.render = function (renderer, line, staffIndex) {
+  if (this._super.inError) return;
+  if (this.tablature.bypass(line)) return;
+  setViolinFonts(this.abcTune);
+  var rndrer = new TabRenderer(this, renderer, line, staffIndex);
+  rndrer.doLayout();
+};
+
+function Plugin() {} //
+// Tablature plugin definition
+//
+
+
+var AbcViolinTab = function AbcViolinTab() {
+  return {
+    name: 'ViolinTab',
+    tablature: Plugin
+  };
+};
+
+module.exports = AbcViolinTab;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/violin/violin-fonts.js":
+/*!***********************************************************!*\
+  !*** ./src/tablatures/instruments/violin/violin-fonts.js ***!
+  \***********************************************************/
+/***/ (function(module) {
+
+/**
+ * Dedicated fonts for violin tabs
+ */
+
+/**
+ * Set here the fonts used by renderer/drawer 
+ * for the violin plugin
+ * @param {} tune 
+ */
+// eslint-disable-next-line no-unused-vars
+function setViolinFonts(tune) {
+  /* enhance or change instrument fonts here */
+  // tune.formatting.tabnumberfont = { face: "\"Times New Roman\"", size: 9, weight: "normal", style: "normal", decoration: "none" };
+  // tune.formatting.tabgracefont = { face: "\"Times New Roman\"", size: 7, weight: "normal", style: "normal", decoration: "none" };
+}
+
+module.exports = setViolinFonts;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/violin/violin-patterns.js":
+/*!**************************************************************!*\
+  !*** ./src/tablatures/instruments/violin/violin-patterns.js ***!
+  \**************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var StringPatterns = __webpack_require__(/*! ../string-patterns */ "./src/tablatures/instruments/string-patterns.js");
+
+function ViolinPatterns(plugin) {
+  this.tuning = plugin._super.params.tuning;
+
+  if (!this.tuning) {
+    this.tuning = ['G,', 'D', 'A', 'e'];
+  }
+
+  plugin.tuning = this.tuning;
+  this.strings = new StringPatterns(plugin);
+}
+
+ViolinPatterns.prototype.notesToNumber = function (notes, graces) {
+  var converter = this.strings;
+  return converter.notesToNumber(notes, graces);
+};
+
+ViolinPatterns.prototype.stringToPitch = function (stringNumber) {
+  var converter = this.strings;
+  return converter.stringToPitch(stringNumber);
+};
+
+module.exports = ViolinPatterns;
+
+/***/ }),
+
+/***/ "./src/tablatures/tab-absolute-elements.js":
+/*!*************************************************!*\
+  !*** ./src/tablatures/tab-absolute-elements.js ***!
+  \*************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/**
+ * Tablature Absolute elements factory
+ */
+var AbsoluteElement = __webpack_require__(/*! ../write/abc_absolute_element */ "./src/write/abc_absolute_element.js");
+
+var RelativeElement = __webpack_require__(/*! ../write/abc_relative_element */ "./src/write/abc_relative_element.js");
+
+var Transposer = __webpack_require__(/*! ./transposer */ "./src/tablatures/transposer.js");
+
+function isObject(a) {
+  return a != null && a.constructor === Object;
+}
+
+function cloneObject(dest, src) {
+  for (var prop in src) {
+    if (src.hasOwnProperty(prop)) {
+      if (!(Array.isArray(src[prop]) || isObject(src[prop]))) {
+        dest[prop] = src[prop];
+      }
+    }
+  }
+}
+
+function cloneAbsolute(absSrc) {
+  var returned = new AbsoluteElement('', 0, 0, '', 0);
+  cloneObject(returned, absSrc);
+  returned.top = 0;
+  returned.bottom = -1;
+
+  if (absSrc.abcelem) {
+    returned.abcelem = {};
+    cloneObject(returned.abcelem, absSrc.abcelem);
+    if (returned.abcelem.el_type === "note") returned.abcelem.el_type = 'tabNumber';
+  }
+
+  return returned;
+}
+
+function cloneAbsoluteAndRelatives(absSrc, plugin) {
+  var returned = cloneAbsolute(absSrc);
+
+  if (plugin) {
+    var children = absSrc.children; // proceed with relative as well
+
+    var first = true;
+
+    for (var ii = 0; ii < children.length; ii++) {
+      var child = children[ii];
+      var relative = new RelativeElement('', 0, 0, 0, '');
+      cloneObject(relative, child);
+      first = plugin.tablature.setRelative(child, relative, first);
+      returned.children.push(relative);
+    }
+  }
+
+  return returned;
+}
+
+function buildTabAbsolute(plugin, absX, relX) {
+  var tabIcon = 'tab.tiny';
+  var tabYPos = 7.5;
+
+  if (plugin.isTabBig) {
+    tabIcon = 'tab.big';
+    tabYPos = 10;
+  }
+
+  var element = {
+    el_type: "tab",
+    icon: tabIcon,
+    Ypos: tabYPos
+  };
+  var tabAbsolute = new AbsoluteElement(element, 0, 0, "symbol", 0);
+  tabAbsolute.x = absX;
+  var tabRelative = new RelativeElement(tabIcon, 0, 0, 7.5, "tab");
+  tabRelative.x = relX;
+  tabAbsolute.children.push(tabRelative);
+
+  if (tabAbsolute.abcelem.el_type == 'tab') {
+    tabRelative.pitch = tabYPos;
+  }
+
+  return tabAbsolute;
+}
+
+function lyricsDim(abs) {
+  if (abs.extra) {
+    for (var ii = 0; ii < abs.extra.length; ii++) {
+      var extra = abs.extra[ii];
+
+      if (extra.type == 'lyric') {
+        return {
+          bottom: extra.bottom,
+          height: extra.height
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+function TabAbsoluteElements() {
+  this.accidentals = null;
+}
+
+function getInitialStaffSize(staffGroup) {
+  var returned = 0;
+
+  for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (!staffGroup[ii].tabNameInfos) returned++;
+  }
+
+  return returned;
+}
+
+function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
+  var strNote = curNote.num;
+
+  if (curNote.note.quarter != null) {
+    // add tab quarter => needs to string conversion then 
+    strNote = strNote.toString();
+    strNote += curNote.note.quarter;
+  }
+
+  var pitch = plugin.semantics.stringToPitch(curNote.str);
+  def.notes.push({
+    num: strNote,
+    str: curNote.str,
+    pitch: curNote.note.emit()
+  });
+  var opt = {
+    type: 'tabNumber'
+  };
+  var tabNoteRelative = new RelativeElement(strNote, 0, 0, pitch + 0.3, opt);
+  tabNoteRelative.x = relX;
+  tabNoteRelative.isGrace = isGrace;
+  tabNoteRelative.isAltered = curNote.note.isAltered;
+  return tabNoteRelative;
+}
+
+function getXGrace(abs, index) {
+  var found = 0;
+
+  if (abs.extra) {
+    for (var ii = 0; ii < abs.extra.length; ii++) {
+      if (abs.extra[ii].c.indexOf('noteheads') >= 0) {
+        if (found === index) {
+          return abs.extra[ii].x + abs.extra[ii].w / 2;
+        } else {
+          found++;
+        }
+      }
+    }
+  }
+
+  return -1;
+}
+
+function graceInRest(absElem) {
+  if (absElem.abcelem) {
+    var elem = absElem.abcelem;
+
+    if (elem.rest) {
+      return elem.gracenotes;
+    }
+  }
+
+  return null;
+}
+
+function checkTransposition(plugin, transposer, pitches, graceNotes) {
+  if (plugin.transpose) {
+    //transposer.transpose(plugin.transpose);
+    for (var jj = 0; jj < pitches.length; jj++) {
+      pitches[jj] = transposer.transposeNote(pitches[jj]);
+    }
+
+    if (graceNotes) {
+      for (var kk = 0; kk < graceNotes.length; kk++) {
+        graceNotes[kk] = transposer.transposeNote(graceNotes[kk]);
+      }
+    }
+  }
+}
+
+function convertToNumber(plugin, pitches, graceNotes) {
+  var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
+
+  if (tabPos.error) {
+    plugin._super.setError(tabPos.error);
+
+    return tabPos; // give up on error here
+  }
+
+  if (tabPos.graces && tabPos.notes) {
+    // add graces to last note in notes
+    var posNote = tabPos.notes.length - 1;
+    tabPos.notes[posNote].graces = tabPos.graces;
+  }
+
+  return tabPos;
+}
+
+function buildGraceRelativesForRest(plugin, abs, absChild, graceNotes, tabVoice) {
+  for (var mm = 0; mm < graceNotes.length; mm++) {
+    var defGrace = {
+      el_type: "note",
+      startChar: absChild.abcelem.startChar,
+      endChar: absChild.abcelem.endChar,
+      notes: [],
+      grace: true
+    };
+    var graceX = getXGrace(absChild, mm);
+    var curGrace = graceNotes[mm];
+    var tabGraceRelative = buildRelativeTabNote(plugin, graceX, defGrace, curGrace, true);
+    abs.children.push(tabGraceRelative);
+    tabVoice.push(defGrace);
+  }
+}
+/**
+ * Build tab absolutes by scanning current staff line absolute array
+ * @param {*} staffAbsolute
+ */
+
+
+TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice, voiceIndex, staffIndex, keySig) {
+  var staffSize = getInitialStaffSize(staffAbsolute);
+  var source = staffAbsolute[staffIndex + voiceIndex];
+  var dest = staffAbsolute[staffSize + staffIndex + voiceIndex];
+  var transposer = null;
+  var tabPos = null;
+  var defNote = null;
+
+  if (source.children[0].abcelem.el_type != 'clef') {
+    // keysig missing => provide one for tabs
+    if (keySig != 'none') {
+      source.children.splice(0, 0, keySig);
+    }
+  }
+
+  for (var ii = 0; ii < source.children.length; ii++) {
+    var absChild = source.children[ii];
+    var absX = absChild.x;
+    var relX = absX; // if (absChild.children.length > 0) {
+    //   relX = absChild.children[0].x;
+    // }
+
+    if (absChild.isClef) {
+      dest.children.push(buildTabAbsolute(plugin, absX, relX));
+    }
+
+    switch (absChild.type) {
+      case 'staff-extra key-signature':
+        // refresh key accidentals
+        this.accidentals = absChild.abcelem.accidentals;
+        plugin.semantics.strings.accidentals = this.accidentals;
+
+        if (plugin.transpose) {
+          transposer = new Transposer(absChild.abcelem.accidentals, plugin.transpose);
+        }
+
+        break;
+
+      case 'bar':
+        var lastBar = false;
+
+        if (ii === source.children.length - 1) {
+          // used for final line bar drawing
+          // for multi tabs / multi staves
+          lastBar = true;
+        }
+
+        var cloned = cloneAbsoluteAndRelatives(absChild, plugin);
+
+        if (cloned.abcelem.barNumber) {
+          delete cloned.abcelem.barNumber;
+
+          for (var bn = 0; bn < cloned.children.length; bn++) {
+            if (cloned.children[bn].type === "barNumber") {
+              cloned.children.splice(bn, 1);
+              break;
+            }
+          }
+        }
+
+        cloned.abcelem.lastBar = lastBar;
+        dest.children.push(cloned);
+        tabVoice.push({
+          el_type: absChild.abcelem.el_type,
+          type: absChild.abcelem.type,
+          endChar: absChild.abcelem.endChar,
+          startChar: absChild.abcelem.startChar,
+          abselem: cloned
+        });
+        break;
+
+      case 'rest':
+        var restGraces = graceInRest(absChild);
+
+        if (restGraces) {
+          // check transpose
+          checkTransposition(plugin, transposer, null, restGraces); // to number conversion 
+
+          tabPos = convertToNumber(plugin, null, restGraces);
+          if (tabPos.error) return; // build relative for grace
+
+          defGrace = {
+            el_type: "note",
+            startChar: absChild.abcelem.startChar,
+            endChar: absChild.abcelem.endChar,
+            notes: [],
+            grace: true
+          };
+          buildGraceRelativesForRest(plugin, abs, absChild, tabPos.graces, tabVoice);
+        }
+
+        break;
+
+      case 'note':
+        var abs = cloneAbsolute(absChild);
+        abs.x = absChild.heads[0].x + absChild.heads[0].w / 2; // center the number
+
+        abs.lyricDim = lyricsDim(absChild);
+        var pitches = absChild.abcelem.pitches;
+        var graceNotes = absChild.abcelem.gracenotes; // check transpose
+
+        abs.type = 'tabNumber';
+        checkTransposition(plugin, transposer, pitches, graceNotes); // to number conversion 
+
+        tabPos = convertToNumber(plugin, pitches, graceNotes);
+        if (tabPos.error) return;
+
+        if (tabPos.graces) {
+          // add graces to last note in notes
+          var posNote = tabPos.notes.length - 1;
+          tabPos.notes[posNote].graces = tabPos.graces;
+        } // build relative
+
+
+        defNote = {
+          el_type: "note",
+          startChar: absChild.abcelem.startChar,
+          endChar: absChild.abcelem.endChar,
+          notes: []
+        };
+
+        for (var ll = 0; ll < tabPos.notes.length; ll++) {
+          var curNote = tabPos.notes[ll];
+
+          if (curNote.graces) {
+            for (var mm = 0; mm < curNote.graces.length; mm++) {
+              var defGrace = {
+                el_type: "note",
+                startChar: absChild.abcelem.startChar,
+                endChar: absChild.abcelem.endChar,
+                notes: [],
+                grace: true
+              };
+              var graceX = getXGrace(absChild, mm);
+              var curGrace = curNote.graces[mm];
+              var tabGraceRelative = buildRelativeTabNote(plugin, graceX, defGrace, curGrace, true);
+              abs.children.push(tabGraceRelative);
+              tabVoice.push(defGrace);
+            }
+          }
+
+          var tabNoteRelative = buildRelativeTabNote(plugin, abs.x + absChild.heads[ll].dx, defNote, curNote, false);
+          abs.children.push(tabNoteRelative);
+        }
+
+        defNote.abselem = abs;
+        tabVoice.push(defNote);
+        dest.children.push(abs);
+        break;
+    }
+  }
+};
+
+module.exports = TabAbsoluteElements;
+
+/***/ }),
+
+/***/ "./src/tablatures/tab-common.js":
+/*!**************************************!*\
+  !*** ./src/tablatures/tab-common.js ***!
+  \**************************************/
+/***/ (function(module) {
+
+/**
+ *
+ * Common Class/Method available for all instruments
+ *
+ */
+function TabCommon(abcTune, tuneNumber, params) {
+  this.tune = abcTune;
+  this.params = params;
+  this.tuneNumber = tuneNumber;
+  this.inError = false;
+}
+
+TabCommon.prototype.setError = function (error) {
+  var tune = this.tune;
+
+  if (error) {
+    this.error = error;
+    this.inError = true;
+
+    if (tune.warnings) {
+      tune.warnings.push(error);
+    } else {
+      tune.warnings = [error];
+    }
+  }
+};
+
+module.exports = TabCommon;
+
+/***/ }),
+
+/***/ "./src/tablatures/tab-renderer.js":
+/*!****************************************!*\
+  !*** ./src/tablatures/tab-renderer.js ***!
+  \****************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/* eslint-disable no-debugger */
+var VoiceElement = __webpack_require__(/*! ../write/abc_voice_element */ "./src/write/abc_voice_element.js");
+
+var TabAbsoluteElements = __webpack_require__(/*! ./tab-absolute-elements */ "./src/tablatures/tab-absolute-elements.js");
+
+var spacing = __webpack_require__(/*! ../write/abc_spacing */ "./src/write/abc_spacing.js");
+
+function initSpecialY() {
+  return {
+    tempoHeightAbove: 0,
+    partHeightAbove: 0,
+    volumeHeightAbove: 0,
+    dynamicHeightAbove: 0,
+    endingHeightAbove: 0,
+    chordHeightAbove: 0,
+    lyricHeightAbove: 0,
+    lyricHeightBelow: 0,
+    chordHeightBelow: 0,
+    volumeHeightBelow: 0,
+    dynamicHeightBelow: 0
+  };
+}
+
+function getLyricHeight(voice) {
+  var maxLyricHeight = 0;
+
+  for (var ii = 0; ii < voice.children.length; ii++) {
+    var curAbs = voice.children[ii];
+
+    if (curAbs.specialY) {
+      if (curAbs.specialY.lyricHeightBelow > maxLyricHeight) {
+        maxLyricHeight = curAbs.specialY.lyricHeightBelow;
+      }
+    }
+  }
+
+  return maxLyricHeight; // add spacing
+}
+
+function buildTabName(self, dest) {
+  var stringSemantics = self.plugin.semantics.strings;
+  var controller = self.renderer.controller;
+  var textSize = controller.getTextSize;
+  var tabName = stringSemantics.tabInfos(self.plugin);
+  var size = textSize.calc(tabName, 'tablabelfont', 'text instrumentname');
+  dest.tabNameInfos = {
+    textSize: size,
+    name: tabName
+  };
+  return size.height;
+}
+/**
+ * Laying out tabs
+ * @param {*} renderer
+ * @param {*} line
+ * @param {*} staffIndex
+ * @param {*} tablatureLayout
+ */
+
+
+function TabRenderer(plugin, renderer, line, staffIndex) {
+  this.renderer = renderer;
+  this.plugin = plugin;
+  this.line = line;
+  this.absolutes = new TabAbsoluteElements();
+  this.staffIndex = staffIndex;
+  this.tabStaff = {
+    clef: {
+      type: 'TAB'
+    }
+  };
+  this.tabSize = plugin.linePitch * plugin.nbLines;
+}
+
+function islastTabInStaff(index, staffGroup) {
+  if (staffGroup[index].isTabStaff) {
+    if (index === staffGroup.length - 1) return true;
+
+    if (staffGroup[index + 1].isTabStaff) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function getStaffNumbers(staffs) {
+  var nbStaffs = 0;
+
+  for (var ii = 0; ii < staffs.length; ii++) {
+    if (!staffs[ii].isTabStaff) {
+      nbStaffs++;
+    }
+  }
+
+  return nbStaffs;
+}
+
+function getParentStaffIndex(staffs, index) {
+  for (var ii = index; ii >= 0; ii--) {
+    if (!staffs[ii].isTabStaff) {
+      return ii;
+    }
+  }
+
+  return -1;
+}
+
+function linkStaffAndTabs(staffs) {
+  for (var ii = 0; ii < staffs.length; ii++) {
+    if (staffs[ii].isTabStaff) {
+      // link to parent staff
+      var parentIndex = getParentStaffIndex(staffs, ii);
+      staffs[ii].hasStaff = staffs[parentIndex];
+      if (!staffs[parentIndex].hasTab) staffs[parentIndex].hasTab = [];
+      staffs[parentIndex].hasTab.push(staffs[ii]);
+    }
+  }
+}
+
+function isMultiVoiceSingleStaff(staffs, parent) {
+  if (getStaffNumbers(staffs) === 1) {
+    if (parent.voices.length > 1) return true;
+  }
+
+  return false;
+}
+
+function getNextTabPos(self, staffGroup) {
+  var tabIndex = self.staffIndex;
+  var startIndex = 0;
+  var handledVoices = 0;
+  var inProgress = true;
+  var nbVoices = 0;
+
+  while (inProgress) {
+    //for (var ii = 0; ii < staffGroup.length; ii++) {
+    if (!staffGroup[startIndex]) return -1;
+
+    if (!staffGroup[startIndex].isTabStaff) {
+      nbVoices = staffGroup[startIndex].voices.length; // get number of staff voices
+    }
+
+    if (staffGroup[startIndex].isTabStaff) {
+      handledVoices++;
+
+      if (islastTabInStaff(startIndex, staffGroup)) {
+        if (handledVoices < nbVoices) return startIndex + 1;
+      }
+    } else {
+      handledVoices = 0;
+
+      if (startIndex >= tabIndex) {
+        if (startIndex + 1 == staffGroup.length) return startIndex + 1;
+        if (!staffGroup[startIndex + 1].isTabStaff) return startIndex + 1;
+      }
+    }
+
+    startIndex++; // out of space case
+
+    if (startIndex > staffGroup.length) return -1;
+  }
+}
+
+function getLastStaff(staffs, lastTab) {
+  for (var ii = lastTab; ii >= 0; ii--) {
+    if (!staffs[ii].isTabStaff) {
+      return staffs[ii];
+    }
+  }
+
+  return null;
+}
+
+function checkVoiceKeySig(voices, ii) {
+  var curVoice = voices[ii]; // on multivoice multistaff only the first voice has key signature
+  // folling consecutive do not have one => we should provide the first voice key sig back then
+
+  var elem0 = curVoice.children[0].abcelem;
+  if (elem0.el_type === 'clef') return null;
+
+  if (ii == 0) {
+    // not found => clef=none case
+    return 'none';
+  }
+
+  return voices[ii - 1].children[0];
+}
+
+TabRenderer.prototype.doLayout = function () {
+  var staffs = this.line.staff;
+
+  if (staffs) {
+    // give up on staffline=0 in key 
+    var firstStaff = staffs[0];
+
+    if (firstStaff) {
+      if (firstStaff.clef) {
+        if (firstStaff.clef.stafflines == 0) {
+          this.plugin._super.setError("No tablatures when stafflines=0");
+
+          return;
+        }
+      }
+    }
+
+    staffs.splice(staffs.length, 0, this.tabStaff);
+  }
+
+  var staffGroup = this.line.staffGroup;
+  var voices = staffGroup.voices;
+  var firstVoice = voices[0]; // take lyrics into account if any
+
+  var lyricsHeight = getLyricHeight(firstVoice);
+  var padd = 3;
+  var prevIndex = this.staffIndex;
+  var previousStaff = staffGroup.staffs[prevIndex];
+  var tabTop = previousStaff.top + padd + lyricsHeight;
+
+  if (previousStaff.isTabStaff) {
+    tabTop = previousStaff.top;
+  }
+
+  var staffGroupInfos = {
+    bottom: -1,
+    isTabStaff: true,
+    specialY: initSpecialY(),
+    lines: this.plugin.nbLines,
+    linePitch: this.plugin.linePitch,
+    dy: 0.15,
+    top: tabTop
+  };
+  var nextTabPos = getNextTabPos(this, staffGroup.staffs);
+  if (nextTabPos === -1) return;
+  staffGroupInfos.parentIndex = nextTabPos - 1;
+  staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos); // staffGroup.staffs.push(staffGroupInfos);
+
+  staffGroup.height += this.tabSize + padd;
+  var parentStaff = getLastStaff(staffGroup.staffs, nextTabPos);
+  var nbVoices = 1;
+
+  if (isMultiVoiceSingleStaff(staffGroup.staffs, parentStaff)) {
+    nbVoices = parentStaff.voices.length;
+  } // build from staff
+
+
+  this.tabStaff.voices = [];
+
+  for (var ii = 0; ii < nbVoices; ii++) {
+    var tabVoice = new VoiceElement(0, 0);
+    var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
+    staffGroup.staffs[this.staffIndex].top += nameHeight;
+    staffGroup.height += nameHeight * spacing.STEP;
+    tabVoice.staff = staffGroupInfos;
+    voices.splice(voices.length, 0, tabVoice);
+    var keySig = checkVoiceKeySig(voices, ii + this.staffIndex);
+    this.tabStaff.voices[ii] = [];
+    this.absolutes.build(this.plugin, voices, this.tabStaff.voices[ii], ii, this.staffIndex, keySig);
+  }
+
+  linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
+};
+
+module.exports = TabRenderer;
+
+/***/ }),
+
+/***/ "./src/tablatures/transposer.js":
+/*!**************************************!*\
+  !*** ./src/tablatures/transposer.js ***!
+  \**************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/**
+ *
+ * generic transposer
+ *
+ */
+var TabNote = __webpack_require__(/*! ./instruments/tab-note */ "./src/tablatures/instruments/tab-note.js");
+
+function buildAccEquiv(acc, note) {
+  var equiv = note.getAccidentalEquiv();
+
+  if (acc.note.toUpperCase() == equiv.name.toUpperCase()) {
+    equiv.isSharp = false;
+    equiv.isFlat = false;
+    return equiv;
+  }
+
+  return note;
+}
+
+function adjustNoteToKey(acc, note) {
+  if (acc.acc == 'sharp') {
+    if (note.isFlat) {
+      return buildAccEquiv(acc, note);
+    } else if (note.isSharp) {
+      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
+        note.isSharp = false;
+        note.isKeySharp = true;
+      } else {
+        if (acc.note.toUpperCase() == note.name.toUpperCase()) {
+          note.natural = true;
+        }
+      }
+    }
+  } else if (acc.acc == 'flat') {
+    if (note.isSharp) {
+      return buildAccEquiv(acc, note);
+    } else if (note.isFlat) {
+      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
+        note.isFlat = false;
+        note.isKeyFlat = true;
+      }
+    } else {
+      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
+        note.natural = true;
+      }
+    }
+  }
+
+  return note;
+}
+
+function replaceNote(self, newNote, start, end) {
+  if (self.lastEnd) {
+    while (start > self.lastEnd) {
+      self.updatedSrc.push(self.abcSrc[self.lastEnd]);
+      self.lastEnd++;
+    }
+  }
+
+  var nNote = newNote.split('');
+
+  for (var ii = 0; ii < nNote.length; ii++) {
+    self.updatedSrc.push(nNote[ii]);
+  }
+
+  var curPos = start + ii;
+
+  while (end >= curPos) {
+    self.updatedSrc.push(nNote[curPos]);
+    curPos++;
+  }
+
+  self.lastEnd = end;
+}
+
+function checkKeys(self, note) {
+  var accs = self.transposedKey;
+
+  for (var ii = 0; ii < accs.length; ii++) {
+    note = adjustNoteToKey(accs[ii], note);
+  }
+
+  return note;
+}
+
+Transposer.prototype.transposeNote = function (note) {
+  var returned = note;
+  var curNote = new TabNote.TabNote(returned.name);
+
+  if (this.transposeBy > 0) {
+    for (var ii = 0; ii < this.transposeBy; ii++) {
+      curNote = checkKeys(this, curNote.nextNote());
+    }
+  } else if (this.transposeBy < 0) {
+    for (var jj = this.transposeBy; jj < 0; jj++) {
+      curNote = checkKeys(this, curNote.prevNote());
+    }
+  }
+
+  returned.name = curNote.emit();
+  return returned;
+};
+
+Transposer.prototype.upgradeSource = function (note, startChar, endChar) {
+  var n = new TabNote.TabNote(note.name);
+  var newNote = n.emit();
+  replaceNote(this, newNote, startChar, endChar - 1);
+};
+
+function Transposer(transposedKey, transposeBy) {
+  this.transposeBy = transposeBy;
+  this.transposedKey = transposedKey;
+  this.lastEnd = this.kEnd + 1;
+}
+
+module.exports = Transposer;
+
+/***/ }),
+
 /***/ "./src/write/abc_absolute_element.js":
 /*!*******************************************!*\
   !*** ./src/write/abc_absolute_element.js ***!
@@ -19008,7 +21055,7 @@ var GetTextSize = __webpack_require__(/*! ./get-text-size */ "./src/write/get-te
 
 var draw = __webpack_require__(/*! ./draw/draw */ "./src/write/draw/draw.js");
 
-var calcHeight = __webpack_require__(/*! ./calcHeight */ "./src/write/calcHeight.js");
+var tablatures = __webpack_require__(/*! ../api/abc_tablatures */ "./src/api/abc_tablatures.js");
 /**
  * @class
  * Controls the engraving process, from ABCJS Abstract Syntax Tree (ABCJS AST) to rendered score sheet
@@ -19231,7 +21278,12 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
 
   this.constructTuneElements(abcTune); // Do all the positioning, both horizontally and vertically
 
-  var maxWidth = layout(this.renderer, abcTune, this.width, this.space); // Do all the writing to the SVG
+  var maxWidth = layout(this.renderer, abcTune, this.width, this.space); // Deal with tablature for staff
+
+  if (abcTune.tablatures) {
+    tablatures.layoutTablatures(this.renderer, abcTune);
+  } // Do all the writing to the SVG
+
 
   var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber);
   this.staffgroups = ret.staffgroups;
@@ -19604,6 +21656,16 @@ var glyphs = {
     d: [['M', 5.07, -7.44], ['l', 0.09, -0.06], ['l', 1.53, 0.00], ['l', 1.53, 0.00], ['l', 0.09, 0.06], ['l', 0.06, 0.09], ['l', 0.00, 7.35], ['l', 0.00, 7.32], ['l', -0.06, 0.09], ['l', -0.09, 0.06], ['l', -1.53, 0.00], ['l', -1.53, 0.00], ['l', -0.09, -0.06], ['l', -0.06, -0.09], ['l', 0.00, -7.32], ['l', 0.00, -7.35], ['z'], ['m', 6.63, 0.00], ['l', 0.09, -0.06], ['l', 1.53, 0.00], ['l', 1.53, 0.00], ['l', 0.09, 0.06], ['l', 0.06, 0.09], ['l', 0.00, 7.35], ['l', 0.00, 7.32], ['l', -0.06, 0.09], ['l', -0.09, 0.06], ['l', -1.53, 0.00], ['l', -1.53, 0.00], ['l', -0.09, -0.06], ['l', -0.06, -0.09], ['l', 0.00, -7.32], ['l', 0.00, -7.35], ['z']],
     w: 21,
     h: 14.97
+  },
+  'tab.big': {
+    d: [['M', 20.16, -21.66], ['c', 0.24, -0.09, 0.66, 0.09, 0.78, 0.36], ['c', 0.09, 0.21, 0.09, 0.24, -0.18, 0.54], ['c', -0.78, 0.81, -1.86, 1.44, -2.94, 1.71], ['c', -0.87, 0.24, -1.71, 0.24, -2.55, 0.03], ['l', -0.06, -0.03], ['l', -0.18, 0.99], ['c', -0.33, 1.98, -0.75, 4.26, -0.96, 5.04], ['c', -0.42, 1.65, -1.26, 3.18, -2.28, 4.14], ['c', -0.57, 0.57, -1.17, 0.90, -1.86, 1.08], ['c', -0.18, 0.06, -0.33, 0.06, -0.66, 0.06], ['c', -0.54, 0.00, -0.78, -0.03, -1.23, -0.27], ['c', -0.39, -0.18, -0.66, -0.39, -1.38, -0.99], ['c', -0.30, -0.24, -0.66, -0.51, -0.75, -0.57], ['c', -0.21, -0.15, -0.27, -0.24, -0.24, -0.45], ['c', 0.06, -0.27, 0.36, -0.60, 0.60, -0.66], ['c', 0.18, -0.03, 0.33, 0.06, 0.90, 0.57], ['c', 0.48, 0.42, 0.72, 0.57, 0.93, 0.69], ['c', 0.66, 0.33, 1.38, 0.21, 1.95, -0.36], ['c', 0.63, -0.60, 1.05, -1.62, 1.23, -3.00], ['c', 0.03, -0.18, 0.09, -0.66, 0.09, -1.11], ['c', 0.09, -1.56, 0.33, -3.81, 0.57, -5.49], ['c', 0.06, -0.33, 0.09, -0.63, 0.09, -0.63], ['c', -0.03, -0.03, -0.81, -0.12, -1.02, -0.12], ['c', -0.57, 0.00, -1.32, 0.12, -1.80, 0.33], ['c', -0.87, 0.30, -1.35, 0.78, -1.50, 1.41], ['c', -0.18, 0.63, 0.09, 1.26, 0.66, 1.65], ['c', 0.12, 0.06, 0.15, 0.12, 0.18, 0.24], ['c', 0.09, 0.27, 0.06, 0.57, -0.09, 0.75], ['c', -0.03, 0.06, -0.12, 0.09, -0.27, 0.15], ['c', -0.72, 0.21, -1.44, 0.15, -2.10, -0.18], ['c', -0.54, -0.27, -0.96, -0.66, -1.20, -1.14], ['c', -0.39, -0.75, -0.33, -1.74, 0.15, -2.52], ['c', 0.27, -0.42, 0.84, -0.93, 1.41, -1.23], ['c', 1.17, -0.57, 2.88, -0.90, 4.80, -0.90], ['c', 0.69, 0.00, 0.78, 0.00, 1.08, 0.06], ['c', 0.45, 0.09, 1.11, 0.30, 2.07, 0.60], ['c', 1.47, 0.48, 1.83, 0.57, 2.55, 0.54], ['c', 1.02, -0.06, 2.04, -0.45, 2.94, -1.11], ['c', 0.12, -0.09, 0.24, -0.18, 0.27, -0.18], ['z'], ['m', -5.88, 13.05], ['c', 0.21, -0.03, 0.81, 0.00, 1.08, 0.06], ['c', 0.48, 0.12, 0.90, 0.42, 0.99, 0.69], ['c', 0.03, 0.09, 0.03, 0.15, 0.00, 0.27], ['c', 0.00, 0.09, -0.03, 0.57, -0.06, 1.08], ['c', -0.09, 2.19, -0.24, 5.76, -0.39, 8.28], ['c', -0.06, 1.53, -0.06, 1.77, 0.03, 2.01], ['c', 0.09, 0.18, 0.15, 0.24, 0.30, 0.30], ['c', 0.24, 0.12, 0.54, 0.06, 1.23, -0.27], ['c', 0.57, -0.27, 0.66, -0.30, 0.75, -0.24], ['c', 0.09, 0.06, 0.18, 0.30, 0.18, 0.45], ['c', 0.00, 0.33, -0.15, 0.51, -0.45, 0.63], ['c', -0.12, 0.03, -0.39, 0.15, -0.60, 0.27], ['c', -1.17, 0.60, -1.38, 0.69, -1.80, 0.72], ['c', -0.45, 0.03, -0.78, -0.09, -1.08, -0.39], ['c', -0.39, -0.42, -0.66, -1.20, -1.02, -3.12], ['c', -0.24, -1.23, -0.36, -2.07, -0.54, -3.75], ['l', 0.00, -0.18], ['l', -0.36, 0.45], ['c', -0.60, 0.75, -1.32, 1.59, -1.95, 2.25], ['c', -0.15, 0.18, -0.27, 0.30, -0.27, 0.33], ['c', 0.00, 0.00, 0.06, 0.09, 0.15, 0.18], ['c', 0.24, 0.33, 0.60, 0.57, 1.05, 0.69], ['c', 0.18, 0.06, 0.30, 0.06, 0.69, 0.06], ['l', 0.48, 0.03], ['l', 0.06, 0.12], ['c', 0.15, 0.27, 0.03, 0.72, -0.21, 0.90], ['c', -0.18, 0.12, -0.93, 0.27, -1.41, 0.27], ['c', -0.84, 0.00, -1.59, -0.30, -1.98, -0.84], ['l', -0.12, -0.15], ['l', -0.45, 0.42], ['c', -0.99, 0.87, -1.53, 1.32, -2.16, 1.74], ['c', -0.78, 0.51, -1.50, 0.84, -2.10, 0.93], ['c', -0.69, 0.12, -1.20, 0.03, -1.95, -0.42], ['c', -0.21, -0.12, -0.51, -0.27, -0.66, -0.36], ['c', -0.24, -0.12, -0.30, -0.18, -0.33, -0.24], ['c', -0.12, -0.27, 0.15, -0.78, 0.45, -0.93], ['c', 0.24, -0.12, 0.33, -0.09, 0.90, 0.18], ['c', 0.60, 0.30, 0.84, 0.39, 1.20, 0.36], ['c', 0.87, -0.09, 1.77, -0.69, 3.24, -2.31], ['c', 2.67, -2.85, 4.59, -5.94, 5.70, -9.15], ['c', 0.15, -0.45, 0.24, -0.63, 0.42, -0.81], ['c', 0.21, -0.24, 0.60, -0.45, 0.99, -0.51], ['z'], ['m', -3.99, 16.05], ['c', 0.18, 0.00, 0.69, -0.03, 1.17, 0.00], ['c', 3.27, 0.03, 5.37, 0.75, 6.00, 2.07], ['c', 0.45, 0.99, 0.12, 2.40, -0.81, 3.42], ['c', -0.24, 0.27, -0.57, 0.57, -0.84, 0.75], ['c', -0.09, 0.06, -0.18, 0.09, -0.18, 0.12], ['c', 0.00, 0.00, 0.18, 0.03, 0.42, 0.09], ['c', 1.23, 0.30, 2.01, 0.81, 2.37, 1.59], ['c', 0.27, 0.54, 0.30, 1.32, 0.09, 2.10], ['c', -0.12, 0.36, -0.45, 1.05, -0.69, 1.35], ['c', -0.87, 1.17, -2.10, 1.92, -3.54, 2.25], ['c', -0.36, 0.06, -0.48, 0.06, -0.96, 0.06], ['c', -0.45, 0.00, -0.66, 0.00, -0.84, -0.03], ['c', -0.84, -0.18, -1.47, -0.51, -2.07, -1.11], ['c', -0.33, -0.33, -0.45, -0.51, -0.45, -0.63], ['c', 0.00, -0.06, 0.03, -0.15, 0.06, -0.24], ['c', 0.18, -0.33, 0.69, -0.60, 0.93, -0.48], ['c', 0.03, 0.03, 0.15, 0.12, 0.27, 0.24], ['c', 0.39, 0.42, 0.99, 0.57, 1.62, 0.45], ['c', 1.05, -0.21, 1.98, -1.02, 2.31, -2.01], ['c', 0.48, -1.53, -0.48, -2.55, -2.58, -2.67], ['c', -0.21, 0.00, -0.36, -0.03, -0.42, -0.06], ['c', -0.15, -0.09, -0.21, -0.51, -0.06, -0.78], ['c', 0.12, -0.27, 0.24, -0.33, 0.60, -0.36], ['c', 0.57, -0.06, 1.11, -0.42, 1.50, -0.99], ['c', 0.48, -0.72, 0.54, -1.59, 0.18, -2.31], ['c', -0.12, -0.21, -0.45, -0.54, -0.69, -0.69], ['c', -0.33, -0.21, -0.93, -0.45, -1.35, -0.51], ['l', -0.12, -0.03], ['l', -0.06, 0.48], ['c', -0.54, 2.94, -1.14, 6.24, -1.29, 6.75], ['c', -0.33, 1.35, -0.93, 2.61, -1.65, 3.60], ['c', -0.30, 0.36, -0.81, 0.90, -1.14, 1.14], ['c', -0.30, 0.24, -0.84, 0.48, -1.14, 0.57], ['c', -0.33, 0.09, -0.96, 0.09, -1.26, 0.03], ['c', -0.45, -0.12, -0.87, -0.39, -1.53, -0.96], ['c', -0.24, -0.15, -0.51, -0.39, -0.63, -0.48], ['c', -0.30, -0.21, -0.33, -0.33, -0.21, -0.63], ['c', 0.12, -0.18, 0.27, -0.36, 0.42, -0.45], ['c', 0.27, -0.12, 0.36, -0.09, 0.87, 0.33], ['c', 0.78, 0.60, 1.08, 0.75, 1.65, 0.72], ['c', 0.45, -0.03, 0.81, -0.21, 1.17, -0.54], ['c', 0.87, -0.90, 1.38, -2.85, 1.38, -5.37], ['c', 0.00, -0.60, 0.03, -1.11, 0.12, -2.04], ['c', 0.06, -0.69, 0.24, -2.01, 0.33, -2.58], ['c', 0.06, -0.24, 0.06, -0.42, 0.06, -0.42], ['c', 0.00, 0.00, -0.12, 0.03, -0.21, 0.09], ['c', -1.44, 0.57, -2.16, 1.65, -1.74, 2.55], ['c', 0.09, 0.15, 0.18, 0.24, 0.27, 0.33], ['c', 0.24, 0.21, 0.30, 0.27, 0.33, 0.39], ['c', 0.06, 0.24, 0.00, 0.63, -0.15, 0.78], ['c', -0.09, 0.12, -0.54, 0.21, -0.96, 0.24], ['c', -1.02, 0.03, -2.01, -0.48, -2.43, -1.32], ['c', -0.21, -0.45, -0.27, -0.90, -0.15, -1.44], ['c', 0.06, -0.27, 0.21, -0.66, 0.39, -0.93], ['c', 0.87, -1.29, 3.00, -2.22, 5.64, -2.43], ['z']],
+    w: 19.643,
+    h: 43.325
+  },
+  'tab.tiny': {
+    d: [['M', 16.02, -17.25], ['c', 0.12, -0.09, 0.15, -0.09, 0.27, -0.09], ['c', 0.21, 0.03, 0.51, 0.30, 0.51, 0.45], ['c', 0.00, 0.06, -0.12, 0.18, -0.30, 0.36], ['c', -1.11, 1.08, -2.55, 1.59, -3.84, 1.41], ['c', -0.15, -0.03, -0.33, -0.06, -0.39, -0.09], ['c', -0.06, -0.03, -0.09, -0.03, -0.12, -0.03], ['c', 0.00, 0.00, -0.06, 0.42, -0.15, 0.93], ['c', -0.33, 2.01, -0.66, 3.69, -0.84, 4.26], ['c', -0.42, 1.41, -1.23, 2.67, -2.16, 3.33], ['c', -0.27, 0.18, -0.75, 0.42, -0.99, 0.48], ['c', -0.30, 0.09, -0.72, 0.09, -1.02, 0.06], ['c', -0.45, -0.09, -0.84, -0.33, -1.53, -0.90], ['c', -0.21, -0.18, -0.51, -0.39, -0.63, -0.48], ['c', -0.27, -0.21, -0.30, -0.24, -0.30, -0.36], ['c', 0.00, -0.12, 0.09, -0.36, 0.18, -0.45], ['c', 0.09, -0.09, 0.27, -0.18, 0.36, -0.18], ['c', 0.12, 0.00, 0.30, 0.12, 0.66, 0.45], ['c', 0.57, 0.51, 0.87, 0.69, 1.23, 0.72], ['c', 0.93, 0.06, 1.68, -0.78, 1.98, -2.37], ['c', 0.09, -0.39, 0.15, -0.75, 0.18, -1.53], ['c', 0.06, -0.99, 0.24, -2.79, 0.42, -4.05], ['c', 0.03, -0.30, 0.06, -0.57, 0.06, -0.60], ['c', 0.00, -0.06, -0.03, -0.09, -0.15, -0.12], ['c', -0.90, -0.18, -2.13, 0.06, -2.76, 0.57], ['c', -0.36, 0.30, -0.51, 0.60, -0.51, 1.02], ['c', 0.00, 0.45, 0.15, 0.75, 0.48, 0.99], ['c', 0.06, 0.06, 0.15, 0.18, 0.18, 0.24], ['c', 0.12, 0.24, 0.03, 0.63, -0.15, 0.69], ['c', -0.24, 0.12, -0.60, 0.15, -0.90, 0.15], ['c', -0.36, -0.03, -0.57, -0.09, -0.87, -0.24], ['c', -0.78, -0.36, -1.23, -1.11, -1.20, -1.92], ['c', 0.12, -1.53, 1.74, -2.49, 4.62, -2.70], ['c', 1.20, -0.09, 1.47, -0.03, 3.33, 0.57], ['c', 0.90, 0.30, 1.14, 0.36, 1.56, 0.39], ['c', 0.45, 0.00, 0.93, -0.06, 1.38, -0.21], ['c', 0.51, -0.18, 0.81, -0.33, 1.41, -0.75], ['z'], ['m', -4.68, 10.38], ['c', 0.39, -0.06, 0.84, 0.00, 1.20, 0.15], ['c', 0.24, 0.12, 0.36, 0.21, 0.45, 0.36], ['l', 0.09, 0.09], ['l', -0.06, 1.41], ['c', -0.09, 2.19, -0.18, 3.96, -0.27, 5.49], ['c', -0.03, 0.78, -0.06, 1.59, -0.06, 1.86], ['c', 0.00, 0.42, 0.00, 0.48, 0.06, 0.57], ['c', 0.06, 0.18, 0.18, 0.24, 0.36, 0.27], ['c', 0.18, 0.00, 0.39, -0.06, 0.84, -0.27], ['c', 0.45, -0.21, 0.54, -0.24, 0.63, -0.18], ['c', 0.12, 0.12, 0.15, 0.54, 0.03, 0.69], ['c', -0.03, 0.03, -0.15, 0.12, -0.27, 0.18], ['c', -0.15, 0.03, -0.30, 0.12, -0.36, 0.15], ['c', -0.87, 0.45, -1.02, 0.51, -1.26, 0.57], ['c', -0.33, 0.09, -0.60, 0.06, -0.84, -0.06], ['c', -0.42, -0.18, -0.63, -0.60, -0.87, -1.44], ['c', -0.30, -1.23, -0.57, -2.97, -0.66, -4.08], ['c', 0.00, -0.18, -0.03, -0.30, -0.03, -0.33], ['l', -0.06, 0.06], ['c', -0.18, 0.27, -1.11, 1.38, -1.68, 2.01], ['l', -0.33, 0.33], ['l', 0.06, 0.09], ['c', 0.06, 0.15, 0.27, 0.33, 0.48, 0.42], ['c', 0.27, 0.18, 0.51, 0.24, 0.96, 0.27], ['l', 0.39, 0.00], ['l', 0.03, 0.12], ['c', 0.12, 0.21, 0.03, 0.57, -0.15, 0.69], ['c', -0.03, 0.03, -0.21, 0.09, -0.36, 0.15], ['c', -0.27, 0.06, -0.39, 0.06, -0.75, 0.06], ['c', -0.48, 0.00, -0.75, -0.03, -1.08, -0.21], ['c', -0.21, -0.12, -0.51, -0.36, -0.57, -0.48], ['l', -0.03, -0.09], ['l', -0.39, 0.36], ['c', -1.47, 1.35, -2.49, 1.98, -3.42, 2.13], ['c', -0.54, 0.09, -0.96, -0.03, -1.62, -0.39], ['c', -0.21, -0.15, -0.45, -0.27, -0.54, -0.30], ['c', -0.18, -0.09, -0.21, -0.21, -0.12, -0.45], ['c', 0.06, -0.27, 0.33, -0.48, 0.54, -0.48], ['c', 0.03, 0.00, 0.27, 0.09, 0.48, 0.21], ['c', 0.48, 0.24, 0.69, 0.27, 0.99, 0.27], ['c', 0.60, -0.06, 1.17, -0.42, 2.10, -1.35], ['c', 2.22, -2.22, 4.02, -4.98, 4.95, -7.59], ['c', 0.21, -0.57, 0.30, -0.78, 0.48, -0.93], ['c', 0.15, -0.15, 0.42, -0.27, 0.66, -0.33], ['z'], ['m', -3.06, 12.84], ['c', 0.27, -0.03, 1.68, 0.00, 2.01, 0.03], ['c', 1.92, 0.18, 3.15, 0.69, 3.63, 1.50], ['c', 0.18, 0.33, 0.24, 0.51, 0.21, 0.93], ['c', 0.00, 0.45, -0.06, 0.72, -0.24, 1.11], ['c', -0.24, 0.51, -0.69, 1.02, -1.17, 1.35], ['c', -0.21, 0.15, -0.21, 0.15, -0.12, 0.18], ['c', 0.72, 0.15, 1.11, 0.30, 1.50, 0.57], ['c', 0.39, 0.24, 0.63, 0.57, 0.75, 0.96], ['c', 0.09, 0.30, 0.09, 0.96, 0.00, 1.29], ['c', -0.15, 0.57, -0.39, 1.05, -0.78, 1.50], ['c', -0.66, 0.75, -1.62, 1.32, -2.61, 1.53], ['c', -0.27, 0.06, -0.42, 0.06, -0.84, 0.06], ['c', -0.48, 0.00, -0.57, 0.00, -0.81, -0.06], ['c', -0.60, -0.18, -1.05, -0.42, -1.47, -0.81], ['c', -0.36, -0.39, -0.42, -0.51, -0.30, -0.75], ['c', 0.12, -0.21, 0.39, -0.39, 0.60, -0.39], ['c', 0.09, 0.00, 0.15, 0.03, 0.33, 0.18], ['c', 0.12, 0.12, 0.27, 0.24, 0.36, 0.27], ['c', 0.96, 0.48, 2.46, -0.33, 2.82, -1.50], ['c', 0.24, -0.81, -0.03, -1.44, -0.69, -1.77], ['c', -0.39, -0.21, -1.02, -0.33, -1.53, -0.33], ['c', -0.18, 0.00, -0.21, 0.00, -0.27, -0.09], ['c', -0.06, -0.09, -0.06, -0.30, -0.03, -0.48], ['c', 0.06, -0.18, 0.18, -0.36, 0.33, -0.36], ['c', 0.39, -0.06, 0.51, -0.09, 0.72, -0.18], ['c', 0.69, -0.36, 1.11, -1.23, 0.99, -2.01], ['c', -0.09, -0.51, -0.42, -0.90, -0.93, -1.17], ['c', -0.24, -0.12, -0.60, -0.27, -0.87, -0.30], ['c', -0.09, -0.03, -0.09, -0.03, -0.12, 0.12], ['c', 0.00, 0.09, -0.21, 1.11, -0.42, 2.25], ['c', -0.66, 3.75, -0.72, 3.99, -1.26, 5.07], ['c', -0.90, 1.89, -2.25, 2.85, -3.48, 2.61], ['c', -0.39, -0.09, -0.69, -0.27, -1.38, -0.84], ['c', -0.63, -0.51, -0.63, -0.48, -0.63, -0.60], ['c', 0.00, -0.18, 0.18, -0.48, 0.39, -0.57], ['c', 0.21, -0.12, 0.30, -0.09, 0.81, 0.33], ['c', 0.15, 0.15, 0.39, 0.30, 0.54, 0.36], ['c', 0.18, 0.12, 0.27, 0.12, 0.48, 0.15], ['c', 0.99, 0.06, 1.71, -0.78, 2.04, -2.46], ['c', 0.12, -0.66, 0.18, -1.14, 0.21, -2.22], ['c', 0.03, -1.23, 0.12, -2.25, 0.36, -3.63], ['c', 0.03, -0.24, 0.06, -0.45, 0.06, -0.48], ['c', -0.06, -0.03, -0.66, 0.27, -0.90, 0.42], ['c', -0.06, 0.06, -0.21, 0.18, -0.33, 0.30], ['c', -0.57, 0.57, -0.60, 1.35, -0.06, 1.74], ['c', 0.18, 0.12, 0.24, 0.24, 0.21, 0.51], ['c', -0.03, 0.30, -0.15, 0.42, -0.57, 0.48], ['c', -1.11, 0.24, -2.22, -0.42, -2.43, -1.38], ['c', -0.09, -0.45, 0.03, -1.02, 0.30, -1.47], ['c', 0.18, -0.24, 0.60, -0.63, 0.90, -0.84], ['c', 0.90, -0.60, 2.28, -1.02, 3.69, -1.11], ['z']],
+    w: 15.709,
+    h: 34.656
   },
   'timesig.common': {
     d: [['M', 6.66, -7.83], ['c', 0.72, -0.06, 1.41, -0.03, 1.98, 0.09], ['c', 1.20, 0.27, 2.34, 0.96, 3.09, 1.92], ['c', 0.63, 0.81, 1.08, 1.86, 1.14, 2.73], ['c', 0.06, 1.02, -0.51, 1.92, -1.44, 2.22], ['c', -0.24, 0.09, -0.30, 0.09, -0.63, 0.09], ['c', -0.33, 0.00, -0.42, 0.00, -0.63, -0.06], ['c', -0.66, -0.24, -1.14, -0.63, -1.41, -1.20], ['c', -0.15, -0.30, -0.21, -0.51, -0.24, -0.90], ['c', -0.06, -1.08, 0.57, -2.04, 1.56, -2.37], ['c', 0.18, -0.06, 0.27, -0.06, 0.63, -0.06], ['l', 0.45, 0.00], ['c', 0.06, 0.03, 0.09, 0.03, 0.09, 0.00], ['c', 0.00, 0.00, -0.09, -0.12, -0.24, -0.27], ['c', -1.02, -1.11, -2.55, -1.68, -4.08, -1.50], ['c', -1.29, 0.15, -2.04, 0.69, -2.40, 1.74], ['c', -0.36, 0.93, -0.42, 1.89, -0.42, 5.37], ['c', 0.00, 2.97, 0.06, 3.96, 0.24, 4.77], ['c', 0.24, 1.08, 0.63, 1.68, 1.41, 2.07], ['c', 0.81, 0.39, 2.16, 0.45, 3.18, 0.09], ['c', 1.29, -0.45, 2.37, -1.53, 3.03, -2.97], ['c', 0.15, -0.33, 0.33, -0.87, 0.39, -1.17], ['c', 0.09, -0.24, 0.15, -0.36, 0.30, -0.39], ['c', 0.21, -0.03, 0.42, 0.15, 0.39, 0.36], ['c', -0.06, 0.39, -0.42, 1.38, -0.69, 1.89], ['c', -0.96, 1.80, -2.49, 2.94, -4.23, 3.18], ['c', -0.99, 0.12, -2.58, -0.06, -3.63, -0.45], ['c', -0.96, -0.36, -1.71, -0.84, -2.40, -1.50], ['c', -1.11, -1.11, -1.80, -2.61, -2.04, -4.56], ['c', -0.06, -0.60, -0.06, -2.01, 0.00, -2.61], ['c', 0.24, -1.95, 0.90, -3.45, 2.01, -4.56], ['c', 0.69, -0.66, 1.44, -1.11, 2.37, -1.47], ['c', 0.63, -0.24, 1.47, -0.42, 2.22, -0.48], ['z']],
@@ -20202,6 +22264,10 @@ Renderer.prototype.calcY = function (ofs) {
 Renderer.prototype.moveY = function (em, numLines) {
   if (numLines === undefined) numLines = 1;
   this.y += em * numLines;
+};
+
+Renderer.prototype.absolutemoveY = function (y) {
+  this.y = y;
 };
 
 module.exports = Renderer;
@@ -21252,7 +23318,13 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
       selectables.add(params, g, false, staffPos);
     } else {
       params.elemset.push(g);
-      selectables.add(params, g, params.type === 'note', staffPos);
+      var isSelectable = false;
+
+      if (params.type === 'note' || params.type === 'tabNumber') {
+        isSelectable = true;
+      }
+
+      selectables.add(params, g, isSelectable, staffPos);
     }
   } else if (params.elemset.length > 0) selectables.add(params, params.elemset[0], params.type === 'note', staffPos); // If there was no output, then don't add to the selectables. This happens when using the "y" spacer, for instance.
 
@@ -21567,7 +23639,7 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
       }
 
       if (staffgroups.length >= 1) addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
-      var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables);
+      var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables, line);
       staffgroup.line = line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
 
       staffgroups.push(staffgroup);
@@ -21587,8 +23659,8 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
   };
 }
 
-function engraveStaffLine(renderer, staffGroup, selectables) {
-  drawStaffGroup(renderer, staffGroup, selectables);
+function engraveStaffLine(renderer, staffGroup, selectables, lineNumber) {
+  drawStaffGroup(renderer, staffGroup, selectables, lineNumber);
   var height = staffGroup.height * spacing.STEP;
   renderer.y += height;
   return staffGroup;
@@ -21801,7 +23873,9 @@ function nonMusic(renderer, obj, selectables) {
   for (var i = 0; i < obj.rows.length; i++) {
     var row = obj.rows[i];
 
-    if (row.move) {
+    if (row.absmove) {
+      renderer.absolutemoveY(row.absmove);
+    } else if (row.move) {
       renderer.moveY(row.move);
     } else if (row.text) {
       var x = row.left ? row.left : 0;
@@ -21846,6 +23920,39 @@ function nonMusic(renderer, obj, selectables) {
 }
 
 module.exports = nonMusic;
+
+/***/ }),
+
+/***/ "./src/write/draw/print-line.js":
+/*!**************************************!*\
+  !*** ./src/write/draw/print-line.js ***!
+  \**************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
+
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+
+function printLine(renderer, x1, x2, y, klass, name, dy) {
+  if (!dy) dy = 0.35;
+  var fill = renderer.foregroundColor;
+  x1 = roundNumber(x1);
+  x2 = roundNumber(x2);
+  var y1 = roundNumber(y - dy);
+  var y2 = roundNumber(y + dy);
+  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y1, x2, y1, x2, y2, x1, y2);
+  var options = {
+    path: pathString,
+    stroke: "none",
+    fill: fill
+  };
+  if (name) options['data-name'] = name;
+  if (klass) options['class'] = klass;
+  var ret = renderer.paper.pathToBack(options);
+  return ret;
+}
+
+module.exports = printLine;
 
 /***/ }),
 
@@ -22058,6 +24165,30 @@ function drawRelativeElement(renderer, params, bartop) {
       }, false);
       break;
 
+    case "tabNumber":
+      var hAnchor = "middle";
+      var tabFont = "tabnumberfont";
+      var tabClass = 'tab-number';
+
+      if (params.isGrace) {
+        tabFont = "tabgracefont";
+        y += 2.5;
+        tabClass = 'tab-grace';
+      }
+
+      params.graphelem = renderText(renderer, {
+        x: params.x,
+        y: y,
+        text: "" + params.c,
+        type: tabFont,
+        klass: renderer.controller.classes.generate(tabClass),
+        anchor: hAnchor,
+        centerVertically: false,
+        dim: params.dim,
+        cursor: 'default'
+      }, false);
+      break;
+
     case "barNumber":
       params.graphelem = renderText(renderer, {
         x: params.x,
@@ -22219,7 +24350,7 @@ Selectables.prototype.getElements = function () {
   return this.elements;
 };
 
-Selectables.prototype.add = function (absEl, svgEl, isNote, staffPos) {
+Selectables.prototype.add = function (absEl, svgEl, isNoteOrTabNumber, staffPos) {
   if (!this.canSelect(absEl)) return;
   var params;
   if (this.selectTypes === undefined) params = {
@@ -22235,7 +24366,7 @@ Selectables.prototype.add = function (absEl, svgEl, isNote, staffPos) {
   var sel = {
     absEl: absEl,
     svgEl: svgEl,
-    isDraggable: isNote
+    isDraggable: isNoteOrTabNumber
   };
   if (staffPos !== undefined) sel.staffPos = staffPos;
   this.elements.push(sel);
@@ -22247,8 +24378,12 @@ Selectables.prototype.canSelect = function (absEl) {
   if (this.selectTypes === true) return true;
 
   if (this.selectTypes === undefined) {
-    // by default, only notes can be clicked.
-    return absEl.abcelem.el_type === 'note';
+    // by default, only notes and tab numbers can be clicked.
+    if (absEl.abcelem.el_type === 'note' || absEl.abcelem.el_type === 'tabNumber') {
+      return true;
+    }
+
+    return false;
   }
 
   return this.selectTypes.indexOf(absEl.abcelem.el_type) >= 0;
@@ -22346,7 +24481,7 @@ module.exports = setPaperSize;
   \***********************************/
 /***/ (function(module) {
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 /**
  * sprintf() for JavaScript v.0.4
@@ -22468,7 +24603,9 @@ var printDebugBox = __webpack_require__(/*! ./debug-box */ "./src/write/draw/deb
 
 var printStem = __webpack_require__(/*! ./print-stem */ "./src/write/draw/print-stem.js");
 
-function drawStaffGroup(renderer, params, selectables) {
+var nonMusic = __webpack_require__(/*! ./non-music */ "./src/write/draw/non-music.js");
+
+function drawStaffGroup(renderer, params, selectables, lineNumber) {
   // We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
   // All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
   // renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
@@ -22541,10 +24678,12 @@ function drawStaffGroup(renderer, params, selectables) {
   var topLine; // these are to connect multiple staves. We need to remember where they are.
 
   var bottomLine;
+  var linePitch = 2;
   var bartop = 0;
 
   for (var i = 0; i < params.voices.length; i++) {
     var staff = params.voices[i].staff;
+    var tabName = params.voices[i].tabNameInfos;
     renderer.y = staff.absoluteY;
     renderer.controller.classes.incrVoice(); //renderer.y = staff.y;
     // offset for starting the counting at middle C
@@ -22552,11 +24691,30 @@ function drawStaffGroup(renderer, params, selectables) {
     if (!params.voices[i].duplicate) {
       //			renderer.moveY(spacing.STEP, staff.top);
       if (!topLine) topLine = renderer.calcY(10);
-      bottomLine = renderer.calcY(2);
+      bottomLine = renderer.calcY(linePitch);
 
       if (staff.lines !== 0) {
+        if (staff.linePitch) {
+          linePitch = staff.linePitch;
+        }
+
         renderer.controller.classes.newMeasure();
-        printStaff(renderer, params.startx, params.w, staff.lines);
+        var lines = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, staff.dy);
+        bottomLine = lines[1];
+        staff.bottomLine = bottomLine;
+        staff.topLine = lines[0]; // rework bartop when tabs are present with current staff
+
+        if (staff.hasTab) {
+          // do not link to staff above  (ugly looking)
+          bartop = staff.topLine;
+        }
+
+        if (staff.hasStaff) {
+          // this is a tab
+          bartop = staff.hasStaff.topLine;
+          params.voices[i].barto = true;
+          params.voices[i].topLine = topLine;
+        }
       }
 
       printBrace(renderer, staff.absoluteY, params.brace, i, selectables);
@@ -22568,10 +24726,35 @@ function drawStaffGroup(renderer, params, selectables) {
       zero: renderer.y,
       height: params.height * spacing.STEP
     });
+    var tabNameHeight = 0;
+
+    if (tabName) {
+      // print tab infos on staffBottom
+      var r = {
+        rows: []
+      };
+      r.rows.push({
+        absmove: bottomLine + 2
+      });
+      var leftMargin = 8;
+      r.rows.push({
+        left: params.startx + leftMargin,
+        text: tabName.name,
+        font: 'tablabelfont',
+        klass: 'text instrument-name',
+        anchor: 'start'
+      });
+      r.rows.push({
+        move: tabName.textSize.height
+      });
+      nonMusic(renderer, r);
+      tabNameHeight = tabName.textSize.height;
+    }
+
     renderer.controller.classes.newMeasure();
 
     if (!params.voices[i].duplicate) {
-      bartop = renderer.calcY(2); // This connects the bar lines between two different staves.
+      bartop = renderer.calcY(2 + tabNameHeight); // This connects the bar lines between two different staves.
       //			if (staff.bottom < 0)
       //				renderer.moveY(spacing.STEP, -staff.bottom);
     }
@@ -22579,7 +24762,11 @@ function drawStaffGroup(renderer, params, selectables) {
 
   renderer.controller.classes.newMeasure(); // connect all the staves together with a vertical line
 
-  if (params.staffs.length > 1) {
+  var staffSize = params.staffs.length;
+
+  if (staffSize > 1) {
+    topLine = params.staffs[0].topLine;
+    bottomLine = params.staffs[staffSize - 1].bottomLine;
     printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
   }
 
@@ -22684,28 +24871,11 @@ module.exports = drawStaffGroup;
   \**************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
+var printLine = __webpack_require__(/*! ./print-line */ "./src/write/draw/print-line.js");
 
-var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
-
-function printStaffLine(renderer, x1, x2, pitch, klass, name) {
-  var dy = 0.35;
-  var fill = renderer.foregroundColor;
+function printStaffLine(renderer, x1, x2, pitch, klass, name, dy) {
   var y = renderer.calcY(pitch);
-  x1 = roundNumber(x1);
-  x2 = roundNumber(x2);
-  var y1 = roundNumber(y - dy);
-  var y2 = roundNumber(y + dy);
-  var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y1, x2, y1, x2, y2, x1, y2);
-  var options = {
-    path: pathString,
-    stroke: "none",
-    fill: fill
-  };
-  if (name) options['data-name'] = name;
-  if (klass) options['class'] = klass;
-  var ret = renderer.paper.pathToBack(options);
-  return ret;
+  return printLine(renderer, x1, x2, y, klass, name, dy);
 }
 
 module.exports = printStaffLine;
@@ -22720,23 +24890,40 @@ module.exports = printStaffLine;
 
 var printStaffLine = __webpack_require__(/*! ./staff-line */ "./src/write/draw/staff-line.js");
 
-function printStaff(renderer, startx, endx, numLines) {
+function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
   var klass = "abcjs-top-line";
+  var pitch = 2;
+
+  if (linePitch) {
+    pitch = linePitch;
+  }
+
   renderer.paper.openGroup({
     prepend: true,
     klass: renderer.controller.classes.generate("abcjs-staff")
   }); // If there is one line, it is the B line. Otherwise, the bottom line is the E line.
 
+  var firstYLine = 0;
+  var lastYLine = 0;
+
   if (numLines === 1) {
     printStaffLine(renderer, startx, endx, 6, klass);
   } else {
     for (var i = numLines - 1; i >= 0; i--) {
-      printStaffLine(renderer, startx, endx, (i + 1) * 2, klass);
+      var curpitch = (i + 1) * pitch;
+      lastYLine = renderer.calcY(curpitch);
+
+      if (firstYLine == 0) {
+        firstYLine = lastYLine;
+      }
+
+      printStaffLine(renderer, startx, endx, curpitch, klass, null, dy);
       klass = undefined;
     }
   }
 
   renderer.paper.closeGroup();
+  return [firstYLine, lastYLine];
 }
 
 module.exports = printStaff;
@@ -22863,6 +25050,10 @@ function renderText(renderer, params, alreadyInGroup) {
   if (params.type === 'debugfont') {
     console.log("Debug msg: " + params.text);
     hash.attr.stroke = "#ff0000";
+  }
+
+  if (params.cursor) {
+    hash.attr.cursor = params.cursor;
   }
 
   var text = params.text.replace(/\n\n/g, "\n \n");
@@ -23178,6 +25369,16 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
       // 	child.elemset = drawTempo(renderer, child);
       // 	break;
       default:
+        if (params.staff.isTabStaff) {
+          child.invisible = false;
+
+          if (child.type == 'bar') {
+            if (child.abcelem.lastBar) {
+              bartop = params.topLine;
+            }
+          }
+        }
+
         drawAbsolute(renderer, child, params.barto || i === params.children.length - 1 ? bartop : 0, selectables, staffPos);
     }
 
@@ -24362,6 +26563,26 @@ module.exports = setUpperAndLowerElements;
 
 var layoutVoiceElements = __webpack_require__(/*! ./VoiceElements */ "./src/write/layout/VoiceElements.js");
 
+function checkLastBarX(voices) {
+  var maxX = 0;
+
+  for (var i = 0; i < voices.length; i++) {
+    var curVoice = voices[i];
+    var lastChild = curVoice.children.length - 1;
+    var maxChild = curVoice.children[lastChild];
+
+    if (maxChild.abcelem.el_type == 'bar') {
+      var barX = maxChild.children[0].x;
+
+      if (barX > maxX) {
+        maxX = barX;
+      } else {
+        maxChild.children[0].x = maxX;
+      }
+    }
+  }
+}
+
 var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staffGroup, leftEdge) {
   var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
 
@@ -24460,8 +26681,10 @@ var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staff
       x = layoutVoiceElements.getNextX(staffGroup.voices[i]);
       spacingunit = layoutVoiceElements.getSpacingUnits(staffGroup.voices[i]);
     }
-  } //console.log("greatest remaining",spacingunit,x);
+  } // adjust lastBar when needed (multi staves)
 
+
+  checkLastBarX(staffGroup.voices); //console.log("greatest remaining",spacingunit,x);
 
   spacingunits += spacingunit;
   staffGroup.setWidth(x);

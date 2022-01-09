@@ -8,6 +8,10 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
+## Major New Feature! 6.0.0-beta.36
+
+String tablature is now available by adding an option to the `renderAbc` parameters. See [tablature documentation](https://paulrosen.github.io/abcjs/visual/tablature.html)
+
 ## Fix to audio in octave clefs 6.0.0-beta.31
 
 If you are using an octave clef (for instance `K:C clef=treble-8`) it will now sound an octave different. The octave calculation was happening twice.

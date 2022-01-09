@@ -34,8 +34,10 @@ All new work should be done in the `dev` branch.
 
 [_] Update npm with `npm publish` or `npm publish --tag beta`.
     To do this in docker:
-    `docker run -v $(pwd):/srv/app -it abcjs /bin/bash`
-     `npm login`
+```bash
+docker run -v $(pwd):/srv/app -it abcjs /bin/bash
+npm login
+``` 
 
 [_] Build docs with `npm run docs:build`.
 

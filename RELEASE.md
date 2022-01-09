@@ -1,3 +1,41 @@
+# Version 6.0.0-beta.36
+
+## Bugs
+
+Fix some typescript definitions.
+
+When stopping synth, return the position that it stopped at.
+
+Implement a fix for race conditions during note loading
+
+Don't call debugger when setting an annotation on an invisible note.
+
+Put try/catch in editor when creating music so there isn't an unhandled exception if there is an abcjs bug.
+
+Don't crash when creating audio and there is a suppressed blank line
+
+When suppressing blank lines, consider a line with only chords as not blank.
+
+Don't add too much spacing on chord symbols when placing them.
+
+Don't lose element's scrolling position when rendering music.
+
+Fix crash when creating timing array and there is a suppressed line because it is empty.
+
+Allow soundFontVolumeMultiplier to be set to zero.
+
+## Features
+
+Add string tablature
+
+Implement %%jazzchord directive
+
+## Documentation
+
+Add example page using multiple synths with program switcher
+
+Add jazzchords to example generator
+
 # Version 6.0.0-beta.35
 
 ## Bugs
