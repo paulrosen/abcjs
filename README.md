@@ -68,19 +68,24 @@ The last version in each major version number is still available in the active b
 In this beta the default soundfont was changed to https://paulrosen.github.io/midi-js-soundfonts/abcjs/ Hopefully you will find that sounds better. If you set the soundfont directly then you won't notice any change. If you prefer the old soundfont, use the `soundFontUrl: "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/"` option when calling the synth functions.
 
 ## Informal roadmap
-I'm trying to get all the issues that will create breaking changes done before releasing 6.0.0. There will still be a few beta versions to come.
-
-I am going to try to release new beta versions regularly with a few improvements in each.
+I'm getting close to taking version 6.0.0 out of beta.
 
 These are the changes that are planned:
-* Improve the API for controlling the synth. That is, make the parameters less confusing.
 * Test and improve the sound of the soundfont.
 * Add all the typescript definitions.
-* Break apart the paths in the SVG so that parts of the note can be targeted. (For instance, just the flag, or one note in a chord.)
-* Control the spacing of the elements on the line better: support equal size measures, and support allowing control of the spacing between notes.
 * Bug fixes.
 
 If you have a particular issue that is impeding your usage of this library, please mention it in the issue.
+
+After the 6.0.0 release, I'll be working on some more architecture changes which will go in a 7.0.0 release:
+
+* Improve the API for controlling the synth. That is, make the parameters less confusing.
+* Create a plugin architecture so that large features that are not widely used can be added without bloating this library.
+* Change the build to use typescript while still maintaining legacy browser capability.
+* Reduce the size of the library by optimizing code.
+* Control the spacing of the elements on the line better: support equal size measures, and support allowing control of the spacing between notes.
+* Improved documentation, particularly for synth.
+* Bug fixes.
 
 Thanks, Paul
 
