@@ -65,6 +65,6 @@ module.exports = (env = {} , argv) => {
 };
 
 function makeBanner(type) {
-  let banner = `abcjs_${type} v${pkg.version} Copyright © 2009-2021 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`
+  let banner = `abcjs_${type} v${pkg.version} Copyright © 2009-2022 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`
   return banner + `/*! For license information please see abcjs_${type}.LICENSE`;
 }
