@@ -11,6 +11,7 @@
     "build:plugin": "npm run webpack -- --config-name plugin",
     "build:test": "npm run webpack -- --config-name test",
     "build:synth": "npm run webpack -- --config-name synth",
+    "watch": "npm run webpack -- --config-name basic --watch",
     "test": "mocha 'tests/**/*.js'",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
