@@ -12,10 +12,10 @@ var soundsCache = require('./sounds-cache');
 // TODO-PER: remove the midi tests from here: I don't think the object can be constructed unless it passes.
 var notSupportedMessage = "MIDI is not supported in this browser.";
 
-var defaultSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/abcjs/";
+var originalSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/abcjs/";
 // These are the original soundfonts supplied. They will need a volume boost:
-var alternateSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/";
-var alternateSoundFontUrl2 = "https://paulrosen.github.io/midi-js-soundfonts/MusyngKite/";
+var defaultSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/";
+var alternateSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/MusyngKite/";
 
 function CreateSynth() {
 	var self = this;
@@ -45,18 +45,59 @@ function CreateSynth() {
 			self.soundFontUrl += '/';
 		if (params.soundFontVolumeMultiplier || params.soundFontVolumeMultiplier === 0)
 			self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;
-		else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2)
-			self.soundFontVolumeMultiplier = 5.0;
-		else if (self.soundFontUrl === defaultSoundFontUrl)
-			self.soundFontVolumeMultiplier = 0.5;
+		else if (self.soundFontUrl === defaultSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl)
+			self.soundFontVolumeMultiplier = 3.0;
+		else if (self.soundFontUrl === originalSoundFontUrl)
+			self.soundFontVolumeMultiplier = 0.4;
 		else
 			self.soundFontVolumeMultiplier = 1.0;
 		if (params.programOffsets)
 			self.programOffsets = params.programOffsets;
-		else if (self.soundFontUrl === defaultSoundFontUrl)
+		else if (self.soundFontUrl === originalSoundFontUrl)
 			self.programOffsets = {
-				"violin": 113,
-				"trombone": 200,
+				"bright_acoustic_piano": 20,
+				"honkytonk_piano": 20,
+				"electric_piano_1": 30,
+				"electric_piano_2": 30,
+				"harpsichord": 40,
+				"clavinet": 20,
+				"celesta": 20,
+				"glockenspiel": 40,
+				"vibraphone": 30,
+				"marimba": 35,
+				"xylophone": 30,
+				"tubular_bells": 35,
+				"dulcimer": 30,
+				"drawbar_organ": 20,
+				"percussive_organ": 25,
+				"rock_organ": 20,
+				"church_organ": 40,
+				"reed_organ": 40,
+				"accordion": 40,
+				"harmonica": 40,
+				"acoustic_guitar_nylon": 20,
+				"acoustic_guitar_steel": 30,
+				"electric_guitar_jazz": 25,
+				"electric_guitar_clean": 15,
+				"electric_guitar_muted": 35,
+				"overdriven_guitar": 25,
+				"distortion_guitar": 20,
+				"guitar_harmonics": 30,
+				"electric_bass_finger": 15,
+				"electric_bass_pick": 30,
+				"fretless_bass": 40,
+				"violin": 105,
+				"viola": 50,
+				"cello": 40,
+				"contrabass": 60,
+				"trumpet": 10,
+				"trombone": 90,
+				"alto_sax": 20,
+				"tenor_sax": 20,
+				"clarinet": 20,
+				"flute": 50,
+				"banjo": 50,
+				"woodblock": 20,
 			};
 		else
 			self.programOffsets = {};
