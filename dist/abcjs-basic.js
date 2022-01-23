@@ -1068,7 +1068,7 @@ try {
 } catch (e) {// if we aren't in a browser, this code will crash, but it is not needed then either.
 }
 
-function renderOne(div, tune, params, tuneNumber) {
+function renderOne(div, tune, params, tuneNumber, lineOffset) {
   if (params.viewportHorizontal) {
     // Create an inner div that holds the music, so that the passed in div will be the viewport.
     div.innerHTML = '<div class="abcjs-inner"></div>';
@@ -1090,7 +1090,7 @@ function renderOne(div, tune, params, tuneNumber) {
   } else div.innerHTML = "";
 
   var engraver_controller = new EngraverController(div, params);
-  engraver_controller.engraveABC(tune, tuneNumber);
+  engraver_controller.engraveABC(tune, tuneNumber, lineOffset);
   tune.engraver = engraver_controller;
 
   if (params.viewportVertical || params.viewportHorizontal) {
@@ -1160,6 +1160,7 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 
   var currentScrollX = div.parentNode.scrollLeft;
   div.innerHTML = "";
+  var lineCount = 0;
 
   for (var k = 0; k < tunes.length; k++) {
     var lineEl = document.createElement("div");
@@ -1182,7 +1183,8 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
       tunes[k].formatting.stretchlast = true;
     }
 
-    renderOne(lineEl, tunes[k], ep, tuneNumber);
+    renderOne(lineEl, tunes[k], ep, tuneNumber, lineCount);
+    lineCount += tunes[k].lines.length;
     if (k === 0) tune.engraver = tunes[k].engraver;else {
       if (!tune.engraver.staffgroups) tune.engraver.staffgroups = tunes[k].engraver.staffgroups;else if (tunes[k].engraver.staffgroups.length > 0) tune.engraver.staffgroups.push(tunes[k].engraver.staffgroups[0]);
     }
@@ -1261,7 +1263,7 @@ var renderAbc = function renderAbc(output, abc, parserParams, engraverParams, re
     if (!removeDiv && params.wrap && params.staffwidth) {
       tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
       return tune;
-    } else if (removeDiv || !params.oneSvgPerLine || tune.lines.length < 2) renderOne(div, tune, params, tuneNumber);else renderEachLineSeparately(div, tune, params, tuneNumber);
+    } else if (removeDiv || !params.oneSvgPerLine || tune.lines.length < 2) renderOne(div, tune, params, tuneNumber, 0);else renderEachLineSeparately(div, tune, params, tuneNumber);
 
     if (removeDiv) div.parentNode.removeChild(div);
     return null;
@@ -1283,7 +1285,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
     if (warnings) tune.warnings = warnings;
   }
 
-  if (!params.oneSvgPerLine || tune.lines.length < 2) renderOne(div, tune, ret.revisedParams, tuneNumber);else renderEachLineSeparately(div, tune, ret.revisedParams, tuneNumber);
+  if (!params.oneSvgPerLine || tune.lines.length < 2) renderOne(div, tune, ret.revisedParams, tuneNumber, 0);else renderEachLineSeparately(div, tune, ret.revisedParams, tuneNumber);
   tune.explanation = ret.explanation;
   return tune;
 }
@@ -15051,10 +15053,10 @@ var soundsCache = __webpack_require__(/*! ./sounds-cache */ "./src/synth/sounds-
 
 
 var notSupportedMessage = "MIDI is not supported in this browser.";
-var defaultSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/abcjs/"; // These are the original soundfonts supplied. They will need a volume boost:
+var originalSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/abcjs/"; // These are the original soundfonts supplied. They will need a volume boost:
 
-var alternateSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/";
-var alternateSoundFontUrl2 = "https://paulrosen.github.io/midi-js-soundfonts/MusyngKite/";
+var defaultSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/";
+var alternateSoundFontUrl = "https://paulrosen.github.io/midi-js-soundfonts/MusyngKite/";
 
 function CreateSynth() {
   var self = this;
@@ -15087,10 +15089,51 @@ function CreateSynth() {
     var params = options.options ? options.options : {};
     self.soundFontUrl = params.soundFontUrl ? params.soundFontUrl : defaultSoundFontUrl;
     if (self.soundFontUrl[self.soundFontUrl.length - 1] !== '/') self.soundFontUrl += '/';
-    if (params.soundFontVolumeMultiplier || params.soundFontVolumeMultiplier === 0) self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;else if (self.soundFontUrl === alternateSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl2) self.soundFontVolumeMultiplier = 5.0;else if (self.soundFontUrl === defaultSoundFontUrl) self.soundFontVolumeMultiplier = 0.5;else self.soundFontVolumeMultiplier = 1.0;
-    if (params.programOffsets) self.programOffsets = params.programOffsets;else if (self.soundFontUrl === defaultSoundFontUrl) self.programOffsets = {
-      "violin": 113,
-      "trombone": 200
+    if (params.soundFontVolumeMultiplier || params.soundFontVolumeMultiplier === 0) self.soundFontVolumeMultiplier = params.soundFontVolumeMultiplier;else if (self.soundFontUrl === defaultSoundFontUrl || self.soundFontUrl === alternateSoundFontUrl) self.soundFontVolumeMultiplier = 3.0;else if (self.soundFontUrl === originalSoundFontUrl) self.soundFontVolumeMultiplier = 0.4;else self.soundFontVolumeMultiplier = 1.0;
+    if (params.programOffsets) self.programOffsets = params.programOffsets;else if (self.soundFontUrl === originalSoundFontUrl) self.programOffsets = {
+      "bright_acoustic_piano": 20,
+      "honkytonk_piano": 20,
+      "electric_piano_1": 30,
+      "electric_piano_2": 30,
+      "harpsichord": 40,
+      "clavinet": 20,
+      "celesta": 20,
+      "glockenspiel": 40,
+      "vibraphone": 30,
+      "marimba": 35,
+      "xylophone": 30,
+      "tubular_bells": 35,
+      "dulcimer": 30,
+      "drawbar_organ": 20,
+      "percussive_organ": 25,
+      "rock_organ": 20,
+      "church_organ": 40,
+      "reed_organ": 40,
+      "accordion": 40,
+      "harmonica": 40,
+      "acoustic_guitar_nylon": 20,
+      "acoustic_guitar_steel": 30,
+      "electric_guitar_jazz": 25,
+      "electric_guitar_clean": 15,
+      "electric_guitar_muted": 35,
+      "overdriven_guitar": 25,
+      "distortion_guitar": 20,
+      "guitar_harmonics": 30,
+      "electric_bass_finger": 15,
+      "electric_bass_pick": 30,
+      "fretless_bass": 40,
+      "violin": 105,
+      "viola": 50,
+      "cello": 40,
+      "contrabass": 60,
+      "trumpet": 10,
+      "trombone": 90,
+      "alto_sax": 20,
+      "tenor_sax": 20,
+      "clarinet": 20,
+      "flute": 50,
+      "banjo": 50,
+      "woodblock": 20
     };else self.programOffsets = {};
     var p = params.fadeLength !== undefined ? parseInt(params.fadeLength, 10) : NaN;
     self.fadeLength = isNaN(p) ? 200 : p;
@@ -21118,7 +21161,7 @@ EngraverController.prototype.reset = function () {
  */
 
 
-EngraverController.prototype.engraveABC = function (abctunes, tuneNumber) {
+EngraverController.prototype.engraveABC = function (abctunes, tuneNumber, lineOffset) {
   if (abctunes[0] === undefined) {
     abctunes = [abctunes];
   }
@@ -21129,7 +21172,7 @@ EngraverController.prototype.engraveABC = function (abctunes, tuneNumber) {
     if (tuneNumber === undefined) tuneNumber = i;
     this.getFontAndAttr = new GetFontAndAttr(abctunes[i].formatting, this.classes);
     this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
-    this.engraveTune(abctunes[i], tuneNumber);
+    this.engraveTune(abctunes[i], tuneNumber, lineOffset);
   }
 };
 /**
@@ -21262,7 +21305,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
   abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
 };
 
-EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
+EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOffset) {
   var scale = this.setupTune(abcTune, tuneNumber); // Create all of the element objects that will appear on the page.
 
   this.constructTuneElements(abcTune); // Do all the positioning, both horizontally and vertically
@@ -21274,7 +21317,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
   } // Do all the writing to the SVG
 
 
-  var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber);
+  var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber, lineOffset);
   this.staffgroups = ret.staffgroups;
   this.selectables = ret.selectables;
   setupSelection(this);
@@ -23611,7 +23654,7 @@ var spacing = __webpack_require__(/*! ../abc_spacing */ "./src/write/abc_spacing
 
 var Selectables = __webpack_require__(/*! ./selectables */ "./src/write/draw/selectables.js");
 
-function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber) {
+function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber, lineOffset) {
   var selectables = new Selectables(renderer.paper, selectTypes, tuneNumber);
   renderer.moveY(renderer.padding.top);
   nonMusic(renderer, abcTune.topText, selectables);
@@ -23629,7 +23672,7 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 
       if (staffgroups.length >= 1) addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
       var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables, line);
-      staffgroup.line = line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
+      staffgroup.line = lineOffset + line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
 
       staffgroups.push(staffgroup);
     } else if (abcLine.nonMusic) {
@@ -28046,7 +28089,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.0.0-beta.36';
+var version = '6.0.0-beta.37';
 module.exports = version;
 
 /***/ })

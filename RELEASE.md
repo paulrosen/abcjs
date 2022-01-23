@@ -1,40 +1,50 @@
+# Version 6.0.0-beta.37
+
+* Keep the correct line count when generating one svg per line. (Fixes analysis of the tune for playback and timing)
+
+## Features
+* 
+* Change the default soundfont to the improved Fluid one; add the anticipations on the abcjs soundfont.
+
+## Bugs
+
 # Version 6.0.0-beta.36
 
 ## Bugs
 
-Fix some typescript definitions.
+* Fix some typescript definitions.
 
-When stopping synth, return the position that it stopped at.
+* When stopping synth, return the position that it stopped at.
 
-Implement a fix for race conditions during note loading
+* Implement a fix for race conditions during note loading
 
-Don't call debugger when setting an annotation on an invisible note.
+* Don't call debugger when setting an annotation on an invisible note.
 
-Put try/catch in editor when creating music so there isn't an unhandled exception if there is an abcjs bug.
+* Put try/catch in editor when creating music so there isn't an unhandled exception if there is an abcjs bug.
 
-Don't crash when creating audio and there is a suppressed blank line
+* Don't crash when creating audio and there is a suppressed blank line
 
-When suppressing blank lines, consider a line with only chords as not blank.
+* When suppressing blank lines, consider a line with only chords as not blank.
 
-Don't add too much spacing on chord symbols when placing them.
+* Don't add too much spacing on chord symbols when placing them.
 
-Don't lose element's scrolling position when rendering music.
+* Don't lose element's scrolling position when rendering music.
 
-Fix crash when creating timing array and there is a suppressed line because it is empty.
+* Fix crash when creating timing array and there is a suppressed line because it is empty.
 
-Allow soundFontVolumeMultiplier to be set to zero.
+* Allow soundFontVolumeMultiplier to be set to zero.
 
 ## Features
 
-Add string tablature
+* Add string tablature
 
-Implement %%jazzchord directive
+* Implement %%jazzchord directive
 
 ## Documentation
 
-Add example page using multiple synths with program switcher
+* Add example page using multiple synths with program switcher
 
-Add jazzchords to example generator
+* Add jazzchords to example generator
 
 # Version 6.0.0-beta.35
 
