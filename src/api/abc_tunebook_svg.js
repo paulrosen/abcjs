@@ -28,7 +28,7 @@ try {
     // if we aren't in a browser, this code will crash, but it is not needed then either.
 }
 
-function renderOne(div, tune, params, tuneNumber) {
+function renderOne(div, tune, params, tuneNumber, lineOffset) {
     if (params.viewportHorizontal) {
         // Create an inner div that holds the music, so that the passed in div will be the viewport.
         div.innerHTML = '<div class="abcjs-inner"></div>';
@@ -50,7 +50,7 @@ function renderOne(div, tune, params, tuneNumber) {
     else
 	    div.innerHTML = "";
     var engraver_controller = new EngraverController(div, params);
-    engraver_controller.engraveABC(tune, tuneNumber);
+    engraver_controller.engraveABC(tune, tuneNumber, lineOffset);
     tune.engraver = engraver_controller;
     if (params.viewportVertical || params.viewportHorizontal) {
         // If we added a wrapper around the div, then we need to size the wrapper, too.
@@ -113,6 +113,7 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
     var currentScrollY = div.parentNode.scrollTop; // If there is scrolling it will be lost during the redraw so remember it.
     var currentScrollX = div.parentNode.scrollLeft;
     div.innerHTML = "";
+    var lineCount = 0;
     for (var k = 0; k < tunes.length; k++) {
         var lineEl = document.createElement("div");
         div.appendChild(lineEl);
@@ -132,7 +133,8 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
             tunes[k].formatting = parseCommon.clone(tunes[k].formatting);
             tunes[k].formatting.stretchlast = true;
         }
-        renderOne(lineEl, tunes[k], ep, tuneNumber);
+        renderOne(lineEl, tunes[k], ep, tuneNumber, lineCount);
+        lineCount += tunes[k].lines.length;
         if (k === 0)
             tune.engraver = tunes[k].engraver;
         else {
@@ -213,7 +215,7 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
 	        return tune;
         }
         else if (removeDiv || !params.oneSvgPerLine || tune.lines.length < 2)
-            renderOne(div, tune, params, tuneNumber);
+            renderOne(div, tune, params, tuneNumber, 0);
         else
             renderEachLineSeparately(div, tune, params, tuneNumber);
         if (removeDiv)
@@ -238,7 +240,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
             tune.warnings = warnings;
     }
     if (!params.oneSvgPerLine || tune.lines.length < 2)
-        renderOne(div, tune, ret.revisedParams, tuneNumber);
+        renderOne(div, tune, ret.revisedParams, tuneNumber, 0);
     else
         renderEachLineSeparately(div, tune, ret.revisedParams, tuneNumber);
 	tune.explanation = ret.explanation;

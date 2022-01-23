@@ -4,7 +4,7 @@ var nonMusic = require('./non-music');
 var spacing = require('../abc_spacing');
 var Selectables = require('./selectables');
 
-function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber) {
+function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber, lineOffset) {
 	var selectables = new Selectables(renderer.paper, selectTypes, tuneNumber);
 	renderer.moveY(renderer.padding.top);
 	nonMusic(renderer, abcTune.topText, selectables);
@@ -20,7 +20,7 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 			if (staffgroups.length >= 1)
 				addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
 			var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables,line);
-			staffgroup.line = line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
+			staffgroup.line = lineOffset+line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
 			staffgroups.push(staffgroup);
 		} else if (abcLine.nonMusic) {
 			nonMusic(renderer, abcLine.nonMusic, selectables);

@@ -88,7 +88,7 @@ EngraverController.prototype.reset = function() {
 /**
  * run the engraving process
  */
-EngraverController.prototype.engraveABC = function(abctunes, tuneNumber) {
+EngraverController.prototype.engraveABC = function(abctunes, tuneNumber, lineOffset) {
   if (abctunes[0]===undefined) {
     abctunes = [abctunes];
   }
@@ -99,7 +99,7 @@ EngraverController.prototype.engraveABC = function(abctunes, tuneNumber) {
       tuneNumber = i;
     this.getFontAndAttr = new GetFontAndAttr(abctunes[i].formatting, this.classes);
     this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
-    this.engraveTune(abctunes[i], tuneNumber);
+    this.engraveTune(abctunes[i], tuneNumber, lineOffset);
   }
 };
 
@@ -227,7 +227,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 	abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
 };
 
-EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
+EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOffset) {
 	var scale = this.setupTune(abcTune, tuneNumber);
 
 	// Create all of the element objects that will appear on the page.
@@ -242,7 +242,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber) {
 	}
 
 	// Do all the writing to the SVG
-	var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber);
+	var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber, lineOffset);
 	this.staffgroups = ret.staffgroups;
 	this.selectables = ret.selectables;
 
