@@ -19,7 +19,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 	var noteName = pitchToNoteName[sound.pitch];
 	var noteBufferPromise = soundsCache[sound.instrument][noteName];
 
-	noteBufferPromise
+	return noteBufferPromise
 		.then(function (audioBuffer) {
 			// create audio buffer
 			var source = offlineCtx.createBufferSource();
