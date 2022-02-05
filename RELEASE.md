@@ -1,12 +1,30 @@
+# Version 6.0.0-beta.38
+
+## Bugs
+
+* Regression: Fix return of CreateSynth.init
+
+* Don't do audio on tablature lines.
+
+* Wait until all notes are loaded before continuing to build audio buffer. (Caused the beginning of the buffer to possibly be arpeggiated if there is a race condition.)
+
+* Don't crash when there is a blank staff on the second line.
+
+* The pan option now works if the actual number of tracks doesn't match the panned tracks.
+
+* Don't add chord track if it is empty.
+
+## Documentation
+
+* Get more detailed with the typescript declarations
+
 # Version 6.0.0-beta.37
 
 * Keep the correct line count when generating one svg per line. (Fixes analysis of the tune for playback and timing)
 
 ## Features
-* 
-* Change the default soundfont to the improved Fluid one; add the anticipations on the abcjs soundfont.
 
-## Bugs
+* Change the default soundfont to the improved Fluid one; add the anticipations on the abcjs soundfont.
 
 # Version 6.0.0-beta.36
 

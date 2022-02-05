@@ -12176,7 +12176,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
       if (currentTrack[0].instrument === undefined) currentTrack[0].instrument = instrument ? instrument : 0;
       if (currentTrackName) currentTrack.unshift(currentTrackName);
       tracks.push(currentTrack);
-      if (chordTrack.length > 0) // Don't do chords on more than one track, so turn off chord detection after we create it.
+      if (!chordTrackEmpty()) // Don't do chords on more than one track, so turn off chord detection after we create it.
         chordTrackFinished = true;
       if (drumTrack.length > 0) // Don't do drums on more than one track, so turn off drum after we create it.
         drumTrackFinished = true;
@@ -12184,7 +12184,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
 
 
     if (options.detuneOctave) findOctaves(tracks, parseInt(options.detuneOctave, 10));
-    if (chordTrack.length > 0) tracks.push(chordTrack);
+    if (!chordTrackEmpty()) tracks.push(chordTrack);
     if (drumTrack.length > 0) tracks.push(drumTrack);
     return {
       tempo: startingTempo,
@@ -12201,6 +12201,16 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
         return;
       }
     }
+  }
+
+  function chordTrackEmpty() {
+    var isEmpty = true;
+
+    for (var i = 0; i < chordTrack.length && isEmpty; i++) {
+      if (chordTrack[i].cmd === 'note') isEmpty = false;
+    }
+
+    return isEmpty;
   }
 
   function timeToRealTime(time) {
@@ -14051,7 +14061,8 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
         var voiceNumber = 0;
 
         for (var j = 0; j < staves.length; j++) {
-          var staff = staves[j]; // For each staff line
+          var staff = staves[j];
+          if (staff.clef && staff.clef.type === "TAB") continue; // For each staff line
 
           for (var k = 0; k < staff.voices.length; k++) {
             // For each voice in a staff line
@@ -14180,7 +14191,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                       tripletMultiplier = elem.tripletMultiplier;
                       tripletDurationTotal = elem.startTriplet * tripletMultiplier * elem.duration;
 
-                      if (elem.startTriplet != elem.tripletR) {
+                      if (elem.startTriplet !== elem.tripletR) {
                         // most commonly (3:2:2
                         if (v + elem.tripletR <= voice.length) {
                           var durationTotal = 0;
@@ -15155,6 +15166,7 @@ function CreateSynth() {
     self.onEnded = params.onEnded;
     var allNotes = {};
     var cached = [];
+    var errorNotes = [];
     var currentInstrument = instrumentIndexToName[0];
     self.flattened.tracks.forEach(function (track) {
       track.forEach(function (event) {
@@ -15166,8 +15178,15 @@ function CreateSynth() {
 
           if (noteName) {
             if (!allNotes[currentInstrument]) allNotes[currentInstrument] = {};
-            if (!soundsCache[currentInstrument] || !soundsCache[currentInstrument][noteName]) allNotes[currentInstrument][noteName] = true;else cached.push(currentInstrument + ":" + noteName);
-          } else console.log("Can't find note: ", pitchNumber);
+            if (!soundsCache[currentInstrument] || !soundsCache[currentInstrument][noteName]) allNotes[currentInstrument][noteName] = true;else {
+              var label2 = currentInstrument + ":" + noteName;
+              if (cached.indexOf(label2) < 0) cached.push(label2);
+            }
+          } else {
+            var label = currentInstrument + ":" + noteName;
+            console.log("Can't find note: ", pitchNumber, label);
+            if (errorNotes.indexOf(label) < 0) errorNotes.push(label);
+          }
         }
       });
     });
@@ -15193,7 +15212,7 @@ function CreateSynth() {
     return new Promise(function (resolve, reject) {
       var results = {
         cached: cached,
-        error: [],
+        error: errorNotes,
         loaded: []
       };
       var index = 0;
@@ -15315,7 +15334,7 @@ function CreateSynth() {
       noteMapTracks.forEach(function (noteMap, trackNumber) {
         var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
         noteMap.forEach(function (note) {
-          var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + Math.round((note.end - note.start) * 1000) / 1000 + ':' + panDistance + ':' + tempoMultiplier + ':' + note.cents;
+          var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + Math.round((note.end - note.start) * 1000) / 1000 + ':' + panDistance + ':' + tempoMultiplier + ':' + (note.cents ? note.cents : 0);
           if (!uniqueSounds[key]) uniqueSounds[key] = [];
           uniqueSounds[key].push(note.start);
         });
@@ -15358,20 +15377,25 @@ function CreateSynth() {
   };
 
   function setPan(numTracks, panParam) {
+    // panParam, if it is set, can be either a number representing the separation between each track,
+    // or an array, which is the absolute pan position for each track.
     if (panParam === null || panParam === undefined) return null;
     var panDistances = [];
 
     if (panParam.length) {
-      if (numTracks === panParam.length) {
-        var ok = true;
-
-        for (var pp = 0; pp < panParam.length; pp++) {
+      // We received an array. If there are the same number of items in the pan array as the number of tracks,
+      // it all lines up perfectly. If there are more items in the pan array than the tracks then the excess items are ignored.
+      // If there are more tracks than items in the pan array then the remaining tracks are placed in the middle.
+      // If any of the pan numbers are out of range then they are adjusted.
+      for (var pp = 0; pp < numTracks; pp++) {
+        if (pp < panParam.length) {
           var x = parseFloat(panParam[pp]);
-          if (x >= -1 && x <= 1) panDistances.push(x);else ok = false;
-        }
-
-        if (ok) return panDistances;
+          if (x < -1) x = -1;else if (x > 1) x = 1;
+          panDistances.push(x);
+        } else panDistances.push(0);
       }
+
+      return panDistances;
     } else {
       var panNumber = parseFloat(panParam); // the separation needs to be no further than 2 (i.e. -1 to 1) so test to see if there are too many tracks for the passed in distance
 
@@ -15778,7 +15802,16 @@ var getNote = function getNote(url, instrument, name, audioContext) {
         return;
       }
 
-      var maybePromise = audioContext.decodeAudioData(xhr.response, resolve, function () {
+      var noteDecoded = function noteDecoded(audioBuffer) {
+        resolve({
+          instrument: instrument,
+          name: name,
+          status: "loaded",
+          audioBuffer: audioBuffer
+        });
+      };
+
+      var maybePromise = audioContext.decodeAudioData(xhr.response, noteDecoded, function () {
         reject(Error("Can't decode sound at " + noteUrl));
       }); // In older browsers `BaseAudioContext.decodeAudio()` did not return a promise
 
@@ -16013,10 +16046,16 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
   var offlineCtx = new OfflineAC(2, Math.floor((len + fadeTimeSec) * sampleRate), sampleRate);
   var noteName = pitchToNoteName[sound.pitch];
   var noteBufferPromise = soundsCache[sound.instrument][noteName];
-  noteBufferPromise.then(function (audioBuffer) {
+
+  if (!noteBufferPromise) {
+    // if the note isn't present then just skip it - it will leave a blank spot in the audio.
+    return Promise.resolve();
+  }
+
+  return noteBufferPromise.then(function (response) {
     // create audio buffer
     var source = offlineCtx.createBufferSource();
-    source.buffer = audioBuffer; // add gain
+    source.buffer = response.audioBuffer; // add gain
     // volume can be between 1 to 127. This translation to gain is just trial and error.
     // The smaller the first number, the more dynamic range between the quietest to loudest.
     // The larger the second number, the louder it will be in general.
@@ -26600,16 +26639,19 @@ function checkLastBarX(voices) {
 
   for (var i = 0; i < voices.length; i++) {
     var curVoice = voices[i];
-    var lastChild = curVoice.children.length - 1;
-    var maxChild = curVoice.children[lastChild];
 
-    if (maxChild.abcelem.el_type == 'bar') {
-      var barX = maxChild.children[0].x;
+    if (curVoice.children.length > 0) {
+      var lastChild = curVoice.children.length - 1;
+      var maxChild = curVoice.children[lastChild];
 
-      if (barX > maxX) {
-        maxX = barX;
-      } else {
-        maxChild.children[0].x = maxX;
+      if (maxChild.abcelem.el_type === 'bar') {
+        var barX = maxChild.children[0].x;
+
+        if (barX > maxX) {
+          maxX = barX;
+        } else {
+          maxChild.children[0].x = maxX;
+        }
       }
     }
   }
@@ -28089,7 +28131,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.0.0-beta.37';
+var version = '6.0.0-beta.38';
 module.exports = version;
 
 /***/ })
