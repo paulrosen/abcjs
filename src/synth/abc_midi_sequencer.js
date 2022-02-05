@@ -152,6 +152,9 @@ var parseCommon = require("../parse/abc_common");
 				var voiceNumber = 0;
 				for (var j = 0; j < staves.length; j++) {
 					var staff = staves[j];
+					if (staff.clef && staff.clef.type === "TAB")
+						continue;
+
 					// For each staff line
 					for (var k = 0; k < staff.voices.length; k++) {
 						// For each voice in a staff line
@@ -235,7 +238,7 @@ var parseCommon = require("../parse/abc_common");
 										if (elem.startTriplet) {
 											tripletMultiplier = elem.tripletMultiplier;
 											tripletDurationTotal = elem.startTriplet * tripletMultiplier * elem.duration;
-											if (elem.startTriplet != elem.tripletR) { // most commonly (3:2:2
+											if (elem.startTriplet !== elem.tripletR) { // most commonly (3:2:2
 												if (v + elem.tripletR <= voice.length) {
 													var durationTotal = 0;
 													for (var w = v; w < v + elem.tripletR; w++) {

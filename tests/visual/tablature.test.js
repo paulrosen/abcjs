@@ -924,6 +924,7 @@ function doStaffTest(abc, expected, tabParams, params, callback) {
 		}
 	}
 	chai.assert.equal((lineLength-1) +staffNumber, expected.length, "different numbers of lines");
+	return visualObj[0]
 }
 
 function doVerticalTest(abc, expected, tabParams, params) {
