@@ -320,23 +320,29 @@ function CreateSynth() {
 	};
 
 	function setPan(numTracks, panParam) {
+		// panParam, if it is set, can be either a number representing the separation between each track,
+		// or an array, which is the absolute pan position for each track.
 		if (panParam === null || panParam === undefined)
 			return null;
 
 		var panDistances = [];
 		if (panParam.length) {
-			if (numTracks === panParam.length) {
-				var ok = true;
-				for (var pp = 0; pp < panParam.length; pp++){
+			// We received an array. If there are the same number of items in the pan array as the number of tracks,
+			// it all lines up perfectly. If there are more items in the pan array than the tracks then the excess items are ignored.
+			// If there are more tracks than items in the pan array then the remaining tracks are placed in the middle.
+			// If any of the pan numbers are out of range then they are adjusted.
+			for (var pp = 0; pp < numTracks; pp++) {
+				if (pp < panParam.length) {
 					var x = parseFloat(panParam[pp]);
-					if (x >= -1 && x <= 1)
-						panDistances.push(x);
-					else
-						ok = false;
-				}
-				if (ok)
-					return panDistances;
+					if (x < -1)
+						x = -1;
+					else if (x > 1)
+						x = 1;
+					panDistances.push(x);
+				} else
+					panDistances.push(0)
 			}
+			return panDistances;
 		} else {
 			var panNumber = parseFloat(panParam);
 			// the separation needs to be no further than 2 (i.e. -1 to 1) so test to see if there are too many tracks for the passed in distance
