@@ -86,6 +86,7 @@
 							audioContext: audioContext,
 							millisecondsPerMeasure: visualObj.millisecondsPerMeasure()
 						}).then(function (response) {
+							console.log("Notes loaded: ", response)
 							statusDiv.innerHTML += "<div>Audio object has been initialized</div>";
 							// console.log(response); // this contains the list of notes that were loaded.
 							// midiBuffer.prime actually builds the output buffer.

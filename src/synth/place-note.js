@@ -19,11 +19,16 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 	var noteName = pitchToNoteName[sound.pitch];
 	var noteBufferPromise = soundsCache[sound.instrument][noteName];
 
+	if (!noteBufferPromise) {
+		// if the note isn't present then just skip it - it will leave a blank spot in the audio.
+		return Promise.resolve();
+	}
+
 	return noteBufferPromise
-		.then(function (audioBuffer) {
+		.then(function (response) {
 			// create audio buffer
 			var source = offlineCtx.createBufferSource();
-			source.buffer = audioBuffer;
+			source.buffer = response.audioBuffer;
 
 			// add gain
 			// volume can be between 1 to 127. This translation to gain is just trial and error.

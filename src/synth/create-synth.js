@@ -125,6 +125,7 @@ function CreateSynth() {
 
 		var allNotes = {};
 		var cached = [];
+		var errorNotes = [];
 		var currentInstrument = instrumentIndexToName[0];
 		self.flattened.tracks.forEach(function(track) {
 			track.forEach(function(event) {
@@ -138,10 +139,17 @@ function CreateSynth() {
 							allNotes[currentInstrument] = {};
 						if (!soundsCache[currentInstrument] || !soundsCache[currentInstrument][noteName])
 							allNotes[currentInstrument][noteName] = true;
-						else
-							cached.push(currentInstrument+":"+noteName);
-					} else
-						console.log("Can't find note: ", pitchNumber);
+						else {
+							var label2 = currentInstrument+":"+noteName
+							if (cached.indexOf(label2) < 0)
+								cached.push(label2);
+						}
+					} else {
+						var label = currentInstrument+":"+noteName
+						console.log("Can't find note: ", pitchNumber, label);
+						if (errorNotes.indexOf(label) < 0)
+							errorNotes.push(label)
+					}
 				}
 			});
 		});
@@ -165,7 +173,7 @@ function CreateSynth() {
 		return new Promise(function(resolve, reject) {
 			var results = {
 				cached: cached,
-				error: [],
+				error: errorNotes,
 				loaded: []
 			};
 

@@ -19,7 +19,10 @@ var getNote = function (url, instrument, name, audioContext) {
 					reject(Error("Can't load sound at " + noteUrl));
 					return
 				}
-				var maybePromise = audioContext.decodeAudioData(xhr.response, resolve, function () {
+				var noteDecoded = function(audioBuffer) {
+					resolve({instrument: instrument, name: name, status: "loaded", audioBuffer: audioBuffer})
+				}
+				var maybePromise = audioContext.decodeAudioData(xhr.response, noteDecoded, function () {
 					reject(Error("Can't decode sound at " + noteUrl));
 				});
 				// In older browsers `BaseAudioContext.decodeAudio()` did not return a promise
