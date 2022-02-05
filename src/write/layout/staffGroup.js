@@ -4,14 +4,16 @@ function checkLastBarX(voices) {
 	var maxX = 0;
 	for (var i = 0; i < voices.length; i++) {
 		var curVoice = voices[i];
-		var lastChild = curVoice.children.length - 1;
-		var maxChild = curVoice.children[lastChild];
-		if (maxChild.abcelem.el_type == 'bar') {
-			var barX = maxChild.children[0].x;
-			if (barX > maxX) {
-				maxX = barX;
-			} else {
-				maxChild.children[0].x = maxX;
+		if (curVoice.children.length > 0) {
+			var lastChild = curVoice.children.length - 1;
+			var maxChild = curVoice.children[lastChild];
+			if (maxChild.abcelem.el_type === 'bar') {
+				var barX = maxChild.children[0].x;
+				if (barX > maxX) {
+					maxX = barX;
+				} else {
+					maxChild.children[0].x = maxX;
+				}
 			}
 		}
 	}
