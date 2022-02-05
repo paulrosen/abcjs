@@ -352,6 +352,11 @@ declare module 'abcjs' {
 		measureStart?: boolean;
 	}
 
+	export interface PercMapElement {
+		sound: number;
+		noteHead: NoteHeadType;
+	}
+
 	export interface Formatting {
 		alignbars?: number;
 		aligncomposer?: Alignment;
@@ -445,7 +450,7 @@ declare module 'abcjs' {
 		parskipfac?: number;
 		partsbox?: boolean;
 		partsspace?: number;
-		percmap?: any; // TODO
+		percmap?: Array<PercMapElement>;
 		playtempo?: string;
 		rightmargin?: number;
 		scale?: number;
@@ -731,7 +736,31 @@ declare module 'abcjs' {
 
 	export type TuneObjectArray = [TuneObject]
 
-	export type AbcElem = any // TODO
+	export interface AbcElem {
+		el_type: string //TODO enumerate these
+		abselem: any;
+		beambr?: number;
+		chord?: Array<any>
+		decoration: Array<any>
+		duration: number
+		endBeam?: boolean
+		endSlur?: number
+		endTriplet?: true
+		gracenotes?: Array<any>
+		lyric?: Array<any>
+		noStem?: boolean
+		pitches?: Array<any>
+		positioning?: any
+		rest?: any
+		startBeam?: boolean
+		startTriplet?: number
+		tripletMultiplier?: number
+		tripletR?: number
+		stemConnectsToAbove?: true
+		style?: NoteHeadType
+		startChar: number
+		endChar: number
+	}
 
 	export interface ClickListenerDrag {
 		step: number;
@@ -773,7 +802,7 @@ declare module 'abcjs' {
 		height: number;
 		left: number;
 		width: number;
-		elements: Array< any>; // TODO
+		elements: Array< HTMLElement>;
 		startCharArray: Array<number>;
 		endCharArray: Array<number>;
 		midiPitches: MidiPitches
@@ -838,7 +867,7 @@ declare module 'abcjs' {
 
 	export interface SequenceBeat {
 		el_type: "beat";
-		beats: any; // TODO
+		beats: [number,number,number];
 	}
 
 	export interface SequenceBeatAccents {
@@ -867,9 +896,9 @@ declare module 'abcjs' {
 	export type MidiFile = any // This is a standard midi file format
 
 	export interface MidiBufferPromise {
-		cached: [any] // TODO
-		error: [any] // TODO
-		loaded: [any] // TODO
+		cached: Array<string>;
+		error: Array<string>;
+		loaded: Array<string>;
 	}
 
 	export interface AudioTrack {
@@ -980,7 +1009,15 @@ declare module 'abcjs' {
 	//
 	// Audio
 	//
-	export type AudioControl = any // TODO
+	export interface AudioControl {
+		disable: (isDisabled: boolean) => void;
+		setWarp: (tempo: number, warp: number) => void;
+		setTempo: (tempo: number) => void;
+		resetAll: () => void;
+		pushPlay: (push: boolean) => void;
+		pushLoop: (push: boolean) => void;
+		setProgress: (percent: number, totalTime: number) => void;
+	}
 
 	export interface MidiBuffer {
 		init(params?: MidiBufferOptions): Promise<MidiBufferPromise>
@@ -990,12 +1027,21 @@ declare module 'abcjs' {
 		resume(): void
 		seek(position: number, units?: ProgressUnit): void
 		stop(): number
-		download(): any // returns audio buffer in wav format
+		download(): string // returns audio buffer in wav format as a reference to a blob
+	}
+
+	export interface SynthInitResponse {
+		status: "no-audio-context" | "created";
+		loadingResponse?: {
+			cached: Array<string>
+			error: Array<string>
+			loaded: Array<string>
+		}
 	}
 
 	export interface SynthObjectController {
 		disable(isDisabled: boolean): void
-		setTune(visualObj: TuneObject, userAction: Boolean, audioParams?: AbcVisualParams): Promise<any> // TODO
+		setTune(visualObj: TuneObject, userAction: Boolean, audioParams?: AbcVisualParams): Promise<SynthInitResponse>
 		load(selector: string, cursorControl?: any, visualOptions?: SynthVisualOptions): void
 		play(): void
 		pause(): void
@@ -1020,7 +1066,7 @@ declare module 'abcjs' {
 		export function supportsAudio(): boolean
 		export function registerAudioContext(ac?: AudioContext): boolean
 		export function activeAudioContext(): AudioContext
-		export function CreateSynthControl(element: Selector, options: AbcVisualParams): AudioControl // TODO
+		export function CreateSynthControl(element: Selector, options: AbcVisualParams): AudioControl
 		export function getMidiFile(source: String | TuneObject, options?: MidiFileOptions): MidiFile;
 		export function playEvent(pitches: MidiPitches, graceNotes: MidiGracePitches, milliSecondsPerMeasure: number): Promise<void>;
 		export function sequence(visualObj: TuneObject, options: AbcVisualParams): AudioSequence
