@@ -220,7 +220,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 			if (currentTrackName)
 				currentTrack.unshift(currentTrackName);
 			tracks.push(currentTrack);
-			if (chordTrack.length > 0) // Don't do chords on more than one track, so turn off chord detection after we create it.
+			if (!chordTrackEmpty()) // Don't do chords on more than one track, so turn off chord detection after we create it.
 				chordTrackFinished = true;
 			if (drumTrack.length > 0) // Don't do drums on more than one track, so turn off drum after we create it.
 				drumTrackFinished = true;
@@ -229,7 +229,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 		if (options.detuneOctave)
 			findOctaves(tracks, parseInt(options.detuneOctave, 10));
 
-		if (chordTrack.length > 0)
+		if (!chordTrackEmpty())
 			tracks.push(chordTrack);
 		if (drumTrack.length > 0)
 			tracks.push(drumTrack);
@@ -244,6 +244,15 @@ var pitchesToPerc = require('./pitches-to-perc');
 				return;
 			}
 		}
+	}
+
+	function chordTrackEmpty() {
+		var isEmpty = true;
+		for (var i = 0; i < chordTrack.length && isEmpty; i++) {
+			if (chordTrack[i].cmd === 'note')
+				isEmpty = false
+		}
+		return isEmpty;
 	}
 
 	function timeToRealTime(time) {

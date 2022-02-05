@@ -2595,6 +2595,58 @@ describe("Audio flattener", function() {
 
 	//////////////////////////////////////////////////////////
 
+	var abcNoChordVoice = 'X: 1\n' +
+		'M: 4/4\n' +
+		'%%score (S A) (T B)\n' +
+		'V:S clef=treble middle=B stem=up\n' +
+		'V:A clef=treble middle=B stem=down\n' +
+		'V:T clef=bass,, stem=up\n' +
+		'V:B clef=bass,, stem=down\n' +
+		'L: 1/4\n' +
+		'K: C\n' +
+		'V: S\n' +
+		'|"Am"e4 |\n' +
+		'V: A\n' +
+		'|E4 |\n' +
+		'V: T\n' +
+		'|B,4 |\n' +
+		'V: B\n' +
+		'|E,4 |\n';
+
+	var expectedNoChordVoice = {
+		"tempo": 180,
+		"instrument": 0,
+		"tracks": [
+			[
+				{"cmd": "program", "channel": 0, "instrument": 0}, {"cmd": "note", "pitch": 76, "volume": 105, "start": 0, "duration": 1, "instrument": 0, "gap": 0},
+			], [
+				{
+					"cmd": "program",
+					"channel": 1,
+					"instrument": 0
+				},
+				{"cmd": "note", "pitch": 64, "volume": 105, "start": 0, "duration": 1, "instrument": 0, "gap": 0},
+			], [
+				{"cmd": "program", "channel": 2, "instrument": 0},
+				{
+				"cmd": "note",
+				"pitch": 59,
+				"volume": 105,
+				"start": 0,
+				"duration": 1,
+				"instrument": 0,
+				"gap": 0
+			},
+			], [
+				{"cmd": "program", "channel": 3, "instrument": 0},
+				{"cmd": "note", "pitch": 52, "volume": 105, "start": 0, "duration": 1, "instrument": 0, "gap": 0},
+			]
+		],
+		"totalDuration": 1
+	}
+
+	//////////////////////////////////////////////////////////
+
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
 	})
@@ -2725,6 +2777,10 @@ describe("Audio flattener", function() {
 	it("flatten-tempo-override", function() {
 		doFlattenTest(abcTempoOverride, expectedTempoOverride, { qpm: 60 });
 		doTimingObjTest(abcTempoOverride, expectedTempoOverrideTiming, { qpm: 60 });
+	})
+
+	it("flatten-no-chord-voice", function() {
+		doFlattenTest(abcNoChordVoice, expectedNoChordVoice, {chordsOff: true});
 	})
 })
 
