@@ -319,10 +319,19 @@ function CreateSynth() {
 				self.debugCallback("creationTime = " + Math.floor((activeAudioContext().currentTime - startTime)*1000) + "ms");
 			}
 			Promise.all(allPromises).then(function() {
-				resolve({
-					status: "ok",
-					seconds: 0
-				});
+				if (activeAudioContext().state !== "running") { // Safari iOS can mess with the audioContext state, so resume if needed.
+					activeAudioContext().resume().then(function () {
+						resolve({
+							status: "ok",
+							seconds: 0
+						});
+					})
+				} else {
+					resolve({
+						status: "ok",
+						seconds: 0
+					});
+				}
 			});
 		});
 	};
