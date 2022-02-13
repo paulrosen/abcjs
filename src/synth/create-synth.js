@@ -319,18 +319,19 @@ function CreateSynth() {
 				self.debugCallback("creationTime = " + Math.floor((activeAudioContext().currentTime - startTime)*1000) + "ms");
 			}
 			Promise.all(allPromises).then(function() {
-				if (activeAudioContext().state !== "running") { // Safari iOS can mess with the audioContext state, so resume if needed.
+				// Safari iOS can mess with the audioContext state, so resume if needed.
+				if (activeAudioContext().state === "suspended") {
 					activeAudioContext().resume().then(function () {
-						resolve({
-							status: "ok",
-							seconds: 0
-						});
+						resolve({status: "ok", seconds: 0});
+					})
+				} else if (activeAudioContext().state === "interrupted") {
+					activeAudioContext().suspend().then(function () {
+						activeAudioContext().resume().then(function () {
+							resolve({status: "ok", seconds: 0});
+						})
 					})
 				} else {
-					resolve({
-						status: "ok",
-						seconds: 0
-					});
+					resolve({status: "ok", seconds: 0});
 				}
 			});
 		});
