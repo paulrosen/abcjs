@@ -1,3 +1,11 @@
+# Version 6.0.0-beta.39
+
+## Bugs
+
+* Add some info to the return of the prime() method
+
+* Fix iOS not playing because audioContext doesn't stay running
+
 # Version 6.0.0-beta.38
 
 ## Bugs

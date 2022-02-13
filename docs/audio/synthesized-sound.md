@@ -106,10 +106,15 @@ This creates the actual buffer - it doesn't require a network connection since a
 
 After calling this, everything is setup so you can freely call the rest of the functions to control how the audio works.
 
+This returns a promise that is `{ status: audioContextStatus, duration: lengthInSecondsOfAudio }`
+
+Note that normally the status will be "running". On iOS, though, it can sometimes be either "suspended" or "interrupted". It might require user intervention to resolve this.
+
 #### Example
 ```javascript
 synth.init(...).then(() => {
-    synth.prime(() => {
+    synth.prime().then((response) => {
+		console.log(response.status)
         ...
     });
 });

@@ -91,8 +91,9 @@
 							// console.log(response); // this contains the list of notes that were loaded.
 							// midiBuffer.prime actually builds the output buffer.
 							return midiBuffer.prime();
-						}).then(function () {
-							statusDiv.innerHTML += "<div>Audio object has been primed</div>";
+						}).then(function (response) {
+							statusDiv.innerHTML += "<div>Audio object has been primed (" + response.duration + " seconds).</div>";
+							statusDiv.innerHTML += "<div>status = " + response.status + "</div>"
 							// At this point, everything slow has happened. midiBuffer.start will return very quickly and will start playing very quickly without lag.
 							midiBuffer.start();
 							statusDiv.innerHTML += "<div>Audio started</div>";
