@@ -15368,10 +15368,20 @@ function CreateSynth() {
       }
 
       Promise.all(allPromises).then(function () {
-        resolve({
-          status: "ok",
-          seconds: 0
-        });
+        if (activeAudioContext().state !== "running") {
+          // Safari iOS can mess with the audioContext state, so resume if needed.
+          activeAudioContext().resume().then(function () {
+            resolve({
+              status: "ok",
+              seconds: 0
+            });
+          });
+        } else {
+          resolve({
+            status: "ok",
+            seconds: 0
+          });
+        }
       });
     });
   };
@@ -28131,7 +28141,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.0.0-beta.38';
+var version = '6.0.0-beta.39';
 module.exports = version;
 
 /***/ })
