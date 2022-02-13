@@ -318,20 +318,24 @@ function CreateSynth() {
 				self.debugCallback("totalSamples = " + totalSamples);
 				self.debugCallback("creationTime = " + Math.floor((activeAudioContext().currentTime - startTime)*1000) + "ms");
 			}
+			function resolveData(me) {
+				var duration = me && me.audioBuffers && me.audioBuffers.length > 0 ? me.audioBuffers[0].duration : 0;
+				return { status: activeAudioContext().state, duration: duration}
+			}
 			Promise.all(allPromises).then(function() {
 				// Safari iOS can mess with the audioContext state, so resume if needed.
 				if (activeAudioContext().state === "suspended") {
 					activeAudioContext().resume().then(function () {
-						resolve({status: "ok", seconds: 0});
+						resolve(resolveData(self));
 					})
 				} else if (activeAudioContext().state === "interrupted") {
 					activeAudioContext().suspend().then(function () {
 						activeAudioContext().resume().then(function () {
-							resolve({status: "ok", seconds: 0});
+							resolve(resolveData(self));
 						})
 					})
 				} else {
-					resolve({status: "ok", seconds: 0});
+					resolve(resolveData(self));
 				}
 			});
 		});
