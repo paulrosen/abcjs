@@ -747,7 +747,13 @@ var pitchesToPerc = require('./pitches-to-perc');
 
 		for (g = 0; g < graces.length; g++) {
 			grace = graces[g];
-			var pitch = { pitch: adjustPitch(grace), duration: grace.duration*multiplier };
+			var actualPitch = adjustPitch(grace);
+			if (currentInstrument === drumInstrument && percmap) {
+				var name = pitchesToPerc(grace)
+				if (name && percmap[name])
+					actualPitch = percmap[name].sound;
+			}
+			var pitch = { pitch: actualPitch, duration: grace.duration*multiplier };
 			pitch = adjustForMicroTone(pitch);
 			ret.push(pitch);
 		}

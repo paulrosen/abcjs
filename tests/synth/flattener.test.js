@@ -1921,7 +1921,7 @@ describe("Audio flattener", function() {
 '%%percmap ^a open-triangle     triangle\n' +
 'Q:1/4=50\n' +
 'K:C perc\n' +
-'DEFG AB^Bc _c^c=cd ^de^ef ^fg^ga ^a\n';
+'DEFG AB^Bc _c{^c}^c=cd ^de^ef ^fg^ga ^a\n';
 
 	var expectedPercMap = {
 		"tempo":50,"instrument":128,"totalDuration":2.625,"tracks":[
@@ -1936,7 +1936,8 @@ describe("Audio flattener", function() {
 				{"cmd":"note","pitch":54,"volume":95,"start":0.75,"duration":0.125,"instrument":128,"gap":0},
 				{"cmd":"note","pitch":38,"volume":85,"start":0.875,"duration":0.125,"instrument":128,"gap":0},
 				{"cmd":"note","pitch":40,"volume":95,"start":1,"duration":0.125,"instrument":128,"gap":0},
-				{"cmd":"note","pitch":77,"volume":85,"start":1.125,"duration":0.125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":77,"volume":57,"start":1.125,"duration":0.0625,"instrument":128,"gap":0,"style":"grace"},
+				{"cmd":"note","pitch":77,"volume":85,"start":1.1875,"duration":0.0625,"instrument":128,"gap":0},
 				{"cmd":"note","pitch":37,"volume":95,"start":1.25,"duration":0.125,"instrument":128,"gap":0},
 				{"cmd":"note","pitch":47,"volume":85,"start":1.375,"duration":0.125,"instrument":128,"gap":0},
 				{"cmd":"note","pitch":76,"volume":95,"start":1.5,"duration":0.125,"instrument":128,"gap":0},
