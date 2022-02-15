@@ -12,12 +12,14 @@ function printStaff(renderer, startx, endx, numLines , linePitch , dy) {
 	var lastYLine = 0;
 	if (numLines === 1) {
 		printStaffLine(renderer, startx,endx,6, klass);
+		firstYLine = renderer.calcY(10);
+		lastYLine = renderer.calcY(2);
 	} else {
 
 		for (var i = numLines - 1; i >= 0; i--) {
 			var curpitch = (i + 1) * pitch;
 			lastYLine = renderer.calcY(curpitch);
-			if (firstYLine == 0) {
+			if (firstYLine === 0) {
 				firstYLine = lastYLine;
 			}
 			printStaffLine(renderer, startx, endx, curpitch, klass , null , dy) ;
