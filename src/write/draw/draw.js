@@ -28,8 +28,10 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 	}
 
 	classes.reset();
-	renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
-	nonMusic(renderer, abcTune.bottomText, selectables);
+	if (abcTune.bottomText && abcTune.bottomText.rows && abcTune.bottomText.rows.length > 0) {
+		renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
+		nonMusic(renderer, abcTune.bottomText, selectables);
+	}
 	setPaperSize(renderer, maxWidth, scale, responsive);
 	return { staffgroups: staffgroups, selectables: selectables.getElements() };
 }
