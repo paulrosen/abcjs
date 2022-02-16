@@ -6,12 +6,14 @@ function setPaperSize(renderer, maxwidth, scale, responsive) {
 	// TODO-PER: We are letting the page get as long as it needs now, but eventually that should go to a second page.
 
 	// for accessibility
-	var text = "Sheet Music";
-	if (renderer.abctune && renderer.abctune.metaText && renderer.abctune.metaText.title)
-		text += " for \"" + renderer.abctune.metaText.title + '"';
-	renderer.paper.setTitle(text);
-	var label = renderer.ariaLabel ? renderer.ariaLabel : text;
-	renderer.paper.setAttribute("aria-label", label);
+	if (renderer.ariaLabel !== '') {
+		var text = "Sheet Music";
+		if (renderer.abctune && renderer.abctune.metaText && renderer.abctune.metaText.title)
+			text += " for \"" + renderer.abctune.metaText.title + '"';
+		renderer.paper.setTitle(text);
+		var label = renderer.ariaLabel ? renderer.ariaLabel : text;
+		renderer.paper.setAttribute("aria-label", label);
+	}
 
 	// for dragging - don't select during drag
 	var styles = [
