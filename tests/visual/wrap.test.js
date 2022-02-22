@@ -50,6 +50,7 @@ describe("Automatic line wrapping", function() {
 		"M:4/4\n" +
 		"L:1/16\n" +
 		"%%staves {(RH) (LH)}\n" +
+		"%%barnumbers -1\n" +
 		"V:RH clef=treble\n" +
 		"V:LH clef=bass\n" +
 		"K:C\n" +
@@ -70,6 +71,11 @@ describe("Automatic line wrapping", function() {
 
 	var expectedPianoLineBreaks = [{"ogLine":0,"line":0,"staff":0,"voice":0,"start":0,"end":12},{"ogLine":0,"line":1,"staff":0,"voice":0,"start":13,"end":27},{"ogLine":0,"line":2,"staff":0,"voice":0,"start":28,"end":38},{"ogLine":0,"line":3,"staff":0,"voice":0,"start":39,"end":56},{"ogLine":0,"line":4,"staff":0,"voice":0,"start":57,"end":68},{"ogLine":0,"line":0,"staff":1,"voice":0,"start":0,"end":15},{"ogLine":0,"line":1,"staff":1,"voice":0,"start":16,"end":32},{"ogLine":0,"line":2,"staff":1,"voice":0,"start":33,"end":46},{"ogLine":0,"line":3,"staff":1,"voice":0,"start":47,"end":71},{"ogLine":0,"line":4,"staff":1,"voice":0,"start":72,"end":86}]
 	;
+
+	var expectedBarNumbers = {
+		bars: [2, 3, undefined, 5, undefined, 7, undefined, 9, undefined, 11, undefined, 13, undefined],
+		lines: [undefined, 4, 6, 8, 10, 12]
+	}
 
 	var abcQuartet = "X:1\n" +
 		"T: wrap quartet\n" +
@@ -197,6 +203,28 @@ describe("Automatic line wrapping", function() {
 	it("share-staff", function() {
 		doWrapTestContents(abcVoicesShareStaff, expectedVoicesShareStaff, 300);
 	})
+
+	it("measure-numbers", function() {
+		var visualObj = abcjs.renderAbc("paper", abcPiano, {
+			staffwidth: 500,
+			wrap: {
+				minSpacing: 1.8,
+				maxSpacing: 2.8,
+				preferredMeasuresPerLine: 4
+			}
+		});
+		var bars = []
+		var lines = []
+		for (var i = 0; i < visualObj[0].lines.length; i++) {
+			var line = visualObj[0].lines[i]
+			var voice = line.staff[0].voices[0]
+			bars = bars.concat(voice.filter(function (v) { return v.el_type === "bar" }).map(function(v) { return v.barNumber }))
+			lines.push(line.staff[0].barNumber)
+		}
+		chai.assert.deepEqual(bars, expectedBarNumbers.bars, "Bar number incorrect on bar element " + JSON.stringify(bars))
+		chai.assert.deepEqual(lines, expectedBarNumbers.lines, "Bar number incorrect on line " + JSON.stringify(lines))
+	})
+
 })
 
 //////////////////////////////////////////////////////////
