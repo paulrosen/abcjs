@@ -778,6 +778,7 @@ declare module 'abcjs' {
 		voice: number;
 		line: number;
 		measure: number;
+		selectableElement: HTMLElement;
 	}
 
 	// TimingCallbacks

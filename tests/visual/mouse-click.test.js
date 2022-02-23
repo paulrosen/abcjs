@@ -269,7 +269,7 @@ describe("Mouse Click", function() {
 		{"isParent":false,"type":"bar","index":69,"originalText":"|","name":"bar"},
 		{"isParent":true,"type":"note","index":70,"originalText":"Z2","name":"rest"},
 		{"isParent":false,"type":"note","index":70,"originalText":"Z2","name":"rests.multimeasure"},
-		{"isParent":false,"type":"note","index":70,"originalText":"Z2","name":"TODO","classes":"abcjs-rest abcjs-l3 abcjs-m4 abcjs-mm4 abcjs-v2 abcjs-n0 abcjs-l3 abcjs-m4 abcjs-mm4 abcjs-v2 abcjs-n0"},
+		{"isParent":false,"type":"note","index":70,"originalText":"Z2","name":"rest","classes":"abcjs-rest abcjs-l3 abcjs-m4 abcjs-mm4 abcjs-v2 abcjs-n0 abcjs-l3 abcjs-m4 abcjs-mm4 abcjs-v2 abcjs-n0"},
 		{"isParent":true,"type":"bar","index":71,"originalText":"|]","name":"bar"},
 		{"isParent":false,"type":"bar","index":71,"originalText":"|]","name":"bar"},
 		{"isParent":false,"type":"bar","index":71,"originalText":"|]","name":"bar"},
@@ -355,7 +355,7 @@ function clickListener(abcelem, tuneNumber, classes, analysis, drag, mouseEvent)
 		result.originalText = testString.substring(abcelem.startChar, abcelem.endChar);
 	else
 		result.originalText = "TODO";
-	result.name = target.dataset.name ? target.dataset.name : "TODO";
+	result.name = target.dataset.name ? target.dataset.name : analysis.selectableElement.dataset.name;
 	if (!isParent && target.classList.length > 0)
 		result.classes = ''+target.classList;
 	results.push(result)
