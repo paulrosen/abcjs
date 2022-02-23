@@ -13,12 +13,13 @@ function printSymbol(renderer, x, offset, symbol, options) {
 	var ycorr;
 	if (!symbol) return null;
 	if (symbol.length > 1 && symbol.indexOf(".") < 0) {
-		renderer.paper.openGroup({"data-name": options.name, klass: options.klass});
+		var groupClass = elementGroup.isInGroup() ? '' : options.klass // If this is already in a group then don't repeat the classes for the sub-group)
+		renderer.paper.openGroup({"data-name": options.name, klass: groupClass});
 		var dx = 0;
 		for (var i = 0; i < symbol.length; i++) {
 			var s = symbol.charAt(i);
 			ycorr = glyphs.getYCorr(s);
-			el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, {stroke: options.stroke, fill: options.fill, "data-name": options.name});
+			el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, {stroke: options.stroke, fill: options.fill});
 			if (el) {
 				if (i < symbol.length - 1)
 					dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));
