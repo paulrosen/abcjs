@@ -47,7 +47,7 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
 		}
 	}
 	this.rows.push({move: space.height * 2});
-	this.rows.push({endGroup: "unalignedWords", absElemType: "unalignedWords"});
+	this.rows.push({endGroup: "unalignedWords", absElemType: "unalignedWords", startChar: -1, endChar: -1, name: "unalignedWords"});
 }
 
 BottomText.prototype.extraText = function (metaText, marginLeft, spacing, getTextSize) {

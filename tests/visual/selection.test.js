@@ -50,12 +50,13 @@ describe("Selection", function() {
 			},
 			"abcEl": {
 				"el_type": "title",
-				"startChar": -1,
-				"endChar": -1,
+				"name":"title",
+				"startChar":202,
+				"endChar":219,
 				"text": "Selection Test"
 			},
 			"size": {
-				"x": 303,
+				"x": 304,
 				"y": 26,
 				"width": 163,
 				"height": 32
@@ -65,20 +66,21 @@ describe("Selection", function() {
 			"draggable": false,
 			"svgEl": {
 				"x": "385",
-				"y": "79.34",
+				"y": "82.34",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "1"
 			},
 			"abcEl": {
 				"el_type": "subtitle",
-				"startChar": -1,
-				"endChar": -1,
+				"name":"subtitle",
+				"startChar":220,
+				"endChar":254,
 				"text": "Everything should be selectable"
 			},
 			"size": {
 				"x": 251,
-				"y": 60,
+				"y": 63,
 				"width": 268,
 				"height": 24
 			}
@@ -87,21 +89,22 @@ describe("Selection", function() {
 			"draggable": false,
 			"svgEl": {
 				"x": "15",
-				"y": "108.9",
+				"y": "113.9",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "2"
 			},
 			"abcEl": {
 				"el_type": "rhythm",
-				"startChar": -1,
-				"endChar": -1,
+				"name":"rhythm",
+				"startChar":272,
+				"endChar":281,
 				"text": "Hit it"
 			},
 			"size": {
 				"x": 14,
-				"y": 92,
-				"width": 41,
+				"y": 97,
+				"width": 40,
 				"height": 21
 			}
 		},
@@ -109,20 +112,21 @@ describe("Selection", function() {
 			"draggable": false,
 			"svgEl": {
 				"x": "755",
-				"y": "108.9",
+				"y": "113.9",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "3"
 			},
 			"abcEl": {
 				"el_type": "composer",
-				"startChar": -1,
-				"endChar": -1,
+				"name":"composer",
+				"startChar":255,
+				"endChar":271,
 				"text": "public domain"
 			},
 			"size": {
 				"x": 644,
-				"y": 92,
+				"y": 97,
 				"width": 111,
 				"height": 21
 			}
@@ -131,20 +135,21 @@ describe("Selection", function() {
 			"draggable": false,
 			"svgEl": {
 				"x": "755",
-				"y": "129.98",
+				"y": "136.9",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "4"
 			},
 			"abcEl": {
 				"el_type": "author",
-				"startChar": -1,
-				"endChar": -1,
+				"name":"author",
+				"startChar":282,
+				"endChar":296,
 				"text": "Yours Truly"
 			},
 			"size": {
 				"x": 668,
-				"y": 113,
+				"y": 120,
 				"width": 88,
 				"height": 21
 			}
@@ -158,13 +163,14 @@ describe("Selection", function() {
 			},
 			"abcEl": {
 				"el_type": "partOrder",
-				"startChar": -1,
-				"endChar": -1,
+				"name":"part-order",
+				"startChar":510,
+				"endChar":517,
 				"text": "AABB"
 			},
 			"size": {
 				"x": 15,
-				"y": 132,
+				"y": 141,
 				"width": 61,
 				"height": 27
 			}
@@ -173,20 +179,21 @@ describe("Selection", function() {
 			"draggable": false,
 			"svgEl": {
 				"x": "15",
-				"y": "193.59",
+				"y": "205.4",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "6"
 			},
 			"abcEl": {
 				"el_type": "freeText",
-				"startChar": -1,
-				"endChar": -1,
+				"name":"free-text",
+				"startChar":648,
+				"endChar":680,
 				"text": "there is some random text"
 			},
 			"size": {
 				"x": 15,
-				"y": 175,
+				"y": 186,
 				"width": 217,
 				"height": 24
 			}
@@ -205,7 +212,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 43,
-				"y": 352,
+				"y": 364,
 				"width": 8,
 				"height": 151
 			}
@@ -214,7 +221,7 @@ describe("Selection", function() {
 			"draggable": false,
 			"svgEl": {
 				"x": "15",
-				"y": "360.25",
+				"y": "372.06",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "8"
@@ -227,7 +234,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 15,
-				"y": 348,
+				"y": 360,
 				"width": 19,
 				"height": 15
 			}
@@ -247,7 +254,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 58,
-				"y": 338,
+				"y": 350,
 				"width": 19,
 				"height": 57
 			}
@@ -275,10 +282,11 @@ describe("Selection", function() {
 				"root": "B",
 				"acc": "b",
 				"mode": "",
+				"el_type":"keySignature",
 			},
 			"size": {
 				"x": 88,
-				"y": 342,
+				"y": 354,
 				"width": 16,
 				"height": 30
 			}
@@ -302,7 +310,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 114,
-				"y": 353,
+				"y": 365,
 				"width": 12,
 				"height": 30
 			}
@@ -315,6 +323,8 @@ describe("Selection", function() {
 				"data-index": "12"
 			},
 			"abcEl": {
+				"startChar":486,
+				"endChar":509,
 				"preString": "Easy Swing",
 				"duration": [
 					0.25
@@ -325,7 +335,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 136,
-				"y": 201,
+				"y": 212,
 				"width": 167,
 				"height": 22
 			}
@@ -345,7 +355,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 136,
-				"y": 224,
+				"y": 236,
 				"width": 19,
 				"height": 27
 			}
@@ -391,7 +401,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 134,
-				"y": 314,
+				"y": 325,
 				"width": 14,
 				"height": 58
 			}
@@ -423,7 +433,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 176,
-				"y": 321,
+				"y": 333,
 				"width": 16,
 				"height": 35
 			}
@@ -455,7 +465,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 193,
-				"y": 317,
+				"y": 329,
 				"width": 10,
 				"height": 35
 			}
@@ -486,7 +496,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 204,
-				"y": 325,
+				"y": 337,
 				"width": 10,
 				"height": 31
 			}
@@ -507,7 +517,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 216,
-				"y": 334,
+				"y": 346,
 				"width": 8,
 				"height": 49
 			}
@@ -547,7 +557,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 242,
-				"y": 314,
+				"y": 325,
 				"width": 19,
 				"height": 51
 			}
@@ -587,7 +597,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 315,
-				"y": 314,
+				"y": 325,
 				"width": 14,
 				"height": 39
 			}
@@ -608,7 +618,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 350,
-				"y": 334,
+				"y": 346,
 				"width": 8,
 				"height": 49
 			}
@@ -634,7 +644,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 365,
-				"y": 340,
+				"y": 352,
 				"width": 8,
 				"height": 21
 			}
@@ -674,7 +684,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 387,
-				"y": 306,
+				"y": 318,
 				"width": 14,
 				"height": 39
 			}
@@ -705,7 +715,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 399,
-				"y": 308,
+				"y": 320,
 				"width": 10,
 				"height": 48
 			}
@@ -736,7 +746,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 410,
-				"y": 311,
+				"y": 323,
 				"width": 10,
 				"height": 53
 			}
@@ -771,7 +781,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 421,
-				"y": 314,
+				"y": 325,
 				"width": 10,
 				"height": 43
 			}
@@ -806,7 +816,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 432,
-				"y": 333,
+				"y": 345,
 				"width": 10,
 				"height": 39
 			}
@@ -837,7 +847,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 443,
-				"y": 331,
+				"y": 343,
 				"width": 10,
 				"height": 33
 			}
@@ -870,7 +880,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 453,
-				"y": 329,
+				"y": 341,
 				"width": 10,
 				"height": 39
 			}
@@ -904,7 +914,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 464,
-				"y": 341,
+				"y": 352,
 				"width": 10,
 				"height": 31
 			}
@@ -925,7 +935,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 488,
-				"y": 334,
+				"y": 346,
 				"width": 8,
 				"height": 49
 			}
@@ -938,6 +948,8 @@ describe("Selection", function() {
 				"data-index": "32"
 			},
 			"abcEl": {
+				"startChar": 776,
+				"endChar": 801,
 				"preString": "left",
 				"duration": [
 					0.25
@@ -945,13 +957,11 @@ describe("Selection", function() {
 				"bpm": 170,
 				"postString": "right",
 				"el_type": "tempo",
-				"startChar": 776,
-				"endChar": 801,
 				"type": "tempo"
 			},
 			"size": {
 				"x": 503,
-				"y": 201,
+				"y": 212,
 				"width": 145,
 				"height": 22
 			}
@@ -991,7 +1001,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 503,
-				"y": 325,
+				"y": 337,
 				"width": 10,
 				"height": 43
 			}
@@ -1017,7 +1027,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 519,
-				"y": 340,
+				"y": 352,
 				"width": 8,
 				"height": 21
 			}
@@ -1054,7 +1064,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 534,
-				"y": 314,
+				"y": 325,
 				"width": 14,
 				"height": 51
 			}
@@ -1075,7 +1085,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 565,
-				"y": 334,
+				"y": 346,
 				"width": 8,
 				"height": 49
 			}
@@ -1115,7 +1125,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 580,
-				"y": 329,
+				"y": 341,
 				"width": 10,
 				"height": 51
 			}
@@ -1156,7 +1166,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 608,
-				"y": 287,
+				"y": 299,
 				"width": 18,
 				"height": 81
 			}
@@ -1177,7 +1187,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 642,
-				"y": 334,
+				"y": 346,
 				"width": 8,
 				"height": 49
 			}
@@ -1217,7 +1227,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 657,
-				"y": 325,
+				"y": 337,
 				"width": 17,
 				"height": 39
 			}
@@ -1251,7 +1261,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 707,
-				"y": 321,
+				"y": 333,
 				"width": 10,
 				"height": 31
 			}
@@ -1271,7 +1281,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 755,
-				"y": 352,
+				"y": 364,
 				"width": 1,
 				"height": 31
 			}
@@ -1291,7 +1301,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 134,
-				"y": 429,
+				"y": 440,
 				"width": 27,
 				"height": 13
 			}
@@ -1310,7 +1320,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 244,
-				"y": 426,
+				"y": 438,
 				"width": 72,
 				"height": 8
 			}
@@ -1329,7 +1339,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 399,
-				"y": 318,
+				"y": 330,
 				"width": 26,
 				"height": 5
 			}
@@ -1348,7 +1358,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 444,
-				"y": 311,
+				"y": 323,
 				"width": 8,
 				"height": 17
 			}
@@ -1367,7 +1377,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 389,
-				"y": 426,
+				"y": 438,
 				"width": 76,
 				"height": 8
 			}
@@ -1387,7 +1397,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 500,
-				"y": 423,
+				"y": 435,
 				"width": 16,
 				"height": 19
 			}
@@ -1407,7 +1417,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 576,
-				"y": 429,
+				"y": 441,
 				"width": 15,
 				"height": 13
 			}
@@ -1426,7 +1436,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 657,
-				"y": 426,
+				"y": 438,
 				"width": 50,
 				"height": 8
 			}
@@ -1458,7 +1468,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 134,
-				"y": 391,
+				"y": 402,
 				"width": 14,
 				"height": 31
 			}
@@ -1491,7 +1501,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 150,
-				"y": 391,
+				"y": 402,
 				"width": 14,
 				"height": 31
 			}
@@ -1523,7 +1533,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 174,
-				"y": 391,
+				"y": 402,
 				"width": 14,
 				"height": 31
 			}
@@ -1554,7 +1564,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 202,
-				"y": 391,
+				"y": 402,
 				"width": 14,
 				"height": 31
 			}
@@ -1599,7 +1609,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 233,
-				"y": 267,
+				"y": 279,
 				"width": 29,
 				"height": 155
 			}
@@ -1644,7 +1654,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 263,
-				"y": 368,
+				"y": 380,
 				"width": 33,
 				"height": 54
 			}
@@ -1675,7 +1685,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 298,
-				"y": 391,
+				"y": 402,
 				"width": 14,
 				"height": 31
 			}
@@ -1706,7 +1716,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 315,
-				"y": 391,
+				"y": 402,
 				"width": 14,
 				"height": 31
 			}
@@ -1737,7 +1747,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 363,
-				"y": 391,
+				"y": 402,
 				"width": 14,
 				"height": 31
 			}
@@ -1767,9 +1777,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 389,
-				"y": 391,
-				"width": 10,
+				"x": 387,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1798,9 +1808,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 432,
-				"y": 391,
-				"width": 10,
+				"x": 430,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1829,9 +1839,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 464,
-				"y": 391,
-				"width": 10,
+				"x": 462,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1860,9 +1870,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 503,
-				"y": 391,
-				"width": 10,
+				"x": 501,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1891,9 +1901,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 519,
-				"y": 391,
-				"width": 10,
+				"x": 517,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1922,9 +1932,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 536,
-				"y": 391,
-				"width": 10,
+				"x": 534,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1953,9 +1963,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 552,
-				"y": 391,
-				"width": 10,
+				"x": 550,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -1984,9 +1994,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 580,
-				"y": 391,
-				"width": 10,
+				"x": 578,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -2015,9 +2025,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 596,
-				"y": 391,
-				"width": 10,
+				"x": 594,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -2046,9 +2056,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 613,
-				"y": 391,
-				"width": 10,
+				"x": 611,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -2077,9 +2087,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 629,
-				"y": 391,
-				"width": 10,
+				"x": 627,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -2108,9 +2118,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 657,
-				"y": 391,
-				"width": 10,
+				"x": 655,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -2139,9 +2149,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 673,
-				"y": 391,
-				"width": 10,
+				"x": 671,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -2170,9 +2180,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 690,
-				"y": 391,
-				"width": 10,
+				"x": 688,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -2201,9 +2211,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 707,
-				"y": 391,
-				"width": 10,
+				"x": 705,
+				"y": 402,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -2221,7 +2231,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 142,
-				"y": 400,
+				"y": 411,
 				"width": 15,
 				"height": 5
 			}
@@ -2240,7 +2250,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 158,
-				"y": 400,
+				"y": 411,
 				"width": 21,
 				"height": 6
 			}
@@ -2259,7 +2269,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 237,
-				"y": 397,
+				"y": 409,
 				"width": 11,
 				"height": 6
 			}
@@ -2278,7 +2288,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 267,
-				"y": 397,
+				"y": 409,
 				"width": 21,
 				"height": 8
 			}
@@ -2287,7 +2297,7 @@ describe("Selection", function() {
 			"draggable": false,
 			"svgEl": {
 				"x": "15",
-				"y": "493.56",
+				"y": "505.38",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "79"
@@ -2300,7 +2310,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 15,
-				"y": 482,
+				"y": 493,
 				"width": 17,
 				"height": 15
 			}
@@ -2320,7 +2330,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 58,
-				"y": 472,
+				"y": 484,
 				"width": 20,
 				"height": 23
 			}
@@ -2348,10 +2358,11 @@ describe("Selection", function() {
 				"root": "B",
 				"acc": "b",
 				"mode": "",
+				"el_type": "keySignature"
 			},
 			"size": {
 				"x": 88,
-				"y": 470,
+				"y": 482,
 				"width": 16,
 				"height": 30
 			}
@@ -2375,7 +2386,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 114,
-				"y": 473,
+				"y": 485,
 				"width": 12,
 				"height": 30
 			}
@@ -2406,7 +2417,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 136,
-				"y": 465,
+				"y": 476,
 				"width": 16,
 				"height": 31
 			}
@@ -2422,7 +2433,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 1,
-						"name": "B,",
+						"name": "D",
 						"verticalPos": 13,
 						"highestVert": 13
 					}
@@ -2436,9 +2447,9 @@ describe("Selection", function() {
 				"maxpitch": 13
 			},
 			"size": {
-				"x": 163,
-				"y": 457,
-				"width": 10,
+				"x": 162,
+				"y": 469,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -2466,7 +2477,7 @@ describe("Selection", function() {
 					},
 					{
 						"pitch": 3,
-						"name": "E",
+						"name": "F",
 						"verticalPos": 15,
 						"highestVert": 15
 					}
@@ -2479,9 +2490,9 @@ describe("Selection", function() {
 				"maxpitch": 15
 			},
 			"size": {
-				"x": 176,
-				"y": 449,
-				"width": 10,
+				"x": 174,
+				"y": 461,
+				"width": 14,
 				"height": 58
 			}
 		},
@@ -2500,7 +2511,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 220,
-				"y": 383,
+				"y": 395,
 				"width": 1,
 				"height": 120
 			}
@@ -2532,7 +2543,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 244,
-				"y": 465,
+				"y": 476,
 				"width": 10,
 				"height": 56
 			}
@@ -2564,7 +2575,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 256,
-				"y": 492,
+				"y": 504,
 				"width": 10,
 				"height": 33
 			}
@@ -2580,7 +2591,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -7,
-						"name": "B,,",
+						"name": "C,",
 						"verticalPos": 5,
 						"highestVert": 11
 					}
@@ -2595,7 +2606,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 284,
-				"y": 465,
+				"y": 477,
 				"width": 10,
 				"height": 31
 			}
@@ -2611,7 +2622,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -6,
-						"name": "B,,",
+						"name": "D,",
 						"verticalPos": 6,
 						"highestVert": 6
 					}
@@ -2626,7 +2637,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 300,
-				"y": 484,
+				"y": 496,
 				"width": 10,
 				"height": 31
 			}
@@ -2642,7 +2653,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -5,
-						"name": "B,,",
+						"name": "E,",
 						"verticalPos": 7,
 						"highestVert": 7
 					}
@@ -2658,7 +2669,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 317,
-				"y": 480,
+				"y": 492,
 				"width": 10,
 				"height": 33
 			}
@@ -2674,7 +2685,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
-						"name": "B,,",
+						"name": "F,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -2689,7 +2700,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 328,
-				"y": 476,
+				"y": 488,
 				"width": 10,
 				"height": 35
 			}
@@ -2705,7 +2716,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
-						"name": "B,,",
+						"name": "G,",
 						"verticalPos": 9,
 						"highestVert": 9
 					}
@@ -2721,7 +2732,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 338,
-				"y": 472,
+				"y": 484,
 				"width": 10,
 				"height": 37
 			}
@@ -2741,7 +2752,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 354,
-				"y": 383,
+				"y": 395,
 				"width": 1,
 				"height": 120
 			}
@@ -2757,7 +2768,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
-						"name": "B,",
+						"name": "F,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -2773,7 +2784,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 365,
-				"y": 476,
+				"y": 488,
 				"width": 10,
 				"height": 33
 			}
@@ -2789,7 +2800,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -2,
-						"name": "B,",
+						"name": "A,",
 						"verticalPos": 10,
 						"highestVert": 10
 					}
@@ -2805,7 +2816,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 377,
-				"y": 468,
+				"y": 480,
 				"width": 10,
 				"height": 37
 			}
@@ -2835,9 +2846,9 @@ describe("Selection", function() {
 				"maxpitch": 13
 			},
 			"size": {
-				"x": 389,
-				"y": 457,
-				"width": 10,
+				"x": 387,
+				"y": 469,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -2866,9 +2877,9 @@ describe("Selection", function() {
 				"maxpitch": 13
 			},
 			"size": {
-				"x": 432,
-				"y": 457,
-				"width": 10,
+				"x": 430,
+				"y": 469,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -2883,7 +2894,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
-						"name": "B,",
+						"name": "G,",
 						"verticalPos": 9,
 						"highestVert": 9
 					}
@@ -2899,7 +2910,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 464,
-				"y": 472,
+				"y": 484,
 				"width": 10,
 				"height": 37
 			}
@@ -2915,7 +2926,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -5,
-						"name": "B,",
+						"name": "E,",
 						"verticalPos": 7,
 						"highestVert": 7
 					}
@@ -2931,7 +2942,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 476,
-				"y": 480,
+				"y": 492,
 				"width": 10,
 				"height": 33
 			}
@@ -2951,7 +2962,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 492,
-				"y": 383,
+				"y": 395,
 				"width": 1,
 				"height": 120
 			}
@@ -2968,7 +2979,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
-						"name": "B,",
+						"name": "F,",
 						"verticalPos": 8,
 						"highestVert": 8
 					},
@@ -2993,9 +3004,9 @@ describe("Selection", function() {
 				"maxpitch": 12
 			},
 			"size": {
-				"x": 503,
-				"y": 461,
-				"width": 10,
+				"x": 501,
+				"y": 473,
+				"width": 14,
 				"height": 47
 			}
 		},
@@ -3020,7 +3031,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 519,
-				"y": 476,
+				"y": 488,
 				"width": 8,
 				"height": 21
 			}
@@ -3043,7 +3054,7 @@ describe("Selection", function() {
 					},
 					{
 						"pitch": 3,
-						"name": "E",
+						"name": "F",
 						"verticalPos": 15,
 						"highestVert": 15
 					}
@@ -3056,9 +3067,9 @@ describe("Selection", function() {
 				"maxpitch": 15
 			},
 			"size": {
-				"x": 536,
-				"y": 449,
-				"width": 10,
+				"x": 534,
+				"y": 461,
+				"width": 14,
 				"height": 47
 			}
 		},
@@ -3077,7 +3088,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 569,
-				"y": 383,
+				"y": 395,
 				"width": 1,
 				"height": 120
 			}
@@ -3093,7 +3104,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
-						"name": "B,",
+						"name": "G,",
 						"verticalPos": 9,
 						"highestVert": 9
 					}
@@ -3108,7 +3119,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 580,
-				"y": 472,
+				"y": 484,
 				"width": 10,
 				"height": 31
 			}
@@ -3139,7 +3150,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 613,
-				"y": 468,
+				"y": 480,
 				"width": 10,
 				"height": 31
 			}
@@ -3159,7 +3170,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 646,
-				"y": 383,
+				"y": 395,
 				"width": 1,
 				"height": 120
 			}
@@ -3190,7 +3201,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 657,
-				"y": 467,
+				"y": 479,
 				"width": 17,
 				"height": 33
 			}
@@ -3222,7 +3233,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 707,
-				"y": 465,
+				"y": 476,
 				"width": 10,
 				"height": 45
 			}
@@ -3253,7 +3264,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 717,
-				"y": 472,
+				"y": 484,
 				"width": 10,
 				"height": 40
 			}
@@ -3269,7 +3280,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -6,
-						"name": "B,,",
+						"name": "D,",
 						"verticalPos": 6,
 						"highestVert": 6
 					}
@@ -3284,7 +3295,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 728,
-				"y": 484,
+				"y": 496,
 				"width": 10,
 				"height": 30
 			}
@@ -3300,7 +3311,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -5,
-						"name": "B,,",
+						"name": "E,",
 						"verticalPos": 7,
 						"highestVert": 7
 					}
@@ -3316,7 +3327,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 739,
-				"y": 480,
+				"y": 492,
 				"width": 10,
 				"height": 37
 			}
@@ -3336,7 +3347,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 755,
-				"y": 383,
+				"y": 395,
 				"width": 1,
 				"height": 120
 			}
@@ -3355,7 +3366,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 15,
-				"y": 620,
+				"y": 632,
 				"width": 8,
 				"height": 147
 			}
@@ -3374,10 +3385,10 @@ describe("Selection", function() {
 				"el_type": "clef"
 			},
 			"size": {
-				"x": 30,
-				"y": 606,
-				"width": 19,
-				"height": 57
+				"x": 21,
+				"y": 614,
+				"width": 28,
+				"height": 61
 			}
 		},
 		{
@@ -3403,10 +3414,11 @@ describe("Selection", function() {
 				"root": "B",
 				"acc": "b",
 				"mode": "",
+				"el_type": "keySignature"
 			},
 			"size": {
 				"x": 59,
-				"y": 610,
+				"y": 622,
 				"width": 16,
 				"height": 30
 			}
@@ -3425,7 +3437,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 12,
-						"name": "g",
+						"name": "a",
 						"verticalPos": 12,
 						"highestVert": 18
 					}
@@ -3445,10 +3457,10 @@ describe("Selection", function() {
 				"maxpitch": 12
 			},
 			"size": {
-				"x": 107,
-				"y": 585,
-				"width": 10,
-				"height": 31
+				"x": 86,
+				"y": 597,
+				"width": 43,
+				"height": 121
 			}
 		},
 		{
@@ -3488,10 +3500,10 @@ describe("Selection", function() {
 				"maxpitch": 13
 			},
 			"size": {
-				"x": 150,
-				"y": 581,
-				"width": 10,
-				"height": 39
+				"x": 141,
+				"y": 593,
+				"width": 21,
+				"height": 125
 			}
 		},
 		{
@@ -3515,7 +3527,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 193,
-				"y": 608,
+				"y": 620,
 				"width": 8,
 				"height": 21
 			}
@@ -3532,7 +3544,7 @@ describe("Selection", function() {
 					{
 						"accidental": "natural",
 						"pitch": 9,
-						"name": "e",
+						"name": "=e",
 						"verticalPos": 9,
 						"highestVert": 15
 					}
@@ -3553,9 +3565,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 205,
-				"y": 597,
+				"y": 609,
 				"width": 17,
-				"height": 38
+				"height": 109
 			}
 		},
 		{
@@ -3573,10 +3585,10 @@ describe("Selection", function() {
 				"endChar": 882
 			},
 			"size": {
-				"x": 228,
-				"y": 620,
-				"width": 1,
-				"height": 31
+				"x": 225,
+				"y": 614,
+				"width": 8,
+				"height": 49
 			}
 		},
 		{
@@ -3622,10 +3634,10 @@ describe("Selection", function() {
 				"maxpitch": 10
 			},
 			"size": {
-				"x": 248,
-				"y": 593,
-				"width": 10,
-				"height": 51
+				"x": 239,
+				"y": 605,
+				"width": 19,
+				"height": 113
 			}
 		},
 		{
@@ -3659,10 +3671,10 @@ describe("Selection", function() {
 				"maxpitch": 8
 			},
 			"size": {
-				"x": 274,
-				"y": 601,
-				"width": 10,
-				"height": 31
+				"x": 260,
+				"y": 613,
+				"width": 28,
+				"height": 105
 			}
 		},
 		{
@@ -3681,10 +3693,10 @@ describe("Selection", function() {
 				"endChar": 895
 			},
 			"size": {
-				"x": 300,
-				"y": 620,
-				"width": 1,
-				"height": 31
+				"x": 297,
+				"y": 614,
+				"width": 8,
+				"height": 49
 			}
 		},
 		{
@@ -3699,7 +3711,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 3,
-						"name": "E",
+						"name": "F",
 						"verticalPos": 3,
 						"highestVert": 3
 					},
@@ -3711,7 +3723,7 @@ describe("Selection", function() {
 					}
 				],
 				"el_type": "note",
-				"startChar": 896,
+				"startChar": 895,
 				"endChar": 903,
 				"averagepitch": 5,
 				"minpitch": 3,
@@ -3719,7 +3731,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 330,
-				"y": 605,
+				"y": 617,
 				"width": 10,
 				"height": 47
 			}
@@ -3736,7 +3748,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 4,
-						"name": "F",
+						"name": "G",
 						"verticalPos": 4,
 						"highestVert": 4
 					},
@@ -3756,7 +3768,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 386,
-				"y": 609,
+				"y": 620,
 				"width": 10,
 				"height": 39
 			}
@@ -3782,7 +3794,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 429,
-				"y": 608,
+				"y": 620,
 				"width": 8,
 				"height": 21
 			}
@@ -3802,10 +3814,10 @@ describe("Selection", function() {
 				"endChar": 913
 			},
 			"size": {
-				"x": 456,
-				"y": 620,
-				"width": 1,
-				"height": 31
+				"x": 448,
+				"y": 614,
+				"width": 15,
+				"height": 49
 			}
 		},
 		{
@@ -3840,7 +3852,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 467,
-				"y": 601,
+				"y": 613,
 				"width": 17,
 				"height": 39
 			}
@@ -3856,7 +3868,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 5,
-						"name": "F",
+						"name": "A",
 						"verticalPos": 5,
 						"highestVert": 11
 					}
@@ -3871,7 +3883,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 521,
-				"y": 612,
+				"y": 624,
 				"width": 10,
 				"height": 31
 			}
@@ -3891,10 +3903,10 @@ describe("Selection", function() {
 				"endChar": 925
 			},
 			"size": {
-				"x": 569,
-				"y": 620,
-				"width": 1,
-				"height": 31
+				"x": 562,
+				"y": 614,
+				"width": 14,
+				"height": 49
 			}
 		},
 		{
@@ -3918,13 +3930,13 @@ describe("Selection", function() {
 					},
 					{
 						"pitch": 5,
-						"name": "F",
+						"name": "A",
 						"verticalPos": 5,
 						"highestVert": 5
 					}
 				],
 				"el_type": "note",
-				"startChar": 929,
+				"startChar": 925,
 				"endChar": 936,
 				"averagepitch": 3,
 				"minpitch": 1,
@@ -3932,7 +3944,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 580,
-				"y": 612,
+				"y": 624,
 				"width": 10,
 				"height": 47
 			}
@@ -3964,7 +3976,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 615,
-				"y": 597,
+				"y": 609,
 				"width": 10,
 				"height": 43
 			}
@@ -3995,7 +4007,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 626,
-				"y": 594,
+				"y": 606,
 				"width": 10,
 				"height": 42
 			}
@@ -4026,7 +4038,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 637,
-				"y": 592,
+				"y": 604,
 				"width": 10,
 				"height": 40
 			}
@@ -4058,7 +4070,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 647,
-				"y": 589,
+				"y": 601,
 				"width": 10,
 				"height": 39
 			}
@@ -4090,7 +4102,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 658,
-				"y": 585,
+				"y": 597,
 				"width": 10,
 				"height": 39
 			}
@@ -4106,7 +4118,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": 5,
-						"name": "G",
+						"name": "A",
 						"verticalPos": 5,
 						"highestVert": 11
 					}
@@ -4121,7 +4133,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 669,
-				"y": 588,
+				"y": 600,
 				"width": 10,
 				"height": 56
 			}
@@ -4152,7 +4164,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 680,
-				"y": 591,
+				"y": 602,
 				"width": 10,
 				"height": 49
 			}
@@ -4187,7 +4199,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 691,
-				"y": 593,
+				"y": 605,
 				"width": 10,
 				"height": 43
 			}
@@ -4207,10 +4219,10 @@ describe("Selection", function() {
 				"endChar": 950
 			},
 			"size": {
-				"x": 706,
-				"y": 620,
-				"width": 1,
-				"height": 31
+				"x": 699,
+				"y": 614,
+				"width": 15,
+				"height": 49
 			}
 		},
 		{
@@ -4242,7 +4254,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 717,
-				"y": 624,
+				"y": 636,
 				"width": 15,
 				"height": 8
 			}
@@ -4263,7 +4275,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 766,
-				"y": 620,
+				"y": 632,
 				"width": 8,
 				"height": 31
 			}
@@ -4283,7 +4295,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 104,
-				"y": 526,
+				"y": 538,
 				"width": 16,
 				"height": 19
 			}
@@ -4302,7 +4314,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 301,
-				"y": 560,
+				"y": 571,
 				"width": 468,
 				"height": 23
 			}
@@ -4321,7 +4333,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 580,
-				"y": 529,
+				"y": 541,
 				"width": 110,
 				"height": 8
 			}
@@ -4341,7 +4353,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 716,
-				"y": 531,
+				"y": 543,
 				"width": 27,
 				"height": 13
 			}
@@ -4371,9 +4383,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 107,
-				"y": 659,
-				"width": 10,
+				"x": 105,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4402,9 +4414,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 150,
-				"y": 659,
-				"width": 10,
+				"x": 148,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4433,9 +4445,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 193,
-				"y": 659,
-				"width": 10,
+				"x": 191,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4464,9 +4476,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 212,
-				"y": 659,
-				"width": 10,
+				"x": 210,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4495,9 +4507,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 248,
-				"y": 659,
-				"width": 10,
+				"x": 246,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4526,9 +4538,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 259,
-				"y": 659,
-				"width": 10,
+				"x": 257,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4557,9 +4569,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 274,
-				"y": 659,
-				"width": 10,
+				"x": 272,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4588,9 +4600,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 285,
-				"y": 659,
-				"width": 10,
+				"x": 283,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4619,9 +4631,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 330,
-				"y": 659,
-				"width": 10,
+				"x": 328,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4650,9 +4662,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 358,
-				"y": 659,
-				"width": 10,
+				"x": 356,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4681,9 +4693,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 386,
-				"y": 659,
-				"width": 10,
+				"x": 384,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4712,9 +4724,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 429,
-				"y": 659,
-				"width": 10,
+				"x": 427,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4743,9 +4755,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 467,
-				"y": 659,
-				"width": 10,
+				"x": 465,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4774,9 +4786,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 489,
-				"y": 659,
-				"width": 10,
+				"x": 487,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4805,9 +4817,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 510,
-				"y": 659,
-				"width": 10,
+				"x": 508,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4836,9 +4848,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 521,
-				"y": 659,
-				"width": 10,
+				"x": 519,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4873,10 +4885,10 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 580,
-				"y": 659,
-				"width": 10,
-				"height": 31
+				"x": 578,
+				"y": 573,
+				"width": 77,
+				"height": 128
 			}
 		},
 		{
@@ -4904,9 +4916,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 591,
-				"y": 659,
-				"width": 10,
+				"x": 589,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4935,9 +4947,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 615,
-				"y": 659,
-				"width": 10,
+				"x": 613,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4966,9 +4978,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 658,
-				"y": 659,
-				"width": 10,
+				"x": 656,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -4997,9 +5009,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 717,
-				"y": 659,
-				"width": 10,
+				"x": 715,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -5028,9 +5040,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 728,
-				"y": 659,
-				"width": 10,
+				"x": 726,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -5059,9 +5071,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 739,
-				"y": 659,
-				"width": 10,
+				"x": 737,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -5090,9 +5102,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 750,
-				"y": 659,
-				"width": 10,
+				"x": 748,
+				"y": 670,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -5111,7 +5123,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 30,
-				"y": 736,
+				"y": 748,
 				"width": 20,
 				"height": 23
 			}
@@ -5139,10 +5151,11 @@ describe("Selection", function() {
 				"root": "B",
 				"acc": "b",
 				"mode": "",
+				"el_type": "keySignature"
 			},
 			"size": {
 				"x": 59,
-				"y": 733,
+				"y": 745,
 				"width": 16,
 				"height": 30
 			}
@@ -5158,7 +5171,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
-						"name": "B,",
+						"name": "F,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -5174,7 +5187,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 107,
-				"y": 740,
+				"y": 751,
 				"width": 10,
 				"height": 29
 			}
@@ -5205,7 +5218,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 118,
-				"y": 736,
+				"y": 748,
 				"width": 10,
 				"height": 33
 			}
@@ -5236,7 +5249,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 129,
-				"y": 732,
+				"y": 744,
 				"width": 10,
 				"height": 37
 			}
@@ -5252,7 +5265,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
-						"name": "G,",
+						"name": "F,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -5268,7 +5281,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 139,
-				"y": 740,
+				"y": 751,
 				"width": 10,
 				"height": 29
 			}
@@ -5305,7 +5318,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 150,
-				"y": 736,
+				"y": 748,
 				"width": 10,
 				"height": 29
 			}
@@ -5336,7 +5349,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 161,
-				"y": 732,
+				"y": 744,
 				"width": 10,
 				"height": 33
 			}
@@ -5367,7 +5380,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 172,
-				"y": 728,
+				"y": 740,
 				"width": 10,
 				"height": 37
 			}
@@ -5402,7 +5415,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 183,
-				"y": 736,
+				"y": 748,
 				"width": 10,
 				"height": 29
 			}
@@ -5432,9 +5445,9 @@ describe("Selection", function() {
 				"maxpitch": 12
 			},
 			"size": {
-				"x": 193,
-				"y": 724,
-				"width": 10,
+				"x": 191,
+				"y": 736,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -5463,9 +5476,9 @@ describe("Selection", function() {
 				"maxpitch": 12
 			},
 			"size": {
-				"x": 212,
-				"y": 724,
-				"width": 10,
+				"x": 210,
+				"y": 736,
+				"width": 14,
 				"height": 31
 			}
 		},
@@ -5484,7 +5497,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 228,
-				"y": 651,
+				"y": 663,
 				"width": 1,
 				"height": 116
 			}
@@ -5521,7 +5534,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 248,
-				"y": 732,
+				"y": 744,
 				"width": 10,
 				"height": 51
 			}
@@ -5538,7 +5551,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
-						"name": "B,",
+						"name": "F,",
 						"verticalPos": 8,
 						"highestVert": 8
 					},
@@ -5550,7 +5563,7 @@ describe("Selection", function() {
 					},
 					{
 						"pitch": 3,
-						"name": "E",
+						"name": "F",
 						"verticalPos": 15,
 						"highestVert": 15
 					}
@@ -5563,9 +5576,9 @@ describe("Selection", function() {
 				"maxpitch": 15
 			},
 			"size": {
-				"x": 274,
-				"y": 712,
-				"width": 10,
+				"x": 272,
+				"y": 724,
+				"width": 14,
 				"height": 58
 			}
 		},
@@ -5584,7 +5597,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 300,
-				"y": 651,
+				"y": 663,
 				"width": 1,
 				"height": 116
 			}
@@ -5616,7 +5629,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 330,
-				"y": 730,
+				"y": 742,
 				"width": 16,
 				"height": 35
 			}
@@ -5647,9 +5660,9 @@ describe("Selection", function() {
 				"maxpitch": 12
 			},
 			"size": {
-				"x": 347,
-				"y": 724,
-				"width": 10,
+				"x": 345,
+				"y": 736,
+				"width": 14,
 				"height": 37
 			}
 		},
@@ -5680,7 +5693,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 358,
-				"y": 728,
+				"y": 740,
 				"width": 16,
 				"height": 33
 			}
@@ -5711,9 +5724,9 @@ describe("Selection", function() {
 				"maxpitch": 13
 			},
 			"size": {
-				"x": 375,
-				"y": 720,
-				"width": 10,
+				"x": 373,
+				"y": 732,
+				"width": 14,
 				"height": 37
 			}
 		},
@@ -5728,7 +5741,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -3,
-						"name": "F,",
+						"name": "G,",
 						"verticalPos": 9,
 						"highestVert": 9
 					}
@@ -5744,7 +5757,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 386,
-				"y": 736,
+				"y": 748,
 				"width": 10,
 				"height": 37
 			}
@@ -5760,7 +5773,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
-						"name": "E,",
+						"name": "F,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -5775,7 +5788,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 397,
-				"y": 740,
+				"y": 751,
 				"width": 10,
 				"height": 36
 			}
@@ -5806,7 +5819,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 408,
-				"y": 743,
+				"y": 755,
 				"width": 10,
 				"height": 34
 			}
@@ -5822,7 +5835,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -6,
-						"name": "C,",
+						"name": "D,",
 						"verticalPos": 6,
 						"highestVert": 6
 					}
@@ -5838,7 +5851,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 418,
-				"y": 747,
+				"y": 759,
 				"width": 10,
 				"height": 33
 			}
@@ -5870,7 +5883,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 429,
-				"y": 740,
+				"y": 751,
 				"width": 10,
 				"height": 33
 			}
@@ -5902,7 +5915,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 440,
-				"y": 732,
+				"y": 744,
 				"width": 10,
 				"height": 37
 			}
@@ -5922,7 +5935,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 456,
-				"y": 651,
+				"y": 663,
 				"width": 1,
 				"height": 116
 			}
@@ -5938,7 +5951,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -6,
-						"name": "C,",
+						"name": "D,",
 						"verticalPos": 6,
 						"highestVert": 6
 					}
@@ -5954,7 +5967,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 467,
-				"y": 721,
+				"y": 732,
 				"width": 10,
 				"height": 35
 			}
@@ -5986,7 +5999,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 478,
-				"y": 724,
+				"y": 736,
 				"width": 10,
 				"height": 35
 			}
@@ -6002,7 +6015,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -8,
-						"name": "B,",
+						"name": "B,,",
 						"verticalPos": 4,
 						"highestVert": 10
 					}
@@ -6018,7 +6031,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 489,
-				"y": 728,
+				"y": 740,
 				"width": 10,
 				"height": 35
 			}
@@ -6034,7 +6047,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -9,
-						"name": "B,",
+						"name": "A,,",
 						"verticalPos": 3,
 						"highestVert": 9
 					}
@@ -6050,7 +6063,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 499,
-				"y": 732,
+				"y": 744,
 				"width": 10,
 				"height": 35
 			}
@@ -6066,7 +6079,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -10,
-						"name": "B,",
+						"name": "G,,",
 						"verticalPos": 2,
 						"highestVert": 8
 					}
@@ -6081,7 +6094,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 510,
-				"y": 740,
+				"y": 752,
 				"width": 10,
 				"height": 31
 			}
@@ -6097,7 +6110,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -11,
-						"name": "B,",
+						"name": "F,,",
 						"verticalPos": 1,
 						"highestVert": 7
 					}
@@ -6113,7 +6126,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 521,
-				"y": 716,
+				"y": 728,
 				"width": 10,
 				"height": 58
 			}
@@ -6129,7 +6142,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -9,
-						"name": "B,",
+						"name": "A,,",
 						"verticalPos": 3,
 						"highestVert": 9
 					}
@@ -6144,7 +6157,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 532,
-				"y": 714,
+				"y": 726,
 				"width": 10,
 				"height": 53
 			}
@@ -6160,7 +6173,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -7,
-						"name": "B,",
+						"name": "C,",
 						"verticalPos": 5,
 						"highestVert": 11
 					}
@@ -6175,7 +6188,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 543,
-				"y": 711,
+				"y": 723,
 				"width": 10,
 				"height": 48
 			}
@@ -6191,7 +6204,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -4,
-						"name": "B,",
+						"name": "F,",
 						"verticalPos": 8,
 						"highestVert": 8
 					}
@@ -6207,7 +6220,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 553,
-				"y": 709,
+				"y": 721,
 				"width": 10,
 				"height": 39
 			}
@@ -6227,7 +6240,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 569,
-				"y": 651,
+				"y": 663,
 				"width": 1,
 				"height": 116
 			}
@@ -6243,7 +6256,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -11,
-						"name": "B,",
+						"name": "F,,",
 						"verticalPos": 1,
 						"highestVert": 7
 					}
@@ -6258,7 +6271,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 580,
-				"y": 744,
+				"y": 756,
 				"width": 16,
 				"height": 31
 			}
@@ -6274,7 +6287,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -13,
-						"name": "B,",
+						"name": "D,,",
 						"verticalPos": -1,
 						"highestVert": 5
 					}
@@ -6288,9 +6301,9 @@ describe("Selection", function() {
 				"maxpitch": -1
 			},
 			"size": {
-				"x": 598,
-				"y": 751,
-				"width": 15,
+				"x": 596,
+				"y": 763,
+				"width": 17,
 				"height": 31
 			}
 		},
@@ -6306,13 +6319,13 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -10,
-						"name": "B,",
+						"name": "G,,",
 						"verticalPos": 2,
 						"highestVert": 2
 					},
 					{
 						"pitch": -6,
-						"name": "B,",
+						"name": "D,",
 						"verticalPos": 6,
 						"highestVert": 6
 					}
@@ -6326,7 +6339,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 615,
-				"y": 724,
+				"y": 736,
 				"width": 10,
 				"height": 47
 			}
@@ -6352,7 +6365,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 657,
-				"y": 740,
+				"y": 751,
 				"width": 8,
 				"height": 21
 			}
@@ -6372,7 +6385,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 706,
-				"y": 651,
+				"y": 663,
 				"width": 1,
 				"height": 116
 			}
@@ -6388,7 +6401,7 @@ describe("Selection", function() {
 				"pitches": [
 					{
 						"pitch": -8,
-						"name": "B,",
+						"name": "B,,",
 						"verticalPos": 4,
 						"highestVert": 4
 					}
@@ -6403,7 +6416,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 717,
-				"y": 755,
+				"y": 767,
 				"width": 15,
 				"height": 8
 			}
@@ -6423,7 +6436,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 766,
-				"y": 651,
+				"y": 663,
 				"width": 8,
 				"height": 116
 			}
@@ -6442,7 +6455,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 156,
-				"y": 724,
+				"y": 735,
 				"width": 30,
 				"height": 7
 			}
@@ -6456,13 +6469,14 @@ describe("Selection", function() {
 			},
 			"abcEl": {
 				"el_type": "unalignedWords",
+				"name": "unalignedWords",
 				"startChar": -1,
 				"endChar": -1,
 				"text": ""
 			},
 			"size": {
 				"x": 65,
-				"y": 809,
+				"y": 820,
 				"width": 278,
 				"height": 74
 			}
@@ -6471,26 +6485,955 @@ describe("Selection", function() {
 			"draggable": false,
 			"svgEl": {
 				"x": "15",
-				"y": "951.61",
+				"y": "963.42",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "219"
 			},
 			"abcEl": {
 				"el_type": "extraText",
-				"startChar": -1,
-				"endChar": -1,
+				"name": "description",
+				"startChar": -2,
+				"endChar": -2,
 				"text": "Source: My own testing\nHistory: This shows every type of thing that can possibly be drawn.\n\nAnd two lines of history!\n"
 			},
 			"size": {
 				"x": 15,
-				"y": 933,
+				"y": 944,
 				"width": 568,
 				"height": 100
 			}
 		}
 	]
 
+	var expectedNone = [{
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "0"},
+		"abcEl": {
+			"decoration": ["mp"],
+			"duration": 0.5,
+			"pitches": [{"pitch": 6, "name": "B", "verticalPos": 6, "highestVert": 6}, {"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 8}, {"pitch": 13, "name": "b", "verticalPos": 13, "highestVert": 13}],
+			"el_type": "note",
+			"startChar": 700,
+			"endChar": 714,
+			"averagepitch": 9,
+			"minpitch": 6,
+			"maxpitch": 13
+		},
+		"size": {"x": 134, "y": 325, "width": 14, "height": 58}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "1"},
+		"abcEl": {"pitches": [{"pitch": 10, "name": "f", "verticalPos": 10, "highestVert": 16}], "duration": 0.1875, "el_type": "note", "startChar": 714, "endChar": 716, "startBeam": true, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 176, "y": 333, "width": 16, "height": 35}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "2"},
+		"abcEl": {"pitches": [{"pitch": 11, "name": "g", "verticalPos": 11, "highestVert": 17}], "duration": 0.0625, "el_type": "note", "startChar": 716, "endChar": 718, "endBeam": true, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 193, "y": 329, "width": 10, "height": 35}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "3"},
+		"abcEl": {"pitches": [{"pitch": 10, "name": "f", "verticalPos": 10, "highestVert": 16}], "duration": 0.25, "el_type": "note", "startChar": 718, "endChar": 720, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 204, "y": 337, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "4"},
+		"abcEl": {
+			"decoration": ["crescendo("],
+			"duration": 0.75,
+			"pitches": [{"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 8}, {"pitch": 13, "name": "b", "verticalPos": 13, "highestVert": 13}],
+			"el_type": "note",
+			"startChar": 721,
+			"endChar": 734,
+			"averagepitch": 10.5,
+			"minpitch": 8,
+			"maxpitch": 13
+		},
+		"size": {"x": 242, "y": 325, "width": 19, "height": 51}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "5"},
+		"abcEl": {
+			"decoration": ["crescendo)"],
+			"duration": 0.25,
+			"pitches": [{"pitch": 11, "name": "g", "verticalPos": 11, "highestVert": 11}, {"pitch": 13, "name": "b", "verticalPos": 13, "highestVert": 13}],
+			"el_type": "note",
+			"startChar": 734,
+			"endChar": 744,
+			"averagepitch": 12,
+			"minpitch": 11,
+			"maxpitch": 13
+		},
+		"size": {"x": 315, "y": 325, "width": 14, "height": 39}
+	}, {
+		"draggable": false,
+		"svgEl": {"selectable": "false", "data-index": "6"},
+		"abcEl": {"rest": {"type": "rest"}, "duration": 0.25, "el_type": "note", "startChar": 745, "endChar": 748, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 365, "y": 352, "width": 8, "height": 21}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "7"},
+		"abcEl": {
+			"decoration": ["crescendo("],
+			"pitches": [{"pitch": 13, "name": "b", "startSlur": [{"label": 101}], "verticalPos": 13, "highestVert": 19}],
+			"duration": 0.0625,
+			"el_type": "note",
+			"startChar": 748,
+			"endChar": 755,
+			"startBeam": true,
+			"averagepitch": 13,
+			"minpitch": 13,
+			"maxpitch": 13
+		},
+		"size": {"x": 387, "y": 318, "width": 14, "height": 39}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "8"},
+		"abcEl": {"pitches": [{"pitch": 10, "name": "f", "verticalPos": 10, "highestVert": 16}], "duration": 0.0625, "el_type": "note", "startChar": 755, "endChar": 756, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 399, "y": 320, "width": 10, "height": 48}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "9"},
+		"abcEl": {"pitches": [{"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 14}], "duration": 0.0625, "el_type": "note", "startChar": 756, "endChar": 757, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 410, "y": 323, "width": 10, "height": 53}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "10"},
+		"abcEl": {"pitches": [{"pitch": 10, "name": "f", "endSlur": [101], "verticalPos": 10, "highestVert": 16}], "duration": 0.0625, "el_type": "note", "startChar": 757, "endChar": 760, "endBeam": true, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 421, "y": 325, "width": 10, "height": 43}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "11"},
+		"abcEl": {
+			"startTriplet": 3,
+			"tripletMultiplier": 0.6666666666666666,
+			"tripletR": 3,
+			"pitches": [{"pitch": 6, "name": "B", "verticalPos": 6, "highestVert": 12}],
+			"duration": 0.125,
+			"el_type": "note",
+			"startChar": 760,
+			"endChar": 764,
+			"startBeam": true,
+			"averagepitch": 6,
+			"minpitch": 6,
+			"maxpitch": 6
+		},
+		"size": {"x": 432, "y": 345, "width": 10, "height": 39}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "12"},
+		"abcEl": {"pitches": [{"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 14}], "duration": 0.125, "el_type": "note", "startChar": 764, "endChar": 766, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 443, "y": 343, "width": 10, "height": 33}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "13"},
+		"abcEl": {"pitches": [{"pitch": 7, "name": "c", "verticalPos": 7, "highestVert": 13}], "duration": 0.125, "endTriplet": true, "el_type": "note", "startChar": 766, "endChar": 769, "endBeam": true, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
+		"size": {"x": 453, "y": 341, "width": 10, "height": 39}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "14"},
+		"abcEl": {"decoration": ["crescendo)"], "pitches": [{"pitch": 6, "name": "B", "verticalPos": 6, "highestVert": 12}], "duration": 0.25, "el_type": "note", "startChar": 769, "endChar": 775, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
+		"size": {"x": 464, "y": 352, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "15"},
+		"abcEl": {
+			"decoration": ["f"],
+			"duration": 0.25,
+			"pitches": [{"pitch": 7, "name": "c", "verticalPos": 7, "highestVert": 7}, {"pitch": 10, "name": "f", "verticalPos": 10, "highestVert": 10}],
+			"el_type": "note",
+			"startChar": 801,
+			"endChar": 811,
+			"averagepitch": 8.5,
+			"minpitch": 7,
+			"maxpitch": 10
+		},
+		"size": {"x": 503, "y": 337, "width": 10, "height": 43}
+	}, {
+		"draggable": false,
+		"svgEl": {"selectable": "false", "data-index": "16"},
+		"abcEl": {"rest": {"type": "rest"}, "duration": 0.25, "el_type": "note", "startChar": 811, "endChar": 814, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 519, "y": 352, "width": 8, "height": 21}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "17"},
+		"abcEl": {"duration": 0.5, "pitches": [{"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 8}, {"pitch": 13, "name": "b", "verticalPos": 13, "highestVert": 13}], "el_type": "note", "startChar": 814, "endChar": 820, "averagepitch": 10.5, "minpitch": 8, "maxpitch": 13},
+		"size": {"x": 534, "y": 325, "width": 14, "height": 51}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "18"},
+		"abcEl": {"decoration": ["p"], "duration": 0.5, "pitches": [{"pitch": 4, "name": "G", "verticalPos": 4, "highestVert": 4}, {"pitch": 9, "name": "e", "verticalPos": 9, "highestVert": 9}], "el_type": "note", "startChar": 821, "endChar": 832, "averagepitch": 6.5, "minpitch": 4, "maxpitch": 9},
+		"size": {"x": 580, "y": 341, "width": 10, "height": 51}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "19"},
+		"abcEl": {
+			"decoration": ["trill", "upbow"],
+			"duration": 0.5,
+			"pitches": [{"pitch": 7, "name": "c", "verticalPos": 7, "highestVert": 7}, {"pitch": 10, "name": "f", "verticalPos": 10, "highestVert": 10}],
+			"el_type": "note",
+			"startChar": 832,
+			"endChar": 840,
+			"averagepitch": 8.5,
+			"minpitch": 7,
+			"maxpitch": 10
+		},
+		"size": {"x": 608, "y": 299, "width": 18, "height": 81}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "20"},
+		"abcEl": {
+			"decoration": ["crescendo("],
+			"duration": 0.75,
+			"pitches": [{"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 8}, {"pitch": 10, "name": "f", "verticalPos": 10, "highestVert": 10}],
+			"el_type": "note",
+			"startChar": 841,
+			"endChar": 854,
+			"averagepitch": 9,
+			"minpitch": 8,
+			"maxpitch": 10
+		},
+		"size": {"x": 657, "y": 337, "width": 17, "height": 39}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "21"},
+		"abcEl": {"decoration": ["crescendo)"], "pitches": [{"pitch": 11, "name": "g", "verticalPos": 11, "highestVert": 17}], "duration": 0.25, "el_type": "note", "startChar": 854, "endChar": 860, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 707, "y": 333, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "22"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "startTie": {}, "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 997, "endChar": 1003, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 134, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "23"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "startTie": {}, "endTie": true, "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1003, "endChar": 1008, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 150, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "24"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "endTie": true, "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1008, "endChar": 1012, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 174, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "25"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1012, "endChar": 1016, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 202, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "26"},
+		"abcEl": {
+			"chord": [{"name": "B♭", "position": "default"}],
+			"gracenotes": [{"pitch": 0, "name": "C", "duration": 0.125, "verticalPos": 0}],
+			"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}],
+			"duration": 0.25,
+			"el_type": "note",
+			"startChar": 1017,
+			"endChar": 1029,
+			"averagepitch": -1,
+			"minpitch": -1,
+			"maxpitch": -1
+		},
+		"size": {"x": 233, "y": 279, "width": 29, "height": 155}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "27"},
+		"abcEl": {
+			"gracenotes": [{"pitch": 0, "name": "C", "duration": 0.125, "verticalPos": 0}, {"pitch": 1, "name": "D", "duration": 0.125, "verticalPos": 1}],
+			"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}],
+			"duration": 0.25,
+			"el_type": "note",
+			"startChar": 1029,
+			"endChar": 1037,
+			"averagepitch": -1,
+			"minpitch": -1,
+			"maxpitch": -1
+		},
+		"size": {"x": 263, "y": 380, "width": 33, "height": 54}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "28"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1037, "endChar": 1041, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 298, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "29"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1041, "endChar": 1045, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 315, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "30"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1046, "endChar": 1051, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 363, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "31"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1051, "endChar": 1055, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 387, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "32"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1055, "endChar": 1059, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 430, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "33"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1059, "endChar": 1063, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 462, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "34"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1064, "endChar": 1069, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 501, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "35"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1069, "endChar": 1073, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 517, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "36"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1073, "endChar": 1077, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 534, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "37"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1077, "endChar": 1081, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 550, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "38"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1082, "endChar": 1087, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 578, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "39"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1087, "endChar": 1091, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 594, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "40"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1091, "endChar": 1095, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 611, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "41"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1095, "endChar": 1099, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 627, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "42"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1100, "endChar": 1105, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 655, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "43"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1105, "endChar": 1109, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 671, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "44"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1109, "endChar": 1113, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 688, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "45"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1113, "endChar": 1117, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 705, "y": 402, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "46"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}], "duration": 0.375, "el_type": "note", "startChar": 1254, "endChar": 1259, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 136, "y": 476, "width": 16, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "47"},
+		"abcEl": {"pitches": [{"pitch": 1, "name": "D", "verticalPos": 13, "highestVert": 13}], "duration": 0.125, "el_type": "note", "startChar": 1259, "endChar": 1262, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
+		"size": {"x": 162, "y": 469, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "48"},
+		"abcEl": {
+			"duration": 0.5,
+			"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}, {"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}, {"pitch": 3, "name": "F", "verticalPos": 15, "highestVert": 15}],
+			"el_type": "note",
+			"startChar": 1262,
+			"endChar": 1272,
+			"averagepitch": 11,
+			"minpitch": 8,
+			"maxpitch": 15
+		},
+		"size": {"x": 174, "y": 461, "width": 14, "height": 58}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "49"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}], "duration": 0.125, "el_type": "note", "startChar": 1273, "endChar": 1276, "startBeam": true, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 244, "y": 476, "width": 10, "height": 56}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "50"},
+		"abcEl": {"pitches": [{"pitch": -8, "name": "B,,", "verticalPos": 4, "highestVert": 10}], "duration": 0.125, "el_type": "note", "startChar": 1276, "endChar": 1281, "endBeam": true, "averagepitch": 4, "minpitch": 4, "maxpitch": 4},
+		"size": {"x": 256, "y": 504, "width": 10, "height": 33}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "51"},
+		"abcEl": {"pitches": [{"pitch": -7, "name": "C,", "verticalPos": 5, "highestVert": 11}], "duration": 0.25, "el_type": "note", "startChar": 1281, "endChar": 1285, "averagepitch": 5, "minpitch": 5, "maxpitch": 5},
+		"size": {"x": 284, "y": 477, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "52"},
+		"abcEl": {"pitches": [{"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 6}], "duration": 0.25, "el_type": "note", "startChar": 1285, "endChar": 1289, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
+		"size": {"x": 300, "y": 496, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "53"},
+		"abcEl": {"pitches": [{"pitch": -5, "name": "E,", "verticalPos": 7, "highestVert": 7}], "duration": 0.0625, "el_type": "note", "startChar": 1289, "endChar": 1291, "startBeam": true, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
+		"size": {"x": 317, "y": 492, "width": 10, "height": 33}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "54"},
+		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.0625, "el_type": "note", "startChar": 1291, "endChar": 1293, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 328, "y": 488, "width": 10, "height": 35}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "55"},
+		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.125, "el_type": "note", "startChar": 1293, "endChar": 1296, "endBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
+		"size": {"x": 338, "y": 484, "width": 10, "height": 37}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "56"},
+		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.125, "el_type": "note", "startChar": 1297, "endChar": 1300, "startBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 365, "y": 488, "width": 10, "height": 33}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "57"},
+		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.125, "el_type": "note", "startChar": 1300, "endChar": 1304, "endBeam": true, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 377, "y": 480, "width": 10, "height": 37}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "58"},
+		"abcEl": {"pitches": [{"pitch": 1, "name": "D", "verticalPos": 13, "highestVert": 13}], "duration": 0.25, "el_type": "note", "startChar": 1304, "endChar": 1307, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
+		"size": {"x": 387, "y": 469, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "59"},
+		"abcEl": {"pitches": [{"pitch": 1, "name": "D", "verticalPos": 13, "highestVert": 13}], "duration": 0.25, "el_type": "note", "startChar": 1307, "endChar": 1310, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
+		"size": {"x": 430, "y": 469, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "60"},
+		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.125, "el_type": "note", "startChar": 1310, "endChar": 1313, "startBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
+		"size": {"x": 464, "y": 484, "width": 10, "height": 37}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "61"},
+		"abcEl": {"pitches": [{"pitch": -5, "name": "E,", "verticalPos": 7, "highestVert": 7}], "duration": 0.125, "el_type": "note", "startChar": 1313, "endChar": 1316, "endBeam": true, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
+		"size": {"x": 476, "y": 492, "width": 10, "height": 33}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "62"},
+		"abcEl": {
+			"duration": 0.25,
+			"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}, {"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}, {"pitch": 0, "name": "C", "verticalPos": 12, "highestVert": 12}],
+			"el_type": "note",
+			"startChar": 1317,
+			"endChar": 1328,
+			"averagepitch": 10,
+			"minpitch": 8,
+			"maxpitch": 12
+		},
+		"size": {"x": 501, "y": 473, "width": 14, "height": 47}
+	}, {
+		"draggable": false,
+		"svgEl": {"selectable": "false", "data-index": "63"},
+		"abcEl": {"rest": {"type": "rest"}, "duration": 0.25, "el_type": "note", "startChar": 1328, "endChar": 1331, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
+		"size": {"x": 519, "y": 488, "width": 8, "height": 21}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "64"},
+		"abcEl": {"duration": 0.5, "pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}, {"pitch": 3, "name": "F", "verticalPos": 15, "highestVert": 15}], "el_type": "note", "startChar": 1331, "endChar": 1338, "averagepitch": 13, "minpitch": 11, "maxpitch": 15},
+		"size": {"x": 534, "y": 461, "width": 14, "height": 47}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "65"},
+		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.5, "el_type": "note", "startChar": 1339, "endChar": 1343, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
+		"size": {"x": 580, "y": 484, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "66"},
+		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.5, "el_type": "note", "startChar": 1343, "endChar": 1346, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 613, "y": 480, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "67"},
+		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.75, "el_type": "note", "startChar": 1347, "endChar": 1352, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 657, "y": 479, "width": 17, "height": 33}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "68"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}], "duration": 0.0625, "el_type": "note", "startChar": 1352, "endChar": 1354, "startBeam": true, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 707, "y": 476, "width": 10, "height": 45}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "69"},
+		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1354, "endChar": 1356, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
+		"size": {"x": 717, "y": 484, "width": 10, "height": 40}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "70"},
+		"abcEl": {"pitches": [{"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 6}], "duration": 0.0625, "el_type": "note", "startChar": 1356, "endChar": 1358, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
+		"size": {"x": 728, "y": 496, "width": 10, "height": 30}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "71"},
+		"abcEl": {"pitches": [{"pitch": -5, "name": "E,", "verticalPos": 7, "highestVert": 7}], "duration": 0.0625, "el_type": "note", "startChar": 1358, "endChar": 1360, "endBeam": true, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
+		"size": {"x": 739, "y": 492, "width": 10, "height": 37}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "72"},
+		"abcEl": {"decoration": ["f"], "pitches": [{"pitch": 12, "name": "a", "verticalPos": 12, "highestVert": 18}], "duration": 0.25, "el_type": "note", "startChar": 862, "endChar": 868, "lyric": [{"syllable": "Strang", "divider": "-"}], "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
+		"size": {"x": 86, "y": 597, "width": 43, "height": 121}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "73"},
+		"abcEl": {
+			"duration": 0.25,
+			"pitches": [{"pitch": 11, "name": "g", "verticalPos": 11, "highestVert": 11}, {"pitch": 13, "name": "b", "verticalPos": 13, "highestVert": 13}],
+			"el_type": "note",
+			"startChar": 868,
+			"endChar": 875,
+			"lyric": [{"syllable": "ers", "divider": " "}],
+			"averagepitch": 12,
+			"minpitch": 11,
+			"maxpitch": 13
+		},
+		"size": {"x": 141, "y": 593, "width": 21, "height": 125}
+	}, {
+		"draggable": false,
+		"svgEl": {"selectable": "false", "data-index": "74"},
+		"abcEl": {"rest": {"type": "rest"}, "duration": 0.25, "el_type": "note", "startChar": 875, "endChar": 878, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 193, "y": 620, "width": 8, "height": 21}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "75"},
+		"abcEl": {"pitches": [{"accidental": "natural", "pitch": 9, "name": "=e", "verticalPos": 9, "highestVert": 15}], "duration": 0.25, "el_type": "note", "startChar": 878, "endChar": 881, "lyric": [{"syllable": "in", "divider": " "}], "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
+		"size": {"x": 205, "y": 609, "width": 17, "height": 109}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "76"},
+		"abcEl": {
+			"duration": 0.5,
+			"pitches": [{"pitch": 5, "name": "A", "verticalPos": 5, "highestVert": 5}, {"pitch": 7, "name": "c", "verticalPos": 7, "highestVert": 7}, {"pitch": 10, "name": "f", "verticalPos": 10, "highestVert": 10}],
+			"el_type": "note",
+			"startChar": 882,
+			"endChar": 891,
+			"lyric": [{"syllable": "the", "divider": " "}],
+			"averagepitch": 7.333333333333333,
+			"minpitch": 5,
+			"maxpitch": 10
+		},
+		"size": {"x": 239, "y": 605, "width": 19, "height": 113}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "77"},
+		"abcEl": {"pitches": [{"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 14}], "duration": 0.5, "el_type": "note", "startChar": 891, "endChar": 893, "lyric": [{"syllable": "night", "divider": " "}], "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 260, "y": 613, "width": 28, "height": 105}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "78"},
+		"abcEl": {"duration": 0.5, "pitches": [{"pitch": 3, "name": "F", "verticalPos": 3, "highestVert": 3}, {"pitch": 7, "name": "c", "verticalPos": 7, "highestVert": 7}], "el_type": "note", "startChar": 895, "endChar": 903, "averagepitch": 5, "minpitch": 3, "maxpitch": 7},
+		"size": {"x": 330, "y": 617, "width": 10, "height": 47}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "79"},
+		"abcEl": {"duration": 0.25, "pitches": [{"pitch": 4, "name": "G", "verticalPos": 4, "highestVert": 4}, {"pitch": 6, "name": "B", "verticalPos": 6, "highestVert": 6}], "el_type": "note", "startChar": 903, "endChar": 910, "averagepitch": 5, "minpitch": 4, "maxpitch": 6},
+		"size": {"x": 386, "y": 620, "width": 10, "height": 39}
+	}, {
+		"draggable": false,
+		"svgEl": {"selectable": "false", "data-index": "80"},
+		"abcEl": {"rest": {"type": "rest"}, "duration": 0.25, "el_type": "note", "startChar": 910, "endChar": 912, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 429, "y": 620, "width": 8, "height": 21}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "81"},
+		"abcEl": {"duration": 0.75, "pitches": [{"pitch": 6, "name": "B", "verticalPos": 6, "highestVert": 6}, {"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 8}], "el_type": "note", "startChar": 913, "endChar": 922, "averagepitch": 7, "minpitch": 6, "maxpitch": 8},
+		"size": {"x": 467, "y": 613, "width": 17, "height": 39}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "82"},
+		"abcEl": {"pitches": [{"pitch": 5, "name": "A", "verticalPos": 5, "highestVert": 11}], "duration": 0.25, "el_type": "note", "startChar": 922, "endChar": 924, "averagepitch": 5, "minpitch": 5, "maxpitch": 5},
+		"size": {"x": 521, "y": 624, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "83"},
+		"abcEl": {
+			"decoration": ["diminuendo("],
+			"duration": 0.5,
+			"pitches": [{"pitch": 1, "name": "D", "verticalPos": 1, "highestVert": 1}, {"pitch": 5, "name": "A", "verticalPos": 5, "highestVert": 5}],
+			"el_type": "note",
+			"startChar": 925,
+			"endChar": 936,
+			"averagepitch": 3,
+			"minpitch": 1,
+			"maxpitch": 5
+		},
+		"size": {"x": 580, "y": 624, "width": 10, "height": 47}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "84"},
+		"abcEl": {"pitches": [{"pitch": 6, "name": "B", "verticalPos": 6, "highestVert": 12}], "duration": 0.0625, "el_type": "note", "startChar": 936, "endChar": 937, "startBeam": true, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
+		"size": {"x": 615, "y": 609, "width": 10, "height": 43}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "85"},
+		"abcEl": {"pitches": [{"pitch": 7, "name": "c", "verticalPos": 7, "highestVert": 13}], "duration": 0.0625, "el_type": "note", "startChar": 937, "endChar": 938, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
+		"size": {"x": 626, "y": 606, "width": 10, "height": 42}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "86"},
+		"abcEl": {"pitches": [{"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 14}], "duration": 0.0625, "el_type": "note", "startChar": 938, "endChar": 939, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 637, "y": 604, "width": 10, "height": 40}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "87"},
+		"abcEl": {"pitches": [{"pitch": 9, "name": "e", "verticalPos": 9, "highestVert": 15}], "duration": 0.0625, "el_type": "note", "startChar": 939, "endChar": 941, "endBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
+		"size": {"x": 647, "y": 601, "width": 10, "height": 39}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "88"},
+		"abcEl": {"pitches": [{"pitch": 10, "name": "f", "verticalPos": 10, "highestVert": 16}], "duration": 0.0625, "el_type": "note", "startChar": 941, "endChar": 942, "startBeam": true, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 658, "y": 597, "width": 10, "height": 39}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "89"},
+		"abcEl": {"pitches": [{"pitch": 5, "name": "A", "verticalPos": 5, "highestVert": 11}], "duration": 0.0625, "el_type": "note", "startChar": 942, "endChar": 943, "averagepitch": 5, "minpitch": 5, "maxpitch": 5},
+		"size": {"x": 669, "y": 600, "width": 10, "height": 56}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "90"},
+		"abcEl": {"pitches": [{"pitch": 6, "name": "B", "verticalPos": 6, "highestVert": 12}], "duration": 0.0625, "el_type": "note", "startChar": 943, "endChar": 944, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
+		"size": {"x": 680, "y": 602, "width": 10, "height": 49}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "91"},
+		"abcEl": {"decoration": ["diminuendo)"], "pitches": [{"pitch": 7, "name": "c", "verticalPos": 7, "highestVert": 13}], "duration": 0.0625, "el_type": "note", "startChar": 944, "endChar": 949, "endBeam": true, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
+		"size": {"x": 691, "y": 605, "width": 10, "height": 43}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "92"},
+		"abcEl": {"decoration": ["mp"], "pitches": [{"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 8}], "duration": 1, "el_type": "note", "startChar": 950, "endChar": 957, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 717, "y": 636, "width": 15, "height": 8}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "93"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1119, "endChar": 1123, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 105, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "94"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1123, "endChar": 1127, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 148, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "95"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1127, "endChar": 1131, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 191, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "96"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1131, "endChar": 1135, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 210, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "97"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1136, "endChar": 1141, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 246, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "98"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1141, "endChar": 1145, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 257, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "99"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1145, "endChar": 1149, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 272, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "100"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1149, "endChar": 1153, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 283, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "101"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1154, "endChar": 1158, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 328, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "102"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1158, "endChar": 1162, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 356, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "103"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1162, "endChar": 1166, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 384, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "104"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1166, "endChar": 1170, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 427, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "105"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1171, "endChar": 1175, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 465, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "106"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1175, "endChar": 1179, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 487, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "107"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1179, "endChar": 1183, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 508, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "108"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1183, "endChar": 1187, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 519, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "109"},
+		"abcEl": {"chord": [{"name": "annotation", "position": "above"}], "pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1188, "endChar": 1205, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 578, "y": 573, "width": 77, "height": 128}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "110"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1205, "endChar": 1209, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 589, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "111"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1209, "endChar": 1213, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 613, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "112"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1213, "endChar": 1217, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 656, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "113"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1218, "endChar": 1222, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 715, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "114"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1222, "endChar": 1226, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 726, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "115"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1226, "endChar": 1230, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 737, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "116"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1230, "endChar": 1234, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 748, "y": 670, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "117"},
+		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.0625, "el_type": "note", "startChar": 1362, "endChar": 1364, "startBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 107, "y": 751, "width": 10, "height": 29}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "118"},
+		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1364, "endChar": 1366, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
+		"size": {"x": 118, "y": 748, "width": 10, "height": 33}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "119"},
+		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.0625, "el_type": "note", "startChar": 1366, "endChar": 1368, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 129, "y": 744, "width": 10, "height": 37}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "120"},
+		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.0625, "el_type": "note", "startChar": 1368, "endChar": 1371, "endBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 139, "y": 751, "width": 10, "height": 29}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "121"},
+		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "startSlur": [{"label": 101}], "verticalPos": 9, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1371, "endChar": 1374, "startBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
+		"size": {"x": 150, "y": 748, "width": 10, "height": 29}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "122"},
+		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.0625, "el_type": "note", "startChar": 1374, "endChar": 1376, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 161, "y": 744, "width": 10, "height": 33}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "123"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}], "duration": 0.0625, "el_type": "note", "startChar": 1376, "endChar": 1378, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 172, "y": 740, "width": 10, "height": 37}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "124"},
+		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "endSlur": [101], "verticalPos": 9, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1378, "endChar": 1382, "endBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
+		"size": {"x": 183, "y": 748, "width": 10, "height": 29}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "125"},
+		"abcEl": {"pitches": [{"pitch": 0, "name": "C", "verticalPos": 12, "highestVert": 12}], "duration": 0.25, "el_type": "note", "startChar": 1382, "endChar": 1385, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
+		"size": {"x": 191, "y": 736, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "126"},
+		"abcEl": {"pitches": [{"pitch": 0, "name": "C", "verticalPos": 12, "highestVert": 12}], "duration": 0.25, "el_type": "note", "startChar": 1385, "endChar": 1387, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
+		"size": {"x": 210, "y": 736, "width": 14, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "127"},
+		"abcEl": {"duration": 0.5, "pitches": [{"pitch": -7, "name": "C,", "verticalPos": 5, "highestVert": 5}, {"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "el_type": "note", "startChar": 1388, "endChar": 1397, "averagepitch": 7.5, "minpitch": 5, "maxpitch": 10},
+		"size": {"x": 248, "y": 744, "width": 10, "height": 51}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "128"},
+		"abcEl": {
+			"duration": 0.5,
+			"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}, {"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}, {"pitch": 3, "name": "F", "verticalPos": 15, "highestVert": 15}],
+			"el_type": "note",
+			"startChar": 1397,
+			"endChar": 1407,
+			"averagepitch": 11.333333333333334,
+			"minpitch": 8,
+			"maxpitch": 15
+		},
+		"size": {"x": 272, "y": 724, "width": 14, "height": 58}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "129"},
+		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.1875, "el_type": "note", "startChar": 1408, "endChar": 1411, "startBeam": true, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 330, "y": 742, "width": 16, "height": 35}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "130"},
+		"abcEl": {"pitches": [{"pitch": 0, "name": "C", "verticalPos": 12, "highestVert": 12}], "duration": 0.0625, "el_type": "note", "startChar": 1411, "endChar": 1413, "endBeam": true, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
+		"size": {"x": 345, "y": 736, "width": 14, "height": 37}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "131"},
+		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}], "duration": 0.1875, "el_type": "note", "startChar": 1413, "endChar": 1416, "startBeam": true, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
+		"size": {"x": 358, "y": 740, "width": 16, "height": 33}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "132"},
+		"abcEl": {"pitches": [{"pitch": 1, "name": "D", "verticalPos": 13, "highestVert": 13}], "duration": 0.0625, "el_type": "note", "startChar": 1416, "endChar": 1418, "endBeam": true, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
+		"size": {"x": 373, "y": 732, "width": 14, "height": 37}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "133"},
+		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1418, "endChar": 1420, "startBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
+		"size": {"x": 386, "y": 748, "width": 10, "height": 37}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "134"},
+		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.0625, "el_type": "note", "startChar": 1420, "endChar": 1422, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 397, "y": 751, "width": 10, "height": 36}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "135"},
+		"abcEl": {"pitches": [{"pitch": -5, "name": "E,", "verticalPos": 7, "highestVert": 7}], "duration": 0.0625, "el_type": "note", "startChar": 1422, "endChar": 1424, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
+		"size": {"x": 408, "y": 755, "width": 10, "height": 34}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "136"},
+		"abcEl": {"pitches": [{"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 6}], "duration": 0.0625, "el_type": "note", "startChar": 1424, "endChar": 1427, "endBeam": true, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
+		"size": {"x": 418, "y": 759, "width": 10, "height": 33}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "137"},
+		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.125, "el_type": "note", "startChar": 1427, "endChar": 1430, "startBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 429, "y": 751, "width": 10, "height": 33}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "138"},
+		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.125, "el_type": "note", "startChar": 1430, "endChar": 1433, "endBeam": true, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
+		"size": {"x": 440, "y": 744, "width": 10, "height": 37}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "139"},
+		"abcEl": {"pitches": [{"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 6}], "duration": 0.125, "el_type": "note", "startChar": 1434, "endChar": 1437, "startBeam": true, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
+		"size": {"x": 467, "y": 732, "width": 10, "height": 35}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "140"},
+		"abcEl": {"pitches": [{"pitch": -7, "name": "C,", "verticalPos": 5, "highestVert": 11}], "duration": 0.125, "el_type": "note", "startChar": 1437, "endChar": 1441, "endBeam": true, "averagepitch": 5, "minpitch": 5, "maxpitch": 5},
+		"size": {"x": 478, "y": 736, "width": 10, "height": 35}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "141"},
+		"abcEl": {"pitches": [{"pitch": -8, "name": "B,,", "verticalPos": 4, "highestVert": 10}], "duration": 0.125, "el_type": "note", "startChar": 1441, "endChar": 1445, "startBeam": true, "averagepitch": 4, "minpitch": 4, "maxpitch": 4},
+		"size": {"x": 489, "y": 740, "width": 10, "height": 35}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "142"},
+		"abcEl": {"pitches": [{"pitch": -9, "name": "A,,", "verticalPos": 3, "highestVert": 9}], "duration": 0.125, "el_type": "note", "startChar": 1445, "endChar": 1450, "endBeam": true, "averagepitch": 3, "minpitch": 3, "maxpitch": 3},
+		"size": {"x": 499, "y": 744, "width": 10, "height": 35}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "143"},
+		"abcEl": {"pitches": [{"pitch": -10, "name": "G,,", "verticalPos": 2, "highestVert": 8}], "duration": 0.25, "el_type": "note", "startChar": 1450, "endChar": 1455, "averagepitch": 2, "minpitch": 2, "maxpitch": 2},
+		"size": {"x": 510, "y": 752, "width": 10, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "144"},
+		"abcEl": {"pitches": [{"pitch": -11, "name": "F,,", "verticalPos": 1, "highestVert": 7}], "duration": 0.0625, "el_type": "note", "startChar": 1455, "endChar": 1458, "startBeam": true, "averagepitch": 1, "minpitch": 1, "maxpitch": 1},
+		"size": {"x": 521, "y": 728, "width": 10, "height": 58}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "145"},
+		"abcEl": {"pitches": [{"pitch": -9, "name": "A,,", "verticalPos": 3, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1458, "endChar": 1461, "averagepitch": 3, "minpitch": 3, "maxpitch": 3},
+		"size": {"x": 532, "y": 726, "width": 10, "height": 53}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "146"},
+		"abcEl": {"pitches": [{"pitch": -7, "name": "C,", "verticalPos": 5, "highestVert": 11}], "duration": 0.0625, "el_type": "note", "startChar": 1461, "endChar": 1463, "averagepitch": 5, "minpitch": 5, "maxpitch": 5},
+		"size": {"x": 543, "y": 723, "width": 10, "height": 48}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "147"},
+		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.0625, "el_type": "note", "startChar": 1463, "endChar": 1465, "endBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"size": {"x": 553, "y": 721, "width": 10, "height": 39}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "148"},
+		"abcEl": {"pitches": [{"pitch": -11, "name": "F,,", "verticalPos": 1, "highestVert": 7}], "duration": 0.375, "el_type": "note", "startChar": 1466, "endChar": 1471, "averagepitch": 1, "minpitch": 1, "maxpitch": 1},
+		"size": {"x": 580, "y": 756, "width": 16, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "149"},
+		"abcEl": {"pitches": [{"pitch": -13, "name": "D,,", "verticalPos": -1, "highestVert": 5}], "duration": 0.125, "el_type": "note", "startChar": 1471, "endChar": 1476, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
+		"size": {"x": 596, "y": 763, "width": 17, "height": 31}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "150"},
+		"abcEl": {"duration": 0.25, "pitches": [{"pitch": -10, "name": "G,,", "verticalPos": 2, "highestVert": 2}, {"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 6}], "el_type": "note", "startChar": 1476, "endChar": 1486, "averagepitch": 4, "minpitch": 2, "maxpitch": 6},
+		"size": {"x": 615, "y": 736, "width": 10, "height": 47}
+	}, {
+		"draggable": false,
+		"svgEl": {"selectable": "false", "data-index": "151"},
+		"abcEl": {"rest": {"type": "rest"}, "duration": 0.25, "el_type": "note", "startChar": 1486, "endChar": 1488, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
+		"size": {"x": 657, "y": 751, "width": 8, "height": 21}
+	}, {
+		"draggable": true,
+		"svgEl": {"selectable": "false", "data-index": "152"},
+		"abcEl": {"pitches": [{"pitch": -8, "name": "B,,", "verticalPos": 4, "highestVert": 4}], "duration": 1, "el_type": "note", "startChar": 1489, "endChar": 1494, "averagepitch": 4, "minpitch": 4, "maxpitch": 4},
+		"size": {"x": 717, "y": 767, "width": 15, "height": 8}
+	}]
 //////////////////////////////////////////////////////////
 	var abcTempo = 'X:1\n' +
 'M:4/4\n' +
@@ -6525,7 +7468,7 @@ describe("Selection", function() {
 				"tabindex": "0",
 				"data-index": "2"
 			},
-			"abcEl": {"preString": "Easy Swing", "duration": [0.25], "bpm": 140, "type": "tempo", "el_type": "tempo"},
+			"abcEl": {"startChar": 16, "endChar": 39, "preString": "Easy Swing", "duration": [0.25], "bpm": 140, "type": "tempo", "el_type": "tempo"},
 			"size": {"x": 71, "y": 27, "width": 167, "height": 22}
 		}, {
 			"draggable": true,
@@ -6739,7 +7682,7 @@ describe("Selection", function() {
 			"currentTrackWholeNotes": 6,
 			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 6, "duration": 1, "instrument": 0, "gap": 0}]
 		},
-		"size": {"x": 48, "y": 599, "width": 19, "height": 8}
+		"size": {"x": 48, "y": 591, "width": 19, "height": 8}
 	}];
 
 //////////////////////////////////////////////////////////
@@ -6751,7 +7694,7 @@ describe("Selection", function() {
 		doSelectionTest(abcTempo, expectedTempo, {selectTypes: true});
 	})
 	it("selection-none", function() {
-		doSelectionTest(abcMultiple, expectedMultiple, {});
+		doSelectionTest(abcMultiple, expectedNone, {});
 	})
 	it("selection-clefs", function() {
 		doSelectionTest(abcClefs, expectedClefs, {selectTypes: [ 'note' ]}, true);
@@ -6781,7 +7724,7 @@ function doSelectionTest(abc, expected, options, audio) {
 			}
 		});
 	}
-	console.log(JSON.stringify(results))
+	//console.log(JSON.stringify(results))
 	for (i = 0; i < results.length; i++) {
 		var msg = "index: " + i + "\nrcv: " + JSON.stringify(results[i]) + "\n" +
 			"exp: " + JSON.stringify(expected[i]) + "\n";
