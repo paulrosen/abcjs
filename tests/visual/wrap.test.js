@@ -73,8 +73,8 @@ describe("Automatic line wrapping", function() {
 	;
 
 	var expectedBarNumbers = {
-		bars: [2, 3, undefined, 5, undefined, 7, undefined, 9, undefined, 11, undefined, 13, undefined],
-		lines: [undefined, 4, 6, 8, 10, 12]
+		bars: [2, 3, undefined, 5, 6, undefined, 8, undefined, 10, 11, undefined, 13, undefined],
+		lines: [undefined, 4, 7, 9, 12]
 	}
 
 	var abcQuartet = "X:1\n" +
@@ -221,8 +221,8 @@ describe("Automatic line wrapping", function() {
 			bars = bars.concat(voice.filter(function (v) { return v.el_type === "bar" }).map(function(v) { return v.barNumber }))
 			lines.push(line.staff[0].barNumber)
 		}
-		chai.assert.deepEqual(bars, expectedBarNumbers.bars, "Bar number incorrect on bar element " + JSON.stringify(bars))
-		chai.assert.deepEqual(lines, expectedBarNumbers.lines, "Bar number incorrect on line " + JSON.stringify(lines))
+		chai.assert.deepEqual(bars, expectedBarNumbers.bars, "Bar number incorrect on bar element\n" + JSON.stringify(bars) + "\n" + JSON.stringify(expectedBarNumbers.bars))
+		chai.assert.deepEqual(lines, expectedBarNumbers.lines, "Bar number incorrect on line\n" + JSON.stringify(lines) + "\n" + JSON.stringify(expectedBarNumbers.lines))
 	})
 
 })

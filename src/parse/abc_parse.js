@@ -578,7 +578,7 @@ var Parse = function() {
 			addHintMeasures();
 		}
 
-		wrap.wrapLines(tune, multilineVars.lineBreaks);
+		wrap.wrapLines(tune, multilineVars.lineBreaks, multilineVars.barNumbers);
 	};
 };
 

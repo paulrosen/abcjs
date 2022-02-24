@@ -1,6 +1,6 @@
 //    wrap_lines.js: does line wrap on an already parsed tune.
 
-function wrapLines(tune, lineBreaks) {
+function wrapLines(tune, lineBreaks, barNumbers) {
 	if (!lineBreaks || tune.lines.length === 0)
 		return;
 
@@ -10,11 +10,11 @@ function wrapLines(tune, lineBreaks) {
 	var lines = tune.deline({lineBreaks: false});
 	var linesBreakElements = findLineBreaks(lines, lineBreaks);
 	//console.log(JSON.stringify(linesBreakElements))
-	tune.lines = addLineBreaks(lines, linesBreakElements);
+	tune.lines = addLineBreaks(lines, linesBreakElements, barNumbers);
 	tune.lineBreaks = linesBreakElements;
 }
 
-function addLineBreaks(lines, linesBreakElements) {
+function addLineBreaks(lines, linesBreakElements, barNumbers) {
 	// linesBreakElements is an array of all of the elements that break for a new line
 	// The objects in the array look like:
 	// {"ogLine":0,"line":0,"staff":0,"voice":0,"start":0, "end":21}
@@ -25,6 +25,7 @@ function addLineBreaks(lines, linesBreakElements) {
 	var outputLines = [];
 	var lastKeySig = []; // This is per staff - if the key changed then this will be populated.
 	var lastStem = [];
+	var currentBarNumber = 1;
 	for (var i = 0; i < linesBreakElements.length; i++) {
 		var action = linesBreakElements[i];
 		if (lines[action.ogLine].staff) {
@@ -34,6 +35,9 @@ function addLineBreaks(lines, linesBreakElements) {
 			}
 			if (!outputLines[action.line].staff[action.staff]) {
 				outputLines[action.line].staff[action.staff] = {voices: []};
+				if (barNumbers !== undefined && action.staff === 0 && action.line > 0) {
+					outputLines[action.line].staff[action.staff].barNumber = currentBarNumber;
+				}
 				var keys = Object.keys(inputStaff)
 				for (var k = 0; k < keys.length; k++) {
 					var skip = keys[k] === "voices";
@@ -71,6 +75,17 @@ function addLineBreaks(lines, linesBreakElements) {
 						direction: currVoice[kk].direction,
 					};
 					break;
+				}
+			}
+			if (barNumbers !== undefined && action.staff === 0 && action.voice === 0) {
+				for (kk = 0; kk < currVoice.length; kk++) {
+					if (currVoice[kk].el_type === 'bar') {
+						currentBarNumber++
+						if (kk === currVoice.length-1)
+							delete currVoice[kk].barNumber
+						else
+							currVoice[kk].barNumber = currentBarNumber
+					}
 				}
 			}
 		} else {
