@@ -214,7 +214,7 @@ describe("Selection", function() {
 				"x": 43,
 				"y": 364,
 				"width": 8,
-				"height": 151
+				"height": 155
 			}
 		},
 		{
@@ -1301,7 +1301,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 134,
-				"y": 440,
+				"y": 444,
 				"width": 27,
 				"height": 13
 			}
@@ -1320,7 +1320,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 244,
-				"y": 438,
+				"y": 442,
 				"width": 72,
 				"height": 8
 			}
@@ -1377,7 +1377,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 389,
-				"y": 438,
+				"y": 442,
 				"width": 76,
 				"height": 8
 			}
@@ -1397,7 +1397,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 500,
-				"y": 435,
+				"y": 439,
 				"width": 16,
 				"height": 19
 			}
@@ -1417,7 +1417,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 576,
-				"y": 441,
+				"y": 444,
 				"width": 15,
 				"height": 13
 			}
@@ -1436,7 +1436,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 657,
-				"y": 438,
+				"y": 442,
 				"width": 50,
 				"height": 8
 			}
@@ -2297,7 +2297,7 @@ describe("Selection", function() {
 			"draggable": false,
 			"svgEl": {
 				"x": "15",
-				"y": "505.38",
+				"y": "509.25",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "79"
@@ -2310,7 +2310,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 15,
-				"y": 493,
+				"y": 497,
 				"width": 17,
 				"height": 15
 			}
@@ -2330,7 +2330,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 58,
-				"y": 484,
+				"y": 488,
 				"width": 20,
 				"height": 23
 			}
@@ -2362,7 +2362,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 88,
-				"y": 482,
+				"y": 486,
 				"width": 16,
 				"height": 30
 			}
@@ -2386,7 +2386,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 114,
-				"y": 485,
+				"y": 489,
 				"width": 12,
 				"height": 30
 			}
@@ -2417,7 +2417,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 136,
-				"y": 476,
+				"y": 480,
 				"width": 16,
 				"height": 31
 			}
@@ -2448,7 +2448,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 162,
-				"y": 469,
+				"y": 473,
 				"width": 14,
 				"height": 31
 			}
@@ -2491,7 +2491,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 174,
-				"y": 461,
+				"y": 465,
 				"width": 14,
 				"height": 58
 			}
@@ -2513,7 +2513,7 @@ describe("Selection", function() {
 				"x": 220,
 				"y": 395,
 				"width": 1,
-				"height": 120
+				"height": 124
 			}
 		},
 		{
@@ -2543,7 +2543,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 244,
-				"y": 476,
+				"y": 480,
 				"width": 10,
 				"height": 56
 			}
@@ -2575,7 +2575,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 256,
-				"y": 504,
+				"y": 507,
 				"width": 10,
 				"height": 33
 			}
@@ -2606,7 +2606,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 284,
-				"y": 477,
+				"y": 481,
 				"width": 10,
 				"height": 31
 			}
@@ -2637,7 +2637,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 300,
-				"y": 496,
+				"y": 500,
 				"width": 10,
 				"height": 31
 			}
@@ -2669,7 +2669,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 317,
-				"y": 492,
+				"y": 496,
 				"width": 10,
 				"height": 33
 			}
@@ -2700,7 +2700,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 328,
-				"y": 488,
+				"y": 492,
 				"width": 10,
 				"height": 35
 			}
@@ -2732,7 +2732,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 338,
-				"y": 484,
+				"y": 488,
 				"width": 10,
 				"height": 37
 			}
@@ -2754,7 +2754,7 @@ describe("Selection", function() {
 				"x": 354,
 				"y": 395,
 				"width": 1,
-				"height": 120
+				"height": 124
 			}
 		},
 		{
@@ -2784,7 +2784,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 365,
-				"y": 488,
+				"y": 492,
 				"width": 10,
 				"height": 33
 			}
@@ -2816,7 +2816,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 377,
-				"y": 480,
+				"y": 484,
 				"width": 10,
 				"height": 37
 			}
@@ -2847,7 +2847,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 387,
-				"y": 469,
+				"y": 473,
 				"width": 14,
 				"height": 31
 			}
@@ -2878,7 +2878,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 430,
-				"y": 469,
+				"y": 473,
 				"width": 14,
 				"height": 31
 			}
@@ -2910,7 +2910,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 464,
-				"y": 484,
+				"y": 488,
 				"width": 10,
 				"height": 37
 			}
@@ -2942,7 +2942,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 476,
-				"y": 492,
+				"y": 496,
 				"width": 10,
 				"height": 33
 			}
@@ -2964,7 +2964,7 @@ describe("Selection", function() {
 				"x": 492,
 				"y": 395,
 				"width": 1,
-				"height": 120
+				"height": 124
 			}
 		},
 		{
@@ -3005,7 +3005,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 501,
-				"y": 473,
+				"y": 476,
 				"width": 14,
 				"height": 47
 			}
@@ -3031,7 +3031,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 519,
-				"y": 488,
+				"y": 492,
 				"width": 8,
 				"height": 21
 			}
@@ -3068,7 +3068,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 534,
-				"y": 461,
+				"y": 465,
 				"width": 14,
 				"height": 47
 			}
@@ -3090,7 +3090,7 @@ describe("Selection", function() {
 				"x": 569,
 				"y": 395,
 				"width": 1,
-				"height": 120
+				"height": 124
 			}
 		},
 		{
@@ -3119,7 +3119,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 580,
-				"y": 484,
+				"y": 488,
 				"width": 10,
 				"height": 31
 			}
@@ -3150,7 +3150,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 613,
-				"y": 480,
+				"y": 484,
 				"width": 10,
 				"height": 31
 			}
@@ -3172,7 +3172,7 @@ describe("Selection", function() {
 				"x": 646,
 				"y": 395,
 				"width": 1,
-				"height": 120
+				"height": 124
 			}
 		},
 		{
@@ -3201,7 +3201,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 657,
-				"y": 479,
+				"y": 483,
 				"width": 17,
 				"height": 33
 			}
@@ -3233,7 +3233,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 707,
-				"y": 476,
+				"y": 480,
 				"width": 10,
 				"height": 45
 			}
@@ -3264,7 +3264,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 717,
-				"y": 484,
+				"y": 488,
 				"width": 10,
 				"height": 40
 			}
@@ -3295,7 +3295,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 728,
-				"y": 496,
+				"y": 500,
 				"width": 10,
 				"height": 30
 			}
@@ -3327,7 +3327,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 739,
-				"y": 492,
+				"y": 496,
 				"width": 10,
 				"height": 37
 			}
@@ -3349,7 +3349,7 @@ describe("Selection", function() {
 				"x": 755,
 				"y": 395,
 				"width": 1,
-				"height": 120
+				"height": 124
 			}
 		},
 		{
@@ -3366,9 +3366,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 15,
-				"y": 632,
+				"y": 636,
 				"width": 8,
-				"height": 147
+				"height": 151
 			}
 		},
 		{
@@ -3386,7 +3386,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 21,
-				"y": 614,
+				"y": 618,
 				"width": 28,
 				"height": 61
 			}
@@ -3418,7 +3418,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 59,
-				"y": 622,
+				"y": 626,
 				"width": 16,
 				"height": 30
 			}
@@ -3458,9 +3458,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 86,
-				"y": 597,
+				"y": 601,
 				"width": 43,
-				"height": 121
+				"height": 125
 			}
 		},
 		{
@@ -3501,9 +3501,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 141,
-				"y": 593,
+				"y": 597,
 				"width": 21,
-				"height": 125
+				"height": 128
 			}
 		},
 		{
@@ -3527,7 +3527,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 193,
-				"y": 620,
+				"y": 624,
 				"width": 8,
 				"height": 21
 			}
@@ -3565,9 +3565,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 205,
-				"y": 609,
+				"y": 613,
 				"width": 17,
-				"height": 109
+				"height": 113
 			}
 		},
 		{
@@ -3586,7 +3586,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 225,
-				"y": 614,
+				"y": 618,
 				"width": 8,
 				"height": 49
 			}
@@ -3635,9 +3635,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 239,
-				"y": 605,
+				"y": 609,
 				"width": 19,
-				"height": 113
+				"height": 117
 			}
 		},
 		{
@@ -3672,9 +3672,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 260,
-				"y": 613,
+				"y": 617,
 				"width": 28,
-				"height": 105
+				"height": 109
 			}
 		},
 		{
@@ -3694,7 +3694,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 297,
-				"y": 614,
+				"y": 618,
 				"width": 8,
 				"height": 49
 			}
@@ -3731,7 +3731,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 330,
-				"y": 617,
+				"y": 620,
 				"width": 10,
 				"height": 47
 			}
@@ -3768,7 +3768,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 386,
-				"y": 620,
+				"y": 624,
 				"width": 10,
 				"height": 39
 			}
@@ -3794,7 +3794,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 429,
-				"y": 620,
+				"y": 624,
 				"width": 8,
 				"height": 21
 			}
@@ -3815,7 +3815,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 448,
-				"y": 614,
+				"y": 618,
 				"width": 15,
 				"height": 49
 			}
@@ -3852,7 +3852,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 467,
-				"y": 613,
+				"y": 617,
 				"width": 17,
 				"height": 39
 			}
@@ -3883,7 +3883,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 521,
-				"y": 624,
+				"y": 628,
 				"width": 10,
 				"height": 31
 			}
@@ -3904,7 +3904,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 562,
-				"y": 614,
+				"y": 618,
 				"width": 14,
 				"height": 49
 			}
@@ -3944,7 +3944,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 580,
-				"y": 624,
+				"y": 628,
 				"width": 10,
 				"height": 47
 			}
@@ -3976,7 +3976,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 615,
-				"y": 609,
+				"y": 612,
 				"width": 10,
 				"height": 43
 			}
@@ -4007,7 +4007,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 626,
-				"y": 606,
+				"y": 610,
 				"width": 10,
 				"height": 42
 			}
@@ -4038,7 +4038,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 637,
-				"y": 604,
+				"y": 607,
 				"width": 10,
 				"height": 40
 			}
@@ -4070,7 +4070,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 647,
-				"y": 601,
+				"y": 605,
 				"width": 10,
 				"height": 39
 			}
@@ -4102,7 +4102,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 658,
-				"y": 597,
+				"y": 601,
 				"width": 10,
 				"height": 39
 			}
@@ -4133,7 +4133,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 669,
-				"y": 600,
+				"y": 604,
 				"width": 10,
 				"height": 56
 			}
@@ -4164,7 +4164,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 680,
-				"y": 602,
+				"y": 606,
 				"width": 10,
 				"height": 49
 			}
@@ -4199,7 +4199,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 691,
-				"y": 605,
+				"y": 609,
 				"width": 10,
 				"height": 43
 			}
@@ -4220,7 +4220,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 699,
-				"y": 614,
+				"y": 618,
 				"width": 15,
 				"height": 49
 			}
@@ -4254,7 +4254,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 717,
-				"y": 636,
+				"y": 640,
 				"width": 15,
 				"height": 8
 			}
@@ -4275,7 +4275,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 766,
-				"y": 632,
+				"y": 636,
 				"width": 8,
 				"height": 31
 			}
@@ -4295,7 +4295,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 104,
-				"y": 538,
+				"y": 542,
 				"width": 16,
 				"height": 19
 			}
@@ -4314,7 +4314,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 301,
-				"y": 571,
+				"y": 575,
 				"width": 468,
 				"height": 23
 			}
@@ -4333,7 +4333,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 580,
-				"y": 541,
+				"y": 544,
 				"width": 110,
 				"height": 8
 			}
@@ -4353,7 +4353,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 716,
-				"y": 543,
+				"y": 547,
 				"width": 27,
 				"height": 13
 			}
@@ -4384,7 +4384,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 105,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4415,7 +4415,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 148,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4446,7 +4446,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 191,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4477,7 +4477,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 210,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4508,7 +4508,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 246,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4539,7 +4539,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 257,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4570,7 +4570,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 272,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4601,7 +4601,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 283,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4632,7 +4632,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 328,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4663,7 +4663,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 356,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4694,7 +4694,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 384,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4725,7 +4725,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 427,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4756,7 +4756,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 465,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4787,7 +4787,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 487,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4818,7 +4818,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 508,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4849,7 +4849,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 519,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4886,7 +4886,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 578,
-				"y": 573,
+				"y": 577,
 				"width": 77,
 				"height": 128
 			}
@@ -4917,7 +4917,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 589,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4948,7 +4948,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 613,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -4979,7 +4979,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 656,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -5010,7 +5010,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 715,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -5041,7 +5041,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 726,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -5072,7 +5072,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 737,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -5103,7 +5103,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 748,
-				"y": 670,
+				"y": 674,
 				"width": 14,
 				"height": 31
 			}
@@ -5123,7 +5123,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 30,
-				"y": 748,
+				"y": 755,
 				"width": 20,
 				"height": 23
 			}
@@ -5155,7 +5155,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 59,
-				"y": 745,
+				"y": 753,
 				"width": 16,
 				"height": 30
 			}
@@ -5187,7 +5187,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 107,
-				"y": 751,
+				"y": 759,
 				"width": 10,
 				"height": 29
 			}
@@ -5218,7 +5218,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 118,
-				"y": 748,
+				"y": 755,
 				"width": 10,
 				"height": 33
 			}
@@ -5249,7 +5249,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 129,
-				"y": 744,
+				"y": 751,
 				"width": 10,
 				"height": 37
 			}
@@ -5281,7 +5281,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 139,
-				"y": 751,
+				"y": 759,
 				"width": 10,
 				"height": 29
 			}
@@ -5318,7 +5318,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 150,
-				"y": 748,
+				"y": 755,
 				"width": 10,
 				"height": 29
 			}
@@ -5349,7 +5349,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 161,
-				"y": 744,
+				"y": 751,
 				"width": 10,
 				"height": 33
 			}
@@ -5380,7 +5380,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 172,
-				"y": 740,
+				"y": 748,
 				"width": 10,
 				"height": 37
 			}
@@ -5415,7 +5415,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 183,
-				"y": 748,
+				"y": 755,
 				"width": 10,
 				"height": 29
 			}
@@ -5446,7 +5446,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 191,
-				"y": 736,
+				"y": 744,
 				"width": 14,
 				"height": 31
 			}
@@ -5477,7 +5477,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 210,
-				"y": 736,
+				"y": 744,
 				"width": 14,
 				"height": 31
 			}
@@ -5497,9 +5497,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 228,
-				"y": 663,
+				"y": 667,
 				"width": 1,
-				"height": 116
+				"height": 120
 			}
 		},
 		{
@@ -5534,7 +5534,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 248,
-				"y": 744,
+				"y": 751,
 				"width": 10,
 				"height": 51
 			}
@@ -5577,7 +5577,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 272,
-				"y": 724,
+				"y": 732,
 				"width": 14,
 				"height": 58
 			}
@@ -5597,9 +5597,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 300,
-				"y": 663,
+				"y": 667,
 				"width": 1,
-				"height": 116
+				"height": 120
 			}
 		},
 		{
@@ -5629,7 +5629,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 330,
-				"y": 742,
+				"y": 750,
 				"width": 16,
 				"height": 35
 			}
@@ -5661,7 +5661,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 345,
-				"y": 736,
+				"y": 744,
 				"width": 14,
 				"height": 37
 			}
@@ -5693,7 +5693,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 358,
-				"y": 740,
+				"y": 748,
 				"width": 16,
 				"height": 33
 			}
@@ -5725,7 +5725,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 373,
-				"y": 732,
+				"y": 740,
 				"width": 14,
 				"height": 37
 			}
@@ -5757,7 +5757,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 386,
-				"y": 748,
+				"y": 755,
 				"width": 10,
 				"height": 37
 			}
@@ -5788,7 +5788,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 397,
-				"y": 751,
+				"y": 759,
 				"width": 10,
 				"height": 36
 			}
@@ -5819,7 +5819,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 408,
-				"y": 755,
+				"y": 763,
 				"width": 10,
 				"height": 34
 			}
@@ -5851,7 +5851,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 418,
-				"y": 759,
+				"y": 767,
 				"width": 10,
 				"height": 33
 			}
@@ -5883,7 +5883,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 429,
-				"y": 751,
+				"y": 759,
 				"width": 10,
 				"height": 33
 			}
@@ -5915,7 +5915,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 440,
-				"y": 744,
+				"y": 751,
 				"width": 10,
 				"height": 37
 			}
@@ -5935,9 +5935,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 456,
-				"y": 663,
+				"y": 667,
 				"width": 1,
-				"height": 116
+				"height": 120
 			}
 		},
 		{
@@ -5967,7 +5967,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 467,
-				"y": 732,
+				"y": 740,
 				"width": 10,
 				"height": 35
 			}
@@ -5999,7 +5999,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 478,
-				"y": 736,
+				"y": 744,
 				"width": 10,
 				"height": 35
 			}
@@ -6031,7 +6031,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 489,
-				"y": 740,
+				"y": 748,
 				"width": 10,
 				"height": 35
 			}
@@ -6063,7 +6063,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 499,
-				"y": 744,
+				"y": 752,
 				"width": 10,
 				"height": 35
 			}
@@ -6094,7 +6094,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 510,
-				"y": 752,
+				"y": 759,
 				"width": 10,
 				"height": 31
 			}
@@ -6126,7 +6126,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 521,
-				"y": 728,
+				"y": 736,
 				"width": 10,
 				"height": 58
 			}
@@ -6157,7 +6157,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 532,
-				"y": 726,
+				"y": 733,
 				"width": 10,
 				"height": 53
 			}
@@ -6188,7 +6188,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 543,
-				"y": 723,
+				"y": 731,
 				"width": 10,
 				"height": 48
 			}
@@ -6220,7 +6220,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 553,
-				"y": 721,
+				"y": 728,
 				"width": 10,
 				"height": 39
 			}
@@ -6240,9 +6240,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 569,
-				"y": 663,
+				"y": 667,
 				"width": 1,
-				"height": 116
+				"height": 120
 			}
 		},
 		{
@@ -6271,7 +6271,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 580,
-				"y": 756,
+				"y": 763,
 				"width": 16,
 				"height": 31
 			}
@@ -6302,7 +6302,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 596,
-				"y": 763,
+				"y": 771,
 				"width": 17,
 				"height": 31
 			}
@@ -6339,7 +6339,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 615,
-				"y": 736,
+				"y": 744,
 				"width": 10,
 				"height": 47
 			}
@@ -6365,7 +6365,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 657,
-				"y": 751,
+				"y": 759,
 				"width": 8,
 				"height": 21
 			}
@@ -6385,9 +6385,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 706,
-				"y": 663,
+				"y": 667,
 				"width": 1,
-				"height": 116
+				"height": 120
 			}
 		},
 		{
@@ -6416,7 +6416,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 717,
-				"y": 767,
+				"y": 775,
 				"width": 15,
 				"height": 8
 			}
@@ -6436,9 +6436,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 766,
-				"y": 663,
+				"y": 667,
 				"width": 8,
-				"height": 116
+				"height": 120
 			}
 		},
 		{
@@ -6455,7 +6455,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 156,
-				"y": 735,
+				"y": 743,
 				"width": 30,
 				"height": 7
 			}
@@ -6476,7 +6476,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 65,
-				"y": 820,
+				"y": 832,
 				"width": 278,
 				"height": 74
 			}
@@ -6485,7 +6485,7 @@ describe("Selection", function() {
 			"draggable": false,
 			"svgEl": {
 				"x": "15",
-				"y": "963.42",
+				"y": "974.87",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "219"
@@ -6499,7 +6499,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 15,
-				"y": 944,
+				"y": 956,
 				"width": 568,
 				"height": 100
 			}
