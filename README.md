@@ -8,6 +8,31 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
+## Announcement: version 6.0.0
+
+After way too long, abcjs 6.0.0 is now out of beta. 
+
+There are only a few bug fixes since the last beta.
+
+The current plan is to continue doing bug fixes and minor features to the 6.x.x branch, but version 7 is already in planning.
+
+## Informal roadmap for version 7.0.0
+
+There will be some architecture changes which will go in a 7.0.0 release:
+
+* Improve the API for controlling the synth. That is, make the parameters less confusing.
+* Create a plugin architecture so that large features that are not widely used can be added without bloating this library.
+* Change the build to use typescript while still maintaining legacy browser capability.
+* Reduce the size of the library by optimizing code.
+* Control the spacing of the elements on the line better: support equal size measures, and support allowing control of the spacing between notes.
+* Improved documentation, particularly for synth.
+* Bug fixes.
+
+I anticipate that for a user that wants the most common functionality, the size of the library might be cut in half.
+
+Thanks, Paul
+
+
 ## Major New Feature! 6.0.0-beta.36
 
 String tablature is now available by adding an option to the `renderAbc` parameters. See [tablature documentation](https://paulrosen.github.io/abcjs/visual/tablature.html)
@@ -66,35 +91,6 @@ The last version in each major version number is still available in the active b
 ## Default soundfont change for 6.0.0-beta.21
 
 In this beta the default soundfont was changed to https://paulrosen.github.io/midi-js-soundfonts/abcjs/ Hopefully you will find that sounds better. If you set the soundfont directly then you won't notice any change. If you prefer the old soundfont, use the `soundFontUrl: "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/"` option when calling the synth functions.
-
-## Informal roadmap
-I'm getting close to taking version 6.0.0 out of beta.
-
-These are the changes that are planned:
-* Test and improve the sound of the soundfont.
-* Add all the typescript definitions.
-* Bug fixes.
-
-If you have a particular issue that is impeding your usage of this library, please mention it in the issue.
-
-After the 6.0.0 release, I'll be working on some more architecture changes which will go in a 7.0.0 release:
-
-* Improve the API for controlling the synth. That is, make the parameters less confusing.
-* Create a plugin architecture so that large features that are not widely used can be added without bloating this library.
-* Change the build to use typescript while still maintaining legacy browser capability.
-* Reduce the size of the library by optimizing code.
-* Control the spacing of the elements on the line better: support equal size measures, and support allowing control of the spacing between notes.
-* Improved documentation, particularly for synth.
-* Bug fixes.
-
-Thanks, Paul
-
-## Future breaking changes
-For most users of abcjs there probably won't be any more breaking changes in this beta.
-
-There will probably still be some changes to the structure of the SVG that is created but if you aren't doing post-processing you won't notice except for better layout of the music.
-
-There might be a few changes to the data that is returned from the callbacks, both the click listener and timing callbacks. Hopefully that will just be added data and won't affect any code.
 
 ## Issues
 

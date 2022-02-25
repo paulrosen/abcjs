@@ -1,3 +1,29 @@
+# Version 6.0.0
+
+## Bugs
+
+* Fix the bar number display when wrapping.
+
+* Don't add extra padding when creating minimal music (like one note)
+
+* Fix selection data for unaligned words
+
+* Pass back actual selectable element when one of its children is clicked.
+
+* Don't put extra classes and data- attributes on compound symbols (like "12/8")
+
+* Fix spacing for triplet number
+
+* Don't add extra space at the bottom if there is no bottom text.
+
+* Allow aria-label to not be set.
+
+* Fix adding class names to dynamics and some other elements.
+
+* Fix regression where the left line of multi-staff music was misplaced if the bottom line is for percussion.
+
+* gracenotes now are processed through %%percmap
+
 # Version 6.0.0-beta.39
 
 ## Bugs
