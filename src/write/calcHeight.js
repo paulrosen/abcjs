@@ -6,7 +6,7 @@ var calcHeight = function (staffGroup) {
 		var staff = staffGroup.voices[i].staff;
 		if (!staffGroup.voices[i].duplicate) {
 			height += staff.top;
-			if (staff.bottom < 0)
+			//if (staff.bottom < 0)
 				height += -staff.bottom;
 		}
 	}

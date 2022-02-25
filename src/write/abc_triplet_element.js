@@ -19,9 +19,9 @@ var TripletElem = function TripletElem(number, anchor1, options) {
 
 	TripletElem.prototype.setCloseAnchor = function(anchor2) {
 		this.anchor2 = anchor2;
-		// TODO-PER: Unfortunately, I don't know if there is a beam above until after the vertical positioning is done,
-		// so I don't know whether to leave room for the number above. Therefore, If there is a beam on the first note, I'll leave room just in case.
-		if (this.anchor1.parent.beam)
+		// TODO-PER: This used to be just for beamed triplets but it looks like bracketed triplets need extra room, too. The only one that doesn't is stem down and beamed
+		//if (this.anchor1.parent.beam)
+		if (!this.anchor1.parent.beam || this.anchor1.stemDir === 'up')
 			this.endingHeightAbove = 4;
 	};
 

@@ -321,6 +321,7 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
 	analysis.clickedName = closest.dataset.name;
 	analysis.parentClasses = parent.classList;
 	analysis.clickedClasses = closest.classList;
+	analysis.selectableElement = target.svgEl;
 
 	for (var i=0; i<this.listeners.length;i++) {
 		this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, { step: dragStep, max: dragMax, index: dragIndex, setSelection: setSelection.bind(this)}, ev);

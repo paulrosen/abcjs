@@ -65,7 +65,7 @@ var EngraverController = function(paper, params) {
 		this.jazzchords = params.jazzchords;
   this.renderer.controller = this; // TODO-GD needed for highlighting
 	this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
-	if (params.ariaLabel)
+	if (params.ariaLabel !== undefined)
 		this.renderer.ariaLabel = params.ariaLabel;
 	this.renderer.minPadding = params.minPadding ? params.minPadding : 0;
 

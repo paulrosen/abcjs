@@ -3657,7 +3657,7 @@ var Parse = function Parse() {
       addHintMeasures();
     }
 
-    wrap.wrapLines(tune, multilineVars.lineBreaks);
+    wrap.wrapLines(tune, multilineVars.lineBreaks, multilineVars.barNumbers);
   };
 };
 
@@ -11424,7 +11424,7 @@ module.exports = TuneBuilder;
 /***/ (function(module) {
 
 //    wrap_lines.js: does line wrap on an already parsed tune.
-function wrapLines(tune, lineBreaks) {
+function wrapLines(tune, lineBreaks, barNumbers) {
   if (!lineBreaks || tune.lines.length === 0) return; // tune.lines contains nested arrays: there is an array of lines (that's the part this function rewrites),
   // there is an array of staffs per line (for instance, piano will have 2, orchestra will have many)
   // there is an array of voices per staff (for instance, 4-part harmony might have bass and tenor on a single staff)
@@ -11434,11 +11434,11 @@ function wrapLines(tune, lineBreaks) {
   });
   var linesBreakElements = findLineBreaks(lines, lineBreaks); //console.log(JSON.stringify(linesBreakElements))
 
-  tune.lines = addLineBreaks(lines, linesBreakElements);
+  tune.lines = addLineBreaks(lines, linesBreakElements, barNumbers);
   tune.lineBreaks = linesBreakElements;
 }
 
-function addLineBreaks(lines, linesBreakElements) {
+function addLineBreaks(lines, linesBreakElements, barNumbers) {
   // linesBreakElements is an array of all of the elements that break for a new line
   // The objects in the array look like:
   // {"ogLine":0,"line":0,"staff":0,"voice":0,"start":0, "end":21}
@@ -11450,6 +11450,7 @@ function addLineBreaks(lines, linesBreakElements) {
   var lastKeySig = []; // This is per staff - if the key changed then this will be populated.
 
   var lastStem = [];
+  var currentBarNumber = 1;
 
   for (var i = 0; i < linesBreakElements.length; i++) {
     var action = linesBreakElements[i];
@@ -11467,6 +11468,11 @@ function addLineBreaks(lines, linesBreakElements) {
         outputLines[action.line].staff[action.staff] = {
           voices: []
         };
+
+        if (barNumbers !== undefined && action.staff === 0 && action.line > 0) {
+          outputLines[action.line].staff[action.staff].barNumber = currentBarNumber;
+        }
+
         var keys = Object.keys(inputStaff);
 
         for (var k = 0; k < keys.length; k++) {
@@ -11509,6 +11515,15 @@ function addLineBreaks(lines, linesBreakElements) {
             direction: currVoice[kk].direction
           };
           break;
+        }
+      }
+
+      if (barNumbers !== undefined && action.staff === 0 && action.voice === 0) {
+        for (kk = 0; kk < currVoice.length; kk++) {
+          if (currVoice[kk].el_type === 'bar') {
+            currentBarNumber++;
+            if (kk === currVoice.length - 1) delete currVoice[kk].barNumber;else currVoice[kk].barNumber = currentBarNumber;
+          }
         }
       }
     } else {
@@ -12860,8 +12875,15 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
 
     for (g = 0; g < graces.length; g++) {
       grace = graces[g];
+      var actualPitch = adjustPitch(grace);
+
+      if (currentInstrument === drumInstrument && percmap) {
+        var name = pitchesToPerc(grace);
+        if (name && percmap[name]) actualPitch = percmap[name].sound;
+      }
+
       var pitch = {
-        pitch: adjustPitch(grace),
+        pitch: actualPitch,
         duration: grace.duration * multiplier
       };
       pitch = adjustForMicroTone(pitch);
@@ -21194,7 +21216,7 @@ var EngraverController = function EngraverController(paper, params) {
   this.renderer.controller = this; // TODO-GD needed for highlighting
 
   this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
-  if (params.ariaLabel) this.renderer.ariaLabel = params.ariaLabel;
+  if (params.ariaLabel !== undefined) this.renderer.ariaLabel = params.ariaLabel;
   this.renderer.minPadding = params.minPadding ? params.minPadding : 0;
   this.reset();
 };
@@ -22786,10 +22808,10 @@ TripletElem.prototype.middleNote = function (elem) {
 };
 
 TripletElem.prototype.setCloseAnchor = function (anchor2) {
-  this.anchor2 = anchor2; // TODO-PER: Unfortunately, I don't know if there is a beam above until after the vertical positioning is done,
-  // so I don't know whether to leave room for the number above. Therefore, If there is a beam on the first note, I'll leave room just in case.
+  this.anchor2 = anchor2; // TODO-PER: This used to be just for beamed triplets but it looks like bracketed triplets need extra room, too. The only one that doesn't is stem down and beamed
+  //if (this.anchor1.parent.beam)
 
-  if (this.anchor1.parent.beam) this.endingHeightAbove = 4;
+  if (!this.anchor1.parent.beam || this.anchor1.stemDir === 'up') this.endingHeightAbove = 4;
 };
 
 module.exports = TripletElem;
@@ -23149,7 +23171,10 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
   });
   this.rows.push({
     endGroup: "unalignedWords",
-    absElemType: "unalignedWords"
+    absElemType: "unalignedWords",
+    startChar: -1,
+    endChar: -1,
+    name: "unalignedWords"
   });
 };
 
@@ -23230,8 +23255,9 @@ var calcHeight = function calcHeight(staffGroup) {
     var staff = staffGroup.voices[i].staff;
 
     if (!staffGroup.voices[i].duplicate) {
-      height += staff.top;
-      if (staff.bottom < 0) height += -staff.bottom;
+      height += staff.top; //if (staff.bottom < 0)
+
+      height += -staff.bottom;
     }
   }
 
@@ -23738,9 +23764,13 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
   }
 
   classes.reset();
-  renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
 
-  nonMusic(renderer, abcTune.bottomText, selectables);
+  if (abcTune.bottomText && abcTune.bottomText.rows && abcTune.bottomText.rows.length > 0) {
+    renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
+
+    nonMusic(renderer, abcTune.bottomText, selectables);
+  }
+
   setPaperSize(renderer, maxWidth, scale, responsive);
   return {
     staffgroups: staffgroups,
@@ -24132,9 +24162,11 @@ function printSymbol(renderer, x, offset, symbol, options) {
   if (!symbol) return null;
 
   if (symbol.length > 1 && symbol.indexOf(".") < 0) {
+    var groupClass = elementGroup.isInGroup() ? '' : options.klass; // If this is already in a group then don't repeat the classes for the sub-group)
+
     renderer.paper.openGroup({
       "data-name": options.name,
-      klass: options.klass
+      klass: groupClass
     });
     var dx = 0;
 
@@ -24143,8 +24175,7 @@ function printSymbol(renderer, x, offset, symbol, options) {
       ycorr = glyphs.getYCorr(s);
       el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, {
         stroke: options.stroke,
-        fill: options.fill,
-        "data-name": options.name
+        fill: options.fill
       });
 
       if (el) {
@@ -24532,11 +24563,14 @@ function setPaperSize(renderer, maxwidth, scale, responsive) {
   // TODO-PER: We are letting the page get as long as it needs now, but eventually that should go to a second page.
   // for accessibility
 
-  var text = "Sheet Music";
-  if (renderer.abctune && renderer.abctune.metaText && renderer.abctune.metaText.title) text += " for \"" + renderer.abctune.metaText.title + '"';
-  renderer.paper.setTitle(text);
-  var label = renderer.ariaLabel ? renderer.ariaLabel : text;
-  renderer.paper.setAttribute("aria-label", label); // for dragging - don't select during drag
+  if (renderer.ariaLabel !== '') {
+    var text = "Sheet Music";
+    if (renderer.abctune && renderer.abctune.metaText && renderer.abctune.metaText.title) text += " for \"" + renderer.abctune.metaText.title + '"';
+    renderer.paper.setTitle(text);
+    var label = renderer.ariaLabel ? renderer.ariaLabel : text;
+    renderer.paper.setAttribute("aria-label", label);
+  } // for dragging - don't select during drag
+
 
   var styles = ["-webkit-touch-callout: none;", "-webkit-user-select: none;", "-khtml-user-select: none;", "-moz-user-select: none;", "-ms-user-select: none;", "user-select: none;"];
   renderer.paper.insertStyles(".abcjs-dragging-in-progress text, .abcjs-dragging-in-progress tspan {" + styles.join(" ") + "}");
@@ -24997,12 +25031,14 @@ function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
 
   if (numLines === 1) {
     printStaffLine(renderer, startx, endx, 6, klass);
+    firstYLine = renderer.calcY(10);
+    lastYLine = renderer.calcY(2);
   } else {
     for (var i = numLines - 1; i >= 0; i--) {
       var curpitch = (i + 1) * pitch;
       lastYLine = renderer.calcY(curpitch);
 
-      if (firstYLine == 0) {
+      if (firstYLine === 0) {
         firstYLine = lastYLine;
       }
 
@@ -27413,6 +27449,7 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
   analysis.clickedName = closest.dataset.name;
   analysis.parentClasses = parent.classList;
   analysis.clickedClasses = closest.classList;
+  analysis.selectableElement = target.svgEl;
 
   for (var i = 0; i < this.listeners.length; i++) {
     this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, {
@@ -27915,7 +27952,7 @@ Svg.prototype.path = function (attr) {
 
   for (var key in attr) {
     if (attr.hasOwnProperty(key)) {
-      if (key === 'path') el.setAttributeNS(null, 'd', attr.path);else if (attr[key] !== undefined) el.setAttributeNS(null, key, attr[key]);
+      if (key === 'path') el.setAttributeNS(null, 'd', attr.path);else if (key === 'klass') el.setAttributeNS(null, "class", attr[key]);else if (attr[key] !== undefined) el.setAttributeNS(null, key, attr[key]);
     }
   }
 
@@ -27928,7 +27965,7 @@ Svg.prototype.pathToBack = function (attr) {
 
   for (var key in attr) {
     if (attr.hasOwnProperty(key)) {
-      if (key === 'path') el.setAttributeNS(null, 'd', attr.path);else el.setAttributeNS(null, key, attr[key]);
+      if (key === 'path') el.setAttributeNS(null, 'd', attr.path);else if (key === 'klass') el.setAttributeNS(null, "class", attr[key]);else el.setAttributeNS(null, key, attr[key]);
     }
   }
 
@@ -28149,7 +28186,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.0.0-beta.39';
+var version = '6.0.0';
 module.exports = version;
 
 /***/ })

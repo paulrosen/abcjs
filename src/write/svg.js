@@ -319,6 +319,8 @@ Svg.prototype.path = function(attr) {
 		if (attr.hasOwnProperty(key)) {
 			if (key === 'path')
 				el.setAttributeNS(null, 'd', attr.path);
+			else if (key === 'klass')
+				el.setAttributeNS(null, "class", attr[key]);
 			else if (attr[key] !== undefined)
 				el.setAttributeNS(null, key, attr[key]);
 		}
@@ -333,6 +335,8 @@ Svg.prototype.pathToBack = function(attr) {
 		if (attr.hasOwnProperty(key)) {
 			if (key === 'path')
 				el.setAttributeNS(null, 'd', attr.path);
+			else if (key === 'klass')
+				el.setAttributeNS(null, "class", attr[key]);
 			else
 				el.setAttributeNS(null, key, attr[key]);
 		}
