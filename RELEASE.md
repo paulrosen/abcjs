@@ -1,3 +1,13 @@
+# Version 6.0.1
+
+## Bugs
+
+* Make the printable example long enough to be on two pages.
+
+* Fix paper size so that the bottom of a narrow staff is not cut off.
+
+* Add a little padding to stems so they aren't cut off.
+
 # Version 6.0.0
 
 ## Bugs

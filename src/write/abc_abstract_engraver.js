@@ -729,7 +729,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 				else
 					p1 += 1;
 			}
-			abselem.addRight(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width}));
+			abselem.addRight(new RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2":p2, linewidth: width, bottom: p1-1}));
 			//var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 			min = Math.min(p1, p2);
 		}

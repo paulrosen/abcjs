@@ -1,6 +1,6 @@
 function setPaperSize(renderer, maxwidth, scale, responsive) {
 	var w = (maxwidth+renderer.padding.right)*scale;
-	var h = (renderer.y+renderer.padding.bottom)*scale;
+	var h = (renderer.y)*scale;
 	if (renderer.isPrint)
 		h = Math.max(h, 1056); // 11in x 72pt/in x 1.33px/pt
 	// TODO-PER: We are letting the page get as long as it needs now, but eventually that should go to a second page.
