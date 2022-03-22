@@ -120,13 +120,13 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 
         if (k === 0) {
 	        ep.paddingtop = origPaddingTop;
-	        ep.paddingbottom = -20;
+	        ep.paddingbottom = 0;
         } else if (k === tunes.length-1) {
 	        ep.paddingtop = 10;
 	        ep.paddingbottom = origPaddingBottom;
         } else {
 	        ep.paddingtop = 10;
-	        ep.paddingbottom = -20;
+	        ep.paddingbottom = 0;
         }
         if (k < tunes.length-1) {
             // If it is not the last line, force stretchlast. If it is, stretchlast might have been set by the input parameters.
