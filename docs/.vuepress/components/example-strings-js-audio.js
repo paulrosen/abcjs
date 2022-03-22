@@ -10,12 +10,12 @@ function activate() {
 
 	if (getters.playbackWidget) {
 		let controlOptions = []
-		if (getters.loop) controlOptions.push("\t\t\tloop: true");
-		if (getters.restart) controlOptions.push("\t\t\trestart: true");
-		if (getters.play) controlOptions.push("\t\t\tplay: true");
-		if (getters.progress) controlOptions.push("\t\t\tprogress: true");
-		if (getters.warp) controlOptions.push("\t\t\twarp: true");
-		if (getters.clock) controlOptions.push("\t\t\tclock: true");
+		if (getters.loop) controlOptions.push("\t\t\tdisplayLoop: true");
+		if (getters.restart) controlOptions.push("\t\t\tdisplayRestart: true");
+		if (getters.play) controlOptions.push("\t\t\tdisplayPlay: true");
+		if (getters.progress) controlOptions.push("\t\t\tdisplayProgress: true");
+		if (getters.warp) controlOptions.push("\t\t\tdisplayWarp: true");
+		if (getters.clock) controlOptions.push("\t\t\tdisplayClock: true");
 		output += `\t\tvar controlOptions = {\n${controlOptions.join(",\n")}\n\t\t};\n`
 	}
 	let options = [];
@@ -47,6 +47,9 @@ function activate() {
 			visualObj: visualObj[0],
 			${options.join(",\n\t\t\t")}
 		}).then(function () {
+			synthControl.setTune(visualObj[0], true).then(function (response) {
+			document.querySelector(".abcjs-inline-audio").classList.remove("disabled");
+\t\t\t})
 		});
 `;
 
