@@ -1,3 +1,15 @@
+# Version 6.0.2
+
+## Bugs
+
+* Fix paper size so that the bottom of a narrow staff is not cut off.
+
+* Fix example generator for synth
+
+* Fix tablature parameter name and tuning examples
+
+* Fix tablature default tuning for guitar (move A down octave)
+
 # Version 6.0.1
 
 ## Bugs

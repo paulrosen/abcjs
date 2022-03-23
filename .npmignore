@@ -1,5 +1,5 @@
 .idea/
-bin/
+dist/*.html
 build-utils/
 docs/
 examples/
@@ -12,6 +12,7 @@ tmp/
 .gitmodules
 deploy-docs.sh
 docker-start.sh
+docker-build.sh
 docker-compose.yml
 Dockerfile
 start-version.sh

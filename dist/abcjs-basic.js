@@ -1168,13 +1168,13 @@ function renderEachLineSeparately(div, tune, params, tuneNumber) {
 
     if (k === 0) {
       ep.paddingtop = origPaddingTop;
-      ep.paddingbottom = -20;
+      ep.paddingbottom = 0;
     } else if (k === tunes.length - 1) {
       ep.paddingtop = 10;
       ep.paddingbottom = origPaddingBottom;
     } else {
       ep.paddingtop = 10;
-      ep.paddingbottom = -20;
+      ep.paddingbottom = 0;
     }
 
     if (k < tunes.length - 1) {
@@ -16696,7 +16696,7 @@ function GuitarPatterns(plugin) {
   this.tuning = plugin._super.params.tuning;
 
   if (!this.tuning) {
-    this.tuning = ['E,', 'A', 'D', 'G', 'B', 'e'];
+    this.tuning = ['E,', 'A,', 'D', 'G', 'B', 'e'];
   }
 
   plugin.tuning = this.tuning;
@@ -24559,7 +24559,7 @@ module.exports = drawSeparator;
 
 function setPaperSize(renderer, maxwidth, scale, responsive) {
   var w = (maxwidth + renderer.padding.right) * scale;
-  var h = renderer.y * scale;
+  var h = (renderer.y + renderer.padding.bottom) * scale;
   if (renderer.isPrint) h = Math.max(h, 1056); // 11in x 72pt/in x 1.33px/pt
   // TODO-PER: We are letting the page get as long as it needs now, but eventually that should go to a second page.
   // for accessibility
@@ -28187,7 +28187,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.0.1';
+var version = '6.0.2';
 module.exports = version;
 
 /***/ })
