@@ -658,7 +658,7 @@ See the ABC documentation for the correct way to format the string that is passe
 ```
 A more complicated example that has the drum pattern fall over two measures of 2/4 time (This is a typical Bulgar pattern):
 ```
-{ drum: "d2dd2ddz", drumBars: 2, drumIntro: 2 }
+{ drum: "d2dd2ddz 76 77 76 77 77 60 30 60 30 30", drumBars: 2, drumIntro: 2 }
 ```
 
 Note that the default soundfont that is used by abcjs contains sounds for pitches **27** through **87**. You can experiment with any of them for different effects.
