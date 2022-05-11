@@ -325,12 +325,24 @@ function CreateSynth() {
 			Promise.all(allPromises).then(function() {
 				// Safari iOS can mess with the audioContext state, so resume if needed.
 				if (activeAudioContext().state === "suspended") {
+					var resumeTimeout = null
+					var resumeTimeout = setTimeout(function() {
+						resolve(resolveData(self))
+					},500)
 					activeAudioContext().resume().then(function () {
+						clearTimeout(resumeTimeout)
 						resolve(resolveData(self));
 					})
+				
 				} else if (activeAudioContext().state === "interrupted") {
+					var resumeTimeout = null
+					var resumeTimeout = setTimeout(function() {
+						resolve(resolveData(self))
+					},500)
+					
 					activeAudioContext().suspend().then(function () {
 						activeAudioContext().resume().then(function () {
+							clearTimeout(resumeTimeout)
 							resolve(resolveData(self));
 						})
 					})
