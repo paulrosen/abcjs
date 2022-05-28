@@ -755,7 +755,7 @@ module.exports = TimingCallbacks;
   \*********************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 //    abc_tunebook.js: splits a string representing ABC Music Notation into individual tunes.
 var Parse = __webpack_require__(/*! ../parse/abc_parse */ "./src/parse/abc_parse.js");
@@ -10158,7 +10158,10 @@ transpose.keySignature = function (multilineVars, keys, keyName, root, acc, loca
   };
   if (!localTranspose) localTranspose = 0;
   multilineVars.localTransposeVerticalMovement = 0;
-  multilineVars.localTransposePreferFlats = false;
+  multilineVars.localTransposePreferFlats = false; // if keyName is "None" (when K: has been ommited on score ) transposer will crash 
+  // not finding the key it sounds acceptable here to defaut key to C
+
+  if (keyName == "none") keyName = "C";
   var k = keys[keyName];
   if (!k) return multilineVars.key; // If the key isn't in the list, it is non-standard. We won't attempt to transpose it.
 
@@ -24605,7 +24608,7 @@ module.exports = setPaperSize;
   \***********************************/
 /***/ (function(module) {
 
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 /**
  * sprintf() for JavaScript v.0.4
@@ -25587,7 +25590,7 @@ function formatJazzChord(chordString) {
   for (var i = 0; i < lines.length; i++) {
     var chord = lines[i]; // If the chord isn't in a recognizable format then just skip the formatting.
 
-    var reg = chord.match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/[ABCDEFG][#b]?)?/);
+    var reg = chord.match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/[ABCDEFG][#b♯♭]?)?/);
     if (reg) lines[i] = (reg[1] ? reg[1] : '') + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
   }
 

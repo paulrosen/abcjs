@@ -30,6 +30,9 @@ transpose.keySignature = function(multilineVars, keys, keyName, root, acc, local
 	if (!localTranspose) localTranspose = 0;
 	multilineVars.localTransposeVerticalMovement = 0;
 	multilineVars.localTransposePreferFlats = false;
+	// if keyName is "None" (when K: has been ommited on score ) transposer will crash 
+	// not finding the key it sounds acceptable here to defaut key to C
+	if (keyName == "none") keyName = "C";
 	var k = keys[keyName];
 	if (!k) return multilineVars.key; // If the key isn't in the list, it is non-standard. We won't attempt to transpose it.
 	multilineVars.localTranspose = (multilineVars.globalTranspose ? multilineVars.globalTranspose : 0) + localTranspose;
