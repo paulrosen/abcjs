@@ -702,11 +702,11 @@ var Tokenizer = function(lines, multilineVars) {
 		}
 		switch (x.token) {
 			case 'pt': return { used: used+1, value: parseFloat(num) };
+			case 'px': return { used: used+1, value: parseFloat(num) };
 			case 'cm': return { used: used+1, value: parseFloat(num)/2.54*72 };
 			case 'in': return { used: used+1, value: parseFloat(num)*72 };
 			default: tokens.unshift(x); return { used: used, value: parseFloat(num) };
 		}
-		return { used: 0 };
 	};
 	var substInChord = function(str) {
 		str = str.replace(/\\n/g, "\n");
