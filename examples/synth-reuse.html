@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+	<link rel="stylesheet" href="examples-styles.css"/>
+
+	<title>abcjs: Synth Demo</title>
+
+	<style>
+        main {
+            max-width: 770px;
+            margin: 0 auto;
+        }
+		.hidden {
+			display: none;
+		}
+	</style>
+
+	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+	<script type="text/javascript">
+
+		var abc =
+			"X:1\n" +
+			"T: Sonata (fragment)\n" +
+			"C: J.S. Bach\n" +
+			"M: C\n" +
+			"L: 1/8\n" +
+			"K:C\n" +
+			"[V:1] c/gf/ E/ed/ c/c'b/ A/ag/ | ^f/e/d- d/(c/B/A/) G/(e/c/e/) Aa| d2-d/g/_b/a/ a3 g/=f/|\n" +
+			"[V:2] c8- | cB/A/ {A}B>c (e/c/A/c/) (E//^F//E//F//TF3//E///F///) | G/(D/G/A/) _B/G/g/e/ ^cA d2|\n" +
+			"[V:3] edcB AG^FE | D^FGg c3d/c/| _BG g2-gf/e/ f>g|\n"
+
+		var synthControl;
+
+		var abcOptions = {
+			add_classes: true,
+			responsive: "resize"
+		};
+
+		var visualObj;
+
+		function load() {
+			document.querySelector(".prime").addEventListener("click", prime);
+			document.querySelector(".play1").addEventListener("click", play1);
+			document.querySelector(".play12").addEventListener("click", play12);
+			document.querySelector(".play23").addEventListener("click", play23);
+			document.querySelector(".play123").addEventListener("click", play123);
+			document.querySelector(".play1s").addEventListener("click", play1s);
+			document.querySelector(".play3s").addEventListener("click", play3s);
+			visualObj = ABCJS.renderAbc("paper", abc, abcOptions)[0];
+		}
+
+		var buffers = []
+
+		function create(voices, ms) {
+			return new Promise(function(resolve, reject) {
+				var midiBuffer = new ABCJS.synth.CreateSynth();
+				midiBuffer.init({
+					visualObj: visualObj,
+					millisecondsPerMeasure: ms,
+					options: {
+						chordsOff: true,
+						voicesOff: voices
+					}
+				}).then(function (response) {
+					midiBuffer.prime().then(function () {
+						resolve({buffer: midiBuffer})
+					});
+				}).catch(function (error) {
+					console.warn("Audio problem:", error);
+					reject(error)
+				});
+			})
+		}
+
+		function prime() {
+			var button = document.querySelector(".prime")
+			button.classList.add("hidden")
+			var progress = document.querySelector(".progress")
+			progress.classList.remove("hidden")
+			var controls = document.querySelector(".after-prime")
+			create([1,2], 4000).then(function(r1) {
+				buffers[0] = r1.buffer
+				return create([2], 4000)
+			}).then(function(r2) {
+				buffers[1] = r2.buffer
+				return create([0], 4000)
+			}).then(function(r3) {
+				buffers[2] = r3.buffer
+				return create([], 4000)
+			}).then(function(r4) {
+				buffers[3] = r4.buffer
+				return create([1,2], 8000)
+			}).then(function(r5) {
+				buffers[4] = r5.buffer
+				return create([0,1], 8000)
+			}).then(function(r6) {
+				buffers[5] = r6.buffer
+				progress.classList.add("hidden")
+				controls.classList.remove("hidden")
+			})
+		}
+
+		function play1() {
+			buffers[0].start();
+		}
+
+		function play12() {
+			buffers[1].start();
+		}
+
+		function play23() {
+			buffers[2].start();
+		}
+
+		function play123() {
+			buffers[3].start();
+		}
+
+		function play1s() {
+			buffers[4].start();
+		}
+
+		function play3s() {
+			buffers[5].start();
+		}
+
+	</script>
+</head>
+<body onload="load()">
+<header>
+	<img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+	<h1>Reusing Synth</h1>
+</header>
+<div class="container">
+	<main>
+		<p>This shows how you can create and save snippets of music so that it is easy to replay them.</p>
+		<p>When you click "Prime" all of the buffers are created from the same music - playing different sets of voices
+			at different tempos.</p>
+		<p>Then the user can play them repeatedly with very little additional processing.</p>
+		<button class="prime">Prime</button>
+		<div class="progress hidden">Loading. Please wait...</div>
+		<div class="after-prime hidden">
+			<button class="play1">Play V1</button>
+			<button class="play12">Play V1 & V2</button>
+			<button class="play23">Play V2 & V3</button>
+			<button class="play123">Play V1 & V2 & V3</button>
+			<button class="play1s">Play V1 slow</button>
+			<button class="play3s">Play V3 slow</button>
+		</div>
+		<div id="paper"></div>
+	</main>
+</div>
+</body>
+</html>
