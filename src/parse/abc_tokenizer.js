@@ -708,12 +708,9 @@ var Tokenizer = function(lines, multilineVars) {
 		}
 		return { used: 0 };
 	};
-	var substInChord = function(str)
-	{
-		while ( str.indexOf("\\n") !== -1)
-		{
-			str = str.replace("\\n", "\n");
-		}
+	var substInChord = function(str) {
+		str = str.replace(/\\n/g, "\n");
+		str = str.replace(/\\"/g, '"');
 		return str;
 	};
 	this.getBrackettedSubstring = function(line, i, maxErrorChars, _matchChar)
@@ -728,8 +725,11 @@ var Tokenizer = function(lines, multilineVars) {
 		// but in the error case it might not be.
 		var matchChar = _matchChar || line.charAt(i);
 		var pos = i+1;
-		while ((pos < line.length) && (line.charAt(pos) !== matchChar))
+		var esc = false;
+		while ((pos < line.length) && (esc || line[pos] !== matchChar)) {
+			esc = line[pos] === '\\';
 			++pos;
+		}
 		if (line.charAt(pos) === matchChar)
 			return [pos-i+1,substInChord(line.substring(i+1, pos)), true];
 		else	// we hit the end of line, so we'll just pick an arbitrary num of chars so the line doesn't disappear.
