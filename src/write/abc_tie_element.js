@@ -25,6 +25,17 @@ TieElem.prototype.addInternalNote = function(note) {
 TieElem.prototype.setEndAnchor = function(anchor2) {
 //	console.log("end", this.anchor1 ? this.anchor1.pitch : "N/A", anchor2 ? anchor2.pitch : "N/A", this.isTie, this.isGrace);
 	this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
+
+	// we don't really have enough info to know what the vertical extent is yet and we won't until drawing. This will just give it enough
+	// room on either side (we don't even know if the slur will be above yet). We need to set this so that we can make sure the voice has
+	// at least enough room that the line doesn't get cut off if the tie or slur is the lowest thing.
+	if (this.anchor1) {
+		this.top = Math.max(this.anchor1.pitch, this.anchor2.pitch) + 4
+		this.bottom = Math.min(this.anchor1.pitch, this.anchor2.pitch) - 4
+	} else {
+		this.top = this.anchor2.pitch + 4
+		this.bottom = this.anchor2.pitch - 4
+	}
 };
 
 // If we encounter a repeat sign, then we don't want to extend either a tie or a slur past it, so these are called to be a limit.

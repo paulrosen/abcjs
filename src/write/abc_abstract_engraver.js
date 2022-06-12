@@ -845,6 +845,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 				for (var j = 0; j < this.ties.length; j++) {
 					if (this.ties[j].anchor1 && this.ties[j].anchor1.pitch === notehead.pitch) {
 						this.ties[j].setEndAnchor(notehead);
+						voice.setRange(this.ties[j])
 						this.ties.splice(j, 1);
 						found = true;
 						break;
@@ -852,6 +853,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 				}
 				if (!found) {
 					this.ties[0].setEndAnchor(notehead);
+					voice.setRange(this.ties[0])
 					this.ties.splice(0, 1);
 				}
 			}
@@ -878,6 +880,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 				if (this.slurs[slurid]) {
 					slur = this.slurs[slurid];
 					slur.setEndAnchor(notehead);
+					voice.setRange(slur)
 					delete this.slurs[slurid];
 				} else {
 					slur = new TieElem({ anchor2: notehead, stemDir: this.stemdir, voiceNumber: voiceNumber});
