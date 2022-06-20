@@ -73,13 +73,13 @@ declare module 'abcjs' {
 	//
 	// Basic types
 	//
-	export type Selector = String | HTMLElement
+	export type Selector = string | HTMLElement
 
 	type NumberFunction = () => number;
 
 	export interface MeterFraction {
-		num: string;
-		den?: string;
+		num: number;
+		den?: number;
 	}
 
 	export interface ClefProperties {
@@ -195,7 +195,7 @@ declare module 'abcjs' {
 		dragColor?: string;
 		dragging?: boolean;
 		foregroundColor?: string;
-		format?: { [attr: FormatAttributes]: any };
+		format?: { [attr: string]: any };
 		header_only?: boolean;
 		initialClef?: boolean;
 		jazzchords?: boolean;
@@ -904,7 +904,7 @@ declare module 'abcjs' {
 
 	export interface AudioTrack {
 		cmd: AudioTrackCommand;
-		[param: any]; // TODO - make this a union
+		[param: string]: any; // TODO - make this a union
 	}
 
 	export interface AudioTracks {
@@ -1042,7 +1042,7 @@ declare module 'abcjs' {
 
 	export interface SynthObjectController {
 		disable(isDisabled: boolean): void
-		setTune(visualObj: TuneObject, userAction: Boolean, audioParams?: AbcVisualParams): Promise<SynthInitResponse>
+		setTune(visualObj: TuneObject, userAction: boolean, audioParams?: any): Promise<SynthInitResponse>
 		load(selector: string, cursorControl?: any, visualOptions?: SynthVisualOptions): void
 		play(): void
 		pause(): void
@@ -1054,7 +1054,9 @@ declare module 'abcjs' {
 	}
 
 	export interface SynthSequenceClass {
-		// TODO
+		addTrack(): AudioTrack
+		setInstrument(trackNumber: number, instrumentNumber: number): void
+		appendNote(trackNumber: number, pitch: number, durationInMeasures: number, volume: number, cents: number): void
 	}
 
 	export namespace synth {
@@ -1068,7 +1070,7 @@ declare module 'abcjs' {
 		export function registerAudioContext(ac?: AudioContext): boolean
 		export function activeAudioContext(): AudioContext
 		export function CreateSynthControl(element: Selector, options: AbcVisualParams): AudioControl
-		export function getMidiFile(source: String | TuneObject, options?: MidiFileOptions): MidiFile;
+		export function getMidiFile(source: string | TuneObject, options?: MidiFileOptions): MidiFile;
 		export function playEvent(pitches: MidiPitches, graceNotes: MidiGracePitches, milliSecondsPerMeasure: number): Promise<void>;
 		export function sequence(visualObj: TuneObject, options: AbcVisualParams): AudioSequence
 	}
