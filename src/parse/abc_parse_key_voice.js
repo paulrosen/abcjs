@@ -340,7 +340,7 @@ var parseKeyVoice = {};
 		}
 	};
 
-	parseKeyVoice.parseKey = function(str)	// (and clef)
+	parseKeyVoice.parseKey = function(str, isInline)	// (and clef)
 	{
 		// returns:
 		//		{ foundClef: true, foundKey: true }
@@ -431,8 +431,14 @@ var parseKeyVoice = {};
 					// We need to do a deep copy because we are going to modify it
 					var oldKey = parseKeyVoice.deepCopyKey(multilineVars.key);
 					//TODO-PER: HACK! To get the local transpose to work, the transposition is done for each line. This caused the global transposition variable to be factored in twice, so, instead of rewriting that right now, I'm just subtracting one of them here.
-					var keyCompensate = multilineVars.globalTranspose ? -multilineVars.globalTranspose : 0;
+					var keyCompensate = !isInline && multilineVars.globalTranspose ? -multilineVars.globalTranspose : 0;
+					//console.log("parse", JSON.stringify(multilineVars), isInline)
+					var savedOrigKey;
+					if (isInline)
+						savedOrigKey = multilineVars.globalTransposeOrigKeySig
 					multilineVars.key = parseKeyVoice.deepCopyKey(parseKeyVoice.standardKey(key, retPitch.token, acc, keyCompensate));
+					if (isInline)
+						multilineVars.globalTransposeOrigKeySig = savedOrigKey
 					multilineVars.key.mode = mode;
 					if (oldKey) {
 						// Add natural in all places that the old key had an accidental.

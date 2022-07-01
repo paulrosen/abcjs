@@ -1,5 +1,6 @@
 //    abc_transpose.js: Handles the automatic transposition of key signatures, chord symbols, and notes.
 
+const allNotes = require("./all-notes");
 var transpose = {};
 
 var keyIndex = {
@@ -196,19 +197,39 @@ var accidentals2 = {
 	"1": "sharp",
 	"2": "dblsharp"
 };
+var accidentals3 = {
+	"-2": "__",
+	"-1": "_",
+	"0": "=",
+	"1": "^",
+	"2": "^^"
+};
+var count = 0
 transpose.note = function(multilineVars, el) {
-	// the "el" that is passed in has el.accidental, and el.pitch. "pitch" is the vertical position (0=middle C)
+	// the "el" that is passed in has el.name, el.accidental, and el.pitch. "pitch" is the vertical position (0=middle C)
 	// localTranspose is the number of half steps
 	// localTransposeVerticalMovement is the vertical distance to move.
+	//console.log(count++,multilineVars.localTranspose, el)
 	if (!multilineVars.localTranspose || multilineVars.clef.type === "perc")
 		return;
 	var origPitch = el.pitch;
-	el.pitch = el.pitch + multilineVars.localTransposeVerticalMovement;
+	if (multilineVars.localTransposeVerticalMovement) {
+		el.pitch = el.pitch + multilineVars.localTransposeVerticalMovement;
+		if (el.name) {
+			var actual = el.accidental ? el.name.substring(1) : el.name
+			var acc = el.accidental ? el.name[0] : ''
+			var p = allNotes.pitchIndex(actual)
+			el.name = acc + allNotes.noteName(p+multilineVars.localTransposeVerticalMovement)
+		}
+	}
 
 	if (el.accidental) {
 		var ret = accidentalChange(origPitch, el.pitch, el.accidental, multilineVars.globalTransposeOrigKeySig, multilineVars.targetKey);
 		el.pitch = ret[0];
 		el.accidental = accidentals2[ret[1]];
+		if (el.name) {
+			el.name = accidentals3[ret[1]] + el.name.replace(/[_^=]/g,'');
+		}
 	}
 
 };

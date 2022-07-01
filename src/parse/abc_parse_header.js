@@ -364,7 +364,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 						multilineVars.meter = meter;
 					return [ e-i+1+ws ];
 				case "[K:":
-					var result = parseKeyVoice.parseKey(line.substring(i+3, e));
+					var result = parseKeyVoice.parseKey(line.substring(i+3, e), true);
 					if (result.foundClef && tuneBuilder.hasBeginMusic())
 						tuneBuilder.appendStartingElement('clef', startChar, endChar, multilineVars.clef);
 					if (result.foundKey && tuneBuilder.hasBeginMusic())
@@ -426,7 +426,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 						tuneBuilder.appendStartingElement('meter', multilineVars.iChar + i, multilineVars.iChar + line.length, meter);
 					return [ line.length ];
 				case "K:":
-					var result = parseKeyVoice.parseKey(line.substring(i+2));
+					var result = parseKeyVoice.parseKey(line.substring(i+2), tuneBuilder.hasBeginMusic());
 					if (result.foundClef && tuneBuilder.hasBeginMusic())
 						tuneBuilder.appendStartingElement('clef', multilineVars.iChar + i, multilineVars.iChar + line.length, multilineVars.clef);
 					if (result.foundKey && tuneBuilder.hasBeginMusic())
@@ -498,7 +498,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 				case  'K':
 					// since the key is the last thing that can happen in the header, we can resolve the tempo now
 					this.resolveTempo();
-					var result = parseKeyVoice.parseKey(line.substring(2));
+					var result = parseKeyVoice.parseKey(line.substring(2), false);
 					if (!multilineVars.is_in_header && tuneBuilder.hasBeginMusic()) {
 						if (result.foundClef)
 							tuneBuilder.appendStartingElement('clef', startChar, endChar, multilineVars.clef);

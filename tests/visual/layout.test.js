@@ -91,7 +91,7 @@ describe("Layout", function() {
 		]
 	];
 
-	var abcChordLayout = "\"F\"c3c|\"C7\"c2df|1f4- & \"F\"xx\"Bb\"x\"Bbm\"x|\"F\"f3z:|2f4- & \"Bb\"!style=harmonic!d2 \"F\"!style=harmonic!c \"C7\"!style=harmonic!B|\"F\"f4 & !style=harmonic!A4||\n"
+	var abcChordLayout = '"F"c3c|"C7"c2df|1f4- & "F"xx"Bb"x"Bbm"x|"F"f3z:|2f4- & "Bb"!style=harmonic!d2 "F"!style=harmonic!c "C7"!style=harmonic!B|"F"f4 & !style=harmonic!A4||\n'
 
 	var expectedChordLayout = [];
 
