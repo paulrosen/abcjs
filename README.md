@@ -16,6 +16,8 @@ There are only a few bug fixes since the last beta.
 
 The current plan is to continue doing bug fixes and minor features to the 6.x.x branch, but version 7 is already in planning.
 
+There are some minor features that will still be added to the version 6 branch, along with fixing transposition.
+
 ## Informal roadmap for version 7.0.0
 
 There will be some architecture changes which will go in a 7.0.0 release:

@@ -1,3 +1,25 @@
+# Version 6.0.3
+
+## Bugs
+
+* Fix unhandled rejection if there is a problem with an input note when creating notes.
+
+* put the height of ties/slurs in the line height calculation
+
+* Measurements that used "px" were reporting a warning.
+
+* Fix bass note in jazz chord when it contains a sharp or flat
+
+## Features
+
+* Quotation maark in a chord can be escaped.
+
+## Documentation
+
+* Add example of reusing created synth buffers.
+
+* Fix example in docs on creating a drum rhythm
+
 # Version 6.0.2
 
 ## Bugs

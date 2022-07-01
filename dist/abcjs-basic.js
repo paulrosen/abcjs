@@ -5709,7 +5709,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
           return [e - i + 1 + ws];
 
         case "[K:":
-          var result = parseKeyVoice.parseKey(line.substring(i + 3, e));
+          var result = parseKeyVoice.parseKey(line.substring(i + 3, e), true);
           if (result.foundClef && tuneBuilder.hasBeginMusic()) tuneBuilder.appendStartingElement('clef', startChar, endChar, multilineVars.clef);
           if (result.foundKey && tuneBuilder.hasBeginMusic()) tuneBuilder.appendStartingElement('key', startChar, endChar, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
           return [e - i + 1 + ws];
@@ -5774,7 +5774,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
           return [line.length];
 
         case "K:":
-          var result = parseKeyVoice.parseKey(line.substring(i + 2));
+          var result = parseKeyVoice.parseKey(line.substring(i + 2), tuneBuilder.hasBeginMusic());
           if (result.foundClef && tuneBuilder.hasBeginMusic()) tuneBuilder.appendStartingElement('clef', multilineVars.iChar + i, multilineVars.iChar + line.length, multilineVars.clef);
           if (result.foundKey && tuneBuilder.hasBeginMusic()) tuneBuilder.appendStartingElement('key', multilineVars.iChar + i, multilineVars.iChar + line.length, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
           return [line.length];
@@ -5863,7 +5863,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
         case 'K':
           // since the key is the last thing that can happen in the header, we can resolve the tempo now
           this.resolveTempo();
-          var result = parseKeyVoice.parseKey(line.substring(2));
+          var result = parseKeyVoice.parseKey(line.substring(2), false);
 
           if (!multilineVars.is_in_header && tuneBuilder.hasBeginMusic()) {
             if (result.foundClef) tuneBuilder.appendStartingElement('clef', startChar, endChar, multilineVars.clef);
@@ -6487,7 +6487,7 @@ var parseKeyVoice = {};
     }
   };
 
-  parseKeyVoice.parseKey = function (str) // (and clef)
+  parseKeyVoice.parseKey = function (str, isInline) // (and clef)
   {
     // returns:
     //		{ foundClef: true, foundKey: true }
@@ -6605,8 +6605,12 @@ var parseKeyVoice = {};
 
           var oldKey = parseKeyVoice.deepCopyKey(multilineVars.key); //TODO-PER: HACK! To get the local transpose to work, the transposition is done for each line. This caused the global transposition variable to be factored in twice, so, instead of rewriting that right now, I'm just subtracting one of them here.
 
-          var keyCompensate = multilineVars.globalTranspose ? -multilineVars.globalTranspose : 0;
+          var keyCompensate = !isInline && multilineVars.globalTranspose ? -multilineVars.globalTranspose : 0; //console.log("parse", JSON.stringify(multilineVars), isInline)
+
+          var savedOrigKey;
+          if (isInline) savedOrigKey = multilineVars.globalTransposeOrigKeySig;
           multilineVars.key = parseKeyVoice.deepCopyKey(parseKeyVoice.standardKey(key, retPitch.token, acc, keyCompensate));
+          if (isInline) multilineVars.globalTransposeOrigKeySig = savedOrigKey;
           multilineVars.key.mode = mode;
 
           if (oldKey) {
@@ -10039,6 +10043,12 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
           value: parseFloat(num)
         };
 
+      case 'px':
+        return {
+          used: used + 1,
+          value: parseFloat(num)
+        };
+
       case 'cm':
         return {
           used: used + 1,
@@ -10058,17 +10068,11 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
           value: parseFloat(num)
         };
     }
-
-    return {
-      used: 0
-    };
   };
 
   var substInChord = function substInChord(str) {
-    while (str.indexOf("\\n") !== -1) {
-      str = str.replace("\\n", "\n");
-    }
-
+    str = str.replace(/\\n/g, "\n");
+    str = str.replace(/\\"/g, '"');
     return str;
   };
 
@@ -10084,8 +10088,10 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
     var matchChar = _matchChar || line.charAt(i);
 
     var pos = i + 1;
+    var esc = false;
 
-    while (pos < line.length && line.charAt(pos) !== matchChar) {
+    while (pos < line.length && (esc || line[pos] !== matchChar)) {
+      esc = line[pos] === '\\';
       ++pos;
     }
 
@@ -10124,9 +10130,11 @@ module.exports = Tokenizer;
 /*!************************************!*\
   !*** ./src/parse/abc_transpose.js ***!
   \************************************/
-/***/ (function(module) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_transpose.js: Handles the automatic transposition of key signatures, chord symbols, and notes.
+var allNotes = __webpack_require__(/*! ./all-notes */ "./src/parse/all-notes.js");
+
 var transpose = {};
 var keyIndex = {
   'C': 0,
@@ -10346,23 +10354,67 @@ var accidentals2 = {
   "1": "sharp",
   "2": "dblsharp"
 };
+var accidentals3 = {
+  "-2": "__",
+  "-1": "_",
+  "0": "=",
+  "1": "^",
+  "2": "^^"
+};
+var count = 0;
 
 transpose.note = function (multilineVars, el) {
-  // the "el" that is passed in has el.accidental, and el.pitch. "pitch" is the vertical position (0=middle C)
+  // the "el" that is passed in has el.name, el.accidental, and el.pitch. "pitch" is the vertical position (0=middle C)
   // localTranspose is the number of half steps
   // localTransposeVerticalMovement is the vertical distance to move.
+  //console.log(count++,multilineVars.localTranspose, el)
   if (!multilineVars.localTranspose || multilineVars.clef.type === "perc") return;
   var origPitch = el.pitch;
-  el.pitch = el.pitch + multilineVars.localTransposeVerticalMovement;
+
+  if (multilineVars.localTransposeVerticalMovement) {
+    el.pitch = el.pitch + multilineVars.localTransposeVerticalMovement;
+
+    if (el.name) {
+      var actual = el.accidental ? el.name.substring(1) : el.name;
+      var acc = el.accidental ? el.name[0] : '';
+      var p = allNotes.pitchIndex(actual);
+      el.name = acc + allNotes.noteName(p + multilineVars.localTransposeVerticalMovement);
+    }
+  }
 
   if (el.accidental) {
     var ret = accidentalChange(origPitch, el.pitch, el.accidental, multilineVars.globalTransposeOrigKeySig, multilineVars.targetKey);
     el.pitch = ret[0];
     el.accidental = accidentals2[ret[1]];
+
+    if (el.name) {
+      el.name = accidentals3[ret[1]] + el.name.replace(/[_^=]/g, '');
+    }
   }
 };
 
 module.exports = transpose;
+
+/***/ }),
+
+/***/ "./src/parse/all-notes.js":
+/*!********************************!*\
+  !*** ./src/parse/all-notes.js ***!
+  \********************************/
+/***/ (function(module) {
+
+var allNotes = {};
+var allPitches = ['C,,,', 'D,,,', 'E,,,', 'F,,,', 'G,,,', 'A,,,', 'B,,,', 'C,,', 'D,,', 'E,,', 'F,,', 'G,,', 'A,,', 'B,,', 'C,', 'D,', 'E,', 'F,', 'G,', 'A,', 'B,', 'C', 'D', 'E', 'F', 'G', 'A', 'B', 'c', 'd', 'e', 'f', 'g', 'a', 'b', "c'", "d'", "e'", "f'", "g'", "a'", "b'", "c''", "d''", "e''", "f''", "g''", "a''", "b''", "c'''", "d'''", "e'''", "f'''", "g'''", "a'''", "b'''"];
+
+allNotes.pitchIndex = function (noteName) {
+  return allPitches.indexOf(noteName);
+};
+
+allNotes.noteName = function (pitchIndex) {
+  return allPitches[pitchIndex];
+};
+
+module.exports = allNotes;
 
 /***/ }),
 
@@ -16138,8 +16190,8 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
     var fnResolve;
 
     offlineCtx.oncomplete = function (e) {
-      if (e.renderedBuffer) {
-        // If the system gets overloaded then this can start failing. Just drop the note if so.
+      if (e.renderedBuffer && e.renderedBuffer.getChannelData) {
+        // If the system gets overloaded or there are network problems then this can start failing. Just drop the note if so.
         for (var i = 0; i < startArray.length; i++) {
           //Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
           var start = startArray[i] * sound.tempoMultiplier;
@@ -19861,6 +19913,7 @@ AbstractEngraver.prototype.addSlursAndTies = function (abselem, pitchelem, noteh
       for (var j = 0; j < this.ties.length; j++) {
         if (this.ties[j].anchor1 && this.ties[j].anchor1.pitch === notehead.pitch) {
           this.ties[j].setEndAnchor(notehead);
+          voice.setRange(this.ties[j]);
           this.ties.splice(j, 1);
           found = true;
           break;
@@ -19869,6 +19922,7 @@ AbstractEngraver.prototype.addSlursAndTies = function (abselem, pitchelem, noteh
 
       if (!found) {
         this.ties[0].setEndAnchor(notehead);
+        voice.setRange(this.ties[0]);
         this.ties.splice(0, 1);
       }
     }
@@ -19904,6 +19958,7 @@ AbstractEngraver.prototype.addSlursAndTies = function (abselem, pitchelem, noteh
       if (this.slurs[slurid]) {
         slur = this.slurs[slurid];
         slur.setEndAnchor(notehead);
+        voice.setRange(slur);
         delete this.slurs[slurid];
       } else {
         slur = new TieElem({
@@ -22663,6 +22718,17 @@ TieElem.prototype.addInternalNote = function (note) {
 TieElem.prototype.setEndAnchor = function (anchor2) {
   //	console.log("end", this.anchor1 ? this.anchor1.pitch : "N/A", anchor2 ? anchor2.pitch : "N/A", this.isTie, this.isGrace);
   this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
+  // we don't really have enough info to know what the vertical extent is yet and we won't until drawing. This will just give it enough
+  // room on either side (we don't even know if the slur will be above yet). We need to set this so that we can make sure the voice has
+  // at least enough room that the line doesn't get cut off if the tie or slur is the lowest thing.
+
+  if (this.anchor1) {
+    this.top = Math.max(this.anchor1.pitch, this.anchor2.pitch) + 4;
+    this.bottom = Math.min(this.anchor1.pitch, this.anchor2.pitch) - 4;
+  } else {
+    this.top = this.anchor2.pitch + 4;
+    this.bottom = this.anchor2.pitch - 4;
+  }
 }; // If we encounter a repeat sign, then we don't want to extend either a tie or a slur past it, so these are called to be a limit.
 
 
@@ -25587,7 +25653,7 @@ function formatJazzChord(chordString) {
   for (var i = 0; i < lines.length; i++) {
     var chord = lines[i]; // If the chord isn't in a recognizable format then just skip the formatting.
 
-    var reg = chord.match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/[ABCDEFG][#b]?)?/);
+    var reg = chord.match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/[ABCDEFG][#b♯♭]?)?/);
     if (reg) lines[i] = (reg[1] ? reg[1] : '') + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
   }
 
@@ -28187,7 +28253,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.0.2';
+var version = '6.0.3';
 module.exports = version;
 
 /***/ })
