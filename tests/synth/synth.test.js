@@ -13,7 +13,7 @@ describe("Synth", function() {
 
 
 	it("drum-intro", function() {
-		this.timeout(5000);
+		this.timeout(22000);
 		const tune = abcjs.renderAbc("paper", abcThatsAPlenty, {
 			add_classes: true,
 //			visualTranspose: currentTransposition,
@@ -44,7 +44,7 @@ describe("Synth", function() {
 			chordsOff: false,
 		});
 		return synthController.play().then(function (response){
-			return sleep(4000).then(function () {
+			return sleep(20000).then(function () {
 				synthController.pause();
 			});
 		});

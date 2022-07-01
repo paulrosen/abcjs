@@ -69,7 +69,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 			}
 			var fnResolve;
 			offlineCtx.oncomplete = function(e) {
-				if (e.renderedBuffer) { // If the system gets overloaded then this can start failing. Just drop the note if so.
+				if (e.renderedBuffer && e.renderedBuffer.getChannelData) { // If the system gets overloaded or there are network problems then this can start failing. Just drop the note if so.
 					for (var i = 0; i < startArray.length; i++) {
 						//Math.floor(startArray[i] * sound.tempoMultiplier * sampleRate)
 						var start = startArray[i] * sound.tempoMultiplier;
