@@ -1,6 +1,6 @@
 # Purpose
 
-This library makes it easy to incorporate **sheet music** into your **websites**. 
+This library makes it easy to incorporate **sheet music** into your **websites**. It is primarily aimed at **javascript developers**. The amount of javascript required for simple uses is very small, though, so one doesn't need to be an expert.
 
 ## Uses
 
@@ -21,6 +21,14 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 ## NOT
 
 * It does not provide a visual editor (although it could be used as a basis if you want to write one.)
+
+## Open Source Apps that require no programming
+
+* If you just want to render your abc but aren't trying to make an entire website, there are a number of openly accessible apps that you can use. 
+
+* For working with tunes in the browser, see [the Editor](https://editor.drawthedots.com). 
+
+* If you are using VSCode, there is an extension that you install. Get to the extension panel with shift-cmd-X, then search for "abcjs". Once you install that you can see the notation rendered as you type in a file. To use it, open your tune file (ending in `.abc`) and type shift-cmd-P to get the command pallet. Search for "abcjs" to open the preview pane.
 
 ## Browser/device support
 
