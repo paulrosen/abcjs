@@ -29,6 +29,10 @@ var createNoteMap = function(sequence) {
 							end: Math.round((ev.start + len - gap) * 1000000)/1000000,
 							volume: ev.volume
 						};
+						if (ev.startChar)
+							obj.startChar = ev.startChar;
+						if (ev.endChar)
+							obj.endChar = ev.endChar;
 						if (ev.style)
 							obj.style = ev.style;
 						if (ev.cents)

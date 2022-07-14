@@ -630,7 +630,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 					if (name && percmap[name])
 						actualPitch = percmap[name].sound;
 				}
-				var p = { cmd: 'note', pitch: actualPitch, volume: velocity, start: timeToRealTime(elem.time), duration: durationRounded(note.duration), instrument: currentInstrument };
+				var p = { cmd: 'note', pitch: actualPitch, volume: velocity, start: timeToRealTime(elem.time), duration: durationRounded(note.duration), instrument: currentInstrument, startChar: elem.elem.startChar, endChar: elem.elem.endChar};
 				p = adjustForMicroTone(p);
 				if (elem.gracenotes) {
 					p.duration = p.duration / 2;
