@@ -195,7 +195,7 @@ declare module 'abcjs' {
 		dragColor?: string;
 		dragging?: boolean;
 		foregroundColor?: string;
-		format?: { [attr: string]: any };
+		format?: { [attr: FormatAttributes]: any };
 		header_only?: boolean;
 		initialClef?: boolean;
 		jazzchords?: boolean;
@@ -261,6 +261,8 @@ declare module 'abcjs' {
 		instrument: number;
 		start: number;
 		end: number;
+		startChar: number;
+		endChar: number;
 		volume: number;
 		style?: string;
 		cents?: number;
