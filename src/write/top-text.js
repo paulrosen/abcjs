@@ -32,7 +32,7 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
 		this.rows.push({move: spacing.composer});
 		if (metaText.rhythm && metaText.rhythm.length > 0) {
 			var noMove = !!(metaText.composer || metaText.origin);
-			addTextIf(this.rows, { marginLeft: paddingLeft, text: metaText.rhythm, font: 'infofont', klass: 'meta-top rhythm', absElemType: "rhythm", noMove: true, info: metaTextInfo.rhythm, name: "rhythm"}, getTextSize);
+			addTextIf(this.rows, { marginLeft: paddingLeft, text: metaText.rhythm, font: 'infofont', klass: 'meta-top rhythm', absElemType: "rhythm", noMove: noMove, info: metaTextInfo.rhythm, name: "rhythm"}, getTextSize);
 		}
 		var composerLine = "";
 		if (metaText.composer) composerLine += metaText.composer;
