@@ -2799,7 +2799,13 @@ function doFlattenTest(abc, expected, options) {
 		for (var j = 0; j < expected.tracks[i].length; j++) {
 			var msg = "trk: " + i + " ev: " + j + "\nrcv: " + JSON.stringify(flatten.tracks[i][j]) + "\n" +
 				"exp: " + JSON.stringify(expected.tracks[i][j]) + "\n";
-			chai.assert.deepStrictEqual(flatten.tracks[i][j],expected.tracks[i][j], msg)
+			// TODO-PER: There are too many changes from adding start and end char, so just ignore them at least for now - they aren't what needs to be tested here anyway.
+			var t = flatten.tracks[i][j]
+			if (t.startChar)
+				delete t.startChar;
+			if (t.endChar)
+				delete t.endChar;
+			chai.assert.deepStrictEqual(t,expected.tracks[i][j], msg)
 		}
 	}
 }

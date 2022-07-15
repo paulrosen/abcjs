@@ -93,7 +93,16 @@ describe("Layout", function() {
 
 	var abcChordLayout = '"F"c3c|"C7"c2df|1f4- & "F"xx"Bb"x"Bbm"x|"F"f3z:|2f4- & "Bb"!style=harmonic!d2 "F"!style=harmonic!c "C7"!style=harmonic!B|"F"f4 & !style=harmonic!A4||\n'
 
-	var expectedChordLayout = [];
+	var expectedChordLayout = [{"x":54,"y":32},{"x":106,"y":32},{"x":344,"y":32},{"x":533,"y":32},{"x":190,"y":32},{"x":208,"y":32},{"x":254,"y":32},{"x":405,"y":32},{"x":455,"y":32},{"x":476,"y":32}];
+
+	var abcStaccatoPlacement = "E.B .B"
+
+	var expectedStaccatoPlacement = [{ x: 82, y: 63 }, { x: 112, y: 40 }]
+
+	var abcRhythmPlacement = "R: reel\n" +
+		"C"
+
+	var expectedRhythmPlacement = [{ x: 20, y: 53 }]
 
 	it("min-spacing", function() {
 		doLayoutTest(abcMinSpacing, {staffwidth: 260 }, expectedMinSpacing0, 'minPadding=0');
@@ -120,16 +129,36 @@ describe("Layout", function() {
 		doChordLayoutTest(abcChordLayout, expectedChordLayout)
 	})
 
+	it("staccato-placement", function() {
+		doItemPlacementTest(abcStaccatoPlacement, expectedStaccatoPlacement, '[data-name="scripts.staccato"]');
+	})
 
+	it("rhythm-placement", function() {
+		doItemPlacementTest(abcRhythmPlacement, expectedRhythmPlacement, '[data-name="clefs.G"]');
+	})
 
 })
 
+function doItemPlacementTest(abc, expected, selector) {
+	abcjs.renderAbc("paper", abc, {add_classes: true});
+	var els = document.querySelectorAll("#paper "+selector)
+	var pos = []
+	for (var i = 0; i < els.length; i++) {
+		var bb = els[i].getBBox()
+		pos.push({x: Math.round(bb.x), y: Math.round(bb.y)})
+	}
+	chai.assert.deepEqual(pos, expected)
+}
+
 function doChordLayoutTest(abc, expected) {
 	var visualObj = abcjs.renderAbc("paper", abc, { showDebug: "box", add_classes: true, staffwidth: 260, format: { gchordfont: "20"}});
-	// var els = document.querySelectorAll("#paper .abcjs-chord")
-	// for (var i = 0; i < els.length; i++) {
-	// 	els[i].setAttribute("background")
-	// }
+	var els = document.querySelectorAll("#paper .abcjs-chord")
+	var pos = []
+	for (var i = 0; i < els.length; i++) {
+		var bb = els[i].getBBox()
+		pos.push({x: Math.round(bb.x), y: Math.round(bb.y)})
+	}
+	chai.assert.deepEqual(pos, expected)
 }
 
 function doCollidingNotesTest(abc, expected) {

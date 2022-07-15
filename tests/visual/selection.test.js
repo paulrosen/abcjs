@@ -6845,12 +6845,12 @@ describe("Selection", function() {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "46"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}], "duration": 0.375, "el_type": "note", "startChar": 1254, "endChar": 1259, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
-		"size": {"x": 136, "y": 476, "width": 16, "height": 31}
+		"size": {"x": 136, "y": 480, "width": 16, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "47"},
 		"abcEl": {"pitches": [{"pitch": 1, "name": "D", "verticalPos": 13, "highestVert": 13}], "duration": 0.125, "el_type": "note", "startChar": 1259, "endChar": 1262, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
-		"size": {"x": 162, "y": 469, "width": 14, "height": 31}
+		"size": {"x": 162, "y": 473, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "48"},
@@ -6864,72 +6864,72 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 15
 		},
-		"size": {"x": 174, "y": 461, "width": 14, "height": 58}
+		"size": {"x": 174, "y": 465, "width": 14, "height": 58}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "49"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}], "duration": 0.125, "el_type": "note", "startChar": 1273, "endChar": 1276, "startBeam": true, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
-		"size": {"x": 244, "y": 476, "width": 10, "height": 56}
+		"size": {"x": 244, "y": 480, "width": 10, "height": 56}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "50"},
 		"abcEl": {"pitches": [{"pitch": -8, "name": "B,,", "verticalPos": 4, "highestVert": 10}], "duration": 0.125, "el_type": "note", "startChar": 1276, "endChar": 1281, "endBeam": true, "averagepitch": 4, "minpitch": 4, "maxpitch": 4},
-		"size": {"x": 256, "y": 504, "width": 10, "height": 33}
+		"size": {"x": 256, "y": 507, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "51"},
 		"abcEl": {"pitches": [{"pitch": -7, "name": "C,", "verticalPos": 5, "highestVert": 11}], "duration": 0.25, "el_type": "note", "startChar": 1281, "endChar": 1285, "averagepitch": 5, "minpitch": 5, "maxpitch": 5},
-		"size": {"x": 284, "y": 477, "width": 10, "height": 31}
+		"size": {"x": 284, "y": 481, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "52"},
 		"abcEl": {"pitches": [{"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 6}], "duration": 0.25, "el_type": "note", "startChar": 1285, "endChar": 1289, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
-		"size": {"x": 300, "y": 496, "width": 10, "height": 31}
+		"size": {"x": 300, "y": 500, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "53"},
 		"abcEl": {"pitches": [{"pitch": -5, "name": "E,", "verticalPos": 7, "highestVert": 7}], "duration": 0.0625, "el_type": "note", "startChar": 1289, "endChar": 1291, "startBeam": true, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
-		"size": {"x": 317, "y": 492, "width": 10, "height": 33}
+		"size": {"x": 317, "y": 496, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "54"},
 		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.0625, "el_type": "note", "startChar": 1291, "endChar": 1293, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
-		"size": {"x": 328, "y": 488, "width": 10, "height": 35}
+		"size": {"x": 328, "y": 492, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "55"},
 		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.125, "el_type": "note", "startChar": 1293, "endChar": 1296, "endBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
-		"size": {"x": 338, "y": 484, "width": 10, "height": 37}
+		"size": {"x": 338, "y": 488, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "56"},
 		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.125, "el_type": "note", "startChar": 1297, "endChar": 1300, "startBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
-		"size": {"x": 365, "y": 488, "width": 10, "height": 33}
+		"size": {"x": 365, "y": 492, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "57"},
 		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.125, "el_type": "note", "startChar": 1300, "endChar": 1304, "endBeam": true, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
-		"size": {"x": 377, "y": 480, "width": 10, "height": 37}
+		"size": {"x": 377, "y": 484, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "58"},
 		"abcEl": {"pitches": [{"pitch": 1, "name": "D", "verticalPos": 13, "highestVert": 13}], "duration": 0.25, "el_type": "note", "startChar": 1304, "endChar": 1307, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
-		"size": {"x": 387, "y": 469, "width": 14, "height": 31}
+		"size": {"x": 387, "y": 473, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "59"},
 		"abcEl": {"pitches": [{"pitch": 1, "name": "D", "verticalPos": 13, "highestVert": 13}], "duration": 0.25, "el_type": "note", "startChar": 1307, "endChar": 1310, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
-		"size": {"x": 430, "y": 469, "width": 14, "height": 31}
+		"size": {"x": 430, "y": 473, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "60"},
 		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.125, "el_type": "note", "startChar": 1310, "endChar": 1313, "startBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
-		"size": {"x": 464, "y": 484, "width": 10, "height": 37}
+		"size": {"x": 464, "y": 488, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "61"},
 		"abcEl": {"pitches": [{"pitch": -5, "name": "E,", "verticalPos": 7, "highestVert": 7}], "duration": 0.125, "el_type": "note", "startChar": 1313, "endChar": 1316, "endBeam": true, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
-		"size": {"x": 476, "y": 492, "width": 10, "height": 33}
+		"size": {"x": 476, "y": 496, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "62"},
@@ -6943,57 +6943,57 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 12
 		},
-		"size": {"x": 501, "y": 473, "width": 14, "height": 47}
+		"size": {"x": 501, "y": 476, "width": 14, "height": 47}
 	}, {
 		"draggable": false,
 		"svgEl": {"selectable": "false", "data-index": "63"},
 		"abcEl": {"rest": {"type": "rest"}, "duration": 0.25, "el_type": "note", "startChar": 1328, "endChar": 1331, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
-		"size": {"x": 519, "y": 488, "width": 8, "height": 21}
+		"size": {"x": 519, "y": 492, "width": 8, "height": 21}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "64"},
 		"abcEl": {"duration": 0.5, "pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}, {"pitch": 3, "name": "F", "verticalPos": 15, "highestVert": 15}], "el_type": "note", "startChar": 1331, "endChar": 1338, "averagepitch": 13, "minpitch": 11, "maxpitch": 15},
-		"size": {"x": 534, "y": 461, "width": 14, "height": 47}
+		"size": {"x": 534, "y": 465, "width": 14, "height": 47}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "65"},
 		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.5, "el_type": "note", "startChar": 1339, "endChar": 1343, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
-		"size": {"x": 580, "y": 484, "width": 10, "height": 31}
+		"size": {"x": 580, "y": 488, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "66"},
 		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.5, "el_type": "note", "startChar": 1343, "endChar": 1346, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
-		"size": {"x": 613, "y": 480, "width": 10, "height": 31}
+		"size": {"x": 613, "y": 484, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "67"},
 		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.75, "el_type": "note", "startChar": 1347, "endChar": 1352, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
-		"size": {"x": 657, "y": 479, "width": 17, "height": 33}
+		"size": {"x": 657, "y": 483, "width": 17, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "68"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}], "duration": 0.0625, "el_type": "note", "startChar": 1352, "endChar": 1354, "startBeam": true, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
-		"size": {"x": 707, "y": 476, "width": 10, "height": 45}
+		"size": {"x": 707, "y": 480, "width": 10, "height": 45}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "69"},
 		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1354, "endChar": 1356, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
-		"size": {"x": 717, "y": 484, "width": 10, "height": 40}
+		"size": {"x": 717, "y": 488, "width": 10, "height": 40}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "70"},
 		"abcEl": {"pitches": [{"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 6}], "duration": 0.0625, "el_type": "note", "startChar": 1356, "endChar": 1358, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
-		"size": {"x": 728, "y": 496, "width": 10, "height": 30}
+		"size": {"x": 728, "y": 500, "width": 10, "height": 30}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "71"},
 		"abcEl": {"pitches": [{"pitch": -5, "name": "E,", "verticalPos": 7, "highestVert": 7}], "duration": 0.0625, "el_type": "note", "startChar": 1358, "endChar": 1360, "endBeam": true, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
-		"size": {"x": 739, "y": 492, "width": 10, "height": 37}
+		"size": {"x": 739, "y": 496, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "72"},
 		"abcEl": {"decoration": ["f"], "pitches": [{"pitch": 12, "name": "a", "verticalPos": 12, "highestVert": 18}], "duration": 0.25, "el_type": "note", "startChar": 862, "endChar": 868, "lyric": [{"syllable": "Strang", "divider": "-"}], "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
-		"size": {"x": 86, "y": 597, "width": 43, "height": 121}
+		"size": {"x": 86, "y": 601, "width": 43, "height": 125}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "73"},
@@ -7008,17 +7008,17 @@ describe("Selection", function() {
 			"minpitch": 11,
 			"maxpitch": 13
 		},
-		"size": {"x": 141, "y": 593, "width": 21, "height": 125}
+		"size": {"x": 141, "y": 597, "width": 21, "height": 128}
 	}, {
 		"draggable": false,
 		"svgEl": {"selectable": "false", "data-index": "74"},
 		"abcEl": {"rest": {"type": "rest"}, "duration": 0.25, "el_type": "note", "startChar": 875, "endChar": 878, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
-		"size": {"x": 193, "y": 620, "width": 8, "height": 21}
+		"size": {"x": 193, "y": 624, "width": 8, "height": 21}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "75"},
 		"abcEl": {"pitches": [{"accidental": "natural", "pitch": 9, "name": "=e", "verticalPos": 9, "highestVert": 15}], "duration": 0.25, "el_type": "note", "startChar": 878, "endChar": 881, "lyric": [{"syllable": "in", "divider": " "}], "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
-		"size": {"x": 205, "y": 609, "width": 17, "height": 109}
+		"size": {"x": 205, "y": 613, "width": 17, "height": 113}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "76"},
@@ -7033,37 +7033,37 @@ describe("Selection", function() {
 			"minpitch": 5,
 			"maxpitch": 10
 		},
-		"size": {"x": 239, "y": 605, "width": 19, "height": 113}
+		"size": {"x": 239, "y": 609, "width": 19, "height": 117}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "77"},
 		"abcEl": {"pitches": [{"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 14}], "duration": 0.5, "el_type": "note", "startChar": 891, "endChar": 893, "lyric": [{"syllable": "night", "divider": " "}], "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
-		"size": {"x": 260, "y": 613, "width": 28, "height": 105}
+		"size": {"x": 260, "y": 617, "width": 28, "height": 109}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "78"},
 		"abcEl": {"duration": 0.5, "pitches": [{"pitch": 3, "name": "F", "verticalPos": 3, "highestVert": 3}, {"pitch": 7, "name": "c", "verticalPos": 7, "highestVert": 7}], "el_type": "note", "startChar": 895, "endChar": 903, "averagepitch": 5, "minpitch": 3, "maxpitch": 7},
-		"size": {"x": 330, "y": 617, "width": 10, "height": 47}
+		"size": {"x": 330, "y": 620, "width": 10, "height": 47}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "79"},
 		"abcEl": {"duration": 0.25, "pitches": [{"pitch": 4, "name": "G", "verticalPos": 4, "highestVert": 4}, {"pitch": 6, "name": "B", "verticalPos": 6, "highestVert": 6}], "el_type": "note", "startChar": 903, "endChar": 910, "averagepitch": 5, "minpitch": 4, "maxpitch": 6},
-		"size": {"x": 386, "y": 620, "width": 10, "height": 39}
+		"size": {"x": 386, "y": 624, "width": 10, "height": 39}
 	}, {
 		"draggable": false,
 		"svgEl": {"selectable": "false", "data-index": "80"},
 		"abcEl": {"rest": {"type": "rest"}, "duration": 0.25, "el_type": "note", "startChar": 910, "endChar": 912, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
-		"size": {"x": 429, "y": 620, "width": 8, "height": 21}
+		"size": {"x": 429, "y": 624, "width": 8, "height": 21}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "81"},
 		"abcEl": {"duration": 0.75, "pitches": [{"pitch": 6, "name": "B", "verticalPos": 6, "highestVert": 6}, {"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 8}], "el_type": "note", "startChar": 913, "endChar": 922, "averagepitch": 7, "minpitch": 6, "maxpitch": 8},
-		"size": {"x": 467, "y": 613, "width": 17, "height": 39}
+		"size": {"x": 467, "y": 617, "width": 17, "height": 39}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "82"},
 		"abcEl": {"pitches": [{"pitch": 5, "name": "A", "verticalPos": 5, "highestVert": 11}], "duration": 0.25, "el_type": "note", "startChar": 922, "endChar": 924, "averagepitch": 5, "minpitch": 5, "maxpitch": 5},
-		"size": {"x": 521, "y": 624, "width": 10, "height": 31}
+		"size": {"x": 521, "y": 628, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "83"},
@@ -7078,227 +7078,227 @@ describe("Selection", function() {
 			"minpitch": 1,
 			"maxpitch": 5
 		},
-		"size": {"x": 580, "y": 624, "width": 10, "height": 47}
+		"size": {"x": 580, "y": 628, "width": 10, "height": 47}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "84"},
 		"abcEl": {"pitches": [{"pitch": 6, "name": "B", "verticalPos": 6, "highestVert": 12}], "duration": 0.0625, "el_type": "note", "startChar": 936, "endChar": 937, "startBeam": true, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
-		"size": {"x": 615, "y": 609, "width": 10, "height": 43}
+		"size": {"x": 615, "y": 612, "width": 10, "height": 43}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "85"},
 		"abcEl": {"pitches": [{"pitch": 7, "name": "c", "verticalPos": 7, "highestVert": 13}], "duration": 0.0625, "el_type": "note", "startChar": 937, "endChar": 938, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
-		"size": {"x": 626, "y": 606, "width": 10, "height": 42}
+		"size": {"x": 626, "y": 610, "width": 10, "height": 42}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "86"},
 		"abcEl": {"pitches": [{"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 14}], "duration": 0.0625, "el_type": "note", "startChar": 938, "endChar": 939, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
-		"size": {"x": 637, "y": 604, "width": 10, "height": 40}
+		"size": {"x": 637, "y": 607, "width": 10, "height": 40}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "87"},
 		"abcEl": {"pitches": [{"pitch": 9, "name": "e", "verticalPos": 9, "highestVert": 15}], "duration": 0.0625, "el_type": "note", "startChar": 939, "endChar": 941, "endBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
-		"size": {"x": 647, "y": 601, "width": 10, "height": 39}
+		"size": {"x": 647, "y": 605, "width": 10, "height": 39}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "88"},
 		"abcEl": {"pitches": [{"pitch": 10, "name": "f", "verticalPos": 10, "highestVert": 16}], "duration": 0.0625, "el_type": "note", "startChar": 941, "endChar": 942, "startBeam": true, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
-		"size": {"x": 658, "y": 597, "width": 10, "height": 39}
+		"size": {"x": 658, "y": 601, "width": 10, "height": 39}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "89"},
 		"abcEl": {"pitches": [{"pitch": 5, "name": "A", "verticalPos": 5, "highestVert": 11}], "duration": 0.0625, "el_type": "note", "startChar": 942, "endChar": 943, "averagepitch": 5, "minpitch": 5, "maxpitch": 5},
-		"size": {"x": 669, "y": 600, "width": 10, "height": 56}
+		"size": {"x": 669, "y": 604, "width": 10, "height": 56}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "90"},
 		"abcEl": {"pitches": [{"pitch": 6, "name": "B", "verticalPos": 6, "highestVert": 12}], "duration": 0.0625, "el_type": "note", "startChar": 943, "endChar": 944, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
-		"size": {"x": 680, "y": 602, "width": 10, "height": 49}
+		"size": {"x": 680, "y": 606, "width": 10, "height": 49}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "91"},
 		"abcEl": {"decoration": ["diminuendo)"], "pitches": [{"pitch": 7, "name": "c", "verticalPos": 7, "highestVert": 13}], "duration": 0.0625, "el_type": "note", "startChar": 944, "endChar": 949, "endBeam": true, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
-		"size": {"x": 691, "y": 605, "width": 10, "height": 43}
+		"size": {"x": 691, "y": 609, "width": 10, "height": 43}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "92"},
 		"abcEl": {"decoration": ["mp"], "pitches": [{"pitch": 8, "name": "d", "verticalPos": 8, "highestVert": 8}], "duration": 1, "el_type": "note", "startChar": 950, "endChar": 957, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
-		"size": {"x": 717, "y": 636, "width": 15, "height": 8}
+		"size": {"x": 717, "y": 640, "width": 15, "height": 8}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "93"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1119, "endChar": 1123, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 105, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 105, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "94"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1123, "endChar": 1127, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 148, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 148, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "95"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1127, "endChar": 1131, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 191, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 191, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "96"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1131, "endChar": 1135, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 210, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 210, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "97"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1136, "endChar": 1141, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 246, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 246, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "98"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1141, "endChar": 1145, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 257, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 257, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "99"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1145, "endChar": 1149, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 272, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 272, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "100"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1149, "endChar": 1153, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 283, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 283, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "101"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1154, "endChar": 1158, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 328, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 328, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "102"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1158, "endChar": 1162, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 356, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 356, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "103"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1162, "endChar": 1166, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 384, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 384, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "104"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1166, "endChar": 1170, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 427, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 427, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "105"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1171, "endChar": 1175, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 465, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 465, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "106"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1175, "endChar": 1179, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 487, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 487, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "107"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1179, "endChar": 1183, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 508, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 508, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "108"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1183, "endChar": 1187, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 519, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 519, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "109"},
 		"abcEl": {"chord": [{"name": "annotation", "position": "above"}], "pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1188, "endChar": 1205, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 578, "y": 573, "width": 77, "height": 128}
+		"size": {"x": 578, "y": 577, "width": 77, "height": 128}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "110"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1205, "endChar": 1209, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 589, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 589, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "111"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1209, "endChar": 1213, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 613, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 613, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "112"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1213, "endChar": 1217, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 656, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 656, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "113"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1218, "endChar": 1222, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 715, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 715, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "114"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1222, "endChar": 1226, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 726, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 726, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "115"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1226, "endChar": 1230, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 737, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 737, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "116"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": -1, "highestVert": -1}], "duration": 0.25, "el_type": "note", "startChar": 1230, "endChar": 1234, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 748, "y": 670, "width": 14, "height": 31}
+		"size": {"x": 748, "y": 674, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "117"},
 		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.0625, "el_type": "note", "startChar": 1362, "endChar": 1364, "startBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
-		"size": {"x": 107, "y": 751, "width": 10, "height": 29}
+		"size": {"x": 107, "y": 759, "width": 10, "height": 29}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "118"},
 		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1364, "endChar": 1366, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
-		"size": {"x": 118, "y": 748, "width": 10, "height": 33}
+		"size": {"x": 118, "y": 755, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "119"},
 		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.0625, "el_type": "note", "startChar": 1366, "endChar": 1368, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
-		"size": {"x": 129, "y": 744, "width": 10, "height": 37}
+		"size": {"x": 129, "y": 751, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "120"},
 		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.0625, "el_type": "note", "startChar": 1368, "endChar": 1371, "endBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
-		"size": {"x": 139, "y": 751, "width": 10, "height": 29}
+		"size": {"x": 139, "y": 759, "width": 10, "height": 29}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "121"},
 		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "startSlur": [{"label": 101}], "verticalPos": 9, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1371, "endChar": 1374, "startBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
-		"size": {"x": 150, "y": 748, "width": 10, "height": 29}
+		"size": {"x": 150, "y": 755, "width": 10, "height": 29}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "122"},
 		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.0625, "el_type": "note", "startChar": 1374, "endChar": 1376, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
-		"size": {"x": 161, "y": 744, "width": 10, "height": 33}
+		"size": {"x": 161, "y": 751, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "123"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}], "duration": 0.0625, "el_type": "note", "startChar": 1376, "endChar": 1378, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
-		"size": {"x": 172, "y": 740, "width": 10, "height": 37}
+		"size": {"x": 172, "y": 748, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "124"},
 		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "endSlur": [101], "verticalPos": 9, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1378, "endChar": 1382, "endBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
-		"size": {"x": 183, "y": 748, "width": 10, "height": 29}
+		"size": {"x": 183, "y": 755, "width": 10, "height": 29}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "125"},
 		"abcEl": {"pitches": [{"pitch": 0, "name": "C", "verticalPos": 12, "highestVert": 12}], "duration": 0.25, "el_type": "note", "startChar": 1382, "endChar": 1385, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
-		"size": {"x": 191, "y": 736, "width": 14, "height": 31}
+		"size": {"x": 191, "y": 744, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "126"},
 		"abcEl": {"pitches": [{"pitch": 0, "name": "C", "verticalPos": 12, "highestVert": 12}], "duration": 0.25, "el_type": "note", "startChar": 1385, "endChar": 1387, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
-		"size": {"x": 210, "y": 736, "width": 14, "height": 31}
+		"size": {"x": 210, "y": 744, "width": 14, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "127"},
 		"abcEl": {"duration": 0.5, "pitches": [{"pitch": -7, "name": "C,", "verticalPos": 5, "highestVert": 5}, {"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "el_type": "note", "startChar": 1388, "endChar": 1397, "averagepitch": 7.5, "minpitch": 5, "maxpitch": 10},
-		"size": {"x": 248, "y": 744, "width": 10, "height": 51}
+		"size": {"x": 248, "y": 751, "width": 10, "height": 51}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "128"},
@@ -7312,127 +7312,127 @@ describe("Selection", function() {
 			"minpitch": 8,
 			"maxpitch": 15
 		},
-		"size": {"x": 272, "y": 724, "width": 14, "height": 58}
+		"size": {"x": 272, "y": 732, "width": 14, "height": 58}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "129"},
 		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.1875, "el_type": "note", "startChar": 1408, "endChar": 1411, "startBeam": true, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
-		"size": {"x": 330, "y": 742, "width": 16, "height": 35}
+		"size": {"x": 330, "y": 750, "width": 16, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "130"},
 		"abcEl": {"pitches": [{"pitch": 0, "name": "C", "verticalPos": 12, "highestVert": 12}], "duration": 0.0625, "el_type": "note", "startChar": 1411, "endChar": 1413, "endBeam": true, "averagepitch": 12, "minpitch": 12, "maxpitch": 12},
-		"size": {"x": 345, "y": 736, "width": 14, "height": 37}
+		"size": {"x": 345, "y": 744, "width": 14, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "131"},
 		"abcEl": {"pitches": [{"pitch": -1, "name": "B,", "verticalPos": 11, "highestVert": 11}], "duration": 0.1875, "el_type": "note", "startChar": 1413, "endChar": 1416, "startBeam": true, "averagepitch": 11, "minpitch": 11, "maxpitch": 11},
-		"size": {"x": 358, "y": 740, "width": 16, "height": 33}
+		"size": {"x": 358, "y": 748, "width": 16, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "132"},
 		"abcEl": {"pitches": [{"pitch": 1, "name": "D", "verticalPos": 13, "highestVert": 13}], "duration": 0.0625, "el_type": "note", "startChar": 1416, "endChar": 1418, "endBeam": true, "averagepitch": 13, "minpitch": 13, "maxpitch": 13},
-		"size": {"x": 373, "y": 732, "width": 14, "height": 37}
+		"size": {"x": 373, "y": 740, "width": 14, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "133"},
 		"abcEl": {"pitches": [{"pitch": -3, "name": "G,", "verticalPos": 9, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1418, "endChar": 1420, "startBeam": true, "averagepitch": 9, "minpitch": 9, "maxpitch": 9},
-		"size": {"x": 386, "y": 748, "width": 10, "height": 37}
+		"size": {"x": 386, "y": 755, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "134"},
 		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.0625, "el_type": "note", "startChar": 1420, "endChar": 1422, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
-		"size": {"x": 397, "y": 751, "width": 10, "height": 36}
+		"size": {"x": 397, "y": 759, "width": 10, "height": 36}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "135"},
 		"abcEl": {"pitches": [{"pitch": -5, "name": "E,", "verticalPos": 7, "highestVert": 7}], "duration": 0.0625, "el_type": "note", "startChar": 1422, "endChar": 1424, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
-		"size": {"x": 408, "y": 755, "width": 10, "height": 34}
+		"size": {"x": 408, "y": 763, "width": 10, "height": 34}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "136"},
 		"abcEl": {"pitches": [{"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 6}], "duration": 0.0625, "el_type": "note", "startChar": 1424, "endChar": 1427, "endBeam": true, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
-		"size": {"x": 418, "y": 759, "width": 10, "height": 33}
+		"size": {"x": 418, "y": 767, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "137"},
 		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.125, "el_type": "note", "startChar": 1427, "endChar": 1430, "startBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
-		"size": {"x": 429, "y": 751, "width": 10, "height": 33}
+		"size": {"x": 429, "y": 759, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "138"},
 		"abcEl": {"pitches": [{"pitch": -2, "name": "A,", "verticalPos": 10, "highestVert": 10}], "duration": 0.125, "el_type": "note", "startChar": 1430, "endChar": 1433, "endBeam": true, "averagepitch": 10, "minpitch": 10, "maxpitch": 10},
-		"size": {"x": 440, "y": 744, "width": 10, "height": 37}
+		"size": {"x": 440, "y": 751, "width": 10, "height": 37}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "139"},
 		"abcEl": {"pitches": [{"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 6}], "duration": 0.125, "el_type": "note", "startChar": 1434, "endChar": 1437, "startBeam": true, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
-		"size": {"x": 467, "y": 732, "width": 10, "height": 35}
+		"size": {"x": 467, "y": 740, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "140"},
 		"abcEl": {"pitches": [{"pitch": -7, "name": "C,", "verticalPos": 5, "highestVert": 11}], "duration": 0.125, "el_type": "note", "startChar": 1437, "endChar": 1441, "endBeam": true, "averagepitch": 5, "minpitch": 5, "maxpitch": 5},
-		"size": {"x": 478, "y": 736, "width": 10, "height": 35}
+		"size": {"x": 478, "y": 744, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "141"},
 		"abcEl": {"pitches": [{"pitch": -8, "name": "B,,", "verticalPos": 4, "highestVert": 10}], "duration": 0.125, "el_type": "note", "startChar": 1441, "endChar": 1445, "startBeam": true, "averagepitch": 4, "minpitch": 4, "maxpitch": 4},
-		"size": {"x": 489, "y": 740, "width": 10, "height": 35}
+		"size": {"x": 489, "y": 748, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "142"},
 		"abcEl": {"pitches": [{"pitch": -9, "name": "A,,", "verticalPos": 3, "highestVert": 9}], "duration": 0.125, "el_type": "note", "startChar": 1445, "endChar": 1450, "endBeam": true, "averagepitch": 3, "minpitch": 3, "maxpitch": 3},
-		"size": {"x": 499, "y": 744, "width": 10, "height": 35}
+		"size": {"x": 499, "y": 752, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "143"},
 		"abcEl": {"pitches": [{"pitch": -10, "name": "G,,", "verticalPos": 2, "highestVert": 8}], "duration": 0.25, "el_type": "note", "startChar": 1450, "endChar": 1455, "averagepitch": 2, "minpitch": 2, "maxpitch": 2},
-		"size": {"x": 510, "y": 752, "width": 10, "height": 31}
+		"size": {"x": 510, "y": 759, "width": 10, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "144"},
 		"abcEl": {"pitches": [{"pitch": -11, "name": "F,,", "verticalPos": 1, "highestVert": 7}], "duration": 0.0625, "el_type": "note", "startChar": 1455, "endChar": 1458, "startBeam": true, "averagepitch": 1, "minpitch": 1, "maxpitch": 1},
-		"size": {"x": 521, "y": 728, "width": 10, "height": 58}
+		"size": {"x": 521, "y": 736, "width": 10, "height": 58}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "145"},
 		"abcEl": {"pitches": [{"pitch": -9, "name": "A,,", "verticalPos": 3, "highestVert": 9}], "duration": 0.0625, "el_type": "note", "startChar": 1458, "endChar": 1461, "averagepitch": 3, "minpitch": 3, "maxpitch": 3},
-		"size": {"x": 532, "y": 726, "width": 10, "height": 53}
+		"size": {"x": 532, "y": 733, "width": 10, "height": 53}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "146"},
 		"abcEl": {"pitches": [{"pitch": -7, "name": "C,", "verticalPos": 5, "highestVert": 11}], "duration": 0.0625, "el_type": "note", "startChar": 1461, "endChar": 1463, "averagepitch": 5, "minpitch": 5, "maxpitch": 5},
-		"size": {"x": 543, "y": 723, "width": 10, "height": 48}
+		"size": {"x": 543, "y": 731, "width": 10, "height": 48}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "147"},
 		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.0625, "el_type": "note", "startChar": 1463, "endChar": 1465, "endBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
-		"size": {"x": 553, "y": 721, "width": 10, "height": 39}
+		"size": {"x": 553, "y": 728, "width": 10, "height": 39}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "148"},
 		"abcEl": {"pitches": [{"pitch": -11, "name": "F,,", "verticalPos": 1, "highestVert": 7}], "duration": 0.375, "el_type": "note", "startChar": 1466, "endChar": 1471, "averagepitch": 1, "minpitch": 1, "maxpitch": 1},
-		"size": {"x": 580, "y": 756, "width": 16, "height": 31}
+		"size": {"x": 580, "y": 763, "width": 16, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "149"},
 		"abcEl": {"pitches": [{"pitch": -13, "name": "D,,", "verticalPos": -1, "highestVert": 5}], "duration": 0.125, "el_type": "note", "startChar": 1471, "endChar": 1476, "averagepitch": -1, "minpitch": -1, "maxpitch": -1},
-		"size": {"x": 596, "y": 763, "width": 17, "height": 31}
+		"size": {"x": 596, "y": 771, "width": 17, "height": 31}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "150"},
 		"abcEl": {"duration": 0.25, "pitches": [{"pitch": -10, "name": "G,,", "verticalPos": 2, "highestVert": 2}, {"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 6}], "el_type": "note", "startChar": 1476, "endChar": 1486, "averagepitch": 4, "minpitch": 2, "maxpitch": 6},
-		"size": {"x": 615, "y": 736, "width": 10, "height": 47}
+		"size": {"x": 615, "y": 744, "width": 10, "height": 47}
 	}, {
 		"draggable": false,
 		"svgEl": {"selectable": "false", "data-index": "151"},
 		"abcEl": {"rest": {"type": "rest"}, "duration": 0.25, "el_type": "note", "startChar": 1486, "endChar": 1488, "averagepitch": 7, "minpitch": 7, "maxpitch": 7},
-		"size": {"x": 657, "y": 751, "width": 8, "height": 21}
+		"size": {"x": 657, "y": 759, "width": 8, "height": 21}
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "152"},
 		"abcEl": {"pitches": [{"pitch": -8, "name": "B,,", "verticalPos": 4, "highestVert": 4}], "duration": 1, "el_type": "note", "startChar": 1489, "endChar": 1494, "averagepitch": 4, "minpitch": 4, "maxpitch": 4},
-		"size": {"x": 717, "y": 767, "width": 15, "height": 8}
+		"size": {"x": 717, "y": 775, "width": 15, "height": 8}
 	}]
 //////////////////////////////////////////////////////////
 	var abcTempo = 'X:1\n' +
@@ -7578,7 +7578,7 @@ describe("Selection", function() {
 			"maxpitch": 0,
 			"currentTrackMilliseconds": 0,
 			"currentTrackWholeNotes": 0,
-			"midiPitches": [{"cmd": "note", "pitch": 60, "volume": 105, "start": 0, "duration": 1, "instrument": 0, "gap": 0}]
+			"midiPitches": [{"cmd": "note", "pitch": 60, "volume": 105, "start": 0, "duration": 1, "instrument": 0,"startChar":32,"endChar":35, "gap": 0}]
 		},
 		"size": {"x": 69, "y": 83, "width": 19, "height": 8}
 	}, {
@@ -7595,7 +7595,7 @@ describe("Selection", function() {
 			"maxpitch": 0,
 			"currentTrackMilliseconds": 1333.3333333333335,
 			"currentTrackWholeNotes": 1,
-			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 1, "duration": 1, "instrument": 0, "gap": 0}]
+			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 1, "duration": 1, "instrument": 0,"startChar":55,"endChar":58, "gap": 0}]
 		},
 		"size": {"x": 47, "y": 176, "width": 19, "height": 8}
 	}, {
@@ -7612,7 +7612,7 @@ describe("Selection", function() {
 			"maxpitch": 0,
 			"currentTrackMilliseconds": 2666.666666666667,
 			"currentTrackWholeNotes": 2,
-			"midiPitches": [{"cmd": "note", "pitch": 48, "volume": 105, "start": 2, "duration": 1, "instrument": 0, "gap": 0}]
+			"midiPitches": [{"cmd": "note", "pitch": 48, "volume": 105, "start": 2, "duration": 1, "instrument": 0,"startChar":78,"endChar":81, "gap": 0}]
 		},
 		"size": {"x": 47, "y": 268, "width": 19, "height": 8}
 	}, {
@@ -7629,7 +7629,7 @@ describe("Selection", function() {
 			"maxpitch": 8,
 			"currentTrackMilliseconds": 4000,
 			"currentTrackWholeNotes": 3,
-			"midiPitches": [{"cmd": "note", "pitch": 48, "volume": 105, "start": 3, "duration": 1, "instrument": 0, "gap": 0}]
+			"midiPitches": [{"cmd": "note", "pitch": 48, "volume": 105, "start": 3, "duration": 1, "instrument": 0,"startChar":98,"endChar":101, "gap": 0}]
 		},
 		"size": {"x": 50, "y": 329, "width": 15, "height": 8}
 	}, {
@@ -7646,7 +7646,7 @@ describe("Selection", function() {
 			"maxpitch": 12,
 			"currentTrackMilliseconds": 5333.333333333334,
 			"currentTrackWholeNotes": 4,
-			"midiPitches": [{"cmd": "note", "pitch": 48, "volume": 105, "start": 4, "duration": 1, "instrument": 0, "gap": 0}]
+			"midiPitches": [{"cmd": "note", "pitch": 48, "volume": 105, "start": 4, "duration": 1, "instrument": 0,"startChar":119,"endChar":122, "gap": 0}]
 		},
 		"size": {"x": 48, "y": 406, "width": 19, "height": 8}
 	}, {
@@ -7663,7 +7663,7 @@ describe("Selection", function() {
 			"maxpitch": 12,
 			"currentTrackMilliseconds": 6666.666666666666,
 			"currentTrackWholeNotes": 5,
-			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 5, "duration": 1, "instrument": 0, "gap": 0}]
+			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 5, "duration": 1, "instrument": 0,"startChar":140,"endChar":143, "gap": 0}]
 		},
 		"size": {"x": 48, "y": 498, "width": 19, "height": 8}
 	}, {
@@ -7680,7 +7680,7 @@ describe("Selection", function() {
 			"maxpitch": 12,
 			"currentTrackMilliseconds": 8000,
 			"currentTrackWholeNotes": 6,
-			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 6, "duration": 1, "instrument": 0, "gap": 0}]
+			"midiPitches": [{"cmd": "note", "pitch": 72, "volume": 105, "start": 6, "duration": 1, "instrument": 0,"startChar":159,"endChar":162, "gap": 0}]
 		},
 		"size": {"x": 48, "y": 591, "width": 19, "height": 8}
 	}];
