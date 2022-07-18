@@ -64,7 +64,7 @@ declare module 'abcjs' {
 	export type Decorations = "trill" | "lowermordent" | "uppermordent" | "mordent" | "pralltriller" | "accent" |
 		"fermata" | "invertedfermata" | "tenuto" | "0" | "1" | "2" | "3" | "4" | "5" | "+" | "wedge" |
 		"open" | "thumb" | "snap" | "turn" | "roll" | "irishroll" | "breath" | "shortphrase" | "mediumphrase" | "longphrase" |
-		"segno" | "coda" | "D.S." | "D.C." | "fine" | "crescendo(" | "crescendo)" | "diminuendo(" | "diminuendo)" |
+		"segno" | "coda" | "D.S." | "D.C." | "fine" | "crescendo(" | "crescendo)" | "diminuendo(" | "diminuendo)" |"glissando(" | "glissando)" |
 		"p" | "pp" | "f" | "ff" | "mf" | "mp" | "ppp" | "pppp" |  "fff" | "ffff" | "sfz" | "repeatbar" | "repeatbar2" | "slide" |
 		"upbow" | "downbow" | "staccato" | "trem1" | "trem2" | "trem3" | "trem4" |
 		"/" | "//" | "///" | "////" | "turnx" | "invertedturn" | "invertedturnx" | "arpeggio" | "trill(" | "trill)" | "xstem" |

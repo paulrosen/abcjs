@@ -2,6 +2,7 @@
 
 var DynamicDecoration = require('./abc_dynamic_decoration');
 var CrescendoElem = require('./abc_crescendo_element');
+var GlissandoElem = require('./abc_glissando_element');
 var glyphs = require('./abc_glyphs');
 var RelativeElement = require('./abc_relative_element');
 var TieElem = require('./abc_tie_element');
@@ -277,6 +278,7 @@ var Decoration = function Decoration() {
 	Decoration.prototype.dynamicDecoration = function(voice, decoration, abselem, positioning) {
 		var diminuendo;
 		var crescendo;
+		var glissando;
 		for (var i=0;i<decoration.length; i++) {
 			switch(decoration[i]) {
 				case "diminuendo(":
@@ -295,6 +297,14 @@ var Decoration = function Decoration() {
 					crescendo = { start: this.startCrescendoX, stop: abselem};
 					this.startCrescendoX = undefined;
 					break;
+				case "glissando(":
+					this.startGlissandoX = abselem;
+					glissando = undefined;
+					break;
+				case "glissando)":
+					glissando = { start: this.startGlissandoX, stop: abselem};
+					this.startGlissandoX = undefined;
+					break;
 			}
 		}
 		if (diminuendo) {
@@ -302,6 +312,9 @@ var Decoration = function Decoration() {
 		}
 		if (crescendo) {
 			voice.addOther(new CrescendoElem(crescendo.start, crescendo.stop, "<", positioning));
+		}
+		if (glissando) {
+			voice.addOther(new GlissandoElem(glissando.start, glissando.stop));
 		}
 	};
 

@@ -1,3 +1,4 @@
+var drawGlissando = require('./glissando');
 var drawCrescendo = require('./crescendo');
 var drawDynamics = require('./dynamics');
 var drawTriplet = require('./triplet');
@@ -67,6 +68,9 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 			renderer.controller.classes.incrMeasure();
 		} else {
 			switch (child.type) {
+				case "GlissandoElem":
+					child.elemset = drawGlissando(renderer, child, selectables);
+					break;
 				case "CrescendoElem":
 					child.elemset = drawCrescendo(renderer, child, selectables);
 					break;

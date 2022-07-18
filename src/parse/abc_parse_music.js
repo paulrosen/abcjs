@@ -732,7 +732,7 @@ var volumeDecorations = [
 ];
 
 var dynamicDecorations = [
-	"crescendo(", "crescendo)", "diminuendo(", "diminuendo)"
+	"crescendo(", "crescendo)", "diminuendo(", "diminuendo)", "glissando(", "glissando)"
 ];
 
 var accentPseudonyms = [
