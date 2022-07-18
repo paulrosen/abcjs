@@ -224,6 +224,7 @@ var Parse = function() {
 		var replace = false;
 		var addWord = function(i) {
 			var word = parseCommon.strip(words.substring(last_divider, i));
+			word = word.replace(/\\([-_*|~])/g, '$1')
 			last_divider = i+1;
 			if (word.length > 0) {
 				if (replace)
@@ -237,34 +238,44 @@ var Parse = function() {
 			}
 			return false;
 		};
+		var escNext = false;
 		for (var i = 0; i < words.length; i++) {
-			switch (words.charAt(i)) {
+			switch (words[i]) {
 				case ' ':
 				case '\x12':
 					addWord(i);
 					break;
 				case '-':
-					if (!addWord(i) && word_list.length > 0) {
+					if (!escNext && !addWord(i) && word_list.length > 0) {
 						parseCommon.last(word_list).divider = '-';
 						word_list.push({skip: true, to: 'next'});
 					}
 					break;
 				case '_':
-					addWord(i);
-					word_list.push({skip: true, to: 'slur'});
+					if (!escNext) {
+						addWord(i);
+						word_list.push({skip: true, to: 'slur'});
+					}
 					break;
 				case '*':
-					addWord(i);
-					word_list.push({skip: true, to: 'next'});
+					if (!escNext) {
+						addWord(i);
+						word_list.push({skip: true, to: 'next'});
+					}
 					break;
 				case '|':
-					addWord(i);
-					word_list.push({skip: true, to: 'bar'});
+					if (!escNext) {
+						addWord(i);
+						word_list.push({skip: true, to: 'bar'});
+					}
 					break;
 				case '~':
-					replace = true;
+					if (!escNext) {
+						replace = true;
+					}
 					break;
 			}
+			escNext = words[i] === '\\'
 		}
 
 		var inSlur = false;
