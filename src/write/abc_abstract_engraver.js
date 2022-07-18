@@ -1004,6 +1004,10 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
   // Add a little space to the left of the bar line so that nothing can crowd it.
 	abselem.extraw -= 5;
 
+	if (elem.chord !== undefined) {
+		var ret3 = addChord(this.getTextSize, abselem, elem, 0, 0, 0, false);
+	}
+
 	return abselem;
 
 };
