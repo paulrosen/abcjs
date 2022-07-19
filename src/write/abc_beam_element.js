@@ -42,6 +42,15 @@ var BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
 		this.hint = true;
 	};
 
+	BeamElem.prototype.runningDirection = function (abcelem) {
+		var pitch = abcelem.averagepitch;
+		if (pitch === undefined) return; // don't include elements like spacers in beams
+		this.total = Math.round(this.total+pitch);
+		if (!this.count)
+			this.count = 0;
+		this.count++
+	};
+
 	BeamElem.prototype.add = function(abselem) {
 		var pitch = abselem.abcelem.averagepitch;
 		if (pitch === undefined) return; // don't include elements like spacers in beams
@@ -60,6 +69,21 @@ var BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
 
 	BeamElem.prototype.addBeam = function(beam) {
 		this.beams.push(beam);
+	};
+
+	BeamElem.prototype.setStemDirection = function() {
+		// Have to figure this out before the notes are placed because placing the notes also places the decorations.
+		this.average = calcAverage(this.total, this.count);
+		if (this.forceup) {
+			this.stemsUp = true;
+		} else if (this.forcedown) {
+			this.stemsUp = false;
+		} else {
+			var middleLine = 6;	// hardcoded 6 is B
+			this.stemsUp = this.average < middleLine; // true is up, false is down;
+		}
+		delete this.count;
+		this.total = 0;
 	};
 
 	BeamElem.prototype.calcDir = function() {

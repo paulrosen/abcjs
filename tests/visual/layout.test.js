@@ -97,7 +97,7 @@ describe("Layout", function() {
 
 	var abcStaccatoPlacement = "E.B .B"
 
-	var expectedStaccatoPlacement = [{ x: 82, y: 63 }, { x: 112, y: 40 }]
+	var expectedStaccatoPlacement = [{ x: 82, y: 64 }, { x: 112, y: 40 }]
 
 	var abcRhythmPlacement = "R: reel\n" +
 		"C"

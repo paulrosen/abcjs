@@ -390,6 +390,13 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		var beamelem = new BeamElem(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams, elems[0]);
 		if (hint) beamelem.setHint();
 		for (var i = 0; i < elems.length; i++) {
+			// Do a first pass to figure out the stem direction before creating the notes, so that staccatos and other decorations can be placed correctly.
+			beamelem.runningDirection(elems[i])
+		}
+		beamelem.setStemDirection()
+		var tempStemDir = this.stemdir
+		this.stemdir = beamelem.stemsUp ? 'up' : 'down'
+		for (i = 0; i < elems.length; i++) {
 			var elem = elems[i];
 			var abselem = this.createNote(elem, true, isSingleLineStaff, voice);
 			abselemset.push(abselem);
@@ -402,6 +409,7 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		}
 		beamelem.calcDir();
 		voice.addBeam(beamelem);
+		this.stemdir = tempStemDir
 		return abselemset;
 	};
 

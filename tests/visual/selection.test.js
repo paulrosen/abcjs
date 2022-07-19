@@ -2561,7 +2561,7 @@ describe("Selection", function() {
 						"pitch": -8,
 						"name": "B,,",
 						"verticalPos": 4,
-						"highestVert": 10
+						"highestVert": 4
 					}
 				],
 				"duration": 0.125,
@@ -5953,7 +5953,7 @@ describe("Selection", function() {
 						"pitch": -6,
 						"name": "D,",
 						"verticalPos": 6,
-						"highestVert": 6
+						"highestVert": 12
 					}
 				],
 				"duration": 0.125,
@@ -6206,7 +6206,7 @@ describe("Selection", function() {
 						"pitch": -4,
 						"name": "F,",
 						"verticalPos": 8,
-						"highestVert": 8
+						"highestVert": 14
 					}
 				],
 				"duration": 0.0625,
@@ -6873,7 +6873,7 @@ describe("Selection", function() {
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "50"},
-		"abcEl": {"pitches": [{"pitch": -8, "name": "B,,", "verticalPos": 4, "highestVert": 10}], "duration": 0.125, "el_type": "note", "startChar": 1276, "endChar": 1281, "endBeam": true, "averagepitch": 4, "minpitch": 4, "maxpitch": 4},
+		"abcEl": {"pitches": [{"pitch": -8, "name": "B,,", "verticalPos": 4, "highestVert": 4}], "duration": 0.125, "el_type": "note", "startChar": 1276, "endChar": 1281, "endBeam": true, "averagepitch": 4, "minpitch": 4, "maxpitch": 4},
 		"size": {"x": 256, "y": 507, "width": 10, "height": 33}
 	}, {
 		"draggable": true,
@@ -7366,7 +7366,7 @@ describe("Selection", function() {
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "139"},
-		"abcEl": {"pitches": [{"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 6}], "duration": 0.125, "el_type": "note", "startChar": 1434, "endChar": 1437, "startBeam": true, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
+		"abcEl": {"pitches": [{"pitch": -6, "name": "D,", "verticalPos": 6, "highestVert": 12}], "duration": 0.125, "el_type": "note", "startChar": 1434, "endChar": 1437, "startBeam": true, "averagepitch": 6, "minpitch": 6, "maxpitch": 6},
 		"size": {"x": 467, "y": 740, "width": 10, "height": 35}
 	}, {
 		"draggable": true,
@@ -7406,7 +7406,7 @@ describe("Selection", function() {
 	}, {
 		"draggable": true,
 		"svgEl": {"selectable": "false", "data-index": "147"},
-		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 8}], "duration": 0.0625, "el_type": "note", "startChar": 1463, "endChar": 1465, "endBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
+		"abcEl": {"pitches": [{"pitch": -4, "name": "F,", "verticalPos": 8, "highestVert": 14}], "duration": 0.0625, "el_type": "note", "startChar": 1463, "endChar": 1465, "endBeam": true, "averagepitch": 8, "minpitch": 8, "maxpitch": 8},
 		"size": {"x": 553, "y": 728, "width": 10, "height": 39}
 	}, {
 		"draggable": true,
