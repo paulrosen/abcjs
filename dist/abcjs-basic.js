@@ -3232,6 +3232,7 @@ var Parse = function Parse() {
 
     var addWord = function addWord(i) {
       var word = parseCommon.strip(words.substring(last_divider, i));
+      word = word.replace(/\\([-_*|~])/g, '$1');
       last_divider = i + 1;
 
       if (word.length > 0) {
@@ -3249,15 +3250,17 @@ var Parse = function Parse() {
       return false;
     };
 
+    var escNext = false;
+
     for (var i = 0; i < words.length; i++) {
-      switch (words.charAt(i)) {
+      switch (words[i]) {
         case ' ':
         case '\x12':
           addWord(i);
           break;
 
         case '-':
-          if (!addWord(i) && word_list.length > 0) {
+          if (!escNext && !addWord(i) && word_list.length > 0) {
             parseCommon.last(word_list).divider = '-';
             word_list.push({
               skip: true,
@@ -3268,33 +3271,47 @@ var Parse = function Parse() {
           break;
 
         case '_':
-          addWord(i);
-          word_list.push({
-            skip: true,
-            to: 'slur'
-          });
+          if (!escNext) {
+            addWord(i);
+            word_list.push({
+              skip: true,
+              to: 'slur'
+            });
+          }
+
           break;
 
         case '*':
-          addWord(i);
-          word_list.push({
-            skip: true,
-            to: 'next'
-          });
+          if (!escNext) {
+            addWord(i);
+            word_list.push({
+              skip: true,
+              to: 'next'
+            });
+          }
+
           break;
 
         case '|':
-          addWord(i);
-          word_list.push({
-            skip: true,
-            to: 'bar'
-          });
+          if (!escNext) {
+            addWord(i);
+            word_list.push({
+              skip: true,
+              to: 'bar'
+            });
+          }
+
           break;
 
         case '~':
-          replace = true;
+          if (!escNext) {
+            replace = true;
+          }
+
           break;
       }
+
+      escNext = words[i] === '\\';
     }
 
     var inSlur = false;
@@ -7985,7 +8002,7 @@ function durationOfMeasure(multilineVars) {
 
 var legalAccents = ["trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge", "open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase", "segno", "coda", "D.S.", "D.C.", "fine", "beambr1", "beambr2", "slide", "marcato", "upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4", "turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato", "style=normal", "style=harmonic", "style=rhythm", "style=x", "style=triangle"];
 var volumeDecorations = ["p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp", "fff", "ffff", "sfz"];
-var dynamicDecorations = ["crescendo(", "crescendo)", "diminuendo(", "diminuendo)"];
+var dynamicDecorations = ["crescendo(", "crescendo)", "diminuendo(", "diminuendo)", "glissando(", "glissando)"];
 var accentPseudonyms = [["<", "accent"], [">", "accent"], ["tr", "trill"], ["plus", "+"], ["emphasis", "accent"], ["^", "umarcato"], ["marcato", "umarcato"]];
 var accentDynamicPseudonyms = [["<(", "crescendo("], ["<)", "crescendo)"], [">(", "diminuendo("], [">)", "diminuendo)"]];
 
@@ -12771,7 +12788,9 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
           volume: velocity,
           start: timeToRealTime(elem.time),
           duration: durationRounded(note.duration),
-          instrument: currentInstrument
+          instrument: currentInstrument,
+          startChar: elem.elem.startChar,
+          endChar: elem.elem.endChar
         };
         p = adjustForMicroTone(p);
 
@@ -14844,6 +14863,8 @@ var createNoteMap = function createNoteMap(sequence) {
               end: Math.round((ev.start + len - gap) * 1000000) / 1000000,
               volume: ev.volume
             };
+            if (ev.startChar) obj.startChar = ev.startChar;
+            if (ev.endChar) obj.endChar = ev.endChar;
             if (ev.style) obj.style = ev.style;
             if (ev.cents) obj.cents = ev.cents;
             map[i].push(obj);
@@ -19354,6 +19375,15 @@ AbstractEngraver.prototype.createBeam = function (isSingleLineStaff, voice, elem
   if (hint) beamelem.setHint();
 
   for (var i = 0; i < elems.length; i++) {
+    // Do a first pass to figure out the stem direction before creating the notes, so that staccatos and other decorations can be placed correctly.
+    beamelem.runningDirection(elems[i]);
+  }
+
+  beamelem.setStemDirection();
+  var tempStemDir = this.stemdir;
+  this.stemdir = beamelem.stemsUp ? 'up' : 'down';
+
+  for (i = 0; i < elems.length; i++) {
     var elem = elems[i];
     var abselem = this.createNote(elem, true, isSingleLineStaff, voice);
     abselemset.push(abselem);
@@ -19368,6 +19398,7 @@ AbstractEngraver.prototype.createBeam = function (isSingleLineStaff, voice, elem
 
   beamelem.calcDir();
   voice.addBeam(beamelem);
+  this.stemdir = tempStemDir;
   return abselemset;
 };
 
@@ -20113,6 +20144,11 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
 
 
   abselem.extraw -= 5;
+
+  if (elem.chord !== undefined) {
+    var ret3 = addChord(this.getTextSize, abselem, elem, 0, 0, 0, false);
+  }
+
   return abselem;
 };
 
@@ -20171,6 +20207,15 @@ BeamElem.prototype.setHint = function () {
   this.hint = true;
 };
 
+BeamElem.prototype.runningDirection = function (abcelem) {
+  var pitch = abcelem.averagepitch;
+  if (pitch === undefined) return; // don't include elements like spacers in beams
+
+  this.total = Math.round(this.total + pitch);
+  if (!this.count) this.count = 0;
+  this.count++;
+};
+
 BeamElem.prototype.add = function (abselem) {
   var pitch = abselem.abcelem.averagepitch;
   if (pitch === undefined) return; // don't include elements like spacers in beams
@@ -20191,6 +20236,24 @@ BeamElem.prototype.add = function (abselem) {
 
 BeamElem.prototype.addBeam = function (beam) {
   this.beams.push(beam);
+};
+
+BeamElem.prototype.setStemDirection = function () {
+  // Have to figure this out before the notes are placed because placing the notes also places the decorations.
+  this.average = calcAverage(this.total, this.count);
+
+  if (this.forceup) {
+    this.stemsUp = true;
+  } else if (this.forcedown) {
+    this.stemsUp = false;
+  } else {
+    var middleLine = 6; // hardcoded 6 is B
+
+    this.stemsUp = this.average < middleLine; // true is up, false is down;
+  }
+
+  delete this.count;
+  this.total = 0;
 };
 
 BeamElem.prototype.calcDir = function () {
@@ -20761,6 +20824,8 @@ var DynamicDecoration = __webpack_require__(/*! ./abc_dynamic_decoration */ "./s
 
 var CrescendoElem = __webpack_require__(/*! ./abc_crescendo_element */ "./src/write/abc_crescendo_element.js");
 
+var GlissandoElem = __webpack_require__(/*! ./abc_glissando_element */ "./src/write/abc_glissando_element.js");
+
 var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
 
 var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
@@ -21077,6 +21142,7 @@ function leftDecoration(decoration, abselem, roomtaken) {
 Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, positioning) {
   var diminuendo;
   var crescendo;
+  var glissando;
 
   for (var i = 0; i < decoration.length; i++) {
     switch (decoration[i]) {
@@ -21105,6 +21171,19 @@ Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, p
         };
         this.startCrescendoX = undefined;
         break;
+
+      case "glissando(":
+        this.startGlissandoX = abselem;
+        glissando = undefined;
+        break;
+
+      case "glissando)":
+        glissando = {
+          start: this.startGlissandoX,
+          stop: abselem
+        };
+        this.startGlissandoX = undefined;
+        break;
     }
   }
 
@@ -21114,6 +21193,10 @@ Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, p
 
   if (crescendo) {
     voice.addOther(new CrescendoElem(crescendo.start, crescendo.stop, "<", positioning));
+  }
+
+  if (glissando) {
+    voice.addOther(new GlissandoElem(glissando.start, glissando.stop));
   }
 };
 
@@ -21478,6 +21561,23 @@ EngraverController.prototype.addSelectListener = function (clickListener) {
 };
 
 module.exports = EngraverController;
+
+/***/ }),
+
+/***/ "./src/write/abc_glissando_element.js":
+/*!********************************************!*\
+  !*** ./src/write/abc_glissando_element.js ***!
+  \********************************************/
+/***/ (function(module) {
+
+var GlissandoElem = function GlissandoElem(anchor1, anchor2) {
+  this.type = "GlissandoElem";
+  this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
+
+  this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
+};
+
+module.exports = GlissandoElem;
 
 /***/ }),
 
@@ -23965,6 +24065,107 @@ module.exports = drawEnding;
 
 /***/ }),
 
+/***/ "./src/write/draw/glissando.js":
+/*!*************************************!*\
+  !*** ./src/write/draw/glissando.js ***!
+  \*************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
+
+var printPath = __webpack_require__(/*! ./print-path */ "./src/write/draw/print-path.js");
+
+var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
+
+function drawGlissando(renderer, params, selectables) {
+  if (!params.anchor1 || !params.anchor2 || !params.anchor1.heads || !params.anchor2.heads || params.anchor1.heads.length === 0 || params.anchor2.heads.length === 0) window.console.error("Glissando Element not set.");
+  var margin = 4;
+  var leftY = renderer.calcY(params.anchor1.heads[0].pitch);
+  var rightY = renderer.calcY(params.anchor2.heads[0].pitch);
+  var leftX = params.anchor1.x + params.anchor1.w / 2;
+  var rightX = params.anchor2.x + params.anchor2.w / 2;
+  var len = lineLength(leftX, leftY, rightX, rightY);
+  var marginLeft = params.anchor1.w / 2 + margin;
+  var marginRight = params.anchor2.w / 2 + margin;
+  var s = slope(leftX, leftY, rightX, rightY);
+  var leftYAdj = getY(leftY, s, marginLeft);
+  var rightYAdj = getY(rightY, s, -marginRight);
+  var num = numSquigglies(len - marginLeft - marginRight);
+  var el = drawSquiggly(renderer, leftX + marginLeft, leftYAdj, num, s);
+  selectables.wrapSvgEl({
+    el_type: "glissando",
+    startChar: -1,
+    endChar: -1
+  }, el);
+  return [el];
+}
+
+function lineLength(leftX, leftY, rightX, rightY) {
+  // The length from notehead center to notehead center.
+  var w = rightX - leftX;
+  var h = rightY - leftY;
+  return Math.sqrt(w * w + h * h);
+}
+
+function slope(leftX, leftY, rightX, rightY) {
+  return (rightY - leftY) / (rightX - leftX);
+}
+
+function getY(y, slope, xOfs) {
+  return roundNumber(y + xOfs * slope);
+}
+
+function numSquigglies(length) {
+  var endLen = 5; // The width of the end - that is, the non repeating part
+
+  return Math.max(2, Math.floor((length - endLen * 2) / 6));
+}
+
+var leftStart = [[3.5, -4.8]];
+var right = [[1.5, -1], [.3, -.3], [-3.5, 3.8]];
+var leftEnd = [[-1.5, 2]];
+var top = [[3, 4], [3, -4]];
+var bottom = [[-3, 4], [-3, -4]];
+
+function segment(arr, slope) {
+  var ret = "";
+
+  for (var i = 0; i < arr.length; i++) {
+    ret += 'l' + arr[i][0] + ' ' + getY(arr[i][1], slope, arr[i][0]);
+  }
+
+  return ret;
+}
+
+var drawSquiggly = function drawSquiggly(renderer, x, y, num, slope) {
+  var p = sprintf("M %f %f", x, y);
+  p += segment(leftStart, slope);
+  var i;
+
+  for (i = 0; i < num; i++) {
+    p += segment(top, slope);
+  }
+
+  p += segment(right, slope);
+
+  for (i = 0; i < num; i++) {
+    p += segment(bottom, slope);
+  }
+
+  p += segment(leftEnd, slope) + 'z';
+  return printPath(renderer, {
+    path: p,
+    highlight: "stroke",
+    stroke: renderer.foregroundColor,
+    'class': renderer.controller.classes.generate('decoration'),
+    "data-name": "glissando"
+  });
+};
+
+module.exports = drawGlissando;
+
+/***/ }),
+
 /***/ "./src/write/draw/group-elements.js":
 /*!******************************************!*\
   !*** ./src/write/draw/group-elements.js ***!
@@ -25502,6 +25703,8 @@ module.exports = drawTriplet;
   \*********************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
+var drawGlissando = __webpack_require__(/*! ./glissando */ "./src/write/draw/glissando.js");
+
 var drawCrescendo = __webpack_require__(/*! ./crescendo */ "./src/write/draw/crescendo.js");
 
 var drawDynamics = __webpack_require__(/*! ./dynamics */ "./src/write/draw/dynamics.js");
@@ -25601,6 +25804,10 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
       renderer.controller.classes.incrMeasure();
     } else {
       switch (child.type) {
+        case "GlissandoElem":
+          child.elemset = drawGlissando(renderer, child, selectables);
+          break;
+
         case "CrescendoElem":
           child.elemset = drawCrescendo(renderer, child, selectables);
           break;
@@ -28175,7 +28382,7 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
         font: 'infofont',
         klass: 'meta-top rhythm',
         absElemType: "rhythm",
-        noMove: true,
+        noMove: noMove,
         info: metaTextInfo.rhythm,
         name: "rhythm"
       }, getTextSize);
@@ -28253,7 +28460,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.0.3';
+var version = '6.0.4';
 module.exports = version;
 
 /***/ })

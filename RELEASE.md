@@ -1,3 +1,25 @@
+# Version 6.0.4
+
+## Bugs
+
+* Fix position of staccato when a note is beamed and its stem is backwards.
+* Write annotations above bar lines.
+* fix placement of rhythm indicator (the R: field) on treble clef when there is nothing else above the staff.
+* fix some broken tests; add test for staccato bug and rhythm word placement.
+* fixed some Typescript warnings and errors
+
+## Features
+
+* Recognize backslash to escape lyrics.
+* Add glissando
+* pass back the start and end char positions with the audio callbacks.
+
+## Documentation
+
+* Add example of adding note names to a tune automatically.
+* Add a mention for the VSCode extension.
+* Add tune book example.
+
 # Version 6.0.3
 
 ## Bugs
@@ -12,7 +34,7 @@
 
 ## Features
 
-* Quotation maark in a chord can be escaped.
+* Quotation mark in a chord can be escaped.
 
 ## Documentation
 
