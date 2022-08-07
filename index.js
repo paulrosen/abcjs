@@ -25,6 +25,7 @@ var version = require('./version');
 var animation = require('./src/api/abc_animation');
 var tuneBook = require('./src/api/abc_tunebook');
 var sequence = require('./src/synth/abc_midi_sequencer');
+var strTranspose = require('./src/str/output');
 
 var abcjs = {};
 
@@ -43,6 +44,7 @@ abcjs.TimingCallbacks = require('./src/api/abc_timing_callbacks');
 
 var glyphs = require('./src/write/abc_glyphs');
 abcjs.setGlyph = glyphs.setSymbol;
+abcjs.strTranspose = strTranspose;
 
 var CreateSynth = require('./src/synth/create-synth');
 var instrumentIndexToName = require('./src/synth/instrument-index-to-name');
