@@ -13,19 +13,17 @@ On this folder, and
 npm link abcjs
 ```
 
-In a test application. Then any changes made to the abcjs code will automatically be picked up by that test application's webpack.
+in an npm-based test application (like React or Vue). Then any changes made to the abcjs code will automatically be picked up by that test application's webpack.
 
 ## Docker
 
 There are docker files included so that npm can be run without installing it. This only applies to someone who wants to keep all their development tools separate on their computer. If you have nodejs installed then you can ignore this.
 
-If you do want to build without development tools installed, but you do have Docker installed, put this in your profile:
-```shell script
-npm() {
-    CMD="${1: } ${2: } ${3: }" docker-compose up
-}
+To run, type:
+```bash
+./docker-start.sh
 ```
-Then from the root folder you can use `npm` like normal. Note that this won't work if you are from any other folder.
+That will get you a linux command like to run npm.
 
 ## Building locally
 
@@ -70,7 +68,29 @@ cat src/plugin/greasemonkey.js bin/abcjs_plugin_5.12.0-min.js > bin/abcjs_plugin
 
 ## Testing
 
-There are hundreds of test files that are stored outside of this repository. If you wish to run the unit tests, please contact [Paul Rosen](https://paulrosen.net/contact-me/) for more information.
+### End-to-end
+
+There are mocha tests that are run in the browser that test various functionality. They are not close to having enough test coverage, compared to the set of ABC strings described below, but they are easy to use. Contributions to these are welcome.
+
+To run them, open the file `tests/all.html` from a server. This is run on the source code so that changes you make to the source will be immediately reflected in the tests.
+
+To run just one test or a smaller set of them, add `?grep=xxxxx` to run only the tests that match your string.
+
+Most of the tests are run from `all.html`, but the audio tests need to run in real-time and require a user click to start them, so they are in a separate file called `web-audio.html`. In addition, there is a file `browser-compatibility.html` that runs the tests using the built version of the abcjs library so it will run on older browsers.
+
+The rest of the `.html` files are subsets of the tests that are just for convenience if you are working on a particular section.
+
+::: tip Branch
+It is not enough to just open the file so that the address bar in the browser shows the `file://` protocol. That will not run the javascript.
+:::
+
+To start a localhost server in WebStorm, open the file and notice the floating browser icons in the upper right corner. Click on one of them to open the test runner in that browser.
+
+To start a localhost server in VSCode, one way to do that is to install the extension "Live Server" and click "Go Live".
+
+### Testing Intermediate Stages
+
+There are hundreds of test files that are stored outside of this repository. If you wish to run those unit tests, please contact [Paul Rosen](https://paulrosen.net/contact-me/) for more information.
 
 The files in the folder `test` contain a number of functions that receive an ABC formatted string and output an easy to read dump of the resulting objects.
 
