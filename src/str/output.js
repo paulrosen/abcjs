@@ -69,6 +69,14 @@ var strTranspose;
 
 	function transposeVoice(abc, voice, keyRoot, keyAccidentals, destinationKey, steps) {
 		var changes = []
+		var letterDistance = letters.indexOf(destinationKey.root) - letters.indexOf(keyRoot)
+		if (steps > 12)
+			letterDistance += 7
+		else if (steps < -12)	
+			letterDistance -=14
+		else if (steps < 0)	
+			letterDistance -= 7
+
 		var measureAccidentals = {}
 		for (var i = 0; i < voice.length; i++) {
 			var el = voice[i];
@@ -76,7 +84,9 @@ var strTranspose;
 				for (var c = 0; c < el.chord.length; c++) {
 					var ch = el.chord[c]
 					if (ch.position === 'default') {
-						var newChord = transposeChordName(ch.name, steps)
+						var prefersFlats = destinationKey.accidentals.length && destinationKey.accidentals[0].acc === 'flat'
+						var newChord = transposeChordName(ch.name, steps, prefersFlats, true)
+						newChord = newChord.replace(/♭/g,"b").replace(/♯/g,"#")
 						changes.push(replaceChord(abc, el.startChar, el.endChar,newChord))
 					}
 				}
@@ -86,7 +96,7 @@ var strTranspose;
 					var note = parseNote(el.pitches[j].name, keyRoot, keyAccidentals, measureAccidentals)
 					if (note.acc)
 						measureAccidentals[note.name] = note.acc
-					var newPitch = transposePitch(note, destinationKey)
+					var newPitch = transposePitch(note, destinationKey, letterDistance)
 					changes.push(replaceNote(abc, el.startChar, el.endChar, newPitch ))
 					//console.log(abc.substring(el.startChar, el.endChar) + ': ' + newPitch)
 				}
@@ -96,7 +106,7 @@ var strTranspose;
 		return changes
 	}
 
-	var letters = "ABCDEFG"
+	var letters = "CDEFGAB"
 	var octaves = [",,,,",",,,",",,",",","","'", "''", "'''", "''''"]
 
 	function newKey(key, steps) {
@@ -107,12 +117,32 @@ var strTranspose;
 		return {root: newMode[0], mode: key.mode, acc: newMode.length>1?newMode[1]:'', accidentals: acc}
 	}
 
-	function transposePitch(note, key) {
-		// TODO-PER: if the note crosses "c" then the octave changes, so that is true of "B" when going up one step, "A" and "B" when going up two steps, etc., and reverse when going down.
+	function transposePitch(note, key, letterDistance) {
+		// Depending on what the current note and new note are, the octave might have changed
+		// The letterDistance is how far the change is to see if we passed "C" when transposing.
+
+		// TODO-PER: take care of case when steps is more than an octave - the note needs to change more.
+
+
+		// If there is an adjustment of 3 or -3 (if there is a flat in the key sig but the note has a double sharp, for instance), then bump the pitch a note.
+		var pitch = note.pitch
+		if (note.adj === 3) {
+			pitch++
+			note.adj -= 2
+		} else if (note.adj === -3) {
+			pitch--
+			note.adj += 2
+		}
 		var root = letters.indexOf(key.root)
-		var index = (root + note.pitch) % 7
+		var index = (root + pitch) % 7
+		// TODO-PER: if the note crosses "c" then the octave changes, so that is true of "B" when going up one step, "A" and "B" when going up two steps, etc., and reverse when going down.
+		if (index-letterDistance < 0)
+			note.oct++;
+			
+		var oct = Math.floor((root + index)/7)
 		var name = letters[index]
-		// TODO-PER: figure out the accidental when there are key sig concerns
+		console.log(JSON.stringify({i:index-letterDistance, root, oct, index, pitch: note.pitch, name}))
+
 		var acc = '';
 		switch (note.adj) {
 			case -2: acc = "__"; break;
@@ -151,7 +181,7 @@ var strTranspose;
 		var pos = letters.indexOf(name) - root;
 		if (pos < 0) pos += 7
 		var oct = octaves.indexOf(reg[3])
-		if (name === reg[2])
+		if (name === reg[2]) // See if it is a capital letter and subtract an octave if so.
 			oct--;
 		return {acc: reg[1], name: name, pitch: pos, oct: oct, adj: calcAdjustment(reg[1], keyAccidentals[name], measureAccidentals[name])}
 	}
