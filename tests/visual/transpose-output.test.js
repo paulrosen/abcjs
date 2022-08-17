@@ -62,6 +62,12 @@ describe("Transpose Output", function () {
 	var abcMinorExpected = "K: F#m\n" +
 		"FGAB|cdef|\n"
 
+	var abcNone = "K: none\n" +
+		"CDEF ^C^D^E^F CDEF|GABc _G_A_B_ cGABc|^^C^^D^^E^^F CDEF|__G__A__B__c GABc|\n"
+
+	var abcNoneExpected = "K: none\n" +
+		"DEFG ^D^E^F^G DEFG|ABcd _A_B_c_d ABcd|^^D^^E^^F^^G DEFG|__A__B__c__d ABcd|\n"
+
 	var abcDorian = "K: EDor\n" +
 		"EFGA|Bcde|\n"
 
@@ -102,6 +108,10 @@ describe("Transpose Output", function () {
 
 	it("output-minor", function () {
 		outputTest(abcMinor, abcMinorExpected, 2)
+	})
+
+	it("output-none", function () {
+		outputTest(abcNone, abcNoneExpected, 2)
 	})
 
 	it("output-grace", function () {
