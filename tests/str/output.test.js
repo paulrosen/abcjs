@@ -1,5 +1,5 @@
 describe("Output", function() {
-	var abcInline = "T: Transpose Output\n" +
+	var abcAll = "T: Transpose Output\n" +
 		"K: Eb\n" +
 		"V: 1\n" +
 		'"Eb"C_D"Eb/C"!marcato!E^F ^^GAB"Ab7b5"z|E__E_E E =E^E^^E E|\n' +
@@ -10,7 +10,7 @@ describe("Output", function() {
 		"V: 2\n" +
 		"c'_d'e'^f' g'a'b'Tc''|\n"
 
-	var abcInlineExpected = "T: Transpose Output\n" +
+	var abcAllExpected = "T: Transpose Output\n" +
 		"K: F\n" +
 		"V: 1\n" +
 		'"F"D_E"F/D"!marcato!F^G ^^ABc"Bb7b5"z|F_FF F ^F^^F^G ^G|\n' +
@@ -21,8 +21,20 @@ describe("Output", function() {
 		"V: 2\n" +
 		"d'_e'f'^g' a'b'c''Td'''|\n"
 
-	it("output", function () {
-		outputTest(abcInline, abcInlineExpected, 2)
+	var abcChords = "T: Transpose Output\n" +
+		"K: D\n" +
+		'[DEF] [_DE^F] [_E=F_G] |\n'
+
+	var abcChordsExpected = "T: Transpose Output\n" +
+		"K: E\n" +
+		'[EFG] [_EFG] [=F=G_A] |\n'
+
+	it("output-transpose-chords", function () {
+		outputTest(abcChords, abcChordsExpected, 2)
+	})
+
+	it("output-all", function () {
+		outputTest(abcAll, abcAllExpected, 2)
 	})
 })
 

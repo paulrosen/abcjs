@@ -4,9 +4,9 @@ var transposeChordName = require("../parse/transpose-chord")
 
 var strTranspose;
 
-(function() {
+(function () {
 	"use strict";
-	strTranspose = function(abc, abcTune, steps) {
+	strTranspose = function (abc, abcTune, steps) {
 		var changes = [];
 		var i;
 		for (i = 0; i < abcTune.length; i++)
@@ -14,14 +14,14 @@ var strTranspose;
 
 		// Reverse sort so that we are replacing strings from the end to the beginning so that the indexes aren't invalidated as we go.
 		// (Because voices can be written in different ways we can't count on the notes being encountered in the order they appear in the string.)
-		changes = changes.sort(function(a,b) {
+		changes = changes.sort(function (a, b) {
 			return b.start - a.start
 		})
 		//console.log(changes)
 		var output = abc.split('')
 		for (i = 0; i < changes.length; i++) {
 			var ch = changes[i]
-			output.splice(ch.start, ch.end-ch.start, ch.note)
+			output.splice(ch.start, ch.end - ch.start, ch.note)
 		}
 		return output.join('')
 	}
@@ -30,11 +30,11 @@ var strTranspose;
 		var changes = []
 		var k = abcTune.getKeySignature()
 		var keySigDef = k.root + k.acc + k.mode
-		var place = abc.indexOf("K:")+2
+		var place = abc.indexOf("K:") + 2
 		while (abc[place] === ' ')
 			place++;
 		var destinationKey = newKey(k, steps)
-		changes.push({start: place, end: place+keySigDef.length, note: destinationKey.root+destinationKey.acc+k.mode})
+		changes.push({ start: place, end: place + keySigDef.length, note: destinationKey.root + destinationKey.acc + k.mode })
 
 		for (var i = 0; i < abcTune.lines.length; i++) {
 			if (abcTune.lines[i].staff) {
@@ -56,7 +56,7 @@ var strTranspose;
 	}
 
 	function createKeyAccidentals(key) {
-		var ret = { }
+		var ret = {}
 		for (var i = 0; i < key.accidentals.length; i++) {
 			var acc = key.accidentals[i];
 			if (acc.acc === 'flat')
@@ -72,9 +72,9 @@ var strTranspose;
 		var letterDistance = letters.indexOf(destinationKey.root) - letters.indexOf(keyRoot)
 		if (steps > 12)
 			letterDistance += 7
-		else if (steps < -12)	
-			letterDistance -=14
-		else if (steps < 0)	
+		else if (steps < -12)
+			letterDistance -= 14
+		else if (steps < 0)
 			letterDistance -= 7
 
 		var measureAccidentals = {}
@@ -86,8 +86,8 @@ var strTranspose;
 					if (ch.position === 'default') {
 						var prefersFlats = destinationKey.accidentals.length && destinationKey.accidentals[0].acc === 'flat'
 						var newChord = transposeChordName(ch.name, steps, prefersFlats, true)
-						newChord = newChord.replace(/♭/g,"b").replace(/♯/g,"#")
-						changes.push(replaceChord(abc, el.startChar, el.endChar,newChord))
+						newChord = newChord.replace(/♭/g, "b").replace(/♯/g, "#")
+						changes.push(replaceChord(abc, el.startChar, el.endChar, newChord))
 					}
 				}
 			}
@@ -97,7 +97,7 @@ var strTranspose;
 					if (note.acc)
 						measureAccidentals[note.name] = note.acc
 					var newPitch = transposePitch(note, destinationKey, letterDistance)
-					changes.push(replaceNote(abc, el.startChar, el.endChar, newPitch ))
+					changes.push(replaceNote(abc, el.startChar, el.endChar, newPitch, j))
 					//console.log(abc.substring(el.startChar, el.endChar) + ': ' + newPitch)
 				}
 			} else if (el.el_type === "bar")
@@ -107,22 +107,19 @@ var strTranspose;
 	}
 
 	var letters = "CDEFGAB"
-	var octaves = [",,,,",",,,",",,",",","","'", "''", "'''", "''''"]
+	var octaves = [",,,,", ",,,", ",,", ",", "", "'", "''", "'''", "''''"]
 
 	function newKey(key, steps) {
 		var major = relativeMajor(key.root + key.acc + key.mode)
 		var newMajor = transposeKey(major, steps)
 		var newMode = relativeMode(newMajor)
 		var acc = allKeys()[newMajor]
-		return {root: newMode[0], mode: key.mode, acc: newMode.length>1?newMode[1]:'', accidentals: acc}
+		return { root: newMode[0], mode: key.mode, acc: newMode.length > 1 ? newMode[1] : '', accidentals: acc }
 	}
 
 	function transposePitch(note, key, letterDistance) {
 		// Depending on what the current note and new note are, the octave might have changed
 		// The letterDistance is how far the change is to see if we passed "C" when transposing.
-
-		// TODO-PER: take care of case when steps is more than an octave - the note needs to change more.
-
 
 		// If there is an adjustment of 3 or -3 (if there is a flat in the key sig but the note has a double sharp, for instance), then bump the pitch a note.
 		var pitch = note.pitch
@@ -135,21 +132,30 @@ var strTranspose;
 		}
 		var root = letters.indexOf(key.root)
 		var index = (root + pitch) % 7
-		// TODO-PER: if the note crosses "c" then the octave changes, so that is true of "B" when going up one step, "A" and "B" when going up two steps, etc., and reverse when going down.
-		if (index-letterDistance < 0)
+		// TODO-PER: The octave crossing isn't complete. Check for going down below an octave and also transposing more than an octave.
+		// if the note crosses "c" then the octave changes, so that is true of "B" when going up one step, "A" and "B" when going up two steps, etc., and reverse when going down.
+		if (index - letterDistance < 0)
 			note.oct++;
-			
-		var oct = Math.floor((root + index)/7)
+
 		var name = letters[index]
-		console.log(JSON.stringify({i:index-letterDistance, root, oct, index, pitch: note.pitch, name}))
 
 		var acc = '';
-		switch (note.adj) {
-			case -2: acc = "__"; break;
-			case -1: acc = "_"; break;
-			case 0: acc = ""; break;
-			case 1: acc = "^"; break;
-			case 2: acc = "^^"; break;
+		if (note.adj) {
+			var adj = note.adj
+			// the amount of adjustment depends on the key - if there is a sharp in the key sig, then -1 is a natural, if there isn't, then -1 is a flat.
+			for (var i = 0; i < key.accidentals.length; i++) {
+				if (key.accidentals[i].note.toLowerCase() === name.toLowerCase()) {
+					adj = adj + (key.accidentals[i].acc === 'flat' ? -1 : 1)
+					break;
+				}
+			}
+			switch (adj) {
+				case -2: acc = "__"; break;
+				case -1: acc = "_"; break;
+				case 0: acc = "="; break;
+				case 1: acc = "^"; break;
+				case 2: acc = "^^"; break;
+			}
 		}
 		switch (note.oct) {
 			case 0: name = name + ",,,"; break;
@@ -183,14 +189,16 @@ var strTranspose;
 		var oct = octaves.indexOf(reg[3])
 		if (name === reg[2]) // See if it is a capital letter and subtract an octave if so.
 			oct--;
-		return {acc: reg[1], name: name, pitch: pos, oct: oct, adj: calcAdjustment(reg[1], keyAccidentals[name], measureAccidentals[name])}
+		return { acc: reg[1], name: name, pitch: pos, oct: oct, adj: calcAdjustment(reg[1], keyAccidentals[name], measureAccidentals[name]) }
 	}
 
-	function replaceNote(abc, start, end, newPitch ) {
+	function replaceNote(abc, start, end, newPitch, index) {
 		// There may be more than just the note between the start and end - there could be spaces, there could be a chord symbol, there could be a decoration.
+		// This could also be a part of a chord. If so, then the particular note needs to be teased out.
 		var note = abc.substring(start, end)
 		var match = note.match(/([_^=]*[A-Ga-g][,']*)(\s*)$/)
 		if (match) {
+			// This will match a single note
 			var noteLen = match[1].length
 			var trailingSpaceLen = match[2].length
 			var leadingLen = end - start - noteLen - trailingSpaceLen
@@ -198,18 +206,31 @@ var strTranspose;
 			// 	console.log(note, leadingLen, noteLen, trailingSpaceLen)
 			start += leadingLen
 			end -= trailingSpaceLen
+		} else {
+			// I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
+			match = note.match(/\[([_^=]*[A-Ga-g][,']*)([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?\](\s*)$/)
+			if (match) {
+				// This will match a chord
+				// Get the number of chars used by the previous notes in this chord
+				var count = 1 // one character for the open bracket
+				for (var i = 1; i < index + 1; i++) { // index is the iteration through the chord. This function gets called for each one.
+					count += match[i].length
+				}
+				start += count
+				end = start + match[index + 1].length
+			}
 		}
-		return {start: start, end: end, note: newPitch}
+		return { start: start, end: end, note: newPitch }
 	}
 
-	function replaceChord(abc, start, end, newChord ) {
+	function replaceChord(abc, start, end, newChord) {
 		// Isolate the chord and just replace that
 		var match = abc.substring(start, end).match(/([^"]+)?(".+")+/)
 		if (match[1])
 			start += match[1].length
-		end = start + match[2].length	
+		end = start + match[2].length
 		// leave the quote in, so skip one more
-		return {start: start+1, end: end-1, note: newChord}
+		return { start: start + 1, end: end - 1, note: newChord }
 	}
 
 	function calcAdjustment(thisAccidental, keyAccidental, measureAccidental) {
@@ -222,7 +243,7 @@ var strTranspose;
 
 		switch (keyAccidental) {
 			case undefined:
-				switch(thisAccidental) {
+				switch (thisAccidental) {
 					case '__': return -2;
 					case '_': return -1;
 					case '=': return 0;
@@ -231,7 +252,7 @@ var strTranspose;
 					default: return 0; // this should never happen
 				}
 			case '_':
-				switch(thisAccidental) {
+				switch (thisAccidental) {
 					case '__': return -1;
 					case '_': return 0;
 					case '=': return 1;
@@ -240,7 +261,7 @@ var strTranspose;
 					default: return 0; // this should never happen
 				}
 			case '^':
-				switch(thisAccidental) {
+				switch (thisAccidental) {
 					case '__': return -3;
 					case '_': return -2;
 					case '=': return -1;
