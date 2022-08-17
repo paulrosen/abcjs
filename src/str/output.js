@@ -1,4 +1,4 @@
-var allKeys = require("../const/all-keys");
+var keyAccidentals = require("../const/key-accidentals");
 var { relativeMajor, transposeKey, relativeMode } = require("../const/relative-major");
 var transposeChordName = require("../parse/transpose-chord")
 
@@ -94,9 +94,9 @@ var strTranspose;
 			if (el.el_type === 'note' && el.pitches) {
 				for (var j = 0; j < el.pitches.length; j++) {
 					var note = parseNote(el.pitches[j].name, keyRoot, keyAccidentals, measureAccidentals)
+					var newPitch = transposePitch(note, destinationKey, letterDistance, measureAccidentals[note.name])
 					if (note.acc)
 						measureAccidentals[note.name] = note.acc
-					var newPitch = transposePitch(note, destinationKey, letterDistance)
 					changes.push(replaceNote(abc, el.startChar, el.endChar, newPitch, j))
 					//console.log(abc.substring(el.startChar, el.endChar) + ': ' + newPitch)
 				}
@@ -110,14 +110,16 @@ var strTranspose;
 	var octaves = [",,,,", ",,,", ",,", ",", "", "'", "''", "'''", "''''"]
 
 	function newKey(key, steps) {
+		if (key.root === "none")
+			return key;
 		var major = relativeMajor(key.root + key.acc + key.mode)
 		var newMajor = transposeKey(major, steps)
 		var newMode = relativeMode(newMajor)
-		var acc = allKeys()[newMajor]
+		var acc = keyAccidentals(newMajor)
 		return { root: newMode[0], mode: key.mode, acc: newMode.length > 1 ? newMode[1] : '', accidentals: acc }
 	}
 
-	function transposePitch(note, key, letterDistance) {
+	function transposePitch(note, key, letterDistance, measureAccidental) {
 		// Depending on what the current note and new note are, the octave might have changed
 		// The letterDistance is how far the change is to see if we passed "C" when transposing.
 
@@ -156,6 +158,8 @@ var strTranspose;
 				case 1: acc = "^"; break;
 				case 2: acc = "^^"; break;
 			}
+			if (measureAccidental === acc)
+				acc = ""
 		}
 		switch (note.oct) {
 			case 0: name = name + ",,,"; break;
@@ -234,6 +238,8 @@ var strTranspose;
 	}
 
 	function calcAdjustment(thisAccidental, keyAccidental, measureAccidental) {
+		if (measureAccidental)
+			console.log(thisAccidental, keyAccidental, measureAccidental)
 		if (!thisAccidental && measureAccidental) {
 			// There was no accidental on this note, but there was earlier in the measure, so we'll use that
 			thisAccidental = measureAccidental

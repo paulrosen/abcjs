@@ -2,6 +2,7 @@
 
 var allNotes = require("./all-notes");
 var transposeChordName = require("../parse/transpose-chord")
+var keyAccidentals = require('../const/key-accidentals');
 var transpose = {};
 
 var keyIndex = {
@@ -26,13 +27,13 @@ var keyIndex = {
 var newKey = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 var newKeyMinor = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
-transpose.keySignature = function(multilineVars, keys, keyName, root, acc, localTranspose) {
-	if (multilineVars.clef.type === "perc")
-		return { accidentals: keys[keyName], root: root, acc: acc };
+transpose.keySignature = function(multilineVars, keyName, root, acc, localTranspose) {
+	if (multilineVars.clef.type === "perc" || multilineVars.clef.type === "none")
+		return { accidentals: keyAccidentals(keyName), root: root, acc: acc };
 	if (!localTranspose) localTranspose = 0;
 	multilineVars.localTransposeVerticalMovement = 0;
 	multilineVars.localTransposePreferFlats = false;
-	var k = keys[keyName];
+	var k = keyAccidentals(keyName);
 	if (!k) return multilineVars.key; // If the key isn't in the list, it is non-standard. We won't attempt to transpose it.
 	multilineVars.localTranspose = (multilineVars.globalTranspose ? multilineVars.globalTranspose : 0) + localTranspose;
 
@@ -55,7 +56,7 @@ transpose.keySignature = function(multilineVars, keys, keyName, root, acc, local
 	if (index > 11) index = index % 12;
 	var newKeyName = (keyName[0] === 'm' ? newKeyMinor[index] : newKey[index]);
 	var transposedKey = newKeyName + keyName;
-	var newKeySig = keys[transposedKey];
+	var newKeySig = keyAccidentals(transposedKey);
 	if (newKeySig.length > 0 && newKeySig[0].acc === 'flat')
 		multilineVars.localTransposePreferFlats = true;
 	var distance = transposedKey.charCodeAt(0) - baseKey.charCodeAt(0);
@@ -90,7 +91,7 @@ transpose.keySignature = function(multilineVars, keys, keyName, root, acc, local
 };
 
 transpose.chordName = function(multilineVars, chord) {
-	return transposeChordName(chord, multilineVars.localTranspose, multilineVars.localTransposePreferFlats, multilineVars.freeGCchord)
+	return transposeChordName(chord, multilineVars.localTranspose, multilineVars.localTransposePreferFlats, multilineVars.freegchord)
 };
 
 var pitchToLetter = [ 'c', 'd', 'e', 'f', 'g', 'a', 'b' ];

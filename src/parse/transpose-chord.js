@@ -4,7 +4,7 @@ var sharpChordsFree = ['C', 'C#', 'D', "D#", 'E', 'F', "F#", 'G', 'G#', 'A', 'A#
 var flatChordsFree = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
 function transposeChordName(chord, steps, preferFlats, freeGCchord) {
-	if (steps && (steps % 12 === 0)) // The chords are the same if it is an exact octave change.
+	if (!steps || (steps % 12 === 0)) // The chords are the same if it is an exact octave change.
 		return chord;
 
 	// There are two things in the chord that might need to be transposed:

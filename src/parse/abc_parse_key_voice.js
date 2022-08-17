@@ -1,7 +1,6 @@
 var parseCommon = require('./abc_common');
 var parseDirective = require('./abc_parse_directive');
 var transpose = require('./abc_transpose');
-var allKeys = require('../const/all-keys');
 
 var parseKeyVoice = {};
 
@@ -20,8 +19,7 @@ var parseKeyVoice = {};
 	};
 
 	parseKeyVoice.standardKey = function(keyName, root, acc, localTranspose) {
-		var keys = allKeys();
-		return transpose.keySignature(multilineVars, keys, keyName, root, acc, localTranspose);
+		return transpose.keySignature(multilineVars, keyName, root, acc, localTranspose);
 	};
 
 	var clefLines = {
