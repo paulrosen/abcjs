@@ -1,4 +1,4 @@
-describe("Output", function () {
+describe("Transpose Output", function () {
 	var abcAll = "T: Transpose Output\n" +
 		"K: Eb\n" +
 		"V: 1\n" +
@@ -52,12 +52,18 @@ describe("Output", function () {
 		"C_DE^F GABc| [K:D] d_e^fg abc'd'|\n" +
 		"d_e^fg abc'd'||\n"
 
-
 	var abcInlineExpected = "K: D\n" +
 		"D_EF^G ABcd| [K:E] e_f^ga bc'd'e'|\n" +
 		"e_f^ga bc'd'e'||\n"
 
+	var abcDorian = "K: EDor\n" +
+		"EFGA|Bcde|\n"
 
+	var abcDorianExpected = "K: F#Dor\n" +
+		"FGAB|cdef|\n"
+
+
+		// TODO-PER: do all of the following tests for -14, -12, -11, -2, -1, 0, 1, 2, 11, 12, 14 steps
 	it("output-transpose-chords", function () {
 		outputTest(abcChords, abcChordsExpected, 2)
 	})
@@ -76,6 +82,10 @@ describe("Output", function () {
 
 	it("output-inline-key", function () {
 		outputTest(abcInline, abcInlineExpected, 2)
+	})
+
+	it("output-dorian", function () {
+		outputTest(abcDorian, abcDorianExpected, 2)
 	})
 })
 
