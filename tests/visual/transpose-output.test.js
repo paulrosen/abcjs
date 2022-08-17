@@ -56,11 +56,23 @@ describe("Transpose Output", function () {
 		"D_EF^G ABcd| [K:E] e_f^ga bc'd'e'|\n" +
 		"e_f^ga bc'd'e'||\n"
 
+	var abcMinor = "K: Em\n" +
+		"EFGA|Bcde|\n"
+
+	var abcMinorExpected = "K: F#m\n" +
+		"FGAB|cdef|\n"
+
 	var abcDorian = "K: EDor\n" +
 		"EFGA|Bcde|\n"
 
 	var abcDorianExpected = "K: F#Dor\n" +
 		"FGAB|cdef|\n"
+
+	var abcGrace = "K: G\n" +
+		"{A}G{dcB}A|\n"
+
+	var abcGraceExpected = "K: A\n" +
+		"{B}A{edc}B|\n"
 
 
 		// TODO-PER: do all of the following tests for -14, -12, -11, -2, -1, 0, 1, 2, 11, 12, 14 steps
@@ -86,6 +98,14 @@ describe("Transpose Output", function () {
 
 	it("output-dorian", function () {
 		outputTest(abcDorian, abcDorianExpected, 2)
+	})
+
+	it("output-minor", function () {
+		outputTest(abcMinor, abcMinorExpected, 2)
+	})
+
+	it("output-grace", function () {
+		outputTest(abcGrace, abcGraceExpected, 2)
 	})
 })
 
