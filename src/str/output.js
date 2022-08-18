@@ -29,6 +29,11 @@ var strTranspose;
 	function transposeOneTune(abc, abcTune, steps) {
 		var changes = []
 
+		// Don't transpose bagpipe music - that is a special case and is always a particular key
+		var key = abcTune.getKeySignature()
+		if (key.root === 'Hp' || key.root === "HP")
+			return changes;
+
 		changes = changes.concat(changeAllKeySigs(abc, steps))
 
 		for (var i = 0; i < abcTune.lines.length; i++) {
