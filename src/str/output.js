@@ -90,12 +90,15 @@ var strTranspose;
 	function transposeVoice(abc, voice, keyRoot, keyAccidentals, destinationKey, steps) {
 		var changes = []
 		var letterDistance = letters.indexOf(destinationKey.root) - letters.indexOf(keyRoot)
+		if (steps > 0 && letterDistance < 0) letterDistance += 8
+		if (steps < 0 && letterDistance > 0) letterDistance -=8
 		if (steps > 12)
 			letterDistance += 7
 		else if (steps < -12)
 			letterDistance -= 14
 		else if (steps < 0)
 			letterDistance -= 7
+		console.log({letterDistance, destRoot: destinationKey.root, keyRoot, steps})	
 
 		var measureAccidentals = {}
 		for (var i = 0; i < voice.length; i++) {
@@ -161,12 +164,20 @@ var strTranspose;
 			pitch--
 			note.adj += 2
 		}
+		var origDistFromC = letters.indexOf(note.name)
 		var root = letters.indexOf(key.root)
 		var index = (root + pitch) % 7
-		// TODO-PER: The octave crossing isn't complete. Check for going down below an octave and also transposing more than an octave.
 		// if the note crosses "c" then the octave changes, so that is true of "B" when going up one step, "A" and "B" when going up two steps, etc., and reverse when going down.
-		if (index - letterDistance < 0)
-			note.oct++;
+		var newDistFromC = origDistFromC+letterDistance
+		console.log({newDistFromC, origDistFromC,letterDistance, key})
+		while(newDistFromC > 6) {
+			note.oct++
+			newDistFromC -= 7
+		}
+		while(newDistFromC < 0) {
+			note.oct--
+			newDistFromC += 7
+		}
 
 		var name = letters[index]
 
