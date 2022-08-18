@@ -48,7 +48,7 @@ describe("Transpose Output", function () {
 	var abcMeasureAccidentalExpected = "T: Transpose Output\n" +
 		"L: 1/4\n" +
 		"K: D\n" +
-		'Bcde _B=c_d_e z Bcde =B=c=d=e z Bcde |\n ^B^c^d^e z Bcde ^^B^^c^^d^^e z Bcde __B__c__d__e Bcde |\n'
+		'Bcde _B=c_d_e z Bcde =B^c=d=e z Bcde |\n ^B^^c^d^e z Bcde ^^Bd^^d^^e z B^d^^de __B_c__d__e Bcde |\n'
 
 	var abcInline = "T: Transpose Output\n" +
 		"K: C\n" +

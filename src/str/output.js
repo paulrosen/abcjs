@@ -57,9 +57,9 @@ var strTranspose;
 			if (match) {
 				var start = count + 2 + match[1].length // move past the 'K:' and optional white space
 				var key = match[2] + match[3] + match[4] // key name, accidental, and mode
-				var destinationKey = newKey({root: match[2], acc: match[3], mode: match[4]}, steps)
+				var destinationKey = newKey({ root: match[2], acc: match[3], mode: match[4] }, steps)
 				var dest = destinationKey.root + destinationKey.acc + destinationKey.mode
-				changes.push({start: start, end: start + key.length, note: dest})
+				changes.push({ start: start, end: start + key.length, note: dest })
 			}
 			count += segment.length + 2
 		}
@@ -91,16 +91,16 @@ var strTranspose;
 		var changes = []
 		var letterDistance = letters.indexOf(destinationKey.root) - letters.indexOf(keyRoot)
 		if (steps > 0 && letterDistance < 0) letterDistance += 8
-		if (steps < 0 && letterDistance > 0) letterDistance -=8
+		if (steps < 0 && letterDistance > 0) letterDistance -= 8
 		if (steps > 12)
 			letterDistance += 7
 		else if (steps < -12)
 			letterDistance -= 14
 		else if (steps < 0)
 			letterDistance -= 7
-		console.log({letterDistance, destRoot: destinationKey.root, keyRoot, steps})	
 
 		var measureAccidentals = {}
+		var transposedMeasureAccidentals = {}
 		for (var i = 0; i < voice.length; i++) {
 			var el = voice[i];
 			if (el.chord) {
@@ -117,23 +117,30 @@ var strTranspose;
 			if (el.el_type === 'note' && el.pitches) {
 				for (var j = 0; j < el.pitches.length; j++) {
 					var note = parseNote(el.pitches[j].name, keyRoot, keyAccidentals, measureAccidentals)
-					var newPitch = transposePitch(note, destinationKey, letterDistance, measureAccidentals[note.name])
 					if (note.acc)
-						measureAccidentals[note.name] = note.acc
-					changes.push(replaceNote(abc, el.startChar, el.endChar, newPitch, j))
+						measureAccidentals[note.name.toUpperCase()] = note.acc
+					var newPitch = transposePitch(note, destinationKey, letterDistance, transposedMeasureAccidentals)
+					if (newPitch.acc)
+						transposedMeasureAccidentals[newPitch.upper] = newPitch.acc
+					changes.push(replaceNote(abc, el.startChar, el.endChar, newPitch.acc + newPitch.name, j))
 					//console.log(abc.substring(el.startChar, el.endChar) + ': ' + newPitch)
 				}
 				if (el.gracenotes) {
 					for (var g = 0; g < el.gracenotes.length; g++) {
 						var grace = parseNote(el.gracenotes[g].name, keyRoot, keyAccidentals, measureAccidentals)
-						var newGrace = transposePitch(grace, destinationKey, letterDistance, measureAccidentals[grace.name])
 						if (grace.acc)
-							measureAccidentals[grace.name] = grace.acc
-						changes.push(replaceGrace(abc, el.startChar, el.endChar, newGrace, g))
+							measureAccidentals[grace.name.toUpperCase()] = grace.acc
+						var newGrace = transposePitch(grace, destinationKey, letterDistance, measureAccidentals)
+						if (newGrace.acc)
+							transposedMeasureAccidentals[newGrace.upper] = newGrace.acc
+						changes.push(replaceGrace(abc, el.startChar, el.endChar, newGrace.acc + newGrace.name, g))
 					}
 				}
 			} else if (el.el_type === "bar")
 				measureAccidentals = {}
+			else if (el.el_type === "keySignature") {
+				console.log("skipped keySig", el)
+			}
 		}
 		return changes
 	}
@@ -151,57 +158,70 @@ var strTranspose;
 		return { root: newMode[0], mode: key.mode, acc: newMode.length > 1 ? newMode[1] : '', accidentals: acc }
 	}
 
-	function transposePitch(note, key, letterDistance, measureAccidental) {
+	function transposePitch(note, key, letterDistance, measureAccidentals) {
 		// Depending on what the current note and new note are, the octave might have changed
 		// The letterDistance is how far the change is to see if we passed "C" when transposing.
 
-		// If there is an adjustment of 3 or -3 (if there is a flat in the key sig but the note has a double sharp, for instance), then bump the pitch a note.
 		var pitch = note.pitch
-		if (note.adj === 3) {
-			pitch++
-			note.adj -= 2
-		} else if (note.adj === -3) {
-			pitch--
-			note.adj += 2
-		}
 		var origDistFromC = letters.indexOf(note.name)
 		var root = letters.indexOf(key.root)
 		var index = (root + pitch) % 7
 		// if the note crosses "c" then the octave changes, so that is true of "B" when going up one step, "A" and "B" when going up two steps, etc., and reverse when going down.
-		var newDistFromC = origDistFromC+letterDistance
-		console.log({newDistFromC, origDistFromC,letterDistance, key})
-		while(newDistFromC > 6) {
-			note.oct++
+		var newDistFromC = origDistFromC + letterDistance
+		var oct = note.oct
+		while (newDistFromC > 6) {
+			oct++
 			newDistFromC -= 7
 		}
-		while(newDistFromC < 0) {
-			note.oct--
+		while (newDistFromC < 0) {
+			oct--
 			newDistFromC += 7
 		}
 
 		var name = letters[index]
 
 		var acc = '';
-		if (note.adj) {
-			var adj = note.adj
-			// the amount of adjustment depends on the key - if there is a sharp in the key sig, then -1 is a natural, if there isn't, then -1 is a flat.
-			for (var i = 0; i < key.accidentals.length; i++) {
-				if (key.accidentals[i].note.toLowerCase() === name.toLowerCase()) {
-					adj = adj + (key.accidentals[i].acc === 'flat' ? -1 : 1)
-					break;
-				}
+		//console.log("TRANS", name, note, measureAccidentals, key.accidentals)
+		//if (note.adj) {
+		var adj = note.adj
+		// the amount of adjustment depends on the key - if there is a sharp in the key sig, then -1 is a natural, if there isn't, then -1 is a flat.
+		var keyAcc = '=';
+		for (var i = 0; i < key.accidentals.length; i++) {
+			if (key.accidentals[i].note.toLowerCase() === name.toLowerCase()) {
+				adj = adj + (key.accidentals[i].acc === 'flat' ? -1 : 1)
+				keyAcc = (key.accidentals[i].acc === 'flat' ? '_' : '^')
+				break;
 			}
-			switch (adj) {
-				case -2: acc = "__"; break;
-				case -1: acc = "_"; break;
-				case 0: acc = "="; break;
-				case 1: acc = "^"; break;
-				case 2: acc = "^^"; break;
-			}
-			if (measureAccidental === acc)
-				acc = ""
 		}
-		switch (note.oct) {
+		switch (adj) {
+			case -2: acc = "__"; break;
+			case -1: acc = "_"; break;
+			case 0: acc = "="; break;
+			case 1: acc = "^"; break;
+			case 2: acc = "^^"; break;
+			case 3:
+				// This requires a triple sharp, so bump up the pitch and try again
+				var newNote = {}
+				newNote.pitch = note.pitch + 1
+				newNote.oct = note.oct
+				newNote.name = letters[letters.indexOf(note.name) + 1]
+				if (!newNote.name) {
+					newNote.name = "C"
+					newNote.oct++
+				}
+				if (newNote.name === "C" || newNote.name === "F")
+					newNote.adj = note.adj - 1;
+				else
+					newNote.adj = note.adj - 2;
+				//console.log("#####", newNote)
+				return transposePitch(newNote, key, letterDistance + 1, measureAccidentals)
+		}
+		//console.log("ma", measureAccidentals, name, note.name)
+		//console.log(name, measureAccidentals)
+		if (measureAccidentals[name] === acc || (!measureAccidentals[name] && acc === keyAcc))
+			acc = ""
+		//}
+		switch (oct) {
 			case 0: name = name + ",,,"; break;
 			case 1: name = name + ",,"; break;
 			case 2: name = name + ","; break;
@@ -212,10 +232,10 @@ var strTranspose;
 			case 7: name = name.toLowerCase() + "'''"; break;
 			case 8: name = name.toLowerCase() + "''''"; break;
 		}
-		if (note.oct > 4)
+		if (oct > 4)
 			name = name.toLowerCase();
 
-		return acc + name
+		return { acc: acc, name: name, upper: name.toUpperCase() }
 	}
 
 	// This the relationship of the note to the tonic and an octave. So what is returned is a distance in steps from the tonic and the amount of adjustment from
@@ -233,6 +253,7 @@ var strTranspose;
 		var oct = octaves.indexOf(reg[3])
 		if (name === reg[2]) // See if it is a capital letter and subtract an octave if so.
 			oct--;
+		//console.log("---- PARSE", name, reg[1], keyAccidentals, measureAccidentals)
 		return { acc: reg[1], name: name, pitch: pos, oct: oct, adj: calcAdjustment(reg[1], keyAccidentals[name], measureAccidentals[name]) }
 	}
 
@@ -295,6 +316,7 @@ var strTranspose;
 	}
 
 	function calcAdjustment(thisAccidental, keyAccidental, measureAccidental) {
+		//console.log("CALC", { thisAccidental, keyAccidental, measureAccidental })
 		if (!thisAccidental && measureAccidental) {
 			// There was no accidental on this note, but there was earlier in the measure, so we'll use that
 			thisAccidental = measureAccidental
