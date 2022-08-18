@@ -13,13 +13,13 @@ describe("Transpose Output", function () {
 	var abcAllExpected = "T: Transpose Output\n" +
 		"K: F\n" +
 		"V: 1\n" +
-		'"F"D_E"F/D"!marcato!F^G ^^ABc"Bb7b5"z|F_FF F ^F^^F^G ^G|\n' +
+		'"F"D_E"F/D"!marcato!F^G ^^ABc"Bb7b5"z|F_F=F F ^F^^F^^G G|\n' +
 		"V: 2\n" +
-		'D,_E,=F,^G, "N.C."A,B,C"^Coda"D| z8|\n' +
+		'D,_E,^F,^G, "N.C."A,B,C"^Coda"D| z8|\n' +
 		"V: 1\n" +
 		"d_ef^g [eac']__bc'd'|\n" +
 		"V: 2\n" +
-		"d'_e'f'^g' a'b'c''Td'''|\n"
+		"d'_e'f'^g' a'b'c''Td''|\n"
 
 	var abcChords = "T: Transpose Output\n" +
 		"K: D\n" +
@@ -57,8 +57,8 @@ describe("Transpose Output", function () {
 
 	var abcInlineExpected = "T: Transpose Output\n" +
 		"K: D\n" +
-		"D_EF^G ABcd| [K:E] e_f^ga bc'd'e'|\n" +
-		"e_f^ga bc'd'e'||\n"
+		"D_EF^G ABcd| [K:E] e=fga bc'd'e'|\n" +
+		"e=fga bc'd'e'||\n"
 
 	var abcKeyChange = "T: Transpose Output\n" +
 		"K: Eb\n" +

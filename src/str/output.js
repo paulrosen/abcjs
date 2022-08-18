@@ -87,8 +87,7 @@ var strTranspose;
 		return ret
 	}
 
-	function transposeVoice(abc, voice, keyRoot, keyAccidentals, destinationKey, steps) {
-		var changes = []
+	function setLetterDistance(destinationKey, keyRoot, steps) {
 		var letterDistance = letters.indexOf(destinationKey.root) - letters.indexOf(keyRoot)
 		if (steps > 0 && letterDistance < 0) letterDistance += 8
 		if (steps < 0 && letterDistance > 0) letterDistance -= 8
@@ -98,6 +97,12 @@ var strTranspose;
 			letterDistance -= 14
 		else if (steps < 0)
 			letterDistance -= 7
+		return letterDistance	
+	}
+
+	function transposeVoice(abc, voice, keyRoot, keyAccidentals, destinationKey, steps) {
+		var changes = []
+		var letterDistance = setLetterDistance(destinationKey, keyRoot, steps)
 
 		var measureAccidentals = {}
 		var transposedMeasureAccidentals = {}
@@ -136,10 +141,14 @@ var strTranspose;
 						changes.push(replaceGrace(abc, el.startChar, el.endChar, newGrace.acc + newGrace.name, g))
 					}
 				}
-			} else if (el.el_type === "bar")
+			} else if (el.el_type === "bar") {
 				measureAccidentals = {}
-			else if (el.el_type === "keySignature") {
-				console.log("skipped keySig", el)
+				transposedMeasureAccidentals = {}
+			} else if (el.el_type === "keySignature") {
+				keyRoot = el.root
+				keyAccidentals = createKeyAccidentals(el)
+				destinationKey = newKey(el, steps)
+				letterDistance = setLetterDistance(destinationKey, keyRoot, steps)
 			}
 		}
 		return changes
@@ -199,6 +208,22 @@ var strTranspose;
 			case 0: acc = "="; break;
 			case 1: acc = "^"; break;
 			case 2: acc = "^^"; break;
+			case -3:
+				// This requires a triple flat, so bump down the pitch and try again
+				var newNote = {}
+				newNote.pitch = note.pitch - 1
+				newNote.oct = note.oct
+				newNote.name = letters[letters.indexOf(note.name) - 1]
+				if (!newNote.name) {
+					newNote.name = "B"
+					newNote.oct--
+				}
+				if (newNote.name === "B" || newNote.name === "E")
+					newNote.adj = note.adj + 1;
+				else
+					newNote.adj = note.adj + 2;
+				//console.log("#####", newNote)
+				return transposePitch(newNote, key, letterDistance + 1, measureAccidentals)
 			case 3:
 				// This requires a triple sharp, so bump up the pitch and try again
 				var newNote = {}
