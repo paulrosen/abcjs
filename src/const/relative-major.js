@@ -37,9 +37,9 @@ function relativeMode(majorKey, mode) {
 		return majorKey;
 	if (mode === '')
 		return majorKey;
-	for (var i = 0; i < group.length; i++) {
-		if (group[i].modes.indexOf(mode) >= 0)
-			return group[i].replace(mode, '')
+	for (var i = 0; i < group.modes.length; i++) {
+		if (group.modes[i].indexOf(mode) >= 0)
+			return group.modes[i].replace(mode, '')
 	}
 	return majorKey;
 }

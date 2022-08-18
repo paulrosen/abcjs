@@ -114,7 +114,7 @@ var strTranspose;
 			return key;
 		var major = relativeMajor(key.root + key.acc + key.mode)
 		var newMajor = transposeKey(major, steps)
-		var newMode = relativeMode(newMajor)
+		var newMode = relativeMode(newMajor, key.mode)
 		var acc = keyAccidentals(newMajor)
 		return { root: newMode[0], mode: key.mode, acc: newMode.length > 1 ? newMode[1] : '', accidentals: acc }
 	}
