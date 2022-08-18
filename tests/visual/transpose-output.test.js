@@ -30,10 +30,12 @@ describe("Transpose Output", function () {
 		'[EFG] [_EFG] [=F=G_A] |\n'
 
 	var abcChordSymbols = 'X:1\n' +
+		"T: Transpose Output\n" +
 		'K:C\n' +
 		'"N.C."c|"C"c"C#"c"Dmaj7"c"D#"c|"E"c"F"c"F#"c"G"c|"G#"c"A/F#"c"A#"c"B"c|"Db"c"Eb"c"Gb"c"Ab"c|"Bb"c "C/B"c "C/Bb"c "C/A#"c | "C/A"c "C/Ab"c "C/G#"c "C/G"c ||'
 
 	var abcChordSymbolsExpected = 'X:1\n' +
+		"T: Transpose Output\n" +
 		'K:D\n' +
 		// TODO-PER: the C#, D#, G#, and A# should probably be expressed as flats.
 		'"N.C."d|"D"d"D#"d"Emaj7"d"F"d|"F#"d"G"d"G#"d"A"d|"A#"d"B/G#"d"C"d"C#"d|"D#"d"F"d"G#"d"A#"d|"C"d "D/C#"d "D/C"d "D/C"d | "D/B"d "D/A#"d "D/A#"d "D/A"d ||'
@@ -48,50 +50,75 @@ describe("Transpose Output", function () {
 		"K: D\n" +
 		'Bcde _B=c_d_e z Bcde =B=c=d=e z Bcde |\n ^B^c^d^e z Bcde ^^B^^c^^d^^e z Bcde __B__c__d__e Bcde |\n'
 
-	var abcInline = "K: C\n" +
+	var abcInline = "T: Transpose Output\n" +
+		"K: C\n" +
 		"C_DE^F GABc| [K:D] d_e^fg abc'd'|\n" +
 		"d_e^fg abc'd'||\n"
 
-	var abcInlineExpected = "K: D\n" +
+	var abcInlineExpected = "T: Transpose Output\n" +
+		"K: D\n" +
 		"D_EF^G ABcd| [K:E] e_f^ga bc'd'e'|\n" +
 		"e_f^ga bc'd'e'||\n"
 
-	var abcKeyChange = "K: Eb\n" +
+	var abcKeyChange = "T: Transpose Output\n" +
+		"K: Eb\n" +
 		"EFGA|\n" +
-		"K: B\n" +
+		"K:B\n" +
 		"Bcde||\n"
 
-	var abcKeyChangeExpected = "K: F\n" +
+	var abcKeyChangeExpected = "T: Transpose Output\n" +
+		"K: F\n" +
 		"FGAB|\n" +
-		"K: Db\n" +
+		"K:Db\n" +
 		"defg||\n"
 
-	var abcMinor = "K: Em\n" +
+	var abcMinor = "T: Transpose Output\n" +
+		"K: Em\n" +
 		"EFGA|Bcde|\n"
 
-	var abcMinorExpected = "K: F#m\n" +
+	var abcMinorExpected = "T: Transpose Output\n" +
+		"K: F#m\n" +
 		"FGAB|cdef|\n"
 
-	var abcNone = "K: none\n" +
+	var abcNone = "T: Transpose Output\n" +
+		"K: none\n" +
 		"CDEF ^C^D^E^F CDEF|GABc _G_A_B_ cGABc|^^C^^D^^E^^F CDEF|__G__A__B__c GABc|\n"
 
-	var abcNoneExpected = "K: none\n" +
+	var abcNoneExpected = "T: Transpose Output\n" +
+		"K: none\n" +
 		"DEFG ^D^E^F^G DEFG|ABcd _A_B_c_d ABcd|^^D^^E^^F^^G DEFG|__A__B__c__d ABcd|\n"
 
-	var abcDorian = "K: EDor\n" +
+	var abcDorian = "T: Transpose Output\n" +
+		"K: EDor\n" +
 		"EFGA|Bcde|\n"
 
-	var abcDorianExpected = "K: F#Dor\n" +
+	var abcDorianExpected = "T: Transpose Output\n" +
+		"K: F#Dor\n" +
 		"FGAB|cdef|\n"
 
-	var abcGrace = "K: G\n" +
+	var abcGrace = "T: Transpose Output\n" +
+		"K: G\n" +
 		"{A}G{dcB}A|\n"
 
-	var abcGraceExpected = "K: A\n" +
+	var abcGraceExpected = "T: Transpose Output\n" +
+		"K: A\n" +
 		"{B}A{edc}B|\n"
 
+	var abcBagpipes = "X:1\n" +
+	"T:Scotland The Brave\n" +
+	"L:1/8\n" +
+	"M:4/4\n" +
+	"K:Hp\n" +
+	"e|{g}A2 {GdGe}A>B {gcd}c{e}A {gcd}ce| {ag}a2{g}a2 {GdG}ae {gcd}c{e}A|\n"
 
-		// TODO-PER: do all of the following tests for -14, -12, -11, -2, -1, 0, 1, 2, 11, 12, 14 steps
+	var abcBagpipesExpected = "X:1\n" +
+	"T:Scotland The Brave\n" +
+	"L:1/8\n" +
+	"M:4/4\n" +
+	"K:Hp\n" +
+	"e|{g}A2 {GdGe}A>B {gcd}c{e}A {gcd}ce| {ag}a2{g}a2 {GdG}ae {gcd}c{e}A|\n"
+
+	// TODO-PER: do all of the following tests for -14, -12, -11, -2, -1, 0, 1, 2, 11, 12, 14 steps
 	it("output-transpose-chords", function () {
 		outputTest(abcChords, abcChordsExpected, 2)
 	})
@@ -130,6 +157,10 @@ describe("Transpose Output", function () {
 
 	it("output-key-change", function () {
 		outputTest(abcKeyChange, abcKeyChangeExpected, 2)
+	})
+
+	it("output-bagpipes", function () {
+		outputTest(abcBagpipes, abcBagpipesExpected, 2)
 	})
 })
 

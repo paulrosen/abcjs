@@ -28,13 +28,15 @@ var strTranspose;
 
 	function transposeOneTune(abc, abcTune, steps) {
 		var changes = []
-		var k = abcTune.getKeySignature()
-		var keySigDef = k.root + k.acc + k.mode
-		var place = abc.indexOf("K:") + 2
-		while (abc[place] === ' ')
-			place++;
-		var destinationKey = newKey(k, steps)
-		changes.push({ start: place, end: place + keySigDef.length, note: destinationKey.root + destinationKey.acc + k.mode })
+		// var k = abcTune.getKeySignature()
+		// var keySigDef = k.root + k.acc + k.mode
+		// var place = abc.indexOf("K:") + 2
+		// while (abc[place] === ' ')
+		// 	place++;
+		//var destinationKey = newKey(k, steps)
+		//changes.push({ start: place, end: place + keySigDef.length, note: destinationKey.root + destinationKey.acc + k.mode })
+
+		changes = changes.concat(changeAllKeySigs(abc, steps))
 
 		for (var i = 0; i < abcTune.lines.length; i++) {
 			if (abcTune.lines[i].staff) {
@@ -42,6 +44,27 @@ var strTranspose;
 					changes = changes.concat(transposeVoices(abc, abcTune.lines[i].staff[j].voices, abcTune.lines[i].staff[j].key, steps))
 				}
 			}
+		}
+		return changes
+	}
+
+	function changeAllKeySigs(abc, steps) {
+		var changes = [];
+		var arr = abc.split("K:")
+		// now each line except the first one will start with whatever is right after "K:"
+		var count = arr[0].length
+		for (var i = 1; i < arr.length; i++) {
+			var segment = arr[i]
+			var match = segment.match(/^( *)([A-G])([#b]?)(\w*)/)
+			console.log(match)
+			if (match) {
+				var start = count + 2 + match[1].length // move past the 'K:' and optional white space
+				var key = match[2] + match[3] + match[4] // key name, accidental, and mode
+				var destinationKey = newKey({root: match[2], acc: match[3], mode: match[4]}, steps)
+				var dest = destinationKey.root + destinationKey.acc + destinationKey.mode
+				changes.push({start: start, end: start + key.length, note: dest})
+			}
+			count += segment.length + 2
 		}
 		return changes
 	}
@@ -264,8 +287,6 @@ var strTranspose;
 	}
 
 	function calcAdjustment(thisAccidental, keyAccidental, measureAccidental) {
-		if (measureAccidental)
-			console.log(thisAccidental, keyAccidental, measureAccidental)
 		if (!thisAccidental && measureAccidental) {
 			// There was no accidental on this note, but there was earlier in the measure, so we'll use that
 			thisAccidental = measureAccidental
