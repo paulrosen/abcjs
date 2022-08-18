@@ -28,13 +28,6 @@ var strTranspose;
 
 	function transposeOneTune(abc, abcTune, steps) {
 		var changes = []
-		// var k = abcTune.getKeySignature()
-		// var keySigDef = k.root + k.acc + k.mode
-		// var place = abc.indexOf("K:") + 2
-		// while (abc[place] === ' ')
-		// 	place++;
-		//var destinationKey = newKey(k, steps)
-		//changes.push({ start: place, end: place + keySigDef.length, note: destinationKey.root + destinationKey.acc + k.mode })
 
 		changes = changes.concat(changeAllKeySigs(abc, steps))
 
@@ -56,7 +49,6 @@ var strTranspose;
 		for (var i = 1; i < arr.length; i++) {
 			var segment = arr[i]
 			var match = segment.match(/^( *)([A-G])([#b]?)(\w*)/)
-			console.log(match)
 			if (match) {
 				var start = count + 2 + match[1].length // move past the 'K:' and optional white space
 				var key = match[2] + match[3] + match[4] // key name, accidental, and mode
