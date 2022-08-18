@@ -100,6 +100,15 @@ var strTranspose;
 					changes.push(replaceNote(abc, el.startChar, el.endChar, newPitch, j))
 					//console.log(abc.substring(el.startChar, el.endChar) + ': ' + newPitch)
 				}
+				if (el.gracenotes) {
+					for (var g = 0; g < el.gracenotes.length; g++) {
+						var grace = parseNote(el.gracenotes[g].name, keyRoot, keyAccidentals, measureAccidentals)
+						var newGrace = transposePitch(grace, destinationKey, letterDistance, measureAccidentals[grace.name])
+						if (grace.acc)
+							measureAccidentals[grace.name] = grace.acc
+						changes.push(replaceGrace(abc, el.startChar, el.endChar, newGrace, g))
+					}
+				}
 			} else if (el.el_type === "bar")
 				measureAccidentals = {}
 		}
@@ -225,6 +234,23 @@ var strTranspose;
 			}
 		}
 		return { start: start, end: end, note: newPitch }
+	}
+
+	function replaceGrace(abc, start, end, newGrace, index) {
+		var note = abc.substring(start, end)
+		// I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
+		var match = note.match(/\{([_^=]*[A-Ga-g][,']*)([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?\}/)
+		if (match) {
+			// This will match all notes inside a grace symbol
+			// Get the number of chars used by the previous graces
+			var count = 1 // one character for the open brace
+			for (var i = 1; i < index + 1; i++) { // index is the iteration through the chord. This function gets called for each one.
+				count += match[i].length
+			}
+			start += count
+			end = start + match[index + 1].length
+		}
+		return { start: start, end: end, note: newGrace }
 	}
 
 	function replaceChord(abc, start, end, newChord) {

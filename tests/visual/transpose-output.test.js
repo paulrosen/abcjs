@@ -56,6 +56,16 @@ describe("Transpose Output", function () {
 		"D_EF^G ABcd| [K:E] e_f^ga bc'd'e'|\n" +
 		"e_f^ga bc'd'e'||\n"
 
+	var abcKeyChange = "K: Eb\n" +
+		"EFGA|\n" +
+		"K: B\n" +
+		"Bcde||\n"
+
+	var abcKeyChangeExpected = "K: F\n" +
+		"FGAB|\n" +
+		"K: Db\n" +
+		"defg||\n"
+
 	var abcMinor = "K: Em\n" +
 		"EFGA|Bcde|\n"
 
@@ -116,6 +126,10 @@ describe("Transpose Output", function () {
 
 	it("output-grace", function () {
 		outputTest(abcGrace, abcGraceExpected, 2)
+	})
+
+	it("output-key-change", function () {
+		outputTest(abcKeyChange, abcKeyChangeExpected, 2)
 	})
 })
 
