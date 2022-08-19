@@ -310,7 +310,6 @@ var strTranspose;
 				regOptionalNote.source + regOptionalNote.source + regOptionalNote.source +
 				regOptionalNote.source + regCloseBracket.source + regSpace.source))
 
-			console.log(match)
 			if (match) {
 				// This will match a chord
 				// Get the number of chars used by the previous notes in this chord
