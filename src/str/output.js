@@ -89,6 +89,8 @@ var strTranspose;
 
 	function setLetterDistance(destinationKey, keyRoot, steps) {
 		var letterDistance = letters.indexOf(destinationKey.root) - letters.indexOf(keyRoot)
+		if (keyRoot === "none")
+			letterDistance = letters.indexOf(destinationKey.root)
 		if (steps > 0 && letterDistance < 0) letterDistance += 8
 		if (steps < 0 && letterDistance > 0) letterDistance -= 8
 		if (steps > 12)
@@ -158,8 +160,9 @@ var strTranspose;
 	var octaves = [",,,,", ",,,", ",,", ",", "", "'", "''", "'''", "''''"]
 
 	function newKey(key, steps) {
-		if (key.root === "none")
-			return key;
+		if (key.root === "none") {
+			return { root: transposeKey("C", steps), mode: "", acc: "", accidentals: [] }
+		}
 		var major = relativeMajor(key.root + key.acc + key.mode)
 		var newMajor = transposeKey(major, steps)
 		var newMode = relativeMode(newMajor, key.mode)
@@ -267,7 +270,7 @@ var strTranspose;
 	// a normal scale. That is - in the key of D an F# is two steps from the tonic and no adjustment. A G# is three steps from the tonic and one half-step higher.
 	// I don't think there is any adjustment needed for minor keys since the adjustment is based on the key signature and the accidentals.
 	function parseNote(note, keyRoot, keyAccidentals, measureAccidentals) {
-		var root = letters.indexOf(keyRoot)
+		var root = keyRoot === "none" ? 0 : letters.indexOf(keyRoot)
 		var reg = note.match(/([_^=]*)([A-Ga-g])([,']*)/)
 		// reg[1] : "__", "_", "", "=", "^", or "^^"
 		// reg[2] : A-G a-g

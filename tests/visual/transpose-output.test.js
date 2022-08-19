@@ -82,7 +82,7 @@ describe("Transpose Output", function () {
 
 	var abcNone = "T: Transpose Output\n" +
 		"K: none\n" +
-		"CDEF ^C^D^E^F CDEF|GABc _G_A_B_ cGABc|^^C^^D^^E^^F CDEF|__G__A__B__c GABc|\n"
+		"CDEF ^C^D^E^F CDEF|GABc _G_A_B_c GABc|^^C^^D^^E^^F CDEF|__G__A__B__c GABc|\n"
 
 	var abcNoneExpected = "T: Transpose Output\n" +
 		"K: none\n" +
