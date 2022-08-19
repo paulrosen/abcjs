@@ -5,11 +5,17 @@ describe("Transpose Output", function () {
 	"K: Em\n" +
 	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
 
+	var abcCooleyExpected_14 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Dm\n" +
+	"|:C,2|D,A,{B,}A,G, A,2 D,A,|~A,2 G,A, CA,G,F,|\n"
+
 	var abcCooleyExpected_13 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Ebm\n" +
-	"|: TODO |\n"
+	"|:D,2|E,B,{C}B,A, B,2 E,B,|~B,2 A,B, DB,A,G,|\n"
 
 	var abcCooleyExpected_12 = "T: Cooley's\n" +
 	"M: 4/4\n" +
@@ -21,67 +27,67 @@ describe("Transpose Output", function () {
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Fm\n" +
-	"|: TODO |\n"
+	"|:E,2|F,C{D}CB, C2 F,C|~C2 B,C ECB,A,|\n"
 
 	var abcCooleyExpected_10 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: F#m\n" +
-	"|: TODO |\n"
+	"|:E,2|F,C{D}CB, C2 F,C|~C2 B,C ECB,A,|\n"
 
 	var abcCooleyExpected_9 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Gm\n" +
-	"|: TODO |\n"
+	"|:F,2|G,D{E}DC D2 G,D|~D2 CD FDCB,|\n"
 
 	var abcCooleyExpected_8 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: G#m\n" +
-	"|: TODO |\n"
+	"|:F,2|G,D{E}DC D2 G,D|~D2 CD FDCB,|\n"
 
 	var abcCooleyExpected_7 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Am\n" +
-	"|:G,2|A,E{F}ED E2 A,E|\n"
+	"|:G,2|A,E{F}ED E2 A,E|~E2 DE GEDC|\n"
 
 	var abcCooleyExpected_6 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: A#m\n" +
-	"|:A,2|B,F{G}FE F2 B,F|\n"
+	"K: Bbm\n" +
+	"|:A,2|B,F{G}FE F2 B,F|~F2 EF AFED|\n"
 
 	var abcCooleyExpected_5 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Bm\n" +
-	"|:A,2|B,F{G}FE F2 B,F|\n"
+	"|:A,2|B,F{G}FE F2 B,F|~F2 EF AFED|\n"
 
 	var abcCooleyExpected_4 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Cm\n" +
-	"|:B,2|CG{A}GF G2 CG|\n"
+	"|:B,2|CG{A}GF G2 CG|~G2 FG BGFE|\n"
 
 	var abcCooleyExpected_3 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: C#m\n" +
-	"|:B,2|CG{A}GF G2 CG|\n"
+	"|:B,2|CG{A}GF G2 CG|~G2 FG BGFE|\n"
 
 	var abcCooleyExpected_2 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Dm\n" +
-	"|:C2|DA{B}AG A2 DA|\n"
+	"|:C2|DA{B}AG A2 DA|~A2 GA cAGF|\n"
 
 	var abcCooleyExpected_1 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Ebm\n" +
-	"|:D2|EB{c}BA B2 EB\n"
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
 
 	var abcCooleyExpected0 = "T: Cooley's\n" +
 	"M: 4/4\n" +
@@ -135,7 +141,7 @@ describe("Transpose Output", function () {
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Cm\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"|:B2|cg{a}gf g2 cg|~g2 fg bgfe|\n"
 
 	var abcCooleyExpected9 = "T: Cooley's\n" +
 	"M: 4/4\n" +
@@ -153,7 +159,7 @@ describe("Transpose Output", function () {
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Ebm\n" +
-	"|:d2|eb{c'}ba c2 eb|~b2 ab d'bag|\n"
+	"|:d2|eb{c'}ba b2 eb|~b2 ab d'bag|\n"
 
 	var abcCooleyExpected12 = "T: Cooley's\n" +
 	"M: 4/4\n" +
@@ -314,6 +320,7 @@ describe("Transpose Output", function () {
 		outputTest(abcCooley, abcCooleyExpected_11, -11, "★★ down -11 ★★")
 		outputTest(abcCooley, abcCooleyExpected_12, -12, "★★ down -12 ★★")
 		outputTest(abcCooley, abcCooleyExpected_13, -13, "★★ down -13 ★★")
+		outputTest(abcCooley, abcCooleyExpected_14, -14, "★★ down -14 ★★")
 	})
 
 	it("output-transpose-chords", function () {

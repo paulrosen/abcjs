@@ -50,6 +50,7 @@ function transposeKey(key, steps) {
 	var match = keys[key]
 	if (!match)
 		return key;
+	while (steps < 0) steps += 12;
 	var fromC = (match.stepsFromC + steps) % 12;
 	for (var i = 0;  i < Object.keys(keys).length; i++) {
 		var k = Object.keys(keys)[i]
