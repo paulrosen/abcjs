@@ -8,80 +8,80 @@ describe("Transpose Output", function () {
 	var abcCooleyExpected_13 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Ebm\n" +
+	"|: TODO |\n"
 
 	var abcCooleyExpected_12 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"|:D,2|E,B,{C}B,A, B,2 E,B,|~B,2 A,B, DB,A,G,|\n"
 
 	var abcCooleyExpected_11 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Fm\n" +
+	"|: TODO |\n"
 
 	var abcCooleyExpected_10 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: F#m\n" +
+	"|: TODO |\n"
 
 	var abcCooleyExpected_9 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Gm\n" +
+	"|: TODO |\n"
 
 	var abcCooleyExpected_8 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: G#m\n" +
+	"|: TODO |\n"
 
 	var abcCooleyExpected_7 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Am\n" +
+	"|:G,2|A,E{F}ED E2 A,E|\n"
 
 	var abcCooleyExpected_6 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: A#m\n" +
+	"|:A,2|B,F{G}FE F2 B,F|\n"
 
 	var abcCooleyExpected_5 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Bm\n" +
+	"|:A,2|B,F{G}FE F2 B,F|\n"
 
 	var abcCooleyExpected_4 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Cm\n" +
+	"|:B,2|CG{A}GF G2 CG|\n"
 
 	var abcCooleyExpected_3 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: C#m\n" +
+	"|:B,2|CG{A}GF G2 CG|\n"
 
 	var abcCooleyExpected_2 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Dm\n" +
+	"|:C2|DA{B}AG A2 DA|\n"
 
 	var abcCooleyExpected_1 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Ebm\n" +
+	"|:D2|EB{c}BA B2 EB\n"
 
 	var abcCooleyExpected0 = "T: Cooley's\n" +
 	"M: 4/4\n" +
@@ -92,80 +92,80 @@ describe("Transpose Output", function () {
 	var abcCooleyExpected1 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Fm\n" +
+	"|:E2|Fc{d}cB c2 Fc|~c2 Bc ecBA|\n"
 
 	var abcCooleyExpected2 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: F#m\n" +
+	"|:E2|Fc{d}cB c2 Fc|~c2 Bc ecBA|\n"
 
 	var abcCooleyExpected3 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Gm\n" +
+	"|:F2|Gd{e}dc d2 Gd|~d2 cd fdcB|\n"
 
 	var abcCooleyExpected4 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: G#m\n" +
+	"|:F2|Gd{e}dc d2 Gd|~d2 cd fdcB|\n"
 
 	var abcCooleyExpected5 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Am\n" +
+	"|:G2|Ae{f}ed e2 Ae|~e2 de gedc|\n"
 
 	var abcCooleyExpected6 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Bbm\n" +
+	"|:A2|Bf{g}fe f2 Bf|~f2 ef afed|\n"
 
 	var abcCooleyExpected7 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Bm\n" +
+	"|:A2|Bf{g}fe f2 Bf|~f2 ef afed|\n"
 
 	var abcCooleyExpected8 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
+	"K: Cm\n" +
 	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
 
 	var abcCooleyExpected9 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: C#m\n" +
+	"|:B2|cg{a}gf g2 cg|~g2 fg bgfe|\n"
 
 	var abcCooleyExpected10 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Dm\n" +
+	"|:c2|da{b}ag a2 da|~a2 ga c'agf|\n"
 
 	var abcCooleyExpected11 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Ebm\n" +
+	"|:d2|eb{c'}ba c2 eb|~b2 ab d'bag|\n"
 
 	var abcCooleyExpected12 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
 	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"|:d2|eb{c'}ba b2 eb|~b2 ab d'bag|\n"
 
 	var abcCooleyExpected13 = "T: Cooley's\n" +
 	"M: 4/4\n" +
 	"L: 1/8\n" +
-	"K: Em\n" +
-	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+	"K: Fm\n" +
+	"|:e2|fc'{d'}c'b c'2 fc'|~c'2 bc' e'c'ba|\n"
 
 	var abcAll = "T: Transpose Output\n" +
 		"K: Eb\n" +

@@ -7,6 +7,7 @@ var strTranspose;
 (function () {
 	"use strict";
 	strTranspose = function (abc, abcTune, steps) {
+		steps = parseInt(steps, 10)
 		var changes = [];
 		var i;
 		for (i = 0; i < abcTune.length; i++)
