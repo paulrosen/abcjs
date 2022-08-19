@@ -29,16 +29,39 @@
 			});
 
 			visualTransposeEl.addEventListener("change", paramChanged);
-			paramChanged();
+			paramChanged(false);
 		};
 
-		function paramChanged() {
+		function paramChanged(userAction) {
 			var visualObj = editor.tunes
 			var abc = abcEl.value
 			var steps = visualTransposeEl.value
 			var output = ABCJS.strTranspose(abc, visualObj, steps)
 			outputEl.innerText = output
-			ABCJS.renderAbc("paper2", output, renderParams)
+			var newVisualObj = ABCJS.renderAbc("paper2", output, renderParams)
+			if (userAction)
+				createSynth(newVisualObj[0])
+		}
+
+		var synthControl
+
+		function createSynth(visualObj) {
+			if (!synthControl) {
+				synthControl = new ABCJS.synth.SynthController();
+				synthControl.load("#audio", null, { displayRestart: true, displayPlay: true, displayProgress: true });
+			}
+			var midiBuffer = new ABCJS.synth.CreateSynth();
+			midiBuffer.init({
+				visualObj: visualObj,
+			}).then(function (response) {
+				synthControl.setTune(visualObj, true).then(function (response) {
+				}).catch(function (error) {
+					console.warn("Audio problem:", error);
+				});
+			}).catch(function (error) {
+				console.warn("Audio problem:", error);
+			});
+
 		}
 	</script>
 	<style>
@@ -48,26 +71,33 @@
 			}
 		}
 
-		.input, .output {
+		.input,
+		.output {
 			display: flex;
 			column-gap: 10px;
 		}
 
-		.input>div, .output>div {
+		.input>div,
+		.output>div {
 			width: 50%;
-			overflow: auto;
 		}
 
 		#abc,
 		#transposed {
 			font-family: monaco, monospace;
 			font-size: 1em;
+			height: 300px;
 		}
 
 		#transposed {
 			border: 1px solid #888;
 			padding: 10px;
 			margin-top: 0;
+			overflow: auto;
+		}
+		label {
+			margin-top: 10px;
+			display: block;
 		}
 	</style>
 </head>
@@ -79,7 +109,7 @@
 	</header>
 	<div class="container">
 		<main>
-			<p>This demonstrates transposing an ABC string and retrieving that transposed string.</p>
+			<p>This demonstrates transposing an ABC string and retrieving that transposed string. Type any valid ABC string in the "input string" area and choose your transposition in half-steps below the input string. The resultant ABC string, transposed audio, and transposed notation are shown on the right side of the page.</p>
 			<section class="input">
 				<div>
 					<h2>Input String</h2>
@@ -95,23 +125,21 @@ V: Melody
 EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
 |:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
 eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
-    </textarea>
-					<fieldset>
-						<legend>Options</legend>
-						<label>Transpose:
-							<input
-								class="transpose"
-								type="number"
-								min="-24"
-								max="24"
-								step="1"
-								value="0">
-						</label>
-					</fieldset>
+</textarea>
+					<label>Transpose:
+						<input
+							class="transpose"
+							type="number"
+							min="-24"
+							max="24"
+							step="1"
+							value="0">
+					</label>
 				</div>
 				<div>
 					<h2>Output String</h2>
 					<pre id="transposed"></pre>
+					<div id="audio"></div>
 				</div>
 			</section>
 

@@ -99,7 +99,7 @@ var strTranspose;
 			letterDistance -= 14
 		else if (steps < 0)
 			letterDistance -= 7
-		return letterDistance	
+		return letterDistance
 	}
 
 	function transposeVoice(abc, voice, keyRoot, keyAccidentals, destinationKey, steps) {
@@ -285,32 +285,47 @@ var strTranspose;
 		return { acc: reg[1], name: name, pitch: pos, oct: oct, adj: calcAdjustment(reg[1], keyAccidentals[name], measureAccidentals[name]) }
 	}
 
+	var regNote = /([_^=]*[A-Ga-g][,']*)(\d*\/?\d*)/
+	var regOptionalNote = /([_^=]*[A-Ga-g][,']*)?(\d*\/?\d*)?/
+	var regSpace = /(\s*)$/
+
 	function replaceNote(abc, start, end, newPitch, index) {
 		// There may be more than just the note between the start and end - there could be spaces, there could be a chord symbol, there could be a decoration.
 		// This could also be a part of a chord. If so, then the particular note needs to be teased out.
 		var note = abc.substring(start, end)
-		var match = note.match(/([_^=]*[A-Ga-g][,']*)(\s*)$/)
+		var match = note.match(new RegExp(regNote.source + regSpace.source), '')
 		if (match) {
 			// This will match a single note
 			var noteLen = match[1].length
-			var trailingSpaceLen = match[2].length
-			var leadingLen = end - start - noteLen - trailingSpaceLen
-			// if (leadingLen || trailingSpaceLen)
-			// 	console.log(note, leadingLen, noteLen, trailingSpaceLen)
+			var trailingLen = match[2].length + match[3].length
+			var leadingLen = end - start - noteLen - trailingLen
 			start += leadingLen
-			end -= trailingSpaceLen
+			end -= trailingLen
 		} else {
 			// I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
-			match = note.match(/\[([_^=]*[A-Ga-g][,']*)([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?\](\s*)$/)
+			var regOpenBracket = /\[/
+			var regCloseBracket = /]/
+			match = note.match(new RegExp(regOpenBracket.source + regOptionalNote.source +
+				regOptionalNote.source + regOptionalNote.source + regOptionalNote.source +
+				regOptionalNote.source + regOptionalNote.source + regOptionalNote.source +
+				regOptionalNote.source + regCloseBracket.source + regSpace.source))
+
+			console.log(match)
 			if (match) {
 				// This will match a chord
 				// Get the number of chars used by the previous notes in this chord
 				var count = 1 // one character for the open bracket
-				for (var i = 1; i < index + 1; i++) { // index is the iteration through the chord. This function gets called for each one.
-					count += match[i].length
+				for (var i = 0; i < index; i++) { // index is the iteration through the chord. This function gets called for each one.
+					if (match[i * 2 + 1])
+						count += match[i * 2 + 1].length
+					if (match[i * 2 + 2])
+						count += match[i * 2 + 2].length
 				}
 				start += count
-				end = start + match[index + 1].length
+				var endLen = match[index * 2 + 1] ? match[index * 2 + 1].length : 0
+				endLen += match[index * 2 + 2] ? match[index * 2 + 2].length : 0
+
+				end = start + endLen
 			}
 		}
 		return { start: start, end: end, note: newPitch }
@@ -319,16 +334,27 @@ var strTranspose;
 	function replaceGrace(abc, start, end, newGrace, index) {
 		var note = abc.substring(start, end)
 		// I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
-		var match = note.match(/\{([_^=]*[A-Ga-g][,']*)([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?([_^=]*[A-Ga-g][,']*)?\}/)
+		var regOpenBrace = /\{/
+		var regCloseBrace = /\}/
+		var match = note.match(new RegExp(regOpenBrace.source + regOptionalNote.source +
+			regOptionalNote.source + regOptionalNote.source + regOptionalNote.source +
+			regOptionalNote.source + regOptionalNote.source + regOptionalNote.source +
+			regOptionalNote.source + regCloseBrace.source))
 		if (match) {
 			// This will match all notes inside a grace symbol
 			// Get the number of chars used by the previous graces
 			var count = 1 // one character for the open brace
-			for (var i = 1; i < index + 1; i++) { // index is the iteration through the chord. This function gets called for each one.
-				count += match[i].length
+			for (var i = 0; i < index; i++) { // index is the iteration through the chord. This function gets called for each one.
+				if (match[i * 2 + 1])
+					count += match[i * 2 + 1].length
+				if (match[i * 2 + 2])
+					count += match[i * 2 + 2].length
 			}
 			start += count
-			end = start + match[index + 1].length
+			var endLen = match[index * 2 + 1] ? match[index * 2 + 1].length : 0
+			endLen += match[index * 2 + 2] ? match[index * 2 + 2].length : 0
+
+			end = start + endLen
 		}
 		return { start: start, end: end, note: newGrace }
 	}

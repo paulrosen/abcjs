@@ -1,4 +1,172 @@
 describe("Transpose Output", function () {
+	var abcCooley = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_13 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_12 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_11 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_10 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_9 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_8 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_7 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_6 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_5 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_4 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_3 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_2 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected_1 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected0 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected1 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected2 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected3 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected4 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected5 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected6 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected7 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected8 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected9 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected10 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected11 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected12 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
+	var abcCooleyExpected13 = "T: Cooley's\n" +
+	"M: 4/4\n" +
+	"L: 1/8\n" +
+	"K: Em\n" +
+	"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|\n"
+
 	var abcAll = "T: Transpose Output\n" +
 		"K: Eb\n" +
 		"V: 1\n" +
@@ -118,7 +286,36 @@ describe("Transpose Output", function () {
 	"K:Hp\n" +
 	"e|{g}A2 {GdGe}A>B {gcd}c{e}A {gcd}ce| {ag}a2{g}a2 {GdG}ae {gcd}c{e}A|\n"
 
-	// TODO-PER: do all of the following tests for -14, -12, -11, -2, -1, 0, 1, 2, 11, 12, 14 steps
+	it("output-cooley", function () {
+		outputTest(abcCooley, abcCooleyExpected0, 0, "★★ up 0 ★★")
+		outputTest(abcCooley, abcCooleyExpected1, 1, "★★ up 1 ★★")
+		outputTest(abcCooley, abcCooleyExpected2, 2, "★★ up 2 ★★")
+		outputTest(abcCooley, abcCooleyExpected3, 3, "★★ up 3 ★★")
+		outputTest(abcCooley, abcCooleyExpected4, 4, "★★ up 4 ★★")
+		outputTest(abcCooley, abcCooleyExpected5, 5, "★★ up 5 ★★")
+		outputTest(abcCooley, abcCooleyExpected6, 6, "★★ up 6 ★★")
+		outputTest(abcCooley, abcCooleyExpected7, 7, "★★ up 7 ★★")
+		outputTest(abcCooley, abcCooleyExpected8, 8, "★★ up 8 ★★")
+		outputTest(abcCooley, abcCooleyExpected9, 9, "★★ up 9 ★★")
+		outputTest(abcCooley, abcCooleyExpected10, 10, "★★ up 10 ★★")
+		outputTest(abcCooley, abcCooleyExpected11, 11, "★★ up 11 ★★")
+		outputTest(abcCooley, abcCooleyExpected12, 12, "★★ up 12 ★★")
+		outputTest(abcCooley, abcCooleyExpected13, 13, "★★ up 13 ★★")
+		outputTest(abcCooley, abcCooleyExpected_1, -1, "★★ down -1 ★★")
+		outputTest(abcCooley, abcCooleyExpected_2, -2, "★★ down -2 ★★")
+		outputTest(abcCooley, abcCooleyExpected_3, -3, "★★ down -3 ★★")
+		outputTest(abcCooley, abcCooleyExpected_4, -4, "★★ down -4 ★★")
+		outputTest(abcCooley, abcCooleyExpected_5, -5, "★★ down -5 ★★")
+		outputTest(abcCooley, abcCooleyExpected_6, -6, "★★ down -6 ★★")
+		outputTest(abcCooley, abcCooleyExpected_7, -7, "★★ down -7 ★★")
+		outputTest(abcCooley, abcCooleyExpected_8, -8, "★★ down -8 ★★")
+		outputTest(abcCooley, abcCooleyExpected_9, -9, "★★ down -9 ★★")
+		outputTest(abcCooley, abcCooleyExpected_10, -10, "★★ down -10 ★★")
+		outputTest(abcCooley, abcCooleyExpected_11, -11, "★★ down -11 ★★")
+		outputTest(abcCooley, abcCooleyExpected_12, -12, "★★ down -12 ★★")
+		outputTest(abcCooley, abcCooleyExpected_13, -13, "★★ down -13 ★★")
+	})
+
 	it("output-transpose-chords", function () {
 		outputTest(abcChords, abcChordsExpected, 2)
 	})
@@ -164,9 +361,10 @@ describe("Transpose Output", function () {
 	})
 })
 
-function outputTest(abc, expected, steps) {
+function outputTest(abc, expected, steps, comment) {
 	var visualObj = abcjs.renderAbc("paper", abc);
 	var output = abcjs.strTranspose(abc, visualObj, steps)
 	abcjs.renderAbc("paper", "%%stretchlast\n" + abc + output);
-	chai.assert.equal(output, expected, "\n" + output.replace(/\n/g, ' ↲ ') + "\n" + expected.replace(/\n/g, ' ↲ ') + "\n")
+	var message = (comment ? "\n" + comment : '') + "\n" + output.replace(/\n/g, ' ↲ ') + "\n" + expected.replace(/\n/g, ' ↲ ') + "\n"
+	chai.assert.equal(output, expected, message)
 }
