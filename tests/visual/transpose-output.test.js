@@ -278,19 +278,42 @@ describe("Transpose Output", function () {
 		"K: A\n" +
 		"{B}A{edc}B|\n"
 
-	var abcBagpipes = "X:1\n" +
-	"T:Scotland The Brave\n" +
+	var abcBagpipes = "T:Scotland The Brave\n" +
 	"L:1/8\n" +
 	"M:4/4\n" +
 	"K:Hp\n" +
 	"e|{g}A2 {GdGe}A>B {gcd}c{e}A {gcd}ce| {ag}a2{g}a2 {GdG}ae {gcd}c{e}A|\n"
 
-	var abcBagpipesExpected = "X:1\n" +
-	"T:Scotland The Brave\n" +
+	var abcBagpipesExpected = "T:Scotland The Brave\n" +
 	"L:1/8\n" +
 	"M:4/4\n" +
 	"K:Hp\n" +
 	"e|{g}A2 {GdGe}A>B {gcd}c{e}A {gcd}ce| {ag}a2{g}a2 {GdG}ae {gcd}c{e}A|\n"
+
+	var abcUnusual = "\n\nX:1\nT: Transpose Output\n" +
+		"K:F#min\n" +
+		'""G-G"D"|A>B|(de)|\n'
+
+	var abcUnusualExpected = "\n\nX:1\nT: Transpose Output\n" +
+		"K:G#min\n" +
+		'""A-A"E"|B>c|(ef)|\n'
+
+	var abcTemp = `
+
+T: Blue Boy
+C: Barney Kessel
+C: Herzel's Bass Line
+M: 4/4
+L: 1/4
+K: C bass
+ "C"c2 c>c- | c4 | c2 c>c-|c4 | \
+ "F" f2 f>f-| f4 | "C" c2 c>c-| c4 |
+  (3"G"g/^f/g/ -g z "F"(3f/"E"e/"F"f/| -f z "F"f\
+      ^f|1  "C"cef^f|"G"gz z4\
+   :|2"C"cef^f|"G"g^gab|
+"C"c'dec|"Dm"df"Eb0"_ed|"C"cdef|"Gm7"gf"C7"ec|
+"F7"fgag|fg"Fm7"_af|"Em7b5"edc_b,|"A7"a,b,^ce|
+`
 
 	it("output-cooley", function () {
 		outputTest(abcCooley, abcCooleyExpected0, 0, "★★ up 0 ★★")
@@ -366,12 +389,20 @@ describe("Transpose Output", function () {
 	it("output-bagpipes", function () {
 		outputTest(abcBagpipes, abcBagpipesExpected, 2)
 	})
+
+	it("output-unusual", function () {
+		outputTest(abcUnusual, abcUnusualExpected, 2)
+	})
+
+	it("output-temp", function () {
+		outputTest(abcTemp, abcUnusualExpected, 2)
+	})
 })
 
 function outputTest(abc, expected, steps, comment) {
-	var visualObj = abcjs.renderAbc("paper", abc);
+	var visualObj = abcjs.renderAbc("paper", abc, { stretchlast: true });
 	var output = abcjs.strTranspose(abc, visualObj, steps)
-	abcjs.renderAbc("paper", "%%stretchlast\n" + abc + output);
+	abcjs.renderAbc("paper2", output, { stretchlast: true });
 	var message = (comment ? "\n" + comment : '') + "\n" + output.replace(/\n/g, ' ↲ ') + "\n" + expected.replace(/\n/g, ' ↲ ') + "\n"
 	chai.assert.equal(output, expected, message)
 }

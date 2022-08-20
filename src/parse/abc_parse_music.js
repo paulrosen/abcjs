@@ -289,7 +289,7 @@ MusicParser.prototype.parseMusic = function(line) {
 						}
 					}
 					multilineVars.addFormattingOptions(el, tune.formatting, 'bar');
-					tuneBuilder.appendElement('bar', startOfLine+i, startOfLine+i+ret[0], bar);
+					tuneBuilder.appendElement('bar', startOfLine+startI, startOfLine+i+ret[0], bar);
 					multilineVars.measureNotEmpty = false;
 					el = {};
 				}

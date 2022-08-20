@@ -125,7 +125,9 @@ var strTranspose;
 						var prefersFlats = destinationKey.accidentals.length && destinationKey.accidentals[0].acc === 'flat'
 						var newChord = transposeChordName(ch.name, steps, prefersFlats, true)
 						newChord = newChord.replace(/♭/g, "b").replace(/♯/g, "#")
-						changes.push(replaceChord(abc, el.startChar, el.endChar, newChord))
+						//∆7"zzzz|"Gb°
+						if (newChord !== ch.name) // If we didn't recognize the chord the input is returned unchanged and there is nothing to replace
+							changes.push(replaceChord(abc, el.startChar, el.endChar, newChord))
 					}
 				}
 			}
@@ -267,12 +269,17 @@ var strTranspose;
 		return { acc: acc, name: name, upper: name.toUpperCase() }
 	}
 
+	var regPitch = /([_^=]*)([A-Ga-g])([,']*)/
+	var regNote = /([_^=]*[A-Ga-g][,']*)(\d*\/*\d*)([\>\<\-\)]*)/
+	var regOptionalNote = /([_^=]*[A-Ga-g][,']*)?(\d*\/*\d*)?([\>\<\-\)]*)?/
+	var regSpace = /(\s*)$/
+
 	// This the relationship of the note to the tonic and an octave. So what is returned is a distance in steps from the tonic and the amount of adjustment from
 	// a normal scale. That is - in the key of D an F# is two steps from the tonic and no adjustment. A G# is three steps from the tonic and one half-step higher.
 	// I don't think there is any adjustment needed for minor keys since the adjustment is based on the key signature and the accidentals.
 	function parseNote(note, keyRoot, keyAccidentals, measureAccidentals) {
 		var root = keyRoot === "none" ? 0 : letters.indexOf(keyRoot)
-		var reg = note.match(/([_^=]*)([A-Ga-g])([,']*)/)
+		var reg = note.match(regPitch)
 		// reg[1] : "__", "_", "", "=", "^", or "^^"
 		// reg[2] : A-G a-g
 		// reg[3] : commas or apostrophes
@@ -285,10 +292,6 @@ var strTranspose;
 		return { acc: reg[1], name: name, pitch: pos, oct: oct, adj: calcAdjustment(reg[1], keyAccidentals[name], measureAccidentals[name]) }
 	}
 
-	var regNote = /([_^=]*[A-Ga-g][,']*)(\d*\/?\d*)/
-	var regOptionalNote = /([_^=]*[A-Ga-g][,']*)?(\d*\/?\d*)?/
-	var regSpace = /(\s*)$/
-
 	function replaceNote(abc, start, end, newPitch, index) {
 		// There may be more than just the note between the start and end - there could be spaces, there could be a chord symbol, there could be a decoration.
 		// This could also be a part of a chord. If so, then the particular note needs to be teased out.
@@ -297,7 +300,7 @@ var strTranspose;
 		if (match) {
 			// This will match a single note
 			var noteLen = match[1].length
-			var trailingLen = match[2].length + match[3].length
+			var trailingLen = match[2].length + match[3].length + match[4].length
 			var leadingLen = end - start - noteLen - trailingLen
 			start += leadingLen
 			end -= trailingLen
@@ -315,14 +318,17 @@ var strTranspose;
 				// Get the number of chars used by the previous notes in this chord
 				var count = 1 // one character for the open bracket
 				for (var i = 0; i < index; i++) { // index is the iteration through the chord. This function gets called for each one.
-					if (match[i * 2 + 1])
-						count += match[i * 2 + 1].length
-					if (match[i * 2 + 2])
-						count += match[i * 2 + 2].length
+					if (match[i * 3 + 1])
+						count += match[i * 3 + 1].length
+					if (match[i * 3 + 2])
+						count += match[i * 3 + 2].length
+					if (match[i * 3 + 3])
+						count += match[i * 3 + 3].length
 				}
 				start += count
-				var endLen = match[index * 2 + 1] ? match[index * 2 + 1].length : 0
-				endLen += match[index * 2 + 2] ? match[index * 2 + 2].length : 0
+				var endLen = match[index * 3 + 1] ? match[index * 3 + 1].length : 0
+				endLen += match[index * 3 + 2] ? match[index * 3 + 2].length : 0
+				endLen += match[index * 3 + 3] ? match[index * 3 + 3].length : 0
 
 				end = start + endLen
 			}
@@ -344,14 +350,17 @@ var strTranspose;
 			// Get the number of chars used by the previous graces
 			var count = 1 // one character for the open brace
 			for (var i = 0; i < index; i++) { // index is the iteration through the chord. This function gets called for each one.
-				if (match[i * 2 + 1])
-					count += match[i * 2 + 1].length
-				if (match[i * 2 + 2])
-					count += match[i * 2 + 2].length
+				if (match[i * 3 + 1])
+					count += match[i * 3 + 1].length
+				if (match[i * 3 + 2])
+					count += match[i * 3 + 2].length
+				if (match[i * 3 + 2])
+					count += match[i * 3 + 2].length
 			}
 			start += count
-			var endLen = match[index * 2 + 1] ? match[index * 2 + 1].length : 0
-			endLen += match[index * 2 + 2] ? match[index * 2 + 2].length : 0
+			var endLen = match[index * 3 + 1] ? match[index * 3 + 1].length : 0
+			endLen += match[index * 3 + 2] ? match[index * 3 + 2].length : 0
+			endLen += match[index * 3 + 3] ? match[index * 3 + 3].length : 0
 
 			end = start + endLen
 		}
@@ -361,6 +370,8 @@ var strTranspose;
 	function replaceChord(abc, start, end, newChord) {
 		// Isolate the chord and just replace that
 		var match = abc.substring(start, end).match(/([^"]+)?(".+")+/)
+		if (!match)
+			debugger;
 		if (match[1])
 			start += match[1].length
 		end = start + match[2].length

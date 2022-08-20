@@ -6,13 +6,14 @@ var bookParser = function(book) {
 	"use strict";
 
 	var directives = "";
+	var initialWhiteSpace = book.match(/(\s*)/)
 	book = parseCommon.strip(book);
 	var tuneStrings = book.split("\nX:");
 	// Put back the X: that we lost when splitting the tunes.
 	for (var i = 1; i < tuneStrings.length; i++)
 		tuneStrings[i] = "X:" + tuneStrings[i];
-	// Keep track of the character position each tune starts with.
-	var pos = 0;
+	// Keep track of the character position each tune starts with. If the string starts with white space, count that, too.
+	var pos = initialWhiteSpace ? initialWhiteSpace[0].length : 0;
 	var tunes = [];
 	parseCommon.each(tuneStrings, function(tune) {
 		tunes.push({ abc: tune, startPos: pos});
