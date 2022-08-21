@@ -191,7 +191,7 @@ describe("Transpose Output", function () {
 		"V: 2\n" +
 		'D,_E,^F,^G, "N.C."A,B,C"^Coda"D| z8|\n' +
 		"V: 1\n" +
-		"d_ef^g [eac']__bc'd'|\n" +
+		"d_e=f^g [eac']__bc'd'|\n" +
 		"V: 2\n" +
 		"d'_e'f'^g' a'b'c''Td''|\n"
 
@@ -201,7 +201,7 @@ describe("Transpose Output", function () {
 
 	var abcChordsExpected = "T: Transpose Output\n" +
 		"K: E\n" +
-		'[EFG] [_EFG] [=F=G_A] |\n'
+		'[EFG] [_EF^G] [=F=G_A] |\n'
 
 	var abcChordSymbols = 'X:1\n' +
 		"T: Transpose Output\n" +
@@ -231,8 +231,8 @@ describe("Transpose Output", function () {
 
 	var abcInlineExpected = "T: Transpose Output\n" +
 		"K: D\n" +
-		"D_EF^G ABcd| [K:E] e=fga bc'd'e'|\n" +
-		"e=fga bc'd'e'||\n"
+		"D_EF^G ABcd| [K:E] e=f^ga bc'd'e'|\n" +
+		"e=f^ga bc'd'e'||\n"
 
 	var abcKeyChange = "T: Transpose Output\n" +
 		"K: Eb\n" +
@@ -261,6 +261,16 @@ describe("Transpose Output", function () {
 	var abcNoneExpected = "T: Transpose Output\n" +
 		"K: none\n" +
 		"DEFG ^D^E^F^G DEFG|ABcd _A_B_c_d ABcd|^^D^^E^^F^^G DEFG|__A__B__c__d ABcd|\n"
+
+	var abcPerc = "T: Transpose Output\n" +
+		"L:1/16\n" +
+		"K:clef=perc stafflines=1\n" +
+		"BBBB BzBB zBBB BBzB BBBz \n"
+
+	var abcPercExpected = "T: Transpose Output\n" +
+		"L:1/16\n" +
+		"K:clef=perc stafflines=1\n" +
+		"BBBB BzBB zBBB BBzB BBBz \n"
 
 	var abcDorian = "T: Transpose Output\n" +
 		"K: EDor\n" +
@@ -292,27 +302,16 @@ describe("Transpose Output", function () {
 
 	var abcUnusual = "\n\nX:1\nT: Transpose Output\n" +
 		"K:F#min\n" +
-		'""G-G"D"|A>B|(de)|\n'
+		'{/GA}B | [G3_d3] | =A !arpeggio!A !arpeggio![CEG^c] | D .- D | {A}B"<2"{c}+1+B ""_G-_G"D"|A>B|"<2"(de)| [BG]>[cA] |\n'
 
 	var abcUnusualExpected = "\n\nX:1\nT: Transpose Output\n" +
 		"K:G#min\n" +
-		'""A-A"E"|B>c|(ef)|\n'
+		'{/AB}c | [A3_e3] | =B !arpeggio!B !arpeggio![DFA^d] | E .- E | {B}c"<2"{d}+1+c ""_A-_A"E"|B>c|"<2"(ef)| [Ac]>[Bd] |\n'
 
-	var abcTemp = `
+	var abcTemp = `T: Transpose Output
+`
 
-T: Blue Boy
-C: Barney Kessel
-C: Herzel's Bass Line
-M: 4/4
-L: 1/4
-K: C bass
- "C"c2 c>c- | c4 | c2 c>c-|c4 | \
- "F" f2 f>f-| f4 | "C" c2 c>c-| c4 |
-  (3"G"g/^f/g/ -g z "F"(3f/"E"e/"F"f/| -f z "F"f\
-      ^f|1  "C"cef^f|"G"gz z4\
-   :|2"C"cef^f|"G"g^gab|
-"C"c'dec|"Dm"df"Eb0"_ed|"C"cdef|"Gm7"gf"C7"ec|
-"F7"fgag|fg"Fm7"_af|"Em7b5"edc_b,|"A7"a,b,^ce|
+	var abcTempExpected = `T: Transpose Output
 `
 
 	it("output-cooley", function () {
@@ -378,6 +377,10 @@ K: C bass
 		outputTest(abcNone, abcNoneExpected, 2)
 	})
 
+	it("output-perc", function () {
+		outputTest(abcPerc, abcPercExpected, 2)
+	})
+
 	it("output-grace", function () {
 		outputTest(abcGrace, abcGraceExpected, 2)
 	})
@@ -394,8 +397,44 @@ K: C bass
 		outputTest(abcUnusual, abcUnusualExpected, 2)
 	})
 
-	it("output-temp", function () {
-		outputTest(abcTemp, abcUnusualExpected, 2)
+	// it("output-temp", function () {
+	// 	outputTest(abcTemp, abcTempExpected, 2)
+	// })
+
+	it ("output-unit", function () {
+		var fns = abcjs.strTranspose(null, "TEST", null)
+		var relativeMajor = fns.relativeMajor
+		var relativeMode = fns.relativeMode
+
+		chai.assert.equal(relativeMajor("F"), "F", 'relativeMajor')
+		chai.assert.equal(relativeMajor("F#"), "F#", 'relativeMajor')
+		chai.assert.equal(relativeMajor("Gb"), "Gb", 'relativeMajor')
+		chai.assert.equal(relativeMajor("Gm"), "Bb", 'relativeMajor')
+		chai.assert.equal(relativeMajor("Amin"), "C", 'relativeMajor')
+		chai.assert.equal(relativeMajor("C#Min"), "E", 'relativeMajor')
+		chai.assert.equal(relativeMajor("D#Min"), "F#", 'relativeMajor')
+		chai.assert.equal(relativeMajor("BbMix"), "Eb", 'relativeMajor')
+		chai.assert.equal(relativeMajor("Bbmix"), "Eb", 'relativeMajor')
+		chai.assert.equal(relativeMajor("Bdor"), "A", 'relativeMajor')
+		chai.assert.equal(relativeMajor("DPhr"), "Bb", 'relativeMajor')
+		chai.assert.equal(relativeMajor("DMix_B_e"), "G", 'relativeMajor')
+		chai.assert.equal(relativeMajor("DDorian"), "C", 'relativeMajor')
+//		chai.assert.equal(relativeMajor("C clef=treble"), "C", 'relativeMajor')
+
+		chai.assert.equal(relativeMode("F", ""), "F", 'relativeMode')
+		chai.assert.equal(relativeMode("F#", ""), "F#", 'relativeMode')
+		chai.assert.equal(relativeMode("Gb", ""), "Gb", 'relativeMode')
+		chai.assert.equal(relativeMode("Bb", "m"), "G", 'relativeMode')
+		chai.assert.equal(relativeMode("C", "min"), "A", 'relativeMode')
+		chai.assert.equal(relativeMode("E", "Min"), "C#", 'relativeMode')
+		chai.assert.equal(relativeMode("F#", "Min"), "D#", 'relativeMode')
+		chai.assert.equal(relativeMode("Eb", "Mix"), "Bb", 'relativeMode')
+		chai.assert.equal(relativeMode("Eb", "mix"), "Bb", 'relativeMode')
+		chai.assert.equal(relativeMode("A", "dor"), "B", 'relativeMode')
+		chai.assert.equal(relativeMode("Bb", "Phr"), "D", 'relativeMode')
+		chai.assert.equal(relativeMode("G", "Mix_B_e"), "D", 'relativeMode')
+		chai.assert.equal(relativeMode("C", "Dorian"), "D", 'relativeMode')
+
 	})
 })
 

@@ -41,7 +41,12 @@ function relativeMajor(key) {
 	if (!keyReverse) {
 		createKeyReverse()
 	}
-	var maj = keyReverse[key.toLowerCase()]
+	// get the key portion itself - there might be other stuff, like extra sharps and flats, or the mode written out.
+	var mode = key.toLowerCase().match(/([a-g][b#]?)(maj|min|mix|dor|phr|lyd|loc|m)?/)
+	if (!mode || !mode[2])
+		return key;
+	mode = mode[1] + mode[2]
+	var maj = keyReverse[mode]
 	if (maj)
 		return maj;
 	return key;
@@ -55,11 +60,15 @@ function relativeMode(majorKey, mode) {
 		return majorKey;
 	if (mode === '')
 		return majorKey;
-	// The mode must match the end - we don't want to mix up "m" and "mix"	
+	var match = mode.toLowerCase().match(/^(maj|min|mix|dor|phr|lyd|loc|m)/)	
+	if (!match)
+		return majorKey
+	var regMode = match[1]	
 	for (var i = 0; i < group.modes.length; i++) {
 		var thisMode = group.modes[i]
-		if (thisMode.indexOf(mode) === thisMode.length - mode.length)
-			return thisMode.replace(mode, '')
+		var ind = thisMode.toLowerCase().indexOf(regMode)
+		if (ind !== -1 && ind === thisMode.length - regMode.length)
+			return thisMode.substring(0, thisMode.length - regMode.length)
 	}
 	return majorKey;
 }

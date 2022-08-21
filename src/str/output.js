@@ -7,6 +7,8 @@ var strTranspose;
 (function () {
 	"use strict";
 	strTranspose = function (abc, abcTune, steps) {
+		if (abcTune === "TEST") // Backdoor way to get entry points for unit tests
+			return { keyAccidentals: keyAccidentals, relativeMajor: relativeMajor, transposeKey: transposeKey, relativeMode: relativeMode, transposeChordName: transposeChordName}
 		steps = parseInt(steps, 10)
 		var changes = [];
 		var i;
@@ -37,9 +39,12 @@ var strTranspose;
 		changes = changes.concat(changeAllKeySigs(abc, steps))
 
 		for (var i = 0; i < abcTune.lines.length; i++) {
-			if (abcTune.lines[i].staff) {
-				for (var j = 0; j < abcTune.lines[i].staff.length; j++) {
-					changes = changes.concat(transposeVoices(abc, abcTune.lines[i].staff[j].voices, abcTune.lines[i].staff[j].key, steps))
+			var staves = abcTune.lines[i].staff
+			if (staves) {
+				for (var j = 0; j < staves.length; j++) {
+					var staff = staves[j]
+					if (staff.clef.type !== "perc")
+						changes = changes.concat(transposeVoices(abc, staff.voices, staff.key, steps))
 				}
 			}
 		}
@@ -125,7 +130,6 @@ var strTranspose;
 						var prefersFlats = destinationKey.accidentals.length && destinationKey.accidentals[0].acc === 'flat'
 						var newChord = transposeChordName(ch.name, steps, prefersFlats, true)
 						newChord = newChord.replace(/♭/g, "b").replace(/♯/g, "#")
-						//∆7"zzzz|"Gb°
 						if (newChord !== ch.name) // If we didn't recognize the chord the input is returned unchanged and there is nothing to replace
 							changes.push(replaceChord(abc, el.startChar, el.endChar, newChord))
 					}
@@ -249,7 +253,7 @@ var strTranspose;
 					newNote.adj = note.adj - 2;
 				return transposePitch(newNote, key, letterDistance + 1, measureAccidentals)
 		}
-		if (measureAccidentals[name] === acc || (!measureAccidentals[name] && acc === keyAcc))
+		if ((measureAccidentals[name] === acc || (!measureAccidentals[name] && acc === keyAcc)) && !note.courtesy)
 			acc = ""
 
 		switch (oct) {
@@ -270,7 +274,7 @@ var strTranspose;
 	}
 
 	var regPitch = /([_^=]*)([A-Ga-g])([,']*)/
-	var regNote = /([_^=]*[A-Ga-g][,']*)(\d*\/*\d*)([\>\<\-\)]*)/
+	var regNote = /([_^=]*[A-Ga-g][,']*)(\d*\/*\d*)([\>\<\-\)\.\s\\]*)/
 	var regOptionalNote = /([_^=]*[A-Ga-g][,']*)?(\d*\/*\d*)?([\>\<\-\)]*)?/
 	var regSpace = /(\s*)$/
 
@@ -289,7 +293,8 @@ var strTranspose;
 		var oct = octaves.indexOf(reg[3])
 		if (name === reg[2]) // See if it is a capital letter and subtract an octave if so.
 			oct--;
-		return { acc: reg[1], name: name, pitch: pos, oct: oct, adj: calcAdjustment(reg[1], keyAccidentals[name], measureAccidentals[name]) }
+		var currentAcc = measureAccidentals[name] || keyAccidentals[name] || "=" //  use the key accidentals if they exist, but override with the measure accidentals, and if neither of them exist, use a natural.
+		return { acc: reg[1], name: name, pitch: pos, oct: oct, adj: calcAdjustment(reg[1], keyAccidentals[name], measureAccidentals[name]), courtesy: reg[1] === currentAcc }
 	}
 
 	function replaceNote(abc, start, end, newPitch, index) {
@@ -306,9 +311,10 @@ var strTranspose;
 			end -= trailingLen
 		} else {
 			// I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
+			var regPreBracket = /([^\[]*)/
 			var regOpenBracket = /\[/
-			var regCloseBracket = /]/
-			match = note.match(new RegExp(regOpenBracket.source + regOptionalNote.source +
+			var regCloseBracket = /\-?](\d*\/*\d*)?([\>\<\-\)]*)/
+			match = note.match(new RegExp(regPreBracket.source + regOpenBracket.source + regOptionalNote.source +
 				regOptionalNote.source + regOptionalNote.source + regOptionalNote.source +
 				regOptionalNote.source + regOptionalNote.source + regOptionalNote.source +
 				regOptionalNote.source + regCloseBracket.source + regSpace.source))
@@ -316,19 +322,19 @@ var strTranspose;
 			if (match) {
 				// This will match a chord
 				// Get the number of chars used by the previous notes in this chord
-				var count = 1 // one character for the open bracket
+				var count = 1 + match[1].length // one character for the open bracket
 				for (var i = 0; i < index; i++) { // index is the iteration through the chord. This function gets called for each one.
-					if (match[i * 3 + 1])
-						count += match[i * 3 + 1].length
 					if (match[i * 3 + 2])
 						count += match[i * 3 + 2].length
 					if (match[i * 3 + 3])
 						count += match[i * 3 + 3].length
+					if (match[i * 3 + 4])
+						count += match[i * 3 + 4].length
 				}
 				start += count
-				var endLen = match[index * 3 + 1] ? match[index * 3 + 1].length : 0
-				endLen += match[index * 3 + 2] ? match[index * 3 + 2].length : 0
-				endLen += match[index * 3 + 3] ? match[index * 3 + 3].length : 0
+				var endLen = match[index * 3 + 2] ? match[index * 3 + 2].length : 0
+				// endLen += match[index * 3 + 3] ? match[index * 3 + 3].length : 0
+				// endLen += match[index * 3 + 4] ? match[index * 3 + 4].length : 0
 
 				end = start + endLen
 			}
@@ -341,26 +347,32 @@ var strTranspose;
 		// I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
 		var regOpenBrace = /\{/
 		var regCloseBrace = /\}/
-		var match = note.match(new RegExp(regOpenBrace.source + regOptionalNote.source +
-			regOptionalNote.source + regOptionalNote.source + regOptionalNote.source +
-			regOptionalNote.source + regOptionalNote.source + regOptionalNote.source +
-			regOptionalNote.source + regCloseBrace.source))
+		var regPreBrace = /([^\{]*)/
+		var regPreNote = /(\/*)/
+		var match = note.match(new RegExp(regPreBrace.source + regOpenBrace.source + regPreNote.source + regOptionalNote.source +
+			regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source +
+			regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source +
+			regPreNote.source + regOptionalNote.source + regCloseBrace.source))
 		if (match) {
 			// This will match all notes inside a grace symbol
 			// Get the number of chars used by the previous graces
-			var count = 1 // one character for the open brace
+			var count = 1 + match[1].length // one character for the open brace, and whatever comes before the brace
 			for (var i = 0; i < index; i++) { // index is the iteration through the chord. This function gets called for each one.
-				if (match[i * 3 + 1])
-					count += match[i * 3 + 1].length
 				if (match[i * 3 + 2])
 					count += match[i * 3 + 2].length
-				if (match[i * 3 + 2])
-					count += match[i * 3 + 2].length
+				if (match[i * 3 + 3])
+					count += match[i * 3 + 3].length
+				if (match[i * 3 + 4])
+					count += match[i * 3 + 4].length
+				if (match[i * 3 + 5])
+					count += match[i * 3 + 5].length
 			}
+			if (match[index * 3 + 2])
+				count += match[i * 3 + 2].length
 			start += count
-			var endLen = match[index * 3 + 1] ? match[index * 3 + 1].length : 0
-			endLen += match[index * 3 + 2] ? match[index * 3 + 2].length : 0
-			endLen += match[index * 3 + 3] ? match[index * 3 + 3].length : 0
+			var endLen = match[index * 3 + 3] ? match[index * 3 + 3].length : 0
+			endLen += match[index * 3 + 4] ? match[index * 3 + 4].length : 0
+			endLen += match[index * 3 + 5] ? match[index * 3 + 5].length : 0
 
 			end = start + endLen
 		}
@@ -370,8 +382,6 @@ var strTranspose;
 	function replaceChord(abc, start, end, newChord) {
 		// Isolate the chord and just replace that
 		var match = abc.substring(start, end).match(/([^"]+)?(".+")+/)
-		if (!match)
-			debugger;
 		if (match[1])
 			start += match[1].length
 		end = start + match[2].length

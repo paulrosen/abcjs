@@ -47,7 +47,7 @@ function keyAccidentals(key) {
 	var newKey = keys[relativeMajor(key)]
 	if (!newKey) // If we don't recognize the key then there is no change
 		return null
-	return JSON.parse(JSON.stringify(keys[relativeMajor(key)]))
+	return JSON.parse(JSON.stringify(newKey))
 };
 
 module.exports = keyAccidentals;
