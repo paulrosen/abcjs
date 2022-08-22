@@ -1,3 +1,19 @@
+# Version 6.1.0
+
+## Bugs
+
+* Fix some bugs in startChar; endChar
+
+## Features
+
+* Add transposing feature
+
+## Documentation
+
+* Document transposing feature
+* Clarify the way testing works
+* Add tablature tests to "all"
+
 # Version 6.0.4
 
 ## Bugs

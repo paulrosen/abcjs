@@ -48,6 +48,8 @@ var tuneBook = __webpack_require__(/*! ./src/api/abc_tunebook */ "./src/api/abc_
 
 var sequence = __webpack_require__(/*! ./src/synth/abc_midi_sequencer */ "./src/synth/abc_midi_sequencer.js");
 
+var strTranspose = __webpack_require__(/*! ./src/str/output */ "./src/str/output.js");
+
 var abcjs = {};
 abcjs.signature = "abcjs-basic v" + version;
 Object.keys(animation).forEach(function (key) {
@@ -62,6 +64,7 @@ abcjs.TimingCallbacks = __webpack_require__(/*! ./src/api/abc_timing_callbacks *
 var glyphs = __webpack_require__(/*! ./src/write/abc_glyphs */ "./src/write/abc_glyphs.js");
 
 abcjs.setGlyph = glyphs.setSymbol;
+abcjs.strTranspose = strTranspose;
 
 var CreateSynth = __webpack_require__(/*! ./src/synth/create-synth */ "./src/synth/create-synth.js");
 
@@ -1291,6 +1294,262 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
 }
 
 module.exports = renderAbc;
+
+/***/ }),
+
+/***/ "./src/const/key-accidentals.js":
+/*!**************************************!*\
+  !*** ./src/const/key-accidentals.js ***!
+  \**************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var _require = __webpack_require__(/*! ./relative-major */ "./src/const/relative-major.js"),
+    relativeMajor = _require.relativeMajor;
+
+var key1sharp = {
+  acc: 'sharp',
+  note: 'f'
+};
+var key2sharp = {
+  acc: 'sharp',
+  note: 'c'
+};
+var key3sharp = {
+  acc: 'sharp',
+  note: 'g'
+};
+var key4sharp = {
+  acc: 'sharp',
+  note: 'd'
+};
+var key5sharp = {
+  acc: 'sharp',
+  note: 'A'
+};
+var key6sharp = {
+  acc: 'sharp',
+  note: 'e'
+};
+var key7sharp = {
+  acc: 'sharp',
+  note: 'B'
+};
+var key1flat = {
+  acc: 'flat',
+  note: 'B'
+};
+var key2flat = {
+  acc: 'flat',
+  note: 'e'
+};
+var key3flat = {
+  acc: 'flat',
+  note: 'A'
+};
+var key4flat = {
+  acc: 'flat',
+  note: 'd'
+};
+var key5flat = {
+  acc: 'flat',
+  note: 'G'
+};
+var key6flat = {
+  acc: 'flat',
+  note: 'c'
+};
+var key7flat = {
+  acc: 'flat',
+  note: 'F'
+};
+var keys = {
+  'C#': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp],
+  'F#': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp],
+  'B': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp],
+  'E': [key1sharp, key2sharp, key3sharp, key4sharp],
+  'A': [key1sharp, key2sharp, key3sharp],
+  'D': [key1sharp, key2sharp],
+  'G': [key1sharp],
+  'C': [],
+  'F': [key1flat],
+  'Bb': [key1flat, key2flat],
+  'Eb': [key1flat, key2flat, key3flat],
+  'Cm': [key1flat, key2flat, key3flat],
+  'Ab': [key1flat, key2flat, key3flat, key4flat],
+  'Db': [key1flat, key2flat, key3flat, key4flat, key5flat],
+  'Gb': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat],
+  'Cb': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat],
+  // The following are not in the 2.0 spec, but seem normal enough.
+  // TODO-PER: These SOUND the same as what's written, but they aren't right
+  'A#': [key1flat, key2flat],
+  'B#': [],
+  'D#': [key1flat, key2flat, key3flat],
+  'E#': [key1flat],
+  'G#': [key1flat, key2flat, key3flat, key4flat],
+  'none': []
+};
+
+function keyAccidentals(key) {
+  var newKey = keys[relativeMajor(key)];
+  if (!newKey) // If we don't recognize the key then there is no change
+    return null;
+  return JSON.parse(JSON.stringify(newKey));
+}
+
+;
+module.exports = keyAccidentals;
+
+/***/ }),
+
+/***/ "./src/const/relative-major.js":
+/*!*************************************!*\
+  !*** ./src/const/relative-major.js ***!
+  \*************************************/
+/***/ (function(module) {
+
+// All these keys have the same number of accidentals
+var keys = {
+  'C': {
+    modes: ['CMaj', 'Amin', 'Am', 'GMix', 'DDor', 'EPhr', 'FLyd', 'BLoc'],
+    stepsFromC: 0
+  },
+  'Db': {
+    modes: ['DbMaj', 'Bbmin', 'Bbm', 'AbMix', 'EbDor', 'FPhr', 'GbLyd', 'CLoc'],
+    stepsFromC: 1
+  },
+  'D': {
+    modes: ['DMaj', 'Bmin', 'Bm', 'AMix', 'EDor', 'F#Phr', 'GLyd', 'C#Loc'],
+    stepsFromC: 2
+  },
+  'Eb': {
+    modes: ['EbMaj', 'Cmin', 'Cm', 'BbMix', 'FDor', 'GPhr', 'AbLyd', 'DLoc'],
+    stepsFromC: 3
+  },
+  'E': {
+    modes: ['EMaj', 'C#min', 'C#m', 'BMix', 'F#Dor', 'G#Phr', 'ALyd', 'D#Loc'],
+    stepsFromC: 4
+  },
+  'F': {
+    modes: ['FMaj', 'Dmin', 'Dm', 'CMix', 'GDor', 'APhr', 'BbLyd', 'ELoc'],
+    stepsFromC: 5
+  },
+  'Gb': {
+    modes: ['GbMaj', 'Ebmin', 'Ebm', 'DbMix', 'AbDor', 'BbPhr', 'CbLyd', 'FLoc'],
+    stepsFromC: 6
+  },
+  'G': {
+    modes: ['GMaj', 'Emin', 'Em', 'DMix', 'ADor', 'BPhr', 'CLyd', 'F#Loc'],
+    stepsFromC: 7
+  },
+  'Ab': {
+    modes: ['AbMaj', 'Fmin', 'Fm', 'EbMix', 'BbDor', 'CPhr', 'DbLyd', 'GLoc'],
+    stepsFromC: 8
+  },
+  'A': {
+    modes: ['AMaj', 'F#min', 'F#m', 'EMix', 'BDor', 'C#Phr', 'DLyd', 'G#Loc'],
+    stepsFromC: 9
+  },
+  'Bb': {
+    modes: ['BbMaj', 'Gmin', 'Gm', 'FMix', 'CDor', 'DPhr', 'EbLyd', 'ALoc'],
+    stepsFromC: 10
+  },
+  'B': {
+    modes: ['BMaj', 'G#min', 'G#m', 'F#Mix', 'C#Dor', 'D#Phr', 'ELyd', 'A#Loc'],
+    stepsFromC: 11
+  },
+  // Enharmonic keys
+  'C#': {
+    modes: ['C#Maj', 'A#min', 'A#m', 'G#Mix', 'D#Dor', 'E#Phr', 'F#Lyd', 'B#Loc'],
+    stepsFromC: 1
+  },
+  'F#': {
+    modes: ['F#Maj', 'D#min', 'D#m', 'C#Mix', 'G#Dor', 'A#Phr', 'BLyd', 'E#Loc'],
+    stepsFromC: 6
+  },
+  'Cb': {
+    modes: ['CbMaj', 'Abmin', 'Abm', 'GbMix', 'DbDor', 'EbPhr', 'FbLyd', 'BbLoc'],
+    stepsFromC: 11
+  }
+};
+var keyReverse = null;
+
+function createKeyReverse() {
+  keyReverse = {};
+  var allKeys = Object.keys(keys);
+
+  for (var i = 0; i < allKeys.length; i++) {
+    var keyObj = keys[allKeys[i]];
+    keyReverse[allKeys[i].toLowerCase()] = allKeys[i];
+
+    for (var j = 0; j < keyObj.modes.length; j++) {
+      var mode = keyObj.modes[j].toLowerCase();
+      keyReverse[mode] = allKeys[i];
+    }
+  }
+}
+
+function relativeMajor(key) {
+  // Translate a key to its relative major. If it doesn't exist, do the best we can
+  // by just returning the original key.
+  // There are alternate spellings of these - so the search needs to be case insensitive.
+  // To make this efficient, the first time this is called the "keys" object is reversed so this search is fast in the future
+  if (!keyReverse) {
+    createKeyReverse();
+  } // get the key portion itself - there might be other stuff, like extra sharps and flats, or the mode written out.
+
+
+  var mode = key.toLowerCase().match(/([a-g][b#]?)(maj|min|mix|dor|phr|lyd|loc|m)?/);
+  if (!mode || !mode[2]) return key;
+  mode = mode[1] + mode[2];
+  var maj = keyReverse[mode];
+  if (maj) return maj;
+  return key;
+}
+
+function relativeMode(majorKey, mode) {
+  // The reverse of the relativeMajor. Translate it back to the original mode.
+  // If it isn't a recognized mode or it is already major, then just return the major key.
+  var group = keys[majorKey];
+  if (!group) return majorKey;
+  if (mode === '') return majorKey;
+  var match = mode.toLowerCase().match(/^(maj|min|mix|dor|phr|lyd|loc|m)/);
+  if (!match) return majorKey;
+  var regMode = match[1];
+
+  for (var i = 0; i < group.modes.length; i++) {
+    var thisMode = group.modes[i];
+    var ind = thisMode.toLowerCase().indexOf(regMode);
+    if (ind !== -1 && ind === thisMode.length - regMode.length) return thisMode.substring(0, thisMode.length - regMode.length);
+  }
+
+  return majorKey;
+}
+
+function transposeKey(key, steps) {
+  // This takes a major key and adds the desired steps.
+  // It assigns each key a number that is the number of steps from C so that there can just be arithmetic.
+  var match = keys[key];
+  if (!match) return key;
+
+  while (steps < 0) {
+    steps += 12;
+  }
+
+  var fromC = (match.stepsFromC + steps) % 12;
+
+  for (var i = 0; i < Object.keys(keys).length; i++) {
+    var k = Object.keys(keys)[i];
+    if (keys[k].stepsFromC === fromC) return k;
+  }
+
+  return key;
+}
+
+module.exports = {
+  relativeMajor: relativeMajor,
+  relativeMode: relativeMode,
+  transposeKey: transposeKey
+};
 
 /***/ }),
 
@@ -3695,15 +3954,16 @@ var bookParser = function bookParser(book) {
   "use strict";
 
   var directives = "";
+  var initialWhiteSpace = book.match(/(\s*)/);
   book = parseCommon.strip(book);
   var tuneStrings = book.split("\nX:"); // Put back the X: that we lost when splitting the tunes.
 
   for (var i = 1; i < tuneStrings.length; i++) {
     tuneStrings[i] = "X:" + tuneStrings[i];
-  } // Keep track of the character position each tune starts with.
+  } // Keep track of the character position each tune starts with. If the string starts with white space, count that, too.
 
 
-  var pos = 0;
+  var pos = initialWhiteSpace ? initialWhiteSpace[0].length : 0;
   var tunes = [];
   parseCommon.each(tuneStrings, function (tune) {
     tunes.push({
@@ -5996,179 +6256,7 @@ var parseKeyVoice = {};
   };
 
   parseKeyVoice.standardKey = function (keyName, root, acc, localTranspose) {
-    var key1sharp = {
-      acc: 'sharp',
-      note: 'f'
-    };
-    var key2sharp = {
-      acc: 'sharp',
-      note: 'c'
-    };
-    var key3sharp = {
-      acc: 'sharp',
-      note: 'g'
-    };
-    var key4sharp = {
-      acc: 'sharp',
-      note: 'd'
-    };
-    var key5sharp = {
-      acc: 'sharp',
-      note: 'A'
-    };
-    var key6sharp = {
-      acc: 'sharp',
-      note: 'e'
-    };
-    var key7sharp = {
-      acc: 'sharp',
-      note: 'B'
-    };
-    var key1flat = {
-      acc: 'flat',
-      note: 'B'
-    };
-    var key2flat = {
-      acc: 'flat',
-      note: 'e'
-    };
-    var key3flat = {
-      acc: 'flat',
-      note: 'A'
-    };
-    var key4flat = {
-      acc: 'flat',
-      note: 'd'
-    };
-    var key5flat = {
-      acc: 'flat',
-      note: 'G'
-    };
-    var key6flat = {
-      acc: 'flat',
-      note: 'c'
-    };
-    var key7flat = {
-      acc: 'flat',
-      note: 'F'
-    };
-    var keys = {
-      'C#': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp],
-      'A#m': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp],
-      'G#Mix': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp],
-      'D#Dor': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp],
-      'E#Phr': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp],
-      'F#Lyd': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp],
-      'B#Loc': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp],
-      'F#': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp],
-      'D#m': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp],
-      'C#Mix': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp],
-      'G#Dor': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp],
-      'A#Phr': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp],
-      'BLyd': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp],
-      'E#Loc': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp],
-      'B': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp],
-      'G#m': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp],
-      'F#Mix': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp],
-      'C#Dor': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp],
-      'D#Phr': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp],
-      'ELyd': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp],
-      'A#Loc': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp],
-      'E': [key1sharp, key2sharp, key3sharp, key4sharp],
-      'C#m': [key1sharp, key2sharp, key3sharp, key4sharp],
-      'BMix': [key1sharp, key2sharp, key3sharp, key4sharp],
-      'F#Dor': [key1sharp, key2sharp, key3sharp, key4sharp],
-      'G#Phr': [key1sharp, key2sharp, key3sharp, key4sharp],
-      'ALyd': [key1sharp, key2sharp, key3sharp, key4sharp],
-      'D#Loc': [key1sharp, key2sharp, key3sharp, key4sharp],
-      'A': [key1sharp, key2sharp, key3sharp],
-      'F#m': [key1sharp, key2sharp, key3sharp],
-      'EMix': [key1sharp, key2sharp, key3sharp],
-      'BDor': [key1sharp, key2sharp, key3sharp],
-      'C#Phr': [key1sharp, key2sharp, key3sharp],
-      'DLyd': [key1sharp, key2sharp, key3sharp],
-      'G#Loc': [key1sharp, key2sharp, key3sharp],
-      'D': [key1sharp, key2sharp],
-      'Bm': [key1sharp, key2sharp],
-      'AMix': [key1sharp, key2sharp],
-      'EDor': [key1sharp, key2sharp],
-      'F#Phr': [key1sharp, key2sharp],
-      'GLyd': [key1sharp, key2sharp],
-      'C#Loc': [key1sharp, key2sharp],
-      'G': [key1sharp],
-      'Em': [key1sharp],
-      'DMix': [key1sharp],
-      'ADor': [key1sharp],
-      'BPhr': [key1sharp],
-      'CLyd': [key1sharp],
-      'F#Loc': [key1sharp],
-      'C': [],
-      'Am': [],
-      'GMix': [],
-      'DDor': [],
-      'EPhr': [],
-      'FLyd': [],
-      'BLoc': [],
-      'F': [key1flat],
-      'Dm': [key1flat],
-      'CMix': [key1flat],
-      'GDor': [key1flat],
-      'APhr': [key1flat],
-      'BbLyd': [key1flat],
-      'ELoc': [key1flat],
-      'Bb': [key1flat, key2flat],
-      'Gm': [key1flat, key2flat],
-      'FMix': [key1flat, key2flat],
-      'CDor': [key1flat, key2flat],
-      'DPhr': [key1flat, key2flat],
-      'EbLyd': [key1flat, key2flat],
-      'ALoc': [key1flat, key2flat],
-      'Eb': [key1flat, key2flat, key3flat],
-      'Cm': [key1flat, key2flat, key3flat],
-      'BbMix': [key1flat, key2flat, key3flat],
-      'FDor': [key1flat, key2flat, key3flat],
-      'GPhr': [key1flat, key2flat, key3flat],
-      'AbLyd': [key1flat, key2flat, key3flat],
-      'DLoc': [key1flat, key2flat, key3flat],
-      'Ab': [key1flat, key2flat, key3flat, key4flat],
-      'Fm': [key1flat, key2flat, key3flat, key4flat],
-      'EbMix': [key1flat, key2flat, key3flat, key4flat],
-      'BbDor': [key1flat, key2flat, key3flat, key4flat],
-      'CPhr': [key1flat, key2flat, key3flat, key4flat],
-      'DbLyd': [key1flat, key2flat, key3flat, key4flat],
-      'GLoc': [key1flat, key2flat, key3flat, key4flat],
-      'Db': [key1flat, key2flat, key3flat, key4flat, key5flat],
-      'Bbm': [key1flat, key2flat, key3flat, key4flat, key5flat],
-      'AbMix': [key1flat, key2flat, key3flat, key4flat, key5flat],
-      'EbDor': [key1flat, key2flat, key3flat, key4flat, key5flat],
-      'FPhr': [key1flat, key2flat, key3flat, key4flat, key5flat],
-      'GbLyd': [key1flat, key2flat, key3flat, key4flat, key5flat],
-      'CLoc': [key1flat, key2flat, key3flat, key4flat, key5flat],
-      'Gb': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat],
-      'Ebm': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat],
-      'DbMix': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat],
-      'AbDor': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat],
-      'BbPhr': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat],
-      'CbLyd': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat],
-      'FLoc': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat],
-      'Cb': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat],
-      'Abm': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat],
-      'GbMix': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat],
-      'DbDor': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat],
-      'EbPhr': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat],
-      'FbLyd': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat],
-      'BbLoc': [key1flat, key2flat, key3flat, key4flat, key5flat, key6flat, key7flat],
-      // The following are not in the 2.0 spec, but seem normal enough.
-      // TODO-PER: These SOUND the same as what's written, but they aren't right
-      'A#': [key1flat, key2flat],
-      'B#': [],
-      'D#': [key1flat, key2flat, key3flat],
-      'E#': [key1flat],
-      'G#': [key1flat, key2flat, key3flat, key4flat],
-      'Gbm': [key1sharp, key2sharp, key3sharp, key4sharp, key5sharp, key6sharp, key7sharp],
-      'none': []
-    };
-    return transpose.keySignature(multilineVars, keys, keyName, root, acc, localTranspose);
+    return transpose.keySignature(multilineVars, keyName, root, acc, localTranspose);
   };
 
   var clefLines = {
@@ -7563,7 +7651,7 @@ MusicParser.prototype.parseMusic = function (line) {
           }
 
           multilineVars.addFormattingOptions(el, tune.formatting, 'bar');
-          tuneBuilder.appendElement('bar', startOfLine + i, startOfLine + i + ret[0], bar);
+          tuneBuilder.appendElement('bar', startOfLine + startI, startOfLine + i + ret[0], bar);
           multilineVars.measureNotEmpty = false;
           el = {};
         }
@@ -10152,6 +10240,10 @@ module.exports = Tokenizer;
 //    abc_transpose.js: Handles the automatic transposition of key signatures, chord symbols, and notes.
 var allNotes = __webpack_require__(/*! ./all-notes */ "./src/parse/all-notes.js");
 
+var transposeChordName = __webpack_require__(/*! ../parse/transpose-chord */ "./src/parse/transpose-chord.js");
+
+var keyAccidentals = __webpack_require__(/*! ../const/key-accidentals */ "./src/const/key-accidentals.js");
+
 var transpose = {};
 var keyIndex = {
   'C': 0,
@@ -10175,16 +10267,16 @@ var keyIndex = {
 var newKey = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 var newKeyMinor = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
-transpose.keySignature = function (multilineVars, keys, keyName, root, acc, localTranspose) {
-  if (multilineVars.clef.type === "perc") return {
-    accidentals: keys[keyName],
+transpose.keySignature = function (multilineVars, keyName, root, acc, localTranspose) {
+  if (multilineVars.clef.type === "perc" || multilineVars.clef.type === "none") return {
+    accidentals: keyAccidentals(keyName),
     root: root,
     acc: acc
   };
   if (!localTranspose) localTranspose = 0;
   multilineVars.localTransposeVerticalMovement = 0;
   multilineVars.localTransposePreferFlats = false;
-  var k = keys[keyName];
+  var k = keyAccidentals(keyName);
   if (!k) return multilineVars.key; // If the key isn't in the list, it is non-standard. We won't attempt to transpose it.
 
   multilineVars.localTranspose = (multilineVars.globalTranspose ? multilineVars.globalTranspose : 0) + localTranspose;
@@ -10220,7 +10312,7 @@ transpose.keySignature = function (multilineVars, keys, keyName, root, acc, loca
   if (index > 11) index = index % 12;
   var newKeyName = keyName[0] === 'm' ? newKeyMinor[index] : newKey[index];
   var transposedKey = newKeyName + keyName;
-  var newKeySig = keys[transposedKey];
+  var newKeySig = keyAccidentals(transposedKey);
   if (newKeySig.length > 0 && newKeySig[0].acc === 'flat') multilineVars.localTransposePreferFlats = true;
   var distance = transposedKey.charCodeAt(0) - baseKey.charCodeAt(0);
 
@@ -10249,76 +10341,8 @@ transpose.keySignature = function (multilineVars, keys, keyName, root, acc, loca
   };
 };
 
-var sharpChords = ['C', 'C♯', 'D', "D♯", 'E', 'F', "F♯", 'G', 'G♯', 'A', 'A♯', 'B'];
-var flatChords = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
-var sharpChordsFree = ['C', 'C#', 'D', "D#", 'E', 'F', "F#", 'G', 'G#', 'A', 'A#', 'B'];
-var flatChordsFree = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-
 transpose.chordName = function (multilineVars, chord) {
-  if (multilineVars.localTranspose && multilineVars.localTranspose % 12 !== 0) {
-    // The chords are the same if it is an exact octave change.
-    var transposeFactor = multilineVars.localTranspose;
-
-    while (transposeFactor < 0) {
-      transposeFactor += 12;
-    }
-
-    if (transposeFactor > 11) transposeFactor = transposeFactor % 12;
-
-    if (multilineVars.freegchord) {
-      chord = chord.replace(/Cb/g, "`~11`");
-      chord = chord.replace(/Db/g, "`~1`");
-      chord = chord.replace(/Eb/g, "`~3`");
-      chord = chord.replace(/Fb/g, "`~4`");
-      chord = chord.replace(/Gb/g, "`~6`");
-      chord = chord.replace(/Ab/g, "`~8`");
-      chord = chord.replace(/Bb/g, "`~10`");
-      chord = chord.replace(/C#/g, "`~1`");
-      chord = chord.replace(/D#/g, "`~3`");
-      chord = chord.replace(/E#/g, "`~5`");
-      chord = chord.replace(/F#/g, "`~6`");
-      chord = chord.replace(/G#/g, "`~8`");
-      chord = chord.replace(/A#/g, "`~10`");
-      chord = chord.replace(/B#/g, "`~0`");
-    } else {
-      chord = chord.replace(/C♭/g, "`~11`");
-      chord = chord.replace(/D♭/g, "`~1`");
-      chord = chord.replace(/E♭/g, "`~3`");
-      chord = chord.replace(/F♭/g, "`~4`");
-      chord = chord.replace(/G♭/g, "`~6`");
-      chord = chord.replace(/A♭/g, "`~8`");
-      chord = chord.replace(/B♭/g, "`~10`");
-      chord = chord.replace(/C♯/g, "`~1`");
-      chord = chord.replace(/D♯/g, "`~3`");
-      chord = chord.replace(/E♯/g, "`~5`");
-      chord = chord.replace(/F♯/g, "`~6`");
-      chord = chord.replace(/G♯/g, "`~8`");
-      chord = chord.replace(/A♯/g, "`~10`");
-      chord = chord.replace(/B♯/g, "`~0`");
-    }
-
-    chord = chord.replace(/C/g, "`~0`");
-    chord = chord.replace(/D/g, "`~2`");
-    chord = chord.replace(/E/g, "`~4`");
-    chord = chord.replace(/F/g, "`~5`");
-    chord = chord.replace(/G/g, "`~7`");
-    chord = chord.replace(/A/g, "`~9`");
-    chord = chord.replace(/B/g, "`~11`");
-    var arr = chord.split("`");
-
-    for (var i = 0; i < arr.length; i++) {
-      if (arr[i][0] === '~') {
-        var chordNum = parseInt(arr[i].substr(1), 10);
-        chordNum += transposeFactor;
-        if (chordNum > 11) chordNum -= 12;
-        if (multilineVars.freegchord) arr[i] = multilineVars.localTransposePreferFlats ? flatChordsFree[chordNum] : sharpChordsFree[chordNum];else arr[i] = multilineVars.localTransposePreferFlats ? flatChords[chordNum] : sharpChords[chordNum];
-      }
-    }
-
-    chord = arr.join("");
-  }
-
-  return chord;
+  return transposeChordName(chord, multilineVars.localTranspose, multilineVars.localTransposePreferFlats, multilineVars.freegchord);
 };
 
 var pitchToLetter = ['c', 'd', 'e', 'f', 'g', 'a', 'b'];
@@ -10432,6 +10456,83 @@ allNotes.noteName = function (pitchIndex) {
 };
 
 module.exports = allNotes;
+
+/***/ }),
+
+/***/ "./src/parse/transpose-chord.js":
+/*!**************************************!*\
+  !*** ./src/parse/transpose-chord.js ***!
+  \**************************************/
+/***/ (function(module) {
+
+var sharpChords = ['C', 'C♯', 'D', "D♯", 'E', 'F', "F♯", 'G', 'G♯', 'A', 'A♯', 'B'];
+var flatChords = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
+var sharpChordsFree = ['C', 'C#', 'D', "D#", 'E', 'F', "F#", 'G', 'G#', 'A', 'A#', 'B'];
+var flatChordsFree = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+function transposeChordName(chord, steps, preferFlats, freeGCchord) {
+  if (!steps || steps % 12 === 0) // The chords are the same if it is an exact octave change.
+    return chord; // There are two things in the chord that might need to be transposed:
+  // The chord will start with a letter from A-G, and might have one accidental after it.
+  // That accidental might be an actual sharp or flat char, or it might be a pound sign or lower case "b".
+  // Then there is a bunch of stuff that isn't transposed and should just be copied. That is stuff like "7" and more complicated chords.
+  // But there is one other exception: right after a slash there will be a bass note and possibly an accidental. That should also be transposed.
+
+  while (steps < 0) {
+    steps += 12;
+  }
+
+  if (steps > 11) steps = steps % 12; // (chord name w/accidental) (a bunch of stuff) (/) (bass note) (anything else)
+
+  var match = chord.match(/^([A-G][b#♭♯]?)([^\/]+)?\/?([A-G][b#♭♯]?)?(.+)?/);
+  if (!match) return chord; // We don't recognize the format of the chord, so skip it.
+
+  var name = match[1];
+  var extra1 = match[2];
+  var bass = match[3];
+  var extra2 = match[4];
+  var index = sharpChords.indexOf(name);
+  if (index < 0) index = flatChords.indexOf(name);
+  if (index < 0) index = sharpChordsFree.indexOf(name);
+  if (index < 0) index = flatChordsFree.indexOf(name);
+  if (index < 0) return chord; // This should never happen, but if we can't find the chord just bail.	
+
+  index += steps;
+  index = index % 12;
+
+  if (preferFlats) {
+    if (freeGCchord) chord = flatChordsFree[index];else chord = flatChords[index];
+  } else {
+    if (freeGCchord) chord = sharpChordsFree[index];else chord = sharpChords[index];
+  }
+
+  if (extra1) chord += extra1;
+
+  if (bass) {
+    var index = sharpChords.indexOf(bass);
+    if (index < 0) index = flatChords.indexOf(bass);
+    if (index < 0) index = sharpChordsFree.indexOf(bass);
+    if (index < 0) index = flatChordsFree.indexOf(bass);
+    chord += '/';
+
+    if (index >= 0) {
+      index += steps;
+      index = index % 12;
+
+      if (preferFlats) {
+        if (freeGCchord) chord += flatChordsFree[index];else chord += flatChords[index];
+      } else {
+        if (freeGCchord) chord += sharpChordsFree[index];else chord += sharpChords[index];
+      }
+    } else chord += bass; // Don't know what to do so do nothing
+
+  }
+
+  if (extra2) chord += extra2;
+  return chord;
+}
+
+module.exports = transposeChordName;
 
 /***/ }),
 
@@ -12008,6 +12109,575 @@ module.exports = {
   wrapLines: wrapLines,
   calcLineWraps: calcLineWraps
 };
+
+/***/ }),
+
+/***/ "./src/str/output.js":
+/*!***************************!*\
+  !*** ./src/str/output.js ***!
+  \***************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var keyAccidentals = __webpack_require__(/*! ../const/key-accidentals */ "./src/const/key-accidentals.js");
+
+var _require = __webpack_require__(/*! ../const/relative-major */ "./src/const/relative-major.js"),
+    relativeMajor = _require.relativeMajor,
+    transposeKey = _require.transposeKey,
+    relativeMode = _require.relativeMode;
+
+var transposeChordName = __webpack_require__(/*! ../parse/transpose-chord */ "./src/parse/transpose-chord.js");
+
+var strTranspose;
+
+(function () {
+  "use strict";
+
+  strTranspose = function strTranspose(abc, abcTune, steps) {
+    if (abcTune === "TEST") // Backdoor way to get entry points for unit tests
+      return {
+        keyAccidentals: keyAccidentals,
+        relativeMajor: relativeMajor,
+        transposeKey: transposeKey,
+        relativeMode: relativeMode,
+        transposeChordName: transposeChordName
+      };
+    steps = parseInt(steps, 10);
+    var changes = [];
+    var i;
+
+    for (i = 0; i < abcTune.length; i++) {
+      changes = changes.concat(transposeOneTune(abc, abcTune[i], steps));
+    } // Reverse sort so that we are replacing strings from the end to the beginning so that the indexes aren't invalidated as we go.
+    // (Because voices can be written in different ways we can't count on the notes being encountered in the order they appear in the string.)
+
+
+    changes = changes.sort(function (a, b) {
+      return b.start - a.start;
+    });
+    var output = abc.split('');
+
+    for (i = 0; i < changes.length; i++) {
+      var ch = changes[i];
+      output.splice(ch.start, ch.end - ch.start, ch.note);
+    }
+
+    return output.join('');
+  };
+
+  function transposeOneTune(abc, abcTune, steps) {
+    var changes = []; // Don't transpose bagpipe music - that is a special case and is always a particular key
+
+    var key = abcTune.getKeySignature();
+    if (key.root === 'Hp' || key.root === "HP") return changes;
+    changes = changes.concat(changeAllKeySigs(abc, steps));
+
+    for (var i = 0; i < abcTune.lines.length; i++) {
+      var staves = abcTune.lines[i].staff;
+
+      if (staves) {
+        for (var j = 0; j < staves.length; j++) {
+          var staff = staves[j];
+          if (staff.clef.type !== "perc") changes = changes.concat(transposeVoices(abc, staff.voices, staff.key, steps));
+        }
+      }
+    }
+
+    return changes;
+  }
+
+  function changeAllKeySigs(abc, steps) {
+    var changes = [];
+    var arr = abc.split("K:"); // now each line except the first one will start with whatever is right after "K:"
+
+    var count = arr[0].length;
+
+    for (var i = 1; i < arr.length; i++) {
+      var segment = arr[i];
+      var match = segment.match(/^( *)([A-G])([#b]?)(\w*)/);
+
+      if (match) {
+        var start = count + 2 + match[1].length; // move past the 'K:' and optional white space
+
+        var key = match[2] + match[3] + match[4]; // key name, accidental, and mode
+
+        var destinationKey = newKey({
+          root: match[2],
+          acc: match[3],
+          mode: match[4]
+        }, steps);
+        var dest = destinationKey.root + destinationKey.acc + destinationKey.mode;
+        changes.push({
+          start: start,
+          end: start + key.length,
+          note: dest
+        });
+      }
+
+      count += segment.length + 2;
+    }
+
+    return changes;
+  }
+
+  function transposeVoices(abc, voices, key, steps) {
+    var changes = [];
+    var destinationKey = newKey(key, steps);
+
+    for (var i = 0; i < voices.length; i++) {
+      changes = changes.concat(transposeVoice(abc, voices[i], key.root, createKeyAccidentals(key), destinationKey, steps));
+    }
+
+    return changes;
+  }
+
+  function createKeyAccidentals(key) {
+    var ret = {};
+
+    for (var i = 0; i < key.accidentals.length; i++) {
+      var acc = key.accidentals[i];
+      if (acc.acc === 'flat') ret[acc.note.toUpperCase()] = '_';else if (acc.acc === 'sharp') ret[acc.note.toUpperCase()] = '^';
+    }
+
+    return ret;
+  }
+
+  function setLetterDistance(destinationKey, keyRoot, steps) {
+    var letterDistance = letters.indexOf(destinationKey.root) - letters.indexOf(keyRoot);
+    if (keyRoot === "none") letterDistance = letters.indexOf(destinationKey.root);
+
+    if (letterDistance === 0) {
+      // This could either be a half step (like Eb => E) or almost an octave (like E => Eb)
+      if (steps > 2) // If it is a large leap, then we are going up an octave
+        letterDistance += 7;else if (steps === -12) // If it is a large leap, then we are going down an octave	
+        letterDistance -= 7;
+    } else if (steps > 0 && letterDistance < 0) letterDistance += 7;else if (steps < 0 && letterDistance > 0) letterDistance -= 7;
+
+    if (steps > 12) letterDistance += 7;else if (steps < -12) letterDistance -= 7;
+    return letterDistance;
+  }
+
+  function transposeVoice(abc, voice, keyRoot, keyAccidentals, destinationKey, steps) {
+    var changes = [];
+    var letterDistance = setLetterDistance(destinationKey, keyRoot, steps);
+    var measureAccidentals = {};
+    var transposedMeasureAccidentals = {};
+
+    for (var i = 0; i < voice.length; i++) {
+      var el = voice[i];
+
+      if (el.chord) {
+        for (var c = 0; c < el.chord.length; c++) {
+          var ch = el.chord[c];
+
+          if (ch.position === 'default') {
+            var prefersFlats = destinationKey.accidentals.length && destinationKey.accidentals[0].acc === 'flat';
+            var newChord = transposeChordName(ch.name, steps, prefersFlats, true);
+            newChord = newChord.replace(/♭/g, "b").replace(/♯/g, "#");
+            if (newChord !== ch.name) // If we didn't recognize the chord the input is returned unchanged and there is nothing to replace
+              changes.push(replaceChord(abc, el.startChar, el.endChar, newChord));
+          }
+        }
+      }
+
+      if (el.el_type === 'note' && el.pitches) {
+        for (var j = 0; j < el.pitches.length; j++) {
+          var note = parseNote(el.pitches[j].name, keyRoot, keyAccidentals, measureAccidentals);
+          if (note.acc) measureAccidentals[note.name.toUpperCase()] = note.acc;
+          var newPitch = transposePitch(note, destinationKey, letterDistance, transposedMeasureAccidentals);
+          if (newPitch.acc) transposedMeasureAccidentals[newPitch.upper] = newPitch.acc;
+          changes.push(replaceNote(abc, el.startChar, el.endChar, newPitch.acc + newPitch.name, j));
+        }
+
+        if (el.gracenotes) {
+          for (var g = 0; g < el.gracenotes.length; g++) {
+            var grace = parseNote(el.gracenotes[g].name, keyRoot, keyAccidentals, measureAccidentals);
+            if (grace.acc) measureAccidentals[grace.name.toUpperCase()] = grace.acc;
+            var newGrace = transposePitch(grace, destinationKey, letterDistance, measureAccidentals);
+            if (newGrace.acc) transposedMeasureAccidentals[newGrace.upper] = newGrace.acc;
+            changes.push(replaceGrace(abc, el.startChar, el.endChar, newGrace.acc + newGrace.name, g));
+          }
+        }
+      } else if (el.el_type === "bar") {
+        measureAccidentals = {};
+        transposedMeasureAccidentals = {};
+      } else if (el.el_type === "keySignature") {
+        keyRoot = el.root;
+        keyAccidentals = createKeyAccidentals(el);
+        destinationKey = newKey(el, steps);
+        letterDistance = setLetterDistance(destinationKey, keyRoot, steps);
+      }
+    }
+
+    return changes;
+  }
+
+  var letters = "CDEFGAB";
+  var octaves = [",,,,", ",,,", ",,", ",", "", "'", "''", "'''", "''''"];
+
+  function newKey(key, steps) {
+    if (key.root === "none") {
+      return {
+        root: transposeKey("C", steps),
+        mode: "",
+        acc: "",
+        accidentals: []
+      };
+    }
+
+    var major = relativeMajor(key.root + key.acc + key.mode);
+    var newMajor = transposeKey(major, steps);
+    var newMode = relativeMode(newMajor, key.mode);
+    var acc = keyAccidentals(newMajor);
+    return {
+      root: newMode[0],
+      mode: key.mode,
+      acc: newMode.length > 1 ? newMode[1] : '',
+      accidentals: acc
+    };
+  }
+
+  function transposePitch(note, key, letterDistance, measureAccidentals) {
+    // Depending on what the current note and new note are, the octave might have changed
+    // The letterDistance is how far the change is to see if we passed "C" when transposing.
+    var pitch = note.pitch;
+    var origDistFromC = letters.indexOf(note.name);
+    var root = letters.indexOf(key.root);
+    var index = (root + pitch) % 7; // if the note crosses "c" then the octave changes, so that is true of "B" when going up one step, "A" and "B" when going up two steps, etc., and reverse when going down.
+
+    var newDistFromC = origDistFromC + letterDistance;
+    var oct = note.oct;
+
+    while (newDistFromC > 6) {
+      oct++;
+      newDistFromC -= 7;
+    }
+
+    while (newDistFromC < 0) {
+      oct--;
+      newDistFromC += 7;
+    }
+
+    var name = letters[index];
+    var acc = '';
+    var adj = note.adj; // the amount of adjustment depends on the key - if there is a sharp in the key sig, then -1 is a natural, if there isn't, then -1 is a flat.
+
+    var keyAcc = '=';
+
+    for (var i = 0; i < key.accidentals.length; i++) {
+      if (key.accidentals[i].note.toLowerCase() === name.toLowerCase()) {
+        adj = adj + (key.accidentals[i].acc === 'flat' ? -1 : 1);
+        keyAcc = key.accidentals[i].acc === 'flat' ? '_' : '^';
+        break;
+      }
+    }
+
+    switch (adj) {
+      case -2:
+        acc = "__";
+        break;
+
+      case -1:
+        acc = "_";
+        break;
+
+      case 0:
+        acc = "=";
+        break;
+
+      case 1:
+        acc = "^";
+        break;
+
+      case 2:
+        acc = "^^";
+        break;
+
+      case -3:
+        // This requires a triple flat, so bump down the pitch and try again
+        var newNote = {};
+        newNote.pitch = note.pitch - 1;
+        newNote.oct = note.oct;
+        newNote.name = letters[letters.indexOf(note.name) - 1];
+
+        if (!newNote.name) {
+          newNote.name = "B";
+          newNote.oct--;
+        }
+
+        if (newNote.name === "B" || newNote.name === "E") newNote.adj = note.adj + 1;else newNote.adj = note.adj + 2;
+        return transposePitch(newNote, key, letterDistance + 1, measureAccidentals);
+
+      case 3:
+        // This requires a triple sharp, so bump up the pitch and try again
+        var newNote = {};
+        newNote.pitch = note.pitch + 1;
+        newNote.oct = note.oct;
+        newNote.name = letters[letters.indexOf(note.name) + 1];
+
+        if (!newNote.name) {
+          newNote.name = "C";
+          newNote.oct++;
+        }
+
+        if (newNote.name === "C" || newNote.name === "F") newNote.adj = note.adj - 1;else newNote.adj = note.adj - 2;
+        return transposePitch(newNote, key, letterDistance + 1, measureAccidentals);
+    }
+
+    if ((measureAccidentals[name] === acc || !measureAccidentals[name] && acc === keyAcc) && !note.courtesy) acc = "";
+
+    switch (oct) {
+      case 0:
+        name = name + ",,,";
+        break;
+
+      case 1:
+        name = name + ",,";
+        break;
+
+      case 2:
+        name = name + ",";
+        break;
+      // case 3: it is already correct
+
+      case 4:
+        name = name.toLowerCase();
+        break;
+
+      case 5:
+        name = name.toLowerCase() + "'";
+        break;
+
+      case 6:
+        name = name.toLowerCase() + "''";
+        break;
+
+      case 7:
+        name = name.toLowerCase() + "'''";
+        break;
+
+      case 8:
+        name = name.toLowerCase() + "''''";
+        break;
+    }
+
+    if (oct > 4) name = name.toLowerCase();
+    return {
+      acc: acc,
+      name: name,
+      upper: name.toUpperCase()
+    };
+  }
+
+  var regPitch = /([_^=]*)([A-Ga-g])([,']*)/;
+  var regNote = /([_^=]*[A-Ga-g][,']*)(\d*\/*\d*)([\>\<\-\)\.\s\\]*)/;
+  var regOptionalNote = /([_^=]*[A-Ga-g][,']*)?(\d*\/*\d*)?([\>\<\-\)]*)?/;
+  var regSpace = /(\s*)$/; // This the relationship of the note to the tonic and an octave. So what is returned is a distance in steps from the tonic and the amount of adjustment from
+  // a normal scale. That is - in the key of D an F# is two steps from the tonic and no adjustment. A G# is three steps from the tonic and one half-step higher.
+  // I don't think there is any adjustment needed for minor keys since the adjustment is based on the key signature and the accidentals.
+
+  function parseNote(note, keyRoot, keyAccidentals, measureAccidentals) {
+    var root = keyRoot === "none" ? 0 : letters.indexOf(keyRoot);
+    var reg = note.match(regPitch); // reg[1] : "__", "_", "", "=", "^", or "^^"
+    // reg[2] : A-G a-g
+    // reg[3] : commas or apostrophes
+
+    var name = reg[2].toUpperCase();
+    var pos = letters.indexOf(name) - root;
+    if (pos < 0) pos += 7;
+    var oct = octaves.indexOf(reg[3]);
+    if (name === reg[2]) // See if it is a capital letter and subtract an octave if so.
+      oct--;
+    var currentAcc = measureAccidentals[name] || keyAccidentals[name] || "="; //  use the key accidentals if they exist, but override with the measure accidentals, and if neither of them exist, use a natural.
+
+    return {
+      acc: reg[1],
+      name: name,
+      pitch: pos,
+      oct: oct,
+      adj: calcAdjustment(reg[1], keyAccidentals[name], measureAccidentals[name]),
+      courtesy: reg[1] === currentAcc
+    };
+  }
+
+  function replaceNote(abc, start, end, newPitch, index) {
+    // There may be more than just the note between the start and end - there could be spaces, there could be a chord symbol, there could be a decoration.
+    // This could also be a part of a chord. If so, then the particular note needs to be teased out.
+    var note = abc.substring(start, end);
+    var match = note.match(new RegExp(regNote.source + regSpace.source), '');
+
+    if (match) {
+      // This will match a single note
+      var noteLen = match[1].length;
+      var trailingLen = match[2].length + match[3].length + match[4].length;
+      var leadingLen = end - start - noteLen - trailingLen;
+      start += leadingLen;
+      end -= trailingLen;
+    } else {
+      // I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
+      var regPreBracket = /([^\[]*)/;
+      var regOpenBracket = /\[/;
+      var regCloseBracket = /\-?](\d*\/*\d*)?([\>\<\-\)]*)/;
+      match = note.match(new RegExp(regPreBracket.source + regOpenBracket.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regCloseBracket.source + regSpace.source));
+
+      if (match) {
+        // This will match a chord
+        // Get the number of chars used by the previous notes in this chord
+        var count = 1 + match[1].length; // one character for the open bracket
+
+        for (var i = 0; i < index; i++) {
+          // index is the iteration through the chord. This function gets called for each one.
+          if (match[i * 3 + 2]) count += match[i * 3 + 2].length;
+          if (match[i * 3 + 3]) count += match[i * 3 + 3].length;
+          if (match[i * 3 + 4]) count += match[i * 3 + 4].length;
+        }
+
+        start += count;
+        var endLen = match[index * 3 + 2] ? match[index * 3 + 2].length : 0; // endLen += match[index * 3 + 3] ? match[index * 3 + 3].length : 0
+        // endLen += match[index * 3 + 4] ? match[index * 3 + 4].length : 0
+
+        end = start + endLen;
+      }
+    }
+
+    return {
+      start: start,
+      end: end,
+      note: newPitch
+    };
+  }
+
+  function replaceGrace(abc, start, end, newGrace, index) {
+    var note = abc.substring(start, end); // I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
+
+    var regOpenBrace = /\{/;
+    var regCloseBrace = /\}/;
+    var regPreBrace = /([^\{]*)/;
+    var regPreNote = /(\/*)/;
+    var match = note.match(new RegExp(regPreBrace.source + regOpenBrace.source + regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source + regCloseBrace.source));
+
+    if (match) {
+      // This will match all notes inside a grace symbol
+      // Get the number of chars used by the previous graces
+      var count = 1 + match[1].length; // one character for the open brace, and whatever comes before the brace
+
+      for (var i = 0; i < index; i++) {
+        // index is the iteration through the chord. This function gets called for each one.
+        if (match[i * 3 + 2]) count += match[i * 3 + 2].length;
+        if (match[i * 3 + 3]) count += match[i * 3 + 3].length;
+        if (match[i * 3 + 4]) count += match[i * 3 + 4].length;
+        if (match[i * 3 + 5]) count += match[i * 3 + 5].length;
+      }
+
+      if (match[index * 3 + 2]) count += match[i * 3 + 2].length;
+      start += count;
+      var endLen = match[index * 3 + 3] ? match[index * 3 + 3].length : 0;
+      endLen += match[index * 3 + 4] ? match[index * 3 + 4].length : 0;
+      endLen += match[index * 3 + 5] ? match[index * 3 + 5].length : 0;
+      end = start + endLen;
+    }
+
+    return {
+      start: start,
+      end: end,
+      note: newGrace
+    };
+  }
+
+  function replaceChord(abc, start, end, newChord) {
+    // Isolate the chord and just replace that
+    var match = abc.substring(start, end).match(/([^"]+)?(".+")+/);
+    if (match[1]) start += match[1].length;
+    end = start + match[2].length; // leave the quote in, so skip one more
+
+    return {
+      start: start + 1,
+      end: end - 1,
+      note: newChord
+    };
+  }
+
+  function calcAdjustment(thisAccidental, keyAccidental, measureAccidental) {
+    if (!thisAccidental && measureAccidental) {
+      // There was no accidental on this note, but there was earlier in the measure, so we'll use that
+      thisAccidental = measureAccidental;
+    }
+
+    if (!thisAccidental) return 0; // there is no deviation from the key.
+
+    switch (keyAccidental) {
+      case undefined:
+        switch (thisAccidental) {
+          case '__':
+            return -2;
+
+          case '_':
+            return -1;
+
+          case '=':
+            return 0;
+
+          case '^':
+            return 1;
+
+          case '^^':
+            return 2;
+
+          default:
+            return 0;
+          // this should never happen
+        }
+
+      case '_':
+        switch (thisAccidental) {
+          case '__':
+            return -1;
+
+          case '_':
+            return 0;
+
+          case '=':
+            return 1;
+
+          case '^':
+            return 2;
+
+          case '^^':
+            return 3;
+
+          default:
+            return 0;
+          // this should never happen
+        }
+
+      case '^':
+        switch (thisAccidental) {
+          case '__':
+            return -3;
+
+          case '_':
+            return -2;
+
+          case '=':
+            return -1;
+
+          case '^':
+            return 0;
+
+          case '^^':
+            return 1;
+
+          default:
+            return 0;
+          // this should never happen
+        }
+
+    }
+
+    return 0; // this should never happen
+  }
+})();
+
+module.exports = strTranspose;
 
 /***/ }),
 
@@ -28460,7 +29130,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.0.4';
+var version = '6.1.0';
 module.exports = version;
 
 /***/ })
