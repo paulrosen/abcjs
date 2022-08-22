@@ -47,6 +47,13 @@
 	},
 	{
 		"isGroup": true,
+		"text": "Transposing",
+		"children": [
+			"/transposing/transposing.md"
+		]
+	},
+	{
+		"isGroup": true,
 		"text": "Analysis",
 		"children": [
 			"/analysis/tune-book.md"
