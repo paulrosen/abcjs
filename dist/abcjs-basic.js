@@ -28062,6 +28062,9 @@ function setupSelection(engraver) {
     }
   }
 
+  engraver.renderer.paper.svg.addEventListener('touchstart', mouseDown.bind(engraver));
+  engraver.renderer.paper.svg.addEventListener('touchmove', mouseMove.bind(engraver));
+  engraver.renderer.paper.svg.addEventListener('touchend', mouseUp.bind(engraver));
   engraver.renderer.paper.svg.addEventListener('mousedown', mouseDown.bind(engraver));
   engraver.renderer.paper.svg.addEventListener('mousemove', mouseMove.bind(engraver));
   engraver.renderer.paper.svg.addEventListener('mouseup', mouseUp.bind(engraver));
@@ -28281,11 +28284,28 @@ function getMousePosition(self, ev) {
   };
 }
 
+function attachMissingTouchEventAttributes(touchEv) {
+  var rect = touchEv.target.getBoundingClientRect();
+  var offsetX = touchEv.touches[0].pageX - rect.left;
+  var offsetY = touchEv.touches[0].pageY - rect.top;
+  touchEv.touches[0].offsetX = offsetX;
+  touchEv.touches[0].offsetY = offsetY;
+  touchEv.touches[0].layerX = touchEv.touches[0].pageX;
+  touchEv.touches[0].layerY = touchEv.touches[0].pageY;
+}
+
 function mouseDown(ev) {
   // "this" is the EngraverController because of the bind(this) when setting the event listener.
-  var positioning = getMousePosition(this, ev); // Only start dragging if the user clicked close enough to an element and clicked with the main mouse button.
+  var _ev = ev;
 
-  if (positioning.clickedOn >= 0 && ev.button === 0) {
+  if (ev.type === 'touchstart') {
+    attachMissingTouchEventAttributes(ev);
+    _ev = ev.touches[0];
+  }
+
+  var positioning = getMousePosition(this, _ev); // Only start dragging if the user clicked close enough to an element and clicked with the main mouse button.
+
+  if (positioning.clickedOn >= 0 && (ev.type === 'touchstart' || ev.button === 0)) {
     this.dragTarget = this.selectables[positioning.clickedOn];
     this.dragIndex = positioning.clickedOn;
     this.dragMechanism = "mouse";
@@ -28302,9 +28322,17 @@ function mouseDown(ev) {
 }
 
 function mouseMove(ev) {
-  // "this" is the EngraverController because of the bind(this) when setting the event listener.
+  var _ev = ev;
+
+  if (ev.type === 'touchmove') {
+    attachMissingTouchEventAttributes(ev);
+    _ev = ev.touches[0];
+  }
+
+  this.lastTouchMove = ev; // "this" is the EngraverController because of the bind(this) when setting the event listener.
+
   if (!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable || this.dragMechanism !== 'mouse') return;
-  var positioning = getMousePosition(this, ev);
+  var positioning = getMousePosition(this, _ev);
   var yDist = Math.round((positioning.y - this.dragMouseStart.y) / spacing.STEP);
 
   if (yDist !== this.dragYStep) {
@@ -28315,6 +28343,13 @@ function mouseMove(ev) {
 
 function mouseUp(ev) {
   // "this" is the EngraverController because of the bind(this) when setting the event listener.
+  var _ev = ev;
+
+  if (ev.type === 'touchend') {
+    attachMissingTouchEventAttributes(this.lastTouchMove);
+    _ev = this.lastTouchMove.touches[0];
+  }
+
   if (!this.dragTarget) return;
   clearSelection.bind(this)();
 
@@ -28323,7 +28358,7 @@ function mouseUp(ev) {
     this.dragTarget.absEl.highlight(undefined, this.selectionColor);
   }
 
-  notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex, ev);
+  notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex, _ev);
 
   if (this.dragTarget.svgEl && this.dragTarget.svgEl.focus) {
     this.dragTarget.svgEl.focus();
