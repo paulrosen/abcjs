@@ -742,7 +742,7 @@ declare module 'abcjs' {
 
 	export interface TuneObject {
 		formatting: Formatting;
-		engraver: EngraverController;
+		engraver?: EngraverController;
 		lines: Array<TuneLine>;
 		media: Media;
 		metaText: MetaText;
