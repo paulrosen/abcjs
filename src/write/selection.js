@@ -1,6 +1,6 @@
 var spacing = require('./abc_spacing');
 
-function setupSelection(engraver) {
+function setupSelection(engraver, svgs) {
 	engraver.rangeHighlight = rangeHighlight;
 	if (engraver.dragging) {
 		for (var h = 0; h < engraver.selectables.length; h++) {
@@ -14,17 +14,21 @@ function setupSelection(engraver) {
 			}
 		}
 	}
-	engraver.renderer.paper.svg.addEventListener('touchstart', mouseDown.bind(engraver));
-	engraver.renderer.paper.svg.addEventListener('touchmove', mouseMove.bind(engraver));
-	engraver.renderer.paper.svg.addEventListener('touchend', mouseUp.bind(engraver));
-	engraver.renderer.paper.svg.addEventListener('mousedown', mouseDown.bind(engraver));
-	engraver.renderer.paper.svg.addEventListener('mousemove', mouseMove.bind(engraver));
-	engraver.renderer.paper.svg.addEventListener('mouseup', mouseUp.bind(engraver));
+	for (var i = 0; i < svgs.length; i++) {
+		svgs[i].addEventListener('touchstart', mouseDown.bind(engraver));
+		svgs[i].addEventListener('touchmove', mouseMove.bind(engraver));
+		svgs[i].addEventListener('touchend', mouseUp.bind(engraver));
+		svgs[i].addEventListener('mousedown', mouseDown.bind(engraver));
+		svgs[i].addEventListener('mousemove', mouseMove.bind(engraver));
+		svgs[i].addEventListener('mouseup', mouseUp.bind(engraver));
+	}
 }
 
-function getCoord(ev, svg) {
+function getCoord(ev) {
 	var scaleX = 1;
 	var scaleY = 1;
+	var svg = ev.target.closest('svg')
+	var yOffset = 0
 
 	// when renderer.options.responsive === 'resize' the click coords are in relation to the HTML
 	// element, we need to convert to the SVG viewBox coords
@@ -34,6 +38,7 @@ function getCoord(ev, svg) {
 			scaleX = svg.viewBox.baseVal.width / svg.clientWidth
 		if (svg.viewBox.baseVal.height !== 0)
 			scaleY = svg.viewBox.baseVal.height / svg.clientHeight
+		yOffset = svg.viewBox.baseVal.y
 	}
 
 	var svgClicked = ev.target.tagName === "svg";
@@ -51,7 +56,7 @@ function getCoord(ev, svg) {
 	y = y * scaleY;
 	//console.log(x, y)
 
-	return [x, y];
+	return [x, y+yOffset];
 }
 
 function elementFocused(ev) {
@@ -123,7 +128,7 @@ function keyboardSelection(ev) {
 
 function findElementInHistory(selectables, el) {
 	for (var i = 0; i < selectables.length; i++) {
-		if (el === selectables[i].svgEl)
+		if (el.dataset.index === selectables[i].svgEl.dataset.index)
 			return i;
 	}
 	return -1;
@@ -219,7 +224,7 @@ function getMousePosition(self, ev) {
 		//console.log("clicked on", clickedOn, x, y, self.selectables[clickedOn].svgEl.getBBox(), ev.target.getBBox());
 	} else {
 		// See if they clicked close to an element.
-		box = getCoord(ev, self.renderer.paper.svg);
+		box = getCoord(ev);
 		x = box[0];
 		y = box[1];
 		clickedOn = findElementByCoord(self, x, y);
