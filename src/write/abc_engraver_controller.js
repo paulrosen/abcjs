@@ -32,6 +32,7 @@ var tablatures = require('../api/abc_tablatures');
  */
 var EngraverController = function(paper, params) {
   params = params || {};
+  this.oneSvgPerLine = params.oneSvgPerLine;
   this.selectionColor = params.selectionColor;
   this.dragColor = params.dragColor ? params.dragColor : params.selectionColor;
   this.dragging = !!params.dragging;
@@ -246,8 +247,70 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
 	this.staffgroups = ret.staffgroups;
 	this.selectables = ret.selectables;
 
-	setupSelection(this);
+	if (this.oneSvgPerLine) {
+		var div = this.renderer.paper.svg.parentNode
+		this.svgs = splitSvgIntoLines(div, abcTune.metaText.title)
+	} else {
+		this.svgs = [this.renderer.paper.svg];
+	}
+	setupSelection(this, this.svgs);
 };
+
+function splitSvgIntoLines(output, title) {
+	// Each line is a top level <g> in the svg. To split it into separate
+	// svgs iterate through each of those and put them in a new svg. Since
+	// they are placed absolutely, the viewBox needs to be manipulated to
+	// get the correct vertical positioning.
+	// We copy all the attributes from the original svg except for the aria-label
+	// since we want that to include a count. And the height is now a fraction of the original svg.
+	if (!title) title = "Untitled"
+	var source = output.querySelector("svg")
+	var style = source.querySelector("style")
+	var width = source.getAttribute("width")
+	var sections = output.querySelectorAll("svg > g") // each section is a line, or the top matter or the bottom matter, or text that has been inserted.
+	var nextTop = 0 // There are often gaps between the elements for spacing, so the actual top and height needs to be inferred.
+	var wrappers = [] // Create all the elements and place them at once because we use the current svg to get data. It would disappear after placing the first line.
+	var svgs = []
+	for (var i = 0; i < sections.length; i++) {
+		var section = sections[i]
+		var box = section.getBBox()
+		var gapBetweenLines = box.y - nextTop // take the margin into account
+		var height = box.height + gapBetweenLines;
+		var wrapper = document.createElement("div");
+		wrapper.setAttribute("style", "overflow: hidden;height:"+height+"px;")
+		var svg = duplicateSvg(source)
+		var fullTitle = "Sheet Music for \"" + title + "\" section " + (i+1)
+		svg.setAttribute("aria-label", fullTitle)
+		svg.setAttribute("height", height)
+		svg.setAttribute("viewBox", "0 " + nextTop + " " + width + " " + height )
+		svg.appendChild(style.cloneNode(true))
+		var titleEl = document.createElement("title")
+		titleEl.innerText = fullTitle
+		svg.appendChild(titleEl)
+		svg.appendChild(section)
+
+		wrapper.appendChild(svg)
+		svgs.push(svg)
+		output.appendChild(wrapper)
+		//wrappers.push(wrapper)
+		nextTop = box.y+box.height
+	}
+	// for (i = 0; i < wrappers.length; i++)
+	// 	output.appendChild(wrappers[i])
+	output.removeChild(source)
+	return svgs;
+}
+
+function duplicateSvg(source) {
+	var svgNS = "http://www.w3.org/2000/svg";
+	var svg = document.createElementNS(svgNS, "svg");
+	for (var i = 0; i < source.attributes.length; i++) {
+		var attr = source.attributes[i];
+		if (attr.name !== "height" && attr.name != "aria-label")
+			svg.setAttribute(attr.name, attr.value)
+	}
+	return svg;
+}
 
 EngraverController.prototype.getDim = function(historyEl) {
 	// Get the dimensions on demand because the getBBox call is expensive.

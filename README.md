@@ -8,6 +8,10 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
+## Announcement: version 6.1.1
+
+There is a little difference in the generated SVG: Now each line is surrounded with a `<g>` element. This probably won't affect your program unless you are doing very specific manipulation of the SVG.
+
 ## Announcement: version 6.1.0
 
 There is a brand new transposing feature. This allows you to input an ABC string and get a new ABC back in a different key. See the documentation for details. I'm sure there are ways to expand this - let me know if your use case is missing.

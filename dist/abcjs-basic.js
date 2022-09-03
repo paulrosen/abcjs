@@ -1101,101 +1101,6 @@ function renderOne(div, tune, params, tuneNumber, lineOffset) {
     var parent = div.parentNode;
     parent.style.width = div.style.width;
   }
-}
-
-function renderEachLineSeparately(div, tune, params, tuneNumber) {
-  function initializeTuneLine(tune) {
-    var obj = new Tune();
-    obj.formatting = tune.formatting;
-    obj.media = tune.media;
-    obj.version = tune.version;
-    return obj;
-  } // Before rendering, chop up the returned tune into an array where each element is a line.
-  // The first element of the array gets the title and other items that go on top, the last element
-  // of the array gets the extra text that goes on bottom. Each element gets any non-music info that comes before it.
-
-
-  var tunes = [];
-  var tuneLine;
-
-  for (var i = 0; i < tune.lines.length; i++) {
-    var line = tune.lines[i];
-    if (!tuneLine) tuneLine = initializeTuneLine(tune);
-
-    if (i === 0) {
-      // These items go on top of the music
-      tuneLine.copyTopInfo(tune);
-    } // push the lines until we get to a music line
-
-
-    tuneLine.lines.push(line);
-
-    if (line.staff) {
-      tunes.push(tuneLine);
-      tuneLine = undefined;
-    }
-  } // Add any extra stuff to the last line.
-
-
-  if (tuneLine) {
-    var lastLine = tunes[tunes.length - 1];
-
-    for (var j = 0; j < tuneLine.lines.length; j++) {
-      lastLine.lines.push(tuneLine.lines[j]);
-    }
-  } // These items go below the music
-
-
-  tuneLine = tunes[tunes.length - 1];
-  tuneLine.copyBottomInfo(tune); // Now create sub-divs and render each line. Need to copy the params to change the padding for the interior slices.
-
-  var ep = {};
-
-  for (var key in params) {
-    if (params.hasOwnProperty(key)) {
-      ep[key] = params[key];
-    }
-  }
-
-  var origPaddingTop = ep.paddingtop;
-  var origPaddingBottom = ep.paddingbottom;
-  var currentScrollY = div.parentNode.scrollTop; // If there is scrolling it will be lost during the redraw so remember it.
-
-  var currentScrollX = div.parentNode.scrollLeft;
-  div.innerHTML = "";
-  var lineCount = 0;
-
-  for (var k = 0; k < tunes.length; k++) {
-    var lineEl = document.createElement("div");
-    div.appendChild(lineEl);
-
-    if (k === 0) {
-      ep.paddingtop = origPaddingTop;
-      ep.paddingbottom = 0;
-    } else if (k === tunes.length - 1) {
-      ep.paddingtop = 10;
-      ep.paddingbottom = origPaddingBottom;
-    } else {
-      ep.paddingtop = 10;
-      ep.paddingbottom = 0;
-    }
-
-    if (k < tunes.length - 1) {
-      // If it is not the last line, force stretchlast. If it is, stretchlast might have been set by the input parameters.
-      tunes[k].formatting = parseCommon.clone(tunes[k].formatting);
-      tunes[k].formatting.stretchlast = true;
-    }
-
-    renderOne(lineEl, tunes[k], ep, tuneNumber, lineCount);
-    lineCount += tunes[k].lines.length;
-    if (k === 0) tune.engraver = tunes[k].engraver;else {
-      if (!tune.engraver.staffgroups) tune.engraver.staffgroups = tunes[k].engraver.staffgroups;else if (tunes[k].engraver.staffgroups.length > 0) tune.engraver.staffgroups.push(tunes[k].engraver.staffgroups[0]);
-    }
-  }
-
-  if (currentScrollX || currentScrollY) {
-    div.parentNode.scrollTo(currentScrollX, currentScrollY);
-  }
 } // A quick way to render a tune from javascript when interactivity is not required.
 // This is used when a javascript routine has some abc text that it wants to render
 // in a div or collection of divs. One tune or many can be rendered.
@@ -1266,8 +1171,9 @@ var renderAbc = function renderAbc(output, abc, parserParams, engraverParams, re
     if (!removeDiv && params.wrap && params.staffwidth) {
       tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
       return tune;
-    } else if (removeDiv || !params.oneSvgPerLine || tune.lines.length < 2) renderOne(div, tune, params, tuneNumber, 0);else renderEachLineSeparately(div, tune, params, tuneNumber);
+    }
 
+    renderOne(div, tune, params, tuneNumber, 0);
     if (removeDiv) div.parentNode.removeChild(div);
     return null;
   }
@@ -1288,7 +1194,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
     if (warnings) tune.warnings = warnings;
   }
 
-  if (!params.oneSvgPerLine || tune.lines.length < 2) renderOne(div, tune, ret.revisedParams, tuneNumber, 0);else renderEachLineSeparately(div, tune, ret.revisedParams, tuneNumber);
+  renderOne(div, tune, ret.revisedParams, tuneNumber, 0);
   tune.explanation = ret.explanation;
   return tune;
 }
@@ -21992,6 +21898,7 @@ var tablatures = __webpack_require__(/*! ../api/abc_tablatures */ "./src/api/abc
 
 var EngraverController = function EngraverController(paper, params) {
   params = params || {};
+  this.oneSvgPerLine = params.oneSvgPerLine;
   this.selectionColor = params.selectionColor;
   this.dragColor = params.dragColor ? params.dragColor : params.selectionColor;
   this.dragging = !!params.dragging;
@@ -22208,8 +22115,78 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
   var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber, lineOffset);
   this.staffgroups = ret.staffgroups;
   this.selectables = ret.selectables;
-  setupSelection(this);
+
+  if (this.oneSvgPerLine) {
+    var div = this.renderer.paper.svg.parentNode;
+    this.svgs = splitSvgIntoLines(div, abcTune.metaText.title);
+  } else {
+    this.svgs = [this.renderer.paper.svg];
+  }
+
+  setupSelection(this, this.svgs);
 };
+
+function splitSvgIntoLines(output, title) {
+  // Each line is a top level <g> in the svg. To split it into separate
+  // svgs iterate through each of those and put them in a new svg. Since
+  // they are placed absolutely, the viewBox needs to be manipulated to
+  // get the correct vertical positioning.
+  // We copy all the attributes from the original svg except for the aria-label
+  // since we want that to include a count. And the height is now a fraction of the original svg.
+  if (!title) title = "Untitled";
+  var source = output.querySelector("svg");
+  var style = source.querySelector("style");
+  var width = source.getAttribute("width");
+  var sections = output.querySelectorAll("svg > g"); // each section is a line, or the top matter or the bottom matter, or text that has been inserted.
+
+  var nextTop = 0; // There are often gaps between the elements for spacing, so the actual top and height needs to be inferred.
+
+  var wrappers = []; // Create all the elements and place them at once because we use the current svg to get data. It would disappear after placing the first line.
+
+  var svgs = [];
+
+  for (var i = 0; i < sections.length; i++) {
+    var section = sections[i];
+    var box = section.getBBox();
+    var gapBetweenLines = box.y - nextTop; // take the margin into account
+
+    var height = box.height + gapBetweenLines;
+    var wrapper = document.createElement("div");
+    wrapper.setAttribute("style", "overflow: hidden;height:" + height + "px;");
+    var svg = duplicateSvg(source);
+    var fullTitle = "Sheet Music for \"" + title + "\" section " + (i + 1);
+    svg.setAttribute("aria-label", fullTitle);
+    svg.setAttribute("height", height);
+    svg.setAttribute("viewBox", "0 " + nextTop + " " + width + " " + height);
+    svg.appendChild(style.cloneNode(true));
+    var titleEl = document.createElement("title");
+    titleEl.innerText = fullTitle;
+    svg.appendChild(titleEl);
+    svg.appendChild(section);
+    wrapper.appendChild(svg);
+    svgs.push(svg);
+    output.appendChild(wrapper); //wrappers.push(wrapper)
+
+    nextTop = box.y + box.height;
+  } // for (i = 0; i < wrappers.length; i++)
+  // 	output.appendChild(wrappers[i])
+
+
+  output.removeChild(source);
+  return svgs;
+}
+
+function duplicateSvg(source) {
+  var svgNS = "http://www.w3.org/2000/svg";
+  var svg = document.createElementNS(svgNS, "svg");
+
+  for (var i = 0; i < source.attributes.length; i++) {
+    var attr = source.attributes[i];
+    if (attr.name !== "height" && attr.name != "aria-label") svg.setAttribute(attr.name, attr.value);
+  }
+
+  return svg;
+}
 
 EngraverController.prototype.getDim = function (historyEl) {
   // Get the dimensions on demand because the getBBox call is expensive.
@@ -24576,8 +24553,10 @@ var Selectables = __webpack_require__(/*! ./selectables */ "./src/write/draw/sel
 
 function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber, lineOffset) {
   var selectables = new Selectables(renderer.paper, selectTypes, tuneNumber);
+  renderer.paper.openGroup();
   renderer.moveY(renderer.padding.top);
   nonMusic(renderer, abcTune.topText, selectables);
+  renderer.paper.closeGroup();
   renderer.moveY(renderer.spacing.music);
   var staffgroups = [];
 
@@ -24586,6 +24565,8 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
     var abcLine = abcTune.lines[line];
 
     if (abcLine.staff) {
+      renderer.paper.openGroup();
+
       if (abcLine.vskip) {
         renderer.moveY(abcLine.vskip);
       }
@@ -24595,17 +24576,22 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
       staffgroup.line = lineOffset + line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
 
       staffgroups.push(staffgroup);
+      renderer.paper.closeGroup();
     } else if (abcLine.nonMusic) {
+      renderer.paper.openGroup();
       nonMusic(renderer, abcLine.nonMusic, selectables);
+      renderer.paper.closeGroup();
     }
   }
 
   classes.reset();
 
   if (abcTune.bottomText && abcTune.bottomText.rows && abcTune.bottomText.rows.length > 0) {
+    renderer.paper.openGroup();
     renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
 
     nonMusic(renderer, abcTune.bottomText, selectables);
+    renderer.paper.closeGroup();
   }
 
   setPaperSize(renderer, maxWidth, scale, responsive);
@@ -25672,8 +25658,8 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
   // renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
   // If there are multiple staves, then renderer.y will be incremented for each new staff.
   var colorIndex; // An invisible marker is useful to be able to find where each system starts.
+  //addInvisibleMarker(renderer, "abcjs-top-of-system");
 
-  addInvisibleMarker(renderer, "abcjs-top-of-system");
   var startY = renderer.y; // So that it can be restored after we're done.
   // Set the absolute Y position for each staff here, so the voice drawing below can just use if.
 
@@ -25865,20 +25851,11 @@ function printBrace(renderer, absoluteY, brace, index, selectables) {
       }
     }
   }
-}
+} // function addInvisibleMarker(renderer, className) {
+// 	var y = Math.round(renderer.y);
+// 	renderer.paper.pathToBack({path:"M 0 " + y + " L 0 0", stroke:"none", fill:"none", "stroke-opacity": 0, "fill-opacity": 0, 'class': renderer.controller.classes.generate(className), 'data-vertical': y });
+// }
 
-function addInvisibleMarker(renderer, className) {
-  var y = Math.round(renderer.y);
-  renderer.paper.pathToBack({
-    path: "M 0 " + y + " L 0 0",
-    stroke: "none",
-    fill: "none",
-    "stroke-opacity": 0,
-    "fill-opacity": 0,
-    'class': renderer.controller.classes.generate(className),
-    'data-vertical': y
-  });
-}
 
 function boxAllElements(renderer, voices, which) {
   for (var i = 0; i < which.length; i++) {
@@ -28045,7 +28022,7 @@ module.exports = layoutVoice;
 
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
 
-function setupSelection(engraver) {
+function setupSelection(engraver, svgs) {
   engraver.rangeHighlight = rangeHighlight;
 
   if (engraver.dragging) {
@@ -28062,14 +28039,21 @@ function setupSelection(engraver) {
     }
   }
 
-  engraver.renderer.paper.svg.addEventListener('mousedown', mouseDown.bind(engraver));
-  engraver.renderer.paper.svg.addEventListener('mousemove', mouseMove.bind(engraver));
-  engraver.renderer.paper.svg.addEventListener('mouseup', mouseUp.bind(engraver));
+  for (var i = 0; i < svgs.length; i++) {
+    svgs[i].addEventListener('touchstart', mouseDown.bind(engraver));
+    svgs[i].addEventListener('touchmove', mouseMove.bind(engraver));
+    svgs[i].addEventListener('touchend', mouseUp.bind(engraver));
+    svgs[i].addEventListener('mousedown', mouseDown.bind(engraver));
+    svgs[i].addEventListener('mousemove', mouseMove.bind(engraver));
+    svgs[i].addEventListener('mouseup', mouseUp.bind(engraver));
+  }
 }
 
-function getCoord(ev, svg) {
+function getCoord(ev) {
   var scaleX = 1;
-  var scaleY = 1; // when renderer.options.responsive === 'resize' the click coords are in relation to the HTML
+  var scaleY = 1;
+  var svg = ev.target.closest('svg');
+  var yOffset = 0; // when renderer.options.responsive === 'resize' the click coords are in relation to the HTML
   // element, we need to convert to the SVG viewBox coords
 
   if (svg.viewBox.baseVal) {
@@ -28077,6 +28061,7 @@ function getCoord(ev, svg) {
     // Chrome makes these values null when no viewBox is given.
     if (svg.viewBox.baseVal.width !== 0) scaleX = svg.viewBox.baseVal.width / svg.clientWidth;
     if (svg.viewBox.baseVal.height !== 0) scaleY = svg.viewBox.baseVal.height / svg.clientHeight;
+    yOffset = svg.viewBox.baseVal.y;
   }
 
   var svgClicked = ev.target.tagName === "svg";
@@ -28094,7 +28079,7 @@ function getCoord(ev, svg) {
   x = x * scaleX;
   y = y * scaleY; //console.log(x, y)
 
-  return [x, y];
+  return [x, y + yOffset];
 }
 
 function elementFocused(ev) {
@@ -28175,7 +28160,7 @@ function keyboardSelection(ev) {
 
 function findElementInHistory(selectables, el) {
   for (var i = 0; i < selectables.length; i++) {
-    if (el === selectables[i].svgEl) return i;
+    if (el.dataset.index === selectables[i].svgEl.dataset.index) return i;
   }
 
   return -1;
@@ -28268,7 +28253,7 @@ function getMousePosition(self, ev) {
     y = box[1]; //console.log("clicked on", clickedOn, x, y, self.selectables[clickedOn].svgEl.getBBox(), ev.target.getBBox());
   } else {
     // See if they clicked close to an element.
-    box = getCoord(ev, self.renderer.paper.svg);
+    box = getCoord(ev);
     x = box[0];
     y = box[1];
     clickedOn = findElementByCoord(self, x, y); //console.log("clicked near", clickedOn, x, y, printEl(ev.target));
@@ -28281,11 +28266,28 @@ function getMousePosition(self, ev) {
   };
 }
 
+function attachMissingTouchEventAttributes(touchEv) {
+  var rect = touchEv.target.getBoundingClientRect();
+  var offsetX = touchEv.touches[0].pageX - rect.left;
+  var offsetY = touchEv.touches[0].pageY - rect.top;
+  touchEv.touches[0].offsetX = offsetX;
+  touchEv.touches[0].offsetY = offsetY;
+  touchEv.touches[0].layerX = touchEv.touches[0].pageX;
+  touchEv.touches[0].layerY = touchEv.touches[0].pageY;
+}
+
 function mouseDown(ev) {
   // "this" is the EngraverController because of the bind(this) when setting the event listener.
-  var positioning = getMousePosition(this, ev); // Only start dragging if the user clicked close enough to an element and clicked with the main mouse button.
+  var _ev = ev;
 
-  if (positioning.clickedOn >= 0 && ev.button === 0) {
+  if (ev.type === 'touchstart') {
+    attachMissingTouchEventAttributes(ev);
+    _ev = ev.touches[0];
+  }
+
+  var positioning = getMousePosition(this, _ev); // Only start dragging if the user clicked close enough to an element and clicked with the main mouse button.
+
+  if (positioning.clickedOn >= 0 && (ev.type === 'touchstart' || ev.button === 0)) {
     this.dragTarget = this.selectables[positioning.clickedOn];
     this.dragIndex = positioning.clickedOn;
     this.dragMechanism = "mouse";
@@ -28302,9 +28304,17 @@ function mouseDown(ev) {
 }
 
 function mouseMove(ev) {
-  // "this" is the EngraverController because of the bind(this) when setting the event listener.
+  var _ev = ev;
+
+  if (ev.type === 'touchmove') {
+    attachMissingTouchEventAttributes(ev);
+    _ev = ev.touches[0];
+  }
+
+  this.lastTouchMove = ev; // "this" is the EngraverController because of the bind(this) when setting the event listener.
+
   if (!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable || this.dragMechanism !== 'mouse') return;
-  var positioning = getMousePosition(this, ev);
+  var positioning = getMousePosition(this, _ev);
   var yDist = Math.round((positioning.y - this.dragMouseStart.y) / spacing.STEP);
 
   if (yDist !== this.dragYStep) {
@@ -28315,6 +28325,13 @@ function mouseMove(ev) {
 
 function mouseUp(ev) {
   // "this" is the EngraverController because of the bind(this) when setting the event listener.
+  var _ev = ev;
+
+  if (ev.type === 'touchend') {
+    attachMissingTouchEventAttributes(this.lastTouchMove);
+    _ev = this.lastTouchMove.touches[0];
+  }
+
   if (!this.dragTarget) return;
   clearSelection.bind(this)();
 
@@ -28323,7 +28340,7 @@ function mouseUp(ev) {
     this.dragTarget.absEl.highlight(undefined, this.selectionColor);
   }
 
-  notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex, ev);
+  notifySelect.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex, _ev);
 
   if (this.dragTarget.svgEl && this.dragTarget.svgEl.focus) {
     this.dragTarget.svgEl.focus();
@@ -29130,7 +29147,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.1.0';
+var version = '6.1.1';
 module.exports = version;
 
 /***/ })

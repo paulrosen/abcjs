@@ -171,6 +171,8 @@ declare module 'abcjs' {
 
 	export type AbsoluteElement = any; // TODO
 
+	export type AbstractEngraver = any;
+
 	export type NoteProperties = any; // TODO
 
 	export type AudioTrackCommand = 'program' | 'text' | 'note';
@@ -504,6 +506,34 @@ declare module 'abcjs' {
 		wordsfont: Font;
 	}
 
+	export interface EngraverController {
+		classes: any;
+		dragColor: string;
+		dragIndex: number;
+		dragMouseStart: { x: number, y: number; };
+		dragTarget: null | any;
+		dragYStep: number;
+		dragging: boolean;
+		engraver: AbstractEngraver;
+		getFontAndAttr: any;
+		getTextSize: any;
+		listeners: [ClickListener];
+		rangeHighlight: any;
+		renderer: any;
+		responsive?: boolean;
+		scale: number;
+		initialClef?: any;
+		selectTypes: boolean | Array<DragTypes>;
+		selectables: Array<Selectable>;
+		selected: Array<any>;
+		selectionColor: string;
+		space: number;
+		staffgroups: [any];
+		staffwidthPrint: number;
+		staffwidthScreen: number;
+		width: number;
+	}
+
 	export interface MetaText {
 		"abc-copyright"?: string;
 		"abc-creator"?: string;
@@ -712,6 +742,7 @@ declare module 'abcjs' {
 
 	export interface TuneObject {
 		formatting: Formatting;
+		engraver?: EngraverController;
 		lines: Array<TuneLine>;
 		media: Media;
 		metaText: MetaText;
@@ -732,11 +763,22 @@ declare module 'abcjs' {
 		millisecondsPerMeasure: NumberFunction;
 		setTiming: (bpm?: number, measuresOfDelay? : number) => void;
 		setUpAudio: (options: SynthOptions) => AudioTracks;
+		makeVoicesArray: () => Array<Selectable[]>
 		lineBreaks?: Array<number>;
 		visualTranspose?: number;
 	}
 
 	export type TuneObjectArray = [TuneObject]
+
+	export interface Selectable {
+		absEl: AbsoluteElement;
+		isDraggable: boolean;
+		staffPos: {
+			height: number;
+			top: number;
+			zero: number;
+		}
+	}
 
 	export interface AbcElem {
 		el_type: string //TODO enumerate these
@@ -1091,6 +1133,8 @@ declare module 'abcjs' {
 
 	export function numberOfTunes(abc: string) : number;
 	export function extractMeasures(abc: string) : Array<MeasureList>;
+	
+	export function strTranspose(originalAbc: string, visualObj: TuneObject, steps: number): string;
 
 	//
 	// Glyph

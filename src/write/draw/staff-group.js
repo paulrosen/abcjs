@@ -15,7 +15,7 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	var colorIndex;
 
 	// An invisible marker is useful to be able to find where each system starts.
-	addInvisibleMarker(renderer, "abcjs-top-of-system");
+	//addInvisibleMarker(renderer, "abcjs-top-of-system");
 
 	var startY = renderer.y; // So that it can be restored after we're done.
 	// Set the absolute Y position for each staff here, so the voice drawing below can just use if.
@@ -177,10 +177,10 @@ function printBrace(renderer, absoluteY, brace, index, selectables) {
 	}
 }
 
-function addInvisibleMarker(renderer, className) {
-	var y = Math.round(renderer.y);
-	renderer.paper.pathToBack({path:"M 0 " + y + " L 0 0", stroke:"none", fill:"none", "stroke-opacity": 0, "fill-opacity": 0, 'class': renderer.controller.classes.generate(className), 'data-vertical': y });
-}
+// function addInvisibleMarker(renderer, className) {
+// 	var y = Math.round(renderer.y);
+// 	renderer.paper.pathToBack({path:"M 0 " + y + " L 0 0", stroke:"none", fill:"none", "stroke-opacity": 0, "fill-opacity": 0, 'class': renderer.controller.classes.generate(className), 'data-vertical': y });
+// }
 
 function boxAllElements(renderer, voices, which) {
 	for (var i = 0; i < which.length; i++) {

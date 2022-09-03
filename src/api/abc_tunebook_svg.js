@@ -59,96 +59,6 @@ function renderOne(div, tune, params, tuneNumber, lineOffset) {
     }
 }
 
-function renderEachLineSeparately(div, tune, params, tuneNumber) {
-    function initializeTuneLine(tune) {
-        var obj = new Tune();
-        obj.formatting = tune.formatting;
-        obj.media = tune.media;
-        obj.version = tune.version;
-        return obj;
-    }
-
-    // Before rendering, chop up the returned tune into an array where each element is a line.
-    // The first element of the array gets the title and other items that go on top, the last element
-    // of the array gets the extra text that goes on bottom. Each element gets any non-music info that comes before it.
-    var tunes = [];
-    var tuneLine;
-    for (var i = 0; i < tune.lines.length; i++) {
-        var line = tune.lines[i];
-        if (!tuneLine)
-            tuneLine = initializeTuneLine(tune);
-
-        if (i === 0) {
-            // These items go on top of the music
-            tuneLine.copyTopInfo(tune);
-        }
-
-        // push the lines until we get to a music line
-        tuneLine.lines.push(line);
-        if (line.staff) {
-            tunes.push(tuneLine);
-            tuneLine = undefined;
-        }
-    }
-    // Add any extra stuff to the last line.
-    if (tuneLine) {
-        var lastLine = tunes[tunes.length-1];
-        for (var j = 0; j < tuneLine.lines.length; j++)
-            lastLine.lines.push(tuneLine.lines[j]);
-    }
-
-    // These items go below the music
-    tuneLine = tunes[tunes.length-1];
-    tuneLine.copyBottomInfo(tune);
-
-    // Now create sub-divs and render each line. Need to copy the params to change the padding for the interior slices.
-    var ep = {};
-    for (var key in params) {
-        if (params.hasOwnProperty(key)) {
-            ep[key] = params[key];
-        }
-    }
-    var origPaddingTop = ep.paddingtop;
-    var origPaddingBottom = ep.paddingbottom;
-    var currentScrollY = div.parentNode.scrollTop; // If there is scrolling it will be lost during the redraw so remember it.
-    var currentScrollX = div.parentNode.scrollLeft;
-    div.innerHTML = "";
-    var lineCount = 0;
-    for (var k = 0; k < tunes.length; k++) {
-        var lineEl = document.createElement("div");
-        div.appendChild(lineEl);
-
-        if (k === 0) {
-	        ep.paddingtop = origPaddingTop;
-	        ep.paddingbottom = 0;
-        } else if (k === tunes.length-1) {
-	        ep.paddingtop = 10;
-	        ep.paddingbottom = origPaddingBottom;
-        } else {
-	        ep.paddingtop = 10;
-	        ep.paddingbottom = 0;
-        }
-        if (k < tunes.length-1) {
-            // If it is not the last line, force stretchlast. If it is, stretchlast might have been set by the input parameters.
-            tunes[k].formatting = parseCommon.clone(tunes[k].formatting);
-            tunes[k].formatting.stretchlast = true;
-        }
-        renderOne(lineEl, tunes[k], ep, tuneNumber, lineCount);
-        lineCount += tunes[k].lines.length;
-        if (k === 0)
-            tune.engraver = tunes[k].engraver;
-        else {
-            if (!tune.engraver.staffgroups)
-                tune.engraver.staffgroups = tunes[k].engraver.staffgroups;
-            else if (tunes[k].engraver.staffgroups.length > 0)
-                tune.engraver.staffgroups.push(tunes[k].engraver.staffgroups[0]);
-        }
-    }
-    if (currentScrollX || currentScrollY) {
-        div.parentNode.scrollTo(currentScrollX, currentScrollY);
-    }
-}
-
 // A quick way to render a tune from javascript when interactivity is not required.
 // This is used when a javascript routine has some abc text that it wants to render
 // in a div or collection of divs. One tune or many can be rendered.
@@ -214,10 +124,7 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
 	        tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
 	        return tune;
         }
-        else if (removeDiv || !params.oneSvgPerLine || tune.lines.length < 2)
-            renderOne(div, tune, params, tuneNumber, 0);
-        else
-            renderEachLineSeparately(div, tune, params, tuneNumber);
+        renderOne(div, tune, params, tuneNumber, 0);
         if (removeDiv)
             div.parentNode.removeChild(div);
         return null;
@@ -239,10 +146,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
         if (warnings)
             tune.warnings = warnings;
     }
-    if (!params.oneSvgPerLine || tune.lines.length < 2)
-        renderOne(div, tune, ret.revisedParams, tuneNumber, 0);
-    else
-        renderEachLineSeparately(div, tune, ret.revisedParams, tuneNumber);
+    renderOne(div, tune, ret.revisedParams, tuneNumber, 0);
 	tune.explanation = ret.explanation;
 	return tune;
 }

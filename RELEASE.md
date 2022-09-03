@@ -1,3 +1,17 @@
+# Version 6.1.1
+
+## Bugs
+
+* rewrite oneSvgPerLine; fixes selection and keeping multiline items (like slurs) correctly.
+
+## Features
+
+* added mobile browser TouchEvent support for dragging
+
+## Documentation
+
+* fixed some typescript definitions
+
 # Version 6.1.0
 
 ## Bugs
