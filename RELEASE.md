@@ -1,3 +1,11 @@
+# Version 6.1.3
+
+## Bugs
+
+* fix placement of tablature staff when there is extra space used above the staff.
+
+* Fix regression crash when using 'y' spacer
+
 # Version 6.1.2
 
 ## Bugs

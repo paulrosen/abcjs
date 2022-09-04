@@ -18972,7 +18972,7 @@ TabRenderer.prototype.doLayout = function () {
   var padd = 3;
   var prevIndex = this.staffIndex;
   var previousStaff = staffGroup.staffs[prevIndex];
-  var tabTop = previousStaff.top + padd + lyricsHeight;
+  var tabTop = this.tabSize + padd - previousStaff.bottom - lyricsHeight;
 
   if (previousStaff.isTabStaff) {
     tabTop = previousStaff.top;
@@ -28905,7 +28905,7 @@ Svg.prototype.closeGroup = function () {
 
   if (g && g.children.length === 0) {
     // If nothing was added to the group it is because all the elements were invisible. We don't need the group, then.
-    this.svg.removeChild(g);
+    g.parentElement.removeChild(g);
     return null;
   }
 
@@ -29151,7 +29151,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.1.2';
+var version = '6.1.3';
 module.exports = version;
 
 /***/ })
