@@ -22118,7 +22118,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
 
   if (this.oneSvgPerLine) {
     var div = this.renderer.paper.svg.parentNode;
-    this.svgs = splitSvgIntoLines(div, abcTune.metaText.title);
+    this.svgs = splitSvgIntoLines(div, abcTune.metaText.title, this.responsive);
   } else {
     this.svgs = [this.renderer.paper.svg];
   }
@@ -22126,7 +22126,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
   setupSelection(this, this.svgs);
 };
 
-function splitSvgIntoLines(output, title) {
+function splitSvgIntoLines(output, title, responsive) {
   // Each line is a top level <g> in the svg. To split it into separate
   // svgs iterate through each of those and put them in a new svg. Since
   // they are placed absolutely, the viewBox needs to be manipulated to
@@ -22135,8 +22135,9 @@ function splitSvgIntoLines(output, title) {
   // since we want that to include a count. And the height is now a fraction of the original svg.
   if (!title) title = "Untitled";
   var source = output.querySelector("svg");
+  if (responsive === 'resize') output.style.paddingBottom = '';
   var style = source.querySelector("style");
-  var width = source.getAttribute("width");
+  var width = responsive === 'resize' ? source.viewBox.baseVal.width : source.getAttribute("width");
   var sections = output.querySelectorAll("svg > g"); // each section is a line, or the top matter or the bottom matter, or text that has been inserted.
 
   var nextTop = 0; // There are often gaps between the elements for spacing, so the actual top and height needs to be inferred.
@@ -22152,11 +22153,14 @@ function splitSvgIntoLines(output, title) {
 
     var height = box.height + gapBetweenLines;
     var wrapper = document.createElement("div");
-    wrapper.setAttribute("style", "overflow: hidden;height:" + height + "px;");
+    var divStyles = "overflow: hidden;";
+    if (responsive !== 'resize') divStyles += "height:" + height + "px;";
+    wrapper.setAttribute("style", divStyles);
     var svg = duplicateSvg(source);
     var fullTitle = "Sheet Music for \"" + title + "\" section " + (i + 1);
     svg.setAttribute("aria-label", fullTitle);
-    svg.setAttribute("height", height);
+    if (responsive !== 'resize') svg.setAttribute("height", height);
+    if (responsive === 'resize') svg.style.position = '';
     svg.setAttribute("viewBox", "0 " + nextTop + " " + width + " " + height);
     svg.appendChild(style.cloneNode(true));
     var titleEl = document.createElement("title");
@@ -29147,7 +29151,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.1.1';
+var version = '6.1.2';
 module.exports = version;
 
 /***/ })

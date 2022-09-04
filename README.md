@@ -8,7 +8,7 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
 
-## Announcement: version 6.1.1
+## Announcement: version 6.1.2
 
 There is a little difference in the generated SVG: Now each line is surrounded with a `<g>` element. This probably won't affect your program unless you are doing very specific manipulation of the SVG.
 

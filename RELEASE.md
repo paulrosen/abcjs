@@ -1,3 +1,10 @@
+# Version 6.1.2
+
+## Bugs
+
+* fix combining oneSvgPerLine with responsive: "resize"
+
+* fix drawing audio controls when the outer stylesheet changes the button's lineHeight
 # Version 6.1.1
 
 ## Bugs
