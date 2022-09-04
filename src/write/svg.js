@@ -307,7 +307,7 @@ Svg.prototype.closeGroup = function() {
 	var g = this.currentGroup.shift();
 	if (g && g.children.length === 0) {
 		// If nothing was added to the group it is because all the elements were invisible. We don't need the group, then.
-		this.svg.removeChild(g);
+		g.parentElement.removeChild(g);
 		return null;
 	}
 	return g;
