@@ -40,20 +40,41 @@ describe("Svg Per Line", function() {
 
 //////////////////////////////////////////////////////////
 	it("svg-per-line", function() {
-		doSvgTest(abcMultiple);
+		doSvgTest(abcMultiple, "paper", { oneSvgPerLine: true, selectTypes: true, clickListener: clickListener }, 5);
+	})
+
+	it("svg-per-line-responsive", function() {
+		doSvgTest(abcMultiple, "paper-resp", { oneSvgPerLine: true, responsive: "resize" }, 5);
+	})
+
+	it("normal", function() {
+		doSvgTest(abcMultiple, "paper-norm", { selectTypes: true }, 1);
+	})
+
+	it("normal-responsive", function() {
+		doSvgTest(abcMultiple, "paper-resp-norm", { responsive: "resize" }, 1);
 	})
 
 })
 
 //////////////////////////////////////////////////////////
 
-function doSvgTest(abc) {
-	var visualObj = abcjs.renderAbc("paper", abc, { oneSvgPerLine: true, selectTypes: true, clickListener: clickListener });
-	var outputs = document.querySelectorAll("#paper svg")
-	chai.assert.equal(outputs.length, 5)
+function replacer(key, value) {
+	// Filtering out properties
+	if (key === 'abselem') {
+		return 'abselem';
+	}
+	return value;
+}
+function doSvgTest(abc, id, options, numLines) {
+	abcjs.renderAbc(id, abc, options);
+	var outputs = document.querySelectorAll("#" + id + " svg")
+	chai.assert.equal(outputs.length, numLines)
 }
 
 function clickListener(abcelem, tuneNumber, classes, analysis, drag, mouseEvent) {
+	var info = document.getElementById("click-info")
+	info.innerHTML = JSON.stringify(abcelem, replacer) + "<br>" + classes + "<br>" + JSON.stringify(analysis) + "<br>" + JSON.stringify(drag)
 	console.log(abcelem, tuneNumber, classes, analysis, drag, mouseEvent)
 }
 

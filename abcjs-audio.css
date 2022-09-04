@@ -24,6 +24,7 @@
 	background: none !important;
 	border: 1px solid transparent;
 	box-sizing: border-box;
+	line-height: 1;
 }
 
 .abcjs-btn g {

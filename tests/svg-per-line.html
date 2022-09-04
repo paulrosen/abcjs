@@ -6,15 +6,30 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
 	<style>
-		#paper > div:nth-child(even) {
+		.abcjs-container > div:nth-child(even), #paper > div:nth-child(even) {
 			background-color: rgba(218, 173, 173, 0.3);
+		}
+		#resp-wrap, #resp-wrap-norm {
+			width: 400px;
+		}
+		#paper,#resp-wrap,#paper-norm,#resp-wrap-norm {
+			margin: 5px;
+			border: 1px dotted #bbb;
 		}
 	</style>
 </head>
 <body>
 <div id="mocha"></div>
-<div style="position: relative;">
+<div id="output">
 <div id="paper"></div>
+<div id="click-info">Click items above to be sure that the handler is called.</div>
+<div id="resp-wrap">
+	<div id="paper-resp"></div>
+</div>
+<div id="paper-norm"></div>
+<div id="resp-wrap-norm">
+	<div id="paper-resp-norm"></div>
+</div>
 </div>
 <script src="../node_modules/chai/chai.js"></script>
 <script src="../node_modules/mocha/mocha.js"></script>
