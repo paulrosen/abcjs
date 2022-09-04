@@ -198,7 +198,7 @@ TabRenderer.prototype.doLayout = function () {
   var padd = 3;
   var prevIndex = this.staffIndex;
   var previousStaff = staffGroup.staffs[prevIndex];
-  var tabTop = previousStaff.top + padd + lyricsHeight;
+  var tabTop = this.tabSize + padd - previousStaff.bottom - lyricsHeight;
   if (previousStaff.isTabStaff) {
     tabTop = previousStaff.top;
   }
