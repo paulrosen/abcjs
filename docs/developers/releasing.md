@@ -28,9 +28,13 @@ All new work should be done in the `dev` branch.
 
 [_] Minify the various library versions with `npm run build`.
 
+[_] Update all personal projects to see if anything breaks.
+
 [_] Check the minified versions and other changed files in.
 
 [_] Merge the `dev` branch into `main`. 
+
+[_] Push the merge to github with `git push`.
 
 [_] Update npm with `npm publish` or `npm publish --tag beta`.
     To do this in docker:
@@ -63,3 +67,5 @@ npm login
 * Make changes in `/trunk`
 * When ready to release, make tag with right-click trunk, subversion => Branch or Tag, then pick "any location" and change the location to `.../tags/x.x.x` with the version number.
 * check in all changed files.
+
+[_] Release a new version of the vscode extension.
