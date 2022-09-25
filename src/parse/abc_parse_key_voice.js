@@ -408,6 +408,16 @@ var parseKeyVoice = {};
 					multilineVars.clef.staffscale = tokens[0].floatt;
 					tokens.shift();
 					break;
+				case "octave":
+					tokens.shift();
+					if (tokens.length === 0) { warn("Expected = after octave", str, 0); return ret; }
+					token = tokens.shift();
+					if (token.token !== "=") { warn("Expected = after octave", str, token.start); break; }
+					if (tokens.length === 0) { warn("Expected parameter after octave=", str, 0); return ret; }
+					if (tokens[0].type !== 'number') { warn("Expected number after octave", str, tokens[0].start); break; }
+					multilineVars.octave = tokens[0].intt;
+					tokens.shift();
+					break;
 				case "style":
 					tokens.shift();
 					if (tokens.length === 0) { warn("Expected = after style", str, 0); return ret; }
@@ -716,7 +726,6 @@ var parseKeyVoice = {};
 						addNextTokenToVoiceInfo(id, 'staffscale', 'number');
 						break;
 					case 'octave':
-						// TODO-PER: This is accepted, but not implemented, yet.
 						addNextTokenToVoiceInfo(id, 'octave', 'number');
 						break;
 					case 'volume':

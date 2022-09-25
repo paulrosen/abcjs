@@ -78,6 +78,7 @@ var Parse = function() {
 			this.hasMainTitle = false;
 			this.default_length = 0.125;
 			this.clef = { type: 'treble', verticalPos: 0 };
+			this.octave = 0;
 			this.next_note_duration = 0;
 			this.start_new_line = true;
 			this.is_in_header = true;
