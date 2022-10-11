@@ -28068,7 +28068,7 @@ function getCoord(ev) {
     yOffset = svg.viewBox.baseVal.y;
   }
 
-  var svgClicked = ev.target.tagName === "svg";
+  var svgClicked = ev.target && ev.target.tagName === "svg";
   var x;
   var y;
 
@@ -28122,7 +28122,7 @@ function keyboardSelection(ev) {
       this.dragTarget = this.selectables[index];
       this.dragIndex = index;
 
-      if (this.dragTarget.isDraggable) {
+      if (this.dragTarget && this.dragTarget.isDraggable) {
         if (this.dragging && this.dragTarget.isDraggable) this.dragTarget.absEl.highlight(undefined, this.dragColor);
         this.dragYStep--;
         this.dragTarget.svgEl.setAttribute("transform", "translate(0," + this.dragYStep * spacing.STEP + ")");
@@ -28137,7 +28137,7 @@ function keyboardSelection(ev) {
       this.dragIndex = index;
       this.dragMechanism = "keyboard";
 
-      if (this.dragTarget.isDraggable) {
+      if (this.dragTarget && this.dragTarget.isDraggable) {
         if (this.dragging && this.dragTarget.isDraggable) this.dragTarget.absEl.highlight(undefined, this.dragColor);
         this.dragYStep++;
         this.dragTarget.svgEl.setAttribute("transform", "translate(0," + this.dragYStep * spacing.STEP + ")");
@@ -28271,6 +28271,7 @@ function getMousePosition(self, ev) {
 }
 
 function attachMissingTouchEventAttributes(touchEv) {
+  if (!touchEv || !touchEv.target || !touchEv.touches || touchEv.touches.length < 1) return;
   var rect = touchEv.target.getBoundingClientRect();
   var offsetX = touchEv.touches[0].pageX - rect.left;
   var offsetY = touchEv.touches[0].pageY - rect.top;
@@ -28286,12 +28287,12 @@ function mouseDown(ev) {
 
   if (ev.type === 'touchstart') {
     attachMissingTouchEventAttributes(ev);
-    _ev = ev.touches[0];
+    if (ev.touches.length > 0) _ev = ev.touches[0];
   }
 
   var positioning = getMousePosition(this, _ev); // Only start dragging if the user clicked close enough to an element and clicked with the main mouse button.
 
-  if (positioning.clickedOn >= 0 && (ev.type === 'touchstart' || ev.button === 0)) {
+  if (positioning.clickedOn >= 0 && (ev.type === 'touchstart' || ev.button === 0) && this.selectables[positioning.clickedOn]) {
     this.dragTarget = this.selectables[positioning.clickedOn];
     this.dragIndex = positioning.clickedOn;
     this.dragMechanism = "mouse";
@@ -28312,12 +28313,12 @@ function mouseMove(ev) {
 
   if (ev.type === 'touchmove') {
     attachMissingTouchEventAttributes(ev);
-    _ev = ev.touches[0];
+    if (ev.touches.length > 0) _ev = ev.touches[0];
   }
 
   this.lastTouchMove = ev; // "this" is the EngraverController because of the bind(this) when setting the event listener.
 
-  if (!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable || this.dragMechanism !== 'mouse') return;
+  if (!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable || this.dragMechanism !== 'mouse' || !this.dragMouseStart) return;
   var positioning = getMousePosition(this, _ev);
   var yDist = Math.round((positioning.y - this.dragMouseStart.y) / spacing.STEP);
 
@@ -28331,9 +28332,9 @@ function mouseUp(ev) {
   // "this" is the EngraverController because of the bind(this) when setting the event listener.
   var _ev = ev;
 
-  if (ev.type === 'touchend') {
+  if (ev.type === 'touchend' && this.lastTouchMove) {
     attachMissingTouchEventAttributes(this.lastTouchMove);
-    _ev = this.lastTouchMove.touches[0];
+    if (ev.touches.length > 0) _ev = this.lastTouchMove.touches[0];
   }
 
   if (!this.dragTarget) return;
@@ -28400,13 +28401,13 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
   if (target.staffPos) analysis.staffPos = target.staffPos;
   var closest = ev.target;
 
-  while (!closest.dataset.name && closest.tagName.toLowerCase() !== 'svg') {
+  while (closest && !closest.dataset.name && closest.tagName.toLowerCase() !== 'svg') {
     closest = closest.parentNode;
   }
 
   var parent = ev.target;
 
-  while (!parent.dataset.index && parent.tagName.toLowerCase() !== 'svg') {
+  while (parent && !parent.dataset.index && parent.tagName.toLowerCase() !== 'svg') {
     parent = parent.parentNode;
   }
 
@@ -29151,7 +29152,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.1.3';
+var version = '6.1.4';
 module.exports = version;
 
 /***/ })
