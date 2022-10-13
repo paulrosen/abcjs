@@ -28235,8 +28235,10 @@ function getTarget(target) {
   var found = target.getAttribute("selectable");
 
   while (!found) {
-    target = target.parentElement;
-    if (target.tagName === "svg") found = true;else found = target.getAttribute("selectable");
+    if (!target.parentElement) found = true;else {
+      target = target.parentElement;
+      if (target.tagName === "svg") found = true;else found = target.getAttribute("selectable");
+    }
   }
 
   return target;
@@ -28334,7 +28336,7 @@ function mouseUp(ev) {
 
   if (ev.type === 'touchend' && this.lastTouchMove) {
     attachMissingTouchEventAttributes(this.lastTouchMove);
-    if (ev.touches.length > 0) _ev = this.lastTouchMove.touches[0];
+    if (this.lastTouchMove.touches.length > 0) _ev = this.lastTouchMove.touches[0];
   }
 
   if (!this.dragTarget) return;
@@ -29152,7 +29154,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.1.4';
+var version = '6.1.5';
 module.exports = version;
 
 /***/ })
