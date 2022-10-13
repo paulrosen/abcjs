@@ -200,11 +200,15 @@ function getTarget(target) {
 
 	var found = target.getAttribute("selectable");
 	while (!found) {
-		target = target.parentElement;
-		if (target.tagName === "svg")
+		if (!target.parentElement)
 			found = true;
-		else
-			found = target.getAttribute("selectable");
+		else {	
+			target = target.parentElement;
+			if (target.tagName === "svg")
+				found = true;
+			else
+				found = target.getAttribute("selectable");
+		}
 	}
 	return target;
 }
@@ -298,7 +302,7 @@ function mouseUp(ev) {
 	var _ev = ev;
 	if (ev.type === 'touchend' && this.lastTouchMove) {
 		attachMissingTouchEventAttributes(this.lastTouchMove);
-		if (ev.touches.length > 0)
+		if (this.lastTouchMove.touches.length > 0)
 			_ev = this.lastTouchMove.touches[0];
 	}
 
