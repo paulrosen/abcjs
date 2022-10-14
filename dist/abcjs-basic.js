@@ -28060,7 +28060,7 @@ function getCoord(ev) {
   var yOffset = 0; // when renderer.options.responsive === 'resize' the click coords are in relation to the HTML
   // element, we need to convert to the SVG viewBox coords
 
-  if (svg.viewBox.baseVal) {
+  if (svg && svg.viewBox && svg.viewBox.baseVal) {
     // Firefox passes null to this when no viewBox is given
     // Chrome makes these values null when no viewBox is given.
     if (svg.viewBox.baseVal.width !== 0) scaleX = svg.viewBox.baseVal.width / svg.clientWidth;
@@ -28336,7 +28336,7 @@ function mouseUp(ev) {
 
   if (ev.type === 'touchend' && this.lastTouchMove) {
     attachMissingTouchEventAttributes(this.lastTouchMove);
-    if (this.lastTouchMove.touches.length > 0) _ev = this.lastTouchMove.touches[0];
+    if (this.lastTouchMove && this.lastTouchMove.touches && this.lastTouchMove.touches.length > 0) _ev = this.lastTouchMove.touches[0];
   }
 
   if (!this.dragTarget) return;
@@ -29154,7 +29154,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.1.5';
+var version = '6.1.6';
 module.exports = version;
 
 /***/ })

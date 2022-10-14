@@ -1,3 +1,9 @@
+# Version 6.1.6
+
+## Bugs
+
+* Fix error when selecting notes
+
 # Version 6.1.5
 
 ## Bugs
