@@ -10,7 +10,8 @@
     "build:basic": "npm run webpack -- --mode development --config-name basic",
     "build:basic-min": "npm run webpack -- --mode production --config-name basic",
     "build:plugin": "npm run webpack -- --mode production --config-name plugin",
-    "test": "echo 'To run tests, open the file tests/all.html in a browser.'",
+    "test-server": "npx http-server",
+    "test": "echo 'To run tests, run the test-server and open http://localhost:8080/tests/all.html in a browser.'",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "build:analyze": "npm run build:basic -- --env analyze"
@@ -48,6 +49,7 @@
     "@tarp/require": "1.4.3",
     "babel-loader": "8.2.2",
     "chai": "4.3.4",
+    "http-server": "14.1.1",
     "mocha": "8.4.0",
     "vuepress": "2.0.0-beta.26",
     "vuex": "4.0.0",
