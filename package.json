@@ -10,6 +10,7 @@
     "build:basic": "npm run webpack -- --mode development --config-name basic",
     "build:basic-min": "npm run webpack -- --mode production --config-name basic",
     "build:plugin": "npm run webpack -- --mode production --config-name plugin",
+    "test-server": "node test-server.js",
     "test": "echo 'To run tests, open the file tests/all.html in a browser.'",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
