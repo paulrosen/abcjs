@@ -32,9 +32,6 @@ const requestListener = function (request, response) {
       response.end('404 - File Not Found');
     }
   });
-
-  //response.writeHead(200);
-  //response.end('My first server!');
 };
 
 const server = http.createServer(requestListener);
