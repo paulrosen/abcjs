@@ -357,10 +357,10 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
 	if (target.staffPos)
 		analysis.staffPos = target.staffPos;
 	var closest = ev.target;
-	while (closest && !closest.dataset.name && closest.tagName.toLowerCase() !== 'svg')
+	while (closest && closest.dataset && !closest.dataset.name && closest.tagName.toLowerCase() !== 'svg')
 		closest = closest.parentNode;
 	var parent = ev.target;
-	while (parent && !parent.dataset.index && parent.tagName.toLowerCase() !== 'svg')
+	while (parent && parent.dataset && !parent.dataset.index && parent.tagName.toLowerCase() !== 'svg')
 		parent = parent.parentNode;
 	analysis.name = parent.dataset.name;
 	analysis.clickedName = closest.dataset.name;
