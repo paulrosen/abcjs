@@ -920,8 +920,11 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 
 AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
 	var measureNumDim = this.getTextSize.calc(number, "measurefont", 'bar-number');
-	var dx = measureNumDim.width > 18 && abselem.abcelem.type === "treble" ? -7 : 0;
-	abselem.addFixed(new RelativeElement(number, dx, measureNumDim.width, 11+measureNumDim.height / spacing.STEP, {type:"barNumber", dim: this.getTextSize.attr("measurefont", 'bar-number')}));
+	var dx = 0;
+	if (abselem.isClef) // If this is a clef rather than bar line, then the number shouldn't be centered because it could overlap the left side. This is an easy way to let it be centered but move it over, too.
+	 	dx += measureNumDim.width / 2
+	var vert = measureNumDim.width > 10 && abselem.abcelem.type === "treble" ? 13 : 11
+	abselem.addFixed(new RelativeElement(number, dx, measureNumDim.width, vert+measureNumDim.height / spacing.STEP, {type:"barNumber", dim: this.getTextSize.attr("measurefont", 'bar-number')}));
 };
 
 AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) {

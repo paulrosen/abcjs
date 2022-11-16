@@ -1,4 +1,12 @@
 describe("Layout", function() {
+	var abcBarLinesTreble = "X:1\n%%barlabelfont Times-Bold 18 box\n%%setbarnb 42\n%%barnumbers 1\nM: 4/4\nL: 1/16\nK:D\nz8 |\n z8 |\n"
+
+	var expectedBarLinesTreble = [{x: 20, y: 88}]
+
+	var abcBarLinesBass = "X:1\n%%barlabelfont Times-Bold 18 box\n%%setbarnb 42\n%%barnumbers 1\nM: 4/4\nL: 1/16\nK:D clef=bass\nz8 |\n z8 |\n"
+
+	var expectedBarLinesBass = [{x: 20, y: 84}]
+
 	var abcMinSpacing = "X:1\nL:1/8\nM:4/4\ncdef cdef|\ncdef cdef|cdef cdef|\ncdef cdef|cdef cdef|cdef cdef|\n";
 
 	var expectedMinSpacing0 = [
@@ -137,6 +145,11 @@ describe("Layout", function() {
 		doItemPlacementTest(abcRhythmPlacement, expectedRhythmPlacement, '[data-name="clefs.G"]');
 	})
 
+	it("measure-numbers", function() {
+		doItemPlacementTest(abcBarLinesTreble, expectedBarLinesTreble, '[data-name="bar-number"]');
+		doItemPlacementTest(abcBarLinesBass, expectedBarLinesBass, '[data-name="bar-number"]');
+	})
+
 })
 
 function doItemPlacementTest(abc, expected, selector) {
@@ -147,6 +160,7 @@ function doItemPlacementTest(abc, expected, selector) {
 		var bb = els[i].getBBox()
 		pos.push({x: Math.round(bb.x), y: Math.round(bb.y)})
 	}
+	//console.log(pos)
 	chai.assert.deepEqual(pos, expected)
 }
 
