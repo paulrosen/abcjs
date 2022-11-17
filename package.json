@@ -44,18 +44,18 @@
   },
   "homepage": "https://abcjs.net",
   "devDependencies": {
-    "@babel/core": "7.14.3",
-    "@babel/preset-env": "7.14.4",
+    "@babel/core": "7.20.2",
+    "@babel/preset-env": "7.20.2",
     "@tarp/require": "1.4.3",
-    "babel-loader": "8.2.2",
-    "chai": "4.3.4",
+    "babel-loader": "9.1.0",
+    "chai": "4.3.7",
     "concurrently": "7.5.0",
     "http-server": "14.1.1",
-    "mocha": "8.4.0",
+    "mocha": "10.1.0",
     "opener": "1.5.2",
     "vuepress": "2.0.0-beta.26",
-    "vuex": "4.0.0",
-    "webpack-bundle-analyzer": "4.4.2",
-    "webpack-cli": "4.9.0"
+    "vuex": "4.1.0",
+    "webpack-bundle-analyzer": "4.7.0",
+    "webpack-cli": "4.10.0"
   }
 }
