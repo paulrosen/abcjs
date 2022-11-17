@@ -1,3 +1,20 @@
+# Version 6.1.7
+
+## Bugs
+
+* don't draw measure numbers before the beginning of the line.
+
+* guard against crash on touch selection
+
+## Testing
+
+* open the browser and run the test-server in parallel
+
+* add a minimal server for serving test pages
+## Documentation
+
+* Add example of getting lyrics out of a tune
+
 # Version 6.1.6
 
 ## Bugs
