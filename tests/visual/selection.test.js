@@ -3385,9 +3385,9 @@ describe("Selection", function() {
 				"el_type": "clef"
 			},
 			"size": {
-				"x": 21,
+				"x": 25,
 				"y": 618,
-				"width": 28,
+				"width": 24,
 				"height": 61
 			}
 		},
