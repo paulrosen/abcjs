@@ -1,30 +1,28 @@
 /*
  * Tablature Plugins
  * tablature are defined dynamically and registered inside abcjs
- * by calling abcTablatures.register(plugin) 
- * where plugin represents a plugin instance 
- * 
+ * by calling abcTablatures.register(plugin)
+ * where plugin represents a plugin instance
+ *
  */
-var ViolinTablature = require('../tablatures/instruments/violin/tab-violin');
-var GuitarTablature = require('../tablatures/instruments/guitar/tab-guitar');
+var ViolinTablature = require("../tablatures/instruments/violin/tab-violin");
+var GuitarTablature = require("../tablatures/instruments/guitar/tab-guitar");
 
 /* extend the table below when adding a new instrument plugin */
 
-// Existing tab classes 
+// Existing tab classes
 var pluginTab = {
-  'violin': 'ViolinTab',
-  'guitar': 'GuitarTab'
+  violin: "ViolinTab",
+  guitar: "GuitarTab"
 };
 
 var abcTablatures = {
-
   inited: false,
   plugins: {},
 
-  
   /**
-   * to be called once per plugin for registration 
-   * @param {*} plugin 
+   * to be called once per plugin for registration
+   * @param {*} plugin
    */
   register: function (plugin) {
     var name = plugin.name;
@@ -42,7 +40,7 @@ var abcTablatures = {
 
   /**
    * handle params for current processed score
-   * @param {*} tune current tune 
+   * @param {*} tune current tune
    * @param {*} tuneNumber number in tune list
    * @param {*} params params to be processed for tablature
    * @return prepared tablatures plugin instances for current tune
@@ -51,12 +49,12 @@ var abcTablatures = {
     var returned = null;
     var nbPlugins = 0;
     if (params.tablature) {
-      // validate requested plugins 
+      // validate requested plugins
       var tabs = params.tablature;
       returned = [];
       for (var ii = 0; ii < tabs.length; ii++) {
         var args = tabs[ii];
-        var instrument = args['instrument'];
+        var instrument = args["instrument"];
         if (instrument == null) {
           this.setError(tune, "tablature 'instrument' is missing");
           return returned;
@@ -76,16 +74,16 @@ var abcTablatures = {
             classz: plugin,
             tuneNumber: tuneNumber,
             params: args,
-            instance: null,
+            instance: null
           };
-          // proceed with tab plugin  init 
+          // proceed with tab plugin  init
           // plugin.init(tune, tuneNumber, args, ii);
           returned.push(pluginInstance);
           nbPlugins++;
         } else {
-          // unknown tab plugin 
+          // unknown tab plugin
           //this.emit_error('Undefined tablature plugin: ' + tabName)
-          this.setError(tune, 'Undefined tablature plugin: ' + instrument);
+          this.setError(tune, "Undefined tablature plugin: " + instrument);
           return returned;
         }
       }
@@ -95,8 +93,8 @@ var abcTablatures = {
 
   /**
    * Call requested plugin
-   * @param {*} renderer 
-   * @param {*} abcTune 
+   * @param {*} renderer
+   * @param {*} abcTune
    */
   layoutTablatures: function (renderer, abcTune) {
     var tabs = abcTune.tablatures;
@@ -113,7 +111,8 @@ var abcTablatures = {
               tabPlugin.instance = new tabPlugin.classz();
               // plugin.init(tune, tuneNumber, args, ii);
               // call initer first
-              tabPlugin.instance.init(abcTune,
+              tabPlugin.instance.init(
+                abcTune,
                 tabPlugin.tuneNumber,
                 tabPlugin.params,
                 jj
@@ -123,7 +122,7 @@ var abcTablatures = {
             tabPlugin.instance.render(renderer, line, jj);
           }
         }
-      }  
+      }
     }
   },
 
@@ -131,7 +130,7 @@ var abcTablatures = {
    * called once internally to register internal plugins
    */
   init: function () {
-    // just register plugin hosted by abcjs 
+    // just register plugin hosted by abcjs
     if (!this.inited) {
       this.register(new ViolinTablature());
       this.register(new GuitarTablature());
@@ -140,5 +139,4 @@ var abcTablatures = {
   }
 };
 
-
-module.exports = abcTablatures ;
+module.exports = abcTablatures;

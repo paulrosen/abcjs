@@ -1,9 +1,9 @@
-var StringPatterns = require('../string-patterns');
+var StringPatterns = require("../string-patterns");
 
 function ViolinPatterns(plugin) {
   this.tuning = plugin._super.params.tuning;
   if (!this.tuning) {
-    this.tuning = ['G,', 'D', 'A', 'e'];
+    this.tuning = ["G,", "D", "A", "e"];
   }
   plugin.tuning = this.tuning;
   this.strings = new StringPatterns(plugin);
@@ -18,6 +18,5 @@ ViolinPatterns.prototype.stringToPitch = function (stringNumber) {
   var converter = this.strings;
   return converter.stringToPitch(stringNumber);
 };
-
 
 module.exports = ViolinPatterns;

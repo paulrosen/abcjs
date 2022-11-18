@@ -1,7 +1,7 @@
 function printPath(renderer, attrs, params) {
-	var ret = renderer.paper.path(attrs);
+  var ret = renderer.paper.path(attrs);
 
-	return ret;
+  return ret;
 }
 
 module.exports = printPath;

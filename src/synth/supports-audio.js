@@ -1,4 +1,4 @@
-var activeAudioContext = require('./active-audio-context');
+var activeAudioContext = require("./active-audio-context");
 
 //
 // Support for audio depends on three things: support for Promise, support for AudioContext, and support for AudioContext.resume.
@@ -11,18 +11,18 @@ var activeAudioContext = require('./active-audio-context');
 // But then, call it again after a user interaction to test for resume.
 
 function supportsAudio() {
-	if (!window.Promise)
-		return false;
+  if (!window.Promise) return false;
 
-	if (!window.AudioContext &&
-		!window.webkitAudioContext &&
-		!navigator.mozAudioContext &&
-		!navigator.msAudioContext)
-		return false;
+  if (
+    !window.AudioContext &&
+    !window.webkitAudioContext &&
+    !navigator.mozAudioContext &&
+    !navigator.msAudioContext
+  )
+    return false;
 
-	var aac = activeAudioContext();
-	if (aac)
-		return aac.resume !== undefined;
+  var aac = activeAudioContext();
+  if (aac) return aac.resume !== undefined;
 }
 
 module.exports = supportsAudio;

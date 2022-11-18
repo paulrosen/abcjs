@@ -1,4 +1,3 @@
-var soundsCache = {
-};
+var soundsCache = {};
 
 module.exports = soundsCache;

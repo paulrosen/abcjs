@@ -60,6 +60,6 @@ var svg = `
 	0 -1086 -11z"></path>
 	</g>
 </svg>
-`
+`;
 
-module.exports = svg
+module.exports = svg;

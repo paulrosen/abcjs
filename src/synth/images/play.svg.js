@@ -4,6 +4,6 @@ var svg = `
     <polygon points="4 0 23 12.5 4 25"/>
     </g>
 </svg>
-`
+`;
 
-module.exports = svg
+module.exports = svg;

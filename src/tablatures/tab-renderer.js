@@ -1,7 +1,7 @@
 /* eslint-disable no-debugger */
-var VoiceElement = require('../write/abc_voice_element');
-var TabAbsoluteElements = require('./tab-absolute-elements');
-var spacing = require('../write/abc_spacing');
+var VoiceElement = require("../write/abc_voice_element");
+var TabAbsoluteElements = require("./tab-absolute-elements");
+var spacing = require("../write/abc_spacing");
 
 function initSpecialY() {
   return {
@@ -37,7 +37,7 @@ function buildTabName(self, dest) {
   var controller = self.renderer.controller;
   var textSize = controller.getTextSize;
   var tabName = stringSemantics.tabInfos(self.plugin);
-  var size = textSize.calc(tabName, 'tablabelfont', 'text instrumentname');
+  var size = textSize.calc(tabName, "tablabelfont", "text instrumentname");
   dest.tabNameInfos = {
     textSize: size,
     name: tabName
@@ -57,20 +57,20 @@ function TabRenderer(plugin, renderer, line, staffIndex) {
   this.plugin = plugin;
   this.line = line;
   this.absolutes = new TabAbsoluteElements();
-  this.staffIndex = staffIndex ;
+  this.staffIndex = staffIndex;
   this.tabStaff = {
     clef: {
-      type: 'TAB'
+      type: "TAB"
     }
   };
-  this.tabSize = (plugin.linePitch * plugin.nbLines);
+  this.tabSize = plugin.linePitch * plugin.nbLines;
 }
 
 function islastTabInStaff(index, staffGroup) {
   if (staffGroup[index].isTabStaff) {
     if (index === staffGroup.length - 1) return true;
     if (staffGroup[index + 1].isTabStaff) {
-      return false; 
+      return false;
     } else {
       return true;
     }
@@ -79,7 +79,7 @@ function islastTabInStaff(index, staffGroup) {
 }
 
 function getStaffNumbers(staffs) {
-  var nbStaffs = 0; 
+  var nbStaffs = 0;
   for (var ii = 0; ii < staffs.length; ii++) {
     if (!staffs[ii].isTabStaff) {
       nbStaffs++;
@@ -97,7 +97,6 @@ function getParentStaffIndex(staffs, index) {
   return -1;
 }
 
-
 function linkStaffAndTabs(staffs) {
   for (var ii = 0; ii < staffs.length; ii++) {
     if (staffs[ii].isTabStaff) {
@@ -110,15 +109,14 @@ function linkStaffAndTabs(staffs) {
   }
 }
 
-function isMultiVoiceSingleStaff(staffs , parent) {
-  if ( getStaffNumbers(staffs) === 1) {
+function isMultiVoiceSingleStaff(staffs, parent) {
+  if (getStaffNumbers(staffs) === 1) {
     if (parent.voices.length > 1) return true;
   }
   return false;
 }
 
-
-function getNextTabPos(self,staffGroup) {
+function getNextTabPos(self, staffGroup) {
   var tabIndex = self.staffIndex;
   var startIndex = 0;
   var handledVoices = 0;
@@ -126,8 +124,7 @@ function getNextTabPos(self,staffGroup) {
   var nbVoices = 0;
   while (inProgress) {
     //for (var ii = 0; ii < staffGroup.length; ii++) {
-    if (!staffGroup[startIndex])
-      return -1;
+    if (!staffGroup[startIndex]) return -1;
     if (!staffGroup[startIndex].isTabStaff) {
       nbVoices = staffGroup[startIndex].voices.length; // get number of staff voices
     }
@@ -139,7 +136,7 @@ function getNextTabPos(self,staffGroup) {
     } else {
       handledVoices = 0;
       if (startIndex >= tabIndex) {
-        if (startIndex+1 == staffGroup.length) return startIndex +1;
+        if (startIndex + 1 == staffGroup.length) return startIndex + 1;
         if (!staffGroup[startIndex + 1].isTabStaff) return startIndex + 1;
       }
     }
@@ -150,12 +147,12 @@ function getNextTabPos(self,staffGroup) {
 }
 
 function getLastStaff(staffs, lastTab) {
-  for (var ii = lastTab; ii >= 0 ; ii-- ) {
+  for (var ii = lastTab; ii >= 0; ii--) {
     if (!staffs[ii].isTabStaff) {
       return staffs[ii];
     }
   }
-  return null; 
+  return null;
 }
 
 function checkVoiceKeySig(voices, ii) {
@@ -163,31 +160,28 @@ function checkVoiceKeySig(voices, ii) {
   // on multivoice multistaff only the first voice has key signature
   // folling consecutive do not have one => we should provide the first voice key sig back then
   var elem0 = curVoice.children[0].abcelem;
-  if (elem0.el_type === 'clef') return null;
+  if (elem0.el_type === "clef") return null;
   if (ii == 0) {
     // not found => clef=none case
-    return 'none';
+    return "none";
   }
-  return voices[ii-1].children[0];
+  return voices[ii - 1].children[0];
 }
 
 TabRenderer.prototype.doLayout = function () {
   var staffs = this.line.staff;
   if (staffs) {
-    // give up on staffline=0 in key 
+    // give up on staffline=0 in key
     var firstStaff = staffs[0];
     if (firstStaff) {
       if (firstStaff.clef) {
         if (firstStaff.clef.stafflines == 0) {
           this.plugin._super.setError("No tablatures when stafflines=0");
-          return; 
+          return;
         }
       }
     }
-    staffs.splice(
-      staffs.length, 0,
-      this.tabStaff
-    );
+    staffs.splice(staffs.length, 0, this.tabStaff);
   }
   var staffGroup = this.line.staffGroup;
 
@@ -209,20 +203,19 @@ TabRenderer.prototype.doLayout = function () {
     lines: this.plugin.nbLines,
     linePitch: this.plugin.linePitch,
     dy: 0.15,
-    top: tabTop,
+    top: tabTop
   };
-  var nextTabPos = getNextTabPos(this,staffGroup.staffs);
-  if (nextTabPos === -1)
-    return;
+  var nextTabPos = getNextTabPos(this, staffGroup.staffs);
+  if (nextTabPos === -1) return;
   staffGroupInfos.parentIndex = nextTabPos - 1;
   staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
   staffGroup.height += this.tabSize + padd;
-  var parentStaff = getLastStaff(staffGroup.staffs, nextTabPos); 
+  var parentStaff = getLastStaff(staffGroup.staffs, nextTabPos);
   var nbVoices = 1;
-  if (isMultiVoiceSingleStaff(staffGroup.staffs,parentStaff)) {
+  if (isMultiVoiceSingleStaff(staffGroup.staffs, parentStaff)) {
     nbVoices = parentStaff.voices.length;
-  }  
+  }
   // build from staff
   this.tabStaff.voices = [];
   for (var ii = 0; ii < nbVoices; ii++) {
@@ -234,10 +227,16 @@ TabRenderer.prototype.doLayout = function () {
     voices.splice(voices.length, 0, tabVoice);
     var keySig = checkVoiceKeySig(voices, ii + this.staffIndex);
     this.tabStaff.voices[ii] = [];
-    this.absolutes.build(this.plugin, voices, this.tabStaff.voices[ii], ii , this.staffIndex ,keySig);
+    this.absolutes.build(
+      this.plugin,
+      voices,
+      this.tabStaff.voices[ii],
+      ii,
+      this.staffIndex,
+      keySig
+    );
   }
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
 };
-
 
 module.exports = TabRenderer;

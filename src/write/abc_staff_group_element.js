@@ -26,80 +26,86 @@
 // TODO-PER: Where is that used? It looks like it might not be needed.
 // height: Set in the draw() method to the height actually used. Used by the calling function to know where to start the next staff group.
 // TODO-PER: This should actually be set in the layout method and passed back as a return value.
-var calcHeight = require('./calcHeight');
+var calcHeight = require("./calcHeight");
 
-var StaffGroupElement = function(getTextSize) {
-	this.getTextSize = getTextSize;
-	this.voices = [];
-	this.staffs = [];
-	this.brace = undefined; //tony
-	this.bracket = undefined;
+var StaffGroupElement = function (getTextSize) {
+  this.getTextSize = getTextSize;
+  this.voices = [];
+  this.staffs = [];
+  this.brace = undefined; //tony
+  this.bracket = undefined;
 };
 
-StaffGroupElement.prototype.setLimit = function(member, voice) {
-	if (!voice.specialY[member]) return;
-	if (!voice.staff.specialY[member])
-		voice.staff.specialY[member] = voice.specialY[member];
-	else
-		voice.staff.specialY[member] = Math.max(voice.staff.specialY[member], voice.specialY[member]);
+StaffGroupElement.prototype.setLimit = function (member, voice) {
+  if (!voice.specialY[member]) return;
+  if (!voice.staff.specialY[member])
+    voice.staff.specialY[member] = voice.specialY[member];
+  else
+    voice.staff.specialY[member] = Math.max(
+      voice.staff.specialY[member],
+      voice.specialY[member]
+    );
 };
 
-StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines) {
-	var voiceNum = this.voices.length;
-	this.voices[voiceNum] = voice;
-	if (this.staffs[staffnumber])
-		this.staffs[staffnumber].voices.push(voiceNum);
-	else {
-		// TODO-PER: how does the min/max change when stafflines is not 5?
-		this.staffs[this.staffs.length] = {
-			top: 10,
-			bottom: 2,
-			lines: stafflines,
-			voices: [voiceNum],
-			specialY: {
-				tempoHeightAbove: 0,
-				partHeightAbove: 0,
-				volumeHeightAbove: 0,
-				dynamicHeightAbove: 0,
-				endingHeightAbove: 0,
-				chordHeightAbove: 0,
-				lyricHeightAbove: 0,
+StaffGroupElement.prototype.addVoice = function (
+  voice,
+  staffnumber,
+  stafflines
+) {
+  var voiceNum = this.voices.length;
+  this.voices[voiceNum] = voice;
+  if (this.staffs[staffnumber]) this.staffs[staffnumber].voices.push(voiceNum);
+  else {
+    // TODO-PER: how does the min/max change when stafflines is not 5?
+    this.staffs[this.staffs.length] = {
+      top: 10,
+      bottom: 2,
+      lines: stafflines,
+      voices: [voiceNum],
+      specialY: {
+        tempoHeightAbove: 0,
+        partHeightAbove: 0,
+        volumeHeightAbove: 0,
+        dynamicHeightAbove: 0,
+        endingHeightAbove: 0,
+        chordHeightAbove: 0,
+        lyricHeightAbove: 0,
 
-				lyricHeightBelow: 0,
-				chordHeightBelow: 0,
-				volumeHeightBelow: 0,
-				dynamicHeightBelow: 0
-			}
-		};
-	}
-	voice.staff = this.staffs[staffnumber];
+        lyricHeightBelow: 0,
+        chordHeightBelow: 0,
+        volumeHeightBelow: 0,
+        dynamicHeightBelow: 0
+      }
+    };
+  }
+  voice.staff = this.staffs[staffnumber];
 };
 
 StaffGroupElement.prototype.setHeight = function () {
-	this.height = calcHeight(this);
+  this.height = calcHeight(this);
 };
 
 StaffGroupElement.prototype.setWidth = function (width) {
-	this.w = width;
-	for (var i=0;i<this.voices.length;i++) {
-		this.voices[i].setWidth(width);
-	}
+  this.w = width;
+  for (var i = 0; i < this.voices.length; i++) {
+    this.voices[i].setWidth(width);
+  }
 };
 
 StaffGroupElement.prototype.setStaffLimits = function (voice) {
-	voice.staff.top = Math.max(voice.staff.top, voice.top);
-	voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
-	this.setLimit('tempoHeightAbove', voice);
-	this.setLimit('partHeightAbove', voice);
-	this.setLimit('volumeHeightAbove', voice);
-	this.setLimit('dynamicHeightAbove', voice);
-	this.setLimit('endingHeightAbove', voice);
-	this.setLimit('chordHeightAbove', voice);
-	this.setLimit('lyricHeightAbove', voice);
-	this.setLimit('lyricHeightBelow', voice);
-	this.setLimit('chordHeightBelow', voice);
-	this.setLimit('volumeHeightBelow', voice);
-	this.setLimit('dynamicHeightBelow', voice);
+  voice.staff.top = Math.max(voice.staff.top, voice.top);
+  voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
+  this.setLimit("tempoHeightAbove", voice);
+  this.setLimit("partHeightAbove", voice);
+  this.setLimit("volumeHeightAbove", voice);
+  this.setLimit("dynamicHeightAbove", voice);
+  this.setLimit("endingHeightAbove", voice);
+  this.setLimit("chordHeightAbove", voice);
+  this.setLimit("lyricHeightAbove", voice);
+  this.setLimit("lyricHeightBelow", voice);
+  this.setLimit("chordHeightBelow", voice);
+  this.setLimit("volumeHeightBelow", voice);
+  this.setLimit("dynamicHeightBelow", voice);
 };
 
 module.exports = StaffGroupElement;

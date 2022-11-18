@@ -4,7 +4,7 @@
 // Two to the power of cents divided by 1200
 
 function centsToFactor(cents) {
-	return Math.pow(2, cents/1200);
+  return Math.pow(2, cents / 1200);
 }
 
 module.exports = centsToFactor;

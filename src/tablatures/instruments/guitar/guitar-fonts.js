@@ -1,12 +1,11 @@
-
 /**
  * Dedicated fonts for violin tabs
  */
 
 /**
- * Set here the fonts used by renderer/drawer 
+ * Set here the fonts used by renderer/drawer
  * for the violin plugin
- * @param {} tune 
+ * @param {} tune
  */
 // eslint-disable-next-line no-unused-vars
 function setGuitarFonts(tune) {
@@ -16,4 +15,3 @@ function setGuitarFonts(tune) {
 }
 
 module.exports = setGuitarFonts;
-

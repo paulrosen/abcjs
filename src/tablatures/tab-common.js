@@ -11,7 +11,6 @@ function TabCommon(abcTune, tuneNumber, params) {
   this.inError = false;
 }
 
-
 TabCommon.prototype.setError = function (error) {
   var tune = this.tune;
   if (error) {
@@ -24,6 +23,5 @@ TabCommon.prototype.setError = function (error) {
     }
   }
 };
-
 
 module.exports = TabCommon;

@@ -1,6 +1,5 @@
-var TabNote = require('./tab-note');
-var TabNotes = require('./tab-notes');
-
+var TabNote = require("./tab-note");
+var TabNotes = require("./tab-notes");
 
 function buildCapo(self) {
   var capoTuning = null;
@@ -30,7 +29,7 @@ function buildPatterns(self) {
     if (iii != tuning.length - 1) {
       nextNote = tuning[iii + 1];
     }
-    var tabNotes = new TabNotes(tuning[iii],nextNote);
+    var tabNotes = new TabNotes(tuning[iii], nextNote);
     var stringNotes = tabNotes.build();
     if (stringNotes.error) {
       return stringNotes;
@@ -39,7 +38,6 @@ function buildPatterns(self) {
   }
   return strings;
 }
-
 
 function buildSecond(first) {
   var seconds = [];
@@ -57,17 +55,18 @@ function sameString(self, chord) {
     var nextPos = chord[jjjj + 1];
     if (curPos.str == nextPos.str) {
       // same String
-      // => change lower pos 
+      // => change lower pos
       if (curPos.str == self.strings.length - 1) {
         // Invalid tab Chord position for instrument
         curPos.num = "?";
-        nextPos.num = "?"; 
-        return; 
+        nextPos.num = "?";
+        return;
       }
       // change lower pitch on lowest string
       if (nextPos.num < curPos.num) {
         nextPos.str++;
-        nextPos = noteToNumber(self,
+        nextPos = noteToNumber(
+          self,
           nextPos.note,
           nextPos.str,
           self.secondPos,
@@ -75,7 +74,8 @@ function sameString(self, chord) {
         );
       } else {
         curPos.str++;
-        curPos = noteToNumber(self,
+        curPos = noteToNumber(
+          self,
           curPos.note,
           curPos.str,
           self.secondPos,
@@ -101,9 +101,9 @@ function handleChordNotes(self, notes) {
   return retNotes;
 }
 
-function noteToNumber(self, note, stringNumber, secondPosition , firstSize) {
+function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
   var strings = self.strings;
-  note.checkKeyAccidentals(self.accidentals) ;
+  note.checkKeyAccidentals(self.accidentals);
   if (secondPosition) {
     strings = secondPosition;
   }
@@ -114,7 +114,7 @@ function noteToNumber(self, note, stringNumber, secondPosition , firstSize) {
     if (secondPosition) {
       num += firstSize;
     }
-    if ( (note.isFlat || note.acc == -1) && (num == 0)) {
+    if ((note.isFlat || note.acc == -1) && num == 0) {
       // flat on 0 pos => previous string 7th position
       var noteEquiv = note.getAccidentalEquiv();
       stringNumber++;
@@ -122,7 +122,7 @@ function noteToNumber(self, note, stringNumber, secondPosition , firstSize) {
       acc = 0;
     }
     return {
-      num: (num + acc),
+      num: num + acc,
       str: stringNumber,
       note: note
     };
@@ -135,12 +135,12 @@ function toNumber(self, note) {
   var str = 0;
   var lowestString = self.strings[self.strings.length - 1];
   var lowestNote = new TabNote.TabNote(lowestString[0]);
-  if (note.isLowerThan(lowestNote) ) {
+  if (note.isLowerThan(lowestNote)) {
     return {
       num: "?",
       str: self.strings.length - 1,
       note: note,
-      error: note.emit() + ': unexpected note for instrument' 
+      error: note.emit() + ": unexpected note for instrument"
     };
   }
   while (str < self.strings.length) {
@@ -156,23 +156,23 @@ function toNumber(self, note) {
 StringPatterns.prototype.stringToPitch = function (stringNumber) {
   var startingPitch = 5.3;
   var bottom = this.strings.length - 1;
-  return startingPitch + ((bottom - stringNumber) * this.linePitch);
+  return startingPitch + (bottom - stringNumber) * this.linePitch;
 };
 
-function invalidNumber( retNotes , note ) {
+function invalidNumber(retNotes, note) {
   var number = {
     num: "?",
     str: 0,
     note: note
   };
   retNotes.push(number);
-  retNotes.error = note.emit() + ': unexpected note for instrument' ;
-} 
+  retNotes.error = note.emit() + ": unexpected note for instrument";
+}
 
 StringPatterns.prototype.notesToNumber = function (notes, graces) {
   var note;
   var number;
-  var error = null; 
+  var error = null;
   var retNotes = null;
   if (notes) {
     retNotes = [];
@@ -191,7 +191,7 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
         error = retNotes.error;
       }
     }
-  }  
+  }
   if (error) return retNotes;
   var retGraces = null;
   if (graces) {
@@ -207,7 +207,7 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
       }
     }
   }
-    
+
   return {
     notes: retNotes,
     graces: retGraces,
@@ -216,25 +216,25 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
 };
 
 StringPatterns.prototype.toString = function () {
-  return this.tuning.join('').replaceAll(',', '').toUpperCase();
+  return this.tuning.join("").replaceAll(",", "").toUpperCase();
 };
 
 StringPatterns.prototype.tabInfos = function (plugin) {
   var _super = plugin._super;
   var name = _super.params.label;
   if (name) {
-    var tunePos = name.indexOf('%T');
+    var tunePos = name.indexOf("%T");
     var tuning = "";
     if (tunePos != -1) {
       tuning = this.toString();
       if (plugin.capo > 0) {
-        tuning += ' capo:' + plugin.capo;
+        tuning += " capo:" + plugin.capo;
       }
-      name = name.replace('%T', tuning);
+      name = name.replace("%T", tuning);
     }
     return name;
   }
-  return '';
+  return "";
 };
 
 /**
@@ -242,7 +242,7 @@ StringPatterns.prototype.tabInfos = function (plugin) {
  * @param {} plugin
  * @param {} tuning
  * @param {*} capo
- * @param {*} highestNote 
+ * @param {*} highestNote
  */
 function StringPatterns(plugin) {
   var tuning = plugin.tuning;
@@ -271,7 +271,5 @@ function StringPatterns(plugin) {
   // second position pattern per string
   this.secondPos = buildSecond(this);
 }
-
-
 
 module.exports = StringPatterns;

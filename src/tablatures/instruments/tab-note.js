@@ -1,10 +1,9 @@
 /**
- * 
+ *
  * Note structure for Tabs
- * 
+ *
  */
-var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-
+var notes = ["A", "B", "C", "D", "E", "F", "G"];
 
 function TabNote(note) {
   var isFlat = false;
@@ -16,39 +15,39 @@ function TabNote(note) {
   var isDouble = false;
   var acc = 0;
 
-  if (note.startsWith('_')) {
+  if (note.startsWith("_")) {
     isFlat = true;
     acc = -1;
     // check quarter flat
-    if (note[1] == '/') {
+    if (note[1] == "/") {
       isFlat = false;
       quarter = "v";
       acc = 0;
-    } else if (note[1] == '_') {
+    } else if (note[1] == "_") {
       // double flat
       isDouble = true;
       acc -= 1;
     }
-  } else if (note.startsWith('^')) {
+  } else if (note.startsWith("^")) {
     isSharp = true;
     acc = +1;
     // check quarter sharp
-    if (note[1] == '/') {
+    if (note[1] == "/") {
       isSharp = false;
       quarter = "^";
       acc = 0;
-    } else if (note[1] == '^') {
+    } else if (note[1] == "^") {
       // double sharp
       isDouble = true;
       acc += 1;
     }
-  } else if (note.startsWith('=')) {
+  } else if (note.startsWith("=")) {
     natural = true;
     acc = 0;
   }
-  isAltered = isFlat || isSharp || (quarter != null);
+  isAltered = isFlat || isSharp || quarter != null;
   if (isAltered || natural) {
-    if ((quarter != null) || (isDouble)) {
+    if (quarter != null || isDouble) {
       newNote = note.slice(2);
     } else {
       newNote = note.slice(1);
@@ -67,7 +66,7 @@ function TabNote(note) {
   this.isKeyFlat = false;
   this.natural = natural;
   this.quarter = quarter;
-  this.isLower = (this.name == this.name.toLowerCase());
+  this.isLower = this.name == this.name.toLowerCase();
   this.name = this.name[0].toUpperCase();
   this.hasComma = hasComma;
   this.isQuoted = hasQuote;
@@ -84,14 +83,16 @@ function cloneNote(self) {
   newTabNote.isFlat = self.isFlat;
   newTabNote.isKeyFlat = self.isKeyFlat;
   return newTabNote;
-} 
+}
 TabNote.prototype.sameNoteAs = function (note) {
-  if ((this.name == note.name) &&
-    (this.hasComma == note.hasComma) &&
-    (this.isLower == note.isLower) &&
-    (this.isQuoted == note.isQuoted) &&
-    (this.isSharp == note.isSharp) &&
-    (this.isFlat == note.isFlat)) {
+  if (
+    this.name == note.name &&
+    this.hasComma == note.hasComma &&
+    this.isLower == note.isLower &&
+    this.isQuoted == note.isQuoted &&
+    this.isSharp == note.isSharp &&
+    this.isFlat == note.isFlat
+  ) {
     return true;
   } else {
     return false;
@@ -99,7 +100,7 @@ TabNote.prototype.sameNoteAs = function (note) {
 };
 
 TabNote.prototype.isLowerThan = function (note) {
-  var noteComparator = ['C','D','E','F','G','A','B'];
+  var noteComparator = ["C", "D", "E", "F", "G", "A", "B"];
   if (this.hasComma > note.hasComma) return true;
   if (note.hasComma > this.hasComma) return false;
   if (this.isQuoted > note.isQuoted) return false;
@@ -111,21 +112,22 @@ TabNote.prototype.isLowerThan = function (note) {
   }
   var noteName = note.name[0].toUpperCase();
   var thisName = this.name[0].toUpperCase();
-  if (noteComparator.indexOf(thisName) < noteComparator.indexOf(noteName)) return true;
+  if (noteComparator.indexOf(thisName) < noteComparator.indexOf(noteName))
+    return true;
   return false;
 };
 
-TabNote.prototype.checkKeyAccidentals = function(accidentals) {
+TabNote.prototype.checkKeyAccidentals = function (accidentals) {
   if (accidentals) {
     var curNote = this.name;
     for (var iii = 0; iii < accidentals.length; iii++) {
       var curAccidentals = accidentals[iii];
       if (curNote == curAccidentals.note.toUpperCase()) {
-        if (curAccidentals.acc == 'flat') {
+        if (curAccidentals.acc == "flat") {
           this.acc = -1;
           this.isKeyFlat = true;
         }
-        if (curAccidentals.acc == 'sharp') {
+        if (curAccidentals.acc == "sharp") {
           this.acc = +1;
           this.isKeySharp = true;
         }
@@ -136,12 +138,12 @@ TabNote.prototype.checkKeyAccidentals = function(accidentals) {
 
 TabNote.prototype.getAccidentalEquiv = function () {
   var cloned = cloneNote(this);
-  if (cloned.isSharp || cloned.isKeySharp ) {
+  if (cloned.isSharp || cloned.isKeySharp) {
     cloned = cloned.nextNote();
     cloned.isFlat = true;
     cloned.isSharp = false;
     cloned.isKeySharp = false;
-  } else if (cloned.isFlat || cloned.isKeyFlat ) {
+  } else if (cloned.isFlat || cloned.isKeyFlat) {
     cloned = cloned.prevNote();
     cloned.isSharp = true;
     cloned.isFlat = false;
@@ -150,19 +152,18 @@ TabNote.prototype.getAccidentalEquiv = function () {
   return cloned;
 };
 
-
 TabNote.prototype.nextNote = function () {
   var newTabNote = cloneNote(this);
 
-  if (!this.isSharp && !this.isKeySharp ) {
-    if (this.name != 'E' && this.name != 'B') {
+  if (!this.isSharp && !this.isKeySharp) {
+    if (this.name != "E" && this.name != "B") {
       newTabNote.isSharp = true;
       return newTabNote;
     }
   } else {
     // cleanup
-    newTabNote.isSharp = false; 
-    newTabNote.isKeySharp = false; 
+    newTabNote.isSharp = false;
+    newTabNote.isKeySharp = false;
   }
   var noteIndex = notes.indexOf(this.name);
   if (noteIndex == notes.length - 1) {
@@ -171,7 +172,7 @@ TabNote.prototype.nextNote = function () {
     noteIndex++;
   }
   newTabNote.name = notes[noteIndex];
-  if (newTabNote.name == 'C') {
+  if (newTabNote.name == "C") {
     if (newTabNote.hasComma > 0) {
       newTabNote.hasComma--;
     } else {
@@ -199,7 +200,7 @@ TabNote.prototype.prevNote = function () {
     noteIndex--;
   }
   newTabNote.name = notes[noteIndex];
-  if (newTabNote.name == 'B') {
+  if (newTabNote.name == "B") {
     if (newTabNote.isLower) {
       newTabNote.hasComma = 1;
     } else {
@@ -218,14 +219,14 @@ TabNote.prototype.prevNote = function () {
     newTabNote.isFlat = false;
     return newTabNote;
   } else {
-    if (this.name != 'E' && this.name != 'B') {
+    if (this.name != "E" && this.name != "B") {
       newTabNote.isSharp = true;
     }
   }
   return newTabNote;
 };
 
-TabNote.prototype.emitNoAccidentals = function (  ) {
+TabNote.prototype.emitNoAccidentals = function () {
   var returned = this.name;
   if (this.isLower) {
     returned = returned.toLowerCase();
@@ -241,16 +242,16 @@ TabNote.prototype.emitNoAccidentals = function (  ) {
 
 TabNote.prototype.emit = function () {
   var returned = this.name;
-  if (this.isSharp || this.isKeySharp ) {
-    returned = '^' + returned;
+  if (this.isSharp || this.isKeySharp) {
+    returned = "^" + returned;
     if (this.isDouble) {
-      returned = '^' + returned;
+      returned = "^" + returned;
     }
   }
   if (this.isFlat || this.isKeyFlat) {
-    returned = '_' + returned;
+    returned = "_" + returned;
     if (this.isDouble) {
-      returned = '_' + returned;
+      returned = "_" + returned;
     }
   }
   if (this.quarter) {
@@ -261,12 +262,12 @@ TabNote.prototype.emit = function () {
     }
   }
   if (this.natural) {
-    returned = '=' + returned;
+    returned = "=" + returned;
   }
   for (var ii = 1; ii <= this.hasComma; ii++) {
-    returned += ',';
+    returned += ",";
   }
-  
+
   if (this.isLower) {
     returned = returned.toLowerCase();
     for (var jj = 1; jj <= this.isQuoted; jj++) {
@@ -277,6 +278,6 @@ TabNote.prototype.emit = function () {
 };
 
 module.exports = {
-  'TabNote': TabNote,
-  'notes': notes
+  TabNote: TabNote,
+  notes: notes
 };

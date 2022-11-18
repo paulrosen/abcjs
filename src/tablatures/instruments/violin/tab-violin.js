@@ -1,15 +1,13 @@
-
-var StringTablature = require('../string-tablature');
-var TabCommon = require('../../tab-common');
-var TabRenderer = require('../../tab-renderer');
-var ViolinPatterns = require('./violin-patterns');
-var setViolinFonts = require('./violin-fonts');
-
+var StringTablature = require("../string-tablature");
+var TabCommon = require("../../tab-common");
+var TabRenderer = require("../../tab-renderer");
+var ViolinPatterns = require("./violin-patterns");
+var setViolinFonts = require("./violin-fonts");
 
 /**
  * upon init mainly store provided instances for later usage
  * @param {*} abcTune  the parsed tune AST tree
-*  @param {*} tuneNumber  the parsed tune AST tree
+ *  @param {*} tuneNumber  the parsed tune AST tree
  * @param {*} params  complementary args provided to Tablature Plugin
  */
 Plugin.prototype.init = function (abcTune, tuneNumber, params) {
@@ -21,8 +19,7 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
   this.isTabBig = false;
   this.capo = params.capo;
   this.transpose = params.visualTranspose;
-  this.tablature = new StringTablature(this.nbLines,
-    this.linePitch);
+  this.tablature = new StringTablature(this.nbLines, this.linePitch);
   var semantics = new ViolinPatterns(this);
   this.semantics = semantics;
 };
@@ -41,7 +38,7 @@ function Plugin() {}
 // Tablature plugin definition
 //
 var AbcViolinTab = function () {
-  return { name: 'ViolinTab', tablature: Plugin };
+  return { name: "ViolinTab", tablature: Plugin };
 };
 
 module.exports = AbcViolinTab;

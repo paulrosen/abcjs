@@ -1,5 +1,4 @@
-
-var TabNote = require('./tab-note');
+var TabNote = require("./tab-note");
 
 var notes = TabNote.notes;
 
@@ -7,7 +6,6 @@ function TabNotes(fromNote, toNote) {
   this.fromN = new TabNote.TabNote(fromNote);
   this.toN = new TabNote.TabNote(toNote);
 }
-
 
 TabNotes.prototype.build = function () {
   var fromN = this.fromN;
@@ -17,14 +15,18 @@ TabNotes.prototype.build = function () {
     var from = fromN.emit();
     var tn = toN.emit();
     return {
-      error: 'Invalid string Instrument tuning : ' +
-        tn + ' string lower than ' + from + ' string'
+      error:
+        "Invalid string Instrument tuning : " +
+        tn +
+        " string lower than " +
+        from +
+        " string"
     };
   }
   var buildReturned = [];
   var startIndex = notes.indexOf(fromN.name);
   var toIndex = notes.indexOf(toN.name);
-  if ((startIndex == -1) || (toIndex == -1)) {
+  if (startIndex == -1 || toIndex == -1) {
     return buildReturned;
   }
   var finished = false;

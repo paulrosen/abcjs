@@ -1,62 +1,57 @@
-var tunebook = require('./abc_tunebook');
-var Tune = require('../data/abc_tune');
+var tunebook = require("./abc_tunebook");
+var Tune = require("../data/abc_tune");
 
-var EngraverController = require('../write/abc_engraver_controller');
-var Parse = require('../parse/abc_parse');
-var wrap = require('../parse/wrap_lines');
+var EngraverController = require("../write/abc_engraver_controller");
+var Parse = require("../parse/abc_parse");
+var wrap = require("../parse/wrap_lines");
 var parseCommon = require("../parse/abc_common");
 // var tablatures = require('./abc_tablatures');
 
-
 var resizeDivs = {};
 function resizeOuter() {
-    var width = window.innerWidth;
-    for (var id in resizeDivs) {
-        if (resizeDivs.hasOwnProperty(id)) {
-            var outer = resizeDivs[id];
-            var ofs = outer.offsetLeft;
-            width -= ofs * 2;
-            outer.style.width = width + "px";
-        }
+  var width = window.innerWidth;
+  for (var id in resizeDivs) {
+    if (resizeDivs.prototype.hasOwnProperty.call(id)) {
+      var outer = resizeDivs[id];
+      var ofs = outer.offsetLeft;
+      width -= ofs * 2;
+      outer.style.width = width + "px";
     }
+  }
 }
 
 try {
-    window.addEventListener("resize", resizeOuter);
-    window.addEventListener("orientationChange", resizeOuter);
-} catch(e) {
-    // if we aren't in a browser, this code will crash, but it is not needed then either.
+  window.addEventListener("resize", resizeOuter);
+  window.addEventListener("orientationChange", resizeOuter);
+} catch (e) {
+  // if we aren't in a browser, this code will crash, but it is not needed then either.
 }
 
 function renderOne(div, tune, params, tuneNumber, lineOffset) {
-    if (params.viewportHorizontal) {
-        // Create an inner div that holds the music, so that the passed in div will be the viewport.
-        div.innerHTML = '<div class="abcjs-inner"></div>';
-        if (params.scrollHorizontal) {
-            div.style.overflowX = "auto";
-            div.style.overflowY = "hidden";
-        } else
-            div.style.overflow = "hidden";
-        resizeDivs[div.id] = div; // We use a hash on the element's id so that multiple calls won't keep adding to the list.
-        div = div.children[0]; // The music should be rendered in the inner div.
-    }
-    else if (params.viewportVertical) {
-        // Create an inner div that holds the music, so that the passed in div will be the viewport.
-        div.innerHTML = '<div class="abcjs-inner scroll-amount"></div>';
-        div.style.overflowX = "hidden";
-        div.style.overflowY = "auto";
-        div = div.children[0]; // The music should be rendered in the inner div.
-    }
-    else
-	    div.innerHTML = "";
-    var engraver_controller = new EngraverController(div, params);
-    engraver_controller.engraveABC(tune, tuneNumber, lineOffset);
-    tune.engraver = engraver_controller;
-    if (params.viewportVertical || params.viewportHorizontal) {
-        // If we added a wrapper around the div, then we need to size the wrapper, too.
-        var parent = div.parentNode;
-        parent.style.width = div.style.width;
-    }
+  if (params.viewportHorizontal) {
+    // Create an inner div that holds the music, so that the passed in div will be the viewport.
+    div.innerHTML = '<div class="abcjs-inner"></div>';
+    if (params.scrollHorizontal) {
+      div.style.overflowX = "auto";
+      div.style.overflowY = "hidden";
+    } else div.style.overflow = "hidden";
+    resizeDivs[div.id] = div; // We use a hash on the element's id so that multiple calls won't keep adding to the list.
+    div = div.children[0]; // The music should be rendered in the inner div.
+  } else if (params.viewportVertical) {
+    // Create an inner div that holds the music, so that the passed in div will be the viewport.
+    div.innerHTML = '<div class="abcjs-inner scroll-amount"></div>';
+    div.style.overflowX = "hidden";
+    div.style.overflowY = "auto";
+    div = div.children[0]; // The music should be rendered in the inner div.
+  } else div.innerHTML = "";
+  var engraver_controller = new EngraverController(div, params);
+  engraver_controller.engraveABC(tune, tuneNumber, lineOffset);
+  tune.engraver = engraver_controller;
+  if (params.viewportVertical || params.viewportHorizontal) {
+    // If we added a wrapper around the div, then we need to size the wrapper, too.
+    var parent = div.parentNode;
+    parent.style.width = div.style.width;
+  }
 }
 
 // A quick way to render a tune from javascript when interactivity is not required.
@@ -76,79 +71,81 @@ function renderOne(div, tune, params, tuneNumber, lineOffset) {
 //          startingTune: an index, starting at zero, representing which tune to start rendering at.
 //              (If this element is not present, then rendering starts at zero.)
 //          width: 800 by default. The width in pixels of the output paper
-var renderAbc = function(output, abc, parserParams, engraverParams, renderParams) {
-    // Note: all parameters have been condensed into the first ones. It doesn't hurt anything to allow the old format, so just copy them here.
-    var params = {};
-    var key;
-    if (parserParams) {
-        for (key in parserParams) {
-            if (parserParams.hasOwnProperty(key)) {
-                params[key] = parserParams[key];
-            }
-        }
-        if (params.warnings_id && params.tablature) {
-            params.tablature.warning_id = params.warnings_id;
-        }
+var renderAbc = function (
+  output,
+  abc,
+  parserParams,
+  engraverParams,
+  renderParams
+) {
+  // Note: all parameters have been condensed into the first ones. It doesn't hurt anything to allow the old format, so just copy them here.
+  var params = {};
+  var key;
+  if (parserParams) {
+    for (key in parserParams) {
+      if (parserParams.prototype.hasOwnProperty.call(key)) {
+        params[key] = parserParams[key];
+      }
     }
-    if (engraverParams) {
-        for (key in engraverParams) {
-            if (engraverParams.hasOwnProperty(key)) {
-	            // There is a conflict with the name of the parameter "listener". If it is in the second parameter, then it is for click.
-	            if (key === "listener") {
-	            	if (engraverParams[key].highlight)
-		                params.clickListener = engraverParams[key].highlight;
-	            } else
-                    params[key] = engraverParams[key];
-            }
-        }
+    if (params.warnings_id && params.tablature) {
+      params.tablature.warning_id = params.warnings_id;
     }
-    if (renderParams) {
-        for (key in renderParams) {
-            if (renderParams.hasOwnProperty(key)) {
-                params[key] = renderParams[key];
-            }
-        }
+  }
+  if (engraverParams) {
+    for (key in engraverParams) {
+      if (engraverParams.prototype.hasOwnProperty.call(key)) {
+        // There is a conflict with the name of the parameter "listener". If it is in the second parameter, then it is for click.
+        if (key === "listener") {
+          if (engraverParams[key].highlight)
+            params.clickListener = engraverParams[key].highlight;
+        } else params[key] = engraverParams[key];
+      }
     }
+  }
+  if (renderParams) {
+    for (key in renderParams) {
+      if (renderParams.prototype.hasOwnProperty.call(key)) {
+        params[key] = renderParams[key];
+      }
+    }
+  }
 
-    function callback(div, tune, tuneNumber, abcString) {
-        var removeDiv = false;
-        if (div === "*") {
-            removeDiv = true;
-            div = document.createElement("div");
-            div.setAttribute("style", "visibility: hidden;");
-            document.body.appendChild(div);
-        }
-    	if (params.afterParsing)
-    		params.afterParsing(tune, tuneNumber, abcString);
-        if (!removeDiv && params.wrap && params.staffwidth) {
-	        tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
-	        return tune;
-        }
-        renderOne(div, tune, params, tuneNumber, 0);
-        if (removeDiv)
-            div.parentNode.removeChild(div);
-        return null;
+  function callback(div, tune, tuneNumber, abcString) {
+    var removeDiv = false;
+    if (div === "*") {
+      removeDiv = true;
+      div = document.createElement("div");
+      div.setAttribute("style", "visibility: hidden;");
+      document.body.appendChild(div);
     }
+    if (params.afterParsing) params.afterParsing(tune, tuneNumber, abcString);
+    if (!removeDiv && params.wrap && params.staffwidth) {
+      tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
+      return tune;
+    }
+    renderOne(div, tune, params, tuneNumber, 0);
+    if (removeDiv) div.parentNode.removeChild(div);
+    return null;
+  }
 
-    return tunebook.renderEngine(callback, output, abc, params);
+  return tunebook.renderEngine(callback, output, abc, params);
 };
 
 function doLineWrapping(div, tune, tuneNumber, abcString, params) {
-	var engraver_controller = new EngraverController(div, params);
-	var widths = engraver_controller.getMeasureWidths(tune);
+  var engraver_controller = new EngraverController(div, params);
+  var widths = engraver_controller.getMeasureWidths(tune);
 
-	var ret = wrap.calcLineWraps(tune, widths, params);
-	if (ret.reParse) {
-        var abcParser = new Parse();
-        abcParser.parse(abcString, ret.revisedParams);
-        tune = abcParser.getTune();
-        var warnings = abcParser.getWarnings();
-        if (warnings)
-            tune.warnings = warnings;
-    }
-    renderOne(div, tune, ret.revisedParams, tuneNumber, 0);
-	tune.explanation = ret.explanation;
-	return tune;
+  var ret = wrap.calcLineWraps(tune, widths, params);
+  if (ret.reParse) {
+    var abcParser = new Parse();
+    abcParser.parse(abcString, ret.revisedParams);
+    tune = abcParser.getTune();
+    var warnings = abcParser.getWarnings();
+    if (warnings) tune.warnings = warnings;
+  }
+  renderOne(div, tune, ret.revisedParams, tuneNumber, 0);
+  tune.explanation = ret.explanation;
+  return tune;
 }
 
 module.exports = renderAbc;

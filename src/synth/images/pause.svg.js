@@ -5,6 +5,6 @@ var svg = `
     <rect width="8.23" height="25" x="17"/>
   </g>
 </svg>
-`
+`;
 
-module.exports = svg
+module.exports = svg;

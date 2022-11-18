@@ -3,11 +3,9 @@
  * generic transposer
  *
  */
-var TabNote = require('./instruments/tab-note');
+var TabNote = require("./instruments/tab-note");
 
-
-
-function buildAccEquiv(acc,note) {
+function buildAccEquiv(acc, note) {
   var equiv = note.getAccidentalEquiv();
   if (acc.note.toUpperCase() == equiv.name.toUpperCase()) {
     equiv.isSharp = false;
@@ -18,7 +16,7 @@ function buildAccEquiv(acc,note) {
 }
 
 function adjustNoteToKey(acc, note) {
-  if (acc.acc == 'sharp') {
+  if (acc.acc == "sharp") {
     if (note.isFlat) {
       return buildAccEquiv(acc, note);
     } else if (note.isSharp) {
@@ -31,7 +29,7 @@ function adjustNoteToKey(acc, note) {
         }
       }
     }
-  } else if (acc.acc == 'flat') {
+  } else if (acc.acc == "flat") {
     if (note.isSharp) {
       return buildAccEquiv(acc, note);
     } else if (note.isFlat) {
@@ -48,7 +46,6 @@ function adjustNoteToKey(acc, note) {
   return note;
 }
 
-
 function replaceNote(self, newNote, start, end) {
   if (self.lastEnd) {
     while (start > self.lastEnd) {
@@ -56,7 +53,7 @@ function replaceNote(self, newNote, start, end) {
       self.lastEnd++;
     }
   }
-  var nNote = newNote.split('');
+  var nNote = newNote.split("");
   for (var ii = 0; ii < nNote.length; ii++) {
     self.updatedSrc.push(nNote[ii]);
   }
@@ -67,7 +64,6 @@ function replaceNote(self, newNote, start, end) {
   }
   self.lastEnd = end;
 }
-
 
 function checkKeys(self, note) {
   var accs = self.transposedKey;
@@ -82,29 +78,27 @@ Transposer.prototype.transposeNote = function (note) {
   var curNote = new TabNote.TabNote(returned.name);
   if (this.transposeBy > 0) {
     for (var ii = 0; ii < this.transposeBy; ii++) {
-      curNote = checkKeys(this,curNote.nextNote());
-    }  
-    
-  } else if ( this.transposeBy < 0) {
+      curNote = checkKeys(this, curNote.nextNote());
+    }
+  } else if (this.transposeBy < 0) {
     for (var jj = this.transposeBy; jj < 0; jj++) {
-      curNote = checkKeys(this,curNote.prevNote());
+      curNote = checkKeys(this, curNote.prevNote());
     }
   }
   returned.name = curNote.emit();
   return returned;
 };
 
-Transposer.prototype.upgradeSource = function (note, startChar, endChar ) {
+Transposer.prototype.upgradeSource = function (note, startChar, endChar) {
   var n = new TabNote.TabNote(note.name);
   var newNote = n.emit();
-  replaceNote(this, newNote, startChar, endChar-1);
+  replaceNote(this, newNote, startChar, endChar - 1);
 };
 
-function Transposer(transposedKey , transposeBy ) {
+function Transposer(transposedKey, transposeBy) {
   this.transposeBy = transposeBy;
   this.transposedKey = transposedKey;
-  this.lastEnd = this.kEnd+1;
+  this.lastEnd = this.kEnd + 1;
 }
-
 
 module.exports = Transposer;
