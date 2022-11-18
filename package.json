@@ -14,7 +14,8 @@
     "test": "concurrently \"http-server\" \"npx opener http://localhost:8080/tests/all.html\"",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
-    "build:analyze": "npm run build:basic -- --env analyze"
+    "build:analyze": "npm run build:basic -- --env analyze",
+    "lint": "eslint ./src"
   },
   "repository": {
     "type": "git",
@@ -50,9 +51,11 @@
     "babel-loader": "9.1.0",
     "chai": "4.3.7",
     "concurrently": "7.5.0",
+    "eslint": "^8.28.0",
     "http-server": "14.1.1",
     "mocha": "10.1.0",
     "opener": "1.5.2",
+    "prettier": "2.7.1",
     "vuepress": "2.0.0-beta.26",
     "vuex": "4.1.0",
     "webpack-bundle-analyzer": "4.7.0",

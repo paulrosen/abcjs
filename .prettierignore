@@ -1,0 +1,19 @@
+# Ignore artifacts:
+.idea/*
+tmp/*
+/node_modules
+/coverage
+to-*.sh
+docs/.vuepress/.cache/*
+docs/.vuepress/.temp/*
+docs/.vuepress/.dist/*
+dist/report.html
+.eslintrc.json
+.github
+dist
+docs
+examples
+font_generator
+tests
+.babelrc
+*.md
