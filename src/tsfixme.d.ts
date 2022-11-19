@@ -1,2 +1,2 @@
 type $TSFixMe = any;
-type $TSFixMeFunction = (...arggs: any[]) => any;
+type $TSFixMeFunction = (...args: any[]) => any;
