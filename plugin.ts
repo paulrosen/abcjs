@@ -26,6 +26,7 @@ THE SOFTWARE.
 /*global abcjs_is_user_script, abcjs_plugin_autostart */
 "use strict";
 
+  // @ts-expect-error $TSFixme
 import { TuneBook } from "./src/api/abc_tunebook";
 import Parse from "./src/parse/abc_parse";
 import EngraverController from "./src/write/abc_engraver_controller";
@@ -34,6 +35,7 @@ var Plugin = function () {
   "use strict";
   var is_user_script = false;
   try {
+  // @ts-expect-error $TSFixme
     is_user_script = abcjs_is_user_script;
   } catch (ex) {}
   this.show_midi = !is_user_script; // TODO-PER: jQuery isn't yet available, so this part of the test will crash. || $.browser.mozilla;	// midi currently only works in Firefox, so in the userscript, don't complicate it.
@@ -79,7 +81,7 @@ plugin.start = function () {
 
 // returns an array of the descendants (including self) of elem which have a text node which matches "X:"
 plugin.getABCContainingElements = function (elem) {
-  var results = [];
+  var results: Array<any> = [];
   var includeself = false; // whether self is already included (no need to include it again)
   // TODO maybe look to see whether it's even worth it by using textContent ?
 
@@ -107,10 +109,10 @@ plugin.getABCContainingElements = function (elem) {
 // div's data("abctext") and return an array
 plugin.convertToDivs = function (elem) {
   var abctext = "";
-  var abcdiv = null;
+  var abcdiv: any = null;
   var inabc = false;
   var brcount = 0;
-  var results = [];
+  var results: Array<any> = [];
   var node;
   var childNodes = Array.prototype.slice.call(elem.childNodes);
   for (var i = 0, ii = childNodes.length; i < ii; ++i) {
@@ -218,6 +220,7 @@ plugin.render = function (contextnode, abcstring) {
 
     var showtext = document.createElement("A");
     showtext.className = "abcshow";
+    // @ts-expect-error $TSFixMe
     showtext.href = "#";
     showtext.innerHTML = this.show_text + (tune.metaText.title || "untitled");
 
@@ -230,7 +233,7 @@ plugin.render = function (contextnode, abcstring) {
         return false;
       };
 
-      abcdiv.parentElement.insertBefore(showtext, abcdiv);
+      abcdiv?.parentElement?.insertBefore(showtext, abcdiv);
     }
   } catch (e) {
     this.errors += e;
@@ -240,7 +243,9 @@ plugin.render = function (contextnode, abcstring) {
 // There may be a variable defined which controls whether to automatically run the script. If it isn't
 // there then it will throw an exception, so we'll catch it here.
 var autostart = true;
+  // @ts-expect-error $TSFixme
 if (typeof abcjs_plugin_autostart !== "undefined") {
+  // @ts-expect-error $TSFixme
   autostart = abcjs_plugin_autostart;
 }
 

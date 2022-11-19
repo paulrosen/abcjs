@@ -27,7 +27,7 @@ import tuneBook from "./src/api/abc_tunebook";
 import sequence from "./src/synth/abc_midi_sequencer";
 import strTranspose from "./src/str/output";
 
-var abcjs = {};
+var abcjs: { [key: string]: any } = {};
 
 abcjs.signature = "abcjs-basic v" + version;
 
@@ -44,8 +44,8 @@ abcjs.renderAbc = renderAbc;
 import TimingCallbacks from "./src/api/abc_timing_callbacks";
 abcjs.TimingCallbacks = TimingCallbacks;
 
-import { setSymbol } from "./src/write/abc_glyphs";
-abcjs.setGlyph = setSymbol;
+import Glyphs from "./src/write/abc_glyphs";
+abcjs.setGlyph = Glyphs.setSymbol;
 abcjs.strTranspose = strTranspose;
 
 import CreateSynth from "./src/synth/create-synth";

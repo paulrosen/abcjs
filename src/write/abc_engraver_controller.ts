@@ -31,7 +31,7 @@ import tablatures from '../api/abc_tablatures';
  * in the renderer for highlighting purposes
  *
  */
-var EngraverController = function(this: any, paper: any, params: any) {
+var EngraverController = function(this: any, paper: any, params?: any) {
   params = params || {};
   this.oneSvgPerLine = params.oneSvgPerLine;
   this.selectionColor = params.selectionColor;
