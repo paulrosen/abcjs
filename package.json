@@ -53,6 +53,8 @@
     "chai": "4.3.7",
     "concurrently": "7.5.0",
     "eslint": "^8.28.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
     "http-server": "14.1.1",
     "mocha": "10.1.0",
     "opener": "1.5.2",
