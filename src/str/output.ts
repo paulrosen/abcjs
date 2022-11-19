@@ -1,5 +1,4 @@
 import keyAccidentals from '../const/key-accidentals';
-// @ts-expect-error TS(2614): Module '"../const/relative-major"' has no exported... Remove this comment to see the full error message
 import { relativeMajor, transposeKey, relativeMode } from '../const/relative-major';
 import transposeChordName from '../parse/transpose-chord';
 

@@ -1,4 +1,4 @@
-import registerAudioContext from './register-audio-context.js';
+import registerAudioContext from './register-audio-context';
 
 function activeAudioContext() {
   // @ts-expect-error TS(2551): Property 'abcjsAudioContext' does not exist on typ... Remove this comment to see the full error message

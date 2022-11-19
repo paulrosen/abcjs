@@ -2,7 +2,7 @@
 // If you call it with no parameters, then an AudioContext is created and stored.
 // If you call it with a parameter, that is used as an already created AudioContext.
 
-function registerAudioContext(ac: any) {
+function registerAudioContext(ac?: any) {
   // If one is passed in, that is the one to use even if there was already one created.
   // @ts-expect-error TS(2551): Property 'abcjsAudioContext' does not exist on typ... Remove this comment to see the full error message
   if (ac) window.abcjsAudioContext = ac;

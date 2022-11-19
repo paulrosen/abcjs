@@ -115,7 +115,7 @@ function createKeyReverse() {
   }
 }
 
-function relativeMajor(key: any) {
+export function relativeMajor(key: any) {
   // Translate a key to its relative major. If it doesn't exist, do the best we can
   // by just returning the original key.
   // There are alternate spellings of these - so the search needs to be case insensitive.
@@ -134,7 +134,7 @@ function relativeMajor(key: any) {
   return key;
 }
 
-function relativeMode(majorKey: any, mode: any) {
+export function relativeMode(majorKey: any, mode: any) {
   // The reverse of the relativeMajor. Translate it back to the original mode.
   // If it isn't a recognized mode or it is already major, then just return the major key.
   // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
@@ -153,7 +153,7 @@ function relativeMode(majorKey: any, mode: any) {
   return majorKey;
 }
 
-function transposeKey(key: any, steps: any) {
+export function transposeKey(key: any, steps: any) {
   // This takes a major key and adds the desired steps.
   // It assigns each key a number that is the number of steps from C so that there can just be arithmetic.
   // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
@@ -169,8 +169,3 @@ function transposeKey(key: any, steps: any) {
   return key;
 }
 
-export default {
-  relativeMajor: relativeMajor,
-  relativeMode: relativeMode,
-  transposeKey: transposeKey
-};

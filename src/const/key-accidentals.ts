@@ -1,5 +1,5 @@
-// @ts-expect-error TS(2614): Module '"./relative-major"' has no exported member... Remove this comment to see the full error message
 import { relativeMajor } from './relative-major';
+
 
 var key1sharp = { acc: "sharp", note: "f" };
 var key2sharp = { acc: "sharp", note: "c" };

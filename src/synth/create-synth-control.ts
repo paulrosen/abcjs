@@ -2,11 +2,11 @@ import supportsAudio from './supports-audio';
 import registerAudioContext from './register-audio-context';
 import activeAudioContext from './active-audio-context';
 import parseCommon from '../parse/abc_common';
-import loopImage from './images/loop.svg.js';
-import playImage from './images/play.svg.js';
-import pauseImage from './images/pause.svg.js';
-import loadingImage from './images/loading.svg.js';
-import resetImage from './images/reset.svg.js';
+import loopImage from './images/loop.svg';
+import playImage from './images/play.svg';
+import pauseImage from './images/pause.svg';
+import loadingImage from './images/loading.svg';
+import resetImage from './images/reset.svg';
 
 function CreateSynthControl(this: any, parent: any, options: any) {
   var self = this;
@@ -198,7 +198,6 @@ function buildDom(parent: any, options: any) {
 function acResumerMiddleWare(next: any, ev: any, playBtn: any, afterResume: any, isPromise: any) {
   var needsInit = true;
   if (!activeAudioContext()) {
-    // @ts-expect-error TS(2554): Expected 1 arguments, but got 0.
     registerAudioContext();
   } else {
     needsInit = activeAudioContext().state === "suspended";
